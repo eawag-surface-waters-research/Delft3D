@@ -43,9 +43,9 @@ module precision
 ! SWITCHING FROM SINGLE PRECISION   FP   TO DOUBLE PRECISION:
 ! 1) File libsrc\flow_modsrc\precision.f90
 !    - Comment out the following line:
-!      integer, parameter :: fp=sp
+!      INTEGER, PARAMETER :: FP=SP
 !    - Activate the following line:
-!      integer, parameter :: fp=hp
+!      INTEGER, PARAMETER :: FP=HP
 ! 2) File include\flow\tri-dyn.igd
 !    - Comment out the following line:
 !      equivalence ( r(0),  rbuf(0))
