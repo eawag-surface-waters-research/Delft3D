@@ -81,18 +81,16 @@ VPATH = @srcdir@
 
 
 # When FCLIBS IS NOT defined here, then:
-# - delftflow crashes on 8 of the 28 dd-testcases
+# - flow2d3d crashes on 8 of the 28 dd-testcases
 # - FCLIBS is defined by automake as: -L/opt/intel/fc/10.1.015/lib -L/usr/lib/gcc/i386-redhat-linux/3.4.6/ -L/usr/lib/gcc/i386-redhat-linux/3.4.6/../../../ -lifport -lifcore -limf -lm -lipgo -lirc -lgcc_s -lirc_s -ldl
 #   Note the dynamic link flag -ldl
 # - All modules compile and link
 # When FCLIBS IS defined here, then:
-# - delftflow runs fine on all dd-testcases
+# - flow2d3d runs fine on all dd-testcases
 # - Modules linked by the C++ linker do not link anymore: undefined reference to `dlsym'
 #   This problem is solved by adding the -ldl flag in the related Makefile.am
 
-# Intel 11:
-# Flag -lsvml is explicitly used by delpar
-FCLIBS = -L/opt/intel/Compiler/11.0/081/lib/ia32 -lsvml
+FCLIBS = -L/opt/intel/Compiler/11.0/081/lib/ia32
 
 #
 # The MPI libraries need to be specified as well

@@ -1203,6 +1203,10 @@ src/third_party_lgpl/DelftOnline/lib/Release/DelftOnlineJNI.dll -text
 src/third_party_lgpl/DelftOnline/lib/Release/DelftOnlineJNI.lib -text
 src/third_party_lgpl/DelftOnline/lib/Release/JavaLaunch.dll -text
 src/third_party_lgpl/DelftOnline/lib/Release/JavaLaunch.lib -text
+src/third_party_lgpl/DelftOnline/lib/libDelftOnline.so -text
+src/third_party_lgpl/DelftOnline/lib/libDelftOnlineJNI.so -text
+src/third_party_lgpl/DelftOnline/lib/libJavaLaunch.so -text
+src/third_party_lgpl/DelftOnline/lib/libjvm.so -text
 src/third_party_lgpl/Makefile.am -text
 src/third_party_lgpl/commandline/bin/win32/libiconv2.dll -text
 src/third_party_lgpl/commandline/bin/win32/libintl3.dll -text
