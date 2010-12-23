@@ -1308,7 +1308,7 @@ BInt4 detect_version( BText file_header, File_Version * file_version )
 {
     BInt4 error = 0;
 
-    if ( strstr( file_header, "Version 1.") )
+    if ( strstr( file_header, "Versie 1.") )
     {
         *file_version = Version_1;
     }

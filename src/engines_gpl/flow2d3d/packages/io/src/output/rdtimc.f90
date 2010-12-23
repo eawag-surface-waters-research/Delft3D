@@ -97,7 +97,7 @@ subroutine rdtimc(comfil    ,lundia    ,error     ,commrd    ,itlen     , &
     data nbytsg/8*4/
     data elmdes/'Acceleration of gravity                                       '&
        & , 'Density of water                                              ',    &
-        & 'Timestep FLOW                                              ',      &
+        & 'Timestep FLOW                                                 ',      &
         & 'Dry point proc. 0 = NO  1 = MEAN  2 = MAX  3 = MIN            ',      &
         & 'Basic unit of time, expressed in seconds                      ',      &
         & 'Reference date                                                ',      &
