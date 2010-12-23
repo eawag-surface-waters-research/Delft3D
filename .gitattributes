@@ -40,7 +40,6 @@ src/engines_gpl/flow2d3d/doc/delft3d/im/hydranet.gif -text
 src/engines_gpl/flow2d3d/doc/delft3d/makeD3D.html -text
 src/engines_gpl/flow2d3d/doc/delft3d/readme.txt -text
 src/engines_gpl/flow2d3d/doc/parallel_status.txt -text
-src/engines_gpl/flow2d3d/doc/versionnumber.txt -text
 src/engines_gpl/flow2d3d/packages/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/data/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/data/data.vfproj -text
