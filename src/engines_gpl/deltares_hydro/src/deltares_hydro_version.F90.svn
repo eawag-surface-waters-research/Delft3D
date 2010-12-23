@@ -1,0 +1,54 @@
+!----- GPL ---------------------------------------------------------------------
+!                                                                               
+!  Copyright (C)  Stichting Deltares, 2011.                                     
+!                                                                               
+!  This program is free software: you can redistribute it and/or modify         
+!  it under the terms of the GNU General Public License as published by         
+!  the Free Software Foundation version 3.                                      
+!                                                                               
+!  This program is distributed in the hope that it will be useful,              
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
+!  GNU General Public License for more details.                                 
+!                                                                               
+!  You should have received a copy of the GNU General Public License            
+!  along with this program.  If not, see <http://www.gnu.org/licenses/>.        
+!                                                                               
+!  contact: delft3d.support@deltares.nl                                         
+!  Stichting Deltares                                                           
+!  P.O. Box 177                                                                 
+!  2600 MH Delft, The Netherlands                                               
+!                                                                               
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"    
+!  are registered trademarks of Stichting Deltares, and remain the property of  
+!  Stichting Deltares. All rights reserved.                                     
+!                                                                               
+!-------------------------------------------------------------------------------
+!
+! Do not use a module here; that will cause a serious dependency problem
+!
+!
+!
+!===============================================================================
+subroutine getfullversionstring_deltares_hydro(stringout)
+   character(*), intent(out) :: stringout
+   integer                   :: length
+
+   character(*), parameter :: deltares_hydro_major        = 'VN_MAJOR'
+   character(*), parameter :: deltares_hydro_minor        = 'VN_MINOR'
+   character(*), parameter :: deltares_hydro_revision     = 'VN_REVISION'
+   character(*), parameter :: deltares_hydro_build_number = 'VN_BUILD_NUMBER'
+
+   character(*), parameter :: deltares_hydro_company      = 'Deltares'
+   character(*), parameter :: deltares_hydro_company_url  = 'http://www.deltares.nl'
+   character(*), parameter :: deltares_hydro_program      = 'Deltares_hydro'
+
+   character(*), parameter :: deltares_hydro_version      = deltares_hydro_major//'.'//deltares_hydro_minor//'.'//deltares_hydro_revision//'.'//deltares_hydro_build_number
+   character(*), parameter :: deltares_hydro_version_full = 'Deltares, '//deltares_hydro_program//' Version '//deltares_hydro_version//', '//__DATE__//', '//__TIME__
+   character(*), parameter :: deltares_hydro_version_id   = '@(#)'//deltares_hydro_version_full
+
+   !
+   ! body
+   length    = min(len_trim(deltares_hydro_version_full),len(stringout))
+   stringout = deltares_hydro_version_id(5:5+length-1)
+end subroutine getfullversionstring_deltares_hydro

@@ -1,0 +1,129 @@
+!----- GPL ---------------------------------------------------------------------
+!                                                                               
+!  Copyright (C)  Stichting Deltares, 2011.                                     
+!                                                                               
+!  This program is free software: you can redistribute it and/or modify         
+!  it under the terms of the GNU General Public License as published by         
+!  the Free Software Foundation version 3.                                      
+!                                                                               
+!  This program is distributed in the hope that it will be useful,              
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
+!  GNU General Public License for more details.                                 
+!                                                                               
+!  You should have received a copy of the GNU General Public License            
+!  along with this program.  If not, see <http://www.gnu.org/licenses/>.        
+!                                                                               
+!  contact: delft3d.support@deltares.nl                                         
+!  Stichting Deltares                                                           
+!  P.O. Box 177                                                                 
+!  2600 MH Delft, The Netherlands                                               
+!                                                                               
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"    
+!  are registered trademarks of Stichting Deltares, and remain the property of  
+!  Stichting Deltares. All rights reserved.                                     
+!                                                                               
+!-------------------------------------------------------------------------------
+!
+! Do not use a module here; that will cause a serious dependency problem
+!
+!
+!
+!===============================================================================
+subroutine getfullversionstring_flow2d3d(stringout)
+   character(*), intent(out) :: stringout
+   integer                   :: length
+
+   character(*), parameter :: flow2d3d_major        = 'VN_MAJOR'
+   character(*), parameter :: flow2d3d_minor        = 'VN_MINOR'
+   character(*), parameter :: flow2d3d_revision     = 'VN_REVISION'
+   character(*), parameter :: flow2d3d_build_number = 'VN_BUILD_NUMBER'
+
+   character(*), parameter :: flow2d3d_company      = 'Deltares'
+   character(*), parameter :: flow2d3d_company_url  = 'http://www.deltares.nl'
+   character(*), parameter :: flow2d3d_program      = 'Delft3D-FLOW'
+
+   character(*), parameter :: flow2d3d_version      = flow2d3d_major//'.'//flow2d3d_minor//'.'//flow2d3d_revision//'.'//flow2d3d_build_number
+   character(*), parameter :: flow2d3d_version_full = 'Deltares, '//flow2d3d_program//' Version '//flow2d3d_version//', '//__DATE__//', '//__TIME__
+   character(*), parameter :: flow2d3d_version_id   = '@(#)'//flow2d3d_version_full
+
+
+
+   !
+   ! body
+   length    = min(len_trim(flow2d3d_version_full),len(stringout))
+   stringout = flow2d3d_version_id(5:5+length-1)
+end subroutine getfullversionstring_flow2d3d
+!
+!
+!===============================================================================
+subroutine getshortversionstring_flow2d3d(stringout)
+   character(*), intent(out) :: stringout
+   integer                   :: length
+
+   character(*), parameter :: flow2d3d_major         = 'VN_MAJOR'
+   character(*), parameter :: flow2d3d_minor         = 'VN_MINOR'
+
+   character(*), parameter :: flow2d3d_short_version = flow2d3d_major//'.'//flow2d3d_minor
+   !
+   ! body
+   length    = min(len_trim(flow2d3d_short_version),len(stringout))
+   stringout = flow2d3d_short_version(1:length)
+end subroutine getshortversionstring_flow2d3d
+!
+!
+!===============================================================================
+subroutine getcomfileversionstring_flow2d3d(stringout)
+   character(*), intent(out) :: stringout
+   integer                   :: length
+
+   character(*), parameter :: com_file_version      = '3.54.11'   ! Needed for the file header
+
+   !
+   ! body
+   length    = min(len_trim(com_file_version),len(stringout))
+   stringout = com_file_version(1:length)
+end subroutine getcomfileversionstring_flow2d3d
+!
+!
+!===============================================================================
+subroutine getmapfileversionstring_flow2d3d(stringout)
+   character(*), intent(out) :: stringout
+   integer                   :: length
+
+   character(*), parameter :: map_file_version      = '3.54.28'   ! Needed for the file header 
+
+   !
+   ! body
+   length    = min(len_trim(map_file_version),len(stringout))
+   stringout = map_file_version(1:length)
+end subroutine getmapfileversionstring_flow2d3d
+!
+!
+!===============================================================================
+subroutine gethisfileversionstring_flow2d3d(stringout)
+   character(*), intent(out) :: stringout
+   integer                   :: length
+
+   character(*), parameter :: his_file_version      = '3.52.09'   ! Needed for the file header
+
+   !
+   ! body
+   length    = min(len_trim(his_file_version),len(stringout))
+   stringout = his_file_version(1:length)
+end subroutine gethisfileversionstring_flow2d3d
+!
+!
+!===============================================================================
+subroutine getdrofileversionstring_flow2d3d(stringout)
+   character(*), intent(out) :: stringout
+   integer                   :: length
+
+   character(*), parameter :: dro_file_version      = '3.20.01'   ! Needed for the file header
+
+   !
+   ! body
+   length    = min(len_trim(dro_file_version),len(stringout))
+   stringout = dro_file_version(1:length)
+end subroutine getdrofileversionstring_flow2d3d
+

@@ -1,0 +1,44 @@
+!!!!!!!!!!! ERROR NUMBERS > 0 !!!!!!!!!!!
+R000 Keyword not found in .ini file
+R001 No landboundary files (rgflandb.*) found
+R002 No grid files (telmcrgf.*) found
+R003 No TRISULA depth files (md-depth.*) found
+R004 No sample depth files (qsamples.*) found
+R005 No IDP depth files (idpdepth.*) found
+R006 No spline files (rgfsplin.*) found
+R007 Premature end of landboundary file (rgflandb.*)
+R008 Premature end of grid file (telmcrgf.*)
+R009 Premature end of TRISULA depth file (md-depth.*)
+R010 Premature end of sample depth file (qsamples.*)
+R011 Premature end of IDP depth file (idpdepth.*)
+R012 Premature end of spline file (rgfsplin.*)
+R013 Grid dimension # in M-direction too big
+R014 Grid dimension # in n-direction too big
+R015 Grid has x default value (0.0) and y non -default value
+R016 Only first # coordinate pairs are used (maybe enlarge parameter MAXLAN)
+R017 Only first # coordinate pairs are used (maybe enlarge parameter MAXLAN)
+R018 Only first # sample points are used (maybe enlarge parameter NSMAX)
+R019 Grid file telmcrgf.* has dimension 0, choose another file
+R020 You loaded file #
+R021 Premature end of file #
+R022 You saved file #
+R023 First load a grid file
+R024 Please install a mouse and mouse driver
+R025 Dimensions zero: there is nothing to save
+R026 This option is not implemented yet
+R027 First create or load splines
+R028 'M-REFINEMENT must be < # , goto 'CHANGE PARAMETERS'
+R029 'N-REFINEMENT must be < # , goto 'CHANGE PARAMETERS'
+R030 Too many crossings on splines; correctly modify splines
+R031 Spline-grid is spaghetty; correctly modify splines
+R032 Spline-orientation is inconsistent, correctly modify splines
+R033 Message #
+R034 First create or load grid
+R035 Grid becomes too large in M-dimension
+R036 Grid becomes too large in N-dimension
+R037 Point 2 must be on one gridline with point 1
+R038 Only shift points on the indicated line
+R039 Menu is disabled, leave SHIFT LINE (Esc or right mouse button)
+R040 First load grid and depths
+R019 Only the first # coordinate pairs in this file will be used
+R020 Only the first # polygons in this file will be used

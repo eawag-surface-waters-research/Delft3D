@@ -1,0 +1,72 @@
+#-------------------------------------------------------------------------------
+#   Makefile for delftflow
+#
+#   Irv.Elshoff@deltares.nl
+#   Adri.Mourits@deltares.nl
+#   Fedor.Baart@deltares.nl
+#   11 jan 2007
+#
+#   Copyright (C) 2009, Deltares
+#-------------------------------------------------------------------------------
+
+include $(top_srcdir)/common.am
+
+bin_PROGRAMS = wave.exe
+
+#-------------------------------------------------------------------------------
+#Includes
+FINCLUDES += \
+	-I$(top_srcdir)/engines_gpl/wave/packages/wave/include
+
+FMODULES += \
+	-I$(top_srcdir)/engines_gpl/wave/packages/data/src \
+	-I$(top_srcdir)/utils_lgpl/precision/packages/precision/src \
+	-I$(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow/src \
+	-I$(top_srcdir)/utils_lgpl/meteo/packages/meteo/src
+
+#-------------------------------------------------------------------------------
+#Sources
+wave_exe_SOURCES = \
+         checklicense.f90 \
+         usage.f90 \
+         wave_version.F90 \
+         wave.f90
+
+#-------------------------------------------------------------------------------
+#Libraries
+
+wave_exe_LDADD   = \
+$(top_srcdir)/engines_gpl/wave/packages/manager/src/libmanager.a \
+$(top_srcdir)/engines_gpl/wave/packages/kernel/src/libkernel.a \
+$(top_srcdir)/engines_gpl/wave/packages/io/src/libio.a \
+$(top_srcdir)/engines_gpl/wave/packages/data/src/libdata.a \
+$(top_srcdir)/utils_lgpl/delftio/packages/delftio/src/diof90/libdelftio.a \
+$(top_srcdir)/utils_lgpl/delftio/packages/delftio_shm/src/diof90/libdelftio_shm.a \
+$(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libfsm.a \
+$(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/libfsm_c.a \
+$(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/libesm_c.a \
+$(top_srcdir)/utils_lgpl/meteo/packages/meteo/src/libmeteo.a \
+$(top_srcdir)/utils_lgpl/inifiles/packages/inifiles/src/libinifiles.a \
+$(top_srcdir)/utils_lgpl/nefis/packages/nefis/src/libnefis.a \
+$(top_srcdir)/utils_lgpl/precision/packages/precision/src/libprecision.a \
+$(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow/src/libutils_flow.a \
+$(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow_c/src/libutils_flow_c.a \
+$(top_srcdir)/utils_lgpl/meteo/packages/meteo_version_number/src/libmeteo_version_number.a \
+$(top_srcdir)/utils_lgpl/delftio/packages/delftio_version_number/src/libdelftio_version_number.a \
+$(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_version_number/src/libesmfsm_version_number.a \
+$(top_srcdir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.a \
+$(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow_version_number/src/libutils_flow_version_number.a \
+$(EXTERNALSOURCES) \
+$(FCLIBS) \
+$(X_PRE_LIBS) -lXt $(XPLIB) $(X_LIBS) -lX11 $(X_EXTRA_LIBS)
+
+
+BUILT_SOURCES = ./always \
+	./wave_version.F90 
+
+./always:
+	rm -rf ./wave_version.F90 
+
+./wave_version.F90:
+	$(top_srcdir)/scripts/linux/update_version.sh $(srcdir)/wave_version.F90 $(srcdir) ../include/version_number.ini $(top_srcdir)
+  

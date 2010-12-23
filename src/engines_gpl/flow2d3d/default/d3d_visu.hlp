@@ -1,0 +1,460 @@
+Delft3D-FLOW Online Visualisation Help                  June, 2005
+                                                       version 2.0
+PROGRAM PURPOSE
+   The main purpose of the ONLINE VISUALISATION program is to
+   visualise model quantities of the Delft3D-FLOW water
+   motion program. A Delft3D-FLOW quantity is an ordered set of
+   values, which are assigned to an ordered set of (curvilinear)
+   grid points.
+
+KEYS
+   F1  = views this help file   : <Esc> = quits viewing the help file
+
+   F2  = views the history file : <Esc> = quits viewing the history file
+         the version number of FLOW
+         the version number of online
+         date of starting the computation
+         type of model : sigma or zmodel
+         X and Y co-ordinates of where the anchor has been put
+
+
+   S/s = halts the computation
+         when FLOW is running the computation can be halted by keeping
+         the <s> or <S> key pressed until the menu-bar appears.
+         The program checks every timestep whether the <s> key is pressed,
+         if not, the computation continues. The longer the computation of
+         1 timestep takes, the longer you will have to press the <s> key
+         to halt the calculation.
+
+   P/p = screen dump to postscript file
+         first  plot = plot001.ps
+         second plot = plot002.ps
+         etc.
+
+   Z/z = zoom window
+         after pressing <Z>, a zoom window appears, with several
+         possibilities:
+
+         moving mouse : the zoom window moves with the mouse movement.
+                        If the sides of the window have been pushed so far
+                        that its sides touch the screen border, the screen
+                        is shifted automatically, which makes the current
+                        cursor position the centre of the new screen.
+                        If the cursor is close to the screen border, pressing
+                        the <Z> key will immediately cause the program to
+                        shift the screen, and make the present cursor
+                        position the centre of the next screen.
+
+                    + : enlarges the zoom window
+                    - : reduces  the zoom window
+           left mouse : zoom in
+          right mouse : zoom out to minimum and maximum of model
+                    z : zoom out 1 step
+               delete : previous zoom window (maximum 4 windows)
+
+   A/a = puts an anchor on the current mouse position
+         When pressing the <A> key on the keyboard (on UNIX, first actualise
+         the cursor position by pressing the middle or right mouse button),
+         a so-called anchor will appear, which acts as zero distance point.
+         The distance of the present cursor position to this point is displayed
+         below the X,Y position of the cursor on the right upper corner of
+         the screen, after the keyword 'DIS'.
+
+   <left mouse> = while drawing, quits the current drawing.
+         Updating the screen, several quantities are drawn, in this sequence:
+
+         1) the scalar variable
+         2) grid
+         3) outline of the computational area
+         4) temporary dry points
+         5) velocity vectors
+         6) wind vectors
+         7) land boundaries
+         8) observation points
+         Drawing on screen of a detailed model can take some time, to
+         interrupt the current drawing, you click the <left mouse>.
+
+    + / - key
+          When running a 3D model the default layer which is shown
+          is the top layer (layer=1).
+          When in top view mode the + and - keys changes the layer
+          which is shown.
+          When in side view mode the + and - keys changes the number of
+          the M line or N line.
+
+GENERAL PROGRAM OPERATION INSTRUCTIONS
+   Most of the program screens have two menu bars, one at the top
+   of the screen, one at the bottom of the screen. Both menu bars can
+   be activated by placing the cursor on top of the bar and pressing
+   the left mouse button. The colours of the menu bar then changes
+   from dull colours to bright colours. Also, the shape of the mouse
+   cursor changes from cross-hair to arrow, indicating that you are
+   now in menu mode, and can indicate choices in the menus.
+
+   The menu bar at the top of the screen contains the main program
+   options, each of which has several sub options. These options can
+   be activated also by pressing the left mouse button. The bottom
+   menu bar contains several options that indicate which user actions
+   are valid for the specific screen
+
+   As indicated on the first bottom menu bar of the opening screen,
+   you can always press the <F1> key for context sensitive help, the <F2>
+   key for a history of previous actions or the print screen or <P> key
+   to get a postscript file the current screen.
+
+HELP INSTRUCTIONS
+   F1 = help    ;
+   Press the <F1> key for HELP. The HELP window behaves like any
+   normal file viewer, apart from some features that have been added
+   for convenience. Mostly, when you have pressed <F1>, the HELP will
+   start at some context sensitive point in the help file. The cursor
+   scrolling control allows quick leafing through this file, since the
+   horizontal cursor position governs the speed at which vertical
+   scrolling is performed. This can be at chapter, section, subsection
+   or normal text speed. Furthermore, the <Tab> key toggles between
+   a keyword menu and the complete text. Choose the desired
+   keyword in the keyword menu, which is much shorter than the
+   complete help text, and press the <Tab> key again. The corresponding
+   help text will immediately appear on the screen. A search function
+   has been added, that searches forward for the required text item.
+   Leave help by pressing the <Esc> key.
+
+GENERAL CURSOR AND KEYBOARD FUNCTIONS
+   The left mouse button activates or confirms desired actions. The
+   Escape key (Esc), cancels the last action. The right mouse button
+   may also confirm actions, or may put the program back into its
+   original mode. In many situations, the <Ins> and <Enter> keys on the
+   right hand bottom of a keyboard function in the same way as the
+   left and right mouse button respectively.
+
+   However, some functions are not invoked by means of the left mouse button,
+   e.g. zooming in, which is invoked by pressing the <Z> key. In such
+   cases first actualise the mouse position at the desired location by
+   pressing the middle or right mouse key, and then press the <Z> key.
+   On PC, the cursor is tracked continuously, so that the zoom window
+   will immediately appear on the desired location following the <Z> key.
+
+   The instructions given in the rest of this HELP will be valid
+   for the PC instruction set, so please keep in mind that on UNIX
+   systems you may have to make some extra mouse clicks.
+
+OPERATIONS
+
+MENU
+ ===============================================================================
+START/STOP MENU
+
+ 1 CONTINUE
+   Continues the computation.
+
+ 2 LEAVE VISUALISATION PROGRAM ONLY
+   Turns off the ONLINE VISUALISATION, the computation continues,
+   ONLINE cannot be put on again.
+
+ 3 STOP VISUALISATION & COMPUTATION
+   Stops the computation.
+
+ -------------------------------------------------------------------------------
+OUTPUT MENU
+
+ CREATE POSTSCRIPT FILE
+    Creates a postscript file (same as pressing <P>).
+
+ CREATE PCX-FILE
+    Creates a PCX file.
+
+ CREATE DEP-FILE
+    Creates a QUICKIN (depth) file of the parameter viewed. 
+
+ INTERVAL SCREEN REFRESH
+    Sets the number of time steps between updates of the screen.
+
+ INTERVAL PCX-FILE
+    Sets the number of time steps between creating PCX-files.
+
+ INTERVAL DEP-FILE
+    Sets the number of time steps between creating QUICKIN dep-files
+    of the parameter currently viewed.
+
+ REFRESH SCREEN AT EACH STEP
+    Toggle between blanking the screen or not before a new screen is drawn.
+    When the time between 2 updates of the screen is short, blanking causes
+    a flickering which can be annoying.
+
+ HALT CALCULATION AT TIME STEP
+    default : -1  when the computation is finished, the online window is
+                  closed and the program terminates normally.
+            :  0  when the computation is finished the online window stays.
+            :  n  the computation halts at n time steps LEFT and waits for
+                  instructions.
+
+ START TIME STEP FOR PCX-FILES
+    When the computation takes 10000 time steps and you want PCX files
+    of only time steps left from 200 until 100 here 200 is entered.
+
+ STOP  TIME STEP FOR PCX-FILES
+    When the computation takes 10000 time steps and you want PCX files
+    of only time steps left from 200 until 100 here 100 is entered.
+
+ START TIME (MIN) FOR DEP-FILES
+    Start time in minutes (after the reference date) for creating QUICKIN
+    dep-files of the current parameter displayed.
+
+ STOP  TIME (MIN) FOR DEP-FILES
+    Stop time in minutes (after the reference date) for creating QUICKIN
+    dep-files of the current parameter displayed.
+
+ SAVE SETTINGS
+    Most of the settings of the online visualisation are saved in the
+    d3d_visu.set file.
+
+    a) scalar variable (water level, velocity, temperature etc)
+    b) window selection
+    c) output parameters (steps for screen updates, PCX-files)
+    d) land boundary files, HLS-file, TEXT-file
+
+    When the d3d_visu.set file is present in the working directory, the 
+    program reads the file and starts the computation immediately.
+    This file is necessary for running in queues.
+    Remarks: - the HLS-file is assumed to be present in the directory
+               c:\delft3d\w32\flow\default
+             - the LDB and TXT file are looked for in the working directory  
+
+ -------------------------------------------------------------------------------
+VIEW MENU
+
+ VIEW ON TOP
+    Top view of the model, i.e. view in the XY space.
+
+ SIDE PROJECTION N CROSS SECTION
+    Displays a side view of the current quantity at an N-line. This makes only
+    sense when running a 3D computation and the current parameter is 3D also.
+    When the parameter displayed is water level nothing will change.
+
+ SIDE PROJECTION M CROSS SECTION
+    Displays a side view of the current parameter at an M-line when running
+    a 3D computation and the parameter is 3D also.
+
+ SCALAR VARIABLE
+   NO VALUE POINTS  : switch values off, only grid, stations, vectors are shown
+   COLOURED DOTS    : only coloured dots are plotted
+   ISOFIL           : shaded contours
+   ISOLINE          : isolines
+   NUMBERS          : values by numbers
+   FIL+LINE         : combination of shaded contours and black isolines
+
+ VELOCITY VECTORS
+   VELOCITY VECTORS ON
+   VELOCITY VECTORS OFF
+
+ GRID
+   NO GRID
+   GRID SOLID LINES
+   GRID DOTTED LINES
+
+ LEGEND
+    Drawing the legend can be put on or off.
+
+ OBSERVATION POINTS
+    Displaying the observation points can be put on or off.
+
+ TEMPORARY DRY POINTS
+    Drawing the temporary dry points  can be put on or off.
+
+ OUTLINE OF COMPUTATIONAL AREA
+    Drawing of the computational area can be put on or off.
+
+ CHANGE ISO PARAMETERS
+    Menu to change various parameters for viewing:
+     colour plot info
+     X position plot info
+     Y position plot info
+     X position legend
+     Y position legend
+     numbers of isocolours
+     autoscale on or off
+     minimum isoline value
+     maximum isoline value
+     velocity vector scale
+     factor for vertical vectors
+
+     flow grid wind vector scale
+     vertical scaling cross-sectional view
+     step vector for plotting velocity vectors
+        a negative number N makes the minimum distance between vectors
+        approximately N mm
+     step vector for plotting wind on flow grid
+
+     number of decimals in legend
+
+ CHANGE LAYER/DEPTH
+    Change the layer number or the depth of the horizontal plane; only in 3D.
+    Use + and - to go through the layers.
+
+ CHANGE CROSS-SECTION COORDINATE
+    When cross section view is on, you can change the number of the M
+    or N line.
+    Use + and - to go through the cross-sections.
+
+ LINE COLOURS
+    Here you can change the default line colours of:
+    land boundary 1
+    land boundary 2
+    grid lines
+    outline of computational area
+    temporary dry points
+    velocity vectors
+    observation points
+    wind vectors flow grid
+
+   ONLINE has 6 main colour numbers which can be used for lines:
+    0 = black
+   30 = red
+   60 = yellow
+   90 = green
+  120 = light blue
+  150 = dark blue
+  180 = purple
+  223 = white
+   Colours of numbers between these values are more or less the same.
+
+ LAYER or HORIZONTAL PLANE
+   Switch between layer or horizontal plane (only 3D computation and
+   3D parameter).
+
+ WINDOW SIZE
+   Here you can change the aspect ratio of the plot window.
+
+ WIND VECTORS ON FLOW GRID
+   Switch for plotting wind vectors.
+
+ -------------------------------------------------------------------------------
+PARAMETER MENU
+
+  WATER LEVEL
+  DEPTH                       : depth in depth points
+  DEPTH IN WATER LEVEL POINTS : depth in water level points
+  TOTAL WATER DEPTH           : depth + water level
+  ENERGY HEIGHT
+  VELOCITY in U-DIRECTION
+  VELOCITY in V-DIRECTION
+  VELOCITY in W-DIRECTION
+  VELOCITY MAGNITUDE      
+  DENSITY
+  VORTICITY
+  VORTICITY in FLUCTUATIONS
+  SALINITY
+  TURB ENERGY
+  TURB ENERGY DISS
+  USER_SELECTION              : you can enter the name of FLOW-code arrays:
+                                vicuv  = viscosity
+                                patm   = background atmospheric pressure
+                                windu  = u-velocity background wind
+                                windv  = v-velocity background wind
+                                s1     = water level
+                                dp     = depth
+ -------------------------------------------------------------------------------
+FILES MENU
+
+ LAND BOUNDARY 1  (LINE) *.ldb
+   Minimum and maximum of window will NOT be adjusted to limits of the
+   co-ordinates in the land boundary file.
+ LAND BOUNDARY 2  (LINE) *.ldb
+   Minimum and maximum of window will be adjusted to limits of the 
+   co-ordinates in the land boundary file.
+    files with X and Y co-ordinates to plot a land boundary
+    example:
+
+    --------------------------------------------------------------
+    * comment
+    BL01             : 4 characters/numbers to define a data block
+    100 2            : number of rows, number of columns
+     10.1  2.2       \
+     10.9  2.9        \
+     ..                > 100 rows with X and Y values
+     ..               /
+     ..              /
+    --------------------------------------------------------------
+ TEXT                (SYMBOL) *.txt
+    File with X and Y co-ordinates, text-string, colour, symbol-code
+    and character height.
+    Remark: when in cross-sectional view, text cannot be visualised.
+
+    example:
+    --------------------------------------------------------------
+    * comment
+    BL01             : 4 characters/numbers to define a data block
+     3 2             : number of rows, number of X, Y columns (2)
+     10.8  20.3   'string-01' 223      43     0.5
+     10.8  21.3   'string-02' 223      43     0.5
+     10.8  22.3   'string-03' 223      43     0.5
+                              colour   symbol characterr height
+
+     symbols:     the text string needs 's at the beginning and at the end
+     20 = square
+     32 = no symbol
+     43 = +
+     45 = -
+    149 = big dot
+    183 = .
+    215 = x
+    --------------------------------------------------------------
+ CLASSES                      *.cls
+    file with classes for the isolines/contours
+
+    example:
+    --------------------------------------------------------------
+    * comment
+    BL01
+     3 1             :  number of rows, number of columns
+     -5
+     0
+     1
+     2
+     5
+    --------------------------------------------------------------
+ HLS COLOURS                  *.hls
+    files with hue, lightness and saturation values for colours.
+    ---------------    -------------    ------------------------
+    hue                lightness        saturation
+    ---------------    -------------    ------------------------
+      0 = dark blue     0 = black         0 = minimum saturation
+     90 = red          50 = standard    100 = maximum saturation
+    180 = yellow      100 = white
+    270 = green
+    360 = dark blue
+
+    example:
+    --------------------------------------------------------------
+    rainbow          : comment
+     60  92 100
+     60  86 100
+     60  72 100
+     60  50 100
+     40  50 100
+     20  50 100
+      0  50 100
+    340  50 100
+    320  50 100
+    300  50 100
+    280  50 100
+    260  50 100
+    240  50 100
+    220  50 100
+    200  50 100
+    180  50 100
+    174  50 100
+    168  50 100
+    154  50 100
+    120  50 100
+    --------------------------------------------------------------
+ SETTINGS                     *.set
+    d3d_visu.set file with settings, saved from menu OUTPUT - SAVE SETTINGS
+    Remarks: - the HLS-file is assumed to be present in the subdirectory
+               flow\default of the install directory
+             - the LDB and TXT file are looked for in the working directory  
+ ===============================================================================
+
+END OF HELP
+
+

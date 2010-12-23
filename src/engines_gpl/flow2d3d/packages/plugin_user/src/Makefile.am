@@ -1,0 +1,43 @@
+#-------------------------------------------------------------------------------
+#   Makefile for delftflow
+#
+#   Irv.Elshoff@deltares.nl
+#   Adri.Mourits@deltares.nl
+#   Fedor.Baart@deltares.nl
+#   11 jan 2007
+#
+#   Copyright (C) 2007, Deltares
+#-------------------------------------------------------------------------------
+
+include $(top_srcdir)/common.am
+lib_LIBRARIES = libplugin_user.a
+
+#-------------------------------------------------------------------------------
+#Includes
+FINCLUDES += \
+	-I$(top_srcdir)/utils_lgpl/esmfsm/include \
+	-I$(top_srcdir)/utils_lgpl/precision/include
+
+FMODULES += \
+        -I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/basics \
+	-I$(top_srcdir)/utils_lgpl/inifiles/packages/inifiles/src \
+	-I$(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow/src \
+	-I$(top_srcdir)/utils_lgpl/ec_module/packages/ec_module/src
+
+#-------------------------------------------------------------------------------
+#Sources
+libplugin_user_a_SOURCES = \
+         u_ppr.f90 \
+         u_rdat.f90 \
+         u_wdro.f90 \
+         u_whis.f90 \
+         u_wmap.f90 \
+         uckbcc.f90 \
+         urdbcc.f90 \
+         urdrgs.f90 \
+         usrdef.f90 \
+         usrptr.f90
+
+#-------------------------------------------------------------------------------
+#Libraries
+

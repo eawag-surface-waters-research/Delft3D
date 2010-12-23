@@ -1,0 +1,1712 @@
+subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
+                         & timnow    ,nst       ,itiwec    ,trasol    ,forfuv    , &
+                         & forfww    ,nfltyp    , &
+                         & saleqs    ,temeqs    , &
+                         & sferic    ,grdang    ,ktemp     ,temint    ,keva      , &
+                         & evaint    ,anglat    ,rouflo    ,rouwav    , &
+                         & betac     ,tkemod    ,gdp       )
+!----- GPL ---------------------------------------------------------------------
+!                                                                               
+!  Copyright (C)  Stichting Deltares, 2011.                                     
+!                                                                               
+!  This program is free software: you can redistribute it and/or modify         
+!  it under the terms of the GNU General Public License as published by         
+!  the Free Software Foundation version 3.                                      
+!                                                                               
+!  This program is distributed in the hope that it will be useful,              
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
+!  GNU General Public License for more details.                                 
+!                                                                               
+!  You should have received a copy of the GNU General Public License            
+!  along with this program.  If not, see <http://www.gnu.org/licenses/>.        
+!                                                                               
+!  contact: delft3d.support@deltares.nl                                         
+!  Stichting Deltares                                                           
+!  P.O. Box 177                                                                 
+!  2600 MH Delft, The Netherlands                                               
+!                                                                               
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"    
+!  are registered trademarks of Stichting Deltares, and remain the property of  
+!  Stichting Deltares. All rights reserved.                                     
+!                                                                               
+!-------------------------------------------------------------------------------
+!!--description-----------------------------------------------------------------
+!
+! Z-model
+! This routine basically carries out the hydrodynamics
+! and the online advection diffusion computation for one complete time step.
+!
+!!--pseudo code and references--------------------------------------------------
+! NONE
+!!--declarations----------------------------------------------------------------
+    use precision
+    use sync_flm
+    use SyncRtcFlow
+    use timers
+    !
+    use globaldata
+    !
+    implicit none
+    !
+    type(globdat),target :: gdp
+    !
+    ! The following list of pointer parameters is used to point inside the gdp structure
+    ! They replace the  include igd / include igp lines
+    !
+    include 'flow_steps_f.inc'
+    include 'fsm.i'
+    integer                              , pointer :: iwrk1
+    integer                              , pointer :: iwrk2
+    integer                              , pointer :: wrka1
+    integer                              , pointer :: wrka2
+    integer                              , pointer :: wrka3
+    integer                              , pointer :: wrka4
+    integer                              , pointer :: wrka5
+    integer                              , pointer :: wrka6
+    integer                              , pointer :: wrka7
+    integer                              , pointer :: wrka8
+    integer                              , pointer :: wrka10
+    integer                              , pointer :: wrka11
+    integer                              , pointer :: wrka15
+    integer                              , pointer :: wrka16
+    integer                              , pointer :: wrkb1
+    integer                              , pointer :: wrkb2
+    integer                              , pointer :: wrkb3
+    integer                              , pointer :: wrkb4
+    integer                              , pointer :: wrkb5
+    integer                              , pointer :: wrkb6
+    integer                              , pointer :: wrkb7
+    integer                              , pointer :: wrkb8
+    integer                              , pointer :: wrkb9
+    integer                              , pointer :: wrkb10
+    integer                              , pointer :: wrkb11
+    integer                              , pointer :: wrkb12
+    integer                              , pointer :: wrkb13
+    integer                              , pointer :: wrkb14
+    integer                              , pointer :: wrkb15
+    integer                              , pointer :: wrkb16
+    integer                              , pointer :: wrkb17
+    integer                              , pointer :: wrkb18
+    integer                              , pointer :: wrkc1
+    integer                              , pointer :: wrkc2
+    integer                              , pointer :: wrkc3
+    integer                              , pointer :: wrkc4
+    integer                              , pointer :: zwork
+    logical , dimension(:)               , pointer :: flbub
+    integer                              , pointer :: nmax
+    integer                              , pointer :: mmax
+    integer                              , pointer :: nlb
+    integer                              , pointer :: nub
+    integer                              , pointer :: mlb
+    integer                              , pointer :: mub
+    integer                              , pointer :: ddbound
+    integer                              , pointer :: nmaxus
+    integer                              , pointer :: kmax
+    integer                              , pointer :: nmaxd
+    integer                              , pointer :: jstart
+    integer                              , pointer :: nmmaxj
+    integer                              , pointer :: nmmax
+    integer                              , pointer :: lsts
+    integer                              , pointer :: lstsc
+    integer                              , pointer :: lstsci
+    integer                              , pointer :: lsal
+    integer                              , pointer :: lsed
+    integer                              , pointer :: ltem
+    integer                              , pointer :: lsecfl
+    integer                              , pointer :: lsec
+    integer                              , pointer :: ltur
+    integer                              , pointer :: ltur2d
+    integer                              , pointer :: kmxdt
+    integer                              , pointer :: npiwe
+    integer                              , pointer :: nbub
+    integer                              , pointer :: nxbub
+    integer                              , pointer :: noroco
+    integer                              , pointer :: norow
+    integer                              , pointer :: nocol
+    integer                              , pointer :: nto
+    integer                              , pointer :: ntof
+    integer                              , pointer :: ntoq
+    integer                              , pointer :: kc
+    integer                              , pointer :: kcd
+    integer                              , pointer :: nrob
+    integer                              , pointer :: nsrc
+    integer                              , pointer :: nsrcd
+    integer                              , pointer :: ndro
+    integer                              , pointer :: nsluv
+    integer                              , pointer :: lundia
+    real(fp)                             , pointer :: timsec
+    real(fp)                             , pointer :: timhr
+    integer                              , pointer :: itiwei
+    integer                              , pointer :: itdiag
+    integer                              , pointer :: julday
+    integer                              , pointer :: ntstep
+    real(fp)              , dimension(:) , pointer :: xx
+    logical                              , pointer :: densin
+    real(fp)                             , pointer :: hdt
+    real(fp)                             , pointer :: rhow
+    real(fp)                             , pointer :: ag
+    real(fp)                             , pointer :: z0
+    real(fp)                             , pointer :: z0v
+    integer                              , pointer :: iro
+    integer                              , pointer :: irov
+    logical                              , pointer :: wind
+    logical                              , pointer :: salin
+    logical                              , pointer :: temp
+    logical                              , pointer :: const
+    logical                              , pointer :: culvert
+    logical                              , pointer :: drogue
+    logical                              , pointer :: wave
+    logical                              , pointer :: iweflg
+    logical                              , pointer :: struct
+    logical                              , pointer :: cdwstruct
+    logical                              , pointer :: sedim
+    logical                              , pointer :: online
+    logical                              , pointer :: htur2d
+    logical                              , pointer :: zmodel
+    logical                              , pointer :: nonhyd
+    logical                              , pointer :: roller
+    logical                              , pointer :: sbkol
+    logical                              , pointer :: bubble
+    integer                              , pointer :: alfas
+    integer                              , pointer :: alpha
+    integer                              , pointer :: areau
+    integer                              , pointer :: areav
+    integer                              , pointer :: bruvai
+    integer                              , pointer :: c
+    integer                              , pointer :: cbuv
+    integer                              , pointer :: cbuvrt
+    integer                              , pointer :: cdwlsu
+    integer                              , pointer :: cdwlsv
+    integer                              , pointer :: cdwzbu
+    integer                              , pointer :: cdwzbv
+    integer                              , pointer :: cdwztu
+    integer                              , pointer :: cdwztv
+    integer                              , pointer :: cfurou
+    integer                              , pointer :: cfvrou
+    integer                              , pointer :: cvalu0
+    integer                              , pointer :: cvalv0
+    integer                              , pointer :: circ2d
+    integer                              , pointer :: circ3d
+    integer                              , pointer :: crbc
+    integer                              , pointer :: dddeta
+    integer                              , pointer :: dddksi
+    integer                              , pointer :: disch0
+    integer                              , pointer :: disch1
+    integer                              , pointer :: decay
+    integer                              , pointer :: deltau
+    integer                              , pointer :: deltav
+    integer                              , pointer :: dfu
+    integer                              , pointer :: dfv
+    integer                              , pointer :: diapl
+    integer                              , pointer :: dicuv
+    integer                              , pointer :: dicww
+    integer                              , pointer :: dis
+    integer                              , pointer :: df
+    integer                              , pointer :: disch
+    integer                              , pointer :: disinp
+    integer                              , pointer :: discum
+    integer                              , pointer :: dp
+    integer                              , pointer :: dps
+    integer                              , pointer :: dpu
+    integer                              , pointer :: dpv
+    integer                              , pointer :: drodep
+    integer                              , pointer :: rint0
+    integer                              , pointer :: rint1
+    integer                              , pointer :: dudz
+    integer                              , pointer :: umdis0
+    integer                              , pointer :: umdis1
+    integer                              , pointer :: dvdz
+    integer                              , pointer :: vmdis0
+    integer                              , pointer :: vmdis1
+    integer                              , pointer :: dxydro
+    integer                              , pointer :: enstro
+    integer                              , pointer :: eroll0
+    integer                              , pointer :: eroll1
+    integer                              , pointer :: evap
+    integer                              , pointer :: ewabr0
+    integer                              , pointer :: ewabr1
+    integer                              , pointer :: ewave0
+    integer                              , pointer :: ewave1
+    integer                              , pointer :: fcorio
+    integer                              , pointer :: fuiwe
+    integer                              , pointer :: fviwe
+    integer                              , pointer :: grmasu
+    integer                              , pointer :: grmasv
+    integer                              , pointer :: grmsur
+    integer                              , pointer :: grmsvr
+    integer                              , pointer :: grfacu
+    integer                              , pointer :: grfacv
+    integer                              , pointer :: gsqs
+    integer                              , pointer :: guu
+    integer                              , pointer :: guv
+    integer                              , pointer :: gvu
+    integer                              , pointer :: gvv
+    integer                              , pointer :: hrms
+    integer                              , pointer :: hu
+    integer                              , pointer :: hu0
+    integer                              , pointer :: hv
+    integer                              , pointer :: hv0
+    integer                              , pointer :: hydrbc
+    integer                              , pointer :: omega
+    integer                              , pointer :: patm
+    integer                              , pointer :: porosu
+    integer                              , pointer :: porosv
+    integer                              , pointer :: procbc
+    integer                              , pointer :: pship
+    integer                              , pointer :: qtfrac
+    integer                              , pointer :: qtfrct
+    integer                              , pointer :: qtfrt2
+    integer                              , pointer :: qu
+    integer                              , pointer :: qv
+    integer                              , pointer :: qxk
+    integer                              , pointer :: qyk
+    integer                              , pointer :: qzk
+    integer                              , pointer :: r0
+    integer                              , pointer :: r1
+    integer                              , pointer :: rbnd
+    integer                              , pointer :: rettim
+    integer                              , pointer :: rho
+    integer                              , pointer :: rhowat
+    integer                              , pointer :: rich
+    integer                              , pointer :: rint
+    integer                              , pointer :: rlabda
+    integer                              , pointer :: rmneg
+    integer                              , pointer :: rnpl
+    integer                              , pointer :: rob
+    integer                              , pointer :: rthbnd
+    integer                              , pointer :: rtu2d0
+    integer                              , pointer :: rtu2d1
+    integer                              , pointer :: rtubnd
+    integer                              , pointer :: rtur0
+    integer                              , pointer :: rtur1
+    integer                              , pointer :: rxx
+    integer                              , pointer :: rxy
+    integer                              , pointer :: ryy
+    integer                              , pointer :: rxz
+    integer                              , pointer :: ryz
+    integer                              , pointer :: s0
+    integer                              , pointer :: s1
+    integer                              , pointer :: sig
+    integer                              , pointer :: sigdif
+    integer                              , pointer :: sigmol
+    integer                              , pointer :: sink
+    integer                              , pointer :: sour
+    integer                              , pointer :: stil
+    integer                              , pointer :: sumrho
+    integer                              , pointer :: taubmx
+    integer                              , pointer :: taubpu
+    integer                              , pointer :: taubpv
+    integer                              , pointer :: taubsu
+    integer                              , pointer :: taubsv
+    integer                              , pointer :: teta
+    integer                              , pointer :: tgarkt
+    integer                              , pointer :: tgarkx
+    integer                              , pointer :: tgarnp
+    integer                              , pointer :: thick
+    integer                              , pointer :: thtim
+    integer                              , pointer :: tkedis
+    integer                              , pointer :: tkepro
+    integer                              , pointer :: tp
+    integer                              , pointer :: u0
+    integer                              , pointer :: u1
+    integer                              , pointer :: ubrlsu
+    integer                              , pointer :: ubrlsv
+    integer                              , pointer :: umdis
+    integer                              , pointer :: umean
+    integer                              , pointer :: umnflc
+    integer                              , pointer :: umnldf
+    integer                              , pointer :: uorb
+    integer                              , pointer :: v0
+    integer                              , pointer :: v1
+    integer                              , pointer :: vicuv
+    integer                              , pointer :: vicww
+    integer                              , pointer :: vmdis
+    integer                              , pointer :: vmean
+    integer                              , pointer :: vmnflc
+    integer                              , pointer :: vmnldf
+    integer                              , pointer :: vnu2d
+    integer                              , pointer :: vnu3d
+    integer                              , pointer :: voldis
+    integer                              , pointer :: volum0
+    integer                              , pointer :: volum1
+    integer                              , pointer :: vortic
+    integer                              , pointer :: w1
+    integer                              , pointer :: w10mag
+    integer                              , pointer :: windsu
+    integer                              , pointer :: windsv
+    integer                              , pointer :: windu
+    integer                              , pointer :: windv
+    integer                              , pointer :: wphy
+    integer                              , pointer :: ws
+    integer                              , pointer :: wsu
+    integer                              , pointer :: wsv
+    integer                              , pointer :: xcor
+    integer                              , pointer :: xydro
+    integer                              , pointer :: xz
+    integer                              , pointer :: ycor
+    integer                              , pointer :: yz
+    integer                              , pointer :: z0urou
+    integer                              , pointer :: z0vrou
+    integer                              , pointer :: zstep
+    integer                              , pointer :: drhodx
+    integer                              , pointer :: drhody
+    integer                              , pointer :: dzs0
+    integer                              , pointer :: dzs1
+    integer                              , pointer :: dzu0
+    integer                              , pointer :: dzu1
+    integer                              , pointer :: dzv0
+    integer                              , pointer :: dzv1
+    integer                              , pointer :: res
+    integer                              , pointer :: fact
+    integer                              , pointer :: rl
+    integer                              , pointer :: xj
+    integer                              , pointer :: p1
+    integer                              , pointer :: p0
+    integer                              , pointer :: p00
+    integer                              , pointer :: pnhcor
+    integer                              , pointer :: w0
+    integer                              , pointer :: s00
+    integer                              , pointer :: guz
+    integer                              , pointer :: gvz
+    integer                              , pointer :: gud
+    integer                              , pointer :: gvd
+    integer                              , pointer :: gsqiu
+    integer                              , pointer :: gsqiv
+    integer                              , pointer :: ibuff
+    integer                              , pointer :: idifu
+    integer                              , pointer :: irocol
+    integer                              , pointer :: itbcc
+    integer                              , pointer :: itbct
+    integer                              , pointer :: itdis
+    integer                              , pointer :: itdro
+    integer                              , pointer :: kadu
+    integer                              , pointer :: kadv
+    integer                              , pointer :: kcs
+    integer                              , pointer :: kcu
+    integer                              , pointer :: kcv
+    integer                              , pointer :: kfs
+    integer                              , pointer :: kfu
+    integer                              , pointer :: kfv
+    integer                              , pointer :: kspu
+    integer                              , pointer :: kspv
+    integer                              , pointer :: kstp
+    integer                              , pointer :: mnbar
+    integer                              , pointer :: mnbnd
+    integer                              , pointer :: mndro
+    integer                              , pointer :: mnksrc
+    integer                              , pointer :: nob
+    integer                              , pointer :: kcshyd
+    integer                              , pointer :: kfumin
+    integer                              , pointer :: kfvmin
+    integer                              , pointer :: kfsmin
+    integer                              , pointer :: kfumax
+    integer                              , pointer :: kfvmax
+    integer                              , pointer :: kfsmax
+    integer                              , pointer :: kfumx0
+    integer                              , pointer :: kfvmx0
+    integer                              , pointer :: kfsmx0
+    integer                              , pointer :: kfsz1
+    integer                              , pointer :: kfuz1
+    integer                              , pointer :: kfvz1
+    integer                              , pointer :: kcscut
+    integer                              , pointer :: kcu45
+    integer                              , pointer :: kcv45
+    integer                              , pointer :: disint
+    integer                              , pointer :: dismmt
+    integer                              , pointer :: nambnd
+    integer                              , pointer :: namsrc
+    integer                              , pointer :: tprofc
+    integer                              , pointer :: tprofu
+    real(fp)     , dimension(:,:)        , pointer :: zrtcsta
+    integer                              , pointer :: ifirstrtc
+    integer                              , pointer :: stacnt
+    integer                              , pointer :: rtcmod
+    integer      , dimension(:,:)        , pointer :: mnrtcsta
+    character(20), dimension(:)          , pointer :: namrtcsta
+    logical                              , pointer :: rtcact
+    real(fp)      , dimension(:)         , pointer :: rhosol
+    integer                              , pointer :: ifirst
+    integer                              , pointer :: nubnd
+    integer                              , pointer :: ubnd
+    real(fp)                             , pointer :: windxt
+    real(fp)                             , pointer :: windyt
+    real(fp)                             , pointer :: windft
+    integer                              , pointer :: nprocs
+    integer      , dimension(:)          , pointer :: nread
+    integer      , dimension(:, :)       , pointer :: nprptr
+    real(fp)     , dimension(:)          , pointer :: rcousr
+    character*20 , dimension(:)          , pointer :: procs
+    logical                              , pointer :: dryrun
+    include 'tri-dyn.igd'
+!
+! Global variables
+!
+    integer             :: icreep      !  Description and declaration in tricom.igs
+    integer             :: itiwec      !!  Current time counter for the calibration of internal wave energy
+    integer, intent(in) :: keva        !  Description and declaration in tricom.igs
+    integer             :: ktemp       !  Description and declaration in tricom.igs
+    integer             :: nfltyp      !  Description and declaration in iidim.f90
+    integer             :: nst         !!  Current time step counter
+    logical             :: sferic      !  Description and declaration in tricom.igs
+    real(fp)            :: anglat      !!  - Angle of latitude of the model centre (used to determine the coef. for the coriolis force)
+                                       !!  - In spherical coordinates this parameter equals the angle of latitude for the origin (water level point) after INIPHY anglat = 0.
+    real(fp)            :: betac       !  Description and declaration in tricom.igs
+    real(fp)            :: grdang      !  Description and declaration in tricom.igs
+    real(fp)            :: saleqs      !  Description and declaration in tricom.igs
+    real(fp)            :: temeqs      !  Description and declaration in tricom.igs
+    real(fp)            :: timnow      !!  Current timestep (multiples of dt)
+    character(1)        :: evaint      !  Description and declaration in tricom.igs
+    character(1)        :: forfuv      !  Description and declaration in tricom.igs
+    character(1)        :: forfww      !  Description and declaration in tricom.igs
+    character(1)        :: temint      !  Description and declaration in tricom.igs
+    character(12)       :: tkemod      !  Description and declaration in tricom.igs
+    character(13)       :: trasol      !  Description and declaration in tricom.igs
+    character(4)        :: rouflo      !  Description and declaration in ckdim.f90
+    character(4)        :: rouwav      !  Description and declaration in tricom.igs
+    character(8)        :: dischy      !  Description and declaration in tricom.igs
+    character(8)        :: solver      !  Description and declaration in tricom.igs
+!
+! Local variables
+!
+    integer      :: icx
+    integer      :: icy
+    integer      :: itemp
+    integer      :: itype
+    integer      :: n
+    integer      :: nhystp
+    integer      :: nmaxddb
+    integer      :: nreal       ! Pointer to real array RCOUSR for UDF particle wind factor parameters
+    logical      :: success      
+    character(8) :: stage       ! First or second half time step
+!
+!! executable statements -------------------------------------------------------
+!
+    iwrk1               => gdp%gdaddress%iwrk1
+    iwrk2               => gdp%gdaddress%iwrk2
+    wrka1               => gdp%gdaddress%wrka1
+    wrka2               => gdp%gdaddress%wrka2
+    wrka3               => gdp%gdaddress%wrka3
+    wrka4               => gdp%gdaddress%wrka4
+    wrka5               => gdp%gdaddress%wrka5
+    wrka6               => gdp%gdaddress%wrka6
+    wrka7               => gdp%gdaddress%wrka7
+    wrka8               => gdp%gdaddress%wrka8
+    wrka10              => gdp%gdaddress%wrka10
+    wrka11              => gdp%gdaddress%wrka11
+    wrka15              => gdp%gdaddress%wrka15
+    wrka16              => gdp%gdaddress%wrka16
+    wrkb1               => gdp%gdaddress%wrkb1
+    wrkb2               => gdp%gdaddress%wrkb2
+    wrkb3               => gdp%gdaddress%wrkb3
+    wrkb4               => gdp%gdaddress%wrkb4
+    wrkb5               => gdp%gdaddress%wrkb5
+    wrkb6               => gdp%gdaddress%wrkb6
+    wrkb7               => gdp%gdaddress%wrkb7
+    wrkb8               => gdp%gdaddress%wrkb8
+    wrkb9               => gdp%gdaddress%wrkb9
+    wrkb10              => gdp%gdaddress%wrkb10
+    wrkb11              => gdp%gdaddress%wrkb11
+    wrkb12              => gdp%gdaddress%wrkb12
+    wrkb13              => gdp%gdaddress%wrkb13
+    wrkb14              => gdp%gdaddress%wrkb14
+    wrkb15              => gdp%gdaddress%wrkb15
+    wrkb16              => gdp%gdaddress%wrkb16
+    wrkb17              => gdp%gdaddress%wrkb17
+    wrkb18              => gdp%gdaddress%wrkb18
+    wrkc1               => gdp%gdaddress%wrkc1
+    wrkc2               => gdp%gdaddress%wrkc2
+    wrkc3               => gdp%gdaddress%wrkc3
+    wrkc4               => gdp%gdaddress%wrkc4
+    zwork               => gdp%gdaddress%zwork
+    flbub               => gdp%gdbubble%flbub
+    nmax                => gdp%d%nmax
+    mmax                => gdp%d%mmax
+    nlb                 => gdp%d%nlb
+    nub                 => gdp%d%nub
+    mlb                 => gdp%d%mlb
+    mub                 => gdp%d%mub
+    ddbound             => gdp%d%ddbound
+    nmaxus              => gdp%d%nmaxus
+    kmax                => gdp%d%kmax
+    nmaxd               => gdp%d%nmaxd
+    jstart              => gdp%d%jstart
+    nmmaxj              => gdp%d%nmmaxj
+    nmmax               => gdp%d%nmmax
+    lsts                => gdp%d%lsts
+    lstsc               => gdp%d%lstsc
+    lstsci              => gdp%d%lstsci
+    lsal                => gdp%d%lsal
+    lsed                => gdp%d%lsed
+    ltem                => gdp%d%ltem
+    lsecfl              => gdp%d%lsecfl
+    lsec                => gdp%d%lsec
+    ltur                => gdp%d%ltur
+    ltur2d              => gdp%d%ltur2d
+    kmxdt               => gdp%d%kmxdt
+    npiwe               => gdp%d%npiwe
+    nbub                => gdp%d%nbub
+    nxbub               => gdp%d%nxbub
+    noroco              => gdp%d%noroco
+    norow               => gdp%d%norow
+    nocol               => gdp%d%nocol
+    nto                 => gdp%d%nto
+    ntof                => gdp%d%ntof
+    ntoq                => gdp%d%ntoq
+    kc                  => gdp%d%kc
+    kcd                 => gdp%d%kcd
+    nrob                => gdp%d%nrob
+    nsrc                => gdp%d%nsrc
+    nsrcd               => gdp%d%nsrcd
+    ndro                => gdp%d%ndro
+    nsluv               => gdp%d%nsluv
+    lundia              => gdp%gdinout%lundia
+    timsec              => gdp%gdinttim%timsec
+    timhr               => gdp%gdinttim%timhr
+    itiwei              => gdp%gdinttim%itiwei
+    itdiag              => gdp%gdinttim%itdiag
+    julday              => gdp%gdinttim%julday
+    ntstep              => gdp%gdinttim%ntstep
+    xx                  => gdp%gdmorpar%xx
+    densin              => gdp%gdmorpar%densin
+    hdt                 => gdp%gdnumeco%hdt
+    rhow                => gdp%gdphysco%rhow
+    ag                  => gdp%gdphysco%ag
+    z0                  => gdp%gdphysco%z0
+    z0v                 => gdp%gdphysco%z0v
+    iro                 => gdp%gdphysco%iro
+    irov                => gdp%gdphysco%irov
+    wind                => gdp%gdprocs%wind
+    salin               => gdp%gdprocs%salin
+    temp                => gdp%gdprocs%temp
+    const               => gdp%gdprocs%const
+    culvert             => gdp%gdprocs%culvert
+    drogue              => gdp%gdprocs%drogue
+    wave                => gdp%gdprocs%wave
+    iweflg              => gdp%gdprocs%iweflg
+    struct              => gdp%gdprocs%struct
+    cdwstruct           => gdp%gdprocs%cdwstruct
+    sedim               => gdp%gdprocs%sedim
+    htur2d              => gdp%gdprocs%htur2d
+    zmodel              => gdp%gdprocs%zmodel
+    nonhyd              => gdp%gdprocs%nonhyd
+    roller              => gdp%gdprocs%roller
+    sbkol               => gdp%gdprocs%sbkol
+    bubble              => gdp%gdprocs%bubble
+    alfas               => gdp%gdr_i_ch%alfas
+    alpha               => gdp%gdr_i_ch%alpha
+    areau               => gdp%gdr_i_ch%areau
+    areav               => gdp%gdr_i_ch%areav
+    bruvai              => gdp%gdr_i_ch%bruvai
+    c                   => gdp%gdr_i_ch%c
+    cbuv                => gdp%gdr_i_ch%cbuv
+    cbuvrt              => gdp%gdr_i_ch%cbuvrt
+    cdwlsu              => gdp%gdr_i_ch%cdwlsu
+    cdwlsv              => gdp%gdr_i_ch%cdwlsv
+    cdwzbu              => gdp%gdr_i_ch%cdwzbu
+    cdwzbv              => gdp%gdr_i_ch%cdwzbv
+    cdwztu              => gdp%gdr_i_ch%cdwztu
+    cdwztv              => gdp%gdr_i_ch%cdwztv
+    cfurou              => gdp%gdr_i_ch%cfurou
+    cfvrou              => gdp%gdr_i_ch%cfvrou
+    cvalu0              => gdp%gdr_i_ch%cvalu0
+    cvalv0              => gdp%gdr_i_ch%cvalv0
+    circ2d              => gdp%gdr_i_ch%circ2d
+    circ3d              => gdp%gdr_i_ch%circ3d
+    crbc                => gdp%gdr_i_ch%crbc
+    dddeta              => gdp%gdr_i_ch%dddeta
+    dddksi              => gdp%gdr_i_ch%dddksi
+    disch0              => gdp%gdr_i_ch%disch0
+    disch1              => gdp%gdr_i_ch%disch1
+    decay               => gdp%gdr_i_ch%decay
+    deltau              => gdp%gdr_i_ch%deltau
+    deltav              => gdp%gdr_i_ch%deltav
+    dfu                 => gdp%gdr_i_ch%dfu
+    dfv                 => gdp%gdr_i_ch%dfv
+    diapl               => gdp%gdr_i_ch%diapl
+    dicuv               => gdp%gdr_i_ch%dicuv
+    dicww               => gdp%gdr_i_ch%dicww
+    dis                 => gdp%gdr_i_ch%dis
+    df                  => gdp%gdr_i_ch%df
+    disch               => gdp%gdr_i_ch%disch
+    disinp              => gdp%gdr_i_ch%disinp
+    discum              => gdp%gdr_i_ch%discum
+    dp                  => gdp%gdr_i_ch%dp
+    dps                 => gdp%gdr_i_ch%dps
+    dpu                 => gdp%gdr_i_ch%dpu
+    dpv                 => gdp%gdr_i_ch%dpv
+    drodep              => gdp%gdr_i_ch%drodep
+    rint0               => gdp%gdr_i_ch%rint0
+    rint1               => gdp%gdr_i_ch%rint1
+    dudz                => gdp%gdr_i_ch%dudz
+    umdis0              => gdp%gdr_i_ch%umdis0
+    umdis1              => gdp%gdr_i_ch%umdis1
+    dvdz                => gdp%gdr_i_ch%dvdz
+    vmdis0              => gdp%gdr_i_ch%vmdis0
+    vmdis1              => gdp%gdr_i_ch%vmdis1
+    dxydro              => gdp%gdr_i_ch%dxydro
+    enstro              => gdp%gdr_i_ch%enstro
+    eroll0              => gdp%gdr_i_ch%eroll0
+    eroll1              => gdp%gdr_i_ch%eroll1
+    evap                => gdp%gdr_i_ch%evap
+    ewabr0              => gdp%gdr_i_ch%ewabr0
+    ewabr1              => gdp%gdr_i_ch%ewabr1
+    ewave0              => gdp%gdr_i_ch%ewave0
+    ewave1              => gdp%gdr_i_ch%ewave1
+    fcorio              => gdp%gdr_i_ch%fcorio
+    fuiwe               => gdp%gdr_i_ch%fuiwe
+    fviwe               => gdp%gdr_i_ch%fviwe
+    grmasu              => gdp%gdr_i_ch%grmasu
+    grmasv              => gdp%gdr_i_ch%grmasv
+    grmsur              => gdp%gdr_i_ch%grmsur
+    grmsvr              => gdp%gdr_i_ch%grmsvr
+    grfacu              => gdp%gdr_i_ch%grfacu
+    grfacv              => gdp%gdr_i_ch%grfacv
+    gsqs                => gdp%gdr_i_ch%gsqs
+    guu                 => gdp%gdr_i_ch%guu
+    guv                 => gdp%gdr_i_ch%guv
+    gvu                 => gdp%gdr_i_ch%gvu
+    gvv                 => gdp%gdr_i_ch%gvv
+    hrms                => gdp%gdr_i_ch%hrms
+    hu                  => gdp%gdr_i_ch%hu
+    hu0                 => gdp%gdr_i_ch%hu0
+    hv                  => gdp%gdr_i_ch%hv
+    hv0                 => gdp%gdr_i_ch%hv0
+    hydrbc              => gdp%gdr_i_ch%hydrbc
+    omega               => gdp%gdr_i_ch%omega
+    patm                => gdp%gdr_i_ch%patm
+    porosu              => gdp%gdr_i_ch%porosu
+    porosv              => gdp%gdr_i_ch%porosv
+    procbc              => gdp%gdr_i_ch%procbc
+    pship               => gdp%gdr_i_ch%pship
+    qtfrac              => gdp%gdr_i_ch%qtfrac
+    qtfrct              => gdp%gdr_i_ch%qtfrct
+    qtfrt2              => gdp%gdr_i_ch%qtfrt2
+    qu                  => gdp%gdr_i_ch%qu
+    qv                  => gdp%gdr_i_ch%qv
+    qxk                 => gdp%gdr_i_ch%qxk
+    qyk                 => gdp%gdr_i_ch%qyk
+    qzk                 => gdp%gdr_i_ch%qzk
+    r0                  => gdp%gdr_i_ch%r0
+    r1                  => gdp%gdr_i_ch%r1
+    rbnd                => gdp%gdr_i_ch%rbnd
+    rettim              => gdp%gdr_i_ch%rettim
+    rho                 => gdp%gdr_i_ch%rho
+    rhowat              => gdp%gdr_i_ch%rhowat
+    rich                => gdp%gdr_i_ch%rich
+    rint                => gdp%gdr_i_ch%rint
+    rlabda              => gdp%gdr_i_ch%rlabda
+    rmneg               => gdp%gdr_i_ch%rmneg
+    rnpl                => gdp%gdr_i_ch%rnpl
+    rob                 => gdp%gdr_i_ch%rob
+    rthbnd              => gdp%gdr_i_ch%rthbnd
+    rtu2d0              => gdp%gdr_i_ch%rtu2d0
+    rtu2d1              => gdp%gdr_i_ch%rtu2d1
+    rtubnd              => gdp%gdr_i_ch%rtubnd
+    rtur0               => gdp%gdr_i_ch%rtur0
+    rtur1               => gdp%gdr_i_ch%rtur1
+    rxx                 => gdp%gdr_i_ch%rxx
+    rxy                 => gdp%gdr_i_ch%rxy
+    ryy                 => gdp%gdr_i_ch%ryy
+    rxz                 => gdp%gdr_i_ch%rxz
+    ryz                 => gdp%gdr_i_ch%ryz
+    s0                  => gdp%gdr_i_ch%s0
+    s1                  => gdp%gdr_i_ch%s1
+    sig                 => gdp%gdr_i_ch%sig
+    sigdif              => gdp%gdr_i_ch%sigdif
+    sigmol              => gdp%gdr_i_ch%sigmol
+    sink                => gdp%gdr_i_ch%sink
+    sour                => gdp%gdr_i_ch%sour
+    stil                => gdp%gdr_i_ch%stil
+    sumrho              => gdp%gdr_i_ch%sumrho
+    taubmx              => gdp%gdr_i_ch%taubmx
+    taubpu              => gdp%gdr_i_ch%taubpu
+    taubpv              => gdp%gdr_i_ch%taubpv
+    taubsu              => gdp%gdr_i_ch%taubsu
+    taubsv              => gdp%gdr_i_ch%taubsv
+    teta                => gdp%gdr_i_ch%teta
+    tgarkt              => gdp%gdr_i_ch%tgarkt
+    tgarkx              => gdp%gdr_i_ch%tgarkx
+    tgarnp              => gdp%gdr_i_ch%tgarnp
+    thick               => gdp%gdr_i_ch%thick
+    thtim               => gdp%gdr_i_ch%thtim
+    tkedis              => gdp%gdr_i_ch%tkedis
+    tkepro              => gdp%gdr_i_ch%tkepro
+    tp                  => gdp%gdr_i_ch%tp
+    u0                  => gdp%gdr_i_ch%u0
+    u1                  => gdp%gdr_i_ch%u1
+    ubrlsu              => gdp%gdr_i_ch%ubrlsu
+    ubrlsv              => gdp%gdr_i_ch%ubrlsv
+    umdis               => gdp%gdr_i_ch%umdis
+    umean               => gdp%gdr_i_ch%umean
+    umnflc              => gdp%gdr_i_ch%umnflc
+    umnldf              => gdp%gdr_i_ch%umnldf
+    uorb                => gdp%gdr_i_ch%uorb
+    v0                  => gdp%gdr_i_ch%v0
+    v1                  => gdp%gdr_i_ch%v1
+    vicuv               => gdp%gdr_i_ch%vicuv
+    vicww               => gdp%gdr_i_ch%vicww
+    vmdis               => gdp%gdr_i_ch%vmdis
+    vmean               => gdp%gdr_i_ch%vmean
+    vmnflc              => gdp%gdr_i_ch%vmnflc
+    vmnldf              => gdp%gdr_i_ch%vmnldf
+    vnu2d               => gdp%gdr_i_ch%vnu2d
+    vnu3d               => gdp%gdr_i_ch%vnu3d
+    voldis              => gdp%gdr_i_ch%voldis
+    volum0              => gdp%gdr_i_ch%volum0
+    volum1              => gdp%gdr_i_ch%volum1
+    vortic              => gdp%gdr_i_ch%vortic
+    w1                  => gdp%gdr_i_ch%w1
+    w10mag              => gdp%gdr_i_ch%w10mag
+    windsu              => gdp%gdr_i_ch%windsu
+    windsv              => gdp%gdr_i_ch%windsv
+    windu               => gdp%gdr_i_ch%windu
+    windv               => gdp%gdr_i_ch%windv
+    wphy                => gdp%gdr_i_ch%wphy
+    ws                  => gdp%gdr_i_ch%ws
+    wsu                 => gdp%gdr_i_ch%wsu
+    wsv                 => gdp%gdr_i_ch%wsv
+    xcor                => gdp%gdr_i_ch%xcor
+    xydro               => gdp%gdr_i_ch%xydro
+    xz                  => gdp%gdr_i_ch%xz
+    ycor                => gdp%gdr_i_ch%ycor
+    yz                  => gdp%gdr_i_ch%yz
+    z0urou              => gdp%gdr_i_ch%z0urou
+    z0vrou              => gdp%gdr_i_ch%z0vrou
+    zstep               => gdp%gdr_i_ch%zstep
+    drhodx              => gdp%gdr_i_ch%drhodx
+    drhody              => gdp%gdr_i_ch%drhody
+    dzs0                => gdp%gdr_i_ch%dzs0
+    dzs1                => gdp%gdr_i_ch%dzs1
+    dzu0                => gdp%gdr_i_ch%dzu0
+    dzu1                => gdp%gdr_i_ch%dzu1
+    dzv0                => gdp%gdr_i_ch%dzv0
+    dzv1                => gdp%gdr_i_ch%dzv1
+    res                 => gdp%gdr_i_ch%res
+    fact                => gdp%gdr_i_ch%fact
+    rl                  => gdp%gdr_i_ch%rl
+    xj                  => gdp%gdr_i_ch%xj
+    p1                  => gdp%gdr_i_ch%p1
+    p0                  => gdp%gdr_i_ch%p0
+    p00                 => gdp%gdr_i_ch%p00
+    pnhcor              => gdp%gdr_i_ch%pnhcor
+    w0                  => gdp%gdr_i_ch%w0
+    s00                 => gdp%gdr_i_ch%s00
+    guz                 => gdp%gdr_i_ch%guz
+    gvz                 => gdp%gdr_i_ch%gvz
+    gud                 => gdp%gdr_i_ch%gud
+    gvd                 => gdp%gdr_i_ch%gvd
+    gsqiu               => gdp%gdr_i_ch%gsqiu
+    gsqiv               => gdp%gdr_i_ch%gsqiv
+    ibuff               => gdp%gdr_i_ch%ibuff
+    idifu               => gdp%gdr_i_ch%idifu
+    irocol              => gdp%gdr_i_ch%irocol
+    itbcc               => gdp%gdr_i_ch%itbcc
+    itbct               => gdp%gdr_i_ch%itbct
+    itdis               => gdp%gdr_i_ch%itdis
+    itdro               => gdp%gdr_i_ch%itdro
+    kadu                => gdp%gdr_i_ch%kadu
+    kadv                => gdp%gdr_i_ch%kadv
+    kcs                 => gdp%gdr_i_ch%kcs
+    kcu                 => gdp%gdr_i_ch%kcu
+    kcv                 => gdp%gdr_i_ch%kcv
+    kfs                 => gdp%gdr_i_ch%kfs
+    kfu                 => gdp%gdr_i_ch%kfu
+    kfv                 => gdp%gdr_i_ch%kfv
+    kspu                => gdp%gdr_i_ch%kspu
+    kspv                => gdp%gdr_i_ch%kspv
+    kstp                => gdp%gdr_i_ch%kstp
+    mnbar               => gdp%gdr_i_ch%mnbar
+    mnbnd               => gdp%gdr_i_ch%mnbnd
+    mndro               => gdp%gdr_i_ch%mndro
+    mnksrc              => gdp%gdr_i_ch%mnksrc
+    nob                 => gdp%gdr_i_ch%nob
+    kcshyd              => gdp%gdr_i_ch%kcshyd
+    kfumin              => gdp%gdr_i_ch%kfumin
+    kfvmin              => gdp%gdr_i_ch%kfvmin
+    kfsmin              => gdp%gdr_i_ch%kfsmin
+    kfumax              => gdp%gdr_i_ch%kfumax
+    kfvmax              => gdp%gdr_i_ch%kfvmax
+    kfsmax              => gdp%gdr_i_ch%kfsmax
+    kfumx0              => gdp%gdr_i_ch%kfumx0
+    kfvmx0              => gdp%gdr_i_ch%kfvmx0
+    kfsmx0              => gdp%gdr_i_ch%kfsmx0
+    kfsz1               => gdp%gdr_i_ch%kfsz1
+    kfuz1               => gdp%gdr_i_ch%kfuz1
+    kfvz1               => gdp%gdr_i_ch%kfvz1
+    kcscut              => gdp%gdr_i_ch%kcscut
+    kcu45               => gdp%gdr_i_ch%kcu45
+    kcv45               => gdp%gdr_i_ch%kcv45
+    disint              => gdp%gdr_i_ch%disint
+    dismmt              => gdp%gdr_i_ch%dismmt
+    nambnd              => gdp%gdr_i_ch%nambnd
+    namsrc              => gdp%gdr_i_ch%namsrc
+    tprofc              => gdp%gdr_i_ch%tprofc
+    tprofu              => gdp%gdr_i_ch%tprofu
+    zrtcsta             => gdp%gdrtc%zrtcsta
+    ifirstrtc           => gdp%gdrtc%ifirstrtc
+    stacnt              => gdp%gdrtc%stacnt
+    rtcmod              => gdp%gdrtc%rtcmod
+    mnrtcsta            => gdp%gdrtc%mnrtcsta
+    namrtcsta           => gdp%gdrtc%namrtcsta
+    rtcact              => gdp%gdrtc%rtcact
+    rhosol              => gdp%gdsedpar%rhosol
+    ifirst              => gdp%gdtrisol%ifirst
+    nubnd               => gdp%gdtrisol%nubnd
+    ubnd                => gdp%gdtrisol%ubnd
+    windxt              => gdp%gdtrisol%windxt
+    windyt              => gdp%gdtrisol%windyt
+    windft              => gdp%gdtrisol%windft
+    nprocs              => gdp%gdusrpar%nprocs
+    nread               => gdp%gdusrpar%nread
+    nprptr              => gdp%gdusrpar%nprptr
+    rcousr              => gdp%gdusrpar%rcousr
+    procs               => gdp%gdusrpar%procs
+    dryrun              => gdp%gdtmpfil%dryrun
+    !
+    icx     = 0
+    icy     = 0
+    nmaxddb = nmax + 2*gdp%d%ddbound
+    !
+    ! DD code added:
+    !
+    !
+    !     D3dFlowMap_InitTimeStep: set up virtual points for next time step
+    !
+    nhystp = nxtstp(d3dflow_inittimestep, gdp)
+    !
+    ! DD code added end
+    !
+    !
+    ! ********************** SET USER DEF FUNCT PARAMETERS ****************
+    !
+    call timer_start(timer_trisol_ini, gdp)
+    if (ifirst == 1) then
+       !
+       ! initialisation of user defined parameters and array pointers
+       !        if user def. function not requested then flag is set 0 and
+       !        array pointers are work array pointer
+       !
+       nubnd  = 0
+       ubnd   = wrkb1
+       windxt = 0.0
+       windyt = 0.0
+       windft = 0.0
+       do n = 1, nprocs
+          if (procs(n) == 'bc turbulence model ') then
+             nubnd = nread(n)
+             if (nubnd /= 0) ubnd = nprptr(1, n)
+          endif
+          if (procs(n) == 'particle wind factor') then
+             if (nread(n) /= 0) then
+                nreal  = nprptr(1, n)
+                windxt = rcousr(nreal)
+                windyt = rcousr(nreal + 1)
+                windft = rcousr(nreal + 2)
+             endif
+          endif
+       enddo
+       !
+       if (bubble) then
+          !
+          ! Fill bubble screens initially;
+          !
+          if (nxbub > 0) then
+             flbub = .true.
+             icx   = nmaxddb
+             icy   = 1
+             call cnvbub(kmax      ,nsrcd     ,nsrc      ,nbub      ,nxbub     , &
+                       & icx       ,icy       ,ch(namsrc),i(mnksrc) , &
+                       & r(disch)  ,gdp       )
+             icx = nmaxddb
+             icy = 1
+             call z_disbub(kmax      ,nsrcd     ,nsrc      ,nxbub     , &
+                         & lstsci    ,lstsc     ,icx       ,icy       , &
+                         & ch(namsrc),i(mnksrc) , &
+                         & i(kfsmin) ,i(kfsmax) ,r(gsqs)   ,r(disinp) , &
+                         & r(sour)   ,r(sink)   ,r(xcor)   ,r(ycor)   , &
+                         & r(r0)     ,r(disch)  ,r(rint)   ,r(sig)    , &
+                         & r(s1)     ,d(dps)    ,ifirst    ,gdp       )
+          endif
+       endif
+       !
+       ifirst = 0
+       !
+    endif
+    call timer_stop(timer_trisol_ini, gdp)
+    !
+    !+++++++++++++++++++++++ START OF COMPLETE TIMESTEP++++++++++++++++++++
+    !
+    timnow = timnow + 1.0_fp
+    call psemnefis
+    call setcurrentdatetime(timnow, gdp)
+    call vsemnefis
+    !
+    ! Set time dependent data
+    ! Some of the new features are not yet supported in ZMODEL
+    ! (see routine CHKZMOD)!!!
+    !
+    if (rtcact) then
+       call rtc_comm_get(((nst*2)+2) * hdt,r(cbuvrt) ,nsluv     , gdp)
+    endif
+    if (wind) then
+       !
+       ! call incwnd is replaced by a call to the meteo module
+       !
+       call timer_start(timer_incmeteo, gdp)
+       call incmeteo(timhr     , grdang   , &
+                   & r (windu ),r (windv ),r (patm  ), &
+                   & i (kcs   ),r (alfas ), &
+                   & r (windsu),r (windsv),r (w10mag), gdp)
+       call timer_stop(timer_incmeteo, gdp)
+    endif
+    if (nto > 0) then
+       !
+       ! Get online external (i.e. 1D) boundary conditions
+       !
+       if (sbkol) then
+          call timer_start(timer_wait, gdp)
+          write(*,*) '1st half time step: d3s_get_discharges'
+          call d3s_get_discharges(ntstep, nto, kcd, r(hydrbc))
+          write(*,*) '1st half time step: d3s_get_discharges DONE'
+          call timer_stop(timer_wait, gdp)
+       endif
+       !
+       ! Boundary conditions; hydrodynamic conditions
+       !
+       call timer_start(timer_incbc, gdp)
+       call incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
+                & kmax      ,kcd       ,nto       ,ntof      ,ntoq      , &
+                & kc        ,nrob      ,noroco    , &
+                & ch(tprofu),i(itbct)  ,i(mnbnd)  ,i(nob)    ,i(kfumin) , &
+                & i(kfumax) ,i(kfvmin) ,i(kfvmax) ,r(hydrbc) ,r(circ2d) , &
+                & r(circ3d) ,r(patm)   ,r(guu)    ,r(gvv)    ,r(xz)     , &
+                & r(yz)     ,r(hu)     ,r(hv)     ,r(omega)  ,r(alpha)  , &
+                & r(z0urou) ,r(z0vrou) ,r(qxk)    ,r(qyk)    ,r(s0)     , &
+                & r(u0)     ,r(v0)     ,r(grmasu) ,r(grmasv) ,r(cfurou) , &
+                & r(cfvrou) ,r(qtfrac) ,r(qtfrct) ,r(qtfrt2) ,r(thick)  , &
+                & r(dzu1)   ,r(dzv1)   ,r(zwork)  ,i(kcu)    ,i(kcv)    , &
+                & timhr     ,ch(nambnd),gdp       )
+       call timer_stop(timer_incbc, gdp)
+       !
+       ! Constituent (excl. turbulence & secondary flow)
+       !
+       if (lstsc > 0) then
+          call timer_start(timer_incbcc, gdp)
+          call incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
+                    & kmax      ,nto       ,nrob      ,lstsc     ,noroco    , &
+                    & ch(tprofc),i(itbcc)  ,i(mnbnd)  ,i(nob)    ,i(kstp)   , &
+                    & i(kfsmin) ,i(kfsmax) ,r(rob)    ,r(rbnd)   ,r(xz)     , &
+                    & r(yz)     ,d(dps)    ,r(s0)     ,r(sig)    ,r(procbc) , &
+                    & r(zstep)  ,r(dzs1)   ,r(sig)    ,gdp       )
+          call timer_stop(timer_incbcc, gdp)
+       endif
+    endif
+    !
+    ! Discharges; constituent (excl. turbulence & secondary flow)
+    !
+    if (nsrcd > 0) then
+       icx = nmaxddb
+       icy = 1
+       call timer_start(timer_incdis, gdp)
+       call incdis(lundia    ,sferic    ,grdang    ,timnow    ,nsrcd     , &
+                 & lstsc     ,lstsci    ,jstart    ,nmmaxj    ,kmax      , &
+                 & icx       ,icy       ,i(kfsmin) ,i(kfsmx0) , &
+                 & ch(disint),ch(dismmt),i(itdis)  ,i(kcu)    ,i(kcv)    , &
+                 & i(kfs)    ,i(ibuff)  ,i(mnksrc) ,r(alfas)  ,r(xcor)   , &
+                 & r(ycor)   ,r(dp)     ,r(disch)  , &
+                 & r(disch0) ,r(disch1) ,r(rint)   ,r(rint0)  ,r(rint1)  , &
+                 & r(umdis)  ,r(umdis0) ,r(umdis1) ,r(vmdis)  ,r(vmdis0) , &                 
+                 & r(vmdis1) ,bubble    ,r(r0)     ,r(thick)  ,r(zwork)  , &
+                 & r(dzs0)   ,d(dps)    ,r(s0)     ,gdp       )
+       call timer_stop(timer_incdis, gdp)
+       !
+       ! Computation of discharge in case of culverts
+       !
+       if (culvert) then
+           call timer_start(timer_culver, gdp)
+           call culver(icx       ,icy       ,kmax      ,nsrcd     ,i(kfs)    , &
+                     & i(kfsmax) ,i(kfsmin) ,i(mnksrc) ,r(disch)  ,d(dps)    , &
+                     & r(s0)     ,r(sig)    ,r(thick)  ,r(voldis) ,timsec    , &
+                     & gdp       )
+           call timer_stop(timer_culver, gdp)
+       endif
+    endif
+    !
+    ! 5 heat modules, input depends on value of KTEMP
+    !
+    call timer_start(timer_trisol_heat, gdp)
+    if (ktemp > 0) then
+       call inctem(ktemp     ,timnow    ,temint    ,gdp       )
+    endif
+    !
+    ! Rain/evaporation as time dependent input
+    !
+    if (keva > 0) then
+       call inceva(timnow    ,evaint    ,jstart    ,nmmaxj    ,nmmax     , &
+                 & r(evap)   ,gdp       )
+    endif
+    call timer_stop(timer_trisol_heat, gdp)
+    !
+    ! skip calculation in case of dryrun
+    !
+    if (.not. dryrun) then
+       !
+       ! Input values depend on local situations (e.g. floating structures)
+       ! WARNING: structures filter w.r.t. radiation is handled in HEATU
+       !
+       icx = nmaxddb
+       icy = 1
+       call timer_start(timer_filterstr, gdp)
+       call filterstructures(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
+                           & icy       ,i(kspu)   ,i(kspv)   ,r(evap)   ,r(windsu) , &
+                           & r(windsv) ,r(w10mag) ,r(uorb)   ,r(tp)     ,r(teta)   , &
+                           & r(dis)    ,r(wsu)    ,r(wsv)    ,r(grmasu) ,r(grmasv) , &
+                           & r(df)     ,gdp       )
+       call timer_stop(timer_filterstr, gdp)
+       !
+       ! Computation proceeds in X direction
+       !
+       !
+       ! Compute densities
+       !
+       if (lsal>0 .or. ltem>0 .or. (lsed>0 .and. densin)) then
+          !
+          ! note: DENS may still be called if sal or tem even if densin = false
+          !
+          call timer_start(timer_dens, gdp)
+          call dens(jstart    ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
+                  & lsal      ,ltem      ,lsed      ,saleqs    ,temeqs    , &
+                  & densin    ,zmodel    ,r(thick)  ,r(r1)     ,r(rho)    , &
+                  & r(sumrho) ,r(rhowat) ,rhosol    ,gdp       )
+          call timer_stop(timer_dens, gdp)
+          !
+          ! z_DENGRA: compute DRHODX/DRHODY terms (only in Z-MODEL)
+          !
+          icx = nmaxddb
+          icy = 1
+          call timer_start(timer_dengra, gdp)
+          call z_dengra(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
+                      & icy       ,i(kfsz1)  ,i(kfumin) ,i(kfumx0) ,i(kfvmin) , &
+                      & i(kfvmx0) ,r(rho)    ,r(gvu)    ,r(guv)    ,r(drhodx) , &
+                      & r(drhody) ,r(dzu0)   ,r(dzv0)   ,gdp       )
+          call timer_stop(timer_dengra, gdp)
+       endif
+       !
+       ! Source and sink terms
+       ! Initial SOUR and SINK are set to 0.
+       ! For temperature, evaporation is added to SINK and rain is added to
+       ! SOUR. For conservative constituents, a decay rate <> 0. is added
+       ! to SINK (except for sediment).
+       !
+       ! Decay rate (array SINK) in Zmodel is based on old Volumes (VOLUM0)
+       !
+       call timer_start(timer_sousin, gdp)
+       call sousin(jstart    ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
+                 & lstsc     ,lsal      ,ktemp     ,ltem      ,lsts      , &
+                 & i(kfs)    ,i(kfsmin) ,i(kfsmax) ,r(gsqs)   ,r(thick)  , &
+                 & r(s0)     ,d(dps)    ,r(volum0) ,r(sour)   ,r(sink)   , &
+                 & r(evap)   ,r(decay)  ,gdp       )
+       call timer_stop(timer_sousin, gdp)
+       !
+       if (bubble) then
+          call timer_start(timer_trisol_rest, gdp)
+          !
+          ! Fill DISCH array for bubble screens;
+          !
+          if (nsrcd > 0) then
+             if (nxbub > 0) then
+                icx = nmaxddb
+                icy = 1
+                call cnvbub(kmax      ,nsrcd     ,nsrc      ,nbub      ,nxbub     , &
+                          & icx       ,icy       ,ch(namsrc),i(mnksrc) , &
+                          & r(disch)  ,gdp       )
+             endif
+             !
+             ! Fill SOUR and SINK arrays  for bubble screens;
+             !
+             if (nxbub > 0) then
+                icx = nmaxddb
+                icy = 1
+                call z_disbub(kmax      ,nsrcd     ,nsrc      ,nxbub     , &
+                            & lstsci    ,lstsc     ,icx       ,icy       , &
+                            & ch(namsrc),i(mnksrc) , &
+                            & i(kfsmin) ,i(kfsmax) ,r(gsqs)   ,r(disinp) , &
+                            & r(sour)   ,r(sink)   ,r(xcor)   ,r(ycor)   , &
+                            & r(r0)     ,r(disch)  ,r(rint)   ,r(sig)    , &
+                            & r(s1)     ,d(dps)    ,ifirst    ,gdp       )
+             endif
+          endif
+          call timer_stop(timer_trisol_rest, gdp)
+       endif
+       !
+       ! Eddy viscosity and diffusivity
+       ! Use SIG for array ZK
+       !
+       call timer_start(timer_turbulence, gdp)
+       icx = nmaxddb
+       icy = 1
+       call timer_start(timer_turclo, gdp)
+       call z_turclo(jstart    ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
+                   & icx       ,icy       ,tkemod    , &
+                   & i(kcs)    ,i(kfu)    ,i(kfv)    ,i(kfs)    ,i(kfuz1)  , &
+                   & i(kfvz1)  ,i(kfsz1)  ,i(kfumin) ,i(kfumax) ,i(kfvmin) , &
+                   & i(kfvmax) ,i(kfsmin) ,i(kfsmax) ,r(s1)     ,d(dps)    , &
+                   & r(hu)     ,r(hv)     ,r(u1)     ,r(v1)     ,r(rtur1)  , &
+                   & r(thick)  ,r(sig)    ,r(rho)    ,r(vicuv)  ,r(vicww)  , &
+                   & r(dicuv)  ,r(dicww)  ,r(windsu) ,r(windsv) ,r(z0urou) , &
+                   & r(z0vrou) ,r(bruvai) ,r(rich)   ,r(dudz)   ,r(dvdz)   , &
+                   & r(dzu1)   ,r(dzv1)   ,r(dzs1)   ,r(sig)    ,gdp       )
+       call timer_stop(timer_turclo, gdp)
+       call timer_stop(timer_turbulence, gdp)
+       !
+       ! Check horizontal eddy viscosity and diffusivity
+       !
+       if (htur2d .or. irov>0) then
+          itype = 2
+          call timer_start(timer_chkvic, gdp)
+          call chkvic(lundia    ,jstart    ,nmmaxj    ,nmmax     ,kmax      , &
+                    & icx       ,icy       ,timnow    ,i(kfs)    ,i(kfu)    , &
+                    & i(kfv)    ,i(kcs)    ,lstsci    ,r(guv)    ,r(gvu)    , &
+                    & r(vicuv)  ,r(dicuv)  ,itype     ,i(kfsmin) ,i(kfsmax) , &
+                    & gdp       )
+          call timer_stop(timer_chkvic, gdp)
+       endif
+       !
+       ! Optional IWE model only for IWEFLG=.true. and NST <= ITIWEC
+       ! Afterwards update ITIWEC
+       !
+       if (iweflg) then
+          if (nst <= itiwec) then
+             itiwec = itiwec + itiwei
+             call timer_start(timer_iwe00, gdp)
+             call iwe_00(nmax      ,mmax      ,kmax      ,kmxdt     ,npiwe     , &
+                       & ltur      ,lundia    ,r(w10mag) ,r(s1)     ,d(dps)    , &
+                       & r(u1)     ,r(v1)     ,r(dudz)   ,r(dvdz)   ,r(windsu) , &
+                       & r(windsv) ,r(taubpu) ,r(taubpv) ,r(sig)    ,r(thick)  , &
+                       & r(rich)   ,r(bruvai) ,r(rtur0)  ,r(vicww)  ,i(kfs)    , &
+                       & i(kfu)    ,i(kfv)    ,r(tgarkx) ,r(tgarkt) ,r(tgarnp) , &
+                       & r(tkepro) ,r(tkedis) ,r(fuiwe)  ,r(fviwe)  ,gdp       )
+             call timer_stop(timer_iwe00, gdp)
+          endif
+       endif
+       !
+       ! Calculation of the water elevation generated by Tide Generating
+       ! Forces.
+       ! Use array WRKB17 to store the water elevation due to this force
+       !
+       call timer_start(timer_tfzeta, gdp)
+       call tfzeta(timnow    ,nmax      ,mmax      ,r(wrkb17) ,r(xz)     , &
+                 & r(yz)     ,gdp       )
+       call timer_stop(timer_tfzeta, gdp)
+       !
+       ! Define KSPU/V and POROSU/V for CDW type of structure (fixed gate with
+       ! - OPTIONALLY - layers with enhanced friction below it).
+       ! Array SIG is passed on twice; the first one represents the SIGma coordinates
+       ! (zmodel == .FALSE.) the second represent the Z-coordinates (zmodel == .TRUE.).
+       ! This is a trick to enable CDWKAD routine to be used for both coordinate types.
+       ! Work array ZWORK has the length of 5*KMAX
+       !
+       if (cdwstruct) then
+          call timer_start(timer_cdwkad, gdp)
+          call cdwkad(nmmax     ,kmax      ,zmodel    ,i(kspu)   ,i(kfsmax) , &
+                    & i(kfsmin) ,i(kfumax) ,i(kfumin) ,r(sig)    ,r(thick)  , &
+                    & r(sig)    ,r(zwork)  ,r(zwork+kmax)  ,r(zwork+2*kmax) , &
+                    & r(dpu)    ,r(hu)     ,r(dzu1)   ,r(porosu) ,r(ubrlsu) , &
+                    & r(cdwztu) ,r(cdwzbu) ,r(cdwlsu) ,gdp       )
+          call cdwkad(nmmax     ,kmax      ,zmodel    ,i(kspv)   ,i(kfsmax) , &
+                    & i(kfsmin) ,i(kfvmax) ,i(kfvmin) ,r(sig)    ,r(thick)  , &
+                    & r(sig)    ,r(zwork)  ,r(zwork+kmax)  ,r(zwork+2*kmax) , &
+                    & r(dpv)    ,r(hv)     ,r(dzv1)   ,r(porosv) ,r(ubrlsv) , &
+                    & r(cdwztv) ,r(cdwzbv) ,r(cdwlsv) ,gdp       )
+          call timer_stop(timer_cdwkad, gdp)
+       endif
+       !
+       ! Define KADU/V for hydrodynamics
+       !
+       call timer_start(timer_hydkad, gdp)
+       call hydkad(jstart    ,nmmaxj    ,nmmax     ,kmax      ,i(kspu)   , &
+                 & i(kspv)   ,i(kadu)   ,i(kadv)   ,gdp       )
+       call timer_stop(timer_hydkad, gdp)
+       !
+       ! Calculate for all barrier points :
+       ! - open or closed in mask arrays KSPU and KSPV
+       ! - extra energy losses due to quadratic friction
+       ! as a function of gate height and waterdepth
+       !
+       if (nsluv > 0) then
+          call timer_start(timer_updbar, gdp)
+          call updbar(nsluv     ,i(mnbar)  ,r(cbuv)   ,r(cbuvrt) ,nmax      , &
+                    & mmax      ,kmax      ,r(thick)  ,i(kspu)   ,i(kspv)   , &
+                    & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,r(ubrlsu) , &
+                    & r(ubrlsv) ,r(hu)     ,r(hv)     ,r(dpu)    ,r(dpv)    , &
+                    & r(sig)    ,r(zwork)  ,gdp       )
+          call timer_stop(timer_updbar, gdp)
+       endif
+       !
+       ! Computation of U1 and V1, i.e. evaluate momentum equations with explicit
+       ! pressure term (water level gradient and non-hydrostaic pressure)
+       !
+       call z_predict_nhfull(jstart    ,nmmaxj    ,nmmax     ,kmax      , &
+                           & mmax      ,nmax      ,zmodel    ,nst       ,nfltyp    , &
+                           & nocol     ,norow     ,nsrc      ,ch(dismmt),i(irocol) , &
+                           & i(mnksrc) ,i(kfu)    ,i(kfv)    ,i(kfs)    ,            &
+                           & i(kspu)   ,i(kspv)   ,i(kadu)   ,i(kadv)   ,i(kcs)    , &
+                           & i(kcu)    ,i(kcv)    ,i(kfsmin) ,i(kfsmax) ,i(kfsmx0) , &
+                           & i(kfumin) ,i(kfumax) ,i(kfumx0) ,i(kfvmin) ,i(kfvmax) , &
+                           & i(kfvmx0) ,i(kfuz1)  ,i(kfvz1)  ,i(kfsz1)  ,i(kcu45)  , &
+                           & i(kcv45)  ,i(kcscut) ,r(porosu) ,r(porosv) ,r(areau)  , &
+                           & r(areav)  ,r(volum1) ,r(s0)     ,r(s1)     ,r(w1)     , &
+                           & r(u0)     ,r(u1)     ,r(v0)     ,r(v1)     ,r(hu)     , &
+                           & r(hv)     ,r(thick)  ,r(umean)  ,r(ubrlsu) ,r(ubrlsv) , &
+                           & r(vmean)  ,r(dpu)    ,r(dpv)    ,d(dps)    ,r(dzu0)   , &
+                           & r(dzv0)   ,r(dzs0)   ,r(dzu1)   ,r(dzv1)   ,r(dzs1)   , &
+                           & r(qxk)    ,r(qyk)    ,r(qzk)    ,r(evap)   ,r(circ2d) , &
+                           & r(circ3d) ,r(drhodx) ,r(drhody) ,r(disch)  ,r(umdis)  , &
+                           & r(vmdis)  ,r(wsu)    ,r(wsv)    ,r(gud)    ,r(gvd)    , &
+                           & r(guu)    ,r(guv)    ,r(gvv)    ,r(gvu)    ,r(guz)    , &
+                           & r(gvz)    ,r(gsqs)   ,r(gsqiu)  ,r(gsqiv)  ,r(taubpu) , &
+                           & r(taubpv) ,r(taubsu) ,r(taubsv) ,r(vicuv)  ,r(vnu2d)  , &
+                           & r(vicww)  ,r(rxx)    ,r(rxy)    ,r(ryy)    ,r(windsu) , &
+                           & r(windsv) ,r(patm)   ,r(fcorio) ,r(wrkb17) ,r(wrka1)  , &
+                           & r(wrka2)  ,r(wrka3)  ,r(wrka4)  ,r(wrka5)  ,r(wrka6)  , &
+                           & r(wrka7)  ,r(wrka8)  ,r(wrka15) ,r(wrka16) ,r(wrkb1)  , &
+                           & r(wrkb2)  ,r(wrkb3)  ,r(wrkb4)  ,r(wrkb5)  ,r(wrkb6)  , &
+                           & r(wrkb7)  ,r(wrkb8)  ,r(sig)    ,r(p0)     ,r(crbc)   , &
+                           & r(hu0)    ,r(hv0)    ,r(wrkb11) ,r(wrkb12) ,r(pship)  , &
+                           & r(diapl)  ,r(rnpl)   ,gdp       )
+       !
+       ! Non hydrostatic pressure
+       ! w0 = non-hydrostatic vertical velocity after complete time step
+       !
+       if (nonhyd) then
+          icx = nmaxddb
+          icy = 1
+          !
+          ! Computation of W1 evaluate momentum equations with explicit
+          ! pressure term (non-hydrostaic pressure)
+          !
+          call z_vermom_nhfull(nmmax     ,kmax      ,icx       ,icy       ,r(u0)     , &
+                      & r(v0)     ,r(w0)     ,r(vicww)  ,r(rxz)    ,r(ryz)    , &
+                      & r(guu)    ,r(gvv)    ,r(guv)    ,r(gvu)    ,i(kfs)    , &
+                      & i(kcs)    ,r(wrkb1)  ,r(wrkb2)  ,r(wrkb3)  ,r(wrkb4)  , &
+                      & i(kfuz1)  ,i(kfvz1)  ,i(kfsz1)  ,i(kfsmin) ,i(kfsmax) , &
+                      & i(kcshyd) ,r(dzs1)   ,r(dzu0)   ,r(dzv0)   ,r(w1)     , &
+                      & r(p0)     ,r(sig)    ,gdp       )
+          !
+          ! pressure correction step non-hydrostatic pressure and water levels
+          ! SIG-array contains layer positions ZK!!!
+          ! Added work arrays wrkb15 to wrkb18 for use in BiCGSTAB, Ullmann 21/02/2008.
+          !
+          icx = nmaxddb
+          icy = 1
+          call z_hydpres_nhfull(mmax      ,nmax      ,jstart    ,nmmaxj    ,nmmax     , &
+                       & kmax      ,nst       ,icx       ,icy       ,nsrc      , &
+                       & norow     ,nocol     ,i(irocol) ,r(s1)     ,r(s0 )    , &
+                       & r(u1)     ,r(v1)     ,r(w1)     ,r(guu)    ,r(gvv)    , &
+                       & r(u0)     ,r(v0)     ,r(w0)     ,r(circ2d) ,            &
+                       & r(guv)    ,r(gvu)    ,r(gsqs)   ,r(guz)    ,r(gvz )   , &
+                       & i(kfu)    ,i(kfv)    ,i(kfs)    ,i(kcs)    ,i(kfuz1)  , &
+                       & i(kfvz1)  ,i(kfsz1)  ,i(kfsmin) ,i(kfsmax) ,i(kcshyd) , &
+                       & i(mnksrc) ,r(umean)  ,r(vmean)  ,d(dps)    ,            &
+                       & r(dzu0)   ,r(dzv0)   ,r(dzs1)   ,r(disch)  ,            &
+                       & r(p1)     ,r(p0)     ,r(pnhcor) ,r(wrkb1)  ,r(sig)    , &
+                       & r(wrkb2)  ,r(wrkb3)  ,r(wrkb4)  ,r(wrkb5)  ,r(wrkb6)  , &
+                       & r(wrkb7)  ,r(wrkb8)  ,r(wrkb9)  ,r(wrkb10) ,r(wrkb11) , &
+                       & r(wrkb12) ,r(wrkb13) ,r(wrkb14) ,r(wrkb15) ,r(wrkb16) , &
+                       & r(wrkb17) ,r(wrkb18) ,gdp       )
+          !
+          ! Correct the momentum
+          !
+          icx = nmaxddb
+          icy = 1
+          call z_momcor_nhfull(nmmax     ,kmax      ,icx       ,icy       ,r(s1)     , &
+                      & r(u1)     ,r(v1)     ,r(w1)     ,r(umean)  ,r(vmean)  , &
+                      & r(qxk)    ,r(qyk)    ,r(qzk)    ,r(guu)    ,r(gvv)    , &
+                      & r(guv)    ,r(gvu)    ,r(gsqs)   ,i(kcs)    ,i(kcshyd) , &
+                      & i(kfuz1)  ,i(kfvz1)  ,i(kfsz1)  ,i(kfumin) ,i(kfumax) , &
+                      & i(kfvmin) ,i(kfvmax) ,i(kfsmin) ,i(kfsmax) ,r(dzs1)   , &
+                      & r(dzu0)   ,r(dzv0)   ,r(p1)     ,r(p0)     ,            &
+                      & r(u0)     ,r(v0)     ,r(w0)     ,r(s0)     ,r(disch)  , &
+                      r(evap)     ,i(mnksrc) ,nsrc      ,r(wrkb1)  ,d(dps  )  , &
+                      & norow     ,nocol     ,i(irocol) ,r(sig)    ,            &
+                      i(kfs)      ,i(kfu)    ,i(kfv)    ,nst       ,gdp         )
+          !
+          !
+          icx   = nmaxddb
+          icy   = 1
+          if (nfltyp/=0) then
+             !
+             ! If waterlevel is below bottom then isolate waterlevel point by setting
+             ! the surrounding velocities to zero and repeat the computation of SUD
+             itemp = 0
+          !
+          ! To enable computation of new grid administration due to water level
+          ! correction in Non-hydro static module
+          ! itemp has been defined to call Z_DRYCHK (and set to zero) replacing idry
+          ! Fluxes are based on geometry at old time level, so drying does not
+          ! lead to repetition of timestep.
+          !
+             call z_drychk(itemp     ,jstart    ,nmmaxj    ,nmmax     ,kmax      , &
+                        & nfltyp    ,icx       ,icy       ,i(kfu)    ,i(kfv)    , &
+                        & i(kfs)    ,i(kcs)    ,i(kfuz1)  ,i(kfvz1)  ,i(kfsz1)  , &
+                        & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,i(kfsmin) , &
+                        & i(kfsmax) ,i(kfsmx0) ,r(s1),r(s0),d(dps)   ,r(qxk)    , &
+                        & r(qyk)    ,r(w1)     ,r(dzu1)   ,r(dzv1)   ,r(dzs1)   , &
+                        & r(sig)    ,gdp       )
+          endif
+          !
+          ! Re-Compute Volume (Areas actually need no update) to be used in routines that computes
+          ! the transport of matter (consistency with WAQ)
+          !
+          call z_updtvol(nmmax     ,kmax      ,i(kcs)    , r(gsqs)   ,r(dzs1)   , &
+                       & r(volum1) ,gdp       )
+       endif
+       !
+       ! Calculate tau_bottom values using local values for HU and HV
+       ! use work array WRKA3 for this purpose.
+       ! U-point and V-point component of TAUBMX are calculated in WRKA1,
+       ! resp. WRKA2 and in CALTMX defined in scalar entity TAUBMX
+       ! The velocities are corrected for mass flux and temporary set in
+       ! WRKB3 (U1) and WRKB4 (V1) which will be used in TAUBOT
+       !
+       ! CVALU0 and CVALV0 contain the actual 2D-chezy value
+       ! to be used in detvic
+       !
+       ! U-point and V-point values of Z0CUR are calculated in WRKA10,
+       ! and WRKA11 respectively and are passed to EROSED
+       !
+       icx = nmaxddb
+       icy = 1
+       call timer_start(timer_taubot, gdp)
+       call taubot(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
+                 & icy       ,rouflo    ,rouwav    ,i(kfu)    ,i(kfv)    , &
+                 & i(kfumin) ,i(kfumax) ,i(kspu)   ,i(kcs)    ,i(kcscut) , &
+                 & d(dps)    ,r(s1)     ,r(u1)     ,r(v1)     ,r(umean)  , &
+                 & r(guu)    ,r(xcor)   ,r(ycor)   ,r(rho)    , &
+                 & r(taubpu) ,r(taubsu) ,r(wrka1)  ,r(dis)    ,r(rlabda) , &
+                 & r(teta)   ,r(uorb)   ,r(tp)     ,r(wsu)    ,r(wsv)    , &
+                 & r(grmasu) ,r(dfu)    ,r(deltau) ,r(hrms)   , &
+                 & r(cfurou) ,r(z0urou) ,r(hu)     ,r(dzu1)   ,r(sig)    , &
+                 & r(wrka10) ,r(cvalu0) ,r(grmsur) ,r(grfacu) ,gdp       )
+       call timer_stop(timer_taubot, gdp)
+       !
+       icx = nmaxddb
+       icy = 1
+       call timer_start(timer_caltmx, gdp)
+       call caltmx(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
+                 & icy       ,zmodel    ,i(kfu)    ,i(kfv)    ,i(kfs)    , &
+                 & i(kfuz1)  ,i(kfvz1)  ,i(kfsmin) ,r(wrka1)  ,r(wrka2)  , &
+                 & r(taubmx) ,r(hu)     ,r(hv)     ,r(dps)    ,r(s1)     , &
+                 & gdp       )
+       call timer_stop(timer_caltmx, gdp)
+       if (htur2d) then
+          !
+          ! HLES/Smagorinsky with bottom friction
+          ! Calculate fluctuating velocity components using lp filter
+          !
+          call timer_start(timer_trisol_hles, gdp)
+          call lpfluc(jstart    ,nmmaxj    ,nmmax     ,i(kfu)    ,i(kfv)    , &
+                    & r(umean)  ,r(vmean)  ,r(umnldf) ,r(vmnldf) ,r(umnflc) , &
+                    & r(vmnflc) ,gdp       )
+          !
+          ! Calculate Turbulent Kinetic Energy production due to velocity
+          ! fluctuation
+          ! wrka3 is used to store the result (S2) to be used in DETVIC
+          !
+          icx = nmaxddb
+          icy = 1
+          call protke(jstart    ,nmmaxj    ,nmmax     ,icx       ,icy       , &
+                    & i(kfs)    ,i(kfu)    ,i(kfv)    ,i(kcs)    ,r(umnflc) , &
+                    & r(vmnflc) ,r(guu)    ,r(gvv)    ,r(wrka1)  ,r(wrka2)  , &
+                    & r(wrka3)  ,gdp       )
+          !
+          ! Calculate subgridscale eddy viscosity/diffusivity
+          ! CVALU0 and CVALV0 contain the actual 2D-chezy value
+          ! WRKA3 contains TKE production (S2)
+          ! result is put in vicuv/dicuv in layer kmax+2
+          !
+          icx = nmaxddb
+          icy = 1
+          call detvic(lundia    ,jstart    ,nmmaxj    ,nmmax     ,kmax      , &
+                    & icx       ,icy       ,i(kfs)    ,i(kfu)    , &
+                    & i(kfv)    ,i(kcs)    ,d(dps)    ,r(s1)     ,r(umean)  , &
+                    & r(vmean)  ,r(cvalu0) ,r(cvalv0) ,r(guv)    ,r(gvu)    , &
+                    & r(gsqs)   ,r(wrka3)  ,r(vicuv)  ,r(dicuv)  , &
+                    & gdp       )
+          call timer_stop(timer_trisol_hles, gdp)
+       endif
+       !
+       ! Constituents: salinity, temperature, user defined,
+       ! secondary flow (2d) & turbulence (3d)
+       !
+       !
+       ! Fill discharges;
+       ! constituent (excl. turbulence & secondary flow)
+       !
+       if (lstsc > 0) then
+          icx = nmaxddb
+          icy = 1
+          call timer_start(timer_discha, gdp)
+          call z_discha(kmax      ,nsrc      ,nbub      ,lstsci    ,lstsc     ,jstart    , &
+                      & nmmaxj    ,icx       ,icy       ,ch(namsrc),i(mnksrc) , &
+                      & i(kfs)    ,i(kcs)    ,i(kfsmin) ,i(kfsmx0) ,r(sour)   , &
+                      & r(sink)   ,d(dps)    ,r(s0)     ,r(dzs0)   ,r(r0)     , &
+                      & r(disch)  ,r(rint)   ,r(zwork)  ,r(zwork+kmax),bubble    ,gdp       )
+          call timer_stop(timer_discha, gdp)
+       endif
+       !
+       ! Temperature model KTEMP > 0 (only if LTEM > 0 per definition)
+       !
+       if (ktemp > 0) then
+          icx = nmaxddb
+          icy = 1
+          call timer_start(timer_heatu, gdp)
+          call heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
+                   & ltem      ,lstsci    ,icx       ,icy       , &
+                   & nmmax     ,kmax      ,i(kfs)    ,i(kfsmx0) , &
+                   & i(kfsmin) ,i(kspu)   ,i(kspv)   ,r(dzs0)   ,r(dzs1)   , &
+                   & r(sour)   ,r(sink)   ,r(r0)     ,r(evap)   ,d(dps)    , &
+                   & r(s0)     ,r(s1)     ,r(thick)  ,r(w10mag) ,r(patm)   , &
+                   & r(ycor)   ,r(gsqs)   ,r(xz)     ,r(yz)     ,gdp       )
+          call timer_stop(timer_heatu, gdp)
+       endif
+       !
+       ! Thatcher harlemann return times;
+       ! constituent (excl. turbulence & secondary flow)
+       !
+       if (lstsc > 0) then
+          icx = 1
+          icy = nmaxddb
+          call timer_start(timer_thahbc, gdp)
+          call thahbc(jstart    ,nmmaxj    ,icx       ,icy       ,kmax      , &
+                    & lstsci    ,lstsc     ,nrob      ,noroco    ,nto       , &
+                    & nst       ,i(kfsmin) ,i(nob)    ,r(thtim)  ,r(rettim) , &
+                    & r(v1)     ,r(u1)     ,r(r0)     ,r(rbnd)   ,r(rthbnd) , &
+                    & r(sig)    ,r(dzs1)   ,d(dps)    ,r(s1)     ,gdp       )
+          call timer_stop(timer_thahbc, gdp)
+       endif
+       !
+       ! Define KADU/V for transport and turbulence
+       !
+       icx = nmaxddb
+       icy = 1
+       call timer_start(timer_trakad, gdp)
+       call trakad(nmmax     ,kmax      ,i(kcs)    , &
+                 & icx       ,icy       , &
+                 & i(kspu)   ,i(kspv)   ,i(kadu)   ,i(kadv)   ,gdp       )
+       call timer_stop(timer_trakad, gdp)
+       !
+       ! Transport turbulence
+       !
+       if (lstsci>0 .and. nst<itdiag) then
+          call timer_start(timer_difu, gdp)
+          !
+          ! NO ADI voor transport eq. In relation with the usual Z_DIFU,
+          ! the boundary condition is imposed in both directions.
+          !
+          icx = nmaxddb
+          icy = 1
+          call timer_start(timer_tritra, gdp)
+          call z_difuv_nhfull(lundia   ,nst       ,icx       ,icy       ,jstart    , &
+                            & nmmaxj    ,nmmax     ,kmax      ,lstsci ,norow, nocol , &
+                            & i(irocol) ,i(kcs)    ,i(kcu)    ,i(kcv)    ,i(kfs)    , &
+                            & i(kfsmin) ,i(kfsmax) ,i(kfsmx0) ,i(kfumin) ,i(kfumx0) , &
+                            & i(kfvmin) ,i(kfvmx0) ,i(kfsz1)  ,i(kfuz1)  ,i(kfvz1)  , &
+                            & r(qxk)    ,r(qyk)    ,r(qzk)    ,r(u1)     ,r(v1)     , &
+                            & r(guv)    ,r(gvu)    ,r(gsqs)   ,r(rbnd)   ,r(sigdif) , &
+                            & r(sigmol) ,r(dicuv)  ,r(dicww)  ,r(r0)     ,r(r1)     , &
+                            & r(sour)   ,r(sink)   ,r(wrkb1)  ,r(wrkb2)  ,r(wrkb3)  , &
+                            & r(wrkc1)  ,r(wrkc2)  ,r(wrkc3)  ,r(wrkc4)  ,r(dzs0)   ,r(dzs1)   , &
+                            & r(dzu0)   ,r(dzv0)   ,r(areau)  ,r(areav)  ,r(volum0) , &
+                            & r(volum1) ,r(guu)    ,r(gvv)    ,r(bruvai) , &
+                            & gdp       )
+          call timer_stop(timer_tritra, gdp)
+          call timer_stop(timer_difu, gdp)
+       endif
+       !
+       ! Turbulence
+       ! user defined BC for turbulence model in NUBND and UBND
+       !
+       call timer_start(timer_turbulence, gdp)
+       if (ltur > 0) then
+          icx = nmaxddb
+          icy = 1
+          call timer_start(timer_tratur, gdp)
+          call z_tratur(dischy    ,nubnd     ,jstart    ,nmmaxj    ,nmmax     , &
+                      & nmax      ,mmax      ,kmax      ,ltur      ,nto       , &
+                      & icx       ,icy       ,i(kfs)    ,i(kfu)    ,i(kfv)    , &
+                      & i(kcs)    ,i(mnbnd)  ,r(s1)     ,d(dps)    ,r(u1)     , &
+                      & r(v1)     ,r(w1)     ,r(rtur0)  ,r(rtur1)  ,r(thick)  , &
+                      & r(sig)    ,r(guu)    ,r(gvv)    ,r(guv)    ,r(gvu)    , &
+                      & r(vicww)  ,r(dicww)  ,r(cfurou) ,r(cfvrou) ,r(z0urou) , &
+                      & r(z0vrou) ,r(windsu) ,r(windsv) ,r(bruvai) ,r(dudz)   , &
+                      & r(dvdz)   ,r(tkepro) ,r(tkedis) ,r(deltau) ,r(dfu)    , &
+                      & r(dfv)    ,r(dis)    ,r(hrms)   ,r(uorb)   ,r(tp)     , &
+                      & r(wrkb1)  ,r(wrkb2)  ,r(wrkb3)  ,r(wrkb4)  ,r(wrkb6)  , &
+                      & r(wrkb7)  ,r(wrkb8)  ,r(wrkb9)  ,r(wrkb10) ,r(wrkb11) , &
+                      & r(ubnd)   ,r(wrkb12) ,i(iwrk1)  ,r(wrka1)  ,i(iwrk2)  , &
+                      & r(wrka2)  ,r(wrkb5)  ,i(kfsmin) ,i(kfsmax) ,i(kfsmx0) , &
+                      & i(kfuz1)  ,i(kfvz1)  ,r(dzs1)   ,gdp       )
+          call timer_stop(timer_tratur, gdp)
+          ! Eddy viscosity and diffusivity
+          ! Use SIG for array ZK
+          !
+          icx = nmaxddb
+          icy = 1
+          call z_turclo(jstart    ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
+                      & icx       ,icy       ,tkemod    , &
+                      & i(kcs)    ,i(kfu)    ,i(kfv)    ,i(kfs)    ,i(kfuz1)  , &
+                      & i(kfvz1)  ,i(kfsz1)  ,i(kfumin) ,i(kfumax) ,i(kfvmin) , &
+                      & i(kfvmax) ,i(kfsmin) ,i(kfsmax) ,r(s1)     ,d(dps)    , &
+                      & r(hu)     ,r(hv)     ,r(u1)     ,r(v1)     ,r(rtur1)  , &
+                      & r(thick)  ,r(sig)    ,r(rho)    ,r(vicuv)  ,r(vicww)  , &
+                      & r(dicuv)  ,r(dicww)  ,r(windsu) ,r(windsv) ,r(z0urou) , &
+                      & r(z0vrou) ,r(bruvai) ,r(rich)   ,r(dudz)   ,r(dvdz)   , &
+                      & r(dzu1)   ,r(dzv1)   ,r(dzs1)   ,r(sig)    ,gdp       )
+          !
+          ! Check horizontal eddy viscosity and diffusivity
+          !
+          if (htur2d .or. irov>0) then
+             itype = 2
+             call chkvic(lundia    ,jstart    ,nmmaxj    ,nmmax     ,kmax      , &
+                       & icx       ,icy       ,timnow    ,i(kfs)    ,i(kfu)    , &
+                       & i(kfv)    ,i(kcs)    ,lstsci    ,r(guv)    ,r(gvu)    , &
+                       & r(vicuv)  ,r(dicuv)  ,itype     ,i(kfsmin) ,i(kfsmax) , &
+                       & gdp       )
+          endif
+       endif
+       !
+       ! 2D Turbulence; BC already in RDQ2EB (see READMD)
+       ! USE IBUFF as work array
+       !
+       if (ltur2d > 0) then
+          icx = nmaxddb
+          icy = 1
+          call timer_start(timer_tur2d, gdp)
+          call tur2d(dischy    ,jstart    ,nmmaxj    ,nmmax     ,nmax      , &
+                   & mmax      ,kmax      ,icx       ,icy       ,i(kfs)    , &
+                   & i(kfu)    ,i(kfv)    ,i(kcs)    ,i(ibuff)  ,r(dp)     , &
+                   & d(dps)    ,r(s1)     ,r(umean)  ,r(vmean)  ,r(rtu2d0) , &
+                   & r(rtu2d1) ,r(rtubnd) ,r(thick)  ,r(guu)    ,r(gvv)    , &
+                   & r(guv)    ,r(gvu)    ,r(vicww)  ,r(dicww)  ,r(vicuv)  , &
+                   & r(vnu2d)  ,r(vnu3d)  ,r(cfurou) ,r(cfvrou) ,r(dddksi) , &
+                   & r(dddeta) ,r(z0urou) ,r(z0vrou) ,r(windsu) ,r(windsv) , &
+                   & r(tkepro) ,r(tkedis) ,r(wrkb2)  ,r(wrkb4)  ,r(wrkb5)  , &
+                   & r(wrkb6)  ,r(wrkb7)  ,r(wrkb8)  ,r(wrka1)  ,r(wrka2)  , &
+                   & r(wrka3)  ,r(wrka4)  ,r(wrkb9)  ,r(wrkb10) ,gdp       )
+          call timer_stop(timer_tur2d, gdp)
+       endif
+       !
+       call timer_stop(timer_turbulence, gdp)
+       !
+       ! Forester filter
+       !
+       if (lstsci > 0) then
+          icx = nmaxddb
+          icy = 1
+          call timer_start(timer_forfil, gdp)
+          call z_forfil(nmmax     ,kmax      ,lstsci    , &
+                      & lsecfl    ,lsal      ,ltem      ,icx       ,icy       , &
+                      & nst       ,forfuv    ,forfww    , &
+                      & i(kfs)    ,i(kcs)    ,i(kcu)    ,i(kcv)    ,i(kfsmin) , &
+                      & i(kfsmax) ,i(kfuz1)  ,i(kfvz1)  ,i(kfsz1)  ,i(idifu)  , &
+                      & r(dzs1)   ,r(r0)     , &
+                      & r(r1)     ,r(rmneg)  ,r(volum1) ,r(dicww)  ,r(w1)     , &
+                      & r(sigdif) ,r(sigmol) ,gdp       )
+          call timer_stop(timer_forfil, gdp)
+       endif
+       !
+       ! Compute drogues (DROGUE = .true.)
+       !
+       if (drogue) then
+          icx = nmaxddb
+          icy = 1
+          call timer_start(timer_drotim, gdp)
+          call drotim(nst       ,jstart    ,nmmaxj    ,kmax      ,ndro      , &
+                    & icx       ,icy       ,windxt    ,windyt    ,windft    , &
+                    & i(kcu)    ,i(kcv)    ,i(kcs)    ,i(kfu)    ,i(kfv)    , &
+                    & i(mndro)  ,i(itdro)  ,r(u1)     ,r(v1)     ,r(xcor)   , &
+                    & r(ycor)   ,r(guu)    ,r(gvv)    ,r(guv)    ,r(gvu)    , &
+                    & r(dxydro) ,r(xydro)  ,r(hu)     ,r(hv)     ,r(s1)     , &
+                    & r(dpu)    ,r(dpv)    ,r(thick)  ,r(drodep) , &
+                    & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) , &
+                    & r(dzu1)   ,r(dzv1)   ,r(sig)    ,gdp       )
+          call timer_stop(timer_drotim, gdp)
+       endif
+       !
+       ! Reset arrays for next half time step
+       ! S0=S1, U0=U1, V0=V1, R0=R1 etc
+       !
+       call timer_start(timer_f0isf1, gdp)
+       call f0isf1(dischy    ,nst       ,zmodel    ,jstart    , &
+                 & nmmax     ,nmmaxj    ,nmax      ,kmax      ,lstsci    , &
+                 & ltur      ,nsrc      ,i(kcu)    ,i(kcv)    ,i(kcs)    , &
+                 & i(kfs)    ,i(kfu)    ,i(kfv)    ,i(kfsmin) ,i(kfsmax) , &
+                 & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,i(kfsmx0) , &
+                 & i(kfumx0) ,i(kfvmx0) ,r(s0)     ,r(s1)     ,r(u0)     , &
+                 & r(u1)     ,r(v0)     ,r(v1)     ,r(volum0) ,r(volum1) , &
+                 & r(r0)     ,r(r1)     ,r(rtur0)  ,r(rtur1)  ,r(disch)  , &
+                 & r(discum) ,r(hu)     ,r(hv)     ,r(dzu1)   ,r(dzv1)   , &
+                 & r(dzs1)   ,r(dzu0)   ,r(dzv0)   ,r(dzs0)   ,r(qxk)    , &
+                 & r(qyk)    ,r(qu)     ,r(qv)     ,r(s00)    ,r(w0)     , &
+                 & r(w1)     ,r(p0)     ,r(p1)     ,r(hu0)    ,r(hv0)    , &
+                 & r(ewabr0) ,r(ewabr1) , &
+                 & r(ewave0) ,r(ewave1) ,r(eroll0) ,r(eroll1) ,roller    , &
+                 & gdp       )
+       call timer_stop(timer_f0isf1, gdp)
+    endif
+    !
+    if (rtcact) then
+       call rtc_comm_put(i(kfs)    ,i(kfsmin) ,i(kfsmax) ,r(sig)    , &
+                       & r(sig)    ,r(s1)     ,d(dps)    ,r(r0)     , &
+                       & gdp)
+    endif
+    if (sbkol) then
+       !
+       ! Communicate with 1D application
+       !
+       call timer_start(timer_wait, gdp)
+       call D3S_put_levels(ntstep   ,            &
+                           gdp%d%mlb, gdp%d%mub, &
+                           gdp%d%nlb, gdp%d%nub, &
+                           r(s1)    , i(kfs)     )
+       call timer_stop(timer_wait, gdp)
+    endif
+    !
+    !++++++++++++++++++++++++++++ LOOP COMPLETE ++++++++++++++++++++++++++++
+    !
+    !
+    ! skip calculation in case of dryrun
+    !
+    if (.not. dryrun) then
+       !
+       ! Define wphy
+       !
+       if (kmax > 1) then
+          icx = nmaxddb
+          icy = 1
+          call timer_start(timer_wphys, gdp)
+          call wphys(r(s1)     ,r(u1)     ,r(v1)     ,r(w1)     ,r(wphy)   , &
+                   & i(irocol) ,norow     ,nocol     ,icx       ,icy       , &
+                   & jstart    ,nmmaxj    ,kmax      ,nsrc      ,zmodel    , &
+                   & i(mnksrc) ,r(disch)  ,r(thick)  ,r(sig)    ,r(guu)    , &
+                   & r(gvv)    ,r(gsqs)   ,d(dps)    ,nmmax     ,i(kcs)    , &
+                   & r(dpu)    ,r(dpv)    ,i(kfsmin) ,i(kfsmax) , &
+                   & r(porosu) ,r(porosv) ,gdp       )
+          call timer_stop(timer_wphys, gdp)
+       endif
+       !
+       ! To avoid problems with GPP, arrays VORTIC (vorticity) and ENSTRO
+       ! (enstrophy) are always computed and stored in HIS and MAP files
+       ! even when HLES is not activated.
+       ! These arrays are computed at the end of each time step for
+       ! post-processing purpose only
+       !
+       call timer_start(timer_cvort, gdp)
+       call c_vort(mmax      ,nmax      ,kmax      ,nmaxus    ,i(kfu)    , &
+                 & i(kfv)    ,r(u1)     ,r(v1)     ,r(gud)    ,r(gvd)    , &
+                 & r(vortic) ,r(enstro) ,r(wrkb1)  ,gdp       )
+       call timer_stop(timer_cvort, gdp)
+    endif
+end subroutine z_trisol_nhfull

@@ -1,0 +1,14 @@
+Version numbers of delftflow:
+
+1.00.00.<revisionnumber>
+    https://repos.deltares.nl/repos/ds/trunk/src/engines/delftflow
+    trunk version
+    
+1.00.01.<revisionnumber>
+    https://repos.deltares.nl/repos/ds/branches/release/delftflow/sobek/2.12
+
+1.00.02.<revisionnumber>
+    https://repos.deltares.nl/repos/ds/branches/release/delftflow/1.00.02
+
+1.00.03.<revisionnumber>
+    https://repos.deltares.nl/repos/ds/branches/release/delft3d/3.28.04

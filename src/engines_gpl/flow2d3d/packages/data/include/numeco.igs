@@ -1,0 +1,82 @@
+!----- GPL ---------------------------------------------------------------------
+!                                                                               
+!  Copyright (C)  Stichting Deltares, 2011.                                     
+!                                                                               
+!  This program is free software: you can redistribute it and/or modify         
+!  it under the terms of the GNU General Public License as published by         
+!  the Free Software Foundation version 3.                                      
+!                                                                               
+!  This program is distributed in the hope that it will be useful,              
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
+!  GNU General Public License for more details.                                 
+!                                                                               
+!  You should have received a copy of the GNU General Public License            
+!  along with this program.  If not, see <http://www.gnu.org/licenses/>.        
+!                                                                               
+!  contact: delft3d.support@deltares.nl                                         
+!  Stichting Deltares                                                           
+!  P.O. Box 177                                                                 
+!  2600 MH Delft, The Netherlands                                               
+!                                                                               
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"    
+!  are registered trademarks of Stichting Deltares, and remain the property of  
+!  Stichting Deltares. All rights reserved.                                     
+!                                                                               
+!-------------------------------------------------------------------------------
+    type gd_numeco
+!
+       real(fp)     :: chzmin !  Global data
+                              !  Minimal chezy coefficient
+                              !  (used with secondairy flow)
+       real(fp)     :: dco    !  Global data
+                              !  Marginal depth for upwind approach
+                              !  in shallow areas [m]
+                              !  Minimal depth for upwind approach
+                              !  in shallow areas [m]
+       real(fp)     :: dgcuni
+       real(fp)     :: dryflc !  Global data
+                              !  Drying & Flooding criterion [m]
+       real(fp)     :: fwfac  !  factor for adjusting intensity of energy dissipation in wave boundary layer
+                              !  (Tuning parameter for wave streaming)
+       real(fp)     :: gammax !  Maximum wave height/water depth ratio
+       real(fp)     :: hdt    !  Description and declaration in rjdim.f90
+       real(fp)     :: paver  !  Global data
+                              !  Average atmosferic pressure in Pa (N/m2)
+       real(fp)     :: rmincf !  Global data
+                              !  Minimal curvature for coriolis force
+                              !  (used with secondairy flow)
+       real(fp)     :: thetqh !  Global data
+                              !  Relaxation parameter QH boundaries
+       integer      :: ibaroc !  Global data
+                              !  Bracoline pressure on open boundary
+                              !  points
+                              !  0 = No
+                              !  1 = Yes default
+                              !  Bracoline pressure onopen boundary
+                              !  points
+                              !  0 = No
+                              !  1 = Yes default
+       integer      :: iter1  !  Global data
+                              !  Loop parameter for iteration over
+                              !  continuity equation
+                              !  Number of iteration
+       integer      :: iter2
+       logical      :: bndneu !  Global data
+                              !  Flag to redefine open boundary type
+                              !  Riemann into Neuman
+       logical      :: cstbnd !  Global data
+                              !  Flag for advection tangential
+                              !  componenton on open boundaries
+                              !  neglected (true)
+       logical      :: pcorr  !  Global data
+                              !  Flag for the use of a pressure
+                              !  correction on boundaries
+                              !  using PAVER, specified in MDF-file
+       character(8) :: dpsopt !  Global data
+                              !  Drying & Flooding procedure
+                              !  [MEAN/MAX/MIN/NO]
+       character(8) :: dpuopt
+       character(6) :: momsol
+!
+    end type gd_numeco

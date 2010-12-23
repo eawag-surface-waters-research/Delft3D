@@ -1,0 +1,397 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Building D3D for UNIX</title>
+</head>
+<body>
+<h1>Building Delft3D on UNIX Systems<br>
+</h1>
+<big><big><big><span style="font-weight: bold; color: rgb(153, 0, 0);">DRAFT</span></big></big></big><br>
+<br>
+<big><a href="mailto:Irv.Elshoff@deltares.nl"><span
+ style="font-style: italic;">Irv.Elshoff@deltares.nl</span></a><br
+ style="font-style: italic;">
+</big><span style="font-style: italic;"><big>3 may 04</big><br>
+</span><br>
+<h2>Contents</h2>
+<ul>
+  <li><a href="#Introduction">Introduction</a></li>
+  <li><a href="#Platforms">Platforms<br>
+    </a> </li>
+  <li><a href="#What_is_D3D">What Is Delft3D?</a></li>
+  <ul>
+    <li><a href="#Source_Directory_Organization">Source Directory
+Organization</a></li>
+    <li><a href="#Versions">Versions</a><br>
+    </li>
+  </ul>
+  <li><a href="#Developer_Tasks">Developer Tasks </a><br>
+  </li>
+  <ul>
+    <li><a href="#Building_Existing_Source_on_an_Existing_">Building
+Existing Source on an Existing Platform</a></li>
+    <li><a href="#Adding_Source_Files_to_an_Existing_">Adding Source
+Files to an Existing Library or Executable</a></li>
+    <li><a href="#Modifying_or_Adding_Include_Files">Modifying or
+Adding Include Files</a></li>
+    <li><a href="#Adding_Internal_Libraries_">Adding Internal Libraries</a></li>
+    <li><a href="#Adding_a_New_Executable">Adding a New Executable</a><br>
+    </li>
+    <li><a href="#Creating_New_Platforms">Creating New Platforms</a></li>
+  </ul>
+  <li><a href="#The_Setup_Script">The Setup Script</a></li>
+  <li><a href="#Implementation_Details">Implementation Details</a><br>
+  </li>
+</ul>
+<br>
+<h2><a name="Introduction"></a>Introduction</h2>
+As part of the WL Next Generation Modelling System initiative and the
+desire to enhance the portatbility of Delft3D, the UNIX "make
+environment" has been updated.&nbsp; This page describes how the new
+environemt works from the Delft3D developer's point of view,
+and how addtional platforms can be configured.&nbsp; (Other changes to
+Delft3D to facilitate portability are not treated here.)<br>
+<br>
+The most important features of the new make enviroment are:<br>
+<ul>
+  <li>The minimum number of compile and link actions are done.<br>
+  </li>
+  <li>The output during a build is streamlined to one simple line per
+action that says what is being done.&nbsp;&nbsp; Detailed logging with
+the actual build commands is selectable by a simple switch.<br>
+  </li>
+  <li>Make stops by default when the first (compile) error is
+encountered, but has a switch to continue blindly until the ship
+sinks...<br>
+  </li>
+  <li>The concept "platform" has replace "architecture".</li>
+  <li>The make environment's knowledge about Delft3D is minimal.&nbsp;
+With little effort the same environment can be used for other WL
+software.<br>
+  </li>
+</ul>
+At present only the "MORFLOW" portion of Delft3D uses the new make
+environment.&nbsp; Later, other parts of Delft3D will be included.<br>
+<h2><a name="Platforms"></a>Platforms</h2>
+Years ago each UNIX workstation or server vendor bundled their own
+hardware, operating system and compilers.&nbsp; WL defined the ARCH
+shell variable (e.g., sgi-mips, sun-sparc) to differentiate
+platforms.&nbsp; With the advent of open-source UNIX implementtations
+(e.g., Linux), commodity hardware (e.g., Intel's IA32 instruction set
+implemented by AMD) and third-party compiler verdors (e.g., Absoft,
+Lahey-Fujitsu), the simple architecture concept has become
+obsolete.<br>
+<br>
+A platform is a combination of five essentially indepenent components:<br>
+<ul>
+  <li>A processor architecture like IA32, IA64, PowerPC, etc.</li>
+  <li>An operating system (= kernel + system libraries) like Linux, Mac
+OSX, etc.</li>
+  <li>A compiler suite (e.g., Intel Fortran and C++, NAG Fortran with
+GNU C++).</li>
+  <li>Selections of Delft3D code included or omitted (e.g.,
+on-line visualization via Interactor or DelftIO).</li>
+  <li>Build options like debugging and optimization.</li>
+</ul>
+The latter two are not traditionally associated with a
+platform or architecture in the usual senses of these words.&nbsp; They
+are nonetheless included in our definition of "platform" because they
+completely describe the target executables for the developer.
+Additional concepts like "build" and "version" apply outside the scope
+of the source directory.<br>
+<br>
+The previous make environment used a two-level directory approach
+(e.g., w32/debug or intel/release).&nbsp; With five degrees of freedom
+but only a handful of actual combinations, a simple, flat platform
+naming convention is better suited.&nbsp; How to name platforms is an
+important aspect of software production.&nbsp; The make environment
+places no restrictions on the name.&nbsp;&nbsp; Slashes can be used in
+platform names to specify subdirectories, so the previous convention
+could still be used.<br>
+<br>
+As of April 2004, Delft3D is officially supported on only one platform,
+with three variations:<br>
+<ul>
+  <li style="font-family: monospace;">wlinux</li>
+  <li style="font-family: monospace;">wlinux-debug</li>
+  <li style="font-family: monospace;">wlinux-optim</li>
+</ul>
+The "wlinux" base Linux platform is what WL uses on a daily
+basis.&nbsp; Presently: RedHat Linux from 7.3 to Enterprise
+3, with the Intel 8.0 Fortran95 and C++ compilers.&nbsp; The debug
+variant adds a "-g" flag to the compiler and link commands; the
+optimizer variant a "-O3".<br>
+<h2><a name="What_is_D3D"></a>What is D3D?</h2>
+In the eyes of the WL developer, Delft3D is a collection of <span
+ style="font-weight: bold;">modules</span> (MORFLOW, WAQ, ...),
+each of which contain one or more <span style="font-weight: bold;">executables</span>
+built from various <span style="font-weight: bold;">libraries</span>
+and source files.&nbsp; Libraries come in two flavors:&nbsp; Internal
+libraries are used only within Delft3D, and are built from <span
+ style="font-weight: bold;">source files</span> contained in the source
+tree. External libraries are built separately (e.g., NEFIS) or provided
+by third-party vendors (e.g., FLEXlm).<br>
+<h3><a name="Source_Directory_Organization"></a>Source Directory
+Organization</h3>
+The make environment resides in the same directory structure as the
+source itself.&nbsp; This tree contains the following main branches:<br>
+<ul>
+  <li><span style="font-weight: bold;">doc</span> - Documentation,
+include the source of this page in <span style="font-style: italic;">makeD3D.html</span><br>
+  </li>
+  <li><span style="font-weight: bold;">make</span> - Support files for
+the make
+environment.&nbsp; Platform-dependent files are contained in <span
+ style="font-style: italic;">make/platform</span> .</li>
+  <li><span style="font-weight: bold;">extern</span> - External
+libraries and related files.&nbsp; One subdirectory for each platform,
+each of which in turn contains <span style="font-style: italic;">include</span>,
+    <span style="font-style: italic;">lib</span> and <span
+ style="font-style: italic;">mod</span> subdirectories.&nbsp; In the
+not to distant future <span style="font-style: italic;">extern</span>
+will be moved outside the Delft3D tree.<br>
+  </li>
+  <li><span style="font-weight: bold;">include</span> - Delft3D include
+files for source.<br>
+  </li>
+  <li><span style="font-weight: bold;">libsrc</span> - Delft3D internal
+library source.<br>
+  </li>
+  <li><span style="font-weight: bold;">progsrc</span> - Delft3D
+exectable source.</li>
+  <li><span style="font-weight: bold;">default</span> - Delft3D
+run-time files.</li>
+</ul>
+The root directory also contains three files:<br>
+<ul>
+  <li><span style="font-weight: bold;">README</span> - A quick starting
+point and last minute notices for this version of Delft3D</li>
+  <li><span style="font-weight: bold;">setup</span> - A shell script
+for Bourne-like shells (as opposed to "C"-like shells) to prepare the
+user's shell for building a particular platform.</li>
+  <li><span style="font-weight: bold;">makefile</span> - The master
+make file.&nbsp; Source subdirectories also contain make files that can
+be invoked locally, but using the top-level make is easiest.<br>
+  </li>
+</ul>
+When Delft3D is built, three additional directories are created:<br>
+<ul>
+  <li><span style="font-weight: bold;">modules</span> - Generated
+Fortran module files.</li>
+  <li><span style="font-weight: bold;">lib</span> - Generated internal
+libraries.</li>
+  <li><span style="font-weight: bold;">bin</span> - Generated
+executables.</li>
+</ul>
+Each of these contain one or more subdirectories named by
+platform.&nbsp; Source is shared by all platforms, but all generated
+files are platform specific and completely independent of the generated
+files for other platforms.<br>
+<h3><a name="Versions"></a>Versions</h3>
+A <span style="font-weight: bold;">version</span> is a specific set of
+source files, including support files for UNIX make, Windows,
+etc.&nbsp; The platform mechanism makes it possible to build variants
+based on a single source, but these are all considered to be part of
+the same version.<br>
+<br>
+Versions are maintained outside the scope of the make environment and
+source tree.&nbsp; WL version management policy is described elsewhere [<small
+ style="font-style: italic;">een link zou mooi zijn</small>].<br>
+<br>
+<h2><a name="Developer_Tasks"></a>Developer Tasks</h2>
+<h3><a name="Building_Existing_Source_on_an_Existing_"></a>Building
+Existing Source on an Existing Platform<br>
+</h3>
+The most basic activity is to build an existing version of Delft3D
+without make any changes:<br>
+<ul>
+  <li>Check out a Delft3D source bundle, unpack it, and <span
+ style="font-family: monospace;">cd</span> to the unpacked directory.<br>
+  </li>
+  <li>Prepare the default platform with the command:&nbsp; <span
+ style="font-family: monospace; font-weight: bold;">. ./setup wlinux</span>&nbsp;
+(note the dot before the dot slash setup).</li>
+  <li>Make the Delft3D executables with&nbsp; <span
+ style="font-family: monospace; font-weight: bold;">make </span>This
+will take 2-10 minutes, depending on your computer.<span
+ style="font-family: monospace; font-weight: bold;"><br>
+    </span></li>
+</ul>
+The setup script has a number of options to aid the build
+process.&nbsp; See <a href="#The_Setup_Script">The Setup Script</a>
+below for details.<br>
+<br>
+Additional platforms are available.&nbsp; Look in <span
+ style="font-style: italic;">make/platform</span> for the current list.<br>
+<h3><a name="Adding_Source_Files_to_an_Existing_"></a>Adding Source
+Files to an Existing Library or Executable<br>
+</h3>
+The source is organized in a collection of (nested) directories.&nbsp;
+Every directory with one or more source files has a <span
+ style="font-style: italic;">makefile</span>. that contains essentially
+nothing more than the name of the target file (library or executable)
+and the names of all source files.<br>
+<br>
+Source files are compiled according to their filename extention.&nbsp;
+To guard against Microsoft Windows filename case ambiguities and
+programmer slips, Delft3D makefiles define lists of source files based
+on their language type.&nbsp; The following types are recoginized:<br>
+<ul>
+  <li><span style="font-family: monospace;">SRC_C</span> - ANSI C
+source file (*.c)<br>
+  </li>
+  <li><span style="font-family: monospace;">SRC_CPP</span> - ANSI C++
+source files (*.C and *.cpp)<br>
+  </li>
+  <li><span style="font-family: monospace;">SRC_F77</span> - Fortran77
+source files (*.f).&nbsp; Deprecated; use Fortran95.<br>
+  </li>
+  <li><span style="font-family: monospace;">SRC_F77_PP</span> -
+Fortran77 source files (*.F) with preprocessing.&nbsp; Deprecated; use
+Fortran95.</li>
+  <li><span style="font-family: monospace;">SRC_F95</span> - Fortran95
+source files (*.f90, *.f95).<br>
+  </li>
+  <li><span style="font-family: monospace;">SRC_F95_PP</span> -
+Fortran95 source files (*.F90, *.F95) with preprocessing.</li>
+</ul>
+The typical WL developer will want to introduce a Fortran90 source
+file.&nbsp; Adding it's name to the SRC_F95 list in the makefile is
+enough. Adhering to the ISO Fortran standard in the source will
+maximize the deployability of the code. ISO Standards language
+compliance for new code will soon be required by WL.<br>
+<br>
+Removing a source file is as easy as removing the file itself and its
+name from its makefile.&nbsp; Keeping Delft3D directory clean prevents
+accidents and makes checking in a new version easier.<br>
+<h3><a name="Modifying_or_Adding_Include_Files"></a>Modifying or Adding
+Include Files</h3>
+The make environment for Delft3D do not presently contain individual
+dependency rules for include files.&nbsp; This is because the
+organization of libraries - and hence include files - is expected to
+change this year. Determining the many dependencies would be wasted
+effort.&nbsp; To ensure consistent builds, make will recompile all
+source whenver any include file is modified.&nbsp; Because this can
+take several minutes, and in many cases is unnecessary, the setup
+program has a "-i" option to disable dependencies on include
+files.&nbsp; Use this with extreme care.<br>
+<br>
+New include files needed in conjunction with an internal library should
+be placed in the <span style="font-style: italic;">include</span>
+directory.&nbsp; At present there are <span style="font-style: italic;">flow</span>
+and <span style="font-style: italic;">mor</span> subdirectories, but
+in the future this will change to one subdirectory per library.&nbsp;
+When adding a new include file, add its name to the list in <span
+ style="font-style: italic;">make/include.mkf</span>.<br>
+<h3><a name="Adding_Internal_Libraries_"></a>
+Adding Internal Libraries<br>
+</h3>
+A new internal library can be added by creating a subdirectory of <span
+ style="font-style: italic;">libsrc</span> for the source files.&nbsp;
+A makefile is most easily created by copying an existing file and
+changing the list of sources (see above).<br>
+<br>
+The make variable <span style="font-family: monospace;">TOPDIR</span>
+is essential.&nbsp; It is the relative pathname to reach the Delft3D
+root directory.&nbsp; For libraries directly under <span
+ style="font-style: italic;">libsrc</span>, "<span
+ style="font-family: monospace;">../..</span>" is the correct
+value.&nbsp; Add another "<span style="font-family: monospace;">/..</span>"
+for every level deeper.&nbsp; (Nesting libraries will be disallowed in
+the future.)<br>
+<br>
+The name of the library is specified in the make variable <span
+ style="font-family: monospace;">LIB</span>.&nbsp; If the library is
+called X, <span style="font-family: monospace;">LIB</span> should be <span
+ style="font-style: italic;">lib</span>X<span
+ style="font-style: italic;">.a</span>. The top-level makefile must be
+editted to aad the library&nbsp;<span style="font-style: italic;"></span>to
+the list of things to build.<br>
+<h3><a name="Adding_a_New_Executable"></a><span
+ style="font-weight: bold;"></span>Adding a New Executable</h3>
+A new executable can be added in a similar fashion to a new library.<br>
+<br>
+Executables must have a C (or C++) main program.&nbsp; This is because
+ISO Fortran-95 provides no access to the outside environment (e.g.,
+command-line arguments, environment variables) and has a very limited
+I/O model.&nbsp; Using ANSI C with POSIX or Microsoft Win32 calls for
+outside access before starting Fortran code makes it possible to keep
+the Fortran code (the bulk of Delft3D) platform-independent and
+standard compliant.&nbsp; This is one of the goals of the WL Next
+Generation Modelling System initiative.<span style="font-weight: bold;"></span>
+<h3><a name="Creating_New_Platforms"></a>Creating New Platforms</h3>
+A new platform X can be created by adding two files to <span
+ style="font-style: italic;">make/platform</span>:
+<ul>
+  <li><span style="font-style: italic;">X.mkf</span> should contain a
+certain set of make definitions that are used by the rest of the make
+environment.<br>
+  </li>
+  <li><span style="font-style: italic;">X.sh</span> should contain any
+necessary shell initialization (e.g., for the compiler suite).&nbsp; If
+no initialization is needed, a symbolic link to <span
+ style="font-family: monospace;">/bin/true</span> is best.&nbsp; <span
+ style="font-style: italic;">X.sh</span> must be executable.<br>
+  </li>
+</ul>
+The make environment supports platform names that contain slashes, so
+platform-related subdirectories can be nested, The old "<span
+ style="font-style: italic;">w32/debug</span>", "<span
+ style="font-style: italic;">intel/release</span>", etc. convention
+could be continued.&nbsp; Nontheless, a simple, flat directory
+structure is recommended.<br>
+<br>
+Because the platform concept has just been introduced, no new naming
+convention has emerged yet.&nbsp; Please contact Adri, David or Irv
+before creating a new platform.<br>
+<br>
+<h2><a name="The_Setup_Script"></a>The Setup Script</h2>
+The setup script must be run once before making Delft3D.&nbsp; It
+prepares the make environment for a particular platform, and sets some
+session-related build options.&nbsp; These are:<br>
+<ul>
+  <li><span style="font-family: monospace; font-weight: bold;">-c</span>&nbsp;
+: Continue blindly after every compile/link error.&nbsp; Normally make
+stops at the first error to allow the developer to correct the
+condition before proceeding and being confronted with subsequent
+problems caused by the first error.&nbsp; Sometimes it's useful to see
+all errors at once.&nbsp; Use with caution.</li>
+  <li><span style="font-family: monospace; font-weight: bold;">-i</span>
+: Ignore changes to include files when determining which source files
+to recompile.&nbsp; If you change include files and select this option,
+be <span style="text-decoration: underline;">absolutely sure</span>
+you know what you're doing.&nbsp; Restructuring D3D source is the
+answer.</li>
+  <li><span style="font-family: monospace; font-weight: bold;">-s</span>
+: Do not use subdirectories for platform-dependent targets.&nbsp; Use
+this option if you only work with one platform and don't like too many
+subdirectories.<br>
+  </li>
+  <li><span style="font-family: monospace; font-weight: bold;">-v</span>
+: Print actual compile, bundle and link commands, with all directory
+changes.&nbsp; Use this option if you encounter unexplainable problems
+and want to see exactly how your executables are built.</li>
+</ul>
+<h2><a name="Implementation_Details"></a>Implementation Details</h2>
+The make environment is based on <a
+ href="http://www.gnu.org/software/make">GNU Make</a>, which is
+available for almost all UNIX systems. <br>
+<br>
+The <span style="font-style: italic;">make</span> directory contains
+most of the make environment implementation.&nbsp; The root <span
+ style="font-style: italic;">makefile</span> and all subdirectory <span
+ style="font-style: italic;">makefile</span>s make up the rest.<br>
+<br>
+Contact Irv, David or Adri for more information.<br>
+<br>
+<br>
+<br>
+<big><span style="font-style: italic;">The End.</span></big><br>
+<br>
+<br>
+<br>
+<br>
+</body>
+</html>

@@ -1,0 +1,470 @@
+!----- GPL ---------------------------------------------------------------------
+!                                                                               
+!  Copyright (C)  Stichting Deltares, 2011.                                     
+!                                                                               
+!  This program is free software: you can redistribute it and/or modify         
+!  it under the terms of the GNU General Public License as published by         
+!  the Free Software Foundation version 3.                                      
+!                                                                               
+!  This program is distributed in the hope that it will be useful,              
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
+!  GNU General Public License for more details.                                 
+!                                                                               
+!  You should have received a copy of the GNU General Public License            
+!  along with this program.  If not, see <http://www.gnu.org/licenses/>.        
+!                                                                               
+!  contact: delft3d.support@deltares.nl                                         
+!  Stichting Deltares                                                           
+!  P.O. Box 177                                                                 
+!  2600 MH Delft, The Netherlands                                               
+!                                                                               
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"    
+!  are registered trademarks of Stichting Deltares, and remain the property of  
+!  Stichting Deltares. All rights reserved.                                     
+!                                                                               
+!-------------------------------------------------------------------------------
+type gd_r_i_ch
+!
+! real:
+       integer :: aks        !  Description and declaration in rjdim.f90
+       integer :: alfas      !  Description and declaration in rjdim.f90
+       integer :: alpha      !  Description and declaration in rjdim.f90
+       integer :: ampbc      !  Description and declaration in rjdim.f90
+       integer :: areau      !  Description and declaration in rjdim.f90
+       integer :: areav      !  Description and declaration in rjdim.f90
+       integer :: atr        !  Description and declaration in rjdim.f90
+       integer :: bruvai     !  Description and declaration in rjdim.f90
+       integer :: c          !  Description and declaration in rjdim.f90
+       integer :: cbuv       !  Description and declaration in rjdim.f90
+       integer :: cbuvrt     !  Description and declaration in rjdim.f90
+       integer :: cdwlsu     !  Description and declaration in rjdim.f90
+       integer :: cdwlsv     !  Description and declaration in rjdim.f90
+       integer :: cdwzbu     !  Description and declaration in rjdim.f90
+       integer :: cdwzbv     !  Description and declaration in rjdim.f90
+       integer :: cdwztu     !  Description and declaration in rjdim.f90
+       integer :: cdwztv     !  Description and declaration in rjdim.f90
+       integer :: cfurou     !  Description and declaration in rjdim.f90
+       integer :: cfvrou     !  Description and declaration in rjdim.f90
+       integer :: cgc        !  Description and declaration in rjdim.f90
+       integer :: cgdghf     !  Description and declaration in rjdim.f90
+       integer :: cgdghl     !  Description and declaration in rjdim.f90
+       integer :: cvalu0     !  Description and declaration in rjdim.f90
+       integer :: cvalv0     !  Description and declaration in rjdim.f90
+       integer :: circ2d     !  Description and declaration in rjdim.f90
+       integer :: circ3d     !  Description and declaration in rjdim.f90
+       integer :: crbc       !  Description and declaration in rjdim.f90
+       integer :: ctbf       !  Description and declaration in rjdim.f90
+       integer :: ctbl       !  Description and declaration in rjdim.f90
+       integer :: ctif       !  Description and declaration in rjdim.f90
+       integer :: ctil       !  Description and declaration in rjdim.f90
+       integer :: ctr        !  Description and declaration in rjdim.f90
+       integer :: ctrf       !  Description and declaration in rjdim.f90
+       integer :: ctrl       !  Description and declaration in rjdim.f90
+       integer :: czusus     !  Description and declaration in rjdim.f90
+       integer :: czvsus     !  Description and declaration in rjdim.f90
+       integer :: dddeta     !  Description and declaration in rjdim.f90
+       integer :: dddksi     !  Description and declaration in rjdim.f90
+       integer :: disch0     !  Description and declaration in rjdim.f90
+       integer :: disch1     !  Description and declaration in rjdim.f90
+       integer :: ddpf
+       integer :: decay      !  Description and declaration in rjdim.f90
+       integer :: deltau     !  Description and declaration in rjdim.f90
+       integer :: deltav     !  Description and declaration in rjdim.f90
+       integer :: depchg     !  Description and declaration in rjdim.f90
+       integer :: dfu        !  Description and declaration in rjdim.f90
+       integer :: dfv        !  Description and declaration in rjdim.f90
+       integer :: diapl      !  Description and declaration in rjdim.f90
+       integer :: dicuv      !  Description and declaration in rjdim.f90
+       integer :: dicww      !  Description and declaration in rjdim.f90
+       integer :: dircom     !  Description and declaration in rjdim.f90
+       integer :: dircos     !  Description and declaration in rjdim.f90
+       integer :: dirsin     !  Description and declaration in rjdim.f90
+       integer :: dis        !  Description and declaration in rjdim.f90
+       integer :: df         !  Description and declaration in rjdim.f90       
+       integer :: disch      !  Description and declaration in rjdim.f90
+       integer :: discom     !  Description and declaration in rjdim.f90
+       integer :: discum     !  Description and declaration in rjdim.f90
+       integer :: disinp     !  Description and declaration in rjdim.f90       
+       integer :: disnf      !  Description and declaration in rjdim.f90
+       integer :: dldeta     !  Description and declaration in rjdim.f90
+       integer :: dldksi     !  Description and declaration in rjdim.f90
+       integer :: dp         !  Description and declaration in rjdim.f90
+       integer :: dpc        !  Description and declaration in rjdim.f90
+       integer :: dpdeta     !  Description and declaration in rjdim.f90
+       integer :: dpdksi     !  Description and declaration in rjdim.f90
+       integer :: dps        !  Description and declaration in rjdim.f90
+       integer :: dpsed      !  Description and declaration in rjdim.f90
+       integer :: dpu        !  Description and declaration in rjdim.f90
+       integer :: dpv        !  Description and declaration in rjdim.f90
+       integer :: drodep     !  Description and declaration in rjdim.f90
+       integer :: rint0      !  Description and declaration in rjdim.f90
+       integer :: rint1      !  Description and declaration in rjdim.f90
+       integer :: dsdeta     !  Description and declaration in rjdim.f90
+       integer :: dsdksi     !  Description and declaration in rjdim.f90
+       integer :: dss        !  Description and declaration in rjdim.f90
+       integer :: dtdeta     !  Description and declaration in rjdim.f90
+       integer :: dtdksi     !  Description and declaration in rjdim.f90
+       integer :: dteu       !  Description and declaration in rjdim.f90
+       integer :: dtev       !  Description and declaration in rjdim.f90
+       integer :: dtr        !  Description and declaration in rjdim.f90
+       integer :: dudz       !  Description and declaration in rjdim.f90
+       integer :: umdis0     !  Description and declaration in rjdim.f90
+       integer :: umdis1     !  Description and declaration in rjdim.f90
+       integer :: dvdz       !  Description and declaration in rjdim.f90
+       integer :: vmdis0     !  Description and declaration in rjdim.f90
+       integer :: vmdis1     !  Description and declaration in rjdim.f90
+       integer :: dxydro     !  Description and declaration in rjdim.f90
+       integer :: dzdeta     !  Description and declaration in rjdim.f90
+       integer :: dzdksi     !  Description and declaration in rjdim.f90
+       integer :: encgf      !  Description and declaration in rjdim.f90
+       integer :: encgl      !  Description and declaration in rjdim.f90
+       integer :: entr       !  Description and declaration in rjdim.f90
+       integer :: enstro     !  Description and declaration in rjdim.f90
+       integer :: epscur     !  Description and declaration in rjdim.f90
+       integer :: epswav     !  Description and declaration in rjdim.f90
+       integer :: eroll0     !  Description and declaration in rjdim.f90
+       integer :: eroll1     !  Description and declaration in rjdim.f90
+       integer :: evap       !  Description and declaration in rjdim.f90
+       integer :: ewabr0     !  Description and declaration in rjdim.f90
+       integer :: ewabr1     !  Description and declaration in rjdim.f90
+       integer :: ewave0     !  Description and declaration in rjdim.f90
+       integer :: ewave1     !  Description and declaration in rjdim.f90
+       integer :: excbed     !  Description and declaration in rjdim.f90
+       integer :: facdss     !  Description and declaration in rjdim.f90
+       integer :: fcorio     !  Description and declaration in rjdim.f90
+       integer :: fltr       !  Description and declaration in rjdim.f90
+       integer :: fuiwe      !  Description and declaration in rjdim.f90
+       integer :: fviwe      !  Description and declaration in rjdim.f90
+       integer :: fxw        !  Description and declaration in rjdim.f90
+       integer :: fyw        !  Description and declaration in rjdim.f90
+       integer :: grmasu     !  Description and declaration in rjdim.f90
+       integer :: grmasv     !  Description and declaration in rjdim.f90
+       integer :: grmsur     !  Description and declaration in rjdim.f90
+       integer :: grmsvr     !  Description and declaration in rjdim.f90
+       integer :: grfacu     !  Description and declaration in rjdim.f90
+       integer :: grfacv     !  Description and declaration in rjdim.f90
+       integer :: gro        !  Description and declaration in rjdim.f90
+       integer :: gsqd       !  Description and declaration in rjdim.f90
+       integer :: gsqs       !  Description and declaration in rjdim.f90
+       integer :: guu        !  Description and declaration in rjdim.f90
+       integer :: guv        !  Description and declaration in rjdim.f90
+       integer :: gvu        !  Description and declaration in rjdim.f90
+       integer :: gvv        !  Description and declaration in rjdim.f90
+       integer :: hkru       !  Description and declaration in rjdim.f90
+       integer :: hkrv       !  Description and declaration in rjdim.f90
+       integer :: hrmcom     !  Description and declaration in rjdim.f90
+       integer :: hrms       !  Description and declaration in rjdim.f90
+       integer :: hu         !  Description and declaration in rjdim.f90
+       integer :: hu0        !  Description and declaration in rjdim.f90
+       integer :: huvw       !  Description and declaration in rjdim.f90
+       integer :: hv         !  Description and declaration in rjdim.f90
+       integer :: hv0        !  Description and declaration in rjdim.f90
+       integer :: hydrbc     !  Description and declaration in rjdim.f90
+       integer :: msucom     !  Description and declaration in rjdim.f90
+       integer :: msvcom     !  Description and declaration in rjdim.f90
+       integer :: ombc       !  Description and declaration in rjdim.f90
+       integer :: omega      !  Description and declaration in rjdim.f90
+       integer :: patm       !  Description and declaration in rjdim.f90
+       integer :: phibc      !  Description and declaration in rjdim.f90
+       integer :: porosu     !  Description and declaration in rjdim.f90
+       integer :: porosv     !  Description and declaration in rjdim.f90
+       integer :: procbc     !  Description and declaration in rjdim.f90
+       integer :: pship      !  Description and declaration in rjdim.f90
+       integer :: qtfrac     !  Description and declaration in rjdim.f90
+       integer :: qtfrct     !  Description and declaration in rjdim.f90
+       integer :: qtfrt2     !  Description and declaration in rjdim.f90
+       integer :: qu         !  Description and declaration in rjdim.f90
+       integer :: qv         !  Description and declaration in rjdim.f90
+       integer :: qxk        !  Description and declaration in rjdim.f90
+       integer :: qxkr       !  Description and declaration in rjdim.f90
+       integer :: qxkw       !  Description and declaration in rjdim.f90
+       integer :: qyk        !  Description and declaration in rjdim.f90
+       integer :: qykr       !  Description and declaration in rjdim.f90
+       integer :: qykw       !  Description and declaration in rjdim.f90
+       integer :: qzk        !  Description and declaration in rjdim.f90
+       integer :: r0         !  Description and declaration in rjdim.f90
+       integer :: r1         !  Description and declaration in rjdim.f90
+       integer :: rbnd       !  Description and declaration in rjdim.f90
+       integer :: rbuff      !  Help arrays for writing NEFIS files
+       integer :: rca        !  Description and declaration in rjdim.f90
+       integer :: rettim     !  Description and declaration in rjdim.f90
+       integer :: rho        !  Description and declaration in rjdim.f90
+       integer :: rhowat     !  Description and declaration in rjdim.f90
+       integer :: rich       !  Description and declaration in rjdim.f90
+       integer :: rint       !  Description and declaration in rjdim.f90
+       integer :: rlabda     !  Description and declaration in rjdim.f90
+       integer :: rmneg      !  Description and declaration in rjdim.f90
+       integer :: rnpl       !  Description and declaration in rjdim.f90
+       integer :: rob        !  Description and declaration in rjdim.f90
+       integer :: rsed       !  Description and declaration in rjdim.f90
+       integer :: rsedeq     !  Description and declaration in rjdim.f90
+       integer :: rthbnd     !  Description and declaration in rjdim.f90
+       integer :: rtu2d0     !  Description and declaration in rjdim.f90
+       integer :: rtu2d1     !  Description and declaration in rjdim.f90
+       integer :: rtubnd     !  Description and declaration in rjdim.f90
+       integer :: rtur0      !  Description and declaration in rjdim.f90
+       integer :: rtur1      !  Description and declaration in rjdim.f90
+       integer :: rxx        !  Description and declaration in rjdim.f90
+       integer :: rxy        !  Description and declaration in rjdim.f90
+       integer :: ryy        !  Description and declaration in rjdim.f90
+       integer :: rxz        !  Description and declaration in rjdim.f90
+       integer :: ryz        !  Description and declaration in rjdim.f90
+       integer :: s0         !  Description and declaration in rjdim.f90
+       integer :: s1         !  Description and declaration in rjdim.f90
+       integer :: sbtr       !  Description and declaration in rjdim.f90
+       integer :: sbtrc      !  Description and declaration in rjdim.f90
+       integer :: sbuu       !  Description and declaration in rjdim.f90
+       integer :: sbvv       !  Description and declaration in rjdim.f90
+       integer :: seddif     !  Description and declaration in rjdim.f90
+       integer :: sepsus     !  Description and declaration in rjdim.f90
+       integer :: sig        !  Description and declaration in rjdim.f90
+       integer :: sigdif     !  Description and declaration in rjdim.f90
+       integer :: sigmol     !  Description and declaration in rjdim.f90
+       integer :: sink       !  Description and declaration in rjdim.f90
+       integer :: sinkr      !  Description and declaration in rjdim.f90
+       integer :: sinkw      !  Description and declaration in rjdim.f90
+       integer :: soumud     !  Description and declaration in rjdim.f90
+       integer :: sour       !  Description and declaration in rjdim.f90
+       integer :: sournf     !  Description and declaration in rjdim.f90
+       integer :: sourr      !  Description and declaration in rjdim.f90
+       integer :: sourw      !  Description and declaration in rjdim.f90
+       integer :: sstr       !  Description and declaration in rjdim.f90
+       integer :: sstrc      !  Description and declaration in rjdim.f90
+       integer :: ssuu       !  Description and declaration in rjdim.f90
+       integer :: ssvv       !  Description and declaration in rjdim.f90
+       integer :: stbf       !  Description and declaration in rjdim.f90
+       integer :: stbl       !  Description and declaration in rjdim.f90
+       integer :: stif       !  Description and declaration in rjdim.f90
+       integer :: stil       !  Description and declaration in rjdim.f90
+       integer :: sumrho     !  Description and declaration in rjdim.f90
+       integer :: taubmx     !  Description and declaration in rjdim.f90
+       integer :: taubpu     !  Description and declaration in rjdim.f90
+       integer :: taubpv     !  Description and declaration in rjdim.f90
+       integer :: taubsu     !  Description and declaration in rjdim.f90
+       integer :: taubsv     !  Description and declaration in rjdim.f90
+       integer :: teta       !  Description and declaration in rjdim.f90
+       integer :: tgarkt     !  Description and declaration in rjdim.f90
+       integer :: tgarkx     !  Description and declaration in rjdim.f90
+       integer :: tgarnp     !  Description and declaration in rjdim.f90
+       integer :: thetbc     !  Description and declaration in rjdim.f90
+       integer :: thick      !  Description and declaration in rjdim.f90
+       integer :: thtim      !  Description and declaration in rjdim.f90
+       integer :: tkedis     !  Description and declaration in rjdim.f90
+       integer :: tkepro     !  Description and declaration in rjdim.f90
+       integer :: tp         !  Description and declaration in rjdim.f90
+       integer :: tpcom      !  Description and declaration in rjdim.f90
+       integer :: tps        !  Description and declaration in rjdim.f90
+       integer :: tpscom     !  Description and declaration in rjdim.f90
+       integer :: u0         !  Description and declaration in rjdim.f90
+       integer :: u1         !  Description and declaration in rjdim.f90
+       integer :: ubrlsu     !  Description and declaration in rjdim.f90
+       integer :: ubrlsv     !  Description and declaration in rjdim.f90
+       integer :: umdis      !  Description and declaration in rjdim.f90
+       integer :: umean      !  Description and declaration in rjdim.f90
+       integer :: umeanf     !  Description and declaration in rjdim.f90
+       integer :: umeanl     !  Description and declaration in rjdim.f90
+       integer :: umnflc     !  Description and declaration in rjdim.f90
+       integer :: umnldf     !  Description and declaration in rjdim.f90
+       integer :: uorb       !  Description and declaration in rjdim.f90
+       integer :: ubot       !  Description and declaration in rjdim.f90
+       integer :: ubcom      !  Description and declaration in rjdim.f90
+       integer :: usus       !  Description and declaration in rjdim.f90
+       integer :: uvdist     !  Description and declaration in rjdim.f90
+       integer :: uwtypu     !  Description and declaration in rjdim.f90
+       integer :: uwtypv     !  Description and declaration in rjdim.f90
+       integer :: v0         !  Description and declaration in rjdim.f90
+       integer :: v1         !  Description and declaration in rjdim.f90
+       integer :: vicuv      !  Description and declaration in rjdim.f90
+       integer :: vicww      !  Description and declaration in rjdim.f90
+       integer :: vmdis      !  Description and declaration in rjdim.f90
+       integer :: vmean      !  Description and declaration in rjdim.f90
+       integer :: vmnflc     !  Description and declaration in rjdim.f90
+       integer :: vmnldf     !  Description and declaration in rjdim.f90
+       integer :: vnu2d      !  Description and declaration in rjdim.f90
+       integer :: vnu3d      !  Description and declaration in rjdim.f90
+       integer :: voldis     !  Description and declaration in rjdim.f90
+       integer :: volum0     !  Description and declaration in rjdim.f90
+       integer :: volum1     !  Description and declaration in rjdim.f90
+       integer :: vortic     !  Description and declaration in rjdim.f90
+       integer :: vsus       !  Description and declaration in rjdim.f90
+       integer :: w1         !  Description and declaration in rjdim.f90
+       integer :: w10mag     !  Description and declaration in rjdim.f90
+       integer :: wenf       !  Description and declaration in rjdim.f90
+       integer :: wenfm      !  Description and declaration in rjdim.f90
+       integer :: wenl       !  Description and declaration in rjdim.f90
+       integer :: wenlm      !  Description and declaration in rjdim.f90
+       integer :: windsu     !  Description and declaration in rjdim.f90
+       integer :: windsv     !  Description and declaration in rjdim.f90
+       integer :: windu      !  Description and declaration in rjdim.f90
+       integer :: windv      !  Description and declaration in rjdim.f90
+       integer :: wlen       !  Description and declaration in rjdim.f90
+       integer :: wlcom      !  Description and declaration in rjdim.f90
+       integer :: wphy       !  Description and declaration in rjdim.f90
+       integer :: ws         !  Description and declaration in rjdim.f90
+       integer :: wssus      !  Description and declaration in rjdim.f90
+       integer :: wstau      !  Description and declaration in rjdim.f90
+       integer :: wsu        !  Description and declaration in rjdim.f90
+       integer :: wsucom     !  Description and declaration in rjdim.f90
+       integer :: wsv        !  Description and declaration in rjdim.f90
+       integer :: wsvcom     !  Description and declaration in rjdim.f90
+       integer :: x2y        !  Description and declaration in rjdim.f90
+       integer :: x3         !  Description and declaration in rjdim.f90
+       integer :: xcor       !  Description and declaration in rjdim.f90
+       integer :: xy2        !  Description and declaration in rjdim.f90
+       integer :: xydro      !  Description and declaration in rjdim.f90
+       integer :: xyzsrc     !  Description and declaration in rjdim.f90
+       integer :: xz         !  Description and declaration in rjdim.f90
+       integer :: y3         !  Description and declaration in rjdim.f90
+       integer :: ycor       !  Description and declaration in rjdim.f90
+       integer :: yz         !  Description and declaration in rjdim.f90
+       integer :: z0urou     !  Description and declaration in rjdim.f90
+       integer :: z0vrou     !  Description and declaration in rjdim.f90
+       integer :: zalfas     !  Description and declaration in rjdim.f90
+       integer :: zbdsed     !  Description and declaration in rjdim.f90
+       integer :: zbmnf      !  Description and declaration in rjdim.f90
+       integer :: zbmnl      !  Description and declaration in rjdim.f90
+       integer :: zcuru      !  Description and declaration in rjdim.f90
+       integer :: zcurv      !  Description and declaration in rjdim.f90
+       integer :: zcurw      !  Description and declaration in rjdim.f90
+       integer :: zdicww     !  Description and declaration in rjdim.f90
+       integer :: zdist      !  Description and declaration in rjdim.f90
+       integer :: zdps       !  Description and declaration in rjdim.f90
+       integer :: zdpsed     !  Description and declaration in rjdim.f90
+       integer :: zenst      !  Description and declaration in rjdim.f90
+       integer :: zetabf     !  Description and declaration in rjdim.f90
+       integer :: zetabl     !  Description and declaration in rjdim.f90
+       integer :: zetaif     !  Description and declaration in rjdim.f90
+       integer :: zetail     !  Description and declaration in rjdim.f90
+       integer :: zmeanf     !  Description and declaration in rjdim.f90
+       integer :: zmeanl     !  Description and declaration in rjdim.f90
+       integer :: zqxk       !  Description and declaration in rjdim.f90
+       integer :: zqyk       !  Description and declaration in rjdim.f90
+       integer :: zrca       !  Description and declaration in rjdim.f90
+       integer :: zrho       !  Description and declaration in rjdim.f90
+       integer :: zrich      !  Description and declaration in rjdim.f90
+       integer :: zrsdeq     !  Description and declaration in rjdim.f90
+       integer :: zsbu       !  Description and declaration in rjdim.f90
+       integer :: zsbv       !  Description and declaration in rjdim.f90
+       integer :: zssu       !  Description and declaration in rjdim.f90
+       integer :: zssv       !  Description and declaration in rjdim.f90
+       integer :: zstep      !  Description and declaration in rjdim.f90
+       integer :: ztauet     !  Description and declaration in rjdim.f90
+       integer :: ztauks     !  Description and declaration in rjdim.f90
+       integer :: ztur       !  Description and declaration in rjdim.f90
+       integer :: zvicww     !  Description and declaration in rjdim.f90
+       integer :: zvort      !  Description and declaration in rjdim.f90
+       integer :: zwl        !  Description and declaration in rjdim.f90
+       integer :: zws        !  Description and declaration in rjdim.f90
+! real z-layer:
+       integer :: drhodx     !  Description and declaration in rjdim.f90
+       integer :: drhody     !  Description and declaration in rjdim.f90
+       integer :: dzs0       !  Description and declaration in rjdim.f90
+       integer :: dzs1       !  Description and declaration in rjdim.f90
+       integer :: dzu0       !  Description and declaration in rjdim.f90
+       integer :: dzu1       !  Description and declaration in rjdim.f90
+       integer :: dzv0       !  Description and declaration in rjdim.f90
+       integer :: dzv1       !  Description and declaration in rjdim.f90
+! real  non-hydrostatic:
+       integer :: zj2
+       integer :: zj
+       integer :: res
+       integer :: fact
+       integer :: rl
+       integer :: rlid
+       integer :: rj2
+       integer :: rj
+       integer :: xj2
+       integer :: xj
+       integer :: apj
+       integer :: pj
+       integer :: pj2
+       integer :: p1         !  Description and declaration in rjdim.f90
+       integer :: p0         !  Description and declaration in rjdim.f90
+       integer :: p00        !  Description and declaration in rjdim.f90
+       integer :: pnhcor     !  Description and declaration in rjdim.f90
+       integer :: w0         !  Description and declaration in rjdim.f90
+       integer :: u00
+       integer :: v00
+       integer :: s00        !  Description and declaration in rjdim.f90
+       integer :: hydprs     !  Description and declaration in rjdim.f90
+! real staircase:
+       integer :: guz        !  Description and declaration in rjdim.f90
+       integer :: gvz        !  Description and declaration in rjdim.f90
+       integer :: gud        !  Description and declaration in rjdim.f90
+       integer :: gvd        !  Description and declaration in rjdim.f90
+       integer :: gsqiu      !  Description and declaration in rjdim.f90
+       integer :: gsqiv      !  Description and declaration in rjdim.f90
+!
+! integer:
+       integer :: ibuff      !  Description and declaration in iidim.f90
+       integer :: idifu      !  Description and declaration in iidim.f90
+       integer :: irocol     !  Description and declaration in iidim.f90
+       integer :: iroll      !  Description and declaration in iidim.f90
+       integer :: itbcc      !  Description and declaration in iidim.f90
+       integer :: itbct      !  Description and declaration in iidim.f90
+       integer :: itdis      !  Description and declaration in iidim.f90
+       integer :: itdro      !  Description and declaration in iidim.f90
+       integer :: kadu       !  Description and declaration in iidim.f90
+       integer :: kadv       !  Description and declaration in iidim.f90
+       integer :: kcs        !  Description and declaration in iidim.f90
+       integer :: kcs_nf     !  Description and declaration in iidim.f90
+       integer :: kcu        !  Description and declaration in iidim.f90
+       integer :: kcv        !  Description and declaration in iidim.f90
+       integer :: kfs        !  Description and declaration in iidim.f90
+       integer :: kfsed      !  Description and declaration in iidim.f90
+       integer :: kfu        !  Description and declaration in iidim.f90
+       integer :: kfv        !  Description and declaration in iidim.f90
+       integer :: kspu       !  Description and declaration in iidim.f90
+       integer :: kspv       !  Description and declaration in iidim.f90
+       integer :: kstp       !  Description and declaration in iidim.f90
+       integer :: kzs        !  Description and declaration in iidim.f90
+       integer :: kzu        !  Description and declaration in iidim.f90
+       integer :: kzv        !  Description and declaration in iidim.f90
+       integer :: kmxsed     !  Description and declaration in iidim.f90
+       integer :: mnbar      !  Description and declaration in iidim.f90
+       integer :: mnbnd      !  Description and declaration in iidim.f90
+       integer :: mndro      !  Description and declaration in iidim.f90
+       integer :: mnit       !  Description and declaration in iidim.f90
+       integer :: mnksrc     !  Description and declaration in iidim.f90
+       integer :: mnstat     !  Description and declaration in iidim.f90
+       integer :: nob        !  Description and declaration in iidim.f90
+       integer :: zkfs       !  Description and declaration in iidim.f90
+! integer z-layer:
+       integer :: kcshyd     !  Description and declaration in iidim.f90
+       integer :: kfumin     !  Description and declaration in iidim.f90
+       integer :: kfvmin     !  Description and declaration in iidim.f90
+       integer :: kfsmin     !  Description and declaration in iidim.f90
+       integer :: kfumax     !  Description and declaration in iidim.f90
+       integer :: kfvmax     !  Description and declaration in iidim.f90
+       integer :: kfsmax     !  Description and declaration in iidim.f90
+       integer :: kfumx0     !  Description and declaration in iidim.f90
+       integer :: kfvmx0     !  Description and declaration in iidim.f90
+       integer :: kfsmx0     !  Description and declaration in iidim.f90
+       integer :: kfsz0
+       integer :: kfsz1      !  Description and declaration in iidim.f90
+       integer :: kfuz0
+       integer :: kfuz1      !  Description and declaration in iidim.f90
+       integer :: kfvz0
+       integer :: kfvz1      !  Description and declaration in iidim.f90
+       integer :: izmodl     !  Description and declaration in iidim.f90
+! integer staircase:
+       integer :: kcscut     !  Description and declaration in iidim.f90
+       integer :: kcu45      !  Description and declaration in iidim.f90
+       integer :: kcv45      !  Description and declaration in iidim.f90
+!
+! character:
+       integer :: disint     !  Description and declaration in ckdim.f90
+       integer :: dismmt     !  Description and declaration in ckdim.f90
+       integer :: nambar     !  Description and declaration in ckdim.f90
+       integer :: nambnd     !  Description and declaration in ckdim.f90
+       integer :: namcon     !  Description and declaration in ckdim.f90
+       integer :: namdro     !  Description and declaration in ckdim.f90
+       integer :: namsrc     !  Description and declaration in ckdim.f90
+       integer :: namst      !  Description and declaration in ckdim.f90
+       integer :: namtra     !  Description and declaration in ckdim.f90
+       integer :: tprofc     !  Description and declaration in ckdim.f90
+       integer :: tprofu     !  Description and declaration in ckdim.f90
+       integer :: typbnd     !  Description and declaration in ckdim.f90
+!
+end type gd_r_i_ch

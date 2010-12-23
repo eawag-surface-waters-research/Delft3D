@@ -1,0 +1,220 @@
+!----- GPL ---------------------------------------------------------------------
+!                                                                               
+!  Copyright (C)  Stichting Deltares, 2011.                                     
+!                                                                               
+!  This program is free software: you can redistribute it and/or modify         
+!  it under the terms of the GNU General Public License as published by         
+!  the Free Software Foundation version 3.                                      
+!                                                                               
+!  This program is distributed in the hope that it will be useful,              
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
+!  GNU General Public License for more details.                                 
+!                                                                               
+!  You should have received a copy of the GNU General Public License            
+!  along with this program.  If not, see <http://www.gnu.org/licenses/>.        
+!                                                                               
+!  contact: delft3d.support@deltares.nl                                         
+!  Stichting Deltares                                                           
+!  P.O. Box 177                                                                 
+!  2600 MH Delft, The Netherlands                                               
+!                                                                               
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"    
+!  are registered trademarks of Stichting Deltares, and remain the property of  
+!  Stichting Deltares. All rights reserved.                                     
+!                                                                               
+!-------------------------------------------------------------------------------
+    type gd_dimens
+!
+       integer :: ncmax
+       integer :: nmax       !  Description and declaration in iidim.f90
+       integer :: mmax       !  Description and declaration in iidim.f90
+       integer :: nlb
+       integer :: nub
+       integer :: mlb
+       integer :: mub
+       integer :: nmlb
+       integer :: nmub
+       integer :: ddbound
+       integer :: nmaxus     !  Description and declaration in iidim.f90
+       integer :: kmax       !  Description and declaration in iidim.f90
+       integer :: nmaxd      !  Global data
+                             !  If KMAX > 0 Then := NMAX else := 1
+       integer :: mmaxd      !  Global data
+                             !  If KMAX > 0 Then := MMAX else := 1
+       integer :: jstart     !  Global data
+                             !  Begin pointer for arrays which have
+                             !  been transformed into 1D arrays.
+                             !  Due to the shift in the 2nd (M-)
+                             !  index, J = -2*NMAX + 1
+                             !  Begin pointer for arrays which have
+                             !  been transformed into 1D arrays.
+                             !  Due to the shift in the 2nd (M-)
+                             !  index, JSTART = -2*NMAX + 1
+       integer :: nmmaxj     !  Global data
+                             !  End   pointer for arrays which have
+                             !  been transformed into 1D arrays.
+                             !  Due to the shift in the 2nd (M-)
+                             !  index, NMMAXJ = NMMAX + 2 * NMAX
+                             !  End   pointer for arrays which have
+                             !  been transformed into 1d arrays.
+                             !  due to the shift in the 2nd (M-)
+                             !  index, NMMAXJ = NMMAX + 2 * NMAX
+                             !  End   pointer for arrays which have
+                             !  been transformed into 1d arrays.
+                             !  due to the shift in the 2nd (m-)
+                             !  index, NMMAXJ = NMMAX + 2 * NMAX
+                             !  End   pointer for arrays which have
+                             !  been transformed into 1d arrays.
+                             !  due to the shift in the 2nd (m-)
+                             !  index, nmmaxj = nmmax + 2 * nmax
+                             !  end   pointer for arrays which have
+                             !  been transformed into 1d arrays.
+                             !  due to the shift in the 2nd (m-)
+                             !  index, nmmaxj = nmmax + 2 * nmax
+                             !  End   pointer for arrays
+       integer :: nmmax      !  Global data
+                             !  Total number of grid pts. (NMAX*MMAX)
+                             !  Total number of grid pts. (nmax*mmax)
+       integer :: lmax       !  Global data
+                             !  Number of constituents (incl. turb.
+                             !  energy dissipation and production)
+                             !  Number of Constituents (incl. turb.
+                             !  energy dissipation and production)
+                             !  Number of constituents
+                             !  Total Number of Constituents (LSTSCI
+                             !  + LTUR)
+                             !  Total number of constituents (LSTSCI+
+                             !  LTUR)
+                             !  Total number of Constituents (LSTSCI+
+                             !  LTUR)
+       integer :: lmaxd      !  Global data
+                             !  Maximum of (1,LMAX)
+       integer :: lsts       !  Global data
+                             !  Number of Constituents (Salinity,
+                             !  Temperature and Sediment)
+                             !  Number of Constituents (Salinity,
+                             !  Temperature, Sediment)
+       integer :: lstsc      !  Global data
+                             !  Number of Constituents (Salinity,
+                             !  Temperature & Conservative Const.)
+                             !  Number of Constituents (Salinity,
+                             !  Temperature, Conservative Const.)
+                             !  Number of Constituents (Salinity,
+                             !  Temperature, Sediment & Conservative
+                             !  Constituent)
+                             !  Number of Constituents (Salinity,
+                             !  Temperature, Sediment & Conservative
+                             !  Constituents)
+                             !  Number of Constituents (Salinity,
+                             !  Temperature, Sediment, Conservative
+                             !  Constituents)
+       integer :: lstsci     !  Description and declaration in iidim.f90
+       integer :: lsal       !  Global data
+                             !  Pointer for Salinity    in array for
+                             !  constituent (if used, always 1)
+                             !  Pointer for Salinity in array for
+                             !  constituent (if used, always 1)
+                             !  Pointer for Salinity in array R
+                             !  for constituents (if used, always 1)
+                             !  Pointer for salinity in array r
+                             !  for constituents (if used, always 1)
+       integer :: lsed       !  Description and declaration in iidim.f90
+       integer :: lsedtot    !  Description and declaration in iidim.f90
+       integer :: ltem       !  Global data
+                             !  Pointer for Temperature in array for
+                             !  constituent (if used LSAL+1 in
+                             !  flow, 1 in UI)
+                             !  Temperature, Conservative Const. and
+                             !  Secondary Flow)
+                             !  Pointer for Temperature in array for
+                             !  constituent (if used LSAL+1 in
+                             !  flow, 1 in UI)
+                             !  Pointer for Temperature in array for
+                             !  constituent (LSAL+1)
+                             !  Pointer for temperature in array r
+                             !  for constituents (lsal+1)
+                             !  Pointer for Temperature in array R
+                             !  for constituents (LSAL+1)
+       integer :: lsecfl     !  Global data
+                             !  Pointer for secondary flow
+                             !  in array r1 for constituents
+                             !  Temperature, Sediment &
+                             !  Conservative Const.)
+                             !  Pointer for secondary flow
+                             !  in array r1 for constituents
+                             !  Pointer for secondary flow
+                             !  in array R1 for constituents
+       integer :: lsec       !  Global data
+                             !  Flag for secondary flow
+                             !      1 = no equilibrium (advection
+                             !          and diffusion term)
+                             !      2 = equilibrium
+       integer :: ltur       !  Description and declaration in iidim.f90
+       integer :: ltur2d     !  Global data
+                             !  Flag for 2D turbulence model
+                             !     (0 = constant      model
+                             !      1 = uittenbogaard model)
+       integer :: kmxdt      !  Global data
+                             !  Dimension for IWE equidistant layer
+                             !  arrays = MAX (1,KMXT)
+                             !  Maximal size of interpolation arrays
+                             !  for IWE
+                             !  Maximal size of interpolation arrays
+       integer :: nbub       !  Total number of 'artificial' discharge points, added automatically to model the bubble screens
+       integer :: nxbub      !  Number of bubble screens
+                             !  Each screen consists of a line of bubble locations
+                             !  For each location, for each vertical layer, an 'artificial' discharge point is added
+       integer :: npiwe      !  Global data
+                             !  Dimension for IWE frequency arrays
+                             !  MAX (1,NFREQS)
+                             !  Maximal size of frequency arrays
+                             !  for IWE
+       integer :: kmxt       !  Global data
+                             !  Nr.of equidistant layers in IWE model
+       integer :: nfreqs     !  Global data
+                             !  Number of angular frequency intervals
+                             !  for inspecting roots (IWE)
+                             !  Number of angular frequency intervals
+                             !  for inspecting roots of the TG
+                             !  equation
+       integer :: nlcest     !  Global data
+                             !  Estimated number of computational
+                             !  rows and columns in IROCOL-table
+                             !  = 5 * max (NMAX  ,MMAX  )
+                             !  Estimated number of computational
+                             !  rows and columns in IROCOL-table
+       integer :: noroco     !  Description and declaration in iidim.f90
+       integer :: norow      !  Description and declaration in iidim.f90
+       integer :: nocol      !  Description and declaration in iidim.f90
+       integer :: nto        !  Description and declaration in iidim.f90
+       integer :: ntod
+       integer :: ntof       !  Number of open boundary sections of the Fourier type
+                             !  Number of open boundary sections of the Harmonic type
+       integer :: ntoq       !  Number of open boundary sections of the QH-rel. type
+                             !  Array containing the return time for constituents at each bnd. point
+                             !  n,1; return time at surface
+                             !  n,2; return time at bottom
+       integer :: ntot       !  Number of boundary sections of the Time varying type
+       integer :: kc         !  Number of Frequencies (incl. mean value) for the Hydrodynamic B.C.
+       integer :: kcd        !  Maximum of (1,KC)
+                             !  Maximum of (KC,KMAX)
+       integer :: nopest     !  Estimated number of open boundary
+                             !  points = 4 * (NMAX  +  MMAX  )
+       integer :: nrob       !  Description and declaration in iidim.f90
+       integer :: nsrc       !  Description and declaration in iidim.f90
+       integer :: nsrcd      !  Number of (ordinary) discharge points plus the number of bubble screens
+       integer :: nostat     !  Number of monitoring stations
+       integer :: ntruv      !  Total nr. of monit. cross sections
+       integer :: ntru       !  Nr. of monitoring cross sections (U)
+       integer :: nofou      !  Number of requested fourier analysis
+       integer :: ndro       !  Number of released drogues
+       integer :: nsluv      !  Global data
+                             !  Number of U- and V-barriers
+       integer :: upwsrc     !  Global data
+                             !  Flag for upwind of discharges
+                             !  -1 : no upwind for all discharges
+                             !   0 : only upwind for momentum discharges
+                             !   1 : upwind for all discharges
+!
+    end type gd_dimens

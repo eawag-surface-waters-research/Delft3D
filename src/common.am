@@ -1,0 +1,126 @@
+#-------------------------------------------------------------------------------
+#   Global flags and settings for DS Automake
+#
+#   For debugging replace -O2 with -g
+#
+#   Fedor, Adri, probably others, and some Irv
+#   31 aug 10
+#
+#   Copyright (C) 2007-2010, Deltares
+#-------------------------------------------------------------------------------
+
+
+#   C/C++ flags
+
+AM_CFLAGS = \
+	-std=c99 \
+	-D_GNU_SOURCE \
+	-O2 \
+	-DSTR_LEN_AT_END \
+        -DWITH_DELFTONLINE
+
+AM_CXXFLAGS = \
+	-std=c++98 \
+	-D_GNU_SOURCE \
+	-O2 \
+	-DSTR_LEN_AT_END \
+        -DWITH_DELFTONLINE
+
+
+#   Fortran 77/90 flags
+
+FINCLUDES =
+
+FMODULES = \
+	-I$(top_srcdir)/utils_lgpl/precision/packages/precision/src
+
+
+AM_FCFLAGS = \
+	$(FINCLUDES) \
+	$(FMODULES) \
+	-O2 \
+	-openmp \
+	-recursive \
+	-reentrancy threaded \
+	-traceback
+
+AM_FFLAGS = \
+	$(FINCLUDES) \
+	$(FMODULES) \
+	-O2 \
+	-extend_source \
+	-openmp \
+	-recursive \
+	-reentrancy threaded \
+	-traceback
+
+
+#   (disabled) LEX and YACC flags
+
+#AM_LFLAGS += -L
+#AM_YFLAGS += -d
+
+
+#   Allow to build in different subdirectories
+#   This is described in http://www.gnu.org/software/automake/manual/automake.html#VPATH-Builds
+
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+
+#-----	Common external library locations  -------------------------------------
+
+#LIBINTERACTER = \
+#    $(top_srcdir)/third_party/interacter/bin/linux/libint.a
+
+#LIBWLAUTH = \
+#    $(top_srcdir)/third_party/wlauth/bin/linux/libWL_auth.a
+
+#EXTERNALSOURCES = $(LIBINTERACTER) $(LIBWLAUTH)
+
+
+
+# When FCLIBS IS NOT defined here, then:
+# - delftflow crashes on 8 of the 28 dd-testcases
+# - FCLIBS is defined by automake as: -L/opt/intel/fc/10.1.015/lib -L/usr/lib/gcc/i386-redhat-linux/3.4.6/ -L/usr/lib/gcc/i386-redhat-linux/3.4.6/../../../ -lifport -lifcore -limf -lm -lipgo -lirc -lgcc_s -lirc_s -ldl
+#   Note the dynamic link flag -ldl
+# - All modules compile and link
+# When FCLIBS IS defined here, then:
+# - delftflow runs fine on all dd-testcases
+# - Modules linked by the C++ linker do not link anymore: undefined reference to `dlsym'
+#   This problem is solved by adding the -ldl flag in the related Makefile.am
+
+# Intel 11:
+# Flag -lsvml is explicitly used by delpar
+FCLIBS = -L/opt/intel/Compiler/11.0/081/lib/ia32 -lsvml
+
+#
+# The MPI libraries need to be specified as well
+#
+MPILIBS = -L/opt/mpich2/lib -lmpichf90 -lmpich -lpthread
+
+#-------------------------------------------------------------------------------
+#   Custom make targets
+
+
+ds-install: install
+	cp -p $(top_srcdir)/third_party_lgpl/DelftOnline/lib/*.so $(libdir)
+
+# ToDo: make delftflow-dist part of ds-install?
+delftflow-dist: ds-install
+	( \
+	    export DEST=$(top_srcdir)/dist/delftflow-linux ; \
+	    mkdir -p $$DEST ; \
+	    cp -p $(top_srcdir)/third_party_lgpl/DelftOnline/classes/*.jar $$DEST ; \
+	    cp -p $(top_srcdir)/third_party_lgpl/DelftOnline/lib/*.so $$DEST ; \
+	    cp -p $(top_srcdir)/bin/deltares_hydro.exe $$DEST ; \
+	    cd $$DEST/.. ; \
+	    tar czf delftflow-linux.tgz delftflow-linux ; \
+	    rm -rf delftflow-linux \
+	)
+
+distclean-local:
+	rm -f *.mod
+
+ds-clean: distclean distclean-local maintainer-clean maintainer-clean-am
+	rm -f Makefile.in
