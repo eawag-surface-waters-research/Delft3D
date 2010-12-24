@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-subroutine flow2d3d(max_keyval, keys   , values   , error_message)
-!DEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'FLOW2D3D' :: FLOW2D3D
+subroutine runme(max_keyval, keys   , values   , error_message)
+!DEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'RUNME' :: RUNME
 !!--description-----------------------------------------------------------------
 !
 ! Computes culvert discharge
@@ -141,4 +141,4 @@ endif
 ! - call trisim to do the actual calculation
 !
 call dd_execute(runid, ddbFile, jarPath, jrePath, urlFile, rolvWait)
-end subroutine flow2d3d
+end subroutine runme

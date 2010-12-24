@@ -59,7 +59,6 @@ integer                                         :: k
 integer                                         :: istat
 integer                                         :: numCompChilds
 integer                                         :: numOlvChilds
-integer                                         :: libFuncSet
 integer                                         :: libNameSet
 integer, external                               :: iargc
 integer, external                               :: open_shared_library
@@ -162,9 +161,9 @@ allocate(values(numKeyVal))
 keys        = ' '
 values      = ' '
 libName     = ' '
-libFunction = ' '
 libNameSet  = 0
-libFuncSet  = 0
+libFunction = 'runme'
+call upperCase(libFunction)
 k           = 0
 do i = 1, numGroups
    do j = 1, configGroups(i)%numChilds
@@ -179,7 +178,6 @@ do i = 1, numGroups
          ! Non-empty library name placed in values(i)
          !
          libNameSet = k
-         libFuncSet = k
       endif
       if (keys(k)/= trim(configGroups(i)%name) // ',' .and. values(k)==' ') then
          write(*,'(5a)') 'ERROR: in config file "', trim(arguments(1)), '", keyword "', trim(keys(k)), '" has an empty value.'
@@ -207,9 +205,6 @@ libName = trim(values(libNameSet)) // '.dll'
 #if defined (HAVE_CONFIG_H)
 libName = 'lib' // trim(values(libNameSet)) // '.so'
 #endif
-!
-libFunction = trim(values(libFuncSet))
-call upperCase(libFunction)
 !
 istat   = 0
 istat   = open_shared_library(libHandle, trim(libName))

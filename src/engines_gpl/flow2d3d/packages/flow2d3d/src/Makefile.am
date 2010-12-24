@@ -19,7 +19,7 @@ FINCLUDES += \
 #Sources
 libflow2d3d_la_SOURCES = \
          flow2d3d_version.F90 \
-         flow2d3d.f90
+         runme.f90
 
 #-------------------------------------------------------------------------------
 #Libraries

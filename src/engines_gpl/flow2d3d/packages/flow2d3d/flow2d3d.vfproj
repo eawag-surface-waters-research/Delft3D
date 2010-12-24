@@ -25,7 +25,7 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Source Files">
-		<File RelativePath=".\src\flow2d3d.f90"/>
+		<File RelativePath=".\src\runme.f90"/>
 		<File RelativePath=".\src\flow2d3d_version.F90"/>
 		<File RelativePath=".\src\flow2d3d_version.F90.svn"/></Filter></Files>
 	<Globals/></VisualStudioProject>
