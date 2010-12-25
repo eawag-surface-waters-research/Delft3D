@@ -19,14 +19,15 @@ To compile on Linux without -g: see build.sh
 
 Directory structure
 ===================
-engines : Programs which perform a physical simulation
-tools   : Programs which support the engines 
-utils   : Libraries which are used by the engines and/or tools, but at least by more than one engine/tool
-wrappers: Shields around engines
+engines     : Programs which perform a physical simulation
+engines_gpl : Open source engines under GPL conditions
+tools       : Programs which support the engines 
+tools_gpl   : Open source tools under GPL conditions
+utils       : Libraries which are used by the engines and/or tools, but at least by more than one engine/tool
+utils_lgpl  : Open source utils under LGPL conditions
 
 
 
-25 May 2010
+25 December 2010
 
-fedor.baart@deltares.nl
 adri.mourits@deltares.nl
