@@ -371,11 +371,11 @@ AC_CONFIG_FILES([Makefile
 		 tools_gpl/vs/packages/vs_version_number/src/Makefile
 		 tools_gpl/vs/packages/vs/Makefile
 		 tools_gpl/vs/packages/vs/src/Makefile
-		 third_party_lgpl/Makefile
-		 third_party_lgpl/version_number/Makefile
-		 third_party_lgpl/version_number/packages/Makefile
-		 third_party_lgpl/version_number/packages/version_number/Makefile
-		 third_party_lgpl/version_number/packages/version_number/src/Makefile
+		 third_party_open/Makefile
+		 third_party_open/version_number/Makefile
+		 third_party_open/version_number/packages/Makefile
+		 third_party_open/version_number/packages/version_number/Makefile
+		 third_party_open/version_number/packages/version_number/src/Makefile
 		 plugins_lgpl/Makefile
 		 plugins_lgpl/plugin_delftflow_traform/Makefile
 		 plugins_lgpl/plugin_delftflow_traform/src/Makefile
