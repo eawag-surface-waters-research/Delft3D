@@ -25,7 +25,7 @@ MODDIR=`pwd`
 
 # svn_dir is not needed to set explicitly
 # cmd_dir is not used on LINUX
-VN_DIR=$TOPDIR/third_party_lgpl/version_number/bin/linux
+VN_DIR=$TOPDIR/third_party_open/version_number/bin/linux
 
 
 

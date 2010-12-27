@@ -187,6 +187,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\include\version_number.h"
+				>
+			</File>
+			<File
 				RelativePath=".\include\version_number.h.svn"
 				>
 			</File>

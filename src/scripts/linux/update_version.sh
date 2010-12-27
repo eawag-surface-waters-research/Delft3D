@@ -13,7 +13,7 @@ cd $2
 MODDIR=`pwd` 
 cd $4
 TOPDIR=`pwd`
-VN_DIR=$TOPDIR/third_party_lgpl/version_number/bin/linux
+VN_DIR=$TOPDIR/third_party_open/version_number/bin/linux
 
 cd $MODDIR
 
