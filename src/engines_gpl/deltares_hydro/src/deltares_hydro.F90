@@ -258,8 +258,8 @@ subroutine printUsage()
    write(*,'(a)') "    <config.ini>  : Name of configuration file in ini format"
    write(*,'(a)') "                    Example configuration file:"
    write(*,'(a)') "                    [Component]"
-   write(*,'(a)') "                       libname = flow2d3d"
-   write(*,'(a)') "                       argfile = delft3d-flow_commandline.txt"
+   write(*,'(a)') "                       Name    = flow2d3d"
+   write(*,'(a)') "                       MdfFile = f34"
 end subroutine printUsage
 
 !

@@ -1055,7 +1055,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                             & nsrc        ,zmodel    ,i(kcs)    ,i(kfs)    ,i(kfu)      , &
                             & i(kfv)      ,i(kfumin) ,i(kfvmin) ,i(kfumax) ,i(kfvmax)   , &
                             & i(kfsmin)   ,i(kfsmax) ,i(mnksrc) ,i(ibuff)  ,r(s1)       , &
-                            & r(dps)      ,r(dzs1)   ,r(thick)  , &
+                            & d(dps)      ,r(dzs1)   ,r(thick)  , &
                             & r(velu)     ,r(velv)   ,r(w1)     ,r(wphy)   ,r(r1)       , &
                             & r(rtur1)    ,r(taubpu) ,r(taubpv) ,r(taubsu) ,r(taubsv)   , &
                             & r(vicww)    ,r(dicww)  ,r(rich)   ,r(rho)    ,r(p1)       , &

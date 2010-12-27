@@ -1741,7 +1741,7 @@ subroutine trisol(dischy    ,solver    ,icreep    , &
        call caltmx(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                  & icy       ,zmodel    ,i(kfu)    ,i(kfv)    ,i(kfs)    , &
                  & i(kfuz1)  ,i(kfvz1)  ,i(kfsmin) ,r(wrka1)  ,r(wrka2)  , &
-                 & r(taubmx) ,r(hu)     ,r(hv)     ,r(dps)    ,r(s1)     , &
+                 & r(taubmx) ,r(hu)     ,r(hv)     ,d(dps)    ,r(s1)     , &
                  & gdp       )
        call timer_stop(timer_caltmx, gdp)
        if (htur2d) then
@@ -2726,7 +2726,7 @@ subroutine trisol(dischy    ,solver    ,icreep    , &
        call caltmx(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                  & icy       ,zmodel    ,i(kfu)    ,i(kfv)    ,i(kfs)    , &
                  & i(kfuz1)  ,i(kfvz1)  ,i(kfsmin) ,r(wrka1)  ,r(wrka2)  , &
-                 & r(taubmx) ,r(hu)     ,r(hv)     ,r(dps)    ,r(s1)     , &
+                 & r(taubmx) ,r(hu)     ,r(hv)     ,d(dps)    ,r(s1)     , &
                  & gdp       )
        call timer_stop(timer_caltmx, gdp)
        if (htur2d) then
