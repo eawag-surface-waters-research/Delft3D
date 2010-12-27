@@ -47,8 +47,8 @@
 
 
 
-//#define FLOW_DOUBLE_PRECISION  // activate this   define when fp == hp (high   precision)
-#undef FLOW_DOUBLE_PRECISION      // activate this undefine when fp == sp (single precision)
+#define FLOW_DOUBLE_PRECISION  // activate this   define when fp == hp (high   precision)
+//#undef FLOW_DOUBLE_PRECISION      // activate this undefine when fp == sp (single precision)
 
 #define PREC_DOUBLE_PRECISION     // activate this   define when prec == hp (high   precision)
 // #undef PREC_DOUBLE_PRECISION   // activate this undefine when prec == sp (single precision)

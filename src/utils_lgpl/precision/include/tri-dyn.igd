@@ -32,9 +32,9 @@ integer    , dimension(0:0) :: i
 character*1, dimension(0:0) :: ch
 
 ! Activate the following line in case fp = hp
-!equivalence ( r(0),  dbuf(0))
+equivalence ( r(0),  dbuf(0))
 ! Activate the following line in case fp = sp
-equivalence ( r(0),  rbuf(0))
+!equivalence ( r(0),  rbuf(0))
 
 ! Activate the following line in case prec = hp
 equivalence ( d(0),  dbuf(0))

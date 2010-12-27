@@ -10,20 +10,20 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libflow2d3d_sp.la
+lib_LTLIBRARIES = libflow2d3d.la
 
 FINCLUDES += \
 	-I$(top_srcdir)/utils_lgpl/esmfsm/include
 
 #-------------------------------------------------------------------------------
 #Sources
-libflow2d3d_sp_la_SOURCES = \
+libflow2d3d_la_SOURCES = \
          flow2d3d_version.F90 \
          runme.f90
 
 #-------------------------------------------------------------------------------
 #Libraries
-libflow2d3d_sp_la_LIBADD = \
+libflow2d3d_la_LIBADD = \
     $(top_srcdir)/engines_gpl/flow2d3d/packages/manager_dd/src/ddexec/libmanager_dd_ddexec.a \
     $(top_srcdir)/engines_gpl/flow2d3d/packages/manager_dd/src/hydra/libmanager_dd_hydra.a \
     $(top_srcdir)/engines_gpl/flow2d3d/packages/manager/src/libmanager.a \
