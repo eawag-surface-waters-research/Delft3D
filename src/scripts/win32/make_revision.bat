@@ -23,9 +23,9 @@ CD %CURDIR%
 CD %2
 SET MODDIR=%CD%
 
-SET SVN_DIR=%TOPDIR%\third_party_lgpl\subversion\bin\win32
-SET CMD_DIR=%TOPDIR%\third_party_lgpl\commandline\bin\win32
-SET VN_DIR=%TOPDIR%\third_party_lgpl\version_number\bin\win32
+SET SVN_DIR=%TOPDIR%\third_party_open\subversion\bin\win32
+SET CMD_DIR=%TOPDIR%\third_party_open\commandline\bin\win32
+SET VN_DIR=%TOPDIR%\third_party_open\version_number\bin\win32
 
 CD %CURDIR%
 

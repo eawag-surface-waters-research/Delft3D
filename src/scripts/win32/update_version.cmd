@@ -9,9 +9,9 @@ echo Generating version number in the %1 ...
 
 set SCRIPT_DIRECTORY=%~dp0
 
-set SED=%SCRIPT_DIRECTORY%\..\..\third_party_lgpl\commandline\bin\win32\sed.exe
-set SVNVERSION=%SCRIPT_DIRECTORY%\..\..\third_party_lgpl\subversion\bin\win32\svnversion.exe
-set VN=%SCRIPT_DIRECTORY%\..\..\third_party_lgpl\version_number\bin\win32\version_number.exe
+set SED=%SCRIPT_DIRECTORY%\..\..\third_party_open\commandline\bin\win32\sed.exe
+set SVNVERSION=%SCRIPT_DIRECTORY%\..\..\third_party_open\subversion\bin\win32\svnversion.exe
+set VN=%SCRIPT_DIRECTORY%\..\..\third_party_open\version_number\bin\win32\version_number.exe
 
 IF DEFINED BUILD_NUMBER (
 	set version=%BUILD_NUMBER%
