@@ -20,8 +20,8 @@ INCLUDES = \
     -I$(top_srcdir)/utils_lgpl/esmfsm/include \ 
     -I$(top_srcdir)/utils_lgpl/instrumentation/include \
     -I$(top_srcdir)/utils_lgpl/stream/include \
-    -I$(top_srcdir)/third_party_lgpl/DelftOnline/include \
-    -I$(top_srcdir)/third_party_lgpl/DelftOnline/include/linux
+    -I$(top_srcdir)/third_party_open/DelftOnline/include \
+    -I$(top_srcdir)/third_party_open/DelftOnline/include/linux
 
 
 libmanager_dd_hydra_a_SOURCES = \

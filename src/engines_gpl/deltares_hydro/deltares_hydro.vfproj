@@ -13,7 +13,7 @@
 				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\scripts\win32\update_version.cmd .\src\deltares_hydro_version.F90 .\ .\include\version_number.ini"/>
 				<Tool Name="VFPostBuildEventTool" CommandLine="echo &quot;This file is overwritten by the post-build command of the project flow2d3d&quot; &gt; .\src\deltares_hydro_version.F90
 copy ..\flow2d3d\bin\$(ConfigurationName)\*.dll bin\$(ConfigurationName)
-copy ..\..\third_party_lgpl\DelftOnline\lib\$(ConfigurationName)\*.dll bin\$(ConfigurationName)"/>
+copy ..\..\third_party_open\DelftOnline\lib\$(ConfigurationName)\*.dll bin\$(ConfigurationName)"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" OutputDirectory="bin/$(ConfigurationName)" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" BuildLogFile="$(IntDir)\BuildLog_delftflow.htm">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" FavorSizeOrSpeed="favorNone" Preprocess="preprocessYes" AdditionalIncludeDirectories="../../utils_lgpl/inifiles/lib/$(ConfigurationName)/static" PreprocessorDefinitions="WIN32" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" ObjectFile="$(INTDIR)/"/>
@@ -25,7 +25,7 @@ copy ..\..\third_party_lgpl\DelftOnline\lib\$(ConfigurationName)\*.dll bin\$(Con
 				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\scripts\win32\update_version.cmd .\src\deltares_hydro_version.F90 .\ .\include\version_number.ini"/>
 				<Tool Name="VFPostBuildEventTool" CommandLine="echo &quot;This file is overwritten by the post-build command of the project flow2d3d&quot; &gt; .\src\deltares_hydro_version.F90
 copy ..\flow2d3d\bin\$(ConfigurationName)\*.dll bin\$(ConfigurationName)
-copy ..\..\third_party_lgpl\DelftOnline\lib\$(ConfigurationName)\*.dll bin\$(ConfigurationName)"/>
+copy ..\..\third_party_open\DelftOnline\lib\$(ConfigurationName)\*.dll bin\$(ConfigurationName)"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Source Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">

@@ -18,8 +18,8 @@ INCLUDES = \
     -I$(top_srcdir)/utils_lgpl/stream/include \
     -I$(top_srcdir)/engines_gpl/flow2d3d/packages/io_dol_c/include \
     -I$(top_srcdir)/engines_gpl/flow2d3d/packages/manager_dd/include \
-    -I$(top_srcdir)/third_party_lgpl/DelftOnline/include \
-    -I$(top_srcdir)/third_party_lgpl/DelftOnline/include/linux
+    -I$(top_srcdir)/third_party_open/DelftOnline/include \
+    -I$(top_srcdir)/third_party_open/DelftOnline/include/linux
 
 libio_dol_c_a_SOURCES = \
      d3dol.cpp \

@@ -21,8 +21,8 @@ INCLUDES = \
     -I$(top_srcdir)/engines_gpl/flow2d3d/packages/io_dol_c/include \
     -I$(top_srcdir)/engines_gpl/flow2d3d/packages/kernel_dd_c/include/mapper \
     -I$(top_srcdir)/engines_gpl/flow2d3d/packages/manager_dd/include \
-    -I$(top_srcdir)/third_party_lgpl/DelftOnline/include \
-    -I$(top_srcdir)/third_party_lgpl/DelftOnline/include/linux
+    -I$(top_srcdir)/third_party_open/DelftOnline/include \
+    -I$(top_srcdir)/third_party_open/DelftOnline/include/linux
 
 libkernel_dd_c_mapping_a_SOURCES = \
      context-flowside.cpp \

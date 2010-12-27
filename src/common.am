@@ -102,15 +102,15 @@ MPILIBS = -L/opt/mpich2/lib -lmpichf90 -lmpich -lpthread
 
 
 ds-install: install
-	cp -p $(top_srcdir)/third_party_lgpl/DelftOnline/lib/*.so $(libdir)
+	cp -p $(top_srcdir)/third_party_open/DelftOnline/lib/*.so $(libdir)
 
 # ToDo: make delftflow-dist part of ds-install?
 delftflow-dist: ds-install
 	( \
 	    export DEST=$(top_srcdir)/dist/delftflow-linux ; \
 	    mkdir -p $$DEST ; \
-	    cp -p $(top_srcdir)/third_party_lgpl/DelftOnline/classes/*.jar $$DEST ; \
-	    cp -p $(top_srcdir)/third_party_lgpl/DelftOnline/lib/*.so $$DEST ; \
+	    cp -p $(top_srcdir)/third_party_open/DelftOnline/classes/*.jar $$DEST ; \
+	    cp -p $(top_srcdir)/third_party_open/DelftOnline/lib/*.so $$DEST ; \
 	    cp -p $(top_srcdir)/bin/deltares_hydro.exe $$DEST ; \
 	    cd $$DEST/.. ; \
 	    tar czf delftflow-linux.tgz delftflow-linux ; \

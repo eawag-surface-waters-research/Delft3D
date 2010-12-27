@@ -82,8 +82,8 @@ implicit none
 !
 ! fp is the generally used precision in Delft3D-FLOW
 !
-integer, parameter :: fp=hp
-!integer, parameter :: fp=sp
+!integer, parameter :: fp=hp
+integer, parameter :: fp=sp
 !
 ! prec is used to switch bodsed/dps from sp to hp
 !
