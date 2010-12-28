@@ -55,7 +55,7 @@ src/clean.cmd -text
 src/common.am -text
 src/configure.ac -text
 src/deltares_hydro_open_source.sln -text
-src/doxyfile_d3d -text
+src/doxyfile_opendelft3d -text
 src/engines_gpl/Makefile.am -text
 src/engines_gpl/deltares_hydro/Makefile.am -text
 src/engines_gpl/deltares_hydro/deltares_hydro.vfproj -text
