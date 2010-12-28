@@ -1,7 +1,7 @@
 subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
                 & d90       ,chezy     ,h         ,hrms      ,tp        , &
                 & dir       ,par       ,dzdx      ,dzdy      ,sbotx     , &
-                & sboty     ,ssusx     ,ssusy     ,cesus     ,gdp       )
+                & sboty     ,ssusx     ,ssusy     ,cesus     )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -39,13 +39,6 @@ subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
     use globaldata
     !
     implicit none
-    !
-    type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    ! They replace the  include igd / include igp lines
-    !
-    real(fp)                 , pointer :: gammax
 !
 ! Global variables
 !
@@ -128,8 +121,6 @@ subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
 !
 !! executable statements -------------------------------------------------------
 !
-    gammax          => gdp%gdnumeco%gammax
-    !
     if (first) then
        inquire (file = 'coef.inp', exist = exist)
        if (exist) then
@@ -176,9 +167,6 @@ subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
        t = tp
     endif
     !
-    ! limit hrms to gammax*h, similar to Bijker implementation
-    !
-    hrms = min(hrms, gammax*h)
     pi = 4.*atan(1.0)
     if ((h/rk<=1.33) .or. (h>200.)) then
        return

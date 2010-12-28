@@ -62,7 +62,7 @@ subroutine tranb7(kode      ,ntrsi     ,utot      ,d50       ,d90       , &
     real(fp)       :: beta   ! lowest level of integration interval over vertical
     real(fp)       :: ca
     real(fp)       :: del
-    real(fp)       :: dster
+    real(fp)       :: dstar
     real(fp)       :: fc
     real(fp)       :: ff     ! coriolis coefficient
     real(fp)       :: g      ! gravity acceleration
@@ -109,18 +109,18 @@ subroutine tranb7(kode      ,ntrsi     ,utot      ,d50       ,d90       , &
     endif
     !
     a = rksc
-    dster = d50*(del*g/rnu/rnu)**(1./3.)
+    dstar = d50*(del*g/rnu/rnu)**(1./3.)
     !
     rmuc = (log10(12.*h/rksc)/log10(12.*h/3./d90))**2
     fc = .24*(log10(12.*h/rksc))**( - 2)
     tbc = .125*rhow*fc*utot**2
     tbce = rmuc*tbc
-    thetcr = shld(dster)
+    thetcr = shld(dstar)
     tbcr = (rhos - rhow)*g*d50*thetcr
     t = (tbce - tbcr)/tbcr
     !
     if (t<.000001) t = .000001
-    ca = .015*alf1*d50/a*t**1.5/dster**.3
+    ca = .015*alf1*d50/a*t**1.5/dstar**.3
     rkap = .4
     !
     uster = sqrt(.125*fc)*utot
@@ -141,8 +141,8 @@ subroutine tranb7(kode      ,ntrsi     ,utot      ,d50       ,d90       , &
     ssus = ff*utot*h*ca
     !
     if (t<3.) then
-       sbot = 0.053*(del)**0.5*sqrt(g)*d50**1.5*dster**( - 0.3)*t**2.1
+       sbot = 0.053*(del)**0.5*sqrt(g)*d50**1.5*dstar**( - 0.3)*t**2.1
     else
-       sbot = 0.100*(del)**0.5*sqrt(g)*d50**1.5*dster**( - 0.3)*t**1.5
+       sbot = 0.100*(del)**0.5*sqrt(g)*d50**1.5*dstar**( - 0.3)*t**1.5
     endif
 end subroutine tranb7

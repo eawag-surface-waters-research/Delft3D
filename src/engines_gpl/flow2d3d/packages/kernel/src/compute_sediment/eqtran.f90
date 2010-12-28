@@ -691,7 +691,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        call tranb5(kode      ,ntrsi      ,u         ,v         ,di50      , &
                  & d90       ,chezy      ,h         ,hrms      ,tp        , &
                  & teta      ,par(1,ised),dzdx      ,dzdy      ,sbcu      , &
-                 & sbcv      ,ssusx      ,ssusy     ,cesus     ,gdp       )
+                 & sbcv      ,ssusx      ,ssusy     ,cesus     )
        !
        ! transport formula will return ntrsi = 2 which means
        !

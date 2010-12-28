@@ -47,7 +47,6 @@ subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp)                 , pointer :: gammax
     logical                  , pointer :: ubot_from_com
     !
 !
@@ -83,7 +82,7 @@ subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     real(fp)                       :: coeffp
     real(fp)                       :: coeffq
     real(fp)                       :: delta
-    real(fp)                       :: dster
+    real(fp)                       :: dstar
     real(fp)                       :: eps
     real(fp)                       :: facth
     real(fp)                       :: factr
@@ -151,7 +150,6 @@ subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    gammax          => gdp%gdnumeco%gammax
     ubot_from_com   => gdp%gdprocs%ubot_from_com
     !
     if (kode== - 1) then
@@ -183,16 +181,6 @@ subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     sbotx = 0.
     sboty = 0.
     !
-    !     Prevent small tp
-    !
-    if (tp<=1. .and. tp>1.E-6) tp = 1.
-    if (tp<=1.E-6) then
-       tp = 5.
-       hrms = 0.01
-    endif
-    !     limit Hrms to gammax*h, similar to Bijker implementation
-    hrms = min(hrms, gammax*h)
-    !
     !     Velocity magnitude
     !
     utot = u**2 + v**2
@@ -202,15 +190,20 @@ subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     !     Wave number k
     !
     if (tp>1.E-6) then
+       !
+       !     Prevent small tp
+       !
+       tp = max(tp,1.0_fp)
+       !
        call wavenr(h         ,tp        ,k         ,ag        )
        if (ubot_from_com) then
           uorb = ubot
        else
           uorb = pi*hrms/tp/sinh(k*h)
        endif
-       !        urms = uorb*0.7071
+       ! urms = uorb*0.7071
     else
-       goto 999
+       uorb = 0.0_fp
     endif
     !
     !
@@ -275,13 +268,13 @@ subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     !           Soulsby p. 104, (ag(s-1)/nu^2)^(1/3) = 25926
     !                    for ag=9.81, s=2.65, nu=1e-6
     !
-    !     dster  = 25296.*d50
-    dster = (ag*delta/rnu**2)**(1./3.)*d50
+    !     dstar  = 25296.*d50
+    dstar = (ag*delta/rnu**2)**(1./3.)*d50
     !
     !           Critical shear stress
     !           Soulsby p. 106, eq. 77
     !
-    thetcr = 0.30/(1. + 1.2*dster) + 0.055*(1. - exp( - 0.020*dster))
+    thetcr = 0.30/(1. + 1.2*dstar) + 0.055*(1. - exp( - 0.020*dstar))
     !
     !          Tau max needed to check the critical tau
     !          Soulsby  p. 168

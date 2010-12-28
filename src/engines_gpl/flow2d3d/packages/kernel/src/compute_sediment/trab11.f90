@@ -44,7 +44,6 @@ subroutine trab11(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp)                 , pointer :: gammax
     logical                  , pointer :: ubot_from_com
 !
 ! Global variables
@@ -72,7 +71,7 @@ subroutine trab11(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     real(fp)                       :: cd
     real(fp)                       :: d90
     real(fp)                       :: delta
-    real(fp)                       :: dster
+    real(fp)                       :: dstar
     real(fp)                       :: ag         !  gravity acceleration
     real(fp)                       :: k          ! wave number
     real(fp)                       :: pi
@@ -89,7 +88,6 @@ subroutine trab11(kode      ,ntrsi     ,u         ,v         ,hrms      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    gammax          => gdp%gdnumeco%gammax
     ubot_from_com   => gdp%gdprocs%ubot_from_com
     !
     if (kode== - 1) then
@@ -120,18 +118,6 @@ subroutine trab11(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     sbotx = 0.
     sboty = 0.
     !
-    !     Prevent small tp
-    !
-    if (tp<=1. .and. tp>1.E-6) tp = 1.
-    if (tp<=1.E-6) then
-       tp = 5.
-       hrms = 0.01
-    endif
-    !
-    !     limit Hrms to gammax*h, similar to Bijker implementation
-    !
-    hrms = min(hrms, gammax*h)
-    !
     !     Velocity magnitude
     !
     utot = u**2 + v**2
@@ -141,6 +127,11 @@ subroutine trab11(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     !     Wave number k, urms orbital velocity
     !
     if (tp>1.E-6) then
+       !
+       !     Prevent small tp
+       !
+       tp = max(tp,1.0_fp)
+       !
        call wavenr(h         ,tp        ,k         ,ag        )
        if (ubot_from_com) then
           uorb = ubot
@@ -149,13 +140,13 @@ subroutine trab11(kode      ,ntrsi     ,u         ,v         ,hrms      , &
        endif
        urms = uorb*0.7071
     else
-       goto 999
+       urms = 0.0_fp
     endif
     !
     !     Soulsby p. 184, (ag(s-1)/nu^2)^(1/3) = 25926
     !                    for ag=9.81, s=2.65, nu=1e-6
     !
-    dster = (ag*delta/rnu**2)**(1./3.)*d50
+    dstar = (ag*delta/rnu**2)**(1./3.)*d50
     !
     !     Soulsby p. 176, eq. 133d,e
     !     For d50 > 2 mm in SEDINP an warning is generated
@@ -173,7 +164,7 @@ subroutine trab11(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     !
     cd = (vonkar/(log(h/z0) - 1.))**2
     asb = 0.005*h*(d50/h/(delta*ag*d50))**1.2
-    ass = 0.012*d50*dster**( - 0.6)/(delta*ag*d50)**1.2
+    ass = 0.012*d50*dstar**( - 0.6)/(delta*ag*d50)**1.2
     term1 = (utot*utot + 0.018/cd*urms*urms)**0.5
     if (term1>ucr) then
        term2 = (term1 - ucr)**2.4
