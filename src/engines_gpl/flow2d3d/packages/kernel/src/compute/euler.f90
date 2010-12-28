@@ -55,6 +55,7 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
     logical  , pointer :: struct
     logical  , pointer :: zmodel
     logical  , pointer :: roller
+    real(fp) , pointer :: ag
     real(fp) , pointer :: pi
     real(fp) , pointer :: degrad
 !
@@ -112,6 +113,7 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
 !
 !! executable statements -------------------------------------------------------
 !
+    ag         => gdp%gdphysco%ag
     pi         => gdp%gdconst%pi
     degrad     => gdp%gdconst%degrad
     wave       => gdp%gdprocs%wave
@@ -154,7 +156,7 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
                    !
                    ! Determine Wave number
                    !
-                   call wavenr(h         ,tpu       ,kwav      ,gdp       )
+                   call wavenr(h         ,tpu       ,kwav      ,ag        )
                    !
                    ! Determine Second order Stokes drift
                    !
@@ -204,7 +206,7 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
                    !
                    ! Determine Wave number
                    !
-                   call wavenr(h         ,tpu       ,kwav      ,gdp       )
+                   call wavenr(h         ,tpu       ,kwav      ,ag        )
                    !
                    ! Determine Second order Stokes drift
                    !

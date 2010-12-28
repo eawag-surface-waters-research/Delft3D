@@ -1,6 +1,6 @@
 subroutine osmom(hrms      ,diepte    ,tp        ,g         ,cr        , &
                & qbb       ,ev1b      ,ev2b      ,ev3b      ,ev5b      , &
-               & od2b      ,od3b      ,od4b      ,gdp       )
+               & od2b      ,od3b      ,od4b      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -37,13 +37,6 @@ subroutine osmom(hrms      ,diepte    ,tp        ,g         ,cr        , &
     !
     implicit none
     !
-    type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    ! They replace the  include igd / include igp lines
-    !
-    !
-    !
     ! COMMON variables
     !
     real(fp), save :: dh, tstep
@@ -79,7 +72,7 @@ subroutine osmom(hrms      ,diepte    ,tp        ,g         ,cr        , &
     integer                        :: lenpat
     integer                        :: lpathd
     integer                        :: utab
-    integer, external              :: newlun
+    integer, external              :: newlun_nogdp
     logical                        :: error
     real(fp)                       :: f0
     real(fp)                       :: f1
@@ -125,7 +118,7 @@ subroutine osmom(hrms      ,diepte    ,tp        ,g         ,cr        , &
        lpathd = index(pathd, ' ')
        if (lpathd==0) lpathd = lenpat + 1
        lpathd = lpathd - 1
-       utab = newlun(gdp)
+       utab = newlun_nogdp()
        open (utab, file = pathd(:lpathd) // 'tabmom')
        read (utab, *) iih, iit, dh, tstep
        do it = 1, iit

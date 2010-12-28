@@ -1,6 +1,6 @@
 subroutine bailtr(h         ,hrms      ,tp        ,thetaw    ,w         , &
                 & dzdx      ,dzdy      ,sbksi     ,sbeta     ,ssksi     , &
-                & sseta     ,epssl     ,faca      ,facu      ,gdp       )
+                & sseta     ,epssl     ,faca      ,facu      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -36,11 +36,6 @@ subroutine bailtr(h         ,hrms      ,tp        ,thetaw    ,w         , &
     use globaldata
     !
     implicit none
-    !
-    type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    ! They replace the  include igd / include igp lines
     !
 !
 ! Global variables
@@ -98,7 +93,7 @@ subroutine bailtr(h         ,hrms      ,tp        ,thetaw    ,w         , &
     !     -----------------------------------------------------
     call osmom(hrms      ,h         ,tp        ,g         ,cr        , &
              & qbb       ,even1b    ,even2b    ,even3b    ,even5b    , &
-             & odd2b     ,odd3b     ,odd4b     ,gdp       )
+             & odd2b     ,odd3b     ,odd4b     )
     !
     odd3 = odd3b*faca
     odd4 = odd4b*faca

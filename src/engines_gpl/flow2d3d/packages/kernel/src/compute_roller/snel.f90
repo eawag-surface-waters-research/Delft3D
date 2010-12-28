@@ -214,7 +214,7 @@ subroutine snel(mmax      ,nmax      ,norow     ,noroco    ,ubot      , &
     !
     ! Compute the orbital velocity and wave length.
     !
-    call wavenr(h0, tp0, k, gdp)
+    call wavenr(h0, tp0, k, ag)
     rlabda0 = 2.0_fp * pi / k
     do m = 1, mmax
        do n = 1, nmax
@@ -238,7 +238,7 @@ subroutine snel(mmax      ,nmax      ,norow     ,noroco    ,ubot      , &
           elseif (k0h < 0.005_fp) then
              k = omega / sqrt(ag*hw)
           else
-             call wavenr(hw, per, k, gdp)
+             call wavenr(hw, per, k, ag)
           endif
           if (wlen_from_com) then
              rlabda(n, m) = wlen(n,m)

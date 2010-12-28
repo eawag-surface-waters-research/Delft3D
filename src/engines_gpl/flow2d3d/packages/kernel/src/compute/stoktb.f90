@@ -42,6 +42,7 @@ subroutine stoktb(hrmsnm    ,tpu       ,h         ,ustokes   ,gdp       )
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
+    real(fp), pointer :: ag
 !
 ! Global variables
 !
@@ -62,6 +63,7 @@ subroutine stoktb(hrmsnm    ,tpu       ,h         ,ustokes   ,gdp       )
 !
 !! executable statements -------------------------------------------------------
 !
+    ag         => gdp%gdphysco%ag
     !
     !
     !-----Calculates Stokes velocities at the bottom
@@ -80,7 +82,7 @@ subroutine stoktb(hrmsnm    ,tpu       ,h         ,ustokes   ,gdp       )
        !
        !-----Determine Wave number
        !
-       call wavenr(h         ,tpu       ,kwav      ,gdp       )
+       call wavenr(h         ,tpu       ,kwav      ,ag        )
        !
        !-----Determine Second order Stokes drift at the bed (z=0)
        !

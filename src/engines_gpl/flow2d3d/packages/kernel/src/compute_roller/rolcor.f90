@@ -45,6 +45,7 @@ subroutine rolcor(hrms      ,tp        ,theta     ,hu        ,hv         , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
+    real(fp)               , pointer :: ag
     real(fp)               , pointer :: pi
     real(fp)               , pointer :: degrad
     real(fp)               , pointer :: rhow
@@ -111,6 +112,7 @@ subroutine rolcor(hrms      ,tp        ,theta     ,hu        ,hv         , &
 !
 !! executable statements -------------------------------------------------------
 !
+    ag        => gdp%gdphysco%ag
     pi        => gdp%gdconst%pi
     degrad    => gdp%gdconst%degrad
     rhow      => gdp%gdphysco%rhow
@@ -138,7 +140,7 @@ subroutine rolcor(hrms      ,tp        ,theta     ,hu        ,hv         , &
                       costu  = 0.5_fp * (cos(degrad*theta(n,m))+cos(degrad*theta(n,m+1)))
                       ampu   = (hrms(n,m)+hrms(n,m+1)) / 4.0_fp
                       omegau = 2._fp * pi / tpu
-                      call wavenr(hu(n,m), tpu, kwavu, gdp)
+                      call wavenr(hu(n,m), tpu, kwavu, ag)
                       f1u    = omegau * kwavu * ampu**2
                       f3u    = (1.0_fp - exp(-2.0_fp*kwavu*hu(n,m)))**2
                       do k=1,kmax
@@ -178,7 +180,7 @@ subroutine rolcor(hrms      ,tp        ,theta     ,hu        ,hv         , &
                       sintv  = 0.5_fp * (sin(degrad*theta(n,m))+sin(degrad*theta(n+1,m)))
                       ampv   = (hrms(n,m)+hrms(n+1,m)) / 4.0_fp
                       omegav = 2.0_fp * pi / tpv
-                      call wavenr(hv(n,m), tpv, kwavv, gdp)
+                      call wavenr(hv(n,m), tpv, kwavv, ag)
                       f1v    = omegav * kwavv * ampv**2
                       f3v    = (1.0_fp - exp(-2.0_fp*kwavv*hv(n,m)))**2
                       do k=1,kmax

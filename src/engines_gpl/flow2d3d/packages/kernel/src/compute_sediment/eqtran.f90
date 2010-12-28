@@ -191,7 +191,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     real(fp)          :: cesus
     real(fp)          :: chezy
     real(fp)          :: cosa
-    real(fp)          :: dd50      ! used in tranb5 (when value is -2) for varying ws
     real(fp)          :: deltas
     real(fp)          :: delw
     real(fp)          :: delm
@@ -689,12 +688,10 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        ! Bijker
        !
-       dd50 = 0 ! dummy value
        call tranb5(kode      ,ntrsi      ,u         ,v         ,di50      , &
                  & d90       ,chezy      ,h         ,hrms      ,tp        , &
                  & teta      ,par(1,ised),dzdx      ,dzdy      ,sbcu      , &
-                 & sbcv      ,ssusx      ,ssusy     ,cesus     ,dd50      , &
-                 & gdp       )
+                 & sbcv      ,ssusx      ,ssusy     ,cesus     ,gdp       )
        !
        ! transport formula will return ntrsi = 2 which means
        !

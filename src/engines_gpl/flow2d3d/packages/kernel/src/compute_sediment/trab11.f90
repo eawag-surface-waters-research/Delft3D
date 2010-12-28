@@ -73,7 +73,7 @@ subroutine trab11(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     real(fp)                       :: d90
     real(fp)                       :: delta
     real(fp)                       :: dster
-    real(fp)                       :: g          !  gravity acceleration
+    real(fp)                       :: ag         !  gravity acceleration
     real(fp)                       :: k          ! wave number
     real(fp)                       :: pi
     real(fp)                       :: rnu
@@ -105,7 +105,7 @@ subroutine trab11(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     ssusy = 0.0
     vonkar = 0.4
     pi = 4.*atan(1.)
-    g = par(1)
+    ag = par(1)
     delta = par(4)
     rnu = par(5)
     acal = par(11)
@@ -141,7 +141,7 @@ subroutine trab11(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     !     Wave number k, urms orbital velocity
     !
     if (tp>1.E-6) then
-       call wavenr(h         ,tp        ,k         ,gdp       )
+       call wavenr(h         ,tp        ,k         ,ag        )
        if (ubot_from_com) then
           uorb = ubot
        else
@@ -152,10 +152,10 @@ subroutine trab11(kode      ,ntrsi     ,u         ,v         ,hrms      , &
        goto 999
     endif
     !
-    !     Soulsby p. 184, (g(s-1)/nu^2)^(1/3) = 25926
-    !                    for g=9.81, s=2.65, nu=1e-6
+    !     Soulsby p. 184, (ag(s-1)/nu^2)^(1/3) = 25926
+    !                    for ag=9.81, s=2.65, nu=1e-6
     !
-    dster = (g*delta/rnu**2)**(1./3.)*d50
+    dster = (ag*delta/rnu**2)**(1./3.)*d50
     !
     !     Soulsby p. 176, eq. 133d,e
     !     For d50 > 2 mm in SEDINP an warning is generated
@@ -172,8 +172,8 @@ subroutine trab11(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     !     Soulsby p. 183
     !
     cd = (vonkar/(log(h/z0) - 1.))**2
-    asb = 0.005*h*(d50/h/(delta*g*d50))**1.2
-    ass = 0.012*d50*dster**( - 0.6)/(delta*g*d50)**1.2
+    asb = 0.005*h*(d50/h/(delta*ag*d50))**1.2
+    ass = 0.012*d50*dster**( - 0.6)/(delta*ag*d50)**1.2
     term1 = (utot*utot + 0.018/cd*urms*urms)**0.5
     if (term1>ucr) then
        term2 = (term1 - ucr)**2.4

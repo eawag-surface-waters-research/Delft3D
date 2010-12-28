@@ -1,8 +1,7 @@
 subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
-                & d90       ,chezy     ,h         ,wh        ,tp        , &
+                & d90       ,chezy     ,h         ,hrms      ,tp        , &
                 & dir       ,par       ,dzdx      ,dzdy      ,sbotx     , &
-                & sboty     ,ssusx     ,ssusy     ,cesus     ,dd50      , &
-                & gdp       )
+                & sboty     ,ssusx     ,ssusy     ,cesus     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -56,7 +55,6 @@ subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
     real(fp)               , intent(in)  :: chezy
     real(fp)               , intent(in)  :: d50
     real(fp)               , intent(in)  :: d90
-    real(fp)               , intent(in)  :: dd50   ! grain size used in transport relation
     real(fp)               , intent(in)  :: dir
     real(fp)                             :: dzdx
     real(fp)                             :: dzdy
@@ -68,13 +66,13 @@ subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
     real(fp)               , intent(in)  :: tp     !  Description and declaration in rjdim.f90
     real(fp)               , intent(in)  :: u
     real(fp)               , intent(in)  :: v
-    real(fp)                             :: wh
+    real(fp)                             :: hrms
     real(fp), dimension(30), intent(in)  :: par
 !
 ! Local variables
 !
     integer                        :: ilun
-    integer, external              :: newlun
+    integer, external              :: newlun_nogdp
     logical, save                  :: crstr
     logical, save                  :: exist
     logical, save                  :: first
@@ -95,6 +93,7 @@ subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
     real(fp)                       :: kw
     real(fp)                       :: pi
     real(fp)                       :: por
+    real(fp)                       :: relhrms
     real(fp)                       :: ri1
     real(fp)                       :: ri2
     real(fp)                       :: rk
@@ -117,7 +116,6 @@ subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
     real(fp)                       :: uymean
     real(fp)                       :: vster
     real(fp)                       :: w                    ! flow velocity in z
-    real(fp)                       :: whh
     real(fp)                       :: z
     real(fp)                       :: zfact
     real(fp), external             :: fgyint
@@ -132,11 +130,10 @@ subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
 !
     gammax          => gdp%gdnumeco%gammax
     !
-!    write(*,'(9e9.2)')u,v,d50,d90,chezy,h,wh,tp,dir  
     if (first) then
        inquire (file = 'coef.inp', exist = exist)
        if (exist) then
-          ilun = newlun(gdp)
+          ilun = newlun_nogdp()
           open (ilun, file = 'coef.inp')
           read (ilun, *) faca
           read (ilun, *) facu
@@ -145,7 +142,6 @@ subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
           crstr = .true.
           write (*, '(A,/,A)') ' File coef.inp is read',                        &
                               & ' Cross-shore transport is accounted for'
-!         write(*,'(10a8)')'h','wh','t','theta','w','dzdx','sbksi','ssksi','epssl','faca'
        else
           faca = 0.
           facu = 0.
@@ -180,20 +176,9 @@ subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
        t = tp
     endif
     !
-    ! dd50 =  0.0 varying d50 from wave    input file, constant fall velocity
-    ! dd50 = -1.0 varying d50 from user    input file, constant fall velocity
-    ! dd50 = -2.0 varying d50 from Quickin input file, constant fall velocity
-    ! dd50 = -3.0 varying d50 from user    input file, fall velocity dependent on d50
-    ! dd50 = -4.0 varying d50 from Quickin input file, fall velocity dependent on d50
+    ! limit hrms to gammax*h, similar to Bijker implementation
     !
-    if (dd50<-2.5 .and. d50>0.0) then
-       w=1.0/10.0**(0.4758*(log10(d50))**2+2.1795*log10(d50)+3.1915)
-    endif
-    !Reduce unrealistic wh > h
-    !wh = MIN (wh,h)
-    !reduce wh (=Hrms) to 0.4 h
-    ! limit wh to gammax*h, similar to Bijker implementation
-    wh = min(wh, gammax*h)
+    hrms = min(hrms, gammax*h)
     pi = 4.*atan(1.0)
     if ((h/rk<=1.33) .or. (h>200.)) then
        return
@@ -204,22 +189,22 @@ subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
        c = chezy
     endif
     uuvar = 0.0
-    call wavenr(h         ,t         ,kw        ,gdp       )
+    call wavenr(h         ,t         ,kw        ,ag        )
     uxmean = u
     uymean = v
     theta = dir*pi/180.
     utot = sqrt(uxmean*uxmean + uymean*uymean)
     if (utot>1.0E-10) uuvar = utot*utot
-    if (t>1.E-6) call wave(uo, t, uuvar, pi, wh, c, rk, h, ag, kw)
+    if (t>1.E-6) call wave(uo, t, uuvar, pi, hrms, c, rk, h, ag, kw)
     cf = ag/c/c
-    whh = wh/h
+    relhrms = hrms/h
     b = bs
-    if (critd<whh .and. whh<crits) then
+    if (critd<relhrms .and. relhrms<crits) then
        fac1 = (bs - bd)/(crits - critd)
        fac2 = bd - fac1*critd
-       b = fac2 + fac1*whh
+       b = fac2 + fac1*relhrms
     endif
-    if (whh<=critd) b = bd
+    if (relhrms<=critd) b = bd
     c90 = 18.*log10(12.*h/d90)
     rmu = c/c90
     rmu = rmu*sqrt(rmu)
@@ -243,10 +228,10 @@ subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
     zfact = 1.83
     cesus = zfact*sbota*(ri1*log(33.0/rkh) + ri2)
     if (crstr) then
-       call bailtr(h         ,wh        ,t         ,theta     ,w         , &
+       call bailtr(h         ,hrms      ,t         ,theta     ,w         , &
                  & dzdx      ,dzdy      ,sbksi     ,sbeta     ,ssksi     , &
-                 & sseta     ,epssl     ,faca      ,facu      ,gdp       )
-!       write(*,'(10e8.2)')h,wh,t,theta,w,dzdx,sbksi,ssksi,epssl,faca
+                 & sseta     ,epssl     ,faca      ,facu      )
+!       write(*,'(10e8.2)')h,hrms,t,theta,w,dzdx,sbksi,ssksi,epssl,faca
     else
        sbksi = 0.
        sbeta = 0.

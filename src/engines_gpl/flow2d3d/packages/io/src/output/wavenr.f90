@@ -1,4 +1,4 @@
-subroutine wavenr(h         ,t         ,k         ,gdp       )
+subroutine wavenr(h         ,t         ,k         ,ag        )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -54,29 +54,21 @@ subroutine wavenr(h         ,t         ,k         ,gdp       )
     !
     implicit none
     !
-    type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    ! They replace the  include igd / include igp lines
-    !
-    real(fp)               , pointer :: ag
 !
 ! Local parameters
 !
     real(hp), parameter :: a1 = 5.060219360721177D-01, a2 = 2.663457535068147D-01,&
-                       & a3 = 1.108728659243231D-01, a4 = 4.197392043833136D-02,&
-                       & a5 = 8.670877524768146D-03, a6 = 4.890806291366061D-03,&
-                       & b1 = 1.727544632667079D-01, b2 = 1.191224998569728D-01,&
-                       & b3 = 4.165097693766726D-02, b4 = 8.674993032204639D-03
+                         & a3 = 1.108728659243231D-01, a4 = 4.197392043833136D-02,&
+                         & a5 = 8.670877524768146D-03, a6 = 4.890806291366061D-03,&
+                         & b1 = 1.727544632667079D-01, b2 = 1.191224998569728D-01,&
+                         & b3 = 4.165097693766726D-02, b4 = 8.674993032204639D-03
 !
 ! Global variables
 !
-    real(fp), intent(in)               :: h
-                                   !!  Waterheight
-    real(fp), intent(out)              :: k
-                                   !!  Approxiamation of wave lenght
-    real(fp), intent(in)               :: t
-                                   !!  Period
+    real(fp), intent(in)               :: h  !!  Waterheight
+    real(fp), intent(out)              :: k  !!  Approxiamation of wave lenght
+    real(fp), intent(in)               :: t  !!  Period
+    real(fp), intent(in)               :: ag !!  Gravitational acceleration
 !
 !
 ! Local variables
@@ -90,10 +82,6 @@ subroutine wavenr(h         ,t         ,k         ,gdp       )
 !
 !! executable statements -------------------------------------------------------
 !
-    !
-    !
-    ag       => gdp%gdphysco%ag
-    !
     pi = 4.0D0*atan(1.0D0)
     ome2 = (2.0D0*pi/real(t, hp))**2*real(h, hp)/real(ag, hp)
     !

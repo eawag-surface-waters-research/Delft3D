@@ -442,7 +442,7 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
           elseif (k0h<0.005) then
              k = omega/sqrt(ag*hw)
           else
-             call wavenr(hw        ,per       ,k         ,gdp       )
+             call wavenr(hw        ,per       ,k         ,ag        )
           endif
           if (wlen_from_com) then
              rlabda(n, m) = wlen(n,m)

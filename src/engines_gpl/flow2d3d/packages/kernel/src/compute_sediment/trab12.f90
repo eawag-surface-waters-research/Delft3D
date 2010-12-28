@@ -88,7 +88,7 @@ subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     real(fp)                       :: facth
     real(fp)                       :: factr
     real(fp)                       :: fw
-    real(fp)                       :: g                    !  gravity acceleration
+    real(fp)                       :: ag                   !  gravity acceleration
     real(fp)                       :: k                    ! wave number
     real(fp)                       :: lfc
     real(fp)                       :: phi
@@ -168,14 +168,14 @@ subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     astarc = 30.*pi**2
     waveps = 1.E-4
     eps = 1.E-6
-    g = par(1)
+    ag = par(1)
     rho = par(2)
     delta = par(4)
     rnu = par(5)
     acal = par(11)
     modind = nint(par(12))
     z0 = d50/par(13)
-    facth = 1./(rho*g*delta*d50)
+    facth = 1./(rho*ag*delta*d50)
     !
     !     Initialize Transports to zero
     !     in case of small u, small h, very large h, u<ucr
@@ -202,7 +202,7 @@ subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     !     Wave number k
     !
     if (tp>1.E-6) then
-       call wavenr(h         ,tp        ,k         ,gdp       )
+       call wavenr(h         ,tp        ,k         ,ag        )
        if (ubot_from_com) then
           uorb = ubot
        else
@@ -272,11 +272,11 @@ subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     thetam = taum*facth
     thetaw = tauwav*facth
     !
-    !           Soulsby p. 104, (g(s-1)/nu^2)^(1/3) = 25926
-    !                    for g=9.81, s=2.65, nu=1e-6
+    !           Soulsby p. 104, (ag(s-1)/nu^2)^(1/3) = 25926
+    !                    for ag=9.81, s=2.65, nu=1e-6
     !
     !     dster  = 25296.*d50
-    dster = (g*delta/rnu**2)**(1./3.)*d50
+    dster = (ag*delta/rnu**2)**(1./3.)*d50
     !
     !           Critical shear stress
     !           Soulsby p. 106, eq. 77
@@ -309,7 +309,7 @@ subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     !
     !           Dimensionless transport perpendicular to current direction
     !
-    factr = sqrt(g*delta*d50**3)
+    factr = sqrt(ag*delta*d50**3)
     sbotx = acal*factr/utot*(phix*u - phiy*v)
     sboty = acal*factr/utot*(phix*v + phiy*u)
     !

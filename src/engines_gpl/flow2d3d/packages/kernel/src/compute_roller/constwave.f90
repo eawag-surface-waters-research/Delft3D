@@ -122,7 +122,7 @@ subroutine constwave(nmmax     ,dps       ,s0        ,alfas     ,ubot      , &
        elseif (k0h < 0.005_fp) then
           k = omega/sqrt(ag*hw)
        else
-          call wavenr(hw, per, k, gdp)
+          call wavenr(hw, per, k, ag)
        endif
        if (wlen_from_com) then
           rlabda(nm) = wlen(nm)
