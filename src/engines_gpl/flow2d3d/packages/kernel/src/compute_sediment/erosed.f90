@@ -582,18 +582,20 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        !
        call compdmean(frac      ,sedd50    ,nmmax     ,lsedtot   , &
                     & sedtyp    ,dm        ,sedd50fld ,logsedsig , &
-                    & gdp       )
+                    & gdp%d%nmlb,gdp%d%nmub)
        !
        ! calculate geometric mean sediment diameter Dg
        !
        call compdgeomean(frac      ,sedd50    ,nmmax     ,lsedtot   , &
-                       & sedtyp    ,dg        ,sedd50fld ,gdp       )
+                       & sedtyp    ,dg        ,sedd50fld ,gdp%d%nmlb, &
+                       & gdp%d%nmub)
        !
        ! Calculate percentiles Dxx
        !
        call compdxx(frac      ,nseddia   ,logseddia ,logsedsig , &
                   & nmmax     ,lsedtot   ,sedtyp    ,dxx       , &
-                  & xx        ,nxx       ,sedd50fld ,gdp       )
+                  & xx        ,nxx       ,sedd50fld ,gdp%d%nmlb, &
+                  & gdp%d%nmub)
        !
        ! determine hiding & exposure factors
        !
