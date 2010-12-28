@@ -207,7 +207,7 @@ subroutine secrhs(s0        ,s1        ,dps       ,u1        ,v1        , &
     !
     if (ierr>0) then
        write (errmsg, '(a,i3,a)') 'in ', ierr, ' point(s)'
-       call prterr(lundia    ,'S230'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'S230'    ,errmsg    )
        !
        !
        !-------stop routine for DELFT3D

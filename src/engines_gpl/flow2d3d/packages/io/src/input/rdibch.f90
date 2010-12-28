@@ -108,9 +108,9 @@ subroutine rdibch(lundia    ,error     ,runid     ,ntof      ,nto       , &
        read (luntmp, iostat = iocond) (omega(k), k = 1, kc)
        if (iocond/=0) then
           if (iocond<0) then
-             call prterr(lundia    ,'G006'    ,filbch(:8 + lrid)    ,gdp       )
+             call prterr(lundia    ,'G006'    ,filbch(:8 + lrid)    )
           else
-             call prterr(lundia    ,'G007'    ,filbch(:8 + lrid)    ,gdp       )
+             call prterr(lundia    ,'G007'    ,filbch(:8 + lrid)    )
           endif
           error = .true.
           goto 200
@@ -121,9 +121,9 @@ subroutine rdibch(lundia    ,error     ,runid     ,ntof      ,nto       , &
        read (luntmp, iostat = iocond)
        if (iocond/=0) then
           if (iocond<0) then
-             call prterr(lundia    ,'G006'    ,filbch(:8 + lrid)    ,gdp       )
+             call prterr(lundia    ,'G006'    ,filbch(:8 + lrid)    )
           else
-             call prterr(lundia    ,'G007'    ,filbch(:8 + lrid)    ,gdp       )
+             call prterr(lundia    ,'G007'    ,filbch(:8 + lrid)    )
           endif
           error = .true.
           goto 200
@@ -138,9 +138,9 @@ subroutine rdibch(lundia    ,error     ,runid     ,ntof      ,nto       , &
           read (luntmp, iostat = iocond) (rtmp(n, k), k = 1, kc)
           if (iocond/=0) then
              if (iocond<0) then
-                call prterr(lundia    ,'G006'    ,filbch(:8 + lrid)    ,gdp       )
+                call prterr(lundia    ,'G006'    ,filbch(:8 + lrid)    )
              else
-                call prterr(lundia    ,'G007'    ,filbch(:8 + lrid)    ,gdp       )
+                call prterr(lundia    ,'G007'    ,filbch(:8 + lrid)    )
              endif
              error = .true.
              goto 200
@@ -159,10 +159,10 @@ subroutine rdibch(lundia    ,error     ,runid     ,ntof      ,nto       , &
           read (luntmp, iostat = iocond) (rtmp(n, k), k = 1, kc)
           if (iocond/=0) then
              if (iocond<0) then
-                call prterr(lundia    ,'G006'    ,filbch(:8 + lrid)    ,gdp       )
+                call prterr(lundia    ,'G006'    ,filbch(:8 + lrid)    )
              !
              else
-                call prterr(lundia    ,'G007'    ,filbch(:8 + lrid)    ,gdp       )
+                call prterr(lundia    ,'G007'    ,filbch(:8 + lrid)    )
              !
              endif
              error = .true.
@@ -181,9 +181,9 @@ subroutine rdibch(lundia    ,error     ,runid     ,ntof      ,nto       , &
        read (luntmp, iostat = iocond)
        if (iocond/=0) then
           if (iocond<0) then
-             call prterr(lundia    ,'G006'    ,filbch(:8 + lrid)    ,gdp       )
+             call prterr(lundia    ,'G006'    ,filbch(:8 + lrid)    )
           else
-             call prterr(lundia    ,'G007'    ,filbch(:8 + lrid)    ,gdp       )
+             call prterr(lundia    ,'G007'    ,filbch(:8 + lrid)    )
           endif
           error = .true.
           goto 200
@@ -200,9 +200,9 @@ subroutine rdibch(lundia    ,error     ,runid     ,ntof      ,nto       , &
           read (luntmp, iostat = iocond) (rtmp(n, k), k = 1, kc)
           if (iocond/=0) then
              if (iocond<0) then
-                call prterr(lundia    ,'G006'    ,filbch(:8 + lrid)    ,gdp       )
+                call prterr(lundia    ,'G006'    ,filbch(:8 + lrid)    )
              else
-                call prterr(lundia    ,'G007'    ,filbch(:8 + lrid)    ,gdp       )
+                call prterr(lundia    ,'G007'    ,filbch(:8 + lrid)    )
              endif
              error = .true.
              goto 200
@@ -221,9 +221,9 @@ subroutine rdibch(lundia    ,error     ,runid     ,ntof      ,nto       , &
           read (luntmp, iostat = iocond) (rtmp(n, k), k = 1, kc)
           if (iocond/=0) then
              if (iocond<0) then
-                call prterr(lundia    ,'G006'    ,filbch(:8 + lrid)    ,gdp       )
+                call prterr(lundia    ,'G006'    ,filbch(:8 + lrid)    )
              else
-                call prterr(lundia    ,'G007'    ,filbch(:8 + lrid)    ,gdp       )
+                call prterr(lundia    ,'G007'    ,filbch(:8 + lrid)    )
              endif
              error = .true.
              exit

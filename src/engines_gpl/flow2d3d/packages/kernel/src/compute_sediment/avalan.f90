@@ -133,7 +133,7 @@ subroutine avalan(dps       ,depchg    ,gvu       ,guv       , &
     initlz     => gdp%gdavalan%initlz
     depchange  => gdp%gdavalan%depchange
        if (istat/=0) then
-          call prterr(lundia, 'U021', 'Avalan: memory alloc error', gdp)
+          call prterr(lundia, 'U021', 'Avalan: memory alloc error')
           call d3stop(1, gdp)
        endif
     endif

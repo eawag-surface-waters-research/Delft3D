@@ -174,7 +174,7 @@ subroutine bedtr1993(uuu       ,vvv       ,u2dh      ,d50       ,d90       , &
        elseif (d50 > 0.0001) then
           vcr = 0.19*(d50)**0.1*log10(4.0*h1/d90)
        else
-          call prterr(lundia, 'P004', 'd50 < 0.0001 not allowed', gdp)
+          call prterr(lundia, 'P004', 'd50 < 0.0001 not allowed')
           call d3stop(1, gdp)
        endif
        phicur = atan2(vvv, uuu)/degrad
@@ -277,7 +277,7 @@ subroutine bedtr1993(uuu       ,vvv       ,u2dh      ,d50       ,d90       , &
           qbcu = qbc*uuu/umod
           qbcv = qbc*vvv/umod
        elseif (qbc > 1.0e-4) then
-          call prterr(lundia, 'P004', 'umod<eps and qbc>1e-4', gdp)
+          call prterr(lundia, 'P004', 'umod<eps and qbc>1e-4')
           call d3stop(1, gdp)
        else
           qbcu = 0.0

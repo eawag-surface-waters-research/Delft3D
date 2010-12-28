@@ -114,9 +114,9 @@ subroutine hybfil(lundia    ,error     ,filrgh    ,fmttmp    ,nmax      , &
              call dfbroadc(iocond, 1, dfint, gdp)
              if (iocond/=0) then
                 if (iocond<0) then
-                   call prterr(lundia    ,'G006'    ,filrgh(1:lfile)      ,gdp       )
+                   call prterr(lundia    ,'G006'    ,filrgh(1:lfile)      )
                 else
-                   call prterr(lundia    ,'G007'    ,filrgh(1:lfile)      ,gdp       )
+                   call prterr(lundia    ,'G007'    ,filrgh(1:lfile)      )
                 endif
                 error = .true.
                 goto 200
@@ -140,9 +140,9 @@ subroutine hybfil(lundia    ,error     ,filrgh    ,fmttmp    ,nmax      , &
              call dfbroadc(iocond, 1, dfint, gdp)
              if (iocond/=0) then
                 if (iocond<0) then
-                   call prterr(lundia    ,'G006'    ,filrgh(1:lfile)      ,gdp       )
+                   call prterr(lundia    ,'G006'    ,filrgh(1:lfile)      )
                 else
-                   call prterr(lundia    ,'G007'    ,filrgh(1:lfile)      ,gdp       )
+                   call prterr(lundia    ,'G007'    ,filrgh(1:lfile)      )
                 endif
                 error = .true.
                 exit
@@ -180,10 +180,10 @@ subroutine hybfil(lundia    ,error     ,filrgh    ,fmttmp    ,nmax      , &
              call dfbroadc(iocond, 1, dfint, gdp)
              if (iocond/=0) then
                 if (iocond<0) then
-                   call prterr(lundia    ,'G006'    ,filrgh(1:lfile)      ,gdp       )
+                   call prterr(lundia    ,'G006'    ,filrgh(1:lfile)      )
                 !
                 else
-                   call prterr(lundia    ,'G007'    ,filrgh(1:lfile)      ,gdp       )
+                   call prterr(lundia    ,'G007'    ,filrgh(1:lfile)      )
                 !
                 endif
                 error = .true.
@@ -208,9 +208,9 @@ subroutine hybfil(lundia    ,error     ,filrgh    ,fmttmp    ,nmax      , &
              call dfbroadc(iocond, 1, dfint, gdp)
              if (iocond/=0) then
                 if (iocond<0) then
-                   call prterr(lundia    ,'G006'    ,filrgh(1:lfile)      ,gdp       )
+                   call prterr(lundia    ,'G006'    ,filrgh(1:lfile)      )
                 else
-                   call prterr(lundia    ,'G007'    ,filrgh(1:lfile)      ,gdp       )
+                   call prterr(lundia    ,'G007'    ,filrgh(1:lfile)      )
                 endif
                 error = .true.
                 exit

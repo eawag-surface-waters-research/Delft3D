@@ -94,7 +94,7 @@ subroutine dfgather_lowlevel ( ioptr, iolen, iiptr, iilen, itype, gdp )
     call mpi_gather( iilen, 1, dfint, icount, 1, dfint, master-1, MPI_COMM_WORLD, ierr )
     if ( ierr /= MPI_SUCCESS ) then
        write (msgstr,'(a,i5)') 'MPI produces some internal error - return code is ',ierr
-       call prterr(lundia, 'U021', trim(msgstr), gdp)
+       call prterr(lundia, 'U021', trim(msgstr))
        call d3stop(1, gdp)
     endif
 #endif
@@ -103,7 +103,7 @@ subroutine dfgather_lowlevel ( ioptr, iolen, iiptr, iilen, itype, gdp )
     !
     if (inode == master) then
        if ( sum(icount) > iolen ) then
-          call prterr(lundia, 'U021', 'Not enough space allocated for gathered data', gdp)
+          call prterr(lundia, 'U021', 'Not enough space allocated for gathered data')
           call d3stop(1, gdp)
        endif
     endif
@@ -123,7 +123,7 @@ subroutine dfgather_lowlevel ( ioptr, iolen, iiptr, iilen, itype, gdp )
     call mpi_gatherv( iiptr, iilen, itype, ioptr, icount, idsplc, itype, master-1, MPI_COMM_WORLD, ierr )
     if ( ierr /= MPI_SUCCESS ) then
        write (msgstr,'(a,i5)') 'MPI produces some internal error - return code is ',ierr
-       call prterr(lundia, 'U021', trim(msgstr), gdp)
+       call prterr(lundia, 'U021', trim(msgstr))
        call d3stop(1, gdp)
     endif
 !
@@ -141,7 +141,7 @@ subroutine dfgather_lowlevel ( ioptr, iolen, iiptr, iilen, itype, gdp )
 !            call mpi_recv ( ioptr, icount(onode), itype, onode, itag, MPI_COMM_WORLD, istat, ierr )
 !            if ( ierr /= MPI_SUCCESS ) then
 !               write (msgstr,'(a,i5)') 'MPI produces some internal error - return code is ',ierr
-!               call prterr(lundia, 'U021', trim(msgstr), gdp)
+!               call prterr(lundia, 'U021', trim(msgstr))
 !               call d3stop(1, gdp)
 !            endif
 !            !n = n + icount(onode)
@@ -152,7 +152,7 @@ subroutine dfgather_lowlevel ( ioptr, iolen, iiptr, iilen, itype, gdp )
 !         call mpi_send ( iiptr, iilen, itype, master-1, itag, MPI_COMM_WORLD, ierr )
 !         if ( ierr /= MPI_SUCCESS ) then
 !            write (msgstr,'(a,i5)') 'MPI produces some internal error - return code is ',ierr
-!            call prterr(lundia, 'U021', trim(msgstr), gdp)
+!            call prterr(lundia, 'U021', trim(msgstr))
 !            call d3stop(1, gdp)
 !         endif
 !      endif

@@ -118,9 +118,9 @@ subroutine ciofil(lundia    ,error     ,filcio    ,mmax      ,nmax      , &
           read (luntmp, *, iostat = iocond) (ftmp(n, m), m = 1, mmaxgl) 
             if (iocond /= 0) then 
                 if (iocond < 0) then 
-                    call prterr(lundia, 'G006', trim(filcio), gdp) 
+                    call prterr(lundia, 'G006', trim(filcio))
                 else 
-                    call prterr(lundia, 'G007', trim(filcio), gdp) 
+                    call prterr(lundia, 'G007', trim(filcio))
                 endif 
                 error = .true. 
                 goto 9999 
@@ -131,7 +131,7 @@ subroutine ciofil(lundia    ,error     ,filcio    ,mmax      ,nmax      , &
             do m = 1, mmax 
                 if ( isnan(ftmp(n, m)) ) then  
                     write(errmsg,'(2a)') 'NaN found in file ', trim(filcio) 
-                    call prterr(lundia, 'P004', errmsg, gdp) 
+                    call prterr(lundia, 'P004', errmsg)
                     error = .true. 
                     goto 9999 
                 endif 
@@ -153,10 +153,10 @@ subroutine ciofil(lundia    ,error     ,filcio    ,mmax      ,nmax      , &
        ! 
        if (iocond/=0) then 
           if (iocond<0) then 
-             call prterr(lundia    ,'G006'    ,filcio(1:lfile)      ,gdp       ) 
+             call prterr(lundia    ,'G006'    ,filcio(1:lfile)      )
           ! 
           else 
-             call prterr(lundia    ,'G007'    ,filcio(1:lfile)      ,gdp       ) 
+             call prterr(lundia    ,'G007'    ,filcio(1:lfile)      )
           ! 
           endif 
           error = .true. 

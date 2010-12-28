@@ -105,7 +105,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
        !
        ! file does not exist !!
        !
-       call prterr(lundia    ,'P101'    ,filnam(1:lfile)      ,gdp)
+       call prterr(lundia    ,'P101'    ,filnam(1:lfile)      )
        error = .true.
        goto 9999
     endif
@@ -116,7 +116,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
     open (luntmp, file = filnam(1:lfile), form = 'formatted', iostat = iocond,  &
         & status = 'old')
     if (iocond/=0) then
-       call prterr(lundia    ,'U015'    ,filnam(1:lfile)      ,gdp)
+       call prterr(lundia    ,'U015'    ,filnam(1:lfile)      )
        error = .true.
        goto 9999
     endif
@@ -168,7 +168,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
        write (rec132, '(i12)') mcurec + 1
        call noextspaces(rec132    ,lcurec    )
        errmsg = filnam(1:lfile) // ', Record: ' // rec132(1:lcurec)
-       call prterr(lundia    ,'G007'    ,errmsg    ,gdp)
+       call prterr(lundia    ,'G007'    ,errmsg    )
        close (luntmp)
        goto 9999
     endif
@@ -219,7 +219,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
        write (rec132, '(i12)') mcurec
        call noextspaces(rec132    ,lcurec    )
        errmsg = filnam(1:lfile) // ', Record: ' // rec132(1:lcurec)
-       call prterr(lundia    ,'G007'    ,errmsg    ,gdp)
+       call prterr(lundia    ,'G007'    ,errmsg    )
        close (luntmp)
        goto 9999
     endif
@@ -248,7 +248,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
           !
           mttaru = mttaru + 1
           if (mttaru>nttaru) then
-             call prterr(lundia    ,'J006'    ,filnam(1:lfile)      ,gdp)
+             call prterr(lundia    ,'J006'    ,filnam(1:lfile)      )
              error = .true.
              close (luntmp)
              goto 9999
@@ -268,7 +268,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
        !
        mttaru = mttaru + 1
        if (mttaru>nttaru) then
-          call prterr(lundia    ,'J006'    ,filnam(1:lfile)      ,gdp)
+          call prterr(lundia    ,'J006'    ,filnam(1:lfile)      )
           error = .true.
           close (luntmp)
           goto 9999
@@ -315,7 +315,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
                 !
                 mttaru = mttaru + 1
                 if (mttaru>nttaru) then
-                   call prterr(lundia    ,'J006'    ,filnam(1:lfile)      ,gdp)
+                   call prterr(lundia    ,'J006'    ,filnam(1:lfile)      )
                    error = .true.
                    close (luntmp)
                    goto 9999
@@ -334,7 +334,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
              !
              mttaru = mttaru + 1
              if (mttaru>nttaru) then
-                call prterr(lundia    ,'J006'    ,filnam(1:lfile)      ,gdp)
+                call prterr(lundia    ,'J006'    ,filnam(1:lfile)      )
                 error = .true.
                 close (luntmp)
                 goto 9999
@@ -361,7 +361,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
        mttaru = mttaru + (abs(ifield(1) - ifield(3)) + 1)                       &
               & *(abs(ifield(2) - ifield(4)) + 1)
        if (mttaru>nttaru) then
-          call prterr(lundia    ,'J006'    ,filnam(1:lfile)      ,gdp)
+          call prterr(lundia    ,'J006'    ,filnam(1:lfile)      )
           error = .true.
           close (luntmp)
           goto 9999

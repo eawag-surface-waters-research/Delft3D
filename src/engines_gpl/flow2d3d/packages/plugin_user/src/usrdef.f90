@@ -187,7 +187,7 @@ subroutine usrdef(lundia    ,error     ,grdang    ,secflo    ,gdp       )
        !
        !--------Initialize user defined array's
        !
-       call prterr(lundia    ,'V200'    ,'bc turbulence model',gdp       )
+       call prterr(lundia    ,'V200'    ,'bc turbulence model')
        !
        length = 2*ltur*(kmax + 1)*2*nto
        call usrptr(lundia    ,error     ,'ubnd'    ,'real     '          ,length    , &
@@ -237,7 +237,7 @@ subroutine usrdef(lundia    ,error     ,grdang    ,secflo    ,gdp       )
        !
        !--------Warning to diagnostic file
        !
-       call prterr(lundia    ,'V200'    ,'rigid sheets'       ,gdp       )
+       call prterr(lundia    ,'V200'    ,'rigid sheets'       )
        !
        !
        !--------Retrieve array entry for Delft3D-FLOW arrays
@@ -273,14 +273,14 @@ subroutine usrdef(lundia    ,error     ,grdang    ,secflo    ,gdp       )
        !
        !--------Initialize user defined array's
        !
-       call prterr(lundia    ,'V200'    ,'diagnostic mode'    ,gdp       )
+       call prterr(lundia    ,'V200'    ,'diagnostic mode'    )
        !
        !
        !--------Test for secondary flow in combination with diagnostic mode
        !        not allowed
        !
        if (secflo) then
-          call prterr(lundia    ,'V240'    ,' '       ,gdp       )
+          call prterr(lundia    ,'V240'    ,' '       )
           !
           error = .true.
           goto 600
@@ -304,7 +304,7 @@ subroutine usrdef(lundia    ,error     ,grdang    ,secflo    ,gdp       )
        itdiag = nint(tdiagm/dt)
        if (dtn(itdiag, tdiagm, dt)) then
           error = .true.
-          call prterr(lundia    ,'U044'    ,'Diagnostic mode time'          ,gdp       )
+          call prterr(lundia    ,'U044'    ,'Diagnostic mode time'          )
           !
           goto 600
        endif
@@ -313,12 +313,12 @@ subroutine usrdef(lundia    ,error     ,grdang    ,secflo    ,gdp       )
        !        For ITDIAG = 0 diagnostic mode for computation is presumed
        !
        if (itdiag>itstop) then
-          call prterr(lundia    ,'V241'    ,' '       ,gdp       )
+          call prterr(lundia    ,'V241'    ,' '       )
        !
        endif
        !
        if (itdiag<=itstrt) then
-          call prterr(lundia    ,'V242'    ,' '       ,gdp       )
+          call prterr(lundia    ,'V242'    ,' '       )
        !
        endif
     endif
@@ -331,7 +331,7 @@ subroutine usrdef(lundia    ,error     ,grdang    ,secflo    ,gdp       )
        !
        !--------Initialize user defined array's
        !
-       call prterr(lundia    ,'V200'    ,'particle wind factor'          ,gdp       )
+       call prterr(lundia    ,'V200'    ,'particle wind factor'          )
        !
        !
        !--------Define real parameter
@@ -352,7 +352,7 @@ subroutine usrdef(lundia    ,error     ,grdang    ,secflo    ,gdp       )
        !--------test wind factor
        !
        if (windft>1.00) then
-          call prterr(lundia    ,'V243'    ,' '       ,gdp       )
+          call prterr(lundia    ,'V243'    ,' '       )
           !
           windft = 0.
        endif
@@ -386,7 +386,7 @@ subroutine usrdef(lundia    ,error     ,grdang    ,secflo    ,gdp       )
        !
        !--------Initialize user defined array's
        !
-       call prterr(lundia    ,'V200'    ,'z_wave'  ,gdp       )
+       call prterr(lundia    ,'V200'    ,'z_wave'  )
        !
        !
        !--------Define real parameter
@@ -406,7 +406,7 @@ subroutine usrdef(lundia    ,error     ,grdang    ,secflo    ,gdp       )
        !--------test z_wave value
        !
        if (zwi<=0.00) then
-          call prterr(lundia    ,'U021'    ,'z_wave will be calculated !'   ,gdp       )
+          call prterr(lundia    ,'U021'    ,'z_wave will be calculated !'   )
           !
           inpzw = 0
        endif

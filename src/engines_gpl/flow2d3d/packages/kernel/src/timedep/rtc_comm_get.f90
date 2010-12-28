@@ -138,7 +138,7 @@ subroutine rtc_comm_get(cursec    ,cbuvrt    ,nsluv     ,gdp       )
        rtcact = .false.
        write (*, '(a)') ' '
        write (*, '(a)') ' Stop signal from RTC '
-       call prterr(lundia, 'P004', 'Stop signal from RTC ', gdp)
+       call prterr(lundia, 'P004', 'Stop signal from RTC ')
        call d3stop(1, gdp)
     endif
 end subroutine rtc_comm_get

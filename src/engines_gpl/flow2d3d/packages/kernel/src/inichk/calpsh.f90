@@ -95,7 +95,7 @@ subroutine calpsh(restid    ,error     ,nmax      ,mmax      ,nmaxus    , &
              ! Test discharge is inner active point (KCS = 1)
              !
              if (kcs(n, m) /= 1 .and. kcs(n, m) /= -1) then
-                call prterr(lundia, 'V232', 'floating structure', gdp)
+                call prterr(lundia, 'V232', 'floating structure')
                 write (lundia, '(20x,a)') errmsg
                 error = .true.
                 cycle

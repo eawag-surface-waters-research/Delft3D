@@ -198,7 +198,7 @@ subroutine dforb ( ipown, npart, iwork, mmax, nmax, gdp )
                       ! was done in last pass over all parts
                       !
                       if ( issucc == 0 ) then
-                         call prterr(lundia, 'U021', 'Internal problem in routine dforb', gdp)
+                         call prterr(lundia, 'U021', 'Internal problem in routine dforb')
                          call d3stop(1, gdp)
                       endif
                       j = jstart

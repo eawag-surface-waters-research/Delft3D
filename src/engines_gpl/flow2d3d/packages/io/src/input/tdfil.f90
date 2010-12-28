@@ -112,7 +112,7 @@ subroutine tdfil(lundia    ,luntd     ,error     ,filtd     ,fmttmp    , &
           if (iocond/=0) then
              if (iocond>0) then
                 error = .true.
-                call prterr(lundia    ,'G007'    ,filtd(1:lfile)       ,gdp       )
+                call prterr(lundia    ,'G007'    ,filtd(1:lfile)       )
              endif
              goto 200
           endif
@@ -154,7 +154,7 @@ subroutine tdfil(lundia    ,luntd     ,error     ,filtd     ,fmttmp    , &
           if (iocond/=0) then
              if (iocond>0) then
                 error = .true.
-                call prterr(lundia    ,'G007'    ,filtd(1:lfile)       ,gdp       )
+                call prterr(lundia    ,'G007'    ,filtd(1:lfile)       )
              endif
              goto 200
           endif
@@ -167,7 +167,7 @@ subroutine tdfil(lundia    ,luntd     ,error     ,filtd     ,fmttmp    , &
                     & ival      ,idef      ,ier       )
           if (ier<=0) then
              error = .true.
-             call prterr(lundia    ,'G007'    ,filtd(1:lfile)       ,gdp       )
+             call prterr(lundia    ,'G007'    ,filtd(1:lfile)       )
              !
              goto 200
           endif
@@ -180,7 +180,7 @@ subroutine tdfil(lundia    ,luntd     ,error     ,filtd     ,fmttmp    , &
                     & lenc      ,ier       )
           if (ier<=0) then
              error = .true.
-             call prterr(lundia    ,'G007'    ,filtd(1:lfile)       ,gdp       )
+             call prterr(lundia    ,'G007'    ,filtd(1:lfile)       )
              goto 200
           endif
           !

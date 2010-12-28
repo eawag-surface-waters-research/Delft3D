@@ -198,7 +198,7 @@ subroutine updbcq(lunbcq    ,lundia    ,itbct     ,ito       ,nto       , &
     !---- Error Exit
     !
  8888 continue
-    call prterr(lundia    ,'U079'    ,' '       ,gdp       )
+    call prterr(lundia    ,'U079'    ,' '       )
     !
     call d3stop(4         ,gdp       )
     !

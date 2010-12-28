@@ -188,7 +188,7 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                     & idef      ,ier       )
           if (ier <= 0) then
              if (noui) error = .true.
-             call prterr(lundia    ,'V007'    ,keyw      ,gdp       )
+             call prterr(lundia    ,'V007'    ,keyw      )
              citdat = ' '
              iitdat = 0
              goto 100
@@ -203,7 +203,7 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                     & lenc      ,ier       )
           if (ier <= 0) then
              if (noui) error = .true.
-             call prterr(lundia    ,'V007'    ,keyw      ,gdp       )
+             call prterr(lundia    ,'V007'    ,keyw      )
              citdat = ' '
              iitdat = 0
              goto 100
@@ -217,7 +217,7 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                     & idef      ,ier       )
           if (ier <= 0) then
              if (noui) error = .true.
-             call prterr(lundia    ,'V007'    ,keyw      ,gdp       )
+             call prterr(lundia    ,'V007'    ,keyw      )
              citdat = ' '
              iitdat = 0
              goto 100
@@ -230,7 +230,7 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           imonth = (index(month, maand) + 3)/4
           if (imonth == 0) then
              if (noui) error = .true.
-             call prterr(lundia    ,'V007'    ,keyw      ,gdp       )
+             call prterr(lundia    ,'V007'    ,keyw      )
              citdat = ' '
              iitdat = 0
              goto 100
@@ -268,7 +268,7 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           call juldat(iitdat    ,julday    )
           if (julday == 0) then
              if (noui) error = .true.
-             call prterr(lundia    ,'V007'    ,keyw      ,gdp       )
+             call prterr(lundia    ,'V007'    ,keyw      )
              citdat = ' '
              iitdat = 0
           endif
@@ -294,7 +294,7 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     elseif (ctunit == 'W') then
        rtunit = scale(5)
     else
-       call prterr(lundia, 'V006', ' ', gdp)
+       call prterr(lundia, 'V006', ' ')
     endif
     !
     ! Time step, start time, stop time and time step for time-dependent
@@ -363,22 +363,22 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     ! test times for multiple of DT, DT <= 0 then skip tests
     !
     if (dt <= 0.) then
-       call prterr(lundia    ,'U007'    ,'value for Simulation time interval'       ,gdp       )
+       call prterr(lundia    ,'U007'    ,'value for Simulation time interval'       )
        if (noui) error = .true.
     else
        itstrt = nint(tstart/dt)
        if (dtn(itstrt, tstart, dt)) then
-          call prterr(lundia    ,'U044'    ,'Start time'         ,gdp       )
+          call prterr(lundia    ,'U044'    ,'Start time'         )
           if (noui) error = .true.
        endif
        itstop = nint(tstop/dt)
        if (dtn(itstop, tstop, dt)) then
-          call prterr(lundia    ,'U044'    ,'Stop time'          ,gdp       )
+          call prterr(lundia    ,'U044'    ,'Stop time'          )
           if (noui) error = .true.
        endif
        if ((itstop - itstrt) <= 0) then
           itstop = itstrt
-          call prterr(lundia    ,'V041'    ,'Stop time must be >='          ,gdp       )
+          call prterr(lundia    ,'V041'    ,'Stop time must be >='          )
        endif
        if (fp == sp .and. itstop > 8388607) then
           !
@@ -435,7 +435,7 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     if (abs(tzone)>12.0) then
         write(errmsg, '(a,a,f5.1,a)') 'Expecting local time zone between -12 and 12 hours, but getting', &
           & sign, abs(tzone), ' hours'
-        call prterr(lundia    ,'U021'    ,errmsg    ,gdp       )
+        call prterr(lundia    ,'U021'    ,errmsg    )
     elseif (abs(tzone)>0.0) then  
         write (lundia, '(a,a,f4.1,a)') '*** MESSAGE Local time zone is UTC',sign, abs(tzone), ' hours'
     endif
@@ -445,7 +445,7 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     dryrun = .false.
     call prop_get_logical(gdp%mdfile_ptr, '*', 'DryRun', dryrun)
     if (dryrun) then
-       call prterr(lundia, 'U190', 'DryRun switched on; running without actual calculations', gdp)
+       call prterr(lundia, 'U190', 'DryRun switched on; running without actual calculations')
        write(*,'(a)') '*** WARNING: DryRun switched on; running without actual calculations'
     endif
 end subroutine rdirt

@@ -262,7 +262,7 @@ subroutine z_cucbp_nhfull(kmax    ,norow     ,icx       , &
              enddo
           else
              write (errtxt, '(6i4)') ic, (irocol(ll, ic), ll = 1, 5)
-             call prterr(lundia    ,'S200'    ,errtxt    ,gdp       )
+             call prterr(lundia    ,'S200'    ,errtxt    )
              !
              ! stop routine for DELFT3D
              !
@@ -368,7 +368,7 @@ subroutine z_cucbp_nhfull(kmax    ,norow     ,icx       , &
              enddo
           else
              write (errtxt, '(6i4)') ic, (irocol(ll, ic), ll = 1, 5)
-             call prterr(lundia    ,'S201'    ,errtxt    ,gdp       )
+             call prterr(lundia    ,'S201'    ,errtxt    )
              !
              ! stop routine for DELFT3D
              !

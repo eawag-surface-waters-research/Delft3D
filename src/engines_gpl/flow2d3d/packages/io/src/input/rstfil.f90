@@ -198,9 +198,9 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        call dfbroadc(iocond, 1, dfint, gdp)
        if (iocond /= 0) then
           if (iocond < 0) then
-             call prterr(lundia    ,'G006'    ,filtmp(:lfile)       ,gdp       )
+             call prterr(lundia    ,'G006'    ,filtmp(:lfile)       )
           else
-             call prterr(lundia    ,'G007'    ,filtmp(:lfile)       ,gdp       )
+             call prterr(lundia    ,'G007'    ,filtmp(:lfile)       )
           endif
           error = .true.
           goto 200
@@ -213,7 +213,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
          do n = 1, nmaxgl
             if (isnan(sbuff(n,m,1,1))) then
                write(message,*)'NaN found in restart file for s1 at (n,m)= (',n,',',m,')'
-               call prterr(lundia, 'U021', trim(message), gdp)
+               call prterr(lundia, 'U021', trim(message))
                call d3stop(1, gdp)
             endif
          enddo
@@ -241,9 +241,9 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
           call dfbroadc(iocond, 1, dfint, gdp)
           if (iocond /= 0) then
              if (iocond < 0) then
-                call prterr(lundia    ,'G006'    ,filtmp(:lfile)       ,gdp       )
+                call prterr(lundia    ,'G006'    ,filtmp(:lfile)       )
              else
-                call prterr(lundia    ,'G007'    ,filtmp(:lfile)       ,gdp       )
+                call prterr(lundia    ,'G007'    ,filtmp(:lfile)       )
              endif
              error = .true.
              goto 200
@@ -258,7 +258,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
             do n = 1, nmaxgl
                if (isnan(sbuff(n,m,k,1))) then
                   write(message,*)'NaN found in restart file for u1 at (n,m,k)= (',n,',',m,',',k,')'
-                  call prterr(lundia, 'U021', trim(message), gdp)
+                  call prterr(lundia, 'U021', trim(message))
                   call d3stop(1, gdp)
                endif
             enddo
@@ -287,9 +287,9 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
           call dfbroadc(iocond, 1, dfint, gdp)
           if (iocond /= 0) then
              if (iocond < 0) then
-                call prterr(lundia    ,'G006'    ,filtmp(:lfile)       ,gdp       )
+                call prterr(lundia    ,'G006'    ,filtmp(:lfile)       )
              else
-                call prterr(lundia    ,'G007'    ,filtmp(:lfile)       ,gdp       )
+                call prterr(lundia    ,'G007'    ,filtmp(:lfile)       )
              endif
              error = .true.
              goto 200
@@ -304,7 +304,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
             do n = 1, nmaxgl
                if (isnan(sbuff(n,m,k,1))) then
                   write(message,*)'NaN found in restart file for v1 at (n,m,k)= (',n,',',m,',',k,')'
-                  call prterr(lundia, 'U021', trim(message), gdp)
+                  call prterr(lundia, 'U021', trim(message))
                   call d3stop(1, gdp)
                endif
             enddo
@@ -337,9 +337,9 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
                 call dfbroadc(iocond, 1, dfint, gdp)
                 if (iocond /= 0) then
                    if (iocond < 0) then
-                      call prterr(lundia    ,'G006'    ,filtmp(:lfile)       ,gdp       )
+                      call prterr(lundia    ,'G006'    ,filtmp(:lfile)       )
                    else
-                      call prterr(lundia    ,'G007'    ,filtmp(:lfile)       ,gdp       )
+                      call prterr(lundia    ,'G007'    ,filtmp(:lfile)       )
                    endif
                    error = .true.
                    goto 200
@@ -356,7 +356,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
                   do n = 1, nmaxgl
                      if (isnan(sbuff(n,m,k,l))) then
                         write(message,*)'NaN found in restart file for r1 at (n,m,k,l)= (',n,',',m,',',k,',',l,')'
-                        call prterr(lundia, 'U021', trim(message), gdp)
+                        call prterr(lundia, 'U021', trim(message))
                         call d3stop(1, gdp)
                      endif
                   enddo
@@ -398,7 +398,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
                       lturi = ltur
                       if (l==2) lturi = -ltur
                    else
-                      call prterr(lundia    ,'G007'    ,filtmp(:lfile)       ,gdp       )
+                      call prterr(lundia    ,'G007'    ,filtmp(:lfile)       )
                       error = .true.
                    endif
                    goto 200
@@ -415,7 +415,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
                   do n = 1, nmaxgl
                      if (isnan(sbuff(n,m,k,l))) then
                         write(message,*)'NaN found in restart file for rtur1 at (n,m,k,l)= (',n,',',m,',',k,',',l,')'
-                        call prterr(lundia, 'U021', trim(message), gdp)
+                        call prterr(lundia, 'U021', trim(message))
                         call d3stop(1, gdp)
                      endif
                   enddo
@@ -453,7 +453,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
          do n = 1, nmaxgl
             if (isnan(sbuff(n,m,1,1))) then
                write(message,*)'NaN found in restart file for umnldf at (n,m)= (',n,',',m,')'
-               call prterr(lundia, 'U021', trim(message), gdp)
+               call prterr(lundia, 'U021', trim(message))
                call d3stop(1, gdp)
             endif
          enddo
@@ -483,7 +483,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
          do n = 1, nmaxgl
             if (isnan(sbuff(n,m,1,1))) then
                write(message,*)'NaN found in restart file for vmnldf at (n,m)= (',n,',',m,')'
-               call prterr(lundia, 'U021', trim(message), gdp)
+               call prterr(lundia, 'U021', trim(message))
                call d3stop(1, gdp)
             endif
          enddo

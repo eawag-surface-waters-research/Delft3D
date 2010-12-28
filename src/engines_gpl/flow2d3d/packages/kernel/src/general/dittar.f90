@@ -100,7 +100,7 @@ subroutine dittar(filnam    ,lundia    ,error     ,nttaru    ,gdp)
        !
        ! file does not exist !!
        !
-       call prterr(lundia    ,'P101'    ,filnam(1:lfile)      ,gdp)
+       call prterr(lundia    ,'P101'    ,filnam(1:lfile)      )
        error = .true.
        goto 9999
     endif
@@ -111,7 +111,7 @@ subroutine dittar(filnam    ,lundia    ,error     ,nttaru    ,gdp)
     open (luntmp, file = filnam(1:lfile), form = 'formatted', iostat = iocond,  &
         & status = 'old')
     if (iocond/=0) then
-       call prterr(lundia    ,'U015'    ,filnam(1:lfile)      ,gdp)
+       call prterr(lundia    ,'U015'    ,filnam(1:lfile)      )
        error = .true.
        goto 9999
     endif
@@ -151,7 +151,7 @@ subroutine dittar(filnam    ,lundia    ,error     ,nttaru    ,gdp)
        write (rec132, '(i12)') mcurec + 1
        call noextspaces(rec132    ,lcurec    )
        errmsg = filnam(1:lfile) // ', Record: ' // rec132(1:lcurec)
-       call prterr(lundia    ,'G007'    ,errmsg    ,gdp)
+       call prterr(lundia    ,'G007'    ,errmsg    )
        close (luntmp)
        goto 9999
     endif
@@ -202,7 +202,7 @@ subroutine dittar(filnam    ,lundia    ,error     ,nttaru    ,gdp)
        write (rec132, '(i12)') mcurec
        call noextspaces(rec132    ,lcurec    )
        errmsg = filnam(1:lfile) // ', Record: ' // rec132(1:lcurec)
-       call prterr(lundia    ,'G007'    ,errmsg    ,gdp)
+       call prterr(lundia    ,'G007'    ,errmsg    )
        close (luntmp)
        goto 9999
     endif

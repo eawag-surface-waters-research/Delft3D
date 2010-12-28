@@ -77,7 +77,7 @@ subroutine dfexchg ( iptr, ks, ke, itype, gdp )
        call dfupdd ( iptr, ks, ke, gdp )
     else
        write (msgstr,'(a,i3)') 'Unknown type of field array to be update: ',itype
-       call prterr(lundia, 'U021', trim(msgstr), gdp)
+       call prterr(lundia, 'U021', trim(msgstr))
        call d3stop(1, gdp)
     endif
 

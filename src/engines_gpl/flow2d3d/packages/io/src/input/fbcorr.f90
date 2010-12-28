@@ -101,7 +101,7 @@ subroutine fbcorr(lundia, nto, nambnd, typbnd, gdp)
                        allocate(parnames(2)         , stat = istat)
        if (istat == 0) allocate(gdflwpar%fcrbnd(nto), stat = istat)
        if (istat /= 0) then
-          call prterr(lundia, 'U021', 'FBCORR: memory alloc error', gdp)
+          call prterr(lundia, 'U021', 'FBCORR: memory alloc error')
           call d3stop(1, gdp)
        endif
        !

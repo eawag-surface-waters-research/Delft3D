@@ -434,7 +434,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        if (istat==0) allocate (sverosed%wslc  (0:kmax)                       , stat = istat)
        if (istat==0) allocate (sverosed%zumod (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
        if (istat/=0) then
-          call prterr(lundia, 'U021', 'Erosed: memory alloc error', gdp)
+          call prterr(lundia, 'U021', 'Erosed: memory alloc error')
           call d3stop(1, gdp)
        endif
        !

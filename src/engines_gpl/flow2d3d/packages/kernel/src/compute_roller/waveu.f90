@@ -202,7 +202,7 @@ subroutine waveu(nmmax     ,kfs       ,sourw     , &
               !
               gamBaSti = 0.5_fp + 0.4_fp*tanh(33.0_fp*hrms0/rlabda0)
            else
-              call prterr(lundia, 'U021', 'Battjes & Stive formulation can not be used without wavecon file', gdp)
+              call prterr(lundia, 'U021', 'Battjes & Stive formulation can not be used without wavecon file')
               call d3stop(1, gdp)
            endif   
        endif

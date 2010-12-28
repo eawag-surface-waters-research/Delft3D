@@ -108,10 +108,10 @@ subroutine trafil(lundia    ,filtra    ,fmttmp    ,error     ,ntruv     , &
           read (luntmp, iostat = iocond) chulp, (ival(i), i = 1, 4)
           if (iocond/=0) then
              if (iocond<0) then
-                call prterr(lundia    ,'G006'    ,filtra(:lfile)       ,gdp       )
+                call prterr(lundia    ,'G006'    ,filtra(:lfile)       )
              !
              else
-                call prterr(lundia    ,'G007'    ,filtra(:lfile)       ,gdp       )
+                call prterr(lundia    ,'G007'    ,filtra(:lfile)       )
              !
              endif
              error = .true.
@@ -126,7 +126,7 @@ subroutine trafil(lundia    ,filtra    ,fmttmp    ,error     ,ntruv     , &
           !
           if (namtra(n)==cdef) then
              error = .true.
-             call prterr(lundia    ,'V014'    ,' '       ,gdp       )
+             call prterr(lundia    ,'V014'    ,' '       )
              !
              exit
           endif
@@ -154,10 +154,10 @@ subroutine trafil(lundia    ,filtra    ,fmttmp    ,error     ,ntruv     , &
           read (luntmp, '(a)', iostat = iocond) rec132
           if (iocond/=0) then
              if (iocond<0) then
-                call prterr(lundia    ,'G006'    ,filtra(:lfile)       ,gdp       )
+                call prterr(lundia    ,'G006'    ,filtra(:lfile)       )
              !
              else
-                call prterr(lundia    ,'G007'    ,filtra(:lfile)       ,gdp       )
+                call prterr(lundia    ,'G007'    ,filtra(:lfile)       )
              !
              endif
              error = .true.
@@ -172,7 +172,7 @@ subroutine trafil(lundia    ,filtra    ,fmttmp    ,error     ,ntruv     , &
           !
           if (namtra(n)==cdef) then
              error = .true.
-             call prterr(lundia    ,'V014'    ,' '       ,gdp       )
+             call prterr(lundia    ,'V014'    ,' '       )
              !
              exit
           endif
@@ -185,7 +185,7 @@ subroutine trafil(lundia    ,filtra    ,fmttmp    ,error     ,ntruv     , &
              call read1i(rec132    ,lr132     ,ibeg      ,iend      ,ival(i)   , &
                        & idef      ,ier       )
              if (ier<=0) then
-                call prterr(lundia    ,'G007'    ,filtra(:lfile)       ,gdp       )
+                call prterr(lundia    ,'G007'    ,filtra(:lfile)       )
                 !
                 error = .true.
                 goto 300

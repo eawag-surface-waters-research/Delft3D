@@ -227,7 +227,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           if (filout == filbct) then
              inquire (file = filout(:8 + lrid), exist = ex)
              if (.not.ex) then
-                call prterr(lundia    ,'G004'    ,filout    ,gdp       )
+                call prterr(lundia    ,'G004'    ,filout    )
                 !
                 error = .true.
                 goto 9999
@@ -242,7 +242,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              ! Not able to read record length for direct access
              !
              if (iocond /= 0) then
-                call prterr(lundia    ,'U081'    ,filout    ,gdp       )
+                call prterr(lundia    ,'U081'    ,filout    )
                 !
                 error = .true.
                 goto 9999
@@ -283,7 +283,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 open (lunrd, file = filbct(:lf), form = 'formatted',            &
                      & status = 'old')
                 write (message, '(2a)') 'Reading BC-hydrodynamic file ', filbct(:lf)
-                call prterr(lundia, 'G051', trim(message), gdp)
+                call prterr(lundia, 'G051', trim(message))
                 call rdtdt(lundia    ,lunout    ,lunrd     ,error     ,filbct    , &
                          & runid     ,typtst    ,eol       ,itstrt    ,itstop    , &
                          & nto       ,ntot      ,ntof      ,tprofu    ,nambnd    , &
@@ -300,7 +300,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 open (lunrd, file = filbct(:lf), form = 'formatted',            &
                      & status = 'old')
                 write (message, '(2a)') 'Reading BC-hydrodynamic file ', filbct(:lf)
-                call prterr(lundia, 'G051', trim(message), gdp)
+                call prterr(lundia, 'G051', trim(message))
                 call rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
                           & filbct    ,runid     ,typtst    ,eol       ,itstrt    , &
                           & itstop    ,nto       ,ntof      ,ntot      ,kmax      , &
@@ -315,7 +315,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 ! Define "fake" timeframe
                 !
                 write (message, '(3a)') 'BC-hydrodynamic file ', filbct(:lf), ' will be skipped in TDATOM'
-                call prterr(lundia, 'G051', trim(message), gdp)
+                call prterr(lundia, 'G051', trim(message))
              endif
           else
              error = .true.
@@ -362,7 +362,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        do n = 1, ntot
           if (tprofu(ntof + n)(:10) == '3d-profile') then
-             call prterr(lundia    ,'V095'    ,'for v249 or less'   ,gdp       )
+             call prterr(lundia    ,'V095'    ,'for v249 or less'   )
              !
              error = .true.
              goto 9999
@@ -390,7 +390,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        endif
        !<==
        if (nbcttm>mxbctm .and. .not.noui) then
-          call prterr(lundia    ,'U153'    ,' '       ,gdp       )
+          call prterr(lundia    ,'U153'    ,' '       )
           !
           nbcttm = mxbctm
        endif
@@ -548,7 +548,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
   500  continue
        if (itold /= -1) then
             if (itold<itstop) then 
-                call prterr(lundia    ,'U042'    ,'Last time for time varying flow boundary conditions <',    gdp       )
+                call prterr(lundia    ,'U042'    ,'Last time for time varying flow boundary conditions <')
                 error = .true.
                 goto 9999
             endif

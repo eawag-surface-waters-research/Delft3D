@@ -155,5 +155,5 @@ subroutine inibnd(lundia    ,error      ,nto       ,nopest    ,nrob      , &
        errornr = 'V026'
     endif
  9999 continue
-    if (error) call prterr(lundia, errornr, ' ', gdp)
+    if (error) call prterr(lundia, errornr, ' ')
 end subroutine inibnd

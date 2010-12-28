@@ -118,11 +118,11 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
     if (istat /= 0) then
        select case (istat)
        case(1)
-          call prterr(lundia, 'G004', trim(filcomp), gdp)
+          call prterr(lundia, 'G004', trim(filcomp))
        case(3)
-          call prterr(lundia, 'G006', trim(filcomp), gdp)
+          call prterr(lundia, 'G006', trim(filcomp))
        case default
-          call prterr(lundia, 'G007', trim(filcomp), gdp)
+          call prterr(lundia, 'G007', trim(filcomp))
        endselect
        call d3stop(1, gdp)
     endif
@@ -142,7 +142,7 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
        ilyr = 0
        allocate(rtemp(nmlb:nmub,lsedtot), stat = istat)
        if (istat /= 0) then
-          call prterr(lundia, 'U021', 'RdIniMorLyr: memory alloc error', gdp)
+          call prterr(lundia, 'U021', 'RdIniMorLyr: memory alloc error')
           call d3stop(1, gdp)
        endif
        !
@@ -178,7 +178,7 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
              !
              write (message,'(a,i2,2a)') 'No type specified for layer ', ilyr, &
                                        & ' in file ', trim(filcomp)
-             call prterr(lundia, 'U021', trim(message), gdp)
+             call prterr(lundia, 'U021', trim(message))
              call d3stop(1, gdp)          
           elseif (layertype == 'mass fraction' .or. &
                 & layertype == 'volume fraction') then
@@ -203,7 +203,7 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
                    write (message,'(a,i2,2a)')  &
                        & 'Missing Thick keyword for layer ', ilyr, &
                        & ' in file ', trim(filcomp)
-                   call prterr(lundia, 'U021', trim(message), gdp)
+                   call prterr(lundia, 'U021', trim(message))
                    call d3stop(1, gdp)          
                 endif
                 do nm = 1, nmmax
@@ -220,7 +220,7 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
                    write (message,'(3a,i2,2a)')  &
                        & 'errorreading thickness from ', trim(filename), &
                        & ' for layer ', ilyr, ' in file ', trim(filcomp)
-                   call prterr(lundia, 'U021', trim(message), gdp)
+                   call prterr(lundia, 'U021', trim(message))
                    call d3stop(1, gdp)          
                 endif
              endif
@@ -245,7 +245,7 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
                        & 'Use Fraction' ,trim(lstr), ' instead of SedBed', &
                        & trim(lstr), ' for ', trim(layertype), ' layer ', &
                        & ilyr, ' in file ', trim(filcomp)
-                   call prterr(lundia, 'U021', trim(message), gdp)
+                   call prterr(lundia, 'U021', trim(message))
                    call d3stop(1, gdp)          
                 endif
                 !
@@ -280,7 +280,7 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
                           & 'errorreading fraction ', l, 'from ', &
                           & trim(filename), ' for layer ', ilyr, ' in file ', &
                           & trim(filcomp)
-                      call prterr(lundia, 'U021', trim(message), gdp)
+                      call prterr(lundia, 'U021', trim(message))
                       call d3stop(1, gdp)          
                    endif
                 endif
@@ -292,7 +292,7 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
                 write (message,'(a,i2,2a)')  &
                     & 'No Fraction keywords found for layer ', ilyr, &
                     & ' in file ', trim(filcomp)
-                call prterr(lundia, 'U021', trim(message), gdp)
+                call prterr(lundia, 'U021', trim(message))
                 call d3stop(1, gdp)          
              endif
              !
@@ -310,13 +310,13 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
                          write (message,'(2a,i2,a,i2,3a,i0)')  &
                              & 'Negative ', trim(layertype), l, ' in layer ', &
                              & ilyr, ' in file ', trim(filcomp), ' at nm=', nm
-                         call prterr(lundia, 'U021', trim(message), gdp)
+                         call prterr(lundia, 'U021', trim(message))
                          call d3stop(1, gdp)          
                       elseif (rtemp(nm, l) > 1.0_fp) then
                          write (message,'(a,i2,a,i2,3a,i0)')  &
                              & trim(layertype), l, ' bigger than 1 in layer ', &
                              & ilyr, ' in file ', trim(filcomp), ' at nm=', nm
-                         call prterr(lundia, 'U021', trim(message), gdp)
+                         call prterr(lundia, 'U021', trim(message))
                          call d3stop(1, gdp)
                       endif
                       totfrac = totfrac + rtemp(nm,l)
@@ -325,7 +325,7 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
                       write (message,'(3a,i2,3a,i0)')  &
                           & 'Sum of ', trim(layertype), ' not equal to 1 in layer ', &
                           & ilyr, ' in file ', trim(filcomp), ' at nm=', nm
-                      call prterr(lundia, 'U021', trim(message), gdp)
+                      call prterr(lundia, 'U021', trim(message))
                       call d3stop(1, gdp)          
                    else
                       totfrac = 0.0_fp
@@ -441,7 +441,7 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
                        & 'Use SedBed', trim(lstr), ' instead of Fraction', &
                        & trim(lstr), ' for ', trim(layertype), ' layer ', &
                        & ilyr, ' in file ', trim(filcomp)
-                   call prterr(lundia, 'U021', trim(message), gdp)
+                   call prterr(lundia, 'U021', trim(message))
                    call d3stop(1, gdp)
                 endif
                 !
@@ -475,7 +475,7 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
                       write (message,'(5a,i2,2a)')  &
                           & 'errorreading ', layertype, '  from ', trim(filename), &
                           & ' for layer ', ilyr, ' in file ', trim(filcomp)
-                      call prterr(lundia, 'U021', trim(message), gdp)
+                      call prterr(lundia, 'U021', trim(message))
                       call d3stop(1, gdp)          
                    endif
                 endif
@@ -487,7 +487,7 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
                 write (message,'(a,i2,2a)')  &
                     & 'No SedBed keywords found for layer ' ,ilyr, &
                     & ' in file ' ,trim(filcomp)
-                call prterr(lundia, 'U021', trim(message), gdp)
+                call prterr(lundia, 'U021', trim(message))
                 call d3stop(1, gdp)          
              endif
              !
@@ -504,7 +504,7 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
                          write (message,'(2a,i2,a,i2,3a,i0)')  &
                              & 'Negative ', trim(layertype), l, ' in layer ', &
                              & ilyr, ' in file ', trim(filcomp), ' at nm=', nm
-                         call prterr(lundia, 'U021', trim(message), gdp)
+                         call prterr(lundia, 'U021', trim(message))
                          call d3stop(1, gdp)          
                       endif
                    enddo
@@ -581,7 +581,7 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
              write (message,'(3a,i2,2a)') 'Unknown layer type ''', &
               & trim(layertype), ''' specified for layer ', ilyr, &
               & ' in file ', trim(filcomp)
-             call prterr(lundia, 'U021', trim(message), gdp)
+             call prterr(lundia, 'U021', trim(message))
              call d3stop(1, gdp)          
           endif
           !
@@ -614,7 +614,7 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
        !
     else
        write (message,'(2a)') 'Invalid file version of ', trim(filcomp)
-       call prterr(lundia, 'U021', trim(message), gdp)
+       call prterr(lundia, 'U021', trim(message))
        call d3stop(1, gdp)          
     endif
     !

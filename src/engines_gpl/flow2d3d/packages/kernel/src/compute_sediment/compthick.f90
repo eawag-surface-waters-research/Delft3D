@@ -72,7 +72,7 @@ subroutine compthick(dps, s1, nmmax, gdp)
     !
     istat = bedcomp_getpointer_integer(gdp%gdmorlyr,'IUnderLyr',iunderlyr)
     if (istat/=0) then
-       call prterr(lundia, 'U021', 'Memory problem in COMPTHICK', gdp)
+       call prterr(lundia, 'U021', 'Memory problem in COMPTHICK')
        call d3stop(1, gdp)
     endif
     !
@@ -81,7 +81,7 @@ subroutine compthick(dps, s1, nmmax, gdp)
        !
        istat = bedcomp_getpointer_realfp (gdp%gdmorlyr,'ThTrLyr'  ,thtrlyr  )
        if (istat/=0) then
-          call prterr(lundia, 'U021', 'Memory problem in COMPTHICK', gdp)
+          call prterr(lundia, 'U021', 'Memory problem in COMPTHICK')
           call d3stop(1, gdp)
        endif
        !

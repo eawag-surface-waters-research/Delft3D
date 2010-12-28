@@ -152,7 +152,7 @@ subroutine rbsig(ncmax     ,ampbc     ,ombc      ,phibc     ,thetbc    , &
           read (uw, '(a)') string
        enddo
        if (version < 1) then
-          call prterr (lundia,'U021','Version number of wave components file is lower than 1',gdp)
+          call prterr (lundia,'U021','Version number of wave components file is lower than 1')
           write (lundia, '(a)') '    The wave components file must contain a reference depth'
           call d3stop(1, gdp)
        endif
@@ -165,7 +165,7 @@ subroutine rbsig(ncmax     ,ampbc     ,ombc      ,phibc     ,thetbc    , &
        msg = 'Number of wave components'
        write (lundia, '(a,a,i4)') msg,':',ncomp
        if (ncomp>ncmax) then
-          call prterr (lundia,'U021','# wave components > ncmax',gdp)
+          call prterr (lundia,'U021','# wave components > ncmax')
           call d3stop(1, gdp)
        endif
        !
@@ -188,7 +188,7 @@ subroutine rbsig(ncmax     ,ampbc     ,ombc      ,phibc     ,thetbc    , &
           if (ombc(jj)<omspl) nsplit = nsplit + 1
           if (jj>1) then
              if (comparereal(ombc(jj),ombc(jj-1)) < 0) then
-                call prterr (lundia,'U021','wave frequencies must be increasing',gdp)
+                call prterr (lundia,'U021','wave frequencies must be increasing')
                 call d3stop(1, gdp)
              endif
           endif
@@ -217,6 +217,6 @@ subroutine rbsig(ncmax     ,ampbc     ,ombc      ,phibc     ,thetbc    , &
        !
        ! file not found
        !
-       call prterr(lundia    ,'G004'    ,filrol(1:lfile)    ,gdp       )
+       call prterr(lundia    ,'G004'    ,filrol(1:lfile)    )
     endif
 end subroutine rbsig

@@ -77,7 +77,7 @@ subroutine filfmt(lundia    ,messag    ,fmttmp    ,error     ,gdp       )
        fmttmp = 'formatted'
     else
        error = .true.
-       call prterr(lundia    ,'U036'    ,messag    ,gdp       )
+       call prterr(lundia    ,'U036'    ,messag    )
     !
     endif
 end subroutine filfmt

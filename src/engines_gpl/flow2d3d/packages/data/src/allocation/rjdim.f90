@@ -222,14 +222,14 @@ subroutine rjdim(lundia, error, gdp)
     !
     if (fp == hp) then
        write (message,'(a,i4)') 'Double precision computation using reals of kind ',fp
-       call prterr(lundia, 'G051', trim(message), gdp)
+       call prterr(lundia, 'G051', trim(message))
        write (*,'(a,a)') '*** WARNING ',trim(message)
     elseif (fp == sp) then
        write (message,'(a,i4)') 'Single precision computation using reals of kind ',fp
-       call prterr(lundia, 'G051', trim(message), gdp)
+       call prterr(lundia, 'G051', trim(message))
     else
        write (message,'(a,i4)') 'Unable to allocate for reals of kind ',fp
-       call prterr(lundia, 'U021', trim(message), gdp)
+       call prterr(lundia, 'U021', trim(message))
        call d3stop(1, gdp)
     endif
     !
@@ -242,19 +242,19 @@ subroutine rjdim(lundia, error, gdp)
     if (prec == sp) then
        if (prec /= fp) then
           write (message,'(a)') 'Array DPS is in single precision'
-          call prterr(lundia, 'G051', trim(message), gdp)
+          call prterr(lundia, 'G051', trim(message))
        endif
     elseif (prec == hp) then
        if (prec /= fp) then
           write (message,'(a)') 'Array DPS is in double precision'
-          call prterr(lundia, 'G051', trim(message), gdp)
+          call prterr(lundia, 'G051', trim(message))
           write (message,'(a)') 'DPS can not be viewed with Online Visualisation'
-          call prterr(lundia, 'Z013', trim(message), gdp)
+          call prterr(lundia, 'Z013', trim(message))
           write (*,'(a,a)') '*** WARNING ',trim(message)
        endif
     else
        write (message,'(a,i4)') 'Unable to allocate for reals of kind ',prec
-       call prterr(lundia, 'U021', trim(message), gdp)
+       call prterr(lundia, 'U021', trim(message))
        call d3stop(1, gdp)
     endif
     !
@@ -3552,7 +3552,7 @@ subroutine rjdim(lundia, error, gdp)
     !
     if (ierr== - 3) then
        error = .true.
-       call prterr(lundia    ,'G005'    ,' '       ,gdp       )
+       call prterr(lundia    ,'G005'    ,' '       )
        write (lundia, *) '         Parameter MXRPNT to small, add ',            &
                        & nrpntr - mxrpnt
     endif
@@ -3563,6 +3563,6 @@ subroutine rjdim(lundia, error, gdp)
  9999 continue
     if (ierr<= - 9) then
        error = .true.
-       call prterr(lundia    ,'G920'    ,'RJDIM'   ,gdp       )
+       call prterr(lundia    ,'G920'    ,'RJDIM'   )
     endif
 end subroutine rjdim

@@ -178,7 +178,7 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     if (dpsmax+zbot > 0) then
        write (errmsg, '(a,g10.3,a)') 'Depth value ', dpsmax, &
              & ' (m) exceeds ZBOT specified in input; change ZBOT to this value'
-       call prterr(lundia, 'P004', trim(errmsg), gdp       )
+       call prterr(lundia, 'P004', trim(errmsg))
        error = .true.
        goto 9999
     endif
@@ -188,7 +188,7 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     !
     if (dpsmin < -ztop) then
        write (errmsg, '(a      )' ) 'One or more depth values exceed ZTOP specified in input'
-       call prterr(lundia, 'P004', trim(errmsg), gdp)       
+       call prterr(lundia, 'P004', trim(errmsg))
        write (lundia, '(a      )' ) 'Options:'
        write (lundia, '(a,g10.3)' ) '1: Change ZTOP to above the heighest value: ', -dpsmin
        write (lundia, '(a      )' ) '2: Copy the following lines into the .dry file to make these points permanently dry:' 
@@ -251,7 +251,7 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
         write (errmsg, '(a,g10.3,2a)') 'Maximum water level ', s1max, &
               & ' (m) exceeds ZTOP specified in input; changing ZTOP to above this value', &
               & ' is strongly advised'
-        call prterr(lundia, 'U190', trim(errmsg), gdp)
+        call prterr(lundia, 'U190', trim(errmsg))
     endif
     !
     ! Set the mask

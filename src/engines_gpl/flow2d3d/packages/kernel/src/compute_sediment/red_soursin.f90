@@ -160,7 +160,7 @@ subroutine red_soursin(nmmax     ,kmax      ,thick     ,kmxsed    , &
                       write(message,'(a,i0,a,f12.2,a,3(i0,a))') &
                           & 'Source and sink term sediment ',l,' reduced with factor', &
                           & 1/reducfac,' (m,n)=(',m,',',n,'), after ',ntstep , ' timesteps.'
-                      call prterr(lundia, 'Z013', trim(message), gdp)
+                      call prterr(lundia, 'Z013', trim(message))
                    endif
                  endif
                  sourse(nm, l) = sourse(nm, l)*reducfac

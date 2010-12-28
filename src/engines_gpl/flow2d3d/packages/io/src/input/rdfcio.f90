@@ -151,7 +151,7 @@ subroutine rdfcio(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
        !
        if (sferic) then
           if (noui) error = .true.
-          call prterr(lundia    ,'U135'    ,' '       ,gdp       )
+          call prterr(lundia    ,'U135'    ,' '       )
        !
        ! Test file existance only in case NOUI = .true.
        !

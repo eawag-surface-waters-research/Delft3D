@@ -101,7 +101,7 @@ subroutine dfpartit ( ipown, icom, mmax, nmax, gdp )
     !
     allocate (gdp%gdparall%iweig(nproc), stat = istat)
     if (istat /= 0) then
-       call prterr(lundia, 'U021', 'dfpartit: memory alloc error', gdp)
+       call prterr(lundia, 'U021', 'dfpartit: memory alloc error')
        call d3stop(1, gdp)
     endif
     !
@@ -179,7 +179,7 @@ subroutine dfpartit ( ipown, icom, mmax, nmax, gdp )
     ! 
     if (max(mmax,nmax)/nproc < 4) then
        write(txt1,'(a,i0,a)') 'Domain is too small to divide in ', nproc, ' partitions'
-       call prterr(lundia, 'U021', trim(txt1), gdp)
+       call prterr(lundia, 'U021', trim(txt1))
        write(lundia,'(10x,a)') '"max(mmax,nmax) / num_partitions" must be greater than 3'
        call d3stop(1, gdp)
     endif

@@ -133,11 +133,11 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
     if (istat /= 0) then
        select case (istat)
        case(1)
-          call prterr(lundia, 'G004', fildpmv, gdp)
+          call prterr(lundia, 'G004', fildpmv)
        case(3)
-          call prterr(lundia, 'G006', fildpmv, gdp)
+          call prterr(lundia, 'G006', fildpmv)
        case default
-          call prterr(lundia, 'G007', fildpmv, gdp)
+          call prterr(lundia, 'G007', fildpmv)
        endselect
        call d3stop(1, gdp)
     endif
@@ -152,11 +152,11 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
        if (istat /= 0) then
           select case (istat)
           case(1)
-             call prterr(lundia, 'G004', polygonfile, gdp)
+             call prterr(lundia, 'G004', polygonfile)
           case(3)
-             call prterr(lundia, 'G006', polygonfile, gdp)
+             call prterr(lundia, 'G006', polygonfile)
           case default
-             call prterr(lundia, 'G007', polygonfile, gdp)
+             call prterr(lundia, 'G007', polygonfile)
           endselect
           call d3stop(1, gdp)
        endif
@@ -171,14 +171,14 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
     call prop_get_string(dpmv_ptr,'DPMVFileInformation','FileVersion',versionnrinput)
     read(versionnrinput,fmt=*,iostat=istat) versionnr
     if (istat /= 0) then
-       call prterr(lundia, 'U021', 'Unable to read version number from DPMV input file', gdp)
+       call prterr(lundia, 'U021', 'Unable to read version number from DPMV input file')
        call d3stop(1, gdp)
     endif
     if (       comparereal(versionnr,versionnrlow ) == -1 &
         & .or. comparereal(versionnr,versionnrhigh) ==  1  ) then
        write (message,'(3(a,f4.2))') 'DPMV input file version number (',versionnr, ') must be between ', &
            & versionnrlow, ' and ', versionnrhigh
-       call prterr(lundia, 'U021', trim(message), gdp)
+       call prterr(lundia, 'U021', trim(message))
        call d3stop(1, gdp)
     endif
     !
@@ -188,7 +188,7 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
     call prop_get_integer(dpmv_ptr,'DPMVOverall','ItPlant',itplant)
     if (itplant == imiss) then
        write (message,'(a,a)') 'Parameter ItPlant not found in file',trim(fildpmv)
-       call prterr(lundia, 'U021', trim(message), gdp)
+       call prterr(lundia, 'U021', trim(message))
        call d3stop(1, gdp)
     endif
     !
@@ -198,7 +198,7 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
     call prop_get(dpmv_ptr,'DPMVOverall','ClPlant',clplant)
     if (comparereal(clplant,amiss) == 0) then
        write (message,'(a,a)') 'Parameter ClPlant not found in file',trim(fildpmv)
-       call prterr(lundia, 'U021', trim(message), gdp)
+       call prterr(lundia, 'U021', trim(message))
        call d3stop(1, gdp)
     endif
     !
@@ -237,7 +237,7 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
                 enddo
              else
                 write (message,'(a,a,a)') 'Vegetation read without vps-lines in pla-file'
-                call prterr(lundia, 'U021', trim(message), gdp)
+                call prterr(lundia, 'U021', trim(message))
                 call d3stop(1, gdp)
              endif
              !
@@ -268,7 +268,7 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
     if (istat==0) allocate (gdp%gddpmveg%nplants  (gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub), stat = istat)
     if (istat==0) allocate (gdp%gddpmveg%vegs(nveg), stat = istat)
     if (istat/=0) then
-       call prterr(lundia, 'U021', 'DPMVeg: memory alloc error', gdp)
+       call prterr(lundia, 'U021', 'DPMVeg: memory alloc error')
        call d3stop(1, gdp)
     endif
     !
@@ -337,7 +337,7 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
              call prop_get_integer(link_ptr, '*', 'nvps', nvps)
              if (nvps == imiss) then
                 write(message,'(a,i0)') 'errordetecting number of vps-lines in vegetation ',cntveg
-                call prterr(lundia, 'U021', message, gdp)
+                call prterr(lundia, 'U021', message)
                 call d3stop(1, gdp)
              else
                 vegs(cntveg)%nvps = nvps
@@ -352,7 +352,7 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
              if (istat==0) allocate (gdp%gddpmveg%vegs(cntveg)%rho   (nvps), stat = istat)
              if (istat==0) allocate (gdp%gddpmveg%vegs(cntveg)%z     (nvps), stat = istat)
              if (istat/=0) then
-                call prterr(lundia, 'U021', 'DPMVeg: memory alloc error', gdp)
+                call prterr(lundia, 'U021', 'DPMVeg: memory alloc error')
                 call d3stop(1, gdp)
              endif
              !
@@ -386,7 +386,7 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
                          if (comparereal(inputvals(k),amiss) == 0 ) then
                             write(message,'(a,i0,a,i0,a,i0)') 'Unable to read value ',k,' of vps ', &
                                  &                            vps,' of vegetation ',cntveg
-                            call prterr(lundia, 'U021', message, gdp)
+                            call prterr(lundia, 'U021', message)
                             call d3stop(1, gdp)
                          endif
                       enddo
@@ -402,7 +402,7 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
                           & .and. comparereal(vegs(cntveg)%rho(vps),0.0_fp) /= 1 ) then
                          write(message,'(a,f10.1,a,i0,a,i0)') 'Negative or zero density read (', &
                              & vegs(cntveg)%rho(vps), ') for vps ', vps, ', vegetation ', cntveg
-                         call prterr(lundia, 'U021', message, gdp)
+                         call prterr(lundia, 'U021', message)
                          call d3stop(1, gdp)
                       endif
                    endif
@@ -434,7 +434,7 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
                 write(message,'(a,a,a,i0,a)') 'Unable to match VegetationType ',trim(inputstring), &
                      &                        ' (used in Area ',cntarea, &
                      &                        ') with the specified vegetations'
-                call prterr(lundia, 'U021', message, gdp)
+                call prterr(lundia, 'U021', message)
                 call d3stop(1, gdp)
              endif
              !
@@ -449,7 +449,7 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
                 !
                 if ( .not. associated(pol_ptr) ) then
                    write(message,'(a)') 'Using polygons but no polygon file specified '
-                   call prterr(lundia, 'U021', message, gdp)
+                   call prterr(lundia, 'U021', message)
                    call d3stop(1, gdp)
                 endif
                 !
@@ -459,11 +459,11 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
                 call prop_get(link_ptr, '*', 'NPlants', cntplants)
                 if (comparereal(cntplants,amiss) == 0) then
                    write(message,'(a,i0)') 'NPlants not specified for area ',cntarea
-                   call prterr(lundia, 'U021', message, gdp)
+                   call prterr(lundia, 'U021', message)
                    call d3stop(1, gdp)
                 elseif (comparereal(cntplants,0.0_fp) == -1) then
                    write(message,'(a,i0)') 'Negative value for NPlants in area ',cntarea
-                   call prterr(lundia, 'U021', message, gdp)
+                   call prterr(lundia, 'U021', message)
                    call d3stop(1, gdp)
                 endif
                 !
@@ -483,7 +483,7 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
                    write(message,'(a,a,a,i0,a)') 'Unable to match Polygon ',trim(inputstring), &
                         &                        ' (used in Area ',cntarea, &
                         &                        ') with the specified polygons'
-                   call prterr(lundia, 'U021', message, gdp)
+                   call prterr(lundia, 'U021', message)
                    call d3stop(1, gdp)
                 endif
                 call tree_get_data_ptr( link_ptr2, data_ptr, node_type )
@@ -505,7 +505,7 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
                      & comparereal(inputvals(2),amiss) == 0        ) then
                       write(message,'(a,i0,a,i0)') 'Unable to read vegetation polygon point ', &
                            &                       ip,' of area ',cntarea
-                      call prterr(lundia, 'U021', message, gdp)
+                      call prterr(lundia, 'U021', message)
                       call d3stop(1, gdp)
                    endif
                    xpol(ip) = inputvals(1)
@@ -550,7 +550,7 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
                    enddo
                 else
                    write(message,'(a,i0)') 'No Polygon or NPlantsFile specified for area',cntarea
-                   call prterr(lundia, 'U021', message, gdp)
+                   call prterr(lundia, 'U021', message)
                    call d3stop(1, gdp)
                 endif
              endif

@@ -185,7 +185,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
        if (istat==0) allocate(gdtrachy%rttdef(ntrt,nroupa)                            , stat = istat)
        !
        if (istat/=0) then
-          call prterr(lundia, 'U021', 'RDTRT: memory alloc error', gdp)
+          call prterr(lundia, 'U021', 'RDTRT: memory alloc error')
           call d3stop(1, gdp)
        endif
        !
@@ -212,7 +212,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     ! Check on multiple
     itimtt = nint(rtimtt/dt)
     if (dtn(itimtt, rtimtt, dt)) then
-       call prterr(lundia    ,'U044'    ,'Trachytope update time'        , gdp)
+       call prterr(lundia    ,'U044'    ,'Trachytope update time'        )
        error = .true.
        goto 9999
     endif
@@ -233,7 +233,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     ! keyword not found ?
     !
     if (filtmp == ' ') then
-       call prterr(lundia    ,'V091'    ,keyw      ,gdp)
+       call prterr(lundia    ,'V091'    ,keyw      )
        error = .true.
        goto 9999
     endif
@@ -248,7 +248,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
        !
        ! file does not exist !!
        !
-       call prterr(lundia    ,'P101'    ,filtmp(1:lfile)      ,gdp)
+       call prterr(lundia    ,'P101'    ,filtmp(1:lfile)      )
        error = .true.
        goto 9999
     endif
@@ -259,7 +259,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     open (luntmp, file = filtmp(1:lfile), form = 'formatted', iostat = iocond,  &
         & status = 'old')
     if (iocond/=0) then
-       call prterr(lundia    ,'U015'    ,filtmp(1:lfile)      ,gdp)
+       call prterr(lundia    ,'U015'    ,filtmp(1:lfile)      )
        error = .true.
        goto 9999
     endif
@@ -357,7 +357,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
        !
        ! Reading error
        !
-       call prterr(lundia    ,'G007'    ,filtmp(1:lfile)      ,gdp)
+       call prterr(lundia    ,'G007'    ,filtmp(1:lfile)      )
        error = .true.
        goto 199
     else
@@ -392,7 +392,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
        write (rec132, '(i12)') mcurec
        call noextspaces(rec132    ,lcurec    )
        errmsg = filtmp(1:lfile) // ', Record: ' // rec132(1:lcurec)
-       call prterr(lundia    ,'G007'    ,errmsg    ,gdp)
+       call prterr(lundia    ,'G007'    ,errmsg    )
        goto 199
     endif
     !
@@ -419,7 +419,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
              write (rec132, '(i12)') mcurec
              call noextspaces(rec132    ,lcurec    )
              errmsg = filtmp(1:lfile) // ', Record: ' // rec132(1:lcurec)
-             call prterr(lundia    ,'J014'    ,errmsg    ,gdp)
+             call prterr(lundia    ,'J014'    ,errmsg    )
              goto 199
           endif
           !
@@ -440,7 +440,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
              write (rec132, '(i12)') mcurec
              call noextspaces(rec132    ,lcurec    )
              errmsg = filtmp(1:lfile) // ', Record: ' // rec132(1:lcurec)
-             call prterr(lundia    ,'G007'    ,errmsg    ,gdp)
+             call prterr(lundia    ,'G007'    ,errmsg    )
              goto 199
           endif
           !
@@ -450,7 +450,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
           !
           mtrt = mtrt + 1
           if (mtrt>ntrt) then
-             call prterr(lundia    ,'J004'    ,' '       ,gdp)
+             call prterr(lundia    ,'J004'    ,' '       )
              error = .true.
              goto 199
           endif
@@ -478,7 +478,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
           write (rec132, '(i12)') mcurec
           call noextspaces(rec132    ,lcurec    )
           errmsg = filtmp(1:lfile) // ', Record: ' // rec132(1:lcurec)
-          call prterr(lundia    ,'J005'    ,errmsg    ,gdp)
+          call prterr(lundia    ,'J005'    ,errmsg    )
           goto 199
        endif
     else
@@ -490,7 +490,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
        write (rec132, '(i12)') mcurec
        call noextspaces(rec132    ,lcurec    )
        errmsg = filtmp(1:lfile) // ', Record: ' // rec132(1:lcurec)
-       call prterr(lundia    ,'G007'    ,errmsg    ,gdp)
+       call prterr(lundia    ,'G007'    ,errmsg    )
        goto 199
     endif
     !
@@ -518,7 +518,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     ! keyword not found ?
     !
     if (filtmp == ' ' .and. ntrt /= 1) then
-       call prterr(lundia    ,'V091'    ,keyw      ,gdp)
+       call prterr(lundia    ,'V091'    ,keyw      )
        error = .true.
        goto 9999
     endif
@@ -555,7 +555,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     ! keyword not found ?
     !
     if (filtmp == ' ' .and. ntrt /= 1) then
-       call prterr(lundia    ,'V091'    ,keyw      ,gdp)
+       call prterr(lundia    ,'V091'    ,keyw      )
        error = .true.
        goto 9999
     endif
@@ -603,7 +603,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
           !
           ! file does not exist !!
           !
-          call prterr(lundia    ,'P101'    ,filtmp(1:lfile)      ,gdp)
+          call prterr(lundia    ,'P101'    ,filtmp(1:lfile)      )
           error = .true.
           goto 9999
        endif
@@ -650,7 +650,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
           !
           ! file does not exist !!
           !
-          call prterr(lundia    ,'P101'    ,filtmp(1:lfile)      ,gdp)
+          call prterr(lundia    ,'P101'    ,filtmp(1:lfile)      )
           error = .true.
           goto 9999
        endif
@@ -692,7 +692,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     !
     txtput1 = keyw
     if (iarea_avg<1 .or. iarea_avg>2) then
-       call prterr(lundia    ,'J001'    ,'TrtMth should be 1 or 2', gdp)
+       call prterr(lundia    ,'J001'    ,'TrtMth should be 1 or 2')
        error = .true.
        goto 9999
     endif

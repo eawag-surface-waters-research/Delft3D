@@ -183,7 +183,7 @@ subroutine rdtdc(lundia    ,lunout    ,lunrd     ,error     ,filbcc    , &
                 !
                 inprof = index(profil, tprofc(n, l))
                 if (inprof==0) then
-                   call prterr(lundia    ,'U066'    ,chulp     ,gdp       )
+                   call prterr(lundia    ,'U066'    ,chulp     )
                    !
                    tprofc(n, l) = 'uniform   '
                 endif
@@ -191,7 +191,7 @@ subroutine rdtdc(lundia    ,lunout    ,lunrd     ,error     ,filbcc    , &
                 !-----------------check for <3d-profile>, not allowed in old file
                 !
                 if (tprofc(n, l)=='3d-profile') then
-                   call prterr(lundia    ,'V095'    ,'for v248 or less'   ,gdp       )
+                   call prterr(lundia    ,'V095'    ,'for v248 or less'   )
                    !
                    error = .true.
                    goto 9999
@@ -215,7 +215,7 @@ subroutine rdtdc(lundia    ,lunout    ,lunrd     ,error     ,filbcc    , &
                 call small(chulp     ,lenc      )
                 if (chulp/=tprofc(n, l)) then
                    error = .true.
-                   call prterr(lundia    ,'U066'    ,record(:lenc)        ,gdp       )
+                   call prterr(lundia    ,'U066'    ,record(:lenc)        )
                    !
                    goto 9999
                 endif
@@ -234,7 +234,7 @@ subroutine rdtdc(lundia    ,lunout    ,lunrd     ,error     ,filbcc    , &
              !
              if (ier<=0) then
                 error = .true.
-                call prterr(lundia    ,'G007'    ,filbcc    ,gdp       )
+                call prterr(lundia    ,'G007'    ,filbcc    )
                 !
                 write (lundia, '(a,a)') 'RECORD: ', record(ibeg:132)
                 goto 9999
@@ -256,7 +256,7 @@ subroutine rdtdc(lundia    ,lunout    ,lunrd     ,error     ,filbcc    , &
              if (rwbval(4, n, l)<0.0) error = .true.
              if (error) then
                 write(errmsg,'(a,a)') 'Concentration at open boundary in ', trim(filbcc)
-                call prterr(lundia    ,'V061'    ,errmsg,   gdp       )
+                call prterr(lundia    ,'V061'    ,errmsg)
                 !
                 goto 9999
              endif
@@ -269,7 +269,7 @@ subroutine rdtdc(lundia    ,lunout    ,lunrd     ,error     ,filbcc    , &
              if (isnan(rwbval(4, n, l))) error = .true.
              if (error) then
                 write(errmsg,'(a,a)') 'Concentration at open boundary containins NaN in ', trim(filbcc)
-                call prterr(lundia    ,'P004'    ,errmsg      ,gdp  )
+                call prterr(lundia    ,'P004'    ,errmsg      )
                 !
                 goto 9999
              endif
@@ -425,7 +425,7 @@ subroutine rdtdc(lundia    ,lunout    ,lunrd     ,error     ,filbcc    , &
     if (itold/= - 1) then
        if (itold<itstop) then
           write(errmsg,'(a,a,a)') 'Last time in file ', trim(filbcc), ' <' 
-          call prterr(lundia    ,'U042'    ,errmsg,    gdp       )
+          call prterr(lundia    ,'U042'    ,errmsg)
           error = .true.
        endif
     endif

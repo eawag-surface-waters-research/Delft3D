@@ -304,7 +304,7 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
              write (lungrd) mmax, nmaxus
              write (lungrd) mmax, 1
              write (lungrd) 1, 1
-             call prterr(lundia    ,'V028'    ,' '       ,gdp       )
+             call prterr(lundia    ,'V028'    ,' '       )
           endif
           goto 200
        endif
@@ -335,14 +335,14 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
                 write (lungrd) mmax, nmaxus
                 write (lungrd) mmax, 1
                 write (lungrd) 1, 1
-                call prterr(lundia    ,'V028'    ,' '       ,gdp       )
+                call prterr(lundia    ,'V028'    ,' '       )
              endif
           else
              !
              ! no value or error found => error
              !
              lerror = .true.
-             call prterr(lundia    ,'V003'    ,'Comp. grid enclosure'          ,gdp       )
+             call prterr(lundia    ,'V003'    ,'Comp. grid enclosure'          )
           endif
        else
           !
@@ -362,7 +362,7 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
           if (ippt > mxnppt) then
              lerror = .true.
              write (errmsg, '(i3)') ippt - mxnppt
-             call prterr(lundia    ,'U130'    ,errmsg    ,gdp       )
+             call prterr(lundia    ,'U130'    ,errmsg    )
              ippt = mxnppt + 1
              goto 200
           endif
@@ -526,7 +526,7 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
        if (ival(1)==0 .or. ival(2)==0 .or. ival(3)==0 .or. ival(4)==0) then
           if (imnd>1) then
              lerror = .true.
-             call prterr(lundia    ,'V003'    ,'Coord. of the dry point'       ,gdp       )
+             call prterr(lundia    ,'V003'    ,'Coord. of the dry point'       )
           endif
        else
           ival(1) = ival(1) -mfg +1
@@ -559,7 +559,7 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
           if (idry>mxndry) then
              lerror = .true.
              write (errmsg, '(i3)') idry - mxndry
-             call prterr(lundia    ,'U131'    ,errmsg    ,gdp       )
+             call prterr(lundia    ,'U131'    ,errmsg    )
              idry = mxndry + 1
              goto 300
           endif
@@ -717,7 +717,7 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
        if (ival(1)==0 .or. ival(2)==0 .or. ival(3)==0 .or. ival(4)==0) then
           if (imnt > 1) then
              lerror = .true.
-             call prterr(lundia    ,'V003'    ,'Thin dam coord.'    ,gdp       )
+             call prterr(lundia    ,'V003'    ,'Thin dam coord.'    )
           endif
        else
           lenc  = 1
@@ -757,7 +757,7 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
           if (itd > mxntd) then
              lerror = .true.
              write (errmsg, '(i3)') itd - mxntd
-             call prterr(lundia    ,'U132'    ,errmsg    ,gdp       )
+             call prterr(lundia    ,'U132'    ,errmsg    )
              itd = mxntd + 1
              goto 400
           endif

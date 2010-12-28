@@ -181,7 +181,7 @@ subroutine reafou(error     ,lundia    ,lunfou    ,filfou    ,kmax      , &
           foutyp(ifou) = 's'
           fconno(ifou) = ltem
        else
-          call prterr(lundia, 'F002', ' ', gdp)
+          call prterr(lundia, 'F002', ' ')
           !
           error = .true.
           goto 9999
@@ -192,7 +192,7 @@ subroutine reafou(error     ,lundia    ,lunfou    ,filfou    ,kmax      , &
           foutyp(ifou) = 's'
           fconno(ifou) = lsal
        else
-          call prterr(lundia, 'F003', ' ', gdp)
+          call prterr(lundia, 'F003', ' ')
           !
           error = .true.
           goto 9999
@@ -202,7 +202,7 @@ subroutine reafou(error     ,lundia    ,lunfou    ,filfou    ,kmax      , &
        fconno(ifou) = fconno(ifou) + max(lsal, ltem)
        if (fconno(ifou)>lstsc) then
           write (cdummy(1:1), '(i1)') fconno(ifou) - max(lsal, ltem)
-          call prterr(lundia, 'F004', cdummy(1:1), gdp)
+          call prterr(lundia, 'F004', cdummy(1:1))
           !
           error = .true.
           goto 9999
@@ -231,14 +231,14 @@ subroutine reafou(error     ,lundia    ,lunfou    ,filfou    ,kmax      , &
     ftmstr(ifou) = nint(rstart/dt)
     !
     if (dtn(ftmstr(ifou), rstart, dt)) then
-       call prterr(lundia, 'U044', errmsg, gdp)
+       call prterr(lundia, 'U044', errmsg)
        error = .true.
        goto 9999
     endif
     !
     !
     if (rstart<tstart) then
-       call prterr(lundia, 'F005', ' ', gdp)
+       call prterr(lundia, 'F005', ' ')
        !
        error = .true.
        goto 9999
@@ -258,14 +258,14 @@ subroutine reafou(error     ,lundia    ,lunfou    ,filfou    ,kmax      , &
     !
     ftmsto(ifou) = nint(rstop/dt)
     if (dtn(ftmsto(ifou), rstop, dt)) then
-       call prterr(lundia, 'U044', errmsg, gdp)
+       call prterr(lundia, 'U044', errmsg)
        error = .true.
        goto 9999
     endif
     !
     !
     if (rstop>tstop) then
-       call prterr(lundia, 'F006', ' ', gdp)
+       call prterr(lundia, 'F006', ' ')
        !
        error = .true.
        goto 9999
@@ -338,7 +338,7 @@ subroutine reafou(error     ,lundia    ,lunfou    ,filfou    ,kmax      , &
        !
        read (record(il(7):ir(7)), fmt) flayno(ifou)
        if (flayno(ifou)>kmax) then
-          call prterr(lundia, 'F007', ' ', gdp)
+          call prterr(lundia, 'F007', ' ')
           !
           error = .true.
           goto 9999
@@ -359,7 +359,7 @@ subroutine reafou(error     ,lundia    ,lunfou    ,filfou    ,kmax      , &
           if (fnumcy(ifou)>0) then
              fnumcy(ifou) = 0
              foufas(ifou) = 0.
-             call prterr(lundia, 'F008', 'max', gdp)
+             call prterr(lundia, 'F008', 'max')
           !
           endif
        elseif (cdummy=='min') then
@@ -367,7 +367,7 @@ subroutine reafou(error     ,lundia    ,lunfou    ,filfou    ,kmax      , &
           if (fnumcy(ifou)>0) then
              fnumcy(ifou) = 0
              foufas(ifou) = 0.
-             call prterr(lundia, 'F008', 'min', gdp)
+             call prterr(lundia, 'F008', 'min')
           !
           endif
        !
@@ -381,7 +381,7 @@ subroutine reafou(error     ,lundia    ,lunfou    ,filfou    ,kmax      , &
           elseif (cdummy /= 'mean') then
              write (message, '(3a,i0,2a)') 'in file ', trim(filfou), ' line ', linenumber, &
                    & ': expecting min, max, mean, yes or no, instead of ', trim(cdummy)
-             call prterr(lundia, 'P004', trim(message), gdp)
+             call prterr(lundia, 'P004', trim(message))
              !
              error = .true.
              goto 9999
@@ -390,7 +390,7 @@ subroutine reafou(error     ,lundia    ,lunfou    ,filfou    ,kmax      , &
           if (cdummy /= 'mean') then
              write (message, '(3a,i0,2a)') 'in file ', trim(filfou), ' line ', linenumber, &
                    & ': expecting min, max or mean, instead of ', trim(cdummy)
-             call prterr(lundia, 'P004', trim(message), gdp)
+             call prterr(lundia, 'P004', trim(message))
              !
              error = .true.
              goto 9999

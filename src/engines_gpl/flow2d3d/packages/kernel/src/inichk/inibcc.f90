@@ -128,7 +128,7 @@ subroutine inibcc(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
        ! error or EOF (IOCOND <> 0), not allowed
        !
        if (iocond/=0) then
-          call prterr(lundia    ,'G007'    ,filnam(:8 + lrid)    ,gdp       )
+          call prterr(lundia    ,'G007'    ,filnam(:8 + lrid)    )
           !
           error = .true.
           goto 9999
@@ -228,25 +228,25 @@ subroutine inibcc(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
              !
              if (tprofc(ito, istsc)(:7)=='uniform') then
                 if (nparrd/=3) then
-                   call prterr(lundia    ,'V097'    ,' '       ,gdp       )
+                   call prterr(lundia    ,'V097'    ,' '       )
                    error = .true.
                    goto 9999
                 endif
              elseif (tprofc(ito, istsc)(:6)=='linear') then
                 if (nparrd/=5) then
-                   call prterr(lundia    ,'V097'    ,' '       ,gdp       )
+                   call prterr(lundia    ,'V097'    ,' '       )
                    error = .true.
                    goto 9999
                 endif
              elseif (tprofc(ito, istsc)(:4)=='step') then
                 if (nparrd/=6) then
-                   call prterr(lundia    ,'V097'    ,' '       ,gdp       )
+                   call prterr(lundia    ,'V097'    ,' '       )
                    error = .true.
                    goto 9999
                 endif
              elseif (tprofc(ito, istsc)=='3d-profile') then
                 if (nparrd/=1 + 2*kmax) then
-                   call prterr(lundia    ,'V097'    ,' '       ,gdp       )
+                   call prterr(lundia    ,'V097'    ,' '       )
                    error = .true.
                    goto 9999
                 endif
@@ -264,7 +264,7 @@ subroutine inibcc(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
              call small(namhlp    ,20        )
              do np = 2, npconc
                 if (parnam(np)(:20)/=namhlp) then
-                   call prterr(lundia    ,'V096'    ,parnam(np)(:20)      ,gdp       )
+                   call prterr(lundia    ,'V096'    ,parnam(np)(:20)      )
                    !
                    error = .true.
                    goto 9999
@@ -272,7 +272,7 @@ subroutine inibcc(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
              enddo
              if (tprofc(ito, istsc)(:4)=='step') then
                 if (parnam(nparrd)(:13)/='discontinuity') then
-                   call prterr(lundia    ,'V096'    ,parnam(nparrd)       ,gdp       )
+                   call prterr(lundia    ,'V096'    ,parnam(nparrd)       )
                    !
                    error = .true.
                    goto 9999

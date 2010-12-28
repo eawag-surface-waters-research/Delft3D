@@ -144,7 +144,7 @@ subroutine rdtrafrm(error, lsedtot, gdp)
        if (istat==0) allocate (sveqtran%dll_strings_settle (max_strings_settle ), stat = istat)
        !
        if (istat/=0) then
-          call prterr(lundia, 'U021', 'RdTraFrm: memory alloc error', gdp)
+          call prterr(lundia, 'U021', 'RdTraFrm: memory alloc error')
           call d3stop(1, gdp)
        endif
        !
@@ -221,7 +221,7 @@ subroutine rdtrafrm(error, lsedtot, gdp)
        ! keyword not specified
        !
        errmsg = 'No transport formula given. Using Van Rijn 1993 by default.'
-       call prterr(lundia    ,'G051'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'G051'    ,errmsg    )
        goto 9999
     endif
     call rdtrafrm0(error  , iform(1)     , npar           , par(1,1), filtrn, &

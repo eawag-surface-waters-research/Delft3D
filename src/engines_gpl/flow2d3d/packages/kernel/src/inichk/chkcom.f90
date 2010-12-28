@@ -159,9 +159,9 @@ subroutine chkcom(lundia    ,error     ,neffil    ,soort     ,gdp       )
             error = .true.
             errnr = 'U021'
             ierror = neferr(0, errmsg)
-            call prterr(lundia    ,errnr     ,errmsg    ,gdp       )
+            call prterr(lundia    ,errnr     ,errmsg    )
             write (errmsg, '(5a)') 'Incomplete COM-files #',trim(datnam),'/',trim(defnam),'# exist'
-            call prterr(lundia    ,errnr     ,errmsg    ,gdp       )
+            call prterr(lundia    ,errnr     ,errmsg    )
             errmsg = 'Try removing the COM-files first'
        endif
     endif
@@ -180,6 +180,6 @@ subroutine chkcom(lundia    ,error     ,neffil    ,soort     ,gdp       )
     !
  9999 continue
     if (error) then
-       call prterr(lundia    ,errnr     ,errmsg    ,gdp       )
+       call prterr(lundia    ,errnr     ,errmsg    )
     endif
 end subroutine chkcom

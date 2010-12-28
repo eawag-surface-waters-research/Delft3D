@@ -92,7 +92,7 @@ subroutine flsfil(lundia    ,error     ,filfls    ,mmax      ,nmax      , &
               & pship     ,gdp       )
     if (error) then
        write (message,'(3a,i2,2a)') 'error reading file ', trim(filfls)
-       call prterr(lundia, 'U021', trim(message), gdp)
+       call prterr(lundia, 'U021', trim(message))
        call d3stop(1, gdp)          
     endif
     !

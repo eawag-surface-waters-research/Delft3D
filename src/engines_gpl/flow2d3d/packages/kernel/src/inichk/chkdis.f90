@@ -119,20 +119,20 @@ subroutine chkdis(lundia    ,error     ,nsrc      ,zmodel    ,nmax      , &
           !
           if (m<1 .or. n<1) then
              errmsg = 'Discharge location ' // namsrc(nr)
-             call prterr(lundia    ,'U007'    ,errmsg    ,gdp       )
+             call prterr(lundia    ,'U007'    ,errmsg    )
              write (lundia, '(20x,'' (m,n,k) = '',3i4)') m, n, k
              error = .true.
              exit
           endif
           if (m>mmax .or. n>nmaxus) then
              errmsg = 'Discharge location ' // namsrc(nr)
-             call prterr(lundia    ,'U140'    ,errmsg    ,gdp       )
+             call prterr(lundia    ,'U140'    ,errmsg    )
              write (lundia, '(20x,'' (m,n,k) = '',3i4)') m, n, k
              error = .true.
              exit
           endif
           if (k<0 .or. k>kmax) then
-             call prterr(lundia    ,'V052'    ,namsrc(nr),gdp       )
+             call prterr(lundia    ,'V052'    ,namsrc(nr))
              write (lundia, '(20x,'' (m,n,k) = '',3i4)') m, n, k
              error = .true.
           endif
@@ -140,7 +140,7 @@ subroutine chkdis(lundia    ,error     ,nsrc      ,zmodel    ,nmax      , &
           ! Test discharge is inner active point (KCS = 1)
           !
           if (kcs(n, m)/=1 .and. kcs(n, m)/=-1) then
-             call prterr(lundia    ,'V051'    ,namsrc(nr),gdp       )
+             call prterr(lundia    ,'V051'    ,namsrc(nr))
              write (lundia, '(20x,'' (m,n,k) = '',3i4)') m, n, k
              error = .true.
           endif

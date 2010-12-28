@@ -212,7 +212,7 @@ subroutine wrboun(comfil    ,lundia    ,error     ,norow     ,nocol     , &
  9999 continue
     if (ierr /= 0) then
        ierr = neferr(0, errmsg)
-       call prterr(lundia, 'P004', errmsg, gdp)
+       call prterr(lundia, 'P004', errmsg)
        error = .true.
     endif
 end subroutine wrboun

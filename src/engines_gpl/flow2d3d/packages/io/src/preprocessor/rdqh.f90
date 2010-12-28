@@ -157,11 +157,11 @@ subroutine rdqh(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
        !
        if (iocond/=0) then
           error = .true.
-          call prterr(lundia    ,'G007'    ,filbcq    ,gdp       )
+          call prterr(lundia    ,'G007'    ,filbcq    )
           !
           if (iocond<0) then
              if (nn<ntoq) then
-                call prterr(lundia    ,'U021'    ,'not for all QH boundaries BCQ data defined'          ,gdp       )
+                call prterr(lundia    ,'U021'    ,'not for all QH boundaries BCQ data defined'          )
              !
              endif
           endif
@@ -186,7 +186,7 @@ subroutine rdqh(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
        ! Test number of parameters read incombination with defined
        !
        if (nparrd/=2) then
-          call prterr(lundia    ,'V097'    ,' '       ,gdp       )
+          call prterr(lundia    ,'V097'    ,' '       )
           !
           error = .true.
           exit
@@ -196,7 +196,7 @@ subroutine rdqh(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
        !
        do np = 1, nparrd
           if (parrd(np)(1:20)/=parnam(np)(1:20)) then
-             call prterr(lundia    ,'V096'    ,parrd(np) ,gdp       )
+             call prterr(lundia    ,'V096'    ,parrd(np) )
              !
              error = .true.
              goto 9999
@@ -265,7 +265,7 @@ subroutine rdqh(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
           !
           if (ier<=0) then
              error = .true.
-             call prterr(lundia    ,'G007'    ,filbcq    ,gdp       )
+             call prterr(lundia    ,'G007'    ,filbcq    )
              !
              write (lundia, '(a,a)') 'RECORD: ', record(:72)
              goto 9999
@@ -275,7 +275,7 @@ subroutine rdqh(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
           !
           if ( isnan(qrd) ) then 
             write(errmsg,'(a,a)') 'NaN in ',filbcq
-            call prterr(lundia    ,'P004'    ,errmsg      ,gdp       )
+            call prterr(lundia    ,'P004'    ,errmsg      )
             error = .true.
             goto 9999
           endif
@@ -286,7 +286,7 @@ subroutine rdqh(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
              qold = qrd
           elseif (qrd<qold) then
              error = .true.
-             call prterr(lundia    ,'U021'    ,'Discharges in QH relation must be increasing.'       ,gdp       )
+             call prterr(lundia    ,'U021'    ,'Discharges in QH relation must be increasing.'       )
              !
              write (lundia, '(a,a)') 'RECORD: ', record(:72)
              goto 9999
@@ -303,7 +303,7 @@ subroutine rdqh(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
           !
           if ( isnan(zrd) ) then 
             write(errmsg,'(a,a)') 'NaN in ',filbcq
-            call prterr(lundia    ,'P004'    ,errmsg      ,gdp       )
+            call prterr(lundia    ,'P004'    ,errmsg      )
             error = .true.
             goto 9999
           endif
@@ -315,7 +315,7 @@ subroutine rdqh(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
           elseif (((zrd<zold) .and. (qrd>0)) .or. ((zrd>zold) .and. (qrd<0)))   &
                 & then
              error = .true.
-             call prterr(lundia    ,'U021'    ,'Waterlevel must increase for increasing abs(Q).'     ,gdp       )
+             call prterr(lundia    ,'U021'    ,'Waterlevel must increase for increasing abs(Q).'     )
              !
              write (lundia, '(a,a)') 'RECORD: ', record(:72)
              goto 9999
@@ -326,7 +326,7 @@ subroutine rdqh(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
           !
           if (ier<=0) then
              error = .true.
-             call prterr(lundia    ,'G007'    ,filbcq    ,gdp       )
+             call prterr(lundia    ,'G007'    ,filbcq    )
              !
              write (lundia, '(a,a)') 'RECORD: ', record(:72)
              goto 9999

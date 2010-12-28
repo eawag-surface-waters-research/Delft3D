@@ -223,18 +223,18 @@ subroutine disbub(kmax      ,nsrcd     ,nsrc      ,nxbub    , &
           zbubl(ibub) = -dps(nm)
           zb          = -dps(nm)
           write (message,'(a,i0,a)') 'Bubble screen ',ibub ,' is moved from below bottom to bottom.'
-          call prterr(lundia, 'U190', trim(message), gdp)
+          call prterr(lundia, 'U190', trim(message))
        endif
        if (kbub < 3) then
           if (stopOnError) then
              write (error,'(2a,i0,2a)') 'Not enough layers above injection point', &
                   & ' at bubble screen ',ibub , '. Increase the number of layers.'
-             call prterr(lundia, 'P004', trim(error), gdp)
+             call prterr(lundia, 'P004', trim(error))
              call d3stop(1, gdp)
           else
              write (message,'(2a,i0,2a)') 'Not enough layers above injection point', &
                   & ' at bubble screen ',ibub , '. The injection point is lowered one layer.'
-             call prterr(lundia, 'U190', trim(message), gdp)
+             call prterr(lundia, 'U190', trim(message))
              !
              ! Increase kbub one layer
              !
@@ -288,12 +288,12 @@ subroutine disbub(kmax      ,nsrcd     ,nsrc      ,nxbub    , &
           if (stopOnError) then
              write (error,'(2a,i0,2a)') 'Not enough layers above injection point', &
                   & ' at bubble screen ',ibub , '. Increase the number of layers.'
-             call prterr(lundia, 'P004', trim(error), gdp)
+             call prterr(lundia, 'P004', trim(error))
              call d3stop(1, gdp)
           else
              write (error,'(2a,i0,2a)') 'Not enough layers above injection point', &
                   & ' at bubble screen ',ibub , '. Increase the number of layers.'
-             call prterr(lundia, 'U190', trim(message), gdp)
+             call prterr(lundia, 'U190', trim(message))
              !
              ! Increase kbubx one layer
              !
@@ -411,7 +411,7 @@ subroutine disbub(kmax      ,nsrcd     ,nsrc      ,nxbub    , &
           call nm_to_n_and_m(nm, n, m, gdp)
           write (message,'(a,i0,a,e12.4,a,i0,a,i0,a)') 'Vertical sum of bubble_discharges ', &
                  & ibub, ' is not zero (',hsum, ') at (m,n)=(', n, ',',m,')'
-          call prterr(lundia, 'U190', trim(message), gdp)
+          call prterr(lundia, 'U190', trim(message))
        endif
     enddo
 end subroutine disbub

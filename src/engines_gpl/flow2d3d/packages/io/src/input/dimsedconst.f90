@@ -110,7 +110,7 @@ subroutine dimsedconst(lundia    ,error     ,sedim     ,const     , &
                 error   = .true.
                 write (lundia,*) keyword,'=#',namc,'#'
                 message = 'Namc may not contain constituents behind empty lines'
-                call prterr(lundia, 'U021', trim(message), gdp)
+                call prterr(lundia, 'U021', trim(message))
                 call d3stop(1, gdp)
              endif
              lconst = i
@@ -139,7 +139,7 @@ subroutine dimsedconst(lundia    ,error     ,sedim     ,const     , &
           if (i > lsed) then
              error   = .true.
              message = 'Namc may not contain sediments behind non-sediment constituents'
-             call prterr(lundia, 'U021', trim(message), gdp)
+             call prterr(lundia, 'U021', trim(message))
              call d3stop(1, gdp)
           endif
        else
@@ -154,7 +154,7 @@ subroutine dimsedconst(lundia    ,error     ,sedim     ,const     , &
        if (lsed > 0) then
           error   = .true.
           message = 'Sediments specified in Namc, but no sediment file specified'
-          call prterr(lundia, 'U021', trim(message), gdp)
+          call prterr(lundia, 'U021', trim(message))
           call d3stop(1, gdp)
        else
           !
@@ -177,11 +177,11 @@ subroutine dimsedconst(lundia    ,error     ,sedim     ,const     , &
     if (istat /= 0) then
        select case (istat)
        case(1)
-          call prterr(lundia, 'G004', trim(filsed), gdp)
+          call prterr(lundia, 'G004', trim(filsed))
        case(3)
-          call prterr(lundia, 'G006', trim(filsed), gdp)
+          call prterr(lundia, 'G006', trim(filsed))
        case default
-          call prterr(lundia, 'G007', trim(filsed), gdp)
+          call prterr(lundia, 'G007', trim(filsed))
        endselect
        call d3stop(1, gdp)
     endif
@@ -221,7 +221,7 @@ subroutine dimsedconst(lundia    ,error     ,sedim     ,const     , &
                                  & '# is specified in Namc in the md-file', &
                                  & ' but is not found in sediment file ',   &
                                  & trim(filsed)
-             call prterr(lundia, 'U021', trim(message), gdp)
+             call prterr(lundia, 'U021', trim(message))
              call d3stop(1, gdp)
           endif
        enddo
@@ -255,7 +255,7 @@ subroutine dimsedconst(lundia    ,error     ,sedim     ,const     , &
                 write(message,'(5a)') 'Sediment #',trim(parname),         &
                                     & '# is specified more than once in', &
                                     & ' sediment file ',trim(filsed)
-                call prterr(lundia, 'U021', trim(message), gdp)
+                call prterr(lundia, 'U021', trim(message))
                 call d3stop(1, gdp)
              endif
              namsedim(j) = parname(1:20)
@@ -307,7 +307,7 @@ subroutine dimsedconst(lundia    ,error     ,sedim     ,const     , &
        deallocate(namsedim)
        write(message,'(i4,2a)') lsedbl, ' bed load fraction(s) found in sediment file: ', &
                               & trim(filsed)
-       call prterr(lundia, 'G051', trim(message), gdp)
+       call prterr(lundia, 'G051', trim(message))
        !
        if (error) then
           call d3stop(1, gdp)

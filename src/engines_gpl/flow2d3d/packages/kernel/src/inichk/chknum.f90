@@ -90,7 +90,7 @@ subroutine chknum(lundia    ,error     ,roumet    ,rouflo    ,gdp)
        rouflo = 'Z   '
     else
        error = .true.
-       call prterr(lundia    ,'V045'    ,' '       ,gdp       )
+       call prterr(lundia    ,'V045'    ,' '       )
     endif
     !
     ! Define TIMJAN
@@ -110,11 +110,11 @@ subroutine chknum(lundia    ,error     ,roumet    ,rouflo    ,gdp)
     if (iter1 < defaultiter) then
        iter1 = defaultiter
        write(message,'(i0)') iter1
-       call prterr(lundia    ,'V071'    ,trim(message)    ,gdp       )
+       call prterr(lundia    ,'V071'    ,trim(message)    )
     endif
     if (iter1 > defaultiter) then
        write(message,'(i0)') iter1
-       call prterr(lundia    ,'U005'    ,trim(message)  ,gdp       )
+       call prterr(lundia    ,'U005'    ,trim(message)  )
     endif
     !
     ! Check DRYFLC, if DRYFLC < 0.02 m an inconsistency for drying and
@@ -122,10 +122,10 @@ subroutine chknum(lundia    ,error     ,roumet    ,rouflo    ,gdp)
     ! Therefore will be set on 0.02
     !
     if (dryflc <= 0.0) then
-       call prterr(lundia    ,'V074'    ,' '       ,gdp       )
+       call prterr(lundia    ,'V074'    ,' '       )
        dryflc = 0.02
     endif
     if (dryflc > 1.0) then
-       call prterr(lundia    ,'V073'    ,' '       ,gdp       )
+       call prterr(lundia    ,'V073'    ,' '       )
     endif
 end subroutine chknum

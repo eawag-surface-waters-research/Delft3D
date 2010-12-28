@@ -70,7 +70,7 @@ function exifil(file      ,lundia    ,errornr    ,gdp       )
     !
     inquire (file = file(:ipos), exist = ex)
     if (.not.ex) then
-       call prterr(lundia    ,errornr    ,file(:ipos)          ,gdp       )
+       call prterr(lundia    ,errornr    ,file(:ipos)          )
        !
        exifil = .false.
     else

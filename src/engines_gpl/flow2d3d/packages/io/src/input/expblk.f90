@@ -91,7 +91,7 @@ subroutine expblk(lundia    ,ittaru    ,rttaru    ,nttaru    ,iblbeg    , &
           !
           icur = icur + 1
           if (icur>nttaru) then
-             call prterr(lundia    ,'J007'    ,' '       ,gdp)
+             call prterr(lundia    ,'J007'    ,' '       )
              error = .true.
              goto 9999
           endif
@@ -115,7 +115,7 @@ subroutine expblk(lundia    ,ittaru    ,rttaru    ,nttaru    ,iblbeg    , &
              !
              icur = icur + 1
              if (icur>nttaru) then
-                call prterr(lundia    ,'J007'    ,' '       ,gdp)
+                call prterr(lundia    ,'J007'    ,' '       )
                 error = .true.
                 goto 9999
              endif

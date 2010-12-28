@@ -186,7 +186,7 @@ subroutine rdmeteo(gdp, ecwind)
             call prop_get_string(gdp%mdfile_ptr,'*','Wndgrd',value)
             if ( index(value,'a')==0 .and. index(value,'A')==0 ) then
                if (parll) then
-                  call prterr(lundia, 'U021', 'Combination of parallel and "wind and pressure on the hydrodynamic grid" is not available', gdp)
+                  call prterr(lundia, 'U021', 'Combination of parallel and "wind and pressure on the hydrodynamic grid" is not available')
                   call d3stop(1, gdp)
                endif
                !
@@ -195,7 +195,7 @@ subroutine rdmeteo(gdp, ecwind)
                if (patmECItemId == -1) then
                   success = addmeteoitem(gdp%runid, filename, sferic, mmax, nmaxus)
                   call checkmeteoresult(success, gdp)
-                  call prterr(lundia, 'G051', 'Wind and pressure specified on the hydrodynamic grid', gdp)
+                  call prterr(lundia, 'G051', 'Wind and pressure specified on the hydrodynamic grid')
                   p_file = .true.
                   u_file = .true.
                   v_file = .true.
@@ -215,12 +215,12 @@ subroutine rdmeteo(gdp, ecwind)
                ! do not use the file specified in Filwnd
                !
                write(message,'(3a)') 'File ',trim(filename),' is not used'
-               call prterr(lundia, 'Z013', trim(message), gdp)
+               call prterr(lundia, 'Z013', trim(message))
             endif
          elseif (index(value,'n')>=1 .or. index(value,'N')>=1) then
             success = addmeteoitem(gdp%runid, filename)
             call checkmeteoresult(success, gdp)
-            call prterr(lundia, 'G051', 'Uniform wind and pressure specified', gdp)
+            call prterr(lundia, 'G051', 'Uniform wind and pressure specified')
             p_file = .true.
             u_file = .true.
             v_file = .true.
@@ -236,9 +236,9 @@ subroutine rdmeteo(gdp, ecwind)
          success = addmeteoitem(gdp%runid, filename, sferic, mmax, nmaxus)
          call checkmeteoresult(success, gdp)
          if (p_file .and. u_file .and. v_file) then
-            call prterr(lundia, 'G051', 'Multiple input for wind and pressure, using input specified on the hydrodynamic grid', gdp)
+            call prterr(lundia, 'G051', 'Multiple input for wind and pressure, using input specified on the hydrodynamic grid')
          else
-            call prterr(lundia, 'G051', 'Wind and pressure specified on the hydrodynamic grid', gdp)
+            call prterr(lundia, 'G051', 'Wind and pressure specified on the hydrodynamic grid')
             p_file = .true.
             u_file = .true.
             v_file = .true.
@@ -251,9 +251,9 @@ subroutine rdmeteo(gdp, ecwind)
          success = addmeteoitem(gdp%runid, filename, sferic)
          call checkmeteoresult(success, gdp)
          if (u_file) then
-            call prterr(lundia, 'G051', 'Multiple input for wind (U component), using input specified on a separate equidistant grid', gdp)
+            call prterr(lundia, 'G051', 'Multiple input for wind (U component), using input specified on a separate equidistant grid')
          else
-            call prterr(lundia, 'G051', 'Wind (U component) specified on a separate equidistant grid', gdp)
+            call prterr(lundia, 'G051', 'Wind (U component) specified on a separate equidistant grid')
             u_file = .true.
          endif
       endif
@@ -264,9 +264,9 @@ subroutine rdmeteo(gdp, ecwind)
          success = addmeteoitem(gdp%runid, filename, sferic)
          call checkmeteoresult(success, gdp)
          if (v_file) then
-            call prterr(lundia, 'G051', 'Multiple input for wind (V component), using input specified on a separate equidistant grid', gdp)
+            call prterr(lundia, 'G051', 'Multiple input for wind (V component), using input specified on a separate equidistant grid')
          else
-            call prterr(lundia, 'G051', 'Wind (V component) specified on a separate equidistant grid', gdp)
+            call prterr(lundia, 'G051', 'Wind (V component) specified on a separate equidistant grid')
             v_file = .true.
          endif
       endif
@@ -277,9 +277,9 @@ subroutine rdmeteo(gdp, ecwind)
          success = addmeteoitem(gdp%runid, filename, sferic)
          call checkmeteoresult(success, gdp)
          if (p_file) then
-            call prterr(lundia, 'G051', 'Multiple input for air pressure, using input specified on a separate equidistant grid', gdp)
+            call prterr(lundia, 'G051', 'Multiple input for air pressure, using input specified on a separate equidistant grid')
          else
-            call prterr(lundia, 'G051', 'Air pressure specified on a separate equidistant grid', gdp)
+            call prterr(lundia, 'G051', 'Air pressure specified on a separate equidistant grid')
             p_file = .true.
          endif
       endif
@@ -290,9 +290,9 @@ subroutine rdmeteo(gdp, ecwind)
          success = addmeteoitem(gdp%runid, filename, sferic, mmax, nmax)
          call checkmeteoresult(success, gdp)
          if (u_file) then
-            call prterr(lundia, 'G051', 'Multiple input for wind (U component), using input specified on a separate curvilinear grid', gdp)
+            call prterr(lundia, 'G051', 'Multiple input for wind (U component), using input specified on a separate curvilinear grid')
          else
-            call prterr(lundia, 'G051', 'Wind (U component) specified on a separate curvilinear grid', gdp)
+            call prterr(lundia, 'G051', 'Wind (U component) specified on a separate curvilinear grid')
             u_file = .true.
          endif
       endif
@@ -303,9 +303,9 @@ subroutine rdmeteo(gdp, ecwind)
          success = addmeteoitem(gdp%runid, filename, sferic, mmax, nmax)
          call checkmeteoresult(success, gdp)
          if (v_file) then
-            call prterr(lundia, 'G051', 'Multiple input for wind (V component), using input specified on a separate curvilinear grid', gdp)
+            call prterr(lundia, 'G051', 'Multiple input for wind (V component), using input specified on a separate curvilinear grid')
          else
-            call prterr(lundia, 'G051', 'Wind (V component) specified on a separate curvilinear grid', gdp)
+            call prterr(lundia, 'G051', 'Wind (V component) specified on a separate curvilinear grid')
             v_file = .true.
          endif
       endif
@@ -316,9 +316,9 @@ subroutine rdmeteo(gdp, ecwind)
          success = addmeteoitem(gdp%runid, filename, sferic, mmax, nmax)
          call checkmeteoresult(success, gdp)
          if (p_file) then
-            call prterr(lundia, 'G051', 'Multiple input for air pressure, using input specified on a separate curvilinear grid', gdp)
+            call prterr(lundia, 'G051', 'Multiple input for air pressure, using input specified on a separate curvilinear grid')
          else
-            call prterr(lundia, 'G051', 'Air pressure specified on a separate curvilinear grid', gdp)
+            call prterr(lundia, 'G051', 'Air pressure specified on a separate curvilinear grid')
             p_file = .true.
          endif
          message = getmeteomessage()
@@ -330,9 +330,9 @@ subroutine rdmeteo(gdp, ecwind)
          success = addmeteoitem(gdp%runid, filename, sferic)
          call checkmeteoresult(success, gdp)
          if (p_file .and. u_file .and. v_file) then
-            call prterr(lundia, 'G051', 'Wind and pressure specified on a Spiderweb grid added to meteo input', gdp)
+            call prterr(lundia, 'G051', 'Wind and pressure specified on a Spiderweb grid added to meteo input')
          else
-            call prterr(lundia, 'G051', 'Wind and pressure specified on a Spiderweb grid', gdp)
+            call prterr(lundia, 'G051', 'Wind and pressure specified on a Spiderweb grid')
             p_file = .true.
             u_file = .true.
             v_file = .true.
@@ -344,17 +344,17 @@ subroutine rdmeteo(gdp, ecwind)
       if (p_file .or. u_file .or. v_file) then
          if (.not. p_file) then
             write(message,'(a)') 'Wind specification is incomplete; air pressure is missing'
-            call prterr(lundia, 'U021', trim(message), gdp)
+            call prterr(lundia, 'U021', trim(message))
             call d3stop(1, gdp)
          endif
          if (.not. u_file) then
             write(message,'(a)') 'Wind specification is incomplete; U component is missing'
-            call prterr(lundia, 'U021', trim(message), gdp)
+            call prterr(lundia, 'U021', trim(message))
             call d3stop(1, gdp)
          endif
          if (.not. v_file) then
             write(message,'(a)') 'Wind specification is incomplete; V component is missing'
-            call prterr(lundia, 'U021', trim(message), gdp)
+            call prterr(lundia, 'U021', trim(message))
             call d3stop(1, gdp)
          endif
       endif   
@@ -370,12 +370,12 @@ subroutine rdmeteo(gdp, ecwind)
    call prop_get_string(gdp%mdfile_ptr,'*','Fwndgr',filename)
    if (filename /= ' ') then
       success = addmeteoitem(gdp%runid, filename, sferic, mmax, nmax)
-      call prterr(lundia, 'G051', 'Relative air humidity specified on a separate curvilinear grid', gdp)
+      call prterr(lundia, 'G051', 'Relative air humidity specified on a separate curvilinear grid')
    else
       call prop_get_string(gdp%mdfile_ptr,'*','Filwr',filename)
       if (filename /= ' ') then
          success = addmeteoitem(gdp%runid, filename, sferic)
-         call prterr(lundia, 'G051', 'Relative air humidity specified on a separate equidistant grid', gdp)
+         call prterr(lundia, 'G051', 'Relative air humidity specified on a separate equidistant grid')
       endif
    endif
    if (filename /= ' ') then
@@ -383,7 +383,7 @@ subroutine rdmeteo(gdp, ecwind)
       call checkmeteoresult(success, gdp)
       allocate (gdp%gdheat%rhumarr(gdp%d%nmlb:gdp%d%nmub), stat = istat)
       if (istat/=0) then
-         call prterr(lundia, 'U021', 'Rdmeteo: memory alloc error', gdp)
+         call prterr(lundia, 'U021', 'Rdmeteo: memory alloc error')
          call d3stop(1, gdp)
       endif
    else
@@ -396,12 +396,12 @@ subroutine rdmeteo(gdp, ecwind)
    call prop_get_string(gdp%mdfile_ptr,'*','Fwndgt',filename)
    if (filename /= ' ') then
       success = addmeteoitem(gdp%runid, filename, sferic, mmax, nmax)
-      call prterr(lundia, 'G051', 'Air temperature specified on a separate curvilinear grid', gdp)
+      call prterr(lundia, 'G051', 'Air temperature specified on a separate curvilinear grid')
    else
       call prop_get_string(gdp%mdfile_ptr,'*','Filwt',filename)
       if (filename /= ' ') then
          success = addmeteoitem(gdp%runid, filename, sferic)
-         call prterr(lundia, 'G051', 'Air temperature specified on a separate equidistant grid', gdp)
+         call prterr(lundia, 'G051', 'Air temperature specified on a separate equidistant grid')
       endif
    endif
    if (filename /= ' ') then
@@ -409,7 +409,7 @@ subroutine rdmeteo(gdp, ecwind)
       call checkmeteoresult(success, gdp)
       allocate (gdp%gdheat%tairarr(gdp%d%nmlb:gdp%d%nmub), stat = istat)
       if (istat/=0) then
-         call prterr(lundia, 'U021', 'Rdmeteo: memory alloc error', gdp)
+         call prterr(lundia, 'U021', 'Rdmeteo: memory alloc error')
          call d3stop(1, gdp)
       endif
    else
@@ -422,12 +422,12 @@ subroutine rdmeteo(gdp, ecwind)
    call prop_get_string(gdp%mdfile_ptr,'*','Fwndgc',filename)
    if (filename /= ' ') then
       success = addmeteoitem(gdp%runid, filename, sferic, mmax, nmax)
-      call prterr(lundia, 'G051', 'Air cloudiness specified on a separate curvilinear grid', gdp)
+      call prterr(lundia, 'G051', 'Air cloudiness specified on a separate curvilinear grid')
    else
       call prop_get_string(gdp%mdfile_ptr,'*','Filwc',filename)
       if (filename /= ' ') then
          success = addmeteoitem(gdp%runid, filename, sferic)
-         call prterr(lundia, 'G051', 'Air cloudiness specified on a separate equidistant grid', gdp)
+         call prterr(lundia, 'G051', 'Air cloudiness specified on a separate equidistant grid')
       endif
    endif
    if (filename /= ' ') then
@@ -435,7 +435,7 @@ subroutine rdmeteo(gdp, ecwind)
       call checkmeteoresult(success, gdp)
       allocate (gdp%gdheat%clouarr(gdp%d%nmlb:gdp%d%nmub), stat = istat)
       if (istat/=0) then
-         call prterr(lundia, 'U021', 'Rdmeteo: memory alloc error', gdp)
+         call prterr(lundia, 'U021', 'Rdmeteo: memory alloc error')
          call d3stop(1, gdp)
       endif
    else
@@ -448,7 +448,7 @@ subroutine rdmeteo(gdp, ecwind)
    call prop_get_logical(gdp%mdfile_ptr,'*','Wndint',interpolate)
    if (.not. interpolate) then
       call meteoblockint()
-      call prterr(lundia, 'G051', 'No interpolation on meteo data', gdp)
+      call prterr(lundia, 'G051', 'No interpolation on meteo data')
    endif
    !
    ! Check whether meteo data is available for the complete time interval
@@ -461,7 +461,7 @@ subroutine rdmeteo(gdp, ecwind)
    if (rhum_file) then
       if (ktemp/=4 .and. ktemp/=5) then
          write(message,'(a,i2)') 'Relative humidity is not used in heat model (ktemp) = ',ktemp
-         call prterr(lundia, 'U021', trim(message), gdp)
+         call prterr(lundia, 'U021', trim(message))
          call d3stop(1, gdp)
       endif
    endif
@@ -471,7 +471,7 @@ subroutine rdmeteo(gdp, ecwind)
    if (tair_file) then
       if (ktemp/=4 .and. ktemp/=5) then
          write(message,'(a,i2)') 'Air temperature is not used in heat model (ktemp) = ',ktemp
-         call prterr(lundia, 'U021', trim(message), gdp)
+         call prterr(lundia, 'U021', trim(message))
          call d3stop(1, gdp)
       endif
    endif
@@ -481,7 +481,7 @@ subroutine rdmeteo(gdp, ecwind)
    if (clou_file) then
       if (ktemp /= 5) then
          write(message,'(a,i2)') 'Cloudiness is not used in heat model (ktemp) = ',ktemp
-         call prterr(lundia, 'U021', trim(message), gdp)
+         call prterr(lundia, 'U021', trim(message))
          call d3stop(1, gdp)
       endif
    endif
@@ -493,22 +493,22 @@ subroutine rdmeteo(gdp, ecwind)
       if (solrad_read) then
          write(message,'(2a)') 'Meteo input on a separate grid ', &
                              & 'is not allowed in combination with input of solar radiation in .tem file.'
-         call prterr(lundia, 'U021', trim(message), gdp)
+         call prterr(lundia, 'U021', trim(message))
          call d3stop(1, gdp)
       endif
       if (.not. rhum_file) then
          write(message,'(a)') 'Air specification is incomplete; relative humidity is missing'
-         call prterr(lundia, 'U021', trim(message), gdp)
+         call prterr(lundia, 'U021', trim(message))
          call d3stop(1, gdp)
       endif
       if (.not. tair_file) then
          write(message,'(a)') 'Air specification is incomplete; temperature is missing'
-         call prterr(lundia, 'U021', trim(message), gdp)
+         call prterr(lundia, 'U021', trim(message))
          call d3stop(1, gdp)
       endif
       if (ktemp==5 .and. .not. clou_file) then
          write(message,'(a)') 'Air specification is incomplete; cloudiness is missing'
-         call prterr(lundia, 'U021', trim(message), gdp)
+         call prterr(lundia, 'U021', trim(message))
          call d3stop(1, gdp)
       endif
    endif
@@ -518,7 +518,7 @@ subroutine rdmeteo(gdp, ecwind)
    if (ktemp==4 .or. ktemp==5) then
       allocate (gdp%gdheat%secchi(gdp%d%nmlb:gdp%d%nmub), stat = istat)
       if (istat/=0) then
-         call prterr(lundia, 'U021', 'Rdproc: memory alloc error', gdp)
+         call prterr(lundia, 'U021', 'Rdproc: memory alloc error')
          call d3stop(1, gdp)
       endif
       !
@@ -561,7 +561,7 @@ subroutine rdmeteo(gdp, ecwind)
             ! old parametrisation: secchi = 1.7/0.127
             secchi = 2.0_fp
             write(message, '(a,f12.7,a)') 'Heat model: Default value used for Secchi depth: ', secchi(1), ' m'
-            call prterr(lundia, 'G051', trim(message), gdp)
+            call prterr(lundia, 'G051', trim(message))
          else
             !
             ! secchi not defined by user;
@@ -569,7 +569,7 @@ subroutine rdmeteo(gdp, ecwind)
             !
             secchi = 1.7_fp/extinc
             write(message, '(a,f12.7)') 'Heat model: Extinc specified to be ', extinc
-            call prterr(lundia, 'G051', trim(message), gdp)
+            call prterr(lundia, 'G051', trim(message))
          endif
       !
       ! secchi is defined by user;
@@ -581,7 +581,7 @@ subroutine rdmeteo(gdp, ecwind)
          else
             write(message, '(a,a)') 'Heat model: Extinc value skipped; Secchi depth read from ', trim(filename)
          endif
-         call prterr(lundia, 'G051', trim(message), gdp)          
+         call prterr(lundia, 'G051', trim(message))
          extinc = -1.0_fp
       else
          if (filename == ' ') then
@@ -589,7 +589,7 @@ subroutine rdmeteo(gdp, ecwind)
          else
             write(message, '(a,a)') 'Heat model: Secchi depth read from ', trim(filename)
          endif
-         call prterr(lundia, 'G051', trim(message), gdp)          
+         call prterr(lundia, 'G051', trim(message))
       endif
    endif
 end subroutine rdmeteo

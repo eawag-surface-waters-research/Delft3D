@@ -93,7 +93,7 @@ subroutine iniphy(iro       ,z0        ,vonkar    ,vicmol    ,sboltz    , &
        ! There, the warning was also generated for sferic = true
        !
        if (comparereal(anglat , 0.0_fp) == 0) then
-          call prterr(gdp%gdinout%lundia, 'U136', ' ', gdp)
+          call prterr(gdp%gdinout%lundia, 'U136', ' ')
        endif
     endif
 end subroutine iniphy

@@ -98,7 +98,7 @@ subroutine dryfil(lundia    ,lundry    ,error     ,fildry    ,fmttmp    , &
           if (iocond/=0) then
              if (iocond>0) then
                 error = .true.
-                call prterr(lundia    ,'G007'    ,fildry(1:lfile)      ,gdp       )
+                call prterr(lundia    ,'G007'    ,fildry(1:lfile)      )
              !
              endif
              goto 200
@@ -141,7 +141,7 @@ subroutine dryfil(lundia    ,lundry    ,error     ,fildry    ,fmttmp    , &
           if (iocond/=0) then
              if (iocond>0) then
                 error = .true.
-                call prterr(lundia    ,'G007'    ,fildry(1:lfile)      ,gdp       )
+                call prterr(lundia    ,'G007'    ,fildry(1:lfile)      )
              !
              endif
              goto 200

@@ -122,12 +122,12 @@ subroutine chksit(lundia    ,error     ,nostat    ,ntruv     ,ntru      , &
           n = mnstat(2, nr)
           if (m<1 .or. m>mmax .or. n<1 .or. n>nmaxus) then
              errmsg = 'Station definition ' // namst(nr)
-             call prterr(lundia    ,'U007'    ,errmsg(:39)          ,gdp       )
+             call prterr(lundia    ,'U007'    ,errmsg(:39)          )
              !
              write (lundia, '(20x,'' (m,n) = '',2i4)') m, n
              error = .true.
           elseif (kcs(n, m)==0) then
-             call prterr(lundia    ,'V050'    ,namst(nr) ,gdp       )
+             call prterr(lundia    ,'V050'    ,namst(nr) )
              !
              write (lundia, '(20x,'' (m,n) = '',2i4)') m, n
           else
@@ -156,13 +156,13 @@ subroutine chksit(lundia    ,error     ,nostat    ,ntruv     ,ntru      , &
                 ! parallel: this is taken care of
                 ! not parallel: still going wrong?
                 !
-                call prterr(lundia    ,'V055'    ,namtra(nr),gdp       )
+                call prterr(lundia    ,'V055'    ,namtra(nr))
                 error = .true.
                 cycle
              endif
              if (m1<1 .or. m1>mmax .or. nnm<1 .or. nnx>nmaxus) then
                 errmsg = 'Cross Section definition ' // namtra(nr)
-                call prterr(lundia    ,'U007'    ,errmsg    ,gdp       )
+                call prterr(lundia    ,'U007'    ,errmsg    )
                 !
                 write (lundia, '(20x,'' (m,n1-n2) = '',3i4)') m1, n1, n2
                 error = .true.
@@ -172,7 +172,7 @@ subroutine chksit(lundia    ,error     ,nostat    ,ntruv     ,ntru      , &
              do n = nnm, nnx
                 if (kcu(n, m1)==0) then
                    if (nbuit==0) then
-                      call prterr(lundia    ,'V054'    ,namtra(nr),gdp       )
+                      call prterr(lundia    ,'V054'    ,namtra(nr))
                    !
                    endif
                    write (lundia, '(20x,'' (m1,n) = '',2i4)') m1, n
@@ -184,7 +184,7 @@ subroutine chksit(lundia    ,error     ,nostat    ,ntruv     ,ntru      , &
              mmx = max(m1, m2)
              if (mmm<1 .or. mmx>mmax .or. n1<1 .or. n1>nmaxus) then
                 errmsg = 'Cross Section definition ' // namtra(nr)
-                call prterr(lundia    ,'U007'    ,errmsg    ,gdp       )
+                call prterr(lundia    ,'U007'    ,errmsg    )
                 !
                 write (lundia, '(20x,'' (m1-m2,n) = '',3i4)') m1, m2, n1
                 error = .true.
@@ -193,7 +193,7 @@ subroutine chksit(lundia    ,error     ,nostat    ,ntruv     ,ntru      , &
              do m = mmm, mmx
                 if (kcv(n1, m)==0) then
                    if (nbuit==0) then
-                      call prterr(lundia    ,'V054'    ,namtra(nr),gdp       )
+                      call prterr(lundia    ,'V054'    ,namtra(nr))
                    !
                    endif
                    write (lundia, '(20x,'' (m,n1) = '',2i4)') m, n1
@@ -201,7 +201,7 @@ subroutine chksit(lundia    ,error     ,nostat    ,ntruv     ,ntru      , &
                 endif
              enddo
           else
-             call prterr(lundia    ,'V053'    ,namtra(nr),gdp       )
+             call prterr(lundia    ,'V053'    ,namtra(nr))
              !
              error = .true.
           endif

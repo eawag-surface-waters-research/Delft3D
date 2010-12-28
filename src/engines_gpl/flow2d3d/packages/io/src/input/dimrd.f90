@@ -251,9 +251,9 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
     read (lunmd, '(a300)', iostat = iocond) mdfrec
     if (iocond /= 0) then
        if (iocond < 0) then
-          call prterr(lundia    ,'G006'    ,'Md-file' ,gdp       )
+          call prterr(lundia    ,'G006'    ,'Md-file' )
        else
-          call prterr(lundia    ,'G007'    ,'Md-file' ,gdp       )
+          call prterr(lundia    ,'G007'    ,'Md-file' )
        endif
        write (lundia, '(a,a)') 'RECORD: ', mdfrec(:72)
        error = .true.
@@ -261,7 +261,7 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
     endif
     iis = index(mdfrec, '=')
     if (iis == 0) then
-       call prterr(lundia    ,'G007'    ,'Md-file' ,gdp       )
+       call prterr(lundia    ,'G007'    ,'Md-file' )
        write (lundia, '(a,a)') 'RECORD: ', mdfrec(:72)
        error = .true.
        goto 9999
@@ -324,7 +324,7 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
     !
     if (parll .and. dredge) then
        error = .true.
-       call prterr(lundia, 'P004', 'The combination of dredge and parallel is not available', gdp)
+       call prterr(lundia, 'P004', 'The combination of dredge and parallel is not available')
        goto 9999
     endif
 
@@ -342,7 +342,7 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
     call prop_get_integers(gdp%mdfile_ptr, '*', 'MNKmax', iarray, 3)
     if (iarray(1) == 0 .or. iarray(2) == 0 .or. iarray(3) == 0) then
        error = .true.
-       call prterr(lundia, 'P004', ' on reading grid dimensions', gdp)
+       call prterr(lundia, 'P004', ' on reading grid dimensions')
        goto 9999
     endif
     mmax   = iarray(1)
@@ -351,7 +351,7 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
     kmax   = iarray(3)
     if (mmax<1 .or. nmax<1 .or. kmax<1) then
        error = .true.
-       call prterr(lundia    ,'V001'    ,'Md-file' ,gdp       )
+       call prterr(lundia    ,'V001'    ,'Md-file' )
        goto 9999
     endif
     if (mod(nmax, 2)==0) then
@@ -362,7 +362,7 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
     !
     if (secflo .and. kmax>1) then
        error = .true.
-       call prterr(lundia    ,'U050'    ,'Secondary Flow'     ,gdp       )
+       call prterr(lundia    ,'U050'    ,'Secondary Flow'     )
        goto 9999
     endif
     !
@@ -470,7 +470,7 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
           elseif (tkemod == 'k-epsilon   ') then
              ltur = 2
           elseif (tkemod/='algebraic   ' .and. tkemod/='constant    ') then
-             call prterr(lundia    ,'V047'    ,' '       ,gdp       )
+             call prterr(lundia    ,'V047'    ,' '       )
           else
           endif
        endif
@@ -501,7 +501,7 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
        elseif (q2emod == 'uittenbogaard') then
           ltur2d = 1
        else
-          call prterr(lundia    ,'V247'    ,' '       ,gdp       )
+          call prterr(lundia    ,'V247'    ,' '       )
        endif
     endif
     !
@@ -542,7 +542,7 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
     !
     if (parll .and. zmodel) then
        error = .true.
-       call prterr(lundia    ,'Z011'    ,'parallel Delft3D-FLOW'       ,gdp       )
+       call prterr(lundia    ,'Z011'    ,'parallel Delft3D-FLOW'       )
        goto 9999
     endif
     !
@@ -662,7 +662,7 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
     ! parallel and cdwstruct disabled
     !
     if (cdwstruct .and. parll) then
-       call prterr( lundia, 'P004', 'Current deflecting structure is not supported when running parallel.', gdp )
+       call prterr( lundia, 'P004', 'Current deflecting structure is not supported when running parallel.')
        error = .true.
        goto 9999
     endif

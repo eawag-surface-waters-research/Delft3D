@@ -164,7 +164,7 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
     if (istat==0) allocate (gdp%gdbedformpar%rksd(gdp%d%nmlb:gdp%d%nmub)          , stat = istat)
     !
     if (istat/=0) then
-       call prterr(lundia, 'U021', 'RDBEDFORMPAR: memory alloc error [1]', gdp)
+       call prterr(lundia, 'U021', 'RDBEDFORMPAR: memory alloc error [1]')
        call d3stop(1, gdp)
     endif
     !
@@ -198,7 +198,7 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
     if (istat==0) allocate (gdp%gdbedformpar%cdpar(2)                             , stat = istat) 
     !
     if (istat/=0) then
-       call prterr(lundia, 'U021', 'RDBEDFORMPAR: memory alloc error [2]', gdp)
+       call prterr(lundia, 'U021', 'RDBEDFORMPAR: memory alloc error [2]')
        call d3stop(1, gdp)
     endif
     !
@@ -300,7 +300,7 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
        call prop_get(gdp%mdfile_ptr,'*','BdfaH',hdpar(1))
        call prop_get(gdp%mdfile_ptr,'*','BdfbH',hdpar(2))
        if (hdpar(1) <= 0.0) then
-          call prterr(lundia, 'U190', 'Dune height coefficients in .mdf -> Dune height <= 0.0', gdp)
+          call prterr(lundia, 'U190', 'Dune height coefficients in .mdf -> Dune height <= 0.0')
        endif
        !
        txtput1 = '  aH'
@@ -457,7 +457,7 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
        call prop_get(gdp%mdfile_ptr,'*','BdfaL',ldpar(1))
        call prop_get(gdp%mdfile_ptr,'*','BdfbL',ldpar(2))
        if (ldpar(1) <= 0.0) then
-          call prterr(lundia, 'U190', 'Dune length coefficients in .mdf -> Dune length <= 0.0', gdp)
+          call prterr(lundia, 'U190', 'Dune length coefficients in .mdf -> Dune length <= 0.0')
        endif
        !
        txtput1 = '  aL'
@@ -530,7 +530,7 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
        call prop_get(gdp%mdfile_ptr,'*','BdfaR',kdpar(1))
        call prop_get(gdp%mdfile_ptr,'*','BdfbR',kdpar(2))
        if (kdpar(1) <= 0.0) then
-          call prterr(lundia, 'U190', 'Dune roughness coefficients in .mdf -> Dune roughness <= 0.0', gdp)
+          call prterr(lundia, 'U190', 'Dune roughness coefficients in .mdf -> Dune roughness <= 0.0')
        endif
        !
        txtput1 = '  aR'
@@ -587,7 +587,7 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
                         & kcs       ,duneheight ,nmlb      ,nmub      )
           !
           write(lundia,'(a,a,a)') txtput1, ':', flbdfh
-          if (error) call prterr(lundia, 'U021', 'RDBEDFORMPAR: error reading initial bedform heights from BdfUni', gdp)
+          if (error) call prterr(lundia, 'U021', 'RDBEDFORMPAR: error reading initial bedform heights from BdfUni')
           if (error) goto 9999
        endif
     endif

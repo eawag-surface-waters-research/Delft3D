@@ -280,5 +280,5 @@ subroutine rdrgf(filrgf    ,lundia    ,error     ,nmax      ,mmax      , &
     errornr = 'G007' 
     ! 
  9999 continue 
-    if (error) call prterr(lundia, errornr, errmsg, gdp) 
+    if (error) call prterr(lundia, errornr, errmsg)
 end subroutine rdrgf 

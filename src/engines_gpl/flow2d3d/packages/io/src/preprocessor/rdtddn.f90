@@ -174,14 +174,14 @@ subroutine rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
        !
        if (iocond/=0) then
           error = .true.
-          call prterr(lundia    ,'G007'    ,fildis    ,gdp       )
+          call prterr(lundia    ,'G007'    ,fildis    )
           !
           if (iocond<0) then
              if (itold<itstop) then
                 write(errmsg,'(a,a,a)') 'Last time in file ', trim(fildis), ' <' 
-                call prterr(lundia    ,'U042'    ,errmsg    ,gdp       )
+                call prterr(lundia    ,'U042'    ,errmsg    )
              elseif (n<nsrc) then
-                call prterr(lundia    ,'U021'    ,'not for all discharge locations DIS data defined'    ,gdp       )
+                call prterr(lundia    ,'U021'    ,'not for all discharge locations DIS data defined'    )
              else
              endif
           endif
@@ -216,48 +216,48 @@ subroutine rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
        !
        if (disflg=='regular   ') then
           if (nparrd/=2 + lstsc) then
-             call prterr(lundia    ,'V097'    ,' '       ,gdp       )
+             call prterr(lundia    ,'V097'    ,' '       )
              error = .true.
              exit
           endif
           cntain = 'regular    # discharge without momentum '
        elseif (disflg=='momentum  ') then
           if (nparrd/=4 + lstsc) then
-             call prterr(lundia    ,'V097'    ,' '       ,gdp       )
+             call prterr(lundia    ,'V097'    ,' '       )
              error = .true.
              exit
           endif
           cntain = 'momentum   # discharge with momentum'
        elseif (disflg=='walking   ') then
           if (nparrd/=2 + lstsc) then
-             call prterr(lundia    ,'V097'    ,' '       ,gdp       )
+             call prterr(lundia    ,'V097'    ,' '       )
              error = .true.
              exit
           endif
           cntain = 'walking   # walking discharge      '
        elseif (disflg=='inoutlet  ') then
           if (nparrd/=2 + lstsc) then
-             call prterr(lundia    ,'V097'    ,' '       ,gdp       )
+             call prterr(lundia    ,'V097'    ,' '       )
              error = .true.
              exit
           endif
           cntain = 'inoutlet  # power station / culvert'
        elseif (disflg=='power     ') then
           if (nparrd/=2 + lstsc) then
-             call prterr(lundia    ,'V097'    ,' '       ,gdp       )
+             call prterr(lundia    ,'V097'    ,' '       )
              error = .true.
              exit
           endif
           cntain = 'power     # power station in/out   '
        elseif (disflg=='culvert   ') then
           if (nparrd/=2 + lstsc) then
-             call prterr(lundia    ,'V097'    ,' '       ,gdp       )
+             call prterr(lundia    ,'V097'    ,' '       )
              error = .true.
              exit
           endif
           cntain = 'culvert   # culvert in/out         '
        else
-          call prterr(lundia    ,'V096'    ,disflg    ,gdp       )
+          call prterr(lundia    ,'V096'    ,disflg    )
           error = .true.
           exit
        endif
@@ -267,7 +267,7 @@ subroutine rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
        !
        do np = 2, nparrd
           if (parrd(np)(:20)/=parnam(np)(:20)) then
-             call prterr(lundia    ,'V096'    ,parrd(np)(:20)       ,gdp       )
+             call prterr(lundia    ,'V096'    ,parrd(np)(:20)       )
              !
              error = .true.
              goto 9999
@@ -334,7 +334,7 @@ subroutine rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
           !
           if (ier<=0) then
              error = .true.
-             call prterr(lundia    ,'G007'    ,fildis    ,gdp       )
+             call prterr(lundia    ,'G007'    ,fildis    )
              write (lundia, '(a,a)') 'RECORD: ', record(:72)
              goto 9999
           endif
@@ -361,7 +361,7 @@ subroutine rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
           !
           if (ier<=0) then
              error = .true.
-             call prterr(lundia    ,'G007'    ,fildis    ,gdp       )
+             call prterr(lundia    ,'G007'    ,fildis    )
              write (lundia, '(a,a)') 'RECORD: ', record(:72)
              goto 9999
           endif
@@ -371,7 +371,7 @@ subroutine rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
           do j = 2, nrval
               if ( isnan(rval(j)) ) then
                  write(errmsg,'(a,a)') 'NaN in ', trim(fildis)
-                 call prterr(lundia    ,'P004'    ,errmsg      ,gdp       )
+                 call prterr(lundia    ,'P004'    ,errmsg      )
                  error = .true.
                  goto 9999
               endif
@@ -384,7 +384,7 @@ subroutine rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
              do j = 2, lstsc + 1
                 if (rval(j)<0.0) then
                    errmsg = 'Concentration at discharge ' // namsrc(n)
-                   call prterr(lundia    ,'V061'    ,errmsg    ,gdp       )
+                   call prterr(lundia    ,'V061'    ,errmsg    )
                    error = .true.
                    goto 9999
                 endif
@@ -396,7 +396,7 @@ subroutine rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
           if (nrval>lstsc + 1) then
              if (rval(lstsc + 2)<0.0) then
                 errmsg = 'Flow magnitude at discharge ' // namsrc(n)
-                call prterr(lundia    ,'V061'    ,errmsg    ,gdp       )
+                call prterr(lundia    ,'V061'    ,errmsg    )
                 error = .true.
                 goto 9999
              endif
@@ -423,7 +423,7 @@ subroutine rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
        if (itold/= - 1) then
           if (itold<itstop) then
              write(errmsg,'(a,a,a,a,a)') 'Last time in file ', trim(fildis), ' for discharge #',trim(namsrc(n)),'# <' 
-             call prterr(lundia    ,'U042'    ,errmsg,    gdp       )
+             call prterr(lundia    ,'U042'    ,errmsg)
              error = .true.
              goto 9999
           endif

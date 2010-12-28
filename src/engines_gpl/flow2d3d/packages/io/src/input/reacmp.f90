@@ -114,7 +114,7 @@ subroutine reacmp(lundia    ,error     ,filana    ,statns    ,nto       , &
           error = .true.
           chulp = filana
           if (filana==' ') chulp = '--Triana--'
-          call prterr(lundia    ,'G004'    ,chulp     ,gdp       )
+          call prterr(lundia    ,'G004'    ,chulp     )
           !
           goto 9999
        endif
@@ -132,7 +132,7 @@ subroutine reacmp(lundia    ,error     ,filana    ,statns    ,nto       , &
                    error = .true.
                    chulp = ' Station ' // statns(i, j)                          &
                          & // ' not found in file ' // filana
-                   call prterr(lundia    ,'U021'    ,chulp     ,gdp       )
+                   call prterr(lundia    ,'U021'    ,chulp     )
                    !
                    goto 9999
                 !
@@ -172,7 +172,7 @@ subroutine reacmp(lundia    ,error     ,filana    ,statns    ,nto       , &
                       error = .true.
                       chulp = ' No amplitude or phase given for ' //            &
                              & ' component ' // name // ' at ' // statns(i, j)
-                      call prterr(lundia    ,'U021'    ,chulp     ,gdp       )
+                      call prterr(lundia    ,'U021'    ,chulp     )
                       !
                       goto 9999
                    endif
@@ -190,7 +190,7 @@ subroutine reacmp(lundia    ,error     ,filana    ,statns    ,nto       , &
                          error = .true.
                          chulp = ' No amplitude or phase given for' //          &
                                 & ' component ' // name // ' at ' // statns(i, j)
-                         call prterr(lundia    ,'U021'    ,chulp     ,gdp       )
+                         call prterr(lundia    ,'U021'    ,chulp     )
                          !
                          goto 9999
                       endif
@@ -223,7 +223,7 @@ subroutine reacmp(lundia    ,error     ,filana    ,statns    ,nto       , &
                 ! Getijsys file not found
                 !
                 chulp = ' Getijsys file ' // statns(i, j) // ' not found '
-                call prterr(lundia    ,'U021'    ,chulp     ,gdp       )
+                call prterr(lundia    ,'U021'    ,chulp     )
                 !
                 error = .true.
                 goto 9999
@@ -264,7 +264,7 @@ subroutine reacmp(lundia    ,error     ,filana    ,statns    ,nto       , &
        ! Reading problem in getijsys file
        !
        chulp = 'Getijsys ' // statns(i, j)
-       call prterr(lundia    ,'G006'    ,chulp     ,gdp       )
+       call prterr(lundia    ,'G006'    ,chulp     )
        !
        close (mcmp)
     endif

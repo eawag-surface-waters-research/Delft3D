@@ -215,7 +215,7 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                     & ', for nm = ', nm_s1max1, ', and icx = ', icx, &
                     & '; changing ZTOP to above this value', &
                     & ' is strongly advised'
-       call prterr(lundia, 'U190', trim(errmsg), gdp)
+       call prterr(lundia, 'U190', trim(errmsg))
     endif
     if (s1max2 > zk(kmax)) then
        write (errmsg, '(a,g10.3,2a,i0,a,i0,2a)') '2: Maximum water level ', s1max2, &
@@ -223,7 +223,7 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                     & ', for nm = ', nm_s1max2, ', and icx = ', icx, &
                     & '; changing ZTOP to above this value', &
                     & ' is strongly advised'
-       call prterr(lundia, 'U190', trim(errmsg), gdp)
+       call prterr(lundia, 'U190', trim(errmsg))
     endif
     !
     ! Recalculate DZS1

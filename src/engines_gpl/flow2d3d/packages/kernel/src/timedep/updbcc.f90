@@ -144,7 +144,7 @@ subroutine updbcc(lunbcc    ,lundia    ,first     ,itbcc     ,ito       , &
        itbcc(5, ito, istsc) = itbcc(4, ito, istsc)
        errmsg = 'open bound = '
        write (errmsg(14:16), '(i3)') ito
-       call prterr(lundia    ,'V098'    ,errmsg(:16)          ,gdp       )
+       call prterr(lundia    ,'V098'    ,errmsg(:16)          )
     !
     endif
     !
@@ -184,7 +184,7 @@ subroutine updbcc(lunbcc    ,lundia    ,first     ,itbcc     ,ito       , &
     ittime = nint(rttime/sdt)
     if (abs(ittime*sdt - rttime)>(0.1*sdt)) then
        write (errmsg, '(a,f10.4)') 'Timbcc = ', rtbcc
-       call prterr(lundia    ,'S044'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'S044'    ,errmsg    )
     endif
     !
     ! Define Time as multiple of SDT, where RTBCC is in SCALEF minutes

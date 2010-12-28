@@ -242,7 +242,7 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           ipmap(i) = nint(tpmap(i)/dt)
           if (dtn(ipmap(i), tpmap(i), dt)) then
              error = .true.
-             call prterr(lundia    ,'U044'    ,'Map print time'     ,gdp       )
+             call prterr(lundia    ,'U044'    ,'Map print time'     )
           !
           endif
        enddo
@@ -264,15 +264,15 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        iphisl = nint(tphisl/dt)
        if (dtn(iphisf, tphisf, dt)) then
           error = .true.
-          call prterr(lundia    ,'U044'    ,'His print start time'          ,gdp       )
+          call prterr(lundia    ,'U044'    ,'His print start time'          )
        endif
        if (dtn(iphisi, tphisi, dt)) then
           error = .true.
-          call prterr(lundia    ,'U044'    ,'His print time interval'       ,gdp       )
+          call prterr(lundia    ,'U044'    ,'His print time interval'       )
        endif
        if (dtn(iphisl, tphisl, dt)) then
           error = .true.
-          call prterr(lundia    ,'U044'    ,'His print stop time',gdp       )
+          call prterr(lundia    ,'U044'    ,'His print stop time')
        endif
     endif
     !
@@ -291,15 +291,15 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     itmapl = nint(tfmapl/dt)
     if (dtn(itmapf, tfmapf, dt)) then
        error = .true.
-       call prterr(lundia    ,'U044'    ,'Map store start time'          ,gdp       )
+       call prterr(lundia    ,'U044'    ,'Map store start time'          )
     endif
     if (dtn(itmapi, tfmapi, dt)) then
        error = .true.
-       call prterr(lundia    ,'U044'    ,'Map store time interval'       ,gdp       )
+       call prterr(lundia    ,'U044'    ,'Map store time interval'       )
     endif
     if (dtn(itmapl, tfmapl, dt)) then
        error = .true.
-       call prterr(lundia    ,'U044'    ,'Map store stop time',gdp       )
+       call prterr(lundia    ,'U044'    ,'Map store stop time')
     endif
     !
     ! 'Flhis'
@@ -317,15 +317,15 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     ithisl = nint(tfhisl/dt)
     if (dtn(ithisf, tfhisf, dt)) then
        error = .true.
-       call prterr(lundia    ,'U044'    ,'History store start time' ,gdp       )
+       call prterr(lundia    ,'U044'    ,'History store start time' )
     endif
     if (dtn(ithisi, tfhisi, dt)) then
        error = .true.
-       call prterr(lundia    ,'U044'    ,'History store time interval' ,gdp       )
+       call prterr(lundia    ,'U044'    ,'History store time interval' )
     endif
     if (dtn(ithisl, tfhisl, dt)) then
        error = .true.
-       call prterr(lundia    ,'U044'    ,'History store stop time' ,gdp       )
+       call prterr(lundia    ,'U044'    ,'History store stop time' )
     endif
     !
     ! locate 'Flpp' record for store field values for Delft3D-WAQ
@@ -343,15 +343,15 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     itcoml = nint(tfcoml/dt)
     if (dtn(itcomf, tfcomf, dt)) then
        error = .true.
-       call prterr(lundia    ,'U044'    ,'COMMUNICATION file start time' ,gdp       )
+       call prterr(lundia    ,'U044'    ,'COMMUNICATION file start time' )
     endif
     if (dtn(itcomi, tfcomi, dt)) then
        error = .true.
-       call prterr(lundia    ,'U044'    ,'COMMUNICATION file time interval'         ,gdp       )
+       call prterr(lundia    ,'U044'    ,'COMMUNICATION file time interval'         )
     endif
     if (dtn(itcoml, tfcoml, dt)) then
        error = .true.
-       call prterr(lundia    ,'U044'    ,'COMMUNICATION file stop time'  ,gdp       )
+       call prterr(lundia    ,'U044'    ,'COMMUNICATION file stop time'  )
     endif
     !
     ! locate 'Flnfl' record for near field computations
@@ -369,15 +369,15 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     itnfll = nint(tfnfll/dt)
     if (dtn(itnflf, tfnflf, dt)) then
        error = .true.
-       call prterr(lundia    ,'U044'    ,'Near field comp. start time'   ,gdp       )
+       call prterr(lundia    ,'U044'    ,'Near field comp. start time'   )
     endif
     if (dtn(itnfli, tfnfli, dt)) then
        error = .true.
-       call prterr(lundia    ,'U044'    ,'Near field comp. time interval',gdp       )
+       call prterr(lundia    ,'U044'    ,'Near field comp. time interval')
     endif
     if (dtn(itnfll, tfnfll, dt)) then
        error = .true.
-       call prterr(lundia    ,'U044'    ,'Near field comp. stop time'    ,gdp       )
+       call prterr(lundia    ,'U044'    ,'Near field comp. stop time'    )
     endif
     !
     ! locate 'Flrst' record for print field values
@@ -434,7 +434,7 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     itrsti = nint(tfrsti/dt)
     if (dtn(itrsti, tfrsti, dt)) then
        error = .true.
-       call prterr(lundia    ,'U044'    ,'Restart file time interval'    ,gdp       )
+       call prterr(lundia    ,'U044'    ,'Restart file time interval'    )
     !
     endif
     !
@@ -476,7 +476,7 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        if (comparereal(real(sval,fp), 1.0e-3_fp) == -1 .or. &
          & comparereal(real(sval,fp), 1.0e3_fp ) ==  1) then
           write (message,'(a,e12.2)') 'User defined smax has unrealistic value ',sval
-          call prterr(lundia, 'P004', trim(message), gdp)
+          call prterr(lundia, 'P004', trim(message))
           call d3stop(1, gdp)
        endif
        smax = real(sval,fp)
@@ -490,7 +490,7 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        if (comparereal(real(sval,fp), 1.0e-3_fp) == -1 .or. &
          & comparereal(real(sval,fp), 1.0e3_fp ) ==  1) then
           write (message,'(a,e12.2)') 'User defined velmax has unrealistic value ',sval
-          call prterr(lundia, 'P004', trim(message), gdp)
+          call prterr(lundia, 'P004', trim(message))
           call d3stop(1, gdp)
        endif
        velmax = real(sval,fp)
@@ -505,6 +505,6 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     if (cval(1:3) == 'glm') then
        flwoutput%veuler = .false.
        write (message,'(a)') 'Writing GLM velocities to map and his file'
-       call prterr(lundia, 'G051', trim(message), gdp)
+       call prterr(lundia, 'G051', trim(message))
     endif
 end subroutine rdtimo

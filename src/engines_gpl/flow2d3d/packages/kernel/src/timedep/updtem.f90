@@ -175,7 +175,7 @@ subroutine updtem(luntem    ,ktemp     ,timnow    ,dt        ,inttem    , &
     ittem = nint(rttem/dt)
     if (dtn(ittem, rttem, dt)) then
        write (errmsg, '(a,f10.4)') 'Timtem = ', rttem
-       call prterr(lundia    ,'S044'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'S044'    ,errmsg    )
     endif
     !
     if (real(ittem,fp) > timnow) first = .false.

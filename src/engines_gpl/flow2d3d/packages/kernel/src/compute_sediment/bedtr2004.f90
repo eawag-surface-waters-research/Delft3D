@@ -323,7 +323,7 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
           vcr = 5.75_fp * sqrt(drho*ag*d50*tetacr) * log10(4.0_fp*h1/d90)
        else
           write(message,'(a,e12.4,a)') 'd50 < ', dclay, ' not allowed'
-          call prterr(lundia, 'P004', trim(message), gdp)
+          call prterr(lundia, 'P004', trim(message))
           call d3stop(1, gdp)
        endif
        !

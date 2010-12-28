@@ -121,7 +121,7 @@ use bedcomposition_module
     if (istat == 0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'MinThickShortWarning', minthick)
     if (istat == 0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'MaxNumShortWarning'  , maxwarn)
     if (istat /= 0) then
-       call prterr(lundia, 'U021', 'Memory problem in RDMORLYR', gdp)
+       call prterr(lundia, 'U021', 'Memory problem in RDMORLYR')
        call d3stop(1, gdp)
     endif
     !
@@ -135,7 +135,7 @@ use bedcomposition_module
     allocate (gdp%gdmorpar%cmpbnd(nto), stat = istat)
     !
     if (istat /= 0) then
-       call prterr(lundia, 'U021', 'RDMORLYR: memory alloc error', gdp)
+       call prterr(lundia, 'U021', 'RDMORLYR: memory alloc error')
        call d3stop(1, gdp)
     endif
     !
@@ -151,7 +151,7 @@ use bedcomposition_module
     !
     if (version < 2) then
        if (allocmorlyr(gdp%gdmorlyr, gdp%d%nmlb, gdp%d%nmub, lsedtot) /= 0) then
-          call prterr(lundia, 'U021', 'RDMORLYR: memory alloc error', gdp)
+          call prterr(lundia, 'U021', 'RDMORLYR: memory alloc error')
           call d3stop(1, gdp)
        endif
        return
@@ -239,7 +239,7 @@ use bedcomposition_module
     endselect
     !
     if (allocmorlyr(gdp%gdmorlyr, gdp%d%nmlb, gdp%d%nmub, lsedtot) /= 0) then
-       call prterr(lundia, 'U021', 'RDMORLYR: memory alloc error', gdp)
+       call prterr(lundia, 'U021', 'RDMORLYR: memory alloc error')
        call d3stop(1, gdp)
     endif
     !
@@ -252,7 +252,7 @@ use bedcomposition_module
        !
        istat = bedcomp_getpointer_realfp(gdp%gdmorlyr, 'ThTrLyr', thtrlyr)
        if (istat /= 0) then
-          call prterr(lundia, 'U021', 'Memory problem in RDMORLYR', gdp)
+          call prterr(lundia, 'U021', 'Memory problem in RDMORLYR')
           call d3stop(1, gdp)
        endif
        !
@@ -323,7 +323,7 @@ use bedcomposition_module
        if (exchlyr) then
           istat = bedcomp_getpointer_realfp(gdp%gdmorlyr, 'ThExLyr', thexlyr)
           if (istat /= 0) then
-             call prterr(lundia, 'U021', 'Memory problem in RDMORLYR', gdp)
+             call prterr(lundia, 'U021', 'Memory problem in RDMORLYR')
              call d3stop(1, gdp)
           endif
           !
@@ -499,12 +499,12 @@ use bedcomposition_module
                 errmsg = 'Invalid number of parameters specified for ''' // &
                        & trim(parname) // ''' at ''' // nambnd(j) // ''' in ' // &
                        & trim(bcmfilnam)
-                call prterr(lundia, 'U021', errmsg, gdp)
+                call prterr(lundia, 'U021', errmsg)
                 call d3stop(1, gdp)
              endif
           else
              errmsg = 'Missing input file for morphological boundary conditions'
-             call prterr(lundia, 'U021', errmsg, gdp)
+             call prterr(lundia, 'U021', errmsg)
              call d3stop(1, gdp)
           endif
        endif

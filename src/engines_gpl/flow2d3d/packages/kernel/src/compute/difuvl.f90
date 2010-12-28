@@ -282,7 +282,7 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
         endif
         !
         if (istat /= 0) then
-            call prterr(lundia, 'U021', 'DIFUFVL: memory alloc error', gdp)
+            call prterr(lundia, 'U021', 'DIFUFVL: memory alloc error')
             call d3stop(1, gdp)
         endif
         !
@@ -536,7 +536,7 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     if (stage == 'stage2  ') then
        allocate(dummy(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), stat=istat)
        if (istat /= 0) then
-          call prterr(lundia, 'P004', 'Difuvl: memory alloc error', gdp)
+          call prterr(lundia, 'P004', 'Difuvl: memory alloc error')
           call d3stop(1, gdp)
        else
           dummy = fluxu
@@ -880,7 +880,7 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     if (stage == 'stage2  ') then
        deallocate(dummy, stat=istat)
        if (istat /= 0) then
-           call prterr(lundia, 'U021', 'DIFUFVL: memory dealloc error', gdp)
+           call prterr(lundia, 'U021', 'DIFUFVL: memory dealloc error')
            call d3stop(1, gdp)
        endif
     endif

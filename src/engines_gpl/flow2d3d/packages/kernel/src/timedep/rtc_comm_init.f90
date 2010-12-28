@@ -252,7 +252,7 @@ subroutine rtc_comm_init(error      ,nambar    ,kfs       ,kfsmin    , &
       call timer_stop(timer_wait, gdp)
       if (error) then
          rtcact = .false.
-         call prterr(lundia    ,'J020'    ,'SyncFlowRtc_Init'   ,gdp       )
+         call prterr(lundia    ,'J020'    ,'SyncFlowRtc_Init'   )
       else
          rtcact = .true.
       endif
@@ -269,5 +269,5 @@ subroutine rtc_comm_init(error      ,nambar    ,kfs       ,kfsmin    , &
     return
     !
 999 continue
-    call prterr(lundia    ,'P004'    ,'Memory allocation error in RTC_COMM_INIT'   ,gdp       )
+    call prterr(lundia    ,'P004'    ,'Memory allocation error in RTC_COMM_INIT'   )
 end subroutine rtc_comm_init

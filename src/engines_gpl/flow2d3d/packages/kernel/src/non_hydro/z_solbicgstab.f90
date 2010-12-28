@@ -385,7 +385,7 @@ subroutine z_solbicgstab(aak       ,bbk       ,cck      ,aak2      ,cck2      , 
          if (iter == nhiter) then
             write (errtxt(1:8), '(i8)') nst
             write (errtxt(25:30), '(i6)') nhiter
-            call prterr(lundia    ,'Z021'    ,trim(errtxt)    ,gdp       )
+            call prterr(lundia    ,'Z021'    ,trim(errtxt)    )
             exit
          endif
       end do

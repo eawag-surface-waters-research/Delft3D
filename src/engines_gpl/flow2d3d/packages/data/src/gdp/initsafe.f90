@@ -110,7 +110,7 @@ subroutine initsafe(gdp)
     !
     call initdfparall  (gdp) 
     ! 
-    ! Since GDP allocation has not yet succeeded, I can't call prterr(...,gdp) and d3stop(...,gdp)
+    ! Since GDP allocation has not yet succeeded, I can't call prterr(...,gdp) and d3stop(...)
     !
     if (istat /= 0) then
        write(*,*) 'ERROR during initialization of GDP structure'

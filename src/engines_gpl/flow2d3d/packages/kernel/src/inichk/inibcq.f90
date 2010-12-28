@@ -118,7 +118,7 @@ subroutine inibcq(lundia    ,error     ,runid     ,itbct     ,nto       , &
        ! error or EOF (IOCOND <> 0), not allowed
        !
        if (iocond/=0) then
-          call prterr(lundia    ,'G007'    ,filnam(:8 + lrid)    ,gdp       )
+          call prterr(lundia    ,'G007'    ,filnam(:8 + lrid)    )
           !
           error = .true.
           goto 9999
@@ -193,7 +193,7 @@ subroutine inibcq(lundia    ,error     ,runid     ,itbct     ,nto       , &
        ! Test number of parameters read
        !
        if (nparrd/=npara) then
-          call prterr(lundia    ,'V097'    ,' '       ,gdp       )
+          call prterr(lundia    ,'V097'    ,' '       )
           error = .true.
           exit
        endif
@@ -203,7 +203,7 @@ subroutine inibcq(lundia    ,error     ,runid     ,itbct     ,nto       , &
        !
        do np = 1, nparrd
           if (parnam(np)(1:20)/=defpar(np)(1:20)) then
-             call prterr(lundia    ,'V096'    ,parnam(np)(1:20)     ,gdp       )
+             call prterr(lundia    ,'V096'    ,parnam(np)(1:20)     )
              error = .true.
              goto 9999
           endif

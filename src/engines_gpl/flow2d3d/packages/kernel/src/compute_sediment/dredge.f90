@@ -288,7 +288,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
                 call extend1d_log(istat,pdredge%triggered,globalnpnt,localoffset)
                 !
                 if (istat/=0) then
-                   call prterr(lundia, 'U021', 'Dredge: memory realloc error', gdp)
+                   call prterr(lundia, 'U021', 'Dredge: memory realloc error')
                    call d3stop(1, gdp)
                 endif
                 !
@@ -348,7 +348,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
                 call extend1d_int(istat,pdump%nm,globalnpnt,localoffset)
                 !
                 if (istat/=0) then
-                   call prterr(lundia, 'U021', 'Dredge: memory realloc error', gdp)
+                   call prterr(lundia, 'U021', 'Dredge: memory realloc error')
                    call d3stop(1, gdp)
                 endif
                 !

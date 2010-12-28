@@ -161,12 +161,12 @@ subroutine rdtimc(comfil    ,lundia    ,error     ,commrd    ,itlen     , &
              commrd = .false.
           else
              ierr = neferr(0, errmsg)
-             call prterr(lundia, 'P004', errmsg, gdp)
+             call prterr(lundia, 'P004', errmsg)
              error = .true.
           endif
        else
           ierr = neferr(0, errmsg)
-          call prterr(lundia, 'P004', errmsg, gdp)
+          call prterr(lundia, 'P004', errmsg)
           error = .true.
        endif
        goto 9999
@@ -178,7 +178,7 @@ subroutine rdtimc(comfil    ,lundia    ,error     ,commrd    ,itlen     , &
               & elmnms(8) ,celidt    ,wrswch    ,ierr      ,idummy    )
     if (ierr/=0) then
        ierr = neferr(0, errmsg)
-       call prterr(lundia, 'P004', errmsg, gdp)
+       call prterr(lundia, 'P004', errmsg)
        error = .true.
        goto 9999
     endif

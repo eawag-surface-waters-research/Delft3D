@@ -129,12 +129,12 @@ subroutine dimmud(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
           !
           ! Define flag mudlay
           !
-          call prterr(lundia, 'G051', 'Mud layer calculation', gdp)
+          call prterr(lundia, 'G051', 'Mud layer calculation')
           mudlay = .true.
           flmd2l = .true.
           call prop_get_logical(gdp%mdfile_ptr, '*', 'MudWave', mudwave)
           if (mudwave) then
-             call prterr(lundia, 'G051', 'Mud - Wave interaction activated', gdp)
+             call prterr(lundia, 'G051', 'Mud - Wave interaction activated')
           endif
           !
           ! Test file's existence
@@ -142,7 +142,7 @@ subroutine dimmud(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
           call noextspaces(filmud    ,lfile     )
           inquire (file = filmud(1:lfile), exist = ex)
           if (.not.ex) then
-             call prterr(lundia    ,'G004'    ,filmud(1:lfile)      ,gdp       )
+             call prterr(lundia    ,'G004'    ,filmud(1:lfile)      )
              error = .true.
           endif
        endif
@@ -171,7 +171,7 @@ subroutine dimmud(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
        if (lerror) then
           lerror = .false.
        elseif ((chulp=='Y' .or. chulp=='y') .and. (.not.sedim)) then
-          call prterr(lundia, 'P004', 'The fluid mud flag requires that the simulation includes sediment', gdp)
+          call prterr(lundia, 'P004', 'The fluid mud flag requires that the simulation includes sediment')
           error = .true.
        else
           !

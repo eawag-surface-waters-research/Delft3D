@@ -172,5 +172,5 @@ subroutine read2i(lunmd     ,error     ,keyw      ,newkw     ,nlook     , &
        if (n<nlook) goto 10
     endif
   999 continue
-    if (error) call prterr(lundia, errornr, keyw, gdp)
+    if (error) call prterr(lundia, errornr, keyw)
 end subroutine read2i

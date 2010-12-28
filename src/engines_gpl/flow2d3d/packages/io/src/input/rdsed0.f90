@@ -96,7 +96,7 @@ subroutine rdsed0(nr_sed    ,luninp    ,lundia    ,csoil     ,iopsus    , &
           call small(sedtyp(l), lenc)
           if (index(sedtyp(l), 'sand') /= 1 .and. index(sedtyp(l), 'mud') /= 1) then
              error = .true.
-             call prterr(lundia, 'U007', 'sediment type (must start with sand or mud)', gdp)
+             call prterr(lundia, 'U007', 'sediment type (must start with sand or mud)')
           endif
        endif
        read (luninp, *, iostat = iocond) rhosol(l)

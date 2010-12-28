@@ -98,11 +98,11 @@ subroutine rdtrafrm0(error, iform     , npar        , par, flname, &
        if (istat /= 0) then
           select case (istat)
           case(1)
-             call prterr(lundia, 'G004', trim(flname), gdp)
+             call prterr(lundia, 'G004', trim(flname))
           case(3)
-             call prterr(lundia, 'G006', trim(flname), gdp)
+             call prterr(lundia, 'G006', trim(flname))
           case default
-             call prterr(lundia, 'G007', trim(flname), gdp)
+             call prterr(lundia, 'G007', trim(flname))
           endselect
           call d3stop(1, gdp)
        endif
@@ -133,7 +133,7 @@ subroutine rdtrafrm0(error, iform     , npar        , par, flname, &
              istat = open_shared_library(dll_handle, rec)
              if (istat /= 0) then
                 write(errmsg,'(a,a)') 'Can not open shared library ', trim(rec)
-                call prterr(lundia, 'P004', trim(errmsg), gdp)
+                call prterr(lundia, 'P004', trim(errmsg))
                 call d3stop(1, gdp)
              endif
              dll_function = ' '
@@ -147,7 +147,7 @@ subroutine rdtrafrm0(error, iform     , npar        , par, flname, &
              endif
           else
              write (lundia, '(a,a)') '    Using default formula'
-             call prterr(lundia, 'P004', 'Reading of ini-file formatted input for default transport formulas is not implemented yet', gdp)
+             call prterr(lundia, 'P004', 'Reading of ini-file formatted input for default transport formulas is not implemented yet')
              call d3stop(1, gdp)
           endif
        else
@@ -158,7 +158,7 @@ subroutine rdtrafrm0(error, iform     , npar        , par, flname, &
           inp = newlun(gdp)
           open (inp, file = flname(1:lfile),status = 'old', iostat = iost)
           if (iost/=0) then
-             call prterr(lundia, 'G004', flname(1:lfile), gdp)
+             call prterr(lundia, 'G004', flname(1:lfile))
              call d3stop(1, gdp)
           endif
           string = ' '
@@ -180,7 +180,7 @@ subroutine rdtrafrm0(error, iform     , npar        , par, flname, &
                 read (inp, '(a)', iostat = iost) string
              enddo
              if (iost/=0) then
-                call prterr(lundia, 'U021', 'Transport formula parameters not found', gdp)
+                call prterr(lundia, 'U021', 'Transport formula parameters not found')
                 call d3stop(1, gdp)
              endif
              write (lundia, '(a)') '    Parameters'
@@ -255,19 +255,19 @@ subroutine rdtrafrm0(error, iform     , npar        , par, flname, &
                 enddo
              elseif (iform==15) then
                 write (lundia, '(a,a)') '    Using Dynamic library'
-                call prterr(lundia, 'P004', 'Transport formula in dynamic library is only possible when the trafrm-file is in ini-file format.', gdp)
+                call prterr(lundia, 'P004', 'Transport formula in dynamic library is only possible when the trafrm-file is in ini-file format.')
                 call d3stop(1, gdp)
              else
                 error  = .true.
                 errmsg = 'Transport formula number is not implemented'
-                call prterr(lundia    ,'U021'    ,errmsg    ,gdp       )
+                call prterr(lundia    ,'U021'    ,errmsg    )
              endif
           endif
           close (inp)
        endif
     else
        errmsg = 'TraFrm file '//flname(1:lfile)//' does not exist'
-       call prterr(lundia    ,'U021'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'U021'    ,errmsg    )
        call d3stop(1, gdp)
        goto 9999
     endif

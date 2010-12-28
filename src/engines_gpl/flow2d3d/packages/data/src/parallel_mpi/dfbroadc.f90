@@ -71,7 +71,7 @@ subroutine dfbroadc ( iptr, ilen, itype, gdp )
     call mpi_bcast ( iptr, ilen, itype, master-1, MPI_COMM_WORLD, ierr )
     if ( ierr /= MPI_SUCCESS ) then
        write (msgstr,'(a,i5)') 'MPI produces some internal error - return code is ',ierr
-       call prterr(lundia, 'U021', trim(msgstr), gdp)
+       call prterr(lundia, 'U021', trim(msgstr))
        call d3stop(1, gdp)
     endif
 #endif

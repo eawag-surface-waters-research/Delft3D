@@ -137,7 +137,7 @@ subroutine rdtimw(comfil    ,lundia    ,error     ,ntwav     ,timwav    , &
     ! If error occurred then write errormessage to diagnostic file
     !
     if (ntwav>maxtim) then
-       call prterr(lundia    ,'D008'    ,' '       ,gdp       )
+       call prterr(lundia    ,'D008'    ,' '       )
        !
        error = .true.
        goto 9999
@@ -157,7 +157,7 @@ subroutine rdtimw(comfil    ,lundia    ,error     ,ntwav     ,timwav    , &
  8888 continue
     if (ierr /= 0) then
        ierr = neferr(0, errmsg)
-       call prterr(lundia, 'P004', errmsg, gdp)
+       call prterr(lundia, 'P004', errmsg)
        error = .true.
     endif
     !

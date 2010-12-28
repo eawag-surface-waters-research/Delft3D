@@ -121,7 +121,7 @@ subroutine rdtdf(lundia    ,luntdp    ,error     ,filnam    ,fmttmp    , &
        do n = 1, nrval
            if (isnan(rval(n))) then
               write(errmsg,'(a,a)') 'NaN in ', trim(filnam)
-              call prterr(lundia    ,'P004'    ,errmsg      ,gdp       )
+              call prterr(lundia    ,'P004'    ,errmsg      )
               !
               error = .true.
               goto 200
@@ -134,13 +134,13 @@ subroutine rdtdf(lundia    ,luntdp    ,error     ,filnam    ,fmttmp    , &
        if (iocond<0) then
           if (itold<itstop) then
              errmsg = 'Last time in file ' // filnam(:lfile) // ' <'
-             call prterr(lundia    ,'U042'    ,errmsg(:20 + lfile)  ,gdp       )
+             call prterr(lundia    ,'U042'    ,errmsg(:20 + lfile)  )
              !
              error = .true.
           endif
           goto 200
        elseif (iocond>0) then
-          call prterr(lundia    ,'G007'    ,filnam(:lfile)       ,gdp       )
+          call prterr(lundia    ,'G007'    ,filnam(:lfile)       )
           !
           error = .true.
           goto 200
@@ -152,7 +152,7 @@ subroutine rdtdf(lundia    ,luntdp    ,error     ,filnam    ,fmttmp    , &
        ittdep = nint(timrd/dt)
        if (dtn(ittdep, timrd, dt)) then
           errmsg = 'Times in file ' // filnam(:lfile)
-          call prterr(lundia    ,'U044'    ,errmsg(:14 + lfile)  ,gdp       )
+          call prterr(lundia    ,'U044'    ,errmsg(:14 + lfile)  )
           !
           error = .true.
           goto 200
@@ -164,7 +164,7 @@ subroutine rdtdf(lundia    ,luntdp    ,error     ,filnam    ,fmttmp    , &
        if (rec1st) then
           if (ittdep>itstrt) then
              errmsg = 'First time in file ' // filnam(:lfile) // ' >'
-             call prterr(lundia    ,'U041'    ,errmsg(:21 + lfile)  ,gdp       )
+             call prterr(lundia    ,'U041'    ,errmsg(:21 + lfile)  )
              !
              error = .true.
              goto 200
@@ -173,7 +173,7 @@ subroutine rdtdf(lundia    ,luntdp    ,error     ,filnam    ,fmttmp    , &
        endif
        !
        if (ittdep<=itold) then
-          call prterr(lundia    ,'U062'    ,filnam(:lfile)       ,gdp       )
+          call prterr(lundia    ,'U062'    ,filnam(:lfile)       )
           !
           error = .true.
           goto 200

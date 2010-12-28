@@ -135,7 +135,7 @@ subroutine z_difuflux(stage   ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
        endif
        !
        if (istat /= 0) then
-          call prterr(lundia, 'U021', 'Z_DIFUFLUX: memory alloc error', gdp)
+          call prterr(lundia, 'U021', 'Z_DIFUFLUX: memory alloc error')
           call d3stop(1, gdp)
        endif
        !

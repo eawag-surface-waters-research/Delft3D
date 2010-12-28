@@ -110,7 +110,7 @@ subroutine read_triana(lundia    ,error     ,kc       ,statns    ,nto        ,gd
     if (ierrs==0 .and. with_corrections) allocate(            ampl_corr(nosup,kc), stat=ierrs)
     if (ierrs==0 .and. with_corrections) allocate(            phas_corr(nosup,kc), stat=ierrs)
     if (ierrs/=0) then
-       call prterr(lundia, 'U021', 'read_triana: memory alloc error', gdp)
+       call prterr(lundia, 'U021', 'read_triana: memory alloc error')
        call d3stop(1, gdp)
     endif
     !
@@ -134,7 +134,7 @@ subroutine read_triana(lundia    ,error     ,kc       ,statns    ,nto        ,gd
        if (filcor == filana) then
           error   = .true.
           message = 'Triana file and Correction file are the same file: ' // filana
-          call prterr(lundia, 'U021', message, gdp)
+          call prterr(lundia, 'U021', message)
           goto 9999
        else
           call reacmp(lundia    ,error     ,filcor    ,statns    ,nto       , &
@@ -148,7 +148,7 @@ subroutine read_triana(lundia    ,error     ,kc       ,statns    ,nto        ,gd
           do k = 1, kc
              if ( isnan(ampl(j, k)) .or. isnan(phas(j, k)) ) then 
                 write(message,'(2a)') 'NaN found in file ', filana
-                call prterr(lundia, 'P004', message, gdp)
+                call prterr(lundia, 'P004', message)
                 !
                 error = .true.
                 goto 9999
@@ -159,7 +159,7 @@ subroutine read_triana(lundia    ,error     ,kc       ,statns    ,nto        ,gd
           do k = 1, kc
              if ( isnan(ampl_corr(j, k)) .or. isnan(phas_corr(j, k)) ) then 
                 write(message,'(2a)') 'NaN found in file ', filcor
-                call prterr(lundia, 'P004', message, gdp)
+                call prterr(lundia, 'P004', message)
                 !
                 error = .true.
                 goto 9999

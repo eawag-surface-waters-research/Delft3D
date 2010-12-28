@@ -69,7 +69,7 @@ subroutine get_real_prop(link_ptr, keyword, text, value, id, gdp )
     call prop_get(link_ptr, '*', keyword, value)
     if (comparereal(value,misvalue) == 0) then
        write(message,'(a,i0)') 'Unable to read '//trim(text)// ' ', id
-       call prterr(lundia, 'U021', message, gdp)
+       call prterr(lundia, 'U021', message)
        call d3stop(1, gdp)
     endif
 end subroutine get_real_prop

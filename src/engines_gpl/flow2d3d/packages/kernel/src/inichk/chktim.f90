@@ -107,14 +107,14 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
        ! IPHISI < 0 is an invalid value => re-define IPHISI = 0
        !
        if (iphisi<0) then
-          call prterr(lundia    ,'U046'    ,'Invalid HIS print time interval'          ,gdp       )
+          call prterr(lundia    ,'U046'    ,'Invalid HIS print time interval'          )
           iphisi = 0
        endif
        !
        ! if IPHISI = 0 then time frame should be IPHISF = IPHISL = 0
        !
        if (iphisl>0 .or. iphisf>0) then
-          call prterr(lundia    ,'U046'    ,'Inconsistent HIS print times'  ,gdp       )
+          call prterr(lundia    ,'U046'    ,'Inconsistent HIS print times'  )
        endif
     endif
     !
@@ -124,7 +124,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     if (iphisi>0) then
        if (nostat==0 .and. ntruv==0) then
           iphisi = 0
-          call prterr(lundia    ,'V056'    ,' '       ,gdp       )
+          call prterr(lundia    ,'V056'    ,' '       )
        endif
     endif
     !
@@ -132,7 +132,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     !
     if (iphisi>0) then
        if (index(prshis, 'Y')==0) then
-          call prterr(lundia    ,'U046'    ,'No print quant. for HIS selected'         ,gdp       )
+          call prterr(lundia    ,'U046'    ,'No print quant. for HIS selected'         )
           iphisi = 0
        endif
     endif
@@ -146,7 +146,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
           iphisl = itstrt
        elseif (iphisi>(itstop - itstrt)) then
           iphisi = max(idt, itstop - itstrt)
-          call prterr(lundia    ,'V009'    ,'HIS print interval (>)'        ,gdp       )
+          call prterr(lundia    ,'V009'    ,'HIS print interval (>)'        )
        else
        endif
     endif
@@ -156,7 +156,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     !
     if (iphisi>0) then
        if (iphisf>itstop) then
-          call prterr(lundia    ,'U046'    ,'Inconsistent HIS print times'  ,gdp       )
+          call prterr(lundia    ,'U046'    ,'Inconsistent HIS print times'  )
           iphisi = 0
        endif
     endif
@@ -166,7 +166,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     !
     if (iphisi>0) then
        if (iphisl<itstrt) then
-          call prterr(lundia    ,'U046'    ,'Inconsistent HIS print times'  ,gdp       )
+          call prterr(lundia    ,'U046'    ,'Inconsistent HIS print times'  )
           iphisi = 0
        endif
     endif
@@ -176,7 +176,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     !
     if (iphisi>0) then
        if (iphisf<itstrt) then
-          call prterr(lundia    ,'V008'    ,'HIS print start time (<)'      ,gdp       )
+          call prterr(lundia    ,'V008'    ,'HIS print start time (<)'      )
           iplus = ((itstrt - iphisf)/iphisi)*iphisi
           if (iplus<(itstrt - iphisf)) iplus = iplus + iphisi
           iphisf = iphisf + iplus
@@ -186,7 +186,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
        ! => re-define IPHISI = 0
        !
        if (iphisl<iphisf) then
-          call prterr(lundia    ,'U046'    ,'Inconsistent HIS print times'  ,gdp       )
+          call prterr(lundia    ,'U046'    ,'Inconsistent HIS print times'  )
           iphisi = 0
        endif
     endif
@@ -197,7 +197,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     if (iphisi>0) then
        if (itstrt/=itstop) then
           if (iphisf==0 .and. iphisl==0) then
-             call prterr(lundia    ,'U046'    ,'Inconsistent HIS print times'  ,gdp       )
+             call prterr(lundia    ,'U046'    ,'Inconsistent HIS print times'  )
              iphisi = 0
           endif
        endif
@@ -218,7 +218,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     if (iphisl/=iphisf) then
        if (iphisi>(iphisl - iphisf)) then
           iphisi = max(idt, iphisl - iphisf)
-          call prterr(lundia    ,'V009'    ,'HIS print interval (>)'        ,gdp       )
+          call prterr(lundia    ,'V009'    ,'HIS print interval (>)'        )
        endif
        !
        ! check his interval according to IPHISF and IPHISL
@@ -228,7 +228,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
        ihisv = ((iphisl - iphisf)/iphisi)*iphisi
        if (ihisv/=(iphisl - iphisf)) then
           iphisl = iphisf + ihisv
-          call prterr(lundia    ,'V008'    ,'HIS print stop time',gdp       )
+          call prterr(lundia    ,'V008'    ,'HIS print stop time')
        endif
     endif
     !
@@ -243,7 +243,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     !
     if (ipmap(1)>=0) then
        if (index(prsmap, 'Y')==0) then
-          call prterr(lundia    ,'U046'    ,'No output for MAP print selected'         ,gdp       )
+          call prterr(lundia    ,'U046'    ,'No output for MAP print selected'         )
           ipmap(1) = -idt
           nreset = 2
        endif
@@ -254,7 +254,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     !
     if (ipmap(1)>=0) then
        if (itstrt==itstop) then
-          call prterr(lundia    ,'U021'    ,'MAP print time set to simulation start time'         ,gdp       )
+          call prterr(lundia    ,'U021'    ,'MAP print time set to simulation start time'         )
           ipmap(1) = itstrt
           nreset = 2
        endif
@@ -265,7 +265,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     !
     if (ipmap(1)>=0) then
        if (ipmap(1)<itstrt) then
-          call prterr(lundia    ,'U021'    ,'MAP print times < simulation start time will be skipped'        ,gdp       )
+          call prterr(lundia    ,'U021'    ,'MAP print times < simulation start time will be skipped'        )
        endif
     endif
     !
@@ -283,7 +283,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
           ! following print requests
           !
           if (ipmap(i)>itstop) then
-             call prterr(lundia    ,'U021'    ,'MAP print times > simulation stop time will be skipped'         ,gdp       )
+             call prterr(lundia    ,'U021'    ,'MAP print times > simulation stop time will be skipped'         )
              nreset = i
              exit
           endif
@@ -292,7 +292,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
           ! order => skipp this and following print requests
           !
           if (ipmap(i)<=ipmap(i - 1)) then
-             call prterr(lundia    ,'U021'    ,'No sequentually increasing MAP print times'          ,gdp       )
+             call prterr(lundia    ,'U021'    ,'No sequentually increasing MAP print times'          )
              nreset = i
              exit
           endif
@@ -309,7 +309,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     ! NOTE: some time checks are already performed in RDTIMO
     !
     if (ithisi < 0) then
-       call prterr(lundia    ,'U046'    ,'Invalid HIS file time interval',gdp       )
+       call prterr(lundia    ,'U046'    ,'Invalid HIS file time interval')
        ithisi = 0
     endif
     !
@@ -318,7 +318,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     !
     if (ithisi == 0) then
        if (nostat>0 .or. ntruv>0) then
-          call prterr(lundia    ,'V010'    ,' '       ,gdp       )
+          call prterr(lundia    ,'V010'    ,' '       )
        endif
     endif
     if (ithisi > 0) then
@@ -331,7 +331,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
           ! parallel: should test nostat and ntruv GLOBAL
           ithisi = 0
           !
-          call prterr(lundia    ,'V011'    ,' '       ,gdp       )
+          call prterr(lundia    ,'V011'    ,' '       )
        endif
        if (nostat<=1 .and. .not. parll) then
           !
@@ -340,7 +340,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
           !
           write (message,'(a,a)') 'At least 2 observation points must be defined ', &
                                 & 'when writing to history file'
-          call prterr(lundia, 'U021', message, gdp)
+          call prterr(lundia, 'U021', message)
           error = .true.
        endif
     endif
@@ -349,7 +349,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     !
     if (ithisi > 0) then
        if (index(selhis, 'Y')==0) then
-          call prterr(lundia    ,'U046'    ,'No output for HIS selected'    ,gdp       )
+          call prterr(lundia    ,'U046'    ,'No output for HIS selected'    )
           ithisi = 0
        endif
     endif
@@ -362,14 +362,14 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
        ! ITMAPI < 0 is an invalid value => re-define ITMAPI = 0
        !
        if (itmapi<0) then
-          call prterr(lundia    ,'U046'    ,'Invalid MAP storage time interval'        ,gdp       )
+          call prterr(lundia    ,'U046'    ,'Invalid MAP storage time interval'        )
           itmapi = 0
        endif
        !
        ! if ITMAPI = 0 then time frame should be ITMAPF = ITMAPL = 0
        !
        if (itmapl>0 .or. itmapf>0) then
-          call prterr(lundia    ,'U046'    ,'Inconsistent MAP file times'   ,gdp       )
+          call prterr(lundia    ,'U046'    ,'Inconsistent MAP file times'   )
        endif
     endif
     !
@@ -381,14 +381,14 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
        ! ITNFLI < 0 is an invalid value => re-define ITNFLI = 0
        !
        if (itnfli < 0) then
-          call prterr(lundia    ,'U046'    ,'Invalid Near Field comp time interval'        ,gdp       )
+          call prterr(lundia    ,'U046'    ,'Invalid Near Field comp time interval'        )
           itmapi = 0
        endif
        !
        ! if ITNFLI = 0 then time frame should be ITNFLF = ITNFLL = 0
        !
        if (itnfll>0 .or. itnflf>0) then
-          call prterr(lundia    ,'U046'    ,'Inconsistent Near Field comp times'   ,gdp       )
+          call prterr(lundia    ,'U046'    ,'Inconsistent Near Field comp times'   )
        endif
     endif
     !
@@ -396,7 +396,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     !
     if (itmapi>0) then
        if (index(selmap, 'Y')==0) then
-          call prterr(lundia    ,'U046'    ,'No output for MAP selected'    ,gdp       )
+          call prterr(lundia    ,'U046'    ,'No output for MAP selected'    )
           itmapi = 0
        endif
     endif
@@ -410,7 +410,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
           itmapl = itstrt
        elseif (itmapi > (itstop - itstrt)) then
           itmapi = max(idt, itstop - itstrt)
-          call prterr(lundia    ,'V009'    ,'< MAP file interval (>)'       ,gdp       )
+          call prterr(lundia    ,'V009'    ,'< MAP file interval (>)'       )
        endif
     endif
     if (ithisi > 0) then
@@ -419,7 +419,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
           ithisl = itstrt
        elseif (ithisi > (itstop - itstrt)) then
           ithisi = max(idt, itstop - itstrt)
-          call prterr(lundia    ,'V009'    ,'< HIS file interval (>)'       ,gdp       )
+          call prterr(lundia    ,'V009'    ,'< HIS file interval (>)'       )
        endif
     endif
     !
@@ -428,13 +428,13 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     !
     if (itmapi > 0) then
        if (itmapf > itstop) then
-          call prterr(lundia    ,'U046'    ,'Inconsistent MAP file times' ,gdp       )
+          call prterr(lundia    ,'U046'    ,'Inconsistent MAP file times' )
           itmapi = 0
        endif
     endif
     if (ithisi > 0) then
        if (ithisf > itstop) then
-          call prterr(lundia    ,'U046'    ,'Inconsistent HIS file times' ,gdp       )
+          call prterr(lundia    ,'U046'    ,'Inconsistent HIS file times' )
           ithisi = 0
        endif
     endif
@@ -444,13 +444,13 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     !
     if (itmapi > 0) then
        if (itmapl < itstrt) then
-          call prterr(lundia    ,'U046'    ,'Inconsistent MAP file times' ,gdp       )
+          call prterr(lundia    ,'U046'    ,'Inconsistent MAP file times' )
           itmapi = 0
        endif
     endif    
     if (ithisi > 0) then
        if (ithisl < itstrt) then
-          call prterr(lundia    ,'U046'    ,'Inconsistent HIS file times' ,gdp       )
+          call prterr(lundia    ,'U046'    ,'Inconsistent HIS file times' )
           ithisi = 0
        endif
     endif    
@@ -464,13 +464,13 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
        ! => re-define ITMAPI = 0
        !
        if (itmapl < itmapf) then
-          call prterr(lundia    ,'U046'    ,'Inconsistent MAP file times'   ,gdp       )
+          call prterr(lundia    ,'U046'    ,'Inconsistent MAP file times'   )
           itmapi = 0
        endif
     endif
     if (ithisi > 0) then
        if (ithisl < ithisf) then
-          call prterr(lundia    ,'U046'    ,'Inconsistent HIS file times'   ,gdp       )
+          call prterr(lundia    ,'U046'    ,'Inconsistent HIS file times'   )
           ithisi = 0
        endif
     endif
@@ -481,7 +481,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     if (itmapi > 0) then
        if (itstrt /= itstop) then
           if (itmapf==0 .and. itmapl==0) then
-             call prterr(lundia    ,'U046'    ,'Inconsistent MAP file times'   ,gdp       )
+             call prterr(lundia    ,'U046'    ,'Inconsistent MAP file times'   )
              itmapi = 0
           endif
        endif
@@ -489,7 +489,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     if (ithisi > 0) then
        if (itstrt /= itstop) then
           if (ithisf==0 .and. ithisl==0) then
-             call prterr(lundia    ,'U046'    ,'Inconsistent HIS file times'   ,gdp       )
+             call prterr(lundia    ,'U046'    ,'Inconsistent HIS file times'   )
              ithisi = 0
           endif
        endif
@@ -514,7 +514,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     if (itmapl /= itmapf) then
        if (itmapi > itmapl-itmapf) then
           itmapi = max(idt, itmapl - itmapf)
-          call prterr(lundia    ,'V009'    ,'MAP interval (>)'   ,gdp       )
+          call prterr(lundia    ,'V009'    ,'MAP interval (>)'   )
        endif
        !
        ! check MAP interval according to ITMAPF and ITMAPL
@@ -524,18 +524,18 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
        imapv = ((itmapl - itmapf)/itmapi)*itmapi
        if (imapv /= (itmapl - itmapf)) then
           itmapl = itmapf + imapv
-          call prterr(lundia    ,'V008'    ,'MAP stop time'      ,gdp       )
+          call prterr(lundia    ,'V008'    ,'MAP stop time'      )
        endif
     endif
     if (ithisl /= ithisf) then
        if (ithisi > ithisl-ithisf) then
           ithisi = max(idt, ithisl - ithisf)
-          call prterr(lundia    ,'V009'    ,'HIS interval (>)'   ,gdp       )
+          call prterr(lundia    ,'V009'    ,'HIS interval (>)'   )
        endif
        ihisv = ((ithisl - ithisf)/ithisi)*ithisi
        if (ihisv /= (ithisl - ithisf)) then
           ithisl = ithisf + ihisv
-          call prterr(lundia    ,'V008'    ,'HIS stop time'      ,gdp       )
+          call prterr(lundia    ,'V008'    ,'HIS stop time'      )
        endif
     endif
     !
@@ -547,14 +547,14 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
        ! ITCOMI < 0 is an invalid value => re-define ITCOMI = 0
        !
        if (itcomi<0) then
-          call prterr(lundia    ,'U046'    ,'Invalid comm. storage time interval'      ,gdp       )
+          call prterr(lundia    ,'U046'    ,'Invalid comm. storage time interval'      )
           itcomi = 0
        endif
        !
        ! if ITCOMI = 0 then time frame should be ITCOMF = ITCOML = 0
        !
        if (itcoml>0 .or. itcomf>0) then
-          call prterr(lundia    ,'U046'    ,'Inconsistent comm. file times' ,gdp       )
+          call prterr(lundia    ,'U046'    ,'Inconsistent comm. file times' )
        endif
     endif
     !
@@ -567,7 +567,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
           itcoml = itstrt
        elseif (itcomi>(itstop - itstrt)) then
           itcomi = max(idt, itstop - itstrt)
-          call prterr(lundia    ,'V009'    ,'Comm. file interval (>)'       ,gdp       )
+          call prterr(lundia    ,'V009'    ,'Comm. file interval (>)'       )
        else
        endif
     endif
@@ -577,7 +577,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     !
     if (itcomi>0) then
        if (itcomf>itstop) then
-          call prterr(lundia    ,'U046'    ,'Inconsistent comm. file times' ,gdp       )
+          call prterr(lundia    ,'U046'    ,'Inconsistent comm. file times' )
           itcomi = 0
        endif
     endif
@@ -587,7 +587,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     !
     if (itcomi>0) then
        if (itcoml<itstrt) then
-          call prterr(lundia    ,'U046'    ,'Inconsistent comm. file times' ,gdp       )
+          call prterr(lundia    ,'U046'    ,'Inconsistent comm. file times' )
           itcomi = 0
        endif
     endif
@@ -597,7 +597,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     !
     if (itcomi>0) then
        if (itcomf<itstrt) then
-          call prterr(lundia    ,'V008'    ,'Comm. start time (<)'          ,gdp       )
+          call prterr(lundia    ,'V008'    ,'Comm. start time (<)'          )
           iplus = ((itstrt - itcomf)/itcomi)*itcomi
           if (iplus<(itstrt - itcomf)) iplus = iplus + itcomi
           itcomf = itcomf + iplus
@@ -607,7 +607,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
        ! to become inside simulation time frame
        !
        if (itcoml>itstop) then
-          call prterr(lundia    ,'V008'    ,'Comm. stop time (>)',gdp       )
+          call prterr(lundia    ,'V008'    ,'Comm. stop time (>)')
           iplus = ((itcoml - itstop)/itcomi)*itcomi
           if (iplus<(itcoml - itstop)) iplus = iplus + itcomi
           itcoml = itcoml - iplus
@@ -617,7 +617,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
        ! => re-define ITCOMI = 0
        !
        if (itcoml<itcomf) then
-          call prterr(lundia    ,'U046'    ,'Inconsistent comm. file times' ,gdp       )
+          call prterr(lundia    ,'U046'    ,'Inconsistent comm. file times' )
           itcomi = 0
        endif
     endif
@@ -628,13 +628,13 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     if (itcomi>0) then
        if (itstrt/=itstop) then
           if (itcomf==0 .and. itcoml==0) then
-             call prterr(lundia    ,'U046'    ,'Inconsistent comm. file times' ,gdp       )
+             call prterr(lundia    ,'U046'    ,'Inconsistent comm. file times' )
              itcomi = 0
           !
           ! Write warning in case of DELWAQ application
           !
           elseif (itcomf==itcoml) then
-             call prterr(lundia    ,'G040'    ,' '       ,gdp       )
+             call prterr(lundia    ,'G040'    ,' '       )
           else
           endif
        endif
@@ -655,7 +655,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     if (itcoml/=itcomf) then
        if (itcomi>itcoml - itcomf) then
           itcomi = max(idt, itcoml - itcomf)
-          call prterr(lundia    ,'V009'    ,'Comm. file interval (>)'       ,gdp       )
+          call prterr(lundia    ,'V009'    ,'Comm. file interval (>)'       )
        endif
        !
        ! check communication interval according to ITCOMF and ITCOML
@@ -665,7 +665,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
        icomv = ((itcoml - itcomf)/itcomi)*itcomi
        if (icomv/=(itcoml - itcomf)) then
           itcoml = itcomf + icomv
-          call prterr(lundia    ,'V009'    ,'Comm. stop time'    ,gdp       )
+          call prterr(lundia    ,'V009'    ,'Comm. stop time'    )
        endif
     endif
     !
@@ -677,7 +677,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
        ! ITRSTI < 0 is an invalid value => re-define ITRSTI = 0
        !
        if (itrsti<0) then
-          call prterr(lundia    ,'U046'    ,'Invalid RESTART file time interval'       ,gdp       )
+          call prterr(lundia    ,'U046'    ,'Invalid RESTART file time interval'       )
           itrsti = 0
        endif
     endif

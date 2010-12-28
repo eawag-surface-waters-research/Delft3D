@@ -148,9 +148,9 @@ subroutine dimiwe(lunmd     ,lundia    ,error     ,nrrec     ,iweflg    , &
              read (luntmp, '(a)', iostat = iocond) mdfrec
              if (iocond/=0) then
                 if (iocond<0) then
-                   call prterr(lundia    ,'G006'    ,filiwe(1:lfile)      ,gdp       )
+                   call prterr(lundia    ,'G006'    ,filiwe(1:lfile)      )
                 else
-                   call prterr(lundia    ,'G007'    ,filiwe(1:lfile)      ,gdp       )
+                   call prterr(lundia    ,'G007'    ,filiwe(1:lfile)      )
                 endif
                 close (luntmp)
                 error = .true.
@@ -160,9 +160,9 @@ subroutine dimiwe(lunmd     ,lundia    ,error     ,nrrec     ,iweflg    , &
              read (luntmp, '(a)', iostat = iocond) mdfrec
              if (iocond/=0) then
                 if (iocond<0) then
-                   call prterr(lundia    ,'G006'    ,filiwe(1:lfile)      ,gdp       )
+                   call prterr(lundia    ,'G006'    ,filiwe(1:lfile)      )
                 else
-                   call prterr(lundia    ,'G007'    ,filiwe(1:lfile)      ,gdp       )
+                   call prterr(lundia    ,'G007'    ,filiwe(1:lfile)      )
                 endif
                 close (luntmp)
                 error = .true.
@@ -180,7 +180,7 @@ subroutine dimiwe(lunmd     ,lundia    ,error     ,nrrec     ,iweflg    , &
              !
              if (ier<=0) then
                 error = .true.
-                call prterr(lundia    ,'G006'    ,filiwe(1:lfile)      ,gdp       )
+                call prterr(lundia    ,'G006'    ,filiwe(1:lfile)      )
                 !
                 goto 9999
              endif
@@ -203,7 +203,7 @@ subroutine dimiwe(lunmd     ,lundia    ,error     ,nrrec     ,iweflg    , &
           ! File does not exist
           !
           else
-             call prterr(lundia    ,'G004'    ,filiwe(1:lfile)      ,gdp       )
+             call prterr(lundia    ,'G004'    ,filiwe(1:lfile)      )
              !
              error = .true.
           endif

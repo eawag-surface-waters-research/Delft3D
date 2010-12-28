@@ -217,7 +217,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           if (filout==filbcc) then
              inquire (file = filout(:8 + lrid), exist = ex)
              if (.not.ex) then
-                call prterr(lundia    ,'G004'    ,filout    ,gdp       )
+                call prterr(lundia    ,'G004'    ,filout    )
                 !
                 error = .true.
                 goto 9999
@@ -232,7 +232,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              ! Not able to read record length for direct access
              !
              if (iocond/=0) then
-                call prterr(lundia    ,'U081'    ,filout    ,gdp       )
+                call prterr(lundia    ,'U081'    ,filout    )
                 !
                 error = .true.
                 goto 9999
@@ -276,7 +276,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 open (lunrd, file = filbcc(:lf), form = 'formatted',            &
                      & status = 'old')
                 write (message, '(2a)') 'Reading BC-transport file ', filbcc(:lf)
-                call prterr(lundia, 'G051', trim(message), gdp)
+                call prterr(lundia, 'G051', trim(message))
                 call rdtdc(lundia    ,lunout    ,lunrd     ,error     ,filbcc    , &
                          & runid     ,profil    ,eol       ,itstrt    ,itstop    , &
                          & nto       ,lstsc     ,nambnd    ,namcon    ,gdp       )
@@ -290,7 +290,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 open (lunrd, file = filbcc(:lf), form = 'formatted',            &
                      & status = 'old')
                 write (message, '(2a)') 'Reading BC-transport file ', filbcc(:lf)
-                call prterr(lundia, 'G051', trim(message), gdp)
+                call prterr(lundia, 'G051', trim(message))
                 call rdtdcn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
                           & filbcc    ,runid     ,profil    ,eol       ,itstrt    , &
                           & itstop    ,nto       ,lstsc     ,kmax       ,nambnd    , &
@@ -304,7 +304,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 ! Define "fake" timeframe
                 !
                 write (message, '(3a)') 'BC-transport file ', filbcc(:lf), ' will be skipped in TDATOM'
-                call prterr(lundia, 'G051', trim(message), gdp)
+                call prterr(lundia, 'G051', trim(message))
              endif
           else
              error = .true.
@@ -370,7 +370,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        endif
        !<==
        if (nbcctm>mxbctm .and. .not.noui) then
-          call prterr(lundia    ,'U153'    ,' '       ,gdp       )
+          call prterr(lundia    ,'U153'    ,' '       )
           !
           nbcctm = mxbctm
        endif
@@ -465,7 +465,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                    ! Check for negative values
                    !
                    if (sab(j, ibcc, nn)<0.0) then
-                      call prterr(lundia    ,'V061'    ,'Salinity at open boundary'     ,gdp       )
+                      call prterr(lundia    ,'V061'    ,'Salinity at open boundary'     )
                       !
                       if (noui) error = .true.
                       goto 700
@@ -475,7 +475,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                    !
                    if ( isnan(cab(j, l, ibcc, nn)) ) then 
                        write(message,'(a,a)') 'Salinity containing NaN in ',filbcc
-                       call prterr(lundia    ,'P004'    ,message      ,gdp       )
+                       call prterr(lundia    ,'P004'    ,message      )
                        error = .true.
                        goto 700
                    endif
@@ -529,7 +529,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                    !
                    inprof = index(profil, tprofc(nn, ll))
                    if (inprof==0) then
-                      call prterr(lundia    ,'U066'    ,chulp     ,gdp       )
+                      call prterr(lundia    ,'U066'    ,chulp     )
                       !
                       tprofc(nn, ll) = cdef
                    endif
@@ -537,7 +537,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                    ! Check for not allowed profile (3d-profile)
                    !
                    if (tprofc(nn, ll)=='3d-profile') then
-                      call prterr(lundia    ,'V095'    ,'for v249 or less'   ,gdp       )
+                      call prterr(lundia    ,'V095'    ,'for v249 or less'   )
                       !
                       if (noui) error = .true.
                       goto 700
@@ -550,7 +550,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                    call small(chulp     ,lenc      )
                    if (chulp/=tprofc(nn, ll)) then
                       if (noui) error = .true.
-                      call prterr(lundia    ,'U066'    ,chulp     ,gdp       )
+                      call prterr(lundia    ,'U066'    ,chulp     )
                       !
                       goto 700
                    endif
@@ -594,7 +594,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                    ! Check for negative values
                    !
                    if (tab(j, ibcc, nn)<0.0) then
-                      call prterr(lundia    ,'V061'    ,'Temperature at open boundary'  ,gdp       )
+                      call prterr(lundia    ,'V061'    ,'Temperature at open boundary'  )
                       !
                       if (noui) error = .true.
                       goto 700
@@ -604,7 +604,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                    !
                    if ( isnan(cab(j, l, ibcc, nn)) ) then 
                        write(message,'(a,a)') 'Temperature containing NaN in ',filbcc
-                       call prterr(lundia    ,'P004'    ,message      ,gdp       )
+                       call prterr(lundia    ,'P004'    ,message      )
                        error = .true.
                        goto 700
                    endif
@@ -658,7 +658,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                    !
                    inprof = index(profil, tprofc(nn, ll))
                    if (inprof==0) then
-                      call prterr(lundia    ,'U066'    ,chulp     ,gdp       )
+                      call prterr(lundia    ,'U066'    ,chulp     )
                       !
                       tprofc(nn, ll) = cdef
                    endif
@@ -666,7 +666,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                    ! Check for not allowed profile (3d-profile)
                    !
                    if (tprofc(nn, ll)=='3d-profile') then
-                      call prterr(lundia    ,'V095'    ,'for v249 or less'   ,gdp       )
+                      call prterr(lundia    ,'V095'    ,'for v249 or less'   )
                       !
                       if (noui) error = .true.
                       goto 700
@@ -679,7 +679,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                    call small(chulp     ,lenc      )
                    if (chulp/=tprofc(nn, ll)) then
                       if (noui) error = .true.
-                      call prterr(lundia    ,'U066'    ,chulp     ,gdp       )
+                      call prterr(lundia    ,'U066'    ,chulp     )
                       !
                       goto 700
                    endif
@@ -725,7 +725,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                       ! Check for negative values
                       !
                       if (cab(j, l, ibcc, nn)<0.0) then
-                         call prterr(lundia    ,'V061'    ,'Concentration at open boundary',gdp       )
+                         call prterr(lundia    ,'V061'    ,'Concentration at open boundary')
                          !
                          if (noui) error = .true.
                          goto 700
@@ -735,7 +735,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                       !
                       if ( isnan(cab(j, l, ibcc, nn)) ) then 
                           write(message,'(a,a)') 'Concentration containing NaN in ',filbcc
-                          call prterr(lundia    ,'P004'    ,message      ,gdp       )
+                          call prterr(lundia    ,'P004'    ,message      )
                           error = .true.
                           goto 700
                       endif
@@ -789,7 +789,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                       !
                       inprof = index(profil, tprofc(nn, ll))
                       if (inprof==0) then
-                         call prterr(lundia    ,'U066'    ,chulp     ,gdp       )
+                         call prterr(lundia    ,'U066'    ,chulp     )
                          !
                          tprofc(nn, ll) = cdef
                       endif
@@ -797,7 +797,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                       ! Check for not allowed profile (3d-profile)
                       !
                       if (tprofc(nn, ll)=='3d-profile') then
-                         call prterr(lundia    ,'V095'    ,'for v249 or less'   ,gdp       )
+                         call prterr(lundia    ,'V095'    ,'for v249 or less'   )
                          !
                          if (noui) error = .true.
                          goto 700
@@ -810,7 +810,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                       call small(chulp     ,lenc      )
                       if (chulp/=tprofc(nn, ll)) then
                          if (noui) error = .true.
-                         call prterr(lundia    ,'U066'    ,chulp     ,gdp       )
+                         call prterr(lundia    ,'U066'    ,chulp     )
                          !
                          goto 700
                       endif
@@ -994,7 +994,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
   700  continue
        if (itold/= - 1) then
             if (itold<itstop) then 
-                call prterr(lundia    ,'U042'    ,'Last time for time varying constituents boundary conditions <',    gdp       )
+                call prterr(lundia    ,'U042'    ,'Last time for time varying constituents boundary conditions <')
                 error = .true.
                 goto 9999
             endif

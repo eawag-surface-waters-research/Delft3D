@@ -63,7 +63,7 @@ subroutine dfsync ( gdp )
     call mpi_barrier ( MPI_COMM_WORLD, ierr )
     if ( ierr /= MPI_SUCCESS ) then
        write (msgstr,'(a,i5,a,i3.3)') 'MPI produces some internal error - return code is ',ierr,' and node number is ',inode
-       call prterr(lundia, 'U021', trim(msgstr), gdp)
+       call prterr(lundia, 'U021', trim(msgstr))
        call d3stop(1, gdp)
     endif
 #endif

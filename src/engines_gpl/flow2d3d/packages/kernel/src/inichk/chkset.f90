@@ -147,62 +147,62 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
        ! errors
        !
        if (iweflg) then
-          call prterr(lundia    ,'M001'    ,'Internal Wave option'          ,gdp       )
+          call prterr(lundia    ,'M001'    ,'Internal Wave option'          )
           ierror = ierror+ 1
        endif
        if (mudlay) then
-          call prterr(lundia    ,'M001'    ,'Fluid Mud'          ,gdp       )
+          call prterr(lundia    ,'M001'    ,'Fluid Mud'          )
           ierror = ierror+ 1
        endif
        if (solver(1:2)=='gs') then
-          call prterr(lundia    ,'M001'    ,'Gauss Seidel solver',gdp       )
+          call prterr(lundia    ,'M001'    ,'Gauss Seidel solver')
           ierror = ierror+ 1
        endif
        !
        ! warnings
        !
        if (roller) then
-          call prterr(lundia    ,'M002'    ,'Roller model'       ,gdp       )
+          call prterr(lundia    ,'M002'    ,'Roller model'       )
           iwarn = iwarn + 1
        endif
        if (ltur2d>0) then
-          call prterr(lundia    ,'M002'    ,'Q2E 2D Turb.model'  ,gdp       )
+          call prterr(lundia    ,'M002'    ,'Q2E 2D Turb.model'  )
           iwarn = iwarn + 1
        endif
        if (nrcmp>0) then
-          call prterr(lundia    ,'M002'    ,'Tide generating forces'        ,gdp       )
+          call prterr(lundia    ,'M002'    ,'Tide generating forces'        )
           iwarn = iwarn + 1
        endif
        if (lsec>0) then
-          call prterr(lundia    ,'M002'    ,'Secondary Flow'     ,gdp       )
+          call prterr(lundia    ,'M002'    ,'Secondary Flow'     )
           iwarn = iwarn + 1
        endif
        if (ndro>0) then
-          call prterr(lundia    ,'M002'    ,'Drogues' ,gdp       )
+          call prterr(lundia    ,'M002'    ,'Drogues' )
           iwarn = iwarn + 1
        endif
        if (disctr(1:4)=='expl') then
-          call prterr(lundia    ,'M002'    ,'Explicit method'    ,gdp       )
+          call prterr(lundia    ,'M002'    ,'Explicit method'    )
           iwarn = iwarn + 1
        endif
        if (wave) then
-          call prterr(lundia    ,'M002'    ,'Wave effect'        ,gdp       )
+          call prterr(lundia    ,'M002'    ,'Wave effect'        )
           iwarn = iwarn + 1
        endif
        if (sferic) then
-          call prterr(lundia    ,'M002'    ,'Spherical coordinate'          ,gdp       )
+          call prterr(lundia    ,'M002'    ,'Spherical coordinate'          )
           iwarn = iwarn + 1
        endif
        if (sedim) then
-          call prterr(lundia    ,'M002'    ,'3D Morphology'      ,gdp       )
+          call prterr(lundia    ,'M002'    ,'3D Morphology'      )
           iwarn = iwarn + 1
        endif
        if (momsol /= 'cyclic') then
-          call prterr(lundia    ,'M002'    ,'Momentum solver other than cyclic'  ,gdp       )
+          call prterr(lundia    ,'M002'    ,'Momentum solver other than cyclic'  )
           iwarn = iwarn + 1
        endif
        if (couplemod) then
-          call prterr(lundia    ,'M002'    ,'Online Couple'      ,gdp       )
+          call prterr(lundia    ,'M002'    ,'Online Couple'      )
           iwarn = iwarn + 1
        endif
     endif
@@ -214,91 +214,91 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
        ! errors
        !
        if (rtcmod == dataFromRTCToFLOW) then
-          call prterr(lundia    ,'Z011'    ,'Real Time Control'  ,gdp       )
+          call prterr(lundia    ,'Z011'    ,'Real Time Control'  )
           ierror = ierror+ 1
        endif
        if (couplemod) then
-          call prterr(lundia    ,'Z011'    ,'Online Couple'      ,gdp       )
+          call prterr(lundia    ,'Z011'    ,'Online Couple'      )
           ierror = ierror+ 1
        endif
        if (sedim) then
-          call prterr(lundia    ,'Z011'    ,'3D Morphology'      ,gdp       )
+          call prterr(lundia    ,'Z011'    ,'3D Morphology'      )
           ierror = ierror+ 1
        endif
        if (iweflg) then
-          call prterr(lundia    ,'Z011'    ,'Internal Wave option'          ,gdp       )
+          call prterr(lundia    ,'Z011'    ,'Internal Wave option'          )
           ierror = ierror+ 1
        endif
        if (mudlay) then
-          call prterr(lundia    ,'Z011'    ,'Fluid Mud'          ,gdp       )
+          call prterr(lundia    ,'Z011'    ,'Fluid Mud'          )
           ierror = ierror+ 1
        endif
        if (solver(1:2)=='gs') then
-          call prterr(lundia    ,'Z011'    ,'Gauss Seidel solver',gdp       )
+          call prterr(lundia    ,'Z011'    ,'Gauss Seidel solver')
           ierror = ierror+ 1
        endif
        if (ltur2d>0) then
-          call prterr(lundia    ,'Z011'    ,'Q2E 2D Turb.model'  ,gdp       )
+          call prterr(lundia    ,'Z011'    ,'Q2E 2D Turb.model'  )
           ierror = ierror+ 1
        endif
        if (lsec>0) then
-          call prterr(lundia    ,'Z011'    ,'Secondary Flow'     ,gdp       )
+          call prterr(lundia    ,'Z011'    ,'Secondary Flow'     )
           errtxt = 'Use Sigma version of Delft3D-FLOW instead'
-          call prterr(lundia    ,'U021'    ,errtxt    ,gdp       )
+          call prterr(lundia    ,'U021'    ,errtxt    )
           ierror = ierror+ 1
        endif
        if (disctr(1:4)=='expl') then
-          call prterr(lundia    ,'Z011'    ,'Explicit method'    ,gdp       )
+          call prterr(lundia    ,'Z011'    ,'Explicit method'    )
           ierror = ierror+ 1
        endif
        if (wave) then
-          call prterr(lundia    ,'Z011'    ,'Wave effect'        ,gdp       )
+          call prterr(lundia    ,'Z011'    ,'Wave effect'        )
           ierror = ierror+ 1
        endif
        if (roller) then
-          call prterr(lundia    ,'Z011'    ,'Roller model'       ,gdp       )
+          call prterr(lundia    ,'Z011'    ,'Roller model'       )
           ierror = ierror+ 1
        endif
        !
        ! warnings
        !
        if (method(1:3)/='adi') then
-          call prterr(lundia    ,'Z011'    ,method    ,gdp       )
+          call prterr(lundia    ,'Z011'    ,method    )
           method = 'adi          '
           errtxt = 'ADI numerical method will be applied instead'
-          call prterr(lundia    ,'U190'    ,errtxt    ,gdp       )
+          call prterr(lundia    ,'U190'    ,errtxt    )
           iwarn = iwarn + 1
        endif
        if (ktemp/=5 .and. ktemp>0) then
-          call prterr(lundia    ,'Z012'    ,'Heat model other than option 5',gdp       )
+          call prterr(lundia    ,'Z012'    ,'Heat model other than option 5')
           iwarn = iwarn + 1
        endif
        if (keva>0) then
-          call prterr(lundia    ,'Z012'    ,'Evaporation model'  ,gdp       )
+          call prterr(lundia    ,'Z012'    ,'Evaporation model'  )
           iwarn = iwarn + 1
        endif
        if (nrcmp>0) then
-          call prterr(lundia    ,'Z012'    ,'Tide generating forces'        ,gdp       )
+          call prterr(lundia    ,'Z012'    ,'Tide generating forces'        )
           iwarn = iwarn + 1
        endif
        if (ntoq>0) then
-          call prterr(lundia    ,'Z012'    ,'Q-H boundary'       ,gdp       )
+          call prterr(lundia    ,'Z012'    ,'Q-H boundary'       )
           iwarn = iwarn + 1
        endif
        if (ndro>0) then
-          call prterr(lundia    ,'Z012'    ,'Drogues' ,gdp       )
+          call prterr(lundia    ,'Z012'    ,'Drogues' )
           iwarn = iwarn + 1
        endif
        if (sferic) then
-          call prterr(lundia    ,'Z012'    ,'Spherical coordinate'          ,gdp       )
+          call prterr(lundia    ,'Z012'    ,'Spherical coordinate'          )
           iwarn = iwarn + 1
        endif
        if (htur2d) then
-          call prterr(lundia    ,'Z012'    ,'HLES'    ,gdp       )
+          call prterr(lundia    ,'Z012'    ,'HLES'    )
           iwarn = iwarn + 1
        endif
        if (struct) then
-          call prterr(lundia    ,'Z012'    ,'Structures'         ,gdp       )
+          call prterr(lundia    ,'Z012'    ,'Structures'         )
           iwarn = iwarn + 1
        endif
     else
@@ -310,7 +310,7 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
        !
        if (fl45 .or. flcut) then
           errtxt = 'Combination of sigma-model and cut cells is not available'
-          call prterr(lundia ,'U021' ,errtxt ,gdp )
+          call prterr(lundia ,'U021' ,errtxt )
           ierror = ierror+ 1
        endif
        !
@@ -318,7 +318,7 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
        !
        if (bubble) then
           errtxt = 'Combination of sigma-model and bubble screens has not yet been tested'
-          call prterr(lundia ,'Z013' ,errtxt ,gdp )
+          call prterr(lundia ,'Z013' ,errtxt )
           iwarn = iwarn + 1
        endif
     endif
@@ -330,7 +330,7 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
        ! errors
        !
        if (.not. sedim) then
-          call prterr(lundia    ,'P004'    ,'Dredging is only allowed in combination with 3D Morphology'  ,gdp       )
+          call prterr(lundia    ,'P004'    ,'Dredging is only allowed in combination with 3D Morphology'  )
           ierror = ierror+ 1
        endif
     endif
@@ -338,14 +338,14 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
     !
     !
     if (multi) then
-       call prterr(lundia, 'U190', 'Mormerge: Mass balance only satisfied for all runs together', gdp)
+       call prterr(lundia, 'U190', 'Mormerge: Mass balance only satisfied for all runs together')
        iwarn = iwarn + 1
     endif
     !
     !
     !
     if (dpsopt=='DP' .and. dpuopt=='MEAN') then
-       call prterr(lundia, 'P004', 'The combination of dpsopt=DP and dpuopt=MEAN is invalid', gdp)
+       call prterr(lundia, 'P004', 'The combination of dpsopt=DP and dpuopt=MEAN is invalid')
        ierror = ierror+ 1
     endif
     !
@@ -353,7 +353,7 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
     !
     if (waqol) then
        if (sedim) then
-          call prterr(lundia, 'P004', 'Morphology/sediments can not be switched on in both FLOW and WAQ', gdp)
+          call prterr(lundia, 'P004', 'Morphology/sediments can not be switched on in both FLOW and WAQ')
           ierror = ierror+ 1
        endif
     endif
@@ -364,7 +364,7 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
        !
        ! The output to ascii file can be written for a maximum of 7 constituents (prthis.f90)
        !
-       call prterr(lundia, 'P004', 'Writing to a tri-prt (ascii) file is not supported when using more than 7 constituents', gdp) 
+       call prterr(lundia, 'P004', 'Writing to a tri-prt (ascii) file is not supported when using more than 7 constituents')
        ierror = ierror+ 1
     endif
     !
@@ -376,7 +376,7 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
        !
        if (drogue) then
           errtxt = 'Drogues/walking monitor points are not available in parallel computations'
-          call prterr(lundia ,'U021' ,errtxt ,gdp )
+          call prterr(lundia ,'U021' ,errtxt )
           ierror = ierror+ 1
        endif
     endif

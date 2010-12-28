@@ -281,11 +281,11 @@ end interface
     if (istat /= 0) then
        select case (istat)
        case(1)
-          call prterr(lundia, 'G004', dredgefile, gdp)
+          call prterr(lundia, 'G004', dredgefile)
        case(3)
-          call prterr(lundia, 'G006', dredgefile, gdp)
+          call prterr(lundia, 'G006', dredgefile)
        case default
-          call prterr(lundia, 'G007', dredgefile, gdp)
+          call prterr(lundia, 'G007', dredgefile)
        endselect
        call d3stop(1, gdp)
     endif
@@ -316,16 +316,16 @@ end interface
        if (istat /= 0) then
           select case (istat)
           case(1)
-             call prterr(lundia, 'G004', polygonfile, gdp)
+             call prterr(lundia, 'G004', polygonfile)
           case(3)
-             call prterr(lundia, 'G006', polygonfile, gdp)
+             call prterr(lundia, 'G006', polygonfile)
           case default
-             call prterr(lundia, 'G007', polygonfile, gdp)
+             call prterr(lundia, 'G007', polygonfile)
           endselect
           call d3stop(1, gdp)
        endif
      else
-       call prterr(lundia, 'P004', 'Unable to find keyword "Polygon File" in dad-file', gdp)
+       call prterr(lundia, 'P004', 'Unable to find keyword "Polygon File" in dad-file')
        call d3stop(1, gdp)
     endif
     !
@@ -336,7 +336,7 @@ end interface
     !
     if (comparereal(versionnrinput, versionnr) == -1) then
        write (message,'(a,f6.2,a)') 'Dredge input file must have version number ',versionnr, ' or higher'
-       call prterr(lundia, 'U021', trim(message), gdp)
+       call prterr(lundia, 'U021', trim(message))
        call d3stop(1, gdp)
     endif
     !
@@ -359,7 +359,7 @@ end interface
     !
     allocate (gdp%gddredge%refplane (gdp%d%nmlb:gdp%d%nmub), stat = istat)
     if (istat /= 0) then
-       call prterr(lundia, 'U021', 'RdDredge: memory alloc error', gdp)
+       call prterr(lundia, 'U021', 'RdDredge: memory alloc error')
        call d3stop(1, gdp)
     endif
     !
@@ -409,13 +409,13 @@ end interface
     if (ex) then
        call flw_readtable(tseriesfile, trim(filename), julday,gdp)
     elseif (filename /= 'dummyname') then
-       call prterr(lundia, 'U021', 'Missing time series file "'//trim(filename)//'"', gdp)
+       call prterr(lundia, 'U021', 'Missing time series file "'//trim(filename)//'"')
        call d3stop(1, gdp)
     endif
     !
     call prop_get(dad_ptr, 'General', 'DepthDef', def_depthdef)
     if (def_depthdef < 1 .or. def_depthdef > DEPTHDEF_MAX) then
-       call prterr(lundia, 'U021', 'Invalid default depth definition', gdp)
+       call prterr(lundia, 'U021', 'Invalid default depth definition')
        call d3stop(1, gdp)
     endif
     call prop_get_logical(dad_ptr, 'General', 'TS_MorTimeScale', tsmortime)
@@ -424,27 +424,27 @@ end interface
     call prop_get(dad_ptr, 'General', 'MaxVolRate' , def_maxvolrate)
     call prop_get_integer(dad_ptr, 'General', 'InPolygon', def_chkloc)
     if (def_chkloc < 1 .or. def_chkloc > 3) then
-       call prterr(lundia, 'U021', 'Invalid default for in polygon check', gdp)
+       call prterr(lundia, 'U021', 'Invalid default for in polygon check')
        call d3stop(1, gdp)
     endif
     call prop_get_integer(dad_ptr, 'General', 'DredgeDistr', def_dredgedistr)
     if (def_dredgedistr < 1 .or. def_dredgedistr > DREDGEDISTR_MAX) then
-       call prterr(lundia, 'U021', 'Invalid default dredge distribution', gdp)
+       call prterr(lundia, 'U021', 'Invalid default dredge distribution')
        call d3stop(1, gdp)
     endif
     call prop_get(dad_ptr, 'General', 'AlphaDuneHeight', alpha_dh)
     if ((alpha_dh > 0.5_fp) .or. (alpha_dh < 0.0_fp)) then
-       call prterr(lundia, 'U021', 'AlphaDuneHeight should be a real number between 0.0 and 0.5', gdp)
+       call prterr(lundia, 'U021', 'AlphaDuneHeight should be a real number between 0.0 and 0.5')
        call d3stop(1, gdp)
     endif
     call prop_get_integer(dad_ptr, 'General', 'DumpDistr', def_dumpdistr)
     if (def_dumpdistr < 1 .or. def_dumpdistr > DUMPDISTR_MAX) then
-       call prterr(lundia, 'U021', 'Invalid default dump distribution', gdp)
+       call prterr(lundia, 'U021', 'Invalid default dump distribution')
        call d3stop(1, gdp)
     endif
     call prop_get_integer(dad_ptr, 'General', 'DistrOverDump', def_dr2dudistr)
     if (def_dr2dudistr < 1 .or. def_dr2dudistr > DR2DUDISTR_MAX) then
-       call prterr(lundia, 'U021', 'Invalid default distribution over dump areas', gdp)
+       call prterr(lundia, 'U021', 'Invalid default distribution over dump areas')
        call d3stop(1, gdp)
     endif
     !
@@ -457,7 +457,7 @@ end interface
           write(message,'(i3,3a)') def_active(3), &
                                  & ' active parameters specified in file "', &
                                  & trim(getfilename(tseriesfile)), '" instead of 1.'
-          call prterr(lundia, 'U021', message, gdp)
+          call prterr(lundia, 'U021', message)
           call d3stop(1, gdp)
        elseif (def_active(3) == 1) then
           call flw_checktable(tseriesfile   , def_active(1) , &
@@ -472,7 +472,7 @@ end interface
     call prop_get_logical(dad_ptr, 'General', 'DumpWhenDry'     , def_dumpwhendry)
     call prop_get_logical(dad_ptr, 'General', 'UseDunes'        , use_dunes)
     if (use_dunes .and. .not. lfbedfrm) then
-       call prterr(lundia, 'U021', 'UseDunes: Dunes can only be used when modelled.', gdp)
+       call prterr(lundia, 'U021', 'UseDunes: Dunes can only be used when modelled.')
     endif
     call prop_get_logical(dad_ptr, 'General', 'ObeyCmp'           , def_obey_cmp)
     call prop_get_logical(dad_ptr, 'General', 'TriggerAll'        , def_trigger_all)
@@ -660,7 +660,7 @@ end interface
     if (istat==0) allocate (gdp%gddredge%dredge_prop     (nadred+nasupl                  ), stat = istat)
     if (istat==0) allocate (gdp%gddredge%dump_prop       (nadump                         ), stat = istat)
     if (istat/=0) then
-       call prterr(lundia, 'U021', 'RdDredge: memory alloc error', gdp)
+       call prterr(lundia, 'U021', 'RdDredge: memory alloc error')
        call d3stop(1, gdp)
     endif
     !
@@ -711,7 +711,7 @@ end interface
     if (istat==0) allocate (ydr(totnpdr), stat = istat)
     if (istat==0) allocate (ydu(totnpdu), stat = istat)
     if (istat/=0) then
-       call prterr(lundia, 'U021', 'RdDredge: memory alloc error', gdp)
+       call prterr(lundia, 'U021', 'RdDredge: memory alloc error')
        call d3stop(1, gdp)
     endif
     !
@@ -842,7 +842,7 @@ end interface
                       write(message,'(i3,3a)') tmp_active(3), &
                                              & ' active parameters specified in file "', &
                                              & trim(getfilename(tseriesfile)), '" instead of 1.'
-                      call prterr(lundia, 'U021', message, gdp)
+                      call prterr(lundia, 'U021', message)
                       call d3stop(1, gdp)
                    else
                       call flw_checktable(tseriesfile   , tmp_active(1), &
@@ -1002,7 +1002,7 @@ end interface
                          cntdump = 0
                          call prop_get_integer(dump_area_ptr, '*', 'dumpid', cntdump)
                          if (cntdump < 1) then
-                            call prterr(lundia, 'U021','Invalid dump ID', gdp)
+                            call prterr(lundia, 'U021','Invalid dump ID')
                             call d3stop(1, gdp)
                          endif
                          link_def(cntlink,1) = cntssrc
@@ -1025,7 +1025,7 @@ end interface
                                                   & xdu, ydu, 'dumping', cntdump, gdp)
                       elseif (parname == 'percentage') then
                          if (ilink == 0) then
-                            call prterr(lundia, 'U021', 'Unexpected percentage encountered', gdp)
+                            call prterr(lundia, 'U021', 'Unexpected percentage encountered')
                             call d3stop(1, gdp)
                          endif
                          sedperc = 0.0_fp
@@ -1049,7 +1049,7 @@ end interface
                             endif
                          enddo
                          if (.not. sfound) then
-                            call prterr(lundia, 'U021', 'Unknown sediment fraction "'//trim(sedname)//'"', gdp)
+                            call prterr(lundia, 'U021', 'Unknown sediment fraction "'//trim(sedname)//'"')
                             call d3stop(1, gdp)
                          endif
                       endif
@@ -1117,7 +1117,7 @@ end interface
                       write(message,'(i3,3a)') tmp_active(3), &
                                              & ' active parameters specified in file "', &
                                              & trim(getfilename(tseriesfile)), '" instead of 1.'
-                      call prterr(lundia, 'U021', message, gdp)
+                      call prterr(lundia, 'U021', message)
                       call d3stop(1, gdp)
                    else
                       call flw_checktable(tseriesfile   , tmp_active(1), &
@@ -1162,14 +1162,14 @@ end interface
                             endif
                          enddo
                          if (.not. sfound) then
-                            call prterr(lundia, 'U021', 'Unknown sediment fraction "'//trim(sedname)//'"', gdp)
+                            call prterr(lundia, 'U021', 'Unknown sediment fraction "'//trim(sedname)//'"')
                             call d3stop(1, gdp)
                          endif
                       elseif (parname == 'sedpercentage') then 
                          sedperc = 0.0_fp
                          call prop_get(node_ptr,'*','SedPercentage', sedperc)
                          if (cntsedidx == 0) then
-                            call prterr(lundia, 'U021', 'SedPercentage without preceding Sediment keyword', gdp)
+                            call prterr(lundia, 'U021', 'SedPercentage without preceding Sediment keyword')
                             call d3stop(1, gdp)
                          else
                             j2 = cntsedidx
@@ -1194,7 +1194,7 @@ end interface
                          cntdump = 0
                          call prop_get_integer(dump_area_ptr, '*', 'dumpid', cntdump)
                          if (cntdump < 1) then
-                            call prterr(lundia, 'U021', 'Invalid dump ID', gdp)
+                            call prterr(lundia, 'U021', 'Invalid dump ID')
                             call d3stop(1, gdp)    
                          endif
                          link_def(cntlink,1) = cntssrc
@@ -1217,7 +1217,7 @@ end interface
                                                   & xdu, ydu, 'dumping', cntdump, gdp)
                       elseif ( parname == 'percentage') then
                          if (ilink == 0) then
-                            call prterr(lundia, 'U021', 'Unexpected percentage encountered', gdp)
+                            call prterr(lundia, 'U021', 'Unexpected percentage encountered')
                             call d3stop(1, gdp)
                          endif
                          call prop_get(node_ptr, '*', 'Percentage', link_percentage(cntlink,1))
@@ -1240,7 +1240,7 @@ end interface
                    enddo
                    if (comparereal(100.0_fp,sumperc) /= 0) then
                       write(message,'(3a)') 'Sum of sediment fractions is not 100.0 for nourishment "', dredge_areas(cntssrc),'"'
-                      call prterr(lundia, 'U021', message, gdp)
+                      call prterr(lundia, 'U021', message)
                       call d3stop(1, gdp)
                    endif
                 else
@@ -1308,7 +1308,7 @@ end interface
                       if (comparereal(100.0_fp,sumperc) /= 0 .and. pdredge%itype /= DREDGETYPE_SANDMINING) then
                          write(message,'(3a)') 'Sum of dump % of '//trim(dredgetype)//' area "', &
                                              & trim(dredge_areas(cntssrc)),'" is not equal to 100.0 '
-                         call prterr(lundia, 'U021', message, gdp)
+                         call prterr(lundia, 'U021', message)
                          call d3stop(1, gdp)
                       endif
                    enddo
@@ -1479,7 +1479,7 @@ end interface
              write(message,'(5a)') 'Dump area "', trim(dump_areas(ic)), &
                                  & '" not uniquely associated with sediment source "', &
                                  & trim(dredge_areas(i)), '".'
-             call prterr(lundia, 'U021', message, gdp)
+             call prterr(lundia, 'U021', message)
              call d3stop(1, gdp)
           endif
        enddo
@@ -1530,7 +1530,7 @@ end interface
                    write(message,'(5a)') 'Dump area "', trim(dump_areas(ic)), &
                                        & '" is not last in sequence of dump areas for "', &
                                        & trim(dredge_areas(i)), '" but has unlimited dumping capacity.'
-                   call prterr(lundia, 'U021', message, gdp)
+                   call prterr(lundia, 'U021', message)
                    call d3stop(1, gdp)
                 endif
              endif
@@ -1547,7 +1547,7 @@ end interface
                 write(message,'(5a)') 'Dump area "', trim(dump_areas(ic)), &
                                     & '" in list of dump areas for "', trim(dredge_areas(i)), &
                                     & '" has unlimited dumping capacity.'
-                call prterr(lundia, 'U021', message, gdp)
+                call prterr(lundia, 'U021', message)
                 call d3stop(1, gdp)
              endif
           enddo
@@ -1562,7 +1562,7 @@ end interface
        if (pdump%dumpdistr == DUMPDISTR_PROPORTIONAL .and. .not.pdump%dumpcapaflag) then
           write(message,'(3a)') 'Dump distribution proportional for area "', &
                                & trim(dump_areas(i)), '" requires specification of MinimumDumpDepth.'
-          call prterr(lundia, 'U021', message, gdp)
+          call prterr(lundia, 'U021', message)
           call d3stop(1, gdp)
        endif
     enddo
@@ -1603,7 +1603,7 @@ end interface
        endif
        !
        if (istat /= 0) then
-          call prterr(lundia, 'U021', 'RdDredge: memory realloc error', gdp)
+          call prterr(lundia, 'U021', 'RdDredge: memory realloc error')
           call d3stop(1, gdp)
        endif
        !
@@ -1732,7 +1732,7 @@ end interface
        if (istat == 0) allocate (dredge_prop(i)%sortvar(npnt)      , stat = istat)
        if (istat == 0) allocate (dredge_prop(i)%triggered(npnt)    , stat = istat)
        if (istat /= 0) then
-          call prterr(lundia, 'U021', 'RdDredge: memory alloc error', gdp)
+          call prterr(lundia, 'U021', 'RdDredge: memory alloc error')
           call d3stop(1, gdp)
        endif
        !
@@ -1828,7 +1828,7 @@ end interface
        if (istat == 0) allocate (dump_prop(i)%dz_dump(npnt) , stat = istat)
        if (istat == 0) allocate (dump_prop(i)%sortvar(npnt) , stat = istat)
        if (istat /= 0) then
-          call prterr(lundia, 'U021', 'RdDredge: memory alloc error', gdp)
+          call prterr(lundia, 'U021', 'RdDredge: memory alloc error')
           call d3stop(1, gdp)
        endif
        do ic = 1, npnt

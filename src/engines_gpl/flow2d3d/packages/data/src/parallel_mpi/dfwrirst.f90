@@ -209,7 +209,7 @@ subroutine dfwrirst(lundia    ,runid     ,itrstc    ,nmaxus    ,mmax      , &
           ! First entry write warning
           !
           if (ifirst==1) then
-             call prterr(lundia    ,'S014'    ,filrst(:lend), gdp)
+             call prterr(lundia    ,'S014'    ,filrst(:lend))
           endif
           open (lunrst, file = filrst(:lend))
           close (lunrst, status = 'delete')

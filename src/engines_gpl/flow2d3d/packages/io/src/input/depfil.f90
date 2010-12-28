@@ -119,9 +119,9 @@ subroutine depfil(lundia    ,error     ,fildep    ,fmttmp    ,mmax      , &
              read (luntmp, iostat = iocond) (dtmp(n, m), m = 1, mmaxgl) 
              if (iocond /= 0) then 
                 if (iocond < 0) then 
-                   call prterr(lundia, 'G006', fildep(1:lfile), gdp) 
+                   call prterr(lundia, 'G006', fildep(1:lfile))
                 else 
-                   call prterr(lundia, 'G007', fildep(1:lfile), gdp) 
+                   call prterr(lundia, 'G007', fildep(1:lfile))
                 endif 
                 error = .true. 
                 goto 9999 
@@ -132,7 +132,7 @@ subroutine depfil(lundia    ,error     ,fildep    ,fmttmp    ,mmax      , &
              do m = 1, mmax 
                 if ( isnan(dtmp(n, m)) ) then  
                     write(errmsg,'(2a)') 'NaN found in file ', fildep(1:lfile) 
-                    call prterr(lundia, 'P004', errmsg, gdp) 
+                    call prterr(lundia, 'P004', errmsg)
                     error = .true. 
                     goto 9999 
                 endif 
@@ -155,9 +155,9 @@ subroutine depfil(lundia    ,error     ,fildep    ,fmttmp    ,mmax      , &
              read (luntmp, *, iostat = iocond) (dtmp(n, m), m = 1, mmaxgl) 
              if (iocond /= 0) then 
                 if (iocond < 0) then 
-                   call prterr(lundia, 'G006', fildep(1:lfile), gdp) 
+                   call prterr(lundia, 'G006', fildep(1:lfile))
                 else 
-                   call prterr(lundia, 'G007', fildep(1:lfile), gdp) 
+                   call prterr(lundia, 'G007', fildep(1:lfile))
                 endif 
                 error = .true. 
                 goto 9999 
@@ -168,7 +168,7 @@ subroutine depfil(lundia    ,error     ,fildep    ,fmttmp    ,mmax      , &
              do m = 1, mmax 
                 if ( isnan(dtmp(n, m)) ) then  
                     write(errmsg,'(2a)') 'NaN found in file ', fildep(1:lfile) 
-                    call prterr(lundia, 'P004', errmsg, gdp) 
+                    call prterr(lundia, 'P004', errmsg)
                     error = .true. 
                     goto 9999 
                 endif 
@@ -191,9 +191,9 @@ subroutine depfil(lundia    ,error     ,fildep    ,fmttmp    ,mmax      , &
        ! 
        if (iocond /= 0) then 
           if (iocond < 0) then 
-             call prterr(lundia    ,'G006'    ,fildep(1:lfile)      ,gdp       ) 
+             call prterr(lundia    ,'G006'    ,fildep(1:lfile)      )
           else 
-             call prterr(lundia    ,'G007'    ,fildep(1:lfile)      ,gdp       ) 
+             call prterr(lundia    ,'G007'    ,fildep(1:lfile)      )
           endif 
           error = .true. 
        else 

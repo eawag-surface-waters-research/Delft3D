@@ -70,7 +70,7 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
 !
     istat = bedcomp_getpointer_integer(gdp%gdmorlyr,'iunderlyr',iunderlyr)
     if (istat/=0) then
-       call prterr(lundia, 'U021', 'Memory problem in WRMORM', gdp)
+       call prterr(lundia, 'U021', 'Memory problem in WRMORM')
        call d3stop(1, gdp)
     endif
     !
@@ -79,7 +79,7 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
        istat = bedcomp_getpointer_realprec(gdp%gdmorlyr,'bodsed',bodsed)
        if (istat==0) istat = bedcomp_getpointer_realfp(gdp%gdmorlyr,'dpsed',dpsed)
        if (istat/=0) then
-          call prterr(lundia, 'U021', 'Memory problem in WRMORM', gdp)
+          call prterr(lundia, 'U021', 'Memory problem in WRMORM')
           call d3stop(1, gdp)
        endif
        if (.not. parll) then
@@ -96,7 +96,7 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
        if (istat==0) istat = bedcomp_getpointer_realfp(gdp%gdmorlyr,'lyrfrac',lyrfrac)
        if (istat==0) istat = bedcomp_getpointer_realfp(gdp%gdmorlyr,'thlyr',thlyr)
        if (istat/=0) then
-          call prterr(lundia, 'U021', 'Memory problem in WRMORM', gdp)
+          call prterr(lundia, 'U021', 'Memory problem in WRMORM')
           call d3stop(1, gdp)
        endif
        if (.not. parll) then

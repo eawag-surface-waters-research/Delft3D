@@ -163,7 +163,7 @@ subroutine dimbub(error, gdp)
              !
              if (iocond /= 0) then
                 if (iocond < 0) goto 310
-                call prterr(lundia, 'G007', filtmp(:lfile), gdp)
+                call prterr(lundia, 'G007', filtmp(:lfile))
                 error = .true.
                 goto 999
              endif
@@ -180,7 +180,7 @@ subroutine dimbub(error, gdp)
                           & ival      ,idef      ,ier       )
                 if (ier <= 0) then
                    error = .true.
-                   call prterr(lundia    ,'G007'    ,filtmp(1:lfile)      ,gdp       )
+                   call prterr(lundia    ,'G007'    ,filtmp(1:lfile)      )
                    goto 310
                 endif
                 mcount = abs(ival(3) - ival(1)) + 1
@@ -212,7 +212,7 @@ subroutine dimbub(error, gdp)
              !
              if (iocond /= 0) then
                 if (iocond < 0) goto 310
-                call prterr(lundia, 'G007', filtmp(:lfile), gdp)
+                call prterr(lundia, 'G007', filtmp(:lfile))
                 error = .true.
                 goto 999
              endif
@@ -229,14 +229,14 @@ subroutine dimbub(error, gdp)
                           & ival      ,idef      ,ier       )
                 if (ier <= 0) then
                    error = .true.
-                   call prterr(lundia, 'G007', filtmp(1:lfile), gdp)
+                   call prterr(lundia, 'G007', filtmp(1:lfile))
                    goto 310
                 endif
                 mcount = abs(ival(3) - ival(1)) + 1
                 ncount = abs(ival(4) - ival(2)) + 1
                 if (mcount>1 .and. ncount>1 .and. mcount/=ncount) then
                    error = .true.
-                   call prterr(lundia , 'V231', errmsg(:32), gdp)
+                   call prterr(lundia , 'V231', errmsg(:32))
                    goto 999
                 endif 
                 nbub = nbub + max(mcount,ncount)*kmax
@@ -283,7 +283,7 @@ subroutine dimbub(error, gdp)
        if (istat==0) allocate (gdp%gdbubble%zvelo(kmax)  , stat=istat)
        if (istat==0) allocate (gdp%gdbubble%flbub(nsrcd) , stat=istat)
        if (istat/=0) then
-          call prterr(lundia, 'U021', 'Dimbub: memory alloc error', gdp)
+          call prterr(lundia, 'U021', 'Dimbub: memory alloc error')
           call d3stop(1, gdp)
        endif
     endif

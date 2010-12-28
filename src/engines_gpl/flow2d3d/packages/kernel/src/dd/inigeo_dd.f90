@@ -484,13 +484,13 @@ subroutine inigeo_dd(lundia    ,mmax      ,nmax      ,nmaxus    ,guu       , &
              if (guu(n, m)<=0.) then
                 write (errmsg(10:), '(2i5)') m, n
                 errmsg(:9) = 'GUU   at '
-                call prterr(lundia    ,'V016'    ,errmsg    ,gdp       )
+                call prterr(lundia    ,'V016'    ,errmsg    )
                 success = .false.
              endif
              if (gvu(n, m)<=0.) then
                 write (errmsg(10:), '(2i5)') m, n
                 errmsg(:9) = 'GVU   at '
-                call prterr(lundia    ,'V016'    ,errmsg    ,gdp       )
+                call prterr(lundia    ,'V016'    ,errmsg    )
                 success = .false.
              endif
           endif
@@ -498,13 +498,13 @@ subroutine inigeo_dd(lundia    ,mmax      ,nmax      ,nmaxus    ,guu       , &
              if (gvv(n, m)<=0.) then
                 write (errmsg(10:), '(2i5)') m, n
                 errmsg(:9) = 'GVV   at '
-                call prterr(lundia    ,'V016'    ,errmsg    ,gdp       )
+                call prterr(lundia    ,'V016'    ,errmsg    )
                 success = .false.
              endif
              if (guv(n, m)<=0.) then
                 write (errmsg(10:), '(2i5)') m, n
                 errmsg(:9) = 'GUV   at '
-                call prterr(lundia    ,'V016'    ,errmsg    ,gdp       )
+                call prterr(lundia    ,'V016'    ,errmsg    )
                 success = .false.
              endif
           endif
@@ -520,11 +520,11 @@ subroutine inigeo_dd(lundia    ,mmax      ,nmax      ,nmaxus    ,guu       , &
                     .and. (md==m .or. kcs(n ,md)/=1) &
                     .and. (mu==m .or. kcs(n ,mu)/=1)) then
                    write (message, '(a,i0,a,i0,a)') 'Boundary point (m,n) = (', m, ',', n, ') is not connected to an active cell'
-                   call prterr(lundia, 'P004', trim(message), gdp)
+                   call prterr(lundia, 'P004', trim(message))
                 else
                    write (errmsg(10:), '(2i5)') m, n
                    errmsg(:9) = 'GSQS  at '
-                   call prterr(lundia    ,'V016'    ,errmsg    ,gdp       )
+                   call prterr(lundia    ,'V016'    ,errmsg    )
                 endif
              endif
           endif

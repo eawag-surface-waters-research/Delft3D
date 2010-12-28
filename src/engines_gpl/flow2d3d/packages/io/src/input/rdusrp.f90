@@ -169,7 +169,7 @@ subroutine rdusrp(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
        !
        if (nprcus>nprocs) then
           write (errtxt(:2), '(i2)') nprocs
-          call prterr(lundia    ,'V211'    ,errtxt(:2),gdp       )
+          call prterr(lundia    ,'V211'    ,errtxt(:2))
           !
           if (noui) error = .true.
           lerror = .true.
@@ -205,7 +205,7 @@ subroutine rdusrp(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
           !-----------test contents of PRCUSR(N) Should not be blank !!
           !
           if (prcusr(n)==chdef) then
-             call prterr(lundia    ,'V212'    ,' '       ,gdp       )
+             call prterr(lundia    ,'V212'    ,' '       )
              !
              if (noui) error = .true.
              lerror = .true.
@@ -219,7 +219,7 @@ subroutine rdusrp(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
           do k = 1, nprocs
              if (prcusr(n)==procs(k)) then
                 if (nread(k)/=0) then
-                   call prterr(lundia    ,'V213'    ,prcusr(n) ,gdp       )
+                   call prterr(lundia    ,'V213'    ,prcusr(n) )
                    !
                    if (noui) error = .true.
                    lerror = .true.
@@ -231,7 +231,7 @@ subroutine rdusrp(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
           enddo
           !
           if (nk==0) then
-             call prterr(lundia    ,'V202'    ,prcusr(n) ,gdp       )
+             call prterr(lundia    ,'V202'    ,prcusr(n) )
              !
              if (noui) error = .true.
              lerror = .true.
@@ -266,7 +266,7 @@ subroutine rdusrp(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
              nprinp(k, n) = ival(k)
              !
              if (nprinp(k, n)/=nprdim(k, nk)) then
-                call prterr(lundia    ,'V214'    ,prcusr(n) ,gdp       )
+                call prterr(lundia    ,'V214'    ,prcusr(n) )
                 !
                 if (noui) error = .true.
                 lerror = .true.
@@ -276,7 +276,7 @@ subroutine rdusrp(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
              isom(k) = isom(k) + ival(k)
              if (isom(k)>mxusrp) then
                 write (errtxt(:2), '(i2)') mxusrp
-                call prterr(lundia    ,'V215'    ,errtxt(:2),gdp       )
+                call prterr(lundia    ,'V215'    ,errtxt(:2))
                 !
                 if (noui) error = .true.
                 lerror = .true.
@@ -293,7 +293,7 @@ subroutine rdusrp(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
     !
  9999 continue
     if (lerror) then
-       call prterr(lundia    ,'V201'    ,' '       ,gdp       )
+       call prterr(lundia    ,'V201'    ,' '       )
        !
        nprcus = 0
        do n = 1, mxusrp

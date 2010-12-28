@@ -132,7 +132,7 @@ subroutine rdwaqpar(lundia, error, kmax, dt, itcomf, itcomi, itcoml, gdp)
                   allocate(gdp%gdwaqpar%ilaggr     (kmax), stat=istat)
     if (istat==0) allocate(             ilaggrInput(kmax), stat=istat)
     if (istat/=0) then
-       call prterr(lundia, 'U021', 'rdwaqpar: memory alloc error', gdp)
+       call prterr(lundia, 'U021', 'rdwaqpar: memory alloc error')
        call d3stop(1, gdp)
     endif
     !
@@ -173,7 +173,7 @@ subroutine rdwaqpar(lundia, error, kmax, dt, itcomf, itcomi, itcoml, gdp)
           if (ilaggrInput(i) < 0) then
              write(message, '(a,i0,a)') 'ilaggr element ', i, &
                  & ' is negative.'
-             call prterr(lundia, 'P004', trim(message), gdp)
+             call prterr(lundia, 'P004', trim(message))
              error = .true.
              call d3stop(1, gdp)
           endif
@@ -182,7 +182,7 @@ subroutine rdwaqpar(lundia, error, kmax, dt, itcomf, itcomi, itcoml, gdp)
        if (k /= kmax) then
           write(message, '(a,i0,a,i0,a)') 'The sum of all ilaggr elements (', k, &
               & ') is not equal to the total number of layers (',kmax, ').'
-          call prterr(lundia, 'P004', trim(message), gdp)
+          call prterr(lundia, 'P004', trim(message))
           error = .true.
           call d3stop(1, gdp)
        endif
@@ -207,27 +207,27 @@ subroutine rdwaqpar(lundia, error, kmax, dt, itcomf, itcomi, itcoml, gdp)
     !
     if (dtn(itwqff, ftwqff, dt)) then
        error = .true.
-       call prterr(lundia    ,'U044'    ,'Waq store start time'          ,gdp       )
+       call prterr(lundia    ,'U044'    ,'Waq store start time'          )
     endif
     if (dtn(itwqfi, ftwqfi, dt)) then
        error = .true.
-       call prterr(lundia    ,'U044'    ,'Waq store time interval'       ,gdp       )
+       call prterr(lundia    ,'U044'    ,'Waq store time interval'       )
     endif
     if (itwqfi<=0) then
        error = .true.
-       call prterr(lundia    ,'U021'    ,'Waq store time interval should be > 0' ,gdp       )
+       call prterr(lundia    ,'U021'    ,'Waq store time interval should be > 0' )
     endif
     if (dtn(itwqfl, ftwqfl, dt)) then
        error = .true.
-       call prterr(lundia    ,'U044'    ,'Waq store stop time',gdp       )
+       call prterr(lundia    ,'U044'    ,'Waq store stop time')
     endif
     if (mod(itwqfl-itwqff,max(itwqfi,1))/=0) then
        error = .true.
-       call prterr(lundia    ,'U021'    ,'Waq store period should be multiple of interval' ,gdp       )
+       call prterr(lundia    ,'U021'    ,'Waq store period should be multiple of interval' )
     endif
     if (itwqfl > itstop) then
        itwqfl = itstop
-       call prterr(lundia, 'U190', 'Waq store end time is set to simulation end time', gdp)
+       call prterr(lundia, 'U190', 'Waq store end time is set to simulation end time')
     endif
     !
     ! read aggregation file
@@ -293,7 +293,7 @@ subroutine rdwaqpar(lundia, error, kmax, dt, itcomf, itcomi, itcoml, gdp)
        itcomf = itstrt
        itcomi = 1
        itcoml = itstrt + 1
-       call prterr(lundia, 'G051', 'The communication file is written during the first time step only. Needed by WAQ.', gdp)
+       call prterr(lundia, 'G051', 'The communication file is written during the first time step only. Needed by WAQ.')
     endif
     write (lundia, *)
     !
@@ -310,7 +310,7 @@ subroutine rdwaqpar(lundia, error, kmax, dt, itcomf, itcomi, itcoml, gdp)
        if (istat==0) allocate (gdp%gdwaqpar%discumwaq(gdp%d%nsrc)                  , stat = istat)
        !
        if (istat /= 0) then
-          call prterr(lundia, 'U021', 'RDWAQPAR: memory alloc error', gdp)
+          call prterr(lundia, 'U021', 'RDWAQPAR: memory alloc error')
           call d3stop(1, gdp)
        endif
        !

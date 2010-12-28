@@ -111,7 +111,7 @@ subroutine readnc(lunmd     ,error     ,keyw      ,newkw     ,nlook     , &
     !     nlook > 0, then wrong text, else no text but ok
     !
     if (.not.found) then
-       call prterr(lundia    ,'U100'    ,keyw      ,gdp       )
+       call prterr(lundia    ,'U100'    ,keyw      )
        !
        error = .true.
        goto 999
@@ -174,7 +174,7 @@ subroutine readnc(lunmd     ,error     ,keyw      ,newkw     ,nlook     , &
     endif
     !
     if (error) then
-       call prterr(lundia    ,'U036'    ,keyw      ,gdp       )
+       call prterr(lundia    ,'U036'    ,keyw      )
        !
        goto 999
     endif

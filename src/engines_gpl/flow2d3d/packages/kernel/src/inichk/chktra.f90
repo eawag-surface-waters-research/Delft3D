@@ -100,7 +100,7 @@ subroutine chktra(lundia    ,error     ,nmax      ,mmax      ,ittdef    , &
           ! Break off the check if 10 messages are exceeded
           !
           if (nmsgnm>10) then
-             call prterr(lundia    ,'J010'    ,cdir      ,gdp)
+             call prterr(lundia    ,'J010'    ,cdir      )
              exit
           endif
           write (cnum(1), '(i12)') ittaru(itt, 1)
@@ -110,7 +110,7 @@ subroutine chktra(lundia    ,error     ,nmax      ,mmax      ,ittdef    , &
           cmsg = 'Trachytopes in ' // cdir // '-Direction, ' //                 &
                & 'N, M out of Range: N = ' // cnum(1)(1:numlen(1))              &
                & // ', M = ' // cnum(2)(1:numlen(2))
-          call prterr(lundia    ,'J001'    ,cmsg      ,gdp)
+          call prterr(lundia    ,'J001'    ,cmsg      )
        endif
        !
        ! Check if trachytope has been defined
@@ -151,14 +151,14 @@ subroutine chktra(lundia    ,error     ,nmax      ,mmax      ,ittdef    , &
           ! Break off the check if 10 messages are exceeded
           !
           if (nmsgtd==10) then
-             call prterr(lundia    ,'J011'    ,cdir      ,gdp)
+             call prterr(lundia    ,'J011'    ,cdir      )
              exit
           endif
           write (cnum(1), '(i12)') ittaru(itt, 3)
           call noextspaces(cnum(1)   ,numlen(1) )
           cmsg = 'Trachytope in ' // cdir // '-Direction ' //                   &
                & 'not defined, Number: ' // cnum(1)(1:numlen(1))
-          call prterr(lundia    ,'J001'    ,cmsg      ,gdp)
+          call prterr(lundia    ,'J001'    ,cmsg      )
        endif
   100  continue
     enddo

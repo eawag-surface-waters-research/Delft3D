@@ -127,7 +127,7 @@ subroutine rdbcq(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        ! QH boundary keyword not in MD file
        !
-       call prterr(lundia    ,'U038'    ,keyw      ,gdp       )
+       call prterr(lundia    ,'U038'    ,keyw      )
        !
        error = .true.
        goto 9999
@@ -159,7 +159,7 @@ subroutine rdbcq(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        if (filout==filbcq) then
           inquire (file = filout(:8 + lrid), exist = ex)
           if (.not.ex) then
-             call prterr(lundia    ,'G004'    ,filout    ,gdp       )
+             call prterr(lundia    ,'G004'    ,filout    )
              !
              error = .true.
              goto 9999
@@ -174,7 +174,7 @@ subroutine rdbcq(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           ! Not able to read record length for direct access
           !
           if (iocond/=0) then
-             call prterr(lundia    ,'U082'    ,filout    ,gdp       )
+             call prterr(lundia    ,'U082'    ,filout    )
              !
              error = .true.
              goto 9999
@@ -200,7 +200,7 @@ subroutine rdbcq(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              open (lunrd, file = filbcq(:lf), form = 'formatted',               &
                  & status = 'old')
              write (message, '(2a)') 'Reading BC-hydrodynamic file ', filbcq(:lf)
-             call prterr(lundia, 'G051', trim(message), gdp)
+             call prterr(lundia, 'G051', trim(message))
              call rdqh(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
                      & filbcq    ,runid     ,eol       ,nto       ,ntof      , &
                      & ntoq      ,nambnd    ,bubble    ,gdp       )
@@ -211,7 +211,7 @@ subroutine rdbcq(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              ! Reading file for BC-hydrodynamic data skipped in TDATOM
              !
              write (message, '(3a)') 'BC-hydrodynamic file ', filbcq(:lf), ' will be skipped in TDATOM'
-             call prterr(lundia, 'G051', trim(message), gdp)
+             call prterr(lundia, 'G051', trim(message))
           endif
        else
           error = .true.

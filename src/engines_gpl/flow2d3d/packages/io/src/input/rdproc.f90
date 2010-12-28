@@ -297,10 +297,10 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
        if (comparereal(lambda,-1.0_fp) /= 0) then
           if (ktemp == 3) then
              write (message,'(a,f12.4)') 'Exchange coefficient (lambda) in the Excess temperature model is fixed to ', lambda
-             call prterr(lundia, 'G051', trim(message), gdp)
+             call prterr(lundia, 'G051', trim(message))
           else
              write (message,'(a,i0)') 'Exchange coefficient (keyword Exchcf) is not used in temperature model ', ktemp
-             call prterr(lundia, 'U190', trim(message), gdp)
+             call prterr(lundia, 'U190', trim(message))
           endif
        endif
        sprval = 0.0_sp
@@ -309,17 +309,17 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
        if (comparereal(qtotmx,0.0_fp) /= 0) then
           if (ktemp == 3) then
              write (message,'(a,f12.4)') 'Heat exchange flux (Qtot) in the Excess temperature model is limited to ', qtotmx
-             call prterr(lundia, 'G051', trim(message), gdp)
+             call prterr(lundia, 'G051', trim(message))
           else
              write (message,'(a,i0)') 'Heat exchange flux (keyword Qtotmx) is not used in temperature model ', ktemp
-             call prterr(lundia, 'U190', trim(message), gdp)
+             call prterr(lundia, 'U190', trim(message))
           endif
        endif
        !
        ! test constistency
        !
        if (ktemp<0 .or. ktemp>5) then
-          call prterr(lundia    ,'U051'    ,' '       ,gdp       )
+          call prterr(lundia    ,'U051'    ,' '       )
           ktemp = idef
        endif
     endif
@@ -468,12 +468,12 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
              else
                 stanton = rval(1)
                 write(message, '(a,e14.5)') 'Ocean heat model: Stanton number specified to be ', stanton
-                call prterr(lundia, 'G051', trim(message), gdp)                
+                call prterr(lundia, 'G051', trim(message))
              endif
           else
              stanton = rdef
              write(message, '(a,e14.5)') 'Ocean heat model: Using default Stanton number ', stanton
-             call prterr(lundia, 'G051', trim(message), gdp)                
+             call prterr(lundia, 'G051', trim(message))
           endif
           !
           ! reset RDEF
@@ -507,12 +507,12 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
              else
                 dalton = rval(1)
                 write(message, '(a,e14.5)') 'Ocean heat model: Dalton number specified to be ', dalton
-                call prterr(lundia, 'G051', trim(message), gdp)
+                call prterr(lundia, 'G051', trim(message))
              endif
           else
              dalton = rdef
              write(message, '(a,e14.5)') 'Ocean heat model: Using default Dalton number ', dalton
-             call prterr(lundia, 'G051', trim(message), gdp)                
+             call prterr(lundia, 'G051', trim(message))
           endif
           !
           ! reset RDEF
@@ -536,7 +536,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
              free_convec = .false.
           else
              write(message,'(a,f12.3)') 'Specified free convection coefficient cfrcon = ', cfrcon
-             call prterr(lundia, 'G051', trim(message), gdp)
+             call prterr(lundia, 'G051', trim(message))
           endif
           !
           ! reset sprval
@@ -549,7 +549,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
           call prop_get_logical(gdp%mdfile_ptr, '*', 'SolRad', solrad_read)
           solrad_read2 = solrad_read
           if (solrad_read) then
-             call prterr(lundia, 'G051', 'Using solar radiation specified in .tem file', gdp)
+             call prterr(lundia, 'G051', 'Using solar radiation specified in .tem file')
           endif
        endif
     endif
@@ -569,7 +569,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
        ! FilEva specified
        !
        write(errmsg,'(2a)') 'Using precipitation/evaporation specified in file ',trim(stringval)
-       call prterr(lundia, 'G051', trim(errmsg), gdp)
+       call prterr(lundia, 'G051', trim(errmsg))
        !
        ! QEvap
        !
@@ -581,14 +581,14 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
           case ('derived')
              keva = 2
              write(errmsg,'(a)') 'Evaporative heat flux is derived from the prescribed evaporative mass flux'
-             call prterr(lundia, 'G051', trim(errmsg), gdp)
+             call prterr(lundia, 'G051', trim(errmsg))
           case ('computed')
              keva = 3
              write(errmsg,'(a)') 'Evaporative heat flux is calculated internally, independent of the prescribed mass flux'
-             call prterr(lundia, 'G051', trim(errmsg), gdp)
+             call prterr(lundia, 'G051', trim(errmsg))
           case default
              write(errmsg,'(a)') 'Value of keyword "QEvap" not recognized. Expecting "derived" or "computed"'
-             call prterr(lundia, 'P004', trim(errmsg), gdp)
+             call prterr(lundia, 'P004', trim(errmsg))
              call d3stop(1, gdp)
           end select
        else
@@ -598,7 +598,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
           if (ktemp /= 3) then
              keva = 3
              write(errmsg,'(a)') 'QEvap not specified. Evaporative heat flux is calculated internally, independent of the prescribed mass flux'
-             call prterr(lundia, 'G051', trim(errmsg), gdp)
+             call prterr(lundia, 'G051', trim(errmsg))
           endif
        endif
     else
@@ -620,16 +620,16 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
     select case( stringval )
         case( 'eckart' )
             idensform = dens_Eckart
-            call prterr(lundia, 'G051', 'Using Eckart density formulation', gdp)            
+            call prterr(lundia, 'G051', 'Using Eckart density formulation')
         case( 'unesco' )
             idensform = dens_UNESCO
-            call prterr(lundia, 'G051', 'Using Unesco density formulation', gdp)
+            call prterr(lundia, 'G051', 'Using Unesco density formulation')
         case( ' '      )
             idensform = dens_UNESCO
-            call prterr(lundia, 'G051', 'Using Unesco density formulation by default', gdp)
+            call prterr(lundia, 'G051', 'Using Unesco density formulation by default')
         case default
             write(message,'(3a)') 'Unknown density formulation ', trim(stringval),'. Use Unesco or Eckart.'
-            call prterr(lundia, 'P004', trim(message), gdp)
+            call prterr(lundia, 'P004', trim(message))
             error = .true.            
     end select
     !
@@ -652,14 +652,14 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
        if (levamas .or. lmaseva) then
           if (ktemp == 3) then
              maseva = 0
-             call prterr(lundia, 'U164', ' ', gdp)
+             call prterr(lundia, 'U164', ' ')
           else
              maseva = 1
-             call prterr(lundia, 'G051', 'Evaporation taken into account in continuity equation', gdp)
+             call prterr(lundia, 'G051', 'Evaporation taken into account in continuity equation')
           endif
        else
           maseva = 0
-          call prterr(lundia, 'G051', 'Evaporation not taken into account in continuity equation', gdp)
+          call prterr(lundia, 'G051', 'Evaporation not taken into account in continuity equation')
        endif
     endif
     !
@@ -706,7 +706,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
           ! stop when reading error(z0v is used in divisions)
           !
           if (lerror .or. rval(1)<rsmall) then
-             call prterr(lundia    ,'U007'    ,'value for z0v (0 not allowed)' ,gdp       )
+             call prterr(lundia    ,'U007'    ,'value for z0v (0 not allowed)' )
              error = .true.
              z0v = rdef
           else
@@ -754,7 +754,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
        ! read; is not correct
        !
        if (nlook/=3) then
-          call prterr(lundia    ,'U036'    ,keyw      ,gdp       )
+          call prterr(lundia    ,'U036'    ,keyw      )
           lerror = .false.
        elseif (lerror) then
           lerror = .false.
@@ -778,7 +778,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
           kbeg = (k - 1)*3 + 1
           kend = k*3
           if (index(tgfhlp, tgfcmp(kbeg:kend))==0) then
-             call prterr(lundia    ,'V081'    ,tgfcmp(kbeg:kend)    ,gdp       )
+             call prterr(lundia    ,'V081'    ,tgfcmp(kbeg:kend)    )
              if (noui) error = .true.
           endif
        enddo
@@ -894,21 +894,21 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
              wstcof(4) = 100.0
              wstcof(5) = wstcof(1)
              wstcof(6) = 100.0
-             call prterr(lundia, 'G051', 'Number of pivot points to convert wind speed to wind drag coef.: 1', gdp)
+             call prterr(lundia, 'G051', 'Number of pivot points to convert wind speed to wind drag coef.: 1')
           elseif (rval(5)>999.9989 .and. rval(5)<999.9991) then
              wstcof(2) = rval(2)
              wstcof(3) = rval(3)
              wstcof(4) = rval(4)
              wstcof(5) = rval(3)
              wstcof(6) = rval(4)+1.
-             call prterr(lundia, 'G051', 'Number of pivot points to convert wind speed to wind drag coef.: 2', gdp)
+             call prterr(lundia, 'G051', 'Number of pivot points to convert wind speed to wind drag coef.: 2')
           else
              wstcof(2) = rval(2)
              wstcof(3) = rval(3)
              wstcof(4) = rval(4)
              wstcof(5) = rval(5)
              wstcof(6) = rval(6)
-             call prterr(lundia, 'G051', 'Number of pivot points to convert wind speed to wind drag coef.: 3', gdp)
+             call prterr(lundia, 'G051', 'Number of pivot points to convert wind speed to wind drag coef.: 3')
           endif
        endif
        !
@@ -1031,12 +1031,12 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
     !  
     if (nonhyd) then
        if (nh_level == nh_weak) then
-          call prterr(lundia, 'G051', 'Non-Hydrostatic calculation: Weak formulation (Bijvelds)', gdp)
+          call prterr(lundia, 'G051', 'Non-Hydrostatic calculation: Weak formulation (Bijvelds)')
        elseif (nh_level == nh_full) then
-          call prterr(lundia, 'G051', 'Non-Hydrostatic calculation: Full formulation (Borsboom/Ullmann)', gdp)
+          call prterr(lundia, 'G051', 'Non-Hydrostatic calculation: Full formulation (Borsboom/Ullmann)')
        else
           write(message,'(a,i0)') 'Non-Hydrostatic calculation: Unexpected nh_level ', nh_level
-          call prterr(lundia, 'P004', trim(message), gdp)
+          call prterr(lundia, 'P004', trim(message))
        endif
        !
        ! Read 'Nharea'
@@ -1052,7 +1052,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
           n1_nhy = 1
           m2_nhy = mmax
           n2_nhy = nmaxus
-          call prterr(lundia    ,'Z014'    ,' '       ,gdp       )
+          call prterr(lundia    ,'Z014'    ,' '       )
        else
           m1_nhy = ival(1)
           n1_nhy = ival(2)
@@ -1068,7 +1068,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
           if (m1_nhy/=ival(1) .or. m2_nhy/=ival(3) .or. n1_nhy/=ival(2) .or.    &
             & n2_nhy/=ival(4)) then
              error = .true.
-             call prterr(lundia    ,'Z015'    ,' '       ,gdp       )
+             call prterr(lundia    ,'Z015'    ,' '       )
              goto 9999
           endif
           if (m1_nhy>m2_nhy .or. n1_nhy>n2_nhy) then
@@ -1085,7 +1085,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
              !
              ! Warning when non-hyd domain is one grid line
              !
-             call prterr(lundia    ,'Z016'    ,' '       ,gdp       )
+             call prterr(lundia    ,'Z016'    ,' '       )
           endif
        endif
        !
@@ -1106,7 +1106,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
        if (lerror) then
           lerror = .false.
           nhiter = idef
-          call prterr(lundia    ,'Z018'    ,' '       ,gdp       )
+          call prterr(lundia    ,'Z018'    ,' '       )
        else
           nhiter = ival(1)
           !
@@ -1114,7 +1114,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
           !
           if (nhiter>=500 .or. nhiter<=5) then
              write (errmsg, '(a6,i6,a1)') '(read:',nhiter,')'
-             call prterr(lundia    ,'Z018'    ,trim(errmsg)    ,gdp       )
+             call prterr(lundia    ,'Z018'    ,trim(errmsg)    )
           endif
        endif
        !
@@ -1136,7 +1136,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
        !
        if (lerror) then
           lerror = .false.
-          call prterr(lundia    ,'Z019'    ,' '       ,gdp       )
+          call prterr(lundia    ,'Z019'    ,' '       )
        else
           !
           ! define L2NORM if CHULP = Y/y
@@ -1229,7 +1229,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
     call prop_get(gdp%mdfile_ptr, '*', 'NodalT', ti_nodal)
     if (comparereal(ti_nodal,21600.0_fp/tunit) /= 0) then
        write (message,'(a,e12.4,3a)') 'Updating tidal node factors every ', ti_nodal, ' [',ctunit,']'
-       call prterr(lundia, 'G051', trim(message), gdp)
+       call prterr(lundia, 'G051', trim(message))
     endif
     !
     ! Flag to activate XBeach wave driver

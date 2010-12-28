@@ -280,7 +280,7 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
                 !
                 if (max_reals < 21) then
                    write(errmsg,'(a,a,a)') 'Insufficient space to pass real values to settling routine.'
-                   call prterr (lundia,'U021', trim(errmsg),gdp)
+                   call prterr (lundia,'U021', trim(errmsg))
                    call d3stop(1, gdp)
                 endif
                 dll_reals( 1) = real(timsec ,hp)
@@ -311,7 +311,7 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
                 !
                 if (max_integers < 5) then
                    write(errmsg,'(a,a,a)') 'Insufficient space to pass integer values to settling routine.'
-                   call prterr (lundia,'U021', trim(errmsg),gdp)
+                   call prterr (lundia,'U021', trim(errmsg))
                    call d3stop(1, gdp)
                 endif
                 call nm_to_n_and_m(nm, n, m, gdp)
@@ -323,7 +323,7 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
                 !
                 if (max_strings < 2) then
                    write(errmsg,'(a,a,a)') 'Insufficient space to pass strings to settling routine.'
-                   call prterr (lundia,'U021', trim(errmsg),gdp)
+                   call prterr (lundia,'U021', trim(errmsg))
                    call d3stop(1, gdp)
                 endif
                 dll_strings( 1) = gdp%runid
@@ -345,7 +345,7 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
                 call vsemlun
                 if (error /= 0) then
                    write(errmsg,'(a,a,a)') 'Cannot find function "',trim(dll_function(l)),'" in dynamic library.'
-                   call prterr (lundia,'U021', trim(errmsg),gdp)
+                   call prterr (lundia,'U021', trim(errmsg))
                    call d3stop(1, gdp)
                 endif
                 if (message /= ' ') then

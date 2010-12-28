@@ -273,7 +273,7 @@ subroutine inicut(lundia    ,error     ,runid     ,nmax      ,mmax      , &
     !
    34 continue
     if (nrp>0) then
-       call prterr(lundia    ,'G051'    ,'45 deg. Staircase Boundary read'          ,gdp       )
+       call prterr(lundia    ,'G051'    ,'45 deg. Staircase Boundary read'          )
        nrp = 0
        close (luntmp, status = 'delete')
     endif
@@ -380,7 +380,7 @@ subroutine inicut(lundia    ,error     ,runid     ,nmax      ,mmax      , &
                 end select checkkcstot2
              endif
           case default
-             call prterr(lundia    ,'U010'    ,' '       ,gdp       )
+             call prterr(lundia    ,'U010'    ,' '       )
              error= .true.
           end select checkdir
           !
@@ -399,7 +399,7 @@ subroutine inicut(lundia    ,error     ,runid     ,nmax      ,mmax      , &
     !
   134 continue
     if (nrp>0) then
-       call prterr(lundia    ,'G051'    ,'Cut-cell Boundary read'        ,gdp       )
+       call prterr(lundia    ,'G051'    ,'Cut-cell Boundary read'        )
        close (luntmp, status = 'delete')
     endif
     !
@@ -417,7 +417,7 @@ subroutine inicut(lundia    ,error     ,runid     ,nmax      ,mmax      , &
                  & + max(0, kcs(n, m + 1)*kcscut(n, m + 1, 1))
           if (kcstot>=3) then
              write (errmsg(1:10), '(2i5)') m, n
-             call prterr(lundia    ,'v088'    ,errmsg(1:10)         ,gdp       )
+             call prterr(lundia    ,'v088'    ,errmsg(1:10)         )
              error= .true.
           endif
        enddo
@@ -443,7 +443,7 @@ subroutine inicut(lundia    ,error     ,runid     ,nmax      ,mmax      , &
                 guv(n, m) = gud(n, m)
              else
                 write (errmsg(1:10), '(2i5)') m, n
-                call prterr(lundia    ,'v075'    ,errmsg(1:10)         ,gdp       )
+                call prterr(lundia    ,'v075'    ,errmsg(1:10)         )
              endif
           else
           endif
@@ -469,7 +469,7 @@ subroutine inicut(lundia    ,error     ,runid     ,nmax      ,mmax      , &
                 gvu(n, m) = gvd(n, m)
              else
                 write (errmsg(1:10), '(2i5)') m, n
-                call prterr(lundia    ,'v076'    ,errmsg(1:10)         ,gdp       )
+                call prterr(lundia    ,'v076'    ,errmsg(1:10)         )
              endif
           else
           endif
@@ -498,7 +498,7 @@ subroutine inicut(lundia    ,error     ,runid     ,nmax      ,mmax      , &
              if (area<=0) then
                 gsqs(n, m) = 1.0
                 write (errmsg(1:10), '(2i5)') m, n
-                call prterr(lundia    ,'v089'    ,errmsg(1:10)         ,gdp       )
+                call prterr(lundia    ,'v089'    ,errmsg(1:10)         )
              else
                 gsqs(n, m) = area
              endif
@@ -582,7 +582,7 @@ subroutine inicut(lundia    ,error     ,runid     ,nmax      ,mmax      , &
  8888 continue
     error= .true.
  9999 continue
-    if (error) call prterr(lundia, errornr, errmsg, gdp)
+    if (error) call prterr(lundia, errornr, errmsg)
     !
  666  format('-',i3.3)
 end subroutine inicut

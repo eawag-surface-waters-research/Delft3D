@@ -132,7 +132,7 @@ subroutine fouini(lundia    ,lunfou    ,error     ,nofou     ,gdp       )
        !
        !--------requested fourier analysis undefined
        !
-       call prterr(lundia    ,'F001'    ,record(il(1):ir(1))  ,gdp       )
+       call prterr(lundia    ,'F001'    ,record(il(1):ir(1))  )
        !
        error = .true.
        goto 999

@@ -121,9 +121,9 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
           call dfbroadc(iocond, 1, dfint, gdp)
           if (iocond /= 0) then
              if (iocond < 0) then
-                call prterr(lundia, 'G006', filic(:lfile), gdp)
+                call prterr(lundia, 'G006', filic(:lfile))
              else
-                call prterr(lundia, 'G007', filic(:lfile), gdp)
+                call prterr(lundia, 'G007', filic(:lfile))
              endif
              error = .true.
              goto 200
@@ -143,9 +143,9 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
              call dfbroadc(iocond, 1, dfint, gdp)
              if (iocond /= 0) then
                 if (iocond < 0) then
-                   call prterr(lundia, 'G006', filic(:lfile), gdp)
+                   call prterr(lundia, 'G006', filic(:lfile))
                 else
-                   call prterr(lundia, 'G007', filic(:lfile), gdp)
+                   call prterr(lundia, 'G007', filic(:lfile))
                 endif
                 error = .true.
                 goto 200
@@ -166,9 +166,9 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
              call dfbroadc(iocond, 1, dfint, gdp)
              if (iocond /= 0) then
                 if (iocond < 0) then
-                   call prterr(lundia, 'G006', filic(:lfile), gdp)
+                   call prterr(lundia, 'G006', filic(:lfile))
                 else
-                   call prterr(lundia, 'G007', filic(:lfile), gdp)
+                   call prterr(lundia, 'G007', filic(:lfile))
                 endif
                 error = .true.
                 goto 200
@@ -193,9 +193,9 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
                    call dfbroadc(iocond, 1, dfint, gdp)
                    if (iocond /= 0) then
                       if (iocond < 0) then
-                         call prterr(lundia, 'G006', filic(:lfile), gdp)
+                         call prterr(lundia, 'G006', filic(:lfile))
                       else
-                         call prterr(lundia, 'G007', filic(:lfile), gdp)
+                         call prterr(lundia, 'G007', filic(:lfile))
                       endif
                       error = .true.
                       goto 200
@@ -225,9 +225,9 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
           call dfbroadc(iocond, 1, dfint, gdp)
           if (iocond /= 0) then
              if (iocond < 0) then
-                call prterr(lundia, 'G006', filic(:lfile), gdp)
+                call prterr(lundia, 'G006', filic(:lfile))
              else
-                call prterr(lundia, 'G007', filic(:lfile), gdp)
+                call prterr(lundia, 'G007', filic(:lfile))
              endif
              error = .true.
              goto 200
@@ -246,9 +246,9 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
              call dfbroadc(iocond, 1, dfint, gdp)
              if (iocond /= 0) then
                 if (iocond < 0) then
-                   call prterr(lundia, 'G006', filic(:lfile), gdp)
+                   call prterr(lundia, 'G006', filic(:lfile))
                 else
-                   call prterr(lundia, 'G007', filic(:lfile), gdp)
+                   call prterr(lundia, 'G007', filic(:lfile))
                 endif
                 error = .true.
                 goto 200
@@ -268,9 +268,9 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
              call dfbroadc(iocond, 1, dfint, gdp)
              if (iocond /= 0) then
                 if (iocond < 0) then
-                   call prterr(lundia, 'G006', filic(:lfile), gdp)
+                   call prterr(lundia, 'G006', filic(:lfile))
                 else
-                   call prterr(lundia, 'G007', filic(:lfile), gdp)
+                   call prterr(lundia, 'G007', filic(:lfile))
                 endif
                 error = .true.
                 goto 200
@@ -293,9 +293,9 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
                    call dfbroadc(iocond, 1, dfint, gdp)
                    if (iocond /= 0) then
                       if (iocond < 0) then
-                         call prterr(lundia, 'G006', filic(:lfile), gdp)
+                         call prterr(lundia, 'G006', filic(:lfile))
                       else
-                         call prterr(lundia, 'G007', filic(:lfile), gdp)
+                         call prterr(lundia, 'G007', filic(:lfile))
                       endif
                       error = .true.
                       goto 200
@@ -320,7 +320,7 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
           do n = 1, nmaxus
              if ( isnan(s1(n,m)) ) then
                 write(message,'(2a)') 'NaN found in water level in file ',filic(:lfile)
-                call prterr(lundia, 'P004', message, gdp)
+                call prterr(lundia, 'P004', message)
                 !
                 error = .true.
                 goto 200
@@ -332,7 +332,7 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
              do n = 1, nmaxus
                 if ( isnan(u1(n, m, k)) ) then
                    write(message,'(2a)') 'NaN found in U-velocity in file ',filic(:lfile)
-                   call prterr(lundia, 'P004', message, gdp)
+                   call prterr(lundia, 'P004', message)
                    !
                    error = .true.
                    goto 200
@@ -345,7 +345,7 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
              do n = 1, nmaxus
                 if ( isnan(v1(n, m, k)) ) then
                    write(message,'(2a)') 'NaN found in V-velocity in file ',filic(:lfile)
-                   call prterr(lundia, 'P004', message, gdp)
+                   call prterr(lundia, 'P004', message)
                    !
                    error = .true.
                    goto 200
@@ -359,7 +359,7 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
                 do n = 1, nmaxus
                    if ( isnan(r1(n, m, k, l)) ) then
                       write(message,'(2a)') 'NaN found in constituent in file ',filic(:lfile)
-                      call prterr(lundia, 'P004', message, gdp)
+                      call prterr(lundia, 'P004', message)
                       !
                       error = .true.
                       goto 200

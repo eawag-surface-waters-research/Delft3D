@@ -235,7 +235,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              if (fmteva=='UN') then
                 inquire (file = filout(:8 + lrid), exist = ex)
                 if (.not.ex) then
-                   call prterr(lundia    ,'G004'    ,filout    ,gdp       )
+                   call prterr(lundia    ,'G004'    ,filout    )
                    !
                    error = .true.
                    goto 9999
@@ -250,7 +250,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 !-------------FMTEVA='UN' but file formatted => error
                 !
                 if (iocond/=0) then
-                   call prterr(lundia    ,'U080'    ,filout    ,gdp       )
+                   call prterr(lundia    ,'U080'    ,filout    )
                    !
                    error = .true.
                    goto 9999
@@ -263,7 +263,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              !-----------FMTEVA='FR' => error
              !
              else
-                call prterr(lundia    ,'U080'    ,filout    ,gdp       )
+                call prterr(lundia    ,'U080'    ,filout    )
                 !
                 error = .true.
                 goto 9999
@@ -290,7 +290,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                  & status = 'unknown')
              !
              write (message, '(2a)') 'Reading Evaporation & Rain file ', fileva(:lf)
-             call prterr(lundia, 'G051', trim(message), gdp)
+             call prterr(lundia, 'G051', trim(message))
              nrval = 3
              call rdtdf(lundia    ,lunout    ,error     ,fileva    ,fmttmp    , &
                       & nrval     ,rval      ,dt        ,itstrt    ,itstop    , &
@@ -303,7 +303,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              !             TDATOM Define "fake" timeframe
              !
              write (message, '(3a)') 'Evaporation & Rain file ', fileva(:lf), ' will be skipped in TDATOM'
-             call prterr(lundia, 'G051', trim(message), gdp)
+             call prterr(lundia, 'G051', trim(message))
           endif
        endif
     !
@@ -358,7 +358,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                  & 'NO'      )
        if (lerror) then
           if (noui) error = .true.
-          call prterr(lundia    ,'U100'    ,keyw      ,gdp       )
+          call prterr(lundia    ,'U100'    ,keyw      )
           !
           goto 500
        endif
@@ -368,7 +368,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        if (.not.found) then
           if (itold<itstop) then
              write(message,'(a,a,a)') 'Last time of parameters for rain/evaporation model in file ', trim(fileva), ' <' 
-             call prterr(lundia    ,'U042'    ,message  ,gdp       )
+             call prterr(lundia    ,'U042'    ,message  )
              !
              if (noui) error = .true.
           endif
@@ -396,7 +396,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        do l = 1, nlook
            if (isnan(rval(l))) then
               write(message,'(a,a)') 'NaN in ', trim(fileva)
-              call prterr(lundia    ,'P004'    ,message      ,gdp       )
+              call prterr(lundia    ,'P004'    ,message      )
               !
               error = .true.
               goto 9999
@@ -410,7 +410,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        ittdep = nint(rteva(ieva)/dt)
        if (dtn(ittdep, rteva(ieva), dt)) then
           if (noui) error = .true.
-          call prterr(lundia    ,'U044'    ,'Tseva'   ,gdp       )
+          call prterr(lundia    ,'U044'    ,'Tseva'   )
        !
        endif
        !
@@ -418,7 +418,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        if (rec1st) then
           if (ittdep>itstrt) then
-             call prterr(lundia    ,'U041'    ,'First time Tseva >' ,gdp       )
+             call prterr(lundia    ,'U041'    ,'First time Tseva >' )
              !
              if (noui) error = .true.
           endif
@@ -426,7 +426,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        endif
        !
        if (ittdep<=itold) then
-          call prterr(lundia    ,'U060'    ,'Tseva'   ,gdp       )
+          call prterr(lundia    ,'U060'    ,'Tseva'   )
           !
           if (noui) error = .true.
        endif
@@ -449,7 +449,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        if (.not.noui) ieva = ieva + 1
        !
        if (ieva>mxevat) then
-          call prterr(lundia    ,'U958'    ,' '       ,gdp       )
+          call prterr(lundia    ,'U958'    ,' '       )
           !
           ieva = mxevat
           goto 500
@@ -474,7 +474,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        if (itold/= - 1) then
           if (itold<itstop) then
              write(message,'(a,a,a)') 'Last time in file ', trim(fileva), ' <' 
-             call prterr(lundia    ,'U042'    ,message,    gdp       )
+             call prterr(lundia    ,'U042'    ,message)
              error = .true.
              goto 9999
           endif

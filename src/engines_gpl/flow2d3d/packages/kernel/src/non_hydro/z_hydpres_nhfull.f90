@@ -397,7 +397,7 @@ subroutine z_hydpres_nhfull(mmax      ,nmax      ,j         ,nmmaxj    ,nmmax   
              ! in case of a culvert no warning generated
              !
              write (errtxt, '(i0,i3)') nst, i
-             call prterr(lundia, 'S208', trim(errtxt), gdp)
+             call prterr(lundia, 'S208', trim(errtxt))
           else
           endif
        endif  

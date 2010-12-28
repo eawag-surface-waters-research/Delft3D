@@ -177,7 +177,7 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
        ! erroror EOF (IOCOND <> 0), not allowed
        !
        if (iocond/=0) then
-          call prterr(lundia    ,'G007'    ,filnam(:8 + lrid)    ,gdp       )
+          call prterr(lundia    ,'G007'    ,filnam(:8 + lrid)    )
           error= .true.
           goto 9999
        endif
@@ -272,20 +272,20 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
             & cntent(:10)=='inoutlet  ' .or. cntent(:10)=='power     ' .or.     &
             & cntent(:10)=='culvert   ') then
              if (nparrd/=2 + lstsc) then
-                call prterr(lundia    ,'V097'    ,' '       ,gdp       )
+                call prterr(lundia    ,'V097'    ,' '       )
                 error= .true.
                 exit
              endif
              dismmt(isrc) = 'N'
           elseif (cntent(:8)=='momentum') then
              if (nparrd/=4 + lstsc) then
-                call prterr(lundia    ,'V097'    ,' '       ,gdp       )
+                call prterr(lundia    ,'V097'    ,' '       )
                 error= .true.
                 exit
              endif
              dismmt(isrc) = 'Y'
           else
-             call prterr(lundia    ,'V096'    ,cntent    ,gdp       )
+             call prterr(lundia    ,'V096'    ,cntent    )
              error= .true.
              exit
           endif
@@ -294,7 +294,7 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
           ! Only first 20 characters are of significance
           !
           if (parnam(2)(:20)/=defpar(1)(:20)) then
-             call prterr(lundia    ,'V096'    ,parnam(2)(:20)       ,gdp       )
+             call prterr(lundia    ,'V096'    ,parnam(2)(:20)       )
              error= .true.
              exit
           endif
@@ -303,7 +303,7 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
              namhlp = namcon(l)
              call small(namhlp    ,20        )
              if (parnam(2 + l)(:20)/=namhlp) then
-                call prterr(lundia    ,'V096'    ,parnam(2 + l)(:20)   ,gdp       )
+                call prterr(lundia    ,'V096'    ,parnam(2 + l)(:20)   )
                 error= .true.
                 goto 9999
              endif
@@ -312,7 +312,7 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
           if (dismmt(isrc)=='Y') then
              do l = 1, 2
                 if (parnam(2 + lstsc + l)(:20)/=defpar(1 + l)(:20)) then
-                   call prterr(lundia    ,'V096'    ,parnam(2 + lstsc + l)(:20)      ,gdp       )
+                   call prterr(lundia    ,'V096'    ,parnam(2 + lstsc + l)(:20)      )
                    error= .true.
                    goto 9999
                 endif
@@ -391,7 +391,7 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
        nd = max(1, n - 1)
        if ( abs(kspu(n, m, 0))>2 .or. abs(kspu(n , md, 0))>2 .or.  &
             abs(kspv(n, m, 0))>2 .or. abs(kspv(nd, m , 0))>2 ) then
-          call prterr(lundia, 'V057', namsrc(isrc), gdp)
+          call prterr(lundia, 'V057', namsrc(isrc))
        endif
        kspu(n , m , 0) = ja_upw
        kspu(n , md, 0) = ja_upw
@@ -406,7 +406,7 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
        nd = max(1, n - 1)
        if ( abs(kspu(n, m, 0))>2 .or. abs(kspu(n , md, 0))>2 .or.  &
             abs(kspv(n, m, 0))>2 .or. abs(kspv(nd, m , 0))>2 ) then
-          call prterr(lundia, 'V057', namsrc(isrc), gdp)
+          call prterr(lundia, 'V057', namsrc(isrc))
        endif
        kspu(n , m , 0) = ja_upw
        kspu(n , md, 0) = ja_upw

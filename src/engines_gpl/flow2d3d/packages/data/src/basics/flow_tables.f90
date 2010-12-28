@@ -249,7 +249,7 @@ subroutine errorhandler(errorstring,gdp)
 !
     lundia  => gdp%gdinout%lundia
     if (errorstring /= ' ') then
-       call prterr(lundia, 'U021', errorstring, gdp)
+       call prterr(lundia, 'U021', errorstring)
        call d3stop(1, gdp)
     endif
 end subroutine errorhandler

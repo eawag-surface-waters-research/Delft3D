@@ -255,7 +255,7 @@ subroutine forfil(nmmax     ,kmax      ,lstsci    , &
                 if (itfil==maxfil) then
                    write (errtxt, '(a,i2,i3,i9)') &
                         & 'Negative concentrations for  l, k, nst:',l, k, nst
-                   call prterr(lundia    ,'U190'    ,errtxt    ,gdp       )
+                   call prterr(lundia    ,'U190'    ,errtxt    )
                 endif
              enddo ! itfil-loop negative concentrations
           enddo    ! k-loop
@@ -398,7 +398,7 @@ subroutine forfil(nmmax     ,kmax      ,lstsci    , &
                       n = (nm - (m-1)*icx)/icy
                       write (errtxt, '(a,i2,i4,i4,i9)') &
                            & 'Vertical wiggle for  l, m ,n, nst :',l, m, n, nst
-                      call prterr(lundia    ,'U190'    ,errtxt    ,gdp       )
+                      call prterr(lundia    ,'U190'    ,errtxt    )
                    endif
                 enddo  ! itfil-loop wiggle in vertical for constituents
              endif      ! only computational wet points

@@ -91,7 +91,7 @@ subroutine ck_dpopt(lundia    ,lsedtot   ,zmodel    ,bedupd    ,dpsopt    , &
        & dpuopt /= 'MEAN'      .and. &
        & dpuopt /= 'MEAN_DPS') then
        message = 'Invalid value found in MD-file for DPUOPT: '//dpuopt
-       call prterr(lundia, 'P004', message, gdp)
+       call prterr(lundia, 'P004', message)
        call d3stop(1, gdp)
     endif
     !
@@ -105,10 +105,10 @@ subroutine ck_dpopt(lundia    ,lsedtot   ,zmodel    ,bedupd    ,dpsopt    , &
           ! If dpuopt is not prescribed it is set to MOR (=MIN) for morphological runs 
           !
           dpuopt = 'MOR'
-          call prterr(lundia, 'G051', 'DPUOPT not prescribed, set to MOR for morphological run', gdp)
+          call prterr(lundia, 'G051', 'DPUOPT not prescribed, set to MOR for morphological run')
        elseif (dpuopt /= 'MIN' .and. dpuopt /= 'MOR') then
           message = 'The combination of DPUOPT = '//dpuopt//' and morphology has not been tested'
-          call prterr(lundia, 'Z013', message, gdp)
+          call prterr(lundia, 'Z013', message)
        else
           !
           ! Dpuopt has correct value (MIN or MOR)
@@ -128,10 +128,10 @@ subroutine ck_dpopt(lundia    ,lsedtot   ,zmodel    ,bedupd    ,dpsopt    , &
           ! If dpuopt is not prescribed it is set to MIN for the Flooding solver 
           !
           dpuopt = 'MIN'
-          call prterr(lundia, 'G051', 'DPUOPT not prescribed, set to MIN for the Flooding solver', gdp)
+          call prterr(lundia, 'G051', 'DPUOPT not prescribed, set to MIN for the Flooding solver')
        elseif (dpuopt /= 'MIN') then
           message = 'The combination of DPUOPT = '//dpuopt//' and Flooding solver is not allowed'
-          call prterr(lundia, 'P004', message, gdp)
+          call prterr(lundia, 'P004', message)
           call d3stop(1, gdp)
        else
           !
@@ -148,10 +148,10 @@ subroutine ck_dpopt(lundia    ,lsedtot   ,zmodel    ,bedupd    ,dpsopt    , &
           ! If dpuopt is not prescribed it is set to MIN for Z-model runs
           !
           dpuopt = 'MIN'
-          call prterr(lundia, 'G051', 'DPUOPT not prescribed, set to MIN for Z-model runs', gdp)
+          call prterr(lundia, 'G051', 'DPUOPT not prescribed, set to MIN for Z-model runs')
        elseif (dpuopt /= 'MIN' .and. dpuopt /= 'UPW') then
           message = 'The combination of DPUOPT = '//dpuopt//' and Z-model is not allowed'
-          call prterr(lundia, 'P004', message, gdp)
+          call prterr(lundia, 'P004', message)
           call d3stop(1, gdp)
        else
           !
@@ -167,7 +167,7 @@ subroutine ck_dpopt(lundia    ,lsedtot   ,zmodel    ,bedupd    ,dpsopt    , &
        ! If dpuopt is not prescribed it is set to MEAN
        !
        dpuopt = 'MEAN'
-       call prterr(lundia, 'Z013', 'DPUOPT not prescribed, set to MEAN', gdp)
+       call prterr(lundia, 'Z013', 'DPUOPT not prescribed, set to MEAN')
     endif
     !
     ! dpsopt
@@ -184,7 +184,7 @@ subroutine ck_dpopt(lundia    ,lsedtot   ,zmodel    ,bedupd    ,dpsopt    , &
        & dpsopt /= 'MAX'  .and. &
        & dpsopt /= 'MIN') then
        message = 'Invalid value found in MD-file for DPSOPT: '//dpsopt
-       call prterr(lundia, 'P004', message, gdp)
+       call prterr(lundia, 'P004', message)
        call d3stop(1, gdp)
     endif
     !
@@ -193,10 +193,10 @@ subroutine ck_dpopt(lundia    ,lsedtot   ,zmodel    ,bedupd    ,dpsopt    , &
     if (rst_dp) then
        if (dpsopt == ' ') then
           dpsopt = 'DP'
-          call prterr(lundia, 'Z013', 'DPSOPT not prescribed, set to DP because of restart', gdp)       
+          call prterr(lundia, 'Z013', 'DPSOPT not prescribed, set to DP because of restart')
        elseif (dpsopt /= 'DP') then
           dpsopt = 'DP'
-          call prterr(lundia, 'Z013', 'DPSOPT value reset to DP because of restart', gdp)
+          call prterr(lundia, 'Z013', 'DPSOPT value reset to DP because of restart')
        else
           !
           ! Dpsopt has correct value (DP)
@@ -211,6 +211,6 @@ subroutine ck_dpopt(lundia    ,lsedtot   ,zmodel    ,bedupd    ,dpsopt    , &
        ! If dpsopt is not prescribed it is set to MAX
        !
        dpsopt = 'MAX'
-       call prterr(lundia, 'Z013', 'DPSOPT not prescribed; set to MAX', gdp)
+       call prterr(lundia, 'Z013', 'DPSOPT not prescribed; set to MAX')
     endif
 end subroutine ck_dpopt

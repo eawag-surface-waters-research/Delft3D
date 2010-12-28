@@ -79,13 +79,13 @@ subroutine chkiwe(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
        !--------test values with model dimensions
        !
        if (mwriwe<1 .or. nwriwe<1) then
-          call prterr(lundia    ,'U007'    ,'Observation point IWE'         ,gdp       )
+          call prterr(lundia    ,'U007'    ,'Observation point IWE'         )
           !
           error = .true.
           goto 9999
        endif
        if (mwriwe>mmax .or. nwriwe>nmaxus) then
-          call prterr(lundia    ,'U140'    ,'Observation point IWE'         ,gdp       )
+          call prterr(lundia    ,'U140'    ,'Observation point IWE'         )
           !
           error = .true.
           goto 9999
@@ -94,7 +94,7 @@ subroutine chkiwe(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
        !--------test discharge is inner point (kcs = 1)
        !
        if (kcs(nwriwe, mwriwe)/=1 .and. kcs(nwriwe, mwriwe)/=-1) then
-          call prterr(lundia    ,'V051'    ,'Observation point IWE'         ,gdp       )
+          call prterr(lundia    ,'V051'    ,'Observation point IWE'         )
           !
           error = .true.
        endif
@@ -105,7 +105,7 @@ subroutine chkiwe(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     !
     dicoww = 0.
     vicoww = 0.
-    call prterr(lundia    ,'U183'    ,' '       ,gdp       )
+    call prterr(lundia    ,'U183'    ,' '       )
     !
     !
     !

@@ -166,12 +166,12 @@ subroutine z_disbub(kmax    ,nsrcd     ,nsrc      ,nxbub    , &
           if (stopOnError) then
              write (error,'(a,i0,a)') 'Not enough layers at bubble screen ',ibub , &
                   & '. Increase the number of layers.'
-             call prterr(lundia, 'P004', trim(error), gdp)
+             call prterr(lundia, 'P004', trim(error))
              call d3stop(1, gdp)
           else
              write (message,'(a,i0,a)') 'Not enough layers at bubble screen ',ibub , &
                   & '. Increase the number of layers.'
-             call prterr(lundia, 'U190', trim(message), gdp)
+             call prterr(lundia, 'U190', trim(message))
              !
              ! This bubble screen is not included. Jump to next ibub.
              !
@@ -231,7 +231,7 @@ subroutine z_disbub(kmax    ,nsrcd     ,nsrc      ,nxbub    , &
           zbubl(ibub) = -dps(nm)
           zb          = -dps(nm)
           write (message,'(a,i0,a)') 'Bubble screen ',ibub ,' is moved from below bottom to bottom.'
-          call prterr(lundia, 'U190', trim(message), gdp)
+          call prterr(lundia, 'U190', trim(message))
        endif
        !
        ! Copy discharge from input 
@@ -240,12 +240,12 @@ subroutine z_disbub(kmax    ,nsrcd     ,nsrc      ,nxbub    , &
           if (stopOnError) then
              write (error,'(2a,i0,2a)') 'Not enough layers above injection point', &
                   & ' at bubble screen ',ibub , '. Increase the number of layers.'
-             call prterr(lundia, 'P004', trim(error), gdp)
+             call prterr(lundia, 'P004', trim(error))
              call d3stop(1, gdp)
           else
              write (message,'(2a,i0,2a)') 'Not enough layers above injection point', &
                   & ' at bubble screen ',ibub , '. Increase the number of layers.'
-             call prterr(lundia, 'U190', trim(message), gdp)
+             call prterr(lundia, 'U190', trim(message))
              !
              ! Lower kbub one layer
              !
@@ -300,12 +300,12 @@ subroutine z_disbub(kmax    ,nsrcd     ,nsrc      ,nxbub    , &
        if (kfsmax(nm) - kbubx < 1) then
           if (stopOnError) then
              write (error,'(a,i0)') 'Top layer too thick at bubblescreen ',ibub
-             call prterr(lundia, 'P004', trim(error), gdp)
+             call prterr(lundia, 'P004', trim(error))
              call d3stop(1, gdp)
           else
              write (message,'(a,i0,a)') 'Top layer too thick at bubblescreen ',ibub, &
                   & '. Adapting bubblescreen schematisation locally.'
-             call prterr(lundia, 'U190', trim(message), gdp)
+             call prterr(lundia, 'U190', trim(message))
              !
              ! Lower kbubx one layer
              !
@@ -397,7 +397,7 @@ subroutine z_disbub(kmax    ,nsrcd     ,nsrc      ,nxbub    , &
           call nm_to_n_and_m(nm, n, m, gdp)
           write (message,'(a,i0,a,e12.4,a,i0,a,i0,a)') 'Vertical sum of bubble_discharges ', &
                  & ibub, ' is not zero (',hsum, ') at (m,n)=(', n, ',',m,')'
-          call prterr(lundia, 'U190', trim(message), gdp)
+          call prterr(lundia, 'U190', trim(message))
        endif
     enddo
 end subroutine z_disbub

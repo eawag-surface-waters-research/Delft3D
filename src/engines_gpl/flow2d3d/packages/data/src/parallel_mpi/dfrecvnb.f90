@@ -76,7 +76,7 @@ subroutine dfrecvnb ( iptr, ilen, itype, isource, itag, gdp )
     call mpi_recv ( iptr, ilen, itype, isource-1, itag, MPI_COMM_WORLD, istat, ierr )
     if ( ierr /= MPI_SUCCESS ) then
        write (msgstr,'(a,i5,a,i3.3)') 'MPI produces some internal error - return code is ',ierr,' and node number is ',inode
-       call prterr(lundia, 'U021', trim(msgstr), gdp)
+       call prterr(lundia, 'U021', trim(msgstr))
        call d3stop(1, gdp)
     endif
 #endif

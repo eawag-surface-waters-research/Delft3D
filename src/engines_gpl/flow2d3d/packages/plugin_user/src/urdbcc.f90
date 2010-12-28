@@ -121,7 +121,7 @@ subroutine urdbcc(lundia    ,error     ,filusr    ,ltur      ,kmax      , &
           !--------------reading error?
           !
           if (iocond>0) then
-             call prterr(lundia    ,'G007'    ,filusr(1:lfile)      ,gdp       )
+             call prterr(lundia    ,'G007'    ,filusr(1:lfile)      )
              !
              error = .true.
           endif
@@ -133,7 +133,7 @@ subroutine urdbcc(lundia    ,error     ,filusr    ,ltur      ,kmax      , &
        !              into+1 > nrand write sequence error in file
        !
        if (into + 1>nrand) then
-          call prterr(lundia    ,'G007'    ,filusr(1:lfile)      ,gdp       )
+          call prterr(lundia    ,'G007'    ,filusr(1:lfile)      )
           !
           error = .true.
           goto 1100
@@ -144,7 +144,7 @@ subroutine urdbcc(lundia    ,error     ,filusr    ,ltur      ,kmax      , &
        !-----------Read boundary layer not first one to read (:= 0)
        !
        if (laag/=0) then
-          call prterr(lundia    ,'G007'    ,filusr(1:lfile)      ,gdp       )
+          call prterr(lundia    ,'G007'    ,filusr(1:lfile)      )
           !
           error = .true.
           goto 1100
@@ -167,7 +167,7 @@ subroutine urdbcc(lundia    ,error     ,filusr    ,ltur      ,kmax      , &
              !
              !-----------------reading error / end-of-file (both not permitted)
              !
-             call prterr(lundia    ,'G007'    ,filusr(1:lfile)      ,gdp       )
+             call prterr(lundia    ,'G007'    ,filusr(1:lfile)      )
              !
              error = .true.
              goto 1100
@@ -176,7 +176,7 @@ subroutine urdbcc(lundia    ,error     ,filusr    ,ltur      ,kmax      , &
           !--------------Read boundary number not expected ? (should be into)
           !
           if (nrand/=into) then
-             call prterr(lundia    ,'G007'    ,filusr(1:lfile)      ,gdp       )
+             call prterr(lundia    ,'G007'    ,filusr(1:lfile)      )
              !
              error = .true.
              goto 1100
@@ -185,7 +185,7 @@ subroutine urdbcc(lundia    ,error     ,filusr    ,ltur      ,kmax      , &
           !--------------Read boundary layer not expected ? (should be k)
           !
           if (laag/=k) then
-             call prterr(lundia    ,'G007'    ,filusr(1:lfile)      ,gdp       )
+             call prterr(lundia    ,'G007'    ,filusr(1:lfile)      )
              !
              error = .true.
              goto 1100
@@ -211,7 +211,7 @@ subroutine urdbcc(lundia    ,error     ,filusr    ,ltur      ,kmax      , &
        !
        !--------file = not exist
        !
-       call prterr(lundia    ,'G004'    ,filusr(1:lfile)      ,gdp       )
+       call prterr(lundia    ,'G004'    ,filusr(1:lfile)      )
        !
        error = .true.
     endif

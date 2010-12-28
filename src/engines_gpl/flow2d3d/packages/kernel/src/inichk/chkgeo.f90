@@ -83,7 +83,7 @@ subroutine chkgeo(lundia    ,error     ,kmax      ,thick     ,sig       ,gdp)
        som = som + thick(k)
     enddo
     if (error2) then
-       call prterr(lundia    ,'U004'    ,' 0.01 - 100.00'     ,gdp       )
+       call prterr(lundia    ,'U004'    ,' 0.01 - 100.00'     )
     !
     endif
     !
@@ -91,7 +91,7 @@ subroutine chkgeo(lundia    ,error     ,kmax      ,thick     ,sig       ,gdp)
     !
     if (abs(som - 1.)>1.E-5) then
        error3 = .true.
-       call prterr(lundia    ,'U006'    ,' '       ,gdp       )
+       call prterr(lundia    ,'U006'    ,' '       )
     !
     endif
     !

@@ -171,7 +171,7 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
              !
              if (iocond/=0) then
                 if (iocond>0) then
-                   call prterr(lundia    ,'G007'    ,filtmp(:lfile)       ,gdp       )
+                   call prterr(lundia    ,'G007'    ,filtmp(:lfile)       )
                    !
                    if (noui) then
                       error = .true.
@@ -222,7 +222,7 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
                 !
                 if (iocond/=0) then
                    if (iocond>0) then
-                      call prterr(lundia    ,'G007'    ,filtmp(:lfile)       ,gdp       )
+                      call prterr(lundia    ,'G007'    ,filtmp(:lfile)       )
                       !
                       if (noui) then
                          error = .true.
@@ -242,7 +242,7 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
                 call read1c(rec132    ,lr132     ,ibeg      ,iend      ,cdum      , &
                           & ldtbnd    ,ier       )
                 if (ier<=0) then
-                   call prterr(lundia    ,'G007'    ,filtmp(:lfile)       ,gdp       )
+                   call prterr(lundia    ,'G007'    ,filtmp(:lfile)       )
                    !
                    if (noui) then
                       error = .true.
@@ -262,7 +262,7 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
                 call read1c(rec132    ,lr132     ,ibeg      ,iend      ,datbnd    , &
                           & ldtbnd    ,ier       )
                 if (ier<=0) then
-                   call prterr(lundia    ,'G007'    ,filtmp(:lfile)       ,gdp       )
+                   call prterr(lundia    ,'G007'    ,filtmp(:lfile)       )
                    !
                    if (noui) then
                       error = .true.
@@ -300,7 +300,7 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
                 !
                 if (iocond/=0) then
                    if (iocond>0) then
-                      call prterr(lundia    ,'G007'    ,filtmp(:lfile)       ,gdp       )
+                      call prterr(lundia    ,'G007'    ,filtmp(:lfile)       )
                       !
                       if (noui) then
                          error = .true.
@@ -378,7 +378,7 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
           ! reading error?
           !
           if (lerror) then
-             call prterr(lundia    ,'U101'    ,'Nambnd & ' // keyw  ,gdp       )
+             call prterr(lundia    ,'U101'    ,'Nambnd & ' // keyw  )
              !
              if (noui) then
                 error = .true.

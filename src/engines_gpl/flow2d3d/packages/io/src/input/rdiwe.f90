@@ -172,9 +172,9 @@ subroutine rdiwe(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        read (luntmp, '(a)', iostat = iocond) rec132
        if (iocond/=0) then
           if (iocond<0) then
-             call prterr(lundia    ,'G006'    ,filiwe(1:lfile)      ,gdp       )
+             call prterr(lundia    ,'G006'    ,filiwe(1:lfile)      )
           else
-             call prterr(lundia    ,'G007'    ,filiwe(1:lfile)      ,gdp       )
+             call prterr(lundia    ,'G007'    ,filiwe(1:lfile)      )
           endif
           error = .true.
           goto 1000
@@ -190,14 +190,14 @@ subroutine rdiwe(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           lenc = 132
           ibeg = index(rec132, ' ')
           if (ibeg==0) then
-             call prterr(lundia    ,'U180'    ,' '       ,gdp       )
+             call prterr(lundia    ,'U180'    ,' '       )
              iwedia = .false.
              goto 100
           endif
           call read1i(rec132    ,lenc      ,ibeg      ,iend      ,mwriwe    , &
                     & idef      ,ier       )
           if (ier<=0) then
-             call prterr(lundia    ,'U180'    ,' '       ,gdp       )
+             call prterr(lundia    ,'U180'    ,' '       )
              iwedia = .false.
              goto 100
           endif
@@ -205,7 +205,7 @@ subroutine rdiwe(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           call read1i(rec132    ,lenc      ,ibeg      ,iend      ,nwriwe    , &
                     & idef      ,ier       )
           if (ier<=0) then
-             call prterr(lundia    ,'U180'    ,' '       ,gdp       )
+             call prterr(lundia    ,'U180'    ,' '       )
              iwedia = .false.
           endif
        endif
@@ -229,9 +229,9 @@ subroutine rdiwe(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        read (luntmp, '(a)', iostat = iocond) rec132
        if (iocond/=0) then
           if (iocond<0) then
-             call prterr(lundia    ,'G006'    ,filiwe(1:lfile)      ,gdp       )
+             call prterr(lundia    ,'G006'    ,filiwe(1:lfile)      )
           else
-             call prterr(lundia    ,'G007'    ,filiwe(1:lfile)      ,gdp       )
+             call prterr(lundia    ,'G007'    ,filiwe(1:lfile)      )
           endif
           error = .true.
           goto 1000
@@ -259,9 +259,9 @@ subroutine rdiwe(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           read (luntmp, '(a)', iostat = iocond) rec132
           if (iocond/=0) then
              if (iocond<0) then
-                call prterr(lundia    ,'G006'    ,filiwe(1:lfile)      ,gdp       )
+                call prterr(lundia    ,'G006'    ,filiwe(1:lfile)      )
              else
-                call prterr(lundia    ,'G007'    ,filiwe(1:lfile)      ,gdp       )
+                call prterr(lundia    ,'G007'    ,filiwe(1:lfile)      )
              endif
              error = .true.
              goto 1000
@@ -275,7 +275,7 @@ subroutine rdiwe(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           !
           if (ier<=0) then
              error = .true.
-             call prterr(lundia    ,'G006'    ,filiwe(1:lfile)      ,gdp       )
+             call prterr(lundia    ,'G006'    ,filiwe(1:lfile)      )
              !
              goto 1000
           endif
@@ -291,12 +291,12 @@ subroutine rdiwe(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        if (wvlbed==0.0) then
           error = .true.
-          call prterr(lundia    ,'U181'    ,'bed topog.'         ,gdp       )
+          call prterr(lundia    ,'U181'    ,'bed topog.'         )
           goto 1000
        endif
        if (wvlsur==0.0) then
           error = .true.
-          call prterr(lundia    ,'U181'    ,'surface' ,gdp       )
+          call prterr(lundia    ,'U181'    ,'surface' )
           goto 1000
        endif
        !
@@ -305,12 +305,12 @@ subroutine rdiwe(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        itiwei = nint(tinciw/dt)
        if (dtn(itiwei, tinciw, dt)) then
-          call prterr(lundia    ,'U044'    ,'Timestep for IWE'   ,gdp       )
+          call prterr(lundia    ,'U044'    ,'Timestep for IWE'   )
           error = .true.
           goto 1000
        endif
        if (itiwei==0) then
-          call prterr(lundia    ,'U182'    ,' '       ,gdp       )
+          call prterr(lundia    ,'U182'    ,' '       )
           error = .true.
           goto 1000
        endif
@@ -336,7 +336,7 @@ subroutine rdiwe(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     else
        error = .true.
-       call prterr(lundia    ,'G004'    ,filiwe(:lfile)       ,gdp       )
+       call prterr(lundia    ,'G004'    ,filiwe(:lfile)       )
     endif
     !
  9999 continue

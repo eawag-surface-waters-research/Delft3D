@@ -783,7 +783,7 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                          !
                          ! ie we got to the top and haven't defined kpwbt and hpkwbt
                          !
-                         call prterr(lundia, 'P004', 'Deltas > water depth in TRATUR ', gdp)
+                         call prterr(lundia, 'P004', 'Deltas > water depth in TRATUR ')
                          kpkwbt(nm) = 1
                          hpkwbt(nm) = ( - sig(kmax) + sig(1)) * h0
                       endif

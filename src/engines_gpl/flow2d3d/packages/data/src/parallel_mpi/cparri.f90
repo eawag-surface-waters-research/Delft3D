@@ -61,7 +61,7 @@ subroutine cparri ( iarr1, iarr2, length, gdp )
     ! check array length
     !
     if ( length <= 0 ) then
-       call prterr(lundia, 'U021', 'Array length should be positive', gdp)
+       call prterr(lundia, 'U021', 'Array length should be positive')
     endif
     !
     ! copy elements of array IARR1 to IARR2

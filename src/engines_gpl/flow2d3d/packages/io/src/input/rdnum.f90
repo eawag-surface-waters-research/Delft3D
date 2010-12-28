@@ -185,7 +185,7 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
           !
           if (chulp(:1)=='Y' .or. chulp(:1)=='y') then
              momsol = 'waqua '
-             call prterr(lundia, 'G051', 'Waqua option enabled', gdp)
+             call prterr(lundia, 'G051', 'Waqua option enabled')
           endif
        endif
     endif
@@ -214,7 +214,7 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     !
     if (found) then
        if (momsol == 'waqua ') then
-          call prterr(lundia, 'P004', 'Usage of both "Momsol" and "Waqopt" is not allowed', gdp)
+          call prterr(lundia, 'P004', 'Usage of both "Momsol" and "Waqopt" is not allowed')
           call d3stop(1,gdp)
        else
           lenc = 6
@@ -232,28 +232,28 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
              else
                 momsol = 'cyclic'
              endif
-             call prterr(lundia    ,'V078'    ,momsol   ,gdp       )
+             call prterr(lundia    ,'V078'    ,momsol   )
           else
              momsol = chulp(:lenc)
              call small(momsol,lenc)
              if (zmodel) then
                 if (momsol == 'mdue  ') then
-                   call prterr(lundia    ,'V079'    ,momsol    ,gdp       )
+                   call prterr(lundia    ,'V079'    ,momsol    )
                 elseif (momsol == 'iupw  ') then
-                   call prterr(lundia    ,'V079'    ,momsol    ,gdp       )
+                   call prterr(lundia    ,'V079'    ,momsol    )
                 else
                    msg = 'Using default momentum solver "Multi Directional Upwind Explicit"'
-                   call prterr(lundia    ,'Z013'    ,msg       ,gdp       )
+                   call prterr(lundia    ,'Z013'    ,msg       )
                    msg = momsol//' can not be used as momentum solver in z-model'
                    write (lundia,'(a,a)') '            ',trim(msg)
                    momsol = 'mdue  '
                 endif
              else
                 if (momsol == 'cyclic' .or. momsol == 'waqua ' .or. momsol == 'flood ') then
-                   call prterr(lundia    ,'V079'    ,momsol    ,gdp       )
+                   call prterr(lundia    ,'V079'    ,momsol    )
                 else   
                    msg = 'Using default momentum solver "Cyclic"'
-                   call prterr(lundia    ,'Z013'    ,msg       ,gdp       )
+                   call prterr(lundia    ,'Z013'    ,msg       )
                    msg = momsol//' can not be used as momentum solver in sigma-model'
                    write (lundia,'(a,a)') '            ',trim(msg)
                    momsol = 'cyclic'
@@ -264,11 +264,11 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     else
        if (zmodel) then
           momsol = 'mdue  '
-          call prterr(lundia    ,'V078'    ,momsol   ,gdp       )
+          call prterr(lundia    ,'V078'    ,momsol   )
        else
           if (momsol /= 'waqua ') then
              momsol = 'cyclic'
-             call prterr(lundia    ,'V078'    ,momsol       ,gdp       )
+             call prterr(lundia    ,'V078'    ,momsol       )
           endif
        endif
     endif
@@ -344,7 +344,7 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     if (dpsopt(1:lenc) /= ' ' .and. chulp(1:lenc) /= ' ') then
        dpsopt = chulp(:lenc)
        msg = 'DRYFLP and DPSOPT both specified in MD-file. Using DPSOPT: '//dpsopt(1:lenc)
-       call prterr(lundia, 'G051', trim(msg), gdp)
+       call prterr(lundia, 'G051', trim(msg))
     elseif (chulp(1:lenc) /= ' ') then
        dpsopt = chulp(:lenc)
     elseif (dpsopt(1:lenc) /= ' ') then
@@ -496,28 +496,28 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
              else
                 trasol = traopt(1)
              endif
-             call prterr(lundia    ,'V049'    ,trasol   ,gdp       )
+             call prterr(lundia    ,'V049'    ,trasol   )
           else
              trasol = chulp(:lenc)
              call small(trasol    ,lenc      )
              if (zmodel) then
                 if (trasol == traopt(2)) then
-                   call prterr(lundia    ,'V349'    ,trasol    ,gdp       )
+                   call prterr(lundia    ,'V349'    ,trasol    )
                 elseif( trasol == traopt(3)) then
-                   call prterr(lundia    ,'V349'    ,trasol    ,gdp       )
+                   call prterr(lundia    ,'V349'    ,trasol    )
                 else
                    msg = 'Using default transport solver "Van Leer-2 (explicit)"'
-                   call prterr(lundia    ,'Z013'    ,trim(msg)       ,gdp       )
+                   call prterr(lundia    ,'Z013'    ,trim(msg)       )
                    msg = trasol//' can not be used as transport solver in z-model'
                    write (lundia,'(a,a)') '            ',trim(msg)
                    trasol = traopt(2)
                 endif
              else
                 if (trasol == traopt(1) .or. trasol == traopt(2)) then
-                   call prterr(lundia    ,'V349'    ,trasol    ,gdp       )
+                   call prterr(lundia    ,'V349'    ,trasol    )
                 else   
                    msg = 'Using default transport solver "Cyclic"'
-                   call prterr(lundia    ,'Z013'    ,trim(msg)       ,gdp       )
+                   call prterr(lundia    ,'Z013'    ,trim(msg)       )
                    msg = trasol//' can not be used as transport solver in sigma-model'
                    write (lundia,'(a,a)') '            ',trim(msg)
                    trasol = traopt(1)
@@ -530,7 +530,7 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
           else
              trasol = traopt(1)
           endif
-          call prterr(lundia    ,'V049'    ,trasol   ,gdp       )
+          call prterr(lundia    ,'V049'    ,trasol   )
        endif
        !
        ! locate 'Forfuv' Criterion for Forester filter for UV

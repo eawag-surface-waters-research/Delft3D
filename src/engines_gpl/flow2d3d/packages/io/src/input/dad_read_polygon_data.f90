@@ -85,7 +85,7 @@ subroutine dad_read_polygon_data(polygon_ptr, idcoord, start, number, &
     if (number == -1) then
        write(message,'(a,a,i0)') 'Unable to read the number of points in ', &
             &                    trim(type), ' polygon of area',indx
-       call prterr(lundia, 'U021', message, gdp)
+       call prterr(lundia, 'U021', message)
        call d3stop(1, gdp)
     endif
     !write (lundia,'(a,i0,a,i0)') 'Number of points in '//trim(type)// &
@@ -108,7 +108,7 @@ subroutine dad_read_polygon_data(polygon_ptr, idcoord, start, number, &
            & comparereal(inputvals(2),misvalue) == 0        ) then
           write(message,'(a,i0,a,i0)') 'Unable to read '//trim(type)// &
                &                       ' polygon point ', ip,' of area ',indx
-          call prterr(lundia, 'U021', message, gdp)
+          call prterr(lundia, 'U021', message)
           call d3stop(1, gdp)
        endif
        xcoord(start+ip-1) = inputvals(1)

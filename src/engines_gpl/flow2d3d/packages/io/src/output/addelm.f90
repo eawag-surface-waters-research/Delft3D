@@ -165,7 +165,7 @@ subroutine addelm(nefisgroup ,elmnms_new ,elmqty_new ,elmunt_new ,elmtps_new , &
     !  Check for memory error
     !
     if (istat/=0) then
-       call prterr(lundia, 'U021', 'Addelm: memory alloc error', gdp)
+       call prterr(lundia, 'U021', 'Addelm: memory alloc error')
        call d3stop(1, gdp)
     endif
     !

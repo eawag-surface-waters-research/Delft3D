@@ -123,7 +123,7 @@ subroutine rdusrf(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
           !-----------test FILUSR(NFIL) Should not be blank !!
           !
           if (filusr(n)==fildef) then
-             call prterr(lundia    ,'V220'    ,' '       ,gdp       )
+             call prterr(lundia    ,'V220'    ,' '       )
              !
              if (noui) error = .true.
              exit

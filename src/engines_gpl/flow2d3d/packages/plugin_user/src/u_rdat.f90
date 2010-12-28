@@ -87,7 +87,7 @@ subroutine u_rdat(lundia    ,error     ,gdp       )
     inquire (file = inpfil(:11), exist = ex)
     if (.not.ex) goto 9999
     !
-    call prterr(lundia    ,'G051'    ,'User defined output specified' ,gdp       )
+    call prterr(lundia    ,'G051'    ,'User defined output specified' )
     luninp = newlun(gdp)
     open (luninp, file = inpfil, form = 'formatted', err = 7777)
     !
@@ -111,11 +111,11 @@ subroutine u_rdat(lundia    ,error     ,gdp       )
     ! as follows: write (lundia,'(a)') errtx1
     !
  7777 continue
-    call prterr(lundia    ,'U021'    ,errtx2    ,gdp       )
+    call prterr(lundia    ,'U021'    ,errtx2    )
     error = .true.
     goto 9999
  8888 continue
-    call prterr(lundia    ,'U021'    ,errtx1    ,gdp       )
+    call prterr(lundia    ,'U021'    ,errtx1    )
     error = .true.
     !
  9999 continue

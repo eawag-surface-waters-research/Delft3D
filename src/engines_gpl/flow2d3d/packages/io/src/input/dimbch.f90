@@ -276,7 +276,7 @@ subroutine dimbch(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
              !
              if (iocond/=0) then
                 if (iocond<0) goto 600
-                call prterr(lundia    ,'G007'    ,filtmp(:lfile)       ,gdp       )
+                call prterr(lundia    ,'G007'    ,filtmp(:lfile)       )
                 !
                 error = .true.
                 goto 9999
@@ -309,7 +309,7 @@ subroutine dimbch(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
                 !
                 if (iocond/=0) then
                    if (iocond<0) goto 600
-                   call prterr(lundia    ,'G007'    ,filtmp(:lfile)       ,gdp       )
+                   call prterr(lundia    ,'G007'    ,filtmp(:lfile)       )
                    !
                    error = .true.
                    goto 9999

@@ -76,7 +76,7 @@ subroutine dfreduce ( iptr, ilen, itype, ityprd, gdp )
     call mpi_allreduce ( iptr, ioptr, ilen, itype, ityprd, MPI_COMM_WORLD, ierr )
     if ( ierr /= MPI_SUCCESS ) then
        write (msgstr,'(a,i5)') 'MPI produces some internal error - return code is ',ierr
-       call prterr(lundia, 'U021', trim(msgstr), gdp)
+       call prterr(lundia, 'U021', trim(msgstr))
        call d3stop(1, gdp)
     endif
 #endif

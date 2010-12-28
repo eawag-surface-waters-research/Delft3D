@@ -182,7 +182,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
           ! Reading error?
           !
           if (iocond>0) then
-             call prterr(lundia    ,'G007'    ,filstr(1:lfile)      ,gdp       )
+             call prterr(lundia    ,'G007'    ,filstr(1:lfile)      )
              !
              error = .true.
           endif
@@ -192,7 +192,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
        ! Empty record? Continue on following line
        !
        if (rec132==' ') then
-          call prterr(lundia    ,'G033'    ,filstr(1:lfile)      ,gdp       )
+          call prterr(lundia    ,'G033'    ,filstr(1:lfile)      )
           !
           goto 1000
        endif
@@ -206,7 +206,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
                  & lenc      ,ier       )
        if (ier<=0) then
           error = .true.
-          call prterr(lundia    ,'G007'    ,filstr(1:lfile)      ,gdp       )
+          call prterr(lundia    ,'G007'    ,filstr(1:lfile)      )
           !
           goto 1100
        endif
@@ -225,7 +225,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
                  & ival      ,idef      ,ier       )
        if (ier <= 0) then
           error = .true.
-          call prterr(lundia    ,'G007'    ,filstr(1:lfile)      ,gdp       )
+          call prterr(lundia    ,'G007'    ,filstr(1:lfile)      )
           !
           goto 1100
        endif
@@ -251,7 +251,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
           call read1r(rec132    ,132       ,ibeg      ,iend      ,brlosc    , &
                     & rdef      ,ier       )
           if (ier<=0) then
-             call prterr(lundia    ,'G007'    ,filstr(1:lfile)      ,gdp       )
+             call prterr(lundia    ,'G007'    ,filstr(1:lfile)      )
              !
              error = .true.
              goto 1100
@@ -268,7 +268,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
           call read1r(rec132    ,132       ,ibeg      ,iend      ,value1   , &
                     & rdef      ,ier       )
           if (ier <= 0) then
-             call prterr(lundia    ,'G007'    ,filstr(1:lfile)      ,gdp       )
+             call prterr(lundia    ,'G007'    ,filstr(1:lfile)      )
              !
              error = .true.
              goto 1100
@@ -283,7 +283,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
           call read1r(rec132    ,132       ,ibeg      ,iend      ,value2   , &
                     & rdef      ,ier       )
           if (ier <= 0) then
-             call prterr(lundia    ,'G007'    ,filstr(1:lfile)      ,gdp       )
+             call prterr(lundia    ,'G007'    ,filstr(1:lfile)      )
              !
              error = .true.
              goto 1100
@@ -311,7 +311,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
        ! If error then no multiple of 45 degrees
        !
        if (error) then
-          call prterr(lundia    ,'V231'    ,errmsg(:24)          ,gdp       )
+          call prterr(lundia    ,'V231'    ,errmsg(:24)          )
           !
           goto 1100
        endif
@@ -323,7 +323,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
 
           if (abs(incx).gt.0 .and. abs(incy).gt.0) then
              errtxt = 'skewed structures in parallel are not allowed'
-             call prterr(lundia ,'U021' ,errtxt ,gdp )
+             call prterr(lundia ,'U021' ,errtxt )
              error = .true.
              goto 1100
           endif
@@ -380,14 +380,14 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
        ! If error then no multiple of 45 degrees
        !
        if (error) then
-          call prterr(lundia    ,'V231'    ,errmsg(:24)          ,gdp       )
+          call prterr(lundia    ,'V231'    ,errmsg(:24)          )
           !
           goto 1100
        endif
 
 
        if ((m1>mmax) .or. (m1<1) .or. (m2>mmax) .or. (m2<1)) then
-          call prterr(lundia    ,'V249'    ,errmsg(:24)          ,gdp       )
+          call prterr(lundia    ,'V249'    ,errmsg(:24)          )
           !
           ! Don't stop, just give warning; skip entry
           !
@@ -395,7 +395,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
        endif
        !
        if ((n1>nmaxus) .or. (n1<1) .or. (n2>nmaxus) .or. (n2<1)) then
-          call prterr(lundia    ,'V249'    ,errmsg(:24)          ,gdp       )
+          call prterr(lundia    ,'V249'    ,errmsg(:24)          )
           !
           ! Don't stop, just give warning; skip entry
           !
@@ -405,7 +405,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
        kkmin = min(k1, k2)
        kkmax = max(k1, k2)
        if ((kkmin<1) .or. (kkmax>kmax)) then
-          call prterr(lundia    ,'V232'    ,errmsg(:16)          ,gdp       )
+          call prterr(lundia    ,'V232'    ,errmsg(:16)          )
           !
           error = .true.
           goto 1100
@@ -416,7 +416,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
        !
        if (iabsst /= 4) then
           if (brlosc <= 0.0) then
-             call prterr(lundia    ,'V234'    ,errmsg(:24)          ,gdp       )
+             call prterr(lundia    ,'V234'    ,errmsg(:24)          )
              !
              error = .true.
           endif
@@ -425,7 +425,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
        ! For gates with fixed position: Value2 > Value1
        !
        if (iabsst==10 .and. value2 <= value1) then
-          call prterr(lundia    ,'V222'    ,' '                    ,gdp       )
+          call prterr(lundia    ,'V222'    ,' '                    )
           !
           error = .true.
           goto 1100
@@ -463,7 +463,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
                    do k = kkmin, kkmax
                       if (kspu(n, m, k) == 1) then
                          errmsg(19:) = ' on ' // struct(kabssp)
-                         call prterr(lundia    ,'V235'    ,errmsg(:40)          ,gdp       )
+                         call prterr(lundia    ,'V235'    ,errmsg(:40)          )
                          write(lundia,*) '          at m=',m,',n= ',n,',k=',k,' (U point)'
                          !
                          error = .true.
@@ -472,7 +472,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
                    enddo
                 else
                    errmsg(19:) = ' on ' // struct(kabssp)
-                   call prterr(lundia    ,'V235'    ,errmsg(:40)          ,gdp       )
+                   call prterr(lundia    ,'V235'    ,errmsg(:40)          )
                    write(lundia,*) '          at m=',m,',n= ',n,' (U point)'
                    !
                    error = .true.
@@ -485,7 +485,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
              !
              if (kabssp > 0) then
                 errmsg(19:) = ' near ' // struct(kabssp)
-                call prterr(lundia    ,'V236'    ,errmsg    ,gdp       )
+                call prterr(lundia    ,'V236'    ,errmsg    )
              !
              endif
              !
@@ -532,7 +532,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
                    do k = kkmin, kkmax
                       if (kspv(n, m, k) == 1) then
                          errmsg(19:) = ' on ' // struct(kabssp)
-                         call prterr(lundia    ,'V235'    ,errmsg(:40)          ,gdp       )
+                         call prterr(lundia    ,'V235'    ,errmsg(:40)          )
                          write(lundia,*) '          at m=',m,',n= ',n,',k=',k,' (V point)'
                          !
                          error = .true.
@@ -541,7 +541,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
                    enddo
                 else
                    errmsg(19:) = ' on ' // struct(kabssp)
-                   call prterr(lundia    ,'V235'    ,errmsg(:40)          ,gdp       )
+                   call prterr(lundia    ,'V235'    ,errmsg(:40)          )
                    write(lundia,*) '          at m=',m,',n= ',n,' (V point)'
                    !
                    error = .true.
@@ -554,7 +554,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
              !
              if (kabssp > 0) then
                 errmsg(19:) = ' near ' // struct(kabssp)
-                call prterr(lundia    ,'V236'    ,errmsg    ,gdp       )
+                call prterr(lundia    ,'V236'    ,errmsg    )
              !
              endif
 
@@ -585,7 +585,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
           enddo
        else
           errmsg(25:28) = ' (' // direct // ')'
-          call prterr(lundia    ,'V233'    ,errmsg(:28)          ,gdp       )
+          call prterr(lundia    ,'V233'    ,errmsg(:28)          )
           !
           error = .true.
        endif

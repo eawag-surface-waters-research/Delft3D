@@ -84,7 +84,7 @@ subroutine chckit(lundia    ,error     ,filnam    ,timrd     ,dt        , &
     ittdep = nint(timrd/dt)
     if (dtn(ittdep, timrd, dt)) then
        errmsg = 'Times in ' // localfilnam(1:namlen)
-       call prterr(lundia    ,'U044'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'U044'    ,errmsg    )
        !
        error = .true.
     endif
@@ -94,7 +94,7 @@ subroutine chckit(lundia    ,error     ,filnam    ,timrd     ,dt        , &
     if (ntimrd==1) then
        if (ittdep>itstrt) then
           errmsg = 'First time in ' // localfilnam(1:namlen) // ' >'
-          call prterr(lundia    ,'U041'    ,errmsg    ,gdp       )
+          call prterr(lundia    ,'U041'    ,errmsg    )
           !
           error = .true.
        endif
@@ -104,7 +104,7 @@ subroutine chckit(lundia    ,error     ,filnam    ,timrd     ,dt        , &
     ! times not increasing
     !
     if (ittdep<=itold) then
-       call prterr(lundia    ,'U060'    ,localfilnam(1:namlen),gdp       )
+       call prterr(lundia    ,'U060'    ,localfilnam(1:namlen))
        !
        error = .true.
     endif

@@ -144,7 +144,7 @@ subroutine upddis(lundis    ,lundia    ,sferic    ,itdis     , &
        itdis(5, isrc) = itdis(4, isrc)
        errmsg         = 'discharge = '
        write (errmsg(13:15), '(i3)') isrc
-       call prterr(lundia    ,'V098'    ,errmsg(:15)          ,gdp       )
+       call prterr(lundia    ,'V098'    ,errmsg(:15)          )
     endif
     !
     ! Read the time dependent data
@@ -188,7 +188,7 @@ subroutine upddis(lundis    ,lundia    ,sferic    ,itdis     , &
     ittime = nint(rttime/dt)
     if (abs(ittime*dt - rttime)>(0.1_fp*dt)) then
        write (errmsg, '(a,f10.4)') 'Timdis = ', rtdis
-       call prterr(lundia    ,'S044'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'S044'    ,errmsg    )
     endif
     !
     ! Define RTDIS as multiplication factor of DT, where RTDIS is in SCALEF minutes

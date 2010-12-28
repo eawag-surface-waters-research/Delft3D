@@ -112,7 +112,7 @@ subroutine chkdro(lundia    ,itstrt    ,itstop    ,drogue    ,itdrof    , &
        !
        if (itdro(1, i)<itstrt) then
           errmsg = 'Drogue start time (<)'
-          call prterr(lundia    ,'V008'    ,errmsg(:23)          ,gdp       )
+          call prterr(lundia    ,'V008'    ,errmsg(:23)          )
           !
           write (lundia, '(12x,a,a)') 'for Drogue: ', namdro(i)
           itdro(1, i) = itstrt
@@ -122,7 +122,7 @@ subroutine chkdro(lundia    ,itstrt    ,itstop    ,drogue    ,itdrof    , &
        !
        if (itdro(1, i)>itstop) then
           errmsg = 'Drogue start time (>)'
-          call prterr(lundia    ,'V017'    ,errmsg(:23)          ,gdp       )
+          call prterr(lundia    ,'V017'    ,errmsg(:23)          )
           !
           write (lundia, '(12x,a,a)') 'for Drogue: ', namdro(i)
           merrs = merrs + 1
@@ -132,7 +132,7 @@ subroutine chkdro(lundia    ,itstrt    ,itstop    ,drogue    ,itdrof    , &
        !
        if (itdro(2, i)<itstrt) then
           errmsg = 'Drogue stop time (<) '
-          call prterr(lundia    ,'V017'    ,errmsg(:22)          ,gdp       )
+          call prterr(lundia    ,'V017'    ,errmsg(:22)          )
           !
           write (lundia, '(12x,a,a)') 'for Drogue: ', namdro(i)
           merrs = merrs + 1
@@ -142,7 +142,7 @@ subroutine chkdro(lundia    ,itstrt    ,itstop    ,drogue    ,itdrof    , &
        !
        if (itdro(2, i)>itstop) then
           errmsg = 'Drogue stop time (>) '
-          call prterr(lundia    ,'V008'    ,errmsg(:22)          ,gdp       )
+          call prterr(lundia    ,'V008'    ,errmsg(:22)          )
           !
           write (lundia, '(12x,a,a)') 'for Drogue: ', namdro(i)
           itdro(2, i) = itstop
@@ -151,7 +151,7 @@ subroutine chkdro(lundia    ,itstrt    ,itstop    ,drogue    ,itdrof    , &
        !--------itdro (1,i) > itdro(2,i) then warning (no drogue calculated)
        !
        if (itdro(1, i)>itdro(2, i)) then
-          call prterr(lundia    ,'V018'    ,namdro(i) ,gdp       )
+          call prterr(lundia    ,'V018'    ,namdro(i) )
           !
           merrs = merrs + 1
        endif
@@ -168,12 +168,12 @@ subroutine chkdro(lundia    ,itstrt    ,itstop    ,drogue    ,itdrof    , &
        n = mndro(2, i)
        if (m<1 .or. m>mmax .or. n<1 .or. n>nmaxus) then
           errmsg = 'Drogue ' // namdro(i)
-          call prterr(lundia    ,'U007'    ,errmsg    ,gdp       )
+          call prterr(lundia    ,'U007'    ,errmsg    )
           !
           write (lundia, '(20x,'' (m,n) = '',2i4)') m - 1, n - 1
           merrs = merrs + 1
        elseif (kcs(n, m)/=1) then
-          call prterr(lundia    ,'V019'    ,namdro(i) ,gdp       )
+          call prterr(lundia    ,'V019'    ,namdro(i) )
           !
           merrs = merrs + 1
        else

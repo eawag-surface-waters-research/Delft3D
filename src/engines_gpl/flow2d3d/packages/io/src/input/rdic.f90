@@ -194,7 +194,7 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        ! test on constistency: runid is not restid
        !
        if (runid == restid) then
-          call prterr(lundia    ,'V005'    ,' '       ,gdp       )
+          call prterr(lundia    ,'V005'    ,' '       )
           error = .true.
        endif
        call rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
@@ -267,7 +267,7 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                       if (comparereal(rval(k),misval) == 0) then
                          write(message,'(a,i0,a,i0,a)') 'Expecting ', kmax, &
                               & ' values to be defined for U0, but value number ', k, ' is not defined.'
-                         call prterr(lundia, 'P004', message, gdp)
+                         call prterr(lundia, 'P004', message)
                          call d3stop(1, gdp)
                       endif
                       u0ini(k) = rval(k)
@@ -314,7 +314,7 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                       if (comparereal(rval(k),misval) == 0) then
                          write(message,'(a,i0,a,i0,a)') 'Expecting ', kmax, &
                               & ' values to be defined for V0, but value number ', k, ' is not defined.'
-                         call prterr(lundia, 'P004', message, gdp)
+                         call prterr(lundia, 'P004', message)
                          call d3stop(1, gdp)
                       endif
                       v0ini(k) = rval(k)
@@ -367,7 +367,7 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                          if (comparereal(rval(k),misval) == 0) then
                             write(message,'(a,i0,a,i0,a)') 'Expecting ', kmax, &
                                  & ' values to be defined for S0, but value number ', k, ' is not defined.'
-                            call prterr(lundia, 'P004', message, gdp)
+                            call prterr(lundia, 'P004', message)
                             call d3stop(1, gdp)
                          endif
                          s0ini(k) = rval(k)
@@ -418,7 +418,7 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                       if (comparereal(rval(k),misval) == 0) then
                          write(message,'(a,i0,a,i0,a)') 'Expecting ', kmax, &
                               & ' values to be defined for T0, but value number ', k, ' is not defined.'
-                         call prterr(lundia, 'P004', message, gdp)
+                         call prterr(lundia, 'P004', message)
                          call d3stop(1, gdp)
                       endif
                       t0ini(k) = rval(k)
@@ -477,7 +477,7 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                             if (comparereal(rval(k),misval) == 0) then
                                write(message,'(a,i0,a,i0,a,i0,a)') 'Expecting ', kmax, &
                                     & ' values to be defined for C0', l, ', but value number ', k, ' is not defined.'
-                               call prterr(lundia, 'P004', message, gdp)
+                               call prterr(lundia, 'P004', message)
                                call d3stop(1, gdp)
                             endif
                             c0ini(k) = rval(k)
@@ -529,7 +529,7 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                       if (comparereal(rval(k),misval) == 0) then
                          write(message,'(a,i0,a,i0,a)') 'Expecting ', kmax, &
                               & ' values to be defined for I0, but value number ', k, ' is not defined.'
-                         call prterr(lundia, 'P004', message, gdp)
+                         call prterr(lundia, 'P004', message)
                          call d3stop(1, gdp)
                       endif
                       i0ini(k) = rval(k)
@@ -585,7 +585,7 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        if (namcon(lnconc) == cdef) then
           error = .true.
-          call prterr(lundia    ,'V015'    ,' '       ,gdp       )
+          call prterr(lundia    ,'V015'    ,' '       )
        endif
     enddo
     !
@@ -613,7 +613,7 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        do ll = 1, l - 1
           if (namcon(ll) == namcon(l)) then
              error = .true.
-             call prterr(lundia    ,'U160'    ,namcon(l) ,gdp       )
+             call prterr(lundia    ,'U160'    ,namcon(l) )
           endif
        enddo
     enddo
@@ -665,7 +665,7 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              ! Don't allow decay rates for sediment fractions
              !
              if (lconc<=lsed) then
-                call prterr(lundia    ,'U021'    ,'Decay rate not allowed for sediment quantities'       ,gdp       )
+                call prterr(lundia    ,'U021'    ,'Decay rate not allowed for sediment quantities'       )
                 error = .true.
              endif
              !
@@ -673,7 +673,7 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              !
              decay(lnconc) = rval(1)
              if (decay(lnconc) < 0.) then
-                call prterr(lundia    ,'U162'    ,namcon(lnconc)       ,gdp       )
+                call prterr(lundia    ,'U162'    ,namcon(lnconc)       )
                 error = .true.
              endif
              decay(lnconc) = decay(lnconc)/daysec

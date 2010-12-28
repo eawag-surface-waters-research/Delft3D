@@ -379,7 +379,7 @@ subroutine calbf(stage     ,nmmax     ,nmaxddb   ,dps       ,s1        , &
        do nm = 1, nmmax
           cflcheck = 2.0_fp*max(abs(qbedformx(nm)),abs(qbedformy(nm)))*hdtb/(gvv(nm)*guu(nm))
           if (cflcheck > 1.0_fp) then
-             call prterr(lundia, 'U190', 'CALBF: Possible violation of CFL-condition [Keywords: BdfaC, BdfbC, MorFac]' , gdp)
+             call prterr(lundia, 'U190', 'CALBF: Possible violation of CFL-condition [Keywords: BdfaC, BdfbC, MorFac]' )
              lfbedfrmCFL = .false.
              exit
           endif

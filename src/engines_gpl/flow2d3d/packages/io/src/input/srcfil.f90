@@ -110,7 +110,7 @@ subroutine srcfil(lundia    ,filsrc    ,error     ,nsrc      ,mnksrc    , &
         & iostat = iocond)
     if (iocond /= 0) then
        error = .true.
-       call prterr(lundia    ,'G007'    ,filsrc(:lfile)       ,gdp       )
+       call prterr(lundia    ,'G007'    ,filsrc(:lfile)       )
        goto 9999
     endif
     !
@@ -124,9 +124,9 @@ subroutine srcfil(lundia    ,filsrc    ,error     ,nsrc      ,mnksrc    , &
        read (luntmp, '(a)', iostat = iocond) rec132
        if (iocond /= 0) then
           if (iocond < 0) then
-             call prterr(lundia    ,'G006'    ,filsrc(:lfile)       ,gdp       )
+             call prterr(lundia    ,'G006'    ,filsrc(:lfile)       )
           else
-             call prterr(lundia    ,'G007'    ,filsrc(:lfile)       ,gdp       )
+             call prterr(lundia    ,'G007'    ,filsrc(:lfile)       )
           endif
           error = .true.
           exit
@@ -140,7 +140,7 @@ subroutine srcfil(lundia    ,filsrc    ,error     ,nsrc      ,mnksrc    , &
        !
        if (namsrc(n) == cdefn) then
           error = .true.
-          call prterr(lundia    ,'V012'    ,' '       ,gdp       )
+          call prterr(lundia    ,'V012'    ,' '       )
           exit
        endif
        !
@@ -151,7 +151,7 @@ subroutine srcfil(lundia    ,filsrc    ,error     ,nsrc      ,mnksrc    , &
        call read1c(rec132    ,lr132     ,ibeg      ,iend      ,chulpi    , &
                  & lenc      ,ier       )
        if (ier <= 0) then
-          call prterr(lundia    ,'G007'    ,filsrc(1:lfile)      ,gdp       )
+          call prterr(lundia    ,'G007'    ,filsrc(1:lfile)      )
           disint(n) = cdefi
           error     = .true.
           exit
@@ -173,7 +173,7 @@ subroutine srcfil(lundia    ,filsrc    ,error     ,nsrc      ,mnksrc    , &
        call readni(rec132    ,lr132     ,ibeg      ,iend      ,3         , &
                  & ival      ,idef      ,ier       )
        if (ier <= 0) then
-          call prterr(lundia    ,'G007'    ,filsrc(1:lfile)      ,gdp       )
+          call prterr(lundia    ,'G007'    ,filsrc(1:lfile)      )
           mnksrc(1, n) = idef
           mnksrc(2, n) = idef
           mnksrc(3, n) = idef
@@ -224,7 +224,7 @@ subroutine srcfil(lundia    ,filsrc    ,error     ,nsrc      ,mnksrc    , &
                     & ival      ,idef      ,ier       )
           if (ier <= 0) then
              write(message,'(2a)') 'Missing second set of coordinates in file ', trim(filsrc)
-             call prterr(lundia, 'G007', trim(message), gdp)
+             call prterr(lundia, 'G007', trim(message))
              mnksrc(4, n) = idef
              mnksrc(5, n) = idef
              mnksrc(6, n) = idef
@@ -246,7 +246,7 @@ subroutine srcfil(lundia    ,filsrc    ,error     ,nsrc      ,mnksrc    , &
                        & rval      ,rdef      ,ier       )
              if (ier <= 0) then
                 write(message,'(2a)') 'Missing regular temperature difference for Q-type power station in file ', trim(filsrc)
-                call prterr(lundia, 'G007', trim(message), gdp)
+                call prterr(lundia, 'G007', trim(message))
                 error = .true.
                 exit
              else
@@ -268,7 +268,7 @@ subroutine srcfil(lundia    ,filsrc    ,error     ,nsrc      ,mnksrc    , &
        if (associated(gdp%gddischarge%capacity)) deallocate(gdp%gddischarge%capacity, stat=ier)
        allocate (gdp%gddischarge%capacity(nsrc) , stat=ier)
        if (ier /= 0) then
-          call prterr(lundia, 'U021', 'srcfil: memory alloc error for capacity array', gdp)
+          call prterr(lundia, 'U021', 'srcfil: memory alloc error for capacity array')
           call d3stop(1, gdp)
        endif
        gdp%gddischarge%capacity = 0.0_fp

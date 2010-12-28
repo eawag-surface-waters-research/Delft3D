@@ -242,7 +242,7 @@ subroutine wrxbm(lundia    ,fout      ,trifil    ,itmapc    ,nmax      , &
  9999 continue
     if (ierror /= 0) then
        ierror = neferr(0, errmsg)
-       call prterr(lundia, 'P004', errmsg, gdp)
+       call prterr(lundia, 'P004', errmsg)
        fout = .true.
     endif
 end subroutine wrxbm

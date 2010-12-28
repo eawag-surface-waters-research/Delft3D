@@ -99,7 +99,7 @@ subroutine updbct(lundia, filnam, ntof, nto, kcd, kmax, hydrbc, tprofu, error, g
           if (.not. allocated(work)) then
              allocate(work(2*kmax), stat=istat)
              if (istat /= 0) then
-                call prterr(lundia, 'U021', 'updbct: memory alloc error', gdp)
+                call prterr(lundia, 'U021', 'updbct: memory alloc error')
                 error = .true.
                 return
              endif

@@ -106,7 +106,7 @@ subroutine varcon(fname     ,timmin    ,result    ,isdir     ,nres      , &
     read (iuntim, *) nt, ncol
     if (ncol < nres + 1) then
        write (message,'(a,a)') 'Not enough columns in file ',trim(fname)
-       call prterr(lundia, 'U021', message, gdp)
+       call prterr(lundia, 'U021', message)
        call d3stop(1, gdp)          
     endif
     read (iuntim, *, err = 998) t1, (buff1(i), i = 1, nres)
@@ -129,7 +129,7 @@ subroutine varcon(fname     ,timmin    ,result    ,isdir     ,nres      , &
        else
           if (t2 <= t1) then
              write (message,'(a,a)') 'Time series not monotonous in file ',trim(fname)
-             call prterr(lundia, 'U021', message, gdp)
+             call prterr(lundia, 'U021', message)
              call d3stop(1, gdp)          
           endif
           b = (timmin - t1)/(t2 - t1)
@@ -165,10 +165,10 @@ subroutine varcon(fname     ,timmin    ,result    ,isdir     ,nres      , &
     !
   998 continue
     write (message,'(a,a)') 'Error reading file ',trim(fname)
-    call prterr(lundia, 'U021', message, gdp)
+    call prterr(lundia, 'U021', message)
     call d3stop(1, gdp)          
   999 continue
     write (message,'(a,a)') 'Error opening file ',trim(fname)
-    call prterr(lundia, 'U021', message, gdp)
+    call prterr(lundia, 'U021', message)
     call d3stop(1, gdp)          
 end subroutine varcon

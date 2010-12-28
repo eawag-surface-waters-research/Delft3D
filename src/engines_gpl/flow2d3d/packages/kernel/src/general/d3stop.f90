@@ -150,7 +150,7 @@ subroutine d3stop(iexit, gdp)
     !
     write(*,*) 'Flow exited abnormally'
     if (lundia /= 0) then
-       call prterr(lundia, 'P004', 'Flow exited abnormally', gdp)
+       call prterr(lundia, 'P004', 'Flow exited abnormally')
        write(*,*) 'Check diagnosis file'
     endif
     call cstop(iexit, char(0))

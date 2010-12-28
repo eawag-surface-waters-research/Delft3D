@@ -91,7 +91,7 @@ subroutine dad_register_polygon(link_ptr, pol_ptr, idcount, totpoints, &
     call tree_get_node_by_name(pol_ptr, name, polygon_ptr )
     if ( .not. associated(polygon_ptr) ) then
        write (message,'(3a)') 'polygon ', trim(name),' is missing'
-       call prterr(lundia, 'U021', trim(message), gdp)
+       call prterr(lundia, 'U021', trim(message))
        call d3stop(1, gdp)
     endif
     !
@@ -116,7 +116,7 @@ subroutine dad_register_polygon(link_ptr, pol_ptr, idcount, totpoints, &
        if ( mustbeunique ) then
           write (message,'(3a)') trim(type)//' area ', trim(name), &
                                  ' is specified more than once in dad-file'
-          call prterr(lundia, 'U021', trim(message), gdp)
+          call prterr(lundia, 'U021', trim(message))
           call d3stop(1, gdp)
        endif
     endif

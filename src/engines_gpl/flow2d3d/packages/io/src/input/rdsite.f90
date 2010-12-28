@@ -296,7 +296,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           !
           if (namst(n)==cdef) then
              if (noui) error = .true.
-             call prterr(lundia    ,'V013'    ,' '       ,gdp       )
+             call prterr(lundia    ,'V013'    ,' '       )
              exit
           endif
           !
@@ -333,7 +333,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        do nn = 1, n - 1
           if (namst(nn)==namst(n)) then
              if (noui) error = .true.
-             call prterr(lundia    ,'U170'    ,namst(n)  ,gdp       )
+             call prterr(lundia    ,'U170'    ,namst(n)  )
           endif
        enddo
     enddo
@@ -535,7 +535,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           !
           if (namtra(n)==cdef) then
              if (noui) error = .true.
-             call prterr(lundia    ,'V014'    ,' '       ,gdp       )
+             call prterr(lundia    ,'V014'    ,' '       )
              exit
           endif
           !
@@ -575,7 +575,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        do nn = 1, n - 1
           if (namtra(nn)==namtra(n)) then
              if (noui) error = .true.
-             call prterr(lundia    ,'U171'    ,namtra(n) ,gdp       )
+             call prterr(lundia    ,'U171'    ,namtra(n) )
           endif
        enddo
     enddo
@@ -800,7 +800,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           !
           if (namdro(n)==cdef) then
              if (noui) error = .true.
-             call prterr(lundia    ,'V034'    ,' '       ,gdp       )
+             call prterr(lundia    ,'V034'    ,' '       )
              exit
           endif
           !
@@ -827,13 +827,13 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           if (dtn(itdro(1, n), rval(1), dt)) then
              if (noui) error = .true.
              errmsg = 'start time'
-             call prterr(lundia    ,'U044'    ,errmsg    ,gdp       )
+             call prterr(lundia    ,'U044'    ,errmsg    )
              write (lundia, '(a,a)') ' for drogue: ', namdro(n)
           endif
           if (dtn(itdro(2, n), rval(2), dt)) then
              if (noui) error = .true.
              errmsg = 'stop  time'
-             call prterr(lundia    ,'U044'    ,errmsg    ,gdp       )
+             call prterr(lundia    ,'U044'    ,errmsg    )
              write (lundia, '(a,a)') ' for drogue: ', namdro(n)
           endif
           if (error) then
@@ -876,7 +876,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        do nn = 1, n - 1
           if (namdro(nn)==namdro(n)) then
              if (noui) error = .true.
-             call prterr(lundia    ,'U172'    ,namdro(n) ,gdp       )
+             call prterr(lundia    ,'U172'    ,namdro(n) )
           endif
        enddo
     enddo
@@ -957,7 +957,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        if (istat==0) allocate(gdp%gdrtc%namrtcsta(stacnt) , stat = istat)
        if (istat==0) allocate(gdp%gdrtc%zrtcsta(gdp%d%kmax,stacnt) , stat = istat)
        if (istat/=0) then
-          call prterr(lundia, 'U021', 'Rdsite: memory alloc error', gdp)
+          call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
           call d3stop(1, gdp)
        endif
        !
@@ -984,7 +984,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        do nn = 1, n - 1
           if (namrtcsta(nn)==namrtcsta(n)) then
              error = .true.
-             call prterr(lundia, 'U170', namrtcsta(n), gdp)
+             call prterr(lundia, 'U170', namrtcsta(n))
           endif
        enddo
     enddo
@@ -1008,23 +1008,23 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                              & taby, pary , nval, 1, gdp       )
              if (taby /= stat_table(n) .or. pary /= stat_par(n)+1) then
                 write(errormessage,'(A,A,A)') 'Y-coordinate for station ''',trim(namst(n)),''' should follow x-coordinate.'
-                call prterr(lundia, 'U021', trim(errormessage), gdp)
+                call prterr(lundia, 'U021', trim(errormessage))
                 call d3stop(1, gdp)
              elseif (nval == 1) then
                 stat_type(n) = 1
                 write(lundia,'(A,A,A)') 'XY-coordinates found for observation point ''',trim(namst(n)),'''.'
              elseif (nval > 1) then
                 write(errormessage,'(A,A,A)') 'Multiple y-coordinates found for observation point ''',trim(namst(n)),'''.'
-                call prterr(lundia, 'U021', trim(errormessage), gdp)
+                call prterr(lundia, 'U021', trim(errormessage))
                 call d3stop(1, gdp)
              else
                 write(errormessage,'(A,A,A)') 'No y-coordinate found for observation point ''',trim(namst(n)),'''.'
-                call prterr(lundia, 'U021', trim(errormessage), gdp)
+                call prterr(lundia, 'U021', trim(errormessage))
                 call d3stop(1, gdp)
              endif
           elseif (nval > 1) then
              write(errormessage,'(A,A,A)') 'Multiple x-coordinates found for observation point ''',trim(namst(n)),'''.'
-             call prterr(lundia, 'U021', trim(errormessage), gdp)
+             call prterr(lundia, 'U021', trim(errormessage))
              call d3stop(1, gdp)
           endif
        endif

@@ -183,7 +183,7 @@ subroutine dimsit(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
              !
              if (iocond/=0) then
                 if (iocond<0) goto 310
-                call prterr(lundia    ,'G007'    ,filtmp(:lfile)       ,gdp       )
+                call prterr(lundia    ,'G007'    ,filtmp(:lfile)       )
                 !
                 error = .true.
                 goto 520
@@ -212,7 +212,7 @@ subroutine dimsit(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
              !
              if (iocond/=0) then
                 if (iocond<0) goto 310
-                call prterr(lundia    ,'G007'    ,filtmp(:lfile)       ,gdp       )
+                call prterr(lundia    ,'G007'    ,filtmp(:lfile)       )
                 !
                 error = .true.
                 goto 520

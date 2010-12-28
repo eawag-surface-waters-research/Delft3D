@@ -265,7 +265,7 @@ subroutine wrsedmgrp(lundia    ,error     ,trifil    ,itmapc    ,mmax      , &
  9999 continue
     if (ierror/= 0) then
        ierror = neferr(0, errmsg)
-       call prterr(lundia, 'P004', errmsg, gdp)
+       call prterr(lundia, 'P004', errmsg)
        error = .true.
     endif
 end subroutine wrsedmgrp

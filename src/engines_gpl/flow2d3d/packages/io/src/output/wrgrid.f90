@@ -227,7 +227,7 @@ subroutine wrgrid(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
               & elmnms(1) ,celidt    ,wrswch    ,ierr      ,idummy    )
     if (ierr/=0) then
        write (errmsg(27:37), '(a)') 'MMAX       '
-       call prterr(lundia    ,'U190'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'U190'    ,errmsg    )
     endif
     !
     ! element  2 NMAX(US)
@@ -238,7 +238,7 @@ subroutine wrgrid(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
               & elmnms(2) ,celidt    ,wrswch    ,ierr      ,idummy    )
     if (ierr/=0) then
        write (errmsg(27:37), '(a)') 'NMAX       '
-       call prterr(lundia    ,'U190'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'U190'    ,errmsg    )
     endif
     !
     ! element  3 XORI
@@ -250,7 +250,7 @@ subroutine wrgrid(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
               & elmnms(3) ,celidt    ,wrswch    ,ierr      ,rdummy    )
     if (ierr/=0) then
        write (errmsg(27:37), '(a)') 'XORI       '
-       call prterr(lundia    ,'U190'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'U190'    ,errmsg    )
     endif
     !
     ! element  4 YORI
@@ -262,7 +262,7 @@ subroutine wrgrid(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
               & elmnms(4) ,celidt    ,wrswch    ,ierr      ,rdummy    )
     if (ierr/=0) then
        write (errmsg(27:37), '(a)') 'YORI       '
-       call prterr(lundia    ,'U190'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'U190'    ,errmsg    )
     endif
     !
     ! element 5 ALFORI
@@ -274,7 +274,7 @@ subroutine wrgrid(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
               & elmnms(5) ,celidt    ,wrswch    ,ierr      ,rdummy    )
     if (ierr/=0) then
        write (errmsg(27:37), '(a)') 'ALFORI     '
-       call prterr(lundia    ,'U190'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'U190'    ,errmsg    )
     endif
     !
     ! For all array the values are buffered in RBUFF, to be sure that
@@ -293,7 +293,7 @@ subroutine wrgrid(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
               & elmnms(6) ,celidt    ,wrswch    ,ierr      ,rbuff     )
     if (ierr/=0) then
        write (errmsg(27:37), '(a)') 'XCOR       '
-       call prterr(lundia    ,'U190'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'U190'    ,errmsg    )
     endif
     !
     ! element  7 YCOR
@@ -309,7 +309,7 @@ subroutine wrgrid(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
               & elmnms(7) ,celidt    ,wrswch    ,ierr      ,rbuff     )
     if (ierr/=0) then
        write (errmsg(27:37), '(a)') 'YCOR       '
-       call prterr(lundia    ,'U190'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'U190'    ,errmsg    )
     endif
     !
     ! element  8 GUU
@@ -325,7 +325,7 @@ subroutine wrgrid(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
               & elmnms(8) ,celidt    ,wrswch    ,ierr      ,rbuff     )
     if (ierr/=0) then
        write (errmsg(27:37), '(a)') 'GUU        '
-       call prterr(lundia    ,'U190'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'U190'    ,errmsg    )
     endif
     !
     ! element  9 GVV
@@ -341,7 +341,7 @@ subroutine wrgrid(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
               & elmnms(9) ,celidt    ,wrswch    ,ierr      ,rbuff     )
     if (ierr/=0) then
        write (errmsg(27:37), '(a)') 'GVV        '
-       call prterr(lundia    ,'U190'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'U190'    ,errmsg    )
     endif
     !
     ! element 10 GUV
@@ -357,7 +357,7 @@ subroutine wrgrid(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
               & elmnms(10),celidt    ,wrswch    ,ierr      ,rbuff     )
     if (ierr/=0) then
        write (errmsg(27:37), '(a)') 'GUV        '
-       call prterr(lundia    ,'U190'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'U190'    ,errmsg    )
     endif
     !
     ! element 11 GVU
@@ -373,7 +373,7 @@ subroutine wrgrid(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
               & elmnms(11),celidt    ,wrswch    ,ierr      ,rbuff     )
     if (ierr/=0) then
        write (errmsg(27:37), '(a)') 'GVU        '
-       call prterr(lundia    ,'U190'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'U190'    ,errmsg    )
     endif
     !
     ! element 12 GSQS
@@ -389,7 +389,7 @@ subroutine wrgrid(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
               & elmnms(12),celidt    ,wrswch    ,ierr      ,rbuff     )
     if (ierr/=0) then
        write (errmsg(27:37), '(a)') 'GSQS       '
-       call prterr(lundia    ,'U190'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'U190'    ,errmsg    )
     endif
     !
     ! element 13 GSQD
@@ -405,7 +405,7 @@ subroutine wrgrid(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
               & elmnms(13),celidt    ,wrswch    ,ierr      ,rbuff     )
     if (ierr/=0) then
        write (errmsg(27:37), '(a)') 'GSQD       '
-       call prterr(lundia    ,'U190'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'U190'    ,errmsg    )
     endif
     !
     ! element 14 ALFAS
@@ -421,7 +421,7 @@ subroutine wrgrid(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
               & elmnms(14),celidt    ,wrswch    ,ierr      ,rbuff     )
     if (ierr/=0) then
        write (errmsg(27:37), '(a)') 'ALFAS      '
-       call prterr(lundia    ,'U190'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'U190'    ,errmsg    )
     endif
     !
     ! element 15 KMAX
@@ -432,7 +432,7 @@ subroutine wrgrid(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
               & elmnms(15),celidt    ,wrswch    ,ierr      ,idummy    )
     if (ierr/=0) then
        write (errmsg(27:37), '(a)') 'KMAX       '
-       call prterr(lundia    ,'U190'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'U190'    ,errmsg    )
     endif
     !
     ! element 16 THICK
@@ -442,7 +442,7 @@ subroutine wrgrid(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
               & elmnms(16),celidt    ,wrswch    ,ierr      ,thick     )
     if (ierr/=0) then
        write (errmsg(27:37), '(a)') 'THICK      '
-       call prterr(lundia    ,'U190'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'U190'    ,errmsg    )
     endif
     if (zmodel) then
        !
@@ -457,7 +457,7 @@ subroutine wrgrid(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
                  & elmnms(17),celidt    ,wrswch    ,ierr      ,rbuffz    )
     if (ierr/=0) then
        write (errmsg(27:37), '(a)') 'ZK         '
-       call prterr(lundia    ,'U190'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'U190'    ,errmsg    )
     endif
     endif
     !
@@ -473,7 +473,7 @@ subroutine wrgrid(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
               & elmnms(18),celidt    ,wrswch    ,ierr      ,cdummy    )
     if (ierr/=0) then
        write (errmsg(27:37), '(a)') 'COORDINATES'
-       call prterr(lundia    ,'U190'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'U190'    ,errmsg    )
     endif
     !
     ! element 19 ZMODEL
@@ -488,6 +488,6 @@ subroutine wrgrid(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
               & elmnms(19),celidt    ,wrswch    ,ierr      ,cdummy    )
     if (ierr/=0) then
        write (errmsg(27:37), '(a)') 'LAYER_MODEL'
-       call prterr(lundia    ,'U190'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'U190'    ,errmsg    )
     endif
 end subroutine wrgrid

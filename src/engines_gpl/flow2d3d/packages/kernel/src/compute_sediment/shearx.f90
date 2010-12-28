@@ -107,7 +107,7 @@ subroutine shearx(tau       ,nm        ,gdp       )
        if (istat==0) allocate (gdp%gdscour%nmref(nof), stat = istat)
        if (istat==0) allocate (gdp%gdscour%factor(nof), stat = istat)
        if (istat/=0) then
-          call prterr(lundia, 'U021', 'Shearx: memory alloc error', gdp)
+          call prterr(lundia, 'U021', 'Shearx: memory alloc error')
           call d3stop(1, gdp)
        endif
        !
@@ -128,7 +128,7 @@ subroutine shearx(tau       ,nm        ,gdp       )
        !
        allocate (gdp%gdscour%tauv(nmmax), stat = istat)
        if (istat/=0) then
-          call prterr(lundia, 'U021', 'Shearx: memory alloc error', gdp)
+          call prterr(lundia, 'U021', 'Shearx: memory alloc error')
           call d3stop(1, gdp)
        endif
        !

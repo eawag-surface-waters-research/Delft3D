@@ -170,14 +170,14 @@ use properties
     dtm = dtms
     if (ierror/= 0) then
        ierror = neferr(0,error_string)
-       call prterr(lundia    ,'P004'    , error_string, gdp)
+       call prterr(lundia    ,'P004'    , error_string)
        error = .true.
        goto 9999
     endif
     ierror = inqmxi(fds, 'map-series', max_index)
     if (ierror/= 0) then
        ierror = neferr(0,error_string)
-       call prterr(lundia    ,'P004'    , error_string, gdp)
+       call prterr(lundia    ,'P004'    , error_string)
        error = .true.
        goto 9999
     endif
@@ -191,7 +191,7 @@ use properties
        ierror = getelt(fds, 'map-info-series', 'ITMAPC', uindex, 1, 4, itmapc)
        if (ierror/= 0) then
           ierror = neferr(0,error_string)
-          call prterr(lundia    ,'P004'    , error_string, gdp)
+          call prterr(lundia    ,'P004'    , error_string)
           error = .true.
           goto 9999
        endif
@@ -223,7 +223,7 @@ use properties
        ierror = getelt( fds , 'map-series', 'S1', uindex, 1, mmax*nmaxus*4, sbuff )
        if (ierror/= 0) then
           ierror = neferr(0,error_string)
-          call prterr(lundia    ,'P004'    , error_string, gdp)
+          call prterr(lundia    ,'P004'    , error_string)
           error = .true.
           goto 9999
        endif
@@ -263,7 +263,7 @@ use properties
        ierror = getelt( fds , 'map-series', 'U1', uindex, 1, mmax*nmaxus*kmax*4, sbuff )
        if (ierror/= 0) then
           ierror = neferr(0,error_string)
-          call prterr(lundia    ,'P004'    , error_string, gdp)
+          call prterr(lundia    ,'P004'    , error_string)
           error = .true.
           goto 9999
        endif
@@ -274,7 +274,7 @@ use properties
        ierror = getelt( fds , 'map-series', 'V1', uindex, 1, mmax*nmaxus*kmax*4, sbuff )
        if (ierror/= 0) then
           ierror = neferr(0,error_string)
-          call prterr(lundia    ,'P004'    , error_string, gdp)
+          call prterr(lundia    ,'P004'    , error_string)
           error = .true.
           goto 9999
        endif
@@ -286,7 +286,7 @@ use properties
        if (ierror/= 0) then
           if (htur2d) then
              ierror = neferr(0,error_string)
-             call prterr(lundia    ,'U190'    , error_string, gdp)
+             call prterr(lundia    ,'U190'    , error_string)
           endif
        else
           umnldf(1:nmaxus,1:mmax) = sbuff(1:nmaxus,1:mmax,1,1)
@@ -298,7 +298,7 @@ use properties
        if (ierror/= 0) then
           if (htur2d) then
              ierror = neferr(0,error_string)
-             call prterr(lundia    ,'U190'    , error_string, gdp)
+             call prterr(lundia    ,'U190'    , error_string)
           endif
        else
           vmnldf(1:nmaxus,1:mmax) = sbuff(1:nmaxus,1:mmax,1,1)
@@ -311,7 +311,7 @@ use properties
        ierror = getelt( fds , 'map-series', 'KFU', uindex, 1, mmax*nmaxus*4, ibuff)
        if (ierror/= 0) then
           ierror = neferr(0,error_string)
-          call prterr(lundia    ,'P004'    , error_string, gdp)
+          call prterr(lundia    ,'P004'    , error_string)
           error = .true.
           goto 9999
        endif
@@ -323,7 +323,7 @@ use properties
        ierror = getelt( fds , 'map-series', 'KFV', uindex, 1, mmax*nmaxus*4, ibuff)
        if (ierror/= 0) then
           ierror = neferr(0,error_string)
-          call prterr(lundia    ,'P004'    , error_string, gdp)
+          call prterr(lundia    ,'P004'    , error_string)
           error = .true.
           goto 9999
        endif
@@ -341,7 +341,7 @@ use properties
              ierror = getelt( fds , 'map-series', 'R1', uindex, 1, mmax*nmaxus*kmax*rst_lstci*4, sbuff )
              if (ierror/= 0) then
                 ierror = neferr(0,error_string)
-                call prterr(lundia    ,'P004'    , error_string, gdp)
+                call prterr(lundia    ,'P004'    , error_string)
                 error = .true.
                 goto 9999
              endif
@@ -357,7 +357,7 @@ use properties
        ierror = getelt(fds, 'map-const', 'LTUR', cuindex, 1, 4, rst_ltur)
        if (ierror/= 0) then
           ierror = neferr(0,error_string)
-          call prterr(lundia    ,'P004'    , error_string, gdp)
+          call prterr(lundia    ,'P004'    , error_string)
           error = .true.
           goto 9999
        endif
@@ -369,7 +369,7 @@ use properties
              ierror = getelt( fds , 'map-series', 'RTUR1', uindex, 1, mmax*nmaxus*(kmax+1)*rst_ltur*4, sbuff )
              if (ierror/= 0) then
                 ierror = neferr(0,error_string)
-                call prterr(lundia    ,'P004'    , error_string, gdp)
+                call prterr(lundia    ,'P004'    , error_string)
                 error = .true.
                 goto 9999
              endif

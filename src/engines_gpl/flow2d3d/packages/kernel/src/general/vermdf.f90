@@ -95,13 +95,13 @@ subroutine vermdf(mdfrec    ,nrver     ,lundia    ,error     ,gdp       )
     !-----Test version number of MD-file
     !
     if (nrver<240) then
-       call prterr(lundia    ,'G106'    ,' '       ,gdp       )
+       call prterr(lundia    ,'G106'    ,' '       )
        !
        error = .true.
     endif
     !
     if (nrver==9999) then
-       call prterr(lundia    ,'G107'    ,' '       ,gdp       )
+       call prterr(lundia    ,'G107'    ,' '       )
        !
        nrver = 300
     endif

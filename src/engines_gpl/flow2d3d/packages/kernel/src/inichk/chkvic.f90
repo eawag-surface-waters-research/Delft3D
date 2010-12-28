@@ -145,7 +145,7 @@ subroutine chkvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                    write (errmsg,'(a,i5,a,i5,a)') &
                        & 'Background horizontal Eddy Viscosity reset for (m,n) = (', &
                        & m, ',', n, ')'
-                   call prterr (lundia, 'U190', trim(errmsg), gdp)
+                   call prterr (lundia, 'U190', trim(errmsg))
                 endif
              endif
              itotal = itotal + 1
@@ -157,7 +157,7 @@ subroutine chkvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
        if (icount > 10) then
            write (errmsg,'(a,i6,a)') &
                & 'Background horizontal Eddy Viscosity reset for ', icount, ' points.'
-          call prterr(lundia, 'U190', trim(errmsg), gdp)
+          call prterr(lundia, 'U190', trim(errmsg))
        endif
        !
        ! Stop Delft3D-FLOW if criterion is exceeded in 10% of the points
@@ -165,7 +165,7 @@ subroutine chkvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
        if (real(icount,fp) > real(itotal,fp)/10.0_fp) then
           write (errmsg, '(a)') &
                & 'Background horizontal Eddy Viscosity too large in too many points.'
-          call prterr(lundia, 'P004', trim(errmsg), gdp)
+          call prterr(lundia, 'P004', trim(errmsg))
           !
           ! stop routine for DELFT3D
           !
@@ -198,7 +198,7 @@ subroutine chkvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                       write (errmsg,'(a,i5,a,i5,a)') &
                           & 'Background horizontal Eddy Diffusivity reset for (m,n) = (', &
                           & m, ',', n, ')'
-                      call prterr (lundia, 'U190', trim(errmsg), gdp)
+                      call prterr (lundia, 'U190', trim(errmsg))
                    endif
                 endif
                 itotal = itotal + 1
@@ -210,7 +210,7 @@ subroutine chkvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
           if (icount > 10) then
               write (errmsg,'(a,i6,a)') &
                   & 'Background horizontal Eddy Diffusivity reset for ',icount,' points.'
-              call prterr(lundia, 'U190', trim(errmsg), gdp)
+              call prterr(lundia, 'U190', trim(errmsg))
           endif
           !
           ! Stop Delft3D-FLOW if criterion is exceeded in 10% of the points
@@ -218,7 +218,7 @@ subroutine chkvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
           if (real(icount,fp) > real(itotal,fp)/10.0_fp) then
              write (errmsg, '(a)') &
                   & 'Background horizontal Eddy Diffusivity too large in too many points.'
-             call prterr(lundia, 'P004', trim(errmsg), gdp)
+             call prterr(lundia, 'P004', trim(errmsg))
              !
              ! stop routine for DELFT3D
              !
@@ -260,7 +260,7 @@ subroutine chkvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                 write (errmsg,'(a,g15.5,a,i5,a,i5,a)') &
                     & 'Horizontal Eddy Viscosity reset at time ', &
                     & timnow, ' for (m,n) = (', m, ',', n, ')'
-                call prterr (lundia, 'U190', trim(errmsg), gdp)
+                call prterr (lundia, 'U190', trim(errmsg))
                 error = .false.
              endif
           endif
@@ -271,7 +271,7 @@ subroutine chkvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
        if (error .and. icount > 10) then
            write (errmsg,'(a,g15.5,a,i6,a)') &
                & 'Horizontal Eddy Viscosity reset at time ', timnow, ' for ', icount, ' points.'
-          call prterr(lundia, 'U190', trim(errmsg), gdp)
+          call prterr(lundia, 'U190', trim(errmsg))
        endif
        if (lstsci > 0) then
           !
@@ -311,7 +311,7 @@ subroutine chkvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                    write (errmsg,'(a,g15.5,a,i5,a,i5,a)') &
                        & 'Horizontal Eddy Diffusivity reset at time ', &
                        & timnow, ' for (m,n) = (', m, ',', n, ')'
-                   call prterr (lundia, 'U190', trim(errmsg), gdp)
+                   call prterr (lundia, 'U190', trim(errmsg))
                    error = .false.
                 endif
              endif
@@ -322,7 +322,7 @@ subroutine chkvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
           if (error .and. icount > 10) then
               write (errmsg,'(a,g15.5,a,i6,a)') &
                   & 'Horizontal Eddy Diffusivity reset at time ', timnow, ' for ', icount, ' points.'
-             call prterr(lundia, 'U190', trim(errmsg), gdp)
+             call prterr(lundia, 'U190', trim(errmsg))
           endif
        endif    ! lstsci > 0
     endif       ! itype == 2

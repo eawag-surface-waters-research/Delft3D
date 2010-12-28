@@ -462,7 +462,7 @@ subroutine adv2d(timest    ,lundia    ,nst       ,icx       ,icy       , &
     if (itr>0 .and. iter<50) goto 1100
     if (iter >= 50) then
        write (errtxt, '(a6,i5)') 'Adv2D', nst
-       call prterr(lundia    ,'S206'    ,errtxt    ,gdp       )
+       call prterr(lundia    ,'S206'    ,errtxt    )
     endif
     !
     !  D3dFlow_Solve_2DAD:

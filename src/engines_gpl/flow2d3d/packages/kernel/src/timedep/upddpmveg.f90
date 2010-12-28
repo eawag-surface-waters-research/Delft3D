@@ -244,7 +244,7 @@ subroutine upddpmveg(mmax      ,nmax      ,kmax      ,sig       ,thick     , &
                          dz = zplt - zplb
                          if (comparereal(dz,0.0_fp) == 0) then
                             write(message,'(a,i0)') 'Identical z coordinates in specification of vegetation type ',vegtype
-                            call prterr(lundia, 'U021', message, gdp)
+                            call prterr(lundia, 'U021', message)
                             call d3stop(1, gdp)
                          endif
                          zfl  = 0.5_fp * (min(zplt,zflt) + zflb)
@@ -292,7 +292,7 @@ subroutine upddpmveg(mmax      ,nmax      ,kmax      ,sig       ,thick     , &
              if (comparereal(pdens,0.01_fp) == -1) then
                 write(message,'(a,i0,a,i0,a)') 'plant density higher than possible for (m,n) = (', &
                     &                          m,',',n,')'
-                call prterr(lundia, 'U021', message, gdp)
+                call prterr(lundia, 'U021', message)
                 call d3stop(1, gdp)
              endif
           enddo

@@ -174,14 +174,14 @@ subroutine rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
        !
        if (iocond /= 0) then
           error = .true.
-          call prterr(lundia    ,'G007'    ,filbct    ,gdp       )
+          call prterr(lundia    ,'G007'    ,filbct    )
           if (iocond < 0) then
              if (itold < itstop) then
                 write(errmsg,'(a,a,a)') 'Last time in file ', trim(filbct), ' <' 
-                call prterr(lundia    ,'U042'    ,errmsg,   gdp       )
+                call prterr(lundia    ,'U042'    ,errmsg)
              elseif (nn < ntot) then
                 write(errmsg,'(a,a)') 'not for all open boundaries BCT data defined in ', trim(filbct) 
-                call prterr(lundia    ,'U021'    ,errmsg        ,gdp       )
+                call prterr(lundia    ,'U021'    ,errmsg        )
              else
              endif
           endif
@@ -214,7 +214,7 @@ subroutine rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
        ! boundary definition attribute files (tested in RDBNDD)
        !
        if (cntent /= tprofu(n)) then
-          call prterr(lundia    ,'V096'    ,cntent    ,gdp       )
+          call prterr(lundia    ,'V096'    ,cntent    )
           error = .true.
           exit
        endif
@@ -223,12 +223,12 @@ subroutine rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
        !
        if (tprofu(n) == '3d-profile') then
           if (nparrd /= 1+2*kmax) then
-             call prterr(lundia    ,'V097'    ,' '       ,gdp       )
+             call prterr(lundia    ,'V097'    ,' '       )
              error = .true.
              exit
           endif
        elseif (nparrd /= 3) then
-          call prterr(lundia    ,'V097'    ,' '       ,gdp       )
+          call prterr(lundia    ,'V097'    ,' '       )
           error = .true.
           exit
        else
@@ -238,7 +238,7 @@ subroutine rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
        !
        do np = 2, nparrd
           if (parrd(np)(:20) /= namtyp(ntyp)) then
-             call prterr(lundia    ,'V096'    ,parrd(np) ,gdp       )
+             call prterr(lundia    ,'V096'    ,parrd(np) )
              error = .true.
              goto 9999
           endif
@@ -363,7 +363,7 @@ subroutine rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
           !
           if (ier <= 0) then
              error = .true.
-             call prterr(lundia    ,'G007'    ,filbct    ,gdp       )
+             call prterr(lundia    ,'G007'    ,filbct    )
              write (lundia, '(a,a)') 'RECORD: ', record(:72)
              goto 9999
           endif
@@ -384,7 +384,7 @@ subroutine rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
           if (tprofu(n)(:2) == '3d') then
              if (tprofu(n) /= tprofu(max(ntof+1,n-1))) then
                 errmsg = '3d-profile must precede other type'
-                call prterr(lundia    ,'U021'    ,errmsg    ,gdp       )
+                call prterr(lundia    ,'U021'    ,errmsg    )
                 error = .true.
                 goto 9999
              endif
@@ -399,7 +399,7 @@ subroutine rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
              !
              if (ier <= 0) then
                 error = .true.
-                call prterr(lundia    ,'G007'    ,filbct    ,gdp       )
+                call prterr(lundia    ,'G007'    ,filbct    )
                 write (lundia, '(a,a)') 'RECORD: ', record(:72)
                 goto 9999
              endif
@@ -414,7 +414,7 @@ subroutine rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
              !
              if (ier <= 0) then
                 error = .true.
-                call prterr(lundia    ,'G007'    ,filbct    ,gdp       )
+                call prterr(lundia    ,'G007'    ,filbct    )
                 write (lundia, '(a,a)') 'RECORD: ', record(:72)
                 goto 9999
              endif
@@ -430,7 +430,7 @@ subroutine rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
              !
              if (ier <= 0) then
                 error = .true.
-                call prterr(lundia    ,'G007'    ,filbct    ,gdp       )
+                call prterr(lundia    ,'G007'    ,filbct    )
                 write (lundia, '(a,a)') 'RECORD: ', record(:72)
                 goto 9999
              endif
@@ -445,7 +445,7 @@ subroutine rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
              !
              if (ier <= 0) then
                 error = .true.
-                call prterr(lundia    ,'G007'    ,filbct    ,gdp       )
+                call prterr(lundia    ,'G007'    ,filbct    )
                 write (lundia, '(a,a)') 'RECORD: ', record(:72)
                 goto 9999
              endif
@@ -459,7 +459,7 @@ subroutine rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
              do i = 1, 2
                 if ( isnan(rwbval(k,i)) ) then 
                     write(errmsg,'(a,a)') 'NaN in ',filbct(1:lfbct)
-                    call prterr(lundia    ,'P004'    ,errmsg      ,gdp       )
+                    call prterr(lundia    ,'P004'    ,errmsg      )
                     error = .true.
                     goto 9999
                 endif
@@ -494,7 +494,7 @@ subroutine rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
        if (itold /= -1) then
             if (itold<itstop) then
                 write(errmsg,'(a,a,a,a,a)') 'Last time in file ', trim(filbct), ' for section #',trim(nambnd(n)),'# <' 
-                call prterr(lundia    ,'U042'    ,errmsg,    gdp       )
+                call prterr(lundia    ,'U042'    ,errmsg)
                 error = .true.
                 goto 9999
             endif

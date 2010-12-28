@@ -137,10 +137,10 @@ subroutine chkbnd(lundia    ,error     ,nmax      ,mmax      ,nrob      , &
        write (errmsg, '(''('',i4,'','',i4,'')'')') ix, iy
        if (icom(ix, iy)==0) then
           error = .true.
-          call prterr(lundia    ,'V031'    ,errmsg    ,gdp       )
+          call prterr(lundia    ,'V031'    ,errmsg    )
        elseif (icom(ix, iy)==1) then
           error = .true.
-          call prterr(lundia    ,'V030'    ,errmsg    ,gdp       )
+          call prterr(lundia    ,'V030'    ,errmsg    )
        else
        endif
     enddo
@@ -172,19 +172,19 @@ subroutine chkbnd(lundia    ,error     ,nmax      ,mmax      ,nrob      , &
              if (icom(ixd, iy)==0 .and. icom(ix, iyd)==0 .and. icom(ixu, iy)==1     &
                & .and. icom(ix, iyu)==1) then
                 error = .true.
-                call prterr(lundia    ,'V032'    ,errmsg    ,gdp       )
+                call prterr(lundia    ,'V032'    ,errmsg    )
              elseif (icom(ixu, iy)==0 .and. icom(ix, iyd)==0 .and. icom(ixd, iy)==1 &
                    & .and. icom(ix, iyu)==1) then
                 error = .true.
-                call prterr(lundia    ,'V032'    ,errmsg    ,gdp       )
+                call prterr(lundia    ,'V032'    ,errmsg    )
              elseif (icom(ixu, iy)==0 .and. icom(ix, iyu)==0 .and. icom(ixd, iy)==1 &
                    & .and. icom(ix, iyd)==1) then
                 error = .true.
-                call prterr(lundia    ,'V032'    ,errmsg    ,gdp       )
+                call prterr(lundia    ,'V032'    ,errmsg    )
              elseif (icom(ixd, iy)==0 .and. icom(ix, iyu)==0 .and. icom(ixu, iy)==1 &
                    & .and. icom(ix, iyd)==1) then
                 error = .true.
-                call prterr(lundia    ,'V032'    ,errmsg    ,gdp       )
+                call prterr(lundia    ,'V032'    ,errmsg    )
              else
              endif
           endif
@@ -192,7 +192,7 @@ subroutine chkbnd(lundia    ,error     ,nmax      ,mmax      ,nrob      , &
        if (icom(ixd, iy)==0 .and. icom(ix, iyd)==0 .and. icom(ixu, iy)==0 &
          & .and. icom(ix, iyu)==0) then
           error = .true.
-          call prterr(lundia    ,'V032'    ,errmsg    ,gdp       )
+          call prterr(lundia    ,'V032'    ,errmsg    )
        endif
     enddo
     if (error) goto 9999
@@ -317,7 +317,7 @@ subroutine chkbnd(lundia    ,error     ,nmax      ,mmax      ,nrob      , &
     !
     if (noroco > nlcest) then
        error = .true.
-       call prterr(lundia    ,'V027'    ,' '       ,gdp       )
+       call prterr(lundia    ,'V027'    ,' '       )
        goto 9999
     endif
     !

@@ -880,7 +880,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        if (itr>0 .and. iter<50) goto 1100
        if (iter >= 50) then
           write (errtxt, '(i0)') nst
-          call prterr(lundia    ,'S205'    ,trim(errtxt)    ,gdp       )
+          call prterr(lundia    ,'S205'    ,trim(errtxt)    )
        endif
        !
        ! Domain decomposition:

@@ -88,12 +88,12 @@ subroutine chkstr(lundia    ,nmax      ,mmax      ,nmaxus    , &
        do n = 1, nmaxus
           ksp = abs(kspu(n, m, 0))*(1 - abs(kcu(n, m)))
           if (ksp>2) then
-             call prterr(lundia    ,'V249'    ,struct(min(ksp, mxstr))         ,gdp       )
+             call prterr(lundia    ,'V249'    ,struct(min(ksp, mxstr))         )
              write (lundia, '(20x,''(M,N) = '',2i4)') m, n
           endif
           ksp = abs(kspv(n, m, 0))*(1 - abs(kcv(n, m)))
           if (ksp>2) then
-             call prterr(lundia    ,'V249'    ,struct(min(ksp, mxstr))         ,gdp       )
+             call prterr(lundia    ,'V249'    ,struct(min(ksp, mxstr))         )
              write (lundia, '(20x,''(M,N) = '',2i4)') m, n
           endif
        enddo

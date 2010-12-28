@@ -222,7 +222,7 @@ subroutine z_discha(kmax      ,nsrc      ,nbub      ,lstsci    ,lstsc     ,j    
                       ! If negative concentration then withdrawal not allowed
                       !
                       concin = 0.0_fp
-                      call prterr(lundia, 'S100', namsrc(isrc), gdp)
+                      call prterr(lundia, 'S100', namsrc(isrc))
                    endif
                 endif
              else
@@ -252,7 +252,7 @@ subroutine z_discha(kmax      ,nsrc      ,nbub      ,lstsci    ,lstsc     ,j    
                 !
                 ! Discharge at permanent dry cell not allowed
                 !
-                call prterr(lundia, 'S101', namsrc(isrc), gdp)
+                call prterr(lundia, 'S101', namsrc(isrc))
              endif
           !
           ! Negative discharge; substract from sinks
@@ -273,7 +273,7 @@ subroutine z_discha(kmax      ,nsrc      ,nbub      ,lstsci    ,lstsc     ,j    
                 !
                 ! If Q < 0 withdrawal from dry cell not allowed
                 !
-                call prterr(lundia, 'S102', namsrc(isrc), gdp)
+                call prterr(lundia, 'S102', namsrc(isrc))
              endif
           endif
           !
@@ -296,7 +296,7 @@ subroutine z_discha(kmax      ,nsrc      ,nbub      ,lstsci    ,lstsc     ,j    
                 !
                 ! If Q < 0 withdrawal from dry cell not allowed
                 !
-                call prterr(lundia, 'S103', namsrc(isrc), gdp)
+                call prterr(lundia, 'S103', namsrc(isrc))
              endif
           endif
        enddo

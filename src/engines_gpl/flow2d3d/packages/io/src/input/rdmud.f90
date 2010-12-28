@@ -151,10 +151,10 @@ subroutine rdmud(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
        read (luninp, *, iostat = iocond) cbed
        if (iocond/=0) then
           if (iocond<0) then
-             call prterr(lundia    ,'G006'    ,filnam    ,gdp       )
+             call prterr(lundia    ,'G006'    ,filnam    )
           !
           else
-             call prterr(lundia    ,'G007'    ,filnam    ,gdp       )
+             call prterr(lundia    ,'G007'    ,filnam    )
           !
           endif
           error = .true.
@@ -166,10 +166,10 @@ subroutine rdmud(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
        read (luninp, *, iostat = iocond) cmud
        if (iocond/=0) then
           if (iocond<0) then
-             call prterr(lundia    ,'G006'    ,filnam    ,gdp       )
+             call prterr(lundia    ,'G006'    ,filnam    )
           !
           else
-             call prterr(lundia    ,'G007'    ,filnam    ,gdp       )
+             call prterr(lundia    ,'G007'    ,filnam    )
           !
           endif
           error = .true.
@@ -181,10 +181,10 @@ subroutine rdmud(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
        read (luninp, *, iostat = iocond) fmud
        if (iocond/=0) then
           if (iocond<0) then
-             call prterr(lundia    ,'G006'    ,filnam    ,gdp       )
+             call prterr(lundia    ,'G006'    ,filnam    )
           !
           else
-             call prterr(lundia    ,'G007'    ,filnam    ,gdp       )
+             call prterr(lundia    ,'G007'    ,filnam    )
           !
           endif
           error = .true.
@@ -196,10 +196,10 @@ subroutine rdmud(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
        read (luninp, *, iostat = iocond) fwat
        if (iocond/=0) then
           if (iocond<0) then
-             call prterr(lundia    ,'G006'    ,filnam    ,gdp       )
+             call prterr(lundia    ,'G006'    ,filnam    )
           !
           else
-             call prterr(lundia    ,'G007'    ,filnam    ,gdp       )
+             call prterr(lundia    ,'G007'    ,filnam    )
           !
           endif
           error = .true.
@@ -211,10 +211,10 @@ subroutine rdmud(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
        read (luninp, *, iostat = iocond) mers
        if (iocond/=0) then
           if (iocond<0) then
-             call prterr(lundia    ,'G006'    ,filnam    ,gdp       )
+             call prterr(lundia    ,'G006'    ,filnam    )
           !
           else
-             call prterr(lundia    ,'G007'    ,filnam    ,gdp       )
+             call prterr(lundia    ,'G007'    ,filnam    )
           !
           endif
           error = .true.
@@ -226,10 +226,10 @@ subroutine rdmud(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
        read (luninp, *, iostat = iocond) rhosus
        if (iocond/=0) then
           if (iocond<0) then
-             call prterr(lundia    ,'G006'    ,filnam    ,gdp       )
+             call prterr(lundia    ,'G006'    ,filnam    )
           !
           else
-             call prterr(lundia    ,'G007'    ,filnam    ,gdp       )
+             call prterr(lundia    ,'G007'    ,filnam    )
           !
           endif
           error = .true.
@@ -242,10 +242,10 @@ subroutine rdmud(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
        read (luninp, *, iostat = iocond) rhomud
        if (iocond/=0) then
           if (iocond<0) then
-             call prterr(lundia    ,'G006'    ,filnam    ,gdp       )
+             call prterr(lundia    ,'G006'    ,filnam    )
           !
           else
-             call prterr(lundia    ,'G007'    ,filnam    ,gdp       )
+             call prterr(lundia    ,'G007'    ,filnam    )
           !
           endif
           error = .true.
@@ -258,10 +258,10 @@ subroutine rdmud(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
        read (luninp, *, iostat = iocond) taubng
        if (iocond/=0) then
           if (iocond<0) then
-             call prterr(lundia    ,'G006'    ,filnam    ,gdp       )
+             call prterr(lundia    ,'G006'    ,filnam    )
           !
           else
-             call prterr(lundia    ,'G007'    ,filnam    ,gdp       )
+             call prterr(lundia    ,'G007'    ,filnam    )
           !
           endif
           error = .true.
@@ -273,10 +273,10 @@ subroutine rdmud(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
        read (luninp, *, iostat = iocond) tauers
        if (iocond/=0) then
           if (iocond<0) then
-             call prterr(lundia    ,'G006'    ,filnam    ,gdp       )
+             call prterr(lundia    ,'G006'    ,filnam    )
           !
           else
-             call prterr(lundia    ,'G007'    ,filnam    ,gdp       )
+             call prterr(lundia    ,'G007'    ,filnam    )
           !
           endif
           error = .true.
@@ -288,10 +288,10 @@ subroutine rdmud(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
        read (luninp, *, iostat = iocond) tauset
        if (iocond/=0) then
           if (iocond<0) then
-             call prterr(lundia    ,'G006'    ,filnam    ,gdp       )
+             call prterr(lundia    ,'G006'    ,filnam    )
           !
           else
-             call prterr(lundia    ,'G007'    ,filnam    ,gdp       )
+             call prterr(lundia    ,'G007'    ,filnam    )
           !
           endif
           error = .true.
@@ -303,10 +303,10 @@ subroutine rdmud(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
        read (luninp, *, iostat = iocond) vdew
        if (iocond/=0) then
           if (iocond<0) then
-             call prterr(lundia    ,'G006'    ,filnam    ,gdp       )
+             call prterr(lundia    ,'G006'    ,filnam    )
           !
           else
-             call prterr(lundia    ,'G007'    ,filnam    ,gdp       )
+             call prterr(lundia    ,'G007'    ,filnam    )
           !
           endif
           error = .true.

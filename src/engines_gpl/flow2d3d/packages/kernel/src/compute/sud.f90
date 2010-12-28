@@ -400,7 +400,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
           endif
        else
           write (errtxt, '(i0,i3)') nst, i
-          call prterr(lundia    ,'S208'    ,trim(errtxt),gdp       )
+          call prterr(lundia    ,'S208'    ,trim(errtxt))
        endif
        !
        ! in case of an intake for an intake/outfall combination:
@@ -422,7 +422,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
           !
           elseif (mnksrc(7, i)/=3) then
              write (errtxt, '(i0,i3)') nst, i
-             call prterr(lundia    ,'S208'    ,trim(errtxt),gdp       )
+             call prterr(lundia    ,'S208'    ,trim(errtxt))
           else
           endif
        endif
@@ -963,7 +963,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
        if (error) then
           write (errtxt, '(a,e12.3,a,i0,a)') 'Mass closure error exceeds ', &
                & epsomb, ' after ', ntstep, ' timesteps.'
-          call prterr(lundia, 'U190', trim(errtxt), gdp)
+          call prterr(lundia, 'U190', trim(errtxt))
        endif
     endif
     call timer_stop(timer_sud_veldisch, gdp)

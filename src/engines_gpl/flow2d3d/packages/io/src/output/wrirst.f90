@@ -125,7 +125,7 @@ subroutine wrirst(lundia    ,runid     ,itrstc    ,nmaxus    ,mmax      , &
        !--------First entry write warning
        !
        if (ifirst==1) then
-          call prterr(lundia    ,'S014'    ,filrst(:8 + lrid + 16)          ,gdp       )
+          call prterr(lundia    ,'S014'    ,filrst(:8 + lrid + 16)          )
        !
        endif
        open (lunrst, file = filrst(:8 + lrid + 16))

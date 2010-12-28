@@ -140,7 +140,7 @@ subroutine rdscour(error, nrrec, mdfrec, gdp)
        !
        if (error) then
           errmsg = 'Not able to read keyword Scour'
-          call prterr(lundia    ,'U021'    ,errmsg    ,gdp       )
+          call prterr(lundia    ,'U021'    ,errmsg    )
           goto 9999
        endif
        call noextspaces(flname, lfile)
@@ -150,7 +150,7 @@ subroutine rdscour(error, nrrec, mdfrec, gdp)
           inp = newlun(gdp)
           open (inp, file = flname(1:lfile),status = 'old', iostat = iost)
           if (iost/=0) then
-             call prterr(lundia, 'G004', flname(1:lfile), gdp)
+             call prterr(lundia, 'G004', flname(1:lfile))
              call d3stop(1, gdp)
           endif
           read (inp, *, iostat = iost) i
@@ -159,7 +159,7 @@ subroutine rdscour(error, nrrec, mdfrec, gdp)
           else
              scour   = .true.
              errmsg  = 'Scouring flag = ON'
-             call prterr(lundia    ,'G051'    ,errmsg    ,gdp       )
+             call prterr(lundia    ,'G051'    ,errmsg    )
           endif
           !
           ! read slope
@@ -185,7 +185,7 @@ subroutine rdscour(error, nrrec, mdfrec, gdp)
           if (iost==0) allocate (gdp%gdscour%nmref(nof), stat = iost)
           if (iost==0) allocate (gdp%gdscour%factor(nof), stat = iost)
           if (iost/=0) then
-             call prterr(lundia, 'U021', 'Rdscour: memory alloc error', gdp)
+             call prterr(lundia, 'U021', 'Rdscour: memory alloc error')
              call d3stop(1, gdp)
           endif
           !
@@ -223,7 +223,7 @@ subroutine rdscour(error, nrrec, mdfrec, gdp)
           deallocate (nmrefin)
        else
           errmsg = 'Scour file '//flname(1:lfile)//' does not exist'
-          call prterr(lundia    ,'U021'    ,errmsg    ,gdp       )
+          call prterr(lundia    ,'U021'    ,errmsg    )
           goto 9999
        endif
     else

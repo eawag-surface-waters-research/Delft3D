@@ -84,7 +84,7 @@ subroutine gdp_alloc_arrays(gdp)
        if (istat == 0) allocate (gdp%gdfourier%foutyp (1:nofou), STAT = istat)
        !
        if (istat /= 0) then
-          call prterr(lundia, 'P004', 'memory alloc error in gdp_alloc_arrays for FOURIER parameters ', gdp)
+          call prterr(lundia, 'P004', 'memory alloc error in gdp_alloc_arrays for FOURIER parameters ')
           call d3stop(1, gdp)
        endif
     endif

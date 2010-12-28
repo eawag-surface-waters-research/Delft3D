@@ -306,7 +306,7 @@ subroutine culver(icx       ,icy       ,kmax      ,nsrc      ,kfs       , &
              !
              if (max_reals < 7) then
                 write(errmsg,'(a,a,a)') 'Insufficient space to pass real values to culvert library.'
-                call prterr (lundia,'U021', trim(errmsg),gdp)
+                call prterr (lundia,'U021', trim(errmsg))
                 call d3stop(1, gdp)
              endif
              dll_reals( 1) = real(timsec ,hp)
@@ -319,7 +319,7 @@ subroutine culver(icx       ,icy       ,kmax      ,nsrc      ,kfs       , &
              !
              if (max_integers < 8) then
                 write(errmsg,'(a,a,a)') 'Insufficient space to pass integer values to culvert library.'
-                call prterr (lundia,'U021', trim(errmsg),gdp)
+                call prterr (lundia,'U021', trim(errmsg))
                 call d3stop(1, gdp)
              endif
              dll_integers( 1) = nmin
@@ -333,7 +333,7 @@ subroutine culver(icx       ,icy       ,kmax      ,nsrc      ,kfs       , &
              !
              if (max_strings < 2) then
                 write(errmsg,'(a,a,a)') 'Insufficient space to pass strings to culvert library.'
-                call prterr (lundia,'U021', trim(errmsg),gdp)
+                call prterr (lundia,'U021', trim(errmsg))
                 call d3stop(1, gdp)
              endif
              dll_strings( 1) = gdp%runid
@@ -355,7 +355,7 @@ subroutine culver(icx       ,icy       ,kmax      ,nsrc      ,kfs       , &
              call vsemlun
              if (error /= 0) then
                 write(errmsg,'(a,a,a)') 'Cannot find function "',trim(dll_function(isrc)),'" in dynamic library.'
-                call prterr (lundia,'U021', trim(errmsg),gdp)
+                call prterr (lundia,'U021', trim(errmsg))
                 call d3stop(1, gdp)
              endif
              if (message /= ' ') then

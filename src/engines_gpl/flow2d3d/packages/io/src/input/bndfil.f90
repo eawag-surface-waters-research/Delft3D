@@ -157,7 +157,7 @@ subroutine bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
              if (iocond /= 0) then
                 if (iocond > 0) then
                    if (noui) error = .true.
-                   call prterr(lundia, 'G007', filbnd(1:lfile), gdp)
+                   call prterr(lundia, 'G007', filbnd(1:lfile))
                    write (lundia,'(a,i3)') 'Last record read for open boundary nr :', n - 1
                 endif
                 goto 200
@@ -183,7 +183,7 @@ subroutine bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
           read (luntmp, iostat = iocond)
           if (iocond == 0) then
              error = .true.
-             call prterr(lundia, 'U122', filbnd(1:lfile), gdp)
+             call prterr(lundia, 'U122', filbnd(1:lfile))
           endif
        else
           !
@@ -208,7 +208,7 @@ subroutine bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
                 read (luntmp, '(a)', iostat = iocond) rec132
                 if (iocond /= 0) then
                    if (iocond > 0) then
-                      call prterr(lundia, 'G007', filbnd(1:lfile), gdp)
+                      call prterr(lundia, 'G007', filbnd(1:lfile))
                       write (lundia, '(a)') 'Last correct record:'
                       write (lundia, '(2a)') recold(:72), '...'
                       if (noui) error = .true.
@@ -221,7 +221,7 @@ subroutine bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
                 nambnd(n) = rec132(:20)
                 if (nambnd(n) == ' ') then
                    write (cdefn(18:20), '(i3)') n
-                   call prterr(lundia, 'U150', filbnd(1:lfile), gdp)
+                   call prterr(lundia, 'U150', filbnd(1:lfile))
                    nambnd(n) = cdefn
                 endif
                 !
@@ -232,7 +232,7 @@ subroutine bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
                 call read1c(rec132    ,lr132     ,ibeg      ,iend      ,chulp     , &
                           & lenc      ,ier       )
                 if (ier <= 0) then
-                   call prterr(lundia, 'G007', filbnd(1:lfile), gdp)
+                   call prterr(lundia, 'G007', filbnd(1:lfile))
                    write (lundia, '(a)') 'Last correct record:'
                    write (lundia, '(2a)') recold(:72), '...'
                    typbnd(n) = cdeft
@@ -248,7 +248,7 @@ subroutine bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
                 call read1c(rec132    ,lr132     ,ibeg      ,iend      ,chulp     , &
                           & lenc      ,ier       )
                 if (ier <= 0) then
-                   call prterr(lundia, 'G007', filbnd(1:lfile), gdp)
+                   call prterr(lundia, 'G007', filbnd(1:lfile))
                    write (lundia, '(a)') 'Last correct record:'
                    write (lundia, '(2a)') recold(:72), '...'
                    datbnd(n) = cdefd
@@ -264,7 +264,7 @@ subroutine bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
                 call readni(rec132    ,lr132     ,ibeg      ,iend      ,4         , &
                           & mnbnd(1, n)          ,idef      ,ier       )
                 if (ier <= 0) then
-                   call prterr(lundia, 'G007', filbnd(1:lfile), gdp)
+                   call prterr(lundia, 'G007', filbnd(1:lfile))
                    write (lundia, '(a)') 'Last correct record:'
                    write (lundia, '(2a)') recold(:72), '...'
                    mnbnd(1, n) = idef
@@ -281,7 +281,7 @@ subroutine bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
                 call read1r(rec132    ,lr132     ,ibeg      ,iend      ,alpha(n)  , &
                           & rdef      ,ier       )
                 if (ier<=0) then
-                   call prterr(lundia, 'G007', filbnd(1:lfile), gdp)
+                   call prterr(lundia, 'G007', filbnd(1:lfile))
                    write (lundia, '(a)') 'Last correct record:'
                    write (lundia, '(2a)') recold(:72), '...'
                    alpha(n) = rdef
@@ -304,7 +304,7 @@ subroutine bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
                    call read1c(rec132    ,lr132     ,ibeg      ,iend      ,chulp     , &
                              & lenc      ,ier       )
                    if (ier <= 0) then
-                      call prterr(lundia, 'G007', filbnd(1:lfile), gdp)
+                      call prterr(lundia, 'G007', filbnd(1:lfile))
                       write (lundia, '(a)') 'Last correct record:'
                       write (lundia, '(2a)') recold(:72), '...'
                       tprofu(n) = cdefp
@@ -319,7 +319,7 @@ subroutine bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
                 !
                 inprof = index(profil, tprofu(n))
                 if (inprof == 0) then
-                   call prterr(lundia, 'U066', chulp, gdp)
+                   call prterr(lundia, 'U066', chulp)
                    write (lundia, '(a)') 'Last correct record:'
                    write (lundia, '(2a)') recold(:72), '...'
                    tprofu(n) = cdefp
@@ -329,7 +329,7 @@ subroutine bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
                 ! TPROFU may be "3d-profile" only for Time series (DATBND(N) = 'T')
                 !
                 if (datbnd(n)/='T' .and. tprofu(n)(:10)=='3d-profile') then
-                   call prterr(lundia, 'U021', '<3D-profile> not allowed for H/A/Q open boundary definitions', gdp )
+                   call prterr(lundia, 'U021', '<3D-profile> not allowed for H/A/Q open boundary definitions')
                    write (lundia, '(a)') 'Last correct record:'
                    write (lundia, '(2a)') recold(:72), '...'
                    tprofu(n) = cdefp
@@ -346,7 +346,7 @@ subroutine bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
                              & lenc      ,ier       )
                    if (ier <= 0) then
                       statns(n, 1) = cdefl
-                      call prterr(lundia, 'G007', filbnd(1:lfile), gdp)
+                      call prterr(lundia, 'G007', filbnd(1:lfile))
                       write (lundia, '(a)') 'Last correct record:'
                       write (lundia, '(2a)') recold(:72), '...'
                       if (noui) error = .true.
@@ -370,7 +370,7 @@ subroutine bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
                                 & lenc      ,ier       )
                       if (ier <= 0) then
                          statns(n, 1) = cdefl
-                         call prterr(lundia, 'G007', filbnd(1:lfile), gdp)
+                         call prterr(lundia, 'G007', filbnd(1:lfile))
                          write (lundia, '(a)') 'Last correct record:'
                          write (lundia, '(2a)') recold(:72), '...'
                          if (noui) error = .true.
@@ -387,7 +387,7 @@ subroutine bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
                              & lenc      ,ier       )
                    if (ier <= 0) then
                       statns(n, 2) = cdefl
-                      call prterr(lundia, 'G007', filbnd(1:lfile), gdp)
+                      call prterr(lundia, 'G007', filbnd(1:lfile))
                       write (lundia, '(a)') 'Last correct record:'
                       write (lundia, '(2a)') recold(:72), '...'
                       if (noui) error = .true.
@@ -426,7 +426,7 @@ subroutine bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
              ! freeformatted file including quotes to seperate character
              ! variables, not (yet) implemented
              !
-             call prterr(lundia, 'U161', filbnd(1:lfile), gdp)
+             call prterr(lundia, 'U161', filbnd(1:lfile))
              if (noui) error = .true.
           endif
           !
@@ -436,7 +436,7 @@ subroutine bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
           read (luntmp, *, iostat = iocond)
           if (iocond == 0) then
              error = .true.
-             call prterr(lundia, 'U122', filbnd(1:lfile), gdp)
+             call prterr(lundia, 'U122', filbnd(1:lfile))
           endif
           !
           ! stop reading file

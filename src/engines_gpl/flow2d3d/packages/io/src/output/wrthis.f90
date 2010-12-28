@@ -556,7 +556,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
   999 continue
     if (ierror/= 0) then
        ierror = neferr(0, errmsg)
-       call prterr(lundia, 'P004', errmsg, gdp)
+       call prterr(lundia, 'P004', errmsg)
        error = .true.
     endif
 end subroutine wrthis

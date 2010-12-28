@@ -376,7 +376,7 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
 !         else
           elseif ( (ibf /= 10) .and. (kcs(nmf) /= -1) ) then
              write (errtxt, '(6i4)') ic, (irocol(ll, ic), ll = 1, 5)
-             call prterr(lundia    ,'S200'    ,errtxt    ,gdp       )
+             call prterr(lundia    ,'S200'    ,errtxt    )
              !
              ! stop routine for DELFT3D
              !
@@ -567,7 +567,7 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
 !         else
           elseif ( (ibl/=10) .and. (kcs(nml).ne.-1) ) then
              write (errtxt, '(6i4)') ic, (irocol(ll, ic), ll = 1, 5)
-             call prterr(lundia    ,'S201'    ,errtxt    ,gdp       )
+             call prterr(lundia    ,'S201'    ,errtxt    )
              !
              ! stop routine for DELFT3D
              !

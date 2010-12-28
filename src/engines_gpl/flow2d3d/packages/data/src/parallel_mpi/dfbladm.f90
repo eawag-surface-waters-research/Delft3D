@@ -127,7 +127,7 @@ subroutine dfbladm ( ipown, icom, mmax, nmax, gdp )
     mlg      => gdparall%mlg
     !
     write(message,'(a,i3.3,a)') 'Running parallel. Partition ', inode, ':'
-    call prterr(lundia, 'G051', trim(message), gdp)
+    call prterr(lundia, 'G051', trim(message))
     !
     ! intialize offsets to be used in searching for interfaces
     !
@@ -160,7 +160,7 @@ subroutine dfbladm ( ipown, icom, mmax, nmax, gdp )
        ! give warning and set empty bounding box
        !
        write (message,'(a,i3.3)') 'Empty subdomain is detected - node number is ',inode
-       call prterr(lundia, 'U190', trim(message), gdp)
+       call prterr(lundia, 'U190', trim(message))
 
        nfg = 1
        nlg = 0
@@ -232,7 +232,7 @@ subroutine dfbladm ( ipown, icom, mmax, nmax, gdp )
                       endif
 
                       if ( inb > nproc ) then
-                         call prterr(lundia, 'U021', 'Found more neighbours than subdomains in the partitioning', gdp)
+                         call prterr(lundia, 'U021', 'Found more neighbours than subdomains in the partitioning')
                          call d3stop(1, gdp)
                       endif
                       !
@@ -285,7 +285,7 @@ subroutine dfbladm ( ipown, icom, mmax, nmax, gdp )
     length = count(itemp/=-999)
     allocate (gdp%gdparall%iblkad(length), stat = istat)
     if (istat /= 0) then
-       call prterr(lundia, 'U021', 'dfbladm: memory alloc error', gdp)
+       call prterr(lundia, 'U021', 'dfbladm: memory alloc error')
        call d3stop(1, gdp)
     endif
     !

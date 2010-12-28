@@ -307,7 +307,7 @@ subroutine z_momcor_nhfull(nmmax     ,kmax      ,icx       ,icy       ,s1       
           endif
        else
           write (errtxt, '(i0,i3)') nst, i
-          call prterr(lundia    ,'S208'    ,trim(errtxt),gdp       )
+          call prterr(lundia    ,'S208'    ,trim(errtxt))
        endif
        !
        ! in case of an intake for an intake/outfall combination:
@@ -345,7 +345,7 @@ subroutine z_momcor_nhfull(nmmax     ,kmax      ,icx       ,icy       ,s1       
              ! in case of a culvert no warning generated
              !
              write (errtxt, '(i0,i3)') nst, i
-             call prterr(lundia    ,'S208'    ,trim(errtxt),gdp       )
+             call prterr(lundia    ,'S208'    ,trim(errtxt))
           else
           endif
        endif

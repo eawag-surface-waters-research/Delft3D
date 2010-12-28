@@ -113,9 +113,9 @@ subroutine drofil(lundia    ,fildro    ,fmttmp    ,error     ,ndro      , &
           read (luntmp, iostat = iocond) chulp, (rval(i), i = 1, 4)
           if (iocond/=0) then
              if (iocond<0) then
-                call prterr(lundia    ,'G006'    ,fildro(:lfile)       ,gdp       )
+                call prterr(lundia    ,'G006'    ,fildro(:lfile)       )
              else
-                call prterr(lundia    ,'G007'    ,fildro(:lfile)       ,gdp       )
+                call prterr(lundia    ,'G007'    ,fildro(:lfile)       )
              endif
              error = .true.
              exit
@@ -129,7 +129,7 @@ subroutine drofil(lundia    ,fildro    ,fmttmp    ,error     ,ndro      , &
           !
           if (namdro(n)==cdef) then
              error = .true.
-             call prterr(lundia    ,'V034'    ,' '       ,gdp       )
+             call prterr(lundia    ,'V034'    ,' '       )
              exit
           endif
           !
@@ -140,13 +140,13 @@ subroutine drofil(lundia    ,fildro    ,fmttmp    ,error     ,ndro      , &
           if (dtn(itdro(1, n), rval(1), dt)) then
              error  = .true.
              errmsg = 'start time'
-             call prterr(lundia    ,'U044'    ,errmsg    ,gdp       )
+             call prterr(lundia    ,'U044'    ,errmsg    )
              write (lundia, '(a,a)') ' for drogue: ', namdro(n)
           endif
           if (dtn(itdro(2, n), rval(2), dt)) then
              error  = .true.
              errmsg = 'stop  time'
-             call prterr(lundia    ,'U044'    ,errmsg    ,gdp       )
+             call prterr(lundia    ,'U044'    ,errmsg    )
              write (lundia, '(a,a)') ' for drogue: ', namdro(n)
           endif
           if (error) then
@@ -177,9 +177,9 @@ subroutine drofil(lundia    ,fildro    ,fmttmp    ,error     ,ndro      , &
           read (luntmp, '(a)', iostat = iocond) rec132
           if (iocond/=0) then
              if (iocond<0) then
-                call prterr(lundia    ,'G006'    ,fildro(:lfile)       ,gdp       )
+                call prterr(lundia    ,'G006'    ,fildro(:lfile)       )
              else
-                call prterr(lundia    ,'G007'    ,fildro(:lfile)       ,gdp       )
+                call prterr(lundia    ,'G007'    ,fildro(:lfile)       )
              endif
              error = .true.
              exit
@@ -193,7 +193,7 @@ subroutine drofil(lundia    ,fildro    ,fmttmp    ,error     ,ndro      , &
           !
           if (namdro(n)==cdef) then
              error = .true.
-             call prterr(lundia    ,'V034'    ,' '       ,gdp       )
+             call prterr(lundia    ,'V034'    ,' '       )
              exit
           endif
           !
@@ -205,7 +205,7 @@ subroutine drofil(lundia    ,fildro    ,fmttmp    ,error     ,ndro      , &
              call read1r(rec132    ,lr132     ,ibeg      ,iend      ,rval(i)   , &
                        & rdef      ,ier       )
              if (ier<=0) then
-                call prterr(lundia    ,'G007'    ,fildro(:lfile)       ,gdp       )
+                call prterr(lundia    ,'G007'    ,fildro(:lfile)       )
                 error = .true.
                 goto 300
              endif
@@ -218,13 +218,13 @@ subroutine drofil(lundia    ,fildro    ,fmttmp    ,error     ,ndro      , &
           if (dtn(itdro(1, n), rval(1), dt)) then
              error  = .true.
              errmsg = 'start time'
-             call prterr(lundia    ,'U044'    ,errmsg    ,gdp       )
+             call prterr(lundia    ,'U044'    ,errmsg    )
              write (lundia, '(a,a)') ' for drogue: ', namdro(n)
           endif
           if (dtn(itdro(2, n), rval(2), dt)) then
              error  = .true.
              errmsg = 'stop  time'
-             call prterr(lundia    ,'U044'    ,errmsg    ,gdp       )
+             call prterr(lundia    ,'U044'    ,errmsg    )
              write (lundia, '(a,a)') ' for drogue: ', namdro(n)
           endif
           if (error) then

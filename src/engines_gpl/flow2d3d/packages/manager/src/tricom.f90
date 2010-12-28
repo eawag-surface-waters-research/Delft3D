@@ -778,7 +778,7 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
     ! Test value of ITLEN in combination with INITI
     !
     if (itlen==0 .and. initi==3) then
-       call prterr(lundia    ,'D001'    ,' '       ,gdp       )
+       call prterr(lundia    ,'D001'    ,' '       )
        error = .true.
        goto 9996
     endif
@@ -825,7 +825,7 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
           call timer_stop(timer_wait, gdp)
           if (error) then
              coupleact = .false.
-             call prterr(lundia    ,'J020'    ,'SyncFlowCouple_Init',gdp       )
+             call prterr(lundia    ,'J020'    ,'SyncFlowCouple_Init')
              goto 9996
           else
              coupleact = .true.
@@ -895,7 +895,7 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
     !
     vscale = dt*tunit - int((dt*tunit)/tscale + 1.E-6)*tscale
     if (abs(vscale) > tscale*1.0e-6) then
-       call prterr(lundia    ,'D002'    ,' '       ,gdp       )
+       call prterr(lundia    ,'D002'    ,' '       )
        if (commrd) then
           write(lundia,'(3a)') '          Tscale is read from files ''com-', trim(runid), '.def'' and ''.dat''. Remove them if not intended.'
        endif
@@ -909,7 +909,7 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
     itp = nint(dt*tunit/tscale)
     if (ite < itb) then
        if (initi == 3) then
-          call prterr(lundia    ,'D003'    ,' '       ,gdp       )
+          call prterr(lundia    ,'D003'    ,' '       )
           error = .true.
           goto 9996
        endif
@@ -918,7 +918,7 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
        itb  = itstrt*itp
        ite  = itstop*itp
        if (itb > itlen .and. itlen /= 0) then
-          call prterr(lundia    ,'D004'    ,' '       ,gdp       )
+          call prterr(lundia    ,'D004'    ,' '       )
           error = .true.
           goto 9996
        endif
@@ -966,12 +966,12 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
     cyclic = (itstop>=itlent) .and. (itlent /= 0)
     if (itcomi == 0) then
        if (cyclic) then
-          call prterr(lundia    ,'D005'    ,' '       ,gdp       )
+          call prterr(lundia    ,'D005'    ,' '       )
        endif
     endif
     if (.not.cyclic) then
        if (it01 /= itdate) then
-          call prterr(lundia    ,'D006'    ,' '       ,gdp       )
+          call prterr(lundia    ,'D006'    ,' '       )
           error = .true.
           goto 9996
        endif
@@ -999,10 +999,10 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
           if (abs(itmor*dt-tdif) > (0.1*dt)) then
              error  = .true.
              txtput = 'Morphological calculation start time'
-             call prterr(lundia, 'U044', txtput, gdp)
+             call prterr(lundia, 'U044', txtput)
           endif
           write(txtput,'(a,i0)') 'Morphological Changes Start Time (step) : ',itmor
-          call prterr(lundia, 'G051', txtput, gdp)
+          call prterr(lundia, 'G051', txtput)
        endif
        !
        ! Initialize input arrays and verify input
@@ -1113,7 +1113,7 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
     if (wave .and. .not.waverd) then
        if (alone .and. .not. (cnstwv .or. snelli) .and. .not. waveol .and. .not. xbeach) then
           error = .true.
-          call prterr(lundia    ,'D007'    ,' '       ,gdp       )
+          call prterr(lundia    ,'D007'    ,' '       )
           goto 9996
        else
           ! Warning about missing COM-file removed.
@@ -1332,7 +1332,7 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
        delta_T       = dt*60.0_hp
        Tstart_Julian = real(julday,hp) + real(tstart,hp)/1440.0_hp - 0.5_hp
        write (message, '(3a)') 'Reading Sobek-Online configuration file "', trim(sbkConfigFile), '"'
-       call prterr(lundia, 'G051', trim(message), gdp)
+       call prterr(lundia, 'G051', trim(message))
        call timer_start(timer_wait, gdp)
        call D3S_setup('D3D-FLOW'    ,    runid   , lundia        , sbkConfigFile , &
                       gdp%d%mlb     , gdp%d%mub  , gdp%d%nlb     , gdp%d%nub     , &
@@ -1343,7 +1343,7 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
        !
        if (.not. success) then
           write(message,'(2a)') '*** error D3S_Init: ', trim(errstring)
-          call prterr(lundia, 'P004', trim(message), gdp)
+          call prterr(lundia, 'P004', trim(message))
           call d3stop(1, gdp)
        endif
        !
@@ -1509,7 +1509,7 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
        if (.not. success) then
           txtput = 'Initialization of DelftIO communication with waves failed'
           write(lunscr,'(a)') trim(txtput)
-          call prterr(lundia, 'P004', trim(txtput), gdp)
+          call prterr(lundia, 'P004', trim(txtput))
           call d3stop(1, gdp)
        endif
     endif
@@ -1525,7 +1525,7 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
        if (.not. success) then
           txtput = 'Initialization of DelftIO communication with waves failed'
           write(lunscr,'(a)') trim(txtput)
-          call prterr(lundia, 'P004', trim(txtput), gdp)
+          call prterr(lundia, 'P004', trim(txtput))
           call d3stop(1, gdp)
        endif
     endif
@@ -1686,7 +1686,7 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
              if (.not. success) then
                 txtput = 'Delftio command to waves failed'
                 write(lunscr,'(a)') trim(txtput)
-                call prterr(lundia    ,'P004'    ,trim(txtput)    ,gdp       )
+                call prterr(lundia    ,'P004'    ,trim(txtput)    )
                 call d3stop(1, gdp)
              endif
              itrw = nst + 1
@@ -1719,7 +1719,7 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
              if (.not. success) then
                 txtput = 'Delftio command to waves failed'
                 write(lunscr,'(a)') trim(txtput)
-                call prterr(lundia    ,'P004'    ,trim(txtput)    ,gdp       )
+                call prterr(lundia    ,'P004'    ,trim(txtput)    )
                 call d3stop(1, gdp)
              endif
           endif
@@ -1906,7 +1906,7 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
        if (.not. success) then
           txtput = 'Delftio command to waves failed'
           write(lunscr,'(a)') trim(txtput)
-          call prterr(lundia    ,'P004'    ,trim(txtput)    ,gdp       )
+          call prterr(lundia    ,'P004'    ,trim(txtput)    )
           call d3stop(1, gdp)
        endif
     endif
@@ -1927,7 +1927,7 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
        if (.not. success) then
           txtput = 'Delftio command to waves failed'
           write(lunscr,'(a)') trim(txtput)
-          call prterr(lundia    ,'P004'    ,trim(txtput)    ,gdp       )
+          call prterr(lundia    ,'P004'    ,trim(txtput)    )
           call d3stop(1, gdp)
        endif
     endif

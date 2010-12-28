@@ -1107,7 +1107,7 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     !
     if (iter >= 50) then
        write (errtxt, '(i0)') nst
-       call prterr(lundia    ,'S205'    ,trim(errtxt)    ,gdp       )
+       call prterr(lundia    ,'S205'    ,trim(errtxt)    )
     endif
     !
     ! Domain decomposition:

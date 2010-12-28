@@ -135,7 +135,7 @@ subroutine rdtdd(lundia    ,lunout    ,lunrd     ,error     ,fildis    , &
           do j = 2, nrval
              if (isnan(rval(j))) then
                 write(errmsg,'(a,a)') 'NaN in ', trim(fildis)
-                call prterr(lundia    ,'P004'    ,errmsg      ,gdp       )
+                call prterr(lundia    ,'P004'    ,errmsg      )
                 !
                 error = .true.
                 goto 9999
@@ -147,7 +147,7 @@ subroutine rdtdd(lundia    ,lunout    ,lunrd     ,error     ,fildis    , &
           do j = 2, nrval
              if (rval(j)<0.0) then
                 write(errmsg,'(a,a)') 'Concentration at discharge points in ', trim(fildis)
-                call prterr(lundia    ,'V061'    ,errmsg        ,gdp       )
+                call prterr(lundia    ,'V061'    ,errmsg        )
                 !
                 error = .true.
                 goto 9999
@@ -219,7 +219,7 @@ subroutine rdtdd(lundia    ,lunout    ,lunrd     ,error     ,fildis    , &
     if (itold/= - 1) then
        if (itold<itstop) then
           write(errmsg,'(a,a,a)') 'Last time in file ', trim(fildis), ' <' 
-          call prterr(lundia    ,'U042'    ,errmsg,    gdp       )
+          call prterr(lundia    ,'U042'    ,errmsg)
           error = .true.
        endif
     endif

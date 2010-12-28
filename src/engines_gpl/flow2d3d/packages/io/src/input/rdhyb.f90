@@ -121,14 +121,14 @@ subroutine rdhyb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     call prop_get_string(gdp%mdfile_ptr,'*','Roumet',roumet)
     if (roumet == ' ') then
        roumet = 'C'
-       call prterr(lundia, 'U190', 'No bottom roughness formulation specification', gdp)
+       call prterr(lundia, 'U190', 'No bottom roughness formulation specification')
        write(lundia,'(10x,2a)') 'Using Roumet = ', roumet
     endif
     !
     ! test combination of roumet = Z and threed = .false.
     !
     if (.not.threed .and. roumet=='Z') then
-       call prterr(lundia    ,'V046'    ,' '       ,gdp       )
+       call prterr(lundia    ,'V046'    ,' '       )
        if (noui) error = .true.
     endif
     !
@@ -173,7 +173,7 @@ subroutine rdhyb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        call prop_get_string(gdp%mdfile_ptr,'*','Ccofu',chulp)
        if (chulp == ' ') then
           ccofu = rdef
-          call prterr(lundia, 'U190', 'No bottom roughness specification', gdp)
+          call prterr(lundia, 'U190', 'No bottom roughness specification')
           write(lundia,'(10x,a,f7.3)') 'Using Ccofu = ', ccofu
        else
           ccofu = rdef
@@ -194,7 +194,7 @@ subroutine rdhyb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        call prop_get_string(gdp%mdfile_ptr,'*','Ccofv',chulp)
        if (chulp == ' ') then
           ccofv = rdef
-          call prterr(lundia, 'U190', 'No bottom roughness specification', gdp)
+          call prterr(lundia, 'U190', 'No bottom roughness specification')
           write(lundia,'(10x,a,f7.3)') 'Using Ccofv = ', ccofv
        else
           ccofv = rdef
@@ -244,13 +244,13 @@ subroutine rdhyb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        if (lerror) then
           lerror = .false.
           rouwav = ccdef
-          call prterr(lundia, 'U190', 'No bottom roughness for waves specification', gdp)
+          call prterr(lundia, 'U190', 'No bottom roughness for waves specification')
           write(lundia,'(10x,2a)') 'Using Rouwav = ', rouwav
        else
           rouwav = chulp
           irou = index(routot, rouwav)
           if (irou==0) then
-             call prterr(lundia    ,'V048'    ,' '       ,gdp       )
+             call prterr(lundia    ,'V048'    ,' '       )
              !
              rouwav = ccdef
           endif

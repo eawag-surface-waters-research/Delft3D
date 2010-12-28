@@ -83,7 +83,7 @@ subroutine usrptr(lundia    ,error      ,pntnam    ,partyp    ,length    , &
     !
     if (ierr== - 2) then
        error = .true.
-       call prterr(lundia    ,'G005'    ,' '       ,gdp       )
+       call prterr(lundia    ,'G005'    ,' '       )
        !
        goto 9999
     endif
@@ -92,7 +92,7 @@ subroutine usrptr(lundia    ,error      ,pntnam    ,partyp    ,length    , &
     !
     if (ierr== - 3) then
        error = .true.
-       call prterr(lundia    ,'G005'    ,' '       ,gdp       )
+       call prterr(lundia    ,'G005'    ,' '       )
        !
        goto 9999
     endif
@@ -102,25 +102,25 @@ subroutine usrptr(lundia    ,error      ,pntnam    ,partyp    ,length    , &
     if (ierr<= - 9) then
        error = .true.
        if (ierr== - 10000000) then
-          call prterr(lundia    ,'G020'    ,partyp    ,gdp       )
+          call prterr(lundia    ,'G020'    ,partyp    )
        !
        elseif (ierr== - 20000000) then
-          call prterr(lundia    ,'G021'    ,partyp    ,gdp       )
+          call prterr(lundia    ,'G021'    ,partyp    )
        !
        elseif (ierr== - 30000000) then
-          call prterr(lundia    ,'G022'    ,partyp    ,gdp       )
+          call prterr(lundia    ,'G022'    ,partyp    )
        !
        elseif (ierr== - 41000000) then
-          call prterr(lundia    ,'G021'    ,pntnam    ,gdp       )
+          call prterr(lundia    ,'G021'    ,pntnam    )
        !
        elseif (ierr== - 42000000) then
-          call prterr(lundia    ,'G023'    ,pntnam    ,gdp       )
+          call prterr(lundia    ,'G023'    ,pntnam    )
        !
        elseif (ierr== - 43000000) then
-          call prterr(lundia    ,'G023'    ,pntnam    ,gdp       )
+          call prterr(lundia    ,'G023'    ,pntnam    )
        !
        else
-          call prterr(lundia    ,'G005'    ,' '       ,gdp       )
+          call prterr(lundia    ,'G005'    ,' '       )
           !
           write (lundia, *) '         Array name already declared !!'
        endif

@@ -356,7 +356,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
           endif
           !
           if (istat /= 0) then
-             call prterr(lundia, 'U021', 'HEATU: memory allocation error', gdp)
+             call prterr(lundia, 'U021', 'HEATU: memory allocation error')
              call d3stop(1, gdp)
           endif
           !
@@ -780,7 +780,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                 elseif (r0(nm, k0, ltem) > 0.0_fp) then
                    sink(nm, k0, ltem) = sink(nm, k0, ltem) - qtotk*gsqs(nm)/r0(nm, k0, ltem)
                 else
-                   call prterr(lundia    ,'U190'    ,errmsg    ,gdp       )
+                   call prterr(lundia    ,'U190'    ,errmsg    )
                 endif
              else
                 if (qtotk > 0.0_fp) then
@@ -788,7 +788,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                 elseif ( r0(nm,k0,ltem) > 0.0_fp ) then
                    sink(nm, k0, ltem) = sink(nm, k0, ltem) - qtotk/(thick(k0)*h0new*r0(nm, k0, ltem))
                 else
-                   call prterr(lundia, 'U190', errmsg, gdp)
+                   call prterr(lundia, 'U190', errmsg)
                 endif
              endif
              do k = k1, k2, kstep
@@ -1079,7 +1079,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                 elseif (r0(nm, k0, ltem) > 0.0_fp) then
                    sink(nm, k0, ltem) = sink(nm, k0, ltem) - qtotk*gsqs(nm)/r0(nm, k0, ltem)
                 else
-                   call prterr(lundia    ,'U190'    ,errmsg    ,gdp       )
+                   call prterr(lundia    ,'U190'    ,errmsg    )
                 endif
              else
                 if (qtotk > 0.0_fp) then
@@ -1087,7 +1087,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                 elseif (r0(nm, k0, ltem) > 0.0_fp) then
                    sink(nm, k0, ltem) = sink(nm, k0, ltem) - qtotk/(thick(k0)*h0new*r0(nm, k0, ltem))
                 else
-                   call prterr(lundia    ,'U190'    ,errmsg    ,gdp       )
+                   call prterr(lundia    ,'U190'    ,errmsg    )
                 endif
              endif
              do k = k1, k2, kstep

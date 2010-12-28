@@ -124,7 +124,7 @@ subroutine updeva(luneva    ,timnow    ,dt        ,inteva    ,first     , &
     iteva = nint(rteva/dt)
     if (dtn(iteva, rteva, dt)) then
        write (errmsg, '(a,f10.4)') 'Timeva = ', rteva
-       call prterr(lundia, 'S044', trim(errmsg), gdp)
+       call prterr(lundia, 'S044', trim(errmsg))
     endif
     !
     if (real(iteva,fp)>timnow) first = .false.
@@ -155,13 +155,13 @@ subroutine updeva(luneva    ,timnow    ,dt        ,inteva    ,first     , &
        if (rval(2) < -998.0_fp) then
           if (keva /= 1) then
              write (errmsg, '(a,f10.4)') 'Cannot handle evaporation switching from a real value to a missing value'
-             call prterr(lundia, 'P004', trim(errmsg), gdp)
+             call prterr(lundia, 'P004', trim(errmsg))
              call d3stop(1, gdp)
           endif
        else
           if (keva == 1) then
              write (errmsg, '(a,f10.4)') 'Cannot handle evaporation switching from a missing value to a real value'
-             call prterr(lundia, 'P004', trim(errmsg), gdp)
+             call prterr(lundia, 'P004', trim(errmsg))
              call d3stop(1, gdp)
           endif
           devapo = rval(2) * rhow / 3600000.0_fp

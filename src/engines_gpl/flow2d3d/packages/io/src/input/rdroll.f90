@@ -127,7 +127,7 @@ subroutine rdroll(lunmd     ,lundia    ,lunscr    ,lerror    ,nrrec     , &
           ! This is really an error: the keyword did exist in dimpro since
           ! otherwise wavcmp would not be set.
           !
-          call prterr(lundia, 'P004', 'Roller functionality switched on but keyword "filrol" not found', gdp)
+          call prterr(lundia, 'P004', 'Roller functionality switched on but keyword "filrol" not found')
           call d3stop(1, gdp)
        endif
     endif
@@ -176,5 +176,5 @@ subroutine rdroll(lunmd     ,lundia    ,lunscr    ,lerror    ,nrrec     , &
        txtput = 'No wave components imposed at boundary'
        write (lundia, '(a)')     txtput
     endif
-    call prterr(lundia, 'U190', 'Background viscosity is added to the Roller contribution (since version 3.50.09.01)', gdp)
+    call prterr(lundia, 'U190', 'Background viscosity is added to the Roller contribution (since version 3.50.09.01)')
 end subroutine rdroll

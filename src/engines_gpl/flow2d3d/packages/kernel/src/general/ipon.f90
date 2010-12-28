@@ -103,7 +103,7 @@ subroutine ipon(xpoly     ,ypoly     ,n         ,xp        ,yp        , &
                      allocate (gdp%gdipon%x(maxpolpoint+1), stat = istat)
        if (istat==0) allocate (gdp%gdipon%y(maxpolpoint+1), stat = istat)
        if (istat/=0) then
-          call prterr(lundia, 'U021', 'Ipon: memory alloc error', gdp)
+          call prterr(lundia, 'U021', 'Ipon: memory alloc error')
           call d3stop(1, gdp)
        endif
        !

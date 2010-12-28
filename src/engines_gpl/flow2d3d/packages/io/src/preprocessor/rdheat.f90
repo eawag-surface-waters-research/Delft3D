@@ -181,7 +181,7 @@ subroutine rdheat(lunmd     ,lundia      ,error     ,nrrec     ,mdfrec      , &
               & status = 'unknown')
           !
           write (message, '(2a)') 'Reading Heat module file ', filtem(:lf)
-          call prterr(lundia, 'G051', trim(message), gdp)
+          call prterr(lundia, 'G051', trim(message))
           nrval = 1
           if (ktemp /= 3) then
              nrval = 3
@@ -247,7 +247,7 @@ subroutine rdheat(lunmd     ,lundia      ,error     ,nrrec     ,mdfrec      , &
        do n = 1, nrval
            if (isnan(rval(n))) then
               write(message,'(2a)') 'NaN in ', trim(filtem)
-              call prterr(lundia    ,'P004'    ,message      ,gdp       )
+              call prterr(lundia    ,'P004'    ,message      )
               !
               error = .true.
               goto 9999
@@ -261,7 +261,7 @@ subroutine rdheat(lunmd     ,lundia      ,error     ,nrrec     ,mdfrec      , &
        ittdep = nint(rttem(item)/dt)
        if (dtn(ittdep, rttem(item), dt)) then
           if (noui) error = .true.
-          call prterr(lundia    ,'U044'    ,'Tstmp'   ,gdp       )
+          call prterr(lundia    ,'U044'    ,'Tstmp'   )
        !
        endif
        !
@@ -269,14 +269,14 @@ subroutine rdheat(lunmd     ,lundia      ,error     ,nrrec     ,mdfrec      , &
        !
        if (rec1st) then
           if (ittdep > itstrt) then
-             call prterr(lundia    ,'U041'    ,'First time Tstmp  >' ,gdp       )
+             call prterr(lundia    ,'U041'    ,'First time Tstmp  >' )
              if (noui) error = .true.
           endif
           rec1st = .false.
        endif
        !
        if (ittdep <= itold) then
-          call prterr(lundia    ,'U060'    ,'Tstmp'   ,gdp       )
+          call prterr(lundia    ,'U060'    ,'Tstmp'   )
           if (noui) error = .true.
        endif
        !
@@ -340,7 +340,7 @@ subroutine rdheat(lunmd     ,lundia      ,error     ,nrrec     ,mdfrec      , &
        if (.not.noui) item = item + 1
        !
        if (item > mxtemt) then
-          call prterr(lundia    ,'U157'    ,' '       ,gdp       )
+          call prterr(lundia    ,'U157'    ,' '       )
           !
           item = mxtemt
           goto 500
@@ -364,7 +364,7 @@ subroutine rdheat(lunmd     ,lundia      ,error     ,nrrec     ,mdfrec      , &
        if (itold/= - 1) then
           if (itold<itstop) then
              write(message,'(3a)') 'Last time in file ', trim(filtem), ' <' 
-             call prterr(lundia    ,'U042'    ,message,    gdp       )
+             call prterr(lundia    ,'U042'    ,message)
              error = .true.
              goto 9999
           endif
@@ -378,7 +378,7 @@ subroutine rdheat(lunmd     ,lundia      ,error     ,nrrec     ,mdfrec      , &
     if (filtem == fildef) then
        error = .true.
        write (message, '(a)') 'No heat module file(s) found'
-       call prterr(lundia, 'P004', message, gdp)
+       call prterr(lundia, 'P004', message)
     endif
     if (noui .and. lunout /= 8) then
        if (error) then

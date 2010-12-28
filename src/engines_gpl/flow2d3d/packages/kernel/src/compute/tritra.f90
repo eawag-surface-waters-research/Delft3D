@@ -258,7 +258,7 @@ subroutine tritra(stage     ,lundia    ,nst       ,icreep    , &
     if (snelli) then
        allocate(qykfac(gdp%d%nmlb:gdp%d%nmub, kmax), stat=istat)
        if (istat /= 0) then
-          call prterr(lundia, 'P004', 'Tritra: memory alloc error', gdp)
+          call prterr(lundia, 'P004', 'Tritra: memory alloc error')
           call d3stop(1, gdp)
        else
           qykfac = 0.0_fp
@@ -630,7 +630,7 @@ subroutine tritra(stage     ,lundia    ,nst       ,icreep    , &
     if (snelli) then
        deallocate(qykfac, stat=istat)
        if (istat /= 0) then
-          call prterr(lundia, 'P004', 'Tritra: memory dealloc error', gdp)
+          call prterr(lundia, 'P004', 'Tritra: memory dealloc error')
           call d3stop(1, gdp)
        endif
     endif

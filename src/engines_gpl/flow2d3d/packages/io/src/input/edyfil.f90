@@ -95,9 +95,9 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
              read (luntmp, iostat = iocond) (vicuv(n, m, kbg), m = 1, mmax )
              if (iocond /= 0) then
                 if (iocond < 0) then
-                   call prterr(lundia, 'G006', filedy(1:lfile), gdp)
+                   call prterr(lundia, 'G006', filedy(1:lfile))
                 else
-                   call prterr(lundia, 'G007', filedy(1:lfile), gdp)
+                   call prterr(lundia, 'G007', filedy(1:lfile))
                 endif
                 error = .true.
                 goto 200
@@ -111,9 +111,9 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
                 read (luntmp, iostat = iocond) (dicuv(n, m, kbg), m = 1, mmax)
                 if (iocond /= 0) then
                    if (iocond < 0) then
-                      call prterr(lundia, 'G006', filedy(1:lfile), gdp)
+                      call prterr(lundia, 'G006', filedy(1:lfile))
                    else
-                      call prterr(lundia, 'G007', filedy(1:lfile), gdp)
+                      call prterr(lundia, 'G007', filedy(1:lfile))
                    endif
                    error = .true.
                    exit
@@ -135,9 +135,9 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
              read (luntmp, *, iostat = iocond) (vicuv(n, m, kbg), m = 1, mmax)
              if (iocond /= 0) then
                 if (iocond < 0) then
-                   call prterr(lundia, 'G006', filedy(1:lfile), gdp)
+                   call prterr(lundia, 'G006', filedy(1:lfile))
                 else
-                   call prterr(lundia, 'G007', filedy(1:lfile), gdp)
+                   call prterr(lundia, 'G007', filedy(1:lfile))
                 endif
                 error = .true.
                 goto 200
@@ -151,9 +151,9 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
                 read (luntmp, *, iostat = iocond) (dicuv(n, m, kbg), m = 1 , mmax)
                 if (iocond /= 0) then
                    if (iocond < 0) then
-                      call prterr(lundia, 'G006', filedy(1:lfile), gdp)
+                      call prterr(lundia, 'G006', filedy(1:lfile))
                    else
-                      call prterr(lundia, 'G007', filedy(1:lfile), gdp)
+                      call prterr(lundia, 'G007', filedy(1:lfile))
                    endif
                    error = .true.
                    exit
@@ -171,7 +171,7 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
           do n = 1, nmaxus
              if ( isnan(vicuv(n, m, kbg)) ) then
                 write(message,'(2a)') 'NaN found in horizontal eddy-viscosity in file ',filedy
-                call prterr(lundia, 'P004', message, gdp)
+                call prterr(lundia, 'P004', message)
                 !
                 error = .true.
                 goto 200
@@ -182,7 +182,7 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
           do n = 1, nmaxus
              if ( isnan(dicuv(n, m, kbg)) ) then
                 write(message,'(2a)') 'NaN found in horizontal eddy-diffusity in file ',filedy
-                call prterr(lundia, 'P004', message, gdp)
+                call prterr(lundia, 'P004', message)
                 !
                 error = .true.
                 goto 200

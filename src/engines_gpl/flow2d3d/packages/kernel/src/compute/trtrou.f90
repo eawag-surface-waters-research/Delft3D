@@ -486,7 +486,7 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
              endif
           enddo
           if (.not.lfound) then
-             call prterr(lundia    ,'J001'    ,'TRTROU: Trachytope not found.' ,gdp)
+             call prterr(lundia    ,'J001'    ,'TRTROU: Trachytope not found.' )
              call d3stop(1, gdp)
           endif
           !
@@ -498,7 +498,7 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
              !
              nlist = nlist+1
              if (nlist>max_cl) then
-                call prterr(lundia    ,'J001'    ,'TRTROU: Maximum recursion depth.' ,gdp)
+                call prterr(lundia    ,'J001'    ,'TRTROU: Maximum recursion depth.' )
                 call d3stop(1, gdp)
              endif
              itrt_list(ilist)   = nint(rttdef(itrt, 1))
@@ -638,7 +638,7 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
                 write (cnum(2), '(i12)') mc
                 call noextspaces(cnum(2)   ,numlen(2) )
                 cmsg = cnum(1)(1:numlen(1)) // ', ' // cnum(2)(1:numlen(2))
-                call prterr(lundia    ,'J015'    ,cmsg      ,gdp       )
+                call prterr(lundia    ,'J015'    ,cmsg      )
                 call d3stop(1, gdp)
                 !
                 thetag = 0.001_fp
@@ -650,7 +650,7 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
                 write (cnum(2), '(i12)') mc
                 call noextspaces(cnum(2)   ,numlen(2) )
                 cmsg = cnum(1)(1:numlen(1)) // ', ' // cnum(2)(1:numlen(2))
-                call prterr(lundia    ,'J016'    ,cmsg      ,gdp       )
+                call prterr(lundia    ,'J016'    ,cmsg      )
                 call d3stop(1, gdp)
                 !
                 thetag = 0.999_fp
@@ -857,7 +857,7 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
              !
              ! Specified roughness type not implemented
              !
-             call prterr(lundia    ,'J001'    ,'TRTROU: Specified roughness type not implemented.'   ,gdp)
+             call prterr(lundia    ,'J001'    ,'TRTROU: Specified roughness type not implemented.'   )
              call d3stop(1, gdp)
           endif
           !

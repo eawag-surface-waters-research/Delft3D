@@ -142,7 +142,7 @@ subroutine inibct(lundia    ,error     ,runid     , &
        ! Error or EOF (IOCOND <> 0), not allowed
        !
        if (iocond /= 0) then
-          call prterr(lundia    ,'G007'    ,filnam(:8 + lrid)    ,gdp       )
+          call prterr(lundia    ,'G007'    ,filnam(:8 + lrid)    )
           !
           error = .true.
           goto 9999
@@ -233,7 +233,7 @@ subroutine inibct(lundia    ,error     ,runid     , &
           !
           if (cntent /= tprofu(ito)) then
              error = .true.
-             call prterr(lundia    ,'V096'    ,cntent    ,gdp       )
+             call prterr(lundia    ,'V096'    ,cntent    )
              exit
           endif
           !
@@ -241,12 +241,12 @@ subroutine inibct(lundia    ,error     ,runid     , &
           !
           if (tprofu(ito)(:10) == '3d-profile') then
              if (nparrd /= 1+2*kmax) then
-                call prterr(lundia    ,'V097'    ,' '       ,gdp       )
+                call prterr(lundia    ,'V097'    ,' '       )
                 error = .true.
                 exit
              endif
           elseif (nparrd /= 3) then
-             call prterr(lundia    ,'V097'    ,' '       ,gdp       )
+             call prterr(lundia    ,'V097'    ,' '       )
              error = .true.
              exit
           else
@@ -258,7 +258,7 @@ subroutine inibct(lundia    ,error     ,runid     , &
           ntyp = index(typtst, typbnd(ito))
           do np = 2, nparrd
              if (parnam(np)(:20) /= defpar(ntyp)(:20)) then
-                call prterr(lundia    ,'V096'    ,parnam(np)(:20)      ,gdp       )
+                call prterr(lundia    ,'V096'    ,parnam(np)(:20)      )
                 error = .true.
                 goto 9999
              endif

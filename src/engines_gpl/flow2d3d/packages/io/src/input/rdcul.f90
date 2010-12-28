@@ -137,11 +137,11 @@ subroutine rdcul(nsrc, namsrc ,mnksrc, voldis, gdp)
     if (istat /= 0) then
         select case (istat) 
         case(1)
-            call prterr(lundia, 'G004', culverfile, gdp)
+            call prterr(lundia, 'G004', culverfile)
         case(3)
-            call prterr(lundia, 'G006', culverfile, gdp)
+            call prterr(lundia, 'G006', culverfile)
         case default
-            call prterr(lundia, 'G007', culverfile, gdp)
+            call prterr(lundia, 'G007', culverfile)
         endselect
         call d3stop(1, gdp)
     endif
@@ -157,7 +157,7 @@ subroutine rdcul(nsrc, namsrc ,mnksrc, voldis, gdp)
     if (trim(versionnrinput) /= trim(versionnr)) then
        write (message, '(a,a)') 'Culvert input file must have version number ', &
                                & versionnr
-       call prterr(lundia, 'U021', trim(message), gdp)
+       call prterr(lundia, 'U021', trim(message))
        call d3stop(1, gdp)
     endif
     !
@@ -201,7 +201,7 @@ subroutine rdcul(nsrc, namsrc ,mnksrc, voldis, gdp)
                                  'Culvert name "' // trim(culvert_name) // '" ' // &
                                  'in culvert input file does not match ' // &
                                  'with any culvert name in src file'
-                            call prterr(lundia, 'U021', trim(message), gdp)
+                            call prterr(lundia, 'U021', trim(message))
                             call d3stop(1, gdp)
                         endif       
                     enddo
@@ -298,7 +298,7 @@ subroutine rdcul(nsrc, namsrc ,mnksrc, voldis, gdp)
                               & numrel3(isrc) .gt. 10) then
                                write (message, '(a)') &
                                     & 'Number of culvert coefficients too large'
-                               call prterr(lundia, 'U021', trim(message), gdp)
+                               call prterr(lundia, 'U021', trim(message))
                                call d3stop(1, gdp)         
                             endif
                             write (lundia,'(a,a,a)') 'for discharge ', &
@@ -351,7 +351,7 @@ subroutine rdcul(nsrc, namsrc ,mnksrc, voldis, gdp)
                                istat = open_shared_library(dll_handle(isrc), dll_name(isrc))
                                if (istat /= 0) then
                                   write(errmsg,'(a,a)') 'Can not open shared library ', trim(dll_name(isrc))
-                                  call prterr(lundia, 'P004', trim(errmsg), gdp)
+                                  call prterr(lundia, 'P004', trim(errmsg))
                                   call d3stop(1, gdp)
                                endif
                                !
@@ -377,7 +377,7 @@ subroutine rdcul(nsrc, namsrc ,mnksrc, voldis, gdp)
                         endif
                     case default
                         write (message, '(a)') 'Wrong culvert type in culvert input'
-                        call prterr(lundia, 'U021', trim(message), gdp)
+                        call prterr(lundia, 'U021', trim(message))
                         call d3stop(1, gdp)         
                     end select
                 endif
@@ -386,7 +386,7 @@ subroutine rdcul(nsrc, namsrc ,mnksrc, voldis, gdp)
                 !
                 ! Stop if there is no [Culvert] block in the input file (issue Delft3D-14304).
                 !
-                call prterr(lundia, 'U021', 'No [Culvert] block found in culvert input file; check file.', gdp)
+                call prterr(lundia, 'U021', 'No [Culvert] block found in culvert input file; check file.')
                 call d3stop(1, gdp)
             endif
             if (scansofculvertfile .eq. 1) then

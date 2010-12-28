@@ -999,7 +999,7 @@ character(20)      :: errtxt
        !
        if (iter >= 50) then
           write (errtxt, '(i0,a,i0)') l, ' ', nst
-          call prterr(lundia    ,'S206'    ,trim(errtxt)    ,gdp       )
+          call prterr(lundia    ,'S206'    ,trim(errtxt)    )
        endif
        !
        ! DD code added:

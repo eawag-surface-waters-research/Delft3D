@@ -174,7 +174,7 @@ subroutine rdq2eb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           ! reading error?
           !
           if (iocond > 0) then
-             call prterr(lundia    ,'G007'    ,filq2e(1:lfile)      ,gdp       )
+             call prterr(lundia    ,'G007'    ,filq2e(1:lfile)      )
              error = .true.
           endif
           goto 1100
@@ -208,7 +208,7 @@ subroutine rdq2eb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        enddo
        if (randpt) goto 1000
        write (errmsg(2:10), '(i4,a1,i4)') mb, comma, nb
-       call prterr(lundia    ,'V248'    ,errmsg    ,gdp       )
+       call prterr(lundia    ,'V248'    ,errmsg    )
        !
        !
        ! <--    next boundary point
@@ -222,7 +222,7 @@ subroutine rdq2eb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        ! file = not exist
        !
-       call prterr(lundia    ,'G004'    ,filq2e(1:lfile)      ,gdp       )
+       call prterr(lundia    ,'G004'    ,filq2e(1:lfile)      )
        !
        ! no open boundary conditions specified!!!
        ! error  = .true.

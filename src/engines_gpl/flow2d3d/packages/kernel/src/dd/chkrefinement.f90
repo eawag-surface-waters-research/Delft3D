@@ -90,7 +90,7 @@ subroutine chkrefinement(gdp)
              ipos = 1
           endif
           line = line(ipos+1:)
-          call prterr(gdp%gdinout%lundia, 'U190', 'The following line in the ddb-file defines a 1 to even domaindecomposition boundary:', gdp)
+          call prterr(gdp%gdinout%lundia, 'U190', 'The following line in the ddb-file defines a 1 to even domaindecomposition boundary:')
           write(gdp%gdinout%lundia,'(2a)') '          ', trim(line)
           write(gdp%gdinout%lundia,'(a)')  '            Odd refinement is strongly advised'
        endif

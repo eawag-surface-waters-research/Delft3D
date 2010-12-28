@@ -182,7 +182,7 @@ subroutine discha(kmax      ,nsrc      ,nbub      ,lstsci    ,lstsc     ,j      
                       ! If negative concentration then withdrawal not allowed
                       !
                    concin = 0.0_fp
-                   call prterr(lundia, 'S100', namsrc(isrc), gdp)
+                   call prterr(lundia, 'S100', namsrc(isrc))
                 endif
              endif
           endif
@@ -208,7 +208,7 @@ subroutine discha(kmax      ,nsrc      ,nbub      ,lstsci    ,lstsc     ,j      
                                    & *concin/volum0(nmout, kkout)
                 endif
              else
-                call prterr(lundia, 'S101', namsrc(isrc), gdp)
+                call prterr(lundia, 'S101', namsrc(isrc))
              endif
              !
           elseif ( disch(isrc) < 0.0_fp) then
@@ -227,7 +227,7 @@ subroutine discha(kmax      ,nsrc      ,nbub      ,lstsci    ,lstsc     ,j      
                 ! negative discharge; addition to sink
                 ! NOT allowed in dry cells
                 !
-                call prterr(lundia, 'S102', namsrc(isrc), gdp)
+                call prterr(lundia, 'S102', namsrc(isrc))
              endif
           endif
           endif
@@ -257,7 +257,7 @@ subroutine discha(kmax      ,nsrc      ,nbub      ,lstsci    ,lstsc     ,j      
                                         & *concin/volum0(nmin, kkin)
                    endif
                 else
-                   call prterr(lundia, 'S101', namsrc(isrc), gdp)
+                   call prterr(lundia, 'S101', namsrc(isrc))
                 endif
              elseif (disch(isrc) > 0.0_fp) then
                 if (kfs(nmin) > 0) then
@@ -274,7 +274,7 @@ subroutine discha(kmax      ,nsrc      ,nbub      ,lstsci    ,lstsc     ,j      
                    !
                    ! negative discharge in dry cells NOT possible
                    !
-                   call prterr(lundia, 'S103', namsrc(isrc), gdp)
+                   call prterr(lundia, 'S103', namsrc(isrc))
                 endif
              endif
           endif

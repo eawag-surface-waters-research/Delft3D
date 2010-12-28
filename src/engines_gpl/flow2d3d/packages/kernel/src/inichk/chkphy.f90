@@ -93,14 +93,14 @@ subroutine chkphy(lundia    ,error     ,salin     ,temp      ,wind      , &
     ! check value of TEMEQS, only if SALIN=.true. and TEMP <> .true.
     !
     if (salin .and. .not.temp .and. temeqs<=0.0) then
-       call prterr(lundia    ,'V061'    ,'Temperature for Eq. of state'  ,gdp       )
+       call prterr(lundia    ,'V061'    ,'Temperature for Eq. of state'  )
        error = .true.
     endif
     !
     ! check value of SALEQS, only if TEMP=.true. and SALIN <> .true.
     !
     if (temp .and. .not.salin .and. saleqs<0.0) then
-       call prterr(lundia    ,'V061'    ,'Salinity for Eq. of state'     ,gdp       )
+       call prterr(lundia    ,'V061'    ,'Salinity for Eq. of state'     )
        error = .true.
     endif
     !
@@ -109,14 +109,14 @@ subroutine chkphy(lundia    ,error     ,salin     ,temp      ,wind      , &
     if (ktemp == 1) then
        fclou = fclou/100.0
        if (comparereal(fclou, 0.0_fp) < 0) then
-          call prterr(lundia    ,'V061'    ,'Cloud par. for Excess T-model' ,gdp       )
+          call prterr(lundia    ,'V061'    ,'Cloud par. for Excess T-model' )
           error = .true.
        endif
     endif
     if (ktemp == 4) then
        fclou = fclou/100.0
        if (comparereal(fclou, 0.0_fp) < 0) then
-          call prterr(lundia    ,'V061'    ,'Cloud par. for Murakami T-model'          ,gdp       )
+          call prterr(lundia    ,'V061'    ,'Cloud par. for Murakami T-model'          )
           error = .true.
        endif
     endif
@@ -124,13 +124,13 @@ subroutine chkphy(lundia    ,error     ,salin     ,temp      ,wind      , &
     ! check SAREA, only if KTEMP = 1,2 or 3
     !
     if (ktemp==1 .and. sarea<=0.0) then
-       call prterr(lundia    ,'V061'    ,'Absolute T-model (Lee)'        ,gdp       )
+       call prterr(lundia    ,'V061'    ,'Absolute T-model (Lee)'        )
        error = .true.
     elseif (ktemp==2 .and. sarea<=0.0) then
-       call prterr(lundia    ,'V061'    ,'Absolute T-model'   ,gdp       )
+       call prterr(lundia    ,'V061'    ,'Absolute T-model'   )
        error = .true.
     elseif (ktemp==3 .and. sarea<=0.0) then
-       call prterr(lundia    ,'V061'    ,'Area par. for Excess T-model'  ,gdp       )
+       call prterr(lundia    ,'V061'    ,'Area par. for Excess T-model'  )
        error = .true.
     else
     endif
@@ -140,15 +140,15 @@ subroutine chkphy(lundia    ,error     ,salin     ,temp      ,wind      , &
     !
     if (wind) then
        if (wstcof(1) < 0.0_fp) then
-          call prterr(lundia    ,'P004'    ,'Negative wind stress coefficient'       ,gdp       )
+          call prterr(lundia    ,'P004'    ,'Negative wind stress coefficient'       )
           error = .true.
        endif
        if (wstcof(3) < 0.0_fp) then
-          call prterr(lundia    ,'P004'    ,'Negative wind stress coefficient'       ,gdp       )
+          call prterr(lundia    ,'P004'    ,'Negative wind stress coefficient'       )
           error = .true.
        endif
        if (wstcof(5) < 0.0_fp) then
-          call prterr(lundia    ,'P004'    ,'Negative wind stress coefficient'       ,gdp       )
+          call prterr(lundia    ,'P004'    ,'Negative wind stress coefficient'       )
           error = .true.
        endif
        ! 
@@ -158,12 +158,12 @@ subroutine chkphy(lundia    ,error     ,salin     ,temp      ,wind      , &
           if (comparereal(wstcof(1), wstcof(3)) == 0) then
              wstcof(4) = wstcof(2) + 1.0_fp
           else
-             call prterr(lundia    ,'V062'    ,' '       ,gdp       )
+             call prterr(lundia    ,'V062'    ,' '       )
              error = .true.
           endif
        endif
        if (rhoa <= 0.0) then
-          call prterr(lundia    ,'V061'    ,'Density of air'     ,gdp       )
+          call prterr(lundia    ,'V061'    ,'Density of air'     )
           error = .true.
        endif
     endif
@@ -171,7 +171,7 @@ subroutine chkphy(lundia    ,error     ,salin     ,temp      ,wind      , &
     ! check RHOW
     !
     if (rhow <= 0.0) then
-       call prterr(lundia    ,'V061'    ,'Density of water'   ,gdp       )
+       call prterr(lundia    ,'V061'    ,'Density of water'   )
        error = .true.
     endif
     !
@@ -187,7 +187,7 @@ subroutine chkphy(lundia    ,error     ,salin     ,temp      ,wind      , &
           enddo
        enddo
     enddo
-    if (error1) call prterr(lundia, 'V061', 'Eddy viscosity', gdp)
+    if (error1) call prterr(lundia, 'V061', 'Eddy viscosity')
     error = error .or. error1
     error1 = .false.
     !
@@ -204,7 +204,7 @@ subroutine chkphy(lundia    ,error     ,salin     ,temp      ,wind      , &
              enddo
           enddo
        enddo
-       if (error1) call prterr(lundia, 'V061', 'Eddy diffusivity', gdp)
+       if (error1) call prterr(lundia, 'V061', 'Eddy diffusivity')
        error = error .or. error1
        error1 = .false.
     endif
@@ -229,6 +229,6 @@ subroutine chkphy(lundia    ,error     ,salin     ,temp      ,wind      , &
           endif
        enddo
     enddo
-    if (error1) call prterr(lundia, 'V061', 'Bed stress coefficient', gdp)
+    if (error1) call prterr(lundia, 'V061', 'Bed stress coefficient')
     error = error .or. error1
 end subroutine chkphy

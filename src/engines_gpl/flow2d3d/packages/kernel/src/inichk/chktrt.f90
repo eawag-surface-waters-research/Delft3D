@@ -100,14 +100,14 @@ subroutine chktrt(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
           cnum = ' '
           write (cnum, '(i12)') ittdef(i, 1)
           call noextspaces(cnum      ,numlen    )
-          call prterr(lundia    ,'J008'    ,cnum(1:numlen)       ,gdp)
+          call prterr(lundia    ,'J008'    ,cnum(1:numlen)       )
           error = .true.
        endif
        if (ittdef(i, 2) <= 0) then
           cnum = ' '
           write (cnum, '(i12)') ittdef(i, 2)
           call noextspaces(cnum      ,numlen    )
-          call prterr(lundia    ,'J009'    ,cnum(1:numlen)       ,gdp)
+          call prterr(lundia    ,'J009'    ,cnum(1:numlen)       )
           error = .true.
        endif
        !
@@ -118,7 +118,7 @@ subroutine chktrt(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
              cnum = ' '
              write (cnum, '(i12)') ittdef(i, 1)
              call noextspaces(cnum      ,numlen    )
-             call prterr(lundia    ,'J012'    ,cnum(1:numlen)       ,gdp)
+             call prterr(lundia    ,'J012'    ,cnum(1:numlen)       )
              error = .true.
           endif
        enddo
@@ -158,7 +158,7 @@ subroutine chktrt(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     do m = 1, mmax
        do n = 1, nmaxus
           if (kcu(n, m) > 0 .and. rgcalu(n, m)<=0.0) then
-             call prterr(lundia    ,'J013'    ,'U'       ,gdp)
+             call prterr(lundia    ,'J013'    ,'U'       )
              error = .true.
              goto 220
           endif
@@ -168,7 +168,7 @@ subroutine chktrt(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     do m = 1, mmax
        do n = 1, nmaxus
           if (kcv(n, m) > 0 .and. rgcalv(n, m)<=0.0) then
-             call prterr(lundia    ,'J013'    ,'V'       ,gdp)
+             call prterr(lundia    ,'J013'    ,'V'       )
              error = .true.
              goto 320
           endif

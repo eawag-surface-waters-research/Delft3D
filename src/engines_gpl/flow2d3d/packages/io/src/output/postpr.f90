@@ -715,7 +715,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                 if (couplestatus<0) then
                    write (*, '(a)') ' '
                    write (*, '(a)') ' Stop signal from Couple '
-                   call prterr(lundia    ,'P004'    ,'Stop signal from Couple '      ,gdp       )
+                   call prterr(lundia    ,'P004'    ,'Stop signal from Couple '      )
                    call d3stop(1         ,gdp       )
                 endif
              endif
@@ -1245,7 +1245,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
              !
              ! Incorrect Fourier type found
              !
-             call prterr(lundia    ,'P004'    ,'Incorrect Fourier type found.'  ,gdp       )
+             call prterr(lundia    ,'P004'    ,'Incorrect Fourier type found.'  )
              call d3stop(1         ,gdp       )
           endif
        enddo

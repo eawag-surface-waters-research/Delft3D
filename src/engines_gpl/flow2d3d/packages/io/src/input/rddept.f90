@@ -101,7 +101,7 @@ subroutine rddept(lundia    ,error     , &
        depuni = real(rval,fp)
        if (comparereal(depuni, real(gdp%gdconst%amiss,fp)) == 0) then
           depuni = 0.0_fp
-          call prterr(lundia, 'U190', 'No depth specification', gdp)
+          call prterr(lundia, 'U190', 'No depth specification')
           write(lundia,'(10x,a,f7.3)') 'Using Depuni = ', depuni
        endif
        !

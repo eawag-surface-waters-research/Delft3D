@@ -103,7 +103,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
        if (istat==0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'thlyr'  , thlyr)
     endif
     if (istat/=0) then
-       call prterr(lundia, 'U021', 'Memory problem in INIMORLYR', gdp)
+       call prterr(lundia, 'U021', 'Memory problem in INIMORLYR')
        call d3stop(1, gdp)
     endif
     !
@@ -200,7 +200,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
                    write (message,'(a,i2,a,a,a,i0)')  &
                        & 'Negative sediment thickness ',ised,' in file ', &
                        & trim(flsdbd(ised)),' at nm=',nm
-                   call prterr(lundia, 'U021',trim(message), gdp)
+                   call prterr(lundia, 'U021',trim(message))
                    call d3stop(1, gdp)          
                 endif
              enddo

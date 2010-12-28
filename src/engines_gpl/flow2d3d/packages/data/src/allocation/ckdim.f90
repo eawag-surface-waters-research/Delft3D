@@ -193,7 +193,7 @@ subroutine ckdim(lundia, error, verify, gdp)
     !
     if (ierr== - 3) then
        error = .true.
-       call prterr(lundia    ,'G005'    ,' '       ,gdp       )
+       call prterr(lundia    ,'G005'    ,' '       )
        !
        write (lundia, *) '         Parameter MXCPNT to small, add ',            &
                        & ncpntr - mxcpnt
@@ -204,7 +204,7 @@ subroutine ckdim(lundia, error, verify, gdp)
  9999 continue
     if (ierr<= - 9) then
        error = .true.
-       call prterr(lundia    ,'G920'    ,'CKDIM'   ,gdp       )
+       call prterr(lundia    ,'G920'    ,'CKDIM'   )
     !
     endif
 end subroutine ckdim

@@ -309,7 +309,7 @@ subroutine chkkc(lundia    ,error     ,runid     ,fldry     ,fltd      , &
        call increm(idx1      ,idy1      ,idx2      ,idy2      ,incx      , &
                  & incy      ,maxinc    ,lerror    )
        if (lerror) then
-          call prterr(lundia    ,'V035'    ,' '       ,gdp       )
+          call prterr(lundia    ,'V035'    ,' '       )
           !
           error  = .true.
           lerror = .false.
@@ -324,10 +324,10 @@ subroutine chkkc(lundia    ,error     ,runid     ,fldry     ,fltd      , &
           idy1 = idy1 + incy
           write (errmsg, '(''('',i4,'','',i4,'')'')') idx1, idy1
           if (kcs(idy1, idx1)==0) then
-             call prterr(lundia    ,'V036'    ,errmsg    ,gdp       )
+             call prterr(lundia    ,'V036'    ,errmsg    )
           !
           elseif (kcs(idy1, idx1)==2) then
-             call prterr(lundia    ,'V037'    ,errmsg    ,gdp       )
+             call prterr(lundia    ,'V037'    ,errmsg    )
              !
              error = .true.
           else
@@ -371,7 +371,7 @@ subroutine chkkc(lundia    ,error     ,runid     ,fldry     ,fltd      , &
        call increm(idx1      ,idy1      ,idx2      ,idy2      ,incx      , &
                  & incy      ,maxinc    ,lerror    )
        if (lerror) then
-          call prterr(lundia    ,'V038'    ,' '       ,gdp       )
+          call prterr(lundia    ,'V038'    ,' '       )
           !
           error  = .true.
           lerror = .false.
@@ -388,13 +388,13 @@ subroutine chkkc(lundia    ,error     ,runid     ,fldry     ,fltd      , &
           idx1 = idx1 + incx
           idy1 = idy1 + incy
           if (idx1>mmax .or. idy1>nmax .or. idx1<1 .or. idy1<1) then
-             call prterr(lundia    ,'V040'    ,errmsg    ,gdp       )
+             call prterr(lundia    ,'V040'    ,errmsg    )
              !
              error = .true.
              goto 9999
           endif
           if (dirtd/='U' .and. dirtd/='V') then
-             call prterr(lundia    ,'U010'    ,' '       ,gdp       )
+             call prterr(lundia    ,'U010'    ,' '       )
              !
              error = .true.
           elseif (dirtd=='U' .and. kcu(idy1, idx1)/=0) then
@@ -403,7 +403,7 @@ subroutine chkkc(lundia    ,error     ,runid     ,fldry     ,fltd      , &
              kcv(idy1, idx1) = 0
           else
              write (errmsg, '(''('',i4,'','',i4,'')'')') idx1, idy1
-             call prterr(lundia    ,'V039'    ,errmsg    ,gdp       )
+             call prterr(lundia    ,'V039'    ,errmsg    )
           endif
        enddo
        goto 410
@@ -413,6 +413,6 @@ subroutine chkkc(lundia    ,error     ,runid     ,fldry     ,fltd      , &
     endif
     goto 9999
  7777 continue
-    call prterr(lundia    ,'G007'    ,filnam    ,gdp       )
+    call prterr(lundia    ,'G007'    ,filnam    )
  9999 continue
 end subroutine chkkc

@@ -95,7 +95,7 @@ subroutine rdlaydis(error, thick, kmax, laydis, gdp)
     call prop_get(gdp%mdfile_ptr, '*', 'laydish0', h0)
     if (h0 == 0.0_sp) then
         message = 'Keyword laydish0 not found'
-        call prterr(lundia, 'U021', trim(message), gdp)
+        call prterr(lundia, 'U021', trim(message))
         error = .true.
         goto 8888
     endif
@@ -104,7 +104,7 @@ subroutine rdlaydis(error, thick, kmax, laydis, gdp)
     call prop_get(gdp%mdfile_ptr, '*', 'laydisdzbed', dzbed)
     if (dzbed == 0.0_sp) then
         message = 'Keyword laydisdzbed not found'
-        call prterr(lundia, 'U021', trim(message), gdp)
+        call prterr(lundia, 'U021', trim(message))
         error = .true.
         goto 8888
     endif
@@ -115,7 +115,7 @@ subroutine rdlaydis(error, thick, kmax, laydis, gdp)
       & laydis /= 'expon' .and. laydis /= 'expo2') then
        write (message, '(a,2x,a,1x,a)') 'Wrong text for type of layer distribution "', &
                                        & laydis, '" should be EQUID, POWER, EXPON or EXPO2.'
-       call prterr(lundia, 'U021', trim(message), gdp)
+       call prterr(lundia, 'U021', trim(message))
        error = .true.
        goto 8888
     endif
@@ -153,7 +153,7 @@ subroutine rdlaydis(error, thick, kmax, laydis, gdp)
        if (gamma > 1.0_fp) then
           write (message, '(2a)') 'Exponential z-distribution not required, ', &
                                 & 'choose option EQUID.'
-          call prterr(lundia, 'U021', trim(message), gdp)
+          call prterr(lundia, 'U021', trim(message))
           error = .true.
           goto 8888
        endif
@@ -178,7 +178,7 @@ subroutine rdlaydis(error, thick, kmax, laydis, gdp)
        if (eps > 0.01_fp) then
           write (message, '(2a)') 'No convergence in iteration for coefficient of ', &
                                 & 'exponential layer distribution.'
-          call prterr(lundia, 'U021', trim(message), gdp)
+          call prterr(lundia, 'U021', trim(message))
           error = .true.
           goto 8888
        endif
@@ -202,7 +202,7 @@ subroutine rdlaydis(error, thick, kmax, laydis, gdp)
        call prop_get(gdp%mdfile_ptr, '*', 'laydisdztop', dztop)
        if (dztop == 0.0_sp) then
            message = 'Keyword laydisdztop not found'
-           call prterr(lundia, 'U021', trim(message), gdp)
+           call prterr(lundia, 'U021', trim(message))
            error = .true.
            goto 8888
        endif
@@ -213,7 +213,7 @@ subroutine rdlaydis(error, thick, kmax, laydis, gdp)
        if (gamma < 1.0_fp) then
           write (message, '(2a)') 'Top side of exponential z-distribution ', &
                                 & 'not required, choose option EQUID.'
-          call prterr(lundia, 'U021', trim(message), gdp)
+          call prterr(lundia, 'U021', trim(message))
           error = .true.
           goto 8888
        endif
@@ -222,7 +222,7 @@ subroutine rdlaydis(error, thick, kmax, laydis, gdp)
        if (gamma < 1.0_fp) then
           write (message, '(2a)') 'Bed side of exponential z-distribution ', &
                                 & 'not required, choose option EQUID.'
-          call prterr(lundia, 'U021', trim(message), gdp)
+          call prterr(lundia, 'U021', trim(message))
           error = .true.
           goto 8888
        endif
@@ -245,7 +245,7 @@ subroutine rdlaydis(error, thick, kmax, laydis, gdp)
        if (eps > 0.01_fp) then
           write (message, '(2a)') 'No convergence in iteration for coefficient of ', &
                                 & 'top-side of exponential layer distribution.'
-          call prterr(lundia, 'U021', trim(message), gdp)
+          call prterr(lundia, 'U021', trim(message))
           error = .true.
           goto 8888
        endif
@@ -268,7 +268,7 @@ subroutine rdlaydis(error, thick, kmax, laydis, gdp)
        if (eps > 0.01_fp) then
           write (message, '(2a)') 'No convergence in iteration for coefficient of ', &
                                 & 'bed-side of exponential layer distribution.'
-          call prterr(lundia, 'U021', trim(message), gdp)
+          call prterr(lundia, 'U021', trim(message))
           error = .true.
           goto 8888
        endif

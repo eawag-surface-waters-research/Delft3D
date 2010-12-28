@@ -138,7 +138,7 @@ subroutine inimet(lundia    ,error     ,versio    ,wave      ,trasol    , &
                    !
                    read (lunmet, '(a8)', iostat = iocond) method
                    if (iocond/=0) then
-                      call prterr(lundia    ,'G007'    ,filusr(nfil)(:lfil)  ,gdp       )
+                      call prterr(lundia    ,'G007'    ,filusr(nfil)(:lfil)  )
                       !
                       error = .true.
                       goto 130
@@ -173,7 +173,7 @@ subroutine inimet(lundia    ,error     ,versio    ,wave      ,trasol    , &
                    !
                    read (lunmet, '(a8)', iostat = iocond) dischy
                    if (iocond/=0) then
-                      call prterr(lundia    ,'G007'    ,filusr(nfil)(:lfil)  ,gdp       )
+                      call prterr(lundia    ,'G007'    ,filusr(nfil)(:lfil)  )
                       !
                       error = .true.
                       goto 130
@@ -196,7 +196,7 @@ subroutine inimet(lundia    ,error     ,versio    ,wave      ,trasol    , &
                    !
                    read (lunmet, '(a8)', iostat = iocond) solver
                    if (iocond/=0) then
-                      call prterr(lundia    ,'G007'    ,filusr(nfil)(:lfil)  ,gdp       )
+                      call prterr(lundia    ,'G007'    ,filusr(nfil)(:lfil)  )
                       !
                       error = .true.
                       goto 130
@@ -217,7 +217,7 @@ subroutine inimet(lundia    ,error     ,versio    ,wave      ,trasol    , &
                    !
                    read (lunmet, *, iostat = iocond) kreep
                    if (iocond/=0) then
-                      call prterr(lundia    ,'G007'    ,filusr(nfil)(:lfil)  ,gdp       )
+                      call prterr(lundia    ,'G007'    ,filusr(nfil)(:lfil)  )
                       !
                       error = .true.
                       goto 130
@@ -245,7 +245,7 @@ subroutine inimet(lundia    ,error     ,versio    ,wave      ,trasol    , &
                    !
                    read (lunmet, '(a8)', iostat = iocond) disctr
                    if (iocond/=0) then
-                      call prterr(lundia    ,'G007'    ,filusr(nfil)(:lfil)  ,gdp       )
+                      call prterr(lundia    ,'G007'    ,filusr(nfil)(:lfil)  )
                       !
                       error = .true.
                       goto 130
@@ -287,7 +287,7 @@ subroutine inimet(lundia    ,error     ,versio    ,wave      ,trasol    , &
                 ! NO file, write warning
                 !
                 else
-                   call prterr(lundia    ,'G004'    ,filusr(nfil)(:lfil)  ,gdp       )
+                   call prterr(lundia    ,'G004'    ,filusr(nfil)(:lfil)  )
                 !
                 endif
              endif

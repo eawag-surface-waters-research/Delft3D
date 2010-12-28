@@ -61,5 +61,5 @@ subroutine errmsg(msgno     ,param     ,gdp       )
     !
     !
     !
-    call prterr(gdp%gdinout%lundia   ,msgno     ,param     ,gdp       )
+    call prterr(gdp%gdinout%lundia   ,msgno     ,param     )
 end subroutine errmsg

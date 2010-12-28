@@ -100,7 +100,7 @@ subroutine chkic(lundia    ,error     ,mmax      ,nmax      ,kmax      , &
        !
        ! errormessage is a warning
        !
-       if (lerror) call prterr(lundia, 'V060', 'Initial condition', gdp)
+       if (lerror) call prterr(lundia, 'V060', 'Initial condition')
     endif
     !
     ! Negative values for turbulence 'not allowed' if read (restart)
@@ -121,7 +121,7 @@ subroutine chkic(lundia    ,error     ,mmax      ,nmax      ,kmax      , &
        ! errormessage
        !
        if (error) then
-          call prterr(lundia    ,'V063'    ,'Turbulence Restart Values'     ,gdp       )
+          call prterr(lundia    ,'V063'    ,'Turbulence Restart Values'     )
        endif
     endif
 end subroutine chkic

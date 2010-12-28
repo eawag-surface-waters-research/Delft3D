@@ -110,10 +110,10 @@ subroutine stafil(lundia    ,filsta    ,fmttmp    ,error     ,nostat    , &
           read (luntmp, iostat = iocond) chulp, (ival(i), i = 1, 2)
           if (iocond/=0) then
              if (iocond<0) then
-                call prterr(lundia    ,'G006'    ,filsta(:lfile)       ,gdp       )
+                call prterr(lundia    ,'G006'    ,filsta(:lfile)       )
              !
              else
-                call prterr(lundia    ,'G007'    ,filsta(:lfile)       ,gdp       )
+                call prterr(lundia    ,'G007'    ,filsta(:lfile)       )
              !
              endif
              error = .true.
@@ -128,7 +128,7 @@ subroutine stafil(lundia    ,filsta    ,fmttmp    ,error     ,nostat    , &
           !
           if (namst(n)==cdef) then
              error = .true.
-             call prterr(lundia    ,'V013'    ,' '       ,gdp       )
+             call prterr(lundia    ,'V013'    ,' '       )
              !
              exit
           endif
@@ -154,10 +154,10 @@ subroutine stafil(lundia    ,filsta    ,fmttmp    ,error     ,nostat    , &
           read (luntmp, '(a)', iostat = iocond) rec132
           if (iocond/=0) then
              if (iocond<0) then
-                call prterr(lundia    ,'G006'    ,filsta(:lfile)       ,gdp       )
+                call prterr(lundia    ,'G006'    ,filsta(:lfile)       )
              !
              else
-                call prterr(lundia    ,'G007'    ,filsta(:lfile)       ,gdp       )
+                call prterr(lundia    ,'G007'    ,filsta(:lfile)       )
              !
              endif
              error = .true.
@@ -172,7 +172,7 @@ subroutine stafil(lundia    ,filsta    ,fmttmp    ,error     ,nostat    , &
           !
           if (namst(n)==cdef) then
              error = .true.
-             call prterr(lundia    ,'V013'    ,' '       ,gdp       )
+             call prterr(lundia    ,'V013'    ,' '       )
              !
              exit
           endif
@@ -185,7 +185,7 @@ subroutine stafil(lundia    ,filsta    ,fmttmp    ,error     ,nostat    , &
              call read1i(rec132    ,lr132     ,ibeg      ,iend      ,ival(i)   , &
                        & idef      ,ier       )
              if (ier<=0) then
-                call prterr(lundia    ,'G007'    ,filsta(:lfile)       ,gdp       )
+                call prterr(lundia    ,'G007'    ,filsta(:lfile)       )
                 !
                 error = .true.
                 goto 300

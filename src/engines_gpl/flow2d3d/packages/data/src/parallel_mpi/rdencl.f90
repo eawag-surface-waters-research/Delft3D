@@ -189,7 +189,7 @@ subroutine rdencl( lunmd     ,lundia    ,error     , runid    , &
              write (lungrd) mmax, nmaxus
              write (lungrd) mmax, 1
              write (lungrd) 1, 1
-             call prterr(lundia    ,'V028'    ,' '       ,gdp       )
+             call prterr(lundia    ,'V028'    ,' '       )
           endif
           goto 200
        endif
@@ -215,13 +215,13 @@ subroutine rdencl( lunmd     ,lundia    ,error     , runid    , &
              write (lungrd) mmax, nmaxus
              write (lungrd) mmax, 1
              write (lungrd) 1, 1
-             call prterr(lundia    ,'V028'    ,' '       ,gdp       )
+             call prterr(lundia    ,'V028'    ,' '       )
           else
              !
              ! no value or error found => error
              !
              lerror = .true.
-             call prterr(lundia    ,'V003'    ,'Comp. grid enclosure'          ,gdp       )
+             call prterr(lundia    ,'V003'    ,'Comp. grid enclosure'          )
           endif
        else
           !

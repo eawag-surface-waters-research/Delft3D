@@ -87,7 +87,7 @@ subroutine dimstr(lunmd     ,filnam    ,lundia    ,error     ,nrrec     , &
         & status = 'old', iostat = iocond)
     if (iocond/=0) then
        error = .true.
-       call prterr(lundia    ,'G007'    ,filnam(:lfile)       ,gdp       )
+       call prterr(lundia    ,'G007'    ,filnam(:lfile)       )
        goto 9999
     endif
     !
@@ -104,7 +104,7 @@ subroutine dimstr(lunmd     ,filnam    ,lundia    ,error     ,nrrec     , &
        !
        ! Error
        !
-       call prterr(lundia    ,'G007'    ,filnam(:lfile)       ,gdp       )
+       call prterr(lundia    ,'G007'    ,filnam(:lfile)       )
        error = .true.
        close (luntmp)
        goto 9999

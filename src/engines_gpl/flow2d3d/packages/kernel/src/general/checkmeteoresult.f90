@@ -57,9 +57,9 @@ subroutine checkmeteoresult(success, gdp)
     lundia => gdp%gdinout%lundia
     message = getmeteomessage()
     if (.not. success) then
-       call prterr(lundia, 'P004', trim(message), gdp)
+       call prterr(lundia, 'P004', trim(message))
        call d3stop(3, gdp)
     elseif (message /= ' ') then
-       call prterr(lundia, 'G051', trim(message), gdp)
+       call prterr(lundia, 'G051', trim(message))
     endif
 end subroutine checkmeteoresult

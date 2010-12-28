@@ -155,12 +155,12 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     itlfsm = nint(tlfsmo/dt)
     if (dtn(itlfsm, tlfsmo, dt)) then
-       call prterr(lundia    ,'U044'    ,'Smoothing time'     ,gdp       )
+       call prterr(lundia    ,'U044'    ,'Smoothing time'     )
        if (noui) error = .true.
     endif
     if (itlfsm > 0) then
        if (restid /= ' ') then
-          call prterr(lundia ,'Z013' ,'Using Smoothing time and restart file' ,gdp )
+          call prterr(lundia ,'Z013' ,'Using Smoothing time and restart file' )
        endif
        if (filic /= ' ') then
           call prterr(lundia ,'Z013' , &
@@ -204,7 +204,7 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              if (rettim(n, 1) < 0.) then
                 errmsg = 'Th. Harlemann opening nr. ...'
                 write (errmsg(27:29), '(i3)') n
-                call prterr(lundia    ,'U075'    ,errmsg    ,gdp       )
+                call prterr(lundia    ,'U075'    ,errmsg    )
                 write (lundia, '(2a)') '            In the boundary ',          &
                                       & 'point the constituent value'
                 write (lundia, '(2a)') '            will be reflected ',        &
@@ -234,7 +234,7 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              if (rettim(n, 2) < 0.) then
                 errmsg = 'Th. Harlemann opening nr. ...'
                 write (errmsg(27:29), '(i3)') n
-                call prterr(lundia    ,'U076'    ,errmsg    ,gdp       )
+                call prterr(lundia    ,'U076'    ,errmsg    )
                 write (lundia, '(2a,f12.3)') &
                     & '            Will be re-', 'defined to surface value: ', rettim(n, 1)
                 rettim(n, 2) = rettim(n, 1)
@@ -283,7 +283,7 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 if (rettim(n, 1)<0.) then
                    errmsg = 'Th. Harlemann opening nr. ...'
                    write (errmsg(27:29), '(i3)') n
-                   call prterr(lundia    ,'U075'    ,errmsg    ,gdp       )
+                   call prterr(lundia    ,'U075'    ,errmsg    )
                    write (lundia, '(2a)') &
                        & '            In the boundary ', 'point the constituent value'
                    write (lundia, '(2a)') &
@@ -410,7 +410,7 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 write (lundia, '(a)') nambnd(n)
              endif
           enddo
-          call prterr(lundia ,'Z013' ,'Use boundary type ''N'' instead of the ''Bndneu'' keyword' ,gdp )
+          call prterr(lundia ,'Z013' ,'Use boundary type ''N'' instead of the ''Bndneu'' keyword' )
        endif
     endif
     !
@@ -424,7 +424,7 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        pcorr = .false.
     else
        write(message,'(a,f14.3,a)') 'Specified pressure for boundary correction = ', paver, ' Pa'
-       call prterr(lundia, 'G051', trim(message), gdp)
+       call prterr(lundia, 'G051', trim(message))
        pcorr = .true.
     endif
     !

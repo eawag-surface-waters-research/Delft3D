@@ -130,12 +130,12 @@ subroutine bubfil(lundia    ,filbub    ,error     ,mmax      ,nmax      , &
     lenc   = 1
     if (kmax < 3) then
        write (errmsg,'(a)') 'Not enough layers for bubble screen. Increase the number of layers.'
-       call prterr(lundia, 'P004', trim(errmsg), gdp)
+       call prterr(lundia, 'P004', trim(errmsg))
        call d3stop(1, gdp)
     endif
     errmsg = 'bubble screen '
     write (message, '(2a)') 'Reading Bubble screen file ', trim(filbub)
-    call prterr(lundia, 'G051', trim(message), gdp)
+    call prterr(lundia, 'G051', trim(message))
     !
     ! test file existance
     !
@@ -149,7 +149,7 @@ subroutine bubfil(lundia    ,filbub    ,error     ,mmax      ,nmax      , &
     open (luntmp, file = filbub(:lfile), status = 'old', iostat = iocond)
     if (iocond /= 0) then
        error = .true.
-       call prterr(lundia, 'G007', filbub(:lfile), gdp)
+       call prterr(lundia, 'G007', filbub(:lfile))
        goto 9999
     endif
     !
@@ -166,9 +166,9 @@ subroutine bubfil(lundia    ,filbub    ,error     ,mmax      ,nmax      , &
        read (luntmp, '(a)', iostat = iocond) rec132
        if (iocond /= 0) then
           if (iocond < 0) then
-             call prterr(lundia, 'G006', filbub(:lfile), gdp)
+             call prterr(lundia, 'G006', filbub(:lfile))
           else
-             call prterr(lundia, 'G007', filbub(:lfile), gdp)
+             call prterr(lundia, 'G007', filbub(:lfile))
           endif
           error = .true.
           goto 300
@@ -191,7 +191,7 @@ subroutine bubfil(lundia    ,filbub    ,error     ,mmax      ,nmax      , &
        if (namsrc(icount) == cdefn) then
           errmsg(12:) = ': no name defined'
           error = .true.
-          call prterr(lundia, 'U021', errmsg, gdp)
+          call prterr(lundia, 'U021', errmsg)
           goto 300
        endif
        !
@@ -204,7 +204,7 @@ subroutine bubfil(lundia    ,filbub    ,error     ,mmax      ,nmax      , &
                  & ival      ,idef      ,ier       )
        if (ier <= 0) then
           error = .true.
-          call prterr(lundia, 'G007', filbub(1:lfile), gdp)
+          call prterr(lundia, 'G007', filbub(1:lfile))
           goto 300
        endif
        !
@@ -222,7 +222,7 @@ subroutine bubfil(lundia    ,filbub    ,error     ,mmax      ,nmax      , &
        call read1r(rec132    ,132       ,ibeg      ,iend      ,zbub        , &
                  & rdef      ,ier       )
        if (ier <= 0) then
-          call prterr(lundia, 'G007', filbub(1:lfile), gdp)
+          call prterr(lundia, 'G007', filbub(1:lfile))
           error = .true.
           goto 300
        endif
@@ -236,7 +236,7 @@ subroutine bubfil(lundia    ,filbub    ,error     ,mmax      ,nmax      , &
        !
        if (error) then
           errmsg(9:) = namsrc(icount)
-          call prterr(lundia, 'V231', errmsg(:32), gdp)
+          call prterr(lundia, 'V231', errmsg(:32))
           error = .true.
           goto 300
        endif
@@ -244,12 +244,12 @@ subroutine bubfil(lundia    ,filbub    ,error     ,mmax      ,nmax      , &
        ! Inside computational domain ?
        !
        if (m1>mmax .or. m1<1 .or. m2>mmax .or. m2<1) then
-          call prterr(lundia, 'V249', errmsg(:22), gdp)
+          call prterr(lundia, 'V249', errmsg(:22))
           ! error = .true.
           ! goto 300
        endif
        if (n1>nmaxus .or. n1<1 .or. n2>nmaxus .or. n2<1) then
-          call prterr(lundia, 'V249', errmsg(:22), gdp)
+          call prterr(lundia, 'V249', errmsg(:22))
           ! error = .true.
           ! goto 300
        endif
@@ -326,7 +326,7 @@ subroutine bubfil(lundia    ,filbub    ,error     ,mmax      ,nmax      , &
              mnksrc(3,n) = -1
              mnksrc(6,n) = -1
              write(message,'(a,3(i0,a))') 'Bubble screen related discharge point (m,n,k)=(', mnksrc(1, n), ',', mnksrc(2, n), ',', mnksrc(3, n), ') is disabled: not in this subdomain'
-             call prterr( lundia, 'U190', trim(message), gdp ) 
+             call prterr( lundia, 'U190', trim(message))
           endif 
        enddo 
     endif 

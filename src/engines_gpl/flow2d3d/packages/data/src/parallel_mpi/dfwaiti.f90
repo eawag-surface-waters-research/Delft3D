@@ -117,7 +117,7 @@ subroutine dfwaiti ( field, work, worksize, ks, ke, request, tag, gdp )
        call mpi_wait(request(inb,1), mpistatus, ierr)
        if ( ierr /= MPI_SUCCESS ) then
           write (msgstr,'(a,i5,a,i3.3)') 'MPI wait produces some internal error - return code is ',ierr,' and node number is ',inode
-          call prterr(lundia, 'U021', trim(msgstr), gdp)
+          call prterr(lundia, 'U021', trim(msgstr))
           call d3stop(1, gdp)
        endif
        ! waiting for the recv call

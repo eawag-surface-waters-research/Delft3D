@@ -193,7 +193,7 @@ subroutine caldpu(lundia    ,mmax      ,nmaxus    ,kmax      , &
                       dpu(n, m)  = dpuw
                       write (errms1(2:7) , '(i6)') m
                       write (errms1(9:14), '(i6)') n
-                      call prterr(lundia    ,'V058'    ,errms1    ,gdp       )
+                      call prterr(lundia    ,'V058'    ,errms1    )
                    else
                       hkru(n, m) = dpu(n, m)
                    endif
@@ -203,7 +203,7 @@ subroutine caldpu(lundia    ,mmax      ,nmaxus    ,kmax      , &
                       hkru(n, m) = dpuw
                       write (errms1(2:7) , '(i6)') m
                       write (errms1(9:14), '(i6)') n
-                      call prterr(lundia    ,'V058'    ,errms1    ,gdp       )
+                      call prterr(lundia    ,'V058'    ,errms1    )
                    endif
                 endif
              endif
@@ -216,7 +216,7 @@ subroutine caldpu(lundia    ,mmax      ,nmaxus    ,kmax      , &
                       dpv(n, m)  = dpvw
                       write (errms2(2:7) , '(i6)') m
                       write (errms2(9:14), '(i6)') n
-                      call prterr(lundia    ,'V058'    ,errms2    ,gdp       )
+                      call prterr(lundia    ,'V058'    ,errms2    )
                    else
                       hkrv(n, m) = dpv(n, m)
                    endif
@@ -226,7 +226,7 @@ subroutine caldpu(lundia    ,mmax      ,nmaxus    ,kmax      , &
                       hkrv(n, m) = dpvw
                       write (errms2(2:7) , '(i6)') m
                       write (errms2(9:14), '(i6)') n
-                      call prterr(lundia    ,'V058'    ,errms2    ,gdp       )
+                      call prterr(lundia    ,'V058'    ,errms2    )
                    endif
                 endif
              endif
@@ -245,7 +245,7 @@ subroutine caldpu(lundia    ,mmax      ,nmaxus    ,kmax      , &
                       dpu(n, m)  = dpuw
                       write (errms1(2:7) , '(i6)') m
                       write (errms1(9:14), '(i6)') n
-                      call prterr(lundia    ,'V058'    ,errms1    ,gdp       )
+                      call prterr(lundia    ,'V058'    ,errms1    )
                    else
                       hkru(n, m) = dpu(n, m)
                    endif
@@ -255,7 +255,7 @@ subroutine caldpu(lundia    ,mmax      ,nmaxus    ,kmax      , &
                       hkru(n, m) = dpuw
                       write (errms1(2:7) , '(i6)') m
                       write (errms1(9:14), '(i6)') n
-                      call prterr(lundia    ,'V058'    ,errms1    ,gdp       )
+                      call prterr(lundia    ,'V058'    ,errms1    )
                    endif
                 endif
              endif
@@ -268,7 +268,7 @@ subroutine caldpu(lundia    ,mmax      ,nmaxus    ,kmax      , &
                       dpv(n, m)  = dpvw
                       write (errms2(2:7) , '(i6)') m
                       write (errms2(9:14), '(i6)') n
-                      call prterr(lundia    ,'V058'    ,errms2    ,gdp       )
+                      call prterr(lundia    ,'V058'    ,errms2    )
                    else
                       hkrv(n, m) = dpv(n, m)
                    endif
@@ -278,7 +278,7 @@ subroutine caldpu(lundia    ,mmax      ,nmaxus    ,kmax      , &
                       hkrv(n, m) = dpvw
                       write (errms2(2:7) , '(i6)') m
                       write (errms2(9:14), '(i6)') n
-                      call prterr(lundia    ,'V058'    ,errms2    ,gdp       )
+                      call prterr(lundia    ,'V058'    ,errms2    )
                    endif
                 endif
              endif
@@ -309,7 +309,7 @@ subroutine caldpu(lundia    ,mmax      ,nmaxus    ,kmax      , &
                    if (dpu(n, m) > dpuw) then
                       hkru(n, m) = dpuw
                       dpu (n, m) = dpuw
-                      call prterr(lundia    ,'V058'    ,errms1    ,gdp       )
+                      call prterr(lundia    ,'V058'    ,errms1    )
                    else
                       hkru(n, m) = dpu(n, m)
                    endif
@@ -317,7 +317,7 @@ subroutine caldpu(lundia    ,mmax      ,nmaxus    ,kmax      , &
                    dpu(n, m) = dpuw
                    if (abs(kspu(n, m, 0))==9 .and. hkru(n, m)>dpuw) then
                       hkru(n, m) = dpuw
-                      call prterr(lundia    ,'V058'    ,errms1    ,gdp       )
+                      call prterr(lundia    ,'V058'    ,errms1    )
                    endif
                 endif
              endif
@@ -328,7 +328,7 @@ subroutine caldpu(lundia    ,mmax      ,nmaxus    ,kmax      , &
                    if (dpv(n, m) > dpvw) then
                       hkrv(n, m) = dpvw
                       dpv (n, m) = dpvw
-                      call prterr(lundia    ,'V058'    ,errms2    ,gdp       )
+                      call prterr(lundia    ,'V058'    ,errms2    )
                    else
                       hkrv(n, m) = dpv(n, m)
                    endif
@@ -336,7 +336,7 @@ subroutine caldpu(lundia    ,mmax      ,nmaxus    ,kmax      , &
                    dpv(n, m) = dpvw
                    if (abs(kspv(n, m, 0))==9 .and. hkrv(n, m)>dpvw) then
                       hkrv(n, m) = dpvw
-                      call prterr(lundia    ,'V058'    ,errms2    ,gdp       )
+                      call prterr(lundia    ,'V058'    ,errms2    )
                    endif
                 endif
              endif

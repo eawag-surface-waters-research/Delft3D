@@ -93,7 +93,7 @@ subroutine grdfil(lundia    ,lungrd    ,error     ,filgrd    ,fmttmp    , &
           if (iocond/=0) then
              if (iocond>0) then
                 error = .true.
-                call prterr(lundia    ,'G007'    ,filgrd(1:lfile)      ,gdp       )
+                call prterr(lundia    ,'G007'    ,filgrd(1:lfile)      )
              !
              endif
              goto 200
@@ -122,7 +122,7 @@ subroutine grdfil(lundia    ,lungrd    ,error     ,filgrd    ,fmttmp    , &
           if (iocond/=0) then
              if (iocond>0) then
                 error = .true.
-                call prterr(lundia    ,'G007'    ,filgrd(1:lfile)      ,gdp       )
+                call prterr(lundia    ,'G007'    ,filgrd(1:lfile)      )
              !
              endif
              goto 200

@@ -116,7 +116,7 @@ subroutine update_stat_locations(nostat    ,ndro      ,mndro     ,xydro     ,tim
           xystat(:,i) = xydro(:,stat_drogue(i))
           mnstat(:,i) = mndro(:,stat_drogue(i))
        else
-          call prterr(lundia    ,'P004'    ,'Unsupported station type encountered in update_stat_locations.'  ,gdp       )
+          call prterr(lundia    ,'P004'    ,'Unsupported station type encountered in update_stat_locations.'  )
           call d3stop(1         ,gdp       )
        endif
     enddo

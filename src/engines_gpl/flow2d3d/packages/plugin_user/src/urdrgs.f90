@@ -136,7 +136,7 @@ subroutine urdrgs(lundia    ,error     ,filusr    ,nmax      ,mmax      , &
           !--------------Reading error?
           !
           if (iocond>0) then
-             call prterr(lundia    ,'G007'    ,filusr(1:lfile)      ,gdp       )
+             call prterr(lundia    ,'G007'    ,filusr(1:lfile)      )
              !
              error = .true.
           endif
@@ -152,7 +152,7 @@ subroutine urdrgs(lundia    ,error     ,filusr    ,nmax      ,mmax      , &
                  & lenc      ,ier       )
        if (ier<=0) then
           error = .true.
-          call prterr(lundia    ,'G007'    ,filusr(1:lfile)      ,gdp       )
+          call prterr(lundia    ,'G007'    ,filusr(1:lfile)      )
           !
           goto 1100
        endif
@@ -167,7 +167,7 @@ subroutine urdrgs(lundia    ,error     ,filusr    ,nmax      ,mmax      , &
                  & ival      ,idef      ,ier       )
        if (ier<=0) then
           error = .true.
-          call prterr(lundia    ,'G007'    ,filusr(1:lfile)      ,gdp       )
+          call prterr(lundia    ,'G007'    ,filusr(1:lfile)      )
           !
           goto 1100
        endif
@@ -184,7 +184,7 @@ subroutine urdrgs(lundia    ,error     ,filusr    ,nmax      ,mmax      , &
        call read1r(rec132    ,132       ,ibeg      ,iend      ,brlosc    , &
                  & rdef      ,ier       )
        if (ier<=0) then
-          call prterr(lundia    ,'G007'    ,filusr(1:lfile)      ,gdp       )
+          call prterr(lundia    ,'G007'    ,filusr(1:lfile)      )
           !
           error = .true.
           goto 1100
@@ -203,7 +203,7 @@ subroutine urdrgs(lundia    ,error     ,filusr    ,nmax      ,mmax      , &
        !-----------If error then no multiple of 45 degrees
        !
        if (error) then
-          call prterr(lundia    ,'V231'    ,' '       ,gdp       )
+          call prterr(lundia    ,'V231'    ,' '       )
           !
           goto 1100
        endif
@@ -211,14 +211,14 @@ subroutine urdrgs(lundia    ,error     ,filusr    ,nmax      ,mmax      , &
        !-----------Inside computational domain ?
        !
        if (m1>mmax .or. m1<1 .or. m2>mmax .or. m2<1) then
-          call prterr(lundia    ,'V232'    ,errtxt    ,gdp       )
+          call prterr(lundia    ,'V232'    ,errtxt    )
           !
           error = .true.
           goto 1100
        endif
        !
        if (n1>nmaxus .or. n1<1 .or. n2>nmaxus .or. n2<1) then
-          call prterr(lundia    ,'V232'    ,errtxt    ,gdp       )
+          call prterr(lundia    ,'V232'    ,errtxt    )
           !
           error = .true.
           goto 1100
@@ -227,7 +227,7 @@ subroutine urdrgs(lundia    ,error     ,filusr    ,nmax      ,mmax      , &
        kkmin = min(k1, k2)
        kkmax = max(k1, k2)
        if (kkmin<1 .or. kkmax>kmax) then
-          call prterr(lundia    ,'V232'    ,errtxt    ,gdp       )
+          call prterr(lundia    ,'V232'    ,errtxt    )
           !
           error = .true.
           goto 1100
@@ -236,7 +236,7 @@ subroutine urdrgs(lundia    ,error     ,filusr    ,nmax      ,mmax      , &
        !-----------Value for wall roughness permitted ?
        !
        if (brlosc<=0.0) then
-          call prterr(lundia    ,'V234'    ,errtxt    ,gdp       )
+          call prterr(lundia    ,'V234'    ,errtxt    )
           !
           error = .true.
           goto 1100
@@ -256,7 +256,7 @@ subroutine urdrgs(lundia    ,error     ,filusr    ,nmax      ,mmax      , &
              m = m + incx
              n = n + incy
              if (kcs(n, m)/=1) then
-                call prterr(lundia    ,'V232'    ,errtxt    ,gdp       )
+                call prterr(lundia    ,'V232'    ,errtxt    )
                 !
                 error = .true.
                 goto 1100
@@ -273,7 +273,7 @@ subroutine urdrgs(lundia    ,error     ,filusr    ,nmax      ,mmax      , &
              n = n + incy
              kspv(n, m, 0) = 5
              if (kcs(n, m)/=1) then
-                call prterr(lundia    ,'V232'    ,errtxt    ,gdp       )
+                call prterr(lundia    ,'V232'    ,errtxt    )
                 !
                 error = .true.
                 goto 1100
@@ -284,7 +284,7 @@ subroutine urdrgs(lundia    ,error     ,filusr    ,nmax      ,mmax      , &
              enddo
           enddo
        else
-          call prterr(lundia    ,'V233'    ,direct    ,gdp       )
+          call prterr(lundia    ,'V233'    ,direct    )
           !
           error = .true.
           goto 1100
@@ -303,7 +303,7 @@ subroutine urdrgs(lundia    ,error     ,filusr    ,nmax      ,mmax      , &
        !
        !--------File not exist
        !
-       call prterr(lundia    ,'G004'    ,filusr(1:lfile)      ,gdp       )
+       call prterr(lundia    ,'G004'    ,filusr(1:lfile)      )
        !
        error = .true.
     endif

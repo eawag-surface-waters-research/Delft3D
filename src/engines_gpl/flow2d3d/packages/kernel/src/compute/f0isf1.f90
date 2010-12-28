@@ -213,7 +213,7 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
        if (s01max >= smax) then
           write(message,'(a,f10.2,a,i0,a)') 'Water level gradient too high > ', smax, &
                & ' m (per 0.5 DT) after ', ntstep, ' timesteps in the following points:'
-          call prterr(lundia, 'P004', trim(message), gdp)
+          call prterr(lundia, 'P004', trim(message))
           do nm = 1, nmmax
              if (kcs(nm) /= 0) then
                 suvval = abs(s0(nm) - s1(nm))
@@ -253,7 +253,7 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
        if (u01max > velmax) then
           write(message,'(a,f10.2,a,i0,a)') 'Velocity gradient too high > ', velmax, &
                & ' m/s (per 0.5 DT) after ', ntstep, ' timesteps in the following points:'
-          call prterr(lundia, 'U190', trim(message), gdp)
+          call prterr(lundia, 'U190', trim(message))
           do nm = 1, nmmax
              if (kcu(nm) /= 0) then
                 do k = 1, kmax
@@ -273,7 +273,7 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
        if (v01max > velmax) then
           write(message,'(a,f10.2,a,i0,a)') 'Velocity gradient too high > ', velmax, &
                & ' m/s (per 0.5 DT) after ', ntstep, ' timesteps in the following points:'
-          call prterr(lundia, 'U190', trim(message), gdp)
+          call prterr(lundia, 'U190', trim(message))
           do nm = 1, nmmax
              if (kcv(nm) /= 0) then
                 do k = 1, kmax

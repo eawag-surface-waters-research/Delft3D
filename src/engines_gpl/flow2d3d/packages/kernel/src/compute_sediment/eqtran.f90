@@ -701,7 +701,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        ! Bailard
        !
-       call prterr (lundia,'U021','Bailard method is disabled',gdp)
+       call prterr (lundia,'U021','Bailard method is disabled')
        call d3stop(1, gdp)
        !call tranb6(kode      ,ntrsi     ,utot      ,u          ,v         , &
        !          & chezy     ,h         ,hrms      ,tp         ,teta      , &
@@ -727,7 +727,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        ! Van Rijn / Ribberink (1994)
        !
-       call prterr (lundia,'U021','Van Rijn/Ribberink (1994) method is disabled',gdp)
+       call prterr (lundia,'U021','Van Rijn/Ribberink (1994) method is disabled')
        call d3stop(1, gdp)
        !call tranb8(kode       ,ntrsi     ,u         ,v         ,hrms      , &
        !          & h          ,teta      ,tp        ,di50      ,d90       , &
@@ -743,7 +743,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        ! Silt module
        !
-       call prterr (lundia,'U021','Original Delft3D-MOR Silt module is disabled',gdp)
+       call prterr (lundia,'U021','Original Delft3D-MOR Silt module is disabled')
        call d3stop(1, gdp)
        !call tranb9(kode      ,ntrsi     ,utot      ,h         ,alfs      , &
        !          & sbot      ,ssus      )
@@ -756,7 +756,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        ! Ashida and Michiue
        !
-       call prterr (lundia,'U021','Ashida and Michiue method is disabled',gdp)
+       call prterr (lundia,'U021','Ashida and Michiue method is disabled')
        call d3stop(1, gdp)
        !call trab10(kode       ,ntrsi     ,utot      ,di50      ,chezy     , &
        !          & h          ,cosa      ,sina      ,dzdx      ,dzdy      , &
@@ -821,7 +821,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        if (max_reals < 30) then
           write(errmsg,'(a,a,a)') 'Insufficient space to pass real values to transport routine.'
-          call prterr (lundia,'U021', trim(errmsg),gdp)
+          call prterr (lundia,'U021', trim(errmsg))
           call d3stop(1, gdp)
        endif
        dll_reals( 1) = real(timsec ,hp)
@@ -857,7 +857,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        if (max_integers < 4) then
           write(errmsg,'(a,a,a)') 'Insufficient space to pass integer values to transport routine.'
-          call prterr (lundia,'U021', trim(errmsg),gdp)
+          call prterr (lundia,'U021', trim(errmsg))
           call d3stop(1, gdp)
        endif
        call nm_to_n_and_m(nm, n, m, gdp)
@@ -868,7 +868,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        if (max_strings < 2) then
           write(errmsg,'(a,a,a)') 'Insufficient space to pass strings to transport routine.'
-          call prterr (lundia,'U021', trim(errmsg),gdp)
+          call prterr (lundia,'U021', trim(errmsg))
           call d3stop(1, gdp)
        endif
        dll_strings( 1) = gdp%runid
@@ -907,7 +907,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        call vsemlun
        if (error /= 0) then
           write(errmsg,'(a,a,a)') 'Cannot find function "',trim(dll_function(ised)),'" in dynamic library.'
-          call prterr (lundia,'U021', trim(errmsg),gdp)
+          call prterr (lundia,'U021', trim(errmsg))
           call d3stop(1, gdp)
        endif
        if (message /= ' ') then
@@ -932,7 +932,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        t_relax = real(t_relax_dll,fp)
     else
-       call prterr (lundia,'U021','Transport formula not recognized',gdp)
+       call prterr (lundia,'U021','Transport formula not recognized')
        call d3stop(1, gdp)
     endif
     !

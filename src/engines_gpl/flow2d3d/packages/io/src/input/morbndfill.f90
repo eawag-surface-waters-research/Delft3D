@@ -131,7 +131,7 @@ subroutine morbndfill(kcs       ,guu       ,gvv       ,icx       ,icy       , &
        if (istat == 0) allocate(morbnd(jb)%nm(nf*npnt)       , stat = istat)
        if (istat == 0) allocate(morbnd(jb)%nxmx(nf*npnt)     , stat = istat)
        if (istat /= 0) then
-          call prterr(lundia, 'U021', 'MORBNDFIL: memory alloc error', gdp)
+          call prterr(lundia, 'U021', 'MORBNDFIL: memory alloc error')
           call d3stop(1, gdp)
        endif
        !

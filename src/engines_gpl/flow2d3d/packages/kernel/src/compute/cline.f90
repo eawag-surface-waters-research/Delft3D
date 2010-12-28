@@ -184,7 +184,7 @@ subroutine cline(hdt       ,j         ,nmmaxj    ,kmax      ,icx       , &
        if (istat==0) allocate (gdp%gdcline%xd  (ndim, md), stat = istat)
        if (istat==0) allocate (gdp%gdcline%rdep(0:kmax+1), stat = istat)
        if (istat/=0) then
-          call prterr(lundia, 'U021', 'Cline: memory alloc error', gdp)
+          call prterr(lundia, 'U021', 'Cline: memory alloc error')
           call d3stop(1, gdp)
        endif
        !

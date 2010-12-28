@@ -202,7 +202,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     allocate (gdp%gdmorpar%morbnd(nto), stat = istat)
     !
     if (istat /= 0) then
-       call prterr(lundia, 'U021', 'RDMOR: memory alloc error', gdp)
+       call prterr(lundia, 'U021', 'RDMOR: memory alloc error')
        call d3stop(1, gdp)
     endif
     !
@@ -310,7 +310,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        ! file does not exist
        !
        errmsg = 'No morphological file defined. Using default values.'
-       call prterr(lundia, 'U190', errmsg, gdp)
+       call prterr(lundia, 'U190', errmsg)
        goto 8888
     endif 
     !
@@ -325,11 +325,11 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     if (istat /= 0) then
        select case (istat)
        case(1)
-          call prterr(lundia, 'G004', trim(filmor), gdp)
+          call prterr(lundia, 'G004', trim(filmor))
        case(3)
-          call prterr(lundia, 'G006', trim(filmor), gdp)
+          call prterr(lundia, 'G006', trim(filmor))
        case default
-          call prterr(lundia, 'G007', trim(filmor), gdp)
+          call prterr(lundia, 'G007', trim(filmor))
        endselect
        call d3stop(1, gdp)
     endif
@@ -741,7 +741,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
           !
           ! file not found
           !
-          call prterr(lundia    ,'G004'    ,filmor(1:lfile)    ,gdp       )
+          call prterr(lundia    ,'G004'    ,filmor(1:lfile)    )
        endif
     endif
     !
@@ -771,7 +771,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     allocate (gdp%gdmorpar%xx(nxx), stat = istat)
     !
     if (istat /= 0) then
-       call prterr(lundia, 'U021', 'RDMOR: memory alloc error', gdp)
+       call prterr(lundia, 'U021', 'RDMOR: memory alloc error')
        call d3stop(1, gdp)
     endif
     !
@@ -830,7 +830,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        if (nval /= 1) then
           write(errmsg,'(i3,3a)') nval, ' MorFac parameters specified in file ', &
                                 & trim(getfilename(morfacfile)), 'instead of 1.'
-          call prterr(lundia, 'U021', errmsg, gdp)
+          call prterr(lundia, 'U021', errmsg)
           call d3stop(1, gdp)
        endif
        call flw_checktable(morfacfile , morfactable    , &
@@ -1068,7 +1068,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     if (sus < 0.0_fp .or. bed < 0.0_fp) then
        error  = .true.
        errmsg = 'SUS or BED less than 0.0'
-       call prterr(lundia, 'U021', errmsg, gdp)
+       call prterr(lundia, 'U021', errmsg)
     endif
     !
     ! errortrap THETSD
@@ -1076,7 +1076,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     if (thetsd < 0.0_fp .or. thetsd > 1.0_fp) then
        error  = .true.
        errmsg = 'THETSD must be in range 0 - 1'
-       call prterr(lundia, 'U021', errmsg, gdp)
+       call prterr(lundia, 'U021', errmsg)
     endif
     !
     ! Echo boundary conditions
@@ -1089,7 +1089,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     !
     allocate(parnames(lsedtot*2), stat = istat)
     if (istat /= 0) then
-       call prterr(lundia, 'U021', 'RDMOR: memory alloc error', gdp)
+       call prterr(lundia, 'U021', 'RDMOR: memory alloc error')
        call d3stop(1, gdp)
     endif
     do j = 1, nto
@@ -1198,12 +1198,12 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
                 errmsg = 'Invalid number of parameters specified for ''' // &
                    & trim(parname) // ''' at ''' // nambnd(j) // ''' in ' // &
                    & trim(bcmfilnam)
-                call prterr(lundia, 'U021', errmsg, gdp)
+                call prterr(lundia, 'U021', errmsg)
                 call d3stop(1, gdp)
              endif
           else
              errmsg = 'Missing input file for morphological boundary conditions'
-             call prterr(lundia, 'U021', errmsg, gdp)
+             call prterr(lundia, 'U021', errmsg)
              call d3stop(1, gdp)
           endif
        endif

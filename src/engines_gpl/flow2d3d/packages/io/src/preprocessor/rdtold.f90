@@ -89,7 +89,7 @@ subroutine rdtold(lunrd     ,lundia    ,error     ,filnam    ,ntimrd    , &
        if (iocond<0) then
           if (itold<itstop) then
              errmsg = 'Last time in ' // filnam // ' <'
-             call prterr(lundia    ,'U042'    ,errmsg    ,gdp       )
+             call prterr(lundia    ,'U042'    ,errmsg    )
              !
              error = .true.
           endif
@@ -97,7 +97,7 @@ subroutine rdtold(lunrd     ,lundia    ,error     ,filnam    ,ntimrd    , &
           !
           !-------------error (IOCOND > 0), not allowed
           !
-          call prterr(lundia    ,'G007'    ,filnam    ,gdp       )
+          call prterr(lundia    ,'G007'    ,filnam    )
           !
           write (lundia, '(a,f12.3)') 'RECORD: ', timrd
           error = .true.
@@ -124,7 +124,7 @@ subroutine rdtold(lunrd     ,lundia    ,error     ,filnam    ,ntimrd    , &
        !
        if (iocond/=0) then
           error = .true.
-          call prterr(lundia    ,'G007'    ,filnam    ,gdp       )
+          call prterr(lundia    ,'G007'    ,filnam    )
           !
           write (lundia, '(a,a)') 'RECORD: ', rec72
           goto 9999

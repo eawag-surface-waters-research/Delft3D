@@ -216,7 +216,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
        if (istat==0) allocate (sverosed%sucor  (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
        if (istat==0) allocate (sverosed%svcor  (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
        if (istat/=0) then
-          call prterr(lundia, 'U021', 'Inised: memory alloc error', gdp)
+          call prterr(lundia, 'U021', 'Inised: memory alloc error')
           call d3stop(1, gdp)
        endif
     dm                  => gdp%gderosed%dm
@@ -258,7 +258,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
        !
        allocate (gdsedpar%sedd50fld(gdp%d%nmlb:gdp%d%nmub), stat = istat)
        if (istat /= 0) then
-          call prterr(lundia, 'U021', 'Inised: memory alloc error', gdp)
+          call prterr(lundia, 'U021', 'Inised: memory alloc error')
           call d3stop(1, gdp)
        endif
     mdcuni              => gdp%gdsedpar%mdcuni
@@ -329,7 +329,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
           do nm = 1, nmmax
              if (kcs(nm) == 1) then
                 if (comparereal(tcrdep(nm,ll), eps_plt) /= 1) then
-                   call prterr(lundia, 'G051', 'Critical shear stress for deposition of mud is 0.0 in at least one cell', gdp)
+                   call prterr(lundia, 'G051', 'Critical shear stress for deposition of mud is 0.0 in at least one cell')
                    exit
                 endif
              endif
@@ -356,7 +356,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
           do nm = 1, nmmax
              if (kcs(nm) == 1) then
                 if (comparereal(tcrero(nm,ll), eps_plt) /= 1) then
-                   call prterr(lundia, 'U021', 'Critical shear stress for erosion of mud must be > 0.0', gdp)
+                   call prterr(lundia, 'U021', 'Critical shear stress for erosion of mud must be > 0.0')
                    call d3stop(1, gdp)
                 endif
              endif

@@ -125,7 +125,7 @@ subroutine rdusrc(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
        !
        if (lerror) then
           lerror = .false.
-          call prterr(lundia    ,'V221'    ,'real'    ,gdp       )
+          call prterr(lundia    ,'V221'    ,'real'    )
           !
           if (noui) error = .true.
           goto 9999
@@ -155,7 +155,7 @@ subroutine rdusrc(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
        !
        if (lerror) then
           lerror = .false.
-          call prterr(lundia    ,'V221'    ,'integer' ,gdp       )
+          call prterr(lundia    ,'V221'    ,'integer' )
           !
           if (noui) error = .true.
           goto 9999
@@ -188,7 +188,7 @@ subroutine rdusrc(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
           !
           if (lerror) then
              lerror = .false.
-             call prterr(lundia    ,'V221'    ,'character'          ,gdp       )
+             call prterr(lundia    ,'V221'    ,'character'          )
              !
              if (noui) error = .true.
              exit

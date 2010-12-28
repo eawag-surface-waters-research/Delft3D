@@ -240,7 +240,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           if (filout==fildis) then
              inquire (file = filout(:8 + lrid), exist = ex)
              if (.not.ex) then
-                call prterr(lundia    ,'G004'    ,filout    ,gdp       )
+                call prterr(lundia    ,'G004'    ,filout    )
                 !
                 error = .true.
                 goto 9999
@@ -255,7 +255,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              ! Not able to read record length for direct access
              !
              if (iocond/=0) then
-                call prterr(lundia    ,'U081'    ,filout    ,gdp       )
+                call prterr(lundia    ,'U081'    ,filout    )
                 !
                 error = .true.
                 goto 9999
@@ -298,7 +298,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 open (lunrd, file = fildis(:lf), form = 'formatted',            &
                      & status = 'old')
                 write (message, '(2a)') 'Reading Discharge file ', fildis(:lf)
-                call prterr(lundia, 'G051', trim(message), gdp)
+                call prterr(lundia, 'G051', trim(message))
                 nrval = 1 + lstsc
                 call rdtdd(lundia    ,lunout    ,lunrd     ,error     ,fildis    , &
                          & runid     ,cntain    ,eol       ,itstrt    ,itstop    , &
@@ -314,7 +314,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 open (lunrd, file = fildis(:lf), form = 'formatted',            &
                      & status = 'old')
                 write (message, '(2a)') 'Reading Discharge file ', fildis(:lf)
-                call prterr(lundia, 'G051', trim(message), gdp)
+                call prterr(lundia, 'G051', trim(message))
                 maxval = 1 + lstsc + 2
                 call rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
                           & fildis    ,runid     ,eol       ,itstrt    ,itstop    , &
@@ -328,7 +328,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 ! Define "fake" timeframe
                 !
                 write (message, '(3a)') 'Discharge file ', fildis(:lf), ' will be skipped in TDATOM'
-                call prterr(lundia, 'G051', trim(message), gdp)
+                call prterr(lundia, 'G051', trim(message))
              endif
           else
              error = .true.
@@ -389,7 +389,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !<==
        ndistm = ndistm/nsrc
        if (ndistm>mxdist .and. .not.noui) then
-          call prterr(lundia    ,'U153'    ,' '       ,gdp       )
+          call prterr(lundia    ,'U153'    ,' '       )
           !
           ndistm = mxdist
        endif
@@ -479,7 +479,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 ! check for negative values
                 !
                 if (cqs(idis, n)<0.0) then
-                   call prterr(lundia    ,'V061'    ,'Salinity at discharge point'   ,gdp       )
+                   call prterr(lundia    ,'V061'    ,'Salinity at discharge point'   )
                    !
                    if (noui) error = .true.
                    goto 700
@@ -514,7 +514,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 ! check for negative values
                 !
                 if (cqt(idis, n)<0.0) then
-                   call prterr(lundia    ,'V061'    ,'Temperature at discharge point',gdp       )
+                   call prterr(lundia    ,'V061'    ,'Temperature at discharge point')
                    !
                    if (noui) error = .true.
                    goto 700
@@ -550,7 +550,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                    ! check for negative values
                    !
                    if (cqc(l, idis, n)<0.0) then
-                      call prterr(lundia    ,'V061'    ,'Concentration at discharge point'         ,gdp       )
+                      call prterr(lundia    ,'V061'    ,'Concentration at discharge point'         )
                       !
                       if (noui) error = .true.
                       goto 700
@@ -630,7 +630,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
   700  continue
        if (itold/= - 1) then
             if (itold<itstop) then 
-                call prterr(lundia    ,'U042'    ,'Last time for time varying discharge rates <',    gdp       )
+                call prterr(lundia    ,'U042'    ,'Last time for time varying discharge rates <')
                 error = .true.
                 goto 9999
             endif

@@ -105,7 +105,7 @@ subroutine read2c(lunmd     ,error     ,keyw      ,newkw     ,nlook     , &
     !
     if (.not.found) then
        if (nlook>0) then
-          call prterr(lundia    ,'U100'    ,keyw      ,gdp       )
+          call prterr(lundia    ,'U100'    ,keyw      )
           !
           nlook = -1
           error = .true.
@@ -131,7 +131,7 @@ subroutine read2c(lunmd     ,error     ,keyw      ,newkw     ,nlook     , &
           endif
        endif
        if (error) then
-          call prterr(lundia    ,'U036'    ,keyw      ,gdp       )
+          call prterr(lundia    ,'U036'    ,keyw      )
           !
           nlook = -1
        endif

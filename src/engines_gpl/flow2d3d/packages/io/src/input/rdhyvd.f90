@@ -176,7 +176,7 @@ subroutine rdhyvd(error     ,nrrec     ,mdfrec    ,noui      ,filedy    , &
     if (htur2d) then
        write (lunscr, *) '*** HLES subgrid viscosity model activated'
        write (lundia, *) '*** HLES subgrid viscosity model activated'
-       call prterr(lundia, 'U190', 'Background viscosity/diffusivity is added to the HLES contribution (since version 3.50.09.01)', gdp)
+       call prterr(lundia, 'U190', 'Background viscosity/diffusivity is added to the HLES contribution (since version 3.50.09.01)')
        !
        ! Read HLES alpha value
        !
@@ -199,7 +199,7 @@ subroutine rdhyvd(error     ,nrrec     ,mdfrec    ,noui      ,filedy    , &
        !
        call prop_get(gdp%mdfile_ptr, '*', 'Hturrt', reltim)
        if (reltim <= 0.0_fp .and. comparereal(reltim,-1.0_fp) /= 0) then
-          call prterr(lundia, 'U021', 'Required parameter Hturrt not specified or incorrect.', gdp)
+          call prterr(lundia, 'U021', 'Required parameter Hturrt not specified or incorrect.')
           call d3stop(1, gdp)
        endif
        !

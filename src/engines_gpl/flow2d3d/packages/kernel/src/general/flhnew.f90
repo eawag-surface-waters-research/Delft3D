@@ -124,7 +124,7 @@ subroutine flhnew(lunrd     ,lundia    ,error     ,record    ,access    , &
     if (ifound== - 9999 .or. ifound==0) then
        error = .true.
        ready = .true.
-       call prterr(lundia    ,'V091'    ,keywrd(1) ,gdp       )
+       call prterr(lundia    ,'V091'    ,keywrd(1) )
     elseif (ifound == 9999) then
        if (access) then
           irecrd = irecrd + 1
@@ -138,7 +138,7 @@ subroutine flhnew(lunrd     ,lundia    ,error     ,record    ,access    , &
     ! IFOUND should be 1
     !
     elseif (ifound /= 1) then
-       call prterr(lundia    ,'V091'    ,keywrd(1) ,gdp       )
+       call prterr(lundia    ,'V091'    ,keywrd(1) )
        error = .true.
        ready = .true.
     else
@@ -205,7 +205,7 @@ subroutine flhnew(lunrd     ,lundia    ,error     ,record    ,access    , &
              !
              call keyinp(record(istart:iend)  ,cntent    )
              if (cntent == ' ') then
-                call prterr(lundia    ,'V091'    ,keywrd(ifound)       ,gdp       )
+                call prterr(lundia    ,'V091'    ,keywrd(ifound)       )
                 error = .true.
                 ready = .true.
              else
@@ -239,7 +239,7 @@ subroutine flhnew(lunrd     ,lundia    ,error     ,record    ,access    , &
                    error = .false.
                    ready = .false.
                 else
-                   call prterr(lundia    ,'V099'    ,chlp20    ,gdp       )
+                   call prterr(lundia    ,'V099'    ,chlp20    )
                    error = .true.
                    ready = .true.
                 endif
@@ -266,7 +266,7 @@ subroutine flhnew(lunrd     ,lundia    ,error     ,record    ,access    , &
              if (ier <= 0) timref = itdate
              !
              if (timref /= itdate) then
-                call prterr(lundia    ,'V093'    ,' '       ,gdp       )
+                call prterr(lundia    ,'V093'    ,' '       )
                 error = .true.
                 ready = .true.
              endif
@@ -287,7 +287,7 @@ subroutine flhnew(lunrd     ,lundia    ,error     ,record    ,access    , &
              elseif (timuni(:1) == 'w') then
                 timscl = 1440.0_fp * 7.0_fp   
              else
-                call prterr(lundia    ,'V006'    ,' '       ,gdp       )
+                call prterr(lundia    ,'V006'    ,' '       )
                 error = .true.
              endif
           elseif (ifound == 12) then
@@ -308,7 +308,7 @@ subroutine flhnew(lunrd     ,lundia    ,error     ,record    ,access    , &
              ! the location definitions
              !
              if (chlp1 /= interp) then
-                call prterr(lundia    ,'V094'    ,interp    ,gdp       )
+                call prterr(lundia    ,'V094'    ,interp    )
              endif
           elseif (ifound == 14) then
              !
@@ -319,7 +319,7 @@ subroutine flhnew(lunrd     ,lundia    ,error     ,record    ,access    , &
              call small(chlp36    ,len(chlp36)          )
              nparrd = nparrd + 1
              if (nparrd > npara) then
-                call prterr(lundia    ,'V096'    ,keywrd(ifound)       ,gdp       )
+                call prterr(lundia    ,'V096'    ,keywrd(ifound)       )
                 error = .true.
                 ready = .true.
              else
@@ -338,7 +338,7 @@ subroutine flhnew(lunrd     ,lundia    ,error     ,record    ,access    , &
                 ntimrd = idef
              endif
              if (ntimrd == idef) then
-                call prterr(lundia    ,'V091'    ,keywrd(ifound)       ,gdp       )
+                call prterr(lundia    ,'V091'    ,keywrd(ifound)       )
                 error = .true.
                 ready = .true.
              endif

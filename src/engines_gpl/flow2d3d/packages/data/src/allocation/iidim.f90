@@ -692,7 +692,7 @@ subroutine iidim(lundia, error, verify, zmodel, gdp)
     !
     if (ierr== - 3) then
        error = .true.
-       call prterr(lundia    ,'G005'    ,' '       ,gdp       )
+       call prterr(lundia    ,'G005'    ,' '       )
        write (lundia, *) '         Parameter MXIPNT to small, add ',            &
                        & nipntr - mxipnt
     endif
@@ -702,6 +702,6 @@ subroutine iidim(lundia, error, verify, zmodel, gdp)
  9999 continue
     if (ierr <= -9) then
        error = .true.
-       call prterr(lundia    ,'G920'    ,'IIDIM'   ,gdp       )
+       call prterr(lundia    ,'G920'    ,'IIDIM'   )
     endif
 end subroutine iidim

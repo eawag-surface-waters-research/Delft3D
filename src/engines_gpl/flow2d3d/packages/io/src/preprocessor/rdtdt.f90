@@ -115,7 +115,7 @@ subroutine rdtdt(lundia    ,lunout    ,lunrd     ,error     ,filbct    , &
     !
     do n = 1, ntot
        if (tprofu(ntof + n)(:10) == '3d-profile') then
-          call prterr(lundia, 'V095', 'for v248 or less', gdp)
+          call prterr(lundia, 'V095', 'for v248 or less')
           !
           error = .true.
           goto 9999
@@ -152,7 +152,7 @@ subroutine rdtdt(lundia    ,lunout    ,lunrd     ,error     ,filbct    , &
           do i = 1, 2
              if ( isnan(rwbval(i)) ) then 
                  write(errmsg,'(a,a)') 'NaN found in file ', trim(filbct)
-                 call prterr(lundia, 'P004', errmsg, gdp)
+                 call prterr(lundia, 'P004', errmsg)
                  error = .true.
                  goto 9999
              endif
@@ -224,7 +224,7 @@ subroutine rdtdt(lundia    ,lunout    ,lunrd     ,error     ,filbct    , &
     if (itold /= -1) then
        if (itold<itstop) then
           write(errmsg,'(a,a,a)') 'Last time in file ', trim(filbct), ' <' 
-          call prterr(lundia    ,'U042'    ,errmsg,    gdp       )
+          call prterr(lundia    ,'U042'    ,errmsg)
           error = .true.
        endif
     endif

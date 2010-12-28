@@ -353,7 +353,7 @@ subroutine erosilt(nmmax   ,icx     ,icy     ,kcs     ,kfs     ,kfu     , &
                 !
                 if (max_reals < 30) then
                    write(errmsg,'(a,a,a)') 'Insufficient space to pass real values to transport routine.'
-                   call prterr (lundia,'U021', trim(errmsg),gdp)
+                   call prterr (lundia,'U021', trim(errmsg))
                    call d3stop(1, gdp)
                 endif
                 dll_reals( 1) = real(timsec ,hp)
@@ -409,7 +409,7 @@ subroutine erosilt(nmmax   ,icx     ,icy     ,kcs     ,kfs     ,kfu     , &
                 !
                 if (max_integers < 4) then
                    write(errmsg,'(a,a,a)') 'Insufficient space to pass integer values to transport routine.'
-                   call prterr (lundia,'U021', trim(errmsg),gdp)
+                   call prterr (lundia,'U021', trim(errmsg))
                    call d3stop(1, gdp)
                 endif
                 call nm_to_n_and_m(nm, n, m, gdp)
@@ -420,7 +420,7 @@ subroutine erosilt(nmmax   ,icx     ,icy     ,kcs     ,kfs     ,kfu     , &
                 !
                 if (max_strings < 2) then
                    write(errmsg,'(a,a,a)') 'Insufficient space to pass strings to transport routine.'
-                   call prterr (lundia,'U021', trim(errmsg),gdp)
+                   call prterr (lundia,'U021', trim(errmsg))
                    call d3stop(1, gdp)
                 endif
                 dll_strings( 1) = gdp%runid
@@ -444,7 +444,7 @@ subroutine erosilt(nmmax   ,icx     ,icy     ,kcs     ,kfs     ,kfu     , &
                 call vsemlun
                 if (error /= 0) then
                    write(errmsg,'(a,a,a)') 'Cannot find function "',trim(dll_function(l)),'" in dynamic library.'
-                   call prterr (lundia,'U021', trim(errmsg),gdp)
+                   call prterr (lundia,'U021', trim(errmsg))
                    call d3stop(1, gdp)
                 endif
                 if (message /= ' ') then

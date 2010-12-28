@@ -338,7 +338,7 @@ subroutine inigrd(lundia    ,error     ,runid     ,nmax      ,mmax      , &
  8888 continue
     error = .true.
  9999 continue
-    if (error) call prterr(lundia, errornr, errmsg, gdp)
+    if (error) call prterr(lundia, errornr, errmsg)
     !
     !
     ! close and delete unformatted scratch file for grid (see rdgrid)

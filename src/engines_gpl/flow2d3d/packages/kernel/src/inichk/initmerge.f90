@@ -123,7 +123,7 @@ subroutine initmerge (nmmax, lsed, runid, gdp)
        !
        mergehandle = getstream(filhand)
     else
-       call prterr(lundia, 'U021', 'File named streamfile not found', gdp)
+       call prterr(lundia, 'U021', 'File named streamfile not found')
        call d3stop(1,gdp)
     endif
     rn(1) = nmmax * 1.0_hp
@@ -135,7 +135,7 @@ subroutine initmerge (nmmax, lsed, runid, gdp)
     !
     allocate (gdp%gdmorpar%mergebuf(nmmax*lsed), stat = istat)
     if (istat /= 0) then
-       call prterr(lundia, 'U021', 'Initmerge: memory alloc error', gdp)
+       call prterr(lundia, 'U021', 'Initmerge: memory alloc error')
        call d3stop(1,gdp)
     endif
 end subroutine initmerge

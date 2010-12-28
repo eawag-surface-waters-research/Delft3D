@@ -620,7 +620,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
               & noui      ,runtxt    ,gdp       )
     if (error) goto 9999
     !
-    if (zmodel) call prterr(lundia    ,'G051'    ,'Z-model used' ,gdp       )
+    if (zmodel) call prterr(lundia    ,'G051'    ,'Z-model used' )
     !
     ! Read grid information
     !
@@ -997,7 +997,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     !
     if (comparereal(fwfac,1.0_fp) /= 0) then
        write (message, '(a,f8.4)') 'Tuning parameter for wave streaming (fwfac) :', fwfac
-       call prterr(lundia, 'G051', trim(message), gdp)
+       call prterr(lundia, 'G051', trim(message))
     endif
     !
  9999 continue

@@ -173,7 +173,7 @@ subroutine rwbcb(lundia    ,lunrd     ,filinp    ,error     ,itstrt    , &
                     & idef      ,ierror   )
           if (ierror<=0) goto 7777
           if (timref/=itdate) then
-             call prterr(lundia    ,'P004'    ,'Reference time must be equal to model reference time '          ,gdp       )
+             call prterr(lundia    ,'P004'    ,'Reference time must be equal to model reference time '          )
              !
              goto 7777
           endif
@@ -196,7 +196,7 @@ subroutine rwbcb(lundia    ,lunrd     ,filinp    ,error     ,itstrt    , &
              timscl = -1.0
           endif
           if (timscl<0.0) then
-             call prterr(lundia    ,'P004'    ,'Time unit must be seconds, minutes, hours or days '  ,gdp       )
+             call prterr(lundia    ,'P004'    ,'Time unit must be seconds, minutes, hours or days '  )
              !
              goto 7777
           endif
@@ -208,7 +208,7 @@ subroutine rwbcb(lundia    ,lunrd     ,filinp    ,error     ,itstrt    , &
           call keyinp(crecrd(stapos:endpos),inte20    )
           if (inte20==' ') goto 7777
           if (inte20(1:6)/='linear' .and. inte20(1:5)/='block') then
-             call prterr(lundia    ,'P004'    ,'Interpolation must be ''linear'' or ''block'' '      ,gdp       )
+             call prterr(lundia    ,'P004'    ,'Interpolation must be ''linear'' or ''block'' '      )
              !
              goto 7777
           endif
@@ -223,7 +223,7 @@ subroutine rwbcb(lundia    ,lunrd     ,filinp    ,error     ,itstrt    , &
           call read1i(crecrd    ,lrec      ,stapos    ,endpos    ,nrecs     , &
                     & idef      ,ierror   )
           if (nrecs<=0) then
-             call prterr(lundia    ,'P004'    ,'Records in table must be > 0 ' ,gdp       )
+             call prterr(lundia    ,'P004'    ,'Records in table must be > 0 ' )
              !
              goto 7777
           endif
@@ -246,13 +246,13 @@ subroutine rwbcb(lundia    ,lunrd     ,filinp    ,error     ,itstrt    , &
        !------ Location
   600  continue
        if (.not.lkeyfd(3)) then
-          call prterr(lundia    ,'P004'    ,'No location in header '        ,gdp       )
+          call prterr(lundia    ,'P004'    ,'No location in header '        )
           !
           goto 7777
        endif
        !------ Records in table
        if (.not.lkeyfd(16)) then
-          call prterr(lundia    ,'P004'    ,'No number of records given '   ,gdp       )
+          call prterr(lundia    ,'P004'    ,'No number of records given '   )
           !
           goto 7777
        endif
@@ -344,7 +344,7 @@ subroutine rwbcb(lundia    ,lunrd     ,filinp    ,error     ,itstrt    , &
        if (itold/= - 1) then
           if (itold<itstop) then
              write(errmsg,'(a,a,a,a,a)') 'Last time in file ', trim(filinp), ' for location #',trim(loca20),'# <' 
-             call prterr(lundia    ,'U042'    ,errmsg,    gdp       )
+             call prterr(lundia    ,'U042'    ,errmsg)
              error = .true.
              goto 9999
           endif
@@ -363,7 +363,7 @@ subroutine rwbcb(lundia    ,lunrd     ,filinp    ,error     ,itstrt    , &
     write (crecrd, '(i12)') icurec
     call noextspaces(crecrd    ,lcurec    )
     errmsg = filinp(1:lninp) // ', Record: ' // crecrd(1:lcurec)
-    call prterr(lundia    ,'G007'    ,errmsg    ,gdp       )
+    call prterr(lundia    ,'G007'    ,errmsg    )
     !
     goto 9999
     !
@@ -374,7 +374,7 @@ subroutine rwbcb(lundia    ,lunrd     ,filinp    ,error     ,itstrt    , &
  8888 continue
     if (.not.lnewtb) then
        error = .true.
-       call prterr(lundia    ,'G006'    ,filinp(1:lninp)      ,gdp       )
+       call prterr(lundia    ,'G006'    ,filinp(1:lninp)      )
     !
     endif
     !

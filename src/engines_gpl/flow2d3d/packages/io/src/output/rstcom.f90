@@ -196,7 +196,7 @@ subroutine rstcom(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
     ! diagnostic file
     !
     if (ntcurr > maxtim) then
-       call prterr(lundia    ,'D008'    ,' '       ,gdp       )
+       call prterr(lundia    ,'D008'    ,' '       )
        error = .true.
        goto 9999
     endif
@@ -319,7 +319,7 @@ subroutine rstcom(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
  9999 continue
     if (ierr /= 0) then
        ierr = neferr(0, errmsg)
-       call prterr(lundia, 'P004', errmsg, gdp)
+       call prterr(lundia, 'P004', errmsg)
        error = .true.
     endif
 end subroutine rstcom

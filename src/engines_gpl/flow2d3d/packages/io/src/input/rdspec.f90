@@ -215,14 +215,14 @@ subroutine rdspec(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 upwsrc = 0 
              else 
                 write(message,'(a,a)') 'UPWSRC should be [Y/N/Momentum only], but found: ', trim(chulp) 
-                call prterr(lundia    ,'P004'    ,trim(message)      ,gdp       ) 
+                call prterr(lundia    ,'P004'    ,trim(message)      )
                 error = .true. 
                 goto 9999 
              endif 
               
           endif 
        endif 
-       call prterr(lundia    ,'G051'    ,txtput      ,gdp       ) 
+       call prterr(lundia    ,'G051'    ,txtput      )
        ! 
        ! Read discharge location definitions from file only if 
        ! NOUI = .true. Stop if reading error occurred or file did not exist (error  = .true.) 
@@ -267,7 +267,7 @@ subroutine rdspec(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              namsrc(n) = chulp 
              if (namsrc(n) == cdef) then 
                 if (noui) error = .true. 
-                call prterr(lundia, 'V012', ' ', gdp) 
+                call prterr(lundia, 'V012', ' ')
              endif 
           endif 
           ! 
@@ -334,7 +334,7 @@ subroutine rdspec(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        do n = 1, nr - 1 
           if (namsrc(n) == namsrc(nr)) then 
              if (noui) error = .true. 
-             call prterr(lundia, 'U173', namsrc(nr), gdp) 
+             call prterr(lundia, 'U173', namsrc(nr))
           endif 
        enddo 
     enddo 
@@ -422,7 +422,7 @@ subroutine rdspec(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                .or. (     (mfl<=m2 .and. m2<=mll .and. nfl<=n2 .and. n2<=nll)       &
                      .and.(m1<mfl  .or.  mll<m1  .or.  n1<nfl  .or.  nll<n1 )  ) ) then 
              write (message,'(a,a,a)') 'Inlet and outfall of discharge "',trim(namsrc(n)),'" are in different partitions' 
-             call prterr( lundia, 'P004', trim(message), gdp )
+             call prterr( lundia, 'P004', trim(message))
              error = .true.
              goto 9999
           elseif ( min(m1,m2) < mfl .or. min(n1,n2) < nfl .or. max(m1,m2) > mll .or. max(n1,n2) > nll ) then 
@@ -433,14 +433,14 @@ subroutine rdspec(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              mnksrc(3,n) = -1
              mnksrc(6,n) = -1
              write(message,'(a,3(i0,a))') 'Discharge (m,n,k)=(', mnksrc(1, n), ',', mnksrc(2, n), ',', mnksrc(3, n), ') is disabled: inlet and/or outfall not in this partition'
-             call prterr( lundia, 'U190', trim(message), gdp ) 
+             call prterr( lundia, 'U190', trim(message))
           endif
           if (mnksrc(7,n) == 1) then
              !
              ! parallel and walking discharge disabled: what if the discharge walks outside partition?
              !
              write (message,'(a,a,a)') 'Discharge "',trim(namsrc(n)),'" is a walking discharge and is not supported when running parallel.' 
-             call prterr( lundia, 'P004', trim(message), gdp )
+             call prterr( lundia, 'P004', trim(message))
              error = .true.
              goto 9999
           endif
@@ -449,7 +449,7 @@ subroutine rdspec(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              ! parallel and culvert disabled: rdcul and culver must be adapted to support a culvert with inlet and outfall in the same partition
              !
              write (message,'(a,a,a)') 'Discharge "',trim(namsrc(n)),'" is a culvert and is not supported when running parallel.' 
-             call prterr( lundia, 'P004', trim(message), gdp )
+             call prterr( lundia, 'P004', trim(message))
              error = .true.
              goto 9999
           endif

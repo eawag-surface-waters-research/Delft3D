@@ -250,7 +250,7 @@ subroutine timers_init (gdp)
                     allocate (gdp%gdtimers%usedcp(numtimers,4), stat = istat)
     if (istat == 0) allocate (gdp%gdtimers%names (numtimers)  , stat = istat)
     if (istat /= 0) then
-       call prterr(gdp%gdinout%lundia, 'U021', 'timers_init: memory alloc error', gdp)
+       call prterr(gdp%gdinout%lundia, 'U021', 'timers_init: memory alloc error')
        call d3stop(1, gdp)
     endif
     gdp%gdtimers%names(timer_total)            = 'Total'
@@ -453,7 +453,7 @@ subroutine timer_start (timnum, gdp)
        !
        if (gdp%errorcode == 0) then
           write (message,'(3a)') 'Timer_start: Timer ', trim(gdp%gdtimers%names(timnum)), ' has already been started'
-          call prterr(gdp%gdinout%lundia, 'U190', trim(message), gdp)
+          call prterr(gdp%gdinout%lundia, 'U190', trim(message))
        endif
     endif
     call system_clock(tcount, trate, tmax)
@@ -542,7 +542,7 @@ subroutine timer_stop (timnum, gdp)
        !
        if (gdp%errorcode == 0) then
           write (message,'(3a)') 'Timer_stop: Timer ', trim(gdp%gdtimers%names(timnum)), ' has not been started'
-          call prterr(gdp%gdinout%lundia, 'U190', trim(message), gdp)
+          call prterr(gdp%gdinout%lundia, 'U190', trim(message))
        endif
        call system_clock(tcount, trate, tmax)
        call cpu_time(cputim)
@@ -589,7 +589,7 @@ subroutine timers_finish (gdp)
 !
     if (.not. gdp%gdtimers%initialized) then
        write (message,'(a)') 'Timers_finish: Timers not initialized; can not produce timer output.'
-       call prterr(gdp%gdinout%lundia, 'U190', trim(message), gdp)
+       call prterr(gdp%gdinout%lundia, 'U190', trim(message))
        return
     endif
     !
@@ -621,7 +621,7 @@ subroutine timers_finish (gdp)
           !
           if (gdp%errorcode == 0) then
              write (message,'(3a)') 'Timer_finish: Timer ', trim(gdp%gdtimers%names(i)), ' has not been stopped'
-             call prterr(lundia, 'U190', trim(message), gdp)
+             call prterr(lundia, 'U190', trim(message))
           endif
           call timer_stop(i, gdp)
        endif

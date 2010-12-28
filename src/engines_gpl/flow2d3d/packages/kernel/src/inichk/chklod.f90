@@ -65,7 +65,7 @@ subroutine chklod(lundia    ,error     ,nto       ,kmax      ,nsrc      , &
     !-----test NTO from DIMRD with maximum value MXNTO
     !
     if (nto>mxnto) then
-       call prterr(lundia    ,'G015'    ,' '       ,gdp       )
+       call prterr(lundia    ,'G015'    ,' '       )
        !
        error = .true.
     endif
@@ -73,7 +73,7 @@ subroutine chklod(lundia    ,error     ,nto       ,kmax      ,nsrc      , &
     !-----test KMAX from DIMRD with maximum value MXKMAX
     !
     if (kmax>mxkmax) then
-       call prterr(lundia    ,'G016'    ,' '       ,gdp       )
+       call prterr(lundia    ,'G016'    ,' '       )
        !
        error = .true.
     endif
@@ -81,7 +81,7 @@ subroutine chklod(lundia    ,error     ,nto       ,kmax      ,nsrc      , &
     !-----test NSRC from DIMRD with maximum value MXNSRC
     !
     if (nsrc>mxnsrc) then
-       call prterr(lundia    ,'G050'    ,' '       ,gdp       )
+       call prterr(lundia    ,'G050'    ,' '       )
        !
        error = .true.
     endif

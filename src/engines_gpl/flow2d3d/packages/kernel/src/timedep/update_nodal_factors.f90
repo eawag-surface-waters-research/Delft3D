@@ -107,7 +107,7 @@ subroutine update_nodal_factors(timnow, kc, ntof, nto, kcd, hydrbc, omega, gdp)
     need_update = ((timnow - time_nodal_update_bnd) * dt >= ti_nodal)
     if ((is_first .or. need_update) .and. ascon == 'Y' .and. kc > 0 .and. ntof > 0) then
        write (message, '(2a)') 'Nodal factors updated at ', date_time
-       call prterr(lundia, 'G051', trim(message), gdp)
+       call prterr(lundia, 'G051', trim(message))
        !
        ! initialisations for A0:
        !
@@ -128,7 +128,7 @@ subroutine update_nodal_factors(timnow, kc, ntof, nto, kcd, hydrbc, omega, gdp)
           time_nodal_update_bnd = timnow
           allocate(v0u(kc-1), fr(kc-1), w(kc-1), stat=ierrs)
           if (ierrs /= 0) then
-             call prterr(lundia, 'U021', 'Update nodal factors: memory alloc error', gdp)
+             call prterr(lundia, 'U021', 'Update nodal factors: memory alloc error')
              call d3stop(1, gdp)
           endif
           !

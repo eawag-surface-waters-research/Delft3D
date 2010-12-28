@@ -134,7 +134,7 @@ subroutine rdnamc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        if (namcon(lnconc)==cdef) then
           if (noui) error = .true.
-          call prterr(lundia    ,'V015'    ,' '       ,gdp       )
+          call prterr(lundia    ,'V015'    ,' '       )
        endif
        !
        ! Define constituent name in small characters

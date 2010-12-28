@@ -242,19 +242,19 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                  & mnbnd     ,alpha     ,tprofu    ,statns    ,gdp       )
        if (error) goto 9999
        if (lnto/=nto) then
-          call prterr(lundia    ,'U145'    ,' '       ,gdp       )
+          call prterr(lundia    ,'U145'    ,' '       )
           !
           error = .true.
           goto 9999
        endif
        if (lntof/=ntof) then
-          call prterr(lundia    ,'U145'    ,' '       ,gdp       )
+          call prterr(lundia    ,'U145'    ,' '       )
           !
           error = .true.
           goto 9999
        endif
        if (lntoq/=ntoq) then
-          call prterr(lundia    ,'U145'    ,' '       ,gdp       )
+          call prterr(lundia    ,'U145'    ,' '       )
           error = .true.
           goto 9999
        endif
@@ -299,7 +299,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              if (noui) error = .true.
              lerror = .false.
              nambnd(n) = cdefn
-             call prterr(lundia    ,'U150'    ,' '       ,gdp       )
+             call prterr(lundia    ,'U150'    ,' '       )
           else
              nambnd(n) = chulp(1)
           endif
@@ -422,7 +422,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           !
           inprof = index(profil, tprofu(n))
           if (inprof == 0) then
-             call prterr(lundia    ,'U066'    ,chulp(1)  ,gdp       )
+             call prterr(lundia    ,'U066'    ,chulp(1)  )
              tprofu(n) = cdefp
              if (noui) error = .true.
           endif
@@ -431,7 +431,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           ! (DATBND(N) = 'T')
           !
           if (datbnd(n)/='T' .and. tprofu(n)(:10)=='3d-profile') then
-             call prterr(lundia ,'U021' ,'<3D-profile> not allowed for H/A/Q open boundary definitions' ,gdp)
+             call prterr(lundia ,'U021' ,'<3D-profile> not allowed for H/A/Q open boundary definitions' )
              tprofu(n) = cdefp
              if (noui) error = .true.
           endif
@@ -457,7 +457,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              ! read; is not correct
              !
              if (nlook /= 2) then
-                call prterr(lundia    ,'U036'    ,keyw      ,gdp       )
+                call prterr(lundia    ,'U036'    ,keyw      )
                 lerror = .false.
              elseif (lerror) then
                 lerror = .false.
@@ -486,7 +486,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        do nn = 1, n - 1
           if (nambnd(nn)==nambnd(n)) then
              if (noui) error = .true.
-             call prterr(lundia    ,'U174'    ,nambnd(n) ,gdp       )
+             call prterr(lundia    ,'U174'    ,nambnd(n) )
           endif
        enddo
     enddo
@@ -499,7 +499,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     if (.not.parll .and. .not.yestdd) then
        allocate (gdp%gdbcdat%bct_order(nn), stat=istat)
        if (istat /= 0) then
-          call prterr(lundia, 'P004', 'memory alloc error in rdbndd', gdp)
+          call prterr(lundia, 'P004', 'memory alloc error in rdbndd')
           call d3stop(1, gdp)
        endif
        bct_order => gdp%gdbcdat%bct_order
@@ -517,7 +517,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           !
           if ( mnbnd(1,n)<1 .or. mnbnd(2,n)<1 .or. mnbnd(3,n)<1 .or. mnbnd(4,n)<1 ) then
              if (noui) error = .true.
-             call prterr( lundia, 'U151', ' ', gdp )
+             call prterr( lundia, 'U151', ' ')
              mnbnd(1, n) = max(mnbnd(1, n), 1)
              mnbnd(2, n) = max(mnbnd(2, n), 1)
              mnbnd(3, n) = max(mnbnd(3, n), 1)
@@ -525,7 +525,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           endif
           if ( mnbnd(1,n)>mmaxgl .or. mnbnd(2,n)>nmaxgl .or. mnbnd(3,n)>mmaxgl .or. mnbnd(4,n)>nmaxgl ) then
              if (noui) error = .true.
-             call prterr( lundia, 'U151', ' ', gdp )
+             call prterr( lundia, 'U151', ' ')
              mnbnd(1, n) = min(mnbnd(1, n), mmaxgl)
              mnbnd(2, n) = min(mnbnd(2, n), nmaxgl)
              mnbnd(3, n) = min(mnbnd(3, n), mmaxgl)
@@ -564,7 +564,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        if (istat == 0) allocate(itemp(7,nn), stat=istat)
        if (istat == 0) allocate(rtemp(  nn), stat=istat)
        if (istat /= 0) then
-          call prterr(lundia, 'P004', 'memory alloc error in rdbndd', gdp)
+          call prterr(lundia, 'P004', 'memory alloc error in rdbndd')
           call d3stop(1, gdp)
        endif
        bct_order => gdp%gdbcdat%bct_order
@@ -620,7 +620,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        if (nambnd(n)==' ') then
           write (cdefn(18:20), '(i3)') n
           nambnd(n) = cdefn
-          call prterr(lundia    ,'U150'    ,' '       ,gdp       )
+          call prterr(lundia    ,'U150'    ,' '       )
        endif
        !
        ! typbnd should be one of the pre-defined types
@@ -628,7 +628,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        if (      typbnd(n)/='Z' .and. typbnd(n)/='C' .and. typbnd(n)/='Q' &
          & .and. typbnd(n)/='R' .and. typbnd(n)/='T' .and. typbnd(n)/='N'  ) then
           if (noui) error = .true.
-          call prterr(lundia    ,'U047'    ,' '       ,gdp       )
+          call prterr(lundia    ,'U047'    ,' '       )
           typbnd(n) = cdeft
        endif
        !
@@ -638,7 +638,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
          & datbnd(n)/='Q') then
           if (noui) error = .true.
           write (errmsg, '(i3)') n
-          call prterr(lundia    ,'V004'    ,errmsg    ,gdp       )
+          call prterr(lundia    ,'V004'    ,errmsg    )
           datbnd(n) = cdefd
        endif
        !
@@ -647,11 +647,11 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        if ((datbnd(n)=='H' .or. datbnd(n)=='A') .and. ntest/=0) then
           if (noui) error = .true.
-          call prterr(lundia    ,'U039'    ,' '       ,gdp       )
+          call prterr(lundia    ,'U039'    ,' '       )
        elseif (datbnd(n)=='Q') then
           if (ntest>1) then
              if (noui) error = .true.
-             call prterr(lundia    ,'U078'    ,' '       ,gdp       )
+             call prterr(lundia    ,'U078'    ,' '       )
           else
              ntest = 1
           endif
@@ -665,20 +665,20 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        if (ascon=='Y' .and. datbnd(n)=='H' .or. ascon=='N' .and. datbnd(n)=='A')&
          & then
           if (noui) error = .true.
-          call prterr(lundia    ,'U065'    ,' '       ,gdp       )
+          call prterr(lundia    ,'U065'    ,' '       )
        endif
        !
        ! test consistency for QH relations
        !
        if (datbnd(n)=='Q' .and. typbnd(n)/='Z') then
           if (noui) error = .true.
-          call prterr(lundia    ,'U077'    ,' '       ,gdp       )
+          call prterr(lundia    ,'U077'    ,' '       )
        endif
        if (mnbnd(5,n) /= 0) then
           if (tprofu(n) /= 'uniform') then
              write(message,'(3a)') 'Restricted vertical opening on a non-uniform open boundary (', &
                                & trim(nambnd(n)), ') is not supported.'
-             call prterr(lundia, 'P004', trim(message), gdp)
+             call prterr(lundia, 'P004', trim(message))
              error = .true.
           endif
           if (     mnbnd(5,n) < 1         &
@@ -686,13 +686,13 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
             & .or. mnbnd(5,n) > mnbnd(6,n) ) then
              write(message,'(3a)') 'Improper vertical specification of open boundary ', &
                                & trim(nambnd(n)), '. Default is used.'
-             call prterr(lundia, 'P004', trim(message), gdp)
+             call prterr(lundia, 'P004', trim(message))
              mnbnd(5,n) = 0
              error = .true.
           else
              write(message,'(3a,i0,a,i0)') 'Open boundary ', trim(nambnd(n)), &
                  & ' is restricted to the layers with number ', mnbnd(5,n), ' to ', mnbnd(6,n)
-             call prterr(lundia, 'G051', trim(message), gdp)
+             call prterr(lundia, 'G051', trim(message))
           endif
        endif
        !
@@ -701,7 +701,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        if ( parll .and. .not.yestdd ) cycle
        if (mnbnd(1, n)<1 .or. mnbnd(2, n)<1 .or. mnbnd(3, n)<1 .or. mnbnd(4, n)<1) then
           if (noui) error = .true.
-          call prterr(lundia    ,'U151'    ,' '       ,gdp       )
+          call prterr(lundia    ,'U151'    ,' '       )
           !
           mnbnd(1, n) = max(mnbnd(1, n), 1)
           mnbnd(2, n) = max(mnbnd(2, n), 1)
@@ -711,7 +711,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        if (mnbnd(1, n)>mmax .or. mnbnd(2, n)>nmaxus .or. mnbnd(3, n)>mmax .or.  &
          & mnbnd(4, n)>nmaxus) then
           if (noui) error = .true.
-          call prterr(lundia    ,'U151'    ,' '       ,gdp       )
+          call prterr(lundia    ,'U151'    ,' '       )
           mnbnd(1, n) = min(mnbnd(1, n), mmax)
           mnbnd(2, n) = min(mnbnd(2, n), nmaxus)
           mnbnd(3, n) = min(mnbnd(3, n), mmax)
@@ -723,7 +723,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     allocate (gdp%gdbcdat%ext_bnd(nto), stat=istat)
     if (istat /= 0) then
-       call prterr(lundia, 'P004', 'memory alloc error in rdbndd(ext_bnd)', gdp)
+       call prterr(lundia, 'P004', 'memory alloc error in rdbndd(ext_bnd)')
        call d3stop(1, gdp)
     endif
     gdp%gdbcdat%ext_bnd = 0

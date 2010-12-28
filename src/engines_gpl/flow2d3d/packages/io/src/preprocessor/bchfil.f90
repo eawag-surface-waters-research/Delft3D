@@ -108,9 +108,9 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
           read (luntmp, iostat = iocond) (omega(k), k = 1, kc)
           if (iocond /= 0) then
              if (iocond < 0) then
-                call prterr(lundia, 'G006', filbch(1:lfile), gdp)
+                call prterr(lundia, 'G006', filbch(1:lfile))
              else
-                call prterr(lundia, 'G007', filbch(1:lfile), gdp)
+                call prterr(lundia, 'G007', filbch(1:lfile))
              endif
              error = .true.
              goto 200
@@ -121,9 +121,9 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
           read (luntmp, iostat = iocond)
           if (iocond /= 0) then
              if (iocond < 0) then
-                call prterr(lundia, 'G006', filbch(1:lfile), gdp)
+                call prterr(lundia, 'G006', filbch(1:lfile))
              else
-                call prterr(lundia, 'G007', filbch(1:lfile), gdp)
+                call prterr(lundia, 'G007', filbch(1:lfile))
              endif
              error = .true.
              goto 200
@@ -135,9 +135,9 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
              read (luntmp, iostat = iocond) (hydrbc(1, n, k), k = 1, kc)
              if (iocond /= 0) then
                 if (iocond < 0) then
-                   call prterr(lundia, 'G006', filbch(1:lfile), gdp)
+                   call prterr(lundia, 'G006', filbch(1:lfile))
                 else
-                   call prterr(lundia, 'G007', filbch(1:lfile), gdp)
+                   call prterr(lundia, 'G007', filbch(1:lfile))
                 endif
                 error = .true.
                 goto 200
@@ -150,9 +150,9 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
              read (luntmp, iostat = iocond) (hydrbc(2, n, k), k = 1, kc)
              if (iocond /= 0) then
                 if (iocond < 0) then
-                   call prterr(lundia, 'G006', filbch(1:lfile), gdp)
+                   call prterr(lundia, 'G006', filbch(1:lfile))
                 else
-                   call prterr(lundia, 'G007', filbch(1:lfile), gdp)
+                   call prterr(lundia, 'G007', filbch(1:lfile))
                 endif
                 error = .true.
                 goto 200
@@ -165,9 +165,9 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
              read (luntmp, iostat = iocond)
              if (iocond /= 0) then
                 if (iocond < 0) then
-                   call prterr(lundia, 'G006', filbch(1:lfile), gdp)
+                   call prterr(lundia, 'G006', filbch(1:lfile))
                 else
-                   call prterr(lundia, 'G007', filbch(1:lfile), gdp)
+                   call prterr(lundia, 'G007', filbch(1:lfile))
                 endif
                 error = .true.
                 goto 200
@@ -180,9 +180,9 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
                 read (luntmp, iostat = iocond) (hydrbc(3, n, k), k = 2, kc)
                 if (iocond /= 0) then
                    if (iocond < 0) then
-                      call prterr(lundia, 'G006', filbch(1:lfile), gdp)
+                      call prterr(lundia, 'G006', filbch(1:lfile))
                    else
-                      call prterr(lundia, 'G007', filbch(1:lfile), gdp)
+                      call prterr(lundia, 'G007', filbch(1:lfile))
                    endif
                    error = .true.
                    goto 200
@@ -195,9 +195,9 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
                 read (luntmp, iostat = iocond) (hydrbc(4, n, k), k = 2, kc)
                 if (iocond /= 0) then
                    if (iocond < 0) then
-                      call prterr(lundia, 'G006', filbch(1:lfile), gdp)
+                      call prterr(lundia, 'G006', filbch(1:lfile))
                    else
-                      call prterr(lundia, 'G007', filbch(1:lfile), gdp)
+                      call prterr(lundia, 'G007', filbch(1:lfile))
                    endif
                    error = .true.
                    exit
@@ -218,9 +218,9 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
           read (luntmp, '(a)', iostat = iocond) rec132
           if (iocond /= 0) then
              if (iocond < 0) then
-                call prterr(lundia, 'G006', filbch(1:lfile), gdp)
+                call prterr(lundia, 'G006', filbch(1:lfile))
              else
-                call prterr(lundia, 'G007', filbch(1:lfile), gdp)
+                call prterr(lundia, 'G007', filbch(1:lfile))
              endif
              error = .true.
              goto 200
@@ -239,9 +239,9 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
                 read (luntmp, '(a)', iostat = iocond) rec132
                 if (iocond /= 0) then
                    if (iocond < 0) then
-                      call prterr(lundia, 'G006', filbch(1:lfile), gdp)
+                      call prterr(lundia, 'G006', filbch(1:lfile))
                    else
-                      call prterr(lundia, 'G007', filbch(1:lfile), gdp)
+                      call prterr(lundia, 'G007', filbch(1:lfile))
                    endif
                    error = .true.
                    goto 200
@@ -253,7 +253,7 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
              endif
              if (ier < 0) then
                 error = .true.
-                call prterr(lundia, 'G006', filbch(1:lfile), gdp)
+                call prterr(lundia, 'G006', filbch(1:lfile))
                 !
                 goto 200
              endif
@@ -264,9 +264,9 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
           read (luntmp, '(a)', iostat = iocond) rec132
           if (iocond /= 0) then
              if (iocond < 0) then
-                call prterr(lundia, 'G006', filbch(1:lfile), gdp)
+                call prterr(lundia, 'G006', filbch(1:lfile))
              else
-                call prterr(lundia, 'G007', filbch(1:lfile), gdp)
+                call prterr(lundia, 'G007', filbch(1:lfile))
              endif
              error = .true.
              goto 200
@@ -279,9 +279,9 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
              read (luntmp, '(a)', iostat = iocond) rec132
              if (iocond /= 0) then
                 if (iocond < 0) then
-                   call prterr(lundia, 'G006', filbch(1:lfile), gdp)
+                   call prterr(lundia, 'G006', filbch(1:lfile))
                 else
-                   call prterr(lundia, 'G007', filbch(1:lfile), gdp)
+                   call prterr(lundia, 'G007', filbch(1:lfile))
                 endif
                 error = .true.
                 goto 200
@@ -299,9 +299,9 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
                    read (luntmp, '(a)', iostat = iocond) rec132
                    if (iocond /= 0) then
                       if (iocond < 0) then
-                         call prterr(lundia, 'G006', filbch(1:lfile), gdp)
+                         call prterr(lundia, 'G006', filbch(1:lfile))
                       else
-                         call prterr(lundia, 'G007', filbch(1:lfile), gdp)
+                         call prterr(lundia, 'G007', filbch(1:lfile))
                       endif
                       error = .true.
                       goto 200
@@ -313,7 +313,7 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
                 endif
                 if (ier < 0) then
                    error = .true.
-                   call prterr(lundia, 'G006', filbch(1:lfile), gdp)
+                   call prterr(lundia, 'G006', filbch(1:lfile))
                    !
                    goto 200
                 endif
@@ -326,9 +326,9 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
              read (luntmp, '(a)', iostat = iocond) rec132
              if (iocond /= 0) then
                 if (iocond < 0) then
-                   call prterr(lundia, 'G006', filbch(1:lfile), gdp)
+                   call prterr(lundia, 'G006', filbch(1:lfile))
                 else
-                   call prterr(lundia, 'G007', filbch(1:lfile), gdp)
+                   call prterr(lundia, 'G007', filbch(1:lfile))
                 endif
                 error = .true.
                 goto 200
@@ -346,10 +346,10 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
                    read (luntmp, '(a)', iostat = iocond) rec132
                    if (iocond /= 0) then
                       if (iocond < 0) then
-                         call prterr(lundia, 'G006', filbch(1:lfile), gdp)
+                         call prterr(lundia, 'G006', filbch(1:lfile))
                       !
                       else
-                         call prterr(lundia, 'G007', filbch(1:lfile), gdp)
+                         call prterr(lundia, 'G007', filbch(1:lfile))
                       !
                       endif
                       error = .true.
@@ -362,7 +362,7 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
                 endif
                 if (ier < 0) then
                    error = .true.
-                   call prterr(lundia, 'G006', filbch(1:lfile), gdp)
+                   call prterr(lundia, 'G006', filbch(1:lfile))
                    goto 200
                 endif
              enddo
@@ -374,9 +374,9 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
              read (luntmp, '(a)', iostat = iocond) rec132
              if (iocond /= 0) then
                 if (iocond < 0) then
-                   call prterr(lundia, 'G006', filbch(1:lfile), gdp)
+                   call prterr(lundia, 'G006', filbch(1:lfile))
                 else
-                   call prterr(lundia, 'G007', filbch(1:lfile), gdp)
+                   call prterr(lundia, 'G007', filbch(1:lfile))
                 endif
                 error = .true.
                 goto 200
@@ -390,9 +390,9 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
                 read (luntmp, '(a)', iostat = iocond) rec132
                 if (iocond /= 0) then
                    if (iocond < 0) then
-                      call prterr(lundia, 'G006', filbch(1:lfile), gdp)
+                      call prterr(lundia, 'G006', filbch(1:lfile))
                    else
-                      call prterr(lundia, 'G007', filbch(1:lfile), gdp)
+                      call prterr(lundia, 'G007', filbch(1:lfile))
                    endif
                    error = .true.
                    goto 200
@@ -410,9 +410,9 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
                       read (luntmp, '(a)', iostat = iocond) rec132
                       if (iocond /= 0) then
                          if (iocond < 0) then
-                            call prterr(lundia, 'G006', filbch(1:lfile), gdp)
+                            call prterr(lundia, 'G006', filbch(1:lfile))
                          else
-                            call prterr(lundia, 'G007', filbch(1:lfile), gdp)
+                            call prterr(lundia, 'G007', filbch(1:lfile))
                          endif
                          error = .true.
                          goto 200
@@ -424,7 +424,7 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
                    endif
                    if (ier < 0) then
                       error = .true.
-                      call prterr(lundia, 'G006', filbch(1:lfile), gdp)
+                      call prterr(lundia, 'G006', filbch(1:lfile))
                       !
                       goto 200
                    endif
@@ -437,9 +437,9 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
                 read (luntmp, '(a)', iostat = iocond) rec132
                 if (iocond /= 0) then
                    if (iocond < 0) then
-                      call prterr(lundia, 'G006', filbch(1:lfile), gdp)
+                      call prterr(lundia, 'G006', filbch(1:lfile))
                    else
-                      call prterr(lundia, 'G007', filbch(1:lfile), gdp)
+                      call prterr(lundia, 'G007', filbch(1:lfile))
                    endif
                    error = .true.
                    exit
@@ -457,9 +457,9 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
                       read (luntmp, '(a)', iostat = iocond) rec132
                       if (iocond /= 0) then
                          if (iocond < 0) then
-                            call prterr(lundia, 'G006', filbch(1:lfile), gdp)
+                            call prterr(lundia, 'G006', filbch(1:lfile))
                          else
-                            call prterr(lundia, 'G007', filbch(1:lfile), gdp)
+                            call prterr(lundia, 'G007', filbch(1:lfile))
                          endif
                          error = .true.
                          goto 200
@@ -471,7 +471,7 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
                    endif
                    if (ier < 0) then
                       error = .true.
-                      call prterr(lundia, 'G006', filbch(1:lfile), gdp)
+                      call prterr(lundia, 'G006', filbch(1:lfile))
                       !
                       goto 200
                    endif
@@ -488,7 +488,7 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
        do k = 1, kc
           if ( isnan(omega(k)) ) then 
              write(errmsg,'(2a)') 'NaN found in file ', filbch(1:lfile)
-             call prterr(lundia, 'P004', errmsg, gdp)
+             call prterr(lundia, 'P004', errmsg)
              error = .true.
              goto 200
           endif
@@ -498,7 +498,7 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
              do i= 1, 4
                 if ( isnan(hydrbc(i,n,k)) ) then 
                    write(errmsg,'(2a)') 'NaN found in file ', filbch(1:lfile)
-                   call prterr(lundia, 'P004', errmsg, gdp)
+                   call prterr(lundia, 'P004', errmsg)
                    error = .true.
                    goto 200
                 endif

@@ -134,7 +134,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
         & iostat = iocond)
     if (iocond/=0) then
        error = .true.
-       call prterr(lundia    ,'G007'    ,filbar(:lfile)       ,gdp       )
+       call prterr(lundia    ,'G007'    ,filbar(:lfile)       )
        !
        goto 9999
     endif
@@ -151,10 +151,10 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
        read (luntmp, '(a)', iostat = iocond) rec132
        if (iocond/=0) then
           if (iocond<0) then
-             call prterr(lundia    ,'G006'    ,filbar(:lfile)       ,gdp       )
+             call prterr(lundia    ,'G006'    ,filbar(:lfile)       )
           !
           else
-             call prterr(lundia    ,'G007'    ,filbar(:lfile)       ,gdp       )
+             call prterr(lundia    ,'G007'    ,filbar(:lfile)       )
           !
           endif
           error = .true.
@@ -176,7 +176,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
        if (nambar(ibar)=='') then
           errmsg(12:) = ': no name defined'
           error = .true.
-          call prterr(lundia    ,'U021'    ,errmsg    ,gdp       )
+          call prterr(lundia    ,'U021'    ,errmsg    )
           !
           goto 300
        endif
@@ -191,7 +191,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
        !
        if (nrflds<7 .or. itype(1)/=3) then
           error = .true.
-          call prterr(lundia    ,'G007'    ,filbar(1:lfile)      ,gdp       )
+          call prterr(lundia    ,'G007'    ,filbar(1:lfile)      )
           !
           goto 300
        endif
@@ -201,7 +201,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
        !
        if (itype(2)/=1 .or. itype(3)/=1 .or. itype(4)/=1 .or. itype(5)/=1) then
           error = .true.
-          call prterr(lundia    ,'G007'    ,filbar(1:lfile)      ,gdp       )
+          call prterr(lundia    ,'G007'    ,filbar(1:lfile)      )
           !
           goto 300
        endif
@@ -224,7 +224,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
        !
        if (error) then
           errmsg(9:) = nambar(ibar)
-          call prterr(lundia    ,'V231'    ,errmsg(:32)          ,gdp       )
+          call prterr(lundia    ,'V231'    ,errmsg(:32)          )
           !
           error = .true.
           goto 300
@@ -233,13 +233,13 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
        !--------Inside computational domain ?
        !
        if (m1>mmax .or. m1<1 .or. m2>mmax .or. m2<1) then
-          call prterr(lundia    ,'V232'    ,errmsg(:22)          ,gdp       )
+          call prterr(lundia    ,'V232'    ,errmsg(:22)          )
           !
           error = .true.
           goto 300
        endif
        if (n1>nmaxus .or. n1<1 .or. n2>nmaxus .or. n2<1) then
-          call prterr(lundia    ,'V232'    ,errmsg(:22)          ,gdp       )
+          call prterr(lundia    ,'V232'    ,errmsg(:22)          )
           !
           error = .true.
           goto 300
@@ -263,7 +263,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
              !
              if (abs(kspu(n, m, 0))>2) then
                 errmsg(1:) = nambar(ibar) // ' on other structure'
-                call prterr(lundia    ,'V235'    ,errmsg(:40)          ,gdp       )
+                call prterr(lundia    ,'V235'    ,errmsg(:40)          )
                 !
                 error = .true.
                 goto 300
@@ -286,7 +286,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
              !
              if (abs(kspv(n, m, 0))>2) then
                 errmsg(1:) = nambar(ibar) // ' on other structure'
-                call prterr(lundia    ,'V235'    ,errmsg(:40)          ,gdp       )
+                call prterr(lundia    ,'V235'    ,errmsg(:40)          )
                 !
                 error = .true.
                 goto 300
@@ -298,7 +298,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
           enddo
        else
           errmsg(23:26) = ' (' // direct // ')'
-          call prterr(lundia    ,'V233'    ,errmsg(:11)          ,gdp       )
+          call prterr(lundia    ,'V233'    ,errmsg(:11)          )
           !
           error = .true.
           goto 300
@@ -314,7 +314,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
           !
           if (itype(6)>2 .or. itype(7)>2) then
              error = .true.
-             call prterr(lundia    ,'G007'    ,filbar(1:lfile)      ,gdp       )
+             call prterr(lundia    ,'G007'    ,filbar(1:lfile)      )
              !
              goto 300
           endif
@@ -325,7 +325,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
           !--------Value for loss coefficient permitted ?
           !
           if (brlosc<0.0) then
-             call prterr(lundia    ,'V234'    ,errmsg(:22)          ,gdp       )
+             call prterr(lundia    ,'V234'    ,errmsg(:22)          )
              !
              error = .true.
           endif
@@ -338,7 +338,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
           !
           if (itype(6)>2) then
              error = .true.
-             call prterr(lundia    ,'G007'    ,filbar(1:lfile)      ,gdp       )
+             call prterr(lundia    ,'G007'    ,filbar(1:lfile)      )
              !
              goto 300
           endif
@@ -350,7 +350,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
           case('a')
              if (nrflds<8 .or. itype(8)>2) then
                 error = .true.
-                call prterr(lundia    ,'G007'    ,filbar(1:lfile)      ,gdp       )
+                call prterr(lundia    ,'G007'    ,filbar(1:lfile)      )
                 !
                 goto 300
              endif
@@ -362,14 +362,14 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
              !
              if (rfield(8)<0.0) then
                 error = .true.
-                call prterr(lundia    ,'V234'    ,errmsg(:22)          ,gdp       )
+                call prterr(lundia    ,'V234'    ,errmsg(:22)          )
                 !
                 goto 300
              endif
           case('b')
              if (nrflds<9 .or. itype(8)>2 .or. itype(9)>2) then
                 error = .true.
-                call prterr(lundia    ,'G007'    ,filbar(1:lfile)      ,gdp       )
+                call prterr(lundia    ,'G007'    ,filbar(1:lfile)      )
                 !
                 goto 300
              endif
@@ -382,7 +382,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
              !
              if (rfield(8)<0.0 .or. (rfield(8)+rfield(9))<0.0) then
                 error = .true.
-                call prterr(lundia    ,'V234'    ,errmsg(:22)          ,gdp       )
+                call prterr(lundia    ,'V234'    ,errmsg(:22)          )
                 !
                 goto 300
              endif
@@ -396,7 +396,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
        do n = 1, ibar - 1
           if (nambar(n)==nambar(ibar)) then
              error = .true.
-             call prterr(lundia    ,'U021'    ,'Barrier name already used: ' // nambar(ibar)         ,gdp       )
+             call prterr(lundia    ,'U021'    ,'Barrier name already used: ' // nambar(ibar)         )
           !
           endif
        enddo

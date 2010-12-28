@@ -134,7 +134,7 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
        call noextspaces(runid     ,lrid      )
        ! Overall maximum allowed length is 200
        if (lrid>200) then
-          call prterr(lunscr    ,'G907'    ,'.mdf, md-file. and md-flow.'   ,gdp       )
+          call prterr(lunscr    ,'G907'    ,'.mdf, md-file. and md-flow.'   )
        endif
        found = .false.
        !
@@ -154,7 +154,7 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
           call prop_file('ini',filmd(1:lfil),gdp%mdfile_ptr,iocond)
           if (iocond /= 0) then
              write(errmsg,'(i0,a)') iocond,' occured on reading md-file'
-             call prterr(lunscr    ,'P004'    ,errmsg   ,gdp       )
+             call prterr(lunscr    ,'P004'    ,errmsg   )
              error = .true.
              goto 9999
           endif
@@ -180,7 +180,7 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
              call prop_file('ini',filmd(1:lfil),gdp%mdfile_ptr,iocond)
              if (iocond /= 0) then
                 write(errmsg,'(i0,a)') iocond,' occured on reading md-file'
-                call prterr(lunscr    ,'P004'    ,errmsg   ,gdp       )
+                call prterr(lunscr    ,'P004'    ,errmsg   )
                 error = .true.
                 goto 9999
              endif
@@ -207,7 +207,7 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
              call prop_file('ini',filmd(1:lfil),gdp%mdfile_ptr,iocond)
              if (iocond /= 0) then
                 write(errmsg,'(i0,a)') iocond,' occured on reading md-file'
-                call prterr(lunscr    ,'P004'    ,errmsg   ,gdp       )
+                call prterr(lunscr    ,'P004'    ,errmsg   )
                 error = .true.
                 goto 9999
              endif
@@ -221,7 +221,7 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
        !
        if (.not.found) then
           errmsg = 'MD file for ' // runid(1:lrid)
-          call prterr(lunscr, 'G004', errmsg(:12 + lrid), gdp)
+          call prterr(lunscr, 'G004', errmsg(:12 + lrid))
           error = .true.
           call d3stop (1, gdp)
        endif
@@ -238,7 +238,7 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
           lrid = lrid - 1
           if (lrid>len(runid)) then
              error = .true.
-             call prterr(lunscr    ,'G907'    ,'.mdf'    ,gdp       )
+             call prterr(lunscr    ,'G907'    ,'.mdf'    )
              goto 9999
           else
              found = .true.
@@ -257,7 +257,7 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
              call noextspaces(filtmp    ,lrid      )
              if (lrid>len(runid)) then
                 error = .true.
-                call prterr(lunscr    ,'G907'    ,'md-file.',gdp       )
+                call prterr(lunscr    ,'G907'    ,'md-file.')
                 goto 9999
              else
                 found = .true.
@@ -277,7 +277,7 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
              call noextspaces(filtmp    ,lrid      )
              if (lrid>len(runid)) then
                 error = .true.
-                call prterr(lunscr    ,'G907'    ,'md-flow.',gdp       )
+                call prterr(lunscr    ,'G907'    ,'md-flow.')
                 goto 9999
              else
                 found = .true.
@@ -294,7 +294,7 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
           call noextspaces(filmd     ,lfil      )
           errmsg(1:12) = 'MD file for '
           errmsg(13:lfil + 12) = filmd(1:lfil)
-          call prterr(lunscr    ,'G004'    ,errmsg(1:lfil + 12)  ,gdp       )
+          call prterr(lunscr    ,'G004'    ,errmsg(1:lfil + 12)  )
           goto 9999
        endif
        !
@@ -315,7 +315,7 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
           call prop_file('ini',filmd(1:lfil),gdp%mdfile_ptr,iocond)
           if (iocond /= 0) then
              write(errmsg,'(i0,a)') iocond,' occured on reading md-file'
-             call prterr(lunscr    ,'P004'    ,errmsg   ,gdp       )
+             call prterr(lunscr    ,'P004'    ,errmsg   )
              error = .true.
              goto 9999
           endif

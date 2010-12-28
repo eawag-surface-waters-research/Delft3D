@@ -127,7 +127,7 @@ subroutine dimtrt(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
     ! keyword not found ?
     !
     if (filtmp == ' ') then
-       call prterr(lundia    ,'V091'    ,keyw      ,gdp)
+       call prterr(lundia    ,'V091'    ,keyw      )
        error = .true.
        goto 9999
     endif
@@ -139,7 +139,7 @@ subroutine dimtrt(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
        !
        ! file does not exist !!
        !
-       call prterr(lundia    ,'P101'    ,filtmp(1:lfile)      ,gdp)
+       call prterr(lundia    ,'P101'    ,filtmp(1:lfile)      )
        error = .true.
        goto 9999
     endif
@@ -150,7 +150,7 @@ subroutine dimtrt(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
     open (luntmp, file = filtmp(1:lfile), form = 'formatted', iostat = iocond,  &
         & status = 'old')
     if (iocond/=0) then
-       call prterr(lundia    ,'U015'    ,filtmp(1:lfile)      ,gdp)
+       call prterr(lundia    ,'U015'    ,filtmp(1:lfile)      )
        error = .true.
        goto 9999
     endif
@@ -174,7 +174,7 @@ subroutine dimtrt(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
        !
        ! Reading error
        !
-       call prterr(lundia    ,'G007'    ,filtmp(1:lfile)      ,gdp)
+       call prterr(lundia    ,'G007'    ,filtmp(1:lfile)      )
        error = .true.
        ! <--
        !
@@ -195,7 +195,7 @@ subroutine dimtrt(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
        ! keyword not found ?
        !
        if (filtmp == ' ' .and. ntrt /= 1) then
-          call prterr(lundia    ,'V091'    ,keyw      ,gdp)
+          call prterr(lundia    ,'V091'    ,keyw      )
           error = .true.
           goto 9999
        endif
@@ -221,7 +221,7 @@ subroutine dimtrt(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
        ! keyword not found ?
        !
        if (filtmp == ' ' .and. ntrt /= 1) then
-          call prterr(lundia    ,'V091'    ,keyw      ,gdp)
+          call prterr(lundia    ,'V091'    ,keyw      )
           error = .true.
           goto 9999
        endif

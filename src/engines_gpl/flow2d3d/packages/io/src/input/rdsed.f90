@@ -259,7 +259,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        if (istat==0) allocate (gdsedpar%sedd50fld (gdp%d%nmlb:gdp%d%nmub            ), stat = istat)
        !
        if (istat/=0) then
-          call prterr(lundia, 'U021', 'RDSED: memory alloc error', gdp)
+          call prterr(lundia, 'U021', 'RDSED: memory alloc error')
           call d3stop(1, gdp)
        endif
        !
@@ -389,7 +389,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        endif
        !
        if ( .not. associated(sed_ptr%child_nodes) ) then
-          call prterr(lundia, 'U021', 'Unable to read sediment information', gdp)
+          call prterr(lundia, 'U021', 'Unable to read sediment information')
           call d3stop(1, gdp)          
        endif
        !
@@ -475,7 +475,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                    ! then show an errormessage
                    !
                    error = .true.
-                   call prterr(lundia, 'U007', 'suspended sediment type (must start with sand or mud)', gdp)
+                   call prterr(lundia, 'U007', 'suspended sediment type (must start with sand or mud)')
                 endif
              endif
              !
@@ -542,7 +542,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                          !
                          ! error: sediment diameter less than or equal to zero!!
                          !
-                         call prterr(lundia, 'U021', 'Sediment diameters must be positive!', gdp)
+                         call prterr(lundia, 'U021', 'Sediment diameters must be positive!')
                          call d3stop(1, gdp)
                       endif
                       !
@@ -555,7 +555,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                             !
                             ! error: sediment diameters not increasing!!
                             !
-                            call prterr(lundia, 'U021', 'Sediment diameters must be increasing!', gdp)
+                            call prterr(lundia, 'U021', 'Sediment diameters must be increasing!')
                             call d3stop(1, gdp)
                          endif
                       endif
@@ -578,7 +578,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                    istat = open_shared_library(dll_handle_settle(l), dll_name_settle(l))
                    if (istat /= 0) then
                       write(errmsg,'(a,a)') 'Can not open shared library ', trim(dll_name_settle(l))
-                      call prterr(lundia, 'P004', trim(errmsg), gdp)
+                      call prterr(lundia, 'P004', trim(errmsg))
                       call d3stop(1, gdp)
                    endif
                    !
@@ -714,7 +714,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
           if (.not. found) then
              write (message,'(4a)') 'Sediment ', trim(sedname), &
                                   & ' not specified in file ', trim(filsed)
-             call prterr(lundia, 'U021', trim(message), gdp)
+             call prterr(lundia, 'U021', trim(message))
              call d3stop(1, gdp)          
           endif
        enddo
@@ -728,7 +728,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        open (luninp, file = filsed(1:lfile), form = 'formatted', status = 'old',            &
            & iostat = iocond)
        if (iocond /= 0) then
-          call prterr(lundia, 'U015', trim(filsed), gdp)
+          call prterr(lundia, 'U015', trim(filsed))
           call d3stop(1, gdp)
        endif
        !
@@ -797,14 +797,14 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     txtput1 = 'Ref concentration'
     write (lundia, '(2a,e12.4)') txtput1, ':', csoil
     if (csoil <= 0.0_fp) then
-       call prterr(lundia, 'U021', 'Reference concentration should be positive.', gdp)
+       call prterr(lundia, 'U021', 'Reference concentration should be positive.')
        call d3stop(1, gdp)
     endif
     txtput1 = 'Option Dss'
     write (lundia, '(2a,i12)') txtput1, ':', iopsus
     if (anymud) then
        if (flsmdc /= ' ' .or. comparereal(mdcuni,0.0_fp) /= 0) then
-          call prterr(lundia, 'G051', 'User defined mud content ignored: mud fraction simulated.', gdp)
+          call prterr(lundia, 'G051', 'User defined mud content ignored: mud fraction simulated.')
        endif
        flsmdc = ' '
        mdcuni = 0.0_fp
@@ -866,7 +866,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
              !
              ! error: no sediment diameter specified!
              !
-             call prterr(lundia, 'U021', 'Missing sediment diameter data', gdp)
+             call prterr(lundia, 'U021', 'Missing sediment diameter data')
              call d3stop(1, gdp)
           elseif (nseddia(l) == 1) then
              !
@@ -876,13 +876,13 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                 !
                 ! error: only minimum sediment diameter is insufficient
                 !
-                call prterr(lundia, 'U021', 'Missing maximum diameter data', gdp)
+                call prterr(lundia, 'U021', 'Missing maximum diameter data')
                 call d3stop(1, gdp)
              elseif (nint(logseddia(1,1,l)) == 100) then
                 !
                 ! error: only maximum sediment diameter is insufficient
                 !
-                call prterr(lundia, 'U021', 'Missing minimum diameter data', gdp)
+                call prterr(lundia, 'U021', 'Missing minimum diameter data')
                 call d3stop(1, gdp)
              endif
              !
@@ -939,7 +939,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                    !
                    ! error: old approach requires D50
                    !
-                   call prterr(lundia, 'U021', 'Missing median diameter data', gdp)
+                   call prterr(lundia, 'U021', 'Missing median diameter data')
                    call d3stop(1, gdp)
                 endif
                 !
@@ -981,7 +981,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                 ! error: not allowed in combination with multiple
                 ! sediment diameters
                 !
-                call prterr(lundia, 'U021', 'Geom. st. dev. not allowed in combination with multiple sediment diameters', gdp)
+                call prterr(lundia, 'U021', 'Geom. st. dev. not allowed in combination with multiple sediment diameters')
                 call d3stop(1, gdp)
              endif
              if (nint(logseddia(1,1,l))==0 .or. nint(logseddia(1,2,l))==100) then
@@ -1068,7 +1068,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                 ! error: not allowed in combination with multiple
                 ! sediment diameters
                 !
-                call prterr(lundia, 'U021', 'Geom. std. dev. not allowed in combination with multiple sediment diameters', gdp)
+                call prterr(lundia, 'U021', 'Geom. std. dev. not allowed in combination with multiple sediment diameters')
                 call d3stop(1, gdp)
              endif
              !
@@ -1168,7 +1168,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
           txtput1 = '  FACDSS'
           write (lundia, '(2a,e12.4)') txtput1, ':', facdss(l)
           if (facdss(l) <= 0.0_fp) then
-             call prterr(lundia, 'U021', 'FACDSS <= 0.0', gdp)
+             call prterr(lundia, 'U021', 'FACDSS <= 0.0')
              call d3stop(1, gdp)
           endif
        endif
@@ -1233,7 +1233,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     do i = 1, lsedtot
        if (iform(i) == 0 .or. iform(i) == -2) then
           if (gdp%gdbedformpar%bdfrpt /= 0) then
-             call prterr(lundia, 'U190', 'Van Rijn 2004 transport formula combined with different bedform roughness predictor', gdp)
+             call prterr(lundia, 'U190', 'Van Rijn 2004 transport formula combined with different bedform roughness predictor')
           endif
           gdp%gdbedformpar%lfbedfrmrou = .true.
           exit

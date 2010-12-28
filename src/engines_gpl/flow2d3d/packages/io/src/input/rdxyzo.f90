@@ -210,17 +210,17 @@ subroutine rdxyzo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        if (comparereal(rval(1),rmissval) == 0 .or. &
          & comparereal(rval(2),rmissval) == 0       ) then
           error = .true.
-          call prterr(lundia, 'P004', 'No grid file defined', gdp)
+          call prterr(lundia, 'P004', 'No grid file defined')
        else
           cdef = ' '
           call prop_get_string(gdp%mdfile_ptr,'*','Sphere',cdef)
           if (cdef /= 'y' .and. cdef /= 'Y') then
              if (parll) then
-                call prterr(lundia, 'P004', 'The combination of constant dx and dy and parallel is not available', gdp)
+                call prterr(lundia, 'P004', 'The combination of constant dx and dy and parallel is not available')
                 write (lundia,*) '           Use a grid file instead'
                 error = .true.
              else
-                call prterr(lundia, 'Z013', 'The use of constant dx and dy is deprecated', gdp)
+                call prterr(lundia, 'Z013', 'The use of constant dx and dy is deprecated')
                 write (lundia,*) '           Use a grid file instead'
                 dx = rval(1)
                 dy = rval(2)
@@ -317,7 +317,7 @@ subroutine rdxyzo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           ztop = rval(1)
           if (ztop<=zbot) then
              error = .true.
-             call prterr(lundia, 'Z003', ' ', gdp)
+             call prterr(lundia, 'Z003', ' ')
           endif
        endif
     endif
