@@ -41,10 +41,36 @@ public realloc
 !!
 !! Where the old and new dimensions overlap, the original array data
 !! is preserved (i.e., for a larger upperbound, all data is preserved)
+!! This can be switched off by passing the optional argument
+!! keepExisting=.false.
 !!
 !! An optional fill value may be specified to set the non-overlapping
 !! elements. For example: call realloc(x, newmax, stat=istat, fill=-999d0)
-!! The original array elements are NOT overwritten by fill.
+!! The original array elements are NOT overwritten by fill, unless
+!! keepExisting=.false.
+!!
+!! Example usage:\code
+!!   integer, allocatable :: iarr(:), itens(:,:,:)
+!!   call realloc(iarr, 100)
+!!   call realloc(iarr, 1000, fill = -1, keepExisting=.false.)
+!!   allocate(itens(10,20,30))
+!!   call realloc(itens, (/ 100, 200, 300 /), fill = 0)
+!! \endcode
+!! 
+!! \param[in,out] arr Array (up to rank 4) to be reallocated.
+!! \param[in]     uindex Desired new size (upper index) for array, scalar
+!!      when arr has rank 1, or rank 1 array with size ra when arr
+!!      has rank ra>1.
+!! \param[in]     lindex (optional) Lower index for new array, defaults
+!!      to lindex(1:ra)==1.
+!! \param[out]   stat (optional) Result status of allocate command for the
+!!      array.
+!! \param[in]     fill (optional) Scalar value to fill any empty spots in
+!!      the new array. Empty spots occur when the new size is larger than
+!!      the old size, or when keepExisting==.false.
+!! \param[in]     keepExisting (optional) Whether to preserve the original
+!!      data in arr (defaults to .true.). When set to .false. and the
+!!      parameter fill is not present, the resulting data is unspecified.
 interface realloc
    module procedure reallocInt
    module procedure reallocInt2
@@ -69,18 +95,19 @@ end interface
 
 contains
 
-subroutine reallocReal(arr, uindex, lindex, stat, fill)
+subroutine reallocReal(arr, uindex, lindex, stat, fill, keepExisting)
    implicit none
    real, allocatable, intent(inout)             :: arr(:)
    integer, intent(in)                          :: uindex
    integer, intent(in), optional                :: lindex
    integer, intent(out), optional               :: stat
    real, intent(in), optional                   :: fill
+   logical, intent(in), optional                :: keepExisting
 
    real, allocatable                            :: b(:)
    integer        :: uind, lind, muind, mlind, lindex_
    integer        :: localErr = 0
-   logical        :: doalloc
+   logical        :: doalloc, docopy
    logical        :: ident
 
    if (present(lindex)) then
@@ -90,6 +117,11 @@ subroutine reallocReal(arr, uindex, lindex, stat, fill)
    endif
 
    doalloc = .false.
+   docopy  = .true.
+   if (present(keepExisting)) then
+      docopy = keepExisting
+   end if
+
    if (allocated(arr)) then
       uind = ubound(arr, 1)
       ident = uind == uindex
@@ -98,8 +130,10 @@ subroutine reallocReal(arr, uindex, lindex, stat, fill)
       mlind = max(lind, lindex_)
       muind = min(uind, uindex)
       if (.not.ident) then
-         allocate (b(mlind:muind))
-         b(mlind:muind) = arr(mlind:muind)
+         if (docopy) then
+            allocate (b(mlind:muind))
+            b(mlind:muind) = arr(mlind:muind)
+         end if
          deallocate(arr)
          doalloc = .true.
       endif
@@ -108,10 +142,11 @@ subroutine reallocReal(arr, uindex, lindex, stat, fill)
    endif
    if (doalloc) then
        allocate(arr(lindex_:uindex), stat = localErr)
-       if (present(fill)) then
-           arr = fill
-       endif
    endif
+   if (present(fill) .and. (doalloc .or. .not. docopy)) then
+       arr = fill
+   endif
+
    if (allocated (b)) then
       arr(mlind:muind) = b(mlind:muind)
       deallocate (b)
@@ -119,18 +154,19 @@ subroutine reallocReal(arr, uindex, lindex, stat, fill)
    if (present(stat)) stat = localErr
 end subroutine
 
-subroutine reallocDouble(arr, uindex, lindex, stat, fill)
+subroutine reallocDouble(arr, uindex, lindex, stat, fill, keepExisting)
    implicit none
    double precision, allocatable, intent(inout) :: arr(:)
    integer, intent(in)                          :: uindex
    integer, optional                            :: lindex
    integer, intent(out), optional               :: stat
    double precision, intent(in), optional       :: fill
+   logical, intent(in), optional                :: keepExisting
 
    double precision, allocatable                :: b(:)
    integer        :: uind, lind, muind, mlind, lindex_
    integer        :: localErr = 0
-   logical        :: doalloc
+   logical        :: doalloc, docopy
    logical        :: ident
 
    if (present(lindex)) then
@@ -139,6 +175,11 @@ subroutine reallocDouble(arr, uindex, lindex, stat, fill)
       lindex_ = 1
    endif
    doalloc = .false.
+   docopy  = .true.
+   if (present(keepExisting)) then
+      docopy = keepExisting
+   end if
+
    if (allocated(arr)) then
       uind = ubound(arr, 1)
       ident = uind == uindex
@@ -147,8 +188,10 @@ subroutine reallocDouble(arr, uindex, lindex, stat, fill)
       mlind = max(lind, lindex_)
       muind = min(uind, uindex)
       if (.not.ident) then
-         allocate (b(mlind:muind))
-         b(mlind:muind) = arr(mlind:muind)
+         if (docopy) then
+            allocate (b(mlind:muind))
+            b(mlind:muind) = arr(mlind:muind)
+         end if
          deallocate(arr)
          doalloc = .true.
       endif
@@ -157,9 +200,9 @@ subroutine reallocDouble(arr, uindex, lindex, stat, fill)
    endif
    if (doalloc) then
        allocate(arr(lindex_:uindex), stat = localErr)
-       if (present(fill)) then
-           arr = fill
-       endif
+   endif
+   if (present(fill) .and. (doalloc .or. .not. docopy)) then
+      arr = fill
    endif
    if (allocated (b)) then
       arr(mlind:muind) = b(mlind:muind)
@@ -169,18 +212,19 @@ subroutine reallocDouble(arr, uindex, lindex, stat, fill)
 end subroutine
 
 
-subroutine reallocCharacter(arr, uindex, lindex, stat, fill)
+subroutine reallocCharacter(arr, uindex, lindex, stat, fill, keepExisting)
    implicit none
    character(len=*), allocatable, intent(inout) :: arr(:)
    integer, intent(in)                          :: uindex
    integer, intent(in), optional                :: lindex
    integer, intent(out), optional               :: stat
    character(len=1), intent(in), optional       :: fill
+   logical, intent(in), optional                :: keepExisting
 
    character(len=len(arr(1))), allocatable      :: b(:)
    integer        :: uind, lind, muind, mlind, lindex_
    integer        :: localErr = 0
-   logical        :: doalloc
+   logical        :: doalloc, docopy
    logical        :: ident
 
    if (present(lindex)) then
@@ -190,6 +234,11 @@ subroutine reallocCharacter(arr, uindex, lindex, stat, fill)
    endif
 
    doalloc = .false.
+   docopy  = .true.
+   if (present(keepExisting)) then
+      docopy = keepExisting
+   end if
+
    localErr = 0
    if (allocated(arr)) then
       uind = ubound(arr, 1)
@@ -199,8 +248,10 @@ subroutine reallocCharacter(arr, uindex, lindex, stat, fill)
       mlind = max(lind, lindex_)
       muind = min(uind, uindex)
       if (.not.ident) then
-         allocate (b(mlind:muind))
-         b(mlind:muind) = arr(mlind:muind)
+         if (docopy) then
+            allocate (b(mlind:muind))
+            b(mlind:muind) = arr(mlind:muind)
+         end if
          deallocate(arr)
          doalloc = .true.
       endif
@@ -210,9 +261,9 @@ subroutine reallocCharacter(arr, uindex, lindex, stat, fill)
 
    if (doalloc) then
       allocate(arr(lindex_:uindex), stat = localErr)
-      if (present(fill)) then
-          arr = fill
-      endif
+   endif
+   if (present(fill) .and. (doalloc .or. .not. docopy)) then
+      arr = fill
    endif
    if (allocated (b)) then
       arr(mlind:muind) = b(mlind:muind)
@@ -221,18 +272,19 @@ subroutine reallocCharacter(arr, uindex, lindex, stat, fill)
    if (present(stat)) stat = localErr
 end subroutine
 
-subroutine reallocLogical(arr, uindex, lindex, stat, fill)
+subroutine reallocLogical(arr, uindex, lindex, stat, fill, keepExisting)
    implicit none
    logical, allocatable, intent(inout)          :: arr(:)
    integer, intent(in)                          :: uindex
    integer, intent(in), optional                :: lindex
    integer, intent(out), optional               :: stat
    logical, intent(in), optional                :: fill
+   logical, intent(in), optional                :: keepExisting
 
    logical, allocatable                         :: b(:)
    integer        :: uind, lind, muind, mlind, lindex_
    integer        :: localErr = 0
-   logical        :: doalloc
+   logical        :: doalloc, docopy
    logical        :: ident
 
    if (present(lindex)) then
@@ -242,6 +294,11 @@ subroutine reallocLogical(arr, uindex, lindex, stat, fill)
    endif
 
    doalloc = .false.
+   docopy  = .true.
+   if (present(keepExisting)) then
+      docopy = keepExisting
+   end if
+
    if (allocated(arr)) then
       uind = ubound(arr, 1)
       ident = uind == uindex
@@ -250,8 +307,10 @@ subroutine reallocLogical(arr, uindex, lindex, stat, fill)
       mlind = max(lind, lindex_)
       muind = min(uind, uindex)
       if (.not.ident) then
-         allocate (b(mlind:muind))
-         b(mlind:muind) = arr(mlind:muind)
+         if (docopy) then
+            allocate (b(mlind:muind))
+            b(mlind:muind) = arr(mlind:muind)
+         end if
          deallocate(arr)
          doalloc = .true.
       endif
@@ -261,9 +320,9 @@ subroutine reallocLogical(arr, uindex, lindex, stat, fill)
 
    if (doalloc) then
        allocate(arr(lindex_:uindex), stat = localErr)
-       if (present(fill)) then
-           arr = fill
-       endif
+   endif
+   if (present(fill) .and. (doalloc .or. .not. docopy)) then
+      arr = fill
    endif
    if (allocated (b)) then
       arr(mlind:muind) = b(mlind:muind)
@@ -272,18 +331,19 @@ subroutine reallocLogical(arr, uindex, lindex, stat, fill)
    if (present(stat)) stat = localErr
 end subroutine
 
-subroutine reallocInt(arr, uindex, lindex, stat, fill)
+subroutine reallocInt(arr, uindex, lindex, stat, fill, keepExisting)
    implicit none
    integer, allocatable, intent(inout)          :: arr(:)
    integer, intent(in)                          :: uindex
    integer, intent(in), optional                :: lindex
    integer, intent(out), optional               :: stat
    integer, intent(in), optional                :: fill
+   logical, intent(in), optional                :: keepExisting
 
    integer, allocatable                         :: b(:)
    integer        :: uind, lind, muind, mlind, lindex_
    integer        :: localErr = 0
-   logical        :: doalloc
+   logical        :: doalloc, docopy
    logical        :: ident
 
    if (present(lindex)) then
@@ -293,6 +353,11 @@ subroutine reallocInt(arr, uindex, lindex, stat, fill)
    endif
 
    doalloc = .false.
+   docopy  = .true.
+   if (present(keepExisting)) then
+      docopy = keepExisting
+   end if
+
    if (allocated(arr)) then
       uind = ubound(arr, 1)
       ident = uind == uindex
@@ -301,8 +366,10 @@ subroutine reallocInt(arr, uindex, lindex, stat, fill)
       mlind = max(lind, lindex_)
       muind = min(uind, uindex)
       if (.not.ident) then
-         allocate (b(mlind:muind))
-         b(mlind:muind) = arr(mlind:muind)
+         if (docopy) then
+            allocate (b(mlind:muind))
+            b(mlind:muind) = arr(mlind:muind)
+         end if
          deallocate(arr)
          doalloc = .true.
       endif
@@ -312,9 +379,9 @@ subroutine reallocInt(arr, uindex, lindex, stat, fill)
 
    if (doalloc) then
        allocate(arr(lindex_:uindex), stat = localErr)
-       if (present(fill)) then
-           arr = fill
-       endif
+   endif
+   if (present(fill) .and. (doalloc .or. .not. docopy)) then
+      arr = fill
    endif
    if (allocated (b)) then
       arr(mlind:muind) = b(mlind:muind)
@@ -323,13 +390,14 @@ subroutine reallocInt(arr, uindex, lindex, stat, fill)
    if (present(stat)) stat = localErr
 end subroutine
 
-subroutine reallocReal2x(arr, u1, u2, l1, l2, stat)
+subroutine reallocReal2x(arr, u1, u2, l1, l2, stat, keepExisting)
    real, allocatable, intent(inout)             :: arr(:, :)
    integer                                      :: u1, u2
    integer, optional                            :: l1, l2
    integer                                      :: uindex(2)
    integer                                      :: lindex(2)
    integer, intent(out), optional               :: stat
+   logical, intent(in), optional                :: keepExisting
 
    uindex = (/u1, u2/)
    if (present(l1)) then
@@ -340,18 +408,20 @@ subroutine reallocReal2x(arr, u1, u2, l1, l2, stat)
    endif
 end subroutine reallocReal2x
 
-subroutine reallocReal2(arr, uindex, lindex, stat, fill)
+subroutine reallocReal2(arr, uindex, lindex, stat, fill, keepExisting)
    real, allocatable, intent(inout) :: arr(:, :)
    integer, intent(in)              :: uindex(2)
    integer, intent(in), optional    :: lindex(2)
    integer, intent(out), optional   :: stat
    real, intent(in), optional       :: fill
+   logical, intent(in), optional    :: keepExisting
 
    real, allocatable                :: b(:,:)
 
    integer        :: uind(2), lind(2), muind(2), mlind(2), lindex_(2)
    integer        :: localErr = 0
-   logical        :: ident, doalloc
+   logical        :: ident, doalloc, docopy
+   integer        :: i1, i2
 
    if (present(lindex)) then
       lindex_ = lindex
@@ -362,6 +432,11 @@ subroutine reallocReal2(arr, uindex, lindex, stat, fill)
    ident = .true.
 
    doalloc = .false.
+   docopy  = .true.
+   if (present(keepExisting)) then
+      docopy = keepExisting
+   end if
+
    if (allocated(arr)) then
       uind = ubound(arr)
       lind = lbound(arr)
@@ -370,8 +445,14 @@ subroutine reallocReal2(arr, uindex, lindex, stat, fill)
       mlind = max(lind, lindex_)
       muind = min(uind, uindex)
       if ( .not. ident )then
-         allocate (b(mlind(1):muind(1),mlind(2):muind(2)))
-         b(mlind(1):muind(1),mlind(2):muind(2)) = arr(mlind(1):muind(1),mlind(2):muind(2))
+         if (docopy) then
+            allocate (b(mlind(1):muind(1),mlind(2):muind(2)))
+            do i2=mlind(2),muind(2)
+            do i1=mlind(1),muind(1)
+                b(i1, i2) = arr(i1, i2)
+            end do
+            end do
+         end if
          deallocate(arr)
          doalloc = .true.
       endif
@@ -381,12 +462,16 @@ subroutine reallocReal2(arr, uindex, lindex, stat, fill)
 
    if (doalloc) then
       allocate(arr(lindex_(1):uindex(1), lindex_(2):uindex(2)), stat = localErr)
-       if (present(fill)) then
-           arr = fill
-       endif
+   endif
+   if (present(fill) .and. (doalloc .or. .not. docopy)) then
+      arr = fill
    endif
    if (allocated (b)) then
-      arr(mlind(1):muind(1),mlind(2):muind(2)) = b(mlind(1):muind(1),mlind(2):muind(2))
+      do i2=mlind(2),muind(2)
+      do i1=mlind(1),muind(1)
+          arr(i1, i2) = b(i1, i2)
+      end do
+      end do
       deallocate (b)
    endif
    if (present(stat)) stat = localErr
@@ -409,18 +494,20 @@ subroutine reallocDouble2x(arr, u1, u2, l1, l2, stat)
    endif
 end subroutine reallocDouble2x
 
-subroutine reallocDouble2(arr, uindex, lindex, stat, fill)
+subroutine reallocDouble2(arr, uindex, lindex, stat, fill, keepExisting)
    double precision, allocatable, intent(inout) :: arr(:, :)
    integer, intent(in)                    :: uindex(2)
    integer, intent(in), optional          :: lindex(2)
    integer, intent(out), optional         :: stat
    double precision, intent(in), optional :: fill
+   logical, intent(in), optional          :: keepExisting
 
    double precision, allocatable    :: b(:,:)
 
    integer        :: uind(2), lind(2), muind(2), mlind(2), lindex_(2)
    integer        :: localErr = 0
-   logical        :: ident, doalloc
+   logical        :: ident, doalloc, docopy
+   integer        :: i1, i2
 
    if (present(lindex)) then
       lindex_ = lindex
@@ -431,6 +518,11 @@ subroutine reallocDouble2(arr, uindex, lindex, stat, fill)
    ident = .true.
 
    doalloc = .false.
+   docopy  = .true.
+   if (present(keepExisting)) then
+      docopy = keepExisting
+   end if
+
    if (allocated(arr)) then
       uind = ubound(arr)
       lind = lbound(arr)
@@ -439,8 +531,14 @@ subroutine reallocDouble2(arr, uindex, lindex, stat, fill)
       mlind = max(lind, lindex_)
       muind = min(uind, uindex)
       if ( .not. ident )then
-         allocate (b(mlind(1):muind(1),mlind(2):muind(2)))
-         b(mlind(1):muind(1),mlind(2):muind(2)) = arr(mlind(1):muind(1),mlind(2):muind(2))
+         if (docopy) then
+            allocate (b(mlind(1):muind(1),mlind(2):muind(2)))
+            do i2=mlind(2),muind(2)
+            do i1=mlind(1),muind(1)
+                b(i1, i2) = arr(i1, i2)
+            end do
+            end do
+         end if
          deallocate(arr)
          doalloc = .true.
       endif
@@ -450,12 +548,16 @@ subroutine reallocDouble2(arr, uindex, lindex, stat, fill)
 
    if (doalloc) then
       allocate(arr(lindex_(1):uindex(1), lindex_(2):uindex(2)), stat = localErr)
-       if (present(fill)) then
-           arr = fill
-       endif
+   endif
+   if (present(fill) .and. (doalloc .or. .not. docopy)) then
+      arr = fill
    endif
    if (allocated (b)) then
-      arr(mlind(1):muind(1),mlind(2):muind(2)) = b(mlind(1):muind(1),mlind(2):muind(2))
+      do i2=mlind(2),muind(2)
+      do i1=mlind(1),muind(1)
+         arr(i1, i2) = b(i1, i2)
+      end do
+      end do
       deallocate (b)
    endif
    if (present(stat)) stat = localErr
@@ -478,18 +580,20 @@ subroutine reallocInt2x(arr, u1, u2, l1, l2, stat)
    endif
 end subroutine reallocInt2x
 
-subroutine reallocInt2(arr, uindex, lindex, stat, fill)
+subroutine reallocInt2(arr, uindex, lindex, stat, fill, keepExisting)
    integer, allocatable, intent(inout)          :: arr(:, :)
    integer, intent(in)                          :: uindex(2)
    integer, intent(in), optional                :: lindex(2)
    integer, intent(out), optional               :: stat
    integer, intent(in), optional                :: fill
+   logical, intent(in), optional                :: keepExisting
 
    integer, allocatable                         :: b(:,:)
 
    integer        :: uind(2), lind(2), muind(2), mlind(2), lindex_(2)
    integer        :: localErr = 0
-   logical        :: ident, doalloc
+   logical        :: ident, doalloc, docopy
+   integer        :: i1, i2
 
    if (present(lindex)) then
       lindex_ = lindex
@@ -500,6 +604,11 @@ subroutine reallocInt2(arr, uindex, lindex, stat, fill)
    ident = .true.
 
    doalloc = .false.
+   docopy  = .true.
+   if (present(keepExisting)) then
+      docopy = keepExisting
+   end if
+
    if (allocated(arr)) then
       uind = ubound(arr)
       lind = lbound(arr)
@@ -508,8 +617,14 @@ subroutine reallocInt2(arr, uindex, lindex, stat, fill)
       mlind = max(lind, lindex_)
       muind = min(uind, uindex)
       if ( .not. ident )then
-         allocate (b(mlind(1):muind(1),mlind(2):muind(2)))
-         b(mlind(1):muind(1),mlind(2):muind(2)) = arr(mlind(1):muind(1),mlind(2):muind(2))
+         if (docopy) then
+            allocate (b(mlind(1):muind(1),mlind(2):muind(2)))
+            do i2=mlind(2),muind(2)
+            do i1=mlind(1),muind(1)
+                b(i1, i2) = arr(i1, i2)
+            end do
+            end do
+         end if
          deallocate(arr)
          doalloc = .true.
       endif
@@ -519,12 +634,16 @@ subroutine reallocInt2(arr, uindex, lindex, stat, fill)
 
    if (doalloc) then
       allocate(arr(lindex_(1):uindex(1), lindex_(2):uindex(2)), stat = localErr)
-      if (present(fill)) then
-          arr = fill
-      endif
+   endif
+   if (present(fill) .and. (doalloc .or. .not. docopy)) then
+      arr = fill
    endif
    if (allocated (b)) then
-      arr(mlind(1):muind(1),mlind(2):muind(2)) = b(mlind(1):muind(1),mlind(2):muind(2))
+      do i2=mlind(2),muind(2)
+      do i1=mlind(1),muind(1)
+          arr(i1, i2) = b(i1, i2)
+      end do
+      end do
       deallocate (b)
    endif
    if (present(stat)) stat = localErr
@@ -547,18 +666,20 @@ subroutine reallocCharacter2x(arr, u1, u2, l1, l2, stat)
    endif
 end subroutine reallocCharacter2x
 
-subroutine reallocCharacter2(arr, uindex, lindex, stat, fill)
+subroutine reallocCharacter2(arr, uindex, lindex, stat, fill, keepExisting)
    character(len=*), allocatable, intent(inout) :: arr(:, :)
    integer, intent(in)                          :: uindex(2)
    integer, intent(in), optional                :: lindex(2)
    integer, intent(out), optional               :: stat
    character(len=1), intent(in), optional       :: fill
+   logical, intent(in), optional                :: keepExisting
 
    character(len=len(arr(1,1))), allocatable    :: b(:,:)
 
    integer        :: uind(2), lind(2), muind(2), mlind(2), lindex_(2)
    integer        :: localErr = 0
-   logical        :: ident, doalloc
+   logical        :: ident, doalloc, docopy
+   integer        :: i1, i2
 
    if (present(lindex)) then
       lindex_ = lindex
@@ -569,6 +690,11 @@ subroutine reallocCharacter2(arr, uindex, lindex, stat, fill)
    ident = .true.
 
    doalloc = .false.
+   docopy  = .true.
+   if (present(keepExisting)) then
+      docopy = keepExisting
+   end if
+
    if (allocated(arr)) then
       uind = ubound(arr)
       lind = lbound(arr)
@@ -577,8 +703,14 @@ subroutine reallocCharacter2(arr, uindex, lindex, stat, fill)
       mlind = max(lind, lindex_)
       muind = min(uind, uindex)
       if ( .not. ident )then
-         allocate (b(mlind(1):muind(1),mlind(2):muind(2)))
-         b(mlind(1):muind(1),mlind(2):muind(2)) = arr(mlind(1):muind(1),mlind(2):muind(2))
+         if (docopy) then
+            allocate (b(mlind(1):muind(1),mlind(2):muind(2)))
+            do i2=mlind(2),muind(2)
+            do i1=mlind(1),muind(1)
+                b(i1, i2) = arr(i1, i2)
+            end do
+            end do
+         end if
          deallocate(arr)
          doalloc = .true.
       endif
@@ -588,29 +720,35 @@ subroutine reallocCharacter2(arr, uindex, lindex, stat, fill)
 
    if (doalloc) then
       allocate(arr(lindex_(1):uindex(1), lindex_(2):uindex(2)), stat = localErr)
-      if (present(fill)) then
-          arr = fill
-      endif
+   endif
+   if (present(fill) .and. (doalloc .or. .not. docopy)) then
+      arr = fill
    endif
    if (allocated (b)) then
-      arr(mlind(1):muind(1),mlind(2):muind(2)) = b(mlind(1):muind(1),mlind(2):muind(2))
+      do i2=mlind(2),muind(2)
+      do i1=mlind(1),muind(1)
+          arr(i1, i2) = b(i1, i2)
+      end do
+      end do
       deallocate (b)
    endif
    if (present(stat)) stat = localErr
 end subroutine
 
-subroutine reallocInt3(arr, uindex, lindex, stat, fill)
+subroutine reallocInt3(arr, uindex, lindex, stat, fill, keepExisting)
    integer, allocatable, intent(inout)          :: arr(:,:,:)
    integer, intent(in)                          :: uindex(3)
    integer, intent(in), optional                :: lindex(3)
    integer, intent(out), optional               :: stat
    integer, intent(in), optional                :: fill
+   logical, intent(in), optional                :: keepExisting
 
    integer, allocatable                         :: b(:,:,:)
 
    integer        :: lind(3), uind(3), muind(3), mlind(3), lindex_(3)
    integer        :: localErr = 0
-   logical        :: ident, doalloc
+   logical        :: ident, doalloc, docopy
+   integer        :: i1, i2, i3
 
    if (present(lindex)) then
       lindex_ = lindex
@@ -620,6 +758,11 @@ subroutine reallocInt3(arr, uindex, lindex, stat, fill)
 
    ident = .true.
    doalloc = .false.
+   docopy  = .true.
+   if (present(keepExisting)) then
+      docopy = keepExisting
+   end if
+
    if (allocated(arr)) then
       uind = ubound(arr)
       lind = lbound(arr)
@@ -628,8 +771,16 @@ subroutine reallocInt3(arr, uindex, lindex, stat, fill)
       mlind = max(lind, lindex_)
       muind = min(uind, uindex)
       if ( .not. ident )then
-         allocate (b(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3)))
-         b(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3)) = arr(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3))
+         if (docopy) then
+            allocate (b(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3)))
+            do i3=mlind(3),muind(3)
+            do i2=mlind(2),muind(2)
+            do i1=mlind(1),muind(1)
+                b(i1, i2, i3) = arr(i1, i2, i3)
+            end do
+            end do
+            end do
+         end if
          deallocate(arr)
          doalloc = .true.
       endif
@@ -639,31 +790,38 @@ subroutine reallocInt3(arr, uindex, lindex, stat, fill)
 
    if (doalloc) then
       allocate(arr(lindex_(1):uindex(1), lindex_(2):uindex(2), lindex_(3):uindex(3)), stat = localErr)
-      if (present(fill)) then
-          arr = fill
-      endif
+   endif
+   if (present(fill) .and. (doalloc .or. .not. docopy)) then
+      arr = fill
    endif
    if (allocated (b)) then
-      arr(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3)) = &
-        b(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3))
+      do i3=mlind(3),muind(3)
+      do i2=mlind(2),muind(2)
+      do i1=mlind(1),muind(1)
+          arr(i1, i2, i3) = b(i1, i2, i3)
+      end do
+      end do
+      end do
       deallocate (b)
    endif
    if (present(stat)) stat = localErr
 end subroutine
 
-subroutine reallocReal3(arr, uindex, lindex, stat, fill)
+subroutine reallocReal3(arr, uindex, lindex, stat, fill, keepExisting)
    real, allocatable, intent(inout) :: arr(:,:,:)
    integer, intent(in)              :: uindex(3)
    integer, intent(in), optional    :: lindex(3)
    integer, intent(out), optional   :: stat
    real, intent(in), optional       :: fill
+   logical, intent(in), optional    :: keepExisting
 
    real, allocatable                :: b(:,:,:)
 
    integer        :: lind(3), uind(3), muind(3), mlind(3), lindex_(3)
    integer        :: localErr = 0
    integer        :: i
-   logical        :: ident, doalloc
+   logical        :: ident, doalloc, docopy
+   integer        :: i1, i2, i3
 
    if (present(lindex)) then
       lindex_ = lindex
@@ -673,6 +831,11 @@ subroutine reallocReal3(arr, uindex, lindex, stat, fill)
 
    ident = .true.
    doalloc = .false.
+   docopy  = .true.
+   if (present(keepExisting)) then
+      docopy = keepExisting
+   end if
+
    if (allocated(arr)) then
       uind = ubound(arr)
       lind = lbound(arr)
@@ -681,8 +844,16 @@ subroutine reallocReal3(arr, uindex, lindex, stat, fill)
       mlind = max(lind, lindex_)
       muind = min(uind, uindex)
       if ( .not. ident )then
-         allocate (b(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3)))
-         b(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3)) = arr(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3))
+         if (docopy) then
+            allocate (b(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3)))
+            do i3=mlind(3),muind(3)
+            do i2=mlind(2),muind(2)
+            do i1=mlind(1),muind(1)
+                b(i1, i2, i3) = arr(i1, i2, i3)
+            end do
+            end do
+            end do
+         end if
          deallocate(arr)
          doalloc = .true.
       endif
@@ -692,30 +863,37 @@ subroutine reallocReal3(arr, uindex, lindex, stat, fill)
 
    if (doalloc) then
       allocate(arr(lindex_(1):uindex(1), lindex_(2):uindex(2), lindex_(3):uindex(3)), stat = localErr)
-      if (present(fill)) then
-          arr = fill
-      endif
+   endif
+   if (present(fill) .and. (doalloc .or. .not. docopy)) then
+      arr = fill
    endif
    if (allocated (b)) then
-      arr(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3)) = &
-        b(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3))
+      do i3=mlind(3),muind(3)
+      do i2=mlind(2),muind(2)
+      do i1=mlind(1),muind(1)
+          arr(i1, i2, i3) = b(i1, i2, i3)
+      end do
+      end do
+      end do
       deallocate (b)
    endif
    if (present(stat)) stat = localErr
 end subroutine
 
-subroutine reallocDouble3(arr, uindex, lindex, stat, fill)
+subroutine reallocDouble3(arr, uindex, lindex, stat, fill, keepExisting)
    double precision, allocatable, intent(inout) :: arr(:,:,:)
    integer, intent(in)                          :: uindex(3)
    integer, intent(in), optional                :: lindex(3)
    integer, intent(out), optional               :: stat
    double precision, intent(in), optional       :: fill
+   logical, intent(in), optional                :: keepExisting
 
    double precision, allocatable                :: b(:,:,:)
 
    integer        :: lind(3), uind(3), muind(3), mlind(3), lindex_(3)
    integer        :: localErr = 0
-   logical        :: ident, doalloc
+   logical        :: ident, doalloc, docopy
+   integer        :: i1, i2, i3
 
    if (present(lindex)) then
       lindex_ = lindex
@@ -725,6 +903,11 @@ subroutine reallocDouble3(arr, uindex, lindex, stat, fill)
 
    ident = .true.
    doalloc = .false.
+   docopy  = .true.
+   if (present(keepExisting)) then
+      docopy = keepExisting
+   end if
+
    if (allocated(arr)) then
       uind = ubound(arr)
       lind = lbound(arr)
@@ -733,8 +916,16 @@ subroutine reallocDouble3(arr, uindex, lindex, stat, fill)
       mlind = max(lind, lindex_)
       muind = min(uind, uindex)
       if ( .not. ident )then
-         allocate (b(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3)))
-         b(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3)) = arr(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3))
+         if (docopy) then
+            allocate (b(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3)))
+            do i3=mlind(3),muind(3)
+            do i2=mlind(2),muind(2)
+            do i1=mlind(1),muind(1)
+                b(i1, i2, i3) = arr(i1, i2, i3)
+            end do
+            end do
+            end do
+         end if
          deallocate(arr)
          doalloc = .true.
       endif
@@ -744,30 +935,37 @@ subroutine reallocDouble3(arr, uindex, lindex, stat, fill)
 
    if (doalloc) then
       allocate(arr(lindex_(1):uindex(1), lindex_(2):uindex(2), lindex_(3):uindex(3)), stat = localErr)
-      if (present(fill)) then
-          arr = fill
-      endif
+   endif
+   if (present(fill) .and. (doalloc .or. .not. docopy)) then
+      arr = fill
    endif
    if (allocated (b)) then
-      arr(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3)) = &
-        b(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3))
+      do i3=mlind(3),muind(3)
+      do i2=mlind(2),muind(2)
+      do i1=mlind(1),muind(1)
+          arr(i1, i2, i3) = b(i1, i2, i3)
+      end do
+      end do
+      end do
       deallocate (b)
    endif
    if (present(stat)) stat = localErr
 end subroutine
 
-subroutine reallocInt4(arr, uindex, lindex, stat, fill)
+subroutine reallocInt4(arr, uindex, lindex, stat, fill, keepExisting)
    integer, allocatable, intent(inout)          :: arr(:,:,:,:)
    integer, intent(in)                          :: uindex(4)
    integer, intent(in), optional                :: lindex(4)
    integer, intent(out), optional               :: stat
    integer, intent(in), optional                :: fill
+   logical, intent(in), optional                :: keepExisting
 
    integer, allocatable                         :: b(:,:,:,:)
 
    integer        :: lind(4), uind(4), muind(4), mlind(4), lindex_(4)
    integer        :: localErr = 0
-   logical        :: ident, doalloc
+   logical        :: ident, doalloc, docopy
+   integer        :: i1, i2, i3, i4
 
    if (present(lindex)) then
       lindex_ = lindex
@@ -777,6 +975,11 @@ subroutine reallocInt4(arr, uindex, lindex, stat, fill)
 
    ident = .true.
    doalloc = .false.
+   docopy  = .true.
+   if (present(keepExisting)) then
+      docopy = keepExisting
+   end if
+
    if (allocated(arr)) then
       uind = ubound(arr)
       lind = lbound(arr)
@@ -785,8 +988,18 @@ subroutine reallocInt4(arr, uindex, lindex, stat, fill)
       mlind = max(lind, lindex_)
       muind = min(uind, uindex)
       if ( .not. ident )then
-         allocate (b(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3),mlind(4):muind(4)))
-         b(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3),mlind(4):muind(4)) = arr(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3),mlind(4):muind(4))
+         if (docopy) then
+            allocate (b(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3),mlind(4):muind(4)))
+            do i4=mlind(4),muind(4)
+            do i3=mlind(3),muind(3)
+            do i2=mlind(2),muind(2)
+            do i1=mlind(1),muind(1)
+                b(i1, i2, i3, i4) = arr(i1, i2, i3, i4)
+            end do
+            end do
+            end do
+            end do
+         end if
          deallocate(arr)
          doalloc = .true.
       endif
@@ -797,29 +1010,38 @@ subroutine reallocInt4(arr, uindex, lindex, stat, fill)
    if (doalloc) then
       allocate(arr(lindex_(1):uindex(1), lindex_(2):uindex(2), &
                    lindex_(3):uindex(3), lindex_(4):uindex(4)), stat = localErr)
-      if (present(fill)) then
-          arr = fill
-      endif
+   endif
+   if (present(fill) .and. (doalloc .or. .not. docopy)) then
+      arr = fill
    endif
    if (allocated (b)) then
-      arr(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3),mlind(4):muind(4)) = &
-        b(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3),mlind(4):muind(4))
+      do i4=mlind(4),muind(4)
+      do i3=mlind(3),muind(3)
+      do i2=mlind(2),muind(2)
+      do i1=mlind(1),muind(1)
+          arr(i1, i2, i3, i4) = b(i1, i2, i3, i4)
+      end do
+      end do
+      end do
+      end do
       deallocate (b)
    endif
    if (present(stat)) stat = localErr
 end subroutine
 
-subroutine reallocReal4(arr, uindex, lindex, stat, fill)
+subroutine reallocReal4(arr, uindex, lindex, stat, fill, keepExisting)
    real   , allocatable, intent(inout)          :: arr(:,:,:,:)
    integer, intent(in)                          :: uindex(4)
    integer, intent(in), optional                :: lindex(4)
    integer, intent(out), optional               :: stat
    real, intent(in), optional                   :: fill
+   logical, intent(in), optional                :: keepExisting
 
    real, allocatable                            :: b(:,:,:,:)
    integer        :: lind(4), uind(4), muind(4), mlind(4), lindex_(4)
    integer        :: localErr = 0
-   logical        :: ident, doalloc
+   logical        :: ident, doalloc, docopy
+   integer        :: i1, i2, i3, i4
 
    if (present(lindex)) then
       lindex_ = lindex
@@ -829,6 +1051,11 @@ subroutine reallocReal4(arr, uindex, lindex, stat, fill)
 
    ident = .true.
    doalloc = .false.
+   docopy  = .true.
+   if (present(keepExisting)) then
+      docopy = keepExisting
+   end if
+
    if (allocated(arr)) then
       uind = ubound(arr)
       lind = lbound(arr)
@@ -837,8 +1064,18 @@ subroutine reallocReal4(arr, uindex, lindex, stat, fill)
       mlind = max(lind, lindex_)
       muind = min(uind, uindex)
       if ( .not. ident )then
-         allocate (b(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3),mlind(4):muind(4)))
-         b(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3),mlind(4):muind(4)) = arr(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3),mlind(4):muind(4))
+         if (docopy) then
+            allocate (b(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3),mlind(4):muind(4)))
+            do i4=mlind(4),muind(4)
+            do i3=mlind(3),muind(3)
+            do i2=mlind(2),muind(2)
+            do i1=mlind(1),muind(1)
+                b(i1, i2, i3, i4) = arr(i1, i2, i3, i4)
+            end do
+            end do
+            end do
+            end do
+         end if
          deallocate(arr)
          doalloc = .true.
       endif
@@ -849,29 +1086,38 @@ subroutine reallocReal4(arr, uindex, lindex, stat, fill)
    if (doalloc) then
       allocate(arr(lindex_(1):uindex(1), lindex_(2):uindex(2), &
                    lindex_(3):uindex(3), lindex_(4):uindex(4)), stat = localErr)
-      if (present(fill)) then
-          arr = fill
-      endif
+   endif
+   if (present(fill) .and. (doalloc .or. .not. docopy)) then
+      arr = fill
    endif
    if (allocated (b)) then
-      arr(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3),mlind(4):muind(4)) = &
-        b(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3),mlind(4):muind(4))
+      do i4=mlind(4),muind(4)
+      do i3=mlind(3),muind(3)
+      do i2=mlind(2),muind(2)
+      do i1=mlind(1),muind(1)
+          arr(i1, i2, i3, i4) = b(i1, i2, i3, i4)
+      end do
+      end do
+      end do
+      end do
       deallocate (b)
    endif
    if (present(stat)) stat = localErr
 end subroutine
 
-subroutine reallocDouble4(arr, uindex, lindex, stat, fill)
+subroutine reallocDouble4(arr, uindex, lindex, stat, fill, keepExisting)
    double precision, allocatable, intent(inout) :: arr(:,:,:,:)
    integer, intent(in)                          :: uindex(4)
    integer, intent(in), optional                :: lindex(4)
    integer, intent(out), optional               :: stat
    double precision, intent(in), optional       :: fill
+   logical, intent(in), optional                :: keepExisting
 
    double precision, allocatable                :: b(:,:,:,:)
    integer        :: lind(4), uind(4), muind(4), mlind(4), lindex_(4)
    integer        :: localErr = 0
-   logical        :: ident, doalloc
+   logical        :: ident, doalloc, docopy
+   integer        :: i1, i2, i3, i4
 
    if (present(lindex)) then
       lindex_ = lindex
@@ -881,6 +1127,11 @@ subroutine reallocDouble4(arr, uindex, lindex, stat, fill)
 
    ident = .true.
    doalloc = .false.
+   docopy  = .true.
+   if (present(keepExisting)) then
+      docopy = keepExisting
+   end if
+
    if (allocated(arr)) then
       uind = ubound(arr)
       lind = lbound(arr)
@@ -889,8 +1140,18 @@ subroutine reallocDouble4(arr, uindex, lindex, stat, fill)
       mlind = max(lind, lindex_)
       muind = min(uind, uindex)
       if ( .not. ident )then
-         allocate (b(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3),mlind(4):muind(4)))
-         b(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3),mlind(4):muind(4)) = arr(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3),mlind(4):muind(4))
+         if (docopy) then
+            allocate (b(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3),mlind(4):muind(4)))
+            do i4=mlind(4),muind(4)
+            do i3=mlind(3),muind(3)
+            do i2=mlind(2),muind(2)
+            do i1=mlind(1),muind(1)
+                b(i1, i2, i3, i4) = arr(i1, i2, i3, i4)
+            end do
+            end do
+            end do
+            end do
+         end if
          deallocate(arr)
          doalloc = .true.
       endif
@@ -901,13 +1162,20 @@ subroutine reallocDouble4(arr, uindex, lindex, stat, fill)
    if (doalloc) then
       allocate(arr(lindex_(1):uindex(1), lindex_(2):uindex(2), &
                    lindex_(3):uindex(3), lindex_(4):uindex(4)), stat = localErr)
-      if (present(fill)) then
-          arr = fill
-      endif
+   endif
+   if (present(fill) .and. (doalloc .or. .not. docopy)) then
+      arr = fill
    endif
    if (allocated (b)) then
-      arr(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3),mlind(4):muind(4)) = &
-        b(mlind(1):muind(1),mlind(2):muind(2),mlind(3):muind(3),mlind(4):muind(4))
+      do i4=mlind(4),muind(4)
+      do i3=mlind(3),muind(3)
+      do i2=mlind(2),muind(2)
+      do i1=mlind(1),muind(1)
+          arr(i1, i2, i3, i4) = b(i1, i2, i3, i4)
+      end do
+      end do
+      end do
+      end do
       deallocate (b)
    endif
    if (present(stat)) stat = localErr
