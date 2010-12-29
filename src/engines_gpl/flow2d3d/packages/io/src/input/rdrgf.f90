@@ -175,7 +175,7 @@ subroutine rdrgf(filrgf    ,lundia    ,error     ,nmax      ,mmax      , &
     if (nc > 9999) then 
        error = .true. 
        call prterr(lundia, 'P004', 'in grid file: Nmax larger than 9999 is not allowed ' // & 
-                        & 'supply grid in Netcdf format', gdp) 
+                        & 'supply grid in Netcdf format') 
        close (lunrgf) 
        return 
     endif 

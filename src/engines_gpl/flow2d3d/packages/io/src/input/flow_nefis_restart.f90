@@ -205,8 +205,7 @@ use properties
     enddo
     if (.not. found) then
        call prterr(lundia    ,'P004'    , &
-            & 'Restart time not found on restart file ' // trim(dat_file), &
-            & gdp       )
+            & 'Restart time not found on restart file ' // trim(dat_file))
        error = .true.
        goto 9999
     else

@@ -278,7 +278,7 @@ subroutine dimsedconst(lundia    ,error     ,sedim     ,const     , &
              if (sedtyptmp == ' ') then
                 error = .true.
                 call prterr(lundia, 'U021', 'Missing sediment type for ' &
-                          & // trim(parname), gdp)
+                          & // trim(parname))
              elseif (found) then
                 if (index(sedtyptmp, 'mud') == 1) then
                    !
@@ -291,13 +291,13 @@ subroutine dimsedconst(lundia    ,error     ,sedim     ,const     , &
                 else
                    error = .true.
                    call prterr(lundia, 'U007', 'suspended sediment type of ' &
-                             & // trim(parname) // ': must start with sand or mud', gdp)
+                             & // trim(parname) // ': must start with sand or mud')
                 endif
              elseif (.not. found) then
                 if (index(sedtyptmp,'bedload') /= 1) then
                    error = .true.
                    call prterr(lundia, 'U007', 'sediment type of ' &
-                             & // trim(parname) // ': must start with bedload', gdp)
+                             & // trim(parname) // ': must start with bedload')
                 else
                    lsedbl = lsedbl + 1
                 endif

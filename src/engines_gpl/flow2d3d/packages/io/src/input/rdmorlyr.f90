@@ -164,7 +164,7 @@ use bedcomposition_module
     call prop_get_integer(mor_ptr, 'Underlayer', 'IUnderLyr', iunderlyr)
     if (iunderlyr < 1 .or. iunderlyr > 2) then
        call prterr(lundia, 'U021', 'IUnderLyr should be 1 or 2 in ' &
-                 & // trim(filmor), gdp)
+                 & // trim(filmor))
        call d3stop(1, gdp)
     endif
     txtput1 = 'Underlayer mechanism'
@@ -190,7 +190,7 @@ use bedcomposition_module
        if (mxnulyr < 0) then
           call prterr(lundia, 'U021', &
                     & 'Maximum number of under layers should be 0 or more in ' &
-                    & // trim(filmor), gdp)
+                    & // trim(filmor))
           call d3stop(1, gdp)
        endif
        txtput1 = 'Maximum number of layers'
@@ -203,7 +203,7 @@ use bedcomposition_module
           write(lundia,'(2a,e20.4)') txtput1, ':', thunlyr
           if (thunlyr <= 0) then
              call prterr(lundia, 'U021', 'ThUnLyr should be positive in ' &
-                       & // trim(filmor), gdp)
+                       & // trim(filmor))
              call d3stop(1, gdp)
           endif
        endif
@@ -211,7 +211,7 @@ use bedcomposition_module
        call prop_get_integer(mor_ptr, 'Underlayer', 'UpdBaseLyr', updbaselyr)
        if (updbaselyr < 1 .or. updbaselyr > 4) then
           call prterr(lundia, 'U021', 'UpdBaseLyr should be 1-4 in ' &
-                    & // trim(filmor), gdp)
+                    & // trim(filmor))
           call d3stop(1, gdp)
        endif
        !
@@ -282,7 +282,7 @@ use bedcomposition_module
                        & nmax      ,nmaxus    ,thtrlyr(gdp%d%nmlb),gdp       )
              if (error) then
                 call prterr(lundia, 'U021', 'Unable to read transport layer thickness from ' &
-                          & // trim(ttlfil), gdp)
+                          & // trim(ttlfil))
                 call d3stop(1, gdp)
              endif
           else
@@ -290,7 +290,7 @@ use bedcomposition_module
              call prop_get(mor_ptr, 'Underlayer', 'ThTrLyr', thtrlyr(1))
              if (thtrlyr(1) <= 0) then
                 call prterr(lundia, 'U021', 'ThTrLyr should be positive in ' &
-                          & // trim(filmor), gdp)
+                          & // trim(filmor))
                 call d3stop(1, gdp)
              endif
              do nm = 1, nmmax
@@ -316,7 +316,7 @@ use bedcomposition_module
           write(lundia,'(2a,e20.4)') txtput1, ':', ttlmin
        case default
           call prterr(lundia, 'U021', 'Invalid transport layer thickness option specified in ' &
-                    & // trim(filmor), gdp)
+                    & // trim(filmor))
           call d3stop(1, gdp)
        end select
        !
@@ -352,7 +352,7 @@ use bedcomposition_module
                           & nmax      ,nmaxus    ,thexlyr(gdp%d%nmlb),gdp       )
                 if (error) then
                    call prterr(lundia, 'U021', 'Unable to read exchange layer thickness from ' &
-                             & // trim(telfil), gdp)
+                             & // trim(telfil))
                    call d3stop(1, gdp)
                 endif
              else
@@ -360,7 +360,7 @@ use bedcomposition_module
                 call prop_get(mor_ptr, 'Underlayer', 'ThExLyr', thexlyr(1))
                 if (thexlyr(1) <= 0) then
                    call prterr(lundia, 'U021', 'ThExLyr should be positive in ' &
-                             & // trim(filmor), gdp)
+                             & // trim(filmor))
                    call d3stop(1, gdp)
                 endif
                 do nm = 1, nmmax
@@ -371,7 +371,7 @@ use bedcomposition_module
              endif
           case default
              call prterr(lundia, 'U021', 'Invalid exchange layer thickness option specified in ' &
-                       & // trim(filmor), gdp)
+                       & // trim(filmor))
              call d3stop(1, gdp)
           end select
        endif
@@ -402,7 +402,7 @@ use bedcomposition_module
        enddo
        if (.not.found) then
           call prterr(lundia, 'U021', &
-                    & 'Unknown boundary "'//trim(bndname)//'" in '//trim(filmor), gdp)
+                    & 'Unknown boundary "'//trim(bndname)//'" in '//trim(filmor))
           call d3stop(1, gdp)          
        endif
        !
@@ -410,7 +410,7 @@ use bedcomposition_module
        if (cmpbnd(j)%icond < 0 .or. cmpbnd(j)%icond > 3) then
           call prterr(lundia, 'U021', &
                     & 'Invalid composition boundary condition at "' &
-                    & //trim(bndname)//'" in '//trim(filmor), gdp)
+                    & //trim(bndname)//'" in '//trim(filmor))
           call d3stop(1, gdp)          
        endif
        !

@@ -227,7 +227,7 @@ subroutine rdxyzo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              endif
           else
              call prterr(lundia, 'P004', 'The use of constant dx and dy for ' // &
-                       & 'spherical models is not supported anymore', gdp)
+                       & 'spherical models is not supported anymore')
              write (lundia,*) '           Use a grid file instead'
              error = .true.
           endif

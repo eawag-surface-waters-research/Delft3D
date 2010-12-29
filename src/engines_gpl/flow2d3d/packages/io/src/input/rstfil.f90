@@ -152,8 +152,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
                                 & dp        ,ex_nfs    ,gdp       )
           if (error .and. .not.ex_nfs) then
              call prterr(lundia    ,'G004'    , &
-             & filtmp(:lfile) // ', ' // filtmp(:8 + lrid) // ' and ' // filtmp(9:8+lrid) // '.dat/.def', &
-             & gdp       )
+             & filtmp(:lfile) // ', ' // filtmp(:8 + lrid) // ' and ' // filtmp(9:8+lrid) // '.dat/.def')
           endif
        else
           lfile = 8 + lrid

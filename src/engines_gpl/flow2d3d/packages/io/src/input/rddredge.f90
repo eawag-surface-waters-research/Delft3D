@@ -862,11 +862,11 @@ end interface
                    if (parname == 'sandmining') then
                       call prterr(lundia, 'U021', &
                                 & 'Unable to read sand mining area "'// &
-                                & trim(dredge_areas(cntssrc))//'"', gdp)
+                                & trim(dredge_areas(cntssrc))//'"')
                    else
                       call prterr(lundia, 'U021', &
                                 & 'Unable to read dredge depth of area "'// &
-                                & trim(dredge_areas(cntssrc))//'"', gdp)
+                                & trim(dredge_areas(cntssrc))//'"')
                    endif
                    call d3stop(1, gdp)
                 elseif (comparereal(pdredge%dredge_depth,1.0e10_fp) == 0) then
@@ -896,21 +896,21 @@ end interface
                 if (pdredge%depthdef < 1 .or. pdredge%depthdef > DEPTHDEF_MAX) then
                    call prterr(lundia, 'U021', &
                              & 'Invalid depth definition for dredge area "'// &
-                             & trim(dredge_areas(cntssrc))//'"', gdp)
+                             & trim(dredge_areas(cntssrc))//'"')
                    call d3stop(1, gdp)
                 endif
                 call prop_get_integer(link_ptr, '*', 'InPolygon', pdredge%ichkloc)
                 if (pdredge%ichkloc < 1 .or. pdredge%ichkloc > 3) then
                    call prterr(lundia, 'U021', &
                              & 'Invalid in polygon check for dredge area "'// &
-                             & trim(dredge_areas(cntssrc))//'"', gdp)
+                             & trim(dredge_areas(cntssrc))//'"')
                    call d3stop(1, gdp)
                 endif
                 call prop_get_integer(link_ptr, '*', 'DredgeDistr', pdredge%dredgedistr)
                 if (pdredge%dredgedistr < 1 .or. pdredge%dredgedistr > DREDGEDISTR_MAX) then
                    call prterr(lundia, 'U021', &
                              & 'Invalid dredge distribution for dredge area "'// &
-                             & trim(dredge_areas(cntssrc))//'"', gdp)
+                             & trim(dredge_areas(cntssrc))//'"')
                    call d3stop(1, gdp)
                 endif
                 if (pdredge%paractive(1) /= -999) then
@@ -1262,7 +1262,7 @@ end interface
                 if (pdredge%dumpdistr<1 .or. pdredge%dumpdistr>DR2DUDISTR_MAX) then
                    call prterr(lundia, 'U021', &
                              & 'Invalid dump distribution for '//trim(dredgetype)//' area "'// &
-                             & trim(dredge_areas(cntssrc))//'"', gdp)
+                             & trim(dredge_areas(cntssrc))//'"')
                    call d3stop(1, gdp)
                 endif
                 !
@@ -1281,7 +1281,7 @@ end interface
                       call prterr(lundia, 'U021', &
                                 & 'Specified percentages conflict with specified dump'// &
                                 & ' distribution for '//trim(dredgetype)//' area "'// &
-                                & trim(dredge_areas(cntssrc))//'"', gdp)
+                                & trim(dredge_areas(cntssrc))//'"')
                       call d3stop(1, gdp)
                    endif
                 endif
@@ -1383,7 +1383,7 @@ end interface
              if (ia > nadump) then
                 call prterr(lundia, 'U190', &
                           & 'Skipping data block for unknown dump area "'// &
-                          & trim(parname)//'"', gdp)
+                          & trim(parname)//'"')
                 cycle
              endif
              pdump => dump_prop(ia)
@@ -1394,21 +1394,21 @@ end interface
              if (pdump%depthdef<1 .or. pdump%depthdef>DEPTHDEF_MAX) then
                 call prterr(lundia, 'U021', &
                           & 'Invalid depth definition for dump area "'// &
-                          & trim(dump_areas(ia))//'"', gdp)
+                          & trim(dump_areas(ia))//'"')
                 call d3stop(1, gdp)
              endif
              call prop_get_integer(link_ptr, '*', 'DumpDistr', pdump%dumpdistr)
              if (pdump%dumpdistr<1 .or. pdump%dumpdistr>DUMPDISTR_MAX) then
                 call prterr(lundia, 'U021', &
                           & 'Invalid dump distribution for dump area "'// &
-                          & trim(dump_areas(ia))//'"', gdp)
+                          & trim(dump_areas(ia))//'"')
                 call d3stop(1, gdp)
              endif
              call prop_get_integer(link_ptr, '*', 'InPolygon', pdump%ichkloc)
              if (pdump%ichkloc<1 .or. pdump%ichkloc>3) then
                 call prterr(lundia, 'U021', &
                           & 'Invalid in polygon check for dump area "'// &
-                          & trim(dump_areas(ia))//'"', gdp)
+                          & trim(dump_areas(ia))//'"')
                 call d3stop(1, gdp)
              endif
              !

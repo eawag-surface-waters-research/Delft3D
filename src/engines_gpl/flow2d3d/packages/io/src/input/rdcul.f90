@@ -424,8 +424,7 @@ subroutine rdcul(nsrc, namsrc ,mnksrc, voldis, gdp)
                 if (istat==0) allocate (gdp%gdculver%dll_strings (max_strings ), stat = istat)
                 !
                 if (istat .ne. 0) then
-                    call prterr(lundia, 'U021', &
-                              & 'Culvert: memory allocation error', gdp)
+                    call prterr(lundia, 'U021', 'Culvert: memory allocation error')
                     call d3stop(1, gdp)
                 endif
                 !

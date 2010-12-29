@@ -528,11 +528,11 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        call prop_get_integer(mor_ptr, 'Morphology', 'IHidExp', ihidexp)
        if (ihidexp < 1 .or. ihidexp > 5) then
           call prterr(lundia, 'U021', 'IHidExp should be in the range 1 to 5 in ' &
-                    & // trim(filmor), gdp)
+                    & // trim(filmor))
           call d3stop(1, gdp)
        elseif (ihidexp>1 .and. anymud) then
           call prterr(lundia, 'U021', 'Mud fractions included: IHidExp should be 1 in ' &
-                    & // trim(filmor), gdp)
+                    & // trim(filmor))
           call d3stop(1, gdp)
        endif
        select case(ihidexp)
@@ -541,7 +541,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
           if (comparereal(asklhe,rmissval) == 0) then
              call prterr(lundia, 'U021', &
                        & 'ASKLHE missing: Alpha exponent for Soehngen et.al.'// &
-                       & ' hiding & exposure in file '//trim(filmor), gdp)
+                       & ' hiding & exposure in file '//trim(filmor))
              call d3stop(1, gdp)          
           endif
        case(5) ! Wu, Wang, Jia
@@ -549,7 +549,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
           if (comparereal(mwwjhe,rmissval) == 0) then
              call prterr(lundia, 'U021', &
                        & 'MWWJHE missing: M exponent for Wu, Wang, Jia'// &
-                       & ' hiding & exposure in file '//trim(filmor), gdp)
+                       & ' hiding & exposure in file '//trim(filmor))
              call d3stop(1, gdp)          
           endif
        endselect
@@ -564,7 +564,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        if (islope < 1 .or. islope > 4) then
           ! bedslope effect formulation
           call prterr(lundia, 'U021', 'ISlope should be 1 to 4 in ' &
-                    & // trim(filmor), gdp)
+                    & // trim(filmor))
           call d3stop(1, gdp)
        endif
        if (islope == 3) then
@@ -606,7 +606,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
           enddo
           if (.not.found) then
              call prterr(lundia, 'U021', &
-                & 'Unknown boundary "'//trim(bndname)//'" in '//trim(filmor), gdp)
+                & 'Unknown boundary "'//trim(bndname)//'" in '//trim(filmor))
              call d3stop(1, gdp)          
           endif
           !
@@ -616,7 +616,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
           if (morbnd(j)%icond<0 .or. morbnd(j)%icond>5) then
              call prterr(lundia, 'U021', &
                 & 'Invalid bed boundary condition at "' &
-                & //trim(bndname)//'" in '//trim(filmor), gdp)
+                & //trim(bndname)//'" in '//trim(filmor))
              call d3stop(1, gdp)          
           endif
        enddo
@@ -637,7 +637,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        call prop_get_integer(mor_ptr, 'Output', 'TranspType',moroutput%transptype)
        if (moroutput%transptype < 0 .or. moroutput%transptype > 2) then
           call prterr(lundia, 'U021', &
-                    & 'Invalid transport type in '//trim(filmor), gdp)
+                    & 'Invalid transport type in '//trim(filmor))
           call d3stop(1, gdp)          
        endif
        call prop_get_logical(mor_ptr, 'Output', 'BedTranspDueToCurrentsAtZeta', moroutput%sbcuv)
@@ -686,7 +686,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
                  & .false., .false.)
        if (nxxuser < 0) then
           call prterr(lundia, 'U021', &
-             & 'Cannot interpret Percentiles string in '//trim(filmor), gdp)
+             & 'Cannot interpret Percentiles string in '//trim(filmor))
           call d3stop(1, gdp)          
        endif
        do i = 1, nxxuser
@@ -694,7 +694,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
              rfield(i) = ifield(i)
           elseif (itype(i) == 3) then
              call prterr(lundia, 'U021', &
-                   & 'Cannot interpret Percentiles string in '//trim(filmor), gdp)
+                   & 'Cannot interpret Percentiles string in '//trim(filmor))
              call d3stop(1, gdp)          
           endif
        enddo
@@ -802,7 +802,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        !
        if (xxmin <= 0.0_fp .or. xxmin >= 100.0_fp) then
           call prterr(lundia, 'U021', &
-                & 'Sediment diameter percentiles should lie between 0 and 100%', gdp)
+                & 'Sediment diameter percentiles should lie between 0 and 100%')
           call d3stop(1, gdp)
        endif
        xx(i) = xxmin / 100.0_fp

@@ -140,13 +140,13 @@ subroutine chktrt(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
           ! Use D50, D90, rhosol of simulated sediment
           !
           call prterr(lundia    ,'G051'    , &
-            & 'Alluvial roughness predictor uses properties of simulated sediment fractions',gdp)
+            & 'Alluvial roughness predictor uses properties of simulated sediment fractions')
        else
           !
           ! Use BedformD50 and BedformD90
           !
           call prterr(lundia    ,'G051'    , &
-            & 'Alluvial roughness predictor uses the following sediment properties',gdp)
+            & 'Alluvial roughness predictor uses the following sediment properties')
           write(lundia,'(a,e12.4)') '            D50 (keyword BdfD50) :',gdp%gdbedformpar%bedformD50
           write(lundia,'(a,e12.4)') '            D90 (keyword BdfD90) :',gdp%gdbedformpar%bedformD90
        endif

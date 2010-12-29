@@ -385,8 +385,7 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           ! Limited by incrementing timnow by 0.5 every half time step ( 2**23-1 )
           !
           call prterr(lundia    ,'U021'    ,'Stop time too far away from Itdate for ' // &
-              & 'a single precision simulation (should be at most 8388607 time steps)' , &
-              & gdp       )
+              & 'a single precision simulation (should be at most 8388607 time steps)')
           error = .true.
        elseif (fp == hp .and. itstop > 2147483647) then
           !
@@ -395,8 +394,7 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           ! 4503599627370495 ( 2**52-1 )
           !
           call prterr(lundia    ,'U021'    ,'Stop time too far away from Itdate for a ' // &
-              & 'double precision simulation (should be at most 2147483647 time steps)' , &
-              & gdp       )
+              & 'double precision simulation (should be at most 2147483647 time steps)')
           error = .true.
        endif
     endif

@@ -164,7 +164,7 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        endif
        if (filic /= ' ') then
           call prterr(lundia ,'Z013' , &
-                    & 'Using Smoothing time and initial condition file' ,gdp )
+                    & 'Using Smoothing time and initial condition file')
        endif
     endif
     !
