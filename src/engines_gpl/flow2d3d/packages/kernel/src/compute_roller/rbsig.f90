@@ -73,6 +73,7 @@ subroutine rbsig(ncmax     ,ampbc     ,ombc      ,phibc     ,thetbc    , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     !
     implicit none
@@ -90,8 +91,6 @@ subroutine rbsig(ncmax     ,ampbc     ,ombc      ,phibc     ,thetbc    , &
     integer  , pointer :: nsplit
     real(fp) , pointer :: timtap
     real(fp) , pointer :: depbnd
-    real(fp) , pointer :: pi
-    real(fp) , pointer :: degrad
 !
 ! Global variables
 !
@@ -127,8 +126,6 @@ subroutine rbsig(ncmax     ,ampbc     ,ombc      ,phibc     ,thetbc    , &
     nsplit    => gdp%gdbcdat%nsplit
     timtap    => gdp%gdbcdat%timtap
     depbnd    => gdp%gdbcdat%depbnd
-    pi        => gdp%gdconst%pi
-    degrad    => gdp%gdconst%degrad
     !
     call noextspaces(filrol    ,lfile     )
     !

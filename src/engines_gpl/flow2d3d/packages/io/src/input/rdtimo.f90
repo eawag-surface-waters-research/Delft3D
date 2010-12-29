@@ -52,7 +52,6 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp)                           , pointer :: pi
     real(sp)                           , pointer :: smiss
     real(fp)                           , pointer :: smax
     real(fp)                           , pointer :: velmax
@@ -134,7 +133,6 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
 !! executable statements -------------------------------------------------------
 !
-    pi             => gdp%gdconst%pi
     smiss          => gdp%gdconst%smiss
     smax           => gdp%gdf0isf1%smax
     velmax         => gdp%gdf0isf1%velmax

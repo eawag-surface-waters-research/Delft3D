@@ -42,6 +42,7 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     !
     use globaldata
     !
@@ -52,7 +53,6 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp)                 , pointer :: pi
     real(fp)                 , pointer :: eps
     logical                  , pointer :: first
     integer, dimension(:, :) , pointer :: elmdms
@@ -189,7 +189,6 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
 !
     nefiselem => gdp%nefisio%nefiselem(nefissetwav)
     !
-    pi              => gdp%gdconst%pi
     eps             => gdp%gdconst%eps
     first           => nefiselem%first
     elmdms          => nefiselem%elmdms

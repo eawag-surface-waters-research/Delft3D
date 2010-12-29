@@ -50,6 +50,7 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     !
     use globaldata
     !
@@ -63,8 +64,6 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
     real(fp)               , pointer :: rhow
     real(fp)               , pointer :: z0
     real(fp)               , pointer :: vicmol
-    real(fp)               , pointer :: pi
-    real(fp)               , pointer :: degrad
     real(fp)               , pointer :: eps
 !
 ! Local parameters
@@ -125,8 +124,6 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
     rhow      => gdp%gdphysco%rhow
     z0        => gdp%gdphysco%z0
     vicmol    => gdp%gdphysco%vicmol
-    pi        => gdp%gdconst%pi
-    degrad    => gdp%gdconst%degrad
     eps       => gdp%gdconst%eps
     !
     ! Set constants

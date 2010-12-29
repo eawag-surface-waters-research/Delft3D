@@ -65,6 +65,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use flow_tables
     !
     use globaldata
@@ -76,8 +77,6 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp)                           , pointer :: degrad
-    real(fp)                           , pointer :: pi
     integer                            , pointer :: itstop
     integer                            , pointer :: itlfsm
     integer                            , pointer :: julday
@@ -241,8 +240,6 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    degrad         => gdp%gdconst%degrad
-    pi             => gdp%gdconst%pi
     relxqh         => gdp%gdincbc%relxqh
     paver          => gdp%gdnumeco%paver
     thetqh         => gdp%gdnumeco%thetqh

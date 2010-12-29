@@ -41,7 +41,8 @@ subroutine usrdef(lundia    ,error     ,grdang    ,secflo    ,gdp       )
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-   !
+    use mathconsts
+    !
     use globaldata
     !
     implicit none
@@ -107,8 +108,6 @@ subroutine usrdef(lundia    ,error     ,grdang    ,secflo    ,gdp       )
     integer, external :: gtrpnt
     logical           :: dtn
     real(fp)          :: anglen
-    real(fp)          :: degrad ! Transformation coeff. from degrees to radial 
-    real(fp)          :: pi     ! 3.14.... 
     real(fp)          :: t
     real(fp)          :: tdiagm
     real(fp)          :: windd  ! Wind direction read from file given as wind from north 
@@ -147,11 +146,6 @@ subroutine usrdef(lundia    ,error     ,grdang    ,secflo    ,gdp       )
     zwi = 0.0
     !
     itdiag = itstop + 1
-    !
-    !-----initilisation local parameters
-    !
-    pi = 4.0*atan(1.0)
-    degrad = pi/180.
     !
     !-----User Defined Function ? <YES/NO>
     !

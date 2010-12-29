@@ -40,6 +40,7 @@ subroutine calseddf2004(ustarc    ,ws        ,tp        ,hrms      ,h1        , 
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     !
     use globaldata
     !
@@ -50,7 +51,6 @@ subroutine calseddf2004(ustarc    ,ws        ,tp        ,hrms      ,h1        , 
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp)               , pointer :: pi
     real(fp)               , pointer :: eps
     real(fp)               , pointer :: dsand
     real(fp)               , pointer :: bed
@@ -128,7 +128,6 @@ subroutine calseddf2004(ustarc    ,ws        ,tp        ,hrms      ,h1        , 
 !
 !! executable statements -------------------------------------------------------
 !
-    pi       => gdp%gdconst%pi
     eps      => gdp%gdconst%eps
     dsand    => gdp%gdmorpar%dsand
     bed      => gdp%gdmorpar%bed

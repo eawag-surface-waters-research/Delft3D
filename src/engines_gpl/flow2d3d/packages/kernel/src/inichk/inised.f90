@@ -36,6 +36,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     !
     use globaldata
     use bedcomposition_module
@@ -48,7 +49,6 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     ! They replace the  include igd / include igp lines
     !
     real(fp)                             , pointer :: eps
-    real(fp)                             , pointer :: eps_plt
     integer,        dimension(:)         , pointer :: iform
     real(fp),       dimension(:,:)       , pointer :: par
     real(fp), dimension(:)               , pointer :: dm
@@ -136,7 +136,6 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
 !! executable statements -------------------------------------------------------
 !
     eps                 => gdp%gdconst%eps
-    eps_plt             => gdp%gdconst%eps_plt
     iform               => gdp%gdeqtran%iform
     par                 => gdp%gdeqtran%par
     dm                  => gdp%gderosed%dm
@@ -328,7 +327,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
           !
           do nm = 1, nmmax
              if (kcs(nm) == 1) then
-                if (comparereal(tcrdep(nm,ll), eps_plt) /= 1) then
+                if (comparereal(tcrdep(nm,ll), eps_fp) /= 1) then
                    call prterr(lundia, 'G051', 'Critical shear stress for deposition of mud is 0.0 in at least one cell')
                    exit
                 endif
@@ -355,7 +354,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
           endif
           do nm = 1, nmmax
              if (kcs(nm) == 1) then
-                if (comparereal(tcrero(nm,ll), eps_plt) /= 1) then
+                if (comparereal(tcrero(nm,ll), eps_fp) /= 1) then
                    call prterr(lundia, 'U021', 'Critical shear stress for erosion of mud must be > 0.0')
                    call d3stop(1, gdp)
                 endif

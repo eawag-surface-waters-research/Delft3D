@@ -38,6 +38,7 @@ subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     !
     implicit none
@@ -97,7 +98,6 @@ subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     real(fp)                       :: phix1
     real(fp)                       :: phix2
     real(fp)                       :: phiy
-    real(fp)                       :: pi
     real(fp)                       :: rho                  !  array with densities [kg/m3]
     real(fp)                       :: rnu
     real(fp)                       :: taucur
@@ -162,7 +162,6 @@ subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     sbotx = 0.0
     sboty = 0.0
     vonkar = 0.4
-    pi = 4.*atan(1.0)
     astarc = 30.*pi**2
     waveps = 1.E-4
     eps = 1.E-6
@@ -228,7 +227,7 @@ subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     !
     !           Angle between current and waves
     !
-    phiwav = dir*pi/180.
+    phiwav = dir*degrad
     phicur = atan2(v, u)
     phi = phiwav - phicur
     abscos = abs(cos(phi))

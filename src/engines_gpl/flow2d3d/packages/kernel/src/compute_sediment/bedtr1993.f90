@@ -45,6 +45,7 @@ subroutine bedtr1993(uuu       ,vvv       ,u2dh      ,d50       ,d90       , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     !
     use globaldata
     !
@@ -59,8 +60,6 @@ subroutine bedtr1993(uuu       ,vvv       ,u2dh      ,d50       ,d90       , &
     real(fp)               , pointer :: ag
     real(fp)               , pointer :: bed
     logical                , pointer :: wave
-    real(fp)               , pointer :: pi
-    real(fp)               , pointer :: degrad
     real(fp)               , pointer :: eps
 !
 ! Global variables
@@ -138,8 +137,6 @@ subroutine bedtr1993(uuu       ,vvv       ,u2dh      ,d50       ,d90       , &
     bed                 => gdp%gdmorpar%bed
     rhow                => gdp%gdphysco%rhow
     ag                  => gdp%gdphysco%ag
-    pi                  => gdp%gdconst%pi
-    degrad              => gdp%gdconst%degrad
     eps                 => gdp%gdconst%eps
     !
     ! CALCULATE BED LOAD TRANSPORT

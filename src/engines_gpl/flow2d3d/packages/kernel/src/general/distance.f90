@@ -36,6 +36,7 @@ subroutine distance(sferic    ,x1        ,y1        ,x2        ,y2        , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     !
     use globaldata
     !
@@ -46,7 +47,6 @@ subroutine distance(sferic    ,x1        ,y1        ,x2        ,y2        , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(hp) , pointer :: ddegrad
     real(hp) , pointer :: dearthrad
 !
 ! Global variables
@@ -76,14 +76,13 @@ subroutine distance(sferic    ,x1        ,y1        ,x2        ,y2        , &
 !
 !! executable statements -------------------------------------------------------
 !
-    ddegrad    => gdp%gdconstd%ddegrad
     dearthrad  => gdp%gdconstd%dearthrad
     !
     if (sferic) then
-       x1rad = real(x1, hp)*ddegrad
-       x2rad = real(x2, hp)*ddegrad
-       y1rad = real(y1, hp)*ddegrad
-       y2rad = real(y2, hp)*ddegrad
+       x1rad = real(x1, hp)*degrad_hp
+       x2rad = real(x2, hp)*degrad_hp
+       y1rad = real(y1, hp)*degrad_hp
+       y2rad = real(y2, hp)*degrad_hp
        !
        xcrd1 = dcos(y1rad)*dsin(x1rad)
        ycrd1 = dcos(y1rad)*dcos(x1rad)

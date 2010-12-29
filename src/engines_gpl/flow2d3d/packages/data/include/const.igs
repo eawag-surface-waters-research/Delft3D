@@ -27,13 +27,8 @@
 type gd_const
     !
     ! doubles
-    real(fp) :: pi
-    real(fp) :: degrad   ! pi/180.0
-    real(fp) :: raddeg   ! 180.0/pi
-    real(fp) :: day      ! 24.0*60.0*60.0
     real(fp) :: earthrad ! 6378137.0
-    real(fp) :: eps      ! epsilon
-    real(fp) :: eps_plt  ! epsilon, related to platform
+    real(fp) :: eps      ! 1.0e-6
     real(fp) :: amiss    ! -999.0
     !
     ! reals

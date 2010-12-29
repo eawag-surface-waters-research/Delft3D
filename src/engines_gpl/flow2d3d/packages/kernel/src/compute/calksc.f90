@@ -38,6 +38,7 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     !
     use globaldata
     !
@@ -48,7 +49,6 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp)                             , pointer :: pi
     real(fp)                             , pointer :: dt
     real(fp)                             , pointer :: tunit
     real(fp)                             , pointer :: ag
@@ -164,7 +164,6 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
     rksr                    => gdp%gdbedformpar%rksr
     rksmr                   => gdp%gdbedformpar%rksmr
     rksd                    => gdp%gdbedformpar%rksd
-    pi                      => gdp%gdconst%pi
     dt                      => gdp%gdexttim%dt
     tunit                   => gdp%gdexttim%tunit
     dxx                     => gdp%gderosed%dxx

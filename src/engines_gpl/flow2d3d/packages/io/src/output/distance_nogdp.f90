@@ -37,6 +37,7 @@ subroutine distance_nogdp(sferic    ,x1        ,y1        , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     !
     implicit none
 !
@@ -65,19 +66,14 @@ subroutine distance_nogdp(sferic    ,x1        ,y1        , &
     real(hp) :: ycrd2  ! Y coordinate of point 2
     real(hp) :: zcrd1  ! Z coordinate of point 1
     real(hp) :: zcrd2  ! Z coordinate of point 2
-    real(hp) :: ddegrad
-    real(hp) :: pi
 !
 !! executable statements -------------------------------------------------------
 !
-    pi        = 4.0_hp*datan(1.0_hp)
-    ddegrad   = pi/180.0_hp
-    !
     if (sferic) then
-       x1rad = real(x1,hp)*ddegrad
-       x2rad = real(x2,hp)*ddegrad
-       y1rad = real(y1,hp)*ddegrad
-       y2rad = real(y2,hp)*ddegrad
+       x1rad = real(x1,hp)*degrad_hp
+       x2rad = real(x2,hp)*degrad_hp
+       y1rad = real(y1,hp)*degrad_hp
+       y2rad = real(y2,hp)*degrad_hp
        !
        xcrd1 = cos(y1rad)*sin(x1rad)
        ycrd1 = cos(y1rad)*cos(x1rad)

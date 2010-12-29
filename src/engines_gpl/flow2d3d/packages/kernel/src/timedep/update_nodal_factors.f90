@@ -34,6 +34,7 @@ subroutine update_nodal_factors(timnow, kc, ntof, nto, kcd, hydrbc, omega, gdp)
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     !
     use globaldata
     !
@@ -48,7 +49,6 @@ subroutine update_nodal_factors(timnow, kc, ntof, nto, kcd, hydrbc, omega, gdp)
     real(fp)                        , pointer       :: time_nodal_update_bnd
     real(fp)                        , pointer       :: time_nodal_update_tgf
     real(fp)                        , pointer       :: ti_nodal ! update interval in unit of mdf-file
-    real(hp)                        , pointer       :: draddeg
     real(fp)                        , pointer       :: dt       ! time step in unit of mdf-file
     real(hp), dimension(:)          , pointer       :: tgffr
     real(hp), dimension(:)          , pointer       :: tgfv0u
@@ -87,7 +87,6 @@ subroutine update_nodal_factors(timnow, kc, ntof, nto, kcd, hydrbc, omega, gdp)
     compnames             => gdp%gdbcdat%compnames
     hydrbcf               => gdp%gdbcdat%hydrbcf
     ascon                 => gdp%gdbcdat%ascon
-    draddeg               => gdp%gdconstd%draddeg
     nrcmp                 => gdp%gdtfzeta%nrcmp
     tgffr                 => gdp%gdtfzeta%tgffr
     tgfv0u                => gdp%gdtfzeta%tgfv0u
@@ -138,12 +137,12 @@ subroutine update_nodal_factors(timnow, kc, ntof, nto, kcd, hydrbc, omega, gdp)
           endif
           !
           do k = 2, kc
-             omega(k) = real(w(k-1)*draddeg, fp)
+             omega(k) = real(w(k-1)*raddeg_hp, fp)
              do n = 1, ntof
                 hydrbc(1, n, k) = hydrbcf(1, n, k) * real(fr(k-1),fp)
                 hydrbc(2, n, k) = hydrbcf(2, n, k) * real(fr(k-1),fp)
-                hydrbc(3, n, k) = hydrbcf(3, n, k) - real(v0u(k-1) * draddeg,fp)
-                hydrbc(4, n, k) = hydrbcf(4, n, k) - real(v0u(k-1) * draddeg,fp)
+                hydrbc(3, n, k) = hydrbcf(3, n, k) - real(v0u(k-1) * raddeg_hp,fp)
+                hydrbc(4, n, k) = hydrbcf(4, n, k) - real(v0u(k-1) * raddeg_hp,fp)
                 !
                 ! correct for PHASE jump at both ends of tidal opening
                 ! (originally in triasc)
@@ -176,8 +175,8 @@ subroutine update_nodal_factors(timnow, kc, ntof, nto, kcd, hydrbc, omega, gdp)
        endif
        !
        do k = 1, nrcmp
-          tgfv0u(k) = tgfv0u(k) * draddeg
-          tgfw(k)   = tgfw(k)   * draddeg
+          tgfv0u(k) = tgfv0u(k) * raddeg_hp
+          tgfw(k)   = tgfw(k)   * raddeg_hp
        enddo
     endif
    !

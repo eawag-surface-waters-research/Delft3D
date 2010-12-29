@@ -39,6 +39,7 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     !
     use globaldata
     !
@@ -67,7 +68,6 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
     real(fp)                         , pointer :: thcrpa
     integer                          , pointer :: i50
     integer                          , pointer :: islope
-    real(fp)                         , pointer :: pi
     real(fp)                         , pointer :: eps
 !
 ! Global variables
@@ -162,7 +162,6 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
     thcrpa              => gdp%gdmorpar%thcrpa
     i50                 => gdp%gdmorpar%i50
     islope              => gdp%gdmorpar%islope
-    pi                  => gdp%gdconst%pi
     eps                 => gdp%gdconst%eps
     !
     ! Make assumptions for friction angle

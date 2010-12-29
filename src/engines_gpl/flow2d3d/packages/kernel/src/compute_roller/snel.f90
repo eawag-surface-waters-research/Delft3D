@@ -34,6 +34,7 @@ subroutine snel(mmax      ,nmax      ,norow     ,noroco    ,ubot      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     !
     use globaldata
     !
@@ -44,8 +45,6 @@ subroutine snel(mmax      ,nmax      ,norow     ,noroco    ,ubot      , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp)               , pointer :: pi
-    real(fp)               , pointer :: degrad
     real(fp)               , pointer :: timmin
     real(fp)               , pointer :: gammax
     real(fp)               , pointer :: rhow
@@ -114,8 +113,6 @@ subroutine snel(mmax      ,nmax      ,norow     ,noroco    ,ubot      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    pi              => gdp%gdconst%pi
-    degrad          => gdp%gdconst%degrad
     timmin          => gdp%gdinttim%timmin
     gammax          => gdp%gdnumeco%gammax
     rhow            => gdp%gdphysco%rhow

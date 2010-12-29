@@ -35,6 +35,7 @@ subroutine trab11(kode      ,ntrsi     ,u         ,v         ,hrms      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     !
     implicit none
@@ -74,7 +75,6 @@ subroutine trab11(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     real(fp)                       :: dstar
     real(fp)                       :: ag         !  gravity acceleration
     real(fp)                       :: k          ! wave number
-    real(fp)                       :: pi
     real(fp)                       :: rnu
     real(fp)                       :: term1
     real(fp)                       :: term2
@@ -102,7 +102,6 @@ subroutine trab11(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     ssusx = 0.0
     ssusy = 0.0
     vonkar = 0.4
-    pi = 4.*atan(1.)
     ag = par(1)
     delta = par(4)
     rnu = par(5)

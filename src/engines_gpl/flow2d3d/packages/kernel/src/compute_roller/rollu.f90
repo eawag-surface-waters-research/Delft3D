@@ -34,7 +34,8 @@ subroutine rollu(nmmax     ,kfs       ,sourr     ,df        , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-   !
+    use mathconsts
+    !
     use globaldata
     !
     implicit none
@@ -45,7 +46,6 @@ subroutine rollu(nmmax     ,kfs       ,sourr     ,df        , &
     ! They replace the  include igd / include igp lines
     !
     real(fp)               , pointer :: betarol
-    real(fp)               , pointer :: pi
     real(fp)               , pointer :: rhow
     real(fp)               , pointer :: ag
 !
@@ -77,7 +77,6 @@ subroutine rollu(nmmax     ,kfs       ,sourr     ,df        , &
 !! executable statements -------------------------------------------------------
 !
     betarol   => gdp%gdbetaro%betarol
-    pi        => gdp%gdconst%pi
     rhow      => gdp%gdphysco%rhow
     ag        => gdp%gdphysco%ag
     !

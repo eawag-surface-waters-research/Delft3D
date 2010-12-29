@@ -20,6 +20,7 @@ FINCLUDES += \
 
 FMODULES += \
 	-I$(top_srcdir)/utils_lgpl/precision/include \
+	-I$(top_srcdir)/utils_lgpl/constants/packages/mathconsts/src \
 	-I$(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow/src \
 	-I$(top_srcdir)/utils_lgpl/ec_module/packages/ec_module/src \
 	-I$(top_srcdir)/utils_lgpl/delftio/packages/delftio/src/diof90 \

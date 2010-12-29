@@ -22,6 +22,7 @@ FMODULES += \
         -I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/basics \
 	-I$(top_srcdir)/utils_lgpl/inifiles/packages/inifiles/src \
 	-I$(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow/src \
+	-I$(top_srcdir)/utils_lgpl/constants/packages/mathconsts/src \
 	-I$(top_srcdir)/utils_lgpl/ec_module/packages/ec_module/src
 
 #-------------------------------------------------------------------------------

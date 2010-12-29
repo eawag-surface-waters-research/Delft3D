@@ -79,6 +79,7 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     use dfparall
     !
@@ -89,7 +90,6 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp)                            , pointer :: pi
     real(fp)                            , pointer :: eps
     real(fp)                            , pointer :: clplant
     integer                             , pointer :: lundia
@@ -289,7 +289,6 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     !
     !  Von Karman constant set in subroutine TEKCOF
     !
-    pi          => gdp%gdconst%pi
     eps         => gdp%gdconst%eps
     clplant     => gdp%gddpmveg%clplant
     lundia      => gdp%gdinout%lundia

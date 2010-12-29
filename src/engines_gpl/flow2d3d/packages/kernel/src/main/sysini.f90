@@ -37,6 +37,7 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use precision_version_module
     use globaldata
     use dfparall
@@ -54,23 +55,13 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
     integer       , pointer :: lundia
     integer       , pointer :: lunprt
     integer       , pointer :: lunscr
-    real(fp)      , pointer :: pi
-    real(fp)      , pointer :: degrad
-    real(fp)      , pointer :: raddeg
-    real(fp)      , pointer :: day
     real(fp)      , pointer :: earthrad
     real(fp)      , pointer :: eps
-    real(fp)      , pointer :: eps_plt
     real(fp)      , pointer :: amiss
     real(sp)      , pointer :: smiss
     integer       , pointer :: imiss
-    real(hp)      , pointer :: dpi
-    real(hp)      , pointer :: ddegrad
-    real(hp)      , pointer :: draddeg
-    real(hp)      , pointer :: dday
     real(hp)      , pointer :: dearthrad
     real(hp)      , pointer :: deps
-    real(hp)      , pointer :: yearsecs
 !
 ! Global variables
 !
@@ -109,20 +100,10 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
 !
 !! executable statements -------------------------------------------------------
 !
-    dpi        => gdp%gdconstd%dpi
-    ddegrad    => gdp%gdconstd%ddegrad
-    draddeg    => gdp%gdconstd%draddeg
-    dday       => gdp%gdconstd%dday
     dearthrad  => gdp%gdconstd%dearthrad
     deps       => gdp%gdconstd%deps
-    yearsecs   => gdp%gdconstd%yearsecs
-    pi         => gdp%gdconst%pi
-    degrad     => gdp%gdconst%degrad
-    raddeg     => gdp%gdconst%raddeg
-    day        => gdp%gdconst%day
     earthrad   => gdp%gdconst%earthrad
     eps        => gdp%gdconst%eps
-    eps_plt    => gdp%gdconst%eps_plt
     amiss      => gdp%gdconst%amiss
     smiss      => gdp%gdconst%smiss
     imiss      => gdp%gdconst%imiss
@@ -137,24 +118,15 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
     ! NOTE: data-statement is not used to avoid problems with the
     !           order of declarations-data-code
     !
-    pi       = 4.0*atan(1.0)
-    degrad   = pi/180.0
-    raddeg   = 180.0/pi
-    day      = 24.0*60.0*60.0
+    call init_mathconsts()
     earthrad = 6378137.0   ! Mathworld, IUGG
     eps      = 1.0e-6
-    eps_plt  = epsilon(1.0_fp)
     amiss    = -999.0_fp
     smiss    = -999.0_sp
     imiss    = -999
     !
-    dpi       = 4.0d0*datan(1.0d0)
-    ddegrad   = dpi/180.0d0
-    draddeg   = 180.0d0/dpi
-    dday      = 24.0d0*60.0d0*60.0d0
     dearthrad = 6378137.0d0
     deps      = 1.0d-12
-    yearsecs  = 31536000.0d0
     !
     ! initialisation
     ! NOTE: lundia gets fake unit number (< 10), for inquire statement

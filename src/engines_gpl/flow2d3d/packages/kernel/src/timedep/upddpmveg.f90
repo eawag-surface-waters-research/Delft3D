@@ -33,6 +33,7 @@ subroutine upddpmveg(mmax      ,nmax      ,kmax      ,sig       ,thick     , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     !
     implicit none
@@ -43,7 +44,6 @@ subroutine upddpmveg(mmax      ,nmax      ,kmax      ,sig       ,thick     , &
     ! They replace the  include igd / include igp lines
     !
     real(fp)                             , pointer :: amiss
-    real(fp)                             , pointer :: pi
     integer, dimension(:,:)              , pointer :: planttype
     real(fp), dimension(:,:)             , pointer :: nplants
     type (dpm_vegetation), dimension(:)  , pointer :: vegs
@@ -130,7 +130,6 @@ subroutine upddpmveg(mmax      ,nmax      ,kmax      ,sig       ,thick     , &
 !! executable statements -------------------------------------------------------
 !
     amiss      => gdp%gdconst%amiss
-    pi         => gdp%gdconst%pi
     planttype  => gdp%gddpmveg%planttype
     nplants    => gdp%gddpmveg%nplants
     vegs       => gdp%gddpmveg%vegs

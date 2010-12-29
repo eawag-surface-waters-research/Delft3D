@@ -52,6 +52,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     !
     use globaldata
     !
@@ -62,8 +63,6 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp)               , pointer :: pi
-    real(fp)               , pointer :: degrad
     real(fp)               , pointer :: eps
     real(fp)               , pointer :: fmud
     real(fp)               , pointer :: taubng
@@ -268,8 +267,6 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
 !
 !! executable statements -------------------------------------------------------
 !
-    pi         => gdp%gdconst%pi
-    degrad     => gdp%gdconst%degrad
     eps        => gdp%gdconst%eps
     fmud       => gdp%gdmudcoe%fmud
     taubng     => gdp%gdmudcoe%taubng

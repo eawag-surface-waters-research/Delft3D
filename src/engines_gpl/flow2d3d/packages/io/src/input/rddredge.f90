@@ -36,6 +36,7 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use properties
     use arrayextend
     use flow_tables
@@ -49,7 +50,6 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(hp)                         , pointer :: yearsecs
     type (handletype)                , pointer :: tseriesfile
     real(fp)      , dimension(:,:)   , pointer :: link_percentage
     real(fp)      , dimension(:)     , pointer :: link_distance
@@ -231,7 +231,6 @@ end interface
 !
 !! executable statements -------------------------------------------------------
 !
-    yearsecs          => gdp%gdconstd%yearsecs
     tseriesfile       => gdp%gddredge%tseriesfile
     link_percentage   => gdp%gddredge%link_percentage
     link_distance     => gdp%gddredge%link_distance
@@ -888,7 +887,7 @@ end interface
                 endif
 
                 if (.not. (comparereal(pdredge%maxvolrate,-999.0_fp) == 0)) then
-                    pdredge%maxvolrate = pdredge%maxvolrate/yearsecs
+                    pdredge%maxvolrate = pdredge%maxvolrate/yearsec_hp
                 endif
 !                write(lundia,'(a,f8.3)') 'maxvolrate ',pdredge%maxvolrate
                                 !
@@ -1143,7 +1142,7 @@ end interface
                 !
                 pdredge%itype = DREDGETYPE_NOURISHMENT
                 if (.not. (comparereal(pdredge%maxvolrate  ,-999.0_fp) == 0)) then
-                    pdredge%maxvolrate = pdredge%maxvolrate/yearsecs
+                    pdredge%maxvolrate = pdredge%maxvolrate/yearsec_hp
                 endif
                 !
                 ilink = 0

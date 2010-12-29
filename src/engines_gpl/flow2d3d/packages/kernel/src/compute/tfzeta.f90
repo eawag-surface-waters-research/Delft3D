@@ -40,6 +40,7 @@ subroutine tfzeta(timnow    ,nmax      ,mmax      ,tgfsep    ,xz        , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     !
     implicit none
@@ -80,7 +81,6 @@ subroutine tfzeta(timnow    ,nmax      ,mmax      ,tgfsep    ,xz        , &
     real(fp)            :: ccphi
     real(fp)            :: cosa
     real(fp)            :: cosphi
-    real(fp)            :: degrad      ! Transformation coeff. from degrees to radial 
     real(fp)            :: lovenr
     real(fp)            :: si2phi
     real(fp)            :: tcur        ! Current time (in hours)
@@ -108,7 +108,6 @@ subroutine tfzeta(timnow    ,nmax      ,mmax      ,tgfsep    ,xz        , &
     !
     !-----initialize local parameters
     !
-    degrad = real(gdp%gdconstd%ddegrad, fp)
     tcur = ((timnow - time_nodal_update_tgf)*dt*tunit/3600._fp - tzone)
     !
     !-----initialize array tgfsep for all (n, m)

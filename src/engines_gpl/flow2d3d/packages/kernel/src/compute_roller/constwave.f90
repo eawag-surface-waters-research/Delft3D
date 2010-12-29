@@ -34,6 +34,7 @@ subroutine constwave(nmmax     ,dps       ,s0        ,alfas     ,ubot      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     !
     use globaldata
     !
@@ -44,7 +45,6 @@ subroutine constwave(nmmax     ,dps       ,s0        ,alfas     ,ubot      , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp)               , pointer :: pi
     real(fp)               , pointer :: gammax
     real(fp)               , pointer :: ag
     real(fp)               , pointer :: timmin
@@ -88,7 +88,6 @@ subroutine constwave(nmmax     ,dps       ,s0        ,alfas     ,ubot      , &
 !
     data isdir/0, 0, 1, 0, 0, 0, 1/
     !
-    pi              => gdp%gdconst%pi
     gammax          => gdp%gdnumeco%gammax
     ag              => gdp%gdphysco%ag
     timmin          => gdp%gdinttim%timmin

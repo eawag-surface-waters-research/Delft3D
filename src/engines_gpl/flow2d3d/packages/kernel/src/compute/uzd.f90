@@ -78,6 +78,7 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     use dfparall
     use timers
@@ -90,7 +91,6 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     ! They replace the  include igd / include igp lines
     !
     include 'flow_steps_f.inc'
-    real(fp)               , pointer :: pi
     real(fp)               , pointer :: eps
     integer                , pointer :: lundia
     real(fp)               , pointer :: dryflc
@@ -302,7 +302,6 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
 !
 !! executable statements -------------------------------------------------------
 !
-    pi         => gdp%gdconst%pi
     eps        => gdp%gdconst%eps
     lundia     => gdp%gdinout%lundia
     dryflc     => gdp%gdnumeco%dryflc

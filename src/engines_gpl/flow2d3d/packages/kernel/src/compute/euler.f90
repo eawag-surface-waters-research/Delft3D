@@ -41,6 +41,7 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use dfparall
     use globaldata
     !
@@ -56,8 +57,6 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
     logical  , pointer :: zmodel
     logical  , pointer :: roller
     real(fp) , pointer :: ag
-    real(fp) , pointer :: pi
-    real(fp) , pointer :: degrad
 !
 ! Global variables
 !
@@ -114,8 +113,6 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
 !! executable statements -------------------------------------------------------
 !
     ag         => gdp%gdphysco%ag
-    pi         => gdp%gdconst%pi
-    degrad     => gdp%gdconst%degrad
     wave       => gdp%gdprocs%wave
     struct     => gdp%gdprocs%struct
     zmodel     => gdp%gdprocs%zmodel

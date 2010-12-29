@@ -39,7 +39,8 @@ subroutine qkwcg(tp        ,rlabda    ,teta      ,qxkw      ,qykw      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-   !
+    use mathconsts
+    !
     use globaldata
     !
     implicit none
@@ -50,8 +51,6 @@ subroutine qkwcg(tp        ,rlabda    ,teta      ,qxkw      ,qykw      , &
     ! They replace the  include igd / include igp lines
     !
     include 'flow_steps_f.inc'
-    real(fp)               , pointer :: pi
-    real(fp)               , pointer :: degrad
     real(fp)               , pointer :: dryflc
     real(fp)               , pointer :: ag
     integer                , pointer :: iro
@@ -96,8 +95,6 @@ subroutine qkwcg(tp        ,rlabda    ,teta      ,qxkw      ,qykw      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    pi        => gdp%gdconst%pi
-    degrad    => gdp%gdconst%degrad
     dryflc    => gdp%gdnumeco%dryflc
     ag        => gdp%gdphysco%ag
     iro       => gdp%gdphysco%iro

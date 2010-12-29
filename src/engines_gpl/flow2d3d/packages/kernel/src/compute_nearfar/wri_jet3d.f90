@@ -36,6 +36,7 @@ subroutine wri_jet3d(u1    ,v1    ,rho    ,thick ,kmax      ,dps   ,&
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     !
     use globaldata
     !
@@ -90,9 +91,6 @@ subroutine wri_jet3d(u1    ,v1    ,rho    ,thick ,kmax      ,dps   ,&
     real(fp)                                    :: sign
     real(fp)                                    :: u0
     real(fp)                                    :: thck
-    real(fp)                                    :: pi
-    real(fp)                                    :: rad2deg
-    real(fp)                                    :: deg2rad
     real(fp)                                    :: uuu
     real(fp)                                    :: vvv
     real(fp)                                    :: theta
@@ -122,9 +120,6 @@ subroutine wri_jet3d(u1    ,v1    ,rho    ,thick ,kmax      ,dps   ,&
     theta0         => gdp%gdnfl%theta0
     nflmod         => gdp%gdnfl%nflmod
     !
-    pi      = acos(-1.0_fp)
-    rad2deg = 180.0_fp / pi
-    deg2rad = pi / 180.0_fp
     sign    = 1.0_fp
     !
     allocate (h1    (kmax+1) )
@@ -188,7 +183,7 @@ subroutine wri_jet3d(u1    ,v1    ,rho    ,thick ,kmax      ,dps   ,&
        vvv = vvv + thick(k)*(v1(nm_amb ,k) + v1(ndm_amb ,k))
     enddo
     !
-    flwang = atan2(vvv,uuu) * rad2deg
+    flwang = atan2(vvv,uuu) * raddeg
     !
     ! Compute heights relative to reference plane 
     ! (Note, jet3d assumes equidistant layer distribution).
@@ -214,7 +209,7 @@ subroutine wri_jet3d(u1    ,v1    ,rho    ,thick ,kmax      ,dps   ,&
        call interp_tk (h2, vv1, kmax, h1(kjet), vvv         )
        call interp_tk (h2, rr , kmax, h1(kjet), rhojet(kjet))
        !
-       umag(kjet) = uuu*cos(flwang*deg2rad) + vvv*sin(flwang*deg2rad)
+       umag(kjet) = uuu*cos(flwang*degrad) + vvv*sin(flwang*degrad)
     enddo
     flwang = flwang + alfas(nm_amb)
     !

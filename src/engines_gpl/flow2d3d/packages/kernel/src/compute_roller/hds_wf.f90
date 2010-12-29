@@ -35,7 +35,8 @@ subroutine hds_wf(kfs       ,dps       ,s1        ,xcor      ,ycor      ,&
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-   !
+    use mathconsts
+    !
     use globaldata
     !
     implicit none
@@ -45,7 +46,6 @@ subroutine hds_wf(kfs       ,dps       ,s1        ,xcor      ,ycor      ,&
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp) , pointer :: degrad
 !
 ! Global variables
 !
@@ -83,11 +83,9 @@ subroutine hds_wf(kfs       ,dps       ,s1        ,xcor      ,ycor      ,&
 !
 ! executable statements -------------------------------------------------------
 !
-    degrad    => gdp%gdconst%degrad
-   !
-   dx(1) = 0.0 
-   if (f_lam < 0.0) f_lamt=-f_lam
-   do m = 1, mmax
+    dx(1) = 0.0 
+    if (f_lam < 0.0) f_lamt=-f_lam
+    do m = 1, mmax
        do n = 1, nmax
           if (kfs(n, m)==1) then
              mx = 1

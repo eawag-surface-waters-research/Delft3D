@@ -48,6 +48,7 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     !
     use globaldata
     !
@@ -58,7 +59,6 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp)               , pointer :: pi
     real(fp)               , pointer :: rhow
     real(fp)               , pointer :: ag
     real(fp)               , pointer :: bed
@@ -68,7 +68,6 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
     real(fp)               , pointer :: susw
     real(fp)               , pointer :: dclay
     logical                , pointer :: wave
-    real(fp)               , pointer :: degrad
     real(fp)               , pointer :: eps
     integer                , pointer :: subiw
 !
@@ -180,10 +179,7 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
     susw    => gdp%gdmorpar%susw
     rhow    => gdp%gdphysco%rhow
     ag      => gdp%gdphysco%ag
-    pi      => gdp%gdconst%pi
-    degrad  => gdp%gdconst%degrad
     eps     => gdp%gdconst%eps
-    pi      => gdp%gdconst%pi
     bedw    => gdp%gdmorpar%bedw
     pangle  => gdp%gdmorpar%pangle
     fpco    => gdp%gdmorpar%fpco

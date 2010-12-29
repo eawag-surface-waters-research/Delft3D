@@ -40,6 +40,7 @@ subroutine bedbc1993(nm        ,tp        ,uorb      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     !
     implicit none
@@ -49,7 +50,6 @@ subroutine bedbc1993(nm        ,tp        ,uorb      , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp)               , pointer :: pi
     real(fp)               , pointer :: eps
     real(fp)               , pointer :: aksfac
     real(fp)               , pointer :: rwave
@@ -131,7 +131,6 @@ subroutine bedbc1993(nm        ,tp        ,uorb      , &
     rhow                => gdp%gdphysco%rhow
     z0                  => gdp%gdphysco%z0
     vonkar              => gdp%gdphysco%vonkar
-    pi                  => gdp%gdconst%pi
     eps                 => gdp%gdconst%eps
     scour               => gdp%gdscour%scour
     factor              => gdp%gdscour%factor

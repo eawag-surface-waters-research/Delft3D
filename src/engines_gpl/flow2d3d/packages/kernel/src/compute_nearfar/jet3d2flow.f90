@@ -38,6 +38,7 @@ subroutine jet3d2flow(thick  ,kmax   ,dps    ,s1     ,disch_nf ,sour_nf , &
 !!--declarations----------------------------------------------------------------
 !
     use precision
+    use mathconsts
     !
     use globaldata
     !
@@ -76,8 +77,6 @@ subroutine jet3d2flow(thick  ,kmax   ,dps    ,s1     ,disch_nf ,sour_nf , &
     integer                                  :: nm_diff
     integer                                  :: nrow
     integer                                  :: luntmp
-    real(fp)                                 :: deg2rad
-    real(fp)                                 :: pi
     real(fp)                                 :: rdum
     real(fp)                                 :: xxx
     real(fp)                                 :: yyy
@@ -92,9 +91,6 @@ subroutine jet3d2flow(thick  ,kmax   ,dps    ,s1     ,disch_nf ,sour_nf , &
 !
     m_diff         => gdp%gdnfl%m_diff
     n_diff         => gdp%gdnfl%n_diff
-    !
-    pi      = acos(-1.0_fp)
-    deg2rad = pi/180.0_fp
     !
     call n_and_m_to_nm(n_diff, m_diff, nm_diff, gdp)
     !
@@ -138,8 +134,8 @@ subroutine jet3d2flow(thick  ,kmax   ,dps    ,s1     ,disch_nf ,sour_nf , &
     ! Jet3d relative to main flow direction, convert coordinates back to orignal coordinate system
     !
     do irow = 1, nrow
-       xxx = x_jet(irow)*cos(flwang*deg2rad) - sign*y_jet(irow)*sin(flwang*deg2rad)
-       yyy = x_jet(irow)*sin(flwang*deg2rad) + sign*y_jet(irow)*cos(flwang*deg2rad)
+       xxx = x_jet(irow)*cos(flwang*degrad) - sign*y_jet(irow)*sin(flwang*degrad)
+       yyy = x_jet(irow)*sin(flwang*degrad) + sign*y_jet(irow)*cos(flwang*degrad)
        x_jet(irow) = xz(nm_diff) + xxx
        y_jet(irow) = yz(nm_diff) + yyy
        z_jet(irow) = real(dps(nm_diff),fp) - z_jet(irow)

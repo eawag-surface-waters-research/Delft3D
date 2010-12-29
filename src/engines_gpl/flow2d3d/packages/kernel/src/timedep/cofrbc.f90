@@ -38,6 +38,7 @@ subroutine cofrbc(j         ,nmmaxj    ,norow     ,icx       ,icy       , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     !
     implicit none
@@ -51,7 +52,6 @@ subroutine cofrbc(j         ,nmmaxj    ,norow     ,icx       ,icy       , &
     integer                , pointer :: nmskl
     integer                , pointer :: mmskf
     integer                , pointer :: mmskl
-    real(fp)               , pointer :: pi
     real(fp)               , pointer :: rhow
     real(fp)               , pointer :: ag
     integer                , pointer :: iro
@@ -137,7 +137,6 @@ subroutine cofrbc(j         ,nmmaxj    ,norow     ,icx       ,icy       , &
     nmskl     => gdp%gdbcdat%nmskl
     mmskf     => gdp%gdbcdat%mmskf
     mmskl     => gdp%gdbcdat%mmskl
-    pi        => gdp%gdconst%pi
     rhow      => gdp%gdphysco%rhow
     ag        => gdp%gdphysco%ag
     iro       => gdp%gdphysco%iro

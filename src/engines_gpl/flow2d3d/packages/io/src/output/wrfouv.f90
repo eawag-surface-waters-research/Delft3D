@@ -43,6 +43,7 @@ subroutine wrfouv(nmax      ,mmax      ,nmaxus    ,kmax      ,nofou     , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     !
     implicit none
@@ -52,7 +53,6 @@ subroutine wrfouv(nmax      ,mmax      ,nmaxus    ,kmax      ,nofou     , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp)                             , pointer :: raddeg
     integer        , dimension(:)        , pointer :: flayno
     integer        , dimension(:)        , pointer :: fnumcy
     integer        , dimension(:)        , pointer :: ftmsto
@@ -129,7 +129,6 @@ subroutine wrfouv(nmax      ,mmax      ,nmaxus    ,kmax      ,nofou     , &
 !! executable statements -------------------------------------------------------
 !
 !
-    raddeg      => gdp%gdconst%raddeg
     flayno      => gdp%gdfourier%flayno
     fnumcy      => gdp%gdfourier%fnumcy
     ftmsto      => gdp%gdfourier%ftmsto

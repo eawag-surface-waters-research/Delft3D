@@ -60,6 +60,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use bedcomposition_module
     use globaldata
     use dfparall
@@ -111,7 +112,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     logical                              , pointer :: wave
     logical                              , pointer :: struct
     logical                              , pointer :: sedim
-    real(fp)                             , pointer :: pi
     real(fp)                             , pointer :: eps
     integer                              , pointer :: ifirst
     real(fp), dimension(:)               , pointer :: bc_mor_array
@@ -344,7 +344,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     z0v                 => gdp%gdphysco%z0v
     vicmol              => gdp%gdphysco%vicmol
     gammax              => gdp%gdnumeco%gammax
-    pi                  => gdp%gdconst%pi
     eps                 => gdp%gdconst%eps
     ifirst              => gdp%gderosed%ifirst
     bc_mor_array        => gdp%gderosed%bc_mor_array

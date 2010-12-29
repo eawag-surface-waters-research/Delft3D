@@ -32,6 +32,7 @@ subroutine varcon(fname     ,timmin    ,result    ,isdir     ,nres      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     !
     implicit none
@@ -41,7 +42,6 @@ subroutine varcon(fname     ,timmin    ,result    ,isdir     ,nres      , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp) , pointer :: degrad
     integer  , pointer :: lundia
 !
 ! Local parameters
@@ -53,7 +53,7 @@ subroutine varcon(fname     ,timmin    ,result    ,isdir     ,nres      , &
     integer                 , intent(in)  :: nres
     integer, dimension(nres), intent(in)  :: isdir
     real(fp)                , intent(in)  :: timmin
-    real(fp), dimension(nres)                 :: result
+    real(fp), dimension(nres)             :: result
     character(*)            , intent(in)  :: fname
 !
 ! Local variables
@@ -81,7 +81,6 @@ subroutine varcon(fname     ,timmin    ,result    ,isdir     ,nres      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    degrad    => gdp%gdconst%degrad
     lundia    => gdp%gdinout%lundia
     !
     !     VARCON interpolates record of values from time series file

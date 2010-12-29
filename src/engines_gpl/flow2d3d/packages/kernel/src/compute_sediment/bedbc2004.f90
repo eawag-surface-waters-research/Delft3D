@@ -44,6 +44,7 @@ subroutine bedbc2004(nm        ,tp        ,rhosol    ,rhowat    , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     !
     use globaldata
     !
@@ -54,9 +55,7 @@ subroutine bedbc2004(nm        ,tp        ,rhosol    ,rhowat    , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp)               , pointer :: pi
     real(fp)               , pointer :: eps
-    real(fp)               , pointer :: degrad
     real(fp)               , pointer :: camax
     real(fp)               , pointer :: dsilt
     real(fp)               , pointer :: dsand
@@ -162,9 +161,7 @@ subroutine bedbc2004(nm        ,tp        ,rhosol    ,rhowat    , &
 !
 !! executable statements -------------------------------------------------------
 !
-    pi                  => gdp%gdconst%pi
     eps                 => gdp%gdconst%eps
-    degrad              => gdp%gdconst%degrad
     camax               => gdp%gdmorpar%camax
     dsilt               => gdp%gdmorpar%dsilt
     dsand               => gdp%gdmorpar%dsand

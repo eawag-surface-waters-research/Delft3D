@@ -43,6 +43,7 @@ subroutine u_whis(lundat    ,header    ,runid     ,itime     ,idate     , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     !
     implicit none
@@ -52,9 +53,6 @@ subroutine u_whis(lundat    ,header    ,runid     ,itime     ,idate     , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp)                           , pointer :: pi
-    real(fp)                           , pointer :: degrad
-    real(fp)                           , pointer :: raddeg
     real(fp)                           , pointer :: eps
     character(20)  , dimension(:)      , pointer :: namst
 !
@@ -120,9 +118,6 @@ subroutine u_whis(lundat    ,header    ,runid     ,itime     ,idate     , &
 !
 !! executable statements -------------------------------------------------------
 !
-    pi        => gdp%gdconst%pi
-    degrad    => gdp%gdconst%degrad
-    raddeg    => gdp%gdconst%raddeg
     eps       => gdp%gdconst%eps
     namst     => gdp%gdstations%namst
     !

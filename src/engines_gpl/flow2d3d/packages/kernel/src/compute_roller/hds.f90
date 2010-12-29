@@ -36,6 +36,7 @@ subroutine hds(kfs       ,dps       ,s1        ,xcor      ,ycor      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     !
     use globaldata
     !
@@ -46,7 +47,6 @@ subroutine hds(kfs       ,dps       ,s1        ,xcor      ,ycor      , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp) , pointer :: degrad
 !
 ! Global variables
 !
@@ -88,8 +88,6 @@ real(fp)                                                       , intent(in)  :: 
 !
 ! executable statements -------------------------------------------------------
 !
-    degrad    => gdp%gdconst%degrad
-   !
    dx(1) = 0.0 
    do m = 1, mmax
        do n = 1, nmax

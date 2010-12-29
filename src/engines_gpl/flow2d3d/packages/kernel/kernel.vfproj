@@ -4,7 +4,7 @@
 		<Platform Name="Win32"/></Platforms>
 	<Configurations>
 		<Configuration Name="Debug|Win32" OutputDirectory="lib/$(ConfigurationName)" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.lib;$(TargetPath)" BuildLogFile="$(IntDir)\BuildLog.txt" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="../data/lib/$(ConfigurationName);../data/lib/$(ConfigurationName);../data/include;../../../../utils_lgpl/meteo/lib/$(ConfigurationName)/static;../../../../utils_lgpl/delftio/lib/$(ConfigurationName)/static;../../../../utils_lgpl/delftio_sync/lib/$(ConfigurationName)/static;../../../../utils_lgpl/esmfsm/include;../../../../utils_lgpl/inifiles/lib/$(ConfigurationName)/static;../../../../utils_lgpl/precision/include;../../../../utils_lgpl/precision/lib/$(ConfigurationName)/static;../../../../utils_lgpl/ec_module/lib/$(ConfigurationName)/static;../../../../utils_lgpl/utils_flow/lib/$(ConfigurationName)/static" PreprocessorDefinitions="w32" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" ObjectFile="$(INTDIR)/" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug" DisableDefaultLibSearch="true"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="../data/lib/$(ConfigurationName);../data/lib/$(ConfigurationName);../data/include;../../../../utils_lgpl/meteo/lib/$(ConfigurationName)/static;../../../../utils_lgpl/delftio/lib/$(ConfigurationName)/static;../../../../utils_lgpl/delftio_sync/lib/$(ConfigurationName)/static;../../../../utils_lgpl/esmfsm/include;../../../../utils_lgpl/inifiles/lib/$(ConfigurationName)/static;../../../../utils_lgpl/precision/include;../../../../utils_lgpl/precision/lib/$(ConfigurationName)/static;../../../../utils_lgpl/constants/lib/$(ConfigurationName)/static;../../../../utils_lgpl/ec_module/lib/$(ConfigurationName)/static;../../../../utils_lgpl/utils_flow/lib/$(ConfigurationName)/static" PreprocessorDefinitions="w32" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" ObjectFile="$(INTDIR)/" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug" DisableDefaultLibSearch="true"/>
 				<Tool Name="VFLibrarianTool"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TypeLibraryName="$(IntDir)/$(InputName).tlb"/>
@@ -14,7 +14,7 @@
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" OutputDirectory="lib/$(ConfigurationName)" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.lib;$(TargetPath)" BuildLogFile="$(IntDir)\BuildLog.txt" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="../data/lib/$(ConfigurationName);../data/lib/$(ConfigurationName);../data/include;../../../../utils_lgpl/meteo/lib/$(ConfigurationName)/static;../../../../utils_lgpl/delftio/lib/$(ConfigurationName)/static;../../../../utils_lgpl/delftio_sync/lib/$(ConfigurationName)/static;../../../../utils_lgpl/esmfsm/include;../../../../utils_lgpl/inifiles/lib/$(ConfigurationName)/static;../../../../utils_lgpl/precision/include;../../../../utils_lgpl/precision/lib/$(ConfigurationName)/static;../../../../utils_lgpl/ec_module/lib/$(ConfigurationName)/static;../../../../utils_lgpl/utils_flow/lib/$(ConfigurationName)/static" PreprocessorDefinitions="w32" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" ObjectFile="$(INTDIR)/" DisableDefaultLibSearch="true"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="../data/lib/$(ConfigurationName);../data/lib/$(ConfigurationName);../data/include;../../../../utils_lgpl/meteo/lib/$(ConfigurationName)/static;../../../../utils_lgpl/delftio/lib/$(ConfigurationName)/static;../../../../utils_lgpl/delftio_sync/lib/$(ConfigurationName)/static;../../../../utils_lgpl/esmfsm/include;../../../../utils_lgpl/inifiles/lib/$(ConfigurationName)/static;../../../../utils_lgpl/precision/include;../../../../utils_lgpl/precision/lib/$(ConfigurationName)/static;../../../../utils_lgpl/constants/lib/$(ConfigurationName)/static;../../../../utils_lgpl/ec_module/lib/$(ConfigurationName)/static;../../../../utils_lgpl/utils_flow/lib/$(ConfigurationName)/static" PreprocessorDefinitions="w32" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" ObjectFile="$(INTDIR)/" DisableDefaultLibSearch="true"/>
 				<Tool Name="VFLibrarianTool" AdditionalOptions="/LTCG"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TypeLibraryName="$(IntDir)/$(InputName).tlb"/>
@@ -172,7 +172,6 @@
 		<Filter Name="compute_sediment">
 		<File RelativePath="src\compute_sediment\adjust_bedload.f90"/>
 		<File RelativePath="src\compute_sediment\avalan.f90"/>
-		<File RelativePath="src\compute_sediment\dredge.f90"/>
 		<File RelativePath="src\compute_sediment\bailtr.f90"/>
 		<File RelativePath="src\compute_sediment\bedbc1993.f90"/>
 		<File RelativePath="src\compute_sediment\bedbc2004.f90"/>
@@ -188,6 +187,7 @@
 		<File RelativePath="src\compute_sediment\compdxx.f90"/>
 		<File RelativePath="src\compute_sediment\comphidexp.f90"/>
 		<File RelativePath="src\compute_sediment\compthick.f90"/>
+		<File RelativePath="src\compute_sediment\dredge.f90"/>
 		<File RelativePath="src\compute_sediment\dredgedump.f90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration></File>
@@ -282,6 +282,7 @@
 		<File RelativePath="src\general\readnr.f90"/>
 		<File RelativePath="src\general\regel.f90"/>
 		<File RelativePath="src\general\rmdel.f90"/>
+		<File RelativePath="src\general\search.f90"/>
 		<File RelativePath="src\general\setcurrentdatetime.f90"/>
 		<File RelativePath="src\general\setlun.f90"/>
 		<File RelativePath="src\general\sortindices.f90"/>
@@ -293,8 +294,7 @@
 		<File RelativePath="src\general\txtstr.f90"/>
 		<File RelativePath="src\general\vermdf.f90"/>
 		<File RelativePath="src\general\wrline.f90"/>
-		<File RelativePath="src\general\z_ainpro.f90"/>
-		<File RelativePath="src\general\search.f90"/></Filter>
+		<File RelativePath="src\general\z_ainpro.f90"/></Filter>
 		<Filter Name="inichk">
 		<File RelativePath="src\inichk\allocadv2d.f90"/>
 		<File RelativePath="src\inichk\caldps.f90"/>

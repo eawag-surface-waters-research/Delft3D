@@ -44,6 +44,8 @@ subroutine prthis(lundia    ,error     ,prshis    ,grdang    ,lunprt    , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
+    !
     implicit none
 !
 ! Global variables
@@ -106,9 +108,6 @@ subroutine prthis(lundia    ,error     ,prshis    ,grdang    ,lunprt    , &
     integer                        :: maxlin       ! Maximum number of lines in one page 
     integer                        :: n            ! Loop counter for NOSTAT or NTRUV 
     real(fp)                       :: adtr         ! Total mass transport (ATR + DTR) 
-    real(fp)                       :: degrad       ! Scaling factor from degrees to rad. 
-    real(fp)                       :: pi           ! 3.14.. 
-    real(fp)                       :: raddeg       ! Scaling factor from rad. to degrees 
     real(fp)                       :: timmin       ! Time since ITDATE in minutes 
     real(fp)                       :: timsec       ! Time since ITDATE in seconds 
     real(fp)                       :: uvdir        ! Current direction 
@@ -121,12 +120,6 @@ subroutine prthis(lundia    ,error     ,prshis    ,grdang    ,lunprt    , &
 !
 !! executable statements -------------------------------------------------------
 !
-    !
-    !-----Initialize local variables
-    !
-    pi = 4.0_fp*atan(1.0_fp)
-    degrad = pi/180.0_fp
-    raddeg = 180.0_fp/pi
     !
     !-----Define header data 'IPHISC'
     !

@@ -78,6 +78,7 @@ subroutine difu(icreep    ,timest    ,lundia    ,nst       ,icx       , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use timers
     use globaldata
     use dfparall
@@ -90,8 +91,6 @@ subroutine difu(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     ! They replace the  include igd / include igp lines
     !
     include 'flow_steps_f.inc'
-    real(fp)               , pointer :: pi
-    real(fp)               , pointer :: day
     real(fp)               , pointer :: eps
     real(fp)               , pointer :: vicmol
     real(fp)               , pointer :: dicoww
@@ -277,8 +276,6 @@ character(20)      :: errtxt
 !
 !! executable statements -------------------------------------------------------
 !
-    pi          => gdp%gdconst%pi
-    day         => gdp%gdconst%day
     eps         => gdp%gdconst%eps
     vicmol      => gdp%gdphysco%vicmol
     dicoww      => gdp%gdphysco%dicoww

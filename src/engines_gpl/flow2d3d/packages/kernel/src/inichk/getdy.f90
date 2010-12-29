@@ -35,6 +35,7 @@ function getdy(sferic,x1,y1,x2,y2,gdp)
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     !
     use globaldata
     !
@@ -45,7 +46,6 @@ function getdy(sferic,x1,y1,x2,y2,gdp)
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(hp) , pointer :: ddegrad
     real(hp) , pointer :: dearthrad
 !
 ! Global variables
@@ -64,12 +64,11 @@ function getdy(sferic,x1,y1,x2,y2,gdp)
 !
 !! executable statements -------------------------------------------------------
 !
-    ddegrad    => gdp%gdconstd%ddegrad
     dearthrad  => gdp%gdconstd%dearthrad
     !
     if (sferic) then
-       yy1   = real(y1,hp)*ddegrad
-       yy2   = real(y2,hp)*ddegrad
+       yy1   = real(y1,hp)*degrad_hp
+       yy2   = real(y2,hp)*degrad_hp
        getdy = real(dearthrad*(yy2-yy1),fp)
     else
        getdy = y2-y1

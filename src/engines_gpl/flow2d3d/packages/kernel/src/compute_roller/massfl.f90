@@ -33,6 +33,7 @@ subroutine massfl(c         ,dir       ,ewave1    ,eroll1    , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     !
     implicit none
@@ -42,7 +43,6 @@ subroutine massfl(c         ,dir       ,ewave1    ,eroll1    , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp)               , pointer :: degrad
     real(fp)               , pointer :: rhow
 !
 ! Global variables
@@ -68,7 +68,6 @@ subroutine massfl(c         ,dir       ,ewave1    ,eroll1    , &
 !
 !! executable statements -------------------------------------------------------
 !
-    degrad    => gdp%gdconst%degrad
     rhow      => gdp%gdphysco%rhow
     !
     ! 2DH: original implementation

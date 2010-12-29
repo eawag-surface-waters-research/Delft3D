@@ -38,6 +38,7 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     !
     implicit none
@@ -48,7 +49,6 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
     ! They replace the  include igd / include igp lines
     !
     real(fp)                   , pointer :: eps
-    real(fp)                   , pointer :: eps_plt
     real(fp)                   , pointer :: rhow
     real(fp)                   , pointer :: ag
     real(fp)                   , pointer :: z0
@@ -228,7 +228,6 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
     vonkar         => gdp%gdphysco%vonkar
     vicmol         => gdp%gdphysco%vicmol
     eps            => gdp%gdconst%eps
-    eps_plt        => gdp%gdconst%eps_plt
     dryflc         => gdp%gdnumeco%dryflc
     !
     alf_area_ser   => gdp%gdtrachy%alf_area_ser
@@ -739,7 +738,7 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
                 vz0  = a1*exp( - f)
                 rc0  = 1.0_fp/(depth**1.5_fp)                                          &
                      & *((2.0_fp/t1)*(t3 - t4) + (uv0/t1)*log(((t3 - uv0)*(t4 + uv0))  &
-                     & /((t3 + uv0)*max((t4 - uv0), eps_plt)))                         &
+                     & /((t3 + uv0)*max((t4 - uv0), eps_fp)))                          &
                      & + (sqrt(ag*t5)/vonkar)                                          &
                      & *((t5*log(t5/vz0)) - (a1*log(a1/vz0)) - (depth - vheigh)))
              endif

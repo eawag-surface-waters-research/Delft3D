@@ -36,6 +36,7 @@ subroutine windtogridc(mmax      ,nmax      ,nmaxus    ,kcs       ,alfas     , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     !
     implicit none
@@ -45,7 +46,6 @@ subroutine windtogridc(mmax      ,nmax      ,nmaxus    ,kcs       ,alfas     , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp) , pointer :: degrad
 !
 ! Global variables
 !
@@ -67,8 +67,6 @@ subroutine windtogridc(mmax      ,nmax      ,nmaxus    ,kcs       ,alfas     , &
 !
 !! executable statements -------------------------------------------------------
 !
-    degrad    => gdp%gdconst%degrad
-    !
     do m = 1, mmax
        do n = 1, nmaxus
           !

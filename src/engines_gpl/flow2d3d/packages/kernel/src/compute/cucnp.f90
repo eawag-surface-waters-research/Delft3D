@@ -76,6 +76,7 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use timers
     !
     use globaldata
@@ -87,7 +88,6 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp)               , pointer :: pi
     real(fp)               , pointer :: gammax
     real(fp)               , pointer :: hdt
     integer                , pointer :: ibaroc
@@ -271,7 +271,6 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
 !
 !! executable statements -------------------------------------------------------
 !
-    pi         => gdp%gdconst%pi
     gammax     => gdp%gdnumeco%gammax
     hdt        => gdp%gdnumeco%hdt
     ibaroc     => gdp%gdnumeco%ibaroc

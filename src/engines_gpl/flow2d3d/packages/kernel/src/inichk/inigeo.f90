@@ -42,6 +42,7 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use dfparall
     use globaldata
     !
@@ -107,15 +108,12 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
     logical                :: new_area_method ! .True.  when gsqs, gsqd, gsqiu and gsqiv are determined with the new approach
                                               ! .False. when gsqs, gsqd, gsqiu and gsqiv are determined with the old approach
     real(fp)               :: sidday
-    real(fp)               :: degrad
     real(fp)               :: dxdknd
     real(fp)               :: dxdknu
     real(fp)               :: dxdksi          ! Help var. 
     real(fp)               :: dydknd
     real(fp)               :: dydknu
     real(fp)               :: dydksi          ! Help var. 
-    real(fp)               :: pi
-    real(fp)               :: raddeg
     real(fp)               :: small
     real(fp)               :: xcndm
     real(fp)               :: xcndmd
@@ -153,9 +151,6 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
     !
     errmsg = ' '
     small  = 1.0E-10
-    pi     = 4.0*atan(1.0)
-    degrad = pi/180.0
-    raddeg = 180.0/pi
     sidday = (365.25/366.25)*86400.0
     ddb    = gdp%d%ddbound
     !

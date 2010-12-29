@@ -1523,6 +1523,14 @@ src/tools_gpl/vs/packages/vs_version_number/src/f2c.c -text
 src/tools_gpl/vs/packages/vs_version_number/src/version.c -text
 src/tools_gpl/vs/packages/vs_version_number/vs_version_number.vcproj -text
 src/utils_lgpl/Makefile.am -text
+src/utils_lgpl/constants/Makefile.am -text
+src/utils_lgpl/constants/packages/Makefile.am -text
+src/utils_lgpl/constants/packages/mathconsts/Makefile.am -text
+src/utils_lgpl/constants/packages/mathconsts/include/version_number.ini -text
+src/utils_lgpl/constants/packages/mathconsts/mathconsts.vfproj -text
+src/utils_lgpl/constants/packages/mathconsts/src/Makefile.am -text
+src/utils_lgpl/constants/packages/mathconsts/src/mathconsts.f90 -text
+src/utils_lgpl/constants/packages/mathconsts/src/mathconsts_version.F90.svn -text
 src/utils_lgpl/delftio/Makefile.am -text
 src/utils_lgpl/delftio/doc/Todo/todo.txt -text
 src/utils_lgpl/delftio/doc/Versions/V1-06-16_compilerDiffs/diff_CVF_6.1_6.6-binaries.txt -text

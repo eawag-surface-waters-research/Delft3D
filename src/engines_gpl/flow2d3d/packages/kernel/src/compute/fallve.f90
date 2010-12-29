@@ -43,6 +43,7 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     !
     use globaldata
     !
@@ -55,7 +56,6 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
     !
     real(fp)                         , pointer :: rhow
     real(fp)                         , pointer :: ag
-    real(fp)                         , pointer :: pi
     real(fp)                         , pointer :: vonkar
     real(fp)                         , pointer :: vicmol
     real(fp)                         , pointer :: csoil
@@ -167,7 +167,6 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
     rhow                => gdp%gdphysco%rhow
     ag                  => gdp%gdphysco%ag
     vonkar              => gdp%gdphysco%vonkar
-    pi                  => gdp%gdconst%pi
     vicmol              => gdp%gdphysco%vicmol
     csoil               => gdp%gdsedpar%csoil
     rhosol              => gdp%gdsedpar%rhosol

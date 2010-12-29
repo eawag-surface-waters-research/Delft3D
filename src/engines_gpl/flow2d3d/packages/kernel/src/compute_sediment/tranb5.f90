@@ -36,6 +36,7 @@ subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     !
     implicit none
@@ -84,7 +85,6 @@ subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
     real(fp)                       :: fac1
     real(fp)                       :: fac2
     real(fp)                       :: kw
-    real(fp)                       :: pi
     real(fp)                       :: por
     real(fp)                       :: relhrms
     real(fp)                       :: ri1
@@ -167,7 +167,6 @@ subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
        t = tp
     endif
     !
-    pi = 4.*atan(1.0)
     if ((h/rk<=1.33) .or. (h>200.)) then
        return
     endif
@@ -180,7 +179,7 @@ subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
     call wavenr(h         ,t         ,kw        ,ag        )
     uxmean = u
     uymean = v
-    theta = dir*pi/180.
+    theta = dir*degrad
     utot = sqrt(uxmean*uxmean + uymean*uymean)
     if (utot>1.0E-10) uuvar = utot*utot
     if (t>1.E-6) call wave(uo, t, uuvar, pi, hrms, c, rk, h, ag, kw)

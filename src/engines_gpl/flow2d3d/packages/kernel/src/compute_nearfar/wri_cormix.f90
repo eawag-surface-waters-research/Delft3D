@@ -36,6 +36,7 @@ subroutine wri_cormix(u1    ,v1    ,rho    ,thick ,kmax  ,dps   ,&
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     !
     use globaldata
     !
@@ -83,11 +84,9 @@ subroutine wri_cormix(u1    ,v1    ,rho    ,thick ,kmax  ,dps   ,&
     integer                 , external     :: newlun
     integer                                :: luntmp
     real(fp)                               :: thck
-    real(fp)                               :: pi
     real(fp)                               :: uuu
     real(fp)                               :: vvv
     real(fp)                               :: u0
-    real(fp)                               :: rad2deg
     real(fp)                               :: rhohulp
     real(fp) , dimension(:) , allocatable  :: h1
     real(fp) , dimension(:) , allocatable  :: ua
@@ -110,9 +109,6 @@ subroutine wri_cormix(u1    ,v1    ,rho    ,thick ,kmax  ,dps   ,&
     sigma0         => gdp%gdnfl%sigma0
     theta0         => gdp%gdnfl%theta0
     nflmod         => gdp%gdnfl%nflmod
-    !
-    pi      = acos(-1.0_fp)
-    rad2deg = 180.0_fp / pi
     !
     allocate (h1   (kmax) )
     allocate (ua   (kmax) )
@@ -144,7 +140,7 @@ subroutine wri_cormix(u1    ,v1    ,rho    ,thick ,kmax  ,dps   ,&
        uuu      = 0.5_fp * (u1(nm_amb ,kmax-k+1) + u1(nmd_amb ,kmax-k+1))
        vvv      = 0.5_fp * (v1(nm_amb ,kmax-k+1) + v1(ndm_amb ,kmax-k+1))
        ua   (k) = sqrt (uuu*uuu + vvv*vvv)
-       taua (k) = atan2(vvv,uuu)*rad2deg + alfas(nm_amb)
+       taua (k) = atan2(vvv,uuu)*raddeg + alfas(nm_amb)
        taua (k) = mod(taua(k) + 360.0_fp,360.0_fp)
        rhoa (k) = rho(nm_amb, kmax-k+1)
     enddo

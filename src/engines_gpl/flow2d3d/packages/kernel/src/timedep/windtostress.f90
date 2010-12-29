@@ -36,6 +36,7 @@ subroutine windtostress(mmax      ,nmax      ,nmaxus    ,grdang    ,kcs       , 
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     !
     implicit none
@@ -45,7 +46,6 @@ subroutine windtostress(mmax      ,nmax      ,nmaxus    ,grdang    ,kcs       , 
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp)               , pointer :: degrad
     real(fp)               , pointer :: rhoa
     real(fp)               , pointer :: ag
     real(fp), dimension(:) , pointer :: wstcof
@@ -83,7 +83,6 @@ subroutine windtostress(mmax      ,nmax      ,nmaxus    ,grdang    ,kcs       , 
     rhoa      => gdp%gdphysco%rhoa
     ag        => gdp%gdphysco%ag
     wstcof    => gdp%gdphysco%wstcof
-    degrad    => gdp%gdconst%degrad
     !
     w1 = wstcof(1)
     w2 = wstcof(2)

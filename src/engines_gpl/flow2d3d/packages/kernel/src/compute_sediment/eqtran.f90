@@ -45,6 +45,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     !
     use globaldata
     !
@@ -55,7 +56,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp)                             , pointer :: pi
     real(fp)                             , pointer :: eps
     integer                              , pointer :: max_integers
     integer                              , pointer :: max_reals
@@ -260,7 +260,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    pi                  => gdp%gdconst%pi
     eps                 => gdp%gdconst%eps
     max_integers        => gdp%gdeqtran%max_integers
     max_reals           => gdp%gdeqtran%max_reals

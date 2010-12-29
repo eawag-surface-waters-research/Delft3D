@@ -44,6 +44,7 @@ subroutine detvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     use dfparall
     !
@@ -54,7 +55,6 @@ subroutine detvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp)               , pointer :: pi
     integer                , pointer :: nd
     real(fp)               , pointer :: sigmat
     real(fp)               , pointer :: flp
@@ -126,7 +126,6 @@ subroutine detvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    pi        => gdp%gdconst%pi
     nd        => gdp%gdhtur2d%nd
     sigmat    => gdp%gdhtur2d%sigmat
     flp       => gdp%gdhtur2d%flp

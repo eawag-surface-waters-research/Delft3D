@@ -76,6 +76,7 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
 !
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use timers
     !
     use globaldata
@@ -88,7 +89,6 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
     ! They replace the  include igd / include igp lines
     !
     include 'flow_steps_f.inc'
-    real(fp)               , pointer :: eps_plt
     real(fp)               , pointer :: hdt
     real(fp)               , pointer :: rhow
     real(fp)               , pointer :: ag
@@ -245,7 +245,6 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
 !
 !! executable statements -------------------------------------------------------
 !
-    eps_plt     => gdp%gdconst%eps_plt
     hdt         => gdp%gdnumeco%hdt
     rhow        => gdp%gdphysco%rhow
     ag          => gdp%gdphysco%ag
@@ -627,7 +626,7 @@ subroutine z_difu_horadv_expl()
                 do l = 1, lstsci
                    rr1 = abs(r0(nmd, k, l) - 2.0_fp*r0(nm, k, l) + r0(nmu, k, l))
                    rr2 = abs(r0(nmd, k, l) - r0(nmu, k, l))
-                   if (kfsz1(nmd, k)*kfsz1(nmu, k) == 0 .or. rr1 >= rr2 .or. rr2 < eps_plt) then 
+                   if (kfsz1(nmd, k)*kfsz1(nmu, k) == 0 .or. rr1 >= rr2 .or. rr2 < eps_fp) then 
                       if (kfsz1(nm,k) == 1) then
                          r00 = r0(nm, k, l)
                       else
@@ -652,7 +651,7 @@ subroutine z_difu_horadv_expl()
                 do l = 1, lstsci
                    rr1 = abs(r0(nmuu, k, l) - 2.0_fp*r0(nmu, k, l) + r0(nm, k, l))
                    rr2 = abs(r0(nmuu, k, l) - r0(nm, k, l))
-                   if (kfsz1(nm, k)*kfsz1(nmuu, k) == 0 .or. rr1 >= rr2 .or. rr2 < eps_plt) then
+                   if (kfsz1(nm, k)*kfsz1(nmuu, k) == 0 .or. rr1 >= rr2 .or. rr2 < eps_fp) then
                       if (kfsz1(nmu,k) == 1) then
                          r00 = r0(nmu, k, l)
                       else
@@ -690,7 +689,7 @@ subroutine z_difu_horadv_expl()
                 do l = 1, lstsci
                    rr1 = abs(r0(ndm, k, l) - 2.0_fp*r0(nm, k, l) + r0(num, k, l))
                    rr2 = abs(r0(ndm, k, l) - r0(num, k, l))
-                   if (kfsz1(ndm, k)*kfsz1(num, k) == 0 .or. rr1 >= rr2 .or. rr2 < eps_plt) then
+                   if (kfsz1(ndm, k)*kfsz1(num, k) == 0 .or. rr1 >= rr2 .or. rr2 < eps_fp) then
                       if (kfsz1(nm,k) == 1) then
                          r00 = r0(nm, k, l)
                       else
@@ -715,7 +714,7 @@ subroutine z_difu_horadv_expl()
                 do l = 1, lstsci
                    rr1 = abs(r0(nuum, k, l) - 2.0_fp*r0(num, k, l) + r0(nm, k, l))
                    rr2 = abs(r0(nuum, k, l) - r0(nm, k, l))
-                   if (kfsz1(nm, k)*kfsz1(nuum, k) == 0 .or. rr1 >= rr2 .or. rr2 < eps_plt) then
+                   if (kfsz1(nm, k)*kfsz1(nuum, k) == 0 .or. rr1 >= rr2 .or. rr2 < eps_fp) then
                       if (kfsz1(num,k) == 1) then
                          r00 = r0(num, k, l)
                       else

@@ -36,6 +36,7 @@ subroutine shrwav(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     !
     implicit none
@@ -76,7 +77,6 @@ subroutine shrwav(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)   :: dfuu
     real(fp)   :: ku
     real(fp)   :: omega
-    real(fp)   :: pi
     real(fp)   :: rzza
     real(fp)   :: rzzb
     real(fp)   :: thsum
@@ -90,7 +90,6 @@ subroutine shrwav(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     ! Initialisation
     !
     thsum = 0.
-    pi    = 4.*atan(1.0)
     !
     do k = 1, kmax
        nmu = icx

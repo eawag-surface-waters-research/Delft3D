@@ -50,6 +50,7 @@ subroutine wavenr(h         ,t         ,k         ,ag        )
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     !
     implicit none
@@ -77,13 +78,11 @@ subroutine wavenr(h         ,t         ,k         ,ag        )
     real(hp)               :: kd                   ! Double value for K 
     real(hp)               :: num                  ! Numerator 
     real(hp)               :: ome2                 ! Omega 
-    real(hp)               :: pi                   ! PI 
 !
 !
 !! executable statements -------------------------------------------------------
 !
-    pi = 4.0D0*atan(1.0D0)
-    ome2 = (2.0D0*pi/real(t, hp))**2*real(h, hp)/real(ag, hp)
+    ome2 = (2.0D0*pi_hp/real(t, hp))**2*real(h, hp)/real(ag, hp)
     !
     num = 1.0D0 +                                                               &
         & ome2*(a1 + ome2*(a2 + ome2*(a3 + ome2*(a4 + ome2*(a5 + ome2*a6)))))

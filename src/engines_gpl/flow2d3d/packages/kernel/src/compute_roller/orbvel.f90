@@ -33,6 +33,7 @@ subroutine orbvel(nmmax     ,kfs       ,dps       ,ubot      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     !
     use globaldata
     !
@@ -43,7 +44,6 @@ subroutine orbvel(nmmax     ,kfs       ,dps       ,ubot      , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp)               , pointer :: pi
     real(fp)               , pointer :: rhow
     real(fp)               , pointer :: ag
     logical                , pointer :: ubot_from_com
@@ -70,7 +70,6 @@ subroutine orbvel(nmmax     ,kfs       ,dps       ,ubot      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    pi              => gdp%gdconst%pi
     rhow            => gdp%gdphysco%rhow
     ag              => gdp%gdphysco%ag
     ubot_from_com   => gdp%gdprocs%ubot_from_com

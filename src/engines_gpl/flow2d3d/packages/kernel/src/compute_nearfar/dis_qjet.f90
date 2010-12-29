@@ -36,6 +36,7 @@ subroutine det_qjet(q, v, b)
 !!--declarations----------------------------------------------------------------
 !
     use precision
+    use mathconsts
 !
 ! Global variables
 !
@@ -48,13 +49,11 @@ subroutine det_qjet(q, v, b)
     integer    ::   ib
     integer    ::   iphi
     real(fp)   ::   bstep
-    real(fp)   ::   pi
     real(fp)   ::   pstep
     real(fp)   ::   uuu
 !
 !! executable statements -------------------------------------------------------
 !
-    pi = acos(-1.0_fp)
     q  = 0.0_fp
     !
     pstep = pi / 100.0_fp

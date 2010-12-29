@@ -62,6 +62,7 @@ libflow2d3d_la_LIBADD = \
     $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/libesm_c.a \
     $(top_srcdir)/utils_lgpl/inifiles/packages/inifiles/src/libinifiles.a \
     $(top_srcdir)/utils_lgpl/nefis/packages/nefis/src/libnefis.a \
+    $(top_srcdir)/utils_lgpl/constants/packages/mathconsts/src/libmathconsts.a \
     $(top_srcdir)/utils_lgpl/precision/packages/precision/src/libprecision.a \
     $(top_srcdir)/utils_lgpl/semaphore/packages/semaphore/src/libsemaphore.a \
     $(top_srcdir)/utils_lgpl/stream/packages/stream/src/libstream.a \

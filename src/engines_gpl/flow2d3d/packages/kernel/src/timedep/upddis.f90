@@ -40,6 +40,7 @@ subroutine upddis(lundis    ,lundia    ,sferic    ,itdis     , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     !
     implicit none
@@ -49,7 +50,6 @@ subroutine upddis(lundis    ,lundia    ,sferic    ,itdis     , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp) , pointer :: degrad
     real(fp) , pointer :: scalef
 !
 ! Global variables
@@ -106,7 +106,6 @@ subroutine upddis(lundis    ,lundia    ,sferic    ,itdis     , &
 !
 !! executable statements -------------------------------------------------------
 !
-    degrad    => gdp%gdconst%degrad
     scalef    => gdp%gdupddis%scalef
     last = .false.
     !

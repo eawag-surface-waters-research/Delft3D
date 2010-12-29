@@ -33,6 +33,7 @@ subroutine stoktb(hrmsnm    ,tpu       ,h         ,ustokes   ,gdp       )
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     !
     implicit none
@@ -58,7 +59,6 @@ subroutine stoktb(hrmsnm    ,tpu       ,h         ,ustokes   ,gdp       )
     real(fp)                       :: fact
     real(fp)                       :: kwav
     real(fp)                       :: omega
-    real(fp)                       :: pi
 !
 !
 !! executable statements -------------------------------------------------------
@@ -76,7 +76,6 @@ subroutine stoktb(hrmsnm    ,tpu       ,h         ,ustokes   ,gdp       )
     !     global data structure definition and access functions
     !
     a = hrmsnm/2.
-    pi = 4.*atan(1.)
     if (tpu>0.1) then
        omega = 2.*pi/tpu
        !

@@ -37,6 +37,7 @@ subroutine reafou(error     ,lundia    ,lunfou    ,filfou    ,kmax      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     !
     implicit none
@@ -46,7 +47,6 @@ subroutine reafou(error     ,lundia    ,lunfou    ,filfou    ,kmax      , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp)                      , pointer :: pi
     real(fp)                      , pointer :: tstart
     real(fp)                      , pointer :: tstop
     real(fp)                      , pointer :: dt
@@ -106,7 +106,6 @@ subroutine reafou(error     ,lundia    ,lunfou    ,filfou    ,kmax      , &
 !! executable statements -------------------------------------------------------
 !
 !
-    pi        => gdp%gdconst%pi
     tstart    => gdp%gdexttim%tstart
     tstop     => gdp%gdexttim%tstop
     dt        => gdp%gdexttim%dt

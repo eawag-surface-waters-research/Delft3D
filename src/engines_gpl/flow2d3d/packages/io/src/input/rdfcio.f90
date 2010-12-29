@@ -41,6 +41,7 @@ subroutine rdfcio(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     !
     implicit none
@@ -90,9 +91,7 @@ subroutine rdfcio(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
     logical       :: lerror ! Flag=TRUE if a local error is encountered 
     logical       :: newkw  ! Logical var. specifying whether a new recnam should be read from the MD-file or just new data in the continuation line 
     real(fp)      :: sidday ! Help var. 
-    real(fp)      :: degrad ! Conversion factor from degree to radial 
     real(fp)      :: ff     ! Help var. (for Coriolis parameter) 
-    real(fp)      :: pi     ! 3.14.... 
     real(fp)      :: posit
     character(12) :: fildef ! Default file name (usually = blank) 
     character(6)  :: keyw   ! Name of record to look for in the MD-file (usually KEYWRD or RECNAM) 
@@ -110,8 +109,6 @@ subroutine rdfcio(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
     fildef = ' '
     nlook = 1
     !
-    pi = 4.*atan(1.0)
-    degrad = pi/180.
     sidday = (365.25/366.25)*86400.0
     !
     ! locate 'Filcio' record for coriolis values in attribute file

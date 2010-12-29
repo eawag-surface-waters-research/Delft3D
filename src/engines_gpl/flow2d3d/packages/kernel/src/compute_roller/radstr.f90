@@ -42,6 +42,7 @@ subroutine radstr(ewave1    ,eroll1    ,sinkr     ,c         ,cgc       , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     !
     use globaldata
     !
@@ -56,7 +57,6 @@ subroutine radstr(ewave1    ,eroll1    ,sinkr     ,c         ,cgc       , &
     integer      , pointer :: nmskl
     integer      , pointer :: mmskf
     integer      , pointer :: mmskl
-    real(fp)     , pointer :: degrad
     real(fp)     , pointer :: dryflc
 !
 ! Global variables
@@ -163,7 +163,6 @@ subroutine radstr(ewave1    ,eroll1    ,sinkr     ,c         ,cgc       , &
     nmskl     => gdp%gdbcdat%nmskl
     mmskf     => gdp%gdbcdat%mmskf
     mmskl     => gdp%gdbcdat%mmskl
-    degrad    => gdp%gdconst%degrad
     dryflc    => gdp%gdnumeco%dryflc
     !                                          +
     !

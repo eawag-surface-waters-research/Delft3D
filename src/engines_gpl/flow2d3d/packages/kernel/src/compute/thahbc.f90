@@ -47,7 +47,8 @@ subroutine thahbc(j         ,nmmaxj    ,icx       ,icy       ,kmax      , &
 !
 !!--declarations----------------------------------------------------------------
     use precision
-   !
+    use mathconsts
+    !
     use globaldata
     !
     implicit none
@@ -118,7 +119,6 @@ subroutine thahbc(j         ,nmmaxj    ,icx       ,icy       ,kmax      , &
     integer                        :: nseg
     real(fp)                       :: cosrrt
     real(fp)                       :: dtsec                ! Integration time step [seconds] 
-    real(fp)                       :: pi
     real(fp)                       :: reldep
     real(fp)                       :: rrt
     real(fp)                       :: rtrntm
@@ -136,7 +136,6 @@ subroutine thahbc(j         ,nmmaxj    ,icx       ,icy       ,kmax      , &
     hdt        => gdp%gdnumeco%hdt
     !
     ddb = gdp%d%ddbound
-    pi = 4.0*atan(1.0)
     dtsec = 2.0*hdt
     icxy = max(icx, icy)
     !
@@ -218,7 +217,7 @@ subroutine thahbc(j         ,nmmaxj    ,icx       ,icy       ,kmax      , &
              else
                 k1st = 1
              endif
-             !$DIR SCALAR
+             !
              zcoor = 0.
              do k = k1st, kmax
                 if (zmodel) then
@@ -256,7 +255,6 @@ subroutine thahbc(j         ,nmmaxj    ,icx       ,icy       ,kmax      , &
                    !                    reflected from the inner point. For outflow the
                    !                    diffusive flux is switched off.
                    !
-                   !$DIR SCALAR
                    do l = 1, lstsc
                       rthbnd(k, l, iflr, ir) = r0(nmr0, k, l)
                       rbnd(k, l, iflr, ir) = r0(nmr0, k, l)
@@ -281,7 +279,7 @@ subroutine thahbc(j         ,nmmaxj    ,icx       ,icy       ,kmax      , &
                           & + reldep*(rettim(nseg, 1) - rettim(nseg, 2))
                    rrt = thtim(k, iflr, ir)/rtrntm
                    cosrrt = (cos(rrt*pi) + 1.0)*0.5
-                   !$DIR SCALAR
+                   !
                    do l = 1, lstsc
                       rbnd(k, l, iflr, ir) &
                         & = rthbnd(k, l, iflr, ir) + cosrrt*(rbnd(k, l, iflr, ir)  &
@@ -291,12 +289,11 @@ subroutine thahbc(j         ,nmmaxj    ,icx       ,icy       ,kmax      , &
                    !
                    !---------------boundary point dry
                    !
-                   !$DIR SCALAR
                    do l = 1, lstsc
                       thtim(k, iflr, ir) = 0.0
                    enddo
                 endif
-             !
+                !
              enddo
           !
           !----------loop over all layers for RETTIM < 0
@@ -306,7 +303,6 @@ subroutine thahbc(j         ,nmmaxj    ,icx       ,icy       ,kmax      , &
           !          400 because r0 is zero anyway when the point is inactive
           !
           elseif (rettim(nseg, 1)<0.) then
-             !$DIR SCALAR
              do k = 1, kmax
                 do l = 1, lstsc
                    rbnd(k, l, iflr, ir) = r0(nmr0, k, l)

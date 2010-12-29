@@ -45,6 +45,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
 !!--declarations----------------------------------------------------------------
     use meteo
     use precision
+    use mathconsts
     !
     use globaldata
     !
@@ -55,9 +56,6 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp)                , pointer :: pi
-    real(fp)                , pointer :: degrad
-    real(fp)                , pointer :: day
     real(fp)                , pointer :: eps
     real(sp)                , pointer :: smiss
     integer                 , pointer :: itdate
@@ -235,9 +233,6 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    pi          => gdp%gdconst%pi
-    degrad      => gdp%gdconst%degrad
-    day         => gdp%gdconst%day
     eps         => gdp%gdconst%eps
     smiss       => gdp%gdconst%smiss
     itdate      => gdp%gdexttim%itdate

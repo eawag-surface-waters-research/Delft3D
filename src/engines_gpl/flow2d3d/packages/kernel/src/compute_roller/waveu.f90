@@ -34,6 +34,7 @@ subroutine waveu(nmmax     ,kfs       ,sourw     , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     !
     use globaldata
     !
@@ -50,7 +51,6 @@ subroutine waveu(nmmax     ,kfs       ,sourw     , &
     real(fp)               , pointer :: gamdis
     real(fp)               , pointer :: f_lam
     real(fp)               , pointer :: fwee
-    real(fp)               , pointer :: pi
     real(fp)               , pointer :: rhow
     real(fp)               , pointer :: ag
     real(fp)               , pointer :: timmin    
@@ -113,7 +113,6 @@ subroutine waveu(nmmax     ,kfs       ,sourw     , &
     f_lam      => gdp%gdbetaro%f_lam
     disform    => gdp%gdbetaro%disform
     fwee       => gdp%gdbetaro%fwee
-    pi         => gdp%gdconst%pi
     rhow       => gdp%gdphysco%rhow
     ag         => gdp%gdphysco%ag
     wave       => gdp%gdprocs%wave

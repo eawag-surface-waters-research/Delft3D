@@ -25,6 +25,7 @@ FMODULES += \
 	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi \
 	-I$(top_srcdir)/utils_lgpl/meteo/packages/meteo/src \
 	-I$(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow/src \
+	-I$(top_srcdir)/utils_lgpl/constants/packages/mathconsts/src \
 	-I$(top_srcdir)/utils_lgpl/ec_module/packages/ec_module/src \
 	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/general
 

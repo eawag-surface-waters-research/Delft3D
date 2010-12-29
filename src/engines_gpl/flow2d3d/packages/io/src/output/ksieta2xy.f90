@@ -36,6 +36,7 @@ subroutine ksieta2xy(mmax    ,nmaxus    ,kcs      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     !
     implicit none
@@ -45,7 +46,6 @@ subroutine ksieta2xy(mmax    ,nmaxus    ,kcs      , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    real(fp) , pointer :: degrad
 !
 ! Global variables
 !
@@ -66,7 +66,6 @@ subroutine ksieta2xy(mmax    ,nmaxus    ,kcs      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    degrad => gdp%gdconst%degrad
     !
     ! Rotate the vector components from (ksi-eta)-coordinates to (x,y)-coordinates
     !

@@ -87,7 +87,6 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
     ! They replace the  include igd / include igp lines
     !
     include 'flow_steps_f.inc'
-    real(fp)               , pointer :: pi
     real(fp)               , pointer :: eps
     real(fp)               , pointer :: precip
     integer                , pointer :: maseva
@@ -267,7 +266,6 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    pi          => gdp%gdconst%pi
     eps         => gdp%gdconst%eps
     precip      => gdp%gdheat%precip
     maseva      => gdp%gdheat%maseva

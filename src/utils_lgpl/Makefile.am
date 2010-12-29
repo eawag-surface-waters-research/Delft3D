@@ -1,6 +1,7 @@
 include $(top_srcdir)/common.am
 SUBDIRS = \
          precision \
+         constants \
          delftio \
          esmfsm \
          ftnunit \

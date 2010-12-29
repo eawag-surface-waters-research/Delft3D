@@ -36,6 +36,7 @@ subroutine rolcor(hrms      ,tp        ,theta     ,hu        ,hv         , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use globaldata
     !
     implicit none
@@ -46,8 +47,6 @@ subroutine rolcor(hrms      ,tp        ,theta     ,hu        ,hv         , &
     ! They replace the  include igd / include igp lines
     !
     real(fp)               , pointer :: ag
-    real(fp)               , pointer :: pi
-    real(fp)               , pointer :: degrad
     real(fp)               , pointer :: rhow
     logical                , pointer :: zmodel
 !
@@ -113,8 +112,6 @@ subroutine rolcor(hrms      ,tp        ,theta     ,hu        ,hv         , &
 !! executable statements -------------------------------------------------------
 !
     ag        => gdp%gdphysco%ag
-    pi        => gdp%gdconst%pi
-    degrad    => gdp%gdconst%degrad
     rhow      => gdp%gdphysco%rhow
     zmodel    => gdp%gdprocs%zmodel 
     !

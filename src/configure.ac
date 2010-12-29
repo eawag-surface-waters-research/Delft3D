@@ -246,6 +246,10 @@ AC_CONFIG_FILES([Makefile
 		 utils_lgpl/nefis/tests/test_17/Makefile
 	         utils_lgpl/nefis/tests/test_18/Makefile
 	         utils_lgpl/nefis/tests/test_19/Makefile
+		 utils_lgpl/constants/Makefile
+		 utils_lgpl/constants/packages/Makefile
+		 utils_lgpl/constants/packages/mathconsts/Makefile
+		 utils_lgpl/constants/packages/mathconsts/src/Makefile
 		 utils_lgpl/precision/Makefile
 		 utils_lgpl/precision/packages/Makefile
 		 utils_lgpl/precision/packages/precision/Makefile

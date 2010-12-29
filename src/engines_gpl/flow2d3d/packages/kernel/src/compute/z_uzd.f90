@@ -82,7 +82,6 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)               , pointer :: rhow
     real(fp)               , pointer :: vicmol
     character(8)           , pointer :: dpsopt
-    real(fp)               , pointer :: pi
     real(fp)               , pointer :: eps
     integer                , pointer :: lundia
     real(fp)               , pointer :: dryflc
@@ -277,7 +276,6 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
 !! executable statements -------------------------------------------------------
 !
     !
-    pi         => gdp%gdconst%pi
     eps        => gdp%gdconst%eps
     lundia     => gdp%gdinout%lundia
     dryflc     => gdp%gdnumeco%dryflc

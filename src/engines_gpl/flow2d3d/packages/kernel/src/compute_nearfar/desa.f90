@@ -39,6 +39,7 @@ subroutine desa(x_jet   ,y_jet    ,z_jet   ,s_jet   ,nrow    , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     !
     use globaldata
     !
@@ -92,7 +93,6 @@ subroutine desa(x_jet   ,y_jet    ,z_jet   ,s_jet   ,nrow    , &
     real(fp)      :: dis_tot
     real(fp)      :: q1
     real(fp)      :: q2
-    real(fp)      :: pi
 !
 !! executable statements -------------------------------------------------------
 !
@@ -102,7 +102,6 @@ subroutine desa(x_jet   ,y_jet    ,z_jet   ,s_jet   ,nrow    , &
     !
     dis_dil = 0.0_fp
     dis_tot = 0.0_fp
-    pi      = acos(-1.0_fp)
     !
     ! Get characteristics starting point
     !

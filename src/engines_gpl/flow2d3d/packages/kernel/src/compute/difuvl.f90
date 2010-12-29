@@ -75,6 +75,7 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use dfparall 
     use timers
    !
@@ -91,7 +92,6 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     real(fp)                            , pointer :: ck
     real(fp)                            , pointer :: dicoww
     real(fp)                            , pointer :: eps
-    real(fp)                            , pointer :: eps_plt
     real(fp), dimension(:,:,:)          , pointer :: fluxu
     real(fp), dimension(:,:,:)          , pointer :: fluxuc
     real(fp), dimension(:,:,:)          , pointer :: fluxv
@@ -256,7 +256,6 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
 !! executable statements -------------------------------------------------------
 !
     eps         => gdp%gdconst%eps
-    eps_plt     => gdp%gdconst%eps_plt
     fluxu       => gdp%gdflwpar%fluxu
     fluxuc      => gdp%gdflwpar%fluxuc
     fluxv       => gdp%gdflwpar%fluxv
@@ -354,7 +353,7 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
                 do l = 1, lstsci
                    rr1 = abs(r0(nmd, k, l) - 2.0_fp*r0(nm, k, l) + r0(nmu, k, l))
                    rr2 = abs(r0(nmd, k, l) - r0(nmu, k, l))
-                   if (kfu(nmd)*kadu(nmd, k) == 0 .or. rr1 >= rr2 .or. rr2 < eps_plt) then
+                   if (kfu(nmd)*kadu(nmd, k) == 0 .or. rr1 >= rr2 .or. rr2 < eps_fp) then
                       r00 = r0(nm, k, l)
                    else
                       r00 = r0(nm, k, l)                                     &
@@ -373,7 +372,7 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
                 do l = 1, lstsci
                    rr1 = abs(r0(nmuu, k, l) - 2.0_fp*r0(nmu, k, l) + r0(nm, k, l))
                    rr2 = abs(r0(nmuu, k, l) - r0(nm, k, l))
-                   if (kfu(nmu)*kadu(nmu, k) == 0 .or. rr1 >= rr2 .or. rr2 < eps_plt) then
+                   if (kfu(nmu)*kadu(nmu, k) == 0 .or. rr1 >= rr2 .or. rr2 < eps_fp) then
                       r00 = r0(nmu, k, l)
                    else
                       r00 = r0(nmu, k, l)                                     &
@@ -410,7 +409,7 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
                 do l = 1, lstsci
                    rr1 = abs(r0(ndm, k, l) - 2.0_fp*r0(nm, k, l) + r0(num, k, l))
                    rr2 = abs(r0(ndm, k, l) - r0(num, k, l))
-                   if (kfv(ndm)*kadv(ndm, k) == 0 .or. rr1 >= rr2 .or. rr2 < eps_plt) then
+                   if (kfv(ndm)*kadv(ndm, k) == 0 .or. rr1 >= rr2 .or. rr2 < eps_fp) then
                       r00 = r0(nm, k, l)
                    else
                       r00 = r0(nm, k, l)                                     &
@@ -429,7 +428,7 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
                 do l = 1, lstsci
                    rr1 = abs(r0(nuum, k, l) - 2.0_fp*r0(num, k, l) + r0(nm, k, l))
                    rr2 = abs(r0(nuum, k, l) - r0(nm, k, l))
-                   if (kfv(num)*kadv(num, k) == 0 .or. rr1 >= rr2 .or. rr2 < eps_plt) then
+                   if (kfv(num)*kadv(num, k) == 0 .or. rr1 >= rr2 .or. rr2 < eps_fp) then
                       r00 = r0(num, k, l)
                    else
                       r00 = r0(num, k, l)                                     &
