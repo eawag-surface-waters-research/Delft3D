@@ -1,4 +1,4 @@
-subroutine wrxbm(lundia    ,fout      ,trifil    ,itmapc    ,nmax      , &
+subroutine wrxbm(lundia     ,error    ,trifil    ,itmapc    ,nmax      , &
                 & mmax      ,nmaxus   ,fxw       ,fyw       , &
                 & wsu       ,wsv      ,guu       ,gvv       ,rbuff1    , &
                 & hrms      ,gdp       )
@@ -55,7 +55,7 @@ subroutine wrxbm(lundia    ,fout      ,trifil    ,itmapc    ,nmax      , &
     integer                                                                    :: mmax   !  Description and declaration in iidim.f90
     integer                                                      , intent(in)  :: nmax   !  Description and declaration in iidim.f90
     integer                                                                    :: nmaxus !  Description and declaration in iidim.f90
-    logical                                                      , intent(out) :: fout
+    logical                                                      , intent(out) :: error
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: fxw    !  Description and declaration in rjdim.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: fyw    !  Description and declaration in rjdim.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: guu    !  Description and declaration in rjdim.f90
@@ -243,6 +243,6 @@ subroutine wrxbm(lundia    ,fout      ,trifil    ,itmapc    ,nmax      , &
     if (ierror /= 0) then
        ierror = neferr(0, errmsg)
        call prterr(lundia, 'P004', errmsg)
-       fout = .true.
+       error = .true.
     endif
 end subroutine wrxbm
