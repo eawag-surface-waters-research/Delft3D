@@ -56,7 +56,6 @@ subroutine thahbc(j         ,nmmaxj    ,icx       ,icy       ,kmax      , &
     type(globdat),target :: gdp
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
-    ! They replace the  include igd / include igp lines
     !
     real(fp)     , pointer :: hdt
     logical      , pointer :: const

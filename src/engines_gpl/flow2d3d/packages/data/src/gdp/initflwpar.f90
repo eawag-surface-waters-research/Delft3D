@@ -39,7 +39,6 @@ subroutine initflwpar(gdp)
     type(globdat),target :: gdp
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
-    ! They replace the  include igd / include igp lines
     !
     real(fp), dimension(:,:,:)         , pointer :: fluxu
     real(fp), dimension(:,:,:)         , pointer :: fluxuc

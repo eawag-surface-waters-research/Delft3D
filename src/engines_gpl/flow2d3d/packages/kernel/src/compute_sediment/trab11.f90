@@ -43,7 +43,6 @@ subroutine trab11(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     type(globdat),target :: gdp
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
-    ! They replace the  include igd / include igp lines
     !
     logical                  , pointer :: ubot_from_com
 !

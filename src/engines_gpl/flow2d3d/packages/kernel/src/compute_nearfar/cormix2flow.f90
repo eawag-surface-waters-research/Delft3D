@@ -45,7 +45,6 @@ subroutine cormix2flow(thick  ,kmax  ,dps   ,s1    ,disch_nf ,sour_nf , &
     type(globdat),target :: gdp
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
-    ! They replace the  include igd / include igp lines
     !
     integer           , pointer :: m_diff
     integer           , pointer :: n_diff

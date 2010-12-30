@@ -43,7 +43,6 @@ subroutine angle(sferic    ,x1        ,y1        ,x2        ,y2        , &
     type(globdat),target :: gdp
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
-    ! They replace the  include igd / include igp lines
     !
 !
 ! Global variables

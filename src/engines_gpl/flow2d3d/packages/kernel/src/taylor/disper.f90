@@ -50,7 +50,6 @@ subroutine disper(kmxdt     ,kmxt      ,np        ,nfreqs    ,angle     , &
     type(globdat),target :: gdp
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
-    ! They replace the  include igd / include igp lines
     !
     real(fp) , pointer :: bvmin
 !

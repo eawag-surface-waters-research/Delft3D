@@ -49,7 +49,6 @@ subroutine z_momcor_nhfull(nmmax     ,kmax      ,icx       ,icy       ,s1       
     type(globdat),target :: gdp
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
-    ! They replace the  include igd / include igp lines
     !
     real(fp)               , pointer :: hdt
     real(fp)               , pointer :: precip

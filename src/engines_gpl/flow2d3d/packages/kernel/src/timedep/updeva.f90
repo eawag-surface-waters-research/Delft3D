@@ -50,7 +50,6 @@ subroutine updeva(luneva    ,timnow    ,dt        ,inteva    ,first     , &
     type(globdat),target :: gdp
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
-    ! They replace the  include igd / include igp lines
     !
     integer                , pointer :: it0eva
     integer                , pointer :: it1eva

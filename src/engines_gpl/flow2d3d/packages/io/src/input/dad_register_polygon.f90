@@ -47,7 +47,6 @@ subroutine dad_register_polygon(link_ptr, pol_ptr, idcount, totpoints, &
     type(globdat),target :: gdp
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
-    ! They replace the  include igd / include igp lines
     !
     integer , pointer :: lundia
 !

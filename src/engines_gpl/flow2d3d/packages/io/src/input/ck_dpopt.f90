@@ -56,7 +56,6 @@ subroutine ck_dpopt(lundia    ,lsedtot   ,zmodel    ,bedupd    ,dpsopt    , &
     type(globdat),target :: gdp
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
-    ! They replace the  include igd / include igp lines
     !
     character(6)   , pointer :: momsol
     logical        , pointer :: rst_dp

@@ -46,7 +46,6 @@ subroutine setcurrentdatetime(timnow, gdp)
     real(fp)             :: timnow
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
-    ! They replace the  include igd / include igp lines
     !
     real(fp)              , pointer :: hdt
     real(fp)              , pointer :: timsec

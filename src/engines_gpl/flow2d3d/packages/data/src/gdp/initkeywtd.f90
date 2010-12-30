@@ -40,7 +40,6 @@ subroutine initkeywtd(gdp       )
     type(globdat),target :: gdp
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
-    ! They replace the  include igd / include igp lines
     !
     character*20, dimension(:) , pointer :: keywrd
 !

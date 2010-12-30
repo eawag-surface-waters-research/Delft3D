@@ -48,7 +48,6 @@ subroutine tfzeta(timnow    ,nmax      ,mmax      ,tgfsep    ,xz        , &
     type(globdat),target :: gdp
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
-    ! They replace the  include igd / include igp lines
     !
     real(fp) , dimension(:) , pointer :: tgfcoe
     real(hp),  dimension(:) , pointer :: tgffr

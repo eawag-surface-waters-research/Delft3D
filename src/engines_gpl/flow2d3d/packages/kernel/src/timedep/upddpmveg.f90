@@ -41,7 +41,6 @@ subroutine upddpmveg(mmax      ,nmax      ,kmax      ,sig       ,thick     , &
     type(globdat),target :: gdp
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
-    ! They replace the  include igd / include igp lines
     !
     real(fp)                             , pointer :: amiss
     integer, dimension(:,:)              , pointer :: planttype
