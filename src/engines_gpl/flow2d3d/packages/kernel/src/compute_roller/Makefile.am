@@ -43,6 +43,7 @@ libkernel_compute_roller_a_SOURCES = \
          snel.f90 \
          tapf.f90 \
          turwav.f90 \
+         varcon.f90 \
          waveu.f90 \
          wnr.f90
 

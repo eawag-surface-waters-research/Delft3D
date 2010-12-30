@@ -167,6 +167,7 @@
 		<File RelativePath="src\compute_roller\snel.f90"/>
 		<File RelativePath="src\compute_roller\tapf.f90"/>
 		<File RelativePath="src\compute_roller\turwav.f90"/>
+		<File RelativePath=".\src\compute_roller\varcon.f90"/>
 		<File RelativePath="src\compute_roller\waveu.f90"/>
 		<File RelativePath="src\compute_roller\wnr.f90"/></Filter>
 		<Filter Name="compute_sediment">
@@ -217,7 +218,6 @@
 		<File RelativePath="src\compute_sediment\tranb5.f90"/>
 		<File RelativePath="src\compute_sediment\tranb7.f90"/>
 		<File RelativePath="src\compute_sediment\upwbed.f90"/>
-		<File RelativePath="src\compute_sediment\varcon.f90"/>
 		<File RelativePath="src\compute_sediment\wave.f90"/></Filter>
 		<Filter Name="dd">
 		<File RelativePath="src\dd\caldpu_dd.f90"/>
