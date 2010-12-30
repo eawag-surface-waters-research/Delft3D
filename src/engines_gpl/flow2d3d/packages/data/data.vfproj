@@ -28,7 +28,6 @@
 		<File RelativePath="include\address.igs"/>
 		<File RelativePath=".\include\adv2d.igs"/>
 		<File RelativePath="include\autok.igs"/>
-		<File RelativePath="include\avalan.igs"/>
 		<File RelativePath="include\bcdat.igs"/>
 		<File RelativePath=".\include\bedformpar.igs"/>
 		<File RelativePath="include\betaro.igs"/>
@@ -91,7 +90,6 @@
 		<File RelativePath="include\rivpro.igs"/>
 		<File RelativePath="include\scour.igs"/>
 		<File RelativePath="include\sedpar.igs"/>
-		<File RelativePath="include\shearx.igs"/>
 		<File RelativePath="include\snel.igs"/>
 		<File RelativePath="include\stations.igs"/>
 		<File RelativePath="include\tablefile.igs"/>
@@ -177,7 +175,6 @@
 		<File RelativePath="src\gdp\gdp_dump.f90"/>
 		<File RelativePath=".\src\gdp\initadv2d.f90"/>
 		<File RelativePath="src\gdp\initarrays.f90"/>
-		<File RelativePath="src\gdp\initavalan.f90"/>
 		<File RelativePath=".\src\gdp\initbcdat.f90"/>
 		<File RelativePath=".\src\gdp\initbedformpar.f90"/>
 		<File RelativePath="src\gdp\initbubble.f90"/>
@@ -210,7 +207,6 @@
 		<File RelativePath="src\gdp\initsafe.f90"/>
 		<File RelativePath="src\gdp\initscour.f90"/>
 		<File RelativePath="src\gdp\initsedpar.f90"/>
-		<File RelativePath="src\gdp\initshearx.f90"/>
 		<File RelativePath="src\gdp\initsnel.f90"/>
 		<File RelativePath="src\gdp\initsobek.f90"/>
 		<File RelativePath="src\gdp\initstations.f90"/>

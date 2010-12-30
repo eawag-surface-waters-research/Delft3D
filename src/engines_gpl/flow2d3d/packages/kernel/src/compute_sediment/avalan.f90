@@ -65,14 +65,10 @@ subroutine avalan(dps       ,depchg    ,gvu       ,guv       , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    integer                , pointer :: mmax
     integer                , pointer :: nmmax
-    integer                , pointer :: kc
-    logical                , pointer :: initlz
     real(fp), dimension(:) , pointer :: depchange
     logical                , pointer :: scour
     real(fp)               , pointer :: slope
-    integer                , pointer :: lundia
 !
 ! Global variables
 !
@@ -87,7 +83,6 @@ subroutine avalan(dps       ,depchg    ,gvu       ,guv       , &
 !
     integer :: icx
     integer :: icy
-    integer :: istat
     integer :: nm
     integer :: nmu
     integer :: num
@@ -98,90 +93,79 @@ subroutine avalan(dps       ,depchg    ,gvu       ,guv       , &
     real(fp):: ddnm
     real(fp):: ddnmu
     real(fp):: ddnum
-    real(fp):: depnm
-    real(fp):: depnmu
-    real(fp):: depnum
-    real(fp):: gemvol
+    real(fp):: dvol
     real(fp):: size
+    !
+    real(hp):: depnm
+    real(hp):: depnmu
+    real(hp):: depnum
 !
 !! executable statements -------------------------------------------------------
 !
-    mmax       => gdp%d%mmax
     nmmax      => gdp%d%nmmax
-    kc         => gdp%d%kc
-    initlz     => gdp%gdavalan%initlz
-    depchange  => gdp%gdavalan%depchange
+    depchange  => gdp%gdscour%depchange
     scour      => gdp%gdscour%scour
     slope      => gdp%gdscour%slope
-    lundia     => gdp%gdinout%lundia
-    !
-    if (initlz) then
-       !
-       ! processed only once at first call
-       !
-       initlz = .false.
-       if (.not.scour) then
-          return
-       endif
-       !
-       ! - nmmax is known through `dimens.igp'
-       ! - use gdp structure for allocation
-       ! - include .igp again to be sure that the local pointer depchange
-       !   points to the allocated memory
-       !
-       allocate (gdp%gdavalan%depchange(nmmax), stat = istat)
-    initlz     => gdp%gdavalan%initlz
-    depchange  => gdp%gdavalan%depchange
-       if (istat/=0) then
-          call prterr(lundia, 'U021', 'Avalan: memory alloc error')
-          call d3stop(1, gdp)
-       endif
-    endif
     !
     ! reset local array
     !
-    do nm = 1, nmmax
-       depchange(nm) = 0.0
-    enddo
+    depchange = 0.0
+    !
     do nm = 1, nmmax-icx
        nmu = nm + icx
+       !
+       ! Slump in first grid direction.
+       !
+       ! WARNING: mass conservation violation
+       ! This code does not take into account the amount of sediment available
+       ! at the grid cell, nor its composition.
+       !
+       ! WARNING: code asymmetry.
+       ! Note that slump cascades may propagate over multiple grid cells if the
+       ! slump direction matches the direction in which the grid cells are
+       ! traversed, whereas slumps in opposite direction will propagate not
+       ! further than one grid cell.
+       !
        if (kcs(nm)>0 .and. kcs(nmu)>0) then
-          depnm  = real(dps(nm),fp)
-          depnmu = real(dps(nmu),fp)
-          ddep   = depnmu - depnm
+          depnm  = dps(nm)
+          depnmu = dps(nmu)
+          ddep   = real(depnmu - depnm,fp)
           size   = gvu(nm)
           if (abs(ddep/size)>slope) then
              anm            = gsqs(nm)
              anmu           = gsqs(nmu)
-             gemvol         = (anm + anmu)/2.0
-             ddnm           = 0.5*ddep*gemvol/anm
-             dps(nm)        = real(depnm + ddnm,prec)
+             dvol           = 0.25*ddep*(anm + anmu)
+             !
+             ddnm           = dvol/anm
+             dps(nm)        = depnm + real(ddnm,prec)
              depchange(nm)  = depchange(nm) - ddnm
-             ddnmu          = -0.5*ddep*gemvol/anmu
-             dps(nmu)       = real(depnmu + ddnmu,prec)
+             ddnmu          = -dvol/anmu
+             dps(nmu)       = depnmu + real(ddnmu,prec)
              depchange(nmu) = depchange(nmu) - ddnmu
           endif
        endif
     enddo
+    !
     do nm = 1, nmmax-icy
        num = nm + icy
        !
-       ! Do the same thing as before but now in the other direction
+       ! Do the same thing as before but now in the other grid direction
        !
        if (kcs(nm)>0 .and. kcs(num)>0) then
-          depnm  = real(dps(nm),fp)
-          depnum = real(dps(num),fp)
-          ddep   = depnum - depnm
+          depnm  = dps(nm)
+          depnum = dps(num)
+          ddep   = real(depnum - depnm,fp)
           size   = guv(nm)
           if (abs(ddep/size)>slope) then
              anm            = gsqs(nm)
              anum           = gsqs(num)
-             gemvol         = (anm + anum)/2.0
-             ddnm           = 0.5*ddep*gemvol/anm
-             dps(nm)        = real(depnm + ddnm,prec)
+             dvol           = 0.25*ddep*(anm + anum)
+             !
+             ddnm           = dvol/anm
+             dps(nm)        = depnm + real(ddnm,prec)
              depchange(nm)  = depchange(nm) - ddnm
-             ddnum          = -0.5*ddep*gemvol/anum
-             dps(num)       = real(depnum + ddnum,prec)
+             ddnum          = -dvol/anum
+             dps(num)       = depnum + real(ddnum,prec)
              depchange(num) = depchange(num) - ddnum
           endif
        endif

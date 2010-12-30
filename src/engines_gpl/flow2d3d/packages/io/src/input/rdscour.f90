@@ -1,4 +1,4 @@
-subroutine rdscour(error, nrrec, mdfrec, gdp)
+subroutine rdscour(error, gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -36,6 +36,7 @@ subroutine rdscour(error, nrrec, mdfrec, gdp)
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use properties
     use globaldata
     !
     implicit none
@@ -46,111 +47,68 @@ subroutine rdscour(error, nrrec, mdfrec, gdp)
     ! They replace the  include igd / include igp lines
     !
     integer                , pointer :: nmax
-    integer                , pointer :: ddbound
     integer                , pointer :: nmaxd
+    integer                , pointer :: nmmax
     integer                , pointer :: nof
     integer, dimension(:)  , pointer :: nmapp
     integer, dimension(:)  , pointer :: nmref
     logical                , pointer :: scour
     real(fp), dimension(:) , pointer :: factor
     real(fp)               , pointer :: slope
-    type (gd_scour)        , pointer :: gdscour
     integer                , pointer :: lunmd
     integer                , pointer :: lundia
     integer                , pointer :: itis
 !
 ! Global variables
 !
-    integer              :: nrrec
     logical, intent(out) :: error
-    character(*)         :: mdfrec
 !
 ! Local variables
 !
-    integer                              :: ddb
     integer                              :: dummy
     integer                              :: i
-    integer                              :: i1
-    integer                              :: i2
-    integer                              :: idx
     integer                              :: inp
     integer                              :: iost    ! IO-errorcodes
-    integer                              :: lenc
-    integer                              :: lfile
-    integer                              :: lkw
     integer                              :: m
     integer                              :: n
     integer, dimension(:,:), allocatable :: nmappin
     integer, dimension(:,:), allocatable :: nmrefin
-    integer                              :: nmaxddb
-    integer                              :: ntrec
-    integer                              :: nlook
     integer, external                    :: newlun
-    logical                              :: found
     logical                              :: lex
-    logical                              :: newkw
-    character                            :: fildef
-    character(6)                         :: keyw
     character(256)                       :: errmsg
     character(256)                       :: flname
 !
 !! executable statements -------------------------------------------------------
 !
     nmax       => gdp%d%nmax
-    ddbound    => gdp%d%ddbound
     nmaxd      => gdp%d%nmaxd
+    nmmax      => gdp%d%nmmax
     nof        => gdp%gdscour%nof
-    nmapp      => gdp%gdscour%nmapp
-    nmref      => gdp%gdscour%nmref
     scour      => gdp%gdscour%scour
-    factor     => gdp%gdscour%factor
     slope      => gdp%gdscour%slope
-    gdscour    => gdp%gdscour
     lunmd      => gdp%gdinout%lunmd
     lundia     => gdp%gdinout%lundia
     itis       => gdp%gdrdpara%itis
     !
     error  = .false.
-    newkw  = .true.
-    found  = .false.
-    fildef = ' '
-    nlook  = 1
     !
     nof = 0
     !
     ! locate 'Scour' record for attribute file containing parameters
     ! for transport formulation
     !
-    keyw = 'Scour'
-    ntrec = nrrec
-    lkw = 6
-    call search(lunmd     ,error     ,newkw     ,nrrec     ,found     , &
-              & ntrec     ,mdfrec    ,itis      ,keyw      ,lkw       , &
-              & 'NO'      )
+    flname = ' '
+    call prop_get_string(gdp%mdfile_ptr, '*', 'Scour', flname)
     !
-    ! read when found
-    !
-    if (found) then
-       lenc = 256
-       call read2c(lunmd     ,error     ,keyw      ,newkw     ,nlook     , &
-                 & mdfrec    ,flname    ,fildef    ,lenc      ,nrrec     , &
-                 & ntrec     ,lundia    ,gdp       )
-       !
-       ! reading error?
-       !
-       if (error) then
-          errmsg = 'Not able to read keyword Scour'
-          call prterr(lundia    ,'U021'    ,errmsg    )
-          goto 9999
-       endif
-       call noextspaces(flname, lfile)
-       !
-       inquire (file = flname(1:lfile), exist = lex)
+    if (flname == ' ') then
+       ! no scour
+    else
+       inquire (file = flname, exist = lex)
        if (lex) then
           inp = newlun(gdp)
-          open (inp, file = flname(1:lfile),status = 'old', iostat = iost)
+          open (inp, file = flname,status = 'old', iostat = iost)
           if (iost/=0) then
-             call prterr(lundia, 'G004', flname(1:lfile))
+             call prterr(lundia, 'G004', trim(flname))
              call d3stop(1, gdp)
           endif
           read (inp, *, iostat = iost) i
@@ -174,36 +132,33 @@ subroutine rdscour(error, nrrec, mdfrec, gdp)
              read (inp, *, iostat = iost) m
           enddo
           !
-          ! End of file found
-          !
           ! Now the required memory is known
-          ! Allocate using the gdp structure itself instead of the local pointers
+          ! Allocate arrays in the gdp structure
           !
                        allocate (nmappin(2, nof), stat = iost)
           if (iost==0) allocate (nmrefin(2, nof), stat = iost)
           if (iost==0) allocate (gdp%gdscour%nmapp(nof), stat = iost)
           if (iost==0) allocate (gdp%gdscour%nmref(nof), stat = iost)
           if (iost==0) allocate (gdp%gdscour%factor(nof), stat = iost)
+          if (iost==0) allocate (gdp%gdscour%tauv(nmmax), stat = iost)
+          if (iost==0) allocate (gdp%gdscour%depchange(nmmax), stat = iost)
           if (iost/=0) then
              call prterr(lundia, 'U021', 'Rdscour: memory alloc error')
              call d3stop(1, gdp)
           endif
           !
-          ! include .igp again to be sure that the local pointers
-          ! point to the allocated memory
+          ! make sure local pointers point to the allocated memory
           !
-    nof        => gdp%gdscour%nof
-    nmapp      => gdp%gdscour%nmapp
-    nmref      => gdp%gdscour%nmref
-    scour      => gdp%gdscour%scour
-    factor     => gdp%gdscour%factor
-    slope      => gdp%gdscour%slope
-    gdscour    => gdp%gdscour
+          nmapp      => gdp%gdscour%nmapp
+          nmref      => gdp%gdscour%nmref
+          factor     => gdp%gdscour%factor
+          !
           rewind (inp)
           read (inp, *) dummy
           read (inp, *) dummy
           do n = 1, nof
-             read (inp, *) (nmrefin(i, n), i = 1, 2), (nmappin(i, n), i = 1, 2),       &
+             read (inp, *) (nmrefin(i,n), i = 1,2), &
+                         & (nmappin(i,n), i = 1,2), &
                          & factor(n)
           enddo
           close (inp)
@@ -211,23 +166,17 @@ subroutine rdscour(error, nrrec, mdfrec, gdp)
           ! convert nmappin(n,nof), nmappin(m,nof) to nmapp(nof) nm point
           ! convert nmrefin(n,nof), nmrefin(m,nof) to nmref(nof) nm point
           !
-          ddb     = gdp%d%ddbound
-          nmaxddb = nmax + 2*ddb
-          idx = 0
           do n = 1, nof
-             idx = idx + 1
-             nmapp(idx) = nmappin(2, n) + ddb + (nmappin(1, n) + ddb - 1)*nmaxddb
-             nmref(idx) = nmrefin(2, n) + ddb + (nmrefin(1, n) + ddb - 1)*nmaxddb
+             call n_and_m_to_nm(nmappin(2,n), nmappin(1,n), nmapp(n), gdp)
+             call n_and_m_to_nm(nmrefin(2,n), nmrefin(1,n), nmref(n), gdp)
           enddo
           deallocate (nmappin)
           deallocate (nmrefin)
        else
-          errmsg = 'Scour file '//flname(1:lfile)//' does not exist'
+          errmsg = 'Scour file '//trim(flname)//' does not exist'
           call prterr(lundia    ,'U021'    ,errmsg    )
           goto 9999
        endif
-    else
-       ! no scour
     endif
  9999 continue
 end subroutine rdscour

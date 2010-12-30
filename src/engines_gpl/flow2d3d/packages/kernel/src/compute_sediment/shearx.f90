@@ -56,24 +56,19 @@ subroutine shearx(tau       ,nm        ,gdp       )
     ! The following list of pointer parameters is used to point inside the gdp structure
     ! They replace the  include igd / include igp lines
     !
-    integer                , pointer :: mmax
     integer                , pointer :: nmmax
     integer                , pointer :: nof
     integer, dimension(:)  , pointer :: nmapp
     integer, dimension(:)  , pointer :: nmref
-    logical                , pointer :: scour
     real(fp), dimension(:) , pointer :: factor
     real(fp), dimension(:) , pointer :: tauv
-    type (gd_scour)        , pointer :: gdscour
-    integer                , pointer :: lundia
-    logical                , pointer :: initlz
 !
 ! Global variables
 !
-    integer             :: nm
+    integer                 :: nm
     real(fp), dimension(*)  :: tau    ! generic 2-way REAL data port
-                                  ! at first    CALL   copies  taubmx(*)
-                                  ! at all next CALL's returns tauv( nm)
+                                      ! at first    CALL   copies  taubmx(*)
+                                      ! at all next CALL's returns tauv( nm)
 !
 ! Local variables
 !
@@ -83,67 +78,13 @@ subroutine shearx(tau       ,nm        ,gdp       )
 !
 !! executable statements -------------------------------------------------------
 !
-    mmax       => gdp%d%mmax
     nmmax      => gdp%d%nmmax
     nof        => gdp%gdscour%nof
     nmapp      => gdp%gdscour%nmapp
     nmref      => gdp%gdscour%nmref
-    scour      => gdp%gdscour%scour
     factor     => gdp%gdscour%factor
     tauv       => gdp%gdscour%tauv
-    gdscour    => gdp%gdscour
-    lundia     => gdp%gdinout%lundia
-    initlz     => gdp%gdshearx%initlz
     !
-    if (initlz) then
-       initlz = .false.
-       if (.not. scour) then
-          return
-       endif
-       !
-       ! Allocate using the gdp structure itself instead of the local pointers
-       !
-                     allocate (gdp%gdscour%nmapp(nof), stat = istat)
-       if (istat==0) allocate (gdp%gdscour%nmref(nof), stat = istat)
-       if (istat==0) allocate (gdp%gdscour%factor(nof), stat = istat)
-       if (istat/=0) then
-          call prterr(lundia, 'U021', 'Shearx: memory alloc error')
-          call d3stop(1, gdp)
-       endif
-       !
-       ! include .igp again to be sure that the local pointers
-       ! point to the allocated memory
-       !
-    nof        => gdp%gdscour%nof
-    nmapp      => gdp%gdscour%nmapp
-    nmref      => gdp%gdscour%nmref
-    scour      => gdp%gdscour%scour
-    factor     => gdp%gdscour%factor
-    tauv       => gdp%gdscour%tauv
-    gdscour    => gdp%gdscour
-       !
-       ! Reserve memory to hold a complete field
-       ! nmmax is known through dimens.igp
-       ! Allocate using the gdp structure itself instead of the local pointers
-       !
-       allocate (gdp%gdscour%tauv(nmmax), stat = istat)
-       if (istat/=0) then
-          call prterr(lundia, 'U021', 'Shearx: memory alloc error')
-          call d3stop(1, gdp)
-       endif
-       !
-       ! include .igp again to be sure that the local pointers
-       ! point to the allocated memory
-       !
-    nof        => gdp%gdscour%nof
-    nmapp      => gdp%gdscour%nmapp
-    nmref      => gdp%gdscour%nmref
-    scour      => gdp%gdscour%scour
-    factor     => gdp%gdscour%factor
-    tauv       => gdp%gdscour%tauv
-    gdscour    => gdp%gdscour
-       write (lundia, *) 'Scour = ON'
-    endif
     if (nm>0) then
        tau(1) = 0.0
        do np = 1, nof

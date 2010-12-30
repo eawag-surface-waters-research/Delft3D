@@ -29,6 +29,7 @@
     real(fp), dimension(:), pointer :: factor
     real(fp)                        :: slope
     real(fp), dimension(:), pointer :: tauv
+    real(fp), dimension(:), pointer :: depchange
     integer                         :: nof
     integer, dimension(:), pointer  :: nmapp
     integer, dimension(:), pointer  :: nmref

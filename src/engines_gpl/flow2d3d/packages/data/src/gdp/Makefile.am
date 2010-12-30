@@ -40,7 +40,6 @@ libdata_gdp_a_SOURCES = \
          gdp_dump.f90 \
          initadv2d.f90 \
          initarrays.f90 \
-         initavalan.f90 \
          initbcdat.f90 \
          initbedformpar.f90 \
          initbubble.f90 \
@@ -73,7 +72,6 @@ libdata_gdp_a_SOURCES = \
          initsafe.f90 \
          initscour.f90 \
          initsedpar.f90 \
-         initshearx.f90 \
          initsnel.f90 \
          initsobek.f90 \
          initstations.f90 \

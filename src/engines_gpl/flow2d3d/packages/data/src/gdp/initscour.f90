@@ -41,30 +41,21 @@ subroutine initscour(gdp       )
     ! They replace the  include igd / include igp lines
     !
     integer                , pointer :: nof
-    integer, dimension(:)  , pointer :: nmapp
-    integer, dimension(:)  , pointer :: nmref
     logical                , pointer :: scour
-    real(fp), dimension(:) , pointer :: factor
     real(fp)               , pointer :: slope
-    real(fp), dimension(:) , pointer :: tauv
-    type (gd_scour)        , pointer :: gdscour
 !
 !! executable statements -------------------------------------------------------
 !
     nof        => gdp%gdscour%nof
-    nmapp      => gdp%gdscour%nmapp
-    nmref      => gdp%gdscour%nmref
     scour      => gdp%gdscour%scour
-    factor     => gdp%gdscour%factor
     slope      => gdp%gdscour%slope
-    tauv       => gdp%gdscour%tauv
-    gdscour    => gdp%gdscour
     !
     nof     = 0
+    scour   = .false.
+    slope   = 0.0
     nullify (gdp%gdscour%nmapp)
     nullify (gdp%gdscour%nmref)
-    scour   = .false.
     nullify (gdp%gdscour%factor)
-    slope   = 0.0
     nullify (gdp%gdscour%tauv)
+    nullify (gdp%gdscour%depchange)
 end subroutine initscour

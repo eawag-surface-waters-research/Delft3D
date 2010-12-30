@@ -108,7 +108,6 @@ module globaldata
     include 'zmodel.igs'
     include 'nonhyd.igs'
     !
-    include 'avalan.igs'
     include 'cline.igs'
     include 'culver.igs'
     include 'defsub.igs'
@@ -125,7 +124,6 @@ module globaldata
     include 'postpr.igs'
     include 'restart.igs'
     include 'rtc.igs'
-    include 'shearx.igs'
     include 'snel.igs'
     include 'timers.igs'
     include 'tricom.igs'
@@ -206,7 +204,6 @@ module globaldata
        type (gd_nonhyd)   , pointer :: gdnonhyd
        type (gd_waqpar)   , pointer :: gdwaqpar
        !
-       type (sv_avalan)   , pointer :: gdavalan
        type (sv_cline)    , pointer :: gdcline
        type (sv_culver)   , pointer :: gdculver
        type (sv_defsub)   , pointer :: gddefsub
@@ -223,7 +220,6 @@ module globaldata
        type (sv_postpr)   , pointer :: gdpostpr
        type (sv_restart)  , pointer :: gdrestart
        type (sv_rtc)      , pointer :: gdrtc
-       type (sv_shearx)   , pointer :: gdshearx
        type (sv_snel)     , pointer :: gdsnel
        type (timerstype)  , pointer :: gdtimers
        type (sv_tricom)   , pointer :: gdtricom
