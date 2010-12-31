@@ -287,19 +287,19 @@ subroutine erosilt(nmmax   ,icx     ,icy     ,kcs     ,kfs     ,kfu     , &
        ! combined waves and currents on rough and smoooth beds"
        ! Estproc report TR137, 2004
        !
-       if (.not. bsskin) then
-          !
-          ! use max bed shear stress, rather than mean
-          !
-          taub = taubmx(nm)
-       else
+       if (bsskin) then
           !
           ! Compute bed stress resulting from skin friction
           !
           call compbsskin   (um      , vm        , h1      , wave    , &
                            & uorb(nm), tp  (nm)  , teta(nm), kssilt  , &
-                           & kssand  , thcmud(nm), taub    , rhow    , &
+                           & kssand  , thcmud(nm), taub    , rhowat(nm,kmax), &
                            & vicmol  )
+       else
+          !
+          ! use max bed shear stress, rather than mean
+          !
+          taub = taubmx(nm)
        endif
        !
        thick0 = thick(kmax) * max(0.01_fp , s0(nm)+real(dps(nm),fp))
