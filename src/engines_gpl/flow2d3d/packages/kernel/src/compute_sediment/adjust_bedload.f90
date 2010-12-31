@@ -54,18 +54,15 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
     real(fp)      , dimension(:)     , pointer :: rhosol
     real(fp)      , dimension(:)     , pointer :: sedd50
     real(fp)      , dimension(:)     , pointer :: sedd50fld
-    real(fp)      , dimension(:)     , pointer :: taucr
     character(4)  , dimension(:)     , pointer :: sedtyp
     real(fp)                         , pointer :: alfabs
     real(fp)                         , pointer :: alfabn
-    real(fp)                         , pointer :: bed
     real(fp)                         , pointer :: ashld
     real(fp)                         , pointer :: bshld
     real(fp)                         , pointer :: cshld
     real(fp)                         , pointer :: dshld
     real(fp)                         , pointer :: alfpa
     real(fp)                         , pointer :: thcrpa
-    integer                          , pointer :: i50
     integer                          , pointer :: islope
     real(fp)                         , pointer :: eps
 !
@@ -148,18 +145,15 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
     rhosol              => gdp%gdsedpar%rhosol
     sedd50              => gdp%gdsedpar%sedd50
     sedd50fld           => gdp%gdsedpar%sedd50fld
-    taucr               => gdp%gdsedpar%taucr
     sedtyp              => gdp%gdsedpar%sedtyp
     alfabs              => gdp%gdmorpar%alfabs
     alfabn              => gdp%gdmorpar%alfabn
-    bed                 => gdp%gdmorpar%bed
     ashld               => gdp%gdmorpar%ashld
     bshld               => gdp%gdmorpar%bshld
     cshld               => gdp%gdmorpar%cshld
     dshld               => gdp%gdmorpar%dshld
     alfpa               => gdp%gdmorpar%alfpa
     thcrpa              => gdp%gdmorpar%thcrpa
-    i50                 => gdp%gdmorpar%i50
     islope              => gdp%gdmorpar%islope
     eps                 => gdp%gdconst%eps
     !

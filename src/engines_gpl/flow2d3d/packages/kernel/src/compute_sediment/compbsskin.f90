@@ -1,5 +1,6 @@
 subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
-                     & teta  , kssilt, kssand, thcmud, taumax, gdp   )
+                     & teta  , kssilt, kssand, thcmud, taumax, rhow  , &
+                     & vicmol)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -52,18 +53,7 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
     use precision
     use mathconsts
     !
-    use globaldata
-    !
     implicit none
-    !
-    type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    real(fp)               , pointer :: rhow
-    real(fp)               , pointer :: z0
-    real(fp)               , pointer :: vicmol
-    real(fp)               , pointer :: eps
 !
 ! Local parameters
 !
@@ -85,6 +75,8 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
                                     !(to be replaced by mudcnt in future)
     real(fp), intent(out) :: taumax ! resulting (maximum) bed shear stress muddy silt bed
     logical , intent(in)  :: wave   ! wave impacts included in flow comp. or not
+    real(fp), intent(in)  :: rhow   ! water density
+    real(fp), intent(in)  :: vicmol ! molecular viscosity
 !
 ! Local variables
 !
@@ -120,10 +112,6 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
 !
 !! executable statements -------------------------------------------------------
 !
-    rhow      => gdp%gdphysco%rhow
-    z0        => gdp%gdphysco%z0
-    vicmol    => gdp%gdphysco%vicmol
-    eps       => gdp%gdconst%eps
     !
     ! Set constants
     !

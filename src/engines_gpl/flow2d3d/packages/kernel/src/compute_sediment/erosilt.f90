@@ -296,9 +296,10 @@ subroutine erosilt(nmmax   ,icx     ,icy     ,kcs     ,kfs     ,kfu     , &
           !
           ! Compute bed stress resulting from skin friction
           !
-          call compbsskin   (um      , vm        , h1      , wave    ,&
-                            &uorb(nm), tp  (nm)  , teta(nm), kssilt  ,&
-                            &kssand  , thcmud(nm), taub    , gdp     )
+          call compbsskin   (um      , vm        , h1      , wave    , &
+                           & uorb(nm), tp  (nm)  , teta(nm), kssilt  , &
+                           & kssand  , thcmud(nm), taub    , rhow    , &
+                           & vicmol  )
        endif
        !
        thick0 = thick(kmax) * max(0.01_fp , s0(nm)+real(dps(nm),fp))
