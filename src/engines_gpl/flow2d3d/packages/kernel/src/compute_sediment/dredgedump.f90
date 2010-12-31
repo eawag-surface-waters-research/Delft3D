@@ -1,5 +1,4 @@
-subroutine dredgedump(dbodsd    ,cdryb     ,lsedtotparam   , &
-                    & nst       ,timhr     ,morft     , &
+subroutine dredgedump(dbodsd    ,cdryb     ,nst       ,timhr     ,morft     , &
                     & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -46,25 +45,19 @@ subroutine dredgedump(dbodsd    ,cdryb     ,lsedtotparam   , &
     !
     include 'fsm.i'
     include 'tri-dyn.igd'
-    integer , pointer :: c
-    integer , pointer :: dp
     integer , pointer :: dps
     integer , pointer :: s1
-    integer , pointer :: kfs
     integer , pointer :: kfsed
-    integer , pointer :: mmax
     integer , pointer :: nmmax
-    integer , pointer :: lsed
     integer , pointer :: lsedtot
 !
 ! Global variables
 !
     integer                                            , intent(in) :: nst
-    integer                                            , intent(in) :: lsedtotparam ! Copy of lsedtot
     real(hp)                                           , intent(in) :: morft
     real(fp)                                           , intent(in) :: timhr
-    real(fp), dimension(lsedtotparam)                  , intent(in) :: cdryb   !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, lsedtotparam)        :: dbodsd  !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%lsedtot)                 , intent(in) :: cdryb   !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, gdp%d%lsedtot)       :: dbodsd  !  Description and declaration in rjdim.f90
 !
 ! Local variables
 !
@@ -72,15 +65,10 @@ subroutine dredgedump(dbodsd    ,cdryb     ,lsedtotparam   , &
 !
 !! executable statements -------------------------------------------------------
 !
-    mmax      => gdp%d%mmax
     nmmax     => gdp%d%nmmax
-    lsed      => gdp%d%lsed
     lsedtot   => gdp%d%lsedtot
-    c         => gdp%gdr_i_ch%c
-    dp        => gdp%gdr_i_ch%dp
     dps       => gdp%gdr_i_ch%dps
     s1        => gdp%gdr_i_ch%s1
-    kfs       => gdp%gdr_i_ch%kfs
     kfsed     => gdp%gdr_i_ch%kfsed
     !
     morhr = real(morft*24.0_hp,fp)
