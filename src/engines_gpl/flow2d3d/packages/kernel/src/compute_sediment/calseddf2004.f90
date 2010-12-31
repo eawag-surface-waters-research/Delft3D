@@ -3,8 +3,8 @@ subroutine calseddf2004(ustarc    ,ws        ,tp        ,hrms      ,h1        , 
                       & tauwav    ,tauc      ,ltur      ,delw      ,rhowat    , &
                       & uwbih     ,aks       ,ce_nm     ,ce_nmtmp  ,deltas    , &
                       & akstmp    ,d50       ,sa        ,ws0       ,fdamp     , &
-                      & psi       ,epsbed    ,epsmax    ,epsmxc    ,nm        , &
-                      & gdp       )
+                      & psi       ,epsbed    ,epsmax    ,epsmxc    ,epspar    , &
+                      & eps       ,dsand     ,bed       ,vonkar    ,wave      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -42,23 +42,7 @@ subroutine calseddf2004(ustarc    ,ws        ,tp        ,hrms      ,h1        , 
     use precision
     use mathconsts
     !
-    use globaldata
-    !
     implicit none
-    !
-    type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    real(fp)               , pointer :: eps
-    real(fp)               , pointer :: dsand
-    real(fp)               , pointer :: bed
-    logical                , pointer :: epspar
-    real(fp)               , pointer :: rhow
-    real(fp)               , pointer :: vonkar
-    logical                , pointer :: const
-    logical                , pointer :: wave
-    logical                , pointer :: sedim
 !
 ! Global variables
 !
@@ -87,7 +71,12 @@ subroutine calseddf2004(ustarc    ,ws        ,tp        ,hrms      ,h1        , 
     real(fp), dimension(0:kmax), intent(in)  :: ws     !  Description and declaration in rjdim.f90
     real(fp), dimension(kmax)  , intent(in)  :: sig    !  Description and declaration in rjdim.f90
     real(fp), dimension(kmax)  , intent(in)  :: thick  !  Description and declaration in rjdim.f90
-    integer                                  :: nm
+    real(fp)                   , intent(in)  :: eps
+    real(fp)                   , intent(in)  :: dsand
+    real(fp)                   , intent(in)  :: bed
+    real(fp)                   , intent(in)  :: vonkar
+    logical                    , intent(in)  :: epspar
+    logical                    , intent(in)  :: wave
 !
 ! Local variables
 !
@@ -127,16 +116,6 @@ subroutine calseddf2004(ustarc    ,ws        ,tp        ,hrms      ,h1        , 
 !
 !! executable statements -------------------------------------------------------
 !
-    eps      => gdp%gdconst%eps
-    dsand    => gdp%gdmorpar%dsand
-    bed      => gdp%gdmorpar%bed
-    epspar   => gdp%gdmorpar%epspar
-    rhow     => gdp%gdphysco%rhow
-    vonkar   => gdp%gdphysco%vonkar
-    const    => gdp%gdprocs%const
-    wave     => gdp%gdprocs%wave
-    sedim    => gdp%gdprocs%sedim
-
     cmaxs = 0.65_fp
     cmax  = min(max((d50/dsand)*cmaxs , 0.05_fp) , cmaxs)
     ffloc = 1.0_fp

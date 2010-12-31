@@ -1,6 +1,7 @@
 subroutine trab11(kode      ,ntrsi     ,u         ,v         ,hrms      , &
                 & h         ,tp        ,d50       ,par       ,sbotx     , &
-                & sboty     ,ssusx     ,ssusy     ,ubot      ,gdp       )
+                & sboty     ,ssusx     ,ssusy     ,ubot      ,vonkar    , &
+                & ubot_from_com        )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -36,15 +37,8 @@ subroutine trab11(kode      ,ntrsi     ,u         ,v         ,hrms      , &
 !!--declarations----------------------------------------------------------------
     use precision
     use mathconsts
-    use globaldata
     !
     implicit none
-    !
-    type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    logical                  , pointer :: ubot_from_com
 !
 ! Global variables
 !
@@ -62,6 +56,8 @@ subroutine trab11(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     real(fp)               , intent(in)  :: u
     real(fp)               , intent(in)  :: v
     real(fp), dimension(30), intent(in)  :: par
+    real(fp)               , intent(in)  :: vonkar
+    logical                , intent(in)  :: ubot_from_com
 !
 ! Local variables
 !
@@ -81,14 +77,11 @@ subroutine trab11(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     real(fp)                       :: uorb       !  orbital velocity at the bottom layer
     real(fp)                       :: urms
     real(fp)                       :: utot       ! flow velocity
-    real(fp)                       :: vonkar
     real(fp)                       :: z0
 !
 !
 !! executable statements -------------------------------------------------------
 !
-    ubot_from_com   => gdp%gdprocs%ubot_from_com
-    !
     if (kode== - 1) then
        return
     endif
@@ -100,7 +93,6 @@ subroutine trab11(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     sboty = 0.0
     ssusx = 0.0
     ssusy = 0.0
-    vonkar = 0.4
     ag = par(1)
     delta = par(4)
     rnu = par(5)

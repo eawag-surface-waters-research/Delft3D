@@ -1,5 +1,5 @@
 subroutine tranb7(kode      ,ntrsi     ,utot      ,d50       ,d90       , &
-                & h         ,par       ,sbot      ,ssus      )
+                & h         ,par       ,sbot      ,ssus      ,vonkar    )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -39,20 +39,21 @@ subroutine tranb7(kode      ,ntrsi     ,utot      ,d50       ,d90       , &
 !
 ! Global variables
 !
-    integer            , intent(in)  :: kode  ! indicates active grid point
-                                              !    = 0 active point
-                                              !    < 0 point not used now
-    integer            , intent(out) :: ntrsi ! indicator for output representation
-                                              !    of sediment transport.
-                                              !    =1 :  magnitude of transport
-                                              !    =2 :  components of transport
-    real(fp)           , intent(in)  :: d50   ! grain size diameter (first specified diameter)
-    real(fp)           , intent(in)  :: d90   ! grain size diameter (first specified diameter)
-    real(fp)           , intent(in)  :: h     ! water depth
-    real(fp)           , intent(out) :: sbot  ! bed load transport
-    real(fp)           , intent(out) :: ssus  ! suspended sediment transport
-    real(fp)           , intent(in)  :: utot  ! flow velocity
+    integer                , intent(in)  :: kode  ! indicates active grid point
+                                                  !    = 0 active point
+                                                  !    < 0 point not used now
+    integer                , intent(out) :: ntrsi ! indicator for output representation
+                                                  !    of sediment transport.
+                                                  !    =1 :  magnitude of transport
+                                                  !    =2 :  components of transport
+    real(fp)               , intent(in)  :: d50   ! grain size diameter (first specified diameter)
+    real(fp)               , intent(in)  :: d90   ! grain size diameter (first specified diameter)
+    real(fp)               , intent(in)  :: h     ! water depth
+    real(fp)               , intent(out) :: sbot  ! bed load transport
+    real(fp)               , intent(out) :: ssus  ! suspended sediment transport
+    real(fp)               , intent(in)  :: utot  ! flow velocity
     real(fp), dimension(30), intent(in)  :: par   ! sediment parameter list
+    real(fp)               , intent(in)  :: vonkar
 !
 ! Local variables
 !
@@ -65,11 +66,10 @@ subroutine tranb7(kode      ,ntrsi     ,utot      ,d50       ,d90       , &
     real(fp)       :: dstar
     real(fp)       :: fc
     real(fp)       :: ff     ! coriolis coefficient
-    real(fp)       :: g      ! gravity acceleration
+    real(fp)       :: ag     ! gravity acceleration
     real(fp)       :: psi
     real(fp)       :: rhos   ! density of sediment
     real(fp)       :: rhow   ! density of water
-    real(fp)       :: rkap
     real(fp)       :: rksc
     real(fp)       :: rmuc
     real(fp)       :: rnu    ! laminar viscosity of water
@@ -78,7 +78,7 @@ subroutine tranb7(kode      ,ntrsi     ,utot      ,d50       ,d90       , &
     real(fp)       :: tbce
     real(fp)       :: tbcr
     real(fp)       :: thetcr
-    real(fp)       :: uster
+    real(fp)       :: ustar
     real(fp)       :: ws     ! settling velocity
     real(fp)       :: zc
     real(fp), external :: shld
@@ -93,7 +93,7 @@ subroutine tranb7(kode      ,ntrsi     ,utot      ,d50       ,d90       , &
        return
     endif
     !
-    g = par(1)
+    ag = par(1)
     rhow = par(2)
     rhos = par(3)
     rnu = par(5)
@@ -109,26 +109,25 @@ subroutine tranb7(kode      ,ntrsi     ,utot      ,d50       ,d90       , &
     endif
     !
     a = rksc
-    dstar = d50*(del*g/rnu/rnu)**(1./3.)
+    dstar = d50*(del*ag/rnu/rnu)**(1./3.)
     !
     rmuc = (log10(12.*h/rksc)/log10(12.*h/3./d90))**2
     fc = .24*(log10(12.*h/rksc))**( - 2)
     tbc = .125*rhow*fc*utot**2
     tbce = rmuc*tbc
     thetcr = shld(dstar)
-    tbcr = (rhos - rhow)*g*d50*thetcr
+    tbcr = (rhos - rhow)*ag*d50*thetcr
     t = (tbce - tbcr)/tbcr
     !
     if (t<.000001) t = .000001
     ca = .015*alf1*d50/a*t**1.5/dstar**.3
-    rkap = .4
     !
-    uster = sqrt(.125*fc)*utot
+    ustar = sqrt(.125*fc)*utot
     zc = 0.
-    beta = 1. + 2.*(ws/uster)**2
+    beta = 1. + 2.*(ws/ustar)**2
     beta = min(beta, 1.5_fp)
-    psi = 2.5*(ws/uster)**0.8*(ca/0.65)**0.4
-    if (uster>0.) zc = ws/rkap/uster/beta + psi
+    psi = 2.5*(ws/ustar)**0.8*(ca/0.65)**0.4
+    if (ustar>0.) zc = ws/vonkar/ustar/beta + psi
     if (zc>20.) zc = 20.
     ah = a/h
     fc = 0.
@@ -141,8 +140,8 @@ subroutine tranb7(kode      ,ntrsi     ,utot      ,d50       ,d90       , &
     ssus = ff*utot*h*ca
     !
     if (t<3.) then
-       sbot = 0.053*(del)**0.5*sqrt(g)*d50**1.5*dstar**( - 0.3)*t**2.1
+       sbot = 0.053*(del)**0.5*sqrt(ag)*d50**1.5*dstar**( - 0.3)*t**2.1
     else
-       sbot = 0.100*(del)**0.5*sqrt(g)*d50**1.5*dstar**( - 0.3)*t**1.5
+       sbot = 0.100*(del)**0.5*sqrt(ag)*d50**1.5*dstar**( - 0.3)*t**1.5
     endif
 end subroutine tranb7

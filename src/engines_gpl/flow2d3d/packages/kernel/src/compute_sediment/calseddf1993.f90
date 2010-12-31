@@ -1,7 +1,7 @@
 subroutine calseddf1993(ustarc    ,ws        ,tp        ,delr      ,dstar     , &
                       & uwb       ,hrms      ,h1        ,seddif    ,kmax      , &
                       & sig       ,thick     ,dicww     ,tauwav    ,tauc      , &
-                      & ltur      ,gdp       )
+                      & ltur      ,eps       ,vonkar    ,wave      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -37,20 +37,8 @@ subroutine calseddf1993(ustarc    ,ws        ,tp        ,delr      ,dstar     , 
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use globaldata
     !
     implicit none
-    !
-    type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    real(fp)               , pointer :: eps
-    real(fp)               , pointer :: bed
-    real(fp)               , pointer :: vonkar
-    logical                , pointer :: const
-    logical                , pointer :: wave
-    logical                , pointer :: sedim
 !
 ! Global variables
 !
@@ -70,6 +58,9 @@ subroutine calseddf1993(ustarc    ,ws        ,tp        ,delr      ,dstar     , 
     real(fp), dimension(0:kmax), intent(in)  :: ws     !  Description and declaration in rjdim.f90
     real(fp), dimension(kmax)  , intent(in)  :: sig    !  Description and declaration in rjdim.f90
     real(fp), dimension(kmax)  , intent(in)  :: thick  !  Description and declaration in rjdim.f90
+    real(fp)                   , intent(in)  :: eps
+    real(fp)                   , intent(in)  :: vonkar
+    logical                    , intent(in)  :: wave
 !
 ! Local variables
 !
@@ -86,12 +77,6 @@ subroutine calseddf1993(ustarc    ,ws        ,tp        ,delr      ,dstar     , 
 !
 !! executable statements -------------------------------------------------------
 !
-    eps                 => gdp%gdconst%eps
-    bed                 => gdp%gdmorpar%bed
-    vonkar              => gdp%gdphysco%vonkar
-    const               => gdp%gdprocs%const
-    wave                => gdp%gdprocs%wave
-    sedim               => gdp%gdprocs%sedim
     !
     ! **** CALCULATE VERTICAL SEDIMENT DIFFUSION COEFFICIENT ****
     !

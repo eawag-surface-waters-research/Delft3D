@@ -1,7 +1,7 @@
 subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
                 & d90       ,chezy     ,h         ,hrms      ,tp        , &
                 & dir       ,par       ,dzdx      ,dzdy      ,sbotx     , &
-                & sboty     ,ssusx     ,ssusy     ,cesus     )
+                & sboty     ,ssusx     ,ssusy     ,cesus     ,vonkar    )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -62,6 +62,7 @@ subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
     real(fp)               , intent(in)  :: v
     real(fp)                             :: hrms
     real(fp), dimension(30), intent(in)  :: par
+    real(fp)               , intent(in)  :: vonkar
 !
 ! Local variables
 !
@@ -90,7 +91,6 @@ subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
     real(fp)                       :: ri1
     real(fp)                       :: ri2
     real(fp)                       :: rk
-    real(fp)                       :: rkappa
     real(fp)                       :: rkh
     real(fp)                       :: rmu
     real(fp)                       :: sbeta
@@ -107,7 +107,7 @@ subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
     real(fp)                       :: uuvar                ! marginal depths in tidal flats
     real(fp)                       :: uxmean
     real(fp)                       :: uymean
-    real(fp)                       :: vster
+    real(fp)                       :: vstar
     real(fp)                       :: w                    ! flow velocity in z
     real(fp)                       :: z
     real(fp)                       :: zfact
@@ -199,9 +199,8 @@ subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
        arga = -.27*delta*d50*c*c/(rmu*uuvar)
        arga = max(arga, -50.0_fp)
        arga = min(arga, 50.0_fp)
-       vster = sqrt(cf)*sqrt(uuvar)
-       rkappa = .4
-       z = w/rkappa/vster
+       vstar = sqrt(cf)*sqrt(uuvar)
+       z = w/vonkar/vstar
        z = min(z, 8.0_fp)
     else
        arga = -50.0

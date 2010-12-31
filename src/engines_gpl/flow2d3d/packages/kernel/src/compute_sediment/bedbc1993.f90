@@ -1,10 +1,11 @@
-subroutine bedbc1993(nm        ,tp        ,uorb      , &
-                   & rhowat    ,h1        ,umod      , &
+subroutine bedbc1993(tp        ,uorb      ,rhowat    ,h1        ,umod      , &
                    & zumod     ,d50       ,d90       ,z0cur     ,z0rou     , &
                    & dstar     ,taucr     ,aks       ,usus      ,zusus     , &
                    & uwb       ,delr      ,muc       ,tauwav    ,ustarc    , &
                    & tauc      ,taubcw    ,taurat    ,ta        ,ce_nm     , &
-                   & dss       ,mudfrac   ,gdp       )
+                   & dss       ,mudfrac   ,eps       ,aksfac    ,rwave     , &
+                   & camax     ,rdc       ,rdw       ,iopkcw    ,iopsus    , &
+                   & vonkar    ,wave      ,tauadd    )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -41,35 +42,11 @@ subroutine bedbc1993(nm        ,tp        ,uorb      , &
 !!--declarations----------------------------------------------------------------
     use precision
     use mathconsts
-    use globaldata
     !
     implicit none
-    !
-    type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    real(fp)               , pointer :: eps
-    real(fp)               , pointer :: aksfac
-    real(fp)               , pointer :: rwave
-    real(fp)               , pointer :: camax
-    real(fp)               , pointer :: rdc
-    real(fp)               , pointer :: rdw
-    integer                , pointer :: iopkcw
-    integer                , pointer :: iopsus
-    real(fp)               , pointer :: rhow
-    real(fp)               , pointer :: z0
-    real(fp)               , pointer :: vonkar
-    logical                , pointer :: const
-    logical                , pointer :: wave
-    logical                , pointer :: sedim
-    logical                , pointer :: scour
-    real(fp), dimension(:) , pointer :: factor
-    real(fp)               , pointer :: slope
 !
 ! Global variables
 !
-    integer , intent(in)  :: nm
     real(fp)              :: aks    !  Description and declaration in rjdim.f90
     real(fp)              :: ce_nm
     real(fp), intent(in)  :: d50
@@ -97,6 +74,17 @@ subroutine bedbc1993(nm        ,tp        ,uorb      , &
     real(fp), intent(in)  :: z0rou
     real(fp), intent(in)  :: zumod
     real(fp)              :: zusus
+    real(fp), intent(in)  :: eps
+    real(fp), intent(in)  :: aksfac
+    real(fp), intent(in)  :: rwave
+    real(fp), intent(in)  :: camax
+    real(fp), intent(in)  :: rdc
+    real(fp), intent(in)  :: rdw
+    integer , intent(in)  :: iopkcw
+    integer , intent(in)  :: iopsus
+    real(fp), intent(in)  :: vonkar
+    logical , intent(in)  :: wave
+    real(fp), intent(in)  :: tauadd
 !
 ! Local variables
 !
@@ -112,29 +100,10 @@ subroutine bedbc1993(nm        ,tp        ,uorb      , &
     real(fp) :: ra
     real(fp) :: rc
     real(fp) :: rw
-    real(fp) :: tauadd
     real(fp) :: taucr1   ! critical shear stress corrected for mud fraction
 !
 !! executable statements -------------------------------------------------------
 !
-    const               => gdp%gdprocs%const
-    wave                => gdp%gdprocs%wave
-    sedim               => gdp%gdprocs%sedim
-    aksfac              => gdp%gdmorpar%aksfac
-    rwave               => gdp%gdmorpar%rwave
-    camax               => gdp%gdmorpar%camax
-    rdc                 => gdp%gdmorpar%rdc
-    rdw                 => gdp%gdmorpar%rdw
-    iopkcw              => gdp%gdmorpar%iopkcw
-    iopsus              => gdp%gdmorpar%iopsus
-    rhow                => gdp%gdphysco%rhow
-    z0                  => gdp%gdphysco%z0
-    vonkar              => gdp%gdphysco%vonkar
-    eps                 => gdp%gdconst%eps
-    scour               => gdp%gdscour%scour
-    factor              => gdp%gdscour%factor
-    slope               => gdp%gdscour%slope
-    !
     delr = 0.0
     uwb  = 0.0
     !
@@ -264,12 +233,7 @@ subroutine bedbc1993(nm        ,tp        ,uorb      , &
     !
     ustarc = usus*vonkar/log(1. + zusus/z0cur)
     tauc   = rhowat*ustarc**2
-    if (scour) then
-       !
-       ! Calculate extra stress (tauadd) for point = nm,
-       ! if so required by user input.
-       !
-       call shearx(tauadd, nm, gdp)
+    if (tauadd>0.0_fp) then
        !
        ! extra stress
        !

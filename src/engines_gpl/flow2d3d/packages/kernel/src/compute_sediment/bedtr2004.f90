@@ -5,7 +5,9 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
                    & qbcu      ,qbcv      ,qbwu      ,qbwv      ,qswu      , &
                    & qswv      ,tetacr    ,aks       ,fsilt     ,sig       , &
                    & thick     ,concin    ,kmax      ,deltas    ,ws        , &
-                   & rksrs     ,dzduu     ,dzdvv     ,nm        ,gdp       )
+                   & rksrs     ,dzduu     ,dzdvv     ,rhow      , &
+                   & ag        ,bedw      ,pangle    ,fpco      ,susw      , &
+                   & dclay     ,wave      ,eps       ,subiw     ,error     )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -50,67 +52,59 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
     use precision
     use mathconsts
     !
-    use globaldata
-    !
     implicit none
-    !
-    type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    real(fp)               , pointer :: rhow
-    real(fp)               , pointer :: ag
-    real(fp)               , pointer :: bed
-    real(fp)               , pointer :: bedw
-    real(fp)               , pointer :: pangle
-    real(fp)               , pointer :: fpco
-    real(fp)               , pointer :: susw
-    real(fp)               , pointer :: dclay
-    logical                , pointer :: wave
-    real(fp)               , pointer :: eps
-    integer                , pointer :: subiw
 !
 ! Global variables
 !
-    integer, intent(in)                   :: lundia   !  Description and declaration in inout.igs
-    integer, intent(in)                   :: kmax     !  Description and declaration in inout.igs
-    integer, intent(in)                   :: nm       !  Description and declaration in inout.igs
-    real(fp), intent(in)                  :: aks
-    real(fp), intent(in)                  :: d50
-    real(fp), intent(in)                  :: d90
-    real(fp), intent(in)                  :: delm
-    real(fp), intent(in)                  :: drho
-    real(fp), intent(in)                  :: dstar
-    real(fp), intent(in)                  :: dzduu    !  Description and declaration in rjdim.f90
-    real(fp), intent(in)                  :: dzdvv    !  Description and declaration in rjdim.f90
-    real(fp), intent(in)                  :: fc1
-    real(fp), intent(in)                  :: fsilt
-    real(fp), intent(in)                  :: fw1
-    real(fp), intent(in)                  :: h1
-    real(fp), intent(in)                  :: phicur
-    real(fp), intent(out)                 :: qbcu
-    real(fp), intent(out)                 :: qbcv
-    real(fp), intent(out)                 :: qbwu
-    real(fp), intent(out)                 :: qbwv
-    real(fp), intent(out)                 :: qswu
-    real(fp), intent(out)                 :: qswv
-    real(fp), intent(in)                  :: ra
-    real(fp), intent(in)                  :: rhosol   !  Description and declaration in rjdim.f90
-    real(fp), intent(in)                  :: teta     !  Description and declaration in rjdim.f90
-    real(fp), intent(in)                  :: tetacr   !  Description and declaration in rjdim.f90
-    real(fp), intent(in)                  :: taucr
-    real(fp), intent(in)                  :: tp       !  Description and declaration in rjdim.f90
-    real(fp), intent(in)                  :: u2dh
-    real(fp), intent(in)                  :: ubw
-    real(fp), intent(in)                  :: uon  
-    real(fp), intent(in)                  :: uoff 
-    real(fp), intent(in)                  :: z0cur
-    real(fp), intent(in)                  :: rksrs
-    real(fp), intent(in)                  :: ws
-    real(fp), intent(in)                  :: deltas
-    real(fp), dimension(kmax), intent(in) :: sig      !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax), intent(in) :: thick    !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax), intent(in) :: concin
+    integer                  , intent(in)  :: lundia   !  Description and declaration in inout.igs
+    integer                  , intent(in)  :: kmax     !  Description and declaration in inout.igs
+    real(fp)                 , intent(in)  :: aks
+    real(fp)                 , intent(in)  :: d50
+    real(fp)                 , intent(in)  :: d90
+    real(fp)                 , intent(in)  :: delm
+    real(fp)                 , intent(in)  :: drho
+    real(fp)                 , intent(in)  :: dstar
+    real(fp)                 , intent(in)  :: dzduu    !  Description and declaration in rjdim.f90
+    real(fp)                 , intent(in)  :: dzdvv    !  Description and declaration in rjdim.f90
+    real(fp)                 , intent(in)  :: fc1
+    real(fp)                 , intent(in)  :: fsilt
+    real(fp)                 , intent(in)  :: fw1
+    real(fp)                 , intent(in)  :: h1
+    real(fp)                 , intent(in)  :: phicur
+    real(fp)                 , intent(out) :: qbcu
+    real(fp)                 , intent(out) :: qbcv
+    real(fp)                 , intent(out) :: qbwu
+    real(fp)                 , intent(out) :: qbwv
+    real(fp)                 , intent(out) :: qswu
+    real(fp)                 , intent(out) :: qswv
+    real(fp)                 , intent(in)  :: ra
+    real(fp)                 , intent(in)  :: rhosol   !  Description and declaration in rjdim.f90
+    real(fp)                 , intent(in)  :: teta     !  Description and declaration in rjdim.f90
+    real(fp)                 , intent(in)  :: tetacr   !  Description and declaration in rjdim.f90
+    real(fp)                 , intent(in)  :: taucr
+    real(fp)                 , intent(in)  :: tp       !  Description and declaration in rjdim.f90
+    real(fp)                 , intent(in)  :: u2dh
+    real(fp)                 , intent(in)  :: ubw
+    real(fp)                 , intent(in)  :: uon  
+    real(fp)                 , intent(in)  :: uoff 
+    real(fp)                 , intent(in)  :: z0cur
+    real(fp)                 , intent(in)  :: rksrs
+    real(fp)                 , intent(in)  :: ws
+    real(fp)                 , intent(in)  :: deltas
+    real(fp), dimension(kmax), intent(in)  :: sig      !  Description and declaration in rjdim.f90
+    real(fp), dimension(kmax), intent(in)  :: thick    !  Description and declaration in rjdim.f90
+    real(fp), dimension(kmax), intent(in)  :: concin
+    real(fp)                 , intent(in)  :: rhow
+    real(fp)                 , intent(in)  :: ag
+    real(fp)                 , intent(in)  :: bedw
+    real(fp)                 , intent(in)  :: pangle
+    real(fp)                 , intent(in)  :: fpco
+    real(fp)                 , intent(in)  :: susw
+    real(fp)                 , intent(in)  :: dclay
+    logical                  , intent(in)  :: wave
+    real(fp)                 , intent(in)  :: eps
+    integer                  , intent(in)  :: subiw
+    logical                  , intent(out) :: error
 !
 ! Local variables
 !
@@ -172,19 +166,7 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
 !
 !! executable statements -------------------------------------------------------
 !
-    wave    => gdp%gdprocs%wave
-    dclay   => gdp%gdmorpar%dclay
-    bed     => gdp%gdmorpar%bed
-    susw    => gdp%gdmorpar%susw
-    rhow    => gdp%gdphysco%rhow
-    ag      => gdp%gdphysco%ag
-    eps     => gdp%gdconst%eps
-    bedw    => gdp%gdmorpar%bedw
-    pangle  => gdp%gdmorpar%pangle
-    fpco    => gdp%gdmorpar%fpco
-    subiw   => gdp%gdmorpar%subiw
-    susw    => gdp%gdmorpar%susw
-    dclay   => gdp%gdmorpar%dclay
+    error = .false.
     !
     ! CALCULATE BED LOAD TRANSPORT
     ! Based on intra-wave near bed velocity signal of Isobe-Horikawa
@@ -319,7 +301,8 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
        else
           write(message,'(a,e12.4,a)') 'd50 < ', dclay, ' not allowed'
           call prterr(lundia, 'P004', trim(message))
-          call d3stop(1, gdp)
+          error = .true.
+          return
        endif
        !
        ! Suspended transport qswu/v due to waves, oriented in wave

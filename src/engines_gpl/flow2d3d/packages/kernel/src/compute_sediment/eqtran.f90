@@ -72,10 +72,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     real(fp)                             , pointer :: susw
     real(fp)                             , pointer :: bedw
     real(fp)                             , pointer :: espir
-    integer                              , pointer :: i50
-    integer                              , pointer :: nxx
-    real(fp)              , dimension(:) , pointer :: xx
-    logical                              , pointer :: multi
     real(fp)                             , pointer :: rhow
     real(fp)                             , pointer :: ag
     real(fp)                             , pointer :: z0
@@ -86,9 +82,21 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     logical                              , pointer :: sedim
     logical                              , pointer :: scour
     logical                              , pointer :: epspar
-    real(fp), dimension(:)               , pointer :: factor
-    real(fp)                             , pointer :: slope
+    logical                              , pointer :: ubot_from_com
     real(fp)                             , pointer :: timsec
+    real(fp)                             , pointer :: camax
+    real(fp)                             , pointer :: dclay
+    real(fp)                             , pointer :: dsilt
+    real(fp)                             , pointer :: dsand
+    real(fp)                             , pointer :: aksfac
+    real(fp)                             , pointer :: rwave
+    real(fp)                             , pointer :: rdc
+    real(fp)                             , pointer :: rdw
+    real(fp)                             , pointer :: pangle
+    real(fp)                             , pointer :: fpco
+    integer                              , pointer :: iopsus
+    integer                              , pointer :: iopkcw
+    integer                              , pointer :: subiw
 !
 ! Global variables
 !
@@ -177,7 +185,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
 ! Local variables
 !
     integer           :: kvalue    
-    integer           :: error
+    integer           :: ierror
     integer           :: k
     integer           :: kode      ! ancient flag: always equal to 1
     integer           :: ntrsi     ! ancient flag: superceded by sbc_total/sus_total
@@ -238,6 +246,8 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     real(fp)          :: epsbed
     real(fp)          :: epsmax
     real(fp)          :: epsmxc
+    real(fp)          :: tauadd
+    logical           :: error
  
     ! Interface to dll is in High precision!
     !
@@ -276,10 +286,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     susw                => gdp%gdmorpar%susw
     bedw                => gdp%gdmorpar%bedw
     espir               => gdp%gdmorpar%espir
-    i50                 => gdp%gdmorpar%i50
-    nxx                 => gdp%gdmorpar%nxx
-    xx                  => gdp%gdmorpar%xx
-    multi               => gdp%gdmorpar%multi
     epspar              => gdp%gdmorpar%epspar 
     rhow                => gdp%gdphysco%rhow
     ag                  => gdp%gdphysco%ag
@@ -290,14 +296,26 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     wave                => gdp%gdprocs%wave
     sedim               => gdp%gdprocs%sedim
     scour               => gdp%gdscour%scour
-    factor              => gdp%gdscour%factor
-    slope               => gdp%gdscour%slope
     timsec              => gdp%gdinttim%timsec
+    camax               => gdp%gdmorpar%camax
+    dclay               => gdp%gdmorpar%dclay
+    dsilt               => gdp%gdmorpar%dsilt
+    dsand               => gdp%gdmorpar%dsand
+    aksfac              => gdp%gdmorpar%aksfac
+    rwave               => gdp%gdmorpar%rwave
+    rdc                 => gdp%gdmorpar%rdc
+    rdw                 => gdp%gdmorpar%rdw
+    pangle              => gdp%gdmorpar%pangle
+    fpco                => gdp%gdmorpar%fpco
+    iopsus              => gdp%gdmorpar%iopsus
+    iopkcw              => gdp%gdmorpar%iopkcw
+    subiw               => gdp%gdmorpar%subiw
+    ubot_from_com       => gdp%gdprocs%ubot_from_com
     !
     ! set camax
     !
     cmx       = 0.65_fp
-    error     = 0
+    ierror    = 0
     equi_conc = .false.
     sbc_total = .false.
     sus_total = .false.
@@ -323,6 +341,16 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     par(4,ised) = (rhosol-rhow) / rhow
     par(6,ised) = di50
     !
+    if (scour) then
+       !
+       ! Calculate extra stress (tauadd) for point = nm,
+       ! if so required by user input.
+       !
+       call shearx(tauadd, nm, gdp)
+    else
+       tauadd = 0.0_fp
+    endif
+    !
     dzdx=dzduu
     dzdy=dzdvv
     if (suspfrac) then
@@ -330,7 +358,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        ! Suspended sediment (mud or sand)
        !
        if (iform(ised) == -2) then
-          call bedbc2004(nm        ,tp        ,rhosol    ,rhowat    , &
+          call bedbc2004(tp        ,rhosol    ,rhowat    , &
                        & h1        ,umod      ,d10       ,zumod     ,di50      , &
                        & d90       ,z0cur     ,z0rou     ,drho      ,dstar     , &
                        & taucr0    ,u2dhim    ,aks       ,ra        ,usus      , &
@@ -340,15 +368,17 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
                        & hrms      ,delw      ,uon       ,uoff      ,uwbih     , &
                        & delm      ,fc1       ,fw1       ,phicur    ,rksrs     , &
                        & i2d3d     ,mudfrac   ,fsilt     ,taucr1    ,psi       , &
-                       & dzduu     ,dzdvv     ,gdp       )
+                       & dzduu     ,dzdvv     ,eps       ,camax     ,dsilt     , &
+                       & dsand     ,iopsus    ,ag        ,wave      ,tauadd    ) 
        else
-          call bedbc1993(nm        ,tp        ,uorb      , &
-                       & rhowat    ,h1        ,umod      , &
+          call bedbc1993(tp        ,uorb      ,rhowat    ,h1        ,umod      , &
                        & zumod     ,di50      ,d90       ,z0cur     ,z0rou     , &
                        & dstar     ,taucr0    ,aks       ,usus      ,zusus     , &
                        & uwb       ,delr      ,muc       ,tauwav    ,ustarc    , &
                        & tauc      ,taubcw    ,taurat    ,ta        ,ce_nm     , &
-                       & dss       ,mudfrac   ,gdp       )
+                       & dss       ,mudfrac   ,eps       ,aksfac    ,rwave     , &
+                       & camax     ,rdc       ,rdw       ,iopkcw    ,iopsus    , &
+                       & vonkar    ,wave      ,tauadd    )
        endif
        !
        ! Find bottom cell for SAND sediment calculations and store for use
@@ -393,8 +423,8 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
                              & tauwav    ,tauc      ,ltur      ,delw      ,rhowat    , &
                              & uwbih     ,aks       ,ce_nm     ,ce_nmtmp  ,deltas    , &
                              & akstmp    ,di50      ,sa        ,ws0       ,fdamp     , &
-                             & psi       ,epsbed    ,epsmax    ,epsmxc    ,nm        , &
-                             & gdp       )
+                             & psi       ,epsbed    ,epsmax    ,epsmxc    ,epspar    , &
+                             & eps       ,dsand     ,bed       ,vonkar    ,wave      )
           else
              do k=1, kmax
                 seddif(k) = dicww(k)
@@ -404,7 +434,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
           call calseddf1993(ustarc    ,ws        ,tp        ,delr      ,dstar     , &
                           & uwb       ,hrms      ,h1        ,seddif    ,kmax      , &
                           & sig       ,thick     ,dicww     ,tauwav    ,tauc      , &
-                          & ltur      ,gdp       )
+                          & ltur      ,eps       ,vonkar    ,wave      )
        endif
        !
        ! Calculate equilibrium concentration profile for sediment
@@ -617,7 +647,9 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
                        & h1        ,taurat    ,ustarc    ,muc       ,rhosol    , &
                        & dstar     ,ws(1)     ,hrms      ,tp        ,teta      , &
                        & rlabda    ,umod      ,sbcu      ,sbcv      ,sbwu      , &
-                       & sbwv      ,sswu      ,sswv      ,lundia    ,gdp       )
+                       & sbwv      ,sswu      ,sswv      ,lundia    ,rhow      , &
+                       & ag        ,wave      ,eps       ,error     )
+          if (error) call d3stop(1, gdp)
        endif
        sbc_total = .false.
        sus_total = .false.
@@ -626,14 +658,17 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        ! VAN RIJN 2004 Instantaneous bed load
        !
        if ((bed>0.0_fp .or. bedw>0.0_fp .or. susw>0.0_fp) .and. ce_nm>0.0_fp) then
-            call bedtr2004(u2dhim    ,di50      ,d90       ,h1        ,rhosol    , &
-                         & tp        ,teta      ,lundia    ,uon       ,uoff      , &
-                         & uwb       ,taucr1    ,delm      ,ra        ,z0cur     , &
-                         & fc1       ,fw1       ,dstar     ,drho      ,phicur    , &
-                         & sbcu      ,sbcv      ,sbwu      ,sbwv      ,sswu      , &
-                         & sswv      ,tetacr    ,aks       ,fsilt     ,sig       , &
-                         & thick     ,concin    ,kmax      ,deltas    ,ws(1)     , &
-                         & rksrs     ,dzduu     ,dzdvv     ,nm        ,gdp       )                        
+          call bedtr2004(u2dhim    ,di50      ,d90       ,h1        ,rhosol    , &
+                       & tp        ,teta      ,lundia    ,uon       ,uoff      , &
+                       & uwb       ,taucr1    ,delm      ,ra        ,z0cur     , &
+                       & fc1       ,fw1       ,dstar     ,drho      ,phicur    , &
+                       & sbcu      ,sbcv      ,sbwu      ,sbwv      ,sswu      , &
+                       & sswv      ,tetacr    ,aks       ,fsilt     ,sig       , &
+                       & thick     ,concin    ,kmax      ,deltas    ,ws(1)     , &
+                       & rksrs     ,dzduu     ,dzdvv     ,rhow      , &
+                       & ag        ,bedw      ,pangle    ,fpco      ,susw      , &
+                       & dclay     ,wave      ,eps       ,subiw     ,error     )
+          if (error) call d3stop(1, gdp)
        endif
        sbc_total = .false.
        sus_total = .false.
@@ -689,7 +724,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        call tranb5(kode      ,ntrsi      ,u         ,v         ,di50      , &
                  & d90       ,chezy      ,h         ,hrms      ,tp        , &
                  & teta      ,par(1,ised),dzdx      ,dzdy      ,sbcu      , &
-                 & sbcv      ,ssusx      ,ssusy     ,cesus     )
+                 & sbcv      ,ssusx      ,ssusy     ,cesus     ,vonkar    )
        !
        ! transport formula will return ntrsi = 2 which means
        !
@@ -715,7 +750,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        ! Van Rijn (1984, modified)
        !
        call tranb7(kode      ,ntrsi      ,utot      ,di50      ,d90       , &
-                 & h         ,par(1,ised),sbot      ,ssus      )
+                 & h         ,par(1,ised),sbot      ,ssus      ,vonkar    )
        !
        ! transport formula will return ntrsi = 1 which means
        !
@@ -770,7 +805,8 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        call trab11(kode      ,ntrsi     ,u         ,v          ,hrms      , &
                  & h         ,tp        ,di50      ,par(1,ised),sbcu      , &
-                 & sbcv      ,ssusx     ,ssusy     ,ubot       ,gdp        )
+                 & sbcv      ,ssusx     ,ssusy     ,ubot       ,vonkar    , &
+                 & ubot_from_com        )
        !
        ! transport formula will return ntrsi = 2 which means
        !
@@ -783,7 +819,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        call trab12(kode      ,ntrsi     ,u         ,v         ,hrms       , &
                  & h         ,tp        ,teta      ,di50      ,par(1,ised), &
                  & sbcu      ,sbcv      ,ssusx     ,ssusy     ,ubot       , &
-                 & gdp        )
+                 & vonkar    ,ubot_from_com        )
        !
        ! transport formula will return ntrsi = 2 which means
        !
@@ -893,17 +929,17 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        ! psem/vsem is used to be sure this works fine in DD calculations
        !
        call psemlun
-       error = perf_function_eqtran(dll_handle(ised), dll_function(ised), &
-                                    dll_integers    , max_integers      , &
-                                    dll_reals       , max_reals         , &
-                                    dll_strings     , max_strings       , &
-                                    sbc_total, sbc_dll  , sbcu_dll      , &
-                                    sbcv_dll , sbwu_dll , sbwv_dll      , &
-                                    equi_conc, cesus_dll, ssus_dll      , &
-                                    sswu_dll , sswv_dll , t_relax_dll   , &
-                                    message)
+       ierror = perf_function_eqtran(dll_handle(ised), dll_function(ised), &
+                                     dll_integers    , max_integers      , &
+                                     dll_reals       , max_reals         , &
+                                     dll_strings     , max_strings       , &
+                                     sbc_total, sbc_dll  , sbcu_dll      , &
+                                     sbcv_dll , sbwu_dll , sbwv_dll      , &
+                                     equi_conc, cesus_dll, ssus_dll      , &
+                                     sswu_dll , sswv_dll , t_relax_dll   , &
+                                     message)
        call vsemlun
-       if (error /= 0) then
+       if (ierror /= 0) then
           write(errmsg,'(a,a,a)') 'Cannot find function "',trim(dll_function(ised)),'" in dynamic library.'
           call prterr (lundia,'U021', trim(errmsg))
           call d3stop(1, gdp)

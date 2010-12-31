@@ -2,7 +2,8 @@ subroutine bedtr1993(uuu       ,vvv       ,u2dh      ,d50       ,d90       , &
                    & h1        ,taurat    ,ustarc    ,muc       ,rhosol    , &
                    & dstar     ,ws        ,hrms      ,tp        ,teta      , &
                    & rlabda    ,umod      ,qbcu      ,qbcv      ,qbwu      , &
-                   & qbwv      ,qswu      ,qswv      ,lundia    ,gdp       )
+                   & qbwv      ,qswu      ,qswv      ,lundia    ,rhow      , &
+                   & ag        ,wave      ,eps       ,error     )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -47,19 +48,7 @@ subroutine bedtr1993(uuu       ,vvv       ,u2dh      ,d50       ,d90       , &
     use precision
     use mathconsts
     !
-    use globaldata
-    !
     implicit none
-    !
-    type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    real(fp)               , pointer :: rhow
-    real(fp)               , pointer :: ag
-    real(fp)               , pointer :: bed
-    logical                , pointer :: wave
-    real(fp)               , pointer :: eps
 !
 ! Global variables
 !
@@ -87,6 +76,11 @@ subroutine bedtr1993(uuu       ,vvv       ,u2dh      ,d50       ,d90       , &
     real(fp), intent(in)  :: uuu
     real(fp), intent(in)  :: vvv
     real(fp), intent(in)  :: ws     !  Description and declaration in rjdim.f90
+    real(fp), intent(in)  :: rhow
+    real(fp), intent(in)  :: ag
+    logical , intent(in)  :: wave
+    real(fp), intent(in)  :: eps
+    logical , intent(out) :: error
 !
 ! Local variables
 !
@@ -132,11 +126,7 @@ subroutine bedtr1993(uuu       ,vvv       ,u2dh      ,d50       ,d90       , &
 !
 !! executable statements -------------------------------------------------------
 !
-    wave                => gdp%gdprocs%wave
-    bed                 => gdp%gdmorpar%bed
-    rhow                => gdp%gdphysco%rhow
-    ag                  => gdp%gdphysco%ag
-    eps                 => gdp%gdconst%eps
+    error = .false.
     !
     ! CALCULATE BED LOAD TRANSPORT
     !
@@ -171,7 +161,8 @@ subroutine bedtr1993(uuu       ,vvv       ,u2dh      ,d50       ,d90       , &
           vcr = 0.19*(d50)**0.1*log10(4.0*h1/d90)
        else
           call prterr(lundia, 'P004', 'd50 < 0.0001 not allowed')
-          call d3stop(1, gdp)
+          error = .true.
+          return
        endif
        phicur = atan2(vvv, uuu)/degrad
        if (phicur < 0.0) phicur = phicur + 360.0
@@ -274,7 +265,7 @@ subroutine bedtr1993(uuu       ,vvv       ,u2dh      ,d50       ,d90       , &
           qbcv = qbc*vvv/umod
        elseif (qbc > 1.0e-4) then
           call prterr(lundia, 'P004', 'umod<eps and qbc>1e-4')
-          call d3stop(1, gdp)
+          error = .true.
        else
           qbcu = 0.0
           qbcv = 0.0

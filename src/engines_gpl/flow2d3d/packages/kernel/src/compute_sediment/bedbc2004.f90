@@ -1,4 +1,4 @@
-subroutine bedbc2004(nm        ,tp        ,rhosol    ,rhowat    , &
+subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
                    & h1        ,umod      ,d10       ,zumod     ,d50       , &
                    & d90       ,z0cur     ,z0rou     ,drho      ,dstar     , &
                    & taucr0    ,u2dhim    ,aks       ,ra        ,usus      , &
@@ -8,7 +8,8 @@ subroutine bedbc2004(nm        ,tp        ,rhosol    ,rhowat    , &
                    & hrms      ,delw      ,uon       ,uoff      ,uwbih     , &
                    & delm      ,fc1       ,fw1       ,phicur    ,kscr      , &
                    & i2d3d     ,mudfrac   ,fsilt     ,taucr1    ,psi       , &
-                   & dzduu     ,dzdvv     ,gdp       ) 
+                   & dzduu     ,dzdvv     ,eps       ,camax     ,dsilt     , &
+                   & dsand     ,iopsus    ,ag        ,wave      ,tauadd    ) 
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -46,33 +47,11 @@ subroutine bedbc2004(nm        ,tp        ,rhosol    ,rhowat    , &
     use precision
     use mathconsts
     !
-    use globaldata
-    !
     implicit none
-    !
-    type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    real(fp)               , pointer :: eps
-    real(fp)               , pointer :: camax
-    real(fp)               , pointer :: dsilt
-    real(fp)               , pointer :: dsand
-    integer                , pointer :: iopsus
-    real(fp)               , pointer :: rhow
-    real(fp)               , pointer :: ag
-    real(fp)               , pointer :: z0
-    real(fp)               , pointer :: vonkar
-    logical                , pointer :: wave
-    logical                , pointer :: sedim
-    logical                , pointer :: scour
-    real(fp), dimension(:) , pointer :: factor
-    real(fp)               , pointer :: slope
 !
 ! Global variables
 !
     integer, intent(in)   :: i2d3d
-    integer, intent(in)   :: nm
     real(fp)              :: aks    !  Description and declaration in rjdim.f90
     real(fp)              :: ce_nm
     real(fp)              :: d10
@@ -119,6 +98,14 @@ subroutine bedbc2004(nm        ,tp        ,rhosol    ,rhowat    , &
     real(fp), intent(out) :: psi
     real(fp), intent(in)  :: dzduu    !  Description and declaration in rjdim.f90
     real(fp), intent(in)  :: dzdvv    !  Description and declaration in rjdim.f90
+    real(fp), intent(in)  :: eps
+    real(fp), intent(in)  :: camax
+    real(fp), intent(in)  :: dsilt
+    real(fp), intent(in)  :: dsand
+    integer , intent(in)  :: iopsus
+    real(fp), intent(in)  :: ag
+    logical , intent(in)  :: wave
+    real(fp), intent(in)  :: tauadd
 !
 ! Local variables
 !
@@ -144,7 +131,6 @@ subroutine bedbc2004(nm        ,tp        ,rhosol    ,rhowat    , &
     real(fp) :: t1   
     real(fp) :: tt1
     real(fp) :: tt2
-    real(fp) :: tauadd   
     real(fp) :: u1   
     real(fp) :: u2dhim
     real(fp) :: umax 
@@ -160,20 +146,6 @@ subroutine bedbc2004(nm        ,tp        ,rhosol    ,rhowat    , &
 !
 !! executable statements -------------------------------------------------------
 !
-    eps                 => gdp%gdconst%eps
-    camax               => gdp%gdmorpar%camax
-    dsilt               => gdp%gdmorpar%dsilt
-    dsand               => gdp%gdmorpar%dsand
-    iopsus              => gdp%gdmorpar%iopsus
-    rhow                => gdp%gdphysco%rhow
-    ag                  => gdp%gdphysco%ag
-    z0                  => gdp%gdphysco%z0
-    vonkar              => gdp%gdphysco%vonkar
-    wave                => gdp%gdprocs%wave
-    sedim               => gdp%gdprocs%sedim
-    scour               => gdp%gdscour%scour
-    factor              => gdp%gdscour%factor
-    slope               => gdp%gdscour%slope
     !
     ! VAN RIJN METHOD
     !
@@ -349,12 +321,7 @@ subroutine bedbc2004(nm        ,tp        ,rhosol    ,rhowat    , &
     tauc = 0.125_fp * rhowat * fc * u2dhim**2
     muc  = fc1 / fc
     !
-    if (scour) then
-       !
-       ! Calculate extra stress (tauadd) for point = nm,
-       ! if so required by user input.
-       !
-       call shearx(tauadd, nm, gdp)
+    if (tauadd>0.0_fp) then
        !
        ! extra stress
        !

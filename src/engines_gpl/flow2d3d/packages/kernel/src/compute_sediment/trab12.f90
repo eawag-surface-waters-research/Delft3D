@@ -1,7 +1,7 @@
 subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
                 & h         ,tp        ,dir       ,d50       ,par       , &
                 & sbotx     ,sboty     ,ssusx     ,ssusy     ,ubot      , &
-                & gdp       )
+                & vonkar    ,ubot_from_com        )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -39,16 +39,8 @@ subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
 !!--declarations----------------------------------------------------------------
     use precision
     use mathconsts
-    use globaldata
     !
     implicit none
-    !
-    type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    logical                  , pointer :: ubot_from_com
-    !
 !
 ! Global variables
 !
@@ -67,6 +59,8 @@ subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     real(fp)               , intent(in)  :: u
     real(fp)               , intent(in)  :: v
     real(fp), dimension(30), intent(in)  :: par
+    real(fp)               , intent(in)  :: vonkar
+    logical                , intent(in)  :: ubot_from_com
 !
 !
 ! Local variables
@@ -108,7 +102,6 @@ subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     real(fp)                       :: thetmx
     real(fp)                       :: uorb                 ! orbital velocity at the bottom layer
     real(fp)                       :: utot                 ! flow velocity
-    real(fp)                       :: vonkar
     real(fp)                       :: waveps
     real(fp)                       :: xpar
     real(fp)                       :: ypar
@@ -149,8 +142,6 @@ subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    ubot_from_com   => gdp%gdprocs%ubot_from_com
-    !
     if (kode== - 1) then
        return
     endif
@@ -160,7 +151,6 @@ subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     ntrsi = 2
     sbotx = 0.0
     sboty = 0.0
-    vonkar = 0.4
     astarc = 30.*pi**2
     waveps = 1.E-4
     eps = 1.E-6
