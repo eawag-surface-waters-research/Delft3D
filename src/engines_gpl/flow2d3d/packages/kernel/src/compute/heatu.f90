@@ -407,19 +407,23 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
              !
              select case (keva)
              case (0,1)
+                !
+                ! No evap from fileva, evap and qeva calculated internally
+                !
                 qeva     = fwind * (3.5_fp + 2.05_fp*w10mag(nm)) * (esvp-easp)
                 evap(nm) = qeva / tl
              case (2)
                 !
-                ! evap(nm) is read from file, use it for qeva
+                ! evap from fileva, qeva based on read evap
                 !
                 qeva = evap(nm) * tl
              case (3)
                 !
-                ! evap(nm) is read from file, qeva is calculated internally
+                ! evap from fileva, qeva is calculated internally
                 !
                 qeva = fwind * (3.5_fp + 2.05_fp*w10mag(nm)) * (esvp-easp)
              case default
+                ! nothing
              end select
              !
              ! HEAT FLUX CONVECTION
@@ -514,19 +518,23 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
              !
              select case (keva)
              case (0,1)
+                !
+                ! No evap from fileva, evap and qeva calculated internally
+                !
                 qeva     = fwind * (3.5_fp + 2.05_fp*w10mag(nm)) * (esvp-easp)
                 evap(nm) = qeva / tl
              case (2)
                 !
-                ! evap(nm) is read from file, use it for qeva
+                ! evap from fileva, qeva based on read evap
                 !
                 qeva = evap(nm) * tl
              case (3)
                 !
-                ! evap(nm) is read from file, qeva is calculated internally
+                ! evap from fileva, qeva is calculated internally
                 !
                 qeva = fwind * (3.5_fp + 2.05_fp*w10mag(nm)) * (esvp-easp)
              case default
+                ! nothing
              end select
              !
              ! HEAT FLUX CONVECTION
@@ -701,19 +709,23 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
              !
              select case (keva)
              case (0,1)
+                !
+                ! No evap from fileva, evap and qeva calculated internally
+                !
                 evap(nm) = 1.2e-9_fp * w10mag(nm) * (esvp-easp) * rhow
                 qeva     = evap(nm) * tl
              case (2)
                 !
-                ! evap(nm) is read from file, use it for qeva
+                ! evap from fileva, qeva based on read evap
                 !
                 qeva = evap(nm) * tl
              case (3)
                 !
-                ! evap(nm) is read from file, qeva is calculated internally
+                ! evap from fileva, qeva is calculated internally
                 !
                 qeva = 1.2e-9_fp * w10mag(nm) * (esvp-easp) * rhow * tl
              case default
+                ! nothing
              end select
              !
              ! HEAT FLUX CONVECTION: Bowens ratio * QEVA
@@ -963,19 +975,23 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
              !
              select case (keva)
              case (0,1)
+                !
+                ! No evap from fileva, evap and qeva calculated internally
+                !
                 evap(nm) = dalton * rhoa * w10mag(nm) * (qw-qal)
                 qeva     = evap(nm) * tl
              case (2)
                 !
-                ! evap(nm) is read from file, use it for qeva
+                ! evap from fileva, qeva based on read evap
                 !
                 qeva = evap(nm) * tl
              case (3)
                 !
-                ! evap(nm) is read from file, qeva is calculated internally
+                ! evap from fileva, qeva is calculated internally
                 !
                 qeva = dalton * rhoa * w10mag(nm) * (qw-qal) * tl
              case default
+                ! nothing
              end select
              !
              ! Heat loss of water by forced convection of sensible heat
@@ -1019,21 +1035,34 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                 hfree = rcpa * fheat * (r0(nm,k0,ltem)-tair)
                 qco   = qco + hfree
                 !
-                if (keva > 0) then
+                ! Latent heat by free convection
+                !
+                select case (keva)
+                case (0,1)
                    !
-                   ! Don't add mass flux due to free evaporation
-                   ! Evaporation was specified in time series file
-                   !
-                   efree    = 0.0_fp
-                else
-                   !
-                   ! For latent heat
-                   ! mass flux due to free convection added to EVAP and QEVA
+                   ! No evap from fileva
+                   ! mass flux due to free convection added to evap
+                   ! heat flux due to free convection added to qeva
                    !
                    efree    = fheat * (qw-qal) * tl * (rhoa0+rhoa10)/2.0_fp
                    evap(nm) = evap(nm) + efree/tl
                    qeva     = qeva + efree
-                endif
+                case (2)
+                   !
+                   ! evap from fileva, qeva based on read evap
+                   ! efree part can not be backwards recalculated
+                   !
+                   efree    = 0.0_fp
+                case (3)
+                   !
+                   ! evap from fileva, qeva is calculated internally
+                   ! heat flux due to free convection added to qeva
+                   !
+                   efree    = fheat * (qw-qal) * tl * (rhoa0+rhoa10)/2.0_fp
+                   qeva     = qeva + efree
+                case default
+                   ! nothing
+                end select
              endif
              !
              ! heat loss by effective infrared back radiation hl, restricted by
