@@ -80,6 +80,7 @@ subroutine write_wave_map (sg, sof, n_swan_grids, wavedata, casl)
     integer                                     :: it02
     integer                                     :: itlen
     !
+    integer       , dimension(1)                :: idummy ! Help array to read/write Nefis files 
     real          , dimension(:,:), allocatable :: rbuf
     !
     !     Define data structure; element dimensions are required only
@@ -260,9 +261,10 @@ subroutine write_wave_map (sg, sof, n_swan_grids, wavedata, casl)
     !
     nelems = 29
     celidt=wavedata%output%count
-    call putgti(filnam    ,grpnam(1) ,nelems    ,elmnms(1) ,elmdms(1, 1)         , &
-              & elmqty(1) ,elmunt(1) ,elmdes(1) ,elmtps(1) ,nbytsg(1) , &
-              & elmnms(1) ,celidt    ,wrswch    ,error     ,wavedata%time%timtscale  )
+    idummy(1) = wavedata%time%timtscale
+    call putgti(filnam    ,grpnam(1) ,nelems    ,elmnms(1) ,elmdms(1, 1) , &
+              & elmqty(1) ,elmunt(1) ,elmdes(1) ,elmtps(1) ,nbytsg(1)    , &
+              & elmnms(1) ,celidt    ,wrswch    ,error     ,idummy(1)    )
     write (*,'(a,i10)') '  Time written ', wavedata%time%timtscale
 
     call putgti(filnam    ,grpnam(1) ,nelems    ,elmnms(1) ,elmdms(1, 1)         , &
@@ -386,9 +388,10 @@ subroutine write_wave_map (sg, sof, n_swan_grids, wavedata, casl)
     ! Also write the possible additional output parameters to the map file
     !
     if (nelems2 > 1) then
-       call putgti(filnam     ,grpnam(2)  ,nelems2    ,elmnms2(1) ,elmdms2(1, 1)            , &
-                 & elmqty2(1) ,elmunt2(1) ,elmdes2(1) ,elmtps2(1) ,nbytsg2(1)               , &
-                 & elmnms2(1) ,celidt     ,wrswch     ,error      ,wavedata%time%timtscale  )
+       idummy(1) = wavedata%time%timtscale
+       call putgti(filnam     ,grpnam(2)  ,nelems2    ,elmnms2(1) ,elmdms2(1, 1) , &
+                 & elmqty2(1) ,elmunt2(1) ,elmdes2(1) ,elmtps2(1) ,nbytsg2(1)    , &
+                 & elmnms2(1) ,celidt     ,wrswch     ,error      ,idummy(1)     )
        do i = 2, nelems2
           call putgtr(filnam     ,grpnam(2)  ,nelems2    ,elmnms2(1) ,elmdms2(1, 1)             , &
                     & elmqty2(1) ,elmunt2(1) ,elmdes2(1) ,elmtps2(1) ,nbytsg2(1)                , &

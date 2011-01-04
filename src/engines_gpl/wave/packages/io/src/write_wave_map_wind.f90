@@ -52,6 +52,7 @@ subroutine write_wave_map_wind (sg, sof, n_swan_grids, wavedata, casl)
     integer                         :: celidt
     integer                         :: error
     integer                         :: ind
+    integer, dimension(1)           :: idummy ! Help array to read/write Nefis files 
     integer, dimension(6, nelmx)    :: elmdms
     integer, dimension(nelmx)       :: nbytsg
     logical                         :: wrswch
@@ -98,9 +99,10 @@ subroutine write_wave_map_wind (sg, sof, n_swan_grids, wavedata, casl)
     !        elements is handled by PUTGET
     !
     celidt=wavedata%output%count
-    call putgti(filnam   , grpnam, nelmx , elmnms, elmdms, &
-              & elmqty   , elmunt, elmdes, elmtps, nbytsg, &
-              & elmnms(1), celidt, wrswch, error , wavedata%time%timtscale )
+    idummy(1) = wavedata%time%timtscale
+    call putgti(filnam   , grpnam, nelmx , elmnms, elmdms    , &
+              & elmqty   , elmunt, elmdes, elmtps, nbytsg    , &
+              & elmnms(1), celidt, wrswch, error , idummy(1) )
     call putgtr(filnam   , grpnam, nelmx , elmnms, elmdms   , &
               & elmqty   , elmunt, elmdes, elmtps, nbytsg   , &
               & elmnms(2), celidt, wrswch, error , sof%windu)
