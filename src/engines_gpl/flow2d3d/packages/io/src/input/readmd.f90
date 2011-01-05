@@ -902,7 +902,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
                 & ch(nambnd),gdp       )
        if (error) goto 9999
        !
-       call rdscour(error, nrrec, mdfrec, gdp)
+       call rdscour(error, gdp)
        if (error) goto 9999
     endif
     !
