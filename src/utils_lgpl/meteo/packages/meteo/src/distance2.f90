@@ -6,8 +6,7 @@ subroutine distance2(sferic    ,x1        ,y1        ,x2        ,y2        , &
 !                                                                               
 !  This library is free software; you can redistribute it and/or                
 !  modify it under the terms of the GNU Lesser General Public                   
-!  License as published by the Free Software Foundation; either                 
-!  version 2.1 of the License.                                                  
+!  License as published by the Free Software Foundation version 2.1.                 
 !                                                                               
 !  This library is distributed in the hope that it will be useful,              
 !  but WITHOUT ANY WARRANTY; without even the implied warranty of               
