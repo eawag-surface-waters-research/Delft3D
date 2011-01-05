@@ -105,6 +105,7 @@
 		<File RelativePath="src\compute\turclo.f90"/>
 		<File RelativePath="src\compute\ulim.f90"/>
 		<File RelativePath="src\compute\updbar.f90"/>
+		<File RelativePath="src\compute\updmassbal.f90"/>
 		<File RelativePath="src\compute\updwaqflx.f90"/>
 		<File RelativePath="src\compute\upwhu.f90"/>
 		<File RelativePath="src\compute\usrbcc.f90"/>
@@ -167,7 +168,7 @@
 		<File RelativePath="src\compute_roller\snel.f90"/>
 		<File RelativePath="src\compute_roller\tapf.f90"/>
 		<File RelativePath="src\compute_roller\turwav.f90"/>
-		<File RelativePath=".\src\compute_roller\varcon.f90"/>
+		<File RelativePath="src\compute_roller\varcon.f90"/>
 		<File RelativePath="src\compute_roller\waveu.f90"/>
 		<File RelativePath="src\compute_roller\wnr.f90"/></Filter>
 		<Filter Name="compute_sediment">

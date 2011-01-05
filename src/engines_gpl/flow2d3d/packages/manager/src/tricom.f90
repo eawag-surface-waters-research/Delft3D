@@ -258,7 +258,11 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
     integer                             , pointer :: rtur1
     integer                             , pointer :: s0
     integer                             , pointer :: s1
+    integer                             , pointer :: sbuu
+    integer                             , pointer :: sbvv
     integer                             , pointer :: sig
+    integer                             , pointer :: ssuu
+    integer                             , pointer :: ssvv
     integer                             , pointer :: teta
     integer                             , pointer :: thetbc
     integer                             , pointer :: thick
@@ -275,6 +279,7 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
     integer                             , pointer :: v1
     integer                             , pointer :: vmean
     integer                             , pointer :: voldis
+    integer                             , pointer :: volum1
     integer                             , pointer :: wlen
     integer                             , pointer :: wlcom
     integer                             , pointer :: wphy
@@ -644,7 +649,11 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
     rtur1               => gdp%gdr_i_ch%rtur1
     s0                  => gdp%gdr_i_ch%s0
     s1                  => gdp%gdr_i_ch%s1
+    sbuu                => gdp%gdr_i_ch%sbuu
+    sbvv                => gdp%gdr_i_ch%sbvv
     sig                 => gdp%gdr_i_ch%sig
+    ssuu                => gdp%gdr_i_ch%ssuu
+    ssvv                => gdp%gdr_i_ch%ssvv
     teta                => gdp%gdr_i_ch%teta
     thetbc              => gdp%gdr_i_ch%thetbc
     thick               => gdp%gdr_i_ch%thick
@@ -661,6 +670,7 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
     v1                  => gdp%gdr_i_ch%v1
     vmean               => gdp%gdr_i_ch%vmean
     voldis              => gdp%gdr_i_ch%voldis
+    volum1              => gdp%gdr_i_ch%volum1
     wlen                => gdp%gdr_i_ch%wlen
     wlcom               => gdp%gdr_i_ch%wlcom
     wphy                => gdp%gdr_i_ch%wphy
@@ -1050,6 +1060,12 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
        !
        call usrdef(lundia    ,error     ,grdang    ,secflo    ,gdp       )
        if (error) goto 9996
+       !
+       ! Balance output?
+       !
+       call rdmassbal(r(xz)     ,r(yz)     ,i(kcs)    ,r(gsqs)   , &
+                    & mmax      ,nmax      ,nmaxus    ,nmmax     , &
+                    & gdp       )
        !
        ! Read the file with wave components
        !
@@ -1634,6 +1650,9 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
        !
        ! Calculate post processing info and write to files if required.
        !
+       call updmassbal(.true.   ,r(qxk)    ,r(qyk)    ,i(kcs)    ,r(r1)     , &
+                     & r(volum1),r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   , &
+                     & r(gsqs)  ,r(guu)    ,r(gvv)    ,d(dps)    ,gdp       )
        call psemnefis
        call timer_start(timer_postpr, gdp)
        call postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
@@ -1775,7 +1794,7 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
        !
        call timer_start(timer_trisol, gdp)
        if (.not.zmodel) then
-          call trisol(dischy    ,solver    ,icreep    , &
+          call trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & timnow    ,nst       ,itiwec    ,trasol    ,forfuv    , &
                     & forfww    ,nfltyp    , &
                     & saleqs    ,temeqs    , &

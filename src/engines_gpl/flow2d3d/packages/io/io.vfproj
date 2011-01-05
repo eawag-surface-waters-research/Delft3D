@@ -32,8 +32,6 @@
 		<File RelativePath="src\input\ciofil.f90"/>
 		<File RelativePath="src\input\ck_dpopt.f90"/>
 		<File RelativePath="src\input\cmpnum.f90"/>
-		<File RelativePath="src\input\dad_read_polygon_data.f90"/>
-		<File RelativePath="src\input\dad_register_polygon.f90"/>
 		<File RelativePath="src\input\depfil.f90"/>
 		<File RelativePath="src\input\depfil_double.f90"/>
 		<File RelativePath="src\input\dimbch.f90"/>
@@ -56,7 +54,6 @@
 		<File RelativePath="src\input\fbcorr.f90"/>
 		<File RelativePath="src\input\flow_nefis_restart.f90"/>
 		<File RelativePath="src\input\flsfil.f90"/>
-		<File RelativePath="src\input\get_real_prop.f90"/>
 		<File RelativePath="src\input\grdfil.f90"/>
 		<File RelativePath="src\input\hybfil.f90"/>
 		<File RelativePath="src\input\icfil.f90"/>
@@ -64,6 +61,7 @@
 		<File RelativePath="src\input\inimet.f90"/>
 		<File RelativePath="src\input\morbndfill.f90"/>
 		<File RelativePath="src\input\numcmp.f90"/>
+		<File RelativePath="src\input\polygon_module.f90"/>
 		<File RelativePath="src\input\rdbcg.f90"/>
 		<File RelativePath="src\input\rdbedformpar.f90"/>
 		<File RelativePath="src\input\rdbndd.f90"/>
@@ -83,6 +81,7 @@
 		<File RelativePath="src\input\rdirt.f90"/>
 		<File RelativePath="src\input\rdiwe.f90"/>
 		<File RelativePath="src\input\rdlaydis.f90"/>
+		<File RelativePath="src\input\rdmassbal.f90"/>
 		<File RelativePath="src\input\rdmeteo.f90"/>
 		<File RelativePath="src\input\rdmor.f90"/>
 		<File RelativePath="src\input\rdmor0.f90"/>
@@ -133,6 +132,7 @@
 		<File RelativePath="src\output\addelm.f90"/>
 		<File RelativePath="src\output\calbed.f90"/>
 		<File RelativePath="src\output\defnewgrp.f90"/>
+		<File RelativePath=".\src\output\detectcelidt.f90"/>
 		<File RelativePath="src\output\dirint.f90"/>
 		<File RelativePath="src\output\distance_nogdp.f90"/>
 		<File RelativePath="src\output\dp999.f90"/>
@@ -190,6 +190,7 @@
 		<File RelativePath="src\output\wridoc.f90"/>
 		<File RelativePath="src\output\wridro.f90"/>
 		<File RelativePath="src\output\wrihis.f90"/>
+		<File RelativePath=".\src\output\wrihisbal.f90"/>
 		<File RelativePath="src\output\wrihisdad.f90"/>
 		<File RelativePath="src\output\wrihisdis.f90"/>
 		<File RelativePath="src\output\wrimap.f90"/>
@@ -214,6 +215,7 @@
 		<File RelativePath="src\output\wrspcp.f90"/>
 		<File RelativePath="src\output\wrtdro.f90"/>
 		<File RelativePath="src\output\wrthis.f90"/>
+		<File RelativePath=".\src\output\wrthisbal.f90"/>
 		<File RelativePath="src\output\wrthisdad.f90"/>
 		<File RelativePath="src\output\wrthisdis.f90"/>
 		<File RelativePath="src\output\wrtmap.f90"/>

@@ -112,7 +112,7 @@
       arey = 0.0
       sum  = 0.0
       do j = 1,mmax
-         do i = 1,nmax
+         do i = 2,nmax
             iq = iqaggr(i,j,itop,1)
             arex(iq) = arex(iq) + guu(i,j)*(xcor(i,j)+xcor(i-1,j))/2.0
             arey(iq) = arey(iq) + guu(i,j)*(ycor(i,j)+ycor(i-1,j))/2.0
@@ -144,7 +144,7 @@
       arex = 0.0
       arey = 0.0
       sum  = 0.0
-      do j = 1,mmax
+      do j = 2,mmax
          do i = 1,nmax
             iq = iqaggr(i,j,itop,2)
             if ( iq .gt. 0 ) iq = iq - noq1

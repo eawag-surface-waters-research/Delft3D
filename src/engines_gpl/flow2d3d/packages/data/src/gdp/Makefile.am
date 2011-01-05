@@ -30,6 +30,7 @@ libdata_gdp_a_SOURCES = \
          clreqtran.f90 \
          clrerosed.f90 \
          clrflwpar.f90 \
+         clrmassbal.f90 \
          clrmorpar.f90 \
          clrsedpar.f90 \
          clrtrachy.f90 \
@@ -62,8 +63,8 @@ libdata_gdp_a_SOURCES = \
          inithwid.f90 \
          initincbc.f90 \
          initincbcc.f90 \
-         initipon.f90 \
          initkeywtd.f90 \
+         initmassbal.f90 \
          initmorpar.f90 \
          initpostpr.f90 \
          initprocs.f90 \

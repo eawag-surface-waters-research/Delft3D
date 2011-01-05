@@ -164,13 +164,11 @@ subroutine wrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc    , &
     integer                                         :: k            ! Help var. 
     integer                                         :: km
     integer                                         :: l            ! Help var. 
-    integer                                         :: lastcl
     integer                                         :: m            ! Help var. 
     integer                                         :: n            ! Help var. 
     integer                                         :: nm
     integer         , dimension(1)                  :: idummy       ! Help array to read/write Nefis files 
     integer         , dimension(3,5)                :: uindex
-    integer                           , external    :: getelt
     integer                           , external    :: putelt
     integer                           , external    :: inqmxi
     integer                           , external    :: clsnef
@@ -226,12 +224,6 @@ subroutine wrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc    , &
     !
     filnam = trifil(1:3) // 'm' // trifil(5:)
     errmsg = ' '
-    !
-    ! initialize group index time dependent data
-    !
-    uindex (1,1) = 1 ! start index
-    uindex (2,1) = 1 ! end index
-    uindex (3,1) = 1 ! increment in time
     ! ad hoc double precision output of S1
     ! call init_buffer()
     !
@@ -543,47 +535,21 @@ subroutine wrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc    , &
     endif
     !
     ! Writing of output on every itmapc
-    !
-    celidt = celidt + 1
-    !
-    ! group 1: element 'ITMAPC'
     ! Overwriting instead of appending if time is already on file
     !
-    !-->
- 10 continue
-    if (celidt > 1) then
-       idummy(1)   = -1
-       lastcl      = celidt - 1
-       uindex(1,1) = lastcl
-       uindex(2,1) = lastcl
-       ierror     = getelt(fds, grnam1, 'ITMAPC', uindex, 1, 4, idummy)
-       if (ierror/=0) goto 9999
-       if (idummy(1)>=itmapc) then
-          celidt = lastcl
-          goto 10
-       endif
-    else
-       celidt = 1
-    endif
-    !<--
+    celidt = celidt + 1
+    call detectcelidt(fds, grnam1, 'ITMAPC', itmapc, celidt, ierror, gdp)
+    if (ierror/=0) goto 9999
+    !
+    ! initialize group index time dependent data
+    !
+    uindex (1,1) = celidt ! start index
+    uindex (2,1) = celidt ! end index
+    uindex (3,1) = 1      ! increment in time
+    !
+    ! group 1: element 'ITMAPC'
+    !
     idummy(1)   = itmapc
-    uindex(1,1) = celidt
-    uindex(2,1) = celidt
-    !
-    ! celidt is obtained by investigating group map-inf-series, identified
-    ! with nefiswrtmapinf.
-    ! Group map-series, identified with nefiswrtmap, must use the same
-    ! value for celidt.
-    ! Easy solution:
-    gdp%nefisio%nefiselem(nefiswrtmap)%celidt = celidt
-    ! Neat solution in pseudo code:
-    ! subroutine wrtmap
-    !    integer :: celidt
-    !    celidt = detectcelidt(nefiswrtmapinf)
-    !    call wrtmapinf(celidt)
-    !    call wrtmapdat(celidt)
-    ! end subroutine
-    !
     ierror = putelt(fds, grnam1, 'ITMAPC', uindex, 1, idummy)
     if (ierror/=0) goto 9999
     !

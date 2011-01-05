@@ -1,5 +1,4 @@
-subroutine dad_read_polygon_data(polygon_ptr, idcoord, start, number, &
-                               & xcoord, ycoord, type, indx, gdp )
+module polygon_module
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -26,12 +25,112 @@ subroutine dad_read_polygon_data(polygon_ptr, idcoord, start, number, &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!!--module description----------------------------------------------------------
+!
+! This module provides support function for processing polygon data.
+!
+!!--module declarations---------------------------------------------------------
+
+
+contains
+
+
+subroutine register_polygon(name, pol_ptr, idcount, totpoints, &
+                          & areatp, mustbeunique, gdp)
+!!--description-----------------------------------------------------------------
+!
+! Search for a polygon in a tree, given it's name. Stop with an error message
+!    if it is not found.
+! If the polygon does not have an id, add a unique one.
+! If the polygon already has an id, and the usage of the polygon should be
+!    unique, stop with an error message.
+!
+!!--declarations----------------------------------------------------------------
+    use precision
+    use properties
+    !
+    use globaldata
+    !
+    implicit none
+    !
+    type(globdat),target :: gdp
+    !
+    ! The following list of pointer parameters is used to point inside the gdp structure
+    !
+    integer , pointer :: lundia
+!
+! Global variables
+!
+    type(tree_data), pointer              :: pol_ptr
+    integer                               :: idcount
+    integer                               :: totpoints
+    character(len=*)        , intent(in)  :: name
+    character(len=*)        , intent(in)  :: areatp
+    logical                 , intent(in)  :: mustbeunique
+!
+! Local variables
+!
+    integer                                     :: id
+    integer           , dimension(1:1)          :: values
+    character(len=1)  , dimension(:)  , pointer :: data_ptr
+    character(len=10)                           :: idstring
+    character(len=200)                          :: message
+    character(len=80)                           :: node_type
+    type(tree_data)                   , pointer :: polygon_ptr
+    type(tree_data)                   , pointer :: node_ptr
+!
+!! executable statements -------------------------------------------------------
+!
+    lundia  => gdp%gdinout%lundia
+    !
+    ! Initialize
+    !
+    values = 0
+    !
+    ! Get corresponding polygon node
+    !
+    call tree_get_node_by_name(pol_ptr, name, polygon_ptr )
+    if ( .not. associated(polygon_ptr) ) then
+       write (message,'(3a)') 'polygon ', trim(name),' is missing'
+       call prterr(lundia, 'U021', trim(message))
+       call d3stop(1, gdp)
+    endif
+    !
+    ! Create the polygon's ID
+    !
+    id = 0
+    call prop_get_integer(polygon_ptr, '*', trim(areatp)//'id', id)
+    if (id == 0) then
+       idcount = idcount + 1
+       !
+       ! This is a new area ... add the ID
+       !
+       call tree_create_node( polygon_ptr, trim(areatp)//'id', node_ptr )
+       write(idstring,'(i0)') idcount
+       call tree_put_data( node_ptr, transfer(trim(idstring),node_value), 'STRING' )
+       !
+       ! Get number of points in this polygon
+       !
+       call tree_get_data_ptr( polygon_ptr, data_ptr, node_type )
+       values = transfer( data_ptr, values )
+    else
+       if ( mustbeunique ) then
+          write (message,'(3a)') trim(areatp)//' area ', trim(name), &
+                                 ' is specified more than once in polygon-file'
+          call prterr(lundia, 'U021', trim(message))
+          call d3stop(1, gdp)
+       endif
+    endif
+    totpoints = totpoints + values(1)
+end subroutine register_polygon
+
+
+subroutine read_polygon_data(polygon_ptr, idcoord, start, number, &
+                           & xcoord, ycoord, areatp, indx, gdp )
 !!--description-----------------------------------------------------------------
 !
 ! Read polygon points
 !
-!!--pseudo code and references--------------------------------------------------
-! NONE
 !!--declarations----------------------------------------------------------------
     use precision
     use properties
@@ -54,7 +153,7 @@ subroutine dad_read_polygon_data(polygon_ptr, idcoord, start, number, &
     integer                 , intent(out) :: number
     real(fp), dimension(:)  , intent(out) :: xcoord
     real(fp), dimension(:)  , intent(out) :: ycoord
-    character(len=*)        , intent(in)  :: type
+    character(len=*)        , intent(in)  :: areatp
     integer                 , intent(in)  :: indx
 !
 ! Local variables
@@ -83,11 +182,11 @@ subroutine dad_read_polygon_data(polygon_ptr, idcoord, start, number, &
     number     = inputivals(1)
     if (number == -1) then
        write(message,'(a,a,i0)') 'Unable to read the number of points in ', &
-            &                    trim(type), ' polygon of area',indx
+            &                    trim(areatp), ' polygon of area',indx
        call prterr(lundia, 'U021', message)
        call d3stop(1, gdp)
     endif
-    !write (lundia,'(a,i0,a,i0)') 'Number of points in '//trim(type)// &
+    !write (lundia,'(a,i0,a,i0)') 'Number of points in '//trim(areatp)// &
     !      &                      ' polygon of area ', indx,': ',number
     !
     ! read the polygon points
@@ -105,7 +204,7 @@ subroutine dad_read_polygon_data(polygon_ptr, idcoord, start, number, &
        inputvals = transfer( data_ptr, 0., 2 )
        if (  comparereal(inputvals(1),misvalue) == 0 .or. &
            & comparereal(inputvals(2),misvalue) == 0        ) then
-          write(message,'(a,i0,a,i0)') 'Unable to read '//trim(type)// &
+          write(message,'(a,i0,a,i0)') 'Unable to read '//trim(areatp)// &
                &                       ' polygon point ', ip,' of area ',indx
           call prterr(lundia, 'U021', message)
           call d3stop(1, gdp)
@@ -113,7 +212,10 @@ subroutine dad_read_polygon_data(polygon_ptr, idcoord, start, number, &
        xcoord(start+ip-1) = inputvals(1)
        ycoord(start+ip-1) = inputvals(2)
        !write(lundia,'(a,i3,a,i3,a,f13.5,f13.5)') 'Point ',ip,', &
-       !     &   '//trim(type)//' area ',indx,':',xcoord(start+ip-1), ycoord(start+ip-1)
+       !     &   '//trim(areatp)//' area ',indx,':',xcoord(start+ip-1), ycoord(start+ip-1)
        idcoord = idcoord + 1
     enddo
-end subroutine dad_read_polygon_data
+end subroutine read_polygon_data
+
+
+end module polygon_module

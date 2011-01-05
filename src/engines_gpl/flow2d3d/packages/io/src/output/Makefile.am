@@ -37,6 +37,7 @@ libio_output_a_SOURCES = \
          addelm.f90 \
          calbed.f90 \
          defnewgrp.f90 \
+         detectcelidt.f90 \
          dirint.f90 \
          distance_nogdp.f90 \
          dp999.f90 \
@@ -88,6 +89,7 @@ libio_output_a_SOURCES = \
          wridoc.f90 \
          wridro.f90 \
          wrihis.f90 \
+         wrihisbal.f90 \
          wrihisdad.f90 \
          wrihisdis.f90 \
          wrimap.f90 \
@@ -110,6 +112,7 @@ libio_output_a_SOURCES = \
          wrspcp.f90 \
          wrtdro.f90 \
          wrthis.f90 \
+         wrthisbal.f90 \
          wrthisdad.f90 \
          wrthisdis.f90 \
          wrtmap.f90 \

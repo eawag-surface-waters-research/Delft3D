@@ -40,6 +40,7 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     use properties
     use arrayextend
     use flow_tables
+    use polygon_module
     !
     use globaldata
     !
@@ -165,12 +166,12 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     logical                                 :: lastdumparea
     logical                                 :: sfound
     character(11)                           :: fmttmp            ! Format file ('formatted  ') 
+    character(80)                           :: name
     character(80)                           :: parname
     character(80)                           :: dredgetype
     character(20)                           :: sedname
     character(1024)                         :: message
-    character(20)                           :: keyword
-    character(20)                           :: type
+    character(20)                           :: areatp
     character(256)                          :: filename
     character(256)                          :: polygonfile
     character(256)                          :: refplanefile
@@ -183,50 +184,6 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     type(tree_data), pointer                :: pol_ptr
     type(dredtype) , pointer                :: pdredge
     type(dumptype) , pointer                :: pdump
-!
-! Interfaces
-!
-interface 
-    subroutine dad_register_polygon(link_ptr, pol_ptr, idcount, totpoints, &
-                                  & keyword, type, unique, gdp)
-        use globaldata
-        use properties
-        type(tree_data), pointer              :: link_ptr
-        type(tree_data), pointer              :: pol_ptr
-        integer                               :: idcount
-        integer                               :: totpoints
-        character(len=*)        , intent(in)  :: keyword
-        character(len=*)        , intent(in)  :: type
-        logical                 , intent(in)  :: unique
-        type(globdat),target                  :: gdp
-    end subroutine dad_register_polygon
-
-    subroutine dad_read_polygon_data(polygon_ptr, idcoord, start, number, &
-                                   & xcoord, ycoord, type, indx, gdp )
-        use globaldata
-        use properties
-        type(tree_data), pointer              :: polygon_ptr
-        integer                               :: idcoord
-        integer                 , intent(out) :: start
-        integer                 , intent(out) :: number
-        real(fp), dimension(:)  , intent(out) :: xcoord
-        real(fp), dimension(:)  , intent(out) :: ycoord
-        character(len=*)        , intent(in)  :: type
-        integer                 , intent(in)  :: indx
-        type(globdat),target                  :: gdp
-    end subroutine dad_read_polygon_data
-
-    subroutine get_real_prop(link_ptr, keyword, text, value, id, gdp )
-        use globaldata
-        use properties
-        type(tree_data), pointer              :: link_ptr
-        character(len=*)        , intent(in)  :: keyword
-        character(len=*)        , intent(in)  :: text
-        real(fp)                , intent(out) :: value
-        integer                 , intent(in)  :: id
-        type(globdat),target                  :: gdp
-    end subroutine get_real_prop
-end interface
 !
 !! executable statements -------------------------------------------------------
 !
@@ -579,13 +536,13 @@ end interface
              !
              ! Dredge area specification found - name must be unique
              !
-             type    = 'dredge'
+             areatp  = 'dredge'
              unique  = .true.
-             keyword = 'name'
-             call dad_register_polygon(link_ptr, pol_ptr, nadred, totnpdr, &
-                                     & keyword , type   , unique, gdp    )
+             call prop_get_string(link_ptr, '*', 'name', name)
+             call register_polygon(name   , pol_ptr, nadred, totnpdr, &
+                                 & areatp , unique, gdp    )
              if ( associated(link_ptr%child_nodes) ) then
-                type   = 'dump'
+                areatp = 'dump'
                 unique = .false.
                 do j = 1, size(link_ptr%child_nodes)
                    !
@@ -594,9 +551,9 @@ end interface
                    node_ptr => link_ptr%child_nodes(j)%node_ptr
                    parname = tree_get_name( node_ptr )
                    if (parname == 'dump') then
-                      keyword = 'dump'
-                      call dad_register_polygon(node_ptr, pol_ptr, nadump, totnpdu, &
-                                              & keyword , type   , unique, gdp    )
+                      call prop_get_string(link_ptr, '*', 'dump', name)
+                      call register_polygon(name   , pol_ptr, nadump, totnpdu, &
+                                          & areatp , unique, gdp    )
                       nalink = nalink + 1
                    endif
                 enddo
@@ -604,7 +561,7 @@ end interface
           case ('nourishment')
              nasupl = nasupl + 1        
              if ( associated(link_ptr%child_nodes) ) then
-                type   = 'dump'
+                areatp = 'dump'
                 unique = .false.
                 do j = 1, size(link_ptr%child_nodes)
                    !
@@ -613,9 +570,9 @@ end interface
                    node_ptr => link_ptr%child_nodes(j)%node_ptr
                    parname = tree_get_name( node_ptr )
                    if (parname == 'dump') then
-                      keyword = 'dump'
-                      call dad_register_polygon(node_ptr, pol_ptr, nadump, totnpdu, &
-                                              & keyword , type   , unique, gdp    )
+                      call prop_get_string(link_ptr, '*', 'dump', name)
+                      call register_polygon(name   , pol_ptr, nadump, totnpdu, &
+                                          & areatp , unique, gdp    )
                       nalink = nalink + 1
                    endif
                 enddo
@@ -966,8 +923,9 @@ end interface
                 ! Read the coordinates of the corresponding polygon
                 !
                 call tree_get_node_by_name(pol_ptr, dredge_areas(cntssrc), dredge_area_ptr )
-                call dad_read_polygon_data(dredge_area_ptr, icdr, ipdr(cntdred), npdr(cntdred), &
-                                         & xdr, ydr, 'dredging', cntdred, gdp)
+                areatp = 'dredge'
+                call read_polygon_data(dredge_area_ptr, icdr, ipdr(cntdred), npdr(cntdred), &
+                                     & xdr, ydr, areatp, cntdred, gdp)
                 !
                 ! Each dredge area may distribute to several dump areas
                 ! The sum of all distribution percentages must be 100.0 for each dredge area
@@ -1019,8 +977,9 @@ end interface
                          ! Read the coordinates of the corresponding polygon
                          !
                          call tree_get_node_by_name(pol_ptr, dump_areas(cntdump), dump_area_ptr )
-                         call dad_read_polygon_data(dump_area_ptr, icdu, ipdu(cntdump), npdu(cntdump), &
-                                                  & xdu, ydu, 'dumping', cntdump, gdp)
+                         areatp = 'dump'
+                         call read_polygon_data(dump_area_ptr, icdu, ipdu(cntdump), npdu(cntdump), &
+                                              & xdu, ydu, areatp, cntdump, gdp)
                       elseif (parname == 'percentage') then
                          if (ilink == 0) then
                             call prterr(lundia, 'U021', 'Unexpected percentage encountered')
@@ -1211,8 +1170,9 @@ end interface
                          ! Read the coordinates of the corresponding polygon
                          !
                          call tree_get_node_by_name(pol_ptr, dump_areas(cntdump), dump_area_ptr )
-                         call dad_read_polygon_data(dump_area_ptr, icdu, ipdu(cntdump), npdu(cntdump), &
-                                                  & xdu, ydu, 'dumping', cntdump, gdp)
+                         areatp = 'dump'
+                         call read_polygon_data(dump_area_ptr, icdu, ipdu(cntdump), npdu(cntdump), &
+                                              & xdu, ydu, areatp, cntdump, gdp)
                       elseif ( parname == 'percentage') then
                          if (ilink == 0) then
                             call prterr(lundia, 'U021', 'Unexpected percentage encountered')

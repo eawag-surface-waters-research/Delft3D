@@ -1,4 +1,3 @@
-subroutine get_real_prop(link_ptr, keyword, text, value, id, gdp )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -25,50 +24,25 @@ subroutine get_real_prop(link_ptr, keyword, text, value, id, gdp )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!!--description-----------------------------------------------------------------
+    type gd_massbal
 !
-! Reads a real from the input tree.
-! Stops with an error message if it fails
-!
-!!--pseudo code and references--------------------------------------------------
-! NONE
-!!--declarations----------------------------------------------------------------
-    use precision
-    use properties
+    logical                                  :: massbal
+    logical                                  :: resetfluxes
+    integer                                  :: nbalpol
+    integer                                  :: nneighb
     !
-    use globaldata
+    character(80), dimension(:)    , pointer :: volnames
     !
-    implicit none
+    integer      , dimension(:)    , pointer :: volnr
+    integer      , dimension(:,:)  , pointer :: exchnr
+    integer      , dimension(:,:)  , pointer :: neighb
     !
-    type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    integer , pointer :: lundia
+    real(fp)     , dimension(:)    , pointer :: accdps
+    real(fp)     , dimension(:)    , pointer :: horareas
+    real(fp)     , dimension(:)    , pointer :: volumes
+    real(fp)     , dimension(:,:)  , pointer :: mass_r1
+    real(fp)     , dimension(:,:)  , pointer :: fluxes
+    real(fp)     , dimension(:,:,:), pointer :: fluxes_r1
+    real(fp)     , dimension(:,:,:), pointer :: fluxes_sd
 !
-! Global variables
-!
-   type(tree_data), pointer              :: link_ptr
-   character(len=*)        , intent(in)  :: keyword
-   character(len=*)        , intent(in)  :: text
-   real(fp)                , intent(out) :: value
-   integer                 , intent(in)  :: id
-!
-! Local variables
-!
-    real(fp)          :: misvalue
-    character(80)     :: message
-!
-!! executable statements -------------------------------------------------------
-!
-    lundia  => gdp%gdinout%lundia
-    !
-    misvalue = -999.999
-    value    = misvalue
-    call prop_get(link_ptr, '*', keyword, value)
-    if (comparereal(value,misvalue) == 0) then
-       write(message,'(a,i0)') 'Unable to read '//trim(text)// ' ', id
-       call prterr(lundia, 'U021', message)
-       call d3stop(1, gdp)
-    endif
-end subroutine get_real_prop
+    end type gd_massbal

@@ -55,6 +55,7 @@ subroutine nefisio_alloc(gdp)
 !
 !! executable statements -------------------------------------------------------
 !
+    nelems = 0
     nelems(nefisrdtimc)       = 8
     nelems(nefisrdtimw)       = 3
     nelems(nefisrstcom)       = 8

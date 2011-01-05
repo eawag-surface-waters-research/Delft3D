@@ -921,6 +921,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
        ! only in case NST = ITHISC
        !
        if (nst == ithisc) then
+          call wrthisbal(ithisc    ,trifil    ,lundia    ,error     ,gdp       )
           if (.not. parll) then
              call wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
                        & itstrt    ,ithisi    ,zmodel    ,nostat    ,ntruv     , &
@@ -943,7 +944,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
           if (error) goto 9999
           if (dredge .and. .not. dadsmonly) then
              call wrthisdad(lundia    ,error     ,trifil    ,ithisc    , &
-                          & lsedtot   , gdp       )
+                          & lsedtot   ,gdp       )
              if (error) goto 9999
           endif
           if (culvert) then

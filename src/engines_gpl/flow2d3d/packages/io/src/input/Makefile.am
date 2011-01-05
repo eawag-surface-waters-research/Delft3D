@@ -36,8 +36,7 @@ libio_input_a_SOURCES = \
          ciofil.f90 \
          ck_dpopt.f90 \
          cmpnum.f90 \
-         dad_read_polygon_data.f90 \
-         dad_register_polygon.f90 \
+         polygon_module.f90 \
          depfil.f90 \
          depfil_double.f90 \
          dimbch.f90 \
@@ -60,7 +59,6 @@ libio_input_a_SOURCES = \
          fbcorr.f90 \
          flow_nefis_restart.f90 \
          flsfil.f90 \
-         get_real_prop.f90 \
          grdfil.f90 \
          hybfil.f90 \
          icfil.f90 \
@@ -87,6 +85,7 @@ libio_input_a_SOURCES = \
          rdirt.f90 \
          rdiwe.f90 \
          rdlaydis.f90 \
+         rdmassbal.f90 \
          rdmeteo.f90 \
          rdmor.f90 \
          rdmor0.f90 \

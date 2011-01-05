@@ -109,6 +109,7 @@ libkernel_compute_a_SOURCES = \
          turclo.f90 \
          ulim.f90 \
          updbar.f90 \
+         updmassbal.f90 \
          updwaqflx.f90 \
          upwhu.f90 \
          usrbcc.f90 \

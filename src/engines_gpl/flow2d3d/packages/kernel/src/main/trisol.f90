@@ -1,4 +1,4 @@
-subroutine trisol(dischy    ,solver    ,icreep    , &
+subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                 & timnow    ,nst       ,itiwec    ,trasol    ,forfuv    , &
                 & forfww    ,nfltyp    , &
                 & saleqs    ,temeqs    , &
@@ -558,6 +558,7 @@ subroutine trisol(dischy    ,solver    ,icreep    , &
 !
 ! Global variables
 !
+    integer              :: ithisc      !! History file output time step
     integer              :: icreep      !  Description and declaration in tricom.igs
     integer              :: itiwec      !!  Current time counter for the calibration of internal wave energy
     integer, intent(in)  :: keva        !  Description and declaration in tricom.igs
@@ -2144,6 +2145,9 @@ subroutine trisol(dischy    ,solver    ,icreep    , &
        call updwaqflx(nst       ,zmodel    ,nmmax     ,kmax      ,i(kcs)    , &
                     & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
                     & nsrc      ,r(disch)  ,gdp       )
+       call updmassbal(.false.  ,r(qxk)    ,r(qyk)    ,i(kcs)    ,r(r1)     , &
+                     & r(volum1),r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   , &
+                     & r(gsqs)  ,r(guu)    ,r(gvv)    ,d(dps)    ,gdp       )
        !
        ! Reset arrays for next half time step
        ! S0=S1, U0=U1, V0=V1, R0=R1 etc
@@ -3125,9 +3129,13 @@ subroutine trisol(dischy    ,solver    ,icreep    , &
           call timer_stop(timer_bott3d, gdp)
           call timer_stop(timer_3dmor, gdp)
        endif
+       !
        call updwaqflx(nst       ,zmodel    ,nmmax     ,kmax      ,i(kcs)    , &
                     & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
                     & nsrc      ,r(disch)  ,gdp       )
+       call updmassbal(nst+1 == ithisc,r(qxk)    ,r(qyk)    ,i(kcs)    ,r(r1)     , &
+                     & r(volum1),r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   , &
+                     & r(gsqs)  ,r(guu)    ,r(gvv)    ,d(dps)    ,gdp       )
        !
        ! Reset arrays for next half time step
        ! S0=S1, U0=U1, V0=V1, R0=R1 etc

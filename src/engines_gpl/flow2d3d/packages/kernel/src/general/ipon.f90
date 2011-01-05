@@ -56,9 +56,6 @@ subroutine ipon(xpoly     ,ypoly     ,n         ,xp        ,yp        , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     integer                    , pointer :: lundia
-    integer                    , pointer :: maxpolpoint
-    real(fp), dimension(:)     , pointer :: x
-    real(fp), dimension(:)     , pointer :: y
 !
 ! Global variables
 !
@@ -75,58 +72,30 @@ subroutine ipon(xpoly     ,ypoly     ,n         ,xp        ,yp        , &
     integer :: istat
     integer :: nunder
     real(fp):: ysn
+    real(fp):: xprev
+    real(fp):: yprev
+    real(fp):: xnext
+    real(fp):: ynext
 !
 ! executable statements ------------------------------------------------------
 !
     lundia       => gdp%gdinout%lundia
-    maxpolpoint  => gdp%gdipon%maxpolpoint
-    x            => gdp%gdipon%x
-    y            => gdp%gdipon%y
     !
-    if (n > maxpolpoint) then
-       !
-       ! ipon is a small routine that may be called for all points of a grid.
-       ! It should not be loaded with a allocate/deallocate each time it is called.
-       ! Therefore the allocated memory in the previous call is used, unless this
-       ! space is too small.
-       !
-       if (maxpolpoint > 0) then
-          deallocate (gdp%gdipon%x, stat = istat)
-          deallocate (gdp%gdipon%y, stat = istat)
-       endif
-       maxpolpoint = n
-       !
-       ! allocate the arrays x and y with one more than the number of points in the
-       ! polygon: the first point is copied in position n+1.
-       !
-                     allocate (gdp%gdipon%x(maxpolpoint+1), stat = istat)
-       if (istat==0) allocate (gdp%gdipon%y(maxpolpoint+1), stat = istat)
-       if (istat/=0) then
-          call prterr(lundia, 'U021', 'Ipon: memory alloc error')
-          call d3stop(1, gdp)
-       endif
-       !
-       ! include .igp again to be sure that the local pointers
-       ! point to the allocated memory
-       !
-    maxpolpoint  => gdp%gdipon%maxpolpoint
-    x            => gdp%gdipon%x
-    y            => gdp%gdipon%y
-    endif
-    do i = 1, n
-       x(i) = xpoly(i) - xp
-       y(i) = ypoly(i) - yp
-    enddo
-    x(n + 1) = x(1)
-    y(n + 1) = y(1)
+    xnext = xpoly(n) - xp
+    ynext = ypoly(n) - yp
     nunder   = 0
     do i = 1, n
-       if ((x(i)<0. .and. x(i + 1)>=0.).or.(x(i + 1)<0. .and. x(i)>=0.)) then
-          if (y(i)<0. .and. y(i + 1)<0.) then
+       xprev = xnext
+       yprev = ynext
+       xnext = xpoly(i) - xp
+       ynext = ypoly(i) - yp
+       !
+       if ((xprev<0. .and. xnext>=0.).or.(xnext<0. .and. xprev>=0.)) then
+          if (yprev<0. .and. ynext<0.) then
              nunder = nunder + 1
-          elseif ((y(i)<=0. .and. y(i + 1)>=0.) .or.                       &
-                & (y(i + 1)<=0. .and. y(i)>=0.)) then
-             ysn = (y(i)*x(i + 1) - x(i)*y(i + 1))/(x(i + 1) - x(i))
+          elseif ((yprev<=0. .and. ynext>=0.) .or.                       &
+                & (ynext<=0. .and. yprev>=0.)) then
+             ysn = (yprev*xnext - xprev*ynext)/(xnext - xprev)
              if (ysn<0.) then
                 nunder = nunder + 1
              elseif (ysn<=0.) then
@@ -139,8 +108,8 @@ subroutine ipon(xpoly     ,ypoly     ,n         ,xp        ,yp        , &
              endif
           else
           endif
-       elseif (abs(x(i))<1.0E-8 .and. abs(x(i + 1))<1.0E-8) then
-          if ((y(i)<=0. .and. y(i + 1)>=0.).or.(y(i + 1)<=0..and.y(i)>=0.)) &
+       elseif (abs(xprev)<1.0E-8 .and. abs(xnext)<1.0E-8) then
+          if ((yprev<=0. .and. ynext>=0.).or.(ynext<=0..and.yprev>=0.)) &
             & then
              !
              ! boundary

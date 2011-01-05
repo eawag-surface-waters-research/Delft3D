@@ -1,4 +1,5 @@
-subroutine initsafe(gdp)
+subroutine detectcelidt(fds       ,grpnam    ,elmnam    ,itc       ,celidt    , &
+                      & ierror    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -27,91 +28,57 @@ subroutine initsafe(gdp)
 !-------------------------------------------------------------------------------
 !!--description-----------------------------------------------------------------
 !
-! NONE
+! Writes the time varying Dredge and Dump group to the NEFIS HIS-DAT file
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-    use precision
-    use sp_buffer
-    use message_module
-    use bedcomposition_module
-    !
     use globaldata
     !
     implicit none
     !
     type(globdat),target :: gdp
     !
-    integer :: istat
+    ! The following list of pointer parameters is used to point inside the gdp structure
+    !
+!
+! Global variables
+!
+    integer                          , intent(in)   :: fds          ! NEFIS file handle
+    character(16)                    , intent(in)   :: grpnam       ! Data-group name for the NEFIS-file
+    character(16)                    , intent(in)   :: elmnam       ! Element name for the NEFIS-file
+    integer                          , intent(in)   :: itc          ! Time step to be written
+    integer                          , intent(out)  :: ierror       ! Error flag for NEFIS files
+    integer                          , intent(inout):: celidt       ! IN:  Last cell number
+                                                                    ! OUT: Cell index to be used
+!
+! Local variables
+!
+    integer                           , external    :: getelt
+!
+    integer         , dimension(1)                  :: idummy       ! Help array to read/write Nefis files 
+    integer                                         :: lastcl
+    integer         , dimension(3,5)                :: uindex
 !
 !! executable statements -------------------------------------------------------
 !
-    istat = 0
-    call tree_create  ( "Delft3D-FLOW input", gdp%input_tree )
-    nullify (gdp%mdfile_ptr)
     !
-    call initadv2d     (gdp)
-    call initbcdat     (gdp)
-    call initbedformpar(gdp)
-    call initbubble    (gdp)
-    call initcline     (gdp)
-    call initculver    (gdp)
-    call initcoup      (gdp)
-    call initdischarge (gdp)
-    call initdefsub    (gdp)
-    call initdpmveg    (gdp)
-    call initdredge    (gdp)
-    call initeqtran    (gdp)
-    call initerosed    (gdp)
-    call initf0isf1    (gdp)
-    call initflwpar    (gdp)
-    call initfmtbcc    (gdp)
-    call initfmtbct    (gdp)
-    call initfmtdis    (gdp)
-    call initfourier   (gdp)
-    call inithwid      (gdp)
-    call initincbc     (gdp)
-    call initincbcc    (gdp)
-    call initkeywtd    (gdp)
-    call initmassbal   (gdp)
-    call initmorpar    (gdp)
-    call initsedpar    (gdp)
-    call initstack     (gdp%messages)
-    istat = initmorlyr (gdp%gdmorlyr)
-    call initpostpr    (gdp)
-    call initrestart   (gdp)
-    call initprocs     (gdp)
-    call initrtc       (gdp)
-    call initscour     (gdp)
-    call initsnel      (gdp)
-    call initsobek     (gdp)
-    call initstations  (gdp)
-    call inittimers    (gdp)
-    call inittrachy    (gdp)
-    call inittrisol    (gdp)
-    call initupdbcc    (gdp)
-    call initupdbct    (gdp)
-    call initupddis    (gdp)
-    call initu_ppr     (gdp)
-    call initwaqpar    (gdp)
-    call initwrirst    (gdp)
-    call initwrline    (gdp)
-    call initz_initcg  (gdp)
-    call initzmodel    (gdp)
+    ! initialize group index time dependent data
     !
-    call sbuff_init
+    ierror = 0
+    uindex (1,1) = celidt ! start index
+    uindex (2,1) = celidt ! end index
+    uindex (3,1) = 1      ! increment in time
     !
-    ! Delft3D-MOR
-    !
-    call initcrvout    (gdp)
-    !
-    call initdfparall  (gdp) 
-    ! 
-    ! Since GDP allocation has not yet succeeded, I can't call prterr(...,gdp) and d3stop(...)
-    !
-    if (istat /= 0) then
-       write(*,*) 'ERROR during initialization of GDP structure'
-       stop 1
-    endif
-end subroutine initsafe
+    do while (celidt > 1)
+       idummy(1)   = -1
+       lastcl      = celidt - 1
+       uindex(1,1) = lastcl
+       uindex(2,1) = lastcl
+       ierror     = getelt(fds, grpnam, elmnam, uindex, 1, 4, idummy)
+       if (ierror/=0) return
+       if (idummy(1)<itc) return
+       celidt = lastcl
+    enddo
+    celidt = 1
+end subroutine detectcelidt

@@ -65,9 +65,11 @@
     integer, parameter :: nefiswrthisdis    = 39
     integer, parameter :: nefiswrcomwind    = 40
     integer, parameter :: nefiswrsedwaqm    = 41
+    integer, parameter :: nefiswrihisbal    = 42
+    integer, parameter :: nefiswrthisbal    = 43
 
 !
-    integer, parameter :: nrnefisfiles      = 41
+    integer, parameter :: nrnefisfiles      = 43
 !
     type nefiselement
        integer                                 :: celidt !  Index of cell to write to or to read

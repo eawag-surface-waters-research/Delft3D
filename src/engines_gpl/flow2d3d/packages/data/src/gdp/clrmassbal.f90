@@ -1,4 +1,4 @@
-subroutine initipon(gdp       )
+subroutine clrmassbal(istat, gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -31,25 +31,38 @@ subroutine initipon(gdp       )
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use flow_tables
+    !
     use globaldata
     !
     implicit none
     !
     type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    integer                    , pointer :: maxpolpoint
-    real(fp), dimension(:)     , pointer :: x
-    real(fp), dimension(:)     , pointer :: y
+!
+! Global variables
+!
+    integer,intent(out) :: istat
+!
+! Local variables
+!
 !
 !! executable statements -------------------------------------------------------
 !
-    maxpolpoint  => gdp%gdipon%maxpolpoint
-    x            => gdp%gdipon%x
-    y            => gdp%gdipon%y
+    if (associated(gdp%gdmassbal%volnames))  deallocate(gdp%gdmassbal%volnames , STAT = istat)
+    if (associated(gdp%gdmassbal%volnr))     deallocate(gdp%gdmassbal%volnr    , STAT = istat)
+    if (associated(gdp%gdmassbal%exchnr))    deallocate(gdp%gdmassbal%exchnr   , STAT = istat)
+    if (associated(gdp%gdmassbal%neighb))    deallocate(gdp%gdmassbal%neighb   , STAT = istat)
     !
-    maxpolpoint  = 0
-    nullify(gdp%gdipon%x)
-    nullify(gdp%gdipon%y)
-end subroutine initipon
+    if (associated(gdp%gdmassbal%accdps))    deallocate(gdp%gdmassbal%accdps   , STAT = istat)
+    if (associated(gdp%gdmassbal%horareas))  deallocate(gdp%gdmassbal%horareas , STAT = istat)
+    if (associated(gdp%gdmassbal%volumes))   deallocate(gdp%gdmassbal%volumes  , STAT = istat)
+    if (associated(gdp%gdmassbal%mass_r1))   deallocate(gdp%gdmassbal%mass_r1  , STAT = istat)
+    if (associated(gdp%gdmassbal%fluxes))    deallocate(gdp%gdmassbal%fluxes   , STAT = istat)
+    if (associated(gdp%gdmassbal%fluxes_r1)) deallocate(gdp%gdmassbal%fluxes_r1, STAT = istat)
+    if (associated(gdp%gdmassbal%fluxes_sd)) deallocate(gdp%gdmassbal%fluxes_sd, STAT = istat)
+    !
+    gdp%gdmassbal%nbalpol = 0
+    gdp%gdmassbal%nneighb = 0
+    gdp%gdmassbal%massbal = .false.
+    !
+end subroutine clrmassbal

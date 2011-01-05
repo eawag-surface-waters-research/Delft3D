@@ -72,6 +72,7 @@
 		<File RelativePath="include\keywtd.igs"/>
 		<File RelativePath="include\lognormal.inc"/>
 		<File RelativePath="include\luntmp.igs"/>
+		<File RelativePath="include\massbal.igs"/>
 		<File RelativePath="include\morpar.igs"/>
 		<File RelativePath="include\mudcoe.igs"/>
 		<File RelativePath="include\nefisio.igs"/>
@@ -166,6 +167,7 @@
 		<File RelativePath="src\gdp\clreqtran.f90"/>
 		<File RelativePath="src\gdp\clrerosed.f90"/>
 		<File RelativePath="src\gdp\clrflwpar.f90"/>
+		<File RelativePath="src\gdp\clrmassbal.f90"/>
 		<File RelativePath="src\gdp\clrmorpar.f90"/>
 		<File RelativePath="src\gdp\clrsedpar.f90"/>
 		<File RelativePath="src\gdp\clrtrachy.f90"/>
@@ -197,8 +199,8 @@
 		<File RelativePath="src\gdp\inithwid.f90"/>
 		<File RelativePath="src\gdp\initincbc.f90"/>
 		<File RelativePath="src\gdp\initincbcc.f90"/>
-		<File RelativePath="src\gdp\initipon.f90"/>
 		<File RelativePath="src\gdp\initkeywtd.f90"/>
+		<File RelativePath="src\gdp\initmassbal.f90"/>
 		<File RelativePath="src\gdp\initmorpar.f90"/>
 		<File RelativePath="src\gdp\initpostpr.f90"/>
 		<File RelativePath="src\gdp\initprocs.f90"/>

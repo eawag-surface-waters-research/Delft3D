@@ -85,6 +85,7 @@ module globaldata
     include 'iwepar.igs'
     include 'keywtd.igs'
     include 'luntmp.igs'
+    include 'massbal.igs'
     include 'morpar.igs'
     include 'mudcoe.igs'
     include 'nfl.igs'
@@ -178,6 +179,7 @@ module globaldata
        type (gd_iwepar)   , pointer :: gdiwepar
        type (gd_keywtd)   , pointer :: gdkeywtd
        type (gd_luntmp)   , pointer :: gdluntmp
+       type (gd_massbal)  , pointer :: gdmassbal
        type (gd_morpar)   , pointer :: gdmorpar
        type (gd_mudcoe)   , pointer :: gdmudcoe
        type (gd_nfl)      , pointer :: gdnfl
@@ -216,7 +218,6 @@ module globaldata
        type (sv_inibcc)   , pointer :: gdinibcc
        type (sv_inibct)   , pointer :: gdinibct
        type (sv_inidis)   , pointer :: gdinidis
-       type (sv_ipon)     , pointer :: gdipon
        type (sv_postpr)   , pointer :: gdpostpr
        type (sv_restart)  , pointer :: gdrestart
        type (sv_rtc)      , pointer :: gdrtc

@@ -60,7 +60,6 @@ subroutine gdp_dealloc(gdp)
     logical :: localrhum_file
     logical :: localtair_file
     logical :: localclou_file
-    integer :: localmaxpolpoint
     logical :: localculvert
     logical :: localdrogue
     logical :: locallftrto
@@ -86,7 +85,6 @@ subroutine gdp_dealloc(gdp)
     localrhum_file   = gdp%gdheat%rhum_file
     localtair_file   = gdp%gdheat%tair_file
     localclou_file   = gdp%gdheat%clou_file
-    localmaxpolpoint = gdp%gdipon%maxpolpoint
     localculvert     = gdp%gdprocs%culvert
     localdrogue      = gdp%gdprocs%drogue
     locallftrto      = gdp%gdprocs%lftrto
@@ -252,17 +250,14 @@ subroutine gdp_dealloc(gdp)
     deallocate (gdp%gdsedpar)
     deallocate (gdp%gdmorpar)
     deallocate (gdp%gdmorlyr)
+    call clrmassbal(istat, gdp)
+    deallocate (gdp%gdmassbal)
     deallocate (gdp%gdf0isf1)
     deallocate (gdp%gdincbc)
     deallocate (gdp%gdincbcc)
     deallocate (gdp%gdinibcc)
     deallocate (gdp%gdinibct)
     deallocate (gdp%gdinidis)
-    if (localmaxpolpoint>0) then
-       if (associated(gdp%gdipon%x)) deallocate (gdp%gdipon%x, STAT = istat)
-       if (associated(gdp%gdipon%y)) deallocate (gdp%gdipon%y, STAT = istat)
-    endif
-    deallocate (gdp%gdipon)
     deallocate (gdp%gdpostpr)
     deallocate (gdp%gdrestart)
     if (gdp%gdrtc%rtcmod == dataFromFLOWToRTC) then

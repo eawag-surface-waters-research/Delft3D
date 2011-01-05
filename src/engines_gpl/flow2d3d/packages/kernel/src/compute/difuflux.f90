@@ -53,7 +53,8 @@ subroutine difuflux(stage     ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
     real(fp), dimension(:,:,:)         , pointer :: fluxv
     real(fp), dimension(:,:,:)         , pointer :: fluxvc
     type (flwoutputtype)               , pointer :: flwoutput
-    type (gd_flwpar)                   , pointer :: gdflwpar
+    !
+    logical                            , pointer :: massbal
 !
 ! Global variables
 !
@@ -116,17 +117,18 @@ subroutine difuflux(stage     ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
     fluxv          => gdp%gdflwpar%fluxv
     fluxvc         => gdp%gdflwpar%fluxvc
     flwoutput      => gdp%gdflwpar%flwoutput
-    gdflwpar       => gdp%gdflwpar
     !
-    if (.not. flwoutput%difuflux .and. lsed==0) return
+    massbal        => gdp%gdmassbal%massbal
+    !
+    if (.not. flwoutput%difuflux .and. lsed==0 .and. .not. massbal) return
     !
     istat = 0
-    if (.not. associated(gdflwpar%fluxu)) then
-       if (istat==0) allocate (gdflwpar%fluxu(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), stat = istat)
-       if (istat==0) allocate (gdflwpar%fluxv(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), stat = istat)
+    if (.not. associated(gdp%gdflwpar%fluxu)) then
+       if (istat==0) allocate (gdp%gdflwpar%fluxu(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), stat = istat)
+       if (istat==0) allocate (gdp%gdflwpar%fluxv(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), stat = istat)
        if (flwoutput%cumdifuflux) then
-          if (istat==0) allocate (gdflwpar%fluxuc(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), stat = istat)
-          if (istat==0) allocate (gdflwpar%fluxvc(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), stat = istat)
+          if (istat==0) allocate (gdp%gdflwpar%fluxuc(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), stat = istat)
+          if (istat==0) allocate (gdp%gdflwpar%fluxvc(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), stat = istat)
        endif
        !
        if (istat /= 0) then
@@ -136,12 +138,10 @@ subroutine difuflux(stage     ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
        !
        ! include IGP file again to update references
        !
-    fluxu          => gdp%gdflwpar%fluxu
-    fluxuc         => gdp%gdflwpar%fluxuc
-    fluxv          => gdp%gdflwpar%fluxv
-    fluxvc         => gdp%gdflwpar%fluxvc
-    flwoutput      => gdp%gdflwpar%flwoutput
-    gdflwpar       => gdp%gdflwpar
+       fluxu          => gdp%gdflwpar%fluxu
+       fluxuc         => gdp%gdflwpar%fluxuc
+       fluxv          => gdp%gdflwpar%fluxv
+       fluxvc         => gdp%gdflwpar%fluxvc
        !
        if (flwoutput%cumdifuflux) then
           fluxuc = 0.0
