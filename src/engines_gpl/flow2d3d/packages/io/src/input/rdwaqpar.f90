@@ -135,31 +135,20 @@ subroutine rdwaqpar(lundia, error, kmax, dt, itcomf, itcomi, itcoml, gdp)
        call d3stop(1, gdp)
     endif
     !
+    ! Update local pointer to point to newly allocated memory
+    !
+    ilaggr     => gdp%gdwaqpar%ilaggr
+    !
     ! Read value of keyword WaqOL in the mdf-file 
     ! When WaqOL = true, FLOW and WAQ communicate online via WAQ input files 
     ! Default WaqOL = false
     !
     call prop_get_logical(gdp%mdfile_ptr, '*', 'WaqOL', waqol)
     !
-    ! include .igp again such that the local pointers
-    ! point to the allocated memory
-    !
-    aggre      => gdp%gdwaqpar%aggre
-    itwqff     => gdp%gdwaqpar%itwqff
-    itwqfi     => gdp%gdwaqpar%itwqfi
-    itwqfl     => gdp%gdwaqpar%itwqfl
-    ilaggr     => gdp%gdwaqpar%ilaggr
-    quwaq      => gdp%gdwaqpar%quwaq
-    qvwaq      => gdp%gdwaqpar%qvwaq
-    qwwaq      => gdp%gdwaqpar%qwwaq
-    discumwaq  => gdp%gdwaqpar%discumwaq 
-    waqfil     => gdp%gdwaqpar%waqfil
-    waqol      => gdp%gdwaqpar%waqol
-    flaggr     => gdp%gdwaqpar%flaggr
-    !
     ilaggrInput = 0
     call prop_get(gdp%mdfile_ptr, '*', 'ilaggr', ilaggrInput, kmax)
     if (ilaggrInput(1) == 0) then
+       ilaggrInput = 1 ! set ilaggrInput to "all ones" for echo to tri-diag file.
        do i = 1, kmax
           ilaggr(i) = i
        enddo
@@ -275,7 +264,7 @@ subroutine rdwaqpar(lundia, error, kmax, dt, itcomf, itcomi, itcoml, gdp)
           message = ' '
           if (i == 1) then
              write(message,'(i0)') ilaggrInput(i)
-          else
+          elseif (ilaggrInput(i)>0) then ! don't show zeroes at end
              write(message,'(a,i0)') ', ', ilaggrInput(i)
           endif
           txtput2 = trim(txtput2)//trim(message)
@@ -313,20 +302,12 @@ subroutine rdwaqpar(lundia, error, kmax, dt, itcomf, itcomi, itcoml, gdp)
           call d3stop(1, gdp)
        endif
        !
-       ! include IGP file again to update references
+       ! Update local pointers to point to newly allocated memory
        !
-    aggre      => gdp%gdwaqpar%aggre
-    itwqff     => gdp%gdwaqpar%itwqff
-    itwqfi     => gdp%gdwaqpar%itwqfi
-    itwqfl     => gdp%gdwaqpar%itwqfl
-    ilaggr     => gdp%gdwaqpar%ilaggr
-    quwaq      => gdp%gdwaqpar%quwaq
-    qvwaq      => gdp%gdwaqpar%qvwaq
-    qwwaq      => gdp%gdwaqpar%qwwaq
-    discumwaq  => gdp%gdwaqpar%discumwaq 
-    waqfil     => gdp%gdwaqpar%waqfil
-    waqol      => gdp%gdwaqpar%waqol
-    flaggr     => gdp%gdwaqpar%flaggr
+       quwaq      => gdp%gdwaqpar%quwaq
+       qvwaq      => gdp%gdwaqpar%qvwaq
+       qwwaq      => gdp%gdwaqpar%qwwaq
+       discumwaq  => gdp%gdwaqpar%discumwaq 
     endif
     !
     ! Initialize arrays allocated
