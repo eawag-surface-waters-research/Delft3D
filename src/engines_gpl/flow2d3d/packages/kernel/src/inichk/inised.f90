@@ -47,9 +47,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    real(fp)                             , pointer :: eps
     integer,        dimension(:)         , pointer :: iform
-    real(fp),       dimension(:,:)       , pointer :: par
     real(fp), dimension(:)               , pointer :: dm
     real(fp), dimension(:)               , pointer :: dg
     real(fp), dimension(:,:)             , pointer :: dxx
@@ -62,11 +60,8 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     real(fp), dimension(:,:)             , pointer :: ssvvc
     real(fp), dimension(:,:)             , pointer :: sucor
     real(fp), dimension(:,:)             , pointer :: svcor
-    type (sv_erosed)                     , pointer :: sverosed
     real(fp)                             , pointer :: dsand
     real(fp)                             , pointer :: dgravel
-    real(fp)                             , pointer :: sus
-    real(fp)                             , pointer :: bed
     integer                              , pointer :: nxx
     real(fp)              , dimension(:) , pointer :: xx
     real(fp)                             , pointer :: rhow
@@ -101,7 +96,6 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     logical                              , pointer :: anymud
     character(256)                       , pointer :: flsdia
     character(256)                       , pointer :: flsmdc
-    type (gd_sedpar)                     , pointer :: gdsedpar
     real(fp)                             , pointer :: factcr
 !
 ! Global variables
@@ -134,9 +128,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
 !
 !! executable statements -------------------------------------------------------
 !
-    eps                 => gdp%gdconst%eps
     iform               => gdp%gdeqtran%iform
-    par                 => gdp%gdeqtran%par
     dm                  => gdp%gderosed%dm
     dg                  => gdp%gderosed%dg
     dxx                 => gdp%gderosed%dxx
@@ -149,11 +141,8 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     ssvvc               => gdp%gderosed%ssvvc
     sucor               => gdp%gderosed%sucor
     svcor               => gdp%gderosed%svcor
-    sverosed            => gdp%gderosed
     dsand               => gdp%gdmorpar%dsand
     dgravel             => gdp%gdmorpar%dgravel
-    sus                 => gdp%gdmorpar%sus
-    bed                 => gdp%gdmorpar%bed
     nxx                 => gdp%gdmorpar%nxx
     xx                  => gdp%gdmorpar%xx
     rhow                => gdp%gdphysco%rhow
@@ -188,7 +177,6 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     anymud              => gdp%gdsedpar%anymud
     flsdia              => gdp%gdsedpar%flsdia
     flsmdc              => gdp%gdsedpar%flsmdc
-    gdsedpar            => gdp%gdsedpar
     factcr              => gdp%gdmorpar%factcr
     !
     nmlb    = gdp%d%nmlb
@@ -200,42 +188,43 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     !
     fmttmp = 'formatted'
     istat  = 0
-    if (.not. associated(sverosed%dm)) then
-                     allocate (sverosed%dm     (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
-       if (istat==0) allocate (sverosed%dg     (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
-       if (istat==0) allocate (sverosed%dxx    (gdp%d%nmlb:gdp%d%nmub,nxx)    , stat = istat)
-       if (istat==0) allocate (sverosed%frac   (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (sverosed%mudfrac(gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
-       if (istat==0) allocate (sverosed%hidexp (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (sverosed%sbuuc  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (sverosed%sbvvc  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (sverosed%ssuuc  (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
-       if (istat==0) allocate (sverosed%ssvvc  (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
-       if (istat==0) allocate (sverosed%sucor  (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
-       if (istat==0) allocate (sverosed%svcor  (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
+    if (.not. associated(gdp%gderosed%dm)) then
+                     allocate (gdp%gderosed%dm     (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%dg     (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%dxx    (gdp%d%nmlb:gdp%d%nmub,nxx)    , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%frac   (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%mudfrac(gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%hidexp (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%sbuuc  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%sbvvc  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%ssuuc  (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%ssvvc  (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%sucor  (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%svcor  (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
        if (istat/=0) then
           call prterr(lundia, 'U021', 'Inised: memory alloc error')
           call d3stop(1, gdp)
        endif
-    dm                  => gdp%gderosed%dm
-    dg                  => gdp%gderosed%dg
-    dxx                 => gdp%gderosed%dxx
-    frac                => gdp%gderosed%frac
-    mudfrac             => gdp%gderosed%mudfrac
-    hidexp              => gdp%gderosed%hidexp
-    sbuuc               => gdp%gderosed%sbuuc
-    sbvvc               => gdp%gderosed%sbvvc
-    ssuuc               => gdp%gderosed%ssuuc
-    ssvvc               => gdp%gderosed%ssvvc
-    sucor               => gdp%gderosed%sucor
-    svcor               => gdp%gderosed%svcor
-    sverosed            => gdp%gderosed
+       !
+       dm                  => gdp%gderosed%dm
+       dg                  => gdp%gderosed%dg
+       dxx                 => gdp%gderosed%dxx
+       frac                => gdp%gderosed%frac
+       mudfrac             => gdp%gderosed%mudfrac
+       hidexp              => gdp%gderosed%hidexp
+       sbuuc               => gdp%gderosed%sbuuc
+       sbvvc               => gdp%gderosed%sbvvc
+       ssuuc               => gdp%gderosed%ssuuc
+       ssvvc               => gdp%gderosed%ssvvc
+       sucor               => gdp%gderosed%sucor
+       svcor               => gdp%gderosed%svcor
        !
        dm      = 0.0
        dg      = 0.0
        dxx     = 0.0
-       mudfrac = 0.0
        frac    = 0.0
+       mudfrac = 0.0
+       hidexp  = 0.0
        sucor   = 0.0
        svcor   = 0.0
     endif
@@ -254,41 +243,12 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
        !  Space varying data has been specified
        !  Use routine that also read the depth file to read the data
        !
-       allocate (gdsedpar%sedd50fld(gdp%d%nmlb:gdp%d%nmub), stat = istat)
+       allocate (gdp%gdsedpar%sedd50fld(gdp%d%nmlb:gdp%d%nmub), stat = istat)
        if (istat /= 0) then
           call prterr(lundia, 'U021', 'Inised: memory alloc error')
           call d3stop(1, gdp)
        endif
-    mdcuni              => gdp%gdsedpar%mdcuni
-    rhosol              => gdp%gdsedpar%rhosol
-    logseddia           => gdp%gdsedpar%logseddia
-    logsedsig           => gdp%gdsedpar%logsedsig
-    sedd50              => gdp%gdsedpar%sedd50
-    sedd50fld           => gdp%gdsedpar%sedd50fld
-    cdryb               => gdp%gdsedpar%cdryb
-    dstar               => gdp%gdsedpar%dstar
-    taucr               => gdp%gdsedpar%taucr
-    tetacr              => gdp%gdsedpar%tetacr
-    ws0                 => gdp%gdsedpar%ws0
-    sdbuni              => gdp%gdsedpar%sdbuni
-    tcrdep              => gdp%gdsedpar%tcrdep
-    tcduni              => gdp%gdsedpar%tcduni
-    tcrero              => gdp%gdsedpar%tcrero
-    tceuni              => gdp%gdsedpar%tceuni
-    eropar              => gdp%gdsedpar%eropar
-    erouni              => gdp%gdsedpar%erouni
-    mudcnt              => gdp%gdsedpar%mudcnt
-    nseddia             => gdp%gdsedpar%nseddia
-    inisedunit          => gdp%gdsedpar%inisedunit
-    sedtyp              => gdp%gdsedpar%sedtyp
-    flsdbd              => gdp%gdsedpar%flsdbd
-    flstcd              => gdp%gdsedpar%flstcd
-    flstce              => gdp%gdsedpar%flstce
-    flsero              => gdp%gdsedpar%flsero
-    anymud              => gdp%gdsedpar%anymud
-    flsdia              => gdp%gdsedpar%flsdia
-    flsmdc              => gdp%gdsedpar%flsmdc
-    gdsedpar            => gdp%gdsedpar
+       sedd50fld           => gdp%gdsedpar%sedd50fld
        !
        call depfil(lundia    ,error     ,flsdia    ,fmttmp    ,mmax      , &
                  & nmax      ,nmaxus    ,sedd50fld ,gdp       )
@@ -467,18 +427,20 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     !
     call compdmean(frac      ,sedd50    ,nmmax     ,lsedtot   , &
                  & sedtyp    ,dm        ,sedd50fld ,logsedsig , &
-                 & gdp       )
+                 & nmlb      ,nmub      )
     !
     ! Calculate geometric mean sediment diameter Dg
     !
     call compdgeomean(frac      ,sedd50    ,nmmax     ,lsedtot   , &
-                    & sedtyp    ,dg        ,sedd50fld ,gdp       )
+                    & sedtyp    ,dg        ,sedd50fld ,nmlb      , &
+                    & nmub      )
     !
     ! Calculate percentiles Dxx
     !
     call compdxx(frac      ,nseddia   ,logseddia ,logsedsig , &
                & nmmax     ,lsedtot   ,sedtyp    ,dxx       , &
-               & xx        ,nxx       ,sedd50fld ,gdp       )
+               & xx        ,nxx       ,sedd50fld ,nmlb      , &
+               & nmub      )
     !
     ! Determine hiding & exposure factors
     !
