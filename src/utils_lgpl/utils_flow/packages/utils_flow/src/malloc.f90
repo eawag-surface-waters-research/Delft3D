@@ -84,6 +84,7 @@ interface realloc
    module procedure reallocReal2
    module procedure reallocReal2x
    module procedure reallocReal3
+   module procedure reallocReal3x
    module procedure reallocReal4
    module procedure reallocDouble
    module procedure reallocDouble2
@@ -806,6 +807,23 @@ subroutine reallocInt3(arr, uindex, lindex, stat, fill, keepExisting)
    endif
    if (present(stat)) stat = localErr
 end subroutine
+
+subroutine reallocReal3x(arr, u1, u2, u3, l1, l2, l3, stat)
+   real, allocatable, intent(inout)             :: arr(:, :, :)
+   integer                                      :: u1, u2, u3
+   integer, optional                            :: l1, l2, l3
+   integer                                      :: uindex(3)
+   integer                                      :: lindex(3)
+   integer, intent(out), optional               :: stat
+
+   uindex = (/u1, u2, u3/)
+   if (present(l1)) then
+      lindex = (/l1, l2, l3/)
+      call reallocReal3(arr, uindex, lindex, stat = stat)
+   else
+      call reallocReal3(arr, uindex, stat = stat)
+   endif
+end subroutine reallocReal3x
 
 subroutine reallocReal3(arr, uindex, lindex, stat, fill, keepExisting)
    real, allocatable, intent(inout) :: arr(:,:,:)
