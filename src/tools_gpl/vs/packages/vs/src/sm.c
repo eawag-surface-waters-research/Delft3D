@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 /*
 
         Viewer/Selector Structure Management Functions

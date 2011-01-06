@@ -26,6 +26,8 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Writes the time varying data for the morphological under layers

@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.                                     
 //                                                                              
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 #ifndef _NEF_DEF_H_
 #define _NEF_DEF_H_
 

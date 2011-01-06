@@ -27,6 +27,8 @@ subroutine massfl(c         ,dir       ,ewave1    ,eroll1    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 ! NONE
 !!--pseudo code and references--------------------------------------------------

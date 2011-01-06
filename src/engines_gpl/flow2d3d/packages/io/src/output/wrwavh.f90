@@ -27,6 +27,8 @@ subroutine wrwavh(lundia    ,error     ,trifil    ,ithisc    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! Writes the time varying data for waves (6 & 7)

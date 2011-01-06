@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 /*
  *   <wl-xdr.c> - Conversion from machine code and IEEE by calling XDR routines
  *

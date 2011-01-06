@@ -24,6 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 type gd_prognm
    integer      :: numdomains    ! Number of subdomains
    integer      :: nummappers    ! Number of mappers: one for each DD boundary,

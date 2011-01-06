@@ -29,6 +29,8 @@ subroutine wrrolm(lundia    ,error     ,trifil    ,itmapc    ,nmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! Writes the time varying data for roller effect

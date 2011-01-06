@@ -25,6 +25,8 @@ module swan_input
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! WAVE-GUI version number dependencies:

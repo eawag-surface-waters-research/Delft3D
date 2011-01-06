@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 //------------------------------------------------------------------------------
 //  Delft-FSM (Fortran Shared Memory)
 //  Definitions for use by FSM itself (in fsm.cpp)

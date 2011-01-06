@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 /*
 
  System      : Viewer/Selector
@@ -36,7 +38,7 @@
  $Log: /delft3d/libraries/vs/progsrc/viewsel.c $
 */
 
-static char rcsid[] = "$Id: viewsel.c,v 1.10 1997/01/31 08:56:25 scherjo Exp $";
+static char rcsid[] = "$Id$";
 
 #include <signal.h>
 #include <stdio.h>

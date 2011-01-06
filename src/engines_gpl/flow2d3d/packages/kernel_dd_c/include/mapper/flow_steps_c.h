@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.                                     
 //                                                                              
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 ///--description-----------------------------------------------------------------
 //
 //  Enumeration of states for DELFT3D-FLOW and its D3dFlow-Mapper

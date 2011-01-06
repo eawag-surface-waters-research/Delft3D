@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 /*                                           */
 /* <btps.h> -  Basic types                   */
 /*                                           */

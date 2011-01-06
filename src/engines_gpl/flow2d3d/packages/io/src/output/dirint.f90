@@ -30,6 +30,8 @@ subroutine dirint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !

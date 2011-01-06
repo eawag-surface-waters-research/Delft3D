@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.                                     
 //                                                                              
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 // smalltest.cpp --
 //     Small test program for the stream library suitable for Windows
 //

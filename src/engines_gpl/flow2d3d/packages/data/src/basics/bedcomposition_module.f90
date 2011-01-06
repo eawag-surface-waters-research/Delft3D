@@ -25,6 +25,8 @@ module bedcomposition_module
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--module description----------------------------------------------------------
 !
 ! This module keeps track of the bed composition at one or more locations. The
@@ -183,8 +185,8 @@ subroutine bedcomposition_module_info(messages)
     !
     type(message_stack), pointer :: messages
     !
-    call addmessage(messages,'$Id: bedcomposition_module.f90 14207 2010-12-21 17:25:13Z mourits $')
-    call addmessage(messages,'$URL: https://repos.deltares.nl/repos/ds/branches/feature/delft3d/modules/d3d_flow/20101104_14542_open_source_testbranch/open_trunk/src/engines_gpl/flow2d3d/packages/data/src/basics/bedcomposition_module.f90 $')
+    call addmessage(messages,'$Id$')
+    call addmessage(messages,'$URL$')
 end subroutine bedcomposition_module_info
 !
 !

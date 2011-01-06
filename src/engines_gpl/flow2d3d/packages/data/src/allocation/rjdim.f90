@@ -25,6 +25,8 @@ subroutine rjdim(lundia, error, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Determines memory requirements for the

@@ -24,6 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 integer, parameter :: mxusrp = 10 !  Max. number of user defined parameters (e.g. files, constants etc.)
 !
 type gd_usrpar

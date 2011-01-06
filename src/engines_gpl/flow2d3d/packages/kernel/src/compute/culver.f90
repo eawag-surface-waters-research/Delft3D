@@ -28,6 +28,8 @@ subroutine culver(icx       ,icy       ,kmax      ,nsrc      ,kfs       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 ! Computes the discharge relation through a culvert.
 !
@@ -476,6 +478,8 @@ integer function intlay    (lundia     ,zmodel    ,kfsmin    ,kfsmax    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 ! Computes the discharge relation through a culvert.
 !

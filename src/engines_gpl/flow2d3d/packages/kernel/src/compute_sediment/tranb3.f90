@@ -26,6 +26,8 @@ subroutine tranb3(kode      ,ntrsi     ,utot      ,d35       ,c         , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 ! computes sediment transport according to
 ! swanby (ackers white)

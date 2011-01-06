@@ -25,6 +25,8 @@ subroutine delnef(filnam    ,gdp       )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Delete DELFT3D-NEFIS files if exists

@@ -25,6 +25,8 @@ subroutine dfsendnb ( iptr, ilen, itype, idest, itag, gdp )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !   Data is sent to a neighbour

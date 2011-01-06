@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.                                     
 //                                                                              
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 /* ------------------------------------------------------------------
    Emulation of shared memory simply using malloc() and free()
    Define the prototypes and macros

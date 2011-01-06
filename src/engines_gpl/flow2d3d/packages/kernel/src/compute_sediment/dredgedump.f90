@@ -26,6 +26,8 @@ subroutine dredgedump(dbodsd    ,cdryb     ,nst       ,timhr     ,morft     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! Switch from nm to n,m

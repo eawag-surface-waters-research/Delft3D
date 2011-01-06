@@ -25,6 +25,8 @@ subroutine griddims( gdp )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Initialises grid related dimensions

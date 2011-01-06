@@ -25,6 +25,8 @@ subroutine get_flow_fields (sif, fg, f2s, wavedata, sr, flowVelocityType)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 ! NONE
 !!--pseudo code and references--------------------------------------------------

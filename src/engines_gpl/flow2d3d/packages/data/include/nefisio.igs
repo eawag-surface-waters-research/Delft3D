@@ -24,6 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
     integer, parameter :: nefisrdtimc       =  1
     integer, parameter :: nefisrdtimw       =  2
     integer, parameter :: nefisrstcom       =  3

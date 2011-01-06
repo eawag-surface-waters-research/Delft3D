@@ -27,6 +27,8 @@ subroutine compdgeomean(frac      ,sedd50    ,nmmax     ,lsedtot   , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! Function: Determines the geometric mean diameter of the non-mud fractions

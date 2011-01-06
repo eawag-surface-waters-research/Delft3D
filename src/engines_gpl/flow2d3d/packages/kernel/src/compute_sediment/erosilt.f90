@@ -31,6 +31,8 @@ subroutine erosilt(nmmax   ,icx     ,icy     ,kcs     ,kfs     ,kfu     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes sediment fluxes at the bed using

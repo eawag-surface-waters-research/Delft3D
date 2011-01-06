@@ -28,6 +28,8 @@ subroutine wrthisdis(lundia    ,error     ,trifil    ,ithisc    ,zmodel    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! Writes the time varying Discharge group to the NEFIS HIS-DAT file

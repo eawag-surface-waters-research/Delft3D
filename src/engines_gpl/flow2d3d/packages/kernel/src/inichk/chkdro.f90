@@ -28,6 +28,8 @@ subroutine chkdro(lundia    ,itstrt    ,itstop    ,drogue    ,itdrof    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: - checks if release time  and stop time of

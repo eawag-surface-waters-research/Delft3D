@@ -26,6 +26,8 @@ subroutine updqs(flupd     ,dstep     ,j         ,nmmaxj    ,kmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Update cummelative values for discharges QU, QV

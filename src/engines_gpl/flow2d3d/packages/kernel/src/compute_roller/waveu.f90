@@ -27,6 +27,8 @@ subroutine waveu(nmmax     ,kfs       ,sourw     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !

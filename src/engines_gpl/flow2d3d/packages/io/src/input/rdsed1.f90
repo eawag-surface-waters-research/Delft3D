@@ -29,6 +29,8 @@ subroutine rdsed1(nr_sed    ,luninp    ,lundia    ,csoil     ,iopsus    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! Read  sediment input version 1

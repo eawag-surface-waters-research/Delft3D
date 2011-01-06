@@ -26,6 +26,8 @@ subroutine comphidexp(frac      ,dm        ,nmmax     ,lsedtot   , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Update underlayer bookkeeping system for erosion/sedimentation

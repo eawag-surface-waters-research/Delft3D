@@ -24,6 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !--------------------------------------------------------------------------------
 !   DelftOnline -- Constant Definitions for Fortran
 !

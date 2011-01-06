@@ -30,6 +30,8 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description----------------------------------------------------------------- 
 ! 
 !    Function: Writes initial output to output files 

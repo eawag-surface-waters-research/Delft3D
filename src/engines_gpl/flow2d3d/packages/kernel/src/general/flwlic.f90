@@ -26,6 +26,8 @@ subroutine flwlic(lunscr    ,error     ,username    ,version_full ,version_short
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Obtains add-ons, checks validity of program ver-

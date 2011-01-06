@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 /*
 
  System      : Viewer/Selector
@@ -40,7 +42,7 @@
 #ifndef _GR_INCLUDED
 #   ifndef MSDOS
 #	ifndef __lint
-	static char GR_rcsid[] = "$Id: gr.h,v 1.2 1997/11/18 12:40:43 mooiman Exp $";
+	static char GR_rcsid[] = "$Id$";
 #	endif
 #   endif
 

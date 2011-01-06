@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 /*                                               */
 /* <nefis.h> -  Basic types                     */
 /*                                               */

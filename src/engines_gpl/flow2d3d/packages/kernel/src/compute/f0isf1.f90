@@ -39,6 +39,8 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Copies the contents of the variable at the old

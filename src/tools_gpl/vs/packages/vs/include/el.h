@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 
 #ifndef _EL_INCLUDED
 #   define _EL_INCLUDED

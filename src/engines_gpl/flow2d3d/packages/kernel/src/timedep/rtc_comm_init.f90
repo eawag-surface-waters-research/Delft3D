@@ -27,6 +27,8 @@ subroutine rtc_comm_init(error      ,nambar    ,kfs       ,kfsmin    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! This routine initializes the communication with the RTC module

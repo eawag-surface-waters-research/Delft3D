@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 
 #ifndef _WR_INCLUDED
 #   define _WR_INCLUDED

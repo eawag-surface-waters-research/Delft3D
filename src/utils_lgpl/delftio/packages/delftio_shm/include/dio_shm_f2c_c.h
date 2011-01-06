@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.                                     
 //                                                                              
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 //
 //  dio_shm_f2c_c.h: DelftIO Shared Memory F90 to C interface, C part.
 //

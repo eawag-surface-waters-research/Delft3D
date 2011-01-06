@@ -31,6 +31,8 @@ subroutine forfil(nmmax     ,kmax      ,lstsci    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Filters concentrations. Numerical diffusion is

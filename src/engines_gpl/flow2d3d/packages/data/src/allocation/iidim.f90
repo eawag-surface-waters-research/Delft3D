@@ -25,6 +25,8 @@ subroutine iidim(lundia, error, verify, zmodel, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! Determines memory requirements for the INTEGER ARRAY.

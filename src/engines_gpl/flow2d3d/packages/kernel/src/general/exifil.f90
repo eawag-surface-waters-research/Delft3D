@@ -25,6 +25,8 @@ function exifil(file      ,lundia    ,errornr    ,gdp       )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: A logical function which checks the existence of a

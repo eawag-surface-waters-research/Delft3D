@@ -25,6 +25,8 @@ subroutine adjlin ( ival, outside, mmax, nmax )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !   Checks how a piece of line of dry points, thin dams, e.g., is located

@@ -25,6 +25,8 @@ subroutine updbct(lundia, filnam, ntof, nto, kcd, kmax, hydrbc, tprofu, error, g
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the time dependent hydrodynamic BC using tables module

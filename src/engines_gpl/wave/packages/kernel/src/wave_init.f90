@@ -25,6 +25,8 @@ subroutine wave_init (mdw_file)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! Reads the name of the mdw file from the command line

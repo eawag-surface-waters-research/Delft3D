@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 //-----------------------------------------------------------------------------
 //  DelftOnline - Microsoft Windows-specific Definitions
 //

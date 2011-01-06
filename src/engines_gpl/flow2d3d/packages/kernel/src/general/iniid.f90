@@ -26,6 +26,8 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Reads RUN IDentification code from file 'runid'

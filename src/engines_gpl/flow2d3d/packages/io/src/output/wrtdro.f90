@@ -26,6 +26,8 @@ subroutine wrtdro(lundia    ,error     ,trifil    ,itdroc    ,itdrof    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Writes the time varying groups (2 & 3) to the

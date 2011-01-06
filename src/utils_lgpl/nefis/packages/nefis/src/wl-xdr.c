@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 /*
  *   <nef-xdr.c> - Conversion from machine code and IEEE by swapping bytes
  *

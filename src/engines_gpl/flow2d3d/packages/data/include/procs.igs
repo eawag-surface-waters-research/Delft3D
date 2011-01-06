@@ -24,6 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 type gd_procs
    logical :: wind          = .false. !  Wind
    logical :: salin         = .false. !  Salinity

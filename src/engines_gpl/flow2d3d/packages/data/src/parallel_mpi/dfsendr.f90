@@ -25,6 +25,8 @@ subroutine dfsendr ( field, work, worksize, ks, ke, request, tag, gdp )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !   Updates field array of type single precision through exchanging halo values

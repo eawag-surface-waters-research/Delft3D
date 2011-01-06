@@ -27,6 +27,8 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! Reads Dredge and Dump input file.

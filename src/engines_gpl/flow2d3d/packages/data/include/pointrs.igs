@@ -24,6 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
     integer, parameter :: mxcpnt = 200
                              !  Maximum number of pointers to
                              !  declare for CH (see pointrs.inc)

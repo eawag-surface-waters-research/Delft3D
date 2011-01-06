@@ -26,6 +26,8 @@ subroutine decarr(lunmd     ,lundia    ,error     ,runid     ,verify    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Initialises parameters/variables

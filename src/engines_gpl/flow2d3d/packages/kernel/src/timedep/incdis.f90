@@ -34,6 +34,8 @@ subroutine incdis(lundia    ,sferic    ,grdang    ,timnow    ,nsrc      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Determine increments and updates the current time

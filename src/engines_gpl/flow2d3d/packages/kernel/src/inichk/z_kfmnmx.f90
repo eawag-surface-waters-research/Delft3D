@@ -27,6 +27,8 @@ subroutine z_kfmnmx(j         ,nmmaxj    ,kmax      ,nm        ,nmref     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 ! NONE
 !!--pseudo code and references--------------------------------------------------

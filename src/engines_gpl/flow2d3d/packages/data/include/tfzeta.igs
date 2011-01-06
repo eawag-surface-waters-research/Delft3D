@@ -24,6 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
     integer, parameter :: mxcmp = 11
                              !  Dimension of number of astronomical
                              !  components

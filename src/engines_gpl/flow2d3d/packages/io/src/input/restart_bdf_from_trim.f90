@@ -26,6 +26,8 @@ subroutine restart_bdf_from_trim(lundia   ,nmaxus   ,mmax     ,bdfh     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 ! Reads initial field condition records from a NEFIS flow output map file
 !

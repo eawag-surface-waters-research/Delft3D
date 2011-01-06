@@ -25,6 +25,8 @@ subroutine cparrr ( iarr1, iarr2, length, gdp )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !   Copies real array IARR1 to IARR2

@@ -25,6 +25,8 @@ subroutine ckdim(lundia, error, verify, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Determines memory requirements for the

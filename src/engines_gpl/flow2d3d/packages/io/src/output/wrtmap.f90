@@ -38,6 +38,8 @@ subroutine wrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Writes the time varying groups (1 & 3) to the

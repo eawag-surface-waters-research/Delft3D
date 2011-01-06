@@ -26,6 +26,8 @@ subroutine dimsedconst(lundia    ,error     ,sedim     ,const     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 ! - Reads sediment dimension from an attribute file
 !

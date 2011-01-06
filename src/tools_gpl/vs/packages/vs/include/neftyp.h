@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 
 #ifndef _NEFTYP_INCLUDED
     enum STORAGE_TYPE {DBLCMPL, COMPLEX, DOUBLE, FLOAT, INT, SHORT, \

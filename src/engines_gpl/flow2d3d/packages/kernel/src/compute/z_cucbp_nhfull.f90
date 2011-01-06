@@ -31,6 +31,8 @@ subroutine z_cucbp_nhfull(kmax    ,norow     ,icx       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Coefficients at boundary points MF, MFU, ML, and

@@ -24,6 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !-------------------------------------------------------------------------------
 !   Delft-FSM (FORTRAN Shared Memory)
 !   Definitions for Fortran programs

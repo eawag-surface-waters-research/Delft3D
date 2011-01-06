@@ -31,6 +31,8 @@ subroutine z_vermom_nhfull(nmmax     ,kmax      ,icx       ,icy       ,u0       
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! Vertical momentum equation. Integration for

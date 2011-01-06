@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 /**--description-----------------------------------------------------------------
  * Generate the hydra config file and the mapper config-files.
  * from a 'dd-boundary' coupling file, as generated from the

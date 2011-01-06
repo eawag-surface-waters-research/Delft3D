@@ -28,6 +28,8 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! Reads attribute file for 3D morphology computation

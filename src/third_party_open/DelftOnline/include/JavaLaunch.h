@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 //-----------------------------------------------------------------------------
 //  JavaLaunch - A Portable C++ Class to Launch a Java Virtual Machine
 //

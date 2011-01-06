@@ -25,6 +25,8 @@ subroutine dfcollect ( fieldc, field, gdp )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !   Collects field array from all nodes

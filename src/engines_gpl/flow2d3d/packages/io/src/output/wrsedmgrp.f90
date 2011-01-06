@@ -26,6 +26,8 @@ subroutine wrsedmgrp(lundia    ,error     ,trifil    ,itmapc    ,mmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Writes the time varying data for bedforms, sediment transport

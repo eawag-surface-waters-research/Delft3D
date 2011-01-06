@@ -28,6 +28,8 @@ subroutine usrbcc(j         ,nmmaxj    ,kmin      ,kmax      ,ldim      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: User defined boundary conditions for constituent

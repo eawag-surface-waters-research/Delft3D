@@ -24,6 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
     gdp%gdtfzeta%tgfdef(1) = 'M2 '
     gdp%gdtfzeta%tgfdef(2) = 'S2 '
     gdp%gdtfzeta%tgfdef(3) = 'N2 '

@@ -26,6 +26,8 @@ subroutine detectcelidt(fds       ,grpnam    ,elmnam    ,itc       ,celidt    , 
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! Writes the time varying Dredge and Dump group to the NEFIS HIS-DAT file

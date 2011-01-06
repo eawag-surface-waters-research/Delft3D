@@ -25,6 +25,8 @@ subroutine waq2flow(dps, mmax, nmaxus, kmax, lundia, mlb, mub, nlb, nub)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Receive updated bed level

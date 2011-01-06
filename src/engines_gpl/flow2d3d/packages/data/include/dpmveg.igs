@@ -24,6 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 type dpm_vegetation
    integer                         :: nvps     ! number of Vertical Plant Structure descriptions
    integer , dimension(:), pointer :: nstem    ! nstem (nvps) number of stems   for each vps description

@@ -26,6 +26,8 @@ subroutine trab14(kode      ,ntrsi     ,utot      ,d50       ,chezy     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! computes sediment transport according to

@@ -27,6 +27,8 @@ subroutine tranb2(kode      ,ntrsi     ,utot      ,d50       ,d90       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 ! computes sediment transport according to
 ! meyer-peter-muller (comor/rivcom)

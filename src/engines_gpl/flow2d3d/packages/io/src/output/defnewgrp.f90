@@ -25,6 +25,8 @@ subroutine defnewgrp(nefisgroup ,filnam    ,grpnam    ,gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Read or writes character buffer to nefis files

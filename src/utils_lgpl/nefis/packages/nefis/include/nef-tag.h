@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.                                     
 //                                                                              
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 #ifndef __NEFIS_TAG__
 #define __NEFIS_TAG__
 extern struct nefis_tag

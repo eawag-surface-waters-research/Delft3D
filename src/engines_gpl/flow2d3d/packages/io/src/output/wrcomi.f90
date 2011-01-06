@@ -36,6 +36,8 @@ subroutine wrcomi(comfil    ,lundia    ,error     ,zmodel    ,mmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !

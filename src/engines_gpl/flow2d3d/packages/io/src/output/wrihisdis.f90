@@ -26,6 +26,8 @@ subroutine wrihisdis(lundia    ,error     ,trifil    ,itdate    ,tunit     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! Writes the initial Discharge group to HIS-DAT

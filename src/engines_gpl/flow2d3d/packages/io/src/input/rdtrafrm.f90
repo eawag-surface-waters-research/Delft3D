@@ -25,6 +25,8 @@ subroutine rdtrafrm(error, lsedtot, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! Reads transport formula and parameters

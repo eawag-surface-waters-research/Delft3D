@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 
 #ifndef _FU_INCLUDED
 #   define _FU_INCLUDED

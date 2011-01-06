@@ -25,6 +25,8 @@ function open_datdef(filnam    ,fds       )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Detect the number of time steps on filnam (map-

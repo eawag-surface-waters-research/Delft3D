@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 /*------------------------------------------------------------------------------*/
 /*  Delft3D - C Utilities */
 /*  Internal (legacy) utility functions. */

@@ -38,6 +38,8 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !

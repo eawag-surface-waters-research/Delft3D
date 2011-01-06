@@ -28,6 +28,8 @@ subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 ! computes sediment transport according to
 ! the bed load transport formula of Soulsby;

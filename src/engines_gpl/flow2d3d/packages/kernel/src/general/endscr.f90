@@ -26,6 +26,8 @@ subroutine endscr(lunscr    ,merr      ,mwarn     ,date     ,time      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Presents the last header/logo on the screen

@@ -24,6 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !> Specifies the interface for MessaheHandling's callback functionality.
 ! (A bit awkward, but including it in MessageHandling's module header
 ! did not make it visible in subprograms when using ifort.)

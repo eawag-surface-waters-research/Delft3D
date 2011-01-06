@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 //------------------------------------------------------------------------------
 //  Interface to TCP/IP Stream library for getarray/putarray functionality
 //

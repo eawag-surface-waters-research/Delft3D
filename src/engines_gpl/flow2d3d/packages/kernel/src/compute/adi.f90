@@ -58,6 +58,8 @@ subroutine adi(dischy    ,solver    ,icreep    ,stage     ,nst       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: ADI performs one time step of the Alternating

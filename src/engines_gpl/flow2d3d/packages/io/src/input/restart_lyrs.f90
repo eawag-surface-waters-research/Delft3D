@@ -27,6 +27,8 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,lyrfrac   , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 ! Reads initial field condition records from an
 ! NEFIS flow output map file

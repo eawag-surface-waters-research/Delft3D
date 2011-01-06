@@ -27,6 +27,8 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Read md-file

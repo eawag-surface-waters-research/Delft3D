@@ -24,6 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 integer, parameter :: mxprt = 50   !  Max. number of print timesteps
 !
 type gd_inttim

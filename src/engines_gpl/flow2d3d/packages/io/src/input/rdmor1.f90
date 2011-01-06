@@ -29,6 +29,8 @@ subroutine rdmor1(ilun      ,morfac    ,tmor      ,thresh    ,morupd    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! Read  morphology input version 1

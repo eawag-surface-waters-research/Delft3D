@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.                                     
 //                                                                              
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 #include <string.h>
 #if defined(WIN32) || defined (WIN64)
 #  include <io.h>

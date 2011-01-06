@@ -39,6 +39,8 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! Computes transport in the u, v and w-direction.

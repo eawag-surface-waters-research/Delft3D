@@ -29,6 +29,8 @@ subroutine z_impl_upw(nmmax     ,kmax      ,icx       ,icy       ,kcs     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !!--pseudo code and references--------------------------------------------------

@@ -31,6 +31,8 @@ subroutine dfwrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Writes the initial group 2 ('his-const') to

@@ -24,6 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 integer, parameter :: noRTC              =  0    ! No coupling with rtc module
 integer, parameter :: dataFromRTCToFLOW  =  1    ! Coupling where RTC sends barrier heights to FLOW
 integer, parameter :: dataFromFLOWToRTC  =  2    ! Coupling where FLOW sends data to RTC

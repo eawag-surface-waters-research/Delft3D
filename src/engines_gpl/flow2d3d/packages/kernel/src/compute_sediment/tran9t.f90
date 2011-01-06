@@ -27,6 +27,8 @@ subroutine tran9t(kode      ,utot      ,d50       ,d90       ,chezy     , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! -

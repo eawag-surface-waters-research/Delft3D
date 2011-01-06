@@ -36,6 +36,8 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! Compute bed roughness and shear stress parameters

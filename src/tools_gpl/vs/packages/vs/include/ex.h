@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 #ifndef _EX_INCLUDED
 #   define COMMAND_STRING_LENGHT 512
 #   define _EX_INCLUDED

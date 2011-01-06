@@ -30,6 +30,8 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Writes the time varying data for sediment (4 & 5)

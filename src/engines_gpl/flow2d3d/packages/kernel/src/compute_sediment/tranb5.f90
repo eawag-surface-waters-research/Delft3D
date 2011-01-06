@@ -28,6 +28,8 @@ subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 ! computes sediment transport according to
 ! bijker with wave effect

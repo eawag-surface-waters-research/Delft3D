@@ -33,6 +33,8 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the dimensions for processes from the

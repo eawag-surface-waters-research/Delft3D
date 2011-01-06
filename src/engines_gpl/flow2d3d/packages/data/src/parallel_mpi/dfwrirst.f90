@@ -28,6 +28,8 @@ subroutine dfwrirst(lundia    ,runid     ,itrstc    ,nmaxus    ,mmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: This routine writes the relevant output arrays to

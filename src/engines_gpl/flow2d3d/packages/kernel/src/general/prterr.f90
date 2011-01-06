@@ -25,6 +25,8 @@ subroutine prterr(lundia, msgno, filtxt)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: This routine prints a message to output device.

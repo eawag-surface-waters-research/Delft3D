@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.                                     
 //                                                                              
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
 // Used by version_number.rc

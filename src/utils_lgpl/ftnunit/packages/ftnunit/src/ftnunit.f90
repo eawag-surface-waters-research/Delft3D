@@ -24,6 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 ! ftnunit.f90 --
 !     Module that implements part of the "ftnunit" framework:
 !     It is inspired by the well-known JUnit framework for
@@ -45,7 +47,7 @@
 !     - Test the various assertion failures
 !     - HTML output of number of differences
 !
-!     $Id: ftnunit.f90,v 1.5 2009/03/27 05:03:18 arjenmarkus Exp $
+!     $Id$
 !
 
 ! ftnunit_utilities

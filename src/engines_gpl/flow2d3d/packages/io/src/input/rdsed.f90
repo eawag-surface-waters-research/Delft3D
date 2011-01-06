@@ -27,6 +27,8 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! Read sediment parameters from an input file

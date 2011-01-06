@@ -26,6 +26,8 @@ subroutine tranb7(kode      ,ntrsi     ,utot      ,d50       ,d90       , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! computes sediment transport according to

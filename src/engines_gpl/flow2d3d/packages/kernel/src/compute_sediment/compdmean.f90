@@ -27,6 +27,8 @@ subroutine compdmean(frac      ,seddm     ,nmmax     ,lsedtot   , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! Function: Determines the arithmetic mean diameter of the non-mud fractions

@@ -25,6 +25,8 @@ subroutine noendspaces(name      ,length    )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Removes the spaces at the end of the name.

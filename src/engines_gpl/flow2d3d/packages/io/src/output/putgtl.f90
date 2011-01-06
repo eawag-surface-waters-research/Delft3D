@@ -27,6 +27,8 @@ subroutine putgtl(filnam    ,grpnam    ,nelems    ,elmnms    ,elmdms    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Read or writes character buffer to nefis files

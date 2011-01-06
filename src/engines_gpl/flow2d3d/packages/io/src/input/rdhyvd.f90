@@ -29,6 +29,8 @@ subroutine rdhyvd(error     ,nrrec     ,mdfrec    ,noui      ,filedy    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Reads the following records from the MD-file:

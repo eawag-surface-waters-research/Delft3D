@@ -28,6 +28,8 @@ subroutine dfupdgeo2 ( alfas     ,fcorio    ,xcor      ,ycor      ,xz        , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !   exchange geometrical information, e.g. guu, gvu, etc. with neighbours

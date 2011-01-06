@@ -25,6 +25,8 @@ subroutine small(string    ,lenstr    )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! Funktie omschrijving   : Omzetten van hoofdletters (in een string)

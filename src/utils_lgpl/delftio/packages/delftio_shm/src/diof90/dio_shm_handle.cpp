@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.                                     
 //                                                                              
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 //
 //  dio_shm_handle.cpp: DelftIO SharedMemory data handles
 //

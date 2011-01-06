@@ -24,13 +24,15 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !> Utility routines for memory (re)allocation.
 module m_alloc
 private 
 
 public realloc
 
-! $Id: malloc.f90 14207 2010-12-21 17:25:13Z mourits $
+! $Id$
 ! TODO: Handle nondefault kinds properly? [AvD]
 
 !> Reallocates memory for an existing array. Arrays of most intrinsic

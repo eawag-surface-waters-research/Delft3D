@@ -25,6 +25,8 @@ subroutine nointextspaces(name      ,length    )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Removes ALL spaces in name. Also returns the

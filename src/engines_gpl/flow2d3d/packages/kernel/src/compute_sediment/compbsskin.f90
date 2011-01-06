@@ -27,6 +27,8 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! Compute tau in case of muddy bed (skin fraction  only)

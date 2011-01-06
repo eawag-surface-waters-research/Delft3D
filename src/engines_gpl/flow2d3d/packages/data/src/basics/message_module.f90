@@ -25,6 +25,8 @@ module message_module
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Keep track of a stack of messages
@@ -87,8 +89,8 @@ subroutine message_module_info(messages)
     !
     ! body
     !
-    call addmessage(messages,'$Id: message_module.f90 14207 2010-12-21 17:25:13Z mourits $')
-    call addmessage(messages,'$URL: https://repos.deltares.nl/repos/ds/branches/feature/delft3d/modules/d3d_flow/20101104_14542_open_source_testbranch/open_trunk/src/engines_gpl/flow2d3d/packages/data/src/basics/message_module.f90 $')
+    call addmessage(messages,'$Id$')
+    call addmessage(messages,'$URL$')
 end subroutine message_module_info
 !
 !

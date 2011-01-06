@@ -25,6 +25,8 @@ subroutine wrihisbal(trifil    ,lundia    ,error     ,gdp       )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! Writes the time varying mass balance data to the NEFIS HIS-DAT file

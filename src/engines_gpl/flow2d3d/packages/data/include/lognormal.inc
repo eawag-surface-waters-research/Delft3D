@@ -24,6 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 real(fp), dimension(99)  :: lognormal
 data lognormal &
   & /-2.3263,-2.0537,-1.8808,-1.7507,-1.6449,-1.5548,-1.4758,-1.4051, &

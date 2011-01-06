@@ -25,6 +25,8 @@ subroutine wridoc(error, neffil, soort, simdat, runtxt, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Writes the initial group 4 ('"soort"-version') to

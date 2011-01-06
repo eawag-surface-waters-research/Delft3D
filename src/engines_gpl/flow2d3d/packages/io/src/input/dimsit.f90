@@ -26,6 +26,8 @@ subroutine dimsit(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Reads the dimension for site definitions from

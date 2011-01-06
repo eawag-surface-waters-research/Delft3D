@@ -26,6 +26,8 @@ subroutine tripoi(runid, filmrs, versio, filmd, &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: - initialize system paramaters for a FLOW

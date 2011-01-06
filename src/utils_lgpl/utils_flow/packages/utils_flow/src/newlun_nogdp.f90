@@ -25,6 +25,8 @@ function newlun_nogdp( )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: This routine gets an available unit specifier. It

@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.                                     
 //                                                                              
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 /* macro for function to calculate r = a oprtr constant */
 #define FUNC( type_a ) \
     static BInt2 gen ## type_a  ( \

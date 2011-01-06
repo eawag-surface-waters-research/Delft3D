@@ -26,6 +26,8 @@ subroutine chklod(lundia    ,error     ,nto       ,kmax      ,nsrc      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Checks the local array dimension, which has been

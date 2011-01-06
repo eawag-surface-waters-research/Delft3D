@@ -27,6 +27,8 @@ subroutine addelm(nefisgroup ,elmnms_new ,elmqty_new ,elmunt_new ,elmtps_new , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Write element dimensions in array elmdms

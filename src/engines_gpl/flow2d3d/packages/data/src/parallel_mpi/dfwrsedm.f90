@@ -28,6 +28,8 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Writes the time varying data for sediment (4 & 5)

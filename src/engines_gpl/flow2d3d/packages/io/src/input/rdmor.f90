@@ -27,6 +27,8 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! Reads attribute file for 3D morphology computation

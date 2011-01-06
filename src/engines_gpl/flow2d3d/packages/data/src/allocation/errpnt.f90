@@ -25,6 +25,8 @@ subroutine errpnt(pntnam    ,soort     ,callty    ,gdp       )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !   ERRPNT is called by the GT?PNT/MK?PNT functions to print

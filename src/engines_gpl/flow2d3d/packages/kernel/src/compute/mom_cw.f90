@@ -31,6 +31,8 @@ subroutine mom_cw &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! This subroutine is part of (called by) CUCNP. It computes the Horizontal 

@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.                                     
 //                                                                              
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 /*------------------------------------------------------------------------------ */
 /*  Delft-ESM (Easy Shared Memory) */
 /*  Utility program to list infomation about ESM contexts. */

@@ -24,5 +24,7 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
     character versie*4, prognm*7, licens*50, ident*27
     common /softw / versie, prognm, licens, ident

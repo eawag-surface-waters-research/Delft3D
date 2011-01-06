@@ -25,6 +25,8 @@ subroutine fxfydr(dirc      ,dirs      ,dir       ,n         ,pi        )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 ! NONE
 !!--pseudo code and references--------------------------------------------------

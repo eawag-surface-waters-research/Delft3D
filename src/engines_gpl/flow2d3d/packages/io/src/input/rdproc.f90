@@ -32,6 +32,8 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Reads physical coefficients for temperature

@@ -24,6 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 type dfparalltype
    !
    integer                        :: mmaxgl    ! number of gridpoints of global computational grid in x-direction

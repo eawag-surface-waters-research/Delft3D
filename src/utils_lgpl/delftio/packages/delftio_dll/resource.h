@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.                                     
 //                                                                              
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 //{{NO_DEPENDENCIES}}
 // Microsoft Developer Studio generated include file.
 // Used by DiofDllVersion.rc

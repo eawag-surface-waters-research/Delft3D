@@ -25,6 +25,8 @@ subroutine layers(kmax, h1, aks, thick, sig)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !   Layers distribution from the reference height to the surface following

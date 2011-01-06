@@ -27,6 +27,8 @@ subroutine dfwrplot(filnam    ,lundia    ,error     ,mmax      ,nmax      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !

@@ -28,6 +28,8 @@ subroutine compdxx(frac      ,nseddia   ,logseddia ,logsedsig , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 ! Function:   Determines the diameter Dxx of the xx-percentile of the

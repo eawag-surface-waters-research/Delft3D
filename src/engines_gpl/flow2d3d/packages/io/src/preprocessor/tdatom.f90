@@ -25,6 +25,8 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description----------------------------------------------------------------- 
 ! 
 !    Function: Reads and writes the time dependent data from the 

@@ -25,6 +25,8 @@ subroutine dfupdgeo1 ( guu, gvv, gdp )
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !   exchange geometrical information, e.g. guu, gvu, etc. with neighbours

@@ -24,6 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
     type gd_htur2d
 !
        real(fp) :: alpha     !  Description and declaration in rjdim.f90

@@ -24,6 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
     integer, parameter :: DEPTHDEF_REFPLANE        = 1
     integer, parameter :: DEPTHDEF_WATERLVL        = 2
     integer, parameter :: DEPTHDEF_MAXREFWL        = 3

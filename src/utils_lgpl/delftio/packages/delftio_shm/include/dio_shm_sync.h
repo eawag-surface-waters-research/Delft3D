@@ -24,6 +24,8 @@
 // Stichting Deltares. All rights reserved.                                     
 //                                                                              
 //------------------------------------------------------------------------------
+// $Id$
+// $HeadURL$
 //
 //  dio_shm_sync.h: DelftIO Shared Memory synchronisation functions
 //

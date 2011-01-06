@@ -31,6 +31,8 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Computes heat exchange through water surface

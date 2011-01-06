@@ -25,6 +25,8 @@ subroutine step_to_screen(nst2go, itstrt, itstop, nst, gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: Determines the remaining percentage of the simulation and
