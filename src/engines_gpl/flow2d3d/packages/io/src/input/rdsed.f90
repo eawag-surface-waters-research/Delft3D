@@ -264,50 +264,43 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
           call d3stop(1, gdp)
        endif
        !
-       ! include IGP file again to update references
+       ! update local pointers
        !
-       csoil         => gdp%gdsedpar%csoil
-       mdcuni        => gdp%gdsedpar%mdcuni
-       kssilt        => gdp%gdsedpar%kssilt
-       kssand        => gdp%gdsedpar%kssand
-       nmudfrac      => gdp%gdsedpar%nmudfrac
-       rhosol        => gdp%gdsedpar%rhosol
+       nseddia       => gdp%gdsedpar%nseddia
        logseddia     => gdp%gdsedpar%logseddia
        logsedsig     => gdp%gdsedpar%logsedsig
        sedd10        => gdp%gdsedpar%sedd10
        sedd50        => gdp%gdsedpar%sedd50
-       sedd50fld     => gdp%gdsedpar%sedd50fld
        seddm         => gdp%gdsedpar%seddm
        sedd90        => gdp%gdsedpar%sedd90
+       !
        cdryb         => gdp%gdsedpar%cdryb
        dstar         => gdp%gdsedpar%dstar
        taucr         => gdp%gdsedpar%taucr
        tetacr        => gdp%gdsedpar%tetacr
+       sdbuni        => gdp%gdsedpar%sdbuni
+       flsdbd        => gdp%gdsedpar%flsdbd
+       inisedunit    => gdp%gdsedpar%inisedunit
+       !
        ws0           => gdp%gdsedpar%ws0
        wsm           => gdp%gdsedpar%wsm
        salmax        => gdp%gdsedpar%salmax
-       sdbuni        => gdp%gdsedpar%sdbuni
+       !
        tcrdep        => gdp%gdsedpar%tcrdep
        tcduni        => gdp%gdsedpar%tcduni
+       flstcd        => gdp%gdsedpar%flstcd
+       !
        tcrero        => gdp%gdsedpar%tcrero
        tceuni        => gdp%gdsedpar%tceuni
        thcmud        => gdp%gdsedpar%thcmud
+       flstce        => gdp%gdsedpar%flstce
+       !
        eropar        => gdp%gdsedpar%eropar
        erouni        => gdp%gdsedpar%erouni
-       mudcnt        => gdp%gdsedpar%mudcnt
-       nseddia       => gdp%gdsedpar%nseddia
-       inisedunit    => gdp%gdsedpar%inisedunit
-       namsed        => gdp%gdsedpar%namsed
-       sedtyp        => gdp%gdsedpar%sedtyp
-       flsdbd        => gdp%gdsedpar%flsdbd
-       flstcd        => gdp%gdsedpar%flstcd
-       flstce        => gdp%gdsedpar%flstce
        flsero        => gdp%gdsedpar%flsero
-       anymud        => gdp%gdsedpar%anymud
-       bsskin        => gdp%gdsedpar%bsskin
-       flsdia        => gdp%gdsedpar%flsdia
-       flsmdc        => gdp%gdsedpar%flsmdc
-       gdsedpar      => gdp%gdsedpar
+       !
+       mudcnt        => gdp%gdsedpar%mudcnt
+       sedd50fld     => gdp%gdsedpar%sedd50fld
        !
        ! end check on assocation of gdsedpar%sedd50
        !

@@ -962,14 +962,11 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           call d3stop(1, gdp)
        endif
        !
-       ! Include .igp again such that the local pointers point to the allocated memory
+       ! Update local pointers
        !
-       zrtcsta    => gdp%gdrtc%zrtcsta
-       stacnt     => gdp%gdrtc%stacnt
-       rtcmod     => gdp%gdrtc%rtcmod
        mnrtcsta   => gdp%gdrtc%mnrtcsta
        namrtcsta  => gdp%gdrtc%namrtcsta
-       filrtc     => gdp%gdrtc%filrtc
+       zrtcsta    => gdp%gdrtc%zrtcsta
        !
        ! Read RTC input station definitions from file
        ! Stop if reading error occurred or file did not exist (error = .true.)

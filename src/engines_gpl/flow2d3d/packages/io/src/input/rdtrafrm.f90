@@ -195,7 +195,7 @@ subroutine rdtrafrm(error, lsedtot, gdp)
           enddo
           !
           par( 1,ll) = ag
-          par( 2,ll) = rhow       ! <- physco.igp
+          par( 2,ll) = rhow       ! <- physco
           par( 5,ll) = 1.0E-6     ! rnu    uit md-tran.*
           par( 7,ll) = 0.05       ! za1    uit md-tran.*
           par( 8,ll) = 0.0        ! za2    uit md-tran.*

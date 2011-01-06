@@ -101,7 +101,6 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     real(fp)                            , pointer :: xlo
     integer                             , pointer :: iro
     type (flwoutputtype)                , pointer :: flwoutput
-    type (gd_flwpar)                    , pointer :: gdflwpar
 !
 ! Global variables
 !
@@ -262,7 +261,6 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     fluxv       => gdp%gdflwpar%fluxv
     fluxvc      => gdp%gdflwpar%fluxvc
     flwoutput   => gdp%gdflwpar%flwoutput
-    gdflwpar    => gdp%gdflwpar
     vicmol      => gdp%gdphysco%vicmol
     dicoww      => gdp%gdphysco%dicoww
     iro         => gdp%gdphysco%iro
@@ -273,12 +271,12 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     icxy = max(icx, icy) 
     !
     istat = 0
-    if (.not. associated(gdflwpar%fluxu)) then
-        if (istat==0) allocate (gdflwpar%fluxu(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), stat = istat)
-        if (istat==0) allocate (gdflwpar%fluxv(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), stat = istat)
+    if (.not. associated(gdp%gdflwpar%fluxu)) then
+        if (istat==0) allocate (gdp%gdflwpar%fluxu(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), stat = istat)
+        if (istat==0) allocate (gdp%gdflwpar%fluxv(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), stat = istat)
         if (flwoutput%cumdifuflux) then
-            if (istat==0) allocate (gdflwpar%fluxuc(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), stat = istat)
-            if (istat==0) allocate (gdflwpar%fluxvc(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), stat = istat)
+            if (istat==0) allocate (gdp%gdflwpar%fluxuc(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), stat = istat)
+            if (istat==0) allocate (gdp%gdflwpar%fluxvc(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), stat = istat)
         endif
         !
         if (istat /= 0) then
@@ -286,14 +284,13 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
             call d3stop(1, gdp)
         endif
         !
-        ! include IGP file again to update references
+        ! update local pointers
         !
         fluxu          => gdp%gdflwpar%fluxu
         fluxuc         => gdp%gdflwpar%fluxuc
         fluxv          => gdp%gdflwpar%fluxv
         fluxvc         => gdp%gdflwpar%fluxvc
         flwoutput      => gdp%gdflwpar%flwoutput
-        gdflwpar       => gdp%gdflwpar
         !
         if (flwoutput%cumdifuflux) then
             fluxuc = 0.0

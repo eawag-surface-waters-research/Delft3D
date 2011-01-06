@@ -189,17 +189,12 @@ subroutine cline(hdt       ,j         ,nmmaxj    ,kmax      ,icx       , &
           call d3stop(1, gdp)
        endif
        !
-       ! include .igp again such that the local pointers
-       ! point to the allocated memory
+       ! update the local pointers
        !
-    ifirst     => gdp%gdcline%ifirst
-    ndim       => gdp%gdcline%ndim
-    md         => gdp%gdcline%md
-    loop       => gdp%gdcline%loop
-    inc        => gdp%gdcline%inc
-    ud         => gdp%gdcline%ud
-    xd         => gdp%gdcline%xd
-    rdep       => gdp%gdcline%rdep
+       inc        => gdp%gdcline%inc
+       ud         => gdp%gdcline%ud
+       xd         => gdp%gdcline%xd
+       rdep       => gdp%gdcline%rdep
     endif
     !
     ! initialition of m,n xd and inc

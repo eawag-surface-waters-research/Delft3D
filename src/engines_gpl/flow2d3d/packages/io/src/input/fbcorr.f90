@@ -51,7 +51,6 @@ subroutine fbcorr(lundia, nto, nambnd, typbnd, gdp)
     type (fbcrbndtype)  , dimension(:) , pointer :: fcrbnd
     logical                            , pointer :: fbccorrection
     character(256)                     , pointer :: fbcrfilnam
-    type (gd_flwpar)                   , pointer :: gdflwpar
     integer                            , pointer :: julday
 !
 ! Global variables
@@ -76,7 +75,6 @@ subroutine fbcorr(lundia, nto, nambnd, typbnd, gdp)
     fcrbnd         => gdp%gdflwpar%fcrbnd
     fbccorrection  => gdp%gdflwpar%fbccorrection
     fbcrfilnam     => gdp%gdflwpar%fbcrfilnam
-    gdflwpar       => gdp%gdflwpar
     julday         => gdp%gdinttim%julday
     !
     ! Corrective boundary conditions
@@ -100,19 +98,15 @@ subroutine fbcorr(lundia, nto, nambnd, typbnd, gdp)
        write (lundia, '(3a)') txtput1, ': ', trim(fbcrfilnam)
        call flw_readtable(fbcrfile ,fbcrfilnam ,julday ,gdp)
                        allocate(parnames(2)         , stat = istat)
-       if (istat == 0) allocate(gdflwpar%fcrbnd(nto), stat = istat)
+       if (istat == 0) allocate(gdp%gdflwpar%fcrbnd(nto), stat = istat)
        if (istat /= 0) then
           call prterr(lundia, 'U021', 'FBCORR: memory alloc error')
           call d3stop(1, gdp)
        endif
        !
-       ! include IGP file again to update references
+       ! update local pointer
        !
-    fbcrfile       => gdp%gdflwpar%fbcrfile
-    fcrbnd         => gdp%gdflwpar%fcrbnd
-    fbccorrection  => gdp%gdflwpar%fbccorrection
-    fbcrfilnam     => gdp%gdflwpar%fbcrfilnam
-    gdflwpar       => gdp%gdflwpar
+       fcrbnd         => gdp%gdflwpar%fcrbnd
        !
        do j = 1, nto
           fcrbnd(j)%ibct  = 0
@@ -178,6 +172,7 @@ subroutine fbcorr(lundia, nto, nambnd, typbnd, gdp)
                 & fcrbnd(j)%ibct(1)    , fcrbnd(j)%ibct(2)     , &
                 & fcrbnd(j)%ibct(3)    , gdp       )
           endif
+          deallocate(parnames, stat = istat)
        enddo
     endif
 end subroutine fbcorr

@@ -61,7 +61,6 @@ subroutine dfexchg ( iptr, ks, ke, itype, gdp )
 !
 !! executable statements -------------------------------------------------------
 !
-!   include 'inout.igp'
     !
     ! if not parallel, return
     !

@@ -320,38 +320,9 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
        call d3stop(1, gdp)
     endif
     !
-    ! include .igp again to be sure that the local pointers
-    ! point to the allocated memory
+    ! update local pointers
     !
-    tseriesfile       => gdp%gddredge%tseriesfile
-    link_percentage   => gdp%gddredge%link_percentage
-    link_distance     => gdp%gddredge%link_distance
-    link_sum          => gdp%gddredge%link_sum
-    dzdred            => gdp%gddredge%dzdred
     refplane          => gdp%gddredge%refplane
-    voldred           => gdp%gddredge%voldred
-    voldune           => gdp%gddredge%voldune
-    totvoldred        => gdp%gddredge%totvoldred
-    globalareadred    => gdp%gddredge%globalareadred
-    voldump           => gdp%gddredge%voldump
-    percsupl          => gdp%gddredge%percsupl
-    totvoldump        => gdp%gddredge%totvoldump
-    localareadump     => gdp%gddredge%localareadump
-    globalareadump    => gdp%gddredge%globalareadump
-    globaldumpcap     => gdp%gddredge%globaldumpcap
-    alpha_dh          => gdp%gddredge%alpha_dh
-    nadred            => gdp%gddredge%nadred
-    nadump            => gdp%gddredge%nadump
-    nasupl            => gdp%gddredge%nasupl
-    nalink            => gdp%gddredge%nalink
-    link_def          => gdp%gddredge%link_def
-    tsmortime         => gdp%gddredge%tsmortime
-    use_dunes         => gdp%gddredge%use_dunes
-    dredgefile        => gdp%gddredge%dredgefile
-    dredge_areas      => gdp%gddredge%dredge_areas
-    dump_areas        => gdp%gddredge%dump_areas
-    dredge_prop       => gdp%gddredge%dredge_prop
-    dump_prop         => gdp%gddredge%dump_prop
     !
     refplane    = 0.0_fp
     refplane(1) = rmissval
@@ -621,36 +592,28 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
        call d3stop(1, gdp)
     endif
     !
-    ! include .igp again to be sure that the local pointers
-    ! point to the allocated memory
+    ! update local pointers
     !
-    tseriesfile       => gdp%gddredge%tseriesfile
+    link_def          => gdp%gddredge%link_def
+    !
     link_percentage   => gdp%gddredge%link_percentage
     link_distance     => gdp%gddredge%link_distance
     link_sum          => gdp%gddredge%link_sum
     dzdred            => gdp%gddredge%dzdred
-    refplane          => gdp%gddredge%refplane
     voldred           => gdp%gddredge%voldred
-    voldune           => gdp%gddredge%voldune
     totvoldred        => gdp%gddredge%totvoldred
     globalareadred    => gdp%gddredge%globalareadred
-    voldump           => gdp%gddredge%voldump
+    voldune           => gdp%gddredge%voldune
     percsupl          => gdp%gddredge%percsupl
     totvoldump        => gdp%gddredge%totvoldump
     localareadump     => gdp%gddredge%localareadump
     globalareadump    => gdp%gddredge%globalareadump
     globaldumpcap     => gdp%gddredge%globaldumpcap
-    alpha_dh          => gdp%gddredge%alpha_dh
-    nadred            => gdp%gddredge%nadred
-    nadump            => gdp%gddredge%nadump
-    nasupl            => gdp%gddredge%nasupl
-    nalink            => gdp%gddredge%nalink
-    link_def          => gdp%gddredge%link_def
-    tsmortime         => gdp%gddredge%tsmortime
-    use_dunes         => gdp%gddredge%use_dunes
-    dredgefile        => gdp%gddredge%dredgefile
+    voldump           => gdp%gddredge%voldump
+    !
     dredge_areas      => gdp%gddredge%dredge_areas
     dump_areas        => gdp%gddredge%dump_areas
+    !
     dredge_prop       => gdp%gddredge%dredge_prop
     dump_prop         => gdp%gddredge%dump_prop
     !
@@ -1570,38 +1533,20 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
        if (istat == 0) call extend1d_int(istat, ipdu, nadump+1)
        if (istat == 0) call extend1d_int(istat, npdu, nadump+1)
        !
-       ! include .igp again to be sure that the local pointers
-       ! point to the allocated memory
+       ! update local pointers
        !
-    tseriesfile       => gdp%gddredge%tseriesfile
-    link_percentage   => gdp%gddredge%link_percentage
-    link_distance     => gdp%gddredge%link_distance
-    link_sum          => gdp%gddredge%link_sum
-    dzdred            => gdp%gddredge%dzdred
-    refplane          => gdp%gddredge%refplane
-    voldred           => gdp%gddredge%voldred
-    voldune           => gdp%gddredge%voldune
-    totvoldred        => gdp%gddredge%totvoldred
-    globalareadred    => gdp%gddredge%globalareadred
-    voldump           => gdp%gddredge%voldump
-    percsupl          => gdp%gddredge%percsupl
-    totvoldump        => gdp%gddredge%totvoldump
-    localareadump     => gdp%gddredge%localareadump
-    globalareadump    => gdp%gddredge%globalareadump
-    globaldumpcap     => gdp%gddredge%globaldumpcap
-    alpha_dh          => gdp%gddredge%alpha_dh
-    nadred            => gdp%gddredge%nadred
-    nadump            => gdp%gddredge%nadump
-    nasupl            => gdp%gddredge%nasupl
-    nalink            => gdp%gddredge%nalink
-    link_def          => gdp%gddredge%link_def
-    tsmortime         => gdp%gddredge%tsmortime
-    use_dunes         => gdp%gddredge%use_dunes
-    dredgefile        => gdp%gddredge%dredgefile
-    dredge_areas      => gdp%gddredge%dredge_areas
-    dump_areas        => gdp%gddredge%dump_areas
-    dredge_prop       => gdp%gddredge%dredge_prop
-    dump_prop         => gdp%gddredge%dump_prop
+       link_percentage   => gdp%gddredge%link_percentage
+       link_distance     => gdp%gddredge%link_distance
+       link_sum          => gdp%gddredge%link_sum
+       voldump           => gdp%gddredge%voldump
+       totvoldump        => gdp%gddredge%totvoldump
+       localareadump     => gdp%gddredge%localareadump
+       globalareadump    => gdp%gddredge%globalareadump
+       globaldumpcap     => gdp%gddredge%globaldumpcap
+       link_def          => gdp%gddredge%link_def
+       dump_areas        => gdp%gddredge%dump_areas
+       dredge_prop       => gdp%gddredge%dredge_prop
+       dump_prop         => gdp%gddredge%dump_prop
        !
        nalink = nalink + noutletlinks
        nadump = nadump + 1

@@ -97,8 +97,6 @@ subroutine tkecof(lturi     ,vonkar    ,sigdif    ,sigmol    , &
 !
     ! Local pointers refering to global data
     !
-    ! turcoe.igp:
-    !
     gdturcoe   => gdp%gdturcoe
     cde        => gdturcoe%cde
     cmukl      => gdturcoe%cmukl
@@ -112,8 +110,6 @@ subroutine tkecof(lturi     ,vonkar    ,sigdif    ,sigmol    , &
     ck         => gdturcoe%ck
     sigq2e     => gdturcoe%sigq2e
     lrdamp_fac => gdturcoe%lrdamp_fac
-    !
-    ! dimens.igp:
     !
     gddimens => gdp%d
     nmax     => gddimens%nmax

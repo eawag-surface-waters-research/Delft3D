@@ -56,7 +56,6 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
     real(fp)                             , pointer :: clplant
     character(256)                       , pointer :: fildpmv
     type (dpm_vegetation), dimension(:)  , pointer :: vegs
-    type (gd_dpmveg)                     , pointer :: gddpmveg
     integer                              , pointer :: lundia
 !
 ! Global variables
@@ -119,7 +118,6 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
     clplant    => gdp%gddpmveg%clplant
     fildpmv    => gdp%gddpmveg%fildpmv
     vegs       => gdp%gddpmveg%vegs
-    gddpmveg   => gdp%gddpmveg
     lundia     => gdp%gdinout%lundia
     !
     versionnrlow   = 0.01_fp
@@ -273,17 +271,11 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
        call d3stop(1, gdp)
     endif
     !
-    ! include .igp again to be sure that the local pointers
-    ! point to the allocated memory
+    ! update local pointers
     !
-    itplant    => gdp%gddpmveg%itplant
-    nveg       => gdp%gddpmveg%nveg
     planttype  => gdp%gddpmveg%planttype
     nplants    => gdp%gddpmveg%nplants
-    clplant    => gdp%gddpmveg%clplant
-    fildpmv    => gdp%gddpmveg%fildpmv
     vegs       => gdp%gddpmveg%vegs
-    gddpmveg   => gdp%gddpmveg
     !
     ! Allocate local arrays used for nplant input file in dep-format
     !
@@ -356,18 +348,6 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
                 call prterr(lundia, 'U021', 'DPMVeg: memory alloc error')
                 call d3stop(1, gdp)
              endif
-             !
-             ! include .igp again to be sure that the local pointers
-             ! point to the allocated memory
-             !
-    itplant    => gdp%gddpmveg%itplant
-    nveg       => gdp%gddpmveg%nveg
-    planttype  => gdp%gddpmveg%planttype
-    nplants    => gdp%gddpmveg%nplants
-    clplant    => gdp%gddpmveg%clplant
-    fildpmv    => gdp%gddpmveg%fildpmv
-    vegs       => gdp%gddpmveg%vegs
-    gddpmveg   => gdp%gddpmveg
              !
              ! Read vps-lines
              !

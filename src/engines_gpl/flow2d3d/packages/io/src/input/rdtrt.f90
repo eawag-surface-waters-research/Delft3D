@@ -139,7 +139,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
        allocate(gdtrachy%rttfu(gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub,kmax))
        allocate(gdtrachy%rttfv(gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub,kmax))
        !
-       ! include IGP file again to update local references
+       ! update local pointers
        !
        rttfu          => gdp%gdtrachy%rttfu
        rttfv          => gdp%gdtrachy%rttfv
@@ -190,11 +190,12 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
           call d3stop(1, gdp)
        endif
        !
-       ! include IGP file again to update local references
+       ! update local pointers
        !
        ittaru         => gdp%gdtrachy%ittaru
        ittarv         => gdp%gdtrachy%ittarv
        ittdef         => gdp%gdtrachy%ittdef
+       !
        rgcalu         => gdp%gdtrachy%rgcalu
        rgcalv         => gdp%gdtrachy%rgcalv
        rttaru         => gdp%gdtrachy%rttaru

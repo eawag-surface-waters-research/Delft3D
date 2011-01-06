@@ -47,10 +47,6 @@ subroutine tdatmain(runid, alone, subsys, filmrs, nuerr, gdp)
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    !!
-    !! include 'prognm.igd'       ! prognm, numdomains
-    integer     , pointer :: numdomains
-    integer     , pointer :: nummappers
     character(6), pointer :: prognm
 !
 ! Global variables
@@ -67,9 +63,6 @@ subroutine tdatmain(runid, alone, subsys, filmrs, nuerr, gdp)
 !! executable statements -------------------------------------------------------
 !
     !
-    ! include 'prognm.igp'
-    numdomains  => gdp%gdprognm%numdomains
-    nummappers  => gdp%gdprognm%nummappers
     prognm      => gdp%gdprognm%prognm 
     !
     ! Set program name and numdomains (tdatom can only be called for one subdomain)

@@ -57,7 +57,6 @@ subroutine cparrd ( iarr1, iarr2, length, gdp )
 !
 !! executable statements -------------------------------------------------------
 !
-    !include 'inout.igp'
     lundia => gdp%gdinout%lundia
     !
     ! check array length

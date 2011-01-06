@@ -138,7 +138,7 @@ subroutine difuflux(stage     ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
           call d3stop(1, gdp)
        endif
        !
-       ! include IGP file again to update references
+       ! update local pointers
        !
        fluxu          => gdp%gdflwpar%fluxu
        fluxuc         => gdp%gdflwpar%fluxuc

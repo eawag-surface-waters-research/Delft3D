@@ -268,12 +268,11 @@
             return
          endif
 
-!        include igp-file again, to ensure that the pointers are pointing
-!        to the newly created arrays
+!        update local pointers
 
+         ifrmto     => gdp%gdwaqpar%ifrmto
          isaggr     => gdp%gdwaqpar%isaggr
          iqaggr     => gdp%gdwaqpar%iqaggr
-         ifrmto     => gdp%gdwaqpar%ifrmto
          lunsed     => gdp%gdwaqpar%lunsed
          kmk        => gdp%gdwaqpar%kmk
 
@@ -311,6 +310,9 @@
             write(*,*) '*** ERROR: wrwaqfil: memory allocation error'
             return
          endif
+
+!        update local pointers
+
          vol        => gdp%gdwaqpar%vol
          sag        => gdp%gdwaqpar%sag
          vol2       => gdp%gdwaqpar%vol2

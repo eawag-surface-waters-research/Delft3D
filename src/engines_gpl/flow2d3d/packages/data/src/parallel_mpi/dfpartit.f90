@@ -107,8 +107,6 @@ subroutine dfpartit ( ipown, icom, mmax, nmax, gdp )
        call d3stop(1, gdp)
     endif
     !
-    ! include IGP file again to update references
-    !
     iweig => gdp%gdparall%iweig
     !
     iweig = 100
