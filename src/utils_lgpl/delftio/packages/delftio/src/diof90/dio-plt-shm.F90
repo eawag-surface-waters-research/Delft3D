@@ -78,7 +78,11 @@ subroutine DioPltWriteHeaderShm(plt)
                 call  DioShmDsWriteHdr(shmHandle, header % nPar, DioMaxParLen, header % pars)
             endif
             if ( header % nLoc .gt. 0 ) then
-                call  DioShmDsWriteHdr(shmHandle, header % nLoc, DioMaxLocLen, header % locs)
+                if (plt % ds % outStream % streamType == Dio_WQMap_Stream) then
+                   call  DioShmDsWriteHdr(shmHandle, header % nLoc)
+                else
+                   call  DioShmDsWriteHdr(shmHandle, header % nLoc, DioMaxLocLen, header % locs)
+                endif
             endif
 
             call  DioShmDsWriteHdr(shmHandle, header % varType)
@@ -114,14 +118,13 @@ subroutine DioPltReadHeaderShm(plt)
 
     if (DioShmDsStartReadHdr(shmHandle )) then
         call  DioShmDsReadHdr(shmHandle, header % npar)
-        call  DioShmDsReadHdr(shmHandle, header % nloc)
-
+        call DioShmDsReadHdr(shmHandle, header % nloc)
         if ( header % nPar .gt. 0 ) then
             allocate(header % pars(header % nPar))
             header % pars = ''
             call  DioShmDsReadHdr(shmHandle, header % nPar, DioMaxParLen, header % pars)
         endif
-        if ( header % nLoc .gt. 0 ) then
+        if ( header % nLoc .gt. 0 .and. streamType /= Dio_WQMap_Stream) then
             allocate(header % locs(header % nLoc))
             header % locs = ''
             call  DioShmDsReadHdr(shmHandle, header % nLoc, DioMaxLocLen, header % locs)

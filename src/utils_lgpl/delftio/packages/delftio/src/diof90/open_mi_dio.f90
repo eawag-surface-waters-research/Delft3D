@@ -302,6 +302,7 @@ function OD_ExchItemCreate_WithSizes(quantID, elmsetID, mMax, nMax, role, startT
     ! locals
     type(t_od_exchange), pointer             :: od_exchange ! pointer to exchanged item
     character(Len=DioMaxParLen),dimension(1) :: arrQuant    ! Array representation of qant.
+    type(DioStreamType)                      :: stream      ! shm-stream for map file
     !
     ! body
     success = .false.
@@ -316,8 +317,10 @@ function OD_ExchItemCreate_WithSizes(quantID, elmsetID, mMax, nMax, role, startT
         else
             arrQuant(1) = quantID
             
-            od_exchange % exchPlt = DioPltDefine(od_exchange % exchDsName,      &
-                                             dio_plt_real, arrQuant, mMax*nMax, startTime )
+            stream = DioStreamCreateAuto(od_exchange % exchDsName, 'w')
+            stream % streamType = Dio_WQMap_Stream
+            od_exchange % exchPlt = DioPltDefine(stream, od_exchange % exchDsName, dio_plt_real, arrQuant, mMax*nMax, startTime)
+
             if ( DioGetLastError() /= 0 ) then
                 write(odLastError,'(A)') 'OPENMI_DIO: ERROR 100: See dio error file'
             else
