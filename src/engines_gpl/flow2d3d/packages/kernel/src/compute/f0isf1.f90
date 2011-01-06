@@ -197,12 +197,12 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
     icx     = nmaxddb
     icy     = 1
     !
-    ! Check on waterlevel and velocity gradient
+    ! Check on waterlevel and velocity change (previously referred to as "gradient")
     ! Not for initialisation (nst < 0)
     !
     if (nst >= 0) then
        !
-       ! Water level gradient:
+       ! Water level change:
        ! if (abs(s0(nm)-s1(nm)) >= smax) then stop
        !
        do nm = 1, nmmax
@@ -212,7 +212,7 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
        enddo
        !
        if (s01max >= smax) then
-          write(message,'(a,f10.2,a,i0,a)') 'Water level gradient too high > ', smax, &
+          write(message,'(a,f10.2,a,i0,a)') 'Water level change too high > ', smax, &
                & ' m (per 0.5 DT) after ', ntstep, ' timesteps in the following points:'
           call prterr(lundia, 'P004', trim(message))
           do nm = 1, nmmax
@@ -234,7 +234,7 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
           call d3stop(iexit, gdp)
        endif
        !
-       ! Velocity gradient:
+       ! Velocity change:
        ! if (abs(u0(nm,k)-u1(nm,k)) >= velmax) then warning
        ! if (abs(v0(nm,k)-v1(nm,k)) >= velmax) then warning
        !
@@ -252,7 +252,7 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
        enddo
        !
        if (u01max > velmax) then
-          write(message,'(a,f10.2,a,i0,a)') 'Velocity gradient too high > ', velmax, &
+          write(message,'(a,f10.2,a,i0,a)') 'Velocity change too high > ', velmax, &
                & ' m/s (per 0.5 DT) after ', ntstep, ' timesteps in the following points:'
           call prterr(lundia, 'U190', trim(message))
           do nm = 1, nmmax
@@ -272,7 +272,7 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
        endif
        !
        if (v01max > velmax) then
-          write(message,'(a,f10.2,a,i0,a)') 'Velocity gradient too high > ', velmax, &
+          write(message,'(a,f10.2,a,i0,a)') 'Velocity change too high > ', velmax, &
                & ' m/s (per 0.5 DT) after ', ntstep, ' timesteps in the following points:'
           call prterr(lundia, 'U190', trim(message))
           do nm = 1, nmmax
