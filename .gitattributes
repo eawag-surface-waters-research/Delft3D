@@ -75,11 +75,8 @@ src/engines_gpl/flow2d3d/default/d3d_visu.ini -text
 src/engines_gpl/flow2d3d/default/dioconfig.ini -text
 src/engines_gpl/flow2d3d/default/files.def -text
 src/engines_gpl/flow2d3d/default/tabmom -text
-src/engines_gpl/flow2d3d/doc/delft3d/D3D-FLOWreadme.txt -text
 src/engines_gpl/flow2d3d/doc/delft3d/hydra.html -text
 src/engines_gpl/flow2d3d/doc/delft3d/im/hydranet.gif -text
-src/engines_gpl/flow2d3d/doc/delft3d/makeD3D.html -text
-src/engines_gpl/flow2d3d/doc/delft3d/readme.txt -text
 src/engines_gpl/flow2d3d/doc/parallel_status.txt -text
 src/engines_gpl/flow2d3d/packages/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/data/Makefile.am -text

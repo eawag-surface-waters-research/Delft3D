@@ -49,6 +49,7 @@ subroutine wrthisbal(ithisc    ,trifil    ,lundia    ,error     ,gdp       )
     integer                        , pointer :: celidt
     type (nefiselement)            , pointer :: nefiselem
     !
+    logical                        , pointer :: massbal
     integer                        , pointer :: nbalpol
     integer                        , pointer :: nneighb
     integer      , dimension(:,:)  , pointer :: neighb
@@ -92,6 +93,10 @@ subroutine wrthisbal(ithisc    ,trifil    ,lundia    ,error     ,gdp       )
 !
 !! executable statements -------------------------------------------------------
 !
+    massbal        => gdp%gdmassbal%massbal
+    !
+    if (.not. massbal) return
+    !
     nefiselem      => gdp%nefisio%nefiselem(nefiswrthisbal)
     first          => nefiselem%first
     celidt         => nefiselem%celidt
