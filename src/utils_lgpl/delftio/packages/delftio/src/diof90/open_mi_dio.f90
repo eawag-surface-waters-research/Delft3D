@@ -80,8 +80,9 @@ module open_mi_dio
 ! Overloaded Functions
 !
     interface OD_ExchItemCreate
-        module procedure OD_ExchItemCreate_WithIDs  ! Called by providing component
-        module procedure OD_ExchItemCreate_NoIDs    ! Called by accepting component
+        module procedure OD_ExchItemCreate_WithIDs   ! Called by providing component
+        module procedure OD_ExchItemCreate_WithSizes ! Called by providing component of 2d fields
+        module procedure OD_ExchItemCreate_NoIDs     ! Called by accepting component
     end interface
 
     interface OD_Put
@@ -107,6 +108,7 @@ module open_mi_dio
         integer                        :: role       ! Providing / Accepting
         character(Len=DioMaxStreamLen) :: exchDsName ! Exchange Dataset Name
         character(Len=DioMaxStreamLen) :: dumpDsName ! Dumpfile name for dataset
+
         type(DioPltType)               :: exchPlt    ! DelftIO PLT for shared mem. exchange
         type(DioPltType)               :: dumpPlt    ! DelftIO PLT for dumping values
 
@@ -279,6 +281,55 @@ function OD_ExchItemCreate_WithIDs(quantID, elmsetID, elmIDs, role, startTime) r
         endif
     endif
 end function OD_ExchItemCreate_WithIDs
+!
+!
+! Create provided exchange item, 2d field (called by providing component)
+!
+!==============================================================================
+function OD_ExchItemCreate_WithSizes(quantID, elmsetID, mMax, nMax, role, startTime) result(success)
+    !
+    ! return value
+    logical :: success  ! .true.: all OK
+    !
+    ! arguments
+    character(Len=*)             , intent(in) :: quantID    ! Quantity Identifier
+    character(Len=*)             , intent(in) :: elmsetID   ! ElementSet Identifier
+    integer                      , intent(in) :: mMax       ! # values m-dir.
+    integer                      , intent(in) :: nMax       ! # values n-dir.
+    integer                      , intent(in) :: role       ! Providing / Accepting
+    double precision             , intent(in) :: startTime  ! Start time for Dio PLT
+    !
+    ! locals
+    type(t_od_exchange), pointer             :: od_exchange ! pointer to exchanged item
+    character(Len=DioMaxParLen),dimension(1) :: arrQuant    ! Array representation of qant.
+    !
+    ! body
+    success = .false.
+    if ( role /= od_providing ) then
+        write(odLastError, '(4A)') 'OPENMI_DIO: ERROR 105: role must be PROVIDING for ', &
+                                        trim(quantID), '/', trim(elmsetID)
+    else
+        od_exchange => odAddExchange(quantID, elmsetID, role)
+        if ( .not. associated(od_exchange) ) then
+            write(odLastError, '(4A)') 'OPENMI_DIO: ERROR 104: could not create exchange item ', &
+                                        trim(quantID), '/', trim(elmsetID)
+        else
+            arrQuant(1) = quantID
+            
+            od_exchange % exchPlt = DioPltDefine(od_exchange % exchDsName,      &
+                                             dio_plt_real, arrQuant, mMax*nMax, startTime )
+            if ( DioGetLastError() /= 0 ) then
+                write(odLastError,'(A)') 'OPENMI_DIO: ERROR 100: See dio error file'
+            else
+                success = .true.
+                if (dumpValues) then
+                    od_exchange % dumpPlt = DioPltDefine(od_exchange % dumpDsName,      &
+                                                 dio_plt_real, arrQuant, mMax*nMax, startTime )
+                endif
+            endif
+        endif
+    endif
+end function OD_ExchItemCreate_WithSizes
 !
 !
 !
