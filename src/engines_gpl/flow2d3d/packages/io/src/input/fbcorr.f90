@@ -172,7 +172,7 @@ subroutine fbcorr(lundia, nto, nambnd, typbnd, gdp)
                 & fcrbnd(j)%ibct(1)    , fcrbnd(j)%ibct(2)     , &
                 & fcrbnd(j)%ibct(3)    , gdp       )
           endif
-          deallocate(parnames, stat = istat)
        enddo
+       deallocate(parnames, stat = istat)
     endif
 end subroutine fbcorr
