@@ -30,7 +30,26 @@ subroutine runme(max_keyval, keys   , values   , error_message)
 !DEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'RUNME' :: RUNME
 !!--description-----------------------------------------------------------------
 !
-! Computes culvert discharge
+! 1) Interpretation of the keys/values from the config file
+! 2) Create runid, based on mdfFile/ddbFile
+! 3) In dd_execute:
+!    - RemoteOLV initialization
+!    - DD initialization
+!    - Start all processes:
+!
+!> @file runme.f90
+!! The dynamic library 'Delft3D-FLOW'.
+!! Flow-related routines are in unstruc.f90
+!<
+!
+!> \mainpage Delft3D-FLOW API docs
+!! \li \b Main \b program: deltares_hydro.F90
+!! \li \b Dynamic \b library \b entrance: runme.f90
+!! \li \b DD \b and \b RemoteOLV \b preparations, \b start \b all \b processes: hydra.cpp (Hydra::Execute)
+!! \li \b Global \b data: modules.f90 (flow, geometry, times, parameters, ...)
+!! \li \b Subdomain \b calculation \b toplevel: trisim.f90
+!! \li \b Preprocessor: \b Convert \b time \b related \b data: tdatom.f90
+!! \li \b Timeloop: trisol.f90
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
