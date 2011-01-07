@@ -300,38 +300,24 @@ function OD_ExchItemCreate_WithSizes(quantID, elmsetID, mMax, nMax, role, startT
     double precision             , intent(in) :: startTime  ! Start time for Dio PLT
     !
     ! locals
-    type(t_od_exchange), pointer             :: od_exchange ! pointer to exchanged item
-    character(Len=DioMaxParLen),dimension(1) :: arrQuant    ! Array representation of qant.
-    type(DioStreamType)                      :: stream      ! shm-stream for map file
+    type(t_od_exchange), pointer              :: od_exchange ! pointer to exchanged item
+    character(Len=DioMaxParLen), dimension(1) :: arrQuant    ! Array representation of qant.
+    character(Len=DioMaxLocLen), &
+       allocatable, dimension(:)              :: locIds      ! Row/Col loc ids
+    integer                                   :: m, n, mn    ! loop counters
+
     !
     ! body
-    success = .false.
-    if ( role /= od_providing ) then
-        write(odLastError, '(4A)') 'OPENMI_DIO: ERROR 105: role must be PROVIDING for ', &
-                                        trim(quantID), '/', trim(elmsetID)
-    else
-        od_exchange => odAddExchange(quantID, elmsetID, role)
-        if ( .not. associated(od_exchange) ) then
-            write(odLastError, '(4A)') 'OPENMI_DIO: ERROR 104: could not create exchange item ', &
-                                        trim(quantID), '/', trim(elmsetID)
-        else
-            arrQuant(1) = quantID
-            
-            stream = DioStreamCreateAuto(od_exchange % exchDsName, 'w')
-            stream % streamType = Dio_WQMap_Stream
-            od_exchange % exchPlt = DioPltDefine(stream, od_exchange % exchDsName, dio_plt_real, arrQuant, mMax*nMax, startTime)
+    allocate(locIds(mMax*nMax))
+    do n = 1, nMax
+        do m = 1, mMax
+           mn = (n-1) * mMax + m
+           write(locIds(mn), '(A,I4.4,A,I4.4,A)') 'row,col[', n, ',', m, ']'
+        enddo
+    enddo
+    success = OD_ExchItemCreate_WithIDs(quantID, elmsetID, locIds, role, startTime)
+    deallocate(locIds)
 
-            if ( DioGetLastError() /= 0 ) then
-                write(odLastError,'(A)') 'OPENMI_DIO: ERROR 100: See dio error file'
-            else
-                success = .true.
-                if (dumpValues) then
-                    od_exchange % dumpPlt = DioPltDefine(od_exchange % dumpDsName,      &
-                                                 dio_plt_real, arrQuant, mMax*nMax, startTime )
-                endif
-            endif
-        endif
-    endif
 end function OD_ExchItemCreate_WithSizes
 !
 !
