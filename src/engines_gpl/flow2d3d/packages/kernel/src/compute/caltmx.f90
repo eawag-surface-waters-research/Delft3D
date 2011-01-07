@@ -92,7 +92,7 @@ subroutine caltmx(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        ndm = -icy
        nmd = -icx
        do nm = 1, nmmax
-          h1         = s1(nm) + real(dps(nm),fp)
+          h1         = max(0.01_fp, s1(nm)+real(dps(nm),fp))
           ndm        = ndm + 1
           nmd        = nmd + 1
           kfuv       = max(1, kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm))

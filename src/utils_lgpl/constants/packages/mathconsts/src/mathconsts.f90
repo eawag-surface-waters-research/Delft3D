@@ -40,6 +40,7 @@ module mathconsts
 ! NONE
 !!--declarations----------------------------------------------------------------
 use precision
+implicit none
 
 !
 ! flexible precision constants
@@ -72,7 +73,7 @@ subroutine init_mathconsts()
     !
     pi_hp      = 4.0_hp*datan(1.0_hp)
     degrad_hp  = pi_hp/180.0_hp
-    raddeg_hp  = 180.0_hp/dpi
+    raddeg_hp  = 180.0_hp/pi_hp
     daysec_hp  = 24.0_hp*60.0_hp*60.0_hp
     yearsec_hp = 31536000.0d0
     eps_hp     = epsilon(1.0_hp)
