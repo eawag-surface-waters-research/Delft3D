@@ -524,7 +524,7 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                    node_ptr => link_ptr%child_nodes(j)%node_ptr
                    parname = tree_get_name( node_ptr )
                    if (parname == 'dump') then
-                      call prop_get_string(link_ptr, '*', 'dump', name)
+                      call prop_get_string(node_ptr, '*', 'dump', name)
                       call register_polygon(name   , pol_ptr, nadump, totnpdu, &
                                           & areatp , unique, gdp    )
                       nalink = nalink + 1
@@ -923,7 +923,7 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                          cntdump = 0
                          call prop_get_integer(dump_area_ptr, '*', 'dumpid', cntdump)
                          if (cntdump < 1) then
-                            call prterr(lundia, 'U021','Invalid dump ID')
+                            call prterr(lundia, 'U021','Invalid dump ID: '//trim(parname))
                             call d3stop(1, gdp)
                          endif
                          link_def(cntlink,1) = cntssrc
