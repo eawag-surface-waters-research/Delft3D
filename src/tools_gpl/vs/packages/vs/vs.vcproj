@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="vs"
 	ProjectGUID="{EBCE44C2-3F65-4063-AF25-F7451B68BEB3}"
 	RootNamespace="vs"
@@ -25,7 +25,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="cd \&#x0D;&#x0A;mkdir tmp&#x0D;&#x0A;cd $(InputDir)\src&#x0D;&#x0A;del /f vs_l.c vs_y.c&#x0D;&#x0A;$(SolutionDir)\third_party_open\lexyacc\bin\win32\flex.exe -ovs_l.c vs_l.l&#x0D;&#x0A;$(SolutionDir)\third_party_open\lexyacc\bin\win32\byacc.exe -d -ovs_y.c vs_y.y&#x0D;&#x0A;"
+				CommandLine="cd \&#x0D;&#x0A;mkdir tmp&#x0D;&#x0A;cd $(InputDir)\src&#x0D;&#x0A;del /f vs_l.c vs_y.c&#x0D;&#x0A;&quot;$(SolutionDir)\third_party_open\lexyacc\bin\win32\flex.exe&quot; -ovs_l.c vs_l.l&#x0D;&#x0A;&quot;$(SolutionDir)\third_party_open\lexyacc\bin\win32\byacc.exe&quot; -d -ovs_y.c vs_y.y&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -104,7 +104,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="cd \&#x0D;&#x0A;mkdir tmp&#x0D;&#x0A;cd $(InputDir)\src&#x0D;&#x0A;del /f vs_l.c vs_y.c&#x0D;&#x0A;$(SolutionDir)\third_party_open\lexyacc\bin\win32\flex.exe -ovs_l.c vs_l.l&#x0D;&#x0A;$(SolutionDir)\third_party_open\lexyacc\bin\win32\byacc.exe -d -ovs_y.c vs_y.y&#x0D;&#x0A;"
+				CommandLine="cd \&#x0D;&#x0A;mkdir tmp&#x0D;&#x0A;cd $(InputDir)\src&#x0D;&#x0A;del /f vs_l.c vs_y.c&#x0D;&#x0A;&quot;$(SolutionDir)\third_party_open\lexyacc\bin\win32\flex.exe&quot; -ovs_l.c vs_l.l&#x0D;&#x0A;&quot;$(SolutionDir)\third_party_open\lexyacc\bin\win32\byacc.exe&quot; -d -ovs_y.c vs_y.y&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
