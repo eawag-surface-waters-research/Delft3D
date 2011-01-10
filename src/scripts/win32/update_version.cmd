@@ -13,14 +13,17 @@ set SED=%SCRIPT_DIRECTORY%\..\..\third_party_open\commandline\bin\win32\sed.exe
 set SVNVERSION=%SCRIPT_DIRECTORY%\..\..\third_party_open\subversion\bin\win32\svnversion.exe
 set VN=%SCRIPT_DIRECTORY%\..\..\third_party_open\version_number\bin\win32\version_number.exe
 
+echo %SVNVERSION%
 IF DEFINED BUILD_NUMBER (
 	set version=%BUILD_NUMBER%
 ) ELSE (
 	rem Obtain the svn version number 
-	%SVNVERSION% %2 | %SED% "s/\(.*\)/set version=\1/" > setversion.bat
+	pause
+
+	"%SVNVERSION%" %2 | "%SED%" "s/\(.*\)/set version=\1/" > setversion.bat
  	call setversion.bat & del setversion.bat > NUL
 )
-	
+
 rem ==========================================================================
 rem If the source has been obtained using a svn export command, the "exported"
 rem string has been generated, but this cannot be used within *.rc files
