@@ -1,12 +1,12 @@
 Compiling on Windows
 ====================
   0) Be sure that you have installed:
-     Visual Studio 2008, including Fortran compiler Intel 11.0 or higher
+     Visual Studio 2008, including Fortran compiler Intel 11.0
      Check the following setting:
      Menu -> Tools -> Options -> Projects and Solutions -> Build and Run -> maximum number of parallel project builds : 1
-  1) Open ds.sln in Visual Studio
-     See directory scripts\solutions for alternative sln files
-  2) <Ctrl><Shift>B
+  1) Open deltares_hydro_open_source.sln in Visual Studio
+  2) Select the "solution configuration you want: Debug or Release
+  3) <Ctrl><Shift>B
 
 
 Compiling on Linux
@@ -28,6 +28,6 @@ utils_lgpl  : Open source utils under LGPL conditions
 
 
 
-25 December 2010
+10 January 2011
 
 adri.mourits@deltares.nl

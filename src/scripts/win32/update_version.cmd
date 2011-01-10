@@ -13,13 +13,10 @@ set SED=%SCRIPT_DIRECTORY%\..\..\third_party_open\commandline\bin\win32\sed.exe
 set SVNVERSION=%SCRIPT_DIRECTORY%\..\..\third_party_open\subversion\bin\win32\svnversion.exe
 set VN=%SCRIPT_DIRECTORY%\..\..\third_party_open\version_number\bin\win32\version_number.exe
 
-echo %SVNVERSION%
 IF DEFINED BUILD_NUMBER (
 	set version=%BUILD_NUMBER%
 ) ELSE (
 	rem Obtain the svn version number 
-	pause
-
 	"%SVNVERSION%" %2 | "%SED%" "s/\(.*\)/set version=\1/" > setversion.bat
  	call setversion.bat & del setversion.bat > NUL
 )
