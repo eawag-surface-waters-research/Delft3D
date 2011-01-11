@@ -5,7 +5,7 @@ Runtxt= #Het Friesche Zeegaatje        #
         #Test model DELFT3D            #
         #Uitgebreid met ongelijke bodem#
 Filcco= #f34.grd#
-Fmtcco= #UN#
+Fmtcco= #FR#
 Anglat=  5.5000000e+001
 Grdang=  0.0000000e+000
 Filgrd= #f34.enc#
