@@ -211,7 +211,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     logical                                             :: found       ! If FOUND = TRUE then recnam in the MD-file was found  
     logical                                             :: error       ! Flag=TRUE if an error is encountered  
     logical                                             :: solrad_read ! Flag=TRUE means Nett Solar Radiation is to be read from .tem file 
-    logical                                             :: lexist      ! Logical to determine file existance  
+    logical                                             :: lexist      ! Logical to determine file existence  
     logical                                             :: newkw       ! Logical var. specifying whether a new recnam should be read from the MD-file or just new data in the continuation line  
     logical                                             :: noui        ! Flag for reading from User Interface  
     logical                                             :: sferic      ! Flag for spherical coordinates (TRUE or FALSE)  

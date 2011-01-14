@@ -258,7 +258,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           !
           call noextspaces(filbct    ,lf        )
           !
-          ! test file existance <YES> -> open file <NO> -> error
+          ! test file existence <YES> -> open file <NO> -> error
           !
           if ( exifil(filbct(:lf),lundia,'G004',gdp) ) then
              if (nrver <= 249) then

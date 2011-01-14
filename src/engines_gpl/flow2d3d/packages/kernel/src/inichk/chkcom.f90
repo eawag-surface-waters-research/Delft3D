@@ -147,7 +147,7 @@ subroutine chkcom(lundia    ,error     ,neffil    ,soort     ,gdp       )
     else
        !
        !        group com-version does not exist
-       !        check existance of flow-group DWQTIM
+       !        check existence of flow-group DWQTIM
        !
        ierror = inqdat(fds, grnam5, grdef5)
        if (ierror ==0) then

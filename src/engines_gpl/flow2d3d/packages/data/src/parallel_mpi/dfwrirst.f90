@@ -190,7 +190,7 @@ subroutine dfwrirst(lundia    ,runid     ,itrstc    ,nmaxus    ,mmax      , &
        !
        call timdat(julday    ,timsec    ,idate    ,itime     )
        !
-       ! get file name and test file existance
+       ! get file name and test file existence
        !
        call noextspaces(runid     ,lrid      )
        !

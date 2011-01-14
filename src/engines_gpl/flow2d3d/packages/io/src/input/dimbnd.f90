@@ -147,7 +147,7 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
           fmttmp = fmtdef(3:)
        endif
        !
-       ! test file existance
+       ! test file existence
        !
        lfile = len(filtmp)
        !

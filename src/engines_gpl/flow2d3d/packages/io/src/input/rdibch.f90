@@ -83,7 +83,7 @@ subroutine rdibch(lundia    ,error     ,runid     ,ntof      ,nto       , &
     !
     call noextspaces(runid     ,lrid      )
     !
-    ! test file existance and if so read
+    ! test file existence and if so read
     !
     filbch = 'TMP_' // runid(:lrid) // '.bch'
     !
@@ -246,7 +246,7 @@ subroutine rdibch(lundia    ,error     ,runid     ,ntof      ,nto       , &
        close (luntmp)
        deallocate(rtmp)
     !
-    ! test file existance <NO>
+    ! test file existence <NO>
     !
     else
        error = .true.

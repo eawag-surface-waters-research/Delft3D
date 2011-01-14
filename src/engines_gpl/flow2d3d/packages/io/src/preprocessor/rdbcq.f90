@@ -190,7 +190,7 @@ subroutine rdbcq(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        call noextspaces(filbcq    ,lf        )
        !
-       ! test file existance <YES> -> open file <NO> -> error
+       ! test file existence <YES> -> open file <NO> -> error
        !
        if (exifil(filbcq(:lf), lundia, 'G004', gdp)) then
           if (.not.noread) then

@@ -161,7 +161,7 @@ subroutine dimdis(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
        !
        if (.not.noui) goto 520
        !
-       ! test file existance
+       ! test file existence
        !
        call noextspaces(filtmp    ,lfile     )
        !

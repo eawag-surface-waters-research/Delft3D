@@ -248,7 +248,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           !
           call noextspaces(filbcc    ,lf        )
           !
-          ! Test file existance <YES> -> open file <NO> -> error
+          ! Test file existence <YES> -> open file <NO> -> error
           !
           if (exifil(filbcc(:lf), lundia, 'G004', gdp)) then
              if (nrver<=249) then

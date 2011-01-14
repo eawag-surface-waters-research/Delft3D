@@ -41,6 +41,8 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     !
     use globaldata
     !
+    use dfparall
+    !
     implicit none
     !
     type(globdat),target :: gdp
@@ -54,6 +56,9 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     integer                    , pointer :: nttaru
     integer                    , pointer :: nttarv
     integer                    , pointer :: ntrt
+    integer                    , pointer :: mfg
+    integer                    , pointer :: nfg
+
     integer , dimension(:,:)   , pointer :: ittaru
     integer , dimension(:,:)   , pointer :: ittarv
     integer , dimension(:,:)   , pointer :: ittdef
@@ -91,14 +96,19 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     integer                          :: iend
     integer                          :: iocond
     integer                          :: istat
+    integer                          :: it
     integer                          :: j
     integer                          :: lcurec
     integer                          :: lfile
     integer                          :: luntmp
     integer                          :: m
+    integer                          :: m1
+    integer                          :: mll
     integer                          :: mcurec
     integer                          :: mtrt
     integer                          :: n
+    integer                          :: n1
+    integer                          :: nll
     integer                          :: nrflds
     integer, dimension(irough)       :: nropar
     integer, dimension(maxfld)       :: ifield
@@ -131,6 +141,9 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     ntrt           => gdp%gdtrachy%ntrt
     gdtrachy       => gdp%gdtrachy
     dryflc         => gdp%gdnumeco%dryflc
+
+    mfg            => gdp%gdparall%mfg
+    nfg            => gdp%gdparall%nfg
     !
     ! Allocate trachytope arrays that are used in main routines
     !
@@ -240,7 +253,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
        goto 9999
     endif
     !
-    ! test file existance
+    ! test file existence
     !
     lfile = index(filtmp, ' ')
     if (lfile==0) lfile = 13
@@ -595,7 +608,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     !
     if (filtmp /= ' ') then
        !
-       ! test file existance
+       ! test file existence
        !
        lfile = index(filtmp, ' ')
        if (lfile==0) lfile = 13
@@ -642,7 +655,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     !
     if (filtmp /= ' ') then
        !
-       ! test file existance
+       ! test file existence
        !
        lfile = index(filtmp, ' ')
        if (lfile==0) lfile = 13
@@ -714,5 +727,53 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     !
     write (lundia, '(a)') '*** End    of trachytopes input'
     write (lundia, *)
+    !
+    ! transfer to local subdomain
+    !
+
+    mll = gdp%d%mmax
+    nll = gdp%d%nmaxus
+
+    if (parll .and. nttaru > 0) then
+       do it = 1,nttaru
+          n1 = ittaru(it,1) - nfg + 1
+          m1 = ittaru(it,2) - mfg + 1
+          ! check if observation point is inside or outside subdomain
+          if ( m1>=1 .and. n1>=1 .and. m1<=mll .and. n1<=nll ) then
+             !
+             ! point is inside subdomain
+             !
+             ittaru(it,1) = n1
+             ittaru(it,2) = m1
+          else
+             ittaru(it,1) = -1
+             ittaru(it,2) = -1
+             ittaru(it,3) = -1
+             rttaru(it) = -1.0
+          endif
+       enddo
+    endif
+
+    if (parll .and. nttarv > 0) then
+       do it = 1,nttarv
+          n1 = ittarv(it,1) - nfg + 1
+          m1 = ittarv(it,2) - mfg + 1
+          ! check if observation point is inside or outside subdomain
+          if ( m1>=1 .and. n1>=1 .and. m1<=mll .and. n1<=nll ) then
+             !
+             ! point is inside subdomain
+             !
+             ittarv(it,1) = n1
+             ittarv(it,2) = m1
+          else
+             ittarv(it,1) = -1
+             ittarv(it,2) = -1
+             ittarv(it,3) = -1
+             rttarv(it) = -1.0
+          endif
+   
+       enddo
+    endif
+    !
  9999 continue
 end subroutine rdtrt

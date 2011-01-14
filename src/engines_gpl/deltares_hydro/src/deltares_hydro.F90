@@ -106,7 +106,7 @@ do i=0,iargc()
    call getarg(i,arguments(i))
 enddo
 !
-! Check existance of the configuration file, specified in the first argument
+! Check existence of the configuration file, specified in the first argument
 !
 inquire (file = trim(arguments(1)), exist = ex)
 if (.not. ex) then

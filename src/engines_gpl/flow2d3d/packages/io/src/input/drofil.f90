@@ -95,7 +95,7 @@ subroutine drofil(lundia    ,fildro    ,fmttmp    ,error     ,ndro      , &
     rdef  = 0.0
     lr132 = 132
     !
-    ! test file existance
+    ! test file existence
     !
     lfile = len(fildro)
     !

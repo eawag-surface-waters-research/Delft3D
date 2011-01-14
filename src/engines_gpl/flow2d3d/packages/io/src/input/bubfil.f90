@@ -138,7 +138,7 @@ subroutine bubfil(lundia    ,filbub    ,error     ,mmax      ,nmax      , &
     write (message, '(2a)') 'Reading Bubble screen file ', trim(filbub)
     call prterr(lundia, 'G051', trim(message))
     !
-    ! test file existance
+    ! test file existence
     !
     call noextspaces(filbub, lfile)
     error = .not.exifil(filbub(:lfile), lundia, 'G004', gdp)

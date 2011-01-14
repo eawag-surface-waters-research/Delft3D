@@ -151,7 +151,7 @@ subroutine rdfcio(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
           if (noui) error = .true.
           call prterr(lundia    ,'U135'    ,' '       )
        !
-       ! Test file existance only in case NOUI = .true.
+       ! Test file existence only in case NOUI = .true.
        !
        elseif (noui) then
           call ciofil(lundia    ,error     ,filcio    ,mmax      ,nmax      , &

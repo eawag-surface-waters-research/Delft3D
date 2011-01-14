@@ -86,7 +86,9 @@ subroutine chktra(lundia    ,error     ,nmax      ,mmax      ,ittdef    , &
        ! Skip block separator
        !
        if (ittaru(itt, 1)== - 1 .and. ittaru(itt, 2)== - 1 .and. ittaru(itt, 3) &
-         & == - 1) goto 20
+         & == - 1) then
+          goto 100
+       endif
        !
        ! Check N,M values
        !

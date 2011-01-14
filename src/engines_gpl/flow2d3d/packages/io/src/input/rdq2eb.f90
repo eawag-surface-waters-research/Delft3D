@@ -91,7 +91,7 @@ subroutine rdq2eb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                :: nlook   ! Help var.: nr. of data to look for in the MD-file 
     integer                :: ntrec   ! Help. var to keep track of NRREC 
     integer, external      :: newlun
-    logical                :: ex      ! Logical flag for file existance 
+    logical                :: ex      ! Logical flag for file existence 
     logical                :: found   ! FOUND=TRUE if KEYW in the MD-file was found 
     logical                :: lerror  ! Flag=TRUE if an error is encountered 
     logical                :: newkw   ! Logical var. specifying whether a new recnam should be read from the MD-file or just new data in the continuation line 

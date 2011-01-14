@@ -299,7 +299,7 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
           goto 9999
        endif
        !
-       ! Check file existance
+       ! Check file existence
        !
        if (exifil(filmd(1:lfil), lunscr, 'G004', gdp)) then
           inquire (file = filmd(1:lfil), opened = opend)

@@ -232,7 +232,7 @@ subroutine dimbch(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
        !
        if (.not.noui) goto 9999
        !
-       ! test file existance
+       ! test file existence
        !
        lfile = len(filtmp)
        !

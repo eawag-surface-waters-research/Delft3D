@@ -492,7 +492,7 @@ BInt4 Define_cel ( BInt4   set       ,
         elm_name[max_copy] = '\0';
 
 /*
- *    Check for existance element name
+ *    Check for existence element name
  */
         nefis_errno = HS_check_ecg (set   , fds       , elm_name   , NIL       , hashtb ,
                                     LHSHEL, &pnt_hash , &pnt_bucket, &new_entry);

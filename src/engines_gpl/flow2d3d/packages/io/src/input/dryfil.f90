@@ -77,7 +77,7 @@ subroutine dryfil(lundia    ,lundry    ,error     ,fildry    ,fmttmp    , &
 !
     mfg => gdp%gdparall%mfg
     nfg => gdp%gdparall%nfg
-    ! test file existance, if so read
+    ! test file existence, if so read
     !
     lfile = len(fildry)
     !
@@ -177,7 +177,7 @@ subroutine dryfil(lundia    ,lundry    ,error     ,fildry    ,fmttmp    , &
        if (error .or. imnd==0) fldry = .false.
     else
        !
-       !-----test file existance <NO>
+       !-----test file existence <NO>
        !
        error = .true.
     endif

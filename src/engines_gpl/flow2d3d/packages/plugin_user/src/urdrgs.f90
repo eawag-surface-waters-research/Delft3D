@@ -31,7 +31,7 @@ subroutine urdrgs(lundia    ,error     ,filusr    ,nmax      ,mmax      , &
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-!    Function: - Test existance of user defined file for
+!    Function: - Test existence of user defined file for
 !                rigis sheets
 !              - Read of input from user defined files and
 !                initialize UBRLSU & UBRLSV
@@ -98,7 +98,7 @@ subroutine urdrgs(lundia    ,error     ,filusr    ,nmax      ,mmax      , &
     integer               :: nlook   ! Help var.: nr. of data to look for in the MD-file 
     integer               :: nrigid  ! Help var. (counter) 
     integer, dimension(6) :: ival    ! Help array (int.) where the data, recently read from file, are stored temporarily 
-    logical               :: ex      ! Logical flag for file existance 
+    logical               :: ex      ! Logical flag for file existence 
     real(fp)              :: brlosc  ! Constant value for wall roughness 
     real(fp)              :: rdef    ! Help var. containing default va- lue(s) for real variable 
     character(1)          :: direct  ! Direction (U/V) of rigid sheet 
@@ -113,7 +113,7 @@ subroutine urdrgs(lundia    ,error     ,filusr    ,nmax      ,mmax      , &
     idef = 0
     rdef = 0.0
     !
-    !-----Test file existance, if so read
+    !-----Test file existence, if so read
     !
     lfile = index(filusr, ' ')
     if (lfile==0) lfile = len(filusr) + 1

@@ -128,7 +128,7 @@ subroutine rdfour(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        call noextspaces(filfou    ,lfile     )
        !
-       !-------test file existance <YES>
+       !-------test file existence <YES>
        !
        if (exifil(filfou(1:lfile), lundia, 'G004', gdp)) then
           !
@@ -147,7 +147,7 @@ subroutine rdfour(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              close (lunfou)
           endif
        !
-       !-------test file existance <NO>
+       !-------test file existence <NO>
        !
        else
           error = .true.

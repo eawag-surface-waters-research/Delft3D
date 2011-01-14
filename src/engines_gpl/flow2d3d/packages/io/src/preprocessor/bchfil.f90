@@ -91,7 +91,7 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
     ier   = 0
     rdef  = 0.0
     !
-    ! Test file existance and if so read
+    ! Test file existence and if so read
     !
     call noextspaces(filbch, lfile)
     !

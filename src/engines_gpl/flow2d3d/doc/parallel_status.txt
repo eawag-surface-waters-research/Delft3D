@@ -285,9 +285,9 @@ group               testcase
                     05-rechtdam            OK 
 19_cdw              01-simple_sigma        ERROR: Current deflecting structure is not supported when running parallel 
                     02-simple_z            ERROR: Z-model and parallel not available    
-                    03-schelde             
-20_trachytopes      01-tt3                 
-                    02-tt4                 
+                    03-schelde             ERROR: Current deflecting structure is not supported when running parallel
+20_trachytopes      01-tt3                 OK
+                    02-tt4                 OK
                     03-tt5                 ***** DISABLED ********** DISABLED *****
                     04-tt6                 ***** DISABLED ********** DISABLED *****
                     05-tt7                 ***** DISABLED ********** DISABLED *****
@@ -296,18 +296,18 @@ group               testcase
                     08-t10                 ***** DISABLED ********** DISABLED *****
                     09-t11                 ***** DISABLED ********** DISABLED *****
                     10-t12                 ***** DISABLED ********** DISABLED *****
-                    11-trachytest          
-                    12-dpmv                
-                    13-dpmv_dep            
-                    14-tt_veg_split        
+                    11-trachytest          ERROR:glibc detected *** delftflow.exe: double free or corruption  
+                    12-dpmv                ERROR: dif_s1 > 1E-4  
+                    13-dpmv_dep            ERROR: dif_s1 > 1E-4 
+                    14-tt_veg_split        OK   
                     15-dpmv_bend           
 21_waveol           01-trench_dd           
                     02-lido_dd             
                     03-coafin_dd           
                     04-botnow_curnow       
                     05-flow_wave_roller    
-22_graded           01-graded              
-                    02-pankop              
+22_graded           01-graded              ERROR: dif_s1 > 0.15            
+                    02-pankop              ERROR: reading nefis file (parallel)
                     03-trench              
                     04-trench_opb          
                     05-pankop_secflow_sp   

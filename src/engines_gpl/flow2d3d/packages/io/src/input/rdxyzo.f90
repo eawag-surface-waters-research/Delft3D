@@ -183,7 +183,7 @@ subroutine rdxyzo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        fmtrgf = 'FR'
        if (fmttmp(:2)=='un') fmtrgf = 'UN'
        !
-       ! test file existance only in case noui = .true.
+       ! test file existence only in case noui = .true.
        !
        if (noui) then
           lfile = len(filrgf)

@@ -240,7 +240,7 @@ subroutine hybfil(lundia    ,error     ,filrgh    ,fmttmp    ,nmax      , &
        if (inode==master) close (luntmp)
        deallocate(ctmp)
     !
-    ! test file existance <NO>
+    ! test file existence <NO>
     !
     else
        error = .true.

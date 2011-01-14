@@ -56,6 +56,7 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
     real(fp)                             , pointer :: clplant
     character(256)                       , pointer :: fildpmv
     type (dpm_vegetation), dimension(:)  , pointer :: vegs
+    type (gd_dpmveg)                     , pointer :: gddpmveg
     integer                              , pointer :: lundia
 !
 ! Global variables
@@ -118,6 +119,7 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
     clplant    => gdp%gddpmveg%clplant
     fildpmv    => gdp%gddpmveg%fildpmv
     vegs       => gdp%gddpmveg%vegs
+    gddpmveg   => gdp%gddpmveg
     lundia     => gdp%gdinout%lundia
     !
     versionnrlow   = 0.01_fp

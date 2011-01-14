@@ -165,7 +165,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     real(fp)                                                          :: xxmin
     real(fp)                   , dimension(:) , allocatable           :: xxprog
     real(fp)                   , dimension(:) , allocatable           :: rfield
-    logical                                                           :: ex       ! Logical flag for file existance
+    logical                                                           :: ex       ! Logical flag for file existence
     logical                                                           :: found
     character(10)                                                     :: versionstring
     character(20)                                                     :: parname

@@ -157,7 +157,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
     errmsg = struct(min(iabsst, mxstr))
 
     !
-    ! test file existance, if so read
+    ! test file existence, if so read
     !
     call noextspaces(filstr    ,lfile     )
     if (exifil(filstr(1:lfile), lundia, 'G004', gdp)) then
@@ -603,7 +603,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
  1100  continue
        close (luntmp)
     !
-    ! test file existance <NO>
+    ! test file existence <NO>
     !
     else
        error = .true.

@@ -122,7 +122,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
     lenc = 1
     errmsg = 'barrier '
     !
-    !-----test file existance
+    !-----test file existence
     !
     call noextspaces(filbar    ,lfile     )
     error = .not.exifil(filbar(:lfile), lundia, 'G004', gdp)

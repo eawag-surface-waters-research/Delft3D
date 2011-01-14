@@ -73,7 +73,7 @@ subroutine grdfil(lundia    ,lungrd    ,error     ,filgrd    ,fmttmp    , &
     !
     !
     !
-    !-----test file existance, if so read
+    !-----test file existence, if so read
     !
     lfile = len(filgrd)
     !
@@ -145,7 +145,7 @@ subroutine grdfil(lundia    ,lungrd    ,error     ,filgrd    ,fmttmp    , &
        if (error) flgrd = .false.
     else
        !
-       !-----test file existance <NO>
+       !-----test file existence <NO>
        !
        error = .true.
     endif

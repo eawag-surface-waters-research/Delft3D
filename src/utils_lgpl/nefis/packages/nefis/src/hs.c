@@ -63,7 +63,7 @@ static BInt4 HS_hash_key  ( BText, BUInt4 );
 
 /*==========================================================================*/
 /*
- *  Check existance of element, cel or group
+ *  Check existence of element, cel or group
  *
  *  input:         key            key to be checked
  *                 hashtb         address to local hashtable

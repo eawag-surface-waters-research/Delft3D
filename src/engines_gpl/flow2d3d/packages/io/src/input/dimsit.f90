@@ -161,7 +161,7 @@ subroutine dimsit(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
        !
        if (.not.noui) goto 520
        !
-       ! test file existance
+       ! test file existence
        !
        lfile = len(filtmp)
        !

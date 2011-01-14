@@ -136,7 +136,7 @@ subroutine dimfou(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
        !
        fmttmp = fmtdef(3:)
        !
-       ! test file existance
+       ! test file existence
        !
        lfile = len(filfou)
        !

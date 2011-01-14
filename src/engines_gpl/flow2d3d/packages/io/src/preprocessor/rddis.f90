@@ -271,7 +271,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           !
           call noextspaces(fildis    ,lf        )
           !
-          ! test file existance <YES> -> open file <NO> -> error
+          ! test file existence <YES> -> open file <NO> -> error
           !
           if (exifil(fildis(:lf), lundia, 'G004', gdp)) then
              if (nrver<=249) then

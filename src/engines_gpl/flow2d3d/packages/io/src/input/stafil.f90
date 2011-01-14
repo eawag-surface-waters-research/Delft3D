@@ -92,7 +92,7 @@ subroutine stafil(lundia    ,filsta    ,fmttmp    ,error     ,nostat    , &
     idef = 0
     lr132 = 132
     !
-    !-----test file existance
+    !-----test file existence
     !
     lfile = len(filsta)
     !

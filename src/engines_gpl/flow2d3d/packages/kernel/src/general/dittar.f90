@@ -94,7 +94,7 @@ subroutine dittar(filnam    ,lundia    ,error     ,nttaru    ,gdp)
        nmpblk(i) = 0
     enddo
     !
-    ! test file existance
+    ! test file existence
     !
     call noextspaces(filnam    ,lfile     )
     if (.not.exifil(filnam(1:lfile) ,lundia    ,'G004'    ,gdp)) then

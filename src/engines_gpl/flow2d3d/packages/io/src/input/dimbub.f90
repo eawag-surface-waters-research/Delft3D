@@ -143,7 +143,7 @@ subroutine dimbub(error, gdp)
     call prop_get_string(gdp%mdfile_ptr, '*', 'Filbub', filtmp)
     if (filtmp /= fildef) then
        !
-       ! test file existance
+       ! test file existence
        !
        if (exifil(trim(filtmp), lundia, 'G004', gdp)) then
           !

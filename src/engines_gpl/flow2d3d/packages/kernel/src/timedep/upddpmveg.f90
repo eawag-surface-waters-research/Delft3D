@@ -37,6 +37,8 @@ subroutine upddpmveg(mmax      ,nmax      ,kmax      ,sig       ,thick     , &
     use precision
     use mathconsts
     use globaldata
+    use dfparall
+
     !
     implicit none
     !
@@ -149,9 +151,9 @@ subroutine upddpmveg(mmax      ,nmax      ,kmax      ,sig       ,thick     , &
           enddo
        enddo
     enddo
-    do m = 2, mmax - 1
-       do n = 2, nmax - 1
-          if (kfs(n, m) == 1) then
+    do m = 1, mmax 
+       do n = 1, nmax 
+          if (abs(kfs(n, m)) == 1) then
              if (planttype(n,m) /= 0) then
                 vegtype  = planttype(n,m)
                 vegcount = nplants(n,m)
@@ -225,7 +227,7 @@ subroutine upddpmveg(mmax      ,nmax      ,kmax      ,sig       ,thick     , &
                       phi = phi + ph
                       phi = min( pi*0.5_fp , max(0.0_fp,phi) )
                       !
-                      ! Jump out of iteration loop when phi has not changed muct
+                      ! Jump out of iteration loop when phi has not changed much
                       !
                       if (comparereal(abs(phi-phi_old),0.01_fp) == -1) exit
                    enddo

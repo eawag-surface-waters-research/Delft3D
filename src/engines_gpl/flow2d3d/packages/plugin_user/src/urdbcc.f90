@@ -30,7 +30,7 @@ subroutine urdbcc(lundia    ,error     ,filusr    ,ltur      ,kmax      , &
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-!    Function: - Test existance of user defined file for
+!    Function: - Test existence of user defined file for
 !                boundary conditions
 !              - Read of input from user defined files and
 !                initialize UBND array for 2 directions, LTUR
@@ -75,7 +75,7 @@ subroutine urdbcc(lundia    ,error     ,filusr    ,ltur      ,kmax      , &
     integer                :: n       ! Loop variable 
     integer                :: newlun
     integer                :: nrand   ! Read boundary number 
-    logical                :: ex      ! Logical flag for file existance 
+    logical                :: ex      ! Logical flag for file existence 
     real(fp)               :: rdef    ! Default value for boundary condition input for turbulent quantities should be < 0 !! 
     real(fp), dimension(2) :: rval    ! Help array to read boundary condi- tion input for turbulent quantities 
 !
@@ -98,7 +98,7 @@ subroutine urdbcc(lundia    ,error     ,filusr    ,ltur      ,kmax      , &
        enddo
     enddo
     !
-    !-----test file existance, if so read
+    !-----test file existence, if so read
     !
     lfile = index(filusr, ' ')
     if (lfile==0) lfile = 13

@@ -126,7 +126,7 @@ subroutine rdbcb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        call noextspaces(filbcb    ,lf        )
        !
-       !-------test file existance <YES> -> open file <NO> -> error
+       !-------test file existence <YES> -> open file <NO> -> error
        !
        if (exifil(filbcb(:lf), lundia, 'G004', gdp)) then
           !

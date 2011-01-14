@@ -133,7 +133,7 @@ subroutine dimtrt(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
        goto 9999
     endif
     !
-    ! test file existance
+    ! test file existence
     !
     call noextspaces(filtmp    ,lfile     )
     if (.not.exifil(filtmp(1:lfile) ,lundia    ,'G004'    ,gdp)) then

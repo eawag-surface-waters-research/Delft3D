@@ -138,7 +138,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
     ex_nfs = .false.
     if (.not.ex) then
        !
-       ! test file existance, second try 'tri-rst.<restid>'
+       ! test file existence, second try 'tri-rst.<restid>'
        !
        inquire (file = filtmp(1:8 + lrid), exist = ex)
        if (.not.ex) then

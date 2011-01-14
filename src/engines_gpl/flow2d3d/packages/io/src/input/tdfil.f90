@@ -91,7 +91,7 @@ subroutine tdfil(lundia    ,luntd     ,error     ,filtd     ,fmttmp    , &
     nlook = 4
     idef  = 0
     !
-    ! test file existance, if so read
+    ! test file existence, if so read
     !
     lfile = len(filtd)
     !
@@ -217,7 +217,7 @@ subroutine tdfil(lundia    ,luntd     ,error     ,filtd     ,fmttmp    , &
        if (error .or. imnt==0) fltd = .false.
     else
        !
-       ! test file existance <NO>
+       ! test file existence <NO>
        !
        error = .true.
     endif

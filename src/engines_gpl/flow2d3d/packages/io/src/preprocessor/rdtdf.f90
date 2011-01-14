@@ -89,7 +89,7 @@ subroutine rdtdf(lundia    ,luntdp    ,error     ,filnam    ,fmttmp    , &
     !
     call noextspaces(filnam    ,lfile     )
     !
-    !-----test file existance <YES>
+    !-----test file existence <YES>
     !
     if (exifil(filnam(:lfile), lundia, 'G004', gdp)) then
        !
@@ -197,7 +197,7 @@ subroutine rdtdf(lundia    ,luntdp    ,error     ,filnam    ,fmttmp    , &
   200  continue
        close (lunrd)
     !
-    !-----test file existance <NO>
+    !-----test file existence <NO>
     !
     else
        error = .true.

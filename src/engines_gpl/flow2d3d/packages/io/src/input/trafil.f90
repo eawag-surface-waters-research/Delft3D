@@ -90,7 +90,7 @@ subroutine trafil(lundia    ,filtra    ,fmttmp    ,error     ,ntruv     , &
     idef = 0
     lr132 = 132
     !
-    !-----test file existance
+    !-----test file existence
     !
     lfile = len(filtra)
     !

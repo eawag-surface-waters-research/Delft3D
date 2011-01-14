@@ -72,7 +72,7 @@ subroutine delnef(filnam    ,gdp       )
     locfnm = filnam
     call noextspaces(locfnm    ,ind       )
     !
-    !-----test files excistance
+    !-----test files existence
     !
     inquire (file = locfnm(:ind) // '.def', exist = exists)
     if (exists) then
@@ -81,7 +81,7 @@ subroutine delnef(filnam    ,gdp       )
        close (luntmp, status = 'delete')
     endif
     !
-    !-----test files excistance
+    !-----test files existence
     !
     inquire (file = locfnm(:ind) // '.dat', exist = exists)
     if (exists) then

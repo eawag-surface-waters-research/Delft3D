@@ -133,7 +133,7 @@ subroutine bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
     ltest  = .true.
     recold = 'no records read yet'
     !
-    ! test file existance and if so read
+    ! test if file exists; and if so, read.
     !
     call noextspaces(filbnd    ,lfile     )
     !

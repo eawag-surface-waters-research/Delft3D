@@ -112,7 +112,7 @@ subroutine rbsig(ncmax     ,ampbc     ,ombc      ,phibc     ,thetbc    , &
     integer           :: uw
     integer, external :: newlun
     integer           :: version  ! to detect the version number of the file
-    logical           :: ex       ! file existance flag
+    logical           :: ex       ! file existence flag
     real(fp)          :: omspl
     character(35)     :: msg
     character(78)     :: string

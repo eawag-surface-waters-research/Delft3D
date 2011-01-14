@@ -97,7 +97,7 @@ subroutine srcfil(lundia    ,filsrc    ,error     ,nsrc      ,mnksrc    , &
     lenc   = 1
     qType  = .false.
     !
-    ! test file existance
+    ! test file existence
     !
     call noextspaces(filsrc    ,lfile     )
     !
