@@ -261,8 +261,8 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
        utvec   = sqrt(max(1.0e-4_fp ,(uut**2 +uvt**2)))
        !
        ! bed slope effects on critical shear stress
-       ! using Dey (2003?) as modified by Van Rijn (App in Report Z4056)
-       ! (approximation where schocklitsch and Leitner factors are combined)
+       ! using Dey (2001) as modified by Van Rijn (Z4056)
+       ! (approximation where Schocklitsch and Leitner factors are combined)
        !
        dzds    =  dzduu*uut/utvec + dzdvv*uvt/utvec
        !

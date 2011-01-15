@@ -353,7 +353,8 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
     taucr1 = fpack * fch1 * fclay * taucr0
     !
     ! bed slope effects on critical shear stress
-    ! using Dey (2003) as modified by Van Rijn
+    ! using Dey (2001) as modified by Van Rijn (Z4056)
+    ! (approximation where Schocklitsch and Leitner factors are combined)
     !
     dzds = dzduu*uuu/max(umod,1.0e-4_fp) + dzdvv*vvv/max(umod,1.0e-4_fp)
     !
