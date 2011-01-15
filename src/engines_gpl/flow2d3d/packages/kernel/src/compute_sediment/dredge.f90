@@ -36,9 +36,9 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use properties
-    use arrayextend
     use flow_tables
     use bedcomposition_module
+    use m_alloc
     !
     use globaldata
     !
@@ -260,33 +260,21 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
                 ! Reallocate and shift
                 !
                 istat = 0
-                ! area
-                call extend1d_fp(istat,pdredge%area,globalnpnt,localoffset)
+                call reallocP(pdredge%area,globalnpnt,shift=localoffset,stat=istat)
                 call dredgecommunicate (pdredge%area, pdredge%npnt)
-                ! hdune
-                call extend1d_fp(istat,pdredge%hdune,globalnpnt,localoffset)
-                ! dz_dredge
-                call extend1d_fp(istat,pdredge%dz_dredge,globalnpnt,localoffset)
-                ! reflevel
-                call extend1d_fp(istat,pdredge%reflevel,globalnpnt,localoffset)
-                ! dunetoplevel
-                call extend1d_fp(istat,pdredge%dunetoplevel,globalnpnt,localoffset)
-                ! triggerlevel
-                call extend1d_fp(istat,pdredge%triggerlevel,globalnpnt,localoffset)
-                ! bedlevel
-                call extend1d_fp(istat,pdredge%bedlevel,globalnpnt,localoffset)
-                ! troughlevel
-                call extend1d_fp(istat,pdredge%troughlevel,globalnpnt,localoffset)
-                ! sedimentdepth
-                call extend1d_fp(istat,pdredge%sedimentdepth,globalnpnt,localoffset)
-                ! sortvar
-                call extend1d_fp(istat,pdredge%sortvar,globalnpnt,localoffset)
-                ! inm
-                call extend1d_int(istat,pdredge%inm,globalnpnt,localoffset)
-                ! nm
-                call extend1d_int(istat,pdredge%nm,globalnpnt,localoffset)
-                ! triggered
-                call extend1d_log(istat,pdredge%triggered,globalnpnt,localoffset)
+                !
+                call reallocP(pdredge%hdune,globalnpnt,shift=localoffset,stat=istat)
+                call reallocP(pdredge%dz_dredge,globalnpnt,shift=localoffset,stat=istat)
+                call reallocP(pdredge%reflevel,globalnpnt,shift=localoffset,stat=istat)
+                call reallocP(pdredge%dunetoplevel,globalnpnt,shift=localoffset,stat=istat)
+                call reallocP(pdredge%triggerlevel,globalnpnt,shift=localoffset,stat=istat)
+                call reallocP(pdredge%bedlevel,globalnpnt,shift=localoffset,stat=istat)
+                call reallocP(pdredge%troughlevel,globalnpnt,shift=localoffset,stat=istat)
+                call reallocP(pdredge%sedimentdepth,globalnpnt,shift=localoffset,stat=istat)
+                call reallocP(pdredge%sortvar,globalnpnt,shift=localoffset,stat=istat)
+                call reallocP(pdredge%inm,globalnpnt,shift=localoffset,stat=istat)
+                call reallocP(pdredge%nm,globalnpnt,shift=localoffset,stat=istat)
+                call reallocP(pdredge%triggered,globalnpnt,shift=localoffset,stat=istat)
                 !
                 if (istat/=0) then
                    call prterr(lundia, 'U021', 'Dredge: memory realloc error')
@@ -330,23 +318,16 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
                 ! Reallocate and shift
                 !
                 istat = 0
-                ! area
-                call extend1d_fp(istat,pdump%area,globalnpnt,localoffset)
+                call reallocP(pdump%area,globalnpnt,shift=localoffset,stat=istat)
                 call dredgecommunicate (pdump%area, pdump%npnt)
-                ! hdune
-                call extend1d_fp(istat,pdump%hdune,globalnpnt,localoffset)
-                ! reflevel
-                call extend1d_fp(istat,pdump%reflevel,globalnpnt,localoffset)
-                ! bedlevel
-                call extend1d_fp(istat,pdump%bedlevel,globalnpnt,localoffset)
-                ! dz_dump
-                call extend1d_fp(istat,pdump%dz_dump,globalnpnt,localoffset)
-                ! sortvar
-                call extend1d_fp(istat,pdump%sortvar,globalnpnt,localoffset)
-                ! inm
-                call extend1d_int(istat,pdump%inm,globalnpnt,localoffset)
-                ! nm
-                call extend1d_int(istat,pdump%nm,globalnpnt,localoffset)
+                !
+                call reallocP(pdump%hdune,globalnpnt,shift=localoffset,stat=istat)
+                call reallocP(pdump%reflevel,globalnpnt,shift=localoffset,stat=istat)
+                call reallocP(pdump%bedlevel,globalnpnt,shift=localoffset,stat=istat)
+                call reallocP(pdump%dz_dump,globalnpnt,shift=localoffset,stat=istat)
+                call reallocP(pdump%sortvar,globalnpnt,shift=localoffset,stat=istat)
+                call reallocP(pdump%inm,globalnpnt,shift=localoffset,stat=istat)
+                call reallocP(pdump%nm,globalnpnt,shift=localoffset,stat=istat)
                 !
                 if (istat/=0) then
                    call prterr(lundia, 'U021', 'Dredge: memory realloc error')

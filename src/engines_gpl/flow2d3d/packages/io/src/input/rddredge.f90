@@ -40,9 +40,9 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     use precision
     use mathconsts
     use properties
-    use arrayextend
     use flow_tables
     use polygon_module
+    use m_alloc
     !
     use globaldata
     !
@@ -190,34 +190,14 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
 !! executable statements -------------------------------------------------------
 !
     tseriesfile       => gdp%gddredge%tseriesfile
-    link_percentage   => gdp%gddredge%link_percentage
-    link_distance     => gdp%gddredge%link_distance
-    link_sum          => gdp%gddredge%link_sum
-    dzdred            => gdp%gddredge%dzdred
-    refplane          => gdp%gddredge%refplane
-    voldred           => gdp%gddredge%voldred
-    voldune           => gdp%gddredge%voldune
-    totvoldred        => gdp%gddredge%totvoldred
-    globalareadred    => gdp%gddredge%globalareadred
-    voldump           => gdp%gddredge%voldump
-    percsupl          => gdp%gddredge%percsupl
-    totvoldump        => gdp%gddredge%totvoldump
-    localareadump     => gdp%gddredge%localareadump
-    globalareadump    => gdp%gddredge%globalareadump
-    globaldumpcap     => gdp%gddredge%globaldumpcap
     alpha_dh          => gdp%gddredge%alpha_dh
     nadred            => gdp%gddredge%nadred
     nadump            => gdp%gddredge%nadump
     nasupl            => gdp%gddredge%nasupl
     nalink            => gdp%gddredge%nalink
-    link_def          => gdp%gddredge%link_def
     tsmortime         => gdp%gddredge%tsmortime
     use_dunes         => gdp%gddredge%use_dunes
     dredgefile        => gdp%gddredge%dredgefile
-    dredge_areas      => gdp%gddredge%dredge_areas
-    dump_areas        => gdp%gddredge%dump_areas
-    dredge_prop       => gdp%gddredge%dredge_prop
-    dump_prop         => gdp%gddredge%dump_prop
     lundia            => gdp%gdinout%lundia
     namsed            => gdp%gdsedpar%namsed
     dt                => gdp%gdexttim%dt
@@ -1496,33 +1476,22 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     if (noutletlinks > 0) then
        !
        istat = 0
-       ! link_percentage
-       if (istat == 0) call extend2d_fp (istat, gdp%gddredge%link_percentage, nalink+noutletlinks)
-       ! link_distance
-       if (istat == 0) call extend1d_fp (istat, gdp%gddredge%link_distance  , nalink+noutletlinks)
-       ! link_sum
-       if (istat == 0) call extend2d_fp (istat, gdp%gddredge%link_sum       , nalink+noutletlinks)
-       ! voldump
-       if (istat == 0) call extend2d_fp (istat, gdp%gddredge%voldump        , nadump+1           )
-       ! totvoldump
-       if (istat == 0) call extend1d_fp (istat, gdp%gddredge%totvoldump     , nadump+1           )
-       ! totareadmup
-       if (istat == 0) call extend1d_fp (istat, gdp%gddredge%localareadump  , nadump+1           )
-       ! globareadmup
-       if (istat == 0) call extend1d_fp (istat, gdp%gddredge%globalareadump , nadump+1           )
-       ! globaldumpcap
-       if (istat == 0) call extend1d_fp (istat, gdp%gddredge%globaldumpcap  , nadump+1           )
-       ! link_def
-       if (istat == 0) call extend2d_int(istat, gdp%gddredge%link_def       , nalink+noutletlinks)
-       ! dump_areas
-       if (istat == 0) call extend1d_ch (istat, gdp%gddredge%dump_areas     , 80                 , nadump+1)
-       ! dump_prop
+       if (istat == 0) call reallocP(gdp%gddredge%link_percentage, (/nalink+noutletlinks,lsedtot/), stat = istat)
+       if (istat == 0) call reallocP(gdp%gddredge%link_distance, nalink+noutletlinks, stat = istat)
+       if (istat == 0) call reallocP(gdp%gddredge%link_sum, (/nalink+noutletlinks,lsedtot/), stat = istat)
+       if (istat == 0) call reallocP(gdp%gddredge%voldump, (/nadump+1,lsedtot/), stat = istat)
+       if (istat == 0) call reallocP(gdp%gddredge%totvoldump, nadump+1, stat = istat)
+       if (istat == 0) call reallocP(gdp%gddredge%localareadump, nadump+1, stat = istat)
+       if (istat == 0) call reallocP(gdp%gddredge%globalareadump, nadump+1, stat = istat)
+       if (istat == 0) call reallocP(gdp%gddredge%globaldumpcap, nadump+1, stat = istat)
+       if (istat == 0) call reallocP(gdp%gddredge%link_def, (/nalink+noutletlinks,2/), stat = istat)
+       if (istat == 0) call reallocP(gdp%gddredge%dump_areas, nadump+1, stat = istat)
        if (istat == 0) then
           allocate(gdp%gddredge%dump_prop(nadump+1), stat=istat)
-       endif
-       if (istat == 0) then
-          gdp%gddredge%dump_prop(1:nadump) = dump_prop(1:nadump)
-          deallocate(dump_prop, stat=istat)
+          if (istat == 0) then
+             gdp%gddredge%dump_prop(1:nadump) = dump_prop(1:nadump)
+             deallocate(dump_prop, stat=istat)
+          endif
        endif
        !
        if (istat /= 0) then
@@ -1530,8 +1499,8 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
           call d3stop(1, gdp)
        endif
        !
-       if (istat == 0) call extend1d_int(istat, ipdu, nadump+1)
-       if (istat == 0) call extend1d_int(istat, npdu, nadump+1)
+       if (istat == 0) call reallocP(ipdu, nadump+1, stat = istat)
+       if (istat == 0) call reallocP(npdu, nadump+1, stat = istat)
        !
        ! update local pointers
        !

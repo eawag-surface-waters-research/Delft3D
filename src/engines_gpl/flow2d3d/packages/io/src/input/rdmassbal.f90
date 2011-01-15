@@ -40,6 +40,7 @@ subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
     use precision
     use properties
     use polygon_module
+    use m_alloc
     !
     use globaldata
     !
@@ -103,7 +104,6 @@ subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
     real(fp), dimension(:)  , allocatable   :: xdr
     real(fp), dimension(:)  , allocatable   :: ydr
     integer, dimension(:,:) , pointer       :: neighb
-    integer, dimension(:,:) , pointer       :: neighb_realloc
 !
 !! executable statements -------------------------------------------------------
 !
@@ -264,14 +264,11 @@ subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
           if (.not.found) then
              ! insert at n
              if (nneighb==size(neighb,2)) then
-                allocate(neighb_realloc(2,2*nneighb), stat=istat)
+                call reallocP(neighb,(/2,2*nneighb/),stat = istat)
                 if (istat /= 0) then
                    call prterr(lundia, 'U021', 'RdMassBal: memory alloc error')
                    call d3stop(1, gdp)
                 endif
-                neighb_realloc(:,1:nneighb) = neighb(:,1:nneighb)
-                deallocate(neighb)
-                neighb => neighb_realloc
              endif
              do ni = nneighb,n,-1
                 neighb(2,ni+1) = neighb(2,ni)

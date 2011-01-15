@@ -153,7 +153,6 @@
 		<File RelativePath="src\allocation\rjdim.f90"/>
 		<File RelativePath="src\allocation\rnull.f90"/></Filter>
 		<Filter Name="basics">
-		<File RelativePath="src\basics\arrayextend.f90"/>
 		<File RelativePath="src\basics\bedcomposition_module.f90"/>
 		<File RelativePath="src\basics\flow_tables.f90"/>
 		<File RelativePath="src\basics\globaldata.f90"/>

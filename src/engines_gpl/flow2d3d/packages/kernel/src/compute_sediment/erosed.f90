@@ -558,7 +558,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     call dfexchg( umod,1, 1, dfloat, gdp)
     call dfexchg( zumod,1, 1, dfloat, gdp)
     !
-    ! het the reduction factor if thickness of sediment at bed is less than
+    ! Get the reduction factor if thickness of sediment at bed is less than
     ! user specified threshold
     !
     call getfixfac(cdryb     ,lsedtot   ,nmmax     , &

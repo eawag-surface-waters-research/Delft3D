@@ -200,7 +200,6 @@ src/engines_gpl/flow2d3d/packages/data/src/allocation/mkrpnt.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/allocation/rjdim.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/allocation/rnull.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/basics/Makefile.am -text
-src/engines_gpl/flow2d3d/packages/data/src/basics/arrayextend.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/basics/bedcomposition_module.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/basics/flow_tables.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/basics/globaldata.f90 -text

@@ -28,7 +28,6 @@ FMODULES += \
 libdata_basics_a_SOURCES = \
          message_module.f90 \
          string_module.f90 \
-         arrayextend.f90 \
          bedcomposition_module.f90 \
          globaldata.f90 \
          sp_buffer.f90 \
