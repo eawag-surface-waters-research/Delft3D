@@ -500,28 +500,32 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
        kdpar(1) = 1.0_fp
        kdpar(2) = 0.0_fp
        kdpar(3) = 0.0_fp
+       !
        kdpar(4) = 0.0_fp
        kdpar(5) = 0.0_fp
        kdpar(6) = 0.0_fp
        !
        call prop_get(gdp%mdfile_ptr,'*','BdfRpC',kdpar(1))
-       call prop_get(gdp%mdfile_ptr,'*','BdfRpR',kdpar(2))
-       call prop_get(gdp%mdfile_ptr,'*','BdfMrC',kdpar(3))
-       call prop_get(gdp%mdfile_ptr,'*','BdfMrR',kdpar(4))
-       call prop_get(gdp%mdfile_ptr,'*','BdfDnC',kdpar(5))
+       call prop_get(gdp%mdfile_ptr,'*','BdfMrC',kdpar(2))
+       call prop_get(gdp%mdfile_ptr,'*','BdfDnC',kdpar(3))
+       !
+       call prop_get(gdp%mdfile_ptr,'*','BdfRpR',kdpar(4))
+       call prop_get(gdp%mdfile_ptr,'*','BdfMrR',kdpar(5))
        call prop_get(gdp%mdfile_ptr,'*','BdfDnR',kdpar(6))
        !
        if (lfbedfrm) then
           txtput1 = '  Ripple calibration (-)'
           write(lundia,'(a,a,e20.4)') txtput1, ':', kdpar(1)
           txtput1 = '  Ripple relaxation factor (-)'
-          write(lundia,'(a,a,e20.4)') txtput1, ':', kdpar(2)
-          txtput1 = '  Mega-ripple calibration (-)'
-          write(lundia,'(a,a,e20.4)') txtput1, ':', kdpar(3)
-          txtput1 = '  Mega-ripple relaxation factor (-)'
           write(lundia,'(a,a,e20.4)') txtput1, ':', kdpar(4)
-          txtput1 = '  Dune calibration (-)'
+          !
+          txtput1 = '  Mega-ripple calibration (-)'
+          write(lundia,'(a,a,e20.4)') txtput1, ':', kdpar(2)
+          txtput1 = '  Mega-ripple relaxation factor (-)'
           write(lundia,'(a,a,e20.4)') txtput1, ':', kdpar(5)
+          !
+          txtput1 = '  Dune calibration (-)'
+          write(lundia,'(a,a,e20.4)') txtput1, ':', kdpar(3)
           txtput1 = '  Dune relaxation factor (-)'
           write(lundia,'(a,a,e20.4)') txtput1, ':', kdpar(6)
        endif
