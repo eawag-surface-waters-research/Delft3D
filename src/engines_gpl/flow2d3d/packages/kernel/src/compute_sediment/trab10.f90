@@ -1,6 +1,6 @@
-subroutine trab10(kode      ,ntrsi     ,utot      ,d         ,c         , &
-                & h         ,cosa      ,sina      ,dzbdx     ,dzbdy     , &
-                & par       ,sbot      ,ssus      )
+subroutine trab10(utot      ,d         ,c         ,h         ,cosa      , &
+                & sina      ,dzbdx     ,dzbdy     ,par       ,sbot      , &
+                & ssus      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -42,13 +42,6 @@ subroutine trab10(kode      ,ntrsi     ,utot      ,d         ,c         , &
 !
 ! Global variables
 !
-    integer            , intent(in)  :: kode  ! indicates active grid point
-                                              !    = 0 active point
-                                              !    < 0 point not used now
-    integer            , intent(out) :: ntrsi ! indicator for output representation
-                                              !    of sediment transport.
-                                              !    =1 :  magnitude of transport
-                                              !    =2 :  components of transport
     real(fp)           , intent(in)  :: c     ! chezy value !  Description and declaration in rjdim.f90
     real(fp)           , intent(in)  :: cosa  ! cosine of shear stress direction at the bed (= near bed flow direction)
     real(fp)           , intent(in)  :: d     ! Grain size specified as d50
@@ -86,17 +79,15 @@ subroutine trab10(kode      ,ntrsi     ,utot      ,d         ,c         , &
 !
 !! executable statements -------------------------------------------------------
 !
-    ntrsi = 1
     sbot = 0.0
     ssus = 0.0
-    if (kode== - 1) then
-       return
-    endif
+    !
     ag = par(1)
     delta = par(4)
     acal = par(11)
     xmus = par(13)
     thcr = par(12)
+    !
     if ((c<1.E-6) .or. (utot<1.E-6)) then
        return
     endif

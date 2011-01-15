@@ -1,7 +1,7 @@
-subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
-                & d90       ,chezy     ,h         ,hrms      ,tp        , &
-                & dir       ,par       ,dzdx      ,dzdy      ,sbotx     , &
-                & sboty     ,ssusx     ,ssusy     ,cesus     ,vonkar    )
+subroutine tranb5(u         ,v         ,d50       ,d90       ,chezy     , &
+                & h         ,hrms      ,tp        ,dir       ,par       , &
+                & dzdx      ,dzdy      ,sbotx     ,sboty     ,ssusx     , &
+                & ssusy     ,cesus     ,vonkar    )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -45,8 +45,6 @@ subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
 !
 ! Global variables
 !
-    integer                , intent(in)  :: kode
-    integer                , intent(out) :: ntrsi
     real(fp)                             :: cesus
     real(fp)               , intent(in)  :: chezy
     real(fp)               , intent(in)  :: d50
@@ -143,7 +141,6 @@ subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
        endif
        first = .false.
     endif
-    ntrsi = 2
     sbot = 0.0
     ssus = 0.0
     sbotx = 0.0
@@ -151,9 +148,7 @@ subroutine tranb5(kode      ,ntrsi     ,u         ,v         ,d50       , &
     ssusx = 0.0
     ssusy = 0.0
     cesus = 0.0
-    if (kode== - 1) then
-       return
-    endif
+    !
     ag = par(1)
     delta = par(4)
     bs = par(11)

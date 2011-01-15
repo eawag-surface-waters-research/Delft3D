@@ -189,8 +189,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     integer           :: kvalue    
     integer           :: ierror
     integer           :: k
-    integer           :: kode      ! ancient flag: always equal to 1
-    integer           :: ntrsi     ! ancient flag: superceded by sbc_total/sus_total
     integer, external :: perf_function_eqtran
     real(fp)          :: aks0
     real(fp)          :: alphaspir
@@ -318,8 +316,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     sbc_total = .false.
     sus_total = .false.
     akstmp    = aks
-    kode  = 1
-    ntrsi = 1
     !
     cesus  = 0.0_fp
     sbot   = 0.0_fp
@@ -674,10 +670,8 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        ! Engelund-Hansen
        !
-       call tranb1(kode      ,ntrsi      ,utot      ,di50      ,chezy     , &
-                 & h         ,par(1,ised),sbot      ,ssus      )
-       !
-       ! transport formula will return ntrsi = 1 which means
+       call tranb1(utot      ,di50      ,chezy     ,h         ,par(1,ised), &
+                 & sbot      ,ssus      )
        !
        sbc_total = .true.
        sus_total = .true.
@@ -685,11 +679,8 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        ! Meyer-Peter-Muller
        !
-       call tranb2(kode      ,ntrsi     ,utot       ,di50      ,d90       , &
-                 & chezy     ,h         ,par(1,ised),hidexp    ,sbot      , &
-                 & ssus      )
-       !
-       ! transport formula will return ntrsi = 1 which means
+       call tranb2(utot       ,di50      ,d90       ,chezy     ,h         , &
+                 & par(1,ised),hidexp    ,sbot      ,ssus      )
        !
        sbc_total = .true.
        sus_total = .true.
@@ -697,10 +688,8 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        ! Ackers-White
        !
-       call tranb3(kode      ,ntrsi      ,utot      ,d90       ,chezy     , &
-                 & h         ,par(1,ised),sbot      ,ssus      )
-       !
-       ! transport formula will return ntrsi = 1 which means
+       call tranb3(utot      ,d90       ,chezy     ,h         ,par(1,ised), &
+                 & sbot      ,ssus      )
        !
        sbc_total = .true.
        sus_total = .true.
@@ -708,10 +697,8 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        ! general relation for bed load
        !
-       call tranb4(kode       ,ntrsi     ,utot      ,di50      ,chezy     , &
-                 & par(1,ised),hidexp    ,sbot      ,ssus      )
-       !
-       ! transport formula will return ntrsi = 1 which means
+       call tranb4(utot      ,di50      ,chezy     ,par(1,ised),hidexp    , &
+                 & sbot      ,ssus      )
        !
        sbc_total = .true.
        sus_total = .true.
@@ -719,12 +706,10 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        ! Bijker
        !
-       call tranb5(kode      ,ntrsi      ,u         ,v         ,di50      , &
-                 & d90       ,chezy      ,h         ,hrms      ,tp        , &
-                 & teta      ,par(1,ised),dzdx      ,dzdy      ,sbcu      , &
-                 & sbcv      ,ssusx      ,ssusy     ,cesus     ,vonkar    )
-       !
-       ! transport formula will return ntrsi = 2 which means
+       call tranb5(u         ,v         ,di50      ,d90       ,chezy      , &
+                 & h         ,hrms      ,tp        ,teta      ,par(1,ised), &
+                 & dzdx      ,dzdy      ,sbcu      ,sbcv      ,ssusx      , &
+                 & ssusy     ,cesus     ,vonkar    )
        !
        sbc_total = .false.
        sus_total = .false.
@@ -734,12 +719,10 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        call prterr (lundia,'U021','Bailard method is disabled')
        call d3stop(1, gdp)
-       !call tranb6(kode      ,ntrsi     ,utot      ,u          ,v         , &
-       !          & chezy     ,h         ,hrms      ,tp         ,teta      , &
-       !          & diss      ,dzdx      ,dzdy      ,par(1,ised),sbcu      , &
-       !          & sbcv      ,ssusx     ,ssusy     ,gdp        )
-       !
-       ! transport formula will return ntrsi = 2 which means
+       !call tranb6(utot      ,u          ,v         ,chezy     ,h         , &
+       !          & hrms      ,tp         ,teta      ,diss      ,dzdx      , &
+       !          & dzdy      ,par(1,ised),sbcu      ,sbcv      ,ssusx     , &
+       !          & ssusy     )
        !
        sbc_total = .false.
        sus_total = .false.
@@ -747,10 +730,8 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        ! Van Rijn (1984, modified)
        !
-       call tranb7(kode      ,ntrsi      ,utot      ,di50      ,d90       , &
-                 & h         ,par(1,ised),sbot      ,ssus      ,vonkar    )
-       !
-       ! transport formula will return ntrsi = 1 which means
+       call tranb7(utot      ,di50       ,d90       ,h         ,par(1,ised), &
+                 & sbot      ,ssus      ,vonkar    )
        !
        sbc_total = .true.
        sus_total = .true.
@@ -760,13 +741,10 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        call prterr (lundia,'U021','Van Rijn/Ribberink (1994) method is disabled')
        call d3stop(1, gdp)
-       !call tranb8(kode       ,ntrsi     ,u         ,v         ,hrms      , &
-       !          & h          ,teta      ,tp        ,di50      ,d90       , &
-       !          & diss       ,dzdx      ,dzdy      ,nm        ,nm        , &
-       !          & par(1,ised),sbcu      ,sbcv      ,ssusx     ,ssusy     , &
-       !          & gdp        )
-       !
-       ! transport formula will return ntrsi = 2 which means
+       !call tranb8(u         ,v         ,hrms      ,h          ,teta      , &
+       !          & tp        ,di50      ,d90       ,diss       ,dzdx      , &
+       !          & dzdy      ,nm        ,nm        ,par(1,ised),sbcu      , &
+       !          & sbcv      ,ssusx     ,ssusy     )
        !
        sbc_total = .false.
        sus_total = .false.
@@ -776,10 +754,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        call prterr (lundia,'U021','Original Delft3D-MOR Silt module is disabled')
        call d3stop(1, gdp)
-       !call tranb9(kode      ,ntrsi     ,utot      ,h         ,alfs      , &
-       !          & sbot      ,ssus      )
-       !
-       ! transport formula will return ntrsi = 1 which means
+       !call tranb9(utot      ,h         ,alfs      ,sbot      ,ssus      )
        !
        sbc_total = .true.
        sus_total = .true.
@@ -789,11 +764,9 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        call prterr (lundia,'U021','Ashida and Michiue method is disabled')
        call d3stop(1, gdp)
-       !call trab10(kode       ,ntrsi     ,utot      ,di50      ,chezy     , &
-       !          & h          ,cosa      ,sina      ,dzdx      ,dzdy      , &
-       !          & par(1,ised),sbot      ,ssus      )
-       !
-       ! transport formula will return ntrsi = 1 which means
+       !call trab10(utot      ,di50      ,chezy     ,h          ,cosa      , &
+       !          & sina      ,dzdx      ,dzdy      ,par(1,ised),sbot      , &
+       !          & ssus      )
        !
        sbc_total = .true.
        sus_total = .true.
@@ -801,12 +774,9 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        ! Soulsby and Van Rijn
        !
-       call trab11(kode      ,ntrsi     ,u         ,v          ,hrms      , &
-                 & h         ,tp        ,di50      ,par(1,ised),sbcu      , &
-                 & sbcv      ,ssusx     ,ssusy     ,ubot       ,vonkar    , &
-                 & ubot_from_com        )
-       !
-       ! transport formula will return ntrsi = 2 which means
+       call trab11(u         ,v          ,hrms      ,h         ,tp        , &
+                 & di50      ,par(1,ised),sbcu      ,sbcv      ,ssusx     , &
+                 & ssusy     ,ubot       ,vonkar    ,ubot_from_com        )
        !
        sbc_total = .false.
        sus_total = .false.
@@ -814,12 +784,9 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        ! Soulsby
        !
-       call trab12(kode      ,ntrsi     ,u         ,v         ,hrms       , &
-                 & h         ,tp        ,teta      ,di50      ,par(1,ised), &
-                 & sbcu      ,sbcv      ,ssusx     ,ssusy     ,ubot       , &
-                 & vonkar    ,ubot_from_com        )
-       !
-       ! transport formula will return ntrsi = 2 which means
+       call trab12(u         ,v         ,hrms       ,h         ,tp        , &
+                 & teta      ,di50      ,par(1,ised),sbcu      ,sbcv      , &
+                 & ssusx     ,ssusy     ,ubot       ,vonkar    ,ubot_from_com)
        !
        sbc_total = .false.
        sus_total = .false.
@@ -827,11 +794,8 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        ! test transport (Wang) Fredsoe
        !
-       call tran9t(kode      ,utot      ,di50      ,d90        ,chezy     , &
-                 & h         ,ntrsi     ,ustarc    ,par(1,ised),sbot      , &
-                 & ssus      )
-       !
-       ! transport formula will return ntrsi = 1 which means
+       call tran9t(utot      ,di50       ,d90       ,chezy     ,h         , &
+                 & ustarc    ,par(1,ised),sbot      ,ssus      )
        !
        sbc_total = .true.
        sus_total = .true.
@@ -839,10 +803,8 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        ! generalized Ashida and Michiue
        !
-       call trab14(kode       ,ntrsi     ,utot      ,di50      ,chezy     , &
-                 & par(1,ised),hidexp    ,sbot      ,ssus      )
-       !
-       ! transport formula will return ntrsi = 1 which means
+       call trab14(utot      ,di50      ,chezy     ,par(1,ised),hidexp    , &
+                 & sbot      ,ssus      )
        !
        sbc_total = .true.
        sus_total = .true.

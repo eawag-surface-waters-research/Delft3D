@@ -1,6 +1,5 @@
-subroutine tran9t(kode      ,utot      ,d50       ,d90       ,chezy     , &
-                & h         ,ntrsi     ,ust       ,par       ,sbot      , &
-                & ssus      )
+subroutine tran9t(utot      ,d50       ,d90       ,chezy     ,h         , &
+                & ust       ,par       ,sbot      ,ssus      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -40,8 +39,6 @@ subroutine tran9t(kode      ,utot      ,d50       ,d90       ,chezy     , &
 !
 ! Global variables
 !
-    integer, intent(in)                 :: kode
-    integer, intent(out)                :: ntrsi
     real(fp), intent(in)                :: chezy
     real(fp), intent(in)                :: d50
     real(fp), intent(in)                :: d90
@@ -73,21 +70,14 @@ subroutine tran9t(kode      ,utot      ,d50       ,d90       ,chezy     , &
 !
 !! executable statements -------------------------------------------------------
 !
-    !
-    !
-    !
-    ntrsi = 1
     sbot = 0.
     ssus = 0.
-    if (kode== - 1) then
-       return
-    endif
+    !
     ag = par(1)
     delta = par(4)
     wamu = par(11)
     acal = par(12)
-    !     d50   = par(6)
-    !     d90   = par(13)
+    !
     t = 0.05*utot**2*ust**3/d50/(ag*delta)**2
     !
     !     bed load transport according to e-f 1976

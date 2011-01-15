@@ -1,5 +1,5 @@
-subroutine tranb4(kode      ,ntrsi     ,utot      ,d         ,c         , &
-                & par       ,hidexp    ,sbot      ,ssus      )
+subroutine tranb4(utot      ,d         ,c         ,par       ,hidexp    , &
+                & sbot      ,ssus      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -41,8 +41,6 @@ subroutine tranb4(kode      ,ntrsi     ,utot      ,d         ,c         , &
 !
 ! Global variables
 !
-    integer                , intent(in)  :: kode
-    integer                , intent(out) :: ntrsi
     real(fp)               , intent(in)  :: c      !  Description and declaration in rjdim.f90
     real(fp)               , intent(in)  :: d
     real(fp)               , intent(in)  :: hidexp ! hiding & exposure factor
@@ -66,12 +64,9 @@ subroutine tranb4(kode      ,ntrsi     ,utot      ,d         ,c         , &
 !
 !! executable statements -------------------------------------------------------
 !
-    ntrsi = 1
     sbot  = 0.0
     ssus  = 0.0
-    if (kode == -1) then
-       return
-    endif
+    !
     ag    = par( 1)
     delta = par( 4)
     acal  = par(11)
@@ -79,7 +74,7 @@ subroutine tranb4(kode      ,ntrsi     ,utot      ,d         ,c         , &
     cc    = par(13)
     rmu   = par(14)
     thcr  = par(15)
-    !     d     = par(16)
+    !
     if ((c<1.0e-6) .or. (utot<1.0e-6)) then
        return
     endif

@@ -1,5 +1,5 @@
-subroutine tranb7(kode      ,ntrsi     ,utot      ,d50       ,d90       , &
-                & h         ,par       ,sbot      ,ssus      ,vonkar    )
+subroutine tranb7(utot      ,d50       ,d90       ,h         ,par       , &
+                & sbot      ,ssus      ,vonkar    )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -41,13 +41,6 @@ subroutine tranb7(kode      ,ntrsi     ,utot      ,d50       ,d90       , &
 !
 ! Global variables
 !
-    integer                , intent(in)  :: kode  ! indicates active grid point
-                                                  !    = 0 active point
-                                                  !    < 0 point not used now
-    integer                , intent(out) :: ntrsi ! indicator for output representation
-                                                  !    of sediment transport.
-                                                  !    =1 :  magnitude of transport
-                                                  !    =2 :  components of transport
     real(fp)               , intent(in)  :: d50   ! grain size diameter (first specified diameter)
     real(fp)               , intent(in)  :: d90   ! grain size diameter (first specified diameter)
     real(fp)               , intent(in)  :: h     ! water depth
@@ -87,24 +80,17 @@ subroutine tranb7(kode      ,ntrsi     ,utot      ,d50       ,d90       , &
 !
 !! executable statements -------------------------------------------------------
 !
-    ntrsi = 1
     sbot = 0.0
     ssus = 0.0
-    !
-    if (kode== - 1) then
-       return
-    endif
     !
     ag = par(1)
     rhow = par(2)
     rhos = par(3)
+    del  = par(4)
     rnu = par(5)
     alf1 = par(11)
-    !     d90   = par(12) ! Formal parameter
     rksc = par(13)
     ws = par(14)
-    !
-    del = (rhos - rhow)/rhow
     !
     if (h/rksc<1.33 .or. utot<1.E-3) then
        return

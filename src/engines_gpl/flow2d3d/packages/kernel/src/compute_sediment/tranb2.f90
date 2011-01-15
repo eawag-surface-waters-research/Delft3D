@@ -1,6 +1,5 @@
-subroutine tranb2(kode      ,ntrsi     ,utot      ,d50       ,d90       , &
-                & chezy     ,h         ,par       ,hidexp    ,sbot      , &
-                & ssus      )
+subroutine tranb2(utot      ,d50       ,d90       ,chezy     ,h         , &
+                & par       ,hidexp    ,sbot      ,ssus      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -41,8 +40,6 @@ subroutine tranb2(kode      ,ntrsi     ,utot      ,d50       ,d90       , &
 !
 ! Global variables
 !
-    integer                , intent(in)  :: kode
-    integer                , intent(out) :: ntrsi
     real(fp)               , intent(in)  :: chezy
     real(fp)               , intent(in)  :: d50
     real(fp)               , intent(in)  :: d90
@@ -65,16 +62,12 @@ subroutine tranb2(kode      ,ntrsi     ,utot      ,d50       ,d90       , &
 !
 !! executable statements -------------------------------------------------------
 !
-    ntrsi = 1
     sbot  = 0.0_fp
     ssus  = 0.0_fp
-    if (kode== - 1) then
-       return
-    endif
+    !
     ag    = par(1)
     delta = par(4)
     acal  = par(11)
-    !     d90   = par(12)
     !
     !     bed load transport
     !

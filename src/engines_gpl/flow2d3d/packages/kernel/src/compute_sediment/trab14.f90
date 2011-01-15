@@ -1,5 +1,5 @@
-subroutine trab14(kode      ,ntrsi     ,utot      ,d50       ,chezy     , &
-                & par       ,hidexp    ,sbot      ,ssus      )
+subroutine trab14(utot      ,d50       ,chezy     ,par       ,hidexp    , &
+                & sbot      ,ssus      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -42,13 +42,6 @@ subroutine trab14(kode      ,ntrsi     ,utot      ,d50       ,chezy     , &
 !
 ! Global variables
 !
-    integer                , intent(in)  :: kode   ! indicates active grid point
-                                                   !    = 0 active point
-                                                   !    < 0 point not used now
-    integer                , intent(out) :: ntrsi  ! indicator for output representation
-                                                   !    of sediment transport.
-                                                   !    =1 :  magnitude of transport
-                                                   !    =2 :  components of transport
     real(fp)               , intent(in)  :: chezy  ! chezy value
     real(fp)               , intent(in)  :: d50    ! Grain size specified as d50
     real(fp)               , intent(in)  :: hidexp ! hiding & exposure factor
@@ -75,30 +68,27 @@ subroutine trab14(kode      ,ntrsi     ,utot      ,d50       ,chezy     , &
 !
 !! executable statements -------------------------------------------------------
 !
+    sbot  = 0.0
+    ssus  = 0.0
+    !
     ag    = par(1)
-    !        rhosol = par( 2)
-    !        rhow   = par( 3)
     delta = par(4)      ! (rhosol - rhow) / rhow
     a     = par(11)     ! acal: tuning constant of sediment transport
     tc    = par(12)
     m     = par(13)
     p     = par(14)
     q     = par(15)
+    !
     sag   = sqrt(ag)
     sgd   = delta*ag*d50
     ssgd3 = sqrt(sgd*d50*d50)
-    ntrsi = 1
-    sbot  = 0.0
-    ssus  = 0.0
-    if (kode /= - 1) then
-       if (chezy >= 1.e-6) then
-          if (utot >= 1.e-6) then
-             ustar = sag*utot/chezy
-             t     = ustar**2/sgd
-             tct   = hidexp*tc/t
-             if (tct < 1.0) then
-                sbot = a * ssgd3 * t**m * (1.0 - tct)**p * (1.0 - sqrt(tct))**q
-             endif
+    if (chezy >= 1.e-6) then
+       if (utot >= 1.e-6) then
+          ustar = sag*utot/chezy
+          t     = ustar**2/sgd
+          tct   = hidexp*tc/t
+          if (tct < 1.0) then
+             sbot = a * ssgd3 * t**m * (1.0 - tct)**p * (1.0 - sqrt(tct))**q
           endif
        endif
     endif

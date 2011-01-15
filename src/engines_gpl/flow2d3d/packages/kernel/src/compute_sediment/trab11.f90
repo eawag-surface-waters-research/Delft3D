@@ -1,7 +1,6 @@
-subroutine trab11(kode      ,ntrsi     ,u         ,v         ,hrms      , &
-                & h         ,tp        ,d50       ,par       ,sbotx     , &
-                & sboty     ,ssusx     ,ssusy     ,ubot      ,vonkar    , &
-                & ubot_from_com        )
+subroutine trab11(u         ,v         ,hrms      ,h         ,tp        , &
+                & d50       ,par       ,sbotx     ,sboty     ,ssusx     , &
+                & ssusy     ,ubot      ,vonkar    ,ubot_from_com        )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -44,8 +43,6 @@ subroutine trab11(kode      ,ntrsi     ,u         ,v         ,hrms      , &
 !
 ! Global variables
 !
-    integer                , intent(in)  :: kode
-    integer                , intent(out) :: ntrsi
     real(fp)               , intent(in)  :: d50
     real(fp)                             :: h
     real(fp)                             :: hrms   !  Description and declaration in rjdim.f90
@@ -84,31 +81,22 @@ subroutine trab11(kode      ,ntrsi     ,u         ,v         ,hrms      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    if (kode== - 1) then
-       return
-    endif
     !
-    !     Initialisations
+    !     Initiliaze Transports to zero
     !
-    ntrsi = 2
     sbotx = 0.0
     sboty = 0.0
     ssusx = 0.0
     ssusy = 0.0
+    !
+    !     Initialisations
+    !
     ag = par(1)
     delta = par(4)
     rnu = par(5)
     acal = par(11)
     d90 = par(12)*d50
     z0 = par(13)
-    !
-    !     Initiliaze Transports to zero
-    !     in case of small u, small h, very large h, u<ucr
-    !
-    ssusx = 0.
-    ssusy = 0.
-    sbotx = 0.
-    sboty = 0.
     !
     !     Velocity magnitude
     !

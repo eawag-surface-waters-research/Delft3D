@@ -1,7 +1,6 @@
-subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
-                & h         ,tp        ,dir       ,d50       ,par       , &
-                & sbotx     ,sboty     ,ssusx     ,ssusy     ,ubot      , &
-                & vonkar    ,ubot_from_com        )
+subroutine trab12(u         ,v         ,hrms      ,h         ,tp        , &
+                & dir       ,d50       ,par       ,sbotx     ,sboty     , &
+                & ssusx     ,ssusy     ,ubot      ,vonkar    ,ubot_from_com)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -46,8 +45,6 @@ subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
 !
 ! Global variables
 !
-    integer                , intent(in)  :: kode
-    integer                , intent(out) :: ntrsi
     real(fp)               , intent(in)  :: d50
     real(fp)               , intent(in)  :: dir
     real(fp)                             :: h
@@ -144,15 +141,15 @@ subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    if (kode== - 1) then
-       return
-    endif
+    !
+    !     Initialize Transports to zero
+    !     in case of small u, small h, very large h, u<ucr
+    !
+    sbotx = 0.0
+    sboty = 0.0
     !
     !     Initialisations
     !
-    ntrsi = 2
-    sbotx = 0.0
-    sboty = 0.0
     astarc = 30.*pi**2
     waveps = 1.E-4
     eps = 1.E-6
@@ -164,12 +161,6 @@ subroutine trab12(kode      ,ntrsi     ,u         ,v         ,hrms      , &
     modind = nint(par(12))
     z0 = d50/par(13)
     facth = 1./(rho*ag*delta*d50)
-    !
-    !     Initialize Transports to zero
-    !     in case of small u, small h, very large h, u<ucr
-    !
-    sbotx = 0.
-    sboty = 0.
     !
     !     Velocity magnitude
     !

@@ -1,5 +1,5 @@
-subroutine tranb3(kode      ,ntrsi     ,utot      ,d35       ,c         , &
-                & h         ,par       ,sbot      ,ssus      )
+subroutine tranb3(utot      ,d35       ,c         ,h         ,par       , &
+                & sbot      ,ssus      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -40,8 +40,6 @@ subroutine tranb3(kode      ,ntrsi     ,utot      ,d35       ,c         , &
 !
 ! Global variables
 !
-    integer, intent(in)            :: kode
-    integer, intent(out)           :: ntrsi
     real(fp), intent(in)               :: c !  Description and declaration in rjdim.f90
     real(fp), intent(in)               :: d35
     real(fp), intent(in)               :: h
@@ -73,23 +71,17 @@ subroutine tranb3(kode      ,ntrsi     ,utot      ,d35       ,c         , &
 !
 !! executable statements -------------------------------------------------------
 !
-    !
-    !
-    !
-    ntrsi = 1
     sbot = 0.0
     ssus = 0.0
-    if (kode== - 1) then
-       return
-    endif
-    if ((utot<1.E-6) .or. (h<.001)) then
-       return
-    endif
+    !
     ag = par(1)
     delta = par(4)
     acal = par(11)
     rk = par(12)
-    !     d35  = par(13)
+    !
+    if ((utot<1.E-6) .or. (h<.001)) then
+       return
+    endif
     if (c<1.E-6) then
        cc = 18.*log10(12.*h/rk)
     else
