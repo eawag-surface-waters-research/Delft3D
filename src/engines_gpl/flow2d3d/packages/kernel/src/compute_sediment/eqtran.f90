@@ -238,7 +238,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     real(fp)          :: uwc
     real(fp)          :: v
     real(fp)          :: z
-    real(fp)          :: cmx
     real(fp)          :: fdamp
     real(fp)          :: psi
     real(fp)          :: htdif
@@ -314,9 +313,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     subiw               => gdp%gdmorpar%subiw
     ubot_from_com       => gdp%gdprocs%ubot_from_com
     !
-    ! set camax
-    !
-    cmx       = 0.65_fp
     ierror    = 0
     equi_conc = .false.
     sbc_total = .false.
