@@ -214,7 +214,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     real(fp)          :: fc1
     real(fp)          :: fi
     real(fp)          :: fw1
-    real(fp)          :: h
     real(fp)          :: lci
     real(fp)          :: phicur
     real(fp)          :: rz
@@ -241,7 +240,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     real(fp)          :: htdif
     real(fp)          :: apower
     real(fp)          :: cavg
-    real(fp)          :: avgcucor   
     real(fp)          :: epsbed
     real(fp)          :: epsmax
     real(fp)          :: epsmxc
@@ -573,7 +571,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        avgu     = 0.0_fp
        avgcu    = 0.0_fp
-       avgcucor = 0.0_fp
        if (zumod > 0.0_fp) then
           do k = 1, kmax
              z     = (1.0_fp + sig(k)) * h1
@@ -625,7 +622,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     endif
     rz    = 1.0_fp + h1 / (max(1.0e-8_fp , ee*z0rou))
     chezy = sag * log(rz) / vonkar
-    h     = h1
     if (scour) then
        utot = ustarc * chezy / sag
     else
@@ -670,7 +666,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        ! Engelund-Hansen
        !
-       call tranb1(utot      ,di50      ,chezy     ,h         ,par(1,ised), &
+       call tranb1(utot      ,di50      ,chezy     ,h1        ,par(1,ised), &
                  & sbot      ,ssus      )
        !
        sbc_total = .true.
@@ -679,7 +675,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        ! Meyer-Peter-Muller
        !
-       call tranb2(utot       ,di50      ,d90       ,chezy     ,h         , &
+       call tranb2(utot       ,di50      ,d90       ,chezy     ,h1        , &
                  & par(1,ised),hidexp    ,sbot      ,ssus      )
        !
        sbc_total = .true.
@@ -688,7 +684,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        ! Ackers-White
        !
-       call tranb3(utot      ,d90       ,chezy     ,h         ,par(1,ised), &
+       call tranb3(utot      ,d90       ,chezy     ,h1        ,par(1,ised), &
                  & sbot      ,ssus      )
        !
        sbc_total = .true.
@@ -707,7 +703,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        ! Bijker
        !
        call tranb5(u         ,v         ,di50      ,d90       ,chezy      , &
-                 & h         ,hrms      ,tp        ,teta      ,par(1,ised), &
+                 & h1        ,hrms      ,tp        ,teta      ,par(1,ised), &
                  & dzdx      ,dzdy      ,sbcu      ,sbcv      ,ssusx      , &
                  & ssusy     ,cesus     ,vonkar    )
        !
@@ -719,7 +715,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        call prterr (lundia,'U021','Bailard method is disabled')
        call d3stop(1, gdp)
-       !call tranb6(utot      ,u          ,v         ,chezy     ,h         , &
+       !call tranb6(utot      ,u          ,v         ,chezy     ,h1        , &
        !          & hrms      ,tp         ,teta      ,diss      ,dzdx      , &
        !          & dzdy      ,par(1,ised),sbcu      ,sbcv      ,ssusx     , &
        !          & ssusy     )
@@ -730,7 +726,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        ! Van Rijn (1984, modified)
        !
-       call tranb7(utot      ,di50       ,d90       ,h         ,par(1,ised), &
+       call tranb7(utot      ,di50       ,d90       ,h1        ,par(1,ised), &
                  & sbot      ,ssus      ,vonkar    )
        !
        sbc_total = .true.
@@ -741,7 +737,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        call prterr (lundia,'U021','Van Rijn/Ribberink (1994) method is disabled')
        call d3stop(1, gdp)
-       !call tranb8(u         ,v         ,hrms      ,h          ,teta      , &
+       !call tranb8(u         ,v         ,hrms      ,h1         ,teta      , &
        !          & tp        ,di50      ,d90       ,diss       ,dzdx      , &
        !          & dzdy      ,nm        ,nm        ,par(1,ised),sbcu      , &
        !          & sbcv      ,ssusx     ,ssusy     )
@@ -754,7 +750,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        call prterr (lundia,'U021','Original Delft3D-MOR Silt module is disabled')
        call d3stop(1, gdp)
-       !call tranb9(utot      ,h         ,alfs      ,sbot      ,ssus      )
+       !call tranb9(utot      ,h1        ,alfs      ,sbot      ,ssus      )
        !
        sbc_total = .true.
        sus_total = .true.
@@ -764,7 +760,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        call prterr (lundia,'U021','Ashida and Michiue method is disabled')
        call d3stop(1, gdp)
-       !call trab10(utot      ,di50      ,chezy     ,h          ,cosa      , &
+       !call trab10(utot      ,di50      ,chezy     ,h1         ,cosa      , &
        !          & sina      ,dzdx      ,dzdy      ,par(1,ised),sbot      , &
        !          & ssus      )
        !
@@ -774,7 +770,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        ! Soulsby and Van Rijn
        !
-       call trab11(u         ,v          ,hrms      ,h         ,tp        , &
+       call trab11(u         ,v          ,hrms      ,h1        ,tp        , &
                  & di50      ,par(1,ised),sbcu      ,sbcv      ,ssusx     , &
                  & ssusy     ,ubot       ,vonkar    ,ubot_from_com        )
        !
@@ -784,7 +780,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        ! Soulsby
        !
-       call trab12(u         ,v         ,hrms       ,h         ,tp        , &
+       call trab12(u         ,v         ,hrms       ,h1        ,tp        , &
                  & teta      ,di50      ,par(1,ised),sbcu      ,sbcv      , &
                  & ssusx     ,ssusy     ,ubot       ,vonkar    ,ubot_from_com)
        !
@@ -794,7 +790,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        ! test transport (Wang) Fredsoe
        !
-       call tran9t(utot      ,di50       ,d90       ,chezy     ,h         , &
+       call tran9t(utot      ,di50       ,d90       ,chezy     ,h1        , &
                  & ustarc    ,par(1,ised),sbot      ,ssus      )
        !
        sbc_total = .true.
@@ -826,7 +822,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        dll_reals( 6) = real(vvv    ,hp)
        dll_reals( 7) = real(umod   ,hp)
        dll_reals( 8) = real(zumod  ,hp)
-       dll_reals( 9) = real(h      ,hp)
+       dll_reals( 9) = real(h1     ,hp)
        dll_reals(10) = real(chezy  ,hp)
        dll_reals(11) = real(hrms   ,hp)
        dll_reals(12) = real(tp     ,hp)
