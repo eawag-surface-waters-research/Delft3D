@@ -198,27 +198,21 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
        vrdelm = u2dh   * log(30.0_fp*delm/ra) / (-1.0_fp+log(30.0_fp*h1  /ra))
        vrra   = vrdelm * log(30.0_fp*aks /rc) /          log(30.0_fp*delm/rc)
     endif
-    tfor = 0.0_fp
-    if(ubw > 0.0_fp) then
-        tfor = uoff / (uon+uoff) * tp
-        tback    = tp - tfor
-        pi_tfor  = pi / tfor
-        pi_tback = pi / tback
-    endif
-    betacw   = 0.25_fp * ((-1.0_fp+log(30.0_fp*h1/rc))/log(30.0_fp*aks/rc))**2
-    acw      = abs(u2dh) / max(1.0e-6_fp , (abs(ubw)+abs(u2dh)))
-    fcw1     = acw*betacw*fc1 + (1.0_fp-acw)*fw1
     ubtotu   = vrra * cos(phicur)
     ubtotv   = vrra * sin(phicur)
     !
-    ! bed slope effects now included (see further below) 
+    ! coefficient related to vertical structure of velocity profile
     !
-    if (wave .and. tp>1.0_fp .and. bedw>0.0_fp) then
-       ntime = subiw
-    else
-       ntime = 1
-    endif
-    dtt    = tp / real(ntime,fp)
+    betacw   = 0.25_fp * ((-1.0_fp+log(30.0_fp*h1/rc))/log(30.0_fp*aks/rc))**2
+    !
+    ! coefficient related to relative strength of wave and current motion: uc/(uc+Uw)
+    !
+    acw      = abs(u2dh) / max(1.0e-6_fp , (abs(ubw)+abs(u2dh)))
+    !
+    ! grain friction coefficient due to currents and waves
+    !
+    fcw1     = acw*betacw*fc1 + (1.0_fp-acw)*fw1
+    !
     fac1   = 0.5_fp * rhow * fcw1
     fac2   = 0.5_fp * d50  * rhosol / (dstar**0.3_fp)
     qbtu   = 0.0_fp
@@ -233,9 +227,30 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
        plead2 = sin(pangle*degrad)
     endif
     !
+    ! Split peak period Tp in an onshore and offshore period
+    !
+    tfor = 0.0_fp
+    if (ubw > 0.0_fp) then
+        tfor = uoff / (uon+uoff) * tp
+        tback    = tp - tfor
+        pi_tfor  = pi / tfor
+        pi_tback = pi / tback
+    endif
+    !
+    ! wave period subdivision
+    !
+    if (wave .and. tp>1.0_fp .and. bedw>0.0_fp) then
+       ntime = subiw
+    else
+       ntime = 1
+    endif
+    dtt    = tp / real(ntime,fp)
     do ii = 1,ntime
-       time = real(ii-1,fp) * dtt
+       !
+       ! Construct instantaneous wave velocity
+       !
        if (ubw>0.0_fp .and. tp>1.0_fp) then
+          time = real(ii-1,fp) * dtt
           if (time < tfor) then
              udt = uon * sin(pi*time/tfor)
              if (pangle > 0.0_fp) then
@@ -256,6 +271,9 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
           udt  = 0.0_fp
           dudt = 0.0_fp
        endif
+       !
+       ! Total instantaneous velocity
+       !
        uut     = udt*cosphiwav + ubtotu
        uvt     = udt*sinphiwav + ubtotv
        utvec   = sqrt(max(1.0e-4_fp ,(uut**2 +uvt**2)))
@@ -263,23 +281,25 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
        ! bed slope effects on critical shear stress
        ! using Dey (2001) as modified by Van Rijn (Z4056)
        ! (approximation where Schocklitsch and Leitner factors are combined)
+       ! positive values refer to downsloping beds
        !
-       dzds    =  dzduu*uut/utvec + dzdvv*uvt/utvec
-       !
-       !! beta = atan(dzds) = longitudinal slope angle
-       !! positive values refer to downsloping beds
-       !! negative values refer to upsloping beds
-       !
-       dzdn    =  abs(dzduu*uvt/utvec + dzdvv*uut/utvec)
-       !
-       !! gamma = atan(dzdn) = lateral (transverse) slope angle
-       !
+       dzds    =  (dzduu*uut + dzdvv*uvt)/utvec
+       dzdn    =  abs(dzduu*uvt + dzdvv*uut)/utvec
        fac_slp = max((1.0_fp-(atan(dzds)/phi)),0.001_fp)**0.75_fp * max((1.0_fp-(atan(dzdn)/phi)),0.001_fp)**0.37_fp
+       !
+       ! Instantaneous grain-related bed-shear stress due to both currents and waves
+       !
        tau1t   = fac1 * utvec * utvec
+       !
+       ! Total bed-load transport including bed slope effect
+       !
        rrr2    = max(min(0.8_fp+0.2_fp*((tau1t/(fac_slp*taucr)-0.8_fp)/1.2_fp) , 1.0_fp) , 0.8_fp )
        tt      = max(0.0001_fp , (tau1t-rrr2*fac_slp*taucr)/(fac_slp*taucr))
        ustar1t = (tau1t/rhow)**0.5_fp
        sbt     = fsilt * fac2 * ustar1t * tt
+       !
+       ! Total bed-load transport components
+       !
        qbtu    = qbtu + uut/utvec*sbt
        qbtv    = qbtv + uvt/utvec*sbt
        !
@@ -309,7 +329,7 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
        !
        ! Suspended transport qswu/v due to waves, oriented in wave
        ! direction
-       ! Expression modified by Walstra (2006)
+       ! Expression modified by Walstra et al (2007)
        !
        ! STEP 1
        ! Integrate concentration between aks and 3*deltas
@@ -348,18 +368,18 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
        ! Multiply integrated transports with orbital & drift velocity component
        !
        veff = sqrt(u2dh*u2dh+uon*uon) - vcr
-       !
-       ! Added phase function
-       !
-       if (fpco == 0.0_fp) then
-          p2 = -tanh(100.0_fp*(rksrs/(ws*tp)-0.1_fp))
-       else
-          p2 = fpco
-       endif
        !    
        if (veff > eps) then
           !
-          ! Gamma has been reduced from 0.2 to 0.1 in TR2004
+          ! Added phase function following Walstra et al (2007)
+          !
+          if (fpco == 0.0_fp) then
+             p2 = -tanh(100.0_fp*(rksrs/(ws*tp)-0.1_fp))
+          else
+             p2 = fpco
+          endif
+          !
+          ! Gamma has been reduced from 0.2 in TR2000 to 0.1 in TR2004
           !
           ua    = 0.1_fp * p2 * (uon**4-uoff**4) / (uon**3+uoff**3)
           uau   = ua * cosphiwav

@@ -159,6 +159,10 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
     zusus = zumod
     rc    = 30.0_fp * z0cur
     !
+    ! Make assumptions for friction angle
+    !
+    phi = 30.0_fp * degrad
+    !
     ! calculate imaginary "depth-averaged current" which has a logarithmic
     ! velocity profile, and a velocity at the bottom zeta point equivalent
     ! to that calculated by the model for 3D current and waves.
@@ -253,10 +257,12 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
        a11    = -0.0049_fp*t1**2 - 0.069_fp*t1 + 0.2911_fp
        raih   = max(0.5_fp  , -5.25_fp-6.1_fp*tanh(a11*u1 - 1.76_fp))
        rmax   = max(0.62_fp , min(0.75_fp, -2.5_fp*h1/rlabda + 0.85_fp) )
+       !
        uon    = umax * (0.5_fp+(rmax-0.5_fp)*tanh((raih-0.5_fp)/(rmax-0.5_fp)))
        uoff   = umax - uon
        uon    = max(1.0e-5_fp , uon)
        uoff   = max(1.0e-5_fp , uoff)
+       !
        uwbih  = (0.5_fp*uon**3.0_fp + 0.5_fp*uoff**3.0_fp)**(1.0_fp/3.0_fp)
        tauwav = 0.25_fp * rhowat * fw * uwbih**2
        !
@@ -320,7 +326,13 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
     !
     fc1  = 0.24_fp  * log10(12.0_fp*h1/d90)**(-2)
     fc   = 0.24_fp  * log10(12.0_fp*h1/rc)**(-2)
+    !
+    ! bed-shear stress current
+    !
     tauc = 0.125_fp * rhowat * fc * u2dhim**2
+    !
+    ! efficiency factor (current-related)
+    !
     muc  = fc1 / fc
     !
     if (tauadd>0.0_fp) then
@@ -334,10 +346,14 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
        ustarc = sqrt(tauc/rhowat)
     endif
     !
+    ! effective bed-shear stress current + waves
+    !
     ! calculate bed shear stress ratio for bed-load slope effects
     ! note this ignores bed-slope effects on initiation of motion
     !
     taubcw = alfacw*muc*tauc + muw*tauwav
+    !
+    ! critical bed-shear stress
     !
     fclay = 1.0_fp
     fpack = 1.0_fp
@@ -351,25 +367,21 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
        fclay = min((1.0_fp+mudfrac)**3, 2.0_fp)
     endif
     taucr1 = fpack * fch1 * fclay * taucr0
+    taurat  = taubcw / taucr1
     !
     ! bed slope effects on critical shear stress
     ! using Dey (2001) as modified by Van Rijn (Z4056)
     ! (approximation where Schocklitsch and Leitner factors are combined)
-    !
-    dzds = dzduu*uuu/max(umod,1.0e-4_fp) + dzdvv*vvv/max(umod,1.0e-4_fp)
-    !
     ! positive values refer to downsloping beds
-    ! negative values refer to upsloping beds
     !
-    dzdn    = abs(dzduu*vvv/max(umod,1.0e-4_fp) + dzdvv*uuu/max(umod,1.0e-4_fp))
-    phi     = 30.0_fp * degrad
+    dzds    = (dzduu*uuu + dzdvv*vvv)/max(umod,1.0e-4_fp)
+    dzdn    = abs(dzduu*vvv + dzdvv*uuu)/max(umod,1.0e-4_fp))
     fac_slp = max((1.0_fp-(atan(dzds)/phi)) , 0.001_fp)**0.75_fp * max((1.0_fp-(atan(dzdn)/phi)),0.001_fp)**0.37_fp
-    rrr1    = max(min(0.8_fp+0.2_fp*((taubcw/(taucr1*fac_slp)-0.8_fp)/1.2_fp) , 1.0_fp) , 0.8_fp )
-    taurat  = taubcw / taucr1
     !
     ! calculate Van Rijn's Dimensionless bed-shear stress for reference
     ! concentration at z=a
     !
+    rrr1    = max(min(0.8_fp+0.2_fp*((taubcw/(taucr1*fac_slp)-0.8_fp)/1.2_fp) , 1.0_fp) , 0.8_fp )
     ta = (taubcw-rrr1*taucr1*fac_slp) / (taucr1*fac_slp)
     !
     ! Equilibrium concentration at reference level aks

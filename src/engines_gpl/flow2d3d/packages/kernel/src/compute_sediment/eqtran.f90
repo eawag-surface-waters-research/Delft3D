@@ -204,8 +204,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     real(fp)          :: delr
     real(fp)          :: diffbt
     real(fp)          :: dz
-    real(fp)          :: dzdx
-    real(fp)          :: dzdy
     real(fp)          :: ee
     real(fp)          :: facce
     real(fp)          :: fact1
@@ -343,8 +341,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        tauadd = 0.0_fp
     endif
     !
-    dzdx=dzduu
-    dzdy=dzdvv
     if (suspfrac) then
        !
        ! Suspended sediment (mud or sand)
@@ -629,8 +625,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     endif
     u     = utot * uuu / (umod+eps)
     v     = utot * vvv / (umod+eps)
-    !dzdx  = 0.0_fp
-    !dzdy  = 0.0_fp
+    !
     if (iform(ised) == -1) then
        if (bed > 0.0_fp) then
           call bedtr1993(uuu       ,vvv       ,utot      ,di50      ,d90       , &
@@ -704,7 +699,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        call tranb5(u         ,v         ,di50      ,d90       ,chezy      , &
                  & h1        ,hrms      ,tp        ,teta      ,par(1,ised), &
-                 & dzdx      ,dzdy      ,sbcu      ,sbcv      ,ssusx      , &
+                 & dzduu     ,dzdvv     ,sbcu      ,sbcv      ,ssusx      , &
                  & ssusy     ,cesus     ,vonkar    )
        !
        sbc_total = .false.
@@ -716,8 +711,8 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        call prterr (lundia,'U021','Bailard method is disabled')
        call d3stop(1, gdp)
        !call tranb6(utot      ,u          ,v         ,chezy     ,h1        , &
-       !          & hrms      ,tp         ,teta      ,diss      ,dzdx      , &
-       !          & dzdy      ,par(1,ised),sbcu      ,sbcv      ,ssusx     , &
+       !          & hrms      ,tp         ,teta      ,diss      ,dzduu     , &
+       !          & dzdvv     ,par(1,ised),sbcu      ,sbcv      ,ssusx     , &
        !          & ssusy     )
        !
        sbc_total = .false.
@@ -738,8 +733,8 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        call prterr (lundia,'U021','Van Rijn/Ribberink (1994) method is disabled')
        call d3stop(1, gdp)
        !call tranb8(u         ,v         ,hrms      ,h1         ,teta      , &
-       !          & tp        ,di50      ,d90       ,diss       ,dzdx      , &
-       !          & dzdy      ,nm        ,nm        ,par(1,ised),sbcu      , &
+       !          & tp        ,di50      ,d90       ,diss       ,dzduu     , &
+       !          & dzdvv     ,nm        ,nm        ,par(1,ised),sbcu      , &
        !          & sbcv      ,ssusx     ,ssusy     )
        !
        sbc_total = .false.
@@ -761,7 +756,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        call prterr (lundia,'U021','Ashida and Michiue method is disabled')
        call d3stop(1, gdp)
        !call trab10(utot      ,di50      ,chezy     ,h1         ,cosa      , &
-       !          & sina      ,dzdx      ,dzdy      ,par(1,ised),sbot      , &
+       !          & sina      ,dzduu     ,dzdvv     ,par(1,ised),sbot      , &
        !          & ssus      )
        !
        sbc_total = .true.
