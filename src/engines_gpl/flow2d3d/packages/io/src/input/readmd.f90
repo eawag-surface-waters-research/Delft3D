@@ -59,7 +59,6 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     include 'fsm.i'
     include 'tri-dyn.igd'
     integer                       , pointer :: alpha
-    integer                       , pointer :: c
     integer                       , pointer :: cbuv
     integer                       , pointer :: cdwlsu
     integer                       , pointer :: cdwlsv
@@ -71,55 +70,36 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     integer                       , pointer :: cfvrou
     integer                       , pointer :: decay
     integer                       , pointer :: dicuv
-    integer                       , pointer :: dis
-    integer                       , pointer :: disch
     integer                       , pointer :: dp
-    integer                       , pointer :: dps
     integer                       , pointer :: dpu
     integer                       , pointer :: dpv
     integer                       , pointer :: drodep
-    integer                       , pointer :: dss
-    integer                       , pointer :: dtr
     integer                       , pointer :: dxydro
     integer                       , pointer :: facdss
     integer                       , pointer :: fcorio
-    integer                       , pointer :: gro
     integer                       , pointer :: hkru
     integer                       , pointer :: hkrv
     integer                       , pointer :: hydrbc
     integer                       , pointer :: kcs
     integer                       , pointer :: omega
-    integer                       , pointer :: patm
     integer                       , pointer :: pship
-    integer                       , pointer :: qu
     integer                       , pointer :: r1
     integer                       , pointer :: rettim
-    integer                       , pointer :: rho
-    integer                       , pointer :: rint
-    integer                       , pointer :: rob
     integer                       , pointer :: rtubnd
     integer                       , pointer :: rtur1
     integer                       , pointer :: s1
-    integer                       , pointer :: sour
     integer                       , pointer :: thick
-    integer                       , pointer :: tp
     integer                       , pointer :: u1
     integer                       , pointer :: ubrlsu
     integer                       , pointer :: ubrlsv
     integer                       , pointer :: umnldf
     integer                       , pointer :: uwtypu
     integer                       , pointer :: uwtypv
-    integer                       , pointer :: v0
     integer                       , pointer :: v1
     integer                       , pointer :: vicuv
     integer                       , pointer :: vmnldf
-    integer                       , pointer :: ws
-    integer                       , pointer :: xydro
     integer                       , pointer :: xcor
     integer                       , pointer :: ycor
-    integer                       , pointer :: yz
-    integer                       , pointer :: res
-    integer                       , pointer :: rl
     integer                       , pointer :: itdro
     integer                       , pointer :: kfu
     integer                       , pointer :: kfv
@@ -145,7 +125,6 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     integer                       , pointer :: nmaxus
     integer                       , pointer :: kmax
     integer                       , pointer :: nmmax
-    integer                       , pointer :: lsts
     integer                       , pointer :: lstsc
     integer                       , pointer :: lstsci
     integer                       , pointer :: lsal
@@ -171,7 +150,6 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     integer                       , pointer :: nsrcd
     integer                       , pointer :: nostat
     integer                       , pointer :: ntruv
-    integer                       , pointer :: ntru
     integer                       , pointer :: nofou
     integer                       , pointer :: ndro
     integer                       , pointer :: nsluv
@@ -198,7 +176,6 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     real(fp)                      , pointer :: rhoa
     real(fp)                      , pointer :: rhofrac
     real(fp)                      , pointer :: ag
-    real(fp)                      , pointer :: z0
     real(fp)                      , pointer :: z0v
     real(fp)                      , pointer :: vicouv
     real(fp)                      , pointer :: vicoww
@@ -206,7 +183,6 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     real(fp)                      , pointer :: dicoww
     real(fp)      , dimension(:)  , pointer :: wstcof
     integer                       , pointer :: idensform
-    integer                       , pointer :: iro
     integer                       , pointer :: irov
     real(fp)                      , pointer :: xlo
     real(fp)                      , pointer :: ck
@@ -270,9 +246,6 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     logical                       , pointer :: fldis
     logical                       , pointer :: fltem
     logical                       , pointer :: fleva
-    real(fp)                      , pointer :: sus
-    real(fp)                      , pointer :: bed
-    real(fp)                      , pointer :: rdw
     integer                       , pointer :: iopsus
     logical                       , pointer :: bedupd
     real(fp)                      , pointer :: zbot
@@ -376,7 +349,6 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     nmaxus              => gdp%d%nmaxus
     kmax                => gdp%d%kmax
     nmmax               => gdp%d%nmmax
-    lsts                => gdp%d%lsts
     lstsc               => gdp%d%lstsc
     lstsci              => gdp%d%lstsci
     lsal                => gdp%d%lsal
@@ -402,7 +374,6 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     nsrcd               => gdp%d%nsrcd
     nostat              => gdp%d%nostat
     ntruv               => gdp%d%ntruv
-    ntru                => gdp%d%ntru
     nofou               => gdp%d%nofou
     ndro                => gdp%d%ndro
     nsluv               => gdp%d%nsluv
@@ -436,9 +407,6 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     itimtt              => gdp%gdinttim%itimtt
     itiwei              => gdp%gdinttim%itiwei
     julday              => gdp%gdinttim%julday
-    sus                 => gdp%gdmorpar%sus
-    bed                 => gdp%gdmorpar%bed
-    rdw                 => gdp%gdmorpar%rdw
     iopsus              => gdp%gdmorpar%iopsus
     bedupd              => gdp%gdmorpar%bedupd
     chzmin              => gdp%gdnumeco%chzmin
@@ -462,7 +430,6 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     rhoa                => gdp%gdphysco%rhoa
     rhofrac             => gdp%gdphysco%rhofrac
     ag                  => gdp%gdphysco%ag
-    z0                  => gdp%gdphysco%z0
     z0v                 => gdp%gdphysco%z0v
     vicouv              => gdp%gdphysco%vicouv
     vicoww              => gdp%gdphysco%vicoww
@@ -470,7 +437,6 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     dicoww              => gdp%gdphysco%dicoww
     wstcof              => gdp%gdphysco%wstcof
     idensform           => gdp%gdphysco%idensform
-    iro                 => gdp%gdphysco%iro
     irov                => gdp%gdphysco%irov
     wind                => gdp%gdprocs%wind
     salin               => gdp%gdprocs%salin
@@ -493,7 +459,6 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     wavcmp              => gdp%gdprocs%wavcmp
     lftrto              => gdp%gdprocs%lftrto
     alpha               => gdp%gdr_i_ch%alpha
-    c                   => gdp%gdr_i_ch%c
     cbuv                => gdp%gdr_i_ch%cbuv
     cdwlsu              => gdp%gdr_i_ch%cdwlsu
     cdwlsv              => gdp%gdr_i_ch%cdwlsv
@@ -505,55 +470,36 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     cfvrou              => gdp%gdr_i_ch%cfvrou
     decay               => gdp%gdr_i_ch%decay
     dicuv               => gdp%gdr_i_ch%dicuv
-    dis                 => gdp%gdr_i_ch%dis
-    disch               => gdp%gdr_i_ch%disch
     dp                  => gdp%gdr_i_ch%dp
-    dps                 => gdp%gdr_i_ch%dps
     dpu                 => gdp%gdr_i_ch%dpu
     dpv                 => gdp%gdr_i_ch%dpv
     drodep              => gdp%gdr_i_ch%drodep
-    dss                 => gdp%gdr_i_ch%dss
-    dtr                 => gdp%gdr_i_ch%dtr
     dxydro              => gdp%gdr_i_ch%dxydro
     facdss              => gdp%gdr_i_ch%facdss
     fcorio              => gdp%gdr_i_ch%fcorio
-    gro                 => gdp%gdr_i_ch%gro
     hkru                => gdp%gdr_i_ch%hkru
     hkrv                => gdp%gdr_i_ch%hkrv
     hydrbc              => gdp%gdr_i_ch%hydrbc
     kcs                 => gdp%gdr_i_ch%kcs
     omega               => gdp%gdr_i_ch%omega
-    patm                => gdp%gdr_i_ch%patm
     pship               => gdp%gdr_i_ch%pship
-    qu                  => gdp%gdr_i_ch%qu
     r1                  => gdp%gdr_i_ch%r1
     rettim              => gdp%gdr_i_ch%rettim
-    rho                 => gdp%gdr_i_ch%rho
-    rint                => gdp%gdr_i_ch%rint
-    rob                 => gdp%gdr_i_ch%rob
     rtubnd              => gdp%gdr_i_ch%rtubnd
     rtur1               => gdp%gdr_i_ch%rtur1
     s1                  => gdp%gdr_i_ch%s1
-    sour                => gdp%gdr_i_ch%sour
     thick               => gdp%gdr_i_ch%thick
-    tp                  => gdp%gdr_i_ch%tp
     u1                  => gdp%gdr_i_ch%u1
     ubrlsu              => gdp%gdr_i_ch%ubrlsu
     ubrlsv              => gdp%gdr_i_ch%ubrlsv
     umnldf              => gdp%gdr_i_ch%umnldf
     uwtypu              => gdp%gdr_i_ch%uwtypu
     uwtypv              => gdp%gdr_i_ch%uwtypv
-    v0                  => gdp%gdr_i_ch%v0
     v1                  => gdp%gdr_i_ch%v1
     vicuv               => gdp%gdr_i_ch%vicuv
     vmnldf              => gdp%gdr_i_ch%vmnldf
-    ws                  => gdp%gdr_i_ch%ws
-    xydro               => gdp%gdr_i_ch%xydro
     xcor                => gdp%gdr_i_ch%xcor
     ycor                => gdp%gdr_i_ch%ycor
-    yz                  => gdp%gdr_i_ch%yz
-    res                 => gdp%gdr_i_ch%res
-    rl                  => gdp%gdr_i_ch%rl
     itdro               => gdp%gdr_i_ch%itdro
     kfu                 => gdp%gdr_i_ch%kfu
     kfv                 => gdp%gdr_i_ch%kfv
