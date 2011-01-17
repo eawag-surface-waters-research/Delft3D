@@ -76,7 +76,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     real(fp)                             , pointer :: espir
     real(fp)                             , pointer :: rhow
     real(fp)                             , pointer :: ag
-    real(fp)                             , pointer :: z0
     real(fp)                             , pointer :: vonkar
     real(fp)                             , pointer :: vicmol
     logical                              , pointer :: wave
@@ -282,7 +281,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     epspar              => gdp%gdmorpar%epspar 
     rhow                => gdp%gdphysco%rhow
     ag                  => gdp%gdphysco%ag
-    z0                  => gdp%gdphysco%z0
     vonkar              => gdp%gdphysco%vonkar
     vicmol              => gdp%gdphysco%vicmol
     wave                => gdp%gdprocs%wave
