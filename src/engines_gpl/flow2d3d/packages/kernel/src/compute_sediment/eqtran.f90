@@ -79,9 +79,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     real(fp)                             , pointer :: z0
     real(fp)                             , pointer :: vonkar
     real(fp)                             , pointer :: vicmol
-    logical                              , pointer :: wind
     logical                              , pointer :: wave
-    logical                              , pointer :: sedim
     logical                              , pointer :: scour
     logical                              , pointer :: epspar
     logical                              , pointer :: ubot_from_com
@@ -287,9 +285,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     z0                  => gdp%gdphysco%z0
     vonkar              => gdp%gdphysco%vonkar
     vicmol              => gdp%gdphysco%vicmol
-    wind                => gdp%gdprocs%wind
     wave                => gdp%gdprocs%wave
-    sedim               => gdp%gdprocs%sedim
     scour               => gdp%gdscour%scour
     timsec              => gdp%gdinttim%timsec
     camax               => gdp%gdmorpar%camax
