@@ -149,7 +149,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     real(fp)                            :: t_relax
     real(fp)                            :: ta
     real(fp)                            :: taubcw
-    real(fp)              , intent(out) :: taubmx   !  Description and declaration in rjdim.f90
+    real(fp)              , intent(in)  :: taubmx   !  Description and declaration in rjdim.f90
     real(fp)                            :: tauc
     real(fp)              , intent(in)  :: taucr0
     real(fp)                            :: taucr1
@@ -377,12 +377,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
              exit
           endif
        enddo
-       if (scour) then
-          !
-          ! copy to field
-          !
-          taubmx = tauc
-       endif
        !
        ! Adjust ce_nm for presence of multiple sediment fractions.
        !

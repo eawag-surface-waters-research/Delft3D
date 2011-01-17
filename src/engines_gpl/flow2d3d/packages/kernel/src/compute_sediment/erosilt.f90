@@ -81,6 +81,7 @@ subroutine erosilt(nmmax   ,icx     ,icy     ,kcs     ,kfs     ,kfu     , &
     real(fp)      , dimension(:,:)   , pointer :: eropar
     character(4)  , dimension(:)     , pointer :: sedtyp
     logical                          , pointer :: bsskin
+    logical                          , pointer :: scour
     integer       , dimension(:)     , pointer :: iform
     !
     integer                                                   , intent(in)  :: icx    !!  Increment in the X-dir., if ICX= NMAX
@@ -142,6 +143,7 @@ subroutine erosilt(nmmax   ,icx     ,icy     ,kcs     ,kfs     ,kfu     , &
     real(fp) :: h1
     real(fp) :: sour
     real(fp) :: sink
+    real(fp) :: tauadd
     real(fp) :: taub
     real(fp) :: taum
     real(fp) :: um
@@ -201,6 +203,7 @@ subroutine erosilt(nmmax   ,icx     ,icy     ,kcs     ,kfs     ,kfu     , &
     eropar              => gdp%gdsedpar%eropar
     sedtyp              => gdp%gdsedpar%sedtyp
     bsskin              => gdp%gdsedpar%bsskin
+    scour               => gdp%gdscour%scour
     !
     timsec              => gdp%gdinttim%timsec
     !
@@ -302,6 +305,16 @@ subroutine erosilt(nmmax   ,icx     ,icy     ,kcs     ,kfs     ,kfu     , &
           ! use max bed shear stress, rather than mean
           !
           taub = taubmx(nm)
+       endif
+       !
+       if (scour) then
+          !
+          ! Calculate extra stress (tauadd) for point = nm,
+          ! if so required by user input.
+          !
+          call shearx(tauadd, nm, gdp)
+          !
+          taub = sqrt(taub**2 + tauadd**2)
        endif
        !
        thick0 = thick(kmax) * max(0.01_fp , s0(nm)+real(dps(nm),fp))
