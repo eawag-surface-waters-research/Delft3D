@@ -375,7 +375,7 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
     ! positive values refer to downsloping beds
     !
     dzds    = (dzduu*uuu + dzdvv*vvv)/max(umod,1.0e-4_fp)
-    dzdn    = abs(dzduu*vvv + dzdvv*uuu)/max(umod,1.0e-4_fp))
+    dzdn    = abs(dzduu*vvv + dzdvv*uuu)/max(umod,1.0e-4_fp)
     fac_slp = max((1.0_fp-(atan(dzds)/phi)) , 0.001_fp)**0.75_fp * max((1.0_fp-(atan(dzdn)/phi)),0.001_fp)**0.37_fp
     !
     ! calculate Van Rijn's Dimensionless bed-shear stress for reference
