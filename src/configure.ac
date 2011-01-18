@@ -33,18 +33,16 @@ AC_PROG_LEX
 AC_PROG_YACC
 
 
-#check if old compilers are used
-# this macro is in the m4 directory (remove if no longer needed, checks for ifort<=8)
-AC_CHECK_OLD_COMPILER
-
-
 ## This is copied from the libtool examples
 ## -------------------------- ##
 ## Fortran90 compiler checks. ##
 ## -------------------------- ##
 AC_LANG_PUSH([Fortran])
 dnl Check for openmp for fortran
-AC_OPENMP
+AX_OPENMP
+dnl prepend the found flags
+FCFLAGS="$FCFLAGS $OPENMP_FCFLAGS"
+
 dnl Check for MPI (sets MPIFC, MPILIBS, HAVE_MPI)
 ACX_MPI
 
@@ -61,7 +59,7 @@ dnl Yes, we want free form Fortran!
 AC_FC_FREEFORM
 dnl Set unlimited line length (don't create lines longer than 132, because it breaks on some compilers,
 dnl but because ifort and gfortran allow it let's not raise errors by default)
-AC_FC_LINE_LENGTH(unlimited)
+AC_FC_LINE_LENGTH([unlimited])
 AC_LANG_POP
 
 ## -------------------------- ##
@@ -71,7 +69,9 @@ AC_LANG_PUSH([Fortran 77])
 AC_PROG_F77([ifort gfortran g77])
 AC_F77_LIBRARY_LDFLAGS
 dnl Check for openmp for fortran
-AC_OPENMP
+AX_OPENMP
+dnl Prepend the flags with the openmp flag
+FFLAGS="$FFLAGS $OPENMP_FFLAGS"
 AC_LANG_POP
 
 dnl Fortran compiler defaults (this could be a separate m4 file)
@@ -82,54 +82,22 @@ AS_HELP_STRING([--enable-fortran-flags-preset],
 dnl set compiler specific options here: 
 if test "$enableval" = yes ; then
         AC_MSG_RESULT([yes])
-        case "$target" in
-        *linux*)
-                case "$F77" in
+	case "$F77" in
                 *gfortran*) dnl GNU Fortran 95 compiler
 		dnl no custom flags
                 ;;
-                *g77*)  dnl GNU Fortran compiler
-		dnl no custom flags
-                ;;
-                *ifc*)  dnl Intel 7.x Fortran compiler
-		dnl no custom flags
-                ;;
                 *ifort*) dnl Intel 8.x Fortran compiler
-                        FFLAGS="-recursive -reentrancy threaded -traceback"
+                        FFLAGS="$FFLAGS -recursive -reentrancy threaded -traceback"
                 ;;
-		esac
-	;;
-        *darwin*)
-                case "$F77" in
-		*gfortran*)  dnl gfortran (or gfortran-mp-?.?)
-                ;;
-		esac
-	;;
-        *)
-                ac_fortran_flags_preset=no
-        ;;
         esac
-
-        case "$target" in
-	        *linux*)
-        	        case "$FC" in
-			*gfortran*) dnl GNU Fortran 95 compiler
-			;;
-                	*ifort*) dnl Intel 8.x Fortran compiler
-				 FCFLAGS="-recursive -reentrancy threaded -traceback"
-			;;
-			esac
-		;;
-		*darwin*)
-			case "$FC" in
-			*gfortran*) dnl GNU Fortran 95 compiler
-			;;
-			esac
-		;;
-		*)
-                ac_fortran_flags_preset=no
-       		;;
-        esac
+	case "$FC" in
+	     *gfortran*) dnl GNU Fortran 95 compiler
+	     dnl no custom flags
+	     ;;
+	     *ifort*) dnl Intel 8.x Fortran compiler
+		      FCFLAGS="$FCFLAGS -recursive -reentrancy threaded -traceback"
+             ;;
+	esac
 else
         AC_MSG_RESULT([no])
 fi
