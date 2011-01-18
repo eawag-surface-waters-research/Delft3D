@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libkernel_non_hydro.a
+lib_LTLIBRARIES = libkernel_non_hydro.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -22,7 +22,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libkernel_non_hydro_a_SOURCES = \
+libkernel_non_hydro_la_SOURCES = \
          z_hydpres.f90 \
          z_hydpres_nhfull.f90 \
          z_ilu_nhfull.f90 \

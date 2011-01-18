@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libkernel_compute_sediment.a
+lib_LTLIBRARIES = libkernel_compute_sediment.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -29,7 +29,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libkernel_compute_sediment_a_SOURCES = \
+libkernel_compute_sediment_la_SOURCES = \
          adjust_bedload.f90 \
          avalan.f90 \
          dredge.f90 \

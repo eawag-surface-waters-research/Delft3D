@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libparallel.a
+lib_LTLIBRARIES = libparallel.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -33,7 +33,7 @@ AM_FCFLAGS += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libparallel_a_SOURCES = \
+libparallel_la_SOURCES = \
          dfparall.f90 \
          initdfparall.f90 \
          dfinitmpi.f90 \

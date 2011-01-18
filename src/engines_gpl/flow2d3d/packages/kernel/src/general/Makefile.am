@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libkernel_general.a
+lib_LTLIBRARIES = libkernel_general.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -31,7 +31,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libkernel_general_a_SOURCES = \
+libkernel_general_la_SOURCES = \
          angle.f90 \
          area4.f90 \
          chckit.f90 \

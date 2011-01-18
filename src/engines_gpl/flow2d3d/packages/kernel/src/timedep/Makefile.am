@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libkernel_timedep.a
+lib_LTLIBRARIES = libkernel_timedep.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -27,7 +27,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libkernel_timedep_a_SOURCES = \
+libkernel_timedep_la_SOURCES = \
          cofrbc.f90 \
          eoferr.f90 \
          incbc.f90 \

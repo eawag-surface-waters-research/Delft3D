@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libdata_basics.a
+lib_LTLIBRARIES = libdata_basics.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -25,7 +25,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libdata_basics_a_SOURCES = \
+libdata_basics_la_SOURCES = \
          message_module.f90 \
          string_module.f90 \
          bedcomposition_module.f90 \

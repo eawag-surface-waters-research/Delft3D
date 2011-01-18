@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libkernel_dd_f_mapping.a
+lib_LTLIBRARIES = libkernel_dd_f_mapping.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -22,7 +22,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libkernel_dd_f_mapping_a_SOURCES = \
+libkernel_dd_f_mapping_la_SOURCES = \
          flow_nextstep.f90
 
 #-------------------------------------------------------------------------------

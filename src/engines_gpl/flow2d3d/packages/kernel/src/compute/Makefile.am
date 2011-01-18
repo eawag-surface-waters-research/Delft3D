@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libkernel_compute.a
+lib_LTLIBRARIES = libkernel_compute.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -29,7 +29,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libkernel_compute_a_SOURCES = \
+libkernel_compute_la_SOURCES = \
          adi.f90 \
          adv2d.f90 \
          bccorr.f90 \

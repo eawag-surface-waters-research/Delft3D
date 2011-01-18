@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libdata_allocation.a
+lib_LTLIBRARIES = libdata_allocation.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -26,7 +26,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libdata_allocation_a_SOURCES = \
+libdata_allocation_la_SOURCES = \
          chnull.f90 \
          ckdim.f90 \
          decarr.f90 \

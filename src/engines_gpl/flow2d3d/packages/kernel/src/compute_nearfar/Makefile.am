@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libkernel_compute_nearfar.a
+lib_LTLIBRARIES = libkernel_compute_nearfar.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -26,7 +26,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libkernel_compute_nearfar_a_SOURCES = \
+libkernel_compute_nearfar_la_SOURCES = \
          findnmk.f90 \
          desa.f90 \
          dis_qjet.f90 \

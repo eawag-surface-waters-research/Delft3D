@@ -112,7 +112,7 @@ fi
 #-----  Make scripts/binaries executable in case checked out via Windows
 
 scripts="
-    ./third_party_lgpl/version_number/bin/linux/version_number.exe
+    ./third_party_open/version_number/bin/linux/version_number.exe
     "
 
 for file in $scripts; do

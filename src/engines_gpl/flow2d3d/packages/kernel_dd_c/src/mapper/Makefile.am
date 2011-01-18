@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libkernel_dd_c_mapping.a
+lib_LTLIBRARIES = libkernel_dd_c_mapping.la
 
 
 INCLUDES = \
@@ -24,7 +24,7 @@ INCLUDES = \
     -I$(top_srcdir)/third_party_open/DelftOnline/include \
     -I$(top_srcdir)/third_party_open/DelftOnline/include/linux
 
-libkernel_dd_c_mapping_a_SOURCES = \
+libkernel_dd_c_mapping_la_SOURCES = \
      context-flowside.cpp \
      context-gawsside.cpp \
      context-mapside.cpp \

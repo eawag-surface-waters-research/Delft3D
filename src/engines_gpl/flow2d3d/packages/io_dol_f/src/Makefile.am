@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libio_dol_f.a
+lib_LTLIBRARIES = libio_dol_f.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -28,7 +28,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libio_dol_f_a_SOURCES = \
+libio_dol_f_la_SOURCES = \
          d3d_olv_class.f90 \
          d3donline.f90 \
          d3dpublish.f90

@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libplugin_user.a
+lib_LTLIBRARIES = libplugin_user.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -27,7 +27,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libplugin_user_a_SOURCES = \
+libplugin_user_la_SOURCES = \
          u_ppr.f90 \
          u_rdat.f90 \
          u_wdro.f90 \

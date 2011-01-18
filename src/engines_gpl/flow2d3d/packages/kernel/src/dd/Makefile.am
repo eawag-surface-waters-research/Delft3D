@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libkernel_dd.a
+lib_LTLIBRARIES = libkernel_dd.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -22,7 +22,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libkernel_dd_a_SOURCES = \
+libkernel_dd_la_SOURCES = \
          caldpu_dd.f90 \
          chkdry_dd.f90 \
          chkrefinement.f90 \

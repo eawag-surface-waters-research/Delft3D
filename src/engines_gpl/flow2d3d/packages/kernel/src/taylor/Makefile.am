@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libkernel_taylor.a
+lib_LTLIBRARIES = libkernel_taylor.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -22,7 +22,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libkernel_taylor_a_SOURCES = \
+libkernel_taylor_la_SOURCES = \
          ampiwe.f90 \
          bediwe.f90 \
          brkbed.f90 \

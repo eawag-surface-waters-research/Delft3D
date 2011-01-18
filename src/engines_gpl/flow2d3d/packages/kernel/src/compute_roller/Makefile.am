@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libkernel_compute_roller.a
+lib_LTLIBRARIES = libkernel_compute_roller.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -26,7 +26,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libkernel_compute_roller_a_SOURCES = \
+libkernel_compute_roller_la_SOURCES = \
          constwave.f90 \
          difuwe.f90 \
          hds.f90 \

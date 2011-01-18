@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libio_input.a
+lib_LTLIBRARIES = libio_input.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -29,7 +29,7 @@ FMODULES += \
 	-I$(top_srcdir)/utils_lgpl/ec_module/packages/ec_module/src
 #-------------------------------------------------------------------------------
 #Sources
-libio_input_a_SOURCES = \
+libio_input_la_SOURCES = \
          barfil.f90 \
          bndfil.f90 \
          bubfil.f90 \

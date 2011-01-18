@@ -24,34 +24,34 @@ libflow2d3d_la_SOURCES = \
 #-------------------------------------------------------------------------------
 #Libraries
 libflow2d3d_la_LIBADD = \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/manager_dd/src/ddexec/libmanager_dd_ddexec.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/manager_dd/src/hydra/libmanager_dd_hydra.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/manager/src/libmanager.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/main/libkernel_main.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/non_hydro/libkernel_non_hydro.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/taylor/libkernel_taylor.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/timedep/libkernel_timedep.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/compute/libkernel_compute.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/compute_nearfar/libkernel_compute_nearfar.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/compute_roller/libkernel_compute_roller.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/libkernel_compute_sediment.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel_dd_f/src/libkernel_dd_f_mapping.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel_dd_c/src/mapper/libkernel_dd_c_mapping.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/io/src/preprocessor/libio_preprocessor.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/io/src/output/libio_output.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/inichk/libkernel_inichk.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/dd/libkernel_dd.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/io/src/input/libio_input.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/general/libkernel_general.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/io_dol_f/src/libio_dol_f.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/io_dol_c/src/libio_dol_c.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/plugin_user/src/libplugin_user.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/plugin_3dmortrafrm_c/src/libplugin_3dmortrafrm_c.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/allocation/libdata_allocation.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/general/libdata_general.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/gdp/libdata_gdp.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/libparallel.a \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/basics/libdata_basics.a \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/manager_dd/src/ddexec/.libs/libmanager_dd_ddexec.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/manager_dd/src/hydra/.libs/libmanager_dd_hydra.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/manager/src/.libs/libmanager.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/main/.libs/libkernel_main.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/non_hydro/.libs/libkernel_non_hydro.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/taylor/.libs/libkernel_taylor.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/timedep/.libs/libkernel_timedep.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/compute/.libs/libkernel_compute.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/compute_nearfar/.libs/libkernel_compute_nearfar.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/compute_roller/.libs/libkernel_compute_roller.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/.libs/libkernel_compute_sediment.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel_dd_f/src/.libs/libkernel_dd_f_mapping.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel_dd_c/src/mapper/.libs/libkernel_dd_c_mapping.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/io/src/preprocessor/.libs/libio_preprocessor.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/io/src/output/.libs/libio_output.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/inichk/.libs/libkernel_inichk.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/dd/.libs/libkernel_dd.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/io/src/input/.libs/libio_input.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/general/.libs/libkernel_general.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/io_dol_f/src/.libs/libio_dol_f.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/io_dol_c/src/.libs/libio_dol_c.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/plugin_user/src/.libs/libplugin_user.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/plugin_3dmortrafrm_c/src/.libs/libplugin_3dmortrafrm_c.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/allocation/.libs/libdata_allocation.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/general/.libs/libdata_general.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/gdp/.libs/libdata_gdp.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/.libs/libparallel.la \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/basics/.libs/libdata_basics.la \
     $(top_srcdir)/utils_lgpl/meteo/packages/meteo/src/libmeteo.a \
     $(top_srcdir)/utils_lgpl/ec_module/packages/ec_module/src/libec_module.a \
     $(top_srcdir)/utils_lgpl/delftio_sync/packages/delftio_sync/src/libdelftio_sync.a \

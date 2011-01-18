@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libio_output.a
+lib_LTLIBRARIES = libio_output.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -33,7 +33,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libio_output_a_SOURCES = \
+libio_output_la_SOURCES = \
          addelm.f90 \
          calbed.f90 \
          defnewgrp.f90 \

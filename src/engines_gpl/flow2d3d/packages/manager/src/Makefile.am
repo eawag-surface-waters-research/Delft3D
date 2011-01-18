@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libmanager.a
+lib_LTLIBRARIES = libmanager.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -33,7 +33,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libmanager_a_SOURCES = \
+libmanager_la_SOURCES = \
          tdatmain.f90 \
          tricom.f90 \
          triend.f90 \

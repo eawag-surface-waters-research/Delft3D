@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libio_preprocessor.a
+lib_LTLIBRARIES = libio_preprocessor.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -25,7 +25,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libio_preprocessor_a_SOURCES = \
+libio_preprocessor_la_SOURCES = \
          asc.f90 \
          bchfil.f90 \
          bewvuf.f90 \

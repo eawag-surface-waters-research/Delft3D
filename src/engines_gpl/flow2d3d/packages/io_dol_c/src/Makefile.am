@@ -11,7 +11,7 @@
 
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libio_dol_c.a
+lib_LTLIBRARIES = libio_dol_c.la
 
 
 INCLUDES = \
@@ -21,6 +21,6 @@ INCLUDES = \
     -I$(top_srcdir)/third_party_open/DelftOnline/include \
     -I$(top_srcdir)/third_party_open/DelftOnline/include/linux
 
-libio_dol_c_a_SOURCES = \
+libio_dol_c_la_SOURCES = \
      d3dol.cpp \
      fortran.cpp

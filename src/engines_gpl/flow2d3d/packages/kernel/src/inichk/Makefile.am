@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libkernel_inichk.a
+lib_LTLIBRARIES = libkernel_inichk.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -32,7 +32,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libkernel_inichk_a_SOURCES = \
+libkernel_inichk_la_SOURCES = \
          allocadv2d.f90 \
          caldps.f90 \
          caldpu.f90 \

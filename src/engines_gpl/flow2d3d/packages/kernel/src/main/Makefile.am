@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libkernel_main.a
+lib_LTLIBRARIES = libkernel_main.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -31,7 +31,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libkernel_main_a_SOURCES = \
+libkernel_main_la_SOURCES = \
          sysini.f90 \
          trisol.f90 \
          z_trisol.f90 \

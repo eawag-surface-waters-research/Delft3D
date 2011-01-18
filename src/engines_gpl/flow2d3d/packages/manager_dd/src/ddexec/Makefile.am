@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libmanager_dd_ddexec.a
+lib_LTLIBRARIES = libmanager_dd_ddexec.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -21,7 +21,7 @@ INCLUDES = \
 
 #-------------------------------------------------------------------------------
 #Sources
-libmanager_dd_ddexec_a_SOURCES = \
+libmanager_dd_ddexec_la_SOURCES = \
          barrier.cpp \
          config.cpp \
          ddexec.cpp \

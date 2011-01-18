@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libdata_gdp.a
+lib_LTLIBRARIES = libdata_gdp.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -23,7 +23,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libdata_gdp_a_SOURCES = \
+libdata_gdp_la_SOURCES = \
          clradv2d.f90 \
          clrbedformpar.f90 \
          clrdredge.f90 \
