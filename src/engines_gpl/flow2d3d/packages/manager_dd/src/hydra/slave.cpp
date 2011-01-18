@@ -241,7 +241,7 @@ Hydra::SlaveNode (
 
         Config.join[jid].stream = masterconfig.join[jid].stream;
         strcpy (Config.join[jid].handle, masterconfig.join[jid].handle);
-        Config.join[jid].thid = (pthread_t) NULL;
+        Config.join[jid].thid.p = (void *) NULL;
         }}
 
     PrintJoinTable ();
@@ -309,7 +309,7 @@ Hydra::SlaveNode (
     // Wait for all helper threads to terminate
 
     {for (int jid = 0 ; jid < Config.numjoins ; jid++) {
-        if (Config.join[jid].thid != (pthread_t) NULL) {
+        if (Config.join[jid].thid.p != (void *) NULL) {
              if (pthread_join (Config.join[jid].thid, NULL) != 0)
                 Abort ("Pthreads error: Cannot join with helper thread, errno=%d", errno);
             }

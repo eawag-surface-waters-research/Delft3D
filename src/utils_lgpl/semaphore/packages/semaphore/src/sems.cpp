@@ -66,8 +66,8 @@
 #   define VSEMNEFIS  FC_FUNC(vsemnefis,VSEMNEFIS)
 #   define PSEMFINISH FC_FUNC(psemfinish,PSEMFINISH)
 #   define VSEMFINISH FC_FUNC(vsemfinish,VSEMFINISH)
-#   define PSEMERROR  FC_FUNC(psemerror,PSEMERROR)
-#   define VSEMERROR  FC_FUNC(vsemerror,VSEMERROR)
+#   define PSEMINIOUT FC_FUNC(pseminiout,PSEMINIOUT)
+#   define VSEMINIOUT FC_FUNC(vseminiout,VSEMINIOUT)
 #else
 /* WIN32 */
 #   define STDCALL  /* nothing */
@@ -79,8 +79,8 @@
 #   define VSEMNEFIS  VSEMNEFIS
 #   define PSEMFINISH PSEMFINISH
 #   define VSEMFINISH VSEMFINISH
-#   define PSEMERROR  PSEMERROR
-#   define VSEMERROR  VSEMERROR
+#   define PSEMINIOUT PSEMINIOUT
+#   define VSEMINIOUT VSEMINIOUT
 #endif
 
 
@@ -100,8 +100,9 @@ void STDCALL PSEMNEFIS(void);
 void STDCALL VSEMNEFIS(void);
 void STDCALL PSEMFINISH(void);
 void STDCALL VSEMFINISH(void);
-void STDCALL PSEMERROR(void);
-void STDCALL VSEMERROR(void);
+void STDCALL PSEMINIOUT(void);
+void STDCALL VSEMINIOUT(void);
+void STDCALL SEMEXIT(void);
 char * STDCALL GETVERSION(void);
 
 #if defined(__cplusplus)
@@ -114,19 +115,11 @@ extern char * getfullversionstring_semaphore(void);
  * Global variables
  */
 
-#if ! defined(WIN32)
 static pthread_mutex_t inimutex =  PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t nfsmutex =  PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t lunmutex =  PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t errmutex =  PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t inomutex =  PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t finmutex =  PTHREAD_MUTEX_INITIALIZER;
-#else
-static pthread_mutex_t inimutex = 0 ;
-static pthread_mutex_t nfsmutex = 0 ;
-static pthread_mutex_t lunmutex = 0 ;
-static pthread_mutex_t errmutex = 0 ;
-static pthread_mutex_t finmutex = 0 ;
-#endif
 
 char * STDCALL GETVERSION(void)
 {
@@ -135,12 +128,6 @@ char * STDCALL GETVERSION(void)
 
 void STDCALL PSEMINIT(void)          /* Initialize   */
 {
-#if defined(WIN32)
-    if ( inimutex == 0 )
-    {
-       pthread_mutex_init(&inimutex,NULL) ;
-    }
-#endif
     pthread_mutex_lock(&inimutex);
 }
 
@@ -152,12 +139,6 @@ void STDCALL VSEMINIT(void)
 
 void STDCALL PSEMLUN(void)          /* New Lun      */
 {
-#if defined(WIN32)
-    if ( lunmutex == 0 )
-    {
-       pthread_mutex_init(&lunmutex,NULL) ;
-    }
-#endif
     pthread_mutex_lock(&lunmutex);
 }
 
@@ -169,12 +150,6 @@ void STDCALL VSEMLUN(void)
 
 void STDCALL PSEMNEFIS(void)            /* Nefis put/get r/c/l/i*/
 {
-#if defined(WIN32)
-    if ( nfsmutex == 0 )
-    {
-       pthread_mutex_init(&nfsmutex,NULL) ;
-    }
-#endif
     pthread_mutex_lock(&nfsmutex);
 }
 
@@ -184,35 +159,51 @@ void STDCALL VSEMNEFIS(void)
 }
 
 
-void STDCALL PSEMERROR(void)            /* PrtErr */
+void STDCALL PSEMINIOUT(void)            /* PrtErr */
 {
-#if defined(WIN32)
-    if ( errmutex == 0 )
-    {
-       pthread_mutex_init(&errmutex,NULL) ;
-    }
-#endif
-    pthread_mutex_lock(&errmutex);
+    pthread_mutex_lock(&inomutex);
 }
 
-void STDCALL VSEMERROR(void)
+void STDCALL VSEMINIOUT(void)
 {
-    pthread_mutex_unlock(&errmutex);
+    pthread_mutex_unlock(&inomutex);
 }
 
 
 void STDCALL PSEMFINISH(void)           /* Finish up */
 {
-#if defined(WIN32)
-    if ( finmutex == 0 )
-    {
-       pthread_mutex_init(&finmutex,NULL) ;
-    }
-#endif
     pthread_mutex_lock(&finmutex);
 }
 
 void STDCALL VSEMFINISH(void)
 {
     pthread_mutex_unlock(&finmutex);
+}
+
+void STDCALL SEMEXIT(void)
+{
+// This function should be called by the main thread, after all sub threads are finished
+// Unfortunately, the main thread is stopped after initialization
+#if defined(WIN32)
+    if ( inimutex != 0 )
+    {
+		pthread_mutex_destroy(&inimutex);
+	}
+    if ( lunmutex != 0 )
+    {
+		pthread_mutex_destroy(&lunmutex);
+	}
+    if ( nfsmutex != 0 )
+    {
+		pthread_mutex_destroy(&nfsmutex);
+	}
+    if ( inomutex != 0 )
+    {
+		pthread_mutex_destroy(&inomutex);
+	}
+    if ( finmutex != 0 )
+    {
+		pthread_mutex_destroy(&finmutex);
+	}
+#endif
 }

@@ -152,7 +152,6 @@ AC_LANG_POP
 
 
 # executables will get an .exe extension 
-# FB: Having .exe files always gives me a bit of an uncomfortable feeling....
 AC_EXEEXT([.exe])
 
 

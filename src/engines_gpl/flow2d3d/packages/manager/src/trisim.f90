@@ -372,7 +372,7 @@ subroutine trisim (numdom, nummap, context_id, fsm_flags, fsm_tracefile, runid)
     ! Related psemnefis is in tricom.f90
     ! This used to be a vsemfinish
     !
-    call vsemnefis
+    call vsemfinish
     !
     ! Tell gaws (Global ADI Wang Solver) and mapper we're done.
     !

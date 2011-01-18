@@ -1655,7 +1655,7 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
        call updmassbal(.true.   ,r(qxk)    ,r(qyk)    ,i(kcs)    ,r(r1)     , &
                      & r(volum1),r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   , &
                      & r(gsqs)  ,r(guu)    ,r(gvv)    ,d(dps)    ,gdp       )
-       call psemnefis
+       call pseminiout
        call timer_start(timer_postpr, gdp)
        call postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                  & trifil    ,mainys    ,runid     ,prsmap    ,prshis    , &
@@ -1665,7 +1665,7 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
                  & itcur     ,ntcur     ,ithisc    ,itmapc    ,itdroc    , &
                  & itrstc    ,ktemp     ,gdp       )
        call timer_stop(timer_postpr, gdp)
-       call vsemnefis
+       call vseminiout
        if (error) goto 9998
        call psemnefis
        if (wave .and. xbeach) then
@@ -1848,7 +1848,7 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
     ! Related vsemnefis is in trisim.F90
     ! This used to be a psemfinish
     !
-    call psemnefis
+    call psemfinish
     !
     if (error) goto 9999
     !
