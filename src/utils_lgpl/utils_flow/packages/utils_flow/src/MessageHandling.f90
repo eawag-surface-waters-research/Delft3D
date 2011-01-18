@@ -87,9 +87,9 @@ module MessageHandling
     module procedure message1char1int
     module procedure message1char2int
     module procedure message1char3int
-    module procedure message2int1char
+!    module procedure message2int1char ! message2int1char == message1char2int
     module procedure message1char1int1double
-    module procedure message1double1int1char
+!    module procedure message1double1int1char ! Double declaration
     end interface
     
     interface err

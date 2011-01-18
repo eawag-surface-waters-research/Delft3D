@@ -38,8 +38,13 @@
 #include <string.h>
 #include <stdarg.h>
 #include <assert.h>
-#if (defined(salford32))
+
 #include <stdlib.h>
+#if defined (HAVE_CONFIG_H)
+#include "config.h"
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif 
 #else
 #include <malloc.h>
 #endif

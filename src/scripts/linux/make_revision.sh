@@ -25,7 +25,15 @@ MODDIR=`pwd`
 
 # svn_dir is not needed to set explicitly
 # cmd_dir is not used on LINUX
-VN_DIR=$TOPDIR/third_party_open/version_number/bin/linux
+
+# I only tested this on OSX (10.5)
+if [ uname=='Darwin' ]
+then
+    # we just made this one. ( I think this should work for everyone, TODO: pls make this the default after tested )
+    VN_DIR=$TOPDIR/third_party_open/version_number/packages/version_number/src
+else
+    VN_DIR=$TOPDIR/third_party_open/version_number/bin/linux
+fi
 
 
 

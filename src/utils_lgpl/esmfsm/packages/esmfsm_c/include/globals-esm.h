@@ -37,8 +37,17 @@
 
 
 #include "esm.h"
+#include <stdlib.h>
 
+#if defined (HAVE_CONFIG_H)
+#include "config.h"
+#ifdef HAVE_MALLOC_H
 #include <malloc.h>
+#endif 
+#else
+#include <malloc.h>
+#endif
+
 #include <math.h>
 #include <pthread.h>
 #include <stdarg.h>

@@ -38,21 +38,15 @@ FMODULES = \
 AM_FCFLAGS = \
 	$(FINCLUDES) \
 	$(FMODULES) \
-	-O2 \
-	-openmp \
-	-recursive \
-	-reentrancy threaded \
-	-traceback
+	-O2 
 
+AM_FCFLAGS+=$(OPENMP_FCFLAGS)
 AM_FFLAGS = \
 	$(FINCLUDES) \
 	$(FMODULES) \
-	-O2 \
-	-extend_source \
-	-openmp \
-	-recursive \
-	-reentrancy threaded \
-	-traceback
+	-O2 
+
+AM_FFLAGS+=$(OPENMP_FFLAGS)
 
 
 #   (disabled) LEX and YACC flags

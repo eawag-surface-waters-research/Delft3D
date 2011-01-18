@@ -38,9 +38,11 @@
 
 
 #include "globals-esm.h"
+#if defined (HAVE_CONFIG_H)
+#include "config.h"
+#endif
 
 #ifndef WIN32
-
 #include <errno.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -873,10 +875,22 @@ ESM_Shared_Info (
 
     int thid = -1;
 
-#if defined (HAVE_CONFIG_H)
+#if defined (HAVE_STRUCT_SHM_INFO)
     struct shm_info shm_info;
 
     // Get count of shared memory segments
+
+    // TODO: make this portable
+    // On OSX this does not return the number of shared memory segments but 0/-1
+
+    // OSX:
+    // http://developer.apple.com/library/mac/#documentation/darwin/reference/manpages/man2/shmctl.2.html
+    // LINUX:
+    // http://linux.die.net/man/2/shmctl
+    // POSIX:
+    // http://pubs.opengroup.org/onlinepubs/009695399/functions/shmctl.html
+    // Discussion
+    // http://lists.apple.com/archives/darwin-dev/2008/Apr/msg00001.html
 
     int maxid = shmctl (0, SHM_INFO, (struct shmid_ds *) &shm_info);
     if (maxid < 0) {

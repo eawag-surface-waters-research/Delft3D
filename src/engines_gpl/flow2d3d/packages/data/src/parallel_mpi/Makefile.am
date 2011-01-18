@@ -14,6 +14,7 @@ lib_LTLIBRARIES = libparallel.la
 
 #-------------------------------------------------------------------------------
 #Includes
+# TODO:/opt/mpich2/include should be configured....
 FINCLUDES += \
         -I/opt/mpich2/include \
         -I$(top_srcdir)/utils_lgpl/parallel_mpi/include \
@@ -27,6 +28,7 @@ FMODULES += \
         -I$(top_srcdir)/utils_lgpl/inifiles/packages/inifiles/src \
         -I$(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow/src
 
+# fpp is compiler dependent (convention is to use .F90 files for preprocessing)
 AM_FCFLAGS += \
         -DDFMPI \
         -fpp

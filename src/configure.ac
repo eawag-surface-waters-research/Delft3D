@@ -32,15 +32,22 @@ AC_PROG_RANLIB
 AC_PROG_LEX
 AC_PROG_YACC
 
+
 #check if old compilers are used
-#AC_CHECK_OLD_COMPILER
-#Arjen: commented this line, the macro is apparently not defined
+# this macro is in the m4 directory (remove if no longer needed, checks for ifort<=8)
+AC_CHECK_OLD_COMPILER
+
 
 ## This is copied from the libtool examples
 ## -------------------------- ##
 ## Fortran90 compiler checks. ##
 ## -------------------------- ##
 AC_LANG_PUSH([Fortran])
+dnl Check for openmp for fortran
+AC_OPENMP
+dnl Check for MPI (sets MPIFC, MPILIBS, HAVE_MPI)
+ACX_MPI
+
 dnl http://www.astro.gla.ac.uk/users/norman/star/ssn78/ssn78.htx/N-x1a1b12.html
 AC_PROG_FC([ifort gfortran g95])
 dnl Check the flags needed to link fc programs with ld (i.e. cc)
@@ -52,6 +59,9 @@ dnl Some Intel ifc/ifort do not understand .f95.  :-/
 AC_FC_SRCEXT([f90])
 dnl Yes, we want free form Fortran!
 AC_FC_FREEFORM
+dnl Set unlimited line length (don't create lines longer than 132, because it breaks on some compilers,
+dnl but because ifort and gfortran allow it let's not raise errors by default)
+AC_FC_LINE_LENGTH(unlimited)
 AC_LANG_POP
 
 ## -------------------------- ##
@@ -60,7 +70,73 @@ AC_LANG_POP
 AC_LANG_PUSH([Fortran 77])
 AC_PROG_F77([ifort gfortran g77])
 AC_F77_LIBRARY_LDFLAGS
+dnl Check for openmp for fortran
+AC_OPENMP
 AC_LANG_POP
+
+dnl Fortran compiler defaults (this could be a separate m4 file)
+AC_MSG_CHECKING([whether using Fortran preset flags])
+AC_ARG_ENABLE(fortran-flags-preset,
+AS_HELP_STRING([--enable-fortran-flags-preset],
+[Enable Fortran compiler flags preset @<:@default yes@:>@]),[],[enableval='yes'])
+dnl set compiler specific options here: 
+if test "$enableval" = yes ; then
+        AC_MSG_RESULT([yes])
+        case "$target" in
+        *linux*)
+                case "$F77" in
+                *gfortran*) dnl GNU Fortran 95 compiler
+		dnl no custom flags
+                ;;
+                *g77*)  dnl GNU Fortran compiler
+		dnl no custom flags
+                ;;
+                *ifc*)  dnl Intel 7.x Fortran compiler
+		dnl no custom flags
+                ;;
+                *ifort*) dnl Intel 8.x Fortran compiler
+                        FFLAGS="-recursive -reentrancy threaded -traceback"
+                ;;
+		esac
+	;;
+        *darwin*)
+                case "$F77" in
+		*gfortran*)  dnl gfortran (or gfortran-mp-?.?)
+                ;;
+		esac
+	;;
+        *)
+                ac_fortran_flags_preset=no
+        ;;
+        esac
+
+        case "$target" in
+	        *linux*)
+        	        case "$FC" in
+			*gfortran*) dnl GNU Fortran 95 compiler
+			;;
+                	*ifort*) dnl Intel 8.x Fortran compiler
+				 FCFLAGS="-recursive -reentrancy threaded -traceback"
+			;;
+			esac
+		;;
+		*darwin*)
+			case "$FC" in
+			*gfortran*) dnl GNU Fortran 95 compiler
+			;;
+			esac
+		;;
+		*)
+                ac_fortran_flags_preset=no
+       		;;
+        esac
+else
+        AC_MSG_RESULT([no])
+fi
+
+			
+
+   
 
 
 # As of the writing of this demo, GNU Autoconf's AC_OBJEXT and
@@ -75,7 +151,8 @@ AC_OBJEXT
 AC_LANG_POP
 
 
-# executables will get an .exe extension
+# executables will get an .exe extension 
+# FB: Having .exe files always gives me a bit of an uncomfortable feeling....
 AC_EXEEXT([.exe])
 
 
@@ -113,14 +190,14 @@ AC_ARG_ENABLE(interactor,
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h netinet/in.h stdlib.h string.h sys/socket.h sys/time.h unistd.h])
+AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h netinet/in.h stdlib.h string.h sys/socket.h sys/time.h unistd.h malloc.h])
 
 #check for jni.h (for later)
 #AC_JNI_INCLUDE_DIR
 
 #check for c++ standard library
 AC_CHECK_LIB([stdc++], [main],, [AC_MSG_ERROR([Compiler can't find libstdc++])])
-
+AC_CHECK_TYPES([struct shm_info])
 #Check for expat
 AC_CHECK_HEADER(expat.h,, [AC_MSG_ERROR([Compiler can't find <expat.h>])])
 AC_CHECK_LIB(expat, XML_Parse,, [AC_MSG_ERROR([Compiler can't find libexpat])])

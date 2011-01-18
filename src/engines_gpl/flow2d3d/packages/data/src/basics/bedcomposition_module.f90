@@ -1447,31 +1447,30 @@ function initmorlyr(this) result (istat)
     !
     ! Function/routine arguments
     !
-    type (bedcomp_data), intent(in) :: this    
-    integer                         :: istat
+    type (bedcomp_data), intent(inout) :: this    
+    integer                            :: istat
     !
     ! Local variables
     !
     type (bedcomp_settings), pointer :: settings
-    type (bedcomp_work), pointer     :: work
-    type (bedcomp_state), pointer    :: state
+    type (bedcomp_work    ), pointer :: work
+    type (bedcomp_state   ), pointer :: state
     !
     !! executable statements -------------------------------------------------------
     !
     istat = 0
-    if (istat == 0) allocate (this%settings, stat = istat)
-    if (istat == 0) allocate (this%work , stat = istat)
-    if (istat == 0) allocate (this%state , stat = istat)
+    if (istat == 0) allocate (settings, stat = istat)
+    if (istat == 0) allocate (work    , stat = istat)
+    if (istat == 0) allocate (state   , stat = istat)
     if (istat /= 0) then
        !error
        return
     endif
     !
-    settings => this%settings
     allocate (settings%morlyrnum , stat = istat)
     if (istat == 0) then
        settings%morlyrnum%MinThickShortWarning = 0.0_fp
-       settings%morlyrnum%MaxNumShortWarning = 100
+       settings%morlyrnum%MaxNumShortWarning   = 100
     endif
     !
     settings%nfrac      = 0
@@ -1484,17 +1483,20 @@ function initmorlyr(this) result (istat)
     settings%thunlyr    = rmissval
     settings%updbaselyr = 1
     !
-    work => this%work
-    nullify(work%dzi)
     nullify(settings%thexlyr)
     nullify(settings%thtrlyr)
     !
-    state => this%state
+    nullify(work%dzi)
+    !
     nullify(state%bodsed)
     nullify(state%dpsed)
     nullify(state%lyrfrac)
     nullify(state%thlyr)
     nullify(state%sedshort)
+    
+    this%settings => settings
+    this%work => work
+    this%state => state
 end function initmorlyr
 !
 !
