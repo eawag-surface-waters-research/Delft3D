@@ -175,14 +175,14 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     integer                                             :: ntimtm      ! Actual number of times for which time varying data is allowed in the Md-file (dummy value)  
     integer                                             :: ntot0       ! Offset for time series bnd. in arrays NTOT0 = NTOF + NTOQ  
     integer                                             :: ntrec       ! Help. var to keep track of NRREC  
-    integer, dimension(7, mxnto)                        :: mnbnd       ! Array containing the coordinates of the open boundary sections 
+    integer, dimension(:,:), pointer                    :: mnbnd       ! Array containing the coordinates of the open boundary sections 
                                                                        !    MNBND(1,K)=X-Coor. of the begin pnt. 
                                                                        !    MNBND(2,K)=X-Coor. of the end   pnt. 
                                                                        !    MNBND(3,K)=Y-Coor. of the begin pnt. 
                                                                        !    MNBND(4,K)=Y-Coor. of the end   pnt. 
                                                                        !    K = 1,.....,NOPEN  
-    integer, dimension(7, mxnsrc)                       :: mnksrc      ! MNK-coord. for discharges  
-    integer, dimension(mxnpnt, -1:mxnpnt + 2, 0:mxkmax) :: kspu        ! NT+2,0:MXKMAX Mask array for total water depth upwind in special (u-)points 
+    integer, dimension(:,:), pointer                    :: mnksrc      ! MNK-coord. for discharges  
+    integer, dimension(:,:,:), pointer                  :: kspu        ! NT+2,0:MXKMAX Mask array for total water depth upwind in special (u-)points 
                                                                        !    In KSPU(NM,0) the special point definition is given 
                                                                        !       = 1 Discharge location 
                                                                        !       = 2 Floating structure 
@@ -194,7 +194,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
                                                                        !       = 8 Barrier 
                                                                        !       = 9 2D Weir 
                                                                        !    For type 1-3,5-8 the negative equivalence implice no upwind  
-    integer, dimension(mxnpnt, -1:mxnpnt + 2, 0:mxkmax) :: kspv        ! NT+2,0:MXKMAX Mask array for total water depth upwind in special (v-)points 
+    integer, dimension(:,:,:), pointer                  :: kspv        ! NT+2,0:MXKMAX Mask array for total water depth upwind in special (v-)points 
                                                                        !    In KSPV(NM,0) the special point definition is given  
                                                                        !       = 1 Discharge location 
                                                                        !       = 2 Floating structure 
@@ -206,7 +206,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
                                                                        !       = 8 Barrier 
                                                                        !       = 9 2D Weir 
                                                                        !    For type 1-3,5-8 the negative equivalence implice no upwind  
-    integer, dimension(mxnto)                           :: nhsub       ! integer array to store sequence numbers of harmonic boundary condition in own subdomain 
+    integer, dimension(:), pointer                      :: nhsub       ! integer array to store sequence numbers of harmonic boundary condition in own subdomain 
     integer, external                                   :: newlun 
     logical                                             :: found       ! If FOUND = TRUE then recnam in the MD-file was found  
     logical                                             :: error       ! Flag=TRUE if an error is encountered  
@@ -234,7 +234,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     real(fp)                                            :: saleqs      ! Salinity value used in eq. of state which will be applied uniformly over the vertical.  
     real(fp)                                            :: temeqs      ! Temperature value used in the eq. of state which will applied uniformly over the vertical.  
     real(fp)                                            :: z0v 
-    real(fp), dimension(6)                              :: wstcof      ! Wind stress Coefficients (constant)
+    real(fp), dimension(:), pointer                     :: wstcof      ! Wind stress Coefficients (constant)
                                                                        !    Space varying: 1 - wstcof at wspeed1
                                                                        !                   2 - wspeed1
                                                                        !                   3 - wstcof at wspeed2
@@ -248,12 +248,12 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
                                                                        !             5 - wstcof(3)
                                                                        !             6 - 100.0 m/s
 
-    real(fp), dimension(:,:,:),allocatable              :: hydrbc 
-    real(fp), dimension(:,:,:,:),allocatable            :: rval        ! ,MXLLLL Help array can have at most 4 array subscripts  
-    real(fp), dimension(mxkc)                           :: omega 
-    real(fp), dimension(mxkmax)                         :: thick       ! Relative layer thickness  
-    real(fp), dimension(mxnto)                          :: alpha 
-    real(fp), dimension(mxtime)                         :: rtime 
+    real(fp), dimension(:,:,:), pointer                 :: hydrbc 
+    real(fp), dimension(:,:,:,:), pointer               :: rval        ! ,MXLLLL Help array can have at most 4 array subscripts  
+    real(fp), dimension(:), pointer                     :: omega 
+    real(fp), dimension(:), pointer                     :: thick       ! Relative layer thickness  
+    real(fp), dimension(:), pointer                     :: alpha 
+    real(fp), dimension(:), pointer                     :: rtime 
     character(1)                                        :: ascon       ! 'Y' if open bnd. contains type 'A'  
     character(1)                                        :: ctunit      ! Time scale for time parameters, currently set to 'M'(inute - fixed).  
     character(1)                                        :: eol         ! ASCII code for End-Of-Line (^J)  
@@ -263,24 +263,24 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     character(1)                                        :: forfww      ! Forester filter option for W  
     character(1)                                        :: sphere      ! Flag Yes / No spherical coordinates  
     character(1)                                        :: temint      ! Interpolation option for the tempe- rature  
-    character(1), dimension(mxnsrc)                     :: disint      ! Interpolation option for the disch.  
-    character(1), dimension(mxnto)                      :: datbnd      ! Type of open boundary: -'A'(stronomical) -'H'(armonic/Tide) -'T'(ime series/time dependent)  
-    character(1), dimension(mxnto)                      :: typbnd      ! Type of open boundary prescribed 
+    character(1), dimension(:), pointer                 :: disint      ! Interpolation option for the disch.  
+    character(1), dimension(:), pointer                 :: datbnd      ! Type of open boundary: -'A'(stronomical) -'H'(armonic/Tide) -'T'(ime series/time dependent)  
+    character(1), dimension(:), pointer                 :: typbnd      ! Type of open boundary prescribed 
     character(10)                                       :: citdat      ! Reference date for the simulation times. Format: "DD MMM 'YY"  
     character(10)                                       :: date        ! Date to be filled in the header  
-    character(30), dimension(10)                        :: runtxt      ! Textual description of model input  
-    character(10), dimension(:,:),allocatable           :: cval        ! Help array for character variables  
+    character(30), dimension(:), pointer                :: runtxt      ! Textual description of model input  
+    character(10), dimension(:,:),pointer               :: cval        ! Help array for character variables  
     character(11)                                       :: fmtfil      ! File format for the time varying data file  
     character(12)                                       :: filsim      ! Name for trigger file for running FLOW and RTC simultaniously  
-    character(12), dimension(mxnto, 2)                  :: statns      ! References to tidal stations at boundary support points  
+    character(12), dimension(:,:),pointer               :: statns      ! References to tidal stations at boundary support points  
     character(13)                                       :: trasol      ! Transport scheme option  
     character(6)                                        :: momsol 
     character(16)                                       :: simdat      ! Dummy string 
     character(20)                                       :: rundat      ! Current date and time containing a combination of DATE and TIME  
-    character(20), dimension(:),allocatable             :: namcon      ! Names of the constituents  
-    character(20), dimension(mxnsrc)                    :: namsrc      ! Names of discharge points the open boundary section  
-    character(20), dimension(mxnto)                     :: nambnd      ! Names of open boundaries  
-    character(20), dimension(mxnto)                     :: tprofu 
+    character(20), dimension(:),pointer                 :: namcon      ! Names of the constituents  
+    character(20), dimension(:),pointer                 :: namsrc      ! Names of discharge points the open boundary section  
+    character(20), dimension(:),pointer                 :: nambnd      ! Names of open boundaries  
+    character(20), dimension(:),pointer                 :: tprofu 
     character(256)                                      :: filnam      ! File name for the time varying data file  
     character(256)                                      :: filmd       ! File name of MD-Flow file 
     character(300)                                      :: mdfrec      ! Standard rec. length in MD-file (300) 300 = 256 + a bit (field, =, ##, etc.)  
@@ -442,6 +442,25 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
         allocate(rval(4, mxtime, mxnto, lstsc)) 
         allocate(cval(mxnto, lstsc)) 
         allocate(namcon(lstsc)) 
+        !
+        allocate(mnbnd (7, mxnto))
+        allocate(mnksrc(7, mxnsrc))
+        allocate(kspu  (mxnpnt, -1:mxnpnt + 2, 0:mxkmax))
+        allocate(kspv  (mxnpnt, -1:mxnpnt + 2, 0:mxkmax))
+        allocate(nhsub (mxnto))
+        allocate(wstcof(6))
+        allocate(omega (mxkc))
+        allocate(thick (mxkmax))
+        allocate(alpha (mxnto ))
+        allocate(rtime (mxtime))
+        allocate(disint(mxnsrc))
+        allocate(datbnd(mxnto ))
+        allocate(typbnd(mxnto ))
+        allocate(runtxt(10    ))
+        allocate(statns(mxnto,2))
+        allocate(namsrc(mxnsrc))
+        allocate(nambnd(mxnto))
+        allocate(tprofu(mxnto))
         ! 
         do j = 1, 4 
            do l = 1, lstsc 
@@ -726,6 +745,25 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
         deallocate(rval) 
         deallocate(cval) 
         deallocate(namcon) 
+
+        deallocate(mnbnd )
+        deallocate(mnksrc)
+        deallocate(kspu  )
+        deallocate(kspv  )
+        deallocate(nhsub )
+        deallocate(wstcof)
+        deallocate(omega )
+        deallocate(thick )
+        deallocate(alpha )
+        deallocate(rtime )
+        deallocate(disint)
+        deallocate(datbnd)
+        deallocate(typbnd)
+        deallocate(runtxt)
+        deallocate(statns)
+        deallocate(namsrc)
+        deallocate(nambnd)
+        deallocate(tprofu)
         ! 
      9990 continue 
         ! 
@@ -788,11 +826,5 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     ! 
     close (lunmd) 
     ! 
-    ! Jump to 9999 only if error = .true. in INIID 
-    ! 
-    ! 
-    ! Define error code for DELFT3DMOR (subroutine !!) 
-    ! 
- 9999 continue 
     if (error) nuerr = 1 
 end subroutine tdatom 
