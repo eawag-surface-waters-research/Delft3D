@@ -39,10 +39,6 @@ module properties
     !
     integer, private, parameter                   :: max_length = 256
     integer, private, parameter                   :: dp = kind(1.0d00)
-    ! Make external (according to fortran standards internal procedures cannot be used as arguments)
-    external max_keylength
-    external leaf_keylength
-    external print_initree
     !
     interface prop_get
        module procedure prop_file
