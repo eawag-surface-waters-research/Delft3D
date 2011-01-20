@@ -14,7 +14,7 @@ MODDIR=`pwd`
 cd $4
 TOPDIR=`pwd`
 # I only tested this on OSX (10.5)
-if [ uname=='Darwin' ]
+if [ `uname` == 'Darwin' ]
 then
     # we just made this one. ( I think this should work for everyone, TODO: pls make this the default after tested )
     VN_DIR=$TOPDIR/third_party_open/version_number/packages/version_number/src
