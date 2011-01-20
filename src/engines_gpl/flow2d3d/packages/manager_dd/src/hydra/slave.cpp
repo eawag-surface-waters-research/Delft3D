@@ -34,7 +34,7 @@
 ///--pseudo code and references--------------------------------------------------
 //
 //  Irv.Elshoff@deltares.nl
-//  02 feb 06
+//  20 jan 11
 //
 ///-------------------------------------------------------------------------------
 
@@ -241,7 +241,7 @@ Hydra::SlaveNode (
 
         Config.join[jid].stream = masterconfig.join[jid].stream;
         strcpy (Config.join[jid].handle, masterconfig.join[jid].handle);
-        Config.join[jid].thid.p = (void *) NULL;
+        Config.join[jid].thread = false;
         }}
 
     PrintJoinTable ();
@@ -269,6 +269,7 @@ Hydra::SlaveNode (
             if (pthread_create (&Config.join[jid].thid, &Global.thattr, &leader_thread, (void *) jid) != 0)
                 Abort ("Pthreads error: Cannot create leader thread, errno=%d", errno);
 
+            Config.join[jid].thread = true;
             Global.leadfollow->PSem ();
             }
         }}
@@ -301,6 +302,8 @@ Hydra::SlaveNode (
 
             if (pthread_create (&Config.join[jid].thid, &Global.thattr, &follower_thread, (void *) jid) != 0)
                 Abort ("Pthreads error: Cannot create follower thread, errno=%d", errno);
+            
+            Config.join[jid].thread = true;
             }
         }}
 
@@ -309,9 +312,11 @@ Hydra::SlaveNode (
     // Wait for all helper threads to terminate
 
     {for (int jid = 0 ; jid < Config.numjoins ; jid++) {
-        if (Config.join[jid].thid.p != (void *) NULL) {
-             if (pthread_join (Config.join[jid].thid, NULL) != 0)
+        if (Config.join[jid].thread) {
+            if (pthread_join (Config.join[jid].thid, NULL) != 0)
                 Abort ("Pthreads error: Cannot join with helper thread, errno=%d", errno);
+            
+            Config.join[jid].thread = false;
             }
         }}
 

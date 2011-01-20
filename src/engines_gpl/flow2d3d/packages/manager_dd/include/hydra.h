@@ -34,7 +34,7 @@
 ///--pseudo code and references--------------------------------------------------
 //
 //  Irv.Elshoff@Deltares.NL
-//  2 sep 10
+//  20 jan 11
 //
 //-------------------------------------------------------------------------------
 
@@ -495,6 +495,7 @@ typedef struct {
         char        logname [MAXSTRING];// name (prefix) of log file
         FILE *      logfile;            // file descriptor for log file
         pthread_t   thid;               // Pthread ID on host node
+        bool        thread;             // true => thid refers to a existing thread
         Semaphore * sync;               // syncronization on host node
         } iterator [MAXITERATORS];
 
@@ -510,6 +511,7 @@ typedef struct {
         Stream *    stream;             // for local/remote
         char        handle [Stream::MAXHANDLE]; // lead stream identity
         pthread_t   thid;               // Pthread ID of lead/follow helper thread
+        bool        thread;             // true => thid refers to a existing thread
         } join [MAXJOINS];
 
     int checksum;

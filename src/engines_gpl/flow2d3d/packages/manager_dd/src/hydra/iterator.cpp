@@ -34,7 +34,7 @@
 ///--pseudo code and references--------------------------------------------------
 //
 //  Irv.Elshoff@deltares.nl
-//  21 oct 05
+//  20 jan 11
 //
 ///-------------------------------------------------------------------------------
 
@@ -147,7 +147,7 @@ Iterator::Iterator (
     Config.iterator[id].function = function;
     Config.iterator[id].weight   = weight;
     Config.iterator[id].catid    = catid;
-    Config.iterator[id].thid.p   = (void *) NULL;
+    Config.iterator[id].thread   = false;
     Config.iterator[id].sync     = NULL;
 
     if (Global.phase == PHASE_CONFIG) {

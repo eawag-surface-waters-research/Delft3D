@@ -34,7 +34,7 @@
 ///--pseudo code and references--------------------------------------------------
 //
 //  Irv.Elshoff@deltares.nl
-//  10 nov 05
+//  20 jan 11
 //
 ///-------------------------------------------------------------------------------
 
@@ -206,6 +206,7 @@ Hydra::StartLocalIteratorThreads (
             if (pthread_create (&Config.iterator[iid].thid, &Global.thattr, &IteratorShell, (void *) iid) != 0)
                 Abort ("Pthreads error: Cannot create shell thread, errno=%d", errno);
 
+            Config.iterator[iid].thread = true;
             Config.iterator[iid].sync->VSem ();
             // ToDo: collapsed fork/start loop.  OK? VSem sill needed?
             Global.initsync->PSem ();
@@ -245,6 +246,7 @@ Hydra::RunSimulation (
                 if (pthread_join (Config.iterator[iid].thid, NULL) != 0)
                     Abort ("Pthreads error: Cannot join with thread, errno=%d", errno);
 
+                Config.iterator[iid].thread = false;
                 Log (LOG_DETAIL, "Iterator \"%s\" has terminated", Config.iterator[iid].name);
                 }
             }
