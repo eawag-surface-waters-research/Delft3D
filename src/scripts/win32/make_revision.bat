@@ -59,7 +59,7 @@ IF DEFINED BUILD_NUMBER (
    IF EXIST "%SVN_DIR%\svnversion.exe" (
         "%SVN_DIR%\svnversion.exe" -n "%MODDIR%" > "%MODDIR%\BUILD_NUMBER"
    ) ELSE (
-        ECHO exported > "%MODDIR%\BUILD_NUMBER"
+        ECHO 000000 > "%MODDIR%\BUILD_NUMBER"
    )					         
    REM also set it as an environment variable    
    SET /p BUILD_NUMBER= < "%MODDIR%\BUILD_NUMBER"	         

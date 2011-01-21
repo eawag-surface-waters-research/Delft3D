@@ -260,21 +260,22 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
                 ! Reallocate and shift
                 !
                 istat = 0
-                call reallocP(pdredge%area,globalnpnt,shift=localoffset,stat=istat)
+                call reallocP(pdredge%area         ,globalnpnt       ,shift=localoffset,stat=istat)
                 call dredgecommunicate (pdredge%area, pdredge%npnt)
                 !
-                call reallocP(pdredge%hdune,globalnpnt,shift=localoffset,stat=istat)
-                call reallocP(pdredge%dz_dredge,globalnpnt,shift=localoffset,stat=istat)
-                call reallocP(pdredge%reflevel,globalnpnt,shift=localoffset,stat=istat)
-                call reallocP(pdredge%dunetoplevel,globalnpnt,shift=localoffset,stat=istat)
-                call reallocP(pdredge%triggerlevel,globalnpnt,shift=localoffset,stat=istat)
-                call reallocP(pdredge%bedlevel,globalnpnt,shift=localoffset,stat=istat)
-                call reallocP(pdredge%troughlevel,globalnpnt,shift=localoffset,stat=istat)
-                call reallocP(pdredge%sedimentdepth,globalnpnt,shift=localoffset,stat=istat)
-                call reallocP(pdredge%sortvar,globalnpnt,shift=localoffset,stat=istat)
-                call reallocP(pdredge%inm,globalnpnt,shift=localoffset,stat=istat)
-                call reallocP(pdredge%nm,globalnpnt,shift=localoffset,stat=istat)
-                call reallocP(pdredge%triggered,globalnpnt,shift=localoffset,stat=istat)
+                call reallocP(pdredge%hdune        ,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%dz_dredge    ,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%reflevel     ,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%dunetoplevel ,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%triggerlevel ,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%bedlevel     ,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%troughlevel  ,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%sedimentdepth,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%sortvar      ,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%inm          ,globalnpnt       ,shift=localoffset,stat=istat)
+                ! nm(i)=0 for points outside this domain is used in this subroutine
+                call reallocP(pdredge%nm           ,globalnpnt,fill=0,shift=localoffset,stat=istat)
+                call reallocP(pdredge%triggered    ,globalnpnt       ,shift=localoffset,stat=istat)
                 !
                 if (istat/=0) then
                    call prterr(lundia, 'U021', 'Dredge: memory realloc error')
@@ -318,16 +319,17 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
                 ! Reallocate and shift
                 !
                 istat = 0
-                call reallocP(pdump%area,globalnpnt,shift=localoffset,stat=istat)
+                call reallocP(pdump%area    ,globalnpnt       ,shift=localoffset,stat=istat)
                 call dredgecommunicate (pdump%area, pdump%npnt)
                 !
-                call reallocP(pdump%hdune,globalnpnt,shift=localoffset,stat=istat)
-                call reallocP(pdump%reflevel,globalnpnt,shift=localoffset,stat=istat)
-                call reallocP(pdump%bedlevel,globalnpnt,shift=localoffset,stat=istat)
-                call reallocP(pdump%dz_dump,globalnpnt,shift=localoffset,stat=istat)
-                call reallocP(pdump%sortvar,globalnpnt,shift=localoffset,stat=istat)
-                call reallocP(pdump%inm,globalnpnt,shift=localoffset,stat=istat)
-                call reallocP(pdump%nm,globalnpnt,shift=localoffset,stat=istat)
+                call reallocP(pdump%hdune   ,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdump%reflevel,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdump%bedlevel,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdump%dz_dump ,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdump%sortvar ,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdump%inm     ,globalnpnt       ,shift=localoffset,stat=istat)
+                ! nm(i)=0 for points outside this domain is used in this subroutine
+                call reallocP(pdump%nm      ,globalnpnt,fill=0,shift=localoffset,stat=istat)
                 !
                 if (istat/=0) then
                    call prterr(lundia, 'U021', 'Dredge: memory realloc error')

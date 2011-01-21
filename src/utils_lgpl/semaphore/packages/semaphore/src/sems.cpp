@@ -66,8 +66,6 @@
 #   define VSEMNEFIS  FC_FUNC(vsemnefis,VSEMNEFIS)
 #   define PSEMFINISH FC_FUNC(psemfinish,PSEMFINISH)
 #   define VSEMFINISH FC_FUNC(vsemfinish,VSEMFINISH)
-#   define PSEMINIOUT FC_FUNC(pseminiout,PSEMINIOUT)
-#   define VSEMINIOUT FC_FUNC(vseminiout,VSEMINIOUT)
 #else
 /* WIN32 */
 #   define STDCALL  /* nothing */
@@ -79,8 +77,6 @@
 #   define VSEMNEFIS  VSEMNEFIS
 #   define PSEMFINISH PSEMFINISH
 #   define VSEMFINISH VSEMFINISH
-#   define PSEMINIOUT PSEMINIOUT
-#   define VSEMINIOUT VSEMINIOUT
 #endif
 
 
@@ -100,8 +96,6 @@ void STDCALL PSEMNEFIS(void);
 void STDCALL VSEMNEFIS(void);
 void STDCALL PSEMFINISH(void);
 void STDCALL VSEMFINISH(void);
-void STDCALL PSEMINIOUT(void);
-void STDCALL VSEMINIOUT(void);
 void STDCALL SEMEXIT(void);
 char * STDCALL GETVERSION(void);
 
@@ -118,7 +112,6 @@ extern char * getfullversionstring_semaphore(void);
 static pthread_mutex_t inimutex =  PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t nfsmutex =  PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t lunmutex =  PTHREAD_MUTEX_INITIALIZER;
-static pthread_mutex_t inomutex =  PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t finmutex =  PTHREAD_MUTEX_INITIALIZER;
 
 char * STDCALL GETVERSION(void)
@@ -126,59 +119,50 @@ char * STDCALL GETVERSION(void)
  return getfullversionstring_semaphore();
 }
 
+
+
 void STDCALL PSEMINIT(void)          /* Initialize   */
 {
     pthread_mutex_lock(&inimutex);
 }
-
 void STDCALL VSEMINIT(void)
 {
     pthread_mutex_unlock(&inimutex);
 }
 
 
+
 void STDCALL PSEMLUN(void)          /* New Lun      */
 {
     pthread_mutex_lock(&lunmutex);
 }
-
 void STDCALL VSEMLUN(void)
 {
     pthread_mutex_unlock(&lunmutex);
 }
 
 
+
 void STDCALL PSEMNEFIS(void)            /* Nefis put/get r/c/l/i*/
 {
     pthread_mutex_lock(&nfsmutex);
 }
-
 void STDCALL VSEMNEFIS(void)
 {
     pthread_mutex_unlock(&nfsmutex);
 }
 
 
-void STDCALL PSEMINIOUT(void)            /* PrtErr */
-{
-    pthread_mutex_lock(&inomutex);
-}
-
-void STDCALL VSEMINIOUT(void)
-{
-    pthread_mutex_unlock(&inomutex);
-}
-
 
 void STDCALL PSEMFINISH(void)           /* Finish up */
 {
     pthread_mutex_lock(&finmutex);
 }
-
 void STDCALL VSEMFINISH(void)
 {
     pthread_mutex_unlock(&finmutex);
 }
+
 
 void STDCALL SEMEXIT(void)
 {
@@ -196,10 +180,6 @@ void STDCALL SEMEXIT(void)
     if ( nfsmutex != 0 )
     {
 		pthread_mutex_destroy(&nfsmutex);
-	}
-    if ( inomutex != 0 )
-    {
-		pthread_mutex_destroy(&inomutex);
 	}
     if ( finmutex != 0 )
     {

@@ -1,4 +1,4 @@
-subroutine delnef(filnam    ,gdp       )
+subroutine delnef(filnam, gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -37,42 +37,33 @@ subroutine delnef(filnam    ,gdp       )
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use dfparall
     !
     implicit none
     !
     type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
 !
 ! Global variables
 !
-    character(*), intent(in)       :: filnam
-                                   !!  Name for communication file
-                                   !!  xxxx-<case><label>
-!
+    character(*), intent(in)       :: filnam !  Name of communication file xxxx-<case><label>
 !
 ! Local variables
 !
-    integer                        :: ind                  ! Length of filenam 
-    integer                        :: luntmp
-    integer                        :: newlun
-    logical                        :: exists
-    character(256)                 :: locfnm ! Local file name 
-!
+    integer         :: ind      ! Length of filenam 
+    integer         :: luntmp
+    integer         :: newlun
+    logical         :: exists
+    character(256)  :: locfnm   ! Local file name 
 !
 !! executable statements -------------------------------------------------------
 !
-    !
-    !
-    !
-    !-----Define file name and length
+    if (parll .and. (inode /= master)) return
     !
     locfnm = ' '
     locfnm = filnam
     call noextspaces(locfnm    ,ind       )
     !
-    !-----test files existence
+    ! test files existence
     !
     inquire (file = locfnm(:ind) // '.def', exist = exists)
     if (exists) then
@@ -81,7 +72,7 @@ subroutine delnef(filnam    ,gdp       )
        close (luntmp, status = 'delete')
     endif
     !
-    !-----test files existence
+    ! test files existence
     !
     inquire (file = locfnm(:ind) // '.dat', exist = exists)
     if (exists) then

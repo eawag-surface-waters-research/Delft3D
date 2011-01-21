@@ -54,7 +54,7 @@ else
    if svnversion . >/dev/null 2>/dev/null ; then 
       BUILD_NUMBER=`svnversion -n $MODDIR`; \
    else 
-      BUILD_NUMBER="exported"; 
+      BUILD_NUMBER="000000"; 
    fi;
    #   also write it to file
    echo $BUILD_NUMBER > $MODDIR/BUILD_NUMBER

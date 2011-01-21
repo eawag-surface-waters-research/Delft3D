@@ -1655,7 +1655,11 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
        call updmassbal(.true.   ,r(qxk)    ,r(qyk)    ,i(kcs)    ,r(r1)     , &
                      & r(volum1),r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   , &
                      & r(gsqs)  ,r(guu)    ,r(gvv)    ,d(dps)    ,gdp       )
-       call pseminiout
+       !
+       ! WARNING: The following semaphore and the next semaphore MUST be of the same semaphore type
+       ! Otherwise, DD with WAVE online will crash: semaphores are NOT synchronisation points!
+       !
+       call psemnefis
        call timer_start(timer_postpr, gdp)
        call postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                  & trifil    ,mainys    ,runid     ,prsmap    ,prshis    , &
@@ -1665,8 +1669,12 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
                  & itcur     ,ntcur     ,ithisc    ,itmapc    ,itdroc    , &
                  & itrstc    ,ktemp     ,gdp       )
        call timer_stop(timer_postpr, gdp)
-       call vseminiout
+       call vsemnefis
        if (error) goto 9998
+       !
+       ! WARNING: The following semaphore and the previous semaphore MUST be of the same semaphore type
+       ! Otherwise, DD with WAVE online will crash: semaphores are NOT synchronisation points!
+       !
        call psemnefis
        if (wave .and. xbeach) then
           ! call xbeach_in_delft3d(r(xz+iofset),r(yz+iofset), &

@@ -42,7 +42,7 @@ else
       SVN_VERSION=`svnversion -n $MODDIR`; \
    else 
       # source is exported/exculded from SVN, no revision number known
-      SVN_VERSION="999999";  
+      SVN_VERSION="000000";  
    fi;
    #   also write it to file
    echo $SVN_VERSION > $MODDIR/$SVN_VERSION

@@ -28,7 +28,7 @@ rem Replace it using 00000 (only necessary on Windows systems)
 rem ==========================================================================
 
 IF "%version%" == "exported" (
-   set version=00000
+   set version=000000
 )
 
 
