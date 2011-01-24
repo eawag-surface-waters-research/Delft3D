@@ -38,6 +38,10 @@ AC_PROG_YACC
 ## Fortran90 compiler checks. ##
 ## -------------------------- ##
 AC_LANG_PUSH([Fortran])
+dnl http://www.astro.gla.ac.uk/users/norman/star/ssn78/ssn78.htx/N-x1a1b12.html
+AC_PROG_FC([ifort gfortran g95])
+dnl Check the flags needed to link fc programs with ld (i.e. cc)
+AC_FC_LIBRARY_LDFLAGS
 dnl Check for openmp for fortran
 AX_OPENMP
 dnl prepend the found flags
@@ -46,10 +50,6 @@ FCFLAGS="$FCFLAGS $OPENMP_FCFLAGS"
 dnl Check for MPI (sets MPIFC, MPILIBS, HAVE_MPI)
 ACX_MPI
 
-dnl http://www.astro.gla.ac.uk/users/norman/star/ssn78/ssn78.htx/N-x1a1b12.html
-AC_PROG_FC([ifort gfortran g95])
-dnl Check the flags needed to link fc programs with ld (i.e. cc)
-AC_FC_LIBRARY_LDFLAGS
 dnl Check for underscoring of external names
 AC_FC_WRAPPERS
 dnl We need to use .f90 and not .f to enable Automake FC support
@@ -68,9 +68,7 @@ AC_LANG_POP
 AC_LANG_PUSH([Fortran 77])
 AC_PROG_F77([ifort gfortran g77])
 AC_F77_LIBRARY_LDFLAGS
-dnl Check for openmp for fortran
 AX_OPENMP
-dnl Prepend the flags with the openmp flag
 FFLAGS="$FFLAGS $OPENMP_FFLAGS"
 AC_LANG_POP
 

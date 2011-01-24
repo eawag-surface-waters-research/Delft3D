@@ -16,5 +16,3 @@ bin_PROGRAMS = version_number.exe
 #Sources
 version_number_exe_SOURCES = \
 	version_number.f90
-
-version_number_exe_LDADD = $(LDADD)	
