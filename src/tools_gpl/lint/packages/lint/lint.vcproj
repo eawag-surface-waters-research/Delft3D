@@ -62,7 +62,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;c:\Program Files\Intel\Compiler\11.0\072\fortran\lib\ia32&quot;"
+				AdditionalLibraryDirectories="&quot;$(IFORT_COMPILER11)\lib\ia32&quot;"
 				GenerateDebugInformation="true"
 				SubSystem="0"
 				RandomizedBaseAddress="1"
@@ -135,7 +135,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;c:\Program Files\Intel\Compiler\11.0\072\fortran\lib\ia32&quot;"
+				AdditionalLibraryDirectories="&quot;$(IFORT_COMPILER11)\lib\ia32&quot;"
 				GenerateDebugInformation="false"
 				SubSystem="1"
 				OptimizeReferences="2"
