@@ -31,6 +31,6 @@
 		<File RelativePath="src\meteo_data.f90"/>
 		<File RelativePath="src\meteo_read.f90"/>
 		<File RelativePath="src\numbersonline_m.f90"/>
-		<File RelativePath="src\openexistingfile.f90"/>
+		<File RelativePath="src\openexistingfile_meteo.f90"/>
 		<File RelativePath="src\readmeteoheader.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>

@@ -168,7 +168,7 @@ function addmeteoitem(runid, inputfile, gridsferic, mmax, nmax) result(success)
     integer                      :: nxr
     integer                      :: minp
     logical                      :: meteogridsferic    ! type of meteo grid sferic (.true.) or cartesian (.false.)?
-    logical, external            :: openexistingfile
+    logical, external            :: openexistingfile_meteo
     logical, external            :: readmeteoheader
     logical, external            :: checkmeteoheader
     type(tmeteo)    , pointer    :: meteo
@@ -189,7 +189,7 @@ function addmeteoitem(runid, inputfile, gridsferic, mmax, nmax) result(success)
     !
     ! Open meteofile
     !
-    success = openexistingfile(minp, inputfile)
+    success = openexistingfile_meteo(minp, inputfile)
     if (.not. success) return
     !
     meteoitem%filename = inputfile

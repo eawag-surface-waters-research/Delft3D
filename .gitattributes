@@ -2135,7 +2135,7 @@ src/utils_lgpl/meteo/packages/meteo/src/meteo.f90 -text
 src/utils_lgpl/meteo/packages/meteo/src/meteo_data.f90 -text
 src/utils_lgpl/meteo/packages/meteo/src/meteo_read.f90 -text
 src/utils_lgpl/meteo/packages/meteo/src/numbersonline_m.f90 -text
-src/utils_lgpl/meteo/packages/meteo/src/openexistingfile.f90 -text
+src/utils_lgpl/meteo/packages/meteo/src/openexistingfile_meteo.f90 -text
 src/utils_lgpl/meteo/packages/meteo/src/readmeteoheader.f90 -text
 src/utils_lgpl/meteo/packages/meteo_version_number/Makefile.am -text
 src/utils_lgpl/meteo/packages/meteo_version_number/include/resource.h -text

@@ -1,4 +1,4 @@
-function openexistingfile(minp, filename) result(success)
+function openexistingfile_meteo(minp, filename) result(success)
 !----- LGPL --------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -71,4 +71,4 @@ function openexistingfile(minp, filename) result(success)
     minp = i
     open (minp, file = trim(filename), action = 'READ')
     success = .true.
-end function openexistingfile
+end function openexistingfile_meteo

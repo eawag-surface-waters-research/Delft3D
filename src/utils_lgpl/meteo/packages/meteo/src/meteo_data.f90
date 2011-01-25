@@ -421,7 +421,7 @@ function meteoallocateitemgrid(runid, meteoitem, m, n, gridfilnam, flowmmax, flo
    character(10)         :: dum
    logical               :: sferic
    logical               :: kw_found
-   logical, external     :: openexistingfile
+   logical, external     :: openexistingfile_meteo
    real(fp)              :: xymiss
    type(tmeteo), pointer :: meteo
    !
@@ -459,7 +459,7 @@ function meteoallocateitemgrid(runid, meteoitem, m, n, gridfilnam, flowmmax, flo
    kw_found = .false.
    xymiss   = nodata_default
    grid     =>  meteoitem%grid
-   success  = openexistingfile(gridfil,trim(gridfilnam))
+   success  = openexistingfile_meteo(gridfil,trim(gridfilnam))
    if (.not. success) return
     !
     ! The following part is copied (and adapted) from file:
