@@ -171,6 +171,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
     real(fp), dimension(:), pointer :: troughlevel
     real(fp), dimension(:), pointer :: sedimentdepth
     logical , dimension(:), pointer :: triggered
+    real(fp), dimension(:), pointer :: dz_dummy
 !
 !! executable statements -------------------------------------------------------
 !
@@ -1568,11 +1569,13 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
     ! dbodsd is filled (kg/m^2 sediment added to a cell)
     !
     if (cmpupd) then
-       if (updmorlyr(gdp%gdmorlyr, dbodsd, gdp%messages) /= 0) then
+       allocate(dz_dummy(gdp%d%nmlb:gdp%d%nmub), stat=istat)
+       if (updmorlyr(gdp%gdmorlyr, dbodsd, dz_dummy, gdp%messages) /= 0) then
           call writemessages(gdp%messages, lundia)
           call d3stop(1, gdp)
        else
           call writemessages(gdp%messages, lundia)
        endif
+       deallocate(dz_dummy, stat=istat)
     endif
 end subroutine dredge

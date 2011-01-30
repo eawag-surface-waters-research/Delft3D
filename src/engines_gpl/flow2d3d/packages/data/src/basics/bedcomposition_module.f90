@@ -206,7 +206,7 @@ end subroutine bedcomposition_module_info
 !
 !
 !==============================================================================
-function updmorlyr(this, dbodsd, messages) result (istat)
+function updmorlyr(this, dbodsd, dz, messages) result (istat)
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Update underlayer bookkeeping system for erosion/sedimentation
@@ -218,16 +218,19 @@ function updmorlyr(this, dbodsd, messages) result (istat)
     !
     ! Call variables
     !
-    type(bedcomp_data)                                                                          :: this 
-    real(fp), dimension(this%settings%nmlb:this%settings%nmub, this%settings%nfrac), intent(in) :: dbodsd  !  change in sediment composition, units : kg/m2
-    type(message_stack)                                                                         :: messages
-    integer                                                                                     :: istat
+    type(bedcomp_data)                                                                           :: this 
+    real(fp), dimension(this%settings%nmlb:this%settings%nmub, this%settings%nfrac), intent(in)  :: dbodsd  !  change in sediment composition, units : kg/m2
+    real(fp), dimension(this%settings%nmlb:this%settings%nmub)                     , intent(out) :: dz      !  change in bed level, units : m
+    type(message_stack)                                                                          :: messages
+    integer                                                                                      :: istat
     !
     ! Local variables
     !
     integer                                 :: l
     integer                                 :: nm
-    real(fp)                                :: dz
+    real(fp)                                :: seddep0
+    real(fp)                                :: seddep1
+    real(fp)                                :: thdiff
     real(fp)                                :: fac
     real(fp)                                :: temp
     real(fp)                                :: thick
@@ -263,6 +266,7 @@ function updmorlyr(this, dbodsd, messages) result (istat)
     select case(this%settings%iunderlyr)
     case(2)
        do nm = this%settings%nmlb,this%settings%nmub
+          call getsedthick_1point(this, nm, seddep0)
           if (.not.this%settings%exchlyr) then
              !
              ! transport layer only
@@ -309,17 +313,17 @@ function updmorlyr(this, dbodsd, messages) result (istat)
              enddo
              thick = thick/svfrac(nm, 1)
              !
-             dz = thick-thtrlyrnew
+             thdiff = thick-thtrlyrnew
              !
              ! get sediment from or put sediment into underlayers
              ! to get transport layer of requested thickness
              !
-             if ( dz > 0.0_fp ) then
+             if ( thdiff > 0.0_fp ) then
                 !   
                 ! sedimentation to underlayers
                 ! determine surplus of mass per fraction
                 ! 
-                fac = dz/thick
+                fac = thdiff/thick
                 do l = 1, this%settings%nfrac
                     dmi(l) = msed(nm, 1, l)*fac
                     msed(nm, 1, l) = msed(nm, 1, l) - dmi(l)
@@ -327,17 +331,17 @@ function updmorlyr(this, dbodsd, messages) result (istat)
                 !
                 ! store surplus of mass in underlayers
                 !
-                call lyrsedimentation(this , nm, dz, dmi, svfrac(nm, 1), work)
+                call lyrsedimentation(this , nm, thdiff, dmi, svfrac(nm, 1), work)
                 !
-             elseif ( dz < 0.0_fp ) then
+             elseif ( thdiff < 0.0_fp ) then
                 !
                 ! erosion of underlayers
-                ! total erosion thickness: dz
+                ! total erosion thickness: thdiff
                 ! associated mass returned in: dmi
                 !
-                dz = -dz
+                thdiff = -thdiff
                 !  
-                call lyrerosion(this , nm, dz, dmi)
+                call lyrerosion(this , nm, thdiff, dmi)
                 !
                 ! add to top layer
                 ! 
@@ -381,10 +385,14 @@ function updmorlyr(this, dbodsd, messages) result (istat)
              istat = -1
              exit
           endif
+          call getsedthick_1point(this, nm, seddep1)
+          dz(nm) = seddep1-seddep0
        enddo
     case default
        do nm = this%settings%nmlb,this%settings%nmub
-          dpsed(nm) = 0.0
+          seddep0 = dpsed(nm)
+          dpsed(nm) = 0.0_fp
+          dz(nm) = 0.0_fp
           do l = 1, this%settings%nfrac
              bodsed(nm, l) = bodsed(nm, l) + real(dbodsd(nm, l),prec)
              if (bodsed(nm, l) < 0.0_prec) then
@@ -404,6 +412,7 @@ function updmorlyr(this, dbodsd, messages) result (istat)
              endif
              dpsed(nm) = dpsed(nm) + real(bodsed(nm, l),fp)/rhofrac(l)
           enddo    
+          dz(nm) = dpsed(nm) - seddep0
        enddo
     endselect
     if (deallocwork(this,work)) return

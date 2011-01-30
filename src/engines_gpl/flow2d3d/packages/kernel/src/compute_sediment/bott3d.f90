@@ -220,7 +220,6 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     real(fp) :: dsdnm
     real(fp) :: dv
     real(fp) :: dz
-    real(fp) :: dztot
     real(fp) :: fact
     real(fp) :: gsqsmin
     real(fp) :: h1
@@ -974,9 +973,9 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           call compthick(dps       ,s1        , &
                        & nmmax     ,gdp       )
           !
-          ! Update layers
+          ! Update layers and obtain the depth change
           !
-          if (updmorlyr(gdp%gdmorlyr, dbodsd, gdp%messages) /= 0) then
+          if (updmorlyr(gdp%gdmorlyr, dbodsd, depchg, gdp%messages) /= 0) then
              call writemessages(gdp%messages, lundia)
              call d3stop(1, gdp)
           else
@@ -988,25 +987,19 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           call bndmorlyr(lsedtot   ,timhr        , &
                        & nto       ,bc_mor_array , &
                        & gdp       )
+       else
+          !
+          ! Compute bed level changes without actually updating the bed composition
+          !
+          depchg = 0.0_fp
+          do nm = 1, nmmax
+             if (kcs(nm)/=0 .and. kcs(nm)<=2) then
+                do l = 1, lsedtot
+                   depchg(nm) = depchg(nm) + dbodsd(nm, l)/cdryb(l)
+                enddo
+             endif
+          enddo
        endif
-       !
-       do nm = 1, nmmax
-          if (kcs(nm)/=0 .and. kcs(nm)<=2) then
-             dztot = 0.0
-             do l = 1, lsedtot
-                dztot = dztot + dbodsd(nm, l)/cdryb(l)
-             enddo
-             !
-             ! note depchg is change in thickness of mixing layer.
-             ! An increase in thickness of mixing layer = a decrease in
-             ! depth
-             ! (if bottom of mixing layer stays in the same place)
-             !
-             depchg(nm) = dztot
-          else
-             depchg(nm) = 0.0
-          endif
-       enddo
        !
        call dfexchg( depchg, 1, 1, dfloat, gdp)
        !
