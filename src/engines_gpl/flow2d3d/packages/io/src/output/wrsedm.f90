@@ -55,6 +55,7 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
     type (nefiselement)                  , pointer :: nefiselem
     integer                              , pointer :: nxx
     type (moroutputtype)                 , pointer :: moroutput
+    logical                              , pointer :: scour
     real(fp), dimension(:)               , pointer :: xx
     real(fp), dimension(:)               , pointer :: rhosol
     real(fp), dimension(:)               , pointer :: cdryb
@@ -113,6 +114,7 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
 ! Local variables
 !
     real(fp)                :: rhol
+    real(fp)                :: tauadd
     integer                 :: ierror     ! Local errorflag for NEFIS files 
     integer                 :: fds
     integer                 :: i
@@ -138,6 +140,7 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
     xx                  => gdp%gdmorpar%xx
     rhosol              => gdp%gdsedpar%rhosol
     cdryb               => gdp%gdsedpar%cdryb
+    scour               => gdp%gdscour%scour
     dm                  => gdp%gderosed%dm
     dg                  => gdp%gderosed%dg
     dxx                 => gdp%gderosed%dxx
@@ -336,6 +339,12 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
           call addelm(nefiswrsedm,'DZDVV',' ','[   -   ]','REAL',4          , &
              & 'Bed slope in v-direction (v point)'                         , &
              & 2         ,nmaxus    ,mmax      ,0         ,0         ,0     , &
+             & lundia    ,gdp       )
+       endif
+       if (scour) then
+          call addelm(nefiswrtmap,'TAUADD',' ','[  N/M2 ]','REAL',4          , &
+             & 'Extra shear stress due to scour feature                     ', &
+             & 2         ,nmaxus    ,mmax      ,0         ,0         ,0      , &
              & lundia    ,gdp       )
        endif
        if (moroutput%taurat) then
@@ -1148,6 +1157,24 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
              sbuff(1:mmax*nmaxus) = -999.0
           endif
           ierror = putelt(fds, grpnam, 'DZDVV', uindex, 1, sbuff)
+          if (ierror/=0) goto 9999
+       endif
+       !
+       if (scour) then
+          !
+          ! element 'TAUADD'
+          !
+          call sbuff_checksize(mmax*nmaxus)
+          i = 0
+          do m = 1, mmax
+             do n = 1, nmaxus
+                i        = i+1
+                call n_and_m_to_nm(n, m, nm, gdp)
+                call shearx(tauadd, nm, gdp)
+                sbuff(i) = real(tauadd,sp)
+             enddo
+          enddo
+          ierror = putelt(fds, grpnam, 'TAUADD', uindex, 1, sbuff)
           if (ierror/=0) goto 9999
        endif
        !

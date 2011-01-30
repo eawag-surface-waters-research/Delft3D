@@ -63,6 +63,7 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
     real(fp)                             , pointer :: bed
     integer                              , pointer :: nxx
     type (moroutputtype)                 , pointer :: moroutput
+    logical                              , pointer :: scour
     real(fp), dimension(:)               , pointer :: xx
     real(fp), dimension(:)               , pointer :: rhosol
     real(fp), dimension(:)               , pointer :: cdryb
@@ -129,6 +130,7 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
 ! Local variables
 !
     real(fp)                                  :: rhol
+    real(fp)                                  :: tauadd
     integer                                   :: ierror    ! Local errorflag for NEFIS files 
     integer                                   :: fds
     integer                                   :: i
@@ -185,6 +187,7 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
     xx                  => gdp%gdmorpar%xx
     rhosol              => gdp%gdsedpar%rhosol
     cdryb               => gdp%gdsedpar%cdryb
+    scour               => gdp%gdscour%scour
     dm                  => gdp%gderosed%dm
     dg                  => gdp%gderosed%dg
     dxx                 => gdp%gderosed%dxx
@@ -417,6 +420,12 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
           call addelm(nefiswrsedm,'DZDVV',' ','[   -   ]','REAL',4          , &
              & 'Bed slope in v-direction (v point)'                         , &
              & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0     , &
+             & lundia    ,gdp       )
+       endif
+       if (scour) then
+          call addelm(nefiswrsedm,'TAUADD',' ','[   -   ]','REAL',4         , &
+             & 'Extra shear stress due to scour feature                    ', &
+             & 3         ,nmaxgl    ,mmaxgl    ,lsedtot   ,0         ,0     , &
              & lundia    ,gdp       )
        endif
        if (moroutput%taurat) then
@@ -1362,6 +1371,26 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
        deallocate(rbuff4)
        if (inode == master) then
           ierror = putelt(fds, grnam5, 'DZDVV', uindex, 1, glbarr4)
+       endif
+       if (ierror/=0) goto 9999
+    endif
+    !
+    if (scour) then
+       !
+       ! group 5: element 'TAUADD'
+       !
+       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1, 1) )
+       do m = 1, mmax
+          do n = 1, nmaxus
+             call n_and_m_to_nm(n, m, nm, gdp)
+             call shearx(tauadd, nm, gdp)
+             rbuff4(n, m, 1, 1) = tauadd
+          enddo
+       enddo
+       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+       deallocate(rbuff4)
+       if (inode == master) then
+          ierror = putelt(fds, grnam5, 'TAUADD', uindex, 1, glbarr4)
        endif
        if (ierror/=0) goto 9999
     endif

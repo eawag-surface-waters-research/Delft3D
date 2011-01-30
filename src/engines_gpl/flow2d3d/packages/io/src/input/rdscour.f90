@@ -153,6 +153,7 @@ subroutine rdscour(error, gdp)
           nmapp      => gdp%gdscour%nmapp
           nmref      => gdp%gdscour%nmref
           factor     => gdp%gdscour%factor
+          gdp%gdscour%tauv = 0.0_fp
           !
           rewind (inp)
           read (inp, *) dummy

@@ -153,10 +153,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp), dimension(:)               , pointer :: vvv
     real(fp), dimension(:)               , pointer :: wslc
     real(fp), dimension(:)               , pointer :: zumod
-    real(fp), dimension(:)               , pointer :: factor
-    real(fp)                             , pointer :: slope
     logical                              , pointer :: scour
-    type (gd_scour)                      , pointer :: gdscour
     integer,        dimension(:)         , pointer :: iform
     real(fp),       dimension(:,:)       , pointer :: par
     real(fp)                             , pointer :: factcr
@@ -384,9 +381,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     wslc                => gdp%gderosed%wslc
     zumod               => gdp%gderosed%zumod
     scour               => gdp%gdscour%scour
-    factor              => gdp%gdscour%factor
-    slope               => gdp%gdscour%slope
-    gdscour             => gdp%gdscour
     iform               => gdp%gdeqtran%iform
     par                 => gdp%gdeqtran%par
     rksr                => gdp%gdbedformpar%rksr
