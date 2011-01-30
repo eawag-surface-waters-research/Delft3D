@@ -100,7 +100,7 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
        endif
     case (2)
        istat = bedcomp_getpointer_integer(gdp%gdmorlyr,'nlyr',nlyr)
-       if (istat==0) istat = bedcomp_getpointer_realfp(gdp%gdmorlyr,'iporosity',iporos)
+       if (istat==0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr,'iporosity',iporos)
        if (istat==0) istat = bedcomp_getpointer_realfp(gdp%gdmorlyr,'svfrac',svfrac)
        if (istat==0) istat = bedcomp_getpointer_realfp(gdp%gdmorlyr,'msed',msed)
        if (istat==0) istat = bedcomp_getpointer_realfp(gdp%gdmorlyr,'thlyr',thlyr)
