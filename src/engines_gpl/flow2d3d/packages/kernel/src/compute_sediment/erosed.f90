@@ -87,7 +87,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)      , dimension(:)         , pointer :: sedd50
     real(fp)      , dimension(:)         , pointer :: sedd90
     real(fp)      , dimension(:)         , pointer :: sedd50fld
-    real(fp)      , dimension(:)         , pointer :: cdryb
     real(fp)      , dimension(:)         , pointer :: dstar
     real(fp)      , dimension(:)         , pointer :: taucr
     real(fp)      , dimension(:)         , pointer :: tetacr
@@ -316,7 +315,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     sedd50              => gdp%gdsedpar%sedd50
     sedd90              => gdp%gdsedpar%sedd90
     sedd50fld           => gdp%gdsedpar%sedd50fld
-    cdryb               => gdp%gdsedpar%cdryb
     dstar               => gdp%gdsedpar%dstar
     taucr               => gdp%gdsedpar%taucr
     tetacr              => gdp%gdsedpar%tetacr
@@ -541,8 +539,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     ! compute the mud fraction.
     !
     if (lsedtot > 1) then
-       call getfrac(gdp%gdmorlyr, cdryb ,frac     , &
-                  & sedtyp    ,anymud   ,mudcnt   ,mudfrac   )
+       call getfrac(gdp%gdmorlyr,frac      ,sedtyp    ,anymud   , &
+                  & mudcnt   ,mudfrac   )
     endif
     !
     ! Calculate velocity components and magnitude at the zeta points
@@ -561,8 +559,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     ! Get the reduction factor if thickness of sediment at bed is less than
     ! user specified threshold
     !
-    call getfixfac(cdryb     ,lsedtot   ,nmmax     , &
-                 & fixfac    ,gdp       )
+    call getfixfac(lsedtot   ,nmmax     ,fixfac    ,gdp       )
     !
     ! in case of multiple (non-mud) fractions, the following quantities
     ! --- that are initialized in INISED --- may be time-dependent and

@@ -976,7 +976,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           !
           ! Update layers
           !
-          if (updmorlyr(gdp%gdmorlyr, dbodsd, cdryb, gdp%messages) /= 0) then
+          if (updmorlyr(gdp%gdmorlyr, dbodsd, gdp%messages) /= 0) then
              call writemessages(gdp%messages, lundia)
              call d3stop(1, gdp)
           else
@@ -987,7 +987,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           !
           call bndmorlyr(lsedtot   ,timhr        , &
                        & nto       ,bc_mor_array , &
-                       & cdryb     ,gdp          )
+                       & gdp       )
        endif
        !
        do nm = 1, nmmax

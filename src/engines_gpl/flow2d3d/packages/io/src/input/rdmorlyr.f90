@@ -92,6 +92,7 @@ use bedcomposition_module
     real(fp)         , dimension(:) , pointer :: thtrlyr
     real(fp)                        , pointer :: ttlalpha
     real(fp)                        , pointer :: ttlmin
+    integer                         , pointer :: iporosity
     integer                         , pointer :: iunderlyr
     integer                         , pointer :: maxwarn
     integer                         , pointer :: neulyr
@@ -128,6 +129,7 @@ use bedcomposition_module
     if (istat == 0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'UpdBaseLyr'          , updbaselyr)
     if (istat == 0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'MinMassShortWarning' , minmass)
     if (istat == 0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'MaxNumShortWarning'  , maxwarn)
+    if (istat == 0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'IPorosity'           , iporosity)
     if (istat /= 0) then
        call prterr(lundia, 'U021', 'Memory problem in RDMORLYR')
        call d3stop(1, gdp)
@@ -192,6 +194,18 @@ use bedcomposition_module
        else
           txtput2 = '                  NO'
        endif
+       write (lundia, '(3a)') txtput1, ':', txtput2
+       !
+       call prop_get_integer(mor_ptr, 'Underlayer', 'IPorosity', iporosity)
+       txtput1 = 'Porosity'
+       select case (iporosity)
+       case (0)
+          txtput2 = '      Based on CDRYB'
+       case (1)
+          txtput2 = '              Linear'
+       case (2)
+          txtput2 = '          Non-linear'
+       end select
        write (lundia, '(3a)') txtput1, ':', txtput2
        !
        nlalyr = 0
@@ -610,4 +624,21 @@ use bedcomposition_module
     !
     write (lundia, '(a)') '*** End    of underlayer input'
     write (lundia, *)
+    !
+    ! Set sediment properties for the morphological layers
+    !
+    if (iporosity==0) then
+       !
+       ! porosity is fraction dependent and included in cdryb densities
+       !
+       call setbedfracprop(gdp%gdmorlyr, gdp%gdsedpar%sedd50, &
+             & gdp%gdsedpar%logsedsig, gdp%gdsedpar%cdryb)
+    else
+       !
+       ! porosity is simulated, the cdryb values are ignored
+       !
+       call setbedfracprop(gdp%gdmorlyr, gdp%gdsedpar%sedd50, &
+             & gdp%gdsedpar%logsedsig, gdp%gdsedpar%rhosol)
+       ! gdp%gdsedpar%cdryb = gdp%gdsedpar%rhosol
+    endif
 end subroutine rdmorlyr

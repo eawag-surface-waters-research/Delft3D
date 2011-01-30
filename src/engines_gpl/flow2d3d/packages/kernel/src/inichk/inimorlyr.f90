@@ -260,7 +260,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
     !
     ! Use BODSED: compute DPSED and as needed transfer information from BODSED to other arrays
     !
-    call bedcomp_use_bodsed(gdp%gdmorlyr, cdryb)
+    call bedcomp_use_bodsed(gdp%gdmorlyr)
     !
     select case(iunderlyr)
     case(2)

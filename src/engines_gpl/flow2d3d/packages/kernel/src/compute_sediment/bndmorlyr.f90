@@ -1,5 +1,5 @@
 subroutine bndmorlyr(lsedtot   ,timhr     ,nto       , &
-                   & bc_mor_array         ,cdryb     ,gdp  )
+                   & bc_mor_array         ,gdp  )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -56,7 +56,6 @@ subroutine bndmorlyr(lsedtot   ,timhr     ,nto       , &
     integer                       , intent(in) :: nto
     real(fp)                                   :: timhr
     real(fp), dimension(2*lsedtot)             :: bc_mor_array
-    real(fp), dimension(lsedtot)  , intent(in) :: cdryb        !  Description and declaration in rjdim.f90
 !
 ! Local variables
 !
@@ -116,8 +115,7 @@ subroutine bndmorlyr(lsedtot   ,timhr     ,nto       , &
              !
              ! Free composition: copy composition from internal point
              !
-             call getmfrac(gdp%gdmorlyr, nxmx, frac)
-             call setmfrac(gdp%gdmorlyr, nm  , frac)
+             call copybedcomp(gdp%gdmorlyr, nxmx, nm)
           elseif (icond == 1) then
              !
              ! Fixed composition: no need to update the values
@@ -139,7 +137,7 @@ subroutine bndmorlyr(lsedtot   ,timhr     ,nto       , &
                 frac(l) = bc_mor_array(l) + &
                         & alfa_dist * (bc_mor_array(l+lsedtot)-bc_mor_array(l))
              enddo
-             call setvfrac(gdp%gdmorlyr, nm, cdryb, frac)
+             call setvfrac(gdp%gdmorlyr, nm, frac)
           endif
        enddo
     enddo

@@ -1,5 +1,4 @@
-subroutine getfixfac(cdryb     ,lsedtot   ,nmmax     , &
-                   & fixfac    ,gdp       )
+subroutine getfixfac(lsedtot   ,nmmax     ,fixfac    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -48,7 +47,6 @@ subroutine getfixfac(cdryb     ,lsedtot   ,nmmax     , &
 !
     integer                                            , intent(in)  :: lsedtot
     integer                                            , intent(in)  :: nmmax   !  Description and declaration in dimens.igs
-    real(fp), dimension(lsedtot)                       , intent(in)  :: cdryb   !  Description and declaration in rjdim.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot), intent(out) :: fixfac
 !
 ! Local variables
@@ -60,7 +58,7 @@ subroutine getfixfac(cdryb     ,lsedtot   ,nmmax     , &
 !
 !! executable statements -------------------------------------------------------
 !
-    call getalluvthick(gdp%gdmorlyr, cdryb, fixfac)
+    call getalluvthick(gdp%gdmorlyr, fixfac)
     !
     thresh = max(1.0e-10_fp,gdp%gdmorpar%thresh)
     do l = 1, lsedtot

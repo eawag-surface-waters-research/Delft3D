@@ -167,7 +167,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
        ! insert empty layers (if necessary)
        !
        do k = 2,1+nlyr-rst_nlyr
-          thlyr(1:nmaxus,1:mmax,k)               = 0.0_fp
+          thlyr(1:nmaxus,1:mmax,k)              = 0.0_fp
           msed(1:nmaxus,1:mmax,k,1:lsedtot)     = 0.0_fp
        enddo
        !

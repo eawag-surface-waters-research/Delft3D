@@ -1,6 +1,6 @@
 subroutine dfwrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
                    & nlyr      ,irequest  ,fds       ,grpnam    ,msed      , &
-                   & thlyr     ,alpha     ,cdryb     ,gdp  )
+                   & thlyr     ,svfrac    ,iporos    ,cdryb     ,gdp  )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -61,6 +61,7 @@ subroutine dfwrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
 ! Global variables
 !
     integer                                                     :: fds
+    integer                                                     :: iporos
     integer                                                     :: irequest
     integer                                                     :: lsedtot
     integer                                                     :: lundia
@@ -72,7 +73,7 @@ subroutine dfwrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
     real(fp), dimension(1:lsedtot)                              :: cdryb
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,1:nlyr,1:lsedtot) :: msed
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,1:nlyr)           :: thlyr
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,1:nlyr)           :: alpha
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,1:nlyr)           :: svfrac
     type(bedcomp_data)                                          :: gdmorlyr
 !
 ! Local variables
@@ -130,10 +131,12 @@ subroutine dfwrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
           & 'Thickness of sediment layer'                      , &
           & 3      ,nmaxgl ,mmaxgl   ,nlyr    ,0       ,0      , &
           & lundia ,gdp    )
-       call addelm(nefiswrsedm,'ALPHA',' ','[   -   ]','REAL',4, &
-          & 'Porosity coefficient'                             , &
-          & 3      ,nmaxgl ,mmaxgl   ,nlyr    ,0       ,0      , &
-          & lundia ,gdp    )
+       if (iporos>0) then
+          call addelm(nefiswrsedm,'EPSPOR',' ','[   -   ]','REAL',4, &
+             & 'Porosity coefficient'                              , &
+             & 3      ,nmaxgl ,mmaxgl   ,nlyr    ,0       ,0       , &
+             & lundia ,gdp    )
+       endif
     case (2)
        !
        ! allocate data arrays for collection data 
@@ -188,7 +191,7 @@ subroutine dfwrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
                 do n = 1, nmaxus
                    call n_and_m_to_nm(n, m, nm, gdp)
                    if (thlyr(nm,k)>0.0_fp) then
-                      rbuff4(n,m,k,l) = msed(nm, k, l)*alpha(nm,k)/(cdryb(l)*thlyr(nm,k))
+                      rbuff4(n,m,k,l) = msed(nm, k, l)/(cdryb(l)*svfrac(nm,k)*thlyr(nm,k))
                    else
                       rbuff4(n,m,k,l) = 0.0_fp
                    endif
@@ -221,23 +224,25 @@ subroutine dfwrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
        endif
        if (ierror/= 0) goto 9999
        !
-       ! element 'ALPHA'
+       ! element 'EPSPOR'
        !
-       allocate(rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr))
-       do k = 1, nlyr
-          do m = 1, mmax
-             do n = 1, nmaxus
-                call n_and_m_to_nm(n, m, nm, gdp)
-                rbuff3(n,m,k) = alpha(nm,k)
+       if (iporos>0) then
+          allocate(rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr))
+          do k = 1, nlyr
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   call n_and_m_to_nm(n, m, nm, gdp)
+                   rbuff3(n,m,k) = 1.0_fp-svfrac(nm,k)
+                enddo
              enddo
           enddo
-       enddo
-       call dfgather(rbuff3,nf,nl,mf,ml,iarrc,gdp)
-       deallocate(rbuff3)
-       if (inode == master) then
-          ierror = putelt(fds, grpnam, 'ALPHA', uindex, 1, glbarr3)
+          call dfgather(rbuff3,nf,nl,mf,ml,iarrc,gdp)
+          deallocate(rbuff3)
+          if (inode == master) then
+             ierror = putelt(fds, grpnam, 'EPSPOR', uindex, 1, glbarr3)
+          endif
+          if (ierror/= 0) goto 9999
        endif
-       if (ierror/= 0) goto 9999
        !
        ! write errormessage if error occurred and set error = .true.
        ! the files will be closed in clsnef (called in triend)

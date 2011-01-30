@@ -140,6 +140,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     real(fp)                  :: seddxx              ! Temporary storage for sediment diameter
     real(fp)                  :: sedsg               ! Temporary storage for geometric standard deviation
     real(fp)                  :: xxinv               ! Help var. [1/xx or 1/(1-xx) in log unif distrib.]
+    real(fp)                  :: xm
     logical                   :: found
     logical                   :: ex
     logical        , external :: stringsequalinsens
@@ -944,10 +945,10 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                 logseddia(2,2,l) = logseddia(2,1,l)
                 !
                 logseddia(1,1,l) = 0.0_fp
-                logseddia(2,1,l) = logseddia(2,2,l) - 0.35960259056473_fp
+                logseddia(2,1,l) = logseddia(2,2,l) + 5.0_fp*log(0.75_fp)/4.0_fp
                 !
                 logseddia(1,3,l) = 100.0_fp
-                logseddia(2,3,l) = logseddia(2,2,l) + 0.50683138513520_fp
+                logseddia(2,3,l) = logseddia(2,2,l) + 5.0_fp*log(1.5_fp)/4.0_fp
                 !
                 ! Compute characteristic sediment diameters
                 !
@@ -956,14 +957,22 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                 sedd90(l) = 1.50_fp * sedd50(l)
                 !
                 seddm(l)  = 0.0_fp
+                logsedsig(l) = 0.0_fp
+                xm = 0.0_fp
                 do n = 2, nseddia(l)
                    xxinv    = logseddia(1,n,l) - logseddia(1,n-1,l)
                    seddm(l) = seddm(l) &
                             & + xxinv * (exp(logseddia(2,n,l)) - exp(logseddia(2,n-1,l))) &
                             & / (logseddia(2,n,l) - logseddia(2,n-1,l))
-                   xxinv = 1.0_fp / xxinv
+                   logsedsig(l) = logsedsig(l) + xxinv * (&
+                                & (logseddia(2,n,l)-logseddia(2,n-1,l))/sqrt(3.0_fp)/2.0_fp &
+                                & + ((logseddia(2,n,l)+logseddia(2,n-1,l))/2.0_fp)**2 &
+                                & )
+                   xm = xm + xxinv * (logseddia(2,n,l)+logseddia(2,n-1,l))/2.0_fp
                 enddo
                 seddm(l) = seddm(l) / 100.0_fp
+                xm = xm / 100.0_fp
+                logsedsig(l) = logsedsig(l) / 100.0_fp - xm**2
              endif
           elseif (nseddia(l) == 2) then
              !
@@ -1012,6 +1021,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                 sedd90(l) = exp(0.1_fp*logseddia(2,1,l) + 0.9_fp*logseddia(2,2,l))
                 seddm(l)  = (exp(logseddia(2,2,l)) - exp(logseddia(2,1,l))) / &
                           & (logseddia(2,2,l) - logseddia(2,1,l))
+                logsedsig(l) = (logseddia(2,2,l) - logseddia(2,1,l))/sqrt(3.0_fp)/2.0_fp
              else
                 !
                 ! Neither minimum nor maximum sediment diameter given:

@@ -1153,7 +1153,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
        ! dbodsd is filled (kg/m^2 sediment removed in a cell)
        !
        if (cmpupd) then
-          if (gettoplyr(gdp%gdmorlyr, dzdred, dbodsd, cdryb, gdp%messages) /= 0) then
+          if (gettoplyr(gdp%gdmorlyr, dzdred, dbodsd, gdp%messages) /= 0) then
              call writemessages(gdp%messages, lundia)
              call d3stop(1, gdp)
           endif
@@ -1568,7 +1568,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
     ! dbodsd is filled (kg/m^2 sediment added to a cell)
     !
     if (cmpupd) then
-       if (updmorlyr(gdp%gdmorlyr, dbodsd, cdryb, gdp%messages) /= 0) then
+       if (updmorlyr(gdp%gdmorlyr, dbodsd, gdp%messages) /= 0) then
           call writemessages(gdp%messages, lundia)
           call d3stop(1, gdp)
        else

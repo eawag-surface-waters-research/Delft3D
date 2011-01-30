@@ -61,12 +61,13 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
 ! Local variables
 !
     integer                                       :: istat
+    integer                             , pointer :: iporos
     integer                             , pointer :: iunderlyr
     integer                             , pointer :: nlyr
     real(prec)       , dimension(:,:)   , pointer :: bodsed
     real(fp)         , dimension(:)     , pointer :: cdryb
     real(fp)         , dimension(:)     , pointer :: dpsed
-    real(fp)         , dimension(:,:)   , pointer :: alpha
+    real(fp)         , dimension(:,:)   , pointer :: svfrac
     real(fp)         , dimension(:,:,:) , pointer :: msed
     real(fp)         , dimension(:,:)   , pointer :: thlyr
 !
@@ -99,7 +100,8 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
        endif
     case (2)
        istat = bedcomp_getpointer_integer(gdp%gdmorlyr,'nlyr',nlyr)
-       if (istat==0) istat = bedcomp_getpointer_realfp(gdp%gdmorlyr,'alpha',alpha)
+       if (istat==0) istat = bedcomp_getpointer_realfp(gdp%gdmorlyr,'iporosity',iporos)
+       if (istat==0) istat = bedcomp_getpointer_realfp(gdp%gdmorlyr,'svfrac',svfrac)
        if (istat==0) istat = bedcomp_getpointer_realfp(gdp%gdmorlyr,'msed',msed)
        if (istat==0) istat = bedcomp_getpointer_realfp(gdp%gdmorlyr,'thlyr',thlyr)
        if (istat/=0) then
@@ -109,11 +111,11 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
        if (.not. parll) then
           call wrmorm2 (lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
                       & nlyr      ,irequest  ,fds       ,grpnam    ,msed      , &
-                      & thlyr     ,alpha     ,cdryb     ,gdp       )
+                      & thlyr     ,svfrac    ,iporos    ,cdryb     ,gdp       )
        else
           call dfwrmorm2 (lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
                         & nlyr      ,irequest  ,fds       ,grpnam    ,msed      , &
-                        & thlyr     ,alpha     ,cdryb     ,gdp       )
+                        & thlyr     ,svfrac    ,iporos    ,cdryb     ,gdp       )
        endif
     case default
     end select

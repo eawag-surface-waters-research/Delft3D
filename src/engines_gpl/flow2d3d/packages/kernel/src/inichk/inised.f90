@@ -422,8 +422,8 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     !
     ! Inilialise fractions
     !
-    call getfrac(gdp%gdmorlyr, cdryb ,frac     , &
-               & sedtyp    ,anymud   ,mudcnt   ,mudfrac   )
+    call getfrac(gdp%gdmorlyr, frac     ,sedtyp    ,anymud    , &
+               & mudcnt   ,mudfrac   )
     !
     ! Calculate arithmetic mean sediment diameter Dm
     !

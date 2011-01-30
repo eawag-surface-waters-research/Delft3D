@@ -74,7 +74,6 @@ subroutine erosilt(nmmax   ,icx     ,icy     ,kcs     ,kfs     ,kfu     , &
     logical                          , pointer :: flmd2l
     real(fp)                         , pointer :: kssilt
     real(fp)                         , pointer :: kssand
-    real(fp)      , dimension(:)     , pointer :: cdryb
     real(fp)      , dimension(:,:)   , pointer :: tcrdep
     real(fp)      , dimension(:,:)   , pointer :: tcrero
     real(fp)      , dimension(:)     , pointer :: thcmud
@@ -196,7 +195,6 @@ subroutine erosilt(nmmax   ,icx     ,icy     ,kcs     ,kfs     ,kfu     , &
     flmd2l              => gdp%gdprocs%flmd2l
     kssilt              => gdp%gdsedpar%kssilt
     kssand              => gdp%gdsedpar%kssand
-    cdryb               => gdp%gdsedpar%cdryb
     tcrdep              => gdp%gdsedpar%tcrdep
     tcrero              => gdp%gdsedpar%tcrero
     thcmud              => gdp%gdsedpar%thcmud
@@ -226,7 +224,7 @@ subroutine erosilt(nmmax   ,icx     ,icy     ,kcs     ,kfs     ,kfu     , &
     ! to be used in computation of skin friction (Soulsby 2004)
     !
     if (bsskin) then
-       call detthcmud(gdp%gdmorlyr  ,cdryb     ,sedtyp    ,thcmud    )
+       call detthcmud(gdp%gdmorlyr  ,sedtyp    ,thcmud    )
     endif
     !
     ! For 3D model set sediment diffusion coefficient
