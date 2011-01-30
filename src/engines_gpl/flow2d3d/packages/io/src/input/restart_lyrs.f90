@@ -1,6 +1,6 @@
-subroutine restart_lyrs (error     ,restid    ,i_restart ,lyrfrac   , &
-                       & thlyr     ,lsedtot   ,nmaxus    ,mmax      ,nlyr      , &
-                       & success   ,gdp       )
+subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
+                       & thlyr     ,lsedtot   ,nmaxus    ,cdryb     , &
+                       & mmax      ,nlyr      ,success   ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -48,16 +48,17 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,lyrfrac   , &
 !
 ! Global variables
 !
-    integer                                                                                       :: i_restart
-    integer                                                                                       :: lsedtot
-    integer                                                                                       :: nlyr
-    integer                                                                                       :: nmaxus
-    integer                                                                                       :: mmax
-    logical                                                                                       :: error
-    logical                                                                         , intent(out) :: success
-    real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr, lsedtot), intent(out) :: lyrfrac
-    real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr)         , intent(out) :: thlyr
-    character(*)                                                                                  :: restid
+    integer                                                                                   :: i_restart
+    integer                                                                                   :: lsedtot
+    integer                                                                                   :: nlyr
+    integer                                                                                   :: nmaxus
+    integer                                                                                   :: mmax
+    logical                                                                                   :: error
+    logical                                                                     , intent(out) :: success
+    real(fp), dimension(                                                lsedtot), intent(in)  :: cdryb
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr, lsedtot), intent(out) :: msed
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr)         , intent(out) :: thlyr
+    character(*)                                                                              :: restid
 !
 ! Local variables
 !
@@ -74,26 +75,30 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,lyrfrac   , &
     integer                                 :: fds
     integer                                 :: k
     integer                                 :: l
+    integer                                 :: m
+    integer                                 :: n
     integer  , dimension(3,5)               :: cuindex
     integer  , dimension(3,5)               :: uindex
     integer                                 :: nbytsg
     integer                                 :: elmndm
     integer  , dimension(5)                 :: elmdms
-    real(sp) , dimension(:,:,:,:), pointer  :: rst_lyrfrac
-    real(sp) , dimension(:,:,:)  , pointer  :: rst_thlyr
+    real(sp), dimension(:,:,:,:), pointer   :: rst_msed
+    real(sp), dimension(:,:,:)  , pointer   :: rst_lyr
     character(len=256)                      :: dat_file
     character(len=8)                        :: elmtyp
     character(len=16)                       :: elmqty
     character(len=16)                       :: elmunt
     character(len=64)                       :: elmdes
     character(len=256)                      :: def_file
+    logical                                 :: layerfrac
 !
 !! executable statements -------------------------------------------------------
 !
-    nullify(rst_lyrfrac)
-    nullify(rst_thlyr)
+    nullify(rst_msed)
+    nullify(rst_lyr)
     error        = .false.
     success      = .false.
+    layerfrac    = .false.
     call noextspaces(restid    ,lrid      )
     !
     ! open NEFIS trim-<restid> file
@@ -126,18 +131,28 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,lyrfrac   , &
     if (rst_lsedtot /= lsedtot) goto 9999
     !
     elmndm = 5
-    ierror = inqelm(fds , 'LYRFRAC', elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
-    if (ierror/= 0) goto 9999
+    ierror  = inqelm(fds , 'MSED', elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
+    if (ierror /= 0) then
+        ierror  = inqelm(fds , 'LYRFRAC', elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
+        layerfrac = .true.
+        if (ierror /= 0) goto 9999
+    endif
     rst_nlyr = elmdms(3)
-    allocate(rst_lyrfrac(nmaxus, mmax, rst_nlyr, rst_lsedtot))
-    allocate(rst_thlyr(nmaxus, mmax, rst_nlyr))
+    allocate(rst_msed(nmaxus, mmax, rst_nlyr, rst_lsedtot))
+    allocate(rst_lyr(nmaxus, mmax, rst_nlyr))
     !
-    ierror = getelt(fds , 'map-sed-series', 'LYRFRAC', uindex, 1, &
-                 & mmax*nmaxus*rst_nlyr*rst_lsedtot*4, rst_lyrfrac )
-    if (ierror/= 0) goto 9999
+    if (layerfrac) then
+        ierror = getelt(fds , 'map-sed-series', 'LYRFRAC', uindex, 1, &
+                 & mmax*nmaxus*rst_nlyr*rst_lsedtot*4, rst_msed )       
+        if (ierror /= 0) goto 9999
+    else
+        ierror = getelt(fds , 'map-sed-series', 'MSED', uindex, 1, &
+                 & mmax*nmaxus*rst_nlyr*rst_lsedtot*4, rst_msed )
+        if (ierror /= 0) goto 9999
+    endif
     !
     ierror = getelt(fds , 'map-sed-series', 'THLYR', uindex, 1, &
-                 & mmax*nmaxus*rst_nlyr*4, rst_thlyr )
+                 & mmax*nmaxus*rst_nlyr*4, rst_lyr )
     if (ierror/= 0) goto 9999
     !
     if (nlyr>=rst_nlyr) then
@@ -146,58 +161,55 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,lyrfrac   , &
        !
        ! copy first layer
        !
-       thlyr(1:nmaxus,1:mmax,1)             = rst_thlyr(1:nmaxus,1:mmax,1)
-       lyrfrac(1:nmaxus,1:mmax,1,1:lsedtot) = rst_lyrfrac(1:nmaxus,1:mmax,1,1:lsedtot)
+       thlyr(1:nmaxus,1:mmax,1)            = rst_lyr(1:nmaxus,1:mmax,1)
+       msed(1:nmaxus,1:mmax,1,1:lsedtot)   = rst_msed(1:nmaxus,1:mmax,1,1:lsedtot)
        !
        ! insert empty layers (if necessary)
        !
        do k = 2,1+nlyr-rst_nlyr
           thlyr(1:nmaxus,1:mmax,k)               = 0.0_fp
-          lyrfrac(1:nmaxus,1:mmax,k,1:lsedtot-1) = 0.0_fp
-          lyrfrac(1:nmaxus,1:mmax,k,lsedtot)     = 1.0_fp
+          msed(1:nmaxus,1:mmax,k,1:lsedtot)     = 0.0_fp
        enddo
        !
        ! copy remaining layers
        !
-       thlyr(1:nmaxus,1:mmax,nlyr-rst_nlyr+2:nlyr)             = rst_thlyr(1:nmaxus,1:mmax,2:rst_nlyr)
-       lyrfrac(1:nmaxus,1:mmax,nlyr-rst_nlyr+2:nlyr,1:lsedtot) = rst_lyrfrac(1:nmaxus,1:mmax,2:rst_nlyr,1:lsedtot)
+       thlyr(1:nmaxus,1:mmax,nlyr-rst_nlyr+2:nlyr)            = rst_lyr(1:nmaxus,1:mmax,2:rst_nlyr)
+       msed(1:nmaxus,1:mmax,nlyr-rst_nlyr+2:nlyr,1:lsedtot)   = rst_msed(1:nmaxus,1:mmax,2:rst_nlyr,1:lsedtot)
     else ! nlyr<rst_nlyr
        !
        ! more layers in restart file than in simulation
        !
        ! copy the first nlyr layers
        !
-       thlyr(1:nmaxus,1:mmax,1:nlyr)             = rst_thlyr(1:nmaxus,1:mmax,1:nlyr)
-       lyrfrac(1:nmaxus,1:mmax,1:nlyr,1:lsedtot) = rst_lyrfrac(1:nmaxus,1:mmax,1:nlyr,1:lsedtot)
-       !
-       ! convert last layer fractions into fraction thicknesses
-       !
-       do l = 1, lsedtot
-          lyrfrac(1:nmaxus,1:mmax,nlyr,l) = lyrfrac(1:nmaxus,1:mmax,nlyr,l) &
-                                          & * thlyr(1:nmaxus,1:mmax,nlyr)
-       enddo
+       thlyr(1:nmaxus,1:mmax,1:nlyr)           = rst_lyr(1:nmaxus,1:mmax,1:nlyr)
+       msed(1:nmaxus,1:mmax,1:nlyr,1:lsedtot)  = rst_msed(1:nmaxus,1:mmax,1:nlyr,1:lsedtot)
        !
        ! add contents of other layers to last layer
        !
        do k = nlyr+1, rst_nlyr
           thlyr(1:nmaxus,1:mmax,nlyr)        = thlyr(1:nmaxus,1:mmax,nlyr) &
-                                             & + rst_thlyr(1:nmaxus,1:mmax,k)
+                                             & + rst_lyr(1:nmaxus,1:mmax,k)
           do l = 1, lsedtot
-             lyrfrac(1:nmaxus,1:mmax,nlyr,l) = lyrfrac(1:nmaxus,1:mmax,nlyr,l) &
-                    & + rst_lyrfrac(1:nmaxus,1:mmax,k,l) * rst_thlyr(1:nmaxus,1:mmax,k)
+             msed(1:nmaxus,1:mmax,nlyr,l)    = msed(1:nmaxus,1:mmax,nlyr,l) &
+                                             & + rst_msed(1:nmaxus,1:mmax,k,l) 
           enddo
        enddo
-       !
-       ! convert last layer fraction thicknesses into fractions
-       !
-       do l = 1, lsedtot
-          lyrfrac(1:nmaxus,1:mmax,nlyr,l) = lyrfrac(1:nmaxus,1:mmax,nlyr,l) &
-                                          & / thlyr(1:nmaxus,1:mmax,nlyr)
-       enddo
     endif
+    if (layerfrac) then
+        do l = 1, lsedtot
+            do k = 1, nlyr
+                do m = 1, mmax
+                    do n = 1, nmaxus
+                        msed(n,m,k,l) = msed(n,m,k,l)*thlyr(n,m,k)*cdryb(l)
+                    enddo
+                enddo
+            enddo
+        enddo
+    endif
+    !
     success = .true.
 9999 continue
-    if (associated(rst_lyrfrac)) deallocate (rst_lyrfrac)
-    if (associated(rst_thlyr))   deallocate (rst_thlyr)
+    if (associated(rst_msed)) deallocate (rst_msed)
+    if (associated(rst_lyr))  deallocate (rst_lyr)
     ierror = clsnef(fds) 
 end subroutine restart_lyrs

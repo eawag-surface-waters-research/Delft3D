@@ -64,12 +64,16 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
     integer                             , pointer :: iunderlyr
     integer                             , pointer :: nlyr
     real(prec)       , dimension(:,:)   , pointer :: bodsed
+    real(fp)         , dimension(:)     , pointer :: cdryb
     real(fp)         , dimension(:)     , pointer :: dpsed
-    real(fp)         , dimension(:,:,:) , pointer :: lyrfrac
+    real(fp)         , dimension(:,:)   , pointer :: alpha
+    real(fp)         , dimension(:,:,:) , pointer :: msed
     real(fp)         , dimension(:,:)   , pointer :: thlyr
 !
 !! executable statements -------------------------------------------------------
 !
+    cdryb               => gdp%gdsedpar%cdryb
+    !
     istat = bedcomp_getpointer_integer(gdp%gdmorlyr,'iunderlyr',iunderlyr)
     if (istat/=0) then
        call prterr(lundia, 'U021', 'Memory problem in WRMORM')
@@ -95,7 +99,8 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
        endif
     case (2)
        istat = bedcomp_getpointer_integer(gdp%gdmorlyr,'nlyr',nlyr)
-       if (istat==0) istat = bedcomp_getpointer_realfp(gdp%gdmorlyr,'lyrfrac',lyrfrac)
+       if (istat==0) istat = bedcomp_getpointer_realfp(gdp%gdmorlyr,'alpha',alpha)
+       if (istat==0) istat = bedcomp_getpointer_realfp(gdp%gdmorlyr,'msed',msed)
        if (istat==0) istat = bedcomp_getpointer_realfp(gdp%gdmorlyr,'thlyr',thlyr)
        if (istat/=0) then
           call prterr(lundia, 'U021', 'Memory problem in WRMORM')
@@ -103,12 +108,12 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
        endif
        if (.not. parll) then
           call wrmorm2 (lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
-                      & nlyr      ,irequest  ,fds       ,grpnam    ,lyrfrac   , &
-                      & thlyr     ,gdp       )
+                      & nlyr      ,irequest  ,fds       ,grpnam    ,msed      , &
+                      & thlyr     ,alpha     ,cdryb     ,gdp       )
        else
           call dfwrmorm2 (lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
-                        & nlyr      ,irequest  ,fds       ,grpnam    ,lyrfrac   , &
-                        & thlyr     ,gdp       )
+                        & nlyr      ,irequest  ,fds       ,grpnam    ,msed      , &
+                        & thlyr     ,alpha     ,cdryb     ,gdp       )
        endif
     case default
     end select

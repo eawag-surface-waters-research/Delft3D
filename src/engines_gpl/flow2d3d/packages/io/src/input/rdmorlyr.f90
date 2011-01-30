@@ -63,10 +63,12 @@ use bedcomposition_module
 ! Local variables
 !
     real(fp)                 :: rmissval
+    real(fp)                 :: thunlyr
     integer                  :: i
     integer                  :: istat
     integer                  :: j
     integer                  :: l
+    integer                  :: mxnulyr
     integer                  :: nm
     integer                  :: nval
     character(11)            :: fmttmp       ! Format file ('formatted  ') 
@@ -83,15 +85,17 @@ use bedcomposition_module
     !
     logical                         , pointer :: exchlyr
     real(fp)                        , pointer :: bed
-    real(fp)                        , pointer :: minthick
-    real(fp)                        , pointer :: thunlyr
+    real(fp)                        , pointer :: minmass
+    real(fp)                        , pointer :: theulyr
+    real(fp)                        , pointer :: thlalyr
     real(fp)         , dimension(:) , pointer :: thexlyr
     real(fp)         , dimension(:) , pointer :: thtrlyr
     real(fp)                        , pointer :: ttlalpha
     real(fp)                        , pointer :: ttlmin
     integer                         , pointer :: iunderlyr
-    integer                         , pointer :: mxnulyr
     integer                         , pointer :: maxwarn
+    integer                         , pointer :: neulyr
+    integer                         , pointer :: nlalyr
     integer                         , pointer :: ttlform
     integer                         , pointer :: telform
     integer                         , pointer :: updbaselyr
@@ -117,10 +121,12 @@ use bedcomposition_module
     !
     istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'IUnderLyr', iunderlyr)
     if (istat == 0) istat = bedcomp_getpointer_logical(gdp%gdmorlyr, 'ExchLyr'             , exchlyr)
-    if (istat == 0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'MxNULyr'             , mxnulyr)
-    if (istat == 0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'ThUnLyr'             , thunlyr)
+    if (istat == 0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'NLaLyr'              , nlalyr)
+    if (istat == 0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'NEuLyr'              , neulyr)
+    if (istat == 0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'ThEuLyr'             , theulyr)
+    if (istat == 0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'ThLaLyr'             , thlalyr)
     if (istat == 0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'UpdBaseLyr'          , updbaselyr)
-    if (istat == 0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'MinThickShortWarning', minthick)
+    if (istat == 0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'MinMassShortWarning' , minmass)
     if (istat == 0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'MaxNumShortWarning'  , maxwarn)
     if (istat /= 0) then
        call prterr(lundia, 'U021', 'Memory problem in RDMORLYR')
@@ -188,6 +194,24 @@ use bedcomposition_module
        endif
        write (lundia, '(3a)') txtput1, ':', txtput2
        !
+       nlalyr = 0
+       neulyr = 0
+       call prop_get_integer(mor_ptr, 'Underlayer', 'NLaLyr', nlalyr)
+       if (nlalyr < 0) then
+          call prterr(lundia, 'U021', &
+                    & 'Number of Lagrangian under layers should be 0 or more in ' &
+                    & // trim(filmor))
+          call d3stop(1, gdp)
+       endif
+       call prop_get_integer(mor_ptr, 'Underlayer', 'NEuLyr', neulyr)
+       if (neulyr < 0) then
+          call prterr(lundia, 'U021', &
+                    & 'Number of Eulerian under layers should be 0 or more in ' &
+                    & // trim(filmor))
+          call d3stop(1, gdp)
+       endif
+       !
+       mxnulyr = nlalyr+neulyr
        call prop_get_integer(mor_ptr, 'Underlayer', 'MxNULyr', mxnulyr)
        if (mxnulyr < 0) then
           call prterr(lundia, 'U021', &
@@ -195,18 +219,77 @@ use bedcomposition_module
                     & // trim(filmor))
           call d3stop(1, gdp)
        endif
-       txtput1 = 'Maximum number of layers'
-       write (lundia, '(2a,i20)') txtput1, ':', mxnulyr
+       if (mxnulyr /= nlalyr+neulyr) then
+          nlalyr = -999
+          neulyr = -999
+          call prop_get_integer(mor_ptr, 'Underlayer', 'NLaLyr', nlalyr)
+          call prop_get_integer(mor_ptr, 'Underlayer', 'NEuLyr', neulyr)
+          if (nlalyr<0 .and. neulyr<0) then
+             !
+             ! neither NLaLyr nor NEuLyr specified
+             !
+             nlalyr = 0
+             neulyr = mxnulyr
+          elseif (nlalyr>=0 .and. neulyr>=0) then
+             !
+             ! mismatch: error
+             !
+             call prterr(lundia, 'U021', &
+                      & 'Remove MxNULyr or set MxNULyr = NLaLyr+NEuLyr in ' &
+                      & // trim(filmor))
+             call d3stop(1, gdp)
+          elseif (nlalyr>=0) then
+             !
+             ! NLaLyr specified and MxNULyr
+             !
+             neulyr = mxnulyr - nlalyr
+             if (neulyr<0) then
+                call prterr(lundia, 'U021', &
+                         & 'NLaLyr must be less than MxNULyr in ' &
+                         & // trim(filmor))
+             endif
+          else
+             !
+             ! NEuLyr specified and MxNULyr
+             !
+             nlalyr = mxnulyr - neulyr
+             if (nlalyr<0) then
+                call prterr(lundia, 'U021', &
+                          & 'NEuLyr must be less than MxNULyr in ' &
+                         & // trim(filmor))
+             endif
+          endif
+       endif
+       mxnulyr = nlalyr + neulyr
+       txtput1 = 'Number of Lagrangian layers'
+       write (lundia, '(2a,i20)') txtput1, ':', nlalyr
+       txtput1 = 'Number of Eulerian layers'
+       write (lundia, '(2a,i20)') txtput1, ':', neulyr
        !
        if (mxnulyr > 0) then
           call prop_get(mor_ptr, 'Underlayer', 'ThUnLyr', thunlyr)
+          theulyr = thunlyr
+          thlalyr = thunlyr
+          call prop_get(mor_ptr, 'Underlayer', 'ThEuLyr', theulyr)
+          call prop_get(mor_ptr, 'Underlayer', 'ThLaLyr', thlalyr)
           !
-          txtput1 = 'Thickness underlayers'
-          write(lundia,'(2a,e20.4)') txtput1, ':', thunlyr
-          if (thunlyr <= 0) then
-             call prterr(lundia, 'U021', 'ThUnLyr should be positive in ' &
-                       & // trim(filmor))
-             call d3stop(1, gdp)
+          if (nlalyr>0) then
+             txtput1 = 'Thickness of Lagrangian underlayers'
+             write(lundia,'(2a,e20.4)') txtput1, ':', thlalyr
+             if (thlalyr <= 0.0_fp) then
+                call prterr(lundia, 'U021', 'ThLaLyr should be positive in ' &
+                          & // trim(filmor))
+                call d3stop(1, gdp)
+             endif
+          endif
+          if (neulyr>0) then
+             txtput1 = 'Thickness of Eulerian underlayers'
+             write(lundia,'(2a,e20.4)') txtput1, ':', thlalyr
+             if (theulyr <= 0.0_fp) then
+                call prterr(lundia, 'U021', 'ThEuLyr should be positive in ' &
+                          & // trim(filmor))
+                call d3stop(1, gdp)
+             endif
           endif
        endif
        !
@@ -235,8 +318,8 @@ use bedcomposition_module
        !
        ! Numerical settings
        !
-       call prop_get(mor_ptr, 'Numerics', 'MinThickShortWarning', minthick)
-       call prop_get(mor_ptr, 'Numerics', 'MaxNumShortWarning'  , maxwarn)
+       call prop_get(mor_ptr, 'Numerics', 'MinMassShortWarning', minmass)
+       call prop_get(mor_ptr, 'Numerics', 'MaxNumShortWarning' , maxwarn)
     case default
     endselect
     !

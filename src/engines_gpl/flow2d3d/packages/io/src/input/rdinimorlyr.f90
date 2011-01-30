@@ -1,4 +1,4 @@
-subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
+subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                      & lsedtot   ,mmax      ,nlyr      ,nmax      , &
                      & nmaxus    ,nmmax     ,lundia    ,kcs       , &
                      & icx       ,icy       ,gdp       )
@@ -62,7 +62,7 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
     integer                                                , intent(in)  :: nmaxus  !  Description and declaration in iidim.f90
     integer                                                              :: nmmax   !  Description and declaration in iidim.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)             , intent(in)  :: kcs     !  Description and declaration in iidim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,nlyr,lsedtot), intent(out) :: lyrfrac
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,nlyr,lsedtot), intent(out) :: msed
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,nlyr)        , intent(out) :: thlyr
     real(fp), dimension(lsedtot)                           , intent(in)  :: cdryb   !  Description and declaration in rjdim.f90
     character(*)                                                         :: filcomp
@@ -81,7 +81,7 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
     real(fp)                              :: cdrybavg
     real(fp)                              :: fraction
     real(fp)                              :: sedbed
-    real(fp)                              :: sedthick
+    real(fp)                              :: sedmass
     real(fp)                              :: rmissval
     real(fp)                              :: totfrac
     real(fp), dimension(:,:), allocatable :: rtemp
@@ -134,9 +134,10 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
     call prop_get_string(mor_ptr, 'BedCompositionFileInformation', 'FileVersion', versionstring)
     if (trim(versionstring) == '01.00') then
        !
-       ! reset fractions to zero
+       ! reset mass of sediment per fraction to zero
        !
-       lyrfrac = 0.0_fp
+       msed = 0.0_fp
+       thlyr = 0.0_fp
        !
        ! allocate temporary array
        !
@@ -219,7 +220,7 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
                           & thlyr(nmlb,ilyr)     ,gdp       )
                 if (error) then
                    write (message,'(3a,i2,2a)')  &
-                       & 'errorreading thickness from ', trim(filename), &
+                       & 'Error reading thickness from ', trim(filename), &
                        & ' for layer ', ilyr, ' in file ', trim(filcomp)
                    call prterr(lundia, 'U021', trim(message))
                    call d3stop(1, gdp)          
@@ -278,7 +279,7 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
                              & rtemp(nmlb,l)        ,gdp       )
                    if (error) then
                       write (message,'(a,i2,3a,i2,2a)')  &
-                          & 'errorreading fraction ', l, 'from ', &
+                          & 'Error reading fraction ', l, 'from ', &
                           & trim(filename), ' for layer ', ilyr, ' in file ', &
                           & trim(filcomp)
                       call prterr(lundia, 'U021', trim(message))
@@ -414,7 +415,7 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
              !
              do l = 1, lsedtot
                 do nm = 1, nmmax
-                   lyrfrac(nm, ilyr, l) = lyrfrac(nm, ilyr, l) + rtemp(nm,l)*thlyr(nm, ilyr)
+                   msed(nm, ilyr, l) = msed(nm, ilyr, l) + rtemp(nm,l)*thlyr(nm, ilyr)*cdryb(l)
                 enddo
              enddo
              !
@@ -438,7 +439,7 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
                 filename = ' '
                 call prop_get_string(layer_ptr, '*', parname, filename)
                 if (filename /= ' ') then
-                   write (message,'(6a,i2,2a)')  &
+                   write (message,'(7a,i2,2a)')  &
                        & 'Use SedBed', trim(lstr), ' instead of Fraction', &
                        & trim(lstr), ' for ', trim(layertype), ' layer ', &
                        & ilyr, ' in file ', trim(filcomp)
@@ -474,7 +475,7 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
                              & rtemp(nmlb,l)        ,gdp       )
                    if (error) then
                       write (message,'(5a,i2,2a)')  &
-                          & 'errorreading ', layertype, '  from ', trim(filename), &
+                          & 'Error reading ', layertype, '  from ', trim(filename), &
                           & ' for layer ', ilyr, ' in file ', trim(filcomp)
                       call prterr(lundia, 'U021', trim(message))
                       call d3stop(1, gdp)          
@@ -563,19 +564,20 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
              !
              ! convert sediment mass to sediment thickness
              !
-             if (layertype == 'sediment mass') then
+             if (layertype == 'sediment thickness') then
                 do l = 1, lsedtot
                    do nm = 1, nmmax
-                      rtemp(nm, l) = rtemp(nm, l) / cdryb(l)
+                      rtemp(nm, l) = rtemp(nm, l) * cdryb(l)
                    enddo
                 enddo
              endif
              !
-             ! add thicknesses in lyrfrac
+             ! add masses in msed and thicknesses in thlyr
              !
              do l = 1, lsedtot
                 do nm = 1, nmmax
-                   lyrfrac(nm, ilyr, l) = lyrfrac(nm, ilyr, l) + rtemp(nm, l)
+                   msed(nm, ilyr, l) = msed(nm, ilyr, l) + rtemp(nm, l)
+                   thlyr(nm, ilyr)   = thlyr(nm,ilyr)    + rtemp(nm, l)/cdryb(l)
                 enddo
              enddo
           else
@@ -589,29 +591,6 @@ subroutine rdinimorlyr(filcomp   ,lyrfrac   ,thlyr     ,cdryb     , &
        enddo
        !
        deallocate(rtemp, stat = istat)
-       !
-       ! Process lyrfrac (sediment thicknesses) to thlyr and lyrfrac
-       !
-       do ilyr = 1, nlyr
-          do nm = 1, nmmax
-             sedthick = 0.0_fp
-             do l = 1, lsedtot
-                sedthick = sedthick + lyrfrac(nm, ilyr, l)
-             enddo
-             sedthick        = max(sedthick, 0.0_fp)
-             thlyr(nm, ilyr) = sedthick
-             if (sedthick > 0.0_fp) then
-                do l = 1, lsedtot
-                   lyrfrac(nm, ilyr, l) = lyrfrac(nm, ilyr, l) / sedthick
-                enddo
-             else
-                do l = 1, lsedtot-1
-                   lyrfrac(nm, ilyr, l) = 0.0_fp
-                enddo
-                lyrfrac(nm, ilyr, lsedtot) = 1.0_fp
-             endif
-          enddo
-       enddo
        !
     else
        write (message,'(2a)') 'Invalid file version of ', trim(filcomp)

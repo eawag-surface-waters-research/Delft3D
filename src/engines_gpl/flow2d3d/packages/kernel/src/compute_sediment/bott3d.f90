@@ -990,13 +990,6 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                        & cdryb     ,gdp          )
        endif
        !
-       ! calculate density of the mixing layer based on mixture of grain
-       ! sizes present. This should be a function of x,y,t.
-       ! Note the current expression is just a trivial version of this.
-       ! rhomix = cdryb(1)
-       ! Compute thickness correctly in case of multiple fractions with
-       ! different cdryb
-       !
        do nm = 1, nmmax
           if (kcs(nm)/=0 .and. kcs(nm)<=2) then
              dztot = 0.0

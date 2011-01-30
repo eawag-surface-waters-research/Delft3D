@@ -87,7 +87,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
     character(11)                                 :: fmttmp   ! Format file ('formatted  ') 
     character(300)                                :: message
     real(prec)       , dimension(:,:)   , pointer :: bodsed
-    real(fp)         , dimension(:,:,:) , pointer :: lyrfrac
+    real(fp)         , dimension(:,:,:) , pointer :: msed
     real(fp)         , dimension(:,:)   , pointer :: thlyr
 !
 !! executable statements -------------------------------------------------------
@@ -100,8 +100,8 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
     if (istat==0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'nlyr'   , nlyr)
     if (istat==0) istat = bedcomp_getpointer_realprec(gdp%gdmorlyr, 'bodsed', bodsed)
     if (iunderlyr==2) then
-       if (istat==0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'lyrfrac', lyrfrac)
-       if (istat==0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'thlyr'  , thlyr)
+       if (istat==0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'msed'  , msed)
+       if (istat==0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'thlyr' ,thlyr)
     endif
     if (istat/=0) then
        call prterr(lundia, 'U021', 'Memory problem in INIMORLYR')
@@ -127,9 +127,9 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
           ! Try restart
           !
           call restart_lyrs ( &
-                 & error     ,restid    ,i_restart ,lyrfrac   , &
-                 & thlyr     ,lsedtot   ,nmaxus    ,mmax      ,nlyr      , &
-                 & success   ,gdp       )
+                 & error     ,restid    ,i_restart ,msed      , &
+                 & thlyr     ,lsedtot   ,nmaxus    ,cdryb     , &
+                 & mmax      ,nlyr      ,success   ,gdp       )
           if (success) goto 9999
        endif
     case default
@@ -268,7 +268,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
           !
           ! Read the data from the initial composition file.
           !
-          call rdinimorlyr(flcomp    ,lyrfrac   ,thlyr     ,cdryb     , &
+          call rdinimorlyr(flcomp    ,msed      ,thlyr     ,cdryb     , &
                          & lsedtot   ,mmax      ,nlyr      ,nmax      , &
                          & nmaxus    ,nmmax     ,lundia    ,kcs       , &
                          & icx       ,icy       ,gdp       )

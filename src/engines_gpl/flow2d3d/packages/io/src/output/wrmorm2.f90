@@ -1,6 +1,6 @@
 subroutine wrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
-                 & nlyr      ,irequest  ,fds       ,grpnam    ,lyrfrac   , &
-                 & thlyr     ,gdp  )
+                 & nlyr      ,irequest  ,fds       ,grpnam    ,msed      , &
+                 & thlyr     ,alpha     ,cdryb     ,gdp  )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -62,8 +62,10 @@ use bedcomposition_module
     integer                                                                :: nmaxus
     logical                                                                :: error
     character(16)                                                          :: grpnam
-    real(fp)           , dimension(gdp%d%nmlb:gdp%d%nmub,1:nlyr,1:lsedtot) :: lyrfrac
+    real(fp)           , dimension(1:lsedtot)                              :: cdryb
+    real(fp)           , dimension(gdp%d%nmlb:gdp%d%nmub,1:nlyr,1:lsedtot) :: msed
     real(fp)           , dimension(gdp%d%nmlb:gdp%d%nmub,1:nlyr)           :: thlyr
+    real(fp)           , dimension(gdp%d%nmlb:gdp%d%nmub,1:nlyr)           :: alpha
     type(bedcomp_data)                                                     :: gdmorlyr
 !
 ! Local variables
@@ -90,12 +92,20 @@ use bedcomposition_module
        !
        ! Define elements
        !
+       call addelm(nefiswrsedm,'MSED',' ','[   -   ]','REAL',4, &
+          & 'Mass of sediment in layer'               , &
+          & 4      ,nmaxus ,mmax     ,nlyr     ,lsedtot  ,0      , &
+          & lundia ,gdp    )
        call addelm(nefiswrsedm,'LYRFRAC',' ','[   -   ]','REAL',4, &
           & 'Volume fraction of sediment in layer'               , &
           & 4      ,nmaxus ,mmax     ,nlyr     ,lsedtot  ,0      , &
           & lundia ,gdp    )
        call addelm(nefiswrsedm,'THLYR',' ','[   M   ]','REAL',4, &
           & 'Thickness of sediment layer'                      , &
+          & 3      ,nmaxus ,mmax     ,nlyr    ,0       ,0      , &
+          & lundia ,gdp    )
+       call addelm(nefiswrsedm,'ALPHA',' ','[   -   ]','REAL',4, &
+          & 'Porosity coefficient'                             , &
           & 3      ,nmaxus ,mmax     ,nlyr    ,0       ,0      , &
           & lundia ,gdp    )
     case (2)
@@ -106,7 +116,7 @@ use bedcomposition_module
        uindex (2,1) = celidt
        uindex (3,1) = 1 ! increment in time
        !
-       ! element 'LYRFRAC'
+       ! element 'MSED'
        !
        call sbuff_checksize(lsedtot*nlyr*mmax*nmaxus)
        i = 0
@@ -116,7 +126,30 @@ use bedcomposition_module
                 do n = 1, nmaxus
                    i        = i+1
                    call n_and_m_to_nm(n, m, nm, gdp)
-                   sbuff(i) = real(lyrfrac(nm, k, l),sp)
+                   sbuff(i) = real(msed(nm, k, l),sp)
+                enddo
+             enddo
+          enddo
+       enddo
+       ierror = putelt(fds, grpnam, 'MSED', uindex, 1, sbuff)
+       if (ierror /= 0) goto 9999
+       !
+       ! element 'LYRFRAC'
+       !
+       call sbuff_checksize(lsedtot*nlyr*mmax*nmaxus)
+       i = 0
+       
+       do k = 1, nlyr
+          do m = 1, mmax
+             do n = 1, nmaxus
+                do l = 1, lsedtot
+                   i        = (l-1)*nlyr*mmax*nmaxus + (k-1)*mmax*nmaxus + (m-1)*nmaxus + n
+                   call n_and_m_to_nm(n, m, nm, gdp)
+                   if (thlyr(nm,k)>0.0_fp) then
+                        sbuff(i) = real(msed(nm, k, l)*alpha(nm,k)/(cdryb(l)*thlyr(nm,k)),sp)
+                   else
+                        sbuff(i) = 0.0
+                   endif
                 enddo
              enddo
           enddo
@@ -138,6 +171,21 @@ use bedcomposition_module
        enddo
        ierror = putelt(fds, grpnam, 'THLYR', uindex, 1, sbuff)
        if (ierror/= 0) goto 9999
+       !
+       ! element 'ALPHA'
+       !
+       i = 0
+       do k = 1, nlyr
+          do m = 1, mmax
+             do n = 1, nmaxus
+                i        = i+1
+                call n_and_m_to_nm(n, m, nm, gdp)
+                sbuff(i) = real(alpha(nm, k),sp)
+             enddo
+          enddo
+       enddo
+       ierror = putelt(fds, grpnam, 'ALPHA', uindex, 1, sbuff)
+       if (ierror /= 0) goto 9999
        !
        ! write error message if error occurred and set error = .true.
        ! the files will be closed in clsnef (called in triend)

@@ -47,29 +47,26 @@ public bedcomp_data
 !
 ! public routines
 !
-public bedcomposition_module_info
-public updmorlyr
-public gettoplyr
-public lyrerosion
-public lyrsedimentation
-public detthcmud
-public getalluvthick
-public getfrac
-public getmfrac
-public setmfrac
-public getvfrac
-public setvfrac
-public getsedthick
-public initmorlyr
-public allocmorlyr
-public clrmorlyr
-public bedcomp_use_bodsed
+public  bedcomposition_module_info
+public  updmorlyr
+public  gettoplyr
+public  detthcmud
+public  getalluvthick
+public  getfrac
+public  getmfrac
+public  setmfrac
+public  getvfrac
+public  setvfrac
+public  getsedthick
+public  initmorlyr
+public  allocmorlyr
+public  clrmorlyr
+public  bedcomp_use_bodsed
 !
 public bedcomp_getpointer_integer
 public bedcomp_getpointer_logical
 public bedcomp_getpointer_realfp
 public bedcomp_getpointer_realprec
-
 !
 ! interfaces
 !
@@ -102,12 +99,16 @@ end interface
 interface setvfrac
    module procedure setvfrac_1point
 end interface
+interface getsedthick
+   module procedure getsedthick_1point
+   module procedure getsedthick_allpoints
+end interface
 
 !
 ! morphology layers numerical settings
 !
 type morlyrnumericstype
-    real(fp) :: MinThickShortWarning ! minimum erosion thickness for a shortage warning
+    real(fp) :: MinMassShortWarning  ! minimum erosion thickness for a shortage warning
     integer  :: MaxNumShortWarning   ! maximum number of shortage warnings remaining
 end type morlyrnumericstype
 
@@ -116,7 +117,8 @@ type bedcomp_settings
     !
     ! doubles
     !
-    real(fp) :: thunlyr   !  thickness of underlayer layers
+    real(fp) :: thlalyr   !  thickness of Lagrangian underlayer layers
+    real(fp) :: theulyr   !  thickness of Eulerian underlayer layers
     !
     ! reals
     !
@@ -126,8 +128,12 @@ type bedcomp_settings
     integer :: iunderlyr  !  switch for underlayer concept
                           !  1: standard fully mixed concept
                           !  2: graded sediment concept
+    integer :: keuler     !  index of first Eulerian (i.e. non-moving) layer
+                          !  2   : standard Eulerian, only top layer moves with bed level
+                          !  nlyr: fully Lagrangian (all layers move with bed level)
     integer :: nfrac      !  number of sediment fractions
-    integer :: mxnulyr    !  maximum number of underlayers
+    integer :: neulyr     !  number of Eulerian underlayers
+    integer :: nlalyr     !  number of Lagrangian underlayers
     integer :: nlyr       !  number of layers (transport + exchange +
                           !  under layers)
     integer :: nmlb       !  start index of segments
@@ -137,12 +143,13 @@ type bedcomp_settings
                           !  2: base layer composition is kept fixed
                           !  3: base layer composition is set equal to the
                           !     composition of layer above it
+                          !  4: base layer composition and thickness constant
     !
     ! pointers
     !
     type (morlyrnumericstype) , pointer :: morlyrnum ! structure containing numerical settings
-    real(fp) , dimension(:) , pointer :: thexlyr  ! thickness of exchange layer
-    real(fp) , dimension(:) , pointer :: thtrlyr  ! thickness of transport layer
+    real(fp) , dimension(:)   , pointer :: thexlyr   ! thickness of exchange layer
+    real(fp) , dimension(:)   , pointer :: thtrlyr   ! thickness of transport layer
     ! 
     ! logicals
     !
@@ -152,27 +159,20 @@ type bedcomp_settings
     ! characters
     !
 end type bedcomp_settings
-
-type bedcomp_work
-    real(fp) , dimension(:) , pointer :: dzi     !  temporary array for passing sediment through
-                                                            !  underlayers
-end type bedcomp_work
-
+!
 type bedcomp_state
-    real(prec) , dimension(:,:) , pointer :: bodsed   ! Array with total sediment
-                                                             ! units : kg /m2
-    real(fp) , dimension(:) , pointer :: dpsed    ! Total depth sediment layer
-    real(fp) , dimension(:,:,:), pointer :: lyrfrac  ! composition of morphological layers:
-                                                             ! volume fractions
-    real(fp) , dimension(:,:) , pointer :: thlyr    ! thickness of morphological layers
-    real(fp) , dimension(:,:) , pointer :: sedshort ! sediment shortage in transport layer
+    real(fp)   , dimension(:,:)  , pointer :: alpha    ! porosity coefficient, units : -
+    real(prec) , dimension(:,:)  , pointer :: bodsed   ! Array with total sediment, units : kg /m2
+    real(fp)   , dimension(:)    , pointer :: dpsed    ! Total depth sediment layer, units : m
+    real(fp)   , dimension(:,:,:), pointer :: msed     ! composition of morphological layers: mass of sediment fractions, units : kg /m2
+    real(fp)   , dimension(:,:)  , pointer :: sedshort ! sediment shortage in transport layer, units : kg /m2
+    real(fp)   , dimension(:,:)  , pointer :: thlyr    ! thickness of morphological layers, units : m
 end type bedcomp_state
-
+!
 type bedcomp_data
    private
    type (bedcomp_settings), pointer :: settings
-   type (bedcomp_work), pointer :: work
-   type (bedcomp_state), pointer :: state
+   type (bedcomp_state)   , pointer :: state
 end type bedcomp_data
 
 contains
@@ -204,40 +204,43 @@ function updmorlyr(this, dbodsd, cdryb, messages) result (istat)
     !
     ! Call variables
     !
-    type(bedcomp_data), intent(in)                                                              :: this    
-    real(fp), dimension(this%settings%nfrac), intent(in)                                        :: cdryb   !  Description and declaration in rjdim.f90
-    real(fp), dimension(this%settings%nmlb:this%settings%nmub, this%settings%nfrac), intent(in) :: dbodsd  !  Description and declaration in rjdim.f90
+    type(bedcomp_data), intent(in)                                                              :: this 
+    real(fp), dimension(this%settings%nfrac)                                       , intent(in) :: cdryb   !  density of sediment fractions, units : kg/m3
+    real(fp), dimension(this%settings%nmlb:this%settings%nmub, this%settings%nfrac), intent(in) :: dbodsd  !  change in sediment composition, units : kg/m2
     type(message_stack)                                                                         :: messages
     integer                                                                                     :: istat
     !
     ! Local variables
     !
-    integer  :: l
-    integer  :: nm
-    real(fp) :: localthlyr
-    real(fp) :: thtrlyrnew
-    real(fp) :: temp
+    integer                                 :: l
+    integer                                 :: nm
+    real(fp)                                :: dz
+    real(fp)                                :: fac
+    real(fp)                                :: temp
+    real(fp)                                :: thick
+    real(fp)                                :: thtrlyrnew
+    real(fp), dimension(this%settings%nfrac):: dmi 
     !
-    character(message_len)                :: message
-    type (morlyrnumericstype) , pointer   :: morlyrnum
-    real(prec) , dimension(:,:) , pointer :: bodsed
-    real(fp) , dimension(:) , pointer     :: dpsed
-    real(fp) , dimension(:) , pointer     :: dzi
-    real(fp) , dimension(:,:,:) , pointer :: lyrfrac
-    real(fp) , dimension(:,:) , pointer   :: thlyr
-    real(fp) , dimension(:) , pointer     :: thtrlyr
-    real(fp) , dimension(:,:) , pointer   :: sedshort
+    character(message_len)                  :: message
+    type (morlyrnumericstype)     , pointer :: morlyrnum
+    real(prec) , dimension(:,:)   , pointer :: bodsed
+    real(fp)   , dimension(:,:)   , pointer :: alpha
+    real(fp)   , dimension(:)     , pointer :: dpsed
+    real(fp)   , dimension(:,:,:) , pointer :: msed
+    real(fp)   , dimension(:,:)   , pointer :: sedshort 
+    real(fp)   , dimension(:,:)   , pointer :: thlyr
+    real(fp)   , dimension(:)     , pointer :: thtrlyr   
 !
 !! executable statements -------------------------------------------------------
 !
     morlyrnum   => this%settings%morlyrnum
     thtrlyr     => this%settings%thtrlyr
-    dzi         => this%work%dzi
+    alpha       => this%state%alpha
     bodsed      => this%state%bodsed
     dpsed       => this%state%dpsed
-    lyrfrac     => this%state%lyrfrac
-    thlyr       => this%state%thlyr
+    msed        => this%state%msed
     sedshort    => this%state%sedshort
+    thlyr       => this%state%thlyr  
     !
     istat = 0
     select case(this%settings%iunderlyr)
@@ -245,18 +248,17 @@ function updmorlyr(this, dbodsd, cdryb, messages) result (istat)
        do nm = this%settings%nmlb,this%settings%nmub
           if (.not.this%settings%exchlyr) then
              !
-             ! transport layer only: lyrfrac will temporarily contain thicknesses!
+             ! transport layer only
              !
-             localthlyr = 0.0_fp
              do l = 1, this%settings%nfrac
-                temp = lyrfrac(nm, 1, l)*thlyr(nm, 1) + dbodsd(nm, l)/cdryb(l)
+                temp  = msed(nm, 1, l) + dbodsd(nm, l)
                 if (temp < 0.0_fp) then
-                   if (temp < -morlyrnum%MinThickShortWarning .and. morlyrnum%MaxNumShortWarning>0) then
+                   if (temp < -morlyrnum%MinMassShortWarning .and. morlyrnum%MaxNumShortWarning>0) then
                       morlyrnum%MaxNumShortWarning = morlyrnum%MaxNumShortWarning - 1
                       write(message,'(a,i5,a,i3,a,e20.4,a,e20.4)') &
                          & 'Sediment erosion shortage at NM ', nm, ' Fraction: ', l, &
-                         & ' Available: ' ,lyrfrac(nm, 1, l)*thlyr(nm, 1), &
-                         & ' Erosion: ', dbodsd(nm, l)/cdryb(l)
+                         & ' Mass available   : ' ,msed(nm, 1, l), &
+                         & ' Mass to be eroded: ', dbodsd(nm, l)
                       call addmessage(messages,message)
                       if (morlyrnum%MaxNumShortWarning == 0) then
                          message = 'Sediment erosion shortage messages suppressed'
@@ -265,73 +267,103 @@ function updmorlyr(this, dbodsd, cdryb, messages) result (istat)
                    endif
                    sedshort(nm, l) = sedshort(nm, l) + temp
                    temp = 0.0_fp
-                elseif (sedshort(nm, l)<0.0) then
+                elseif ( sedshort(nm, l) < 0.0 ) then
                    temp = temp + sedshort(nm, l)
-                   if (temp < 0.0_fp) then
+                   if ( temp < 0.0_fp ) then
                       sedshort(nm, l) = temp
                       temp = 0.0_fp
                    else
                       sedshort(nm, l) = 0.0_fp
                    endif
                 endif
-                lyrfrac(nm, 1, l) = temp
-                localthlyr        = localthlyr + lyrfrac(nm, 1, l)
+                msed(nm, 1, l) = temp
              enddo
              !
-             ! get new transport layer thickness.
-             ! preliminary solution, keep it fixed
+             ! get new requested transport layer thickness.
              !
              thtrlyrnew = thtrlyr(nm)
              !
-             ! convert lyrfrac back from thicknesses to fractions
+             ! compute actual current thickness of top layer
+             !
+             thick = 0.0_fp
+             do l = 1, this%settings%nfrac
+                 thick = thick + msed(nm, 1, l)*alpha(nm, 1)/cdryb(l)
+             enddo
+             !
+             dz = thick-thtrlyrnew
+             !
              ! get sediment from or put sediment into underlayers
              ! to get transport layer of requested thickness
              !
-             if (localthlyr>thtrlyrnew) then
-                !
+             if ( dz > 0.0_fp ) then
+                !   
                 ! sedimentation to underlayers
-                !
+                ! determine surplus of mass per fraction
+                ! 
+                fac = dz/thick
                 do l = 1, this%settings%nfrac
-                   lyrfrac(nm, 1, l) = lyrfrac(nm, 1, l)/localthlyr
-                   dzi(l)            = lyrfrac(nm, 1, l) * (localthlyr-thtrlyrnew)
+                    dmi(l) = msed(nm, 1, l)*fac
+                    msed(nm, 1, l) = msed(nm, 1, l) - dmi(l)
                 enddo
                 !
-                ! store dzi in underlayers
+                ! store surplus of mass in underlayers
                 !
-                call lyrsedimentation(this , nm)
+                call lyrsedimentation(this , nm, dz, cdryb, dmi)
                 !
-             else
+             elseif ( dz < 0.0_fp ) then
                 !
                 ! erosion of underlayers
-                ! get dzi from underlayers (sum should be thtrlyrnew-localthlyr)
+                ! total erosion thickness: dz
+                ! associated mass returned in: dmi
                 !
-                call lyrerosion(this , nm, thtrlyrnew-localthlyr)
+                dz = -dz
+                !  
+                call lyrerosion(this , nm, dz, cdryb, dmi)
                 !
-                do l = 1, this%settings%nfrac
-                   if (sedshort(nm, l) < 0.0_fp .and. dzi(l) > 0.0_fp) then
-                      sedshort(nm, l) = sedshort(nm, l) + dzi(l)
-                      if (sedshort(nm, l) > 0.0_fp) then
-                         dzi(l) = sedshort(nm, l)
-                         sedshort(nm, l) = 0.0_fp
-                      else
-                         dzi(l) = 0.0_fp
-                      endif
-                   endif
-                   localthlyr        = localthlyr + dzi(l)
-                   lyrfrac(nm, 1, l) = lyrfrac(nm, 1, l)+dzi(l)
+                ! add to top layer
+                ! 
+                do l = 1, this%settings%nfrac 
+                    msed(nm, 1, l)   = msed(nm, 1, l) + dmi(l)
                 enddo
                 !
-                ! if there is not enough sediment in the bed localthlyr may not
-                ! match thtrlyrnew, so we should use localthlyr instead of the
-                ! desired value of thtrlyrnew
-                !
-                thtrlyrnew = localthlyr
-                localthlyr = max(localthlyr,1.0e-20_fp)
                 do l = 1, this%settings%nfrac
-                   lyrfrac(nm, 1, l) = lyrfrac(nm, 1, l)/localthlyr
+                    if (sedshort(nm, l) < 0.0_fp .and. msed(nm, 1, l) > 0.0_fp) then
+                        sedshort(nm, l) = sedshort(nm, l) + msed(nm, 1, l)
+                        if (sedshort(nm, l) > 0.0_fp) then
+                            msed(nm, 1, l)  = sedshort(nm, l)
+                            sedshort(nm, l) = 0.0_fp
+                        else
+                            msed(nm, 1, l) = 0.0_fp
+                        endif
+                    endif
                 enddo
+                !
+                thick = 0.0_fp
+                do l = 1, this%settings%nfrac
+                    thick = thick + msed(nm, 1, l)*alpha(nm,1)/cdryb(l)
+                enddo
+                !
+                ! if there is not enough sediment in the bed then the actual
+                ! thickness thick of the top layer may not reach the desired
+                ! thickness thtrlyrnew, so we should here use thick as the
+                ! thickness instead of thtrlyrnew
+                !
+                thtrlyrnew = thick
              endif
-             thlyr(nm, 1) = thtrlyrnew
+             thlyr(nm, 1) = thtrlyrnew  
+             !
+             ! update porosity coefficient -> this computation will always result in 1 (within numerical precision)
+             !
+             thick = 0.0_fp  
+             do l = 1, this%settings%nfrac
+                thick = thick + msed(nm,1,l)/cdryb(l)
+             enddo     
+             if ( thick > 0.0_fp ) then
+                alpha(nm,1) = thlyr(nm,1)/thick
+             else
+                alpha(nm,1) = 1.0_fp
+             endif
+             !
           else
              !
              ! transport and exchange layer
@@ -348,12 +380,12 @@ function updmorlyr(this, dbodsd, cdryb, messages) result (istat)
           do l = 1, this%settings%nfrac
              bodsed(nm, l) = bodsed(nm, l) + real(dbodsd(nm, l),prec)
              if (bodsed(nm, l) < 0.0_prec) then
-                if (bodsed(nm, l) < real(-morlyrnum%MinThickShortWarning,prec) .and. morlyrnum%MaxNumShortWarning>0) then
+                if (bodsed(nm, l) < real(-morlyrnum%MinMassShortWarning,prec) .and. morlyrnum%MaxNumShortWarning>0) then
                    morlyrnum%MaxNumShortWarning = morlyrnum%MaxNumShortWarning - 1
                    write(message,'(a,i0,a,i0,a,e20.4,a,e20.4)') &
                       & 'Sediment erosion shortage at NM ', nm, ' Fraction: ', l, &
-                      & ' Available: ' ,bodsed(nm, l), &
-                      & ' Erosion: ', dbodsd(nm, l)
+                      & ' Mass available   : ' ,bodsed(nm, l), &
+                      & ' Mass to be eroded: ', dbodsd(nm, l)
                    call addmessage(messages,message)
                    if (morlyrnum%MaxNumShortWarning == 0) then
                       message = 'Sediment erosion shortage messages suppressed'
@@ -363,7 +395,7 @@ function updmorlyr(this, dbodsd, cdryb, messages) result (istat)
                 bodsed(nm, l) = 0.0_prec
              endif
              dpsed(nm) = dpsed(nm) + real(bodsed(nm, l),fp)/cdryb(l)
-          enddo
+          enddo    
        enddo
     endselect
 end function updmorlyr
@@ -387,41 +419,47 @@ function gettoplyr(this, dz_eros, dbodsd, cdryb, messages  ) result (istat)
     ! Function/routine arguments
     !
     type(bedcomp_data), intent(in)                                                               :: this
-    real(fp), dimension(this%settings%nfrac), intent(in)                                         :: cdryb
-    real(fp), dimension(this%settings%nmlb:this%settings%nmub, this%settings%nfrac), intent(out) :: dbodsd
-    real(fp), dimension(this%settings%nmlb:this%settings%nmub)                                   :: dz_eros
+    real(fp), dimension(this%settings%nfrac)                                       , intent(in)  :: cdryb   !  density of sediment fractions, units : kg/m3
+    real(fp), dimension(this%settings%nmlb:this%settings%nmub, this%settings%nfrac), intent(out) :: dbodsd  !  change in sediment composition, units : kg/m2
+    real(fp), dimension(this%settings%nmlb:this%settings%nmub)                                   :: dz_eros !  change in sediment thickness, units : m
     type(message_stack)                                                                          :: messages
     integer                                                                                      :: istat
     !
     ! Local variables
     !
-    integer                               :: l
-    integer                               :: nm
-    real(fp)                              :: localthlyr
-    real(fp)                              :: thtrlyrnew
-    real(fp)                              :: thck_ratio
-    character(message_len)                :: message
-    real(prec) , dimension(:,:) , pointer :: bodsed
-    real(fp) , dimension(:) , pointer     :: dpsed
-    real(fp) , dimension(:) , pointer     :: dzi
-    real(fp) , dimension(:,:,:) , pointer :: lyrfrac
-    real(fp) , dimension(:,:) , pointer   :: thlyr
-    real(fp) , dimension(:) , pointer     :: thtrlyr
+    integer                                 :: k
+    integer                                 :: l
+    integer                                 :: nm
+    real(fp)                                :: dz
+    real(fp)                                :: fac
+    real(fp)                                :: thtrlyrnew
+    real(fp)                                :: thick
+    real(fp), dimension(this%settings%nfrac):: dmi 
+    !
+    character(message_len)                  :: message
+    real(prec) , dimension(:,:)   , pointer :: bodsed
+    real(fp)   , dimension(:,:)   , pointer :: alpha
+    real(fp)   , dimension(:)     , pointer :: dpsed
+    real(fp)   , dimension(:,:,:) , pointer :: msed
+    real(fp)   , dimension(:,:)   , pointer :: sedshort 
+    real(fp)   , dimension(:,:)   , pointer :: thlyr
+    real(fp)   , dimension(:)     , pointer :: thtrlyr
     !
     !! executable statements -------------------------------------------------------
     !
     thtrlyr     => this%settings%thtrlyr
-    dzi         => this%work%dzi
+    alpha       => this%state%alpha
     bodsed      => this%state%bodsed
     dpsed       => this%state%dpsed
-    lyrfrac     => this%state%lyrfrac
+    msed        => this%state%msed
+    sedshort    => this%state%sedshort
     thlyr       => this%state%thlyr
     !
     istat = 0
     select case(this%settings%iunderlyr)
     case(2)
        do nm = this%settings%nmlb,this%settings%nmub
-          if (dz_eros(nm)<0.0_fp) then
+          if ( dz_eros(nm) < 0.0_fp ) then
              !
              ! erosion should not be negative
              !
@@ -438,83 +476,114 @@ function gettoplyr(this, dz_eros, dbodsd, cdryb, messages  ) result (istat)
              enddo
           elseif (.not.this%settings%exchlyr) then
              !
-             ! transport layer only: lyrfrac will temporarily contain thicknesses!
-             !
-             if (dz_eros(nm)<=thlyr(nm, 1)) then
+             ! transport layer only
+             !  
+             if (dz_eros(nm) <= thlyr(nm, 1)) then
                 !
                 ! erosion less than transport layer thickness
                 !
-                localthlyr = thlyr(nm, 1) - dz_eros(nm)
+                thick = thlyr(nm, 1) - dz_eros(nm)
+                fac = dz_eros(nm)/thlyr(nm,1)
                 do l = 1, this%settings%nfrac
-                   dbodsd (nm, l)    = lyrfrac(nm, 1, l)*dz_eros(nm)*cdryb(l)
-                   lyrfrac(nm, 1, l) = lyrfrac(nm, 1, l)*localthlyr
+                   dbodsd (nm, l) = msed(nm, 1, l)*fac
+                   msed(nm, 1, l) = msed(nm, 1, l) - dbodsd(nm, l)
                 enddo
              else
                 !
                 ! erosion more than transport layer thickness
                 !
                 do l = 1, this%settings%nfrac
-                   dbodsd (nm, l)    = lyrfrac(nm, 1, l)*thlyr(nm, 1)*cdryb(l)
-                   lyrfrac(nm, 1, l) = 0.0_fp
+                   dbodsd (nm, l) = msed(nm,1,l)
+                   msed(nm, 1, l) = 0.0_fp
                 enddo
                 dz_eros(nm) = dz_eros(nm)-thlyr(nm, 1)
-                localthlyr  = 0.0_fp
+                thick  = 0.0_fp
                 !
                 ! get remaining dz_eros from underlayers
-                ! get dzi from underlayers (sum should be thtrlyrnew-localthlyr)
+                ! get dmi from underlayers 
                 !
-                call lyrerosion(this , nm, dz_eros(nm))
+                call lyrerosion(this , nm, dz_eros(nm), cdryb, dmi)
                 !
                 do l = 1, this%settings%nfrac
-                   dbodsd(nm, l) = dbodsd(nm, l) + dzi(l)*cdryb(l)
+                   dbodsd(nm, l) = dbodsd(nm, l) + dmi(l)
                 enddo
              endif
              !
              ! get new transport layer thickness.
-             ! preliminary solution, keep it fixed
              !
              thtrlyrnew = thtrlyr(nm)
              !
-             ! convert lyrfrac back from thicknesses to fractions
+             ! compute new thickness of top layer
              ! get sediment from or put sediment into underlayers
              ! to get transport layer of requested thickness
              !
-             if (localthlyr>thtrlyrnew) then
-                !
+             dz = thick-thtrlyrnew
+             !
+             if ( dz > 0.0_fp ) then
+                !   
                 ! sedimentation to underlayers
-                !
+                ! 
+                fac = dz/thick
                 do l = 1, this%settings%nfrac
-                   lyrfrac(nm, 1, l) = lyrfrac(nm, 1, l)/localthlyr
-                   dzi(l)            = lyrfrac(nm, 1, l) * (localthlyr-thtrlyrnew)
-                enddo
+                    dmi(l) = msed(nm,1,l)*fac
+                    msed(nm, 1, l) = msed(nm, 1, l) - dmi(l)
+                enddo   
                 !
-                ! store dzi in underlayers
+                ! store surplus of mass in underlayers
                 !
-                call lyrsedimentation(this , nm)
+                call lyrsedimentation(this , nm, dz, cdryb, dmi)
                 !
-             else
+             elseif ( dz < 0.0_fp ) then
                 !
                 ! erosion of underlayers
-                ! get dzi from underlayers (sum should be thtrlyrnew-localthlyr)
                 !
-                call lyrerosion(this , nm, thtrlyrnew-localthlyr)
+                dz = -dz
+                call lyrerosion(this , nm, dz, cdryb, dmi)
                 !
-                do l = 1, this%settings%nfrac
-                   localthlyr        = localthlyr + dzi(l)
-                   lyrfrac(nm, 1, l) = lyrfrac(nm, 1, l)+dzi(l)
+                ! add to top layer
+                !  
+                do l = 1, this%settings%nfrac 
+                    msed(nm, 1, l)   = msed(nm, 1, l) + dmi(l) 
                 enddo
                 !
-                ! if there is not enough sediment in the bed localthlyr may not
-                ! match thtrlyrnew, so we should use localthlyr instead of the
-                ! desired value of thtrlyrnew
-                !
-                thtrlyrnew = localthlyr
-                localthlyr = max(localthlyr,1.0e-20_fp)
                 do l = 1, this%settings%nfrac
-                   lyrfrac(nm, 1, l) = lyrfrac(nm, 1, l)/localthlyr
+                    if (sedshort(nm, l) < 0.0_fp .and. msed(nm, 1, l) > 0.0_fp) then
+                        sedshort(nm, l) = sedshort(nm, l) + msed(nm, 1, l)
+                        if (sedshort(nm, l) > 0.0_fp) then
+                            msed(nm, 1, l)  = sedshort(nm, l)
+                            sedshort(nm, l) = 0.0_fp
+                        else
+                            msed(nm, 1, l) = 0.0_fp
+                        endif
+                    endif
                 enddo
+                !
+                thick = 0.0_fp
+                do l = 1, this%settings%nfrac
+                    thick = thick + msed(nm,1,l)*alpha(nm,1)/cdryb(l)
+                enddo
+                !
+                ! if there is not enough sediment in the bed then the actual
+                ! thickness thick of the top layer may not reach the desired
+                ! thickness thtrlyrnew, so we should here use thick as the
+                ! thickness instead of thtrlyrnew
+                !
+                thtrlyrnew = thick
              endif
              thlyr(nm, 1) = thtrlyrnew
+             !
+             ! update porosity coefficient -> this computation will always result in 1 (within numerical precision)
+             !
+             thick = 0.0_fp  
+             do l = 1, this%settings%nfrac
+                thick = thick + msed(nm,1,l)/cdryb(l)
+             enddo     
+             if ( thick > 0.0_fp ) then
+                alpha(nm,1) = thlyr(nm,1)/thick
+             else
+                alpha(nm,1) = 1.0_fp
+             endif
+             !
           else
              !
              ! transport and exchange layer
@@ -546,10 +615,10 @@ function gettoplyr(this, dz_eros, dbodsd, cdryb, messages  ) result (istat)
              !
              ! some sediment remaining
              !
-             thck_ratio = dz_eros(nm)/dpsed(nm)
+             fac = dz_eros(nm)/dpsed(nm)
              dpsed(nm) = 0.0_fp
              do l = 1, this%settings%nfrac
-                dbodsd(nm, l) = real(bodsed(nm, l),fp)*thck_ratio
+                dbodsd(nm, l) = real(bodsed(nm, l),fp)*fac
                 bodsed(nm, l) = bodsed(nm, l) - real(dbodsd(nm, l),prec)
                 dpsed (nm)    = dpsed(nm) + real(bodsed(nm, l),fp)/cdryb(l)
              enddo
@@ -570,7 +639,7 @@ end function gettoplyr
 !
 !
 !==============================================================================
-subroutine lyrerosion(this, nm, dzini)
+subroutine lyrerosion(this, nm, dzini, cdryb, dmi)
 !!--description-----------------------------------------------------------------
 !
 !    Function:
@@ -584,59 +653,117 @@ subroutine lyrerosion(this, nm, dzini)
     !
     ! Function/routine arguments
     !
-    type(bedcomp_data), intent(in) :: this    
-    integer , intent(in)           :: nm
-    real(fp) , intent(in)          :: dzini
+    type(bedcomp_data)                       , intent(in) :: this    
+    integer                                  , intent(in) :: nm
+    real(fp)                                 , intent(in) :: dzini   !  thickness of eroded layer, units : m
+    real(fp), dimension(this%settings%nfrac) , intent(in) :: cdryb   !  dry bed density, units : kg/m3
+    real(fp), dimension(this%settings%nfrac) , intent(out):: dmi     !  density of sediment fractions, units : kg/m3
     !
     ! Local variables
     !
-    integer                             :: k
-    integer                             :: l
-    real(fp)                            :: dz
-    real(fp)                            :: thbaselyr
-    integer, pointer                    :: nlyr
-    integer, pointer                    :: updbaselyr
-    real(fp), dimension(:), pointer     :: dzi
-    real(fp), dimension(:,:,:), pointer :: lyrfrac
-    real(fp), dimension(:,:), pointer   :: thlyr
+    logical                                            :: remove
+    integer                                            :: k
+    integer                                            :: kero1  ! top-most layer that has been (partially) eroded
+    integer                                            :: l
+    real(fp)                                           :: dz
+    real(fp)                                           :: dm
+    real(fp)                                           :: fac
+    real(fp)                                           :: thick
+    real(fp)                                           :: thbaselyr
+    real(fp), dimension(this%settings%nfrac)           :: mbaselyr  
+    real(fp)                                 , pointer :: thlalyr
+    integer                                  , pointer :: keuler 
+    integer                                  , pointer :: nlyr
+    integer                                  , pointer :: updbaselyr
+    real(fp), dimension(:,:)                 , pointer :: alpha
+    real(fp), dimension(:,:,:)               , pointer :: msed
+    real(fp), dimension(:,:)                 , pointer :: thlyr
 !
 !! executable statements -------------------------------------------------------
 !
+    keuler      => this%settings%keuler
     nlyr        => this%settings%nlyr
+    thlalyr     => this%settings%thlalyr
     updbaselyr  => this%settings%updbaselyr
-    dzi         => this%work%dzi
-    lyrfrac     => this%state%lyrfrac
+    alpha       => this%state%alpha
+    msed        => this%state%msed
     thlyr       => this%state%thlyr
     !
     k   = 2
     if (this%settings%exchlyr) k = 3
     !
     thbaselyr = thlyr(nm,nlyr)
-    !
-    dzi = 0.0
+    mbaselyr  = msed(nm,nlyr,:)
+    dmi = 0.0_fp
     dz  = dzini
-    do while (dz>0.0 .and. k<=nlyr)
-       if (thlyr(nm,k) < dz) then
-          !
-          ! all sediment should be removed from the layer
-          !
-          do l = 1, this%settings%nfrac
-             dzi(l) = dzi(l) + thlyr(nm,k)*lyrfrac(nm,k,l)
-          enddo
-          dz          = dz - thlyr(nm,k)
-          thlyr(nm,k) = 0.0
-          k           = k+1
-       else ! thlyr(k)>=dz
-          !
-          ! only part of the sediment has to be removed from
-          ! the layer
-          !
-          do l = 1, this%settings%nfrac
-             dzi(l) = dzi(l) + dz*lyrfrac(nm,k,l)
-          enddo
-          thlyr(nm,k) = thlyr(nm,k) - dz
-          dz          = 0.0
-       endif
+    !
+    ! initially remove sediment irrespective of layer type
+    ! then fill the Lagrangian layers again up to their
+    ! original thickness
+    ! kero1 represents the Lagrangian layer that was eroded and needs
+    ! to be replenished
+    ! remove indicates that sediment should be eroded (stored in dmi)
+    ! rather than shifted to another Lagrangian layer
+    !
+    kero1 = k-1
+    remove = .true.
+    do while (dz>0.0_fp .and. k<=nlyr)
+        if ( thlyr(nm,k) < dz ) then
+            !
+            ! more sediment is needed than there is available in layer
+            ! k, so all sediment should be removed from this layer
+            !          
+            do l = 1, this%settings%nfrac
+                if (remove) then
+                   dmi(l) = dmi(l) + msed(nm,k,l)
+                else
+                   msed(nm, kero1, l) = msed(nm,kero1,l) + msed(nm,k,l)
+                endif
+                msed(nm, k, l) = 0.0_fp
+            enddo
+            dz          = dz - thlyr(nm,k)
+            if (.not.remove) then
+               thlyr(nm,kero1) = thlyr(nm,kero1) + thlyr(nm,k)
+            endif
+            thlyr(nm,k) = 0.0_fp
+            k           = k+1
+        else ! thlyr(k)>=dz
+            !
+            ! layer k contains more sediment than is need, so only part
+            ! of the sediment has to be removed from the layer
+            !
+            fac = dz/thlyr(nm,k)
+            do l = 1, this%settings%nfrac
+                dm = msed(nm, k, l)*fac
+                if (remove) then
+                   dmi(l)             = dmi(l) + dm 
+                else
+                   msed(nm, kero1, l) = msed(nm,kero1,l) + dm
+                endif
+                msed(nm, k, l) = msed(nm, k, l) - dm
+            enddo
+            thlyr(nm,k)        = thlyr(nm,k)     - dz
+            if (.not.remove) then
+               thlyr(nm,kero1) = thlyr(nm,kero1) + dz
+            endif
+            !
+            ! erosion complete (dz=0) now continue to replenish the
+            ! (partially) eroded Lagrangian layers as long as
+            ! sediment is available in lower layers. Note that the
+            ! Eulerian layers don't get replenished.
+            !
+            kero1 = kero1+1
+            remove = .false.
+            !
+            ! do we have to fill again some of the Lagrangian layers?
+            !
+            if (kero1<keuler) then
+                dz = max(thlalyr - thlyr(nm,kero1),0.0_fp)
+                k = max(k,kero1+1)
+            else
+                dz = 0.0_fp
+            endif
+        endif
     enddo
     !
     ! update composition of base layer
@@ -648,23 +775,29 @@ subroutine lyrerosion(this, nm, dzini)
        !
     case(2) ! composition of base layer constant
        !
-       ! no change necessary
+       ! compute new masses
        !
+       fac = thlyr(nm,nlyr)/thbaselyr
+       do l = 1, this%settings%nfrac
+          msed(nm,nlyr,l) = mbaselyr(l)*fac
+       enddo
     case(3) ! same as the (first non-empty) layer above it
        !
        ! find lowest non-empty layer
        !
        do k = nlyr-1,1,-1
-          if (thlyr(nm,k)>0.0) exit
+          if ( thlyr(nm,k) > 0.0_fp ) exit
        enddo
+       fac = thlyr(nm,nlyr)/thlyr(nm,k)
        do l = 1, this%settings%nfrac
-          lyrfrac(nm,nlyr,l) = lyrfrac(nm,k,l)
+          msed(nm,nlyr,l) = msed(nm,k,l)*fac
        enddo
     case(4) ! composition and thickness of base layer constant
        !
-       ! reset thickness
+       ! reset thickness and masses
        !
-       thlyr(nm,nlyr) = thbaselyr
+       thlyr(nm,nlyr)  = thbaselyr
+       msed(nm,nlyr,:) = mbaselyr
     case default
        !
        ! ERROR
@@ -675,7 +808,7 @@ end subroutine lyrerosion
 !
 !
 !==============================================================================
-subroutine lyrsedimentation(this, nm)
+subroutine lyrsedimentation(this, nm, dzini, cdryb, dmi)
 !!--description-----------------------------------------------------------------
 !
 !    Function:
@@ -690,45 +823,210 @@ subroutine lyrsedimentation(this, nm)
 !
 ! Function/routine arguments
 !
-    type(bedcomp_data), intent(in) :: this    
-    integer, intent(in)            :: nm
+    type(bedcomp_data)                       , intent(in) :: this   
+    integer                                  , intent(in) :: nm
+    real(fp)                                 , intent(in) :: dzini
+    real(fp), dimension(this%settings%nfrac) , intent(in) :: cdryb   !  dry bed density, units : kg/m3
+    real(fp), dimension(this%settings%nfrac)              :: dmi
 !
 ! Local variables
 !
-    integer                             :: k
-    integer                             :: kmin
-    integer                             :: kne
-    integer                             :: l
-    real(fp)                            :: dz
-    real(fp)                            :: depfrac
-    real(fp)                            :: newthlyr
-    real(fp), pointer                   :: thunlyr
-    integer, pointer                    :: nlyr
-    integer, pointer                    :: updbaselyr
-    real(fp), dimension(:), pointer     :: dzi
-    real(fp), dimension(:,:,:), pointer :: lyrfrac
-    real(fp), dimension(:,:), pointer   :: thlyr
+    integer                                     :: k
+    integer                                     :: k2
+    integer                                     :: kmin
+    integer                                     :: kne
+    integer                                     :: l
+    real(fp)                                    :: depfrac
+    real(fp)                                    :: dm
+    real(fp)                                    :: dz
+    real(fp)                                    :: dz2
+    real(fp)                                    :: dzc
+    real(fp)                                    :: dzk
+    real(fp)                                    :: dzlmax
+    real(fp)                                    :: fac
+    real(fp)                                    :: newthlyr
+    real(fp)                                    :: thick
+    real(fp)                  , pointer         :: thlalyr
+    integer                   , pointer         :: keuler
+    integer                   , pointer         :: nlyr
+    integer                   , pointer         :: updbaselyr
+    real(fp), dimension(:,:)  , pointer         :: alpha
+    real(fp), dimension(:,:,:), pointer         :: msed
+    real(fp), dimension(:,:)  , pointer         :: thlyr
+    real(fp), dimension(this%settings%nfrac)    :: dmi2
+    real(fp), dimension(this%settings%nlyr,this%settings%nfrac) :: msed2
+    real(fp), dimension(this%settings%nlyr) :: thlyr2
 !
 !! executable statements -------------------------------------------------------
 !
-    thunlyr     => this%settings%thunlyr
+    thlalyr     => this%settings%thlalyr
+    keuler      => this%settings%keuler
     nlyr        => this%settings%nlyr
     updbaselyr  => this%settings%updbaselyr
-    dzi         => this%work%dzi
-    lyrfrac     => this%state%lyrfrac
+    alpha       => this%state%alpha
+    msed        => this%state%msed
     thlyr       => this%state%thlyr
     !
-    dz = 0.0
-    do l = 1, this%settings%nfrac
-       dz = dz + dzi(l)
-    enddo
     kmin = 2
     if (this%settings%exchlyr) kmin = 3
+    dz = dzini
+    !
+    ! copy Lagrangian layer data to temporary array
+    !
+    do k = kmin,keuler-1
+       do l = 1, this%settings%nfrac
+          msed2(k,l) = msed(nm,k,l)
+          msed(nm,k,l) = 0.0_fp
+       enddo
+       thlyr2(k) = thlyr(nm,k)
+       thlyr(nm,k) = 0.0_fp
+    enddo
+    !
+    ! fill the Lagrangian layers from top to bottom
+    !
+    do k = kmin,keuler-1
+       !
+       ! while there is newly deposited sediment use that to fill the layers
+       !
+       if (dz>thlalyr) then
+          !
+          ! sufficient newly deposited sediment to fill whole layer
+          !
+          fac = thlalyr/dz
+          do l = 1, this%settings%nfrac
+             dm = dmi(l) * fac
+             msed(nm, k, l) = dm
+             dmi(l) = dmi(l) - dm
+          enddo
+          thlyr(nm, k) = thlalyr
+          dz = dz - thlalyr
+       elseif (dz>0.0_fp) then
+          !
+          ! last bit of newly deposited sediment to partially fill the layer
+          !
+          do l = 1, this%settings%nfrac
+             msed(nm, k, l) = dmi(l)
+             dmi(l) = 0.0_fp
+          enddo
+          thlyr(nm, k) = dz
+          dz = 0.0_fp
+       endif
+       !
+       ! as long as there is still space in this layer, fill it with sediment
+       ! from the old Lagrangian layers
+       !
+       k2 = kmin
+       dzc = thlalyr - thlyr(nm,k)
+       do while (k2<keuler .and. dzc > 0.0_fp)
+          !
+          ! did this Lagrangian layer contain sediment?
+          !
+          if (thlyr2(k2)>0.0_fp) then
+             if (dzc<thlyr2(k2)) then
+                !
+                ! sufficient sediment left in old layer k2 to fill the
+                ! remainder of new layer k
+                !
+                fac = dzc/thlyr2(k2)
+                do l = 1, this%settings%nfrac
+                   dm = msed2(k2, l) * fac
+                   msed(nm, k, l) = msed(nm, k, l) + dm
+                   msed2(k2, l) = msed2(k2, l) - dm
+                enddo
+                thlyr(nm, k) = thlalyr
+                thlyr2(k2) = thlyr2(k2) - dzc
+             else
+                !
+                ! all the sediment of old layer k2 fits into new layer k
+                !
+                do l = 1, this%settings%nfrac
+                   msed(nm, k, l) = msed(nm, k, l) + msed2(k2, l)
+                   msed2(k2, l) = 0.0_fp
+                enddo
+                thlyr(nm, k) = thlyr(nm, k) + thlyr2(k2)
+                thlyr2(k2) = 0.0_fp
+             endif
+             dzc = thlalyr - thlyr(nm,k)
+          endif
+          k2 = k2+1
+       enddo
+    enddo
+    !
+    ! if there is any sediment left in the old Lagrangian layers then move it
+    ! to the Eulerian layers below
+    !
+    do k2 = keuler-1,kmin,-1
+       if (thlyr2(k2)>0.0_fp) then
+          do l = 1, this%settings%nfrac
+             dmi2(l) = msed2(k2,l)
+          enddo
+          call lyrsedimentation_eulerian(this, nm, thlyr2(k2), cdryb, dmi2)
+       endif
+    enddo
+end subroutine lyrsedimentation
+!
+!
+!
+!==============================================================================
+subroutine lyrsedimentation_eulerian(this, nm, dzini, cdryb, dmi)
+!!--description-----------------------------------------------------------------
+!
+!    Function:
+!     - lyrsedimentation_eulerian implements the deposition of sediment in the 
+!       Eulerian layers below the transport, exchange and other Lagrangian
+!       layers
+!
+!!--declarations----------------------------------------------------------------
+    use precision
+    !
+    implicit none
+    !
+!
+! Function/routine arguments
+!
+    type(bedcomp_data)                       , intent(in) :: this   
+    integer                                  , intent(in) :: nm
+    real(fp)                                 , intent(in) :: dzini
+    real(fp), dimension(this%settings%nfrac) , intent(in) :: cdryb   !  dry bed density, units : kg/m3
+    real(fp), dimension(this%settings%nfrac)              :: dmi
+!
+! Local variables
+!
+    integer                                     :: k
+    integer                                     :: kmin
+    integer                                     :: kne
+    integer                                     :: l
+
+    real(fp)                                    :: depfrac
+    real(fp)                                    :: dm
+    real(fp)                                    :: dz
+    real(fp)                                    :: fac
+    real(fp)                                    :: newthlyr
+    real(fp)                                    :: thick
+    real(fp)                  , pointer         :: theulyr
+    integer                   , pointer         :: keuler
+    integer                   , pointer         :: nlyr
+    integer                   , pointer         :: updbaselyr
+    real(fp), dimension(:,:)  , pointer         :: alpha
+    real(fp), dimension(:,:,:), pointer         :: msed
+    real(fp), dimension(:,:)  , pointer         :: thlyr
+!
+!! executable statements -------------------------------------------------------
+!
+    theulyr     => this%settings%theulyr
+    keuler      => this%settings%keuler
+    nlyr        => this%settings%nlyr
+    updbaselyr  => this%settings%updbaselyr
+    alpha       => this%state%alpha
+    msed        => this%state%msed
+    thlyr       => this%state%thlyr
+    !
+    dz = dzini
     !
     ! find first (partially) filled underlayer
     !
-    k = kmin
-    do while (thlyr(nm,k) == 0.0 .and. k<nlyr)
+    k = keuler
+    do while (comparereal(thlyr(nm,k),0.0_fp)==0 .and. k<nlyr)
        k = k+1
     enddo
     !
@@ -738,105 +1036,123 @@ subroutine lyrsedimentation(this, nm)
     !
     ! start filling upwards
     !
-    do while (k>=kmin .and. dz>0.0)
-       if (thlyr(nm,k) < thunlyr) then
+    do while ( k>=keuler .and. dz > 0.0_fp )
+       if ( thlyr(nm,k) < theulyr ) then
           !
           ! sediment can be added to this layer
           !
-          if (dz > thunlyr-thlyr(nm,k) .and. thlyr(nm,k) > 0) then
+          if ( dz > theulyr-thlyr(nm,k) ) then
              !
              ! not all sediment can be added to this layer
              !
-             depfrac = (thunlyr-thlyr(nm,k))/dz
-             dz      = dz*(1.0-depfrac)
+             fac     = (theulyr-thlyr(nm,k))/dz
+             dz      = dz*(1.0_fp-fac)
              do l = 1,this%settings%nfrac
-                lyrfrac(nm, k, l) = (lyrfrac(nm, k, l)*thlyr(nm, k) + dzi(l)*depfrac)/thunlyr
-                dzi(l)            = dzi(l)*(1.0-depfrac)
+                dm = dmi(l)*fac
+                msed(nm, k, l) = msed(nm, k, l) + dm
+                dmi(l)         = dmi(l)         - dm
              enddo
-             thlyr(nm,k) = thunlyr
+             thlyr(nm,k) = theulyr
           else
              !
              ! everything can be added to this layer
              !
-             newthlyr = thlyr(nm, k)
-             do l = 1,this%settings%nfrac
-                lyrfrac(nm, k, l) = lyrfrac(nm, k, l)*thlyr(nm, k) + dzi(l)
-                newthlyr          = newthlyr + dzi(l)
-             enddo
-             do l = 1,this%settings%nfrac
-                lyrfrac(nm, k, l) = lyrfrac(nm, k, l)/newthlyr
+             do l = 1,this%settings%nfrac            
+                msed(nm, k, l) = msed(nm, k, l) + dmi(l)
+                dmi(l) = 0.0_fp
              enddo
              thlyr(nm, k) = thlyr(nm, k) + dz
-             dz           = 0.0
+             dz           = 0.0_fp
           endif
        endif
+       !
+       ! Update porosity coefficient
+       !
+       thick = 0.0_fp
+       do l = 1, this%settings%nfrac
+           thick = thick + msed(nm, k, l)/cdryb(l)                       
+       enddo
+       if ( thick > 0.0_fp ) then
+           alpha(nm,k) = thlyr(nm,k)/thick
+       else
+           alpha(nm,k) = 1.0_fp
+       endif
+       !
        k = k-1
     enddo
     !
-    ! the first underlayer is completely filled or
+    ! the first Eulerian underlayer is completely filled or
     ! all sediment deposited
     !
-    if (dz > 0.0) then
+    if ( dz > 0.0_fp ) then
        !
        ! still more sediment to be deposited
        !
-       if (nlyr == kmin) then
+       if (keuler == nlyr) then
+          k = nlyr
           !
-          ! no thin underlayers, so put everything in
+          ! no Eulerian underlayers, so put everything in
           ! the last (i.e. base) layer
           !
           select case (updbaselyr)
           case(1) ! compute separate composition for the base layer
-             k        = nlyr
-             newthlyr = thlyr(nm, k)
-             do l = 1,this%settings%nfrac
-                lyrfrac(nm, k, l) = lyrfrac(nm, k, l)*thlyr(nm, k) + dzi(l)
-                newthlyr          = newthlyr + dzi(l)
+             do l = 1,this%settings%nfrac           
+                msed(nm, k, l) = msed(nm, k, l) + dmi(l)
              enddo
-             thlyr(nm, k) = newthlyr
-             do l = 1,this%settings%nfrac
-                lyrfrac(nm, k, l) = lyrfrac(nm, k, l)/newthlyr
-             enddo
-             dz = 0.0
+             thlyr(nm, k) = thlyr(nm,k) + dz
+             dz           = 0.0_fp
           case(2) ! composition of base layer constant
              !
              ! composition of dz is lost, update thickness
              !
-             k            = nlyr
+             fac = (thlyr(nm,k)+dz)/thlyr(nm,k)
+             do l = 1, this%settings%nfrac
+                msed(nm,k,l) = msed(nm,k,l)*fac
+             enddo
              thlyr(nm, k) = thlyr(nm, k) + dz
           case(3) ! same as the (first non-empty) layer above it
              !
              ! composition of dz is lost, update thickness
-             ! and set composition to that of transp. or exchange
-             ! layer
+             ! and set composition to that of layer nlyr-1
              !
-             k            = nlyr
              thlyr(nm, k) = thlyr(nm, k) + dz
+             fac = thlyr(nm,k)/thlyr(nm,k-1)
              do l = 1,this%settings%nfrac
-                lyrfrac(nm, k, l) = lyrfrac(nm, kmin-1, l)
+                msed(nm, k, l) = msed(nm, kmin-1, l)*fac
              enddo
           case default
              !
              ! ERROR
              !
           endselect
+          !
+          ! compute porosity coefficient
+          !
+          thick = 0.0_fp
+          do l = 1, this%settings%nfrac
+              thick = thick + msed(nm, k, l)/cdryb(l)                       
+          enddo
+          if ( thick > 0.0_fp ) then
+            alpha(nm,k) = thlyr(nm,k)/thick
+          else
+            alpha(nm,k) = 1.0_fp
+          endif
+          !
        else
           !
           ! thin underlayers filled shift administration and deposit
           ! remaining sediment
           !
-          do while (dz > 0.0)
+          do while ( dz > 0.0_fp )
              !
              ! add last thin underlayer to the last (i.e. base) layer
              !
              newthlyr = thlyr(nm, nlyr)+thlyr(nm, nlyr-1)
              select case (updbaselyr)
              case(1) ! compute separate composition for the base layer
-                if (newthlyr > 0.0) then
+                if ( newthlyr > 0.0_fp ) then
                    do l = 1,this%settings%nfrac
-                      lyrfrac(nm, nlyr, l) =                            &
-                         & (  lyrfrac(nm, nlyr , l) * thlyr(nm,nlyr)   &
-                         &  + lyrfrac(nm, nlyr-1, l) * thlyr(nm,nlyr-1)) / newthlyr
+                      msed(nm, nlyr, l) = msed(nm, nlyr , l) + msed(nm, nlyr-1, l) 
                    enddo
                 endif
              case(2) ! composition of base layer constant
@@ -844,15 +1160,20 @@ subroutine lyrsedimentation(this, nm)
                 ! composition of layer nlyr-1 is lost; just the
                 ! thickness of the base layer is updated
                 !
+                fac = newthlyr/thlyr(nm,nlyr)
+                do l = 1, this%settings%nfrac
+                    msed(nm,nlyr,l) = msed(nm,nlyr,l)*fac
+                enddo
              case(3) ! same as the (first non-empty) layer above it
                 !
                 ! find lowest non-empty layer
                 !
                 do kne = nlyr-2,1,-1
-                   if (thlyr(nm,kne)>0.0) exit
+                   if ( thlyr(nm,kne) > 0.0_fp ) exit
                 enddo
+                fac = newthlyr/thlyr(nm,kne)
                 do l = 1, this%settings%nfrac
-                   lyrfrac(nm,nlyr,l) = lyrfrac(nm,kne,l)
+                   msed(nm,nlyr,l) = msed(nm,kne,l)*fac
                 enddo
              case(4) ! composition and thickness of base layer constant
                 !
@@ -870,24 +1191,37 @@ subroutine lyrsedimentation(this, nm)
              !
              ! shift layers down by one
              !
-             do k = nlyr-1,kmin+1,-1
+             do k = nlyr-1,keuler+1,-1
                 do l = 1,this%settings%nfrac
-                   lyrfrac(nm,k,l) = lyrfrac(nm,k-1,l)
+                   msed(nm,k,l) = msed(nm,k-1,l)
                 enddo
                 thlyr(nm,k) = thlyr(nm,k-1)
+                alpha(nm,k) = alpha(nm,k-1)
              enddo
              !
              ! put all the sediment in one layer
              !
-             thlyr(nm,kmin) = dz
-             do l = 1, this%settings%nfrac
-                lyrfrac(nm,kmin,l) = dzi(l)/dz
+             k = keuler
+             thick = 0.0_fp
+             do l = 1, this%settings%nfrac 
+                 msed(nm, k, l) = dmi(l)
+                 thick = thick + msed(nm, k, l)/cdryb(l)
              enddo
-             dz = 0.0
+             thlyr(nm,k) = dz
+             dz = 0.0_fp
+             !
+             ! compute porosity coefficient
+             !
+             if ( thick > 0.0_fp ) then
+                alpha(nm,k) = thlyr(nm,k)/thick
+             else
+                alpha(nm,k) = 1.0_fp
+             endif
+             !
           enddo
        endif
     endif
-end subroutine lyrsedimentation
+end subroutine lyrsedimentation_eulerian
 !
 !
 !
@@ -1020,7 +1354,7 @@ subroutine getfrac(this, cdryb, frac, sedtyp, anymud, mudcnt, mudfrac)
     !
     select case(this%settings%iunderlyr)
     case(1)
-       call getmfrac_allpoints(this ,cdryb ,frac      )
+       call getmfrac_allpoints(this ,frac      )
     case default
        call getvfrac_allpoints(this ,cdryb ,frac      )
     endselect
@@ -1057,7 +1391,7 @@ end subroutine getfrac
 !
 !
 !==============================================================================
-subroutine getmfrac_allpoints(this, cdryb, frac)
+subroutine getmfrac_allpoints(this, frac)
 !!--description-----------------------------------------------------------------
 !
 !    Function: Determines the mass fractions for all points
@@ -1069,7 +1403,6 @@ subroutine getmfrac_allpoints(this, cdryb, frac)
     ! Function/routine arguments
     !
     type(bedcomp_data), intent(in)                                                  :: this
-    real(fp), dimension(this%settings%nfrac), intent(in)                            :: cdryb
     real(fp), dimension(this%settings%nmlb:this%settings%nmub, this%settings%nfrac) :: frac
     !
     ! Local variables
@@ -1078,34 +1411,33 @@ subroutine getmfrac_allpoints(this, cdryb, frac)
     integer                             :: nm
     real(fp)                            :: sedtot
     real(prec), dimension(:,:), pointer :: bodsed
-    real(fp), dimension(:,:,:), pointer :: lyrfrac
+    real(fp), dimension(:,:,:), pointer :: msed
     !
     !! executable statements -------------------------------------------------------
     !
     bodsed      => this%state%bodsed
-    lyrfrac     => this%state%lyrfrac
+    msed        => this%state%msed
     !
     ! Calculate total bottom sediments and fractions
     !
     select case(this%settings%iunderlyr)
     case(2)
        do nm = this%settings%nmlb,this%settings%nmub
-          sedtot = 0.0
+          sedtot = 0.0_fp
           do l = 1, this%settings%nfrac
-             frac(nm, l) = lyrfrac(nm, 1, l)
-             sedtot      = sedtot + frac(nm, l)*cdryb(l)
+             sedtot = sedtot + msed(nm,1,l)
           enddo
           if (comparereal(sedtot,0.0_fp) == 0) then
              frac(nm, :) = 1.0_fp/this%settings%nfrac
           else
-             do l = 1, this%settings%nfrac
-                frac(nm, l) = frac(nm, l)*cdryb(l)/sedtot
-             enddo
+            do l = 1, this%settings%nfrac
+                frac(nm, l) = msed(nm, 1, l)/sedtot
+            enddo
           endif
        enddo
     case default
        do nm = this%settings%nmlb,this%settings%nmub
-          sedtot = 0.0
+          sedtot = 0.0_fp
           do l = 1, this%settings%nfrac
              sedtot = sedtot + real(bodsed(nm, l),fp)
           enddo
@@ -1123,7 +1455,7 @@ end subroutine getmfrac_allpoints
 !
 !
 !==============================================================================
-subroutine getmfrac_1point(this ,nm ,cdryb ,frac      )
+subroutine getmfrac_1point(this ,nm  ,frac      )
 !!--description-----------------------------------------------------------------
 !
 !    Function: Determines the mass fractions for 1 point
@@ -1136,7 +1468,6 @@ subroutine getmfrac_1point(this ,nm ,cdryb ,frac      )
     !
     type(bedcomp_data), intent(in)                        :: this    
     integer, intent(in)                                   :: nm
-    real(fp), dimension(this%settings%nfrac), intent(in)  :: cdryb
     real(fp), dimension(this%settings%nfrac), intent(out) :: frac
     !
     ! Local variables
@@ -1144,31 +1475,30 @@ subroutine getmfrac_1point(this ,nm ,cdryb ,frac      )
     integer                             :: l
     real(fp)                            :: sedtot
     real(prec), dimension(:,:), pointer :: bodsed
-    real(fp), dimension(:,:,:), pointer :: lyrfrac
+    real(fp), dimension(:,:,:), pointer :: msed
     !
     !! executable statements -------------------------------------------------------
     !
     bodsed      => this%state%bodsed
-    lyrfrac     => this%state%lyrfrac
+    msed        => this%state%msed
     !
     ! Calculate total bottom sediments and fractions
     !
     select case(this%settings%iunderlyr)
     case(2)
-       sedtot = 0.0
+       sedtot = 0.0_fp
        do l = 1, this%settings%nfrac
-          frac(l) = lyrfrac(nm, 1, l)
-          sedtot      = sedtot + frac(l)*cdryb(l)
+          sedtot = sedtot + msed(nm,1,l)
        enddo
        if (comparereal(sedtot,0.0_fp) == 0) then
           frac = 1.0_fp/this%settings%nfrac
        else
           do l = 1, this%settings%nfrac
-             frac(l) = frac(l)*cdryb(l)/sedtot
+             frac(l) = msed(nm,1,l)/sedtot
           enddo
        endif
     case default
-       sedtot = 0.0
+       sedtot = 0.0_fp
        do l = 1, this%settings%nfrac
           sedtot = sedtot + real(bodsed(nm, l),fp)
        enddo
@@ -1185,7 +1515,7 @@ end subroutine getmfrac_1point
 !
 !
 !==============================================================================
-subroutine setmfrac_1point(this, nm, cdryb, frac)
+subroutine setmfrac_1point(this, nm, frac)
 !!--description-----------------------------------------------------------------
 !
 !    Function: Sets the mass fractions for 1 point
@@ -1198,37 +1528,33 @@ subroutine setmfrac_1point(this, nm, cdryb, frac)
     !
     type(bedcomp_data), intent(in)                        :: this
     integer, intent(in)                                   :: nm
-    real(fp), dimension(this%settings%nfrac), intent(in)  :: cdryb
     real(fp), dimension(this%settings%nfrac), intent(in)  :: frac
     !
     ! Local variables
     !
     integer                             :: l
     real(fp)                            :: masstot
-    real(fp)                            :: voltot
     real(prec), dimension(:,:), pointer :: bodsed
-    real(fp), dimension(:,:,:), pointer :: lyrfrac
+    real(fp), dimension(:,:,:), pointer :: msed
     !
     !! executable statements -------------------------------------------------------
     !
     bodsed      => this%state%bodsed
-    lyrfrac     => this%state%lyrfrac
+    msed        => this%state%msed
     !
     ! Calculate total bottom sediments and fractions
     !
-    masstot = 1000.0_fp
     select case(this%settings%iunderlyr)
     case(2)
-       voltot = 0.0_fp
+       masstot = 0.0_fp
        do l = 1, this%settings%nfrac
-          lyrfrac(nm, 1, l) = frac(l)*masstot/cdryb(l)
-          voltot = voltot + lyrfrac(nm, 1, l)
+          masstot = masstot + msed(nm,1,l)
        enddo
-       !
        do l = 1, this%settings%nfrac
-          lyrfrac(nm, 1, l) = lyrfrac(nm, 1, l)/voltot
+          msed(nm, 1, l) = frac(l)*masstot
        enddo
     case default
+       masstot = 1000.0_fp
        do l = 1, this%settings%nfrac
           bodsed(nm, l) = real(frac(l)*masstot,prec)
        enddo
@@ -1250,42 +1576,47 @@ subroutine getvfrac_allpoints(this, cdryb, frac)
     ! Function/routine arguments
     !
     type(bedcomp_data), intent(in)                                                  :: this    
-    real(fp), dimension(this%settings%nfrac), intent(in)                            :: cdryb
+    real(fp), dimension(this%settings%nfrac), intent(in)                            :: cdryb 
     real(fp), dimension(this%settings%nmlb:this%settings%nmub, this%settings%nfrac) :: frac
     !
     ! Local variables
     !
     integer                             :: l
     integer                             :: nm
-    real(fp)                            :: sedtot
     real(prec), dimension(:,:), pointer :: bodsed
-    real(fp), dimension(:,:,:), pointer :: lyrfrac
+    real(prec), dimension(:)  , pointer :: dpsed
+    real(fp), dimension(:,:)  , pointer :: alpha
+    real(fp), dimension(:,:,:), pointer :: msed
+    real(fp), dimension(:,:)  , pointer :: thlyr
 !
 !! executable statements -------------------------------------------------------
 !
+    alpha       => this%state%alpha
     bodsed      => this%state%bodsed
-    lyrfrac     => this%state%lyrfrac
+    dpsed       => this%state%dpsed
+    msed        => this%state%msed
+    thlyr       => this%state%thlyr
     !
     ! Calculate total bottom sediments and fractions
     !
     select case(this%settings%iunderlyr)
     case(2)
-       do nm = this%settings%nmlb, this%settings%nmub
-          do l = 1, this%settings%nfrac
-             frac(nm, l) = lyrfrac(nm, 1, l)
-          enddo
+       do nm = this%settings%nmlb, this%settings%nmub          
+          if (comparereal(thlyr(nm,1),0.0_fp) == 0) then
+             frac(nm, :) = 1.0_fp/this%settings%nfrac
+          else
+            do l = 1, this%settings%nfrac
+                frac(nm, l) = msed(nm, 1, l)*alpha(nm,1)/(cdryb(l)*thlyr(nm,1))
+            enddo
+          endif
        enddo
     case default
        do nm = this%settings%nmlb, this%settings%nmub
-          sedtot = 0.0
-          do l = 1, this%settings%nfrac
-             sedtot = sedtot + real(bodsed(nm, l),fp)/cdryb(l)
-          enddo
-          if (comparereal(sedtot,0.0_fp) == 0) then
+          if (comparereal(real(dpsed(nm),fp),0.0_fp) == 0) then
              frac(nm, :) = 1.0_fp/this%settings%nfrac
           else
              do l = 1, this%settings%nfrac
-                frac(nm, l) = real(bodsed(nm, l),fp)/sedtot/cdryb(l)
+                frac(nm, l) = real(bodsed(nm, l),fp)/(cdryb(l)*real(dpsed(nm),fp))
              enddo
           endif
        enddo
@@ -1314,32 +1645,37 @@ subroutine getvfrac_1point(this ,nm ,cdryb ,frac      )
     ! Local variables
     !
     integer                             :: l
-    real(fp)                            :: sedtot
     real(prec), dimension(:,:), pointer :: bodsed
-    real(fp), dimension(:,:,:), pointer :: lyrfrac
+    real(prec), dimension(:)  , pointer :: dpsed
+    real(fp), dimension(:,:)  , pointer :: alpha
+    real(fp), dimension(:,:,:), pointer :: msed
+    real(fp), dimension(:,:)  , pointer :: thlyr
 !
 !! executable statements -------------------------------------------------------
 !
+    alpha       => this%state%alpha
     bodsed      => this%state%bodsed
-    lyrfrac     => this%state%lyrfrac
+    dpsed       => this%state%dpsed
+    msed        => this%state%msed
+    thlyr       => this%state%thlyr
     !
     ! Calculate total bottom sediments and fractions
     !
     select case(this%settings%iunderlyr)
     case(2)
-       do l = 1, this%settings%nfrac
-          frac(l) = lyrfrac(nm, 1, l)
-       enddo
-    case default
-       sedtot = 0.0
-       do l = 1, this%settings%nfrac
-          sedtot = sedtot + real(bodsed(nm, l),fp)/cdryb(l)
-       enddo
-       if (comparereal(sedtot,0.0_fp) == 0) then
+       if (comparereal(thlyr(nm,1),0.0_fp) == 0) then
           frac = 1.0_fp/this%settings%nfrac
        else
           do l = 1, this%settings%nfrac
-             frac(l) = real(bodsed(nm, l),fp)/sedtot/cdryb(l)
+             frac(l) = msed(nm, 1, l)*alpha(nm,1)/(cdryb(l)*thlyr(nm,1))
+          enddo
+       endif
+    case default
+       if (comparereal(real(dpsed(nm),fp),0.0_fp) == 0) then
+          frac = 1.0_fp/this%settings%nfrac
+       else
+          do l = 1, this%settings%nfrac
+             frac(l) = real(bodsed(nm, l),fp)/(cdryb(l)*real(dpsed(nm),fp))
           enddo
        endif
     endselect
@@ -1368,21 +1704,29 @@ subroutine setvfrac_1point(this, nm, cdryb, frac)
     !
     integer                             :: l
     real(fp)                            :: voltot
+    real(fp), dimension(:,:)  , pointer :: alpha
     real(prec), dimension(:,:), pointer :: bodsed
-    real(fp), dimension(:,:,:), pointer :: lyrfrac
+    real(fp), dimension(:,:,:), pointer :: msed
+    real(fp), dimension(:,:)  , pointer :: thlyr
     !
     !! executable statements -------------------------------------------------------
     !
+    alpha       => this%state%alpha
     bodsed      => this%state%bodsed
-    lyrfrac     => this%state%lyrfrac
+    msed        => this%state%msed
+    thlyr       => this%state%thlyr
     !
     ! Calculate total bottom sediments and fractions
     !
     select case(this%settings%iunderlyr)
     case(2)
-       do l = 1, this%settings%nfrac
-          lyrfrac(nm, 1, l) = frac(l)
-       enddo
+        if ( thlyr(nm,1) == 0.0_fp ) then
+            msed(nm, 1, l) = 0.0_fp
+        else
+            do l = 1, this%settings%nfrac
+                msed(nm, 1, l) = frac(l)*thlyr(nm,l)*cdryb(l)/alpha(nm,1)
+            enddo
+        endif
     case default
        voltot = 1000.0_fp
        do l = 1, this%settings%nfrac
@@ -1394,7 +1738,7 @@ end subroutine setvfrac_1point
 !
 !
 !==============================================================================
-subroutine getsedthick(this, nm, seddep)
+subroutine getsedthick_allpoints(this, seddep)
 !!--description-----------------------------------------------------------------
 !
 !    Function: Determines the volume fractions
@@ -1405,9 +1749,53 @@ subroutine getsedthick(this, nm, seddep)
     !
     ! Function/routine arguments
     !
-    type(bedcomp_data), intent(in) :: this    
-    integer, intent(in)            :: nm
-    real(fp), intent(out)          :: seddep
+    type(bedcomp_data)                                          , intent(in)  :: this 
+    real(fp), dimension(this%settings%nmlb:this%settings%nmub)  , intent(out) :: seddep
+    !
+    ! Local variables
+    !
+    integer                           :: k
+    integer                           :: nm
+    real(fp), dimension(:), pointer   :: dpsed
+    real(fp), dimension(:,:), pointer :: thlyr
+    !
+    !! executable statements -------------------------------------------------------
+    !
+    dpsed       => this%state%dpsed
+    thlyr       => this%state%thlyr
+    !
+    ! Calculate total bottom sediments and fractions
+    !
+    select case(this%settings%iunderlyr)
+    case(2)
+        seddep = 0.0_fp
+        do nm = this%settings%nmlb, this%settings%nmub
+            do k = 1, this%settings%nlyr
+                seddep(nm) = seddep(nm) + thlyr(nm, k)
+            enddo
+        enddo
+    case default
+       seddep = dpsed
+    endselect
+end subroutine getsedthick_allpoints
+!
+!
+!
+!==============================================================================
+subroutine getsedthick_1point(this, nm, seddep)
+!!--description-----------------------------------------------------------------
+!
+!    Function: Determines the volume fractions
+!
+!!--declarations----------------------------------------------------------------
+    use precision 
+    implicit none
+    !
+    ! Function/routine arguments
+    !
+    type(bedcomp_data)                      , intent(in)  :: this    
+    integer                                 , intent(in)  :: nm
+    real(fp)                                , intent(out) :: seddep
     !
     ! Local variables
     !
@@ -1431,7 +1819,7 @@ subroutine getsedthick(this, nm, seddep)
     case default
        seddep = dpsed(nm)
     endselect
-end subroutine getsedthick
+end subroutine getsedthick_1point
 !
 !
 !
@@ -1452,15 +1840,13 @@ function initmorlyr(this) result (istat)
     !
     ! Local variables
     !
-    type (bedcomp_settings), pointer :: settings
-    type (bedcomp_work    ), pointer :: work
-    type (bedcomp_state   ), pointer :: state
+    type (bedcomp_settings), pointer   :: settings
+    type (bedcomp_state   ), pointer   :: state
     !
     !! executable statements -------------------------------------------------------
     !
     istat = 0
     if (istat == 0) allocate (settings, stat = istat)
-    if (istat == 0) allocate (work    , stat = istat)
     if (istat == 0) allocate (state   , stat = istat)
     if (istat /= 0) then
        !error
@@ -1469,34 +1855,35 @@ function initmorlyr(this) result (istat)
     !
     allocate (settings%morlyrnum , stat = istat)
     if (istat == 0) then
-       settings%morlyrnum%MinThickShortWarning = 0.0_fp
-       settings%morlyrnum%MaxNumShortWarning   = 100
+       settings%morlyrnum%MinMassShortWarning = 0.0_fp
+       settings%morlyrnum%MaxNumShortWarning = 100
     endif
     !
+    settings%keuler     = 2
     settings%nfrac      = 0
     settings%nlyr       = 0
     settings%nmlb       = 0
     settings%nmub       = 0
     settings%iunderlyr  = 1
     settings%exchlyr    = .false.
-    settings%mxnulyr    = 0
-    settings%thunlyr    = rmissval
+    settings%neulyr     = 0
+    settings%nlalyr     = 0
+    settings%theulyr    = rmissval
+    settings%thlalyr    = rmissval
     settings%updbaselyr = 1
     !
     nullify(settings%thexlyr)
     nullify(settings%thtrlyr)
     !
-    nullify(work%dzi)
-    !
+    nullify(state%alpha)
     nullify(state%bodsed)
     nullify(state%dpsed)
-    nullify(state%lyrfrac)
+    nullify(state%msed)
     nullify(state%thlyr)
     nullify(state%sedshort)
-    
+    !
     this%settings => settings
-    this%work => work
-    this%state => state
+    this%state    => state
 end function initmorlyr
 !
 !
@@ -1520,23 +1907,24 @@ function allocmorlyr(this, nmlb, nmub, nfrac) result (istat)
     ! Local variables
     !
     type (bedcomp_settings), pointer :: settings
-    type (bedcomp_work), pointer     :: work
     type (bedcomp_state), pointer    :: state
     !
     !! executable statements -------------------------------------------------------
     !
     settings => this%settings
-    work => this%work
     state => this%state
     !
     ! Number of layers: 1       transport layer
     !                   1       exchange layer (optional)
-    !                   mxnulyr underlayers
+    !                   nlalyr  lagrangian underlayers
+    !                   neulyr  eulerian underlayers
     !                   1       persistent base layer
     !
-    settings%nlyr = 2 + settings%mxnulyr
+    settings%nlyr   = 2 + settings%nlalyr + settings%neulyr
+    settings%keuler = 2 + settings%nlalyr
     if (settings%exchlyr) then
-       settings%nlyr = settings%nlyr + 1
+       settings%nlyr   = settings%nlyr + 1
+       settings%keuler = settings%keuler + 1
     endif
     !
     settings%nmlb = nmlb
@@ -1556,18 +1944,14 @@ function allocmorlyr(this, nmlb, nmub, nfrac) result (istat)
           if (istat == 0) settings%thexlyr = 0.0_fp
        endif
        !
-       if (istat == 0) allocate (work%dzi(nfrac), stat = istat)
-       if (istat == 0) work%dzi = 0.0_fp
-       !
-       if (istat == 0) allocate (state%lyrfrac(nmlb:nmub,settings%nlyr,nfrac), stat = istat)
-       if (istat == 0) then
-          state%lyrfrac = 0.0_fp
-          state%lyrfrac(:,:,nfrac) = 1.0_fp
-       endif
+       if (istat == 0) allocate (state%msed(nmlb:nmub,settings%nlyr,nfrac), stat = istat)
+       if (istat == 0) state%msed = 0.0_fp
        if (istat == 0) allocate (state%thlyr(nmlb:nmub,settings%nlyr), stat = istat)
        if (istat == 0) state%thlyr = 0.0_fp
        if (istat == 0) allocate (state%sedshort(nmlb:nmub,nfrac), stat = istat)
        if (istat == 0) state%sedshort = 0.0_fp
+       if (istat == 0) allocate (state%alpha(nmlb:nmub,settings%nlyr), stat = istat)
+       if (istat == 0) state%alpha = 1.0_fp
     endif
 end function allocmorlyr
 !
@@ -1589,7 +1973,6 @@ function clrmorlyr(this) result (istat)
     ! Local variables
     !
     type (bedcomp_settings), pointer :: settings
-    type (bedcomp_work), pointer     :: work
     type (bedcomp_state), pointer    :: state
     !
     !! executable statements -------------------------------------------------------
@@ -1604,20 +1987,13 @@ function clrmorlyr(this) result (istat)
        nullify(this%settings)
     endif
     !
-    if (associated(this%work)) then
-       work => this%work
-       if (associated(work%dzi))           deallocate(work%dzi , STAT = istat)
-       !
-       deallocate(this%work, STAT = istat)
-       nullify(this%work)
-    endif
-    !
     if (associated(this%state)) then
        state => this%state
-       if (associated(state%bodsed))       deallocate(state%bodsed , STAT = istat)
-       if (associated(state%dpsed))        deallocate(state%dpsed , STAT = istat)
-       if (associated(state%lyrfrac))      deallocate(state%lyrfrac , STAT = istat)
-       if (associated(state%thlyr))        deallocate(state%thlyr , STAT = istat)
+       if (associated(state%alpha))        deallocate(state%alpha   , STAT = istat)
+       if (associated(state%bodsed))       deallocate(state%bodsed  , STAT = istat)
+       if (associated(state%dpsed))        deallocate(state%dpsed   , STAT = istat)
+       if (associated(state%msed))         deallocate(state%msed    , STAT = istat)
+       if (associated(state%thlyr))        deallocate(state%thlyr   , STAT = istat)
        if (associated(state%sedshort))     deallocate(state%sedshort, STAT = istat)
        !
        deallocate(this%state, STAT = istat)
@@ -1693,12 +2069,16 @@ function bedcomp_getpointer_integer_scalar(this, variable, val) result (istat)
     select case (localname)
     case ('iunderlyr')
        val => this%settings%iunderlyr
+    case ('keuler')
+       val => this%settings%keuler
     case ('nlyr')
        val => this%settings%nlyr
     case ('maxnumshortwarning')
        val => this%settings%morlyrnum%MaxNumShortWarning
-    case ('mxnulyr')
-       val => this%settings%mxnulyr
+    case ('neulyr')
+       val => this%settings%neulyr
+    case ('nlalyr')
+       val => this%settings%nlalyr
     case ('updbaselyr')
        val => this%settings%updbaselyr
     case default
@@ -1737,10 +2117,12 @@ function bedcomp_getpointer_fp_scalar(this, variable, val) result (istat)
     localname = variable
     call str_lower(localname)
     select case (localname)
-    case ('thunlyr')
-       val => this%settings%thunlyr
-    case ('minthickshortwarning')
-       val => this%settings%morlyrnum%MinThickShortWarning
+    case ('theulyr')
+       val => this%settings%theulyr
+    case ('thlalyr')
+       val => this%settings%thlalyr
+    case ('minmassshortwarning')
+       val => this%settings%morlyrnum%MinMassShortWarning
     case default
        val => NULL()
     end select
@@ -1786,7 +2168,7 @@ function bedcomp_getpointer_fp_1darray(this, variable, val) result (istat)
     case default
        val => NULL()
     end select
-    if (.not.associated(val)) istat = -1
+    if (.not.associated(val)) istat = -1    
 end function
 !
 !
@@ -1819,6 +2201,8 @@ function bedcomp_getpointer_fp_2darray(this, variable, val) result (istat)
     localname = variable
     call str_lower(localname)
     select case (localname)
+    case ('alpha')
+       val => this%state%alpha
     case ('thlyr')
        val => this%state%thlyr
     case default
@@ -1857,8 +2241,8 @@ function bedcomp_getpointer_fp_3darray(this, variable, val) result (istat)
     localname = variable
     call str_lower(localname)
     select case (localname)
-    case ('lyrfrac')
-       val => this%state%lyrfrac
+    case ('msed')
+       val => this%state%msed
     case default
        val => NULL()
     end select
@@ -1922,26 +2306,28 @@ subroutine bedcomp_use_bodsed(this, cdryb)
     !
     ! Local variables
     !
-    integer :: ised
-    integer :: k
-    integer :: kstart
-    integer :: nm
+    integer  :: ised
+    integer  :: k
+    integer  :: kstart
+    integer  :: nm
+    real(fp) :: fac
     real(fp) :: sedthick
     real(fp) :: sedthicklim
+    real(fp) :: thsed
     real(prec), dimension(:,:) , pointer :: bodsed
-    real(fp) , dimension(:) , pointer :: dpsed
-    real(fp) , dimension(:,:,:), pointer :: lyrfrac
-    real(fp) , dimension(:,:) , pointer :: thlyr
-    real(fp) , dimension(:) , pointer :: thtrlyr
-    real(fp) , dimension(:) , pointer :: thexlyr
+    real(fp) , dimension(:)    , pointer :: dpsed
+    real(fp) , dimension(:,:,:), pointer :: msed
+    real(fp) , dimension(:,:)  , pointer :: thlyr
+    real(fp) , dimension(:)    , pointer :: thtrlyr
+    real(fp) , dimension(:)    , pointer :: thexlyr
     !
     !! executable statements -------------------------------------------------------
-    thtrlyr => this%settings%thtrlyr
-    thexlyr => this%settings%thexlyr
-    bodsed => this%state%bodsed
-    dpsed => this%state%dpsed
-    lyrfrac => this%state%lyrfrac
-    thlyr => this%state%thlyr
+    thtrlyr    => this%settings%thtrlyr
+    thexlyr    => this%settings%thexlyr
+    bodsed     => this%state%bodsed
+    dpsed      => this%state%dpsed
+    msed       => this%state%msed
+    thlyr      => this%state%thlyr
     !
     ! Fill initial values of DPSED
     !
@@ -1965,32 +2351,56 @@ subroutine bedcomp_use_bodsed(this, cdryb)
        ! No file specified for initial bed composition: extract data from
        ! the BODSED data read above.
        !
+       msed = 0.0_fp
+       thlyr = 0.0_fp
        do nm = this%settings%nmlb, this%settings%nmub
           !if (kcs(nm)<1 .or. kcs(nm)>2) cycle  !TODO: find a solution for this line
           !
           ! nm = (m-1)*nmax + n
           !
-          sedthick = 0.0_fp
+          thsed = 0.0_fp
           do ised = 1, this%settings%nfrac
-             sedthick = sedthick + real(bodsed(nm, ised),fp)/cdryb(ised)
+             thsed = thsed + real(bodsed(nm, ised),fp)/cdryb(ised)
           enddo
-          sedthicklim = max(sedthick, 1.0e-20_fp)
+          sedthick      = thsed
+          thlyr(nm, 1)  = min(thtrlyr(nm),sedthick)
+          thsed = max(thsed,1.0e-20_fp)
+          fac = thlyr(nm,1)/thsed
           do ised = 1, this%settings%nfrac
-             lyrfrac(nm, :, ised) = real(bodsed(nm, ised),fp)/cdryb(ised) / sedthicklim
+             msed(nm, 1, ised) = real(bodsed(nm, ised),fp)*fac
           enddo
-          thlyr(nm, 1) = min(thtrlyr(nm),sedthick)
-          sedthick     = sedthick - thlyr(nm, 1)
-          kstart       = 1
+          sedthick      = sedthick - thlyr(nm, 1)
+          kstart        = 1
           if (this%settings%exchlyr) then
              kstart       = 2
              thlyr(nm, 2) = min(thexlyr(nm),sedthick)
              sedthick     = sedthick - thlyr(nm, 2)
+             fac = thlyr(nm,2)/thsed
+             do ised = 1, this%settings%nfrac
+                msed(nm, 2, ised) = real(bodsed(nm, ised),fp)*fac
+             enddo
           endif
-          do k = kstart+1,this%settings%nlyr-1
-             thlyr(nm, k) = min(this%settings%thunlyr,sedthick)
+          do k = kstart+1,this%settings%keuler-1
+             thlyr(nm, k) = min(this%settings%thlalyr,sedthick)
              sedthick     = sedthick - thlyr(nm, k)
+             fac = thlyr(nm,k)/thsed
+             do ised = 1, this%settings%nfrac
+                msed(nm, k, ised) = real(bodsed(nm, ised),fp)*fac
+             enddo
+          enddo
+          do k = this%settings%keuler,this%settings%nlyr-1
+             thlyr(nm, k) = min(this%settings%theulyr,sedthick)
+             sedthick     = sedthick - thlyr(nm, k)
+             fac = thlyr(nm,k)/thsed
+             do ised = 1, this%settings%nfrac
+                msed(nm, k, ised) = real(bodsed(nm, ised),fp)*fac
+             enddo
           enddo
           thlyr(nm, this%settings%nlyr) = sedthick
+          fac = thlyr(nm,this%settings%nlyr)/thsed
+          do ised = 1, this%settings%nfrac
+             msed(nm, this%settings%nlyr, ised) = real(bodsed(nm, ised),fp)*fac
+          enddo
        enddo
     case default
        !

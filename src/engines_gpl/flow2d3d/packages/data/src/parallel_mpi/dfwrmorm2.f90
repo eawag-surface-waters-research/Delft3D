@@ -1,6 +1,6 @@
 subroutine dfwrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
-                   & nlyr      ,irequest  ,fds       ,grpnam    ,lyrfrac   , &
-                   & thlyr     ,gdp  )
+                   & nlyr      ,irequest  ,fds       ,grpnam    ,msed      , &
+                   & thlyr     ,alpha     ,cdryb     ,gdp  )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -69,8 +69,10 @@ subroutine dfwrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
     integer                                                     :: nmaxus
     logical                                                     :: error
     character(16)                                               :: grpnam
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,1:nlyr,1:lsedtot) :: lyrfrac
+    real(fp), dimension(1:lsedtot)                              :: cdryb
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,1:nlyr,1:lsedtot) :: msed
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,1:nlyr)           :: thlyr
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,1:nlyr)           :: alpha
     type(bedcomp_data)                                          :: gdmorlyr
 !
 ! Local variables
@@ -116,12 +118,20 @@ subroutine dfwrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
        !
        ! Define elements
        !
+       call addelm(nefiswrsedm,'MSED',' ','[   -   ]','REAL',4, &
+          & 'Mass of sediment in layer'                       , &
+          & 4      ,nmaxgl ,mmaxgl   ,nlyr     ,lsedtot  ,0   , &
+          & lundia ,gdp    )
        call addelm(nefiswrsedm,'LYRFRAC',' ','[   -   ]','REAL',4, &
           & 'Volume fraction of sediment in layer'               , &
           & 4      ,nmaxgl ,mmaxgl   ,nlyr     ,lsedtot  ,0      , &
           & lundia ,gdp    )
        call addelm(nefiswrsedm,'THLYR',' ','[   M   ]','REAL',4, &
           & 'Thickness of sediment layer'                      , &
+          & 3      ,nmaxgl ,mmaxgl   ,nlyr    ,0       ,0      , &
+          & lundia ,gdp    )
+       call addelm(nefiswrsedm,'ALPHA',' ','[   -   ]','REAL',4, &
+          & 'Porosity coefficient'                             , &
           & 3      ,nmaxgl ,mmaxgl   ,nlyr    ,0       ,0      , &
           & lundia ,gdp    )
     case (2)
@@ -150,6 +160,25 @@ subroutine dfwrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
        uindex (2,1) = celidt
        uindex (3,1) = 1 ! increment in time
        !
+       ! element 'MSED'
+       !
+       allocate(rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr, lsedtot))
+       do l = 1, lsedtot
+          do k = 1, nlyr
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   call n_and_m_to_nm(n, m, nm, gdp)
+                   rbuff4(n,m,k,l) = msed(nm, k, l)
+                enddo
+             enddo
+          enddo
+       enddo
+       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+       deallocate(rbuff4)
+       if (inode == master) then
+          ierror = putelt(fds, grpnam, 'MSED', uindex, 1, glbarr4)
+       endif
+       !
        ! element 'LYRFRAC'
        !
        allocate(rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr, lsedtot))
@@ -158,7 +187,11 @@ subroutine dfwrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
              do m = 1, mmax
                 do n = 1, nmaxus
                    call n_and_m_to_nm(n, m, nm, gdp)
-                   rbuff4(n,m,k,l) = lyrfrac(nm, k, l)
+                   if (thlyr(nm,k)>0.0_fp) then
+                      rbuff4(n,m,k,l) = msed(nm, k, l)*alpha(nm,k)/(cdryb(l)*thlyr(nm,k))
+                   else
+                      rbuff4(n,m,k,l) = 0.0_fp
+                   endif
                 enddo
              enddo
           enddo
@@ -185,6 +218,24 @@ subroutine dfwrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
        deallocate(rbuff3)
        if (inode == master) then
           ierror = putelt(fds, grpnam, 'THLYR', uindex, 1, glbarr3)
+       endif
+       if (ierror/= 0) goto 9999
+       !
+       ! element 'ALPHA'
+       !
+       allocate(rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr))
+       do k = 1, nlyr
+          do m = 1, mmax
+             do n = 1, nmaxus
+                call n_and_m_to_nm(n, m, nm, gdp)
+                rbuff3(n,m,k) = alpha(nm,k)
+             enddo
+          enddo
+       enddo
+       call dfgather(rbuff3,nf,nl,mf,ml,iarrc,gdp)
+       deallocate(rbuff3)
+       if (inode == master) then
+          ierror = putelt(fds, grpnam, 'ALPHA', uindex, 1, glbarr3)
        endif
        if (ierror/= 0) goto 9999
        !

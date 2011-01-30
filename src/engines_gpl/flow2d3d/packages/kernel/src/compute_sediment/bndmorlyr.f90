@@ -69,7 +69,9 @@ subroutine bndmorlyr(lsedtot   ,timhr     ,nto       , &
     real(fp) :: alfa_dist
     real(fp) :: bndval
     real(fp) :: sedtot
-    real(fp), dimension(lsedtot) :: frac
+    real(fp), dimension(lsedtot)         :: frac
+    real(fp), dimension(:,:,:) , pointer :: msed
+    real(fp), dimension(:,:)   , pointer :: thlyr
 !
 !! executable statements -------------------------------------------------------
 !
@@ -114,8 +116,8 @@ subroutine bndmorlyr(lsedtot   ,timhr     ,nto       , &
              !
              ! Free composition: copy composition from internal point
              !
-             call getvfrac(gdp%gdmorlyr, nxmx, cdryb, frac)
-             call setvfrac(gdp%gdmorlyr, nm  , cdryb, frac)
+             call getmfrac(gdp%gdmorlyr, nxmx, frac)
+             call setmfrac(gdp%gdmorlyr, nm  , frac)
           elseif (icond == 1) then
              !
              ! Fixed composition: no need to update the values
@@ -128,7 +130,7 @@ subroutine bndmorlyr(lsedtot   ,timhr     ,nto       , &
                 frac(l) = bc_mor_array(l) + &
                         & alfa_dist * (bc_mor_array(l+lsedtot)-bc_mor_array(l))
              enddo
-             call setmfrac(gdp%gdmorlyr, nm, cdryb, frac)
+             call setmfrac(gdp%gdmorlyr, nm, frac)
           elseif (icond == 3) then
              !
              ! Prescribed volume fraction; needed volume fraction
