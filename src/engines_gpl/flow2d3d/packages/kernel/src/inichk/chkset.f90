@@ -35,6 +35,7 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
 ! Checks the combination of Z-model with various program modes
 ! The combination Domain Decomposition and Z-model is allowed
 ! Dredge is only allowed in combination with 3D morphology
+! Checks the combination of 2-D and non-hydrostatic
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
@@ -49,6 +50,7 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    integer                       , pointer :: kmax
     integer                       , pointer :: lsec
     integer                       , pointer :: lstsci
     integer                       , pointer :: ltur
@@ -57,6 +59,7 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
     integer                       , pointer :: ntoq
     integer                       , pointer :: ndro
     logical                       , pointer :: multi
+    logical                       , pointer :: nonhyd
     character(8)                  , pointer :: dpsopt
     character(8)                  , pointer :: dpuopt
     character(6)                  , pointer :: momsol
@@ -103,6 +106,7 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
 !
 !! executable statements -------------------------------------------------------
 !
+    kmax                => gdp%d%kmax
     lsec                => gdp%d%lsec
     lstsci              => gdp%d%lstsci
     ltur                => gdp%d%ltur
@@ -123,6 +127,7 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
     sedim               => gdp%gdprocs%sedim
     htur2d              => gdp%gdprocs%htur2d
     mudlay              => gdp%gdprocs%mudlay
+    nonhyd              => gdp%gdprocs%nonhyd
     couplemod           => gdp%gdprocs%couplemod
     zmodel              => gdp%gdprocs%zmodel
     roller              => gdp%gdprocs%roller
@@ -369,7 +374,13 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
        ierror = ierror+ 1
     endif
     !
-    !
+    if (kmax == 1 .and. nonhyd) then
+       !
+       ! 2D (kmax == 1) and non-hydrostatic is not allowed
+       !
+       call prterr(lundia, 'P004', 'The combination 2D and non-hydrostatic is not allowed')
+       ierror = ierror+ 1
+    endif
     !
     if (parll) then
        !
