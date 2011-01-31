@@ -1,6 +1,7 @@
 subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
                        & thlyr     ,lsedtot   ,nmaxus    ,cdryb     , &
-                       & mmax      ,nlyr      ,success   ,gdp       )
+                       & mmax      ,nlyr      ,success   ,svfrac    , &
+                       & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -38,6 +39,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
 !!--declarations----------------------------------------------------------------
     use precision 
     use globaldata
+    use bedcomposition_module
     !
     implicit none
     !
@@ -45,6 +47,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    real(fp)        , dimension(:)    , pointer :: rhosol
 !
 ! Global variables
 !
@@ -57,6 +60,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     logical                                                                     , intent(out) :: success
     real(fp), dimension(                                                lsedtot), intent(in)  :: cdryb
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr, lsedtot), intent(out) :: msed
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr)                       :: svfrac
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr)         , intent(out) :: thlyr
     character(*)                                                                              :: restid
 !
@@ -67,6 +71,8 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     integer                      , external :: getelt
     integer                      , external :: clsnef
     integer                      , external :: inqelm
+    integer                      , pointer  :: iporosity
+    integer                                 :: istat
     integer                                 :: rst_lsed
     integer                                 :: rst_lsedbl
     integer                                 :: rst_lsedtot
@@ -77,6 +83,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     integer                                 :: l
     integer                                 :: m
     integer                                 :: n
+    integer                                 :: nm
     integer  , dimension(3,5)               :: cuindex
     integer  , dimension(3,5)               :: uindex
     integer                                 :: nbytsg
@@ -84,6 +91,10 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     integer  , dimension(5)                 :: elmdms
     real(sp), dimension(:,:,:,:), pointer   :: rst_msed
     real(sp), dimension(:,:,:)  , pointer   :: rst_lyr
+    real(fp), dimension(lsedtot)            :: mfrac
+    real(fp)                                :: mfracsum
+    real(fp)                                :: poros
+    real(fp)                                :: sedthick
     character(len=256)                      :: dat_file
     character(len=8)                        :: elmtyp
     character(len=16)                       :: elmqty
@@ -94,6 +105,8 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
 !
 !! executable statements -------------------------------------------------------
 !
+    rhosol               => gdp%gdsedpar%rhosol
+    !
     nullify(rst_msed)
     nullify(rst_lyr)
     error        = .false.
@@ -195,16 +208,70 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
           enddo
        enddo
     endif
+    !
     if (layerfrac) then
-        do l = 1, lsedtot
-            do k = 1, nlyr
+       istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'IPorosity', iporosity)
+       !
+       ! msed contains volume fractions
+       !
+       if (iporosity==0) then
+          do l = 1,lsedtot
+             do k = 1, nlyr
                 do m = 1, mmax
-                    do n = 1, nmaxus
-                        msed(n,m,k,l) = msed(n,m,k,l)*thlyr(n,m,k)*cdryb(l)
-                    enddo
+                   do n = 1, nmaxus
+                      msed(n,m,k,l) = msed(n,m,k,l)*thlyr(n,m,k)*cdryb(l)
+                   enddo
                 enddo
-            enddo
-        enddo
+             enddo
+          enddo
+       else
+          do k = 1, nlyr
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   !
+                   ! determine mass fractions
+                   !
+                   mfracsum = 0.0_fp
+                   do l = 1, lsedtot
+                      mfrac(l) = msed(n,m,k,l)*rhosol(l)
+                      mfracsum = mfracsum + mfrac(l)
+                   enddo
+                   if (mfracsum>0.0_fp) then
+                      do l = 1, lsedtot
+                         mfrac(l) = mfrac(l)/mfracsum
+                      enddo
+                      !
+                      ! obtain porosity and sediment thickness without pores
+                      !
+                      call getporosity(gdp%gdmorlyr, mfrac, poros)
+                      sedthick = thlyr(n,m,k)*(1.0_fp-poros)
+                   else
+                      sedthick = 0.0_fp
+                      poros = 0.0_fp
+                   endif
+                   !
+                   ! convert volume fractions to sediment mass
+                   !
+                   do l = 1, lsedtot
+                      msed(n,m,k,l) = msed(n,m,k,l)*sedthick*rhosol(l)
+                   enddo
+                   svfrac(n,m,k) = 1.0_fp-poros
+                enddo
+             enddo
+          enddo
+       endif
+    else
+       if (iporosity>0) then
+          do m = 1, mmax
+             do n = 1, nmaxus
+                sedthick = 0.0_fp
+                do l = 1, lsedtot
+                   sedthick = sedthick + msed(n,m,k,l)/rhosol(l)
+                enddo
+                svfrac(n,m,k) = sedthick/thlyr(n,m,k)
+             enddo
+          enddo
+       endif
     endif
     !
     success = .true.

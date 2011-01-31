@@ -53,6 +53,7 @@ public  updmorlyr
 public  gettoplyr
 public  detthcmud
 public  getalluvthick
+public  getporosity
 public  getfrac
 public  getmfrac
 public  setmfrac
@@ -105,7 +106,6 @@ interface getsedthick
    module procedure getsedthick_1point
    module procedure getsedthick_allpoints
 end interface
-
 !
 ! morphology layers numerical settings
 !
@@ -2397,25 +2397,30 @@ subroutine bedcomp_use_bodsed(this)
     !
     ! Call variables
     !
-    type(bedcomp_data)                    :: this
+    type(bedcomp_data)                         :: this
     !
     ! Local variables
     !
-    integer                               :: ised
-    integer                               :: k
-    integer                               :: kstart
-    integer                               :: nm
-    real(fp)                              :: fac
-    real(fp)                              :: sedthick
-    real(fp)                              :: sedthicklim
-    real(fp)                              :: thsed
-    real(prec), dimension(:,:)  , pointer :: bodsed
-    real(fp)  , dimension(:)    , pointer :: dpsed
-    real(fp)  , dimension(:,:,:), pointer :: msed
-    real(fp)  , dimension(:,:)  , pointer :: thlyr
-    real(fp)  , dimension(:)    , pointer :: thtrlyr
-    real(fp)  , dimension(:)    , pointer :: thexlyr
-    real(fp)  , dimension(:)    , pointer :: rhofrac
+    integer                                    :: ised
+    integer                                    :: k
+    integer                                    :: kstart
+    integer                                    :: nm
+    real(fp)                                   :: fac
+    real(fp)  , dimension(this%settings%nfrac) :: mfrac
+    real(fp)                                   :: poros
+    real(fp)                                   :: sedthick
+    real(fp)                                   :: sedthicklim
+    real(fp)                                   :: svf
+    real(fp)                                   :: thsed
+    real(fp)                                   :: totsed
+    real(prec), dimension(:,:)       , pointer :: bodsed
+    real(fp)  , dimension(:)         , pointer :: dpsed
+    real(fp)  , dimension(:,:,:)     , pointer :: msed
+    real(fp)  , dimension(:,:)       , pointer :: svfrac
+    real(fp)  , dimension(:,:)       , pointer :: thlyr
+    real(fp)  , dimension(:)         , pointer :: thtrlyr
+    real(fp)  , dimension(:)         , pointer :: thexlyr
+    real(fp)  , dimension(:)         , pointer :: rhofrac
     !
     !! executable statements -------------------------------------------------------
     thtrlyr    => this%settings%thtrlyr
@@ -2424,13 +2429,10 @@ subroutine bedcomp_use_bodsed(this)
     bodsed     => this%state%bodsed
     dpsed      => this%state%dpsed
     msed       => this%state%msed
+    svfrac     => this%state%svfrac
     thlyr      => this%state%thlyr
     !
     ! Fill initial values of DPSED
-    !
-    ! calculate density of the mixing layer based on mixture of grain
-    ! sizes present. This should be a function of x,y,t.
-    ! Note the current expression is just a trivial version of this.
     !
     do nm = this%settings%nmlb, this%settings%nmub
        !
@@ -2455,18 +2457,37 @@ subroutine bedcomp_use_bodsed(this)
           !
           ! nm = (m-1)*nmax + n
           !
+          totsed = 0.0_fp
+          do ised = 1, this%settings%nfrac
+             totsed = totsed + real(bodsed(nm, ised),fp)
+          enddo
+          do ised = 1, this%settings%nfrac
+             mfrac(ised) = real(bodsed(nm, ised),fp)/totsed
+          enddo
+          !
+          call getporosity(this, mfrac, poros)
+          svf = 1.0_fp - poros
+          !
           thsed = 0.0_fp
           do ised = 1, this%settings%nfrac
              thsed = thsed + real(bodsed(nm, ised),fp)/rhofrac(ised)
           enddo
+          thsed         = thsed/svf
           sedthick      = thsed
+          thsed         = max(thsed,1.0e-20_fp) ! avoid division by zero
+          !
+          ! active/transport layer
+          !
           thlyr(nm, 1)  = min(thtrlyr(nm),sedthick)
-          thsed = max(thsed,1.0e-20_fp)
           fac = thlyr(nm,1)/thsed
           do ised = 1, this%settings%nfrac
              msed(nm, 1, ised) = real(bodsed(nm, ised),fp)*fac
           enddo
+          svfrac(nm, 1) = svf
           sedthick      = sedthick - thlyr(nm, 1)
+          !
+          ! exchange layer
+          !
           kstart        = 1
           if (this%settings%exchlyr) then
              kstart       = 2
@@ -2476,7 +2497,11 @@ subroutine bedcomp_use_bodsed(this)
              do ised = 1, this%settings%nfrac
                 msed(nm, 2, ised) = real(bodsed(nm, ised),fp)*fac
              enddo
+             svfrac(nm, 2) = svf
           endif
+          !
+          ! Lagrangian layers
+          !
           do k = kstart+1, this%settings%keuler-1
              thlyr(nm, k) = min(this%settings%thlalyr,sedthick)
              sedthick     = sedthick - thlyr(nm, k)
@@ -2484,7 +2509,11 @@ subroutine bedcomp_use_bodsed(this)
              do ised = 1, this%settings%nfrac
                 msed(nm, k, ised) = real(bodsed(nm, ised),fp)*fac
              enddo
+             svfrac(nm, k) = svf
           enddo
+          !
+          ! Eulerian layers
+          !
           do k = this%settings%keuler,this%settings%nlyr-1
              thlyr(nm, k) = min(this%settings%theulyr,sedthick)
              sedthick     = sedthick - thlyr(nm, k)
@@ -2492,12 +2521,17 @@ subroutine bedcomp_use_bodsed(this)
              do ised = 1, this%settings%nfrac
                 msed(nm, k, ised) = real(bodsed(nm, ised),fp)*fac
              enddo
+             svfrac(nm, k) = svf
           enddo
+          !
+          ! base layer
+          !
           thlyr(nm, this%settings%nlyr) = sedthick
           fac = thlyr(nm,this%settings%nlyr)/thsed
           do ised = 1, this%settings%nfrac
              msed(nm, this%settings%nlyr, ised) = real(bodsed(nm, ised),fp)*fac
           enddo
+          svfrac(nm, this%settings%nlyr) = svf
        enddo
     case default
        !

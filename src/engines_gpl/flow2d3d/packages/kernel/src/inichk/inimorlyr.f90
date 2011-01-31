@@ -49,6 +49,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
     real(fp)         , dimension(:)     , pointer :: thexlyr
     real(fp)         , dimension(:)     , pointer :: thtrlyr
     real(fp)         , dimension(:,:)   , pointer :: sedshort
+    real(fp)         , dimension(:)     , pointer :: rhosol
     logical                             , pointer :: exchlyr
     character(256)                      , pointer :: flcomp
     integer                             , pointer :: i_restart
@@ -73,6 +74,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
 !
     integer                                       :: icx
     integer                                       :: icy
+    integer                             , pointer :: iporosity
     integer                                       :: ised
     integer                             , pointer :: iunderlyr
     integer                                       :: istat
@@ -86,22 +88,29 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
     logical                                       :: success
     character(11)                                 :: fmttmp   ! Format file ('formatted  ') 
     character(300)                                :: message
+    real(fp)         , dimension(lsedtot)         :: mfrac
+    real(fp)                                      :: mfracsum
+    real(fp)                                      :: poros
+    real(fp)                                      :: svf
     real(prec)       , dimension(:,:)   , pointer :: bodsed
     real(fp)         , dimension(:,:,:) , pointer :: msed
     real(fp)         , dimension(:,:)   , pointer :: thlyr
+    real(fp)         , dimension(:,:)   , pointer :: svfrac
 !
 !! executable statements -------------------------------------------------------
 !
     i_restart          => gdp%gdrestart%i_restart
     restid             => gdp%gdrestart%restid
     flcomp             => gdp%gdmorpar%flcomp
+    rhosol               => gdp%gdsedpar%rhosol
     !
     istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'iunderlyr', iunderlyr)
     if (istat==0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'nlyr'   , nlyr)
     if (istat==0) istat = bedcomp_getpointer_realprec(gdp%gdmorlyr, 'bodsed', bodsed)
     if (iunderlyr==2) then
        if (istat==0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'msed'  , msed)
-       if (istat==0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'thlyr' ,thlyr)
+       if (istat==0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'thlyr' , thlyr)
+       if (istat==0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'svfrac', svfrac)
     endif
     if (istat/=0) then
        call prterr(lundia, 'U021', 'Memory problem in INIMORLYR')
@@ -129,7 +138,8 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
           call restart_lyrs ( &
                  & error     ,restid    ,i_restart ,msed      , &
                  & thlyr     ,lsedtot   ,nmaxus    ,cdryb     , &
-                 & mmax      ,nlyr      ,success   ,gdp       )
+                 & mmax      ,nlyr      ,success   ,svfrac    , &
+                 & gdp       )
           if (success) goto 9999
        endif
     case default
@@ -176,17 +186,61 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
              endif
              if (error) goto 9999
           endif
-          if (inisedunit(ised) == 'm') then
+       enddo
+       if (iporosity == 0) then
+          do ised = 1, lsedtot
+             if (inisedunit(ised) == 'm') then
+                do nm = 1, nmmax
+                   bodsed(nm, ised) = bodsed(nm, ised) * cdryb(ised)
+                enddo
+             else
+                !
+                ! inisedunit(ised) = kg/m2
+                ! no conversion needed
+                !
+             endif
+          enddo
+       else
+          do ised = 2, lsedtot
+             if (inisedunit(ised) /= inisedunit(1)) then
+                call prterr(lundia, 'U021', 'All sediment fields in the same layer should have unit.')
+                call d3stop(1, gdp)
+                error = 1
+                goto 9999
+             endif
+          enddo
+          if (inisedunit(1) == 'm') then
+             !
+             ! all input specified as thickness
+             !
              do nm = 1, nmmax
-                bodsed(nm, ised) = bodsed(nm, ised) * cdryb(ised)
+                mfracsum = 0.0_fp
+                do ised = 1, lsedtot
+                   mfrac(ised) = bodsed(nm, ised) * rhosol(ised)
+                   mfracsum = mfracsum + mfrac(ised)
+                enddo
+                if (mfracsum > 0.0_fp) then
+                   do ised = 1, lsedtot
+                      mfrac(ised) = mfrac(ised) / mfracsum
+                   enddo
+                   !
+                   call getporosity(gdp%gdmorlyr, mfrac, poros)
+                   svf = 1.0_fp - poros
+                else
+                   svf = 1.0_fp
+                endif
+                !
+                do ised = 1, lsedtot
+                   bodsed(nm, ised) = bodsed(nm, ised) * svf * rhosol(ised)
+                enddo
              enddo
           else
              !
-             ! inisedunit(ised) = kg/m2
+             ! inisedunit(1) = kg/m2
              ! no conversion needed
              !
           endif
-       enddo
+       endif
        !
        ! Check validity of input data
        !
@@ -271,7 +325,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
           call rdinimorlyr(flcomp    ,msed      ,thlyr     ,cdryb     , &
                          & lsedtot   ,mmax      ,nlyr      ,nmax      , &
                          & nmaxus    ,nmmax     ,lundia    ,kcs       , &
-                         & icx       ,icy       ,gdp       )
+                         & icx       ,icy       ,svfrac    ,gdp       )
        endif
     endselect
  9999 continue

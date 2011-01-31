@@ -1,7 +1,7 @@
 subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                      & lsedtot   ,mmax      ,nlyr      ,nmax      , &
                      & nmaxus    ,nmmax     ,lundia    ,kcs       , &
-                     & icx       ,icy       ,gdp       )
+                     & icx       ,icy       ,svfrac    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -49,6 +49,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    real(fp)        , dimension(:)    , pointer :: rhosol
 !
 ! Global variables
 !
@@ -63,6 +64,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
     integer                                                              :: nmmax   !  Description and declaration in iidim.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)             , intent(in)  :: kcs     !  Description and declaration in iidim.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,nlyr,lsedtot), intent(out) :: msed
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,nlyr)        , intent(out) :: svfrac
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,nlyr)        , intent(out) :: thlyr
     real(fp), dimension(lsedtot)                           , intent(in)  :: cdryb   !  Description and declaration in rjdim.f90
     character(*)                                                         :: filcomp
@@ -71,6 +73,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
 !
     integer                               :: i
     integer                               :: ilyr
+    integer                     , pointer :: iporosity
     integer                               :: istat
     integer                               :: l
     integer                               :: length
@@ -80,11 +83,18 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
     integer                               :: nmub
     real(fp)                              :: cdrybavg
     real(fp)                              :: fraction
+    real(fp), dimension(lsedtot)          :: mfrac
+    real(fp)                              :: mfracsum
+    real(fp)                              :: poros
+    real(fp)                              :: rmissval
     real(fp)                              :: sedbed
     real(fp)                              :: sedmass
-    real(fp)                              :: rmissval
+    real(fp)                              :: svf
+    real(fp)                              :: thick
     real(fp)                              :: totfrac
     real(fp), dimension(:,:), allocatable :: rtemp
+    real(fp), dimension(:), allocatable   :: thtemp
+    real(fp)                              :: vfracsum
     logical                               :: anyfrac
     logical                               :: anysedbed
     logical                               :: err
@@ -102,6 +112,8 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
 !
 !! executable statements -------------------------------------------------------
 !
+    rhosol               => gdp%gdsedpar%rhosol
+    !
     rmissval      = -999.0_fp
     fmttmp        = 'formatted'
     nmlb          = gdp%d%nmlb
@@ -143,6 +155,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
        !
        ilyr = 0
        allocate(rtemp(nmlb:nmub,lsedtot), stat = istat)
+       if (istat == 0) allocate(thtemp(nmlb:nmub), stat = istat)
        if (istat /= 0) then
           call prterr(lundia, 'U021', 'RdIniMorLyr: memory alloc error')
           call d3stop(1, gdp)
@@ -163,11 +176,8 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
           !
           ! Initialize/reset the temporary array
           !
-          do l = 1, lsedtot
-             do nm = 1, nmmax
-                rtemp(nm, l) = 0.0_fp
-             enddo
-          enddo
+          rtemp  = 0.0_fp
+          thtemp = 0.0_fp
           !
           ! Layer group found, scan it for the layer composition
           !
@@ -209,7 +219,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                    call d3stop(1, gdp)          
                 endif
                 do nm = 1, nmmax
-                   thlyr(nm, ilyr) = sedbed
+                   thtemp(nm) = sedbed
                 enddo
              else
                 !
@@ -217,7 +227,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                 !
                 call depfil(lundia    ,error     ,filename, fmttmp    , &
                           & mmax      ,nmax      ,nmaxus  , &
-                          & thlyr(nmlb,ilyr)     ,gdp       )
+                          & thtemp    ,gdp       )
                 if (error) then
                    write (message,'(3a,i2,2a)')  &
                        & 'Error reading thickness from ', trim(filename), &
@@ -364,7 +374,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                    do l = 1, lsedtot
                       rtemp(nm, l) = 0.0_fp
                    enddo
-                   thlyr(nm, ilyr) = 0.0_fp
+                   thtemp(nm) = 0.0_fp
                 endif
              enddo
              !
@@ -389,35 +399,83 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                    do l = 1, lsedtot
                       rtemp(nm, l) = rtemp(nm2, l)
                    enddo
-                   thlyr(nm, ilyr) = thlyr(nm2, ilyr)
+                   thtemp(nm) = thtemp(nm2)
                 endif
              enddo
              !
              ! convert mass fractions into volume fractions
              !
-             if (layertype == 'mass fraction') then
-                do nm = 1, nmmax
-                   cdrybavg = 0.0_fp
-                   do l = 1, lsedtot
-                      cdrybavg = cdrybavg + rtemp(nm, l)/cdryb(l)
-                   enddo
-                   if (cdrybavg > 0.0_fp) then
-                      cdrybavg = max(cdrybavg, 1.0e-8_fp)
-                      cdrybavg = 1.0_fp / cdrybavg
+             if (iporosity == 0) then
+                if (layertype == 'mass fraction') then
+                   do nm = 1, nmmax
+                      cdrybavg = 0.0_fp
                       do l = 1, lsedtot
-                         rtemp(nm, l) = rtemp(nm, l) * cdrybavg / cdryb(l)
+                         cdrybavg = cdrybavg + rtemp(nm, l)/cdryb(l)
                       enddo
-                   endif
-                enddo
-             endif
-             !
-             ! add thicknesses in lyrfrac
-             !
-             do l = 1, lsedtot
+                      if (cdrybavg > 0.0_fp) then
+                         cdrybavg = max(cdrybavg, 1.0e-8_fp)
+                         cdrybavg = 1.0_fp / cdrybavg
+                         do l = 1, lsedtot
+                            rtemp(nm, l) = rtemp(nm, l) * cdrybavg / cdryb(l)
+                         enddo
+                      endif
+                   enddo
+                endif
+                !
+                ! add thicknesses in lyrfrac
+                !
                 do nm = 1, nmmax
-                   msed(nm, ilyr, l) = msed(nm, ilyr, l) + rtemp(nm,l)*thlyr(nm, ilyr)*cdryb(l)
+                   do l = 1, lsedtot
+                      msed(nm, ilyr, l) = msed(nm, ilyr, l) + rtemp(nm, l)*thtemp(nm)*cdryb(l)
+                   enddo
+                   thlyr(nm, ilyr) = thlyr(nm, ilyr) + thtemp(nm)
                 enddo
-             enddo
+             else
+                if (layertype == 'volume fraction') then
+                   do nm = 1, nmmax
+                      mfracsum = 0.0_fp
+                      do l = 1, lsedtot
+                         mfrac(l) = rtemp(nm, l) * rhosol(l)
+                         mfracsum = mfracsum + mfrac(l)
+                      enddo
+                      do l = 1, lsedtot
+                         mfrac(l) = mfrac(l) / mfracsum
+                      enddo
+                      !
+                      call getporosity(gdp%gdmorlyr, mfrac, poros)
+                      svf = 1.0_fp - poros
+                      !
+                      do l = 1, lsedtot
+                         msed(nm, ilyr, l) = msed(nm, ilyr, l) + rtemp(nm, l)*thtemp(nm)*rhosol(l)*svf
+                      enddo
+                      thick = thlyr(nm, ilyr) + thtemp(nm)
+                      svfrac(nm, ilyr) = (thlyr(nm, ilyr) * svfrac(nm, ilyr) + thtemp(nm) * svf) / thick
+                      thlyr(nm, ilyr)  = thick
+                   enddo
+                else ! layertype == 'mass fraction'
+                   do nm = 1, nmmax
+                      vfracsum = 0.0_fp
+                      do l = 1, lsedtot
+                         mfrac(l) = rtemp(nm, l)
+                         rtemp(nm, l) = rtemp(nm, l) / rhosol(l)
+                         vfracsum = vfracsum + rtemp(nm, l)
+                      enddo
+                      do l = 1, lsedtot
+                         rtemp(nm, l) = rtemp(nm, l) / vfracsum
+                      enddo
+                      !
+                      call getporosity(gdp%gdmorlyr, mfrac, poros)
+                      svf = 1.0_fp - poros
+                      !
+                      do l = 1, lsedtot
+                         msed(nm, ilyr, l) = msed(nm, ilyr, l) + rtemp(nm, l)*thtemp(nm)*rhosol(l)*svf
+                      enddo
+                      thick = thlyr(nm, ilyr) + thtemp(nm)
+                      svfrac(nm, ilyr) = (thlyr(nm, ilyr) * svfrac(nm, ilyr) + thtemp(nm) * svf) / thick
+                      thlyr(nm, ilyr)  = thick
+                   enddo
+                endif
+             endif
              !
           elseif (layertype == 'sediment mass' .or. &
                 & layertype == 'sediment thickness') then
@@ -564,22 +622,77 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
              !
              ! convert sediment mass to sediment thickness
              !
-             if (layertype == 'sediment thickness') then
+             if (iporosity == 0) then
+                if (layertype == 'sediment thickness') then
+                   do l = 1, lsedtot
+                      do nm = 1, nmmax
+                         rtemp(nm, l) = rtemp(nm, l) * cdryb(l)
+                      enddo
+                   enddo
+                endif
+                !
+                ! add masses in msed and thicknesses in thlyr
+                !
                 do l = 1, lsedtot
                    do nm = 1, nmmax
-                      rtemp(nm, l) = rtemp(nm, l) * cdryb(l)
+                      msed(nm, ilyr, l) = msed(nm, ilyr, l) + rtemp(nm, l)
+                      thlyr(nm, ilyr)   = thlyr(nm,ilyr)    + rtemp(nm, l)/cdryb(l)
                    enddo
                 enddo
+             else
+                if (layertype == 'sediment thickness') then
+                   do nm = 1, nmmax
+                      mfracsum = 0.0_fp
+                      do l = 1, lsedtot
+                         mfrac(l) = rtemp(nm, l) * rhosol(l)
+                         mfracsum = mfracsum + mfrac(l)
+                      enddo
+                      if (mfracsum>0.0_fp) then
+                         do l = 1, lsedtot
+                            mfrac(l) = mfrac(l) / mfracsum
+                         enddo
+                         !
+                         call getporosity(gdp%gdmorlyr, mfrac, poros)
+                         svf = 1.0_fp - poros
+                      else
+                         svf = 1.0_fp
+                      endif
+                      !
+                      thtemp(nm) = 0.0_fp
+                      do l = 1, lsedtot
+                         msed(nm, ilyr, l) = msed(nm, ilyr, l) + rtemp(nm, l) * rhosol(l) * svf
+                         thtemp(nm)        = thtemp(nm)        + rtemp(nm, l)
+                      enddo
+                      thick = thlyr(nm, ilyr) + thtemp(nm)
+                      svfrac(nm, ilyr) = (thlyr(nm, ilyr) * svfrac(nm, ilyr) + thtemp(nm) * svf) / thick
+                      thlyr(nm, ilyr)  = thick
+                   enddo
+                else ! layertype == 'sediment mass'
+                   !
+                   ! add masses in msed and thicknesses in thlyr
+                   !
+                   do nm = 1, nmmax
+                      vfracsum = 0.0_fp
+                      do l = 1, lsedtot
+                         mfrac(l) = rtemp(nm, l)
+                         rtemp(nm, l) = rtemp(nm, l) / rhosol(l)
+                         vfracsum = vfracsum + rtemp(nm, l)
+                      enddo
+                      do l = 1, lsedtot
+                         rtemp(nm, l) = rtemp(nm, l) / vfracsum
+                      enddo
+                      !
+                      thtemp(nm) = 0.0_fp
+                      do l = 1, lsedtot
+                         msed(nm, ilyr, l) = msed(nm, ilyr, l) + rtemp(nm, l) * rhosol(l) * svf
+                         thtemp(nm)        = thtemp(nm)        + rtemp(nm, l)
+                      enddo
+                      thick = thlyr(nm, ilyr) + thtemp(nm)
+                      svfrac(nm, ilyr) = (thlyr(nm, ilyr) * svfrac(nm, ilyr) + thtemp(nm) * svf) / thick
+                      thlyr(nm, ilyr)  = thick
+                   enddo
+                endif
              endif
-             !
-             ! add masses in msed and thicknesses in thlyr
-             !
-             do l = 1, lsedtot
-                do nm = 1, nmmax
-                   msed(nm, ilyr, l) = msed(nm, ilyr, l) + rtemp(nm, l)
-                   thlyr(nm, ilyr)   = thlyr(nm,ilyr)    + rtemp(nm, l)/cdryb(l)
-                enddo
-             enddo
           else
              write (message,'(3a,i2,2a)') 'Unknown layer type ''', &
               & trim(layertype), ''' specified for layer ', ilyr, &
@@ -590,7 +703,8 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
           !
        enddo
        !
-       deallocate(rtemp, stat = istat)
+       deallocate(rtemp , stat = istat)
+       deallocate(thtemp, stat = istat)
        !
     else
        write (message,'(2a)') 'Invalid file version of ', trim(filcomp)
