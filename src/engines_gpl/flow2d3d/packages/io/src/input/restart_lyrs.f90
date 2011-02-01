@@ -1,7 +1,7 @@
 subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
                        & thlyr     ,lsedtot   ,nmaxus    ,cdryb     , &
                        & mmax      ,nlyr      ,success   ,svfrac    , &
-                       & gdp       )
+                       & iporosity ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -52,6 +52,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
 ! Global variables
 !
     integer                                                                                   :: i_restart
+    integer                                                                                   :: iporosity
     integer                                                                                   :: lsedtot
     integer                                                                                   :: nlyr
     integer                                                                                   :: nmaxus
@@ -71,7 +72,6 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     integer                      , external :: getelt
     integer                      , external :: clsnef
     integer                      , external :: inqelm
-    integer                      , pointer  :: iporosity
     integer                                 :: istat
     integer                                 :: rst_lsed
     integer                                 :: rst_lsedbl
@@ -210,7 +210,6 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     endif
     !
     if (layerfrac) then
-       istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'IPorosity', iporosity)
        !
        ! msed contains volume fractions
        !

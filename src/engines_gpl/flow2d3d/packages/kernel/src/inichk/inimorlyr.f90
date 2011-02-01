@@ -140,7 +140,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
                  & error     ,restid    ,i_restart ,msed      , &
                  & thlyr     ,lsedtot   ,nmaxus    ,cdryb     , &
                  & mmax      ,nlyr      ,success   ,svfrac    , &
-                 & gdp       )
+                 & iporosity ,gdp       )
           if (success) goto 9999
        endif
     case default
