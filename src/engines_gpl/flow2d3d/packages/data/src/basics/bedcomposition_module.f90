@@ -1674,7 +1674,7 @@ subroutine getvfrac_1point(this ,nm ,frac      )
           frac = 1.0_fp/this%settings%nfrac
        else
           do l = 1, this%settings%nfrac
-             frac(l) = real(bodsed(nm, l),fp)/(rhofrac(l)*dpsed(nm),fp)
+             frac(l) = real(bodsed(nm, l),fp)/(rhofrac(l)*dpsed(nm))
           enddo
        endif
     endselect
