@@ -1933,6 +1933,14 @@ function allocmorlyr(this, nmlb, nmub, nfrac) result (istat)
     if (istat == 0) state%bodsed = 0.0_fp
     if (istat == 0) allocate (state%dpsed(nmlb:nmub), stat = istat)
     if (istat == 0) state%dpsed = 0.0_fp
+    !
+    if (istat == 0) allocate (settings%rhofrac(nfrac), stat = istat)
+    if (istat == 0) settings%rhofrac = 0.0_fp
+    if (istat == 0) allocate (settings%phi(nfrac), stat = istat)
+    if (istat == 0) settings%phi = 0.0_fp
+    if (istat == 0) allocate (settings%sigphi(nfrac), stat = istat)
+    if (istat == 0) settings%sigphi = 0.0_fp
+    !
     if (settings%iunderlyr==2) then
        if (istat == 0) allocate (settings%thtrlyr(nmlb:nmub), stat = istat)
        if (istat == 0) settings%thtrlyr = 0.0_fp
@@ -1940,13 +1948,6 @@ function allocmorlyr(this, nmlb, nmub, nfrac) result (istat)
           if (istat == 0) allocate (settings%thexlyr(nmlb:nmub), stat = istat)
           if (istat == 0) settings%thexlyr = 0.0_fp
        endif
-       if (istat == 0) allocate (settings%rhofrac(nfrac), stat = istat)
-       if (istat == 0) settings%rhofrac = 0.0_fp
-       if (istat == 0) allocate (settings%phi(nfrac), stat = istat)
-       if (istat == 0) settings%phi = 0.0_fp
-       if (istat == 0) allocate (settings%sigphi(nfrac), stat = istat)
-       if (istat == 0) settings%sigphi = 0.0_fp
-       !
        if (istat == 0) allocate (state%msed(nmlb:nmub,settings%nlyr,nfrac), stat = istat)
        if (istat == 0) state%msed = 0.0_fp
        if (istat == 0) allocate (state%thlyr(nmlb:nmub,settings%nlyr), stat = istat)

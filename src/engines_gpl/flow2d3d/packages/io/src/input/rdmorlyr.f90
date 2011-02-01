@@ -164,7 +164,7 @@ use bedcomposition_module
           call prterr(lundia, 'U021', 'RDMORLYR: memory alloc error')
           call d3stop(1, gdp)
        endif
-       return
+       goto 777
     endif
     write (lundia, '(a)') '*** Start  of underlayer input'
     call tree_get_node_by_name( gdp%input_tree, 'Morphology Input', mor_ptr )
@@ -627,6 +627,7 @@ use bedcomposition_module
     !
     ! Set sediment properties for the morphological layers
     !
+777 continue
     if (iporosity==0) then
        !
        ! porosity is fraction dependent and included in cdryb densities

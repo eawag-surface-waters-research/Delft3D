@@ -107,8 +107,8 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
     istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'iunderlyr', iunderlyr)
     if (istat==0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'nlyr'   , nlyr)
     if (istat==0) istat = bedcomp_getpointer_realprec(gdp%gdmorlyr, 'bodsed', bodsed)
+    if (istat==0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'iporosity', iporosity)
     if (iunderlyr==2) then
-       if (istat==0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'iporosity', iporosity)
        if (istat==0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'msed'     , msed)
        if (istat==0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'thlyr'    , thlyr)
        if (istat==0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'svfrac'   , svfrac)
