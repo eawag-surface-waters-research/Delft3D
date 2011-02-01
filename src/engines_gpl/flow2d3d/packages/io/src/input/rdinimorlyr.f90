@@ -1,7 +1,8 @@
 subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                      & lsedtot   ,mmax      ,nlyr      ,nmax      , &
                      & nmaxus    ,nmmax     ,lundia    ,kcs       , &
-                     & icx       ,icy       ,svfrac    ,gdp       )
+                     & icx       ,icy       ,svfrac    ,iporosity , &
+                     & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -55,6 +56,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
 !
     integer                                                , intent(in)  :: icx
     integer                                                , intent(in)  :: icy
+    integer                                                , intent(in)  :: iporosity
     integer                                                , intent(in)  :: lsedtot !  Description and declaration in iidim.f90
     integer                                                              :: lundia  !  Description and declaration in inout.igs
     integer                                                , intent(in)  :: mmax    !  Description and declaration in iidim.f90
@@ -73,7 +75,6 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
 !
     integer                               :: i
     integer                               :: ilyr
-    integer                     , pointer :: iporosity
     integer                               :: istat
     integer                               :: l
     integer                               :: length

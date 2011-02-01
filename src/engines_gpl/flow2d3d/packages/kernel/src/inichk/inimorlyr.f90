@@ -108,9 +108,10 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
     if (istat==0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'nlyr'   , nlyr)
     if (istat==0) istat = bedcomp_getpointer_realprec(gdp%gdmorlyr, 'bodsed', bodsed)
     if (iunderlyr==2) then
-       if (istat==0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'msed'  , msed)
-       if (istat==0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'thlyr' , thlyr)
-       if (istat==0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'svfrac', svfrac)
+       if (istat==0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'iporosity', iporosity)
+       if (istat==0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'msed'     , msed)
+       if (istat==0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'thlyr'    , thlyr)
+       if (istat==0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'svfrac'   , svfrac)
     endif
     if (istat/=0) then
        call prterr(lundia, 'U021', 'Memory problem in INIMORLYR')
@@ -325,7 +326,8 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
           call rdinimorlyr(flcomp    ,msed      ,thlyr     ,cdryb     , &
                          & lsedtot   ,mmax      ,nlyr      ,nmax      , &
                          & nmaxus    ,nmmax     ,lundia    ,kcs       , &
-                         & icx       ,icy       ,svfrac    ,gdp       )
+                         & icx       ,icy       ,svfrac    ,iporosity , &
+                         & gdp       )
        endif
     endselect
  9999 continue
