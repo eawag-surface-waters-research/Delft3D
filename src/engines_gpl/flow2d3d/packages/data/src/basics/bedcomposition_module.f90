@@ -390,9 +390,9 @@ function updmorlyr(this, dbodsd, dz, messages) result (istat)
        enddo
     case default
        do nm = this%settings%nmlb,this%settings%nmub
-          seddep0 = dpsed(nm)
+          seddep0   = dpsed(nm)
           dpsed(nm) = 0.0_fp
-          dz(nm) = 0.0_fp
+          dz(nm)    = 0.0_fp
           do l = 1, this%settings%nfrac
              bodsed(nm, l) = bodsed(nm, l) + real(dbodsd(nm, l),prec)
              if (bodsed(nm, l) < 0.0_prec) then
@@ -1577,7 +1577,7 @@ subroutine getvfrac_allpoints(this, frac)
     integer                               :: nm
     real(fp)                              :: thick
     real(prec), dimension(:,:)  , pointer :: bodsed
-    real(prec), dimension(:)    , pointer :: dpsed
+    real(fp)  , dimension(:)    , pointer :: dpsed
     real(fp)  , dimension(:,:)  , pointer :: svfrac
     real(fp)  , dimension(:,:,:), pointer :: msed
     real(fp)  , dimension(:,:)  , pointer :: thlyr
@@ -1608,11 +1608,11 @@ subroutine getvfrac_allpoints(this, frac)
        enddo
     case default
        do nm = this%settings%nmlb, this%settings%nmub
-          if (comparereal(real(dpsed(nm),fp),0.0_fp) == 0) then
+          if (comparereal(dpsed(nm),0.0_fp) == 0) then
              frac(nm, :) = 1.0_fp/this%settings%nfrac
           else
              do l = 1, this%settings%nfrac
-                frac(nm, l) = real(bodsed(nm, l),fp)/(rhofrac(l)*real(dpsed(nm),fp))
+                frac(nm, l) = real(bodsed(nm, l),fp)/(rhofrac(l)*dpsed(nm))
              enddo
           endif
        enddo
@@ -1642,7 +1642,7 @@ subroutine getvfrac_1point(this ,nm ,frac      )
     integer                               :: l
     real(fp)                              :: thick
     real(prec), dimension(:,:)  , pointer :: bodsed
-    real(prec), dimension(:)    , pointer :: dpsed
+    real(fp)  , dimension(:)    , pointer :: dpsed
     real(fp)  , dimension(:,:)  , pointer :: svfrac
     real(fp)  , dimension(:,:,:), pointer :: msed
     real(fp)  , dimension(:,:)  , pointer :: thlyr
@@ -1670,11 +1670,11 @@ subroutine getvfrac_1point(this ,nm ,frac      )
           enddo
        endif
     case default
-       if (comparereal(real(dpsed(nm),fp),0.0_fp) == 0) then
+       if (comparereal(dpsed(nm),0.0_fp) == 0) then
           frac = 1.0_fp/this%settings%nfrac
        else
           do l = 1, this%settings%nfrac
-             frac(l) = real(bodsed(nm, l),fp)/(rhofrac(l)*real(dpsed(nm),fp))
+             frac(l) = real(bodsed(nm, l),fp)/(rhofrac(l)*dpsed(nm),fp)
           enddo
        endif
     endselect
@@ -1796,7 +1796,7 @@ subroutine getsedthick_1point(this, nm, seddep)
     ! Local variables
     !
     integer                           :: k
-    real(fp), dimension(:), pointer   :: dpsed
+    real(fp), dimension(:)  , pointer :: dpsed
     real(fp), dimension(:,:), pointer :: thlyr
     !
     !! executable statements -------------------------------------------------------
@@ -2439,7 +2439,7 @@ subroutine bedcomp_use_bodsed(this)
        ! Compute thickness correctly in case of
        ! multiple fractions with different rhofrac
        !
-       dpsed(nm) = 0.0
+       dpsed(nm) = 0.0_fp
        do ised = 1, this%settings%nfrac
           dpsed(nm) = dpsed(nm) + real(bodsed(nm, ised),fp)/rhofrac(ised)
        enddo
