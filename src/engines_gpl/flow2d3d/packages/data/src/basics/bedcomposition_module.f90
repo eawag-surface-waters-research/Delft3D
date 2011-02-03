@@ -983,6 +983,13 @@ subroutine lyrsedimentation(this, nm, dzini, dmi, svfracdep, work)
           call lyrsedimentation_eulerian(this, nm, work%thlyr2(k2), dmi2, work%svfrac2(k2))
        endif
     enddo
+    !
+    ! and finally if there is any sediment left in the original deposit that
+    ! came from the active layer(s) then deposit that sediment
+    !
+    if (dz>0.0_fp) then
+       call lyrsedimentation_eulerian(this, nm, dz, dmi, svfracdep)
+    endif    
 end subroutine lyrsedimentation
 !
 !
