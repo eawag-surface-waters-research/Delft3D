@@ -598,7 +598,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     !
     if (itcomi>0) then
        if (itcomf<itstrt) then
-          call prterr(lundia    ,'V008'    ,'Comm. start time (<)'          )
+          call prterr(lundia, 'V064', '<')
           iplus = ((itstrt - itcomf)/itcomi)*itcomi
           if (iplus<(itstrt - itcomf)) iplus = iplus + itcomi
           itcomf = itcomf + iplus
@@ -608,7 +608,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
        ! to become inside simulation time frame
        !
        if (itcoml>itstop) then
-          call prterr(lundia    ,'V008'    ,'Comm. stop time (>)')
+          call prterr(lundia, 'V064', '>')
           iplus = ((itcoml - itstop)/itcomi)*itcomi
           if (iplus<(itcoml - itstop)) iplus = iplus + itcomi
           itcoml = itcoml - iplus
