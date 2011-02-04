@@ -102,7 +102,7 @@ subroutine DioSyncSetItemAvailable(stream, itemName, availType)
         open(dioStartLun - 1,file=fname,status='new', action= 'write', iostat=ierr)
 #endif
         if (ierr.gt.0) then
-            call DioStreamError(901, 'Could not set avaiable:', fname)
+            call DioStreamError(901, 'Could not set available:', fname)
         else
             close(dioStartLun - 1)
         endif
