@@ -107,7 +107,7 @@ group               testcase
                     06-india_droogval      OK
                     07-india_cyclone       ***** DISABLED ********** DISABLED *****
                     08-lakevictoria        OK
-                    09-getij_with_measur   OK (after grid creating grid)
+                    09-getij_with_measur   OK (after creating grid)
                     10-hirlam              OK  (air output parameters repaired)
                     11-vietnam_cyclone     OK
                     12-secchi_variable_0   NOT OK: diff_temp < 1.1C; diff_sep < 0.12m, dif_u < 0.1 m/s
@@ -307,8 +307,8 @@ group               testcase
                     04-botnow_curnow       
                     05-flow_wave_roller    
 22_graded           01-graded              ERROR: dif_s1 > 0.15            
-                    02-pankop              ERROR: reading nefis file (parallel)
-                    03-trench              
+                    02-pankop              ERROR: diff u > 0.03 (at inflow) 
+                    03-trench              ERROR: locally very large differences
                     04-trench_opb          
                     05-pankop_secflow_sp   
 23_timeunit         01-sec                 

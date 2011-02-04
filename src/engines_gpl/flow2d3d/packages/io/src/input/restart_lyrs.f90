@@ -40,6 +40,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     use precision 
     use globaldata
     use bedcomposition_module
+    use dfparall
     !
     implicit none
     !
@@ -51,19 +52,19 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
 !
 ! Global variables
 !
-    integer                                                                                   :: i_restart
-    integer                                                                                   :: iporosity
-    integer                                                                                   :: lsedtot
-    integer                                                                                   :: nlyr
-    integer                                                                                   :: nmaxus
-    integer                                                                                   :: mmax
-    logical                                                                                   :: error
-    logical                                                                     , intent(out) :: success
+    integer                                                                                       :: i_restart
+    integer                                                                                       :: iporosity
+    integer                                                                                       :: lsedtot
+    integer                                                                                       :: nlyr
+    integer                                                                                       :: nmaxus
+    integer                                                                                       :: mmax
+    logical                                                                                       :: error
+    logical                                                                         , intent(out) :: success
     real(fp), dimension(                                                lsedtot), intent(in)  :: cdryb
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr, lsedtot), intent(out) :: msed
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr)                       :: svfrac
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr)         , intent(out) :: thlyr
-    character(*)                                                                              :: restid
+    character(*)                                                                                  :: restid
 !
 ! Local variables
 !
@@ -79,6 +80,8 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     integer                                 :: rst_nlyr
     integer                                 :: ierror
     integer                                 :: fds
+    integer                                 :: i
+    integer                                 :: j    
     integer                                 :: k
     integer                                 :: l
     integer                                 :: m
@@ -89,12 +92,19 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     integer                                 :: nbytsg
     integer                                 :: elmndm
     integer  , dimension(5)                 :: elmdms
-    real(sp), dimension(:,:,:,:), pointer   :: rst_msed
-    real(sp), dimension(:,:,:)  , pointer   :: rst_lyr
+    real(sp) , dimension(:,:,:,:), pointer  :: rst_msed
+    real(sp) , dimension(:,:,:)  , pointer  :: rst_thlyr
+    integer                     , pointer   :: mfg
+    integer                     , pointer   :: mlg
+    integer                     , pointer   :: nfg
+    integer                     , pointer   :: nlg
+    integer                     , pointer   :: nmaxgl
+    integer                     , pointer   :: mmaxgl
     real(fp), dimension(lsedtot)            :: mfrac
     real(fp)                                :: mfracsum
     real(fp)                                :: poros
     real(fp)                                :: sedthick
+     
     character(len=256)                      :: dat_file
     character(len=8)                        :: elmtyp
     character(len=16)                       :: elmqty
@@ -102,13 +112,23 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     character(len=64)                       :: elmdes
     character(len=256)                      :: def_file
     logical                                 :: layerfrac
+ 
+    
+    real(fp), dimension(:,:,:,:), allocatable :: msed_g     
+    real(fp), dimension(:,:,:),   allocatable :: thlyr_g
 !
 !! executable statements -------------------------------------------------------
 !
-    rhosol               => gdp%gdsedpar%rhosol
-    !
+    rhosol              => gdp%gdsedpar%rhosol
+    mfg                 => gdp%gdparall%mfg
+    mlg                 => gdp%gdparall%mlg
+    nfg                 => gdp%gdparall%nfg
+    nlg                 => gdp%gdparall%nlg
+    mmaxgl              => gdp%gdparall%mmaxgl
+    nmaxgl              => gdp%gdparall%nmaxgl 
+
     nullify(rst_msed)
-    nullify(rst_lyr)
+    nullify(rst_thlyr)
     error        = .false.
     success      = .false.
     layerfrac    = .false.
@@ -118,10 +138,12 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     !
     dat_file = restid(1:lrid)//'.dat'
     def_file = restid(1:lrid)//'.def'
-    ierror   = crenef(fds, dat_file, def_file, ' ', 'r')
-    if (ierror/= 0) then
-       error = .true.
-       goto 9999
+    if (inode == master) then    
+       ierror   = crenef(fds, dat_file, def_file, ' ', 'r')
+       if (ierror/= 0) then
+          error = .true.
+          goto 9999
+       endif
     endif
     !
     ! initialize group index constant data
@@ -135,6 +157,17 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     uindex (3,1) = 1 ! increment in time
     uindex (1,1) = i_restart
     uindex (2,1) = i_restart
+
+    !
+    ! allocate global versions of msed and thlyr
+    !
+    allocate(msed_g(nmaxgl,mmaxgl, nlyr, lsedtot))
+    allocate(thlyr_g(nmaxgl,mmaxgl, nlyr))
+
+    
+    ! the master opens and reads the file 
+    ! 
+    if ( inode /= master ) goto 50 
     !
     ierror = getelt(fds, 'map-const', 'LSED'  , cuindex, 1, 4, rst_lsed)
     if (ierror/= 0) goto 9999
@@ -144,71 +177,113 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     if (rst_lsedtot /= lsedtot) goto 9999
     !
     elmndm = 5
-    ierror  = inqelm(fds , 'MSED', elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
+    ierror = inqelm(fds , 'MSED', elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
     if (ierror /= 0) then
         ierror  = inqelm(fds , 'LYRFRAC', elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
         layerfrac = .true.
         if (ierror /= 0) goto 9999
+   
+        if (ierror/= 0) goto 9999
     endif
+
     rst_nlyr = elmdms(3)
-    allocate(rst_msed(nmaxus, mmax, rst_nlyr, rst_lsedtot))
-    allocate(rst_lyr(nmaxus, mmax, rst_nlyr))
     !
+    ! allocate restart-data for whole domain
+    !
+    allocate(rst_msed(nmaxgl, mmaxgl, rst_nlyr, rst_lsedtot))
+    allocate(rst_thlyr(nmaxgl, mmaxgl, rst_nlyr))
+    !
+
     if (layerfrac) then
+
         ierror = getelt(fds , 'map-sed-series', 'LYRFRAC', uindex, 1, &
-                 & mmax*nmaxus*rst_nlyr*rst_lsedtot*4, rst_msed )       
+                 & mmaxgl*nmaxgl*rst_nlyr*rst_lsedtot*4, rst_msed )       
         if (ierror /= 0) goto 9999
     else
         ierror = getelt(fds , 'map-sed-series', 'MSED', uindex, 1, &
-                 & mmax*nmaxus*rst_nlyr*rst_lsedtot*4, rst_msed )
+                 & mmaxgl*nmaxgl*rst_nlyr*rst_lsedtot*4, rst_msed )
         if (ierror /= 0) goto 9999
     endif
+
     !
     ierror = getelt(fds , 'map-sed-series', 'THLYR', uindex, 1, &
-                 & mmax*nmaxus*rst_nlyr*4, rst_lyr )
+                 & mmaxgl*nmaxgl*rst_nlyr*4, rst_thlyr )
     if (ierror/= 0) goto 9999
-    !
+
     if (nlyr>=rst_nlyr) then
        !
        ! more layers in simulation than in restart file (or same number)
        !
        ! copy first layer
        !
-       thlyr(1:nmaxus,1:mmax,1)            = rst_lyr(1:nmaxus,1:mmax,1)
-       msed(1:nmaxus,1:mmax,1,1:lsedtot)   = rst_msed(1:nmaxus,1:mmax,1,1:lsedtot)
+       thlyr_g(1:nmaxgl,1:mmaxgl,1)             = rst_thlyr(1:nmaxgl,1:mmaxgl,1)
+       msed_g(1:nmaxgl,1:mmaxgl,1,1:lsedtot) = rst_msed(1:nmaxgl,1:mmaxgl,1,1:lsedtot)
        !
        ! insert empty layers (if necessary)
        !
        do k = 2,1+nlyr-rst_nlyr
-          thlyr(1:nmaxus,1:mmax,k)              = 0.0_fp
-          msed(1:nmaxus,1:mmax,k,1:lsedtot)     = 0.0_fp
+          thlyr_g(1:nmaxgl,1:mmaxgl,k)               = 0.0_fp
+          msed_g(1:nmaxgl,1:mmaxgl,k,1:lsedtot)     = 0.0_fp
        enddo
        !
        ! copy remaining layers
        !
-       thlyr(1:nmaxus,1:mmax,nlyr-rst_nlyr+2:nlyr)            = rst_lyr(1:nmaxus,1:mmax,2:rst_nlyr)
-       msed(1:nmaxus,1:mmax,nlyr-rst_nlyr+2:nlyr,1:lsedtot)   = rst_msed(1:nmaxus,1:mmax,2:rst_nlyr,1:lsedtot)
+       thlyr_g(1:nmaxgl,1:mmaxgl,nlyr-rst_nlyr+2:nlyr)             = rst_thlyr(1:nmaxgl,1:mmaxgl,2:rst_nlyr)
+       msed_g(1:nmaxgl,1:mmaxgl,nlyr-rst_nlyr+2:nlyr,1:lsedtot) = rst_msed(1:nmaxgl,1:mmaxgl,2:rst_nlyr,1:lsedtot)
     else ! nlyr<rst_nlyr
        !
        ! more layers in restart file than in simulation
        !
        ! copy the first nlyr layers
        !
-       thlyr(1:nmaxus,1:mmax,1:nlyr)           = rst_lyr(1:nmaxus,1:mmax,1:nlyr)
-       msed(1:nmaxus,1:mmax,1:nlyr,1:lsedtot)  = rst_msed(1:nmaxus,1:mmax,1:nlyr,1:lsedtot)
+       thlyr_g(1:nmaxgl,1:mmaxgl,1:nlyr)             = rst_thlyr(1:nmaxgl,1:mmaxgl,1:nlyr)
+       msed_g(1:nmaxgl,1:mmaxgl,1:nlyr,1:lsedtot) = rst_msed(1:nmaxgl,1:mmaxgl,1:nlyr,1:lsedtot)
+       !
        !
        ! add contents of other layers to last layer
        !
        do k = nlyr+1, rst_nlyr
-          thlyr(1:nmaxus,1:mmax,nlyr)        = thlyr(1:nmaxus,1:mmax,nlyr) &
-                                             & + rst_lyr(1:nmaxus,1:mmax,k)
+          thlyr_g(1:nmaxgl,1:mmaxgl,nlyr)        = thlyr_g(1:nmaxgl,1:mmaxgl,nlyr) &
+                                             & + rst_thlyr(1:nmaxgl,1:mmaxgl,k)
           do l = 1, lsedtot
-             msed(1:nmaxus,1:mmax,nlyr,l)    = msed(1:nmaxus,1:mmax,nlyr,l) &
-                                             & + rst_msed(1:nmaxus,1:mmax,k,l) 
+             msed_g(1:nmaxgl,1:mmaxgl,nlyr,l) = msed_g(1:nmaxgl,1:mmaxgl,nlyr,l) &
+                    & + rst_msed(1:nmaxgl,1:mmaxgl,k,l) 
           enddo
        enddo
     endif
-    !
+      
+    !    end of master part
+    ! 
+    ! scatter information to all nodes     
+    
+ 50 continue     
+     
+    ! 
+    ! scatter arrays msed and thlyr to all nodes. Note: the broadc must use 'dfloat'
+    ! since the arrays are 'fp'! Otherwise, intractable memory errors will occur. 
+    ! 
+    call dfsync ( gdp) 
+    call dfbroadc ( thlyr_g, nmaxgl*mmaxgl*nlyr, dfloat, gdp ) 
+    call dfbroadc ( msed_g, nmaxgl*mmaxgl*nlyr*lsedtot, dfloat, gdp ) 
+    ! 
+    ! put copies of parts of msed, thlyr, etc for each subdomain 
+    ! 
+    call dfsync ( gdp ) 
+    do j = mfg, mlg 
+       do i = nfg, nlg 
+          msed(i-nfg+1,j-mfg+1,1:nlyr,1:lsedtot) = msed_g(i,j,1:nlyr,1:lsedtot) 
+          thlyr(i-nfg+1,j-mfg+1,1:nlyr) = thlyr_g(i,j,1:nlyr)
+          
+       enddo 
+    enddo 
+
+
+        
+    deallocate(msed_g, thlyr_g)    
+  
+    
+
+ !
     if (layerfrac) then
        !
        ! msed contains volume fractions
@@ -272,10 +347,18 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
           enddo
        endif
     endif
-    !
-    success = .true.
+
+!
+   
+                    
 9999 continue
-    if (associated(rst_msed)) deallocate (rst_msed)
-    if (associated(rst_lyr))  deallocate (rst_lyr)
-    ierror = clsnef(fds) 
+    
+    if (inode == master) then
+      if (associated(rst_msed)) deallocate (rst_msed)
+      if (associated(rst_thlyr))   deallocate (rst_thlyr)     
+      ierror = clsnef(fds) 
+    endif
+    
+    success = .true.
+
 end subroutine restart_lyrs

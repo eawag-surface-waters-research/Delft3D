@@ -43,6 +43,8 @@ use properties
 !
     use globaldata
     !
+    use dfparall
+    !
     implicit none
     !
     type(globdat),target :: gdp
@@ -97,6 +99,7 @@ use properties
     integer, external                     :: inqmxi
     integer, external                     :: neferr
     integer                               :: i
+    integer                               :: j
     integer                               :: itmapc
     integer                               :: max_index
     integer                               :: rst_lstci
@@ -112,6 +115,23 @@ use properties
     character(1024)                       :: error_string
     character(256)                        :: dat_file
     character(256)                        :: def_file
+    integer                     , pointer :: mfg
+    integer                     , pointer :: mlg
+    integer                     , pointer :: nfg
+    integer                     , pointer :: nlg
+    integer                     , pointer :: nmaxgl
+    integer                     , pointer :: mmaxgl   
+    real(sp), dimension(:,:), allocatable :: s1_g
+    real(sp), dimension(:,:), allocatable :: dp_g
+    real(sp), dimension(:,:,:), allocatable :: u1_g
+    real(sp), dimension(:,:,:), allocatable :: v1_g        
+    real(sp), dimension(:,:), allocatable :: umnldf_g
+    real(sp), dimension(:,:), allocatable :: vmnldf_g
+    integer, dimension(:,:), allocatable :: kfu_g
+    integer, dimension(:,:), allocatable :: kfv_g        
+    real(sp), dimension(:,:,:,:), allocatable :: r1_g
+    real(sp), dimension(:,:,:,:), allocatable :: rtur1_g
+    integer                                   :: ier1, ier2, ier3, ier4,ier5,ier6,ier7,ier8,ier9
 !
 !! executable statements -------------------------------------------------------
 !
@@ -128,6 +148,13 @@ use properties
     morft               => gdp%gdmorpar%morft
     morft0              => gdp%gdmorpar%morft0
     bed                 => gdp%gdmorpar%bed
+    mfg                 => gdp%gdparall%mfg
+    mlg                 => gdp%gdparall%mlg
+    nfg                 => gdp%gdparall%nfg
+    nlg                 => gdp%gdparall%nlg
+    mmaxgl              => gdp%gdparall%mmaxgl
+    nmaxgl              => gdp%gdparall%nmaxgl    
+    
     !
     ! dp_from_map_file=false: do not read depth from map file
     !
@@ -143,13 +170,17 @@ use properties
     !
     dat_file = restid(1:lrid)//'.dat'
     def_file = restid(1:lrid)//'.def'
-    ierror = crenef(fds, dat_file, def_file, ' ', 'r')
-    if (ierror/= 0) then
-       error = .true.
-       goto 9999
+    
+    if (inode == master) then
+       ierror = crenef(fds, dat_file, def_file, ' ', 'r')
+       if (ierror/= 0) then
+          error = .true.
+          goto 9999
+       endif
     endif
     ex_nfs = .true.
     write(lundia, '(a)') 'Restarting from ' // trim(dat_file) // ' and ' // trim(def_file)
+
     !
     ! Now also reading KFU and KFV from restart file
     !
@@ -167,7 +198,15 @@ use properties
     cuindex (1,1) = 1
     cuindex (2,1) = 1
     !
+    
+    ! the master opens and reads the grid file 
+    ! 
+    if ( inode /= master ) goto 50 
+    
     ierror = getelt(fds, 'map-const', 'DT', cuindex, 1, 4, dtms)
+
+ 
+
     dtm = dtms
     if (ierror/= 0) then
        ierror = neferr(0,error_string)
@@ -216,18 +255,19 @@ use properties
        ! The following parameters use a nmaxus*mmax*kmax*1 buffer:
        ! S1, DPS, U1, V1, UMNLDF, VMNLDF
        !
-       allocate(sbuff(nmaxus, mmax, kmax, 1))
+       allocate(sbuff(nmaxgl, mmaxgl, kmax, 1), stat = ier1)
+       allocate(s1_g(nmaxgl,mmaxgl),stat = ier2)
        !
        ! S1
        !
-       ierror = getelt( fds , 'map-series', 'S1', uindex, 1, mmax*nmaxus*4, sbuff )
+       ierror = getelt( fds , 'map-series', 'S1', uindex, 1, mmaxgl*nmaxgl*4, sbuff )
        if (ierror/= 0) then
           ierror = neferr(0,error_string)
           call prterr(lundia    ,'P004'    , error_string)
           error = .true.
           goto 9999
        endif
-       s1(1:nmaxus,1:mmax) = sbuff(1:nmaxus,1:mmax,1,1)
+       s1_g(1:nmaxgl,1:mmaxgl) = sbuff(1:nmaxgl,1:mmaxgl,1,1)
        !
        ! Only read depth when dp_from_map_file=true
        !
@@ -235,7 +275,7 @@ use properties
           !
           ! DPS
           !
-          ierror = getelt( fds , 'map-sed-series', 'DPS', uindex, 1, mmax*nmaxus*4, sbuff )
+          ierror = getelt( fds , 'map-sed-series', 'DPS', uindex, 1, mmaxgl*nmaxgl*4, sbuff )
           if (ierror/= 0) then
              write(lundia, '(a)') 'No bed level data on restart file available:'
              write(lundia, '(a)') 'using bed level data as prescribed in master definition file.'
@@ -248,7 +288,8 @@ use properties
              !
              write(lundia, '(a)') 'Bed level data read from restart file.'
              rst_dp = .true.
-             dp(1:nmaxus,1:mmax) = sbuff(1:nmaxus,1:mmax,1,1)
+             allocate(dp_g(nmaxgl,mmaxgl), stat = ier1)
+             dp_g(1:nmaxgl,1:mmaxgl) = sbuff(1:nmaxgl,1:mmaxgl,1,1)
              !
              ! Read associated morphological time from map file.
              !
@@ -260,92 +301,102 @@ use properties
        !
        ! U1
        !
-       ierror = getelt( fds , 'map-series', 'U1', uindex, 1, mmax*nmaxus*kmax*4, sbuff )
+       ierror = getelt( fds , 'map-series', 'U1', uindex, 1, mmaxgl*nmaxgl*kmax*4, sbuff )
        if (ierror/= 0) then
           ierror = neferr(0,error_string)
           call prterr(lundia    ,'P004'    , error_string)
           error = .true.
           goto 9999
        endif
-       u1(1:nmaxus,1:mmax,1:kmax) = sbuff(1:nmaxus,1:mmax,1:kmax,1)
+       allocate(u1_g(nmaxgl,mmaxgl,kmax), stat = ier1)
+       u1_g(1:nmaxgl,1:mmaxgl,1:kmax) = sbuff(1:nmaxgl,1:mmaxgl,1:kmax,1)
        !
        ! V1
        !
-       ierror = getelt( fds , 'map-series', 'V1', uindex, 1, mmax*nmaxus*kmax*4, sbuff )
+       ierror = getelt( fds , 'map-series', 'V1', uindex, 1, mmaxgl*nmaxgl*kmax*4, sbuff )
        if (ierror/= 0) then
           ierror = neferr(0,error_string)
           call prterr(lundia    ,'P004'    , error_string)
           error = .true.
           goto 9999
        endif
-       v1(1:nmaxus,1:mmax,1:kmax) = sbuff(1:nmaxus,1:mmax,1:kmax,1)
+       allocate(v1_g(nmaxgl,mmaxgl,kmax), stat = ier2)
+       v1_g(1:nmaxgl,1:mmaxgl,1:kmax) = sbuff(1:nmaxgl,1:mmaxgl,1:kmax,1)
        !
        ! UMNLDF: filtered velocity U-component for subgrid viscosity model
        !
-       ierror = getelt( fds , 'map-series', 'UMNLDF', uindex, 1, mmax*nmaxus*4, sbuff)
+       ierror = getelt( fds , 'map-series', 'UMNLDF', uindex, 1, mmaxgl*nmaxgl*4, sbuff)
        if (ierror/= 0) then
           if (htur2d) then
              ierror = neferr(0,error_string)
              call prterr(lundia    ,'U190'    , error_string)
           endif
        else
-          umnldf(1:nmaxus,1:mmax) = sbuff(1:nmaxus,1:mmax,1,1)
+          allocate(umnldf_g(nmaxgl,mmaxgl), stat = ier3)
+          umnldf_g(1:nmaxgl,1:mmaxgl) = sbuff(1:nmaxgl,1:mmaxgl,1,1)
        endif
        !
        ! VMNLDF: filtered velocity V-component for subgrid viscosity model
        !
-       ierror = getelt( fds , 'map-series', 'VMNLDF', uindex, 1, mmax*nmaxus*4, sbuff)
+       ierror = getelt( fds , 'map-series', 'VMNLDF', uindex, 1, mmaxgl*nmaxgl*4, sbuff)
        if (ierror/= 0) then
           if (htur2d) then
              ierror = neferr(0,error_string)
              call prterr(lundia    ,'U190'    , error_string)
           endif
        else
-          vmnldf(1:nmaxus,1:mmax) = sbuff(1:nmaxus,1:mmax,1,1)
+          allocate(vmnldf_g(nmaxgl,mmaxgl), stat = ier4)
+          vmnldf_g(1:nmaxgl,1:mmaxgl) = sbuff(1:nmaxgl,1:mmaxgl,1,1)
        endif
        !
-       allocate(ibuff(nmaxus, mmax, 1, 1))
+       allocate(ibuff(nmaxgl, mmaxgl, 1, 1), stat = ier1)
        !
        ! KFU: current active/inactive status of U point
        !
-       ierror = getelt( fds , 'map-series', 'KFU', uindex, 1, mmax*nmaxus*4, ibuff)
+       ierror = getelt( fds , 'map-series', 'KFU', uindex, 1, mmaxgl*nmaxgl*4, ibuff)
        if (ierror/= 0) then
           ierror = neferr(0,error_string)
           call prterr(lundia    ,'P004'    , error_string)
           error = .true.
           goto 9999
        endif
-       kfu=0
-       kfu(1:nmaxus,1:mmax) = ibuff(1:nmaxus,1:mmax,1,1)
+       allocate(kfu_g(nmaxgl,mmaxgl), stat = ier1)
+       kfu_g=0
+       kfu_g(1:nmaxgl,1:mmaxgl) = ibuff(1:nmaxgl,1:mmaxgl,1,1)
        !
        ! KFV: current active/inactive status of V point
        !
-       ierror = getelt( fds , 'map-series', 'KFV', uindex, 1, mmax*nmaxus*4, ibuff)
+       ierror = getelt( fds , 'map-series', 'KFV', uindex, 1, mmaxgl*nmaxgl*4, ibuff)
        if (ierror/= 0) then
           ierror = neferr(0,error_string)
           call prterr(lundia    ,'P004'    , error_string)
           error = .true.
           goto 9999
        endif
-       kfv=0
-       kfv(1:nmaxus,1:mmax) = ibuff(1:nmaxus,1:mmax,1,1)
+       allocate(kfv_g(nmaxgl,mmaxgl), stat = ier2)
+       kfv_g=0
+       kfv_g(1:nmaxgl,1:mmaxgl) = ibuff(1:nmaxgl,1:mmaxgl,1,1)
        !
        ! Constituents sal, temp, constituents
        ! Use nmaxus*mmax*kmax*lstsci buffer
        !
-       ierror = getelt(fds, 'map-const', 'LSTCI', cuindex, 1, 4, rst_lstci)
+
+       
+       ierror = getelt(fds, 'map-const', 'LSTCI', cuindex, 1, 4, rst_lstci)       
+       
        if (lstsci /= 0) then
           if (lstsci == rst_lstci) then
              deallocate(sbuff)
-             allocate(sbuff(nmaxus, mmax, kmax, lstsci))
-             ierror = getelt( fds , 'map-series', 'R1', uindex, 1, mmax*nmaxus*kmax*rst_lstci*4, sbuff )
+             allocate(sbuff(nmaxgl, mmaxgl, kmax, lstsci), stat = ier3)
+             ierror = getelt( fds , 'map-series', 'R1', uindex, 1, mmaxgl*nmaxgl*kmax*rst_lstci*4, sbuff )
              if (ierror/= 0) then
                 ierror = neferr(0,error_string)
                 call prterr(lundia    ,'P004'    , error_string)
                 error = .true.
                 goto 9999
              endif
-             r1(1:nmaxus,1:mmax,1:kmax,1:lstsci) = sbuff(1:nmaxus,1:mmax,1:kmax,1:lstsci)
+             allocate(r1_g(nmaxgl,mmaxgl, kmax, lstsci), stat = ier4)
+             r1_g(1:nmaxgl,1:mmaxgl,1:kmax,1:lstsci) = sbuff(1:nmaxgl,1:mmaxgl,1:kmax,1:lstsci)
           else        
              write(lundia, *) 'No restart value used for Salinity, Temperature, a Constituent or Spiral Intensity'
           endif
@@ -365,22 +416,122 @@ use properties
        if (ltur > 0) then
           if (ltur == rst_ltur) then
              deallocate(sbuff)
-             allocate(sbuff(nmaxus, mmax, 0:kmax, ltur))
-             ierror = getelt( fds , 'map-series', 'RTUR1', uindex, 1, mmax*nmaxus*(kmax+1)*rst_ltur*4, sbuff )
+             allocate(sbuff(nmaxgl, mmaxgl, 0:kmax, ltur), stat = ier1)
+             ierror = getelt( fds , 'map-series', 'RTUR1', uindex, 1, mmaxgl*nmaxgl*(kmax+1)*rst_ltur*4, sbuff )
              if (ierror/= 0) then
                 ierror = neferr(0,error_string)
                 call prterr(lundia    ,'P004'    , error_string)
                 error = .true.
                 goto 9999
              endif
-             rtur1(1:nmaxus,1:mmax,0:kmax,1:ltur) = sbuff(1:nmaxus,1:mmax,0:kmax,1:ltur)
+             allocate(rtur1_g(nmaxgl,mmaxgl, 0:kmax, 1:ltur), stat = ier2)
+             rtur1_g(1:nmaxgl,1:mmaxgl,0:kmax,1:ltur) = sbuff(1:nmaxgl,1:mmaxgl,0:kmax,1:ltur)
           else        
              write(lundia, *) 'Turbulence model is not compatible with previous simulation, default initialisation will be used'
           endif
        endif
+
     endif
+
+    !    end of master part
+    ! 
+    ! scatter information to all nodes     
+50 continue    
+    !
+    ! first scatter ltur1, r1 information to all domains!
+    !
+    call dfbroadc ( rst_lstci, 1, dfint, gdp )    
+    call dfbroadc ( rst_ltur, 1, dfint, gdp )   
+       
+    if ( inode /= master ) then 
+       allocate (s1_g(nmaxgl,mmaxgl),stat=ier1) 
+       if (dp_from_map_file) allocate (dp_g(nmaxgl,mmaxgl))
+       allocate (u1_g(nmaxgl,mmaxgl,kmax), stat = ier2) 
+       allocate (v1_g(nmaxgl,mmaxgl,kmax), stat = ier3) 
+       allocate (umnldf_g(nmaxgl,mmaxgl), stat = ier4) 
+       allocate (vmnldf_g(nmaxgl,mmaxgl), stat = ier5)
+       allocate (kfu_g(nmaxgl,mmaxgl), stat = ier6) 
+       allocate (kfv_g(nmaxgl,mmaxgl), stat = ier7)
+       if (lstsci > 0 .and. lstsci == rst_lstci) allocate (r1_g(nmaxgl,mmaxgl,kmax,1:lstsci), stat = ier8)
+       if (ltur > 0 .and. ltur == rst_ltur)  allocate (rtur1_g(nmaxgl,mmaxgl,0:kmax,1:ltur), stat = ier9)              
+        
+    endif 
+    ! 
+    ! scatter arrays s1 etc to all nodes. Note: the broadc must use 'dfreal'
+    ! since the arrays are single precision! Otherwise, intractable memory errors will occur. 
+    ! 
+    call dfsync(gdp)
+      
+    call dfbroadc ( s1_g, nmaxgl*mmaxgl, dfreal, gdp )   
+    if (dp_from_map_file) call dfbroadc ( dp_g, nmaxgl*mmaxgl, dfreal, gdp ) 
+    call dfbroadc ( u1_g, nmaxgl*mmaxgl*kmax, dfreal, gdp )
+    call dfbroadc ( v1_g, nmaxgl*mmaxgl*kmax, dfreal, gdp )
+    call dfbroadc ( umnldf_g, nmaxgl*mmaxgl, dfreal, gdp )
+    call dfbroadc ( vmnldf_g, nmaxgl*mmaxgl, dfreal, gdp )
+    call dfbroadc ( kfu_g, nmaxgl*mmaxgl, dfint, gdp )
+    call dfbroadc ( kfv_g, nmaxgl*mmaxgl, dfint, gdp )
+    if (lstsci > 0 .and. lstsci  == rst_lstci) call dfbroadc ( r1_g, nmaxgl*mmaxgl*kmax*lstsci, dfreal, gdp )
+    if (ltur > 0  .and. ltur == rst_ltur )  call dfbroadc ( rtur1_g, nmaxgl*mmaxgl*(kmax+1)*ltur, dfreal, gdp )    
+    !
+    !
+    ! 
+    ! put copies of parts of s1 etc for each subdomain 
+    ! 
+    call dfsync ( gdp ) 
+    do j = mfg, mlg 
+       do i = nfg, nlg 
+          s1(i-nfg+1,j-mfg+1) = s1_g(i,j) 
+          u1(i-nfg+1,j-mfg+1,1:kmax) = u1_g(i,j,1:kmax)
+          v1(i-nfg+1,j-mfg+1,1:kmax) = v1_g(i,j,1:kmax)           
+          umnldf(i-nfg+1,j-mfg+1) = umnldf_g(i,j)
+          vmnldf(i-nfg+1,j-mfg+1) = vmnldf_g(i,j)
+          kfu(i-nfg+1,j-mfg+1) = kfu_g(i,j)
+          kfv(i-nfg+1,j-mfg+1) = kfv_g(i,j)
+       enddo 
+    enddo 
+        
+    if (dp_from_map_file) then
+       do j = mfg, mlg 
+          do i = nfg, nlg 
+             dp(i-nfg+1,j-mfg+1) = dp_g(i,j)          
+          enddo
+       enddo    
+    endif
+
+    if (lstsci > 0 .and. lstsci  == rst_lstci) then
+       do j = mfg, mlg 
+          do i = nfg, nlg 
+             r1(i-nfg+1,j-mfg+1,1:kmax,1:lstsci) = r1_g(i,j,1:kmax,1:lstsci)          
+          enddo
+       enddo    
+    endif 
+       
+    if (ltur > 0  .and. ltur == rst_ltur ) then
+       do j = mfg, mlg 
+          do i = nfg, nlg 
+             rtur1(i-nfg+1,j-mfg+1,0:kmax,1:ltur) = rtur1_g(i,j,0:kmax,1:ltur)          
+          enddo
+       enddo   
+    endif       
+
+    deallocate(u1_g, v1_g, stat = ier2)
+    deallocate(s1_g, stat = ier1)
+    deallocate(umnldf_g, vmnldf_g, stat = ier3)
+    deallocate(kfu_g, kfv_g, stat=ier4)
+    if (dp_from_map_file) deallocate(dp_g, stat = ier1)
+    if (lstsci > 0 .and. lstsci  == rst_lstci) deallocate(r1_g, stat = ier2)
+    if (ltur > 0  .and. ltur == rst_ltur ) deallocate(rtur1_g, stat = ier3)
+
+                
 9999 continue
-    if (associated(sbuff)) deallocate (sbuff)
-    if (associated(ibuff)) deallocate (ibuff)
-    ierror = clsnef(fds) 
+
+    
+    if (inode == master) then
+      if (associated(sbuff)) deallocate (sbuff)
+      if (associated(ibuff)) deallocate (ibuff)
+      ierror = clsnef(fds) 
+    endif
+    
+    call dfsync(gdp)
+      
 end subroutine flow_nefis_restart
