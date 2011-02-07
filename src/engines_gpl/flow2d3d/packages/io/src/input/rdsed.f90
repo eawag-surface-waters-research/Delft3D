@@ -144,6 +144,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     logical                   :: found
     logical                   :: ex
     logical        , external :: stringsequalinsens
+    logical                   :: success
     character(20)             :: sedname
     character(256)            :: filsed
     character(256)            :: filtrn
@@ -674,13 +675,22 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                 inquire (file = flsdbd(l), exist = ex)
              endif
              if (.not. ex) then
-                flsdbd(l) = ' '
                 sdbuni(l) = rmissval
                 if (inisedunit(l) == 'm') then
-                   call prop_get(sedblock_ptr, '*', 'IniSedThick', sdbuni(l))
+                   call prop_get(sedblock_ptr, '*', 'IniSedThick', sdbuni(l), success)
                 else
-                   call prop_get(sedblock_ptr, '*', 'SdBUni', sdbuni(l))
+                   call prop_get(sedblock_ptr, '*', 'SdBUni', sdbuni(l), success)
                 endif
+                if (.not. success) then
+                   if (inisedunit(l) == 'm') then
+                      errmsg = 'Error in IniSedThick: ' // trim(flsdbd(l)) // ' is not a file and not a value.'
+                   else
+                      errmsg = 'Error in SdBUni.' // trim(flsdbd(l))
+                   endif
+                   call prterr(lundia, 'P004', trim(errmsg))
+                   call d3stop(1, gdp)
+                endif
+                flsdbd(l) = ' '
              endif
              !
              if (l <= lsed) then
