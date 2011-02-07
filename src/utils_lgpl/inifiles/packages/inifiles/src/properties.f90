@@ -734,8 +734,9 @@ subroutine prop_get_integers(tree   ,chapter   ,key       ,value     ,valuelengt
     integer :: k
     integer :: length
     integer :: valcount
+    integer :: ierr
     character(12)  :: intchars = '0123456789-+'
-    character(20)  :: format
+    character(20)  :: fmt
     character(255) :: avalue
     character(255) :: prop_value
     !
@@ -773,8 +774,14 @@ subroutine prop_get_integers(tree   ,chapter   ,key       ,value     ,valuelengt
        prop_value = prop_value(i:len(prop_value))
        length = len_trim(avalue)
        if (length/=0) then
-          write (format, '(a,i5,a)') '(i', length, ')'
-          read (avalue, format) value(valcount)
+          write (fmt, '(a,i5,a)') '(i', length, ')'
+          read (avalue, fmt, iostat=ierr) value(valcount)
+          if (ierr /= 0) then
+             if (present(success)) then
+                success = .false.
+             endif
+             return
+          endif
        endif
     enddo
 end subroutine prop_get_integers
@@ -865,8 +872,9 @@ subroutine prop_get_reals(tree  ,chapter ,key ,value ,valuelength, success)
     integer        :: k
     integer        :: length
     integer        :: valcount
+    integer        :: ierr
     character(15)  :: realchars = '0123456789-+.eE'
-    character(20)  :: format
+    character(20)  :: fmt
     character(255) :: avalue
     character(255) :: prop_value
     logical        :: digitfound
@@ -885,10 +893,11 @@ subroutine prop_get_reals(tree  ,chapter ,key ,value ,valuelength, success)
           !
           ! Remove everything before the first real
           !
-          if (len_trim(prop_value) < 1) exit
           digitfound = .false.
           k = 0
-          do i = 1, len(prop_value)
+          length = len_trim(prop_value)
+          if (length < 1) exit
+          do i = 1, length
              k = index(realchars, prop_value(i:i))
              if (k>0) exit
           enddo
@@ -900,7 +909,8 @@ subroutine prop_get_reals(tree  ,chapter ,key ,value ,valuelength, success)
           !
           ! Move the first real to avalue
           !
-          do i = 1, len(prop_value)
+          length = len_trim(prop_value)
+          do i = 1, length
              k = index(realchars, prop_value(i:i))
              if (k==0) exit
              if (k <= 10) digitfound = .true.
@@ -912,8 +922,14 @@ subroutine prop_get_reals(tree  ,chapter ,key ,value ,valuelength, success)
           ! if avalue does not contain a digit, scan the rest of prop_value for reals
           !
           if (digitfound .and. length/=0) then
-             write (format, '(a,i0,a)') '(f', length, '.0)'
-             read (avalue, format) value(valcount)
+             write (fmt, '(a,i0,a)') '(f', length, '.0)'
+             read (avalue, fmt, iostat=ierr) value(valcount)
+             if (ierr /= 0) then
+                if (present(success)) then
+                   success = .false.
+                endif
+                return
+             endif
              exit
           endif
        enddo
@@ -1007,8 +1023,9 @@ subroutine prop_get_doubles(tree  ,chapter ,key ,value ,valuelength,success)
     integer        :: k
     integer        :: length
     integer        :: valcount
+    integer        :: ierr
     character(17)  :: realchars = '0123456789-+.eEdD'
-    character(20)  :: format
+    character(20)  :: fmt
     character(255) :: avalue
     character(255) :: prop_value
     logical        :: digitfound
@@ -1027,10 +1044,11 @@ subroutine prop_get_doubles(tree  ,chapter ,key ,value ,valuelength,success)
           !
           ! Remove everything before the first real
           !
-          if (len_trim(prop_value) < 1) exit
           digitfound = .false.
           k = 0
-          do i = 1, len(prop_value)
+          length = len_trim(prop_value)
+          if (length < 1) exit
+          do i = 1, length
              k = index(realchars, prop_value(i:i))
              if (k>0) exit
           enddo
@@ -1042,7 +1060,8 @@ subroutine prop_get_doubles(tree  ,chapter ,key ,value ,valuelength,success)
           !
           ! Move the first real to avalue
           !
-          do i = 1, len(prop_value)
+          length = len_trim(prop_value)
+          do i = 1, length
              k = index(realchars, prop_value(i:i))
              if (k==0) exit
              if (k <= 10) digitfound = .true.
@@ -1054,8 +1073,14 @@ subroutine prop_get_doubles(tree  ,chapter ,key ,value ,valuelength,success)
           ! if avalue does not contain a digit, scan the rest of prop_value for reals
           !
           if (digitfound .and. length/=0) then
-             write (format, '(a,i0,a)') '(f', length, '.0)'
-             read (avalue, format) value(valcount)
+             write (fmt, '(a,i0,a)') '(f', length, '.0)'
+             read (avalue, fmt, iostat=ierr) value(valcount)
+             if (ierr /= 0) then
+                if (present(success)) then
+                   success = .false.
+                endif
+                return
+             endif
              exit
           endif
        enddo
