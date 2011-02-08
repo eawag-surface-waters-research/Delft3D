@@ -1,5 +1,4 @@
 @ECHO OFF
-ECHO IN MAKE_REVISION.BAT, starting script
 
 REM =====================================
 REM Arguments
@@ -60,7 +59,6 @@ IF DEFINED BUILD_NUMBER (
    IF EXIST "%SVN_DIR%\svnversion.exe" (
        echo %0: executing %SVN_DIR%\svnversion.exe -n
        FOR /F "tokens=*" %%i IN ('call "%SVN_DIR%\svnversion.exe" -n "%MODDIR%"') DO set BUILD_NUMBER=%%i 
-       echo %0: done with svnversion.exe
    ) ELSE (
         ECHO 000000 > "%MODDIR%\BUILD_NUMBER"
    )					         
