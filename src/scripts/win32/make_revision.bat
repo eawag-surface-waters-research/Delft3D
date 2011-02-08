@@ -1,4 +1,5 @@
 @ECHO OFF
+ECHO IN MAKE_REVISION.BAT, starting script
 
 REM =====================================
 REM Arguments
@@ -44,7 +45,7 @@ IF "%6"=="Debug" (
 CD "%2"
 
 IF DEFINED BUILD_NUMBER (
-   echo build exists
+   echo %0: build exists
    REM =====================================
    REM BUILD_NUMBER already known
    REM =====================================
@@ -57,13 +58,13 @@ IF DEFINED BUILD_NUMBER (
 
    CD "%MODDIR%"
    IF EXIST "%SVN_DIR%\svnversion.exe" (
-        "%SVN_DIR%\svnversion.exe" -n "%MODDIR%" > "%MODDIR%\BUILD_NUMBER"
+       echo %0: executing %SVN_DIR%\svnversion.exe -n
+       FOR /F "tokens=*" %%i IN ('call "%SVN_DIR%\svnversion.exe" -n "%MODDIR%"') DO set BUILD_NUMBER=%%i 
+       echo %0: done with svnversion.exe
    ) ELSE (
         ECHO 000000 > "%MODDIR%\BUILD_NUMBER"
    )					         
-   REM also set it as an environment variable    
-   SET /p BUILD_NUMBER= < "%MODDIR%\BUILD_NUMBER"	         
-
+   REM also set it as an environment variable 
 ) 
 
 REM ==========================================================================
@@ -75,7 +76,7 @@ REM ==========================================================================
 IF "%BUILD_NUMBER%" == "exported" (
    SET BUILD_NUMBER=00000
 )
-echo %BUILD_NUMBER%
+echo %0: %BUILD_NUMBER%
 
 REM =====================================
 REM Build substitution line
@@ -90,7 +91,7 @@ REM Inputfile > Substitute > Outputfile
 REM =====================================
 
 CD "%CURDIR%"
-
+echo %0: executing version_number.exe %BUILD_NUMBER% "%3" "%4" "%5"
 "%VN_DIR%\version_number.exe" %BUILD_NUMBER% "%3" "%4" "%5"
 
 REM =====================================
