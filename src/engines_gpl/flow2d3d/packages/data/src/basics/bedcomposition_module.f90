@@ -2097,7 +2097,11 @@ subroutine setbedfracprop(this, sedd50, logsedsig, rhofrac)
     !! executable statements -------------------------------------------------------
     !
     do l = 1, this%settings%nfrac
-       this%settings%phi(l)     = -log(sedd50(l))/log(2.0_fp)
+        if (sedd50(l)<=0.0_fp) then
+            this%settings%phi(l) = 0.0_fp
+        else
+            this%settings%phi(l)     = -log(sedd50(l))/log(2.0_fp)
+        endif
        this%settings%sigphi(l)  = logsedsig(l)/log(2.0_fp)
        this%settings%rhofrac(l) = rhofrac(l) ! either rhosol or cdryb
     enddo
@@ -2469,6 +2473,7 @@ subroutine bedcomp_use_bodsed(this)
           do ised = 1, this%settings%nfrac
              totsed = totsed + real(bodsed(nm, ised),fp)
           enddo
+          totsed         = max(totsed,1.0e-20_fp) ! avoid division by zero
           do ised = 1, this%settings%nfrac
              mfrac(ised) = real(bodsed(nm, ised),fp)/totsed
           enddo
