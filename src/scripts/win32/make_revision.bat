@@ -60,9 +60,8 @@ IF DEFINED BUILD_NUMBER (
        echo %0: executing %SVN_DIR%\svnversion.exe -n
        FOR /F "tokens=*" %%i IN ('call "%SVN_DIR%\svnversion.exe" -n "%MODDIR%"') DO set BUILD_NUMBER=%%i 
    ) ELSE (
-        ECHO 000000 > "%MODDIR%\BUILD_NUMBER"
+        set BUILD_NUMBER=000000
    )					         
-   REM also set it as an environment variable 
 ) 
 
 REM ==========================================================================
@@ -72,7 +71,7 @@ REM Replace it using 00000 (only necessary on Windows systems)
 REM ==========================================================================
 
 IF "%BUILD_NUMBER%" == "exported" (
-   SET BUILD_NUMBER=00000
+   SET BUILD_NUMBER=000000
 )
 echo %0: %BUILD_NUMBER%
 

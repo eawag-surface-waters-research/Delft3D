@@ -52,70 +52,67 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
 !
 ! Global variables
 !
-    integer                                                                                       :: i_restart
-    integer                                                                                       :: iporosity
-    integer                                                                                       :: lsedtot
-    integer                                                                                       :: nlyr
-    integer                                                                                       :: nmaxus
-    integer                                                                                       :: mmax
-    logical                                                                                       :: error
-    logical                                                                         , intent(out) :: success
+    integer                                                                                   :: i_restart
+    integer                                                                                   :: iporosity
+    integer                                                                                   :: lsedtot
+    integer                                                                                   :: nlyr
+    integer                                                                                   :: nmaxus
+    integer                                                                                   :: mmax
+    logical                                                                                   :: error
+    logical                                                                     , intent(out) :: success
     real(fp), dimension(                                                lsedtot), intent(in)  :: cdryb
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr, lsedtot), intent(out) :: msed
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr)                       :: svfrac
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr)         , intent(out) :: thlyr
-    character(*)                                                                                  :: restid
+    character(*)                                                                              :: restid
 !
 ! Local variables
 !
-    integer                                 :: lrid        ! character variables for files Help var., length of restid
-    integer                      , external :: crenef
-    integer                      , external :: getelt
-    integer                      , external :: clsnef
-    integer                      , external :: inqelm
-    integer                                 :: istat
-    integer                                 :: rst_lsed
-    integer                                 :: rst_lsedbl
-    integer                                 :: rst_lsedtot
-    integer                                 :: rst_nlyr
-    integer                                 :: ierror
-    integer                                 :: fds
-    integer                                 :: i
-    integer                                 :: j    
-    integer                                 :: k
-    integer                                 :: l
-    integer                                 :: m
-    integer                                 :: n
-    integer                                 :: nm
-    integer  , dimension(3,5)               :: cuindex
-    integer  , dimension(3,5)               :: uindex
-    integer                                 :: nbytsg
-    integer                                 :: elmndm
-    integer  , dimension(5)                 :: elmdms
-    real(sp) , dimension(:,:,:,:), pointer  :: rst_msed
-    real(sp) , dimension(:,:,:)  , pointer  :: rst_thlyr
-    integer                     , pointer   :: mfg
-    integer                     , pointer   :: mlg
-    integer                     , pointer   :: nfg
-    integer                     , pointer   :: nlg
-    integer                     , pointer   :: nmaxgl
-    integer                     , pointer   :: mmaxgl
-    real(fp), dimension(lsedtot)            :: mfrac
-    real(fp)                                :: mfracsum
-    real(fp)                                :: poros
-    real(fp)                                :: sedthick
-     
-    character(len=256)                      :: dat_file
-    character(len=8)                        :: elmtyp
-    character(len=16)                       :: elmqty
-    character(len=16)                       :: elmunt
-    character(len=64)                       :: elmdes
-    character(len=256)                      :: def_file
-    logical                                 :: layerfrac
- 
-    
+    integer                                   :: lrid        ! character variables for files Help var., length of restid
+    integer                      , external   :: crenef
+    integer                      , external   :: getelt
+    integer                      , external   :: clsnef
+    integer                      , external   :: inqelm
+    integer                                   :: istat
+    integer                                   :: rst_lsed
+    integer                                   :: rst_lsedbl
+    integer                                   :: rst_lsedtot
+    integer                                   :: rst_nlyr
+    integer                                   :: ierror
+    integer                                   :: fds
+    integer                                   :: i
+    integer                                   :: j    
+    integer                                   :: k
+    integer                                   :: l
+    integer                                   :: m
+    integer                                   :: n
+    integer                                   :: nm
+    integer  , dimension(3,5)                 :: cuindex
+    integer  , dimension(3,5)                 :: uindex
+    integer                                   :: nbytsg
+    integer                                   :: elmndm
+    integer  , dimension(5)                   :: elmdms
+    integer                      , pointer    :: mfg
+    integer                      , pointer    :: mlg
+    integer                      , pointer    :: nfg
+    integer                      , pointer    :: nlg
+    integer                      , pointer    :: nmaxgl
+    integer                      , pointer    :: mmaxgl
+    real(sp) , dimension(:,:,:,:), pointer    :: rst_msed
+    real(sp) , dimension(:,:,:)  , pointer    :: rst_thlyr
+    real(fp), dimension(lsedtot)              :: mfrac
+    real(fp)                                  :: mfracsum
+    real(fp)                                  :: poros
+    real(fp)                                  :: sedthick
     real(fp), dimension(:,:,:,:), allocatable :: msed_g     
-    real(fp), dimension(:,:,:),   allocatable :: thlyr_g
+    real(fp), dimension(:,:,:)  , allocatable :: thlyr_g
+    character(len=256)                        :: dat_file
+    character(len=8)                          :: elmtyp
+    character(len=16)                         :: elmqty
+    character(len=16)                         :: elmunt
+    character(len=64)                         :: elmdes
+    character(len=256)                        :: def_file
+    logical                                   :: layerfrac
 !
 !! executable statements -------------------------------------------------------
 !
@@ -126,7 +123,6 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     nlg                 => gdp%gdparall%nlg
     mmaxgl              => gdp%gdparall%mmaxgl
     nmaxgl              => gdp%gdparall%nmaxgl 
-
     nullify(rst_msed)
     nullify(rst_thlyr)
     error        = .false.
@@ -157,14 +153,12 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     uindex (3,1) = 1 ! increment in time
     uindex (1,1) = i_restart
     uindex (2,1) = i_restart
-
     !
     ! allocate global versions of msed and thlyr
     !
     allocate(msed_g(nmaxgl,mmaxgl, nlyr, lsedtot))
     allocate(thlyr_g(nmaxgl,mmaxgl, nlyr))
-
-    
+    !   
     ! the master opens and reads the file 
     ! 
     if ( inode /= master ) goto 50 
@@ -182,10 +176,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
         ierror  = inqelm(fds , 'LYRFRAC', elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
         layerfrac = .true.
         if (ierror /= 0) goto 9999
-   
-        if (ierror/= 0) goto 9999
     endif
-
     rst_nlyr = elmdms(3)
     !
     ! allocate restart-data for whole domain
@@ -193,9 +184,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     allocate(rst_msed(nmaxgl, mmaxgl, rst_nlyr, rst_lsedtot))
     allocate(rst_thlyr(nmaxgl, mmaxgl, rst_nlyr))
     !
-
     if (layerfrac) then
-
         ierror = getelt(fds , 'map-sed-series', 'LYRFRAC', uindex, 1, &
                  & mmaxgl*nmaxgl*rst_nlyr*rst_lsedtot*4, rst_msed )       
         if (ierror /= 0) goto 9999
@@ -204,12 +193,10 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
                  & mmaxgl*nmaxgl*rst_nlyr*rst_lsedtot*4, rst_msed )
         if (ierror /= 0) goto 9999
     endif
-
     !
     ierror = getelt(fds , 'map-sed-series', 'THLYR', uindex, 1, &
                  & mmaxgl*nmaxgl*rst_nlyr*4, rst_thlyr )
     if (ierror/= 0) goto 9999
-
     if (nlyr>=rst_nlyr) then
        !
        ! more layers in simulation than in restart file (or same number)
@@ -251,13 +238,10 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
           enddo
        enddo
     endif
-      
     !    end of master part
     ! 
     ! scatter information to all nodes     
-    
  50 continue     
-     
     ! 
     ! scatter arrays msed and thlyr to all nodes. Note: the broadc must use 'dfloat'
     ! since the arrays are 'fp'! Otherwise, intractable memory errors will occur. 
@@ -273,17 +257,10 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
        do i = nfg, nlg 
           msed(i-nfg+1,j-mfg+1,1:nlyr,1:lsedtot) = msed_g(i,j,1:nlyr,1:lsedtot) 
           thlyr(i-nfg+1,j-mfg+1,1:nlyr) = thlyr_g(i,j,1:nlyr)
-          
        enddo 
     enddo 
-
-
-        
     deallocate(msed_g, thlyr_g)    
-  
-    
-
- !
+    !
     if (layerfrac) then
        !
        ! msed contains volume fractions
@@ -347,18 +324,12 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
           enddo
        endif
     endif
-
-!
-   
-                    
+    !
 9999 continue
-    
     if (inode == master) then
       if (associated(rst_msed)) deallocate (rst_msed)
       if (associated(rst_thlyr))   deallocate (rst_thlyr)     
       ierror = clsnef(fds) 
     endif
-    
     success = .true.
-
 end subroutine restart_lyrs
