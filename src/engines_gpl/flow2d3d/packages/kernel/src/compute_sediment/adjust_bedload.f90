@@ -422,8 +422,54 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
           ! transfer values back into bedload arrays
           !
           do nm = 1, nmmax
-             suu(nm,l) = sbuut(nm)
-             svv(nm,l) = sbvvt(nm)
+             !
+             ! Copy sbuut/sbvvt to suu(l)/svv(l)
+             ! Put a zero on positions in suu/svv that must be overwritten by neighbouring domains
+             !
+             nmd   = nm - icx
+             ndm   = nm - icy
+             nmu   = nm + icx
+             num   = nm + icy
+             !
+             ! suu
+             !
+             if (kcs(nm)==1 .and. kcs(nmu)==3) then
+                if (sbuut(nm) < 0.0_fp) then ! To be used: sbu(nm)
+                   ! transport from right neighbour into this domain: this suu must be overwritten
+                   suu(nm,l) = 0.0_fp
+                else
+                   suu(nm,l) = sbuut(nm)
+                endif
+             elseif (kcs(nm)==3 .and. kcs(nmu)==1) then
+                if (sbuut(nm) > 0.0_fp) then ! To be used: sbu(nmu)
+                   ! transport from left neighbour into this domain: this suu must be overwritten
+                   suu(nm,l) = 0.0_fp
+                else
+                   suu(nm,l) = sbuut(nm)
+                endif
+             else
+                suu(nm,l) = sbuut(nm)
+             endif
+             !
+             ! svv
+             !
+             if (kcs(nm)==1 .and. kcs(num)==3) then
+                if (sbvvt(nm) < 0.0_fp) then ! To be used: sbv(nm)
+                   ! transport from top neighbour into this domain: this svv must be overwritten
+                   svv(nm,l) = 0.0_fp
+                else
+                   svv(nm,l) = sbvvt(nm)
+                endif
+             elseif (kcs(nm)==3 .and. kcs(num)==1) then
+                if (sbvvt(nm) > 0.0_fp) then ! To be used: sbv(num)
+                   ! transport from bottom neighbour into this domain: this svv must be overwritten
+                   svv(nm,l) = 0.0_fp
+                else
+                   svv(nm,l) = sbvvt(nm)
+                endif
+             else
+                svv(nm,l) = sbvvt(nm)
+             endif
           enddo
        endif
     enddo

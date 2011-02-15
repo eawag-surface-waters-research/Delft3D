@@ -2749,48 +2749,99 @@ void D3dFlowMapper::CopySediment(
         {
             case Seq_U:
 
+				// m,n,oM,oN are different comparing Edge_Left to Edge_Right
+				// copy sbuu only for Edge_Left for both copying directions:
+				// if zero, overwrite
              if ( l2r && Edge[ctx] == Edge_Left )
              {
                 if ( Ref[ctx] < Ref[oCtx] )
                 {
+                   // oCtx is refined compared to ctx
                    MAP_CELLS_LOOP(ctx,eq)
                    {
-                      // printf("coor-coarse (%2d %2d)<-- (%2d %2d)\n",m,n,oM,oN);
+                      printf("coor-coarse (%2d %2d) <--?--> (%2d %2d)\n",m,n,oM,oN);
                       for ( l = 1 ; l <= C[ctx]->lSedtt ; l++ )
                       {
                         MapScalar totsed = 0.0L;
 
                         MAP_REFINED_LOOP(oCtx,oM+1,oN)
                         {
-                           totsed += cI3D(oCtx,fM+1,fN,l,sbuu);
+							// Do not use fM+1 but fM!
+                           totsed += cI3D(oCtx,fM,fN,l,sbuu);
                         }
-                        cI3D(ctx,m+1,n,l,sbuu) = (float) totsed / (float) nHorRef;
-                        // printf("Sed-SBUU-coarse (%2d %2d %2d)<-- %10.7f\n",m+1,n,l,cI3D(oCtx,m+1,n,l,sbuu));
+						if ( cI3D(ctx,m+1,n,l,sbuu) == 0.0L )
+						{
+							cI3D(ctx,m+1,n,l,sbuu) = (float) totsed / (float) nHorRef;
+							printf("   Sed-SBUU-coarse (%2d %2d %2d)<-- %10.7f\n",m+1,n,l,cI3D(ctx,m+1,n,l,sbuu));
+						}
+						else
+						{
+							MAP_REFINED_LOOP(oCtx,oM+1,oN)
+							{
+								// Do not use fM+1 but fM!
+								if ( cI3D(oCtx,fM,fN,l,sbuu) == 0.0L )
+								{
+									cI3D(oCtx,fM,fN,l,sbuu) = cI3D(ctx,m+1,n,l,sbuu);
+									printf("   Sed-SBUU-fine (%2d %2d %2d)<-- %10.7f\n",fM,fN,l,cI3D(oCtx,fM,fN,l,sbuu));
+								}
+							}
+						}
                       }
                    }
                 }
                 else if ( Ref[ctx] > Ref[oCtx] )
                 {
+                   // ctx is refined compared to oCtx
                    MAP_CELLS_LOOP(ctx,eq)
                    {
-                      // printf("coor-ref (%2d %2d)<-- (%2d %2d)\n",m,n,oM,oN);
+                      printf("coor-fine (%2d %2d) <--?--> (%2d %2d)\n",m,n,oM,oN);
                       for ( l = 1 ; l <= C[ctx]->lSedtt ; l++ )
                       {
-                        cI3D(ctx,m+1,n,l,sbuu) = cI3D(oCtx,oM+1,oN,l,sbuu);
-                       // printf("Sed-SBUU-refined (%2d %2d %2d)<-- (%2d %2d) %10.7f %3d %10.7f\n",m+1,n,l,oM+1,oN,cI3D(ctx,m+1,n,l,sbuu),Ref[ctx],cI3D(oCtx,oM+1,oN,l,sbuu));
+                        MapScalar totsed = 0.0L;
+
+                        MAP_REFINED_LOOP(ctx,m+1,n)
+                        {
+							// Do not use fM+1 but fM!
+                           totsed += cI3D(oCtx,fM,fN,l,sbuu);
+                        }
+						if ( cI3D(oCtx,oM+1,oN,l,sbuu) == 0.0L )
+						{
+							cI3D(oCtx,oM+1,oN,l,sbuu) = (float) totsed / (float) nHorRef;
+							printf("   Sed-SBUU-coarse (%2d %2d %2d)<-- %10.7f\n",oM+1,oN,l,cI3D(oCtx,oM+1,oN,l,sbuu));
+						}
+						else
+						{
+							MAP_REFINED_LOOP(ctx,m+1,n)
+							{
+								// Do not use fM+1 but fM!
+								if ( cI3D(ctx,fM,fN,l,sbuu) == 0.0L )
+								{
+									cI3D(ctx,fM,fN,l,sbuu) = cI3D(oCtx,oM+1,oN,l,sbuu);
+									printf("   Sed-SBUU-fine (%2d %2d %2d)<-- %10.7f\n",fM,fN,l,cI3D(ctx,fM,fN,l,sbuu));
+								}
+							}
+						}
                       }
                    }
                 }
                 else
                 {
-                   // in case of no grid refinement
+                   // no grid refinement
                    MAP_CELLS_LOOP(ctx,eq)
                    {
-                      // printf("coor (%2d %2d)<-- (%2d %2d)\n",m,n,oM,oN);
+                      printf("coor (%2d %2d) <--?--> (%2d %2d)\n",m,n,oM,oN);
                       for ( l = 1 ; l <= C[ctx]->lSedtt ; l++ )
                       {
-                        cI3D(ctx,m+1,n,l,sbuu)= cI3D(oCtx,oM+1,oN,l,sbuu);
-                        // printf("Sed-SBUU-norm (%2d %2d %2d)<-- (%2d %2d) %10.7f\n",m+1,n,l,oM+1,oN,cI3D(oCtx,oM+1,oN,l,sbuu));
+							if ( cI3D(ctx,m+1,n,l,sbuu) == 0.0L )
+							{
+								cI3D(ctx,m+1,n,l,sbuu)= cI3D(oCtx,oM+1,oN,l,sbuu);
+								printf("   Sed-SBUU-norm (%2d %2d %2d)<-- (%2d %2d) %10.7f\n",m+1,n,l,oM+1,oN,cI3D(ctx,m+1,n,l,sbuu));
+							}
+							else
+							{
+								cI3D(oCtx,oM+1,oN,l,sbuu)= cI3D(ctx,m+1,n,l,sbuu);
+								printf("   Sed-SBUU-norm (%2d %2d %2d)<-- (%2d %2d) %10.7f\n",oM+1,oN,l,m+1,n,cI3D(oCtx,oM+1,oN,l,sbuu));
+							}
                       }
                    }
                 }
@@ -2799,48 +2850,99 @@ void D3dFlowMapper::CopySediment(
 
             case Seq_V:
 
+				// m,n,oM,oN are different comparing Edge_Bottom to Edge_Top
+				// copy sbvv only for Edge_Bottom for both copying directions:
+				// if zero, overwrite
              if ( b2t && Edge[ctx] == Edge_Bottom )
              {
                 if ( Ref[ctx] < Ref[oCtx] )
                 {
+                   // oCtx is refined compared to ctx
                    MAP_CELLS_LOOP(ctx,eq)
                    {
-                      // printf("coor-coarse (%2d %2d)<-- (%2d %2d)\n",m,n,oM,oN);
+                      printf("coor-coarse (%2d %2d) <--?--> (%2d %2d)\n",m,n,oM,oN);
                       for ( l = 1 ; l <= C[ctx]->lSedtt ; l++ )
                       {
                         MapScalar totsed = 0.0L;
 
                         MAP_REFINED_LOOP(oCtx,oM,oN+1)
                         {
-                           totsed += cI3D(oCtx,fM,fN+1,l,sbvv);
+							// Do not use fN+1 but fN!
+                           totsed += cI3D(oCtx,fM,fN,l,sbvv);
                         }
-                        cI3D(ctx,m,n+1,l,sbvv) = (float) totsed / (float) nHorRef;
-                        // printf("Sed-SBVV-coarse (%2d %2d %2d)<-- %10.7f\n",m,n+1,l,cI3D(ctx,m,n+1,l,sbvv));
+						if ( cI3D(ctx,m,n+1,l,sbvv) == 0.0L )
+						{
+							cI3D(ctx,m,n+1,l,sbvv) = (float) totsed / (float) nHorRef;
+							printf("   Sed-SBVV-coarse (%2d %2d %2d)<-- %10.7f\n",m,n+1,l,cI3D(ctx,m,n+1,l,sbvv));
+						}
+						else
+						{
+							MAP_REFINED_LOOP(oCtx,oM,oN+1)
+							{
+								// Do not use fN+1 but fN!
+								if ( cI3D(oCtx,fM,fN,l,sbvv) == 0.0L )
+								{
+									cI3D(oCtx,fM,fN,l,sbvv) = cI3D(ctx,m,n+1,l,sbvv);
+									printf("   Sed-SBVV-fine (%2d %2d %2d)<-- %10.7f\n",fM,fN,l,cI3D(oCtx,fM,fN,l,sbvv));
+								}
+							}
+						}
                       }
                    }
                 }
                 else if ( Ref[ctx] > Ref[oCtx] )
                 {
+                   // ctx is refined compared to oCtx
                    MAP_CELLS_LOOP(ctx,eq)
                    {
-                      // printf("coor-ref (%2d %2d)<-- (%2d %2d)\n",m,n,oM,oN);
+                      printf("coor-fine (%2d %2d) <--?--> (%2d %2d)\n",m,n,oM,oN);
                       for ( l = 1 ; l <= C[ctx]->lSedtt ; l++ )
                       {
-                        cI3D(ctx,m,n+1,l,sbvv) = cI3D(oCtx,oM,oN+1,l,sbvv);
-                        // printf("Sed-SBVV-refined (%2d %2d %2d)<-- (%2d %2d) %10.7f %3d %10.7f\n",m,n+1,l,oM,oN+1,cI3D(ctx,m,n+1,l,sbvv),Ref[ctx],cI3D(oCtx,oM,oN+1,l,sbvv));
+                        MapScalar totsed = 0.0L;
+
+                        MAP_REFINED_LOOP(ctx,m,n+1)
+                        {
+							// Do not use fN+1 but fN!
+                           totsed += cI3D(oCtx,fM,fN,l,sbvv);
+                        }
+						if ( cI3D(oCtx,oM,oN+1,l,sbvv) == 0.0L )
+						{
+							cI3D(oCtx,oM,oN+1,l,sbvv) = (float) totsed / (float) nHorRef;
+							printf("   Sed-SBVV-coarse (%2d %2d %2d)<-- %10.7f\n",oM,oN+1,l,cI3D(ctx,oM,oN+1,l,sbvv));
+						}
+						else
+						{
+							MAP_REFINED_LOOP(ctx,m,n+1)
+							{
+								// Do not use fN+1 but fN!
+								if ( cI3D(ctx,fM,fN,l,sbvv) == 0.0L )
+								{
+									cI3D(ctx,fM,fN,l,sbvv) = cI3D(oCtx,oM,oN+1,l,sbvv);
+									printf("   Sed-SBVV-fine (%2d %2d %2d)<-- %10.7f\n",fM,fN,l,cI3D(ctx,fM,fN,l,sbvv));
+								}
+							}
+						}
                       }
                    }
                 }
                 else
                 {
-                   // in case of no grid refinement
+                   // no grid refinement
                    MAP_CELLS_LOOP(ctx,eq)
                    {
-                      // printf("coor (%2d %2d)<-- (%2d %2d)\n",m,n,oM,oN);
+                      printf("coor (%2d %2d) <--?--> (%2d %2d)\n",m,n,oM,oN);
                       for ( l = 1 ; l <= C[ctx]->lSedtt ; l++ )
                       {
-                        cI3D(ctx,m,n+1,l,sbvv)= cI3D(oCtx,oM,oN+1,l,sbvv);
-                      // printf("Sed-SBVV-norm (%2d %2d %2d)<-- (%2d %2d) %10.7f\n",m,n+1,l,oM,oN+1,cI3D(oCtx,oM,oN+1,l,sbvv));
+						  if ( cI3D(ctx,m,n+1,l,sbvv) == 0.0L )
+						  {
+							cI3D(ctx,m,n+1,l,sbvv)= cI3D(oCtx,oM,oN+1,l,sbvv);
+							printf("   Sed-SBVV-norm (%2d %2d %2d)<-- (%2d %2d) %10.7f\n",m,n+1,l,oM,oN+1,cI3D(oCtx,m,n+1,l,sbvv));
+						  }
+						  else
+						  {
+							cI3D(oCtx,oM,oN+1,l,sbvv)= cI3D(ctx,m,n+1,l,sbvv);
+							printf("   Sed-SBVV-norm (%2d %2d %2d)<-- (%2d %2d) %10.7f\n",oM,oN+1,l,m,n+1,cI3D(oCtx,oM,oN+1,l,sbvv));
+						  }
                       }
                    }
                 }
@@ -2849,11 +2951,11 @@ void D3dFlowMapper::CopySediment(
 
             case Seq_Zeta:
 
-        MAP_CELLS_LOOP(ctx,eq)
-        {
-            cI2D(ctx,m,n,dps) = cI2D(oCtx,oM,oN,dps);
-            // printf("Sed-Depchg (%2d %2d) <-- (%2d %2d) %10.7f\n",m,n,oM,oN,cI2D(ctx,m,n,depchg));
-        }
+				MAP_CELLS_LOOP(ctx,eq)
+				{
+					cI2D(ctx,m,n,dps) = cI2D(oCtx,oM,oN,dps);
+					// printf("Sed-Depchg (%2d %2d) <-- (%2d %2d) %10.7f\n",m,n,oM,oN,cI2D(ctx,m,n,depchg));
+				}
             break;
 
         default:
