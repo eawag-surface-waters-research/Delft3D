@@ -196,6 +196,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     integer           :: npbt
     integer           :: nsta           ! Starting coord. (in the y-dir.) of an open bound. section 
     integer           :: ntot0          ! Offset for open boundary sections of the Time-series type (NTOF+NTOQ) 
+    integer           :: posrel         ! code denoting the position of the open boundary, related to the complete grid
     logical           :: first          ! Flag = TRUE in case a time-dependent file is read for the 1-st time 
     logical           :: error          ! errorstatus
     logical           :: horiz          ! Flag=TRUE if open boundary lies parallel to x-/KSI-dir. 
@@ -446,6 +447,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        nsta   = mnbnd(2, n1)
        mend   = mnbnd(3, n1)
        nend   = mnbnd(4, n1)
+       posrel = mnbnd(7, n1)
        incx   = mend - msta
        incy   = nend - nsta
        maxinc = max(abs(incx), abs(incy))
@@ -723,6 +725,22 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
           !
           if (  tprofu(n1)(1:7)  == 'uniform' .or. &
               & tprofu(n1)(1:11) == 'logarithmic'   ) then
+             !
+             ! atmospheric pressure correction for Riemann boundaries
+             !
+             if (ibtype==6) then
+                if (pcorr) then   
+                   pdiff = patm(np, mp) - paver
+                   if (posrel <= 2) then
+                      circ2d(kp, kq) = (-pdiff/(ag*rhow))*sqrt(ag/h0)
+                   else
+                      circ2d(kp, kq) = (pdiff/(ag*rhow))*sqrt(ag/h0)
+                   endif
+                else
+                   circ2d(kp, kq) = 0.0
+                endif
+             endif
+             !
              if (n1 <= ntof) then
                 !
                 ! Amplitude and phase values at individual boundary
@@ -730,7 +748,6 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                 ! for all sort of profiles the boundary values are
                 ! defined as depth averaged
                 !
-                circ2d(kp, kq) = 0.0
                 do k = 1, kc
                    amplik = hydrbc(1*2 - 1, n1, k)                              &
                           & + frac*(hydrbc(1*2, n1, k) - hydrbc(1*2 - 1, n1, k))
@@ -744,9 +761,9 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                 ! Time dependent open boundary value
                 ! Amplitude value at individual boundary points
                 !
-                circ2d(kp, kq) = hydrbc(1*2 - 1, n1, 1)                         &
+                circ2d(kp, kq) = circ2d(kp, kq) + hydrbc(1*2 - 1, n1, 1)        &
                                & + frac*(hydrbc(1*2, n1, 1)                     &
-                               & - hydrbc(1*2 - 1, n1, 1))
+                               &       - hydrbc(1*2 - 1, n1, 1))
              endif
              !
              ! For total discharge boundary use fraction

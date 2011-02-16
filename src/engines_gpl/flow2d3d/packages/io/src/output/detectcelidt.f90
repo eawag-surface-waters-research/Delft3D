@@ -47,8 +47,8 @@ subroutine detectcelidt(fds       ,grpnam    ,elmnam    ,itc       ,celidt    , 
 ! Global variables
 !
     integer                          , intent(in)   :: fds          ! NEFIS file handle
-    character(16)                    , intent(in)   :: grpnam       ! Data-group name for the NEFIS-file
-    character(16)                    , intent(in)   :: elmnam       ! Element name for the NEFIS-file
+    character(*)                     , intent(in)   :: grpnam       ! Data-group name for the NEFIS-file
+    character(*)                     , intent(in)   :: elmnam       ! Element name for the NEFIS-file
     integer                          , intent(in)   :: itc          ! Time step to be written
     integer                          , intent(out)  :: ierror       ! Error flag for NEFIS files
     integer                          , intent(inout):: celidt       ! IN:  Last cell number
