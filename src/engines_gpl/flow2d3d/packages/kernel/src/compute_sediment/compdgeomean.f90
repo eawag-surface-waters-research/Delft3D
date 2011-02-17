@@ -38,10 +38,9 @@ subroutine compdgeomean(frac      ,sedd50    ,nmmax     ,lsedtot   , &
 !!--declarations----------------------------------------------------------------
     use precision
     !
-    use globaldata
-    !
     implicit none
     !
+    include 'sedparams.inc'
 !
 ! Global variables
 !
@@ -49,11 +48,11 @@ subroutine compdgeomean(frac      ,sedd50    ,nmmax     ,lsedtot   , &
     integer                                             , intent(in)  :: nmmax     ! last space index to be processed
     integer                                             , intent(in)  :: nmlb      ! start space index
     integer                                             , intent(in)  :: nmub      ! end space index
+    integer,  dimension(lsedtot)                        , intent(in)  :: sedtyp    ! sediment type: 0=total/1=noncoh/2=coh
     real(fp), dimension(nmlb:nmub, lsedtot)             , intent(in)  :: frac      ! fractional composition of sediment
     real(fp), dimension(lsedtot)                        , intent(in)  :: sedd50    ! D50 of sediment fraction
     real(fp), dimension(nmlb:nmub)                      , intent(out) :: dg        ! geometric mean diameter field
     real(fp), dimension(nmlb:nmub)                      , intent(in)  :: sedd50fld ! D50 field (in case of 1 sediment fraction)
-    character(4), dimension(lsedtot)                    , intent(in)  :: sedtyp    ! sediment type: sand/mud/bedload
 !
 ! Local variables
 !
@@ -75,7 +74,7 @@ subroutine compdgeomean(frac      ,sedd50    ,nmmax     ,lsedtot   , &
           fracnonmud = 0.0
           dg(nm)     = 1.0
           do l = 1, lsedtot
-             if (sedtyp(l) /= 'mud') then
+             if (sedtyp(l) /= SEDTYP_COHESIVE) then
                 dg(nm)     = dg(nm) * (sedd50(l)**frac(nm,l))
                 fracnonmud = fracnonmud + frac(nm,l)
              endif

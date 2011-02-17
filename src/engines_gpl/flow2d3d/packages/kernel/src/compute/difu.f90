@@ -92,6 +92,7 @@ subroutine difu(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     include 'flow_steps_f.inc'
+    include 'sedparams.inc'
     real(fp)               , pointer :: eps
     real(fp)               , pointer :: vicmol
     real(fp)               , pointer :: dicoww
@@ -136,6 +137,7 @@ integer, dimension(gdp%d%nmlb:gdp%d%nmub)                             :: kfv    
 integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                       :: kadu      !  Description and declaration in iidim.f90
 integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                       :: kadv      !  Description and declaration in iidim.f90
 integer, dimension(gdp%d%nmlb:gdp%d%nmub, lsed)                       :: kmxsed    !  Description and declaration in iidim.f90
+integer, dimension(lsed)                                , intent(in)  :: sedtyp    !! sediment type: 0=total/1=noncoh/2=coh
 logical                                                 , intent(in)  :: eqmbcsand !  Description and declaration in morpar.igs
 logical                                                 , intent(in)  :: eqmbcmud  !  Description and declaration in morpar.igs
 real(fp)                                                , intent(in)  :: timest    !!  Half Integration time step [sec.]
@@ -211,7 +213,6 @@ real(fp), dimension(kmax)                                             :: thick  
 real(fp), dimension(kmax, max(lstsc, 1), 2, norow)      , intent(in)  :: rbnd      !  Description and declaration in rjdim.f90
 real(fp), dimension(lstsci)                                           :: sigdif    !  Description and declaration in rjdim.f90
 real(fp), dimension(lstsci)                             , intent(in)  :: sigmol    !  Description and declaration in rjdim.f90
-character(4), dimension(lsed)                           , intent(in)  :: sedtyp    !  Description and declaration in ckdim.f90
 !
 ! Local variables
 !
@@ -647,8 +648,8 @@ character(20)      :: errtxt
        lst = max(lsal, ltem)
        do l = 1, lsed
           ll = lst + l
-          if ((eqmbcsand .and. sedtyp(l) == 'sand') .or. &
-            & (eqmbcmud  .and. sedtyp(l) == 'mud' )       ) then
+          if ((eqmbcsand .and. sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) .or. &
+            & (eqmbcmud  .and. sedtyp(l) == SEDTYP_COHESIVE)             ) then
              if (kcu(nmf) == 1) then
                 do k = 1, kmax
                    ddkl(nmf, k, ll) = r0(nmfu, k, ll)

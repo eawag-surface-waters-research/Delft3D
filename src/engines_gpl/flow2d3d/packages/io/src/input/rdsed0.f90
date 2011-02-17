@@ -47,6 +47,7 @@ subroutine rdsed0(nr_sed    ,luninp    ,lundia    ,csoil     ,iopsus    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    include 'sedparams.inc'
 !
 ! Global variables
 !
@@ -67,7 +68,7 @@ subroutine rdsed0(nr_sed    ,luninp    ,lundia    ,csoil     ,iopsus    , &
     real(fp)      , dimension(*)              :: tceuni !  Description and declaration in rjdim.f90
     real(fp)      , dimension(*)              :: ws0    !  Description and declaration in rjdim.f90
     real(fp)      , dimension(*)              :: wsm    !  Description and declaration in rjdim.f90
-    character(4)  , dimension(*)              :: sedtyp !  Description and declaration in ckdim.f90
+    integer       , dimension(*)              :: sedtyp !  sediment type: 0=total/1=noncoh/2=coh
     character(256), dimension(*)              :: flsdbd !  Description and declaration in ckdim.f90
     character(256), dimension(*)              :: flsero !  Description and declaration in ckdim.f90
     character(256), dimension(*)              :: flstcd !  Description and declaration in ckdim.f90
@@ -78,6 +79,7 @@ subroutine rdsed0(nr_sed    ,luninp    ,lundia    ,csoil     ,iopsus    , &
     integer       :: iocond
     integer       :: l
     integer       :: lenc
+    character(4)  :: sedtype
 !
 !! executable statements -------------------------------------------------------
 !
@@ -92,10 +94,15 @@ subroutine rdsed0(nr_sed    ,luninp    ,lundia    ,csoil     ,iopsus    , &
        flstcd(l) = ' '
        flstce(l) = ' '
        flsero(l) = ' '
-       read (luninp, '(a)', iostat = iocond) sedtyp(l)
+       sedtype   = ' '
+       read (luninp, '(a)', iostat = iocond) sedtype
        if (iocond == 0) then
-          call small(sedtyp(l), lenc)
-          if (index(sedtyp(l), 'sand') /= 1 .and. index(sedtyp(l), 'mud') /= 1) then
+          call small(sedtype, lenc)
+          if (index(sedtype, 'sand') == 1) then
+              sedtyp(l) = SEDTYP_NONCOHESIVE_SUSPENDED
+          elseif (index(sedtype, 'mud') == 1) then
+              sedtyp(l) = SEDTYP_COHESIVE
+          else
              error = .true.
              call prterr(lundia, 'U007', 'sediment type (must start with sand or mud)')
           endif

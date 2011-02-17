@@ -151,6 +151,7 @@ src/engines_gpl/flow2d3d/packages/data/include/rivpro.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/rtc.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/scour.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/sedpar.igs -text
+src/engines_gpl/flow2d3d/packages/data/include/sedparams.inc -text
 src/engines_gpl/flow2d3d/packages/data/include/snel.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/sobek.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/stations.igs -text

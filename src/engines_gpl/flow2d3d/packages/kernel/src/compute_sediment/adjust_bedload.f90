@@ -56,7 +56,6 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
     real(fp)      , dimension(:)     , pointer :: rhosol
     real(fp)      , dimension(:)     , pointer :: sedd50
     real(fp)      , dimension(:)     , pointer :: sedd50fld
-    character(4)  , dimension(:)     , pointer :: sedtyp
     real(fp)                         , pointer :: alfabs
     real(fp)                         , pointer :: alfabn
     real(fp)                         , pointer :: ashld
@@ -66,7 +65,9 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
     real(fp)                         , pointer :: alfpa
     real(fp)                         , pointer :: thcrpa
     integer                          , pointer :: islope
+    integer       , dimension(:)     , pointer :: sedtyp
     real(fp)                         , pointer :: eps
+    include 'sedparams.inc'
 !
 ! Global variables
 !
@@ -165,7 +166,7 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
     tphi = tan(phi)
     !
     do l = 1, lsedtot
-       if (sedtyp(l)=='sand' .or. sedtyp(l)=='bedl') then
+       if (sedtyp(l) /= SEDTYP_COHESIVE) then
           di50        = sedd50(l)
           di50spatial = .false.
           if (di50<0 .and. lsedtot==1) di50spatial = .true.

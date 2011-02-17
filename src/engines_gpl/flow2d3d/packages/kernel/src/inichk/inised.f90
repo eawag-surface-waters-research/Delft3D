@@ -66,6 +66,9 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     real(fp)                             , pointer :: dgravel
     integer                              , pointer :: nxx
     real(fp)              , dimension(:) , pointer :: xx
+    integer                              , pointer :: ihidexp
+    real(fp)                             , pointer :: asklhe
+    real(fp)                             , pointer :: mwwjhe
     real(fp)                             , pointer :: rhow
     real(fp)                             , pointer :: ag
     real(fp)                             , pointer :: vicmol
@@ -89,8 +92,8 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     real(fp)      , dimension(:)         , pointer :: erouni
     real(fp)      , dimension(:)         , pointer :: mudcnt
     integer       , dimension(:)         , pointer :: nseddia
+    integer       , dimension(:)         , pointer :: sedtyp
     character(10) , dimension(:)         , pointer :: inisedunit
-    character(4)  , dimension(:)         , pointer :: sedtyp
     character(256), dimension(:)         , pointer :: flsdbd
     character(256), dimension(:)         , pointer :: flstcd
     character(256), dimension(:)         , pointer :: flstce
@@ -99,6 +102,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     character(256)                       , pointer :: flsdia
     character(256)                       , pointer :: flsmdc
     real(fp)                             , pointer :: factcr
+    include 'sedparams.inc'
 !
 ! Global variables
 !
@@ -147,6 +151,9 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     dgravel             => gdp%gdmorpar%dgravel
     nxx                 => gdp%gdmorpar%nxx
     xx                  => gdp%gdmorpar%xx
+    ihidexp             => gdp%gdmorpar%ihidexp
+    asklhe              => gdp%gdmorpar%asklhe
+    mwwjhe              => gdp%gdmorpar%mwwjhe
     rhow                => gdp%gdphysco%rhow
     ag                  => gdp%gdphysco%ag
     vicmol              => gdp%gdphysco%vicmol
@@ -170,8 +177,8 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     erouni              => gdp%gdsedpar%erouni
     mudcnt              => gdp%gdsedpar%mudcnt
     nseddia             => gdp%gdsedpar%nseddia
-    inisedunit          => gdp%gdsedpar%inisedunit
     sedtyp              => gdp%gdsedpar%sedtyp
+    inisedunit          => gdp%gdsedpar%inisedunit
     flsdbd              => gdp%gdsedpar%flsdbd
     flstcd              => gdp%gdsedpar%flstcd
     flstce              => gdp%gdsedpar%flstce
@@ -267,7 +274,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
        !
        ! tcrdep; only for mud
        !
-       if (sedtyp(ll) == 'mud') then
+       if (sedtyp(ll) == SEDTYP_COHESIVE) then
           if (flstcd(ll) == ' ') then
              !
              ! Uniform data has been specified
@@ -298,7 +305,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
        !
        ! tcrero; only for mud
        !
-       if (sedtyp(ll) == 'mud') then
+       if (sedtyp(ll) == SEDTYP_COHESIVE) then
           if (flstce(ll) == ' ') then
              !
              ! Uniform data has been specified
@@ -381,7 +388,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     !
     if (lsedtot/=1 .or. lsed/=1 .or. flsdia==' ') then
        do ll = 1, lsedtot
-          if (sedtyp(ll)=='sand' .or. sedtyp(ll)=='bedl') then
+          if (sedtyp(ll) /= SEDTYP_COHESIVE) then
               drho      = (rhosol(ll)-rhow) / rhow
               dstar(ll) = sedd50(ll) * (drho*ag/vicmol**2)**0.3333_fp
               if (dstar(ll) < 1.0_fp) then
@@ -448,7 +455,8 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     !
     if (lsedtot > 1) then
        call comphidexp(frac     ,dm        ,nmmax     ,lsedtot   , &
-                     & sedd50   ,hidexp    ,gdp       )
+                     & sedd50   ,hidexp    ,ihidexp   ,asklhe    , &
+                     & mwwjhe   ,nmlb      ,nmub      )
     else
        hidexp = 1.0
     endif
@@ -456,7 +464,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     ! Initialise settling velocity for sand
     !
     do ll = 1, lsed
-       if (sedtyp(ll) == 'sand') then
+       if (sedtyp(ll) == SEDTYP_NONCOHESIVE_SUSPENDED) then
           s = rhosol(ll)/rhow
           !
           if (sedd50(ll) < 1.5*dsand) then

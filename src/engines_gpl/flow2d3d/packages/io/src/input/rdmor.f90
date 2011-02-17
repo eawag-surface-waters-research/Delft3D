@@ -61,6 +61,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     integer                                , pointer :: morfactable
     integer                                , pointer :: nxx
     integer                                , pointer :: nmudfrac
+    integer                , dimension(:)  , pointer :: sedtyp
     integer                                , pointer :: julday
     real(fp)                               , pointer :: morfac
     real(fp)                               , pointer :: thresh
@@ -114,12 +115,12 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     character(256)         , dimension(:)  , pointer :: name
     character(256)                         , pointer :: bcmfilnam
     character(20)          , dimension(:)  , pointer :: namsed
-    character(4)           , dimension(:)  , pointer :: sedtyp
     type (handletype)                      , pointer :: bcmfile
     type (handletype)                      , pointer :: morfacfile
     type (moroutputtype)                   , pointer :: moroutput
     type (mornumericstype)                 , pointer :: mornum
     type (bedbndtype)      , dimension(:)  , pointer :: morbnd
+    include 'sedparams.inc'
 !
 ! Local parameters
 !
@@ -1159,7 +1160,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
                 else
                    i = 0
                    do l = 1, lsedtot
-                      if (sedtyp(l) /= 'mud') then
+                      if (sedtyp(l) /= SEDTYP_COHESIVE) then
                          i = i + 1
                          parnames(i) = trim(parname) // ' ' // trim(namsed(l))
                       endif
@@ -1181,7 +1182,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
                 else
                    i = 0
                    do l = 1, lsedtot
-                      if (sedtyp(l) /= 'mud') then
+                      if (sedtyp(l) /= SEDTYP_COHESIVE) then
                          i = i + 1
                          parnames(i)      = trim(parname) // ' ' // trim(namsed(l)) // ' end A'
                          parnames(nval+i) = trim(parname) // ' ' // trim(namsed(l)) // ' end B'

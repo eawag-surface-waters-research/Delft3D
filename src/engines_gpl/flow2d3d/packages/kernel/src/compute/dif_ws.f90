@@ -100,7 +100,7 @@ subroutine dif_ws(j         ,nmmaxj    ,nmmax     ,kmax      ,lsal      , &
        ! *** Replaced with CENTRAL scheme                           ***
        ! *** Purpose is to reduce upward numerical diffusion        ***
        !
-       !             if (sedtyp(l) .eq. 'sand') then
+       !             if (sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) then
        !                maxlay = kmxsed(nm)
        !             else
        !                maxlay = kmax

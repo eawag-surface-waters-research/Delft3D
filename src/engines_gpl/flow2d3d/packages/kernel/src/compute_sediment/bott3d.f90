@@ -120,12 +120,13 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     integer                              , pointer :: nmudfrac
     real(fp)      , dimension(:)         , pointer :: rhosol
     real(fp)      , dimension(:)         , pointer :: cdryb
-    character(4)  , dimension(:)         , pointer :: sedtyp
+    integer       , dimension(:)         , pointer :: sedtyp
     integer                              , pointer :: julday
     integer                              , pointer :: ntstep
     real(fp), dimension(:,:,:)           , pointer :: fluxu
     real(fp), dimension(:,:,:)           , pointer :: fluxv
     real(fp), dimension(:)               , pointer :: duneheight
+    include 'sedparams.inc'
 !
 ! Local parameters
 !
@@ -333,7 +334,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
        if (kmax > 1) then
           do l = 1, lsed
              ll = lstart + l
-             if (sedtyp(l) == 'sand') then
+             if (sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) then
                 !
                 call dfexchg( fluxu(:,:,ll) ,1, kmax, dfloat, gdp)
                 call dfexchg( fluxv(:,:,ll) ,1, kmax, dfloat, gdp)
@@ -515,7 +516,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                       endif
                    endif
                 enddo ! nm
-             endif    ! sedtyp=sand
+             endif    ! sedtyp = SEDTYP_NONCOHESIVE_SUSPENDED
           enddo       ! l
        endif          ! kmax>1
        !
@@ -637,7 +638,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                    !
                    ! bed load transport always zero for mud fractions
                    !
-                   if (sedtyp(l) == 'mud') cycle
+                   if (sedtyp(l) == SEDTYP_COHESIVE) cycle
                    li = li + 1
                    !
                    if (morbnd(jb)%ibcmt(3) == lsedbed) then
@@ -683,7 +684,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
        !
        bedchangemesscount = 0
        do l = 1, lsedtot
-          bedload = sedtyp(l)=='bedl'
+          bedload = sedtyp(l)==SEDTYP_NONCOHESIVE_TOTALLOAD
           ll = lstart + l
           do nm = 1, nmmax
              !
@@ -716,7 +717,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                       !
                       ! mass balance includes entrainment and deposition
                       !
-                      if (sedtyp(l) == 'sand') then
+                      if (sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) then
                          k = kmxsed(nm, l)
                       else
                          k = kmax

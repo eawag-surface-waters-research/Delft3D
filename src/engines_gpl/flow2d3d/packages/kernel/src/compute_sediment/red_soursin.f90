@@ -64,7 +64,8 @@ subroutine red_soursin(nmmax     ,kmax      ,thick     ,kmxsed    , &
     logical                          , pointer :: bedupd
     real(fp)                         , pointer :: hdt
     real(fp)      , dimension(:)     , pointer :: cdryb
-    character(4)  , dimension(:)     , pointer :: sedtyp
+    integer       , dimension(:)     , pointer :: sedtyp
+    include 'sedparams.inc'
 !
 ! Local parameters
 !
@@ -132,7 +133,7 @@ subroutine red_soursin(nmmax     ,kmax      ,thick     ,kmxsed    , &
        !
        ! Reduction is not applied to mud and not to bedl
        !
-       if (sedtyp(l)=='sand') then
+       if (sedtyp(l)==SEDTYP_NONCOHESIVE_SUSPENDED) then
           do nm = 1, nmmax
              !
              ! Apply reduction factor to source and sink terms if

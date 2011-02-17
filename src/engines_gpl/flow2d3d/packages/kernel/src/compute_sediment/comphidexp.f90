@@ -1,5 +1,6 @@
 subroutine comphidexp(frac      ,dm        ,nmmax     ,lsedtot   , &
-                    & sedd50    ,hidexp    ,gdp       )
+                    & sedd50    ,hidexp    ,ihidexp   ,asklhe    , &
+                    & mwwjhe    ,nmlb      ,nmub      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -36,17 +37,8 @@ subroutine comphidexp(frac      ,dm        ,nmmax     ,lsedtot   , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision 
-    use globaldata
     !
     implicit none
-    !
-    type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    real(fp) , pointer :: asklhe
-    real(fp) , pointer :: mwwjhe
-    integer  , pointer :: ihidexp
 !
 ! Local parameters
 !
@@ -56,11 +48,16 @@ subroutine comphidexp(frac      ,dm        ,nmmax     ,lsedtot   , &
 ! Global variables
 !
     integer                                             , intent(in)  :: lsedtot
+    integer                                             , intent(in)  :: nmlb
+    integer                                             , intent(in)  :: nmub
     integer                                             , intent(in)  :: nmmax   !  Description and declaration in dimens.igs
     real(fp), dimension(lsedtot)                        , intent(in)  :: sedd50  !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot)               :: hidexp
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot) , intent(in)  :: frac
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: dm
+    real(fp), dimension(nmlb:nmub, lsedtot)                           :: hidexp
+    real(fp), dimension(nmlb:nmub, lsedtot)             , intent(in)  :: frac
+    real(fp), dimension(nmlb:nmub)                      , intent(in)  :: dm
+    real(fp)                                            , intent(in)  :: asklhe
+    real(fp)                                            , intent(in)  :: mwwjhe
+    integer                                             , intent(in)  :: ihidexp
 !
 ! Local variables
 !
@@ -74,10 +71,6 @@ subroutine comphidexp(frac      ,dm        ,nmmax     ,lsedtot   , &
 !
 !! executable statements -------------------------------------------------------
 !
-    asklhe              => gdp%gdmorpar%asklhe
-    mwwjhe              => gdp%gdmorpar%mwwjhe
-    ihidexp             => gdp%gdmorpar%ihidexp
-    !
     select case(ihidexp)
     case(2) ! Egiazaroff
        !

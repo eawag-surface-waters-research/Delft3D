@@ -549,10 +549,10 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     integer                              , pointer :: nprocs
     integer      , dimension(:)          , pointer :: nread
     integer      , dimension(:, :)       , pointer :: nprptr
+    integer      , dimension(:)          , pointer :: sedtyp
     real(fp)     , dimension(:)          , pointer :: rcousr
+    real(fp)     , dimension(:)          , pointer :: rhosol
     character(20), dimension(:)          , pointer :: procs
-    real(fp)      , dimension(:)         , pointer :: rhosol
-    character(4)  , dimension(:)         , pointer :: sedtyp
     logical                              , pointer :: dryrun
     logical                              , pointer :: eulerisoglm
 !
@@ -1098,10 +1098,10 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     nprocs              => gdp%gdusrpar%nprocs
     nread               => gdp%gdusrpar%nread
     nprptr              => gdp%gdusrpar%nprptr
-    rcousr              => gdp%gdusrpar%rcousr
-    procs               => gdp%gdusrpar%procs
-    rhosol              => gdp%gdsedpar%rhosol
     sedtyp              => gdp%gdsedpar%sedtyp
+    rcousr              => gdp%gdusrpar%rcousr
+    rhosol              => gdp%gdsedpar%rhosol
+    procs               => gdp%gdusrpar%procs
     dryrun              => gdp%gdtmpfil%dryrun
     nrcmp               => gdp%gdtfzeta%nrcmp
     !

@@ -90,6 +90,7 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     include 'flow_steps_f.inc'
+    include 'sedparams.inc'
     real(fp)                            , pointer :: ck
     real(fp)                            , pointer :: dicoww
     real(fp)                            , pointer :: eps
@@ -133,6 +134,7 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             , intent(in)  :: kadu       !  Description and declaration in iidim.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             , intent(in)  :: kadv       !  Description and declaration in iidim.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub, lsed)             , intent(in)  :: kmxsed     !  Description and declaration in iidim.f90
+    integer , dimension(lsed)                                   , intent(in)  :: sedtyp     !  sediment type: 0=total/1=noncoh/2=coh
     logical                                                     , intent(in)  :: eqmbcsand  !  Description and declaration in morpar.igs
     logical                                                     , intent(in)  :: eqmbcmud   !  Description and declaration in morpar.igs
     real(fp)                                                    , intent(in)  :: timest     !  Half Integration time step [sec.]
@@ -196,7 +198,6 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     real(fp), dimension(lstsci)                                 , intent(in)  :: sigdif     !  Description and declaration in rjdim.f90
     real(fp), dimension(lstsci)                                 , intent(in)  :: sigmol     !  Description and declaration in rjdim.f90
     character(8)                                                , intent(in)  :: stage      !  First or second half time step
-    character(4), dimension(lsed)                               , intent(in)  :: sedtyp     !  Description and declaration in ckdim.f90
 !
 ! Local variables
 !
@@ -704,8 +705,8 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
        lst = max(lsal, ltem)
        do l = 1, lsed
           ll = lst + l
-          if ((eqmbcsand .and. sedtyp(l) == 'sand') .or. &
-            & (eqmbcmud  .and. sedtyp(l) == 'mud' )       ) then
+          if ((eqmbcsand .and. sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) .or. &
+            & (eqmbcmud  .and. sedtyp(l) == SEDTYP_COHESIVE)             ) then
              if (kcu(nmf) == 1) then
                 do k = 1, kmax
                    ddkl(nmf, k, ll) = r0(nmfu, k, ll)

@@ -94,7 +94,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)      , dimension(:)         , pointer :: salmax
     real(fp)      , dimension(:)         , pointer :: mudcnt
     integer       , dimension(:)         , pointer :: nseddia
-    character(4)  , dimension(:)         , pointer :: sedtyp
+    integer       , dimension(:)         , pointer :: sedtyp
     logical                              , pointer :: anymud
     real(fp)                             , pointer :: thresh
     real(fp)                             , pointer :: bed
@@ -157,8 +157,13 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     integer,        dimension(:)         , pointer :: iform
     real(fp),       dimension(:,:)       , pointer :: par
     real(fp)                             , pointer :: factcr
+    integer                              , pointer :: ihidexp
+    real(fp)                             , pointer :: asklhe
+    real(fp)                             , pointer :: mwwjhe
+    real(fp)                             , pointer :: ffthresh
     real(fp), dimension(:)               , pointer :: rksr
     include 'flow_steps_f.inc'
+    include 'sedparams.inc'
 !
 ! Local parameters
 !
@@ -248,7 +253,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     integer                       :: nmd
     integer                       :: nmu
     integer                       :: num
-    logical                       :: suspfrac  ! suspended component sedtyp(l)/='bedl'
+    logical                       :: suspfrac  ! suspended component sedtyp(l)/=SEDTYP_NONCOHESIVE_TOTALLOAD
     real(fp)                      :: akstmp
     real(fp)                      :: ce_nm
     real(fp)                      :: ce_nmtmp
@@ -333,6 +338,10 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     xx                  => gdp%gdmorpar%xx
     multi               => gdp%gdmorpar%multi
     factcr              => gdp%gdmorpar%factcr
+    ihidexp             => gdp%gdmorpar%ihidexp
+    asklhe              => gdp%gdmorpar%asklhe
+    mwwjhe              => gdp%gdmorpar%mwwjhe
+    ffthresh            => gdp%gdmorpar%thresh
     rhow                => gdp%gdphysco%rhow
     ag                  => gdp%gdphysco%ag
     z0                  => gdp%gdphysco%z0
@@ -553,7 +562,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     ! Get the reduction factor if thickness of sediment at bed is less than
     ! user specified threshold
     !
-    call getfixfac(lsedtot   ,nmmax     ,fixfac    ,gdp       )
+    call getfixfac(lsedtot   ,nmmax     ,fixfac    ,ffthresh  ,gdp%d%nmlb, &
+                 & gdp%d%nmub,gdp%gdmorlyr)
     !
     ! in case of multiple (non-mud) fractions, the following quantities
     ! --- that are initialized in INISED --- may be time-dependent and
@@ -586,7 +596,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        ! determine hiding & exposure factors
        !
        call comphidexp(frac      ,dm        ,nmmax     ,lsedtot   , &
-                     & sedd50    ,hidexp    ,gdp       )
+                     & sedd50    ,hidexp    ,ihidexp   ,asklhe    , &
+                     & mwwjhe    ,gdp%d%nmlb,gdp%d%nmub)
     endif
     !
     do nm = 1, nmmax
@@ -628,9 +639,9 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     enddo
     !
     do l = 1, lsedtot
-       if (sedtyp(l)/='sand' .and. sedtyp(l)/='bedl') cycle
+       if (sedtyp(l)==SEDTYP_COHESIVE) cycle
        ll = lstart + l
-       suspfrac = sedtyp(l)/='bedl'
+       suspfrac = sedtyp(l)/=SEDTYP_NONCOHESIVE_TOTALLOAD
        !
        ! Calculation for sand or bedload
        !
@@ -915,7 +926,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        call dfexchg( sbcv(:,l) ,1, 1, dfloat, gdp)
        call dfexchg( sbwv(:,l) ,1, 1, dfloat, gdp)
        call dfexchg( sswv(:,l) ,1, 1, dfloat, gdp)
-       if (sedtyp(l)=='sand' .or. sedtyp(l)=='bedl') then
+       if (sedtyp(l)/=SEDTYP_COHESIVE) then
           do nm = 1, nmmax
              sutot(nm, l) = sbcu(nm, l) + sbwu(nm, l) + sswu(nm, l)
              svtot(nm, l) = sbcv(nm, l) + sbwv(nm, l) + sswv(nm, l)
@@ -997,7 +1008,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     ! Summation of current-related and wave-related transports
     !
     do l = 1,lsedtot
-       if (sedtyp(l)=='sand' .or. sedtyp(l)=='bedl') then
+       if (sedtyp(l)/=SEDTYP_COHESIVE) then
           do nm = 1, nmmax
              sbuu(nm, l) = sbcuu(nm, l) + sbwuu(nm, l) + sswuu(nm, l)
              sbvv(nm, l) = sbcvv(nm, l) + sbwvv(nm, l) + sswvv(nm, l)

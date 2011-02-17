@@ -80,9 +80,9 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     real(fp)        , dimension(:)    , pointer :: erouni
     real(fp)        , dimension(:)    , pointer :: mudcnt
     integer         , dimension(:)    , pointer :: nseddia
+    integer         , dimension(:)    , pointer :: sedtyp
     character(10)   , dimension(:)    , pointer :: inisedunit
     character(20)   , dimension(:)    , pointer :: namsed
-    character(4)    , dimension(:)    , pointer :: sedtyp
     character(256)  , dimension(:)    , pointer :: flsdbd
     character(256)  , dimension(:)    , pointer :: flstcd
     character(256)  , dimension(:)    , pointer :: flstce
@@ -105,6 +105,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     character(256)  , dimension(:)    , pointer :: name
     real(fp)        , dimension(:,:)  , pointer :: par
     include 'lognormal.inc'
+    include 'sedparams.inc'
 !
 ! Global variables
 !
@@ -193,9 +194,9 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     erouni               => gdp%gdsedpar%erouni
     mudcnt               => gdp%gdsedpar%mudcnt
     nseddia              => gdp%gdsedpar%nseddia
+    sedtyp               => gdp%gdsedpar%sedtyp
     inisedunit           => gdp%gdsedpar%inisedunit
     namsed               => gdp%gdsedpar%namsed
-    sedtyp               => gdp%gdsedpar%sedtyp
     flsdbd               => gdp%gdsedpar%flsdbd
     flstcd               => gdp%gdsedpar%flstcd
     flstce               => gdp%gdsedpar%flstce
@@ -310,7 +311,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     !
     ! Initialization of the just allocated arrays
     !
-    sedtyp       = ' '
+    sedtyp       = 0
     flsdbd       = ' '
     !
     nseddia      = 0        ! nseddia counts relevant data
@@ -451,20 +452,25 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
              if (.not. stringsequalinsens(parname, sedname)) cycle
              !
              found     = .true.
-             sedtyp(l) = ' '
-             call prop_get_string(sedblock_ptr, '*', 'SedTyp', sedtyp(l))
-             if (sedtyp(l) /= ' ') then
-                call small(sedtyp(l), lenc)
+             sedtype   = ' '
+             call prop_get_string(sedblock_ptr, '*', 'SedTyp', sedtype)
+             if (sedtype /= ' ') then
+                call small(sedtype, lenc)
                 !
                 ! check sedtyp
                 !
-                if (l<=lsed .and. index(sedtyp(l), 'mud')==1) then
+                if (l<=lsed .and. index(sedtype, 'mud')==1) then
                    !
                    ! if it starts with mud, make it mud
                    !
-                   sedtyp(l) = 'mud'
-                elseif (l<=lsed .and. index(sedtyp(l), 'sand')/=1) then
+                   sedtyp(l) = SEDTYP_COHESIVE
+                elseif (l<=lsed .and. index(sedtype, 'sand')==1) then
                    !
+                   !
+                   !
+                   sedtyp(l) = SEDTYP_NONCOHESIVE_SUSPENDED
+                   !
+                else
                    ! if it does not start with mud (checked above) and
                    !   if it does not start with sand and
                    !   if it is one of the first LSED sediment fractions (otherwise bedload would also be acceptable)
@@ -789,7 +795,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        goto 9999
     endif
     do l = 1, lsedtot
-       if (sedtyp(l) == 'mud') then
+       if (sedtyp(l) == SEDTYP_COHESIVE) then
           anymud   = .true.
           nmudfrac = nmudfrac + 1
        endif
@@ -837,7 +843,14 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        txtput1 = '  Name'
        write (lundia, '(3a)') txtput1, ': ', trim(namsed(l))
        txtput1 = '  Type'
-       write (lundia, '(2a,a12)') txtput1, ':', sedtyp(l)
+       select case (sedtyp(l))
+          case (SEDTYP_NONCOHESIVE_TOTALLOAD)
+             write (lundia, '(2a,a12)') txtput1, ':', 'bedload'
+          case (SEDTYP_NONCOHESIVE_SUSPENDED)
+             write (lundia, '(2a,a12)') txtput1, ':', 'sand'
+          case (SEDTYP_COHESIVE)
+             write (lundia, '(2a,a12)') txtput1, ':', 'mud'
+       end select
        txtput1 = '  RHOSOL'
        write (lundia, '(2a,e12.4)') txtput1, ':', rhosol(l)
        if (flsdia /= ' ') then
@@ -861,7 +874,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
           write (lundia, '(2a,e12.4)') txtput1, ':', exp(logsedsig(l))
           txtput1 = '  SedD50'
           write (lundia, '(3a)') txtput1, ':  ', trim(flsdia)
-       elseif (sedtyp(l) == 'sand' .or. sedtyp(l) == 'bedl') then
+       elseif (sedtyp(l) /= SEDTYP_COHESIVE) then
           !
           ! Determine various sediment diameters in case of
           ! sand or bedload.
@@ -1191,7 +1204,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
           write (lundia, '(a,a)') txtput1, ':  '
           call rdtrafrm0(error  , iform(l)     , npar           , par(1,l), flstrn(l), &
                        & name(l), dll_handle(l), dll_function(l), dll_usrfil(l), gdp   )
-       elseif (sedtyp(l) == 'mud ') then
+       elseif (sedtyp(l) == SEDTYP_COHESIVE) then
           !
           ! default transport formula: Partheniades-Krone
           !
@@ -1229,7 +1242,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
              txtput1 = '  Input for Settle function'
              write (lundia, '(3a)') txtput1, ': ', trim(dll_usrfil_settle(l))
           endif
-       elseif (sedtyp(l) == 'mud ') then
+       elseif (sedtyp(l) == SEDTYP_COHESIVE) then
           txtput1 = '  SALMAX'
           write (lundia, '(2a,e12.4)') txtput1, ':', salmax(l)
           txtput1 = '  WS0'

@@ -1,5 +1,3 @@
-subroutine getfixfac(lsedtot   ,nmmax     ,fixfac    ,ffthresh  ,nmlb      , &
-                   & nmub      ,bedcomp   )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -26,45 +24,9 @@ subroutine getfixfac(lsedtot   ,nmmax     ,fixfac    ,ffthresh  ,nmlb      , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id$
-!  $HeadURL$
-!!--description-----------------------------------------------------------------
-!
-!    Function: - Update underlayer bookkeeping system for erosion/sedimentation
-!
-!!--pseudo code and references--------------------------------------------------
-! NONE
-!!--declarations----------------------------------------------------------------
-    use precision 
-    use bedcomposition_module
-    !
-    implicit none
-!
-! Global variables
-!
-    integer                                            , intent(in)  :: lsedtot
-    integer                                            , intent(in)  :: nmmax
-    integer                                            , intent(in)  :: nmlb
-    integer                                            , intent(in)  :: nmub
-    type(bedcomp_data)                                 , intent(in)  :: bedcomp
-    real(fp)                                           , intent(in)  :: ffthresh
-    real(fp), dimension(nmlb:nmub, lsedtot)            , intent(out) :: fixfac
-!
-! Local variables
-!
-    integer  :: l
-    integer  :: nm
-    real(fp) :: ffac
-    real(fp) :: thresh
-!
-!! executable statements -------------------------------------------------------
-!
-    call getalluvthick(bedcomp, fixfac)
-    !
-    thresh = max(1.0e-10_fp,ffthresh)
-    do l = 1, lsedtot
-       do nm = 1, nmmax
-          fixfac(nm, l) = min(max(fixfac(nm, l)/thresh, 0.0_fp), 1.0_fp)
-       enddo
-    enddo
-end subroutine getfixfac
+!  $Id: lognormal.inc 47 2011-01-06 06:49:52Z jagers $
+!  $HeadURL: http://svn.oss.deltares.nl/repos/opendelft3d/trunk/src/engines_gpl/flow2d3d/packages/data/include/lognormal.inc $$
+!-------------------------------------------------------------------------------
+integer, parameter :: SEDTYP_NONCOHESIVE_TOTALLOAD = 0
+integer, parameter :: SEDTYP_NONCOHESIVE_SUSPENDED = 1
+integer, parameter :: SEDTYP_COHESIVE              = 2

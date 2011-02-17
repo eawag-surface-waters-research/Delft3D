@@ -78,10 +78,11 @@ subroutine erosilt(nmmax   ,icx     ,icy     ,kcs     ,kfs     ,kfu     , &
     real(fp)      , dimension(:,:)   , pointer :: tcrero
     real(fp)      , dimension(:)     , pointer :: thcmud
     real(fp)      , dimension(:,:)   , pointer :: eropar
-    character(4)  , dimension(:)     , pointer :: sedtyp
     logical                          , pointer :: bsskin
     logical                          , pointer :: scour
     integer       , dimension(:)     , pointer :: iform
+    integer       , dimension(:)     , pointer :: sedtyp
+    include 'sedparams.inc'
     !
     integer                                                   , intent(in)  :: icx    !!  Increment in the X-dir., if ICX= NMAX
                                                                                       !!  then computation proceeds in the X-
@@ -234,7 +235,7 @@ subroutine erosilt(nmmax   ,icx     ,icy     ,kcs     ,kfs     ,kfu     , &
     !
     if (kmax > 1) then
        do l = 1, lsedtot
-          if (sedtyp(l)=='sand' .or. sedtyp(l)=='bedl') cycle
+          if (sedtyp(l)/=SEDTYP_COHESIVE) cycle
           !
           ! calculation both for mud and floc
           !
@@ -332,7 +333,7 @@ subroutine erosilt(nmmax   ,icx     ,icy     ,kcs     ,kfs     ,kfu     , &
        ! Main computational loop over all sediments
        !
        do l = 1, lsedtot
-          if (sedtyp(l)=='sand' .or. sedtyp(l)=='bedl') cycle
+          if (sedtyp(l)/=SEDTYP_COHESIVE) cycle
           !
           ! calculation both for mud and floc
           !

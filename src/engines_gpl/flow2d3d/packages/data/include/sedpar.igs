@@ -25,7 +25,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 !  $Id$
-!  $HeadURL$
+!  $HeadURL$$
+!-------------------------------------------------------------------------------
 type gd_sedpar
     !
     ! doubles
@@ -74,9 +75,9 @@ type gd_sedpar
     real(fp)      , dimension(:)    , pointer :: mudcnt     !  mud content / mud fraction field (non-zero only if mud
                                                             !  is not included simulation)
     integer       , dimension(:)    , pointer :: nseddia    !  Number of characteristic sediment diameters
+    integer       , dimension(:)    , pointer :: sedtyp     !  Sediment type: 0=total/1=noncoh/2=coh
     character(10) , dimension(:)    , pointer :: inisedunit !  'm' or 'kg/m2' : Initial sediment at bed specified as thickness ([m]) or density ([kg/m2])
     character(20) , dimension(:)    , pointer :: namsed     !  Names of all sediment fractions
-    character(4)  , dimension(:)    , pointer :: sedtyp     !  Sediment type: Sand, Mud or Bedl
     character(256), dimension(:)    , pointer :: flsdbd     !  File name containing initial sediment mass at bed
     character(256), dimension(:)    , pointer :: flstcd     !  Critical stress deposition file names
     character(256), dimension(:)    , pointer :: flstce     !  Critical stress erosion file names

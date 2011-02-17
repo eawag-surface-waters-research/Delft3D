@@ -48,9 +48,10 @@ subroutine upwbed(su        ,sv        ,suu       ,svv       ,kfu       , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    character(4)  , dimension(:)         , pointer :: sedtyp
+    integer, dimension(:)                , pointer :: sedtyp
     real(fp)                             , pointer :: bed
     type (mornumericstype)               , pointer :: mornum
+    include 'sedparams.inc'
 !
 ! Global variables
 !
@@ -95,7 +96,7 @@ subroutine upwbed(su        ,sv        ,suu       ,svv       ,kfu       , &
     laterallyaveragedbedload = mornum%laterallyaveragedbedload
     !
     do l = 1, lsedtot
-       if (sedtyp(l)=='sand' .or. sedtyp(l)=='bedl') then
+       if (sedtyp(l) /= SEDTYP_COHESIVE) then
           do nm = 1, nmmax
              !
              ! Try a scheme that reverts to central if transport directions oppose (G. Lesser) 

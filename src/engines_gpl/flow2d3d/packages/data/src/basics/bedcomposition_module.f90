@@ -1235,12 +1235,13 @@ subroutine detthcmud(this, sedtyp, thcmud)
     !
     implicit none
     !
+    include 'sedparams.inc'
 !
 ! Function/routine arguments
 !
     type(bedcomp_data)                                        , intent(in)  :: this
     real(fp), dimension(this%settings%nmlb:this%settings%nmub), intent(out) :: thcmud  !  Total thickness of the mud layers
-    character(4), dimension(this%settings%nfrac)              , intent(in)  :: sedtyp
+    integer, dimension(this%settings%nfrac)                   , intent(in)  :: sedtyp
 !
 ! Local variables
 !
@@ -1257,7 +1258,7 @@ subroutine detthcmud(this, sedtyp, thcmud)
     do nm = this%settings%nmlb,this%settings%nmub
        thcmud (nm) = 0.0
         do l = 1, this%settings%nfrac
-           if (sedtyp(l) == 'mud ') thcmud(nm) = thcmud(nm) + real(bodsed(nm, l),fp)/rhofrac(l)
+           if (sedtyp(l) == SEDTYP_COHESIVE) thcmud(nm) = thcmud(nm) + real(bodsed(nm, l),fp)/rhofrac(l)
         enddo
     enddo
 end subroutine detthcmud
@@ -1331,6 +1332,7 @@ subroutine getfrac(this, frac, sedtyp, anymud, mudcnt, mudfrac)
 !!--declarations----------------------------------------------------------------
     use precision 
     implicit none
+    include 'sedparams.inc'
     !
     ! Function/routine arguments
     !
@@ -1339,7 +1341,7 @@ subroutine getfrac(this, frac, sedtyp, anymud, mudcnt, mudfrac)
     real(fp), dimension(this%settings%nmlb:this%settings%nmub, this%settings%nfrac) :: frac
     real(fp), dimension(this%settings%nmlb:this%settings%nmub)                      :: mudfrac
     real(fp), dimension(this%settings%nmlb:this%settings%nmub)                      :: mudcnt
-    character(4), dimension(this%settings%nfrac)                      , intent(in)  :: sedtyp
+    integer , dimension(this%settings%nfrac)                          , intent(in)  :: sedtyp
     !
     ! Local variables
     !
@@ -1367,7 +1369,7 @@ subroutine getfrac(this, frac, sedtyp, anymud, mudcnt, mudfrac)
        !
        mudfrac = 0.0
        do l = 1, this%settings%nfrac
-          if (sedtyp(l) == 'mud') then
+          if (sedtyp(l) == SEDTYP_COHESIVE) then
              do nm = this%settings%nmlb,this%settings%nmub
                 mudfrac(nm) = mudfrac(nm) + frac(nm,l)
              enddo

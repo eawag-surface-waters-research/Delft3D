@@ -67,16 +67,16 @@ subroutine initsedpar(gdp)
     real(fp)      , dimension(:)     , pointer :: erouni
     real(fp)      , dimension(:)     , pointer :: mudcnt
     integer       , dimension(:)     , pointer :: nseddia
+    integer       , dimension(:)     , pointer :: sedtyp
     character(10) , dimension(:)     , pointer :: inisedunit
     character(20) , dimension(:)     , pointer :: namsed
-    character(4)  , dimension(:)     , pointer :: sedtyp
     character(256), dimension(:)     , pointer :: flsdbd
     character(256), dimension(:)     , pointer :: flstcd
     character(256), dimension(:)     , pointer :: flstce
     character(256), dimension(:)     , pointer :: flsero
     character(256)                   , pointer :: flsdia
     character(256)                   , pointer :: flsmdc
-    type (gd_sedpar)                 , pointer :: gdsedpar
+    include 'sedparams.inc'
 !
 !! executable statements -------------------------------------------------------
 !
@@ -105,16 +105,15 @@ subroutine initsedpar(gdp)
     erouni      => gdp%gdsedpar%erouni
     mudcnt      => gdp%gdsedpar%mudcnt
     nseddia     => gdp%gdsedpar%nseddia
+    sedtyp      => gdp%gdsedpar%sedtyp
     inisedunit  => gdp%gdsedpar%inisedunit
     namsed      => gdp%gdsedpar%namsed
-    sedtyp      => gdp%gdsedpar%sedtyp
     flsdbd      => gdp%gdsedpar%flsdbd
     flstcd      => gdp%gdsedpar%flstcd
     flstce      => gdp%gdsedpar%flstce
     flsero      => gdp%gdsedpar%flsero
     flsdia      => gdp%gdsedpar%flsdia
     flsmdc      => gdp%gdsedpar%flsmdc
-    gdsedpar    => gdp%gdsedpar
     !
     mdcuni   = 0.0
     !
@@ -146,10 +145,10 @@ subroutine initsedpar(gdp)
     nullify(gdp%gdsedpar%mudcnt)
     !
     nullify(gdp%gdsedpar%nseddia)
+    nullify(gdp%gdsedpar%sedtyp)
     !
     nullify(gdp%gdsedpar%inisedunit)
     nullify(gdp%gdsedpar%namsed)
-    nullify(gdp%gdsedpar%sedtyp)
     nullify(gdp%gdsedpar%flsdbd)
     nullify(gdp%gdsedpar%flstcd)
     nullify(gdp%gdsedpar%flstce)

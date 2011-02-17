@@ -226,7 +226,7 @@ subroutine tritra(stage     ,lundia    ,nst       ,icreep    , &
     real(fp)  , dimension(norow + nocol)                            :: wenf         !  Description and declaration in rjdim.f90
     real(fp)  , dimension(norow + nocol)                            :: wenl         !  Description and declaration in rjdim.f90
     character(13)                                     , intent(in)  :: trasol       !  Description and declaration in tricom.igs
-    character(4), dimension(lsed)                                   :: sedtyp       !  Description and declaration in ckdim.f90
+    integer, dimension(lsed)                                        :: sedtyp       !!  sediment type: 0=total/1=noncoh/2=coh
     character(8)                                      , intent(in)  :: stage        !!  First or second half time step
 !
 ! Local variables

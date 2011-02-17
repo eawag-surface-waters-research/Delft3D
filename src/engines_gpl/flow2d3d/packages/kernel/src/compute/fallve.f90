@@ -66,10 +66,10 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
     real(fp)      , dimension(:)     , pointer :: salmax
     real(fp)      , dimension(:)     , pointer :: sedd50
     real(fp)      , dimension(:)     , pointer :: sedd50fld
-    character(4)  , dimension(:)     , pointer :: sedtyp
     real(fp)                         , pointer :: dsand
     real(fp)                         , pointer :: dgravel
     integer,        dimension(:)     , pointer :: iform
+    integer       , dimension(:)     , pointer :: sedtyp
     real(fp)                         , pointer :: timsec
     !
     character(256), dimension(:)     , pointer :: dll_function
@@ -82,6 +82,7 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
     integer       , dimension(:)     , pointer :: dll_integers
     real(hp)      , dimension(:)     , pointer :: dll_reals
     character(256), dimension(:)     , pointer :: dll_strings
+    include 'sedparams.inc'
 !
 ! Global variables
 !
@@ -360,7 +361,7 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
                 ws(nm, k, l) = real(ws_dll,fp)
              enddo     ! nm
           enddo        ! k
-       elseif (sedtyp(l) == 'sand') then
+       elseif (sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) then
           !
           do k = 1, kmax
              ku = min(k + 1, kmax)
@@ -430,7 +431,7 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
                 endif  ! kfs=1, kcs<=2
              enddo     ! nm
           enddo        ! k
-       elseif (sedtyp(l)(1:3) == 'mud') then
+       elseif (sedtyp(l) == SEDTYP_COHESIVE) then
           do k = 1, kmax
              ku = min(k+1 , kmax)
              ts = thick(k) + thick(ku)
@@ -466,6 +467,6 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
              enddo      ! nm
           enddo         ! k
        else
-       endif            ! sedtyp = sand/mud
+       endif            ! dll_function/sedtyp
     enddo               ! l
 end subroutine fallve

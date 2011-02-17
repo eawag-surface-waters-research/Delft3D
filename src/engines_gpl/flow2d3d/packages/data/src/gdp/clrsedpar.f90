@@ -65,9 +65,9 @@ subroutine clrsedpar(istat     ,gdp       )
     real(fp)      , dimension(:)     , pointer :: erouni
     real(fp)      , dimension(:)     , pointer :: mudcnt
     integer       , dimension(:)     , pointer :: nseddia
+    integer       , dimension(:)     , pointer :: sedtyp
     character(10) , dimension(:)     , pointer :: inisedunit
     character(20) , dimension(:)     , pointer :: namsed
-    character(4)  , dimension(:)     , pointer :: sedtyp
     character(256), dimension(:)     , pointer :: flsdbd
     character(256), dimension(:)     , pointer :: flstcd
     character(256), dimension(:)     , pointer :: flstce
@@ -138,10 +138,10 @@ subroutine clrsedpar(istat     ,gdp       )
     if (associated(gdsedpar%mudcnt))     deallocate(gdsedpar%mudcnt,     STAT = istat)
     !
     if (associated(gdsedpar%nseddia))    deallocate(gdsedpar%nseddia,    STAT = istat)
+    if (associated(gdsedpar%sedtyp))     deallocate(gdsedpar%sedtyp,     STAT = istat)
     !
     if (associated(gdsedpar%inisedunit)) deallocate(gdsedpar%inisedunit, STAT = istat)
     if (associated(gdsedpar%namsed))     deallocate(gdsedpar%namsed,     STAT = istat)
-    if (associated(gdsedpar%sedtyp))     deallocate(gdsedpar%sedtyp,     STAT = istat)
     if (associated(gdsedpar%flsdbd))     deallocate(gdsedpar%flsdbd,     STAT = istat)
     if (associated(gdsedpar%flstcd))     deallocate(gdsedpar%flstcd,     STAT = istat)
     if (associated(gdsedpar%flstce))     deallocate(gdsedpar%flstce,     STAT = istat)
