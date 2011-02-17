@@ -61,7 +61,7 @@ use bedcomposition_module
     integer                                                         :: nmaxus
     logical                                                         :: error
     character(16)                                                   :: grpnam
-    real(prec)         , dimension(gdp%d%nmlb:gdp%d%nmub,1:lsedtot) :: bodsed
+    real(prec)         , dimension(1:lsedtot,gdp%d%nmlb:gdp%d%nmub) :: bodsed
     real(fp)           , dimension(gdp%d%nmlb:gdp%d%nmub)           :: dpsed
     type(bedcomp_data)                                              :: gdmorlyr
 !
@@ -113,7 +113,7 @@ use bedcomposition_module
              do n = 1, nmaxus
                 i        = i+1
                 call n_and_m_to_nm(n, m, nm, gdp)
-                sbuff(i) = real(bodsed(nm, l),sp)
+                sbuff(i) = real(bodsed(l, nm),sp)
              enddo
           enddo
        enddo

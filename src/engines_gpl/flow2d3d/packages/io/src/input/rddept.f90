@@ -91,7 +91,7 @@ subroutine rddept(lundia    ,error     , &
        fmttmp = fmtdep
        call filfmt(lundia    ,'Fmtdep'      ,fmttmp    ,lerror    ,gdp       )
        call depfil(lundia    ,error     ,fildep    ,fmttmp    ,mmax      , &
-                 & nmax      ,nmaxus    ,dp        ,gdp       )
+                 & nmaxus    ,dp        ,1         ,1         ,gdp       )
     else
        !
        ! No depth values in file

@@ -537,8 +537,8 @@ subroutine rdmeteo(gdp, ecwind)
       inquire (file = trim(filename), exist = ex)
       if (ex) then
          fmttmp = 'formatted'
-         call depfil(lundia      ,error     ,filename    ,fmttmp  ,mmax      , &
-                   & nmax        ,nmaxus    ,secchi      ,gdp     )
+         call depfil(lundia    ,error     ,filename  ,fmttmp    ,mmax      , &
+                   & nmaxus    ,secchi    ,1         ,1         ,gdp       )
          if (error) call d3stop(1, gdp)
       else
          filename = ' '

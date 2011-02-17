@@ -394,13 +394,13 @@ function updmorlyr(this, dbodsd, dz, messages) result (istat)
           dpsed(nm) = 0.0_fp
           dz(nm)    = 0.0_fp
           do l = 1, this%settings%nfrac
-             bodsed(nm, l) = bodsed(nm, l) + real(dbodsd(nm, l),prec)
-             if (bodsed(nm, l) < 0.0_prec) then
-                if (bodsed(nm, l) < real(-morlyrnum%MinMassShortWarning,prec) .and. morlyrnum%MaxNumShortWarning>0) then
+             bodsed(l, nm) = bodsed(l, nm) + real(dbodsd(nm, l),prec)
+             if (bodsed(l, nm) < 0.0_prec) then
+                if (bodsed(l, nm) < real(-morlyrnum%MinMassShortWarning,prec) .and. morlyrnum%MaxNumShortWarning>0) then
                    morlyrnum%MaxNumShortWarning = morlyrnum%MaxNumShortWarning - 1
                    write(message,'(a,i0,a,i0,a,e20.4,a,e20.4)') &
                       & 'Sediment erosion shortage at NM ', nm, ' Fraction: ', l, &
-                      & ' Mass available   : ' ,bodsed(nm, l), &
+                      & ' Mass available   : ' ,bodsed(l, nm), &
                       & ' Mass to be eroded: ', dbodsd(nm, l)
                    call addmessage(messages,message)
                    if (morlyrnum%MaxNumShortWarning == 0) then
@@ -408,9 +408,9 @@ function updmorlyr(this, dbodsd, dz, messages) result (istat)
                       call addmessage(messages,message)
                    endif
                 endif
-                bodsed(nm, l) = 0.0_prec
+                bodsed(l, nm) = 0.0_prec
              endif
-             dpsed(nm) = dpsed(nm) + real(bodsed(nm, l),fp)/rhofrac(l)
+             dpsed(nm) = dpsed(nm) + real(bodsed(l, nm),fp)/rhofrac(l)
           enddo    
           dz(nm) = dpsed(nm) - seddep0
        enddo
@@ -628,9 +628,9 @@ function gettoplyr(this, dz_eros, dbodsd, messages  ) result (istat)
              fac = dz_eros(nm)/dpsed(nm)
              dpsed(nm) = 0.0_fp
              do l = 1, this%settings%nfrac
-                dbodsd(nm, l) = real(bodsed(nm, l),fp)*fac
-                bodsed(nm, l) = bodsed(nm, l) - real(dbodsd(nm, l),prec)
-                dpsed (nm)    = dpsed(nm) + real(bodsed(nm, l),fp)/rhofrac(l)
+                dbodsd(nm, l) = real(bodsed(l, nm),fp)*fac
+                bodsed(l, nm) = bodsed(l, nm) - real(dbodsd(nm, l),prec)
+                dpsed (nm)    = dpsed(nm) + real(bodsed(l, nm),fp)/rhofrac(l)
              enddo
           else
              !
@@ -638,8 +638,8 @@ function gettoplyr(this, dz_eros, dbodsd, messages  ) result (istat)
              !
              dpsed(nm) = 0.0_fp
              do l = 1, this%settings%nfrac
-                dbodsd(nm, l) = real(bodsed(nm, l),fp)
-                bodsed(nm, l) = 0.0_hp
+                dbodsd(nm, l) = real(bodsed(l, nm),fp)
+                bodsed(l, nm) = 0.0_hp
              enddo
           endif
        enddo
@@ -1258,7 +1258,7 @@ subroutine detthcmud(this, sedtyp, thcmud)
     do nm = this%settings%nmlb,this%settings%nmub
        thcmud (nm) = 0.0
         do l = 1, this%settings%nfrac
-           if (sedtyp(l) == SEDTYP_COHESIVE) thcmud(nm) = thcmud(nm) + real(bodsed(nm, l),fp)/rhofrac(l)
+           if (sedtyp(l) == SEDTYP_COHESIVE) thcmud(nm) = thcmud(nm) + real(bodsed(l, nm),fp)/rhofrac(l)
         enddo
     enddo
 end subroutine detthcmud
@@ -1315,7 +1315,7 @@ subroutine getalluvthick(this, seddep)
     case default
        do nm = this%settings%nmlb,this%settings%nmub
           do l = 1, this%settings%nfrac
-             seddep(nm, l) = real(bodsed(nm, l),fp)/rhofrac(l)
+             seddep(nm, l) = real(bodsed(l, nm),fp)/rhofrac(l)
           enddo
        enddo
     endselect
@@ -1441,13 +1441,13 @@ subroutine getmfrac_allpoints(this, frac)
        do nm = this%settings%nmlb,this%settings%nmub
           sedtot = 0.0_fp
           do l = 1, this%settings%nfrac
-             sedtot = sedtot + real(bodsed(nm, l),fp)
+             sedtot = sedtot + real(bodsed(l, nm),fp)
           enddo
           if (comparereal(sedtot,0.0_fp) == 0) then
              frac(nm, :) = 1.0_fp/this%settings%nfrac
           else
              do l = 1, this%settings%nfrac
-                frac(nm, l) = real(bodsed(nm, l),fp)/sedtot
+                frac(nm, l) = real(bodsed(l, nm),fp)/sedtot
              enddo
           endif
        enddo
@@ -1502,13 +1502,13 @@ subroutine getmfrac_1point(this ,nm  ,frac      )
     case default
        sedtot = 0.0_fp
        do l = 1, this%settings%nfrac
-          sedtot = sedtot + real(bodsed(nm, l),fp)
+          sedtot = sedtot + real(bodsed(l, nm),fp)
        enddo
        if (comparereal(sedtot,0.0_fp) == 0) then
           frac = 1.0_fp/this%settings%nfrac
        else
           do l = 1, this%settings%nfrac
-             frac(l) = real(bodsed(nm, l),fp)/sedtot
+             frac(l) = real(bodsed(l, nm),fp)/sedtot
           enddo
        endif
     endselect
@@ -1558,7 +1558,7 @@ subroutine setmfrac_1point(this, nm, frac)
     case default
        masstot = 1000.0_fp
        do l = 1, this%settings%nfrac
-          bodsed(nm, l) = real(frac(l)*masstot,prec)
+          bodsed(l, nm) = real(frac(l)*masstot,prec)
        enddo
     endselect
 end subroutine setmfrac_1point
@@ -1621,7 +1621,7 @@ subroutine getvfrac_allpoints(this, frac)
              frac(nm, :) = 1.0_fp/this%settings%nfrac
           else
              do l = 1, this%settings%nfrac
-                frac(nm, l) = real(bodsed(nm, l),fp)/(rhofrac(l)*dpsed(nm))
+                frac(nm, l) = real(bodsed(l, nm),fp)/(rhofrac(l)*dpsed(nm))
              enddo
           endif
        enddo
@@ -1683,7 +1683,7 @@ subroutine getvfrac_1point(this ,nm ,frac      )
           frac = 1.0_fp/this%settings%nfrac
        else
           do l = 1, this%settings%nfrac
-             frac(l) = real(bodsed(nm, l),fp)/(rhofrac(l)*dpsed(nm))
+             frac(l) = real(bodsed(l, nm),fp)/(rhofrac(l)*dpsed(nm))
           enddo
        endif
     endselect
@@ -1938,7 +1938,7 @@ function allocmorlyr(this, nmlb, nmub, nfrac) result (istat)
     settings%nfrac = nfrac
     !
     istat = 0
-    if (istat == 0) allocate (state%bodsed(nmlb:nmub,nfrac), stat = istat)
+    if (istat == 0) allocate (state%bodsed(nfrac,nmlb:nmub), stat = istat)
     if (istat == 0) state%bodsed = 0.0_fp
     if (istat == 0) allocate (state%dpsed(nmlb:nmub), stat = istat)
     if (istat == 0) state%dpsed = 0.0_fp
@@ -2455,7 +2455,7 @@ subroutine bedcomp_use_bodsed(this)
        !
        dpsed(nm) = 0.0_fp
        do ised = 1, this%settings%nfrac
-          dpsed(nm) = dpsed(nm) + real(bodsed(nm, ised),fp)/rhofrac(ised)
+          dpsed(nm) = dpsed(nm) + real(bodsed(ised, nm),fp)/rhofrac(ised)
        enddo
     enddo
     select case(this%settings%iunderlyr)
@@ -2473,11 +2473,11 @@ subroutine bedcomp_use_bodsed(this)
           !
           totsed = 0.0_fp
           do ised = 1, this%settings%nfrac
-             totsed = totsed + real(bodsed(nm, ised),fp)
+             totsed = totsed + real(bodsed(ised, nm),fp)
           enddo
           totsed         = max(totsed,1.0e-20_fp) ! avoid division by zero
           do ised = 1, this%settings%nfrac
-             mfrac(ised) = real(bodsed(nm, ised),fp)/totsed
+             mfrac(ised) = real(bodsed(ised, nm),fp)/totsed
           enddo
           !
           call getporosity(this, mfrac, poros)
@@ -2485,7 +2485,7 @@ subroutine bedcomp_use_bodsed(this)
           !
           thsed = 0.0_fp
           do ised = 1, this%settings%nfrac
-             thsed = thsed + real(bodsed(nm, ised),fp)/rhofrac(ised)
+             thsed = thsed + real(bodsed(ised, nm),fp)/rhofrac(ised)
           enddo
           thsed         = thsed/svf
           sedthick      = thsed
@@ -2496,7 +2496,7 @@ subroutine bedcomp_use_bodsed(this)
           thlyr(nm, 1)  = min(thtrlyr(nm),sedthick)
           fac = thlyr(nm,1)/thsed
           do ised = 1, this%settings%nfrac
-             msed(nm, 1, ised) = real(bodsed(nm, ised),fp)*fac
+             msed(nm, 1, ised) = real(bodsed(ised, nm),fp)*fac
           enddo
           svfrac(nm, 1) = svf
           sedthick      = sedthick - thlyr(nm, 1)
@@ -2510,7 +2510,7 @@ subroutine bedcomp_use_bodsed(this)
              sedthick     = sedthick - thlyr(nm, 2)
              fac = thlyr(nm,2)/thsed
              do ised = 1, this%settings%nfrac
-                msed(nm, 2, ised) = real(bodsed(nm, ised),fp)*fac
+                msed(nm, 2, ised) = real(bodsed(ised, nm),fp)*fac
              enddo
              svfrac(nm, 2) = svf
           endif
@@ -2522,7 +2522,7 @@ subroutine bedcomp_use_bodsed(this)
              sedthick     = sedthick - thlyr(nm, k)
              fac = thlyr(nm,k)/thsed
              do ised = 1, this%settings%nfrac
-                msed(nm, k, ised) = real(bodsed(nm, ised),fp)*fac
+                msed(nm, k, ised) = real(bodsed(ised, nm),fp)*fac
              enddo
              svfrac(nm, k) = svf
           enddo
@@ -2534,7 +2534,7 @@ subroutine bedcomp_use_bodsed(this)
              sedthick     = sedthick - thlyr(nm, k)
              fac = thlyr(nm,k)/thsed
              do ised = 1, this%settings%nfrac
-                msed(nm, k, ised) = real(bodsed(nm, ised),fp)*fac
+                msed(nm, k, ised) = real(bodsed(ised, nm),fp)*fac
              enddo
              svfrac(nm, k) = svf
           enddo
@@ -2544,7 +2544,7 @@ subroutine bedcomp_use_bodsed(this)
           thlyr(nm, this%settings%nlyr) = sedthick
           fac = thlyr(nm,this%settings%nlyr)/thsed
           do ised = 1, this%settings%nfrac
-             msed(nm, this%settings%nlyr, ised) = real(bodsed(nm, ised),fp)*fac
+             msed(nm, this%settings%nlyr, ised) = real(bodsed(ised, nm),fp)*fac
           enddo
           svfrac(nm, this%settings%nlyr) = svf
        enddo
@@ -2601,7 +2601,7 @@ subroutine copybedcomp(this, nmfrom, nmto)
        enddo
     case default
        do l = 1, this%settings%nfrac
-          bodsed(nmto,l) = bodsed(nmfrom,l)
+          bodsed(l, nmto) = bodsed(l, nmfrom)
        enddo
        dpsed(nmto) = dpsed(nmfrom)
     end select

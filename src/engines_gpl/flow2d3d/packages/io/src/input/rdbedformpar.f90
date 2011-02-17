@@ -578,7 +578,7 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
           !
           fmttmp = 'formatted'
           call depfil(lundia    ,error     ,flbdfh    ,fmttmp    ,mmax      , &
-                    & nmax      ,nmaxus    ,duneheight ,gdp       )
+                    & nmaxus    ,duneheight,1         ,1         ,gdp       )
           !
           ! Call mirror routine to fill external points on the boundary with the internal value in x-direction
           !

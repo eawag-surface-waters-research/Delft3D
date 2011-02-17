@@ -226,9 +226,9 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                 !
                 ! Spatially varying thickness
                 !
-                call depfil(lundia    ,error     ,filename, fmttmp    , &
-                          & mmax      ,nmax      ,nmaxus  , &
-                          & thtemp    ,gdp       )
+                call depfil(lundia    ,error     ,filename  ,fmttmp    , &
+                          & mmax      ,nmaxus    ,thtemp    ,1         , &
+                          & 1         ,gdp       )
                 if (error) then
                    write (message,'(3a,i2,2a)')  &
                        & 'Error reading thickness from ', trim(filename), &
@@ -285,9 +285,9 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                    ! Spatially varying fraction
                    !
                    anyfrac = .true.
-                   call depfil(lundia    ,error     ,filename, fmttmp    , &
-                             & mmax      ,nmax      ,nmaxus  , &
-                             & rtemp(nmlb,l)        ,gdp       )
+                   call depfil(lundia    ,error     ,filename  , fmttmp    , &
+                             & mmax      ,nmaxus    ,rtemp(nmlb,l)         , &
+                             & 1         ,1         ,gdp       )
                    if (error) then
                       write (message,'(a,i2,3a,i2,2a)')  &
                           & 'Error reading fraction ', l, 'from ', &
@@ -529,9 +529,9 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                    ! Spatially varying thickness or mass
                    !
                    anysedbed = .true.
-                   call depfil(lundia    ,error     ,filename, fmttmp    , &
-                             & mmax      ,nmax      ,nmaxus  , &
-                             & rtemp(nmlb,l)        ,gdp       )
+                   call depfil(lundia    ,error     ,filename  , fmttmp    , &
+                             & mmax      ,nmaxus    ,rtemp(nmlb,l)         , &
+                             & 1         ,1         ,gdp       )
                    if (error) then
                       write (message,'(5a,i2,2a)')  &
                           & 'Error reading ', layertype, '  from ', trim(filename), &

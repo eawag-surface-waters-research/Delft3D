@@ -171,7 +171,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
              ! Uniform data has been specified
              !
              do nm = 1, nmmax
-                bodsed(nm, ised) = real(sdbuni(ised),prec)
+                bodsed(ised, nm) = real(sdbuni(ised),prec)
              enddo
           else
              !
@@ -179,11 +179,13 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
              ! Use routine that also read the depth file to read the data
              !
              if (prec == hp) then
-                call depfil_double(lundia    ,error     ,flsdbd(ised)         ,fmttmp    ,mmax      , &
-                                 & nmax      ,nmaxus    ,bodsed(nmlb, ised)   ,gdp       )
+                call depfil_double(lundia    ,error     ,flsdbd(ised)         , &
+                                 & fmttmp    ,mmax      ,nmaxus    ,bodsed    , &
+                                 & lsedtot   , ised     ,gdp       )
              else
-                call depfil(lundia    ,error     ,flsdbd(ised)         ,fmttmp    ,mmax      , &
-                          & nmax      ,nmaxus    ,bodsed(nmlb, ised)   ,gdp       )
+                call depfil(lundia    ,error     ,flsdbd(ised)         , &
+                          & fmttmp    ,mmax      ,nmaxus    ,bodsed    , &
+                          & lsedtot   ,ised      ,gdp       )
              endif
              if (error) goto 9999
           endif
@@ -192,7 +194,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
           do ised = 1, lsedtot
              if (inisedunit(ised) == 'm') then
                 do nm = 1, nmmax
-                   bodsed(nm, ised) = bodsed(nm, ised) * cdryb(ised)
+                   bodsed(ised, nm) = bodsed(ised, nm) * cdryb(ised)
                 enddo
              else
                 !
@@ -217,7 +219,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
              do nm = 1, nmmax
                 mfracsum = 0.0_fp
                 do ised = 1, lsedtot
-                   mfrac(ised) = bodsed(nm, ised) * rhosol(ised)
+                   mfrac(ised) = bodsed(ised, nm) * rhosol(ised)
                    mfracsum = mfracsum + mfrac(ised)
                 enddo
                 if (mfracsum > 0.0_fp) then
@@ -232,7 +234,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
                 endif
                 !
                 do ised = 1, lsedtot
-                   bodsed(nm, ised) = bodsed(nm, ised) * svf * rhosol(ised)
+                   bodsed(ised, nm) = bodsed(ised, nm) * svf * rhosol(ised)
                 enddo
              enddo
           else
@@ -252,7 +254,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
              ! Check the values carefully before continuing.
              !
              do ised = 1, lsedtot
-                if (bodsed(nm, ised) < 0.0) then
+                if (bodsed(ised, nm) < 0.0) then
                    write (message,'(a,i2,a,a,a,i0)')  &
                        & 'Negative sediment thickness ',ised,' in file ', &
                        & trim(flsdbd(ised)),' at nm=',nm
@@ -269,13 +271,13 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
              !
              err = .false.
              do ised = 1, lsedtot
-                if (bodsed(nm, ised)<0.0) err=.true.
+                if (bodsed(ised, nm)<0.0) err=.true.
              enddo
              if (err) then
                 !
                 ! set dummy flag
                 !
-                bodsed(nm, 1) = -1.0
+                bodsed(1, nm) = -1.0
              endif
           else
              !
@@ -283,7 +285,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
              ! Just replace whatever was read by something valid.
              !
              do ised = 1, lsedtot
-                bodsed(nm, ised) = 0.0
+                bodsed(ised, nm) = 0.0
              enddo
           endif
        enddo
@@ -292,7 +294,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
        ! yet been assigned valid data.
        !
        do nm = 1, nmmax
-          if (kcs(nm)==2 .and. bodsed(nm,1)<0.0) then
+          if (kcs(nm)==2 .and. bodsed(1, nm)<0.0) then
              if (kcs(nm-icx) == 1) then
                 ! ndm
                 nm2 = nm-icx
@@ -307,7 +309,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
                 nm2 = nm+icy
              endif
              do ised = 1,lsedtot
-                bodsed(nm, ised) = bodsed(nm2, ised)
+                bodsed(ised, nm) = bodsed(ised, nm2)
              enddo
           endif
        enddo

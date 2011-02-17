@@ -68,7 +68,7 @@ subroutine dfwrmorm1(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
     integer                                                :: nmaxus
     logical                                                :: error
     character(16)                                          :: grpnam
-    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub,1:lsedtot) :: bodsed
+    real(prec), dimension(1:lsedtot,gdp%d%nmlb:gdp%d%nmub) :: bodsed
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)           :: dpsed
     type(bedcomp_data)                                     :: gdmorlyr
 !
@@ -155,7 +155,7 @@ subroutine dfwrmorm1(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
           do m = 1, mmax
              do n = 1, nmaxus
                 call n_and_m_to_nm(n, m, nm, gdp)
-                rbuff3(n,m,l) = real(bodsed(nm,l),fp)
+                rbuff3(n,m,l) = real(bodsed(l, nm),fp)
              enddo
           enddo
        enddo

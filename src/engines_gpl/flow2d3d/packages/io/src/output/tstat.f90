@@ -65,8 +65,6 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    real(prec)       , dimension(:,:)   , pointer :: bodsed
-    real(fp)         , dimension(:)     , pointer :: dpsed
     integer          , dimension(:,:)   , pointer :: mnstat
 
 !

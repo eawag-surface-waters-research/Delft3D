@@ -88,9 +88,9 @@ subroutine flsfil(lundia    ,error     ,filfls    ,mmax      ,nmax      , &
     !
     fmttmp = 'formatted'
     !
-    call depfil(lundia    ,error     ,trim(filfls), fmttmp    , &
-              & mmax      ,nmax      ,nmaxus  , &
-              & pship     ,gdp       )
+    call depfil(lundia    ,error     ,trim(filfls)         ,fmttmp    , &
+              & mmax      ,nmaxus    ,pship     ,1         ,1         , &
+              & gdp       )
     if (error) then
        write (message,'(3a,i2,2a)') 'error reading file ', trim(filfls)
        call prterr(lundia, 'U021', trim(message))

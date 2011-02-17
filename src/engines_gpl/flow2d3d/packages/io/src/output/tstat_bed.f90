@@ -87,7 +87,7 @@ use bedcomposition_module
        !
        zdpsed(ii) = dpsed(nm)
        do l = 1, lsedtot
-          zbdsed(ii,l) = real(bodsed(nm,l),fp)
+          zbdsed(ii,l) = real(bodsed(l, nm),fp)
        enddo
     enddo
 end subroutine tstat_bed

@@ -1,5 +1,5 @@
 subroutine depfil(lundia    ,error     ,fildep    ,fmttmp    ,mmax      , &
-                & nmax      ,nmaxus    ,dp        ,gdp       )
+                & nmaxus    ,array     ,nfld      ,ifld      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -46,27 +46,27 @@ subroutine depfil(lundia    ,error     ,fildep    ,fmttmp    ,mmax      , &
     ! 
     ! The following list of pointer parameters is used to point inside the gdp structure 
     ! 
-! 
-! Global variables 
-! 
-    integer                                                                    :: lundia !  Description and declaration in inout.igs 
-    integer                                                      , intent(in)  :: mmax   !  Description and declaration in iidim.f90 
-    integer                                                                    :: nmax   !  Description and declaration in iidim.f90 
-    integer                                                      , intent(in)  :: nmaxus !  Description and declaration in iidim.f90 
-    logical                                                      , intent(out) :: error  !!  Flag=TRUE if an error is encountered 
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: dp     !  Description and declaration in rjdim.f90 
-    character(*)                                                               :: fildep !!  Name of the relevant file 
-    character(11)                                                , intent(in)  :: fmttmp !!  Help var. for the attribute file 
-                                                                                         !!  formats (eg. the thin dams file) 
-! 
-! Local variables 
-! 
     integer, pointer                      :: mfg 
     integer, pointer                      :: mlg 
     integer, pointer                      :: nfg 
     integer, pointer                      :: nlg 
     integer, pointer                      :: mmaxgl 
     integer, pointer                      :: nmaxgl 
+! 
+! Global variables 
+! 
+    integer                                                            , intent(in)  :: ifld   !  index of field to be read
+    integer                                                                          :: lundia !  unit number for diagnostic file
+    integer                                                            , intent(in)  :: mmax   !  maximum internal grid index in m dimension
+    integer                                                            , intent(in)  :: nfld   !  number of fields
+    integer                                                            , intent(in)  :: nmaxus !  maximum internal grid index in n dimension
+    logical                                                            , intent(out) :: error  !  Flag=TRUE if an error is encountered 
+    real(fp), dimension(nfld, gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: array  !  data array to fill
+    character(*)                                                                     :: fildep !  Name of the relevant file 
+    character(11)                                                      , intent(in)  :: fmttmp !  Fornat switch for the attribute file 
+! 
+! Local variables 
+! 
     integer                               :: iocond ! Help variable for iostat condition  
     integer                               :: lfile  ! Length of file name  
     integer                               :: luntmp ! Unit number for attribute file  
@@ -83,8 +83,8 @@ subroutine depfil(lundia    ,error     ,fildep    ,fmttmp    ,mmax      , &
     mlg    => gdp%gdparall%mlg 
     nfg    => gdp%gdparall%nfg 
     nlg    => gdp%gdparall%nlg 
-    nmaxgl => gdp%gdparall%nmaxgl 
     mmaxgl => gdp%gdparall%mmaxgl 
+    nmaxgl => gdp%gdparall%nmaxgl 
     !
     error = .false.
     ! 
@@ -96,7 +96,7 @@ subroutine depfil(lundia    ,error     ,fildep    ,fmttmp    ,mmax      , &
        ! File exists 
        ! 
        ! 
-       ! allocate temporary array to store dp of entire domain read from depth file 
+       ! allocate temporary array to store data of entire domain read from file 
        ! 
        allocate (dtmp(nmaxgl,mmaxgl)) 
        ! 
@@ -110,10 +110,10 @@ subroutine depfil(lundia    ,error     ,fildep    ,fmttmp    ,mmax      , &
        if (fmttmp(1:2) == 'un') then 
           ! 
           ! unformatted file 
-          ! read per nmaxus, mmax values in dp array 
+          ! read per nmaxus, mmax values in dtmp array 
           ! NOTE: nmaxus and mmax equal nmaxgl and mmaxgl, respectively (for entire domain) 
-          !       in case of parallel runs. Moreover, dp is associated with subdomain and 
-          !       therefore, dp for entire domain is stored in temporary array dtmp 
+          !       in case of parallel runs. Moreover, array is associated with subdomain and 
+          !       therefore, data for entire domain is stored in temporary array dtmp 
           ! end of error in file = not ok 
           ! 
           do n = 1, nmaxgl 
@@ -146,11 +146,8 @@ subroutine depfil(lundia    ,error     ,fildep    ,fmttmp    ,mmax      , &
           ! 
           call skipstarlines(luntmp) 
           ! 
-          ! read per nmaxus, mmax values in dp array 
-          ! NOTE: nmaxus and mmax equal nmaxgl and mmaxgl, respectively (for entire domain) 
-          !       in case of parallel runs. Moreover, dp is associated with subdomain and 
-          !       therefore, dp for entire domain is stored in temporary array dtmp 
-          ! end of error in file = not ok 
+          ! Read per nmaxus, mmax values in dtmp array 
+          ! End of error in file = not ok 
           ! 
           do n = 1, nmaxgl 
              read (luntmp, *, iostat = iocond) (dtmp(n, m), m = 1, mmaxgl) 
@@ -203,11 +200,11 @@ subroutine depfil(lundia    ,error     ,fildep    ,fmttmp    ,mmax      , &
           ! 
           call dfbroadc ( dtmp, nmaxgl*mmaxgl, dfloat, gdp ) 
           ! 
-          ! put copies of parts of dp for each subdomain 
+          ! put copies of parts of dtmp for each subdomain 
           ! 
           do m = mfg, mlg 
              do n = nfg, nlg 
-                dp(n-nfg+1,m-mfg+1) = dtmp(n,m) 
+                array(ifld,n-nfg+1,m-mfg+1) = dtmp(n,m) 
              enddo 
           enddo 
        endif 

@@ -260,7 +260,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
        sedd50fld           => gdp%gdsedpar%sedd50fld
        !
        call depfil(lundia    ,error     ,flsdia    ,fmttmp    ,mmax      , &
-                 & nmax      ,nmaxus    ,sedd50fld ,gdp       )
+                 & nmaxus    ,sedd50fld ,1         ,1         ,gdp       )
        if (error) goto 9999
        !
        call mirror_bnd(icx       ,icy       ,nmmax     , &
@@ -286,7 +286,8 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
              ! Use routine that also reads the depth file to read the data
              !
              call depfil(lundia    ,error     ,flstcd(ll),fmttmp    ,mmax      , &
-                       & nmax      ,nmaxus    ,tcrdep(nmlb, ll)     ,gdp       )
+                       & nmaxus    ,tcrdep(nmlb, ll)     ,1         ,1         , &
+                       & gdp       )
              if (error) goto 9999
           endif
           !
@@ -317,7 +318,8 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
              ! Use routine that also reads the depth file to read the data
              !
              call depfil(lundia    ,error     ,flstce(ll),fmttmp    ,mmax      , &
-                       & nmax      ,nmaxus    ,tcrero(nmlb, ll)     ,gdp       )
+                       & nmaxus    ,tcrero(nmlb, ll)     ,1         ,1         , &
+                       & gdp       )
              if (error) goto 9999
           endif
           do nm = 1, nmmax
@@ -343,7 +345,8 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
           ! Use routine that also read the depth file to read the data
           !
           call depfil(lundia    ,error     ,flsero(ll),fmttmp    ,mmax      , &
-                    & nmax      ,nmaxus    ,eropar(nmlb, ll)     ,gdp       )
+                    & nmaxus    ,eropar(nmlb, ll)     ,1         ,1         , &
+                    & gdp       )
           if (error) goto 9999
        endif
     enddo
@@ -361,7 +364,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
        ! Use routine that also read the depth file to read the data
        !
        call depfil(lundia    ,error     ,flsmdc    ,fmttmp    ,mmax      , &
-                 & nmax      ,nmaxus    ,mudcnt    ,gdp       )
+                 & nmaxus    ,mudcnt    ,1         ,1         ,gdp       )
        if (error) goto 9999
     endif
     do nm = 1, nmmax

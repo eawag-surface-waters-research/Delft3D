@@ -1,5 +1,5 @@
 subroutine depfil_double(lundia    ,error     ,fildep    ,fmttmp    ,mmax      , &
-                       & nmax      ,nmaxus    ,dp        ,gdp       )
+                       & nmaxus    ,array     ,nfld      ,ifld      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -55,15 +55,15 @@ subroutine depfil_double(lundia    ,error     ,fildep    ,fmttmp    ,mmax      ,
 ! 
 ! Global variables 
 ! 
-    integer                                                                    :: lundia !  Description and declaration in inout.igs 
-    integer                                                      , intent(in)  :: mmax   !  Description and declaration in iidim.f90 
-    integer                                                                    :: nmax   !  Description and declaration in iidim.f90 
-    integer                                                      , intent(in)  :: nmaxus !  Description and declaration in iidim.f90 
-    logical                                                      , intent(out) :: error  !!  Flag=TRUE if an error is encountered 
-    real(hp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: dp     !  Description and declaration in rjdim.f90 
-    character(*)                                                               :: fildep !!  Name of the relevant file 
-    character(11)                                                , intent(in)  :: fmttmp !!  Help var. for the attribute file 
-                                                                                         !!  formats (eg. the thin dams file) 
+    integer                                                            , intent(in)  :: ifld   !  index of field to be read
+    integer                                                                          :: lundia !  unit number for diagnostic file
+    integer                                                            , intent(in)  :: mmax   !  maximum internal grid index in m dimension
+    integer                                                            , intent(in)  :: nfld   !  number of fields
+    integer                                                            , intent(in)  :: nmaxus !  maximum internal grid index in n dimension
+    logical                                                            , intent(out) :: error  !  Flag=TRUE if an error is encountered 
+    real(hp), dimension(nfld, gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: array  !  data array to fill
+    character(*)                                                                     :: fildep !  Name of the relevant file 
+    character(11)                                                      , intent(in)  :: fmttmp !  Fornat switch for the attribute file 
 ! 
 ! Local variables 
 ! 
@@ -73,7 +73,7 @@ subroutine depfil_double(lundia    ,error     ,fildep    ,fmttmp    ,mmax      ,
     integer                               :: m 
     integer                               :: n 
     integer                 , external    :: newlun
-    real(hp), dimension(:,:), allocatable :: dtmp 
+    real(hp), dimension(:,:), allocatable :: dtmp   ! Temporary array containing dp of entire domain 
     logical                 , external    :: exifil
     character(300)                        :: errmsg ! Character string containing the errormessage to be written to file. The message depends on the error.  
 ! 
@@ -96,7 +96,7 @@ subroutine depfil_double(lundia    ,error     ,fildep    ,fmttmp    ,mmax      ,
        ! File exists 
        ! 
        ! 
-       ! allocate temporary array to store dp of entire domain read from depth file 
+       ! allocate temporary array to store data of entire domain read from file 
        ! 
        allocate (dtmp(nmaxgl,mmaxgl)) 
        ! 
@@ -110,10 +110,10 @@ subroutine depfil_double(lundia    ,error     ,fildep    ,fmttmp    ,mmax      ,
        if (fmttmp(1:2) == 'un') then 
           ! 
           ! unformatted file 
-          ! read per nmaxus, mmax values in dp array 
+          ! read per nmaxus, mmax values in dtmp array 
           ! NOTE: nmaxus and mmax equal nmaxgl and mmaxgl, respectively (for entire domain) 
-          !       in case of parallel runs. Moreover, dp is associated with subdomain and 
-          !       hence, dp for entire domain is stored in temporary array dtmp 
+          !       in case of parallel runs. Moreover, array is associated with subdomain and 
+          !       therefore, data for entire domain is stored in temporary array dtmp 
           ! end of error in file = not ok 
           ! 
           do n = 1, nmaxgl 
@@ -132,7 +132,7 @@ subroutine depfil_double(lundia    ,error     ,fildep    ,fmttmp    ,mmax      ,
              ! 
              do m = 1, mmax 
                 if ( isnan(dtmp(n, m)) ) then  
-                    write(errmsg,'(a,a)') 'NaN found in file ', fildep(1:lfile) 
+                    write(errmsg,'(2a)') 'NaN found in file ', fildep(1:lfile) 
                     call prterr(lundia, 'P004', errmsg)
                     error = .true. 
                     goto 9999 
@@ -146,7 +146,7 @@ subroutine depfil_double(lundia    ,error     ,fildep    ,fmttmp    ,mmax      ,
           ! 
           call skipstarlines(luntmp) 
           ! 
-          ! Read per nmaxus, mmax values in dp array 
+          ! Read per nmaxus, mmax values in dtmp array 
           ! End of error in file = not ok 
           ! 
           do n = 1, nmaxgl 
@@ -165,7 +165,7 @@ subroutine depfil_double(lundia    ,error     ,fildep    ,fmttmp    ,mmax      ,
              ! 
              do m = 1, mmax 
                 if ( isnan(dtmp(n, m)) ) then  
-                    write(errmsg,'(a,a)') 'NaN found in file ', fildep(1:lfile) 
+                    write(errmsg,'(2a)') 'NaN found in file ', fildep(1:lfile) 
                     call prterr(lundia, 'P004', errmsg)
                     error = .true. 
                     goto 9999 
@@ -200,11 +200,11 @@ subroutine depfil_double(lundia    ,error     ,fildep    ,fmttmp    ,mmax      ,
           ! 
           call dfbroadc ( dtmp, nmaxgl*mmaxgl, dfdble, gdp ) 
           ! 
-          ! put copies of parts of dp for each subdomain 
+          ! put copies of parts of dtmp for each subdomain 
           ! 
           do m = mfg, mlg 
              do n = nfg, nlg 
-                dp(n-nfg+1,m-mfg+1) = dtmp(n,m) 
+                array(ifld, n-nfg+1, m-mfg+1) = dtmp(n, m) 
              enddo 
           enddo 
        endif 

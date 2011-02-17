@@ -53,11 +53,14 @@ subroutine restart_bodsed (error     ,restid    ,i_restart ,bodsed    , &
     integer                                                                               :: mmax
     logical                                                                               :: error
     logical                                                                 , intent(out) :: success
-    real(prec), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsedtot), intent(out) :: bodsed
+    real(prec), dimension(lsedtot, gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: bodsed
     character(*)                                                                          :: restid
 !
 ! Local variables
 !
+    integer                                :: l
+    integer                                :: m
+    integer                                :: n
     integer                                :: lrid        ! character variables for files Help var., length of restid
     integer                     , external :: crenef
     integer                     , external :: getelt
@@ -114,7 +117,13 @@ subroutine restart_bodsed (error     ,restid    ,i_restart ,bodsed    , &
     ierror = getelt(fds , 'map-sed-series', 'BODSED', uindex, 1, &
                  & mmax*nmaxus*rst_lsedtot*4, sbuff )
     if (ierror/= 0) goto 9999
-    bodsed(1:nmaxus,1:mmax,1:lsedtot) = real(sbuff(1:nmaxus,1:mmax,1:lsedtot,1),prec)
+    do l = 1, lsedtot
+       do m = 1, mmax
+          do n = 1, nmaxus
+             bodsed(l,n,m) = real(sbuff(n,m,l,1),prec)
+          enddo
+       enddo
+    enddo
     success = .true.
 9999 continue
     if (associated(sbuff)) deallocate (sbuff)

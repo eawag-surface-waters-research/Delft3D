@@ -628,7 +628,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
        !
        fmttmp = 'FORMATTED'
        call depfil(lundia    ,error     ,filtmp    ,fmttmp    ,mmax      , &
-                 & nmax      ,nmaxus    ,rgcalu    ,gdp       )
+                 & nmaxus    ,rgcalu    ,1         ,1         ,gdp       )
        if (error) goto 9999
     else
        !
@@ -675,7 +675,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
        !
        fmttmp = 'FORMATTED'
        call depfil(lundia    ,error     ,filtmp    ,fmttmp    ,mmax      , &
-                 & nmax      ,nmaxus    ,rgcalv    ,gdp       )
+                 & nmaxus    ,rgcalv    ,1         ,1         ,gdp       )
        if (error) then
        endif
     else

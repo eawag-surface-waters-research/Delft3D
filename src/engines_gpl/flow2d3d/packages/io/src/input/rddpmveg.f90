@@ -516,7 +516,7 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
                    error     = .false.
                    message   = 'formatted'
                    call depfil(lundia    ,error     ,trim(inputstring),message(1:11)      ,mmax      , &
-                             & nmax      ,nmaxus    ,nplantdep   ,gdp       )
+                             & nmaxus    ,nplantdep ,1                ,1                  ,gdp       )
                    write (lundia,'(a,a)') '                   dep-file : ',trim(inputstring)
                    !
                    ! Array nplantdep contains positive reals

@@ -377,8 +377,8 @@ use bedcomposition_module
              !
              write(lundia,'(3a)') txtput1, ':', ttlfil
              !
-             call depfil(lundia    ,error     ,ttlfil             ,fmttmp    ,mmax      , &
-                       & nmax      ,nmaxus    ,thtrlyr(gdp%d%nmlb),gdp       )
+             call depfil(lundia    ,error     ,ttlfil    ,fmttmp    ,mmax      , &
+                       & nmaxus    ,thtrlyr   ,1         ,1         ,gdp       )
              if (error) then
                 call prterr(lundia, 'U021', 'Unable to read transport layer thickness from ' &
                           & // trim(ttlfil))
@@ -447,8 +447,8 @@ use bedcomposition_module
                 !
                 ! read data from file
                 !
-                call depfil(lundia    ,error     ,telfil             ,fmttmp    ,mmax      , &
-                          & nmax      ,nmaxus    ,thexlyr(gdp%d%nmlb),gdp       )
+                call depfil(lundia    ,error     ,telfil    ,fmttmp    ,mmax      , &
+                          & nmaxus    ,thexlyr   ,1         ,1         ,gdp       )
                 if (error) then
                    call prterr(lundia, 'U021', 'Unable to read exchange layer thickness from ' &
                              & // trim(telfil))
