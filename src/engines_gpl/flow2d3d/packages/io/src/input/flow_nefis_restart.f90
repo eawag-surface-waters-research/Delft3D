@@ -45,6 +45,8 @@ use properties
     !
     use dfparall
     !
+    use nan_check_module
+    !
     implicit none
     !
     type(globdat),target :: gdp
@@ -268,6 +270,7 @@ use properties
           goto 9999
        endif
        s1_g(1:nmaxgl,1:mmaxgl) = sbuff(1:nmaxgl,1:mmaxgl,1,1)
+       if (.not. nan_check(s1_g, 's1_g (restart-file)', lundia)) call d3stop(1, gdp)
        !
        ! Only read depth when dp_from_map_file=true
        !
@@ -279,6 +282,7 @@ use properties
           if (ierror/= 0) then
              write(lundia, '(a)') 'No bed level data on restart file available:'
              write(lundia, '(a)') 'using bed level data as prescribed in master definition file.'
+             dp_from_map_file = .false.
           else
              !
              ! The read DPS is placed in array DP
@@ -290,6 +294,7 @@ use properties
              rst_dp = .true.
              allocate(dp_g(nmaxgl,mmaxgl), stat = ier1)
              dp_g(1:nmaxgl,1:mmaxgl) = sbuff(1:nmaxgl,1:mmaxgl,1,1)
+             if (.not. nan_check(dp_g, 'dp_g (restart-file)', lundia)) call d3stop(1, gdp)
              !
              ! Read associated morphological time from map file.
              !
@@ -310,6 +315,7 @@ use properties
        endif
        allocate(u1_g(nmaxgl,mmaxgl,kmax), stat = ier1)
        u1_g(1:nmaxgl,1:mmaxgl,1:kmax) = sbuff(1:nmaxgl,1:mmaxgl,1:kmax,1)
+       if (.not. nan_check(u1_g, 'u1_g (restart-file)', lundia)) call d3stop(1, gdp)
        !
        ! V1
        !
@@ -322,6 +328,7 @@ use properties
        endif
        allocate(v1_g(nmaxgl,mmaxgl,kmax), stat = ier2)
        v1_g(1:nmaxgl,1:mmaxgl,1:kmax) = sbuff(1:nmaxgl,1:mmaxgl,1:kmax,1)
+       if (.not. nan_check(v1_g, 'v1_g (restart-file)', lundia)) call d3stop(1, gdp)
        !
        ! UMNLDF: filtered velocity U-component for subgrid viscosity model
        !
@@ -334,6 +341,7 @@ use properties
        else
           allocate(umnldf_g(nmaxgl,mmaxgl), stat = ier3)
           umnldf_g(1:nmaxgl,1:mmaxgl) = sbuff(1:nmaxgl,1:mmaxgl,1,1)
+          if (.not. nan_check(umnldf_g, 'umnldf_g (restart-file)', lundia)) call d3stop(1, gdp)
        endif
        !
        ! VMNLDF: filtered velocity V-component for subgrid viscosity model
@@ -347,6 +355,7 @@ use properties
        else
           allocate(vmnldf_g(nmaxgl,mmaxgl), stat = ier4)
           vmnldf_g(1:nmaxgl,1:mmaxgl) = sbuff(1:nmaxgl,1:mmaxgl,1,1)
+          if (.not. nan_check(vmnldf_g, 'vmnldf_g (restart-file)', lundia)) call d3stop(1, gdp)
        endif
        !
        allocate(ibuff(nmaxgl, mmaxgl, 1, 1), stat = ier1)
@@ -397,6 +406,7 @@ use properties
              endif
              allocate(r1_g(nmaxgl,mmaxgl, kmax, lstsci), stat = ier4)
              r1_g(1:nmaxgl,1:mmaxgl,1:kmax,1:lstsci) = sbuff(1:nmaxgl,1:mmaxgl,1:kmax,1:lstsci)
+             if (.not. nan_check(r1_g, 'r1_g (restart-file)', lundia)) call d3stop(1, gdp)
           else        
              write(lundia, *) 'No restart value used for Salinity, Temperature, a Constituent or Spiral Intensity'
           endif
@@ -426,6 +436,7 @@ use properties
              endif
              allocate(rtur1_g(nmaxgl,mmaxgl, 0:kmax, 1:ltur), stat = ier2)
              rtur1_g(1:nmaxgl,1:mmaxgl,0:kmax,1:ltur) = sbuff(1:nmaxgl,1:mmaxgl,0:kmax,1:ltur)
+             if (.not. nan_check(rtur1_g, 'rtur1_g (restart-file)', lundia)) call d3stop(1, gdp)
           else        
              write(lundia, *) 'Turbulence model is not compatible with previous simulation, default initialisation will be used'
           endif
@@ -533,5 +544,5 @@ use properties
     endif
     
     call dfsync(gdp)
-      
+
 end subroutine flow_nefis_restart

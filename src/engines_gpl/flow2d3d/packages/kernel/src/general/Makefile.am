@@ -6,7 +6,7 @@
 #   Fedor.Baart@deltares.nl
 #   11 jan 2007
 #
-#   Copyright (C) 2007, Deltares
+#   Copyright (C) 2011, Deltares
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
@@ -32,6 +32,7 @@ FMODULES += \
 #-------------------------------------------------------------------------------
 #Sources
 libkernel_general_la_SOURCES = \
+         nan_check_module.f90 \
          angle.f90 \
          area4.f90 \
          chckit.f90 \

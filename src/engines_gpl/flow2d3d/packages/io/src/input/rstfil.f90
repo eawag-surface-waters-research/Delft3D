@@ -42,6 +42,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
 !!--declarations----------------------------------------------------------------
     use precision
     use dfparall
+    use nan_check_module
     !
     use globaldata
     !
@@ -209,15 +210,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        ! send buffer to other nodes
        !
        call dfbroadc(sbuff, mmaxgl*nmaxgl*(kmax+1)*max(1,lstsci,ltur), dfreal, gdp)
-       do m = 1, mmaxgl
-         do n = 1, nmaxgl
-            if (isnan(sbuff(n,m,1,1))) then
-               write(message,*)'NaN found in restart file for s1 at (n,m)= (',n,',',m,')'
-               call prterr(lundia, 'U021', trim(message))
-               call d3stop(1, gdp)
-            endif
-         enddo
-       enddo
+       if (.not. nan_check(sbuff(:,:,1,1), 's1 (restart-file)', lundia)) call d3stop(1, gdp)
        !
        ! put copies of parts of s1 for each subdomain
        !
@@ -253,17 +246,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        ! send buffer to other nodes
        !
        call dfbroadc(sbuff, mmaxgl*nmaxgl*(kmax+1)*max(1,lstsci,ltur), dfreal, gdp)
-       do k = 1, kmax
-          do m = 1, mmaxgl
-            do n = 1, nmaxgl
-               if (isnan(sbuff(n,m,k,1))) then
-                  write(message,*)'NaN found in restart file for u1 at (n,m,k)= (',n,',',m,',',k,')'
-                  call prterr(lundia, 'U021', trim(message))
-                  call d3stop(1, gdp)
-               endif
-            enddo
-          enddo
-       enddo
+       if (.not. nan_check(sbuff(:,:,1:kmax,1), 'u1 (restart-file)', lundia)) call d3stop(1, gdp)
        !
        ! put copies of parts of u1 for each subdomain
        !
@@ -299,17 +282,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        ! send buffer to other nodes
        !
        call dfbroadc(sbuff, mmaxgl*nmaxgl*(kmax+1)*max(1,lstsci,ltur), dfreal, gdp)
-       do k = 1, kmax
-          do m = 1, mmaxgl
-            do n = 1, nmaxgl
-               if (isnan(sbuff(n,m,k,1))) then
-                  write(message,*)'NaN found in restart file for v1 at (n,m,k)= (',n,',',m,',',k,')'
-                  call prterr(lundia, 'U021', trim(message))
-                  call d3stop(1, gdp)
-               endif
-            enddo
-          enddo
-       enddo
+       if (.not. nan_check(sbuff(:,:,1:kmax,1), 'v1 (restart-file)', lundia)) call d3stop(1, gdp)
        !
        ! put copies of parts of v1 for each subdomain
        !
@@ -350,19 +323,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
           ! send buffer to other nodes
           !
           call dfbroadc(sbuff, mmaxgl*nmaxgl*(kmax+1)*max(1,lstsci,ltur), dfreal, gdp)
-          do l = 1, lstsci
-             do k = 1, kmax
-                do m = 1, mmaxgl
-                  do n = 1, nmaxgl
-                     if (isnan(sbuff(n,m,k,l))) then
-                        write(message,*)'NaN found in restart file for r1 at (n,m,k,l)= (',n,',',m,',',k,',',l,')'
-                        call prterr(lundia, 'U021', trim(message))
-                        call d3stop(1, gdp)
-                     endif
-                  enddo
-                enddo
-             enddo
-          enddo
+          if (.not. nan_check(sbuff(:,:,1:kmax,1:lstsci), 'r1 (restart-file)', lundia)) call d3stop(1, gdp)
           !
           ! put copies of parts of r1 for each subdomain
           !
@@ -409,19 +370,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
           ! send buffer to other nodes
           !
           call dfbroadc(sbuff, mmaxgl*nmaxgl*(kmax+1)*max(1,lstsci,ltur), dfreal, gdp)
-          do l = 1, ltur
-             do k = 1, kmax
-                do m = 1, mmaxgl
-                  do n = 1, nmaxgl
-                     if (isnan(sbuff(n,m,k,l))) then
-                        write(message,*)'NaN found in restart file for rtur1 at (n,m,k,l)= (',n,',',m,',',k,',',l,')'
-                        call prterr(lundia, 'U021', trim(message))
-                        call d3stop(1, gdp)
-                     endif
-                  enddo
-                enddo
-             enddo
-          enddo
+          if (.not. nan_check(sbuff(:,:,:,1:ltur), 'rtur1 (restart-file)', lundia)) call d3stop(1, gdp)
           !
           ! put copies of parts of rtur1 for each subdomain
           !
@@ -449,15 +398,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        ! send buffer to other nodes
        !
        call dfbroadc(sbuff, mmaxgl*nmaxgl*(kmax+1)*max(1,lstsci,ltur), dfreal, gdp)
-       do m = 1, mmaxgl
-         do n = 1, nmaxgl
-            if (isnan(sbuff(n,m,1,1))) then
-               write(message,*)'NaN found in restart file for umnldf at (n,m)= (',n,',',m,')'
-               call prterr(lundia, 'U021', trim(message))
-               call d3stop(1, gdp)
-            endif
-         enddo
-       enddo
+       if (.not. nan_check(sbuff(:,:,1,1), 'umnldf (restart-file)', lundia)) call d3stop(1, gdp)
        !
        ! put copies of parts of umnldf for each subdomain
        !
@@ -479,15 +420,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        ! send buffer to other nodes
        !
        call dfbroadc(sbuff, mmaxgl*nmaxgl*(kmax+1)*max(1,lstsci,ltur), dfreal, gdp)
-       do m = 1, mmaxgl
-         do n = 1, nmaxgl
-            if (isnan(sbuff(n,m,1,1))) then
-               write(message,*)'NaN found in restart file for vmnldf at (n,m)= (',n,',',m,')'
-               call prterr(lundia, 'U021', trim(message))
-               call d3stop(1, gdp)
-            endif
-         enddo
-       enddo
+       if (.not. nan_check(sbuff(:,:,1,1), 'vmnldf (restart-file)', lundia)) call d3stop(1, gdp)
        !
        ! put copies of parts of vmnldf for each subdomain
        !
