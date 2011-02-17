@@ -35,8 +35,6 @@ subroutine dfrecvnb ( iptr, ilen, itype, isource, itag, gdp )
 !
 !   wrapper for MPI_RECV
 !
-!   Marcel.Zijlema@wldelft.nl
-!   01 mar 07
 !
 !!--declarations----------------------------------------------------------------
 #if defined (DFMPI)

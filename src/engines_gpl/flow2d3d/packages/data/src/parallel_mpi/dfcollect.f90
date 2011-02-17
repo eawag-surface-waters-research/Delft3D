@@ -39,8 +39,6 @@ subroutine dfcollect ( fieldc, field, gdp )
 !   gather data of all subdomains
 !   copy gathered data to global array in appropriate manner
 !
-!   Marcel.Zijlema@wldelft.nl
-!   01 mar 07
 !
 !!--declarations----------------------------------------------------------------
     use precision

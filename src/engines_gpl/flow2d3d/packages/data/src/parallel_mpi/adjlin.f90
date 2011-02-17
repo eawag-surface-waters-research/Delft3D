@@ -72,8 +72,6 @@ subroutine adjlin ( ival, outside, mmax, nmax )
 !
 !   re-set the indices of piece of line and its location w.r.t. subdomain
 !
-!   Marcel.Zijlema@wldelft.nl
-!   01 mar 07
 !
 !!--declarations----------------------------------------------------------------
     implicit none

@@ -36,8 +36,6 @@ subroutine dfupdgeo ( alfas     ,fcorio    ,xcor      ,ycor      ,xz        , &
 !
 !!--pseudo code and references--------------------------------------------------
 !
-!   Marcel.Zijlema@wldelft.nl
-!   01 mar 07
 !
 !!--declarations----------------------------------------------------------------
     use precision

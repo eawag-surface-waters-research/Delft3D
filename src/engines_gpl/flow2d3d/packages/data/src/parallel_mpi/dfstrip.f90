@@ -41,8 +41,6 @@ subroutine dfstrip ( ipown, jpart, npart, iwork, mmax, nmax )
 !          if no remaining points, create next empty part
 !          else remaining points belong to the current part
 !
-!   Marcel.Zijlema@wldelft.nl
-!   01 mar 07
 !
 !!--declarations----------------------------------------------------------------
     use dfparall

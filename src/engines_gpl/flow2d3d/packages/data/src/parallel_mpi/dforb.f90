@@ -57,8 +57,6 @@ subroutine dforb ( ipown, npart, iwork, mmax, nmax, gdp )
 !   M. Roest, Partitioning for parallel finite difference computations
 !   in coastal water simulation, PhD. Thesis, DUT, 1997
 !
-!   Marcel.Zijlema@wldelft.nl
-!   01 mar 07
 !
 !!--declarations----------------------------------------------------------------
     use globaldata

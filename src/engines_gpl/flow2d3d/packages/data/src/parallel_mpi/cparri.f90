@@ -33,8 +33,6 @@ subroutine cparri ( iarr1, iarr2, length, gdp )
 !
 !!--pseudo code and references--------------------------------------------------
 !
-!   Marcel.Zijlema@wldelft.nl
-!   01 mar 07
 !
 !!--declarations----------------------------------------------------------------
     use precision

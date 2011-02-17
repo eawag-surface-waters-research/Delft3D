@@ -40,8 +40,6 @@ subroutine dfinitmpi
 !   define MPI constants for communication within Delft3D-FLOW
 !   determine precision for type real in case of communication (single or double)
 !
-!   Marcel.Zijlema@wldelft.nl
-!   01 mar 07
 !
 !!--declarations----------------------------------------------------------------
 #ifdef DFMPI

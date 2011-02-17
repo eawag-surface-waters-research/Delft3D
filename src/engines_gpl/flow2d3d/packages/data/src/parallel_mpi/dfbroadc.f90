@@ -35,8 +35,6 @@ subroutine dfbroadc ( iptr, ilen, itype, gdp )
 !
 !   wrapper for MPI_BCAST
 !
-!   Marcel.Zijlema@wldelft.nl
-!   01 mar 07
 !
 !!--declarations----------------------------------------------------------------
 #if defined (DFMPI)

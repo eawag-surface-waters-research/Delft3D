@@ -35,8 +35,6 @@ subroutine dfsendnb ( iptr, ilen, itype, idest, itag, gdp )
 !
 !   wrapper for MPI_SEND
 !
-!   Marcel.Zijlema@wldelft.nl
-!   01 mar 07
 !
 !!--declarations----------------------------------------------------------------
 #if defined (DFMPI)

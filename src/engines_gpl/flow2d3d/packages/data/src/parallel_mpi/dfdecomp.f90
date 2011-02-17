@@ -51,8 +51,6 @@ subroutine dfdecomp ( lunmd, lundia, error, runid, gdp )
 !   recompute grid related dimensions for each subdomain
 !   store array ICOM for each subdomain
 !
-!   Marcel.Zijlema@wldelft.nl
-!   01 mar 07
 !
 !!--declarations----------------------------------------------------------------
     use dfparall

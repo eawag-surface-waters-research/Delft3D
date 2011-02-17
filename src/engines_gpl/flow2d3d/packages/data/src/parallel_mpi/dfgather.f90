@@ -38,8 +38,6 @@ subroutine dfgather_lowlevel ( ioptr, iolen, iiptr, iilen, itype, gdp )
 !   calculate starting address of each local array with respect to the global array
 !   gather different amounts of data from each processor to the master
 !
-!   Marcel.Zijlema@wldelft.nl
-!   01 mar 07
 !
 !!--declarations----------------------------------------------------------------
 #if defined (DFMPI)

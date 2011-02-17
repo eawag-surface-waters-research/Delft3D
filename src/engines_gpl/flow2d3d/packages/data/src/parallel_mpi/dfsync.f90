@@ -35,8 +35,6 @@ subroutine dfsync ( gdp )
 !
 !   wrapper for MPI_BARRIER
 !
-!   Marcel.Zijlema@wldelft.nl
-!   01 mar 07
 !
 !!--declarations----------------------------------------------------------------
 #if defined (DFMPI)

@@ -37,8 +37,6 @@ subroutine dfreduce ( iptr, ilen, itype, ityprd, gdp )
 !
 !   wrapper for MPI_ALLREDUCE
 !
-!   Marcel.Zijlema@wldelft.nl
-!   01 mar 07
 !
 !!--declarations----------------------------------------------------------------
 #if defined (DFMPI)

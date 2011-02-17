@@ -33,8 +33,6 @@ subroutine wrscr ( tekst, gdp )
 !
 !!--pseudo code and references--------------------------------------------------
 !
-!   Marcel.Zijlema@wldelft.nl
-!   01 mar 07
 !
 !!--declarations----------------------------------------------------------------
     use dfparall

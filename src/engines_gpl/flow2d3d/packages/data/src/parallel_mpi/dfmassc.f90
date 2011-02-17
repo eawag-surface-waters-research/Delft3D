@@ -42,8 +42,6 @@ subroutine dfmassc (s1        ,u1        ,qxk       ,hu        ,d0        , &
 !   exchange waterlevel with neighbours
 !   re-compute waterdepth at u-point and u-velocity at coupling boundary based on adapted waterlevel
 !
-!   Marcel.Zijlema@wldelft.nl
-!   01 mar 07
 !
 !!--declarations----------------------------------------------------------------
     use precision

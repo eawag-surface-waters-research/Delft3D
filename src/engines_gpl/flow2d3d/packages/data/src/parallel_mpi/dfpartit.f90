@@ -40,8 +40,6 @@ subroutine dfpartit ( ipown, icom, mmax, nmax, gdp )
 !   determine numbers and sizes of parts to be created
 !   partition grid
 !
-!   Marcel.Zijlema@wldelft.nl
-!   01 mar 07
 !
 !!--declarations----------------------------------------------------------------
     use globaldata

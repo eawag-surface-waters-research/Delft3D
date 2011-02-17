@@ -40,8 +40,6 @@ subroutine dfexitmpi ( iexit )
 !      else
 !         close MPI
 !
-!   Marcel.Zijlema@wldelft.nl
-!   01 mar 07
 !
 !!--declarations----------------------------------------------------------------
 #if defined (DFMPI)

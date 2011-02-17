@@ -44,8 +44,6 @@ subroutine dfupdr ( field, ks, ke, gdp )
 !      receive next array and store in WORK
 !      store the received data
 !
-!   Marcel.Zijlema@wldelft.nl
-!   01 mar 07
 !
 !!--declarations----------------------------------------------------------------
     use precision

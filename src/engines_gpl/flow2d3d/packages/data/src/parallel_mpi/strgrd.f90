@@ -41,8 +41,6 @@ subroutine strgrd ( icom, runid, mmax, nmax, mmaxgl, nmaxgl, &
 !   store own array ICOM in scratch file
 !   close file
 !
-!   Marcel.Zijlema@wldelft.nl
-!   01 mar 07
 !
 !!--declarations----------------------------------------------------------------
     use globaldata

@@ -54,8 +54,6 @@ subroutine dfbladm ( ipown, icom, mmax, nmax, gdp )
 !
 !   store block administration
 !
-!   Marcel.Zijlema@wldelft.nl
-!   01 mar 07
 !
 !!--declarations----------------------------------------------------------------
     use globaldata

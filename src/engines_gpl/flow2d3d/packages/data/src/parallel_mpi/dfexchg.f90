@@ -36,8 +36,6 @@ subroutine dfexchg ( iptr, ks, ke, itype, gdp )
 !   if not parallel, return
 !   actual update of field array based on its type
 !
-!   Marcel.Zijlema@wldelft.nl
-!   01 mar 07
 !
 !!--declarations----------------------------------------------------------------
     use dfparall
