@@ -25,7 +25,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 !  $Id$
-!  $HeadURL$
+!  $HeadURL$$
+!-------------------------------------------------------------------------------
 integer, parameter :: nh_weak = 1 ! Marco Bijvelds method
 integer, parameter :: nh_full = 2 ! Sebastian Ullmann / Mart Borsboom method
 

@@ -25,7 +25,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 !  $Id$
-!  $HeadURL$
+!  $HeadURL$$
+!-------------------------------------------------------------------------------
 type gd_turcoe
    real(fp) :: cde        !  Coefficient for epsilon in K-L model
    real(fp) :: cmukl      !  Coefficient for eddy visc. in k-l model

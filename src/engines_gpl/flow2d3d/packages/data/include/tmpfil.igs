@@ -25,7 +25,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 !  $Id$
-!  $HeadURL$
+!  $HeadURL$$
+!-------------------------------------------------------------------------------
     type gd_tmpfil
        logical :: reusetmp   !  Flag=TRUE if the temporary files have to be reused
        logical :: flgrd      !  Flag=TRUE if the grid file containing the grid coord. were read without any errors

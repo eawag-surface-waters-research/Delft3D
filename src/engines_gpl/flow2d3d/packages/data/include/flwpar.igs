@@ -25,7 +25,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 !  $Id$
-!  $HeadURL$
+!  $HeadURL$$
+!-------------------------------------------------------------------------------
 type flwoutputtype
     logical :: air
     logical :: addtim              ! Flag for additional timings output

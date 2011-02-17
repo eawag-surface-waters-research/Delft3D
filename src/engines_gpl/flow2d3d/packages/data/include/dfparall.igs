@@ -25,7 +25,8 @@
 !                                                                               
 !-------------------------------------------------------------------------------
 !  $Id$
-!  $HeadURL$
+!  $HeadURL$$
+!-------------------------------------------------------------------------------
 type dfparalltype
    !
    integer                        :: mmaxgl    ! number of gridpoints of global computational grid in x-direction
