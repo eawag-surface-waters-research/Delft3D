@@ -728,17 +728,15 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
              !
              ! atmospheric pressure correction for Riemann boundaries
              !
-             if (ibtype==6) then
-                if (pcorr) then   
-                   pdiff = patm(np, mp) - paver
-                   if (posrel <= 2) then
-                      circ2d(kp, kq) = (-pdiff/(ag*rhow))*sqrt(ag/h0)
-                   else
-                      circ2d(kp, kq) = (pdiff/(ag*rhow))*sqrt(ag/h0)
-                   endif
+             if (ibtype==6 .and. pcorr) then   
+                pdiff = patm(np, mp) - paver
+                if (posrel <= 2) then
+                   circ2d(kp, kq) = (-pdiff/(ag*rhow))*sqrt(ag/h0)
                 else
-                   circ2d(kp, kq) = 0.0
+                   circ2d(kp, kq) = (pdiff/(ag*rhow))*sqrt(ag/h0)
                 endif
+             else
+                circ2d(kp, kq) = 0.0
              endif
              !
              if (n1 <= ntof) then
