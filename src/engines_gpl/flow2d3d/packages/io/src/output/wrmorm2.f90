@@ -64,7 +64,7 @@ use bedcomposition_module
     logical                                                                :: error
     character(16)                                                          :: grpnam
     real(fp)           , dimension(1:lsedtot)                              :: cdryb
-    real(fp)           , dimension(gdp%d%nmlb:gdp%d%nmub,1:nlyr,1:lsedtot) :: msed
+    real(fp)           , dimension(1:lsedtot,1:nlyr,gdp%d%nmlb:gdp%d%nmub) :: msed
     real(fp)           , dimension(gdp%d%nmlb:gdp%d%nmub,1:nlyr)           :: thlyr
     real(fp)           , dimension(gdp%d%nmlb:gdp%d%nmub,1:nlyr)           :: svfrac
     type(bedcomp_data)                                                     :: gdmorlyr
@@ -129,7 +129,7 @@ use bedcomposition_module
                 do n = 1, nmaxus
                    i        = i+1
                    call n_and_m_to_nm(n, m, nm, gdp)
-                   sbuff(i) = real(msed(nm, k, l),sp)
+                   sbuff(i) = real(msed(l, k, nm),sp)
                 enddo
              enddo
           enddo
@@ -149,7 +149,7 @@ use bedcomposition_module
                    i        = (l-1)*nlyr*mmax*nmaxus + (k-1)*mmax*nmaxus + (m-1)*nmaxus + n
                    call n_and_m_to_nm(n, m, nm, gdp)
                    if (thlyr(nm,k)>0.0_fp) then
-                        sbuff(i) = real(msed(nm, k, l)/(cdryb(l)*svfrac(nm,k)*thlyr(nm,k)),sp)
+                        sbuff(i) = real(msed(l, k, nm)/(cdryb(l)*svfrac(nm,k)*thlyr(nm,k)),sp)
                    else
                         sbuff(i) = 0.0
                    endif

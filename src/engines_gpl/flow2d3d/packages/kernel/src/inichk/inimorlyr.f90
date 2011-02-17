@@ -48,7 +48,6 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
     real(fp)         , dimension(:)     , pointer :: dzi
     real(fp)         , dimension(:)     , pointer :: thexlyr
     real(fp)         , dimension(:)     , pointer :: thtrlyr
-    real(fp)         , dimension(:,:)   , pointer :: sedshort
     real(fp)         , dimension(:)     , pointer :: rhosol
     logical                             , pointer :: exchlyr
     character(256)                      , pointer :: flcomp

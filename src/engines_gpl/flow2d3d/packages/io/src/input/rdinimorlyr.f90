@@ -65,7 +65,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
     integer                                                , intent(in)  :: nmaxus  !  Description and declaration in iidim.f90
     integer                                                              :: nmmax   !  Description and declaration in iidim.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)             , intent(in)  :: kcs     !  Description and declaration in iidim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,nlyr,lsedtot), intent(out) :: msed
+    real(fp), dimension(lsedtot,nlyr,gdp%d%nmlb:gdp%d%nmub), intent(out) :: msed
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,nlyr)        , intent(out) :: svfrac
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,nlyr)        , intent(out) :: thlyr
     real(fp), dimension(lsedtot)                           , intent(in)  :: cdryb   !  Description and declaration in rjdim.f90
@@ -427,7 +427,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                 !
                 do nm = 1, nmmax
                    do l = 1, lsedtot
-                      msed(nm, ilyr, l) = msed(nm, ilyr, l) + rtemp(nm, l)*thtemp(nm)*cdryb(l)
+                      msed(l, ilyr, nm) = msed(l, ilyr, nm) + rtemp(nm, l)*thtemp(nm)*cdryb(l)
                    enddo
                    thlyr(nm, ilyr) = thlyr(nm, ilyr) + thtemp(nm)
                 enddo
@@ -447,7 +447,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                       svf = 1.0_fp - poros
                       !
                       do l = 1, lsedtot
-                         msed(nm, ilyr, l) = msed(nm, ilyr, l) + rtemp(nm, l)*thtemp(nm)*rhosol(l)*svf
+                         msed(l, ilyr, nm) = msed(l, ilyr, nm) + rtemp(nm, l)*thtemp(nm)*rhosol(l)*svf
                       enddo
                       thick = thlyr(nm, ilyr) + thtemp(nm)
                       svfrac(nm, ilyr) = (thlyr(nm, ilyr) * svfrac(nm, ilyr) + thtemp(nm) * svf) / thick
@@ -469,7 +469,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                       svf = 1.0_fp - poros
                       !
                       do l = 1, lsedtot
-                         msed(nm, ilyr, l) = msed(nm, ilyr, l) + rtemp(nm, l)*thtemp(nm)*rhosol(l)*svf
+                         msed(l, ilyr, nm) = msed(l, ilyr, nm) + rtemp(nm, l)*thtemp(nm)*rhosol(l)*svf
                       enddo
                       thick = thlyr(nm, ilyr) + thtemp(nm)
                       svfrac(nm, ilyr) = (thlyr(nm, ilyr) * svfrac(nm, ilyr) + thtemp(nm) * svf) / thick
@@ -636,7 +636,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                 !
                 do l = 1, lsedtot
                    do nm = 1, nmmax
-                      msed(nm, ilyr, l) = msed(nm, ilyr, l) + rtemp(nm, l)
+                      msed(l, ilyr, nm) = msed(l, ilyr, nm) + rtemp(nm, l)
                       thlyr(nm, ilyr)   = thlyr(nm,ilyr)    + rtemp(nm, l)/cdryb(l)
                    enddo
                 enddo
@@ -661,7 +661,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                       !
                       thtemp(nm) = 0.0_fp
                       do l = 1, lsedtot
-                         msed(nm, ilyr, l) = msed(nm, ilyr, l) + rtemp(nm, l) * rhosol(l) * svf
+                         msed(l, ilyr, nm) = msed(l, ilyr, nm) + rtemp(nm, l) * rhosol(l) * svf
                          thtemp(nm)        = thtemp(nm)        + rtemp(nm, l)
                       enddo
                       thick = thlyr(nm, ilyr) + thtemp(nm)
@@ -685,7 +685,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                       !
                       thtemp(nm) = 0.0_fp
                       do l = 1, lsedtot
-                         msed(nm, ilyr, l) = msed(nm, ilyr, l) + rtemp(nm, l) * rhosol(l) * svf
+                         msed(l, ilyr, nm) = msed(l, ilyr, nm) + rtemp(nm, l) * rhosol(l) * svf
                          thtemp(nm)        = thtemp(nm)        + rtemp(nm, l)
                       enddo
                       thick = thlyr(nm, ilyr) + thtemp(nm)

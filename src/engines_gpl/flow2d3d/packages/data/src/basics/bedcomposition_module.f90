@@ -272,13 +272,13 @@ function updmorlyr(this, dbodsd, dz, messages) result (istat)
              ! transport layer only
              !
              do l = 1, this%settings%nfrac
-                temp  = msed(nm, 1, l) + dbodsd(nm, l)
+                temp  = msed(l, 1, nm) + dbodsd(nm, l)
                 if (temp < 0.0_fp) then
                    if (temp < -morlyrnum%MinMassShortWarning .and. morlyrnum%MaxNumShortWarning>0) then
                       morlyrnum%MaxNumShortWarning = morlyrnum%MaxNumShortWarning - 1
                       write(message,'(a,i5,a,i3,a,e20.4,a,e20.4)') &
                          & 'Sediment erosion shortage at NM ', nm, ' Fraction: ', l, &
-                         & ' Mass available   : ' ,msed(nm, 1, l), &
+                         & ' Mass available   : ' ,msed(l, 1, nm), &
                          & ' Mass to be eroded: ', dbodsd(nm, l)
                       call addmessage(messages,message)
                       if (morlyrnum%MaxNumShortWarning == 0) then
@@ -286,18 +286,18 @@ function updmorlyr(this, dbodsd, dz, messages) result (istat)
                          call addmessage(messages,message)
                       endif
                    endif
-                   sedshort(nm, l) = sedshort(nm, l) + temp
+                   sedshort(l, nm) = sedshort(l, nm) + temp
                    temp = 0.0_fp
-                elseif ( sedshort(nm, l) < 0.0 ) then
-                   temp = temp + sedshort(nm, l)
+                elseif ( sedshort(l, nm) < 0.0 ) then
+                   temp = temp + sedshort(l, nm)
                    if ( temp < 0.0_fp ) then
-                      sedshort(nm, l) = temp
+                      sedshort(l, nm) = temp
                       temp = 0.0_fp
                    else
-                      sedshort(nm, l) = 0.0_fp
+                      sedshort(l, nm) = 0.0_fp
                    endif
                 endif
-                msed(nm, 1, l) = temp
+                msed(l, 1, nm) = temp
              enddo
              !
              ! get new requested transport layer thickness.
@@ -309,7 +309,7 @@ function updmorlyr(this, dbodsd, dz, messages) result (istat)
              call updateporosity(this, nm, 1)
              thick = 0.0_fp
              do l = 1, this%settings%nfrac
-                 thick = thick + msed(nm, 1, l)/rhofrac(l)
+                 thick = thick + msed(l, 1, nm)/rhofrac(l)
              enddo
              thick = thick/svfrac(nm, 1)
              !
@@ -325,8 +325,8 @@ function updmorlyr(this, dbodsd, dz, messages) result (istat)
                 ! 
                 fac = thdiff/thick
                 do l = 1, this%settings%nfrac
-                    dmi(l) = msed(nm, 1, l)*fac
-                    msed(nm, 1, l) = msed(nm, 1, l) - dmi(l)
+                    dmi(l) = msed(l, 1, nm)*fac
+                    msed(l, 1, nm) = msed(l, 1, nm) - dmi(l)
                 enddo
                 !
                 ! store surplus of mass in underlayers
@@ -346,17 +346,17 @@ function updmorlyr(this, dbodsd, dz, messages) result (istat)
                 ! add to top layer
                 ! 
                 do l = 1, this%settings%nfrac 
-                    msed(nm, 1, l)   = msed(nm, 1, l) + dmi(l)
+                    msed(l, 1, nm)   = msed(l, 1, nm) + dmi(l)
                 enddo
                 !
                 do l = 1, this%settings%nfrac
-                    if (sedshort(nm, l) < 0.0_fp .and. msed(nm, 1, l) > 0.0_fp) then
-                        sedshort(nm, l) = sedshort(nm, l) + msed(nm, 1, l)
-                        if (sedshort(nm, l) > 0.0_fp) then
-                            msed(nm, 1, l)  = sedshort(nm, l)
-                            sedshort(nm, l) = 0.0_fp
+                    if (sedshort(l, nm) < 0.0_fp .and. msed(l, 1, nm) > 0.0_fp) then
+                        sedshort(l, nm) = sedshort(l, nm) + msed(l, 1, nm)
+                        if (sedshort(l, nm) > 0.0_fp) then
+                            msed(l, 1, nm)  = sedshort(l, nm)
+                            sedshort(l, nm) = 0.0_fp
                         else
-                            msed(nm, 1, l) = 0.0_fp
+                            msed(l, 1, nm) = 0.0_fp
                         endif
                     endif
                 enddo
@@ -364,7 +364,7 @@ function updmorlyr(this, dbodsd, dz, messages) result (istat)
                 call updateporosity(this, nm, 1)
                 thick = 0.0_fp
                 do l = 1, this%settings%nfrac
-                    thick = thick + msed(nm, 1, l)/rhofrac(l)
+                    thick = thick + msed(l, 1, nm)/rhofrac(l)
                 enddo
                 thick = thick/svfrac(nm, 1)
                 !
@@ -506,16 +506,16 @@ function gettoplyr(this, dz_eros, dbodsd, messages  ) result (istat)
                 thick = thlyr(nm, 1) - dz_eros(nm)
                 fac = dz_eros(nm)/thlyr(nm,1)
                 do l = 1, this%settings%nfrac
-                   dbodsd (nm, l) = msed(nm, 1, l)*fac
-                   msed(nm, 1, l) = msed(nm, 1, l) - dbodsd(nm, l)
+                   dbodsd (nm, l) = msed(l, 1, nm)*fac
+                   msed(l, 1, nm) = msed(l, 1, nm) - dbodsd(nm, l)
                 enddo
              else
                 !
                 ! erosion more than transport layer thickness
                 !
                 do l = 1, this%settings%nfrac
-                   dbodsd (nm, l) = msed(nm,1,l)
-                   msed(nm, 1, l) = 0.0_fp
+                   dbodsd (nm, l) = msed(l, 1, nm)
+                   msed(l, 1, nm) = 0.0_fp
                 enddo
                 dz_eros(nm) = dz_eros(nm)-thlyr(nm, 1)
                 thick  = 0.0_fp
@@ -546,8 +546,8 @@ function gettoplyr(this, dz_eros, dbodsd, messages  ) result (istat)
                 ! 
                 fac = dz/thick
                 do l = 1, this%settings%nfrac
-                    dmi(l) = msed(nm,1,l)*fac
-                    msed(nm, 1, l) = msed(nm, 1, l) - dmi(l)
+                    dmi(l) = msed(l, 1, nm)*fac
+                    msed(l, 1, nm) = msed(l, 1, nm) - dmi(l)
                 enddo   
                 !
                 ! store surplus of mass in underlayers
@@ -564,17 +564,17 @@ function gettoplyr(this, dz_eros, dbodsd, messages  ) result (istat)
                 ! add to top layer
                 !  
                 do l = 1, this%settings%nfrac 
-                    msed(nm, 1, l)   = msed(nm, 1, l) + dmi(l) 
+                    msed(l, 1, nm)   = msed(l, 1, nm) + dmi(l) 
                 enddo
                 !
                 do l = 1, this%settings%nfrac
-                    if (sedshort(nm, l) < 0.0_fp .and. msed(nm, 1, l) > 0.0_fp) then
-                        sedshort(nm, l) = sedshort(nm, l) + msed(nm, 1, l)
-                        if (sedshort(nm, l) > 0.0_fp) then
-                            msed(nm, 1, l)  = sedshort(nm, l)
-                            sedshort(nm, l) = 0.0_fp
+                    if (sedshort(l, nm) < 0.0_fp .and. msed(l, 1, nm) > 0.0_fp) then
+                        sedshort(l, nm) = sedshort(l, nm) + msed(l, 1, nm)
+                        if (sedshort(l, nm) > 0.0_fp) then
+                            msed(l, 1, nm)  = sedshort(l, nm)
+                            sedshort(l, nm) = 0.0_fp
                         else
-                            msed(nm, 1, l) = 0.0_fp
+                            msed(l, 1, nm) = 0.0_fp
                         endif
                     endif
                 enddo
@@ -582,7 +582,7 @@ function gettoplyr(this, dz_eros, dbodsd, messages  ) result (istat)
                 call updateporosity(this, nm, 1)
                 thick = 0.0_fp
                 do l = 1, this%settings%nfrac
-                    thick = thick + msed(nm, 1, l)/rhofrac(l)
+                    thick = thick + msed(l, 1, nm)/rhofrac(l)
                 enddo
                 thick = thick/svfrac(nm, 1)
                 !
@@ -702,8 +702,8 @@ subroutine lyrerosion(this, nm, dzini, dmi)
     k   = 2
     if (this%settings%exchlyr) k = 3
     !
-    thbaselyr = thlyr(nm,nlyr)
-    mbaselyr  = msed(nm,nlyr,:)
+    thbaselyr = thlyr(nm, nlyr)
+    mbaselyr  = msed(:, nlyr, nm)
     dmi = 0.0_fp
     dz  = dzini
     !
@@ -725,11 +725,11 @@ subroutine lyrerosion(this, nm, dzini, dmi)
             !          
             do l = 1, this%settings%nfrac
                 if (remove) then
-                   dmi(l) = dmi(l) + msed(nm,k,l)
+                   dmi(l) = dmi(l) + msed(l, k, nm)
                 else
-                   msed(nm, kero1, l) = msed(nm,kero1,l) + msed(nm,k,l)
+                   msed(l, kero1, nm) = msed(l, kero1, nm) + msed(l, k, nm)
                 endif
-                msed(nm, k, l) = 0.0_fp
+                msed(l, k, nm) = 0.0_fp
             enddo
             dz          = dz - thlyr(nm,k)
             if (.not.remove) then
@@ -746,13 +746,13 @@ subroutine lyrerosion(this, nm, dzini, dmi)
             !
             fac = dz/thlyr(nm,k)
             do l = 1, this%settings%nfrac
-                dm = msed(nm, k, l)*fac
+                dm = msed(l, k, nm)*fac
                 if (remove) then
                    dmi(l)             = dmi(l) + dm 
                 else
-                   msed(nm, kero1, l) = msed(nm,kero1,l) + dm
+                   msed(l, kero1, nm) = msed(l, kero1, nm) + dm
                 endif
-                msed(nm, k, l) = msed(nm, k, l) - dm
+                msed(l, k, nm) = msed(l, k, nm) - dm
             enddo
             thlyr(nm,k)        = thlyr(nm,k)     - dz
             if (.not.remove) then
@@ -793,7 +793,7 @@ subroutine lyrerosion(this, nm, dzini, dmi)
        !
        fac = thlyr(nm,nlyr)/thbaselyr
        do l = 1, this%settings%nfrac
-          msed(nm,nlyr,l) = mbaselyr(l)*fac
+          msed(l, nlyr, nm) = mbaselyr(l)*fac
        enddo
     case(3) ! same as the (first non-empty) layer above it
        !
@@ -804,14 +804,14 @@ subroutine lyrerosion(this, nm, dzini, dmi)
        enddo
        fac = thlyr(nm,nlyr)/thlyr(nm,k)
        do l = 1, this%settings%nfrac
-          msed(nm,nlyr,l) = msed(nm,k,l)*fac
+          msed(l, nlyr, nm) = msed(l, k, nm)*fac
        enddo
     case(4) ! composition and thickness of base layer constant
        !
        ! reset thickness and masses
        !
-       thlyr(nm,nlyr)  = thbaselyr
-       msed(nm,nlyr,:) = mbaselyr
+       thlyr(nm, nlyr)  = thbaselyr
+       msed(:, nlyr, nm) = mbaselyr
     case default
        !
        ! ERROR
@@ -888,8 +888,8 @@ subroutine lyrsedimentation(this, nm, dzini, dmi, svfracdep, work)
     !
     do k = kmin,keuler-1
        do l = 1, this%settings%nfrac
-          work%msed2(k,l) = msed(nm,k,l)
-          msed(nm,k,l)    = 0.0_fp
+          work%msed2(l, k) = msed(l, k, nm)
+          msed(l, k, nm)   = 0.0_fp
        enddo
        work%svfrac2(k)  = svfrac(nm,k)
        work%thlyr2(k)   = thlyr(nm,k)
@@ -909,7 +909,7 @@ subroutine lyrsedimentation(this, nm, dzini, dmi, svfracdep, work)
           fac = thlalyr/dz
           do l = 1, this%settings%nfrac
              dm = dmi(l) * fac
-             msed(nm, k, l) = dm
+             msed(l, k, nm) = dm
              dmi(l) = dmi(l) - dm
           enddo
           svfrac(nm, k) = svfracdep
@@ -920,7 +920,7 @@ subroutine lyrsedimentation(this, nm, dzini, dmi, svfracdep, work)
           ! last bit of newly deposited sediment to partially fill the layer
           !
           do l = 1, this%settings%nfrac
-             msed(nm, k, l) = dmi(l)
+             msed(l, k, nm) = dmi(l)
              dmi(l) = 0.0_fp
           enddo
           svfrac(nm, k) = svfracdep
@@ -945,9 +945,9 @@ subroutine lyrsedimentation(this, nm, dzini, dmi, svfracdep, work)
                 !
                 fac = dzc/work%thlyr2(k2)
                 do l = 1, this%settings%nfrac
-                   dm = work%msed2(k2, l) * fac
-                   msed(nm, k, l)    = msed(nm, k, l)    + dm
-                   work%msed2(k2, l) = work%msed2(k2, l) - dm
+                   dm = work%msed2(l, k2) * fac
+                   msed(l, k, nm)    = msed(l, k, nm)    + dm
+                   work%msed2(l, k2) = work%msed2(l, k2) - dm
                 enddo
                 svfrac(nm, k)   = svfrac(nm, k)*thlyr(nm, k) + work%svfrac2(k2)*dzc
                 thlyr(nm, k)    = thlalyr
@@ -958,8 +958,8 @@ subroutine lyrsedimentation(this, nm, dzini, dmi, svfracdep, work)
                 ! all the sediment of old layer k2 fits into new layer k
                 !
                 do l = 1, this%settings%nfrac
-                   msed(nm, k, l)    = msed(nm, k, l) + work%msed2(k2, l)
-                   work%msed2(k2, l) = 0.0_fp
+                   msed(l, k, nm)    = msed(l, k, nm) + work%msed2(l, k2)
+                   work%msed2(l, k2) = 0.0_fp
                 enddo
                 svfrac(nm, k)   = svfrac(nm, k)*thlyr(nm, k) + work%svfrac2(k2)*work%thlyr2(k2)
                 thlyr(nm, k)    = thlyr(nm, k) + work%thlyr2(k2)
@@ -978,7 +978,7 @@ subroutine lyrsedimentation(this, nm, dzini, dmi, svfracdep, work)
     do k2 = keuler-1,kmin,-1
        if (work%thlyr2(k2)>0.0_fp) then
           do l = 1, this%settings%nfrac
-             dmi2(l) = work%msed2(k2,l)
+             dmi2(l) = work%msed2(l, k2)
           enddo
           call lyrsedimentation_eulerian(this, nm, work%thlyr2(k2), dmi2, work%svfrac2(k2))
        endif
@@ -1076,7 +1076,7 @@ subroutine lyrsedimentation_eulerian(this, nm, dzini, dmi, svfracdep)
              dz      = dz*(1.0_fp-fac)
              do l = 1, this%settings%nfrac
                 dm = dmi(l)*fac
-                msed(nm, k, l) = msed(nm, k, l) + dm
+                msed(l, k, nm) = msed(l, k, nm) + dm
                 dmi(l)         = dmi(l)         - dm
              enddo
              svfrac(nm, k) = svfrac(nm, k)*thlyr(nm, k) + svfracdep*(theulyr-thlyr(nm,k))
@@ -1087,7 +1087,7 @@ subroutine lyrsedimentation_eulerian(this, nm, dzini, dmi, svfracdep)
              ! everything can be added to this layer
              !
              do l = 1, this%settings%nfrac            
-                msed(nm, k, l) = msed(nm, k, l) + dmi(l)
+                msed(l, k, nm) = msed(l, k, nm) + dmi(l)
                 dmi(l) = 0.0_fp
              enddo
              svfrac(nm, k) = svfrac(nm, k)*thlyr(nm, k) + svfracdep*dz
@@ -1115,7 +1115,7 @@ subroutine lyrsedimentation_eulerian(this, nm, dzini, dmi, svfracdep)
           select case (updbaselyr)
           case(1) ! compute separate composition for the base layer
              do l = 1, this%settings%nfrac           
-                msed(nm, k, l) = msed(nm, k, l) + dmi(l)
+                msed(l, k, nm) = msed(l, k, nm) + dmi(l)
              enddo
              svfrac(nm, k) = svfrac(nm, k)*thlyr(nm, k) + svfracdep*dz
              thlyr(nm, k)  = thlyr(nm, k) + dz
@@ -1127,7 +1127,7 @@ subroutine lyrsedimentation_eulerian(this, nm, dzini, dmi, svfracdep)
              !
              fac = (thlyr(nm,k)+dz)/thlyr(nm,k)
              do l = 1, this%settings%nfrac
-                msed(nm,k,l) = msed(nm,k,l)*fac
+                msed(l, k, nm) = msed(l, k, nm)*fac
              enddo
              thlyr(nm, k) = thlyr(nm, k) + dz
           case(3) ! same as the (first non-empty) layer above it
@@ -1138,7 +1138,7 @@ subroutine lyrsedimentation_eulerian(this, nm, dzini, dmi, svfracdep)
              thlyr(nm, k) = thlyr(nm, k) + dz
              fac = thlyr(nm,k)/thlyr(nm,k-1)
              do l = 1, this%settings%nfrac
-                msed(nm, k, l) = msed(nm, kmin-1, l)*fac
+                msed(l, k, nm) = msed(l, kmin-1, nm)*fac
              enddo
           case default
              !
@@ -1159,7 +1159,7 @@ subroutine lyrsedimentation_eulerian(this, nm, dzini, dmi, svfracdep)
              case(1) ! compute separate composition for the base layer
                 if ( newthlyr > 0.0_fp ) then
                    do l = 1, this%settings%nfrac
-                      msed(nm, nlyr, l) = msed(nm, nlyr , l) + msed(nm, nlyr-1, l) 
+                      msed(l, nlyr, nm) = msed(l, nlyr, nm) + msed(l, nlyr-1, nm) 
                    enddo
                    svfrac(nm, nlyr) = svfrac(nm, nlyr)*thlyr(nm, nlyr) + svfrac(nm, nlyr-1)*thlyr(nm, nlyr-1)
                    svfrac(nm, nlyr) = svfrac(nm, nlyr)/newthlyr
@@ -1171,7 +1171,7 @@ subroutine lyrsedimentation_eulerian(this, nm, dzini, dmi, svfracdep)
                 !
                 fac = newthlyr/thlyr(nm,nlyr)
                 do l = 1, this%settings%nfrac
-                    msed(nm,nlyr,l) = msed(nm,nlyr,l)*fac
+                    msed(l, nlyr, nm) = msed(l, nlyr, nm)*fac
                 enddo
              case(3) ! same as the (first non-empty) layer above it
                 !
@@ -1182,7 +1182,7 @@ subroutine lyrsedimentation_eulerian(this, nm, dzini, dmi, svfracdep)
                 enddo
                 fac = newthlyr/thlyr(nm,kne)
                 do l = 1, this%settings%nfrac
-                   msed(nm,nlyr,l) = msed(nm,kne,l)*fac
+                   msed(l, nlyr, nm) = msed(l, kne, nm)*fac
                 enddo
              case(4) ! composition and thickness of base layer constant
                 !
@@ -1202,7 +1202,7 @@ subroutine lyrsedimentation_eulerian(this, nm, dzini, dmi, svfracdep)
              !
              do k = nlyr-1,keuler+1,-1
                 do l = 1, this%settings%nfrac
-                   msed(nm,k,l) = msed(nm,k-1,l)
+                   msed(l, k, nm) = msed(l, k-1, nm)
                 enddo
                 thlyr(nm,k)  = thlyr(nm,k-1)
                 svfrac(nm,k) = svfrac(nm,k-1)
@@ -1212,7 +1212,7 @@ subroutine lyrsedimentation_eulerian(this, nm, dzini, dmi, svfracdep)
              !
              k = keuler
              do l = 1, this%settings%nfrac 
-                 msed(nm, k, l) = dmi(l)
+                 msed(l, k, nm) = dmi(l)
              enddo
              thlyr(nm,k)  = dz
              svfrac(nm,k) = svfracdep
@@ -1427,13 +1427,13 @@ subroutine getmfrac_allpoints(this, frac)
        do nm = this%settings%nmlb,this%settings%nmub
           sedtot = 0.0_fp
           do l = 1, this%settings%nfrac
-             sedtot = sedtot + msed(nm,1,l)
+             sedtot = sedtot + msed(l, 1, nm)
           enddo
           if (comparereal(sedtot,0.0_fp) == 0) then
              frac(nm, :) = 1.0_fp/this%settings%nfrac
           else
             do l = 1, this%settings%nfrac
-                frac(nm, l) = msed(nm, 1, l)/sedtot
+                frac(nm, l) = msed(l, 1, nm)/sedtot
             enddo
           endif
        enddo
@@ -1490,13 +1490,13 @@ subroutine getmfrac_1point(this ,nm  ,frac      )
     case(2)
        sedtot = 0.0_fp
        do l = 1, this%settings%nfrac
-          sedtot = sedtot + msed(nm,1,l)
+          sedtot = sedtot + msed(l, 1, nm)
        enddo
        if (comparereal(sedtot,0.0_fp) == 0) then
           frac = 1.0_fp/this%settings%nfrac
        else
           do l = 1, this%settings%nfrac
-             frac(l) = msed(nm,1,l)/sedtot
+             frac(l) = msed(l, 1, nm)/sedtot
           enddo
        endif
     case default
@@ -1550,10 +1550,10 @@ subroutine setmfrac_1point(this, nm, frac)
     case(2)
        masstot = 0.0_fp
        do l = 1, this%settings%nfrac
-          masstot = masstot + msed(nm,1,l)
+          masstot = masstot + msed(l, 1, nm)
        enddo
        do l = 1, this%settings%nfrac
-          msed(nm, 1, l) = frac(l)*masstot
+          msed(l, 1, nm) = frac(l)*masstot
        enddo
     case default
        masstot = 1000.0_fp
@@ -1611,7 +1611,7 @@ subroutine getvfrac_allpoints(this, frac)
           else
             thick = svfrac(nm,1) * thlyr(nm,1)
             do l = 1, this%settings%nfrac
-                frac(nm, l) = msed(nm, 1, l)/(rhofrac(l)*thick)
+                frac(nm, l) = msed(l, 1, nm)/(rhofrac(l)*thick)
             enddo
           endif
        enddo
@@ -1675,7 +1675,7 @@ subroutine getvfrac_1point(this ,nm ,frac      )
        else
           thick = svfrac(nm,1) * thlyr(nm,1)
           do l = 1, this%settings%nfrac
-             frac(l) = msed(nm, 1, l)/(rhofrac(l)*thick)
+             frac(l) = msed(l, 1, nm)/(rhofrac(l)*thick)
           enddo
        endif
     case default
@@ -1957,11 +1957,11 @@ function allocmorlyr(this, nmlb, nmub, nfrac) result (istat)
           if (istat == 0) allocate (settings%thexlyr(nmlb:nmub), stat = istat)
           if (istat == 0) settings%thexlyr = 0.0_fp
        endif
-       if (istat == 0) allocate (state%msed(nmlb:nmub,settings%nlyr,nfrac), stat = istat)
+       if (istat == 0) allocate (state%msed(nfrac,settings%nlyr,nmlb:nmub), stat = istat)
        if (istat == 0) state%msed = 0.0_fp
        if (istat == 0) allocate (state%thlyr(nmlb:nmub,settings%nlyr), stat = istat)
        if (istat == 0) state%thlyr = 0.0_fp
-       if (istat == 0) allocate (state%sedshort(nmlb:nmub,nfrac), stat = istat)
+       if (istat == 0) allocate (state%sedshort(nfrac,nmlb:nmub), stat = istat)
        if (istat == 0) state%sedshort = 0.0_fp
        if (istat == 0) allocate (state%svfrac(nmlb:nmub,settings%nlyr), stat = istat)
        if (istat == 0) state%svfrac = 1.0_fp
@@ -1995,9 +1995,9 @@ function allocwork(this, work) result (istat)
     nlyr  => this%settings%nlyr
     !
     istat = 0
-    if (istat == 0) allocate (work%msed2(nlyr,nfrac), stat = istat)
-    if (istat == 0) allocate (work%thlyr2(nlyr)     , stat = istat)
-    if (istat == 0) allocate (work%svfrac2(nlyr)    , stat = istat)
+    if (istat == 0) allocate (work%msed2(nfrac, nlyr), stat = istat)
+    if (istat == 0) allocate (work%thlyr2(nlyr)      , stat = istat)
+    if (istat == 0) allocate (work%svfrac2(nlyr)     , stat = istat)
 end function allocwork
 !
 !
@@ -2496,7 +2496,7 @@ subroutine bedcomp_use_bodsed(this)
           thlyr(nm, 1)  = min(thtrlyr(nm),sedthick)
           fac = thlyr(nm,1)/thsed
           do ised = 1, this%settings%nfrac
-             msed(nm, 1, ised) = real(bodsed(ised, nm),fp)*fac
+             msed(ised, 1, nm) = real(bodsed(ised, nm),fp)*fac
           enddo
           svfrac(nm, 1) = svf
           sedthick      = sedthick - thlyr(nm, 1)
@@ -2510,7 +2510,7 @@ subroutine bedcomp_use_bodsed(this)
              sedthick     = sedthick - thlyr(nm, 2)
              fac = thlyr(nm,2)/thsed
              do ised = 1, this%settings%nfrac
-                msed(nm, 2, ised) = real(bodsed(ised, nm),fp)*fac
+                msed(ised, 2, nm) = real(bodsed(ised, nm),fp)*fac
              enddo
              svfrac(nm, 2) = svf
           endif
@@ -2522,7 +2522,7 @@ subroutine bedcomp_use_bodsed(this)
              sedthick     = sedthick - thlyr(nm, k)
              fac = thlyr(nm,k)/thsed
              do ised = 1, this%settings%nfrac
-                msed(nm, k, ised) = real(bodsed(ised, nm),fp)*fac
+                msed(ised, k, nm) = real(bodsed(ised, nm),fp)*fac
              enddo
              svfrac(nm, k) = svf
           enddo
@@ -2534,7 +2534,7 @@ subroutine bedcomp_use_bodsed(this)
              sedthick     = sedthick - thlyr(nm, k)
              fac = thlyr(nm,k)/thsed
              do ised = 1, this%settings%nfrac
-                msed(nm, k, ised) = real(bodsed(ised, nm),fp)*fac
+                msed(ised, k, nm) = real(bodsed(ised, nm),fp)*fac
              enddo
              svfrac(nm, k) = svf
           enddo
@@ -2544,7 +2544,7 @@ subroutine bedcomp_use_bodsed(this)
           thlyr(nm, this%settings%nlyr) = sedthick
           fac = thlyr(nm,this%settings%nlyr)/thsed
           do ised = 1, this%settings%nfrac
-             msed(nm, this%settings%nlyr, ised) = real(bodsed(ised, nm),fp)*fac
+             msed(ised, this%settings%nlyr, nm) = real(bodsed(ised, nm),fp)*fac
           enddo
           svfrac(nm, this%settings%nlyr) = svf
        enddo
@@ -2594,7 +2594,7 @@ subroutine copybedcomp(this, nmfrom, nmto)
     case(2)
        do k = 1, this%settings%nlyr
           do l = 1, this%settings%nfrac
-             msed(nmto,k,l) = msed(nmfrom,k,l)
+             msed(l, k, nmto) = msed(l, k, nmfrom)
           enddo
           thlyr(nmto,k) = thlyr(nmfrom,k)
           svfrac(nmto,k) = svfrac(nmfrom,k)
@@ -2644,11 +2644,11 @@ subroutine updateporosity(this, nm, k)
     case(2)
        totmass       = 0.0_fp
        do l = 1, this%settings%nfrac
-          totmass    = totmass + msed(nm,k,l)
+          totmass    = totmass + msed(l, k, nm)
        enddo
        if (totmass>0.0_fp) then
           do l = 1, this%settings%nfrac
-            mfrac(l)   = msed(nm,k,l)/totmass
+            mfrac(l)   = msed(l, k, nm)/totmass
           enddo
           !
           call getporosity(this, mfrac, poros)

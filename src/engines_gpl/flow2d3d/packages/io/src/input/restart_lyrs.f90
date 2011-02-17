@@ -61,7 +61,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     logical                                                                                   :: error
     logical                                                                     , intent(out) :: success
     real(fp), dimension(                                                lsedtot), intent(in)  :: cdryb
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr, lsedtot), intent(out) :: msed
+    real(fp), dimension(lsedtot, nlyr, gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: msed
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr)                       :: svfrac
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr)         , intent(out) :: thlyr
     character(*)                                                                              :: restid
@@ -254,9 +254,13 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     ! 
     call dfsync ( gdp ) 
     do j = mfg, mlg 
-       do i = nfg, nlg 
-          msed(i-nfg+1,j-mfg+1,1:nlyr,1:lsedtot) = msed_g(i,j,1:nlyr,1:lsedtot) 
-          thlyr(i-nfg+1,j-mfg+1,1:nlyr) = thlyr_g(i,j,1:nlyr)
+       do i = nfg, nlg
+          do k = 1, nlyr
+             do l = 1, lsedtot
+                msed(l,k,i-nfg+1,j-mfg+1) = msed_g(i,j,k,l)
+             enddo
+             thlyr(i-nfg+1,j-mfg+1,k) = thlyr_g(i,j,k)
+          enddo
        enddo 
     enddo 
     deallocate(msed_g, thlyr_g)    
@@ -270,7 +274,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
              do k = 1, nlyr
                 do m = 1, mmax
                    do n = 1, nmaxus
-                      msed(n,m,k,l) = msed(n,m,k,l)*thlyr(n,m,k)*cdryb(l)
+                      msed(l,k,n,m) = msed(l,k,n,m)*thlyr(n,m,k)*cdryb(l)
                    enddo
                 enddo
              enddo
@@ -284,7 +288,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
                    !
                    mfracsum = 0.0_fp
                    do l = 1, lsedtot
-                      mfrac(l) = msed(n,m,k,l)*rhosol(l)
+                      mfrac(l) = msed(l,k,n,m)*rhosol(l)
                       mfracsum = mfracsum + mfrac(l)
                    enddo
                    if (mfracsum>0.0_fp) then
@@ -304,7 +308,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
                    ! convert volume fractions to sediment mass
                    !
                    do l = 1, lsedtot
-                      msed(n,m,k,l) = msed(n,m,k,l)*sedthick*rhosol(l)
+                      msed(l,k,n,m) = msed(l,k,n,m)*sedthick*rhosol(l)
                    enddo
                    svfrac(n,m,k) = 1.0_fp-poros
                 enddo
@@ -317,7 +321,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
              do n = 1, nmaxus
                 sedthick = 0.0_fp
                 do l = 1, lsedtot
-                   sedthick = sedthick + msed(n,m,k,l)/rhosol(l)
+                   sedthick = sedthick + msed(l,k,n,m)/rhosol(l)
                 enddo
                 svfrac(n,m,k) = sedthick/thlyr(n,m,k)
              enddo
