@@ -436,23 +436,13 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
                & mudcnt   ,mudfrac   )
     !
     ! Calculate arithmetic mean sediment diameter Dm
-    !
-    call compdmean(frac      ,sedd50    ,nmmax     ,lsedtot   , &
-                 & sedtyp    ,dm        ,sedd50fld ,logsedsig , &
-                 & nmlb      ,nmub      )
-    !
     ! Calculate geometric mean sediment diameter Dg
-    !
-    call compdgeomean(frac      ,sedd50    ,nmmax     ,lsedtot   , &
-                    & sedtyp    ,dg        ,sedd50fld ,nmlb      , &
-                    & nmub      )
-    !
     ! Calculate percentiles Dxx
     !
-    call compdxx(frac      ,nseddia   ,logseddia ,logsedsig , &
-               & nmmax     ,lsedtot   ,sedtyp    ,dxx       , &
-               & xx        ,nxx       ,sedd50fld ,nmlb      , &
-               & nmub      )
+    call compdiam(frac      ,sedd50    ,sedd50    ,sedtyp    ,lsedtot   , &
+                & logsedsig ,nseddia   ,logseddia ,nmmax     ,nmlb      , &
+                & nmub      ,xx        ,nxx       ,sedd50fld ,dm        , &
+                & dg        ,dxx       )
     !
     ! Determine hiding & exposure factors
     !

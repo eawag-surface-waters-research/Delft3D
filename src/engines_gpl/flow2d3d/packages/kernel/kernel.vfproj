@@ -184,9 +184,7 @@
 		<File RelativePath="src\compute_sediment\calseddf1993.f90"/>
 		<File RelativePath="src\compute_sediment\calseddf2004.f90"/>
 		<File RelativePath="src\compute_sediment\compbsskin.f90"/>
-		<File RelativePath="src\compute_sediment\compdgeomean.f90"/>
-		<File RelativePath="src\compute_sediment\compdmean.f90"/>
-		<File RelativePath="src\compute_sediment\compdxx.f90"/>
+		<File RelativePath=".\src\compute_sediment\compdiam.f90"/>
 		<File RelativePath="src\compute_sediment\comphidexp.f90"/>
 		<File RelativePath="src\compute_sediment\compthick.f90"/>
 		<File RelativePath="src\compute_sediment\dredge.f90"/>

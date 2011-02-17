@@ -744,9 +744,7 @@ src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/bott3d.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/calseddf1993.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/calseddf2004.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/compbsskin.f90 -text
-src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/compdgeomean.f90 -text
-src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/compdmean.f90 -text
-src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/compdxx.f90 -text
+src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/compdiam.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/comphidexp.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/compthick.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/dredge.f90 -text

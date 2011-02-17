@@ -43,9 +43,7 @@ libkernel_compute_sediment_la_SOURCES = \
          calseddf1993.f90 \
          calseddf2004.f90 \
          compbsskin.f90 \
-         compdgeomean.f90 \
-         compdmean.f90 \
-         compdxx.f90 \
+         compdiam.f90 \
          comphidexp.f90 \
          compthick.f90 \
          dredgedump.f90 \
