@@ -59,7 +59,7 @@ subroutine dredgedump(dbodsd    ,cdryb     ,nst       ,timhr     ,morft     , &
     real(hp)                                           , intent(in) :: morft
     real(fp)                                           , intent(in) :: timhr
     real(fp), dimension(gdp%d%lsedtot)                 , intent(in) :: cdryb   !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, gdp%d%lsedtot)       :: dbodsd  !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%lsedtot, gdp%d%nmlb:gdp%d%nmub)       :: dbodsd  !  Description and declaration in rjdim.f90
 !
 ! Local variables
 !

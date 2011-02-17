@@ -784,7 +784,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                 !
                 ! Update dbodsd value at nm
                 !
-                dbodsd(nm, l) = dbodsd(nm, l) + dsdnm
+                dbodsd(l, nm) = dbodsd(l, nm) + dsdnm
              endif ! kcs*kfs = 1
           enddo    ! nm
        enddo       ! l
@@ -809,7 +809,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           if (kcs(nm)*kfs(nm)*kfsed(nm) == 1) then
              totdbodsd = 0.0
              do l = 1, lsedtot
-                totdbodsd = totdbodsd + dbodsd(nm, l)
+                totdbodsd = totdbodsd + dbodsd(l, nm)
              enddo
              !
              ! If this is a cell in erosion is occuring (accretion is not
@@ -890,29 +890,29 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                       !
                       if (from_ndm) then
                          dv = thet*fixfac(ndm, l)*frac(ndm, l)
-                         dbodsd(ndm, l) = dbodsd(ndm, l) - dv/gsqs(ndm)
-                         dbodsd(nm , l) = dbodsd(nm , l) + dv/gsqs(nm)
+                         dbodsd(l, ndm) = dbodsd(l, ndm) - dv/gsqs(ndm)
+                         dbodsd(l, nm ) = dbodsd(l, nm ) + dv/gsqs(nm)
                          sbvv(ndm, l) = sbvv(ndm, l) + dv/(hdt*morfac*gvv(ndm))
                       endif
                       !
                       if (from_nmd) then
                          dv = thet*fixfac(nmd, l)*frac(nmd, l)
-                         dbodsd(nmd, l) = dbodsd(nmd, l) - dv/gsqs(nmd)
-                         dbodsd(nm , l) = dbodsd(nm , l) + dv/gsqs(nm)
+                         dbodsd(l, nmd) = dbodsd(l, nmd) - dv/gsqs(nmd)
+                         dbodsd(l, nm ) = dbodsd(l, nm ) + dv/gsqs(nm)
                          sbuu(nmd, l) = sbuu(nmd, l) + dv/(hdt*morfac*guu(nmd))
                       endif
                       !
                       if (from_nmu) then
                          dv = thet*fixfac(nmu, l)*frac(nmu, l)
-                         dbodsd(nmu, l) = dbodsd(nmu, l) - dv/gsqs(nmu)
-                         dbodsd(nm , l) = dbodsd(nm , l) + dv/gsqs(nm)
+                         dbodsd(l, nmu) = dbodsd(l, nmu) - dv/gsqs(nmu)
+                         dbodsd(l, nm ) = dbodsd(l, nm ) + dv/gsqs(nm)
                          sbuu(nm, l) = sbuu(nm, l) - dv/(hdt*morfac*guu(nm))
                       endif
                       !
                       if (from_num) then
                          dv = thet*fixfac(num, l)*frac(num, l)
-                         dbodsd(num, l) = dbodsd(num, l) - dv/gsqs(num)
-                         dbodsd(nm , l) = dbodsd(nm , l) + dv/gsqs(nm)
+                         dbodsd(l, num) = dbodsd(l, num) - dv/gsqs(num)
+                         dbodsd(l, nm ) = dbodsd(l, nm ) + dv/gsqs(nm)
                          sbvv(nm, l) = sbvv(nm, l) - dv/(hdt*morfac*gvv(nm))
                       endif
                    enddo ! l
@@ -929,9 +929,9 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
        if (multi) then
           i = 0
           do l = 1, lsedtot
-             do nm=1,nmmax
+             do nm = 1, nmmax
                 i = i + 1
-                mergebuf(i) = real(dbodsd(nm,l),hp)
+                mergebuf(i) = real(dbodsd(l, nm),hp)
              enddo
           enddo
           call putarray (mergehandle,mergebuf(1:nmmax*lsedtot),nmmax*lsedtot)
@@ -940,7 +940,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           do l = 1, lsedtot
              do nm=1,nmmax
                 i = i + 1
-                dbodsd(nm,l) = real(mergebuf(i),fp)
+                dbodsd(l, nm) = real(mergebuf(i),fp)
              enddo
           enddo
        endif
@@ -996,7 +996,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           do nm = 1, nmmax
              if (kcs(nm)/=0 .and. kcs(nm)<=2) then
                 do l = 1, lsedtot
-                   depchg(nm) = depchg(nm) + dbodsd(nm, l)/cdryb(l)
+                   depchg(nm) = depchg(nm) + dbodsd(l, nm)/cdryb(l)
                 enddo
              endif
           enddo

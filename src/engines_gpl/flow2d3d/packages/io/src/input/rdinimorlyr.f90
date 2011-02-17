@@ -66,8 +66,8 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
     integer                                                              :: nmmax   !  Description and declaration in iidim.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)             , intent(in)  :: kcs     !  Description and declaration in iidim.f90
     real(fp), dimension(lsedtot,nlyr,gdp%d%nmlb:gdp%d%nmub), intent(out) :: msed
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,nlyr)        , intent(out) :: svfrac
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,nlyr)        , intent(out) :: thlyr
+    real(fp), dimension(nlyr,gdp%d%nmlb:gdp%d%nmub)        , intent(out) :: svfrac
+    real(fp), dimension(nlyr,gdp%d%nmlb:gdp%d%nmub)        , intent(out) :: thlyr
     real(fp), dimension(lsedtot)                           , intent(in)  :: cdryb   !  Description and declaration in rjdim.f90
     character(*)                                                         :: filcomp
 !
@@ -429,7 +429,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                    do l = 1, lsedtot
                       msed(l, ilyr, nm) = msed(l, ilyr, nm) + rtemp(nm, l)*thtemp(nm)*cdryb(l)
                    enddo
-                   thlyr(nm, ilyr) = thlyr(nm, ilyr) + thtemp(nm)
+                   thlyr(ilyr, nm) = thlyr(ilyr, nm) + thtemp(nm)
                 enddo
              else
                 if (layertype == 'volume fraction') then
@@ -449,9 +449,9 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                       do l = 1, lsedtot
                          msed(l, ilyr, nm) = msed(l, ilyr, nm) + rtemp(nm, l)*thtemp(nm)*rhosol(l)*svf
                       enddo
-                      thick = thlyr(nm, ilyr) + thtemp(nm)
-                      svfrac(nm, ilyr) = (thlyr(nm, ilyr) * svfrac(nm, ilyr) + thtemp(nm) * svf) / thick
-                      thlyr(nm, ilyr)  = thick
+                      thick = thlyr(ilyr, nm) + thtemp(nm)
+                      svfrac(ilyr, nm) = (thlyr(ilyr, nm) * svfrac(ilyr, nm) + thtemp(nm) * svf) / thick
+                      thlyr(ilyr, nm)  = thick
                    enddo
                 else ! layertype == 'mass fraction'
                    do nm = 1, nmmax
@@ -471,9 +471,9 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                       do l = 1, lsedtot
                          msed(l, ilyr, nm) = msed(l, ilyr, nm) + rtemp(nm, l)*thtemp(nm)*rhosol(l)*svf
                       enddo
-                      thick = thlyr(nm, ilyr) + thtemp(nm)
-                      svfrac(nm, ilyr) = (thlyr(nm, ilyr) * svfrac(nm, ilyr) + thtemp(nm) * svf) / thick
-                      thlyr(nm, ilyr)  = thick
+                      thick = thlyr(ilyr, nm) + thtemp(nm)
+                      svfrac(ilyr, nm) = (thlyr(ilyr, nm) * svfrac(ilyr, nm) + thtemp(nm) * svf) / thick
+                      thlyr(ilyr, nm)  = thick
                    enddo
                 endif
              endif
@@ -637,7 +637,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                 do l = 1, lsedtot
                    do nm = 1, nmmax
                       msed(l, ilyr, nm) = msed(l, ilyr, nm) + rtemp(nm, l)
-                      thlyr(nm, ilyr)   = thlyr(nm,ilyr)    + rtemp(nm, l)/cdryb(l)
+                      thlyr(ilyr, nm)   = thlyr(ilyr, nm)    + rtemp(nm, l)/cdryb(l)
                    enddo
                 enddo
              else
@@ -664,9 +664,9 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                          msed(l, ilyr, nm) = msed(l, ilyr, nm) + rtemp(nm, l) * rhosol(l) * svf
                          thtemp(nm)        = thtemp(nm)        + rtemp(nm, l)
                       enddo
-                      thick = thlyr(nm, ilyr) + thtemp(nm)
-                      svfrac(nm, ilyr) = (thlyr(nm, ilyr) * svfrac(nm, ilyr) + thtemp(nm) * svf) / thick
-                      thlyr(nm, ilyr)  = thick
+                      thick = thlyr(ilyr, nm) + thtemp(nm)
+                      svfrac(ilyr, nm) = (thlyr(ilyr, nm) * svfrac(ilyr, nm) + thtemp(nm) * svf) / thick
+                      thlyr(ilyr, nm)  = thick
                    enddo
                 else ! layertype == 'sediment mass'
                    !
@@ -688,9 +688,9 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                          msed(l, ilyr, nm) = msed(l, ilyr, nm) + rtemp(nm, l) * rhosol(l) * svf
                          thtemp(nm)        = thtemp(nm)        + rtemp(nm, l)
                       enddo
-                      thick = thlyr(nm, ilyr) + thtemp(nm)
-                      svfrac(nm, ilyr) = (thlyr(nm, ilyr) * svfrac(nm, ilyr) + thtemp(nm) * svf) / thick
-                      thlyr(nm, ilyr)  = thick
+                      thick = thlyr(ilyr, nm) + thtemp(nm)
+                      svfrac(ilyr, nm) = (thlyr(ilyr, nm) * svfrac(ilyr, nm) + thtemp(nm) * svf) / thick
+                      thlyr(ilyr, nm)  = thick
                    enddo
                 endif
              endif

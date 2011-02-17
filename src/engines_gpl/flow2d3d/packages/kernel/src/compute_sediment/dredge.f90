@@ -96,7 +96,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
     real(fp)                                             , intent(in)  :: morhr
     real(fp)                                             , intent(in)  :: timhr
     real(fp)  , dimension(lsedtot)                       , intent(in)  :: cdryb   !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot)              :: dbodsd  !  Description and declaration in rjdim.f90
+    real(fp)  , dimension(lsedtot, gdp%d%nmlb:gdp%d%nmub)              :: dbodsd  !  Description and declaration in rjdim.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in)  :: s1      !  Description and declaration in rjdim.f90
     real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)                       :: dps     !  Description and declaration in rjdim.f90
 
@@ -1168,7 +1168,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
           !
           dz = 0.0_fp
           do lsed = 1, lsedtot
-             dzl               = dbodsd(nm,lsed) / cdryb(lsed)
+             dzl               = dbodsd(lsed, nm) / cdryb(lsed)
              voldred(ia,lsed)  = voldred(ia,lsed) + dzl * area(i)
              dz                = dz + dzl
           enddo
@@ -1332,7 +1332,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
     !
     ! And finally: Dumping
     !
-    dbodsd(1:nmmax, 1:lsedtot) = 0.0_fp
+    dbodsd(1:lsedtot, 1:nmmax) = 0.0_fp
     do ib = 1, nadump
        pdump => dump_prop(ib)
        !
@@ -1557,7 +1557,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
           dz = dz_dump(i)
           do lsed = 1, lsedtot
              dpadd            = dz * (voldump(ib, lsed) / voldumped)
-             dbodsd(nm, lsed) = dbodsd(nm, lsed) + dpadd * cdryb(lsed)
+             dbodsd(lsed, nm) = dbodsd(lsed, nm) + dpadd * cdryb(lsed)
           enddo
           !
           dps(nm) = dps(nm) - real(dz_dump(i), prec)

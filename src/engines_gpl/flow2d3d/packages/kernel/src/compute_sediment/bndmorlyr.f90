@@ -69,8 +69,6 @@ subroutine bndmorlyr(lsedtot   ,timhr     ,nto       , &
     real(fp) :: bndval
     real(fp) :: sedtot
     real(fp), dimension(lsedtot)         :: frac
-    real(fp), dimension(:,:,:) , pointer :: msed
-    real(fp), dimension(:,:)   , pointer :: thlyr
 !
 !! executable statements -------------------------------------------------------
 !

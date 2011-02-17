@@ -60,10 +60,10 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     integer                                                                                   :: mmax
     logical                                                                                   :: error
     logical                                                                     , intent(out) :: success
-    real(fp), dimension(                                                lsedtot), intent(in)  :: cdryb
+    real(fp), dimension(lsedtot)                                                , intent(in)  :: cdryb
     real(fp), dimension(lsedtot, nlyr, gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: msed
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr)                       :: svfrac
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, nlyr)         , intent(out) :: thlyr
+    real(fp), dimension(nlyr, gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                       :: svfrac
+    real(fp), dimension(nlyr, gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)         , intent(out) :: thlyr
     character(*)                                                                              :: restid
 !
 ! Local variables
@@ -259,7 +259,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
              do l = 1, lsedtot
                 msed(l,k,i-nfg+1,j-mfg+1) = msed_g(i,j,k,l)
              enddo
-             thlyr(i-nfg+1,j-mfg+1,k) = thlyr_g(i,j,k)
+             thlyr(k,i-nfg+1,j-mfg+1) = thlyr_g(i,j,k)
           enddo
        enddo 
     enddo 
@@ -274,7 +274,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
              do k = 1, nlyr
                 do m = 1, mmax
                    do n = 1, nmaxus
-                      msed(l,k,n,m) = msed(l,k,n,m)*thlyr(n,m,k)*cdryb(l)
+                      msed(l,k,n,m) = msed(l,k,n,m)*thlyr(k,n,m)*cdryb(l)
                    enddo
                 enddo
              enddo
@@ -299,7 +299,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
                       ! obtain porosity and sediment thickness without pores
                       !
                       call getporosity(gdp%gdmorlyr, mfrac, poros)
-                      sedthick = thlyr(n,m,k)*(1.0_fp-poros)
+                      sedthick = thlyr(k,n,m)*(1.0_fp-poros)
                    else
                       sedthick = 0.0_fp
                       poros = 0.0_fp
@@ -310,7 +310,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
                    do l = 1, lsedtot
                       msed(l,k,n,m) = msed(l,k,n,m)*sedthick*rhosol(l)
                    enddo
-                   svfrac(n,m,k) = 1.0_fp-poros
+                   svfrac(k,n,m) = 1.0_fp-poros
                 enddo
              enddo
           enddo
@@ -323,7 +323,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
                 do l = 1, lsedtot
                    sedthick = sedthick + msed(l,k,n,m)/rhosol(l)
                 enddo
-                svfrac(n,m,k) = sedthick/thlyr(n,m,k)
+                svfrac(k,n,m) = sedthick/thlyr(k,n,m)
              enddo
           enddo
        endif

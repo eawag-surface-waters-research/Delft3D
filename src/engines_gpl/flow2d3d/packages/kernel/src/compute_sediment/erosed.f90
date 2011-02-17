@@ -400,7 +400,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        ! Allocate using the gdp structure itself instead of the local pointers
        !
                      allocate (gdp%gderosed%bc_mor_array(lsedtot*2)              , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%dbodsd(gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%dbodsd(lsedtot,gdp%d%nmlb:gdp%d%nmub), stat = istat)
        if (istat==0) allocate (gdp%gderosed%dcwwlc(0:kmax)                       , stat = istat)
        if (istat==0) allocate (gdp%gderosed%dzduu (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
        if (istat==0) allocate (gdp%gderosed%dzdvv (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)

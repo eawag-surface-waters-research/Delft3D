@@ -72,8 +72,8 @@ subroutine dfwrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
     character(16)                                               :: grpnam
     real(fp), dimension(1:lsedtot)                              :: cdryb
     real(fp), dimension(1:lsedtot,1:nlyr,gdp%d%nmlb:gdp%d%nmub) :: msed
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,1:nlyr)           :: thlyr
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,1:nlyr)           :: svfrac
+    real(fp), dimension(1:nlyr,gdp%d%nmlb:gdp%d%nmub)           :: thlyr
+    real(fp), dimension(1:nlyr,gdp%d%nmlb:gdp%d%nmub)           :: svfrac
     type(bedcomp_data)                                          :: gdmorlyr
 !
 ! Local variables
@@ -190,8 +190,8 @@ subroutine dfwrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
              do m = 1, mmax
                 do n = 1, nmaxus
                    call n_and_m_to_nm(n, m, nm, gdp)
-                   if (thlyr(nm,k)>0.0_fp) then
-                      rbuff4(n,m,k,l) = msed(l, k, nm)/(cdryb(l)*svfrac(nm,k)*thlyr(nm,k))
+                   if (thlyr(k, nm)>0.0_fp) then
+                      rbuff4(n,m,k,l) = msed(l, k, nm)/(cdryb(l)*svfrac(k, nm)*thlyr(k, nm))
                    else
                       rbuff4(n,m,k,l) = 0.0_fp
                    endif
@@ -213,7 +213,7 @@ subroutine dfwrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
           do m = 1, mmax
              do n = 1, nmaxus
                 call n_and_m_to_nm(n, m, nm, gdp)
-                rbuff3(n,m,k) = thlyr(nm,k)
+                rbuff3(n,m,k) = thlyr(k, nm)
              enddo
           enddo
        enddo
@@ -232,7 +232,7 @@ subroutine dfwrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
              do m = 1, mmax
                 do n = 1, nmaxus
                    call n_and_m_to_nm(n, m, nm, gdp)
-                   rbuff3(n,m,k) = 1.0_fp-svfrac(nm,k)
+                   rbuff3(n,m,k) = 1.0_fp-svfrac(k, nm)
                 enddo
              enddo
           enddo
