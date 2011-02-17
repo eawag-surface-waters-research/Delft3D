@@ -6,7 +6,7 @@
 #   Fedor.Baart@deltares.nl
 #   11 jan 2007
 #
-#   Copyright (C) 2007, Deltares
+#   Copyright (C) 2011, Deltares
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
@@ -32,6 +32,7 @@ libutils_flow_a_SOURCES = \
          stringsequal.f90 \
          malloc.f90 \
          MessageHandling.f90 \
+         nan_check_module.f90 \
          util.f90
 
 #-------------------------------------------------------------------------------

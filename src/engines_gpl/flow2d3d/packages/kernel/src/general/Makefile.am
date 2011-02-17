@@ -32,7 +32,6 @@ FMODULES += \
 #-------------------------------------------------------------------------------
 #Sources
 libkernel_general_la_SOURCES = \
-         nan_check_module.f90 \
          angle.f90 \
          area4.f90 \
          chckit.f90 \

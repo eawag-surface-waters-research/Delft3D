@@ -14,6 +14,9 @@ lib_LTLIBRARIES = libdata_gdp.la
 
 #-------------------------------------------------------------------------------
 #Includes
+FINCLUDES += \
+	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/include
+
 FMODULES += \
 	-I$(top_srcdir)/utils_lgpl/inifiles/packages/inifiles/src \
 	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/basics \
