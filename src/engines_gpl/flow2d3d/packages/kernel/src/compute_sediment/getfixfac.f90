@@ -1,5 +1,5 @@
-subroutine getfixfac(lsedtot   ,nmmax     ,fixfac    ,ffthresh  ,nmlb      , &
-                   & nmub      ,bedcomp   )
+subroutine getfixfac(bedcomp   ,nmlb      ,nmub      ,nval      ,nmmax     , &
+                   & fixfac    ,ffthresh  )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -42,13 +42,13 @@ subroutine getfixfac(lsedtot   ,nmmax     ,fixfac    ,ffthresh  ,nmlb      , &
 !
 ! Global variables
 !
-    integer                                            , intent(in)  :: lsedtot
     integer                                            , intent(in)  :: nmmax
     integer                                            , intent(in)  :: nmlb
     integer                                            , intent(in)  :: nmub
+    integer                                            , intent(in)  :: nval
     type(bedcomp_data)                                 , intent(in)  :: bedcomp
     real(fp)                                           , intent(in)  :: ffthresh
-    real(fp), dimension(nmlb:nmub, lsedtot)            , intent(out) :: fixfac
+    real(fp), dimension(nmlb:nmub, nval)               , intent(out) :: fixfac
 !
 ! Local variables
 !
@@ -59,11 +59,11 @@ subroutine getfixfac(lsedtot   ,nmmax     ,fixfac    ,ffthresh  ,nmlb      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    call getalluvthick(bedcomp, fixfac)
+    call getalluvthick(bedcomp, fixfac, nmlb, nmub, nval)
     !
     thresh = max(1.0e-10_fp,ffthresh)
-    do l = 1, lsedtot
-       do nm = 1, nmmax
+    do l = 1, nval
+       do nm = max(nmlb,1), min(nmmax,nmub)
           fixfac(nm, l) = min(max(fixfac(nm, l)/thresh, 0.0_fp), 1.0_fp)
        enddo
     enddo

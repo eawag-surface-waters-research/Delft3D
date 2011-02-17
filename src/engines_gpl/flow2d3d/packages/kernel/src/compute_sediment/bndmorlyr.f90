@@ -126,7 +126,7 @@ subroutine bndmorlyr(lsedtot   ,timhr     ,nto       , &
                 frac(l) = bc_mor_array(l) + &
                         & alfa_dist * (bc_mor_array(l+lsedtot)-bc_mor_array(l))
              enddo
-             call setmfrac(gdp%gdmorlyr, nm, frac)
+             call setmfrac(gdp%gdmorlyr, frac, nm, nm)
           elseif (icond == 3) then
              !
              ! Prescribed volume fraction; needed volume fraction
@@ -135,7 +135,7 @@ subroutine bndmorlyr(lsedtot   ,timhr     ,nto       , &
                 frac(l) = bc_mor_array(l) + &
                         & alfa_dist * (bc_mor_array(l+lsedtot)-bc_mor_array(l))
              enddo
-             call setvfrac(gdp%gdmorlyr, nm, frac)
+             call setvfrac(gdp%gdmorlyr, frac, nm, nm)
           endif
        enddo
     enddo

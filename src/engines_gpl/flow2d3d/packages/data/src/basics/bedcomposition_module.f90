@@ -88,20 +88,6 @@ end interface
 interface bedcomp_getpointer_realprec
    module procedure bedcomp_getpointer_prec_2darray
 end interface
-interface getmfrac
-   module procedure getmfrac_1point
-   module procedure getmfrac_allpoints
-end interface
-interface setmfrac
-   module procedure setmfrac_1point
-end interface
-interface getvfrac
-   module procedure getvfrac_1point
-   module procedure getvfrac_allpoints
-end interface
-interface setvfrac
-   module procedure setvfrac_1point
-end interface
 interface getsedthick
    module procedure getsedthick_1point
    module procedure getsedthick_allpoints
@@ -738,7 +724,7 @@ subroutine lyrerosion(this, nm, dzini, dmi)
                svfrac(kero1, nm) = svfrac(kero1, nm)/thlyr(kero1, nm)
             endif
             thlyr(k, nm) = 0.0_fp
-            k            = k+1
+            k           = k+1
         else ! thlyr(k)>=dz
             !
             ! layer k contains more sediment than is need, so only part
@@ -1216,7 +1202,7 @@ subroutine lyrsedimentation_eulerian(this, nm, dzini, dmi, svfracdep)
              enddo
              thlyr(k, nm)  = dz
              svfrac(k, nm) = svfracdep
-             dz            = 0.0_fp
+             dz           = 0.0_fp
           enddo
        endif
     endif
@@ -1266,7 +1252,7 @@ end subroutine detthcmud
 !
 !
 !==============================================================================
-subroutine getalluvthick(this, seddep)
+subroutine getalluvthick(this, seddep, nmfrom, nmto, nval)
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Update underlayer bookkeeping system for erosion/sedimentation
@@ -1279,8 +1265,11 @@ subroutine getalluvthick(this, seddep)
 !
 ! Function/routine arguments
 !
-    type(bedcomp_data)                                                             , intent(in)  :: this
-    real(fp), dimension(this%settings%nmlb:this%settings%nmub, this%settings%nfrac), intent(out) :: seddep
+    type(bedcomp_data)                                                , intent(in)  :: this
+    real(fp), dimension(nmfrom:nmto, nval)                            , intent(out) :: seddep
+    integer                                                           , intent(in)  :: nmfrom
+    integer                                                           , intent(in)  :: nmto
+    integer                                                           , intent(in)  :: nval
 !
 ! Local variables
 !
@@ -1290,9 +1279,9 @@ subroutine getalluvthick(this, seddep)
     real(fp)                             :: thkl
     integer, pointer                     :: nlyr
     real(prec), dimension(:,:) , pointer :: bodsed
-    real(fp), dimension(:,:) , pointer   :: thlyr
-    real(fp), pointer                    :: thresh
-    real(fp)  , dimension(:)  , pointer :: rhofrac
+    real(fp)  , dimension(:,:) , pointer :: thlyr
+    real(fp)                   , pointer :: thresh
+    real(fp)  , dimension(:)   , pointer :: rhofrac
 !
 !! executable statements -------------------------------------------------------
 !
@@ -1303,20 +1292,27 @@ subroutine getalluvthick(this, seddep)
     !
     select case(this%settings%iunderlyr)
     case(2)
-       do nm = this%settings%nmlb,this%settings%nmub
+       do nm = nmfrom,nmto
           thkl = 0.0_fp
           do k = 1, nlyr
              thkl = thkl + thlyr(k, nm)
           enddo
-          do l = 1, this%settings%nfrac
+          do l = 1, nval
              seddep(nm, l) = thkl
           enddo
        enddo
     case default
-       do nm = this%settings%nmlb,this%settings%nmub
-          do l = 1, this%settings%nfrac
-             seddep(nm, l) = real(bodsed(l, nm),fp)/rhofrac(l)
-          enddo
+       do nm = nmfrom,nmto
+          if (nval==1) then
+             seddep(nm, nval) = 0.0
+             do l = 1, this%settings%nfrac
+                seddep(nm, nval) = seddep(nm, nval) + real(bodsed(l, nm),fp)/rhofrac(l)
+             enddo
+          else
+             do l = 1, this%settings%nfrac
+                seddep(nm, l) = real(bodsed(l, nm),fp)/rhofrac(l)
+             enddo
+          endif
        enddo
     endselect
 end subroutine getalluvthick
@@ -1324,7 +1320,7 @@ end subroutine getalluvthick
 !
 !
 !==============================================================================
-subroutine getfrac(this, frac, sedtyp, anymud, mudcnt, mudfrac)
+subroutine getfrac(this, frac, sedtyp, anymud, mudcnt, mudfrac, nmfrom, nmto)
 !!--description-----------------------------------------------------------------
 !
 !    Function: Determines the (mass or volume) fractions
@@ -1337,11 +1333,13 @@ subroutine getfrac(this, frac, sedtyp, anymud, mudcnt, mudfrac)
     ! Function/routine arguments
     !
     type(bedcomp_data)                                                , intent(in)  :: this    
-    logical                                                                         :: anymud
-    real(fp), dimension(this%settings%nmlb:this%settings%nmub, this%settings%nfrac) :: frac
-    real(fp), dimension(this%settings%nmlb:this%settings%nmub)                      :: mudfrac
-    real(fp), dimension(this%settings%nmlb:this%settings%nmub)                      :: mudcnt
+    logical                                                           , intent(in)  :: anymud
+    real(fp), dimension(nmfrom:nmto, this%settings%nfrac)             , intent(out) :: frac
+    real(fp), dimension(nmfrom:nmto)                                  , intent(out) :: mudfrac
+    real(fp), dimension(nmfrom:nmto)                                  , intent(in)  :: mudcnt
     integer , dimension(this%settings%nfrac)                          , intent(in)  :: sedtyp
+    integer                                                           , intent(in)  :: nmfrom
+    integer                                                           , intent(in)  :: nmto
     !
     ! Local variables
     !
@@ -1356,9 +1354,9 @@ subroutine getfrac(this, frac, sedtyp, anymud, mudcnt, mudfrac)
     !
     select case(this%settings%iunderlyr)
     case(1)
-       call getmfrac_allpoints(this ,frac      )
+       call getmfrac(this ,frac, nmfrom, nmto)
     case default
-       call getvfrac_allpoints(this ,frac      )
+       call getvfrac(this ,frac, nmfrom, nmto)
     endselect
     !
     ! Calculate mud fraction
@@ -1370,7 +1368,7 @@ subroutine getfrac(this, frac, sedtyp, anymud, mudcnt, mudfrac)
        mudfrac = 0.0
        do l = 1, this%settings%nfrac
           if (sedtyp(l) == SEDTYP_COHESIVE) then
-             do nm = this%settings%nmlb,this%settings%nmub
+             do nm = nmfrom, nmto
                 mudfrac(nm) = mudfrac(nm) + frac(nm,l)
              enddo
           endif
@@ -1380,9 +1378,9 @@ subroutine getfrac(this, frac, sedtyp, anymud, mudcnt, mudfrac)
        ! Take into account possible non-simulated
        ! mud fraction.
        !
-       do nm = this%settings%nmlb,this%settings%nmub
+       do nm = nmfrom, nmto
           mudfrac(nm) = mudcnt(nm)
-          nonmud      = 1.0 - mudcnt(nm)
+          nonmud      = 1.0_fp - mudcnt(nm)
           do l = 1, this%settings%nfrac
              frac(nm,l) = frac(nm,l) * nonmud
           enddo
@@ -1393,10 +1391,10 @@ end subroutine getfrac
 !
 !
 !==============================================================================
-subroutine getmfrac_allpoints(this, frac)
+subroutine getmfrac(this, frac, nmfrom, nmto)
 !!--description-----------------------------------------------------------------
 !
-!    Function: Determines the mass fractions for all points
+!    Function: Determines the mass fractions
 !
 !!--declarations----------------------------------------------------------------
     use precision 
@@ -1405,7 +1403,9 @@ subroutine getmfrac_allpoints(this, frac)
     ! Function/routine arguments
     !
     type(bedcomp_data)                                                , intent(in)  :: this
-    real(fp), dimension(this%settings%nmlb:this%settings%nmub, this%settings%nfrac) :: frac
+    real(fp), dimension(nmfrom:nmto, this%settings%nfrac)             , intent(out) :: frac
+    integer                                                           , intent(in)  :: nmfrom
+    integer                                                           , intent(in)  :: nmto
     !
     ! Local variables
     !
@@ -1424,7 +1424,7 @@ subroutine getmfrac_allpoints(this, frac)
     !
     select case(this%settings%iunderlyr)
     case(2)
-       do nm = this%settings%nmlb,this%settings%nmub
+       do nm = nmfrom, nmto
           sedtot = 0.0_fp
           do l = 1, this%settings%nfrac
              sedtot = sedtot + msed(l, 1, nm)
@@ -1438,7 +1438,7 @@ subroutine getmfrac_allpoints(this, frac)
           endif
        enddo
     case default
-       do nm = this%settings%nmlb,this%settings%nmub
+       do nm = nmfrom, nmto
           sedtot = 0.0_fp
           do l = 1, this%settings%nfrac
              sedtot = sedtot + real(bodsed(l, nm),fp)
@@ -1452,15 +1452,15 @@ subroutine getmfrac_allpoints(this, frac)
           endif
        enddo
     endselect
-end subroutine getmfrac_allpoints
+end subroutine getmfrac
 !
 !
 !
 !==============================================================================
-subroutine getmfrac_1point(this ,nm  ,frac      )
+subroutine setmfrac(this, frac, nmfrom, nmto)
 !!--description-----------------------------------------------------------------
 !
-!    Function: Determines the mass fractions for 1 point
+!    Function: Update the bed composition given the mass fraction data
 !
 !!--declarations----------------------------------------------------------------
     use precision 
@@ -1468,13 +1468,15 @@ subroutine getmfrac_1point(this ,nm  ,frac      )
     !
     ! Function/routine arguments
     !
-    type(bedcomp_data)                      , intent(in)  :: this    
-    integer                                 , intent(in)  :: nm
-    real(fp), dimension(this%settings%nfrac), intent(out) :: frac
+    type(bedcomp_data)                                                              :: this
+    real(fp), dimension(nmfrom:nmto, this%settings%nfrac)             , intent(in)  :: frac
+    integer                                                           , intent(in)  :: nmfrom
+    integer                                                           , intent(in)  :: nmto
     !
     ! Local variables
     !
     integer                             :: l
+    integer                             :: nm
     real(fp)                            :: sedtot
     real(prec), dimension(:,:), pointer :: bodsed
     real(fp), dimension(:,:,:), pointer :: msed
@@ -1484,92 +1486,39 @@ subroutine getmfrac_1point(this ,nm  ,frac      )
     bodsed      => this%state%bodsed
     msed        => this%state%msed
     !
-    ! Calculate total bottom sediments and fractions
+    ! Update the sediment mass per fraction, but keep the total mass identical
     !
     select case(this%settings%iunderlyr)
     case(2)
-       sedtot = 0.0_fp
-       do l = 1, this%settings%nfrac
-          sedtot = sedtot + msed(l, 1, nm)
-       enddo
-       if (comparereal(sedtot,0.0_fp) == 0) then
-          frac = 1.0_fp/this%settings%nfrac
-       else
+       do nm = nmfrom, nmto
+          sedtot = 0.0_fp
           do l = 1, this%settings%nfrac
-             frac(l) = msed(l, 1, nm)/sedtot
+             sedtot = sedtot + msed(l, 1, nm)
           enddo
-       endif
+          do l = 1, this%settings%nfrac
+             msed(l, 1, nm) = frac(nm, l)*sedtot
+          enddo
+       enddo
     case default
-       sedtot = 0.0_fp
-       do l = 1, this%settings%nfrac
-          sedtot = sedtot + real(bodsed(l, nm),fp)
-       enddo
-       if (comparereal(sedtot,0.0_fp) == 0) then
-          frac = 1.0_fp/this%settings%nfrac
-       else
+       do nm = nmfrom, nmto
+          sedtot = 0.0_fp
           do l = 1, this%settings%nfrac
-             frac(l) = real(bodsed(l, nm),fp)/sedtot
+             sedtot = sedtot + real(bodsed(l, nm),fp)
           enddo
-       endif
+          do l = 1, this%settings%nfrac
+             bodsed(l, nm) = real(frac(nm, l)*sedtot,prec)
+          enddo
+       enddo
     endselect
-end subroutine getmfrac_1point
+end subroutine setmfrac
 !
 !
 !
 !==============================================================================
-subroutine setmfrac_1point(this, nm, frac)
+subroutine getvfrac(this, frac, nmfrom, nmto)
 !!--description-----------------------------------------------------------------
 !
-!    Function: Sets the mass fractions for 1 point
-!
-!!--declarations----------------------------------------------------------------
-    use precision 
-    implicit none
-    !
-    ! Function/routine arguments
-    !
-    type(bedcomp_data)                                    :: this
-    integer                                 , intent(in)  :: nm
-    real(fp), dimension(this%settings%nfrac), intent(in)  :: frac
-    !
-    ! Local variables
-    !
-    integer                             :: l
-    real(fp)                            :: masstot
-    real(prec), dimension(:,:), pointer :: bodsed
-    real(fp), dimension(:,:,:), pointer :: msed
-    !
-    !! executable statements -------------------------------------------------------
-    !
-    bodsed      => this%state%bodsed
-    msed        => this%state%msed
-    !
-    ! Calculate total bottom sediments and fractions
-    !
-    select case(this%settings%iunderlyr)
-    case(2)
-       masstot = 0.0_fp
-       do l = 1, this%settings%nfrac
-          masstot = masstot + msed(l, 1, nm)
-       enddo
-       do l = 1, this%settings%nfrac
-          msed(l, 1, nm) = frac(l)*masstot
-       enddo
-    case default
-       masstot = 1000.0_fp
-       do l = 1, this%settings%nfrac
-          bodsed(l, nm) = real(frac(l)*masstot,prec)
-       enddo
-    endselect
-end subroutine setmfrac_1point
-!
-!
-!
-!==============================================================================
-subroutine getvfrac_allpoints(this, frac)
-!!--description-----------------------------------------------------------------
-!
-!    Function: Determines the volume fractions for all points
+!    Function: Determines the volume fractions
 !
 !!--declarations----------------------------------------------------------------
     use precision
@@ -1578,7 +1527,9 @@ subroutine getvfrac_allpoints(this, frac)
     ! Function/routine arguments
     !
     type(bedcomp_data)                                                , intent(in)  :: this
-    real(fp), dimension(this%settings%nmlb:this%settings%nmub, this%settings%nfrac) :: frac
+    real(fp), dimension(nmfrom:nmto, this%settings%nfrac)             , intent(out) :: frac
+    integer                                                           , intent(in)  :: nmfrom
+    integer                                                           , intent(in)  :: nmto
     !
     ! Local variables
     !
@@ -1605,18 +1556,18 @@ subroutine getvfrac_allpoints(this, frac)
     !
     select case(this%settings%iunderlyr)
     case(2)
-       do nm = this%settings%nmlb, this%settings%nmub          
+       do nm = nmfrom, nmto
           if (comparereal(thlyr(1, nm),0.0_fp) == 0) then
              frac(nm, :) = 1.0_fp/this%settings%nfrac
           else
-            thick = svfrac(1, nm) * thlyr(1, nm)
-            do l = 1, this%settings%nfrac
+             thick = svfrac(1, nm) * thlyr(1, nm)
+             do l = 1, this%settings%nfrac
                 frac(nm, l) = msed(l, 1, nm)/(rhofrac(l)*thick)
-            enddo
+             enddo
           endif
        enddo
     case default
-       do nm = this%settings%nmlb, this%settings%nmub
+       do nm = nmfrom, nmto
           if (comparereal(dpsed(nm),0.0_fp) == 0) then
              frac(nm, :) = 1.0_fp/this%settings%nfrac
           else
@@ -1626,15 +1577,15 @@ subroutine getvfrac_allpoints(this, frac)
           endif
        enddo
     endselect
-end subroutine getvfrac_allpoints
+end subroutine getvfrac
 !
 !
 !
 !==============================================================================
-subroutine getvfrac_1point(this ,nm ,frac      )
+subroutine setvfrac(this, frac, nmfrom, nmto)
 !!--description-----------------------------------------------------------------
 !
-!    Function: Determines the volume fractions for 1 point
+!    Function: Update the bed composition given the volume fraction data
 !
 !!--declarations----------------------------------------------------------------
     use precision 
@@ -1642,81 +1593,21 @@ subroutine getvfrac_1point(this ,nm ,frac      )
     !
     ! Function/routine arguments
     !
-    type(bedcomp_data)                      , intent(in)  :: this
-    integer                                 , intent(in)  :: nm
-    real(fp), dimension(this%settings%nfrac), intent(out) :: frac
-    !
-    ! Local variables
-    !
-    integer                               :: l
-    real(fp)                              :: thick
-    real(prec), dimension(:,:)  , pointer :: bodsed
-    real(fp)  , dimension(:)    , pointer :: dpsed
-    real(fp)  , dimension(:,:)  , pointer :: svfrac
-    real(fp)  , dimension(:,:,:), pointer :: msed
-    real(fp)  , dimension(:,:)  , pointer :: thlyr
-    real(fp)  , dimension(:)    , pointer :: rhofrac
-!
-!! executable statements -------------------------------------------------------
-!
-    rhofrac     => this%settings%rhofrac
-    svfrac      => this%state%svfrac
-    bodsed      => this%state%bodsed
-    dpsed       => this%state%dpsed
-    msed        => this%state%msed
-    thlyr       => this%state%thlyr
-    !
-    ! Calculate total bottom sediments and fractions
-    !
-    select case(this%settings%iunderlyr)
-    case(2)
-       if (comparereal(thlyr(1, nm),0.0_fp) == 0) then
-          frac = 1.0_fp/this%settings%nfrac
-       else
-          thick = svfrac(1, nm) * thlyr(1, nm)
-          do l = 1, this%settings%nfrac
-             frac(l) = msed(l, 1, nm)/(rhofrac(l)*thick)
-          enddo
-       endif
-    case default
-       if (comparereal(dpsed(nm),0.0_fp) == 0) then
-          frac = 1.0_fp/this%settings%nfrac
-       else
-          do l = 1, this%settings%nfrac
-             frac(l) = real(bodsed(l, nm),fp)/(rhofrac(l)*dpsed(nm))
-          enddo
-       endif
-    endselect
-end subroutine getvfrac_1point
-!
-!
-!
-!==============================================================================
-subroutine setvfrac_1point(this, nm, vfrac)
-!!--description-----------------------------------------------------------------
-!
-!    Function: Sets the volume fractions for 1 point
-!
-!!--declarations----------------------------------------------------------------
-    use precision 
-    implicit none
-    !
-    ! Function/routine arguments
-    !
-    type(bedcomp_data)                                    :: this    
-    integer                                 , intent(in)  :: nm
-    real(fp), dimension(this%settings%nfrac), intent(in)  :: vfrac
+    type(bedcomp_data)                                                              :: this    
+    real(fp), dimension(nmfrom:nmto, this%settings%nfrac)             , intent(in)  :: frac
+    integer                                                           , intent(in)  :: nmfrom
+    integer                                                           , intent(in)  :: nmto
     !
     ! Local variables
     !
     integer                                    :: l
+    integer                                    :: nm
     real(fp)                                   :: sum
-    real(fp)                                   :: voltot
+    real(fp)                                   :: sedtot
     real(fp)  , dimension(:,:)  , pointer      :: svfrac
     real(prec), dimension(:,:)  , pointer      :: bodsed
     real(fp)  , dimension(:,:,:), pointer      :: msed
     real(fp)  , dimension(:,:)  , pointer      :: thlyr
-    real(fp)  , dimension(this%settings%nfrac) :: mfrac
     real(fp)  , dimension(:)    , pointer      :: rhofrac
     !
     !! executable statements -------------------------------------------------------
@@ -1729,16 +1620,37 @@ subroutine setvfrac_1point(this, nm, vfrac)
     !
     ! Calculate total bottom sediments and fractions
     !
-    sum = 0.0_fp
-    do l = 1, this%settings%nfrac
-       mfrac(l) = vfrac(l)*rhofrac(l)
-       sum = sum + mfrac(l)
-    enddo
-    do l = 1, this%settings%nfrac
-       mfrac(l) = mfrac(l)/sum
-    enddo
-    call setmfrac_1point(this, nm, mfrac)
-end subroutine setvfrac_1point
+    select case(this%settings%iunderlyr)
+    case(2)
+       do nm = nmfrom, nmto
+          sedtot = 0.0_fp
+          do l = 1, this%settings%nfrac
+             sedtot = sedtot + msed(l, 1, nm)
+          enddo
+          sum = 0.0_fp
+          do l = 1, this%settings%nfrac
+             sum = sum + frac(nm, l)*rhofrac(l)
+          enddo
+          do l = 1, this%settings%nfrac
+             msed(l, 1, nm) = sedtot*(frac(nm, l)*rhofrac(l)/sum)
+          enddo
+       enddo
+    case default
+       do nm = nmfrom, nmto
+          sedtot = 0.0_fp
+          do l = 1, this%settings%nfrac
+             sedtot = sedtot + real(bodsed(l, nm),fp)
+          enddo
+          sum = 0.0_fp
+          do l = 1, this%settings%nfrac
+             sum = sum + frac(nm, l)*rhofrac(l)
+          enddo
+          do l = 1, this%settings%nfrac
+             bodsed(l, nm) = real(sedtot*(frac(nm, l)*rhofrac(l)/sum),prec)
+          enddo
+       enddo
+    endselect
+end subroutine setvfrac
 !
 !
 !
@@ -1996,8 +1908,8 @@ function allocwork(this, work) result (istat)
     !
     istat = 0
     if (istat == 0) allocate (work%msed2(nfrac, nlyr), stat = istat)
-    if (istat == 0) allocate (work%thlyr2(nlyr)      , stat = istat)
-    if (istat == 0) allocate (work%svfrac2(nlyr)     , stat = istat)
+    if (istat == 0) allocate (work%thlyr2(nlyr)     , stat = istat)
+    if (istat == 0) allocate (work%svfrac2(nlyr)    , stat = istat)
 end function allocwork
 !
 !
