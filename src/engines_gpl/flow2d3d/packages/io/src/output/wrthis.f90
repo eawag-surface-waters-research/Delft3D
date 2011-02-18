@@ -55,13 +55,14 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer , dimension(:)    , pointer :: line_orig
-    logical                   , pointer :: first
-    integer                   , pointer :: celidt
-    integer , dimension(:, :) , pointer :: elmdms
-    type (nefiselement)       , pointer :: nefiselem
+    integer , dimension(:)          , pointer :: line_orig
+    logical                         , pointer :: first
+    integer                         , pointer :: celidt
+    integer , dimension(:, :)       , pointer :: elmdms
+    type (nefiselement)             , pointer :: nefiselem
     integer       , dimension(:, :) , pointer :: mnstat
     real(fp)      , dimension(:, :) , pointer :: xystat
+    character*(10)                  , pointer :: trans_unit !  Unit of the variables ATR and DTR
 !
 ! Local parameters
 !
@@ -184,6 +185,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     elmdms     => nefiselem%elmdms
     mnstat     => gdp%gdstations%mnstat
     xystat     => gdp%gdstations%xystat
+    trans_unit => gdp%gdpostpr%trans_unit
     !
     !
     !-----Initialize local variables
@@ -193,6 +195,8 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     nelmx1 = 1
     nelmx3 = nelmx - 1
     ierror = 0
+    elmunt(22) = trans_unit
+    elmunt(23) = trans_unit
     !
     ! Modifications to append his-files
     ! celidt = INT ( (ithisc - itstrt + 1.01*ithisi) / ithisi )

@@ -64,7 +64,8 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer , pointer :: itis
+    integer       , pointer :: itis
+    character*(10), pointer :: trans_unit !  Unit of the variables ATR and DTR
     include 'pardef.igd'
 !
 ! Global variables
@@ -141,8 +142,6 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                           :: lkw     ! Length (in characters) of keyword 
     integer                           :: ll      ! Help var. 
     integer                           :: lnconc  ! Help var. for constituent 
-    integer                           :: m       ! Help var. 
-    integer                           :: n       ! Help var. 
     integer                           :: nlook   ! Help var.: nr. of data to look for in the MD-file 
     integer                           :: ntrec   ! Help. var to keep track of NRREC 
     logical                           :: defaul  ! Flag set to YES if default value may be applied in case var. read is empty (ier <= 0, or nrread < nlook) 
@@ -164,7 +163,8 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
 !! executable statements -------------------------------------------------------
 !
-    itis  => gdp%gdrdpara%itis
+    itis       => gdp%gdrdpara%itis
+    trans_unit => gdp%gdpostpr%trans_unit
     !
     rdef   = 0.0
     nlook  = 1
@@ -681,4 +681,17 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           endif
        endif
     enddo
+
+    if (salin .and. .not. temp .and. lconc==0) then
+    !  only salinity:
+       trans_unit = '[PPT M3 ]'
+    else if (temp .and. .not. salin .and. lconc==0) then
+    !  only temperature
+       trans_unit = '[TEMP M3]'
+    else if (.not. salin .and. .not. temp .and. lconc>0) then
+    !  only concentrations
+       trans_unit = '[  KG   ]'
+    else
+       trans_unit = '[ MIXED ]'
+    endif
 end subroutine rdic
