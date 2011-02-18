@@ -133,7 +133,8 @@ use properties
     integer, dimension(:,:), allocatable :: kfv_g        
     real(sp), dimension(:,:,:,:), allocatable :: r1_g
     real(sp), dimension(:,:,:,:), allocatable :: rtur1_g
-    integer                                   :: ier1, ier2, ier3, ier4,ier5,ier6,ier7,ier8,ier9
+    integer                                   :: ier1, ier2
+    integer, dimension(10)                    :: ierr
 !
 !! executable statements -------------------------------------------------------
 !
@@ -258,7 +259,11 @@ use properties
        ! S1, DPS, U1, V1, UMNLDF, VMNLDF
        !
        allocate(sbuff(nmaxgl, mmaxgl, kmax, 1), stat = ier1)
-       allocate(s1_g(nmaxgl,mmaxgl),stat = ier2)
+       allocate(s1_g(nmaxgl,mmaxgl), stat = ier2)
+       if (ier1 /= 0 .or. ier2 /= 0) then
+          call prterr(lundia, 'G020', 's1_g')
+          call d3stop(1, gdp)
+       endif
        !
        ! S1
        !
@@ -293,6 +298,10 @@ use properties
              write(lundia, '(a)') 'Bed level data read from restart file.'
              rst_dp = .true.
              allocate(dp_g(nmaxgl,mmaxgl), stat = ier1)
+             if (ier1 /= 0) then
+                call prterr(lundia, 'G020', 'dp_g')
+                call d3stop(1, gdp)
+             endif
              dp_g(1:nmaxgl,1:mmaxgl) = sbuff(1:nmaxgl,1:mmaxgl,1,1)
              if (.not. nan_check(dp_g, 'dp_g (restart-file)', lundia)) call d3stop(1, gdp)
              !
@@ -314,6 +323,10 @@ use properties
           goto 9999
        endif
        allocate(u1_g(nmaxgl,mmaxgl,kmax), stat = ier1)
+       if (ier1 /= 0) then
+          call prterr(lundia, 'G020', 'u1_g')
+          call d3stop(1, gdp)
+       endif
        u1_g(1:nmaxgl,1:mmaxgl,1:kmax) = sbuff(1:nmaxgl,1:mmaxgl,1:kmax,1)
        if (.not. nan_check(u1_g, 'u1_g (restart-file)', lundia)) call d3stop(1, gdp)
        !
@@ -327,6 +340,10 @@ use properties
           goto 9999
        endif
        allocate(v1_g(nmaxgl,mmaxgl,kmax), stat = ier2)
+       if (ier2 /= 0) then
+          call prterr(lundia, 'G020', 'v1_g')
+          call d3stop(1, gdp)
+       endif
        v1_g(1:nmaxgl,1:mmaxgl,1:kmax) = sbuff(1:nmaxgl,1:mmaxgl,1:kmax,1)
        if (.not. nan_check(v1_g, 'v1_g (restart-file)', lundia)) call d3stop(1, gdp)
        !
@@ -339,7 +356,11 @@ use properties
              call prterr(lundia    ,'U190'    , error_string)
           endif
        else
-          allocate(umnldf_g(nmaxgl,mmaxgl), stat = ier3)
+          allocate(umnldf_g(nmaxgl,mmaxgl), stat = ier1)
+          if (ier1 /= 0) then
+             call prterr(lundia, 'G020', 'umnldf_g')
+             call d3stop(1, gdp)
+          endif
           umnldf_g(1:nmaxgl,1:mmaxgl) = sbuff(1:nmaxgl,1:mmaxgl,1,1)
           if (.not. nan_check(umnldf_g, 'umnldf_g (restart-file)', lundia)) call d3stop(1, gdp)
        endif
@@ -353,12 +374,21 @@ use properties
              call prterr(lundia    ,'U190'    , error_string)
           endif
        else
-          allocate(vmnldf_g(nmaxgl,mmaxgl), stat = ier4)
+          allocate(vmnldf_g(nmaxgl,mmaxgl), stat = ier1)
+          if (ier1 /= 0) then
+             call prterr(lundia, 'G020', 'vmnldf_g')
+             call d3stop(1, gdp)
+          endif
           vmnldf_g(1:nmaxgl,1:mmaxgl) = sbuff(1:nmaxgl,1:mmaxgl,1,1)
           if (.not. nan_check(vmnldf_g, 'vmnldf_g (restart-file)', lundia)) call d3stop(1, gdp)
        endif
        !
        allocate(ibuff(nmaxgl, mmaxgl, 1, 1), stat = ier1)
+       allocate(kfu_g(nmaxgl,mmaxgl), stat = ier2)
+       if (ier1 /= 0 .or. ier2 /= 0) then
+          call prterr(lundia, 'G020', 'kfu_g')
+          call d3stop(1, gdp)
+       endif
        !
        ! KFU: current active/inactive status of U point
        !
@@ -369,7 +399,6 @@ use properties
           error = .true.
           goto 9999
        endif
-       allocate(kfu_g(nmaxgl,mmaxgl), stat = ier1)
        kfu_g=0
        kfu_g(1:nmaxgl,1:mmaxgl) = ibuff(1:nmaxgl,1:mmaxgl,1,1)
        !
@@ -383,20 +412,27 @@ use properties
           goto 9999
        endif
        allocate(kfv_g(nmaxgl,mmaxgl), stat = ier2)
+       if (ier2 /= 0) then
+          call prterr(lundia, 'G020', 'kfv_g')
+          call d3stop(1, gdp)
+       endif
        kfv_g=0
        kfv_g(1:nmaxgl,1:mmaxgl) = ibuff(1:nmaxgl,1:mmaxgl,1,1)
        !
        ! Constituents sal, temp, constituents
        ! Use nmaxus*mmax*kmax*lstsci buffer
        !
-
-       
        ierror = getelt(fds, 'map-const', 'LSTCI', cuindex, 1, 4, rst_lstci)       
        
        if (lstsci /= 0) then
           if (lstsci == rst_lstci) then
              deallocate(sbuff)
-             allocate(sbuff(nmaxgl, mmaxgl, kmax, lstsci), stat = ier3)
+             allocate(sbuff(nmaxgl, mmaxgl, kmax, lstsci), stat = ier1)
+             allocate(r1_g(nmaxgl,mmaxgl, kmax, lstsci), stat = ier2)
+             if (ier1 /= 0 .or. ier2 /= 0) then
+                call prterr(lundia, 'G020', 'r1_g')
+                call d3stop(1, gdp)
+             endif
              ierror = getelt( fds , 'map-series', 'R1', uindex, 1, mmaxgl*nmaxgl*kmax*rst_lstci*4, sbuff )
              if (ierror/= 0) then
                 ierror = neferr(0,error_string)
@@ -404,7 +440,6 @@ use properties
                 error = .true.
                 goto 9999
              endif
-             allocate(r1_g(nmaxgl,mmaxgl, kmax, lstsci), stat = ier4)
              r1_g(1:nmaxgl,1:mmaxgl,1:kmax,1:lstsci) = sbuff(1:nmaxgl,1:mmaxgl,1:kmax,1:lstsci)
              if (.not. nan_check(r1_g, 'r1_g (restart-file)', lundia)) call d3stop(1, gdp)
           else        
@@ -427,6 +462,11 @@ use properties
           if (ltur == rst_ltur) then
              deallocate(sbuff)
              allocate(sbuff(nmaxgl, mmaxgl, 0:kmax, ltur), stat = ier1)
+             allocate(rtur1_g(nmaxgl,mmaxgl, 0:kmax, 1:ltur), stat = ier2)
+             if (ier1 /= 0 .or. ier2 /= 0) then
+                call prterr(lundia, 'G020', 'rtur1_g')
+                call d3stop(1, gdp)
+             endif
              ierror = getelt( fds , 'map-series', 'RTUR1', uindex, 1, mmaxgl*nmaxgl*(kmax+1)*rst_ltur*4, sbuff )
              if (ierror/= 0) then
                 ierror = neferr(0,error_string)
@@ -434,7 +474,6 @@ use properties
                 error = .true.
                 goto 9999
              endif
-             allocate(rtur1_g(nmaxgl,mmaxgl, 0:kmax, 1:ltur), stat = ier2)
              rtur1_g(1:nmaxgl,1:mmaxgl,0:kmax,1:ltur) = sbuff(1:nmaxgl,1:mmaxgl,0:kmax,1:ltur)
              if (.not. nan_check(rtur1_g, 'rtur1_g (restart-file)', lundia)) call d3stop(1, gdp)
           else        
@@ -455,22 +494,26 @@ use properties
     call dfbroadc ( rst_ltur, 1, dfint, gdp )   
        
     if ( inode /= master ) then 
-       allocate (s1_g(nmaxgl,mmaxgl),stat=ier1) 
-       if (dp_from_map_file) allocate (dp_g(nmaxgl,mmaxgl))
-       allocate (u1_g(nmaxgl,mmaxgl,kmax), stat = ier2) 
-       allocate (v1_g(nmaxgl,mmaxgl,kmax), stat = ier3) 
-       allocate (umnldf_g(nmaxgl,mmaxgl), stat = ier4) 
-       allocate (vmnldf_g(nmaxgl,mmaxgl), stat = ier5)
-       allocate (kfu_g(nmaxgl,mmaxgl), stat = ier6) 
-       allocate (kfv_g(nmaxgl,mmaxgl), stat = ier7)
-       if (lstsci > 0 .and. lstsci == rst_lstci) allocate (r1_g(nmaxgl,mmaxgl,kmax,1:lstsci), stat = ier8)
-       if (ltur > 0 .and. ltur == rst_ltur)  allocate (rtur1_g(nmaxgl,mmaxgl,0:kmax,1:ltur), stat = ier9)              
-        
+       ierr(8:10) = 0
+       allocate (s1_g(nmaxgl,mmaxgl), stat=ierr(1)) 
+       if (dp_from_map_file) allocate (dp_g(nmaxgl,mmaxgl), stat=ierr(10))
+       allocate (u1_g(nmaxgl,mmaxgl,kmax), stat = ierr(2)) 
+       allocate (v1_g(nmaxgl,mmaxgl,kmax), stat = ierr(3)) 
+       allocate (umnldf_g(nmaxgl,mmaxgl), stat = ierr(4)) 
+       allocate (vmnldf_g(nmaxgl,mmaxgl), stat = ierr(5))
+       allocate (kfu_g(nmaxgl,mmaxgl), stat = ierr(6)) 
+       allocate (kfv_g(nmaxgl,mmaxgl), stat = ierr(7))
+       if (lstsci > 0 .and. lstsci == rst_lstci) allocate (r1_g(nmaxgl,mmaxgl,kmax,1:lstsci), stat = ierr(8))
+       if (ltur > 0 .and. ltur == rst_ltur)  allocate (rtur1_g(nmaxgl,mmaxgl,0:kmax,1:ltur), stat = ierr(9))
+       if (any(ierr(1:10) /= 0)) then
+          call prterr(lundia, 'G020', 'restart-data')
+          call d3stop(1, gdp)
+       endif
     endif 
     ! 
     ! scatter arrays s1 etc to all nodes. Note: the broadc must use 'dfreal'
     ! since the arrays are single precision! Otherwise, intractable memory errors will occur. 
-    ! 
+    !
     call dfsync(gdp)
       
     call dfbroadc ( s1_g, nmaxgl*mmaxgl, dfreal, gdp )   
@@ -525,13 +568,17 @@ use properties
        enddo   
     endif       
 
-    deallocate(u1_g, v1_g, stat = ier2)
-    deallocate(s1_g, stat = ier1)
-    deallocate(umnldf_g, vmnldf_g, stat = ier3)
-    deallocate(kfu_g, kfv_g, stat=ier4)
-    if (dp_from_map_file) deallocate(dp_g, stat = ier1)
-    if (lstsci > 0 .and. lstsci  == rst_lstci) deallocate(r1_g, stat = ier2)
-    if (ltur > 0  .and. ltur == rst_ltur ) deallocate(rtur1_g, stat = ier3)
+    deallocate(u1_g, v1_g, stat = ierr(1))
+    deallocate(s1_g, stat = ierr(2))
+    deallocate(umnldf_g, vmnldf_g, stat = ierr(3))
+    deallocate(kfu_g, kfv_g, stat=ierr(4))
+    ierr(5:6) = 0
+    if (dp_from_map_file) deallocate(dp_g, stat = ierr(5))
+    if (lstsci > 0 .and. lstsci  == rst_lstci) deallocate(r1_g, stat = ierr(6))
+    if (ltur > 0  .and. ltur == rst_ltur ) deallocate(rtur1_g, stat = ierr(7))
+    if (any(ierr(1:7) /= 0)) then
+       call prterr(lundia, 'U021', 'flow_nefis_restart: memory de-allocate error')
+    endif
 
                 
 9999 continue

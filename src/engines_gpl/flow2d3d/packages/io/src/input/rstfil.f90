@@ -69,7 +69,6 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
     integer                                                                    , intent(out) :: lturi  !  Description and declaration in tricom.igs
     integer                                                                                  :: lundia !  Description and declaration in inout.igs
     integer                                                                    , intent(in)  :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                                  :: nmax   !  Description and declaration in iidim.f90
     integer                                                                    , intent(in)  :: nmaxus !  Description and declaration in iidim.f90
     integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                            :: kfu    !  Description and declaration in iidim.f90
     integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                            :: kfv    !  Description and declaration in iidim.f90
@@ -107,8 +106,6 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
     logical                                              :: ex
     logical                                              :: ex_nfs
     real(sp)      , dimension(:,:,:,:)     , allocatable :: sbuff   !!  Single precision buffer to read from file
-    real(sp)      , dimension(:,:)         , allocatable :: sbuffg
-    character(256)                                       :: message
     character(300)                                       :: filtmp  ! File name restart file 300 = 256 + a bit
 !
 !! executable statements -------------------------------------------------------
