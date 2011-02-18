@@ -153,98 +153,98 @@ group               testcase
                     10-bijker              ERROR: Waves activated but no COM-file present
                     11-rijn1993            ERROR: Waves activated but no COM-file present
                     12-vanrijn_temp        OK
-07_zlayers          01-channel             
-                    02-drying-flooding     
-                    03-tidalflume          
+07_zlayers          01-channel             ERROR: Z layer
+                    02-drying-flooding     ERROR: Z layer
+                    03-tidalflume          ERROR: Z layer
                     04-temperature         ***** DISABLED ********** DISABLED *****
-                    05-pits                
-                    06-125                 
-                    07-f34                 
-                    08-brassem             
-                    09-zegerplas           
-                    10-gate1               
-                    11-gate2               
-                    12-lockex_nhy          
-                    13-jet_nhy             
-                    14-01.06-rot_r         
-                    15-01.07-chezy_r       
-                    16-01.08-power_r       
-                    17-01.12-breukelerme   
-                    18-01.15-eva_plus      
-                    19-03.06-india_droog   
-                    20-04.07-034           
-                    21-11.10-q10           
-                    22-jvk-bak_met_dremp   
-                    23-onl                 
-                    24-forester            
-                    25-bubblescreen        
-                    26-powerstation        
-07a_zlayers_implicit01-channel             
-                    02-drying-flooding     
-                    03-tidalflume          
+                    05-pits                ERROR: Z layer
+                    06-125                 ERROR: Z layer
+                    07-f34                 ERROR: Z layer
+                    08-brassem             ERROR: Z layer
+                    09-zegerplas           ERROR: Z layer
+                    10-gate1               ERROR: Z layer
+                    11-gate2               ERROR: Z layer
+                    12-lockex_nhy          ERROR: Z layer
+                    13-jet_nhy             ERROR: Z layer
+                    14-01.06-rot_r         ERROR: Z layer
+                    15-01.07-chezy_r       ERROR: Z layer
+                    16-01.08-power_r       ERROR: Z layer
+                    17-01.12-breukelerme   ERROR: Z layer
+                    18-01.15-eva_plus      ERROR: Z layer
+                    19-03.06-india_droog   ERROR: Z layer
+                    20-04.07-034           ERROR: Z layer
+                    21-11.10-q10           ERROR: Z layer
+                    22-jvk-bak_met_dremp   ERROR: Z layer
+                    23-onl                 ERROR: Z layer
+                    24-forester            ERROR: Z layer
+                    25-bubblescreen        ERROR: Z layer
+                    26-powerstation        ERROR: Z layer
+07a_zlayers_implicit01-channel             ERROR: Z layer
+                    02-drying-flooding     ERROR: Z layer
+                    03-tidalflume          ERROR: Z layer
                     04-temperature         ***** DISABLED ********** DISABLED *****
-                    05-pits                
-                    06-125                 
-                    07-f34                 
-                    08-brassem             
-                    09-zegerplas           
-                    10-gate1               
-                    11-gate2               
-                    12-lockex_nhy          
-                    13-jet_nhy             
-                    14-01.06-rot_r         
-                    15-01.07-chezy_r       
-                    16-01.08-power_r       
-                    17-01.12-breukelerme   
-                    18-01.15-eva_plus      
-                    19-03.06-india_droog   
-                    20-04.07-034           
-                    21-11.10-q10           
-                    22-jvk-bak_met_dremp   
-                    23-onl                 
-                    24-forester            
-                    25-bubblescreen        
-08_fluidmud         1-helling              
-                    2-aandrijving1         
-                    3-aandrijving2         
-                    4-slibhelling          
-                    5-consolidatie         
-                    6-inuitstroom          
-                    7-erosie               
-                    8-klots                
-                    9-bezinken             
-09_rtc              01-basic               
+                    05-pits                ERROR: Z layer
+                    06-125                 ERROR: Z layer
+                    07-f34                 ERROR: Z layer
+                    08-brassem             ERROR: Z layer
+                    09-zegerplas           ERROR: Z layer
+                    10-gate1               ERROR: Z layer
+                    11-gate2               ERROR: Z layer
+                    12-lockex_nhy          ERROR: Z layer
+                    13-jet_nhy             ERROR: Z layer
+                    14-01.06-rot_r         ERROR: Z layer
+                    15-01.07-chezy_r       ERROR: Z layer
+                    16-01.08-power_r       ERROR: Z layer
+                    17-01.12-breukelerme   ERROR: Z layer
+                    18-01.15-eva_plus      ERROR: Z layer
+                    19-03.06-india_droog   ERROR: Z layer
+                    20-04.07-034           ERROR: Z layer
+                    21-11.10-q10           ERROR: Z layer
+                    22-jvk-bak_met_dremp   ERROR: Z layer
+                    23-onl                 ERROR: Z layer
+                    24-forester            ERROR: Z layer
+                    25-bubblescreen        ERROR: Z layer
+08_fluidmud         1-helling              ERROR: Z layer
+                    2-aandrijving1         ERROR: Z layer
+                    3-aandrijving2         ERROR: Z layer
+                    4-slibhelling          ERROR: Z layer
+                    5-consolidatie         ERROR: Z layer
+                    6-inuitstroom          ERROR: Z layer
+                    7-erosie               ERROR: Z layer
+                    8-klots                ERROR: Z layer
+                    9-bezinken             ERROR: Z layer
+09_rtc              01-basic               ERROR: RTC online
                     02-s01a_dd             ***** DISABLED ********** DISABLED *****
-10_dd               00-2bakjes             
-                    01-3bakjes             
-                    02-6bakjes             
-                    03-vlissingen          
-                    04-humber              
-                    05-victoria            
-                    06-x-even              
-                    07-y-even              
-                    08-vict-even           
-                    09-3bakjes_movedback   
-                    10-vlissingen_movedb   
-                    11-tutorial            
-                    12-whirlpool           
-                    13-ols-trench-x        
-                    14-ols-trench-y-refi   
-                    15-ols-humber          
-                    16-lockex_nhy          
-                    17-jet_nhy             
-                    18-cdw_nhy             
-                    19-203                 
-                    20-233                 
-                    21-4channels_2d        
-                    22-4channels_3d        
-                    23-palmisland          
-                    24-binnenhoek          
-                    25-palmisland_4dom     
-                    26-1dom_dd             
-                    27-ols_forester        
-                    28-settle_veloc_opb_   
-                    29-z_ini               
+10_dd               00-2bakjes             ERROR: DD
+                    01-3bakjes             ERROR: DD
+                    02-6bakjes             ERROR: DD
+                    03-vlissingen          ERROR: DD
+                    04-humber              ERROR: DD
+                    05-victoria            ERROR: DD
+                    06-x-even              ERROR: DD
+                    07-y-even              ERROR: DD
+                    08-vict-even           ERROR: DD
+                    09-3bakjes_movedback   ERROR: DD
+                    10-vlissingen_movedb   ERROR: DD
+                    11-tutorial            ERROR: DD
+                    12-whirlpool           ERROR: DD
+                    13-ols-trench-x        ERROR: DD
+                    14-ols-trench-y-refi   ERROR: DD
+                    15-ols-humber          ERROR: DD
+                    16-lockex_nhy          ERROR: DD
+                    17-jet_nhy             ERROR: DD
+                    18-cdw_nhy             ERROR: DD
+                    19-203                 ERROR: DD
+                    20-233                 ERROR: DD
+                    21-4channels_2d        ERROR: DD
+                    22-4channels_3d        ERROR: DD
+                    23-palmisland          ERROR: DD
+                    24-binnenhoek          ERROR: DD
+                    25-palmisland_4dom     ERROR: DD
+                    26-1dom_dd             ERROR: DD
+                    27-ols_forester        ERROR: DD
+                    28-settle_veloc_opb_   ERROR: DD
+                    29-z_ini               ERROR: DD
 11_qhqtot           01-q01                 OK (after making grid) 
                     02-q02                 
                     03-q03                 

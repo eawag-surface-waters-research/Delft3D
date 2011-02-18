@@ -470,7 +470,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                    !
                    sedtyp(l) = SEDTYP_NONCOHESIVE_SUSPENDED
                    !
-                else
+                elseif (l <= lsed) then
                    ! if it does not start with mud (checked above) and
                    !   if it does not start with sand and
                    !   if it is one of the first LSED sediment fractions (otherwise bedload would also be acceptable)
@@ -478,6 +478,10 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                    !
                    error = .true.
                    call prterr(lundia, 'U007', 'suspended sediment type (must start with sand or mud)')
+                else
+                   !
+                   ! bedload sediment type
+                   !
                 endif
              endif
              !

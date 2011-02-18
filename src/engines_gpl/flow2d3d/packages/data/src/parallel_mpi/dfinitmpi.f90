@@ -99,6 +99,8 @@ subroutine dfinitmpi
     ! get node number INODE
     !
 #ifdef DFMPI
+    host      = 'unknown'
+    processor = 'unknown'
     call mpi_comm_rank ( MPI_COMM_WORLD, inode, ierr )
     call util_getenv('HOSTNAME',host)
     call mpi_get_processor_name (processor,len,ierr)
