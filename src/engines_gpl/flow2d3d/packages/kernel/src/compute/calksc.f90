@@ -45,6 +45,7 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
     use globaldata
     !
     implicit none
+    include "vanrijn.inc"
     !
     type(globdat),target :: gdp
     !
@@ -60,9 +61,6 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
     real(fp)      , dimension(:)         , pointer :: sedd50
     real(fp)      , dimension(:)         , pointer :: sedd50fld
     real(fp)      , dimension(:)         , pointer :: sedd90
-    real(fp)                             , pointer :: dsilt
-    real(fp)                             , pointer :: dsand
-    real(fp)                             , pointer :: dgravel
     integer                              , pointer :: i50
     integer                              , pointer :: i90
     real(fp)              , dimension(:) , pointer :: xx
@@ -177,9 +175,6 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
     sedd50                  => gdp%gdsedpar%sedd50
     sedd50fld               => gdp%gdsedpar%sedd50fld
     sedd90                  => gdp%gdsedpar%sedd90
-    dsilt                   => gdp%gdmorpar%dsilt
-    dsand                   => gdp%gdmorpar%dsand
-    dgravel                 => gdp%gdmorpar%dgravel
     i50                     => gdp%gdmorpar%i50
     i90                     => gdp%gdmorpar%i90
     xx                      => gdp%gdmorpar%xx

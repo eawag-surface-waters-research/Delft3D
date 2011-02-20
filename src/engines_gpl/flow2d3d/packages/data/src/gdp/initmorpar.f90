@@ -63,10 +63,6 @@ subroutine initmorpar(gdp)
     real(fp)                             , pointer :: alfabs
     real(fp)                             , pointer :: alfabn
     real(fp)                             , pointer :: camax
-    real(fp)                             , pointer :: dclay
-    real(fp)                             , pointer :: dsilt
-    real(fp)                             , pointer :: dsand
-    real(fp)                             , pointer :: dgravel
     real(fp)                             , pointer :: dzmax
     real(fp)                             , pointer :: sus
     real(fp)                             , pointer :: bed
@@ -138,10 +134,6 @@ subroutine initmorpar(gdp)
     alfabs              => gdp%gdmorpar%alfabs
     alfabn              => gdp%gdmorpar%alfabn
     camax               => gdp%gdmorpar%camax
-    dclay               => gdp%gdmorpar%dclay
-    dsilt               => gdp%gdmorpar%dsilt
-    dsand               => gdp%gdmorpar%dsand
-    dgravel             => gdp%gdmorpar%dgravel
     dzmax               => gdp%gdmorpar%dzmax
     sus                 => gdp%gdmorpar%sus
     bed                 => gdp%gdmorpar%bed
@@ -262,10 +254,6 @@ subroutine initmorpar(gdp)
     alfabs             = 1.0_fp
     alfabn             = 1.5_fp
     camax              = 0.65_fp
-    dclay              =  8.0e-6_fp
-    dsilt              = 32.0e-6_fp
-    dsand              = 64.0e-6_fp
-    dgravel            =  2.0e-3_fp
     dzmax              = 0.05_fp
     sus                = 1.0_fp
     bed                = 1.0_fp

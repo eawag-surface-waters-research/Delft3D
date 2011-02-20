@@ -169,6 +169,7 @@ src/engines_gpl/flow2d3d/packages/data/include/updbcc.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/updbct.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/upddis.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/usrpar.igs -text
+src/engines_gpl/flow2d3d/packages/data/include/vanrijn.inc -text
 src/engines_gpl/flow2d3d/packages/data/include/waqpar.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/wrirst.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/wrline.igs -text

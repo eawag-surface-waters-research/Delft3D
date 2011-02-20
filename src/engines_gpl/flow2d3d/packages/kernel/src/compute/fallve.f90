@@ -50,6 +50,7 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
     use globaldata
     !
     implicit none
+    include "vanrijn.inc"
     !
     type(globdat),target :: gdp
     !
@@ -66,8 +67,6 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
     real(fp)      , dimension(:)     , pointer :: salmax
     real(fp)      , dimension(:)     , pointer :: sedd50
     real(fp)      , dimension(:)     , pointer :: sedd50fld
-    real(fp)                         , pointer :: dsand
-    real(fp)                         , pointer :: dgravel
     integer,        dimension(:)     , pointer :: iform
     integer       , dimension(:)     , pointer :: sedtyp
     real(fp)                         , pointer :: timsec
@@ -178,8 +177,6 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
     sedtyp              => gdp%gdsedpar%sedtyp
     sedd50              => gdp%gdsedpar%sedd50
     sedd50fld           => gdp%gdsedpar%sedd50fld
-    dsand               => gdp%gdmorpar%dsand
-    dgravel             => gdp%gdmorpar%dgravel
     iform               => gdp%gdeqtran%iform
     !
     timsec              => gdp%gdinttim%timsec

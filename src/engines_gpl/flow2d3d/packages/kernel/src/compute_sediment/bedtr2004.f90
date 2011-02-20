@@ -7,7 +7,7 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
                    & thick     ,concin    ,kmax      ,deltas    ,ws        , &
                    & rksrs     ,dzduu     ,dzdvv     ,rhow      , &
                    & ag        ,bedw      ,pangle    ,fpco      ,susw      , &
-                   & dclay     ,wave      ,eps       ,subiw     ,error     )
+                   & wave      ,eps       ,subiw     ,error     )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -55,6 +55,7 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
     use mathconsts
     !
     implicit none
+    include "vanrijn.inc"
 !
 ! Global variables
 !
@@ -102,7 +103,6 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
     real(fp)                 , intent(in)  :: pangle
     real(fp)                 , intent(in)  :: fpco
     real(fp)                 , intent(in)  :: susw
-    real(fp)                 , intent(in)  :: dclay
     logical                  , intent(in)  :: wave
     real(fp)                 , intent(in)  :: eps
     integer                  , intent(in)  :: subiw

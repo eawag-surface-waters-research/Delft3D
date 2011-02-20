@@ -8,8 +8,8 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
                    & hrms      ,delw      ,uon       ,uoff      ,uwbih     , &
                    & delm      ,fc1       ,fw1       ,phicur    ,kscr      , &
                    & i2d3d     ,mudfrac   ,fsilt     ,taucr1    ,psi       , &
-                   & dzduu     ,dzdvv     ,eps       ,camax     ,dsilt     , &
-                   & dsand     ,iopsus    ,ag        ,wave      ,tauadd    ) 
+                   & dzduu     ,dzdvv     ,eps       ,camax     ,iopsus    , &
+                   & ag        ,wave      ,tauadd    ) 
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -50,6 +50,7 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
     use mathconsts
     !
     implicit none
+    include "vanrijn.inc"
 !
 ! Global variables
 !
@@ -102,8 +103,6 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
     real(fp), intent(in)  :: dzdvv    !  Description and declaration in rjdim.f90
     real(fp), intent(in)  :: eps
     real(fp), intent(in)  :: camax
-    real(fp), intent(in)  :: dsilt
-    real(fp), intent(in)  :: dsand
     integer , intent(in)  :: iopsus
     real(fp), intent(in)  :: ag
     logical , intent(in)  :: wave

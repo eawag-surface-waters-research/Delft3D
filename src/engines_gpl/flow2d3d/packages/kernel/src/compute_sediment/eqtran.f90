@@ -84,9 +84,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     logical                              , pointer :: ubot_from_com
     real(fp)                             , pointer :: timsec
     real(fp)                             , pointer :: camax
-    real(fp)                             , pointer :: dclay
-    real(fp)                             , pointer :: dsilt
-    real(fp)                             , pointer :: dsand
     real(fp)                             , pointer :: aksfac
     real(fp)                             , pointer :: rwave
     real(fp)                             , pointer :: rdc
@@ -287,9 +284,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     scour               => gdp%gdscour%scour
     timsec              => gdp%gdinttim%timsec
     camax               => gdp%gdmorpar%camax
-    dclay               => gdp%gdmorpar%dclay
-    dsilt               => gdp%gdmorpar%dsilt
-    dsand               => gdp%gdmorpar%dsand
     aksfac              => gdp%gdmorpar%aksfac
     rwave               => gdp%gdmorpar%rwave
     rdc                 => gdp%gdmorpar%rdc
@@ -350,8 +344,8 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
                        & hrms      ,delw      ,uon       ,uoff      ,uwbih     , &
                        & delm      ,fc1       ,fw1       ,phicur    ,rksrs     , &
                        & i2d3d     ,mudfrac   ,fsilt     ,taucr1    ,psi       , &
-                       & dzduu     ,dzdvv     ,eps       ,camax     ,dsilt     , &
-                       & dsand     ,iopsus    ,ag        ,wave      ,tauadd    ) 
+                       & dzduu     ,dzdvv     ,eps       ,camax     ,iopsus    , &
+                       & ag        ,wave      ,tauadd    ) 
        else
           call bedbc1993(tp        ,uorb      ,rhowat    ,h1        ,umod      , &
                        & zumod     ,di50      ,d90       ,z0cur     ,z0rou     , &
@@ -400,7 +394,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
                              & uwbih     ,aks       ,ce_nm     ,ce_nmtmp  ,deltas    , &
                              & akstmp    ,di50      ,sa        ,ws0       ,fdamp     , &
                              & psi       ,epsbed    ,epsmax    ,epsmxc    ,epspar    , &
-                             & eps       ,dsand     ,bed       ,vonkar    ,wave      )
+                             & eps       ,bed       ,vonkar    ,wave      )
           else
              do k=1, kmax
                 seddif(k) = dicww(k)
@@ -640,7 +634,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
                        & thick     ,concin    ,kmax      ,deltas    ,ws(1)     , &
                        & rksrs     ,dzduu     ,dzdvv     ,rhow      , &
                        & ag        ,bedw      ,pangle    ,fpco      ,susw      , &
-                       & dclay     ,wave      ,eps       ,subiw     ,error     )
+                       & wave      ,eps       ,subiw     ,error     )
           if (error) call d3stop(1, gdp)
        endif
        sbc_total = .false.

@@ -122,10 +122,6 @@ type gd_morpar
     real(fp):: alfabs     !  factor for longitudinal bed load transport
     real(fp):: alfabn     !  factor for transverse bed load transport
     real(fp):: camax      !  Maximum volumetric reference concentration
-    real(fp):: dclay      !  grain size threshold clay   (vRijn:    8um)
-    real(fp):: dsilt      !  grain size threshold silt   (vRijn:   32um)  
-    real(fp):: dsand      !  grain size threshold sand   (vRijn:   62um)  
-    real(fp):: dgravel    !  grain size threshold gravel (vRijn: 2000um)
     real(fp):: dzmax      !  factor for limiting source and sink term in EROSED (percentage of water depth)
     real(fp):: sus        !  flag for calculating suspended load transport
     real(fp):: bed        !  flag for calculating bed load transport

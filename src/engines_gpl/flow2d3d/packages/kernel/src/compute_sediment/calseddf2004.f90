@@ -4,7 +4,7 @@ subroutine calseddf2004(ustarc    ,ws        ,tp        ,hrms      ,h1        , 
                       & uwbih     ,aks       ,ce_nm     ,ce_nmtmp  ,deltas    , &
                       & akstmp    ,d50       ,sa        ,ws0       ,fdamp     , &
                       & psi       ,epsbed    ,epsmax    ,epsmxc    ,epspar    , &
-                      & eps       ,dsand     ,bed       ,vonkar    ,wave      )
+                      & eps       ,bed       ,vonkar    ,wave      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -45,6 +45,7 @@ subroutine calseddf2004(ustarc    ,ws        ,tp        ,hrms      ,h1        , 
     use mathconsts
     !
     implicit none
+    include "vanrijn.inc"
 !
 ! Global variables
 !
@@ -74,7 +75,6 @@ subroutine calseddf2004(ustarc    ,ws        ,tp        ,hrms      ,h1        , 
     real(fp), dimension(kmax)  , intent(in)  :: sig    !  Description and declaration in rjdim.f90
     real(fp), dimension(kmax)  , intent(in)  :: thick  !  Description and declaration in rjdim.f90
     real(fp)                   , intent(in)  :: eps
-    real(fp)                   , intent(in)  :: dsand
     real(fp)                   , intent(in)  :: bed
     real(fp)                   , intent(in)  :: vonkar
     logical                    , intent(in)  :: epspar

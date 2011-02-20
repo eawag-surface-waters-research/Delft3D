@@ -44,6 +44,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     use bedcomposition_module
     !
     implicit none
+    include "vanrijn.inc"
     !
     type(globdat),target :: gdp
     !
@@ -62,8 +63,6 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     real(fp), dimension(:,:)             , pointer :: ssvvc
     real(fp), dimension(:,:)             , pointer :: sucor
     real(fp), dimension(:,:)             , pointer :: svcor
-    real(fp)                             , pointer :: dsand
-    real(fp)                             , pointer :: dgravel
     integer                              , pointer :: nxx
     real(fp)              , dimension(:) , pointer :: xx
     integer                              , pointer :: ihidexp
@@ -147,8 +146,6 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     ssvvc               => gdp%gderosed%ssvvc
     sucor               => gdp%gderosed%sucor
     svcor               => gdp%gderosed%svcor
-    dsand               => gdp%gdmorpar%dsand
-    dgravel             => gdp%gdmorpar%dgravel
     nxx                 => gdp%gdmorpar%nxx
     xx                  => gdp%gdmorpar%xx
     ihidexp             => gdp%gdmorpar%ihidexp
