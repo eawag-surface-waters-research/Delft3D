@@ -12,7 +12,12 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
                 & hidexp    ,suspfrac  ,ust2      ,tetacr    ,sa        , &
                 & salmax    ,ws0       ,t_relax   ,dis       ,concin    , &
                 & dzduu     ,dzdvv     ,ubot      ,temp      ,tauadd    , &
-                & error     ,gdp       )
+                & sus       ,bed       ,susw      ,bedw      ,espir     , &
+                & rhow      ,ag        ,vonkar    ,vicmol    ,wave      , &
+                & scour     ,epspar    ,ubot_from_com,timsec ,camax     , &
+                & aksfac    ,rwave     ,rdc       ,rdw       ,pangle    , &
+                & fpco      ,iopsus    ,iopkcw    ,subiw     ,eps       , &
+                & runid     ,n         ,m         ,error     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -58,7 +63,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    real(fp)                             , pointer :: eps
     integer                              , pointer :: max_integers
     integer                              , pointer :: max_reals
     integer                              , pointer :: max_strings
@@ -70,128 +74,120 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     character(256), dimension(:)         , pointer :: dll_usrfil
     integer,        dimension(:)         , pointer :: iform
     real(fp),       dimension(:,:)       , pointer :: par
-    real(fp)                             , pointer :: sus
-    real(fp)                             , pointer :: bed
-    real(fp)                             , pointer :: susw
-    real(fp)                             , pointer :: bedw
-    real(fp)                             , pointer :: espir
-    real(fp)                             , pointer :: rhow
-    real(fp)                             , pointer :: ag
-    real(fp)                             , pointer :: vonkar
-    real(fp)                             , pointer :: vicmol
-    logical                              , pointer :: wave
-    logical                              , pointer :: scour
-    logical                              , pointer :: epspar
-    logical                              , pointer :: ubot_from_com
-    real(fp)                             , pointer :: timsec
-    real(fp)                             , pointer :: camax
-    real(fp)                             , pointer :: aksfac
-    real(fp)                             , pointer :: rwave
-    real(fp)                             , pointer :: rdc
-    real(fp)                             , pointer :: rdw
-    real(fp)                             , pointer :: pangle
-    real(fp)                             , pointer :: fpco
-    integer                              , pointer :: iopsus
-    integer                              , pointer :: iopkcw
-    integer                              , pointer :: subiw
 !
 ! Global variables
 !
-    integer                             :: i2d3d
-    integer                             :: kmax     !  Description and declaration in iidim.f90
-    integer                             :: kmaxsd
-    integer                             :: ised     !  i-th sediment
-    integer                             :: lsecfl   !  Description and declaration in iidim.f90
-    integer                             :: ltur     !  Description and declaration in iidim.f90
-    integer                             :: lundia   !  Description and declaration in inout.igs
-    integer                             :: nm
-    integer                             :: n
-    integer                             :: m
-    real(fp)                            :: aks      !  Description and declaration in rjdim.f90
-    real(fp)                            :: akstmp
-    real(fp)                            :: ce_nm
-    real(fp)                            :: ce_nmtmp
-    real(fp)  , dimension(kmax)         :: concin
-    real(fp)                            :: crep
-    real(fp)                            :: d10
-    real(fp)                            :: d90
-    real(fp)                            :: di50
-    real(fp)                            :: drho
-    real(fp)              , intent(in)  :: dis
-    real(fp)              , intent(out) :: dss      !  Description and declaration in rjdim.f90
-    real(fp)              , intent(in)  :: dstar
-    real(fp)              , intent(in)  :: frac     !  Description and declaration in rjdim.f90
-    real(fp)              , intent(in)  :: dzduu     !  Description and declaration in rjdim.f90
-    real(fp)              , intent(in)  :: dzdvv     !  Description and declaration in rjdim.f90
-    real(fp)                            :: fsilt
-    real(fp)                            :: h1
-    real(fp)                            :: hidexp
-    real(fp)                            :: hrms     !  Description and declaration in rjdim.f90
-    real(fp)                            :: muc
-    real(fp)              , intent(in)  :: mudfrac
-    real(fp)                            :: ra
-    real(fp)                            :: rhosol   !  Description and declaration in rjdim.f90
-    real(fp)                            :: rhowat   !  Description and declaration in rjdim.f90
-    real(fp)                            :: rksrs    !  Description and declaration in rjdim.f90
-    real(fp)                            :: rlabda   !  Description and declaration in rjdim.f90
-    real(fp)                            :: sa
-    real(fp)                            :: salmax
-    real(fp)                            :: sbcu
-    real(fp)                            :: sbcv
-    real(fp)                            :: sbwu
-    real(fp)                            :: sbwv
-    real(fp)                            :: sswu
-    real(fp)                            :: sswv
-    real(fp)              , intent(in)  :: sigmol   !  Description and declaration in rjdim.f90
-    real(fp)              , intent(in)  :: spirint  !  Spiral flow intensity
-    real(fp)                            :: t_relax
-    real(fp)                            :: ta
-    real(fp)              , intent(in)  :: tauadd
-    real(fp)                            :: taubcw
-    real(fp)              , intent(in)  :: taubmx   !  Description and declaration in rjdim.f90
-    real(fp)                            :: tauc
-    real(fp)              , intent(in)  :: taucr0
-    real(fp)                            :: taucr1
-    real(fp)                            :: taurat
-    real(fp)                            :: tauwav
-    real(fp)                            :: temp
-    real(fp)                            :: teta     !  Description and declaration in rjdim.f90
-    real(fp)              , intent(in)  :: tetacr
-    real(fp)                            :: tp       !  Description and declaration in rjdim.f90
-    real(fp)                            :: umod
-    real(fp)                            :: ubot     !  Description and declaration in rjdim.f90
-    real(fp)                            :: uorb     !  Description and declaration in rjdim.f90
-    real(fp)                            :: ustarc
-    real(fp)              , intent(out) :: ust2
-    real(fp)                            :: usus     !  Description and declaration in rjdim.f90
-    real(fp)                            :: uuu
-    real(fp)                            :: uwb
-    real(fp)                            :: vvv
-    real(fp)                            :: ws0
-    real(fp)                            :: z0cur
-    real(fp)                            :: z0rou
-    real(fp)                            :: zumod
-    real(fp)                            :: zusus
-    real(fp), dimension(0:kmax)         :: dicww    !  Description and declaration in rjdim.f90
-    real(fp), dimension(0:kmax)         :: seddif   !  Description and declaration in rjdim.f90
-    real(fp), dimension(0:kmax)         :: ws       !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax)           :: rsedeq   !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax)           :: sig      !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax)           :: thick    !  Description and declaration in rjdim.f90
-    logical                             :: error
-    logical                             :: suspfrac !  suspended sediment fraction
+    integer                         , intent(in)   :: i2d3d
+    integer                         , intent(in)   :: iopsus
+    integer                         , intent(in)   :: iopkcw
+    integer                         , intent(in)   :: ised     !  i-th sediment
+    integer                         , intent(in)   :: kmax     !  Description and declaration in iidim.f90
+    integer                         , intent(out)  :: kmaxsd
+    integer                         , intent(in)   :: lsecfl   !  Description and declaration in iidim.f90
+    integer                         , intent(in)   :: ltur     !  Description and declaration in iidim.f90
+    integer                         , intent(in)   :: lundia   !  Description and declaration in inout.igs
+    integer                         , intent(in)   :: m
+    integer                         , intent(in)   :: n
+    integer                         , intent(in)   :: nm
+    integer                         , intent(in)   :: subiw
+    real(fp)                        , intent(in)   :: ag
+    real(fp)                        , intent(in)   :: aks      !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: aksfac
+    real(fp)                        , intent(out)  :: akstmp
+    real(fp)                        , intent(in)   :: bed
+    real(fp)                        , intent(in)   :: bedw
+    real(fp)                        , intent(in)   :: camax
+    real(fp)                        , intent(out)  :: ce_nm
+    real(fp)                        , intent(out)  :: ce_nmtmp
+    real(fp)  , dimension(kmax)     , intent(out)  :: concin
+    real(fp)                        , intent(out)  :: crep
+    real(fp)                        , intent(in)   :: d10
+    real(fp)                        , intent(in)   :: d90
+    real(fp)                        , intent(in)   :: di50
+    real(fp), dimension(0:kmax)     , intent(in)   :: dicww    !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: dis
+    real(fp)                        , intent(out)  :: dss      !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: dstar
+    real(fp)                        , intent(in)   :: dzduu     !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: dzdvv     !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: eps
+    real(fp)                        , intent(in)   :: espir
+    real(fp)                        , intent(in)   :: fpco
+    real(fp)                        , intent(in)   :: frac     !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: h1
+    real(fp)                        , intent(in)   :: hidexp
+    real(fp)                        , intent(in)   :: hrms     !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: mudfrac
+    real(fp)                        , intent(in)   :: pangle
+    real(fp)                        , intent(in)   :: rdc
+    real(fp)                        , intent(in)   :: rdw
+    real(fp)                        , intent(in)   :: rhow
+    real(fp)                        , intent(in)   :: rhowat   !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: rhosol   !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: rksrs    !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: rlabda   !  Description and declaration in rjdim.f90
+    real(fp), dimension(kmax)       , intent(out)  :: rsedeq   !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: rwave
+    real(fp)                        , intent(in)   :: sa
+    real(fp)                        , intent(in)   :: salmax
+    real(fp)                        , intent(out)  :: sbcu
+    real(fp)                        , intent(out)  :: sbcv
+    real(fp)                        , intent(out)  :: sbwu
+    real(fp)                        , intent(out)  :: sbwv
+    real(fp), dimension(0:kmax)     , intent(out)  :: seddif   !  Description and declaration in rjdim.f90
+    real(fp), dimension(kmax)       , intent(in)   :: sig      !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: sigmol   !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: spirint  !  Spiral flow intensity
+    real(fp)                        , intent(out)  :: sswu
+    real(fp)                        , intent(out)  :: sswv
+    real(fp)                        , intent(in)   :: sus
+    real(fp)                        , intent(in)   :: susw
+    real(fp)                        , intent(out)  :: t_relax
+    real(fp)                        , intent(in)   :: tauadd
+    real(fp)                        , intent(in)   :: taubmx   !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: taucr0
+    real(fp)                        , intent(in)   :: taurat
+    real(fp)                        , intent(in)   :: temp
+    real(fp)                        , intent(in)   :: teta     !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: tetacr
+    real(fp), dimension(kmax)       , intent(in)   :: thick    !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: timsec
+    real(fp)                        , intent(in)   :: tp       !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: umod
+    real(fp)                        , intent(in)   :: ubot     !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: uorb     !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: ustarc
+    real(fp)                        , intent(out)  :: ust2
+    real(fp)                        , intent(in)   :: uuu
+    real(fp)                        , intent(in)   :: vicmol
+    real(fp)                        , intent(in)   :: vonkar
+    real(fp)                        , intent(in)   :: vvv
+    real(fp), dimension(0:kmax)     , intent(in)   :: ws       !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: ws0
+    real(fp)                        , intent(in)   :: z0cur
+    real(fp)                        , intent(in)   :: z0rou
+    real(fp)                        , intent(in)   :: zumod
+    logical                         , intent(in)   :: epspar
+    logical                         , intent(out)  :: error
+    logical                         , intent(in)   :: scour
+    logical                         , intent(in)   :: suspfrac !  suspended sediment fraction
+    logical                         , intent(in)   :: ubot_from_com
+    logical                         , intent(in)   :: wave
+    character(len=*)                , intent(in)   :: runid
 !
 ! Local variables
 !
-    integer           :: kvalue    
     integer           :: ierror
     integer           :: k
+    integer           :: kvalue
     integer, external :: perf_function_eqtran
     real(fp)          :: aks0
     real(fp)          :: alphaspir
+    real(fp)          :: apower
     real(fp)          :: avgcu
     real(fp)          :: avgu
     real(fp)          :: bakdif
+    real(fp)          :: cavg
     real(fp)          :: cesus
     real(fp)          :: chezy
     real(fp)          :: cosa
@@ -200,17 +196,27 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     real(fp)          :: delm
     real(fp)          :: delr
     real(fp)          :: diffbt
+    real(fp)          :: drho
     real(fp)          :: dz
     real(fp)          :: ee
+    real(fp)          :: epsbed
+    real(fp)          :: epsmax
+    real(fp)          :: epsmxc
     real(fp)          :: facce
     real(fp)          :: fact1
-    real(fp)          :: fcc
-    real(fp)          :: ff
     real(fp)          :: fc1
+    real(fp)          :: fcc
+    real(fp)          :: fdamp
+    real(fp)          :: ff
     real(fp)          :: fi
+    real(fp)          :: fsilt
     real(fp)          :: fw1
+    real(fp)          :: htdif
     real(fp)          :: lci
+    real(fp)          :: muc
     real(fp)          :: phicur
+    real(fp)          :: psi
+    real(fp)          :: ra
     real(fp)          :: rz
     real(fp)          :: sag
     real(fp)          :: sbot
@@ -219,25 +225,25 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     real(fp)          :: ssus
     real(fp)          :: ssusx
     real(fp)          :: ssusy
+    real(fp)          :: ta
+    real(fp)          :: taubcw
+    real(fp)          :: tauc
+    real(fp)          :: taucr1
+    real(fp)          :: tauwav
     real(fp)          :: txg
     real(fp)          :: tyg
     real(fp)          :: u
     real(fp)          :: u2dhim
     real(fp)          :: uon
     real(fp)          :: uoff
+    real(fp)          :: usus     !  Description and declaration in rjdim.f90
     real(fp)          :: utot
+    real(fp)          :: uwb
     real(fp)          :: uwbih
     real(fp)          :: uwc
     real(fp)          :: v
     real(fp)          :: z
-    real(fp)          :: fdamp
-    real(fp)          :: psi
-    real(fp)          :: htdif
-    real(fp)          :: apower
-    real(fp)          :: cavg
-    real(fp)          :: epsbed
-    real(fp)          :: epsmax
-    real(fp)          :: epsmxc
+    real(fp)          :: zusus
  
     ! Interface to dll is in High precision!
     !
@@ -259,7 +265,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    eps                 => gdp%gdconst%eps
     max_integers        => gdp%gdeqtran%max_integers
     max_reals           => gdp%gdeqtran%max_reals
     max_strings         => gdp%gdeqtran%max_strings
@@ -271,30 +276,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     dll_usrfil          => gdp%gdeqtran%dll_usrfil
     iform               => gdp%gdeqtran%iform
     par                 => gdp%gdeqtran%par
-    sus                 => gdp%gdmorpar%sus
-    bed                 => gdp%gdmorpar%bed
-    susw                => gdp%gdmorpar%susw
-    bedw                => gdp%gdmorpar%bedw
-    espir               => gdp%gdmorpar%espir
-    epspar              => gdp%gdmorpar%epspar 
-    rhow                => gdp%gdphysco%rhow
-    ag                  => gdp%gdphysco%ag
-    vonkar              => gdp%gdphysco%vonkar
-    vicmol              => gdp%gdphysco%vicmol
-    wave                => gdp%gdprocs%wave
-    scour               => gdp%gdscour%scour
-    timsec              => gdp%gdinttim%timsec
-    camax               => gdp%gdmorpar%camax
-    aksfac              => gdp%gdmorpar%aksfac
-    rwave               => gdp%gdmorpar%rwave
-    rdc                 => gdp%gdmorpar%rdc
-    rdw                 => gdp%gdmorpar%rdw
-    pangle              => gdp%gdmorpar%pangle
-    fpco                => gdp%gdmorpar%fpco
-    iopsus              => gdp%gdmorpar%iopsus
-    iopkcw              => gdp%gdmorpar%iopkcw
-    subiw               => gdp%gdmorpar%subiw
-    ubot_from_com       => gdp%gdprocs%ubot_from_com
     !
     ierror    = 0
     error = .false.
@@ -829,7 +810,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
           error = .true.
           return
        endif
-       call nm_to_n_and_m(nm, n, m, gdp)
        dll_integers( 1) = nm
        dll_integers( 2) = n
        dll_integers( 3) = m
@@ -841,7 +821,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
           error = .true.
           return
        endif
-       dll_strings( 1) = gdp%runid
+       dll_strings( 1) = runid
        dll_strings( 2) = dll_usrfil(ised)
        !
        ! Initialisation of output variables of user defined transport formulae

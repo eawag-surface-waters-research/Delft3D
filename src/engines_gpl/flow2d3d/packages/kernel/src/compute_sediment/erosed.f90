@@ -162,6 +162,22 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                             , pointer :: mwwjhe
     real(fp)                             , pointer :: ffthresh
     real(fp), dimension(:)               , pointer :: rksr
+    real(fp)                             , pointer :: sus
+    real(fp)                             , pointer :: espir
+    real(fp)                             , pointer :: vonkar
+    logical                              , pointer :: epspar
+    logical                              , pointer :: ubot_from_com
+    real(fp)                             , pointer :: timsec
+    real(fp)                             , pointer :: camax
+    real(fp)                             , pointer :: aksfac
+    real(fp)                             , pointer :: rwave
+    real(fp)                             , pointer :: rdc
+    real(fp)                             , pointer :: rdw
+    real(fp)                             , pointer :: pangle
+    real(fp)                             , pointer :: fpco
+    integer                              , pointer :: iopsus
+    integer                              , pointer :: iopkcw
+    integer                              , pointer :: subiw
     include 'flow_steps_f.inc'
     include 'sedparams.inc'
 !
@@ -247,6 +263,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     integer                       :: l
     integer                       :: ll
     integer                       :: lstart
+    integer                       :: m
+    integer                       :: n
     integer                       :: ndm
     integer                       :: nhystp
     integer                       :: nm
@@ -395,6 +413,30 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     iform               => gdp%gdeqtran%iform
     par                 => gdp%gdeqtran%par
     rksr                => gdp%gdbedformpar%rksr
+    sus                 => gdp%gdmorpar%sus
+    bed                 => gdp%gdmorpar%bed
+    susw                => gdp%gdmorpar%susw
+    bedw                => gdp%gdmorpar%bedw
+    espir               => gdp%gdmorpar%espir
+    epspar              => gdp%gdmorpar%epspar 
+    rhow                => gdp%gdphysco%rhow
+    ag                  => gdp%gdphysco%ag
+    vonkar              => gdp%gdphysco%vonkar
+    vicmol              => gdp%gdphysco%vicmol
+    wave                => gdp%gdprocs%wave
+    scour               => gdp%gdscour%scour
+    timsec              => gdp%gdinttim%timsec
+    camax               => gdp%gdmorpar%camax
+    aksfac              => gdp%gdmorpar%aksfac
+    rwave               => gdp%gdmorpar%rwave
+    rdc                 => gdp%gdmorpar%rdc
+    rdw                 => gdp%gdmorpar%rdw
+    pangle              => gdp%gdmorpar%pangle
+    fpco                => gdp%gdmorpar%fpco
+    iopsus              => gdp%gdmorpar%iopsus
+    iopkcw              => gdp%gdmorpar%iopkcw
+    subiw               => gdp%gdmorpar%subiw
+    ubot_from_com       => gdp%gdprocs%ubot_from_com
     !
     if (ifirst == 1) then
        ifirst = 0
@@ -755,6 +797,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              endif
              taucr(l) = factcr * (rhosol(l)-rhow) * ag * di50 * tetacr(l)
           endif
+          call nm_to_n_and_m(nm, n, m, gdp)
           !
           ! SWITCH 2DH/3D SIMULATIONS
           !
@@ -807,7 +850,12 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & hidexp(nm,l),suspfrac       ,ust2(nm)     ,tetacr(l)    ,salinity  , &
                        & tsalmax     ,tws0           ,tsd          ,dis(nm)      ,concin3d  , &
                        & dzduu(nm)   ,dzdvv(nm)      ,ubot(nm)     ,temperature  ,tauadd    , &
-                       & error       ,gdp            )
+                       & sus         ,bed            ,susw         ,bedw         ,espir     , &
+                       & rhow        ,ag             ,vonkar       ,vicmol       ,wave      , &
+                       & scour       ,epspar         ,ubot_from_com,timsec       ,camax     , &
+                       & aksfac      ,rwave          ,rdc          ,rdw          ,pangle    , &
+                       & fpco        ,iopsus         ,iopkcw       ,subiw        ,eps       , &
+                       & gdp%runid   ,n              ,m            ,error       , gdp       )
              if (error) call d3stop(1, gdp)
              if (suspfrac) then
                 dss(nm, l) = tdss
@@ -893,7 +941,12 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & hidexp(nm,l),suspfrac       ,ust2(nm)     ,tetacr(l)    ,salinity   , &
                        & tsalmax     ,tws0           ,tsd          ,dis(nm)      ,concin2d   , &
                        & dzduu(nm)   ,dzdvv(nm)      ,ubot(nm)     ,temperature  ,tauadd     , &
-                       & error       ,gdp            )
+                       & sus         ,bed            ,susw         ,bedw         ,espir      , &
+                       & rhow        ,ag             ,vonkar       ,vicmol       ,wave       , &
+                       & scour       ,epspar         ,ubot_from_com,timsec       ,camax      , &
+                       & aksfac      ,rwave          ,rdc          ,rdw          ,pangle     , &
+                       & fpco        ,iopsus         ,iopkcw       ,subiw        ,eps        , &
+                       & gdp%runid   ,n              ,m            ,error       , gdp        )
              if (error) call d3stop(1, gdp)
              if (suspfrac) then
                 dss   (nm, l)    = tdss
