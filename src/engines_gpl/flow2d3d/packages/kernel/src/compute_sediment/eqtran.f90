@@ -11,7 +11,8 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
                 & ce_nmtmp  ,akstmp    ,mudfrac   ,lsecfl    ,spirint   , &
                 & hidexp    ,suspfrac  ,ust2      ,tetacr    ,sa        , &
                 & salmax    ,ws0       ,t_relax   ,dis       ,concin    , &
-                & dzduu     ,dzdvv     ,ubot      ,temp      ,gdp       )
+                & dzduu     ,dzdvv     ,ubot      ,temp      ,tauadd    , &
+                & error     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -145,6 +146,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     real(fp)              , intent(in)  :: spirint  !  Spiral flow intensity
     real(fp)                            :: t_relax
     real(fp)                            :: ta
+    real(fp)              , intent(in)  :: tauadd
     real(fp)                            :: taubcw
     real(fp)              , intent(in)  :: taubmx   !  Description and declaration in rjdim.f90
     real(fp)                            :: tauc
@@ -176,6 +178,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     real(fp), dimension(kmax)           :: rsedeq   !  Description and declaration in rjdim.f90
     real(fp), dimension(kmax)           :: sig      !  Description and declaration in rjdim.f90
     real(fp), dimension(kmax)           :: thick    !  Description and declaration in rjdim.f90
+    logical                             :: error
     logical                             :: suspfrac !  suspended sediment fraction
 !
 ! Local variables
@@ -235,8 +238,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     real(fp)          :: epsbed
     real(fp)          :: epsmax
     real(fp)          :: epsmxc
-    real(fp)          :: tauadd
-    logical           :: error
  
     ! Interface to dll is in High precision!
     !
@@ -296,6 +297,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     ubot_from_com       => gdp%gdprocs%ubot_from_com
     !
     ierror    = 0
+    error = .false.
     equi_conc = .false.
     sbc_total = .false.
     sus_total = .false.
@@ -318,16 +320,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     par(3,ised) = rhosol
     par(4,ised) = (rhosol-rhow) / rhow
     par(6,ised) = di50
-    !
-    if (scour) then
-       !
-       ! Calculate extra stress (tauadd) for point = nm,
-       ! if so required by user input.
-       !
-       call shearx(tauadd, nm, gdp)
-    else
-       tauadd = 0.0_fp
-    endif
     !
     if (suspfrac) then
        !
@@ -616,7 +608,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
                        & rlabda    ,umod      ,sbcu      ,sbcv      ,sbwu      , &
                        & sbwv      ,sswu      ,sswv      ,lundia    ,rhow      , &
                        & ag        ,wave      ,eps       ,error     )
-          if (error) call d3stop(1, gdp)
+          if (error) return
        endif
        sbc_total = .false.
        sus_total = .false.
@@ -635,7 +627,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
                        & rksrs     ,dzduu     ,dzdvv     ,rhow      , &
                        & ag        ,bedw      ,pangle    ,fpco      ,susw      , &
                        & wave      ,eps       ,subiw     ,error     )
-          if (error) call d3stop(1, gdp)
+          if (error) return
        endif
        sbc_total = .false.
        sus_total = .false.
@@ -691,7 +683,9 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        ! Bailard
        !
        call prterr (lundia,'U021','Bailard method is disabled')
-       call d3stop(1, gdp)
+       error = .true.
+       return
+       !
        !call tranb6(utot      ,u          ,v         ,chezy     ,h1        , &
        !          & hrms      ,tp         ,teta      ,diss      ,dzduu     , &
        !          & dzdvv     ,par(1,ised),sbcu      ,sbcv      ,ssusx     , &
@@ -713,7 +707,9 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        ! Van Rijn / Ribberink (1994)
        !
        call prterr (lundia,'U021','Van Rijn/Ribberink (1994) method is disabled')
-       call d3stop(1, gdp)
+       error = .true.
+       return
+       !
        !call tranb8(u         ,v         ,hrms      ,h1         ,teta      , &
        !          & tp        ,di50      ,d90       ,diss       ,dzduu     , &
        !          & dzdvv     ,nm        ,nm        ,par(1,ised),sbcu      , &
@@ -726,7 +722,9 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        ! Silt module
        !
        call prterr (lundia,'U021','Original Delft3D-MOR Silt module is disabled')
-       call d3stop(1, gdp)
+       error = .true.
+       return
+       !
        !call tranb9(utot      ,h1        ,alfs      ,sbot      ,ssus      )
        !
        sbc_total = .true.
@@ -736,7 +734,9 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        ! Ashida and Michiue
        !
        call prterr (lundia,'U021','Ashida and Michiue method is disabled')
-       call d3stop(1, gdp)
+       error = .true.
+       return
+       !
        !call trab10(utot      ,di50      ,chezy     ,h1         ,cosa      , &
        !          & sina      ,dzduu     ,dzdvv     ,par(1,ised),sbot      , &
        !          & ssus      )
@@ -789,7 +789,8 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        if (max_reals < 30) then
           write(errmsg,'(a,a,a)') 'Insufficient space to pass real values to transport routine.'
           call prterr (lundia,'U021', trim(errmsg))
-          call d3stop(1, gdp)
+          error = .true.
+          return
        endif
        dll_reals( 1) = real(timsec ,hp)
        dll_reals( 2) = real(u      ,hp)
@@ -825,7 +826,8 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        if (max_integers < 4) then
           write(errmsg,'(a,a,a)') 'Insufficient space to pass integer values to transport routine.'
           call prterr (lundia,'U021', trim(errmsg))
-          call d3stop(1, gdp)
+          error = .true.
+          return
        endif
        call nm_to_n_and_m(nm, n, m, gdp)
        dll_integers( 1) = nm
@@ -836,7 +838,8 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        if (max_strings < 2) then
           write(errmsg,'(a,a,a)') 'Insufficient space to pass strings to transport routine.'
           call prterr (lundia,'U021', trim(errmsg))
-          call d3stop(1, gdp)
+          error = .true.
+          return
        endif
        dll_strings( 1) = gdp%runid
        dll_strings( 2) = dll_usrfil(ised)
@@ -875,13 +878,15 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        if (ierror /= 0) then
           write(errmsg,'(a,a,a)') 'Cannot find function "',trim(dll_function(ised)),'" in dynamic library.'
           call prterr (lundia,'U021', trim(errmsg))
-          call d3stop(1, gdp)
+          error = .true.
+          return
        endif
        if (message /= ' ') then
           write (lundia,'(a,a,a)') '*** ERROR Message from user defined transport formulae ',trim(dll_function(ised)),' :'
           write (lundia,'(a,a  )') '          ', trim(message)
           write (lundia,'(a    )') ' '
-          call d3stop(1, gdp)
+          error = .true.
+          return
        endif
        !
        ! Output parameters
@@ -900,7 +905,8 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        t_relax = real(t_relax_dll,fp)
     else
        call prterr (lundia,'U021','Transport formula not recognized')
-       call d3stop(1, gdp)
+       error = .true.
+       return
     endif
     !
     if (iform(ised) > 0) then

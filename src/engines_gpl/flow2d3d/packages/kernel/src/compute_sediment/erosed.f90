@@ -253,6 +253,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     integer                       :: nmd
     integer                       :: nmu
     integer                       :: num
+    logical                       :: error
     logical                       :: suspfrac  ! suspended component sedtyp(l)/=SEDTYP_NONCOHESIVE_TOTALLOAD
     real(fp)                      :: akstmp
     real(fp)                      :: ce_nm
@@ -271,6 +272,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: rlnm
     real(fp)                      :: salinity
     real(fp)                      :: spirint   ! local variable for spiral flow intensity r0(nm,1,lsecfl)
+    real(fp)                      :: tauadd
     real(fp)                      :: tdss      ! temporary variable for dss
     real(fp)                      :: temperature
     real(fp)                      :: tetanm
@@ -628,6 +630,16 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        call dfexchg( ws(:,:,l),0, kmax, dfloat, gdp)
     enddo
     !
+    if (scour) then
+       !
+       ! Calculate extra stress (tauadd) for point = nm,
+       ! if so required by user input.
+       !
+       call shearx(tauadd, nm, gdp)
+    else
+       tauadd = 0.0_fp
+    endif
+    !
     do l = 1, lsedtot
        if (sedtyp(l)==SEDTYP_COHESIVE) cycle
        ll = lstart + l
@@ -794,7 +806,9 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & ce_nmtmp    ,akstmp         ,mudfrac(nm)  ,lsecfl       ,spirint   , &
                        & hidexp(nm,l),suspfrac       ,ust2(nm)     ,tetacr(l)    ,salinity  , &
                        & tsalmax     ,tws0           ,tsd          ,dis(nm)      ,concin3d  , &
-                       & dzduu(nm)   ,dzdvv(nm)      ,ubot(nm)     ,temperature  ,gdp          )
+                       & dzduu(nm)   ,dzdvv(nm)      ,ubot(nm)     ,temperature  ,tauadd    , &
+                       & error       ,gdp            )
+             if (error) call d3stop(1, gdp)
              if (suspfrac) then
                 dss(nm, l) = tdss
                 !
@@ -878,7 +892,9 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & ce_nmtmp    ,akstmp         ,mudfrac(nm)  ,lsecfl       ,spirint    , &
                        & hidexp(nm,l),suspfrac       ,ust2(nm)     ,tetacr(l)    ,salinity   , &
                        & tsalmax     ,tws0           ,tsd          ,dis(nm)      ,concin2d   , &
-                       & dzduu(nm)   ,dzdvv(nm)      ,ubot(nm)     ,temperature  ,gdp          )
+                       & dzduu(nm)   ,dzdvv(nm)      ,ubot(nm)     ,temperature  ,tauadd     , &
+                       & error       ,gdp            )
+             if (error) call d3stop(1, gdp)
              if (suspfrac) then
                 dss   (nm, l)    = tdss
                 rsedeq(nm, 1, l) = trsedeq
