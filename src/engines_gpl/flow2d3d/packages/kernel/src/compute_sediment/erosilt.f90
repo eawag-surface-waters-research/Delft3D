@@ -3,11 +3,11 @@ subroutine erosilt(l        ,thick    ,rhowat   ,rlabda   ,vicmol   , &
                  & wstau    ,entr     ,dicww    ,seddif   ,lundia   ,rhosol   , &
                  & nm       ,h0       ,h1       ,z0rou    ,tauadd   ,um       , &
                  & vm       ,uuu      ,vvv      ,taub     ,salinity ,temperature, &
-                 & n        ,m        ,error    ,ag       ,vonkar   ,fixfac   , &
+                 & error    ,ag       ,vonkar   ,fixfac   , &
                  & frac     ,sinkse   ,sourse   ,oldmudfrac, flmd2l , tcrdep  , &
                  & tcrero   ,eropar   ,timsec   ,iform    , &
                  & numintpar,numrealpar,numstrpar,dllfunc ,dllhandle, &
-                 & intpar   ,realpar  ,strpar   ,usrfil   ,runid    )
+                 & intpar   ,realpar  ,strpar   )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -83,8 +83,6 @@ subroutine erosilt(l        ,thick    ,rhowat   ,rlabda   ,vicmol   , &
     real(fp)                                                  , intent(in)  :: vm
     real(fp)                                                  , intent(in)  :: vvv
     real(fp)                                                  , intent(in)  :: taub
-    integer                                                   , intent(in)  :: n
-    integer                                                   , intent(in)  :: m
     logical                                                   , intent(out) :: error
     real(fp)                                                  , intent(in)  :: ag
     real(fp)                                                  , intent(in)  :: vonkar
@@ -107,8 +105,6 @@ subroutine erosilt(l        ,thick    ,rhowat   ,rlabda   ,vicmol   , &
     character(256), dimension(numstrpar), intent(inout):: strpar
     character(256)                  , intent(in)   :: dllfunc
     integer                         , intent(in)   :: dllhandle
-    character(256)                  , intent(in)   :: usrfil
-    character(len=*)                , intent(in)   :: runid
 !
 ! Local variables
 !
@@ -240,26 +236,6 @@ subroutine erosilt(l        ,thick    ,rhowat   ,rlabda   ,vicmol   , &
           realpar(28) = real(ag        ,hp)
           realpar(29) = real(vicmol    ,hp)
           realpar(30) = real(tauba     ,hp)
-          !
-          if (numintpar < 4) then
-             write(errmsg,'(a,a,a)') 'Insufficient space to pass integer values to transport routine.'
-             call prterr (lundia,'U021', trim(errmsg))
-             error = .true.
-             return
-          endif
-          intpar( 1) = nm
-          intpar( 2) = n
-          intpar( 3) = m
-          intpar( 4) = l
-          !
-          if (numstrpar < 2) then
-             write(errmsg,'(a,a,a)') 'Insufficient space to pass strings to transport routine.'
-             call prterr (lundia,'U021', trim(errmsg))
-             error = .true.
-             return
-          endif
-          strpar( 1) = runid
-          strpar( 2) = usrfil
           !
           ! Initialisation of output variables of user defined transport formulae
           !

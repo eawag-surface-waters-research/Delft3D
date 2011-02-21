@@ -339,6 +339,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp), dimension(kmax2d)   :: thck2d
     real(fp), dimension(kmax)     :: concin3d
     real(fp), dimension(kmax2d)   :: concin2d
+    character(256)    :: errmsg
     !
     data thck2d/0.1747, 0.1449, 0.1202, 0.0997, 0.0827, 0.0686, 0.0569, 0.0472, &
        & 0.0391, 0.0325, 0.0269, 0.0223, 0.0185, 0.0154, 0.0127, 0.0106, 0.0088,&
@@ -834,7 +835,29 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        d10  = dxx(nm,i10)
        d90  = dxx(nm,i90)
        !
+       if (max_integers < 4) then
+          write(errmsg,'(a,a,a)') 'Insufficient space to pass integer values to transport routine.'
+          call prterr (lundia,'U021', trim(errmsg))
+          error = .true.
+          return
+       endif
+       dll_integers( 1) = nm
+       dll_integers( 2) = n
+       dll_integers( 3) = m
+       !
+       if (max_strings < 2) then
+          write(errmsg,'(a,a,a)') 'Insufficient space to pass strings to transport routine.'
+          call prterr (lundia,'U021', trim(errmsg))
+          error = .true.
+          return
+       endif
+       dll_strings( 1) = gdp%runid
+       !
        do l = 1, lsedtot
+          !
+          dll_integers( 4) = l
+          dll_strings ( 2) = dll_usrfil(l)
+          !
           if (sedtyp(l)==SEDTYP_COHESIVE) then
              !
              ! sediment type COHESIVE
@@ -849,11 +872,11 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                         & wstau(nm),entr(nm) ,dcwwlc  ,sddflc   ,lundia   ,rhosol(l)  , &
                         & nm       ,h0       ,h1      ,z0rou    ,tauadd   ,umean      , &
                         & vmean    ,ubed     ,vbed    ,taub     ,salinity ,temperature, &
-                        & n        ,m        ,error   ,ag       ,vonkar   ,fixfac     , &
+                        & error   ,ag       ,vonkar   ,fixfac     , &
                         & frac     ,sinkse   ,sourse  ,oldmudfrac,flmd2l  ,tcrdep     , &
                         & tcrero   ,eropar   ,timsec  ,iform    , &
                         & max_integers,max_reals      ,max_strings  ,dll_function(l),dll_handle(l), &
-                        & dll_integers,dll_reals      ,dll_strings  ,dll_usrfil(l)  ,gdp%runid    )
+                        & dll_integers,dll_reals      ,dll_strings  )
              if (error) call d3stop(1, gdp)
              !
              do k = 1, kmax
@@ -966,9 +989,9 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & scour       ,epspar         ,ubot_from_com,timsec       ,camax     , &
                        & aksfac      ,rwave          ,rdc          ,rdw          ,pangle    , &
                        & fpco        ,iopsus         ,iopkcw       ,subiw        ,eps       , &
-                       & gdp%runid   ,n              ,m            ,iform(l)     ,par(1,l)  , &
+                       & iform(l)     ,par(1,l)  , &
                        & max_integers,max_reals      ,max_strings  ,dll_function(l),dll_handle(l), &
-                       & dll_integers,dll_reals      ,dll_strings  ,dll_usrfil(l),error     )
+                       & dll_integers,dll_reals      ,dll_strings  ,error     )
              if (error) call d3stop(1, gdp)
              if (suspfrac) then
                 dss(nm, l) = tdss
@@ -1059,9 +1082,9 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & scour       ,epspar         ,ubot_from_com,timsec       ,camax      , &
                        & aksfac      ,rwave          ,rdc          ,rdw          ,pangle     , &
                        & fpco        ,iopsus         ,iopkcw       ,subiw        ,eps        , &
-                       & gdp%runid   ,n              ,m            ,iform(l)     ,par(1,l)   , &
+                       & iform(l)     ,par(1,l)   , &
                        & max_integers,max_reals      ,max_strings  ,dll_function(l),dll_handle(l), &
-                       & dll_integers,dll_reals      ,dll_strings  ,dll_usrfil(l),error      )
+                       & dll_integers,dll_reals      ,dll_strings  ,error      )
              if (error) call d3stop(1, gdp)
              if (suspfrac) then
                 dss   (nm, l)    = tdss

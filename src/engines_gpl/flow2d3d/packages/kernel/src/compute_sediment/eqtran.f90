@@ -17,9 +17,9 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
                 & scour     ,epspar    ,ubot_from_com,timsec ,camax     , &
                 & aksfac    ,rwave     ,rdc       ,rdw       ,pangle    , &
                 & fpco      ,iopsus    ,iopkcw    ,subiw     ,eps       , &
-                & runid     ,n         ,m         ,iform     ,par       , &
+                & iform     ,par       , &
                 & numintpar ,numrealpar,numstrpar ,dllfunc   ,dllhandle , &
-                & intpar    ,realpar   ,strpar    ,usrfil    ,error     )
+                & intpar    ,realpar   ,strpar    ,error     )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -73,8 +73,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     integer                         , intent(in)   :: lsecfl   !  Description and declaration in iidim.f90
     integer                         , intent(in)   :: ltur     !  Description and declaration in iidim.f90
     integer                         , intent(in)   :: lundia   !  Description and declaration in inout.igs
-    integer                         , intent(in)   :: m
-    integer                         , intent(in)   :: n
     integer                         , intent(in)   :: nm
     integer                         , intent(in)   :: numintpar
     integer                         , intent(in)   :: numrealpar
@@ -166,9 +164,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     logical                         , intent(in)   :: ubot_from_com
     logical                         , intent(in)   :: wave
     character(256)                  , intent(in)   :: dllfunc
-    character(len=*)                , intent(in)   :: runid
     character(256), dimension(numstrpar), intent(inout):: strpar
-    character(256)                  , intent(in)   :: usrfil
 !
 ! Local variables
 !
@@ -786,26 +782,6 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        realpar(28) = real(ag     ,hp)
        realpar(29) = real(vicmol ,hp)
        realpar(30) = real(taubmx ,hp)
-       !
-       if (numintpar < 4) then
-          write(errmsg,'(a)') 'Insufficient space to pass integer values to transport routine.'
-          call prterr (lundia,'U021', trim(errmsg))
-          error = .true.
-          return
-       endif
-       intpar( 1) = nm
-       intpar( 2) = n
-       intpar( 3) = m
-       intpar( 4) = ised
-       !
-       if (numstrpar < 2) then
-          write(errmsg,'(a)') 'Insufficient space to pass strings to transport routine.'
-          call prterr (lundia,'U021', trim(errmsg))
-          error = .true.
-          return
-       endif
-       strpar( 1) = runid
-       strpar( 2) = usrfil
        !
        ! Initialisation of output variables of user defined transport formulae
        !
