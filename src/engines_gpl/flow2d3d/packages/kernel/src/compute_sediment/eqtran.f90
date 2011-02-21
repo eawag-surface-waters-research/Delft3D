@@ -17,7 +17,7 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
                 & scour     ,epspar    ,ubot_from_com,timsec ,camax     , &
                 & aksfac    ,rwave     ,rdc       ,rdw       ,pangle    , &
                 & fpco      ,iopsus    ,iopkcw    ,subiw     ,eps       , &
-                & iform     ,par       ,chezy     , &
+                & iform     ,par       , &
                 & numintpar ,numrealpar,numstrpar ,dllfunc   ,dllhandle , &
                 & intpar    ,realpar   ,strpar    ,error     )
 !----- GPL ---------------------------------------------------------------------
@@ -58,6 +58,8 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     use mathconsts
     !
     implicit none
+    !
+    include 'trapar.inc'
 !
 ! Global variables
 !
@@ -205,7 +207,6 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     real(fp)          :: phicur
     real(fp)          :: psi
     real(fp)          :: ra
-    real(fp)          :: rz
     real(fp)          :: sag
     real(fp)          :: sbot
     real(fp)          :: sina
@@ -258,6 +259,7 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     sbc_total = .false.
     sus_total = .false.
     akstmp    = aks
+    chezy     = real(realpar(RP_CHEZY),fp)
     !
     cesus  = 0.0_fp
     sbot   = 0.0_fp
@@ -272,10 +274,6 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     sswv   = 0.0_fp
     ee     = exp(1.0_fp)
     sag    = sqrt(ag)
-    !
-    par(3) = rhosol
-    par(4) = (rhosol-rhow) / rhow
-    par(6) = di50
     !
     if (suspfrac) then
        !
@@ -546,8 +544,6 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
        endif
        kmaxsd = kmax
     endif
-    rz    = 1.0_fp + h1 / (max(1.0e-8_fp , ee*z0rou))
-    chezy = sag * log(rz) / vonkar
     if (scour) then
        utot = ustarc * chezy / sag
     else
@@ -743,13 +739,13 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
        ! Input parameters are passed via realpar/intpar/strpar-arrays that have
        ! been filled in calling routine
        !
-       realpar( 2) = real(u      ,hp)
-       realpar( 3) = real(v      ,hp)
-       realpar( 4) = real(utot   ,hp)
-       realpar( 5) = real(uuu    ,hp)
-       realpar( 6) = real(vvv    ,hp)
-       realpar( 7) = real(umod   ,hp)
-       realpar( 8) = real(zumod  ,hp)
+       realpar(RP_UMEAN) = real(u      ,hp)
+       realpar(RP_VMEAN) = real(v      ,hp)
+       realpar(RP_VELMN) = real(utot   ,hp)
+       realpar(RP_UCHAR) = real(uuu    ,hp)
+       realpar(RP_VCHAR) = real(vvv    ,hp)
+       realpar(RP_VELCH) = real(umod   ,hp)
+       realpar(RP_ZVLCH) = real(zumod  ,hp)
        ! Initialisation of output variables of user defined transport formulae
        !
        sbc_total   = .false. ! may be changed by user defined formulae

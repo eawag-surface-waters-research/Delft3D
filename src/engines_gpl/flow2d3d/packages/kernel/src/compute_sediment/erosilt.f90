@@ -51,6 +51,7 @@ subroutine erosilt(thick    ,kmax     ,ws       , &
     implicit none
     !
     include 'sedparams.inc'
+    include 'trapar.inc'
     !
     integer                                                   , intent(in)  :: kmax
     integer                                                                 :: lundia   !  Description and declaration in inout.igs
@@ -167,16 +168,16 @@ subroutine erosilt(thick    ,kmax     ,ws       , &
           ! User defined formula in DLL
           ! Input parameters are passed via realpar/intpar/strpar-arrays
           !
-          realpar( 2) = real(um     ,hp)
-          realpar( 3) = real(vm     ,hp)
-          realpar( 4) = real(sqrt(um*um + vm*vm),hp)
-          realpar( 5) = real(uuu    ,hp)
-          realpar( 6) = real(vvv    ,hp)
-          realpar( 7) = real(sqrt(uuu*uuu + vvv*vvv),hp)
+          realpar(RP_UMEAN) = real(um     ,hp)
+          realpar(RP_VMEAN) = real(vm     ,hp)
+          realpar(RP_VELMN) = real(sqrt(um*um + vm*vm),hp)
+          realpar(RP_UCHAR) = real(uuu    ,hp)
+          realpar(RP_VCHAR) = real(vvv    ,hp)
+          realpar(RP_VELCH) = real(sqrt(uuu*uuu + vvv*vvv),hp)
           if (kmax>1) then
-             realpar( 8) = real(h1*thick(kmax)/2.0_fp,hp)
+             realpar(RP_ZVLCH) = real(h1*thick(kmax)/2.0_fp,hp)
           else
-             realpar( 8) = real(h1/ee,hp)
+             realpar(RP_ZVLCH) = real(h1/ee,hp)
           endif
           !
           ! Initialisation of output variables of user defined transport formulae

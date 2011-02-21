@@ -160,6 +160,7 @@ src/engines_gpl/flow2d3d/packages/data/include/tfzeta.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/timers.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/tmpfil.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/trachy.igs -text
+src/engines_gpl/flow2d3d/packages/data/include/trapar.inc -text
 src/engines_gpl/flow2d3d/packages/data/include/tricom.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/trisol.igs -text
 src/engines_gpl/flow2d3d/packages/data/include/turcoe.igs -text

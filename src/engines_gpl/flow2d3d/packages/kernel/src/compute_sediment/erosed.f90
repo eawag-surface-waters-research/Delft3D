@@ -198,6 +198,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)      , dimension(:,:)   , pointer :: eropar
     include 'flow_steps_f.inc'
     include 'sedparams.inc'
+    include 'trapar.inc'
 !
 ! Local parameters
 !
@@ -844,75 +845,77 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        !
        ! Input parameters are passed via dll_reals/integers/strings-arrays
        !
-       if (max_reals < 30) then
+       if (max_reals < MAX_RP) then
           write(errmsg,'(a)') 'Insufficient space to pass real values to transport routine.'
           call prterr (lundia,'U021', trim(errmsg))
           call d3stop(1, gdp)
        endif
-       dll_reals( 1) = real(timsec ,hp)
-       !dll_reals( 2) = depth averaged u velocity
-       !dll_reals( 3) = depth averaged v velocity
-       !dll_reals( 4) = depth averaged velocity magnitude
-       !dll_reals( 5) = characteristic u velocity
-       !dll_reals( 6) = characteristic v velocity
-       !dll_reals( 7) = characteristic velocity magnitude
-       !dll_reals( 8) = z level of characteristic velocity
-       dll_reals( 9) = real(h1        ,hp)
-       dll_reals(10) = real(chezy     ,hp)
-       dll_reals(11) = real(hrms(nm)  ,hp)
-       dll_reals(12) = real(tp(nm)    ,hp)
-       dll_reals(13) = real(teta(nm)  ,hp)
-       dll_reals(14) = real(rlabda(nm),hp)
-       dll_reals(15) = real(uorb(nm)  ,hp)
-       !dll_reals(16) = d50 of fraction
-       !dll_reals(17) = suspended sediment diameter of fraction
-       !dll_reals(18) = dstar of fraction
-       dll_reals(19) = real(d10    ,hp)
-       dll_reals(20) = real(d90    ,hp)
-       dll_reals(21) = real(mudfrac(nm),hp)
-       !dll_reals(22) = hiding and exposure
-       !dll_reals(23) = settling velocity
-       !dll_reals(24) = specific density
-       dll_reals(25) = real(rhowat(nm,kmax),hp) ! Density of water
-       dll_reals(26) = real(salinity,hp)
-       dll_reals(27) = real(temperature,hp)
-       dll_reals(28) = real(ag     ,hp)
-       dll_reals(29) = real(vicmol ,hp)
-       dll_reals(30) = real(taub   ,hp) !taubmx incremented with tauadd
+       dll_reals(RP_TIME ) = real(timsec ,hp)
+      !dll_reals(RP_UMEAN) = depth averaged u velocity
+      !dll_reals(RP_VMEAN) = depth averaged v velocity
+      !dll_reals(RP_VELMN) = depth averaged velocity magnitude
+      !dll_reals(RP_UCHAR) = characteristic u velocity
+      !dll_reals(RP_VCHAR) = characteristic v velocity
+      !dll_reals(RP_VELCH) = characteristic velocity magnitude
+      !dll_reals(RP_ZVLCH) = z level of characteristic velocity
+       dll_reals(RP_DEPTH) = real(h1        ,hp)
+       dll_reals(RP_CHEZY) = real(chezy     ,hp)
+       dll_reals(RP_HRMS ) = real(hrms(nm)  ,hp)
+       dll_reals(RP_TPEAK) = real(tp(nm)    ,hp)
+       dll_reals(RP_TETA ) = real(teta(nm)  ,hp)
+       dll_reals(RP_RLAMB) = real(rlabda(nm),hp)
+       dll_reals(RP_UORB ) = real(uorb(nm)  ,hp)
+      !dll_reals(RP_D50  ) = d50 of fraction
+      !dll_reals(RP_DSS  ) = suspended sediment diameter of fraction
+      !dll_reals(RP_DSTAR) = dstar of fraction
+       dll_reals(RP_D10MX) = real(d10    ,hp)
+       dll_reals(RP_D90MX) = real(d90    ,hp)
+       dll_reals(RP_MUDFR) = real(mudfrac(nm),hp)
+      !dll_reals(RP_HIDEX) = hiding and exposure
+      !dll_reals(RP_SETVL) = settling velocity
+      !dll_reals(RP_RHOSL) = specific density
+       dll_reals(RP_RHOWT) = real(rhowat(nm,kmax),hp) ! Density of water
+       dll_reals(RP_SALIN) = real(salinity,hp)
+       dll_reals(RP_TEMP ) = real(temperature,hp)
+       dll_reals(RP_GRAV ) = real(ag     ,hp)
+       dll_reals(RP_VICML) = real(vicmol ,hp)
+       dll_reals(RP_TAUB ) = real(taub   ,hp) !taubmx incremented with tauadd
        !
-       if (max_integers < 4) then
+       if (max_integers < MAX_IP) then
           write(errmsg,'(a,a,a)') 'Insufficient space to pass integer values to transport routine.'
           call prterr (lundia,'U021', trim(errmsg))
           call d3stop(1, gdp)
        endif
-       dll_integers( 1) = nm
-       dll_integers( 2) = n
-       dll_integers( 3) = m
+       dll_integers(IP_NM   ) = nm
+       dll_integers(IP_N    ) = n
+       dll_integers(IP_M    ) = m
+      !dll_integers(IP_ISED ) = l
        !
-       if (max_strings < 2) then
+       if (max_strings < MAX_SP) then
           write(errmsg,'(a,a,a)') 'Insufficient space to pass strings to transport routine.'
           call prterr (lundia,'U021', trim(errmsg))
           call d3stop(1, gdp)
        endif
-       dll_strings( 1) = gdp%runid
+       dll_strings(SP_RUNID) = gdp%runid
+      !dll_strings(SP_USRFL) = dll_usrfil(l)
        !
        do l = 1, lsedtot
           !
           ! fraction specific quantities
           !
-          dll_reals(22)    = real(hidexp(nm,l) ,hp)
-          dll_reals(23)    = real(ws(nm, kmax, l)  ,hp) ! Vertical velocity near bedlevel
-          dll_reals(24)    = real(rhosol(l) ,hp)
-          dll_integers( 4) = l
-          dll_strings( 2)  = dll_usrfil(l)
+          dll_reals(RP_HIDEX)    = real(hidexp(nm,l) ,hp)
+          dll_reals(RP_SETVL)    = real(ws(nm, kmax, l)  ,hp) ! Vertical velocity near bedlevel
+          dll_reals(RP_RHOSL)    = real(rhosol(l) ,hp)
+          dll_integers(IP_ISED ) = l
+          dll_strings(SP_USRFL)  = dll_usrfil(l)
           !
           if (sedtyp(l)==SEDTYP_COHESIVE) then
              !
              ! sediment type COHESIVE
              !
-             dll_reals(16) = 0.0_hp
-             dll_reals(17) = 0.0_hp
-             dll_reals(18) = 0.0_hp
+             dll_reals(RP_D50  ) = 0.0_hp
+             dll_reals(RP_DSS  ) = 0.0_hp
+             dll_reals(RP_DSTAR) = 0.0_hp
              !
              do k = 0, kmax
                 wslc(k)   = ws(nm, k, l)
@@ -1000,9 +1003,12 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           !
           ! NONCOHESIVE fraction specific quantities
           !
-          dll_reals(16) = real(di50    ,hp)
-          dll_reals(17) = real(tdss    ,hp)
-          dll_reals(18) = real(dstar(l),hp)
+          dll_reals(RP_D50  ) = real(di50    ,hp)
+          dll_reals(RP_DSS  ) = real(tdss    ,hp)
+          dll_reals(RP_DSTAR) = real(dstar(l),hp)
+          par(3,l) = rhosol(l)
+          par(4,l) = (rhosol(l)-rhow) / rhow
+          par(6,l) = di50
           !
           ! SWITCH 2DH/3D SIMULATIONS
           !
@@ -1047,7 +1053,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & scour       ,epspar         ,ubot_from_com,timsec       ,camax     , &
                        & aksfac      ,rwave          ,rdc          ,rdw          ,pangle    , &
                        & fpco        ,iopsus         ,iopkcw       ,subiw        ,eps       , &
-                       & iform(l)    ,par(1,l)       ,chezy        , &
+                       & iform(l)    ,par(1,l)       , &
                        & max_integers,max_reals      ,max_strings  ,dll_function(l),dll_handle(l), &
                        & dll_integers,dll_reals      ,dll_strings  ,error     )
              if (error) call d3stop(1, gdp)
@@ -1131,7 +1137,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & scour       ,epspar         ,ubot_from_com,timsec       ,camax      , &
                        & aksfac      ,rwave          ,rdc          ,rdw          ,pangle     , &
                        & fpco        ,iopsus         ,iopkcw       ,subiw        ,eps        , &
-                       & iform(l)    ,par(1,l)       ,chezy        , &
+                       & iform(l)    ,par(1,l)       , &
                        & max_integers,max_reals      ,max_strings  ,dll_function(l),dll_handle(l), &
                        & dll_integers,dll_reals      ,dll_strings  ,error      )
              if (error) call d3stop(1, gdp)
