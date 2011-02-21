@@ -2791,35 +2791,35 @@ void D3dFlowMapper::CopySediment(
                 }
                 else if ( Ref[ctx] > Ref[oCtx] )
                 {
-                   // ctx is refined compared to oCtx
-                   MAP_CELLS_LOOP(ctx,eq)
-                   {
-                      // printf("coor-fine (%2d %2d) <--?--> (%2d %2d)\n",m,n,oM,oN);
-                      for ( l = 1 ; l <= C[ctx]->lSedtt ; l++ )
-                      {
-                        MapScalar totsed = 0.0L;
+					// ctx is refined compared to oCtx
+					// MAP_CELLS_LOOP(oCtx)  does not work!
+					// loop over the refined side and add sbuu to totsed
+					// the for-lsed-loop and the map-cells-m,n-loop must be swapped
+					// When the last refined cell connected to oM,oN is handled, totsed can be used and reset
+                  for ( l = 1 ; l <= C[ctx]->lSedtt ; l++ )
+                  {
+                    MapScalar totsed = 0.0L;
+					int refCount = 0;
 
-                        MAP_REFINED_LOOP(ctx,m+1,n)
-                        {
-							// Do not use fM+1 but fM!
-                           totsed += cI3D(oCtx,fM,fN,l,sbuu);
-                        }
-						if ( cI3D(oCtx,oM+1,oN,l,sbuu) == 0.0L )
+				    MAP_CELLS_LOOP(ctx,eq)
+				    {
+                      // printf("coor-fine (%2d %2d) <--?--> (%2d %2d)\n",m,n,oM,oN);
+						refCount++;
+                        totsed += cI3D(ctx,m+1,n,l,sbuu);
+						if ( cI3D(ctx,m+1,n,l,sbuu) == 0.0L )
 						{
-							cI3D(oCtx,oM+1,oN,l,sbuu) = (float) totsed / (float) nHorRef;
-							// printf("   Sed-SBUU-coarse (%2d %2d %2d)<-- %10.7f\n",oM+1,oN,l,cI3D(oCtx,oM+1,oN,l,sbuu));
+							cI3D(ctx,m+1,n,l,sbuu) = cI3D(oCtx,oM+1,oN,l,sbuu);
+							// printf("   Sed-SBUU-fine (%2d %2d %2d)<-- %10.7f\n",m+1,n,l,cI3D(ctx,m+1,n,l,sbuu));
 						}
-						else
+						if ( refCount == Ref[ctx] )
 						{
-							MAP_REFINED_LOOP(ctx,m+1,n)
+							if ( cI3D(oCtx,oM+1,oN,l,sbuu) == 0.0L )
 							{
-								// Do not use fM+1 but fM!
-								if ( cI3D(ctx,fM,fN,l,sbuu) == 0.0L )
-								{
-									cI3D(ctx,fM,fN,l,sbuu) = cI3D(oCtx,oM+1,oN,l,sbuu);
-									// printf("   Sed-SBUU-fine (%2d %2d %2d)<-- %10.7f\n",fM,fN,l,cI3D(ctx,fM,fN,l,sbuu));
-								}
+								cI3D(oCtx,oM+1,oN,l,sbuu) = (float) totsed / (float) Ref[ctx];
+								// printf("   Sed-SBUU-coarse (%2d %2d %2d)<-- %10.7f\n",oM+1,oN,l,cI3D(oCtx,oM+1,oN,l,sbuu));
 							}
+							totsed = 0.0L;
+							refCount = 0;
 						}
                       }
                    }
@@ -2892,35 +2892,35 @@ void D3dFlowMapper::CopySediment(
                 }
                 else if ( Ref[ctx] > Ref[oCtx] )
                 {
-                   // ctx is refined compared to oCtx
-                   MAP_CELLS_LOOP(ctx,eq)
-                   {
-                      // printf("coor-fine (%2d %2d) <--?--> (%2d %2d)\n",m,n,oM,oN);
-                      for ( l = 1 ; l <= C[ctx]->lSedtt ; l++ )
-                      {
-                        MapScalar totsed = 0.0L;
+					// ctx is refined compared to oCtx
+					// MAP_CELLS_LOOP(oCtx)  does not work!
+					// loop over the refined side and add sbvv to totsed
+					// the for-lsed-loop and the map-cells-m,n-loop must be swapped
+					// When the last refined cell connected to oM,oN is handled, totsed can be used and reset
+                  for ( l = 1 ; l <= C[ctx]->lSedtt ; l++ )
+                  {
+                    MapScalar totsed = 0.0L;
+					int refCount = 0;
 
-                        MAP_REFINED_LOOP(ctx,m,n+1)
-                        {
-							// Do not use fN+1 but fN!
-                           totsed += cI3D(oCtx,fM,fN,l,sbvv);
-                        }
-						if ( cI3D(oCtx,oM,oN+1,l,sbvv) == 0.0L )
+				    MAP_CELLS_LOOP(ctx,eq)
+				    {
+                        // printf("coor-fine (%2d %2d) <--?--> (%2d %2d)\n",m,n,oM,oN);
+						refCount++;
+                        totsed += cI3D(ctx,m,n+1,l,sbvv);
+						if ( cI3D(ctx,m,n+1,l,sbvv) == 0.0L )
 						{
-							cI3D(oCtx,oM,oN+1,l,sbvv) = (float) totsed / (float) nHorRef;
-							// printf("   Sed-SBVV-coarse (%2d %2d %2d)<-- %10.7f\n",oM,oN+1,l,cI3D(ctx,oM,oN+1,l,sbvv));
+							cI3D(ctx,m,n+1,l,sbvv) = cI3D(oCtx,oM,oN+1,l,sbvv);
+							// printf("   Sed-SBVV-fine (%2d %2d %2d)<-- %10.7f\n",m,n+1,l,cI3D(ctx,m,n+1,l,sbvv));
 						}
-						else
+						if ( refCount == Ref[ctx] )
 						{
-							MAP_REFINED_LOOP(ctx,m,n+1)
+							if ( cI3D(oCtx,oM,oN+1,l,sbvv) == 0.0L )
 							{
-								// Do not use fN+1 but fN!
-								if ( cI3D(ctx,fM,fN,l,sbvv) == 0.0L )
-								{
-									cI3D(ctx,fM,fN,l,sbvv) = cI3D(oCtx,oM,oN+1,l,sbvv);
-									// printf("   Sed-SBVV-fine (%2d %2d %2d)<-- %10.7f\n",fM,fN,l,cI3D(ctx,fM,fN,l,sbvv));
-								}
+								cI3D(oCtx,oM,oN+1,l,sbvv) = (float) totsed / (float) Ref[ctx];
+								// printf("   Sed-SBVV-coarse (%2d %2d %2d)<-- %10.7f\n",oM,oN+1,l,cI3D(oCtx,oM,oN+1,l,sbvv));
 							}
+							totsed = 0.0L;
+							refCount = 0;
 						}
                       }
                    }
