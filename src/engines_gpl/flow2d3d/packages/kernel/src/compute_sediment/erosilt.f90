@@ -1,11 +1,9 @@
-subroutine erosilt(thick    ,rhowat   ,rlabda   ,vicmol   , &
-                 & kmax     ,hrms     ,uorb     ,tp       ,teta     ,ws       , &
-                 & wstau    ,entr     ,dicww    ,seddif   ,lundia   ,rhosol   , &
-                 & h0       ,h1       ,z0rou    ,tauadd   ,um       , &
-                 & vm       ,uuu      ,vvv      ,taub     ,salinity ,temperature, &
-                 & error    ,ag       ,vonkar   ,fixfac   , &
+subroutine erosilt(thick    ,kmax     ,ws       , &
+                 & wstau    ,entr     ,dicww    ,seddif   ,lundia   , &
+                 & h0       ,h1       ,um       ,vm       ,uuu      ,vvv      , &
+                 & taub     ,error    ,fixfac   , &
                  & frac     ,sinkse   ,sourse   ,oldmudfrac, flmd2l , tcrdep  , &
-                 & tcrero   ,eropar   ,timsec   ,iform    , &
+                 & tcrero   ,eropar   ,iform    , &
                  & numintpar,numrealpar,numstrpar,dllfunc ,dllhandle, &
                  & intpar   ,realpar  ,strpar   )
 !----- GPL ---------------------------------------------------------------------
@@ -56,39 +54,24 @@ subroutine erosilt(thick    ,rhowat   ,rlabda   ,vicmol   , &
     !
     integer                                                   , intent(in)  :: kmax
     integer                                                                 :: lundia   !  Description and declaration in inout.igs
-    real(fp)                                                  , intent(in)  :: salinity
-    real(fp)                                                  , intent(in)  :: temperature
-    real(fp)                                                  , intent(in)  :: vicmol
     real(fp)                                                  , intent(in)  :: entr
-    real(fp)                                                  , intent(in)  :: hrms
-    real(fp)                                                  , intent(in)  :: rlabda
-    real(fp)                                                  , intent(in)  :: teta
-    real(fp)                                                  , intent(in)  :: tp
-    real(fp)                                                  , intent(in)  :: uorb
     real(fp)  , dimension(0:kmax)                             , intent(in)  :: ws
     real(fp)                                                  , intent(out) :: wstau
     real(fp)  , dimension(0:kmax)                             , intent(in)  :: dicww
-    real(fp)                                                  , intent(in)  :: rhowat !  Description and declaration in rjdim.f90
     real(fp)  , dimension(0:kmax)                             , intent(out) :: seddif
-    real(fp)                                                  , intent(in)  :: rhosol
     real(fp)  , dimension(kmax)                               , intent(in)  :: thick
     real(fp)                                                  , intent(in)  :: h0
     real(fp)                                                  , intent(in)  :: h1
-    real(fp)                                                  , intent(in)  :: z0rou
-    real(fp)                                                  , intent(in)  :: tauadd
     real(fp)                                                  , intent(in)  :: um
     real(fp)                                                  , intent(in)  :: uuu
     real(fp)                                                  , intent(in)  :: vm
     real(fp)                                                  , intent(in)  :: vvv
     real(fp)                                                  , intent(in)  :: taub
     logical                                                   , intent(out) :: error
-    real(fp)                                                  , intent(in)  :: ag
-    real(fp)                                                  , intent(in)  :: vonkar
     real(fp)                                                  , intent(in)  :: fixfac
     real(fp)                                                  , intent(in)  :: frac
     real(fp)                                                  , intent(out) :: sinkse
     real(fp)                                                  , intent(out) :: sourse
-    real(fp)                                                  , intent(in)  :: timsec
     logical                                                   , intent(in)  :: oldmudfrac
     logical                                                   , intent(in)  :: flmd2l
     real(fp)                                                  , intent(in)  :: tcrdep
@@ -107,7 +90,6 @@ subroutine erosilt(thick    ,rhowat   ,rlabda   ,vicmol   , &
 ! Local variables
 !
     integer  :: k
-    integer  :: kn
     real(fp) :: sour
     real(fp) :: sink
     real(fp) :: taum
@@ -116,12 +98,9 @@ subroutine erosilt(thick    ,rhowat   ,rlabda   ,vicmol   , &
 
     ! Interface to dll is in High precision!
     !
-    real(fp)          :: chezy
-    real(fp)          :: sag
     real(fp)          :: ee
     real(hp)          :: sink_dll
     real(hp)          :: sour_dll
-    real(fp)          :: tauba
     integer           :: ierror
     integer, external :: perf_function_erosilt
     character(256)    :: errmsg
@@ -130,14 +109,9 @@ subroutine erosilt(thick    ,rhowat   ,rlabda   ,vicmol   , &
 !! executable statements ------------------
 !
     ee     = exp(1.0_fp)
-    sag    = sqrt(ag)
     error  = .false.
     !
     ! Calculate total (possibly wave enhanced) roughness
-    !
-    chezy = sag * log( 1.0_fp + h1/max(1.0e-8_fp,ee*z0rou) ) / vonkar
-    !
-    tauba = sqrt(taub**2 + tauadd**2)
     !
     thick0 = thick(kmax) * h0
     thick1 = thick(kmax) * h1
@@ -173,7 +147,7 @@ subroutine erosilt(thick    ,rhowat   ,rlabda   ,vicmol   , &
        !
        sour = entr
        if (tcrdep > 0.0) then
-          sink = max(0.0_fp , 1.0-tauba/tcrdep)
+          sink = max(0.0_fp , 1.0-taub/tcrdep)
        else
           sink = 0.0
        endif
@@ -182,10 +156,10 @@ subroutine erosilt(thick    ,rhowat   ,rlabda   ,vicmol   , &
           !
           ! Default Partheniades-Krone formula
           !
-          taum = max(0.0_fp, tauba/tcrero - 1.0)
+          taum = max(0.0_fp, taub/tcrero - 1.0)
           sour = eropar * taum
           if (tcrdep > 0.0) then
-             sink = max(0.0_fp , 1.0-tauba/tcrdep)
+             sink = max(0.0_fp , 1.0-taub/tcrdep)
           else
              sink = 0.0
           endif
@@ -194,13 +168,6 @@ subroutine erosilt(thick    ,rhowat   ,rlabda   ,vicmol   , &
           ! User defined formula in DLL
           ! Input parameters are passed via realpar/intpar/strpar-arrays
           !
-          if (numrealpar < 30) then
-             write(errmsg,'(a,a,a)') 'Insufficient space to pass real values to transport routine.'
-             call prterr (lundia,'U021', trim(errmsg))
-             error = .true.
-             return
-          endif
-          realpar( 1) = real(timsec ,hp)
           realpar( 2) = real(um     ,hp)
           realpar( 3) = real(vm     ,hp)
           realpar( 4) = real(sqrt(um*um + vm*vm),hp)
@@ -212,28 +179,6 @@ subroutine erosilt(thick    ,rhowat   ,rlabda   ,vicmol   , &
           else
              realpar( 8) = real(h1/ee,hp)
           endif
-          realpar( 9) = real(h1     ,hp)
-          realpar(10) = real(chezy  ,hp)
-          realpar(11) = real(hrms  ,hp)
-          realpar(12) = real(tp    ,hp)
-          realpar(13) = real(teta  ,hp)
-          realpar(14) = real(rlabda,hp)
-          realpar(15) = real(uorb  ,hp)
-          realpar(16) = 0.0_hp !real(di50   ,hp)
-          realpar(17) = 0.0_hp !real(dss    ,hp)
-          realpar(18) = 0.0_hp !real(dstar  ,hp)
-          realpar(19) = 0.0_hp !real(d10    ,hp)
-          realpar(20) = 0.0_hp !real(d90    ,hp)
-          realpar(21) = 0.0_hp !real(mudfrac,hp)
-          realpar(22) = 1.0_hp !real(hidexp ,hp)
-          realpar(23) = real(ws(kmax)  ,hp) ! Vertical velocity near bedlevel
-          realpar(24) = real(rhosol    ,hp)
-          realpar(25) = real(rhowat    ,hp) ! Density of water
-          realpar(26) = real(salinity,hp)
-          realpar(27) = real(temperature,hp)
-          realpar(28) = real(ag        ,hp)
-          realpar(29) = real(vicmol    ,hp)
-          realpar(30) = real(tauba     ,hp)
           !
           ! Initialisation of output variables of user defined transport formulae
           !

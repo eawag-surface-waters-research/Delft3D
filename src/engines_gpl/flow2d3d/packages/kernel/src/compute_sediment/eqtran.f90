@@ -11,13 +11,13 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
                 & ce_nmtmp  ,akstmp    ,mudfrac   ,lsecfl    ,spirint   , &
                 & hidexp    ,suspfrac  ,ust2      ,tetacr    ,sa        , &
                 & salmax    ,ws0       ,t_relax   ,dis       ,concin    , &
-                & dzduu     ,dzdvv     ,ubot      ,temp      ,tauadd    , &
+                & dzduu     ,dzdvv     ,ubot      ,tauadd    , &
                 & sus       ,bed       ,susw      ,bedw      ,espir     , &
                 & rhow      ,ag        ,vonkar    ,vicmol    ,wave      , &
                 & scour     ,epspar    ,ubot_from_com,timsec ,camax     , &
                 & aksfac    ,rwave     ,rdc       ,rdw       ,pangle    , &
                 & fpco      ,iopsus    ,iopkcw    ,subiw     ,eps       , &
-                & iform     ,par       , &
+                & iform     ,par       ,chezy     , &
                 & numintpar ,numrealpar,numstrpar ,dllfunc   ,dllhandle , &
                 & intpar    ,realpar   ,strpar    ,error     )
 !----- GPL ---------------------------------------------------------------------
@@ -134,7 +134,6 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     real(fp)                        , intent(in)   :: taubmx   !  Description and declaration in rjdim.f90
     real(fp)                        , intent(in)   :: taucr0
     real(fp)                        , intent(in)   :: taurat
-    real(fp)                        , intent(in)   :: temp
     real(fp)                        , intent(in)   :: teta     !  Description and declaration in rjdim.f90
     real(fp)                        , intent(in)   :: tetacr
     real(fp), dimension(kmax)       , intent(in)   :: thick    !  Description and declaration in rjdim.f90
@@ -742,15 +741,9 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     elseif (iform == 15) then
        !
        ! User defined formula in DLL
-       ! Input parameters are passed via realpar/intpar/strpar-arrays
+       ! Input parameters are passed via realpar/intpar/strpar-arrays that have
+       ! been filled in calling routine
        !
-       if (numrealpar < 30) then
-          write(errmsg,'(a)') 'Insufficient space to pass real values to transport routine.'
-          call prterr (lundia,'U021', trim(errmsg))
-          error = .true.
-          return
-       endif
-       realpar( 1) = real(timsec ,hp)
        realpar( 2) = real(u      ,hp)
        realpar( 3) = real(v      ,hp)
        realpar( 4) = real(utot   ,hp)
@@ -758,29 +751,6 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
        realpar( 6) = real(vvv    ,hp)
        realpar( 7) = real(umod   ,hp)
        realpar( 8) = real(zumod  ,hp)
-       realpar( 9) = real(h1     ,hp)
-       realpar(10) = real(chezy  ,hp)
-       realpar(11) = real(hrms   ,hp)
-       realpar(12) = real(tp     ,hp)
-       realpar(13) = real(teta   ,hp)
-       realpar(14) = real(rlabda ,hp)
-       realpar(15) = real(uorb   ,hp)
-       realpar(16) = real(di50   ,hp)
-       realpar(17) = real(dss    ,hp)
-       realpar(18) = real(dstar  ,hp)
-       realpar(19) = real(d10    ,hp)
-       realpar(20) = real(d90    ,hp)
-       realpar(21) = real(mudfrac,hp)
-       realpar(22) = real(hidexp ,hp)
-       realpar(23) = real(ws(1)  ,hp) ! Vertical velocity near bedlevel
-       realpar(24) = real(rhosol ,hp)
-       realpar(25) = real(rhowat ,hp) ! Density of water
-       realpar(26) = real(sa     ,hp)
-       realpar(27) = real(temp   ,hp)
-       realpar(28) = real(ag     ,hp)
-       realpar(29) = real(vicmol ,hp)
-       realpar(30) = real(taubmx ,hp)
-       !
        ! Initialisation of output variables of user defined transport formulae
        !
        sbc_total   = .false. ! may be changed by user defined formulae

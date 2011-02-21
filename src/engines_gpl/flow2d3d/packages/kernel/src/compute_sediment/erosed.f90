@@ -296,6 +296,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: akstmp
     real(fp)                      :: ce_nm
     real(fp)                      :: ce_nmtmp
+    real(fp)                      :: chezy
     real(fp)                      :: crep
     real(fp)                      :: d10
     real(fp)                      :: d90
@@ -303,11 +304,13 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: difbot
     real(fp)                      :: drho
     real(fp)                      :: dstari
+    real(fp)                      :: ee
     real(fp)                      :: fi
     real(fp)                      :: h0
     real(fp)                      :: h1
     real(fp)                      :: hrmsnm
     real(fp)                      :: rlnm
+    real(fp)                      :: sag
     real(fp)                      :: salinity
     real(fp)                      :: spirint   ! local variable for spiral flow intensity r0(nm,1,lsecfl)
     real(fp)                      :: tauadd
@@ -586,6 +589,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     !     set kfsed
     !
     lstart = max(lsal, ltem)
+    sag    = sqrt(ag)
+    ee     = exp(1.0_fp)
     !
     ! Reset Sourse and Sinkse arrays for all (nm,l)
     !
@@ -723,16 +728,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        call dfexchg( ws(:,:,l),0, kmax, dfloat, gdp)
     enddo
     !
-    if (scour) then
-       !
-       ! Calculate extra stress (tauadd) for point = nm,
-       ! if so required by user input.
-       !
-       call shearx(tauadd, nm, gdp)
-    else
-       tauadd = 0.0_fp
-    endif
-    !
     do nm = 1, nmmax
        if (kfs(nm)/=1 .or. kcs(nm)>2) cycle
        !
@@ -787,6 +782,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        !
        z0rou = (  kfu(nmd)*z0urou(nmd) + kfu(nm)*z0urou(nm) &
              &  + kfv(ndm)*z0vrou(ndm) + kfv(nm)*z0vrou(nm)  )/kn
+       chezy = sag * log( 1.0_fp + h1/max(1.0e-8_fp,ee*z0rou) ) / vonkar
        !
        ! bed shear stress as used in flow, or
        ! skin fiction following Soulsby; "Bed shear stress under
@@ -806,6 +802,17 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           ! use max bed shear stress, rather than mean
           !
           taub = taubmx(nm)
+       endif
+       !
+       if (scour) then
+          !
+          ! Calculate extra stress (tauadd) for point = nm,
+          ! if so required by user input.
+          !
+          call shearx(tauadd, nm, gdp)
+          taub = sqrt(taub**2 + tauadd**2)
+       else
+          tauadd = 0.0_fp
        endif
        !
        if (wave) then
@@ -835,11 +842,48 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        d10  = dxx(nm,i10)
        d90  = dxx(nm,i90)
        !
+       ! Input parameters are passed via dll_reals/integers/strings-arrays
+       !
+       if (max_reals < 30) then
+          write(errmsg,'(a)') 'Insufficient space to pass real values to transport routine.'
+          call prterr (lundia,'U021', trim(errmsg))
+          call d3stop(1, gdp)
+       endif
+       dll_reals( 1) = real(timsec ,hp)
+       !dll_reals( 2) = depth averaged u velocity
+       !dll_reals( 3) = depth averaged v velocity
+       !dll_reals( 4) = depth averaged velocity magnitude
+       !dll_reals( 5) = characteristic u velocity
+       !dll_reals( 6) = characteristic v velocity
+       !dll_reals( 7) = characteristic velocity magnitude
+       !dll_reals( 8) = z level of characteristic velocity
+       dll_reals( 9) = real(h1        ,hp)
+       dll_reals(10) = real(chezy     ,hp)
+       dll_reals(11) = real(hrms(nm)  ,hp)
+       dll_reals(12) = real(tp(nm)    ,hp)
+       dll_reals(13) = real(teta(nm)  ,hp)
+       dll_reals(14) = real(rlabda(nm),hp)
+       dll_reals(15) = real(uorb(nm)  ,hp)
+       !dll_reals(16) = d50 of fraction
+       !dll_reals(17) = suspended sediment diameter of fraction
+       !dll_reals(18) = dstar of fraction
+       dll_reals(19) = real(d10    ,hp)
+       dll_reals(20) = real(d90    ,hp)
+       dll_reals(21) = real(mudfrac(nm),hp)
+       !dll_reals(22) = hiding and exposure
+       !dll_reals(23) = settling velocity
+       !dll_reals(24) = specific density
+       dll_reals(25) = real(rhowat(nm,kmax),hp) ! Density of water
+       dll_reals(26) = real(salinity,hp)
+       dll_reals(27) = real(temperature,hp)
+       dll_reals(28) = real(ag     ,hp)
+       dll_reals(29) = real(vicmol ,hp)
+       dll_reals(30) = real(taub   ,hp) !taubmx incremented with tauadd
+       !
        if (max_integers < 4) then
           write(errmsg,'(a,a,a)') 'Insufficient space to pass integer values to transport routine.'
           call prterr (lundia,'U021', trim(errmsg))
-          error = .true.
-          return
+          call d3stop(1, gdp)
        endif
        dll_integers( 1) = nm
        dll_integers( 2) = n
@@ -848,33 +892,39 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        if (max_strings < 2) then
           write(errmsg,'(a,a,a)') 'Insufficient space to pass strings to transport routine.'
           call prterr (lundia,'U021', trim(errmsg))
-          error = .true.
-          return
+          call d3stop(1, gdp)
        endif
        dll_strings( 1) = gdp%runid
        !
        do l = 1, lsedtot
           !
+          ! fraction specific quantities
+          !
+          dll_reals(22)    = real(hidexp(nm,l) ,hp)
+          dll_reals(23)    = real(ws(nm, kmax, l)  ,hp) ! Vertical velocity near bedlevel
+          dll_reals(24)    = real(rhosol(l) ,hp)
           dll_integers( 4) = l
-          dll_strings ( 2) = dll_usrfil(l)
+          dll_strings( 2)  = dll_usrfil(l)
           !
           if (sedtyp(l)==SEDTYP_COHESIVE) then
              !
              ! sediment type COHESIVE
+             !
+             dll_reals(16) = 0.0_hp
+             dll_reals(17) = 0.0_hp
+             dll_reals(18) = 0.0_hp
              !
              do k = 0, kmax
                 wslc(k)   = ws(nm, k, l)
                 dcwwlc(k) = dicww(nm, k)
              enddo
              !
-             call erosilt(thick    ,rhowat(nm,kmax)   ,rlnm     ,vicmol     , &
-                        & kmax     ,hrmsnm   ,uorbnm  ,tpnm     ,tetanm   ,wslc       , &
-                        & wstau(nm),entr(nm) ,dcwwlc  ,sddflc   ,lundia   ,rhosol(l)  , &
-                        & h0       ,h1       ,z0rou   ,tauadd   ,umean      , &
-                        & vmean    ,ubed     ,vbed    ,taub     ,salinity ,temperature, &
-                        & error    ,ag       ,vonkar  ,fixfac     , &
-                        & frac     ,sinkse   ,sourse  ,oldmudfrac,flmd2l  ,tcrdep     , &
-                        & tcrero   ,eropar   ,timsec  ,iform    , &
+             call erosilt(thick    ,kmax     ,wslc     , &
+                        & wstau(nm),entr(nm) ,dcwwlc   ,sddflc   ,lundia   , &
+                        & h0       ,h1       ,umean    ,vmean    ,ubed     ,vbed     , &
+                        & taub     ,error    ,fixfac   , &
+                        & frac     ,sinkse   ,sourse   ,oldmudfrac,flmd2l  ,tcrdep(nm,l), &
+                        & tcrero(nm,l) ,eropar(nm,l)   ,iform    , &
                         & max_integers,max_reals      ,max_strings  ,dll_function(l),dll_handle(l), &
                         & dll_integers,dll_reals      ,dll_strings  )
              if (error) call d3stop(1, gdp)
@@ -933,6 +983,27 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              taucr(l) = factcr * (rhosol(l)-rhow) * ag * di50 * tetacr(l)
           endif
           !
+          if (suspfrac) then
+             tsigmol = sigmol(ll)
+             tdss    = dss(nm, l)
+             tsalmax = salmax(l)
+             tws0    = ws0(l)
+          else
+             !
+             ! use dummy values for bedload fractions
+             !
+             tsigmol =  1.0_fp
+             tdss    = di50
+             tsalmax = 30.0_fp
+             tws0    =  0.0_fp
+          endif
+          !
+          ! NONCOHESIVE fraction specific quantities
+          !
+          dll_reals(16) = real(di50    ,hp)
+          dll_reals(17) = real(tdss    ,hp)
+          dll_reals(18) = real(dstar(l),hp)
+          !
           ! SWITCH 2DH/3D SIMULATIONS
           !
           if (kmax > 1) then
@@ -948,19 +1019,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                    wslc(k)   = ws(nm, k, l)
                    dcwwlc(k) = dicww(nm, k)
                 enddo
-                !
-                tsigmol = sigmol(ll)
-                tdss    = dss(nm, l)
-                tsalmax = salmax(l)
-                tws0    = ws0(l)
-             else
-                !
-                ! use dummy values for bedload fractions
-                !
-                tsigmol =  1.0_fp
-                tdss    = di50
-                tsalmax = 30.0_fp
-                tws0    =  0.0_fp
              endif
              !
              do k = 1, kmax
@@ -983,13 +1041,13 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & ce_nmtmp    ,akstmp         ,mudfrac(nm)  ,lsecfl       ,spirint   , &
                        & hidexp(nm,l),suspfrac       ,ust2(nm)     ,tetacr(l)    ,salinity  , &
                        & tsalmax     ,tws0           ,tsd          ,dis(nm)      ,concin3d  , &
-                       & dzduu(nm)   ,dzdvv(nm)      ,ubot(nm)     ,temperature  ,tauadd    , &
+                       & dzduu(nm)   ,dzdvv(nm)      ,ubot(nm)     ,tauadd    , &
                        & sus         ,bed            ,susw         ,bedw         ,espir     , &
                        & rhow        ,ag             ,vonkar       ,vicmol       ,wave      , &
                        & scour       ,epspar         ,ubot_from_com,timsec       ,camax     , &
                        & aksfac      ,rwave          ,rdc          ,rdw          ,pangle    , &
                        & fpco        ,iopsus         ,iopkcw       ,subiw        ,eps       , &
-                       & iform(l)     ,par(1,l)  , &
+                       & iform(l)    ,par(1,l)       ,chezy        , &
                        & max_integers,max_reals      ,max_strings  ,dll_function(l),dll_handle(l), &
                        & dll_integers,dll_reals      ,dll_strings  ,error     )
              if (error) call d3stop(1, gdp)
@@ -1039,19 +1097,10 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                    ws2d(k2d)   = ws(nm, 1, l)
                    dcww2d(k2d) = 0.0_fp
                 enddo
-                !
-                tsigmol = sigmol(ll)
-                tdss    = dss(nm, l)
                 trsedeq = rsedeq(nm, 1, l)
-                tsalmax = salmax(l)
-                tws0    = ws0(l)
              else
-                tsigmol =  1.0_fp
-                tdss    = di50
                 trsedeq =  0.0_fp
-                tsalmax = 30.0_fp
-                tws0    =  0.0_fp
-            endif
+             endif
              !
              if (lsecfl > 0) then
                 spirint = r0(nm,1,lsecfl)
@@ -1076,13 +1125,13 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & ce_nmtmp    ,akstmp         ,mudfrac(nm)  ,lsecfl       ,spirint    , &
                        & hidexp(nm,l),suspfrac       ,ust2(nm)     ,tetacr(l)    ,salinity   , &
                        & tsalmax     ,tws0           ,tsd          ,dis(nm)      ,concin2d   , &
-                       & dzduu(nm)   ,dzdvv(nm)      ,ubot(nm)     ,temperature  ,tauadd     , &
+                       & dzduu(nm)   ,dzdvv(nm)      ,ubot(nm)     ,tauadd     , &
                        & sus         ,bed            ,susw         ,bedw         ,espir      , &
                        & rhow        ,ag             ,vonkar       ,vicmol       ,wave       , &
                        & scour       ,epspar         ,ubot_from_com,timsec       ,camax      , &
                        & aksfac      ,rwave          ,rdc          ,rdw          ,pangle     , &
                        & fpco        ,iopsus         ,iopkcw       ,subiw        ,eps        , &
-                       & iform(l)     ,par(1,l)   , &
+                       & iform(l)    ,par(1,l)       ,chezy        , &
                        & max_integers,max_reals      ,max_strings  ,dll_function(l),dll_handle(l), &
                        & dll_integers,dll_reals      ,dll_strings  ,error      )
              if (error) call d3stop(1, gdp)
