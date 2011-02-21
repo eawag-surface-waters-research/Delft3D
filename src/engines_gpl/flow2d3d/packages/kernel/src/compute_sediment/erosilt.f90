@@ -1,10 +1,13 @@
-subroutine erosilt(nmmax   ,icx     ,icy     ,kcs     ,kfs     ,kfu     , &
-                 & kfv     ,kfsed   ,kmxsed  ,lsedtot ,lsed    ,thick   , &
-                 & kmax    ,dps     ,s0      ,s1      ,taubmx  ,u0eul   , &
-                 & v0eul   ,hrms    ,uorb    ,tp      ,teta    ,ws      , &
-                 & wstau   ,entr    ,dicww   ,seddif  ,lundia  ,rhosol  , &
-                 & rhowat  ,rlabda  ,z0urou  ,z0vrou  ,r0      ,lsal    , &
-                 & ltem    ,saleqs  ,temeqs  ,vicmol  ,gdp     )
+subroutine erosilt(l        ,thick    ,rhowat   ,rlabda   ,vicmol   , &
+                 & kmax     ,hrms     ,uorb     ,tp       ,teta     ,ws       , &
+                 & wstau    ,entr     ,dicww    ,seddif   ,lundia   ,rhosol   , &
+                 & nm       ,h0       ,h1       ,z0rou    ,tauadd   ,um       , &
+                 & vm       ,uuu      ,vvv      ,taub     ,salinity ,temperature, &
+                 & n        ,m        ,error    ,ag       ,vonkar   ,fixfac   , &
+                 & frac     ,sinkse   ,sourse   ,oldmudfrac, flmd2l , tcrdep  , &
+                 & tcrero   ,eropar   ,timsec   ,iform    , &
+                 & numintpar,numrealpar,numstrpar,dllfunc ,dllhandle, &
+                 & intpar   ,realpar  ,strpar   ,usrfil   ,runid    )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -47,186 +50,114 @@ subroutine erosilt(nmmax   ,icx     ,icy     ,kcs     ,kfs     ,kfu     , &
 !!--declarations----------------------------------------------------------------
     use precision
     !
-    use globaldata
-    use bedcomposition_module
-    !
     implicit none
     !
-    type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    real(fp)                         , pointer :: ag
-    real(fp)                         , pointer :: vonkar
-    real(fp)                         , pointer :: gammax
-    real(fp), dimension(:)           , pointer :: dm
-    real(fp), dimension(:,:)         , pointer :: fixfac
-    real(fp), dimension(:,:)         , pointer :: frac
-    real(fp), dimension(:)           , pointer :: mudfrac
-    real(fp), dimension(:,:)         , pointer :: sinkse
-    real(fp), dimension(:,:)         , pointer :: sourse
-    real(fp)                         , pointer :: morfac
-    real(fp)                         , pointer :: bed
-    real(fp)                         , pointer :: timsec
-    logical                          , pointer :: oldmudfrac
-    logical                          , pointer :: wave
-    logical                          , pointer :: sedim
-    logical                          , pointer :: flmd2l
-    real(fp)                         , pointer :: kssilt
-    real(fp)                         , pointer :: kssand
-    real(fp)      , dimension(:,:)   , pointer :: tcrdep
-    real(fp)      , dimension(:,:)   , pointer :: tcrero
-    real(fp)      , dimension(:)     , pointer :: thcmud
-    real(fp)      , dimension(:,:)   , pointer :: eropar
-    logical                          , pointer :: bsskin
-    logical                          , pointer :: scour
-    integer       , dimension(:)     , pointer :: iform
-    integer       , dimension(:)     , pointer :: sedtyp
     include 'sedparams.inc'
     !
-    integer                                                   , intent(in)  :: icx    !!  Increment in the X-dir., if ICX= NMAX
-                                                                                      !!  then computation proceeds in the X-
-                                                                                      !!  dir. If icx=1 then computation pro-
-                                                                                      !!  ceeds in the Y-dir.
-    integer                                                   , intent(in)  :: icy    !!  Increment in the Y-dir. (see ICX)
     integer                                                   , intent(in)  :: kmax
-    integer                                                   , intent(in)  :: lsedtot
-    integer                                                   , intent(in)  :: lsed
-    integer                                                   , intent(in)  :: lsal
-    integer                                                   , intent(in)  :: ltem
+    integer                                                   , intent(in)  :: nm
+    integer                                                   , intent(in)  :: l
     integer                                                                 :: lundia   !  Description and declaration in inout.igs
-    integer                                                   , intent(in)  :: nmmax
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kcs
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfs
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfu
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfv
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: kfsed
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub, lsed)                      :: kmxsed
-    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: dps
-    real(fp)                                                  , intent(in)  :: saleqs
-    real(fp)                                                  , intent(in)  :: temeqs
+    real(fp)                                                  , intent(in)  :: salinity
+    real(fp)                                                  , intent(in)  :: temperature
     real(fp)                                                  , intent(in)  :: vicmol
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: entr
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: hrms
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: rlabda
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax, *)     , intent(in)  :: r0
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: s0
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: s1
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: taubmx
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: teta
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: tp
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: uorb
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax, *)   , intent(in)  :: ws
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: wstau
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)      , intent(in)  :: dicww
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: rhowat !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax, lsed)              :: seddif
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: u0eul
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: v0eul
-    real(fp)  , dimension(lsed)                               , intent(in)  :: rhosol
+    real(fp)                                                  , intent(in)  :: entr
+    real(fp)                                                  , intent(in)  :: hrms
+    real(fp)                                                  , intent(in)  :: rlabda
+    real(fp)                                                  , intent(in)  :: teta
+    real(fp)                                                  , intent(in)  :: tp
+    real(fp)                                                  , intent(in)  :: uorb
+    real(fp)  , dimension(0:kmax)                             , intent(in)  :: ws
+    real(fp)                                                  , intent(out) :: wstau
+    real(fp)  , dimension(0:kmax)                             , intent(in)  :: dicww
+    real(fp)                                                  , intent(in)  :: rhowat !  Description and declaration in rjdim.f90
+    real(fp)  , dimension(0:kmax)                             , intent(out) :: seddif
+    real(fp)                                                  , intent(in)  :: rhosol
     real(fp)  , dimension(kmax)                               , intent(in)  :: thick
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: z0urou !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: z0vrou
+    real(fp)                                                  , intent(in)  :: h0
+    real(fp)                                                  , intent(in)  :: h1
+    real(fp)                                                  , intent(in)  :: z0rou
+    real(fp)                                                  , intent(in)  :: tauadd
+    real(fp)                                                  , intent(in)  :: um
+    real(fp)                                                  , intent(in)  :: uuu
+    real(fp)                                                  , intent(in)  :: vm
+    real(fp)                                                  , intent(in)  :: vvv
+    real(fp)                                                  , intent(in)  :: taub
+    integer                                                   , intent(in)  :: n
+    integer                                                   , intent(in)  :: m
+    logical                                                   , intent(out) :: error
+    real(fp)                                                  , intent(in)  :: ag
+    real(fp)                                                  , intent(in)  :: vonkar
+    real(fp)                                                  , intent(in)  :: fixfac
+    real(fp)                                                  , intent(in)  :: frac
+    real(fp)                                                  , intent(out) :: sinkse
+    real(fp)                                                  , intent(out) :: sourse
+    real(fp)                                                  , intent(in)  :: timsec
+    logical                                                   , intent(in)  :: oldmudfrac
+    logical                                                   , intent(in)  :: flmd2l
+    real(fp)                                                  , intent(in)  :: tcrdep
+    real(fp)                                                  , intent(in)  :: tcrero
+    real(fp)                                                  , intent(in)  :: eropar
+    integer                                                   , intent(in)  :: iform
+    integer, dimension(numintpar)   , intent(inout):: intpar
+    integer                         , intent(in)   :: numintpar
+    integer                         , intent(in)   :: numrealpar
+    integer                         , intent(in)   :: numstrpar
+    real(hp), dimension(numrealpar) , intent(inout):: realpar
+    character(256), dimension(numstrpar), intent(inout):: strpar
+    character(256)                  , intent(in)   :: dllfunc
+    integer                         , intent(in)   :: dllhandle
+    character(256)                  , intent(in)   :: usrfil
+    character(len=*)                , intent(in)   :: runid
 !
 ! Local variables
 !
     integer  :: k
-    integer  :: ku
-    integer  :: kv
     integer  :: kn
-    integer  :: l
-    integer  :: n
-    integer  :: m
-    integer  :: nm
-    integer  :: ndm
-    integer  :: nmd
-    real(fp) :: h1
     real(fp) :: sour
     real(fp) :: sink
-    real(fp) :: tauadd
-    real(fp) :: taub
     real(fp) :: taum
-    real(fp) :: um
-    real(fp) :: uuu
-    real(fp) :: vm
-    real(fp) :: vvv
     real(fp) :: thick0
     real(fp) :: thick1
 
     ! Interface to dll is in High precision!
     !
-    real(fp)          :: z0rou
     real(fp)          :: chezy
     real(fp)          :: sag
     real(fp)          :: ee
     real(hp)          :: sink_dll
     real(hp)          :: sour_dll
-    integer           :: error
+    real(fp)          :: tauba
+    integer           :: ierror
     integer, external :: perf_function_erosilt
     character(256)    :: errmsg
     character(256)    :: message     ! Contains message from
-    !
-    character(256), dimension(:)         , pointer :: dll_function
-    integer,        dimension(:)         , pointer :: dll_handle
-    character(256), dimension(:)         , pointer :: dll_usrfil
-    !
-    integer                              , pointer :: max_integers
-    integer                              , pointer :: max_reals
-    integer                              , pointer :: max_strings
-    integer       , dimension(:)         , pointer :: dll_integers
-    real(hp)      , dimension(:)         , pointer :: dll_reals
-    character(256), dimension(:)         , pointer :: dll_strings
 !
 !! executable statements ------------------
 !
-    ag                  => gdp%gdphysco%ag
-    vonkar              => gdp%gdphysco%vonkar
-    gammax              => gdp%gdnumeco%gammax
-    dm                  => gdp%gderosed%dm
-    fixfac              => gdp%gderosed%fixfac
-    frac                => gdp%gderosed%frac
-    mudfrac             => gdp%gderosed%mudfrac
-    sinkse              => gdp%gderosed%sinkse
-    sourse              => gdp%gderosed%sourse
-    morfac              => gdp%gdmorpar%morfac
-    bed                 => gdp%gdmorpar%bed
-    oldmudfrac          => gdp%gdmorpar%oldmudfrac
-    wave                => gdp%gdprocs%wave
-    sedim               => gdp%gdprocs%sedim
-    flmd2l              => gdp%gdprocs%flmd2l
-    kssilt              => gdp%gdsedpar%kssilt
-    kssand              => gdp%gdsedpar%kssand
-    tcrdep              => gdp%gdsedpar%tcrdep
-    tcrero              => gdp%gdsedpar%tcrero
-    thcmud              => gdp%gdsedpar%thcmud
-    eropar              => gdp%gdsedpar%eropar
-    sedtyp              => gdp%gdsedpar%sedtyp
-    bsskin              => gdp%gdsedpar%bsskin
-    scour               => gdp%gdscour%scour
-    !
-    timsec              => gdp%gdinttim%timsec
-    !
-    iform               => gdp%gdeqtran%iform
-    dll_function        => gdp%gdeqtran%dll_function
-    dll_handle          => gdp%gdeqtran%dll_handle
-    dll_usrfil          => gdp%gdeqtran%dll_usrfil
-    !
-    max_integers        => gdp%gdeqtran%max_integers
-    max_reals           => gdp%gdeqtran%max_reals
-    max_strings         => gdp%gdeqtran%max_strings
-    dll_integers        => gdp%gdeqtran%dll_integers
-    dll_reals           => gdp%gdeqtran%dll_reals
-    dll_strings         => gdp%gdeqtran%dll_strings
-    !
     ee     = exp(1.0_fp)
     sag    = sqrt(ag)
+    error  = .false.
     !
-    ! Determine total thickness of the mud layers
-    ! to be used in computation of skin friction (Soulsby 2004)
+    ! Calculate total (possibly wave enhanced) roughness
     !
-    if (bsskin) then
-       call detthcmud(gdp%gdmorlyr  ,sedtyp    ,thcmud    )
-    endif
+    chezy = sag * log( 1.0_fp + h1/max(1.0e-8_fp,ee*z0rou) ) / vonkar
+    !
+    tauba = sqrt(taub**2 + tauadd**2)
+    !
+    thick0 = thick(kmax) * h0
+    thick1 = thick(kmax) * h1
+    !
+    ! Bed transport following Partheniades and Krone
+    ! but in case of fluid mud, source term is determined by
+    ! fluid mud part (sourmu). Information is passed via entr()
+    ! maximum erosion is sediment available at bed (ignores sediment
+    ! settling during the current morphological timestep)
+    ! In case of fluid mud the maximum erosion is determined in sourmu
+    ! of the fluid mud module. So ignore this check when fluid mud.
+    ! Also, taum is not required in the formulation since whether or not
+    ! and how much entrainment occurs is entirely handled by the sourmu
+    ! routine.
     !
     ! For 3D model set sediment diffusion coefficient
     ! NOTE THAT IF ALGEBRAIC OR K-L TURBULENCE MODEL IS USED THEN WAVES
@@ -234,262 +165,147 @@ subroutine erosilt(nmmax   ,icx     ,icy     ,kcs     ,kfs     ,kfu     , &
     ! ROUGHNESS
     !
     if (kmax > 1) then
-       do l = 1, lsedtot
-          if (sedtyp(l)/=SEDTYP_COHESIVE) cycle
-          !
-          ! calculation both for mud and floc
-          !
-          do k = 1, kmax
-             do nm = 1, nmmax
-                if (kfs(nm)==1 .and. kcs(nm)<=2) then
-                   seddif(nm, k, l) = dicww(nm, k)
-                endif
-             enddo
-          enddo
+       do k = 1, kmax
+          seddif(k) = dicww(k)
        enddo
     endif
     !
-    ! Main computational loop over all nm points
+    ! calculation both for mud and floc
     !
-    do nm = 1, nmmax
+    if (flmd2l) then
        !
-       ! Don't compute anything if water depth is small or if point is DD-point
+       ! maximum erosion is sediment available at bed
+       ! (ignores sediment settling during the current morphological timestep)
        !
-       if (kfsed(nm)==0 .or. kcs(nm)>2) cycle
-       !
-       ! kfsed(nm) == 1
-       !
-       nmd  = nm - icx
-       ndm  = nm - icy
-       !
-       ! Compute depth at cell-centre
-       !
-       h1   = max(0.01_fp, s1(nm) + real(dps(nm),fp))
-       !
-       ! Compute depth-averaged velocity components at cell centre
-       !
-       ku = max(1,kfu(nmd) + kfu(nm))
-       kv = max(1,kfv(ndm) + kfv(nm))
-       um = 0.0
-       vm = 0.0
-       do k = 1, kmax
-          um = um + thick(k)*(u0eul(nm,k) + u0eul(nmd,k))/ku
-          vm = vm + thick(k)*(v0eul(nm,k) + v0eul(ndm,k))/kv
-       enddo
-       uuu = (u0eul(nm,kmax) + u0eul(nmd,kmax))/ku
-       vvv = (v0eul(nm,kmax) + v0eul(ndm,kmax))/kv
-       !
-       ! Calculate total (possibly wave enhanced) roughness
-       !
-       kn    = max(1, kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm))
-       z0rou = (  kfu(nmd)*z0urou(nmd) + kfu(nm)*z0urou(nm) &
-             &  + kfv(ndm)*z0vrou(ndm) + kfv(nm)*z0vrou(nm)  )/kn
-       chezy = sag * log( 1.0_fp + h1/max(1.0e-8_fp,ee*z0rou) ) / vonkar
-       !
-       ! bed shear stress as used in flow, or
-       ! skin fiction following Soulsby; "Bed shear stress under
-       ! combined waves and currents on rough and smoooth beds"
-       ! Estproc report TR137, 2004
-       !
-       if (bsskin) then
-          !
-          ! Compute bed stress resulting from skin friction
-          !
-          call compbsskin   (um      , vm        , h1      , wave    , &
-                           & uorb(nm), tp  (nm)  , teta(nm), kssilt  , &
-                           & kssand  , thcmud(nm), taub    , rhowat(nm,kmax), &
-                           & vicmol  )
+       sour = entr
+       if (tcrdep > 0.0) then
+          sink = max(0.0_fp , 1.0-tauba/tcrdep)
        else
-          !
-          ! use max bed shear stress, rather than mean
-          !
-          taub = taubmx(nm)
+          sink = 0.0
        endif
-       !
-       if (scour) then
+    else
+       if (iform == -1) then
           !
-          ! Calculate extra stress (tauadd) for point = nm,
-          ! if so required by user input.
+          ! Default Partheniades-Krone formula
           !
-          call shearx(tauadd, nm, gdp)
-          !
-          taub = sqrt(taub**2 + tauadd**2)
-       endif
-       !
-       thick0 = thick(kmax) * max(0.01_fp , s0(nm)+real(dps(nm),fp))
-       thick1 = thick(kmax) * h1
-       !
-       ! Bed transport following Partheniades and Krone
-       ! but in case of fluid mud, source term is determined by
-       ! fluid mud part (sourmu). Information is passed via entr()
-       ! maximum erosion is sediment available at bed (ignores sediment
-       ! settling during the current morphological timestep)
-       ! In case of fluid mud the maximum erosion is determined in sourmu
-       ! of the fluid mud module. So ignore this check when fluid mud.
-       ! Also, taum is not required in the formulation since whether or not
-       ! and how much entrainment occurs is entirely handled by the sourmu
-       ! routine.
-       !
-       ! Main computational loop over all sediments
-       !
-       do l = 1, lsedtot
-          if (sedtyp(l)/=SEDTYP_COHESIVE) cycle
-          !
-          ! calculation both for mud and floc
-          !
-          if (flmd2l) then
-             !
-             ! maximum erosion is sediment available at bed
-             ! (ignores sediment settling during the current morphological timestep)
-             !
-             sour = entr(nm)
-             if (tcrdep(nm, l) > 0.0) then
-                sink = max(0.0_fp , 1.0-taub/tcrdep(nm, l))
-             else
-                sink = 0.0
-             endif
+          taum = max(0.0_fp, tauba/tcrero - 1.0)
+          sour = eropar * taum
+          if (tcrdep > 0.0) then
+             sink = max(0.0_fp , 1.0-tauba/tcrdep)
           else
-             if (iform(l) == -1) then
-                !
-                ! Default Partheniades-Krone formula
-                !
-                taum = max(0.0_fp, taub/tcrero(nm, l) - 1.0)
-                sour = eropar(nm, l) * taum
-                if (tcrdep(nm, l) > 0.0) then
-                   sink = max(0.0_fp , 1.0-taub/tcrdep(nm, l))
-                else
-                   sink = 0.0
-                endif
-             elseif (iform(l) == 15) then
-                !
-                ! User defined formula in DLL
-                ! Input parameters are passed via dll_reals/integers/strings-arrays
-                !
-                if (max_reals < 30) then
-                   write(errmsg,'(a,a,a)') 'Insufficient space to pass real values to transport routine.'
-                   call prterr (lundia,'U021', trim(errmsg))
-                   call d3stop(1, gdp)
-                endif
-                dll_reals( 1) = real(timsec ,hp)
-                dll_reals( 2) = real(um     ,hp)
-                dll_reals( 3) = real(vm     ,hp)
-                dll_reals( 4) = real(sqrt(um*um + vm*vm),hp)
-                dll_reals( 5) = real(uuu    ,hp)
-                dll_reals( 6) = real(vvv    ,hp)
-                dll_reals( 7) = real(sqrt(uuu*uuu + vvv*vvv),hp)
-                if (kmax>1) then
-                   dll_reals( 8) = real(h1*thick(kmax)/2.0_fp,hp)
-                else
-                   dll_reals( 8) = real(h1/ee,hp)
-                endif
-                dll_reals( 9) = real(h1     ,hp)
-                dll_reals(10) = real(chezy  ,hp)
-                if (wave) then
-                   dll_reals(11) = real(min(gammax*h1, hrms(nm)),hp)
-                   dll_reals(12) = real(tp(nm)  ,hp)
-                   dll_reals(13) = real(teta(nm),hp)
-                   dll_reals(14) = real(rlabda(nm),hp)
-                   dll_reals(15) = real(uorb(nm),hp)
-                else
-                   dll_reals(11) = 0.0_hp
-                   dll_reals(12) = 0.0_hp
-                   dll_reals(13) = 0.0_hp
-                   dll_reals(14) = 0.0_hp
-                   dll_reals(15) = 0.0_hp
-                endif
-                dll_reals(16) = 0.0_hp !real(di50   ,hp)
-                dll_reals(17) = 0.0_hp !real(dss    ,hp)
-                dll_reals(18) = 0.0_hp !real(dstar  ,hp)
-                dll_reals(19) = 0.0_hp !real(d10    ,hp)
-                dll_reals(20) = 0.0_hp !real(d90    ,hp)
-                dll_reals(21) = 0.0_hp !real(mudfrac,hp)
-                dll_reals(22) = 1.0_hp !real(hidexp ,hp)
-                dll_reals(23) = real(ws(nm,kmax,l)   ,hp) ! Vertical velocity near bedlevel
-                dll_reals(24) = real(rhosol(l) ,hp)
-                dll_reals(25) = real(rhowat(nm,kmax) ,hp) ! Density of sediment and water
-                if (lsal > 0) then
-                   dll_reals(26) = real(r0(nm,kmax,lsal),hp)
-                else
-                   dll_reals(26) = real(saleqs,hp)
-                endif
-                if (ltem > 0) then
-                   dll_reals(27) = real(r0(nm,kmax,ltem),hp)
-                else
-                   dll_reals(27) = real(temeqs,hp)
-                endif
-                dll_reals(28) = real(ag        ,hp)
-                dll_reals(29) = real(vicmol    ,hp)
-                dll_reals(30) = real(taub      ,hp)
-                !
-                if (max_integers < 4) then
-                   write(errmsg,'(a,a,a)') 'Insufficient space to pass integer values to transport routine.'
-                   call prterr (lundia,'U021', trim(errmsg))
-                   call d3stop(1, gdp)
-                endif
-                call nm_to_n_and_m(nm, n, m, gdp)
-                dll_integers( 1) = nm
-                dll_integers( 2) = n
-                dll_integers( 3) = m
-                dll_integers( 4) = l
-                !
-                if (max_strings < 2) then
-                   write(errmsg,'(a,a,a)') 'Insufficient space to pass strings to transport routine.'
-                   call prterr (lundia,'U021', trim(errmsg))
-                   call d3stop(1, gdp)
-                endif
-                dll_strings( 1) = gdp%runid
-                dll_strings( 2) = dll_usrfil(l)
-                !
-                ! Initialisation of output variables of user defined transport formulae
-                !
-                sink_dll    = 0.0_hp
-                sour_dll    = 0.0_hp
-                message     = ' '
-                !
-                ! psem/vsem is used to be sure this works fine in DD calculations
-                !
-                call psemlun
-                error = perf_function_erosilt(dll_handle(l)   , dll_function(l)   , &
-                                              dll_integers    , max_integers      , &
-                                              dll_reals       , max_reals         , &
-                                              dll_strings     , max_strings       , &
-                                              sink_dll        , sour_dll          , &
-                                              message)
-                call vsemlun
-                if (error /= 0) then
-                   write(errmsg,'(a,a,a)') 'Cannot find function "',trim(dll_function(l)),'" in dynamic library.'
-                   call prterr (lundia,'U021', trim(errmsg))
-                   call d3stop(1, gdp)
-                endif
-                if (message /= ' ') then
-                   write (lundia,'(a,a,a)') '*** ERROR Message from user defined erosion/deposition formulae ',trim(dll_function(l)),' :'
-                   write (lundia,'(a,a  )') '          ', trim(message)
-                   write (lundia,'(a    )') ' '
-                   call d3stop(1, gdp)
-                endif
-                !
-                ! Output parameters
-                !
-                sour    = real(sour_dll,fp)
-                sink    = real(sink_dll,fp)
-             endif
+             sink = 0.0
+          endif
+       elseif (iform == 15) then
+          !
+          ! User defined formula in DLL
+          ! Input parameters are passed via realpar/intpar/strpar-arrays
+          !
+          if (numrealpar < 30) then
+             write(errmsg,'(a,a,a)') 'Insufficient space to pass real values to transport routine.'
+             call prterr (lundia,'U021', trim(errmsg))
+             error = .true.
+             return
+          endif
+          realpar( 1) = real(timsec ,hp)
+          realpar( 2) = real(um     ,hp)
+          realpar( 3) = real(vm     ,hp)
+          realpar( 4) = real(sqrt(um*um + vm*vm),hp)
+          realpar( 5) = real(uuu    ,hp)
+          realpar( 6) = real(vvv    ,hp)
+          realpar( 7) = real(sqrt(uuu*uuu + vvv*vvv),hp)
+          if (kmax>1) then
+             realpar( 8) = real(h1*thick(kmax)/2.0_fp,hp)
+          else
+             realpar( 8) = real(h1/ee,hp)
+          endif
+          realpar( 9) = real(h1     ,hp)
+          realpar(10) = real(chezy  ,hp)
+          realpar(11) = real(hrms  ,hp)
+          realpar(12) = real(tp    ,hp)
+          realpar(13) = real(teta  ,hp)
+          realpar(14) = real(rlabda,hp)
+          realpar(15) = real(uorb  ,hp)
+          realpar(16) = 0.0_hp !real(di50   ,hp)
+          realpar(17) = 0.0_hp !real(dss    ,hp)
+          realpar(18) = 0.0_hp !real(dstar  ,hp)
+          realpar(19) = 0.0_hp !real(d10    ,hp)
+          realpar(20) = 0.0_hp !real(d90    ,hp)
+          realpar(21) = 0.0_hp !real(mudfrac,hp)
+          realpar(22) = 1.0_hp !real(hidexp ,hp)
+          realpar(23) = real(ws(kmax)  ,hp) ! Vertical velocity near bedlevel
+          realpar(24) = real(rhosol    ,hp)
+          realpar(25) = real(rhowat    ,hp) ! Density of water
+          realpar(26) = real(salinity,hp)
+          realpar(27) = real(temperature,hp)
+          realpar(28) = real(ag        ,hp)
+          realpar(29) = real(vicmol    ,hp)
+          realpar(30) = real(tauba     ,hp)
+          !
+          if (numintpar < 4) then
+             write(errmsg,'(a,a,a)') 'Insufficient space to pass integer values to transport routine.'
+             call prterr (lundia,'U021', trim(errmsg))
+             error = .true.
+             return
+          endif
+          intpar( 1) = nm
+          intpar( 2) = n
+          intpar( 3) = m
+          intpar( 4) = l
+          !
+          if (numstrpar < 2) then
+             write(errmsg,'(a,a,a)') 'Insufficient space to pass strings to transport routine.'
+             call prterr (lundia,'U021', trim(errmsg))
+             error = .true.
+             return
+          endif
+          strpar( 1) = runid
+          strpar( 2) = usrfil
+          !
+          ! Initialisation of output variables of user defined transport formulae
+          !
+          sink_dll    = 0.0_hp
+          sour_dll    = 0.0_hp
+          message     = ' '
+          !
+          ! psem/vsem is used to be sure this works fine in DD calculations
+          !
+          call psemlun
+          ierror = perf_function_erosilt(dllhandle       , dllfunc           , &
+                                         intpar          , numintpar         , &
+                                         realpar         , numrealpar        , &
+                                         strpar          , numstrpar         , &
+                                         sink_dll        , sour_dll          , &
+                                         message)
+          call vsemlun
+          if (ierror /= 0) then
+             write(errmsg,'(a,a,a)') 'Cannot find function "',trim(dllfunc),'" in dynamic library.'
+             call prterr (lundia,'U021', trim(errmsg))
+             error = .true.
+             return
+          endif
+          if (message /= ' ') then
+             write (lundia,'(a,a,a)') '*** ERROR Message from user defined erosion/deposition formulae ',trim(dllfunc),' :'
+             write (lundia,'(a,a  )') '          ', trim(message)
+             write (lundia,'(a    )') ' '
+             error = .true.
+             return
           endif
           !
-          wstau(nm)     = ws(nm, kmax, l) * sink
-          if (.not.flmd2l) then
-             if (oldmudfrac) then
-                sour = fixfac(nm, l) * sour
-             else
-                sour = fixfac(nm, l) * frac(nm,l) * sour
-             endif
-          endif
-          sourse(nm, l) = sour / thick0
-          sinkse(nm, l) = wstau(nm) / thick1
+          ! Output parameters
           !
-          ! sediment reference cell is always kmax for cohesive sediment
-          !
-          kmxsed(nm, l) = kmax
-          !
-       enddo ! next nm point
-    enddo ! next sediment fraction
+          sour    = real(sour_dll,fp)
+          sink    = real(sink_dll,fp)
+       endif
+    endif
+    !
+    wstau         = ws(kmax) * sink
+    if (.not.flmd2l) then
+       if (oldmudfrac) then
+          sour = fixfac * sour
+       else
+          sour = fixfac * frac * sour
+       endif
+    endif
+    sourse = sour / thick0
+    sinkse = wstau / thick1
 end subroutine erosilt

@@ -187,6 +187,15 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(hp)      , dimension(:)         , pointer :: dll_reals
     character(256), dimension(:)         , pointer :: dll_strings
     character(256), dimension(:)         , pointer :: dll_usrfil
+    logical                              , pointer :: bsskin
+    real(fp)      , dimension(:)         , pointer :: thcmud
+    real(fp)                             , pointer :: kssilt
+    real(fp)                             , pointer :: kssand
+    logical                          , pointer :: oldmudfrac
+    logical                          , pointer :: flmd2l
+    real(fp)      , dimension(:,:)   , pointer :: tcrdep
+    real(fp)      , dimension(:,:)   , pointer :: tcrero
+    real(fp)      , dimension(:,:)   , pointer :: eropar
     include 'flow_steps_f.inc'
     include 'sedparams.inc'
 !
@@ -269,6 +278,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     integer                       :: k2d
     integer                       :: kmaxsd
     integer                       :: kn
+    integer                       :: ku
+    integer                       :: kv
     integer                       :: l
     integer                       :: ll
     integer                       :: lstart
@@ -300,6 +311,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: salinity
     real(fp)                      :: spirint   ! local variable for spiral flow intensity r0(nm,1,lsecfl)
     real(fp)                      :: tauadd
+    real(fp)                      :: taub
     real(fp)                      :: tdss      ! temporary variable for dss
     real(fp)                      :: temperature
     real(fp)                      :: tetanm
@@ -311,8 +323,12 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: tsd
     real(fp)                      :: tsigmol   ! temporary variable for sigmol
     real(fp)                      :: tws0
+    real(fp)                      :: ubed
+    real(fp)                      :: umean
     real(fp)                      :: uorbnm
     real(fp)                      :: ustarc
+    real(fp)                      :: vbed
+    real(fp)                      :: vmean
     real(fp)                      :: z0cur
     real(fp)                      :: z0rou
     real(fp), dimension(0:kmax2d) :: dcww2d
@@ -455,6 +471,15 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     dll_reals           => gdp%gdeqtran%dll_reals
     dll_strings         => gdp%gdeqtran%dll_strings
     dll_usrfil          => gdp%gdeqtran%dll_usrfil
+    bsskin              => gdp%gdsedpar%bsskin
+    thcmud              => gdp%gdsedpar%thcmud
+    kssilt              => gdp%gdsedpar%kssilt
+    kssand              => gdp%gdsedpar%kssand
+    oldmudfrac          => gdp%gdmorpar%oldmudfrac
+    flmd2l              => gdp%gdprocs%flmd2l
+    tcrdep              => gdp%gdsedpar%tcrdep
+    tcrero              => gdp%gdsedpar%tcrero
+    eropar              => gdp%gdsedpar%eropar
     !
     if (ifirst == 1) then
        ifirst = 0
@@ -545,6 +570,13 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        ! Second parameter is zero: save taubmx(*) in gdp%gdscour
        !
        call shearx(taubmx, 0, gdp)
+    endif
+    !
+    ! Determine total thickness of the mud layers
+    ! to be used in computation of skin friction (Soulsby 2004)
+    !
+    if (bsskin) then
+       call detthcmud(gdp%gdmorlyr  ,sedtyp    ,thcmud    )
     endif
     !
     ! Initialisation:
@@ -700,88 +732,150 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        tauadd = 0.0_fp
     endif
     !
-    do l = 1, lsedtot
-       if (sedtyp(l)==SEDTYP_COHESIVE) cycle
-       ll = lstart + l
-       suspfrac = sedtyp(l)/=SEDTYP_NONCOHESIVE_TOTALLOAD
+    do nm = 1, nmmax
+       if (kfs(nm)/=1 .or. kcs(nm)>2) cycle
        !
-       ! Calculation for sand or bedload
+       ! do not calculate sediment sources, sinks, and bed load
+       ! transport in areas with very shallow water.
        !
-       ! Reset Prandtl-Schmidt number for sand fractions
-       !
-       if (suspfrac) then
-          sigdif(ll) = 1.0_fp
-       endif
-       do nm = 1, nmmax
-          if (kfs(nm)/=1 .or. kcs(nm)>2) cycle
+       if (kfsed(nm) == 0) then
           !
-          ! do not calculate sediment sources, sinks, and bed load
-          ! transport in areas with very shallow water.
+          ! Very shallow water:
+          ! set sediment diffusion coefficient
+          ! and set zero equilibrium concentrations
           !
-          if (kfsed(nm) == 0) then
-             !
-             ! Very shallow water:
-             ! set sediment diffusion coefficient
-             ! and set zero equilibrium concentrations
-             !
-             if (kmax>1 .and. l<=lsed) then
+          if (kmax>1) then
+             do l = 1, lsed
                 do k = 1, kmax
                    seddif(nm, k, l) = dicww(nm, k)
                    rsedeq(nm, k, l) = 0.0_fp
                 enddo
-             endif
+             enddo
+          endif
+          cycle
+       endif
+       !
+       ! kfsed(nm) == 1
+       !
+       h0   = max(0.01_fp, s0(nm) + real(dps(nm),fp))
+       h1   = max(0.01_fp, s1(nm) + real(dps(nm),fp))
+       nmd  = nm - icx
+       ndm  = nm - icy
+       call nm_to_n_and_m(nm, n, m, gdp)
+       !
+       ! Compute depth-averaged velocity components at cell centre
+       !
+       ku = max(1,kfu(nmd) + kfu(nm))
+       kv = max(1,kfv(ndm) + kfv(nm))
+       umean = 0.0
+       vmean = 0.0
+       do k = 1, kmax
+          umean = umean + thick(k)*(u0eul(nm,k) + u0eul(nmd,k))/ku
+          vmean = vmean + thick(k)*(v0eul(nm,k) + v0eul(ndm,k))/kv
+       enddo
+       ubed = (u0eul(nm,kmax) + u0eul(nmd,kmax))/ku
+       vbed = (v0eul(nm,kmax) + v0eul(ndm,kmax))/kv
+       !
+       ! Calculate current related roughness
+       !
+       kn    = max(1, kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm))
+       z0cur = (  kfu(nmd)*z0ucur(nmd) + kfu(nm)*z0ucur(nm) &
+             &  + kfv(ndm)*z0vcur(ndm) + kfv(nm)*z0vcur(nm)  )/kn
+       !
+       ! Calculate total (possibly wave enhanced) roughness
+       !
+       z0rou = (  kfu(nmd)*z0urou(nmd) + kfu(nm)*z0urou(nm) &
+             &  + kfv(ndm)*z0vrou(ndm) + kfv(nm)*z0vrou(nm)  )/kn
+       !
+       ! bed shear stress as used in flow, or
+       ! skin fiction following Soulsby; "Bed shear stress under
+       ! combined waves and currents on rough and smoooth beds"
+       ! Estproc report TR137, 2004
+       !
+       if (bsskin) then
+          !
+          ! Compute bed stress resulting from skin friction
+          !
+          call compbsskin   (umean   , vmean     , h1      , wave    , &
+                           & uorb(nm), tp  (nm)  , teta(nm), kssilt  , &
+                           & kssand  , thcmud(nm), taub    , rhowat(nm,kmax), &
+                           & vicmol  )
+       else
+          !
+          ! use max bed shear stress, rather than mean
+          !
+          taub = taubmx(nm)
+       endif
+       !
+       if (wave) then
+          hrmsnm = min(gammax*h1, hrms(nm))
+          tpnm   = tp(nm)
+          tetanm = teta(nm)
+          rlnm   = rlabda(nm)
+          uorbnm = uorb(nm)
+       else
+          hrmsnm = 0.0_fp
+          tpnm   = 0.0_fp
+          tetanm = 0.0_fp
+          rlnm   = 0.0_fp
+          uorbnm = 0.0_fp
+       endif
+       if (lsal > 0) then
+          salinity = r0(nm, kmax, lsal)
+       else
+          salinity = saleqs
+       endif
+       if (ltem > 0) then
+          temperature = r0(nm, kmax, ltem)
+       else
+          temperature = temeqs
+       endif
+       !
+       d10  = dxx(nm,i10)
+       d90  = dxx(nm,i90)
+       !
+       do l = 1, lsedtot
+          if (sedtyp(l)==SEDTYP_COHESIVE) then
+             !
+             ! sediment type COHESIVE
+             !
+             do k = 0, kmax
+                wslc(k)   = ws(nm, k, l)
+                dcwwlc(k) = dicww(nm, k)
+             enddo
+             !
+             call erosilt(l        ,thick    ,rhowat(nm,kmax)   ,rlnm     ,vicmol     , &
+                        & kmax     ,hrmsnm   ,uorbnm  ,tpnm     ,tetanm   ,wslc       , &
+                        & wstau(nm),entr(nm) ,dcwwlc  ,sddflc   ,lundia   ,rhosol(l)  , &
+                        & nm       ,h0       ,h1      ,z0rou    ,tauadd   ,umean      , &
+                        & vmean    ,ubed     ,vbed    ,taub     ,salinity ,temperature, &
+                        & n        ,m        ,error   ,ag       ,vonkar   ,fixfac     , &
+                        & frac     ,sinkse   ,sourse  ,oldmudfrac,flmd2l  ,tcrdep     , &
+                        & tcrero   ,eropar   ,timsec  ,iform    , &
+                        & max_integers,max_reals      ,max_strings  ,dll_function(l),dll_handle(l), &
+                        & dll_integers,dll_reals      ,dll_strings  ,dll_usrfil(l)  ,gdp%runid    )
+             if (error) call d3stop(1, gdp)
+             !
+             do k = 1, kmax
+                seddif(nm, k, l) = sddflc(k)
+             enddo 
+             kmxsed(nm, l) = kmax
              cycle
           endif
           !
-          ! kfsed(nm) == 1
+          ! sediment type NONCOHESIVE_SUSPENDED or NONCOHESIVE_TOTALLOAD
           !
-          h0   = max(0.01_fp, s0(nm) + real(dps(nm),fp))
-          h1   = max(0.01_fp, s1(nm) + real(dps(nm),fp))
-          nmd  = nm - icx
-          ndm  = nm - icy
+          ll = lstart + l
+          suspfrac = sedtyp(l)/=SEDTYP_NONCOHESIVE_TOTALLOAD
           !
-          ! Calculate current related roughness
+          ! Calculation for sand or bedload
           !
-          kn    = max(1, kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm))
-          z0cur = (  kfu(nmd)*z0ucur(nmd) + kfu(nm)*z0ucur(nm) &
-                &  + kfv(ndm)*z0vcur(ndm) + kfv(nm)*z0vcur(nm)  )/kn
+          ! Reset Prandtl-Schmidt number for sand fractions
           !
-          ! Calculate total (possibly wave enhanced) roughness
-          !
-          z0rou = (  kfu(nmd)*z0urou(nmd) + kfu(nm)*z0urou(nm) &
-                &  + kfv(ndm)*z0vrou(ndm) + kfv(nm)*z0vrou(nm)  )/kn
-          if (wave) then
-             hrmsnm = min(gammax*h1, hrms(nm))
-             tpnm   = tp(nm)
-             tetanm = teta(nm)
-             rlnm   = rlabda(nm)
-             uorbnm = uorb(nm)
-          else
-             hrmsnm = 0.0_fp
-             tpnm   = 0.0_fp
-             tetanm = 0.0_fp
-             rlnm   = 0.0_fp
-             uorbnm = 0.0_fp
-          endif
-          if (lsal > 0) then
-             salinity = r0(nm, kmax, lsal)
-          else
-             salinity = saleqs
-          endif
-          if (ltem > 0) then
-             temperature = r0(nm, kmax, ltem)
-          else
-             temperature = temeqs
+          if (suspfrac) then
+             sigdif(ll) = 1.0_fp
           endif
           tsd = -999.0_fp
-          !
-          ! Van Rijn 2004 updates:
-          ! d10  = sedd10(l)
-          ! d90  = sedd90(l)
-          ! This caused unacceptable effects in for example testcase 12.06-bedlvlmap
-          !
-          d10  = dxx(nm,i10)
-          d90  = dxx(nm,i90)
           di50 = sedd50(l)
           if (di50 < 0.0_fp) then
              !
@@ -815,7 +909,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              endif
              taucr(l) = factcr * (rhosol(l)-rhow) * ag * di50 * tetacr(l)
           endif
-          call nm_to_n_and_m(nm, n, m, gdp)
           !
           ! SWITCH 2DH/3D SIMULATIONS
           !
@@ -985,8 +1078,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           if (suspfrac) then
              rca(nm, l) = ce_nm * rhosol(l)
           endif
-       enddo ! next nm point
-    enddo ! next sediment fraction
+       enddo ! next sediment fraction
+    enddo ! next nm point
     !
     ! Reduce the source and sink terms to avoid large bed level changes
     ! Note: previous implementation forgot to multiply source/
@@ -1096,18 +1189,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           enddo
        endif
     enddo
-    !
-    !================================================================
-    !    Start of mud part
-    !================================================================
-    !
-    call erosilt(nmmax   ,icx     ,icy     ,kcs     ,kfs     ,kfu     ,&
-                &kfv     ,kfsed   ,kmxsed  ,lsedtot ,lsed    ,thick   ,&
-                &kmax    ,dps     ,s0      ,s1      ,taubmx  ,u0eul   ,&
-                &v0eul   ,hrms    ,uorb    ,tp      ,teta    ,ws      ,&
-                &wstau   ,entr    ,dicww   ,seddif  ,lundia  ,rhosol  ,&
-                &rhowat  ,rlabda  ,z0urou  ,z0vrou  ,r0      ,lsal    ,&
-                &ltem    ,saleqs  ,temeqs  ,vicmol  ,gdp     )
     !
     ! Finally fill sour and sink arrays for both sand and silt
     ! note that sourse and sinkse arrays are required for BOTT3D

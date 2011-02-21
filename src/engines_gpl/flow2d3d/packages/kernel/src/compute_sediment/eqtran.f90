@@ -780,7 +780,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        realpar(22) = real(hidexp ,hp)
        realpar(23) = real(ws(1)  ,hp) ! Vertical velocity near bedlevel
        realpar(24) = real(rhosol ,hp)
-       realpar(25) = real(rhowat ,hp) ! Density of sediment and water
+       realpar(25) = real(rhowat ,hp) ! Density of water
        realpar(26) = real(sa     ,hp)
        realpar(27) = real(temp   ,hp)
        realpar(28) = real(ag     ,hp)
