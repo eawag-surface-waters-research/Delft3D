@@ -1,4 +1,4 @@
-subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
+subroutine eqtran(sig       ,thick     ,kmax      , &
                 & h1        ,aks       ,ustarc    ,ws        ,ltur      , &
                 & frac      ,tp        ,dstar     ,hrms      ,rlabda    , &
                 & di50      ,d90       ,sigmol    ,rhosol    ,uuu       , &
@@ -67,13 +67,11 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     integer, dimension(numintpar)   , intent(inout):: intpar
     integer                         , intent(in)   :: iopsus
     integer                         , intent(in)   :: iopkcw
-    integer                         , intent(in)   :: ised     !  i-th sediment
     integer                         , intent(in)   :: kmax     !  Description and declaration in iidim.f90
     integer                         , intent(out)  :: kmaxsd
     integer                         , intent(in)   :: lsecfl   !  Description and declaration in iidim.f90
     integer                         , intent(in)   :: ltur     !  Description and declaration in iidim.f90
     integer                         , intent(in)   :: lundia   !  Description and declaration in inout.igs
-    integer                         , intent(in)   :: nm
     integer                         , intent(in)   :: numintpar
     integer                         , intent(in)   :: numrealpar
     integer                         , intent(in)   :: numstrpar
@@ -672,8 +670,8 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        !call tranb8(u         ,v         ,hrms      ,h1         ,teta      , &
        !          & tp        ,di50      ,d90       ,diss       ,dzduu     , &
-       !          & dzdvv     ,nm        ,nm        ,par        ,sbcu      , &
-       !          & sbcv      ,ssusx     ,ssusy     )
+       !          & dzdvv     ,par       ,sbcu      ,sbcv       ,ssusx     , &
+       !          & ssusy     )
        !
        sbc_total = .false.
        sus_total = .false.

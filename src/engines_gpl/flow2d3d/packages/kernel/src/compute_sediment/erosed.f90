@@ -867,12 +867,12 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                 dcwwlc(k) = dicww(nm, k)
              enddo
              !
-             call erosilt(l        ,thick    ,rhowat(nm,kmax)   ,rlnm     ,vicmol     , &
+             call erosilt(thick    ,rhowat(nm,kmax)   ,rlnm     ,vicmol     , &
                         & kmax     ,hrmsnm   ,uorbnm  ,tpnm     ,tetanm   ,wslc       , &
                         & wstau(nm),entr(nm) ,dcwwlc  ,sddflc   ,lundia   ,rhosol(l)  , &
-                        & nm       ,h0       ,h1      ,z0rou    ,tauadd   ,umean      , &
+                        & h0       ,h1       ,z0rou   ,tauadd   ,umean      , &
                         & vmean    ,ubed     ,vbed    ,taub     ,salinity ,temperature, &
-                        & error   ,ag       ,vonkar   ,fixfac     , &
+                        & error    ,ag       ,vonkar  ,fixfac     , &
                         & frac     ,sinkse   ,sourse  ,oldmudfrac,flmd2l  ,tcrdep     , &
                         & tcrero   ,eropar   ,timsec  ,iform    , &
                         & max_integers,max_reals      ,max_strings  ,dll_function(l),dll_handle(l), &
@@ -970,7 +970,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              ! Solve equilibrium concentration vertical and
              ! integrate over vertical
              !
-             call eqtran(nm          ,l              ,sig          ,thick        ,kmax      , &
+             call eqtran(sig          ,thick        ,kmax      , &
                        & h1          ,aks(nm)        ,ustarc       ,wslc         ,ltur      , &
                        & frac(nm,l)  ,tpnm           ,dstar(l)     ,hrmsnm       ,rlnm      , &
                        & di50        ,d90            ,tsigmol      ,rhosol(l)    ,uuu(nm)   , &
@@ -1063,7 +1063,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              ! integrate over vertical; compute bedload
              ! transport excluding slope effects.
              !
-             call eqtran(nm          ,l              ,sig2d        ,thck2d       ,kmax2d     , &
+             call eqtran(sig2d        ,thck2d       ,kmax2d     , &
                        & h1          ,aks(nm)        ,ustarc       ,ws2d         ,ltur       , &
                        & frac(nm,l)  ,tpnm           ,dstar(l)     ,hrmsnm       ,rlnm       , &
                        & di50        ,d90            ,tsigmol      ,rhosol(l)    ,uuu(nm)    , &

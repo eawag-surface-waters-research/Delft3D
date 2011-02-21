@@ -1,7 +1,7 @@
-subroutine erosilt(l        ,thick    ,rhowat   ,rlabda   ,vicmol   , &
+subroutine erosilt(thick    ,rhowat   ,rlabda   ,vicmol   , &
                  & kmax     ,hrms     ,uorb     ,tp       ,teta     ,ws       , &
                  & wstau    ,entr     ,dicww    ,seddif   ,lundia   ,rhosol   , &
-                 & nm       ,h0       ,h1       ,z0rou    ,tauadd   ,um       , &
+                 & h0       ,h1       ,z0rou    ,tauadd   ,um       , &
                  & vm       ,uuu      ,vvv      ,taub     ,salinity ,temperature, &
                  & error    ,ag       ,vonkar   ,fixfac   , &
                  & frac     ,sinkse   ,sourse   ,oldmudfrac, flmd2l , tcrdep  , &
@@ -55,8 +55,6 @@ subroutine erosilt(l        ,thick    ,rhowat   ,rlabda   ,vicmol   , &
     include 'sedparams.inc'
     !
     integer                                                   , intent(in)  :: kmax
-    integer                                                   , intent(in)  :: nm
-    integer                                                   , intent(in)  :: l
     integer                                                                 :: lundia   !  Description and declaration in inout.igs
     real(fp)                                                  , intent(in)  :: salinity
     real(fp)                                                  , intent(in)  :: temperature
