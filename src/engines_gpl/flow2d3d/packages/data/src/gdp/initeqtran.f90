@@ -42,40 +42,10 @@ subroutine initeqtran(gdp       )
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     integer                        , pointer :: npar
-    character(256), dimension(:)   , pointer :: dll_function_settle
-    character(256), dimension(:)   , pointer :: dll_name_settle
-    integer,        dimension(:)   , pointer :: dll_handle_settle
-    integer       , dimension(:)   , pointer :: dll_integers_settle
-    real(hp)      , dimension(:)   , pointer :: dll_reals_settle
-    character(256), dimension(:)   , pointer :: dll_strings_settle
-    character(256), dimension(:)   , pointer :: dll_function
-    integer,        dimension(:)   , pointer :: dll_handle
-    integer       , dimension(:)   , pointer :: dll_integers
-    real(hp)      , dimension(:)   , pointer :: dll_reals
-    character(256), dimension(:)   , pointer :: dll_strings
-    character(256), dimension(:)   , pointer :: flstrn
-    integer,        dimension(:)   , pointer :: iform
-    character(256), dimension(:)   , pointer :: name
-    real(fp),       dimension(:,:) , pointer :: par
 !
 !! executable statements -------------------------------------------------------
 !
     npar          => gdp%gdeqtran%npar
-    dll_function_settle  => gdp%gdeqtran%dll_function_settle
-    dll_name_settle      => gdp%gdeqtran%dll_name_settle
-    dll_handle_settle    => gdp%gdeqtran%dll_handle_settle
-    dll_integers_settle  => gdp%gdeqtran%dll_integers_settle
-    dll_reals_settle     => gdp%gdeqtran%dll_reals_settle
-    dll_strings_settle   => gdp%gdeqtran%dll_strings_settle
-    dll_function  => gdp%gdeqtran%dll_function
-    dll_handle    => gdp%gdeqtran%dll_handle
-    dll_integers  => gdp%gdeqtran%dll_integers
-    dll_reals     => gdp%gdeqtran%dll_reals
-    dll_strings   => gdp%gdeqtran%dll_strings
-    flstrn        => gdp%gdeqtran%flstrn
-    iform         => gdp%gdeqtran%iform
-    name          => gdp%gdeqtran%name
-    par           => gdp%gdeqtran%par
     !
     ! Note: 30 is hardcoded in sediment transport formulae
     !

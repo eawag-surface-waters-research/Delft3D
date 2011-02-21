@@ -178,6 +178,15 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     integer                              , pointer :: iopsus
     integer                              , pointer :: iopkcw
     integer                              , pointer :: subiw
+    integer                              , pointer :: max_integers
+    integer                              , pointer :: max_reals
+    integer                              , pointer :: max_strings
+    character(256), dimension(:)         , pointer :: dll_function
+    integer,        dimension(:)         , pointer :: dll_handle
+    integer       , dimension(:)         , pointer :: dll_integers
+    real(hp)      , dimension(:)         , pointer :: dll_reals
+    character(256), dimension(:)         , pointer :: dll_strings
+    character(256), dimension(:)         , pointer :: dll_usrfil
     include 'flow_steps_f.inc'
     include 'sedparams.inc'
 !
@@ -437,6 +446,15 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     iopkcw              => gdp%gdmorpar%iopkcw
     subiw               => gdp%gdmorpar%subiw
     ubot_from_com       => gdp%gdprocs%ubot_from_com
+    max_integers        => gdp%gdeqtran%max_integers
+    max_reals           => gdp%gdeqtran%max_reals
+    max_strings         => gdp%gdeqtran%max_strings
+    dll_function        => gdp%gdeqtran%dll_function
+    dll_handle          => gdp%gdeqtran%dll_handle
+    dll_integers        => gdp%gdeqtran%dll_integers
+    dll_reals           => gdp%gdeqtran%dll_reals
+    dll_strings         => gdp%gdeqtran%dll_strings
+    dll_usrfil          => gdp%gdeqtran%dll_usrfil
     !
     if (ifirst == 1) then
        ifirst = 0
@@ -855,7 +873,9 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & scour       ,epspar         ,ubot_from_com,timsec       ,camax     , &
                        & aksfac      ,rwave          ,rdc          ,rdw          ,pangle    , &
                        & fpco        ,iopsus         ,iopkcw       ,subiw        ,eps       , &
-                       & gdp%runid   ,n              ,m            ,error       , gdp       )
+                       & gdp%runid   ,n              ,m            ,iform(l)     ,par(1,l)  , &
+                       & max_integers,max_reals      ,max_strings  ,dll_function(l),dll_handle(l), &
+                       & dll_integers,dll_reals      ,dll_strings  ,dll_usrfil(l),error     )
              if (error) call d3stop(1, gdp)
              if (suspfrac) then
                 dss(nm, l) = tdss
@@ -946,7 +966,9 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & scour       ,epspar         ,ubot_from_com,timsec       ,camax      , &
                        & aksfac      ,rwave          ,rdc          ,rdw          ,pangle     , &
                        & fpco        ,iopsus         ,iopkcw       ,subiw        ,eps        , &
-                       & gdp%runid   ,n              ,m            ,error       , gdp        )
+                       & gdp%runid   ,n              ,m            ,iform(l)     ,par(1,l)   , &
+                       & max_integers,max_reals      ,max_strings  ,dll_function(l),dll_handle(l), &
+                       & dll_integers,dll_reals      ,dll_strings  ,dll_usrfil(l),error      )
              if (error) call d3stop(1, gdp)
              if (suspfrac) then
                 dss   (nm, l)    = tdss

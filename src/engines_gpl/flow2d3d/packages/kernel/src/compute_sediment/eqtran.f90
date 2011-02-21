@@ -17,7 +17,9 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
                 & scour     ,epspar    ,ubot_from_com,timsec ,camax     , &
                 & aksfac    ,rwave     ,rdc       ,rdw       ,pangle    , &
                 & fpco      ,iopsus    ,iopkcw    ,subiw     ,eps       , &
-                & runid     ,n         ,m         ,error     ,gdp       )
+                & runid     ,n         ,m         ,iform     ,par       , &
+                & numintpar ,numrealpar,numstrpar ,dllfunc   ,dllhandle , &
+                & intpar    ,realpar   ,strpar    ,usrfil    ,error     )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -55,29 +57,14 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     use precision
     use mathconsts
     !
-    use globaldata
-    !
     implicit none
-    !
-    type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    integer                              , pointer :: max_integers
-    integer                              , pointer :: max_reals
-    integer                              , pointer :: max_strings
-    character(256), dimension(:)         , pointer :: dll_function
-    integer,        dimension(:)         , pointer :: dll_handle
-    integer       , dimension(:)         , pointer :: dll_integers
-    real(hp)      , dimension(:)         , pointer :: dll_reals
-    character(256), dimension(:)         , pointer :: dll_strings
-    character(256), dimension(:)         , pointer :: dll_usrfil
-    integer,        dimension(:)         , pointer :: iform
-    real(fp),       dimension(:,:)       , pointer :: par
 !
 ! Global variables
 !
+    integer                         , intent(in)   :: dllhandle
     integer                         , intent(in)   :: i2d3d
+    integer                         , intent(in)   :: iform
+    integer, dimension(numintpar)   , intent(inout):: intpar
     integer                         , intent(in)   :: iopsus
     integer                         , intent(in)   :: iopkcw
     integer                         , intent(in)   :: ised     !  i-th sediment
@@ -89,6 +76,9 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     integer                         , intent(in)   :: m
     integer                         , intent(in)   :: n
     integer                         , intent(in)   :: nm
+    integer                         , intent(in)   :: numintpar
+    integer                         , intent(in)   :: numrealpar
+    integer                         , intent(in)   :: numstrpar
     integer                         , intent(in)   :: subiw
     real(fp)                        , intent(in)   :: ag
     real(fp)                        , intent(in)   :: aks      !  Description and declaration in rjdim.f90
@@ -99,7 +89,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     real(fp)                        , intent(in)   :: camax
     real(fp)                        , intent(out)  :: ce_nm
     real(fp)                        , intent(out)  :: ce_nmtmp
-    real(fp)  , dimension(kmax)     , intent(out)  :: concin
+    real(fp), dimension(kmax)       , intent(out)  :: concin
     real(fp)                        , intent(out)  :: crep
     real(fp)                        , intent(in)   :: d10
     real(fp)                        , intent(in)   :: d90
@@ -119,6 +109,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     real(fp)                        , intent(in)   :: hrms     !  Description and declaration in rjdim.f90
     real(fp)                        , intent(in)   :: mudfrac
     real(fp)                        , intent(in)   :: pangle
+    real(fp), dimension(30)         , intent(inout):: par
     real(fp)                        , intent(in)   :: rdc
     real(fp)                        , intent(in)   :: rdw
     real(fp)                        , intent(in)   :: rhow
@@ -167,13 +158,17 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     real(fp)                        , intent(in)   :: z0cur
     real(fp)                        , intent(in)   :: z0rou
     real(fp)                        , intent(in)   :: zumod
+    real(hp), dimension(numrealpar) , intent(inout):: realpar
     logical                         , intent(in)   :: epspar
     logical                         , intent(out)  :: error
     logical                         , intent(in)   :: scour
     logical                         , intent(in)   :: suspfrac !  suspended sediment fraction
     logical                         , intent(in)   :: ubot_from_com
     logical                         , intent(in)   :: wave
+    character(256)                  , intent(in)   :: dllfunc
     character(len=*)                , intent(in)   :: runid
+    character(256), dimension(numstrpar), intent(inout):: strpar
+    character(256)                  , intent(in)   :: usrfil
 !
 ! Local variables
 !
@@ -265,20 +260,8 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    max_integers        => gdp%gdeqtran%max_integers
-    max_reals           => gdp%gdeqtran%max_reals
-    max_strings         => gdp%gdeqtran%max_strings
-    dll_function        => gdp%gdeqtran%dll_function
-    dll_handle          => gdp%gdeqtran%dll_handle
-    dll_integers        => gdp%gdeqtran%dll_integers
-    dll_reals           => gdp%gdeqtran%dll_reals
-    dll_strings         => gdp%gdeqtran%dll_strings
-    dll_usrfil          => gdp%gdeqtran%dll_usrfil
-    iform               => gdp%gdeqtran%iform
-    par                 => gdp%gdeqtran%par
-    !
     ierror    = 0
-    error = .false.
+    error     = .false.
     equi_conc = .false.
     sbc_total = .false.
     sus_total = .false.
@@ -298,15 +281,15 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     ee     = exp(1.0_fp)
     sag    = sqrt(ag)
     !
-    par(3,ised) = rhosol
-    par(4,ised) = (rhosol-rhow) / rhow
-    par(6,ised) = di50
+    par(3) = rhosol
+    par(4) = (rhosol-rhow) / rhow
+    par(6) = di50
     !
     if (suspfrac) then
        !
        ! Suspended sediment (mud or sand)
        !
-       if (iform(ised) == -2) then
+       if (iform == -2) then
           call bedbc2004(tp        ,rhosol    ,rhowat    , &
                        & h1        ,umod      ,d10       ,zumod     ,di50      , &
                        & d90       ,z0cur     ,z0rou     ,drho      ,dstar     , &
@@ -347,7 +330,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        ! Adjust ce_nm for presence of multiple sediment fractions.
        !
-       if (iform(ised) <= 0) then
+       if (iform <= 0) then
           ce_nm    = ce_nm * frac
           ce_nmtmp = ce_nm
           akstmp   = aks
@@ -355,7 +338,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        ! Calculate vertical sediment diffusion coefficient
        !
-       if (iform(ised) == -2) then
+       if (iform == -2) then
           !
           ! Calculate sediment mixing due to waves following
           ! Van Rijn 2004 - intra-wave approach for bed load (original TR2004)
@@ -393,7 +376,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        ! concentration gradient.
        ! solution to stationary advection/diffusion equation in vertical.
        !
-       if (iform(ised) == -2) then
+       if (iform == -2) then
           !
           ! In case of Van Rijn 2004
           !
@@ -452,7 +435,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
           !
           ! If transport formula is not Transpor2004
           !
-          if (ce_nm>1.0e-6_fp .or. iform(ised)>0) then
+          if (ce_nm>1.0e-6_fp .or. iform>0) then
              ! Use simple expression based on upwind approximation for
              ! concentration and fall velocity, and central difference for
              ! concentration gradient.
@@ -472,7 +455,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
              ! crep is given (computed furtheron). Compute vertical using ce_nm=1
              ! to obtain relation between ce_nm and crep
              !
-             if (iform(ised) <= 0) then
+             if (iform <= 0) then
                 !
                 ! Van Rijn
                 !
@@ -505,7 +488,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
              enddo
           else
              !
-             ! if ce_nm <= 1.0e-6 and iform(ised) <= 0 and .not.iform(ised) == -2
+             ! if ce_nm <= 1.0e-6 and iform <= 0 and .not.iform == -2
              !
              do k = 1, kmax
                 rsedeq(k) = 0.0_fp
@@ -581,7 +564,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     u     = utot * uuu / (umod+eps)
     v     = utot * vvv / (umod+eps)
     !
-    if (iform(ised) == -1) then
+    if (iform == -1) then
        if (bed > 0.0_fp) then
           call bedtr1993(uuu       ,vvv       ,utot      ,di50      ,d90       , &
                        & h1        ,taurat    ,ustarc    ,muc       ,rhosol    , &
@@ -593,7 +576,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        endif
        sbc_total = .false.
        sus_total = .false.
-    elseif (iform(ised) == -2) then
+    elseif (iform == -2) then
        !
        ! VAN RIJN 2004 Instantaneous bed load
        !
@@ -612,54 +595,54 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        endif
        sbc_total = .false.
        sus_total = .false.
-    elseif (iform(ised) == 1) then
+    elseif (iform == 1) then
        !
        ! Engelund-Hansen
        !
-       call tranb1(utot      ,di50      ,chezy     ,h1        ,par(1,ised), &
+       call tranb1(utot      ,di50      ,chezy     ,h1        ,par        , &
                  & sbot      ,ssus      )
        !
        sbc_total = .true.
        sus_total = .true.
-    elseif (iform(ised) == 2) then
+    elseif (iform == 2) then
        !
        ! Meyer-Peter-Muller
        !
        call tranb2(utot       ,di50      ,d90       ,chezy     ,h1        , &
-                 & par(1,ised),hidexp    ,sbot      ,ssus      )
+                 & par        ,hidexp    ,sbot      ,ssus      )
        !
        sbc_total = .true.
        sus_total = .true.
-    elseif (iform(ised) == 3) then
+    elseif (iform == 3) then
        !
        ! Ackers-White
        !
-       call tranb3(utot      ,d90       ,chezy     ,h1        ,par(1,ised), &
+       call tranb3(utot      ,d90       ,chezy     ,h1        ,par        , &
                  & sbot      ,ssus      )
        !
        sbc_total = .true.
        sus_total = .true.
-    elseif (iform(ised) == 4) then
+    elseif (iform == 4) then
        !
        ! general relation for bed load
        !
-       call tranb4(utot      ,di50      ,chezy     ,par(1,ised),hidexp    , &
+       call tranb4(utot      ,di50      ,chezy     ,par        ,hidexp    , &
                  & sbot      ,ssus      )
        !
        sbc_total = .true.
        sus_total = .true.
-    elseif (iform(ised) == 5) then
+    elseif (iform == 5) then
        !
        ! Bijker
        !
        call tranb5(u         ,v         ,di50      ,d90       ,chezy      , &
-                 & h1        ,hrms      ,tp        ,teta      ,par(1,ised), &
+                 & h1        ,hrms      ,tp        ,teta      ,par        , &
                  & dzduu     ,dzdvv     ,sbcu      ,sbcv      ,ssusx      , &
                  & ssusy     ,cesus     ,vonkar    )
        !
        sbc_total = .false.
        sus_total = .false.
-    elseif (iform(ised) == 6) then
+    elseif (iform == 6) then
        !
        ! Bailard
        !
@@ -669,21 +652,21 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        !call tranb6(utot      ,u          ,v         ,chezy     ,h1        , &
        !          & hrms      ,tp         ,teta      ,diss      ,dzduu     , &
-       !          & dzdvv     ,par(1,ised),sbcu      ,sbcv      ,ssusx     , &
+       !          & dzdvv     ,par        ,sbcu      ,sbcv      ,ssusx     , &
        !          & ssusy     )
        !
        sbc_total = .false.
        sus_total = .false.
-    elseif (iform(ised) == 7) then
+    elseif (iform == 7) then
        !
        ! Van Rijn (1984, modified)
        !
-       call tranb7(utot      ,di50       ,d90       ,h1        ,par(1,ised), &
+       call tranb7(utot      ,di50       ,d90       ,h1        ,par        , &
                  & sbot      ,ssus      ,vonkar    )
        !
        sbc_total = .true.
        sus_total = .true.
-    elseif (iform(ised) == 8) then
+    elseif (iform == 8) then
        !
        ! Van Rijn / Ribberink (1994)
        !
@@ -693,12 +676,12 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        !call tranb8(u         ,v         ,hrms      ,h1         ,teta      , &
        !          & tp        ,di50      ,d90       ,diss       ,dzduu     , &
-       !          & dzdvv     ,nm        ,nm        ,par(1,ised),sbcu      , &
+       !          & dzdvv     ,nm        ,nm        ,par        ,sbcu      , &
        !          & sbcv      ,ssusx     ,ssusy     )
        !
        sbc_total = .false.
        sus_total = .false.
-    elseif (iform(ised) == 9) then
+    elseif (iform == 9) then
        !
        ! Silt module
        !
@@ -710,7 +693,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        sbc_total = .true.
        sus_total = .true.
-    elseif (iform(ised) == 10) then
+    elseif (iform == 10) then
        !
        ! Ashida and Michiue
        !
@@ -719,110 +702,110 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        return
        !
        !call trab10(utot      ,di50      ,chezy     ,h1         ,cosa      , &
-       !          & sina      ,dzduu     ,dzdvv     ,par(1,ised),sbot      , &
+       !          & sina      ,dzduu     ,dzdvv     ,par        ,sbot      , &
        !          & ssus      )
        !
        sbc_total = .true.
        sus_total = .true.
-    elseif (iform(ised) == 11) then
+    elseif (iform == 11) then
        !
        ! Soulsby and Van Rijn
        !
        call trab11(u         ,v          ,hrms      ,h1        ,tp        , &
-                 & di50      ,par(1,ised),sbcu      ,sbcv      ,ssusx     , &
+                 & di50      ,par        ,sbcu      ,sbcv      ,ssusx     , &
                  & ssusy     ,ubot       ,vonkar    ,ubot_from_com        )
        !
        sbc_total = .false.
        sus_total = .false.
-    elseif (iform(ised) == 12) then
+    elseif (iform == 12) then
        !
        ! Soulsby
        !
        call trab12(u         ,v         ,hrms       ,h1        ,tp        , &
-                 & teta      ,di50      ,par(1,ised),sbcu      ,sbcv      , &
+                 & teta      ,di50      ,par        ,sbcu      ,sbcv      , &
                  & ssusx     ,ssusy     ,ubot       ,vonkar    ,ubot_from_com)
        !
        sbc_total = .false.
        sus_total = .false.
-    elseif (iform(ised) == 13) then
+    elseif (iform == 13) then
        !
        ! test transport (Wang) Fredsoe
        !
        call tran9t(utot      ,di50       ,d90       ,chezy     ,h1        , &
-                 & ustarc    ,par(1,ised),sbot      ,ssus      )
+                 & ustarc    ,par        ,sbot      ,ssus      )
        !
        sbc_total = .true.
        sus_total = .true.
-    elseif (iform(ised) == 14) then
+    elseif (iform == 14) then
        !
        ! generalized Ashida and Michiue
        !
-       call trab14(utot      ,di50      ,chezy     ,par(1,ised),hidexp    , &
+       call trab14(utot      ,di50      ,chezy     ,par        ,hidexp    , &
                  & sbot      ,ssus      )
        !
        sbc_total = .true.
        sus_total = .true.
-    elseif (iform(ised) == 15) then
+    elseif (iform == 15) then
        !
        ! User defined formula in DLL
-       ! Input parameters are passed via dll_reals/integers/strings-arrays
+       ! Input parameters are passed via realpar/intpar/strpar-arrays
        !
-       if (max_reals < 30) then
-          write(errmsg,'(a,a,a)') 'Insufficient space to pass real values to transport routine.'
+       if (numrealpar < 30) then
+          write(errmsg,'(a)') 'Insufficient space to pass real values to transport routine.'
           call prterr (lundia,'U021', trim(errmsg))
           error = .true.
           return
        endif
-       dll_reals( 1) = real(timsec ,hp)
-       dll_reals( 2) = real(u      ,hp)
-       dll_reals( 3) = real(v      ,hp)
-       dll_reals( 4) = real(utot   ,hp)
-       dll_reals( 5) = real(uuu    ,hp)
-       dll_reals( 6) = real(vvv    ,hp)
-       dll_reals( 7) = real(umod   ,hp)
-       dll_reals( 8) = real(zumod  ,hp)
-       dll_reals( 9) = real(h1     ,hp)
-       dll_reals(10) = real(chezy  ,hp)
-       dll_reals(11) = real(hrms   ,hp)
-       dll_reals(12) = real(tp     ,hp)
-       dll_reals(13) = real(teta   ,hp)
-       dll_reals(14) = real(rlabda ,hp)
-       dll_reals(15) = real(uorb   ,hp)
-       dll_reals(16) = real(di50   ,hp)
-       dll_reals(17) = real(dss    ,hp)
-       dll_reals(18) = real(dstar  ,hp)
-       dll_reals(19) = real(d10    ,hp)
-       dll_reals(20) = real(d90    ,hp)
-       dll_reals(21) = real(mudfrac,hp)
-       dll_reals(22) = real(hidexp ,hp)
-       dll_reals(23) = real(ws(1)  ,hp) ! Vertical velocity near bedlevel
-       dll_reals(24) = real(rhosol ,hp)
-       dll_reals(25) = real(rhowat ,hp) ! Density of sediment and water
-       dll_reals(26) = real(sa     ,hp)
-       dll_reals(27) = real(temp   ,hp)
-       dll_reals(28) = real(ag     ,hp)
-       dll_reals(29) = real(vicmol ,hp)
-       dll_reals(30) = real(taubmx ,hp)
+       realpar( 1) = real(timsec ,hp)
+       realpar( 2) = real(u      ,hp)
+       realpar( 3) = real(v      ,hp)
+       realpar( 4) = real(utot   ,hp)
+       realpar( 5) = real(uuu    ,hp)
+       realpar( 6) = real(vvv    ,hp)
+       realpar( 7) = real(umod   ,hp)
+       realpar( 8) = real(zumod  ,hp)
+       realpar( 9) = real(h1     ,hp)
+       realpar(10) = real(chezy  ,hp)
+       realpar(11) = real(hrms   ,hp)
+       realpar(12) = real(tp     ,hp)
+       realpar(13) = real(teta   ,hp)
+       realpar(14) = real(rlabda ,hp)
+       realpar(15) = real(uorb   ,hp)
+       realpar(16) = real(di50   ,hp)
+       realpar(17) = real(dss    ,hp)
+       realpar(18) = real(dstar  ,hp)
+       realpar(19) = real(d10    ,hp)
+       realpar(20) = real(d90    ,hp)
+       realpar(21) = real(mudfrac,hp)
+       realpar(22) = real(hidexp ,hp)
+       realpar(23) = real(ws(1)  ,hp) ! Vertical velocity near bedlevel
+       realpar(24) = real(rhosol ,hp)
+       realpar(25) = real(rhowat ,hp) ! Density of sediment and water
+       realpar(26) = real(sa     ,hp)
+       realpar(27) = real(temp   ,hp)
+       realpar(28) = real(ag     ,hp)
+       realpar(29) = real(vicmol ,hp)
+       realpar(30) = real(taubmx ,hp)
        !
-       if (max_integers < 4) then
-          write(errmsg,'(a,a,a)') 'Insufficient space to pass integer values to transport routine.'
+       if (numintpar < 4) then
+          write(errmsg,'(a)') 'Insufficient space to pass integer values to transport routine.'
           call prterr (lundia,'U021', trim(errmsg))
           error = .true.
           return
        endif
-       dll_integers( 1) = nm
-       dll_integers( 2) = n
-       dll_integers( 3) = m
-       dll_integers( 4) = ised
+       intpar( 1) = nm
+       intpar( 2) = n
+       intpar( 3) = m
+       intpar( 4) = ised
        !
-       if (max_strings < 2) then
-          write(errmsg,'(a,a,a)') 'Insufficient space to pass strings to transport routine.'
+       if (numstrpar < 2) then
+          write(errmsg,'(a)') 'Insufficient space to pass strings to transport routine.'
           call prterr (lundia,'U021', trim(errmsg))
           error = .true.
           return
        endif
-       dll_strings( 1) = runid
-       dll_strings( 2) = dll_usrfil(ised)
+       strpar( 1) = runid
+       strpar( 2) = usrfil
        !
        ! Initialisation of output variables of user defined transport formulae
        !
@@ -845,10 +828,10 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        ! psem/vsem is used to be sure this works fine in DD calculations
        !
        call psemlun
-       ierror = perf_function_eqtran(dll_handle(ised), dll_function(ised), &
-                                     dll_integers    , max_integers      , &
-                                     dll_reals       , max_reals         , &
-                                     dll_strings     , max_strings       , &
+       ierror = perf_function_eqtran(dllhandle       , dllfunc           , &
+                                     intpar          , numintpar         , &
+                                     realpar         , numrealpar        , &
+                                     strpar          , numstrpar         , &
                                      sbc_total, sbc_dll  , sbcu_dll      , &
                                      sbcv_dll , sbwu_dll , sbwv_dll      , &
                                      equi_conc, cesus_dll, ssus_dll      , &
@@ -856,13 +839,13 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
                                      message)
        call vsemlun
        if (ierror /= 0) then
-          write(errmsg,'(a,a,a)') 'Cannot find function "',trim(dll_function(ised)),'" in dynamic library.'
+          write(errmsg,'(a,a,a)') 'Cannot find function "',trim(dllfunc),'" in dynamic library.'
           call prterr (lundia,'U021', trim(errmsg))
           error = .true.
           return
        endif
        if (message /= ' ') then
-          write (lundia,'(a,a,a)') '*** ERROR Message from user defined transport formulae ',trim(dll_function(ised)),' :'
+          write (lundia,'(a,a,a)') '*** ERROR Message from user defined transport formulae ',trim(dllfunc),' :'
           write (lundia,'(a,a  )') '          ', trim(message)
           write (lundia,'(a    )') ' '
           error = .true.
@@ -889,7 +872,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        return
     endif
     !
-    if (iform(ised) > 0) then
+    if (iform > 0) then
        !
        ! Change from volume to mass concentrations/transport rates.
        !
@@ -964,7 +947,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
     sswu = susw * sswu
     sswv = susw * sswv
     !
-    if (iform(ised)>0) then
+    if (iform>0) then
        cesus    = sus * cesus
        ssus     = sus * ssus
        ssusx    = sus * ssusx
@@ -978,7 +961,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        crep     = sus * crep
     endif
     !
-    if (iform(ised)>0 .and. suspfrac) then
+    if (iform>0 .and. suspfrac) then
        !
        ! If we are not using Van Rijn 1993 or Van Rijn 2004
        ! then we still need to compute values for ce_nm,
@@ -1022,7 +1005,7 @@ subroutine eqtran(nm        ,ised      ,sig       ,thick     ,kmax      , &
        !
        ! The effect of frac is included in the bed load at a later stage.
        !
-       if (iform(ised) <= 0) then
+       if (iform <= 0) then
            !
            ! Van Rijn 1993 or 2004 formula
            ! NOTE 1: This doesn't work yet because Van Rijn 1993 and 2004
