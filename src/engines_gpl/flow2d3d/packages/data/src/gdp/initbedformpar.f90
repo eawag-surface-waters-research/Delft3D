@@ -63,8 +63,6 @@ subroutine initbedformpar(gdp)
     real(fp), pointer                         :: bdfL_Hc
     real(fp), pointer                         :: bdfL_Hp
     real(fp), pointer                         :: bdfPmax
-    real(fp), pointer                         :: bedformD50
-    real(fp), pointer                         :: bedformD90
     real(fp), pointer                         :: bedformL_H
     real(fp), pointer                         :: bedformT_H
     real(fp), pointer                         :: bdfuni
@@ -96,8 +94,6 @@ subroutine initbedformpar(gdp)
     bdfL_Hc                 => gdp%gdbedformpar%bdfL_Hc
     bdfL_Hp                 => gdp%gdbedformpar%bdfL_Hp
     bdfPmax                 => gdp%gdbedformpar%bdfPmax
-    bedformD50              => gdp%gdbedformpar%bedformD50
-    bedformD90              => gdp%gdbedformpar%bedformD90
     bedformL_H              => gdp%gdbedformpar%bedformL_H
     bedformT_H              => gdp%gdbedformpar%bedformT_H 
     bdfuni                  => gdp%gdbedformpar%bdfuni
@@ -118,6 +114,8 @@ subroutine initbedformpar(gdp)
     nullify(gdp%gdbedformpar%rksr)
     nullify(gdp%gdbedformpar%rksmr)
     nullify(gdp%gdbedformpar%rksd)
+    nullify(gdp%gdbedformpar%bedformD50)
+    nullify(gdp%gdbedformpar%bedformD90)
     !
     flbdfh      = ' '
     !
@@ -140,8 +138,6 @@ subroutine initbedformpar(gdp)
     bdfL_Hc    =    1.0_fp
     bdfL_Hp    =    2.5_fp
     bdfPmax    =    3.0_fp
-    bedformD50 =    0.0002_fp
-    bedformD90 =    0.0003_fp
     bedformL_H =    0.0_fp    
     bedformT_H =    1.0_fp
     bdfuni     =    0.0_fp

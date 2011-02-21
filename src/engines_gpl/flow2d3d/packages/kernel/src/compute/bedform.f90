@@ -53,8 +53,9 @@ subroutine bedform(nmmax     ,dps       ,s1        ,u         ,v         , &
     integer                              , pointer :: bedformlengthtype
     integer                              , pointer :: i50
     integer                              , pointer :: i90
-    real(fp)                             , pointer :: bedformD50
-    real(fp)                             , pointer :: bedformD90
+    logical                              , pointer :: spatial_bedform
+    real(fp), dimension(:)               , pointer :: bedformD50
+    real(fp), dimension(:)               , pointer :: bedformD90
     real(fp)                             , pointer :: thetacdune
     real(fp), dimension(:)               , pointer :: hdpar
     real(fp), dimension(:)               , pointer :: duneheightequi
@@ -116,6 +117,7 @@ subroutine bedform(nmmax     ,dps       ,s1        ,u         ,v         , &
 !
     bedformD50              => gdp%gdbedformpar%bedformD50
     bedformD90              => gdp%gdbedformpar%bedformD90
+    spatial_bedform         => gdp%gdbedformpar%spatial_bedform
     bedformheighttype       => gdp%gdbedformpar%bedformheighttype
     bedformlengthtype       => gdp%gdbedformpar%bedformlengthtype
     hdpar                   => gdp%gdbedformpar%hdpar
@@ -163,8 +165,13 @@ subroutine bedform(nmmax     ,dps       ,s1        ,u         ,v         , &
                 d90 = dxx(nm, i90)
                 relden = (rhosol(1)-rhow)/rhow ! assume density equal for all sediment fractions
              else
-                d50 = bedformD50
-                d90 = bedformD90
+                if (spatial_bedform) then
+                   d50 = bedformD50(nm)
+                   d90 = bedformD90(nm)
+                else
+                   d50 = bedformD50(1)
+                   d90 = bedformD90(1)
+                endif
                 relden = 1.65_fp
              endif
              !

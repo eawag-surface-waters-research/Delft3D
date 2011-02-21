@@ -54,6 +54,8 @@ subroutine chktrt(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     real(fp), dimension(:,:)   , pointer :: rgcalu
     real(fp), dimension(:,:)   , pointer :: rgcalv
     logical                    , pointer :: flsedprop_rqrd
+    character(256)             , pointer :: flnmD50
+    character(256)             , pointer :: flnmD90
 !
 ! Global variables
 !
@@ -85,6 +87,8 @@ subroutine chktrt(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     rgcalu        => gdp%gdtrachy%rgcalu
     rgcalv        => gdp%gdtrachy%rgcalv
     flsedprop_rqrd=> gdp%gdtrachy%flsedprop_rqrd
+    flnmD50       => gdp%gdbedformpar%flnmD50
+    flnmD90       => gdp%gdbedformpar%flnmD90
     !
     ! Initialise flags
     !
@@ -148,8 +152,8 @@ subroutine chktrt(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
           !
           call prterr(lundia    ,'G051'    , &
             & 'Alluvial roughness predictor uses the following sediment properties')
-          write(lundia,'(a,e12.4)') '            D50 (keyword BdfD50) :',gdp%gdbedformpar%bedformD50
-          write(lundia,'(a,e12.4)') '            D90 (keyword BdfD90) :',gdp%gdbedformpar%bedformD90
+          write(lundia,'(12x,2a)') 'D50 (keyword BdfD50) :', trim(flnmD50)
+          write(lundia,'(12x,2a)') 'D90 (keyword BdfD90) :', trim(flnmD90)
        endif
        !
     endif

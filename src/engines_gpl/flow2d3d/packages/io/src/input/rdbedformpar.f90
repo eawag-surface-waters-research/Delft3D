@@ -49,12 +49,15 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
     !
         
     character(256)                  , pointer :: flbdfh
+    character(256)                  , pointer :: flnmD50
+    character(256)                  , pointer :: flnmD90
     logical                         , pointer :: lfbedfrm
     logical                         , pointer :: lfbedfrmout
     logical                         , pointer :: lfbedfrmrou
     logical                         , pointer :: lfbedfrmCFL
     logical                         , pointer :: lfbedfrmADV
     logical                         , pointer :: lfbdfmor
+    logical                         , pointer :: spatial_bedform
     integer                         , pointer :: bedformheighttype
     integer                         , pointer :: bedformlengthtype
     integer                         , pointer :: bdfrpt
@@ -66,8 +69,8 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
     real(fp)                        , pointer :: bdfL_Hc
     real(fp)                        , pointer :: bdfL_Hp
     real(fp)                        , pointer :: bdfPmax
-    real(fp)                        , pointer :: bedformD50
-    real(fp)                        , pointer :: bedformD90
+    real(fp)      , dimension(:)    , pointer :: bedformD50
+    real(fp)      , dimension(:)    , pointer :: bedformD90
     real(fp)                        , pointer :: bedformL_H
     real(fp)                        , pointer :: bedformT_H
     real(fp)                        , pointer :: bdfuni
@@ -109,6 +112,11 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
     logical           :: bdfhfile_exists
     logical           :: hdread
     logical           :: ldread
+    logical           :: success
+    logical           :: successD50
+    logical           :: successD90
+    logical           :: existD50
+    logical           :: existD90
     integer           :: icx
     integer           :: icy
     integer           :: istat
@@ -127,8 +135,9 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
     bdfrpt                  => gdp%gdbedformpar%bdfrpt
     bdfrlxtype              => gdp%gdbedformpar%bdfrlxtype
     bdfuni                  => gdp%gdbedformpar%bdfuni
-    bedformD50              => gdp%gdbedformpar%bedformD50
-    bedformD90              => gdp%gdbedformpar%bedformD90
+    spatial_bedform         => gdp%gdbedformpar%spatial_bedform
+    flnmD50                 => gdp%gdbedformpar%flnmD50
+    flnmD90                 => gdp%gdbedformpar%flnmD90
     bedformheighttype       => gdp%gdbedformpar%bedformheighttype
     bedformlengthtype       => gdp%gdbedformpar%bedformlengthtype
     bedformL_H              => gdp%gdbedformpar%bedformL_H
@@ -147,9 +156,67 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
     ! Read Bedform sediment diameter
     !
     if (.not.sedim) then
-       call prop_get(gdp%mdfile_ptr,'*','BdfD50',bedformD50)
-       bedformD90 = 1.5_fp * bedformD50
-       call prop_get(gdp%mdfile_ptr,'*','BdfD90',bedformD90)
+       call prop_get_string(gdp%mdfile_ptr, '*', 'BdfD50', flnmD50, successD50)
+       call prop_get_string(gdp%mdfile_ptr, '*', 'BdfD90', flnmD90, successD90)
+       !
+       ! check if D50 or D90 is spatial varying; if only one is given, both are treated so.
+       !
+       if (.not. successD50 .and. .not. successD90) then
+          spatial_bedform = .false.
+          existD50 = .false.
+          existD90 = .false.
+       else
+          if (successD50) then
+             inquire (file = trim(flnmD50), exist = existD50)
+          else
+             existD50 = .false.
+          endif
+          if (successD90) then
+             inquire (file = trim(flnmD90), exist = existD90)
+          else
+             existD90 = .false.
+          endif
+          spatial_bedform = (existD50 .or. existD90)
+       endif
+       if (spatial_bedform) then
+          allocate(gdp%gdbedformpar%bedformD50(gdp%d%nmlb:gdp%d%nmub))
+          allocate(gdp%gdbedformpar%bedformD90(gdp%d%nmlb:gdp%d%nmub))
+       else
+          allocate(gdp%gdbedformpar%bedformD50(1))
+          allocate(gdp%gdbedformpar%bedformD90(1))
+       endif
+       bedformD50 => gdp%gdbedformpar%bedformD50
+       bedformD90 => gdp%gdbedformpar%bedformD90
+       !
+       ! default values:
+       !
+       bedformD50 = 0.0002_fp
+       bedformD90 = 0.0003_fp
+
+       if (successD50) then
+          if (.not. existD50) then
+             call prop_get(gdp%mdfile_ptr,'*', 'BdfD50', bedformD50(1), success)
+             if (spatial_bedform) then
+                bedformD50(:) = bedformD50(1)
+             endif
+          else
+             fmttmp = 'formatted'
+             call depfil(lundia    ,error     ,flnmD50   ,fmttmp    ,mmax      , &
+                       & nmaxus    ,bedformD50,1         ,1         ,gdp       )
+          endif
+       endif
+       if (successD90) then
+          if (.not. existD90) then
+             call prop_get(gdp%mdfile_ptr,'*', 'BdfD90', bedformD90(1), success)
+             if (spatial_bedform) then
+                bedformD90(:) = bedformD90(1)
+             endif
+          else
+             fmttmp = 'formatted'
+             call depfil(lundia    ,error     ,flnmD90   ,fmttmp    ,mmax      , &
+                       & nmaxus    ,bedformD90,1         ,1         ,gdp       )
+          endif
+       endif
     endif
     !
     call prop_get(gdp%mdfile_ptr,'*','Bdf',lfbedfrm)

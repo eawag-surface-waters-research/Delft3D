@@ -100,7 +100,7 @@ subroutine prtmap(lundia    ,error     ,prsmap    ,lunprt    ,nuprpg    , &
     character(131), dimension(10)                                                            :: header !  Description and declaration in postpr.igs
     character(19)                                                              , intent(in)  :: prsmap !  Description and declaration in tricom.igs
     character(20), dimension(lstsci + ltur)                                    , intent(in)  :: namcon !  Description and declaration in ckdim.f90
-    character(10)                                                              , intent(in)  :: velt   !  Velocity type 'eulerian' or 'GLM'
+    character(*)                                                               , intent(in)  :: velt   !  Velocity type 'eulerian' or 'GLM'
 !
 ! Local variables
 !

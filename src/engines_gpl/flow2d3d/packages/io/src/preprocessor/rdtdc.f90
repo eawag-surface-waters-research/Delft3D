@@ -269,7 +269,7 @@ subroutine rdtdc(lundia    ,lunout    ,lunrd     ,error     ,filbcc    , &
              if (isnan(rwbval(3, n, l))) error = .true.
              if (isnan(rwbval(4, n, l))) error = .true.
              if (error) then
-                write(errmsg,'(a,a)') 'Concentration at open boundary containins NaN in ', trim(filbcc)
+                write(errmsg,'(a,a)') 'Concentration at open boundary contains NaN in ', trim(filbcc)
                 call prterr(lundia    ,'P004'    ,errmsg      )
                 !
                 goto 9999

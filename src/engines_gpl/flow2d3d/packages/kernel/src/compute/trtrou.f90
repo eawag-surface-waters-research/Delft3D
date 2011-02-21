@@ -74,13 +74,14 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
     real(fp), dimension(:,:,:) , pointer :: rttfu
     real(fp), dimension(:,:,:) , pointer :: rttfv
     logical                    , pointer :: flsedprop_rqrd
+    logical                    , pointer :: spatial_bedform
     !
     real(fp), dimension(:,:)   , pointer :: dxx
     real(fp), dimension(:)     , pointer :: rhosol
     integer                    , pointer :: i50
     integer                    , pointer :: i90
-    real(fp)                   , pointer :: bedformD50
-    real(fp)                   , pointer :: bedformD90
+    real(fp), dimension(:)     , pointer :: bedformD50
+    real(fp), dimension(:)     , pointer :: bedformD90
     real(fp), dimension(:)     , pointer :: rksr
     real(fp), dimension(:)     , pointer :: rksmr
     real(fp), dimension(:)     , pointer :: rksd
@@ -223,41 +224,42 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    rhow           => gdp%gdphysco%rhow
-    ag             => gdp%gdphysco%ag
-    z0             => gdp%gdphysco%z0
-    vonkar         => gdp%gdphysco%vonkar
-    vicmol         => gdp%gdphysco%vicmol
-    eps            => gdp%gdconst%eps
-    dryflc         => gdp%gdnumeco%dryflc
+    rhow            => gdp%gdphysco%rhow
+    ag              => gdp%gdphysco%ag
+    z0              => gdp%gdphysco%z0
+    vonkar          => gdp%gdphysco%vonkar
+    vicmol          => gdp%gdphysco%vicmol
+    eps             => gdp%gdconst%eps
+    dryflc          => gdp%gdnumeco%dryflc
     !
-    alf_area_ser   => gdp%gdtrachy%alf_area_ser
-    trtminh        => gdp%gdtrachy%trtminh
-    iarea_avg      => gdp%gdtrachy%iarea_avg
-    nttaru         => gdp%gdtrachy%nttaru
-    nttarv         => gdp%gdtrachy%nttarv
-    ntrt           => gdp%gdtrachy%ntrt
-    ittaru         => gdp%gdtrachy%ittaru
-    ittarv         => gdp%gdtrachy%ittarv
-    ittdef         => gdp%gdtrachy%ittdef
-    rgcalu         => gdp%gdtrachy%rgcalu
-    rgcalv         => gdp%gdtrachy%rgcalv
-    rttaru         => gdp%gdtrachy%rttaru
-    rttarv         => gdp%gdtrachy%rttarv
-    rttdef         => gdp%gdtrachy%rttdef
-    rttfu          => gdp%gdtrachy%rttfu
-    rttfv          => gdp%gdtrachy%rttfv
-    flsedprop_rqrd => gdp%gdtrachy%flsedprop_rqrd
+    alf_area_ser    => gdp%gdtrachy%alf_area_ser
+    trtminh         => gdp%gdtrachy%trtminh
+    iarea_avg       => gdp%gdtrachy%iarea_avg
+    nttaru          => gdp%gdtrachy%nttaru
+    nttarv          => gdp%gdtrachy%nttarv
+    ntrt            => gdp%gdtrachy%ntrt
+    ittaru          => gdp%gdtrachy%ittaru
+    ittarv          => gdp%gdtrachy%ittarv
+    ittdef          => gdp%gdtrachy%ittdef
+    rgcalu          => gdp%gdtrachy%rgcalu
+    rgcalv          => gdp%gdtrachy%rgcalv
+    rttaru          => gdp%gdtrachy%rttaru
+    rttarv          => gdp%gdtrachy%rttarv
+    rttdef          => gdp%gdtrachy%rttdef
+    rttfu           => gdp%gdtrachy%rttfu
+    rttfv           => gdp%gdtrachy%rttfv
+    flsedprop_rqrd  => gdp%gdtrachy%flsedprop_rqrd
     !
-    dxx            => gdp%gderosed%dxx
-    rhosol         => gdp%gdsedpar%rhosol
-    i50            => gdp%gdmorpar%i50
-    i90            => gdp%gdmorpar%i90
-    bedformD50     => gdp%gdbedformpar%bedformD50
-    bedformD90     => gdp%gdbedformpar%bedformD90
-    rksr           => gdp%gdbedformpar%rksr
-    rksmr          => gdp%gdbedformpar%rksmr
-    rksd           => gdp%gdbedformpar%rksd
+    dxx             => gdp%gderosed%dxx
+    rhosol          => gdp%gdsedpar%rhosol
+    i50             => gdp%gdmorpar%i50
+    i90             => gdp%gdmorpar%i90
+    bedformD50      => gdp%gdbedformpar%bedformD50
+    bedformD90      => gdp%gdbedformpar%bedformD90
+    spatial_bedform => gdp%gdbedformpar%spatial_bedform
+    rksr            => gdp%gdbedformpar%rksr
+    rksmr           => gdp%gdbedformpar%rksmr
+    rksd            => gdp%gdbedformpar%rksd
     !
     ! refer to appropriate arrays depending on direction
     !
@@ -404,8 +406,13 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
                    d90 = 0.5_fp*(dxx(nm, i90) + dxx(nmu, i90))
                    relden = (rhosol(1)-rhow)/rhow ! assume density equal for all sediment fractions
                 else
-                   d50 = bedformD50
-                   d90 = bedformD90
+                   if (spatial_bedform) then
+                      d50 = 0.5_fp*(bedformD50(nm) + bedformD50(nmu))
+                      d90 = 0.5_fp*(bedformD90(nm) + bedformD90(nmu))
+                   else
+                      d50 = bedformD50(1)
+                      d90 = bedformD90(1)
+                   endif
                    relden = 1.65_fp
                 endif 
              endif
@@ -435,10 +442,15 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
                    d90 = 0.5_fp*(dxx(nm, i90) + dxx(num, i90))
                    relden = (rhosol(1)-rhow)/rhow ! assume density equal for all sediment fractions
                 else
-                   d50 = bedformD50
-                   d90 = bedformD90
+                   if (spatial_bedform) then
+                      d50 = 0.5_fp*(bedformD50(nm) + bedformD50(num))
+                      d90 = 0.5_fp*(bedformD90(nm) + bedformD90(num))
+                   else
+                      d50 = bedformD50(1)
+                      d90 = bedformD90(1)
+                   endif
                    relden = 1.65_fp
-                endif 
+                endif
              endif
              !
              ! Average perpendicular velocity

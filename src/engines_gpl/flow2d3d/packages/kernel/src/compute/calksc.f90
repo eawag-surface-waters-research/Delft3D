@@ -58,6 +58,7 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
     real(fp)                             , pointer :: z0v
     logical                              , pointer :: wave
     logical                              , pointer :: lftrto
+    logical                              , pointer :: spatial_bedform
     real(fp)      , dimension(:)         , pointer :: sedd50
     real(fp)      , dimension(:)         , pointer :: sedd50fld
     real(fp)      , dimension(:)         , pointer :: sedd90
@@ -67,8 +68,8 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
     integer                              , pointer :: ntrt
     integer , dimension(:,:)             , pointer :: ittdef
     integer                              , pointer :: bdfrpt
-    real(fp)                             , pointer :: bedformD50
-    real(fp)                             , pointer :: bedformD90
+    real(fp), dimension(:)               , pointer :: bedformD50
+    real(fp), dimension(:)               , pointer :: bedformD90
     real(fp), dimension(:)               , pointer :: kdpar
     real(fp), dimension(:)               , pointer :: duneheight
     real(fp), dimension(:)               , pointer :: dunelength
@@ -126,8 +127,6 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
     real(fp) :: par4    ! relaxation time scale ripples (minutes)
     real(fp) :: par5    ! relaxation time scale mega-ripples (minutes)
     real(fp) :: par6    ! relaxation time scale dunes (minutes)
-    real(fp) :: par7    ! D50 if not otherwise available
-    real(fp) :: par8    ! D90 if not otherwise available
     real(fp) :: psi
     real(fp) :: raih
     real(fp) :: relaxr
@@ -158,6 +157,7 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
     kdpar                   => gdp%gdbedformpar%kdpar
     bedformD50              => gdp%gdbedformpar%bedformD50
     bedformD90              => gdp%gdbedformpar%bedformD90
+    spatial_bedform         => gdp%gdbedformpar%spatial_bedform
     duneheight              => gdp%gdbedformpar%duneheight
     dunelength              => gdp%gdbedformpar%dunelength
     rksr                    => gdp%gdbedformpar%rksr
@@ -199,8 +199,6 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
        par4 = kdpar(4)
        par5 = kdpar(5)
        par6 = kdpar(6)
-       par7 = bedformD50
-       par8 = bedformD90
        !
        ! In revision 13740, the relaxation coefficients were changed such that
        ! the meaning of the time scales to be provided by the user are better
@@ -274,9 +272,12 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
              if (lsedtot > 0) then
                 d50 = dxx(nm, i50)
                 d90 = dxx(nm, i90)
+             else if (spatial_bedform) then
+                d50 = bedformD50(nm)
+                d90 = bedformD90(nm)
              else
-                d50 = par7
-                d90 = par8
+                d50 = bedformD50(1)
+                d90 = bedformD90(1)
              endif
              !
              ! Van Rijn 2004 roughness predictor
@@ -382,8 +383,10 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
        do nm = 1, nmmax
           if (associated(gdp%gderosed%dxx))  then 
              d90 = dxx(nm, i90)
+          else if (spatial_bedform) then
+             d90 = bedformD90(nm)
           else
-             d90 = bedformD90
+             d90 = bedformD90(1)
           endif 
           if (kfs(nm)>0) then
              dunelength(nm) = max(dunelength(nm),1e-6_fp)
@@ -404,8 +407,10 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
        do nm = 1, nmmax
           if (associated(gdp%gderosed%dxx))  then 
              d90 = dxx(nm, i90)
+          else if (spatial_bedform) then
+             d90 = bedformD90(nm)
           else
-             d90 = bedformD90
+             d90 = bedformD90(1)
           endif 
           if (kfs(nm)>0) then
              rksd(nm)  = kdpar(1)*abs(duneheight(nm))**kdpar(2)
