@@ -103,7 +103,6 @@ subroutine erosilt(thick    ,kmax     ,ws       , &
     real(hp)          :: sour_dll
     integer           :: ierror
     integer, external :: perf_function_erosilt
-    character(256)    :: errmsg
     character(256)    :: message     ! Contains message from
 !
 !! executable statements ------------------
@@ -197,8 +196,7 @@ subroutine erosilt(thick    ,kmax     ,ws       , &
                                          message)
           call vsemlun
           if (ierror /= 0) then
-             write(errmsg,'(a,a,a)') 'Cannot find function "',trim(dllfunc),'" in dynamic library.'
-             call prterr (lundia,'U021', trim(errmsg))
+             write(lundia,'(a,a,a)') '*** ERROR Cannot find function "',trim(dllfunc),'" in dynamic library.'
              error = .true.
              return
           endif

@@ -245,7 +245,6 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     real(hp)          :: sswu_dll
     real(hp)          :: sswv_dll
     real(hp)          :: t_relax_dll
-    character(256)    :: errmsg
     character(256)    :: message     ! Contains message from
     logical           :: equi_conc   ! equilibrium concentration near bedlevel
     logical           :: sbc_total   ! total bed load given (instead of m,n components)
@@ -783,8 +782,7 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
                                      message)
        call vsemlun
        if (ierror /= 0) then
-          write(errmsg,'(a,a,a)') 'Cannot find function "',trim(dllfunc),'" in dynamic library.'
-          call prterr (lundia,'U021', trim(errmsg))
+          write(lundia,'(a,a,a)') '*** ERROR Cannot find function "',trim(dllfunc),'" in dynamic library.'
           error = .true.
           return
        endif
