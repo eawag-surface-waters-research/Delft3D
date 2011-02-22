@@ -158,10 +158,6 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
     zusus = zumod
     rc    = 30.0_fp * z0cur
     !
-    ! Make assumptions for friction angle
-    !
-    phi = 30.0_fp * degrad
-    !
     ! calculate imaginary "depth-averaged current" which has a logarithmic
     ! velocity profile, and a velocity at the bottom zeta point equivalent
     ! to that calculated by the model for 3D current and waves.
@@ -171,6 +167,28 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
     else
        u2dhim = umod
     endif
+    !
+    ! calculate bed-shear stress due to currents
+    !
+    cc = 18.0_fp * log10(12.0_fp*h1/rc)
+    ustarc = sqrt(ag) / cc * u2dhim
+    !
+    ! bed-shear stress current
+    !
+    fc   = 0.24_fp  * log10(12.0_fp*h1/rc)**(-2)
+    tauc = 0.125_fp * rhowat * fc * u2dhim**2
+    !
+    if (tauadd>0.0_fp) then
+       !
+       ! extra stress
+       !
+       tauc   = sqrt(tauc**2 + tauadd**2)
+       !
+       ! update
+       !
+       ustarc = sqrt(tauc/rhowat)
+    endif
+    !
     phicur = atan2(vvv, uuu)
     if (phicur < 0.0_fp) then
        phicur = phicur + 2.0_fp*pi
@@ -301,49 +319,10 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
     d50t = max(0.0001_fp , min(d50 , 0.0005_fp))
     psi  = uwc**2 / (drho * ag * d50t)
     !
-    !  Determination of suspended sediment size dss
-    !
-    if (iopsus == 1) then
-       if (psi < 550.0_fp) then
-          dss = (1.0_fp+0.0006_fp*(d50/d10-1.0_fp)*(psi-550.0_fp)) * d50
-       else
-          dss = d50
-       endif
-       dss = max(d10, dss)
-       if (d50 < dsilt) then
-          dss = d50
-       endif
-       dss = max(dss , 0.5_fp*dsilt)
-    endif
-    !
-    ! calculate bed-shear stress due to currents
-    !
-    cc = 18.0_fp * log10(12.0_fp*h1/rc)
-    ustarc = sqrt(ag) / cc * u2dhim
-    !
     ! calculate efficiency factor currents
     !
     fc1  = 0.24_fp  * log10(12.0_fp*h1/d90)**(-2)
-    fc   = 0.24_fp  * log10(12.0_fp*h1/rc)**(-2)
-    !
-    ! bed-shear stress current
-    !
-    tauc = 0.125_fp * rhowat * fc * u2dhim**2
-    !
-    ! efficiency factor (current-related)
-    !
     muc  = fc1 / fc
-    !
-    if (tauadd>0.0_fp) then
-       !
-       ! extra stress
-       !
-       tauc   = sqrt(tauc**2 + tauadd**2)
-       !
-       ! update
-       !
-       ustarc = sqrt(tauc/rhowat)
-    endif
     !
     ! effective bed-shear stress current + waves
     !
@@ -367,6 +346,10 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
     endif
     taucr1 = fpack * fch1 * fclay * taucr0
     taurat  = taubcw / taucr1
+    !
+    ! Make assumptions for friction angle
+    !
+    phi = 30.0_fp * degrad
     !
     ! bed slope effects on critical shear stress
     ! using Dey (2001) as modified by Van Rijn (Z4056)
@@ -396,5 +379,20 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
        ce_nm = min(camax , 0.015_fp*fsilt*d50*ta**1.5_fp/(aks*dstar**0.3_fp))
     else
        ce_nm = 0.0_fp
+    endif
+    !
+    !  Determination of suspended sediment size dss
+    !
+    if (iopsus == 1) then
+       if (psi < 550.0_fp) then
+          dss = (1.0_fp+0.0006_fp*(d50/d10-1.0_fp)*(psi-550.0_fp)) * d50
+       else
+          dss = d50
+       endif
+       dss = max(d10, dss)
+       if (d50 < dsilt) then
+          dss = d50
+       endif
+       dss = max(dss , 0.5_fp*dsilt)
     endif
 end subroutine bedbc2004

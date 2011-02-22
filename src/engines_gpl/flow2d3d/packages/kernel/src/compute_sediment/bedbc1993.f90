@@ -224,9 +224,7 @@ subroutine bedbc1993(tp        ,uorb      ,rhowat    ,h1        ,umod      , &
     ! Limit maximum aks to 20% of water depth
     ! (may be used when water depth becomes very small)
     !
-    if (aks>0.2*h1) then
-       aks = 0.2*h1
-    endif
+    aks = min(aks, 0.2_fp * h1)
     !
     ! Calculate bed-shear stress due to currents
     ! Note: this expression uses the current-only roughness (z0 value)
