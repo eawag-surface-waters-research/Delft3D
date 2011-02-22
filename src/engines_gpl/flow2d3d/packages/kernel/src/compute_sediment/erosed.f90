@@ -309,8 +309,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: fi
     real(fp)                      :: h0
     real(fp)                      :: h1
-    real(fp)                      :: hrmsnm
-    real(fp)                      :: rlnm
     real(fp)                      :: sag
     real(fp)                      :: salinity
     real(fp)                      :: spirint   ! local variable for spiral flow intensity r0(nm,1,lsecfl)
@@ -318,10 +316,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: taub
     real(fp)                      :: tdss      ! temporary variable for dss
     real(fp)                      :: temperature
-    real(fp)                      :: tetanm
     real(fp)                      :: thick0
     real(fp)                      :: thick1
-    real(fp)                      :: tpnm
     real(fp)                      :: trsedeq   ! temporary variable for rsedeq
     real(fp)                      :: tsalmax
     real(fp)                      :: tsd
@@ -329,7 +325,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: tws0
     real(fp)                      :: ubed
     real(fp)                      :: umean
-    real(fp)                      :: uorbnm
     real(fp)                      :: ustarc
     real(fp)                      :: vbed
     real(fp)                      :: vmean
@@ -816,19 +811,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           tauadd = 0.0_fp
        endif
        !
-       if (wave) then
-          hrmsnm = min(gammax*h1, hrms(nm))
-          tpnm   = tp(nm)
-          tetanm = teta(nm)
-          rlnm   = rlabda(nm)
-          uorbnm = uorb(nm)
-       else
-          hrmsnm = 0.0_fp
-          tpnm   = 0.0_fp
-          tetanm = 0.0_fp
-          rlnm   = 0.0_fp
-          uorbnm = 0.0_fp
-       endif
        if (lsal > 0) then
           salinity = r0(nm, kmax, lsal)
        else
@@ -860,11 +842,19 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
       !dll_reals(RP_ZVLCH) = z level of characteristic velocity
        dll_reals(RP_DEPTH) = real(h1        ,hp)
        dll_reals(RP_CHEZY) = real(chezy     ,hp)
-       dll_reals(RP_HRMS ) = real(hrms(nm)  ,hp)
-       dll_reals(RP_TPEAK) = real(tp(nm)    ,hp)
-       dll_reals(RP_TETA ) = real(teta(nm)  ,hp)
-       dll_reals(RP_RLAMB) = real(rlabda(nm),hp)
-       dll_reals(RP_UORB ) = real(uorb(nm)  ,hp)
+       if (wave) then
+          dll_reals(RP_HRMS ) = real(min(gammax*h1, hrms(nm)) ,hp)
+          dll_reals(RP_TPEAK) = real(tp(nm)    ,hp)
+          dll_reals(RP_TETA ) = real(teta(nm)  ,hp)
+          dll_reals(RP_RLAMB) = real(rlabda(nm),hp)
+          dll_reals(RP_UORB ) = real(uorb(nm)  ,hp)
+       else
+          dll_reals(RP_HRMS ) = 0.0_hp
+          dll_reals(RP_TPEAK) = 0.0_hp
+          dll_reals(RP_TETA ) = 0.0_hp
+          dll_reals(RP_RLAMB) = 0.0_hp
+          dll_reals(RP_UORB ) = 0.0_hp
+       endif
       !dll_reals(RP_D50  ) = d50 of fraction
       !dll_reals(RP_DSS  ) = suspended sediment diameter of fraction
       !dll_reals(RP_DSTAR) = dstar of fraction
@@ -925,9 +915,9 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              call erosilt(thick    ,kmax     ,wslc     , &
                         & wstau(nm),entr(nm) ,dcwwlc   ,sddflc   ,lundia   , &
                         & h0       ,h1       ,umean    ,vmean    ,ubed     ,vbed     , &
-                        & taub     ,error    ,fixfac   , &
-                        & frac     ,sinkse   ,sourse   ,oldmudfrac,flmd2l  ,tcrdep(nm,l), &
-                        & tcrero(nm,l) ,eropar(nm,l)   ,iform    , &
+                        & taub     ,error    ,fixfac(nm,l), &
+                        & frac(nm,l),sinkse(nm,l),sourse(nm,l),oldmudfrac,flmd2l  ,tcrdep(nm,l), &
+                        & tcrero(nm,l) ,eropar(nm,l)   ,iform(l) , &
                         & max_integers,max_reals      ,max_strings  ,dll_function(l),dll_handle(l), &
                         & dll_integers,dll_reals      ,dll_strings  )
              if (error) call d3stop(1, gdp)
@@ -1034,28 +1024,27 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              ! Solve equilibrium concentration vertical and
              ! integrate over vertical
              !
-             call eqtran(sig          ,thick        ,kmax      , &
-                       & h1          ,aks(nm)        ,ustarc       ,wslc         ,ltur      , &
-                       & frac(nm,l)  ,tpnm           ,dstar(l)     ,hrmsnm       ,rlnm      , &
-                       & di50        ,d90            ,tsigmol      ,rhosol(l)    ,uuu(nm)   , &
-                       & vvv(nm)     ,umod(nm)       ,zumod(nm)    ,z0rou        , &
-                       & ce_nm       ,taurat(nm,l)   ,dcwwlc       ,sddflc       ,rsdqlc    , &
-                       & kmaxsd      ,crep           ,sbcu(nm,l )  ,sbcv(nm,l)   ,sbwu(nm,l), &
-                       & sbwv(nm,l)  ,sswu(nm,l)     ,sswv(nm,l)   ,lundia       , &
-                       & uorbnm      ,rhowat(nm,kmax),z0cur        ,tetanm       ,taucr(l)  , &
-                       & d10         ,taubmx(nm)     ,tdss         ,rksr(nm)     ,3         , &
-                       & ce_nmtmp    ,akstmp         ,mudfrac(nm)  ,lsecfl       ,spirint   , &
-                       & hidexp(nm,l),suspfrac       ,ust2(nm)     ,tetacr(l)    ,salinity  , &
-                       & tsalmax     ,tws0           ,tsd          ,dis(nm)      ,concin3d  , &
-                       & dzduu(nm)   ,dzdvv(nm)      ,ubot(nm)     ,tauadd    , &
-                       & sus         ,bed            ,susw         ,bedw         ,espir     , &
-                       & rhow        ,ag             ,vonkar       ,vicmol       ,wave      , &
-                       & scour       ,epspar         ,ubot_from_com,timsec       ,camax     , &
-                       & aksfac      ,rwave          ,rdc          ,rdw          ,pangle    , &
-                       & fpco        ,iopsus         ,iopkcw       ,subiw        ,eps       , &
-                       & iform(l)    ,par(1,l)       , &
-                       & max_integers,max_reals      ,max_strings  ,dll_function(l),dll_handle(l), &
-                       & dll_integers,dll_reals      ,dll_strings  ,error     )
+             call eqtran(sig         ,thick       ,kmax         , &
+                       & aks(nm)     ,ustarc      ,wslc         ,ltur      , &
+                       & frac(nm,l)  ,tsigmol     ,uuu(nm)      , &
+                       & vvv(nm)     ,umod(nm)    ,zumod(nm)    ,z0rou     , &
+                       & ce_nm       ,taurat(nm,l),dcwwlc       ,sddflc    ,rsdqlc    , &
+                       & kmaxsd      ,crep        ,sbcu(nm,l )  ,sbcv(nm,l),sbwu(nm,l), &
+                       & sbwv(nm,l)  ,sswu(nm,l)  ,sswv(nm,l)   ,lundia    , &
+                       & z0cur       ,taucr(l)    , &
+                       & taubmx(nm)  ,tdss        ,rksr(nm)     ,3         , &
+                       & ce_nmtmp    ,akstmp      ,lsecfl       ,spirint   , &
+                       & suspfrac    ,ust2(nm)    ,tetacr(l)    , &
+                       & tsalmax     ,tws0        ,tsd          ,dis(nm)   ,concin3d  , &
+                       & dzduu(nm)   ,dzdvv(nm)   ,ubot(nm)     ,tauadd    , &
+                       & sus         ,bed         ,susw         ,bedw      ,espir     , &
+                       & rhow        ,vonkar      ,wave         , &
+                       & scour       ,epspar      ,ubot_from_com,camax     , &
+                       & aksfac      ,rwave       ,rdc          ,rdw       ,pangle    , &
+                       & fpco        ,iopsus      ,iopkcw       ,subiw     ,eps       , &
+                       & iform(l)    ,par(1,l)    , &
+                       & max_integers,max_reals   ,max_strings  ,dll_function(l),dll_handle(l), &
+                       & dll_integers,dll_reals   ,dll_strings  ,error     )
              if (error) call d3stop(1, gdp)
              if (suspfrac) then
                 dss(nm, l) = tdss
@@ -1118,28 +1107,27 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              ! integrate over vertical; compute bedload
              ! transport excluding slope effects.
              !
-             call eqtran(sig2d        ,thck2d       ,kmax2d     , &
-                       & h1          ,aks(nm)        ,ustarc       ,ws2d         ,ltur       , &
-                       & frac(nm,l)  ,tpnm           ,dstar(l)     ,hrmsnm       ,rlnm       , &
-                       & di50        ,d90            ,tsigmol      ,rhosol(l)    ,uuu(nm)    , &
-                       & vvv(nm)     ,umod(nm)       ,zumod(nm)    ,z0rou        , &
-                       & ce_nm       ,taurat(nm,l)   ,dcww2d       ,sddf2d       ,rsdq2d     , &
-                       & kmaxsd      ,trsedeq        ,sbcu(nm,l)   ,sbcv(nm,l)   ,sbwu(nm,l) , &
-                       & sbwv(nm,l)  ,sswu(nm,l)     ,sswv(nm,l)   ,lundia       , &
-                       & uorbnm      ,rhowat(nm,kmax),z0cur        ,tetanm       ,taucr(l)   , &
-                       & d10         ,taubmx(nm)     ,tdss         ,rksr(nm)     ,2          , &
-                       & ce_nmtmp    ,akstmp         ,mudfrac(nm)  ,lsecfl       ,spirint    , &
-                       & hidexp(nm,l),suspfrac       ,ust2(nm)     ,tetacr(l)    ,salinity   , &
-                       & tsalmax     ,tws0           ,tsd          ,dis(nm)      ,concin2d   , &
-                       & dzduu(nm)   ,dzdvv(nm)      ,ubot(nm)     ,tauadd     , &
-                       & sus         ,bed            ,susw         ,bedw         ,espir      , &
-                       & rhow        ,ag             ,vonkar       ,vicmol       ,wave       , &
-                       & scour       ,epspar         ,ubot_from_com,timsec       ,camax      , &
-                       & aksfac      ,rwave          ,rdc          ,rdw          ,pangle     , &
-                       & fpco        ,iopsus         ,iopkcw       ,subiw        ,eps        , &
-                       & iform(l)    ,par(1,l)       , &
-                       & max_integers,max_reals      ,max_strings  ,dll_function(l),dll_handle(l), &
-                       & dll_integers,dll_reals      ,dll_strings  ,error      )
+             call eqtran(sig2d       ,thck2d      ,kmax2d       , &
+                       & aks(nm)     ,ustarc      ,ws2d         ,ltur       , &
+                       & frac(nm,l)  ,tsigmol     ,uuu(nm)      , &
+                       & vvv(nm)     ,umod(nm)    ,zumod(nm)    ,z0rou      , &
+                       & ce_nm       ,taurat(nm,l),dcww2d       ,sddf2d     ,rsdq2d     , &
+                       & kmaxsd      ,trsedeq     ,sbcu(nm,l)   ,sbcv(nm,l) ,sbwu(nm,l) , &
+                       & sbwv(nm,l)  ,sswu(nm,l)  ,sswv(nm,l)   ,lundia     , &
+                       & z0cur       ,taucr(l)    , &
+                       & taubmx(nm)  ,tdss        ,rksr(nm)     ,2          , &
+                       & ce_nmtmp    ,akstmp      ,lsecfl       ,spirint    , &
+                       & suspfrac    ,ust2(nm)    ,tetacr(l)    , &
+                       & tsalmax     ,tws0        ,tsd          ,dis(nm)    ,concin2d   , &
+                       & dzduu(nm)   ,dzdvv(nm)   ,ubot(nm)     ,tauadd     , &
+                       & sus         ,bed         ,susw         ,bedw       ,espir      , &
+                       & rhow        ,vonkar      ,wave         , &
+                       & scour       ,epspar      ,ubot_from_com,camax      , &
+                       & aksfac      ,rwave       ,rdc          ,rdw        ,pangle     , &
+                       & fpco        ,iopsus      ,iopkcw       ,subiw      ,eps        , &
+                       & iform(l)    ,par(1,l)    , &
+                       & max_integers,max_reals   ,max_strings  ,dll_function(l),dll_handle(l), &
+                       & dll_integers,dll_reals   ,dll_strings  ,error      )
              if (error) call d3stop(1, gdp)
              if (suspfrac) then
                 dss   (nm, l)    = tdss

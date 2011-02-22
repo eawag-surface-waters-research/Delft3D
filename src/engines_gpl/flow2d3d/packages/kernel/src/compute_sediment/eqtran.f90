@@ -1,20 +1,19 @@
 subroutine eqtran(sig       ,thick     ,kmax      , &
-                & h1        ,aks       ,ustarc    ,ws        ,ltur      , &
-                & frac      ,tp        ,dstar     ,hrms      ,rlabda    , &
-                & di50      ,d90       ,sigmol    ,rhosol    ,uuu       , &
+                & aks       ,ustarc    ,ws        ,ltur      , &
+                & frac      ,sigmol    ,uuu       , &
                 & vvv       ,umod      ,zumod     ,z0rou     , &
                 & ce_nm     ,taurat    ,dicww     ,seddif    ,rsedeq    , &
                 & kmaxsd    ,crep      ,sbcu      ,sbcv      ,sbwu      , &
                 & sbwv      ,sswu      ,sswv      ,lundia    , &
-                & uorb      ,rhowat    ,z0cur     ,teta      ,taucr0    , &
-                & d10       ,taubmx    ,dss       ,rksrs     ,i2d3d     , &
-                & ce_nmtmp  ,akstmp    ,mudfrac   ,lsecfl    ,spirint   , &
-                & hidexp    ,suspfrac  ,ust2      ,tetacr    ,sa        , &
+                & z0cur     ,taucr0    , &
+                & taubmx    ,dss       ,rksrs     ,i2d3d     , &
+                & ce_nmtmp  ,akstmp    ,lsecfl    ,spirint   , &
+                & suspfrac  ,ust2      ,tetacr    , &
                 & salmax    ,ws0       ,t_relax   ,dis       ,concin    , &
                 & dzduu     ,dzdvv     ,ubot      ,tauadd    , &
                 & sus       ,bed       ,susw      ,bedw      ,espir     , &
-                & rhow      ,ag        ,vonkar    ,vicmol    ,wave      , &
-                & scour     ,epspar    ,ubot_from_com,timsec ,camax     , &
+                & rhow      ,vonkar    ,wave      , &
+                & scour     ,epspar    ,ubot_from_com,camax     , &
                 & aksfac    ,rwave     ,rdc       ,rdw       ,pangle    , &
                 & fpco      ,iopsus    ,iopkcw    ,subiw     ,eps       , &
                 & iform     ,par       , &
@@ -78,7 +77,6 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     integer                         , intent(in)   :: numrealpar
     integer                         , intent(in)   :: numstrpar
     integer                         , intent(in)   :: subiw
-    real(fp)                        , intent(in)   :: ag
     real(fp)                        , intent(in)   :: aks      !  Description and declaration in rjdim.f90
     real(fp)                        , intent(in)   :: aksfac
     real(fp)                        , intent(out)  :: akstmp
@@ -89,35 +87,23 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     real(fp)                        , intent(out)  :: ce_nmtmp
     real(fp), dimension(kmax)       , intent(out)  :: concin
     real(fp)                        , intent(out)  :: crep
-    real(fp)                        , intent(in)   :: d10
-    real(fp)                        , intent(in)   :: d90
-    real(fp)                        , intent(in)   :: di50
     real(fp), dimension(0:kmax)     , intent(in)   :: dicww    !  Description and declaration in rjdim.f90
     real(fp)                        , intent(in)   :: dis
     real(fp)                        , intent(out)  :: dss      !  Description and declaration in rjdim.f90
-    real(fp)                        , intent(in)   :: dstar
     real(fp)                        , intent(in)   :: dzduu     !  Description and declaration in rjdim.f90
     real(fp)                        , intent(in)   :: dzdvv     !  Description and declaration in rjdim.f90
     real(fp)                        , intent(in)   :: eps
     real(fp)                        , intent(in)   :: espir
     real(fp)                        , intent(in)   :: fpco
     real(fp)                        , intent(in)   :: frac     !  Description and declaration in rjdim.f90
-    real(fp)                        , intent(in)   :: h1
-    real(fp)                        , intent(in)   :: hidexp
-    real(fp)                        , intent(in)   :: hrms     !  Description and declaration in rjdim.f90
-    real(fp)                        , intent(in)   :: mudfrac
     real(fp)                        , intent(in)   :: pangle
     real(fp), dimension(30)         , intent(inout):: par
     real(fp)                        , intent(in)   :: rdc
     real(fp)                        , intent(in)   :: rdw
     real(fp)                        , intent(in)   :: rhow
-    real(fp)                        , intent(in)   :: rhowat   !  Description and declaration in rjdim.f90
-    real(fp)                        , intent(in)   :: rhosol   !  Description and declaration in rjdim.f90
     real(fp)                        , intent(in)   :: rksrs    !  Description and declaration in rjdim.f90
-    real(fp)                        , intent(in)   :: rlabda   !  Description and declaration in rjdim.f90
     real(fp), dimension(kmax)       , intent(out)  :: rsedeq   !  Description and declaration in rjdim.f90
     real(fp)                        , intent(in)   :: rwave
-    real(fp)                        , intent(in)   :: sa
     real(fp)                        , intent(in)   :: salmax
     real(fp)                        , intent(out)  :: sbcu
     real(fp)                        , intent(out)  :: sbcv
@@ -136,18 +122,13 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     real(fp)                        , intent(in)   :: taubmx   !  Description and declaration in rjdim.f90
     real(fp)                        , intent(in)   :: taucr0
     real(fp)                        , intent(in)   :: taurat
-    real(fp)                        , intent(in)   :: teta     !  Description and declaration in rjdim.f90
     real(fp)                        , intent(in)   :: tetacr
     real(fp), dimension(kmax)       , intent(in)   :: thick    !  Description and declaration in rjdim.f90
-    real(fp)                        , intent(in)   :: timsec
-    real(fp)                        , intent(in)   :: tp       !  Description and declaration in rjdim.f90
     real(fp)                        , intent(in)   :: umod
     real(fp)                        , intent(in)   :: ubot     !  Description and declaration in rjdim.f90
-    real(fp)                        , intent(in)   :: uorb     !  Description and declaration in rjdim.f90
-    real(fp)                        , intent(in)   :: ustarc
+    real(fp)                        , intent(out)  :: ustarc
     real(fp)                        , intent(out)  :: ust2
     real(fp)                        , intent(in)   :: uuu
-    real(fp)                        , intent(in)   :: vicmol
     real(fp)                        , intent(in)   :: vonkar
     real(fp)                        , intent(in)   :: vvv
     real(fp), dimension(0:kmax)     , intent(in)   :: ws       !  Description and declaration in rjdim.f90
@@ -171,6 +152,7 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     integer           :: k
     integer           :: kvalue
     integer, external :: perf_function_eqtran
+    real(fp)          :: ag
     real(fp)          :: aks0
     real(fp)          :: alphaspir
     real(fp)          :: apower
@@ -181,12 +163,16 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     real(fp)          :: cesus
     real(fp)          :: chezy
     real(fp)          :: cosa
+    real(fp)          :: d10
+    real(fp)          :: d90
     real(fp)          :: deltas
     real(fp)          :: delw
     real(fp)          :: delm
     real(fp)          :: delr
+    real(fp)          :: di50
     real(fp)          :: diffbt
     real(fp)          :: drho
+    real(fp)          :: dstar
     real(fp)          :: dz
     real(fp)          :: ee
     real(fp)          :: epsbed
@@ -201,12 +187,20 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     real(fp)          :: fi
     real(fp)          :: fsilt
     real(fp)          :: fw1
+    real(fp)          :: h1
+    real(fp)          :: hidexp
+    real(fp)          :: hrms
     real(fp)          :: htdif
     real(fp)          :: lci
     real(fp)          :: muc
+    real(fp)          :: mudfrac
     real(fp)          :: phicur
     real(fp)          :: psi
     real(fp)          :: ra
+    real(fp)          :: rhosol
+    real(fp)          :: rhowat
+    real(fp)          :: rlabda
+    real(fp)          :: sa
     real(fp)          :: sag
     real(fp)          :: sbot
     real(fp)          :: sina
@@ -219,18 +213,22 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     real(fp)          :: tauc
     real(fp)          :: taucr1
     real(fp)          :: tauwav
+    real(fp)          :: teta
+    real(fp)          :: tp
     real(fp)          :: txg
     real(fp)          :: tyg
     real(fp)          :: u
     real(fp)          :: u2dhim
     real(fp)          :: uon
     real(fp)          :: uoff
-    real(fp)          :: usus     !  Description and declaration in rjdim.f90
+    real(fp)          :: uorb
+    real(fp)          :: usus
     real(fp)          :: utot
     real(fp)          :: uwb
     real(fp)          :: uwbih
     real(fp)          :: uwc
     real(fp)          :: v
+    real(fp)          :: vicmol
     real(fp)          :: z
     real(fp)          :: zusus
  
@@ -259,7 +257,29 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     sbc_total = .false.
     sus_total = .false.
     akstmp    = aks
+
+    h1        = real(realpar(RP_DEPTH),fp)
     chezy     = real(realpar(RP_CHEZY),fp)
+    hrms      = real(realpar(RP_HRMS) ,fp)
+    tp        = real(realpar(RP_TPEAK),fp)
+    teta      = real(realpar(RP_TETA) ,fp)
+    rlabda    = real(realpar(RP_RLAMB),fp)
+    uorb      = real(realpar(RP_UORB) ,fp)
+    di50      = real(realpar(RP_D50)  ,fp)
+    !realpar(RP_DSS) = real(dss,hp)
+    dstar     = real(realpar(RP_DSTAR),fp)
+    d10       = real(realpar(RP_D10MX),fp)
+    d90       = real(realpar(RP_D90MX),fp)
+    mudfrac   = real(realpar(RP_MUDFR),fp)
+    hidexp    = real(realpar(RP_HIDEX),fp)
+    !ws        = real(realpar(RP_SETVL),fp)
+    rhosol    = real(realpar(RP_RHOSL),fp)
+    rhowat    = real(realpar(RP_RHOWT),fp)
+    sa        = real(realpar(RP_SALIN),fp)
+    !temp      = real(realpar(RP_TEMP) ,fp)
+    ag        = real(realpar(RP_GRAV) ,fp)
+    vicmol    = real(realpar(RP_VICML),fp)
+    !taub      = real(realpar(RP_TAUB) ,fp)
     !
     cesus  = 0.0_fp
     sbot   = 0.0_fp
@@ -302,6 +322,7 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
                        & camax     ,rdc       ,rdw       ,iopkcw    ,iopsus    , &
                        & vonkar    ,wave      ,tauadd    )
        endif
+       realpar(RP_DSS)   = real(dss    ,hp)
        !
        ! Find bottom cell for SAND sediment calculations and store for use
        ! in DIFU and DIF_WS
@@ -737,7 +758,7 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
        !
        ! User defined formula in DLL
        ! Input parameters are passed via realpar/intpar/strpar-arrays that have
-       ! been filled in calling routine
+       ! been mostly filled in calling routine
        !
        realpar(RP_UMEAN) = real(u      ,hp)
        realpar(RP_VMEAN) = real(v      ,hp)
