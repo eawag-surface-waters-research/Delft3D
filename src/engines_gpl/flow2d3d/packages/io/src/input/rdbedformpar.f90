@@ -179,11 +179,15 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
           spatial_bedform = (existD50 .or. existD90)
        endif
        if (spatial_bedform) then
-          allocate(gdp%gdbedformpar%bedformD50(gdp%d%nmlb:gdp%d%nmub))
-          allocate(gdp%gdbedformpar%bedformD90(gdp%d%nmlb:gdp%d%nmub))
+                        allocate(gdp%gdbedformpar%bedformD50(gdp%d%nmlb:gdp%d%nmub), stat = istat)
+          if (istat==0) allocate(gdp%gdbedformpar%bedformD90(gdp%d%nmlb:gdp%d%nmub), stat = istat)
        else
-          allocate(gdp%gdbedformpar%bedformD50(1))
-          allocate(gdp%gdbedformpar%bedformD90(1))
+                        allocate(gdp%gdbedformpar%bedformD50(1), stat = istat)
+          if (istat==0) allocate(gdp%gdbedformpar%bedformD90(1), stat = istat)
+       endif
+       if (istat /= 0) then
+          call prterr(lundia, 'G020', 'bedformD50/90')
+          call d3stop(1, gdp)
        endif
        bedformD50 => gdp%gdbedformpar%bedformD50
        bedformD90 => gdp%gdbedformpar%bedformD90
@@ -196,6 +200,10 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
        if (successD50) then
           if (.not. existD50) then
              call prop_get(gdp%mdfile_ptr,'*', 'BdfD50', bedformD50(1), success)
+             if (.not. success) then
+                call prterr(lundia, 'G052', 'BdfD50: ' // trim(flnmD50))
+                call d3stop(1, gdp)
+             endif
              if (spatial_bedform) then
                 bedformD50(:) = bedformD50(1)
              endif
@@ -208,6 +216,10 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
        if (successD90) then
           if (.not. existD90) then
              call prop_get(gdp%mdfile_ptr,'*', 'BdfD90', bedformD90(1), success)
+             if (.not. success) then
+                call prterr(lundia, 'G052', 'BdfD90: ' // trim(flnmD90))
+                call d3stop(1, gdp)
+             endif
              if (spatial_bedform) then
                 bedformD90(:) = bedformD90(1)
              endif
