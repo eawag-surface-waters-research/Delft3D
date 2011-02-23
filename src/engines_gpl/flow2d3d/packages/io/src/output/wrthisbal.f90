@@ -140,11 +140,11 @@ subroutine wrthisbal(ithisc    ,trifil    ,lundia    ,error     ,gdp       )
           & lundia    ,gdp       )
        if (lstsci>0) then
           call addelm(nefiswrthisbal,'BALR1CONC',' ','[   -   ]','REAL',4    , &
-             & 'Average concentration within polygon                       ', &
+             & 'Average concentration within polygon                        ', &
              & 2         ,nbalpol   ,lstsci    ,0         ,0         ,0      , &
              & lundia    ,gdp       )
           call addelm(nefiswrthisbal,'BALR1FLUX',' ','[   -   ]','REAL',4    , &
-             & 'Accumulated substance flux between polygons                 ', &
+             & 'Accumulated constituent flux between polygons               ', &
              & 3         ,2         ,nneighb   ,lstsci    ,0         ,0      , &
              & lundia    ,gdp       )
        endif
