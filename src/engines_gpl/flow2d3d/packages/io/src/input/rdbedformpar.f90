@@ -201,7 +201,8 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
           if (.not. existD50) then
              call prop_get(gdp%mdfile_ptr,'*', 'BdfD50', bedformD50(1), success)
              if (.not. success) then
-                call prterr(lundia, 'G052', 'BdfD50: ' // trim(flnmD50))
+                call prterr(lundia, 'P004', &
+                   'Error in rdbedformpar: ' // trim(flnmD50) // ' is not a file and not a value.')
                 call d3stop(1, gdp)
              endif
              if (spatial_bedform) then
@@ -211,13 +212,18 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
              fmttmp = 'formatted'
              call depfil(lundia    ,error     ,flnmD50   ,fmttmp    ,mmax      , &
                        & nmaxus    ,bedformD50,1         ,1         ,gdp       )
+             if (error) then
+                call prterr(lundia, 'P004', 'Error while reading bedformD50 from file ' // trim(flnmD50))
+                call d3stop(1, gdp)
+             endif
           endif
        endif
        if (successD90) then
           if (.not. existD90) then
              call prop_get(gdp%mdfile_ptr,'*', 'BdfD90', bedformD90(1), success)
              if (.not. success) then
-                call prterr(lundia, 'G052', 'BdfD90: ' // trim(flnmD90))
+                call prterr(lundia, 'P004', &
+                   'Error in rdbedformpar: ' // trim(flnmD90) // ' is not a file and not a value.')
                 call d3stop(1, gdp)
              endif
              if (spatial_bedform) then
@@ -227,7 +233,13 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
              fmttmp = 'formatted'
              call depfil(lundia    ,error     ,flnmD90   ,fmttmp    ,mmax      , &
                        & nmaxus    ,bedformD90,1         ,1         ,gdp       )
+             if (error) then
+                call prterr(lundia, 'P004', 'Error while reading bedformD90 from file ' // trim(flnmD50))
+                call d3stop(1, gdp)
+             endif
           endif
+       else
+          bedformD90 = 1.5_fp * bedformD50
        endif
     endif
     !

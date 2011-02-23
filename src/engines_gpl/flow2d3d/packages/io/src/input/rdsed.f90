@@ -693,10 +693,11 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                 endif
                 if (.not. success) then
                    if (inisedunit(l) == 'm') then
-                      call prterr(lundia, 'G052', 'IniSedThick: ' // trim(flsdbd(l)))
+                      errmsg = 'Error in IniSedThick: ' // trim(flsdbd(l)) // ' is not a file and not a value.'
                    else
-                      call prterr(lundia, 'P004', 'Error in SdBUni.' // trim(flsdbd(l)))
+                      errmsg = 'Error in SdBUni.' // trim(flsdbd(l))
                    endif
+                   call prterr(lundia, 'P004', trim(errmsg))
                    call d3stop(1, gdp)
                 endif
                 flsdbd(l) = ' '

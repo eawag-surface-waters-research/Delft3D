@@ -154,8 +154,6 @@ subroutine prterr(lundia, msgno, filtxt)
             & 'large. Contact Deltares'
     case ('G051')
        msg = '*** MESSAGE #'
-    case ('G052')
-       msg = '*** ERROR in #: is not a file and not a value.'
     case ('G106')
        msg = '*** ERROR Old, no longer supported, version of the input MD-file !!'
     case ('G107')
