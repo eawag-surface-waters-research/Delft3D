@@ -400,7 +400,7 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
                       !
                       ! Hindered settling (Van Rijn, 2004)
                       !
-                      cgel = 1722.0_fp * min(sedd50(l)/dsand , 1.0_fp)
+                      cgel = 0.65_fp * rhosol(l) * min(sedd50(l)/dsand , 1.0_fp)
                       hinset = max(0.0_fp , (1.0 - max(0.0_fp, 0.65_fp*aak(nm,ku))/cgel))
                       !
                       ! Flocculation (Van Rijn, 2004)
