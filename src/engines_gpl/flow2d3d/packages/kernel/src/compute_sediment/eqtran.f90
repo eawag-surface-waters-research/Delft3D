@@ -200,8 +200,8 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     real(fp)          :: rhosol
     real(fp)          :: rhowat
     real(fp)          :: rlabda
-    real(fp)          :: sa
     real(fp)          :: sag
+    real(fp)          :: salinity
     real(fp)          :: sbot
     real(fp)          :: sina
     real(fp)          :: sk
@@ -275,7 +275,7 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     !ws        = real(realpar(RP_SETVL),fp)
     rhosol    = real(realpar(RP_RHOSL),fp)
     rhowat    = real(realpar(RP_RHOWT),fp)
-    sa        = real(realpar(RP_SALIN),fp)
+    salinity  = real(realpar(RP_SALIN),fp)
     !temp      = real(realpar(RP_TEMP) ,fp)
     ag        = real(realpar(RP_GRAV) ,fp)
     vicmol    = real(realpar(RP_VICML),fp)
@@ -359,9 +359,9 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
                              & seddif    ,kmax      ,sig       ,thick     ,dicww     , &
                              & tauwav    ,tauc      ,ltur      ,delw      ,rhowat    , &
                              & uwbih     ,aks       ,ce_nm     ,ce_nmtmp  ,deltas    , &
-                             & akstmp    ,di50      ,sa        ,ws0       ,fdamp     , &
+                             & akstmp    ,di50      ,salinity  ,ws0       ,fdamp     , &
                              & psi       ,epsbed    ,epsmax    ,epsmxc    ,epspar    , &
-                             & eps       ,bed       ,vonkar    ,wave      )
+                             & eps       ,bed       ,vonkar    ,salmax    ,wave      )
           else
              do k=1, kmax
                 seddif(k) = dicww(k)

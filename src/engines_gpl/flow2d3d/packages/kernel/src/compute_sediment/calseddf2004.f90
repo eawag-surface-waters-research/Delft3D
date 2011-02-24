@@ -2,9 +2,9 @@ subroutine calseddf2004(ustarc    ,ws        ,tp        ,hrms      ,h1        , 
                       & seddif    ,kmax      ,sig       ,thick     ,dicww     , &
                       & tauwav    ,tauc      ,ltur      ,delw      ,rhowat    , &
                       & uwbih     ,aks       ,ce_nm     ,ce_nmtmp  ,deltas    , &
-                      & akstmp    ,d50       ,sa        ,ws0       ,fdamp     , &
+                      & akstmp    ,d50       ,salinity  ,ws0       ,fdamp     , &
                       & psi       ,epsbed    ,epsmax    ,epsmxc    ,epspar    , &
-                      & eps       ,bed       ,vonkar    ,wave      )
+                      & eps       ,bed       ,vonkar    ,salmax    ,wave      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -62,7 +62,8 @@ subroutine calseddf2004(ustarc    ,ws        ,tp        ,hrms      ,h1        , 
     real(fp)                   , intent(in)  :: h1
     real(fp)                   , intent(in)  :: hrms   !  Description and declaration in rjdim.f90
     real(fp)                   , intent(in)  :: rhowat !  Description and declaration in rjdim.f90
-    real(fp)                   , intent(in)  :: sa
+    real(fp)                   , intent(in)  :: salinity
+    real(fp)                   , intent(in)  :: salmax
     real(fp)                   , intent(in)  :: tauc
     real(fp)                   , intent(in)  :: tauwav
     real(fp)                   , intent(in)  :: tp     !  Description and declaration in rjdim.f90
@@ -252,11 +253,11 @@ subroutine calseddf2004(ustarc    ,ws        ,tp        ,hrms      ,h1        , 
           !
           ! ffloc : flocculation term
           !
-          if (d50 < dsand .and. sa>0.01_fp) then
+          if (d50 < dsand .and. salinity>0.01_fp) then
              fhulp = max(4.0_fp+log10(2.0_fp*c/cmax) , 1.0_fp)
              efloc = min(max(dsand/d50-1.0_fp , 0.0_fp) , 3.0_fp)
              ffloc = max(min(fhulp**efloc , 10.0_fp) , 1.0_fp)
-             ffloc = (ffloc-1.0_fp) * min(1.0_fp , sa) + 1.0_fp
+             ffloc = (ffloc-1.0_fp) * min(1.0_fp , salinity) + 1.0_fp
           endif
           fcc  = -ws0 * c * fhs * ffloc / (es * fi)
           ff   = 1.0_fp / c * fcc
