@@ -299,8 +299,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: ce_nmtmp
     real(fp)                      :: chezy
     real(fp)                      :: crep
-    real(fp)                      :: d10
-    real(fp)                      :: d90
     real(fp)                      :: di50
     real(fp)                      :: difbot
     real(fp)                      :: drho
@@ -822,9 +820,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           temperature = temeqs
        endif
        !
-       d10  = dxx(nm,i10)
-       d90  = dxx(nm,i90)
-       !
        ! Input parameters are passed via dll_reals/integers/strings-arrays
        !
        if (max_reals < MAX_RP) then
@@ -858,8 +853,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
       !dll_reals(RP_D50  ) = d50 of fraction
       !dll_reals(RP_DSS  ) = suspended sediment diameter of fraction
       !dll_reals(RP_DSTAR) = dstar of fraction
-       dll_reals(RP_D10MX) = real(d10    ,hp)
-       dll_reals(RP_D90MX) = real(d90    ,hp)
+       dll_reals(RP_D10MX) = real(dxx(nm,i10),hp)
+       dll_reals(RP_D90MX) = real(dxx(nm,i90),hp)
        dll_reals(RP_MUDFR) = real(mudfrac(nm),hp)
       !dll_reals(RP_HIDEX) = hiding and exposure
       !dll_reals(RP_SETVL) = settling velocity
