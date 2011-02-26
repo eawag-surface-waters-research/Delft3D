@@ -73,6 +73,7 @@ subroutine rdtrafrm(error, lsedtot, gdp)
     real(fp),       dimension(:,:) , pointer :: par
     type (sv_eqtran)               , pointer :: sveqtran
     integer                        , pointer :: lundia
+    include 'trapar.inc'
 !
 ! Global variables
 !
@@ -123,9 +124,9 @@ subroutine rdtrafrm(error, lsedtot, gdp)
        if (istat==0) allocate (sveqtran%flstrn      (lsedtot), stat = istat)
        if (istat==0) allocate (sveqtran%name        (lsedtot), stat = istat)
        !
-       max_integers =  4
-       max_reals    = 30
-       max_strings  =  2
+       max_integers = MAX_IP
+       max_reals    = MAX_RP
+       max_strings  = MAX_SP
        if (istat==0) allocate (sveqtran%dll_handle  (lsedtot), stat = istat)
        if (istat==0) allocate (sveqtran%dll_function(lsedtot), stat = istat)
        if (istat==0) allocate (sveqtran%dll_usrfil  (lsedtot), stat = istat)

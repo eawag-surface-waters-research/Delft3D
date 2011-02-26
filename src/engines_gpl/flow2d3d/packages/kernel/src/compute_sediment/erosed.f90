@@ -865,6 +865,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        dll_reals(RP_GRAV ) = real(ag     ,hp)
        dll_reals(RP_VICML) = real(vicmol ,hp)
        dll_reals(RP_TAUB ) = real(taub   ,hp) !taubmx incremented with tauadd
+       dll_reals(RP_VNKAR) = real(vonkar ,hp)
        !
        if (max_integers < MAX_IP) then
           write(errmsg,'(a,a,a)') 'Insufficient space to pass integer values to transport routine.'
@@ -1027,13 +1028,13 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & kmaxsd      ,crep        ,sbcu(nm,l )  ,sbcv(nm,l),sbwu(nm,l), &
                        & sbwv(nm,l)  ,sswu(nm,l)  ,sswv(nm,l)   ,lundia    , &
                        & z0cur       ,taucr(l)    , &
-                       & taubmx(nm)  ,tdss        ,rksr(nm)     ,3         , &
+                       & tdss        ,rksr(nm)     ,3         , &
                        & ce_nmtmp    ,akstmp      ,lsecfl       ,spirint   , &
                        & suspfrac    ,ust2(nm)    ,tetacr(l)    , &
-                       & tsalmax     ,tws0        ,tsd          ,dis(nm)   ,concin3d  , &
+                       & tsalmax     ,tws0        ,tsd          ,concin3d  , &
                        & dzduu(nm)   ,dzdvv(nm)   ,ubot(nm)     ,tauadd    , &
                        & sus         ,bed         ,susw         ,bedw      ,espir     , &
-                       & rhow        ,vonkar      ,wave         , &
+                       & rhow        ,wave        , &
                        & scour       ,epspar      ,ubot_from_com,camax     , &
                        & aksfac      ,rwave       ,rdc          ,rdw       ,pangle    , &
                        & fpco        ,iopsus      ,iopkcw       ,subiw     ,eps       , &
@@ -1110,13 +1111,13 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & kmaxsd      ,trsedeq     ,sbcu(nm,l)   ,sbcv(nm,l) ,sbwu(nm,l) , &
                        & sbwv(nm,l)  ,sswu(nm,l)  ,sswv(nm,l)   ,lundia     , &
                        & z0cur       ,taucr(l)    , &
-                       & taubmx(nm)  ,tdss        ,rksr(nm)     ,2          , &
+                       & tdss        ,rksr(nm)     ,2          , &
                        & ce_nmtmp    ,akstmp      ,lsecfl       ,spirint    , &
                        & suspfrac    ,ust2(nm)    ,tetacr(l)    , &
-                       & tsalmax     ,tws0        ,tsd          ,dis(nm)    ,concin2d   , &
+                       & tsalmax     ,tws0        ,tsd          ,concin2d   , &
                        & dzduu(nm)   ,dzdvv(nm)   ,ubot(nm)     ,tauadd     , &
                        & sus         ,bed         ,susw         ,bedw       ,espir      , &
-                       & rhow        ,vonkar      ,wave         , &
+                       & rhow        ,wave        , &
                        & scour       ,epspar      ,ubot_from_com,camax      , &
                        & aksfac      ,rwave       ,rdc          ,rdw        ,pangle     , &
                        & fpco        ,iopsus      ,iopkcw       ,subiw      ,eps        , &

@@ -6,13 +6,13 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
                 & kmaxsd    ,crep      ,sbcu      ,sbcv      ,sbwu      , &
                 & sbwv      ,sswu      ,sswv      ,lundia    , &
                 & z0cur     ,taucr0    , &
-                & taubmx    ,dss       ,rksrs     ,i2d3d     , &
+                & dss       ,rksrs     ,i2d3d     , &
                 & ce_nmtmp  ,akstmp    ,lsecfl    ,spirint   , &
                 & suspfrac  ,ust2      ,tetacr    , &
-                & salmax    ,ws0       ,t_relax   ,dis       ,concin    , &
+                & salmax    ,ws0       ,t_relax   ,concin    , &
                 & dzduu     ,dzdvv     ,ubot      ,tauadd    , &
                 & sus       ,bed       ,susw      ,bedw      ,espir     , &
-                & rhow      ,vonkar    ,wave      , &
+                & rhow      ,wave      , &
                 & scour     ,epspar    ,ubot_from_com,camax     , &
                 & aksfac    ,rwave     ,rdc       ,rdw       ,pangle    , &
                 & fpco      ,iopsus    ,iopkcw    ,subiw     ,eps       , &
@@ -88,7 +88,6 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     real(fp), dimension(kmax)       , intent(out)  :: concin
     real(fp)                        , intent(out)  :: crep
     real(fp), dimension(0:kmax)     , intent(in)   :: dicww    !  Description and declaration in rjdim.f90
-    real(fp)                        , intent(in)   :: dis
     real(fp)                        , intent(out)  :: dss      !  Description and declaration in rjdim.f90
     real(fp)                        , intent(in)   :: dzduu     !  Description and declaration in rjdim.f90
     real(fp)                        , intent(in)   :: dzdvv     !  Description and declaration in rjdim.f90
@@ -119,7 +118,6 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     real(fp)                        , intent(in)   :: susw
     real(fp)                        , intent(out)  :: t_relax
     real(fp)                        , intent(in)   :: tauadd
-    real(fp)                        , intent(in)   :: taubmx   !  Description and declaration in rjdim.f90
     real(fp)                        , intent(in)   :: taucr0
     real(fp)                        , intent(in)   :: taurat
     real(fp)                        , intent(in)   :: tetacr
@@ -129,7 +127,6 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     real(fp)                        , intent(out)  :: ustarc
     real(fp)                        , intent(out)  :: ust2
     real(fp)                        , intent(in)   :: uuu
-    real(fp)                        , intent(in)   :: vonkar
     real(fp)                        , intent(in)   :: vvv
     real(fp), dimension(0:kmax)     , intent(in)   :: ws       !  Description and declaration in rjdim.f90
     real(fp)                        , intent(in)   :: ws0
@@ -229,6 +226,7 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     real(fp)          :: uwc
     real(fp)          :: v
     real(fp)          :: vicmol
+    real(fp)          :: vonkar
     real(fp)          :: z
     real(fp)          :: zusus
  
@@ -280,6 +278,7 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     ag        = real(realpar(RP_GRAV) ,fp)
     vicmol    = real(realpar(RP_VICML),fp)
     !taub      = real(realpar(RP_TAUB) ,fp)
+    vonkar    = real(realpar(RP_VNKAR),fp)
     !
     cesus  = 0.0_fp
     sbot   = 0.0_fp

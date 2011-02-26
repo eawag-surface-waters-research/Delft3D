@@ -253,11 +253,11 @@ subroutine calseddf2004(ustarc    ,ws        ,tp        ,hrms      ,h1        , 
           !
           ! ffloc : flocculation term
           !
-          if (d50 < dsand .and. salinity>0.01_fp) then
+          if (d50 < dsand .and. salinity>0.01_fp .and. salmax>0.0_fp) then
              fhulp = max(4.0_fp+log10(2.0_fp*c/cmax) , 1.0_fp)
              efloc = min(max(dsand/d50-1.0_fp , 0.0_fp) , 3.0_fp)
              ffloc = max(min(fhulp**efloc , 10.0_fp) , 1.0_fp)
-             ffloc = (ffloc-1.0_fp) * min(1.0_fp , salinity) + 1.0_fp
+             ffloc = (ffloc-1.0_fp) * min(1.0_fp , salinity/salmax) + 1.0_fp
           endif
           fcc  = -ws0 * c * fhs * ffloc / (es * fi)
           ff   = 1.0_fp / c * fcc

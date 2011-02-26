@@ -410,7 +410,7 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
                       else
                         salint = saleqs
                       endif
-                      if (salint >= 0.01_fp) then
+                      if (salint >= 0.01_fp .and. salmax(l)>0.0_fp) then
                          fhulp = max(4.0_fp+log10(2.0_fp*max(1.0e-6_fp,aak(nm,k))/cgel) , 1.0_fp)
                          efloc = min(max(dsand/sedd50(l)-1.0_fp , 1.0_fp) , 3.0_fp)
                          ffloc0 = max(min(fhulp**efloc , 10.0_fp) , 1.0_fp)
