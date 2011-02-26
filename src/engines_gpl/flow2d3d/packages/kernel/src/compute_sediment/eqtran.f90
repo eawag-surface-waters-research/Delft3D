@@ -12,7 +12,7 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
                 & salmax    ,ws0       ,t_relax   ,concin    , &
                 & dzduu     ,dzdvv     ,ubot      ,tauadd    , &
                 & sus       ,bed       ,susw      ,bedw      ,espir     , &
-                & rhow      ,wave      , &
+                & wave      , &
                 & scour     ,epspar    ,ubot_from_com,camax     , &
                 & aksfac    ,rwave     ,rdc       ,rdw       ,pangle    , &
                 & fpco      ,iopsus    ,iopkcw    ,subiw     ,eps       , &
@@ -99,7 +99,6 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     real(fp), dimension(30)         , intent(inout):: par
     real(fp)                        , intent(in)   :: rdc
     real(fp)                        , intent(in)   :: rdw
-    real(fp)                        , intent(in)   :: rhow
     real(fp)                        , intent(in)   :: rksrs    !  Description and declaration in rjdim.f90
     real(fp), dimension(kmax)       , intent(out)  :: rsedeq   !  Description and declaration in rjdim.f90
     real(fp)                        , intent(in)   :: rwave
@@ -578,7 +577,7 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
                        & h1        ,taurat    ,ustarc    ,muc       ,rhosol    , &
                        & dstar     ,ws(1)     ,hrms      ,tp        ,teta      , &
                        & rlabda    ,umod      ,sbcu      ,sbcv      ,sbwu      , &
-                       & sbwv      ,sswu      ,sswv      ,lundia    ,rhow      , &
+                       & sbwv      ,sswu      ,sswv      ,lundia    ,rhowat    , &
                        & ag        ,wave      ,eps       ,error     )
           if (error) return
        endif
@@ -596,7 +595,7 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
                        & sbcu      ,sbcv      ,sbwu      ,sbwv      ,sswu      , &
                        & sswv      ,tetacr    ,aks       ,fsilt     ,sig       , &
                        & thick     ,concin    ,kmax      ,deltas    ,ws(1)     , &
-                       & rksrs     ,dzduu     ,dzdvv     ,rhow      , &
+                       & rksrs     ,dzduu     ,dzdvv     ,rhowat    , &
                        & ag        ,bedw      ,pangle    ,fpco      ,susw      , &
                        & wave      ,eps       ,subiw     ,error     )
           if (error) return

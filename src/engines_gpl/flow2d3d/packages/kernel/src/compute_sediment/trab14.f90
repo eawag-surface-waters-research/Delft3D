@@ -72,7 +72,7 @@ subroutine trab14(utot      ,d50       ,chezy     ,par       ,hidexp    , &
     ssus  = 0.0
     !
     ag    = par(1)
-    delta = par(4)      ! (rhosol - rhow) / rhow
+    delta = par(4)      ! (rhosol - rhowat) / rhowat
     a     = par(11)     ! acal: tuning constant of sediment transport
     tc    = par(12)
     m     = par(13)

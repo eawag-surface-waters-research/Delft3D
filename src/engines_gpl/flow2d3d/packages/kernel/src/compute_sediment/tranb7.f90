@@ -63,8 +63,8 @@ subroutine tranb7(utot      ,d50       ,d90       ,h         ,par       , &
     real(fp)       :: ff     ! coriolis coefficient
     real(fp)       :: ag     ! gravity acceleration
     real(fp)       :: psi
-    real(fp)       :: rhos   ! density of sediment
-    real(fp)       :: rhow   ! density of water
+    real(fp)       :: rhosol ! density of sediment
+    real(fp)       :: rhowat ! density of water
     real(fp)       :: rksc
     real(fp)       :: rmuc
     real(fp)       :: rnu    ! laminar viscosity of water
@@ -84,8 +84,8 @@ subroutine tranb7(utot      ,d50       ,d90       ,h         ,par       , &
     ssus = 0.0
     !
     ag = par(1)
-    rhow = par(2)
-    rhos = par(3)
+    rhowat = par(2)
+    rhosol = par(3)
     del  = par(4)
     rnu = par(5)
     alf1 = par(11)
@@ -101,10 +101,10 @@ subroutine tranb7(utot      ,d50       ,d90       ,h         ,par       , &
     !
     rmuc = (log10(12.*h/rksc)/log10(12.*h/3./d90))**2
     fc = .24*(log10(12.*h/rksc))**( - 2)
-    tbc = .125*rhow*fc*utot**2
+    tbc = .125*rhowat*fc*utot**2
     tbce = rmuc*tbc
     thetcr = shld(dstar)
-    tbcr = (rhos - rhow)*ag*d50*thetcr
+    tbcr = (rhosol - rhowat)*ag*d50*thetcr
     t = (tbce - tbcr)/tbcr
     !
     if (t<.000001) t = .000001

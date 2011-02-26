@@ -3,7 +3,7 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
                         & suu       ,svv       ,sbuut     ,sbvvt     ,dzduu     , &
                         & dzdvv     ,taurat    ,frac      ,fixfac    ,ust2      , &
                         & hu        ,hv        ,dm        ,hidexp    ,slopecor  , &
-                        & gdp       )
+                        & rhowat    ,kmax      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -51,7 +51,6 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    real(fp)                         , pointer :: rhow
     real(fp)                         , pointer :: ag
     real(fp)      , dimension(:)     , pointer :: rhosol
     real(fp)      , dimension(:)     , pointer :: sedd50
@@ -76,6 +75,7 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
                                                                                    !!  dir. If icx=1 then computation pro-
                                                                                    !!  ceeds in the Y-dir.
     integer                                               , intent(in)  :: icy     !!  Increment in the Y-dir. (see ICX)
+    integer                                               , intent(in)  :: kmax    !  Number of layers
     integer                                               , intent(in)  :: lsedtot !!  Total number of sediment fractions
     integer                                               , intent(in)  :: nmmax   !  Description and declaration in dimens.igs
     logical                                               , intent(in)  :: slopecor
@@ -92,6 +92,7 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: hu      !  Description and declaration in rjdim.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot) , intent(in)  :: hidexp
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: hv      !  Description and declaration in rjdim.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)    , intent(in)  :: rhowat
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot)               :: suu     !  sbcuu, sbwuu, or sswuu
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot)               :: svv     !  sbcvv, sbwvv, or sswvv
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                        :: sbuut
@@ -143,7 +144,6 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
 !
 !! executable statements -------------------------------------------------------
 !
-    rhow                => gdp%gdphysco%rhow
     ag                  => gdp%gdphysco%ag
     rhosol              => gdp%gdsedpar%rhosol
     sedd50              => gdp%gdsedpar%sedd50
@@ -170,7 +170,6 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
           di50        = sedd50(l)
           di50spatial = .false.
           if (di50<0 .and. lsedtot==1) di50spatial = .true.
-          delta   = (rhosol(l) - rhow)/rhow
           do nm = 1, nmmax
              !
              ! initialise variables
@@ -346,6 +345,7 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
                       if (di50spatial) then
                          di50 = sqrt(sedd50fld(nm)*sedd50fld(nm2))
                       endif
+                      delta   = (rhosol(l) - rhowat(nm,kmax))/rhowat(nm,kmax)
                       shield  = ust2avg/ag/delta/di50
                       !
                       if (shield/=0.0_fp) then

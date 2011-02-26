@@ -74,7 +74,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     real(fp)                             , pointer :: gammax
-    real(fp)                             , pointer :: rhow
     real(fp)                             , pointer :: ag
     real(fp)                             , pointer :: z0
     real(fp)                             , pointer :: z0v
@@ -385,7 +384,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     asklhe              => gdp%gdmorpar%asklhe
     mwwjhe              => gdp%gdmorpar%mwwjhe
     ffthresh            => gdp%gdmorpar%thresh
-    rhow                => gdp%gdphysco%rhow
     ag                  => gdp%gdphysco%ag
     z0                  => gdp%gdphysco%z0
     z0v                 => gdp%gdphysco%z0v
@@ -442,8 +440,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     bedw                => gdp%gdmorpar%bedw
     espir               => gdp%gdmorpar%espir
     epspar              => gdp%gdmorpar%epspar 
-    rhow                => gdp%gdphysco%rhow
-    ag                  => gdp%gdphysco%ag
     vonkar              => gdp%gdphysco%vonkar
     vicmol              => gdp%gdphysco%vicmol
     wave                => gdp%gdprocs%wave
@@ -946,7 +942,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              ! This code is copied from inised (uniform sedd50)
              !
              di50     = sedd50fld(nm)
-             drho     = (rhosol(l)-rhow) / rhow
+             drho     = (rhosol(l)-rhowat(nm,kmax)) / rhowat(nm,kmax)
              dstar(l) = di50 * (drho*ag/vicmol**2)**0.3333_fp
              if (dstar(l) < 1.0_fp) then
                 if (iform(l) == -2) then
@@ -969,7 +965,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              else
                 tetacr(l) = 0.055_fp
              endif
-             taucr(l) = factcr * (rhosol(l)-rhow) * ag * di50 * tetacr(l)
+             taucr(l) = factcr * (rhosol(l)-rhowat(nm,kmax)) * ag * di50 * tetacr(l)
           endif
           !
           if (suspfrac) then
@@ -993,7 +989,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           dll_reals(RP_DSS  ) = real(tdss    ,hp)
           dll_reals(RP_DSTAR) = real(dstar(l),hp)
           par(3,l) = rhosol(l)
-          par(4,l) = (rhosol(l)-rhow) / rhow
+          par(4,l) = (rhosol(l)-rhowat(nm,kmax)) / rhowat(nm,kmax)
           par(6,l) = di50
           !
           ! SWITCH 2DH/3D SIMULATIONS
@@ -1034,7 +1030,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & tsalmax     ,tws0        ,tsd          ,concin3d  , &
                        & dzduu(nm)   ,dzdvv(nm)   ,ubot(nm)     ,tauadd    , &
                        & sus         ,bed         ,susw         ,bedw      ,espir     , &
-                       & rhow        ,wave        , &
+                       & wave        , &
                        & scour       ,epspar      ,ubot_from_com,camax     , &
                        & aksfac      ,rwave       ,rdc          ,rdw       ,pangle    , &
                        & fpco        ,iopsus      ,iopkcw       ,subiw     ,eps       , &
@@ -1117,7 +1113,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & tsalmax     ,tws0        ,tsd          ,concin2d   , &
                        & dzduu(nm)   ,dzdvv(nm)   ,ubot(nm)     ,tauadd     , &
                        & sus         ,bed         ,susw         ,bedw       ,espir      , &
-                       & rhow        ,wave        , &
+                       & wave        , &
                        & scour       ,epspar      ,ubot_from_com,camax      , &
                        & aksfac      ,rwave       ,rdc          ,rdw        ,pangle     , &
                        & fpco        ,iopsus      ,iopkcw       ,subiw      ,eps        , &
@@ -1214,7 +1210,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
               & sbcuu     ,sbcvv     ,sbuut     ,sbvvt     ,dzduu     , &
               & dzdvv     ,taurat    ,frac      ,fixfac    ,ust2      , &
               & hu        ,hv        ,dm        ,hidexp    ,.true.    , &
-              & gdp       )
+              & rhowat    ,kmax      ,gdp       )
     endif
     !
     ! Bed-slope and sediment availability effects for
@@ -1226,7 +1222,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
               & sbwuu     ,sbwvv     ,sbuut     ,sbvvt     ,dzduu     , &
               & dzdvv     ,taurat    ,frac      ,fixfac    ,ust2      , &
               & hu        ,hv        ,dm        ,hidexp    ,.true.    , &
-              & gdp       )
+              & rhowat    ,kmax      ,gdp       )
     endif
     !
     ! Sediment availability effects for
@@ -1238,7 +1234,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
               & sswuu     ,sswvv     ,sbuut     ,sbvvt     ,dzduu     , &
               & dzdvv     ,taurat    ,frac      ,fixfac    ,ust2      , &
               & hu        ,hv        ,dm        ,hidexp    ,.false.   , &
-              & gdp       )
+              & rhowat    ,kmax      ,gdp       )
     endif
     !
     ! Summation of current-related and wave-related transports

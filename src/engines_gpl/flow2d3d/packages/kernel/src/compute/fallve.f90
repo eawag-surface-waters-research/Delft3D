@@ -56,7 +56,6 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    real(fp)                         , pointer :: rhow
     real(fp)                         , pointer :: ag
     real(fp)                         , pointer :: vonkar
     real(fp)                         , pointer :: vicmol
@@ -165,7 +164,6 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    rhow                => gdp%gdphysco%rhow
     ag                  => gdp%gdphysco%ag
     vonkar              => gdp%gdphysco%vonkar
     vicmol              => gdp%gdphysco%vicmol

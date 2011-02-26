@@ -1,5 +1,5 @@
 subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
-                     & teta  , kssilt, kssand, thcmud, taumax, rhow  , &
+                     & teta  , kssilt, kssand, thcmud, taumax, rhowat, &
                      & vicmol)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -77,7 +77,7 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
                                     !(to be replaced by mudcnt in future)
     real(fp), intent(out) :: taumax ! resulting (maximum) bed shear stress muddy silt bed
     logical , intent(in)  :: wave   ! wave impacts included in flow comp. or not
-    real(fp), intent(in)  :: rhow   ! water density
+    real(fp), intent(in)  :: rhowat ! water density
     real(fp), intent(in)  :: vicmol ! molecular viscosity
 !
 ! Local variables
@@ -153,13 +153,13 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
        ! Flow only
        !
        if (rec <= 2000.) then
-          taum   = 3.0 * rhow * vicmol * umod / depth
+          taum   = 3.0 * rhowat * vicmol * umod / depth
           taumax = taum
        else
           if (cdr >= cds) then
-             taum = rhow * cdr * umod * umod
+             taum = rhowat * cdr * umod * umod
           else
-             taum = rhow * cds * umod * umod
+             taum = rhowat * cds * umod * umod
           endif
           taumax = taum
        endif
@@ -169,12 +169,12 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
        !
        taum = 0.0
        if (rew <= rewcr) then
-          taumax = rhow * uorbm * uorbm / sqrt(rew)
+          taumax = rhowat * uorbm * uorbm / sqrt(rew)
        else
           if (fwr >= fws) then
-             taumax = 0.5 * rhow * fwr * uorbm * uorbm
+             taumax = 0.5 * rhowat * fwr * uorbm * uorbm
           else
-             taumax = 0.5 * rhow * fws * uorbm * uorbm
+             taumax = 0.5 * rhowat * fws * uorbm * uorbm
           endif
        endif
     elseif (umod >= 1.0e-6 .and. wave) then
@@ -186,8 +186,8 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
           !
           ! laminar flow
           !
-          taum   = 3.0 * rhow * vicmol * umod / depth
-          tauw   = rhow * uorbm * uorbm / sqrt(rew)
+          taum   = 3.0 * rhowat * vicmol * umod / depth
+          tauw   = rhowat * uorbm * uorbm / sqrt(rew)
           taumax = sqrt((taum +  tauw*abs(cos(phiwr)))**2 &
                        &      + (tauw*abs(sin(phiwr)))**2 )
        else
@@ -205,8 +205,8 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
           cdm     = (sqrt(a1*a1 + a2) - a1)**2
           cdmax   = sqrt((cdm +  t3*(uorbm/umod)*sqrt(fwr/2.0)*abs(cos(phiwr)))**2 &
                          &    + (t3*(uorbm/umod)*sqrt(fwr/2.0)*abs(sin(phiwr)))**2 )
-          taumr   = rhow * cdm   * umod * umod
-          taumaxr = rhow * cdmax * umod * umod
+          taumr   = rhowat * cdm   * umod * umod
+          taumaxr = rhowat * cdmax * umod * umod
           !
           ! 2) compute shear stresses belonging with smooth bed
           !
@@ -220,8 +220,8 @@ subroutine compbsskin (umean , vmean , depth , wave  , uorb  , tper  , &
           cdm     = (sqrt(a1*a1 + a2) - a1)**2
           cdmax   = sqrt((cdm +  t3*(uorbm/umod)*sqrt(fws/2.0)*abs(cos(phiwr)))**2 &
                          &    + (t3*(uorbm/umod)*sqrt(fws/2.0)*abs(sin(phiwr)))**2)
-          taums   = rhow * cdm   * umod * umod
-          taumaxs = rhow * cdmax * umod * umod
+          taums   = rhowat * cdm   * umod * umod
+          taumaxs = rhowat * cdmax * umod * umod
           !
           ! 3) determine shear stresses
           !

@@ -5,7 +5,7 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
                    & qbcu      ,qbcv      ,qbwu      ,qbwv      ,qswu      , &
                    & qswv      ,tetacr    ,aks       ,fsilt     ,sig       , &
                    & thick     ,concin    ,kmax      ,deltas    ,ws        , &
-                   & rksrs     ,dzduu     ,dzdvv     ,rhow      , &
+                   & rksrs     ,dzduu     ,dzdvv     ,rhowat    , &
                    & ag        ,bedw      ,pangle    ,fpco      ,susw      , &
                    & wave      ,eps       ,subiw     ,error     )
 !----- GPL ---------------------------------------------------------------------
@@ -97,7 +97,7 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
     real(fp), dimension(kmax), intent(in)  :: sig      !  Description and declaration in rjdim.f90
     real(fp), dimension(kmax), intent(in)  :: thick    !  Description and declaration in rjdim.f90
     real(fp), dimension(kmax), intent(in)  :: concin
-    real(fp)                 , intent(in)  :: rhow
+    real(fp)                 , intent(in)  :: rhowat
     real(fp)                 , intent(in)  :: ag
     real(fp)                 , intent(in)  :: bedw
     real(fp)                 , intent(in)  :: pangle
@@ -213,7 +213,7 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
     !
     fcw1     = acw*betacw*fc1 + (1.0_fp-acw)*fw1
     !
-    fac1   = 0.5_fp * rhow * fcw1
+    fac1   = 0.5_fp * rhowat * fcw1
     fac2   = 0.5_fp * d50  * rhosol / (dstar**0.3_fp)
     qbtu   = 0.0_fp
     qbtv   = 0.0_fp
@@ -295,7 +295,7 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
        !
        rrr2    = max(min(0.8_fp+0.2_fp*((tau1t/(fac_slp*taucr)-0.8_fp)/1.2_fp) , 1.0_fp) , 0.8_fp )
        tt      = max(0.0001_fp , (tau1t-rrr2*fac_slp*taucr)/(fac_slp*taucr))
-       ustar1t = (tau1t/rhow)**0.5_fp
+       ustar1t = sqrt(tau1t/rhowat)
        sbt     = fsilt * fac2 * ustar1t * tt
        !
        ! Total bed-load transport components

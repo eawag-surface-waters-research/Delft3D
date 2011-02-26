@@ -2,7 +2,7 @@ subroutine bedtr1993(uuu       ,vvv       ,u2dh      ,d50       ,d90       , &
                    & h1        ,taurat    ,ustarc    ,muc       ,rhosol    , &
                    & dstar     ,ws        ,hrms      ,tp        ,teta      , &
                    & rlabda    ,umod      ,qbcu      ,qbcv      ,qbwu      , &
-                   & qbwv      ,qswu      ,qswv      ,lundia    ,rhow      , &
+                   & qbwv      ,qswu      ,qswv      ,lundia    ,rhowat    , &
                    & ag        ,wave      ,eps       ,error     )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -78,7 +78,7 @@ subroutine bedtr1993(uuu       ,vvv       ,u2dh      ,d50       ,d90       , &
     real(fp), intent(in)  :: uuu
     real(fp), intent(in)  :: vvv
     real(fp), intent(in)  :: ws     !  Description and declaration in rjdim.f90
-    real(fp), intent(in)  :: rhow
+    real(fp), intent(in)  :: rhowat
     real(fp), intent(in)  :: ag
     logical , intent(in)  :: wave
     real(fp), intent(in)  :: eps
@@ -146,7 +146,7 @@ subroutine bedtr1993(uuu       ,vvv       ,u2dh      ,d50       ,d90       , &
        ! Velocity components w.r.t. U-V grid, velocity direction in
        ! degrees (0.,360.)
        !
-       s = rhosol/rhow
+       s = rhosol/rhowat
        !
        ! Calculate imaginary "depth-averaged current" which has a
        ! logarithmic velocity profile, and a velocity at the bottom
