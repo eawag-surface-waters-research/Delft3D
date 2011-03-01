@@ -1,12 +1,8 @@
 @echo off
 
+set swanexec=%D3D_HOME%\w32\wave\bin\swan_4072ABCDE_del_w32_i11_omp.exe
+
 rem
-rem Use this script only in the Delft3D open source directory structure
-rem
-
-set swanexec=%D3D_HOME%\third_party_open\swan\bin\win32\swan_4072ABCDE_del_w32_i11_omp.exe
-
-
 rem swan40.72AB and newer runs parallel, using the total number of cores on the machine
 rem to force the number of parallel processes, remove the "rem" in front of the following line and adjust the number
 rem set OMP_NUM_THREADS=1

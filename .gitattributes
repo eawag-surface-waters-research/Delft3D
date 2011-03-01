@@ -1,4 +1,25 @@
 * text=auto !eol
+examples/testbank_21.04-botnow_curnow/S00D92sm_new02.dep -text
+examples/testbank_21.04-botnow_curnow/config_flow2d3d.ini -text
+examples/testbank_21.04-botnow_curnow/depth_wave05.dep -text
+examples/testbank_21.04-botnow_curnow/dioconfig.ini -text
+examples/testbank_21.04-botnow_curnow/f50_spne.bch -text
+examples/testbank_21.04-botnow_curnow/frg2_new02.crs -text
+examples/testbank_21.04-botnow_curnow/frg_new02.enc -text
+examples/testbank_21.04-botnow_curnow/frg_new02.grd -text
+examples/testbank_21.04-botnow_curnow/frg_wave05.enc -text
+examples/testbank_21.04-botnow_curnow/frg_wave05.grd -text
+examples/testbank_21.04-botnow_curnow/frgf50_new02.obs -text
+examples/testbank_21.04-botnow_curnow/frgh_new02.bcc -text
+examples/testbank_21.04-botnow_curnow/frgh_new02.bnd -text
+examples/testbank_21.04-botnow_curnow/morfac_07.mor -text
+examples/testbank_21.04-botnow_curnow/r17.mdf -text
+examples/testbank_21.04-botnow_curnow/r17.mdm -text
+examples/testbank_21.04-botnow_curnow/r17.mdw -text
+examples/testbank_21.04-botnow_curnow/run_flow2d3d.bat -text
+examples/testbank_21.04-botnow_curnow/run_flow2d3d.sh -text
+examples/testbank_21.04-botnow_curnow/sedsand.sed -text
+examples/testbank_21.04-botnow_curnow/wind_01.wnd -text
 examples/testbank_flow_01.03-f34/config_flow2d3d.ini -text
 examples/testbank_flow_01.03-f34/f34.bca -text
 examples/testbank_flow_01.03-f34/f34.bch -text
@@ -1326,6 +1347,8 @@ src/third_party_open/swan/bin/win32/libiomp5md.dll -text
 src/third_party_open/swan/bin/win32/swan_4072ABCDE_del_w32_i11_omp.exe -text
 src/third_party_open/swan/scripts/swan.bat -text
 src/third_party_open/swan/scripts/swan.sh -text
+src/third_party_open/swan/scripts/swan_install.bat -text
+src/third_party_open/swan/scripts/swan_install.sh -text
 src/third_party_open/version_number/Makefile.am -text
 src/third_party_open/version_number/bin/linux/version_number.exe -text
 src/third_party_open/version_number/bin/win32/version_number.exe -text

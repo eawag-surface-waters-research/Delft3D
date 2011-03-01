@@ -1,9 +1,4 @@
 #!/bin/sh
-
-#
-# Use this script only in the Delft3D open source directory structure
-#
-
 #
 ################################################################################
 ## Example shell script for submitting Delft3D-FLOW/WAVE jobs using           ##
@@ -52,9 +47,9 @@ fi
 ## INITIALIZATION                                                             ##
 ################################################################################
 if [ $mpirun -eq 1 ]; then
-  SWANEXEC=${D3D_HOME}/third_party_open/swan/bin/$ARCH/swan_4072ABCDE_del_l32_i11_mpi.exe
+  SWANEXEC=${D3D_HOME}/$ARCH/wave/bin/swan_4072ABCDE_del_l32_i11_mpi.exe
 else
-  SWANEXEC=${D3D_HOME}/third_party_open/swan/bin/$ARCH/swan_4072ABCDE_del_l32_i11_omp.exe
+  SWANEXEC=${D3D_HOME}/$ARCH/wave/bin/swan_4072ABCDE_del_l32_i11_omp.exe
   #
   # swan40.72AB and newer runs parallel using OpenMP, using the total number of cores on the machine
   # To force the number of parallel processes, remove the "#" in front of the following line and adjust the number
