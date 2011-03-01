@@ -1342,6 +1342,7 @@ src/tools_gpl/datsel/packages/common.am -text
 src/tools_gpl/datsel/packages/configure.ac -text
 src/tools_gpl/datsel/packages/datsel/Makefile.am -text
 src/tools_gpl/datsel/packages/datsel/datsel.vcproj -text
+src/tools_gpl/datsel/packages/datsel/datsel.vcxproj -text
 src/tools_gpl/datsel/packages/datsel/src/Makefile.am -text
 src/tools_gpl/datsel/packages/datsel/src/main.cpp -text
 src/tools_gpl/datsel/packages/datsel_f/Makefile.am -text
@@ -1363,6 +1364,7 @@ src/tools_gpl/datsel/packages/datsel_f/src/uv2cen.f90 -text
 src/tools_gpl/datsel/packages/datsel_f/src/vecmag.f90 -text
 src/tools_gpl/datsel/packages/datsel_version_number/Makefile.am -text
 src/tools_gpl/datsel/packages/datsel_version_number/datsel_version_number.vcproj -text
+src/tools_gpl/datsel/packages/datsel_version_number/datsel_version_number.vcxproj -text
 src/tools_gpl/datsel/packages/datsel_version_number/include/resource.h -text
 src/tools_gpl/datsel/packages/datsel_version_number/include/version_number.h.svn -text
 src/tools_gpl/datsel/packages/datsel_version_number/include/version_number.ini -text
@@ -1383,6 +1385,7 @@ src/tools_gpl/kubint/packages/common.am -text
 src/tools_gpl/kubint/packages/configure.ac -text
 src/tools_gpl/kubint/packages/kubint/Makefile.am -text
 src/tools_gpl/kubint/packages/kubint/kubint.vcproj -text
+src/tools_gpl/kubint/packages/kubint/kubint.vcxproj -text
 src/tools_gpl/kubint/packages/kubint/src/Makefile.am -text
 src/tools_gpl/kubint/packages/kubint/src/main.cpp -text
 src/tools_gpl/kubint/packages/kubint_f/Makefile.am -text
@@ -1406,6 +1409,7 @@ src/tools_gpl/kubint/packages/kubint_version_number/include/version_number.h.svn
 src/tools_gpl/kubint/packages/kubint_version_number/include/version_number.ini -text
 src/tools_gpl/kubint/packages/kubint_version_number/include/version_number.rc.svn -text
 src/tools_gpl/kubint/packages/kubint_version_number/kubint_version_number.vcproj -text
+src/tools_gpl/kubint/packages/kubint_version_number/kubint_version_number.vcxproj -text
 src/tools_gpl/kubint/packages/kubint_version_number/src/Makefile.am -text
 src/tools_gpl/kubint/packages/kubint_version_number/src/c2c.c -text
 src/tools_gpl/kubint/packages/kubint_version_number/src/f2c.c -text
@@ -1422,6 +1426,7 @@ src/tools_gpl/lint/packages/common.am -text
 src/tools_gpl/lint/packages/configure.ac -text
 src/tools_gpl/lint/packages/lint/Makefile.am -text
 src/tools_gpl/lint/packages/lint/lint.vcproj -text
+src/tools_gpl/lint/packages/lint/lint.vcxproj -text
 src/tools_gpl/lint/packages/lint/src/Makefile.am -text
 src/tools_gpl/lint/packages/lint/src/main.cpp -text
 src/tools_gpl/lint/packages/lint_f/Makefile.am -text
@@ -1444,6 +1449,7 @@ src/tools_gpl/lint/packages/lint_version_number/include/version_number.h.svn -te
 src/tools_gpl/lint/packages/lint_version_number/include/version_number.ini -text
 src/tools_gpl/lint/packages/lint_version_number/include/version_number.rc.svn -text
 src/tools_gpl/lint/packages/lint_version_number/lint_version_number.vcproj -text
+src/tools_gpl/lint/packages/lint_version_number/lint_version_number.vcxproj -text
 src/tools_gpl/lint/packages/lint_version_number/src/Makefile.am -text
 src/tools_gpl/lint/packages/lint_version_number/src/c2c.c -text
 src/tools_gpl/lint/packages/lint_version_number/src/f2c.c -text
@@ -1461,6 +1467,7 @@ src/tools_gpl/mormerge/packages/mormerge_version_number/include/version_number.h
 src/tools_gpl/mormerge/packages/mormerge_version_number/include/version_number.ini -text
 src/tools_gpl/mormerge/packages/mormerge_version_number/include/version_number.rc.svn -text
 src/tools_gpl/mormerge/packages/mormerge_version_number/mormerge_version_number.vcproj -text
+src/tools_gpl/mormerge/packages/mormerge_version_number/mormerge_version_number.vcxproj -text
 src/tools_gpl/mormerge/packages/mormerge_version_number/src/Makefile.am -text
 src/tools_gpl/mormerge/packages/mormerge_version_number/src/c2c.c -text
 src/tools_gpl/mormerge/packages/mormerge_version_number/src/f2c.c -text
@@ -1512,6 +1519,7 @@ src/tools_gpl/vs/packages/vs/src/vs_l.l -text
 src/tools_gpl/vs/packages/vs/src/vs_y.y -text
 src/tools_gpl/vs/packages/vs/src/wr.c -text
 src/tools_gpl/vs/packages/vs/vs.vcproj -text
+src/tools_gpl/vs/packages/vs/vs.vcxproj -text
 src/tools_gpl/vs/packages/vs_version_number/Makefile.am -text
 src/tools_gpl/vs/packages/vs_version_number/include/resource.h -text
 src/tools_gpl/vs/packages/vs_version_number/include/version_number.h.svn -text
@@ -1522,6 +1530,7 @@ src/tools_gpl/vs/packages/vs_version_number/src/c2c.c -text
 src/tools_gpl/vs/packages/vs_version_number/src/f2c.c -text
 src/tools_gpl/vs/packages/vs_version_number/src/version.c -text
 src/tools_gpl/vs/packages/vs_version_number/vs_version_number.vcproj -text
+src/tools_gpl/vs/packages/vs_version_number/vs_version_number.vcxproj -text
 src/utils_lgpl/Makefile.am -text
 src/utils_lgpl/constants/Makefile.am -text
 src/utils_lgpl/constants/packages/Makefile.am -text
