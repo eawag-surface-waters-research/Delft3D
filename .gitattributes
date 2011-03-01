@@ -1613,6 +1613,7 @@ src/utils_lgpl/delftio/packages/delftio_dll/resource.fd -text
 src/utils_lgpl/delftio/packages/delftio_dll/resource.h -text
 src/utils_lgpl/delftio/packages/delftio_shm/Makefile.am -text
 src/utils_lgpl/delftio/packages/delftio_shm/delftio_shm.vcproj -text
+src/utils_lgpl/delftio/packages/delftio_shm/delftio_shm.vcxproj -text
 src/utils_lgpl/delftio/packages/delftio_shm/include/checkDiff -text
 src/utils_lgpl/delftio/packages/delftio_shm/include/dio-sync-ux.h -text
 src/utils_lgpl/delftio/packages/delftio_shm/include/dio_shm.h -text
@@ -1630,6 +1631,7 @@ src/utils_lgpl/delftio/packages/delftio_shm/src/diof90/dio_shm_handle.cpp -text
 src/utils_lgpl/delftio/packages/delftio_shm/src/diof90/dio_shm_sync.cpp -text
 src/utils_lgpl/delftio/packages/delftio_version_number/Makefile.am -text
 src/utils_lgpl/delftio/packages/delftio_version_number/delftio_version_number.vcproj -text
+src/utils_lgpl/delftio/packages/delftio_version_number/delftio_version_number.vcxproj -text
 src/utils_lgpl/delftio/packages/delftio_version_number/include/resource.h -text
 src/utils_lgpl/delftio/packages/delftio_version_number/include/version_number.h.svn -text
 src/utils_lgpl/delftio/packages/delftio_version_number/include/version_number.ini -text
@@ -1961,6 +1963,7 @@ src/utils_lgpl/delftio_sync/packages/delftio_sync/src/sync_rtcflow.f90 -text
 src/utils_lgpl/delftio_sync/packages/delftio_sync/src/waq2flow.f90 -text
 src/utils_lgpl/delftio_sync/packages/delftio_sync_version_number/Makefile.am -text
 src/utils_lgpl/delftio_sync/packages/delftio_sync_version_number/delftio_sync_version_number.vcproj -text
+src/utils_lgpl/delftio_sync/packages/delftio_sync_version_number/delftio_sync_version_number.vcxproj -text
 src/utils_lgpl/delftio_sync/packages/delftio_sync_version_number/include/resource.h -text
 src/utils_lgpl/delftio_sync/packages/delftio_sync_version_number/include/version_number.h.svn -text
 src/utils_lgpl/delftio_sync/packages/delftio_sync_version_number/include/version_number.ini -text
@@ -2031,6 +2034,7 @@ src/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/fortapi.f90 -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/esmfsm_c.vcproj -text
+src/utils_lgpl/esmfsm/packages/esmfsm_c/esmfsm_c.vcxproj -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/include/globals-esm.h -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/include/globals-fsm.h -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/src/Makefile.am -text
@@ -2042,6 +2046,7 @@ src/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/fsm.cpp -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/esmfsm_version_number.vcproj -text
+src/utils_lgpl/esmfsm/packages/esmfsm_version_number/esmfsm_version_number.vcxproj -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/include/resource.h -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/include/version_number.h.svn -text
 src/utils_lgpl/esmfsm/packages/esmfsm_version_number/include/version_number.ini -text
@@ -2153,6 +2158,7 @@ src/utils_lgpl/meteo/packages/meteo_version_number/include/version_number.h.svn 
 src/utils_lgpl/meteo/packages/meteo_version_number/include/version_number.ini -text
 src/utils_lgpl/meteo/packages/meteo_version_number/include/version_number.rc.svn -text
 src/utils_lgpl/meteo/packages/meteo_version_number/meteo_version_number.vcproj -text
+src/utils_lgpl/meteo/packages/meteo_version_number/meteo_version_number.vcxproj -text
 src/utils_lgpl/meteo/packages/meteo_version_number/src/Makefile.am -text
 src/utils_lgpl/meteo/packages/meteo_version_number/src/c2c.c -text
 src/utils_lgpl/meteo/packages/meteo_version_number/src/f2c.c -text
@@ -2190,8 +2196,10 @@ src/utils_lgpl/nefis/packages/nefis/include/pt.h -text
 src/utils_lgpl/nefis/packages/nefis/include/rt.h -text
 src/utils_lgpl/nefis/packages/nefis/include/wl-xdr.h -text
 src/utils_lgpl/nefis/packages/nefis/nefis.vcproj -text
+src/utils_lgpl/nefis/packages/nefis/nefis.vcxproj -text
 src/utils_lgpl/nefis/packages/nefis/nefis5.dsp -text
 src/utils_lgpl/nefis/packages/nefis/nefis_dll.vcproj -text
+src/utils_lgpl/nefis/packages/nefis/nefis_dll.vcxproj -text
 src/utils_lgpl/nefis/packages/nefis/src/Makefile.am -text
 src/utils_lgpl/nefis/packages/nefis/src/c2c.c -text
 src/utils_lgpl/nefis/packages/nefis/src/df.c -text
@@ -2213,6 +2221,7 @@ src/utils_lgpl/nefis/packages/nefis_version_number/include/version_number.ini -t
 src/utils_lgpl/nefis/packages/nefis_version_number/include/version_number.rc.svn -text
 src/utils_lgpl/nefis/packages/nefis_version_number/nefis_version_number.dsp -text
 src/utils_lgpl/nefis/packages/nefis_version_number/nefis_version_number.vcproj -text
+src/utils_lgpl/nefis/packages/nefis_version_number/nefis_version_number.vcxproj -text
 src/utils_lgpl/nefis/packages/nefis_version_number/src/Makefile.am -text
 src/utils_lgpl/nefis/packages/nefis_version_number/src/c2c.c -text
 src/utils_lgpl/nefis/packages/nefis_version_number/src/f2c.c -text
@@ -2401,6 +2410,7 @@ src/utils_lgpl/semaphore/packages/semaphore/Makefile.am -text
 src/utils_lgpl/semaphore/packages/semaphore/include/semaphore_version.h.svn -text
 src/utils_lgpl/semaphore/packages/semaphore/include/version_number.ini -text
 src/utils_lgpl/semaphore/packages/semaphore/semaphore.vcproj -text
+src/utils_lgpl/semaphore/packages/semaphore/semaphore.vcxproj -text
 src/utils_lgpl/semaphore/packages/semaphore/src/Makefile.am -text
 src/utils_lgpl/semaphore/packages/semaphore/src/semaphore_version.cpp -text
 src/utils_lgpl/semaphore/packages/semaphore/src/sems.cpp -text
@@ -2416,6 +2426,7 @@ src/utils_lgpl/stream/packages/stream/src/Makefile.am -text
 src/utils_lgpl/stream/packages/stream/src/stream-mpi.cpp -text
 src/utils_lgpl/stream/packages/stream/src/stream.cpp -text
 src/utils_lgpl/stream/packages/stream/stream.vcproj -text
+src/utils_lgpl/stream/packages/stream/stream.vcxproj -text
 src/utils_lgpl/stream/packages/stream_version_number/Makefile.am -text
 src/utils_lgpl/stream/packages/stream_version_number/include/resource.h -text
 src/utils_lgpl/stream/packages/stream_version_number/include/version_number.h.svn -text
@@ -2426,12 +2437,15 @@ src/utils_lgpl/stream/packages/stream_version_number/src/c2c.c -text
 src/utils_lgpl/stream/packages/stream_version_number/src/f2c.c -text
 src/utils_lgpl/stream/packages/stream_version_number/src/version.c -text
 src/utils_lgpl/stream/packages/stream_version_number/stream_version_number.vcproj -text
+src/utils_lgpl/stream/packages/stream_version_number/stream_version_number.vcxproj -text
 src/utils_lgpl/stream/tests/01-smalltest/01-smalltest.vcproj -text
+src/utils_lgpl/stream/tests/01-smalltest/01-smalltest.vcxproj -text
 src/utils_lgpl/stream/tests/01-smalltest/Makefile.am -text
 src/utils_lgpl/stream/tests/01-smalltest/runsmalltest.bat -text
 src/utils_lgpl/stream/tests/01-smalltest/runsmalltest.sh -text
 src/utils_lgpl/stream/tests/01-smalltest/smalltest.cpp -text
 src/utils_lgpl/stream/tests/02-streamtest/02-streamtest.vcproj -text
+src/utils_lgpl/stream/tests/02-streamtest/02-streamtest.vcxproj -text
 src/utils_lgpl/stream/tests/02-streamtest/Makefile.am -text
 src/utils_lgpl/stream/tests/02-streamtest/streamtest.cpp -text
 src/utils_lgpl/stream/tests/02-streamtest/tcpstream.sh -text
@@ -2479,6 +2493,7 @@ src/utils_lgpl/utils_flow/packages/utils_flow_c/src/getopt.cpp -text
 src/utils_lgpl/utils_flow/packages/utils_flow_c/src/getputarray.cpp -text
 src/utils_lgpl/utils_flow/packages/utils_flow_c/src/throwexception.cpp -text
 src/utils_lgpl/utils_flow/packages/utils_flow_c/utils_flow_c.vcproj -text
+src/utils_lgpl/utils_flow/packages/utils_flow_c/utils_flow_c.vcxproj -text
 src/utils_lgpl/utils_flow/packages/utils_flow_version_number/Makefile.am -text
 src/utils_lgpl/utils_flow/packages/utils_flow_version_number/include/resource.h -text
 src/utils_lgpl/utils_flow/packages/utils_flow_version_number/include/version_number.h.svn -text
@@ -2489,6 +2504,7 @@ src/utils_lgpl/utils_flow/packages/utils_flow_version_number/src/c2c.c -text
 src/utils_lgpl/utils_flow/packages/utils_flow_version_number/src/f2c.c -text
 src/utils_lgpl/utils_flow/packages/utils_flow_version_number/src/version.c -text
 src/utils_lgpl/utils_flow/packages/utils_flow_version_number/utils_flow_version_number.vcproj -text
+src/utils_lgpl/utils_flow/packages/utils_flow_version_number/utils_flow_version_number.vcxproj -text
 src/utils_lgpl/utils_flow/tests/01_test/main.c -text
 src/utils_lgpl/utils_flow/tests/01_test/test_01.f90 -text
 src/utils_lgpl/utils_flow/tests/01_test/test_01.vcproj -text
