@@ -71,11 +71,10 @@ fi
 
 #-----  Initialize Fortran compiler
 
-# Note:  The 11.1 compiler is temporarily disabled.  When it is used,
-# the following message is produced when running delftflow.exe:
+# Note:  If the 11.1 compiler is used and the svml library is used in common.am,
+# the following message will be produced when running delftflow.exe:
 # ./delftflow.exe: symbol lookup error: /opt/intel/Compiler/11.1/072/lib/ia32/libsvml.so: undefined symbol: __intel_cpu_indicator
-# The reason is an explicit reference to the SVML library of the Intel 11.0 compiler
-# in commmon.am.  Why?  Who?  Please tell Adri.Mourits@Deltares.NL
+# Solution: don't use the svml library in commmon.am
 
 case $compiler in
     intel11)
