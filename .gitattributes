@@ -1320,6 +1320,12 @@ src/third_party_open/subversion/bin/win32/svnmucc.exe -text
 src/third_party_open/subversion/bin/win32/svnserve.exe -text
 src/third_party_open/subversion/bin/win32/svnsync.exe -text
 src/third_party_open/subversion/bin/win32/svnversion.exe -text
+src/third_party_open/swan/bin/linux/swan_4072ABCDE_del_l32_i11_mpi.exe -text
+src/third_party_open/swan/bin/linux/swan_4072ABCDE_del_l32_i11_omp.exe -text
+src/third_party_open/swan/bin/win32/libiomp5md.dll -text
+src/third_party_open/swan/bin/win32/swan_4072ABCDE_del_w32_i11_omp.exe -text
+src/third_party_open/swan/scripts/swan.bat -text
+src/third_party_open/swan/scripts/swan.sh -text
 src/third_party_open/version_number/Makefile.am -text
 src/third_party_open/version_number/bin/linux/version_number.exe -text
 src/third_party_open/version_number/bin/win32/version_number.exe -text
