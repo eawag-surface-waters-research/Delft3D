@@ -23,24 +23,27 @@ mdwfile=r17.mdw
     #
     # Set the directory containing delftflow.exe
     #
-exedir=../../src/bin
-libdir=../../src/lib
+curdir=`pwd`
+export D3D_HOME=$curdir/../../src
+exedir=$curdir/../../src/bin
+libdir=$curdir/../../src/lib
 wavedir=$exedir
-swandir=../../src/third_party_open/swan/bin/intel
-swanbatdir=../../src/third_party_open/swan/scripts
+swandir=$curdir/../../src/third_party_open/swan/bin/intel
+swanbatdir=$curdir/../../src/third_party_open/swan/scripts
  
     #
     # No adaptions needed below
     #
 
     # Set some (environment) parameters
-curdir=`pwd`
-export D3D_HOME=$curdir\..\..\src
     # Only needed for the debug version:
     #. /opt/intel/Compiler/11.0/081/bin/ifortvars.sh ia32
 export LD_LIBRARY_PATH=$swanbatdir:$exedir:$libdir:$LD_LIBRARY_PATH 
+export PATH=$swanbatdir:$PATH 
 
     # Run
-$exedir/deltares_hydro.exe $argfile $
+ldd $exedir/libflow2d3d.so
+$exedir/deltares_hydro.exe $argfile &
 
-$wavedir\wave.exe $mdwfile 1
+$wavedir/wave.exe $mdwfile 1
+
