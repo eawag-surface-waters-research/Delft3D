@@ -76,7 +76,8 @@ void D3dFlowMapper::InitKc(
     if ( ( mEnd[C_0][eq] < mStart[C_0][eq] ) ||
          ( nEnd[C_0][eq] < nStart[C_0][eq] )    )
     {
-        Warn( (char*)"Map-length <= 0 for eq %d", eq);
+        Warn( (char*)"Map-length <= 0 for equation %d\nm1=%d > m2=%d or n1=%d > n2=%d", 
+                     eq, mStart[C_0][eq], mEnd[C_0][eq], nStart[C_0][eq], nEnd[C_0][eq] );
         return;
     }
 
