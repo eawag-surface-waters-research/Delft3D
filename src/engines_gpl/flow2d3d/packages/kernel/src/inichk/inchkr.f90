@@ -45,6 +45,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     use flow_tables
     !
     use globaldata
+    use dfparall
     !
     implicit none
     !
@@ -375,6 +376,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
 !
     integer                            :: icx
     integer                            :: icy
+    integer                            :: ierror
     integer                            :: itype
     integer                            :: nmaxddb
     integer                            :: nst     ! Current time step counter 
@@ -691,11 +693,15 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     call copykcuv(i(kcu), kcucopy, gdp)
     call copykcuv(i(kcv), kcvcopy, gdp)
     !
+    ierror = 0
     if (nsrcd > 0) then
        call chkdis(lundia    ,error     ,nsrcd     ,zmodel    ,nmax      , &
                  & mmax      ,nmaxus    ,kmax      ,ch(namsrc),i(mnksrc) , &
                  & i(kcs)    ,r(xyzsrc) ,r(sig)    ,r(sig)    ,d(dps)    , &
                  & r(s1)     ,r(xz)     ,r(yz)     ,gdp       )
+       if (error) ierror = 1
+       call dfreduce( ierror, 1, dfint, dfmax, gdp )
+       error = ierror==1
        if (error) goto 9999
     endif
     !

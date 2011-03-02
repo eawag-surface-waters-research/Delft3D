@@ -431,10 +431,12 @@ subroutine rdspec(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              ! if inlet or outfall is outside partition, then they are both outside this partition:
              ! remove it from this partition by setting k to -1 en continue
              ! 
+             write(message,'(a,3(i0,a))') 'Discharge (m,n,k)=(', mnksrc(1, n) +mfg -1, &
+                ',', mnksrc(2, n)+nfg-1, ',', mnksrc(3, n), &
+                ') is disabled: inlet and/or outfall not in this partition'
+             call prterr( lundia, 'U190', trim(message))
              mnksrc(3,n) = -1
              mnksrc(6,n) = -1
-             write(message,'(a,3(i0,a))') 'Discharge (m,n,k)=(', mnksrc(1, n), ',', mnksrc(2, n), ',', mnksrc(3, n), ') is disabled: inlet and/or outfall not in this partition'
-             call prterr( lundia, 'U190', trim(message))
           endif
           if (mnksrc(7,n) == 1) then
              !
