@@ -26,9 +26,10 @@
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
-!> Specifies the interface for MessaheHandling's callback functionality.
+
+!> Specifies the interface for MessageHandling's callback functionality.
 ! (A bit awkward, but including it in MessageHandling's module header
-! did not make it visible in subprograms when using ifort.)
+! did not make it visible in subprograms when using ifort 11.0.)
 module MHCallBack
    abstract interface
       subroutine mh_callbackiface(level)
@@ -125,7 +126,6 @@ contains
 !> Sets up the output of messages. All three formats are optional
 !! and can be used in any combination.
 subroutine SetMessageHandling(write2screen, useLog, lunMessages, callback, thresholdLevel)
-   use MHCallBack   
    logical, optional, intent(in)       :: write2screen !< Print messages to stdout.
    logical, optional, intent(in)       :: useLog       !< Store messages in buffer.
    integer, optional, intent(in)       :: lunMessages  !< File pointer whereto messages can be written.
@@ -137,7 +137,7 @@ subroutine SetMessageHandling(write2screen, useLog, lunMessages, callback, thres
    if (present(lunMessages) )  lunMess             = lunMessages
    if (present(useLog) )       useLogging          = useLog
    if (present(callback) ) then
-       !mh_callback         =>callback
+       mh_callback         =>callback
    endif
    if (present(thresholdLevel) )  thresholdLvl     = thresholdLevel
    alreadyInCallback = .false.
@@ -146,7 +146,6 @@ end subroutine SetMessageHandling
 !> The main message routine. Puts the message string to all output
 !! channels previously set up by SetMessageHandling
 recursive subroutine SetMessage(level, string)
-   use MHCallBack
    integer, intent(in)           :: level  !< One of: LEVEL_(DEBUG|INFO|WARN|ERROR|FATAL).
    character(len=*), intent(in)  :: string !< Complete message string.
 
