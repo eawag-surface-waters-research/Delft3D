@@ -11,7 +11,8 @@ subroutine dfwrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                   & vortic    ,enstro    ,umnldf    ,vmnldf    ,vicuv     , &
                   & taubmx    ,windu     ,windv     ,velt      ,cvalu0    , &
                   & cvalv0    ,cfurou    ,cfvrou    ,rouflo    ,patm      , &
-                  & ktemp     ,gdp       )
+                  & z0ucur    ,z0vcur    ,z0urou    ,z0vrou    ,ktemp     , &
+                  & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -160,6 +161,10 @@ subroutine dfwrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         , intent(in)  :: vortic      !  Description and declaration in rjdim.f90
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         , intent(in)  :: wphy        !  Description and declaration in rjdim.f90
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci) , intent(in)  :: r1          !  Description and declaration in rjdim.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: z0ucur      !  Description and declaration in rjdim.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: z0vcur      !  Description and declaration in rjdim.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: z0urou      !  Description and declaration in rjdim.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: z0vrou      !  Description and declaration in rjdim.f90
     character(*)                                                                      , intent(in)  :: trifil      !!  File name for FLOW NEFIS output files (tri"h/m"-"casl""labl".dat/def)
     character(4)                                                                      , intent(in)  :: rouflo      !  Description and declaration in ckdim.f90
     character(21)                                                                     , intent(in)  :: selmap      !  Description and declaration in tricom.igs
@@ -542,6 +547,26 @@ subroutine dfwrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           call addelm(nefiswrtmap,'ROUMETV',' ',runit      ,'REAL',4         , &
              & trim(rdesc) // ' in V-point'                                  , &
              & 2         ,nmaxus    ,mmax      ,0         ,0         ,0      , &
+             & lundia    ,gdp       )
+       endif
+       if (flwoutput%z0cur) then
+          call addelm(nefiswrtmap,'Z0UCUR',' ','[   M   ]','REAL',4          , &
+             & 'Current only z0 bed roughness in U-point                    ', &
+             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
+             & lundia    ,gdp       )
+          call addelm(nefiswrtmap,'Z0VCUR',' ','[   M   ]','REAL',4          , &
+             & 'Current only z0 bed roughness in V-point                    ', &
+             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
+             & lundia    ,gdp       )
+       endif
+       if (flwoutput%z0rou) then
+          call addelm(nefiswrtmap,'Z0UROU',' ','[   M   ]','REAL',4          , &
+             & 'Wave enhanced z0 bed roughness in U-point                   ', &
+             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
+             & lundia    ,gdp       )
+          call addelm(nefiswrtmap,'Z0VROU',' ','[   M   ]','REAL',4          , &
+             & 'Wave enhanced z0 bed roughness in V-point                   ', &
+             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
              & lundia    ,gdp       )
        endif
        if (flwoutput%layering) then
@@ -1290,6 +1315,42 @@ subroutine dfwrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        deallocate(rbuff2)
        if (inode == master) then
           ierror = putelt(fds, grnam3, 'ROUMETV', uindex, 1, glbarr2)
+       endif
+       if (ierror /= 0) goto 999
+    endif
+    if (flwoutput%z0cur) then
+       !
+       ! element 'Z0UCUR'
+       !
+       call dfgather(z0ucur,nf,nl,mf,ml,iarrc,gdp)
+       if (inode == master) then
+          ierror = putelt(fds, grnam3, 'Z0UCUR', uindex, 1, glbarr2)
+       endif
+       if (ierror /= 0) goto 999
+       !
+       ! element 'Z0VCUR'
+       !
+       call dfgather(z0vcur,nf,nl,mf,ml,iarrc,gdp)
+       if (inode == master) then
+          ierror = putelt(fds, grnam3, 'Z0VCUR', uindex, 1, glbarr2)
+       endif
+       if (ierror /= 0) goto 999
+    endif
+    if (flwoutput%z0rou) then
+       !
+       ! element 'Z0UROU'
+       !
+       call dfgather(z0urou,nf,nl,mf,ml,iarrc,gdp)
+       if (inode == master) then
+          ierror = putelt(fds, grnam3, 'Z0UROU', uindex, 1, glbarr2)
+       endif
+       if (ierror /= 0) goto 999
+       !
+       ! element 'Z0VROU'
+       !
+       call dfgather(z0vrou,nf,nl,mf,ml,iarrc,gdp)
+       if (inode == master) then
+          ierror = putelt(fds, grnam3, 'Z0VROU', uindex, 1, glbarr2)
        endif
        if (ierror /= 0) goto 999
     endif

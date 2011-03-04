@@ -41,8 +41,6 @@
        integer :: wrka7      !  Description and declaration in rjdim.f90
        integer :: wrka8      !  Description and declaration in rjdim.f90
        integer :: wrka9      !  Description and declaration in rjdim.f90
-       integer :: wrka10     !  Description and declaration in rjdim.f90
-       integer :: wrka11     !  Description and declaration in rjdim.f90
        integer :: wrka12     !  Description and declaration in rjdim.f90
        integer :: wrka13     !  Description and declaration in rjdim.f90
        integer :: wrka14     !  Description and declaration in rjdim.f90

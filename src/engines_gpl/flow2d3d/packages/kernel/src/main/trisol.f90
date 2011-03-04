@@ -69,8 +69,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     integer                              , pointer :: wrka7
     integer                              , pointer :: wrka8
     integer                              , pointer :: wrka9
-    integer                              , pointer :: wrka10
-    integer                              , pointer :: wrka11
     integer                              , pointer :: wrka12
     integer                              , pointer :: wrka13
     integer                              , pointer :: wrka14
@@ -464,6 +462,8 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     integer                              , pointer :: y3
     integer                              , pointer :: ycor
     integer                              , pointer :: yz
+    integer                              , pointer :: z0ucur
+    integer                              , pointer :: z0vcur
     integer                              , pointer :: z0urou
     integer                              , pointer :: z0vrou
     integer                              , pointer :: zbmnf
@@ -619,8 +619,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     wrka7               => gdp%gdaddress%wrka7
     wrka8               => gdp%gdaddress%wrka8
     wrka9               => gdp%gdaddress%wrka9
-    wrka10              => gdp%gdaddress%wrka10
-    wrka11              => gdp%gdaddress%wrka11
     wrka12              => gdp%gdaddress%wrka12
     wrka13              => gdp%gdaddress%wrka13
     wrka14              => gdp%gdaddress%wrka14
@@ -1014,6 +1012,8 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     y3                  => gdp%gdr_i_ch%y3
     ycor                => gdp%gdr_i_ch%ycor
     yz                  => gdp%gdr_i_ch%yz
+    z0ucur              => gdp%gdr_i_ch%z0ucur
+    z0vcur              => gdp%gdr_i_ch%z0vcur
     z0urou              => gdp%gdr_i_ch%z0urou
     z0vrou              => gdp%gdr_i_ch%z0vrou
     zbmnf               => gdp%gdr_i_ch%zbmnf
@@ -1619,8 +1619,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
               & r(dpdeta) ,r(ubrlsu) ,r(ubrlsv) ,r(uwtypu) ,r(uwtypv) , &
               & r(pship)  ,r(wrkb17) ,r(soumud) ,r(excbed) ,r(wrka1)  , &
               & r(wrka2)  ,r(wrka3)  ,r(wrka4)  ,r(wrka5)  ,r(wrka6)  , &
-              & r(wrka7)  ,r(wrka8)  ,r(wrka9)  ,r(wrka10) ,r(wrka11) , &
-              & r(wrka12) ,r(wrka13) ,r(wrka14) ,r(wrka15) ,r(wrka16) , &
+              & r(wrka7)  ,r(wrka8)  ,r(wrka9)  ,r(wrka15) ,r(wrka16) , &
               & r(wrkb1)  ,r(wrkb2)  ,r(wrkb3)  ,r(wrkb4)  ,r(wrkb5)  , &
               & r(wrkb6)  ,r(wrkb7)  ,r(wrkb8)  ,r(wrkb9)  ,r(wrkb10) , &
               & r(wrkb11) ,r(wrkb12) ,r(wrkb13) ,r(wrkb14) ,r(wrkb15) , &
@@ -1695,9 +1694,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        ! CVALU0 and CVALV0 are used to store the actual 2D-chezy value
        ! to be used in detvic
        !
-       ! U-point and V-point values of Z0CUR are calculated in WRKA10,
-       ! and WRKA11 respectively and are passed to EROSED
-       !
        icx = nmaxddb
        icy = 1
        call timer_start(timer_upwhu, gdp)
@@ -1715,7 +1711,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                  & r(teta)   ,r(uorb)   ,r(tp)     ,r(wsu)    ,r(wsv)    , &
                  & r(grmasu) ,r(dfu)    ,r(deltau) ,r(hrms)   , &
                  & r(cfurou) ,r(z0urou) ,r(wrka3)  ,r(dzu1)   ,r(sig)    , &
-                 & r(wrka10) ,r(cvalu0) ,r(grmsur) ,r(grfacu) ,gdp       )
+                 & r(z0ucur) ,r(cvalu0) ,r(grmsur) ,r(grfacu) ,gdp       )
        call timer_stop(timer_taubot, gdp)
        !
        icx = 1
@@ -1735,7 +1731,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                  & r(teta)   ,r(uorb)   ,r(tp)     ,r(wsv)    ,r(wsu)    , &
                  & r(grmasv) ,r(dfv)    ,r(deltav) ,r(hrms)   , &
                  & r(cfvrou) ,r(z0vrou) ,r(wrka3)  ,r(dzv1)   ,r(sig)    , &
-                 & r(wrka11) ,r(cvalv0) ,r(grmsvr) ,r(grfacv) ,gdp       )
+                 & r(z0vcur) ,r(cvalv0) ,r(grmsvr) ,r(grfacv) ,gdp       )
        call timer_stop(timer_taubot, gdp)
        icx = nmaxddb
        icy = 1
@@ -1914,7 +1910,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                  & lsecfl    ,i(kfs)    ,i(kfu)    ,i(kfv)    ,r(sig)    , &
                  & r(r0)     ,r(wrkb5)  ,r(wrkb6)  ,r(s0)     ,d(dps)    , &
                  & r(z0urou) ,r(z0vrou) ,r(sour)   ,r(sink)   ,r(rhowat) , &
-                 & r(ws)     ,r(rsedeq) ,r(wrka10) ,r(wrka11) ,r(sigmol) , &
+                 & r(ws)     ,r(rsedeq) ,r(z0ucur) ,r(z0vcur) ,r(sigmol) , &
                  & r(taubmx) ,r(s1)     ,r(uorb)   ,r(tp)     ,r(sigdif) , &
                  & lstsci    ,r(thick)  ,r(dicww)  ,i(kmxsed) ,i(kcs)    , &
                  & i(kcu)    ,i(kcv)    ,r(guv)    ,r(gvu)    ,r(sbuu)   , &
@@ -2559,8 +2555,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
               & r(dpdeta) ,r(ubrlsu) ,r(ubrlsv) ,r(uwtypu) ,r(uwtypv) , &
               & r(pship)  ,r(wrkb17) ,r(soumud) ,r(excbed) ,r(wrka1)  , &
               & r(wrka2)  ,r(wrka3)  ,r(wrka4)  ,r(wrka5)  ,r(wrka6)  , &
-              & r(wrka7)  ,r(wrka8)  ,r(wrka9)  ,r(wrka10) ,r(wrka11) , &
-              & r(wrka12) ,r(wrka13) ,r(wrka14) ,r(wrka15) ,r(wrka16) , &
+              & r(wrka7)  ,r(wrka8)  ,r(wrka9)  ,r(wrka15) ,r(wrka16) , &
               & r(wrkb1)  ,r(wrkb2)  ,r(wrkb3)  ,r(wrkb4)  ,r(wrkb5)  , &
               & r(wrkb6)  ,r(wrkb7)  ,r(wrkb8)  ,r(wrkb9)  ,r(wrkb10) , &
               & r(wrkb11) ,r(wrkb12) ,r(wrkb13) ,r(wrkb14) ,r(wrkb15) , &
@@ -2634,9 +2629,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        ! CVALU0 and CVALV0 are used to store the actual 2D-chezy value
        ! to be used in detvic
        !
-       ! U-point and V-point values of Z0CUR are calculated in WRKA10,
-       ! and WRKA11 respectively and are passed to EROSED
-       !
        icx = nmaxddb
        icy = 1
        call timer_start(timer_upwhu, gdp)
@@ -2679,7 +2671,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                  & r(teta)   ,r(uorb)   ,r(tp)     ,r(wsu)    ,r(wsv)    , &
                  & r(grmasu) ,r(dfu)    ,r(deltau) ,r(hrms)   , &
                  & r(cfurou) ,r(z0urou) ,r(wrka3)  ,r(dzu1)   ,r(sig)    , &
-                 & r(wrka10) ,r(cvalu0) ,r(grmsur) ,r(grfacu) ,gdp       )
+                 & r(z0ucur) ,r(cvalu0) ,r(grmsur) ,r(grfacu) ,gdp       )
        call timer_stop(timer_taubot, gdp)
        !
        icx = 1
@@ -2722,7 +2714,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                  & r(teta)   ,r(uorb)   ,r(tp)     ,r(wsv)    ,r(wsu)    , &
                  & r(grmasv) ,r(dfv)    ,r(deltav) ,r(hrms)   , &
                  & r(cfvrou) ,r(z0vrou) ,r(wrka3)  ,r(dzv1)   ,r(sig)    , &
-                 & r(wrka11) ,r(cvalv0) ,r(grmsvr) ,r(grfacv) ,gdp       )
+                 & r(z0vcur) ,r(cvalv0) ,r(grmsvr) ,r(grfacv) ,gdp       )
        call timer_stop(timer_taubot, gdp)
        !
        icx = nmaxddb
@@ -2902,7 +2894,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & lsecfl    ,i(kfs)    ,i(kfu)    ,i(kfv)    ,r(sig)    , &
                     & r(r0)     ,r(wrkb5)  ,r(wrkb6)  ,r(s0)     ,d(dps)    , &
                     & r(z0urou) ,r(z0vrou) ,r(sour)   ,r(sink)   ,r(rhowat) , &
-                    & r(ws)     ,r(rsedeq) ,r(wrka10) ,r(wrka11) ,r(sigmol) , &
+                    & r(ws)     ,r(rsedeq) ,r(z0ucur) ,r(z0vcur) ,r(sigmol) , &
                     & r(taubmx) ,r(s1)     ,r(uorb)   ,r(tp)     ,r(sigdif) , &
                     & lstsci    ,r(thick)  ,r(dicww)  ,i(kmxsed) ,i(kcs)    , &
                     & i(kcu)    ,i(kcv)    ,r(guv)    ,r(gvu)    ,r(sbuu)   , &

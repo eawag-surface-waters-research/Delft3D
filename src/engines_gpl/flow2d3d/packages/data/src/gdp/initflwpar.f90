@@ -98,6 +98,8 @@ subroutine initflwpar(gdp)
     flwoutput%roughness   = .false.
     flwoutput%temperature = .false.
     flwoutput%veuler      = .true.
+    flwoutput%z0cur       = .false.
+    flwoutput%z0rou       = .false.
     !
     nullify(gdflwpar%fluxu)
     nullify(gdflwpar%fluxuc)

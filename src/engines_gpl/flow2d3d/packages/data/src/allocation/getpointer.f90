@@ -58,8 +58,6 @@ function getpointer(pntnam, gdp)
     integer , pointer :: wrka7
     integer , pointer :: wrka8
     integer , pointer :: wrka9
-    integer , pointer :: wrka10
-    integer , pointer :: wrka11
     integer , pointer :: wrka12
     integer , pointer :: wrka13
     integer , pointer :: wrka14
@@ -317,6 +315,8 @@ function getpointer(pntnam, gdp)
     integer , pointer :: y3
     integer , pointer :: ycor
     integer , pointer :: yz
+    integer , pointer :: z0ucur
+    integer , pointer :: z0vcur
     integer , pointer :: z0urou
     integer , pointer :: z0vrou
     integer , pointer :: zalfas
@@ -659,6 +659,8 @@ function getpointer(pntnam, gdp)
     y3      => gdp%gdr_i_ch%y3
     ycor    => gdp%gdr_i_ch%ycor
     yz      => gdp%gdr_i_ch%yz
+    z0ucur  => gdp%gdr_i_ch%z0ucur
+    z0vcur  => gdp%gdr_i_ch%z0vcur
     z0urou  => gdp%gdr_i_ch%z0urou
     z0vrou  => gdp%gdr_i_ch%z0vrou
     zalfas  => gdp%gdr_i_ch%zalfas
@@ -769,8 +771,6 @@ function getpointer(pntnam, gdp)
     wrka7   => gdp%gdaddress%wrka7
     wrka8   => gdp%gdaddress%wrka8
     wrka9   => gdp%gdaddress%wrka9
-    wrka10  => gdp%gdaddress%wrka10
-    wrka11  => gdp%gdaddress%wrka11
     wrka12  => gdp%gdaddress%wrka12
     wrka13  => gdp%gdaddress%wrka13
     wrka14  => gdp%gdaddress%wrka14
@@ -1267,6 +1267,10 @@ function getpointer(pntnam, gdp)
        returnval = ycor
     case ('yz')
        returnval = yz
+    case ('z0ucur')
+       returnval = z0ucur
+    case ('z0vcur')
+       returnval = z0vcur
     case ('z0urou')
        returnval = z0urou
     case ('z0vrou')
@@ -1474,10 +1478,6 @@ function getpointer(pntnam, gdp)
        returnval = wrka8
     case ('wrka9')
        returnval = wrka9
-    case ('wrka10')
-       returnval = wrka10
-    case ('wrka11')
-       returnval = wrka11
     case ('wrka12')
        returnval = wrka12
     case ('wrka13')

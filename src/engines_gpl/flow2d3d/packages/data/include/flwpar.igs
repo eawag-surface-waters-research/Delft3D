@@ -37,6 +37,8 @@ type flwoutputtype
     logical :: roughness
     logical :: temperature
     logical :: veuler
+    logical :: z0cur
+    logical :: z0rou
 end type flwoutputtype
 
 !

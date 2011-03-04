@@ -2385,8 +2385,6 @@ subroutine rjdim(lundia, error, gdp)
     !                wrka7    (nmaxddb  ,mmaxddb)
     !                wrka8    (nmaxddb  ,mmaxddb)
     !                wrka9    (nmaxddb  ,mmaxddb)
-    !                wrka10   (nmaxddb  ,mmaxddb)
-    !                wrka11   (nmaxddb  ,mmaxddb)
     !                wrka12   (nmaxddb  ,mmaxddb)
     !                wrka13   (nmaxddb  ,mmaxddb)
     !                wrka14   (nmaxddb  ,mmaxddb)
@@ -2438,16 +2436,6 @@ subroutine rjdim(lundia, error, gdp)
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
                              !  Internal work array
     if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'wrka10'        !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Internal work array
-    if (ierr== - 1) goto 9999
-    !
-    pntnam = 'wrka11'        !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Internal work array
-    if (ierr== - 1) goto 9999
     !
     pntnam = 'wrka12'        !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
@@ -2856,6 +2844,8 @@ subroutine rjdim(lundia, error, gdp)
     !
     !                        volum0(nmaxddb  ,mmaxddb,kmax  )
     !                        volum1(nmaxddb  ,mmaxddb,kmax  )
+    !                        z0ucur(nmaxddb  ,mmaxddb       )
+    !                        z0vcur(nmaxddb  ,mmaxddb       )
     !                        z0urou(nmaxddb  ,mmaxddb       )
     !                        z0vrou(nmaxddb  ,mmaxddb       )
     !                        qu    (nmaxddb  ,mmaxddb,kmax  )
@@ -2872,61 +2862,24 @@ subroutine rjdim(lundia, error, gdp)
                              !  Volume of a cell at new time level
     if (ierr<= - 9) goto 9999
     !
+    pntnam = 'z0ucur'        !  Global data
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
+                             !  Z0 roughness related to currents in U-point
+    if (ierr== - 1) goto 9999
+    !
+    pntnam = 'z0vcur'        !  Global data
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
+                             !  Z0 roughness related to currents in V-point
+    if (ierr== - 1) goto 9999
+    !
     pntnam = 'z0urou'        !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  Pointer of array Z0UROU
-                             !  2DH : Array containing space depen-
-                             !        dent coefficients in roughness
-                             !        method in u-point
-                             !        manning         for rouflo=mann
-                             !        chezy           for rouflo=chez
-                             !        white colebrook for rouflo=whit
-                             !  3d  : array containing
-                             !        ratio magnitude velocity/ustar
-                             !        in u-point
-                             !  Array containing space dependent
-                             !  coefficients in roughness method in
-                             !  U-point (3D as well as 2D)
-                             !        Manning         for ROUFLO=MANN
-                             !        Chezy           for ROUFLO=CHEZ
-                             !        White Colebrook for ROUFLO=WHIT
-                             !        roughness par.  for ROUFLO=Z
-                             !  Roughness height z_0 at u-point
-                             !  array containing space dependent
-                             !  coefficients in roughness method in
-                             !  U-point (3D as well as 2D)
-                             !        Manning         for ROUFLO=MANN
-                             !        Chezy           for ROUFLO=CHEZ
-                             !        White Colebrook for ROUFLO=WHIT
-                             !        roughness par.  for ROUFLO=Z
+                             !  Wave enhanced Z0 roughness in U-point
     if (ierr<= - 9) goto 9999
     !
     pntnam = 'z0vrou'        !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
-                             !  2DH : Array containing space depen-
-                             !        dent coefficient in roughness
-                             !        method in v-point
-                             !        manning         for rouflo=mann
-                             !        chezy           for rouflo=chez
-                             !        white colebrook for rouflo=whit
-                             !  3d  : array containing
-                             !        ratio magnitude velocity/ustar
-                             !        in v-point
-                             !  Array containing space dependent
-                             !  coefficients in roughness method in
-                             !  V-point (3D as well as 2D)
-                             !        Manning         for ROUFLO=MANN
-                             !        Chezy           for ROUFLO=CHEZ
-                             !        White Colebrook for ROUFLO=WHIT
-                             !        roughness par.  for ROUFLO=Z
-                             !  Roughness height z_0 at v-point
-                             !  array containing space dependent
-                             !  coefficients in roughness method in
-                             !  V-point (3D as well as 2D)
-                             !        Manning         for ROUFLO=MANN
-                             !        Chezy           for ROUFLO=CHEZ
-                             !        White Colebrook for ROUFLO=WHIT
-                             !        roughness par.  for ROUFLO=Z
+                             !  Wave enhanced Z0 roughness in V-point
     if (ierr<= - 9) goto 9999
     !
     pntnam = 'qu'            !  Global data

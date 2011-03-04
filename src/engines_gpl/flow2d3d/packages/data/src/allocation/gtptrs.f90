@@ -343,6 +343,8 @@ subroutine gtptrs(gdp)
     integer , pointer :: y3
     integer , pointer :: ycor
     integer , pointer :: yz
+    integer , pointer :: z0ucur
+    integer , pointer :: z0vcur
     integer , pointer :: z0urou
     integer , pointer :: z0vrou
     integer , pointer :: zalfas
@@ -475,8 +477,6 @@ subroutine gtptrs(gdp)
     integer , pointer :: wrka7
     integer , pointer :: wrka8
     integer , pointer :: wrka9
-    integer , pointer :: wrka10
-    integer , pointer :: wrka11
     integer , pointer :: wrka12
     integer , pointer :: wrka13
     integer , pointer :: wrka14
@@ -811,6 +811,8 @@ subroutine gtptrs(gdp)
     y3        => gdp%gdr_i_ch%y3
     ycor      => gdp%gdr_i_ch%ycor
     yz        => gdp%gdr_i_ch%yz
+    z0ucur    => gdp%gdr_i_ch%z0ucur
+    z0vcur    => gdp%gdr_i_ch%z0vcur
     z0urou    => gdp%gdr_i_ch%z0urou
     z0vrou    => gdp%gdr_i_ch%z0vrou
     zalfas    => gdp%gdr_i_ch%zalfas
@@ -943,8 +945,6 @@ subroutine gtptrs(gdp)
     wrka7     => gdp%gdaddress%wrka7
     wrka8     => gdp%gdaddress%wrka8
     wrka9     => gdp%gdaddress%wrka9
-    wrka10    => gdp%gdaddress%wrka10
-    wrka11    => gdp%gdaddress%wrka11
     wrka12    => gdp%gdaddress%wrka12
     wrka13    => gdp%gdaddress%wrka13
     wrka14    => gdp%gdaddress%wrka14
@@ -1346,6 +1346,8 @@ subroutine gtptrs(gdp)
     y3     = gtrpnt('y3'    , gdp)
     ycor   = gtrpnt('ycor'  , gdp)
     yz     = gtrpnt('yz'    , gdp)
+    z0ucur = gtrpnt('z0ucur', gdp)
+    z0vcur = gtrpnt('z0vcur', gdp)
     z0urou = gtrpnt('z0urou', gdp)
     z0vrou = gtrpnt('z0vrou', gdp)
     zalfas = gtrpnt('zalfas', gdp)
@@ -1421,8 +1423,6 @@ subroutine gtptrs(gdp)
     wrka7  = gtrpnt('wrka7' , gdp)
     wrka8  = gtrpnt('wrka8' , gdp)
     wrka9  = gtrpnt('wrka9' , gdp)
-    wrka10 = gtrpnt('wrka10', gdp)
-    wrka11 = gtrpnt('wrka11', gdp)
     wrka12 = gtrpnt('wrka12', gdp)
     wrka13 = gtrpnt('wrka13', gdp)
     wrka14 = gtrpnt('wrka14', gdp)

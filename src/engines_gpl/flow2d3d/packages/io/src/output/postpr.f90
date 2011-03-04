@@ -264,6 +264,10 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     integer                              , pointer :: yz
     integer                              , pointer :: zalfas
     integer                              , pointer :: zbdsed
+    integer                              , pointer :: z0ucur
+    integer                              , pointer :: z0vcur
+    integer                              , pointer :: z0urou
+    integer                              , pointer :: z0vrou
     integer                              , pointer :: zcuru
     integer                              , pointer :: zcurv
     integer                              , pointer :: zcurw
@@ -596,6 +600,10 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     xz                  => gdp%gdr_i_ch%xz
     ycor                => gdp%gdr_i_ch%ycor
     yz                  => gdp%gdr_i_ch%yz
+    z0ucur              => gdp%gdr_i_ch%z0ucur
+    z0vcur              => gdp%gdr_i_ch%z0vcur
+    z0urou              => gdp%gdr_i_ch%z0urou
+    z0vrou              => gdp%gdr_i_ch%z0vrou
     zalfas              => gdp%gdr_i_ch%zalfas
     zbdsed              => gdp%gdr_i_ch%zbdsed
     zcuru               => gdp%gdr_i_ch%zcuru
@@ -1049,7 +1057,8 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                           & r(vortic)   ,r(enstro) ,r(umnldf) ,r(vmnldf) ,r(vicuv)    , &
                           & r(taubmx)   ,r(windu)  ,r(windv)  ,velt      ,r(cvalu0)   , &
                           & r(cvalv0)   ,r(cfurou) ,r(cfvrou) ,rouflo    ,r(patm)     , &
-                          & ktemp       ,gdp       )
+                          & r(z0ucur)   ,r(z0vcur) ,r(z0urou) ,r(z0vrou) ,ktemp       , &
+                          & gdp       )
              else
                 call dfwrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc      , &
                             & rhow        ,mmax      , &
@@ -1064,7 +1073,8 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                             & r(vortic)   ,r(enstro) ,r(umnldf) ,r(vmnldf) ,r(vicuv)    , &
                             & r(taubmx)   ,r(windu)  ,r(windv)  ,velt      ,r(cvalu0)   , &
                             & r(cvalv0)   ,r(cfurou) ,r(cfvrou) ,rouflo    ,r(patm)     , &
-                            & ktemp       ,gdp       )
+                            & r(z0ucur)   ,r(z0vcur) ,r(z0urou) ,r(z0vrou) ,ktemp       , &
+                            & gdp       )
              endif
              if (error) goto 9999
              if (roller) then

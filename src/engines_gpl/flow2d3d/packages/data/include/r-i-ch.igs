@@ -321,6 +321,8 @@ type gd_r_i_ch
        integer :: y3         !  Description and declaration in rjdim.f90
        integer :: ycor       !  Description and declaration in rjdim.f90
        integer :: yz         !  Description and declaration in rjdim.f90
+       integer :: z0ucur     !  Description and declaration in rjdim.f90
+       integer :: z0vcur     !  Description and declaration in rjdim.f90
        integer :: z0urou     !  Description and declaration in rjdim.f90
        integer :: z0vrou     !  Description and declaration in rjdim.f90
        integer :: zalfas     !  Description and declaration in rjdim.f90

@@ -57,8 +57,6 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     integer                              , pointer :: wrka1
     integer                              , pointer :: wrka2
     integer                              , pointer :: wrka3
-    integer                              , pointer :: wrka10
-    integer                              , pointer :: wrka11
     integer                              , pointer :: wrkb1
     integer                              , pointer :: wrkb2
     integer                              , pointer :: wrkb3
@@ -279,6 +277,8 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     integer                              , pointer :: xz
     integer                              , pointer :: ycor
     integer                              , pointer :: yz
+    integer                              , pointer :: z0ucur
+    integer                              , pointer :: z0vcur
     integer                              , pointer :: z0urou
     integer                              , pointer :: z0vrou
     integer                              , pointer :: zstep
@@ -392,8 +392,6 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     wrka1               => gdp%gdaddress%wrka1
     wrka2               => gdp%gdaddress%wrka2
     wrka3               => gdp%gdaddress%wrka3
-    wrka10              => gdp%gdaddress%wrka10
-    wrka11              => gdp%gdaddress%wrka11
     wrkb1               => gdp%gdaddress%wrkb1
     wrkb2               => gdp%gdaddress%wrkb2
     wrkb3               => gdp%gdaddress%wrkb3
@@ -614,6 +612,8 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     xz                  => gdp%gdr_i_ch%xz
     ycor                => gdp%gdr_i_ch%ycor
     yz                  => gdp%gdr_i_ch%yz
+    z0ucur              => gdp%gdr_i_ch%z0ucur
+    z0vcur              => gdp%gdr_i_ch%z0vcur
     z0urou              => gdp%gdr_i_ch%z0urou
     z0vrou              => gdp%gdr_i_ch%z0vrou
     zstep               => gdp%gdr_i_ch%zstep
@@ -1071,7 +1071,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
               & r(teta)   ,r(uorb)   ,r(tp)     ,r(wsu)    ,r(wsv)    , &
               & r(grmasu) ,r(dfu)    ,r(deltau) ,r(hrms)   , &
               & r(cfurou) ,r(z0urou) ,r(wrkb1)  ,r(dzu1)   ,r(sig)    , &
-              & r(wrka10) ,r(cvalu0) ,r(grmsur) ,r(grfacu) ,gdp       )
+              & r(z0ucur) ,r(cvalu0) ,r(grmsur) ,r(grfacu) ,gdp       )
     icx = 1
     icy = nmaxddb
     if (.not. zmodel) then
@@ -1088,7 +1088,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
               & r(teta)   ,r(uorb)   ,r(tp)     ,r(wsv)    ,r(wsu)    , &
               & r(grmasv) ,r(dfv)    ,r(deltav) ,r(hrms)   , &
               & r(cfvrou) ,r(z0vrou) ,r(wrkb2)  ,r(dzv1)   ,r(sig)    , &
-              & r(wrka11) ,r(cvalv0) ,r(grmsvr) ,r(grfacv) ,gdp       )
+              & r(z0vcur) ,r(cvalv0) ,r(grmsvr) ,r(grfacv) ,gdp       )
     icx = nmaxddb
     icy = 1
     call caltmx(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &

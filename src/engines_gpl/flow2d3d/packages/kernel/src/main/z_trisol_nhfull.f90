@@ -67,8 +67,6 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     integer                              , pointer :: wrka6
     integer                              , pointer :: wrka7
     integer                              , pointer :: wrka8
-    integer                              , pointer :: wrka10
-    integer                              , pointer :: wrka11
     integer                              , pointer :: wrka15
     integer                              , pointer :: wrka16
     integer                              , pointer :: wrkb1
@@ -347,6 +345,8 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     integer                              , pointer :: xz
     integer                              , pointer :: ycor
     integer                              , pointer :: yz
+    integer                              , pointer :: z0ucur
+    integer                              , pointer :: z0vcur
     integer                              , pointer :: z0urou
     integer                              , pointer :: z0vrou
     integer                              , pointer :: zstep
@@ -493,8 +493,6 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     wrka6               => gdp%gdaddress%wrka6
     wrka7               => gdp%gdaddress%wrka7
     wrka8               => gdp%gdaddress%wrka8
-    wrka10              => gdp%gdaddress%wrka10
-    wrka11              => gdp%gdaddress%wrka11
     wrka15              => gdp%gdaddress%wrka15
     wrka16              => gdp%gdaddress%wrka16
     wrkb1               => gdp%gdaddress%wrkb1
@@ -772,6 +770,8 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     xz                  => gdp%gdr_i_ch%xz
     ycor                => gdp%gdr_i_ch%ycor
     yz                  => gdp%gdr_i_ch%yz
+    z0ucur              => gdp%gdr_i_ch%z0ucur
+    z0vcur              => gdp%gdr_i_ch%z0vcur
     z0urou              => gdp%gdr_i_ch%z0urou
     z0vrou              => gdp%gdr_i_ch%z0vrou
     zstep               => gdp%gdr_i_ch%zstep
@@ -1374,9 +1374,6 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
        ! CVALU0 and CVALV0 contain the actual 2D-chezy value
        ! to be used in detvic
        !
-       ! U-point and V-point values of Z0CUR are calculated in WRKA10,
-       ! and WRKA11 respectively and are passed to EROSED
-       !
        icx = nmaxddb
        icy = 1
        call timer_start(timer_taubot, gdp)
@@ -1389,7 +1386,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
                  & r(teta)   ,r(uorb)   ,r(tp)     ,r(wsu)    ,r(wsv)    , &
                  & r(grmasu) ,r(dfu)    ,r(deltau) ,r(hrms)   , &
                  & r(cfurou) ,r(z0urou) ,r(hu)     ,r(dzu1)   ,r(sig)    , &
-                 & r(wrka10) ,r(cvalu0) ,r(grmsur) ,r(grfacu) ,gdp       )
+                 & r(z0ucur) ,r(cvalu0) ,r(grmsur) ,r(grfacu) ,gdp       )
        call timer_stop(timer_taubot, gdp)
        !
        icx = nmaxddb

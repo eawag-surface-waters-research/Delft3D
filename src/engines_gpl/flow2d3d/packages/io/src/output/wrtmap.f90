@@ -11,7 +11,8 @@ subroutine wrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc    , &
                 & vortic      ,enstro    ,umnldf    ,vmnldf    ,vicuv     , &
                 & taubmx      ,windu     ,windv     ,velt      ,cvalu0    , &
                 & cvalv0      ,cfurou    ,cfvrou    ,rouflo    ,patm      , &
-                & ktemp       ,gdp       )
+                & z0ucur      ,z0vcur    ,z0urou    ,z0vrou    ,ktemp     , &
+                & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -151,6 +152,10 @@ subroutine wrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc    , &
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         , intent(in)  :: vortic      !  Description and declaration in rjdim.f90
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         , intent(in)  :: wphy        !  Description and declaration in rjdim.f90
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci) , intent(in)  :: r1          !  Description and declaration in rjdim.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: z0ucur      !  Description and declaration in rjdim.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: z0vcur      !  Description and declaration in rjdim.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: z0urou      !  Description and declaration in rjdim.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: z0vrou      !  Description and declaration in rjdim.f90
     character(*)                                                                      , intent(in)  :: trifil      !!  File name for FLOW NEFIS output
                                                                                                                    !!  files (tri"h/m"-"casl""labl".dat/def)
     character(4)                                                                      , intent(in)  :: rouflo      !  Description and declaration in ckdim.f90
@@ -507,6 +512,26 @@ subroutine wrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc    , &
              & lundia    ,gdp       )
           call addelm(nefiswrtmap,'ROUMETV',' ',runit      ,'REAL',4         , &
              & trim(rdesc) // ' in V-point'                                  , &
+             & 2         ,nmaxus    ,mmax      ,0         ,0         ,0      , &
+             & lundia    ,gdp       )
+       endif
+       if (flwoutput%z0cur) then
+          call addelm(nefiswrtmap,'Z0UCUR',' ','[   M   ]','REAL',4          , &
+             & 'Current only z0 bed roughness in U-point                    ', &
+             & 2         ,nmaxus    ,mmax      ,0         ,0         ,0      , &
+             & lundia    ,gdp       )
+          call addelm(nefiswrtmap,'Z0VCUR',' ','[   M   ]','REAL',4          , &
+             & 'Current only z0 bed roughness in V-point                    ', &
+             & 2         ,nmaxus    ,mmax      ,0         ,0         ,0      , &
+             & lundia    ,gdp       )
+       endif
+       if (flwoutput%z0rou) then
+          call addelm(nefiswrtmap,'Z0UROU',' ','[   M   ]','REAL',4          , &
+             & 'Wave enhanced z0 bed roughness in U-point                   ', &
+             & 2         ,nmaxus    ,mmax      ,0         ,0         ,0      , &
+             & lundia    ,gdp       )
+          call addelm(nefiswrtmap,'Z0VROU',' ','[   M   ]','REAL',4          , &
+             & 'Wave enhanced z0 bed roughness in V-point                   ', &
              & 2         ,nmaxus    ,mmax      ,0         ,0         ,0      , &
              & lundia    ,gdp       )
        endif
@@ -1202,7 +1227,7 @@ subroutine wrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc    , &
     endif
     if (flwoutput%roughness) then
        !
-       ! element 'ROUTMETU'
+       ! element 'ROUMETU'
        !
        call sbuff_checksize(mmax*nmaxus)
        i = 0
@@ -1229,6 +1254,66 @@ subroutine wrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc    , &
        !
        ierror = putelt(fds, grnam3, 'ROUMETV', uindex, 1, sbuff)
        if (ierror /= 0) goto 9999
+    endif
+    if (flwoutput%z0rou) then
+       !
+       ! element 'Z0UROU'
+       !
+       call sbuff_checksize(mmax*nmaxus)
+       i = 0
+       do m = 1, mmax
+          do n = 1, nmaxus
+             i        = i+1
+             sbuff(i) = real(z0urou(n, m),sp)
+          enddo
+       enddo
+       !
+       ierror = putelt(fds, grnam3, 'Z0UROU', uindex, 1, sbuff)
+       if (ierror/= 0) goto 9999
+       !
+       ! element 'Z0VROU'
+       !
+       call sbuff_checksize(mmax*nmaxus)
+       i = 0
+       do m = 1, mmax
+          do n = 1, nmaxus
+             i        = i+1
+             sbuff(i) = real(z0vrou(n, m),sp)
+          enddo
+       enddo
+       !
+       ierror = putelt(fds, grnam3, 'Z0VROU', uindex, 1, sbuff)
+       if (ierror/= 0) goto 9999
+    endif
+    if (flwoutput%z0cur) then
+       !
+       ! element 'Z0UCUR'
+       !
+       call sbuff_checksize(mmax*nmaxus)
+       i = 0
+       do m = 1, mmax
+          do n = 1, nmaxus
+             i        = i+1
+             sbuff(i) = real(z0ucur(n, m),sp)
+          enddo
+       enddo
+       !
+       ierror = putelt(fds, grnam3, 'Z0UCUR', uindex, 1, sbuff)
+       if (ierror/= 0) goto 9999
+       !
+       ! element 'Z0VCUR'
+       !
+       call sbuff_checksize(mmax*nmaxus)
+       i = 0
+       do m = 1, mmax
+          do n = 1, nmaxus
+             i        = i+1
+             sbuff(i) = real(z0vcur(n, m),sp)
+          enddo
+       enddo
+       !
+       ierror = putelt(fds, grnam3, 'Z0VCUR', uindex, 1, sbuff)
+       if (ierror/= 0) goto 9999
     endif
     !
     ! Output of vertical coordinates of the layer interfaces (both for Sigma- and Z-model)

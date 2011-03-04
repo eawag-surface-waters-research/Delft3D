@@ -26,8 +26,7 @@ subroutine adi(dischy    ,solver    ,icreep    ,stage     ,nst       , &
              & dpdeta    ,ubrlsu    ,ubrlsv    ,uwtypu    ,uwtypv    , &
              & pship     ,tgfsep    ,soumud    ,excbed    ,wrka1     , &
              & wrka2     ,wrka3     ,wrka4     ,wrka5     ,wrka6     , &
-             & wrka7     ,wrka8     ,wrka9     ,wrka10    ,wrka11    , &
-             & wrka12    ,wrka13    ,wrka14    ,wrka15    ,wrka16    , &
+             & wrka7     ,wrka8     ,wrka9     ,wrka15    ,wrka16    , &
              & wrkb1     ,wrkb2     ,wrkb3     ,wrkb4     ,wrkb5     , &
              & wrkb6     ,wrkb7     ,wrkb8     ,wrkb9     ,wrkb10    , &
              & wrkb11    ,wrkb12    ,wrkb13    ,wrkb14    ,wrkb15    , &
@@ -182,11 +181,6 @@ subroutine adi(dischy    ,solver    ,icreep    ,stage     ,nst       , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: windsu !  Description and declaration in rjdim.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: windsv !  Description and declaration in rjdim.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka1  !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka10 !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka11 !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka12 !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka13 !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka14 !  Description and declaration in rjdim.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka15 !  Description and declaration in rjdim.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka16 !  Description and declaration in rjdim.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka2  !  Description and declaration in rjdim.f90
