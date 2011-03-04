@@ -85,12 +85,12 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
     real(fp), intent(out) :: taurat
     real(fp)              :: tauwav
     real(fp)              :: tp     !  Description and declaration in rjdim.f90
-    real(fp)              :: umod
+    real(fp), intent(in)  :: umod
     real(fp)              :: ustarc
     real(fp)              :: usus   !  Description and declaration in rjdim.f90
-    real(fp)              :: uuu
+    real(fp), intent(in)  :: uuu
     real(fp)              :: uwb
-    real(fp)              :: vvv
+    real(fp), intent(in)  :: vvv
     real(fp)              :: z0cur
     real(fp), intent(in)  :: z0rou
     real(fp), intent(in)  :: zumod

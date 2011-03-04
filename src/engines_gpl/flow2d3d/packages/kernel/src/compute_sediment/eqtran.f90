@@ -1,12 +1,10 @@
 subroutine eqtran(sig       ,thick     ,kmax      , &
                 & aks       ,ustarc    ,ws        ,ltur      , &
-                & frac      ,sigmol    ,uuu       , &
-                & vvv       ,umod      ,zumod     ,z0rou     , &
+                & frac      ,sigmol    , &
                 & ce_nm     ,taurat    ,dicww     ,seddif    ,rsedeq    , &
                 & kmaxsd    ,crep      ,sbcu      ,sbcv      ,sbwu      , &
                 & sbwv      ,sswu      ,sswv      ,lundia    , &
-                & z0cur     ,taucr0    , &
-                & dss       ,rksrs     ,i2d3d     , &
+                & taucr0    ,dss       ,rksrs     ,i2d3d     , &
                 & ce_nmtmp  ,akstmp    ,lsecfl    ,spirint   , &
                 & suspfrac  ,ust2      ,tetacr    , &
                 & salmax    ,ws0       ,t_relax   ,concin    , &
@@ -118,20 +116,14 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     real(fp)                        , intent(out)  :: t_relax
     real(fp)                        , intent(in)   :: tauadd
     real(fp)                        , intent(in)   :: taucr0
-    real(fp)                        , intent(in)   :: taurat
+    real(fp)                        , intent(out)  :: taurat
     real(fp)                        , intent(in)   :: tetacr
     real(fp), dimension(kmax)       , intent(in)   :: thick    !  Description and declaration in rjdim.f90
-    real(fp)                        , intent(in)   :: umod
     real(fp)                        , intent(in)   :: ubot     !  Description and declaration in rjdim.f90
     real(fp)                        , intent(out)  :: ustarc
     real(fp)                        , intent(out)  :: ust2
-    real(fp)                        , intent(in)   :: uuu
-    real(fp)                        , intent(in)   :: vvv
     real(fp), dimension(0:kmax)     , intent(in)   :: ws       !  Description and declaration in rjdim.f90
     real(fp)                        , intent(in)   :: ws0
-    real(fp)                        , intent(in)   :: z0cur
-    real(fp)                        , intent(in)   :: z0rou
-    real(fp)                        , intent(in)   :: zumod
     real(hp), dimension(numrealpar) , intent(inout):: realpar
     logical                         , intent(in)   :: epspar
     logical                         , intent(out)  :: error
@@ -215,18 +207,24 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     real(fp)          :: tyg
     real(fp)          :: u
     real(fp)          :: u2dhim
+    real(fp)          :: umod
     real(fp)          :: uon
     real(fp)          :: uoff
     real(fp)          :: uorb
     real(fp)          :: usus
     real(fp)          :: utot
+    real(fp)          :: uuu
     real(fp)          :: uwb
     real(fp)          :: uwbih
     real(fp)          :: uwc
     real(fp)          :: v
     real(fp)          :: vicmol
     real(fp)          :: vonkar
+    real(fp)          :: vvv
     real(fp)          :: z
+    real(fp)          :: z0cur
+    real(fp)          :: z0rou
+    real(fp)          :: zumod
     real(fp)          :: zusus
  
     ! Interface to dll is in High precision!
@@ -254,7 +252,11 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     sbc_total = .false.
     sus_total = .false.
     akstmp    = aks
-
+    !
+    uuu       = real(realpar(RP_UCHAR),fp)
+    vvv       = real(realpar(RP_VCHAR),fp)
+    umod      = real(realpar(RP_VELCH),fp)
+    zumod     = real(realpar(RP_ZVLCH),fp)
     h1        = real(realpar(RP_DEPTH),fp)
     chezy     = real(realpar(RP_CHEZY),fp)
     hrms      = real(realpar(RP_HRMS) ,fp)
@@ -277,7 +279,13 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     ag        = real(realpar(RP_GRAV) ,fp)
     vicmol    = real(realpar(RP_VICML),fp)
     !taub      = real(realpar(RP_TAUB) ,fp)
+    !ubed      = real(realpar(RP_UBED ),fp)
+    !vbed      = real(realpar(RP_VBED ),fp)
+    !velb      = real(realpar(RP_VELBD),fp)
+    !zvelb     = real(realpar(RP_ZVLBD),fp)
     vonkar    = real(realpar(RP_VNKAR),fp)
+    z0cur     = real(realpar(RP_Z0CUR),fp)
+    z0rou     = real(realpar(RP_z0ROU),fp)
     !
     cesus  = 0.0_fp
     sbot   = 0.0_fp
@@ -554,6 +562,17 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
              !enddo
              !
              ! can be replaced by analytical integration
+             !        h1
+             !  1    /
+             ! --- * | log(1+z/z0rou) dz =
+             !  h1   /
+             !      z=0
+             !
+             ! (z0rou/h1+1) * log(1+h1/z0rou) - 1 =
+             !
+             ! log (1 + zavg/z0rou) where
+             ! zavg = (1+h1/z0rou)**(z0rou/h1)*exp(-1)*(z0rou+h1)-z0rou
+             ! the level at which u(z) = avgu
              !
              avgu = (z0rou/h1+1.0_fp)*log(1.0_fp+h1/z0rou) - 1.0_fp
              avgu = avgu * umod / log(1.0_fp+zumod/z0rou)
@@ -761,10 +780,6 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
        realpar(RP_UMEAN) = real(u      ,hp)
        realpar(RP_VMEAN) = real(v      ,hp)
        realpar(RP_VELMN) = real(utot   ,hp)
-       realpar(RP_UCHAR) = real(uuu    ,hp)
-       realpar(RP_VCHAR) = real(vvv    ,hp)
-       realpar(RP_VELCH) = real(umod   ,hp)
-       realpar(RP_ZVLCH) = real(zumod  ,hp)
        ! Initialisation of output variables of user defined transport formulae
        !
        sbc_total   = .false. ! may be changed by user defined formulae

@@ -1,7 +1,6 @@
 subroutine erosilt(thick    ,kmax     ,ws       , &
                  & wstau    ,entr     ,dicww    ,seddif   ,lundia   , &
-                 & h0       ,h1       ,um       ,vm       ,uuu      ,vvv      , &
-                 & taub     ,error    ,fixfac   , &
+                 & h0       ,h1       ,error    ,fixfac   , &
                  & frac     ,sinkse   ,sourse   ,oldmudfrac, flmd2l , tcrdep  , &
                  & tcrero   ,eropar   ,iform    , &
                  & numintpar,numrealpar,numstrpar,dllfunc ,dllhandle, &
@@ -63,11 +62,6 @@ subroutine erosilt(thick    ,kmax     ,ws       , &
     real(fp)  , dimension(kmax)                               , intent(in)  :: thick
     real(fp)                                                  , intent(in)  :: h0
     real(fp)                                                  , intent(in)  :: h1
-    real(fp)                                                  , intent(in)  :: um
-    real(fp)                                                  , intent(in)  :: uuu
-    real(fp)                                                  , intent(in)  :: vm
-    real(fp)                                                  , intent(in)  :: vvv
-    real(fp)                                                  , intent(in)  :: taub
     logical                                                   , intent(out) :: error
     real(fp)                                                  , intent(in)  :: fixfac
     real(fp)                                                  , intent(in)  :: frac
@@ -93,13 +87,13 @@ subroutine erosilt(thick    ,kmax     ,ws       , &
     integer  :: k
     real(fp) :: sour
     real(fp) :: sink
+    real(fp) :: taub
     real(fp) :: taum
     real(fp) :: thick0
     real(fp) :: thick1
 
     ! Interface to dll is in High precision!
     !
-    real(fp)          :: ee
     real(hp)          :: sink_dll
     real(hp)          :: sour_dll
     integer           :: ierror
@@ -108,13 +102,13 @@ subroutine erosilt(thick    ,kmax     ,ws       , &
 !
 !! executable statements ------------------
 !
-    ee     = exp(1.0_fp)
     error  = .false.
     !
     ! Calculate total (possibly wave enhanced) roughness
     !
     thick0 = thick(kmax) * h0
     thick1 = thick(kmax) * h1
+    taub = real(realpar(RP_TAUB), fp)
     !
     ! Bed transport following Partheniades and Krone
     ! but in case of fluid mud, source term is determined by
@@ -164,21 +158,6 @@ subroutine erosilt(thick    ,kmax     ,ws       , &
              sink = 0.0
           endif
        elseif (iform == 15) then
-          !
-          ! User defined formula in DLL
-          ! Input parameters are passed via realpar/intpar/strpar-arrays
-          !
-          realpar(RP_UMEAN) = real(um     ,hp)
-          realpar(RP_VMEAN) = real(vm     ,hp)
-          realpar(RP_VELMN) = real(sqrt(um*um + vm*vm),hp)
-          realpar(RP_UCHAR) = real(uuu    ,hp)
-          realpar(RP_VCHAR) = real(vvv    ,hp)
-          realpar(RP_VELCH) = real(sqrt(uuu*uuu + vvv*vvv),hp)
-          if (kmax>1) then
-             realpar(RP_ZVLCH) = real(h1*thick(kmax)/2.0_fp,hp)
-          else
-             realpar(RP_ZVLCH) = real(h1/ee,hp)
-          endif
           !
           ! Initialisation of output variables of user defined transport formulae
           !

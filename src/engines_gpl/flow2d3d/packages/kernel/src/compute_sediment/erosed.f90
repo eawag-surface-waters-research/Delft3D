@@ -324,9 +324,12 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: umean
     real(fp)                      :: ustarc
     real(fp)                      :: vbed
+    real(fp)                      :: velb
+    real(fp)                      :: velm
     real(fp)                      :: vmean
     real(fp)                      :: z0cur
     real(fp)                      :: z0rou
+    real(fp)                      :: zvelb
     real(fp), dimension(0:kmax2d) :: dcww2d
     real(fp), dimension(0:kmax2d) :: sddf2d
     real(fp), dimension(0:kmax2d) :: ws2d
@@ -759,8 +762,16 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           umean = umean + thick(k)*(u0eul(nm,k) + u0eul(nmd,k))/ku
           vmean = vmean + thick(k)*(v0eul(nm,k) + v0eul(ndm,k))/kv
        enddo
+       velm = sqrt(umean**2+vmean**2)
+       !
        ubed = (u0eul(nm,kmax) + u0eul(nmd,kmax))/ku
        vbed = (v0eul(nm,kmax) + v0eul(ndm,kmax))/kv
+       velb = sqrt(ubed**2 + vbed**2)
+       if (kmax>1) then
+          zvelb = h1*thick(kmax)/2.0_fp
+       else
+          zvelb = h1/ee
+       endif
        !
        ! Calculate current related roughness
        !
@@ -824,13 +835,13 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           call d3stop(1, gdp)
        endif
        dll_reals(RP_TIME ) = real(timsec ,hp)
-      !dll_reals(RP_UMEAN) = depth averaged u velocity
-      !dll_reals(RP_VMEAN) = depth averaged v velocity
-      !dll_reals(RP_VELMN) = depth averaged velocity magnitude
-      !dll_reals(RP_UCHAR) = characteristic u velocity
-      !dll_reals(RP_VCHAR) = characteristic v velocity
-      !dll_reals(RP_VELCH) = characteristic velocity magnitude
-      !dll_reals(RP_ZVLCH) = z level of characteristic velocity
+       dll_reals(RP_UMEAN) = real(umean  ,hp)
+       dll_reals(RP_VMEAN) = real(vmean  ,hp)
+       dll_reals(RP_VELMN) = real(velm   ,hp)
+       dll_reals(RP_UCHAR) = real(uuu(nm)   ,hp)
+       dll_reals(RP_VCHAR) = real(vvv(nm)   ,hp)
+       dll_reals(RP_VELCH) = real(umod(nm)  ,hp)
+       dll_reals(RP_ZVLCH) = real(zumod(nm) ,hp)
        dll_reals(RP_DEPTH) = real(h1        ,hp)
        dll_reals(RP_CHEZY) = real(chezy     ,hp)
        if (wave) then
@@ -861,7 +872,13 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        dll_reals(RP_GRAV ) = real(ag     ,hp)
        dll_reals(RP_VICML) = real(vicmol ,hp)
        dll_reals(RP_TAUB ) = real(taub   ,hp) !taubmx incremented with tauadd
+       dll_reals(RP_UBED ) = real(ubed   ,hp)
+       dll_reals(RP_VBED ) = real(vbed   ,hp)
+       dll_reals(RP_VELBD) = real(velb   ,hp)
+       dll_reals(RP_ZVLBD) = real(zvelb  ,hp)
        dll_reals(RP_VNKAR) = real(vonkar ,hp)
+       dll_reals(RP_Z0CUR) = real(z0cur  ,hp)
+       dll_reals(RP_Z0ROU) = real(z0rou  ,hp)
        !
        if (max_integers < MAX_IP) then
           write(errmsg,'(a,a,a)') 'Insufficient space to pass integer values to transport routine.'
@@ -906,8 +923,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              !
              call erosilt(thick    ,kmax     ,wslc     , &
                         & wstau(nm),entr(nm) ,dcwwlc   ,sddflc   ,lundia   , &
-                        & h0       ,h1       ,umean    ,vmean    ,ubed     ,vbed     , &
-                        & taub     ,error    ,fixfac(nm,l), &
+                        & h0       ,h1       ,error    ,fixfac(nm,l), &
                         & frac(nm,l),sinkse(nm,l),sourse(nm,l),oldmudfrac,flmd2l  ,tcrdep(nm,l), &
                         & tcrero(nm,l) ,eropar(nm,l)   ,iform(l) , &
                         & max_integers,max_reals      ,max_strings  ,dll_function(l),dll_handle(l), &
@@ -1018,13 +1034,11 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              !
              call eqtran(sig         ,thick       ,kmax         , &
                        & aks(nm)     ,ustarc      ,wslc         ,ltur      , &
-                       & frac(nm,l)  ,tsigmol     ,uuu(nm)      , &
-                       & vvv(nm)     ,umod(nm)    ,zumod(nm)    ,z0rou     , &
+                       & frac(nm,l)  ,tsigmol     , &
                        & ce_nm       ,taurat(nm,l),dcwwlc       ,sddflc    ,rsdqlc    , &
                        & kmaxsd      ,crep        ,sbcu(nm,l )  ,sbcv(nm,l),sbwu(nm,l), &
                        & sbwv(nm,l)  ,sswu(nm,l)  ,sswv(nm,l)   ,lundia    , &
-                       & z0cur       ,taucr(l)    , &
-                       & tdss        ,rksr(nm)     ,3         , &
+                       & taucr(l)    ,tdss        ,rksr(nm)     ,3         , &
                        & ce_nmtmp    ,akstmp      ,lsecfl       ,spirint   , &
                        & suspfrac    ,ust2(nm)    ,tetacr(l)    , &
                        & tsalmax     ,tws0        ,tsd          ,concin3d  , &
@@ -1101,13 +1115,11 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              !
              call eqtran(sig2d       ,thck2d      ,kmax2d       , &
                        & aks(nm)     ,ustarc      ,ws2d         ,ltur       , &
-                       & frac(nm,l)  ,tsigmol     ,uuu(nm)      , &
-                       & vvv(nm)     ,umod(nm)    ,zumod(nm)    ,z0rou      , &
+                       & frac(nm,l)  ,tsigmol     , &
                        & ce_nm       ,taurat(nm,l),dcww2d       ,sddf2d     ,rsdq2d     , &
                        & kmaxsd      ,trsedeq     ,sbcu(nm,l)   ,sbcv(nm,l) ,sbwu(nm,l) , &
                        & sbwv(nm,l)  ,sswu(nm,l)  ,sswv(nm,l)   ,lundia     , &
-                       & z0cur       ,taucr(l)    , &
-                       & tdss        ,rksr(nm)     ,2          , &
+                       & taucr(l)    ,tdss        ,rksr(nm)     ,2          , &
                        & ce_nmtmp    ,akstmp      ,lsecfl       ,spirint    , &
                        & suspfrac    ,ust2(nm)    ,tetacr(l)    , &
                        & tsalmax     ,tws0        ,tsd          ,concin2d   , &

@@ -57,8 +57,14 @@
     integer, parameter :: RP_GRAV  = 28
     integer, parameter :: RP_VICML = 29
     integer, parameter :: RP_TAUB  = 30
-    integer, parameter :: RP_VNKAR = 31
-    integer, parameter :: MAX_RP   = 31
+    integer, parameter :: RP_UBED  = 31
+    integer, parameter :: RP_VBED  = 32
+    integer, parameter :: RP_VELBD = 33
+    integer, parameter :: RP_ZVLBD = 34
+    integer, parameter :: RP_VNKAR = 35
+    integer, parameter :: RP_Z0CUR = 36
+    integer, parameter :: RP_Z0ROU = 37
+    integer, parameter :: MAX_RP   = 37
 !
 
     integer, parameter :: IP_NM    =  1
