@@ -84,7 +84,7 @@ module TREE_STRUCTURES
               tree_get_data_ptr, tree_put_data, tree_get_name, &
               tree_get_datatype, tree_get_data_string,         &
               tree_traverse, tree_traverse_level, print_tree, &
-              tree_fold
+              tree_fold, tree_destroy
 
 contains
 
@@ -402,6 +402,103 @@ recursive subroutine tree_traverse( tree, handler, data, stop )
     endif
 
 end subroutine tree_traverse
+
+
+! tree_traverse_bottomup --
+!    Traverse a tree and handle the nodes by a depth-first method.
+!    The callback subroutine is first performed on the children of each
+!    node and then on the node itself.
+!
+! Arguments:
+!    tree        The tree or node to traverse
+!    handler     Routine to handle each node
+!    data        Arbitrary data to be passed to the handler
+!    stop        Whether to continue or stop (if set true)
+! Result:
+!    Each tree node is visited (unless the traversal is
+!    prematurely ended by setting "stop" to true)
+!
+recursive subroutine tree_traverse_bottomup( tree, handler, data, stop )
+    type(TREE_DATA), pointer        :: tree
+    character(len=1), dimension(:)  :: data
+    logical, intent(out)            :: stop
+
+    interface
+       subroutine handler( node, data, stop )
+          use TREE_DATA_TYPES
+          type(TREE_DATA), pointer        :: node
+          character(len=1), dimension(:)  :: data
+          logical, intent(inout)          :: stop
+       end subroutine handler
+    end interface
+
+    integer                         :: i
+
+    stop = .false.
+    if ( .not. associated( tree ) ) then
+       return
+    endif
+
+    !
+    ! First recurse through the child nodes (if any)
+    !
+    if ( associated( tree%child_nodes) ) then
+       do i = 1,size(tree%child_nodes)
+          traverse_level = traverse_level + 1
+          call tree_traverse_bottomup( tree%child_nodes(i)%node_ptr, &
+                              handler, data, stop )
+          traverse_level = traverse_level - 1
+          if ( stop ) then
+             exit
+          endif
+       enddo
+    endif
+    if ( stop ) then
+       return
+    endif
+
+    !
+    ! Then call the handler for the current node/tree
+    !
+    call handler( tree, data, stop )
+
+end subroutine tree_traverse_bottomup
+
+
+!> Destroys a tree freeing up all its memory.
+subroutine tree_destroy(tree)
+    type(TREE_DATA), pointer                   :: tree    !< Tree that should be destroyed.
+    logical :: dummylog
+
+    call tree_traverse_bottomup(tree, dealloc_tree_data, node_value, dummylog)
+    nullify(tree)
+contains
+
+!> Deallocates all node data for a tree root.
+!! Assumes that all child nodes's data is already deallocated.
+!! This subroutine is intended for use in tree_traverse_bottomup.
+subroutine dealloc_tree_data(tree, data, stop)
+    type(TREE_DATA), pointer                      :: tree !< Tree whose root should be printed.
+    character(len=1), dimension(:), intent(in)    :: data !< Help data, not used, may be empty
+    logical,                        intent(inout) :: stop !< Whether to continue or stop.
+
+    if (associated(tree)) then
+        if (associated(tree%node_name)) then
+            deallocate(tree%node_name)
+        end if
+        if (associated(tree%node_data)) then
+            deallocate(tree%node_data)
+        end if
+        if (associated(tree%node_data_type)) then
+            deallocate(tree%node_data_type)
+        end if
+        if (associated(tree%child_nodes)) then
+            deallocate(tree%child_nodes)
+        end if
+   end if
+end subroutine dealloc_tree_data
+
+end subroutine tree_destroy
 
 
 !> 'Fold' a tree together, using operations on child data, in a bottomup fashion.
