@@ -95,7 +95,11 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
       if (      comparereal(wavedata%time%timsec,wavedata%output%nextint)>=0 &
         & .and. comparereal(swan_run%int2keephotfile,0.0)==1) then
          call setkeep_hotfile(wavedata%output, .true.)
-         call setnextint(wavedata%output, wavedata%time%timsec +  swan_run%int2keephotfile * 60.0 )
+         if (comparereal(wavedata%output%nextint,0.0)==0) then
+            call setnextint(wavedata%output, wavedata%time%timsec +  (swan_run%int2keephotfile + swan_run%deltc) * 60.0 )
+         else
+            call setnextint(wavedata%output, wavedata%time%timsec +  swan_run%int2keephotfile * 60.0 )
+         endif
       else
          call setkeep_hotfile(wavedata%output, .false.)
       endif
