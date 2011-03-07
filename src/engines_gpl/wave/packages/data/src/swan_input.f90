@@ -325,6 +325,7 @@ module swan_input
        character(256)                           :: specfile
        character(15)                            :: prevhottime = '00000000.000000'       
        character(15)                            :: curhottime  = '00000000.000000'       
+       character(15)                            :: nexthottime  ='00000000.000000'       
        character(20), dimension(:), allocatable :: pntfilnam
        !
        type(handletype)                         :: tseriesfile
@@ -4498,7 +4499,7 @@ subroutine write_swan_inp (wavedata, outcnt, &
        !
        ! define the name of the hotfile to be used
        !
-       write (fname,'(a,i0,2a)') 'hot_', inest, '_', trim(sr%prevhottime)
+       write (fname,'(a,i0,2a)') 'hot_', inest, '_', trim(sr%nexthottime)
        !
        ! use it when it exists
        !
@@ -5185,6 +5186,7 @@ subroutine write_swan_inp (wavedata, outcnt, &
        ! line to ensure that SWAN is going to produce a hotfile
        !
        write (fname,'(a,i0,2a)') 'hot_', inest, '_', trim(tendc)
+       sr%nexthottime = tendc
        line  = 'HOTF ''' // trim(fname) // ''''
        write (luninp, '(1X,A)') line
     endif
