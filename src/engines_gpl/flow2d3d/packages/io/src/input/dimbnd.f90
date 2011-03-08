@@ -136,7 +136,7 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
        !
        if (lerror) then
           lerror = .false.
-          fmttmp = fmtdef(3:)
+          fmttmp = 'FRformatted'
        endif
        call filfmt(lundia    ,keyw      ,fmttmp    ,lerror    ,gdp       )
        !

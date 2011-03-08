@@ -596,7 +596,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
                 nm = m*icx - icxy
                 do n = 1, nmaxddb
                    nm = nm + icy
-                      if (kcs(nm) > 0) then
+                   if (kcs(nm) > 0) then
                       bi    = 1./(b(nm) - a(nm)*c(nm - icx))
                       c(nm) = c(nm)*bi
                       d(nm) = (d(nm) - a(nm)*d(nm - icx))*bi

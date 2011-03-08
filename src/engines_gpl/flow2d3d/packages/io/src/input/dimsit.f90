@@ -146,7 +146,7 @@ subroutine dimsit(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
        !
        if (lerror) then
           lerror = .false.
-          fmttmp = fmtdef(3:)
+          fmttmp = 'FRformatted'
        endif
        call filfmt(lundia    ,keyw      ,fmttmp    ,lerror    ,gdp       )
        !
@@ -154,7 +154,7 @@ subroutine dimsit(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
        !
        if (lerror) then
           lerror = .false.
-          fmttmp = fmtdef(3:)
+          fmttmp = 'formatted'
        endif
        !
        ! skip reading from file for UI
