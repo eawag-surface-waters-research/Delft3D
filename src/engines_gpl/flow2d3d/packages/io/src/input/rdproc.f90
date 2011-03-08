@@ -624,12 +624,12 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
             call prterr(lundia, 'G051', 'Using Eckart density formulation')
         case( 'unesco' )
             idensform = dens_UNESCO
-            call prterr(lundia, 'G051', 'Using Unesco density formulation')
+            call prterr(lundia, 'G051', 'Using UNESCO density formulation')
         case( ' '      )
             idensform = dens_UNESCO
-            call prterr(lundia, 'G051', 'Using Unesco density formulation by default')
+            call prterr(lundia, 'G051', 'Using UNESCO density formulation by default')
         case default
-            write(message,'(3a)') 'Unknown density formulation ', trim(stringval),'. Use Unesco or Eckart.'
+            write(message,'(3a)') 'Unknown density formulation ', trim(stringval),'. Use UNESCO or Eckart.'
             call prterr(lundia, 'P004', trim(message))
             error = .true.            
     end select

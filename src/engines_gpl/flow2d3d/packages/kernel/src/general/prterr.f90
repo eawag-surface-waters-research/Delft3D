@@ -155,9 +155,9 @@ subroutine prterr(lundia, msgno, filtxt)
     case ('G051')
        msg = '*** MESSAGE #'
     case ('G106')
-       msg = '*** ERROR Old, no longer supported, version of the input MD-file !!'
+       msg = '*** ERROR Old, no longer supported, version of the input MDF-file !!'
     case ('G107')
-       msg = '*** WARNING No version of the input MD-file ' //                  &
+       msg = '*** WARNING No version of the input MDF-file ' //                  &
             & 'found, version 3.00 presumed'
     case ('G907')
        msg = '*** ERROR RUNID for "#" FLOW-file too large'
@@ -391,15 +391,15 @@ subroutine prterr(lundia, msgno, filtxt)
     case ('U081')
        msg = '*** ERROR Time Varying Data file # should be direct access'
     case ('U100')
-       msg = '*** ERROR No # record in MD-file, item will be skipped ?!'
+       msg = '*** MESSAGE No # record found in MDF-file, item will be skipped'
     case ('U101')
-       msg = '*** ERROR Coupled records # in MD-file not consistent ?!'
+       msg = '*** ERROR Coupled records # in MDF-file not consistent ?!'
     case ('U110')
-       msg = '*** WARNING You have an old version of the MD-file (#)'
+       msg = '*** WARNING You have an old version of the MDF-file (#)'
     case ('U111')
-       msg = '*** WARNING Pre-processor out of date. MD-file is more recent (#)'
+       msg = '*** WARNING Pre-processor out of date. MDF-file is more recent (#)'
     case ('U112')
-       msg = '*** WARNING This MD-file (version number 1.xx) ' //               &
+       msg = '*** WARNING This MDF-file (version number 1.xx) ' //               &
             & 'is not supported anymore !!'
     case ('U122')
        msg = '*** ERROR Number of boundary openings in # exceeds maximum'
@@ -706,7 +706,7 @@ subroutine prterr(lundia, msgno, filtxt)
     case ('V220')
        msg = '*** ERROR No name specified for User-Defined Files'
     case ('V221')
-       msg = '*** ERROR Pre-defined User-Defined # constants not in MD-file'
+       msg = '*** ERROR Pre-defined User-Defined # constants not in MDF-file'
     case ('V222')
        msg = '*** ERROR top z-coordinate of the gate must be > than the ' //    &
             & 'bottom z-coordinate'
@@ -758,9 +758,9 @@ subroutine prterr(lundia, msgno, filtxt)
        msg = '*** WARNING In Z-model DPUOPT must be either MIN' //              &
             & ' or UPW; DPUOPT reset to MIN'
     case ('Z007')
-       msg = '*** MESSAGE DPSOPT found in md-file: #'
+       msg = '*** MESSAGE DPSOPT found in MDF-file: #'
     case ('Z008')
-       msg = '*** MESSAGE DPUOPT found in md-file: #'
+       msg = '*** MESSAGE DPUOPT found in MDF-file: #'
     case ('Z009')
        msg = '*** WARNING If Momsol=FLOOD, DPUOPT must be MIN;' //              &
             & ' DPUOPT reset to MIN'
