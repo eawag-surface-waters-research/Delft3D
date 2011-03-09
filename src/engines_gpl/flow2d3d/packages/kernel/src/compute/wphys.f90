@@ -206,7 +206,9 @@ subroutine wphys(s1        ,u1        ,v1        ,w1        ,wphy      , &
        do i = 1, nsrc
           nm = (mnksrc(5, i) + ddb) + ((mnksrc(4, i) - 1) + ddb)*icxy
           k = mnksrc(6, i)
-          if (k==0) then
+          if (k==-1) then
+             cycle
+          else if (k==0) then
              do kk = 1, kmax
                 q = thick(kk)*disch(i)
                 wphy(nm, kk) = wphy(nm, kk) + (sig(kk) + 1.0)                   &

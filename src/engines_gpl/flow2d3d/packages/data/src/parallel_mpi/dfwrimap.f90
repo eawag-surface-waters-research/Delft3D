@@ -575,6 +575,8 @@ subroutine dfwrimap(lundia    ,error     ,trifil    ,selmap    ,simdat    , &
        if (ierror/=0) goto 999
        !
        first = .false.
+    else
+       ierror = 0
     endif ! inode==master
     !
     ! gather grid indices of all subdomains

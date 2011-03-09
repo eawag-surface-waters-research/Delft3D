@@ -436,7 +436,7 @@ subroutine dfwrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
        allocate(ibuff(2,nostat))
        do k=1,nostat
           !
-          ! mnstat contains indices with respect to this partion
+          ! mnstat contains indices with respect to this partition
           ! transfer into global indices
           !
           ibuff(1,k) = mnstat(1,k) + mfg - 1

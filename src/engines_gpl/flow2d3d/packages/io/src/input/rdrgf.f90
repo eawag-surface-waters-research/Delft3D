@@ -198,7 +198,7 @@ subroutine rdrgf(filrgf    ,lundia    ,error     ,nmax      ,mmax      , &
     do j = 1, nc 
         read (lunrgf, *, end = 7777, err = 8888) dum, dum, (xtmp(j,i), i=1,mc) 
         do i = 1, mc 
-            if (isnan(xcor(j,i))) goto 6666 
+            if (isnan(xtmp(j,i))) goto 6666 
         enddo 
     enddo 
     ! 
@@ -208,7 +208,7 @@ subroutine rdrgf(filrgf    ,lundia    ,error     ,nmax      ,mmax      , &
     do j = 1, nc 
        read (lunrgf, *, end = 7777, err = 8888) dum, dum, (ytmp(j, i), i=1,mc) 
        do i = 1, mc 
-            if (isnan(ycor(j,i))) goto 6666 
+            if (isnan(ytmp(j,i))) goto 6666 
        enddo 
     enddo 
     close (lunrgf) 

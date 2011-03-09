@@ -159,7 +159,7 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
     integer                                    :: nfltyp !  Description and declaration in iidim.f90 
     logical                                    :: error  !!  Flag=TRUE if an error is encountered 
     logical                       , intent(in) :: mainys !!  Logical flag for FLOW is main 
-                                                         !!  porgram (TRUE) for writing output 
+                                                         !!  program (TRUE) for writing output 
     logical                                    :: sferic !  Description and declaration in tricom.igs 
     real(fp)                                   :: grdang !  Description and declaration in tricom.igs 
     real(fp)                                   :: tscale !  Description and declaration in rjdim.f90 

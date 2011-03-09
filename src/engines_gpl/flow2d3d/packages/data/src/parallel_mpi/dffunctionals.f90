@@ -1646,9 +1646,6 @@ subroutine dffind_duplicate_C(lundia, nb, nbto, nbgl, nam, duplicate, gdp)
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-#if defined (DFMPI)
-    use mpi
-#endif
     use precision
     use dfparall
     use globaldata
@@ -1671,11 +1668,6 @@ integer                                     :: ip
 integer                                     :: indx
 integer      , dimension(:), allocatable    :: nbarr
 character(20), dimension(:), allocatable    :: namto
-integer                                     :: ierr                   ! error value of MPI call
-#if defined (DFMPI)
-    integer                                 :: istat(mpi_status_size) ! MPI status array
-#endif
-character(80)                               :: msgstr                 ! string to pass message
 !
 !! executable statements -------------------------------------------------------
 !
@@ -1722,9 +1714,6 @@ subroutine dffind_duplicate_I(lundia, nb, nbto, nbgl, order, gdp)
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-#if defined (DFMPI)
-    use mpi
-#endif
     use precision
     use globaldata
     use dfparall
@@ -1743,14 +1732,7 @@ integer, dimension(nb)  , intent(in)  :: order
 logical                                     :: found
 integer                                     :: m
 integer                                     :: n
-integer                                     :: ip
-integer                                     :: indx
 integer, dimension(:), allocatable          :: nbarr
-integer                                     :: ierr                   ! error value of MPI call
-#if defined (DFMPI)
-    integer                                 :: istat(mpi_status_size) ! MPI status array
-#endif
-character(80)                               :: msgstr                 ! string to pass message
 !
 !! executable statements -------------------------------------------------------
 !

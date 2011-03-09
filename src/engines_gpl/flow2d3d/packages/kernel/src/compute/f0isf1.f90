@@ -69,6 +69,8 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
     !
     use globaldata
     !
+    use dfparall
+    !
     implicit none
     !
     type(globdat),target :: gdp
@@ -160,6 +162,7 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
     integer        :: icx    ! Increment in the X-dir., if ICX= NMAX then computation proceeds in the X- dir. If icx=1 then computation pro- ceeds in the Y-dir. 
     integer        :: icy    ! Increment in the Y-dir. (see ICX) 
     integer        :: iexit
+    integer        :: ierror
     integer        :: k
     integer        :: k2
     integer        :: k0
@@ -227,9 +230,20 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
                 endif
              endif
           enddo
-          !
-          ! stop routine for DELFT3D
-          !
+          ierror = 1
+       else if (isnan(s01max)) then
+          write(message,'(a,i0,a)') 'NaN found after ', ntstep, ' timestep(s).'
+          call prterr(lundia, 'P004', trim(message))
+          ierror = 1
+       else
+          ierror = 0
+       endif
+       !
+       ! stop routine for DELFT3D,
+       !    if in any subdomain s01max >= smax
+       !
+       call dfreduce(ierror, 1, dfint, dfmax, gdp)
+       if (ierror > 0) then
           iexit = 4
           call d3stop(iexit, gdp)
        endif

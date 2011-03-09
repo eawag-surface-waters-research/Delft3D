@@ -45,7 +45,6 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
-    use dfparall
     !
     implicit none
     !
@@ -178,7 +177,6 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
                 goto 200
              endif
           enddo
-          call dfsync(gdp)
           do m = mfg, mlg 
              do n = nfg, nlg 
                 vicuv(n-nfg+1,m-mfg+1,kbg) = tmp(n,m,kbg) 
