@@ -1,7 +1,8 @@
 #! /bin/sh
 
 #-------------------------------------------------------------------------------
-#   Top-Level Build Script for DelftSSS (whatever that is)
+#   Top-Level Build Script for DeltaresHydro
+#
 #   There are command-line options to select Fortran compiler and debug or not.
 #
 #   ToDo:  Remove stripping of execuables when the debug flag is set.
@@ -13,7 +14,7 @@
 #   maintanence.
 #
 #   Irv.Elshoff@Deltares.NL
-#   16 sep 10
+#   9 mar 11
 #
 #   Copyright © 2010, Stichting Deltares
 #-------------------------------------------------------------------------------
@@ -25,7 +26,7 @@ noMake=0
 
 
 function usage {
-    echo "Usage: `basename $0` [-intel10|-intel11] [-debug] [-make] [-?]"
+    echo "Usage: `basename $0` [-intel10|-intel11|-intel12] [-debug] [-make] [-?]"
     }
 
 function log {
@@ -42,6 +43,9 @@ while [ $# -gt 0 ]; do
             ;;
         -intel11)
             compiler='intel11'
+            ;;
+        -intel12)
+            compiler='intel12'
             ;;
         -d|-debug)
             debug=1
@@ -77,6 +81,11 @@ fi
 # Solution: don't use the svml library in commmon.am
 
 case $compiler in
+    intel12)
+        ifortInit='. /opt/intel/bin/ifortvars.sh ia32'
+        #idbInit='. /opt/intel/bin/idbvars.sh'
+        echo "Using Intel 12 Fortran compiler"
+        ;;
     intel11)
         if [ -d /opt/intel/Compiler/11.1/072 ]; then
             ifortInit='. /opt/intel/Compiler/11.1/072/bin/ifortvars.sh ia32'
