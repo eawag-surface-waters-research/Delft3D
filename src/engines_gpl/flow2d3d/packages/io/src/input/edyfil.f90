@@ -36,14 +36,15 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
 !              file
 ! Method used:
 !
-!    Read, unformatted or formatted, arrays VICUV and DICUV for all grid points,
-!    then copy values to points in own partition.
+!    Master reads, unformatted or formatted, arrays VICUV and DICUV for all grid points,
+!    then broadcast values to points in each partition.
 !    Finally check on NaN's.
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use dfparall
     use globaldata
     !
     implicit none
@@ -75,7 +76,8 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
 !
 ! Local variables
 !
-    integer           :: iocond  ! IO status for reading 
+    integer           :: iocond  ! IO status for reading
+    integer           :: istat   ! IO status for allocate
     integer           :: kbg     ! denotes the k-index of vicuv/dicuv containing the background values
     integer           :: lfile   ! Help var. specifying the length of character variables for file names 
     integer           :: luntmp  ! Help var. for a unit number of an attribute file 
@@ -84,7 +86,7 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
     integer, external :: newlun
     logical, external :: exifil
     character(300)    :: message
-    real(fp), dimension(:,:,:), allocatable :: tmp   ! Temporary array containing dicuv/vicuv of entire domain 
+    real(fp), dimension(:,:), allocatable :: tmp   ! Temporary array containing dicuv/vicuv of entire domain 
 !
 !! executable statements -------------------------------------------------------
 !
@@ -106,110 +108,78 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
        ! 
        ! allocate temporary array to store data of entire domain read from file 
        ! 
-       allocate(tmp(nmaxgl,mmaxgl,kbg:kbg))
+       allocate(tmp(nmaxgl,mmaxgl), stat = istat)
+       istat = abs(istat)
+       call dfreduce( istat, 1, dfint, dfmax, gdp )
+       if (istat /= 0) then
+          call prterr(lundia, 'G020', 'vicuv/dicuv')
+          error = .true.
+          return
+       endif
        !
-       luntmp = newlun(gdp)
-       open (luntmp, file = filedy(1:lfile), form = fmttmp, status = 'old')
+       if (inode == master) then
+          luntmp = newlun(gdp)
+          open (luntmp, file = filedy(1:lfile), form = fmttmp, status = 'old')
+       endif
        !
-       ! Unformatted file
        ! Read records with horizontal eddy-viscosity, for each row one record
        !
-       if (fmttmp(1:2) == 'un') then
-          do n = 1, nmaxgl
-             read (luntmp, iostat = iocond) (tmp(n, m, kbg), m = 1, mmaxgl )
-             if (iocond /= 0) then
-                if (iocond < 0) then
-                   call prterr(lundia, 'G006', filedy(1:lfile))
-                else
-                   call prterr(lundia, 'G007', filedy(1:lfile))
-                endif
-                error = .true.
-                goto 200
-             endif
-          enddo
-          do m = mfg, mlg 
-             do n = nfg, nlg 
-                vicuv(n-nfg+1,m-mfg+1,kbg) = tmp(n,m,kbg) 
-             enddo 
-          enddo 
-          !
-          ! Read records with horizontal eddy-diffusity if (lstsci > 0), for each row one record
-          !
-          if (lstsci > 0) then
-             do n = 1, nmaxgl
-                read (luntmp, iostat = iocond) (tmp(n, m, kbg), m = 1, mmaxgl)
-                if (iocond /= 0) then
-                   if (iocond < 0) then
-                      call prterr(lundia, 'G006', filedy(1:lfile))
-                   else
-                      call prterr(lundia, 'G007', filedy(1:lfile))
-                   endif
-                   error = .true.
-                   exit
-                endif
-             enddo
+       if (inode == master) then
+          if (fmttmp(1:2) == 'un') then
+             read (luntmp, iostat = iocond) ((tmp(n, m), m = 1, mmaxgl), n = 1, nmaxgl)
+          else
+             !
+             ! Freeformatted file, skip lines starting with a '*' before reading actual data
+             !
+             call skipstarlines(luntmp)
+             read (luntmp, *, iostat = iocond) ((tmp(n, m), m = 1, mmaxgl), n = 1, nmaxgl)
           endif
-          do m = mfg, mlg 
-             do n = nfg, nlg 
-                dicuv(n-nfg+1,m-mfg+1,kbg) = tmp(n,m,kbg) 
-             enddo 
-          enddo 
-          !
-          ! Stop reading file
-          !
-       else
-          !
-          ! Freeformatted file, skip lines starting with a '*'
-          !
-          call skipstarlines(luntmp)
-          !
-          ! Read record with horizontal eddy-viscosity for each row one record
-          !
-          do n = 1, nmaxgl
-             read (luntmp, *, iostat = iocond) (tmp(n, m, kbg), m = 1, mmaxgl)
-             if (iocond /= 0) then
-                if (iocond < 0) then
-                   call prterr(lundia, 'G006', filedy(1:lfile))
-                else
-                   call prterr(lundia, 'G007', filedy(1:lfile))
-                endif
-                error = .true.
-                goto 200
-             endif
-          enddo
-          do m = mfg, mlg 
-             do n = nfg, nlg 
-                vicuv(n-nfg+1,m-mfg+1,kbg) = tmp(n,m,kbg) 
-             enddo 
-          enddo 
-
-          !
-          ! Read records with horizontal eddy-diffusity if (lstsci > 0), for each row one record
-          !
-          if (lstsci > 0) then
-             do n = 1, nmaxgl
-                read (luntmp, *, iostat = iocond) (tmp(n, m, kbg), m = 1 , mmaxgl)
-                if (iocond /= 0) then
-                   if (iocond < 0) then
-                      call prterr(lundia, 'G006', filedy(1:lfile))
-                   else
-                      call prterr(lundia, 'G007', filedy(1:lfile))
-                   endif
-                   error = .true.
-                   exit
-                endif
-             enddo
-          endif
-          do m = mfg, mlg 
-             do n = nfg, nlg 
-                dicuv(n-nfg+1,m-mfg+1,kbg) = tmp(n,m,kbg) 
-             enddo 
-          enddo 
-          !
-          ! Stop reading file
-          !
        endif
-       deallocate(tmp)
+       call dfbroadc(iocond, 1, dfint, gdp)
+       if (iocond /= 0) then
+          if (iocond < 0) then
+             call prterr(lundia, 'G006', filedy(1:lfile))
+          else
+             call prterr(lundia, 'G007', filedy(1:lfile))
+          endif
+          error = .true.
+          goto 200
+       endif
+       call dfbroadc(tmp, mmaxgl*nmaxgl, dfreal, gdp)
+       do m = mfg, mlg 
+          do n = nfg, nlg 
+             vicuv(n-nfg+1,m-mfg+1,kbg) = tmp(n,m) 
+          enddo 
+       enddo
+       !
+       ! Read records with horizontal eddy-diffusity if (lstsci > 0), for each row one record
+       !
+       if (lstsci > 0) then
+          if (inode == master) then
+             if (fmttmp(1:2) == 'un') then
+                read (luntmp, iostat = iocond) ((tmp(n, m), m = 1, mmaxgl), n = 1, nmaxgl)
+             else
+                read (luntmp, *, iostat = iocond) ((tmp(n, m), m = 1, mmaxgl), n = 1, nmaxgl)
+             endif
+          endif
+          call dfbroadc(iocond, 1, dfint, gdp)
+          if (iocond /= 0) then
+             if (iocond < 0) then
+                call prterr(lundia, 'G006', filedy(1:lfile))
+             else
+                call prterr(lundia, 'G007', filedy(1:lfile))
+             endif
+             error = .true.
+          endif
+          call dfbroadc(tmp, mmaxgl*nmaxgl, dfreal, gdp)
+          do m = mfg, mlg 
+             do n = nfg, nlg 
+                dicuv(n-nfg+1,m-mfg+1,kbg) = tmp(n,m)
+             enddo
+          enddo
+       endif
+       !
+       ! Stop reading file
        !
        ! If a NaN is read -> error
        !
@@ -236,11 +206,14 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
           enddo
        enddo
        !
-       ! Close file
+       ! Close file and deallocate
        !
   200  continue
+       deallocate(tmp)
+       if (inode == master) then
+          close (luntmp)
+       endif
        !
-       close (luntmp)
     else
        !
        ! File does not exist
