@@ -36,11 +36,16 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
 !              file
 ! Method used:
 !
+!    Read, unformatted or formatted, arrays VICUV and DICUV for all grid points,
+!    then copy values to points in own partition.
+!    Finally check on NaN's.
+!
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use dfparall
     !
     implicit none
     !
@@ -48,6 +53,12 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    integer, pointer                      :: mfg 
+    integer, pointer                      :: mlg 
+    integer, pointer                      :: nfg 
+    integer, pointer                      :: nlg 
+    integer, pointer                      :: mmaxgl 
+    integer, pointer                      :: nmaxgl 
 !
 ! Global variables
 !
@@ -74,9 +85,17 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
     integer, external :: newlun
     logical, external :: exifil
     character(300)    :: message
+    real(fp), dimension(:,:,:), allocatable :: tmp   ! Temporary array containing dicuv/vicuv of entire domain 
 !
 !! executable statements -------------------------------------------------------
 !
+    !
+    mfg    => gdp%gdparall%mfg 
+    mlg    => gdp%gdparall%mlg 
+    nfg    => gdp%gdparall%nfg 
+    nlg    => gdp%gdparall%nlg 
+    mmaxgl => gdp%gdparall%mmaxgl 
+    nmaxgl => gdp%gdparall%nmaxgl
     !
     kbg = kmax + 1
     !
@@ -85,6 +104,11 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
     lfile = len(filedy)
     !
     if (exifil(filedy, lundia, 'G004', gdp)) then
+       ! 
+       ! allocate temporary array to store data of entire domain read from file 
+       ! 
+       allocate(tmp(nmaxgl,mmaxgl,kbg:kbg))
+       !
        luntmp = newlun(gdp)
        open (luntmp, file = filedy(1:lfile), form = fmttmp, status = 'old')
        !
@@ -92,8 +116,8 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
        ! Read records with horizontal eddy-viscosity, for each row one record
        !
        if (fmttmp(1:2) == 'un') then
-          do n = 1, nmaxus
-             read (luntmp, iostat = iocond) (vicuv(n, m, kbg), m = 1, mmax )
+          do n = 1, nmaxgl
+             read (luntmp, iostat = iocond) (tmp(n, m, kbg), m = 1, mmaxgl )
              if (iocond /= 0) then
                 if (iocond < 0) then
                    call prterr(lundia, 'G006', filedy(1:lfile))
@@ -104,12 +128,17 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
                 goto 200
              endif
           enddo
+          do m = mfg, mlg 
+             do n = nfg, nlg 
+                vicuv(n-nfg+1,m-mfg+1,kbg) = tmp(n,m,kbg) 
+             enddo 
+          enddo 
           !
           ! Read records with horizontal eddy-diffusity if (lstsci > 0), for each row one record
           !
           if (lstsci > 0) then
-             do n = 1, nmaxus
-                read (luntmp, iostat = iocond) (dicuv(n, m, kbg), m = 1, mmax)
+             do n = 1, nmaxgl
+                read (luntmp, iostat = iocond) (tmp(n, m, kbg), m = 1, mmaxgl)
                 if (iocond /= 0) then
                    if (iocond < 0) then
                       call prterr(lundia, 'G006', filedy(1:lfile))
@@ -121,6 +150,11 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
                 endif
              enddo
           endif
+          do m = mfg, mlg 
+             do n = nfg, nlg 
+                dicuv(n-nfg+1,m-mfg+1,kbg) = tmp(n,m,kbg) 
+             enddo 
+          enddo 
           !
           ! Stop reading file
           !
@@ -132,8 +166,8 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
           !
           ! Read record with horizontal eddy-viscosity for each row one record
           !
-          do n = 1, nmaxus
-             read (luntmp, *, iostat = iocond) (vicuv(n, m, kbg), m = 1, mmax)
+          do n = 1, nmaxgl
+             read (luntmp, *, iostat = iocond) (tmp(n, m, kbg), m = 1, mmaxgl)
              if (iocond /= 0) then
                 if (iocond < 0) then
                    call prterr(lundia, 'G006', filedy(1:lfile))
@@ -144,12 +178,19 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
                 goto 200
              endif
           enddo
+          call dfsync(gdp)
+          do m = mfg, mlg 
+             do n = nfg, nlg 
+                vicuv(n-nfg+1,m-mfg+1,kbg) = tmp(n,m,kbg) 
+             enddo 
+          enddo 
+
           !
           ! Read records with horizontal eddy-diffusity if (lstsci > 0), for each row one record
           !
           if (lstsci > 0) then
-             do n = 1, nmaxus
-                read (luntmp, *, iostat = iocond) (dicuv(n, m, kbg), m = 1 , mmax)
+             do n = 1, nmaxgl
+                read (luntmp, *, iostat = iocond) (tmp(n, m, kbg), m = 1 , mmaxgl)
                 if (iocond /= 0) then
                    if (iocond < 0) then
                       call prterr(lundia, 'G006', filedy(1:lfile))
@@ -161,10 +202,16 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
                 endif
              enddo
           endif
+          do m = mfg, mlg 
+             do n = nfg, nlg 
+                dicuv(n-nfg+1,m-mfg+1,kbg) = tmp(n,m,kbg) 
+             enddo 
+          enddo 
           !
           ! Stop reading file
           !
        endif
+       deallocate(tmp)
        !
        ! If a NaN is read -> error
        !
