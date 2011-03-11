@@ -330,6 +330,7 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
        !
        keyw   = 'Fmtdry'
        ntrec  = nrrec
+       nlook  = 1
        lenc   = 2
        fmttmp = ' '
        call read2c(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
