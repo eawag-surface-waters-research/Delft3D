@@ -42,7 +42,7 @@ subroutine incdis(lundia    ,sferic    ,grdang    ,timnow    ,nsrc      , &
 !              dependent value for discharge flows and conc.
 !              (if fldis = TRUE)
 ! Method used: At each time step (if DISINT=TRUE) 
-!              New values with linear interpoaltion are determined
+!              New values with linear interpolation are determined
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
