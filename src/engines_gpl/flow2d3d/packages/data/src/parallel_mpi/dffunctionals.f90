@@ -470,7 +470,9 @@ integer                                   :: itag
           enddo
        else
           do n = 1, nbtotal
-             if (ibuff(n) /= 0) oubuff(ibuff(n), jf:jl) = rbuff(jf:jl, n)
+             if (ibuff(n) > 0 .and. ibuff(n) <= size(oubuff,1)) then
+                oubuff(ibuff(n), jf:jl) = rbuff(jf:jl, n)
+             endif
           enddo
        endif
        deallocate( ibuff )

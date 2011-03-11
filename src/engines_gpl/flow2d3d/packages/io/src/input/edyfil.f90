@@ -145,7 +145,7 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
           error = .true.
           goto 200
        endif
-       call dfbroadc(tmp, mmaxgl*nmaxgl, dfreal, gdp)
+       call dfbroadc(tmp, mmaxgl*nmaxgl, dfloat, gdp)
        do m = mfg, mlg 
           do n = nfg, nlg 
              vicuv(n-nfg+1,m-mfg+1,kbg) = tmp(n,m) 
@@ -171,7 +171,7 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
              endif
              error = .true.
           endif
-          call dfbroadc(tmp, mmaxgl*nmaxgl, dfreal, gdp)
+          call dfbroadc(tmp, mmaxgl*nmaxgl, dfloat, gdp)
           do m = mfg, mlg 
              do n = nfg, nlg 
                 dicuv(n-nfg+1,m-mfg+1,kbg) = tmp(n,m)
