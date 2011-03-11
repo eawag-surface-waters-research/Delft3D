@@ -262,7 +262,7 @@ subroutine reallocPInt(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr,1)
       lind = lbound(arr,1)
       equalSize = (uindex == uind) .and. (lindex_ == lind)
-      if (equalSize .and. docopy .and. shift_==0) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -326,7 +326,7 @@ subroutine reallocInt(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr,1)
       lind = lbound(arr,1)
       equalSize = (uindex == uind) .and. (lindex_ == lind)
-      if (equalSize .and. docopy .and. shift_==0) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -390,7 +390,7 @@ subroutine reallocPInt2(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -458,7 +458,7 @@ subroutine reallocInt2(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -530,7 +530,7 @@ subroutine reallocPInt3(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -600,7 +600,7 @@ subroutine reallocInt3(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -676,7 +676,7 @@ subroutine reallocPInt4(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -748,7 +748,7 @@ subroutine reallocInt4(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -828,7 +828,7 @@ subroutine reallocPCharacter(arr, uindex, lindex, stat, fill, shift, keepExistin
       uind = ubound(arr,1)
       lind = lbound(arr,1)
       equalSize = (uindex == uind) .and. (lindex_ == lind)
-      if (equalSize .and. docopy .and. shift_==0) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -892,7 +892,7 @@ subroutine reallocCharacter(arr, uindex, lindex, stat, fill, shift, keepExisting
       uind = ubound(arr,1)
       lind = lbound(arr,1)
       equalSize = (uindex == uind) .and. (lindex_ == lind)
-      if (equalSize .and. docopy .and. shift_==0) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -956,7 +956,7 @@ subroutine reallocPCharacter2(arr, uindex, lindex, stat, fill, shift, keepExisti
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -1024,7 +1024,7 @@ subroutine reallocCharacter2(arr, uindex, lindex, stat, fill, shift, keepExistin
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -1096,7 +1096,7 @@ subroutine reallocPCharacter3(arr, uindex, lindex, stat, fill, shift, keepExisti
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -1166,7 +1166,7 @@ subroutine reallocCharacter3(arr, uindex, lindex, stat, fill, shift, keepExistin
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -1242,7 +1242,7 @@ subroutine reallocPCharacter4(arr, uindex, lindex, stat, fill, shift, keepExisti
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -1314,7 +1314,7 @@ subroutine reallocCharacter4(arr, uindex, lindex, stat, fill, shift, keepExistin
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -1394,7 +1394,7 @@ subroutine reallocPReal(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr,1)
       lind = lbound(arr,1)
       equalSize = (uindex == uind) .and. (lindex_ == lind)
-      if (equalSize .and. docopy .and. shift_==0) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -1458,7 +1458,7 @@ subroutine reallocReal(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr,1)
       lind = lbound(arr,1)
       equalSize = (uindex == uind) .and. (lindex_ == lind)
-      if (equalSize .and. docopy .and. shift_==0) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -1522,7 +1522,7 @@ subroutine reallocPReal2(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -1590,7 +1590,7 @@ subroutine reallocReal2(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -1662,7 +1662,7 @@ subroutine reallocPReal3(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -1732,7 +1732,7 @@ subroutine reallocReal3(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -1808,7 +1808,7 @@ subroutine reallocPReal4(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -1880,7 +1880,7 @@ subroutine reallocReal4(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -1960,7 +1960,7 @@ subroutine reallocPDouble(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr,1)
       lind = lbound(arr,1)
       equalSize = (uindex == uind) .and. (lindex_ == lind)
-      if (equalSize .and. docopy .and. shift_==0) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -2024,7 +2024,7 @@ subroutine reallocDouble(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr,1)
       lind = lbound(arr,1)
       equalSize = (uindex == uind) .and. (lindex_ == lind)
-      if (equalSize .and. docopy .and. shift_==0) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -2088,7 +2088,7 @@ subroutine reallocPDouble2(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -2156,7 +2156,7 @@ subroutine reallocDouble2(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -2228,7 +2228,7 @@ subroutine reallocPDouble3(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -2298,7 +2298,7 @@ subroutine reallocDouble3(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -2374,7 +2374,7 @@ subroutine reallocPDouble4(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -2446,7 +2446,7 @@ subroutine reallocDouble4(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -2526,7 +2526,7 @@ subroutine reallocPLogical(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr,1)
       lind = lbound(arr,1)
       equalSize = (uindex == uind) .and. (lindex_ == lind)
-      if (equalSize .and. docopy .and. shift_==0) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -2590,7 +2590,7 @@ subroutine reallocLogical(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr,1)
       lind = lbound(arr,1)
       equalSize = (uindex == uind) .and. (lindex_ == lind)
-      if (equalSize .and. docopy .and. shift_==0) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. shift_==0) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -2654,7 +2654,7 @@ subroutine reallocPLogical2(arr, uindex, lindex, stat, fill, shift, keepExisting
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -2722,7 +2722,7 @@ subroutine reallocLogical2(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -2794,7 +2794,7 @@ subroutine reallocPLogical3(arr, uindex, lindex, stat, fill, shift, keepExisting
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -2864,7 +2864,7 @@ subroutine reallocLogical3(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -2940,7 +2940,7 @@ subroutine reallocPLogical4(arr, uindex, lindex, stat, fill, shift, keepExisting
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
@@ -3012,7 +3012,7 @@ subroutine reallocLogical4(arr, uindex, lindex, stat, fill, shift, keepExisting)
       uind = ubound(arr)
       lind = lbound(arr)
       equalSize = all(uindex == uind) .and. all(lindex_ == lind)
-      if (equalSize .and. docopy .and. all(shift_==0)) return ! output=input
+      if (equalSize .and. (docopy .or. .not. present(fill)) .and. all(shift_==0)) return ! output=input
       !
       if (docopy) then
          mlind = max(lind + shift_, lindex_)
