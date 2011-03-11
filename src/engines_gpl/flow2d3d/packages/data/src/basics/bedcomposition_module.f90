@@ -65,6 +65,7 @@ public  setbedfracprop
 public  allocmorlyr
 public  clrmorlyr
 public  bedcomp_use_bodsed
+public  initpreload
 !
 public bedcomp_getpointer_integer
 public bedcomp_getpointer_logical
@@ -155,6 +156,7 @@ type bedcomp_settings
 end type bedcomp_settings
 !
 type bedcomp_state
+    real(fp)   , dimension(:,:)  , pointer :: preload  ! historical largest load, units : kg
     real(fp)   , dimension(:,:)  , pointer :: svfrac   ! 1 - porosity coefficient, units : -
     real(prec) , dimension(:,:)  , pointer :: bodsed   ! Array with total sediment, units : kg /m2
     real(fp)   , dimension(:)    , pointer :: dpsed    ! Total depth sediment layer, units : m
@@ -371,6 +373,7 @@ function updmorlyr(this, dbodsd, dz, messages) result (istat)
              istat = -1
              exit
           endif
+          call consolidate(this, nm)
           call getsedthick_1point(this, nm, seddep1)
           dz(nm) = seddep1-seddep0
        enddo
@@ -1793,6 +1796,7 @@ function initmorlyr(this) result (istat)
     nullify(settings%thexlyr)
     nullify(settings%thtrlyr)
     !
+    nullify(state%preload)
     nullify(state%svfrac)
     nullify(state%bodsed)
     nullify(state%dpsed)
@@ -1877,6 +1881,8 @@ function allocmorlyr(this, nmlb, nmub, nfrac) result (istat)
        if (istat == 0) state%sedshort = 0.0_fp
        if (istat == 0) allocate (state%svfrac(settings%nlyr,nmlb:nmub), stat = istat)
        if (istat == 0) state%svfrac = 1.0_fp
+       if (istat == 0) allocate (state%preload(settings%nlyr,nmlb:nmub), stat = istat)
+       if (istat == 0) state%preload = 0.0_fp
     endif
 end function allocmorlyr
 !
@@ -2634,5 +2640,116 @@ subroutine getporosity(this, mfrac, poros)
        poros         = 0.0_fp
     end select
 end subroutine
+
+subroutine consolidate(this, nm)
+!!--description-----------------------------------------------------------------
+!
+!    Function: - Consolidate the bed of column nm
+!
+!!--declarations----------------------------------------------------------------
+    use precision
+    implicit none
+    !
+    ! Call variables
+    !
+    type(bedcomp_data)                   :: this
+    integer                , intent(in)  :: nm
+    !
+    ! Local variables
+    !
+    integer                                   :: k
+    integer                                   :: l
+    real(fp)                                  :: load
+    real(fp)                                  :: thnew
+    real(fp)                                  :: dzc
+    real(fp) , dimension(:,:,:), pointer      :: msed
+    real(fp) , dimension(:,:)  , pointer      :: preload
+    real(fp) , dimension(:,:)  , pointer      :: svfrac
+    real(fp) , dimension(:,:)  , pointer      :: thlyr
+    !
+    !! executable statements -------------------------------------------------------
+    msed       => this%state%msed
+    preload    => this%state%preload
+    svfrac     => this%state%svfrac
+    thlyr      => this%state%thlyr
+    !
+    select case(this%settings%iunderlyr)
+    case(2)
+       load = 0.0_fp
+       do k = 2, this%settings%nlyr
+          do l = 1, this%settings%nfrac
+             load = load + msed(l, k-1, nm)
+          enddo
+          if (load > preload(k, nm)) then
+             !
+             ! compute consolidation
+             !
+             dzc = 0.0_fp ! function of load-preload(k,nm)
+             !
+             ! reduce layer thickness and porosity, i.e. increase svfrac
+             !
+             thnew = thlyr(k, nm) - dzc
+             svfrac(k, nm) = svfrac(k, nm)*thlyr(k, nm)/thnew
+             thlyr(k, nm) = thnew
+             preload(k, nm) = load
+          else
+             !
+             ! no consolidation in this layer and any layer below
+             !
+             return
+          endif
+       enddo
+    case default
+       ! option not available for this bed composition model
+    end select
+end subroutine consolidate
+!
+!
+!
+!==============================================================================
+subroutine initpreload(this)
+!!--description-----------------------------------------------------------------
+!
+
+! Initialize the preload array assuming that all sediment is fully consolidated.
+!
+
+!!--declarations----------------------------------------------------------------
+    use precision
+    implicit none
+    !
+    ! Function/routine arguments
+    !
+    type (bedcomp_data), intent(inout) :: this    
+    !
+    ! Local variables
+    !
+    integer                                   :: k
+    integer                                   :: l
+    integer                                   :: nm
+    real(fp)                                  :: load
+    real(fp) , dimension(:,:,:), pointer      :: msed
+    real(fp) , dimension(:,:)  , pointer      :: preload
+    !
+    !! executable statements -------------------------------------------------------
+    !
+    msed       => this%state%msed
+    preload    => this%state%preload
+    !
+    select case(this%settings%iunderlyr)
+    case(2)
+       do nm = this%settings%nmlb, this%settings%nmub
+          preload(1, nm) = 0.0_fp
+          do k = 2, this%settings%nlyr
+             do l = 1, this%settings%nfrac
+                load = load + msed(l, k-1, nm)
+             enddo
+             preload(k, nm) = load
+          enddo
+       enddo
+    case default
+       ! option not available for this bed composition model
+    end select
+end subroutine initpreload
 
 end module bedcomposition_module
