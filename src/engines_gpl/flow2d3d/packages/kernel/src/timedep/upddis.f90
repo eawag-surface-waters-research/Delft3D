@@ -120,6 +120,10 @@ subroutine upddis(lundis    ,lundia    ,sferic    ,itdis     , &
         rint0(l, isrc) = rint1(l, isrc)
     enddo
     !
+    ! End of simulation
+    !
+    if (nint(timnow)==itstop) return
+    !
     ! Define reading format
     !
     fmtdis = '(f16.4,..g14.6)'
