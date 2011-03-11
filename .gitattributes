@@ -1298,6 +1298,8 @@ src/third_party_open/openmp/lib/win32/libiompstubs5md.lib -text
 src/third_party_open/openmp/lib/win32/libiompstubs5mt.lib -text
 src/third_party_open/pthreads/bin/win32/pthreadVCE2.dll -text
 src/third_party_open/pthreads/bin/win32/pthreadVCE2.lib -text
+src/third_party_open/pthreads/bin/win32/pthreadvce.dll -text
+src/third_party_open/pthreads/bin/win32/pthreadvce.lib -text
 src/third_party_open/pthreads/include/win32/pthread.h -text
 src/third_party_open/pthreads/include/win32/sched.h -text
 src/third_party_open/subversion/bin/win32/intl3_svn.dll -text
