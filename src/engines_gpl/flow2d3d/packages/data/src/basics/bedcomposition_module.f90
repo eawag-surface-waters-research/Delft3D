@@ -730,7 +730,7 @@ subroutine lyrerosion(this, nm, dzini, dmi)
             k           = k+1
         else ! thlyr(k)>=dz
             !
-            ! layer k contains more sediment than is need, so only part
+            ! layer k contains more sediment than is needed, so only part
             ! of the sediment has to be removed from the layer
             !
             fac = dz/thlyr(k, nm)
@@ -2680,7 +2680,11 @@ subroutine consolidate(this, nm)
           do l = 1, this%settings%nfrac
              load = load + msed(l, k-1, nm)
           enddo
-          if (load > preload(k, nm)) then
+          if (comparereal(thlyr(k, nm),0.0_fp)==0) then
+             !
+             ! layers with zero thickness don't consolidate
+             !
+          elseif (load > preload(k, nm)) then
              !
              ! compute consolidation
              !
