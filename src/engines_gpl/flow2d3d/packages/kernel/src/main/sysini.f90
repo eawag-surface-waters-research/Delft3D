@@ -242,19 +242,22 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
     ! copy contents of old td-diag file created by tdatom
     ! test for ERRORS and if found, stop
     !
-    filtmp(1:8 + lrid) = 'td-diag.' // runid
-    inquire (file = filtmp(1:8 + lrid), exist = ex)
-    if (ex) then
-       lunhlp = newlun(gdp)
-       open (lunhlp, file = filtmp(1:8 + lrid), form = 'formatted')
-   50  continue
-       read (lunhlp, '(a)', end = 100, err = 100) txthlp
-       write (lundia, '(a,a)') '      ',trim(txthlp)
-       ierr = index(txthlp, 'ERROR')
-       if (ierr/=0) error = .true.
-       goto 50
-  100  continue
-       close (lunhlp, status = 'delete')
+    if (inode==master) then
+       filtmp(1:8 + lrid) = 'td-diag.' // runid
+       inquire (file = filtmp(1:8 + lrid), exist = ex)
+       if (ex) then
+          lunhlp = newlun(gdp)
+          open (lunhlp, file = filtmp(1:8 + lrid), form = 'formatted')
+   50     continue
+          read (lunhlp, '(a)', end = 100, err = 100) txthlp
+          write (lundia, '(a,a)') '      ',trim(txthlp)
+          ierr = index(txthlp, 'ERROR')
+          if (ierr/=0) error = .true.
+          goto 50
+  100     continue
+          close (lunhlp, status = 'delete')
+       endif
     endif
+    call dfbroadc(error, 1, dfint, gdp)
  9999 continue
 end subroutine sysini
