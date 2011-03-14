@@ -38,25 +38,25 @@ public realloc, reallocP
 !> Reallocates memory for an existing array. Arrays of most intrinsic
 !! data types up to rank 4 are accepted and they may still be unallocated.
 !! realloc is mainly intended for increasing array sizes, but it may also
-!! be used for decreasing them. Use realloc for allocatable arrays and
-!! use reallocP for pointer arrays. Although the Intel compiler is able to
-!! distinguish interfaces with allocatable and pointer arrays, the official
-!! FORTRAN 2003 does not support distinguishing interfaces based on the
-!! allocatable/pointer attribute; therefore, the two sets of routines have
-!! been put into separate interfaces. The routine syntax is identical for
-!! realloc and reallocP.
+!! be used for \e decreasing them. Use m_alloc::realloc for allocatable arrays and
+!! use m_alloc::reallocP for pointer arrays<sup>1</sup>.
 !!
-!! Where the old and new dimensions overlap, the original array data
-!! is preserved (i.e., for a larger upperbound, all data is preserved)
-!! This can be switched off by passing the optional argument
-!! keepExisting=.false.
+!! The actual values in the new array depend on two optional parameters:
+!! \a keepExisting and \a fill.
+!! By default, where the old and new dimensions overlap, the original array
+!! data is preserved (i.e., for a larger upperbound, all data is preserved).
+!! This behaviour can be switched off by passing the optional argument
+!! <tt>keepExisting=.false.</tt> (for example, to prevent unnecessary data copy).
 !!
 !! An optional fill value may be specified to set the non-overlapping
-!! elements. For example: call realloc(x, newmax, stat=istat, fill=-999d0)
-!! The original array elements are NOT overwritten by fill, unless
-!! keepExisting=.false.
+!! elements. For example: <tt>call realloc(x, newmax, stat=istat, fill=-999d0)</tt>
+!! The original array elements are NOT overwritten by \a fill, unless
+!! <tt>keepExisting=.false.</tt>
 !!
-!! Example usage:\code
+!! When <tt>keepExisting=.false.</tt> and no fill value is specified,
+!! the resulting values are unspecified<sup>2</sup>.
+!!
+!! <b>Example usage:</b>\code
 !!   integer, allocatable :: iarr(:), itens(:,:,:)
 !!   call realloc(iarr, 100)
 !!   call realloc(iarr, 1000, fill = -1, keepExisting=.false.)
@@ -80,6 +80,18 @@ public realloc, reallocP
 !! \param[in]     keepExisting (optional) Whether to preserve the original
 !!      data in arr (defaults to .true.). When set to .false. and the
 !!      parameter fill is not present, the resulting data is unspecified.
+!!
+!! <small>(1. Although the Intel compiler is able to
+!! distinguish interfaces with allocatable and pointer arrays, the official
+!! FORTRAN 2003 standard does not support distinguishing interfaces based on the
+!! allocatable/pointer attribute; therefore, the two sets of routines have
+!! been put into separate interfaces. The routine syntax is identical for
+!! realloc and reallocP.)</small>
+!!
+!! <small>(2. When the array size remains identical to the original and
+!! \a keepExisting is either true or false, and \a fill is not present
+!! the original array is preserved anyway, to prevent unnecessary assignments.
+!! This is not a guaranteed feature and is subject to change.)</small>
 interface realloc
    module procedure reallocInt
    module procedure reallocInt2
@@ -108,6 +120,8 @@ interface realloc
    module procedure reallocLogical4
 end interface
 
+!> Reallocates memory for an existing \a pointer array. behaviour and arguments
+!! are identical to \ref m_alloc::realloc.
 interface reallocP
    module procedure reallocPInt
    module procedure reallocPInt2
@@ -130,7 +144,6 @@ interface reallocP
    module procedure reallocPLogical3
    module procedure reallocPLogical4
 end interface
-
 contains
 
 subroutine reallocReal2x(arr, u1, u2, l1, l2, stat, keepExisting)
