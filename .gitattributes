@@ -1103,6 +1103,7 @@ src/engines_gpl/flow2d3d/scripts/cleantemp_d3dflow.tcl -text
 src/engines_gpl/flow2d3d/scripts/ddb2ddd.sh -text
 src/engines_gpl/flow2d3d/scripts/delft3d-flow_run.bat -text
 src/engines_gpl/flow2d3d/scripts/delft3d-flow_run.sh -text
+src/engines_gpl/flow2d3d/scripts/delft3d-flow_run_parallel.bat -text
 src/engines_gpl/flow2d3d/scripts/fluidmud_run.sh -text
 src/engines_gpl/flow2d3d/scripts/kill.tcl -text
 src/engines_gpl/flow2d3d/scripts/kill_d3dflow.tcl -text
