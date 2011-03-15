@@ -328,12 +328,12 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
           enddo
        endif
     endif
+    success = .true.
     !
 9999 continue
     if (inode == master) then
-      if (associated(rst_msed)) deallocate (rst_msed)
-      if (associated(rst_thlyr))   deallocate (rst_thlyr)     
-      ierror = clsnef(fds) 
+       if (associated(rst_msed)) deallocate (rst_msed)
+       if (associated(rst_thlyr))   deallocate (rst_thlyr)     
+       ierror = clsnef(fds) 
     endif
-    success = .true.
 end subroutine restart_lyrs
