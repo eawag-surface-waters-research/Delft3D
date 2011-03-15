@@ -8,7 +8,7 @@
 # mormerge.tcl - Script to start parallel FLOW runs
 #                and a morphological merging executable
 #
-# Copyright (C) 2008 Deltares
+# Copyright (C) 2011 Deltares
 #
 # Authors: Adri Mourits
 #
@@ -20,7 +20,7 @@
 #
 
 global version
-set version "2.10"
+set version "2.20"
 
 global debug
 set debug 0
@@ -526,7 +526,7 @@ proc readInputFile { inputfilename iflist } {
    global queuesys
 
    set flowexedir      " "
-   set flowexename     "trisim"
+   set flowexename     "deltares_hydro"
    set flowargs        " "
    set waveexedir      " "
    set waveargs        " "
@@ -622,9 +622,9 @@ proc readInputFile { inputfilename iflist } {
       puts "       flowexedir         = /delft3d/flow/bin/wlinux"
       exit 1
    }
-   if {$flowexename != "trisim" && $flowexename != "delftflow"} {
+   if {$flowexename != "trisim" && $flowexename != "delftflow" && $flowexename != "deltares_hydro"} {
       puts "ERROR: In file $inputfilename"
-      puts "       Expecting executable name being \"trisim\" (default) or \"delftflow\", example:"
+      puts "       Expecting executable name being \"deltares_hydro\" (default), \"trisim\" (default) or \"delftflow\", example:"
       puts "       flowexename         = delftflow"
       exit 1
    }
@@ -929,7 +929,24 @@ proc getRunids { flowargs inputdir numdoms rids} {
    if {$argcount == 1} {
       #the argument is a ddbound file
       scanDDBoundFile $fargs $inputdir runids
+   }
+   set words [split $flowargs "="]
+   if {[llength $words] == 2} {
+      # the argument has the shape "keyword = value" (from a config.ini file)
+      set keyword [string tolower [string trim [lindex $words 0]]]
+      set value   [string trim [lindex $words 1]]
+      switch -- $keyword {
+         "mdffile" {
+               set runid $value
+               regsub -all {.mdf} $runid "" runid
+               lappend runids $runid
+         }
+         "ddbfile" {
+               scanDDBoundFile $value $inputdir runids
+         }
+      }
    } else {
+      # the arguments are guided with flags like -r or -c
       set argnumber 0
       while { $argnumber < $argcount } {
          set arg [lindex $fargs $argnumber ]
@@ -957,7 +974,7 @@ proc getRunids { flowargs inputdir numdoms rids} {
    set numdomains [llength $runids]
    if {$numdomains < 1} {
       puts "ERROR: In flow arguments \"$flowargs\":"
-      puts "       Expecting at least one runid to be specificied by flowargs"
+      puts "       Expecting at least one runid to be specified by flowargs"
       exit 1
    }
 }
@@ -1705,8 +1722,8 @@ if { $infillist(localrun) } {
 }
 putsDebug "numnodes          : $infillist(numnodes)"
 
-# No separate tdatom when using delftflow executable
-if { $infillist(flowexename) == "delftflow" } {
+# No separate tdatom when using delftflow/deltares_hydro executable
+if { $infillist(flowexename) == "delftflow" || $infillist(flowexename) == "deltares_hydro" } {
    set arglist(runtdatom) 0
 }
 
@@ -1717,6 +1734,7 @@ if { $infillist(flowexename) == "delftflow" } {
 # Runids, wave OnLine
 #
 if { $infillist(flowexename) == "trisim" } {
+   putsDebug "Scanning commandline arguments for trisim ..."
    getRunids $infillist(flowargs) $inputdir numdomains runids
 } elseif { $infillist(flowexename) == "delftflow" } {
    set d3dfilnam [file nativename [file join $rootdir "input" [lindex $infillist(flowargs) 0] ] ]
@@ -1724,6 +1742,15 @@ if { $infillist(flowexename) == "trisim" } {
    set d3dinfile [open $d3dfilnam r]
    while {[gets $d3dinfile aline] >= 0} {
       if { [string length $aline] > 3 } break
+   }
+   close $d3dinfile
+   getRunids $aline $inputdir numdomains runids
+} elseif { $infillist(flowexename) == "deltares_hydro" } {
+   set d3dfilnam [file nativename [file join $rootdir "input" [lindex $infillist(flowargs) 0] ] ]
+   putsDebug "Scanning input file $d3dfilnam ..."
+   set d3dinfile [open $d3dfilnam r]
+   while {[gets $d3dinfile aline] >= 0} {
+      if { [string match -nocase "*mdffile*" $aline] || [string match -nocase "*ddbfile*" $aline] } break
    }
    close $d3dinfile
    getRunids $aline $inputdir numdomains runids
@@ -1809,6 +1836,8 @@ if { $infillist(flowexename) == "trisim" } {
    set flowexe   [file nativename [file join $infillist(flowexedir) "trisim.exe"] ]
 } elseif { $infillist(flowexename) == "delftflow" } {
    set flowexe   [file nativename [file join $infillist(flowexedir) "delftflow.exe"] ]
+} elseif { $infillist(flowexename) == "deltares_hydro" } {
+   set flowexe   [file nativename [file join $infillist(flowexedir) "deltares_hydro.exe"] ]
 }
 
 checkFil exe $mergeexe

@@ -12,7 +12,7 @@ rem to force the number of parallel processes, remove the "rem" in front of the 
 rem set OMP_NUM_THREADS=1
 
 @echo SWAN batchfile executed for Delft3D
-@echo Using %D3D_HOME%\w32\lib\swan.bat
+@echo Using swan.bat in directory %~dp0
 @echo Using %swanexec%
 @echo Performing wave computation for: %1.swn
 
