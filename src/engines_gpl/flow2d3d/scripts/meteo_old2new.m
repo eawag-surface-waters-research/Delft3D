@@ -160,8 +160,23 @@ switch filetype
 case 'arcinfo'
     grid.n_cols       = sscanf(getLineEnd(header,'ncols'),'%f',1);
     grid.n_rows       = sscanf(getLineEnd(header,'nrows'),'%f',1);
-    grid.x_ll         = sscanf(getLineEnd(header,'xllcentre'),'%f',1);
-    grid.y_ll         = sscanf(getLineEnd(header,'yllcentre'),'%f',1);
+    idx  = strfind(header, 'xllcentre');
+    arr1 = cell2mat(idx);
+    idx  = strfind(header, 'xllcorner');
+    arr2 = cell2mat(idx);
+    if ~isempty(arr1)
+        grid.x_llcentre   = sscanf(getLineEnd(header,'xllcentre'),'%f',1);
+        grid.y_llcentre   = sscanf(getLineEnd(header,'yllcentre'),'%f',1);
+        grid.x_llcorner   = 0;
+        grid.y_llcorner   = 0;
+    elseif ~isempty(arr2)
+        grid.x_llcentre   = 0;
+        grid.y_llcentre   = 0;
+        grid.x_llcorner   = sscanf(getLineEnd(header,'xllcorner'),'%f',1);
+        grid.y_llcorner   = sscanf(getLineEnd(header,'yllcorner'),'%f',1);
+    else
+        error(['Could not find xllcorner (and yllcorner) or xllcentre (and yllcentre).']);
+    end
     dx                = sscanf(getLineEnd(header,'cellsize'),'%f',2);
     grid.dx           = dx(1);
     grid.dy           = dx(2);
@@ -236,7 +251,7 @@ case 'spiderweb'
 case 'svwp'
     % Just skip first line (second line is start of first time block)
     fgetl(fin);
-	grid.nodata_value = nodata;
+    grid.nodata_value = nodata;
 end % switch filetype
 
 % Now write the standardized output file header 
@@ -252,8 +267,13 @@ end % switch filetype
         fprintf(fout,'%s%-50s%s\n','grid_unit       =    ',gridunit,'# Unit used for grid dimensions');
     end
     if strcmp(filetype,'arcinfo')
-        fprintf(fout,'%s%-50.4f%s\n','x_llcorner      =    ',grid.x_ll,'# Xcoordinate of lower left corner of grid (in units specified in grid_unit)');
-        fprintf(fout,'%s%-50.4f%s\n','y_llcorner      =    ',grid.y_ll,'# Ycoordinate of lower left corner of grid (in units specified in grid_unit)');
+        if grid.x_llcorner > 0 || grid.y_llcorner > 0
+            fprintf(fout,'%s%-50.4f%s\n','x_llcorner      =    ',grid.x_llcorner,'# Xcoordinate of lower left corner of grid (in units specified in grid_unit)');
+            fprintf(fout,'%s%-50.4f%s\n','y_llcorner      =    ',grid.y_llcorner,'# Ycoordinate of lower left corner of grid (in units specified in grid_unit)');
+        else
+            fprintf(fout,'%s%-50.4f%s\n','x_llcentre      =    ',grid.x_llcentre,'# Xcoordinate of lower left corner of grid (in units specified in grid_unit)');
+            fprintf(fout,'%s%-50.4f%s\n','y_llcentre      =    ',grid.y_llcentre,'# Ycoordinate of lower left corner of grid (in units specified in grid_unit)');
+        end
         fprintf(fout,'%s%-50.4f%s\n','dx              =    ',grid.dx,'# Grid dimension dx (in units specified in grid_unit)');
         fprintf(fout,'%s%-50.4f%s\n','dy              =    ',grid.dy,'# Grid dimension dy (in units specified in grid_unit)');
     end
