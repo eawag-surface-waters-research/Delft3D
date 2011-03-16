@@ -67,6 +67,8 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
     logical                       , pointer :: temp
     logical                       , pointer :: dredge
     logical                       , pointer :: wave
+    logical                       , pointer :: waveol
+    logical                       , pointer :: xbeach
     logical                       , pointer :: iweflg
     logical                       , pointer :: struct
     logical                       , pointer :: sedim
@@ -83,6 +85,7 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
     logical                       , pointer :: flcut
     logical                       , pointer :: fl45
     logical                       , pointer :: waqol
+    integer                       , pointer :: itcomi
 !
 ! Global variables
 !
@@ -122,6 +125,8 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
     temp                => gdp%gdprocs%temp
     dredge              => gdp%gdprocs%dredge
     wave                => gdp%gdprocs%wave
+    waveol              => gdp%gdprocs%waveol
+    xbeach              => gdp%gdprocs%xbeach
     iweflg              => gdp%gdprocs%iweflg
     struct              => gdp%gdprocs%struct
     sedim               => gdp%gdprocs%sedim
@@ -139,6 +144,7 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
     flcut               => gdp%gdtmpfil%flcut
     fl45                => gdp%gdtmpfil%fl45
     waqol               => gdp%gdwaqpar%waqol
+    itcomi              => gdp%gdinttim%itcomi
     !
     ierror = 0
     iwarn  = 0
@@ -379,6 +385,15 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
        ! 2D (kmax == 1) and non-hydrostatic is not allowed
        !
        call prterr(lundia, 'P004', 'The combination 2D and non-hydrostatic is not allowed')
+       ierror = ierror+ 1
+    endif
+    !
+    if (wave .and. waveol .and. (.not.xbeach) .and. itcomi==1) then
+       !
+       ! Calling wave every timestep is not supported (yet).
+       ! If tried, FLOW does not read wave information at all.
+       !
+       call prterr(lundia, 'P004', 'Calling wave every timestep is not supported.')
        ierror = ierror+ 1
     endif
     !
