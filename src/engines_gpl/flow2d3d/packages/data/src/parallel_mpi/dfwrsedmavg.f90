@@ -320,6 +320,7 @@ subroutine dfwrsedmavg(lundia    ,error     ,trifil    ,nst       ,mmax      , &
     !ierror = putelt(fds, grnam7, 'SBUUA', uindex, 1, sbuff)
     call dfgather(rsbuff,nf,nl,mf,ml,iarrc,gdp)
     deallocate(rsbuff)
+    ierror = 0
     if (inode == master) then
        ierror = putelt(fds, grnam7, 'SBUUA', uindex, 1, glbarr4)
     endif

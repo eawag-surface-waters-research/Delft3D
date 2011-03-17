@@ -297,6 +297,7 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
     celidt              => nefiselem%celidt
     endif
     !
+    ierror = 0
     if (inode == master) ierror = open_datdef(filnam   ,fds      )
     if (ierror/= 0) goto 9999
     if (first .and. inode == master) then
@@ -317,51 +318,51 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
     ! Overwriting instead of appending if time is already on file
     !
     !-->
- 10 continue
-    if (celidt > 1) then
-       idummy(1)   = -1
-       lastcl      = celidt - 1
-       uindex(1,1) = lastcl
-       uindex(2,1) = lastcl
-       ierror     = getelt(fds, grnam4, 'ITHISS', uindex, 1, 4, idummy)
-       if (ierror/= 0) goto 9999
-       if (idummy(1) >= ithisc) then
-          celidt = lastcl
-          goto 10
+ 10    continue
+       if (celidt > 1) then
+          idummy(1)   = -1
+          lastcl      = celidt - 1
+          uindex(1,1) = lastcl
+          uindex(2,1) = lastcl
+          ierror     = getelt(fds, grnam4, 'ITHISS', uindex, 1, 4, idummy)
+          if (ierror/= 0) goto 9999
+          if (idummy(1) >= ithisc) then
+             celidt = lastcl
+             goto 10
+          endif
+       else
+          celidt = 1
        endif
-    else
-       celidt = 1
-    endif
-    !<--
-    idummy(1)   = ithisc
-    uindex(1,1) = celidt
-    uindex(2,1) = celidt
-    !
-    ! celidt is obtained by investigating group his-infsed-serie, identified
-    ! with nefiswrsedhinf.
-    ! Group his-sed-series, identified with nefiswrsedh, must use the same
-    ! value for celidt.
-    ! Easy solution:
-    gdp%nefisio%nefiselem(nefiswrsedh)%celidt = celidt
-    ! Neat solution in pseudo code:
-    ! subroutine wrsedh
-    !    integer :: celidt
-    !    celidt = detectcelidt(nefiswrsedhinf)
-    !    call wrsedhinf(celidt)
-    !    call wrsedhdat(celidt)
-    ! end subroutine
-    !
-    ierror     = putelt(fds, grnam4, 'ITHISS', uindex, 1, idummy)
-    if (ierror/= 0) goto 9999
-    !
-    sdummy      = real(morfac,sp)
-    ierror     = putelt(fds, grnam4, 'MORFAC', uindex, 1, sdummy)
-    if (ierror/= 0) goto 9999
-    !
-    ! MORFT is a double!
-    !
-    ierror     = putelt(fds, grnam4, 'MORFT', uindex, 1, morft)
-    if (ierror/= 0) goto 9999
+       !<--
+       idummy(1)   = ithisc
+       uindex(1,1) = celidt
+       uindex(2,1) = celidt
+       !
+       ! celidt is obtained by investigating group his-infsed-serie, identified
+       ! with nefiswrsedhinf.
+       ! Group his-sed-series, identified with nefiswrsedh, must use the same
+       ! value for celidt.
+       ! Easy solution:
+       gdp%nefisio%nefiselem(nefiswrsedh)%celidt = celidt
+       ! Neat solution in pseudo code:
+       ! subroutine wrsedh
+       !    integer :: celidt
+       !    celidt = detectcelidt(nefiswrsedhinf)
+       !    call wrsedhinf(celidt)
+       !    call wrsedhdat(celidt)
+       ! end subroutine
+       !
+       ierror     = putelt(fds, grnam4, 'ITHISS', uindex, 1, idummy)
+       if (ierror/= 0) goto 9999
+       !
+       sdummy      = real(morfac,sp)
+       ierror     = putelt(fds, grnam4, 'MORFAC', uindex, 1, sdummy)
+       if (ierror/= 0) goto 9999
+       !
+       ! MORFT is a double!
+       !
+       ierror     = putelt(fds, grnam4, 'MORFT', uindex, 1, morft)
+       if (ierror/= 0) goto 9999
     endif !inode==master
     !
     ! his-sed-series: stations
@@ -375,18 +376,18 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
           if (inode == master) allocate( rsbuff2(1:nostatgl, 1:kmax+1, 1:lsed) )
           call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, kmax+1, 1, lsed, order_sta, zws, rsbuff2, gdp)
           if (inode == master) then
-          i = 0
-          do l = 1, lsed
-             do k = 0, kmax
-                do n = 1, nostatgl
-                   i        = i+1
-                   sbuff(i) = rsbuff2(n, k, l)
+             i = 0
+             do l = 1, lsed
+                do k = 1, kmax+1
+                   do n = 1, nostatgl
+                      i        = i+1
+                      sbuff(i) = rsbuff2(n, k, l)
+                   enddo
                 enddo
              enddo
-          enddo
-          deallocate( rsbuff2 )
-          ierror = putelt(fds, grnam5, 'ZWS', uindex, 1, sbuff)
-          if (ierror/= 0) goto 9999
+             deallocate( rsbuff2 )
+             ierror = putelt(fds, grnam5, 'ZWS', uindex, 1, sbuff)
+             if (ierror/= 0) goto 9999
           endif !inode==master
           !
           ! group 5: element 'ZRSDEQ'
@@ -395,18 +396,18 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
           if (inode == master) allocate( rsbuff2(1:nostatgl, 1:kmax, 1:lsed) )
           call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, kmax, 1, lsed, order_sta, zrsdeq, rsbuff2, gdp)
           if (inode == master) then
-          i = 0
-          do l = 1, lsed
-             do k = 1, kmax
-                do n = 1, nostatgl
-                   i        = i+1
-                   sbuff(i) = rsbuff2(n, k, l)
+             i = 0
+             do l = 1, lsed
+                do k = 1, kmax
+                   do n = 1, nostatgl
+                      i        = i+1
+                      sbuff(i) = rsbuff2(n, k, l)
+                   enddo
                 enddo
              enddo
-          enddo
-          deallocate( rsbuff2 )
-          ierror = putelt(fds, grnam5, 'ZRSDEQ', uindex, 1, sbuff)
-          if (ierror/= 0) goto 9999
+             deallocate( rsbuff2 )
+             ierror = putelt(fds, grnam5, 'ZRSDEQ', uindex, 1, sbuff)
+             if (ierror/= 0) goto 9999
           endif !inode==master
        endif
        !
@@ -416,16 +417,16 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
        if (inode == master) allocate( rsbuff1(1:nostatgl, 1:lsedtot) )
        call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, lsedtot, order_sta, zbdsed, rsbuff1, gdp)
        if (inode == master) then
-       i = 0
-       do l = 1, lsedtot
-          do n = 1, nostatgl
-             i        = i+1
-             sbuff(i) = rsbuff1(n, l)
+          i = 0
+          do l = 1, lsedtot
+             do n = 1, nostatgl
+                i        = i+1
+                sbuff(i) = rsbuff1(n, l)
+             enddo
           enddo
-       enddo
-       deallocate( rsbuff1 )
-       ierror = putelt(fds, grnam5, 'ZBDSED', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
+          deallocate( rsbuff1 )
+          ierror = putelt(fds, grnam5, 'ZBDSED', uindex, 1, sbuff)
+          if (ierror/= 0) goto 9999
        endif !inode==master
        !
        ! group 5: element 'ZDPSED'
@@ -434,14 +435,14 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
        if (inode == master) allocate( rsbuff(1:nostatgl) )
        call dfgather_filter(lundia, nostat, nostatto, nostatgl, order_sta, zdpsed, rsbuff, gdp )
        if (inode == master) then
-       i = 0
-       do n = 1, nostatgl
-          i        = i+1
-          sbuff(i) = rsbuff(n)
-       enddo
-       deallocate( rsbuff )
-       ierror = putelt(fds, grnam5, 'ZDPSED', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
+          i = 0
+          do n = 1, nostatgl
+             i        = i+1
+             sbuff(i) = rsbuff(n)
+          enddo
+          deallocate( rsbuff )
+          ierror = putelt(fds, grnam5, 'ZDPSED', uindex, 1, sbuff)
+          if (ierror/= 0) goto 9999
        endif !inode==master
        !
        ! group 5: element 'ZDPS'
@@ -450,14 +451,14 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
        if (inode == master) allocate( rsbuff(1:nostatgl) )
        call dfgather_filter(lundia, nostat, nostatto, nostatgl, order_sta, zdps, rsbuff, gdp )
        if (inode==master) then
-       i = 0
-       do n = 1, nostatgl
-          i        = i+1
-          sbuff(i) = rsbuff(n)
-       enddo
-       deallocate( rsbuff )
-       ierror = putelt(fds, grnam5, 'ZDPS', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
+          i = 0
+          do n = 1, nostatgl
+             i        = i+1
+             sbuff(i) = rsbuff(n)
+          enddo
+          deallocate( rsbuff )
+          ierror = putelt(fds, grnam5, 'ZDPS', uindex, 1, sbuff)
+          if (ierror/= 0) goto 9999
        endif !inode==master
        !
        ! group 5: element 'ZSBU'
@@ -466,24 +467,24 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
        if (inode == master) allocate( rsbuff1(1:nostatgl, 1:lsedtot) )
        call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, lsedtot, order_sta, zsbu, rsbuff1, gdp)
        if (inode == master) then
-       i = 0
-       do l = 1, lsedtot
-          select case(moroutput%transptype)
-          case (0)
-             rhol = 1.0_fp
-          case (1)
-             rhol = cdryb(l)
-          case (2)
-             rhol = rhosol(l)
-          end select
-          do n = 1, nostatgl
-             i        = i+1
-             sbuff(i) = rsbuff1(n, l)/rhol
+          i = 0
+          do l = 1, lsedtot
+             select case(moroutput%transptype)
+             case (0)
+                rhol = 1.0_fp
+             case (1)
+                rhol = cdryb(l)
+             case (2)
+                rhol = rhosol(l)
+             end select
+             do n = 1, nostatgl
+                i        = i+1
+                sbuff(i) = rsbuff1(n, l)/rhol
+             enddo
           enddo
-       enddo
-       deallocate( rsbuff1 )
-       ierror = putelt(fds, grnam5, 'ZSBU', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
+          deallocate( rsbuff1 )
+          ierror = putelt(fds, grnam5, 'ZSBU', uindex, 1, sbuff)
+          if (ierror/= 0) goto 9999
        endif !inode==master
        !
        ! group 5: element 'ZSBV'
@@ -492,24 +493,24 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
        if (inode == master) allocate( rsbuff1(1:nostatgl, 1:lsedtot) )
        call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, lsedtot, order_sta, zsbv, rsbuff1, gdp)
        if (inode == master) then
-       i = 0
-       do l = 1, lsedtot
-          select case(moroutput%transptype)
-          case (0)
-             rhol = 1.0_fp
-          case (1)
-             rhol = cdryb(l)
-          case (2)
-             rhol = rhosol(l)
-          end select
-          do n = 1, nostatgl
-             i        = i+1
-             sbuff(i) = rsbuff1(n, l)/rhol
+          i = 0
+          do l = 1, lsedtot
+             select case(moroutput%transptype)
+             case (0)
+                rhol = 1.0_fp
+             case (1)
+                rhol = cdryb(l)
+             case (2)
+                rhol = rhosol(l)
+             end select
+             do n = 1, nostatgl
+                i        = i+1
+                sbuff(i) = rsbuff1(n, l)/rhol
+             enddo
           enddo
-       enddo
-       deallocate( rsbuff1 )
-       ierror = putelt(fds, grnam5, 'ZSBV', uindex, 1, sbuff)
-       if (ierror/= 0) goto 9999
+          deallocate( rsbuff1 )
+          ierror = putelt(fds, grnam5, 'ZSBV', uindex, 1, sbuff)
+          if (ierror/= 0) goto 9999
        endif !inode==master
        if (lsed > 0) then     
           !
@@ -519,24 +520,24 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
           if (inode == master) allocate( rsbuff1(1:nostatgl, 1:lsed) )
           call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, lsed, order_sta, zssu, rsbuff1, gdp)
           if (inode == master) then
-          i = 0
-          do l = 1, lsed
-             select case(moroutput%transptype)
-             case (0)
-                rhol = 1.0_fp
-             case (1)
-                rhol = cdryb(l)
-             case (2)
-                rhol = rhosol(l)
-             end select
-             do n = 1, nostatgl
-                i        = i+1
-                sbuff(i) = rsbuff1(n, l)/rhol
+             i = 0
+             do l = 1, lsed
+                select case(moroutput%transptype)
+                case (0)
+                   rhol = 1.0_fp
+                case (1)
+                   rhol = cdryb(l)
+                case (2)
+                   rhol = rhosol(l)
+                end select
+                do n = 1, nostatgl
+                   i        = i+1
+                   sbuff(i) = rsbuff1(n, l)/rhol
+                enddo
              enddo
-          enddo
-          deallocate( rsbuff1 )
-          ierror = putelt(fds, grnam5, 'ZSSU', uindex, 1, sbuff)
-          if (ierror/= 0) goto 9999
+             deallocate( rsbuff1 )
+             ierror = putelt(fds, grnam5, 'ZSSU', uindex, 1, sbuff)
+             if (ierror/= 0) goto 9999
           endif !inode==master
           !
           ! group 5: element 'ZSSV'
@@ -545,24 +546,24 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
           if (inode == master) allocate( rsbuff1(1:nostatgl, 1:lsed) )
           call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, lsed, order_sta, zssv, rsbuff1, gdp)
           if (inode == master) then
-          i = 0
-          do l = 1, lsed
-             select case(moroutput%transptype)
-             case (0)
-                rhol = 1.0_fp
-             case (1)
-                rhol = cdryb(l)
-             case (2)
-                rhol = rhosol(l)
-             end select
-             do n = 1, nostatgl
-                i        = i+1
-                sbuff(i) = rsbuff1(n, l)/rhol
+             i = 0
+             do l = 1, lsed
+                select case(moroutput%transptype)
+                case (0)
+                   rhol = 1.0_fp
+                case (1)
+                   rhol = cdryb(l)
+                case (2)
+                   rhol = rhosol(l)
+                end select
+                do n = 1, nostatgl
+                   i        = i+1
+                   sbuff(i) = rsbuff1(n, l)/rhol
+                enddo
              enddo
-          enddo
-          deallocate( rsbuff1 )
-          ierror = putelt(fds, grnam5, 'ZSSV', uindex, 1, sbuff)
-          if (ierror/= 0) goto 9999
+             deallocate( rsbuff1 )
+             ierror = putelt(fds, grnam5, 'ZSSV', uindex, 1, sbuff)
+             if (ierror/= 0) goto 9999
           endif !inode==master
           !
           ! group 5: element 'ZRCA'
@@ -571,17 +572,17 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
           if (inode == master) allocate( rsbuff1(1:nostatgl, 1:lsed) )
           call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, lsed, order_sta, zrca, rsbuff1, gdp)
           if (inode == master) then
-          i = 0
-          do l = 1, lsed
-             do n = 1, nostatgl
-                i        = i+1
-                sbuff(i) = rsbuff1(n, l)
+             i = 0
+             do l = 1, lsed
+                do n = 1, nostatgl
+                   i        = i+1
+                   sbuff(i) = rsbuff1(n, l)
+                enddo
              enddo
-          enddo
-          deallocate( rsbuff1 )
-          ierror = putelt(fds, grnam5, 'ZRCA', uindex, 1, sbuff)
-          if (ierror/= 0) goto 9999
-          endif !inode==master
+             deallocate( rsbuff1 )
+             ierror = putelt(fds, grnam5, 'ZRCA', uindex, 1, sbuff)
+             if (ierror/= 0) goto 9999
+             endif !inode==master
        endif
     endif
     !
@@ -682,25 +683,25 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
           if (inode == master) allocate( rsbuff1(1:ntruvgl, 1:lsed) )
           call dfgather_filter(lundia, ntruv, ntruvto, ntruvgl, 1, lsed, order_tra, sstrc, rsbuff1, gdp, cross_sec)
           if (inode == master) then  
-          i = 0
-          do l = 1, lsed
-             select case(moroutput%transptype)
-             case (0)
-                rhol = 1.0_fp
-             case (1)
-                rhol = cdryb(l)
-             case (2)
-                rhol = rhosol(l)
-             end select
-             do n = 1, ntruvgl
-                i        = i+1
-                sbuff(i) = rsbuff1(n, l)/rhol
+             i = 0
+             do l = 1, lsed
+                select case(moroutput%transptype)
+                case (0)
+                   rhol = 1.0_fp
+                case (1)
+                   rhol = cdryb(l)
+                case (2)
+                   rhol = rhosol(l)
+                end select
+                do n = 1, ntruvgl
+                   i        = i+1
+                   sbuff(i) = rsbuff1(n, l)/rhol
+                enddo
              enddo
-          enddo
-          deallocate( rsbuff1 )
-          ierror = putelt(fds, grnam5, 'SSTRC', uindex, 1, sbuff)
-          if (ierror/= 0) goto 9999
-       endif ! inode == master
+             deallocate( rsbuff1 )
+             ierror = putelt(fds, grnam5, 'SSTRC', uindex, 1, sbuff)
+             if (ierror/= 0) goto 9999
+          endif ! inode == master
        endif
     endif
     !

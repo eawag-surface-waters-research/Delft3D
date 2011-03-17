@@ -629,8 +629,8 @@ subroutine dfwrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
        !
        ! group 3: element 'XYSTAT'
        !
-       if (inode == master) allocate( rsbuff2(1:nostatgl,1:nostatgl) )
-       call dfgather_filter(lundia, 2, size(xystat,2), nostatgl, 1, nostatgl, order_sta, xystat, rsbuff2, gdp )
+       if (inode == master) allocate( rsbuff2(2,1:nostatgl) )
+       call dfgather_filter(lundia, nostat, size(xystat,2), nostatgl, 1, nostatgl, order_sta, xystat, rsbuff2, gdp )
        if (inode == master) then
           ierror = putelt(fds, grnam3, 'XYSTAT', uindex, 1, rsbuff2)
           deallocate( rsbuff2 )
