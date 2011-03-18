@@ -206,6 +206,7 @@ subroutine dfwrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     !
     call dfsync(gdp)
     call dffind_duplicate(lundia, nostat, nostatto, nostatgl, order_sta, gdp)
+    if (inode /= master) nostatto = nostatgl
     !
     ! Recalculates the effective global number of cross sections
     !
@@ -630,7 +631,7 @@ subroutine dfwrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
        ! group 3: element 'XYSTAT'
        !
        if (inode == master) allocate( rsbuff2(2,1:nostatgl) )
-       call dfgather_filter(lundia, nostat, size(xystat,2), nostatgl, 1, nostatgl, order_sta, xystat, rsbuff2, gdp )
+       call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, 2, order_sta, xystat, rsbuff2, gdp )
        if (inode == master) then
           ierror = putelt(fds, grnam3, 'XYSTAT', uindex, 1, rsbuff2)
           deallocate( rsbuff2 )
