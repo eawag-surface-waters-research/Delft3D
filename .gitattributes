@@ -1279,6 +1279,7 @@ src/third_party_open/lexyacc/bin/win32/flex.exe -text
 src/third_party_open/mpich2/COPYRIGHT.rtf -text
 src/third_party_open/mpich2/README.winbin.rtf -text
 src/third_party_open/mpich2/bin/mpiexec.exe -text
+src/third_party_open/mpich2/bin/smpd.exe -text
 src/third_party_open/mpich2/include/clog_commset.h -text
 src/third_party_open/mpich2/include/clog_const.h -text
 src/third_party_open/mpich2/include/clog_inttypes.h -text
