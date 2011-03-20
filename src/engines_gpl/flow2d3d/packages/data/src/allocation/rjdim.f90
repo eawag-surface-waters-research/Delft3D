@@ -262,29 +262,20 @@ subroutine rjdim(lundia, error, gdp)
     ! arrays for: 3d information
     !
     !                           thick   (kmax                )
-    !                           sig     (0:kmax              )
+    !                           sig     (kmax                ) in sigma model
+    !                           sig     (0:kmax              ) = zk() in z model
     !                           zwork   (kmax*5              )
-    pntnam = 'thick'         !  Global data
+    pntnam = 'thick'         !  Relative layer thickness
     ierr = mkfpnt(pntnam, kmax, gdp)
-                             !  Pointer of array THICK
-                             !  Realtive layer thickness in hydro-
-                             !  dynamic module
-                             !  Relative layer thickness
     if (ierr<= - 9) goto 9999
     !
-    pntnam = 'sig'           !  Global data
+    pntnam = 'sig'           !  Sigma [-1,0] levels of layer centers (in sigma model): kmax
+                             !  or Z levels of layer interfaces (in z model): kmax+1
     ierr = mkfpnt(pntnam, kmax+1, gdp)
-                             !  Pointer of array SIG
-                             !  Sigma [-1,0] levels of density points
-                             !  Sigma coordinate density points.
-                             !  Sigma coordinate density point
-                             !  Sigma-coordinate horizontal interfaces
-                             !  vertical coordinate
     if (ierr<= - 9) goto 9999
     !
-    pntnam = 'zwork'         !  Global data
+    pntnam = 'zwork'         !  Work array for Z layer model
     ierr = mkfpnt(pntnam, kmax*5, gdp)
-                             !  no description (yet)
     if (ierr<= - 9) goto 9999
     !
     !-----array for: x,y,z position of sources
