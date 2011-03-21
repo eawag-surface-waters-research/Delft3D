@@ -100,7 +100,7 @@ subroutine wrihisbal(trifil    ,lundia    ,error     ,gdp       )
        & 'Volume/polygon surface areas                                ', &
        & 1         ,nbalpol+1 ,0         ,0         ,0         ,0      , &
        & lundia    ,gdp       )
-    call addelm(nefiswrihisbal,'BALNEIGHB',' ','[  M3   ]','REAL',4    , &
+    call addelm(nefiswrihisbal,'BALNEIGHB',' ','[   -   ]','INTEGER',4 , &
        & 'Neighbouring volumes/polygons                               ', &
        & 2         ,2         ,nneighb   ,0         ,0         ,0      , &
        & lundia    ,gdp       )
