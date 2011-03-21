@@ -1300,6 +1300,7 @@ src/third_party_open/mpich2/lib/cxx.lib -text
 src/third_party_open/mpich2/lib/cxxd.lib -text
 src/third_party_open/mpich2/lib/fmpe.dll -text
 src/third_party_open/mpich2/lib/fmpe.lib -text
+src/third_party_open/mpich2/lib/fmpich2.dll -text
 src/third_party_open/mpich2/lib/fmpich2.lib -text
 src/third_party_open/mpich2/lib/fmpich2g.dll -text
 src/third_party_open/mpich2/lib/fmpich2g.lib -text
