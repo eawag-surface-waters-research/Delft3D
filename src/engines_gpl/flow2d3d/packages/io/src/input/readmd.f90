@@ -923,7 +923,10 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     call checkResult(ECHandle, success)
     if (ecwind) then
        sizenm = nmax*(1 + gdp%d%mub - gdp%d%mlb)
-       gridECItemId = addElementSet(ECHandle, r(xcor+iofset:xcor+iofset+sizenm), r(ycor+iofset:ycor+iofset+sizenm), i(kcs:kcs+sizenm), sferic, nmax, mmax, gdp%d%mub, gdp%d%mlb)
+       gridECItemId = addElementSet(ECHandle, r(xcor+iofset:xcor+iofset+sizenm), &
+                                            & r(ycor+iofset:ycor+iofset+sizenm), &
+                                            & i(kcs:kcs+sizenm), sferic, nmax, &
+                                            & mmax, gdp%d%mub, gdp%d%mlb)
        if (gridECItemId == 0) call checkResult(ECHandle)
        success = setInternalGrid(ECHandle, gridECItemId)
     endif
