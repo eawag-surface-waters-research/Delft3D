@@ -108,7 +108,6 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     integer                                 :: cntsupl
     integer                                 :: cntlink
     integer                                 :: cntsedidx
-    integer, external                       :: stringsequalinsens
     integer             , dimension(4)      :: def_active
     integer                                 :: def_chkloc
     integer                                 :: def_depthdef
@@ -158,6 +157,7 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     real(sp)                                :: versionnrinput
     logical                                 :: ex
     logical                                 :: error
+    logical, external                       :: stringsequalinsens
     logical                                 :: success
     logical                                 :: unique
     logical                                 :: def_dredgewhendry

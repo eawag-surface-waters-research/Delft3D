@@ -298,7 +298,7 @@
       if ( mtimstep .lt. 0 ) then
          mtimstep = dvoltot
       else
-         mtimstep = min ( mtimstep, dvoltot )
+         mtimstep = min ( real(mtimstep,4), dvoltot )
       endif
       write( lundia,'(//,A,F15.2)' )                                     &
      &               "Maximum timestep whole simulation: ", mtimstep

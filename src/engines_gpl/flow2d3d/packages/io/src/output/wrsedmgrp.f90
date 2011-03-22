@@ -97,6 +97,9 @@ subroutine wrsedmgrp(lundia    ,error     ,trifil    ,itmapc    ,mmax      , &
     character(256)          :: errmsg      ! Character var. containing the errormessage to be written to file. The message depends on the error. 
     character(60)           :: filnam      ! Help var. for FLOW file name 
 !
+    data grnam4/'map-infsed-serie'/
+    data grnam5/'map-sed-series'/
+!
 !! executable statements -------------------------------------------------------
 !
     nefiselem           => gdp%nefisio%nefiselem(nefiswrsedminf)
@@ -113,9 +116,6 @@ subroutine wrsedmgrp(lundia    ,error     ,trifil    ,itmapc    ,mmax      , &
     rsedeq              => gdp%gdr_i_ch%rsedeq
     dps                 => gdp%gdr_i_ch%dps
     rca                 => gdp%gdr_i_ch%rca
-    !
-    data grnam4/'map-infsed-serie'/
-    data grnam5/'map-sed-series'/
     !
     ! Initialize local variables
     !

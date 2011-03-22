@@ -88,13 +88,6 @@ subroutine wrxbm(lundia     ,error    ,trifil    ,itmapc    ,nmax      , &
     character(60)                   :: filnam
     character(64), dimension(nelmx) :: elmdes
 !
-!! executable statements -------------------------------------------------------
-!
-    nefiselem => gdp%nefisio%nefiselem(nefiswrrolm)
-    first     => nefiselem%first
-    celidt    => nefiselem%celidt
-    elmdms    => nefiselem%elmdms
-    !
     data grnam1/'map-infrol-serie'/
     data grnam2/'map-rol-series'/
     data elmnms/'ITMAPS', 'HS',  &
@@ -111,6 +104,13 @@ subroutine wrxbm(lundia     ,error    ,trifil    ,itmapc    ,nmax      , &
          &  'Component of wave force in eta direction                      ',   &
          &  'Component of roller force in ksi direction                    ',   &
          &  'Component of roller force in eta direction                    '/
+    !
+!! executable statements -------------------------------------------------------
+!
+    nefiselem => gdp%nefisio%nefiselem(nefiswrrolm)
+    first     => nefiselem%first
+    celidt    => nefiselem%celidt
+    elmdms    => nefiselem%elmdms
     !
     ! Initialize local variables
     ! Default is append mode: celidt = last cell + 1
