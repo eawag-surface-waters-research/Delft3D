@@ -55,41 +55,49 @@ subroutine dfinitmpi
     integer                            :: ierr      ! error value of MPI call
     integer                            :: len
     character(128)                     :: msgstr    ! string to pass message
+    character(128)                     :: rankstr
 #ifdef DFMPI
     character(MPI_MAX_PROCESSOR_NAME)  :: host      ! hostname       for current MPI process
     character(MPI_MAX_PROCESSOR_NAME)  :: processor ! processor name for current MPI process
 #endif
     logical                            :: mpi_is_initialized
+    logical                            :: usempi
 !
 !! executable statements -------------------------------------------------------
 !
     ! enroll in MPI
     !
     mpi_is_initialized = .false.
+    ierr = MPI_SUCCESS
+    call get_environment_variable('PMI_RANK', rankstr, len)
+    usempi = (len > 0)
+
+    if (usempi) then
+       !
+       ! test first if MPI was initialized (to avoid boxing MPI_init in DD runs)    
+       !
 #ifdef DFMPI
-    !
-    ! test first if MPI was initialized (to avoid boxing MPI_init in DD runs)    
-    !
-    call mpi_initialized( mpi_is_initialized, ierr )
-    if ( ierr /= MPI_SUCCESS ) then
-       write (msgstr,'(a,i5)') 'MPI produces some internal error in mpi_initialized - return code is ',ierr
-       write (6,*) trim(msgstr)
-       call cstop( 1, char(0) )
-    endif
-    !
-    ! early return if MPI was already initialized before...
-    !
-    if (mpi_is_initialized) return
+       call mpi_initialized( mpi_is_initialized, ierr )
 #endif
+       if ( ierr /= MPI_SUCCESS ) then
+          write (msgstr,'(a,i5)') 'MPI produces some internal error in mpi_initialized - return code is ',ierr
+          write (6,*) trim(msgstr)
+          call cstop( 1, char(0) )
+       endif
+       !
+       ! early return if MPI was already initialized before...
+       !
+       if (mpi_is_initialized) return
 
 #ifdef DFMPI
-    call mpi_init ( ierr )
-    if ( ierr /= MPI_SUCCESS ) then
-       write (msgstr,'(a,i5)') 'MPI produces some internal error in mpi_init - return code is ',ierr
-       write (6,*) trim(msgstr)
-       call cstop( 1, char(0) )
-    endif
+       call mpi_init ( ierr )
 #endif
+       if ( ierr /= MPI_SUCCESS ) then
+          write (msgstr,'(a,i5)') 'MPI produces some internal error in mpi_init - return code is ',ierr
+          write (6,*) trim(msgstr)
+          call cstop( 1, char(0) )
+       endif
+    endif
     !
     ! initialize common variables
     !
@@ -98,35 +106,37 @@ subroutine dfinitmpi
     !
     ! get node number INODE
     !
+    if (usempi) then
 #ifdef DFMPI
-    host      = 'unknown'
-    processor = 'unknown'
-    call mpi_comm_rank ( MPI_COMM_WORLD, inode, ierr )
-    call util_getenv('HOSTNAME',host)
-    call mpi_get_processor_name (processor,len,ierr)
-    write (6,'(a,i3.3,4a)') 'MPI process number ', inode, ' has host ', trim(host), ' and is running on processor ', trim(processor)
+       host      = 'unknown'
+       processor = 'unknown'
+       call mpi_comm_rank ( MPI_COMM_WORLD, inode, ierr )
+       call util_getenv('HOSTNAME',host)
+       call mpi_get_processor_name (processor,len,ierr)
+       write (6,'(a,i3.3,4a)') 'MPI process number ', inode, ' has host ', trim(host), ' and is running on processor ', trim(processor)
 #endif
+    endif
 
     inode = inode + 1
 
-#ifdef DFMPI
-    if ( ierr /= MPI_SUCCESS ) then
-       write (msgstr,'(a,i5,a,i3.3)') 'MPI produces some internal error - return code is ',ierr,' and node number is ',inode
-       write (6,*) trim(msgstr)
-       call cstop( 1, char(0) )
-    endif
-#endif
+    if (usempi) then
+       if ( ierr /= MPI_SUCCESS ) then
+          write (msgstr,'(a,i5,a,i3.3)') 'MPI produces some internal error - return code is ',ierr,' and node number is ',inode
+          write (6,*) trim(msgstr)
+          call cstop( 1, char(0) )
+       endif
     !
     ! determine total number of processes
     !
 #ifdef DFMPI
-    call mpi_comm_size ( MPI_COMM_WORLD, nproc, ierr )
-    if ( ierr /= MPI_SUCCESS ) then
-       write (msgstr,'(a,i5,a,i3.3)') 'MPI produces some internal error - return code is ',ierr,' and node number is ',inode
-       write (6,*) trim(msgstr)
-       call cstop( 1, char(0) )
-    endif
+       call mpi_comm_size ( MPI_COMM_WORLD, nproc, ierr )
 #endif
+       if ( ierr /= MPI_SUCCESS ) then
+          write (msgstr,'(a,i5,a,i3.3)') 'MPI produces some internal error - return code is ',ierr,' and node number is ',inode
+          write (6,*) trim(msgstr)
+          call cstop( 1, char(0) )
+       endif
+    endif
     !
     ! determine whether this is a parallel run or not
     !
@@ -146,12 +156,9 @@ subroutine dfinitmpi
     dfmax  = MPI_MAX
     dfmin  = MPI_MIN
     dfsum  = MPI_SUM
-#endif
     !
     ! determine precision for type real in case of communication (single or double)
     !
-
-#ifdef DFMPI
     if ( fp == hp ) then
        dfloat = dfdble
     else

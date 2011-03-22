@@ -70,6 +70,7 @@ character(256)                         , intent(out) :: error_message ! not empt
 integer        :: argsinfile   ! 1: Delft3D-FLOW args (-c ddb -M -d 9 etc) are in an ASCII inputfile
 integer        :: i
 integer        :: rolvWait
+logical        :: ex           ! logical to test if a file exists
 character(256) :: engineName
 character(256) :: mdfFile      ! Name of input file of single domain Delft3D-FLOW calculation
 character(256) :: ddbFile      ! Name of input file containing the DomainDecomposition boundaries
@@ -101,6 +102,16 @@ do i = 1, max_keyval
    select case (keys(i))
    case ('component,mdffile')
       mdfFile  = values(i)
+   case ('component,filewait')
+      !
+      ! for debugging:
+      ! get some time to attach debugger to process
+      !
+      do
+      inquire(file=trim(values(i)), exist=ex)
+         if (ex) exit
+         call sleep(1)
+      enddo
    case ('component,ddbfile')
       ddbFile  = values(i)
    case ('remoteolv,jarpath')

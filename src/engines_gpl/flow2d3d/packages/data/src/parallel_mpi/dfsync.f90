@@ -57,6 +57,10 @@ subroutine dfsync ( gdp )
 !
     lundia => gdp%gdinout%lundia
     !
+    ! if not parallel, return
+    !
+    if (.not.parll) return
+    !
     ! blocks until all nodes have called this routine
     !
 #if defined (DFMPI)
