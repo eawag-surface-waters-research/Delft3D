@@ -112,7 +112,7 @@ subroutine nefisio_alloc(gdp)
     endif
     nelems(nefiswrtmapinf)    = 0
     nelems(nefiswrtmap)       = 0
-    nelems(nefissetwav)       = 9
+    nelems(nefissetwav)       = 12
     nelems(nefiswrsedhinf)    = 0
     nelems(nefiswrsedh)       = 0
     nelems(nefiswrsedminf)    = 0
@@ -122,7 +122,7 @@ subroutine nefisio_alloc(gdp)
     nelems(nefischkcom)       = 4
     nelems(nefiswrwavhinf)    = 0
     nelems(nefiswrwavh)       = 0
-    nelems(nefiswrrolm)       = 11
+    nelems(nefiswrrolm)       = 12
     nelems(nefiswrihisdad)    = 8
     nelems(nefiswrthisdad)    = 5
     nelems(nefiswrihisdis)    = 4
