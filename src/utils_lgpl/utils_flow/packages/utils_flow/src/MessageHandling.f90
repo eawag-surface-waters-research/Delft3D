@@ -69,6 +69,7 @@ module MessageHandling
    integer,parameter, public     :: LEVEL_WARN  = 3
    integer,parameter, public     :: LEVEL_ERROR = 4
    integer,parameter, public     :: LEVEL_FATAL = 5
+   integer,parameter, public     :: LEVEL_NONE  = 6
    integer,parameter, public     :: Charln = 256
    integer,parameter, public     :: Idlen = 40
    integer,parameter, public     :: max_level = 5
