@@ -209,7 +209,7 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
        ! if (abs(s0(nm)-s1(nm)) >= smax) then stop
        !
        do nm = 1, nmmax
-          if (kcs(nm) /= 0) then
+          if (kcs(nm) > 0) then
              s01max = max( s01max , abs(s0(nm)-s1(nm)) )
           endif
        enddo
@@ -219,7 +219,7 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
                & ' m (per 0.5 DT) after ', ntstep, ' timesteps in the following points:'
           call prterr(lundia, 'P004', trim(message))
           do nm = 1, nmmax
-             if (kcs(nm) /= 0) then
+             if (kcs(nm) > 0) then
                 suvval = abs(s0(nm) - s1(nm))
                 if (suvval >= smax) then
                    call nm_to_n_and_m(nm, n, m, gdp)
@@ -310,7 +310,7 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
     !
     delta = 0.0
     do nm = 1, nmmax
-       if (kcs(nm) /= 0) then
+       if (kcs(nm) > 0) then
           if (zmodel) then
              k0 = kfumin(nm)
              k1 = kfumax(nm)
@@ -357,7 +357,7 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
        enddo
        if (zmodel) k0 = kfsmin(nm)
        do k = k0, kmax
-          if (kcs(nm) /= 0) then
+          if (kcs(nm) > 0) then
              volum0(nm, k) = volum1(nm, k)
           endif
        enddo
@@ -366,7 +366,7 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
     ! copy s1 to s0;hu to hu0; hv to hv0
     !
     do nm = 1, nmmax
-       if (kcs(nm) /= 0) then
+       if (kcs(nm) > 0) then
           s0(nm) = s1(nm)
        endif
        if (kcu(nm) /= 0) then
@@ -383,7 +383,7 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
        do nm = 1, nmmax
           if (zmodel) k0 = kfsmin(nm)
           do k = k0, kmax
-             if (kcs(nm)/=0) then
+             if (kcs(nm)>0) then
                 r0(nm, k, l) = r1(nm, k, l)
              endif
           enddo
@@ -396,7 +396,7 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
        do nm = 1, nmmax
           if (zmodel) k0 = kfsmin(nm)
           do k = k0 - 1, kmax
-             if (kcs(nm)/=0) then
+             if (kcs(nm)>0) then
                 rtur0(nm, k, l) = rtur1(nm, k, l)
              endif
           enddo
@@ -447,7 +447,7 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
        if (nonhyd) then
           do nm = 1, nmmax
              do k = kfsmin(nm), kmax
-                if (kcs(nm) /= 0) then
+                if (kcs(nm) > 0) then
                    p0(nm, k) = p1(nm, k)
                 endif
              enddo
@@ -458,11 +458,11 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
           ! The test "if (nst== - 1) then" is disabled by Sebastian Ullmann, so:
           if ((nh_level == nh_full) .or. (nh_level== nh_weak .and. nst== - 1)) then
              do nm = 1, nmmax
-                if (kcs(nm) /= 0) then
+                if (kcs(nm) > 0) then
                    s00(nm) = s0(nm)
                 endif
                 do k = kfsmin(nm), kmax
-                   if (kcs(nm) /= 0) then
+                   if (kcs(nm) > 0) then
                       w0(nm, k) = w1(nm, k)
                    endif
                 enddo
@@ -475,7 +475,7 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
     !
     if (roller) then
        do nm = 1, nmmax
-          if (kcs(nm) /= 0) then
+          if (kcs(nm) > 0) then
              ewabr0(nm) = ewabr1(nm)
              ewave0(nm) = ewave1(nm)
              eroll0(nm) = eroll1(nm)
