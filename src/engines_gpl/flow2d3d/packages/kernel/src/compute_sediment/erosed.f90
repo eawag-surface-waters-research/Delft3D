@@ -320,6 +320,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: tsd
     real(fp)                      :: tsigmol   ! temporary variable for sigmol
     real(fp)                      :: tws0
+    real(fp)                      :: twsk
     real(fp)                      :: ubed
     real(fp)                      :: umean
     real(fp)                      :: ustarc
@@ -903,7 +904,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           ! fraction specific quantities
           !
           dll_reals(RP_HIDEX)    = real(hidexp(nm,l) ,hp)
-          dll_reals(RP_SETVL)    = real(ws(nm, kmax, l)  ,hp) ! Vertical velocity near bedlevel
           dll_reals(RP_RHOSL)    = real(rhosol(l) ,hp)
           dll_integers(IP_ISED ) = l
           dll_strings(SP_USRFL)  = dll_usrfil(l)
@@ -915,6 +915,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              dll_reals(RP_D50  ) = 0.0_hp
              dll_reals(RP_DSS  ) = 0.0_hp
              dll_reals(RP_DSTAR) = 0.0_hp
+             dll_reals(RP_SETVL) = real(ws(nm, kmax, l)  ,hp) ! Vertical velocity near bedlevel
              !
              do k = 0, kmax
                 wslc(k)   = ws(nm, k, l)
@@ -989,6 +990,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              tdss    = dss(nm, l)
              tsalmax = salmax(l)
              tws0    = ws0(l)
+             twsk    = ws(nm, kmax, l)
           else
              !
              ! use dummy values for bedload fractions
@@ -997,6 +999,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              tdss    = di50
              tsalmax = 30.0_fp
              tws0    =  0.0_fp
+             twsk    =  0.0_fp
           endif
           !
           ! NONCOHESIVE fraction specific quantities
@@ -1004,6 +1007,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           dll_reals(RP_D50  ) = real(di50    ,hp)
           dll_reals(RP_DSS  ) = real(tdss    ,hp)
           dll_reals(RP_DSTAR) = real(dstar(l),hp)
+          dll_reals(RP_SETVL) = real(twsk    ,hp) ! Vertical velocity near bedlevel
           par(3,l) = rhosol(l)
           par(4,l) = (rhosol(l)-rhowat(nm,kmax)) / rhowat(nm,kmax)
           par(6,l) = di50
