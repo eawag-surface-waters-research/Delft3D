@@ -372,19 +372,20 @@ D3DOL_Timestep (
 
 #ifdef WITH_DELFTONLINE
     try {
-        if (*timestep==*itstart) {
-			printf ("\nWaiting for RemoteOLV\n");
-			fflush (stdout);
-        }
-		if (D3DOL_Global.dol != NULL)
+        if (D3DOL_Global.dol != NULL) {
+           if (*timestep==*itstart) {
+                printf ("\nWaiting for RemoteOLV\n");
+                fflush (stdout)
+            }
             D3DOL_Global.dol->PassMilestone ((DOL::Milestone) *timestep);
         }
+    }
 
     catch (DOL::Exception * ex) {
         Hydra::Abort ("DOL fails: %s", ex->message);
-        }
-#endif
     }
+#endif
+}
 
 
 //-------------------------------------------------------------------------------
