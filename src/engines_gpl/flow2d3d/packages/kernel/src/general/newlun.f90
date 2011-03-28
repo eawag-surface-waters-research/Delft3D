@@ -56,6 +56,7 @@ function newlun(gdp       )
 ! Local variables
 !
     integer                        :: iexit                ! Exit return value 
+    integer                        :: ierr
     integer                        :: lunit                ! Help var. 
     logical                        :: opened               ! Logical flag = TRUE if the test file is already opened 
 !
@@ -76,7 +77,8 @@ function newlun(gdp       )
    10 continue
     if (opened .and. lunit<999) then
        lunit = lunit + 1
-       inquire (unit = lunit, opened = opened)
+       inquire (unit = lunit, iostat = ierr, opened = opened)
+       if (ierr /= 0) opened = .true.
        goto 10
     !
     ! <--
