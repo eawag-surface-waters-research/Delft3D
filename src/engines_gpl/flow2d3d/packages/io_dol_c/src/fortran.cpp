@@ -94,7 +94,7 @@ extern "C" {
     void STDCALL D3DOL_RetractArrayShape    (const char *, int);
     void STDCALL D3DOL_Retract_Function     (const char *, int);
     void STDCALL D3DOL_SetDescription       (const char *, int, const char *, int);
-    void STDCALL D3DOL_Timestep             (int *);
+    void STDCALL D3DOL_Timestep             (int *, int *);
 #else
     void STDCALL D3DOL_ArrayShape           (const char *, int *, int [], int);
     void STDCALL D3DOL_ChangeDirectory      (const char *, int);
@@ -105,7 +105,7 @@ extern "C" {
     void STDCALL D3DOL_RetractArrayShape    (const char *, int);
     void STDCALL D3DOL_Retract_Function     (const char *, int);
     void STDCALL D3DOL_SetDescription       (const char *, const char *, int, int);
-    void STDCALL D3DOL_Timestep             (int *);
+    void STDCALL D3DOL_Timestep             (int *, int *);
 #endif
 
 
@@ -366,12 +366,17 @@ D3DOL_SetDescription (
 
 void STDCALL
 D3DOL_Timestep (
-    int *   timestep
+    int *   timestep,
+	int *   itstart
     ) {
 
 #ifdef WITH_DELFTONLINE
     try {
-        if (D3DOL_Global.dol != NULL)
+        if (*timestep==*itstart) {
+			printf ("\nWaiting for RemoteOLV\n");
+			fflush (stdout);
+        }
+		if (D3DOL_Global.dol != NULL)
             D3DOL_Global.dol->PassMilestone ((DOL::Milestone) *timestep);
         }
 

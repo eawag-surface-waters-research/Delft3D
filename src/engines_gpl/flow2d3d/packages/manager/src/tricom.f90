@@ -1622,7 +1622,7 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
        endif
        call vsemnefis
        call timer_stop(timer_step2screen, gdp)
-       call D3DOL_Timestep (nst)
+       call D3DOL_Timestep (nst, itstrt)
        !
        ! Status is: simulation is running / iteration
        !
@@ -1837,7 +1837,7 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
     
     ! The sequence of the 2 next calls is important for the OLV client.
     !
-    call D3DOL_Timestep (itstop)
+    call D3DOL_Timestep (itstop, itstrt)
     call setEndFlag( olv_handle, 1 ) !Tells the DOL client that the simulation has ended by passing an exception
 
     !
