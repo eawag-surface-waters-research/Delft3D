@@ -375,7 +375,7 @@ D3DOL_Timestep (
         if (D3DOL_Global.dol != NULL) {
            if (*timestep==*itstart) {
                 printf ("\nWaiting for RemoteOLV\n");
-                fflush (stdout)
+                fflush (stdout);
             }
             D3DOL_Global.dol->PassMilestone ((DOL::Milestone) *timestep);
         }
