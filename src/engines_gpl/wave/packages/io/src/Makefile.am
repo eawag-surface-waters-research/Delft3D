@@ -23,6 +23,7 @@ FMODULES += \
 libio_a_SOURCES = \
          cp_file.f90 \
          dam_cod.f90 \
+         deletehotfile.f90 \
          flow2wav.f90 \
          get_cur.f90 \
          get_dep.f90 \

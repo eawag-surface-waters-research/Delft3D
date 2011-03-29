@@ -27,6 +27,7 @@
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
 		<File RelativePath=".\src\cp_file.f90"/>
 		<File RelativePath=".\src\dam_cod.f90"/>
+		<File RelativePath=".\src\deletehotfile.f90"/>
 		<File RelativePath=".\src\flow2wav.f90"/>
 		<File RelativePath=".\src\get_cur.f90"/>
 		<File RelativePath=".\src\get_dep.f90"/>

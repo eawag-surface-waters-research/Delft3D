@@ -65,9 +65,8 @@ end type wave_time_type
 type wave_output_type
    integer  :: count           ! [-]        Counts the number of generated output fields
    real     :: nexttim         ! [sec]      Next time to write to wavm-file
-   real     :: nextint         ! [sec]      Next time to write to wavm-file   
+   real     :: timseckeephot   ! [sec]      seconds since ref date on which time the hotfile should not be deleted
    logical  :: write_wavm      ! [y/n]      True when writing to wavm file
-   logical  :: keephotfile     ! [y/n]      True when writing to wavm file   
 end type wave_output_type
 !
 type wave_data_type
@@ -100,9 +99,8 @@ subroutine initialize_wavedata(wavedata)
    wavedata%time%timmin            =  0.0
    wavedata%output%count           =  0
    wavedata%output%nexttim         =  0.0
+   wavedata%output%timseckeephot   =  0.0
    wavedata%output%write_wavm      =  .false.
-   wavedata%output%keephotfile     =  .false.   
-   wavedata%output%nextint         =  0.0   
    !
    ! platform definition
    !
@@ -203,24 +201,6 @@ subroutine setwrite_wavm(waveoutput, write_in)
 
    waveoutput%write_wavm = write_in
 end subroutine setwrite_wavm
-!
-!
-!===============================================================================
-subroutine setkeep_hotfile(waveoutput, keep_in)
-   logical :: keep_in
-   type(wave_output_type) :: waveoutput
-
-   waveoutput%keephotfile = keep_in
-end subroutine setkeep_hotfile
-!
-!
-!===============================================================================
-subroutine setnextint(waveoutput, nextint_in)
-   real :: nextint_in
-   type(wave_output_type) :: waveoutput
-
-   waveoutput%nextint = nextint_in
-end subroutine setnextint
 
 
 

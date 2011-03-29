@@ -69,6 +69,7 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
    logical                                       :: positiveonly
    logical                                       :: success
    logical                                       :: exists
+   logical                         , external    :: deletehotfile
    character(256)                                :: fname
    character(500)                                :: message
    type(swan_dom), pointer                       :: dom
@@ -92,17 +93,6 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
       !   current time >= nextint
       !   int2keephotfile is specified
       !
-      if (      comparereal(wavedata%time%timsec,wavedata%output%nextint)>=0 &
-        & .and. comparereal(swan_run%int2keephotfile,0.0)==1) then
-         call setkeep_hotfile(wavedata%output, .true.)
-         if (comparereal(wavedata%output%nextint,0.0)==0) then
-            call setnextint(wavedata%output, wavedata%time%timsec +  (swan_run%int2keephotfile + swan_run%deltc) * 60.0 )
-         else
-            call setnextint(wavedata%output, wavedata%time%timsec +  swan_run%int2keephotfile * 60.0 )
-         endif
-      else
-         call setkeep_hotfile(wavedata%output, .false.)
-      endif
    endif
    do itide = 1, swan_run%nttide
       if (wavedata%output%write_wavm) then
@@ -344,8 +334,11 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
          endif
          call dealloc_output_fields (swan_output_fields)
          !
-         if (.not.wavedata%output%keephotfile) then
-            write (fname,'(a,i0,2a)') 'hot_', i_swan, '_', trim(swan_run%prevhottime)
+         if (deletehotfile(wavedata)) then
+            !
+            ! The hotfile related to "usehottime" has been used and can now be deleted
+            !
+            write (fname,'(a,i0,2a)') 'hot_', i_swan, '_', trim(swan_run%usehottime)
             inquire (file = trim(fname), exist = exists)
             if (exists) then
                lunhot = new_lun()
@@ -359,7 +352,7 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
             count = 0
             do
                count = count + 1
-               write (fname,'(a,i0,3a,i3.3)') 'hot_', i_swan, '_', trim(swan_run%prevhottime), '-', count
+               write (fname,'(a,i0,3a,i3.3)') 'hot_', i_swan, '_', trim(swan_run%usehottime), '-', count
                inquire (file = trim(fname), exist = exists)
                if (exists) then
                   lunhot = new_lun()
@@ -376,8 +369,9 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
       enddo ! nested swan grids
       !
       ! After all hotfiles are handled correctly for each i_swan:
+      ! Next time, use the last written hotfile
       !
-      swan_run%prevhottime = swan_run%curhottime
+      swan_run%usehottime = swan_run%writehottime
       !
       ! gl THINK THIS CHECK SHOULD BE AROUND ALL WRITING TO THE COM FILE
       !

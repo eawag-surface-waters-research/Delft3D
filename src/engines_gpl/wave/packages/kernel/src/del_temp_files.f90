@@ -100,7 +100,7 @@ subroutine del_temp_files(n_swan_grids)
        !
     else
        do igrid = 1, n_swan_grids
-          write (filnam,'(a,i0,2a)') 'hot_', igrid, '_', trim(swan_run%prevhottime)
+          write (filnam,'(a,i0,2a)') 'hot_', igrid, '_', trim(swan_run%writehottime)
           inquire (file = trim(filnam), exist = ex)
           if (ex) then
              fillun = new_lun()

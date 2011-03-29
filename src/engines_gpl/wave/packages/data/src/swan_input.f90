@@ -323,9 +323,9 @@ module swan_input
        character(256)                           :: filcom
        character(256)                           :: filnam
        character(256)                           :: specfile
-       character(15)                            :: prevhottime = '00000000.000000'       
-       character(15)                            :: curhottime  = '00000000.000000'       
-       character(15)                            :: nexthottime  ='00000000.000000'       
+       character(15)                            :: usehottime    = '00000000.000000'       ! Time in the name of the hotfile that has to be used by SWAN
+       character(15)                            :: writehottime  = '00000000.000000'       ! Time in the name of the hotfile that has to be written by SWAN
+       character(15)                            :: keephottime   = '00000000.000000'       ! Time in the name of the hotfile that should not be deleted
        character(20), dimension(:), allocatable :: pntfilnam
        !
        type(handletype)                         :: tseriesfile
@@ -4492,14 +4492,12 @@ subroutine write_swan_inp (wavedata, outcnt, &
     line(1:79) = ' '
     !
     ! hotfile= true: use hotfile
-    ! modsim = 2   : quasi-stationary
-    ! modsim = 3   : non-stationary
     !
     if (sr%hotfile) then
        !
        ! define the name of the hotfile to be used
        !
-       write (fname,'(a,i0,2a)') 'hot_', inest, '_', trim(sr%nexthottime)
+       write (fname,'(a,i0,2a)') 'hot_', inest, '_', trim(sr%usehottime)
        !
        ! use it when it exists
        !
@@ -4509,18 +4507,6 @@ subroutine write_swan_inp (wavedata, outcnt, &
           write (luninp, '(1X,A)') line
           write(*,'(2a)') '  Using SWAN hotstart file: ',trim(fname)
        endif
-       !
-       ! put current time in curhottime
-       !
-       call juldat(wavedata%time%refdate, julday)
-       call timdat(julday, wavedata%time%timsec, idate, itime)
-       iyear = idate/10000
-       imon  = (idate - iyear*10000)/100
-       iday  = idate - iyear*10000 - imon*100
-       ihour = itime/10000
-       imin  = (itime - ihour*10000)/100
-       isec  = itime - ihour*10000 - imin*100
-       write (sr%curhottime, '(I4,2I2.2,A1,3I2.2)') iyear, imon, iday, '.', ihour, imin, isec
     endif
     !
     !     Physics activated in SWAN (default options)
@@ -5095,22 +5081,37 @@ subroutine write_swan_inp (wavedata, outcnt, &
     line(1:79) = ' '
     line(1:2) = '$ '
     write (luninp, '(1X,A)') line
-    line(1:79) = ' '
+!-----------------------------------------------------------------------
     !
     !     Compute and test parameters
     !
+    line(1:79) = ' '
     line(1:35) = 'TEST  ITEST=      ITRACE=          '
     write (line(14:16), '(I3)') itest
     write (line(27:29), '(I3)') itrace
     line(36:79) = ' '
     write (luninp, '(1X,A)') line
     line(1:79) = ' '
+    !
+    ! Default: put current time in writehottime
+    ! writehottime will be overwritten by tendc when quasi-/non-stationary
+    !
+    call juldat(wavedata%time%refdate, julday)
+    call timdat(julday, wavedata%time%timsec, idate, itime)
+    iyear = idate/10000
+    imon  = (idate - iyear*10000)/100
+    iday  = idate - iyear*10000 - imon*100
+    ihour = itime/10000
+    imin  = (itime - ihour*10000)/100
+    isec  = itime - ihour*10000 - imin*100
+    write (sr%writehottime, '(I4,2I2.2,A1,3I2.2)') iyear, imon, iday, '.', ihour, imin, isec
+    !
+    ! 
     if (.not.sr%compmode) then
        line(1:1) = '$'
        line(2:79) = ' '
     else
        !
-       ! hotfile= true: use hotfile
        ! modsim = 2   : quasi-stationary
        ! modsim = 3   : non-stationary
        !
@@ -5132,6 +5133,7 @@ subroutine write_swan_inp (wavedata, outcnt, &
           write (tendc, '(I4,2I2.2,A1,3I2.2)') &
               & iyear, imon, iday, '.', ihour, imin, isec
           write (line,'(A,1X,A)') 'COMPUTE STAT  ',tendc
+          sr%writehottime = tendc
        elseif (sr%modsim == 3) then
           !
           ! non-stationary
@@ -5171,6 +5173,7 @@ subroutine write_swan_inp (wavedata, outcnt, &
           write (line(33:40), '(f8.2)') sr%deltc
           line(41:44) = ' MIN'
           write (line(46:61), '(a)')    tendc
+          sr%writehottime = tendc
        else
        endif
     endif
@@ -5185,8 +5188,7 @@ subroutine write_swan_inp (wavedata, outcnt, &
        !
        ! line to ensure that SWAN is going to produce a hotfile
        !
-       write (fname,'(a,i0,2a)') 'hot_', inest, '_', trim(tendc)
-       sr%nexthottime = tendc
+       write (fname,'(a,i0,2a)') 'hot_', inest, '_', trim(sr%writehottime)
        line  = 'HOTF ''' // trim(fname) // ''''
        write (luninp, '(1X,A)') line
     endif

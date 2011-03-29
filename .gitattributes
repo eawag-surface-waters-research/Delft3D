@@ -1160,6 +1160,7 @@ src/engines_gpl/wave/packages/io/io.vfproj -text
 src/engines_gpl/wave/packages/io/src/Makefile.am -text
 src/engines_gpl/wave/packages/io/src/cp_file.f90 -text
 src/engines_gpl/wave/packages/io/src/dam_cod.f90 -text
+src/engines_gpl/wave/packages/io/src/deletehotfile.f90 -text
 src/engines_gpl/wave/packages/io/src/flow2wav.f90 -text
 src/engines_gpl/wave/packages/io/src/get_cur.f90 -text
 src/engines_gpl/wave/packages/io/src/get_dep.f90 -text
