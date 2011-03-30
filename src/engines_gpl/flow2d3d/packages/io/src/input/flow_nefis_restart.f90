@@ -110,6 +110,7 @@ use properties
     integer, dimension(3,5)               :: uindex
     integer, dimension(:,:,:,:), pointer  :: ibuff
     logical                               :: found
+    integer                               :: has_umean
     real(fp)                              :: dtm          ! time step in minutes (flexible precision)
     real(fp)                              :: t_restart
     real(sp)                              :: dtms         ! time step in minutes (single precision)
@@ -349,12 +350,14 @@ use properties
        !
        ! UMNLDF: filtered velocity U-component for subgrid viscosity model
        !
+       has_umean = 1
        ierror = getelt( fds , 'map-series', 'UMNLDF', uindex, 1, mmaxgl*nmaxgl*4, sbuff)
        if (ierror/= 0) then
           if (htur2d) then
              ierror = neferr(0,error_string)
              call prterr(lundia    ,'U190'    , error_string)
           endif
+          has_umean = 0
        else
           allocate(umnldf_g(nmaxgl,mmaxgl), stat = ier1)
           if (ier1 /= 0) then
@@ -373,6 +376,7 @@ use properties
              ierror = neferr(0,error_string)
              call prterr(lundia    ,'U190'    , error_string)
           endif
+          has_umean = 0
        else
           allocate(vmnldf_g(nmaxgl,mmaxgl), stat = ier1)
           if (ier1 /= 0) then
@@ -482,17 +486,30 @@ use properties
        endif
 
     endif
-
+    !
     !    end of master part
-    ! 
-    ! scatter information to all nodes     
-50 continue    
     !
-    ! first scatter ltur1, r1 information to all domains!
+    ! todo:
+    ! - master should not jump to 9999 or call d3stop while reading data,
+    !   but jump to 50 and scatter error-flag.
+    ! - the same hold for the other nodes when allocate fails.
+    ! - scattering all flags in one call is more efficient,
+    !   but takes more lines of code.
     !
-    call dfbroadc ( rst_lstci, 1, dfint, gdp )    
-    call dfbroadc ( rst_ltur, 1, dfint, gdp )   
-       
+    ! scatter information to all nodes
+50 continue
+    !
+    ! first scatter flags that are changed by the master
+    ! (as ltur1, r1 etc) to all other domains!
+    !
+    call dfbroadc ( rst_lstci, 1, dfint, gdp )
+    call dfbroadc ( rst_ltur, 1, dfint, gdp )
+    call dfbroadc ( lturi, 1, dfint, gdp )
+    call dfbroadc ( dp_from_map_file, 1, dfint, gdp )
+    call dfbroadc ( has_umean, 1, dfint, gdp)
+
+    call dfsync(gdp)
+      
     if ( inode /= master ) then 
        ierr(8:10) = 0
        allocate (s1_g(nmaxgl,mmaxgl), stat=ierr(1)) 
@@ -509,19 +526,26 @@ use properties
           call prterr(lundia, 'G020', 'restart-data')
           call d3stop(1, gdp)
        endif
-    endif 
-    ! 
+    endif
+    !
+    ! check if umean is found; necessary for 2D turbulence
+    !
+    if (htur2d .and. has_umean == 0) then
+       call prterr(lundia, 'P004', 'umean (umnldf and/or vmnldf) not found in restart-data, but using 2D turbulence')
+       call d3stop(1, gdp)
+    endif
+    !
     ! scatter arrays s1 etc to all nodes. Note: the broadc must use 'dfreal'
     ! since the arrays are single precision! Otherwise, intractable memory errors will occur. 
     !
-    call dfsync(gdp)
-      
     call dfbroadc ( s1_g, nmaxgl*mmaxgl, dfreal, gdp )   
     if (dp_from_map_file) call dfbroadc ( dp_g, nmaxgl*mmaxgl, dfreal, gdp ) 
     call dfbroadc ( u1_g, nmaxgl*mmaxgl*kmax, dfreal, gdp )
     call dfbroadc ( v1_g, nmaxgl*mmaxgl*kmax, dfreal, gdp )
-    call dfbroadc ( umnldf_g, nmaxgl*mmaxgl, dfreal, gdp )
-    call dfbroadc ( vmnldf_g, nmaxgl*mmaxgl, dfreal, gdp )
+    if (has_umean /= 0) then
+       call dfbroadc ( umnldf_g, nmaxgl*mmaxgl, dfreal, gdp )
+       call dfbroadc ( vmnldf_g, nmaxgl*mmaxgl, dfreal, gdp )
+    endif
     call dfbroadc ( kfu_g, nmaxgl*mmaxgl, dfint, gdp )
     call dfbroadc ( kfv_g, nmaxgl*mmaxgl, dfint, gdp )
     if (lstsci > 0 .and. lstsci  == rst_lstci) call dfbroadc ( r1_g, nmaxgl*mmaxgl*kmax*lstsci, dfreal, gdp )
@@ -537,13 +561,19 @@ use properties
           s1(i-nfg+1,j-mfg+1) = s1_g(i,j) 
           u1(i-nfg+1,j-mfg+1,1:kmax) = u1_g(i,j,1:kmax)
           v1(i-nfg+1,j-mfg+1,1:kmax) = v1_g(i,j,1:kmax)           
-          umnldf(i-nfg+1,j-mfg+1) = umnldf_g(i,j)
-          vmnldf(i-nfg+1,j-mfg+1) = vmnldf_g(i,j)
           kfu(i-nfg+1,j-mfg+1) = kfu_g(i,j)
           kfv(i-nfg+1,j-mfg+1) = kfv_g(i,j)
        enddo 
     enddo 
-        
+    if (has_umean /= 0) then
+       do j = mfg, mlg 
+          do i = nfg, nlg 
+             umnldf(i-nfg+1,j-mfg+1) = umnldf_g(i,j)
+             vmnldf(i-nfg+1,j-mfg+1) = vmnldf_g(i,j)
+          enddo 
+       enddo 
+    endif
+
     if (dp_from_map_file) then
        do j = mfg, mlg 
           do i = nfg, nlg 
@@ -570,13 +600,14 @@ use properties
 
     deallocate(u1_g, v1_g, stat = ierr(1))
     deallocate(s1_g, stat = ierr(2))
-    deallocate(umnldf_g, vmnldf_g, stat = ierr(3))
-    deallocate(kfu_g, kfv_g, stat=ierr(4))
-    ierr(5:6) = 0
-    if (dp_from_map_file) deallocate(dp_g, stat = ierr(5))
-    if (lstsci > 0 .and. lstsci  == rst_lstci) deallocate(r1_g, stat = ierr(6))
-    if (ltur > 0  .and. ltur == rst_ltur ) deallocate(rtur1_g, stat = ierr(7))
-    if (any(ierr(1:7) /= 0)) then
+    ierr(3:8) = 0
+    if (allocated(umnldf_g)) deallocate(umnldf_g, stat = ierr(3))
+    if (allocated(vmnldf_g)) deallocate(vmnldf_g, stat = ierr(4))
+    deallocate(kfu_g, kfv_g, stat=ierr(5))
+    if (dp_from_map_file) deallocate(dp_g, stat = ierr(6))
+    if (lstsci > 0 .and. lstsci  == rst_lstci) deallocate(r1_g, stat = ierr(7))
+    if (ltur > 0  .and. ltur == rst_ltur ) deallocate(rtur1_g, stat = ierr(8))
+    if (any(ierr(1:8) /= 0)) then
        call prterr(lundia, 'U021', 'flow_nefis_restart: memory de-allocate error')
     endif
 
@@ -589,7 +620,10 @@ use properties
       if (associated(ibuff)) deallocate (ibuff)
       ierror = clsnef(fds) 
     endif
-    
+    !
+    ! todo:
+    ! no communication since last call to dfsync, so it can be removed?
+    !
     call dfsync(gdp)
 
 end subroutine flow_nefis_restart
