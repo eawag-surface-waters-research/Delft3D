@@ -940,7 +940,8 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                        & r(zcurw)  ,r(zqxk)   ,r(zqyk)   ,r(ztauks) ,r(ztauet) , &
                        & r(zvicww) ,r(zdicww) ,r(zrich)  ,r(zrho)   ,r(gro)    , &
                        & r(ztur)   ,r(zvort)  ,r(zenst)  ,r(hydprs) ,r(fltr)   , &
-                       & r(ctr)    ,r(atr)    ,r(dtr)    ,velt      ,gdp       )
+                       & r(ctr)    ,r(atr)    ,r(dtr)    ,velt      ,r(zdps)   , &
+                       & gdp       )
           else    
              call dfwrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
                          & itstrt    ,ithisi    ,zmodel    ,nostat    ,ntruv     , &
@@ -949,7 +950,8 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                          & r(zcurw)  ,r(zqxk)   ,r(zqyk)   ,r(ztauks) ,r(ztauet) , &
                          & r(zvicww) ,r(zdicww) ,r(zrich)  ,r(zrho)   ,r(gro)    , &
                          & r(ztur)   ,r(zvort)  ,r(zenst)  ,r(hydprs) ,r(fltr)   , &
-                         & r(ctr)    ,r(atr)    ,r(dtr)    ,velt      ,gdp       )
+                         & r(ctr)    ,r(atr)    ,r(dtr)    ,velt      ,r(zdps)   , &
+                         & gdp       )
           endif    
           if (error) goto 9999
           if (dredge .and. .not. dadsmonly) then

@@ -567,10 +567,20 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
        enddo
     endif
     !
+    ! Depth may vary due to morphology or due to movement of the observation point.
+    !
+    zdps   = -999.0_fp
+    do ii = 1, nostat
+       m  = mnstat(1, ii)
+       if (m<0) cycle
+       n  = mnstat(2, ii)
+       if (n<0) cycle
+       zdps(ii)   = real(dps(n, m),fp)
+    enddo
+    !
     ! Store quantities specific for sediment in defined stations
     !
     if (lsed>0) then
-       zdps   = -999.0_fp
        zrca   = -999.0_fp
        zsbu   = -999.0_fp
        zsbv   = -999.0_fp

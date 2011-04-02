@@ -5,7 +5,8 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
                 & zcurw     ,zqxk      ,zqyk      ,ztauks    ,ztauet    , &
                 & zvicww    ,zdicww    ,zrich     ,zrho      ,gro       , &
                 & ztur      ,zvort     ,zenst     ,hydprs    ,fltr      , &
-                & ctr       ,atr       ,dtr       ,velt      ,gdp       )
+                & ctr       ,atr       ,dtr       ,velt      ,zdps      , &
+                & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -66,7 +67,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
 !
 ! Local parameters
 !
-    integer, parameter :: nelmx = 23
+    integer, parameter :: nelmx = 24
 !
 ! Global variables
 !
@@ -85,6 +86,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     integer      , dimension(nostat)                             :: zkfs   !  KFS in monitoring station
     logical                                        , intent(out) :: error  !!  Flag=TRUE if an error is encountered
     logical                                        , intent(in)  :: zmodel !  Description and declaration in procs.igs
+    real(fp)     , dimension(nostat)                             :: zdps   !  Description and declaration in rjdim.f90
     real(fp)     , dimension(nostat)                             :: ztauet !  Description and declaration in rjdim.f90
     real(fp)     , dimension(nostat)                             :: ztauks !  Description and declaration in rjdim.f90
     real(fp)     , dimension(nostat)                             :: zwl    !  Description and declaration in rjdim.f90
@@ -142,15 +144,15 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     data grnam3/'his-series'/
     data elmnms/'ITHISC', 'ZKFS', 'ZWL', 'ZCURU', 'ZCURV', 'ZCURW', 'ZQXK', 'ZQYK',    &
         & 'GRO', 'ZTUR', 'ZTAUKS', 'ZTAUET', 'ZVICWW', 'ZDICWW', 'ZRICH', 'ZRHO',&
-        & 'HYDPRES', 'XYSTAT', 'MNSTAT', 'FLTR', 'CTR', 'ATR', 'DTR'/
-    data elmqty/23*' '/
+        & 'HYDPRES', 'XYSTAT', 'MNSTAT', 'DPS', 'FLTR', 'CTR', 'ATR', 'DTR'/
+    data elmqty/24*' '/
     data elmunt/2*'[   -   ]', '[   M   ]', 3*'[  M/S  ]', 2*'[  M3/S ]',  &
         & 2*'[   -   ]', 2*'[  N/M2 ]', 2*'[  M2/S ]', '[   -   ]', '[ KG/M3 ]', &
-        & '[  N/M2 ]', '[   M   ]', '[   -   ]', &
+        & '[  N/M2 ]', '[   M   ]', '[   -   ]', '[   M   ]', &
         & '[   M3  ]', '[  M3/S ]', 2*'[   -   ]'/
-    data elmtps/2*'INTEGER', 16*'REAL','INTEGER',4*'REAL'/
-    data nbytsg/23*4/
-    data (elmdes(i), i = 1, 11)                                                 &
+    data elmtps/2*'INTEGER', 16*'REAL','INTEGER',5*'REAL'/
+    data nbytsg/24*4/
+    data (elmdes(i), i = 1, 10)                                                  &
          & /'timestep number (ITHISC*DT*TUNIT := time in sec from ITDATE)  ',    &
          & 'Non-active (0) or active (1) zeta point (time-dependent)      ',     &
          & 'Water-level in station (zeta point)                           ',     &
@@ -160,10 +162,10 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
          & 'U-discharge per layer in station (zeta point)                 ',     &
          & 'V-discharge per layer in station (zeta point)                 ',     &
          & 'Concentrations per layer in station (zeta point)              ',     &
-         & 'Turbulent quantity per layer in station (zeta point)          ',     &
-         & 'Bottom stress U in station (zeta point)                       '/
-    data (elmdes(i), i = 12, 23)                                                &
-         & /'Bottom stress V in station (zeta point)                       ',    &
+         & 'Turbulent quantity per layer in station (zeta point)          '/
+    data (elmdes(i), i = 11, 20)                                                 &
+         & /'Bottom stress U in station (zeta point)                       ',    &
+         & 'Bottom stress V in station (zeta point)                       ',     &
          & 'Vertical eddy viscosity-3D in station (zeta point)            ',     &
          & 'Vertical eddy diffusivity-3D in station (zeta point)          ',     &
          & 'Richardson number in station (zeta point)                     ',     &
@@ -171,7 +173,9 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
          & 'Non-hydrostatic pressure at station (zeta point)              ',     &
          & '(X,Y) coordinates of monitoring stations                      ',     &
          & '(M,N) indices of monitoring stations                          ',     &
-         & 'Total discharge through cross section (velocity points)       ',     &
+         & 'Depth in station                                              '/ ! same as in wrihis
+    data (elmdes(i), i = 21, 24)                                                 &
+         & /'Total discharge through cross section (velocity points)       ',    &
          & 'Monumentary discharge through cross section (velocity points) ',     &
          & 'Advective transport through cross section (velocity points)   ',     &
          & 'Dispersive transport through cross section (velocity points)  '/
@@ -285,22 +289,24 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
                     & 0         ,0         ,0         )
           call filldm(elmdms    ,19        ,2         ,2         ,nostat    , &
                     & 0         ,0         ,0         )
+          call filldm(elmdms    ,20        ,1         ,nostat    ,0         , &
+                    & 0         ,0         ,0         )
        endif
        if (ntruv>0) then
           if (selhis(20:20)=='Y') then
-             call filldm(elmdms    ,20        ,1         ,ntruv     ,0         , &
-                       & 0         ,0         ,0         )
-          endif
-          if (selhis(21:21)=='Y') then
              call filldm(elmdms    ,21        ,1         ,ntruv     ,0         , &
                        & 0         ,0         ,0         )
           endif
+          if (selhis(21:21)=='Y') then
+             call filldm(elmdms    ,22        ,1         ,ntruv     ,0         , &
+                       & 0         ,0         ,0         )
+          endif
           if (selhis(22:22)=='Y') then
-             call filldm(elmdms    ,22        ,2         ,ntruv     ,lstsci    , &
+             call filldm(elmdms    ,23        ,2         ,ntruv     ,lstsci    , &
                        & 0         ,0         ,0         )
           endif
           if (selhis(23:23)=='Y') then
-             call filldm(elmdms    ,23        ,2         ,ntruv     ,lstsci    , &
+             call filldm(elmdms    ,24        ,2         ,ntruv     ,lstsci    , &
                        & 0         ,0         ,0         )
           endif
        endif
@@ -500,6 +506,13 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
                  & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2)  , &
                  & elmnms(19),celidt    ,wrswch    ,ierror   ,mnstat     )
        if (ierror/=0) goto 999
+       !
+       !--------group 3: element 'DPS'
+       !
+       call putgtr(filnam    ,grnam3    ,nelmx3    ,elmnms(2) ,elmdms(1, 2)         , &
+                 & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2)  , &
+                 & elmnms(20),celidt    ,wrswch    ,ierror   ,zdps     )
+       if (ierror/=0) goto 999
     endif
     !
     !-----group 3: next 4 depend on NTRUV > 0
@@ -520,7 +533,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
        if (selhis(20:20)=='Y') then
           call putgtr(filnam    ,grnam3    ,nelmx3    ,elmnms(2) ,elmdms(1, 2)         , &
                     & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2)  , &
-                    & elmnms(20),celidt    ,wrswch    ,ierror   ,fltr_buff  )
+                    & elmnms(21),celidt    ,wrswch    ,ierror   ,fltr_buff  )
           if (ierror/=0) goto 999
        endif
        !
@@ -529,7 +542,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
        if (selhis(21:21)=='Y') then
           call putgtr(filnam    ,grnam3    ,nelmx3    ,elmnms(2) ,elmdms(1, 2)         , &
                     & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2)  , &
-                    & elmnms(21),celidt    ,wrswch    ,ierror   ,ctr_buff   )
+                    & elmnms(22),celidt    ,wrswch    ,ierror   ,ctr_buff   )
           if (ierror/=0) goto 999
        endif
        !
@@ -539,7 +552,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
        if (selhis(22:22)=='Y') then
           call putgtr(filnam    ,grnam3    ,nelmx3    ,elmnms(2) ,elmdms(1, 2)         , &
                     & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2)  , &
-                    & elmnms(22),celidt    ,wrswch    ,ierror   ,atr_buff   )
+                    & elmnms(23),celidt    ,wrswch    ,ierror   ,atr_buff   )
           if (ierror/=0) goto 999
        endif
        !
@@ -549,7 +562,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
        if (selhis(23:23)=='Y') then
           call putgtr(filnam    ,grnam3    ,nelmx3    ,elmnms(2) ,elmdms(1, 2)         , &
                     & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2)  , &
-                    & elmnms(23),celidt    ,wrswch    ,ierror   ,dtr_buff   )
+                    & elmnms(24),celidt    ,wrswch    ,ierror   ,dtr_buff   )
           if (ierror/=0) goto 999
        endif
     endif

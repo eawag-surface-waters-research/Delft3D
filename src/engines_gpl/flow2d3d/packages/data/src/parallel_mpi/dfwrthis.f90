@@ -5,7 +5,8 @@ subroutine dfwrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
                   & zcurw     ,zqxk      ,zqyk      ,ztauks    ,ztauet    , &
                   & zvicww    ,zdicww    ,zrich     ,zrho      ,gro       , &
                   & ztur      ,zvort     ,zenst     ,hydprs    ,fltr      , &
-                  & ctr       ,atr       ,dtr       ,velt      ,gdp       )
+                  & ctr       ,atr       ,dtr       ,velt      ,zdps      , &
+                  & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -92,6 +93,7 @@ subroutine dfwrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     integer      , dimension(nostat)                             :: zkfs   !  KFS in monitoring station
     logical                                        , intent(out) :: error  !!  Flag=TRUE if an error is encountered
     logical                                        , intent(in)  :: zmodel !  Description and declaration in procs.igs
+    real(fp)     , dimension(nostat)                             :: zdps   !  Description and declaration in rjdim.f90
     real(fp)     , dimension(nostat)                             :: ztauet !  Description and declaration in rjdim.f90
     real(fp)     , dimension(nostat)                             :: ztauks !  Description and declaration in rjdim.f90
     real(fp)     , dimension(nostat)                             :: zwl    !  Description and declaration in rjdim.f90
@@ -329,6 +331,10 @@ subroutine dfwrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
           call addelm(nefiswrthis,'MNSTAT',' ','[   -   ]','INTEGER',4              , &
              & '(M,N) indices of monitoring stations                          ', &
              & 2         ,2         ,nostatgl  ,0         ,0         ,0      , &
+             & lundia    ,gdp       )
+          call addelm(nefiswrthis,'ZDPS',' ','[   M   ]','REAL',4              , &
+             & 'Depth in station                                              ', & ! same as in wrihis
+             & 1         ,nostatgl  ,0         ,0         ,0         ,0      , &
              & lundia    ,gdp       )
        endif
        if (ntruvgl > 0) then
@@ -655,6 +661,16 @@ subroutine dfwrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
        if (inode == master) then
           ierror = putelt(fds, grnam3, 'MNSTAT', uindex, 1, ibuff2)
           deallocate( ibuff2 )
+       endif
+       if (ierror/=0) goto 999
+       !
+       ! group 3: element 'DPS'
+       !
+       if (inode == master) allocate( rsbuff1(1:nostatgl) )
+       call dfgather_filter(lundia, nostat, nostatto, nostatgl, order_sta, zdps, rsbuff1, gdp )
+       if (inode == master) then
+          ierror = putelt(fds, grnam3, 'DPS', uindex, 1, rsbuff1)
+          deallocate( rsbuff1 )
        endif
        if (ierror/=0) goto 999
     endif

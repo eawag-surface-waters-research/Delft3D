@@ -108,7 +108,7 @@ subroutine nefisio_alloc(gdp)
        !
        ! wrthis uses filldm and putgtr
        !
-       nelems(nefiswrthis)    = 23
+       nelems(nefiswrthis)    = 24
     endif
     nelems(nefiswrtmapinf)    = 0
     nelems(nefiswrtmap)       = 0
