@@ -212,11 +212,11 @@ function readmeteoheader(minp, meteoitem) result(success)
           return
        endif
     elseif ( meteoitem%fileversion == ' ' ) then
-       meteomessage = 'Using old meteo input version, keyword FileVersion not found in meteofile. File header should be keyword based.'
+       meteomessage = 'Using old meteo input version, keyword FileVersion not found in meteofile. File header should be keyword based. Check the DELFT3D-FLOW User Manual for changes.'
        success = .false.
        return
     else
-       write (meteomessage, '(3a)') 'Using old meteo input version, expecting version ', trim(newest_version), '. See User Manual for changes.'
+       write (meteomessage, '(5a)') 'Meteo input version ', trim(meteoitem%fileversion), ' is not supported. Expecting version ', trim(newest_version), '. Check the DELFT3D-FLOW User Manual for changes.'
        success = .false.
        return
     endif
