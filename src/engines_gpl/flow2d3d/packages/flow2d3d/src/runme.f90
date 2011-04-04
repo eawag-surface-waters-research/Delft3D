@@ -39,7 +39,7 @@ subroutine runme(max_keyval, keys   , values   , error_message)
 !
 !> @file runme.f90
 !! The dynamic library 'Delft3D-FLOW'.
-!! Flow-related routines are in unstruc.f90
+!! Flow-related routines are in trisim.f90 and below.
 !<
 !
 !> \mainpage Delft3D-FLOW API docs
