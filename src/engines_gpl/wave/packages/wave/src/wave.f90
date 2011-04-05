@@ -66,7 +66,7 @@ program waves_main
    character(20)                                :: tmpchar
    character(256)                               :: mdw_file     ! filename mdw file
    character(500)                               :: message
-   type(wave_data_type)                         :: wavedata
+   type(wave_data_type),target                  :: wavedata
 !
 !! executable statements -----------------------------------------------
 !

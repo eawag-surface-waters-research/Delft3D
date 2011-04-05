@@ -3759,18 +3759,9 @@ subroutine write_swan_inp (wavedata, outcnt, &
     integer                     :: cs
     integer                     :: dsprtype
     integer                     :: i
-    integer                     :: idate
-    integer                     :: iday
-    integer                     :: ihour
-    integer                     :: imin
-    integer                     :: imon
     integer                     :: ind
-    integer                     :: isec
-    integer                     :: itime
-    integer                     :: iyear
     integer                     :: j
     integer                     :: jendcrv
-    integer                     :: julday
     integer                     :: k
     integer                     :: kst
     integer                     :: l
@@ -3818,6 +3809,7 @@ subroutine write_swan_inp (wavedata, outcnt, &
     character(8)                :: casl_short
     character(15)               :: tbegc
     character(15)               :: tendc
+    character(15), external     :: datetime_to_string
     character(37)               :: botfil
     character(37)               :: curfil
     character(37)               :: mudfil
@@ -5096,15 +5088,7 @@ subroutine write_swan_inp (wavedata, outcnt, &
     ! Default: put current time in writehottime
     ! writehottime will be overwritten by tendc when quasi-/non-stationary
     !
-    call juldat(wavedata%time%refdate, julday)
-    call timdat(julday, wavedata%time%timsec, idate, itime)
-    iyear = idate/10000
-    imon  = (idate - iyear*10000)/100
-    iday  = idate - iyear*10000 - imon*100
-    ihour = itime/10000
-    imin  = (itime - ihour*10000)/100
-    isec  = itime - ihour*10000 - imin*100
-    write (sr%writehottime, '(I4,2I2.2,A1,3I2.2)') iyear, imon, iday, '.', ihour, imin, isec
+    sr%writehottime = datetime_to_string(wavedata%time%refdate, wavedata%time%timsec)
     !
     ! 
     if (.not.sr%compmode) then
@@ -5122,48 +5106,20 @@ subroutine write_swan_inp (wavedata, outcnt, &
           !
           line(1:7) = 'COMPUTE'
        elseif (sr%modsim == 2) then
-          call juldat(wavedata%time%refdate, julday)
-          call timdat(julday, wavedata%time%timsec, idate, itime)
-          iyear = idate/10000
-          imon  = (idate - iyear*10000)/100
-          iday  = idate - iyear*10000 - imon*100
-          ihour = itime/10000
-          imin  = (itime - ihour*10000)/100
-          isec  = itime - ihour*10000 - imin*100
-          write (tendc, '(I4,2I2.2,A1,3I2.2)') &
-              & iyear, imon, iday, '.', ihour, imin, isec
+          tendc = datetime_to_string(wavedata%time%refdate, wavedata%time%timsec)
           write (line,'(A,1X,A)') 'COMPUTE STAT  ',tendc
           sr%writehottime = tendc
        elseif (sr%modsim == 3) then
           !
           ! non-stationary
           !
-          call juldat(wavedata%time%refdate, julday)
-          !
           ! starttime
           !
-          call timdat(julday, wavedata%time%timsec, idate, itime)
-          iyear = idate/10000
-          imon  = (idate - iyear*10000)/100
-          iday  = idate - iyear*10000 - imon*100
-          ihour = itime/10000
-          imin  = (itime - ihour*10000)/100
-          isec  = itime - ihour*10000 - imin*100
-          write (tbegc, '(I4,2I2.2,A1,3I2.2)') &
-              & iyear, imon, iday, '.', ihour, imin, isec
+          tbegc = datetime_to_string(wavedata%time%refdate, wavedata%time%timsec)
           !
           ! endtime
           !
-          timsec = wavedata%time%timsec + sr%deltcom * 60.0
-          call timdat(julday, timsec, idate, itime)
-          iyear = idate/10000
-          imon  = (idate - iyear*10000)/100
-          iday  = idate - iyear*10000 - imon*100
-          ihour = itime/10000
-          imin  = (itime - ihour*10000)/100
-          isec  = itime - ihour*10000 - imin*100
-          write (tendc, '(I4,2I2.2,A1,3I2.2)') &
-              & iyear, imon, iday, '.', ihour, imin, isec
+          tendc = datetime_to_string(wavedata%time%refdate, wavedata%time%timsec + sr%deltcom * 60.0)
           !
           ! built line
           !

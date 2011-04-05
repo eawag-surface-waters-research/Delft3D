@@ -1,4 +1,4 @@
-function deletehotfile(wavedata) result (dodelete)
+function datetime_to_string(date, time) result (dtstring)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -29,54 +29,40 @@ function deletehotfile(wavedata) result (dodelete)
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-!    Function: Return true if the hotfile with time hotfiletime can be deleted
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-use precision
-use wave_data
-use swan_input
 !
 implicit none
 !
 ! Global variables
 !
-logical        :: dodelete
-type(wave_data_type), target :: wavedata
+character(15)             :: dtstring ! [yyyymmdd.hhmmss] julian date
+integer      , intent(in) :: date     ! [yyyymmdd]
+real         , intent(in) :: time     ! [sec]      seconds since date, 0:00:00 h
 !
 ! Local variables
 !
-real(hp)                :: rkeeptime
-real(hp)                :: rusetime
-real, pointer           :: timseckeephot
-character(15), external :: datetime_to_string
+integer       :: idate
+integer       :: iday
+integer       :: ihour
+integer       :: imin
+integer       :: imon
+integer       :: isec
+integer       :: itime
+integer       :: iyear
+integer       :: julday
 !
 !! executable statements -------------------------------------------------------
 !
-   timseckeephot => wavedata%output%timseckeephot
-   ! Always delete the hotfile when
-   ! - running standalone
-   ! or
-   ! - no "int2keephotfile" specified
-   !
-   if (wavedata%mode==stand_alone .or. comparereal(swan_run%int2keephotfile,0.0)<=0) then
-      dodelete = .true.
-      return
-   endif
-   read (swan_run%usehottime ,*) rusetime
-   read (swan_run%keephottime,*) rkeeptime
-   !
-   ! increase rkeeptime until it is equal to or greater than rusetime
-   !
-   do while (comparereal(rkeeptime,rusetime) < 0)
-      timseckeephot = timseckeephot + swan_run%int2keephotfile*60.0
-      swan_run%keephottime = datetime_to_string(wavedata%time%refdate, timseckeephot)
-      read (swan_run%keephottime,*) rkeeptime
-   enddo
-   if (comparereal(rkeeptime,rusetime) == 0) then
-      dodelete = .false.
-   else
-      dodelete = .true.
-   endif
-end function deletehotfile
+   call juldat(date, julday)
+   call timdat(julday, time, idate, itime)
+   iyear = idate/10000
+   imon  = (idate - iyear*10000)/100
+   iday  = idate - iyear*10000 - imon*100
+   ihour = itime/10000
+   imin  = (itime - ihour*10000)/100
+   isec  = itime - ihour*10000 - imin*100
+   write (dtstring, '(I4,2I2.2,A1,3I2.2)') iyear, imon, iday, '.', ihour, imin, isec
+end function datetime_to_string
