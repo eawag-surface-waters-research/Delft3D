@@ -26,22 +26,13 @@
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
-subroutine runme(max_keyval, keys   , values   , error_message)
-!DEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'RUNME' :: RUNME
-!!--description-----------------------------------------------------------------
-!
-! 1) Interpretation of the keys/values from the config file
-! 2) Create runid, based on mdfFile/ddbFile
-! 3) In dd_execute:
-!    - RemoteOLV initialization
-!    - DD initialization
-!    - Start all processes:
-!
+
 !> @file runme.f90
 !! The dynamic library 'Delft3D-FLOW'.
 !! Flow-related routines are in trisim.f90 and below.
 !<
-!
+
+! Content specifically for the Doxygen-index page:
 !> \mainpage Delft3D-FLOW API docs
 !! \li \b Main \b program: deltares_hydro.F90
 !! \li \b Dynamic \b library \b entrance: runme.f90
@@ -50,7 +41,19 @@ subroutine runme(max_keyval, keys   , values   , error_message)
 !! \li \b Subdomain \b calculation \b toplevel: trisim.f90
 !! \li \b Preprocessor: \b Convert \b time \b related \b data: tdatom.f90
 !! \li \b Timeloop: trisol.f90
-!
+!<
+
+!> Perform a Delft3D-FLOW computation, given a set of configuration parameters.
+!!
+!! Phases:
+!! - 1) Interpretation of the keys/values from the config file
+!! - 2) Create runid, based on mdfFile/ddbFile
+!! - 3) In dd_execute:
+!!    - RemoteOLV initialization
+!!    - DD initialization
+!!    - Start all processes:
+subroutine runme(max_keyval, keys   , values   , error_message)
+!DEC$ ATTRIBUTES DLLEXPORT, ALIAS: 'RUNME' :: RUNME
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
@@ -60,10 +63,10 @@ include 'fsm.i'   ! for FSM_SILENT (to start single threaded call)
 !
 ! Subroutine arguments
 !
-integer                                , intent(in)  :: max_keyval
-character(256), dimension(max_keyval)  , intent(in)  :: keys
-character(256), dimension(max_keyval)  , intent(in)  :: values
-character(256)                         , intent(out) :: error_message ! not empty: echo and stop run
+integer                                , intent(in)  :: max_keyval    !< Size of key-value arrays.
+character(256), dimension(max_keyval)  , intent(in)  :: keys          !< Array with keys for all configuration settings.
+character(256), dimension(max_keyval)  , intent(in)  :: values        !< Array with values for all configuration keys.
+character(256)                         , intent(out) :: error_message !< Error message, if not empty: echo and stop run.
 !
 ! Local variables
 !
