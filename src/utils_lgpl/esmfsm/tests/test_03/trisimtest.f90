@@ -26,7 +26,7 @@
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
-subroutine trisim (context_id, fsm_flags)
+subroutine trisimtest (context_id, fsm_flags)
     implicit none
     !
     include 'fsm.i'
@@ -76,4 +76,4 @@ subroutine trisim (context_id, fsm_flags)
            stop "Cannot free memory"
     endif
 
-end subroutine trisim
+end subroutine trisimtest

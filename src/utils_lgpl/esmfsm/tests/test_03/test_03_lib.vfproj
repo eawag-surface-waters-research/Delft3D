@@ -26,7 +26,7 @@
 		<File RelativePath="chnull.f90"/>
 		<File RelativePath="inull.f90"/>
 		<File RelativePath="rnull.f90"/>
-		<File RelativePath="trisim.f90">
+		<File RelativePath="trisimtest.f90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" SwitchesHaveChanged="false" BoundsCheck="false"/></FileConfiguration></File></Filter>
 		<Filter Name="Header Files" Filter="h;hpp;hxx;hm;inl;fi;fd"/>

@@ -19,7 +19,7 @@ libtest_03_a_SOURCES = \
          inull.f90 \
          rnull.f90 \
          test_03.cpp \
-         trisim.f90
+         trisimtest.f90
 
 #-------------------------------------------------------------------------------
 #Libraries

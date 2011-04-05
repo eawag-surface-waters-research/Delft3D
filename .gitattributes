@@ -2179,7 +2179,7 @@ src/utils_lgpl/esmfsm/tests/test_03/rnull.f90 -text
 src/utils_lgpl/esmfsm/tests/test_03/test_03.cpp -text
 src/utils_lgpl/esmfsm/tests/test_03/test_03.vcproj -text
 src/utils_lgpl/esmfsm/tests/test_03/test_03_lib.vfproj -text
-src/utils_lgpl/esmfsm/tests/test_03/trisim.f90 -text
+src/utils_lgpl/esmfsm/tests/test_03/trisimtest.f90 -text
 src/utils_lgpl/esmfsm/tests/testesm/Makefile.am -text
 src/utils_lgpl/esmfsm/tests/testesm/runtest -text
 src/utils_lgpl/esmfsm/tests/testesm/testesm.cpp -text
