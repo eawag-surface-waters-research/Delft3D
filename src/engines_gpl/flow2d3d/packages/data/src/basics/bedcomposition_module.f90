@@ -2017,12 +2017,16 @@ subroutine setbedfracprop(this, sedd50, logsedsig, rhofrac)
     !! executable statements -------------------------------------------------------
     !
     do l = 1, this%settings%nfrac
-        if (sedd50(l)<=0.0_fp) then
-            this%settings%phi(l) = 0.0_fp
-        else
-            this%settings%phi(l)     = -log(sedd50(l))/log(2.0_fp)
-        endif
-       this%settings%sigphi(l)  = logsedsig(l)/log(2.0_fp)
+       if (sedd50(l)<=0.0_fp) then
+          this%settings%phi(l) = 13.9_fp ! -log(65um)/log(2)
+       else
+          this%settings%phi(l)     = -log(sedd50(l))/log(2.0_fp)
+       endif
+       if (logsedsig(l)<=0.0_fp) then
+          this%settings%sigphi(l)  = log(1.34) ! use default for "well sorted" sediment (see rdsed.f90)
+       else
+          this%settings%sigphi(l)  = logsedsig(l)/log(2.0_fp)
+       endif
        this%settings%rhofrac(l) = rhofrac(l) ! either rhosol or cdryb
     enddo
 end subroutine
