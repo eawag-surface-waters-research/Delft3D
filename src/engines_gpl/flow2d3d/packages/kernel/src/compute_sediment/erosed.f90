@@ -917,10 +917,12 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              dll_reals(RP_DSTAR) = 0.0_hp
              dll_reals(RP_SETVL) = real(ws(nm, kmax, l)  ,hp) ! Vertical velocity near bedlevel
              !
-             do k = 0, kmax
-                wslc(k)   = ws(nm, k, l)
-                dcwwlc(k) = dicww(nm, k)
-             enddo
+             if (kmax>1) then
+                do k = 0, kmax
+                   wslc(k)   = ws(nm, k, l)
+                   dcwwlc(k) = dicww(nm, k)
+                enddo
+             endif
              !
              call erosilt(thick    ,kmax     ,wslc     , &
                         & wstau(nm),entr(nm) ,dcwwlc   ,sddflc   ,lundia   , &

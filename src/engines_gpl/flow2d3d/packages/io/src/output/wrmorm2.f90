@@ -1,6 +1,7 @@
 subroutine wrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
                  & nlyr      ,irequest  ,fds       ,grpnam    ,msed      , &
-                 & thlyr     ,svfrac    ,iporos    ,cdryb     ,gdp  )
+                 & thlyr     ,svfrac    ,iporos    ,cdryb     ,rhosol    , &
+                 & gdp  )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -64,6 +65,7 @@ use bedcomposition_module
     logical                                                                :: error
     character(16)                                                          :: grpnam
     real(fp)           , dimension(1:lsedtot)                              :: cdryb
+    real(fp)           , dimension(1:lsedtot)                              :: rhosol
     real(fp)           , dimension(1:lsedtot,1:nlyr,gdp%d%nmlb:gdp%d%nmub) :: msed
     real(fp)           , dimension(1:nlyr,gdp%d%nmlb:gdp%d%nmub)           :: thlyr
     real(fp)           , dimension(1:nlyr,gdp%d%nmlb:gdp%d%nmub)           :: svfrac
@@ -81,6 +83,7 @@ use bedcomposition_module
     integer, external       :: neferr
     integer, external       :: putelt
     integer, dimension(3,5) :: uindex
+    real(fp)                :: dens
     character(256)          :: errmsg
 !
 !! executable statements -------------------------------------------------------
@@ -141,15 +144,19 @@ use bedcomposition_module
        !
        call sbuff_checksize(lsedtot*nlyr*mmax*nmaxus)
        i = 0
-       
        do k = 1, nlyr
           do m = 1, mmax
              do n = 1, nmaxus
                 do l = 1, lsedtot
                    i        = (l-1)*nlyr*mmax*nmaxus + (k-1)*mmax*nmaxus + (m-1)*nmaxus + n
                    call n_and_m_to_nm(n, m, nm, gdp)
+                   if (iporos==0) then
+                      dens = cdryb(l)
+                   else
+                      dens = rhosol(l)
+                   endif
                    if (thlyr(k,nm)>0.0_fp) then
-                        sbuff(i) = real(msed(l, k, nm)/(cdryb(l)*svfrac(k, nm)*thlyr(k, nm)),sp)
+                        sbuff(i) = real(msed(l, k, nm)/(dens*svfrac(k, nm)*thlyr(k, nm)),sp)
                    else
                         sbuff(i) = 0.0
                    endif

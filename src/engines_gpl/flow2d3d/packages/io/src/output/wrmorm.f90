@@ -66,6 +66,7 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
     integer                             , pointer :: nlyr
     real(prec)       , dimension(:,:)   , pointer :: bodsed
     real(fp)         , dimension(:)     , pointer :: cdryb
+    real(fp)         , dimension(:)     , pointer :: rhosol
     real(fp)         , dimension(:)     , pointer :: dpsed
     real(fp)         , dimension(:,:)   , pointer :: svfrac
     real(fp)         , dimension(:,:,:) , pointer :: msed
@@ -74,6 +75,7 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
 !! executable statements -------------------------------------------------------
 !
     cdryb               => gdp%gdsedpar%cdryb
+    rhosol              => gdp%gdsedpar%rhosol
     !
     istat = bedcomp_getpointer_integer(gdp%gdmorlyr,'iunderlyr',iunderlyr)
     if (istat/=0) then
@@ -111,11 +113,13 @@ subroutine wrmorm(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
        if (.not. parll) then
           call wrmorm2 (lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
                       & nlyr      ,irequest  ,fds       ,grpnam    ,msed      , &
-                      & thlyr     ,svfrac    ,iporos    ,cdryb     ,gdp       )
+                      & thlyr     ,svfrac    ,iporos    ,cdryb     ,rhosol    , &
+                      & gdp       )
        else
           call dfwrmorm2 (lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
                         & nlyr      ,irequest  ,fds       ,grpnam    ,msed      , &
-                        & thlyr     ,svfrac    ,iporos    ,cdryb     ,gdp       )
+                        & thlyr     ,svfrac    ,iporos    ,cdryb     ,rhosol    , &
+                        & gdp       )
        endif
     case default
     end select

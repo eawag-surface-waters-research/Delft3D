@@ -1,6 +1,7 @@
 subroutine dfwrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
                    & nlyr      ,irequest  ,fds       ,grpnam    ,msed      , &
-                   & thlyr     ,svfrac    ,iporos    ,cdryb     ,gdp  )
+                   & thlyr     ,svfrac    ,iporos    ,cdryb     ,rhosol    , &
+                   & gdp  )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -71,6 +72,7 @@ subroutine dfwrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
     logical                                                     :: error
     character(16)                                               :: grpnam
     real(fp), dimension(1:lsedtot)                              :: cdryb
+    real(fp), dimension(1:lsedtot)                              :: rhosol
     real(fp), dimension(1:lsedtot,1:nlyr,gdp%d%nmlb:gdp%d%nmub) :: msed
     real(fp), dimension(1:nlyr,gdp%d%nmlb:gdp%d%nmub)           :: thlyr
     real(fp), dimension(1:nlyr,gdp%d%nmlb:gdp%d%nmub)           :: svfrac
@@ -97,6 +99,7 @@ subroutine dfwrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
     integer , dimension(0:nproc-1)            :: nf     ! first index w.r.t. global grid in y-direction
     integer , dimension(0:nproc-1)            :: nl     ! last index w.r.t. global grid in y-direction
     integer                                   :: nsiz   ! size of present subdomain in y-direction
+    real(fp)                                  :: dens
     real(fp), dimension(:,:,:)  , allocatable :: rbuff3
     real(fp), dimension(:,:,:,:), allocatable :: rbuff4
     character(256)                            :: errmsg
@@ -190,8 +193,13 @@ subroutine dfwrmorm2(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
              do m = 1, mmax
                 do n = 1, nmaxus
                    call n_and_m_to_nm(n, m, nm, gdp)
+                   if (iporos==0) then
+                      dens = cdryb(l)
+                   else
+                      dens = rhosol(l)
+                   endif
                    if (thlyr(k, nm)>0.0_fp) then
-                      rbuff4(n,m,k,l) = msed(l, k, nm)/(cdryb(l)*svfrac(k, nm)*thlyr(k, nm))
+                      rbuff4(n,m,k,l) = msed(l, k, nm)/(dens*svfrac(k, nm)*thlyr(k, nm))
                    else
                       rbuff4(n,m,k,l) = 0.0_fp
                    endif
