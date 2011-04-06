@@ -2748,6 +2748,7 @@ subroutine initpreload(this)
     case(2)
        do nm = this%settings%nmlb, this%settings%nmub
           preload(1, nm) = 0.0_fp
+          load = 0.0_fp
           do k = 2, this%settings%nlyr
              do l = 1, this%settings%nfrac
                 load = load + msed(l, k-1, nm)
