@@ -1,4 +1,4 @@
-#! /bin/sh
+#! /bin/bash
 
 #-------------------------------------------------------------------------------
 #   Top-Level Build Script for DeltaresHydro

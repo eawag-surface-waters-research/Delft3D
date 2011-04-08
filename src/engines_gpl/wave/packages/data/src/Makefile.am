@@ -25,6 +25,7 @@ FMODULES += \
 #Sources
 libdata_a_SOURCES = \
          checkmeteoresult_wave.f90 \
+         datetime_to_string.f90 \
          utilities.f90 \
          handles.f90 \
          tables.f90 \

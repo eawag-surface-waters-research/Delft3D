@@ -26,6 +26,7 @@
 	<Files>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
 		<File RelativePath=".\src\checkmeteoresult_wave.f90"/>
+		<File RelativePath=".\src\datetime_to_string.f90"/>
 		<File RelativePath=".\src\filldm.f90"/>
 		<File RelativePath=".\src\flow_data.f90"/>
 		<File RelativePath=".\src\handles.f90"/>

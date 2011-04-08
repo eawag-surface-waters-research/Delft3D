@@ -24,7 +24,6 @@ FMODULES += \
 libkernel_a_SOURCES = \
          corrht.f90 \
          check_input.f90 \
-         datetime_to_string.f90 \
          del_temp_files.f90 \
          dircor.f90 \
          fxfydr.f90 \

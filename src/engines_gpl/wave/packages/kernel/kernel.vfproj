@@ -27,7 +27,6 @@
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
 		<File RelativePath=".\src\check_input.f90"/>
 		<File RelativePath=".\src\corrht.f90"/>
-		<File RelativePath=".\src\datetime_to_string.f90"/>
 		<File RelativePath=".\src\del_temp_files.f90"/>
 		<File RelativePath=".\src\dircor.f90"/>
 		<File RelativePath=".\src\fxfydr.f90"/>

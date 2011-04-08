@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Program will replace $1 by the $1.svn and will replace VERSION_BUILD_NUMBER by a corresponding svn version using svnversion command
 

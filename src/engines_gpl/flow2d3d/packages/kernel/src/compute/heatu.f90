@@ -60,6 +60,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     real(fp)                , pointer :: eps
     real(sp)                , pointer :: smiss
     integer                 , pointer :: itdate
+    integer                 , pointer :: ntstep
     real(fp)                , pointer :: tzone
     type (flwoutputtype)    , pointer :: flwoutput
     real(fp)                , pointer :: cfrcon
@@ -158,6 +159,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     integer       :: k2
     integer       :: kstep
     integer       :: m
+    integer       :: msgcount
     integer       :: n
     integer       :: ndm
     integer       :: nm
@@ -230,13 +232,14 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     real(fp)      :: zdown
     real(fp)      :: ztop
     logical       :: success
-    character(51) :: errmsg
+    character(100):: errmsg
 !
 !! executable statements -------------------------------------------------------
 !
     eps         => gdp%gdconst%eps
     smiss       => gdp%gdconst%smiss
     itdate      => gdp%gdexttim%itdate
+    ntstep      => gdp%gdinttim%ntstep
     tzone       => gdp%gdexttim%tzone
     flwoutput   => gdp%gdflwpar%flwoutput
     cfrcon      => gdp%gdheat%cfrcon
@@ -286,6 +289,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     struct      => gdp%gdprocs%struct
     zmodel      => gdp%gdprocs%zmodel
     !
+    msgcount = 0
     if (rhum_file .or. tair_file .or. clou_file) then
        !
        ! update meteo input (if necessary)
@@ -309,7 +313,6 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
           call checkmeteoresult(success, gdp)
        endif
     endif
-    errmsg = 'No heat flux to air; water temperature is 0 degrees'
     !
     !
     ! WIND COEFFICIENT, FOLLOWING H.E. SWEERS
@@ -788,7 +791,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                 elseif (r0(nm, k0, ltem) > 0.0_fp) then
                    sink(nm, k0, ltem) = sink(nm, k0, ltem) - qtotk*gsqs(nm)/r0(nm, k0, ltem)
                 else
-                   call prterr(lundia    ,'U190'    ,errmsg    )
+                   msgcount = msgcount + 1
                 endif
              else
                 if (qtotk > 0.0_fp) then
@@ -796,7 +799,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                 elseif ( r0(nm,k0,ltem) > 0.0_fp ) then
                    sink(nm, k0, ltem) = sink(nm, k0, ltem) - qtotk/(thick(k0)*h0new*r0(nm, k0, ltem))
                 else
-                   call prterr(lundia, 'U190', errmsg)
+                   msgcount = msgcount + 1
                 endif
              endif
              do k = k1, k2, kstep
@@ -1104,7 +1107,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                 elseif (r0(nm, k0, ltem) > 0.0_fp) then
                    sink(nm, k0, ltem) = sink(nm, k0, ltem) - qtotk*gsqs(nm)/r0(nm, k0, ltem)
                 else
-                   call prterr(lundia    ,'U190'    ,errmsg    )
+                   msgcount = msgcount + 1
                 endif
              else
                 if (qtotk > 0.0_fp) then
@@ -1112,7 +1115,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                 elseif (r0(nm, k0, ltem) > 0.0_fp) then
                    sink(nm, k0, ltem) = sink(nm, k0, ltem) - qtotk/(thick(k0)*h0new*r0(nm, k0, ltem))
                 else
-                   call prterr(lundia    ,'U190'    ,errmsg    )
+                   msgcount = msgcount + 1
                 endif
              endif
              do k = k1, k2, kstep
@@ -1155,5 +1158,11 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
           endif
        enddo
     else
+    endif
+    !
+    if (msgcount > 0) then
+        write (errmsg,'(a,2(i0,a))') &
+            & 'Timestep ', ntstep, ': No heat flux to air; water temperature is 0 degrees in ', msgcount, ' points.'
+       call prterr(lundia, 'U190', trim(errmsg))
     endif
 end subroutine heatu
