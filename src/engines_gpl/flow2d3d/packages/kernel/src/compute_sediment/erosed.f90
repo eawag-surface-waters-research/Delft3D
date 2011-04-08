@@ -917,15 +917,11 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              dll_reals(RP_DSTAR) = 0.0_hp
              dll_reals(RP_SETVL) = real(ws(nm, kmax, l)  ,hp) ! Vertical velocity near bedlevel
              !
-             if (kmax>1) then
-                do k = 0, kmax
-                   wslc(k)   = ws(nm, k, l)
-                   dcwwlc(k) = dicww(nm, k)
-                enddo
-             endif
+             do k = 0, kmax
+                wslc(k)   = ws(nm, k, l)
+             enddo
              !
-             call erosilt(thick    ,kmax     ,wslc     , &
-                        & wstau(nm),entr(nm) ,dcwwlc   ,sddflc   ,lundia   , &
+             call erosilt(thick    ,kmax     ,wslc     ,wstau(nm),entr(nm) ,lundia   , &
                         & h0       ,h1       ,error    ,fixfac(nm,l), &
                         & frac(nm,l),sinkse(nm,l),sourse(nm,l),oldmudfrac,flmd2l  ,tcrdep(nm,l), &
                         & tcrero(nm,l) ,eropar(nm,l)   ,iform(l) , &
@@ -933,9 +929,17 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                         & dll_integers,dll_reals      ,dll_strings  )
              if (error) call d3stop(1, gdp)
              !
-             do k = 1, kmax
-                seddif(nm, k, l) = sddflc(k)
-             enddo 
+             if (kmax>1) then 
+                !
+                ! For 3D model set sediment diffusion coefficient
+                ! NOTE THAT IF ALGEBRAIC OR K-L TURBULENCE MODEL IS USED THEN WAVES
+                ! ONLY AFFECT THE VERTICAL TURBULENT MIXING VIA THE ENHANCED BED
+                ! ROUGHNESS
+                !
+                do k = 0, kmax
+                   seddif(nm, k, l) = dicww(nm, k)
+                enddo
+             endif
              kmxsed(nm, l) = kmax
              cycle
           endif

@@ -1,5 +1,4 @@
-subroutine erosilt(thick    ,kmax     ,ws       , &
-                 & wstau    ,entr     ,dicww    ,seddif   ,lundia   , &
+subroutine erosilt(thick    ,kmax     ,ws       ,wstau    ,entr     ,lundia   , &
                  & h0       ,h1       ,error    ,fixfac   , &
                  & frac     ,sinkse   ,sourse   ,oldmudfrac, flmd2l , tcrdep  , &
                  & tcrero   ,eropar   ,iform    , &
@@ -38,7 +37,6 @@ subroutine erosilt(thick    ,kmax     ,ws       , &
 !    Function: Computes sediment fluxes at the bed using
 !              the Partheniades-Krone formulations.
 !              Arrays SOURSE and SINKSE are filled
-!              Array seddif id filled with dicww for mud
 ! Method used:
 !
 !
@@ -57,8 +55,6 @@ subroutine erosilt(thick    ,kmax     ,ws       , &
     real(fp)                                                  , intent(in)  :: entr
     real(fp)  , dimension(0:kmax)                             , intent(in)  :: ws
     real(fp)                                                  , intent(out) :: wstau
-    real(fp)  , dimension(0:kmax)                             , intent(in)  :: dicww
-    real(fp)  , dimension(0:kmax)                             , intent(out) :: seddif
     real(fp)  , dimension(kmax)                               , intent(in)  :: thick
     real(fp)                                                  , intent(in)  :: h0
     real(fp)                                                  , intent(in)  :: h1
@@ -120,17 +116,6 @@ subroutine erosilt(thick    ,kmax     ,ws       , &
     ! Also, taum is not required in the formulation since whether or not
     ! and how much entrainment occurs is entirely handled by the sourmu
     ! routine.
-    !
-    ! For 3D model set sediment diffusion coefficient
-    ! NOTE THAT IF ALGEBRAIC OR K-L TURBULENCE MODEL IS USED THEN WAVES
-    ! ONLY AFFECT THE VERTICAL TURBULENT MIXING VIA THE ENHANCED BED
-    ! ROUGHNESS
-    !
-    if (kmax > 1) then
-       do k = 1, kmax
-          seddif(k) = dicww(k)
-       enddo
-    endif
     !
     ! calculation both for mud and floc
     !
