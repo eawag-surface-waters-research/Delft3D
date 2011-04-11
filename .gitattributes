@@ -18,6 +18,7 @@ examples/01_standard/f34.thd -text
 examples/01_standard/f34.wnd -text
 examples/01_standard/run_flow2d3d.bat -text
 examples/01_standard/run_flow2d3d.sh -text
+examples/01_standard/run_flow2d3d_parallel.bat -text
 examples/02_domaindecomposition/bak_1.enc -text
 examples/02_domaindecomposition/bak_1.grd -text
 examples/02_domaindecomposition/bak_2.enc -text
@@ -1122,7 +1123,6 @@ src/engines_gpl/flow2d3d/scripts/cleantemp_d3dflow.tcl -text
 src/engines_gpl/flow2d3d/scripts/ddb2ddd.sh -text
 src/engines_gpl/flow2d3d/scripts/delft3d-flow_run.bat -text
 src/engines_gpl/flow2d3d/scripts/delft3d-flow_run.sh -text
-src/engines_gpl/flow2d3d/scripts/delft3d-flow_run_parallel.bat -text
 src/engines_gpl/flow2d3d/scripts/fluidmud_run.sh -text
 src/engines_gpl/flow2d3d/scripts/kill.tcl -text
 src/engines_gpl/flow2d3d/scripts/kill_d3dflow.tcl -text
