@@ -332,7 +332,7 @@ subroutine dfwrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
              & '(M,N) indices of monitoring stations                          ', &
              & 2         ,2         ,nostatgl  ,0         ,0         ,0      , &
              & lundia    ,gdp       )
-          call addelm(nefiswrthis,'ZDPS',' ','[   M   ]','REAL',4              , &
+          call addelm(nefiswrthis,'DPS',' ','[   M   ]','REAL',4              , &
              & 'Depth in station                                              ', & ! same as in wrihis
              & 1         ,nostatgl  ,0         ,0         ,0         ,0      , &
              & lundia    ,gdp       )
