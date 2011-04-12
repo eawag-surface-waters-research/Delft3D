@@ -6,10 +6,10 @@ SUBDIRS = \
          esmfsm \
          ftnunit \
          inifiles \
-         meteo \
          nefis \
          delftio_sync \
          semaphore \
          stream \
          utils_flow \
+         meteo \
          ec_module

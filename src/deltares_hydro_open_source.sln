@@ -279,6 +279,7 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "meteo", "utils_lgpl\meteo\p
 	ProjectSection(ProjectDependencies) = postProject
 		{94272A7C-EC63-4BB8-8D1E-94008E227980} = {94272A7C-EC63-4BB8-8D1E-94008E227980}
 		{5E1814B7-3691-4CA6-8FE2-A374EC5A5904} = {5E1814B7-3691-4CA6-8FE2-A374EC5A5904}
+		{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118} = {2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "meteo_version_number", "utils_lgpl\meteo\packages\meteo_version_number\meteo_version_number.vcproj", "{94272A7C-EC63-4BB8-8D1E-94008E227980}"

@@ -70,8 +70,9 @@ module meteo
    real(fp), private :: d2r
 
 contains
-
-
+!
+!
+!===============================================================================
 function initmeteo(runid) result(success)
    implicit none
    logical               :: success
@@ -88,8 +89,9 @@ function initmeteo(runid) result(success)
    version_full                      = ''
    call getfullversionstring_METEO(version_full)
 end function initmeteo
-
-
+!
+!
+!===============================================================================
 function gridtometeo(runid, nmax, mmax, &
                    & nlb  , nub , mlb , mub, &
                    & kcs  , xz  , yz  ) result(success)
@@ -143,8 +145,9 @@ function gridtometeo(runid, nmax, mmax, &
       allocate(meteo%spiderweb%spwarr(3,meteo%flowgrid%nmax,meteo%flowgrid%mmax))
    endif
 end function gridtometeo
-
-
+!
+!
+!===============================================================================
 function addmeteoitem(runid, inputfile, gridsferic, mmax, nmax) result(success)
     !
     ! return value
@@ -299,8 +302,9 @@ function addmeteoitem(runid, inputfile, gridsferic, mmax, nmax) result(success)
     endif
     !
 end function addmeteoitem
-
-
+!
+!
+!===============================================================================
 function checkmeteo(runid, flow_itdate, flow_tzone, tstop) result(success)
    implicit none
    !
@@ -336,8 +340,9 @@ function checkmeteo(runid, flow_itdate, flow_tzone, tstop) result(success)
       meteoitem%field(meteoitem%it1)%time = nodata_default
    enddo
 end function checkmeteo
-
-
+!
+!
+!===============================================================================
 function meteoupdate(runid, flow_itdate, flow_tzone, time) result(success)
    implicit none
    !
@@ -368,8 +373,9 @@ function meteoupdate(runid, flow_itdate, flow_tzone, time) result(success)
       if (.not. success) return
    enddo
 end function meteoupdate
-
-
+!
+!
+!===============================================================================
 function meteoupdateitem(meteoitem, flow_itdate, flow_tzone, tim) result(success)
    !
    ! Update information of an item in the meteo module.
@@ -497,15 +503,18 @@ function meteoupdateitem(meteoitem, flow_itdate, flow_tzone, tim) result(success
       success      = .true.
    endif
 end function meteoupdateitem
-
-
+!
+!
+!===============================================================================
 subroutine meteoswapitem(meteoitem)
    implicit none
    type(tmeteoitem) :: meteoitem
    meteoitem%it0 =     meteoitem%it1
    meteoitem%it1 = 1 - meteoitem%it0
 end subroutine meteoswapitem
-
+!
+!
+!===============================================================================
 function setmeteodefault(quantity, gapres) result(success)
    implicit none
 !
@@ -534,7 +543,62 @@ function setmeteodefault(quantity, gapres) result(success)
    endif
    !   
 end function setmeteodefault
-
+!
+!
+!===============================================================================
+function getmeteotypes(runid, meteotypes) result(success)
+   use m_alloc
+   implicit none
+!
+! Return value
+!
+   logical :: success
+!
+! Global variables
+!
+   character(*) , intent(in)  :: runid
+   character(256), dimension(:), allocatable, intent(out)  :: meteotypes
+!
+! Local variables
+!
+   integer                             :: i
+   integer                             :: j
+   integer                             :: ierr
+   logical                             :: newtype
+   character(256)                      :: curtype
+   type(tmeteo)              , pointer :: meteo     ! all meteo for one subdomain
+   type(tmeteoitem)          , pointer :: meteoitem
+!
+!! executable statements -------------------------------------------------------
+!
+   success = .true.
+   call getmeteopointer(runid, meteo)
+   if ( .not. associated(meteo) ) then
+      success = .false.
+      return
+   endif
+   ierr = 0
+   do i = 1, meteo%nummeteoitems
+      curtype = meteo%item(i)%ptr%meteotype
+      newtype = .true.
+      do j = 1, size(meteotypes)
+         if (meteotypes(j) == curtype) then
+            newtype = .false.
+            exit
+         endif
+      enddo
+      if (newtype) then
+         call realloc(meteotypes, size(meteotypes)+1, stat=ierr, keepExisting=.true.)
+         meteotypes(size(meteotypes)) = curtype
+      endif
+   enddo
+   if (ierr /= 0) then
+      success = .false.
+   endif
+end function getmeteotypes
+!
+!
+!===============================================================================
 function getmeteoval(runid, quantity, time, &
                    & nlb, nub, mlb, mub, qarray) result(success)
    !
@@ -1034,8 +1098,9 @@ function getmeteoval(runid, quantity, time, &
    endif
    success = .true.
 end function getmeteoval
-
-
+!
+!
+!===============================================================================
 subroutine regulate(w0, w1, a0, a1, w)
 !
 ! angular interpolation
@@ -1070,8 +1135,9 @@ subroutine regulate(w0, w1, a0, a1, w)
    call regdir(w(2), w(4))
    call regdir(w(1), w(3))
 end subroutine regulate
-
-
+!
+!
+!===============================================================================
 subroutine regdir(w0, w1)
 !
 ! angle regularisation
@@ -1102,8 +1168,9 @@ subroutine regdir(w0, w1)
       endif
    endif
 end subroutine regdir
-
-
+!
+!
+!===============================================================================
 function findnm(xp, yp, mv, nv, mpoint, npoint, grid) result(success)
     !
     ! Search mv,nv indices in grid in which the xp,yp point is located
@@ -1215,8 +1282,9 @@ function findnm(xp, yp, mv, nv, mpoint, npoint, grid) result(success)
     write(meteomessage,'(a,e14.5,a,e14.5)') 'meteo_findnm: m,n not found for point x=',xp,' y=',yp
     success = .false.
 end function findnm
-
-
+!
+!
+!===============================================================================
 subroutine pinpok(xl, yl, n, x, y, inside, maxhul)
    implicit none
    integer                    , intent(in)  :: n
