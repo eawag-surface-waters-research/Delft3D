@@ -1205,7 +1205,7 @@ subroutine org_cleartable(this)
 !
 ! Global variables
 !
-    type(tablefiletype), intent(in)        :: this
+    type(tablefiletype)                    :: this
 !
 ! Local variables
 !
