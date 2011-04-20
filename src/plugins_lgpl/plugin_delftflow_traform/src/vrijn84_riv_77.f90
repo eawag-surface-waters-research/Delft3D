@@ -277,9 +277,9 @@ endif
     !
     if (wsform == 1) then
        ! Van Rijn
-       if (d50>1.0_hp) then
+       if (d50>1.0E-3_hp) then
           ws = 1.1_hp * (delta * ag *d50)**0.5_hp
-       elseif (d50<=1.0_hp .and. d50>100e-6) then
+       elseif (d50<=1.0E-3_hp .and. d50>100E-6_hp) then
           ws = 10.0_hp * vicmol / d50*(sqrt(1.0_hp+(0.01_hp*delta*ag*d50**3/vicmol/vicmol))-1.0_hp)
        else
           ws = delta * ag * d50**2/18.0_hp/vicmol
