@@ -151,8 +151,8 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
             !
             call get_buffer(windu_fp, swan_input_fields%mmax, swan_input_fields%nmax)
             success = getmeteoval(swan_grids(i_swan)%grid_name, 'windu'     , wave_timmin, &
-                                & 1, swan_input_fields%nmax   , &
-                                & 1, swan_input_fields%mmax   , &
+                                & 1,1, 1, swan_input_fields%nmax   , &
+                                &      1, swan_input_fields%mmax   , &
                                 & windu_fp       )
             call checkmeteoresult_wave(success)
             swan_input_fields%windu = real(windu_fp, sp)
@@ -161,8 +161,8 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
             !
             call get_buffer(windv_fp, swan_input_fields%mmax, swan_input_fields%nmax)
             success = getmeteoval(swan_grids(i_swan)%grid_name, 'windv'     , wave_timmin, &
-                                & 1, swan_input_fields%nmax   , &
-                                & 1, swan_input_fields%mmax   , &
+                                & 1, 1,  1, swan_input_fields%nmax   , &
+                                &        1, swan_input_fields%mmax   , &
                                 & windv_fp       )
             call checkmeteoresult_wave(success)
             swan_input_fields%windv = real(windv_fp, sp)
@@ -171,8 +171,8 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
             !
             !call get_buffer(patm_fp, swan_input_fields%mmax, swan_input_fields%nmax)
             !success = getmeteoval(swan_grids(i_swan)%grid_name, 'patm'      , wave_timmin, &
-            !                    & 1, swan_input_fields%nmax   , &
-            !                    & 1, swan_input_fields%mmax   , &
+            !                    & 1, 1, 1, swan_input_fields%nmax   , &
+            !                    &       1, swan_input_fields%mmax   , &
             !                    & patm_fp        )
             !call checkmeteoresult_wave(success)
             !swan_input_fields%patm = real(patm_fp, sp)

@@ -71,8 +71,8 @@ group               testcase
                     09-walking             ERROR: walking discharge
                     10-culvert             ERROR: culvert
                     11-c03                 OK     (use order_bct in updbct)
-                    12-breukelermeer       ERROR: Combination of parallel and "wind and pressure on the hydrodynamic grid" is not available
-                    13-markermeer          ERROR: Combination of parallel and "wind and pressure on the hydrodynamic grid" is not available
+                    12-breukelermeer       OK
+                    13-markermeer          OK
                     14-g52                 OK
                     15-eva                 OK
                     16-f33tutorial         ERROR: drogues
@@ -117,17 +117,16 @@ group               testcase
                     13-foumod_scs          NOT OK: wl difference of 0.2 at skewed open boundary near Andaman Sea
                     14-katrina_windcd3     OK
 04_coarsewind       01-001                 ***** DISABLED ********** DISABLED *****
-                    02-003                 ERROR:  Combination of parallel and "wind and pressure on the hydrodynamic grid" is not available
+                    02-003                 OK?      maxdiff(sep) = 0.003m;  range(sep)=3m
                     03-004                 OK
                     04-005                 ***** DISABLED ********** DISABLED *****
                     05-006                 ***** DISABLED ********** DISABLED *****
-                    06-007                 ERROR:  Combination of parallel and "wind and pressure on the hydrodynamic grid" is not available
+                    06-007                 OK?      maxdiff(sep) = 0.003m;  range(sep)=3m 
                     07-034                 NOT OK: dif_sep <0.01m, dif_u < 0.1m/s
                     08-w01                 OK
                     09-scs                 NOT OK: wl difference of 0.4m at skewed open boundary near Andaman Sea
-                    10-mark_grid_svwp      ERROR: meteo_findnm: m,n not found for point x=   0.00000E+00 y=   0.00000E+00
-                                           (op domein 2; blijft daardoor hangen)  
-                    11-mark_grid_arc       ERROR: meteo_findnm: m,n not found for point x=   0.00000E+00 y=   0.00000E+00
+                    10-mark_grid_svwp      OK
+                    11-mark_grid_arc       OK
                     12-meteo_computation   ERROR: max(mmax,nmax)/npart < 4
                     13-meteo_equidistant   ERROR: max(mmax,nmax)/npart < 4
                     14-meteo_equidistant   ERROR: max(mmax,nmax)/npart < 4

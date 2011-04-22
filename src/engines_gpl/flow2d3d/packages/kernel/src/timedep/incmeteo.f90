@@ -112,11 +112,11 @@ subroutine incmeteo(timhr  ,grdang ,windu  ,windv ,patm   , &
        !
        ! update wind arrays
        !
-       success = getmeteoval(gdp%runid, 'windu', time, nlb, nub, mlb, mub, windu)
+       success = getmeteoval(gdp%runid, 'windu', time, gdp%gdparall%mfg, gdp%gdparall%nfg, nlb, nub, mlb, mub, windu)
        call checkmeteoresult(success, gdp)
-       success = getmeteoval(gdp%runid, 'windv', time, nlb, nub, mlb, mub, windv)
+       success = getmeteoval(gdp%runid, 'windv', time, gdp%gdparall%mfg, gdp%gdparall%nfg, nlb, nub, mlb, mub, windv)
        call checkmeteoresult(success, gdp)
-       success = getmeteoval(gdp%runid,  'patm', time, nlb, nub, mlb, mub,  patm)
+       success = getmeteoval(gdp%runid,  'patm', time, gdp%gdparall%mfg, gdp%gdparall%nfg, nlb, nub, mlb, mub,  patm)
        call checkmeteoresult(success, gdp)
     else
        success = getVal(ECHandle, patmECItemId , dtimmin,  patm, nlb, nub, mlb, mub)

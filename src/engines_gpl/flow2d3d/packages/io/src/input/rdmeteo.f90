@@ -115,7 +115,7 @@ subroutine rdmeteo(gdp, ecwind)
 !! executable statements -------------------------------------------------------
 !
    nmaxgl        => gdp%gdparall%nmaxgl
-   mmaxgl        => gdp%gdparall%nmaxgl
+   mmaxgl        => gdp%gdparall%mmaxgl
    nmax          => gdp%d%nmax
    mmax          => gdp%d%mmax
    mlb           => gdp%d%mlb
@@ -186,15 +186,11 @@ subroutine rdmeteo(gdp, ecwind)
             value = ' '
             call prop_get_string(gdp%mdfile_ptr,'*','Wndgrd',value)
             if ( index(value,'a')==0 .and. index(value,'A')==0 ) then
-               if (parll) then
-                  call prterr(lundia, 'U021', 'Combination of parallel and "wind and pressure on the hydrodynamic grid" is not available')
-                  call d3stop(1, gdp)
-               endif
                !
                ! flow dimensions needed here
                !
                if (patmECItemId == -1) then
-                  success = addmeteoitem(gdp%runid, filename, sferic, mmax, nmaxus)
+                  success = addmeteoitem(gdp%runid, filename, sferic, mmaxgl, nmaxgl)
                   call checkmeteoresult(success, gdp)
                   call prterr(lundia, 'G051', 'Wind and pressure specified on the hydrodynamic grid')
                   p_file = .true.
@@ -234,7 +230,7 @@ subroutine rdmeteo(gdp, ecwind)
          !
          ! flow dimensions needed here
          !
-         success = addmeteoitem(gdp%runid, filename, sferic, mmax, nmaxus)
+         success = addmeteoitem(gdp%runid, filename, sferic, mmaxgl, nmaxgl)
          call checkmeteoresult(success, gdp)
          if (p_file .and. u_file .and. v_file) then
             call prterr(lundia, 'G051', 'Multiple input for wind and pressure, using input specified on the hydrodynamic grid')
@@ -288,7 +284,7 @@ subroutine rdmeteo(gdp, ecwind)
       filename = ' '
       call prop_get_string(gdp%mdfile_ptr,'*','Fwndgu',filename)
       if (filename /= ' ') then
-         success = addmeteoitem(gdp%runid, filename, sferic, mmax, nmax)
+         success = addmeteoitem(gdp%runid, filename, sferic, mmaxgl, nmaxgl)
          call checkmeteoresult(success, gdp)
          if (u_file) then
             call prterr(lundia, 'G051', 'Multiple input for wind (U component), using input specified on a separate curvilinear grid')
@@ -301,7 +297,7 @@ subroutine rdmeteo(gdp, ecwind)
       filename = ' '
       call prop_get_string(gdp%mdfile_ptr,'*','Fwndgv',filename)
       if (filename /= ' ') then
-         success = addmeteoitem(gdp%runid, filename, sferic, mmax, nmax)
+         success = addmeteoitem(gdp%runid, filename, sferic, mmaxgl, nmaxgl)
          call checkmeteoresult(success, gdp)
          if (v_file) then
             call prterr(lundia, 'G051', 'Multiple input for wind (V component), using input specified on a separate curvilinear grid')
@@ -314,7 +310,7 @@ subroutine rdmeteo(gdp, ecwind)
       filename = ' '
       call prop_get_string(gdp%mdfile_ptr,'*','Fwndgp',filename)
       if (filename /= ' ') then
-         success = addmeteoitem(gdp%runid, filename, sferic, mmax, nmax)
+         success = addmeteoitem(gdp%runid, filename, sferic, mmaxgl, nmaxgl)
          call checkmeteoresult(success, gdp)
          if (p_file) then
             call prterr(lundia, 'G051', 'Multiple input for air pressure, using input specified on a separate curvilinear grid')
@@ -370,7 +366,7 @@ subroutine rdmeteo(gdp, ecwind)
    filename = ' '
    call prop_get_string(gdp%mdfile_ptr,'*','Fwndgr',filename)
    if (filename /= ' ') then
-      success = addmeteoitem(gdp%runid, filename, sferic, mmax, nmax)
+      success = addmeteoitem(gdp%runid, filename, sferic, mmaxgl, nmaxgl)
       call prterr(lundia, 'G051', 'Relative air humidity specified on a separate curvilinear grid')
    else
       call prop_get_string(gdp%mdfile_ptr,'*','Filwr',filename)
@@ -396,7 +392,7 @@ subroutine rdmeteo(gdp, ecwind)
    filename = ' '
    call prop_get_string(gdp%mdfile_ptr,'*','Fwndgt',filename)
    if (filename /= ' ') then
-      success = addmeteoitem(gdp%runid, filename, sferic, mmax, nmax)
+      success = addmeteoitem(gdp%runid, filename, sferic, mmaxgl, nmaxgl)
       call prterr(lundia, 'G051', 'Air temperature specified on a separate curvilinear grid')
    else
       call prop_get_string(gdp%mdfile_ptr,'*','Filwt',filename)
@@ -422,7 +418,7 @@ subroutine rdmeteo(gdp, ecwind)
    filename = ' '
    call prop_get_string(gdp%mdfile_ptr,'*','Fwndgc',filename)
    if (filename /= ' ') then
-      success = addmeteoitem(gdp%runid, filename, sferic, mmax, nmax)
+      success = addmeteoitem(gdp%runid, filename, sferic, mmaxgl, nmaxgl)
       call prterr(lundia, 'G051', 'Air cloudiness specified on a separate curvilinear grid')
    else
       call prop_get_string(gdp%mdfile_ptr,'*','Filwc',filename)

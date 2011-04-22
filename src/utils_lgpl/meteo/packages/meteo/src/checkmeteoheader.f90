@@ -252,7 +252,7 @@ function checkmeteoheader(meteoitem) result(success)
        !
        ! Wind and pressure on a Spiderweb grid
        !
-       ! Note: one extra colum for 360 deg = 0 deg was added in function addmeteoitem
+       ! Note: one extra column for 360 deg = 0 deg was added in function addmeteoitem
        !
        pi           = acos(-1.0_fp)
        meteoitem%dx = 2.0_fp * pi / real(meteoitem%n_cols-1, fp)          ! n_cols-1 intervals in angular direction

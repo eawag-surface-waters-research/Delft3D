@@ -66,6 +66,7 @@ module meteo
    use precision
    use meteo_data
 
+
    real(fp), private :: pi
    real(fp), private :: d2r
 
@@ -323,7 +324,7 @@ function checkmeteo(runid, flow_itdate, flow_tzone, tstop) result(success)
    type(tmeteoitem), pointer  :: meteoitem
    !
    ! Executable statements
-   !
+   !   
    success = meteoupdate(runid, flow_itdate, flow_tzone, tstop)
    if (.not. success) then
       return
@@ -599,13 +600,19 @@ end function getmeteotypes
 !
 !
 !===============================================================================
-function getmeteoval(runid, quantity, time, &
+function getmeteoval(runid, quantity, time, mfg, nfg, & 
                    & nlb, nub, mlb, mub, qarray) result(success)
    !
    ! Function description:
    ! Put quantity values for given time for complete grid in qarray
    ! Spiderweb input is added to possible other types of meteo input
    !
+ 
+   ! Note that size(qarray) need not to be equal to the size of the
+   ! meteo%flowgrid. When running in parallel, qarray is defined for a local 
+   ! domain while the meteo information is always stored globally.
+ 
+   
    implicit none
 !
 ! Return value
@@ -618,6 +625,8 @@ function getmeteoval(runid, quantity, time, &
    integer                                          , intent(in)  :: nub
    integer                                          , intent(in)  :: mlb
    integer                                          , intent(in)  :: mub
+   integer                                          , intent(in)  :: mfg !offset in global domain.
+   integer                                          , intent(in)  :: nfg !offset in global domain.
    real(fp)                                         , intent(in)  :: time
    real(fp)    , dimension(nlb:nub, mlb:mub), target, intent(out) :: qarray
    character(*)                                     , intent(in)  :: quantity
@@ -807,9 +816,12 @@ function getmeteoval(runid, quantity, time, &
                   success = .false.
                   return
                end select
-               do m = 1,meteo%flowgrid%mmax
-                  do n = 1,meteo%flowgrid%nmax
-                     qarray(n,m) = a0*v0(n,m,k) + a1*v1(n,m,k)
+               !
+               ! Note: This loop will not fill the boundaries of qarray. 
+               !
+               do m = 1, meteo%flowgrid%mmax
+                  do n = 1, meteo%flowgrid%nmax
+                     qarray(n,m) = a0*v0(n+nfg-1,m+mfg-1,k) + a1*v1(n+nfg-1,m+mfg-1,k)
                   enddo
                enddo
             case ( meteo_on_equidistant_grid )
@@ -861,6 +873,17 @@ function getmeteoval(runid, quantity, time, &
                            success = .false.
                            return
                         endif
+                        !
+                        ! now transform to global arrays v0, v1
+                        i1 = i1 + mfg - 1
+                        j1 = j1 + nfg - 1
+                        if (i1 > size(v0,1) .or. j1 > size(v0,2)) then
+                           write(tex,'(2f10.1)') x1,y1
+                           write(meteomessage,'(2a)') 'Flow point outside global meteo grid x,y,:',trim(tex)
+                           success = .false.
+                           return
+                        endif                        
+                        
                         u(1) = v0(i1  , j1  , 1)
                         u(2) = v0(i1+1, j1  , 1)
                         u(3) = v0(i1+1, j1+1, 1)
@@ -881,7 +904,7 @@ function getmeteoval(runid, quantity, time, &
                grid  => meteoitem%grid
                do m = 1,meteo%flowgrid%mmax
                   do n = 1,meteo%flowgrid%nmax
-                     if (meteo%flowgrid%kcs(n, m) /= 0) then
+                     if (meteo%flowgrid%kcs(n, m) > 0) then
                         x = meteo%flowgrid%xz(n, m)
                         y = meteo%flowgrid%yz(n, m)
                         !

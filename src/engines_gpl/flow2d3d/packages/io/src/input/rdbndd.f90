@@ -558,7 +558,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        ! restore mnbnd, alpha, typbnd, datbnd, statns, nambnd and tprofu of own subdomain
        ! re-count nto, ntof and ntoq in own subdomain
        !
-                       allocate(gdp%gdbcdat%bct_order(nn), stat=istat)
+       allocate(gdp%gdbcdat%bct_order(nn), stat=istat)
        if (istat == 0) allocate(ctmp1(2,nn), stat=istat)
        if (istat == 0) allocate(ctmp2(2,nn), stat=istat)
        if (istat == 0) allocate(ctmp3(2,nn), stat=istat)

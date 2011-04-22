@@ -803,17 +803,17 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     endif
     if (rhum_file) then
        success = getmeteoval(gdp%runid, 'relhum', timhr * 60.0, &
-                           & nlb, nub, mlb, mub, rhumarr)
+                           & gdp%gdparall%mfg, gdp%gdparall%nfg, nlb, nub, mlb, mub, rhumarr)
        call checkmeteoresult(success, gdp)
     endif
     if (tair_file) then
        success = getmeteoval(gdp%runid, 'airtemp', timhr * 60.0, &
-                           & nlb, nub, mlb, mub, tairarr)
+                           &gdp%gdparall%mfg, gdp%gdparall%nfg,  nlb, nub, mlb, mub, tairarr)
        call checkmeteoresult(success, gdp)
     endif
     if (clou_file) then
        success = getmeteoval(gdp%runid, 'cloud', timhr * 60.0, &
-                           & nlb, nub, mlb, mub, clouarr)
+                           &gdp%gdparall%mfg, gdp%gdparall%nfg, nlb, nub, mlb, mub, clouarr)
        call checkmeteoresult(success, gdp)
     endif
     !
