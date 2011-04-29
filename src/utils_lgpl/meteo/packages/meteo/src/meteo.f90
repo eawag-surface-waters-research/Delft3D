@@ -562,6 +562,7 @@ function getmeteotypes(runid, meteotypes) result(success)
 !
 ! Local variables
 !
+   integer                             :: dimmeteotypes
    integer                             :: i
    integer                             :: j
    integer                             :: ierr
@@ -582,7 +583,12 @@ function getmeteotypes(runid, meteotypes) result(success)
    do i = 1, meteo%nummeteoitems
       curtype = meteo%item(i)%ptr%meteotype
       newtype = .true.
-      do j = 1, size(meteotypes)
+      if (allocated(meteotypes)) then
+         dimmeteotypes = size(meteotypes)
+      else
+         dimmeteotypes = 0
+      endif
+      do j = 1, dimmeteotypes
          if (meteotypes(j) == curtype) then
             newtype = .false.
             exit
