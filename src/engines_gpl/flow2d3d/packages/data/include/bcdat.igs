@@ -39,7 +39,7 @@
        integer                                 :: nsplit
        integer     , dimension(:)    , pointer :: pindex    ! converts component number in internal database to component number
                                                             ! used in hydrbc, hydrbcf and compnames
-       integer     , dimension(:)    , pointer :: bct_order ! stores the original order of the boundaries in the bct file
+       integer     , dimension(:)    , pointer :: bct_order ! stores the original order of the timeseries-boundaries in the bct file
                                                             ! used for parallel
        integer     , dimension(:)    , pointer :: ext_bnd   ! mask array to identify boundaries whose information is prescribed by external components (e.g. SobekSIM) instead of the (dummy) input file
        character(1)                            :: ascon     ! 'Y' if open bnd. contains type 'A'

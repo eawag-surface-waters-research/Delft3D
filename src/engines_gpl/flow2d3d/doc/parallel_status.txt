@@ -317,7 +317,7 @@ group               testcase
 25_bottfric_2D_3D   01-chezygoot_equid     
                     02-chezygoot_log       
                     03-estuarium_equid     
-                    04-estuarium_log       
+                    04-estuarium_log       OK      
                     05-noordzee_2d         
                     06-noordzee_equid      
                     07-noordzee_log        

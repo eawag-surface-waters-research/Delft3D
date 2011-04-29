@@ -116,10 +116,12 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                                     :: n        ! Help var. 
     integer                                     :: nlook    ! Help var.: nr. of data to look for in the MD-file 
     integer                                     :: nn
+    integer                                     :: nn_t    
     integer                                     :: ntest    ! Help var. 
     integer                                     :: ntrec    ! Help. var to keep track of NRREC 
     integer       , dimension(4)                :: ival     ! Help array (int.) where the data, recently read from the MD-file, are stored temporarily 
-    integer       , dimension(mxdnto)           :: nsd                    ! integer array to store sequence numbers of arrays mnbnd, alpha, typbnd, datbnd, statns, nambnd and tprofu in own subdomain
+    integer       , dimension(mxdnto)           :: nsd      ! integer array to store sequence numbers of arrays mnbnd, alpha, typbnd, datbnd, statns, nambnd and tprofu in own subdomain
+    integer       , dimension(mxdnto)           :: nsd_t    ! integer array to store sequence numbers of timeserie-boundaries arrays in own subdomain
     integer       , dimension(:,:), allocatable :: itemp    ! work array to store mnbnd temporarily
     logical                                     :: defaul   ! Flag set to YES if default value may be applied in case var. read is empty (ier <= 0, or nrread < nlook) 
     logical                                     :: found
@@ -498,19 +500,21 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        nhsub(n) = n
     enddo
     if (.not.parll .and. .not.yestdd) then
-       allocate (gdp%gdbcdat%bct_order(nn), stat=istat)
+       allocate (gdp%gdbcdat%bct_order(nto - ntof - ntoq), stat=istat)
        if (istat /= 0) then
           call prterr(lundia, 'P004', 'memory alloc error in rdbndd')
           call d3stop(1, gdp)
        endif
        bct_order => gdp%gdbcdat%bct_order
-       do n = 1, nto
+       do n = 1, nto - ntof - ntoq
           bct_order(n) = n
        enddo
     endif
     if (parll .and. .not.yestdd) then
        nn  = 0
+       nn_t  =0       
        nsd = 0
+       nsd_t = 0
        do n = 1, nto
           !
           ! first, check whether mnbnd values are inside entire domain
@@ -533,10 +537,10 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              mnbnd(4, n) = min(mnbnd(4, n), nmaxgl)
           endif
           !
-          ival(1) = mnbnd(1, n) -mfg +1
-          ival(2) = mnbnd(2, n) -nfg +1
-          ival(3) = mnbnd(3, n) -mfg +1
-          ival(4) = mnbnd(4, n) -nfg +1
+          ival(1) = mnbnd(1, n) - mfg + 1
+          ival(2) = mnbnd(2, n) - nfg + 1
+          ival(3) = mnbnd(3, n) - mfg + 1
+          ival(4) = mnbnd(4, n) - nfg + 1
           !
           ! check if boundary opening is fully (.TRUE.) or partly (.FALSE.) outside subdomain
           !
@@ -552,13 +556,18 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              mnbnd(4, n) = ival(4)
              nn = nn +1
              nsd(nn) = n
+             if (n > ntof + ntoq) then
+                nn_t = nn_t + 1
+                nsd_t(nn_t) = n - ntof - ntoq 
+             endif   
+          
           endif
        enddo
        !
        ! restore mnbnd, alpha, typbnd, datbnd, statns, nambnd and tprofu of own subdomain
        ! re-count nto, ntof and ntoq in own subdomain
        !
-       allocate(gdp%gdbcdat%bct_order(nn), stat=istat)
+
        if (istat == 0) allocate(ctmp1(2,nn), stat=istat)
        if (istat == 0) allocate(ctmp2(2,nn), stat=istat)
        if (istat == 0) allocate(ctmp3(2,nn), stat=istat)
@@ -568,9 +577,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           call prterr(lundia, 'P004', 'memory alloc error in rdbndd')
           call d3stop(1, gdp)
        endif
-       bct_order => gdp%gdbcdat%bct_order
        do n = 1, nn
-          bct_order(n) = nsd(n)
           ctmp1(1,n)   = nambnd(nsd(n))
           ctmp1(2,n)   = tprofu(nsd(n))
           ctmp2(1,n)   = typbnd(nsd(n))
@@ -612,7 +619,16 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              nhsub(ntof) = nsd(n)
           endif
        enddo
+      
+       allocate(gdp%gdbcdat%bct_order(nto-ntof-ntoq), stat=istat)
+    
+       do n = 1, nto-ntof-ntoq               ! n = 1, nn_t
+          gdp%gdbcdat%bct_order(n) = nsd_t(n)
+       enddo
+
        deallocate(ctmp1,ctmp2,ctmp3,itemp,rtemp)
+       
+            
     endif ! parll and not.yestdd
     do n = 1, nto
        !
