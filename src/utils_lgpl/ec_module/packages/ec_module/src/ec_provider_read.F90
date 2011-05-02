@@ -393,7 +393,9 @@ function read_grib(unitnr, filename, filenr, xwind, ywind, press, nmax, mmax, me
          if (debug) call grsdbg(1)
 #     endif
       ierr = 0
+#     if defined GRIB
       call gribex(isec0, isec1, isec2, zsec2, isec3, zsec3, isec4, zbuf4, bufsz2, buffer, lenout, iword, request, ierr)
+#     endif
       select case (ierr)
       case (-4)
          if (debug) write (*,*) "grib decode warning: Bit-map encountered"
