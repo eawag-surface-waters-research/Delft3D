@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="kubint"
 	ProjectGUID="{BC28FF1D-CC36-4812-B9AB-D3E8EF785FB2}"
 	RootNamespace="kubint_c"
@@ -159,6 +159,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="..\..\..\..\oss-install.cmd kubint ..\bin"
 			/>
 		</Configuration>
 	</Configurations>

@@ -168,7 +168,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine=""
+				CommandLine="..\..\..\..\oss-install.cmd vs ..\bin"
 			/>
 		</Configuration>
 	</Configurations>

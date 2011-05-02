@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="datsel"
 	ProjectGUID="{64F27FE8-975F-4F36-8C39-0BE14AB6C89E}"
 	RootNamespace="datsel_c"
@@ -159,6 +159,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
+				CommandLine="..\..\..\..\oss-install.cmd datsel ..\bin"
 			/>
 		</Configuration>
 	</Configurations>

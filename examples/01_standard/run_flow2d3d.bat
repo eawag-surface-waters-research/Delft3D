@@ -23,18 +23,17 @@ set argfile=config_flow2d3d.ini
     rem
     rem Set the directory containing delftflow.exe here
     rem
-set exedir=..\..\src\engines_gpl\deltares_hydro\bin\release
-set dlldir=..\..\src\engines_gpl\flow2d3d\bin\release
+set D3D_HOME=..\..\bin
+set exedir=%D3D_HOME%\w32\flow\bin
 
     rem
     rem No adaptions needed below
     rem
 
     rem Set some (environment) parameters
-set D3D_HOME=%exedir%
     rem Only needed for the debug version:
     rem set inteldir=c:\Program Files\Intel\Compiler\11.0\072\fortran\lib\ia32
-set PATH=%dlldir%;%inteldir%;%PATH%
+set PATH=%exedir%;%inteldir%;%PATH%
 
     rem Run
 %exedir%\deltares_hydro.exe %argfile%

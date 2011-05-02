@@ -21,7 +21,8 @@
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
 				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts\win32\update_version.cmd .\src\wave_version.F90 ..\..\ .\include\version_number.ini"/>
-				<Tool Name="VFPostBuildEventTool" CommandLine="echo &quot;This file is overwritten by the post-build command of the project wave&quot; &gt; ./src/wave_version.F90"/>
+				<Tool Name="VFPostBuildEventTool" CommandLine="echo &quot;This file is overwritten by the post-build command of the project wave&quot; &gt; ./src/wave_version.F90
+..\..\..\..\oss-install.cmd wave ..\bin"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Resource Files" Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">

@@ -11,7 +11,8 @@
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
 				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts\win32\update_version.cmd .\src\flow2d3d_version.F90 ..\.. .\include\version_number.ini"/>
-				<Tool Name="VFPostBuildEventTool" CommandLine="echo &quot;This file is overwritten by the post-build command of the project flow2d3d&quot; &gt; ./src/flow2d3d_version.F90"/>
+				<Tool Name="VFPostBuildEventTool" CommandLine="echo &quot;This file is overwritten by the post-build command of the project flow2d3d&quot; &gt; ./src/flow2d3d_version.F90
+..\..\..\..\oss-install_debug.cmd flow2d3d"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" OutputDirectory="../../bin/$(ConfigurationName)" BuildLogFile="$(IntDir)\BuildLog_delftflow_openmi.htm" ConfigurationType="typeDynamicLibrary">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" Preprocess="preprocessYes" AdditionalIncludeDirectories="../../../../utils_lgpl/utils_flow/lib/$(ConfigurationName)/static;../../../../utils_lgpl/ec_module/lib/$(ConfigurationName)/static;../../../../utils_lgpl/delftio/lib/$(ConfigurationName)/static;../../../../utils_lgpl/esmfsm/include" PreprocessorDefinitions="DO_LOG, INCL_CF, WIN32" ModulePath="$(OutDir)/"/>
@@ -21,7 +22,8 @@
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
 				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts\win32\update_version.cmd .\src\flow2d3d_version.F90 ..\..\ .\include\version_number.ini"/>
-				<Tool Name="VFPostBuildEventTool" CommandLine="echo &quot;This file is overwritten by the post-build command of the project flow2d3d&quot; &gt; ./src/flow2d3d_version.F90"/>
+				<Tool Name="VFPostBuildEventTool" CommandLine="echo &quot;This file is overwritten by the post-build command of the project flow2d3d&quot; &gt; ./src/flow2d3d_version.F90
+..\..\..\..\oss-install.cmd flow2d3d ..\bin"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Source Files">

@@ -1244,6 +1244,8 @@ src/m4/ax_openmp.m4 -text
 src/m4/fortran.m4.diff -text
 src/m4/fortranextra.m4 -text
 src/m4/gwqt.m4 -text
+src/oss-install.cmd -text
+src/oss-install_debug.cmd -text
 src/plugins_lgpl/Makefile.am -text
 src/plugins_lgpl/plugin_culvert/Makefile.am -text
 src/plugins_lgpl/plugin_culvert/plugin_culvert.sln -text
