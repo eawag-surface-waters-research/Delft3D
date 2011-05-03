@@ -166,8 +166,6 @@ AC_CHECK_TYPES([struct shm_info])
 #Check for expat
 AC_CHECK_HEADER(expat.h,, [AC_MSG_ERROR([Compiler can't find <expat.h>])])
 AC_CHECK_LIB(expat, XML_Parse,, [AC_MSG_ERROR([Compiler can't find libexpat])])
-AC_PATH_X
-AC_PATH_XTRA
 
 # checks for pthreads
 ACX_PTHREAD([enable_threads="pthread"],[enable_threads="no"])

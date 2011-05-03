@@ -78,8 +78,7 @@ libflow2d3d_la_LIBADD = \
     -L$(top_srcdir)/third_party_open/DelftOnline/lib -lDelftOnline -lDelftOnlineJNI -lJavaLaunch \
     $(EXTERNALSOURCES) \
     $(MPILIBS) \
-    $(FCLIBS) \
-    $(X_PRE_LIBS) -lXt $(XPLIB) $(X_LIBS) -lX11 $(X_EXTRA_LIBS)
+    $(FCLIBS)
 
 
 BUILT_SOURCES = ./always \

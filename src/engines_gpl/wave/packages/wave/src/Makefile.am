@@ -57,8 +57,7 @@ $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_version_number/src/libesmfsm_ver
 $(top_srcdir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.a \
 $(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow_version_number/src/libutils_flow_version_number.a \
 $(EXTERNALSOURCES) \
-$(FCLIBS) \
-$(X_PRE_LIBS) -lXt $(XPLIB) $(X_LIBS) -lX11 $(X_EXTRA_LIBS)
+$(FCLIBS)
 
 
 BUILT_SOURCES = ./always \

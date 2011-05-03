@@ -35,8 +35,7 @@ FCLIBS += \
 deltares_hydro_exe_LDADD = \
     $(top_srcdir)/utils_lgpl/inifiles/packages/inifiles/src/libinifiles.a \
     $(EXTERNALSOURCES) \
-    $(FCLIBS) \
-    $(X_PRE_LIBS) -lXt $(XPLIB) $(X_LIBS) -lX11 $(X_EXTRA_LIBS)
+    $(FCLIBS)
 
 
 BUILT_SOURCES = ./always \
