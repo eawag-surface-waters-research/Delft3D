@@ -96,7 +96,11 @@ MPILIBS = -L/opt/mpich2/lib -lmpichf90 -lmpich -lpthread
 
 
 ds-install: install
-	cp -p $(top_srcdir)/third_party_open/DelftOnline/lib/*.so $(libdir)
+	( \
+	    cp -p $(top_srcdir)/third_party_open/DelftOnline/lib/*.so $(libdir) ; \
+	    cd $(top_srcdir) ; \
+	    ./oss-install.sh ../bin \
+	)
 
 # ToDo: make delftflow-dist part of ds-install?
 delftflow-dist: ds-install
