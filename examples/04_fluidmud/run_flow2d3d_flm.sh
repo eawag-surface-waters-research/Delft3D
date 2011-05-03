@@ -14,8 +14,9 @@ argfilemud=config_flow2d3d_mud.ini
     #
     # Set the directory containing deltares_hydro.exe and libflow2d3d.so here
     #
-exedir=../../src/bin
-libdir=../../src/lib
+export ARCH=intel
+export D3D_HOME=../../bin
+exedir=$D3D_HOME/$ARCH/flow/bin
 useSharedMem=1
 
 
@@ -28,11 +29,9 @@ useSharedMem=1
     #
 
     # Set some (environment) parameters
-export ARCH=intel
-export D3D_HOME=$exedir
     # Only needed for the debug version:
     #. /opt/intel/Compiler/11.0/081/bin/ifortvars.sh ia32
-export LD_LIBRARY_PATH=$exedir:$libdir:$LD_LIBRARY_PATH 
+export LD_LIBRARY_PATH=$exedir:$LD_LIBRARY_PATH 
 
 
     #
