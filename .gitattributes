@@ -1223,6 +1223,7 @@ src/engines_gpl/wave/packages/wave/src/usage.f90 -text
 src/engines_gpl/wave/packages/wave/src/wave.f90 -text
 src/engines_gpl/wave/packages/wave/src/wave_version.F90.svn -text
 src/engines_gpl/wave/packages/wave/wave.vfproj -text
+src/install.sh -text
 src/m4/COPYING.gwqt -text
 src/m4/ac_check_java_home.m4 -text
 src/m4/ac_check_old_compilers.m4 -text
@@ -1244,9 +1245,6 @@ src/m4/ax_openmp.m4 -text
 src/m4/fortran.m4.diff -text
 src/m4/fortranextra.m4 -text
 src/m4/gwqt.m4 -text
-src/oss-install.cmd -text
-src/oss-install.sh -text
-src/oss-install_debug.cmd -text
 src/plugins_lgpl/Makefile.am -text
 src/plugins_lgpl/plugin_culvert/Makefile.am -text
 src/plugins_lgpl/plugin_culvert/plugin_culvert.sln -text
@@ -1266,10 +1264,13 @@ src/plugins_lgpl/plugin_delftflow_traform/src/partheniades_krone.f90 -text
 src/plugins_lgpl/plugin_delftflow_traform/src/settling_velocity.f90 -text
 src/plugins_lgpl/plugin_delftflow_traform/src/shld.f90 -text
 src/plugins_lgpl/plugin_delftflow_traform/src/vrijn84_riv_77.f90 -text
-src/scripts/linux/make_revision.sh -text
-src/scripts/linux/update_version.sh -text
-src/scripts/win32/make_revision.bat -text
-src/scripts/win32/update_version.cmd -text
+src/scripts_lgpl/linux/make_revision.sh -text
+src/scripts_lgpl/linux/oss-install.sh -text
+src/scripts_lgpl/linux/update_version.sh -text
+src/scripts_lgpl/win32/make_revision.bat -text
+src/scripts_lgpl/win32/oss-install.cmd -text
+src/scripts_lgpl/win32/oss-install_debug.cmd -text
+src/scripts_lgpl/win32/update_version.cmd -text
 src/third_party_open/DelftOnline/classes/DelftOnline.jar -text
 src/third_party_open/DelftOnline/include/DelftOnline.h -text
 src/third_party_open/DelftOnline/include/DelftOnline.i -text

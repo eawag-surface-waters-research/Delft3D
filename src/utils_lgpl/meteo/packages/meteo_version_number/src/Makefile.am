@@ -28,7 +28,7 @@ BUILT_SOURCES = ../include/always \
 	rm -f ../include/version_number.h
 
 ../include/version_number.h:
-	$(top_srcdir)/scripts/linux/make_revision.sh $(top_srcdir) ../../.. ../include/version_number.ini ../include/version_number.h.svn ../include/version_number.h
+	$(top_srcdir)/scripts_lgpl/linux/make_revision.sh $(top_srcdir) ../../.. ../include/version_number.ini ../include/version_number.h.svn ../include/version_number.h
 #-------------------------------------------------------------------------------
 #Libraries
 

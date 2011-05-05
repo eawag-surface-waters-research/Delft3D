@@ -159,7 +159,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="..\..\..\..\oss-install.cmd datsel ..\bin"
+				CommandLine="..\..\..\..\scripts_lgpl\win32\oss-install.cmd datsel ..\bin"
 			/>
 		</Configuration>
 	</Configurations>

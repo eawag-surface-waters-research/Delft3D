@@ -34,8 +34,8 @@ if [%dest_main%] EQU [] (
     goto end
 )
 
-rem Change to directory where this batch file resides (necessary when oss-install.cmd is called from outside of oss/trunk/src)
-cd %~dp0
+rem Change to directory tree where this batch file resides (necessary when oss-install.cmd is called from outside of oss/trunk/src)
+cd %~dp0\..\..
 
 call :!project!
 

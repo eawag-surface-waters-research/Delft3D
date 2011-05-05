@@ -25,7 +25,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="call ..\..\..\..\scripts\win32\update_version.cmd .\include\semaphore_version.h .\ .\include\version_number.ini"
+				CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\semaphore_version.h .\ .\include\version_number.ini"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -92,7 +92,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="call ..\..\..\..\scripts\win32\update_version.cmd .\include\semaphore_version.h .\ .\include\version_number.ini"
+				CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\semaphore_version.h .\ .\include\version_number.ini"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"

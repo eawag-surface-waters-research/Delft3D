@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 
 
@@ -241,12 +241,11 @@ if [ "$dest_main" == '' ]; then
     exit 1
 fi
 
-# Change to directory where this batch file resides (necessary when oss-install.sh is called from outside of oss/trunk/src)
+# Change to directory tree where this batch file resides (necessary when oss-install.sh is called from outside of oss/trunk/src)
 curdir=`pwd`
 scriptdirname=`readlink \-f \$0`
 scriptdir=`dirname $scriptdirname`
-echo $scriptdir
-cd $scriptdir
+cd $scriptdir\..\..
 
 $project
 

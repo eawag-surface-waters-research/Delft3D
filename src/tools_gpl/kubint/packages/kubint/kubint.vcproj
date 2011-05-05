@@ -159,7 +159,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="..\..\..\..\oss-install.cmd kubint ..\bin"
+				CommandLine="..\..\..\..\scripts_lgpl\win32\oss-install.cmd kubint ..\bin"
 			/>
 		</Configuration>
 	</Configurations>

@@ -20,7 +20,7 @@ SUBDIRS = \
 	  test_18 \
 	  test_19
 	  
-TESTS_ENVIRONMENT = $(top_srcdir)/scripts/linux/regression.sh 
+TESTS_ENVIRONMENT = $(top_srcdir)/scripts_lgpl/linux/regression.sh 
 TESTS = \
 	  test_00/test_00 \
 	  test_01/test_01 \

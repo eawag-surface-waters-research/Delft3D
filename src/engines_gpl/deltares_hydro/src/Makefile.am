@@ -45,5 +45,5 @@ BUILT_SOURCES = ./always \
 	rm -rf ./deltares_hydro_version.F90 
 
 ./deltares_hydro_version.F90:
-	$(top_srcdir)/scripts/linux/update_version.sh $(srcdir)/deltares_hydro_version.F90 $(srcdir) ../include/version_number.ini $(top_srcdir)
+	$(top_srcdir)/scripts_lgpl/linux/update_version.sh $(srcdir)/deltares_hydro_version.F90 $(srcdir) ../include/version_number.ini $(top_srcdir)
 

@@ -168,7 +168,7 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="..\..\..\..\oss-install.cmd vs ..\bin"
+				CommandLine="..\..\..\..\scripts_lgpl\win32\oss-install.cmd vs ..\bin"
 			/>
 		</Configuration>
 	</Configurations>

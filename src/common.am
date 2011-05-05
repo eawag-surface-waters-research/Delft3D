@@ -99,7 +99,7 @@ ds-install: install
 	( \
 	    cp -p $(top_srcdir)/third_party_open/DelftOnline/lib/*.so $(libdir) ; \
 	    cd $(top_srcdir) ; \
-	    ./oss-install.sh ../bin \
+	    ./install.sh ../bin \
 	)
 
 # ToDo: make delftflow-dist part of ds-install?
