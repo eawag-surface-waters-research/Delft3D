@@ -209,7 +209,7 @@ function vs () {
 # === MAIN
 # ========
 
-echo Installing...
+echo oss-install...
 
 # Example calls:
 # > install.cmd <dest directory>              # Install entire solution

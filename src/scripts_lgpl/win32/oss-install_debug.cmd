@@ -1,6 +1,6 @@
 @echo off
 
-echo Installing Debug...
+echo oss-install_debug...
 
 rem Example calls:
 rem > install.cmd               # Install all dlls in the directory of the executable to be debugged

@@ -1,6 +1,6 @@
 @echo off
 
-echo Installing...
+echo oss-install...
 
 rem Example calls:
 rem > install.cmd <dest directory>               # Install entire solution
@@ -244,8 +244,9 @@ goto :endproc
 if NOT %ErrorLevel% EQU 0 (
     rem
     rem Only jump to :end when the script is completely finished
-    rem 
-    exit %ErrorLevel%
+    rem
+    rem Do not use exit here; it may go wrong when oss-install is being called by install.cmd
+    rem exit %ErrorLevel%
 )
 
 :endproc
