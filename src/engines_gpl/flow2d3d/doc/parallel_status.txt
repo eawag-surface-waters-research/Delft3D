@@ -44,13 +44,10 @@ Not supported functionality and limitations
 - culvert
 - powerstation only works when inlet and outfall are in the same partition (is checked)
 - walking discharge
-- svwp file
-- wind on separate curvilinear grid?
 - Writing WAQ input files?
 - Moving obstacles
 - 2D skewed (not 1D-) Weirs 
-- space varying bed roughness
-- max(mmax,nmax)/npart >= 4 (is checked)
+- max(mmax,nmax)/npart <= 4 (is checked)
 
 
 
