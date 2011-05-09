@@ -1223,6 +1223,7 @@ src/engines_gpl/wave/packages/wave/src/usage.f90 -text
 src/engines_gpl/wave/packages/wave/src/wave.f90 -text
 src/engines_gpl/wave/packages/wave/src/wave_version.F90.svn -text
 src/engines_gpl/wave/packages/wave/wave.vfproj -text
+src/install.cmd -text
 src/install.sh -text
 src/m4/COPYING.gwqt -text
 src/m4/ac_check_java_home.m4 -text

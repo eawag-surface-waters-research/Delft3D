@@ -13,15 +13,15 @@ rem  The next statement is needed in order for the set commands to work inside t
 setlocal enabledelayedexpansion
 
 if [%1] EQU [] (
-    rem Install the package/engine specified by the first argument.
-
-    set project=%1
-    echo Source          : package/engine !project!
-) else (
     rem Install all engines.
 
     set project=install_all
     echo Source          : all engines
+) else (
+    rem Install the package/engine specified by the first argument.
+
+    set project=%1
+    echo Source          : package/engine !project!
 )
 
 rem Change to directory tree where this batch file resides (necessary when oss-install.cmd is called from outside of oss/trunk/src)
