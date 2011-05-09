@@ -245,7 +245,7 @@ fi
 curdir=`pwd`
 scriptdirname=`readlink \-f \$0`
 scriptdir=`dirname $scriptdirname`
-cd $scriptdir\..\..
+cd $scriptdir/../..
 
 $project
 
