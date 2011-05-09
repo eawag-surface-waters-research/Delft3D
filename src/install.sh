@@ -6,7 +6,7 @@ scriptdirname=`readlink \-f \$0`
 scriptdir=`dirname $scriptdirname`
 cd $scriptdir
 
-scripts_lgpl\linux\oss-install.sh $1 $2
+scripts_lgpl/linux/oss-install.sh $1 $2
 
 cd $curdir
 
