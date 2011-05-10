@@ -65,6 +65,22 @@ rem ===============
 goto :endproc
 
 
+rem ========================
+rem === INSTALL_DELFT3D-FLOW
+rem ========================
+:delft3d-flow
+    echo "    installing delft3d-flow . . ."
+    if not exist !dest_main! mkdir !dest_main!
+
+    call :deltares_hydro
+    call :flow2d3d
+    call :plugin_culvert
+    call :plugin_delftflow_traform
+    call :mormerge
+
+goto :endproc
+
+
 
 rem ==========================
 rem === INSTALL_DELTARES_HYDRO

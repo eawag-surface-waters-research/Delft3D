@@ -26,6 +26,25 @@ function install_all () {
 
 
 
+# ========================
+# === INSTALL_DELFT3D-FLOW
+# ========================
+function delft3d-flow () {
+    echo "    installing delft3d-flow . . ."
+
+    mkdir -p $dest_main
+
+    deltares_hydro
+    flow2d3d
+    plugin_culvert
+    plugin_delftflow_traform
+    mormerge
+
+    return
+}
+
+
+
 # ==========================
 # === INSTALL_DELTARES_HYDRO
 # ==========================

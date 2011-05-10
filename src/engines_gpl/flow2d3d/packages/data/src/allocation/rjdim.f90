@@ -224,7 +224,6 @@ subroutine rjdim(lundia, error, gdp)
     if (fp == hp) then
        write (message,'(a,i4)') 'Double precision computation using reals of kind ',fp
        call prterr(lundia, 'G051', trim(message))
-       write (*,'(a,a)') '*** WARNING ',trim(message)
     elseif (fp == sp) then
        write (message,'(a,i4)') 'Single precision computation using reals of kind ',fp
        call prterr(lundia, 'G051', trim(message))
