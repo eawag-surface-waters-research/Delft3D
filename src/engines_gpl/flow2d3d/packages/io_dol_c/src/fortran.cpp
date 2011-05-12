@@ -30,7 +30,7 @@
 //  Delft3D -- Fortran Interface to DelftOnline
 //
 //  Irv.Elshoff@deltares.nl
-//  19 may 10
+//  17 mar 11
 //
 //-------------------------------------------------------------------------------
 
@@ -153,7 +153,7 @@ D3DOL_ArrayShape (
         Hydra::Abort ("DOL ArrayShape fails: %s", ex->message);
         }
 
-    delete name;
+    delete [] name;
 #endif
     }
 
@@ -175,7 +175,7 @@ D3DOL_ChangeDirectory (
         Hydra::Abort ("Cannot set DOL description: %s", ex->message);
         }
 
-    delete dirname;
+    delete [] dirname;
 #endif
     }
 
@@ -231,11 +231,11 @@ D3DOL_Publish_c (
         Hydra::Abort ("DOL Publish fails: %s", ex->message);
         }
 
-    delete name;
-    delete description;
-    delete units;
-    delete definedon;
-    delete arrayshape;
+    delete [] name;
+    delete [] description;
+    delete [] units;
+    delete [] definedon;
+    delete [] arrayshape;
 #endif
     }
 
@@ -318,8 +318,8 @@ D3DOL_PublishFunction (
         Hydra::Abort ("DOL PublishFunction fails: %s", ex->message);
         }
 
-    delete name;
-    delete description;
+    delete [] name;
+    delete [] description;
 #endif
     }
 
@@ -348,8 +348,8 @@ D3DOL_SetDescription (
     char * desc  = new char [strlen (prog) + strlen (model) + 10];
     sprintf (desc, "%s :: %s", prog, model);
 
-    delete prog;
-    delete model;
+    delete [] prog;
+    delete [] model;
 
     try {
         D3DOL_Global.dol->SetDescription (desc);
@@ -359,7 +359,7 @@ D3DOL_SetDescription (
         Hydra::Abort ("Cannot set DOL description: %s", ex->message);
         }
 
-    delete desc;
+    delete [] desc;
 #endif
     }
 
@@ -409,7 +409,7 @@ D3DOL_Retract (
         Hydra::Abort ("Cannot Retract DOL DataElement: %s", ex->message);
         }
 
-    delete name;
+    delete [] name;
 #endif
     }
 
@@ -431,7 +431,7 @@ D3DOL_RetractArrayShape (
         Hydra::Abort ("Cannot Retract DOL ArrayShape: %s", ex->message);
         }
 
-    delete name;
+    delete [] name;
 #endif
     }
 
@@ -453,7 +453,7 @@ D3DOL_RetractFunction (
         Hydra::Abort ("Cannot Retract DOL Function: %s", ex->message);
         }
 
-    delete name;
+    delete [] name;
 #endif
     }
 
