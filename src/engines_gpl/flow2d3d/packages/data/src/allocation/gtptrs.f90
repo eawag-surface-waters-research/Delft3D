@@ -53,458 +53,458 @@ subroutine gtptrs(gdp)
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer , pointer :: aks
-    integer , pointer :: alfas
-    integer , pointer :: alpha
-    integer , pointer :: ampbc
-    integer , pointer :: areau
-    integer , pointer :: areav
-    integer , pointer :: atr
-    integer , pointer :: bruvai
-    integer , pointer :: c
-    integer , pointer :: cbuv
-    integer , pointer :: cbuvrt
-    integer , pointer :: cdwlsu
-    integer , pointer :: cdwlsv
-    integer , pointer :: cdwzbu
-    integer , pointer :: cdwzbv
-    integer , pointer :: cdwztu
-    integer , pointer :: cdwztv
-    integer , pointer :: cfurou
-    integer , pointer :: cfvrou
-    integer , pointer :: cgc
-    integer , pointer :: cgdghf
-    integer , pointer :: cgdghl
-    integer , pointer :: cvalu0
-    integer , pointer :: cvalv0
-    integer , pointer :: circ2d
-    integer , pointer :: circ3d
-    integer , pointer :: crbc
-    integer , pointer :: ctbf
-    integer , pointer :: ctbl
-    integer , pointer :: ctif
-    integer , pointer :: ctil
-    integer , pointer :: ctr
-    integer , pointer :: ctrf
-    integer , pointer :: ctrl
-    integer , pointer :: czusus
-    integer , pointer :: czvsus
-    integer , pointer :: dddeta
-    integer , pointer :: dddksi
-    integer , pointer :: disch0
-    integer , pointer :: disch1
-    integer , pointer :: decay
-    integer , pointer :: deltau
-    integer , pointer :: deltav
-    integer , pointer :: depchg
-    integer , pointer :: dfu
-    integer , pointer :: dfv
-    integer , pointer :: diapl
-    integer , pointer :: dicuv
-    integer , pointer :: dicww
-    integer , pointer :: dircom
-    integer , pointer :: dircos
-    integer , pointer :: dirsin
-    integer , pointer :: dis
-    integer , pointer :: df
-    integer , pointer :: disch
-    integer , pointer :: discom
-    integer , pointer :: discum
-    integer , pointer :: disinp
-    integer , pointer :: disnf    
-    integer , pointer :: dldeta
-    integer , pointer :: dldksi
-    integer , pointer :: dp
-    integer , pointer :: dpc
-    integer , pointer :: dpdeta
-    integer , pointer :: dpdksi
-    integer , pointer :: dps
-    integer , pointer :: dpsed
-    integer , pointer :: dpu
-    integer , pointer :: dpv
-    integer , pointer :: drodep
-    integer , pointer :: rint0
-    integer , pointer :: rint1
-    integer , pointer :: dsdeta
-    integer , pointer :: dsdksi
-    integer , pointer :: dss
-    integer , pointer :: dtdeta
-    integer , pointer :: dtdksi
-    integer , pointer :: dteu
-    integer , pointer :: dtev
-    integer , pointer :: dtr
-    integer , pointer :: dudz
-    integer , pointer :: umdis0
-    integer , pointer :: umdis1
-    integer , pointer :: dvdz
-    integer , pointer :: vmdis0
-    integer , pointer :: vmdis1
-    integer , pointer :: dxydro
-    integer , pointer :: dzdeta
-    integer , pointer :: dzdksi
-    integer , pointer :: encgf
-    integer , pointer :: encgl
-    integer , pointer :: enstro
-    integer , pointer :: entr
-    integer , pointer :: epscur
-    integer , pointer :: epswav
-    integer , pointer :: eroll0
-    integer , pointer :: eroll1
-    integer , pointer :: evap
-    integer , pointer :: ewabr0
-    integer , pointer :: ewabr1
-    integer , pointer :: ewave0
-    integer , pointer :: ewave1
-    integer , pointer :: excbed
-    integer , pointer :: facdss
-    integer , pointer :: fcorio
-    integer , pointer :: fltr
-    integer , pointer :: fuiwe
-    integer , pointer :: fviwe
-    integer , pointer :: fxw
-    integer , pointer :: fyw
-    integer , pointer :: grmasu
-    integer , pointer :: grmasv
-    integer , pointer :: grmsur
-    integer , pointer :: grmsvr
-    integer , pointer :: grfacu
-    integer , pointer :: grfacv
-    integer , pointer :: gro
-    integer , pointer :: gsqd
-    integer , pointer :: gsqs
-    integer , pointer :: guu
-    integer , pointer :: guv
-    integer , pointer :: gvu
-    integer , pointer :: gvv
-    integer , pointer :: hkru
-    integer , pointer :: hkrv
-    integer , pointer :: hrmcom
-    integer , pointer :: hrms
-    integer , pointer :: hu
-    integer , pointer :: hu0
-    integer , pointer :: huvw
-    integer , pointer :: hv
-    integer , pointer :: hv0
-    integer , pointer :: hydrbc
-    integer , pointer :: msucom
-    integer , pointer :: msvcom
-    integer , pointer :: ombc
-    integer , pointer :: omega
-    integer , pointer :: patm
-    integer , pointer :: phibc
-    integer , pointer :: porosu
-    integer , pointer :: porosv
-    integer , pointer :: procbc
-    integer , pointer :: pship
-    integer , pointer :: qtfrac
-    integer , pointer :: qtfrct
-    integer , pointer :: qtfrt2
-    integer , pointer :: qu
-    integer , pointer :: qv
-    integer , pointer :: qxk
-    integer , pointer :: qxkr
-    integer , pointer :: qxkw
-    integer , pointer :: qyk
-    integer , pointer :: qykr
-    integer , pointer :: qykw
-    integer , pointer :: qzk
-    integer , pointer :: r0
-    integer , pointer :: r1
-    integer , pointer :: rbnd
-    integer , pointer :: rbuff
-    integer , pointer :: rca
-    integer , pointer :: rettim
-    integer , pointer :: rho
-    integer , pointer :: rhowat
-    integer , pointer :: rich
-    integer , pointer :: rint
-    integer , pointer :: rlabda
-    integer , pointer :: rmneg
-    integer , pointer :: rnpl
-    integer , pointer :: rob
-    integer , pointer :: rsed
-    integer , pointer :: rsedeq
-    integer , pointer :: rthbnd
-    integer , pointer :: rtu2d0
-    integer , pointer :: rtu2d1
-    integer , pointer :: rtubnd
-    integer , pointer :: rtur0
-    integer , pointer :: rtur1
-    integer , pointer :: rxx
-    integer , pointer :: rxy
-    integer , pointer :: ryy
-    integer , pointer :: rxz
-    integer , pointer :: ryz
-    integer , pointer :: s0
-    integer , pointer :: s1
-    integer , pointer :: sbtr
-    integer , pointer :: sbtrc
-    integer , pointer :: sbuu
-    integer , pointer :: sbvv
-    integer , pointer :: seddif
-    integer , pointer :: sepsus
-    integer , pointer :: sig
-    integer , pointer :: sigdif
-    integer , pointer :: sigmol
-    integer , pointer :: sink
-    integer , pointer :: sinkr
-    integer , pointer :: sinkw
-    integer , pointer :: soumud
-    integer , pointer :: sour
-    integer , pointer :: sournf    
-    integer , pointer :: sourr
-    integer , pointer :: sourw
-    integer , pointer :: sstr
-    integer , pointer :: sstrc
-    integer , pointer :: ssuu
-    integer , pointer :: ssvv
-    integer , pointer :: stbf
-    integer , pointer :: stbl
-    integer , pointer :: stif
-    integer , pointer :: stil
-    integer , pointer :: sumrho
-    integer , pointer :: taubmx
-    integer , pointer :: taubpu
-    integer , pointer :: taubpv
-    integer , pointer :: taubsu
-    integer , pointer :: taubsv
-    integer , pointer :: teta
-    integer , pointer :: tgarkt
-    integer , pointer :: tgarkx
-    integer , pointer :: tgarnp
-    integer , pointer :: thetbc
-    integer , pointer :: thick
-    integer , pointer :: thtim
-    integer , pointer :: tkedis
-    integer , pointer :: tkepro
-    integer , pointer :: tp
-    integer , pointer :: tpcom
-    integer , pointer :: tps
-    integer , pointer :: tpscom
-    integer , pointer :: u0
-    integer , pointer :: u1
-    integer , pointer :: ubrlsu
-    integer , pointer :: ubrlsv
-    integer , pointer :: umdis
-    integer , pointer :: umean
-    integer , pointer :: umeanf
-    integer , pointer :: umeanl
-    integer , pointer :: umnflc
-    integer , pointer :: umnldf
-    integer , pointer :: uorb
-    integer , pointer :: ubot
-    integer , pointer :: ubcom
-    integer , pointer :: usus
-    integer , pointer :: uvdist
-    integer , pointer :: uwtypu
-    integer , pointer :: uwtypv
-    integer , pointer :: v0
-    integer , pointer :: v1
-    integer , pointer :: vicuv
-    integer , pointer :: vicww
-    integer , pointer :: vmdis
-    integer , pointer :: vmean
-    integer , pointer :: vmnflc
-    integer , pointer :: vmnldf
-    integer , pointer :: vnu2d
-    integer , pointer :: vnu3d
-    integer , pointer :: voldis
-    integer , pointer :: volum0
-    integer , pointer :: volum1
-    integer , pointer :: vortic
-    integer , pointer :: vsus
-    integer , pointer :: w1
-    integer , pointer :: w10mag
-    integer , pointer :: wenf
-    integer , pointer :: wenfm
-    integer , pointer :: wenl
-    integer , pointer :: wenlm
-    integer , pointer :: windsu
-    integer , pointer :: windsv
-    integer , pointer :: windu
-    integer , pointer :: windv
-    integer , pointer :: wlen
-    integer , pointer :: wlcom
-    integer , pointer :: wphy
-    integer , pointer :: ws
-    integer , pointer :: wssus
-    integer , pointer :: wstau
-    integer , pointer :: wsu
-    integer , pointer :: wsucom
-    integer , pointer :: wsv
-    integer , pointer :: wsvcom
-    integer , pointer :: x2y
-    integer , pointer :: x3
-    integer , pointer :: xcor
-    integer , pointer :: xy2
-    integer , pointer :: xydro
-    integer , pointer :: xyzsrc
-    integer , pointer :: xz
-    integer , pointer :: y3
-    integer , pointer :: ycor
-    integer , pointer :: yz
-    integer , pointer :: z0ucur
-    integer , pointer :: z0vcur
-    integer , pointer :: z0urou
-    integer , pointer :: z0vrou
-    integer , pointer :: zalfas
-    integer , pointer :: zbdsed
-    integer , pointer :: zbmnf
-    integer , pointer :: zbmnl
-    integer , pointer :: zcuru
-    integer , pointer :: zcurv
-    integer , pointer :: zcurw
-    integer , pointer :: zdicww
-    integer , pointer :: zdist
-    integer , pointer :: zdps
-    integer , pointer :: zdpsed
-    integer , pointer :: zenst
-    integer , pointer :: zetabf
-    integer , pointer :: zetabl
-    integer , pointer :: zetaif
-    integer , pointer :: zetail
-    integer , pointer :: zmeanf
-    integer , pointer :: zmeanl
-    integer , pointer :: zqxk
-    integer , pointer :: zqyk
-    integer , pointer :: zrca
-    integer , pointer :: zrho
-    integer , pointer :: zrich
-    integer , pointer :: zrsdeq
-    integer , pointer :: zsbu
-    integer , pointer :: zsbv
-    integer , pointer :: zssu
-    integer , pointer :: zssv
-    integer , pointer :: zstep
-    integer , pointer :: ztauet
-    integer , pointer :: ztauks
-    integer , pointer :: ztur
-    integer , pointer :: zvicww
-    integer , pointer :: zvort
-    integer , pointer :: zwl
-    integer , pointer :: zws
-    integer , pointer :: drhodx
-    integer , pointer :: drhody
-    integer , pointer :: dzs0
-    integer , pointer :: dzs1
-    integer , pointer :: dzu0
-    integer , pointer :: dzu1
-    integer , pointer :: dzv0
-    integer , pointer :: dzv1
-    integer , pointer :: res
-    integer , pointer :: rl
-    integer , pointer :: rj
-    integer , pointer :: p1
-    integer , pointer :: p0
-    integer , pointer :: p00
-    integer , pointer :: pnhcor
-    integer , pointer :: w0
-    integer , pointer :: s00
-    integer , pointer :: hydprs
-    integer , pointer :: guz
-    integer , pointer :: gvz
-    integer , pointer :: gud
-    integer , pointer :: gvd
-    integer , pointer :: gsqiu
-    integer , pointer :: gsqiv
-    integer , pointer :: ibuff
-    integer , pointer :: idifu
-    integer , pointer :: irocol
-    integer , pointer :: iroll
-    integer , pointer :: itbcc
-    integer , pointer :: itbct
-    integer , pointer :: itdis
-    integer , pointer :: itdro
-    integer , pointer :: kadu
-    integer , pointer :: kadv
-    integer , pointer :: kcs
-    integer , pointer :: kcs_nf    
-    integer , pointer :: kcu
-    integer , pointer :: kcv
-    integer , pointer :: kfs
-    integer , pointer :: kfsed
-    integer , pointer :: kfu
-    integer , pointer :: kfv
-    integer , pointer :: kspu
-    integer , pointer :: kspv
-    integer , pointer :: kstp
-    integer , pointer :: kzs
-    integer , pointer :: kzu
-    integer , pointer :: kzv
-    integer , pointer :: kmxsed
-    integer , pointer :: mnbar
-    integer , pointer :: mnbnd
-    integer , pointer :: mndro
-    integer , pointer :: mnksrc
-    integer , pointer :: nob
-    integer , pointer :: kcshyd
-    integer , pointer :: kfumin
-    integer , pointer :: kfvmin
-    integer , pointer :: kfsmin
-    integer , pointer :: kfumax
-    integer , pointer :: kfvmax
-    integer , pointer :: kfsmax
-    integer , pointer :: kfumx0
-    integer , pointer :: kfvmx0
-    integer , pointer :: kfsmx0
-    integer , pointer :: kfsz1
-    integer , pointer :: kfuz1
-    integer , pointer :: kfvz1
-    integer , pointer :: izmodl
-    integer , pointer :: kcscut
-    integer , pointer :: kcu45
-    integer , pointer :: kcv45
-    integer , pointer :: disint
-    integer , pointer :: dismmt
-    integer , pointer :: nambar
-    integer , pointer :: nambnd
-    integer , pointer :: namcon
-    integer , pointer :: namdro
-    integer , pointer :: namsrc
-    integer , pointer :: tprofc
-    integer , pointer :: tprofu
-    integer , pointer :: typbnd
-    integer , pointer :: zkfs
-    integer , pointer :: iwrk1
-    integer , pointer :: iwrk2
-    integer , pointer :: iwrk3
-    integer , pointer :: wrka1
-    integer , pointer :: wrka2
-    integer , pointer :: wrka3
-    integer , pointer :: wrka4
-    integer , pointer :: wrka5
-    integer , pointer :: wrka6
-    integer , pointer :: wrka7
-    integer , pointer :: wrka8
-    integer , pointer :: wrka9
-    integer , pointer :: wrka12
-    integer , pointer :: wrka13
-    integer , pointer :: wrka14
-    integer , pointer :: wrka15
-    integer , pointer :: wrka16
-    integer , pointer :: wrkb1
-    integer , pointer :: wrkb2
-    integer , pointer :: wrkb3
-    integer , pointer :: wrkb4
-    integer , pointer :: wrkb5
-    integer , pointer :: wrkb6
-    integer , pointer :: wrkb7
-    integer , pointer :: wrkb8
-    integer , pointer :: wrkb9
-    integer , pointer :: wrkb10
-    integer , pointer :: wrkb11
-    integer , pointer :: wrkb12
-    integer , pointer :: wrkb13
-    integer , pointer :: wrkb14
-    integer , pointer :: wrkb15
-    integer , pointer :: wrkb16
-    integer , pointer :: wrkb17
-    integer , pointer :: wrkb18
-    integer , pointer :: wrkc1
-    integer , pointer :: wrkc2
-    integer , pointer :: wrkc3
-    integer , pointer :: wrkc4
-    integer , pointer :: zwork
+    integer(kind=pntrsize), pointer :: aks
+    integer(kind=pntrsize), pointer :: alfas
+    integer(kind=pntrsize), pointer :: alpha
+    integer(kind=pntrsize), pointer :: ampbc
+    integer(kind=pntrsize), pointer :: areau
+    integer(kind=pntrsize), pointer :: areav
+    integer(kind=pntrsize), pointer :: atr
+    integer(kind=pntrsize), pointer :: bruvai
+    integer(kind=pntrsize), pointer :: c
+    integer(kind=pntrsize), pointer :: cbuv
+    integer(kind=pntrsize), pointer :: cbuvrt
+    integer(kind=pntrsize), pointer :: cdwlsu
+    integer(kind=pntrsize), pointer :: cdwlsv
+    integer(kind=pntrsize), pointer :: cdwzbu
+    integer(kind=pntrsize), pointer :: cdwzbv
+    integer(kind=pntrsize), pointer :: cdwztu
+    integer(kind=pntrsize), pointer :: cdwztv
+    integer(kind=pntrsize), pointer :: cfurou
+    integer(kind=pntrsize), pointer :: cfvrou
+    integer(kind=pntrsize), pointer :: cgc
+    integer(kind=pntrsize), pointer :: cgdghf
+    integer(kind=pntrsize), pointer :: cgdghl
+    integer(kind=pntrsize), pointer :: cvalu0
+    integer(kind=pntrsize), pointer :: cvalv0
+    integer(kind=pntrsize), pointer :: circ2d
+    integer(kind=pntrsize), pointer :: circ3d
+    integer(kind=pntrsize), pointer :: crbc
+    integer(kind=pntrsize), pointer :: ctbf
+    integer(kind=pntrsize), pointer :: ctbl
+    integer(kind=pntrsize), pointer :: ctif
+    integer(kind=pntrsize), pointer :: ctil
+    integer(kind=pntrsize), pointer :: ctr
+    integer(kind=pntrsize), pointer :: ctrf
+    integer(kind=pntrsize), pointer :: ctrl
+    integer(kind=pntrsize), pointer :: czusus
+    integer(kind=pntrsize), pointer :: czvsus
+    integer(kind=pntrsize), pointer :: dddeta
+    integer(kind=pntrsize), pointer :: dddksi
+    integer(kind=pntrsize), pointer :: disch0
+    integer(kind=pntrsize), pointer :: disch1
+    integer(kind=pntrsize), pointer :: decay
+    integer(kind=pntrsize), pointer :: deltau
+    integer(kind=pntrsize), pointer :: deltav
+    integer(kind=pntrsize), pointer :: depchg
+    integer(kind=pntrsize), pointer :: dfu
+    integer(kind=pntrsize), pointer :: dfv
+    integer(kind=pntrsize), pointer :: diapl
+    integer(kind=pntrsize), pointer :: dicuv
+    integer(kind=pntrsize), pointer :: dicww
+    integer(kind=pntrsize), pointer :: dircom
+    integer(kind=pntrsize), pointer :: dircos
+    integer(kind=pntrsize), pointer :: dirsin
+    integer(kind=pntrsize), pointer :: dis
+    integer(kind=pntrsize), pointer :: df
+    integer(kind=pntrsize), pointer :: disch
+    integer(kind=pntrsize), pointer :: discom
+    integer(kind=pntrsize), pointer :: discum
+    integer(kind=pntrsize), pointer :: disinp
+    integer(kind=pntrsize), pointer :: disnf
+    integer(kind=pntrsize), pointer :: dldeta
+    integer(kind=pntrsize), pointer :: dldksi
+    integer(kind=pntrsize), pointer :: dp
+    integer(kind=pntrsize), pointer :: dpc
+    integer(kind=pntrsize), pointer :: dpdeta
+    integer(kind=pntrsize), pointer :: dpdksi
+    integer(kind=pntrsize), pointer :: dps
+    integer(kind=pntrsize), pointer :: dpsed
+    integer(kind=pntrsize), pointer :: dpu
+    integer(kind=pntrsize), pointer :: dpv
+    integer(kind=pntrsize), pointer :: drodep
+    integer(kind=pntrsize), pointer :: rint0
+    integer(kind=pntrsize), pointer :: rint1
+    integer(kind=pntrsize), pointer :: dsdeta
+    integer(kind=pntrsize), pointer :: dsdksi
+    integer(kind=pntrsize), pointer :: dss
+    integer(kind=pntrsize), pointer :: dtdeta
+    integer(kind=pntrsize), pointer :: dtdksi
+    integer(kind=pntrsize), pointer :: dteu
+    integer(kind=pntrsize), pointer :: dtev
+    integer(kind=pntrsize), pointer :: dtr
+    integer(kind=pntrsize), pointer :: dudz
+    integer(kind=pntrsize), pointer :: umdis0
+    integer(kind=pntrsize), pointer :: umdis1
+    integer(kind=pntrsize), pointer :: dvdz
+    integer(kind=pntrsize), pointer :: vmdis0
+    integer(kind=pntrsize), pointer :: vmdis1
+    integer(kind=pntrsize), pointer :: dxydro
+    integer(kind=pntrsize), pointer :: dzdeta
+    integer(kind=pntrsize), pointer :: dzdksi
+    integer(kind=pntrsize), pointer :: encgf
+    integer(kind=pntrsize), pointer :: encgl
+    integer(kind=pntrsize), pointer :: enstro
+    integer(kind=pntrsize), pointer :: entr
+    integer(kind=pntrsize), pointer :: epscur
+    integer(kind=pntrsize), pointer :: epswav
+    integer(kind=pntrsize), pointer :: eroll0
+    integer(kind=pntrsize), pointer :: eroll1
+    integer(kind=pntrsize), pointer :: evap
+    integer(kind=pntrsize), pointer :: ewabr0
+    integer(kind=pntrsize), pointer :: ewabr1
+    integer(kind=pntrsize), pointer :: ewave0
+    integer(kind=pntrsize), pointer :: ewave1
+    integer(kind=pntrsize), pointer :: excbed
+    integer(kind=pntrsize), pointer :: facdss
+    integer(kind=pntrsize), pointer :: fcorio
+    integer(kind=pntrsize), pointer :: fltr
+    integer(kind=pntrsize), pointer :: fuiwe
+    integer(kind=pntrsize), pointer :: fviwe
+    integer(kind=pntrsize), pointer :: fxw
+    integer(kind=pntrsize), pointer :: fyw
+    integer(kind=pntrsize), pointer :: grmasu
+    integer(kind=pntrsize), pointer :: grmasv
+    integer(kind=pntrsize), pointer :: grmsur
+    integer(kind=pntrsize), pointer :: grmsvr
+    integer(kind=pntrsize), pointer :: grfacu
+    integer(kind=pntrsize), pointer :: grfacv
+    integer(kind=pntrsize), pointer :: gro
+    integer(kind=pntrsize), pointer :: gsqd
+    integer(kind=pntrsize), pointer :: gsqs
+    integer(kind=pntrsize), pointer :: guu
+    integer(kind=pntrsize), pointer :: guv
+    integer(kind=pntrsize), pointer :: gvu
+    integer(kind=pntrsize), pointer :: gvv
+    integer(kind=pntrsize), pointer :: hkru
+    integer(kind=pntrsize), pointer :: hkrv
+    integer(kind=pntrsize), pointer :: hrmcom
+    integer(kind=pntrsize), pointer :: hrms
+    integer(kind=pntrsize), pointer :: hu
+    integer(kind=pntrsize), pointer :: hu0
+    integer(kind=pntrsize), pointer :: huvw
+    integer(kind=pntrsize), pointer :: hv
+    integer(kind=pntrsize), pointer :: hv0
+    integer(kind=pntrsize), pointer :: hydrbc
+    integer(kind=pntrsize), pointer :: msucom
+    integer(kind=pntrsize), pointer :: msvcom
+    integer(kind=pntrsize), pointer :: ombc
+    integer(kind=pntrsize), pointer :: omega
+    integer(kind=pntrsize), pointer :: patm
+    integer(kind=pntrsize), pointer :: phibc
+    integer(kind=pntrsize), pointer :: porosu
+    integer(kind=pntrsize), pointer :: porosv
+    integer(kind=pntrsize), pointer :: procbc
+    integer(kind=pntrsize), pointer :: pship
+    integer(kind=pntrsize), pointer :: qtfrac
+    integer(kind=pntrsize), pointer :: qtfrct
+    integer(kind=pntrsize), pointer :: qtfrt2
+    integer(kind=pntrsize), pointer :: qu
+    integer(kind=pntrsize), pointer :: qv
+    integer(kind=pntrsize), pointer :: qxk
+    integer(kind=pntrsize), pointer :: qxkr
+    integer(kind=pntrsize), pointer :: qxkw
+    integer(kind=pntrsize), pointer :: qyk
+    integer(kind=pntrsize), pointer :: qykr
+    integer(kind=pntrsize), pointer :: qykw
+    integer(kind=pntrsize), pointer :: qzk
+    integer(kind=pntrsize), pointer :: r0
+    integer(kind=pntrsize), pointer :: r1
+    integer(kind=pntrsize), pointer :: rbnd
+    integer(kind=pntrsize), pointer :: rbuff
+    integer(kind=pntrsize), pointer :: rca
+    integer(kind=pntrsize), pointer :: rettim
+    integer(kind=pntrsize), pointer :: rho
+    integer(kind=pntrsize), pointer :: rhowat
+    integer(kind=pntrsize), pointer :: rich
+    integer(kind=pntrsize), pointer :: rint
+    integer(kind=pntrsize), pointer :: rlabda
+    integer(kind=pntrsize), pointer :: rmneg
+    integer(kind=pntrsize), pointer :: rnpl
+    integer(kind=pntrsize), pointer :: rob
+    integer(kind=pntrsize), pointer :: rsed
+    integer(kind=pntrsize), pointer :: rsedeq
+    integer(kind=pntrsize), pointer :: rthbnd
+    integer(kind=pntrsize), pointer :: rtu2d0
+    integer(kind=pntrsize), pointer :: rtu2d1
+    integer(kind=pntrsize), pointer :: rtubnd
+    integer(kind=pntrsize), pointer :: rtur0
+    integer(kind=pntrsize), pointer :: rtur1
+    integer(kind=pntrsize), pointer :: rxx
+    integer(kind=pntrsize), pointer :: rxy
+    integer(kind=pntrsize), pointer :: ryy
+    integer(kind=pntrsize), pointer :: rxz
+    integer(kind=pntrsize), pointer :: ryz
+    integer(kind=pntrsize), pointer :: s0
+    integer(kind=pntrsize), pointer :: s1
+    integer(kind=pntrsize), pointer :: sbtr
+    integer(kind=pntrsize), pointer :: sbtrc
+    integer(kind=pntrsize), pointer :: sbuu
+    integer(kind=pntrsize), pointer :: sbvv
+    integer(kind=pntrsize), pointer :: seddif
+    integer(kind=pntrsize), pointer :: sepsus
+    integer(kind=pntrsize), pointer :: sig
+    integer(kind=pntrsize), pointer :: sigdif
+    integer(kind=pntrsize), pointer :: sigmol
+    integer(kind=pntrsize), pointer :: sink
+    integer(kind=pntrsize), pointer :: sinkr
+    integer(kind=pntrsize), pointer :: sinkw
+    integer(kind=pntrsize), pointer :: soumud
+    integer(kind=pntrsize), pointer :: sour
+    integer(kind=pntrsize), pointer :: sournf
+    integer(kind=pntrsize), pointer :: sourr
+    integer(kind=pntrsize), pointer :: sourw
+    integer(kind=pntrsize), pointer :: sstr
+    integer(kind=pntrsize), pointer :: sstrc
+    integer(kind=pntrsize), pointer :: ssuu
+    integer(kind=pntrsize), pointer :: ssvv
+    integer(kind=pntrsize), pointer :: stbf
+    integer(kind=pntrsize), pointer :: stbl
+    integer(kind=pntrsize), pointer :: stif
+    integer(kind=pntrsize), pointer :: stil
+    integer(kind=pntrsize), pointer :: sumrho
+    integer(kind=pntrsize), pointer :: taubmx
+    integer(kind=pntrsize), pointer :: taubpu
+    integer(kind=pntrsize), pointer :: taubpv
+    integer(kind=pntrsize), pointer :: taubsu
+    integer(kind=pntrsize), pointer :: taubsv
+    integer(kind=pntrsize), pointer :: teta
+    integer(kind=pntrsize), pointer :: tgarkt
+    integer(kind=pntrsize), pointer :: tgarkx
+    integer(kind=pntrsize), pointer :: tgarnp
+    integer(kind=pntrsize), pointer :: thetbc
+    integer(kind=pntrsize), pointer :: thick
+    integer(kind=pntrsize), pointer :: thtim
+    integer(kind=pntrsize), pointer :: tkedis
+    integer(kind=pntrsize), pointer :: tkepro
+    integer(kind=pntrsize), pointer :: tp
+    integer(kind=pntrsize), pointer :: tpcom
+    integer(kind=pntrsize), pointer :: tps
+    integer(kind=pntrsize), pointer :: tpscom
+    integer(kind=pntrsize), pointer :: u0
+    integer(kind=pntrsize), pointer :: u1
+    integer(kind=pntrsize), pointer :: ubrlsu
+    integer(kind=pntrsize), pointer :: ubrlsv
+    integer(kind=pntrsize), pointer :: umdis
+    integer(kind=pntrsize), pointer :: umean
+    integer(kind=pntrsize), pointer :: umeanf
+    integer(kind=pntrsize), pointer :: umeanl
+    integer(kind=pntrsize), pointer :: umnflc
+    integer(kind=pntrsize), pointer :: umnldf
+    integer(kind=pntrsize), pointer :: uorb
+    integer(kind=pntrsize), pointer :: ubot
+    integer(kind=pntrsize), pointer :: ubcom
+    integer(kind=pntrsize), pointer :: usus
+    integer(kind=pntrsize), pointer :: uvdist
+    integer(kind=pntrsize), pointer :: uwtypu
+    integer(kind=pntrsize), pointer :: uwtypv
+    integer(kind=pntrsize), pointer :: v0
+    integer(kind=pntrsize), pointer :: v1
+    integer(kind=pntrsize), pointer :: vicuv
+    integer(kind=pntrsize), pointer :: vicww
+    integer(kind=pntrsize), pointer :: vmdis
+    integer(kind=pntrsize), pointer :: vmean
+    integer(kind=pntrsize), pointer :: vmnflc
+    integer(kind=pntrsize), pointer :: vmnldf
+    integer(kind=pntrsize), pointer :: vnu2d
+    integer(kind=pntrsize), pointer :: vnu3d
+    integer(kind=pntrsize), pointer :: voldis
+    integer(kind=pntrsize), pointer :: volum0
+    integer(kind=pntrsize), pointer :: volum1
+    integer(kind=pntrsize), pointer :: vortic
+    integer(kind=pntrsize), pointer :: vsus
+    integer(kind=pntrsize), pointer :: w1
+    integer(kind=pntrsize), pointer :: w10mag
+    integer(kind=pntrsize), pointer :: wenf
+    integer(kind=pntrsize), pointer :: wenfm
+    integer(kind=pntrsize), pointer :: wenl
+    integer(kind=pntrsize), pointer :: wenlm
+    integer(kind=pntrsize), pointer :: windsu
+    integer(kind=pntrsize), pointer :: windsv
+    integer(kind=pntrsize), pointer :: windu
+    integer(kind=pntrsize), pointer :: windv
+    integer(kind=pntrsize), pointer :: wlen
+    integer(kind=pntrsize), pointer :: wlcom
+    integer(kind=pntrsize), pointer :: wphy
+    integer(kind=pntrsize), pointer :: ws
+    integer(kind=pntrsize), pointer :: wssus
+    integer(kind=pntrsize), pointer :: wstau
+    integer(kind=pntrsize), pointer :: wsu
+    integer(kind=pntrsize), pointer :: wsucom
+    integer(kind=pntrsize), pointer :: wsv
+    integer(kind=pntrsize), pointer :: wsvcom
+    integer(kind=pntrsize), pointer :: x2y
+    integer(kind=pntrsize), pointer :: x3
+    integer(kind=pntrsize), pointer :: xcor
+    integer(kind=pntrsize), pointer :: xy2
+    integer(kind=pntrsize), pointer :: xydro
+    integer(kind=pntrsize), pointer :: xyzsrc
+    integer(kind=pntrsize), pointer :: xz
+    integer(kind=pntrsize), pointer :: y3
+    integer(kind=pntrsize), pointer :: ycor
+    integer(kind=pntrsize), pointer :: yz
+    integer(kind=pntrsize), pointer :: z0ucur
+    integer(kind=pntrsize), pointer :: z0vcur
+    integer(kind=pntrsize), pointer :: z0urou
+    integer(kind=pntrsize), pointer :: z0vrou
+    integer(kind=pntrsize), pointer :: zalfas
+    integer(kind=pntrsize), pointer :: zbdsed
+    integer(kind=pntrsize), pointer :: zbmnf
+    integer(kind=pntrsize), pointer :: zbmnl
+    integer(kind=pntrsize), pointer :: zcuru
+    integer(kind=pntrsize), pointer :: zcurv
+    integer(kind=pntrsize), pointer :: zcurw
+    integer(kind=pntrsize), pointer :: zdicww
+    integer(kind=pntrsize), pointer :: zdist
+    integer(kind=pntrsize), pointer :: zdps
+    integer(kind=pntrsize), pointer :: zdpsed
+    integer(kind=pntrsize), pointer :: zenst
+    integer(kind=pntrsize), pointer :: zetabf
+    integer(kind=pntrsize), pointer :: zetabl
+    integer(kind=pntrsize), pointer :: zetaif
+    integer(kind=pntrsize), pointer :: zetail
+    integer(kind=pntrsize), pointer :: zmeanf
+    integer(kind=pntrsize), pointer :: zmeanl
+    integer(kind=pntrsize), pointer :: zqxk
+    integer(kind=pntrsize), pointer :: zqyk
+    integer(kind=pntrsize), pointer :: zrca
+    integer(kind=pntrsize), pointer :: zrho
+    integer(kind=pntrsize), pointer :: zrich
+    integer(kind=pntrsize), pointer :: zrsdeq
+    integer(kind=pntrsize), pointer :: zsbu
+    integer(kind=pntrsize), pointer :: zsbv
+    integer(kind=pntrsize), pointer :: zssu
+    integer(kind=pntrsize), pointer :: zssv
+    integer(kind=pntrsize), pointer :: zstep
+    integer(kind=pntrsize), pointer :: ztauet
+    integer(kind=pntrsize), pointer :: ztauks
+    integer(kind=pntrsize), pointer :: ztur
+    integer(kind=pntrsize), pointer :: zvicww
+    integer(kind=pntrsize), pointer :: zvort
+    integer(kind=pntrsize), pointer :: zwl
+    integer(kind=pntrsize), pointer :: zws
+    integer(kind=pntrsize), pointer :: drhodx
+    integer(kind=pntrsize), pointer :: drhody
+    integer(kind=pntrsize), pointer :: dzs0
+    integer(kind=pntrsize), pointer :: dzs1
+    integer(kind=pntrsize), pointer :: dzu0
+    integer(kind=pntrsize), pointer :: dzu1
+    integer(kind=pntrsize), pointer :: dzv0
+    integer(kind=pntrsize), pointer :: dzv1
+    integer(kind=pntrsize), pointer :: res
+    integer(kind=pntrsize), pointer :: rl
+    integer(kind=pntrsize), pointer :: rj
+    integer(kind=pntrsize), pointer :: p1
+    integer(kind=pntrsize), pointer :: p0
+    integer(kind=pntrsize), pointer :: p00
+    integer(kind=pntrsize), pointer :: pnhcor
+    integer(kind=pntrsize), pointer :: w0
+    integer(kind=pntrsize), pointer :: s00
+    integer(kind=pntrsize), pointer :: hydprs
+    integer(kind=pntrsize), pointer :: guz
+    integer(kind=pntrsize), pointer :: gvz
+    integer(kind=pntrsize), pointer :: gud
+    integer(kind=pntrsize), pointer :: gvd
+    integer(kind=pntrsize), pointer :: gsqiu
+    integer(kind=pntrsize), pointer :: gsqiv
+    integer(kind=pntrsize), pointer :: ibuff
+    integer(kind=pntrsize), pointer :: idifu
+    integer(kind=pntrsize), pointer :: irocol
+    integer(kind=pntrsize), pointer :: iroll
+    integer(kind=pntrsize), pointer :: itbcc
+    integer(kind=pntrsize), pointer :: itbct
+    integer(kind=pntrsize), pointer :: itdis
+    integer(kind=pntrsize), pointer :: itdro
+    integer(kind=pntrsize), pointer :: kadu
+    integer(kind=pntrsize), pointer :: kadv
+    integer(kind=pntrsize), pointer :: kcs
+    integer(kind=pntrsize), pointer :: kcs_nf
+    integer(kind=pntrsize), pointer :: kcu
+    integer(kind=pntrsize), pointer :: kcv
+    integer(kind=pntrsize), pointer :: kfs
+    integer(kind=pntrsize), pointer :: kfsed
+    integer(kind=pntrsize), pointer :: kfu
+    integer(kind=pntrsize), pointer :: kfv
+    integer(kind=pntrsize), pointer :: kspu
+    integer(kind=pntrsize), pointer :: kspv
+    integer(kind=pntrsize), pointer :: kstp
+    integer(kind=pntrsize), pointer :: kzs
+    integer(kind=pntrsize), pointer :: kzu
+    integer(kind=pntrsize), pointer :: kzv
+    integer(kind=pntrsize), pointer :: kmxsed
+    integer(kind=pntrsize), pointer :: mnbar
+    integer(kind=pntrsize), pointer :: mnbnd
+    integer(kind=pntrsize), pointer :: mndro
+    integer(kind=pntrsize), pointer :: mnksrc
+    integer(kind=pntrsize), pointer :: nob
+    integer(kind=pntrsize), pointer :: kcshyd
+    integer(kind=pntrsize), pointer :: kfumin
+    integer(kind=pntrsize), pointer :: kfvmin
+    integer(kind=pntrsize), pointer :: kfsmin
+    integer(kind=pntrsize), pointer :: kfumax
+    integer(kind=pntrsize), pointer :: kfvmax
+    integer(kind=pntrsize), pointer :: kfsmax
+    integer(kind=pntrsize), pointer :: kfumx0
+    integer(kind=pntrsize), pointer :: kfvmx0
+    integer(kind=pntrsize), pointer :: kfsmx0
+    integer(kind=pntrsize), pointer :: kfsz1
+    integer(kind=pntrsize), pointer :: kfuz1
+    integer(kind=pntrsize), pointer :: kfvz1
+    integer(kind=pntrsize), pointer :: izmodl
+    integer(kind=pntrsize), pointer :: kcscut
+    integer(kind=pntrsize), pointer :: kcu45
+    integer(kind=pntrsize), pointer :: kcv45
+    integer(kind=pntrsize), pointer :: disint
+    integer(kind=pntrsize), pointer :: dismmt
+    integer(kind=pntrsize), pointer :: nambar
+    integer(kind=pntrsize), pointer :: nambnd
+    integer(kind=pntrsize), pointer :: namcon
+    integer(kind=pntrsize), pointer :: namdro
+    integer(kind=pntrsize), pointer :: namsrc
+    integer(kind=pntrsize), pointer :: tprofc
+    integer(kind=pntrsize), pointer :: tprofu
+    integer(kind=pntrsize), pointer :: typbnd
+    integer(kind=pntrsize), pointer :: zkfs
+    integer(kind=pntrsize), pointer :: iwrk1
+    integer(kind=pntrsize), pointer :: iwrk2
+    integer(kind=pntrsize), pointer :: iwrk3
+    integer(kind=pntrsize), pointer :: wrka1
+    integer(kind=pntrsize), pointer :: wrka2
+    integer(kind=pntrsize), pointer :: wrka3
+    integer(kind=pntrsize), pointer :: wrka4
+    integer(kind=pntrsize), pointer :: wrka5
+    integer(kind=pntrsize), pointer :: wrka6
+    integer(kind=pntrsize), pointer :: wrka7
+    integer(kind=pntrsize), pointer :: wrka8
+    integer(kind=pntrsize), pointer :: wrka9
+    integer(kind=pntrsize), pointer :: wrka12
+    integer(kind=pntrsize), pointer :: wrka13
+    integer(kind=pntrsize), pointer :: wrka14
+    integer(kind=pntrsize), pointer :: wrka15
+    integer(kind=pntrsize), pointer :: wrka16
+    integer(kind=pntrsize), pointer :: wrkb1
+    integer(kind=pntrsize), pointer :: wrkb2
+    integer(kind=pntrsize), pointer :: wrkb3
+    integer(kind=pntrsize), pointer :: wrkb4
+    integer(kind=pntrsize), pointer :: wrkb5
+    integer(kind=pntrsize), pointer :: wrkb6
+    integer(kind=pntrsize), pointer :: wrkb7
+    integer(kind=pntrsize), pointer :: wrkb8
+    integer(kind=pntrsize), pointer :: wrkb9
+    integer(kind=pntrsize), pointer :: wrkb10
+    integer(kind=pntrsize), pointer :: wrkb11
+    integer(kind=pntrsize), pointer :: wrkb12
+    integer(kind=pntrsize), pointer :: wrkb13
+    integer(kind=pntrsize), pointer :: wrkb14
+    integer(kind=pntrsize), pointer :: wrkb15
+    integer(kind=pntrsize), pointer :: wrkb16
+    integer(kind=pntrsize), pointer :: wrkb17
+    integer(kind=pntrsize), pointer :: wrkb18
+    integer(kind=pntrsize), pointer :: wrkc1
+    integer(kind=pntrsize), pointer :: wrkc2
+    integer(kind=pntrsize), pointer :: wrkc3
+    integer(kind=pntrsize), pointer :: wrkc4
+    integer(kind=pntrsize), pointer :: zwork
     integer , pointer :: lmax
     integer , pointer :: kc
     integer , pointer :: ndro
@@ -514,10 +514,10 @@ subroutine gtptrs(gdp)
 !
 ! Local variables
 !
-    integer, external :: gtcpnt
-    integer, external :: gtipnt
-    integer, external :: gtrpnt
-    integer, external :: gtdpnt
+    integer(kind=pntrsize), external :: gtcpnt
+    integer(kind=pntrsize), external :: gtipnt
+    integer(kind=pntrsize), external :: gtrpnt
+    integer(kind=pntrsize), external :: gtdpnt
 !
 !! executable statements -------------------------------------------------------
 !
@@ -1039,7 +1039,7 @@ subroutine gtptrs(gdp)
     mndro  = gtipnt('mndro' , gdp)
     mnksrc = gtipnt('MNKSRC', gdp)
     nob    = gtipnt('NOB'   , gdp)
-    zkfs   = gtipnt('zkfs'  , gdp)    
+    zkfs   = gtipnt('zkfs'  , gdp)
 !
 ! REAL POOL ARRAY
 !
@@ -1095,12 +1095,12 @@ subroutine gtptrs(gdp)
     dircos = gtrpnt('dircos', gdp)
     dirsin = gtrpnt('dirsin', gdp)
     dis    = gtrpnt('dis'   , gdp)
-    df     = gtrpnt('df'    , gdp)    
+    df     = gtrpnt('df'    , gdp)
     disch  = gtrpnt('disch' , gdp)
     discom = gtrpnt('discom', gdp)
     discum = gtrpnt('discum', gdp)
     disinp = gtrpnt('disinp', gdp)
-    disnf  = gtrpnt('disnf' , gdp)    
+    disnf  = gtrpnt('disnf' , gdp)
     dldeta = gtrpnt('dldeta', gdp)
     dldksi = gtrpnt('dldksi', gdp)
     dp     = gtrpnt('dp'    , gdp)

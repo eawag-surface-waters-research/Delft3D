@@ -94,5 +94,11 @@ integer, parameter :: prec=hp
 ! old hp's in sobek that should stay sp
 !
 integer, parameter :: fhp=sp 
+!
+! length of integers which are esm/fsm pointers
+! = 4 for 32bit versions
+! = 8 for 64bit versions
+!
+integer, parameter :: pntrsize=4
 
 end module precision

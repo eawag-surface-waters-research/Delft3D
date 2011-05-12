@@ -31,6 +31,10 @@ FMODULES += \
 	-I$(top_srcdir)/utils_lgpl/ec_module/packages/ec_module/src \
 	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/io_dol_f/src
 
+# fpp is compiler dependent
+AM_FCFLAGS += \
+        -fpp
+
 #-------------------------------------------------------------------------------
 #Sources
 libmanager_la_SOURCES = \

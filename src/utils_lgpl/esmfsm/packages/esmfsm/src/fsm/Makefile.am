@@ -18,6 +18,9 @@ FINCLUDES += \
 	-I$(top_srcdir)/utils_lgpl/esmfsm/include \
 	-I$(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm/include
 
+FMODULES += \
+	-I$(top_srcdir)/utils_lgpl/precision/packages/precision/src
+
 #-------------------------------------------------------------------------------
 #Sources
 libfsm_a_SOURCES = \

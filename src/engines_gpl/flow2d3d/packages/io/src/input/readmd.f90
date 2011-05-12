@@ -58,65 +58,65 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     !
     include 'fsm.i'
     include 'tri-dyn.igd'
-    integer                       , pointer :: alpha
-    integer                       , pointer :: cbuv
-    integer                       , pointer :: cdwlsu
-    integer                       , pointer :: cdwlsv
-    integer                       , pointer :: cdwzbu
-    integer                       , pointer :: cdwzbv
-    integer                       , pointer :: cdwztu
-    integer                       , pointer :: cdwztv
-    integer                       , pointer :: cfurou
-    integer                       , pointer :: cfvrou
-    integer                       , pointer :: decay
-    integer                       , pointer :: dicuv
-    integer                       , pointer :: dp
-    integer                       , pointer :: dpu
-    integer                       , pointer :: dpv
-    integer                       , pointer :: drodep
-    integer                       , pointer :: dxydro
-    integer                       , pointer :: facdss
-    integer                       , pointer :: fcorio
-    integer                       , pointer :: hkru
-    integer                       , pointer :: hkrv
-    integer                       , pointer :: hydrbc
-    integer                       , pointer :: kcs
-    integer                       , pointer :: omega
-    integer                       , pointer :: pship
-    integer                       , pointer :: r1
-    integer                       , pointer :: rettim
-    integer                       , pointer :: rtubnd
-    integer                       , pointer :: rtur1
-    integer                       , pointer :: s1
-    integer                       , pointer :: thick
-    integer                       , pointer :: u1
-    integer                       , pointer :: ubrlsu
-    integer                       , pointer :: ubrlsv
-    integer                       , pointer :: umnldf
-    integer                       , pointer :: uwtypu
-    integer                       , pointer :: uwtypv
-    integer                       , pointer :: v1
-    integer                       , pointer :: vicuv
-    integer                       , pointer :: vmnldf
-    integer                       , pointer :: xcor
-    integer                       , pointer :: ycor
-    integer                       , pointer :: itdro
-    integer                       , pointer :: kfu
-    integer                       , pointer :: kfv
-    integer                       , pointer :: kspu
-    integer                       , pointer :: kspv
-    integer                       , pointer :: mnbar
-    integer                       , pointer :: mnbnd
-    integer                       , pointer :: mndro
-    integer                       , pointer :: mnksrc
-    integer                       , pointer :: disint
-    integer                       , pointer :: nambar
-    integer                       , pointer :: nambnd
-    integer                       , pointer :: namcon
-    integer                       , pointer :: namdro
-    integer                       , pointer :: namsrc
-    integer                       , pointer :: tprofu
-    integer                       , pointer :: typbnd
+    integer(kind=pntrsize)        , pointer :: alpha
+    integer(kind=pntrsize)        , pointer :: cbuv
+    integer(kind=pntrsize)        , pointer :: cdwlsu
+    integer(kind=pntrsize)        , pointer :: cdwlsv
+    integer(kind=pntrsize)        , pointer :: cdwzbu
+    integer(kind=pntrsize)        , pointer :: cdwzbv
+    integer(kind=pntrsize)        , pointer :: cdwztu
+    integer(kind=pntrsize)        , pointer :: cdwztv
+    integer(kind=pntrsize)        , pointer :: cfurou
+    integer(kind=pntrsize)        , pointer :: cfvrou
+    integer(kind=pntrsize)        , pointer :: decay
+    integer(kind=pntrsize)        , pointer :: dicuv
+    integer(kind=pntrsize)        , pointer :: dp
+    integer(kind=pntrsize)        , pointer :: dpu
+    integer(kind=pntrsize)        , pointer :: dpv
+    integer(kind=pntrsize)        , pointer :: drodep
+    integer(kind=pntrsize)        , pointer :: dxydro
+    integer(kind=pntrsize)        , pointer :: facdss
+    integer(kind=pntrsize)        , pointer :: fcorio
+    integer(kind=pntrsize)        , pointer :: hkru
+    integer(kind=pntrsize)        , pointer :: hkrv
+    integer(kind=pntrsize)        , pointer :: hydrbc
+    integer(kind=pntrsize)        , pointer :: kcs
+    integer(kind=pntrsize)        , pointer :: omega
+    integer(kind=pntrsize)        , pointer :: pship
+    integer(kind=pntrsize)        , pointer :: r1
+    integer(kind=pntrsize)        , pointer :: rettim
+    integer(kind=pntrsize)        , pointer :: rtubnd
+    integer(kind=pntrsize)        , pointer :: rtur1
+    integer(kind=pntrsize)        , pointer :: s1
+    integer(kind=pntrsize)        , pointer :: thick
+    integer(kind=pntrsize)        , pointer :: u1
+    integer(kind=pntrsize)        , pointer :: ubrlsu
+    integer(kind=pntrsize)        , pointer :: ubrlsv
+    integer(kind=pntrsize)        , pointer :: umnldf
+    integer(kind=pntrsize)        , pointer :: uwtypu
+    integer(kind=pntrsize)        , pointer :: uwtypv
+    integer(kind=pntrsize)        , pointer :: v1
+    integer(kind=pntrsize)        , pointer :: vicuv
+    integer(kind=pntrsize)        , pointer :: vmnldf
+    integer(kind=pntrsize)        , pointer :: xcor
+    integer(kind=pntrsize)        , pointer :: ycor
+    integer(kind=pntrsize)        , pointer :: itdro
+    integer(kind=pntrsize)        , pointer :: kfu
+    integer(kind=pntrsize)        , pointer :: kfv
+    integer(kind=pntrsize)        , pointer :: kspu
+    integer(kind=pntrsize)        , pointer :: kspv
+    integer(kind=pntrsize)        , pointer :: mnbar
+    integer(kind=pntrsize)        , pointer :: mnbnd
+    integer(kind=pntrsize)        , pointer :: mndro
+    integer(kind=pntrsize)        , pointer :: mnksrc
+    integer(kind=pntrsize)        , pointer :: disint
+    integer(kind=pntrsize)        , pointer :: nambar
+    integer(kind=pntrsize)        , pointer :: nambnd
+    integer(kind=pntrsize)        , pointer :: namcon
+    integer(kind=pntrsize)        , pointer :: namdro
+    integer(kind=pntrsize)        , pointer :: namsrc
+    integer(kind=pntrsize)        , pointer :: tprofu
+    integer(kind=pntrsize)        , pointer :: typbnd
     integer                       , pointer :: rtcmod
     include 'pardef.igd'
     integer                       , pointer :: ncmax
@@ -305,7 +305,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
 ! Local variables
 !
     integer                               :: iofset      ! Offset to get begin pointer of array at point (1,1) instead of (1,-1)
-    integer                               :: ivapop      ! Flag specifying whether vapour pres- sure data are to be computed or specified Only for KTEMP=4 IVAPOP can be 1
+    integer                               :: ivapop      ! Flag specifying whether vapour pressure data are to be computed or specified Only for KTEMP=4 IVAPOP can be 1
     integer                               :: mxdnto      ! Array dimension for opening boundary definition arrays, which are dynamic declared (NTO in call to RDBNDD)
     integer                               :: ncpgrd      ! Actional number of computaional grid enclosure points
     integer                               :: ndry        ! Actional number of dry points sections
@@ -324,12 +324,12 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     real(fp)                              :: ccofu       ! Array containing the uniform bottom roughness coefficient in the x- dir. (value depends on ROUMET)
     real(fp)                              :: ccofv       ! Array containing the uniform bottom roughness coefficient in the y- dir. (value depends on ROUMET)
     real(fp)                              :: depuni      ! Initial depth value at depth points
-    real(fp)                              :: tinciw      ! Time in UNIT's to activate the Inter nal Wave Energy calculation
+    real(fp)                              :: tinciw      ! Time in UNIT's to activate the Internal Wave Energy calculation
     real(fp)                              :: tlfsmo      ! Timespan for smoothing (in minutes)
     real(fp)                              :: zini        ! Initial water elevation in the model
     real(fp)       , dimension(mxkmax, 5) :: wrkini      ! Work array for initial values in RDIC
     character(1)                          :: ctunit      ! Time scale for time parameters, currently set to 'M'(inute - fixed).
-    character(1)                          :: equili      ! Equilibrium or advection and diffu- sion default = no equilibrium ('N') which means LSEC = 1
+    character(1)                          :: equili      ! Equilibrium or advection and diffusion default = no equilibrium ('N') which means LSEC = 1
     character(1)                          :: sphere      ! Flag Yes / No spherical coordinates
     character(1)   , dimension(mxnpnt)    :: dirtd       ! Work array for direction of thin dam point sections in RDGRID
     character(1)   , dimension(mxnto)     :: datbnd      ! Type of open boundary: -'H'(armonic/Tide) -'T'(ime series/time dependent)

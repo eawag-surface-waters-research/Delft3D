@@ -50,6 +50,7 @@
 
 
 integer function FSMINI (contextid, flags)
+    use precision
     implicit none
     integer contextid
     integer flags
@@ -64,7 +65,8 @@ end
 !-------------------------------------------------------------------------------
 
 
-integer function MAKPTR (keyname, keytype, length)
+function MAKPTR (keyname, keytype, length)
+    use precision
     implicit none
     character   keyname*(*)
     integer keytype
@@ -85,8 +87,9 @@ integer function MAKPTR (keyname, keytype, length)
 
     integer     lkey
     character   ckey*2000
-    integer*4   ptr
-    integer     fsm_pointer_index
+    integer(kind=pntrsize)   MAKPTR
+    integer(kind=pntrsize)   ptr
+    integer(kind=pntrsize)   fsm_pointer_index
 
     !   Convert key name string to null-terminated C representation.
 
@@ -113,7 +116,8 @@ end
 
 !-------------------------------------------------------------------------------
 
-integer function GETPTR (keyname)
+function GETPTR (keyname)
+    use precision
     implicit none
     character   keyname*(*)
 
@@ -123,11 +127,12 @@ integer function GETPTR (keyname)
 
     include 'globals-fsm.i'
 
+    integer(kind=pntrsize) GETPTR
     integer     lkey
     character   ckey*2000
     integer     keytype
-    integer*4   ptr
-    integer     fsm_pointer_index
+    integer(kind=pntrsize)   ptr
+    integer(kind=pntrsize)   fsm_pointer_index
 
     !   Convert key name string to null-terminated C representation.
 
@@ -153,6 +158,7 @@ end
 !-------------------------------------------------------------------------------
 
 integer function RELPTR (keyname)
+    use precision
     implicit none
     character   keyname*(*)
 
@@ -161,8 +167,8 @@ integer function RELPTR (keyname)
     integer     lkey
     character   ckey*2000
     integer     keytype
-    integer*4   ptr
-    integer     fsm_pointer_index
+    integer(kind=pntrsize)   ptr
+    integer(kind=pntrsize)   fsm_pointer_index
 
     !   Convert key name string to null-terminated C representation.
 
@@ -188,6 +194,7 @@ end
 
 
 integer function PRTKEY ()
+    use precision
     implicit none
     include 'globals-fsm.i'
     integer status
@@ -202,6 +209,7 @@ end
 
 
 integer function FSMERR (string)
+    use precision
     implicit none
     character string*(*)
 
@@ -218,6 +226,7 @@ end
 
 
 integer function FSMTRF (filename)
+    use precision
     implicit none
     character filename*(*)
 
@@ -262,11 +271,12 @@ end
 
 
 !-------------------------------------------------------------------------------
-!   The follwing helper routines are not intended to be called
+!   The following helper routines are not intended to be called
 !   by FSM user programs.
 
 
 subroutine fsm_check_alignment
+    use precision
     implicit none
 
     !   This routine is called once at the start of a program that uses FSM
@@ -276,7 +286,7 @@ subroutine fsm_check_alignment
     include 'fsm.i'
     include 'globals-fsm.i'
 
-    integer location
+    integer(kind=pntrsize) location
 
     location = loc (ibuf (0))
     if (mod (location, alignment (ityp)) .ne. 0) then
@@ -318,10 +328,9 @@ end
 !-------------------------------------------------------------------------------
 
 
-integer function fsm_pointer_index (ptr, keytype)
+function fsm_pointer_index (ptr, keytype)
+    use precision
     implicit none
-    integer*4   ptr
-    integer keytype
 
     !   This function contains the main "gimmick" of FSM: return an
     !   index to an array in the DYNMEM common block which, when used
@@ -331,7 +340,10 @@ integer function fsm_pointer_index (ptr, keytype)
     include 'fsm.i'
     include 'globals-fsm.i'
 
-    integer*4   base
+    integer(kind=pntrsize)   ptr
+    integer keytype
+    integer(kind=pntrsize) fsm_pointer_index
+    integer(kind=pntrsize)   base
 
     !   Relate return address to an index in the appropriate array.
 
@@ -359,6 +371,7 @@ end
 
 
 subroutine alignment_error (type)
+    use precision
     implicit none
     character   type*(*)
 

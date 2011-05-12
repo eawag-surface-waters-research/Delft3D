@@ -5,7 +5,7 @@
 #
 #   There are command-line options to select Fortran compiler and debug or not.
 #
-#   ToDo:  Remove stripping of execuables when the debug flag is set.
+#   ToDo:  Remove stripping of executables when the debug flag is set.
 #   It's even debatable whether stipping belongs in the build.  I think not.
 #
 #   ToDo: Don't preintialize the compiler, the user should do this himself
@@ -16,17 +16,18 @@
 #   Irv.Elshoff@Deltares.NL
 #   9 mar 11
 #
-#   Copyright © 2010, Stichting Deltares
+#   Copyright © 2011, Stichting Deltares
 #-------------------------------------------------------------------------------
 
 
 compiler='intel11'
+platform='ia32'
 debug=0
 noMake=0
 
 
 function usage {
-    echo "Usage: `basename $0` [-intel10|-intel11|-intel12] [-debug] [-make] [-?]"
+    echo "Usage: `basename $0` [-intel10|-intel11|-intel12] [-debug] [-make] [-intel64] [-?]"
     }
 
 function log {
@@ -46,6 +47,9 @@ while [ $# -gt 0 ]; do
             ;;
         -intel12)
             compiler='intel12'
+            ;;
+        -intel64)
+            platform='intel64'
             ;;
         -d|-debug)
             debug=1
@@ -72,6 +76,20 @@ if [ "$BASH_ENV" != '' ]; then
     unset BASH_ENV
 fi
 
+# extra for linux64:
+# - work-around to omit delft_online on linux-64bit
+# - test pointersize in precision
+if test "$platform" = "intel64"
+then
+    cp engines_gpl/flow2d3d/packages/flow2d3d/src/Makefile64bit.am engines_gpl/flow2d3d/packages/flow2d3d/src/Makefile.am
+    cp engines_gpl/flow2d3d/packages/data/src/parallel_mpi/Makefile64bit.am engines_gpl/flow2d3d/packages/data/src/parallel_mpi/Makefile.am 
+    chk8bit=`grep '^integer.*pntrsize.*8' utils_lgpl/precision/packages/precision/src/precision.f90`
+    if test -z "$chk8bit"
+    then
+        echo "Error: pntrsize in precision <> 8"
+        exit 1
+    fi
+fi
 
 #-----  Initialize Fortran compiler
 
@@ -82,19 +100,19 @@ fi
 
 case $compiler in
     intel12)
-        ifortInit='. /opt/intel/bin/ifortvars.sh ia32'
+        ifortInit=". /opt/intel/bin/ifortvars.sh $platform"
         #idbInit='. /opt/intel/bin/idbvars.sh'
-        echo "Using Intel 12 Fortran compiler"
+        echo "Using Intel 12 Fortran ($platform) compiler"
         ;;
     intel11)
         if [ -d /opt/intel/Compiler/11.1/072 ]; then
-            ifortInit='. /opt/intel/Compiler/11.1/072/bin/ifortvars.sh ia32'
-            idbInit='. /opt/intel/Compiler/11.1/072/bin/ia32/idbvars.sh'
-            echo "Using Intel 11.1 Fortran compiler"
+            ifortInit=". /opt/intel/Compiler/11.1/072/bin/ifortvars.sh $platform"
+            idbInit=". /opt/intel/Compiler/11.1/072/bin/$platform/idbvars.sh"
+            echo "Using Intel 11.1 Fortran ($platform) compiler"
         elif [ -d /opt/intel/Compiler/11.0/081 ]; then
-            ifortInit='. /opt/intel/Compiler/11.0/081/bin/ifortvars.sh ia32'
-            idbInit='. /opt/intel/Compiler/11.0/081/bin/ia32/idbvars.sh'
-            echo "Using Intel 11.0 Fortran compiler"
+            ifortInit=". /opt/intel/Compiler/11.0/081/bin/ifortvars.sh $platform"
+            idbInit=". /opt/intel/Compiler/11.0/081/bin/$platform/idbvars.sh"
+            echo "Using Intel 11.0 Fortran ($platform) compiler"
         fi
         ;;
     intel10)
@@ -152,13 +170,24 @@ else
     flags='-O2'
 fi
 
-command=" \
-    CFLAGS='$flags $CFLAGS' \
-    CXXFLAGS='$flags $CXXFLAGS' \
-    FFLAGS='$flags $FFLAGS' \
-    FCFLAGS='$flags $FCFLAGS' \
-    ./configure --prefix=`pwd` &> $log \
-    "
+if test "$platform" = "intel64"
+then
+   command=" \
+       CFLAGS='$flags -fPIC -m64 $CFLAGS' \
+       CXXFLAGS='$flags -fPIC -m64 $CXXFLAGS' \
+       FFLAGS='$flags -fPIC -m64 $FFLAGS' \
+       FCFLAGS='$flags -fPIC -m64 $FCFLAGS' \
+       ./configure --prefix=`pwd` &> $log \
+       "
+else
+   command=" \
+       CFLAGS='$flags $CFLAGS' \
+       CXXFLAGS='$flags $CXXFLAGS' \
+       FFLAGS='$flags -DWITH_DELFTONLINE $FFLAGS' \
+       FCFLAGS='$flags $FCFLAGS' \
+       ./configure --prefix=`pwd` &> $log \
+       "
+fi
 
 log "Running `echo $command | sed 's/ +/ /g'`"
 eval $command

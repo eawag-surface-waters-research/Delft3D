@@ -51,14 +51,14 @@ subroutine wrsedmgrp(lundia    ,error     ,trifil    ,itmapc    ,mmax      , &
     !
     include 'fsm.i'
     include 'tri-dyn.igd'
-    integer                              , pointer :: sbuu
-    integer                              , pointer :: sbvv
-    integer                              , pointer :: ssuu
-    integer                              , pointer :: ssvv
-    integer                              , pointer :: ws
-    integer                              , pointer :: rsedeq
-    integer                              , pointer :: dps
-    integer                              , pointer :: rca
+    integer(kind=pntrsize)               , pointer :: sbuu
+    integer(kind=pntrsize)               , pointer :: sbvv
+    integer(kind=pntrsize)               , pointer :: ssuu
+    integer(kind=pntrsize)               , pointer :: ssvv
+    integer(kind=pntrsize)               , pointer :: ws
+    integer(kind=pntrsize)               , pointer :: rsedeq
+    integer(kind=pntrsize)               , pointer :: dps
+    integer(kind=pntrsize)               , pointer :: rca
     logical                              , pointer :: lfbedfrmout
     logical                              , pointer :: first
     integer                              , pointer :: celidt

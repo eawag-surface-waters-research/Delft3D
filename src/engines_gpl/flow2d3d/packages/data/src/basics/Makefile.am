@@ -6,7 +6,7 @@
 #   Fedor.Baart@wldelft.nl
 #   11 jan 2007
 #
-#   Copyright (C) 2007, WL | Delft Hydraulics
+#   Copyright (C) 2011, Deltares
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am

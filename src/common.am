@@ -16,15 +16,13 @@ AM_CFLAGS = \
 	-std=c99 \
 	-D_GNU_SOURCE \
 	-O2 \
-	-DSTR_LEN_AT_END \
-        -DWITH_DELFTONLINE
+	-DSTR_LEN_AT_END
 
 AM_CXXFLAGS = \
 	-std=c++98 \
 	-D_GNU_SOURCE \
 	-O2 \
-	-DSTR_LEN_AT_END \
-        -DWITH_DELFTONLINE
+	-DSTR_LEN_AT_END
 
 
 #   Fortran 77/90 flags
@@ -89,7 +87,7 @@ FCLIBS = -L/opt/intel/Compiler/11.0/081/lib/ia32
 #
 # The MPI libraries need to be specified as well
 #
-MPILIBS = -L/opt/mpich2/lib -lmpichf90 -lmpich -lpthread
+MPILIBS = -L/opt/mpich2-1.0.8-intel64/lib -lmpichf90 -lmpich -lpthread
 
 #-------------------------------------------------------------------------------
 #   Custom make targets

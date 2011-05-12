@@ -53,59 +53,59 @@ subroutine inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
     !
     include 'fsm.i'
     include 'tri-dyn.igd'
-    integer                , pointer :: alfas
-    integer                , pointer :: c
-    integer                , pointer :: cfurou
-    integer                , pointer :: cfvrou
-    integer                , pointer :: dicuv
-    integer                , pointer :: dp
-    integer                , pointer :: fcorio
-    integer                , pointer :: gsqd
-    integer                , pointer :: gsqs
-    integer                , pointer :: guu
-    integer                , pointer :: guv
-    integer                , pointer :: gvu
-    integer                , pointer :: gvv
-    integer                , pointer :: hu
-    integer                , pointer :: pship
-    integer                , pointer :: r1
-    integer                , pointer :: rho
-    integer                , pointer :: rob
-    integer                , pointer :: rtu2d0
-    integer                , pointer :: rtur1
-    integer                , pointer :: s1
-    integer                , pointer :: sig
-    integer                , pointer :: sigdif
-    integer                , pointer :: sigmol
-    integer                , pointer :: thick
-    integer                , pointer :: vicuv
-    integer                , pointer :: ws
-    integer                , pointer :: x2y
-    integer                , pointer :: x3
-    integer                , pointer :: xcor
-    integer                , pointer :: xy2
-    integer                , pointer :: xz
-    integer                , pointer :: y3
-    integer                , pointer :: ycor
-    integer                , pointer :: yz
-    integer                , pointer :: res
-    integer                , pointer :: xj
-    integer                , pointer :: guz
-    integer                , pointer :: gvz
-    integer                , pointer :: gud
-    integer                , pointer :: gvd
-    integer                , pointer :: gsqiu
-    integer                , pointer :: gsqiv
-    integer                , pointer :: irocol
-    integer                , pointer :: kcs
-    integer                , pointer :: kcu
-    integer                , pointer :: kcv
-    integer                , pointer :: kfs
-    integer                , pointer :: kspu
-    integer                , pointer :: kspv
-    integer                , pointer :: mnbnd
-    integer                , pointer :: nob
-    integer                , pointer :: typbnd
+    integer(kind=pntrsize) , pointer :: alfas
+    integer(kind=pntrsize) , pointer :: c
+    integer(kind=pntrsize) , pointer :: cfurou
+    integer(kind=pntrsize) , pointer :: cfvrou
+    integer(kind=pntrsize) , pointer :: dicuv
+    integer(kind=pntrsize) , pointer :: dp
+    integer(kind=pntrsize) , pointer :: fcorio
+    integer(kind=pntrsize) , pointer :: gsqd
+    integer(kind=pntrsize) , pointer :: gsqs
+    integer(kind=pntrsize) , pointer :: guu
+    integer(kind=pntrsize) , pointer :: guv
+    integer(kind=pntrsize) , pointer :: gvu
+    integer(kind=pntrsize) , pointer :: gvv
+    integer(kind=pntrsize) , pointer :: hu
+    integer(kind=pntrsize) , pointer :: pship
+    integer(kind=pntrsize) , pointer :: r1
+    integer(kind=pntrsize) , pointer :: rho
+    integer(kind=pntrsize) , pointer :: rob
+    integer(kind=pntrsize) , pointer :: rtu2d0
+    integer(kind=pntrsize) , pointer :: rtur1
+    integer(kind=pntrsize) , pointer :: s1
+    integer(kind=pntrsize) , pointer :: sig
+    integer(kind=pntrsize) , pointer :: sigdif
+    integer(kind=pntrsize) , pointer :: sigmol
+    integer(kind=pntrsize) , pointer :: thick
+    integer(kind=pntrsize) , pointer :: vicuv
+    integer(kind=pntrsize) , pointer :: ws
+    integer(kind=pntrsize) , pointer :: x2y
+    integer(kind=pntrsize) , pointer :: x3
+    integer(kind=pntrsize) , pointer :: xcor
+    integer(kind=pntrsize) , pointer :: xy2
+    integer(kind=pntrsize) , pointer :: xz
+    integer(kind=pntrsize) , pointer :: y3
+    integer(kind=pntrsize) , pointer :: ycor
+    integer(kind=pntrsize) , pointer :: yz
+    integer(kind=pntrsize) , pointer :: res
+    integer(kind=pntrsize) , pointer :: xj
+    integer(kind=pntrsize) , pointer :: guz
+    integer(kind=pntrsize) , pointer :: gvz
+    integer(kind=pntrsize) , pointer :: gud
+    integer(kind=pntrsize) , pointer :: gvd
+    integer(kind=pntrsize) , pointer :: gsqiu
+    integer(kind=pntrsize) , pointer :: gsqiv
+    integer(kind=pntrsize) , pointer :: irocol
+    integer(kind=pntrsize) , pointer :: kcs
+    integer(kind=pntrsize) , pointer :: kcu
+    integer(kind=pntrsize) , pointer :: kcv
+    integer(kind=pntrsize) , pointer :: kfs
+    integer(kind=pntrsize) , pointer :: kspu
+    integer(kind=pntrsize) , pointer :: kspv
+    integer(kind=pntrsize) , pointer :: mnbnd
+    integer(kind=pntrsize) , pointer :: nob
+    integer(kind=pntrsize) , pointer :: typbnd
     integer                , pointer :: nmax
     integer                , pointer :: mmax
     integer                , pointer :: ddbound
@@ -209,10 +209,10 @@ subroutine inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
 !
     integer :: icx
     integer :: icy
-    integer :: iofset  ! Offset to get begin pointer of array at point (1,1) instead of (1,-1) 
+    integer(kind=pntrsize) :: iofset  ! Offset to get begin pointer of array at point (1,1) instead of (1,-1)
     integer :: mmaxddb
     integer :: nmaxddb
-    integer :: nmtot   ! Total number of array elements NMAX * (MMAX + 4) 
+    integer :: nmtot   ! Total number of array elements NMAX * (MMAX + 4)
 !
 !! executable statements -------------------------------------------------------
 !

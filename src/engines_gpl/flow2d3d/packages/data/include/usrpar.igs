@@ -37,7 +37,7 @@ type gd_usrpar
                                                  !  user defined input
    integer      , dimension(mxusrp)    :: nread  !  Test field to check if user defined
                                                  !  process is only once defined
-   integer      , dimension(4, mxusrp) :: nprptr
+   integer(kind=pntrsize), dimension(4, mxusrp) :: nprptr
    integer                             :: nprcus !  Actual number of user defined processes
    integer      , dimension(4, mxusrp) :: nprinp !  Nr. of input (files, real, integer and
                                                  !  and character constants) required per

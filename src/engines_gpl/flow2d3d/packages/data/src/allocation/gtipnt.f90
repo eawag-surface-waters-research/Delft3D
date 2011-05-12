@@ -53,7 +53,7 @@ function gtipnt(pntnam    ,gdp       )
 !
 ! Global variables
 !
-    integer         :: gtipnt
+    integer(kind=pntrsize) :: gtipnt
     character(*)    :: pntnam
                                    !!  Character string containing array
                                    !!  name (hence max 6 characters).

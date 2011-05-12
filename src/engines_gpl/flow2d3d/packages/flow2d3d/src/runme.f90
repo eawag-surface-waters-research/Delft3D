@@ -59,8 +59,6 @@ subroutine runme(max_keyval, keys   , values   , error_message)
 !!--declarations----------------------------------------------------------------
 implicit none
 !
-include 'fsm.i'   ! for FSM_SILENT (to start single threaded call)
-!
 ! Subroutine arguments
 !
 integer                                , intent(in)  :: max_keyval    !< Size of key-value arrays.

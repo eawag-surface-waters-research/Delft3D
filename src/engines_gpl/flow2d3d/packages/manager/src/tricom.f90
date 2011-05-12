@@ -58,12 +58,16 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
     use sync_flowcouple
     use sync_flowwave
     use timers
+#ifdef WITH_DELFTONLINE
     use D3DOnline
     use D3DPublish
+#endif
     use D3D_Sobek 
     use globaldata
     use dfparall
+#ifdef WITH_DELFTONLINE
     use d3d_olv_class
+#endif
     !
     implicit none
     !
@@ -200,135 +204,135 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
     logical                             , pointer :: xbeach
     integer                             , pointer :: numdomains
     integer                             , pointer :: nummappers
-    integer                             , pointer :: alfas
-    integer                             , pointer :: ampbc
-    integer                             , pointer :: c
-    integer                             , pointer :: cgc
-    integer                             , pointer :: ctr
-    integer                             , pointer :: dircom
-    integer                             , pointer :: dircos
-    integer                             , pointer :: dirsin
-    integer                             , pointer :: dis
-    integer                             , pointer :: disch
-    integer                             , pointer :: discom
-    integer                             , pointer :: dp
-    integer                             , pointer :: dpc
-    integer                             , pointer :: dps
-    integer                             , pointer :: dpu
-    integer                             , pointer :: dpv
-    integer                             , pointer :: ewabr0
-    integer                             , pointer :: ewabr1
-    integer                             , pointer :: ewave0
-    integer                             , pointer :: ewave1
-    integer                             , pointer :: fxw
-    integer                             , pointer :: fyw
-    integer                             , pointer :: grmasu
-    integer                             , pointer :: grmasv
-    integer                             , pointer :: gro
-    integer                             , pointer :: gsqd
-    integer                             , pointer :: gsqs
-    integer                             , pointer :: guu
-    integer                             , pointer :: guv
-    integer                             , pointer :: gvu
-    integer                             , pointer :: gvv
-    integer                             , pointer :: hkru
-    integer                             , pointer :: hkrv
-    integer                             , pointer :: hrmcom
-    integer                             , pointer :: hrms
-    integer                             , pointer :: hu
-    integer                             , pointer :: huvw
-    integer                             , pointer :: hv
-    integer                             , pointer :: msucom
-    integer                             , pointer :: msvcom
-    integer                             , pointer :: ombc
-    integer                             , pointer :: phibc
-    integer                             , pointer :: qu
-    integer                             , pointer :: qxk
-    integer                             , pointer :: qxkr
-    integer                             , pointer :: qxkw
-    integer                             , pointer :: qyk
-    integer                             , pointer :: qykr
-    integer                             , pointer :: qykw
-    integer                             , pointer :: r0
-    integer                             , pointer :: r1
-    integer                             , pointer :: rbnd
-    integer                             , pointer :: rbuff
-    integer                             , pointer :: rho
-    integer                             , pointer :: rint
-    integer                             , pointer :: rlabda
-    integer                             , pointer :: rob
-    integer                             , pointer :: rtur1
-    integer                             , pointer :: s0
-    integer                             , pointer :: s1
-    integer                             , pointer :: sbuu
-    integer                             , pointer :: sbvv
-    integer                             , pointer :: sig
-    integer                             , pointer :: ssuu
-    integer                             , pointer :: ssvv
-    integer                             , pointer :: teta
-    integer                             , pointer :: thetbc
-    integer                             , pointer :: thick
-    integer                             , pointer :: tp
-    integer                             , pointer :: tpcom
-    integer                             , pointer :: tps
-    integer                             , pointer :: tpscom
-    integer                             , pointer :: u1
-    integer                             , pointer :: umean
-    integer                             , pointer :: uorb
-    integer                             , pointer :: ubot
-    integer                             , pointer :: ubcom
-    integer                             , pointer :: uvdist
-    integer                             , pointer :: v1
-    integer                             , pointer :: vmean
-    integer                             , pointer :: voldis
-    integer                             , pointer :: volum1
-    integer                             , pointer :: wlen
-    integer                             , pointer :: wlcom
-    integer                             , pointer :: wphy
-    integer                             , pointer :: ws
-    integer                             , pointer :: wsu
-    integer                             , pointer :: wsucom
-    integer                             , pointer :: wsv
-    integer                             , pointer :: wsvcom
-    integer                             , pointer :: xcor
-    integer                             , pointer :: xz
-    integer                             , pointer :: ycor
-    integer                             , pointer :: yz
-    integer                             , pointer :: zdist
-    integer                             , pointer :: dzs1
-    integer                             , pointer :: res
-    integer                             , pointer :: rl
-    integer                             , pointer :: xj
-    integer                             , pointer :: guz
-    integer                             , pointer :: gvz
-    integer                             , pointer :: gud
-    integer                             , pointer :: gvd
-    integer                             , pointer :: gsqiu
-    integer                             , pointer :: gsqiv
-    integer                             , pointer :: ibuff
-    integer                             , pointer :: irocol
-    integer                             , pointer :: iroll
-    integer                             , pointer :: itdro
-    integer                             , pointer :: kcs
-    integer                             , pointer :: kcu
-    integer                             , pointer :: kcv
-    integer                             , pointer :: kfs
-    integer                             , pointer :: kfu
-    integer                             , pointer :: kfv
-    integer                             , pointer :: kspu
-    integer                             , pointer :: kspv
-    integer                             , pointer :: kzs
-    integer                             , pointer :: kzu
-    integer                             , pointer :: kzv
-    integer                             , pointer :: mnbnd
-    integer                             , pointer :: mnksrc
-    integer                             , pointer :: kfsmin
-    integer                             , pointer :: kfsmax
-    integer                             , pointer :: izmodl
-    integer                             , pointer :: nambar
-    integer                             , pointer :: nambnd
-    integer                             , pointer :: namcon
-    integer                             , pointer :: namsrc
+    integer(kind=pntrsize)              , pointer :: alfas
+    integer(kind=pntrsize)              , pointer :: ampbc
+    integer(kind=pntrsize)              , pointer :: c
+    integer(kind=pntrsize)              , pointer :: cgc
+    integer(kind=pntrsize)              , pointer :: ctr
+    integer(kind=pntrsize)              , pointer :: dircom
+    integer(kind=pntrsize)              , pointer :: dircos
+    integer(kind=pntrsize)              , pointer :: dirsin
+    integer(kind=pntrsize)              , pointer :: dis
+    integer(kind=pntrsize)              , pointer :: disch
+    integer(kind=pntrsize)              , pointer :: discom
+    integer(kind=pntrsize)              , pointer :: dp
+    integer(kind=pntrsize)              , pointer :: dpc
+    integer(kind=pntrsize)              , pointer :: dps
+    integer(kind=pntrsize)              , pointer :: dpu
+    integer(kind=pntrsize)              , pointer :: dpv
+    integer(kind=pntrsize)              , pointer :: ewabr0
+    integer(kind=pntrsize)              , pointer :: ewabr1
+    integer(kind=pntrsize)              , pointer :: ewave0
+    integer(kind=pntrsize)              , pointer :: ewave1
+    integer(kind=pntrsize)              , pointer :: fxw
+    integer(kind=pntrsize)              , pointer :: fyw
+    integer(kind=pntrsize)              , pointer :: grmasu
+    integer(kind=pntrsize)              , pointer :: grmasv
+    integer(kind=pntrsize)              , pointer :: gro
+    integer(kind=pntrsize)              , pointer :: gsqd
+    integer(kind=pntrsize)              , pointer :: gsqs
+    integer(kind=pntrsize)              , pointer :: guu
+    integer(kind=pntrsize)              , pointer :: guv
+    integer(kind=pntrsize)              , pointer :: gvu
+    integer(kind=pntrsize)              , pointer :: gvv
+    integer(kind=pntrsize)              , pointer :: hkru
+    integer(kind=pntrsize)              , pointer :: hkrv
+    integer(kind=pntrsize)              , pointer :: hrmcom
+    integer(kind=pntrsize)              , pointer :: hrms
+    integer(kind=pntrsize)              , pointer :: hu
+    integer(kind=pntrsize)              , pointer :: huvw
+    integer(kind=pntrsize)              , pointer :: hv
+    integer(kind=pntrsize)              , pointer :: msucom
+    integer(kind=pntrsize)              , pointer :: msvcom
+    integer(kind=pntrsize)              , pointer :: ombc
+    integer(kind=pntrsize)              , pointer :: phibc
+    integer(kind=pntrsize)              , pointer :: qu
+    integer(kind=pntrsize)              , pointer :: qxk
+    integer(kind=pntrsize)              , pointer :: qxkr
+    integer(kind=pntrsize)              , pointer :: qxkw
+    integer(kind=pntrsize)              , pointer :: qyk
+    integer(kind=pntrsize)              , pointer :: qykr
+    integer(kind=pntrsize)              , pointer :: qykw
+    integer(kind=pntrsize)              , pointer :: r0
+    integer(kind=pntrsize)              , pointer :: r1
+    integer(kind=pntrsize)              , pointer :: rbnd
+    integer(kind=pntrsize)              , pointer :: rbuff
+    integer(kind=pntrsize)              , pointer :: rho
+    integer(kind=pntrsize)              , pointer :: rint
+    integer(kind=pntrsize)              , pointer :: rlabda
+    integer(kind=pntrsize)              , pointer :: rob
+    integer(kind=pntrsize)              , pointer :: rtur1
+    integer(kind=pntrsize)              , pointer :: s0
+    integer(kind=pntrsize)              , pointer :: s1
+    integer(kind=pntrsize)              , pointer :: sbuu
+    integer(kind=pntrsize)              , pointer :: sbvv
+    integer(kind=pntrsize)              , pointer :: sig
+    integer(kind=pntrsize)              , pointer :: ssuu
+    integer(kind=pntrsize)              , pointer :: ssvv
+    integer(kind=pntrsize)              , pointer :: teta
+    integer(kind=pntrsize)              , pointer :: thetbc
+    integer(kind=pntrsize)              , pointer :: thick
+    integer(kind=pntrsize)              , pointer :: tp
+    integer(kind=pntrsize)              , pointer :: tpcom
+    integer(kind=pntrsize)              , pointer :: tps
+    integer(kind=pntrsize)              , pointer :: tpscom
+    integer(kind=pntrsize)              , pointer :: u1
+    integer(kind=pntrsize)              , pointer :: umean
+    integer(kind=pntrsize)              , pointer :: uorb
+    integer(kind=pntrsize)              , pointer :: ubot
+    integer(kind=pntrsize)              , pointer :: ubcom
+    integer(kind=pntrsize)              , pointer :: uvdist
+    integer(kind=pntrsize)              , pointer :: v1
+    integer(kind=pntrsize)              , pointer :: vmean
+    integer(kind=pntrsize)              , pointer :: voldis
+    integer(kind=pntrsize)              , pointer :: volum1
+    integer(kind=pntrsize)              , pointer :: wlen
+    integer(kind=pntrsize)              , pointer :: wlcom
+    integer(kind=pntrsize)              , pointer :: wphy
+    integer(kind=pntrsize)              , pointer :: ws
+    integer(kind=pntrsize)              , pointer :: wsu
+    integer(kind=pntrsize)              , pointer :: wsucom
+    integer(kind=pntrsize)              , pointer :: wsv
+    integer(kind=pntrsize)              , pointer :: wsvcom
+    integer(kind=pntrsize)              , pointer :: xcor
+    integer(kind=pntrsize)              , pointer :: xz
+    integer(kind=pntrsize)              , pointer :: ycor
+    integer(kind=pntrsize)              , pointer :: yz
+    integer(kind=pntrsize)              , pointer :: zdist
+    integer(kind=pntrsize)              , pointer :: dzs1
+    integer(kind=pntrsize)              , pointer :: res
+    integer(kind=pntrsize)              , pointer :: rl
+    integer(kind=pntrsize)              , pointer :: xj
+    integer(kind=pntrsize)              , pointer :: guz
+    integer(kind=pntrsize)              , pointer :: gvz
+    integer(kind=pntrsize)              , pointer :: gud
+    integer(kind=pntrsize)              , pointer :: gvd
+    integer(kind=pntrsize)              , pointer :: gsqiu
+    integer(kind=pntrsize)              , pointer :: gsqiv
+    integer(kind=pntrsize)              , pointer :: ibuff
+    integer(kind=pntrsize)              , pointer :: irocol
+    integer(kind=pntrsize)              , pointer :: iroll
+    integer(kind=pntrsize)              , pointer :: itdro
+    integer(kind=pntrsize)              , pointer :: kcs
+    integer(kind=pntrsize)              , pointer :: kcu
+    integer(kind=pntrsize)              , pointer :: kcv
+    integer(kind=pntrsize)              , pointer :: kfs
+    integer(kind=pntrsize)              , pointer :: kfu
+    integer(kind=pntrsize)              , pointer :: kfv
+    integer(kind=pntrsize)              , pointer :: kspu
+    integer(kind=pntrsize)              , pointer :: kspv
+    integer(kind=pntrsize)              , pointer :: kzs
+    integer(kind=pntrsize)              , pointer :: kzu
+    integer(kind=pntrsize)              , pointer :: kzv
+    integer(kind=pntrsize)              , pointer :: mnbnd
+    integer(kind=pntrsize)              , pointer :: mnksrc
+    integer(kind=pntrsize)              , pointer :: kfsmin
+    integer(kind=pntrsize)              , pointer :: kfsmax
+    integer(kind=pntrsize)              , pointer :: izmodl
+    integer(kind=pntrsize)              , pointer :: nambar
+    integer(kind=pntrsize)              , pointer :: nambnd
+    integer(kind=pntrsize)              , pointer :: namcon
+    integer(kind=pntrsize)              , pointer :: namsrc
     character(256)                      , pointer :: restid
     integer                             , pointer :: rtcmod
     logical                             , pointer :: rtcact
@@ -398,16 +402,16 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
     integer                                       :: iphisc        ! Current time counter for printing history data 
     integer                                       :: iplus
     integer                                       :: istat
-    integer                                       :: itcomc        ! Current time counter for the com- munication file 
-    integer                                       :: itcur         ! Current time counter for the com- munication file, where starting point depend on CYCLIC 
-    integer                                       :: itdroc        ! Current time counter for the dro- gue data file 
-    integer                                       :: ithisc        ! Current time counter for the his- tory file 
+    integer                                       :: itcomc        ! Current time counter for the communication file 
+    integer                                       :: itcur         ! Current time counter for the communication file, where starting point depend on CYCLIC 
+    integer                                       :: itdroc        ! Current time counter for the drogue data file 
+    integer                                       :: ithisc        ! Current time counter for the history file 
     integer                                       :: itimc         ! Current time step counter for 2D system 
-    integer                                       :: itiwec        ! Current time counter for the cali- bration of internal wave energy 
+    integer                                       :: itiwec        ! Current time counter for the calibration of internal wave energy 
     integer                                       :: itlent        ! Lenght of the tide cycle in steps of ITP 
     integer                                       :: itmapc        ! Current time counter for the map file 
     integer                                       :: itp           ! Timestep for computation 2D system 
-    integer                                       :: itrstc        ! Current time counter for the re- start file. Start writing after first interval is passed. Last time will always be written to file for ITRSTI > 0 
+    integer                                       :: itrstc        ! Current time counter for the restart file. Start writing after first interval is passed. Last time will always be written to file for ITRSTI > 0 
     integer                                       :: itwav         ! Current time counter for executation of a wave computation (online coupling with wave)
     integer                                       :: itrw          ! Time to read the wave information in case of online wave coupling
     integer                                       :: lunfil
@@ -430,9 +434,9 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
     integer        , dimension(2)                 :: ifcore        ! Time indices (cell id's) of the wave functions which are in core available 
     integer        , dimension(maxtim)            :: timcur        ! Array with time steps on comm. file for restart option 
     integer        , dimension(maxtim)            :: timwav        ! Array with time steps on comm. file for wave results 
-    integer                            , external :: gtcpnt
-    integer                            , external :: gtipnt
-    integer                            , external :: gtrpnt
+    integer(kind=pntrsize)             , external :: gtcpnt
+    integer(kind=pntrsize)             , external :: gtipnt
+    integer(kind=pntrsize)             , external :: gtrpnt
     logical                                       :: commrd
     logical                                       :: cyclic        ! Flag = TRUE if cyclic system assumed 
     logical                                       :: error         ! Flag=TRUE if an error is encountered 
@@ -461,7 +465,9 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
     character(60)                                 :: txtput        ! Text to be print
     character(300)                                :: message
     character(256)                                :: errstring
+#ifdef WITH_DELFTONLINE
     type(olvhandle)                               :: olv_handle
+#endif
 !
 !! executable statements -------------------------------------------------------
 !
@@ -1560,13 +1566,17 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
     !
     ! Make D3D data available to online applications
     !
+#ifdef WITH_DELFTONLINE
     olv_handle = new_olv()
     call publishGDP(olv_handle, gdp, runid, zmodel)
+#endif
     !
     ! Not multi threaded
     !
+#ifdef WITH_DELFTONLINE
     call publishUtils(olv_handle)
     call setEndTimeStep(olv_handle, itstop)
+#endif
     
     !
     ! Synchronisation point 2
@@ -1608,7 +1618,9 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
     !
     ! Simulation time loop
     !
+#ifdef WITH_DELFTONLINE
     call setRunningFlag( olv_handle, 0, itstrt)    !status is: started
+#endif
     do nst = itstrt, itstop - 1, 1
        call timer_start(timer_timeintegr, gdp)
        !
@@ -1622,11 +1634,15 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
        endif
        call vsemnefis
        call timer_stop(timer_step2screen, gdp)
+#ifdef WITH_DELFTONLINE
        call D3DOL_Timestep (nst, itstrt)
+#endif
        !
        ! Status is: simulation is running / iteration
        !
+#ifdef WITH_DELFTONLINE
        call setRunningFlag(olv_handle, 1, nst)
+#endif
        !
        ! Set timsec and current date and time.
        !
@@ -1837,8 +1853,10 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
     
     ! The sequence of the 2 next calls is important for the OLV client.
     !
+#ifdef WITH_DELFTONLINE
     call D3DOL_Timestep (itstop, itstrt)
     call setEndFlag( olv_handle, 1 ) !Tells the DOL client that the simulation has ended by passing an exception
+#endif
 
     !
     call timer_stop(timer_simulation, gdp)

@@ -47,9 +47,9 @@ subroutine dredgedump(dbodsd    ,cdryb     ,nst       ,timhr     ,morft     , &
     !
     include 'fsm.i'
     include 'tri-dyn.igd'
-    integer , pointer :: dps
-    integer , pointer :: s1
-    integer , pointer :: kfsed
+    integer(kind=pntrsize) , pointer :: dps
+    integer(kind=pntrsize) , pointer :: s1
+    integer(kind=pntrsize) , pointer :: kfsed
     integer , pointer :: nmmax
     integer , pointer :: lsedtot
 !

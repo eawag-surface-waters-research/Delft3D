@@ -216,6 +216,13 @@ subroutine rjdim(lundia, error, gdp)
        kfacdpmv = 1
     endif
     !
+    ! check 32bit/64bit:
+    ! pntrsize = 4 : 32bit
+    ! pntrsize = 8 : 64bit
+    !
+    write (message,'(a,i2,a)') 'Executable for ', 8*pntrsize, '-bits platform.'
+    call prterr(lundia, 'G051', trim(message))
+    !
     ! check precision:
     ! fp = sp : single precision
     ! fp = hp : double precision

@@ -435,6 +435,7 @@ FSM_GetPointer (
 
     // If the key exists, return its type and pointer (possibly after asking ESM for pointer)
 
+
     if ((kindex = LookupKey (FSM.Threads[thid].keytable, name)) >= 0) {
         *type = FSM.Threads[thid].keytable[kindex].type;
         if (FSM.Pointer[kindex] == NULL) {

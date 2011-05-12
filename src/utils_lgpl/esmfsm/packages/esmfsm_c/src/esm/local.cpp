@@ -1,5 +1,3 @@
-//---- LGPL --------------------------------------------------------------------
-//
 // Copyright (C)  Stichting Deltares, 2011.
 //
 // This library is free software; you can redistribute it and/or
@@ -140,6 +138,7 @@ ESM_Local_Delete (
     }
 
 
+#include <stdlib.h>
 void *
 ESM_Local_Alloc (
     int thid,
@@ -191,7 +190,8 @@ ESM_Local_Alloc (
     //  tolerable since the number of regions is usually not more than 100's.
 
     void * addr;
-    if ((addr = (void *) malloc (size + ESM_ALIGNMENT)) == NULL) {
+    long long nwsize = size + ESM_ALIGNMENT;
+    if ((addr = (void *) malloc (nwsize)) == NULL) {
         SetError (thid, "Cannot allocate region (%d+%d bytes) in ESM_Alloc", size, ESM_ALIGNMENT);
         return NULL;
         }
@@ -199,8 +199,8 @@ ESM_Local_Alloc (
     //  Adjust the pointer to a multiple of the alignment unit if necessary
 
     void * ptr = addr;
-    if (((long) ptr) % ESM_ALIGNMENT != 0)
-        ptr = (void *) ((long) ptr + ESM_ALIGNMENT - (((long) ptr) % ESM_ALIGNMENT));
+    if (((long long) ptr) % ESM_ALIGNMENT != 0)
+        ptr = (void *) ((long long) ptr + ESM_ALIGNMENT - (((long long) ptr) % ESM_ALIGNMENT));
 
     //  Add then new region to front of the context's region list
 

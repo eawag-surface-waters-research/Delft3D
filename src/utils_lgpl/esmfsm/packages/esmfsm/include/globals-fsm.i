@@ -36,8 +36,6 @@
 !-------------------------------------------------------------------------------
 
 
-!include 'fsm.i'
-
 !-------------------------------------------------------------------------------
 !   C Implementation routines (in "fsm.cpp")
 
@@ -45,10 +43,10 @@
     integer FSM_Init
 
     external FSM_MakePointer
-    integer FSM_MakePointer
+    integer(kind=pntrsize) FSM_MakePointer
 
     external FSM_GetPointer
-    integer FSM_GetPointer
+    integer(kind=pntrsize) FSM_GetPointer
 
     external FSM_ReleasePointer
     integer FSM_ReleasePointer

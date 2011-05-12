@@ -48,9 +48,9 @@ subroutine findnm_kcs_flowwrapper(xp    , yp    , mp    , np    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer , pointer :: xcor 
-    integer , pointer :: ycor 
-    integer , pointer :: kcs
+    integer(kind=pntrsize) , pointer :: xcor
+    integer(kind=pntrsize) , pointer :: ycor
+    integer(kind=pntrsize) , pointer :: kcs
     integer , pointer :: mlb
     integer , pointer :: mmax
     integer , pointer :: mub

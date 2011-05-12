@@ -59,6 +59,8 @@ subroutine dfinitmpi
 #ifdef DFMPI
     character(MPI_MAX_PROCESSOR_NAME)  :: host      ! hostname       for current MPI process
     character(MPI_MAX_PROCESSOR_NAME)  :: processor ! processor name for current MPI process
+#else
+    integer, parameter                 :: MPI_SUCCESS = 0
 #endif
     logical                            :: mpi_is_initialized
     logical                            :: usempi

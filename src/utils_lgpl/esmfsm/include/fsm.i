@@ -39,14 +39,14 @@
 
 !-------------------------------------------------------------------------------
 !   API Functions and Subroutines
-
+!
     integer     fsmini
     external    fsmini
 
-    integer     makptr
+    integer(kind=pntrsize) :: makptr
     external    makptr
 
-    integer     getptr
+    integer(kind=pntrsize) :: getptr
     external    getptr
 
     integer     relptr
@@ -145,5 +145,5 @@
 !   loc(chbuf)   4
 !
 !   Example:
-!   The length of a doble complex is 16, therefor the base adress for
+!   The length of a double complex is 16, therefor the base adress for
 !   double complex have to be a multiple of 16.
