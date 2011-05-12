@@ -1,3 +1,5 @@
+//---- LGPL --------------------------------------------------------------------
+//
 // Copyright (C)  Stichting Deltares, 2011.
 //
 // This library is free software; you can redistribute it and/or

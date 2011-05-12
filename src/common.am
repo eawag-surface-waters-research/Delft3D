@@ -82,12 +82,13 @@ VPATH = @srcdir@
 # - Modules linked by the C++ linker do not link anymore: undefined reference to `dlsym'
 #   This problem is solved by adding the -ldl flag in the related Makefile.am
 
+# 32 bit:
 FCLIBS = -L/opt/intel/Compiler/11.0/081/lib/ia32
+MPILIBS = -L/opt/mpich2/lib -lmpichf90 -lmpich -lpthread
 
-#
-# The MPI libraries need to be specified as well
-#
-MPILIBS = -L/opt/mpich2-1.0.8-intel64/lib -lmpichf90 -lmpich -lpthread
+# 64 bit:
+# FCLIBS = -L/opt/intel/Compiler/11.0/081/lib/intel64
+# MPILIBS = -L/opt/mpich2-1.0.8-intel64/lib -lmpichf90 -lmpich -lpthread
 
 #-------------------------------------------------------------------------------
 #   Custom make targets

@@ -74,9 +74,7 @@ libflow2d3d_la_LIBADD = \
     $(top_srcdir)/utils_lgpl/stream/packages/stream_version_number/src/libstream_version_number.a \
     $(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow_version_number/src/libutils_flow_version_number.a \
     $(EXTERNALSOURCES) \
-    $(FCLIBS) \
-    $(X_PRE_LIBS) -lXt $(XPLIB) $(X_LIBS) -lX11 $(X_EXTRA_LIBS)
-
+    $(FCLIBS)
 
 BUILT_SOURCES = ./always \
 	./flow2d3d_version.F90 
@@ -85,5 +83,5 @@ BUILT_SOURCES = ./always \
 	rm -rf ./flow2d3d_version.F90 
 
 ./flow2d3d_version.F90:
-	$(top_srcdir)/scripts/linux/update_version.sh $(srcdir)/flow2d3d_version.F90 $(srcdir) ../include/version_number.ini $(top_srcdir)
+	$(top_srcdir)/scripts_lgpl/linux/update_version.sh $(srcdir)/flow2d3d_version.F90 $(srcdir) ../include/version_number.ini $(top_srcdir)
 

@@ -39,7 +39,7 @@ AM_FCFLAGS += \
 #Sources
 libmanager_la_SOURCES = \
          tdatmain.f90 \
-         tricom.f90 \
+         tricom.F90 \
          triend.f90 \
          tripoi.f90 \
          trisim.f90
