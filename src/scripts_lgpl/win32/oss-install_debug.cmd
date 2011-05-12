@@ -44,7 +44,7 @@ rem ===============
     call :flow2d3d
     call :wave
     call :plugin_culvert
-    call :plugin_delftflow_trafrm
+    call :plugin_delftflow_traform
     call :datsel
     call :kubint
     call :lint
@@ -113,11 +113,11 @@ goto :endproc
 
 
 
-rem ===================================
-rem === INSTALL_PLUGIN_DELFTFLOW_TRAFRM
-rem ===================================
-:plugin_delftflow_trafrm
-    echo "installing plugin_delftflow_trafrm . . ."
+rem ====================================
+rem === INSTALL_PLUGIN_DELFTFLOW_TRAFORM
+rem ====================================
+:plugin_delftflow_traform
+    echo "installing plugin_delftflow_traform . . ."
 
     set dest_bin="engines_gpl\deltares_hydro\bin\Debug"
 
