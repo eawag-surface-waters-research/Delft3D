@@ -112,7 +112,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     character(len=16)                         :: elmunt
     character(len=64)                         :: elmdes
     character(len=256)                        :: def_file
-    logical                                   :: layerfrac
+    integer                                   :: layerfrac
 !
 !! executable statements -------------------------------------------------------
 !
@@ -127,7 +127,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     nullify(rst_thlyr)
     error        = .false.
     success      = .false.
-    layerfrac    = .false.
+    layerfrac    = 0
     call noextspaces(restid    ,lrid      )
     !
     ! open NEFIS trim-<restid> file
@@ -174,7 +174,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     ierror = inqelm(fds , 'MSED', elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
     if (ierror /= 0) then
         ierror  = inqelm(fds , 'LYRFRAC', elmtyp, nbytsg, elmqty, elmunt, elmdes, elmndm, elmdms)
-        layerfrac = .true.
+        layerfrac = 1
         if (ierror /= 0) goto 9999
     endif
     rst_nlyr = elmdms(3)
@@ -184,7 +184,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     allocate(rst_msed(nmaxgl, mmaxgl, rst_nlyr, rst_lsedtot))
     allocate(rst_thlyr(nmaxgl, mmaxgl, rst_nlyr))
     !
-    if (layerfrac) then
+    if (layerfrac==1) then
         ierror = getelt(fds , 'map-sed-series', 'LYRFRAC', uindex, 1, &
                  & mmaxgl*nmaxgl*rst_nlyr*rst_lsedtot*4, rst_msed )       
         if (ierror /= 0) goto 9999
@@ -249,6 +249,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     call dfsync ( gdp) 
     call dfbroadc ( thlyr_g, nmaxgl*mmaxgl*nlyr, dfloat, gdp ) 
     call dfbroadc ( msed_g, nmaxgl*mmaxgl*nlyr*lsedtot, dfloat, gdp ) 
+    call dfbroadc (layerfrac, 1, dfint, gdp)
     ! 
     ! put copies of parts of msed, thlyr, etc for each subdomain 
     ! 
@@ -265,7 +266,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     enddo 
     deallocate(msed_g, thlyr_g)    
     !
-    if (layerfrac) then
+    if (layerfrac==1) then
        !
        ! msed contains volume fractions
        !
