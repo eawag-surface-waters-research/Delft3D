@@ -57,15 +57,15 @@ function mkfpnt(pntnam    ,length    ,gdp       )
 !
     integer      :: length
                                    !!  Total required array length
-    integer(kind=pntrsize) :: mkfpnt
+    integer(pntrsize) :: mkfpnt
     character(*) :: pntnam
                                    !!  Character string containing array
                                    !!  name (hence max 6 characters).
 !
 ! Local variables
 !
-    integer(kind=pntrsize), external :: mkdpnt
-    integer(kind=pntrsize), external :: mkrpnt
+    integer(pntrsize), external :: mkdpnt
+    integer(pntrsize), external :: mkrpnt
 !
 !! executable statements -------------------------------------------------------
 !

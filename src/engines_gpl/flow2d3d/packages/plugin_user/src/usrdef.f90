@@ -73,7 +73,7 @@ subroutine usrdef(lundia    ,error     ,grdang    ,secflo    ,gdp       )
     integer                        , pointer :: inpzw
     integer                        , pointer :: nprocs
     integer      , dimension(:)    , pointer :: nread
-    integer(kind=pntrsize), dimension(:, :) , pointer :: nprptr
+    integer(pntrsize), dimension(:, :) , pointer :: nprptr
     integer      , dimension(:, :) , pointer :: nprinp
     real(fp)     , dimension(:)    , pointer :: rcousr
     character*256, dimension(:)    , pointer :: filusr
@@ -88,11 +88,11 @@ subroutine usrdef(lundia    ,error     ,grdang    ,secflo    ,gdp       )
 !
 ! Local variables
 !
-    integer(kind=pntrsize) :: kcs    ! Pointer of array KCS 
-    integer(kind=pntrsize) :: kspu   ! Pointer of array KSPU 
-    integer(kind=pntrsize) :: kspv   ! Pointer of array KSPV 
-    integer(kind=pntrsize) :: nob    ! Pointer of array NOB 
-    integer(kind=pntrsize) :: ubnd   ! Pointer of array UBND 
+    integer(pntrsize) :: kcs    ! Pointer of array KCS 
+    integer(pntrsize) :: kspu   ! Pointer of array KSPU 
+    integer(pntrsize) :: kspv   ! Pointer of array KSPV 
+    integer(pntrsize) :: nob    ! Pointer of array NOB 
+    integer(pntrsize) :: ubnd   ! Pointer of array UBND 
     integer           :: it
     integer           :: length
     integer           :: ltest1
@@ -105,8 +105,8 @@ subroutine usrdef(lundia    ,error     ,grdang    ,secflo    ,gdp       )
     integer           :: nreal
     integer           :: ubrlsu
     integer           :: ubrlsv
-    integer(kind=pntrsize), external :: gtipnt
-    integer(kind=pntrsize), external :: gtrpnt
+    integer(pntrsize), external :: gtipnt
+    integer(pntrsize), external :: gtrpnt
     logical           :: dtn
     real(fp)          :: anglen
     real(fp)          :: t

@@ -43,31 +43,31 @@ type, public ::  olv_handle_t
     integer, pointer            :: mmax
     integer, pointer            :: nmax
     integer, pointer            :: nlb, nub, mlb, mub, kmax
-    integer(kind=pntrsize), pointer :: thick
     
     integer, pointer            :: ltur
     integer, pointer            :: lstsci
-    integer(kind=pntrsize), pointer            :: xcor
-    integer(kind=pntrsize), pointer            :: ycor
-    integer(kind=pntrsize), pointer            :: gvz
-    integer(kind=pntrsize), pointer            :: guz
-    integer(kind=pntrsize), pointer            :: xz
-    integer(kind=pntrsize), pointer            :: yz
-    integer(kind=pntrsize), pointer            :: kcs
-    integer(kind=pntrsize), pointer            :: kfs
-    integer(kind=pntrsize), pointer            :: kfu
-    integer(kind=pntrsize), pointer            :: kfv
-    integer(kind=pntrsize), pointer            :: kfsz1
-    integer(kind=pntrsize), pointer            :: alfas
-    integer(kind=pntrsize), pointer            :: s1
-    integer(kind=pntrsize), pointer            :: dp
-    integer(kind=pntrsize), pointer            :: dps
-    integer(kind=pntrsize), pointer            :: u1
-    integer(kind=pntrsize), pointer            :: v1
-    integer(kind=pntrsize), pointer            :: r1
-    integer(kind=pntrsize), pointer            :: rtur1
-    integer(kind=pntrsize), pointer            :: namcon
-        
+    integer(pntrsize), pointer  :: thick
+    integer(pntrsize), pointer  :: xcor
+    integer(pntrsize), pointer  :: ycor
+    integer(pntrsize), pointer  :: gvz
+    integer(pntrsize), pointer  :: guz
+    integer(pntrsize), pointer  :: xz
+    integer(pntrsize), pointer  :: yz
+    integer(pntrsize), pointer  :: kcs
+    integer(pntrsize), pointer  :: kfs
+    integer(pntrsize), pointer  :: kfu
+    integer(pntrsize), pointer  :: kfv
+    integer(pntrsize), pointer  :: kfsz1
+    integer(pntrsize), pointer  :: alfas
+    integer(pntrsize), pointer  :: s1
+    integer(pntrsize), pointer  :: dp
+    integer(pntrsize), pointer  :: dps
+    integer(pntrsize), pointer  :: u1
+    integer(pntrsize), pointer  :: v1
+    integer(pntrsize), pointer  :: r1
+    integer(pntrsize), pointer  :: rtur1
+    integer(pntrsize), pointer  :: namcon
+ 
     real(fp), pointer           :: zbot
     real(fp), pointer           :: ztop
     logical                     :: zmodel

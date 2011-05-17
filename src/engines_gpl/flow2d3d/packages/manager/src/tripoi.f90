@@ -79,7 +79,7 @@ subroutine tripoi(runid, filmrs, versio, filmd, &
 !
 ! Local variables
 !
-    integer(kind=pntrsize), external :: gtipnt
+    integer(pntrsize), external :: gtipnt
     logical           :: error  ! Flag=TRUE if an error is encountered 
     logical           :: verify ! Flag=FALSE for the FLOW sim. prg. =TRUE  for the MD-VER       prg. 
     character(6)      :: soort  ! Help var. determining the prog. name currently active 

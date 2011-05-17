@@ -85,11 +85,11 @@ function MAKPTR (keyname, keytype, length)
 
     include 'globals-fsm.i'
 
-    integer     lkey
-    character   ckey*2000
-    integer(kind=pntrsize)   MAKPTR
-    integer(kind=pntrsize)   ptr
-    integer(kind=pntrsize)   fsm_pointer_index
+    integer           lkey
+    character         ckey*2000
+    integer(pntrsize) MAKPTR
+    integer(pntrsize) ptr
+    integer(pntrsize) fsm_pointer_index
 
     !   Convert key name string to null-terminated C representation.
 
@@ -127,12 +127,12 @@ function GETPTR (keyname)
 
     include 'globals-fsm.i'
 
-    integer(kind=pntrsize) GETPTR
-    integer     lkey
-    character   ckey*2000
-    integer     keytype
-    integer(kind=pntrsize)   ptr
-    integer(kind=pntrsize)   fsm_pointer_index
+    integer(pntrsize) GETPTR
+    integer           lkey
+    character         ckey*2000
+    integer           keytype
+    integer(pntrsize) ptr
+    integer(pntrsize) fsm_pointer_index
 
     !   Convert key name string to null-terminated C representation.
 
@@ -164,11 +164,11 @@ integer function RELPTR (keyname)
 
     include 'globals-fsm.i'
 
-    integer     lkey
-    character   ckey*2000
-    integer     keytype
-    integer(kind=pntrsize)   ptr
-    integer(kind=pntrsize)   fsm_pointer_index
+    integer           lkey
+    character         ckey*2000
+    integer           keytype
+    integer(pntrsize) ptr
+    integer(pntrsize) fsm_pointer_index
 
     !   Convert key name string to null-terminated C representation.
 
@@ -286,7 +286,7 @@ subroutine fsm_check_alignment
     include 'fsm.i'
     include 'globals-fsm.i'
 
-    integer(kind=pntrsize) location
+    integer(pntrsize) location
 
     location = loc (ibuf (0))
     if (mod (location, alignment (ityp)) .ne. 0) then
@@ -340,10 +340,10 @@ function fsm_pointer_index (ptr, keytype)
     include 'fsm.i'
     include 'globals-fsm.i'
 
-    integer(kind=pntrsize)   ptr
-    integer keytype
-    integer(kind=pntrsize) fsm_pointer_index
-    integer(kind=pntrsize)   base
+    integer(pntrsize) ptr
+    integer           keytype
+    integer(pntrsize) fsm_pointer_index
+    integer(pntrsize) base
 
     !   Relate return address to an index in the appropriate array.
 

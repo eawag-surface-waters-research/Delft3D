@@ -38,6 +38,6 @@
        integer :: ifirst
        integer :: nubnd      !  Flag for user defined boundary
                              !  conditions 0 = no, 1 = yes
-       integer(kind=pntrsize) :: ubnd !  User def. array with boundary conditions for turbulent quantities
+       integer(pntrsize) :: ubnd !  User def. array with boundary conditions for turbulent quantities
 !
     end type sv_trisol

@@ -64,7 +64,7 @@ function mklpnt(pntnam    ,length    ,gdp       )
 !
     integer         :: length
                                    !!  Total required array length
-    integer(kind=pntrsize) :: mklpnt
+    integer(pntrsize) :: mklpnt
     character(*)    :: pntnam
                                    !!  Character string containing array
                                    !!  name (hence max 6 characters).

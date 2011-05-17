@@ -53,7 +53,7 @@ function gtrpnt(pntnam    ,gdp       )
 !
 ! Global variables
 !
-    integer(kind=pntrsize) :: gtrpnt
+    integer(pntrsize) :: gtrpnt
     character(*)    :: pntnam
                                    !!  Character string containing array
                                    !!  name (hence max 6 characters).

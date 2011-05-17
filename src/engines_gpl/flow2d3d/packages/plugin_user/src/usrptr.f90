@@ -50,7 +50,7 @@ subroutine usrptr(lundia    ,error      ,pntnam    ,partyp    ,length    , &
 !
 ! Global variables
 !
-    integer(kind=pntrsize), intent(out) :: ipoint
+    integer(pntrsize), intent(out) :: ipoint
                                    !!  Pointer of requested array PNTNAM
     integer              :: length
                                    !!  Length of the requested array
@@ -65,9 +65,9 @@ subroutine usrptr(lundia    ,error      ,pntnam    ,partyp    ,length    , &
 ! Local variables
 !
     integer           :: ierr   ! Error return value from dynamic array declaration routines 
-    integer(kind=pntrsize), external :: gtcpnt
-    integer(kind=pntrsize), external :: gtipnt
-    integer(kind=pntrsize), external :: gtrpnt
+    integer(pntrsize), external :: gtcpnt
+    integer(pntrsize), external :: gtipnt
+    integer(pntrsize), external :: gtrpnt
     integer, external :: mkcpnt
     integer, external :: mkipnt
     integer, external :: mkfpnt

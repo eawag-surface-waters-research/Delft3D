@@ -62,7 +62,7 @@ subroutine getfpt(nmax    ,mmax    ,kmax    ,nofou    ,ifou   ,gdp   )
 !
 ! Local variables
 !
-    integer(kind=pntrsize), external :: getpointer
+    integer(pntrsize), external :: getpointer
 !
 !! executable statements -------------------------------------------------------
 !
