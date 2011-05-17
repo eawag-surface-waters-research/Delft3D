@@ -2460,6 +2460,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/wlgrid.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/xyveloc.m -text
 src/tools_lgpl/matlab/quickplot/qp_iconedit.m -text
 src/tools_lgpl/matlab/quickplot/read_identification.m -text
+src/tools_lgpl/matlab/quickplot/svnstripfile.m -text
 src/utils_lgpl/Makefile.am -text
 src/utils_lgpl/constants/Makefile.am -text
 src/utils_lgpl/constants/packages/Makefile.am -text
