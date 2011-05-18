@@ -346,31 +346,31 @@
 !                    Although it is not standard Fortran
 
          lunvol    = newlun_nogdp()
-         open  ( lunvol , file=trim(filnam)//'vol' , form = 'binary' , SHARED )
+         open  ( lunvol , file=trim(filnam)//'vol' , form = 'binary' )
          lunare    = newlun_nogdp()
-         open  ( lunare , file=trim(filnam)//'are' , form = 'binary' , SHARED )
+         open  ( lunare , file=trim(filnam)//'are' , form = 'binary' )
          lunflo    = newlun_nogdp()
-         open  ( lunflo , file=trim(filnam)//'flo' , form = 'binary' , SHARED )
+         open  ( lunflo , file=trim(filnam)//'flo' , form = 'binary' )
          if ( lsal .gt. 0 ) then
             lunsal    = newlun_nogdp()
-            open  ( lunsal , file=trim(filnam)//'sal' , form = 'binary' , SHARED )
+            open  ( lunsal , file=trim(filnam)//'sal' , form = 'binary' )
          endif
          if ( ltem .gt. 0 ) then
             luntem    = newlun_nogdp()
-            open  ( luntem , file=trim(filnam)//'tem' , form = 'binary' , SHARED )
+            open  ( luntem , file=trim(filnam)//'tem' , form = 'binary' )
          endif
          do l = 1, lsed
             lunsed(l) = newlun_nogdp()
             sf = "sed00"
             write( sf(4:5), '(i2.2)' ) l
-            open  ( lunsed(l), file=trim(filnam)//sf  , form = 'binary' , SHARED )
+            open  ( lunsed(l), file=trim(filnam)//sf  , form = 'binary' )
          enddo
          if ( ilaggr(kmax) .gt. 1 ) then
             lunvdf    = newlun_nogdp()
-            open  ( lunvdf , file=trim(filnam)//'vdf' , form = 'binary' , SHARED )
+            open  ( lunvdf , file=trim(filnam)//'vdf' , form = 'binary' )
          endif
          luntau    = newlun_nogdp()
-         open  ( luntau , file=trim(filnam)//'tau' , form = 'binary' , SHARED )
+         open  ( luntau , file=trim(filnam)//'tau' , form = 'binary' )
  !       lunfmap   = newlun_nogdp()
  !       open  ( lunfmap, file=trim(filnam)//'fmap', form = 'binary' )
          if ( nsrc .gt. 0 ) then
