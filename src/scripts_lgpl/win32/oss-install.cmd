@@ -261,8 +261,7 @@ if NOT %ErrorLevel% EQU 0 (
     rem
     rem Only jump to :end when the script is completely finished
     rem
-    rem Do not use exit here; it may go wrong when oss-install is being called by install.cmd
-    rem exit %ErrorLevel%
+    exit %ErrorLevel%
 )
 
 :endproc
