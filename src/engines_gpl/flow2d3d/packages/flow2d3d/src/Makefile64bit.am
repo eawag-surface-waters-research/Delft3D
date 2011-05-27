@@ -43,6 +43,8 @@ libflow2d3d_la_LIBADD = \
     $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/dd/*.lo \
     $(top_srcdir)/engines_gpl/flow2d3d/packages/io/src/input/*.lo \
     $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/general/*.lo \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/io_dol_f/src/*.lo \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/io_dol_c/src/*.lo \
     $(top_srcdir)/engines_gpl/flow2d3d/packages/plugin_user/src/*.lo \
     $(top_srcdir)/engines_gpl/flow2d3d/packages/plugin_3dmortrafrm_c/src/*.lo \
     $(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/allocation/*.lo \
@@ -75,6 +77,7 @@ libflow2d3d_la_LIBADD = \
     $(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow_version_number/src/libutils_flow_version_number.a \
     $(EXTERNALSOURCES) \
     $(FCLIBS)
+
 
 BUILT_SOURCES = ./always \
 	./flow2d3d_version.F90 
