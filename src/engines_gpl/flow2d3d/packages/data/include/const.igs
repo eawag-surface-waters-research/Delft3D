@@ -29,6 +29,8 @@
 !-------------------------------------------------------------------------------
 type gd_const
     !
+    ! These parameters are set in kernel/src/main/sysini.f90
+    !
     ! doubles
     real(fp) :: earthrad ! 6378137.0
     real(fp) :: eps      ! 1.0e-6
