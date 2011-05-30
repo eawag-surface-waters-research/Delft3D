@@ -59,22 +59,22 @@ subroutine itadi2(lundia    ,s1        ,kcs       ,mmax      ,nmax      , &
                                                          !!  Due to the shift in the 2nd (M-)
                                                          !!  index, J = -2*NMAX + 1
     integer                                    :: lundia !  Description and declaration in inout.igs
-    integer                                    :: mmax   !  Description and declaration in iidim.f90
-    integer                                    :: nmax   !  Description and declaration in iidim.f90
+    integer                                    :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                    :: nmax   !  Description and declaration in esm_alloc_int.f90
     integer                                    :: nmmax  !  Description and declaration in dimens.igs
     integer                                    :: nmmaxj !  Description and declaration in dimens.igs
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)  :: kcs    !  Description and declaration in iidim.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)  :: kcs    !  Description and declaration in esm_alloc_int.f90
     real(fp)                                   :: smax   !  Description and declaration in f0isf1.igs
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: a
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: b
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: c      !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: c      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: d
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: e
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: f
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: s1     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: wrka1  !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: wrka2  !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: wrka3  !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: s1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: wrka1  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: wrka2  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: wrka3  !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

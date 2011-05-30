@@ -72,7 +72,7 @@ subroutine rdiwe(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                   :: nrrec  !!  Record counter keeping the track of the last record read
     logical     , intent(out) :: error  !!  Flag=TRUE if an error is encountered
     logical     , intent(in)  :: noui
-    real(fp)                  :: dt     !  Description and declaration in rjdim.f90
+    real(fp)                  :: dt     !  Description and declaration in esm_alloc_real.f90
     real(fp)                  :: tinciw !!  Time in UNIT's to activate the Internal Wave Energy calculation
     character(*)              :: filiwe !!  File name for the IWE parameters
     character(*)              :: mdfrec !!  Record read from the MD-file

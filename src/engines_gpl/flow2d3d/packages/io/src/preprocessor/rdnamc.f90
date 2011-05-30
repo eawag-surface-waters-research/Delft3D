@@ -63,7 +63,7 @@ subroutine rdnamc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     logical           , intent(in)  :: salin  !  Description and declaration in procs.igs
     logical           , intent(in)  :: temp   !  Description and declaration in procs.igs
     character(*)                    :: mdfrec !!  Standard rec. length in MD-file (300)
-    character(20), dimension(lstsc) :: namcon !  Description and declaration in ckdim.f90
+    character(20), dimension(lstsc) :: namcon !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

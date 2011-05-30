@@ -56,14 +56,14 @@ subroutine dersig(j         ,nmmaxj    ,nmmax     ,icx       ,icy       , &
     integer                                                 :: j      !!  Begin pointer for arrays which have been transformed into 1D arrays. Due to the shift in the 2nd (M-) index, J = -2*NMAX + 1
     integer, intent(in)            :: nmmax !  Description and declaration in dimens.igs
     integer         :: nmmaxj !  Description and declaration in dimens.igs
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kfu !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kfv !  Description and declaration in iidim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: dddeta !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: dddksi !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: dp !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: dzdeta !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: dzdksi !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: s1 !  Description and declaration in rjdim.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kfu !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kfv !  Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: dddeta !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: dddksi !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: dp !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: dzdeta !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: dzdksi !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: s1 !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

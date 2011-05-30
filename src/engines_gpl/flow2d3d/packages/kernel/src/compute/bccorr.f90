@@ -69,16 +69,16 @@ subroutine bccor(j         ,nmmaxj    ,kmax      ,norow     ,icx       , &
                                                                             !!  been transformed into 1D arrays.
                                                                             !!  Due to the shift in the 2nd (M-)
                                                                             !!  index, J = -2*NMAX + 1
-    integer                                         , intent(in)  :: kmax   !  Description and declaration in iidim.f90
+    integer                                         , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                         , intent(in)  :: nmmaxj !  Description and declaration in dimens.igs
-    integer                                         , intent(in)  :: norow  !  Description and declaration in iidim.f90
-    integer, dimension(5, norow)                    , intent(in)  :: irocol !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kcs    !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kfu    !  Description and declaration in iidim.f90
+    integer                                         , intent(in)  :: norow  !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(5, norow)                    , intent(in)  :: irocol !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kfu    !  Description and declaration in esm_alloc_int.f90
     logical                                         , intent(in)  :: zmodel !  Description and declaration in procs.igs
-    real(fp), dimension(4, norow)                   , intent(in)  :: circ2d !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(out) :: qxk    !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax)                       , intent(in)  :: thick  !  Description and declaration in rjdim.f90
+    real(fp), dimension(4, norow)                   , intent(in)  :: circ2d !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(out) :: qxk    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax)                       , intent(in)  :: thick  !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

@@ -62,17 +62,17 @@ subroutine usrbrl(icx       ,icy       ,nmmax     ,kmax      ,kfu       , &
                                                                              !!  dir. If icx=1 then computation pro-
                                                                              !!  ceeds in the Y-dir.
     integer                                          , intent(in)  :: icy    !!  Increment in the Y-dir. (see ICX)
-    integer                                          , intent(in)  :: kmax   !  Description and declaration in iidim.f90
+    integer                                          , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                          , intent(in)  :: nmmax  !  Description and declaration in dimens.igs
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: kfu    !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax), intent(in)  :: kspu   !  Description and declaration in iidim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: gvu    !  Description and declaration in rjdim.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: kfu    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax), intent(in)  :: kspu   !  Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: gvu    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: bbk    !!  Internal work array, coefficient la-
                                                                              !!  yer velocity in (N,M,K) implicit part
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in)  :: diapl  !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in)  :: rnpl   !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in)  :: u0     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in)  :: ubrlsu !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in)  :: diapl  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in)  :: rnpl   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in)  :: u0     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in)  :: ubrlsu !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in)  :: v      !!  V-velocities at new/old time level
                                                                              !!  depending on the ADI-stage (calling
                                                                              !!  routines)

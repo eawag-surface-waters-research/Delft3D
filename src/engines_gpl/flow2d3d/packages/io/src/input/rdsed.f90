@@ -110,15 +110,15 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
 ! Global variables
 !
     integer                                  , intent(in)  :: lsal    !  Description and declaration in dimens.igs
-    integer                                  , intent(in)  :: lsed    !  Description and declaration in iidim.f90
-    integer                                  , intent(in)  :: lsedtot !  Description and declaration in iidim.f90
-    integer                                  , intent(in)  :: lstsci  !  Description and declaration in iidim.f90
+    integer                                  , intent(in)  :: lsed    !  Description and declaration in esm_alloc_int.f90
+    integer                                  , intent(in)  :: lsedtot !  Description and declaration in esm_alloc_int.f90
+    integer                                  , intent(in)  :: lstsci  !  Description and declaration in esm_alloc_int.f90
     integer                                  , intent(in)  :: ltem    !  Description and declaration in dimens.igs
-    integer                                  , intent(in)  :: ltur    !  Description and declaration in iidim.f90
+    integer                                  , intent(in)  :: ltur    !  Description and declaration in esm_alloc_int.f90
     integer                                                :: lundia  !  Description and declaration in inout.igs
     logical                                  , intent(out) :: error   !!  Flag=TRUE if an error is encountered
-    real(fp)      , dimension(lsed)                        :: facdss  !  Description and declaration in rjdim.f90
-    character(20) , dimension(lstsci + ltur)               :: namcon  !  Description and declaration in ckdim.f90
+    real(fp)      , dimension(lsed)                        :: facdss  !  Description and declaration in esm_alloc_real.f90
+    character(20) , dimension(lstsci + ltur)               :: namcon  !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

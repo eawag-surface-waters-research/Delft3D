@@ -58,9 +58,9 @@ subroutine rdfcio(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
 !
     integer                                                                          :: lundia !  Description and declaration in inout.igs
     integer                                                                          :: lunmd  !  Description and declaration in inout.igs
-    integer                                                                          :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                          :: nmax   !  Description and declaration in iidim.f90
-    integer                                                                          :: nmaxus !  Description and declaration in iidim.f90
+    integer                                                                          :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                          :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                          :: nmaxus !  Description and declaration in esm_alloc_int.f90
     integer                                                                          :: nrrec  !!  Pointer to the record number in the
                                                                                                !!  MD-file
     logical                                                                          :: error  !!  Flag=TRUE if an error is encountered
@@ -75,7 +75,7 @@ subroutine rdfcio(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
                                                                                                !!    after INIPHY anglat = 0.
     real(fp)                                                           , intent(in)  :: dy     !!  Uniform grid-distance in the y-dir. in meters
                                                                                                !!  if sferic = T dy := dtheta in (decimals) degrees
-    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: fcorio !  Description and declaration in rjdim.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: fcorio !  Description and declaration in esm_alloc_real.f90
     character(*)                                                                     :: filcio !!  File name for variable coriolis values
     character(2)                                                       , intent(out) :: fmtcio
     character(300)                                                                   :: mdfrec !!  Standard rec. length in MD-file (300)

@@ -64,7 +64,7 @@ subroutine ck_dpopt(lundia    ,lsedtot   ,zmodel    ,bedupd    ,dpsopt    , &
 !
 ! Global variables
 !
-    integer, intent(in) :: lsedtot !  Description and declaration in iidim.f90
+    integer, intent(in) :: lsedtot !  Description and declaration in esm_alloc_int.f90
     integer             :: lundia  !  Description and declaration in inout.igs
     logical, intent(in) :: bedupd  !  Description and declaration in morpar.igs
     logical, intent(in) :: zmodel  !  Description and declaration in procs.igs

@@ -76,22 +76,22 @@ subroutine chkvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                                                                             !!  Due to the shift in the 2nd (M-)
                                                                             !!  index, J = -2*NMAX + 1
     integer                                         , intent(in)  :: itype
-    integer                                         , intent(in)  :: lstsci !  Description and declaration in iidim.f90
-    integer                                         , intent(in)  :: kmax   !  Description and declaration in iidim.f90
+    integer                                         , intent(in)  :: lstsci !  Description and declaration in esm_alloc_int.f90
+    integer                                         , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                       :: lundia !  Description and declaration in inout.igs
     integer                                         , intent(in)  :: nmmax  !  Description and declaration in dimens.igs
     integer                                                       :: nmmaxj !  Description and declaration in dimens.igs
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kcs    !  Description and declaration in iidim.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfs    !  Description and declaration in iidim.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfsmax !  Description and declaration in iidim.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfsmin !  Description and declaration in iidim.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfu    !  Description and declaration in iidim.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfv    !  Description and declaration in iidim.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfs    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfsmax !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfsmin !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfu    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfv    !  Description and declaration in esm_alloc_int.f90
     real(fp)                                        , intent(in)  :: timnow
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: guv    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: gvu    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax + 2)          :: dicuv  !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax + 2)          :: vicuv  !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: guv    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: gvu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax + 2)          :: dicuv  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax + 2)          :: vicuv  !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

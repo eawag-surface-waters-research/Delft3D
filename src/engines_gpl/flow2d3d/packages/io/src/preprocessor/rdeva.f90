@@ -69,7 +69,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                                       :: nrrec      !  Pointer to the record number in the MD-file
     logical                         , intent(out) :: error      !  Flag=TRUE if an error is encountered
     logical                         , intent(in)  :: noui       !  Flag for reading from User Interface
-    real(fp)                        , intent(in)  :: dt         !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)  :: dt         !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(mxevat) , intent(out) :: evapor     !  Description and declaration in heat.igs
     real(fp)    , dimension(mxevat) , intent(out) :: precip     !  Description and declaration in heat.igs
     real(fp)    , dimension(mxevat)               :: rteva      !  At most MXTEMT times for time varying rain/evaporation model data

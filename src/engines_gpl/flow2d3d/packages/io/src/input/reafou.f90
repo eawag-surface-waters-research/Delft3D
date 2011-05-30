@@ -70,7 +70,7 @@ subroutine reafou(error     ,lundia    ,lunfou    ,filfou    ,kmax      , &
 !
 ! Global variables
 !
-    integer                          , intent(in) :: kmax   !  Description and declaration in iidim.f90
+    integer                          , intent(in) :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                          , intent(in) :: lsal   !  Description and declaration in dimens.igs
     integer                          , intent(in) :: lstsc  !  Description and declaration in dimens.igs
     integer                          , intent(in) :: ltem   !  Description and declaration in dimens.igs

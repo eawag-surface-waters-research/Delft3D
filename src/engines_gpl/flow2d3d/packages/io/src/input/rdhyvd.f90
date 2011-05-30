@@ -78,11 +78,11 @@ subroutine rdhyvd(error     ,nrrec     ,mdfrec    ,noui      ,filedy    , &
 !
 ! Global variables
 !
-    integer                                                                     , intent(in)  :: kmax   !  Description and declaration in iidim.f90
-    integer                                                                                   :: lstsci !  Description and declaration in iidim.f90
-    integer                                                                                   :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                                   :: nmax   !  Description and declaration in iidim.f90
-    integer                                                                                   :: nmaxus !  Description and declaration in iidim.f90
+    integer                                                                     , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                   :: lstsci !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                   :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                   :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                   :: nmaxus !  Description and declaration in esm_alloc_int.f90
     integer                                                                                   :: nrrec  !!  Pointer to the record number in the
                                                                                                         !!  MD-file
     logical                                                                                   :: error  !!  Flag=TRUE if an error is encountered
@@ -93,8 +93,8 @@ subroutine rdhyvd(error     ,nrrec     ,mdfrec    ,noui      ,filedy    , &
                                                                                                         !!  [m2/s] (in density point)
     real(fp)                                                                                  :: vicoww !  Description and declaration in tricom.igs
     real(fp)                                                                                  :: xlo    !  Description and declaration in turcoe.igs
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax + 2)              :: dicuv  !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax + 2)              :: vicuv  !  Description and declaration in rjdim.f90
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax + 2)              :: dicuv  !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax + 2)              :: vicuv  !  Description and declaration in esm_alloc_real.f90
     character(*)                                                                              :: filedy !!  File name for the eddy viscosities
     character(*)                                                                              :: mdfrec !!  Standard rec. length in MD-file (300)
     character(12)                                                                             :: tkemod !  Description and declaration in tricom.igs

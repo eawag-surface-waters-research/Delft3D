@@ -55,7 +55,7 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     integer                    :: lundia !  Description and declaration in inout.igs
     integer                    :: lunmd  !  Description and declaration in inout.igs
     integer                    :: nrrec  !!  Record counter keeping the track of the last record read
-    integer                    :: nto    !  Description and declaration in iidim.f90
+    integer                    :: nto    !  Description and declaration in esm_alloc_int.f90
     integer                    :: ntof   !  Description and declaration in dimens.igs
     integer                    :: ntoq   !  Description and declaration in dimens.igs
     integer      , intent(out) :: ntot   !  Description and declaration in dimens.igs

@@ -95,10 +95,10 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in)  :: kfsed
     real(fp)                                             , intent(in)  :: morhr
     real(fp)                                             , intent(in)  :: timhr
-    real(fp)  , dimension(lsedtot)                       , intent(in)  :: cdryb   !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(lsedtot, gdp%d%nmlb:gdp%d%nmub)              :: dbodsd  !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in)  :: s1      !  Description and declaration in rjdim.f90
-    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)                       :: dps     !  Description and declaration in rjdim.f90
+    real(fp)  , dimension(lsedtot)                       , intent(in)  :: cdryb   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(lsedtot, gdp%d%nmlb:gdp%d%nmub)              :: dbodsd  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in)  :: s1      !  Description and declaration in esm_alloc_real.f90
+    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)                       :: dps     !  Description and declaration in esm_alloc_real.f90
 
 !
 ! Local variables

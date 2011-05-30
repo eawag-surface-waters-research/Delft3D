@@ -55,10 +55,10 @@ subroutine frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
                                                                                                 !!  For values of func which need a third
                                                                                                 !!  dimension, else 1
     integer                                                                           :: lundia !  Description and declaration in inout.igs
-    integer                                                             , intent(in)  :: mmax   !  Description and declaration in iidim.f90
+    integer                                                             , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                                           :: nelmx  !!  Number of elements for this group
-    integer                                                                           :: nmax   !  Description and declaration in iidim.f90
-    integer                                                             , intent(in)  :: nmaxus !  Description and declaration in iidim.f90
+    integer                                                                           :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                             , intent(in)  :: nmaxus !  Description and declaration in esm_alloc_int.f90
     integer                                                                           :: ntimwa !!  Time index of first function
     integer                                                                           :: ntimwb !!  Time index of second function
     integer, dimension(2)                                               , intent(in)  :: ifcore !!  Time indices (cell id's) of the wave

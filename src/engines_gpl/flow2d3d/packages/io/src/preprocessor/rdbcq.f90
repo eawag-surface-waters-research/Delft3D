@@ -58,7 +58,7 @@ subroutine rdbcq(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                              :: lunmd  !  Description and declaration in inout.igs
     integer                              :: nrrec  !!  Pointer to the record number in the
                                                    !!  MD-file
-    integer                              :: nto    !  Description and declaration in iidim.f90
+    integer                              :: nto    !  Description and declaration in esm_alloc_int.f90
     integer                              :: ntof   !  Description and declaration in dimens.igs
     integer                              :: ntoq   !  Description and declaration in dimens.igs
     logical                , intent(in)  :: bubble !  Description and declaration in procs.igs    
@@ -68,7 +68,7 @@ subroutine rdbcq(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     character(*)                         :: mdfrec !!  Standard rec. length in MD-file (300)
     character(*)                         :: runid
     character(1)                         :: eol    !!  ASCII code for End-Of-Line (^J)
-    character(20), dimension(nto)        :: nambnd !  Description and declaration in ckdim.f90
+    character(20), dimension(nto)        :: nambnd !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

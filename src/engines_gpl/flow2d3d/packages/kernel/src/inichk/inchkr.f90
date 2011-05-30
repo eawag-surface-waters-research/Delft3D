@@ -368,7 +368,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     character(*)         :: runid
     character(1)         :: evaint      !  Description and declaration in tricom.igs
     character(1)         :: temint      !  Description and declaration in tricom.igs
-    character(4)         :: rouflo      !  Description and declaration in ckdim.f90
+    character(4)         :: rouflo      !  Description and declaration in esm_alloc_char.f90
     character(4)         :: rouwav      !  Description and declaration in tricom.igs
     character(8)         :: dischy      !  Description and declaration in tricom.igs
 !
@@ -1222,8 +1222,8 @@ subroutine copykcuv(kcu, kcucopy, gdp)
     implicit none
     !
     type(globdat),target :: gdp
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: kcu     !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: kcucopy !  Description and declaration in iidim.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: kcu     !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: kcucopy !  Description and declaration in esm_alloc_int.f90
     integer :: nm
 
     do nm=gdp%d%nmlb, gdp%d%nmub

@@ -58,16 +58,16 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
 !
     integer                                         , intent(in)  :: lsedtot
     integer                                                       :: lundia     !  Description and declaration in inout.igs
-    integer                                         , intent(in)  :: mmax       !  Description and declaration in iidim.f90
-    integer                                         , intent(in)  :: nmax       !  Description and declaration in iidim.f90
-    integer                                         , intent(in)  :: nmaxus     !  Description and declaration in iidim.f90
-    integer                                                       :: nmmax      !  Description and declaration in iidim.f90
-    integer       , dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: kcs        !  Description and declaration in iidim.f90
+    integer                                         , intent(in)  :: mmax       !  Description and declaration in esm_alloc_int.f90
+    integer                                         , intent(in)  :: nmax       !  Description and declaration in esm_alloc_int.f90
+    integer                                         , intent(in)  :: nmaxus     !  Description and declaration in esm_alloc_int.f90
+    integer                                                       :: nmmax      !  Description and declaration in esm_alloc_int.f90
+    integer       , dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: kcs        !  Description and declaration in esm_alloc_int.f90
     logical                                                       :: error      !  Flag=TRUE if an error is encountered
-    real(fp)      , dimension(lsedtot)              , intent(in)  :: cdryb      !  Description and declaration in rjdim.f90
-    real(fp)      , dimension(lsedtot)              , intent(in)  :: sdbuni     !  Description and declaration in rjdim.f90
-    character(10) , dimension(lsedtot)              , intent(in)  :: inisedunit !  Description and declaration in ckdim.f90
-    character(256), dimension(lsedtot)              , intent(in)  :: flsdbd     !  Description and declaration in ckdim.f90
+    real(fp)      , dimension(lsedtot)              , intent(in)  :: cdryb      !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(lsedtot)              , intent(in)  :: sdbuni     !  Description and declaration in esm_alloc_real.f90
+    character(10) , dimension(lsedtot)              , intent(in)  :: inisedunit !  Description and declaration in esm_alloc_char.f90
+    character(256), dimension(lsedtot)              , intent(in)  :: flsdbd     !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

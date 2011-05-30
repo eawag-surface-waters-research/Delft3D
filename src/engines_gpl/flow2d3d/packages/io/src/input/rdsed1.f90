@@ -59,22 +59,22 @@ subroutine rdsed1(nr_sed    ,luninp    ,lundia    ,csoil     ,iopsus    , &
     integer                                   :: nr_sed
     logical                     , intent(out) :: error
     real(fp)                                  :: csoil  !  Description and declaration in tricom.igs
-    real(fp)      , dimension(*)              :: cdryb  !  Description and declaration in rjdim.f90
-    real(fp)      , dimension(*)              :: erouni !  Description and declaration in rjdim.f90
-    real(fp)      , dimension(*)              :: facdss !  Description and declaration in rjdim.f90
-    real(fp)      , dimension(*)              :: rhosol !  Description and declaration in rjdim.f90
-    real(fp)      , dimension(*)              :: salmax !  Description and declaration in rjdim.f90
-    real(fp)      , dimension(*)              :: sdbuni !  Description and declaration in rjdim.f90
-    real(fp)      , dimension(*)              :: seddia !  Description and declaration in rjdim.f90
-    real(fp)      , dimension(*)              :: tcduni !  Description and declaration in rjdim.f90
-    real(fp)      , dimension(*)              :: tceuni !  Description and declaration in rjdim.f90
-    real(fp)      , dimension(*)              :: ws0    !  Description and declaration in rjdim.f90
-    real(fp)      , dimension(*)              :: wsm    !  Description and declaration in rjdim.f90
+    real(fp)      , dimension(*)              :: cdryb  !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(*)              :: erouni !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(*)              :: facdss !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(*)              :: rhosol !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(*)              :: salmax !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(*)              :: sdbuni !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(*)              :: seddia !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(*)              :: tcduni !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(*)              :: tceuni !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(*)              :: ws0    !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(*)              :: wsm    !  Description and declaration in esm_alloc_real.f90
     integer       , dimension(*)              :: sedtyp !  sediment type: 0=total/1=noncoh/2=coh
-    character(256), dimension(*)              :: flsdbd !  Description and declaration in ckdim.f90
-    character(256), dimension(*)              :: flsero !  Description and declaration in ckdim.f90
-    character(256), dimension(*)              :: flstcd !  Description and declaration in ckdim.f90
-    character(256), dimension(*)              :: flstce !  Description and declaration in ckdim.f90
+    character(256), dimension(*)              :: flsdbd !  Description and declaration in esm_alloc_char.f90
+    character(256), dimension(*)              :: flsero !  Description and declaration in esm_alloc_char.f90
+    character(256), dimension(*)              :: flstcd !  Description and declaration in esm_alloc_char.f90
+    character(256), dimension(*)              :: flstce !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

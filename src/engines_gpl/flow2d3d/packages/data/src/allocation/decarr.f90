@@ -225,20 +225,20 @@ subroutine decarr(lunmd     ,lundia    ,error     ,runid     ,verify    , &
     ! calculate indices of real arrays
     !
     lerror = .false.
-    call rjdim(lundia    ,lerror    ,gdp       )
+    call esm_alloc_real(lundia    ,lerror    ,gdp       )
     if (lerror) error = .true.
     !
     ! calculate indices of integer arrays
     !
     lerror = .false.
-    call iidim(lundia    ,lerror    ,verify    ,zmodel    , &
+    call esm_alloc_int(lundia    ,lerror    ,verify    ,zmodel    , &
              & gdp       )
     if (lerror) error = .true.
     !
     ! calculate indices of character arrays
     !
     lerror = .false.
-    call ckdim(lundia    ,lerror    ,verify    ,gdp       )
+    call esm_alloc_char(lundia    ,lerror    ,verify    ,gdp       )
     if (lerror) error = .true.
     !
     ! Allocate arrays in GDP structure using read dimensions

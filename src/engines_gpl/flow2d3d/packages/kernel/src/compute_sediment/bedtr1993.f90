@@ -59,7 +59,7 @@ subroutine bedtr1993(uuu       ,vvv       ,u2dh      ,d50       ,d90       , &
     real(fp), intent(in)  :: d90
     real(fp), intent(in)  :: dstar
     real(fp), intent(in)  :: h1
-    real(fp), intent(in)  :: hrms   !  Description and declaration in rjdim.f90
+    real(fp), intent(in)  :: hrms   !  Description and declaration in esm_alloc_real.f90
     real(fp), intent(in)  :: muc
     real(fp), intent(out) :: qbcu
     real(fp), intent(out) :: qbcv
@@ -67,17 +67,17 @@ subroutine bedtr1993(uuu       ,vvv       ,u2dh      ,d50       ,d90       , &
     real(fp), intent(out) :: qbwv
     real(fp), intent(out) :: qswu
     real(fp), intent(out) :: qswv
-    real(fp), intent(in)  :: rhosol !  Description and declaration in rjdim.f90
-    real(fp), intent(in)  :: rlabda !  Description and declaration in rjdim.f90
+    real(fp), intent(in)  :: rhosol !  Description and declaration in esm_alloc_real.f90
+    real(fp), intent(in)  :: rlabda !  Description and declaration in esm_alloc_real.f90
     real(fp), intent(in)  :: taurat
-    real(fp), intent(in)  :: teta   !  Description and declaration in rjdim.f90
-    real(fp), intent(in)  :: tp     !  Description and declaration in rjdim.f90
+    real(fp), intent(in)  :: teta   !  Description and declaration in esm_alloc_real.f90
+    real(fp), intent(in)  :: tp     !  Description and declaration in esm_alloc_real.f90
     real(fp), intent(in)  :: u2dh
     real(fp), intent(in)  :: umod
     real(fp), intent(in)  :: ustarc
     real(fp), intent(in)  :: uuu
     real(fp), intent(in)  :: vvv
-    real(fp), intent(in)  :: ws     !  Description and declaration in rjdim.f90
+    real(fp), intent(in)  :: ws     !  Description and declaration in esm_alloc_real.f90
     real(fp), intent(in)  :: rhowat
     real(fp), intent(in)  :: ag
     logical , intent(in)  :: wave

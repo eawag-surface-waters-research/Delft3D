@@ -79,19 +79,19 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
     integer                                               , intent(in)  :: lsedtot !!  Total number of sediment fractions
     integer                                               , intent(in)  :: nmmax   !  Description and declaration in dimens.igs
     logical                                               , intent(in)  :: slopecor
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: kcs     !  Description and declaration in iidim.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: kcu     !  Description and declaration in iidim.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: kcv     !  Description and declaration in iidim.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: kfu     !  Description and declaration in iidim.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: kfv     !  Description and declaration in iidim.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: kcs     !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: kcu     !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: kcv     !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: kfu     !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: kfv     !  Description and declaration in esm_alloc_int.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: dm
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: dzduu
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: dzdvv
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot) , intent(in)  :: fixfac
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot) , intent(in)  :: frac
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: hu      !  Description and declaration in rjdim.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: hu      !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot) , intent(in)  :: hidexp
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: hv      !  Description and declaration in rjdim.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: hv      !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)    , intent(in)  :: rhowat
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot)               :: suu     !  sbcuu, sbwuu, or sswuu
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot)               :: svv     !  sbcvv, sbwvv, or sswvv

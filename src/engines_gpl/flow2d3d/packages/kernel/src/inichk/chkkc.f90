@@ -53,14 +53,14 @@ subroutine chkkc(lundia    ,error     ,runid     ,fldry     ,fltd      , &
 ! Global variables
 !
     integer                                                                   :: lundia !  Description and declaration in inout.igs
-    integer                                                      , intent(in) :: mmax   !  Description and declaration in iidim.f90
-    integer                                                      , intent(in) :: nmax   !  Description and declaration in iidim.f90
-    integer                                                      , intent(in) :: noroco !  Description and declaration in iidim.f90
-    integer                                                      , intent(in) :: norow  !  Description and declaration in iidim.f90
-    integer, dimension(5, noroco)                                , intent(in) :: irocol !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: kcs    !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: kcu    !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: kcv    !  Description and declaration in iidim.f90
+    integer                                                      , intent(in) :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                      , intent(in) :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                      , intent(in) :: noroco !  Description and declaration in esm_alloc_int.f90
+    integer                                                      , intent(in) :: norow  !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(5, noroco)                                , intent(in) :: irocol !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: kcu    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: kcv    !  Description and declaration in esm_alloc_int.f90
     logical                                                     , intent(in)  :: fldry  !  Description and declaration in tmpfil.igs
     logical                                                     , intent(in)  :: fltd   !  Description and declaration in tmpfil.igs
     logical                                                     , intent(out) :: error  !!  Flag=TRUE if an error is encountered
@@ -117,7 +117,7 @@ subroutine chkkc(lundia    ,error     ,runid     ,fldry     ,fltd      , &
     !
     !
     ! initialize local parameters
-    ! initialisation kcu, kcv and kcs not required (done in iidim)
+    ! initialisation kcu, kcv and kcs not required (done in esm_alloc_int)
     !
     dirtd = ' '
     lerror = .false.

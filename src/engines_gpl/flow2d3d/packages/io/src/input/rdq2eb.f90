@@ -55,14 +55,14 @@ subroutine rdq2eb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
     integer                                                                       :: lundia  !  Description and declaration in inout.igs
     integer                                                                       :: lunmd   !  Description and declaration in inout.igs
-    integer                                                         , intent(in)  :: mmax    !  Description and declaration in iidim.f90
-    integer                                                         , intent(in)  :: nmax    !  Description and declaration in iidim.f90
-    integer                                                                       :: nmaxus  !  Description and declaration in iidim.f90
+    integer                                                         , intent(in)  :: mmax    !  Description and declaration in esm_alloc_int.f90
+    integer                                                         , intent(in)  :: nmax    !  Description and declaration in esm_alloc_int.f90
+    integer                                                                       :: nmaxus  !  Description and declaration in esm_alloc_int.f90
     integer                                                                       :: nrrec   !!  Pointer to the record number in the MD-file
-    integer                                                         , intent(in)  :: nto     !  Description and declaration in iidim.f90
-    integer , dimension(7, nto)                                     , intent(in)  :: mnbnd   !  Description and declaration in iidim.f90
+    integer                                                         , intent(in)  :: nto     !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(7, nto)                                     , intent(in)  :: mnbnd   !  Description and declaration in esm_alloc_int.f90
     logical                                                                       :: error   !!  Flag=TRUE if an error is encountered
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 2), intent(out) :: rtubnd  !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 2), intent(out) :: rtubnd  !  Description and declaration in esm_alloc_real.f90
     character(*)                                                                  :: filq2e  !!  File name containing boundary condition
                                                                                              !!  for 2D turbulence parameter (RTU2D0)
     character(300)                                                                :: mdfrec  !!  Standard rec. length in MD-file (300)

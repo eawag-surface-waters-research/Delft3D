@@ -66,16 +66,16 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     integer, dimension(numintpar)   , intent(inout):: intpar
     integer                         , intent(in)   :: iopsus
     integer                         , intent(in)   :: iopkcw
-    integer                         , intent(in)   :: kmax     !  Description and declaration in iidim.f90
+    integer                         , intent(in)   :: kmax     !  Description and declaration in esm_alloc_int.f90
     integer                         , intent(out)  :: kmaxsd
-    integer                         , intent(in)   :: lsecfl   !  Description and declaration in iidim.f90
-    integer                         , intent(in)   :: ltur     !  Description and declaration in iidim.f90
+    integer                         , intent(in)   :: lsecfl   !  Description and declaration in esm_alloc_int.f90
+    integer                         , intent(in)   :: ltur     !  Description and declaration in esm_alloc_int.f90
     integer                         , intent(in)   :: lundia   !  Description and declaration in inout.igs
     integer                         , intent(in)   :: numintpar
     integer                         , intent(in)   :: numrealpar
     integer                         , intent(in)   :: numstrpar
     integer                         , intent(in)   :: subiw
-    real(fp)                        , intent(in)   :: aks      !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: aks      !  Description and declaration in esm_alloc_real.f90
     real(fp)                        , intent(in)   :: aksfac
     real(fp)                        , intent(out)  :: akstmp
     real(fp)                        , intent(in)   :: bed
@@ -85,29 +85,29 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     real(fp)                        , intent(out)  :: ce_nmtmp
     real(fp), dimension(kmax)       , intent(out)  :: concin
     real(fp)                        , intent(out)  :: crep
-    real(fp), dimension(0:kmax)     , intent(in)   :: dicww    !  Description and declaration in rjdim.f90
-    real(fp)                        , intent(out)  :: dss      !  Description and declaration in rjdim.f90
-    real(fp)                        , intent(in)   :: dzduu     !  Description and declaration in rjdim.f90
-    real(fp)                        , intent(in)   :: dzdvv     !  Description and declaration in rjdim.f90
+    real(fp), dimension(0:kmax)     , intent(in)   :: dicww    !  Description and declaration in esm_alloc_real.f90
+    real(fp)                        , intent(out)  :: dss      !  Description and declaration in esm_alloc_real.f90
+    real(fp)                        , intent(in)   :: dzduu     !  Description and declaration in esm_alloc_real.f90
+    real(fp)                        , intent(in)   :: dzdvv     !  Description and declaration in esm_alloc_real.f90
     real(fp)                        , intent(in)   :: eps
     real(fp)                        , intent(in)   :: espir
     real(fp)                        , intent(in)   :: fpco
-    real(fp)                        , intent(in)   :: frac     !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: frac     !  Description and declaration in esm_alloc_real.f90
     real(fp)                        , intent(in)   :: pangle
     real(fp), dimension(30)         , intent(inout):: par
     real(fp)                        , intent(in)   :: rdc
     real(fp)                        , intent(in)   :: rdw
-    real(fp)                        , intent(in)   :: rksrs    !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax)       , intent(out)  :: rsedeq   !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: rksrs    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax)       , intent(out)  :: rsedeq   !  Description and declaration in esm_alloc_real.f90
     real(fp)                        , intent(in)   :: rwave
     real(fp)                        , intent(in)   :: salmax
     real(fp)                        , intent(out)  :: sbcu
     real(fp)                        , intent(out)  :: sbcv
     real(fp)                        , intent(out)  :: sbwu
     real(fp)                        , intent(out)  :: sbwv
-    real(fp), dimension(0:kmax)     , intent(out)  :: seddif   !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax)       , intent(in)   :: sig      !  Description and declaration in rjdim.f90
-    real(fp)                        , intent(in)   :: sigmol   !  Description and declaration in rjdim.f90
+    real(fp), dimension(0:kmax)     , intent(out)  :: seddif   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax)       , intent(in)   :: sig      !  Description and declaration in esm_alloc_real.f90
+    real(fp)                        , intent(in)   :: sigmol   !  Description and declaration in esm_alloc_real.f90
     real(fp)                        , intent(in)   :: spirint  !  Spiral flow intensity
     real(fp)                        , intent(out)  :: sswu
     real(fp)                        , intent(out)  :: sswv
@@ -118,11 +118,11 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     real(fp)                        , intent(in)   :: taucr0
     real(fp)                        , intent(out)  :: taurat
     real(fp)                        , intent(in)   :: tetacr
-    real(fp), dimension(kmax)       , intent(in)   :: thick    !  Description and declaration in rjdim.f90
-    real(fp)                        , intent(in)   :: ubot     !  Description and declaration in rjdim.f90
+    real(fp), dimension(kmax)       , intent(in)   :: thick    !  Description and declaration in esm_alloc_real.f90
+    real(fp)                        , intent(in)   :: ubot     !  Description and declaration in esm_alloc_real.f90
     real(fp)                        , intent(out)  :: ustarc
     real(fp)                        , intent(out)  :: ust2
-    real(fp), dimension(0:kmax)     , intent(in)   :: ws       !  Description and declaration in rjdim.f90
+    real(fp), dimension(0:kmax)     , intent(in)   :: ws       !  Description and declaration in esm_alloc_real.f90
     real(fp)                        , intent(in)   :: ws0
     real(hp), dimension(numrealpar) , intent(inout):: realpar
     logical                         , intent(in)   :: epspar

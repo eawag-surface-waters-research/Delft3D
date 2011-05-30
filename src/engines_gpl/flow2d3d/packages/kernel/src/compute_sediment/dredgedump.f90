@@ -58,8 +58,8 @@ subroutine dredgedump(dbodsd    ,cdryb     ,nst       ,timhr     ,morft     , &
     integer                                            , intent(in) :: nst
     real(hp)                                           , intent(in) :: morft
     real(fp)                                           , intent(in) :: timhr
-    real(fp), dimension(gdp%d%lsedtot)                 , intent(in) :: cdryb   !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%lsedtot, gdp%d%nmlb:gdp%d%nmub)       :: dbodsd  !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%lsedtot)                 , intent(in) :: cdryb   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%lsedtot, gdp%d%nmlb:gdp%d%nmub)       :: dbodsd  !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

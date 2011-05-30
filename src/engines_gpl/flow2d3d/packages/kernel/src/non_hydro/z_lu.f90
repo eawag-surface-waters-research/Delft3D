@@ -54,9 +54,9 @@ subroutine z_lu(bbka      ,bbk       ,bbkc      ,kmax      ,icx       , &
 !
     integer                                        , intent(in)  :: icx
     integer                                        , intent(in)  :: icy
-    integer                                        , intent(in)  :: kmax !  Description and declaration in iidim.f90
+    integer                                        , intent(in)  :: kmax !  Description and declaration in esm_alloc_int.f90
     integer                                                      :: nmmax !  Description and declaration in dimens.igs
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in)  :: kfsz1 !  Description and declaration in iidim.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in)  :: kfsz1 !  Description and declaration in esm_alloc_int.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in)  :: bbk
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in)  :: bbka
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in)  :: bbkc

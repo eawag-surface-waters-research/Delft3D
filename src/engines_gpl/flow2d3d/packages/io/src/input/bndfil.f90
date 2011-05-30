@@ -53,7 +53,7 @@ subroutine bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
 !
 ! Global variables
 !
-    integer                            , intent(in)  :: kmax   !  Description and declaration in iidim.f90
+    integer                            , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                          :: lnto   !!  Local number of boundary openings read in attribute file
                                                                !!  Test with input NTO
     integer                                          :: lntof  !!  Local number of QH openings read in attribute file
@@ -67,12 +67,12 @@ subroutine bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
                                                                !!  declared (NTO in call from READMD
                                                                !!  and MXNTO in call from TDATOM)
     integer                            , intent(in)  :: mxnto  !!  Max. number of open boundaries
-    integer     , dimension(7, mxdnto)               :: mnbnd  !  Description and declaration in iidim.f90
+    integer     , dimension(7, mxdnto)               :: mnbnd  !  Description and declaration in esm_alloc_int.f90
     logical                            , intent(out) :: error  !!  Flag=TRUE if an error is encountered
     logical                            , intent(in)  :: noui   !!  Flag for reading from User Interface
-    real(fp)    , dimension(mxdnto)                  :: alpha  !  Description and declaration in rjdim.f90
+    real(fp)    , dimension(mxdnto)                  :: alpha  !  Description and declaration in esm_alloc_real.f90
     character(*)                                     :: filbnd !!  File name for the boundary definition file
-    character(1), dimension(mxdnto)                  :: typbnd !  Description and declaration in ckdim.f90
+    character(1), dimension(mxdnto)                  :: typbnd !  Description and declaration in esm_alloc_char.f90
     character(1), dimension(mxnto)                   :: datbnd !!  Type of open boundary:
                                                                !!     -'H'(armonic/Tide)
                                                                !!     -'A'(stronomic/Tide)
@@ -80,8 +80,8 @@ subroutine bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
                                                                !!     -'T'(ime series/time dependent)
     character(11)                      , intent(in)  :: fmttmp !!  Help variable for file format
     character(12), dimension(mxnto, 2)               :: statns !!  References to tidal stations at boundary support points
-    character(20), dimension(mxdnto)                 :: nambnd !  Description and declaration in ckdim.f90
-    character(20), dimension(mxdnto)                 :: tprofu !  Description and declaration in ckdim.f90
+    character(20), dimension(mxdnto)                 :: nambnd !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(mxdnto)                 :: tprofu !  Description and declaration in esm_alloc_char.f90
     character(60)                      , intent(in)  :: profil !!  Total string of possible profiles
 !
 ! Local variables

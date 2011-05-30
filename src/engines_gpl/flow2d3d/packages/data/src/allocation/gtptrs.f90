@@ -1112,7 +1112,7 @@ subroutine gtptrs(gdp)
     elseif (prec == hp) then
        dps = gtdpnt('dps'   , gdp)
     else
-       ! catched in rjdim.f90
+       ! catched in esm_alloc_real.f90
     endif
     dpu    = gtrpnt('dpu'   , gdp)
     dpv    = gtrpnt('dpv'   , gdp)
@@ -1457,7 +1457,7 @@ subroutine gtptrs(gdp)
     !
     ! RBUFF is used only outside TRISOL. So we use a work array, which
     ! is initialized each timestep in TRISOL, here WRKB1 or WRKC1
-    ! The maximum needed storage space for RBUFF is defined in RJDIM
+    ! The maximum needed storage space for RBUFF is defined in esm_alloc_real
     ! and taken in consideration in the declaration of WRKB1 and WRKC1
     ! Because RBUFF must fit in NMAXUS * MMAX * KMAX * 2 the turn-
     ! over point lies for LMAX > 1 (NMAXUS * MMAX * (KMAX+1) * LMAX)

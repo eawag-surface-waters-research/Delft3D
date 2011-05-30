@@ -56,12 +56,12 @@ subroutine inibnd(lundia    ,error      ,nto       ,nopest    ,nrob      , &
 !
     integer                                         :: lundia !  Description and declaration in inout.igs
     integer                           , intent(in)  :: nopest !  Description and declaration in dimens.igs
-    integer                                         :: nrob   !  Description and declaration in iidim.f90
-    integer                           , intent(in)  :: nto    !  Description and declaration in iidim.f90
-    integer     , dimension(7, nto)   , intent(in)  :: mnbnd  !  Description and declaration in iidim.f90
-    integer     , dimension(8, nopest), intent(out) :: nob    !  Description and declaration in iidim.f90
+    integer                                         :: nrob   !  Description and declaration in esm_alloc_int.f90
+    integer                           , intent(in)  :: nto    !  Description and declaration in esm_alloc_int.f90
+    integer     , dimension(7, nto)   , intent(in)  :: mnbnd  !  Description and declaration in esm_alloc_int.f90
+    integer     , dimension(8, nopest), intent(out) :: nob    !  Description and declaration in esm_alloc_int.f90
     logical                                         :: error   !!  Flag=TRUE if an error is encountered
-    character(1), dimension(nto)      , intent(in)  :: typbnd !  Description and declaration in ckdim.f90
+    character(1), dimension(nto)      , intent(in)  :: typbnd !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

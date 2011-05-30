@@ -56,18 +56,18 @@ subroutine updqs(flupd     ,dstep     ,j         ,nmmaxj    ,kmax      , &
                                    !!  been transformed into 1D arrays.
                                    !!  Due to the shift in the 2nd (M-)
                                    !!  index, JSTART = -2*NMAX + 1
-    integer, intent(in)            :: kmax !  Description and declaration in iidim.f90
+    integer, intent(in)            :: kmax !  Description and declaration in esm_alloc_int.f90
     integer, intent(in)            :: nmmaxj !  Description and declaration in dimens.igs
-    integer, intent(in)            :: nsrc !  Description and declaration in iidim.f90
+    integer, intent(in)            :: nsrc !  Description and declaration in esm_alloc_int.f90
     logical, intent(in)            :: flupd
                                    !!  Flag to update (true) or initialize
                                    !!  (false) the discharge arrays
     real(fp), intent(in)               :: dstep
                                    !!  1. / total number of timesteps
                                    !!  (interval to write comm. file)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax) :: qu !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax) :: qv !  Description and declaration in rjdim.f90
-    real(fp), dimension(nsrc) :: discum !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax) :: qu !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax) :: qv !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nsrc) :: discum !  Description and declaration in esm_alloc_real.f90
 !
 !
 ! Local variables

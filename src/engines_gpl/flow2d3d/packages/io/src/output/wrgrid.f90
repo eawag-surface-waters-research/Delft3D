@@ -69,23 +69,23 @@ subroutine wrgrid(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
 !
 ! Global variables
 !
-    integer                                                                    :: kmax   !  Description and declaration in iidim.f90
+    integer                                                                    :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                                    :: lundia !  Description and declaration in inout.igs
-    integer                                                                    :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                    :: nmax   !  Description and declaration in iidim.f90
-    integer                                                                    :: nmaxus !  Description and declaration in iidim.f90
+    integer                                                                    :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                    :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                    :: nmaxus !  Description and declaration in esm_alloc_int.f90
     logical                                                      , intent(out) :: error  !!  Flag=TRUE if an error is encountered
     real(fp)                                                     , intent(in)  :: zbot   !  Description and declaration in zmodel.igs
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: alfas  !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: gsqd   !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: gsqs   !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: guu    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: guv    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: gvu    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: gvv    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: xcor   !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: ycor   !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax)                                                  :: thick  !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: alfas  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: gsqd   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: gsqs   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: guu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: guv    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: gvu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: gvv    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: xcor   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: ycor   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax)                                                  :: thick  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(0:kmax)                                  , intent(in)  :: zk     !!  Vertical coordinates of cell
                                                                                          !!  interfaces
                                                                                          !!  Flag for activation of Z-MODEL

@@ -50,7 +50,7 @@ subroutine rdlaydis(error, thick, kmax, laydis, gdp)
     integer                      , intent(in)  :: kmax
     logical                                    :: error
     character(*)                 , intent(in)  :: laydis
-    real(fp)    , dimension(kmax), intent(out) :: thick  !  Description and declaration in rjdim.f90
+    real(fp)    , dimension(kmax), intent(out) :: thick  !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

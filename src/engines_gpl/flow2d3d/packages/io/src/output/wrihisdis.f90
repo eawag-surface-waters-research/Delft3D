@@ -58,7 +58,7 @@ subroutine wrihisdis(lundia    ,error     ,trifil    ,itdate    ,tunit     , &
     integer                        , intent(in)  :: itdate ! Description and declaration in exttim.igs
     integer                        , intent(in)  :: lundia ! Description and declaration in inout.igs
     integer                        , intent(in)  :: nsrc   ! Description and declaration in dimens.igs        
-    real(fp)                       , intent(in)  :: dt     ! Description and declaration in rjdim.f90    
+    real(fp)                       , intent(in)  :: dt     ! Description and declaration in esm_alloc_real.f90    
     real(fp)                       , intent(in)  :: tunit  ! Description and declaration in exttim.igs
     logical                        , intent(out) :: error  ! Description and declaration in tricom.f90
     character(20), dimension(nsrc) , intent(in)  :: namsrc ! Description and declaration in r-i-ch.igs

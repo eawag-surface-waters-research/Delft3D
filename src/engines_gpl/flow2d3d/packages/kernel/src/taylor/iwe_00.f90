@@ -65,18 +65,18 @@ subroutine iwe_00(nmax      ,mmax      ,kmax      ,kmxdt     ,npiwe     , &
     real(fp)               , pointer :: ag
 !
 ! Global variables
-! All reals   : Description and declaration in rjdim.f90
+! All reals   : Description and declaration in esm_alloc_real.f90
 !
-integer                                                                                    :: kmax   !  Description and declaration in iidim.f90
+integer                                                                                    :: kmax   !  Description and declaration in esm_alloc_int.f90
 integer                                                                                    :: kmxdt  !  Description and declaration in dimens.igs
-integer                                                                      , intent(in)  :: ltur   !  Description and declaration in iidim.f90
+integer                                                                      , intent(in)  :: ltur   !  Description and declaration in esm_alloc_int.f90
 integer                                                                                    :: lundia !  Description and declaration in inout.igs
-integer                                                                      , intent(in)  :: mmax   !  Description and declaration in iidim.f90
-integer                                                                      , intent(in)  :: nmax   !  Description and declaration in iidim.f90
+integer                                                                      , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
+integer                                                                      , intent(in)  :: nmax   !  Description and declaration in esm_alloc_int.f90
 integer                                                                                    :: npiwe  !  Description and declaration in dimens.igs
-integer   , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: kfs    !  Description and declaration in iidim.f90
-integer   , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: kfu    !  Description and declaration in iidim.f90
-integer   , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: kfv    !  Description and declaration in iidim.f90
+integer   , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: kfs    !  Description and declaration in esm_alloc_int.f90
+integer   , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: kfu    !  Description and declaration in esm_alloc_int.f90
+integer   , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: kfv    !  Description and declaration in esm_alloc_int.f90
 real(fp)  , dimension(0:kmax , 15)                                                         :: tgarkx
 real(fp)  , dimension(0:kmxdt, 24)                                                         :: tgarkt
 real(fp)  , dimension(0:npiwe,  4)                                                         :: tgarnp

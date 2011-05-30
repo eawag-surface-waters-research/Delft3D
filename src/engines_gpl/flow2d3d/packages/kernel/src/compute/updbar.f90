@@ -56,26 +56,26 @@ subroutine updbar(nsluv     ,mnbar     ,cbuv      ,cbuvrt    ,nmax      , &
 !
 ! Global variables
 !
-    integer                                                             , intent(in) :: kmax   !  Description and declaration in iidim.f90
-    integer                                                                          :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                          :: nmax   !  Description and declaration in iidim.f90
+    integer                                                             , intent(in) :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                          :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                          :: nmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                             , intent(in) :: nsluv  !  Description and declaration in dimens.igs
-    integer, dimension(5, nsluv)                                        , intent(in) :: mnbar  !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: kfumax !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: kfumin !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: kfvmax !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: kfvmin !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax), intent(out):: kspu   !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax), intent(out):: kspv   !  Description and declaration in iidim.f90
-    real(fp), dimension(4, nsluv)                                       , intent(in) :: cbuv   !  Description and declaration in rjdim.f90
-    real(fp), dimension(2, nsluv)                                       , intent(in) :: cbuvrt !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in) :: dpu    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in) :: dpv    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in) :: hu     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in) :: hv     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax) , intent(out):: ubrlsu !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax) , intent(out):: ubrlsv !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax)                                           , intent(in) :: thick  !  Description and declaration in rjdim.f90
+    integer, dimension(5, nsluv)                                        , intent(in) :: mnbar  !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: kfumax !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: kfumin !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: kfvmax !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: kfvmin !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax), intent(out):: kspu   !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax), intent(out):: kspv   !  Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(4, nsluv)                                       , intent(in) :: cbuv   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(2, nsluv)                                       , intent(in) :: cbuvrt !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in) :: dpu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in) :: dpv    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in) :: hu     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in) :: hv     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax) , intent(out):: ubrlsu !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax) , intent(out):: ubrlsv !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax)                                           , intent(in) :: thick  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(kmax)                                                        :: zcor
     real(fp), dimension(0:kmax)                                         , intent(in) :: zk
 !

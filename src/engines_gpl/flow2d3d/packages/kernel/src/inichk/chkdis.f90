@@ -53,24 +53,24 @@ subroutine chkdis(lundia    ,error     ,nsrc      ,zmodel    ,nmax      , &
 !
 ! Global variables
 !
-    integer                                                           , intent(in)  :: kmax   !  Description and declaration in iidim.f90
+    integer                                                           , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                                         :: lundia !  Description and declaration in inout.igs
-    integer                                                           , intent(in)  :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                         :: nmax   !  Description and declaration in iidim.f90
-    integer                                                           , intent(in)  :: nmaxus !  Description and declaration in iidim.f90
-    integer                                                           , intent(in)  :: nsrc   !  Description and declaration in iidim.f90
-    integer     , dimension(7, nsrc)                                  , intent(in)  :: mnksrc !  Description and declaration in iidim.f90
-    integer     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: kcs    !  Description and declaration in iidim.f90
+    integer                                                           , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                         :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                           , intent(in)  :: nmaxus !  Description and declaration in esm_alloc_int.f90
+    integer                                                           , intent(in)  :: nsrc   !  Description and declaration in esm_alloc_int.f90
+    integer     , dimension(7, nsrc)                                  , intent(in)  :: mnksrc !  Description and declaration in esm_alloc_int.f90
+    integer     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
     logical                                                                         :: error  !!  Flag=TRUE if an error is encountered
     logical                                                           , intent(in)  :: zmodel !  Description and declaration in procs.igs
-    real(fp)     , dimension(3, nsrc)                                 , intent(out) :: xyzsrc !  Description and declaration in rjdim.f90
-    real(prec)   , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: dps    !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: s1     !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: xz     !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: yz     !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(kmax)                                    , intent(in)  :: sig    !  Description and declaration in rjdim.f90
+    real(fp)     , dimension(3, nsrc)                                 , intent(out) :: xyzsrc !  Description and declaration in esm_alloc_real.f90
+    real(prec)   , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: s1     !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: xz     !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: yz     !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(kmax)                                    , intent(in)  :: sig    !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(0:kmax)                                  , intent(in)  :: zk     !!  Initial layer thickness
-    character(20), dimension(nsrc)                                                  :: namsrc !  Description and declaration in ckdim.f90
+    character(20), dimension(nsrc)                                                  :: namsrc !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

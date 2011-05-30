@@ -53,8 +53,8 @@ subroutine rdencl( lunmd     ,lundia    ,error     , runid    , &
 !
     integer, intent(in)       :: lundia ! Description and declaration in inout.igs
     integer, intent(in)       :: lunmd  ! Description and declaration in inout.igs
-    integer, intent(in)       :: mmax   ! Description and declaration in iidim.f90
-    integer, intent(in)       :: nmaxus ! Description and declaration in iidim.f90
+    integer, intent(in)       :: mmax   ! Description and declaration in esm_alloc_int.f90
+    integer, intent(in)       :: nmaxus ! Description and declaration in esm_alloc_int.f90
     logical, intent(out)      :: error  ! Flag=TRUE if an error is encountered
     character(*), intent(in)  :: runid  ! Run identification code for the current
                                         ! simulation (used to determine

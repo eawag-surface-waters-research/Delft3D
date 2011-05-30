@@ -58,15 +58,15 @@ subroutine wrrouf(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
 ! Global variables
 !
     integer                                                                           :: lundia !  Description and declaration in inout.igs
-    integer                                                                           :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                           :: nmax   !  Description and declaration in iidim.f90
-    integer                                                                           :: nmaxus !  Description and declaration in iidim.f90
+    integer                                                                           :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                           :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                           :: nmaxus !  Description and declaration in esm_alloc_int.f90
     logical                                                             , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 3), intent(in)  :: cfurou !  Description and declaration in rjdim.f90
-    real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 3), intent(in)  :: cfvrou !  Description and declaration in rjdim.f90
+    real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 3), intent(in)  :: cfurou !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 3), intent(in)  :: cfvrou !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(nmaxus, mmax)                                             :: rbuff  !  Description and declaration in r-i-ch.igs
     character(*)                                                                      :: comfil !!  Name for communication file com-<case><label>
-    character(4)                                                        , intent(in)  :: rouflo !  Description and declaration in ckdim.f90
+    character(4)                                                        , intent(in)  :: rouflo !  Description and declaration in esm_alloc_char.f90
 !
 !
 ! Local variables

@@ -61,7 +61,7 @@ subroutine read_triana(lundia    ,error     ,kc       ,statns    ,nto        ,gd
 ! Global variables
 !
     integer                            :: lundia !  Description and declaration in inout.igs
-    integer                            :: nto    !  Description and declaration in iidim.f90
+    integer                            :: nto    !  Description and declaration in esm_alloc_int.f90
     integer                            :: kc     !!  Actual number of components used
     logical                            :: error  !!  errorflag
     character(12), dimension(mxnto, 2) :: statns !!  References to tidal stations at ns boundary support points

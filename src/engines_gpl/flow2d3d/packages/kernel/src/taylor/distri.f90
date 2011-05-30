@@ -61,7 +61,7 @@ subroutine distri(ttkiw     ,tiwtk     ,tkepro    ,tkedis    ,futg      , &
     integer         :: kbed
                                    !!  K-value on TG grid: upper level
                                    !!  stratified layer
-    integer, intent(in)            :: kmax !  Description and declaration in iidim.f90
+    integer, intent(in)            :: kmax !  Description and declaration in esm_alloc_int.f90
     integer, intent(in)            :: kmxdt !  Description and declaration in dimens.igs
     integer, intent(in)            :: kmxt !  Description and declaration in dimens.igs
     integer         :: ktop
@@ -78,11 +78,11 @@ subroutine distri(ttkiw     ,tiwtk     ,tkepro    ,tkedis    ,futg      , &
     real(fp), dimension(0:kmxdt) :: fvtg
     real(fp), dimension(0:kmxdt), intent(in) :: tiwtk
     real(fp), dimension(0:kmxdt), intent(in) :: ttkiw
-    real(fp), dimension(kmax) :: fuiwe !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax) :: fviwe !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax), intent(in) :: thick !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax) :: tkedis !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax) :: tkepro !  Description and declaration in rjdim.f90
+    real(fp), dimension(kmax) :: fuiwe !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax) :: fviwe !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax), intent(in) :: thick !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax) :: tkedis !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax) :: tkepro !  Description and declaration in esm_alloc_real.f90
 !
 !
 ! Local variables

@@ -50,7 +50,7 @@ subroutine dimiwe(lunmd     ,lundia    ,error     ,nrrec     ,iweflg    , &
 !
 ! Global variables
 !
-    integer               :: kmax   !  Description and declaration in iidim.f90
+    integer               :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer               :: kmxdt  !  Description and declaration in dimens.igs
     integer               :: lundia !  Description and declaration in inout.igs
     integer               :: lunmd  !  Description and declaration in inout.igs

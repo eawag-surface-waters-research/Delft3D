@@ -56,18 +56,18 @@ subroutine updwaqflx(nst       ,zmodel    ,nmmax     ,kmax      ,kcs       , &
 !
 ! Global variables
 !
-    integer                                                  :: nsrc   !  Description and declaration in iidim.f90
+    integer                                                  :: nsrc   !  Description and declaration in esm_alloc_int.f90
     integer                                                  :: nst    !!  Time step number
-    integer                                                  :: nmmax  !  Description and declaration in iidim.f90
-    integer                                                  :: kmax   !  Description and declaration in iidim.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)               :: kcs    !  Description and declaration in iidim.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)               :: kcu    !  Description and declaration in iidim.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)               :: kcv    !  Description and declaration in iidim.f90
+    integer                                                  :: nmmax  !  Description and declaration in esm_alloc_int.f90
+    integer                                                  :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)               :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)               :: kcu    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)               :: kcv    !  Description and declaration in esm_alloc_int.f90
     logical                                                  :: zmodel !  Description and declaration in procs.igs
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)       :: qzk    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: qxk    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: qyk    !  Description and declaration in rjdim.f90
-    real(fp), dimension(nsrc)                                :: disch  !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)       :: qzk    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: qxk    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: qyk    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nsrc)                                :: disch  !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

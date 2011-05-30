@@ -56,9 +56,9 @@ subroutine fouana(mmax      ,nmaxus    ,nofou     ,ifou      ,kcs      , &
 ! Global variables
 !
     integer                                                                   , intent(in)  :: ifou   !!  Counter
-    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in)  :: kcs    !  Description and declaration in iidim.f90
-    integer                                                                   , intent(in)  :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                   , intent(in)  :: nmaxus !  Description and declaration in iidim.f90
+    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer                                                                   , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                   , intent(in)  :: nmaxus !  Description and declaration in esm_alloc_int.f90
     integer                                                                   , intent(in)  :: nofou  !  Description and declaration in dimens.igs
     integer                                                                   , intent(in)  :: nst    !!  Time step number
     real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in)  :: rarray !!  Array for fourier analysis

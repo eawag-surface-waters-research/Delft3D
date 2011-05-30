@@ -54,9 +54,9 @@ subroutine z_precon_ilu(aak       ,bbk       ,cck       ,aak2      ,cck2      , 
 !
     integer                                         , intent(in) :: icx
     integer                                         , intent(in) :: icy
-    integer                                         , intent(in) :: kmax  !  Description and declaration in iidim.f90
+    integer                                         , intent(in) :: kmax  !  Description and declaration in esm_alloc_int.f90
     integer                                                      :: nmmax !  Description and declaration in dimens.igs
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in) :: kfsz1 !  Description and declaration in iidim.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in) :: kfsz1 !  Description and declaration in esm_alloc_int.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: aak
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: aak2
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: bbk
@@ -64,7 +64,7 @@ subroutine z_precon_ilu(aak       ,bbk       ,cck       ,aak2      ,cck2      , 
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: bbkc
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: cck
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: cck2
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: p1     !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: p1     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in) :: rj
 !
 ! Local variables

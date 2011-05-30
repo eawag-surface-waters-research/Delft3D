@@ -70,22 +70,22 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
 ! Global variables
 !
-    integer                                                                     :: kmax   !  Description and declaration in iidim.f90
+    integer                                                                     :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                       , intent(in)  :: lsal   !  Description and declaration in dimens.igs
     integer                                                       , intent(in)  :: lsed   !  Description and declaration in dimens.igs
     integer                                                       , intent(in)  :: lstsc  !  Description and declaration in dimens.igs
-    integer                                                                     :: lstsci !  Description and declaration in iidim.f90
+    integer                                                                     :: lstsci !  Description and declaration in esm_alloc_int.f90
     integer                                                       , intent(in)  :: ltem   !  Description and declaration in dimens.igs
-    integer                                                                     :: ltur   !  Description and declaration in iidim.f90
+    integer                                                                     :: ltur   !  Description and declaration in esm_alloc_int.f90
     integer                                                                     :: lturi  !  Description and declaration in tricom.igs
     integer                                                                     :: lundia !  Description and declaration in inout.igs
     integer                                                                     :: lunmd  !  Description and declaration in inout.igs
-    integer                                                                     :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                     :: nmax   !  Description and declaration in iidim.f90
-    integer                                                                     :: nmaxus !  Description and declaration in iidim.f90
+    integer                                                                     :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                     :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                     :: nmaxus !  Description and declaration in esm_alloc_int.f90
     integer                                                                     :: nrrec  !!  Pointer to the record number in the MD-file
-    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: kfu    !  Description and declaration in iidim.f90
-    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: kfv    !  Description and declaration in iidim.f90
+    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: kfu    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: kfv    !  Description and declaration in esm_alloc_int.f90
     logical                                                       , intent(in)  :: const  !  Description and declaration in procs.igs
     logical                                                                     :: error  !!  Flag=TRUE if an error is encountered
     logical                                                       , intent(in)  :: noui   !!  Flag for reading from User Interface
@@ -93,15 +93,15 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     logical                                                       , intent(in)  :: secflo !  Description and declaration in procs.igs
     logical                                                       , intent(in)  :: temp   !  Description and declaration in procs.igs
     real(fp)                                                                    :: zini   !!  Initial water elevation in the model
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: dp     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: s1     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: umnldf !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: vmnldf !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax, ltur) :: rtur1  !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: u1     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: v1     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci) :: r1     !  Description and declaration in rjdim.f90
-    real(fp), dimension(lstsc)                                                  :: decay  !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: dp     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: s1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: umnldf !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: vmnldf !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax, ltur) :: rtur1  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: u1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: v1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci) :: r1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(lstsc)                                                  :: decay  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(mxkmax)                                                 :: i0ini  !!  Initial condition for secondary flow
                                                                                           !!  only if kmax = 1
     real(fp), dimension(mxkmax)                                                 :: s0ini  !!  Initial condition for salinity,
@@ -131,7 +131,7 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                                                                                           !!  the names of the in- /output files
                                                                                           !!  used by the system)
     character(2)                                                  , intent(out) :: fmtic  !!  File format of initial condition file
-    character(20), dimension(lstsci + ltur)                                     :: namcon !  Description and declaration in ckdim.f90
+    character(20), dimension(lstsci + ltur)                                     :: namcon !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

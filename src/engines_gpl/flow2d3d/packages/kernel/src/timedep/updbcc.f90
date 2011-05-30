@@ -64,20 +64,20 @@ subroutine updbcc(lunbcc    ,lundia    ,first     ,itbcc     ,ito       , &
     integer                             , intent(in)  :: istsc  !!  Index number of constituent
     integer                             , intent(in)  :: ito    !!  Index number of open boundary loc.
     integer                             , intent(in)  :: itstop !  Description and declaration in inttim.igs
-    integer                             , intent(in)  :: kmax   !  Description and declaration in iidim.f90
+    integer                             , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                             , intent(in)  :: lstsc  !  Description and declaration in dimens.igs
     integer                             , intent(in)  :: lunbcc !  Description and declaration in luntmp.igs
     integer                                           :: lundia !  Description and declaration in inout.igs
-    integer                             , intent(in)  :: nto    !  Description and declaration in iidim.f90
-    integer, dimension(5, nto, lstsc)                 :: itbcc  !  Description and declaration in iidim.f90
+    integer                             , intent(in)  :: nto    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(5, nto, lstsc)                 :: itbcc  !  Description and declaration in esm_alloc_int.f90
     logical                                           :: first  !!  Flag = TRUE in case a time-dependent
                                                                 !!  file is read for the 1-st time
     real(fp)                            , intent(in)  :: timnow !!  Current timestep (multiples of dt)
     real(fp)                            , intent(in)  :: timscl !!  Multiple factor to create minutes
                                                                 !!  from read times
-    real(fp), dimension(2, nto, lstsc)                :: zstep  !  Description and declaration in rjdim.f90
-    real(fp), dimension(4, nto, kmax, lstsc)          :: procbc !  Description and declaration in rjdim.f90
-    character(10), dimension(nto, lstsc), intent(in)  :: tprofc !  Description and declaration in ckdim.f90
+    real(fp), dimension(2, nto, lstsc)                :: zstep  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(4, nto, kmax, lstsc)          :: procbc !  Description and declaration in esm_alloc_real.f90
+    character(10), dimension(nto, lstsc), intent(in)  :: tprofc !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

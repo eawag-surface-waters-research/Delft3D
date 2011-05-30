@@ -220,10 +220,12 @@ src/engines_gpl/flow2d3d/packages/data/include/zmodel.igs -text
 src/engines_gpl/flow2d3d/packages/data/src/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/data/src/allocation/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/data/src/allocation/chnull.f90 -text
-src/engines_gpl/flow2d3d/packages/data/src/allocation/ckdim.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/allocation/decarr.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/allocation/dnull.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/allocation/errpnt.f90 -text
+src/engines_gpl/flow2d3d/packages/data/src/allocation/esm_alloc_char.f90 -text
+src/engines_gpl/flow2d3d/packages/data/src/allocation/esm_alloc_int.f90 -text
+src/engines_gpl/flow2d3d/packages/data/src/allocation/esm_alloc_real.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/allocation/getlun.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/allocation/getpointer.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/allocation/gtcpnt.f90 -text
@@ -232,7 +234,6 @@ src/engines_gpl/flow2d3d/packages/data/src/allocation/gtipnt.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/allocation/gtlpnt.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/allocation/gtptrs.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/allocation/gtrpnt.f90 -text
-src/engines_gpl/flow2d3d/packages/data/src/allocation/iidim.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/allocation/inull.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/allocation/lnull.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/allocation/mkcpnt.f90 -text
@@ -241,7 +242,6 @@ src/engines_gpl/flow2d3d/packages/data/src/allocation/mkfpnt.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/allocation/mkipnt.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/allocation/mklpnt.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/allocation/mkrpnt.f90 -text
-src/engines_gpl/flow2d3d/packages/data/src/allocation/rjdim.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/allocation/rnull.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/basics/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/data/src/basics/bedcomposition_module.f90 -text

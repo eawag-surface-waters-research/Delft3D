@@ -79,13 +79,13 @@ subroutine taylor(kmax      ,kmxdt     ,kmxt      ,np        ,nfreqs    , &
 !
 ! Global variables
 !
-    integer                                      :: kmax   !  Description and declaration in iidim.f90
+    integer                                      :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                      :: kmxdt  !  Description and declaration in dimens.igs
     integer                                      :: kmxt   !  Description and declaration in dimens.igs
     integer                                      :: luniwe !!  Unit number for diagnostic reports of this subprogram as well as called subroutines
     integer                                      :: nfreqs !  Description and declaration in dimens.igs
     integer                                      :: np     !!  Dimension for IWE frequency arrays MAX (1,NFREQS)
-    real(prec)                                   :: dps    !  Description and declaration in rjdim.f90
+    real(prec)                                   :: dps    !  Description and declaration in esm_alloc_real.f90
     real(fp)                                     :: frcbed !  Description and declaration in iwepar.igs
     real(fp)                                     :: frcsur !  Description and declaration in iwepar.igs
     real(fp)                                     :: siglim !  Description and declaration in iwepar.igs
@@ -97,14 +97,14 @@ subroutine taylor(kmax      ,kmxdt     ,kmxt      ,np        ,nfreqs    , &
     real(fp)                        , intent(in) :: wvlbed !  Description and declaration in iwepar.igs
     real(fp)                        , intent(in) :: wvlsur !  Description and declaration in iwepar.igs
     real(fp)                                     :: zeta   !!  Water surface elevation
-    real(fp) , dimension(0:kmax)                 :: bruvai !  Description and declaration in rjdim.f90
+    real(fp) , dimension(0:kmax)                 :: bruvai !  Description and declaration in esm_alloc_real.f90
     real(fp) , dimension(0:kmax)                 :: d2u0
     real(fp) , dimension(0:kmax)                 :: d2v0
-    real(fp) , dimension(0:kmax)                 :: dudz   !  Description and declaration in rjdim.f90
-    real(fp) , dimension(0:kmax)                 :: dvdz   !  Description and declaration in rjdim.f90
-    real(fp) , dimension(0:kmax)                 :: rich   !  Description and declaration in rjdim.f90
-    real(fp) , dimension(0:kmax)                 :: vicww  !  Description and declaration in rjdim.f90
-    real(fp) , dimension(0:kmax, 2)              :: rtur0  !  Description and declaration in rjdim.f90
+    real(fp) , dimension(0:kmax)                 :: dudz   !  Description and declaration in esm_alloc_real.f90
+    real(fp) , dimension(0:kmax)                 :: dvdz   !  Description and declaration in esm_alloc_real.f90
+    real(fp) , dimension(0:kmax)                 :: rich   !  Description and declaration in esm_alloc_real.f90
+    real(fp) , dimension(0:kmax)                 :: vicww  !  Description and declaration in esm_alloc_real.f90
+    real(fp) , dimension(0:kmax, 2)              :: rtur0  !  Description and declaration in esm_alloc_real.f90
     real(fp) , dimension(0:kmxdt)                :: atg
     real(fp) , dimension(0:kmxdt)                :: btg
     real(fp) , dimension(0:kmxdt)                :: bv2
@@ -125,14 +125,14 @@ subroutine taylor(kmax      ,kmxdt     ,kmxt      ,np        ,nfreqs    , &
     real(fp) , dimension(0:kmxdt)                :: utg
     real(fp) , dimension(0:kmxdt)                :: vtg
     real(fp) , dimension(0:kmxdt)                :: zlw
-    real(fp) , dimension(kmax)                   :: fuiwe  !  Description and declaration in rjdim.f90
-    real(fp) , dimension(kmax)                   :: fviwe  !  Description and declaration in rjdim.f90
-    real(fp) , dimension(kmax)                   :: sig    !  Description and declaration in rjdim.f90
-    real(fp) , dimension(kmax)                   :: thick  !  Description and declaration in rjdim.f90
-    real(fp) , dimension(kmax)                   :: tkedis !  Description and declaration in rjdim.f90
-    real(fp) , dimension(kmax)                   :: tkepro !  Description and declaration in rjdim.f90
-    real(fp) , dimension(kmax)                   :: u0     !  Description and declaration in rjdim.f90
-    real(fp) , dimension(kmax)                   :: v0     !  Description and declaration in rjdim.f90
+    real(fp) , dimension(kmax)                   :: fuiwe  !  Description and declaration in esm_alloc_real.f90
+    real(fp) , dimension(kmax)                   :: fviwe  !  Description and declaration in esm_alloc_real.f90
+    real(fp) , dimension(kmax)                   :: sig    !  Description and declaration in esm_alloc_real.f90
+    real(fp) , dimension(kmax)                   :: thick  !  Description and declaration in esm_alloc_real.f90
+    real(fp) , dimension(kmax)                   :: tkedis !  Description and declaration in esm_alloc_real.f90
+    real(fp) , dimension(kmax)                   :: tkepro !  Description and declaration in esm_alloc_real.f90
+    real(fp) , dimension(kmax)                   :: u0     !  Description and declaration in esm_alloc_real.f90
+    real(fp) , dimension(kmax)                   :: v0     !  Description and declaration in esm_alloc_real.f90
     real(fp) , dimension(np, 2)                  :: freqlo
     real(fp) , dimension(np, 2)                  :: frequp
 !

@@ -50,13 +50,13 @@ subroutine layerdep(dep   , thick, kmax, nm    , dp    , wlev, &
 !
     integer                                         , intent(in)  :: kmax
     integer                                         , intent(in)  :: nm
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfumin !  Description and declaration in iidim.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfumax !  Description and declaration in iidim.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfumin !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfumax !  Description and declaration in esm_alloc_int.f90
     real(fp), dimension(0:kmax+1)                   , intent(out) :: dep    !  Depth of layers
-    real(fp), dimension(kmax)                       , intent(in)  :: thick  !  Description and declaration in rjdim.f90
+    real(fp), dimension(kmax)                       , intent(in)  :: thick  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: dp
     real(fp)                                        , intent(in)  :: wlev
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in)  :: dzu1   !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in)  :: dzu1   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(0:kmax)                     , intent(in)  :: zk
     logical                                         , intent(in)  :: zmodel
 !

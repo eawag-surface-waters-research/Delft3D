@@ -64,22 +64,22 @@ subroutine initau(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                                                                      !!  been transformed into 1D arrays.
                                                                      !!  Due to the shift in the 2nd (M-)
                                                                      !!  index, J = -2*NMAX + 1
-    integer                                                :: kmax   !  Description and declaration in iidim.f90
+    integer                                                :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                :: nmmax  !  Description and declaration in dimens.igs
     integer                                                :: nmmaxj !  Description and declaration in dimens.igs
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)              :: kcs    !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)              :: kcu    !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)              :: kfu    !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)      :: kspu   !  Description and declaration in iidim.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)              :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)              :: kcu    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)              :: kfu    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)      :: kspu   !  Description and declaration in esm_alloc_int.f90
     logical                                                :: zmodel !  Description and declaration in procs.igs
-    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)                 :: dps    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                 :: dpu    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                 :: hu     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                 :: s1     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                 :: umean  !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)   , intent(out) :: z0urou !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 3), intent(in)  :: cfurou !  Description and declaration in rjdim.f90
-    character(4)                             , intent(in)  :: rouflo !  Description and declaration in ckdim.f90
+    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)                 :: dps    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                 :: dpu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                 :: hu     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                 :: s1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                 :: umean  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)   , intent(out) :: z0urou !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 3), intent(in)  :: cfurou !  Description and declaration in esm_alloc_real.f90
+    character(4)                             , intent(in)  :: rouflo !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

@@ -65,41 +65,41 @@ subroutine prtmap(lundia    ,error     ,prsmap    ,lunprt    ,nuprpg    , &
     integer                                                                    , intent(in)  :: ipmapc !!  Current time counter for printing map
                                                                                                        !!  data (called with IPMAP (NPMAPC))
     integer                                                                                  :: julday !  Description and declaration in inttim.igs
-    integer                                                                    , intent(in)  :: kmax   !  Description and declaration in iidim.f90
+    integer                                                                    , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                                    , intent(in)  :: lmaxd  !  Description and declaration in dimens.igs
     integer                                                                    , intent(in)  :: lsal   !  Description and declaration in dimens.igs
-    integer                                                                    , intent(in)  :: lstsci !  Description and declaration in iidim.f90
+    integer                                                                    , intent(in)  :: lstsci !  Description and declaration in esm_alloc_int.f90
     integer                                                                    , intent(in)  :: ltem   !  Description and declaration in dimens.igs
-    integer                                                                    , intent(in)  :: ltur   !  Description and declaration in iidim.f90
+    integer                                                                    , intent(in)  :: ltur   !  Description and declaration in esm_alloc_int.f90
     integer                                                                                  :: lundia !  Description and declaration in inout.igs
     integer                                                                                  :: lunprt !  Description and declaration in inout.igs
-    integer                                                                    , intent(in)  :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                                  :: nmax   !  Description and declaration in iidim.f90
-    integer                                                                    , intent(in)  :: nmaxus !  Description and declaration in iidim.f90
+    integer                                                                    , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                  :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                    , intent(in)  :: nmaxus !  Description and declaration in esm_alloc_int.f90
     integer                                                                                  :: nuprln !  Description and declaration in postpr.igs
     integer                                                                                  :: nuprpg !  Description and declaration in postpr.igs
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                             :: kcs    !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: kfu    !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: kfv    !  Description and declaration in iidim.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                             :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: kfu    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: kfv    !  Description and declaration in esm_alloc_int.f90
     logical                                                                                  :: error  !!  Flag=TRUE if an error is encountered
     real(fp)                                                                   , intent(in)  :: dtsec  !!  Integration time step [in seconds]
     real(fp)                                                                                 :: grdang !  Description and declaration in tricom.igs
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                            :: alfas  !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: s1     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)      , intent(in)  :: dicww  !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)      , intent(in)  :: rich   !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)      , intent(in)  :: vicww  !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax, ltur), intent(in)  :: rtur1  !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: rho    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: u1     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: v1     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: wphy   !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci), intent(in)  :: r1     !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                            :: alfas  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: s1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)      , intent(in)  :: dicww  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)      , intent(in)  :: rich   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)      , intent(in)  :: vicww  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax, ltur), intent(in)  :: rtur1  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: rho    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: u1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: v1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: wphy   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci), intent(in)  :: r1     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(nmaxus, mmax, 0:kmax, lmaxd)                                         :: rbuff0 !!  Help arrays for writing NEFIS files
     real(fp), dimension(nmaxus, mmax, 1:kmax, lmaxd)                                         :: rbuff1 !!  Help arrays for writing NEFIS files
     character(131), dimension(10)                                                            :: header !  Description and declaration in postpr.igs
     character(19)                                                              , intent(in)  :: prsmap !  Description and declaration in tricom.igs
-    character(20), dimension(lstsci + ltur)                                    , intent(in)  :: namcon !  Description and declaration in ckdim.f90
+    character(20), dimension(lstsci + ltur)                                    , intent(in)  :: namcon !  Description and declaration in esm_alloc_char.f90
     character(*)                                                               , intent(in)  :: velt   !  Velocity type 'eulerian' or 'GLM'
 !
 ! Local variables

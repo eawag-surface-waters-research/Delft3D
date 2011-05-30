@@ -59,10 +59,10 @@ subroutine z_initcg_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2     
 !
     integer                                                       :: icx
     integer                                                       :: icy
-    integer                                                       :: kmax   !  Description and declaration in iidim.f90
+    integer                                                       :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                       :: nmmax  !  Description and declaration in dimens.igs
     integer                                                       :: nst
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: kfsz1  !  Description and declaration in iidim.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: kfsz1  !  Description and declaration in esm_alloc_int.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: aak
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: aak2
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: bbk
@@ -72,13 +72,13 @@ subroutine z_initcg_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2     
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: cck2
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: ddk
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: dinv
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: p1     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: p0    !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: p1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: p0    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: pbbk
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: pbbkc
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: pnhcor !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: pnhcor !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: rj
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                    :: s1     !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                    :: s1     !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

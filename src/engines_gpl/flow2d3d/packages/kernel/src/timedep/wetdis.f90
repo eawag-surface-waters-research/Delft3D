@@ -62,15 +62,15 @@ subroutine wetdis(i         ,isrc      ,jsrc      ,dp        ,xcor      , &
                                                                      !!  index, j = -2*nmax + 1
     integer                                                :: jsrc   !!  n-index of discharge
     integer                                   , intent(in) :: nmmaxj !  Description and declaration in dimens.igs
-    integer,  dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kcu    !  Description and declaration in iidim.f90
-    integer,  dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kcv    !  Description and declaration in iidim.f90
+    integer,  dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kcu    !  Description and declaration in esm_alloc_int.f90
+    integer,  dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kcv    !  Description and declaration in esm_alloc_int.f90
     integer,  dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfd    !!  mask array for the zeta points
                                                                      !!  =0 not yet used for searching
                                                                      !!  =1 already used
-    integer,  dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kfs    !  Description and declaration in iidim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: dp     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: xcor   !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: ycor   !  Description and declaration in rjdim.f90
+    integer,  dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kfs    !  Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: dp     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: xcor   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: ycor   !  Description and declaration in esm_alloc_real.f90
 !
 !
 ! Local variables

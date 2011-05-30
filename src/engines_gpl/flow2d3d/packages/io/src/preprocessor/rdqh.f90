@@ -57,7 +57,7 @@ subroutine rdqh(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
                                                          !!  help file between tdatom and trisim
     integer                                    :: lunrd  !!  Unit number of the attribute file
                                                          !!  containing the time series
-    integer                      , intent(in)  :: nto    !  Description and declaration in iidim.f90
+    integer                      , intent(in)  :: nto    !  Description and declaration in esm_alloc_int.f90
     integer                      , intent(in)  :: ntof   !  Description and declaration in dimens.igs
     integer                      , intent(in)  :: ntoq   !  Description and declaration in dimens.igs
     logical                      , intent(in)  :: bubble !  Description and declaration in procs.igs        
@@ -67,7 +67,7 @@ subroutine rdqh(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
     character(*)                               :: filout !!  Name of the output file to be opened
     character(*)                 , intent(in)  :: runid
     character(1)                 , intent(in)  :: eol    !!  ASCII code for End-Of-Line (^J)
-    character(20), dimension(nto)              :: nambnd !  Description and declaration in ckdim.f90
+    character(20), dimension(nto)              :: nambnd !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

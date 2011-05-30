@@ -53,8 +53,8 @@ subroutine dimsedconst(lundia    ,error     ,sedim     ,const     , &
 ! Global variables
 !
     integer , intent(out) :: lconst
-    integer , intent(out) :: lsed    ! Description and declaration in iidim.f90
-    integer , intent(out) :: lsedtot ! Description and declaration in iidim.f90
+    integer , intent(out) :: lsed    ! Description and declaration in esm_alloc_int.f90
+    integer , intent(out) :: lsedtot ! Description and declaration in esm_alloc_int.f90
     integer               :: lundia  ! Description and declaration in inout.igs
     logical , intent(in)  :: const    
     logical , intent(out) :: error

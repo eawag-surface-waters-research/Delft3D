@@ -65,12 +65,12 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
 !
 ! Global variables
 !
-    integer      , intent(in)  :: kmax   !  Description and declaration in iidim.f90
+    integer      , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer      , intent(in)  :: lsal   !  Description and declaration in dimens.igs
     integer      , intent(in)  :: lsed   !  Description and declaration in dimens.igs
-    integer      , intent(in)  :: lstsci !  Description and declaration in iidim.f90
+    integer      , intent(in)  :: lstsci !  Description and declaration in esm_alloc_int.f90
     integer      , intent(in)  :: ltem   !  Description and declaration in dimens.igs
-    integer      , intent(in)  :: ltur   !  Description and declaration in iidim.f90
+    integer      , intent(in)  :: ltur   !  Description and declaration in esm_alloc_int.f90
     integer                    :: lundia !  Description and declaration in inout.igs
     integer                    :: lunmd  !  Description and declaration in inout.igs
     integer      , intent(in)  :: nostat !  Description and declaration in dimens.igs

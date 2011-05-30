@@ -105,17 +105,17 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
 !
 ! Global variables
 !
-    integer                                                         , intent(in)  :: lsed    !  Description and declaration in iidim.f90
-    integer                                                         , intent(in)  :: lsedtot !  Description and declaration in iidim.f90
+    integer                                                         , intent(in)  :: lsed    !  Description and declaration in esm_alloc_int.f90
+    integer                                                         , intent(in)  :: lsedtot !  Description and declaration in esm_alloc_int.f90
     integer                                                         , intent(in)  :: lundia  !  Description and declaration in inout.igs
-    integer                                                         , intent(in)  :: mmax    !  Description and declaration in iidim.f90
-    integer                                                         , intent(in)  :: nmax    !  Description and declaration in iidim.f90
-    integer                                                         , intent(in)  :: nmaxus  !  Description and declaration in iidim.f90
-    integer                                                         , intent(in)  :: nmmax   !  Description and declaration in iidim.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                    , intent(in)  :: kcs     !  Description and declaration in iidim.f90
+    integer                                                         , intent(in)  :: mmax    !  Description and declaration in esm_alloc_int.f90
+    integer                                                         , intent(in)  :: nmax    !  Description and declaration in esm_alloc_int.f90
+    integer                                                         , intent(in)  :: nmaxus  !  Description and declaration in esm_alloc_int.f90
+    integer                                                         , intent(in)  :: nmmax   !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                    , intent(in)  :: kcs     !  Description and declaration in esm_alloc_int.f90
     logical                                                                       :: error   !!  Flag=TRUE if an error is encountered
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsed)              , intent(out) :: dss     !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(lsed)                                     , intent(in)  :: facdss  !  Description and declaration in rjdim.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsed)              , intent(out) :: dss     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(lsed)                                     , intent(in)  :: facdss  !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

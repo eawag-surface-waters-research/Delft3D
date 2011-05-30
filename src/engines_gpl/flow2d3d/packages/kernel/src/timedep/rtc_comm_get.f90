@@ -67,7 +67,7 @@ subroutine rtc_comm_get(cursec    ,cbuvrt    ,nsluv     ,gdp       )
 !
     integer                      , intent(in) :: nsluv  ! number of barriers
     real(fp)                     , intent(in) :: cursec ! Current simulation time in seconds 
-    real(fp), dimension(2, nsluv)             :: cbuvrt ! Description and declaration in rjdim.f90
+    real(fp), dimension(2, nsluv)             :: cbuvrt ! Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

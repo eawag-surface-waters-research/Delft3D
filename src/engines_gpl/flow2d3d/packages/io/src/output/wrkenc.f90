@@ -58,13 +58,13 @@ subroutine wrkenc(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
 ! Global variables
 !
     integer                                                                   :: lundia !  Description and declaration in inout.igs
-    integer                                                                   :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                   :: nmax   !  Description and declaration in iidim.f90
-    integer                                                                   :: nmaxus !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: kcs    !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: kcu    !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: kcv    !  Description and declaration in iidim.f90
-    integer, dimension(nmaxus, mmax)                                          :: ibuff  !  Description and declaration in iidim.f90
+    integer                                                                   :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                   :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                   :: nmaxus !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: kcu    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: kcv    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(nmaxus, mmax)                                          :: ibuff  !  Description and declaration in esm_alloc_int.f90
     logical                                                     , intent(out) :: error  !!  Flag=TRUE if an error is encountered
     character(*)                                                              :: comfil !!  Name for communication file
                                                                                         !!  com-<case><label>

@@ -54,7 +54,7 @@ subroutine dimdis(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     integer               :: lundia !  Description and declaration in inout.igs
     integer               :: lunmd  !  Description and declaration in inout.igs
     integer               :: nrrec  !!  Record counter keeping the track of the last record read
-    integer               :: nsrc   !  Description and declaration in iidim.f90
+    integer               :: nsrc   !  Description and declaration in esm_alloc_int.f90
     logical , intent(out) :: error  !!  Flag=TRUE if an error is encountered
     logical , intent(in)  :: noui   !!  Flag true if program calling routine is not User Interface
 !

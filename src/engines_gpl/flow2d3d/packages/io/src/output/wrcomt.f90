@@ -57,35 +57,35 @@ subroutine wrcomt(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
                                                                                           !!  point depend on CYCLIC
     integer                                                                     :: itimc  !!  Current time step counter for 2D
                                                                                           !!  system
-    integer                                                                     :: kmax   !  Description and declaration in iidim.f90
+    integer                                                                     :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                                     :: lsal   !  Description and declaration in dimens.igs
     integer                                                                     :: lsecfl !  Description and declaration in dimens.igs
-    integer                                                                     :: lstsci !  Description and declaration in iidim.f90
+    integer                                                                     :: lstsci !  Description and declaration in esm_alloc_int.f90
     integer                                                                     :: ltem   !  Description and declaration in dimens.igs
     integer                                                                     :: lundia !  Description and declaration in inout.igs
-    integer                                                                     :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                     :: nmax   !  Description and declaration in iidim.f90
-    integer                                                                     :: nmaxus !  Description and declaration in iidim.f90
-    integer                                                                     :: nsrc   !  Description and declaration in iidim.f90
+    integer                                                                     :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                     :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                     :: nmaxus !  Description and declaration in esm_alloc_int.f90
+    integer                                                                     :: nsrc   !  Description and declaration in esm_alloc_int.f90
     integer                                                                     :: ntcur  !!  Total number of timesteps on com-
                                                                                           !!  munication file (to write to)
-    integer , dimension(7, nsrc)                                                :: mnksrc !  Description and declaration in iidim.f90
-    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: kfu    !  Description and declaration in iidim.f90
-    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: kfv    !  Description and declaration in iidim.f90
-    integer , dimension(nmaxus, mmax)                                           :: ibuff  !  Description and declaration in iidim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: s1     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: taubmx !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)       :: dicww  !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax + 2)     :: dicuv  !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: qu     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: qv     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: u1     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: v1     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: windu  !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: windv  !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci) :: r1     !  Description and declaration in rjdim.f90
+    integer , dimension(7, nsrc)                                                :: mnksrc !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: kfu    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: kfv    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(nmaxus, mmax)                                           :: ibuff  !  Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: s1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: taubmx !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)       :: dicww  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax + 2)     :: dicuv  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: qu     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: qv     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: u1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: v1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: windu  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: windv  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci) :: r1     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(nmaxus, mmax, kmax)                                     :: rbuff  !  Description and declaration in r-i-ch.igs
-    real(fp), dimension(nsrc)                                                   :: discum !  Description and declaration in rjdim.f90
+    real(fp), dimension(nsrc)                                                   :: discum !  Description and declaration in esm_alloc_real.f90
     logical                                                                     :: error  !!  Flag=TRUE if an error is encountered
     character(*)                                                                :: comfil !!  Name for communication file
                                                                                           !!  com-<case><label>

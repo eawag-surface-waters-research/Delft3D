@@ -45,10 +45,10 @@ subroutine creategridborder(xcor, ycor, mmax, nmax, gdp)
 !
 ! Global variables
 !
-    integer              :: mmax   !  Description and declaration in iidim.f90
-    integer              :: nmax   !  Description and declaration in iidim.f90
-    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)  :: xcor   !  Description and declaration in rjdim.f90
-    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)  :: ycor   !  Description and declaration in rjdim.f90
+    integer              :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer              :: nmax   !  Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)  :: xcor   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)  :: ycor   !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

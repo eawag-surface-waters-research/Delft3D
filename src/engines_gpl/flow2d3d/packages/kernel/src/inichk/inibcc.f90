@@ -59,21 +59,21 @@ subroutine inibcc(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
 !
     integer                                       :: itstop !  Description and declaration in inttim.igs
     integer                                       :: itstrt !  Description and declaration in inttim.igs
-    integer                                       :: kmax   !  Description and declaration in iidim.f90
+    integer                                       :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                       :: lstsc  !  Description and declaration in dimens.igs
     integer                                       :: lundia !  Description and declaration in inout.igs
-    integer                                       :: nto    !  Description and declaration in iidim.f90
-    integer      , dimension(5, nto, lstsc)       :: itbcc  !  Description and declaration in iidim.f90
+    integer                                       :: nto    !  Description and declaration in esm_alloc_int.f90
+    integer      , dimension(5, nto, lstsc)       :: itbcc  !  Description and declaration in esm_alloc_int.f90
     logical                                       :: cyclic
     logical                         , intent(in)  :: bubble !  Description and declaration in procs.igs
     logical                                       :: error  !!  Flag=TRUE if an error is encountered
     real(fp)                                      :: timnow !!  Current timestep (ITSTRT * dt)
-    real(fp)     , dimension(2, nto, lstsc)       :: zstep  !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(4, nto, kmax, lstsc) :: procbc !  Description and declaration in rjdim.f90
+    real(fp)     , dimension(2, nto, lstsc)       :: zstep  !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(4, nto, kmax, lstsc) :: procbc !  Description and declaration in esm_alloc_real.f90
     character(*)                                  :: runid
-    character(10), dimension(nto, lstsc)          :: tprofc !  Description and declaration in ckdim.f90
-    character(20), dimension(lstsc) , intent(in)  :: namcon !  Description and declaration in ckdim.f90
-    character(20), dimension(nto)                 :: nambnd !  Description and declaration in ckdim.f90
+    character(10), dimension(nto, lstsc)          :: tprofc !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(lstsc) , intent(in)  :: namcon !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(nto)                 :: nambnd !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

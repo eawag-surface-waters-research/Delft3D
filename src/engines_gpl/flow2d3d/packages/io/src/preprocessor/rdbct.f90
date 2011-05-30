@@ -66,7 +66,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
     integer                                        :: itstop !  Description and declaration in inttim.igs
     integer                                        :: itstrt !  Description and declaration in inttim.igs
-    integer                                        :: kmax   !  Description and declaration in iidim.f90
+    integer                                        :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                        :: lundia !  Description and declaration in inout.igs
     integer                                        :: lunmd  !  Description and declaration in inout.igs
     integer                          , intent(in)  :: mxbctm !!  Maximum number of times for which
@@ -78,7 +78,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                                        :: nrrec  !!  Pointer to the record number in the
                                                              !!  MD-file
     integer                          , intent(in)  :: nrver  !!  Version number (240 - ....)
-    integer                                        :: nto    !  Description and declaration in iidim.f90
+    integer                                        :: nto    !  Description and declaration in esm_alloc_int.f90
     integer                                        :: ntof   !  Description and declaration in dimens.igs
     integer                                        :: ntot   !  Description and declaration in dimens.igs
     logical, intent(in)                            :: bubble !  Description and declaration in procs.igs    
@@ -94,9 +94,9 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     character(*)                                   :: mdfrec !!  Standard rec. length in MD-file (300)
     character(*)                                   :: runid
     character(1)                                   :: eol    !!  ASCII code for End-Of-Line (^J)
-    character(1) , dimension(nto)                  :: typbnd !  Description and declaration in ckdim.f90
-    character(20), dimension(nto)                  :: nambnd !  Description and declaration in ckdim.f90
-    character(20), dimension(nto)                  :: tprofu !  Description and declaration in ckdim.f90
+    character(1) , dimension(nto)                  :: typbnd !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(nto)                  :: nambnd !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(nto)                  :: tprofu !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

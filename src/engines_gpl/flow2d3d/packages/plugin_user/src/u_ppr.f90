@@ -224,7 +224,7 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     logical, intent(in) :: ftstat  !!  Flag set when TSTAT  is invoked
     real(fp)            :: dtsec   !!  Integration time step [in seconds]
     real(fp)            :: grdang  !  Description and declaration in tricom.igs
-    real(fp)            :: rhow    !  Description and declaration in rjdim.f90
+    real(fp)            :: rhow    !  Description and declaration in esm_alloc_real.f90
     character(*)        :: runid   !!  Run identification code for the cur-
                                    !!  rent simulation (used to determine
                                    !!  the names of the in- /output files

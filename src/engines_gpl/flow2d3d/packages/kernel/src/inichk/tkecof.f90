@@ -68,23 +68,23 @@ subroutine tkecof(lturi     ,vonkar    ,sigdif    ,sigmol    , &
 ! dimens.igd:
 !
     type (gd_dimens) , pointer::gddimens !
-    integer, pointer :: nmax !  Description and declaration in iidim.f90
-    integer, pointer :: mmax !  Description and declaration in iidim.f90
-    integer, pointer :: kmax !  Description and declaration in iidim.f90
-    integer, pointer :: lstsci !  Description and declaration in iidim.f90
+    integer, pointer :: nmax !  Description and declaration in esm_alloc_int.f90
+    integer, pointer :: mmax !  Description and declaration in esm_alloc_int.f90
+    integer, pointer :: kmax !  Description and declaration in esm_alloc_int.f90
+    integer, pointer :: lstsci !  Description and declaration in esm_alloc_int.f90
     integer, pointer :: lsal !  Description and declaration in dimens.igs
     integer, pointer :: ltem !  Description and declaration in dimens.igs
-    integer, pointer :: ltur !  Description and declaration in iidim.f90
+    integer, pointer :: ltur !  Description and declaration in esm_alloc_int.f90
     integer, pointer :: ltur2d !  Description and declaration in dimens.igs
 !
 ! Global variables
 !
     integer                , intent(in)  :: lturi !  Description and declaration in tricom.igs
     real(fp)               , intent(in)  :: vonkar !  Description and declaration in physco.igs
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:gdp%d%kmax, gdp%d%ltur), intent(out) :: rtur1 !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 2)                       , intent(out) :: rtu2d1 !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%lstsci), intent(out) :: sigdif !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%lstsci), intent(out) :: sigmol !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:gdp%d%kmax, gdp%d%ltur), intent(out) :: rtur1 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 2)                       , intent(out) :: rtu2d1 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%lstsci), intent(out) :: sigdif !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%lstsci), intent(out) :: sigmol !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

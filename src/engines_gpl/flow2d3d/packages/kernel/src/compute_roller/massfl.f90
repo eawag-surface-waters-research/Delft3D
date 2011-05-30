@@ -48,13 +48,13 @@ subroutine massfl(c         ,dir       ,ewave1    ,eroll1    , &
 !
 ! Global variables
 !
-    integer                                                  , intent(in)  :: mmax   !  Description and declaration in iidim.f90
-    integer                                                  , intent(in)  :: nmax   !  Description and declaration in iidim.f90
-    integer                                                  , intent(in)  :: kmax   !  Description and declaration in iidim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: c      !  Description and declaration in rjdim.f90
+    integer                                                  , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                  , intent(in)  :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                  , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: c      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: dir
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: eroll1 !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: ewave1 !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: eroll1 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: ewave1 !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: rmasu
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: rmasv
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: rmasur

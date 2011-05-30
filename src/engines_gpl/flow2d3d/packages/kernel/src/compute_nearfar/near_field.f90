@@ -74,17 +74,17 @@ subroutine near_field(u1    ,v1      ,rho    ,thick ,kmax  ,alfas ,dps   ,&
     integer    , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kcs      !
     integer    , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: kcs_nf   !
     real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: alfas    !
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: s1       !  Description and declaration in rjdim.f90
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: s1       !  Description and declaration in esm_alloc_real.f90
     real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: xz       !  Description and declaration in
     real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: yz       !  Description and declaration in
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(out) :: disch_nf !  Description and declaration in rjdim.f90
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: rho      !  Description and declaration in rjdim.f90
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: u1       !  Description and declaration in rjdim.f90
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: v1       !  Description and declaration in rjdim.f90
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax,lstsci) , intent(in)  :: r1       !  Description and declaration in rjdim.f90
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax,lstsci) , intent(out) :: sournf   !  Description and declaration in rjdim.f90
-    real(fp)   , dimension(kmax)                               , intent(in)  :: thick    !  Description and declaration in rjdim.f90
-    real(prec) , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: dps      !  Description and declaration in rjdim.f90
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(out) :: disch_nf !  Description and declaration in esm_alloc_real.f90
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: rho      !  Description and declaration in esm_alloc_real.f90
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: u1       !  Description and declaration in esm_alloc_real.f90
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: v1       !  Description and declaration in esm_alloc_real.f90
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax,lstsci) , intent(in)  :: r1       !  Description and declaration in esm_alloc_real.f90
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax,lstsci) , intent(out) :: sournf   !  Description and declaration in esm_alloc_real.f90
+    real(fp)   , dimension(kmax)                               , intent(in)  :: thick    !  Description and declaration in esm_alloc_real.f90
+    real(prec) , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: dps      !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

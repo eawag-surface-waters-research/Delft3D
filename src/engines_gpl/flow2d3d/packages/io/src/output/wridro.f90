@@ -64,17 +64,17 @@ subroutine wridro(lundia    ,error     ,trifil    ,ndro      ,itdrof    , &
     integer                          , intent(in)  :: itdroi !  Description and declaration in inttim.igs
     integer                                        :: lundia !  Description and declaration in inout.igs
     integer                                        :: ndro   !  Description and declaration in dimens.igs
-    integer      , dimension(2, ndro)              :: ibuff  !  Description and declaration in iidim.f90
-    integer      , dimension(2, ndro), intent(in)  :: itdro  !  Description and declaration in iidim.f90
-    integer      , dimension(2, ndro), intent(in)  :: mndro  !  Description and declaration in iidim.f90
+    integer      , dimension(2, ndro)              :: ibuff  !  Description and declaration in esm_alloc_int.f90
+    integer      , dimension(2, ndro), intent(in)  :: itdro  !  Description and declaration in esm_alloc_int.f90
+    integer      , dimension(2, ndro), intent(in)  :: mndro  !  Description and declaration in esm_alloc_int.f90
     logical                          , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    real(fp)                         , intent(in)  :: dt     !  Description and declaration in rjdim.f90
+    real(fp)                         , intent(in)  :: dt     !  Description and declaration in esm_alloc_real.f90
     real(fp)                         , intent(in)  :: tunit  !  Description and declaration in exttim.igs
-    real(fp)     , dimension(2, ndro)              :: dxydro !  Description and declaration in rjdim.f90
+    real(fp)     , dimension(2, ndro)              :: dxydro !  Description and declaration in esm_alloc_real.f90
     character(*)                     , intent(in)  :: trifil !!  File name for FLOW NEFIS output
                                                              !!  files (tri"h/m/d"-"casl""labl".dat/def)
     character(16)                    , intent(in)  :: simdat !!  Simulation date representing the flow condition at this date
-    character(20), dimension(ndro)                 :: namdro !  Description and declaration in ckdim.f90
+    character(20), dimension(ndro)                 :: namdro !  Description and declaration in esm_alloc_char.f90
 !
 !
 ! Local variables

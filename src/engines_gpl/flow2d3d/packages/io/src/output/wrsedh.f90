@@ -71,27 +71,27 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
     integer                             , intent(in)  :: ithisc !!  Current time counter for the history data file
     integer                                           :: ithisi !  Description and declaration in inttim.igs
     integer                                           :: itstrt !  Description and declaration in inttim.igs
-    integer                                           :: kmax   !  Description and declaration in iidim.f90
-    integer                                           :: lsed   !  Description and declaration in iidim.f90
-    integer                                           :: lsedtot!  Description and declaration in iidim.f90
+    integer                                           :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                           :: lsed   !  Description and declaration in esm_alloc_int.f90
+    integer                                           :: lsedtot!  Description and declaration in esm_alloc_int.f90
     integer                                           :: lundia !  Description and declaration in inout.igs
     integer                                           :: nostat !  Description and declaration in dimens.igs
     integer                                           :: ntruv  !  Description and declaration in dimens.igs
     logical                             , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    real(fp), dimension(nostat)                       :: zdps   !  Description and declaration in rjdim.f90
-    real(fp), dimension(nostat)                       :: zdpsed !  Description and declaration in rjdim.f90
-    real(fp), dimension(nostat, 0:kmax, lsed)         :: zws    !  Description and declaration in rjdim.f90
-    real(fp), dimension(nostat, kmax, lsed)           :: zrsdeq !  Description and declaration in rjdim.f90
-    real(fp), dimension(nostat, lsedtot)              :: zbdsed !  Description and declaration in rjdim.f90
-    real(fp), dimension(nostat, lsed)                 :: zrca   !  Description and declaration in rjdim.f90
-    real(fp), dimension(nostat, lsedtot), intent(in)  :: zsbu   !  Description and declaration in rjdim.f90
-    real(fp), dimension(nostat, lsedtot), intent(in)  :: zsbv   !  Description and declaration in rjdim.f90
-    real(fp), dimension(nostat, lsed)   , intent(in)  :: zssu   !  Description and declaration in rjdim.f90
-    real(fp), dimension(nostat, lsed)   , intent(in)  :: zssv   !  Description and declaration in rjdim.f90
-    real(fp), dimension(ntruv, lsedtot) , intent(in)  :: sbtr   !  Description and declaration in rjdim.f90
-    real(fp), dimension(ntruv, lsedtot) , intent(in)  :: sbtrc  !  Description and declaration in rjdim.f90
-    real(fp), dimension(ntruv, lsed)    , intent(in)  :: sstr   !  Description and declaration in rjdim.f90
-    real(fp), dimension(ntruv, lsed)    , intent(in)  :: sstrc  !  Description and declaration in rjdim.f90
+    real(fp), dimension(nostat)                       :: zdps   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat)                       :: zdpsed !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat, 0:kmax, lsed)         :: zws    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat, kmax, lsed)           :: zrsdeq !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat, lsedtot)              :: zbdsed !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat, lsed)                 :: zrca   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat, lsedtot), intent(in)  :: zsbu   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat, lsedtot), intent(in)  :: zsbv   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat, lsed)   , intent(in)  :: zssu   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat, lsed)   , intent(in)  :: zssv   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(ntruv, lsedtot) , intent(in)  :: sbtr   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(ntruv, lsedtot) , intent(in)  :: sbtrc  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(ntruv, lsed)    , intent(in)  :: sstr   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(ntruv, lsed)    , intent(in)  :: sstrc  !  Description and declaration in esm_alloc_real.f90
     character(60)                       , intent(in)  :: trifil !!  File name for FLOW NEFIS output
                                                                 !!  files (tri"h/m"-"casl""labl".dat/def)
 !

@@ -52,8 +52,8 @@ subroutine compthick(dps, s1, nmmax, gdp)
 ! Global variables
 !
     integer                                     , intent(in)  :: nmmax  !  Description and declaration in dimens.igs
-    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: dps    !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: s1     !  Description and declaration in rjdim.f90
+    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: s1     !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

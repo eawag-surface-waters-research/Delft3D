@@ -81,40 +81,40 @@ subroutine dfwrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     integer                                        , intent(in)  :: ithisc !!  Current time counter for the history data file
     integer                                                      :: ithisi !  Description and declaration in inttim.igs
     integer                                                      :: itstrt !  Description and declaration in inttim.igs
-    integer                                                      :: kmax   !  Description and declaration in iidim.f90
+    integer                                                      :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                      :: lmax   !  Description and declaration in dimens.igs
     integer                                                      :: lsal   !  Description and declaration in dimens.igs
-    integer                                                      :: lstsci !  Description and declaration in iidim.f90
+    integer                                                      :: lstsci !  Description and declaration in esm_alloc_int.f90
     integer                                                      :: ltem   !  Description and declaration in dimens.igs
-    integer                                                      :: ltur   !  Description and declaration in iidim.f90
+    integer                                                      :: ltur   !  Description and declaration in esm_alloc_int.f90
     integer                                                      :: lundia !  Description and declaration in inout.igs
     integer                                                      :: nostat !  Description and declaration in dimens.igs
     integer                                                      :: ntruv  !  Description and declaration in dimens.igs
     integer      , dimension(nostat)                             :: zkfs   !  KFS in monitoring station
     logical                                        , intent(out) :: error  !!  Flag=TRUE if an error is encountered
     logical                                        , intent(in)  :: zmodel !  Description and declaration in procs.igs
-    real(fp)     , dimension(nostat)                             :: zdps   !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nostat)                             :: ztauet !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nostat)                             :: ztauks !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nostat)                             :: zwl    !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nostat, 0:kmax)                     :: zdicww !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nostat, 0:kmax)                     :: zrich  !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nostat, 0:kmax)                     :: zvicww !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nostat, 0:kmax, ltur)               :: ztur   !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nostat, kmax)                       :: hydprs !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nostat, kmax)                       :: zcuru  !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nostat, kmax)                       :: zcurv  !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nostat, kmax)                       :: zcurw  !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nostat, kmax)                       :: zenst  !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nostat, kmax)                       :: zqxk   !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nostat, kmax)                       :: zqyk   !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nostat, kmax)                       :: zrho   !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nostat, kmax)                       :: zvort  !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nostat, kmax, lstsci)               :: gro    !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(ntruv)                              :: ctr    !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(ntruv)                              :: fltr   !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(ntruv, lstsci)                      :: atr    !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(ntruv, lstsci)                      :: dtr    !  Description and declaration in rjdim.f90
+    real(fp)     , dimension(nostat)                             :: zdps   !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nostat)                             :: ztauet !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nostat)                             :: ztauks !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nostat)                             :: zwl    !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nostat, 0:kmax)                     :: zdicww !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nostat, 0:kmax)                     :: zrich  !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nostat, 0:kmax)                     :: zvicww !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nostat, 0:kmax, ltur)               :: ztur   !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nostat, kmax)                       :: hydprs !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nostat, kmax)                       :: zcuru  !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nostat, kmax)                       :: zcurv  !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nostat, kmax)                       :: zcurw  !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nostat, kmax)                       :: zenst  !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nostat, kmax)                       :: zqxk   !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nostat, kmax)                       :: zqyk   !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nostat, kmax)                       :: zrho   !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nostat, kmax)                       :: zvort  !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nostat, kmax, lstsci)               :: gro    !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(ntruv)                              :: ctr    !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(ntruv)                              :: fltr   !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(ntruv, lstsci)                      :: atr    !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(ntruv, lstsci)                      :: dtr    !  Description and declaration in esm_alloc_real.f90
     character(*)                                   , intent(in)  :: trifil !!  File name for FLOW NEFIS output files (tri"h/m"-"casl""labl".dat/def)
     character(23)                                  , intent(in)  :: selhis !  Description and declaration in tricom.igs
     character(10)                                  , intent(in)  :: velt   !! Velocity type 'eulerian' or 'GLM'

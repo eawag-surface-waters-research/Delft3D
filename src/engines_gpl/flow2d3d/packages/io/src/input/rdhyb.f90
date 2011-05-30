@@ -56,9 +56,9 @@ subroutine rdhyb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
     integer                                                          :: lundia !  Description and declaration in inout.igs
     integer                                                          :: lunmd  !  Description and declaration in inout.igs
-    integer                                                          :: mmax   !  Description and declaration in iidim.f90
-    integer                                                          :: nmax   !  Description and declaration in iidim.f90
-    integer                                                          :: nmaxus !  Description and declaration in iidim.f90
+    integer                                                          :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                          :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                          :: nmaxus !  Description and declaration in esm_alloc_int.f90
     integer                                                          :: nrrec  !!  Pointer to the record number in the
                                                                                !!  MD-file
     logical                                                          :: error  !!  Flag=TRUE if an error is encountered
@@ -71,8 +71,8 @@ subroutine rdhyb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     real(fp)                                                         :: ccofv  !!  Array containing the uniform bottom
                                                                                !!  roughness coefficient in the y- dir.
                                                                                !!  (value depends on ROUMET)
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 3) :: cfurou !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 3) :: cfvrou !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 3) :: cfurou !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 3) :: cfvrou !  Description and declaration in esm_alloc_real.f90
     character(*)                                                     :: filrgh !!  File name for bedstresses
                                                                                !! file will be read formatted !!
     character(*)                                                     :: mdfrec !!  Standard rec. length in MD-file (300)

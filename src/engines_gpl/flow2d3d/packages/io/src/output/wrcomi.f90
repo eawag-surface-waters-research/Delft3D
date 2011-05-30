@@ -59,58 +59,58 @@ subroutine wrcomi(comfil    ,lundia    ,error     ,zmodel    ,mmax      , &
 !
 ! Global variables
 !
-    integer                                                             :: it01   !  Description and declaration in iidim.f90
-    integer                                                             :: it02   !  Description and declaration in iidim.f90
-    integer                                                             :: itlen  !  Description and declaration in iidim.f90
-    integer                                                             :: kmax   !  Description and declaration in iidim.f90
+    integer                                                             :: it01   !  Description and declaration in esm_alloc_int.f90
+    integer                                                             :: it02   !  Description and declaration in esm_alloc_int.f90
+    integer                                                             :: itlen  !  Description and declaration in esm_alloc_int.f90
+    integer                                                             :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                             :: lundia !  Description and declaration in inout.igs
-    integer                                                             :: mmax   !  Description and declaration in iidim.f90
-    integer                                                             :: nfltyp !  Description and declaration in iidim.f90
-    integer                                                             :: nmax   !  Description and declaration in iidim.f90
-    integer                                                             :: nmaxus !  Description and declaration in iidim.f90
-    integer                                                             :: nocol  !  Description and declaration in iidim.f90
-    integer                                                             :: noroco !  Description and declaration in iidim.f90
-    integer                                                             :: norow  !  Description and declaration in iidim.f90
-    integer                                                             :: nrob   !  Description and declaration in iidim.f90
-    integer                                                             :: nsrc   !  Description and declaration in iidim.f90
-    integer                                                             :: nto    !  Description and declaration in iidim.f90
-    integer   , dimension(7, nto)                                       :: mnbnd  !  Description and declaration in iidim.f90
-    integer   , dimension(5, noroco)                                    :: irocol !  Description and declaration in iidim.f90
-    integer   , dimension(7, nsrc)                                      :: mnksrc !  Description and declaration in iidim.f90
-    integer   , dimension(8, nrob)                                      :: nob    !  Description and declaration in iidim.f90
-    integer   , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: kcs    !  Description and declaration in iidim.f90
-    integer   , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: kcu    !  Description and declaration in iidim.f90
-    integer   , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: kcv    !  Description and declaration in iidim.f90
-    integer   , dimension(nmaxus, mmax)                                 :: ibuff  !  Description and declaration in iidim.f90
+    integer                                                             :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                             :: nfltyp !  Description and declaration in esm_alloc_int.f90
+    integer                                                             :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                             :: nmaxus !  Description and declaration in esm_alloc_int.f90
+    integer                                                             :: nocol  !  Description and declaration in esm_alloc_int.f90
+    integer                                                             :: noroco !  Description and declaration in esm_alloc_int.f90
+    integer                                                             :: norow  !  Description and declaration in esm_alloc_int.f90
+    integer                                                             :: nrob   !  Description and declaration in esm_alloc_int.f90
+    integer                                                             :: nsrc   !  Description and declaration in esm_alloc_int.f90
+    integer                                                             :: nto    !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(7, nto)                                       :: mnbnd  !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(5, noroco)                                    :: irocol !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(7, nsrc)                                      :: mnksrc !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(8, nrob)                                      :: nob    !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: kcu    !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: kcv    !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(nmaxus, mmax)                                 :: ibuff  !  Description and declaration in esm_alloc_int.f90
     logical                                                             :: error  !!  Flag=TRUE if an error is encountered
     logical                                                             :: zmodel !  Description and declaration in procs.igs
     logical                                                             :: sferic
-    real(fp)                                                            :: dt     !  Description and declaration in rjdim.f90
-    real(fp)                                                            :: tscale !  Description and declaration in rjdim.f90
+    real(fp)                                                            :: dt     !  Description and declaration in esm_alloc_real.f90
+    real(fp)                                                            :: tscale !  Description and declaration in esm_alloc_real.f90
     real(fp)                                                            :: tzone  !  Description and declaration in exttim.igs
     real(fp)                                                            :: zbot   !  Description and declaration in zmodel.igs
-    real(fp)  , dimension(3, nsrc)                                      :: xyzsrc !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: alfas  !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: dp     !  Description and declaration in rjdim.f90
-    real(prec), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: dps    !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: gsqd   !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: gsqs   !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: guu    !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: guv    !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: gvu    !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: gvv    !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: xcor   !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: ycor   !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 3)  :: cfurou !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 3)  :: cfvrou !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(kmax)                                         :: thick  !  Description and declaration in rjdim.f90
+    real(fp)  , dimension(3, nsrc)                                      :: xyzsrc !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: alfas  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: dp     !  Description and declaration in esm_alloc_real.f90
+    real(prec), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: dps    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: gsqd   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: gsqs   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: guu    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: guv    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: gvu    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: gvv    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: xcor   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)     :: ycor   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 3)  :: cfurou !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 3)  :: cfvrou !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(kmax)                                         :: thick  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(0:kmax)                                       :: zk     !!  Vertical coordinates of cell interfaces
                                                                                   !!  Flag for activation of Z-MODEL
     real(fp)  , dimension(nmaxus, mmax)                                 :: rbuff  !  Description and declaration in r-i-ch.igs
     real(fp)  , dimension(kmax+1)                                       :: rbuffz !  Description and declaration in r-i-ch.igs
     character(*)                                                        :: comfil !!  Name for communication file
-    character(20), dimension(nsrc)                                      :: namsrc !  Description and declaration in ckdim.f90
-    character(4)                                                        :: rouflo !  Description and declaration in ckdim.f90
+    character(20), dimension(nsrc)                                      :: namsrc !  Description and declaration in esm_alloc_char.f90
+    character(4)                                                        :: rouflo !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

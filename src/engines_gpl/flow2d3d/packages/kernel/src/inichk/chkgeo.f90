@@ -47,11 +47,11 @@ subroutine chkgeo(lundia    ,error     ,kmax      ,thick     ,sig       ,gdp)
 !
 ! Global variables
 !
-    integer                   , intent(in) :: kmax   !  Description and declaration in iidim.f90
+    integer                   , intent(in) :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                :: lundia !  Description and declaration in inout.igs
     logical                                :: error
-    real(fp), dimension(kmax)              :: sig    !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax)              :: thick  !  Description and declaration in rjdim.f90
+    real(fp), dimension(kmax)              :: sig    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax)              :: thick  !  Description and declaration in esm_alloc_real.f90
 !
 !
 ! Local variables

@@ -56,13 +56,13 @@ subroutine rdibch(lundia    ,error     ,runid     ,ntof      ,nto       , &
     integer                         , intent(in)  :: kc     !  Description and declaration in dimens.igs
     integer                         , intent(in)  :: kcd    !  Description and declaration in dimens.igs
     integer                                       :: lundia !  Description and declaration in inout.igs
-    integer                         , intent(in)  :: nto    !  Description and declaration in iidim.f90
+    integer                         , intent(in)  :: nto    !  Description and declaration in esm_alloc_int.f90
     integer                         , intent(in)  :: ntof   !  Description and declaration in dimens.igs
     integer                         , intent(in)  :: ntofgl ! total number of H/A-type boundary sections of entire domain
     integer , dimension(ntof)       , intent(in)  :: nhsub  ! integer array to store sequence numbers of harmonic boundary condition in own subdomain
     logical                         , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    real(fp), dimension(4, nto, kcd), intent(out) :: hydrbc !  Description and declaration in rjdim.f90
-    real(fp), dimension(kc)         , intent(out) :: omega  !  Description and declaration in rjdim.f90
+    real(fp), dimension(4, nto, kcd), intent(out) :: hydrbc !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kc)         , intent(out) :: omega  !  Description and declaration in esm_alloc_real.f90
     character(*)                                  :: runid  !!  Run identification code for the current simulation
 !
 ! Local variables

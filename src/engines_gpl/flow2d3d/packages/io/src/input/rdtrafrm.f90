@@ -78,7 +78,7 @@ subroutine rdtrafrm(error, lsedtot, gdp)
 ! Global variables
 !
     logical, intent(out) :: error
-    integer, intent(in)  :: lsedtot !  Description and declaration in iidim.f90
+    integer, intent(in)  :: lsedtot !  Description and declaration in esm_alloc_int.f90
 !
 ! Local variables
 !

@@ -56,13 +56,13 @@ subroutine calpsh(restid    ,error     ,nmax      ,mmax      ,nmaxus    , &
 !
 ! Global variables
 !
-    integer                                                      , intent(in)  :: mmax   !  Description and declaration in iidim.f90
-    integer                                                      , intent(in)  :: nmax   !  Description and declaration in iidim.f90
-    integer                                                      , intent(in)  :: nmaxus !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: kcs    !  Description and declaration in iidim.f90
+    integer                                                      , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                      , intent(in)  :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                      , intent(in)  :: nmaxus !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
     logical                                                      , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: pship  !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: s1     !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: pship  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: s1     !  Description and declaration in esm_alloc_real.f90
     character(*)                                                 , intent(in)  :: restid !!  Runid of the restart file
 !
 ! Local variables

@@ -57,15 +57,15 @@ subroutine flsfil(lundia    ,error     ,filfls    ,mmax      ,nmax      , &
                                                                                                 !!  =+/-6: porous plate
                                                                                                 !!  =+/-7: bridge
                                                                                                 !!  =+/-9: 2d weir
-    integer                                                             , intent(in)  :: kmax   !  Description and declaration in iidim.f90
+    integer                                                             , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                                           :: lundia !  Description and declaration in inout.igs
-    integer                                                             , intent(in)  :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                           :: nmax   !  Description and declaration in iidim.f90
-    integer                                                             , intent(in)  :: nmaxus !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax), intent(out) :: kspu   !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax), intent(out) :: kspv   !  Description and declaration in iidim.f90
+    integer                                                             , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                           :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                             , intent(in)  :: nmaxus !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax), intent(out) :: kspu   !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax), intent(out) :: kspv   !  Description and declaration in esm_alloc_int.f90
     logical                                                             , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     :: pship  !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     :: pship  !  Description and declaration in esm_alloc_real.f90
     character(*)                                                                      :: filfls !!  Name of the relevant file
 !
 ! Local variables

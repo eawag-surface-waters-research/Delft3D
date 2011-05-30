@@ -86,7 +86,7 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                                          :: nrrec  !!  Pointer to the record number in the MD-file
     integer      , dimension(maxprt)                 :: ipmap  !  Description and declaration in inttim.igs
     logical                          , intent(out)   :: error  !!  Flag=TRUE if an error is encountered
-    real(fp)                                         :: dt     !  Description and declaration in rjdim.f90
+    real(fp)                                         :: dt     !  Description and declaration in esm_alloc_real.f90
     real(fp)                         , intent(in)    :: tstop  !  Description and declaration in exttim.igs
     character(*)                                     :: mdfrec !!  Standard rec. length in MD-file (300)
 !

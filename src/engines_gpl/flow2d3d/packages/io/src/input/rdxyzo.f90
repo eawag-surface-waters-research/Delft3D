@@ -60,11 +60,11 @@ subroutine rdxyzo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
 ! Global variables
 !
-    integer                  , intent(in)  :: kmax   !  Description and declaration in iidim.f90
+    integer                  , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                :: lundia !  Description and declaration in inout.igs
     integer                                :: lunmd  !  Description and declaration in inout.igs
-    integer                  , intent(in)  :: mmax   !  Description and declaration in iidim.f90
-    integer                  , intent(in)  :: nmax   !  Description and declaration in iidim.f90
+    integer                  , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                  , intent(in)  :: nmax   !  Description and declaration in esm_alloc_int.f90
     integer                                :: nrrec  !!  Pointer to the record number in the
                                                      !!  MD-file
     logical                  , intent(out) :: error  !!  Flag=TRUE if an error is encountered
@@ -88,9 +88,9 @@ subroutine rdxyzo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     real(fp)                 , intent(out) :: grdang !  Description and declaration in tricom.igs
     real(fp)                               :: zbot   !  Description and declaration in zmodel.igs
     real(fp)                               :: ztop   !  Description and declaration in zmodel.igs
-    real(fp), dimension(kmax), intent(out) :: thick  !  Description and declaration in rjdim.f90
-    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound) :: xcor !  Description and declaration in rjdim.f90
-    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound) :: ycor !  Description and declaration in rjdim.f90
+    real(fp), dimension(kmax), intent(out) :: thick  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound) :: xcor !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound) :: ycor !  Description and declaration in esm_alloc_real.f90
     character(*)                           :: filrgf !!  File name for the curvi-linear grid !!  file (telmcrgf.xxx)
                                                      !!  file will be read formatted
     character(*)                           :: mdfrec !!  Standard rec. length in MD-file (300)

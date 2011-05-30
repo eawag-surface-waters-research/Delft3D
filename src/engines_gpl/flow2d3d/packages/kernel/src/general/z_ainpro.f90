@@ -53,8 +53,8 @@ function z_ainpro(vect1     ,vect2     ,kmax      ,kfsz1     ,icx       , &
 !
     integer                                        , intent(in) :: icx
     integer                                        , intent(in) :: icy
-    integer                                        , intent(in) :: kmax !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in) :: kfsz1 !  Description and declaration in iidim.f90
+    integer                                        , intent(in) :: kmax !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in) :: kfsz1 !  Description and declaration in esm_alloc_int.f90
     real(fp)                                                    :: z_ainpro
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: vect1
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: vect2

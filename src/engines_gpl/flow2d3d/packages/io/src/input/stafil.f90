@@ -51,12 +51,12 @@ subroutine stafil(lundia    ,filsta    ,fmttmp    ,error     ,nostat    , &
 !
     integer                                    :: lundia   ! Description and declaration in inout.igs
     integer, intent(in)                        :: nostat   ! Description and declaration in dimens.igs
-    integer, dimension(2, nostat), intent(out) :: mnstat   ! Description and declaration in iidim.f90
+    integer, dimension(2, nostat), intent(out) :: mnstat   ! Description and declaration in esm_alloc_int.f90
     logical                                    :: error    ! Flag=TRUE if an error is encountered
     character(*)                               :: filsta   ! Name of the relevant file
     character(11), intent(in)                  :: fmttmp   ! Help var. for the attribute file
                                                           !! formats (eg. the grid file)
-    character(20), dimension(nostat)           :: namst    ! Description and declaration in ckdim.f90
+    character(20), dimension(nostat)           :: namst    ! Description and declaration in esm_alloc_char.f90
 !
 !
 ! Local variables

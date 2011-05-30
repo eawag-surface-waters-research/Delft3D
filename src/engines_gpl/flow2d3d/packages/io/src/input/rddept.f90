@@ -56,12 +56,12 @@ subroutine rddept(lundia    ,error     , &
 ! Global variables
 !
     integer                                                                        :: lundia !  Description and declaration in inout.igs
-    integer                                                                        :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                        :: nmax   !  Description and declaration in iidim.f90
-    integer                                                                        :: nmaxus !  Description and declaration in iidim.f90
+    integer                                                                        :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                        :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                        :: nmaxus !  Description and declaration in esm_alloc_int.f90
     logical                                                                        :: error  !!  Flag=TRUE if an error is encountered
     real(fp)                                                         , intent(out) :: depuni
-    real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: dp     !  Description and declaration in rjdim.f90
+    real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: dp     !  Description and declaration in esm_alloc_real.f90
     character(*)                                                                   :: fildep !!  File name for variable depth values
     character(2)                                                                   :: fmtdep !!  File format definition for depth file
 !

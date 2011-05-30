@@ -49,28 +49,28 @@ subroutine bedbc1993(tp        ,uorb      ,rhowat    ,h1        ,umod      , &
 !
 ! Global variables
 !
-    real(fp)              :: aks    !  Description and declaration in rjdim.f90
+    real(fp)              :: aks    !  Description and declaration in esm_alloc_real.f90
     real(fp)              :: ce_nm
     real(fp), intent(in)  :: d50
     real(fp), intent(in)  :: d90
     real(fp)              :: delr
-    real(fp), intent(out) :: dss    !  Description and declaration in rjdim.f90
+    real(fp), intent(out) :: dss    !  Description and declaration in esm_alloc_real.f90
     real(fp), intent(in)  :: dstar
     real(fp), intent(in)  :: h1
     real(fp)              :: muc
     real(fp), intent(in)  :: mudfrac
-    real(fp), intent(in)  :: rhowat !  Description and declaration in rjdim.f90
+    real(fp), intent(in)  :: rhowat !  Description and declaration in esm_alloc_real.f90
     real(fp)              :: ta
     real(fp)              :: taubcw
     real(fp)              :: tauc
     real(fp), intent(in)  :: taucr
     real(fp), intent(out) :: taurat
     real(fp)              :: tauwav
-    real(fp), intent(in)  :: tp     !  Description and declaration in rjdim.f90
+    real(fp), intent(in)  :: tp     !  Description and declaration in esm_alloc_real.f90
     real(fp), intent(in)  :: umod
-    real(fp), intent(in)  :: uorb   !  Description and declaration in rjdim.f90
+    real(fp), intent(in)  :: uorb   !  Description and declaration in esm_alloc_real.f90
     real(fp)              :: ustarc
-    real(fp)              :: usus   !  Description and declaration in rjdim.f90
+    real(fp)              :: usus   !  Description and declaration in esm_alloc_real.f90
     real(fp)              :: uwb
     real(fp), intent(in)  :: z0cur
     real(fp), intent(in)  :: z0rou

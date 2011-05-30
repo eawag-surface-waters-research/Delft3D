@@ -64,8 +64,8 @@ subroutine rdbch(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                                       :: ntof   !  Description and declaration in dimens.igs
     logical                                       :: error  !!  Flag=TRUE if an error is encountered
     logical                         , intent(in)  :: noui   !!  Flag for reading from User Interface
-    real(fp), dimension(4, mxnto, mxkc)           :: hydrbc !  Description and declaration in rjdim.f90
-    real(fp), dimension(mxkc)                     :: omega  !  Description and declaration in rjdim.f90
+    real(fp), dimension(4, mxnto, mxkc)           :: hydrbc !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(mxkc)                     :: omega  !  Description and declaration in esm_alloc_real.f90
     character(*)                                  :: filbch !!  File name for the harmonic boundary conditions file
     character(*)                                  :: mdfrec !!  Standard rec. length in MD-file (300)
     character(1)                    , intent(in)  :: ascon  !!  'Y' if open bnd. contains type 'A'

@@ -58,12 +58,12 @@ subroutine hybfil(lundia    ,error     ,filrgh    ,fmttmp    ,nmax      , &
 ! Global variables
 !
     integer                                                                       :: lundia !  Description and declaration in inout.igs
-    integer                                                         , intent(in)  :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                       :: nmax   !  Description and declaration in iidim.f90
-    integer                                                         , intent(in)  :: nmaxus !  Description and declaration in iidim.f90
+    integer                                                         , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                       :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                         , intent(in)  :: nmaxus !  Description and declaration in esm_alloc_int.f90
     logical                                                         , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 3), intent(out) :: cfurou !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 3), intent(out) :: cfvrou !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 3), intent(out) :: cfurou !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 3), intent(out) :: cfvrou !  Description and declaration in esm_alloc_real.f90
     character(*)                                                                  :: filrgh !!  Name of the relevant file
     character(11)                                                   , intent(in)  :: fmttmp !!  Help var. for the attribute file formats (eg. the grid file)
 !

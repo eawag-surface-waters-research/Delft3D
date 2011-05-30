@@ -75,27 +75,27 @@ subroutine difhor(nm        ,nmu       ,j         ,nmmaxj    ,kmax      , &
                                                                                     !!  been transformed into 1d arrays.
                                                                                     !!  due to the shift in the 2nd (m-)
                                                                                     !!  index, j = -2*nmax + 1
-    integer                                                 , intent(in)  :: kmax   !  Description and declaration in iidim.f90
+    integer                                                 , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                 , intent(in)  :: lsal   !  Description and declaration in dimens.igs
-    integer                                                 , intent(in)  :: lstsci !  Description and declaration in iidim.f90
+    integer                                                 , intent(in)  :: lstsci !  Description and declaration in esm_alloc_int.f90
     integer                                                 , intent(in)  :: ltem   !  Description and declaration in dimens.igs
     integer                                                 , intent(in)  :: nm
     integer                                                               :: nmmaxj !  Description and declaration in dimens.igs
     integer                                                 , intent(in)  :: nmu
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kcs    !  Description and declaration in iidim.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: kadu   !  Description and declaration in iidim.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: kadu   !  Description and declaration in esm_alloc_int.f90
     real(fp)                                                , intent(in)  :: dpnm
     real(fp)                                                , intent(in)  :: dpnmu
     real(fp)                                                , intent(in)  :: sepnm
     real(fp)                                                , intent(in)  :: sepnmu
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: guu    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: gvu    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax+2)      , intent(in)  :: dicuv  !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: guu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: gvu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax+2)      , intent(in)  :: dicuv  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)              :: ddkl   !!  Internal work array, right hand side at (n,m,k,l)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), intent(in)  :: r0     !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax)                               , intent(in)  :: sig    !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax)                               , intent(in)  :: thick  !  Description and declaration in rjdim.f90
-    real(fp), dimension(lstsci)                             , intent(in)  :: sigdif !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), intent(in)  :: r0     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax)                               , intent(in)  :: sig    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax)                               , intent(in)  :: thick  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(lstsci)                             , intent(in)  :: sigdif !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

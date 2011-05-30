@@ -147,22 +147,22 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
                                                          !!  =2 initialization and read restart 
                                                          !!     information from the communication file 
                                                          !!  =3 no initialization 
-    integer                                    :: it01   !  Description and declaration in iidim.f90 
-    integer                                    :: it02   !  Description and declaration in iidim.f90 
+    integer                                    :: it01   !  Description and declaration in esm_alloc_int.f90 
+    integer                                    :: it02   !  Description and declaration in esm_alloc_int.f90 
     integer                                    :: itcur  !!  Current time counter for the com- 
                                                          !!  munication file, where starting 
                                                          !!  point depend on CYCLIC 
     integer                                    :: itimc  !!  Current time step counter for 2D 
                                                          !!  system 
-    integer                                    :: itlen  !  Description and declaration in iidim.f90 
+    integer                                    :: itlen  !  Description and declaration in esm_alloc_int.f90 
     integer                                    :: lundia !  Description and declaration in inout.igs 
-    integer                                    :: nfltyp !  Description and declaration in iidim.f90 
+    integer                                    :: nfltyp !  Description and declaration in esm_alloc_int.f90 
     logical                                    :: error  !!  Flag=TRUE if an error is encountered 
     logical                       , intent(in) :: mainys !!  Logical flag for FLOW is main 
                                                          !!  program (TRUE) for writing output 
     logical                                    :: sferic !  Description and declaration in tricom.igs 
     real(fp)                                   :: grdang !  Description and declaration in tricom.igs 
-    real(fp)                                   :: tscale !  Description and declaration in rjdim.f90 
+    real(fp)                                   :: tscale !  Description and declaration in esm_alloc_real.f90 
     character(*)                               :: comfil !!  Name for communication file 
                                                          !!  com-<case><label> 
     character(*)                               :: selmap !  Description and declaration in tricom.igs 
@@ -170,7 +170,7 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
                                                          !!  files (tri"h/m"-"casl""labl".dat/def) 
     character(23)                              :: selhis !  Description and declaration in tricom.igs 
     character(30) , dimension(10)              :: runtxt !!  Textual description of model input 
-    character(4)                               :: rouflo !  Description and declaration in ckdim.f90 
+    character(4)                               :: rouflo !  Description and declaration in esm_alloc_char.f90 
 ! 
 ! Local variables 
 ! 

@@ -62,14 +62,14 @@ subroutine rdtdc(lundia    ,lunout    ,lunrd     ,error     ,filbcc    , &
     integer                         , intent(in)  :: lundia     !  Description and declaration in inout.igs
     integer                         , intent(in)  :: lunout     !  Unit number for unformatted FLOW help file between tdatom and trisim
     integer                                       :: lunrd      !  Unit number of the attribute file containing the time series
-    integer                         , intent(in)  :: nto        !  Description and declaration in iidim.f90
+    integer                         , intent(in)  :: nto        !  Description and declaration in esm_alloc_int.f90
     logical                         , intent(out) :: error      !  Flag=TRUE if an error is encountered
     character(*)                    , intent(in)  :: filbcc     !  File name for the time varying data on boundaries for processes file
     character(*)                    , intent(in)  :: runid      !  Run identification code for the current simulation (used to determine
                                                                 !  the names of the in- /output files used by the system)
     character(1)                    , intent(in)  :: eol        !  ASCII code for End-Of-Line (^J)
-    character(20), dimension(lstsc) , intent(in)  :: namcon     !  Description and declaration in ckdim.f90
-    character(20), dimension(nto)   , intent(in)  :: nambnd     !  Description and declaration in ckdim.f90
+    character(20), dimension(lstsc) , intent(in)  :: namcon     !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(nto)   , intent(in)  :: nambnd     !  Description and declaration in esm_alloc_char.f90
     character(40)                   , intent(in)  :: profil     !  Total string of possible profiles
 !
 !

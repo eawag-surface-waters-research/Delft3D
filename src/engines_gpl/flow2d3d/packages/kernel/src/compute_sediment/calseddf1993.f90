@@ -44,22 +44,22 @@ subroutine calseddf1993(ustarc    ,ws        ,tp        ,delr      ,dstar     , 
 !
 ! Global variables
 !
-    integer                    , intent(in)  :: kmax   !  Description and declaration in iidim.f90
-    integer                    , intent(in)  :: ltur   !  Description and declaration in iidim.f90
+    integer                    , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer                    , intent(in)  :: ltur   !  Description and declaration in esm_alloc_int.f90
     real(fp)                   , intent(in)  :: delr
     real(fp)                   , intent(in)  :: dstar
     real(fp)                   , intent(in)  :: h1
-    real(fp)                   , intent(in)  :: hrms   !  Description and declaration in rjdim.f90
+    real(fp)                   , intent(in)  :: hrms   !  Description and declaration in esm_alloc_real.f90
     real(fp)                   , intent(in)  :: tauc
     real(fp)                   , intent(in)  :: tauwav
-    real(fp)                   , intent(in)  :: tp     !  Description and declaration in rjdim.f90
+    real(fp)                   , intent(in)  :: tp     !  Description and declaration in esm_alloc_real.f90
     real(fp)                   , intent(in)  :: ustarc
     real(fp)                   , intent(in)  :: uwb
-    real(fp), dimension(0:kmax), intent(in)  :: dicww  !  Description and declaration in rjdim.f90
-    real(fp), dimension(0:kmax), intent(out) :: seddif !  Description and declaration in rjdim.f90
-    real(fp), dimension(0:kmax), intent(in)  :: ws     !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax)  , intent(in)  :: sig    !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax)  , intent(in)  :: thick  !  Description and declaration in rjdim.f90
+    real(fp), dimension(0:kmax), intent(in)  :: dicww  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(0:kmax), intent(out) :: seddif !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(0:kmax), intent(in)  :: ws     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax)  , intent(in)  :: sig    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax)  , intent(in)  :: thick  !  Description and declaration in esm_alloc_real.f90
     real(fp)                   , intent(in)  :: eps
     real(fp)                   , intent(in)  :: vonkar
     logical                    , intent(in)  :: wave

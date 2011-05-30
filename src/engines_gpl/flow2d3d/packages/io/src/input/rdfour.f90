@@ -49,7 +49,7 @@ subroutine rdfour(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
 ! Global variables
 !
-    integer                   :: kmax   !  Description and declaration in iidim.f90
+    integer                   :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                   :: lsal   !  Description and declaration in dimens.igs
     integer                   :: lstsc  !  Description and declaration in dimens.igs
     integer                   :: ltem   !  Description and declaration in dimens.igs

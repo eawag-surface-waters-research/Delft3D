@@ -51,8 +51,8 @@ use bedcomposition_module
     integer                               , intent(in)  :: nostat
     integer                               , intent(in)  :: nmax
     integer                               , intent(in)  :: lsedtot
-    real(fp)  , dimension(nostat)         , intent(out) :: zdpsed !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(nostat, lsedtot), intent(out) :: zbdsed !  Description and declaration in rjdim.f90
+    real(fp)  , dimension(nostat)         , intent(out) :: zdpsed !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nostat, lsedtot), intent(out) :: zbdsed !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

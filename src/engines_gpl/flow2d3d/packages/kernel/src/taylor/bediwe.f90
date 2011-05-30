@@ -70,7 +70,7 @@ subroutine bediwe(kmax      ,kmxdt     ,kmxt      ,h0        ,scale     , &
                                    !!  K-value on TG grid of the critical
                                    !!  level associated with a given IW own
                                    !!  mode (R1TG)
-    integer, intent(in)            :: kmax !  Description and declaration in iidim.f90
+    integer, intent(in)            :: kmax !  Description and declaration in esm_alloc_int.f90
     integer, intent(in)            :: kmxdt !  Description and declaration in dimens.igs
     integer         :: kmxt !  Description and declaration in dimens.igs
     integer         :: ktop
@@ -102,8 +102,8 @@ subroutine bediwe(kmax      ,kmxdt     ,kmxt      ,h0        ,scale     , &
     real(fp)        :: xkh
                                    !!  Wave number magnitude normalized by
                                    !!  SCALE
-    real(fp), dimension(0:kmax), intent(in) :: dudz !  Description and declaration in rjdim.f90
-    real(fp), dimension(0:kmax), intent(in) :: dvdz !  Description and declaration in rjdim.f90
+    real(fp), dimension(0:kmax), intent(in) :: dudz !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(0:kmax), intent(in) :: dvdz !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(0:kmxdt) :: d2u
                                    !!  curvature of vertical profile of u-
                                    !!  velocity component
@@ -130,7 +130,7 @@ subroutine bediwe(kmax      ,kmxdt     ,kmxt      ,h0        ,scale     , &
     real(fp), dimension(0:kmxdt) :: zamp
                                    !!  Maximal vertical displacement amp-
                                    !!  litude of bed-induced IW
-    real(fp), dimension(kmax), intent(in) :: thick !  Description and declaration in rjdim.f90
+    real(fp), dimension(kmax), intent(in) :: thick !  Description and declaration in esm_alloc_real.f90
 !
 !
 ! Local variables

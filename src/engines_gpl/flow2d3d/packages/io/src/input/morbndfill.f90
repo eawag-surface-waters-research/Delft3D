@@ -55,11 +55,11 @@ subroutine morbndfill(kcs       ,guu       ,gvv       ,icx       ,icy       , &
     integer                                   , intent(in)  :: icy
     integer                                   , intent(in)  :: nto
     !
-    integer , dimension(7, nto)               , intent(in)  :: mnbnd  !  Description and declaration in iidim.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: kcs    !  Description and declaration in iidim.f90
+    integer , dimension(7, nto)               , intent(in)  :: mnbnd  !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
     !
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: guu    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: gvv    !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: guu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: gvv    !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

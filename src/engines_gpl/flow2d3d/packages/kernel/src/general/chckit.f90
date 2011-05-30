@@ -55,7 +55,7 @@ subroutine chckit(lundia    ,error     ,filnam    ,timrd     ,dt        , &
     integer                        :: lundia      ! Description and declaration in inout.igs
     integer      , intent(in)      :: ntimrd      ! Sequence nr of the time read
     logical      , intent(out)     :: error       ! Flag=TRUE if an error is encountered
-    real(fp)                       :: dt          ! Description and declaration in rjdim.f90
+    real(fp)                       :: dt          ! Description and declaration in esm_alloc_real.f90
     real(fp)     , intent(in)      :: timrd       ! Time in minutes read
     character(*) , intent(in)      :: filnam      ! Name of the specified data file
 !

@@ -58,15 +58,15 @@ subroutine chkstr(lundia    ,nmax      ,mmax      ,nmaxus    , &
 !
 ! Global variables
 !
-    integer                                                             , intent(in)  :: kmax   !  Description and declaration in iidim.f90
+    integer                                                             , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                                           :: lundia !  Description and declaration in inout.igs
-    integer                                                             , intent(in)  :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                           :: nmax   !  Description and declaration in iidim.f90
-    integer                                                             , intent(in)  :: nmaxus !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in)  :: kcu    !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in)  :: kcv    !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax), intent(in)  :: kspu   !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax), intent(in)  :: kspv   !  Description and declaration in iidim.f90
+    integer                                                             , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                           :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                             , intent(in)  :: nmaxus !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in)  :: kcu    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in)  :: kcv    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax), intent(in)  :: kspu   !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax), intent(in)  :: kspv   !  Description and declaration in esm_alloc_int.f90
 !
 !
 ! Local variables

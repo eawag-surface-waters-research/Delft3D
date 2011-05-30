@@ -69,11 +69,11 @@ subroutine wrsedmavg(lundia    ,error     ,trifil    ,nst       ,mmax      , &
 ! Global variables
 !
     integer        , intent(in)  :: initi
-    integer        , intent(in)  :: lsed    !  Description and declaration in iidim.f90
-    integer        , intent(in)  :: lsedtot !  Description and declaration in iidim.f90
+    integer        , intent(in)  :: lsed    !  Description and declaration in esm_alloc_int.f90
+    integer        , intent(in)  :: lsedtot !  Description and declaration in esm_alloc_int.f90
     integer                      :: lundia  !  Description and declaration in inout.igs
-    integer        , intent(in)  :: mmax    !  Description and declaration in iidim.f90
-    integer        , intent(in)  :: nmaxus  !  Description and declaration in iidim.f90
+    integer        , intent(in)  :: mmax    !  Description and declaration in esm_alloc_int.f90
+    integer        , intent(in)  :: nmaxus  !  Description and declaration in esm_alloc_int.f90
     integer        , intent(in)  :: nst
     logical        , intent(out) :: error   !!  Flag=TRUE if an error is encountered
     character(60)  , intent(in)  :: trifil  !!  File name for FLOW NEFIS output

@@ -379,15 +379,15 @@ subroutine tricom(tscale    ,it01      ,it02      ,itb       ,ite       , &
 ! Global variables
 !
     integer                   :: initia  !!  if < 0: iteration process of morsys else  : equal to INITI =1 initialization =2 initialization and read restart information from the communication file =3 no initialization
-    integer                   :: it01    !  Description and declaration in iidim.f90
-    integer                   :: it02    !  Description and declaration in iidim.f90
+    integer                   :: it01    !  Description and declaration in esm_alloc_int.f90
+    integer                   :: it02    !  Description and declaration in esm_alloc_int.f90
     integer                   :: itb     !!  Start time of computational interval for a stand alone system the input value from FLOW: ITB = 1
     integer                   :: ite     !!  End time of computational interval for a stand alone system the input value from FLOW: ITE = -1
     integer                   :: itima   !!  Time to start simulation (N * tscale) according to DELFT3D conventions
-    integer                   :: itlen   !  Description and declaration in iidim.f90
+    integer                   :: itlen   !  Description and declaration in esm_alloc_int.f90
     logical      , intent(in) :: alone   !!  TRUE when flow runs stand-alone, FALSE when flow is part of morsys
     logical                   :: mainys  !!  Logical flag for FLOW is main program (TRUE) for writing output
-    real(fp)                  :: tscale  !  Description and declaration in rjdim.f90
+    real(fp)                  :: tscale  !  Description and declaration in esm_alloc_real.f90
     character(*)              :: comfil  !!  Communication file name
     character(*)              :: runid   !!  Run identification code for the current simulation (used to determine the names of the in- /output files used by the system)
     character(*)              :: trifil  !!  File name for FLOW NEFIS output files (tri"h/m"-"casl""labl".dat/def)

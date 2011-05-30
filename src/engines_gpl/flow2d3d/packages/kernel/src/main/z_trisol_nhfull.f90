@@ -447,7 +447,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     integer             :: itiwec      !!  Current time counter for the calibration of internal wave energy
     integer, intent(in) :: keva        !  Description and declaration in tricom.igs
     integer             :: ktemp       !  Description and declaration in tricom.igs
-    integer             :: nfltyp      !  Description and declaration in iidim.f90
+    integer             :: nfltyp      !  Description and declaration in esm_alloc_int.f90
     integer             :: nst         !!  Current time step counter
     logical             :: sferic      !  Description and declaration in tricom.igs
     real(fp)            :: anglat      !!  - Angle of latitude of the model centre (used to determine the coef. for the coriolis force)
@@ -463,7 +463,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     character(1)        :: temint      !  Description and declaration in tricom.igs
     character(12)       :: tkemod      !  Description and declaration in tricom.igs
     character(13)       :: trasol      !  Description and declaration in tricom.igs
-    character(4)        :: rouflo      !  Description and declaration in ckdim.f90
+    character(4)        :: rouflo      !  Description and declaration in esm_alloc_char.f90
     character(4)        :: rouwav      !  Description and declaration in tricom.igs
     character(8)        :: dischy      !  Description and declaration in tricom.igs
     character(8)        :: solver      !  Description and declaration in tricom.igs

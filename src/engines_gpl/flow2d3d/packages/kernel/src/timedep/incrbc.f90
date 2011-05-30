@@ -63,58 +63,58 @@ subroutine incrbc(timsec    ,j         ,nmmaxj    ,nmax      ,norow     , &
     integer                                :: icy
     integer                                :: j
     integer                                :: ncmax
-    integer                                :: nmax !  Description and declaration in iidim.f90
+    integer                                :: nmax !  Description and declaration in esm_alloc_int.f90
     integer                                :: nmmaxj !  Description and declaration in dimens.igs
-    integer                                :: nocol !  Description and declaration in iidim.f90
-    integer                                :: norow !  Description and declaration in iidim.f90
-    integer, dimension(5, norow + nocol)   :: irocol !  Description and declaration in iidim.f90
-    real(fp)                               :: hdt !  Description and declaration in rjdim.f90
+    integer                                :: nocol !  Description and declaration in esm_alloc_int.f90
+    integer                                :: norow !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(5, norow + nocol)   :: irocol !  Description and declaration in esm_alloc_int.f90
+    real(fp)                               :: hdt !  Description and declaration in esm_alloc_real.f90
     real(fp)                               :: timsec !  Description and declaration in inttim.igs
-    real(fp), dimension(4, norow + nocol)      :: circ2d !  Description and declaration in rjdim.f90
-    real(fp), dimension(12, norow + nocol)     :: crbc !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: dpu !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: dpv !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: guv !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: gvu !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: hu !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: hv !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: s0 !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: u0 !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: v0 !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: wsu !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: wsv !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: xcor !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: ycor !  Description and declaration in rjdim.f90
-    real(fp), dimension(ncmax)                 :: ampbc !  Description and declaration in rjdim.f90
-    real(fp), dimension(ncmax)                 :: ombc !  Description and declaration in rjdim.f90
-    real(fp), dimension(ncmax)                 :: phibc !  Description and declaration in rjdim.f90
-    real(fp), dimension(ncmax)                 :: thetbc !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: cgdghf !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: cgdghl !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: ctbf !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: ctbl !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: ctif !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: ctil !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: ctrf !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: ctrl !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: stbf !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: stbl !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: stif !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: stil !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: umeanf !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: umeanl !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: wenf !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: wenfm !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: wenl !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: wenlm !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: zbmnf !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: zbmnl !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: zetabf !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: zetabl !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: zetaif !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: zetail !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: zmeanf !  Description and declaration in rjdim.f90
-    real(fp), dimension(norow + nocol)         :: zmeanl !  Description and declaration in rjdim.f90
+    real(fp), dimension(4, norow + nocol)      :: circ2d !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(12, norow + nocol)     :: crbc !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: dpu !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: dpv !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: guv !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: gvu !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: hu !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: hv !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: s0 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: u0 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: v0 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: wsu !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: wsv !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: xcor !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub) :: ycor !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(ncmax)                 :: ampbc !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(ncmax)                 :: ombc !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(ncmax)                 :: phibc !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(ncmax)                 :: thetbc !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: cgdghf !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: cgdghl !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: ctbf !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: ctbl !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: ctif !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: ctil !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: ctrf !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: ctrl !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: stbf !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: stbl !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: stif !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: stil !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: umeanf !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: umeanl !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: wenf !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: wenfm !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: wenl !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: wenlm !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: zbmnf !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: zbmnl !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: zetabf !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: zetabl !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: zetaif !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: zetail !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: zmeanf !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(norow + nocol)         :: zmeanl !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

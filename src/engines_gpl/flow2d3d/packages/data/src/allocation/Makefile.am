@@ -28,10 +28,12 @@ FMODULES += \
 #Sources
 libdata_allocation_la_SOURCES = \
          chnull.f90 \
-         ckdim.f90 \
          decarr.f90 \
          dnull.f90 \
          errpnt.f90 \
+         esm_alloc_char.f90 \
+         esm_alloc_int.f90 \
+         esm_alloc_real.f90 \
          getlun.f90 \
          getpointer.f90 \
          gtcpnt.f90 \
@@ -40,7 +42,6 @@ libdata_allocation_la_SOURCES = \
          gtlpnt.f90 \
          gtptrs.f90 \
          gtrpnt.f90 \
-         iidim.f90 \
          inull.f90 \
          lnull.f90 \
          mkcpnt.f90 \
@@ -49,7 +50,6 @@ libdata_allocation_la_SOURCES = \
          mkipnt.f90 \
          mklpnt.f90 \
          mkrpnt.f90 \
-         rjdim.f90 \
          rnull.f90
 
 #-------------------------------------------------------------------------------

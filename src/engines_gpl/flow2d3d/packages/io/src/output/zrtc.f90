@@ -57,12 +57,12 @@ subroutine zrtc(mlb, mub, nlb, nub, kfs, kfsmin, kfsmax, sig, zk, s1, dps, kmax,
     integer                               , intent(in) :: mub
     integer                               , intent(in) :: nlb
     integer                               , intent(in) :: nub
-    integer   , dimension(nlb:nub,mlb:mub), intent(in) :: kfsmax !  Description and declaration in iidim.f90
-    integer   , dimension(nlb:nub,mlb:mub), intent(in) :: kfsmin !  Description and declaration in iidim.f90
-    integer   , dimension(nlb:nub,mlb:mub), intent(in) :: kfs    !  Description and declaration in iidim.f90
-    integer                               , intent(in) :: kmax   !  Description and declaration in iidim.f90
-    real(prec), dimension(nlb:nub,mlb:mub), intent(in) :: dps    !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(nlb:nub,mlb:mub), intent(in) :: s1     !  Description and declaration in rjdim.f90
+    integer   , dimension(nlb:nub,mlb:mub), intent(in) :: kfsmax !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(nlb:nub,mlb:mub), intent(in) :: kfsmin !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(nlb:nub,mlb:mub), intent(in) :: kfs    !  Description and declaration in esm_alloc_int.f90
+    integer                               , intent(in) :: kmax   !  Description and declaration in esm_alloc_int.f90
+    real(prec), dimension(nlb:nub,mlb:mub), intent(in) :: dps    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nlb:nub,mlb:mub), intent(in) :: s1     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(  kmax)         , intent(in) :: sig
     real(fp)  , dimension(0:kmax)         , intent(in) :: zk
 !

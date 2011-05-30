@@ -57,8 +57,8 @@ subroutine fbcorr(lundia, nto, nambnd, typbnd, gdp)
 !
     integer                      , intent(in) :: lundia  !  Description and declaration in inout.igs 
     integer                      , intent(in) :: nto
-    character(20), dimension(nto), intent(in) :: nambnd  !  Description and declaration in ckdim.f90
-    character(1) , dimension(nto), intent(in) :: typbnd  !  Description and declaration in ckdim.f90
+    character(20), dimension(nto), intent(in) :: nambnd  !  Description and declaration in esm_alloc_char.f90
+    character(1) , dimension(nto), intent(in) :: typbnd  !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

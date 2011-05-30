@@ -62,15 +62,15 @@ subroutine chksit(lundia    ,error     ,nostat    ,ntruv     ,ntru      , &
 ! Global variables
 !
     integer                                                                           :: lundia    ! Description and declaration in inout.igs
-    integer                                                             , intent(in)  :: mmax      ! Description and declaration in iidim.f90
-    integer                                                                           :: nmax      ! Description and declaration in iidim.f90
-    integer                                                             , intent(in)  :: nmaxus    ! Description and declaration in iidim.f90
+    integer                                                             , intent(in)  :: mmax      ! Description and declaration in esm_alloc_int.f90
+    integer                                                                           :: nmax      ! Description and declaration in esm_alloc_int.f90
+    integer                                                             , intent(in)  :: nmaxus    ! Description and declaration in esm_alloc_int.f90
     integer                                                             , intent(in)  :: nostat    ! Description and declaration in dimens.igs
     integer                                                                           :: ntru      ! Description and declaration in dimens.igs
     integer                                                             , intent(in)  :: ntruv     ! Description and declaration in dimens.igs
-    integer       , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: kcs       ! Description and declaration in iidim.f90
-    integer       , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: kcu       ! Description and declaration in iidim.f90
-    integer       , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: kcv       ! Description and declaration in iidim.f90
+    integer       , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: kcs       ! Description and declaration in esm_alloc_int.f90
+    integer       , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: kcu       ! Description and declaration in esm_alloc_int.f90
+    integer       , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: kcv       ! Description and declaration in esm_alloc_int.f90
     logical                                                             , intent(out) :: error     ! Flag=TRUE if an error is encountered
 !
 !

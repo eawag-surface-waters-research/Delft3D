@@ -42,20 +42,20 @@ subroutine c_vvv(j         ,nmmaxj    ,kmax      ,nm        ,nmu       , &
 ! Global variables
 !
     integer                        , intent(in) :: j
-    integer                        , intent(in) :: kmax !  Description and declaration in iidim.f90
+    integer                        , intent(in) :: kmax !  Description and declaration in esm_alloc_int.f90
     integer                        , intent(in) :: kmaxx
     integer                        , intent(in) :: ndm
     integer                        , intent(in) :: ndmu
     integer                        , intent(in) :: nm
     integer                        , intent(in) :: nmmaxj !  Description and declaration in dimens.igs
     integer                        , intent(in) :: nmu
-    integer, dimension(j:nmmaxj)   , intent(in) :: kcs !  Description and declaration in iidim.f90
-    integer, dimension(j:nmmaxj)   , intent(in) :: kfv !  Description and declaration in iidim.f90
+    integer, dimension(j:nmmaxj)   , intent(in) :: kcs !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(j:nmmaxj)   , intent(in) :: kfv !  Description and declaration in esm_alloc_int.f90
     logical                        , intent(in) :: cstbnd !  Description and declaration in numeco.igs
     logical                        , intent(in) :: kcscuttest
     logical                        , intent(in) :: zmodel !  Description and declaration in procs.igs
     real(fp)                                    :: vvv
-    real(fp), dimension(j:nmmaxj, kmax), intent(in) :: v1 !  Description and declaration in rjdim.f90
+    real(fp), dimension(j:nmmaxj, kmax), intent(in) :: v1 !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

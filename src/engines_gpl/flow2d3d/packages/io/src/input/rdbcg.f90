@@ -64,7 +64,7 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                                    :: lunmd  !  Description and declaration in inout.igs
     integer                                    :: mxnto  !!  Not Used any more (old UI)
     integer                                    :: nrrec  !!  Pointer to the record number in the MD-file
-    integer                      , intent(in)  :: nto    !  Description and declaration in iidim.f90
+    integer                      , intent(in)  :: nto    !  Description and declaration in esm_alloc_int.f90
     integer                      , intent(in)  :: ntoq   !  Description and declaration in dimens.igs
     logical                                    :: bndneu !  Description and declaration in numeco.igs
     logical                                    :: cstbnd !  Description and declaration in numeco.igs
@@ -72,12 +72,12 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     logical                      , intent(in)  :: noui   !!  Flag=true if not User Interface
     logical                                    :: pcorr  !  Flag=TRUE when using pressure correction 
                                                          !!  on boundaries using PAVER
-    real(fp)                                   :: dt     !  Description and declaration in rjdim.f90
+    real(fp)                                   :: dt     !  Description and declaration in esm_alloc_real.f90
     real(fp)                                   :: paver  !  Description and declaration in numeco.igs
     real(fp)                                   :: thetqh !  Description and declaration in numeco.igs
     real(fp)                                   :: tlfsmo !!  Timespan for smoothing (in minutes)
     real(fp)                     , intent(in)  :: tunit  !  Description and declaration in exttim.igs
-    real(fp), dimension(nto, 2)                :: rettim !  Description and declaration in rjdim.f90
+    real(fp), dimension(nto, 2)                :: rettim !  Description and declaration in esm_alloc_real.f90
     character(*)                               :: filic  !!  File name of initial condition file
     character(*)                               :: mdfrec !!  Standard rec. length in MD-file (300)
     character(*)                               :: restid !!  Run identification of the restart
@@ -85,8 +85,8 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                                                          !!  current simulation will use this
                                                          !!  file to for setting the initial
                                                          !!  conditions
-    character(1) , dimension(nto), intent(in)  :: typbnd !  Description and declaration in ckdim.f90
-    character(20), dimension(nto), intent(in)  :: nambnd !  Description and declaration in ckdim.f90
+    character(1) , dimension(nto), intent(in)  :: typbnd !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(nto), intent(in)  :: nambnd !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

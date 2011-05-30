@@ -51,12 +51,12 @@ subroutine srcfil(lundia    ,filsrc    ,error     ,nsrc      ,mnksrc    , &
 ! Global variables
 !
     integer                                        :: lundia !  Description and declaration in inout.igs
-    integer                          , intent(in)  :: nsrc   !  Description and declaration in iidim.f90
-    integer      , dimension(7, nsrc), intent(out) :: mnksrc !  Description and declaration in iidim.f90
+    integer                          , intent(in)  :: nsrc   !  Description and declaration in esm_alloc_int.f90
+    integer      , dimension(7, nsrc), intent(out) :: mnksrc !  Description and declaration in esm_alloc_int.f90
     logical                                        :: error  !  Flag=TRUE if an error is encountered
     character(*)                                   :: filsrc !  Name of the relevant file
-    character(1) , dimension(nsrc)                 :: disint !  Description and declaration in ckdim.f90
-    character(20), dimension(nsrc)                 :: namsrc !  Description and declaration in ckdim.f90
+    character(1) , dimension(nsrc)                 :: disint !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(nsrc)                 :: namsrc !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

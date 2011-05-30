@@ -56,7 +56,7 @@ subroutine reacmp(lundia    ,error     ,filana    ,statns    ,nto       , &
     integer                            , intent(in)  :: jacor  !  Flag which file has to be read
     integer                            , intent(in)  :: kc     !  actual number of components used
     integer                                          :: lundia !  Description and declaration in inout.igs
-    integer                            , intent(in)  :: nto    !  Description and declaration in iidim.f90
+    integer                            , intent(in)  :: nto    !  Description and declaration in esm_alloc_int.f90
     logical                            , intent(out) :: error
     real(fp)     , dimension(nto*2, kc)              :: ampl   !!  Amplitudes
     real(fp)     , dimension(nto*2, kc)              :: phas   !!  Phases

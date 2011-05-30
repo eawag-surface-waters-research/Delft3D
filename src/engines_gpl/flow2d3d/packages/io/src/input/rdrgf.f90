@@ -57,12 +57,12 @@ subroutine rdrgf(filrgf    ,lundia    ,error     ,nmax      ,mmax      , &
 ! Global variables 
 ! 
     integer                                                                                                             :: lundia !  Description and declaration in inout.igs 
-    integer                                                                                               , intent(in)  :: mmax   !  Description and declaration in iidim.f90 
-    integer                                                                                               , intent(in)  :: nmax   !  Description and declaration in iidim.f90 
+    integer                                                                                               , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90 
+    integer                                                                                               , intent(in)  :: nmax   !  Description and declaration in esm_alloc_int.f90 
     logical                                                                                                             :: error  !!  Flag=TRUE if an error is encountered 
     logical                                                                                               , intent(out) :: sferic !  Description and declaration in tricom.igs 
-    real(fp)    , dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)              :: xcor   !  Description and declaration in rjdim.f90 
-    real(fp)    , dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)              :: ycor   !  Description and declaration in rjdim.f90 
+    real(fp)    , dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)              :: xcor   !  Description and declaration in esm_alloc_real.f90 
+    real(fp)    , dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)              :: ycor   !  Description and declaration in esm_alloc_real.f90 
     character(*)                                                                                                        :: filrgf !!  File name for the curvi-linear grid file (telmcrgf.xxx) 
 ! 
 ! Local variables 

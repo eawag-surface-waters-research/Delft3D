@@ -63,16 +63,16 @@ subroutine rdtdd(lundia    ,lunout    ,lunrd     ,error     ,fildis    , &
     integer                                 , intent(in)  :: lunout     !  Unit number for the transformed output file
     integer                                               :: lunrd      !  Unit number of the attribute file containing the time series
     integer                                 , intent(in)  :: nrval      !  NR. of data in a record to be read
-    integer                                 , intent(in)  :: nsrc       !  Description and declaration in iidim.f90
+    integer                                 , intent(in)  :: nsrc       !  Description and declaration in esm_alloc_int.f90
     logical                                 , intent(out) :: error      !  Flag=TRUE if an error is encountered
     real(fp)        , dimension(nrval)                    :: rval       !  Array for the time dependent data
     character(*)                                          :: fildis     !  Name of the relevant file
     character(*)                            , intent(in)  :: runid      !  Run identification code for the current simulation (used to determine
                                                                         !  the names of the in- /output files used by the system)
     character(1)                            , intent(in)  :: eol        !  ASCII code for End-Of-Line (^J)
-    character(1)    , dimension(nsrc)       , intent(in)  :: disint     !  Description and declaration in ckdim.f90
+    character(1)    , dimension(nsrc)       , intent(in)  :: disint     !  Description and declaration in esm_alloc_char.f90
     character(10)   , dimension(4 + lstsc)  , intent(in)  :: parunt     !  Unit name fitting the parameter
-    character(20)   , dimension(nsrc)       , intent(in)  :: namsrc     !  Description and declaration in ckdim.f90
+    character(20)   , dimension(nsrc)       , intent(in)  :: namsrc     !  Description and declaration in esm_alloc_char.f90
     character(36)   , dimension(4 + lstsc)  , intent(in)  :: parnam     !  Names of the paramaters to write to time dependent file DIS
     character(40)                           , intent(in)  :: cntain
 !

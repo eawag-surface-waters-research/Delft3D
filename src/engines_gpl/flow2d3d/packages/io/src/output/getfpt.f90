@@ -55,9 +55,9 @@ subroutine getfpt(nmax    ,mmax    ,kmax    ,nofou    ,ifou   ,gdp   )
 ! Global variables
 !
     integer                          , intent(in)  :: ifou
-    integer                          , intent(in)  :: kmax    !  Description and declaration in iidim.f90
-    integer                          , intent(in)  :: mmax    !  Description and declaration in iidim.f90
-    integer                          , intent(in)  :: nmax    !  Description and declaration in iidim.f90
+    integer                          , intent(in)  :: kmax    !  Description and declaration in esm_alloc_int.f90
+    integer                          , intent(in)  :: mmax    !  Description and declaration in esm_alloc_int.f90
+    integer                          , intent(in)  :: nmax    !  Description and declaration in esm_alloc_int.f90
     integer                          , intent(in)  :: nofou   !  Description and declaration in dimens.igs
 !
 ! Local variables

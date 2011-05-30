@@ -57,20 +57,20 @@ subroutine wrirst(lundia    ,runid     ,itrstc    ,nmaxus    ,mmax      , &
 ! Global variables
 !
     integer                                                                    , intent(in)  :: itrstc !!  Current time counter for the restart file. Start writing after first interval is passed. Last time will always be written to file for ITRSTI > 0
-    integer                                                                    , intent(in)  :: kmax !  Description and declaration in iidim.f90
-    integer                                                                    , intent(in)  :: lstsci !  Description and declaration in iidim.f90
-    integer                                                                    , intent(in)  :: ltur !  Description and declaration in iidim.f90
+    integer                                                                    , intent(in)  :: kmax !  Description and declaration in esm_alloc_int.f90
+    integer                                                                    , intent(in)  :: lstsci !  Description and declaration in esm_alloc_int.f90
+    integer                                                                    , intent(in)  :: ltur !  Description and declaration in esm_alloc_int.f90
     integer                                                                                  :: lundia !  Description and declaration in inout.igs
-    integer                                                                    , intent(in)  :: mmax !  Description and declaration in iidim.f90
-    integer                                                                                  :: nmax !  Description and declaration in iidim.f90
-    integer                                                                    , intent(in)  :: nmaxus !  Description and declaration in iidim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: s1 !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: umnldf !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: vmnldf !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax, ltur), intent(in)  :: rtur1 !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: u1 !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: v1 !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci), intent(in)  :: r1 !  Description and declaration in rjdim.f90
+    integer                                                                    , intent(in)  :: mmax !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                  :: nmax !  Description and declaration in esm_alloc_int.f90
+    integer                                                                    , intent(in)  :: nmaxus !  Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: s1 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: umnldf !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: vmnldf !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax, ltur), intent(in)  :: rtur1 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: u1 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: v1 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci), intent(in)  :: r1 !  Description and declaration in esm_alloc_real.f90
     character(*)                                                                             :: runid
 !
 ! Local variables

@@ -83,7 +83,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                                               :: ndistm !  Actual number of times for which time varying data at discharge points is allowed in the Md-file
     integer                                               :: nrrec  !  Pointer to the record number in the MD-file
     integer                                 , intent(in)  :: nrver  !  Version number (240/249)
-    integer                                               :: nsrc   !  Description and declaration in iidim.f90
+    integer                                               :: nsrc   !  Description and declaration in esm_alloc_int.f90
     logical                                 , intent(in)  :: bubble !  Description and declaration in procs.igs    
     logical                                 , intent(in)  :: const  !  Description and declaration in procs.igs
     logical                                               :: error  !  Flag=TRUE if an error is encountered
@@ -94,14 +94,14 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     real(fp)     , dimension(mxdist)                      :: rtdis  !  At most MXDIST times for time varying data at discharge points
     real(fp)     , dimension(mxdist, mxnsrc)              :: cqs    !  At most MXDIST time varying salinities at discharge points
     real(fp)     , dimension(mxdist, mxnsrc)              :: cqt    !  At most MXDIST time varying temperatures at discharge points
-    real(fp)     , dimension(mxdist, mxnsrc), intent(out) :: disch  !  Description and declaration in rjdim.f90
+    real(fp)     , dimension(mxdist, mxnsrc), intent(out) :: disch  !  Description and declaration in esm_alloc_real.f90
     character(*)                                          :: fildis !  File name for the time varying data at discharge points
     character(*)                                          :: mdfrec !  Standard rec. length in MD-file (300)
     character(*)                                          :: runid
     character(1)                                          :: eol    !  ASCII code for End-Of-Line (^J)
-    character(1) , dimension(nsrc)                        :: disint !  Description and declaration in ckdim.f90
-    character(20), dimension(lstsc)         , intent(in)  :: namcon !  Description and declaration in ckdim.f90
-    character(20), dimension(nsrc)                        :: namsrc !  Description and declaration in ckdim.f90
+    character(1) , dimension(nsrc)                        :: disint !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(lstsc)         , intent(in)  :: namcon !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(nsrc)                        :: namsrc !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

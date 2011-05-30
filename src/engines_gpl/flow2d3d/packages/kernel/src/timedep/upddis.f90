@@ -66,24 +66,24 @@ subroutine upddis(lundis    ,lundia    ,sferic    ,itdis     , &
     integer                                   , intent(in)  :: lundis !  Description and declaration in luntmp.igs
     integer                                   , intent(in)  :: nm     !!  N,M index for discharge location
     integer                                                 :: nmmaxj !  Description and declaration in dimens.igs
-    integer                                   , intent(in)  :: nsrc   !  Description and declaration in iidim.f90
-    integer, dimension(5, nsrc)                             :: itdis  !  Description and declaration in iidim.f90
+    integer                                   , intent(in)  :: nsrc   !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(5, nsrc)                             :: itdis  !  Description and declaration in esm_alloc_int.f90
     logical                                                 :: sferic !  Description and declaration in tricom.igs
-    real(fp)                                  , intent(in)  :: dt     !  Description and declaration in rjdim.f90
+    real(fp)                                  , intent(in)  :: dt     !  Description and declaration in esm_alloc_real.f90
     real(fp)                                  , intent(in)  :: grdang !  Description and declaration in tricom.igs
     real(fp)                                  , intent(in)  :: timnow !!  Current timestep (multiples of dt)
     real(fp)                                  , intent(in)  :: timscl !!  Multiple factor to create minutes
                                                                       !!  from read times
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: alfas  !  Description and declaration in rjdim.f90
-    real(fp), dimension(lstsc, nsrc)                        :: rint0  !  Description and declaration in rjdim.f90
-    real(fp), dimension(lstsc, nsrc)                        :: rint1  !  Description and declaration in rjdim.f90
-    real(fp), dimension(nsrc)                               :: disch0 !  Description and declaration in rjdim.f90
-    real(fp), dimension(nsrc)                               :: disch1 !  Description and declaration in rjdim.f90
-    real(fp), dimension(nsrc)                               :: umdis0 !  Description and declaration in rjdim.f90
-    real(fp), dimension(nsrc)                               :: umdis1 !  Description and declaration in rjdim.f90
-    real(fp), dimension(nsrc)                               :: vmdis0 !  Description and declaration in rjdim.f90
-    real(fp), dimension(nsrc)                               :: vmdis1 !  Description and declaration in rjdim.f90
-    character(1), dimension(nsrc)             , intent(in)  :: dismmt !  Description and declaration in ckdim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: alfas  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(lstsc, nsrc)                        :: rint0  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(lstsc, nsrc)                        :: rint1  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nsrc)                               :: disch0 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nsrc)                               :: disch1 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nsrc)                               :: umdis0 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nsrc)                               :: umdis1 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nsrc)                               :: vmdis0 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nsrc)                               :: vmdis1 !  Description and declaration in esm_alloc_real.f90
+    character(1), dimension(nsrc)             , intent(in)  :: dismmt !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

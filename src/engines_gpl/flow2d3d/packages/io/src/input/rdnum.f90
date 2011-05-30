@@ -64,9 +64,9 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     integer     , intent(out) :: icreep !  Description and declaration in tricom.igs
     integer                   :: iter1  !  Description and declaration in numeco.igs
     integer     , intent(in)  :: keva   !  Description and declaration in tricom.igs
-    integer     , intent(in)  :: kmax   !  Description and declaration in iidim.f90
+    integer     , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer     , intent(in)  :: ktemp  !  Description and declaration in tricom.igs
-    integer     , intent(in)  :: lstsci !  Description and declaration in iidim.f90
+    integer     , intent(in)  :: lstsci !  Description and declaration in esm_alloc_int.f90
     integer                   :: lundia !  Description and declaration in inout.igs
     integer                   :: lunmd  !  Description and declaration in inout.igs
     integer                   :: nrrec  !!  Pointer to the record number in the

@@ -49,8 +49,8 @@ subroutine rdhyg(ag, rhow, gdp)
 !
 ! Global variables
 !
-    real(fp) :: ag   !  Description and declaration in rjdim.f90
-    real(fp) :: rhow !  Description and declaration in rjdim.f90
+    real(fp) :: ag   !  Description and declaration in esm_alloc_real.f90
+    real(fp) :: rhow !  Description and declaration in esm_alloc_real.f90
 !
 !! executable statements -------------------------------------------------------
 !

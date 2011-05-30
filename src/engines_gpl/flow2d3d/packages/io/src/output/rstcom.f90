@@ -58,26 +58,26 @@ subroutine rstcom(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
 !
 ! Global variables
 !
-    integer, intent(in)                                                         :: itlen  !  Description and declaration in iidim.f90
-    integer                                                                     :: kmax   !  Description and declaration in iidim.f90
+    integer, intent(in)                                                         :: itlen  !  Description and declaration in esm_alloc_int.f90
+    integer                                                                     :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer, intent(in)                                                         :: lsec   !  Description and declaration in dimens.igs
     integer, intent(in)                                                         :: lsecfl !  Description and declaration in dimens.igs
-    integer, intent(in)                                                         :: lstsci !  Description and declaration in iidim.f90
+    integer, intent(in)                                                         :: lstsci !  Description and declaration in esm_alloc_int.f90
     integer                                                                     :: lundia !  Description and declaration in inout.igs
     integer, intent(in)                                                         :: maxtim !!  Max.nr. of timesteps for the communi-
                                                                                           !!  cation file
-    integer                                                                     :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                     :: nmax   !  Description and declaration in iidim.f90
-    integer                                                                     :: nmaxus !  Description and declaration in iidim.f90
+    integer                                                                     :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                     :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                     :: nmaxus !  Description and declaration in esm_alloc_int.f90
     integer, intent(in)                                                         :: timrst !!  Restart time in combination with
                                                                                           !!  restart option from comm. file
     integer, dimension(maxtim)                                                  :: timcur !!  Array with time steps on comm. file
                                                                                           !!  for restart option
     logical                                                                     :: error  !!  Flag=TRUE if an error is encountered
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: s1     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: u1     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: v1     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci) :: r1     !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: s1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: u1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: v1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci) :: r1     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(nmaxus, mmax, kmax, 2)                                  :: rbuff  !  Description and declaration in r-i-ch.igs
     character(*)                                                                :: comfil !!  Name for communication file
                                                                                           !!  com-<case><label>

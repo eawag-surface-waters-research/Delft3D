@@ -72,11 +72,11 @@ subroutine caldps(nmmax     ,nfltyp    ,icx       , &
 !
     integer                                     , intent(in)  :: icx    !!  Increment in the X-dir., if ICX= NMAX then computation proceeds in the X-dir. If icx=1 then computation proceeds in the Y-dir.
     integer                                     , intent(in)  :: icy    !!  Increment in the Y-dir. (see ICX)
-    integer                                     , intent(out) :: nfltyp !  Description and declaration in iidim.f90
+    integer                                     , intent(out) :: nfltyp !  Description and declaration in esm_alloc_int.f90
     integer                                     , intent(in)  :: nmmax  !  Description and declaration in dimens.igs
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              :: kcs    !  Description and declaration in iidim.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              :: dp     !  Description and declaration in rjdim.f90
-    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: dps    !  Description and declaration in rjdim.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              :: kcs    !  Description and declaration in esm_alloc_int.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              :: dp     !  Description and declaration in esm_alloc_real.f90
+    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: dps    !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

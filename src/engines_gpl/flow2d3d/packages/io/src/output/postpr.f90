@@ -360,7 +360,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     logical       , intent(in)  :: mainys !!  Flag for running main routines
     real(fp)                    :: dtsec  !!  Integration time step [in seconds]
     real(fp)                    :: grdang !  Description and declaration in tricom.igs
-    real(fp)                    :: rhow   !  Description and declaration in rjdim.f90
+    real(fp)                    :: rhow   !  Description and declaration in esm_alloc_real.f90
     character(*)                :: comfil !!  Name for communication file com-<case><label>
     character(*)                :: runid  !!  Run identification code for the current simulation
                                           !!  (used to determine the names of the in- /output files used by the system)

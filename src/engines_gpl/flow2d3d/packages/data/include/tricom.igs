@@ -104,7 +104,7 @@
                              !               initialized for K/EPS
                              !       =-LTUR: turbulence arrays
                              !               initialized using old K
-       integer :: nfltyp     !  Description and declaration in iidim.f90
+       integer :: nfltyp     !  Description and declaration in esm_alloc_int.f90
        integer :: icreep     !  Global data
                              !  Identification for special approach
                              !  horizontal gradients (0=no, 1=yes)
@@ -138,7 +138,7 @@
                              !  Forester filter option for UV
        character*1 :: forfww !  Global data
                              !  Forester filter option for W
-       character*4 :: rouflo !  Description and declaration in ckdim.f90
+       character*4 :: rouflo !  Description and declaration in esm_alloc_char.f90
        character*4 :: rouwav !  Global data
                              !  Bed stress formulation for waves:
                              !   FR84 - Fredsoe 1984 (Default)

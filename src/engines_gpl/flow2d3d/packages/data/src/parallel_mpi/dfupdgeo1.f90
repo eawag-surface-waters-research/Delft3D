@@ -45,8 +45,8 @@ subroutine dfupdgeo1 ( guu, gvv, gdp )
 !
 ! Global variables
 !
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(inout) :: guu    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(inout) :: gvv    !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(inout) :: guu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(inout) :: gvv    !  Description and declaration in esm_alloc_real.f90
 !
 !! executable statements -------------------------------------------------------
 !

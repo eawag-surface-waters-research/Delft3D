@@ -50,9 +50,9 @@ subroutine uv2zeta(mmax        ,nmaxus     ,kcs        ,divByCellWidth   ,ucompu
 !
 ! Global variables
 ! 
-    integer  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: kcs             !!  Description and declaration in iidim.f90
-    integer                                                        , intent(in)  :: mmax            !!  Description and declaration in iidim.f90
-    integer                                                        , intent(in)  :: nmaxus          !!  Description and declaration in iidim.f90
+    integer  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: kcs             !!  Description and declaration in esm_alloc_int.f90
+    integer                                                        , intent(in)  :: mmax            !!  Description and declaration in esm_alloc_int.f90
+    integer                                                        , intent(in)  :: nmaxus          !!  Description and declaration in esm_alloc_int.f90
     real(fp) , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: ucompu          !  First component of vector (u, qxk or taubpu) in u-points
     real(fp) , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: vcompv          !  Second component of vector (v, qyk or taubpv) in v-points
     real(fp) , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(out) :: ucompz          !  First component of vector (u, qxk or taubpu) in zeta-points

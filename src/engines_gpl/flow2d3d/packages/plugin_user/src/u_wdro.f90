@@ -51,10 +51,10 @@ subroutine u_wdro(lundat    ,first     ,header    ,runid     ,itime     , &
     integer                        , intent(in) :: notim
     logical                        , intent(in) :: first
     real(fp)                       , intent(in) :: timnow
-    real(fp), dimension(2, nodro)      , intent(in) :: xydro !  Description and declaration in rjdim.f90
+    real(fp), dimension(2, nodro)      , intent(in) :: xydro !  Description and declaration in esm_alloc_real.f90
     character(*)                   , intent(in) :: runid
     character(131), dimension(10)               :: header !  Description and declaration in postpr.igs
-    character(20), dimension(nodro), intent(in) :: namdro !  Description and declaration in ckdim.f90
+    character(20), dimension(nodro), intent(in) :: namdro !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

@@ -44,8 +44,8 @@ subroutine mirror_bnd(icx       ,icy       ,nmmax     , &
     integer                                              , intent(in)   :: icy
     integer                                              , intent(in)   :: nmlb
     integer                                              , intent(in)   :: nmub
-    integer                                              , intent(in)   :: nmmax  !  Description and declaration in iidim.f90
-    integer   , dimension(nmlb:nmub)                     , intent(in)   :: kcs    !  Description and declaration in iidim.f90
+    integer                                              , intent(in)   :: nmmax  !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(nmlb:nmub)                     , intent(in)   :: kcs    !  Description and declaration in esm_alloc_int.f90
     real(fp)  , dimension(nmlb:nmub)                     , intent(inout):: fld
 !
 ! Local variables

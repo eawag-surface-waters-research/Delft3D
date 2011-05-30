@@ -63,12 +63,12 @@ subroutine tfzeta(timnow    ,nmax      ,mmax      ,tgfsep    ,xz        , &
 !
 ! Global variables
 !
-    integer  , intent(in)                                                       :: mmax   !  Description and declaration in iidim.f90
-    integer  , intent(in)                                                       :: nmax   !  Description and declaration in iidim.f90
+    integer  , intent(in)                                                       :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer  , intent(in)                                                       :: nmax   !  Description and declaration in esm_alloc_int.f90
     real(fp) , intent(in)                                                       :: timnow !!  Current timestep (multiples of dt)
     real(fp) , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: tgfsep !!  Water elev. induced by tide gen.force
-    real(fp) , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in) :: xz     !  Description and declaration in rjdim.f90
-    real(fp) , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in) :: yz     !  Description and declaration in rjdim.f90
+    real(fp) , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in) :: xz     !  Description and declaration in esm_alloc_real.f90
+    real(fp) , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in) :: yz     !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

@@ -58,11 +58,11 @@ subroutine rdtimc(comfil    ,lundia    ,error     ,commrd    ,itlen     , &
 !
 ! Global variables
 !
-    integer      , intent(out) :: itlen  !  Description and declaration in iidim.f90
+    integer      , intent(out) :: itlen  !  Description and declaration in esm_alloc_int.f90
     integer                    :: lundia !  Description and declaration in inout.igs
     logical      , intent(out) :: commrd !!  Flag = TRUE if communication file exists and can be read from
     logical      , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    real(fp)     , intent(out) :: tscale !  Description and declaration in rjdim.f90
+    real(fp)     , intent(out) :: tscale !  Description and declaration in esm_alloc_real.f90
     character(*)               :: comfil !!  First part of file name
 !
 !

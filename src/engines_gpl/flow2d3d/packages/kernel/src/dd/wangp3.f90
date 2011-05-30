@@ -65,14 +65,14 @@ subroutine wangp3(s1        ,kcs       ,irocol    ,norow     ,icx       , &
                                                                       !!  Due to the shift in the 2nd (M-)
                                                                       !!  index, J = -2*NMAX + 1
     integer                                                 :: nmmaxj !  Description and declaration in dimens.igs
-    integer                                   , intent(in)  :: norow  !  Description and declaration in iidim.f90
-    integer , dimension(5, norow)             , intent(in)  :: irocol !  Description and declaration in iidim.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: kcs    !  Description and declaration in iidim.f90
+    integer                                   , intent(in)  :: norow  !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(5, norow)             , intent(in)  :: irocol !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: a
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: b
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: c      !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: c      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              :: d
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: s1     !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: s1     !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

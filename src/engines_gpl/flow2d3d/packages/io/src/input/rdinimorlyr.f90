@@ -57,18 +57,18 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
     integer                                                , intent(in)  :: icx
     integer                                                , intent(in)  :: icy
     integer                                                , intent(in)  :: iporosity
-    integer                                                , intent(in)  :: lsedtot !  Description and declaration in iidim.f90
+    integer                                                , intent(in)  :: lsedtot !  Description and declaration in esm_alloc_int.f90
     integer                                                              :: lundia  !  Description and declaration in inout.igs
-    integer                                                , intent(in)  :: mmax    !  Description and declaration in iidim.f90
-    integer                                                , intent(in)  :: nlyr    !  Description and declaration in iidim.f90
-    integer                                                , intent(in)  :: nmax    !  Description and declaration in iidim.f90
-    integer                                                , intent(in)  :: nmaxus  !  Description and declaration in iidim.f90
-    integer                                                              :: nmmax   !  Description and declaration in iidim.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)             , intent(in)  :: kcs     !  Description and declaration in iidim.f90
+    integer                                                , intent(in)  :: mmax    !  Description and declaration in esm_alloc_int.f90
+    integer                                                , intent(in)  :: nlyr    !  Description and declaration in esm_alloc_int.f90
+    integer                                                , intent(in)  :: nmax    !  Description and declaration in esm_alloc_int.f90
+    integer                                                , intent(in)  :: nmaxus  !  Description and declaration in esm_alloc_int.f90
+    integer                                                              :: nmmax   !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)             , intent(in)  :: kcs     !  Description and declaration in esm_alloc_int.f90
     real(fp), dimension(lsedtot,nlyr,gdp%d%nmlb:gdp%d%nmub), intent(out) :: msed
     real(fp), dimension(nlyr,gdp%d%nmlb:gdp%d%nmub)        , intent(out) :: svfrac
     real(fp), dimension(nlyr,gdp%d%nmlb:gdp%d%nmub)        , intent(out) :: thlyr
-    real(fp), dimension(lsedtot)                           , intent(in)  :: cdryb   !  Description and declaration in rjdim.f90
+    real(fp), dimension(lsedtot)                           , intent(in)  :: cdryb   !  Description and declaration in esm_alloc_real.f90
     character(*)                                                         :: filcomp
 !
 ! Local variables

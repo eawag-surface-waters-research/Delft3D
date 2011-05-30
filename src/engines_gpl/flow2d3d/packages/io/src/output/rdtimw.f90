@@ -58,8 +58,8 @@ subroutine rdtimw(comfil    ,lundia    ,error     ,ntwav     ,timwav    , &
 !
     integer                                   :: lundia !  Description and declaration in inout.igs
     integer                     , intent(in)  :: maxtim !!  Max.nr. of timesteps for the communication file
-    integer                                   :: mmax   !  Description and declaration in iidim.f90
-    integer                                   :: nmaxus !  Description and declaration in iidim.f90
+    integer                                   :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                   :: nmaxus !  Description and declaration in esm_alloc_int.f90
     integer                                   :: ntwav  !!  Total number of timesteps on comm. file (to read from)
     integer , dimension(maxtim)               :: timwav !!  Array with time steps on comm. file for wave results
     logical                     , intent(out) :: error  !!  Flag = TRUE if an error is encountered

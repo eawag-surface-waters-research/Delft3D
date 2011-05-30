@@ -46,7 +46,7 @@ use bedcomposition_module
 !
 ! Global variables
 !
-    integer                                         , intent(in)  :: lsedtot  !  Description and declaration in iidim.f90
+    integer                                         , intent(in)  :: lsedtot  !  Description and declaration in esm_alloc_int.f90
     integer                                                       :: lundia   !  Description and declaration in inout.igs
     integer                                         , intent(in)  :: mmax
     integer                                         , intent(in)  :: nmax
@@ -56,7 +56,7 @@ use bedcomposition_module
     integer                                         , intent(in)  :: version
     logical                                         , intent(out) :: error
     character(*)                                                  :: filmor
-    character(20)             , dimension(nto)                    :: nambnd   !  Description and declaration in ckdim.f90
+    character(20)             , dimension(nto)                    :: nambnd   !  Description and declaration in esm_alloc_char.f90
     character(20)             , dimension(lsedtot)                :: namsed   !  Names of all sediment fractions 
     character(MAXTABLECLENGTH), dimension(2*lsedtot)              :: parnames
 !

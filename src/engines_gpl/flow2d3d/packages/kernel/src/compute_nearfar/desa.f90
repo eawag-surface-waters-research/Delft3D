@@ -63,20 +63,20 @@ subroutine desa(x_jet   ,y_jet    ,z_jet   ,s_jet   ,nrow    , &
     integer                                                    , intent(in)  :: ltem     !  Description and declaration in tricom.igs
     integer                                                    , intent(in)  :: nmmax    !  Description and declaration in tricom.igs
     integer                                                    , intent(in)  :: nrow     !  Description and declaration in tricom.igs
-    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kcs      !  Description and declaration in rjdim.f90 gs
+    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kcs      !  Description and declaration in esm_alloc_real.f90 gs
     real(fp)   , dimension(nrow)                               , intent(in)  :: x_jet    !  Description and declaration in
     real(fp)   , dimension(nrow)                               , intent(in)  :: y_jet    !  Description and declaration in
     real(fp)   , dimension(nrow)                               , intent(in)  :: z_jet    !  Description and declaration in
     real(fp)   , dimension(nrow)                               , intent(in)  :: s_jet    !  Description and declaration in
 !    real(fp)   , dimension(nrow)                               , intent(in)  :: b_jet    !  Description and declaration in
 !    real(fp)   , dimension(nrow)                               , intent(in)  :: v_jet    !  Description and declaration in
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: s1       !  Description and declaration in rjdim.f90 gs
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: xz       !  Description and declaration in rjdim.f90 gs
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: yz       !  Description and declaration in rjdim.f90
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(out) :: disch_nf !  Description and declaration in rjdim.f90
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: s1       !  Description and declaration in esm_alloc_real.f90 gs
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: xz       !  Description and declaration in esm_alloc_real.f90 gs
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: yz       !  Description and declaration in esm_alloc_real.f90
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(out) :: disch_nf !  Description and declaration in esm_alloc_real.f90
     real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax,lstsci) , intent(out) :: sour_nf  !  Description and declaration in
-    real(fp)   , dimension(kmax)                               , intent(in)  :: thick    !  Description and declaration in rjdim.f90 gs
-    real(prec) , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: dps      !  Description and declaration in rjdim.f90
+    real(fp)   , dimension(kmax)                               , intent(in)  :: thick    !  Description and declaration in esm_alloc_real.f90 gs
+    real(prec) , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: dps      !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

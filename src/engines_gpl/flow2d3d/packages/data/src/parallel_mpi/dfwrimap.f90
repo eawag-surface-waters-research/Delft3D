@@ -84,46 +84,46 @@ subroutine dfwrimap(lundia    ,error     ,trifil    ,selmap    ,simdat    , &
 ! Global variables
 !
     integer                                                         , intent(in)  :: itdate  !  Description and declaration in exttim.igs
-    integer                                                                       :: kmax    !  Description and declaration in iidim.f90
+    integer                                                                       :: kmax    !  Description and declaration in esm_alloc_int.f90
     integer                                                         , intent(in)  :: lmax    !  Description and declaration in dimens.igs
-    integer                                                         , intent(in)  :: lsed    !  Description and declaration in iidim.f90
-    integer                                                         , intent(in)  :: lsedtot !  Description and declaration in iidim.f90
-    integer                                                         , intent(in)  :: lstsci  !  Description and declaration in iidim.f90
-    integer                                                         , intent(in)  :: ltur    !  Description and declaration in iidim.f90
+    integer                                                         , intent(in)  :: lsed    !  Description and declaration in esm_alloc_int.f90
+    integer                                                         , intent(in)  :: lsedtot !  Description and declaration in esm_alloc_int.f90
+    integer                                                         , intent(in)  :: lstsci  !  Description and declaration in esm_alloc_int.f90
+    integer                                                         , intent(in)  :: ltur    !  Description and declaration in esm_alloc_int.f90
     integer                                                                       :: lundia  !  Description and declaration in inout.igs
-    integer                                                                       :: mmax    !  Description and declaration in iidim.f90
-    integer                                                                       :: nmax    !  Description and declaration in iidim.f90
-    integer                                                                       :: nmaxus  !  Description and declaration in iidim.f90
-    integer                                                                       :: noroco  !  Description and declaration in iidim.f90
-    integer                                                         , intent(in)  :: norow   !  Description and declaration in iidim.f90
+    integer                                                                       :: mmax    !  Description and declaration in esm_alloc_int.f90
+    integer                                                                       :: nmax    !  Description and declaration in esm_alloc_int.f90
+    integer                                                                       :: nmaxus  !  Description and declaration in esm_alloc_int.f90
+    integer                                                                       :: noroco  !  Description and declaration in esm_alloc_int.f90
+    integer                                                         , intent(in)  :: norow   !  Description and declaration in esm_alloc_int.f90
     integer                                                                       :: nostat  !  Description and declaration in dimens.igs
-    integer                                                                       :: nsrc    !  Description and declaration in iidim.f90
+    integer                                                                       :: nsrc    !  Description and declaration in esm_alloc_int.f90
     integer                                                                       :: ntruv   !  Description and declaration in dimens.igs
-    integer , dimension(5, noroco)                                                :: irocol  !  Description and declaration in iidim.f90
-    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   , intent(in)  :: kcs     !  Description and declaration in iidim.f90
-    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   , intent(in)  :: kcu     !  Description and declaration in iidim.f90
-    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   , intent(in)  :: kcv     !  Description and declaration in iidim.f90
-    integer , dimension(nmaxus, mmax)                                             :: ibuff   !  Description and declaration in iidim.f90
+    integer , dimension(5, noroco)                                                :: irocol  !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   , intent(in)  :: kcs     !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   , intent(in)  :: kcu     !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   , intent(in)  :: kcv     !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(nmaxus, mmax)                                             :: ibuff   !  Description and declaration in esm_alloc_int.f90
     logical                                                         , intent(out) :: error   !!  Flag=TRUE if an error is encountered
     logical                                                         , intent(in)  :: sferic  !  Description and declaration in tricom.igs
     logical                                                         , intent(in)  :: zmodel  !  Description and declaration in procs.igs
-    real(fp)                                                        , intent(in)  :: dt      !  Description and declaration in rjdim.f90
+    real(fp)                                                        , intent(in)  :: dt      !  Description and declaration in esm_alloc_real.f90
     real(fp)                                                        , intent(in)  :: grdang  !  Description and declaration in tricom.igs
     real(fp)                                                        , intent(in)  :: tunit   !  Description and declaration in exttim.igs
     real(fp)                                                        , intent(in)  :: tzone   !  Description and declaration in exttim.igs
     real(fp)                                                        , intent(in)  :: zbot    !  Description and declaration in zmodel.igs
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   , intent(in)  :: alfas   !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   , intent(in)  :: dp      !  Description and declaration in rjdim.f90
-    real(prec), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: dps     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   , intent(in)  :: dpu     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   , intent(in)  :: dpv     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   , intent(in)  :: gsqs    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   , intent(in)  :: xcor    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   , intent(in)  :: xz      !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   , intent(in)  :: ycor    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   , intent(in)  :: yz      !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   , intent(in)  :: alfas   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   , intent(in)  :: dp      !  Description and declaration in esm_alloc_real.f90
+    real(prec), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) , intent(in)  :: dps     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   , intent(in)  :: dpu     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   , intent(in)  :: dpv     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   , intent(in)  :: gsqs    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   , intent(in)  :: xcor    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   , intent(in)  :: xz      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   , intent(in)  :: ycor    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   , intent(in)  :: yz      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(kmax + 1)                                   , intent(out) :: rbuff1  
-    real(fp), dimension(kmax)                                                     :: thick   !  Description and declaration in rjdim.f90
+    real(fp), dimension(kmax)                                                     :: thick   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(0:kmax)                                     , intent(in)  :: zk      !!  Vertical coordinates of cell interfaces
                                                                                              !!  Flag for activation of Z-MODEL
     real(fp), dimension(nmaxus, mmax)                                             :: rbuff   !  Description and declaration in r-i-ch.igs
@@ -131,9 +131,9 @@ subroutine dfwrimap(lundia    ,error     ,trifil    ,selmap    ,simdat    , &
                                                                                              !!  files (tri"h/m"-"casl""labl".dat/def)
     character(16)                                                   , intent(in)  :: simdat  !!  Simulation date representing the
                                                                                              !!  flow condition at this date
-    character(20), dimension(lmax)                                  , intent(in)  :: namcon  !  Description and declaration in ckdim.f90
-    character(20), dimension(lsedtot)                               , intent(in)  :: namsed  !  Description and declaration in ckdim.f90
-    character(20), dimension(nsrc)                                                :: namsrc  !  Description and declaration in ckdim.f90
+    character(20), dimension(lmax)                                  , intent(in)  :: namcon  !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(lsedtot)                               , intent(in)  :: namsed  !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(nsrc)                                                :: namsrc  !  Description and declaration in esm_alloc_char.f90
     character(21)                                                   , intent(in)  :: selmap  !  Description and declaration in tricom.igs
     character(8)                                                    , intent(in)  :: dpsopt  !  Description and declaration in numeco.igs
 !

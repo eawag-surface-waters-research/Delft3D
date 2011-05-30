@@ -65,7 +65,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
     integer                                                   :: itstop !  Description and declaration in inttim.igs
     integer                                                   :: itstrt !  Description and declaration in inttim.igs
-    integer                                                   :: kmax   !  Description and declaration in iidim.f90
+    integer                                                   :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                     , intent(in)  :: lconc  !  Number of constituents (excl. salinity, temperature, secondary flow,
                                                                         !  turbulence energy dissipation and production)
     integer                                                   :: lstsc  !  Description and declaration in dimens.igs
@@ -77,7 +77,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                                                                         !  boundaries are allowed in the Md-file
     integer                                                   :: nrrec  !  Pointer to the record number in the MD-file
     integer                                     , intent(in)  :: nrver  !  Version number (240/249)
-    integer                                                   :: nto    !  Description and declaration in iidim.f90
+    integer                                                   :: nto    !  Description and declaration in esm_alloc_int.f90
     logical                                     , intent(in)  :: bubble !  Description and declaration in procs.igs    
     logical                                     , intent(in)  :: const  !  Description and declaration in procs.igs
     logical                                                   :: error  !  Flag=TRUE if an error is encountered
@@ -88,14 +88,14 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     real(fp)     , dimension(4, mxbctm, nto)                  :: sab    !  At most MXBCTM time varying salinities on boundaries (end A and end B)
     real(fp)     , dimension(4, mxbctm, nto)                  :: tab    !  At most MXBCTM time varying temperatures on boundaries (end A and end B)
     real(fp)     , dimension(mxbctm)                          :: rtbcc  !  At most MXBCTM times for time varying data on boundaries for processes
-    real(fp)     , dimension(mxbctm, nto, lstsc), intent(out) :: zstep  !  Description and declaration in rjdim.f90
+    real(fp)     , dimension(mxbctm, nto, lstsc), intent(out) :: zstep  !  Description and declaration in esm_alloc_real.f90
     character(*)                                              :: filbcc !  File name for the time varying data on boundaries for processes file
     character(*)                                              :: mdfrec !  Standard rec. length in MD-file (300)
     character(*)                                              :: runid
     character(1)                                              :: eol    !  ASCII code for End-Of-Line (^J)
-    character(10), dimension(nto, lstsc)                      :: tprofc !  Description and declaration in ckdim.f90
-    character(20), dimension(lstsc)                           :: namcon !  Description and declaration in ckdim.f90
-    character(20), dimension(nto)                             :: nambnd !  Description and declaration in ckdim.f90
+    character(10), dimension(nto, lstsc)                      :: tprofc !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(lstsc)                           :: namcon !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(nto)                             :: nambnd !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

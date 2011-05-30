@@ -45,13 +45,13 @@ subroutine bailtr(h         ,hrms      ,tp        ,thetaw    ,w         , &
     real(fp), intent(in)               :: dzdx
     real(fp), intent(in)               :: dzdy
     real(fp)        :: h
-    real(fp)        :: hrms !  Description and declaration in rjdim.f90
+    real(fp)        :: hrms !  Description and declaration in esm_alloc_real.f90
     real(fp), intent(out)              :: sbeta
     real(fp), intent(out)              :: sbksi
     real(fp), intent(out)              :: sseta
     real(fp), intent(out)              :: ssksi
     real(fp), intent(in)               :: thetaw !  Description and declaration in rivpro.igs
-    real(fp)        :: tp !  Description and declaration in rjdim.f90
+    real(fp)        :: tp !  Description and declaration in esm_alloc_real.f90
     real(fp), intent(in)               :: w
     real(fp), intent(in) :: epssl, faca, facu
 !

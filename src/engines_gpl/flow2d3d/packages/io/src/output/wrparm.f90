@@ -60,14 +60,14 @@ subroutine wrparm(comfil    ,lundia    ,error     , &
 !
 ! Global variables
 !
-    integer     , intent(in)  :: it01   !  Description and declaration in iidim.f90
-    integer     , intent(in)  :: it02   !  Description and declaration in iidim.f90
-    integer     , intent(in)  :: itlen  !  Description and declaration in iidim.f90
+    integer     , intent(in)  :: it01   !  Description and declaration in esm_alloc_int.f90
+    integer     , intent(in)  :: it02   !  Description and declaration in esm_alloc_int.f90
+    integer     , intent(in)  :: itlen  !  Description and declaration in esm_alloc_int.f90
     integer                   :: lundia !  Description and declaration in inout.igs
-    integer     , intent(in)  :: nfltyp !  Description and declaration in iidim.f90
+    integer     , intent(in)  :: nfltyp !  Description and declaration in esm_alloc_int.f90
     logical     , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    real(fp)    , intent(in)  :: dt     !  Description and declaration in rjdim.f90
-    real(fp)    , intent(in)  :: tscale !  Description and declaration in rjdim.f90
+    real(fp)    , intent(in)  :: dt     !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , intent(in)  :: tscale !  Description and declaration in esm_alloc_real.f90
     real(fp)    , intent(in)  :: tzone  !  Description and declaration in exttim.igs
     character(*)              :: comfil !!  Name for communication file
 !

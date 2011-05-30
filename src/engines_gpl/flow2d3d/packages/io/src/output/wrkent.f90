@@ -60,13 +60,13 @@ subroutine wrkent(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
     integer                                                     , intent(in)  :: itcur  !!  Current time counter for the communication file, where starting point depend on CYCLIC
     integer                                                     , intent(in)  :: itimc  !!  Current time step counter for 2D system
     integer                                                                   :: lundia !  Description and declaration in inout.igs
-    integer                                                                   :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                   :: nmax   !  Description and declaration in iidim.f90
-    integer                                                                   :: nmaxus !  Description and declaration in iidim.f90
+    integer                                                                   :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                   :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                   :: nmaxus !  Description and declaration in esm_alloc_int.f90
     integer                                                     , intent(in)  :: ntcur  !!  Total number of timesteps on communication file (to write to)
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: kfu    !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: kfv    !  Description and declaration in iidim.f90
-    integer, dimension(nmaxus, mmax)                                          :: ibuff  !  Description and declaration in iidim.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: kfu    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: kfv    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(nmaxus, mmax)                                          :: ibuff  !  Description and declaration in esm_alloc_int.f90
     logical                                                     , intent(out) :: error  !!  Flag=TRUE if an error is encountered
     character(*)                                                              :: comfil !!  Name for communication file
                                                                                         !!  com-<case><label>

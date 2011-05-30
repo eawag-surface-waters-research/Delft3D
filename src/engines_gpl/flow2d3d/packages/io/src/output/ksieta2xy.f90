@@ -50,10 +50,10 @@ subroutine ksieta2xy(mmax    ,nmaxus    ,kcs      , &
 !
 ! Global variables
 !
-    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: kcs    !! Description and declaration in iidim.f90
-    integer                                                                   , intent(in) :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                   , intent(in) :: nmaxus !  Description and declaration in iidim.f90
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: alfas  !  Description and declaration in rjdim.f90
+    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: kcs    !! Description and declaration in esm_alloc_int.f90
+    integer                                                                   , intent(in) :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                   , intent(in) :: nmaxus !  Description and declaration in esm_alloc_int.f90
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: alfas  !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     :: comp1  !  First component of vector (u, qxk or taubpu)
     real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     :: comp2  !  Second component of vector (v, qyk or taubpv)
 !

@@ -63,7 +63,7 @@ subroutine wrtdro(lundia    ,error     ,trifil    ,itdroc    ,itdrof    , &
     integer                                        :: lundia !  Description and declaration in inout.igs
     integer                                        :: ndro   !  Description and declaration in dimens.igs
     logical                          , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    real(fp)    , dimension(2, ndro)               :: xydro  !  Description and declaration in rjdim.f90
+    real(fp)    , dimension(2, ndro)               :: xydro  !  Description and declaration in esm_alloc_real.f90
     character(*)                     , intent(in)  :: trifil !!  File name for FLOW NEFIS output
                                                              !!  files (tri"h/m/d"-"casl""labl".dat/def)
 !

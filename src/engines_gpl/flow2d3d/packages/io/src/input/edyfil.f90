@@ -63,14 +63,14 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
 ! Global variables
 !
     integer                                                                      , intent(in)  :: kmax   !!  Number of layers in the z-dir.
-    integer                                                                      , intent(in)  :: lstsci !  Description and declaration in iidim.f90
+    integer                                                                      , intent(in)  :: lstsci !  Description and declaration in esm_alloc_int.f90
     integer                                                                      , intent(in)  :: lundia !  Description and declaration in inout.igs
-    integer                                                                      , intent(in)  :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                      , intent(in)  :: nmax   !  Description and declaration in iidim.f90
-    integer                                                                      , intent(in)  :: nmaxus !  Description and declaration in iidim.f90
+    integer                                                                      , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                      , intent(in)  :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                      , intent(in)  :: nmaxus !  Description and declaration in esm_alloc_int.f90
     logical                                                                      , intent(out) :: error  !  Flag=TRUE if an error is encountered
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax + 2) , intent(out) :: dicuv  !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax + 2) , intent(out) :: vicuv  !  Description and declaration in rjdim.f90
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax + 2) , intent(out) :: dicuv  !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax + 2) , intent(out) :: vicuv  !  Description and declaration in esm_alloc_real.f90
     character(*)                                                                 , intent(in)  :: filedy !  Name of the relevant file
     character(11)                                                                , intent(in)  :: fmttmp !  Help var. for the attribute file formats (eg. the grid file)
 !

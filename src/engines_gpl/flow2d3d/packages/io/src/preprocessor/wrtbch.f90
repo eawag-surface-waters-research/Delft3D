@@ -56,8 +56,8 @@ subroutine wrtbch(lunbch    ,ntof      ,kc        ,omega     ,hydrbc    , &
     integer, intent(in)            :: mxnto
                                    !!  Maximum of number of open boundaries
     integer, intent(in)            :: ntof !  Description and declaration in dimens.igs
-    real(fp), dimension(4, mxnto, mxkc), intent(in) :: hydrbc !  Description and declaration in rjdim.f90
-    real(fp), dimension(mxkc), intent(in) :: omega !  Description and declaration in rjdim.f90
+    real(fp), dimension(4, mxnto, mxkc), intent(in) :: hydrbc !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(mxkc), intent(in) :: omega !  Description and declaration in esm_alloc_real.f90
 !
 !
 ! Local variables

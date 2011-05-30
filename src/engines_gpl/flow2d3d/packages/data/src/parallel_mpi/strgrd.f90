@@ -54,11 +54,11 @@ subroutine strgrd ( icom, runid, mmax, nmax, mmaxgl, nmaxgl, &
 !
     integer, intent(in)                                 :: mfg    ! Description and declaration in dfparall.igs
     integer, intent(in)                                 :: mlg    ! Description and declaration in dfparall.igs
-    integer, intent(in)                                 :: mmax   ! Description and declaration in iidim.f90
+    integer, intent(in)                                 :: mmax   ! Description and declaration in esm_alloc_int.f90
     integer, intent(in)                                 :: mmaxgl ! Description and declaration in dfparall.igs
     integer, intent(in)                                 :: nfg    ! Description and declaration in dfparall.igs
     integer, intent(in)                                 :: nlg    ! Description and declaration in dfparall.igs
-    integer, intent(in)                                 :: nmax   ! Description and declaration in iidim.f90
+    integer, intent(in)                                 :: nmax   ! Description and declaration in esm_alloc_int.f90
     integer, intent(in)                                 :: nmaxgl ! Description and declaration in dfparall.igs
     integer, dimension(-1:mmaxgl+2, nmaxgl), intent(in) :: icom   ! mask array for the water level points in global domain
                                                                   !  = 0 : point is not active

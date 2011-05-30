@@ -54,10 +54,10 @@ subroutine chkiwe(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
 ! Global variables
 !
     integer                                                                   :: lundia !  Description and declaration in inout.igs
-    integer                                                     , intent(in)  :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                   :: nmax   !  Description and declaration in iidim.f90
-    integer                                                     , intent(in)  :: nmaxus !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: kcs    !  Description and declaration in iidim.f90
+    integer                                                     , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                   :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                     , intent(in)  :: nmaxus !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
     logical                                                                   :: error  !!  Flag=TRUE if an error is encountered
     real(fp)                                                    , intent(out) :: dicoww !  Description and declaration in tricom.igs
     real(fp)                                                    , intent(out) :: vicoww !  Description and declaration in tricom.igs

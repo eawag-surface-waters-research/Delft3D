@@ -55,15 +55,15 @@ subroutine inibcq(lundia    ,error     ,runid     ,itbct     ,nto       , &
 !
     integer                              , intent(in)  :: kcd    !  Description and declaration in dimens.igs
     integer                                            :: lundia !  Description and declaration in inout.igs
-    integer                              , intent(in)  :: nto    !  Description and declaration in iidim.f90
+    integer                              , intent(in)  :: nto    !  Description and declaration in esm_alloc_int.f90
     integer                              , intent(in)  :: ntof   !  Description and declaration in dimens.igs
     integer                              , intent(in)  :: ntoq   !  Description and declaration in dimens.igs
-    integer      , dimension(5, nto)     , intent(out) :: itbct  !  Description and declaration in iidim.f90
+    integer      , dimension(5, nto)     , intent(out) :: itbct  !  Description and declaration in esm_alloc_int.f90
     logical                              , intent(in)  :: bubble !  Description and declaration in procs.igs    
     logical                                            :: error
-    real(fp)     , dimension(4, nto, kcd), intent(out) :: hydrbc !  Description and declaration in rjdim.f90
+    real(fp)     , dimension(4, nto, kcd), intent(out) :: hydrbc !  Description and declaration in esm_alloc_real.f90
     character(*)                                       :: runid
-    character(20), dimension(nto)                      :: nambnd !  Description and declaration in ckdim.f90
+    character(20), dimension(nto)                      :: nambnd !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

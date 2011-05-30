@@ -136,10 +136,10 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     integer                        , intent(in)  :: nto
     integer                                      :: lundia  !  Description and declaration in inout.igs
     integer                        , intent(in)  :: lsec
-    integer                        , intent(in)  :: lsedtot !  Description and declaration in iidim.f90
+    integer                        , intent(in)  :: lsedtot !  Description and declaration in esm_alloc_int.f90
     logical                        , intent(out) :: error
     character(*)                                 :: filmor
-    character(20) , dimension(nto)               :: nambnd  !  Description and declaration in ckdim.f90
+    character(20) , dimension(nto)               :: nambnd  !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

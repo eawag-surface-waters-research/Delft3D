@@ -54,10 +54,10 @@ subroutine updbcq(lunbcq    ,lundia    ,itbct     ,ito       ,nto       , &
     integer, intent(in)            :: kcd !  Description and declaration in dimens.igs
     integer, intent(in)            :: lunbcq !  Description and declaration in luntmp.igs
     integer         :: lundia !  Description and declaration in inout.igs
-    integer, intent(in)            :: nto !  Description and declaration in iidim.f90
-    integer, dimension(5, nto) :: itbct !  Description and declaration in iidim.f90
+    integer, intent(in)            :: nto !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(5, nto) :: itbct !  Description and declaration in esm_alloc_int.f90
     real(fp), intent(in)               :: qsim
-    real(fp), dimension(4, nto, kcd) :: hydrbc !  Description and declaration in rjdim.f90
+    real(fp), dimension(4, nto, kcd) :: hydrbc !  Description and declaration in esm_alloc_real.f90
 !
 !
 ! Local variables

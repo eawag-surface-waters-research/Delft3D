@@ -1,4 +1,4 @@
-subroutine ckdim(lundia, error, verify, gdp)
+subroutine esm_alloc_char(lundia, error, verify, gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -205,7 +205,7 @@ subroutine ckdim(lundia, error, verify, gdp)
  9999 continue
     if (ierr<= - 9) then
        error = .true.
-       call prterr(lundia    ,'G920'    ,'CKDIM'   )
+       call prterr(lundia    ,'G920'    ,'esm_alloc_char'   )
     !
     endif
-end subroutine ckdim
+end subroutine esm_alloc_char

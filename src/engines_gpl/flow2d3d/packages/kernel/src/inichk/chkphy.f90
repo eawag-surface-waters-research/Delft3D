@@ -52,30 +52,30 @@ subroutine chkphy(lundia    ,error     ,salin     ,temp      ,wind      , &
 !
 ! Global variables
 !
-    integer                                                                , intent(in)  :: kmax   !  Description and declaration in iidim.f90
+    integer                                                                , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                                , intent(in)  :: ktemp  !  Description and declaration in tricom.igs
     integer                                                                , intent(in)  :: lmax   !  Description and declaration in dimens.igs
     integer                                                                              :: lundia !  Description and declaration in inout.igs
-    integer                                                                , intent(in)  :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                , intent(in)  :: nmax   !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(in)  :: kcs    !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(in)  :: kcu    !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(in)  :: kcv    !  Description and declaration in iidim.f90
+    integer                                                                , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                , intent(in)  :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(in)  :: kcu    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(in)  :: kcv    !  Description and declaration in esm_alloc_int.f90
     logical                                                                              :: error  !!  Flag=TRUE if an error is encountered
     logical                                                                , intent(in)  :: salin  !  Description and declaration in procs.igs
     logical                                                                , intent(in)  :: temp   !  Description and declaration in procs.igs
     logical                                                                , intent(in)  :: wind   !  Description and declaration in procs.igs
     real(fp)                                                                             :: fclou  !  Description and declaration in heat.igs
     real(fp)                                                               , intent(in)  :: rhoa   !  Description and declaration in physco.igs
-    real(fp)                                                               , intent(in)  :: rhow   !  Description and declaration in rjdim.f90
+    real(fp)                                                               , intent(in)  :: rhow   !  Description and declaration in esm_alloc_real.f90
     real(fp)                                                               , intent(in)  :: saleqs !  Description and declaration in tricom.igs
     real(fp)                                                               , intent(in)  :: sarea  !  Description and declaration in heat.igs
     real(fp)                                                               , intent(in)  :: temeqs !  Description and declaration in tricom.igs
     real(fp), dimension(6)                                                               :: wstcof !  Description and declaration in physco.igs
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub,3)                      :: cfurou !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub,3)                      :: cfvrou !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax + 2), intent(in)  :: dicuv  !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax + 2), intent(in)  :: vicuv  !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub,3)                      :: cfurou !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub,3)                      :: cfvrou !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax + 2), intent(in)  :: dicuv  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax + 2), intent(in)  :: vicuv  !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

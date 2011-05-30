@@ -59,7 +59,7 @@ subroutine enloss(ag        ,d1        ,eweir     ,hkruin    ,hov       , &
 !
 ! Global variables
 !
-    real(fp)    , intent(in) :: ag     !  Description and declaration in rjdim.f90
+    real(fp)    , intent(in) :: ag     !  Description and declaration in esm_alloc_real.f90
     real(fp)                 :: d1     !!  Distance between crest and downstream depth
     real(fp)    , intent(out):: dte    !!  Subgrid energy loss due to weir
     real(fp)    , intent(in) :: dtefri !!  Energy loss due to friction

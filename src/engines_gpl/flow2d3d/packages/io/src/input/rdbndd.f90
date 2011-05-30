@@ -71,26 +71,26 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
 ! Global variables
 !
-    integer                                           :: kmax   !  Description and declaration in iidim.f90
+    integer                                           :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                           :: lundia !  Description and declaration in inout.igs
     integer                                           :: lunmd  !  Description and declaration in inout.igs
-    integer                           , intent(in)    :: mmax   !  Description and declaration in iidim.f90
+    integer                           , intent(in)    :: mmax   !  Description and declaration in esm_alloc_int.f90
     integer                                           :: mxdnto !!  Array dimension for opening boundary definition arrays, which are dynamic declared (NTO in call from READM and MXNTO in call from TDATOM)
     integer                                           :: mxnto  !!  Max. number of open boundaries
-    integer                           , intent(in)    :: nmaxus !  Description and declaration in iidim.f90
+    integer                           , intent(in)    :: nmaxus !  Description and declaration in esm_alloc_int.f90
     integer                                           :: nrrec  !!  Pointer to the record number in the MD-file
-    integer                           , intent(inout) :: nto    !  Description and declaration in iidim.f90
+    integer                           , intent(inout) :: nto    !  Description and declaration in esm_alloc_int.f90
     integer                           , intent(inout) :: ntof   !  Description and declaration in dimens.igs
     integer                           , intent(inout) :: ntoq   !  Description and declaration in dimens.igs
-    integer     , dimension(7, mxdnto)                :: mnbnd  !  Description and declaration in iidim.f90
+    integer     , dimension(7, mxdnto)                :: mnbnd  !  Description and declaration in esm_alloc_int.f90
     integer     , dimension(mxnto)                    :: nhsub  !  integer array to store sequence numbers of harmonic boundary condition in own subdomain
     logical                                           :: error  !!  Flag=TRUE if an error is encountered
     logical                                           :: noui   !!  Flag for reading from User Interface
-    real(fp)    , dimension(mxdnto)                   :: alpha  !  Description and declaration in rjdim.f90
+    real(fp)    , dimension(mxdnto)                   :: alpha  !  Description and declaration in esm_alloc_real.f90
     character(*)                                      :: filbnd !!  File name for the boundary definition file
     character(*)                                      :: mdfrec !!  Standard rec. length in MD-file (300)
     character(1)                                      :: ascon  !!  'Y' if open bnd. contains type 'A'
-    character(1), dimension(mxdnto)                   :: typbnd !  Description and declaration in ckdim.f90
+    character(1), dimension(mxdnto)                   :: typbnd !  Description and declaration in esm_alloc_char.f90
     character(1), dimension(mxnto)                    :: datbnd !!  Type of open boundary:
                                                                 !!     -'H'(armonic/Tide)
                                                                 !!     -'A'(stronomic/Tide)
@@ -98,8 +98,8 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                                                                 !!     -'T'(ime series/time dependent)
     character(12), dimension(mxnto, 2)                :: statns !!  References to tidal stations at boundary support points
     character(2)                      , intent(out)   :: fmtbnd !!  File format for the boundary definition file
-    character(20), dimension(mxdnto)                  :: nambnd !  Description and declaration in ckdim.f90
-    character(20), dimension(mxdnto)                  :: tprofu !  Description and declaration in ckdim.f90
+    character(20), dimension(mxdnto)                  :: nambnd !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(mxdnto)                  :: tprofu !  Description and declaration in esm_alloc_char.f90
     logical, intent(in)                               :: yestdd ! Flag for call from .true. : tdatom .false.: readmd
 !
 ! Local variables

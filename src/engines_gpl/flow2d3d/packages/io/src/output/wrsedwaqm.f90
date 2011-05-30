@@ -59,10 +59,10 @@ subroutine wrsedwaqm( lundia , error     , trifil    , itmapc    , &
 !
     integer                                                              , intent(in)  :: itmapc !!  Current time counter for the MAP data file
     integer                                                                            :: lundia !  Description and declaration in inout.igs
-    integer                                                                            :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                            :: nmaxus !  Description and declaration in iidim.f90
+    integer                                                                            :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                            :: nmaxus !  Description and declaration in esm_alloc_int.f90
     logical                                                              , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    real(prec)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)  , intent(in)  :: dps    !  Description and declaration in rjdim.f90
+    real(prec)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)  , intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
     character(60)                                                        , intent(in)  :: trifil !!  File name for NEFIS output
                                                                                                  !!  files (tri"h/m"-"casl""labl".dat/def)
 !

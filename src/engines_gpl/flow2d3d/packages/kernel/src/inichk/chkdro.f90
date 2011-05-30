@@ -62,19 +62,19 @@ subroutine chkdro(lundia    ,itstrt    ,itstop    ,drogue    ,itdrof    , &
     integer, intent(in)            :: itstop !  Description and declaration in inttim.igs
     integer, intent(in)            :: itstrt !  Description and declaration in inttim.igs
     integer         :: lundia !  Description and declaration in inout.igs
-    integer, intent(in)            :: mmax !  Description and declaration in iidim.f90
+    integer, intent(in)            :: mmax !  Description and declaration in esm_alloc_int.f90
     integer, intent(in)            :: ndro !  Description and declaration in dimens.igs
-    integer         :: nmax !  Description and declaration in iidim.f90
-    integer, intent(in)            :: nmaxus !  Description and declaration in iidim.f90
-    integer, dimension(2, ndro) :: itdro !  Description and declaration in iidim.f90
-    integer, dimension(2, ndro) :: mndro !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in) :: kcs !  Description and declaration in iidim.f90
+    integer         :: nmax !  Description and declaration in esm_alloc_int.f90
+    integer, intent(in)            :: nmaxus !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(2, ndro) :: itdro !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(2, ndro) :: mndro !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in) :: kcs !  Description and declaration in esm_alloc_int.f90
     logical, intent(out)           :: drogue !  Description and declaration in procs.igs
-    real(fp), dimension(2, ndro), intent(in) :: dxydro !  Description and declaration in rjdim.f90
-    real(fp), dimension(2, ndro), intent(out) :: xydro !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in) :: xcor !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in) :: ycor !  Description and declaration in rjdim.f90
-    character(20), dimension(ndro) :: namdro !  Description and declaration in ckdim.f90
+    real(fp), dimension(2, ndro), intent(in) :: dxydro !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(2, ndro), intent(out) :: xydro !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in) :: xcor !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in) :: ycor !  Description and declaration in esm_alloc_real.f90
+    character(20), dimension(ndro) :: namdro !  Description and declaration in esm_alloc_char.f90
 !
 !
 ! Local variables

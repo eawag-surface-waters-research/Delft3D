@@ -95,14 +95,14 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                                          :: nostat !  Description and declaration in dimens.igs
     integer                                          :: nrrec  !!  Pointer to the record number in the MD-file
     integer                                          :: ntruv  !  Description and declaration in dimens.igs
-    integer       , dimension(2, ndro)               :: itdro  !  Description and declaration in iidim.f90
-    integer       , dimension(2, ndro)               :: mndro  !  Description and declaration in iidim.f90
+    integer       , dimension(2, ndro)               :: itdro  !  Description and declaration in esm_alloc_int.f90
+    integer       , dimension(2, ndro)               :: mndro  !  Description and declaration in esm_alloc_int.f90
     logical                                          :: drogue !  Description and declaration in procs.igs
     logical                                          :: error  !!  Flag=TRUE if an error is encountered
     logical                            , intent(in)  :: noui   !!  Flag for reading from User Interface
-    real(fp)                                         :: dt     !  Description and declaration in rjdim.f90
-    real(fp)      , dimension(2, ndro)               :: dxydro !  Description and declaration in rjdim.f90
-    real(fp)      , dimension(ndro)                  :: drodep !  Description and declaration in rjdim.f90
+    real(fp)                                         :: dt     !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(2, ndro)               :: dxydro !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(ndro)                  :: drodep !  Description and declaration in esm_alloc_real.f90
     character(*)                                     :: fildro !!  File name for the drogue file
     character(*)                                     :: filsta !!  File name for the monitoring stations file
     character(*)                                     :: filtra !!  File name for the cross sections file
@@ -110,7 +110,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     character(2)                       , intent(out) :: fmtdro !!  File format for the drogue file
     character(2)                       , intent(out) :: fmtsta !!  File format for the monitoring stations file
     character(2)                       , intent(out) :: fmttra !!  File format for the cross sections file
-    character(20) , dimension(ndro)                  :: namdro !  Description and declaration in ckdim.f90
+    character(20) , dimension(ndro)                  :: namdro !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

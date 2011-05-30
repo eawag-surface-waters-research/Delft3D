@@ -51,18 +51,18 @@ subroutine c_vort(mmax      ,nmax      ,kmax      ,nmaxus    ,kfu       , &
 !
 ! Global variables
 !
-    integer                                                            , intent(in) :: kmax   !  Description and declaration in iidim.f90
-    integer                                                            , intent(in) :: mmax   !  Description and declaration in iidim.f90
-    integer                                                            , intent(in) :: nmax   !  Description and declaration in iidim.f90
-    integer                                                            , intent(in) :: nmaxus !  Description and declaration in iidim.f90
-    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in) :: kfu    !  Description and declaration in iidim.f90
-    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in) :: kfv    !  Description and declaration in iidim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in) :: gud    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in) :: gvd    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)             :: enstro !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax), intent(in) :: u1     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax), intent(in) :: v1     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)             :: vortic !  Description and declaration in rjdim.f90
+    integer                                                            , intent(in) :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                            , intent(in) :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                            , intent(in) :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                            , intent(in) :: nmaxus !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in) :: kfu    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in) :: kfv    !  Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in) :: gud    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in) :: gvd    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)             :: enstro !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax), intent(in) :: u1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax), intent(in) :: v1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)             :: vortic !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)             :: wrkarr
 !
 ! Local variables

@@ -66,14 +66,14 @@ subroutine wri_jet3d(u1    ,v1    ,rho    ,thick ,kmax      ,dps   ,&
 !
     integer                                             , intent(in)  :: kmax     !  Description and declaration in tricom.igs
     integer                                             , intent(in)  :: idensform!  Description and declaration in tricom.igs
-    real(fp)                                            , intent(out) :: flwang   !  Description and declaration in rjdim.f90 gs
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: alfas    !  Description and declaration in rjdim.f90 gs
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: s1       !  Description and declaration in rjdim.f90 gs
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in)  :: u1       !  Description and declaration in rjdim.f90 gs
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in)  :: v1       !  Description and declaration in rjdim.f90 gs
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in)  :: rho      !  Description and declaration in rjdim.f90 gs
-    real(fp)   , dimension(kmax)                        , intent(in)  :: thick    !  Description and declaration in rjdim.f90 gs
-    real(prec) , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: dps      !  Description and declaration in rjdim.f90 gs
+    real(fp)                                            , intent(out) :: flwang   !  Description and declaration in esm_alloc_real.f90 gs
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: alfas    !  Description and declaration in esm_alloc_real.f90 gs
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: s1       !  Description and declaration in esm_alloc_real.f90 gs
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in)  :: u1       !  Description and declaration in esm_alloc_real.f90 gs
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in)  :: v1       !  Description and declaration in esm_alloc_real.f90 gs
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in)  :: rho      !  Description and declaration in esm_alloc_real.f90 gs
+    real(fp)   , dimension(kmax)                        , intent(in)  :: thick    !  Description and declaration in esm_alloc_real.f90 gs
+    real(prec) , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: dps      !  Description and declaration in esm_alloc_real.f90 gs
 !
 ! Local variables
 !

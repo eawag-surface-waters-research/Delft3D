@@ -63,34 +63,34 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
 !
 ! Global variables
 !
-    integer                                                                          :: kmax !  Description and declaration in iidim.f90
+    integer                                                                          :: kmax !  Description and declaration in esm_alloc_int.f90
     integer                                                                          :: lstsc !  Description and declaration in dimens.igs
     integer                                                                          :: lundia !  Description and declaration in inout.igs
-    integer                                                                          :: mmax !  Description and declaration in iidim.f90
-    integer                                                                          :: nmax !  Description and declaration in iidim.f90
-    integer                                                            , intent(in)  :: noroco !  Description and declaration in iidim.f90
-    integer                                                            , intent(in)  :: nrob !  Description and declaration in iidim.f90
-    integer                                                                          :: nto !  Description and declaration in iidim.f90
-    integer, dimension(7, nto)                                         , intent(in)  :: mnbnd !  Description and declaration in iidim.f90
-    integer, dimension(5, nto, lstsc)                                                :: itbcc !  Description and declaration in iidim.f90
-    integer, dimension(8, nrob)                                        , intent(in)  :: nob !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     :: kfsmax !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: kfsmin !  Description and declaration in iidim.f90
-    integer, dimension(nrob, lstsc)                                                  :: kstp !  Description and declaration in iidim.f90
+    integer                                                                          :: mmax !  Description and declaration in esm_alloc_int.f90
+    integer                                                                          :: nmax !  Description and declaration in esm_alloc_int.f90
+    integer                                                            , intent(in)  :: noroco !  Description and declaration in esm_alloc_int.f90
+    integer                                                            , intent(in)  :: nrob !  Description and declaration in esm_alloc_int.f90
+    integer                                                                          :: nto !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(7, nto)                                         , intent(in)  :: mnbnd !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(5, nto, lstsc)                                                :: itbcc !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(8, nrob)                                        , intent(in)  :: nob !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     :: kfsmax !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: kfsmin !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(nrob, lstsc)                                                  :: kstp !  Description and declaration in esm_alloc_int.f90
     logical, intent(in)                                                              :: zmodel !  Description and declaration in procs.igs
     real(fp)                                                                         :: timnow !!  Current timestep (multiples of dt)
-    real(fp), dimension(2, nto, lstsc)                                               :: zstep !  Description and declaration in rjdim.f90
-    real(fp), dimension(4, nto, kmax, lstsc)                                         :: procbc !  Description and declaration in rjdim.f90
-    real(prec), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)    , intent(in)  :: dps !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: s0 !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: xz !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: yz !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax), intent(in)  :: dzs1 !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax)                                          , intent(in)  :: sig !  Description and declaration in rjdim.f90
+    real(fp), dimension(2, nto, lstsc)                                               :: zstep !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(4, nto, kmax, lstsc)                                         :: procbc !  Description and declaration in esm_alloc_real.f90
+    real(prec), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)    , intent(in)  :: dps !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: s0 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: xz !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: yz !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax), intent(in)  :: dzs1 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax)                                          , intent(in)  :: sig !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(0:kmax)                                        , intent(in)  :: zk
-    real(fp), dimension(kmax, max(lstsc, 1), 2, noroco)                              :: rbnd !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax, nrob)                                                  :: rob !  Description and declaration in rjdim.f90
-    character(10), dimension(nto, lstsc)                                             :: tprofc !  Description and declaration in ckdim.f90
+    real(fp), dimension(kmax, max(lstsc, 1), 2, noroco)                              :: rbnd !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax, nrob)                                                  :: rob !  Description and declaration in esm_alloc_real.f90
+    character(10), dimension(nto, lstsc)                                             :: tprofc !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

@@ -59,21 +59,21 @@ subroutine rdspec(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 ! 
     integer                             , intent(in)  :: lundia !  Description and declaration in inout.igs 
     integer                             , intent(in)  :: lunmd  !  Description and declaration in inout.igs 
-    integer                             , intent(in)  :: mmax   !  Description and declaration in iidim.f90 
-    integer                             , intent(in)  :: nmax   !  Description and declaration in iidim.f90 
-    integer                             , intent(in)  :: nmaxus !  Description and declaration in iidim.f90 
+    integer                             , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90 
+    integer                             , intent(in)  :: nmax   !  Description and declaration in esm_alloc_int.f90 
+    integer                             , intent(in)  :: nmaxus !  Description and declaration in esm_alloc_int.f90 
     integer                                           :: nrrec  !  Pointer to the record number in the MD-file 
-    integer                                           :: nsrc   !  Description and declaration in iidim.f90 
-    integer                             , intent(out) :: upwsrc !  Description and declaration in iidim.f90 
-    integer      , dimension(7, nsrc)   , intent(out) :: mnksrc !  Description and declaration in iidim.f90 
+    integer                                           :: nsrc   !  Description and declaration in esm_alloc_int.f90 
+    integer                             , intent(out) :: upwsrc !  Description and declaration in esm_alloc_int.f90 
+    integer      , dimension(7, nsrc)   , intent(out) :: mnksrc !  Description and declaration in esm_alloc_int.f90 
     logical                             , intent(out) :: error  !  Flag=TRUE if an error is encountered 
     logical                             , intent(in)  :: noui   !  Flag for reading from User Interface 
     logical                             , intent(in)  :: yestdd !  Flag for call from TDATOM (.true.) for time varying data 
     character(*)                        , intent(out) :: filsrc !  File name for the discharge location definition file 
     character(*)                                      :: mdfrec !  Standard rec. length in MD-file (300) 
-    character(1) , dimension(nsrc)                    :: disint !  Description and declaration in ckdim.f90 
+    character(1) , dimension(nsrc)                    :: disint !  Description and declaration in esm_alloc_char.f90 
     character(2)                        , intent(out) :: fmtsrc !  File format for the discharge location definition file 
-    character(20), dimension(nsrc)      , intent(out) :: namsrc !  Description and declaration in ckdim.f90 
+    character(20), dimension(nsrc)      , intent(out) :: namsrc !  Description and declaration in esm_alloc_char.f90 
 ! 
 ! 
 ! Local variables 

@@ -65,7 +65,7 @@ subroutine rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
     integer                                          :: lunout !  Unit number for the transformed ouput file
     integer                                          :: lunrd  !  Unit number of the attribute file containing the time series
     integer                            , intent(in)  :: maxval !  Maximum number of values 1+LSTSC+2
-    integer                            , intent(in)  :: nsrc   !  Description and declaration in iidim.f90
+    integer                            , intent(in)  :: nsrc   !  Description and declaration in esm_alloc_int.f90
     logical                            , intent(in)  :: bubble !  Description and declaration in procs.igs        
     logical                                          :: error  !  Flag=TRUE if an error is encountered
     real(fp)     , dimension(maxval)                 :: rval   !  Array for the time dependent data
@@ -73,9 +73,9 @@ subroutine rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
     character(*)                                     :: filout !  Name of the output file to be opened
     character(*)                       , intent(in)  :: runid
     character(1)                       , intent(in)  :: eol    !  ASCII code for End-Of-Line (^J)
-    character(1) , dimension(nsrc)                   :: disint !  Description and declaration in ckdim.f90
+    character(1) , dimension(nsrc)                   :: disint !  Description and declaration in esm_alloc_char.f90
     character(10), dimension(lstsc + 4), intent(in)  :: parunt !  Unit name fitting the parameter
-    character(20), dimension(nsrc)                   :: namsrc !  Description and declaration in ckdim.f90
+    character(20), dimension(nsrc)                   :: namsrc !  Description and declaration in esm_alloc_char.f90
     character(36), dimension(lstsc + 4), intent(in)  :: parnam !  Names of theparamaters to write to time dependent file DIS
 !
 ! Local variables

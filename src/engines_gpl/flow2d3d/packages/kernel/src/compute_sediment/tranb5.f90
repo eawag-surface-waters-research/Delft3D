@@ -57,7 +57,7 @@ subroutine tranb5(u         ,v         ,d50       ,d90       ,chezy     , &
     real(fp)               , intent(out) :: sboty
     real(fp)               , intent(out) :: ssusx
     real(fp)               , intent(out) :: ssusy
-    real(fp)               , intent(in)  :: tp     !  Description and declaration in rjdim.f90
+    real(fp)               , intent(in)  :: tp     !  Description and declaration in esm_alloc_real.f90
     real(fp)               , intent(in)  :: u
     real(fp)               , intent(in)  :: v
     real(fp)                             :: hrms

@@ -1,4 +1,4 @@
-subroutine rjdim(lundia, error, gdp)
+subroutine esm_alloc_real(lundia, error, gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -643,7 +643,7 @@ subroutine rjdim(lundia, error, gdp)
     elseif (prec == hp) then
        ierr = mkdpnt(pntnam, nmaxddb*mmaxddb, gdp)
     else
-       ! catched at top of rjdim.f90
+       ! catched at top of esm_alloc_real.f90
     endif
                              !  Pointer of array DPS
                              !  Depth at waterlevel points
@@ -2622,7 +2622,7 @@ subroutine rjdim(lundia, error, gdp)
     !
     ! RBUFF is used only outside TRISOL. So we use a work array, which
     ! is initialized each timestep in TRISOL, here WRKB1 or WRKC1
-    ! The maximum needed storage space for RBUFF is defined in RJDIM
+    ! The maximum needed storage space for RBUFF is defined in esm_alloc_real
     ! and taken in consideration in the declaration of WRKB1 and WRKC1
     !
     ! As a result RBUFF does not need to be allocated
@@ -3462,9 +3462,9 @@ subroutine rjdim(lundia, error, gdp)
     ! because then the mapper can read them.
     ! BE CAREFUL:
     !    These reals are allocated TWICE inside FLOW:
-    !    in rjdim.f90 as part of the shared memory block, allocated via esm/fsm, and
+    !    in esm_alloc_real.f90 as part of the shared memory block, allocated via esm/fsm, and
     !    in *.igs-files as part of the GDP structure (e.g. ag) or
-    !    locally on a high level (see scalar integers in iidim.f90)
+    !    locally on a high level (see scalar integers in esm_alloc_int.f90)
     !
     !    FLOW uses the instance in the GDP-structure (or the
     !    local definition respectively) and place a copy of these parameters in
@@ -3514,6 +3514,6 @@ subroutine rjdim(lundia, error, gdp)
  9999 continue
     if (ierr<= - 9) then
        error = .true.
-       call prterr(lundia    ,'G920'    ,'RJDIM'   )
+       call prterr(lundia    ,'G920'    ,'esm_alloc_real'   )
     endif
-end subroutine rjdim
+end subroutine esm_alloc_real

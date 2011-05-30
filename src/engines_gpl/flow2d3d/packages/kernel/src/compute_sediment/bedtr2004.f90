@@ -67,8 +67,8 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
     real(fp)                 , intent(in)  :: delm
     real(fp)                 , intent(in)  :: drho
     real(fp)                 , intent(in)  :: dstar
-    real(fp)                 , intent(in)  :: dzduu    !  Description and declaration in rjdim.f90
-    real(fp)                 , intent(in)  :: dzdvv    !  Description and declaration in rjdim.f90
+    real(fp)                 , intent(in)  :: dzduu    !  Description and declaration in esm_alloc_real.f90
+    real(fp)                 , intent(in)  :: dzdvv    !  Description and declaration in esm_alloc_real.f90
     real(fp)                 , intent(in)  :: fc1
     real(fp)                 , intent(in)  :: fsilt
     real(fp)                 , intent(in)  :: fw1
@@ -81,11 +81,11 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
     real(fp)                 , intent(out) :: qswu
     real(fp)                 , intent(out) :: qswv
     real(fp)                 , intent(in)  :: ra
-    real(fp)                 , intent(in)  :: rhosol   !  Description and declaration in rjdim.f90
-    real(fp)                 , intent(in)  :: teta     !  Description and declaration in rjdim.f90
-    real(fp)                 , intent(in)  :: tetacr   !  Description and declaration in rjdim.f90
+    real(fp)                 , intent(in)  :: rhosol   !  Description and declaration in esm_alloc_real.f90
+    real(fp)                 , intent(in)  :: teta     !  Description and declaration in esm_alloc_real.f90
+    real(fp)                 , intent(in)  :: tetacr   !  Description and declaration in esm_alloc_real.f90
     real(fp)                 , intent(in)  :: taucr
-    real(fp)                 , intent(in)  :: tp       !  Description and declaration in rjdim.f90
+    real(fp)                 , intent(in)  :: tp       !  Description and declaration in esm_alloc_real.f90
     real(fp)                 , intent(in)  :: u2dh
     real(fp)                 , intent(in)  :: ubw
     real(fp)                 , intent(in)  :: uon  
@@ -94,8 +94,8 @@ subroutine bedtr2004(u2dh      ,d50       ,d90       ,h1        ,rhosol    , &
     real(fp)                 , intent(in)  :: rksrs
     real(fp)                 , intent(in)  :: ws
     real(fp)                 , intent(in)  :: deltas
-    real(fp), dimension(kmax), intent(in)  :: sig      !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax), intent(in)  :: thick    !  Description and declaration in rjdim.f90
+    real(fp), dimension(kmax), intent(in)  :: sig      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax), intent(in)  :: thick    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(kmax), intent(in)  :: concin
     real(fp)                 , intent(in)  :: rhowat
     real(fp)                 , intent(in)  :: ag

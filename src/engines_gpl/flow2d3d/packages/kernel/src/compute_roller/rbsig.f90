@@ -97,10 +97,10 @@ subroutine rbsig(ncmax     ,ampbc     ,ombc      ,phibc     ,thetbc    , &
 !
     integer               , intent(in)  :: lundia !  Description and declaration in inout.igs
     integer               , intent(in)  :: ncmax
-    real(fp), dimension(ncmax), intent(out) :: ampbc !  Description and declaration in rjdim.f90
-    real(fp), dimension(ncmax)              :: ombc !  Description and declaration in rjdim.f90
-    real(fp), dimension(ncmax)              :: phibc !  Description and declaration in rjdim.f90
-    real(fp), dimension(ncmax)              :: thetbc !  Description and declaration in rjdim.f90
+    real(fp), dimension(ncmax), intent(out) :: ampbc !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(ncmax)              :: ombc !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(ncmax)              :: phibc !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(ncmax)              :: thetbc !  Description and declaration in esm_alloc_real.f90
     character(*)          , intent(in)  :: filrol
 !
 ! Local variables

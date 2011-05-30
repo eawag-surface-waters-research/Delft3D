@@ -104,9 +104,9 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
     integer                  :: keva        !  Description and declaration in tricom.igs
     integer                  :: ktemp       !  Description and declaration in tricom.igs
     integer    , intent(out) :: lsec        !  Description and declaration in dimens.igs
-    integer    , intent(in)  :: mmax        !  Description and declaration in iidim.f90
-    integer    , intent(in)  :: nmax        !  Description and declaration in iidim.f90
-    integer    , intent(in)  :: nmaxus      !  Description and declaration in iidim.f90
+    integer    , intent(in)  :: mmax        !  Description and declaration in esm_alloc_int.f90
+    integer    , intent(in)  :: nmax        !  Description and declaration in esm_alloc_int.f90
+    integer    , intent(in)  :: nmaxus      !  Description and declaration in esm_alloc_int.f90
     integer                  :: nrrec       !!  Pointer to the record number in the MD-file
     integer                  :: rtcmod      !  Description and declaration in rtc.igs
     logical    , intent(out) :: couplemod   !  Description and declaration in procs.igs

@@ -71,24 +71,24 @@ subroutine disbub(kmax      ,nsrcd     ,nsrc      ,nxbub    , &
     integer                                                 , intent(in)  :: ifirst ! ifirst = 1 when first time in z_disbub                                                                                    
     integer                                                 , intent(in)  :: kmax
     integer                                                 , intent(in)  :: lstsc  ! Description and declaration in dimens.igs
-    integer                                                 , intent(in)  :: lstsci ! Description and declaration in iidim.f90
+    integer                                                 , intent(in)  :: lstsci ! Description and declaration in esm_alloc_int.f90
     integer                                                 , intent(in)  :: nsrc   ! Description and declaration in dimens.igs
     integer                                                 , intent(in)  :: nsrcd  ! Description and declaration in dimens.igs
     integer                                                 , intent(in)  :: nxbub  ! Description and declaration in dimens.igs
-    integer , dimension(7, nsrc)                            , intent(in)  :: mnksrc !  Description and declaration in iidim.f90
-    real(fp), dimension(nsrc)                                             :: disch  ! Description and declaration in rjdim.f90
-    real(fp), dimension(nsrc)                               , intent(out) :: disinp ! Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: gsqs   !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), intent(in)  :: r1     ! Description and declaration in rjdim.f90
-    real(fp), dimension(lstsc, nsrc)                        , intent(out) :: rint   ! Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                            :: s1     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)              :: sink   ! Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)              :: sour   ! Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: xcor   !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: ycor   !  Description and declaration in rjdim.f90
+    integer , dimension(7, nsrc)                            , intent(in)  :: mnksrc !  Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(nsrc)                                             :: disch  ! Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nsrc)                               , intent(out) :: disinp ! Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: gsqs   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), intent(in)  :: r1     ! Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(lstsc, nsrc)                        , intent(out) :: rint   ! Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                            :: s1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)              :: sink   ! Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)              :: sour   ! Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: xcor   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: ycor   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(kmax)                               , intent(in)  :: thick
     real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: dps
-    character(20), dimension(nsrc)                          , intent(in)  :: namsrc !  Description and declaration in ckdim.f90
+    character(20), dimension(nsrc)                          , intent(in)  :: namsrc !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

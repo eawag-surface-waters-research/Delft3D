@@ -51,7 +51,7 @@ subroutine comphidexp(frac      ,dm        ,nmmax     ,lsedtot   , &
     integer                                             , intent(in)  :: nmlb
     integer                                             , intent(in)  :: nmub
     integer                                             , intent(in)  :: nmmax   !  Description and declaration in dimens.igs
-    real(fp), dimension(lsedtot)                        , intent(in)  :: sedd50  !  Description and declaration in rjdim.f90
+    real(fp), dimension(lsedtot)                        , intent(in)  :: sedd50  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(nmlb:nmub, lsedtot)                           :: hidexp
     real(fp), dimension(nmlb:nmub, lsedtot)             , intent(in)  :: frac
     real(fp), dimension(nmlb:nmub)                      , intent(in)  :: dm

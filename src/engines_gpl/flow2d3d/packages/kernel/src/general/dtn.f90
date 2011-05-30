@@ -44,7 +44,7 @@ function dtn(it, t, dt)
 !
     integer , intent(in) :: it
     real(fp), intent(in) :: t
-    real(fp), intent(in) :: dt !  Description and declaration in rjdim.f90
+    real(fp), intent(in) :: dt !  Description and declaration in esm_alloc_real.f90
 !
 !! executable statements -------------------------------------------------------
 !

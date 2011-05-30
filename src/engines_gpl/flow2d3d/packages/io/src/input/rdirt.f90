@@ -65,7 +65,7 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                    :: nrrec  !!  Pointer to the record number in the MD-file
     logical      , intent(out) :: error  !!  Flag=TRUE if an error is encountered
     logical      , intent(in)  :: noui   !!  Flag for reading from User Interface
-    real(fp)                   :: dt     !  Description and declaration in rjdim.f90
+    real(fp)                   :: dt     !  Description and declaration in esm_alloc_real.f90
     real(fp)     , intent(out) :: rtunit !!  Time scale for time parameters (sec)
     real(fp)                   :: tstart !  Description and declaration in exttim.igs
     real(fp)                   :: tstop  !  Description and declaration in exttim.igs

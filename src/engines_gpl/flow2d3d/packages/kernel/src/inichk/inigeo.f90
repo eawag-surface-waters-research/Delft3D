@@ -58,32 +58,32 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
 ! Global variables
 !
     integer                                                                                                            :: lundia !  Description and declaration in inout.igs
-    integer                                                                                                            :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                                                            :: nmax   !  Description and declaration in iidim.f90
-    integer                                                                                            , intent(in)    :: nmaxus !  Description and declaration in iidim.f90
-    integer , dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound) , intent(in)    :: kcs    !  Description and declaration in iidim.f90
-    integer , dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound) , intent(in)    :: kcu    !  Description and declaration in iidim.f90
-    integer , dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound) , intent(in)    :: kcv    !  Description and declaration in iidim.f90
+    integer                                                                                                            :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                                            :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                            , intent(in)    :: nmaxus !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound) , intent(in)    :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound) , intent(in)    :: kcu    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound) , intent(in)    :: kcv    !  Description and declaration in esm_alloc_int.f90
     logical                                                                                                            :: error  !!  Flag=TRUE if an error is encountered
     logical                                                                                                            :: sferic !  Description and declaration in tricom.igs
-    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: alfas  !  Description and declaration in rjdim.f90
-    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound) , intent(out)   :: fcorio !  Description and declaration in rjdim.f90
-    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound) , intent(out)   :: gsqd   !  Description and declaration in rjdim.f90
-    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: gsqiu  !  Description and declaration in rjdim.f90
-    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: gsqiv  !  Description and declaration in rjdim.f90
-    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: gsqs   !  Description and declaration in rjdim.f90
-    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: gud    !  Description and declaration in rjdim.f90
-    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: guu    !  Description and declaration in rjdim.f90
-    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: guv    !  Description and declaration in rjdim.f90
-    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: guz    !  Description and declaration in rjdim.f90
-    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: gvd    !  Description and declaration in rjdim.f90
-    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: gvu    !  Description and declaration in rjdim.f90
-    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: gvv    !  Description and declaration in rjdim.f90
-    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: gvz    !  Description and declaration in rjdim.f90
-    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: xcor   !  Description and declaration in rjdim.f90
-    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: xz     !  Description and declaration in rjdim.f90
-    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: ycor   !  Description and declaration in rjdim.f90
-    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: yz     !  Description and declaration in rjdim.f90
+    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: alfas  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound) , intent(out)   :: fcorio !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound) , intent(out)   :: gsqd   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: gsqiu  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: gsqiv  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: gsqs   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: gud    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: guu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: guv    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: guz    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: gvd    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: gvu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: gvv    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: gvz    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: xcor   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: xz     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: ycor   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(1 - gdp%d%ddbound:nmax + gdp%d%ddbound,1 - gdp%d%ddbound:mmax + gdp%d%ddbound)                 :: yz     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                                                         , intent(inout) :: dfguu  !  complete guu array for exchange between domains
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                                                         , intent(inout) :: dfgvv  !  complete gvv array for exchange between domains
     real(fp)                                                                                           , intent(in)    :: dx     !!  Uniform grid-distance in the x-dir.

@@ -54,23 +54,23 @@ subroutine wrfou(nmax      ,mmax      ,nmaxus    ,kmax      ,lmax      , &
 ! Global variables
 !
     integer                                                                                 :: itdate !  Reference time in YYYYMMDD
-    integer                                                                                 :: kmax   !  Description and declaration in iidim.f90
+    integer                                                                                 :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                                                 :: lmax   !  Description and declaration in dimens.igs
-    integer                                                                                 :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                                 :: nmax   !  Description and declaration in iidim.f90
-    integer                                                                                 :: nmaxus !  Description and declaration in iidim.f90
+    integer                                                                                 :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                 :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                 :: nmaxus !  Description and declaration in esm_alloc_int.f90
     integer                                                                                 :: nofou  !  Description and declaration in dimens.igs
-    integer       , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     :: kcs    !  Description and declaration in iidim.f90
-    integer       , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     :: kfu    !  Description and declaration in iidim.f90
-    integer       , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     :: kfv    !  Description and declaration in iidim.f90
+    integer       , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer       , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     :: kfu    !  Description and declaration in esm_alloc_int.f90
+    integer       , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     :: kfv    !  Description and declaration in esm_alloc_int.f90
     real(fp)                                                                                :: dtsec  !!  Integration time step [in seconds]
-    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     :: alfas  !  Description and declaration in rjdim.f90
-    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     :: xcor   !  Description and declaration in rjdim.f90
-    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     :: xz     !  Description and declaration in rjdim.f90
-    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     :: ycor   !  Description and declaration in rjdim.f90
-    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     :: yz     !  Description and declaration in rjdim.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     :: alfas  !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     :: xcor   !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     :: xz     !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     :: ycor   !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     :: yz     !  Description and declaration in esm_alloc_real.f90
     character(*)                                                                            :: runid  !!  Run identification of this simulation
-    character(20) , dimension(lmax)                                                         :: namcon !  Description and declaration in ckdim.f90
+    character(20) , dimension(lmax)                                                         :: namcon !  Description and declaration in esm_alloc_char.f90
     character(5)                                                               , intent(in) :: versio !!  Version nr. of the current package
 !
 !

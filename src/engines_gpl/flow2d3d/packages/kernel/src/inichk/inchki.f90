@@ -203,7 +203,7 @@ subroutine inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
                             !!   C : Chezy    W : White Colebrook
                             !!   M : Manning  Z : roughness par.
     character(36) :: tgfcmp !  Description and declaration in tricom.igs
-    character(4)  :: rouflo !  Description and declaration in ckdim.f90
+    character(4)  :: rouflo !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

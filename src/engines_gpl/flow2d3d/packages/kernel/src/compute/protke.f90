@@ -67,15 +67,15 @@ subroutine protke(j         ,nmmaxj    ,nmmax     ,icx       ,icy       , &
                                                                         !! index, J = -2*NMAX + 1
     integer                                     , intent(in)  :: nmmax  ! Description and declaration in dimens.igs
     integer                                                   :: nmmaxj ! Description and declaration in dimens.igs
-    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)               :: kcs    ! Description and declaration in iidim.f90
-    integer  , dimension(gdp%d%nmlb:gdp%d%nmub) , intent(in)  :: kfs    ! Description and declaration in iidim.f90
-    integer  , dimension(gdp%d%nmlb:gdp%d%nmub) , intent(in)  :: kfu    ! Description and declaration in iidim.f90
-    integer  , dimension(gdp%d%nmlb:gdp%d%nmub) , intent(in)  :: kfv    ! Description and declaration in iidim.f90
-    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub) , intent(in)  :: guu    ! Description and declaration in rjdim.f90
-    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub) , intent(in)  :: gvv    ! Description and declaration in rjdim.f90
+    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)               :: kcs    ! Description and declaration in esm_alloc_int.f90
+    integer  , dimension(gdp%d%nmlb:gdp%d%nmub) , intent(in)  :: kfs    ! Description and declaration in esm_alloc_int.f90
+    integer  , dimension(gdp%d%nmlb:gdp%d%nmub) , intent(in)  :: kfu    ! Description and declaration in esm_alloc_int.f90
+    integer  , dimension(gdp%d%nmlb:gdp%d%nmub) , intent(in)  :: kfv    ! Description and declaration in esm_alloc_int.f90
+    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub) , intent(in)  :: guu    ! Description and declaration in esm_alloc_real.f90
+    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub) , intent(in)  :: gvv    ! Description and declaration in esm_alloc_real.f90
     real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub) , intent(out) :: ptke   !! TKE production due to velocity fluctuation
-    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub) , intent(in)  :: umnflc ! Description and declaration in rjdim.f90
-    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub) , intent(in)  :: vmnflc ! Description and declaration in rjdim.f90
+    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub) , intent(in)  :: umnflc ! Description and declaration in esm_alloc_real.f90
+    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub) , intent(in)  :: vmnflc ! Description and declaration in esm_alloc_real.f90
     real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrk1
     real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrk2
 !

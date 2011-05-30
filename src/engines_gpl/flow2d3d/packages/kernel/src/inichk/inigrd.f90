@@ -56,9 +56,9 @@ subroutine inigrd(lundia    ,error     ,runid     ,nmax      ,mmax      , &
 ! Global variables
 !
     integer                                                            :: lundia !  Description and declaration in inout.igs
-    integer      , intent(in)                                          :: mmax   !  Description and declaration in iidim.f90
-    integer      , intent(in)                                          :: nmax   !  Description and declaration in iidim.f90
-    integer      , intent(in)                                          :: nmaxus !  Description and declaration in iidim.f90
+    integer      , intent(in)                                          :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer      , intent(in)                                          :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer      , intent(in)                                          :: nmaxus !  Description and declaration in esm_alloc_int.f90
     integer      , dimension(*)                                        :: ipx    !!  X-coordinate of the comp. grid enclosure (temporary/work array)
     integer      , dimension(*)                                        :: ipy    !!  Y-coordinate of the comp. grid enclosure (temporary/work array)
     integer      , dimension(gdp%d%mlb:gdp%d%mub, gdp%d%nlb:gdp%d%nub) :: icom   !!  Temporary work array containing:0 = if a point is not active,1 = if a point is active

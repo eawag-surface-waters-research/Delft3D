@@ -68,7 +68,7 @@ subroutine wrihisdad(lundia    ,error     ,trifil    ,itdate    , &
     integer     , intent(in)  :: lsedtot !  Description and declaration in exttim.igs
     integer                   :: lundia  !  Description and declaration in inout.igs
     logical     , intent(out) :: error
-    real(fp)    , intent(in)  :: dt      !  Description and declaration in rjdim.f90
+    real(fp)    , intent(in)  :: dt      !  Description and declaration in esm_alloc_real.f90
     real(fp)    , intent(in)  :: tunit   !  Description and declaration in exttim.igs
     character(*), intent(in)  :: trifil
 !

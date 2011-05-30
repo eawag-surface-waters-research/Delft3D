@@ -1,4 +1,4 @@
-subroutine iidim(lundia, error, verify, zmodel, gdp)
+subroutine esm_alloc_int(lundia, error, verify, zmodel, gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -555,7 +555,7 @@ subroutine iidim(lundia, error, verify, zmodel, gdp)
     ! because then the mapper can read them.
     ! BE CAREFUL:
     !    These integers are allocated TWICE inside FLOW:
-    !    in iidim.f90 as part of the shared memory block, allocated via esm/fsm, and
+    !    in esm_alloc_int.f90 as part of the shared memory block, allocated via esm/fsm, and
     !    in *.igs-files as part of the GDP structure (e.g. nmax) or
     !    locally on a high level (e.g. it01 in trisim.f90)
     !
@@ -703,6 +703,6 @@ subroutine iidim(lundia, error, verify, zmodel, gdp)
  9999 continue
     if (ierr <= -9) then
        error = .true.
-       call prterr(lundia    ,'G920'    ,'IIDIM'   )
+       call prterr(lundia    ,'G920'    ,'esm_alloc_int'   )
     endif
-end subroutine iidim
+end subroutine esm_alloc_int

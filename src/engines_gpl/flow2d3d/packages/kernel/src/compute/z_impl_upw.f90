@@ -52,20 +52,20 @@ subroutine z_impl_upw(nmmax     ,kmax      ,icx       ,icy       ,kcs     , &
 !
     integer                                                        :: icx    !!  Increment in the X-dir., if ICX= NMAX then computation proceeds in the X- dir. If icx=1 then computation pro ceeds in the Y-dir.
     integer                                                        :: icy    !!  Increment in the Y-dir. (see ICX)
-    integer                                                        :: kmax   !  Description and declaration in iidim.f90
+    integer                                                        :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                        :: nmmax  !  Description and declaration in dimens.igs
-    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kcs    !  Description and declaration in iidim.f90
-    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfu    !  Description and declaration in iidim.f90
-    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfumax !  Description and declaration in iidim.f90
-    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfumin !  Description and declaration in iidim.f90
-    integer  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in) :: kcscut !  Description and declaration in iidim.f90
-    integer  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: kfuz1  !  Description and declaration in iidim.f90
-    integer  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: kfvz1  !  Description and declaration in iidim.f90
-    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: gsqiu  !  Description and declaration in rjdim.f90
-    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: guu    !  Description and declaration in rjdim.f90
-    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: guz    !  Description and declaration in rjdim.f90
-    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: gvd    !  Description and declaration in rjdim.f90
-    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: gvu    !  Description and declaration in rjdim.f90
+    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfu    !  Description and declaration in esm_alloc_int.f90
+    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfumax !  Description and declaration in esm_alloc_int.f90
+    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfumin !  Description and declaration in esm_alloc_int.f90
+    integer  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in) :: kcscut !  Description and declaration in esm_alloc_int.f90
+    integer  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: kfuz1  !  Description and declaration in esm_alloc_int.f90
+    integer  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: kfvz1  !  Description and declaration in esm_alloc_int.f90
+    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: gsqiu  !  Description and declaration in esm_alloc_real.f90
+    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: guu    !  Description and declaration in esm_alloc_real.f90
+    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: guz    !  Description and declaration in esm_alloc_real.f90
+    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: gvd    !  Description and declaration in esm_alloc_real.f90
+    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: gvu    !  Description and declaration in esm_alloc_real.f90
     real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: bdx    !!  Internal work array, implicit coupling of layer velocity in (N,M,K)
                                                                              !!  with layer velocity in (N,M-1,K)
     real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: bdy    !!  Internal work array, implicit coupling of layer velocity in (N,M,K)
@@ -76,8 +76,8 @@ subroutine z_impl_upw(nmmax     ,kmax      ,icx       ,icy       ,kcs     , &
                                                                              !!  with layer velocity in (N+1,M,K)
     real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: bbk    !!  Internal work array, coefficient layer velocity in (N,M,K) implicit part
     real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: ddk    !!  Internal work array, diagonal space at (N,M,K)
-    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: u0     !  Description and declaration in rjdim.f90
-    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: v1     !  Description and declaration in rjdim.f90
+    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: u0     !  Description and declaration in esm_alloc_real.f90
+    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: v1     !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

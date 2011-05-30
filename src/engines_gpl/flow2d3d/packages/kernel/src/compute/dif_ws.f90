@@ -53,18 +53,18 @@ subroutine dif_ws(j         ,nmmaxj    ,nmmax     ,kmax      ,lsal      , &
 !
     integer                                                                 :: j      !! Begin pointer for arrays which have been transformed into 1D arrays
                                                                                       !! Due to the shift in the 2nd (M-) index, J = -2*NMAX + 1
-    integer                                                    , intent(in) :: kmax   !  Description and declaration in iidim.f90
+    integer                                                    , intent(in) :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                    , intent(in) :: lsal   !  Description and declaration in dimens.igs
-    integer                                                    , intent(in) :: lsed   !  Description and declaration in iidim.f90
-    integer                                                    , intent(in) :: lstsci !  Description and declaration in iidim.f90
+    integer                                                    , intent(in) :: lsed   !  Description and declaration in esm_alloc_int.f90
+    integer                                                    , intent(in) :: lstsci !  Description and declaration in esm_alloc_int.f90
     integer                                                    , intent(in) :: ltem   !  Description and declaration in dimens.igs
     integer                                                    , intent(in) :: nmmax  !  Description and declaration in dimens.igs
     integer                                                                 :: nmmaxj !  Description and declaration in dimens.igs
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                 , intent(in) :: kcs    !  Description and declaration in iidim.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                 , intent(in) :: kfs    !  Description and declaration in iidim.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub, lsed)           , intent(in) :: kmxsed !  Description and declaration in iidim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                 , intent(in) :: gsqs   !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax, lstsci) , intent(in) :: ws     !  Description and declaration in rjdim.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                 , intent(in) :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                 , intent(in) :: kfs    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, lsed)           , intent(in) :: kmxsed !  Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                 , intent(in) :: gsqs   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax, lstsci) , intent(in) :: ws     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)                :: aakl   !! Internal work array, lower diagonal tridiagonal matrix, implicit coupling
                                                                                       !! of concentration in (N,M,K) with concentration in (N,M,K-1)
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)                :: bbkl   !! Internal work array, main diagonal tridiagonal matrix, implicit coupling

@@ -58,7 +58,7 @@ subroutine chknum(lundia    ,error     ,roumet    ,rouflo    ,gdp)
     character(1), intent(in)  :: roumet  !!  Bed stress formulation specified:
                                          !!   C : Chezy    W : White Colebrook
                                          !!   M : Manning  Z : roughness par.
-    character(4), intent(out) :: rouflo  !  Description and declaration in ckdim.f90
+    character(4), intent(out) :: rouflo  !  Description and declaration in esm_alloc_char.f90
     character(4)              :: message
 !
 ! Local variables

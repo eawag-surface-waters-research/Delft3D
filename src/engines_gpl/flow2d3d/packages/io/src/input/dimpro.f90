@@ -70,11 +70,11 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
 !
     integer        , intent(out) :: lsal    !  Description and declaration in dimens.igs
     integer        , intent(out) :: lsecfl  !  Description and declaration in dimens.igs
-    integer                      :: lsed    !  Description and declaration in iidim.f90
-    integer                      :: lsedtot !  Description and declaration in iidim.f90
+    integer                      :: lsed    !  Description and declaration in esm_alloc_int.f90
+    integer                      :: lsedtot !  Description and declaration in esm_alloc_int.f90
     integer                      :: lsts    !  Description and declaration in dimens.igs
     integer                      :: lstsc   !  Description and declaration in dimens.igs
-    integer                      :: lstsci  !  Description and declaration in iidim.f90
+    integer                      :: lstsci  !  Description and declaration in esm_alloc_int.f90
     integer        , intent(out) :: ltem    !  Description and declaration in dimens.igs
     integer                      :: lundia  !  Description and declaration in inout.igs
     integer                      :: lunmd   !  Description and declaration in inout.igs
@@ -252,7 +252,7 @@ subroutine dimpro(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
        wavcmp = .false.
        !
        ! locate 'Filwcm' record in MD-file. Filwcm contains data of wave components
-       ! ncmax is used in rjdim for dimensioning arrays
+       ! ncmax is used in esm_alloc_real for dimensioning arrays
        !
        filrol = ' '
        call prop_get_string(gdp%mdfile_ptr, '*', 'Filwcm', filrol)

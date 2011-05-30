@@ -63,22 +63,22 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
                                                                                                 !!  =+/-6: porous plate
                                                                                                 !!  =+/-7: bridge
                                                                                                 !!  =+/-9: 2D Weir
-    integer                                                             , intent(in)  :: kmax   !  Description and declaration in iidim.f90
+    integer                                                             , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                                           :: lundia !  Description and declaration in inout.igs
-    integer                                                             , intent(in)  :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                           :: nmax   !  Description and declaration in iidim.f90
-    integer                                                             , intent(in)  :: nmaxus !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)              :: kspu   !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)              :: kspv   !  Description and declaration in iidim.f90
+    integer                                                             , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                           :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                             , intent(in)  :: nmaxus !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)              :: kspu   !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)              :: kspv   !  Description and declaration in esm_alloc_int.f90
     logical                                                                           :: error  !!  Flag=TRUE if an error is encountered
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(out) :: dphkru !!  Depth in u points incl. crest or
                                                                                                 !!  Crown height at u points
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(out) :: dphkrv !!  Depth in v points incl. crest or
                                                                                                 !!  Crown height at v points
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(out) :: uwtypu !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(out) :: uwtypv !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax) , intent(out) :: ubrlsu !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax) , intent(out) :: ubrlsv !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(out) :: uwtypu !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(out) :: uwtypv !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax) , intent(out) :: ubrlsu !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax) , intent(out) :: ubrlsv !  Description and declaration in esm_alloc_real.f90
     character(*)                                                                      :: filstr !!  Name of the relevant file
 !
 ! Local variables

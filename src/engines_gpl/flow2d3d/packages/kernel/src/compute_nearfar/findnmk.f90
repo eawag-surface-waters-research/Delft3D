@@ -55,11 +55,11 @@ subroutine findnmk(xz     ,yz     ,dps    ,s1     ,kcs    ,nmmax  ,thick   , &
     real(fp)                                      , intent(in)  :: x_jet
     real(fp)                                      , intent(in)  :: y_jet
     real(fp)                                      , intent(in)  :: z_jet
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub) , intent(in)  :: s1     !  Description and declaration in rjdim.f90 gs
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub) , intent(in)  :: xz     !  Description and declaration in rjdim.f90 gs
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub) , intent(in)  :: yz     !  Description and declaration in rjdim.f90
-    real(fp)   , dimension(kmax)                  , intent(in)  :: thick  !  Description and declaration in rjdim.f90 gs
-    real(prec) , dimension(gdp%d%nmlb:gdp%d%nmub) , intent(in)  :: dps    !  Description and declaration in rjdim.f90
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub) , intent(in)  :: s1     !  Description and declaration in esm_alloc_real.f90 gs
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub) , intent(in)  :: xz     !  Description and declaration in esm_alloc_real.f90 gs
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub) , intent(in)  :: yz     !  Description and declaration in esm_alloc_real.f90
+    real(fp)   , dimension(kmax)                  , intent(in)  :: thick  !  Description and declaration in esm_alloc_real.f90 gs
+    real(prec) , dimension(gdp%d%nmlb:gdp%d%nmub) , intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

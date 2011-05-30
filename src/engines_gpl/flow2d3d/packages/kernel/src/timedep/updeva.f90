@@ -72,7 +72,7 @@ subroutine updeva(luneva    ,timnow    ,dt        ,inteva    ,first     , &
     logical  , intent(in)  :: inteva !!  Interpolation method between consecutive data:
                                      !!    N = No     interpolation.
                                      !!    Y = Linear interpolation.
-    real(fp)               :: dt     !  Description and declaration in rjdim.f90
+    real(fp)               :: dt     !  Description and declaration in esm_alloc_real.f90
     real(fp) , intent(in)  :: timnow !!  Current timestep (multiples of dt)
 !
 ! Local variables

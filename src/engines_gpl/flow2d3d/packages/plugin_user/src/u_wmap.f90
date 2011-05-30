@@ -61,52 +61,52 @@ subroutine u_wmap(lundat    ,header    ,runid     ,itime     ,idate     , &
     integer                                         , intent(in) :: idate
     integer                                         , intent(in) :: ilay
     integer                                         , intent(in) :: itime
-    integer                                         , intent(in) :: kmax !  Description and declaration in iidim.f90
+    integer                                         , intent(in) :: kmax !  Description and declaration in esm_alloc_int.f90
     integer                                         , intent(in) :: lmaxd !  Description and declaration in dimens.igs
     integer                                         , intent(in) :: lsal !  Description and declaration in dimens.igs
-    integer                                         , intent(in) :: lstsci !  Description and declaration in iidim.f90
+    integer                                         , intent(in) :: lstsci !  Description and declaration in esm_alloc_int.f90
     integer                                         , intent(in) :: ltem !  Description and declaration in dimens.igs
-    integer                                         , intent(in) :: ltur !  Description and declaration in iidim.f90
+    integer                                         , intent(in) :: ltur !  Description and declaration in esm_alloc_int.f90
     integer                                         , intent(in) :: lundat
-    integer                                         , intent(in) :: mmax !  Description and declaration in iidim.f90
-    integer                                         , intent(in) :: nmax !  Description and declaration in iidim.f90
-    integer                                         , intent(in) :: nmaxus !  Description and declaration in iidim.f90
-    integer                                         , intent(in) :: nsrc !  Description and declaration in iidim.f90
-    integer, dimension(7, nsrc)                     , intent(in) :: mnksrc !  Description and declaration in iidim.f90
-    integer, dimension(nmax, -1:mmax + 2)           , intent(in) :: kcs !  Description and declaration in iidim.f90
-    integer, dimension(nmax, -1:mmax + 2)           , intent(in) :: kfs !  Description and declaration in iidim.f90
-    integer, dimension(nmax, -1:mmax + 2)           , intent(in) :: kfsmax !  Description and declaration in iidim.f90
-    integer, dimension(nmax, -1:mmax + 2)           , intent(in) :: kfsmin !  Description and declaration in iidim.f90
-    integer, dimension(nmax, -1:mmax + 2)           , intent(in) :: kfu !  Description and declaration in iidim.f90
-    integer, dimension(nmax, -1:mmax + 2)           , intent(in) :: kfumax !  Description and declaration in iidim.f90
-    integer, dimension(nmax, -1:mmax + 2)           , intent(in) :: kfumin !  Description and declaration in iidim.f90
-    integer, dimension(nmax, -1:mmax + 2)           , intent(in) :: kfv !  Description and declaration in iidim.f90
-    integer, dimension(nmax, -1:mmax + 2)           , intent(in) :: kfvmax !  Description and declaration in iidim.f90
-    integer, dimension(nmax, -1:mmax + 2)           , intent(in) :: kfvmin !  Description and declaration in iidim.f90
+    integer                                         , intent(in) :: mmax !  Description and declaration in esm_alloc_int.f90
+    integer                                         , intent(in) :: nmax !  Description and declaration in esm_alloc_int.f90
+    integer                                         , intent(in) :: nmaxus !  Description and declaration in esm_alloc_int.f90
+    integer                                         , intent(in) :: nsrc !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(7, nsrc)                     , intent(in) :: mnksrc !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(nmax, -1:mmax + 2)           , intent(in) :: kcs !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(nmax, -1:mmax + 2)           , intent(in) :: kfs !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(nmax, -1:mmax + 2)           , intent(in) :: kfsmax !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(nmax, -1:mmax + 2)           , intent(in) :: kfsmin !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(nmax, -1:mmax + 2)           , intent(in) :: kfu !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(nmax, -1:mmax + 2)           , intent(in) :: kfumax !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(nmax, -1:mmax + 2)           , intent(in) :: kfumin !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(nmax, -1:mmax + 2)           , intent(in) :: kfv !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(nmax, -1:mmax + 2)           , intent(in) :: kfvmax !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(nmax, -1:mmax + 2)           , intent(in) :: kfvmin !  Description and declaration in esm_alloc_int.f90
     logical                                         , intent(in) :: zmodel !  Description and declaration in procs.igs
     real(fp)                                        , intent(in) :: timnow
-    real(prec), dimension(nmax, -1:mmax + 2)              , intent(in) :: dps !  Description and declaration in rjdim.f90
-    real(fp), dimension(nmax, -1:mmax + 2)              , intent(in) :: s1 !  Description and declaration in rjdim.f90
-    real(fp), dimension(nmax, -1:mmax + 2)              , intent(in) :: taubpu !  Description and declaration in rjdim.f90
-    real(fp), dimension(nmax, -1:mmax + 2)              , intent(in) :: taubpv !  Description and declaration in rjdim.f90
-    real(fp), dimension(nmax, -1:mmax + 2)              , intent(in) :: taubsu !  Description and declaration in rjdim.f90
-    real(fp), dimension(nmax, -1:mmax + 2)              , intent(in) :: taubsv !  Description and declaration in rjdim.f90
-    real(fp), dimension(nmax, -1:mmax + 2)              , intent(in) :: umnldf !  Description and declaration in rjdim.f90
-    real(fp), dimension(nmax, -1:mmax + 2)              , intent(in) :: vmnldf !  Description and declaration in rjdim.f90
-    real(fp), dimension(nmax, -1:mmax + 2)              , intent(in) :: xz !  Description and declaration in rjdim.f90
-    real(fp), dimension(nmax, -1:mmax + 2)              , intent(in) :: yz !  Description and declaration in rjdim.f90
-    real(fp), dimension(nmax, -1:mmax + 2, 0:kmax)      , intent(in) :: dicww !  Description and declaration in rjdim.f90
-    real(fp), dimension(nmax, -1:mmax + 2, 0:kmax)      , intent(in) :: rich !  Description and declaration in rjdim.f90
-    real(fp), dimension(nmax, -1:mmax + 2, 0:kmax)      , intent(in) :: vicww !  Description and declaration in rjdim.f90
-    real(fp), dimension(nmax, -1:mmax + 2, 0:kmax)      , intent(in) :: w1 !  Description and declaration in rjdim.f90
-    real(fp), dimension(nmax, -1:mmax + 2, 0:kmax, ltur), intent(in) :: rtur1 !  Description and declaration in rjdim.f90
-    real(fp), dimension(nmax, -1:mmax + 2, kmax + 2)    , intent(in) :: vicuv !  Description and declaration in rjdim.f90
-    real(fp), dimension(nmax, -1:mmax + 2, kmax)        , intent(in) :: p1 !  Description and declaration in rjdim.f90
-    real(fp), dimension(nmax, -1:mmax + 2, kmax)        , intent(in) :: rho !  Description and declaration in rjdim.f90
-    real(fp), dimension(nmax, -1:mmax + 2, kmax)        , intent(in) :: u1 !  Description and declaration in rjdim.f90
-    real(fp), dimension(nmax, -1:mmax + 2, kmax)        , intent(in) :: v1 !  Description and declaration in rjdim.f90
-    real(fp), dimension(nmax, -1:mmax + 2, kmax)        , intent(in) :: wphy !  Description and declaration in rjdim.f90
-    real(fp), dimension(nmax, -1:mmax + 2, kmax, lstsci), intent(in) :: r1 !  Description and declaration in rjdim.f90
+    real(prec), dimension(nmax, -1:mmax + 2)              , intent(in) :: dps !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nmax, -1:mmax + 2)              , intent(in) :: s1 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nmax, -1:mmax + 2)              , intent(in) :: taubpu !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nmax, -1:mmax + 2)              , intent(in) :: taubpv !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nmax, -1:mmax + 2)              , intent(in) :: taubsu !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nmax, -1:mmax + 2)              , intent(in) :: taubsv !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nmax, -1:mmax + 2)              , intent(in) :: umnldf !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nmax, -1:mmax + 2)              , intent(in) :: vmnldf !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nmax, -1:mmax + 2)              , intent(in) :: xz !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nmax, -1:mmax + 2)              , intent(in) :: yz !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nmax, -1:mmax + 2, 0:kmax)      , intent(in) :: dicww !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nmax, -1:mmax + 2, 0:kmax)      , intent(in) :: rich !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nmax, -1:mmax + 2, 0:kmax)      , intent(in) :: vicww !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nmax, -1:mmax + 2, 0:kmax)      , intent(in) :: w1 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nmax, -1:mmax + 2, 0:kmax, ltur), intent(in) :: rtur1 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nmax, -1:mmax + 2, kmax + 2)    , intent(in) :: vicuv !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nmax, -1:mmax + 2, kmax)        , intent(in) :: p1 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nmax, -1:mmax + 2, kmax)        , intent(in) :: rho !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nmax, -1:mmax + 2, kmax)        , intent(in) :: u1 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nmax, -1:mmax + 2, kmax)        , intent(in) :: v1 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nmax, -1:mmax + 2, kmax)        , intent(in) :: wphy !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nmax, -1:mmax + 2, kmax, lstsci), intent(in) :: r1 !  Description and declaration in esm_alloc_real.f90
     character(*)                                    , intent(in) :: runid
     character(131), dimension(10)                                :: header !  Description and declaration in postpr.igs
 !

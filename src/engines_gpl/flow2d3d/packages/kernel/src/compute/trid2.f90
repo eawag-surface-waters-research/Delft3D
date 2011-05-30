@@ -61,18 +61,18 @@ subroutine trid2(lundia    ,s1        ,kcs       ,mmax      ,nmax      , &
                                                                       !!  Due to the shift in the 2nd (M-)
                                                                       !!  index, J = -2*NMAX + 1
     integer                                                 :: lundia !  Description and declaration in inout.igs
-    integer                                   , intent(in)  :: mmax   !  Description and declaration in iidim.f90
-    integer                                   , intent(in)  :: nmax   !  Description and declaration in iidim.f90
+    integer                                   , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                   , intent(in)  :: nmax   !  Description and declaration in esm_alloc_int.f90
     integer                                   , intent(in)  :: nmmax  !  Description and declaration in dimens.igs
     integer                                   , intent(in)  :: nmmaxj !  Description and declaration in dimens.igs
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              :: kcs    !  Description and declaration in iidim.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              :: kcs    !  Description and declaration in esm_alloc_int.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: a
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: b
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: c      !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: c      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: d
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: e
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: f
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              :: s1     !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              :: s1     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(j:nmmaxj)                           :: c2
     real(fp), dimension(j:nmmaxj)                           :: d2
 !

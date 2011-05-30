@@ -57,17 +57,17 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
 !
 ! Global variables
 !
-    integer                                                                         , intent(in)  :: kmax   !  Description and declaration in iidim.f90
-    integer                                                                         , intent(in)  :: lstsci !  Description and declaration in iidim.f90
+    integer                                                                         , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                         , intent(in)  :: lstsci !  Description and declaration in esm_alloc_int.f90
     integer                                                                         , intent(in)  :: lundia !  Description and declaration in inout.igs
-    integer                                                                         , intent(in)  :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                                       :: nmax   !  Description and declaration in iidim.f90
-    integer                                                                         , intent(in)  :: nmaxus !  Description and declaration in iidim.f90
+    integer                                                                         , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                       :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                         , intent(in)  :: nmaxus !  Description and declaration in esm_alloc_int.f90
     logical                                                                         , intent(out) :: error  !  Flag=TRUE if an error is encountered
-    real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(out) :: s1     !  Description and declaration in rjdim.f90
-    real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         , intent(out) :: u1     !  Description and declaration in rjdim.f90
-    real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         , intent(out) :: v1     !  Description and declaration in rjdim.f90
-    real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci) , intent(out) :: r1     !  Description and declaration in rjdim.f90
+    real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(out) :: s1     !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         , intent(out) :: u1     !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         , intent(out) :: v1     !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci) , intent(out) :: r1     !  Description and declaration in esm_alloc_real.f90
     character(*)                                                                                  :: filic  !  File name of initial condition file
     character(11)                                                                   , intent(in)  :: fmttmp !  File format of initial condition file
 !

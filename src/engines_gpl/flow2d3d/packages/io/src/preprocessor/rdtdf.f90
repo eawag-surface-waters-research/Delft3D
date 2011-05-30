@@ -56,7 +56,7 @@ subroutine rdtdf(lundia    ,luntdp    ,error     ,filnam    ,fmttmp    , &
     integer                     , intent(in)  :: luntdp !  Unit number of the unformatted file where the data, just read, are to be rewritten again (for FLOW sim.)
     integer                     , intent(in)  :: nrval  !  NR. of data in a record to be read
     logical                     , intent(out) :: error  !  Flag=TRUE if an error is encountered
-    real(fp)                    , intent(in)  :: dt     !  Description and declaration in rjdim.f90
+    real(fp)                    , intent(in)  :: dt     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(nrval)  , intent(out) :: rval   !  Array for the time dependent data
                                                         !  RVAL   (1,I) = Values at t=TIM0
                                                         !  RVAL   (2,I) = Values at t=TIM1

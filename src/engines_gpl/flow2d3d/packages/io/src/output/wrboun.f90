@@ -59,14 +59,14 @@ subroutine wrboun(comfil    ,lundia    ,error     ,norow     ,nocol     , &
 ! Global variables
 !
     integer                                    :: lundia !  Description and declaration in inout.igs
-    integer, intent(in)                        :: nocol  !  Description and declaration in iidim.f90
-    integer                                    :: noroco !  Description and declaration in iidim.f90
-    integer, intent(in)                        :: norow  !  Description and declaration in iidim.f90
-    integer                                    :: nrob   !  Description and declaration in iidim.f90
-    integer                                    :: nto    !  Description and declaration in iidim.f90
-    integer, dimension(7, nto)                 :: mnbnd  !  Description and declaration in iidim.f90
-    integer, dimension(5, noroco)              :: irocol !  Description and declaration in iidim.f90
-    integer, dimension(8, nrob)                :: nob    !  Description and declaration in iidim.f90
+    integer, intent(in)                        :: nocol  !  Description and declaration in esm_alloc_int.f90
+    integer                                    :: noroco !  Description and declaration in esm_alloc_int.f90
+    integer, intent(in)                        :: norow  !  Description and declaration in esm_alloc_int.f90
+    integer                                    :: nrob   !  Description and declaration in esm_alloc_int.f90
+    integer                                    :: nto    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(7, nto)                 :: mnbnd  !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(5, noroco)              :: irocol !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(8, nrob)                :: nob    !  Description and declaration in esm_alloc_int.f90
     logical                      , intent(out) :: error  !!  Flag=TRUE if an error is encountered
     character(*)                               :: comfil !!  Name for communication file
                                                          !!  com-<case><label>

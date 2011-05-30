@@ -77,21 +77,21 @@ subroutine wrfouv(nmax      ,mmax      ,nmaxus    ,kmax      ,nofou     , &
 !
     integer                                                                    , intent(in) :: ifou   !!  Fourier counter
     integer                                                                                 :: itdate !  Reference time in YYYYMMDD
-    integer                                                                    , intent(in) :: kmax   !  Description and declaration in iidim.f90
+    integer                                                                    , intent(in) :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                                    , intent(in) :: lunfou !!  Unit number fourier output file
-    integer                                                                    , intent(in) :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                                 :: nmax   !  Description and declaration in iidim.f90
-    integer                                                                    , intent(in) :: nmaxus !  Description and declaration in iidim.f90
+    integer                                                                    , intent(in) :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                 :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                    , intent(in) :: nmaxus !  Description and declaration in esm_alloc_int.f90
     integer                                                                    , intent(in) :: nofou  !  Description and declaration in dimens.igs
-    integer       , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: kcs    !  Description and declaration in iidim.f90
-    integer       , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: kfu    !  Description and declaration in iidim.f90
-    integer       , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: kfv    !  Description and declaration in iidim.f90
+    integer       , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer       , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: kfu    !  Description and declaration in esm_alloc_int.f90
+    integer       , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: kfv    !  Description and declaration in esm_alloc_int.f90
     real(fp)                                                                   , intent(in) :: dtsec  !!  Integration time step [in seconds]
-    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: alfas  !  Description and declaration in rjdim.f90
-    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: xcor   !  Description and declaration in rjdim.f90
-    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: xz     !  Description and declaration in rjdim.f90
-    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: ycor   !  Description and declaration in rjdim.f90
-    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: yz     !  Description and declaration in rjdim.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: alfas  !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: xcor   !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: xz     !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: ycor   !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)        , intent(in) :: yz     !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

@@ -47,7 +47,7 @@ subroutine z_kfmnmx(j         ,nmmaxj    ,kmax      ,nm        ,nmref     , &
 ! Global variables
 !
     integer                                                  :: j
-    integer                                     , intent(in) :: kmax !  Description and declaration in iidim.f90
+    integer                                     , intent(in) :: kmax !  Description and declaration in esm_alloc_int.f90
     integer                                     , intent(in) :: nm
     integer                                                  :: nmmaxj !  Description and declaration in dimens.igs
     integer                                     , intent(in) :: nmref

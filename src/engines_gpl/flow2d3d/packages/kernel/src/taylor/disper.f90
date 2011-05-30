@@ -90,8 +90,8 @@ subroutine disper(kmxdt     ,kmxt      ,np        ,nfreqs    ,angle     , &
                                    !!  Water depth
     real(fp)        :: scale
                                    !!  Length scale for scaling
-    real(fp), intent(in)               :: umean !  Description and declaration in rjdim.f90
-    real(fp), intent(in)               :: vmean !  Description and declaration in rjdim.f90
+    real(fp), intent(in)               :: umean !  Description and declaration in esm_alloc_real.f90
+    real(fp), intent(in)               :: vmean !  Description and declaration in esm_alloc_real.f90
     real(fp)        :: xkh
                                    !!  Non-dimensional XK
     real(fp), dimension(0:kmxdt) :: atg

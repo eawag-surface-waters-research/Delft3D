@@ -67,40 +67,40 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
     integer                                                                     , intent(in)  :: itstop !  Description and declaration in inttim.igs
     integer                                                                     , intent(in)  :: itstrt !  Description and declaration in inttim.igs
     integer                                                                                   :: j      !!  Begin pointer for arrays which have been transformed into 1D arrays. Due to the shift in the 2nd (M-) index, J = -2*NMAX + 1
-    integer                                                                     , intent(in)  :: kmax   !  Description and declaration in iidim.f90
+    integer                                                                     , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                                     , intent(in)  :: lstsc  !  Description and declaration in dimens.igs
     integer                                                                     , intent(in)  :: lundia !  Description and declaration in inout.igs
     integer                                                                     , intent(in)  :: nmmaxj !  Description and declaration in dimens.igs
-    integer                                                                     , intent(in)  :: nsrc   !  Description and declaration in iidim.f90
-    integer                                                                     , intent(in)  :: upwsrc !  Description and declaration in iidim.f90
-    integer      , dimension(5, nsrc)                                           , intent(out) :: itdis  !  Description and declaration in iidim.f90
-    integer      , dimension(7, nsrc)                                           , intent(in)  :: mnksrc !  Description and declaration in iidim.f90
+    integer                                                                     , intent(in)  :: nsrc   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                     , intent(in)  :: upwsrc !  Description and declaration in esm_alloc_int.f90
+    integer      , dimension(5, nsrc)                                           , intent(out) :: itdis  !  Description and declaration in esm_alloc_int.f90
+    integer      , dimension(7, nsrc)                                           , intent(in)  :: mnksrc !  Description and declaration in esm_alloc_int.f90
     logical                                                                     , intent(in)  :: bubble !  Description and declaration in procs.igs        
     logical                                                                     , intent(in)  :: cyclic !!  Flag = TRUE if cyclic system assumed
     logical                                                                     , intent(out) :: error  !!  Flag=TRUE if an erroris encountered
     logical                                                                     , intent(in)  :: sferic !  Description and declaration in tricom.igs
     real(fp)                                                                                  :: grdang !  Description and declaration in tricom.igs
     real(fp)                                                                    , intent(in)  :: timnow
-    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)                             , intent(in)  :: alfas  !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(lstsc, nsrc)                                                     :: rint   !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(lstsc, nsrc)                                                     :: rint0  !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(lstsc, nsrc)                                                     :: rint1  !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nsrc)                                                            :: disch  !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nsrc)                                                            :: disch0 !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nsrc)                                                            :: disch1 !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nsrc)                                                            :: umdis  !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nsrc)                                                            :: umdis0 !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nsrc)                                                            :: umdis1 !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nsrc)                                                            :: vmdis  !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nsrc)                                                            :: vmdis0 !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nsrc)                                                            :: vmdis1 !  Description and declaration in rjdim.f90
+    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)                             , intent(in)  :: alfas  !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(lstsc, nsrc)                                                     :: rint   !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(lstsc, nsrc)                                                     :: rint0  !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(lstsc, nsrc)                                                     :: rint1  !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nsrc)                                                            :: disch  !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nsrc)                                                            :: disch0 !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nsrc)                                                            :: disch1 !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nsrc)                                                            :: umdis  !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nsrc)                                                            :: umdis0 !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nsrc)                                                            :: umdis1 !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nsrc)                                                            :: vmdis  !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nsrc)                                                            :: vmdis0 !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nsrc)                                                            :: vmdis1 !  Description and declaration in esm_alloc_real.f90
     character(*)                                                                , intent(in)  :: runid
-    character(1) , dimension(nsrc)                                                            :: disint !  Description and declaration in ckdim.f90
-    character(1) , dimension(nsrc)                                                            :: dismmt !  Description and declaration in ckdim.f90
-    character(20), dimension(lstsc)                                             , intent(in)  :: namcon !  Description and declaration in ckdim.f90
-    character(20), dimension(nsrc)                                                            :: namsrc !  Description and declaration in ckdim.f90
-    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)                :: kspu   !  Description and declaration in iidim.f90
-    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)                :: kspv   !  Description and declaration in iidim.f90
+    character(1) , dimension(nsrc)                                                            :: disint !  Description and declaration in esm_alloc_char.f90
+    character(1) , dimension(nsrc)                                                            :: dismmt !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(lstsc)                                             , intent(in)  :: namcon !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(nsrc)                                                            :: namsrc !  Description and declaration in esm_alloc_char.f90
+    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)                :: kspu   !  Description and declaration in esm_alloc_int.f90
+    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)                :: kspv   !  Description and declaration in esm_alloc_int.f90
 !
 !> Local variables
 !

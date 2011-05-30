@@ -51,11 +51,11 @@ subroutine trafil(lundia    ,filtra    ,fmttmp    ,error     ,ntruv     , &
 !
     integer                                           :: lundia  !  Description and declaration in inout.igs
     integer                             , intent(in)  :: ntruv   !  Description and declaration in dimens.igs
-    integer       , dimension(4, ntruv) , intent(out) :: mnit    !  Description and declaration in iidim.f90
+    integer       , dimension(4, ntruv) , intent(out) :: mnit    !  Description and declaration in esm_alloc_int.f90
     logical                                           :: error   !!  Flag=TRUE if an error is encountered
     character(*)                                      :: filtra  !!  Name of the relevant file
     character(11)                       , intent(in)  :: fmttmp  !!  Help var. for the attribute file formats (eg. the grid file)
-    character(20) , dimension(ntruv)                  :: namtra  !  Description and declaration in ckdim.f90
+    character(20) , dimension(ntruv)                  :: namtra  !  Description and declaration in esm_alloc_char.f90
 !
 !
 ! Local variables

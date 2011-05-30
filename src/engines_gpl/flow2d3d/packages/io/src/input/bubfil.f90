@@ -57,18 +57,18 @@ subroutine bubfil(lundia    ,filbub    ,error     ,mmax      ,nmax      , &
 !
 ! Global variables
 !
-    integer                          , intent(in)  :: kmax   !  Description and declaration in iidim.f90
+    integer                          , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                        :: lundia !  Description and declaration in inout.igs
-    integer                          , intent(in)  :: mmax   !  Description and declaration in iidim.f90
-    integer                                        :: nmax   !  Description and declaration in iidim.f90
-    integer                          , intent(in)  :: nmaxus !  Description and declaration in iidim.f90
+    integer                          , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                        :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                          , intent(in)  :: nmaxus !  Description and declaration in esm_alloc_int.f90
     integer                                        :: nbub   !  Description and declaration in dimens.igs
     integer                                        :: nsrc   !  Description and declaration in dimens.igs
     integer                          , intent(in)  :: nxbub  !  Description and declaration in dimens.igs
-    integer      , dimension(7, nsrc), intent(out) :: mnksrc !  Description and declaration in iidim.f90
+    integer      , dimension(7, nsrc), intent(out) :: mnksrc !  Description and declaration in esm_alloc_int.f90
     logical                                        :: error  !!  Flag=TRUE if an error is encountered
     character(*)                                   :: filbub !!  File name for Bubble screen
-    character(20), dimension(nsrc)   ,intent(out)  :: namsrc !  Description and declaration in ckdim.f90
+    character(20), dimension(nsrc)   ,intent(out)  :: namsrc !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

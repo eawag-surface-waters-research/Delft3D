@@ -59,7 +59,7 @@ subroutine rdtold(lunrd     ,lundia    ,error     ,filnam    ,ntimrd    , &
     integer     , intent(in)  :: nrskip  !  Nr. of records to be read/skipped that must exists if the file is complete
     integer                   :: ntimrd  !  Nr. of times read
     logical     , intent(out) :: error   !  Flag=TRUE if an error is encountered
-    real(fp)    , intent(in)  :: dt      !  Description and declaration in rjdim.f90
+    real(fp)    , intent(in)  :: dt      !  Description and declaration in esm_alloc_real.f90
     character(*), intent(in)  :: filnam !  Name of the relevant file
 !
 ! Local variables

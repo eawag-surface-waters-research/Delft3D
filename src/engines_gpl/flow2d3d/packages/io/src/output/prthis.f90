@@ -54,12 +54,12 @@ subroutine prthis(lundia    ,error     ,prshis    ,grdang    ,lunprt    , &
 !
     integer                                          , intent(in) :: iphisc !!  Current time counter for printing history data
     integer                                                       :: julday !  Description and declaration in inttim.igs
-    integer                                          , intent(in) :: kmax   !  Description and declaration in iidim.f90
+    integer                                          , intent(in) :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                          , intent(in) :: lmax   !  Description and declaration in dimens.igs
     integer                                                       :: lsal   !  Description and declaration in dimens.igs
-    integer                                          , intent(in) :: lstsci !  Description and declaration in iidim.f90
+    integer                                          , intent(in) :: lstsci !  Description and declaration in esm_alloc_int.f90
     integer                                                       :: ltem   !  Description and declaration in dimens.igs
-    integer                                          , intent(in) :: ltur   !  Description and declaration in iidim.f90
+    integer                                          , intent(in) :: ltur   !  Description and declaration in esm_alloc_int.f90
     integer                                                       :: lundia !  Description and declaration in inout.igs
     integer                                                       :: lunprt !  Description and declaration in inout.igs
     integer                                          , intent(in) :: nostat !  Description and declaration in dimens.igs
@@ -72,23 +72,23 @@ subroutine prthis(lundia    ,error     ,prshis    ,grdang    ,lunprt    , &
     logical                                                       :: error  !!  Flag=TRUE if an error is encountered
     real(fp)                                         , intent(in) :: dtsec  !!  Integration time step [in seconds]
     real(fp)                                         , intent(in) :: grdang !  Description and declaration in tricom.igs
-    real(fp)       , dimension(nostat)               , intent(in) :: zalfas !  Description and declaration in rjdim.f90
-    real(fp)       , dimension(nostat)               , intent(in) :: zwl    !  Description and declaration in rjdim.f90
-    real(fp)       , dimension(nostat, 0:kmax)       , intent(in) :: zdicww !  Description and declaration in rjdim.f90
-    real(fp)       , dimension(nostat, 0:kmax)       , intent(in) :: zrich  !  Description and declaration in rjdim.f90
-    real(fp)       , dimension(nostat, 0:kmax)       , intent(in) :: zvicww !  Description and declaration in rjdim.f90
-    real(fp)       , dimension(nostat, 0:kmax, ltur) , intent(in) :: ztur   !  Description and declaration in rjdim.f90
-    real(fp)       , dimension(nostat, kmax)         , intent(in) :: zcuru  !  Description and declaration in rjdim.f90
-    real(fp)       , dimension(nostat, kmax)         , intent(in) :: zcurv  !  Description and declaration in rjdim.f90
-    real(fp)       , dimension(nostat, kmax)         , intent(in) :: zcurw  !  Description and declaration in rjdim.f90
-    real(fp)       , dimension(nostat, kmax)         , intent(in) :: zrho   !  Description and declaration in rjdim.f90
-    real(fp)       , dimension(nostat, kmax, lstsci) , intent(in) :: gro    !  Description and declaration in rjdim.f90
-    real(fp)       , dimension(ntruv)                , intent(in) :: ctr    !  Description and declaration in rjdim.f90
-    real(fp)       , dimension(ntruv)                , intent(in) :: fltr   !  Description and declaration in rjdim.f90
-    real(fp)       , dimension(ntruv, lstsci)        , intent(in) :: atr    !  Description and declaration in rjdim.f90
-    real(fp)       , dimension(ntruv, lstsci)        , intent(in) :: dtr    !  Description and declaration in rjdim.f90
+    real(fp)       , dimension(nostat)               , intent(in) :: zalfas !  Description and declaration in esm_alloc_real.f90
+    real(fp)       , dimension(nostat)               , intent(in) :: zwl    !  Description and declaration in esm_alloc_real.f90
+    real(fp)       , dimension(nostat, 0:kmax)       , intent(in) :: zdicww !  Description and declaration in esm_alloc_real.f90
+    real(fp)       , dimension(nostat, 0:kmax)       , intent(in) :: zrich  !  Description and declaration in esm_alloc_real.f90
+    real(fp)       , dimension(nostat, 0:kmax)       , intent(in) :: zvicww !  Description and declaration in esm_alloc_real.f90
+    real(fp)       , dimension(nostat, 0:kmax, ltur) , intent(in) :: ztur   !  Description and declaration in esm_alloc_real.f90
+    real(fp)       , dimension(nostat, kmax)         , intent(in) :: zcuru  !  Description and declaration in esm_alloc_real.f90
+    real(fp)       , dimension(nostat, kmax)         , intent(in) :: zcurv  !  Description and declaration in esm_alloc_real.f90
+    real(fp)       , dimension(nostat, kmax)         , intent(in) :: zcurw  !  Description and declaration in esm_alloc_real.f90
+    real(fp)       , dimension(nostat, kmax)         , intent(in) :: zrho   !  Description and declaration in esm_alloc_real.f90
+    real(fp)       , dimension(nostat, kmax, lstsci) , intent(in) :: gro    !  Description and declaration in esm_alloc_real.f90
+    real(fp)       , dimension(ntruv)                , intent(in) :: ctr    !  Description and declaration in esm_alloc_real.f90
+    real(fp)       , dimension(ntruv)                , intent(in) :: fltr   !  Description and declaration in esm_alloc_real.f90
+    real(fp)       , dimension(ntruv, lstsci)        , intent(in) :: atr    !  Description and declaration in esm_alloc_real.f90
+    real(fp)       , dimension(ntruv, lstsci)        , intent(in) :: dtr    !  Description and declaration in esm_alloc_real.f90
     character(131) , dimension(10)                                :: header !  Description and declaration in postpr.igs
-    character(20)  , dimension(lmax)                              :: namcon !  Description and declaration in ckdim.f90
+    character(20)  , dimension(lmax)                              :: namcon !  Description and declaration in esm_alloc_char.f90
     character(20)  , dimension(nostat)               , intent(in) :: namst  !  Description and declaration in stations.igs
     character(20)  , dimension(ntruv)                , intent(in) :: namtra !  Description and declaration in stations.igs
     character(23)                                    , intent(in) :: prshis !  Description and declaration in tricom.igs

@@ -61,9 +61,9 @@ subroutine cnvbub(kmax    ,nsrcd     ,nsrc      ,nbub      ,nxbub    , &
     integer                          , intent(in)  :: nsrc   ! Description and declaration in dimens.igs
     integer                          , intent(in)  :: nsrcd  ! Description and declaration in dimens.igs
     integer                          , intent(in)  :: nxbub  ! Description and declaration in dimens.igs
-    integer      , dimension(7, nsrc), intent(in)  :: mnksrc !  Description and declaration in iidim.f90
-    real(fp)     , dimension(nsrc)                 :: disch  ! Description and declaration in rjdim.f90
-    character(20), dimension(nsrc)   , intent(in)  :: namsrc !  Description and declaration in ckdim.f90
+    integer      , dimension(7, nsrc), intent(in)  :: mnksrc !  Description and declaration in esm_alloc_int.f90
+    real(fp)     , dimension(nsrc)                 :: disch  ! Description and declaration in esm_alloc_real.f90
+    character(20), dimension(nsrc)   , intent(in)  :: namsrc !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

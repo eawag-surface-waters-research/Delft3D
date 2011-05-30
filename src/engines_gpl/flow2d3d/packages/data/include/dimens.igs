@@ -30,8 +30,8 @@
     type gd_dimens
 !
        integer :: ncmax
-       integer :: nmax       !  Description and declaration in iidim.f90
-       integer :: mmax       !  Description and declaration in iidim.f90
+       integer :: nmax       !  Description and declaration in esm_alloc_int.f90
+       integer :: mmax       !  Description and declaration in esm_alloc_int.f90
        integer :: nlb
        integer :: nub
        integer :: mlb
@@ -39,8 +39,8 @@
        integer :: nmlb
        integer :: nmub
        integer :: ddbound
-       integer :: nmaxus     !  Description and declaration in iidim.f90
-       integer :: kmax       !  Description and declaration in iidim.f90
+       integer :: nmaxus     !  Description and declaration in esm_alloc_int.f90
+       integer :: kmax       !  Description and declaration in esm_alloc_int.f90
        integer :: nmaxd      !  Global data
                              !  If KMAX > 0 Then := NMAX else := 1
        integer :: mmaxd      !  Global data
@@ -112,7 +112,7 @@
                              !  Number of Constituents (Salinity,
                              !  Temperature, Sediment, Conservative
                              !  Constituents)
-       integer :: lstsci     !  Description and declaration in iidim.f90
+       integer :: lstsci     !  Description and declaration in esm_alloc_int.f90
        integer :: lsal       !  Global data
                              !  Pointer for Salinity    in array for
                              !  constituent (if used, always 1)
@@ -122,8 +122,8 @@
                              !  for constituents (if used, always 1)
                              !  Pointer for salinity in array r
                              !  for constituents (if used, always 1)
-       integer :: lsed       !  Description and declaration in iidim.f90
-       integer :: lsedtot    !  Description and declaration in iidim.f90
+       integer :: lsed       !  Description and declaration in esm_alloc_int.f90
+       integer :: lsedtot    !  Description and declaration in esm_alloc_int.f90
        integer :: ltem       !  Global data
                              !  Pointer for Temperature in array for
                              !  constituent (if used LSAL+1 in
@@ -153,7 +153,7 @@
                              !      1 = no equilibrium (advection
                              !          and diffusion term)
                              !      2 = equilibrium
-       integer :: ltur       !  Description and declaration in iidim.f90
+       integer :: ltur       !  Description and declaration in esm_alloc_int.f90
        integer :: ltur2d     !  Global data
                              !  Flag for 2D turbulence model
                              !     (0 = constant      model
@@ -187,10 +187,10 @@
                              !  = 5 * max (NMAX  ,MMAX  )
                              !  Estimated number of computational
                              !  rows and columns in IROCOL-table
-       integer :: noroco     !  Description and declaration in iidim.f90
-       integer :: norow      !  Description and declaration in iidim.f90
-       integer :: nocol      !  Description and declaration in iidim.f90
-       integer :: nto        !  Description and declaration in iidim.f90
+       integer :: noroco     !  Description and declaration in esm_alloc_int.f90
+       integer :: norow      !  Description and declaration in esm_alloc_int.f90
+       integer :: nocol      !  Description and declaration in esm_alloc_int.f90
+       integer :: nto        !  Description and declaration in esm_alloc_int.f90
        integer :: ntod
        integer :: ntof       !  Number of open boundary sections of the Fourier type
                              !  Number of open boundary sections of the Harmonic type
@@ -204,8 +204,8 @@
                              !  Maximum of (KC,KMAX)
        integer :: nopest     !  Estimated number of open boundary
                              !  points = 4 * (NMAX  +  MMAX  )
-       integer :: nrob       !  Description and declaration in iidim.f90
-       integer :: nsrc       !  Description and declaration in iidim.f90
+       integer :: nrob       !  Description and declaration in esm_alloc_int.f90
+       integer :: nsrc       !  Description and declaration in esm_alloc_int.f90
        integer :: nsrcd      !  Number of (ordinary) discharge points plus the number of bubble screens
        integer :: nostat     !  Number of monitoring stations
        integer :: ntruv      !  Total nr. of monit. cross sections

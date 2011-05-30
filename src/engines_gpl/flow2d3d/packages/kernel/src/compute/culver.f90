@@ -77,18 +77,18 @@ subroutine culver(icx       ,icy       ,kmax      ,nsrc      ,kfs       , &
                                                                         ! ceeds in the Y-dir.    
     integer                                     , intent(in)  :: icy    ! Increment in the Y-dir. (see ICX)
     integer                                     , intent(in)  :: nsrc   ! Description and declaration in dimens.igs
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)   , intent(in)  :: kfs    ! Description and declaration in iidim.f90   
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)   , intent(in)  :: kfsmax ! Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)   , intent(in)  :: kfsmin ! Description and declaration in iidim.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)   , intent(in)  :: kfs    ! Description and declaration in esm_alloc_int.f90   
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)   , intent(in)  :: kfsmax ! Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)   , intent(in)  :: kfsmin ! Description and declaration in esm_alloc_int.f90
     integer                                     , intent(in)  :: kmax    
     integer, dimension(7, nsrc)                               :: mnksrc ! Description and declaration in r-i-ch.igs
     real(fp)                                    , intent(in)  :: timsec ! Time in seconds since reference date
-    real(fp), dimension(nsrc)                   , intent(out) :: disch  ! Description and declaration in rjdim.f90
-    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: dps    ! Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: s0     ! Description and declaration in rjdim.f90
-    real(fp), dimension(kmax)                   , intent(in)  :: thick  ! Description and declaration in rjdim.f90
-    real(fp), dimension(nsrc)                                 :: voldis ! Description and declaration in rjdim.f90   
-    real(fp), dimension(0:kmax)                 , intent(in)  :: zk     ! See description and declaration of sig in rjdim.f90
+    real(fp), dimension(nsrc)                   , intent(out) :: disch  ! Description and declaration in esm_alloc_real.f90
+    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: dps    ! Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: s0     ! Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax)                   , intent(in)  :: thick  ! Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nsrc)                                 :: voldis ! Description and declaration in esm_alloc_real.f90   
+    real(fp), dimension(0:kmax)                 , intent(in)  :: zk     ! See description and declaration of sig in esm_alloc_real.f90
 !
 ! Local variables
 !
@@ -494,15 +494,15 @@ integer function intlay    (lundia     ,zmodel    ,kfsmin    ,kfsmax    , &
 !
     logical                                     , intent(in)  :: zmodel ! True = zmodel, False = otherwise (sigma)
     integer                                     , intent(in)  :: isrc   ! Number of culvert
-    integer                                     , intent(in)  :: kfsmax ! Description and declaration in iidim.f90
-    integer                                     , intent(in)  :: kfsmin ! Description and declaration in iidim.f90
+    integer                                     , intent(in)  :: kfsmax ! Description and declaration in esm_alloc_int.f90
+    integer                                     , intent(in)  :: kfsmin ! Description and declaration in esm_alloc_int.f90
     integer                                     , intent(in)  :: kmax   ! Number of layers
     integer                                     , intent(in)  :: lundia ! Diagnostic file
     real(prec)                                  , intent(in)  :: dps    ! Bathymetry [m below ref. level]
     real(fp)                                    , intent(in)  :: pos    ! Level of culvert [m above ref. level]
     real(fp)                                    , intent(in)  :: s0     ! Water level [m above ref. level]
-    real(fp), dimension(kmax)                   , intent(in)  :: thick  ! Description and declaration in rjdim.f90
-    real(fp), dimension(0:kmax)                 , intent(in)  :: zk     ! See description and declaration of sig in rjdim.f90
+    real(fp), dimension(kmax)                   , intent(in)  :: thick  ! Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(0:kmax)                 , intent(in)  :: zk     ! See description and declaration of sig in esm_alloc_real.f90
     character(7)                                , intent(in)  :: intake ! 'intake' or 'outfall'
 !
 ! Local variables

@@ -57,12 +57,12 @@ subroutine wrspcp(comfil    ,lundia    ,error     ,nsrc      ,namsrc    , &
 ! Global variables
 !
     integer                                        :: lundia !  Description and declaration in inout.igs
-    integer                                        :: nsrc   !  Description and declaration in iidim.f90
-    integer      , dimension(7, nsrc)              :: mnksrc !  Description and declaration in iidim.f90
+    integer                                        :: nsrc   !  Description and declaration in esm_alloc_int.f90
+    integer      , dimension(7, nsrc)              :: mnksrc !  Description and declaration in esm_alloc_int.f90
     logical                          , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    real(fp)     , dimension(3, nsrc)              :: xyzsrc !  Description and declaration in rjdim.f90
+    real(fp)     , dimension(3, nsrc)              :: xyzsrc !  Description and declaration in esm_alloc_real.f90
     character(*)                                   :: comfil !!  Name for communication file com-<case><label>
-    character(20), dimension(nsrc)                 :: namsrc !  Description and declaration in ckdim.f90
+    character(20), dimension(nsrc)                 :: namsrc !  Description and declaration in esm_alloc_char.f90
 !
 !
 ! Local variables

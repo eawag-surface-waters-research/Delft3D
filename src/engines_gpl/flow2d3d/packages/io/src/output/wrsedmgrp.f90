@@ -69,12 +69,12 @@ subroutine wrsedmgrp(lundia    ,error     ,trifil    ,itmapc    ,mmax      , &
 ! Global variables
 !
     integer       , intent(in)  :: itmapc !!  Current time counter for the MAP data file
-    integer                     :: kmax   !  Description and declaration in iidim.f90
-    integer                     :: lsed   !  Description and declaration in iidim.f90
-    integer                     :: lsedtot!  Description and declaration in iidim.f90
+    integer                     :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer                     :: lsed   !  Description and declaration in esm_alloc_int.f90
+    integer                     :: lsedtot!  Description and declaration in esm_alloc_int.f90
     integer                     :: lundia !  Description and declaration in inout.igs
-    integer                     :: mmax   !  Description and declaration in iidim.f90
-    integer                     :: nmaxus !  Description and declaration in iidim.f90
+    integer                     :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                     :: nmaxus !  Description and declaration in esm_alloc_int.f90
     logical       , intent(out) :: error  !!  Flag=TRUE if an error is encountered
     character(60) , intent(in)  :: trifil !!  File name for FLOW NEFIS output files (tri"h/m"-"casl""labl".dat/def)
 !

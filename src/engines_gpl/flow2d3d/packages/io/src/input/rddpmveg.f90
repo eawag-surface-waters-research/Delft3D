@@ -61,11 +61,11 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
 !
 ! Global variables
 !
-    integer                                                  , intent(in)  :: mmax   !  Description and declaration in iidim.f90
-    integer                                                  , intent(in)  :: nmax   !  Description and declaration in iidim.f90
-    integer                                                  , intent(in)  :: nmaxus !  Description and declaration in iidim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: xz     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: yz     !  Description and declaration in rjdim.f90 
+    integer                                                  , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                  , intent(in)  :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                  , intent(in)  :: nmaxus !  Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: xz     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: yz     !  Description and declaration in esm_alloc_real.f90 
 !
 ! Local variables
 !

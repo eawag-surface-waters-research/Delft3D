@@ -40,7 +40,7 @@ subroutine tranb3(utot      ,d35       ,c         ,h         ,par       , &
 !
 ! Global variables
 !
-    real(fp), intent(in)               :: c !  Description and declaration in rjdim.f90
+    real(fp), intent(in)               :: c !  Description and declaration in esm_alloc_real.f90
     real(fp), intent(in)               :: d35
     real(fp), intent(in)               :: h
     real(fp), intent(out)              :: sbot

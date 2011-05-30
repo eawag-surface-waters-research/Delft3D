@@ -62,13 +62,13 @@ subroutine rdwaqpar(lundia, error, kmax, dt, itcomf, itcomi, itcoml, gdp)
 !
 ! Global variables
 !
-    integer   , intent(in)  :: kmax   !  Description and declaration in iidim.f90 
+    integer   , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90 
     integer                 :: lundia !  Description and declaration in inout.igs
     integer                 :: itcomf !  Description and declaration in inttim.igs
     integer                 :: itcomi !  Description and declaration in inttim.igs
     integer                 :: itcoml !  Description and declaration in inttim.igs
     logical   , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    real(fp)                :: dt     !  Description and declaration in rjdim.f90
+    real(fp)                :: dt     !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

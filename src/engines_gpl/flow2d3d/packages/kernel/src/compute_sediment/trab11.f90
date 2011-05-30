@@ -45,13 +45,13 @@ subroutine trab11(u         ,v         ,hrms      ,h         ,tp        , &
 !
     real(fp)               , intent(in)  :: d50
     real(fp)                             :: h
-    real(fp)                             :: hrms   !  Description and declaration in rjdim.f90
+    real(fp)                             :: hrms   !  Description and declaration in esm_alloc_real.f90
     real(fp)               , intent(out) :: sbotx
     real(fp)               , intent(out) :: sboty
     real(fp)               , intent(out) :: ssusx
     real(fp)               , intent(out) :: ssusy
-    real(fp)                             :: tp     !  Description and declaration in rjdim.f90
-    real(fp)               , intent(in)  :: ubot   !  Description and declaration in rjdim.f90
+    real(fp)                             :: tp     !  Description and declaration in esm_alloc_real.f90
+    real(fp)               , intent(in)  :: ubot   !  Description and declaration in esm_alloc_real.f90
     real(fp)               , intent(in)  :: u
     real(fp)               , intent(in)  :: v
     real(fp), dimension(30), intent(in)  :: par

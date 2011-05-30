@@ -68,16 +68,16 @@ subroutine chkbnd(lundia    ,error     ,nmax      ,mmax      ,nrob      , &
 ! Global variables
 !
     integer                                                          :: lundia !  Description and declaration in inout.igs
-    integer                                            , intent(in)  :: mmax   !  Description and declaration in iidim.f90
-    integer, dimension(7, gdp%d%nto)                                 :: mnbnd  !  Description and declaration in iidim.f90
+    integer                                            , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(7, gdp%d%nto)                                 :: mnbnd  !  Description and declaration in esm_alloc_int.f90
     integer                                            , intent(in)  :: nlcest !  Description and declaration in dimens.igs
-    integer                                            , intent(in)  :: nmax   !  Description and declaration in iidim.f90
-    integer                                                          :: nocol  !  Description and declaration in iidim.f90
-    integer                                                          :: noroco !  Description and declaration in iidim.f90
-    integer                                                          :: norow  !  Description and declaration in iidim.f90
-    integer                                            , intent(in)  :: nrob   !  Description and declaration in iidim.f90
-    integer, dimension(5, nlcest)                                    :: irocol !  Description and declaration in iidim.f90
-    integer, dimension(8, nrob)                                      :: nob    !  Description and declaration in iidim.f90
+    integer                                            , intent(in)  :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                          :: nocol  !  Description and declaration in esm_alloc_int.f90
+    integer                                                          :: noroco !  Description and declaration in esm_alloc_int.f90
+    integer                                                          :: norow  !  Description and declaration in esm_alloc_int.f90
+    integer                                            , intent(in)  :: nrob   !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(5, nlcest)                                    :: irocol !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(8, nrob)                                      :: nob    !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%mlb:gdp%d%mub, gdp%d%nlb:gdp%d%nub)     :: icom   !!  Temporary work array containing:
                                                                                !!      0 = if a point is not active
                                                                                !!      1 = if a point is active

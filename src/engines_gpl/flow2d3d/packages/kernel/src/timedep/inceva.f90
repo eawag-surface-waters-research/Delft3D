@@ -66,7 +66,7 @@ subroutine inceva(timnow    ,evaint    ,j         ,nmmaxj    ,nmmax     , &
     integer                                       , intent(in)  :: nmmax  !  Description and declaration in dimens.igs
     integer                                                     :: nmmaxj !  Description and declaration in dimens.igs
     real(fp)                                                    :: timnow !!  Current timestep (multiples of dt)
-    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: evap   !  Description and declaration in rjdim.f90
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: evap   !  Description and declaration in esm_alloc_real.f90
     character(1)                                  , intent(in)  :: evaint !  Description and declaration in tricom.igs
 !
 ! Local variables

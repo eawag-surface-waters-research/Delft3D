@@ -77,7 +77,7 @@ subroutine rdheat(lunmd     ,lundia      ,error     ,nrrec     ,mdfrec      , &
     logical                                      :: error       !!  Flag=TRUE if an error is encountered
     logical                        , intent(in)  :: noui        !!  Flag for reading from User Interface
     logical                        , intent(in)  :: solrad_read !  Description and declaration in heat.igs
-    real(fp)                                     :: dt          !  Description and declaration in rjdim.f90
+    real(fp)                                     :: dt          !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(mxtemt), intent(out) :: cfclou      !  Description and declaration in heat.igs
     real(fp)    , dimension(mxtemt), intent(out) :: qsolar      !!  Sun Insolation (Cloud-less if KTEMP=1 or 4,
                                                                 !!  QSUN in HEATU, or net if KTEMP=2, QRADIN in HEATU)

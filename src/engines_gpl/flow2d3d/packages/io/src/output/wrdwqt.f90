@@ -65,23 +65,23 @@ subroutine wrdwqt(comfil    ,lundia    ,error     ,itcur     ,itimc     , &
     integer                                                                        , intent(in)  :: itcur  !!  Current time counter for the communication file,
                                                                                                            !!  where startingpoint depends on CYCLIC
     integer                                                                        , intent(in)  :: itimc  !!  Current time step counter for 2D system
-    integer                                                                                      :: kmax   !  Description and declaration in iidim.f90
+    integer                                                                                      :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                                        , intent(in)  :: lsal   !  Description and declaration in dimens.igs
-    integer                                                                        , intent(in)  :: lstsci !  Description and declaration in iidim.f90
+    integer                                                                        , intent(in)  :: lstsci !  Description and declaration in esm_alloc_int.f90
     integer                                                                        , intent(in)  :: ltem   !  Description and declaration in dimens.igs
     integer                                                                                      :: lundia !  Description and declaration in inout.igs
-    integer                                                                                      :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                                      :: nmax   !  Description and declaration in iidim.f90
-    integer                                                                                      :: nmaxus !  Description and declaration in iidim.f90
-    integer                                                                                      :: nsrc   !  Description and declaration in iidim.f90
-    integer     , dimension(7, nsrc)                                                             :: mnksrc !  Description and declaration in iidim.f90
+    integer                                                                                      :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                      :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                      :: nmaxus !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                      :: nsrc   !  Description and declaration in esm_alloc_int.f90
+    integer     , dimension(7, nsrc)                                                             :: mnksrc !  Description and declaration in esm_alloc_int.f90
     logical                                                                        , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: taubmx !  Description and declaration in rjdim.f90
-    real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)      , intent(in)  :: dicww  !  Description and declaration in rjdim.f90
-    real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax + 2)    , intent(in)  :: dicuv  !  Description and declaration in rjdim.f90
-    real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci), intent(in)  :: r1     !  Description and declaration in rjdim.f90
+    real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: taubmx !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)      , intent(in)  :: dicww  !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax + 2)    , intent(in)  :: dicuv  !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci), intent(in)  :: r1     !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(nmaxus, mmax, kmax)                                                  :: rbuff  !  Description and declaration in r-i-ch.igs
-    real(fp)    , dimension(nsrc)                                                                :: discum !  Description and declaration in rjdim.f90
+    real(fp)    , dimension(nsrc)                                                                :: discum !  Description and declaration in esm_alloc_real.f90
     character(*)                                                                                 :: comfil !!  Name for communication file
                                                                                                            !!  com-<case><label>
 !

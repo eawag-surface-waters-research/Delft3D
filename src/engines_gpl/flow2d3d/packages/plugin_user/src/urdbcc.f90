@@ -55,10 +55,10 @@ subroutine urdbcc(lundia    ,error     ,filusr    ,ltur      ,kmax      , &
 !
 ! Global variables
 !
-    integer                                     , intent(in)  :: kmax   !  Description and declaration in iidim.f90
-    integer                                     , intent(in)  :: ltur   !  Description and declaration in iidim.f90
+    integer                                     , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                     , intent(in)  :: ltur   !  Description and declaration in esm_alloc_int.f90
     integer                                                   :: lundia !  Description and declaration in inout.igs
-    integer                                     , intent(in)  :: nto    !  Description and declaration in iidim.f90
+    integer                                     , intent(in)  :: nto    !  Description and declaration in esm_alloc_int.f90
     logical                                     , intent(out) :: error  !!  Flag=TRUE if an error is encountered
     real(fp), dimension(2, ltur, 0:kmax, 2, nto), intent(out) :: ubnd   !  Description and declaration in trisol.igs
     character(256)                                            :: filusr !  Description and declaration in usrpar.igs

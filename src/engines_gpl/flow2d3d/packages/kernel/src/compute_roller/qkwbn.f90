@@ -49,11 +49,11 @@ subroutine qkwbn(qxkw      ,cgc       ,kfu       ,irocol    ,norow     , &
 !
     integer                                  , intent(in) :: icx
     integer                                  , intent(in) :: icy
-    integer                                  , intent(in) :: norow !  Description and declaration in iidim.f90
-    integer, dimension(5, norow)             , intent(in) :: irocol !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kfu !  Description and declaration in iidim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)             :: cgc !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)             :: qxkw !  Description and declaration in rjdim.f90
+    integer                                  , intent(in) :: norow !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(5, norow)             , intent(in) :: irocol !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kfu !  Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)             :: cgc !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)             :: qxkw !  Description and declaration in esm_alloc_real.f90
 !
 !
 ! Local variables

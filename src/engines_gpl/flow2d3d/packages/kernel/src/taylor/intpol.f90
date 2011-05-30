@@ -75,7 +75,7 @@ subroutine intpol(kmax      ,kmxdt     ,kmxt      ,h0        ,zeta      , &
 !
     integer                                     :: kbed   !!  KTG-value of upper level stratified
                                                           !!  layer
-    integer                       , intent(in)  :: kmax   !  Description and declaration in iidim.f90
+    integer                       , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                       , intent(in)  :: kmxdt  !  Description and declaration in dimens.igs
     integer                       , intent(in)  :: kmxt   !  Description and declaration in dimens.igs
     integer                                     :: ktop   !!  KTG-value of lower level stratified
@@ -84,39 +84,39 @@ subroutine intpol(kmax      ,kmxdt     ,kmxt      ,h0        ,zeta      , &
     logical                       , intent(in)  :: useref
     real(fp)                                    :: bvav   !!  Mean bouyancy frequency
     real(fp)                      , intent(out) :: bvmx   !!  Maximal buoyancy frequency
-    real(prec)                    , intent(in)  :: dps    !  Description and declaration in rjdim.f90
+    real(prec)                    , intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
     real(fp)                                    :: h0     !!  Water depth
     real(fp)                                    :: riav   !!  Mean value of all RICH with RICH >
                                                           !!  RICRIT
     real(fp)                                    :: rilz   !!  Vertical interval with RICH > RICRIT
     real(fp)                                    :: scale  !!  Length scale for non-dimensionalising
     real(fp)                      , intent(in)  :: siglim !  Description and declaration in iwepar.igs
-    real(fp)                                    :: umean  !  Description and declaration in rjdim.f90
+    real(fp)                                    :: umean  !  Description and declaration in esm_alloc_real.f90
     real(fp)                                    :: ustbx
     real(fp)                                    :: ustby
     real(fp)                      , intent(in)  :: ustwix !!  X-component of wind-shear stress
                                                           !!  velocity
     real(fp)                      , intent(in)  :: ustwiy !!  Y-component of wind-shear stress
                                                           !!  velocity
-    real(fp)                                    :: vmean  !  Description and declaration in rjdim.f90
+    real(fp)                                    :: vmean  !  Description and declaration in esm_alloc_real.f90
     real(fp)                      , intent(in)  :: xk     !!  Magnitude of horizontal wave number
                                                           !!  vector, in [m^-1]
     real(fp)                      , intent(out) :: xkh    !!  XK normalized by SCALE
     real(fp)                      , intent(in)  :: zeta   !!  Watrface elevation
     real(fp)                                    :: zlo    !!  Ozmidov length scale, depth-averaged
                                                           !!  over stratified layer
-    real(fp), dimension(0:kmax)   , intent(in)  :: bruvai !  Description and declaration in rjdim.f90
+    real(fp), dimension(0:kmax)   , intent(in)  :: bruvai !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(0:kmax)                 :: d2u0   !!  Dummay array, curvature of vertical
                                                           !!  profile of u-velocity component
                                                           !!  component on hydrodynamic grid
     real(fp), dimension(0:kmax)                 :: d2v0   !!  Dummy array, curvature of vertical
                                                           !!  profile of v-velocity component
                                                           !!  component on hydrodynamic grid
-    real(fp), dimension(0:kmax)   , intent(in)  :: dudz   !  Description and declaration in rjdim.f90
-    real(fp), dimension(0:kmax)   , intent(in)  :: dvdz   !  Description and declaration in rjdim.f90
-    real(fp), dimension(0:kmax)   , intent(in)  :: rich   !  Description and declaration in rjdim.f90
-    real(fp), dimension(0:kmax)   , intent(in)  :: vicww  !  Description and declaration in rjdim.f90
-    real(fp), dimension(0:kmax, 2), intent(in)  :: rtur0  !  Description and declaration in rjdim.f90
+    real(fp), dimension(0:kmax)   , intent(in)  :: dudz   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(0:kmax)   , intent(in)  :: dvdz   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(0:kmax)   , intent(in)  :: rich   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(0:kmax)   , intent(in)  :: vicww  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(0:kmax, 2), intent(in)  :: rtur0  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(0:kmxdt)                :: bv2    !!  Interpolated bouyancy frequency,
                                                           !!   squared
     real(fp), dimension(0:kmxdt)                :: d2u    !!  D2U0, interpolated
@@ -133,10 +133,10 @@ subroutine intpol(kmax      ,kmxdt     ,kmxt      ,h0        ,zeta      , &
     real(fp), dimension(0:kmxdt)                :: vtg    !!  As UTG for v-velocity component
     real(fp), dimension(0:kmxdt)                :: zlw    !!  Non-dimensional integral length scale
                                                           !!  of turbulence in z/w-direction
-    real(fp), dimension(kmax)     , intent(in)  :: sig    !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax)     , intent(in)  :: thick  !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax)     , intent(in)  :: u0     !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax)     , intent(in)  :: v0     !  Description and declaration in rjdim.f90
+    real(fp), dimension(kmax)     , intent(in)  :: sig    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax)     , intent(in)  :: thick  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax)     , intent(in)  :: u0     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax)     , intent(in)  :: v0     !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

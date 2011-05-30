@@ -69,7 +69,7 @@ subroutine suriwe(kmax      ,kmxdt     ,kmxt      ,h0        ,scale     , &
                                    !!  K-value on TG grid of the critical
                                    !!  level associated with a given IW own
                                    !!  mode (R1TG)
-    integer         :: kmax !  Description and declaration in iidim.f90
+    integer         :: kmax !  Description and declaration in esm_alloc_int.f90
     integer, intent(in)            :: kmxdt !  Description and declaration in dimens.igs
     integer         :: kmxt !  Description and declaration in dimens.igs
     integer         :: ktop

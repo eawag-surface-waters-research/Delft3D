@@ -95,33 +95,33 @@ subroutine dengra(icreep    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                                                                                     !!  been transformed into 1d arrays.
                                                                                     !!  due to the shift in the 2nd (m-)
                                                                                     !!  index, j = -2*nmax + 1
-    integer                                                 , intent(in)  :: kmax   !  Description and declaration in iidim.f90
+    integer                                                 , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                 , intent(in)  :: lsal   !  Description and declaration in dimens.igs
-    integer                                                 , intent(in)  :: lsed   !  Description and declaration in iidim.f90
+    integer                                                 , intent(in)  :: lsed   !  Description and declaration in esm_alloc_int.f90
     integer                                                 , intent(in)  :: lsts   !  Description and declaration in dimens.igs
-    integer                                                 , intent(in)  :: lstsci !  Description and declaration in iidim.f90
+    integer                                                 , intent(in)  :: lstsci !  Description and declaration in esm_alloc_int.f90
     integer                                                 , intent(in)  :: ltem   !  Description and declaration in dimens.igs
     integer                                                 , intent(in)  :: nmmax  !  Description and declaration in dimens.igs
     integer                                                               :: nmmaxj !  Description and declaration in dimens.igs
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kcs    !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfu    !  Description and declaration in iidim.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfu    !  Description and declaration in esm_alloc_int.f90
     real(fp)                                                , intent(in)  :: saleqs !  Description and declaration in tricom.igs
     real(fp)                                                , intent(in)  :: temeqs !  Description and declaration in tricom.igs
-    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)            , intent(in)  :: dps    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: dpu    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: guu    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: gvu    !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: hu     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: s0     !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax + 2)    , intent(in)  :: dicuv  !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(out) :: dldksi !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: dpdksi !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: dsdksi !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: dtdksi !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), intent(in)  :: r0     !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax)                               , intent(in)  :: sig    !  Description and declaration in rjdim.f90
-    real(fp), dimension(kmax)                               , intent(in)  :: thick  !  Description and declaration in rjdim.f90
-    real(fp), dimension(lsed)                               , intent(in)  :: rhosol !  Description and declaration in rjdim.f90
+    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)            , intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: dpu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: guu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: gvu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: hu     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: s0     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax + 2)    , intent(in)  :: dicuv  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(out) :: dldksi !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: dpdksi !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: dsdksi !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: dtdksi !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), intent(in)  :: r0     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax)                               , intent(in)  :: sig    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax)                               , intent(in)  :: thick  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(lsed)                               , intent(in)  :: rhosol !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

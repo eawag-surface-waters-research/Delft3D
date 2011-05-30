@@ -56,8 +56,8 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
     integer                                  , intent(in)  :: mxnto   ! Maximum number of open boundaries, for NOUI = .true. MXNTO := NTO
     integer                                  , intent(in)  :: ntof    ! Description and declaration in dimens.igs
     logical                                  , intent(out) :: error   ! Flag=TRUE if an error is encountered
-    real(fp)     , dimension(4, mxnto, mxkc)               :: hydrbc  ! Description and declaration in rjdim.f90
-    real(fp)     , dimension(kc)                           :: omega   ! Description and declaration in rjdim.f90
+    real(fp)     , dimension(4, mxnto, mxkc)               :: hydrbc  ! Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(kc)                           :: omega   ! Description and declaration in esm_alloc_real.f90
     character(*)                             , intent(in)  :: filbch  ! Name of the relevant file
     character(11)                            , intent(in)  :: fmttmp  ! Help var. for the attribute file formats (eg. the grid file)
 !

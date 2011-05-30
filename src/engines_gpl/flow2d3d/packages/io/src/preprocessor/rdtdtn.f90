@@ -62,11 +62,11 @@ subroutine rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
 !
     integer                      , intent(in)  :: itstop !  Description and declaration in inttim.igs
     integer                                    :: itstrt !  Description and declaration in inttim.igs
-    integer                                    :: kmax   !  Description and declaration in iidim.f90
+    integer                                    :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                    :: lundia !  Description and declaration in inout.igs
     integer                                    :: lunout !  Unit number for unformatted FLOW help file between tdatom and trisim
     integer                                    :: lunrd  !  Unit number of the attribute file containing the time series
-    integer                      , intent(in)  :: nto    !  Description and declaration in iidim.f90
+    integer                      , intent(in)  :: nto    !  Description and declaration in esm_alloc_int.f90
     integer                      , intent(in)  :: ntof   !  Description and declaration in dimens.igs
     integer                      , intent(in)  :: ntot   !  Description and declaration in dimens.igs
     logical                      , intent(in)  :: bubble !  Description and declaration in procs.igs        
@@ -76,11 +76,11 @@ subroutine rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
     character(*)                 , intent(in)  :: runid  !  Run identification code for the current simulation (used to determine
                                                          !  the names of the in- /output files used by the system)
     character(1)                 , intent(in)  :: eol    !  ASCII code for End-Of-Line (^J)
-    character(1), dimension(nto) , intent(in)  :: typbnd !  Description and declaration in ckdim.f90
+    character(1), dimension(nto) , intent(in)  :: typbnd !  Description and declaration in esm_alloc_char.f90
     character(10), dimension(6)  , intent(in)  :: unttyp !  Unit name fitting the parameter depending on value of TYPBND
     character(20), dimension(6)  , intent(in)  :: namtyp !  Names of the paramaters to write to time dependent files for BCT depending on value of TYPBND
-    character(20), dimension(nto)              :: nambnd !  Description and declaration in ckdim.f90
-    character(20), dimension(nto), intent(in)  :: tprofu !  Description and declaration in ckdim.f90
+    character(20), dimension(nto)              :: nambnd !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(nto), intent(in)  :: tprofu !  Description and declaration in esm_alloc_char.f90
     character(6)                 , intent(in)  :: typtst !  Data string to test type of boundary
 !
 ! Local variables

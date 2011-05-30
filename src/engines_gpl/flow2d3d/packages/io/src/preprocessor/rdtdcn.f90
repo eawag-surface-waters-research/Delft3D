@@ -61,12 +61,12 @@ subroutine rdtdcn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
 !
     integer                        , intent(in)  :: itstop !  Description and declaration in inttim.igs
     integer                                      :: itstrt !  Description and declaration in inttim.igs
-    integer                                      :: kmax   !  Description and declaration in iidim.f90
+    integer                                      :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                        , intent(in)  :: lstsc  !  Description and declaration in dimens.igs
     integer                                      :: lundia !  Description and declaration in inout.igs
     integer                                      :: lunout !  Unit number for direct access Delft3D-FLOW help file between TDATOM and TRISIM
     integer                                      :: lunrd  !  Unit number of the attribute file containing the time series
-    integer                        , intent(in)  :: nto    !  Description and declaration in iidim.f90
+    integer                        , intent(in)  :: nto    !  Description and declaration in esm_alloc_int.f90
     logical                        , intent(in)  :: bubble !  Description and declaration in procs.igs        
     logical                                      :: error  !  Flag=TRUE if an error is encountered
     character(*)                                 :: filbcc !  Name of the specified data file
@@ -74,8 +74,8 @@ subroutine rdtdcn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
     character(*)                   , intent(in)  :: runid  !  Run identification code for the current simulation (used to determine
                                                            !  the names of the in- /output files used by the system)
     character(1)                   , intent(in)  :: eol    !  ASCII code for End-Of-Line (^J)
-    character(20), dimension(lstsc), intent(in)  :: namcon !  Description and declaration in ckdim.f90
-    character(20), dimension(nto)                :: nambnd !  Description and declaration in ckdim.f90
+    character(20), dimension(lstsc), intent(in)  :: namcon !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(nto)                :: nambnd !  Description and declaration in esm_alloc_char.f90
     character(40)                  , intent(in)  :: profil !  Total string of possible profiles
 !
 ! Local variables

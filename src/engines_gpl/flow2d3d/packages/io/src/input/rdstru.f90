@@ -67,44 +67,44 @@ subroutine rdstru(lunmd     ,lundia    ,error     ,mdfrec    ,nrrec     , &
 !
 ! Global variables
 !
-    integer                                                                                 :: kmax   !  Description and declaration in iidim.f90
+    integer                                                                                 :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                                                 :: lundia !  Description and declaration in inout.igs
     integer                                                                                 :: lunmd  !  Description and declaration in inout.igs
-    integer                                                                                 :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                                 :: nbub   !  Description and declaration in iidim.f90
-    integer                                                                                 :: nsrc   !  Description and declaration in iidim.f90
-    integer                                                                                 :: nmax   !  Description and declaration in iidim.f90
-    integer                                                                                 :: nmaxus !  Description and declaration in iidim.f90
+    integer                                                                                 :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                 :: nbub   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                 :: nsrc   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                 :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                 :: nmaxus !  Description and declaration in esm_alloc_int.f90
     integer                                                                                 :: nrrec  !!  Pointer to the record number in the MD-file
     integer                                                                                 :: nsluv  !  Description and declaration in dimens.igs
-    integer                                                                                 :: nxbub  !  Description and declaration in iidim.f90
-    integer      , dimension(5, nsluv)                                                      :: mnbar  !  Description and declaration in iidim.f90
-    integer      , dimension(3, nsrc)                                                       :: mnksrc  !  Description and declaration in iidim.f90
-    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)              :: kspu   !  Description and declaration in iidim.f90
-    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)              :: kspv   !  Description and declaration in iidim.f90
+    integer                                                                                 :: nxbub  !  Description and declaration in esm_alloc_int.f90
+    integer      , dimension(5, nsluv)                                                      :: mnbar  !  Description and declaration in esm_alloc_int.f90
+    integer      , dimension(3, nsrc)                                                       :: mnksrc  !  Description and declaration in esm_alloc_int.f90
+    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)              :: kspu   !  Description and declaration in esm_alloc_int.f90
+    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)              :: kspv   !  Description and declaration in esm_alloc_int.f90
     logical                                                                                 :: error  !!  Flag=TRUE if an error is encountered
     logical                                                                   , intent(out) :: struct !  Description and declaration in procs.igs
     real(fp)                                                                                :: riglid !!  Rigid lid factor to reduce horizontal
                                                                                                       !!  wet area (incompressible)
-    real(fp)     , dimension(4, nsluv)                                                      :: cbuv   !  Description and declaration in rjdim.f90
+    real(fp)     , dimension(4, nsluv)                                                      :: cbuv   !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                      :: cdwlsu
     real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                      :: cdwlsv
     real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                      :: cdwzbu
     real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                      :: cdwztu
     real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                      :: cdwzbv
     real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                      :: cdwztv
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                      :: dpu    !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                      :: dpv    !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                      :: hkru   !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                      :: hkrv   !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                      :: pship  !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                      :: uwtypu !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                      :: uwtypv !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)                :: ubrlsu !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)                :: ubrlsv !  Description and declaration in rjdim.f90
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                      :: dpu    !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                      :: dpv    !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                      :: hkru   !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                      :: hkrv   !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                      :: pship  !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                      :: uwtypu !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                      :: uwtypv !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)                :: ubrlsu !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)                :: ubrlsv !  Description and declaration in esm_alloc_real.f90
     character(*)                                                                            :: mdfrec !!  Standard rec. length in MD-file (300)
-    character(20), dimension(nsluv)                                                         :: nambar !  Description and declaration in ckdim.f90
-    character(20), dimension(nsrc)                                            , intent(out) :: namsrc !  Description and declaration in ckdim.f90
+    character(20), dimension(nsluv)                                                         :: nambar !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(nsrc)                                            , intent(out) :: namsrc !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !

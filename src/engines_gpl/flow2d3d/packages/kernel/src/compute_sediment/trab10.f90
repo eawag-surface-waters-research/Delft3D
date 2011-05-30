@@ -42,7 +42,7 @@ subroutine trab10(utot      ,d         ,c         ,h         ,cosa      , &
 !
 ! Global variables
 !
-    real(fp)           , intent(in)  :: c     ! chezy value !  Description and declaration in rjdim.f90
+    real(fp)           , intent(in)  :: c     ! chezy value !  Description and declaration in esm_alloc_real.f90
     real(fp)           , intent(in)  :: cosa  ! cosine of shear stress direction at the bed (= near bed flow direction)
     real(fp)           , intent(in)  :: d     ! Grain size specified as d50
     real(fp)           , intent(in)  :: dzbdx ! x-component of bed level gradient

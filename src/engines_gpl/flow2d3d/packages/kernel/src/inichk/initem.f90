@@ -88,7 +88,7 @@ subroutine initem(runid, cyclic, timnow, ktemp, temint, patm, gdp)
     integer                                                    :: ktemp  !  Description and declaration in tricom.igs
     logical                                                    :: cyclic !!  Flag = TRUE if cyclic system assumed
     real(fp)                                                   :: timnow !!  Current timestep (ITSTRT * dt)
-    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)             :: patm   !  Description and declaration in rjdim.f90
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)             :: patm   !  Description and declaration in esm_alloc_real.f90
     character(*)                                               :: runid
     character(1)                                  , intent(in) :: temint !  Description and declaration in tricom.igs
 !

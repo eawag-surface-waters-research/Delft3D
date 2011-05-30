@@ -55,11 +55,11 @@ subroutine wrcomwind(error     ,comfil    ,itcur    ,itimc     , &
 !
     integer                                                      , intent(in)  :: itcur  ! Current time counter for the COM file
     integer                                                      , intent(in)  :: itimc  ! Current time step counter
-    integer                                                                    :: mmax   ! Description and declaration in iidim.f90
-    integer                                                                    :: nmaxus ! Description and declaration in iidim.f90
+    integer                                                                    :: mmax   ! Description and declaration in esm_alloc_int.f90
+    integer                                                                    :: nmaxus ! Description and declaration in esm_alloc_int.f90
     logical                                                      , intent(out) :: error  ! Flag=TRUE if an error is encountered
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: windu  ! Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: windv  ! Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: windu  ! Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: windv  ! Description and declaration in esm_alloc_real.f90
     character(60)                                                , intent(in)  :: comfil ! COM file name
 !
 ! Local variables

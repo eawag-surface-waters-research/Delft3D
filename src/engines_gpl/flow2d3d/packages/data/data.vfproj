@@ -117,10 +117,12 @@
 		<Filter Name="Source Files" Filter="fi;fd">
 		<Filter Name="allocation">
 		<File RelativePath="src\allocation\chnull.f90"/>
-		<File RelativePath="src\allocation\ckdim.f90"/>
 		<File RelativePath="src\allocation\decarr.f90"/>
 		<File RelativePath="src\allocation\dnull.f90"/>
 		<File RelativePath="src\allocation\errpnt.f90"/>
+		<File RelativePath="src\allocation\esm_alloc_char.f90"/>
+		<File RelativePath="src\allocation\esm_alloc_int.f90"/>
+		<File RelativePath="src\allocation\esm_alloc_real.f90"/>
 		<File RelativePath="src\allocation\getlun.f90"/>
 		<File RelativePath="src\allocation\getpointer.f90"/>
 		<File RelativePath="src\allocation\gtcpnt.f90"/>
@@ -129,7 +131,6 @@
 		<File RelativePath="src\allocation\gtlpnt.f90"/>
 		<File RelativePath="src\allocation\gtptrs.f90"/>
 		<File RelativePath="src\allocation\gtrpnt.f90"/>
-		<File RelativePath="src\allocation\iidim.f90"/>
 		<File RelativePath="src\allocation\inull.f90"/>
 		<File RelativePath="src\allocation\lnull.f90"/>
 		<File RelativePath="src\allocation\mkcpnt.f90">
@@ -150,7 +151,6 @@
 		<File RelativePath="src\allocation\mkrpnt.f90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration></File>
-		<File RelativePath="src\allocation\rjdim.f90"/>
 		<File RelativePath="src\allocation\rnull.f90"/></Filter>
 		<Filter Name="basics">
 		<File RelativePath="src\basics\bedcomposition_module.f90"/>

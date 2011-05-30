@@ -53,13 +53,13 @@ subroutine turwav(nmmax     ,kmax      ,kfs       , &
 !
 ! Global variables
 !
-    integer                                       , intent(in) :: kmax  !  Description and declaration in iidim.f90
+    integer                                       , intent(in) :: kmax  !  Description and declaration in esm_alloc_int.f90
     integer                                       , intent(in) :: nmmax !  Description and declaration in dimens.igs
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in) :: kfs   !  Description and declaration in iidim.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in) :: dis   !  Description and declaration in rjdim.f90
-    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in) :: dps   !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in) :: s0    !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax + 2)     :: vicuv !  Description and declaration in rjdim.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in) :: kfs   !  Description and declaration in esm_alloc_int.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in) :: dis   !  Description and declaration in esm_alloc_real.f90
+    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in) :: dps   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in) :: s0    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax + 2)     :: vicuv !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

@@ -71,7 +71,7 @@ subroutine inieva(runid     ,cyclic    ,timnow    ,evaint    ,j         , &
                                    !!  Flag = TRUE if cyclic system assumed
     real(fp)        :: timnow
                                    !!  Current timestep (ITSTRT * dt)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: evap !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: evap !  Description and declaration in esm_alloc_real.f90
     character(*)    :: runid
                                    !!  Run identification code for the cur-
                                    !!  rent simulation (used to determine

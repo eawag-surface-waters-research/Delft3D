@@ -64,7 +64,7 @@ subroutine usrbcc(j         ,nmmaxj    ,kmin      ,kmax      ,ldim      , &
                                                                                        !!  been transformed into 1d arrays.
                                                                                        !!  due to the shift in the 2nd (m-)
                                                                                        !!  index, j = -2*nmax + 1
-    integer                                                    , intent(in)  :: kmax   !  Description and declaration in iidim.f90
+    integer                                                    , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                    , intent(in)  :: kmin   !!  Starting index of number of layers
                                                                                        !!  in the z-dir. (0 or 1)
     integer                                                    , intent(in)  :: ldim   !!  Dimension for constituents or turbu-
@@ -73,8 +73,8 @@ subroutine usrbcc(j         ,nmmaxj    ,kmin      ,kmax      ,ldim      , &
                                                                                        !!  user defined array (eq LUSTOF:=LTUR)
     integer                                                                  :: nmmaxj !  Description and declaration in dimens.igs
     integer                                                    , intent(in)  :: nrow   !!  Flag = 1 for rows; = 2 for columns
-    integer                                                    , intent(in)  :: nto    !  Description and declaration in iidim.f90
-    integer, dimension(7, nto)                                 , intent(in)  :: mnbnd  !  Description and declaration in iidim.f90
+    integer                                                    , intent(in)  :: nto    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(7, nto)                                 , intent(in)  :: mnbnd  !  Description and declaration in esm_alloc_int.f90
     real(fp), dimension(2, lustof, kmin:kmax, 2, nto)          , intent(in)  :: ubnd   !  Description and declaration in trisol.igs
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmin:kmax, ldim), intent(out) :: aakl   !!  Internal work array, lower diagonal
                                                                                        !!  tridiagonal matrix, implicit coupling

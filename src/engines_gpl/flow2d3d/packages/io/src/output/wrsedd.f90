@@ -64,8 +64,8 @@ subroutine wrsedd(lundia    ,error     ,mmax      ,nmaxus    ,irequest  , &
     integer        , intent(in)  :: irequest !! Action flag: 1 = define, 2 = write
     character(16)  , intent(in)  :: grpnam   !!  Group name
     integer                      :: lundia   !  Description and declaration in inout.igs
-    integer                      :: mmax     !  Description and declaration in iidim.f90
-    integer                      :: nmaxus   !  Description and declaration in iidim.f90
+    integer                      :: mmax     !  Description and declaration in esm_alloc_int.f90
+    integer                      :: nmaxus   !  Description and declaration in esm_alloc_int.f90
     logical        , intent(out) :: error    !!  Flag=TRUE if an error is encountered
 !
 ! Local variables

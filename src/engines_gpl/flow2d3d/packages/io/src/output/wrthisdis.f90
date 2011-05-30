@@ -66,15 +66,15 @@ subroutine wrthisdis(lundia    ,error     ,trifil    ,ithisc    ,zmodel    , &
     integer                                                        , intent(in)  :: lundia ! Description and declaration in inout.igs
     integer                                                        , intent(in)  :: nsrc   ! Description and declaration in dimens.igs
     integer   , dimension(7, nsrc)                                               :: mnksrc ! Description and declaration in r-i-ch.igs
-    real(fp)  , dimension(nsrc)                                    , intent(in)  :: disch  ! Description and declaration in rjdim.f90
-    real(prec), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: dps    ! Description and declaration in rjdim.f90
-    real(fp)  , dimension(lstsc, nsrc)                             , intent(in)  :: rint   ! Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: s1     ! Description and declaration in rjdim.f90
-    real(fp)  , dimension(kmax)                                    , intent(in)  :: sig    ! Description and declaration in rjdim.f90
-    real(fp)  , dimension(nsrc)                                    , intent(in)  :: voldis ! Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: xcor   ! Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: ycor   ! Description and declaration in rjdim.f90
-    real(fp)  , dimension(0:kmax)                                  , intent(in)  :: zk     ! See description and declaration of sig in rjdim.f90
+    real(fp)  , dimension(nsrc)                                    , intent(in)  :: disch  ! Description and declaration in esm_alloc_real.f90
+    real(prec), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: dps    ! Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(lstsc, nsrc)                             , intent(in)  :: rint   ! Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: s1     ! Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(kmax)                                    , intent(in)  :: sig    ! Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nsrc)                                    , intent(in)  :: voldis ! Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: xcor   ! Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: ycor   ! Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(0:kmax)                                  , intent(in)  :: zk     ! See description and declaration of sig in esm_alloc_real.f90
     logical                                                        , intent(out) :: error  ! Description and declaration in tricom.f90
     logical                                                        , intent(in)  :: zmodel ! Description and declaration in procs.igs
     character(*)                                                   , intent(in)  :: trifil ! Description and declaration in trisim.F90

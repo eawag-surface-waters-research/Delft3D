@@ -51,19 +51,19 @@ subroutine chkic(lundia    ,error     ,mmax      ,nmax      ,kmax      , &
 !
 ! Global variables
 !
-    integer                                                                    , intent(in) :: kmax   !  Description and declaration in iidim.f90
-    integer                                                                    , intent(in) :: lstsci !  Description and declaration in iidim.f90
-    integer                                                                    , intent(in) :: lsecfl !  Description and declaration in iidim.f90
-    integer                                                                    , intent(in) :: ltur   !  Description and declaration in iidim.f90
+    integer                                                                    , intent(in) :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                    , intent(in) :: lstsci !  Description and declaration in esm_alloc_int.f90
+    integer                                                                    , intent(in) :: lsecfl !  Description and declaration in esm_alloc_int.f90
+    integer                                                                    , intent(in) :: ltur   !  Description and declaration in esm_alloc_int.f90
     integer                                                                    , intent(in) :: lturi  !  Description and declaration in tricom.igs
     integer                                                                                 :: lundia !  Description and declaration in inout.igs
-    integer                                                                    , intent(in) :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                                 :: nmax   !  Description and declaration in iidim.f90
-    integer                                                                    , intent(in) :: nmaxus !  Description and declaration in iidim.f90
+    integer                                                                    , intent(in) :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                 :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                    , intent(in) :: nmaxus !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in) :: kfs
     logical                                                                                 :: error  !!  Flag=TRUE if an error is encountered
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax, ltur), intent(in) :: rtur1  !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci), intent(in) :: r1     !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax, ltur), intent(in) :: rtur1  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci), intent(in) :: r1     !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

@@ -50,13 +50,13 @@ subroutine windtogridc(mmax      ,nmax      ,nmaxus    ,kcs       ,alfas     , &
 !
 ! Global variables
 !
-    integer                                                      , intent(in) :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                   :: nmax   !  Description and declaration in iidim.f90
-    integer                                                      , intent(in) :: nmaxus !  Description and declaration in iidim.f90
-    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in) :: kcs    !  Description and declaration in iidim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in) :: alfas  !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)             :: windsu !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)             :: windsv !  Description and declaration in rjdim.f90
+    integer                                                      , intent(in) :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                   :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                      , intent(in) :: nmaxus !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in) :: kcs    !  Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in) :: alfas  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)             :: windsu !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)             :: windsv !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

@@ -57,12 +57,12 @@ subroutine rolcor(hrms      ,tp        ,theta     ,hu        ,hv         , &
     integer                                                             , intent(in)  :: nmax
     integer                                                             , intent(in)  :: kmax
     logical                                                             , intent(in)  :: eulerisoglm !  Flag for using eulerian velocities for suspended transports
-    integer,  dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: kcu         !  Description and declaration in iidim.f90
-    integer,  dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: kcv         !  Description and declaration in iidim.f90
-    integer,  dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: kfsmax      !  Description and declaration in iidim.f90
-    integer,  dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: kfsmin      !  Description and declaration in iidim.f90
-    integer,  dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: kfu         !  Description and declaration in iidim.f90
-    integer,  dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: kfv         !  Description and declaration in iidim.f90
+    integer,  dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: kcu         !  Description and declaration in esm_alloc_int.f90
+    integer,  dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: kcv         !  Description and declaration in esm_alloc_int.f90
+    integer,  dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: kfsmax      !  Description and declaration in esm_alloc_int.f90
+    integer,  dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: kfsmin      !  Description and declaration in esm_alloc_int.f90
+    integer,  dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: kfu         !  Description and declaration in esm_alloc_int.f90
+    integer,  dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: kfv         !  Description and declaration in esm_alloc_int.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: hrms
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: tp
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: hu

@@ -74,53 +74,53 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
 !
     integer                                                        , intent(in)  :: itimc  !!  Current time step counter for 2D
                                                                                            !!  system
-    integer                                                        , intent(in)  :: itlen  !  Description and declaration in iidim.f90
+    integer                                                        , intent(in)  :: itlen  !  Description and declaration in esm_alloc_int.f90
     integer                                                                      :: lundia !  Description and declaration in inout.igs
-    integer                                                                      :: mmax   !  Description and declaration in iidim.f90
-    integer                                                                      :: nmax   !  Description and declaration in iidim.f90
-    integer                                                                      :: nmaxus !  Description and declaration in iidim.f90
-    integer                                                        , intent(in)  :: noroco !  Description and declaration in iidim.f90
-    integer                                                        , intent(in)  :: norow  !  Description and declaration in iidim.f90
+    integer                                                                      :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                      :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                      :: nmaxus !  Description and declaration in esm_alloc_int.f90
+    integer                                                        , intent(in)  :: noroco !  Description and declaration in esm_alloc_int.f90
+    integer                                                        , intent(in)  :: norow  !  Description and declaration in esm_alloc_int.f90
     integer                                                        , intent(in)  :: ntwav  !!  Total number of timesteps on com-
                                                                                            !!  munication file (to read from)
     integer   , dimension(2)                                                     :: ifcore !!  Time indices (cell id's) of the wave
                                                                                            !!  functions which are in core available
-    integer   , dimension(5, noroco)                               , intent(in)  :: irocol !  Description and declaration in iidim.f90
+    integer   , dimension(5, noroco)                               , intent(in)  :: irocol !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(ntwav)                                   , intent(in)  :: timwav !!  Array with time steps on comm. file
                                                                                            !!  for wave results
     logical                                                                      :: error  !!  Flag=TRUE if an error is encountered
     logical                                                        , intent(in)  :: roller
     logical                                                        , intent(in)  :: wavcmp
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: dis    !  Description and declaration in rjdim.f90
-    real(prec), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: dps    !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: ewabr0 !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: ewave0 !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: grmasu !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: grmasv !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: hrms   !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: rlabda !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: s0     !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: teta   !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: tp     !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: uorb   !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: wsu    !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: wsv    !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: tps    !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: ubot   !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: wlen   !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: dircom !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: dircos !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: dirsin !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: discom !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: hrmcom !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: msucom !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: msvcom !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: tpcom  !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: wsucom !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: wsvcom !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: tpscom !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: ubcom  !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: wlcom  !  Description and declaration in rjdim.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: dis    !  Description and declaration in esm_alloc_real.f90
+    real(prec), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: ewabr0 !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: ewave0 !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: grmasu !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: grmasv !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: hrms   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: rlabda !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: s0     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: teta   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: tp     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: uorb   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: wsu    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: wsv    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: tps    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: ubot   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: wlen   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: dircom !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: dircos !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: dirsin !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: discom !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: hrmcom !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: msucom !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: msvcom !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: tpcom  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: wsucom !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: wsvcom !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: tpscom !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: ubcom  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: wlcom  !  Description and declaration in esm_alloc_real.f90
     character(*)                                                                 :: comfil !!  Name for communication file
                                                                                            !!  com-<case><label>
 !

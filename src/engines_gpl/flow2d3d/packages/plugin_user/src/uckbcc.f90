@@ -43,11 +43,11 @@ subroutine uckbcc(ltur      ,kmax      ,nto       ,nrob      ,nob       , &
 !
 ! Global variables
 !
-    integer, intent(in)            :: kmax !  Description and declaration in iidim.f90
-    integer, intent(in)            :: ltur !  Description and declaration in iidim.f90
-    integer, intent(in)            :: nrob !  Description and declaration in iidim.f90
-    integer, intent(in)            :: nto !  Description and declaration in iidim.f90
-    integer, dimension(8, nrob), intent(in) :: nob !  Description and declaration in iidim.f90
+    integer, intent(in)            :: kmax !  Description and declaration in esm_alloc_int.f90
+    integer, intent(in)            :: ltur !  Description and declaration in esm_alloc_int.f90
+    integer, intent(in)            :: nrob !  Description and declaration in esm_alloc_int.f90
+    integer, intent(in)            :: nto !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(8, nrob), intent(in) :: nob !  Description and declaration in esm_alloc_int.f90
     real(fp), dimension(2, ltur, 0:kmax, 2, nto), intent(out) :: ubnd !  Description and declaration in trisol.igs
 !
 !

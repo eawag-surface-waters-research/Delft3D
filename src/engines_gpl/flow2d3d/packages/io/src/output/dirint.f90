@@ -55,10 +55,10 @@ subroutine dirint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
     integer                                                                  , intent(in)  :: kmaxk  !!  Number of layers in the z-dir.
                                                                                                      !!  For values of func which need a third dimension, else 1
     integer                                                                                :: lundia !  Description and declaration in inout.igs
-    integer                                                                  , intent(in)  :: mmax   !  Description and declaration in iidim.f90
+    integer                                                                  , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                                                :: nelmx  !!  Number of elements for this group
-    integer                                                                                :: nmax   !  Description and declaration in iidim.f90
-    integer                                                                  , intent(in)  :: nmaxus !  Description and declaration in iidim.f90
+    integer                                                                                :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                  , intent(in)  :: nmaxus !  Description and declaration in esm_alloc_int.f90
     integer                                                                                :: ntimwa !!  Time index of first function
     integer                                                                                :: ntimwb !!  Time index of second function
     integer      , dimension(2)                                              , intent(in)  :: ifcore !!  Time indices (cell id's) of the wave
@@ -69,10 +69,10 @@ subroutine dirint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
     real(fp)                                                                 , intent(in)  :: atimw  !!  Interpolation factor for first function
     real(fp)                                                                 , intent(in)  :: btimw  !!  Interpolation factor for second function
     real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxk), intent(out) :: func   !!  Interpolated result
-    real(fp)     , dimension(nmaxus, mmax, 2)                                              :: dircos !  Description and declaration in rjdim.f90
-    real(fp)     , dimension(nmaxus, mmax, 2)                                              :: dirsin !  Description and declaration in rjdim.f90
+    real(fp)     , dimension(nmaxus, mmax, 2)                                              :: dircos !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nmaxus, mmax, 2)                                              :: dirsin !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(nmaxus, mmax, kmaxk, 2)                                       :: fcom   !!  The two timesteps, defined by ifcore, of the function
-    real(fp)     , dimension(nmaxus, mmax, kmaxk, 2)                         , intent(in)  :: hrmcom !  Description and declaration in rjdim.f90
+    real(fp)     , dimension(nmaxus, mmax, kmaxk, 2)                         , intent(in)  :: hrmcom !  Description and declaration in esm_alloc_real.f90
     character(*)                                                                           :: comfil !!  Name for communication file
                                                                                                      !!  com-<case><label>
     character(10), dimension(nelmx)                                                        :: elmunt !!  Array with element physical unit

@@ -117,39 +117,39 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                                                                                         !!  then computation proceeds in the X-dir.
                                                                                         !!  If icx=1 then computation proceeds in the Y-dir.
     integer                                                     , intent(in)  :: icy    !!  Increment in the Y-dir. (see ICX)
-    integer                                                     , intent(in)  :: kmax   !  Description and declaration in iidim.f90
+    integer                                                     , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                     , intent(in)  :: keva   !  Description and declaration in tricom.igs
     integer                                                     , intent(in)  :: ktemp  !  Description and declaration in tricom.igs
-    integer                                                     , intent(in)  :: lstsci !  Description and declaration in iidim.f90
+    integer                                                     , intent(in)  :: lstsci !  Description and declaration in esm_alloc_int.f90
     integer                                                     , intent(in)  :: ltem   !  Description and declaration in dimens.igs
     integer                                                     , intent(in)  :: nmmax  !  Description and declaration in dimens.igs
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                , intent(in)  :: kfs    !  Description and declaration in iidim.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                , intent(in)  :: kfsmax !  Description and declaration in iidim.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                , intent(in)  :: kfsmin !  Description and declaration in iidim.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)        , intent(in)  :: kspu   !  Description and declaration in iidim.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)        , intent(in)  :: kspv   !  Description and declaration in iidim.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                , intent(in)  :: kfs    !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                , intent(in)  :: kfsmax !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                , intent(in)  :: kfsmin !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)        , intent(in)  :: kspu   !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)        , intent(in)  :: kspv   !  Description and declaration in esm_alloc_int.f90
     logical                                                     , intent(in)  :: sferic !  Description and declaration in tricom.igs
     real(fp)                                                    , intent(in)  :: anglat !!  - Angle of latitude of the model centre
                                                                                         !!    (used to determine the coef. for the coriolis force)
                                                                                         !!  - In spherical coordinates this parameter equals the angle of latitude
                                                                                         !!    for the origin (water level point) after INIPHY anglat = 0.
     real(fp)                                                    , intent(in)  :: timhr  !!  Current timestep (in hours), TIMNOW * DTSEC / 3600.
-    real(prec) , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: dps    !  Description and declaration in rjdim.f90
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)                             :: evap   !  Description and declaration in rjdim.f90
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: gsqs   !  Description and declaration in rjdim.f90
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: patm   !  Description and declaration in rjdim.f90
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: s0     !  Description and declaration in rjdim.f90
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: s1     !  Description and declaration in rjdim.f90
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: w10mag !  Description and declaration in rjdim.f90
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: ycor   !  Description and declaration in rjdim.f90
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: xz     !  Description and declaration in rjdim.f90
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: yz     !  Description and declaration in rjdim.f90
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in)  :: dzs0   !  Description and declaration in rjdim.f90
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in)  :: dzs1   !  Description and declaration in rjdim.f90
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci) , intent(in)  :: r0     !  Description and declaration in rjdim.f90
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)               :: sink   !  Description and declaration in rjdim.f90
-    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)               :: sour   !  Description and declaration in rjdim.f90
-    real(fp)   , dimension(kmax)                                , intent(in)  :: thick  !  Description and declaration in rjdim.f90
+    real(prec) , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)                             :: evap   !  Description and declaration in esm_alloc_real.f90
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: gsqs   !  Description and declaration in esm_alloc_real.f90
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: patm   !  Description and declaration in esm_alloc_real.f90
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: s0     !  Description and declaration in esm_alloc_real.f90
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: s1     !  Description and declaration in esm_alloc_real.f90
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: w10mag !  Description and declaration in esm_alloc_real.f90
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: ycor   !  Description and declaration in esm_alloc_real.f90
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: xz     !  Description and declaration in esm_alloc_real.f90
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: yz     !  Description and declaration in esm_alloc_real.f90
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in)  :: dzs0   !  Description and declaration in esm_alloc_real.f90
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in)  :: dzs1   !  Description and declaration in esm_alloc_real.f90
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci) , intent(in)  :: r0     !  Description and declaration in esm_alloc_real.f90
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)               :: sink   !  Description and declaration in esm_alloc_real.f90
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)               :: sour   !  Description and declaration in esm_alloc_real.f90
+    real(fp)   , dimension(kmax)                                , intent(in)  :: thick  !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

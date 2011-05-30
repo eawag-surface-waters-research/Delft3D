@@ -63,9 +63,9 @@ subroutine update_stat_locations(nostat    ,ndro      ,mndro     ,xydro     ,tim
     integer                     , intent(in)  :: ndro   !  Description and declaration in dimens.igs
     integer                     , intent(in)  :: julday !  Julian date
     integer                     , intent(in)  :: lundia !  Diagnostics file
-    integer , dimension(2, ndro)              :: mndro  !  Description and declaration in iidim.f90
+    integer , dimension(2, ndro)              :: mndro  !  Description and declaration in esm_alloc_int.f90
     real(fp)                    , intent(in)  :: timhr  !  Time in hours
-    real(fp), dimension(2, ndro)              :: xydro  !  Description and declaration in rjdim.f90
+    real(fp), dimension(2, ndro)              :: xydro  !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

@@ -69,7 +69,7 @@ subroutine rdcul(nsrc, namsrc ,mnksrc, voldis, gdp)
 !
     integer                          , intent(in)  :: nsrc   ! Description and declaration in dimens.igs
     integer      , dimension(7, nsrc), intent(in)  :: mnksrc ! Description and declaration in r-i-ch.igs
-    real(fp)     , dimension(nsrc)   , intent(out) :: voldis ! Description and declaration in rjdim.f90       
+    real(fp)     , dimension(nsrc)   , intent(out) :: voldis ! Description and declaration in esm_alloc_real.f90       
     character(20), dimension(nsrc)   , intent(in)  :: namsrc
 !
 ! Local variables

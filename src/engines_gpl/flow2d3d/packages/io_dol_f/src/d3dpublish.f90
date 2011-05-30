@@ -181,7 +181,7 @@ contains
         olv%runid    = runid
         olv%zmodel   = zmodel 
         
-        !----- Description parameters D3DOnline_Publish (full description and declaration in rjdim.f90):
+        !----- Description parameters D3DOnline_Publish (full description and declaration in esm_alloc_real.f90):
         ! A      internal name
         ! B      user name (description)
         ! C      units as string
@@ -193,7 +193,7 @@ contains
         !    
         ! parameter codes     A               B              C      D   E           F        G           H
         !
-        !The following parameters, always need to be published (descriptions can be found in rjdim.f90)!
+        !The following parameters, always need to be published (descriptions can be found in esm_alloc_real.f90)!
         call D3DOL_Publish( 'nlb',  '',                              '',    '', '',     DOL_INTEGER, olv%nlb,          DOL_OUT)
         call D3DOL_Publish( 'nub',  '',                              '',    '', '',     DOL_INTEGER, olv%nub,          DOL_OUT)
         call D3DOL_Publish( 'mlb',  '',                              '',    '', '',     DOL_INTEGER, olv%mlb,          DOL_OUT)

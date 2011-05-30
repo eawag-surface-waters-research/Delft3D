@@ -48,17 +48,17 @@ subroutine inirgl(riglid    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
 !
 ! Global variables
 !
-    integer, intent(in)            :: kmax !  Description and declaration in iidim.f90
-    integer, intent(in)            :: mmax !  Description and declaration in iidim.f90
-    integer         :: nmax !  Description and declaration in iidim.f90
-    integer, intent(in)            :: nmaxus !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in) :: kcs !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax), intent(in) :: kspu !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax), intent(in) :: kspv !  Description and declaration in iidim.f90
+    integer, intent(in)            :: kmax !  Description and declaration in esm_alloc_int.f90
+    integer, intent(in)            :: mmax !  Description and declaration in esm_alloc_int.f90
+    integer         :: nmax !  Description and declaration in esm_alloc_int.f90
+    integer, intent(in)            :: nmaxus !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in) :: kcs !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax), intent(in) :: kspu !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax), intent(in) :: kspv !  Description and declaration in esm_alloc_int.f90
     real(fp), intent(in)               :: riglid
                                    !!  Rigid lid factor to reduce horizontal
                                    !!  wet area (incompressible)
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) :: gsqs !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) :: gsqs !  Description and declaration in esm_alloc_real.f90
 !
 !
 ! Local variables

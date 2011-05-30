@@ -41,7 +41,7 @@ subroutine tranb4(utot      ,d         ,c         ,par       ,hidexp    , &
 !
 ! Global variables
 !
-    real(fp)               , intent(in)  :: c      !  Description and declaration in rjdim.f90
+    real(fp)               , intent(in)  :: c      !  Description and declaration in esm_alloc_real.f90
     real(fp)               , intent(in)  :: d
     real(fp)               , intent(in)  :: hidexp ! hiding & exposure factor
                                                    ! default value, 1.0, to be used when called from Delft3D-MOR

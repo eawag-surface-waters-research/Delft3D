@@ -71,7 +71,7 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
 !
     integer                                      :: lundia !  Description and declaration in inout.igs
     integer                                      :: lunmd  !  Description and declaration in inout.igs
-    integer                        , intent(in)  :: mmax   !  Description and declaration in iidim.f90
+    integer                        , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
     integer                        , intent(in)  :: mxndry !!  Maximum number of dry points
                                                            !!  sections
     integer                        , intent(in)  :: mxnppt !!  Maximum number of grid enclosure,
@@ -83,7 +83,7 @@ subroutine rdgrid(lunmd     ,lundia    ,error     ,zmodel    ,nrrec     , &
                                                            !!  enclosure points
     integer                        , intent(out) :: ndry   !!  Actual number of dry points
                                                            !!  sections
-    integer                        , intent(in)  :: nmaxus !  Description and declaration in iidim.f90
+    integer                        , intent(in)  :: nmaxus !  Description and declaration in esm_alloc_int.f90
     integer                                      :: nrrec  !!  Pointer to the record number in the
                                                            !!  MD-file
     integer                        , intent(out) :: ntd    !!  Actual number of thin dams

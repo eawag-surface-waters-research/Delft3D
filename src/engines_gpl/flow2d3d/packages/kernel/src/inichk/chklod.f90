@@ -53,10 +53,10 @@ subroutine chklod(lundia    ,error     ,nto       ,kmax      ,nsrc      , &
 !
 ! Global variables
 !
-    integer, intent(in)  :: kmax   !  Description and declaration in iidim.f90
+    integer, intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer              :: lundia !  Description and declaration in inout.igs
-    integer, intent(in)  :: nsrc   !  Description and declaration in iidim.f90
-    integer, intent(in)  :: nto    !  Description and declaration in iidim.f90
+    integer, intent(in)  :: nsrc   !  Description and declaration in esm_alloc_int.f90
+    integer, intent(in)  :: nto    !  Description and declaration in esm_alloc_int.f90
     logical, intent(out) :: error  !!  Flag=TRUE if an error is encountered
 !
 !

@@ -55,28 +55,28 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
 ! Global variables
 !
     integer, intent(in)   :: i2d3d
-    real(fp)              :: aks    !  Description and declaration in rjdim.f90
+    real(fp)              :: aks    !  Description and declaration in esm_alloc_real.f90
     real(fp)              :: ce_nm
     real(fp)              :: d10
     real(fp)              :: d50
     real(fp)              :: d90
     real(fp)              :: delw
     real(fp), intent(out) :: drho
-    real(fp), intent(out) :: dss    !  Description and declaration in rjdim.f90
+    real(fp), intent(out) :: dss    !  Description and declaration in esm_alloc_real.f90
     real(fp), intent(in)  :: dstar
     real(fp), intent(out) :: fc1
     real(fp), intent(out) :: fsilt
     real(fp)              :: h1
-    real(fp)              :: hrms   !  Description and declaration in rjdim.f90
+    real(fp)              :: hrms   !  Description and declaration in esm_alloc_real.f90
     real(fp), intent(in)  :: kscr
     real(fp)              :: muc
     real(fp), intent(in)  :: mudfrac
     real(fp), intent(out) :: phicur
     real(fp)              :: ra
     real(fp)              :: rc
-    real(fp), intent(in)  :: rhosol !  Description and declaration in rjdim.f90
-    real(fp), intent(in)  :: rhowat !  Description and declaration in rjdim.f90
-    real(fp)              :: rlabda !  Description and declaration in rjdim.f90
+    real(fp), intent(in)  :: rhosol !  Description and declaration in esm_alloc_real.f90
+    real(fp), intent(in)  :: rhowat !  Description and declaration in esm_alloc_real.f90
+    real(fp)              :: rlabda !  Description and declaration in esm_alloc_real.f90
     real(fp)              :: ta
     real(fp)              :: taubcw
     real(fp)              :: tauc
@@ -84,10 +84,10 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
     real(fp), intent(out) :: taucr1
     real(fp), intent(out) :: taurat
     real(fp)              :: tauwav
-    real(fp)              :: tp     !  Description and declaration in rjdim.f90
+    real(fp)              :: tp     !  Description and declaration in esm_alloc_real.f90
     real(fp), intent(in)  :: umod
     real(fp)              :: ustarc
-    real(fp)              :: usus   !  Description and declaration in rjdim.f90
+    real(fp)              :: usus   !  Description and declaration in esm_alloc_real.f90
     real(fp), intent(in)  :: uuu
     real(fp)              :: uwb
     real(fp), intent(in)  :: vvv
@@ -99,8 +99,8 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
     real(fp), intent(out) :: uoff 
     real(fp), intent(out) :: uwbih
     real(fp), intent(out) :: psi
-    real(fp), intent(in)  :: dzduu    !  Description and declaration in rjdim.f90
-    real(fp), intent(in)  :: dzdvv    !  Description and declaration in rjdim.f90
+    real(fp), intent(in)  :: dzduu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), intent(in)  :: dzdvv    !  Description and declaration in esm_alloc_real.f90
     real(fp), intent(in)  :: eps
     real(fp), intent(in)  :: camax
     integer , intent(in)  :: iopsus

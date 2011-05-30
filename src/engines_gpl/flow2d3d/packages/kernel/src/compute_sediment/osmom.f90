@@ -54,12 +54,12 @@ subroutine osmom(hrms      ,diepte    ,tp        ,g         ,cr        , &
     real(fp)             :: ev3b
     real(fp)             :: ev5b
     real(fp), intent(in) :: g
-    real(fp), intent(in) :: hrms   !  Description and declaration in rjdim.f90
+    real(fp), intent(in) :: hrms   !  Description and declaration in esm_alloc_real.f90
     real(fp)             :: od2b
     real(fp)             :: od3b
     real(fp)             :: od4b
     real(fp), intent(in) :: qbb
-    real(fp), intent(in) :: tp     !  Description and declaration in rjdim.f90
+    real(fp), intent(in) :: tp     !  Description and declaration in esm_alloc_real.f90
 !
 !
 ! Local variables

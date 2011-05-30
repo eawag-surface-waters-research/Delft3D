@@ -56,13 +56,13 @@ subroutine updbct(lundia, filnam, ntof, nto, kcd, kmax, hydrbc, tprofu, error, g
     ! Global variables
     !
     integer                      , intent(in)  :: kcd    !  Description and declaration in dimens.igs
-    integer                      , intent(in)  :: kmax   !  Description and declaration in iidim.f90
+    integer                      , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                      , intent(in)  :: lundia !  Description and declaration in inout.igs
     character(len=*)             , intent(in)  :: filnam !  filename of TMP bct file
     integer                      , intent(in)  :: ntof   !  Description and declaration in dimens.igs
-    integer                      , intent(in)  :: nto    !  Description and declaration in iidim.f90
-    real(fp), dimension(4, nto, kcd)           :: hydrbc !  Description and declaration in rjdim.f90
-    character(20), dimension(nto), intent(in)  :: tprofu !  Description and declaration in ckdim.f90
+    integer                      , intent(in)  :: nto    !  Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(4, nto, kcd)           :: hydrbc !  Description and declaration in esm_alloc_real.f90
+    character(20), dimension(nto), intent(in)  :: tprofu !  Description and declaration in esm_alloc_char.f90
     logical                      , intent(out) :: error  !  Flag=TRUE if an error is encountered
 !
 ! Local variables
