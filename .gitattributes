@@ -2394,7 +2394,6 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/uv2cen.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/var2str.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/vardiff.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/vec2str.m -text
-src/tools_lgpl/matlab/quickplot/progsrc/private/waqfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/waqua.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/waquafil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/writeavi.cpp -text
@@ -2451,6 +2450,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/vs_put.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/vs_type.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/vs_use.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/vslice.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/waqfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/waquaio.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/weir.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/wildstrmatch.m -text
