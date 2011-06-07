@@ -96,10 +96,6 @@
       <Project>{a7bafe5d-1301-48f8-878b-9becb3dde241}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\..\..\..\utils_lgpl\utils_flow\packages\utils_flow\utils_flow.vfproj">
-      <Project>{2d6bcbca-cc6c-49fe-a6aa-61af62529118}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
     <ProjectReference Include="..\datsel_f\datsel_f.vfproj">
       <Project>{03b0b2ab-125f-49e6-9c53-ed7e5fc7718d}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
