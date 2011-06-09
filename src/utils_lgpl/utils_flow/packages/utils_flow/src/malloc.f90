@@ -31,7 +31,7 @@ module m_alloc
 implicit none
 private 
 
-public realloc, reallocP
+public realloc, reallocP, reallocCharacter
 
 ! TODO: Handle nondefault kinds properly? [AvD]
 
