@@ -7,7 +7,7 @@ Compiling on Windows
   3) <Ctrl><Shift>B
   4) The binaries are installed in directory "bin\w32" (release) 
      or in the subdirectory of the executable, e.g. "src\engines_gpl\deltares_hydro\bin\Debug" (debug)
- 
+
 
 Compiling on Linux
 ==================
