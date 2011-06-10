@@ -357,8 +357,6 @@ src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/dfupdr.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/dfwaitd.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/dfwaiti.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/dfwaitr.f90 -text
-src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/dfwrihis.f90 -text
-src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/dfwrimap.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/dfwrirst.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/dfwrmorm1.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/dfwrmorm2.f90 -text
@@ -366,8 +364,6 @@ src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/dfwrplot.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/dfwrsedh.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/dfwrsedm.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/dfwrsedmavg.f90 -text
-src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/dfwrthis.f90 -text
-src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/dfwrtmap.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/initdfparall.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/rdencl.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/strgrd.f90 -text

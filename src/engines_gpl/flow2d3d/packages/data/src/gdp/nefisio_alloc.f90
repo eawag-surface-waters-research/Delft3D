@@ -69,28 +69,8 @@ subroutine nefisio_alloc(gdp)
     nelems(nefiswribot)       = 4
     nelems(nefiswridoc)       = 4
     nelems(nefiswridro)       = 9
-    if (parll) then
-       !
-       ! dfwrihis uses addelm and putelt
-       !
-       nelems(nefiswrihis)    = 0
-    else
-       !
-       ! wrihis uses filldm and putgtr
-       !
-       nelems(nefiswrihis)    = 28
-    endif
-    if (parll) then
-       !
-       ! dfwrimap uses addelm and putelt
-       !
-       nelems(nefiswrimap)    = 0
-    else
-       !
-       ! wrimap uses filldm and putgtr
-       !
-       nelems(nefiswrimap)    = 46
-    endif
+    nelems(nefiswrihis)       = 0
+    nelems(nefiswrimap)       = 0
     nelems(nefiswrkenc)       = 3
     nelems(nefiswrkent)       = 4
     nelems(nefiswrparm)       = 9
@@ -99,17 +79,7 @@ subroutine nefisio_alloc(gdp)
     nelems(nefiswrspcp)       = 4
     nelems(nefiswrtdro)       = 2
     nelems(nefiswrthisinf)    = 0
-    if (parll) then
-       !
-       ! dfwrthis uses addelm and putelt
-       !
-       nelems(nefiswrthis)    = 0
-    else
-       !
-       ! wrthis uses filldm and putgtr
-       !
-       nelems(nefiswrthis)    = 24
-    endif
+    nelems(nefiswrthis)       = 0
     nelems(nefiswrtmapinf)    = 0
     nelems(nefiswrtmap)       = 0
     nelems(nefissetwav)       = 12

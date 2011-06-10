@@ -189,7 +189,7 @@
 		<File RelativePath="src\output\wribot.f90"/>
 		<File RelativePath="src\output\wridoc.f90"/>
 		<File RelativePath="src\output\wridro.f90"/>
-		<File RelativePath="src\output\wrihis.f90"/>
+		<File RelativePath=".\src\output\wrihis.f90"/>
 		<File RelativePath=".\src\output\wrihisbal.f90"/>
 		<File RelativePath="src\output\wrihisdad.f90"/>
 		<File RelativePath="src\output\wrihisdis.f90"/>

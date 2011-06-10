@@ -932,8 +932,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
        !
        if (nst == ithisc) then
           call wrthisbal(ithisc    ,trifil    ,lundia    ,error     ,gdp       )
-          if (.not. parll) then
-             call wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
+          call wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
                        & itstrt    ,ithisi    ,zmodel    ,nostat    ,ntruv     , &
                        & kmax      ,lmax      ,lstsci    ,lsal      ,ltem      , &
                        & ltur      ,i(zkfs)   ,r(zwl)    ,r(zcuru)  ,r(zcurv)  , &
@@ -942,17 +941,6 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                        & r(ztur)   ,r(zvort)  ,r(zenst)  ,r(hydprs) ,r(fltr)   , &
                        & r(ctr)    ,r(atr)    ,r(dtr)    ,velt      ,r(zdps)   , &
                        & gdp       )
-          else    
-             call dfwrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
-                         & itstrt    ,ithisi    ,zmodel    ,nostat    ,ntruv     , &
-                         & kmax      ,lmax      ,lstsci    ,lsal      ,ltem      , &
-                         & ltur      ,i(zkfs)   ,r(zwl)    ,r(zcuru)  ,r(zcurv)  , &
-                         & r(zcurw)  ,r(zqxk)   ,r(zqyk)   ,r(ztauks) ,r(ztauet) , &
-                         & r(zvicww) ,r(zdicww) ,r(zrich)  ,r(zrho)   ,r(gro)    , &
-                         & r(ztur)   ,r(zvort)  ,r(zenst)  ,r(hydprs) ,r(fltr)   , &
-                         & r(ctr)    ,r(atr)    ,r(dtr)    ,velt      ,r(zdps)   , &
-                         & gdp       )
-          endif    
           if (error) goto 9999
           if (dredge .and. .not. dadsmonly) then
              call wrthisdad(lundia    ,error     ,trifil    ,ithisc    , &
@@ -1042,11 +1030,10 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
        !
        if (itmapi > 0) then
           if (nst == itmapc) then
-              !
-              ! Write to NEFIS MAP files (trim-ext.dat and trim-ext.def)
-              !
-             if (.not. parll) then
-                call wrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc      , &
+             !
+             ! Write to NEFIS MAP files (trim-ext.dat and trim-ext.def)
+             !
+             call wrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc      , &
                           & rhow        ,mmax      , &
                           & kmax        ,nmaxus    ,lstsci    ,ltur      , &
                           & nsrc        ,zmodel    ,i(kcs)    ,i(kfs)    ,i(kfu)    , &
@@ -1061,23 +1048,6 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                           & r(cvalv0)   ,r(cfurou) ,r(cfvrou) ,rouflo    ,r(patm)     , &
                           & r(z0ucur)   ,r(z0vcur) ,r(z0urou) ,r(z0vrou) ,ktemp       , &
                           & gdp       )
-             else
-                call dfwrtmap(lundia      ,error     ,trifil    ,selmap    ,itmapc      , &
-                            & rhow        ,mmax      , &
-                            & kmax        ,nmaxus    ,lstsci    ,ltur      , &
-                            & nsrc        ,zmodel    ,i(kcs)    ,i(kfs)    ,i(kfu)      , &
-                            & i(kfv)      ,i(kfumin) ,i(kfvmin) ,i(kfumax) ,i(kfvmax)   , &
-                            & i(kfsmin)   ,i(kfsmax) ,i(mnksrc) ,i(ibuff)  ,r(s1)       , &
-                            & d(dps)      ,r(dzs1)   ,r(thick)  , &
-                            & r(velu)     ,r(velv)   ,r(w1)     ,r(wphy)   ,r(r1)       , &
-                            & r(rtur1)    ,r(taubpu) ,r(taubpv) ,r(taubsu) ,r(taubsv)   , &
-                            & r(vicww)    ,r(dicww)  ,r(rich)   ,r(rho)    ,r(p1)       , &
-                            & r(vortic)   ,r(enstro) ,r(umnldf) ,r(vmnldf) ,r(vicuv)    , &
-                            & r(taubmx)   ,r(windu)  ,r(windv)  ,velt      ,r(cvalu0)   , &
-                            & r(cvalv0)   ,r(cfurou) ,r(cfvrou) ,rouflo    ,r(patm)     , &
-                            & r(z0ucur)   ,r(z0vcur) ,r(z0urou) ,r(z0vrou) ,ktemp       , &
-                            & gdp       )
-             endif
              if (error) goto 9999
              if (roller) then
                 call wrrolm(lundia    ,error     ,trifil    ,itmapc    ,nmax      , &

@@ -335,23 +335,14 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
           if (error) goto 9999 
        endif 
        if (ithisi > 0) then 
-          if (.not. parll) then 
-             call wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , & 
-                       & itdate    ,tzone     ,tunit     ,dt        ,nostat    , & 
-                       & ntruv     ,nmax      ,mmax      ,kmax      ,lmax      , & 
-                       & lstsci    ,ltur      ,grdang    ,sferic    ,lsed      , & 
-                       & lsedtot   ,zbot      ,zmodel    ,ch(namcon),namsed    , & 
-                       & r(xz)     ,r(yz)     ,r(alfas)  ,d(dps)    ,r(thick)  , & 
-                       & r(sig)    ,r(rbuff)  ,r(rbuff)  ,r(rbuff)  ,gdp       )
-          else 
-             call dfwrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , & 
+           call wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , & 
                          & itdate    ,tzone     ,tunit     ,dt        ,nostat    , & 
                          & ntruv     ,nmax      ,mmax      ,kmax      ,lmax      , & 
                          & lstsci    ,ltur      ,grdang    ,sferic    ,lsed      , & 
                          & lsedtot   ,zbot      ,zmodel    ,ch(namcon),namsed    , & 
                          & r(xz)     ,r(yz)     ,r(alfas)  ,d(dps)    ,r(thick)  , & 
                          & r(sig)    ,r(rbuff)  ,r(rbuff)  ,r(rbuff)  ,gdp       ) 
-          endif 
+
           if (error) goto 9999 
           soort = 'his' 
           if (.not.parll .or. (parll .and. inode==master)) then 
@@ -377,8 +368,7 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
        ! and MAP DEF files following the NEFIS description 
        ! 
        if (itmapi > 0) then 
-          if (.not. parll) then 
-             call wrimap(lundia    ,error     ,trifil    ,selmap    ,simdat    , & 
+          call wrimap(lundia    ,error     ,trifil    ,selmap    ,simdat    , & 
                        & itdate    ,tzone     ,tunit     ,dt        ,mmax      , & 
                        & kmax      ,lmax      ,lstsci    ,ltur      ,nmaxus    , & 
                        & noroco    ,norow     ,nostat    ,nsrc      ,ntruv     , & 
@@ -388,18 +378,6 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
                        & r(xcor)   ,r(ycor)   ,r(xz)     ,r(yz)     ,r(alfas)  , & 
                        & r(dp)     ,r(thick)  ,r(sig)    ,r(rbuff)  ,r(rbuff)  , & 
                        & d(dps)    ,r(dpu)    ,r(dpv)    ,r(gsqs)   ,gdp       ) 
-          else 
-             call dfwrimap(lundia    ,error     ,trifil    ,selmap    ,simdat    , & 
-                         & itdate    ,tzone     ,tunit     ,dt        ,mmax      , & 
-                         & kmax      ,lmax      ,lstsci    ,ltur      ,nmaxus    , & 
-                         & noroco    ,norow     ,nostat    ,nsrc      ,ntruv     , & 
-                         & grdang    ,dpsopt    ,sferic    ,lsed      ,lsedtot   , & 
-                         & zmodel    ,zbot      ,ch(namsrc),ch(namcon),namsed    , & 
-                         & i(kcu)    ,i(kcv)    ,i(kcs)    ,i(irocol) ,i(ibuff)  , & 
-                         & r(xcor)   ,r(ycor)   ,r(xz)     ,r(yz)     ,r(alfas)  , & 
-                         & r(dp)     ,r(thick)  ,r(sig)    ,r(rbuff)  ,r(rbuff)  , & 
-                         & d(dps)    ,r(dpu)    ,r(dpv)    ,r(gsqs)   ,gdp       )
-          endif 
           if (error) goto 9999 
           soort = 'map' 
           if (.not.parll .or. (parll .and. inode==master)) then 

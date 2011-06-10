@@ -63,7 +63,7 @@ subroutine putgtr(filnam    ,grpnam    ,nelems    ,elmnms    ,elmdms    , &
                                                    !!    .TRUE. : write to  file
                                                    !!    .FALSE.: read from file
     real, dimension(*)                   :: buffr  !!  User supplied buffer to read from or
-                                                   !!  to write to, dependig on the write
+                                                   !!  to write to, depending on the write
                                                    !!  switch (WRILOG).
     character(*)                         :: elmnam !!  Name of element, who's values must
                                                    !!  be written or read. This name must

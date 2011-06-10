@@ -69,13 +69,9 @@ libparallel_la_SOURCES = \
          dffunctionals.f90 \
          dfgather.f90 \
          dfgather_grddim.f90 \
-         dfwrihis.f90 \
-         dfwrimap.f90 \
          dfwrirst.f90 \
          dfwrmorm1.f90 \
          dfwrmorm2.f90 \
-         dfwrthis.f90 \
-         dfwrtmap.f90 \
          dfwrsedm.f90 \
          dfwrsedmavg.f90 \
          dfwrsedh.f90 \
