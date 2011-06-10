@@ -37,6 +37,7 @@ subroutine gdp_dealloc(gdp)
     use precision
     use sp_buffer
     !
+    use bedcomposition_module
     use globaldata
     use dfparall
     !
@@ -243,7 +244,7 @@ subroutine gdp_dealloc(gdp)
        call clrerosed(istat, gdp)
        call clrsedpar(istat, gdp)
        call clrmorpar(istat, gdp)
-       call clrmorlyr(istat, gdp)
+       istat = clrmorlyr(gdp%gdmorlyr)
        call clrdredge(istat, gdp)
     endif
     deallocate (gdp%gddredge)
@@ -251,7 +252,6 @@ subroutine gdp_dealloc(gdp)
     deallocate (gdp%gderosed)
     deallocate (gdp%gdsedpar)
     deallocate (gdp%gdmorpar)
-    deallocate (gdp%gdmorlyr)
     call clrmassbal(istat, gdp)
     deallocate (gdp%gdmassbal)
     deallocate (gdp%gdf0isf1)
