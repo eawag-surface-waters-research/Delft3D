@@ -44,7 +44,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>
-      <Command>call ..\..\..\..\scripts\win32\update_version.cmd .\include\semaphore_version.h .\ .\include\version_number.ini</Command>
+      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\semaphore_version.h .\ .\include\version_number.ini</Command>
     </PreBuildEvent>
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -68,7 +68,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PreBuildEvent>
-      <Command>call ..\..\..\..\scripts\win32\update_version.cmd .\include\semaphore_version.h .\ .\include\version_number.ini</Command>
+      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\semaphore_version.h .\ .\include\version_number.ini</Command>
     </PreBuildEvent>
     <ClCompile>
       <AdditionalIncludeDirectories>../../include/win32;./include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>

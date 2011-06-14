@@ -44,8 +44,8 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>
-      <Command>call ..\..\..\..\scripts\win32\make_revision.bat ..\..\..\.. ..\.. .\include\version_number.ini .\include\version_number.h.svn .\include\version_number.h
-if exist ".\include\version_number.rc.svn" call ..\..\..\..\scripts\win32\make_revision.bat ..\..\..\.. ..\.. .\include\version_number.ini .\include\version_number.rc.svn .\include\version_number.rc
+      <Command>call ..\..\..\..\scripts_lgpl\win32\make_revision.bat ..\..\..\.. ..\.. .\include\version_number.ini .\include\version_number.h.svn .\include\version_number.h
+if exist ".\include\version_number.rc.svn" call ..\..\..\..\scripts_lgpl\win32\make_revision.bat ..\..\..\.. ..\.. .\include\version_number.ini .\include\version_number.rc.svn .\include\version_number.rc
 </Command>
     </PreBuildEvent>
     <CustomBuildStep>
@@ -72,8 +72,8 @@ if exist ".\include\version_number.rc.svn" call ..\..\..\..\scripts\win32\make_r
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PreBuildEvent>
-      <Command>call ..\..\..\..\scripts\win32\make_revision.bat ..\..\..\.. ..\.. .\include\version_number.ini .\include\version_number.h.svn .\include\version_number.h
-if exist ".\include\version_number.rc.svn" call ..\..\..\..\scripts\win32\make_revision.bat ..\..\..\.. ..\.. .\include\version_number.ini .\include\version_number.rc.svn .\include\version_number.rc
+      <Command>call ..\..\..\..\scripts_lgpl\win32\make_revision.bat ..\..\..\.. ..\.. .\include\version_number.ini .\include\version_number.h.svn .\include\version_number.h
+if exist ".\include\version_number.rc.svn" call ..\..\..\..\scripts_lgpl\win32\make_revision.bat ..\..\..\.. ..\.. .\include\version_number.ini .\include\version_number.rc.svn .\include\version_number.rc
 </Command>
     </PreBuildEvent>
     <ClCompile>
