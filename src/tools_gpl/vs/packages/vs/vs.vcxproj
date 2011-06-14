@@ -110,8 +110,7 @@ del /f vs_l.c vs_y.c
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>
-      </Command>
+      <Command>..\..\..\..\scripts_lgpl\win32\oss-install.cmd vs ..\bin</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
