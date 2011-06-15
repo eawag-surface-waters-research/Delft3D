@@ -132,7 +132,7 @@ subroutine SetMessageHandling(write2screen, useLog, lunMessages, callback, thres
    integer, optional, intent(in)       :: lunMessages  !< File pointer whereto messages can be written.
    integer, optional, intent(in)       :: thresholdLevel  !< Messages with level lower than the thresholdlevel
                                                           !< will be discarded.
-   procedure(mh_callbackiface), optional, pointer :: callback
+   procedure(mh_callbackiface), optional :: callback
 
    if (present(write2screen) ) writeMessage2Screen = write2screen
    if (present(lunMessages) )  lunMess             = lunMessages
