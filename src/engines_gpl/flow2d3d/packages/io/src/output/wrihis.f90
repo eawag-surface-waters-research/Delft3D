@@ -715,12 +715,14 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
        ! group 2, element 'ZK'
        !
        if (zmodel) then
+          allocate( rsbuff(kmax+1))
           do k = 1, kmax
-             rbuffz(k + 1) = zk(k)
+             rsbuff(k + 1) = zk(k)
           enddo
-          rbuffz(1) = zbot
-          ierror = putelt(fds, grnam2, 'ZK', uindex, 1, rbuffz)
+          rsbuff(1) = zbot
+          ierror = putelt(fds, grnam2, 'ZK', uindex, 1, rsbuff)
           if (ierror/=0) goto 999
+          deallocate(rsbuff)
        endif
        !
        ! group 2, element 'COORDINATES'
