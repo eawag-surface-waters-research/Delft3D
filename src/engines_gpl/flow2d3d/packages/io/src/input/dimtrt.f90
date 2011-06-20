@@ -86,7 +86,6 @@ subroutine dimtrt(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
     character(20)                                 :: cdef
     character(20)                                 :: chulp
     character(256)                                :: filtmp
-    character(300)                                :: rec300
     character(6)                                  :: keyw
 !
 !! executable statements -------------------------------------------------------

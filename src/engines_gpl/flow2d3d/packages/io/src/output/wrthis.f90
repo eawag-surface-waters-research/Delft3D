@@ -145,10 +145,6 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     integer        , dimension(:,:)  , allocatable   :: ibuff2b   ! work array
     integer        , dimension(:)    , allocatable   :: nostatarr ! number of stations per partition
     logical                                          :: cross_sec ! option to sum results from cross-sections across partitions
-    real(fp)       , dimension(:)      , allocatable :: rbuff1
-    real(fp)       , dimension(:,:)    , allocatable :: rbuff2
-    real(fp)       , dimension(:,:,:)  , allocatable :: rbuff3
-    real(fp)       , dimension(:,:,:,:), allocatable :: rbuff4
     real(sp)       , dimension(:)      , allocatable :: rsbuff1   ! work array
     real(sp)       , dimension(:,:)    , allocatable :: rsbuff2   ! work array
     real(sp)       , dimension(:,:,:)  , allocatable :: rsbuff3   ! work array

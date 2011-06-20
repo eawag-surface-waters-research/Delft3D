@@ -360,7 +360,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
              call d3stop(1, gdp)
           endif
           !
-          ! define pointers again to update references
+          ! define pointers again to update references; initialize the arrays
           !
           qeva_out   => gdp%gdheat%qeva_out
           qco_out    => gdp%gdheat%qco_out
@@ -371,6 +371,15 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
           hfree_out  => gdp%gdheat%hfree_out
           efree_out  => gdp%gdheat%efree_out
           qmis_out   => gdp%gdheat%qmis_out
+          qeva_out  = 0.0_fp
+          qco_out   = 0.0_fp
+          qbl_out   = 0.0_fp
+          qin_out   = 0.0_fp
+          qnet_out  = 0.0_fp
+          hlc_out   = 0.0_fp
+          hfree_out = 0.0_fp
+          efree_out = 0.0_fp
+          qmis_out  = 0.0_fp          
        endif
     endif
     !

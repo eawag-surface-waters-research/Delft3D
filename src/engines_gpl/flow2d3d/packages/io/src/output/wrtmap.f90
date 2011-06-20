@@ -181,7 +181,6 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     integer                                       :: l            ! Help var.
     integer                                       :: lastcl
     integer                                       :: m            ! Help var.
-    integer                                       :: maxdim4
     integer                                       :: n            ! Help var.
     integer                                       :: nm
     integer    , dimension(1)                     :: idummy       ! Help array to read/write Nefis files
@@ -193,25 +192,16 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     integer                        , external     :: open_datdef
     integer                        , external     :: neferr
     integer    , dimension(4,0:nproc-1)           :: iarrc        ! array containing collected grid indices 
-    integer                                       :: indx         ! array index
-    integer                                       :: ip           ! node number 
-    integer                                       :: istart       ! start pointer for each subdomain in collected array
     integer                                       :: lenlo        ! length of field of current subdomain
     integer                                       :: lengl        ! length of field containing collected data
     integer    , dimension(0:nproc-1)             :: mf           ! first index w.r.t. global grid in x-direction
     integer    , dimension(0:nproc-1)             :: ml           ! last index w.r.t. global grid in x-direction
-    integer                                       :: msiz         ! size of present subdomain in x-direction
     integer    , dimension(0:nproc-1)             :: nf           ! first index w.r.t. global grid in y-direction
     integer    , dimension(0:nproc-1)             :: nl           ! last index w.r.t. global grid in y-direction
-    integer                                       :: nsiz         ! size of present subdomain in y-direction
     integer    , dimension(:,:)    , allocatable  :: ibuff2
-    real(fp)   , dimension(:)      , allocatable  :: rbuff1
     real(fp)   , dimension(:,:)    , allocatable  :: rbuff2
     real(fp)   , dimension(:,:,:)  , allocatable  :: rbuff3
     real(fp)   , dimension(:,:,:,:), allocatable  :: rbuff4
-    real(sp)   ,  dimension(:)      , allocatable :: rsbuff1   ! work array
-    real(sp)   ,  dimension(:,:)    , allocatable :: rsbuff2   ! work array
-    real(sp)   ,  dimension(:,:,:)  , allocatable :: rsbuff3   ! work array    
     real(fp)   , dimension(:,:,:)  , allocatable  :: zkt            ! Vertical coordinates of layering interfaces
     character(10)                                 :: runit
     character(16)                                 :: grnam1       ! Data-group name defined for the NEFIS-files group 1
@@ -219,7 +209,6 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     character(64)                                 :: rdesc
     character(256)                                :: filnam       ! Help var. for FLOW file name
     character(6)                                  :: errmsg       ! Character var. containing the error message to be written to file. The message depend on the error.
-    character(1024)                               :: error_string
 !
 ! Data statements
 !

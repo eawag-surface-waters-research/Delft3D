@@ -85,7 +85,6 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
     integer                        :: ieva
     integer                        :: iocond               ! IO status for reading 
-    integer                        :: it
     integer                        :: itold                ! Help var. to store last read time to test accending order 
     integer                        :: ittdep               ! Help var. for the time read (now de- fined as multiples of DT, but in fu- ture it may take any value) 
     integer                        :: l                    ! Help var. 
@@ -108,7 +107,6 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     logical                        :: rec1st               ! Flag set to TRUE if the record read is the first record 
     real(fp)                       :: rdef                 ! Help var. containing default va- lue(s) for real variable 
     real(fp)                       :: rdummy
-    real(fp)                       :: t
     real(fp), dimension(4)         :: rval                 ! Help array (real) where the data, recently read from the MD-file, are stored temporarily 
     character(11)                  :: fmtdef               ! Default file format (usually=blank) 
     character(11)                  :: fmttmp               ! Help variable for file format 
