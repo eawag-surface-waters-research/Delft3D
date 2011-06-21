@@ -165,7 +165,6 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        !
        ! Allocate temporary single precision array for the ENTIRE domain
        !
-       !      allocate(sbuff(nmaxus, mmax, 0:kmax, max(1, lstsci, ltur)))
        allocate(sbuff(nmaxgl, mmaxgl, 0:kmax, max(1, lstsci, ltur)))
        !
        ! the restart file is opened and read by the master

@@ -406,7 +406,7 @@ subroutine inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
     !
     ! DFUPDGEO: exchange geometrical information as computed in routine inigeo with neighbours in case of parallel runs
     !
-    call dfupdgeo2( r(alfas)    ,r(fcorio)   ,r(xcor)     ,r(ycor)     ,r(xz)       , &
+    call dfupdgeo( r(alfas)    ,r(fcorio)   ,r(xcor)     ,r(ycor)     ,r(xz)       , &
                  & r(yz)       ,r(guu)      ,r(gvv)      ,r(guv)      ,r(gvu)      , &
                  & r(gsqs)     ,r(gsqd)     ,r(guz)      ,r(gvz)      ,r(gud)      , &
                  & r(gvd)      ,r(gsqiu)    ,r(gsqiv)    ,gdp         )

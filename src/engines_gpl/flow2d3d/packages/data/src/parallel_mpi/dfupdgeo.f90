@@ -82,12 +82,15 @@ subroutine dfupdgeo ( alfas     ,fcorio    ,xcor      ,ycor      ,xz        , &
     call dfexchg ( gsqiv , 1, 1, dfloat, gdp )
     call dfexchg ( gsqs  , 1, 1, dfloat, gdp )
     call dfexchg ( gud   , 1, 1, dfloat, gdp )
-    call dfexchg ( guu   , 1, 1, dfloat, gdp )
+!
+!   Note: for obvious reasons (?), guu and gvv do not have to be exchanged.
+!    
+!    call dfexchg ( guu   , 1, 1, dfloat, gdp )
     call dfexchg ( guv   , 1, 1, dfloat, gdp )
     call dfexchg ( guz   , 1, 1, dfloat, gdp )
     call dfexchg ( gvd   , 1, 1, dfloat, gdp )
     call dfexchg ( gvu   , 1, 1, dfloat, gdp )
-    call dfexchg ( gvv   , 1, 1, dfloat, gdp )
+!    call dfexchg ( gvv   , 1, 1, dfloat, gdp )
     call dfexchg ( gvz   , 1, 1, dfloat, gdp )
     call dfexchg ( xcor  , 1, 1, dfloat, gdp )
     call dfexchg ( xz    , 1, 1, dfloat, gdp )

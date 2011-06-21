@@ -350,8 +350,6 @@ src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/dfstrip.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/dfsync.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/dfupdd.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/dfupdgeo.f90 -text
-src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/dfupdgeo1.f90 -text
-src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/dfupdgeo2.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/dfupdi.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/dfupdr.f90 -text
 src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/dfwaitd.f90 -text

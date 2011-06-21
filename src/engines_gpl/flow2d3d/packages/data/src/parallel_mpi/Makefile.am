@@ -62,8 +62,7 @@ libparallel_la_SOURCES = \
          dfpartit.f90 \
          dfbladm.f90 \
          dforb.f90 \
-         dfupdgeo1.f90 \
-         dfupdgeo2.f90 \
+         dfupdgeo.f90 \
          dfstrip.f90 \
          dfmassc.f90 \
          dffunctionals.f90 \
