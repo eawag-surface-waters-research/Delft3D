@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
     #
     # This script starts a Delft3D-FLOW (4.00.00 or higher) computation on Linux
     # running a Fluid Mud calculation
