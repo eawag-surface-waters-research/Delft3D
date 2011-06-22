@@ -47,9 +47,9 @@ fi
 ## INITIALIZATION                                                             ##
 ################################################################################
 if [ $mpirun -eq 1 ]; then
-  SWANEXEC=${D3D_HOME}/$ARCH/wave/bin/swan_4072ABCDE_del_l32_i11_mpi.exe
+  SWANEXEC=${D3D_HOME}/$ARCH/wave/bin/swan_4081_del_l32_i11_mpi.exe
 else
-  SWANEXEC=${D3D_HOME}/$ARCH/wave/bin/swan_4072ABCDE_del_l32_i11_omp.exe
+  SWANEXEC=${D3D_HOME}/$ARCH/wave/bin/swan_4081_del_l32_i11_omp.exe
   #
   # swan40.72AB and newer runs parallel using OpenMP, using the total number of cores on the machine
   # To force the number of parallel processes, remove the "#" in front of the following line and adjust the number
