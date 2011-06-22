@@ -32,6 +32,7 @@ subroutine scan_fl(checkVersionNumber, versionNumberOK)
 ! SCANFL scans the file "hiswa.out" for a string "SEVERE" or
 ! or the Swan file "PRINT" for a string "ERROR"
 ! If found, the program will be stopped.
+! Errors related to the grid are converted into a warning.
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
@@ -40,23 +41,29 @@ subroutine scan_fl(checkVersionNumber, versionNumberOK)
 !
 ! Global variables
 !
-    logical, intent(in)  :: checkVersionNumber
+    logical, intent(in) :: checkVersionNumber
+    character(*)        :: versionNumberOK
 !
 ! Local variables
 !
     integer           :: k
+    integer           :: k2
+    integer           :: gridwarn
     integer           :: verLen
     integer           :: uh
-    integer, external :: new_lun
     character(20)     :: versionNumber
-    character(*)      :: versionNumberOK
     character(80)     :: line
+!
+! Functions called
+!
+    integer, external :: new_lun
 !
 !! executable statements -------------------------------------------------------
 !
     verLen = len_trim(versionNumberOK)
     uh = new_lun()
     open (uh, file = 'PRINT', form = 'FORMATTED')
+    gridwarn = 0
 100 continue
        read (uh, '(A)', end = 200) line
        call small(line, 80)
@@ -68,9 +75,14 @@ subroutine scan_fl(checkVersionNumber, versionNumberOK)
        endif
        k = index(line, 'error')
        if (k > 0) then
-          write (*, '(a)') '*** ERROR: SWAN file PRINT contains ERRORS'
-          close (uh)
-          stop
+          k2 = index(line, 'grid')
+          if (k2 > 0) then
+             gridwarn = gridwarn + 1
+          else
+             write (*, '(a)') '*** ERROR: SWAN file PRINT contains ERRORS'
+             close (uh)
+             stop
+          endif
        endif
        if (checkVersionNumber) then
           k = index(line, 'version number')
@@ -85,5 +97,9 @@ subroutine scan_fl(checkVersionNumber, versionNumberOK)
        endif
     goto 100
 200 continue
+    if (gridwarn > 0) then
+       write (*, '(a,i4,a)') 'Warning: found ', gridwarn, &
+          ' times a error about the grid. See PRINT file for details'
+    endif
     close (uh)
 end subroutine scan_fl
