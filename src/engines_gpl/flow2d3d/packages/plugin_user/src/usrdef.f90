@@ -66,7 +66,7 @@ subroutine usrdef(lundia    ,error     ,grdang    ,secflo    ,gdp       )
     real(fp)                       , pointer :: tstop
     real(fp)                       , pointer :: dt
     integer                        , pointer :: itstrt
-    integer                        , pointer :: itstop
+    integer                        , pointer :: itfinish
     integer                        , pointer :: itdiag
     real(fp)                       , pointer :: zwi
     real(fp)                       , pointer :: ck
@@ -130,7 +130,7 @@ subroutine usrdef(lundia    ,error     ,grdang    ,secflo    ,gdp       )
     tstop       => gdp%gdexttim%tstop
     dt          => gdp%gdexttim%dt
     itstrt      => gdp%gdinttim%itstrt
-    itstop      => gdp%gdinttim%itstop
+    itfinish    => gdp%gdinttim%itfinish
     itdiag      => gdp%gdinttim%itdiag
     zwi         => gdp%gdturcoe%zwi
     ck          => gdp%gdturcoe%ck
@@ -146,7 +146,7 @@ subroutine usrdef(lundia    ,error     ,grdang    ,secflo    ,gdp       )
     inpzw = 0
     zwi = 0.0
     !
-    itdiag = itstop + 1
+    itdiag = itfinish + 1
     !
     !-----User Defined Function ? <YES/NO>
     !
@@ -307,7 +307,7 @@ subroutine usrdef(lundia    ,error     ,grdang    ,secflo    ,gdp       )
        !--------test value inside time frame
        !        For ITDIAG = 0 diagnostic mode for computation is presumed
        !
-       if (itdiag>itstop) then
+       if (itdiag>itfinish) then
           call prterr(lundia    ,'V241'    ,' '       )
        !
        endif

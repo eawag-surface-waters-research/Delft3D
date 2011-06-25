@@ -97,7 +97,7 @@ subroutine gdp_dealloc(gdp)
     !
     call nefisio_dealloc(gdp       )
     !
-    call clradv2d(gdp)
+    call clradv2d(istat, gdp)
     deallocate (gdp%gdadv2d)
     deallocate (gdp%gdaddress)
     deallocate (gdp%gdautok)
@@ -115,8 +115,9 @@ subroutine gdp_dealloc(gdp)
     deallocate (gdp%gdcoup)
     deallocate (gdp%gddatusr)
     deallocate (gdp%gddiagno)
-    deallocate (gdp%gddischarge)
+
     if (associated(gdp%gddischarge%capacity)) deallocate (gdp%gddischarge%capacity, STAT = istat)
+    deallocate (gdp%gddischarge)
     deallocate (gdp%d)
     if (localdpmveg) then
        do i=1,gdp%gddpmveg%nveg
@@ -284,7 +285,7 @@ subroutine gdp_dealloc(gdp)
     deallocate (gdp%gdupdbcc)
     deallocate (gdp%gdupdbct)
     deallocate (gdp%gdupddis)
-    call clrwaqpar(istat, gdp)
+ !   call clrwaqpar(istat, gdp)
     deallocate (gdp%gdwaqpar)
     deallocate (gdp%gdwrirst)
     deallocate (gdp%gdwrline)

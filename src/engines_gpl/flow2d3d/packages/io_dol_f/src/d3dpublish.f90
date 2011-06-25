@@ -96,6 +96,8 @@ contains
         
         character(len=20), dimension(:), pointer    :: p_ch => null()
 
+        if (isNull_olv(olv_handle)) return
+
         !-----  Executable statements  ------!
         olv => olv_handle%fields
         
@@ -301,6 +303,8 @@ contains
         include 'delftonline.i'
         type(olvhandle)             :: olv_handle
         type(olv_handle_t), pointer :: olv
+
+        if (isNull_olv(olv_handle)) return
                 
         olv => olv_handle%fields
         
@@ -322,6 +326,8 @@ contains
         type(olvhandle) :: olv_handle
         type(olv_handle_t), pointer :: olv
 
+        if (isNull_olv(olv_handle)) return
+
         olv => olv_handle%fields
         
         olv%runningFlag = value
@@ -338,6 +344,8 @@ contains
         type(olvhandle) :: olv_handle
         type(olv_handle_t), pointer :: olv
 
+        if (isNull_olv(olv_handle)) return
+
         olv => olv_handle%fields
 
         olv%endTimeStep = itstop
@@ -351,6 +359,8 @@ contains
 
         type(olvhandle) :: olv_handle
         type(olv_handle_t), pointer :: olv
+
+        if (isNull_olv(olv_handle)) return
 
         olv => olv_handle%fields
 

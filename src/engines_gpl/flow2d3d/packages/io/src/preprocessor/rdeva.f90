@@ -1,6 +1,6 @@
 subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                & noui      ,runid     ,fileva    ,fmteva    ,rteva     , &
-               & dt        ,itstrt    ,itstop    ,mxevat    ,nevatm    , &
+               & dt        ,itstrt    ,itfinish  ,mxevat    ,nevatm    , &
                & precip    ,evapor    ,train     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -60,7 +60,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
 ! Global variables
 !
-    integer                                       :: itstop     !  Description and declaration in inttim.igs
+    integer                                       :: itfinish   !  Description and declaration in inttim.igs
     integer                                       :: itstrt     !  Description and declaration in inttim.igs
     integer                         , intent(in)  :: lundia     !  Description and declaration in inout.igs
     integer                         , intent(in)  :: lunmd      !  Description and declaration in inout.igs
@@ -292,7 +292,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              call prterr(lundia, 'G051', trim(message))
              nrval = 3
              call rdtdf(lundia    ,lunout    ,error     ,fileva    ,fmttmp    , &
-                      & nrval     ,rval      ,dt        ,itstrt    ,itstop    , &
+                      & nrval     ,rval      ,dt        ,itstrt    ,itfinish  , &
                       & gdp       )
              if (error) goto 9999
           !
@@ -365,7 +365,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !---------not found ?
        !
        if (.not.found) then
-          if (itold<itstop) then
+          if (itold < itfinish) then
              write(message,'(a,a,a)') 'Last time of parameters for rain/evaporation model in file ', trim(fileva), ' <' 
              call prterr(lundia    ,'U042'    ,message  )
              !
@@ -471,7 +471,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
   500  continue
        if (itold/= - 1) then
-          if (itold<itstop) then
+          if (itold < itfinish) then
              write(message,'(a,a,a)') 'Last time in file ', trim(fileva), ' <' 
              call prterr(lundia    ,'U042'    ,message)
              error = .true.

@@ -57,6 +57,7 @@ libkernel_inichk_la_SOURCES = \
          chktrt.f90 \
          chkvic.f90 \
          creategridborder.f90 \
+         d3d_in_openda.f90 \
          getdx.f90 \
          getdy.f90 \
          inchki.f90 \

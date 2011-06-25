@@ -84,8 +84,17 @@ function mkipnt(pntnam    ,length    ,gdp       )
     !
     mkipnt = getptr(pntnam(:ind - 1))
     if (mkipnt /= 0) then
+   
+       if (gdp%gdtricom%initi /= 3) then
+          call inull(ibuf(mkipnt)         ,length    )
+          mkipnt = 1
+       else
+
        ! return the value -1 (used in Mor)
-       mkipnt = -1
+         mkipnt = -1
+       endif   
+
+    
     else
        !
        ! Call dynamic array declaration function MAKPTR for pointer name

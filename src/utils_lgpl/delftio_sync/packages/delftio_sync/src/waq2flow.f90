@@ -50,7 +50,7 @@ subroutine waq2flow(dps, mmax, nmaxus, kmax, lundia, mlb, mub, nlb, nub)
     integer                                , intent(in)  :: nmaxus
     integer                                , intent(in)  :: kmax
     integer                                , intent(in)  :: lundia
-    real(prec), dimension(nlb:nub, mlb:mub)              :: dps    !  Description and declaration in rjdim.f90
+    real(prec), dimension(nlb:nub, mlb:mub)              :: dps    !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

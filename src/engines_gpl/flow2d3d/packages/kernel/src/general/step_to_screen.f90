@@ -1,4 +1,4 @@
-subroutine step_to_screen(nst2go, itstrt, itstop, nst, gdp)
+subroutine step_to_screen(nst2go, itstrt, itfinish, nst, gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -55,7 +55,7 @@ subroutine step_to_screen(nst2go, itstrt, itstop, nst, gdp)
 !
     integer       :: nst2go       !!  number of timesteps to go
     integer       :: itstrt       !!  first timestep
-    integer       :: itstop       !!  last timestep
+    integer       :: itfinish     !!  last timestep
     integer       :: nst          !!  current timestep
 !
 ! Local variables
@@ -74,7 +74,7 @@ subroutine step_to_screen(nst2go, itstrt, itstop, nst, gdp)
     !
     ! determine completed percentage of simulation
     !
-    perc_compl  = 100.0_fp*(real(nst-itstrt,fp)/real(itstop-itstrt,fp))
+    perc_compl  = 100.0_fp*(real(nst-itstrt,fp)/real(itfinish-itstrt,fp))
     !
     ! initialise the remaining minutes, hours and days 
     !

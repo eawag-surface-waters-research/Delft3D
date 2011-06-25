@@ -116,7 +116,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     character(16)  , dimension(:)        , pointer :: founam
     character(1)   , dimension(:)        , pointer :: foutyp
     integer                              , pointer :: itstrt
-    integer                              , pointer :: itstop
+    integer                              , pointer :: itfinish
     integer                              , pointer :: itmapi
     integer                              , pointer :: itmapl
     integer                              , pointer :: ithisi
@@ -403,7 +403,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     wrka4               => gdp%gdaddress%wrka4
     wrka5               => gdp%gdaddress%wrka5
     wrkb1               => gdp%gdaddress%wrkb1
-    wrkb2               => gdp%gdaddress%wrkb2    
+    wrkb2               => gdp%gdaddress%wrkb2
     wrkb3               => gdp%gdaddress%wrkb3
     wrkb4               => gdp%gdaddress%wrkb4
     nmax                => gdp%d%nmax
@@ -455,7 +455,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     founam              => gdp%gdfourier%founam
     foutyp              => gdp%gdfourier%foutyp
     itstrt              => gdp%gdinttim%itstrt
-    itstop              => gdp%gdinttim%itstop
+    itfinish            => gdp%gdinttim%itfinish
     itmapi              => gdp%gdinttim%itmapi
     itmapl              => gdp%gdinttim%itmapl
     ithisi              => gdp%gdinttim%ithisi
@@ -761,7 +761,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                    & nsrc      ,r(qu)     ,r(qv)     ,r(discum) ,gdp       )
           !
           ! Update timestep to write Communication file
-          ! ITSTRT <= ITCOMF <= ITCOMC <= ITCOML <= ITSTOP
+          ! ITSTRT <= ITCOMF <= ITCOMC <= ITCOML <= ITFINISH
           !
           if (itcomc+itcomi <= itcoml) then
              itcomc = itcomc + itcomi
@@ -922,7 +922,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
           if (error) goto 9999
           !
           ! Update timestep to print HIS data
-          ! ITSTRT <= IPHISF <= IPHISC <= IPHISL <= ITSTOP
+          ! ITSTRT <= IPHISF <= IPHISC <= IPHISL <= ITFINISH
           !
           if (iphisc+iphisi <= iphisl) iphisc = iphisc + iphisi
        endif
@@ -993,7 +993,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
           endif
           !
           ! Update timestep to write HIS files
-          ! ITSTRT <= ITHISF <= ITHISC <= ITHISL <= ITSTOP
+          ! ITSTRT <= ITHISF <= ITHISC <= ITHISL <= ITFINISH
           !
           if (nst==ithisc .and. ithisc+ithisi<=ithisl) then
              ithisc = ithisc + ithisi
@@ -1020,7 +1020,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
           if (error) goto 9999
           !
           ! Update timestep to print MAP data
-          ! ITSTRT <= IPMAP (NPMAP) <= IPMAP (NPMAP+1) <= ITSTOP
+          ! ITSTRT <= IPMAP (NPMAP) <= IPMAP (NPMAP+1) <= ITFINISH
           !
           npmap = npmap + 1
        endif
@@ -1108,7 +1108,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
           endif
           !
           ! Update timestep to write MAP files
-          ! ITSTRT <= ITMAPF <= ITMAPC <= ITMAPL <= ITSTOP
+          ! ITSTRT <= ITMAPF <= ITMAPC <= ITMAPL <= ITFINISH
           !
           if (nst==itmapc .and. itmapc+itmapi<=itmapl) then
              itmapc = itmapc + itmapi
@@ -1129,7 +1129,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
           if (error) goto 9999
           !
           ! Update timestep to write drogue file
-          ! ITSTRT <= ITDROF <= ITDROC <= ITDROL <= ITSTOP
+          ! ITSTRT <= ITDROF <= ITDROC <= ITDROL <= ITFINISH
           !
           if (itdroc+itdroi <= itdrol) then
              itdroc = itdroc + itdroi
@@ -1236,7 +1236,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
        !
        ! Write results of fourier analysis to "TEKAL" data file
        ! only once when all fourier periods are complete
-       ! "if (nst==itstop) then" doesn't work for morsys simulations with
+       ! "if (nst==itfinish) then" doesn't work for morsys simulations with
        ! multiple flow calls because wrfou gets called multiple times and this
        ! messes up the averageing.
        !
@@ -1250,7 +1250,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     endif
     !
     ! Write restart file
-    ! Add interval ITRSTI to ITRSTC until ITSTOP (write also for ITSTOP)
+    ! Add interval ITRSTI to ITRSTC until ITFINISH (write also for ITFINISH)
     !
     if (nst == itrstc) then
        if (.not. parll) then
@@ -1266,7 +1266,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
        endif
        write (lundia, '(a,f15.4,a)') '*** Restart file written at ', real(nst,sp)  &
                                    & *dtsec/60., ' minutes after ITDATE'
-       itrstc = min(itrstc + itrsti, itstop)
+       itrstc = min(itrstc + itrsti, itfinish)
     endif
  9999 continue
 end subroutine postpr

@@ -1,7 +1,7 @@
 subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                & noui      ,nrver     ,runid     ,filbct    ,eol       , &
                & nambnd    ,typbnd    ,tprofu    ,nto       ,ntot      , &
-               & ntof      ,kmax      ,rtbct     ,itstrt    ,itstop    , &
+               & ntof      ,kmax      ,rtbct     ,itstrt    ,itfinish  , &
                & mxbctm    ,nbcttm    ,tampab    ,bubble    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -64,39 +64,35 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
 ! Global variables
 !
-    integer                                        :: itstop !  Description and declaration in inttim.igs
-    integer                                        :: itstrt !  Description and declaration in inttim.igs
-    integer                                        :: kmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                        :: lundia !  Description and declaration in inout.igs
-    integer                                        :: lunmd  !  Description and declaration in inout.igs
-    integer                          , intent(in)  :: mxbctm !!  Maximum number of times for which
-                                                             !!  time varying boundary conditions are
-                                                             !!  allowed in the Md-file
-    integer                                        :: nbcttm !!  Actual number of times for which
-                                                             !!  time varying boundary conditions are
-                                                             !!  allowed in the Md-file
-    integer                                        :: nrrec  !!  Pointer to the record number in the
-                                                             !!  MD-file
-    integer                          , intent(in)  :: nrver  !!  Version number (240 - ....)
-    integer                                        :: nto    !  Description and declaration in esm_alloc_int.f90
-    integer                                        :: ntof   !  Description and declaration in dimens.igs
-    integer                                        :: ntot   !  Description and declaration in dimens.igs
-    logical, intent(in)                            :: bubble !  Description and declaration in procs.igs    
-    logical                                        :: error  !!  Flag=TRUE if an error is encountered
-    logical, intent(in)                            :: noui   !!  Flag for reading from User Interface
-    real(fp), dimension(2, mxbctm, nto)            :: tampab !!  At most MXBCTM amlitudes for time
-                                                             !!  varying boundary openings (end A and
-                                                             !!  end B)
-    real(fp), dimension(mxbctm)                    :: rtbct  !!  At most MXBCTM times for time varying
-                                                             !!  boundary openings
-    character(*)                                   :: filbct !!  File name for the time varying
-                                                             !!  boundary conditions file
-    character(*)                                   :: mdfrec !!  Standard rec. length in MD-file (300)
+    integer                                        :: itfinish !  Description and declaration in inttim.igs
+    integer                                        :: itstrt   !  Description and declaration in inttim.igs
+    integer                                        :: kmax     !  Description and declaration in esm_alloc_int.f90
+    integer                                        :: lundia   !  Description and declaration in inout.igs
+    integer                                        :: lunmd    !  Description and declaration in inout.igs
+    integer                          , intent(in)  :: mxbctm   !!  Maximum number of times for which
+                                                               !!  time varying boundary conditions are
+                                                               !!  allowed in the Md-file
+    integer                                        :: nbcttm   !!  Actual number of times for which
+                                                               !!  time varying boundary conditions are
+                                                               !!  allowed in the Md-file
+    integer                                        :: nrrec    !!  Pointer to the record number in the MD-file
+    integer                          , intent(in)  :: nrver    !!  Version number (240 - ....)
+    integer                                        :: nto      !  Description and declaration in esm_alloc_int.f90
+    integer                                        :: ntof     !  Description and declaration in dimens.igs
+    integer                                        :: ntot     !  Description and declaration in dimens.igs
+    logical, intent(in)                            :: bubble   !  Description and declaration in procs.igs
+    logical                                        :: error    !!  Flag=TRUE if an error is encountered
+    logical, intent(in)                            :: noui     !!  Flag for reading from User Interface
+    real(fp), dimension(2, mxbctm, nto)            :: tampab   !!  At most MXBCTM amlitudes for time
+                                                               !!  varying boundary openings (end A and end B)
+    real(fp), dimension(mxbctm)                    :: rtbct    !!  At most MXBCTM times for time varying boundary openings
+    character(*)                                   :: filbct   !!  File name for the time varying boundary conditions file
+    character(*)                                   :: mdfrec   !!  Standard rec. length in MD-file (300)
     character(*)                                   :: runid
-    character(1)                                   :: eol    !!  ASCII code for End-Of-Line (^J)
-    character(1) , dimension(nto)                  :: typbnd !  Description and declaration in esm_alloc_char.f90
-    character(20), dimension(nto)                  :: nambnd !  Description and declaration in esm_alloc_char.f90
-    character(20), dimension(nto)                  :: tprofu !  Description and declaration in esm_alloc_char.f90
+    character(1)                                   :: eol      !!  ASCII code for End-Of-Line (^J)
+    character(1) , dimension(nto)                  :: typbnd   !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(nto)                  :: nambnd   !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(nto)                  :: tprofu   !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !
@@ -286,7 +282,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 write (message, '(2a)') 'Reading BC-hydrodynamic file ', filbct(:lf)
                 call prterr(lundia, 'G051', trim(message))
                 call rdtdt(lundia    ,lunout    ,lunrd     ,error     ,filbct    , &
-                         & runid     ,typtst    ,eol       ,itstrt    ,itstop    , &
+                         & runid     ,typtst    ,eol       ,itstrt    ,itfinish  , &
                          & nto       ,ntot      ,ntof      ,tprofu    ,nambnd    , &
                          & typbnd    ,namtyp    ,unttyp    ,gdp       )
                 !
@@ -304,7 +300,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 call prterr(lundia, 'G051', trim(message))
                 call rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
                           & filbct    ,runid     ,typtst    ,eol       ,itstrt    , &
-                          & itstop    ,nto       ,ntof      ,ntot      ,kmax      , &
+                          & itfinish  ,nto       ,ntof      ,ntot      ,kmax      , &
                           & tprofu    ,nambnd    ,typbnd    ,namtyp    ,unttyp    , &
                           & bubble    ,gdp       )
                 !
@@ -548,7 +544,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
   500  continue
        if (itold /= -1) then
-            if (itold<itstop) then 
+            if (itold < itfinish) then 
                 call prterr(lundia    ,'U042'    ,'Last time for time varying flow boundary conditions <')
                 error = .true.
                 goto 9999

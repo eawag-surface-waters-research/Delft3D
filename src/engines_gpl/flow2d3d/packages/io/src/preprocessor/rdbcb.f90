@@ -1,5 +1,5 @@
 subroutine rdbcb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
-               & runid     ,filbcb    ,itstrt    ,itstop    ,gdp       )
+               & runid     ,filbcb    ,itstrt    ,itfinish  ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -57,7 +57,7 @@ subroutine rdbcb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
 ! Global variables
 !
-    integer         :: itstop   !  Description and declaration in inttim.igs
+    integer         :: itfinish !  Description and declaration in inttim.igs
     integer         :: itstrt   !  Description and declaration in inttim.igs
     integer         :: lundia   !  Description and declaration in inout.igs
     integer         :: lunmd    !  Description and declaration in inout.igs
@@ -140,7 +140,7 @@ subroutine rdbcb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           !---------Read/Write data blocks
           !
           call rwbcb(lundia    ,lunrd     ,filbcb    ,error     ,itstrt    , &
-                   & itstop    ,gdp       )
+                   & itfinish  ,gdp       )
           !
           close (lunrd)
           if (error) then

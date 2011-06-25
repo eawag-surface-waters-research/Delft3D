@@ -38,5 +38,6 @@ libmanager_dd_hydra_la_SOURCES = \
      master.cpp \
      semaphore.cpp \
      slave.cpp \
+     trisim_c.cpp \
      util.cpp
 

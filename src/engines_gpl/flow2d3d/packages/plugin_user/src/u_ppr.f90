@@ -188,7 +188,7 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     real(fp)              , pointer :: timsec
     real(fp)              , pointer :: timmin
     integer               , pointer :: itstrt
-    integer               , pointer :: itstop
+    integer               , pointer :: itfinish
     integer               , pointer :: julday
     character*256         , pointer :: filus1
     character*256         , pointer :: filus2
@@ -282,7 +282,7 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     timsec      => gdp%gdinttim%timsec
     timmin      => gdp%gdinttim%timmin
     itstrt      => gdp%gdinttim%itstrt
-    itstop      => gdp%gdinttim%itstop
+    itfinish    => gdp%gdinttim%itfinish
     julday      => gdp%gdinttim%julday
     drogue      => gdp%gdprocs%drogue
     wave        => gdp%gdprocs%wave
@@ -480,7 +480,7 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     ! for station number 5
     !
     if (nostat>=5 .and. filus1/=' ') then
-       notim = itstop - itstrt + 1
+       notim = itfinish - itstrt + 1
        istat = 5
        write (lundia, *) '@@@@@ Writing user HIS file at tstep: ', nst
        !
@@ -508,7 +508,7 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     ! each time step
     !
     if (ndro>=1 .and. filus2/=' ') then
-       notim = itstop - itstrt + 1
+       notim = itfinish - itstrt + 1
        idro = 1
        write (lundia, *) '@@@@@ Writing user DRO file at tstep: ', nst
        !
@@ -561,7 +561,7 @@ subroutine u_ppr(lundia    ,lunprt    ,error     ,versio    ,prsmap    , &
     ! in this example all 3 files are closed
     !
  9999 continue
-    if (nst == itstop) then
+    if (nst == itfinish) then
        if (lunus1 /= 0) close (lunus1)
        if (lunus2 /= 0) close (lunus2)
        if (lunus3 /= 0) close (lunus3)

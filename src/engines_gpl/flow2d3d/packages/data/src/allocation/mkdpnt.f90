@@ -84,8 +84,14 @@ function mkdpnt(pntnam    ,length    ,gdp       )
     !
     mkdpnt = getptr(pntnam(:ind - 1))
     if (mkdpnt /= 0) then
+       if (gdp%gdtricom%initi /= 3) then
+          call dnull(dbuf(mkdpnt)         ,length    )
+          mkdpnt = 1
+       else
        ! return the value -1 (used in Mor)
-       mkdpnt = -1
+         mkdpnt = -1
+       endif       
+    
     else
        !
        ! Call dynamic array declaration function MAKPTR for pointer name

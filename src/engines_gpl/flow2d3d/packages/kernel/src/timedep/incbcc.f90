@@ -47,8 +47,8 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    !
     use globaldata
+    use m_openda_exchange_items, only : get_openda_buffer
     !
     implicit none
     !
@@ -56,8 +56,10 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    integer               , pointer :: ltem
+    integer               , pointer :: lsal
     real(fp)              , pointer :: tstop
-    integer               , pointer :: itstop
+    integer               , pointer :: itfinish
     integer               , pointer :: lunbcc
     logical               , pointer :: newstp
 !
@@ -130,17 +132,18 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     real(fp)  :: totl    ! Actual length of an openbnd. section 
     real(fp)  :: zcord
     real(fp)  :: zjmp
+    real(fp), dimension(4, nto, kmax, lstsc) :: procbc_old 
 !
 !! executable statements -------------------------------------------------------
 !
+    ltem        => gdp%d%ltem
+    lsal        => gdp%d%lsal
     newstp      => gdp%gdincbcc%newstp
     lunbcc      => gdp%gdluntmp%lunbcc
-    itstop      => gdp%gdinttim%itstop
+    itfinish    => gdp%gdinttim%itfinish
     tstop       => gdp%gdexttim%tstop
-    ! statics
     !
-    !
-    ! Initilisation local parameters
+    ! Initialization local parameters
     ! TIMSCL will not been used in UPDBCC
     !
     first  = .false.
@@ -150,14 +153,40 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     !
     do ito = 1, nto
        do istsc = 1, lstsc
-          if (timnow>real(itbcc(2, ito, istsc),fp)) then
+          !
+          ! When using several instances, it is necessary to do a partial rewind of the file since
+          ! a newly selected instance has an older time stamp. 
+          ! Luckily, this file (see updbcc) can be read by record.
+          ! So we reset the record pointer to the start record if timnow < itbcc(1,..)
+          !
+          if (timnow < real(itbcc(1,ito,istsc),fp)) then
+              itbcc(5, ito, istsc) = itbcc(3, ito, istsc) - 1
+
+             first = .true.
+             call updbcc(lunbcc    ,lundia    ,first     ,itbcc     ,ito       , &
+                       & istsc     ,timnow    ,itfinish  ,timscl    , &
+                       & nto       ,kmax      ,lstsc     ,procbc    ,tprofc    , &
+                       & zstep     ,gdp       )
+             !          
+             ! Now, we have to update procbc(1,:) . Its current value is still the value in the
+             ! file at itbcc(1,:)
+             !
+             do k = 1, kmax
+                procbc(1,ito,k,istsc) = procbc(1,ito,k,istsc) +                                                 &
+                                      & 2.0_fp*(timnow-0.5_fp - real(itbcc(1,ito,istsc)))*procbc(3,ito,k,istsc) 
+                procbc(2,ito,k,istsc) = procbc(2,ito,k,istsc) +                                                 &
+                                      & 2.0_fp*(timnow-0.5_fp - real(itbcc(1,ito,istsc)))*procbc(4,ito,k,istsc)               
+             enddo 
+          endif
+          !
+          if (timnow > real(itbcc(2, ito, istsc),fp)) then
              zstep(1, ito, istsc) = zstep(2, ito, istsc)
              itbcc(1, ito, istsc) = itbcc(2, ito, istsc)
              !
              ! Read new time step and concentrations data
              !
              call updbcc(lunbcc    ,lundia    ,first     ,itbcc     ,ito       , &
-                       & istsc     ,timnow    ,itstop    ,timscl    , &
+                       & istsc     ,timnow    ,itfinish  ,timscl    , &
                        & nto       ,kmax      ,lstsc     ,procbc    ,tprofc    , &
                        & zstep     ,gdp       )
              newstp = .true.
@@ -172,6 +201,20 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                                       & + procbc(4, ito, k, istsc)
           enddo
        enddo
+       !
+       ! Overrule procbc(1:2,:) with OpenDA input, if present
+       ! this is done for salinity and temperature, if present
+       ! note: store this value and reset procbc at the end of this routine.
+       ! This is to prevent noise-on-noise since procbc(1:2) is never read from file again
+       !
+       if (lsal .ne. 0) then
+          procbc_old(1:2,ito,1:kmax,lsal) = procbc(1:2,ito,1:kmax,lsal)
+          call get_openda_buffer('bound_salt', ito, 2, kmax, procbc(1:2,ito,1:kmax,lsal))
+       endif
+       if (ltem .ne. 0) then
+          procbc_old(1:2,ito,1:kmax,ltem) = procbc(1:2,ito,1:kmax,ltem)
+          call get_openda_buffer('bound_temp', ito, 2, kmax, procbc(1:2,ito,1:kmax,ltem))    
+       endif
     enddo
     !
     ! for all "conservative" constituents
@@ -338,4 +381,13 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        enddo
     enddo
     newstp = .false.
+    !
+    ! Now reset procbc(1:2)
+    !
+    if (lsal .ne. 0) then
+       procbc(1:2,1:nto,1:kmax,lsal) = procbc_old(1:2,1:nto,1:kmax,lsal)
+    endif
+    if (ltem .ne. 0) then
+       procbc(1:2,1:nto,1:kmax,ltem) = procbc_old(1:2,1:nto,1:kmax,ltem)
+    endif    
 end subroutine incbcc

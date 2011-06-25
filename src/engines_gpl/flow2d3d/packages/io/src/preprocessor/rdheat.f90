@@ -1,6 +1,6 @@
 subroutine rdheat(lunmd     ,lundia      ,error     ,nrrec     ,mdfrec      , &
                 & noui      ,runid       ,filtem    ,fmttem    ,ktemp       , &
-                & rttem     ,dt          ,itstrt    ,itstop    ,mxtemt      , &
+                & rttem     ,dt          ,itstrt    ,itfinish  ,mxtemt      , &
                 & ntemtm    ,ivapop      ,rhum      ,tdryb     ,qsolar      , &
                 & tback     ,tair        ,vapres    ,cfclou    ,solrad_read , &
                 & gdp       )
@@ -65,7 +65,7 @@ subroutine rdheat(lunmd     ,lundia      ,error     ,nrrec     ,mdfrec      , &
 !
 ! Global variables
 !
-    integer                                      :: itstop      !  Description and declaration in inttim.igs
+    integer                                      :: itfinish    !  Description and declaration in inttim.igs
     integer                                      :: itstrt      !  Description and declaration in inttim.igs
     integer                        , intent(in)  :: ivapop      !  Description and declaration in heat.igs
     integer                        , intent(in)  :: ktemp       !  Description and declaration in tricom.igs
@@ -192,7 +192,7 @@ subroutine rdheat(lunmd     ,lundia      ,error     ,nrrec     ,mdfrec      , &
              
           endif
           call rdtdf(lundia    ,lunout    ,error     ,filtem    ,fmttmp    , &
-                   & nrval     ,rval      ,dt        ,itstrt    ,itstop    , &
+                   & nrval     ,rval      ,dt        ,itstrt    ,itfinish  , &
                    & gdp       )
        endif
     else
@@ -363,7 +363,7 @@ subroutine rdheat(lunmd     ,lundia      ,error     ,nrrec     ,mdfrec      , &
        !
   500  continue
        if (itold/= - 1) then
-          if (itold<itstop) then
+          if (itold < itfinish) then
              write(message,'(3a)') 'Last time in file ', trim(filtem), ' <' 
              call prterr(lundia    ,'U042'    ,message)
              error = .true.

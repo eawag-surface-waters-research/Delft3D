@@ -243,6 +243,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\src\hydra\trisim_c.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\src\hydra\util.cpp"
 					>
 				</File>
@@ -303,6 +307,10 @@
 			</File>
 			<File
 				RelativePath=".\include\semaphore.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\trisim.h"
 				>
 			</File>
 		</Filter>

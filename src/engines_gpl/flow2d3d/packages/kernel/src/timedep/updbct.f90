@@ -38,6 +38,7 @@ subroutine updbct(lundia, filnam, ntof, nto, kcd, kmax, hydrbc, tprofu, error, g
     use handles
     use flow_tables
     use globaldata
+    use m_openda_exchange_items, only : get_openda_buffer
     !
     implicit none
     !
@@ -88,7 +89,9 @@ subroutine updbct(lundia, filnam, ntof, nto, kcd, kmax, hydrbc, tprofu, error, g
     !
     error = .false.
     if (htype == -999) then
+       !
        ! in case of reuse TMP files:
+       !
        call flw_readtable(tseriesfile, filnam, julday, gdp)
     endif
     !
@@ -117,6 +120,10 @@ subroutine updbct(lundia, filnam, ntof, nto, kcd, kmax, hydrbc, tprofu, error, g
           call flw_gettabledata(tseriesfile, tablenumber , 1, 2, irec, hydrbc(1:2,ito,1), timhr, julday, gdp)
        endif
        minrec = min(minrec, irec)
+       !
+       ! Adjust boundaries by OpenDA if necessary
+       !
+       call get_openda_buffer('bound_HQ', ito, 2, kmax, hydrbc(1:2,ito,1:kmax))
     enddo
     !
     timerec = minrec

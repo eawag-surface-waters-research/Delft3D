@@ -211,4 +211,69 @@
                              !  Tide generating forces. If blank then
                              !  No forces will be included.
 !
+!  NEWLY ADDED because of splitting trisim,tricom (VT):
+!
+       integer                            :: initia !!  if < 0: iteration process of morsys
+                                                    !!  else  : equal to INITI
+                                                    !!  =1 initialization
+                                                    !!  =2 initialization and read restart
+                                                    !!     information from the communication
+                                                    !!     file
+                                                    !!  =3 no initialization
+       integer                            :: it01   !  Description and declaration in iidim.f90
+       integer                            :: it02   !  Description and declaration in iidim.f90
+       integer                            :: itb    !!  Start time of computational interval
+                                                    !!  for a stand alone system the input
+                                                    !!  value from TRISIM: ITB = 1
+       integer                            :: ite    !!  End time of computational interval
+                                                    !!  for a stand alone system the input
+                                                    !!  value from TRISIM: ITE = -1
+       integer                            :: itima  !!  Time to start simulation (N * tscale)
+                                                    !!  according to DELFT3D conventions
+       integer                            :: itlen  !  Description and declaration in iidim.f90
+       
+       integer                            :: initi  ! Control parameter 
+       integer                            :: iphisc ! Current time counter for printing history data 
+       
+       integer                            :: itcomc ! Current time counter for the com- munication file 
+       integer                            :: itcur  ! Current time counter for the com- munication file, where starting point depend on CYCLIC 
+       integer                            :: itdroc ! Current time counter for the dro- gue data file 
+       integer                            :: ithisc ! Current time counter for the his- tory file 
+       integer                            :: itimc  ! Current time step counter for 2D system 
+       integer                            :: itiwec ! Current time counter for the cali- bration of internal wave energy 
+       integer                            :: itlent ! Lenght of the tide cycle in steps of ITP 
+       integer                            :: itmapc ! Current time counter for the map file 
+       integer                            :: itp    ! Timestep for computation 2D system 
+       integer                            :: itrstc ! Current time counter for the re- start file. Start writing after first interval is passed. Last time will always be written to file for ITRSTI > 0 
+       integer                            :: itwav  ! Current time counter for executation of a wave computation (online coupling with wave)
+       integer                            :: itrw   ! Time to read the wave information in case of online wave coupling
+
+       integer                            :: maxmn  ! Maximum of MMAX and NMAX 
+       integer                            :: npmap  ! Current array counter for printing map data 
+       integer                            :: ntcur  ! Total number of timesteps on comm. file (to write to) 
+       integer                            :: ntwav  ! Total number of timesteps on comm. file (to read from) for waves 
+       logical                            :: alone  !!  TRUE when flow runs stand-alone,
+                                                    !!  FALSE when flow is part of morsys
+       logical                            :: mainys !!  Logical flag for TRISULA is main
+                                                    !!  program (TRUE) for writing output
+
+       logical                            :: cyclic ! Flag = TRUE if cyclic system assumed 
+       logical                            :: fout   ! Flag=TRUE if an error is encountered 
+       logical                            :: lrdok  ! Logical to check if reading phase has been passed. 
+       logical                            :: waverd ! Flag = TRUE if wave process and communication file exist 
+
+       real(fp)                           :: anglat ! Angle of latitude of the model centre (used to determine the coeff. for the coriolis force) 
+       real(fp)                           :: dtsec  ! DT in seconds 
+       real(fp)                           :: tscale !  Description and declaration in rjdim.f90
+       character(256)                     :: comfil !!  Communication file name
+       character(256)                     :: filmd  ! File name for MD FLOW file 
+       character(256)                     :: runid  !!  Run identification code for the cur-
+                                                    !!  rent simulation (used to determine
+                                                    !!  the names of the in- /output files
+                                                    !!  used by the system)
+       character(256)                     :: trifil !!  File name for TRISULA NEFIS output
+                                                    !!  files (tri"h/m"-"casl""labl".dat/def)
+       character(5)                       :: versio !!  Version nr. of the current package
+       
+       integer        , dimension(1500)   :: timwav  ! Array with time steps on comm. file for wave results 
     end type sv_tricom

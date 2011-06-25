@@ -1,0 +1,74 @@
+!----- GPL ---------------------------------------------------------------------
+!                                                                               
+!  Copyright (C)  Stichting Deltares, 2011.                                     
+!                                                                               
+!  This program is free software: you can redistribute it and/or modify         
+!  it under the terms of the GNU General Public License as published by         
+!  the Free Software Foundation version 3.                                      
+!                                                                               
+!  This program is distributed in the hope that it will be useful,              
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
+!  GNU General Public License for more details.                                 
+!                                                                               
+!  You should have received a copy of the GNU General Public License            
+!  along with this program.  If not, see <http://www.gnu.org/licenses/>.        
+!                                                                               
+!  contact: delft3d.support@deltares.nl                                         
+!  Stichting Deltares                                                           
+!  P.O. Box 177                                                                 
+!  2600 MH Delft, The Netherlands                                               
+!                                                                               
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"    
+!  are registered trademarks of Stichting Deltares, and remain the property of  
+!  Stichting Deltares. All rights reserved.                                     
+!                                                                               
+!-------------------------------------------------------------------------------
+!  $Id: flow2d3d_openda_version.F90.svn 47 2011-01-06 06:49:52Z jagers $
+!  $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/branches/research/Deltares/20110405_12987_openmi_openda_merge/engines_gpl/flow2d3d/packages/flow2d3d/src/flow2d3d_openda_version.F90.svn $
+!
+! Do not use a module here; that will cause a serious dependency problem
+!
+!
+!
+!===============================================================================
+subroutine getfullversionstring_flow2d3d_openda(stringout)
+   character(*), intent(out) :: stringout
+   integer                   :: length
+
+   character(*), parameter :: flow2d3d_openda_major        = 'VN_MAJOR'
+   character(*), parameter :: flow2d3d_openda_minor        = 'VN_MINOR'
+   character(*), parameter :: flow2d3d_openda_revision     = 'VN_REVISION'
+   character(*), parameter :: flow2d3d_openda_build_number = 'VN_BUILD_NUMBER'
+
+   character(*), parameter :: flow2d3d_openda_company      = 'Deltares'
+   character(*), parameter :: flow2d3d_openda_company_url  = 'http://www.deltares.nl'
+   character(*), parameter :: flow2d3d_openda_program      = 'Delft3D-FLOW'
+
+   character(*), parameter :: flow2d3d_openda_version      = flow2d3d_openda_major//'.'//flow2d3d_openda_minor//'.'//flow2d3d_openda_revision//'.'//flow2d3d_openda_build_number
+   character(*), parameter :: flow2d3d_openda_version_full = 'Deltares, '//flow2d3d_openda_program//' Version '//flow2d3d_openda_version//', '//__DATE__//', '//__TIME__
+   character(*), parameter :: flow2d3d_openda_version_id   = '@(#)'//flow2d3d_openda_version_full
+
+
+
+   !
+   ! body
+   length    = min(len_trim(flow2d3d_openda_version_full),len(stringout))
+   stringout = flow2d3d_openda_version_id(5:5+length-1)
+end subroutine getfullversionstring_flow2d3d_openda
+!
+!
+!===============================================================================
+subroutine getshortversionstring_flow2d3d_openda(stringout)
+   character(*), intent(out) :: stringout
+   integer                   :: length
+
+   character(*), parameter :: flow2d3d_openda_major         = 'VN_MAJOR'
+   character(*), parameter :: flow2d3d_openda_minor         = 'VN_MINOR'
+
+   character(*), parameter :: flow2d3d_openda_short_version = flow2d3d_openda_major//'.'//flow2d3d_openda_minor
+   !
+   ! body
+   length    = min(len_trim(flow2d3d_openda_short_version),len(stringout))
+   stringout = flow2d3d_openda_short_version(1:length)
+end subroutine getshortversionstring_flow2d3d_openda

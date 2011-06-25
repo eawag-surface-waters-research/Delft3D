@@ -874,7 +874,7 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                       buoflu  = 0.0_fp
                    endif
                    !
-                   ! In a previous appraoch the TKE was taken implicitly (RTUR1(NM,K,1))
+                   ! In a previous approach the TKE was taken implicitly (RTUR1(NM,K,1))
                    !
                    ddk(nm, k) = ddk(nm, k)                                       &
                               & + cep1*(buoflu - tkepro(nm, k))*rtur0(nm, k, 2)  &
@@ -983,7 +983,7 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
        else
           !
           ! dissipation in epsilon equation (Newton linearisation)
-          ! In a previous appraoch the TKE was taken implicitly (RTUR1(NM,K,1))
+          ! In a previous approach the TKE was taken implicitly (RTUR1(NM,K,1))
           !
           do k = 1, kmax - 1
              do nm = 1, nmmax

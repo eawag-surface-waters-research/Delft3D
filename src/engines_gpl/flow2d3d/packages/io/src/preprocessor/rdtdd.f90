@@ -1,5 +1,5 @@
 subroutine rdtdd(lundia    ,lunout    ,lunrd     ,error     ,fildis    , &
-               & runid     ,cntain    ,eol       ,itstrt    ,itstop    ,&
+               & runid     ,cntain    ,eol       ,itstrt    ,itfinish  ,&
                & nsrc      ,lstsc     ,nrval     ,rval      ,namsrc    , &
                & disint    ,parnam    ,parunt    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
@@ -56,7 +56,7 @@ subroutine rdtdd(lundia    ,lunout    ,lunrd     ,error     ,fildis    , &
 !
 ! Global variables
 !
-    integer                                               :: itstop     !  Description and declaration in inttim.igs
+    integer                                               :: itfinish   !  Description and declaration in inttim.igs
     integer                                               :: itstrt     !  Description and declaration in inttim.igs
     integer                                 , intent(in)  :: lstsc      !  Description and declaration in dimens.igs
     integer                                 , intent(in)  :: lundia     !  Description and declaration in inout.igs
@@ -120,7 +120,7 @@ subroutine rdtdd(lundia    ,lunout    ,lunrd     ,error     ,fildis    , &
     ndistm = 0
     nrskip = nsrc
     call rdtold(lunrd     ,lundia    ,error     ,fildis    ,ndistm    , &
-              & nrskip    ,dt        ,itstrt    ,itstop    ,itold     ,gdp       )
+              & nrskip    ,dt        ,itstrt    ,itfinish  ,itold     ,gdp       )
     !
     if (error) goto 9999
     !
@@ -218,7 +218,7 @@ subroutine rdtdd(lundia    ,lunout    ,lunrd     ,error     ,fildis    , &
     !
  9999 continue
     if (itold/= - 1) then
-       if (itold<itstop) then
+       if (itold < itfinish) then
           write(errmsg,'(a,a,a)') 'Last time in file ', trim(fildis), ' <' 
           call prterr(lundia    ,'U042'    ,errmsg)
           error = .true.

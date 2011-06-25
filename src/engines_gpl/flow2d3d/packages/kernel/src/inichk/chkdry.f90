@@ -126,14 +126,16 @@ subroutine chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lsec      , &
     kfuv_from_restart  => gdp%gdrestart%kfuv_from_restart
     restid             => gdp%gdrestart%restid
     !
-    if (initia>0) then
-       do nm = j, nmmaxj
-          kfs(nm) = max(min(1, kcs(nm)),0)
-          if (.not.kfuv_from_restart) then
-             kfu(nm) = min(1, kcu(nm))
-             kfv(nm) = min(1, kcv(nm))
-          endif
-       enddo
+    if (initia > 0) then
+       if ( restid .ne. 'STATE' ) then
+          do nm = j, nmmaxj
+             kfs(nm) = max(min(1, kcs(nm)),0)
+             if (.not.kfuv_from_restart) then
+                kfu(nm) = min(1, kcu(nm))
+                kfv(nm) = min(1, kcv(nm))
+             endif
+          enddo
+       endif
        !
        ! Apply boundary condition d()/dn=0 at open boundaries for waterlevel points
        ! if the simulation is NOT a restart
@@ -217,20 +219,22 @@ subroutine chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lsec      , &
        ! arrays KFU,KFV and KFS
        ! -icx := -1 in m-direction, -icy := -1 in n-direction
        !
-       do nm = 1, nmmax
-          nmd = nm - icx
-          ndm = nm - icy
-          if (kcs(nm)>0) then
-             if (s1(nm)<= - real(dps(nm),fp)) then
-                s1(nm) = -real(dps(nm),fp)
-                kfu(nm) = 0
-                kfu(nmd) = 0
-                kfv(nm) = 0
-                kfv(ndm) = 0
-                kfs(nm) = 0
+       if (restid .ne. 'STATE') then
+          do nm = 1, nmmax
+             nmd = nm - icx
+             ndm = nm - icy
+             if (kcs(nm)>0) then
+                if (s1(nm)<= - real(dps(nm),fp)) then
+                   s1(nm)   = -real(dps(nm),fp)
+                   kfu(nm)  = 0
+                   kfu(nmd) = 0
+                   kfv(nm)  = 0
+                   kfv(ndm) = 0
+                   kfs(nm)  = 0
+                endif
              endif
-          endif
-       enddo
+          enddo
+       endif
        !
        ! exchange mask array kfs with neighbours for parallel runs
        !
@@ -263,44 +267,46 @@ subroutine chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lsec      , &
     ! HUCRES is initially set to extreme large value to guarantee
     ! the MIN operator works as planned
     !
-    if (initia>0) then
-       do nm = 1, nmmax
-          hucres = 1E9
-          if (abs(kspu(nm, 0))==9) then
-             if (umean(nm)>=0.001) then
-                hucres = s1(nm) + hkru(nm)
-             elseif (umean(nm)<= - 0.001) then
-                hucres = s1(nm + icx) + hkru(nm)
-             else
-                hucres = max(s1(nm + icx), s1(nm)) + hkru(nm)
+    if (restid .ne. 'STATE') then
+       if (initia>0) then
+          do nm = 1, nmmax
+             hucres = 1E9
+             if (abs(kspu(nm, 0))==9) then
+                if (umean(nm)>=0.001) then
+                   hucres = s1(nm) + hkru(nm)
+                elseif (umean(nm)<= - 0.001) then
+                   hucres = s1(nm + icx) + hkru(nm)
+                else
+                   hucres = max(s1(nm + icx), s1(nm)) + hkru(nm)
+                endif
              endif
-          endif
+             !
+             hvcres = 1E9
+             if (abs(kspv(nm, 0))==9) then
+                if (vmean(nm)>=0.001) then
+                   hvcres = s1(nm) + hkrv(nm)
+                elseif (vmean(nm)<= - 0.001) then
+                   hvcres = s1(nm + icy) + hkrv(nm)
+                else
+                   hvcres = max(s1(nm + icy), s1(nm)) + hkrv(nm)
+                endif
+             endif
+             !
+             if (.not.kfuv_from_restart) then
+                if (kfu(nm)*min(hu(nm), hucres)<dryflc .and. kcu(nm)*kfu(nm)==1) then
+                   kfu(nm) = 0
+                endif
+                if (kfv(nm)*min(hv(nm), hvcres)<dryflc .and. kcv(nm)*kfv(nm)==1) then
+                   kfv(nm) = 0
+                endif
+             endif
+          enddo
           !
-          hvcres = 1E9
-          if (abs(kspv(nm, 0))==9) then
-             if (vmean(nm)>=0.001) then
-                hvcres = s1(nm) + hkrv(nm)
-             elseif (vmean(nm)<= - 0.001) then
-                hvcres = s1(nm + icy) + hkrv(nm)
-             else
-                hvcres = max(s1(nm + icy), s1(nm)) + hkrv(nm)
-             endif
-          endif
+          ! exchange mask arrays kfu and kfv with neighbours for parallel runs
           !
-          if (.not.kfuv_from_restart) then
-             if (kfu(nm)*min(hu(nm), hucres)<dryflc .and. kcu(nm)*kfu(nm)==1) then
-                kfu(nm) = 0
-             endif
-             if (kfv(nm)*min(hv(nm), hvcres)<dryflc .and. kcv(nm)*kfv(nm)==1) then
-                kfv(nm) = 0
-             endif
-          endif
-       enddo
-       !
-       ! exchange mask arrays kfu and kfv with neighbours for parallel runs
-       !
-       call dfexchg ( kfu, 1, 1, dfint, gdp )
-       call dfexchg ( kfv, 1, 1, dfint, gdp )
+          call dfexchg ( kfu, 1, 1, dfint, gdp )
+          call dfexchg ( kfv, 1, 1, dfint, gdp )
+       endif
     endif
     !
     ! mask initial arrays

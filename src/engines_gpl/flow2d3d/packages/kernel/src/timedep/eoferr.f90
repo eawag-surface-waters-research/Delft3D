@@ -34,7 +34,7 @@ subroutine eoferr(srttdd    ,lundia    ,iocond    ,tlread    ,gdp       )
 !              NOTE: in future exit from program using logical
 !                    ERROR and no exit when reaching EOF but
 !                    re-defining data read to last read data
-!                    and last time read to ITSTOP
+!                    and last time read to ITFINISH
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE

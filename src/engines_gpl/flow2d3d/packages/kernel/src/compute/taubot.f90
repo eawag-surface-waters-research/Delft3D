@@ -370,7 +370,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              cfurou(nm, 1) = cfurou(nm, 2)
           elseif (rouflo=='WHIT') then
              !
-             ! Formula for White Colebrook, more constitent with 3D
+             ! Formula for White Colebrook, more consistent with 3D
              !
              if (chz_k2d) then
                 hurou         = max(0.5_fp, hu(nm)/cfurou(nm, 2))

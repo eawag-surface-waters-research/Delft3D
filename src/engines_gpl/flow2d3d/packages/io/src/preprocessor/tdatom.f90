@@ -88,7 +88,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     integer                         , pointer :: lundia 
     integer                         , pointer :: lunscr 
     integer                         , pointer :: itstrt 
-    integer                         , pointer :: itstop 
+    integer                         , pointer :: itfinish 
     integer                         , pointer :: julday 
     character(256)                  , pointer :: nflmod 
     logical                         , pointer :: wind 
@@ -327,7 +327,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     lundia      => gdp%gdinout%lundia 
     lunscr      => gdp%gdinout%lunscr 
     itstrt      => gdp%gdinttim%itstrt 
-    itstop      => gdp%gdinttim%itstop 
+    itfinish    => gdp%gdinttim%itfinish 
     julday      => gdp%gdinttim%julday 
     nflmod      => gdp%gdnfl%nflmod 
     wind        => gdp%gdprocs%wind 
@@ -507,7 +507,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
         ! 
         call rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , & 
                  & noui      ,citdat    ,tstart    ,tstop     ,tzone     , & 
-                 & itdate    ,julday    ,itstrt    ,itstop    ,dt        , & 
+                 & itdate    ,julday    ,itstrt    ,itfinish  ,dt        , & 
                  & ctunit    ,tunit     ,gdp       ) 
         if (error) goto 999 
         ! 
@@ -638,7 +638,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
            call rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , & 
                     & noui      ,nrver     ,runid     ,filnam    ,eol       , & 
                     & nambnd    ,typbnd    ,tprofu    ,nto       ,ntot      , & 
-                    & ntot0     ,kmax      ,rtime     ,itstrt    ,itstop    , & 
+                    & ntot0     ,kmax      ,rtime     ,itstrt    ,itfinish  , & 
                     & mxtime    ,ntimtm    ,rval      ,bubble    ,gdp       ) 
            if (error) goto 999 
         endif 
@@ -652,7 +652,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
            call rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , & 
                     & noui      ,nrver     ,runid     ,filnam    ,eol       , & 
                     & nambnd    ,namcon    ,nto       ,lstsc     ,kmax      , & 
-                    & rtime     ,itstrt    ,itstop    ,mxtime    ,ntimtm    , & 
+                    & rtime     ,itstrt    ,itfinish  ,mxtime    ,ntimtm    , & 
                     & salin     ,temp      ,const     ,lconc     ,rval      , & 
                     & rval      ,rval      ,rval      ,cval      ,bubble    , & 
                     & gdp       ) 
@@ -668,7 +668,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
            call rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , & 
                     & noui      ,nrver     ,runid     ,filnam    ,eol       , & 
                     & namsrc    ,disint    ,namcon    ,nsrcd     ,rtime     , & 
-                    & itstrt    ,itstop    ,mxnsrc    ,mxtime    ,ntimtm    , & 
+                    & itstrt    ,itfinish  ,mxnsrc    ,mxtime    ,ntimtm    , & 
                     & lstsc     ,salin     ,temp      ,const     ,lconc     , & 
                     & rval      ,rval      ,rval      ,rval      ,bubble    , & 
                     & gdp       ) 
@@ -683,7 +683,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
            ntimtm = 0 
            ! 
            call rdbcb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , & 
-                    & runid     ,filnam    ,itstrt    ,itstop    ,gdp       ) 
+                    & runid     ,filnam    ,itstrt    ,itfinish  ,gdp       ) 
            if (error) goto 999 
            ! 
            ! Create trigger file for starting RTC
@@ -712,7 +712,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
            ntimtm = 0 
            call rdheat(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec      , & 
                      & noui      ,runid     ,filnam    ,fmtfil    ,ktemp       , & 
-                     & rval      ,dt        ,itstrt    ,itstop    ,mxtime      , & 
+                     & rval      ,dt        ,itstrt    ,itfinish  ,mxtime      , & 
                      & ntimtm    ,ivapop    ,rval      ,rval      ,rval        , & 
                      & rval      ,rval      ,rval      ,rval      ,solrad_read , & 
                      & gdp       ) 
@@ -729,7 +729,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
            ! 
            call rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , & 
                     & noui      ,runid     ,filnam    ,fmtfil    ,rval      , & 
-                    & dt        ,itstrt    ,itstop    ,mxtime    ,ntimtm    , & 
+                    & dt        ,itstrt    ,itfinish  ,mxtime    ,ntimtm    , & 
                     & rval      ,rval      ,rval      ,gdp       ) 
            if (error) goto 999 
         endif 
@@ -828,3 +828,4 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     ! 
     if (error) nuerr = 1 
 end subroutine tdatom 
+

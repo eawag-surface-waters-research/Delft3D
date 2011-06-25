@@ -1,4 +1,4 @@
-subroutine chkdro(lundia    ,itstrt    ,itstop    ,drogue    ,itdrof    , &
+subroutine chkdro(lundia    ,itstrt    ,itfinish  ,drogue    ,itdrof    , &
                 & itdrol    ,itdroi    ,ndro      ,nmax      ,mmax      , &
                 & nmaxus    ,namdro    ,mndro     ,itdro     ,kcs       , &
                 & dxydro    ,xydro     ,xcor      ,ycor      ,gdp       )
@@ -56,25 +56,25 @@ subroutine chkdro(lundia    ,itstrt    ,itstop    ,drogue    ,itdrof    , &
 !
 ! Global variables
 !
-    integer         :: itdrof !  Description and declaration in inttim.igs
-    integer, intent(out)           :: itdroi !  Description and declaration in inttim.igs
-    integer         :: itdrol !  Description and declaration in inttim.igs
-    integer, intent(in)            :: itstop !  Description and declaration in inttim.igs
-    integer, intent(in)            :: itstrt !  Description and declaration in inttim.igs
-    integer         :: lundia !  Description and declaration in inout.igs
-    integer, intent(in)            :: mmax !  Description and declaration in esm_alloc_int.f90
-    integer, intent(in)            :: ndro !  Description and declaration in dimens.igs
-    integer         :: nmax !  Description and declaration in esm_alloc_int.f90
-    integer, intent(in)            :: nmaxus !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(2, ndro) :: itdro !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(2, ndro) :: mndro !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in) :: kcs !  Description and declaration in esm_alloc_int.f90
-    logical, intent(out)           :: drogue !  Description and declaration in procs.igs
-    real(fp), dimension(2, ndro), intent(in) :: dxydro !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(2, ndro), intent(out) :: xydro !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in) :: xcor !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in) :: ycor !  Description and declaration in esm_alloc_real.f90
-    character(20), dimension(ndro) :: namdro !  Description and declaration in esm_alloc_char.f90
+    integer                                                                         :: itdrof   !  Description and declaration in inttim.igs
+    integer                                                           , intent(out) :: itdroi   !  Description and declaration in inttim.igs
+    integer                                                                         :: itdrol   !  Description and declaration in inttim.igs
+    integer                                                           , intent(in)  :: itfinish !  Description and declaration in inttim.igs
+    integer                                                           , intent(in)  :: itstrt   !  Description and declaration in inttim.igs
+    integer                                                                         :: lundia   !  Description and declaration in inout.igs
+    integer                                                           , intent(in)  :: mmax     !  Description and declaration in esm_alloc_int.f90
+    integer                                                           , intent(in)  :: ndro     !  Description and declaration in dimens.igs
+    integer                                                                         :: nmax     !  Description and declaration in esm_alloc_int.f90
+    integer                                                           , intent(in)  :: nmaxus   !  Description and declaration in esm_alloc_int.f90
+    integer      , dimension(2, ndro)                                               :: itdro    !  Description and declaration in esm_alloc_int.f90
+    integer      , dimension(2, ndro)                                               :: mndro    !  Description and declaration in esm_alloc_int.f90
+    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: kcs      !  Description and declaration in esm_alloc_int.f90
+    logical                                                           , intent(out) :: drogue   !  Description and declaration in procs.igs
+    real(fp)     , dimension(2, ndro)                                 , intent(in)  :: dxydro   !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(2, ndro)                                 , intent(out) :: xydro    !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: xcor     !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: ycor     !  Description and declaration in esm_alloc_real.f90
+    character(20), dimension(ndro)                                                  :: namdro   !  Description and declaration in esm_alloc_char.f90
 !
 !
 ! Local variables
@@ -98,12 +98,12 @@ subroutine chkdro(lundia    ,itstrt    ,itstop    ,drogue    ,itdrof    , &
     !-----initialisation of interval to calculate drogues (to keep the
     !     trid-<runid>.dat as small as possible)
     !
-    itdrof = itstop + 1
+    itdrof = itfinish + 1
     itdrol = itstrt - 1
     itdroi = 1
     !
     !-----test for all drogues if time interval is inside simulation
-    !     interval (itstrt - itstop) and if drogue is released on an
+    !     interval (itstrt - itfinish) and if drogue is released on an
     !     active point (kcs = 1)
     !
     do i = 1, ndro
@@ -119,9 +119,9 @@ subroutine chkdro(lundia    ,itstrt    ,itstop    ,drogue    ,itdrof    , &
           itdro(1, i) = itstrt
        endif
        !
-       !--------itdro (1,i) > itstop then warning (no drogue calculated)
+       !--------itdro (1,i) > itfinish then warning (no drogue calculated)
        !
-       if (itdro(1, i)>itstop) then
+       if (itdro(1, i)>itfinish) then
           errmsg = 'Drogue start time (>)'
           call prterr(lundia    ,'V017'    ,errmsg(:23)          )
           !
@@ -139,14 +139,14 @@ subroutine chkdro(lundia    ,itstrt    ,itstop    ,drogue    ,itdrof    , &
           merrs = merrs + 1
        endif
        !
-       !--------itdro (2,i) > itstop then warning and correction to itstop
+       !--------itdro (2,i) > itfinish then warning and correction to itfinish
        !
-       if (itdro(2, i)>itstop) then
+       if (itdro(2, i)>itfinish) then
           errmsg = 'Drogue stop time (>) '
           call prterr(lundia    ,'V008'    ,errmsg(:22)          )
           !
           write (lundia, '(12x,a,a)') 'for Drogue: ', namdro(i)
-          itdro(2, i) = itstop
+          itdro(2, i) = itfinish
        endif
        !
        !--------itdro (1,i) > itdro(2,i) then warning (no drogue calculated)
@@ -184,7 +184,7 @@ subroutine chkdro(lundia    ,itstrt    ,itstop    ,drogue    ,itdrof    , &
        !        (outside computation)
        !
        if (merrs>0) then
-          itdro(1, i) = itstop + 1
+          itdro(1, i) = itfinish + 1
           itdro(2, i) = itstrt - 1
        else
           !

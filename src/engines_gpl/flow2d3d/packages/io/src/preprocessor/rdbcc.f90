@@ -1,7 +1,7 @@
 subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                & noui      ,nrver     ,runid     ,filbcc    ,eol       , &
                & nambnd    ,namcon    ,nto       ,lstsc     ,kmax      , &
-               & rtbcc     ,itstrt    ,itstop    ,mxbctm    ,nbcctm    , &
+               & rtbcc     ,itstrt    ,itfinish  ,mxbctm    ,nbcctm    , &
                & salin     ,temp      ,const     ,lconc     ,sab       , &
                & tab       ,cab       ,zstep     ,tprofc    ,bubble    , &
                & gdp       )
@@ -63,39 +63,39 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
 ! Global variables
 !
-    integer                                                   :: itstop !  Description and declaration in inttim.igs
-    integer                                                   :: itstrt !  Description and declaration in inttim.igs
-    integer                                                   :: kmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                     , intent(in)  :: lconc  !  Number of constituents (excl. salinity, temperature, secondary flow,
-                                                                        !  turbulence energy dissipation and production)
-    integer                                                   :: lstsc  !  Description and declaration in dimens.igs
-    integer                                                   :: lundia !  Description and declaration in inout.igs
-    integer                                                   :: lunmd  !  Description and declaration in inout.igs
-    integer                                     , intent(in)  :: mxbctm !  Maximum number of times for which time varying boundary conditions are
-                                                                        !  allowed in the Md-file
-    integer                                                   :: nbcctm !  Actual number of times for which time varying data for processes on
-                                                                        !  boundaries are allowed in the Md-file
-    integer                                                   :: nrrec  !  Pointer to the record number in the MD-file
-    integer                                     , intent(in)  :: nrver  !  Version number (240/249)
-    integer                                                   :: nto    !  Description and declaration in esm_alloc_int.f90
-    logical                                     , intent(in)  :: bubble !  Description and declaration in procs.igs    
-    logical                                     , intent(in)  :: const  !  Description and declaration in procs.igs
-    logical                                                   :: error  !  Flag=TRUE if an error is encountered
-    logical                                     , intent(in)  :: noui   !  Flag for reading from User Interface
-    logical                                     , intent(in)  :: salin  !  Description and declaration in procs.igs
-    logical                                     , intent(in)  :: temp   !  Description and declaration in procs.igs
-    real(fp)     , dimension(4, 5, mxbctm, nto)               :: cab    !  At most MXBCTM time varying concentrations on boundaries (end A and end B)
-    real(fp)     , dimension(4, mxbctm, nto)                  :: sab    !  At most MXBCTM time varying salinities on boundaries (end A and end B)
-    real(fp)     , dimension(4, mxbctm, nto)                  :: tab    !  At most MXBCTM time varying temperatures on boundaries (end A and end B)
-    real(fp)     , dimension(mxbctm)                          :: rtbcc  !  At most MXBCTM times for time varying data on boundaries for processes
-    real(fp)     , dimension(mxbctm, nto, lstsc), intent(out) :: zstep  !  Description and declaration in esm_alloc_real.f90
-    character(*)                                              :: filbcc !  File name for the time varying data on boundaries for processes file
-    character(*)                                              :: mdfrec !  Standard rec. length in MD-file (300)
+    integer                                                   :: itfinish !  Description and declaration in inttim.igs
+    integer                                                   :: itstrt   !  Description and declaration in inttim.igs
+    integer                                                   :: kmax     !  Description and declaration in esm_alloc_int.f90
+    integer                                     , intent(in)  :: lconc    !  Number of constituents (excl. salinity, temperature, secondary flow,
+                                                                          !  turbulence energy dissipation and production)
+    integer                                                   :: lstsc    !  Description and declaration in dimens.igs
+    integer                                                   :: lundia   !  Description and declaration in inout.igs
+    integer                                                   :: lunmd    !  Description and declaration in inout.igs
+    integer                                     , intent(in)  :: mxbctm   !  Maximum number of times for which time varying boundary conditions are
+                                                                          !  allowed in the Md-file
+    integer                                                   :: nbcctm   !  Actual number of times for which time varying data for processes on
+                                                                          !  boundaries are allowed in the Md-file
+    integer                                                   :: nrrec    !  Pointer to the record number in the MD-file
+    integer                                     , intent(in)  :: nrver    !  Version number (240/249)
+    integer                                                   :: nto      !  Description and declaration in esm_alloc_int.f90
+    logical                                     , intent(in)  :: bubble   !  Description and declaration in procs.igs
+    logical                                     , intent(in)  :: const    !  Description and declaration in procs.igs
+    logical                                                   :: error    !  Flag=TRUE if an error is encountered
+    logical                                     , intent(in)  :: noui     !  Flag for reading from User Interface
+    logical                                     , intent(in)  :: salin    !  Description and declaration in procs.igs
+    logical                                     , intent(in)  :: temp     !  Description and declaration in procs.igs
+    real(fp)     , dimension(4, 5, mxbctm, nto)               :: cab      !  At most MXBCTM time varying concentrations on boundaries (end A and end B)
+    real(fp)     , dimension(4, mxbctm, nto)                  :: sab      !  At most MXBCTM time varying salinities on boundaries (end A and end B)
+    real(fp)     , dimension(4, mxbctm, nto)                  :: tab      !  At most MXBCTM time varying temperatures on boundaries (end A and end B)
+    real(fp)     , dimension(mxbctm)                          :: rtbcc    !  At most MXBCTM times for time varying data on boundaries for processes
+    real(fp)     , dimension(mxbctm, nto, lstsc), intent(out) :: zstep    !  Description and declaration in esm_alloc_real.f90
+    character(*)                                              :: filbcc   !  File name for the time varying data on boundaries for processes file
+    character(*)                                              :: mdfrec   !  Standard rec. length in MD-file (300)
     character(*)                                              :: runid
-    character(1)                                              :: eol    !  ASCII code for End-Of-Line (^J)
-    character(10), dimension(nto, lstsc)                      :: tprofc !  Description and declaration in esm_alloc_char.f90
-    character(20), dimension(lstsc)                           :: namcon !  Description and declaration in esm_alloc_char.f90
-    character(20), dimension(nto)                             :: nambnd !  Description and declaration in esm_alloc_char.f90
+    character(1)                                              :: eol      !  ASCII code for End-Of-Line (^J)
+    character(10), dimension(nto, lstsc)                      :: tprofc   !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(lstsc)                           :: namcon   !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(nto)                             :: nambnd   !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !
@@ -279,7 +279,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 write (message, '(2a)') 'Reading BC-transport file ', filbcc(:lf)
                 call prterr(lundia, 'G051', trim(message))
                 call rdtdc(lundia    ,lunout    ,lunrd     ,error     ,filbcc    , &
-                         & runid     ,profil    ,eol       ,itstrt    ,itstop    , &
+                         & runid     ,profil    ,eol       ,itstrt    ,itfinish  , &
                          & nto       ,lstsc     ,nambnd    ,namcon    ,gdp       )
                 !
                 close (lunrd)
@@ -294,7 +294,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 call prterr(lundia, 'G051', trim(message))
                 call rdtdcn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
                           & filbcc    ,runid     ,profil    ,eol       ,itstrt    , &
-                          & itstop    ,nto       ,lstsc     ,kmax       ,nambnd    , &
+                          & itfinish  ,nto       ,lstsc     ,kmax       ,nambnd    , &
                           & namcon    ,bubble    ,gdp       )
                 !
                 close (lunrd)
@@ -994,7 +994,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
   700  continue
        if (itold/= - 1) then
-            if (itold<itstop) then 
+            if (itold < itfinish) then 
                 call prterr(lundia    ,'U042'    ,'Last time for time varying constituents boundary conditions <')
                 error = .true.
                 goto 9999

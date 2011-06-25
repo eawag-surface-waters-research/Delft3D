@@ -147,9 +147,13 @@ subroutine gdp_alloc(gdp)
     !
     allocate (gdp%dd)
     !
-    allocate (gdp%runid)
+    ! runid may be already allocated. See d3df_dll.F90, module gdp_entry, subroutine gdpAlloc
     !
     allocate (gdp%gdparall)
+    !
+    if (.not. associated(gdp%runid)) then
+       allocate (gdp%runid)
+    endif
     !
     allocate (gdp%arch)
     allocate (gdp%errorcode)

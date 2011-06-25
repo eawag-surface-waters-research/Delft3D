@@ -33,7 +33,7 @@ function getpointer(pntnam, gdp)
 ! See subroutine gtptrs
 ! If used after initialization, they point to the latest initialized sub domain.
 ! If needed after initialization, use this function getpointer instead.
-! See subroutines inspec and getfpt
+! See subroutine getfpt
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE

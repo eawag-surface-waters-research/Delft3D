@@ -1,5 +1,5 @@
 subroutine inibct(lundia    ,error     ,runid     , &
-                & itbct     ,itstop    ,nto       ,ntof      , &
+                & itbct     ,nto       ,ntof      , &
                 & kmax      ,kcd       ,nambnd    ,typbnd    ,tprofu    , &
                 & hydrbc    ,bubble    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
@@ -58,16 +58,13 @@ subroutine inibct(lundia    ,error     ,runid     , &
 !
 ! Global variables
 !
-    integer                                            :: itstop !  Description and declaration in inttim.igs
-    integer                                            :: itstrt !  Description and declaration in inttim.igs
     integer                                            :: kcd    !  Description and declaration in dimens.igs
     integer                                            :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                            :: lundia !  Description and declaration in inout.igs
     integer                                            :: nto    !  Description and declaration in esm_alloc_int.f90
     integer                              , intent(in)  :: ntof   !  Description and declaration in dimens.igs
     integer      , dimension(5, nto)                   :: itbct  !  Description and declaration in esm_alloc_int.f90
-    logical                              , intent(in)  :: bubble !  Description and declaration in procs.igs        
-    logical                                            :: cyclic !!  Flag = TRUE if cyclic system assumed
+    logical                              , intent(in)  :: bubble !  Description and declaration in procs.igs
     logical                                            :: error  !!  Flag=TRUE if an error is encountered
     real(fp)     , dimension(4, nto, kcd)              :: hydrbc !  Description and declaration in esm_alloc_real.f90
     character(*)                                       :: runid

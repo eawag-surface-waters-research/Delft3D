@@ -43,7 +43,7 @@ subroutine d3s_get_discharges( nst, nto, kcd, hydrbc )
     integer                         , intent(in)  :: nst
     integer                         , intent(in)  :: nto
     integer                         , intent(in)  :: kcd
-    real(fp), dimension(4, nto, kcd), intent(out) :: hydrbc !  Description and declaration in rjdim.f90
+    real(fp), dimension(4, nto, kcd), intent(out) :: hydrbc !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

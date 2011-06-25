@@ -147,7 +147,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     real(fp)                             , pointer :: timsec
     real(fp)                             , pointer :: timhr
     integer                              , pointer :: itstrt
-    integer                              , pointer :: itstop
+    integer                              , pointer :: itfinish
     integer                              , pointer :: itcomi
     integer                              , pointer :: itimtt
     integer                              , pointer :: itnflf
@@ -605,6 +605,9 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     logical                 :: success
     real(fp), dimension(1)  :: value
     character(8)            :: stage       ! First or second half time step 
+    logical                 :: l_f0isf1_TTF  ! flag when f0isf1 is called:
+                                             ! at start and half-way (TRUE) (OpenDA purposes)
+                                             ! or half-way and at end (FALSE) (original situation)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -697,7 +700,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     timsec              => gdp%gdinttim%timsec
     timhr               => gdp%gdinttim%timhr
     itstrt              => gdp%gdinttim%itstrt
-    itstop              => gdp%gdinttim%itstop
+    itfinish            => gdp%gdinttim%itfinish
     itcomi              => gdp%gdinttim%itcomi
     itimtt              => gdp%gdinttim%itimtt
     itnflf              => gdp%gdinttim%itnflf
@@ -1170,7 +1173,32 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        endif
        ifirst = 0
     endif
-    if (dpmveg) then
+    !
+    l_f0isf1_TTF = .TRUE.    !TRUE: openDA mode; FALSE: original situation
+    !
+    ! f0isf1 moved to here (before dmpveg since it uses s0)
+    !
+    if (l_f0isf1_TTF) then
+       call timer_start(timer_f0isf1, gdp)
+       call f0isf1(dischy    ,nst       ,zmodel    ,jstart    , &
+                 & nmmax     ,nmmaxj    ,nmax      ,kmax      ,lstsci    , &
+                 & ltur      ,nsrc      ,i(kcu)    ,i(kcv)    ,i(kcs)    , &
+                 & i(kfs)    ,i(kfu)    ,i(kfv)    ,i(kfsmin) ,i(kfsmax) , &
+                 & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,i(kfsmx0) , &
+                 & i(kfumx0) ,i(kfvmx0) ,r(s0)     ,r(s1)     ,r(u0)     , &
+                 & r(u1)     ,r(v0)     ,r(v1)     ,r(volum0) ,r(volum1) , &
+                 & r(r0)     ,r(r1)     ,r(rtur0)  ,r(rtur1)  ,r(disch)  , &
+                 & r(discum) ,r(hu)     ,r(hv)     ,r(dzu1)   ,r(dzv1)   , &
+                 & r(dzs1)   ,r(dzu0)   ,r(dzv0)   ,r(dzs0)   ,r(qxk)    , &
+                 & r(qyk)    ,r(qu)     ,r(qv)     ,r(s00)    ,r(w0)     , &
+                 & r(w1)     ,r(p0)     ,r(p1)     ,r(hu0)    ,r(hv0)    , &
+                 & r(ewabr0) ,r(ewabr1) , &
+                 & r(ewave0) ,r(ewave1) ,r(eroll0) ,r(eroll1) ,roller    , &
+                 & gdp       )
+        call timer_stop(timer_f0isf1, gdp)
+     endif
+     !
+     if (dpmveg) then
        !
        ! update vegetation arrays if necessary
        !
@@ -1210,7 +1238,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        ! Communicate data and synchronise executables
        !
        call timer_start(timer_wait, gdp)
-       call syncom(mudlay    ,timnow    ,itstrt    ,itstop    ,kmax      , &
+       call syncom(mudlay    ,timnow    ,itstrt    ,itfinish  ,kmax      , &
                  & r(u0)     ,r(usus)   ,r(v0)     ,r(vsus)   ,r(cfurou) , &
                  & r(czusus) ,r(cfvrou) ,r(czvsus) ,r(r0)     ,r(rsed)   , &
                  & lstsci    ,lsal      ,ltem      ,r(wstau)  ,r(wssus)  , &
@@ -2199,7 +2227,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     call timer_start(timer_trisol_fluidmud, gdp)
     if (flmd2l) then
        call timer_start(timer_wait, gdp)
-       call syncom(mudlay    ,timnow    ,itstrt    ,itstop    ,kmax      , &
+       call syncom(mudlay    ,timnow    ,itstrt    ,itfinish  ,kmax      , &
                  & r(u0)     ,r(usus)   ,r(v0)     ,r(vsus)   ,r(cfurou) , &
                  & r(czusus) ,r(cfvrou) ,r(czvsus) ,r(r0)     ,r(rsed)   , &
                  & lstsci    ,lsal      ,ltem      ,r(wstau)  ,r(wssus)  , &
@@ -3131,26 +3159,30 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                      & r(volum1),r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   , &
                      & r(gsqs)  ,r(guu)    ,r(gvv)    ,d(dps)    ,gdp       )
        !
+       ! This call is not needed when running in OpenDA mode. 
+       ! f0isf1 is now called at the START of the routine trisol!
        ! Reset arrays for next half time step
        ! S0=S1, U0=U1, V0=V1, R0=R1 etc
        !
-       call timer_start(timer_f0isf1, gdp)
-       call f0isf1(dischy    ,nst       ,zmodel    ,jstart    , &
-                 & nmmax     ,nmmaxj    ,nmax      ,kmax      ,lstsci    , &
-                 & ltur      ,nsrc      ,i(kcu)    ,i(kcv)    ,i(kcs)    , &
-                 & i(kfs)    ,i(kfu)    ,i(kfv)    ,i(kfsmin) ,i(kfsmax) , &
-                 & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,i(kfsmx0) , &
-                 & i(kfumx0) ,i(kfvmx0) ,r(s0)     ,r(s1)     ,r(u0)     , &
-                 & r(u1)     ,r(v0)     ,r(v1)     ,r(volum0) ,r(volum1) , &
-                 & r(r0)     ,r(r1)     ,r(rtur0)  ,r(rtur1)  ,r(disch)  , &
-                 & r(discum) ,r(hu)     ,r(hv)     ,r(dzu1)   ,r(dzv1)   , &
-                 & r(dzs1)   ,r(dzu0)   ,r(dzv0)   ,r(dzs0)   ,r(qxk)    , &
-                 & r(qyk)    ,r(qu)     ,r(qv)     ,r(s00)    ,r(w0)     , &
-                 & r(w1)     ,r(p0)     ,r(p1)     ,r(hu0)    ,r(hv0)    , &
-                 & r(ewabr0) ,r(ewabr1) , &
-                 & r(ewave0) ,r(ewave1) ,r(eroll0) ,r(eroll1) ,roller    , &
-                 & gdp       )
-       call timer_stop(timer_f0isf1, gdp)
+       if (.not. l_f0isf1_TTF) then
+          call timer_start(timer_f0isf1, gdp)
+          call f0isf1(dischy    ,nst       ,zmodel    ,jstart    , &
+                    & nmmax     ,nmmaxj    ,nmax      ,kmax      ,lstsci    , &
+                    & ltur      ,nsrc      ,i(kcu)    ,i(kcv)    ,i(kcs)    , &
+                    & i(kfs)    ,i(kfu)    ,i(kfv)    ,i(kfsmin) ,i(kfsmax) , &
+                    & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,i(kfsmx0) , &
+                    & i(kfumx0) ,i(kfvmx0) ,r(s0)     ,r(s1)     ,r(u0)     , &
+                    & r(u1)     ,r(v0)     ,r(v1)     ,r(volum0) ,r(volum1) , &
+                    & r(r0)     ,r(r1)     ,r(rtur0)  ,r(rtur1)  ,r(disch)  , &
+                    & r(discum) ,r(hu)     ,r(hv)     ,r(dzu1)   ,r(dzv1)   , &
+                    & r(dzs1)   ,r(dzu0)   ,r(dzv0)   ,r(dzs0)   ,r(qxk)    , &
+                    & r(qyk)    ,r(qu)     ,r(qv)     ,r(s00)    ,r(w0)     , &
+                    & r(w1)     ,r(p0)     ,r(p1)     ,r(hu0)    ,r(hv0)    , &
+                    & r(ewabr0) ,r(ewabr1) , &
+                    & r(ewave0) ,r(ewave1) ,r(eroll0) ,r(eroll1) ,roller    , &
+                    & gdp       )
+          call timer_stop(timer_f0isf1, gdp)
+       endif
     endif
     if (rtcact) then
        call rtc_comm_put(i(kfs)    ,i(kfsmin) ,i(kfsmax) ,r(sig)    , &

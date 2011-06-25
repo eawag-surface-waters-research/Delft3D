@@ -1,7 +1,7 @@
 subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                & noui      ,nrver     ,runid     ,fildis    ,eol       , &
                & namsrc    ,disint    ,namcon    ,nsrc      ,rtdis     , &
-               & itstrt    ,itstop    ,mxnsrc    ,mxdist    ,ndistm    , &
+               & itstrt    ,itfinish  ,mxnsrc    ,mxdist    ,ndistm    , &
                & lstsc     ,salin     ,temp      ,const     ,lconc     , &
                & disch     ,cqs       ,cqt       ,cqc       ,bubble    , &
                & gdp       )
@@ -71,37 +71,37 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
 ! Global variables
 !
-    integer                                               :: itstop !  Description and declaration in inttim.igs
-    integer                                               :: itstrt !  Description and declaration in inttim.igs
-    integer                                 , intent(in)  :: lconc  !  Number of Constituents (excl. salinity, temperature, secondary flow,
-                                                                    !  turbulence energy dissipation and production)
-    integer                                               :: lstsc  !  Description and declaration in dimens.igs
-    integer                                               :: lundia !  Description and declaration in inout.igs
-    integer                                               :: lunmd  !  Description and declaration in inout.igs
-    integer                                 , intent(in)  :: mxdist !  Maximum number of times for which time varying data at discharge points is allowed in the Md-file
-    integer                                 , intent(in)  :: mxnsrc !  Maximum number of discharge points
-    integer                                               :: ndistm !  Actual number of times for which time varying data at discharge points is allowed in the Md-file
-    integer                                               :: nrrec  !  Pointer to the record number in the MD-file
-    integer                                 , intent(in)  :: nrver  !  Version number (240/249)
-    integer                                               :: nsrc   !  Description and declaration in esm_alloc_int.f90
-    logical                                 , intent(in)  :: bubble !  Description and declaration in procs.igs    
-    logical                                 , intent(in)  :: const  !  Description and declaration in procs.igs
-    logical                                               :: error  !  Flag=TRUE if an error is encountered
-    logical                                 , intent(in)  :: noui   !  Flag for reading from User Interface
-    logical                                 , intent(in)  :: salin  !  Description and declaration in procs.igs
-    logical                                 , intent(in)  :: temp   !  Description and declaration in procs.igs
-    real(fp)     , dimension(5, mxdist, mxnsrc)           :: cqc    !  At most MXDIST time varying concen-trations at discharge points
-    real(fp)     , dimension(mxdist)                      :: rtdis  !  At most MXDIST times for time varying data at discharge points
-    real(fp)     , dimension(mxdist, mxnsrc)              :: cqs    !  At most MXDIST time varying salinities at discharge points
-    real(fp)     , dimension(mxdist, mxnsrc)              :: cqt    !  At most MXDIST time varying temperatures at discharge points
-    real(fp)     , dimension(mxdist, mxnsrc), intent(out) :: disch  !  Description and declaration in esm_alloc_real.f90
-    character(*)                                          :: fildis !  File name for the time varying data at discharge points
-    character(*)                                          :: mdfrec !  Standard rec. length in MD-file (300)
+    integer                                               :: itfinish !  Description and declaration in inttim.igs
+    integer                                               :: itstrt   !  Description and declaration in inttim.igs
+    integer                                 , intent(in)  :: lconc    !  Number of Constituents (excl. salinity, temperature, secondary flow,
+                                                                      !  turbulence energy dissipation and production)
+    integer                                               :: lstsc    !  Description and declaration in dimens.igs
+    integer                                               :: lundia   !  Description and declaration in inout.igs
+    integer                                               :: lunmd    !  Description and declaration in inout.igs
+    integer                                 , intent(in)  :: mxdist   !  Maximum number of times for which time varying data at discharge points is allowed in the Md-file
+    integer                                 , intent(in)  :: mxnsrc   !  Maximum number of discharge points
+    integer                                               :: ndistm   !  Actual number of times for which time varying data at discharge points is allowed in the Md-file
+    integer                                               :: nrrec    !  Pointer to the record number in the MD-file
+    integer                                 , intent(in)  :: nrver    !  Version number (240/249)
+    integer                                               :: nsrc     !  Description and declaration in esm_alloc_int.f90
+    logical                                 , intent(in)  :: bubble   !  Description and declaration in procs.igs
+    logical                                 , intent(in)  :: const    !  Description and declaration in procs.igs
+    logical                                               :: error    !  Flag=TRUE if an error is encountered
+    logical                                 , intent(in)  :: noui     !  Flag for reading from User Interface
+    logical                                 , intent(in)  :: salin    !  Description and declaration in procs.igs
+    logical                                 , intent(in)  :: temp     !  Description and declaration in procs.igs
+    real(fp)     , dimension(5, mxdist, mxnsrc)           :: cqc      !  At most MXDIST time varying concen-trations at discharge points
+    real(fp)     , dimension(mxdist)                      :: rtdis    !  At most MXDIST times for time varying data at discharge points
+    real(fp)     , dimension(mxdist, mxnsrc)              :: cqs      !  At most MXDIST time varying salinities at discharge points
+    real(fp)     , dimension(mxdist, mxnsrc)              :: cqt      !  At most MXDIST time varying temperatures at discharge points
+    real(fp)     , dimension(mxdist, mxnsrc), intent(out) :: disch    !  Description and declaration in esm_alloc_real.f90
+    character(*)                                          :: fildis   !  File name for the time varying data at discharge points
+    character(*)                                          :: mdfrec   !  Standard rec. length in MD-file (300)
     character(*)                                          :: runid
-    character(1)                                          :: eol    !  ASCII code for End-Of-Line (^J)
-    character(1) , dimension(nsrc)                        :: disint !  Description and declaration in esm_alloc_char.f90
-    character(20), dimension(lstsc)         , intent(in)  :: namcon !  Description and declaration in esm_alloc_char.f90
-    character(20), dimension(nsrc)                        :: namsrc !  Description and declaration in esm_alloc_char.f90
+    character(1)                                          :: eol      !  ASCII code for End-Of-Line (^J)
+    character(1) , dimension(nsrc)                        :: disint   !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(lstsc)         , intent(in)  :: namcon   !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(nsrc)                        :: namsrc   !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !
@@ -302,7 +302,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 call prterr(lundia, 'G051', trim(message))
                 nrval = 1 + lstsc
                 call rdtdd(lundia    ,lunout    ,lunrd     ,error     ,fildis    , &
-                         & runid     ,cntain    ,eol       ,itstrt    ,itstop    , &
+                         & runid     ,cntain    ,eol       ,itstrt    ,itfinish  , &
                          & nsrc      ,lstsc     ,nrval     ,rval      ,namsrc    , &
                          & disint    ,parnam    ,parunt    ,gdp       )
                 !
@@ -318,7 +318,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 call prterr(lundia, 'G051', trim(message))
                 maxval = 1 + lstsc + 2
                 call rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
-                          & fildis    ,runid     ,eol       ,itstrt    ,itstop    , &
+                          & fildis    ,runid     ,eol       ,itstrt    ,itfinish  , &
                           & nsrc      ,lstsc     ,rval      ,maxval    ,namsrc    , &
                           & disint    ,parnam    ,parunt    ,bubble    ,gdp       )
                 !
@@ -630,7 +630,7 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
   700  continue
        if (itold/= - 1) then
-            if (itold<itstop) then 
+            if (itold < itfinish) then 
                 call prterr(lundia    ,'U042'    ,'Last time for time varying discharge rates <')
                 error = .true.
                 goto 9999

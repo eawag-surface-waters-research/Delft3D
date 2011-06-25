@@ -1,5 +1,5 @@
 subroutine rdtdf(lundia    ,luntdp    ,error     ,filnam    ,fmttmp    , &
-               & nrval     ,rval      ,dt        ,itstrt    ,itstop    , &
+               & nrval     ,rval      ,dt        ,itstrt    ,itfinish  , &
                & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -50,19 +50,19 @@ subroutine rdtdf(lundia    ,luntdp    ,error     ,filnam    ,fmttmp    , &
 !
 ! Global variables
 !
-    integer                     , intent(in)  :: itstop !  Description and declaration in inttim.igs
-    integer                     , intent(in)  :: itstrt !  Description and declaration in inttim.igs
-    integer                     , intent(in)  :: lundia !  Description and declaration in inout.igs
-    integer                     , intent(in)  :: luntdp !  Unit number of the unformatted file where the data, just read, are to be rewritten again (for FLOW sim.)
-    integer                     , intent(in)  :: nrval  !  NR. of data in a record to be read
-    logical                     , intent(out) :: error  !  Flag=TRUE if an error is encountered
-    real(fp)                    , intent(in)  :: dt     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nrval)  , intent(out) :: rval   !  Array for the time dependent data
-                                                        !  RVAL   (1,I) = Values at t=TIM0
-                                                        !  RVAL   (2,I) = Values at t=TIM1
-                                                        !  I=1,.,NDIM   = nr. of REC. to read
-    character(*)                , intent(in)  :: filnam !  Name of the relevant file
-    character(11)               , intent(in)  :: fmttmp !  Format of the relevant file
+    integer                     , intent(in)  :: itfinish !  Description and declaration in inttim.igs
+    integer                     , intent(in)  :: itstrt   !  Description and declaration in inttim.igs
+    integer                     , intent(in)  :: lundia   !  Description and declaration in inout.igs
+    integer                     , intent(in)  :: luntdp   !  Unit number of the unformatted file where the data, just read, are to be rewritten again (for FLOW sim.)
+    integer                     , intent(in)  :: nrval    !  NR. of data in a record to be read
+    logical                     , intent(out) :: error    !  Flag=TRUE if an error is encountered
+    real(fp)                    , intent(in)  :: dt       !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nrval)  , intent(out) :: rval     !  Array for the time dependent data
+                                                          !  RVAL   (1,I) = Values at t=TIM0
+                                                          !  RVAL   (2,I) = Values at t=TIM1
+                                                          !  I=1,.,NDIM   = nr. of REC. to read
+    character(*)                , intent(in)  :: filnam   !  Name of the relevant file
+    character(11)               , intent(in)  :: fmttmp   !  Format of the relevant file
 !
 ! Local variables
 !
@@ -133,7 +133,7 @@ subroutine rdtdf(lundia    ,luntdp    ,error     ,filnam    ,fmttmp    , &
        !           or reading error (IOCOND > 0)
        !
        if (iocond<0) then
-          if (itold<itstop) then
+          if (itold < itfinish) then
              errmsg = 'Last time in file ' // filnam(:lfile) // ' <'
              call prterr(lundia    ,'U042'    ,errmsg(:20 + lfile)  )
              !

@@ -1,4 +1,4 @@
-subroutine rtc_comm_init(error      ,nambar    ,kfs       ,kfsmin    , &
+subroutine rtc_comm_init(error     ,nambar    ,kfs       ,kfsmin    , &
                        & kfsmax    ,sig       ,zk        ,s1        , &
                        & dps       ,r0        ,gdp       )
 !----- GPL ---------------------------------------------------------------------
@@ -47,7 +47,7 @@ subroutine rtc_comm_init(error      ,nambar    ,kfs       ,kfsmin    , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     integer                       , pointer :: ifirstrtc
-    integer                       , pointer :: itstop
+    integer                       , pointer :: itfinish
     integer                       , pointer :: itstrt
     integer                       , pointer :: kmax
     integer                       , pointer :: lsal
@@ -77,16 +77,16 @@ subroutine rtc_comm_init(error      ,nambar    ,kfs       ,kfsmin    , &
 !
 ! Global variables
 !
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kfsmax !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kfsmin !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kfs    !  Description and declaration in esm_alloc_int.f90
-    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: dps    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, gdp%d%kmax, gdp%d%lstsci), intent(in)  :: r0
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: s1     !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(  gdp%d%kmax)         , intent(in) :: sig
-    real(fp)  , dimension(0:gdp%d%kmax)         , intent(in) :: zk
-    logical                                :: error        ! Flag=TRUE if an error is encountered 
-    character(20) , dimension(gdp%d%nsluv) :: nambar      ! names of all parameters to get from RTC
+    integer       , dimension(gdp%d%nmlb:gdp%d%nmub)                                             , intent(in) :: kfsmax !  Description and declaration in esm_alloc_int.f90
+    integer       , dimension(gdp%d%nmlb:gdp%d%nmub)                                             , intent(in) :: kfsmin !  Description and declaration in esm_alloc_int.f90
+    integer       , dimension(gdp%d%nmlb:gdp%d%nmub)                                             , intent(in) :: kfs    !  Description and declaration in esm_alloc_int.f90
+    real(prec)    , dimension(gdp%d%nmlb:gdp%d%nmub)                                             , intent(in) :: dps    !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, gdp%d%kmax, gdp%d%lstsci), intent(in) :: r0
+    real(fp)      , dimension(gdp%d%nmlb:gdp%d%nmub)                                             , intent(in) :: s1     !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(  gdp%d%kmax)                                                      , intent(in) :: sig
+    real(fp)      , dimension(0:gdp%d%kmax)                                                      , intent(in) :: zk
+    logical                                                                                                   :: error  ! Flag=TRUE if an error is encountered 
+    character(20) , dimension(gdp%d%nsluv)                                                                    :: nambar ! names of all parameters to get from RTC
 !
 ! Local variables
 !
@@ -101,7 +101,7 @@ subroutine rtc_comm_init(error      ,nambar    ,kfs       ,kfsmin    , &
 !! executable statements -------------------------------------------------------
 !
     ifirstrtc      => gdp%gdrtc%ifirstrtc
-    itstop         => gdp%gdinttim%itstop
+    itfinish       => gdp%gdinttim%itfinish
     itstrt         => gdp%gdinttim%itstrt
     kmax           => gdp%d%kmax
     lsal           => gdp%d%lsal
@@ -240,14 +240,14 @@ subroutine rtc_comm_init(error      ,nambar    ,kfs       ,kfsmin    , &
             !
             call datatortc(timsec, ifirstrtc, tnparput, tparput, &
                          & tparput_names, success)
-            call syncflowrtc_init(error, tparget_names, tnparget, 80, itstop - itstrt, commSalinity)
+            call syncflowrtc_init(error, tparget_names, tnparget, 80, itfinish - itstrt, commSalinity)
          endif
       else
          !
          ! Communication with RTC occurs only by the master domain
          !
          if (rtc_domainnr == 1) then
-            call syncflowrtc_init(error, tparget_names, tnparget, 80, itstop - itstrt, commBarriers)
+            call syncflowrtc_init(error, tparget_names, tnparget, 80, itfinish - itstrt, commBarriers)
          endif
       endif
       call timer_stop(timer_wait, gdp)

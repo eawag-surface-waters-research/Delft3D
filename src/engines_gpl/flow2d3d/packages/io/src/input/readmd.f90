@@ -207,7 +207,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     logical                       , pointer :: wavcmp
     logical                       , pointer :: lftrto
     integer                       , pointer :: itstrt
-    integer                       , pointer :: itstop
+    integer                       , pointer :: itfinish
     integer                       , pointer :: itlfsm
     integer                       , pointer :: itmapf
     integer                       , pointer :: itmapi
@@ -385,7 +385,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     tunit               => gdp%gdexttim%tunit
     tzone               => gdp%gdexttim%tzone
     itstrt              => gdp%gdinttim%itstrt
-    itstop              => gdp%gdinttim%itstop
+    itfinish            => gdp%gdinttim%itfinish
     itlfsm              => gdp%gdinttim%itlfsm
     itmapf              => gdp%gdinttim%itmapf
     itmapi              => gdp%gdinttim%itmapi
@@ -624,7 +624,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     !
     call rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              & noui      ,citdat    ,tstart    ,tstop     ,tzone     , &
-             & itdate    ,julday    ,itstrt    ,itstop    ,dt        , &
+             & itdate    ,julday    ,itstrt    ,itfinish  ,dt        , &
              & ctunit    ,tunit     ,gdp       )
     if (error) goto 9999
     !
@@ -815,7 +815,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     !
     call rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
               & tstop     ,dt        ,ipmap     ,mxprt     , &
-              & nprttm    ,itstop    ,iphisf    ,iphisi    ,iphisl    , &
+              & nprttm    ,itfinish  ,iphisf    ,iphisi    ,iphisl    , &
               & itmapf    ,itmapi    ,itmapl    ,ithisf    ,ithisi    , &
               & ithisl    ,itcomf    ,itcomi    ,itcoml    ,itrsti    , &
               & itnflf    ,itnfli    ,itnfll    ,gdp       )

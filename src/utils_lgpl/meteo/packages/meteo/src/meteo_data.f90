@@ -191,6 +191,17 @@ module meteo_data
 
 contains
 
+subroutine init_meteo_data
+   implicit none
+
+   num_meteopointers     = 0
+   message_count         = 0
+   msferic               = .false.
+   meteoint              = .true.  
+   patm_default          = 101300.0_fp
+   meteomessage          = ' '
+  
+end subroutine init_meteo_data
 
 
 !subroutine meteosetsferic()

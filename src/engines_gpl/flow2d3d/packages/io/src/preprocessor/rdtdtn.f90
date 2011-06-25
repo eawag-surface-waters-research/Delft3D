@@ -1,6 +1,6 @@
 subroutine rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
                 & filbct    ,runid     ,typtst    ,eol       ,itstrt    , &
-                & itstop    ,nto       ,ntof      ,ntot      ,kmax      , &
+                & itfinish  ,nto       ,ntof      ,ntot      ,kmax      , &
                 & tprofu    ,nambnd    ,typbnd    ,namtyp    ,unttyp    , &
                 & bubble    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
@@ -60,28 +60,28 @@ subroutine rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
 !
 ! Global variables
 !
-    integer                      , intent(in)  :: itstop !  Description and declaration in inttim.igs
-    integer                                    :: itstrt !  Description and declaration in inttim.igs
-    integer                                    :: kmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                    :: lundia !  Description and declaration in inout.igs
-    integer                                    :: lunout !  Unit number for unformatted FLOW help file between tdatom and trisim
-    integer                                    :: lunrd  !  Unit number of the attribute file containing the time series
-    integer                      , intent(in)  :: nto    !  Description and declaration in esm_alloc_int.f90
-    integer                      , intent(in)  :: ntof   !  Description and declaration in dimens.igs
-    integer                      , intent(in)  :: ntot   !  Description and declaration in dimens.igs
-    logical                      , intent(in)  :: bubble !  Description and declaration in procs.igs        
-    logical                                    :: error  !  Flag=TRUE if an error is encountered
-    character(*)                               :: filbct !  File name for the time varying boundary conditions file
-    character(*)                               :: filout !  Name of the output file to be opened
-    character(*)                 , intent(in)  :: runid  !  Run identification code for the current simulation (used to determine
-                                                         !  the names of the in- /output files used by the system)
-    character(1)                 , intent(in)  :: eol    !  ASCII code for End-Of-Line (^J)
-    character(1), dimension(nto) , intent(in)  :: typbnd !  Description and declaration in esm_alloc_char.f90
-    character(10), dimension(6)  , intent(in)  :: unttyp !  Unit name fitting the parameter depending on value of TYPBND
-    character(20), dimension(6)  , intent(in)  :: namtyp !  Names of the paramaters to write to time dependent files for BCT depending on value of TYPBND
-    character(20), dimension(nto)              :: nambnd !  Description and declaration in esm_alloc_char.f90
-    character(20), dimension(nto), intent(in)  :: tprofu !  Description and declaration in esm_alloc_char.f90
-    character(6)                 , intent(in)  :: typtst !  Data string to test type of boundary
+    integer                      , intent(in)  :: itfinish !  Description and declaration in inttim.igs
+    integer                                    :: itstrt   !  Description and declaration in inttim.igs
+    integer                                    :: kmax     !  Description and declaration in esm_alloc_int.f90
+    integer                                    :: lundia   !  Description and declaration in inout.igs
+    integer                                    :: lunout   !  Unit number for unformatted FLOW help file between tdatom and trisim
+    integer                                    :: lunrd    !  Unit number of the attribute file containing the time series
+    integer                      , intent(in)  :: nto      !  Description and declaration in esm_alloc_int.f90
+    integer                      , intent(in)  :: ntof     !  Description and declaration in dimens.igs
+    integer                      , intent(in)  :: ntot     !  Description and declaration in dimens.igs
+    logical                      , intent(in)  :: bubble   !  Description and declaration in procs.igs
+    logical                                    :: error    !  Flag=TRUE if an error is encountered
+    character(*)                               :: filbct   !  File name for the time varying boundary conditions file
+    character(*)                               :: filout   !  Name of the output file to be opened
+    character(*)                 , intent(in)  :: runid    !  Run identification code for the current simulation (used to determine
+                                                           !  the names of the in- /output files used by the system)
+    character(1)                 , intent(in)  :: eol      !  ASCII code for End-Of-Line (^J)
+    character(1), dimension(nto) , intent(in)  :: typbnd   !  Description and declaration in esm_alloc_char.f90
+    character(10), dimension(6)  , intent(in)  :: unttyp   !  Unit name fitting the parameter depending on value of TYPBND
+    character(20), dimension(6)  , intent(in)  :: namtyp   !  Names of the paramaters to write to time dependent files for BCT depending on value of TYPBND
+    character(20), dimension(nto)              :: nambnd   !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(nto), intent(in)  :: tprofu   !  Description and declaration in esm_alloc_char.f90
+    character(6)                 , intent(in)  :: typtst   !  Data string to test type of boundary
 !
 ! Local variables
 !
@@ -177,7 +177,7 @@ subroutine rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
           error = .true.
           call prterr(lundia    ,'G007'    ,filbct    )
           if (iocond < 0) then
-             if (itold < itstop) then
+             if (itold < itfinish) then
                 write(errmsg,'(a,a,a)') 'Last time in file ', trim(filbct), ' <' 
                 call prterr(lundia    ,'U042'    ,errmsg)
              elseif (nn < ntot) then
@@ -493,7 +493,7 @@ subroutine rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
        ! Define maximum time
        !
        if (itold /= -1) then
-            if (itold<itstop) then
+            if (itold < itfinish) then
                 write(errmsg,'(a,a,a,a,a)') 'Last time in file ', trim(filbct), ' for section #',trim(nambnd(n)),'# <' 
                 call prterr(lundia    ,'U042'    ,errmsg)
                 error = .true.

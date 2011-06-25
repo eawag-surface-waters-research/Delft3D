@@ -1,5 +1,5 @@
 subroutine rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
-                & fildis    ,runid     ,eol       ,itstrt    ,itstop    , &
+                & fildis    ,runid     ,eol       ,itstrt    ,itfinish  , &
                 & nsrc      ,lstsc     ,rval      ,maxval    ,namsrc    , &
                 & disint    ,parnam    ,parunt    ,bubble    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
@@ -58,25 +58,25 @@ subroutine rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
 !
 ! Global variables
 !
-    integer                            , intent(in)  :: itstop !  Description and declaration in inttim.igs
-    integer                                          :: itstrt !  Description and declaration in inttim.igs
-    integer                            , intent(in)  :: lstsc  !  Description and declaration in dimens.igs
-    integer                                          :: lundia !  Description and declaration in inout.igs
-    integer                                          :: lunout !  Unit number for the transformed ouput file
-    integer                                          :: lunrd  !  Unit number of the attribute file containing the time series
-    integer                            , intent(in)  :: maxval !  Maximum number of values 1+LSTSC+2
-    integer                            , intent(in)  :: nsrc   !  Description and declaration in esm_alloc_int.f90
-    logical                            , intent(in)  :: bubble !  Description and declaration in procs.igs        
-    logical                                          :: error  !  Flag=TRUE if an error is encountered
-    real(fp)     , dimension(maxval)                 :: rval   !  Array for the time dependent data
-    character(*)                                     :: fildis !  Name of time dependent input file
-    character(*)                                     :: filout !  Name of the output file to be opened
+    integer                            , intent(in)  :: itfinish !  Description and declaration in inttim.igs
+    integer                                          :: itstrt   !  Description and declaration in inttim.igs
+    integer                            , intent(in)  :: lstsc    !  Description and declaration in dimens.igs
+    integer                                          :: lundia   !  Description and declaration in inout.igs
+    integer                                          :: lunout   !  Unit number for the transformed ouput file
+    integer                                          :: lunrd    !  Unit number of the attribute file containing the time series
+    integer                            , intent(in)  :: maxval   !  Maximum number of values 1+LSTSC+2
+    integer                            , intent(in)  :: nsrc     !  Description and declaration in esm_alloc_int.f90
+    logical                            , intent(in)  :: bubble   !  Description and declaration in procs.igs
+    logical                                          :: error    !  Flag=TRUE if an error is encountered
+    real(fp)     , dimension(maxval)                 :: rval     !  Array for the time dependent data
+    character(*)                                     :: fildis   !  Name of time dependent input file
+    character(*)                                     :: filout   !  Name of the output file to be opened
     character(*)                       , intent(in)  :: runid
-    character(1)                       , intent(in)  :: eol    !  ASCII code for End-Of-Line (^J)
-    character(1) , dimension(nsrc)                   :: disint !  Description and declaration in esm_alloc_char.f90
-    character(10), dimension(lstsc + 4), intent(in)  :: parunt !  Unit name fitting the parameter
-    character(20), dimension(nsrc)                   :: namsrc !  Description and declaration in esm_alloc_char.f90
-    character(36), dimension(lstsc + 4), intent(in)  :: parnam !  Names of theparamaters to write to time dependent file DIS
+    character(1)                       , intent(in)  :: eol      !  ASCII code for End-Of-Line (^J)
+    character(1) , dimension(nsrc)                   :: disint   !  Description and declaration in esm_alloc_char.f90
+    character(10), dimension(lstsc + 4), intent(in)  :: parunt   !  Unit name fitting the parameter
+    character(20), dimension(nsrc)                   :: namsrc   !  Description and declaration in esm_alloc_char.f90
+    character(36), dimension(lstsc + 4), intent(in)  :: parnam   !  Names of theparamaters to write to time dependent file DIS
 !
 ! Local variables
 !
@@ -178,7 +178,7 @@ subroutine rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
           call prterr(lundia    ,'G007'    ,fildis    )
           !
           if (iocond<0) then
-             if (itold<itstop) then
+             if (itold < itfinish) then
                 write(errmsg,'(a,a,a)') 'Last time in file ', trim(fildis), ' <' 
                 call prterr(lundia    ,'U042'    ,errmsg    )
              elseif (n<nsrc) then
@@ -422,7 +422,7 @@ subroutine rdtddn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
        ! Define maximum time
        !
        if (itold/= - 1) then
-          if (itold<itstop) then
+          if (itold < itfinish) then
              write(errmsg,'(a,a,a,a,a)') 'Last time in file ', trim(fildis), ' for discharge #',trim(namsrc(n)),'# <' 
              call prterr(lundia    ,'U042'    ,errmsg)
              error = .true.

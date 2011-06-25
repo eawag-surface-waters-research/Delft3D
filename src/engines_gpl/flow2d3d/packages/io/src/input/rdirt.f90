@@ -1,6 +1,6 @@
 subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                & noui      ,citdat    ,tstart    ,tstop     ,tzone     , &
-               & iitdat    ,julday    ,itstrt    ,itstop    ,dt        , &
+               & iitdat    ,julday    ,itstrt    ,itfinish  ,dt        , &
                & ctunit    ,rtunit    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -56,23 +56,23 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
 ! Global variables
 !
-    integer                    :: iitdat !!  Reference date for the simulation times. Format: YYYYMMDD
-    integer                    :: itstop !  Description and declaration in inttim.igs
-    integer                    :: itstrt !  Description and declaration in inttim.igs
-    integer                    :: julday !  Description and declaration in inttim.igs
-    integer                    :: lundia !  Description and declaration in inout.igs
-    integer                    :: lunmd  !  Description and declaration in inout.igs
-    integer                    :: nrrec  !!  Pointer to the record number in the MD-file
-    logical      , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    logical      , intent(in)  :: noui   !!  Flag for reading from User Interface
-    real(fp)                   :: dt     !  Description and declaration in esm_alloc_real.f90
-    real(fp)     , intent(out) :: rtunit !!  Time scale for time parameters (sec)
-    real(fp)                   :: tstart !  Description and declaration in exttim.igs
-    real(fp)                   :: tstop  !  Description and declaration in exttim.igs
-    real(fp)     , intent(out) :: tzone  !  Description and declaration in exttim.igs
-    character(*)               :: mdfrec !!  Standard rec. length in MD-file (300)
-    character(1)               :: ctunit !!  Time scale for time parameters, currently set to 'M'(inute - fixed).
-    character(10)              :: citdat !!  Reference date for the simulation times. Format: "YYYY-MM-DD"
+    integer                    :: iitdat   !!  Reference date for the simulation times. Format: YYYYMMDD
+    integer                    :: itfinish !  Description and declaration in inttim.igs
+    integer                    :: itstrt   !  Description and declaration in inttim.igs
+    integer                    :: julday   !  Description and declaration in inttim.igs
+    integer                    :: lundia   !  Description and declaration in inout.igs
+    integer                    :: lunmd    !  Description and declaration in inout.igs
+    integer                    :: nrrec    !!  Pointer to the record number in the MD-file
+    logical      , intent(out) :: error    !!  Flag=TRUE if an error is encountered
+    logical      , intent(in)  :: noui     !!  Flag for reading from User Interface
+    real(fp)                   :: dt       !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , intent(out) :: rtunit   !!  Time scale for time parameters (sec)
+    real(fp)                   :: tstart   !  Description and declaration in exttim.igs
+    real(fp)                   :: tstop    !  Description and declaration in exttim.igs
+    real(fp)     , intent(out) :: tzone    !  Description and declaration in exttim.igs
+    character(*)               :: mdfrec   !!  Standard rec. length in MD-file (300)
+    character(1)               :: ctunit   !!  Time scale for time parameters, currently set to 'M'(inute - fixed).
+    character(10)              :: citdat   !!  Reference date for the simulation times. Format: "YYYY-MM-DD"
 !
 ! Local variables
 !
@@ -372,23 +372,23 @@ subroutine rdirt(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           call prterr(lundia    ,'U044'    ,'Start time'         )
           if (noui) error = .true.
        endif
-       itstop = nint(tstop/dt)
-       if (dtn(itstop, tstop, dt)) then
+       itfinish = nint(tstop/dt)
+       if (dtn(itfinish, tstop, dt)) then
           call prterr(lundia    ,'U044'    ,'Stop time'          )
           if (noui) error = .true.
        endif
-       if ((itstop - itstrt) <= 0) then
-          itstop = itstrt
+       if ((itfinish - itstrt) <= 0) then
+          itfinish = itstrt
           call prterr(lundia    ,'V041'    ,'Stop time must be >='          )
        endif
-       if (fp == sp .and. itstop > 8388607) then
+       if (fp == sp .and. itfinish > 8388607) then
           !
           ! Limited by incrementing timnow by 0.5 every half time step ( 2**23-1 )
           !
           call prterr(lundia    ,'U021'    ,'Stop time too far away from Itdate for ' // &
               & 'a single precision simulation (should be at most 8388607 time steps)')
           error = .true.
-       elseif (fp == hp .and. itstop > 2147483647) then
+       elseif (fp == hp .and. itfinish > 2147483647) then
           !
           ! Limited by output times written as signed integers to NEFIS files ( 2**31-1 )
           ! Double precision incrementing timnow imposes a second limit at

@@ -1,6 +1,6 @@
 subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 & tstop     ,dt        ,ipmap     ,maxprt    , &
-                & nprttm    ,itstop    ,iphisf    ,iphisi    ,iphisl    , &
+                & nprttm    ,itfinish  ,iphisf    ,iphisi    ,iphisl    , &
                 & itmapf    ,itmapi    ,itmapl    ,ithisf    ,ithisi    , &
                 & ithisl    ,itcomf    ,itcomi    ,itcoml    ,itrsti    , &
                 & itnflf    ,itnfli    ,itnfll    ,gdp       )
@@ -62,33 +62,33 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
 ! Global variables
 !
-    integer                                          :: iphisf !  Description and declaration in inttim.igs
-    integer                                          :: iphisi !  Description and declaration in inttim.igs
-    integer                                          :: iphisl !  Description and declaration in inttim.igs
-    integer                                          :: itcomf !  Description and declaration in inttim.igs
-    integer                                          :: itcomi !  Description and declaration in inttim.igs
-    integer                                          :: itcoml !  Description and declaration in inttim.igs
-    integer                                          :: ithisf !  Description and declaration in inttim.igs
-    integer                                          :: ithisi !  Description and declaration in inttim.igs
-    integer                                          :: ithisl !  Description and declaration in inttim.igs
-    integer                                          :: itmapf !  Description and declaration in inttim.igs
-    integer                                          :: itmapi !  Description and declaration in inttim.igs
-    integer                                          :: itmapl !  Description and declaration in inttim.igs
-    integer                                          :: itnflf !  Description and declaration in inttim.igs
-    integer                                          :: itnfli !  Description and declaration in inttim.igs
-    integer                                          :: itnfll !  Description and declaration in inttim.igs
-    integer                                          :: itrsti !  Description and declaration in inttim.igs
-    integer                          , intent(in)    :: itstop !  Description and declaration in inttim.igs
-    integer                                          :: lundia !  Description and declaration in inout.igs
-    integer                                          :: lunmd  !  Description and declaration in inout.igs
+    integer                                          :: iphisf   !  Description and declaration in inttim.igs
+    integer                                          :: iphisi   !  Description and declaration in inttim.igs
+    integer                                          :: iphisl   !  Description and declaration in inttim.igs
+    integer                                          :: itcomf   !  Description and declaration in inttim.igs
+    integer                                          :: itcomi   !  Description and declaration in inttim.igs
+    integer                                          :: itcoml   !  Description and declaration in inttim.igs
+    integer                                          :: ithisf   !  Description and declaration in inttim.igs
+    integer                                          :: ithisi   !  Description and declaration in inttim.igs
+    integer                                          :: ithisl   !  Description and declaration in inttim.igs
+    integer                                          :: itmapf   !  Description and declaration in inttim.igs
+    integer                                          :: itmapi   !  Description and declaration in inttim.igs
+    integer                                          :: itmapl   !  Description and declaration in inttim.igs
+    integer                                          :: itnflf   !  Description and declaration in inttim.igs
+    integer                                          :: itnfli   !  Description and declaration in inttim.igs
+    integer                                          :: itnfll   !  Description and declaration in inttim.igs
+    integer                                          :: itrsti   !  Description and declaration in inttim.igs
+    integer                          , intent(in)    :: itfinish !  Description and declaration in inttim.igs
+    integer                                          :: lundia   !  Description and declaration in inout.igs
+    integer                                          :: lunmd    !  Description and declaration in inout.igs
     integer                          , intent(in)    :: maxprt
-    integer                                          :: nprttm !!  Number of print times steps
-    integer                                          :: nrrec  !!  Pointer to the record number in the MD-file
-    integer      , dimension(maxprt)                 :: ipmap  !  Description and declaration in inttim.igs
-    logical                          , intent(out)   :: error  !!  Flag=TRUE if an error is encountered
-    real(fp)                                         :: dt     !  Description and declaration in esm_alloc_real.f90
-    real(fp)                         , intent(in)    :: tstop  !  Description and declaration in exttim.igs
-    character(*)                                     :: mdfrec !!  Standard rec. length in MD-file (300)
+    integer                                          :: nprttm   !!  Number of print times steps
+    integer                                          :: nrrec    !!  Pointer to the record number in the MD-file
+    integer      , dimension(maxprt)                 :: ipmap    !  Description and declaration in inttim.igs
+    logical                          , intent(out)   :: error    !!  Flag=TRUE if an error is encountered
+    real(fp)                                         :: dt       !  Description and declaration in esm_alloc_real.f90
+    real(fp)                         , intent(in)    :: tstop    !  Description and declaration in exttim.igs
+    character(*)                                     :: mdfrec   !!  Standard rec. length in MD-file (300)
 !
 ! Local variables
 !
@@ -165,7 +165,7 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     itcomf = 0
     itcomi = 0
     itcoml = 0
-    itrsti = itstop
+    itrsti = itfinish
     !
     nprttm = 0
     do n = 1, maxprt

@@ -1,5 +1,5 @@
 subroutine rdtdt(lundia    ,lunout    ,lunrd     ,error     ,filbct    , &
-               & runid     ,typtst    ,eol       ,itstrt    ,itstop    , &
+               & runid     ,typtst    ,eol       ,itstrt    ,itfinish  , &
                & nto       ,ntot      ,ntof      ,tprofu    ,nambnd    , &
                & typbnd    ,namtyp    ,unttyp    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
@@ -57,24 +57,24 @@ subroutine rdtdt(lundia    ,lunout    ,lunrd     ,error     ,filbct    , &
 !
 ! Global variables
 !
-    integer                                    :: itstop !  Description and declaration in inttim.igs
-    integer                                    :: itstrt !  Description and declaration in inttim.igs
-    integer                                    :: lundia !  Description and declaration in inout.igs
-    integer                      , intent(in)  :: lunout !  Unit number for the transformed output file
-    integer                                    :: lunrd  !  Unit number of the attribute file containing the time series
-    integer                      , intent(in)  :: nto    !  Description and declaration in esm_alloc_int.f90
-    integer                      , intent(in)  :: ntof   !  Description and declaration in dimens.igs
-    integer                      , intent(in)  :: ntot   !  Description and declaration in dimens.igs
-    logical                                    :: error  !  Flag=TRUE if an error is encountered
-    character(*)                               :: filbct !  File name for the time varying boundary conditions file
+    integer                                    :: itfinish !  Description and declaration in inttim.igs
+    integer                                    :: itstrt   !  Description and declaration in inttim.igs
+    integer                                    :: lundia   !  Description and declaration in inout.igs
+    integer                      , intent(in)  :: lunout   !  Unit number for the transformed output file
+    integer                                    :: lunrd    !  Unit number of the attribute file containing the time series
+    integer                      , intent(in)  :: nto      !  Description and declaration in esm_alloc_int.f90
+    integer                      , intent(in)  :: ntof     !  Description and declaration in dimens.igs
+    integer                      , intent(in)  :: ntot     !  Description and declaration in dimens.igs
+    logical                                    :: error    !  Flag=TRUE if an error is encountered
+    character(*)                               :: filbct   !  File name for the time varying boundary conditions file
     character(*)                 , intent(in)  :: runid
-    character(1)                 , intent(in)  :: eol    !  ASCII code for End-Of-Line (^J)
-    character(1) , dimension(nto), intent(in)  :: typbnd !  Description and declaration in esm_alloc_char.f90
-    character(10), dimension(6)  , intent(in)  :: unttyp !  Unit name fitting the parameter depending on value of TYPBND
-    character(20), dimension(6)  , intent(in)  :: namtyp !  Names of the paramaters to write to  time dependent files for BCT depending on value of TYPBND
-    character(20), dimension(nto), intent(in)  :: nambnd !  Description and declaration in esm_alloc_char.f90
-    character(20), dimension(nto), intent(in)  :: tprofu !  Description and declaration in esm_alloc_char.f90
-    character(6)                 , intent(in)  :: typtst !  Data string to test type of boundary
+    character(1)                 , intent(in)  :: eol      !  ASCII code for End-Of-Line (^J)
+    character(1) , dimension(nto), intent(in)  :: typbnd   !  Description and declaration in esm_alloc_char.f90
+    character(10), dimension(6)  , intent(in)  :: unttyp   !  Unit name fitting the parameter depending on value of TYPBND
+    character(20), dimension(6)  , intent(in)  :: namtyp   !  Names of the paramaters to write to  time dependent files for BCT depending on value of TYPBND
+    character(20), dimension(nto), intent(in)  :: nambnd   !  Description and declaration in esm_alloc_char.f90
+    character(20), dimension(nto), intent(in)  :: tprofu   !  Description and declaration in esm_alloc_char.f90
+    character(6)                 , intent(in)  :: typtst   !  Data string to test type of boundary
 !
 ! Local variables
 !
@@ -132,7 +132,7 @@ subroutine rdtdt(lundia    ,lunout    ,lunrd     ,error     ,filbct    , &
     nbcttm = 0
     nrskip = ntot*2
     call rdtold(lunrd     ,lundia    ,error     ,filbct    ,nbcttm    , &
-              & nrskip    ,dt        ,itstrt    ,itstop    ,itold     ,gdp       )
+              & nrskip    ,dt        ,itstrt    ,itfinish  ,itold     ,gdp       )
     !
     if (error) goto 9999
     !
@@ -223,7 +223,7 @@ subroutine rdtdt(lundia    ,lunout    ,lunrd     ,error     ,filbct    , &
     !
  9999 continue
     if (itold /= -1) then
-       if (itold<itstop) then
+       if (itold < itfinish) then
           write(errmsg,'(a,a,a)') 'Last time in file ', trim(filbct), ' <' 
           call prterr(lundia    ,'U042'    ,errmsg)
           error = .true.

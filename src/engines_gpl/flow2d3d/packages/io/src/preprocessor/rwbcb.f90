@@ -1,5 +1,5 @@
 subroutine rwbcb(lundia    ,lunrd     ,filinp    ,error     ,itstrt    , &
-               & itstop    ,gdp       )
+               & itfinish  ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -50,7 +50,7 @@ subroutine rwbcb(lundia    ,lunrd     ,filinp    ,error     ,itstrt    , &
 !
 ! Global variables
 !
-    integer         , intent(in)  :: itstop     !  Description and declaration in inttim.igs
+    integer         , intent(in)  :: itfinish   !  Description and declaration in inttim.igs
     integer         , intent(in)  :: itstrt     !  Description and declaration in inttim.igs
     integer         , intent(in)  :: lundia     !  Description and declaration in inout.igs
     integer         , intent(in)  :: lunrd      !  Unit number for input file
@@ -343,8 +343,8 @@ subroutine rwbcb(lundia    ,lunrd     ,filinp    ,error     ,itstrt    , &
        !------Define maximum time
        !
        if (itold/= - 1) then
-          if (itold<itstop) then
-             write(errmsg,'(a,a,a,a,a)') 'Last time in file ', trim(filinp), ' for location #',trim(loca20),'# <' 
+          if (itold < itfinish) then
+             write(errmsg,'(5a)') 'Last time in file ', trim(filinp), ' for location #',trim(loca20),'# <' 
              call prterr(lundia    ,'U042'    ,errmsg)
              error = .true.
              goto 9999

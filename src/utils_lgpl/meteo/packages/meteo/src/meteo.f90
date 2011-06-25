@@ -417,6 +417,25 @@ function meteoupdateitem(meteoitem, flow_itdate, flow_tzone, tim) result(success
       success = .false.
       return
    endif
+   
+   ! first check if current time is not before meteo time interval.
+   ! If not, reset the whole meteo!
+   ! alternatively, we can make it more subtle by decreasing meteoitem(it0)%time,
+   ! but then we have to rewind the file anyway.
+    
+   if (comparereal(real(meteoitem%field(meteoitem%it0)%time,fp), tim) == 1) then
+   
+   !    print *,'WARNING: current time ',tim,'before start of meteo data time interval: ', &
+   !        meteoitem%field(meteoitem%it0)%time
+   !    print *,'probably because of a change of instance? In any case, we reset the meteo. '  
+
+       rewind (meteoitem%lun)
+       meteoitem%field(meteoitem%it0)%time = nodata_default
+       meteoitem%field(meteoitem%it1)%time = nodata_default
+
+   endif
+   
+   
    !
    do
       !

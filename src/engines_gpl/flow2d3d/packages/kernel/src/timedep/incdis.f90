@@ -57,7 +57,7 @@ subroutine incdis(lundia    ,sferic    ,grdang    ,timnow    ,nsrc      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer               , pointer :: itstop
+    integer               , pointer :: itfinish
     integer               , pointer :: lundis
     integer               , pointer :: ltem
     real(fp)              , pointer :: tstop
@@ -150,7 +150,7 @@ subroutine incdis(lundia    ,sferic    ,grdang    ,timnow    ,nsrc      , &
 !
     tstop      => gdp%gdexttim%tstop
     dt         => gdp%gdexttim%dt
-    itstop     => gdp%gdinttim%itstop
+    itfinish   => gdp%gdinttim%itfinish
     lundis     => gdp%gdluntmp%lundis
     ltem       => gdp%d%ltem
     cp         => gdp%gdheat%cp
@@ -223,7 +223,7 @@ subroutine incdis(lundia    ,sferic    ,grdang    ,timnow    ,nsrc      , &
           !
           call upddis(lundis    ,lundia    ,sferic    ,itdis     , &
                     & isrc      ,nm        ,grdang    ,timnow    ,dt        , &
-                    & itstop    ,timscl    ,nsrc      ,lstsc     ,j         , &
+                    & itfinish  ,timscl    ,nsrc      ,lstsc     ,j         , &
                     & nmmaxj    ,dismmt    ,alfas     , &
                     & disch0    ,disch1    ,rint0     ,rint1     , &
                     & umdis0    ,umdis1    ,vmdis0    ,vmdis1    ,gdp       )

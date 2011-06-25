@@ -43,6 +43,7 @@ subroutine incmeteo(timhr  ,grdang ,windu  ,windv ,patm   , &
     use precision
     use dfparall
     use globaldata
+    use m_openda_exchange_items, only : get_openda_buffer
     !
     implicit none
     !
@@ -126,6 +127,11 @@ subroutine incmeteo(timhr  ,grdang ,windu  ,windv ,patm   , &
        success = getVal(ECHandle, vwindECItemId, dtimmin, windv, nlb, nub, mlb, mub)
        call checkResult(ECHandle, success)
     endif
+    !
+    ! Get possible input from OpenDA
+    !
+    call get_openda_buffer('windu', 1, nub-nlb+1, mub-mlb+1, windu)
+    call get_openda_buffer('windv', 1, nub-nlb+1, mub-mlb+1, windv)
     !
     ! Exchange data between partitions
     ! NB: wind velocities might not be required

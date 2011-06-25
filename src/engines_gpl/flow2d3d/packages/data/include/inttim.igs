@@ -47,8 +47,14 @@ type gd_inttim
     ! reals
     !
     ! integers
+    !
+    integer               :: itinit = 0        !  Initial time to start simulation (N * dt)
     integer               :: itstrt = 0        !  Time to start simulation (N * dt)
-    integer               :: itstop = 0        !  Time to stop simulation (N * dt)
+    integer               :: itstop = 0        !  OpenDA  : itstop = itstrt + 1 (halt computation, ready to continue)
+                                               !  else : itstop = itfinish
+                                               !  Note : before OpenDA introduction, itstop was used as itfinish
+    integer               :: itfinish = 0      !  Time to stop simulation (N * DT)
+                                               !  Note : introduced with OpenDA to replace itstop
     integer               :: it0tem = 0        !  Previous time (multiple of dt) of the time-dependent data read from LUNTEM/LUNWND
     integer               :: it1tem = 0        !  Next     time (multiple of dt) of the time-dependent data read from LUNTEM
     integer               :: it0eva = 0        !  Previous time (multiple of dt) of the time-dependent data read from LUNTEM
@@ -91,5 +97,6 @@ type gd_inttim
     !
     !
     ! characters
+    !
     character(24) :: date_time = ' '  ! current simulation date and time. Format: YYYY-MM-DD HH:MM:SS.FFFF
 end type gd_inttim

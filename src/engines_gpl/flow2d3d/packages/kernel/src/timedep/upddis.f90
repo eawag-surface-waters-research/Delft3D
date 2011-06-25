@@ -1,6 +1,6 @@
 subroutine upddis(lundis    ,lundia    ,sferic    ,itdis     , &
                 & isrc      ,nm        ,grdang    ,timnow    ,dt        , &
-                & itstop    ,timscl    ,nsrc      ,lstsc     ,j         , &
+                & itfinish  ,timscl    ,nsrc      ,lstsc     ,j         , &
                 & nmmaxj    ,dismmt    ,alfas     , &
                 & disch0    ,disch1    ,rint0     ,rint1     , &
                 & umdis0    ,umdis1    ,vmdis0    ,vmdis1    ,gdp       )
@@ -55,35 +55,35 @@ subroutine upddis(lundis    ,lundia    ,sferic    ,itdis     , &
 !
 ! Global variables
 !
-    integer                                   , intent(in)  :: isrc   !!  Index number of discharge location
-    integer                                   , intent(in)  :: itstop !  Description and declaration in inttim.igs
-    integer                                                 :: j      !!  Begin pointer for arrays which have
-                                                                      !!  been transformed into 1D arrays.
-                                                                      !!  Due to the shift in the 2nd (M-)
-                                                                      !!  index, J = -2*NMAX + 1
-    integer                                   , intent(in)  :: lstsc  !  Description and declaration in dimens.igs
-    integer                                                 :: lundia !  Description and declaration in inout.igs
-    integer                                   , intent(in)  :: lundis !  Description and declaration in luntmp.igs
-    integer                                   , intent(in)  :: nm     !!  N,M index for discharge location
-    integer                                                 :: nmmaxj !  Description and declaration in dimens.igs
-    integer                                   , intent(in)  :: nsrc   !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(5, nsrc)                             :: itdis  !  Description and declaration in esm_alloc_int.f90
-    logical                                                 :: sferic !  Description and declaration in tricom.igs
-    real(fp)                                  , intent(in)  :: dt     !  Description and declaration in esm_alloc_real.f90
-    real(fp)                                  , intent(in)  :: grdang !  Description and declaration in tricom.igs
-    real(fp)                                  , intent(in)  :: timnow !!  Current timestep (multiples of dt)
-    real(fp)                                  , intent(in)  :: timscl !!  Multiple factor to create minutes
-                                                                      !!  from read times
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: alfas  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(lstsc, nsrc)                        :: rint0  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(lstsc, nsrc)                        :: rint1  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nsrc)                               :: disch0 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nsrc)                               :: disch1 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nsrc)                               :: umdis0 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nsrc)                               :: umdis1 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nsrc)                               :: vmdis0 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nsrc)                               :: vmdis1 !  Description and declaration in esm_alloc_real.f90
-    character(1), dimension(nsrc)             , intent(in)  :: dismmt !  Description and declaration in esm_alloc_char.f90
+    integer                                   , intent(in)  :: isrc     !!  Index number of discharge location
+    integer                                   , intent(in)  :: itfinish !  Description and declaration in inttim.igs
+    integer                                                 :: j        !!  Begin pointer for arrays which have
+                                                                        !!  been transformed into 1D arrays.
+                                                                        !!  Due to the shift in the 2nd (M-)
+                                                                        !!  index, J = -2*NMAX + 1
+    integer                                   , intent(in)  :: lstsc    !  Description and declaration in dimens.igs
+    integer                                                 :: lundia   !  Description and declaration in inout.igs
+    integer                                   , intent(in)  :: lundis   !  Description and declaration in luntmp.igs
+    integer                                   , intent(in)  :: nm       !!  N,M index for discharge location
+    integer                                                 :: nmmaxj   !  Description and declaration in dimens.igs
+    integer                                   , intent(in)  :: nsrc     !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(5, nsrc)                             :: itdis    !  Description and declaration in esm_alloc_int.f90
+    logical                                                 :: sferic   !  Description and declaration in tricom.igs
+    real(fp)                                  , intent(in)  :: dt       !  Description and declaration in esm_alloc_real.f90
+    real(fp)                                  , intent(in)  :: grdang   !  Description and declaration in tricom.igs
+    real(fp)                                  , intent(in)  :: timnow   !!  Current timestep (multiples of dt)
+    real(fp)                                  , intent(in)  :: timscl   !!  Multiple factor to create minutes
+                                                                        !!  from read times
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: alfas    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(lstsc, nsrc)                        :: rint0    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(lstsc, nsrc)                        :: rint1    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nsrc)                               :: disch0   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nsrc)                               :: disch1   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nsrc)                               :: umdis0   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nsrc)                               :: umdis1   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nsrc)                               :: vmdis0   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nsrc)                               :: vmdis1   !  Description and declaration in esm_alloc_real.f90
+    character(1), dimension(nsrc)             , intent(in)  :: dismmt   !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !
@@ -122,7 +122,7 @@ subroutine upddis(lundis    ,lundia    ,sferic    ,itdis     , &
     !
     ! End of simulation
     !
-    if (nint(timnow)==itstop) return
+    if (nint(timnow)==itfinish) return
     !
     ! Define reading format
     !
@@ -199,7 +199,7 @@ subroutine upddis(lundis    ,lundia    ,sferic    ,itdis     , &
     !
     rtdis = real(nint(rtdis*scalef/dt),fp)
     if (last) then
-       rtdis = real(itstop,fp)
+       rtdis = real(itfinish,fp)
     endif
     itdis(2, isrc) = nint(rtdis)
     !

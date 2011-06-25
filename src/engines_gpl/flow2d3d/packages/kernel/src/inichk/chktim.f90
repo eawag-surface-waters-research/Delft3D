@@ -1,4 +1,4 @@
-subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
+subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itfinish  , &
                 & prsmap    ,prshis    ,selmap    ,selhis    ,ipmap     , &
                 & maxprt    ,itmapf    ,itmapl    ,itmapi    ,iphisf    , &
                 & iphisl    ,iphisi    ,ithisf    ,ithisl    ,ithisi    , &
@@ -53,34 +53,34 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
 !
 ! Global variables
 !
-    integer                         :: iphisf !  Description and declaration in inttim.igs
-    integer                         :: iphisi !  Description and declaration in inttim.igs
-    integer                         :: iphisl !  Description and declaration in inttim.igs
-    integer                         :: itcomf !  Description and declaration in inttim.igs
-    integer                         :: itcomi !  Description and declaration in inttim.igs
-    integer                         :: itcoml !  Description and declaration in inttim.igs
-    integer                         :: ithisf !  Description and declaration in inttim.igs
-    integer                         :: ithisi !  Description and declaration in inttim.igs
-    integer                         :: ithisl !  Description and declaration in inttim.igs
-    integer                         :: itmapf !  Description and declaration in inttim.igs
-    integer                         :: itmapi !  Description and declaration in inttim.igs
-    integer                         :: itmapl !  Description and declaration in inttim.igs
-    integer                         :: itnflf !  Description and declaration in inttim.igs
-    integer                         :: itnfli !  Description and declaration in inttim.igs
-    integer                         :: itnfll !  Description and declaration in inttim.igs
-    integer                         :: itrsti !  Description and declaration in inttim.igs
-    integer           , intent(in)  :: itstop !  Description and declaration in inttim.igs
-    integer           , intent(in)  :: itstrt !  Description and declaration in inttim.igs
-    integer                         :: lundia !  Description and declaration in inout.igs
+    integer                         :: iphisf   !  Description and declaration in inttim.igs
+    integer                         :: iphisi   !  Description and declaration in inttim.igs
+    integer                         :: iphisl   !  Description and declaration in inttim.igs
+    integer                         :: itcomf   !  Description and declaration in inttim.igs
+    integer                         :: itcomi   !  Description and declaration in inttim.igs
+    integer                         :: itcoml   !  Description and declaration in inttim.igs
+    integer                         :: ithisf   !  Description and declaration in inttim.igs
+    integer                         :: ithisi   !  Description and declaration in inttim.igs
+    integer                         :: ithisl   !  Description and declaration in inttim.igs
+    integer                         :: itmapf   !  Description and declaration in inttim.igs
+    integer                         :: itmapi   !  Description and declaration in inttim.igs
+    integer                         :: itmapl   !  Description and declaration in inttim.igs
+    integer                         :: itnflf   !  Description and declaration in inttim.igs
+    integer                         :: itnfli   !  Description and declaration in inttim.igs
+    integer                         :: itnfll   !  Description and declaration in inttim.igs
+    integer                         :: itrsti   !  Description and declaration in inttim.igs
+    integer           , intent(in)  :: itfinish !  Description and declaration in inttim.igs
+    integer           , intent(in)  :: itstrt   !  Description and declaration in inttim.igs
+    integer                         :: lundia   !  Description and declaration in inout.igs
     integer           , intent(in)  :: maxprt
-    integer           , intent(in)  :: nostat !  Description and declaration in dimens.igs
-    integer           , intent(in)  :: ntruv  !  Description and declaration in dimens.igs
-    integer, dimension(maxprt)      :: ipmap  !  Description and declaration in inttim.igs
-    logical           , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    character(*)      , intent(in)  :: selmap !  Description and declaration in tricom.igs
-    character(19)     , intent(in)  :: prsmap !  Description and declaration in tricom.igs
-    character(23)     , intent(in)  :: prshis !  Description and declaration in tricom.igs
-    character(23)     , intent(in)  :: selhis !  Description and declaration in tricom.igs
+    integer           , intent(in)  :: nostat   !  Description and declaration in dimens.igs
+    integer           , intent(in)  :: ntruv    !  Description and declaration in dimens.igs
+    integer, dimension(maxprt)      :: ipmap    !  Description and declaration in inttim.igs
+    logical           , intent(out) :: error    !!  Flag=TRUE if an error is encountered
+    character(*)      , intent(in)  :: selmap   !  Description and declaration in tricom.igs
+    character(19)     , intent(in)  :: prsmap   !  Description and declaration in tricom.igs
+    character(23)     , intent(in)  :: prshis   !  Description and declaration in tricom.igs
+    character(23)     , intent(in)  :: selhis   !  Description and declaration in tricom.igs
 !
 ! Local variables
 !
@@ -100,7 +100,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     idt = 1
     error = .false.
     !
-    ! check HIS print times according to ITSTRT and ITSTOP
+    ! check HIS print times according to ITSTRT and ITFINISH
     ! NOTE: some time checks are already preformed in RDTIMO
     !
     if (iphisi<=0) then
@@ -138,25 +138,25 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
        endif
     endif
     !
-    ! if ITSTRT = ITSTOP then IPHISF = IPHISL = ITSTRT
-    ! or if ITSTRT <> ITSTOP then IPHISI <= (ITSTOP - ITSTRT)
+    ! if ITSTRT = ITFINISH then IPHISF = IPHISL = ITSTRT
+    ! or if ITSTRT <> ITFINISH then IPHISI <= (ITFINISH - ITSTRT)
     !
     if (iphisi>0) then
-       if (itstrt==itstop) then
+       if (itstrt==itfinish) then
           iphisf = itstrt
           iphisl = itstrt
-       elseif (iphisi>(itstop - itstrt)) then
-          iphisi = max(idt, itstop - itstrt)
+       elseif (iphisi>(itfinish - itstrt)) then
+          iphisi = max(idt, itfinish - itstrt)
           call prterr(lundia    ,'V009'    ,'HIS print interval (>)'        )
        else
        endif
     endif
     !
-    ! if IPHISF > ITSTOP: HIS print time frame outside simulation
+    ! if IPHISF > ITFINISH: HIS print time frame outside simulation
     ! time frame => re-define IPHISI = 0
     !
     if (iphisi>0) then
-       if (iphisf>itstop) then
+       if (iphisf>itfinish) then
           call prterr(lundia    ,'U046'    ,'Inconsistent HIS print times'  )
           iphisi = 0
        endif
@@ -192,11 +192,11 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
        endif
     endif
     !
-    ! if IPHISL = IPHISL = 0 while ITSTRT <> ITSTOP: ill defined HIS
+    ! if IPHISL = IPHISL = 0 while ITSTRT <> ITFINISH: ill defined HIS
     ! print time frame => re-define IPHISI = 0
     !
     if (iphisi>0) then
-       if (itstrt/=itstop) then
+       if (itstrt/=itfinish) then
           if (iphisf==0 .and. iphisl==0) then
              call prterr(lundia    ,'U046'    ,'Inconsistent HIS print times'  )
              iphisi = 0
@@ -233,7 +233,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
        endif
     endif
     !
-    ! check MAP print times according to ITSTRT and ITSTOP
+    ! check MAP print times according to ITSTRT and ITFINISH
     ! NOTE: some time checks are already preformed in RDTIMO
     ! no MAP prints requested then IPMAP (1) is defined as -IDT
     !
@@ -250,11 +250,11 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
        endif
     endif
     !
-    ! If IPMAP (1) <> -IDT and ITSTRT = ITSTOP
+    ! If IPMAP (1) <> -IDT and ITSTRT = ITFINISH
     ! => re-define IPMAP (1) = ITSTRT
     !
     if (ipmap(1)>=0) then
-       if (itstrt==itstop) then
+       if (itstrt==itfinish) then
           call prterr(lundia    ,'U021'    ,'MAP print time set to simulation start time'         )
           ipmap(1) = itstrt
           nreset = 2
@@ -280,10 +280,10 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
              exit
           endif
           !
-          ! If IPMAP (I) > ITSTOP give warning about skipping this and
+          ! If IPMAP (I) > ITFINISH give warning about skipping this and
           ! following print requests
           !
-          if (ipmap(i)>itstop) then
+          if (ipmap(i)>itfinish) then
              call prterr(lundia    ,'U021'    ,'MAP print times > simulation stop time will be skipped'         )
              nreset = i
              exit
@@ -306,7 +306,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
        ipmap(i) = 0
     enddo
     !
-    ! check HIS interval according to ITSTRT and ITSTOP
+    ! check HIS interval according to ITSTRT and ITFINISH
     ! NOTE: some time checks are already performed in RDTIMO
     !
     if (ithisi < 0) then
@@ -355,7 +355,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
        endif
     endif
     !
-    ! check MAP times according to ITSTRT and ITSTOP
+    ! check MAP times according to ITSTRT and ITFINISH
     ! NOTE: some time checks are already preformed in RDTIMO
     !
     if (itmapi<=0) then
@@ -402,39 +402,39 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
        endif
     endif
     !
-    ! if ITSTRT = ITSTOP then ITMAPF = ITMAPL = ITSTRT
-    ! or if ITSTRT <> ITSTOP then ITMAPI <= (ITSTOP - ITSTRT)
+    ! if ITSTRT = ITFINISH then ITMAPF = ITMAPL = ITSTRT
+    ! or if ITSTRT <> ITFINISH then ITMAPI <= (ITFINISH - ITSTRT)
     !
     if (itmapi > 0) then
-       if (itstrt==itstop) then
+       if (itstrt == itfinish) then
           itmapf = itstrt
           itmapl = itstrt
-       elseif (itmapi > (itstop - itstrt)) then
-          itmapi = max(idt, itstop - itstrt)
+       elseif (itmapi > (itfinish - itstrt)) then
+          itmapi = max(idt, itfinish - itstrt)
           call prterr(lundia    ,'V009'    ,'< MAP file interval (>)'       )
        endif
     endif
     if (ithisi > 0) then
-       if (itstrt==itstop) then
+       if (itstrt == itfinish) then
           ithisf = itstrt
           ithisl = itstrt
-       elseif (ithisi > (itstop - itstrt)) then
-          ithisi = max(idt, itstop - itstrt)
+       elseif (ithisi > (itfinish - itstrt)) then
+          ithisi = max(idt, itfinish - itstrt)
           call prterr(lundia    ,'V009'    ,'< HIS file interval (>)'       )
        endif
     endif
     !
-    ! if ITMAPF > ITSTOP: MAP file time frame outside simulation
+    ! if ITMAPF > ITFINISH: MAP file time frame outside simulation
     ! time frame => re-define ITMAPI = 0
     !
     if (itmapi > 0) then
-       if (itmapf > itstop) then
+       if (itmapf > itfinish) then
           call prterr(lundia    ,'U046'    ,'Inconsistent MAP file times' )
           itmapi = 0
        endif
     endif
     if (ithisi > 0) then
-       if (ithisf > itstop) then
+       if (ithisf > itfinish) then
           call prterr(lundia    ,'U046'    ,'Inconsistent HIS file times' )
           ithisi = 0
        endif
@@ -476,11 +476,11 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
        endif
     endif
     !
-    ! if ITMAPF = ITMAPL = 0 while ITSTRT <> ITSTOP: ill defined MAP
+    ! if ITMAPF = ITMAPL = 0 while ITSTRT <> ITFINISH: ill defined MAP
     ! file time frame => re-define ITMAPI = 0
     !
     if (itmapi > 0) then
-       if (itstrt /= itstop) then
+       if (itstrt /= itfinish) then
           if (itmapf==0 .and. itmapl==0) then
              call prterr(lundia    ,'U046'    ,'Inconsistent MAP file times'   )
              itmapi = 0
@@ -488,7 +488,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
        endif
     endif
     if (ithisi > 0) then
-       if (itstrt /= itstop) then
+       if (itstrt /= itfinish) then
           if (ithisf==0 .and. ithisl==0) then
              call prterr(lundia    ,'U046'    ,'Inconsistent HIS file times'   )
              ithisi = 0
@@ -540,14 +540,14 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
        endif
     endif
     !
-    ! check communication times according to ITSTRT and ITSTOP
+    ! check communication times according to ITSTRT and ITFINISH
     ! NOTE: some time checks are already preformed in RDTIMO
     !
-    if (itcomi<=0) then
+    if (itcomi <= 0) then
        !
        ! ITCOMI < 0 is an invalid value => re-define ITCOMI = 0
        !
-       if (itcomi<0) then
+       if (itcomi < 0) then
           call prterr(lundia    ,'U046'    ,'Invalid comm. storage time interval'      )
           itcomi = 0
        endif
@@ -559,25 +559,25 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
        endif
     endif
     !
-    ! if ITSTRT = ITSTOP then ITCOMF = ITCOML = ITSTRT
-    ! or if ITSTRT <> ITSTOP then ITCOMI <= (ITSTOP - ITSTRT)
+    ! if ITSTRT = ITFINISH then ITCOMF = ITCOML = ITSTRT
+    ! or if ITSTRT <> ITFINISH then ITCOMI <= (ITFINISH - ITSTRT)
     !
-    if (itcomi>0) then
-       if (itstrt==itstop) then
+    if (itcomi > 0) then
+       if (itstrt == itfinish) then
           itcomf = itstrt
           itcoml = itstrt
-       elseif (itcomi>(itstop - itstrt)) then
-          itcomi = max(idt, itstop - itstrt)
+       elseif (itcomi > (itfinish - itstrt)) then
+          itcomi = max(idt, itfinish - itstrt)
           call prterr(lundia    ,'V009'    ,'Comm. file interval (>)'       )
        else
        endif
     endif
     !
-    ! if ITCOMF > ITSTOP: Comm. file time frame outside simulation
+    ! if ITCOMF > ITFINISH: Comm. file time frame outside simulation
     ! time frame => re-define ITCOMI = 0
     !
-    if (itcomi>0) then
-       if (itcomf>itstop) then
+    if (itcomi > 0) then
+       if (itcomf > itfinish) then
           call prterr(lundia    ,'U046'    ,'Inconsistent comm. file times' )
           itcomi = 0
        endif
@@ -586,8 +586,8 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     ! if ITCOML < ITSTRT: Comm. file time frame outside simulation
     ! time frame => re-define ITCOMI = 0
     !
-    if (itcomi>0) then
-       if (itcoml<itstrt) then
+    if (itcomi > 0) then
+       if (itcoml < itstrt) then
           call prterr(lundia    ,'U046'    ,'Inconsistent comm. file times' )
           itcomi = 0
        endif
@@ -596,45 +596,45 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     ! if ITCOMF < ITSTRT: Comm. file start time moved forward N*ITCOMI
     ! to become inside simulation time frame
     !
-    if (itcomi>0) then
-       if (itcomf<itstrt) then
+    if (itcomi > 0) then
+       if (itcomf < itstrt) then
           call prterr(lundia, 'V064', '<')
           iplus = ((itstrt - itcomf)/itcomi)*itcomi
           if (iplus<(itstrt - itcomf)) iplus = iplus + itcomi
           itcomf = itcomf + iplus
        endif
        !
-       ! if ITCOML > ITSTOP: Comm. file stop time moved back N*ITCOMI
+       ! if ITCOML > ITFINISH: Comm. file stop time moved back N*ITCOMI
        ! to become inside simulation time frame
        !
-       if (itcoml>itstop) then
+       if (itcoml > itfinish) then
           call prterr(lundia, 'V064', '>')
-          iplus = ((itcoml - itstop)/itcomi)*itcomi
-          if (iplus<(itcoml - itstop)) iplus = iplus + itcomi
+          iplus = ((itcoml - itfinish)/itcomi)*itcomi
+          if (iplus<(itcoml - itfinish)) iplus = iplus + itcomi
           itcoml = itcoml - iplus
        endif
        !
        ! if ITCOML < ITCOML: ill defined Comm. file time frame
        ! => re-define ITCOMI = 0
        !
-       if (itcoml<itcomf) then
+       if (itcoml < itcomf) then
           call prterr(lundia    ,'U046'    ,'Inconsistent comm. file times' )
           itcomi = 0
        endif
     endif
     !
-    ! if ITCOML = ITCOML = 0 while ITSTRT <> ITSTOP: ill defined Comm.
+    ! if ITCOML = ITCOML = 0 while ITSTRT <> ITFINISH: ill defined Comm.
     ! file time frame => re-define ITCOMI = 0
     !
-    if (itcomi>0) then
-       if (itstrt/=itstop) then
+    if (itcomi > 0) then
+       if (itstrt /= itfinish) then
           if (itcomf==0 .and. itcoml==0) then
              call prterr(lundia    ,'U046'    ,'Inconsistent comm. file times' )
              itcomi = 0
           !
           ! Write warning in case of DELWAQ application
           !
-          elseif (itcomf==itcoml) then
+          elseif (itcomf == itcoml) then
              call prterr(lundia    ,'G040'    ,' '       )
           else
           endif
@@ -644,7 +644,7 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     ! no Comm. file (ITCOMI = 0) then re-define Comm. file time
     ! frame <-IDT,-IDT>
     !
-    if (itcomi==0) then
+    if (itcomi == 0) then
        itcomf = -idt
        itcoml = -idt
     endif
@@ -653,8 +653,8 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
     ! if ITCOML > ITCOMF and if ITCOMI > ITCOML - ITCOMF then reset to
     ! MAX of IDT and ITCOML-ITCOMF
     !
-    if (itcoml/=itcomf) then
-       if (itcomi>itcoml - itcomf) then
+    if (itcoml /= itcomf) then
+       if (itcomi > itcoml-itcomf) then
           itcomi = max(idt, itcoml - itcomf)
           call prterr(lundia    ,'V009'    ,'Comm. file interval (>)'       )
        endif
@@ -664,20 +664,20 @@ subroutine chktim(lundia    ,nostat    ,ntruv     ,itstrt    ,itstop    , &
        ! ITCOMI then reset ITCOML
        !
        icomv = ((itcoml - itcomf)/itcomi)*itcomi
-       if (icomv/=(itcoml - itcomf)) then
+       if (icomv /= (itcoml-itcomf)) then
           itcoml = itcomf + icomv
           call prterr(lundia    ,'V009'    ,'Comm. stop time'    )
        endif
     endif
     !
-    ! check RESTART interval according to ITSTRT and ITSTOP
+    ! check RESTART interval according to ITSTRT and ITFINISH
     ! NOTE: some time checks are already preformed in RDTIMO
     !
-    if (itrsti<=0) then
+    if (itrsti <= 0) then
        !
        ! ITRSTI < 0 is an invalid value => re-define ITRSTI = 0
        !
-       if (itrsti<0) then
+       if (itrsti < 0) then
           call prterr(lundia    ,'U046'    ,'Invalid RESTART file time interval'       )
           itrsti = 0
        endif

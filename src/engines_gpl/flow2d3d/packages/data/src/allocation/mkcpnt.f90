@@ -83,9 +83,19 @@ function mkcpnt(pntnam    ,length    ,gdp       )
     ! If mkcpnt /= 0 then the pointer already exists
     !
     mkcpnt = getptr(pntnam(:ind - 1))
+    
+    
+    
     if (mkcpnt /= 0) then
+       if (gdp%gdtricom%initi /= 3) then
+          call chnull(chbuf(mkcpnt)         ,length    )
+          mkcpnt = 1
+       else
+
        ! return the value -1 (used in Mor)
-       mkcpnt = -1
+         mkcpnt = -1
+       endif   
+
     else
        !
        ! Call dynamic array declaration function MAKPTR for pointer name

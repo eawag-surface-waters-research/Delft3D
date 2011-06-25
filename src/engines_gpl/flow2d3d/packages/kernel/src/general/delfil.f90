@@ -92,6 +92,7 @@ subroutine delfil(runid     ,filmd     ,gdp       )
     character(256)                 :: filrd   ! File name read from Md-file/flow file 
     character(300)                 :: mdfrec  ! Standard rec. length in MD-file (300) 300 = 256 + a bit (field, =, ##, etc.) 
     character(6)                   :: keyw    ! Name of record to look for in the MD-file (usually KEYWRD or RECNAM) 
+    logical                        :: lmd_open
 !
 !! executable statements -------------------------------------------------------
 !
@@ -101,13 +102,14 @@ subroutine delfil(runid     ,filmd     ,gdp       )
     itis        => gdp%gdrdpara%itis
     reusetmp    => gdp%gdtmpfil%reusetmp
     !
-    lerror = .false.
-    newkw = .true.
-    found = .false.
-    nlook = 1
-    lkw = 6
-    lenc = 12
-    fildef = ' '
+    lerror   = .false.
+    newkw    = .true.
+    found    = .false.
+    lmd_open = .false.
+    nlook    = 1
+    lkw      = 6
+    lenc     = 12
+    fildef   = ' '
     !
     ! Unit number to write output to
     !
@@ -133,6 +135,10 @@ subroutine delfil(runid     ,filmd     ,gdp       )
           lunmd = newlun(gdp)
           open (lunmd, file = filmd(1:lmd), form = 'formatted')
        endif
+       !
+       ! Md-file is opened, it should be closed at the end of this routine
+       !
+       lmd_open = .true.
     else
        goto 9999
     endif
@@ -529,4 +535,6 @@ subroutine delfil(runid     ,filmd     ,gdp       )
     filnam = 'com-' // runid(:lrid) // '.srctmp'
     call rmdel(filnam, gdp)
 9999 continue
+    !
+    if (lmd_open) close(lunmd)
 end subroutine delfil

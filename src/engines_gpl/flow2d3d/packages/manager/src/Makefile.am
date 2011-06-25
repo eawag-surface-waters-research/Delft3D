@@ -29,7 +29,8 @@ FMODULES += \
 	-I$(top_srcdir)/utils_lgpl/meteo/packages/meteo/src \
 	-I$(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow/src \
 	-I$(top_srcdir)/utils_lgpl/ec_module/packages/ec_module/src \
-	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/io_dol_f/src
+	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/io_dol_f/src \
+	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/inichk
 
 # fpp is compiler dependent
 AM_FCFLAGS += \
@@ -39,9 +40,12 @@ AM_FCFLAGS += \
 #Sources
 libmanager_la_SOURCES = \
          tdatmain.f90 \
-         tricom.F90 \
+         tricom_init.f90 \
+         tricom_step.f90 \
+         tricom_finish.f90 \
          triend.f90 \
          tripoi.f90 \
+         trisim_mod.f90 \
          trisim.f90
 
 #-------------------------------------------------------------------------------

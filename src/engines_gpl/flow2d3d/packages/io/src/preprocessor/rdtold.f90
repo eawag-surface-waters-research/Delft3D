@@ -1,5 +1,5 @@
 subroutine rdtold(lunrd     ,lundia    ,error     ,filnam    ,ntimrd    , &
-                & nrskip    ,dt        ,itstrt    ,itstop    ,itold     ,gdp       )
+                & nrskip    ,dt        ,itstrt    ,itfinish  ,itold     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -51,16 +51,16 @@ subroutine rdtold(lunrd     ,lundia    ,error     ,filnam    ,ntimrd    , &
 !
 ! Global variables
 !
-    integer                   :: itold   !  Help var. to store last read time to test accending order
-    integer     , intent(in)  :: itstop  !  Description and declaration in inttim.igs
-    integer     , intent(in)  :: itstrt  !  Description and declaration in inttim.igs
-    integer     , intent(in)  :: lundia  !  Description and declaration in inout.igs
-    integer     , intent(in)  :: lunrd   !  Unit number of the attribute file containing the time series
-    integer     , intent(in)  :: nrskip  !  Nr. of records to be read/skipped that must exists if the file is complete
-    integer                   :: ntimrd  !  Nr. of times read
-    logical     , intent(out) :: error   !  Flag=TRUE if an error is encountered
-    real(fp)    , intent(in)  :: dt      !  Description and declaration in esm_alloc_real.f90
-    character(*), intent(in)  :: filnam !  Name of the relevant file
+    integer                   :: itold    !  Help var. to store last read time to test accending order
+    integer     , intent(in)  :: itfinish !  Description and declaration in inttim.igs
+    integer     , intent(in)  :: itstrt   !  Description and declaration in inttim.igs
+    integer     , intent(in)  :: lundia   !  Description and declaration in inout.igs
+    integer     , intent(in)  :: lunrd    !  Unit number of the attribute file containing the time series
+    integer     , intent(in)  :: nrskip   !  Nr. of records to be read/skipped that must exists if the file is complete
+    integer                   :: ntimrd   !  Nr. of times read
+    logical     , intent(out) :: error    !  Flag=TRUE if an error is encountered
+    real(fp)    , intent(in)  :: dt       !  Description and declaration in esm_alloc_real.f90
+    character(*), intent(in)  :: filnam   !  Name of the relevant file
 !
 ! Local variables
 !
@@ -83,12 +83,12 @@ subroutine rdtold(lunrd     ,lundia    ,error     ,filnam    ,ntimrd    , &
     read (lunrd, *, iostat = iocond) timrd
     !
     !-------test last time read (IOCOND < 0)
-    !       OK depending on ITOLD >= ITSTOP and ITO = 1
+    !       OK depending on ITOLD >= ITFINISH and ITO = 1
     !       reading error (IOCOND > 0), not allowed
     !
     if (iocond/=0) then
        if (iocond<0) then
-          if (itold<itstop) then
+          if (itold < itfinish) then
              errmsg = 'Last time in ' // filnam // ' <'
              call prterr(lundia    ,'U042'    ,errmsg    )
              !

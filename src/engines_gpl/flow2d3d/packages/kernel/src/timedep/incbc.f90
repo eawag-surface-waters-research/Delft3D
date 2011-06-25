@@ -69,8 +69,8 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     use precision
     use mathconsts
     use flow_tables
-    !
     use globaldata
+    use m_openda_exchange_items, only : get_openda_buffer
     !
     implicit none
     !
@@ -78,9 +78,10 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer                            , pointer :: itstop
+    integer                            , pointer :: itfinish
     integer                            , pointer :: itlfsm
     integer                            , pointer :: julday
+    real(fp)                           , pointer :: time_nodal_update_bnd
     real(fp)                           , pointer :: tstart
     real(fp)                           , pointer :: tstop
     real(fp)                           , pointer :: dt
@@ -101,7 +102,6 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     type (handletype)                  , pointer :: fbcrfile
     type (fbcrbndtype)  , dimension(:) , pointer :: fcrbnd
     logical                            , pointer :: fbccorrection
-    real(fp)                           , pointer :: time_nodal_update_bnd
 !
 ! Global variables
 !
@@ -242,30 +242,30 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    relxqh         => gdp%gdincbc%relxqh
-    paver          => gdp%gdnumeco%paver
-    thetqh         => gdp%gdnumeco%thetqh
-    pcorr          => gdp%gdnumeco%pcorr
-    rhow           => gdp%gdphysco%rhow
-    ag             => gdp%gdphysco%ag
-    z0             => gdp%gdphysco%z0
-    z0v            => gdp%gdphysco%z0v
-    iro            => gdp%gdphysco%iro
-    lunbct         => gdp%gdluntmp%lunbct
-    lunbcq         => gdp%gdluntmp%lunbcq
-    tstart         => gdp%gdexttim%tstart
-    tstop          => gdp%gdexttim%tstop
-    dt             => gdp%gdexttim%dt
-    tunit          => gdp%gdexttim%tunit
-    itstop         => gdp%gdinttim%itstop
-    itlfsm         => gdp%gdinttim%itlfsm
-    julday         => gdp%gdinttim%julday
-    rttfu          => gdp%gdtrachy%rttfu
-    rttfv          => gdp%gdtrachy%rttfv
-    fbcrfile       => gdp%gdflwpar%fbcrfile
-    fcrbnd         => gdp%gdflwpar%fcrbnd
-    fbccorrection  => gdp%gdflwpar%fbccorrection
+    relxqh                => gdp%gdincbc%relxqh
+    paver                 => gdp%gdnumeco%paver
+    thetqh                => gdp%gdnumeco%thetqh
+    pcorr                 => gdp%gdnumeco%pcorr
+    rhow                  => gdp%gdphysco%rhow
+    ag                    => gdp%gdphysco%ag
+    z0                    => gdp%gdphysco%z0
+    z0v                   => gdp%gdphysco%z0v
+    iro                   => gdp%gdphysco%iro
+    lunbct                => gdp%gdluntmp%lunbct
+    lunbcq                => gdp%gdluntmp%lunbcq
+    tstart                => gdp%gdexttim%tstart
+    tstop                 => gdp%gdexttim%tstop
+    dt                    => gdp%gdexttim%dt
+    tunit                 => gdp%gdexttim%tunit
+    itfinish              => gdp%gdinttim%itfinish
+    itlfsm                => gdp%gdinttim%itlfsm
+    julday                => gdp%gdinttim%julday
     time_nodal_update_bnd => gdp%gdinttim%time_nodal_update_bnd
+    rttfu                 => gdp%gdtrachy%rttfu
+    rttfv                 => gdp%gdtrachy%rttfv
+    fbcrfile              => gdp%gdflwpar%fbcrfile
+    fcrbnd                => gdp%gdflwpar%fcrbnd
+    fbccorrection         => gdp%gdflwpar%fbccorrection
     !
     ! initialize local parameters
     ! omega in deg/hour & time in seconds !!, alfa = in minuten
@@ -603,6 +603,11 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                 angle  = degrad*(omega(k)*tcur - phasek)
                 circ2d(kp, kq) = circ2d(kp, kq) + amplik*cos(angle)
              enddo
+             !
+             ! Adjust boundaries by OpenDA if necessary
+             !
+             call get_openda_buffer('bound_astroH', n1, 1, 1, circ2d(kp,kq))
+             !
           elseif (n1 <= ntof+ntoq) then
              !
              ! boundary defined with QH relation (S1) boundary value
