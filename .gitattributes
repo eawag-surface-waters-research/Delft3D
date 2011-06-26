@@ -1090,6 +1090,7 @@ src/engines_gpl/flow2d3d/packages/manager_dd/include/morflow.h -text
 src/engines_gpl/flow2d3d/packages/manager_dd/include/platform.h -text
 src/engines_gpl/flow2d3d/packages/manager_dd/include/rtc_comm.h -text
 src/engines_gpl/flow2d3d/packages/manager_dd/include/semaphore.h -text
+src/engines_gpl/flow2d3d/packages/manager_dd/include/trisim.h -text
 src/engines_gpl/flow2d3d/packages/manager_dd/manager_dd.vcproj -text
 src/engines_gpl/flow2d3d/packages/manager_dd/src/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/manager_dd/src/ddexec/Makefile.am -text
