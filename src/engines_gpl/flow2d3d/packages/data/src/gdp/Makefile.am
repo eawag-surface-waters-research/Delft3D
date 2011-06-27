@@ -27,6 +27,7 @@ FMODULES += \
 #-------------------------------------------------------------------------------
 #Sources
 libdata_gdp_la_SOURCES = \
+         gdp_for_dll.f90 \
          clradv2d.f90 \
          clrbedformpar.f90 \
          clrdredge.f90 \

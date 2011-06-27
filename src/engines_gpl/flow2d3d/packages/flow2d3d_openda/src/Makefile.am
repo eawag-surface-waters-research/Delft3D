@@ -22,7 +22,7 @@ libflow2d3d_la_SOURCES = \
          m_d3dstate_2_openda.f90 \
          d3dstate_2_d3d.f90 \
          flow2d3d_openda.f90 \
-         flow2d3d_openda_dll.f90 \
+         flow2d3d_openda_dll.f90
 
 #-------------------------------------------------------------------------------
 #Libraries

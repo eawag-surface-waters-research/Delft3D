@@ -538,12 +538,12 @@ function get_exchange_item_id_CI(location_id_c,quantity_id) result(id)
     integer :: location_id
 
     
-    integer       , pointer :: nambnd
-    integer       , pointer :: nto
-    integer       , pointer :: ntof
-    integer       , pointer :: ntoq
-    integer       , pointer :: nostat
-    character(20)       , dimension(:)    , pointer :: namst
+    integer(pntrsize) , pointer :: nambnd
+    integer           , pointer :: nto
+    integer           , pointer :: ntof
+    integer           , pointer :: ntoq
+    integer           , pointer :: nostat
+    character(20)     , dimension(:)    , pointer :: namst
 
     id = -1
 
@@ -728,9 +728,9 @@ function get_values_for_time_span(exchange_item_id, start_time, end_time, nvals,
 
     integer :: location_id, quantity_id
 
-    integer                      , pointer :: s1
-    integer                      , pointer :: zcuru
-    integer                      , pointer :: zcurv
+    integer(pntrsize)            , pointer :: s1
+    integer(pntrsize)            , pointer :: zcuru
+    integer(pntrsize)            , pointer :: zcurv
     integer   , dimension(:,:)   , pointer :: mnstat
     
     ! body
@@ -800,8 +800,8 @@ function set_noise_for_time_span(exchange_item_id, start_time, end_time, operati
     double precision, dimension(nvals), intent(in) :: values           ! returned values
 
     ! locals
-    integer           :: location_id, quantity_id
-    integer , pointer :: disch
+    integer                     :: location_id, quantity_id
+    integer(pntrsize) , pointer :: disch
 
 
     ! body
