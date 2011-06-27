@@ -62,6 +62,7 @@ subroutine runme_core(max_keyval, keys   , values   , error_message)
     !!--pseudo code and references--------------------------------------------------
     ! NONE
     !!--declarations----------------------------------------------------------------
+    use precision
     implicit none
     !
     include 'fsm.i'   ! for FSM_SILENT (to start single threaded call)

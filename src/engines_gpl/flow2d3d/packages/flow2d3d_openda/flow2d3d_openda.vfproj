@@ -10,7 +10,8 @@
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
-				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd ..\flow2d3d\src\flow2d3d_version.F90 ..\..\ ..\flow2d3d\include\version_number.ini"/>
+				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd ..\flow2d3d\src\flow2d3d_version.F90 ..\..\ ..\flow2d3d\include\version_number.ini
+call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\src\flow2d3d_openda_version.F90 ..\..\ ..\include\version_number.ini"/>
 				<Tool Name="VFPostBuildEventTool" CommandLine="echo &quot;This file is overwritten by the post-build command of the project flow2d3d&quot; &gt; ../flow2d3d/src/flow2d3d_version.F90
 echo &quot;This file is overwritten by the post-build command of the project flow2d3d_openda&quot; &gt; ./src/flow2d3d_openda_version.F90"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
