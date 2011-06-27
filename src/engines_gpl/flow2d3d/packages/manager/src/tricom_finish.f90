@@ -1,21 +1,32 @@
 subroutine tricom_finish(gdp       )
-!!--copyright-------------------------------------------------------------------
-! Copyright (c) 2009, WL | Delft Hydraulics. All rights reserved.
-!!--disclaimer------------------------------------------------------------------
-! This code is part of the Delft3D software system. WL|Delft Hydraulics has
-! developed c.q. manufactured this code to its best ability and according to the
-! state of the art. Nevertheless, there is no express or implied warranty as to
-! this software whether tangible or intangible. In particular, there is no
-! express or implied warranty as to the fitness for a particular purpose of this
-! software, whether tangible or intangible. The intellectual property rights
-! related to this software code remain with WL|Delft Hydraulics at all times.
-! For details on the licensing agreement, we refer to the Delft3D software
-! license and any modifications to this license, if applicable. These documents
-! are available upon request.
-!!--version information---------------------------------------------------------
-! $Author$
-! $Date$
-! $Revision$
+!----- GPL ---------------------------------------------------------------------
+!                                                                               
+!  Copyright (C)  Stichting Deltares, 2011.                                     
+!                                                                               
+!  This program is free software: you can redistribute it and/or modify         
+!  it under the terms of the GNU General Public License as published by         
+!  the Free Software Foundation version 3.                                      
+!                                                                               
+!  This program is distributed in the hope that it will be useful,              
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
+!  GNU General Public License for more details.                                 
+!                                                                               
+!  You should have received a copy of the GNU General Public License            
+!  along with this program.  If not, see <http://www.gnu.org/licenses/>.        
+!                                                                               
+!  contact: delft3d.support@deltares.nl                                         
+!  Stichting Deltares                                                           
+!  P.O. Box 177                                                                 
+!  2600 MH Delft, The Netherlands                                               
+!                                                                               
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"    
+!  are registered trademarks of Stichting Deltares, and remain the property of  
+!  Stichting Deltares. All rights reserved.                                     
+!                                                                               
+!-------------------------------------------------------------------------------
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Read md-file
@@ -357,15 +368,15 @@ subroutine tricom_finish(gdp       )
 !
 ! Local variables
 !
-    integer ,pointer                                      :: itcomc        ! Current time counter for the com- munication file 
-    integer ,pointer                                      :: itcur         ! Current time counter for the com- munication file, where starting point depend on CYCLIC 
-    integer ,pointer                                      :: itdroc        ! Current time counter for the dro- gue data file 
-    integer ,pointer                                      :: ithisc        ! Current time counter for the his- tory file 
+    integer ,pointer                                      :: itcomc        ! Current time counter for the communication file 
+    integer ,pointer                                      :: itcur         ! Current time counter for the communication file, where starting point depend on CYCLIC 
+    integer ,pointer                                      :: itdroc        ! Current time counter for the drogue data file 
+    integer ,pointer                                      :: ithisc        ! Current time counter for the history file 
     integer ,pointer                                      :: itimc         ! Current time step counter for 2D system 
-    integer ,pointer                                      :: itiwec        ! Current time counter for the cali- bration of internal wave energy 
+    integer ,pointer                                      :: itiwec        ! Current time counter for the calibration of internal wave energy 
     integer ,pointer                                      :: itmapc        ! Current time counter for the map file 
     integer ,pointer                                      :: itp           ! Timestep for computation 2D system 
-    integer ,pointer                                      :: itrstc        ! Current time counter for the re- start file. Start writing after first interval is passed. Last time will always be written to file for ITRSTI > 0 
+    integer ,pointer                                      :: itrstc        ! Current time counter for the restart file. Start writing after first interval is passed. Last time will always be written to file for ITRSTI > 0 
     integer ,pointer                                      :: itwav         ! Current time counter for executation of a wave computation (online coupling with wave)
     integer ,pointer                                      :: itrw          ! Time to read the wave information in case of online wave coupling
 

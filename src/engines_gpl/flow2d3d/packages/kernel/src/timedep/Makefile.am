@@ -23,7 +23,8 @@ FMODULES += \
 	-I$(top_srcdir)/utils_lgpl/constants/packages/mathconsts/src \
 	-I$(top_srcdir)/utils_lgpl/ec_module/packages/ec_module/src \
 	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/basics \
-	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi
+	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi \
+	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/inichk
 
 #-------------------------------------------------------------------------------
 #Sources

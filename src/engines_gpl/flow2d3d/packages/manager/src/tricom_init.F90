@@ -25,8 +25,8 @@ subroutine tricom_init(gdp)
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id: $
-!  $HeadURL: $
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
 !    Function: - Read md-file
@@ -375,16 +375,16 @@ subroutine tricom_init(gdp)
     character(256)                      , pointer :: trifil  !!  File name for FLOW NEFIS output files (tri"h/m"-"casl""labl".dat/def)
     character(5)                        , pointer :: versio  !!  Version nr. of the current package
     integer                             , pointer :: iphisc        ! Current time counter for printing history data 
-    integer                             , pointer :: itcomc        ! Current time counter for the com- munication file 
-    integer                             , pointer :: itcur         ! Current time counter for the com- munication file, where starting point depend on CYCLIC 
-    integer                             , pointer :: itdroc        ! Current time counter for the dro- gue data file 
-    integer                             , pointer :: ithisc        ! Current time counter for the his- tory file 
+    integer                             , pointer :: itcomc        ! Current time counter for the communication file 
+    integer                             , pointer :: itcur         ! Current time counter for the communication file, where starting point depend on CYCLIC 
+    integer                             , pointer :: itdroc        ! Current time counter for the drogue data file 
+    integer                             , pointer :: ithisc        ! Current time counter for the history file 
     integer                             , pointer :: itimc         ! Current time step counter for 2D system 
-    integer                             , pointer :: itiwec        ! Current time counter for the cali- bration of internal wave energy 
+    integer                             , pointer :: itiwec        ! Current time counter for the calibration of internal wave energy 
     integer                             , pointer :: itlent        ! Lenght of the tide cycle in steps of ITP 
     integer                             , pointer :: itmapc        ! Current time counter for the map file 
     integer                             , pointer :: itp           ! Timestep for computation 2D system 
-    integer                             , pointer :: itrstc        ! Current time counter for the re- start file. Start writing after first interval is passed. Last time will always be written to file for ITRSTI > 0 
+    integer                             , pointer :: itrstc        ! Current time counter for the restart file. Start writing after first interval is passed. Last time will always be written to file for ITRSTI > 0 
     integer                             , pointer :: itrw          ! Time to read the wave information in case of online wave coupling
     integer                             , pointer :: maxmn         ! Maximum of MMAX and NMAX 
     integer                             , pointer :: npmap         ! Current array counter for printing map data 
