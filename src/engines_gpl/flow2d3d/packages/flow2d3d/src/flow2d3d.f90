@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id: $
-!  $HeadURL: $
+!  $Id$
+!  $HeadURL$
 !
 !-------------------------------------------------------------------------------
 !
@@ -753,16 +753,16 @@ function get_values_for_time_span(exchange_item_id, start_time, end_time, nvals,
             gdp%d%nlb,gdp%d%nub, gdp%d%mlb,gdp%d%mub)
     
     elseif (quantity_id .eq. x_velocity) then   
-       call ei_copy_vel(r(zcuru),values, location_id, gdp%d%nostat,gdp%d%kmax) 
+       call ei_copy_vel(r(zcuru),values(1), location_id, gdp%d%nostat,gdp%d%kmax) 
 
     elseif (quantity_id .eq. y_velocity) then   
-       call ei_copy_vel(r(zcurv),values, location_id, gdp%d%nostat,gdp%d%kmax) 
+       call ei_copy_vel(r(zcurv),values(1), location_id, gdp%d%nostat,gdp%d%kmax) 
            
     elseif (quantity_id .eq. x_discharge) then 
-      call ei_provide_copy_disch(r(zqxk),values, location_id, gdp%d%nostat,gdp%d%kmax) 
+      call ei_provide_copy_disch(r(zqxk),values(1), location_id, gdp%d%nostat,gdp%d%kmax) 
 
     elseif (quantity_id .eq. y_discharge) then 
-      call ei_provide_copy_disch(r(zqyk),values, location_id, gdp%d%nostat,gdp%d%kmax)
+      call ei_provide_copy_disch(r(zqyk),values(1), location_id, gdp%d%nostat,gdp%d%kmax)
 
     endif
     
@@ -858,7 +858,7 @@ end function set_noise_for_time_span
     implicit none
     integer :: ii, nostat, nlb,nub,mlb,mub
    
-    real(fp), dimension(1)    :: ei_openda
+    real(hp), dimension(1)    :: ei_openda
     integer, dimension(2,nostat) :: mnstat
     integer :: m,n
     real(fp)  , dimension(nlb:nub, mlb:mub) , intent(in)  :: s1   
@@ -878,7 +878,7 @@ end function set_noise_for_time_span
     implicit none
     integer :: ii, nostat, kmax
     real(fp), dimension(nostat,kmax)  :: zcuruv
-    real(fp)   :: ei_openda
+    real(hp)   :: ei_openda
 
     ! for now, use velocities at top layer
     ei_openda = zcuruv(ii,1)
@@ -893,7 +893,7 @@ end function set_noise_for_time_span
     implicit none
     integer :: ii, nostat, kmax
     real(fp), dimension(nostat,kmax)  :: zqxyk
-    real(fp)   :: ei_openda
+    real(hp)   :: ei_openda
    ! for now, use discharges at top layer
     ei_openda = zqxyk(ii,1)
 
@@ -906,7 +906,7 @@ end function set_noise_for_time_span
     implicit none
     integer :: ii, nsrc
     real(fp), dimension(nsrc)  :: disch
-    real(fp)   :: ei_openda
+    real(hp)   :: ei_openda
    ! 
    write(*,*) 'FORCINGS: discharge source ',ii, 'of value ',disch(ii), 'adjusted with ',ei_openda 
    disch(ii)= disch(ii) + ei_openda 

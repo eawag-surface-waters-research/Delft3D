@@ -132,7 +132,7 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     real(fp)  :: totl    ! Actual length of an openbnd. section 
     real(fp)  :: zcord
     real(fp)  :: zjmp
-    real(fp), dimension(4, nto, kmax, lstsc) :: procbc_old 
+    real(fp), dimension(:, :, :, :), pointer :: procbc_old => null()
 !
 !! executable statements -------------------------------------------------------
 !
@@ -142,6 +142,9 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     lunbcc      => gdp%gdluntmp%lunbcc
     itfinish    => gdp%gdinttim%itfinish
     tstop       => gdp%gdexttim%tstop
+    if (lsal .ne. 0 .or. ltem .ne. 0) then
+       allocate(procbc_old(4, nto, kmax, lstsc))
+    endif
     !
     ! Initialization local parameters
     ! TIMSCL will not been used in UPDBCC
@@ -390,4 +393,7 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     if (ltem .ne. 0) then
        procbc(1:2,1:nto,1:kmax,ltem) = procbc_old(1:2,1:nto,1:kmax,ltem)
     endif    
+    if (lsal .ne. 0 .or. ltem .ne. 0) then
+       deallocate(procbc_old)
+    endif
 end subroutine incbcc
