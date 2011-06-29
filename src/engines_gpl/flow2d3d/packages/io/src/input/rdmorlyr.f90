@@ -614,6 +614,10 @@ use bedcomposition_module
     flcomp = ''
     call prop_get(mor_ptr, 'Underlayer', 'IniComp', flcomp)
     !
+    if (iunderlyr /= 2 .and. flcomp /= ' ') then  
+       write(lundia,'(a)') 'WARNING: IniComp keyword only supported for IUnderLyr=2'
+       flcomp = ' '
+    endif
     txtput1 = 'Initial bed composition'
     if (flcomp == ' ') then
        txtput2 = 'from sediment file'
