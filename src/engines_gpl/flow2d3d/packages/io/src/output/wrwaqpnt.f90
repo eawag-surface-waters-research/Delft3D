@@ -5,30 +5,30 @@
      &                      nobnd  , kmk    , zmodel , filnam , lundia )
 
 !----- GPL ---------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2011.                                     
-!                                                                               
-!  This program is free software: you can redistribute it and/or modify         
-!  it under the terms of the GNU General Public License as published by         
-!  the Free Software Foundation version 3.                                      
-!                                                                               
-!  This program is distributed in the hope that it will be useful,              
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
-!  GNU General Public License for more details.                                 
-!                                                                               
-!  You should have received a copy of the GNU General Public License            
-!  along with this program.  If not, see <http://www.gnu.org/licenses/>.        
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D" and "Deltares"    
-!  are registered trademarks of Stichting Deltares, and remain the property of  
-!  Stichting Deltares. All rights reserved.                                     
-!                                                                               
+!
+!  Copyright (C)  Stichting Deltares, 2011.
+!
+!  This program is free software: you can redistribute it and/or modify
+!  it under the terms of the GNU General Public License as published by
+!  the Free Software Foundation version 3.
+!
+!  This program is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!  GNU General Public License for more details.
+!
+!  You should have received a copy of the GNU General Public License
+!  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"
+!  are registered trademarks of Stichting Deltares, and remain the property of
+!  Stichting Deltares. All rights reserved.
+!
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
@@ -181,7 +181,7 @@
                         iapnt(k) = -nobnd
                      else
                         noseg = noseg + 1
-                        iapnt(k) = noseg ! this is the difference with line 110
+                        iapnt(k) = noseg ! this is the difference with line 123
                      endif
                   endif
                   k = k + 1
@@ -223,9 +223,9 @@
                j =    (i-1)/mnmax  + 1          ! layer number 1 to k
                k = mod(i-1 ,mnmax) + 1          ! index
                if ( j .lt. imint(k) ) then
-                  isaggr(i) = 0                 ! non aggregated cell below bottom
+                  isaggr(i) = 0                 ! non aggregated cell below bed
                else
-                  ibpnt (m) = 1                 ! aggregated cell above bottom
+                  ibpnt (m) = 1                 ! aggregated cell above bed
                endif
             endif
          enddo
@@ -235,7 +235,6 @@
                if ( ibpnt(m) .eq. 0 ) ifrmto(i) = 0
             endif
          enddo
-         deallocate ( ibpnt )
       endif
 
 !            write the 'from' 'to' pointer table
@@ -252,7 +251,7 @@
 
 !            write the attribute file
 
-      open  ( lunout, file=trim(filnam)//'atr', recl=max(min(nmax*2,1000),128) )
+      open  ( lunout, file=trim(filnam)//'atr', recl=max(min(nmax*2+8,1008),202) )
       write ( lunout , '(a)' )  '         ; DELWAQ_COMPLETE_ATTRIBUTES'
       write ( lunout , '(a)' )  '    2    ; two blocks with input     '
       write ( lunout , '(a)' )  '    1    ; number of attributes, they are :'
@@ -287,8 +286,15 @@
                write ( lunout, '(500a2)' ) kenout
             enddo
          else
-            do j = 1, nosegl
-               write ( lunout, '(100i2)' ) kmk(j+n)
+            write ( lunout, '(100i2)' ) ( kmk(j+n),j=1,nosegl )
+            do j = 1, mmax
+               do i = 1,nmax
+                  kenout(i) = '  '
+                  m = iapnt(k)
+                  if ( m .gt. 0 ) write( kenout(i), '(I2)' ) kmk( m+n )
+                  k = k + 1
+               enddo
+               write ( lunout, '(''; '',500a2)' ) kenout
             enddo
          endif
       enddo
@@ -306,18 +312,22 @@
             do k = kfmin, kmax
                iseg = isaggr( (k-1)*mnmax+(j-1)*nmax + i )
                if ( zmodel ) then
-                  if ( k .eq. kfmin ) kmk(iseg) = 3      !  bottom segment
-                  if ( k .eq. kmax  ) then               !  surface segment
-                     if ( kmk(iseg) .eq. -1 .or.                         &
-     &                    kmk(iseg) .eq.  2      ) then  !  no bottom no surface
-                        kmk(iseg) = 1                    !  so surface
+                  if ( ibpnt(iseg) .gt. 0 ) then                   ! active cell
+                     if ( kmk(iseg) .eq. -1 ) then                 ! not dealt with yet
+                        if ( iseg .gt. noseg - nosegl ) then       ! last or only layer
+                           kmk(iseg) = 3
+                        else
+                           if ( ibpnt(iseg+nosegl) .eq. 0 ) then   ! first active layer
+                              kmk(iseg) = 3                        ! from below
+                           else                                    ! somewhere in the
+                              kmk(iseg) = 2                        ! middle (or at the top)
+                           endif
+                        endif
+                        if ( iseg .lt. nosegl ) then               ! top layer
+                           if ( kmk(iseg) .eq. 3 ) kmk(iseg) = 0   ! it was only layer
+                           if ( kmk(iseg) .eq. 2 ) kmk(iseg) = 1   ! has bed below
+                        endif
                      endif
-                     if ( kmk(iseg) .eq. 3 ) then      !  also bottom segment
-                        kmk(iseg) = 0                  !  so both
-                     endif
-                  endif
-                  if ( k .ne. kfmin .and. k .ne. kmax ) then
-                     if ( kmk(iseg) .eq. -1 ) kmk(iseg) = 2
                   endif
                else
                   if ( kmk(iseg) .eq. -1 ) kmk(iseg) = 2
@@ -349,8 +359,15 @@
                write ( lunout, '(500a2)' ) kenout
             enddo
          else
-            do j = 1, nosegl
-               write ( lunout, '(100i2)' ) kmk(j+n)
+            write ( lunout, '(100i2)' ) ( kmk(j+n),j=1,nosegl )
+            do j = 1, mmax
+               do i = 1,nmax
+                  kenout(i) = '  '
+                  m = iapnt(k)
+                  if ( m .gt. 0 ) write( kenout(i), '(I2)' ) kmk( m+n )
+                  k = k + 1
+               enddo
+               write ( lunout, '(''; '',500a2)' ) kenout
             enddo
          endif
       enddo
@@ -361,6 +378,9 @@
 
       deallocate ( lgrid )
       deallocate ( iapnt )
-      if ( zmodel ) deallocate ( imint )
+      if ( zmodel ) then
+         deallocate ( imint )
+         deallocate ( ibpnt )
+      endif
 !
       end subroutine wrwaqpnt
