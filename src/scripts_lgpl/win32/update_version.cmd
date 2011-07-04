@@ -24,9 +24,10 @@ IF DEFINED BUILD_NUMBER (
 rem ==========================================================================
 rem If the source has been obtained using a svn export command, the "exported"
 rem string has been generated, but this cannot be used within *.rc files
-rem Replace it using 00000 (only necessary on Windows systems)
+rem Replace it using 000000 (only necessary on Windows systems)
 rem ==========================================================================
 
+set version=%version:~0,8%
 IF "%version%" == "exported" (
    set version=000000
 )
