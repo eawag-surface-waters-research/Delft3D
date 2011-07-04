@@ -1,4 +1,6 @@
-subroutine inibcc(lundia    ,error     ,runid     ,timnow    , &                & itbcc     ,itstrt    ,itfinish  ,nto       ,lstsc     , &                & kmax      ,nambnd    ,namcon    ,tprofc    ,procbc    , &
+subroutine inibcc(lundia    ,error     ,runid     ,timnow    , &
+                & itbcc     ,itstrt    ,itfinish  ,nto       ,lstsc     , &
+                & kmax      ,nambnd    ,namcon    ,tprofc    ,procbc    , &
                 & zstep     ,bubble    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -292,7 +294,8 @@ subroutine inibcc(lundia    ,error     ,runid     ,timnow    , &                
           !
           first = .true.
           call updbcc(lunbcc    ,lundia    ,first     ,itbcc     ,ito       , &
-                    & istsc     ,timnow    ,itfinish  ,timscl    , &                    & nto       ,kmax      ,lstsc     ,procbc    ,tprofc    , &
+                    & istsc     ,timnow    ,itfinish  ,timscl    , &
+                    & nto       ,kmax      ,lstsc     ,procbc    ,tprofc    , &
                     & zstep     ,gdp       )
           !
           ! Interpolate between ITBCC (1,ITO,ISTSC) and TIMNOW
