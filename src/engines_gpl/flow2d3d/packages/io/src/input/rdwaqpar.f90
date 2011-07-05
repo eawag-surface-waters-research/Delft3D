@@ -50,7 +50,7 @@ subroutine rdwaqpar(lundia, error, kmax, dt, itcomf, itcomi, itcoml, gdp)
     integer                       , pointer :: itwqfi
     integer                       , pointer :: itwqfl
     integer                       , pointer :: itstrt
-    integer                       , pointer :: itstop
+    integer                       , pointer :: itfinish
     integer       , dimension(:)  , pointer :: ilaggr    ! layer aggregation pointer
     real(fp)      , dimension(:,:), pointer :: quwaq     ! Cumulative qxk
     real(fp)      , dimension(:,:), pointer :: qvwaq     ! Cumulative qyk
@@ -94,7 +94,7 @@ subroutine rdwaqpar(lundia, error, kmax, dt, itcomf, itcomi, itcoml, gdp)
     itwqfi     => gdp%gdwaqpar%itwqfi
     itwqfl     => gdp%gdwaqpar%itwqfl
     itstrt     => gdp%gdinttim%itstrt
-    itstop     => gdp%gdinttim%itstop
+    itfinish   => gdp%gdinttim%itfinish
     ilaggr     => gdp%gdwaqpar%ilaggr
     quwaq      => gdp%gdwaqpar%quwaq
     qvwaq      => gdp%gdwaqpar%qvwaq
@@ -215,8 +215,8 @@ subroutine rdwaqpar(lundia, error, kmax, dt, itcomf, itcomi, itcoml, gdp)
        error = .true.
        call prterr(lundia    ,'U021'    ,'Waq store period should be multiple of interval' )
     endif
-    if (itwqfl > itstop) then
-       itwqfl = itstop
+    if (itwqfl > itfinish) then
+       itwqfl = itfinish
        call prterr(lundia, 'U190', 'Waq store end time is set to simulation end time')
     endif
     !

@@ -56,6 +56,12 @@ subroutine nm_to_n_and_m(nm, n, m, gdp)
 !
     ddb     = gdp%d%ddbound
     nmaxddb = gdp%d%nmax + 2*gdp%d%ddbound
-    m = int (nm / nmaxddb ) + 1 - ddb
+    !
+    ! Calculation of m:
+    ! This used to be:
+    ! m = int (nm / nmaxddb ) + 1 - ddb
+    ! But that goes wrong for negative nm and nm is a multiple of nmaxddb
+    !
+    m = floor(real(nm-1)/real(nmaxddb)) + 1 - ddb
     n = nm - nmaxddb * (m - 1 + ddb ) - ddb
 end subroutine nm_to_n_and_m
