@@ -110,13 +110,13 @@ Extern char     Error [ESM_ERROR_LEN];  // error message of last failed operatio
 Extern pthread_mutex_t  Mutex;          // mutual exclusion for global variables
 Extern pthread_key_t    Self;           // set to thread ID
 
-Extern struct {
+Extern struct esm_thread {
     int     flags;                      // thread-specific flags
     FILE *  tracefile;                  // descriptor for trace output
     char    error [ESM_ERROR_LEN];      // error message of last failed operation
     } Threads [ESM_MAX_THREADS];
 
-Extern struct {
+Extern struct esm_context {
     int     contextid;                  // context ID
     void *  cd;                         // local addr of context descriptor
     int     nattached;                  // number of mapped pages (shared only)
