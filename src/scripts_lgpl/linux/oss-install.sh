@@ -27,9 +27,9 @@ function install_all () {
 
 
 # ========================
-# === INSTALL_DELFT3D-FLOW
+# === INSTALL_DELFT3D_FLOW
 # ========================
-function delft3d-flow () {
+function delft3d_flow () {
     echo "    installing delft3d-flow . . ."
 
     mkdir -p $dest_main
