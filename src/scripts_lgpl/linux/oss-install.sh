@@ -224,6 +224,71 @@ function vs () {
 }
 
 
+# =====================
+# === INSTALL DELFTFLOW
+# =====================
+function delftflow () {
+    echo "installing delftflow ..."
+    
+}
+
+# ================
+# === INSTALL TIDE
+# ================
+function tide () {
+    echo "installing tide..."
+    
+}
+
+# ==================
+# === INSTALL TRIANA
+# ==================
+function triana () {
+    echo "installing triana ..."
+    
+}
+
+# ==================
+# === INSTALL NESTHD1
+# ===================
+function nesthd1 () {
+    echo "installing nesthd1 ..."
+    
+}
+
+# ===================
+# === INSTALL NESTHD2
+# ===================
+function nesthd2 () {
+    echo "installing nesthd2 ..."
+    
+}
+
+# ===================
+# === INSTALL NESTWQ1
+# ===================
+function nestwq1 () {
+    echo "installing nestwq1 ..."
+    
+}
+
+# ===================
+# === INSTALL NESTWQ2
+# ===================
+function nestwq2 () {
+    echo "installing nestwq2 ..."
+    
+}
+
+# ===============
+# === INSTALL WES
+# ===============
+function wes () {
+    echo "installing wes ..."
+    
+}
+
+
 # ========
 # === MAIN
 # ========
