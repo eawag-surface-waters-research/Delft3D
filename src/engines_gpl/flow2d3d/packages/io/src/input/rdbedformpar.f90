@@ -117,12 +117,7 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
     logical           :: successD90
     logical           :: existD50
     logical           :: existD90
-    integer           :: icx
-    integer           :: icy
     integer           :: istat
-    integer           :: nmaxddb
-    integer           :: nmlb
-    integer           :: nmub
     character(11)     :: fmttmp ! Format file ('formatted  ') 
 !
 !! executable statements -------------------------------------------------------
@@ -670,18 +665,6 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
           fmttmp = 'formatted'
           call depfil(lundia    ,error     ,flbdfh    ,fmttmp    ,mmax      , &
                     & nmaxus    ,duneheight,1         ,1         ,gdp       )
-          !
-          ! Call mirror routine to fill external points on the boundary with the internal value in x-direction
-          !
-          nmlb    = gdp%d%nmlb
-          nmub    = gdp%d%nmub
-          nmaxddb = gdp%d%nub - gdp%d%nlb + 1
-          !
-          icx = 1
-          icy = nmaxddb
-          !
-          call mirror_bnd(icx       ,icy       ,nmmax     , &
-                        & kcs       ,duneheight ,nmlb      ,nmub      )
           !
           write(lundia,'(a,a,a)') txtput1, ':', flbdfh
           if (error) call prterr(lundia, 'U021', 'RDBEDFORMPAR: error reading initial bedform heights from BdfUni')

@@ -67,6 +67,7 @@ subroutine bedform(nmmax     ,dps       ,s1        ,u         ,v         , &
     real(fp)                             , pointer :: ag
     real(fp)                             , pointer :: rhow
     real(fp)                             , pointer :: vicmol
+    real(fp)                             , pointer :: eps
 !
 ! Global variables
 !
@@ -133,6 +134,7 @@ subroutine bedform(nmmax     ,dps       ,s1        ,u         ,v         , &
     ag                      => gdp%gdphysco%ag
     rhow                    => gdp%gdphysco%rhow
     vicmol                  => gdp%gdphysco%vicmol
+    eps                     => gdp%gdconst%eps
     !
     do nm = 1, nmmax
        if (kfs(nm)>0) then
@@ -226,11 +228,13 @@ subroutine bedform(nmmax     ,dps       ,s1        ,u         ,v         , &
              elseif (bedformheighttype == 2) then
                 !
                 ! Fredsoe for Meyer-Peter & Mueller 1948
+                ! Avoid division by zero (using eps) when theta or mu is zero
                 !
                 mu    = (chezy/rcgrn)**1.5_fp
-                theta = u2dhb**2/((chezy**2)*relden*d50)
-                t1    = hdpar(1)*24.0_fp/63.0_fp
-                t2    = thetac/(theta*mu)
+                theta = u2dhb**2 / ((chezy**2)*relden*d50)
+                t1    = hdpar(1) * 24.0_fp / 63.0_fp
+                t4    = max(theta*mu,eps)
+                t2    = thetac/t4
                 t3    = max(1.0_fp-t2,0.0_fp)
                 duneheightequi(nm) = max(t1*t3*depth,0.0_fp)
              endif

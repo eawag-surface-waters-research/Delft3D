@@ -157,6 +157,8 @@ subroutine inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
     logical                , pointer :: dpmveg
     logical                , pointer :: fldry
     logical                , pointer :: fltd
+    character(256)         , pointer :: flbdfh
+    real(fp), dimension(:) , pointer :: duneheight
 !
 ! Global variables
 !
@@ -320,6 +322,8 @@ subroutine inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
     typbnd     => gdp%gdr_i_ch%typbnd
     fldry      => gdp%gdtmpfil%fldry
     fltd       => gdp%gdtmpfil%fltd
+    flbdfh     => gdp%gdbedformpar%flbdfh
+    duneheight => gdp%gdbedformpar%duneheight
     !
     icx     = 0
     icy     = 0
@@ -525,5 +529,14 @@ subroutine inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
     ! Allocate arrays for 2D advection solver
     !
     call allocadv2d(norow, nocol, gdp)
+    !
+    ! For bedform:
+    ! Call mirror routine to fill external points on the boundary with the internal value in x-direction
+    ! This call was originally located in rdbedformpar, but at that time, kcs was not defined yet.
+    !
+    if (flbdfh /= ' ') then
+       call mirror_bnd(1       ,gdp%d%nub-gdp%d%nlb+1,gdp%d%nmmax     , &
+                     & i(kcs)  ,duneheight           ,gdp%d%nmlb      ,gdp%d%nmub      )
+    endif
  9999 continue
 end subroutine inchki
