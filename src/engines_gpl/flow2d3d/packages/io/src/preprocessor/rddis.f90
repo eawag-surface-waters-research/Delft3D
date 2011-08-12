@@ -105,50 +105,51 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
 ! Local variables
 !
-    integer                               :: id
-    integer                               :: idis    ! Help var. for times read 
-    integer                               :: iocond  ! IO status for reading 
-    integer                               :: irec
-    integer                               :: itold   ! Help var. to store last read time to test accending order 
-    integer                               :: ittdep  ! Help var. for the time read (now de- fined as multiples of DT, but in fu- ture it may take any value) 
-    integer                               :: l       ! Help loop var. 
-    integer                               :: lenc    ! Help var. (length of var. cvar to be looked for in the MD-file) 
-    integer                               :: lf      ! Help var. specifying the length of character variables for file names 
-    integer                               :: lkw     ! Length (in characters) of keyword 
-    integer                               :: ll      ! Help var. 
-    integer                               :: lnconc
-    integer                               :: lrec    ! Length of direct access records if file already exists 
-    integer                               :: lrid    ! Length of character string runid 
-    integer                               :: lunout  ! Unit number for transformed file 
-    integer                               :: lunrd
-    integer                               :: maxval  ! Maximum number of values 1+LSTSC+2 
-    integer                               :: mxlrec
-    integer                               :: n       ! Help var. 
-    integer, external                     :: newlun
-    integer                               :: nlook   ! Help var.: nr. of data to look for in the MD-file 
-    integer                               :: nrval   ! Number of values to read from file 
-    integer                               :: ntrec   ! Help. var to keep track of NRREC 
-    logical                               :: ex      ! Flag to test if file exists 
-    logical, external                     :: exifil
-    logical                               :: found   ! FOUND=TRUE if KEYW in the MD-file was found 
-    logical                               :: lerror  ! Flag=TRUE if a local error is encountered 
-    logical                               :: newkw   ! Logical var. specifying whether a new recnam should be read from the MD-file or just new data in the continuation line 
-    logical                               :: nodef   ! Flag set to YES if default value may NOT be applied in case var. read is empty (ier <= 0, or nrread < nlook) 
-    logical                               :: noread  ! Flag if FILDIS is equal to TMP file and should not be read. 
-    real(fp)                              :: rdef    ! Help var. containing default va- lue(s) for real variable 
-    real(fp), dimension(10)               :: rval    ! Help array to read the data from MD-file 
-    real(fp), dimension(10)               :: rwdis
-    character(1)                          :: cdummy  ! Character help variable 
-    character(1)                          :: quote   ! Apostrophe ASCII-character 39 
-    character(10), dimension(4 + lstsc)   :: parunt  ! Unit name fitting the parameter 
-    character(12)                         :: fildef  ! Default file name (usually = blank) 
-    character(20)                         :: interp  ! Character string containing inter- polation option 
-    character(256)                        :: filout  ! Help variable for file name 
-    character(36), dimension(4 + lstsc)   :: parnam  ! Names of the paramaters to write to time dependent file DIS 
-    character(40)                         :: cntain
-    character(42)                         :: tablnm  ! Table name specification 
-    character(6)                          :: keyw    ! Name of record to look for in the MD-file (usually KEYWRD or RECNAM) 
-    character(300)                        :: message
+    integer                                  :: id
+    integer                                  :: idis    ! Help var. for times read 
+    integer                                  :: iocond  ! IO status for reading 
+    integer                                  :: irec
+    integer                                  :: istat
+    integer                                  :: itold   ! Help var. to store last read time to test accending order 
+    integer                                  :: ittdep  ! Help var. for the time read (now de- fined as multiples of DT, but in fu- ture it may take any value) 
+    integer                                  :: l       ! Help loop var. 
+    integer                                  :: lenc    ! Help var. (length of var. cvar to be looked for in the MD-file) 
+    integer                                  :: lf      ! Help var. specifying the length of character variables for file names 
+    integer                                  :: lkw     ! Length (in characters) of keyword 
+    integer                                  :: ll      ! Help var. 
+    integer                                  :: lnconc
+    integer                                  :: lrec    ! Length of direct access records if file already exists 
+    integer                                  :: lrid    ! Length of character string runid 
+    integer                                  :: lunout  ! Unit number for transformed file 
+    integer                                  :: lunrd
+    integer                                  :: maxval  ! Maximum number of values 1+LSTSC+2 
+    integer                                  :: mxlrec
+    integer                                  :: n       ! Help var. 
+    integer, external                        :: newlun
+    integer                                  :: nlook   ! Help var.: nr. of data to look for in the MD-file 
+    integer                                  :: nrval   ! Number of values to read from file 
+    integer                                  :: ntrec   ! Help. var to keep track of NRREC 
+    logical                                  :: ex      ! Flag to test if file exists 
+    logical, external                        :: exifil
+    logical                                  :: found   ! FOUND=TRUE if KEYW in the MD-file was found 
+    logical                                  :: lerror  ! Flag=TRUE if a local error is encountered 
+    logical                                  :: newkw   ! Logical var. specifying whether a new recnam should be read from the MD-file or just new data in the continuation line 
+    logical                                  :: nodef   ! Flag set to YES if default value may NOT be applied in case var. read is empty (ier <= 0, or nrread < nlook) 
+    logical                                  :: noread  ! Flag if FILDIS is equal to TMP file and should not be read. 
+    real(fp)                                 :: rdef    ! Help var. containing default va- lue(s) for real variable 
+    real(fp)     , dimension(:), allocatable :: rval    ! Help array to read the data from MD-file 
+    real(fp)     , dimension(:), allocatable :: rwdis
+    character(1)                             :: cdummy  ! Character help variable 
+    character(1)                             :: quote   ! Apostrophe ASCII-character 39 
+    character(10), dimension(:), allocatable :: parunt  ! Unit name fitting the parameter 
+    character(12)                            :: fildef  ! Default file name (usually = blank) 
+    character(20)                            :: interp  ! Character string containing inter- polation option 
+    character(256)                           :: filout  ! Help variable for file name 
+    character(36), dimension(:), allocatable :: parnam  ! Names of the paramaters to write to time dependent file DIS 
+    character(40)                            :: cntain
+    character(42)                            :: tablnm  ! Table name specification 
+    character(6)                             :: keyw    ! Name of record to look for in the MD-file (usually KEYWRD or RECNAM) 
+    character(300)                           :: message
 !
 !! executable statements -------------------------------------------------------
 !
@@ -158,6 +159,15 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     tstop   => gdp%gdexttim%tstop
     dt      => gdp%gdexttim%dt
     itis    => gdp%gdrdpara%itis
+    !
+                    allocate(rval  (4+lstsc), stat = istat)
+    if (istat == 0) allocate(rwdis (4+lstsc), stat = istat)
+    if (istat == 0) allocate(parunt(4+lstsc), stat = istat)
+    if (istat == 0) allocate(parnam(4+lstsc), stat = istat)
+    if (istat /= 0) then
+       call prterr(lundia, 'U021', 'rddis: memory alloc error')
+       call d3stop(1, gdp)
+    endif
     !
     lerror = .false.
     newkw  = .true.
@@ -650,4 +660,9 @@ subroutine rddis(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           close (lunout)
        endif
     endif
+    !
+    deallocate(rval  )
+    deallocate(rwdis )
+    deallocate(parunt)
+    deallocate(parnam)
 end subroutine rddis
