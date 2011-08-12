@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{7433E10A-C467-493C-A3E5-3BB2E7DF8780}</ProjectGuid>
+    <RootNamespace>kernel_dd_c</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">lib/$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">lib/$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>include\mapper;..\io_dol_c\include;..\manager_dd\include;..\..\..\..\utils_lgpl\esmfsm\include;..\..\..\..\utils_lgpl\instrumentation\include;..\..\..\..\utils_lgpl\precision\include;..\..\..\..\utils_lgpl\semaphore\include\win32;..\..\..\..\utils_lgpl\stream\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;MS32;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>include\mapper;..\io_dol_c\include;..\manager_dd\include;..\..\..\..\utils_lgpl\esmfsm\include;..\..\..\..\utils_lgpl\instrumentation\include;..\..\..\..\utils_lgpl\precision\include;..\..\..\..\utils_lgpl\semaphore\include\win32;..\..\..\..\utils_lgpl\stream\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;MS32;_CRT_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="src\mapper\context-flowside.cpp" />
+    <ClCompile Include="src\mapper\context-gawsside.cpp" />
+    <ClCompile Include="src\mapper\context-mapside.cpp" />
+    <ClCompile Include="src\mapper\context_distrib_functs.cpp" />
+    <ClCompile Include="src\mapper\context_general_functs.cpp" />
+    <ClCompile Include="src\mapper\flow_nxtstp.cpp" />
+    <ClCompile Include="src\mapper\gaws.cpp" />
+    <ClCompile Include="src\mapper\gaws_wang_eq.cpp" />
+    <ClCompile Include="src\mapper\gawsbarr.cpp" />
+    <ClCompile Include="src\mapper\hymapper.cpp" />
+    <ClCompile Include="src\mapper\map_debug.cpp" />
+    <ClCompile Include="src\mapper\map_messages.cpp" />
+    <ClCompile Include="src\mapper\mapper_config.cpp" />
+    <ClCompile Include="src\mapper\mapper_general.cpp" />
+    <ClCompile Include="src\mapper\mapper_statemachine.cpp" />
+    <ClCompile Include="src\mapper\mapper_uvz.cpp" />
+    <ClCompile Include="src\mapper\varinfocoll.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\mapper\context-flowside.h" />
+    <ClInclude Include="include\mapper\context-gawsside.h" />
+    <ClInclude Include="include\mapper\context-mapside.h" />
+    <ClInclude Include="include\mapper\context.h" />
+    <ClInclude Include="include\mapper\dd_messages.h" />
+    <ClInclude Include="include\mapper\flow_in_hydra.h" />
+    <ClInclude Include="include\mapper\flow_nxtstp.h" />
+    <ClInclude Include="include\mapper\flow_steps_c.h" />
+    <ClInclude Include="include\mapper\gaws.h" />
+    <ClInclude Include="include\mapper\gaws_wang_eq.h" />
+    <ClInclude Include="include\mapper\map_debug.h" />
+    <ClInclude Include="include\mapper\map_messages.h" />
+    <ClInclude Include="include\mapper\maploops.h" />
+    <ClInclude Include="include\mapper\mapper.h" />
+    <ClInclude Include="include\mapper\varinfocoll.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

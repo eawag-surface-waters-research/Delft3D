@@ -5,7 +5,7 @@
 	<Configurations>
 		<Configuration Name="Debug|Win32" OutputDirectory="../../bin/$(ConfigurationName)">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Preprocess="preprocessYes" AdditionalIncludeDirectories="include;..\data\bin\$(ConfigurationName);..\kernel\bin\$(ConfigurationName);..\..\..\..\utils_lgpl\precision\lib\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\meteo\lib\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\utils_flow\lib\$(ConfigurationName)\static" WarnInterfaces="true" ModulePath="$(OutDir)/" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
-				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" IgnoreDefaultLibraryNames="libc.lib" GenerateDebugInformation="true" SubSystem="subSystemConsole" LargeAddressAware="addrAwareLarge" AdditionalDependencies="wsock32.lib netapi32.lib comctl32.lib user32.lib advapi32.lib comdlg32.lib gdi32.lib winspool.lib"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" IgnoreDefaultLibraryNames="libc.lib;libcmtd.lib;libcmt.lib" GenerateDebugInformation="true" SubSystem="subSystemConsole" LargeAddressAware="addrAwareLarge" AdditionalDependencies="wsock32.lib netapi32.lib comctl32.lib user32.lib advapi32.lib comdlg32.lib gdi32.lib winspool.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
@@ -15,7 +15,7 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" OutputDirectory="../../bin/$(ConfigurationName)">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" Preprocess="preprocessYes" AdditionalIncludeDirectories="include;..\data\bin\$(ConfigurationName);..\kernel\bin\$(ConfigurationName);..\..\..\..\utils_lgpl\precision\lib\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\meteo\lib\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\utils_flow\lib\$(ConfigurationName)\static" ModulePath="$(OutDir)/"/>
-				<Tool Name="VFLinkerTool" AdditionalOptions="/LTCG" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" IgnoreDefaultLibraryNames="libc.lib;libcd.lib" SubSystem="subSystemConsole" LargeAddressAware="addrAwareLarge" AdditionalDependencies="wsock32.lib netapi32.lib comctl32.lib user32.lib advapi32.lib comdlg32.lib gdi32.lib winspool.lib"/>
+				<Tool Name="VFLinkerTool" AdditionalOptions="/LTCG" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" IgnoreDefaultLibraryNames="libc.lib;libcd.lib;libcmt.lib" SubSystem="subSystemConsole" LargeAddressAware="addrAwareLarge" AdditionalDependencies="wsock32.lib netapi32.lib comctl32.lib user32.lib advapi32.lib comdlg32.lib gdi32.lib winspool.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>

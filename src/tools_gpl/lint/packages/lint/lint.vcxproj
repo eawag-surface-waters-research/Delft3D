@@ -64,6 +64,7 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>..\lint_f\$(ConfigurationName)\lint_f.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -85,6 +86,7 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
+      <AdditionalDependencies>..\lint_f\$(ConfigurationName)\lint_f.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>..\..\..\..\scripts_lgpl\win32\oss-install.cmd lint ..\bin</Command>
@@ -100,10 +102,6 @@
     <ResourceCompile Include="..\lint_version_number\include\version_number.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\lint_f\lint_f.vfproj">
-      <Project>{0acac0f8-a142-4811-83aa-598e80a38fbb}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
     <ProjectReference Include="..\lint_version_number\lint_version_number.vcxproj">
       <Project>{83b2dcb2-3f71-41a7-b235-c4e32045c730}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>

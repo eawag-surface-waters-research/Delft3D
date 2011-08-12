@@ -96,11 +96,13 @@ src/clean.cmd -text
 src/common.am -text
 src/configure.ac -text
 src/deltares_hydro_open_source.sln -text
+src/deltares_hydro_open_source_vs2010.sln -text
 src/doxyfile_delft3d -text
 src/engines_gpl/Makefile.am -text
 src/engines_gpl/deltares_hydro/Makefile.am -text
 src/engines_gpl/deltares_hydro/deltares_hydro.vfproj -text
 src/engines_gpl/deltares_hydro/deltares_hydro_c.vcproj -text
+src/engines_gpl/deltares_hydro/deltares_hydro_c.vcxproj -text
 src/engines_gpl/deltares_hydro/include/version_number.ini -text
 src/engines_gpl/deltares_hydro/src/Makefile.am -text
 src/engines_gpl/deltares_hydro/src/deltares_hydro.F90 -text
@@ -625,6 +627,7 @@ src/engines_gpl/flow2d3d/packages/io_dol_c/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/io_dol_c/include/d3dol.h -text
 src/engines_gpl/flow2d3d/packages/io_dol_c/include/win32.h -text
 src/engines_gpl/flow2d3d/packages/io_dol_c/io_dol_c.vcproj -text
+src/engines_gpl/flow2d3d/packages/io_dol_c/io_dol_c.vcxproj -text
 src/engines_gpl/flow2d3d/packages/io_dol_c/src/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/io_dol_c/src/d3dol.cpp -text
 src/engines_gpl/flow2d3d/packages/io_dol_c/src/fortran.cpp -text
@@ -1041,6 +1044,7 @@ src/engines_gpl/flow2d3d/packages/kernel_dd_c/include/mapper/maploops.h -text
 src/engines_gpl/flow2d3d/packages/kernel_dd_c/include/mapper/mapper.h -text
 src/engines_gpl/flow2d3d/packages/kernel_dd_c/include/mapper/varinfocoll.h -text
 src/engines_gpl/flow2d3d/packages/kernel_dd_c/kernel_dd_c.vcproj -text
+src/engines_gpl/flow2d3d/packages/kernel_dd_c/kernel_dd_c.vcxproj -text
 src/engines_gpl/flow2d3d/packages/kernel_dd_c/src/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/kernel_dd_c/src/mapper/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/kernel_dd_c/src/mapper/context-flowside.cpp -text
@@ -1092,6 +1096,7 @@ src/engines_gpl/flow2d3d/packages/manager_dd/include/rtc_comm.h -text
 src/engines_gpl/flow2d3d/packages/manager_dd/include/semaphore.h -text
 src/engines_gpl/flow2d3d/packages/manager_dd/include/trisim.h -text
 src/engines_gpl/flow2d3d/packages/manager_dd/manager_dd.vcproj -text
+src/engines_gpl/flow2d3d/packages/manager_dd/manager_dd.vcxproj -text
 src/engines_gpl/flow2d3d/packages/manager_dd/src/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/manager_dd/src/ddexec/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/manager_dd/src/ddexec/barrier.cpp -text
@@ -1121,6 +1126,7 @@ src/engines_gpl/flow2d3d/packages/manager_dd/src/hydra/trisim_c.cpp -text
 src/engines_gpl/flow2d3d/packages/manager_dd/src/hydra/util.cpp -text
 src/engines_gpl/flow2d3d/packages/plugin_3dmortrafrm_c/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/plugin_3dmortrafrm_c/plugin_3dmortrafrm_c.vcproj -text
+src/engines_gpl/flow2d3d/packages/plugin_3dmortrafrm_c/plugin_3dmortrafrm_c.vcxproj -text
 src/engines_gpl/flow2d3d/packages/plugin_3dmortrafrm_c/src/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/plugin_3dmortrafrm_c/src/f902c.c -text
 src/engines_gpl/flow2d3d/packages/plugin_user/Makefile.am -text
