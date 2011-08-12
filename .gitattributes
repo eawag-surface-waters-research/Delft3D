@@ -2379,7 +2379,6 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/series_frame.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/series_init.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/setProperty.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/setaxesprops.m -text
-src/tools_lgpl/matlab/quickplot/progsrc/private/shape.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/shapewrite.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/shiftcontrol.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/simsteps.m -text
@@ -2442,6 +2441,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/qpsa.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/qpsf.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/qpsi.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/samples.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/shape.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/splitcellstr.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/stagprint.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/tba_compare.m -text
