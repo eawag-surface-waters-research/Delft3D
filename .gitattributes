@@ -103,6 +103,7 @@ src/engines_gpl/deltares_hydro/Makefile.am -text
 src/engines_gpl/deltares_hydro/deltares_hydro.vfproj -text
 src/engines_gpl/deltares_hydro/deltares_hydro_c.vcproj -text
 src/engines_gpl/deltares_hydro/deltares_hydro_c.vcxproj -text
+src/engines_gpl/deltares_hydro/deltares_hydro_vs2010.vfproj -text
 src/engines_gpl/deltares_hydro/include/version_number.ini -text
 src/engines_gpl/deltares_hydro/src/Makefile.am -text
 src/engines_gpl/deltares_hydro/src/deltares_hydro.F90 -text
@@ -372,6 +373,7 @@ src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/writetofile.c -text
 src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/wrscr.f90 -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/flow2d3d.vfproj -text
+src/engines_gpl/flow2d3d/packages/flow2d3d/flow2d3d_vs2010.vfproj -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/include/version_number.ini -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/src/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/src/Makefile64bit.am -text
@@ -381,6 +383,7 @@ src/engines_gpl/flow2d3d/packages/flow2d3d/src/flow2d3d_version.F90.svn -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/src/runme.f90 -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_openda/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_openda/flow2d3d_openda.vfproj -text
+src/engines_gpl/flow2d3d/packages/flow2d3d_openda/flow2d3d_openda_vs2010.vfproj -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_openda/include/cta_f77.inc -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_openda/include/version_number.ini -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_openda/src/Makefile.am -text
@@ -1246,6 +1249,7 @@ src/engines_gpl/wave/packages/wave/src/usage.f90 -text
 src/engines_gpl/wave/packages/wave/src/wave.f90 -text
 src/engines_gpl/wave/packages/wave/src/wave_version.F90.svn -text
 src/engines_gpl/wave/packages/wave/wave.vfproj -text
+src/engines_gpl/wave/packages/wave/wave_vs2010.vfproj -text
 src/install.cmd -text
 src/install.sh -text
 src/m4/COPYING.gwqt -text
@@ -1871,6 +1875,7 @@ src/tools_gpl/mormerge/Makefile.am -text
 src/tools_gpl/mormerge/packages/Makefile.am -text
 src/tools_gpl/mormerge/packages/mormerge/Makefile.am -text
 src/tools_gpl/mormerge/packages/mormerge/mormerge.vfproj -text
+src/tools_gpl/mormerge/packages/mormerge/mormerge_vs2010.vfproj -text
 src/tools_gpl/mormerge/packages/mormerge/src/Makefile.am -text
 src/tools_gpl/mormerge/packages/mormerge/src/merge.f90 -text
 src/tools_gpl/mormerge/packages/mormerge/src/mormerge.f90 -text
