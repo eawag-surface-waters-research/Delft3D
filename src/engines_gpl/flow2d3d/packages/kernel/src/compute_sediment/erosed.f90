@@ -10,7 +10,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                 & sbvv      ,seddif    ,hrms      ,dis       ,ltur      , &
                 & teta      ,rlabda    ,aks       ,kfsed     ,saleqs    , &
                 & sbuut     ,sbvvt     ,entr      ,wstau     ,hu        , &
-                & hv        ,rca       ,dss       ,ubot      , &
+                & hv        ,rca       ,dss       ,ubot      ,rtur0     , &
                 & temeqs    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -236,6 +236,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: hu     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: hv     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: rlabda !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax, ltur), intent(in)  :: rtur0  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: s0     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: s1     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: sbuut
@@ -880,6 +881,9 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        dll_reals(RP_VNKAR) = real(vonkar ,hp)
        dll_reals(RP_Z0CUR) = real(z0cur  ,hp)
        dll_reals(RP_Z0ROU) = real(z0rou  ,hp)
+       if (ltur>=1) then
+          dll_reals(RP_KTUR ) = real(rtur0(nm,kmax,1),hp)
+       endif
        !
        if (max_integers < MAX_IP) then
           write(errmsg,'(a,a,a)') 'Insufficient space to pass integer values to transport routine.'

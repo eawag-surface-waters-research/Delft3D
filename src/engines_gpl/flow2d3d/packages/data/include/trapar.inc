@@ -64,7 +64,8 @@
     integer, parameter :: RP_VNKAR = 35
     integer, parameter :: RP_Z0CUR = 36
     integer, parameter :: RP_Z0ROU = 37
-    integer, parameter :: MAX_RP   = 37
+    integer, parameter :: RP_KTUR  = 38
+    integer, parameter :: MAX_RP   = 38
 !
 
     integer, parameter :: IP_NM    =  1

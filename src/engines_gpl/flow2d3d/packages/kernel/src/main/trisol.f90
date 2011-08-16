@@ -1945,7 +1945,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                  & r(sbvv)   ,r(seddif) ,r(hrms)   ,r(dis)    ,ltur      , &
                  & r(teta)   ,r(rlabda) ,r(aks)    ,i(kfsed)  ,saleqs    , &
                  & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &
-                 & r(hv)     ,r(rca)    ,r(dss)    ,r(ubot)   , &
+                 & r(hv)     ,r(rca)    ,r(dss)    ,r(ubot)   ,r(rtur0)  , &
                  & temeqs    ,gdp       )
           call timer_stop(timer_erosed, gdp)
           call timer_stop(timer_3dmor, gdp)
@@ -2929,7 +2929,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & r(sbvv)   ,r(seddif) ,r(hrms)   ,r(dis)    ,ltur      , &
                     & r(teta)   ,r(rlabda) ,r(aks)    ,i(kfsed)  ,saleqs    , &
                     & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &
-                    & r(hv)     ,r(rca)    ,r(dss)    ,r(ubot)   , &
+                    & r(hv)     ,r(rca)    ,r(dss)    ,r(ubot)   ,r(rtur0)  , &
                     & temeqs    ,gdp       )
           call timer_stop(timer_erosed, gdp)
           call timer_stop(timer_3dmor, gdp)
