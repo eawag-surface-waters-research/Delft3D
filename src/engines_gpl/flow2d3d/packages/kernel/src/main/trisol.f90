@@ -1174,7 +1174,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        ifirst = 0
     endif
     !
-    l_f0isf1_TTF = .TRUE.    !TRUE: openDA mode; FALSE: original situation
+    l_f0isf1_TTF = .FALSE.    !TRUE: openDA mode; FALSE: original situation
     !
     ! f0isf1 moved to here (before dmpveg since it uses s0)
     !

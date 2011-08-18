@@ -1163,9 +1163,10 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
           ! Call with argument rtur1 since f0isf1 will copy this to rtur0
           ! anyway. Moreover, it seems that rtur1=f(rtur0) in the viscosity computations.
           ! if in trisol, the variable l_foisf1_TTF=FALSE, this will go wrong.
+          ! rtur1 is temporary reverted to rtur0
           !
           call initur(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
-                    & icy       ,ltur      ,lturi     ,r(rtur1)  , &
+                    & icy       ,ltur      ,lturi     ,r(rtur0)  , &
                     & r(s1)     ,d(dps)    ,r(hu)     ,r(hv)     ,r(u1)     , &
                     & r(v1)     ,r(thick)  ,r(windsu) ,r(windsv) ,r(z0urou) , &
                     & r(z0vrou) ,i(kfu)    ,i(kfv)    ,i(kfs)    ,i(kcs)    , &

@@ -51,7 +51,6 @@ subroutine inibct(lundia    ,error     ,runid     , &
     !
     include 'pardef.igd'
     integer      , pointer :: itdate
-    real(fp)     , pointer :: tstop
     integer      , pointer :: lunbct
     real(fp)     , pointer :: timscl
     logical      , pointer :: bndneu
@@ -110,7 +109,6 @@ subroutine inibct(lundia    ,error     ,runid     , &
     timscl  => gdp%gdinibct%timscl
     lunbct  => gdp%gdluntmp%lunbct
     itdate  => gdp%gdexttim%itdate
-    tstop   => gdp%gdexttim%tstop
     bndneu  => gdp%gdnumeco%bndneu
     !
     ! Initialize DEFPAR
