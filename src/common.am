@@ -62,15 +62,6 @@ VPATH = @srcdir@
 
 #-----	Common external library locations  -------------------------------------
 
-#LIBINTERACTER = \
-#    $(top_srcdir)/third_party/interacter/bin/linux/libint.a
-
-#LIBWLAUTH = \
-#    $(top_srcdir)/third_party/wlauth/bin/linux/libWL_auth.a
-
-#EXTERNALSOURCES = $(LIBINTERACTER) $(LIBWLAUTH)
-
-
 
 # When FCLIBS IS NOT defined here, then:
 # - flow2d3d crashes on 8 of the 28 dd-testcases

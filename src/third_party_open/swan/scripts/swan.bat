@@ -4,7 +4,7 @@ rem
 rem Use this script only in the Delft3D open source directory structure
 rem
 
-set swanexec=%D3D_HOME%\third_party_open\swan\bin\win32\swan_4081_del_w32_i11_omp.exe
+set swanexec=%D3D_HOME%\third_party_open\swan\bin\win32\swan_4072ABCDE_del_w32_i11_omp.exe
 
 
 rem swan40.72AB and newer runs parallel, using the total number of cores on the machine
