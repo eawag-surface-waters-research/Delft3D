@@ -53,6 +53,7 @@ rem ===============
 
     call :deltares_hydro
     call :flow2d3d
+    call :flow2d3d_openda
     call :wave
     call :plugin_culvert
     call :plugin_delftflow_traform
@@ -74,6 +75,7 @@ rem ========================
 
     call :deltares_hydro
     call :flow2d3d
+    call :flow2d3d_openda
     call :plugin_culvert
     call :plugin_delftflow_traform
     call :mormerge
@@ -110,7 +112,6 @@ rem ====================
     if not exist !dest_default! mkdir !dest_default!
 
     copy engines_gpl\flow2d3d\bin\Release\flow2d3d.dll                                     !dest_bin!
-    copy engines_gpl\flow2d3d\bin\Release\flow2d3d_openda.dll                              !dest_bin!
     copy engines_gpl\flow2d3d\bin\Release\flow2d3d_sp.dll                                  !dest_bin!
     copy engines_gpl\flow2d3d\scripts\meteo_old2new.m                                      !dest_bin!
     copy third_party_open\DelftOnline\lib\Release\DelftOnline.dll                          !dest_bin!
@@ -121,6 +122,21 @@ rem ====================
     copy third_party_open\mpich2\bin\*.exe                                                 !dest_bin!
     copy third_party_open\mpich2\lib\*.dll                                                 !dest_bin!
     copy engines_gpl\flow2d3d\default\*.*                                                  !dest_default!
+goto :endproc
+
+
+
+rem ===========================
+rem === INSTALL_FLOW2D3D_OPENDA
+rem ===========================
+:flow2d3d_openda
+    echo "installing flow2d3d_openda . . ."
+
+    set dest_bin="!dest_main!\w32\flow\bin"
+
+    if not exist !dest_bin!     mkdir !dest_bin!
+
+    copy engines_gpl\flow2d3d\bin\Release\flow2d3d_openda.dll                              !dest_bin!
 goto :endproc
 
 

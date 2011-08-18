@@ -12,6 +12,7 @@ function install_all () {
 
     deltares_hydro
     flow2d3d
+    flow2d3d_openda
     wave
     plugin_culvert
     plugin_delftflow_traform
@@ -36,6 +37,7 @@ function delft3d_flow () {
 
     deltares_hydro
     flow2d3d
+    flow2d3d_openda
     plugin_culvert
     plugin_delftflow_traform
     mormerge
@@ -83,6 +85,22 @@ function flow2d3d () {
     cp -fp bin/esm_delete                                            $dest_bin
     cp -fp bin/esm_info                                              $dest_bin
     cp -fp engines_gpl/flow2d3d/default/*.*                          $dest_default
+
+    return
+}
+
+
+
+# ===========================
+# === INSTALL FLOW2D3D_OPENDA
+# ===========================
+function flow2d3d_openda () {
+    echo "installing flow2d3d_openda . . ."
+    dest_bin="$dest_main/intel/flow/bin"
+
+    mkdir -p $dest_bin
+
+    cp -fp lib/libflow2d3d_openda.so                                 $dest_bin
 
     return
 }
