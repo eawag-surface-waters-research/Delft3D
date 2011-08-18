@@ -110,6 +110,7 @@ rem ====================
     if not exist !dest_default! mkdir !dest_default!
 
     copy engines_gpl\flow2d3d\bin\Release\flow2d3d.dll                                     !dest_bin!
+    copy engines_gpl\flow2d3d\bin\Release\flow2d3d_openda.dll                              !dest_bin!
     copy engines_gpl\flow2d3d\bin\Release\flow2d3d_sp.dll                                  !dest_bin!
     copy engines_gpl\flow2d3d\scripts\meteo_old2new.m                                      !dest_bin!
     copy third_party_open\DelftOnline\lib\Release\DelftOnline.dll                          !dest_bin!

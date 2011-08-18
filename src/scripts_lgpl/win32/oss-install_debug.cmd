@@ -76,6 +76,7 @@ rem ====================
     if not exist !dest_bin!     mkdir !dest_bin!
 
     copy engines_gpl\flow2d3d\bin\Debug\flow2d3d.dll                                     !dest_bin!
+    copy engines_gpl\flow2d3d\bin\Debug\flow2d3d_openda.dll                              !dest_bin!
     copy engines_gpl\flow2d3d\bin\Debug\flow2d3d_sp.dll                                  !dest_bin!
     copy third_party_open\DelftOnline\lib\Debug\DelftOnline.dll                          !dest_bin!
     copy third_party_open\DelftOnline\lib\Debug\DelftOnlineJNI.dll                       !dest_bin!
