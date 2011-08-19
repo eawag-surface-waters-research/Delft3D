@@ -137,6 +137,7 @@ rem ===========================
     if not exist !dest_bin!     mkdir !dest_bin!
 
     copy engines_gpl\flow2d3d\bin\Release\flow2d3d_openda.dll                              !dest_bin!
+    copy engines_gpl\flow2d3d\bin\Release\flow2d3d_openda_sp.dll                           !dest_bin!
 goto :endproc
 
 

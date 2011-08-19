@@ -14,10 +14,10 @@ if {[llength $argv] != 1} {
    }
    if {[string equal [lindex $argv 0] "single"]} {
       set mode "single"
-      puts "This script changes Delft3D-FLOW code to produce a SINGLE PRECISION executable."
+      puts "This script changes Delft3D-FLOW code to produce SINGLE PRECISION binaries."
    } else {
       set mode "double"
-      puts "This script changes Delft3D-FLOW code to produce a DOUBLE PRECISION executable."
+      puts "This script changes Delft3D-FLOW code to produce DOUBLE PRECISION binaries."
    }
 }
 
@@ -36,6 +36,9 @@ lappend files [file join $rootdir "packages" "precision" "src" "precision.f90"]
 lappend files [file join $rootdir "include" "tri-dyn.igd"]
 lappend files [file join $rootdir "include" "precision.h"]
 lappend files [file join $rootdir ".." ".." "engines_gpl" "flow2d3d" "packages" "flow2d3d" "flow2d3d.vfproj"]
+lappend files [file join $rootdir ".." ".." "engines_gpl" "flow2d3d" "packages" "flow2d3d" "flow2d3d_vs2010.vfproj"]
+lappend files [file join $rootdir ".." ".." "engines_gpl" "flow2d3d" "packages" "flow2d3d_openda" "flow2d3d_openda.vfproj"]
+lappend files [file join $rootdir ".." ".." "engines_gpl" "flow2d3d" "packages" "flow2d3d_openda" "flow2d3d_openda_vs2010.vfproj"]
 # parse Makefile.am twice for two strings to be replaced
 lappend files [file join $rootdir ".." ".." "engines_gpl" "flow2d3d" "packages" "flow2d3d" "src" "Makefile.am"]
 lappend files [file join $rootdir ".." ".." "engines_gpl" "flow2d3d" "packages" "flow2d3d" "src" "Makefile.am"]
@@ -51,12 +54,18 @@ lappend filetypes "c"
 lappend filetypes "o"
 lappend filetypes "o"
 lappend filetypes "o"
+lappend filetypes "o"
+lappend filetypes "o"
+lappend filetypes "o"
 
 set hplines {}
 lappend hplines "integer, parameter :: fp=hp"
 lappend hplines "equivalence ( r(0),  dbuf(0))"
 lappend hplines "#define FLOW_DOUBLE_PRECISION"
 lappend hplines "flow2d3d.dll"
+lappend hplines "flow2d3d.dll"
+lappend hplines "flow2d3d_openda.dll"
+lappend hplines "flow2d3d_openda.dll"
 lappend hplines "libflow2d3d.la"
 lappend hplines "libflow2d3d_la"
 
@@ -65,6 +74,9 @@ lappend splines "integer, parameter :: fp=sp"
 lappend splines "equivalence ( r(0),  rbuf(0))"
 lappend splines "#undef FLOW_DOUBLE_PRECISION"
 lappend splines "flow2d3d_sp.dll"
+lappend splines "flow2d3d_sp.dll"
+lappend splines "flow2d3d_openda_sp.dll"
+lappend splines "flow2d3d_openda_sp.dll"
 lappend splines "libflow2d3d_sp.la"
 lappend splines "libflow2d3d_sp_la"
 
