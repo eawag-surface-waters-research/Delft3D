@@ -165,7 +165,7 @@ subroutine tkecof(lturi     ,vonkar    ,sigdif    ,sigmol    , &
           do k = 0, kmax
              do m = -1, mmax + 2
                 do n = 1, nmax
-                   rtur1(n, m, k, l) = 1.E-7_fp
+                   rtur1(n, m, k, l) = 1.E-7
                 enddo
              enddo
           enddo
@@ -179,7 +179,7 @@ subroutine tkecof(lturi     ,vonkar    ,sigdif    ,sigmol    , &
           do k = 0, kmax
              do m = -1, mmax + 2
                 do n = 1, nmax
-                   rtur1(n, m, k, l) = 1.E-7_fp
+                   rtur1(n, m, k, l) = 1.E-7
                 enddo
              enddo
           enddo
@@ -193,8 +193,8 @@ subroutine tkecof(lturi     ,vonkar    ,sigdif    ,sigmol    , &
     if (ltur2d>0) then
        do m = -1, mmax + 2
           do n = 1, nmax
-             rtu2d1(n, m, 1) = 1.E-7_fp
-             rtu2d1(n, m, 2) = 1.E-7_fp
+             rtu2d1(n, m, 1) = 1.E-7
+             rtu2d1(n, m, 2) = 1.E-7
           enddo
        enddo
     endif
