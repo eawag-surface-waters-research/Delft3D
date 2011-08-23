@@ -6,7 +6,7 @@
 
 extern "C"{
 
-int TRISIM_C_INIT(void){  
+int TRISIM_C_INIT(void){
         int fsm_flags = ESM_SILENT; // FSM flags for trisim
         //int fsm_flags = ESM_TRACE;        // FSM flags for trisim
         ESM_Init (fsm_flags);
@@ -25,7 +25,7 @@ int TRISIM_C_INIT(void){
         int nummappers = 0;
 
         InitInstruments ();
-        return 0; 
+        return 0;
 }
 
 int TRISIM_C_FINISH(void){
@@ -33,4 +33,4 @@ int TRISIM_C_FINISH(void){
     return 0;
 }
 
-} 
+}
