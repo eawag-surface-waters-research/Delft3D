@@ -568,7 +568,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        ! re-count nto, ntof and ntoq in own subdomain
        !
 
-       if (istat == 0) allocate(ctmp1(2,nn), stat=istat)
+                       allocate(ctmp1(2,nn), stat=istat)
        if (istat == 0) allocate(ctmp2(2,nn), stat=istat)
        if (istat == 0) allocate(ctmp3(2,nn), stat=istat)
        if (istat == 0) allocate(itemp(7,nn), stat=istat)
@@ -621,6 +621,10 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        enddo
       
        allocate(gdp%gdbcdat%bct_order(nto-ntof-ntoq), stat=istat)
+       if (istat /= 0) then
+          call prterr(lundia, 'P004', 'memory alloc error in rdbndd(bct_order)')
+          call d3stop(1, gdp)
+       endif
     
        do n = 1, nto-ntof-ntoq               ! n = 1, nn_t
           gdp%gdbcdat%bct_order(n) = nsd_t(n)
