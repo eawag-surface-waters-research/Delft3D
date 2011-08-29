@@ -1174,7 +1174,11 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        ifirst = 0
     endif
     !
-    l_f0isf1_TTF = .FALSE.    !TRUE: openDA mode; FALSE: original situation
+    ! l_f0isf1_TTF = .TRUE. : OpenDA mode
+    !                         in inchkr: call initur with rtur1
+    ! l_f0isf1_TTF = .FALSE.: Original situation
+    !                         in inchkr: call initur with rtur0
+    l_f0isf1_TTF = .TRUE.
     !
     ! f0isf1 moved to here (before dmpveg since it uses s0)
     !
