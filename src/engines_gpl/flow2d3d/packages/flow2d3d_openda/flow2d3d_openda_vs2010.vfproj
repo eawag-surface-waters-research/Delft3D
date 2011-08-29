@@ -40,12 +40,15 @@ echo &quot;This file is overwritten by the post-build command of the project flo
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration></File>
 		<File RelativePath="..\flow2d3d\src\flow2d3d_dll.f90"/>
-		<File RelativePath=".\src\flow2d3d_openda.f90"/>
+		<File RelativePath=".\src\flow2d3d_openda.f90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration></File>
 		<File RelativePath=".\src\flow2d3d_openda_dll.f90"/>
 		<File RelativePath=".\src\flow2d3d_openda_version.F90"/>
 		<File RelativePath=".\src\flow2d3d_openda_version.F90.svn"/>
 		<File RelativePath="..\flow2d3d\src\flow2d3d_version.F90"/>
 		<File RelativePath="..\flow2d3d\src\flow2d3d_version.F90.svn"/>
+		<File RelativePath=".\src\localization.f90"/>
 		<File RelativePath=".\src\m_d3d_state.f90"/>
 		<File RelativePath=".\src\m_d3dstate_2_openda.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>

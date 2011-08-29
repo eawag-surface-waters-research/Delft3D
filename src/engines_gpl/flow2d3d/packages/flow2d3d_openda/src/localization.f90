@@ -55,7 +55,7 @@ function cohn(sm,sn,rm,rn,dist) result(weight)
     real :: weight ! localization weight according to Cohn's formula
 
     ! coordinates to compute localization weight for
-    integer :: sm, sn 
+    double precision :: sm, sn 
     
     ! treshold distance for Cohn's formula. all points at a distance
     ! more than 2*dist have weight 0
