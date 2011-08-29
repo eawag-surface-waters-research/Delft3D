@@ -62,6 +62,7 @@ public :: d3da_create_instance, d3da_select_new_instance, d3da_store_current_ins
 
 character(len=10)  :: state_file_extension = '.txt'           ! default: ascii; other possible value: nc (netcdf)
 
+integer, dimension(9), public :: sub_core_offsets = 0
 
 contains
 
@@ -384,6 +385,10 @@ subroutine d3da_getinstancesize(inst_size)
    
   ! not necessary to update the state; size does not change
    call CTA_TREEVECTOR_GETSIZE(state_handles(current_instance), inst_size, ierr)
+   if (ierr .ne. CTA_OK) then
+      print *,'d3da_getinstancesize: error getting size ', ierr
+      inst_size = -1
+   endif   
 
 end subroutine  d3da_getinstancesize
 
@@ -471,7 +476,7 @@ subroutine d3da_create_cta_state_vector(isbackground, ierr)
   integer, dimension(12) :: sub_pseudos
   integer :: hdescr    ! Costa metainfo handle
   integer :: ier2
-
+  integer :: nsub      ! length of sub-treevector
 ! prepare output file : create and open
   write(instance_as_string,'(i3.3)') current_instance
   file_names(current_instance)='cta_state_'//trim(instance_as_string)// trim(state_file_extension)
@@ -622,7 +627,26 @@ subroutine d3da_create_cta_state_vector(isbackground, ierr)
   endif 
    ! and retrieve it again (cumbersome, but occurs only here in initialization)
   call d3da_get_ctastate_from_d3d(ierr)
-  
+
+  ! compute offsets for variables in state vector
+  sub_core_offsets(1) = 1
+  call CTA_TREEVECTOR_GETSIZE(s_sep   , nsub ,ierr)
+  sub_core_offsets(2) = sub_core_offsets(1) + nsub
+  call CTA_TREEVECTOR_GETSIZE(s_u     , nsub,ierr)
+  sub_core_offsets(3) = sub_core_offsets(2) + nsub
+  call CTA_TREEVECTOR_GETSIZE(s_v     , nsub,ierr)
+  sub_core_offsets(4) = sub_core_offsets(3) + nsub
+  call CTA_TREEVECTOR_GETSIZE(s_dp    , nsub,ierr)
+  sub_core_offsets(5) = sub_core_offsets(4) + nsub
+  call CTA_TREEVECTOR_GETSIZE(s_umnldf, nsub,ierr)
+  sub_core_offsets(6) = sub_core_offsets(5) + nsub
+  call CTA_TREEVECTOR_GETSIZE(s_vmnldf, nsub,ierr)
+  sub_core_offsets(7) = sub_core_offsets(6) + nsub
+  call CTA_TREEVECTOR_GETSIZE(s_rtur1 , nsub,ierr)
+  sub_core_offsets(8) = sub_core_offsets(7) + nsub
+  call CTA_TREEVECTOR_GETSIZE(s_r1    , nsub,ierr)
+  sub_core_offsets(9) = sub_core_offsets(8) + nsub
+
   return
 
  9999 continue

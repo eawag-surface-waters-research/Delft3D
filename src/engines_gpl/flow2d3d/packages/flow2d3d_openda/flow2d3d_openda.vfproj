@@ -5,7 +5,7 @@
 	<Configurations>
 		<Configuration Name="Debug|Win32" OutputDirectory="../../bin/$(ConfigurationName)" BuildLogFile="$(IntDir)\BuildLog_delftflow_openmi.htm" ConfigurationType="typeDynamicLibrary">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" Preprocess="preprocessYes" AdditionalIncludeDirectories="../data/lib/$(ConfigurationName);../data/include;../manager/lib/$(ConfigurationName);../kernel/lib/$(ConfigurationName);../../../../utils_lgpl/utils_flow/lib/$(ConfigurationName)/static;../../../../utils_lgpl/ec_module/lib/$(ConfigurationName)/static;../../../../utils_lgpl/delftio/lib/$(ConfigurationName)/static;../../../../utils_lgpl/inifiles/lib/$(ConfigurationName)/static;../../../../utils_lgpl/precision/lib/$(ConfigurationName)/static;../../../../utils_lgpl/precision/include;../../../../utils_lgpl/esmfsm/include;../../../../third_party_open/mpich2/include;../../../../third_party_open/openda/core/native/include;./include" PreprocessorDefinitions="INCL_CF" WarnInterfaces="true" ModulePath="$(OutDir)/" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL"/>
-				<Tool Name="VFLinkerTool" OutputFile="$(OutDir)\flow2d3d_openda.dll" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\third_party_open\pthreads\bin\win32;..\..\..\..\third_party_open\DelftOnline\lib\$(ConfigurationName);..\..\..\..\third_party_open\mpich2\lib;..\..\..\..\third_party_open\openda\core\native\lib\win32;..\..\..\..\utils_lgpl\precision\lib\$(ConfigurationName)\static" IgnoreDefaultLibraryNames="libc.lib;libcmtd.lib;libcmt.lib" GenerateDebugInformation="true" SubSystem="subSystemWindows" StackReserveSize="20000000" LargeAddressAware="addrAwareLarge" LinkDLL="true" AdditionalDependencies="libcta.lib pthreadVCE2.lib DelftOnline.lib JavaLaunch.lib wsock32.lib netapi32.lib comctl32.lib user32.lib advapi32.lib comdlg32.lib gdi32.lib winspool.lib fmpich2.lib cxx.lib"/>
+				<Tool Name="VFLinkerTool" OutputFile="$(OutDir)\\flow2d3d_openda.dll" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\third_party_open\pthreads\bin\win32;..\..\..\..\third_party_open\DelftOnline\lib\$(ConfigurationName);..\..\..\..\third_party_open\mpich2\lib;..\..\..\..\third_party_open\openda\core\native\lib\win32;..\..\..\..\utils_lgpl\precision\lib\$(ConfigurationName)\static" IgnoreDefaultLibraryNames="libc.lib;libcmtd.lib;libcmt.lib" GenerateDebugInformation="true" SubSystem="subSystemWindows" StackReserveSize="20000000" LargeAddressAware="addrAwareLarge" LinkDLL="true" AdditionalDependencies="libcta.lib pthreadVCE2.lib DelftOnline.lib JavaLaunch.lib wsock32.lib netapi32.lib comctl32.lib user32.lib advapi32.lib comdlg32.lib gdi32.lib winspool.lib fmpich2.lib cxx.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
@@ -18,7 +18,7 @@ echo &quot;This file is overwritten by the post-build command of the project flo
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" OutputDirectory="../../bin/$(ConfigurationName)" BuildLogFile="$(IntDir)\BuildLog_delftflow_openmi.htm" ConfigurationType="typeDynamicLibrary">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" Preprocess="preprocessYes" AdditionalIncludeDirectories="../data/lib/$(ConfigurationName);../data/include;../manager/lib/$(ConfigurationName);../kernel/lib/$(ConfigurationName);../../../../utils_lgpl/utils_flow/lib/$(ConfigurationName)/static;../../../../utils_lgpl/ec_module/lib/$(ConfigurationName)/static;../../../../utils_lgpl/delftio/lib/$(ConfigurationName)/static;../../../../utils_lgpl/inifiles/lib/$(ConfigurationName)/static;../../../../utils_lgpl/precision/lib/$(ConfigurationName)/static;../../../../utils_lgpl/precision/include;../../../../utils_lgpl/esmfsm/include;../../../../third_party_open/mpich2/include;../../../../third_party_open/openda/core/native/include;./include" PreprocessorDefinitions="DO_LOG, INCL_CF, WIN32" ModulePath="$(OutDir)/"/>
-				<Tool Name="VFLinkerTool" AdditionalOptions="/LTCG" OutputFile="$(OutDir)\flow2d3d_openda.dll" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\third_party_open\pthreads\bin\win32;..\..\..\..\third_party_open\DelftOnline\lib\$(ConfigurationName);..\..\..\..\third_party_open\mpich2\lib;..\..\..\..\third_party_open\openda\core\native\lib\win32;..\..\..\..\utils_lgpl\precision\lib\$(ConfigurationName)\static" IgnoreDefaultLibraryNames="libc.lib;libcd.lib" SubSystem="subSystemWindows" StackReserveSize="20000000" LargeAddressAware="addrAwareLarge" LinkDLL="true" AdditionalDependencies="libcta.lib pthreadVCE2.lib DelftOnline.lib JavaLaunch.lib wsock32.lib netapi32.lib comctl32.lib user32.lib advapi32.lib comdlg32.lib gdi32.lib winspool.lib fmpich2.lib cxx.lib"/>
+				<Tool Name="VFLinkerTool" AdditionalOptions="/LTCG" OutputFile="$(OutDir)\\flow2d3d_openda.dll" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\third_party_open\pthreads\bin\win32;..\..\..\..\third_party_open\DelftOnline\lib\$(ConfigurationName);..\..\..\..\third_party_open\mpich2\lib;..\..\..\..\third_party_open\openda\core\native\lib\win32;..\..\..\..\utils_lgpl\precision\lib\$(ConfigurationName)\static" IgnoreDefaultLibraryNames="libc.lib;libcd.lib" SubSystem="subSystemWindows" StackReserveSize="20000000" LargeAddressAware="addrAwareLarge" LinkDLL="true" AdditionalDependencies="libcta.lib pthreadVCE2.lib DelftOnline.lib JavaLaunch.lib wsock32.lib netapi32.lib comctl32.lib user32.lib advapi32.lib comdlg32.lib gdi32.lib winspool.lib fmpich2.lib cxx.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
@@ -32,6 +32,7 @@ echo &quot;This file is overwritten by the post-build command of the project flo
 	<Files>
 		<Filter Name="Header Files">
 		<File RelativePath=".\include\cta_f77.inc"/></Filter>
+		<Filter Name="NewFolder1"/>
 		<Filter Name="Source Files">
 		<File RelativePath=".\src\d3dstate_2_d3d.f90">
 			<FileConfiguration Name="Debug|Win32">
@@ -40,12 +41,15 @@ echo &quot;This file is overwritten by the post-build command of the project flo
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration></File>
 		<File RelativePath="..\flow2d3d\src\flow2d3d_dll.f90"/>
-		<File RelativePath=".\src\flow2d3d_openda.f90"/>
+		<File RelativePath=".\src\flow2d3d_openda.f90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration></File>
 		<File RelativePath=".\src\flow2d3d_openda_dll.f90"/>
 		<File RelativePath=".\src\flow2d3d_openda_version.F90"/>
 		<File RelativePath=".\src\flow2d3d_openda_version.F90.svn"/>
 		<File RelativePath="..\flow2d3d\src\flow2d3d_version.F90"/>
 		<File RelativePath="..\flow2d3d\src\flow2d3d_version.F90.svn"/>
+		<File RelativePath=".\src\localization.f90"/>
 		<File RelativePath=".\src\m_d3d_state.f90"/>
 		<File RelativePath=".\src\m_d3dstate_2_openda.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>

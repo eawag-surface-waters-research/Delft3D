@@ -123,3 +123,105 @@ function Finalize_openda(componentID, schemID) result(retVal)
     ! TODO: costa finalize?
     !
 end function Finalize_openda
+!
+!==============================================================================
+!
+function getObservedLocalization(location_id_c, dist, nvals, values) result(retVal)
+    use gdp_entry 
+    use m_openda_quantities
+    use m_d3dstate_2_openda
+    
+    implicit none  
+
+    ! arguments
+    integer         , intent(in)                    :: nvals         ! size of values array
+    double precision, intent(in)                    :: dist          ! the characteristic distance
+    double precision, dimension(nvals), intent(out) :: values        ! returned values
+    character(*)    , intent(in)                    :: location_id_c ! location name
+
+    !
+    ! result
+    integer :: retVal
+
+    include 'tri-dyn.igd'
+    include 'fsm.i'
+    
+    integer , pointer :: nmax
+    integer , pointer :: mmax
+    integer , pointer :: nostat
+    integer , dimension(:,:) , pointer :: mnstat
+    integer , pointer :: xz
+    integer , pointer :: yz
+    integer , pointer :: kcs
+    integer , pointer :: nub
+    integer , pointer :: nlb
+    integer , pointer :: mub
+    integer , pointer :: mlb
+    integer :: ist, lenid, ilo, iup
+    real(fp):: ms, ns                ! (m,n) value of station
+    real(fp), dimension(:), allocatable :: locval 
+    character(20), dimension(:)    , pointer :: namst
+    
+    lenid = len(location_id_c)
+    lenid = min(20,lenid)
+
+    ! body
+    retVal = -1 ! indices not ok
+       
+    if ( dist <= 0.0 ) then
+       write(*,*) 'problem with characteristic distance ', dist
+       return
+    endif  
+
+    if (sub_core_offsets(9)-1 /= nvals) then
+       write(*,*) 'compute localization weights: incompatible lenghts ', nvals, nmax*mmax
+       return
+    else
+       nmax       => gdp%d%nmax
+       mmax       => gdp%d%mmax
+       nostat     => gdp%d%nostat
+       mnstat     => gdp%gdstations%mnstat
+       namst      => gdp%gdstations%namst
+       xz         => gdp%gdr_i_ch%xz
+       yz         => gdp%gdr_i_ch%yz
+       kcs        => gdp%gdr_i_ch%kcs
+       nlb        => gdp%d%nlb
+       nub        => gdp%d%nub
+       mlb        => gdp%d%mlb
+       mub        => gdp%d%mub
+    
+       allocate(locval((nub-nlb+1)*(mub-mlb+1)))       
+       do ist = 1, nostat
+         if (location_id_c(1:lenid)==namst(ist)(1:lenid)) then
+            call compute_localization_weights( ist, dist, nlb, nub, mlb, mub, nmax, mmax, &
+                                               nostat, mnstat, i(kcs), r(xz), r(yz), locval )
+            retVal = 0
+         endif
+      enddo
+
+      !  initialize weights
+      values = 0.0
+   
+      !  check size and copy localization weights per state variable
+      do ist = 1, size(sub_core_offsets)-1
+         ilo = sub_core_offsets(ist)
+         iup = sub_core_offsets(ist+1)
+         ! check size
+         if (iup-ilo == size(locval)) then
+            values(sub_core_offsets(ist):sub_core_offsets(ist+1)-1) = locval
+         else
+            ! sub-tree vector of an unused variable has length 1
+            if (iup-ilo /= 1 ) then
+               write(*,*) 'GetObservedLocalization:                    ', &
+                                'Warning sub-treevector does not      ', &
+                                'have length "mnmaxk" localization is ', &
+                                'not (yet) supported for this kind of ', &
+                                'vectors'
+            end if 
+         endif
+      enddo  
+      deallocate(locval)
+  end if 
+
+end function getObservedLocalization
+!

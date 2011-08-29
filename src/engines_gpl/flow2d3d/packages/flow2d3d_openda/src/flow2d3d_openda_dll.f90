@@ -261,3 +261,29 @@ subroutine define_ordinary_state(imode)
     call d3da_define_ordinary_state(imode)
     !
 end subroutine define_ordinary_state
+!
+!==============================================================================
+!
+function SE_get_observed_localization(location_id_c, dist, nvals, values) result(retVal)
+    !DEC$ ATTRIBUTES DLLEXPORT :: SE_get_observed_localization
+    !
+    implicit none
+    !
+    ! result
+    integer :: retVal
+    !
+    ! externals
+    integer, external :: getObservedLocalization
+    !
+    ! arguments
+    integer         , intent(in)                    :: nvals        ! size of values array
+    double precision, intent(in)                    :: dist         ! the characteristic distance
+    double precision, dimension(nvals), intent(out) :: values       ! returned values
+    character(*)    , intent(in)                    :: location_id_c ! location name
+    !
+    ! body
+    !
+
+    retVal = getObservedLocalization(location_id_c, dist, nvals, values)
+    !
+end function SE_get_observed_localization
