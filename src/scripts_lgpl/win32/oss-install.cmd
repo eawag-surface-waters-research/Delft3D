@@ -142,6 +142,15 @@ rem ===========================
     copy engines_gpl\flow2d3d\bin\Release\flow2d3d_openda_sp.dll                           !dest_bin!
        rem One of these two dlls will not exist and cause an ErrorLevel=1. Reset it.
     set ErrorLevel=0
+    copy engines_gpl\flow2d3d\scripts\meteo_old2new.m                                      !dest_bin!
+    copy third_party_open\DelftOnline\lib\Release\DelftOnline.dll                          !dest_bin!
+    copy third_party_open\DelftOnline\lib\Release\DelftOnlineJNI.dll                       !dest_bin!
+    copy third_party_open\DelftOnline\lib\Release\JavaLaunch.dll                           !dest_bin!
+    copy third_party_open\pthreads\bin\win32\pthreadVCE2.dll                               !dest_bin!
+    copy third_party_open\pthreads\bin\win32\pthreadvce.dll                                !dest_bin!
+    copy third_party_open\mpich2\bin\*.exe                                                 !dest_bin!
+    copy third_party_open\mpich2\lib\*.dll                                                 !dest_bin!
+    copy engines_gpl\flow2d3d\default\*.*                                                  !dest_default!
 goto :endproc
 
 
