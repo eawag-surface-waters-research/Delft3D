@@ -20,7 +20,7 @@
 #
 
 global version
-set version "2.20"
+set version "2.21"
 
 global debug
 set debug 0
@@ -273,7 +273,7 @@ proc getInput {channel tag} {
         set processes [lreplace $processes $idx $idx]
         puts "$tag : Finished"
         if { [catch {close $channel} errmsg] } {
-            putsDebug "\n$tag : $errmsg"
+            puts "\nERROR: tag=$tag : $errmsg"
         }
         if { [llength $processes] == 0 } {
             set ::finished 1
