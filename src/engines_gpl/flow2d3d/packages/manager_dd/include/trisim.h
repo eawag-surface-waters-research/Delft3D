@@ -38,27 +38,17 @@
 #ifndef TRISIM_H
 #define TRISIM_H
 
-
-#if defined (FTN_UNDERSCORE)
-#   define TRISIM_C_INIT     TRISIM_C_INIT_
-#   define TRISIM_C_FINISH   TRISIM_C_FINISH_
-
-#elif defined (FTN_SMALL)
-#   define trisim_c_init     trisim_c_init
-#   define trisim_c_finish   trisim_c_finish
-
-#elif defined (FTN_CAPITALS)
-#   define TRISIM_C_INIT     TRISIM_C_INIT
-#   define TRISIM_C_FINISH   TRISIM_C_FINISH
-
+#ifdef HAVE_CONFIG_H
+#define TRISIM_C_INIT trisim_c_init_
+#define TRISIM_C_FINISH trisim_c_finish_
 #endif
 
 //  Define standard call for Microsoft Windows multi-language call
 #undef STDCALL
 #if defined (WIN32)
 #   define STDCALL
-#else
-#   define STDCALL  /* nothing */
+#elif defined(HAVE_CONFIG_H)
+#   define STDCALL
 #endif
 
 #if defined (_cplusplus) || defined (__cplusplus)

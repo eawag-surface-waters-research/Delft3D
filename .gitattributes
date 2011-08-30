@@ -108,9 +108,12 @@ src/engines_gpl/deltares_hydro/deltares_hydro_c.vcxproj -text
 src/engines_gpl/deltares_hydro/deltares_hydro_vs2010.vfproj -text
 src/engines_gpl/deltares_hydro/include/version_number.ini -text
 src/engines_gpl/deltares_hydro/src/Makefile.am -text
+src/engines_gpl/deltares_hydro/src/Makefile_ddlinux.am -text
 src/engines_gpl/deltares_hydro/src/deltares_hydro.F90 -text
+src/engines_gpl/deltares_hydro/src/deltares_hydro_ddlinux.f90 -text
 src/engines_gpl/deltares_hydro/src/deltares_hydro_version.F90.svn -text
 src/engines_gpl/deltares_hydro/src/f902c.c -text
+src/engines_gpl/deltares_hydro/src/readme.txt -text
 src/engines_gpl/flow2d3d/Makefile.am -text
 src/engines_gpl/flow2d3d/default/SOBEKSIM.FNM -text
 src/engines_gpl/flow2d3d/default/SOBEKSIM.LNG -text
