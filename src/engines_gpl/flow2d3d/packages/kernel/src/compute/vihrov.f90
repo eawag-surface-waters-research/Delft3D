@@ -115,26 +115,7 @@ subroutine vihrov(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     irov     => gdp%gdphysco%irov
     hdt      => gdp%gdnumeco%hdt
     !
-    ! Set upper bound for VICUV in coupling points
-    ! maximum value based on CFL stability criterion (see also DETVIC)
-    !
-    if (irov>0) then
-       do nm = 1, nmmax
-          nmd = nm - icx
-          ndm = nm - icy
-          if (kfs(nm)==1 .and. kcs(nm)==3) then
-             do k = 1, kmax
-                dx =  0.5 * ( gvv(nm) + gvv(ndm) )
-                dy =  0.5 * ( guu(nm) + guu(nmd) )
-                vicmax = 1.0/dx**2 + 1.0/dy**2
-                vicmax = 0.9/(4.0*hdt*vicmax)
-                if (vicuv(nm, k)>=vicmax) then
-                   vicuv(nm, k) = vicmax
-                endif
-             enddo
-          endif
-       enddo
-    endif
+    ! Upper bound for VICUV in coupling points is removed. See chkvic.
     !
     do nm = 1, nmmax
        do k = 1, kmax

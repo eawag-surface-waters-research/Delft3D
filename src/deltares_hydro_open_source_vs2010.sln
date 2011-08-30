@@ -163,7 +163,7 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "manager", "engines_gpl\wave
 		{BBB439F6-B1DE-42D2-848E-732EA9402576} = {BBB439F6-B1DE-42D2-848E-732EA9402576}
 	EndProjectSection
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "wave", "engines_gpl\wave\packages\wave\wave_vs2010.vfproj", "{35D95B51-6CBE-473D-9ED5-1BB7CE16BE24}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "wave_vs2010", "engines_gpl\wave\packages\wave\wave_vs2010.vfproj", "{35D95B51-6CBE-473D-9ED5-1BB7CE16BE24}"
 	ProjectSection(ProjectDependencies) = postProject
 		{91C4971E-914C-4AD8-9711-6B53E856884C} = {91C4971E-914C-4AD8-9711-6B53E856884C}
 		{5EC2EC2B-BE35-4303-963C-AA0BEDEF707C} = {5EC2EC2B-BE35-4303-963C-AA0BEDEF707C}
@@ -252,7 +252,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "02-streamtest", "utils_lgpl
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mormerge_version_number", "tools_gpl\mormerge\packages\mormerge_version_number\mormerge_version_number.vcxproj", "{C2638430-A7F5-41DD-A51A-9C23D604FB34}"
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "mormerge", "tools_gpl\mormerge\packages\mormerge\mormerge_vs2010.vfproj", "{5849A2F3-6526-4967-97CF-30CA683A16CC}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "mormerge_vs2010", "tools_gpl\mormerge\packages\mormerge\mormerge_vs2010.vfproj", "{5849A2F3-6526-4967-97CF-30CA683A16CC}"
 	ProjectSection(ProjectDependencies) = postProject
 		{C2638430-A7F5-41DD-A51A-9C23D604FB34} = {C2638430-A7F5-41DD-A51A-9C23D604FB34}
 		{E366AF30-9FFF-4B68-B291-CF9197F5B738} = {E366AF30-9FFF-4B68-B291-CF9197F5B738}
@@ -284,7 +284,7 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "plugin_culvert", "plugins_l
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "ftnunit", "utils_lgpl\ftnunit\packages\ftnunit\ftnunit.vfproj", "{10382558-3C7B-4BED-BEE8-C89EDCAE740B}"
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "flow2d3d", "engines_gpl\flow2d3d\packages\flow2d3d\flow2d3d_vs2010.vfproj", "{B998CF6F-9E18-4E6A-A59B-4F72D104F8D8}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "flow2d3d_vs2010", "engines_gpl\flow2d3d\packages\flow2d3d\flow2d3d_vs2010.vfproj", "{B998CF6F-9E18-4E6A-A59B-4F72D104F8D8}"
 	ProjectSection(ProjectDependencies) = postProject
 		{AAE44000-23CC-4039-B135-3E04708C6CE2} = {AAE44000-23CC-4039-B135-3E04708C6CE2}
 		{F9102D02-48CF-4954-B1C2-ED815BAA11A6} = {F9102D02-48CF-4954-B1C2-ED815BAA11A6}
@@ -315,7 +315,7 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "flow2d3d", "engines_gpl\flo
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "deltares_hydro_c", "engines_gpl\deltares_hydro\deltares_hydro_c.vcxproj", "{E1717454-9483-4D00-A85D-3299FCA6EB6A}"
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "deltares_hydro", "engines_gpl\deltares_hydro\deltares_hydro_vs2010.vfproj", "{7284EE7B-507F-496A-B8B8-FC4DBB6CEF53}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "deltares_hydro_vs2010", "engines_gpl\deltares_hydro\deltares_hydro_vs2010.vfproj", "{7284EE7B-507F-496A-B8B8-FC4DBB6CEF53}"
 	ProjectSection(ProjectDependencies) = postProject
 		{E1717454-9483-4D00-A85D-3299FCA6EB6A} = {E1717454-9483-4D00-A85D-3299FCA6EB6A}
 		{B51D72D1-8C84-41D5-87BF-BBB63728B422} = {B51D72D1-8C84-41D5-87BF-BBB63728B422}
@@ -326,7 +326,7 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "mathconsts", "utils_lgpl\co
 		{5E1814B7-3691-4CA6-8FE2-A374EC5A5904} = {5E1814B7-3691-4CA6-8FE2-A374EC5A5904}
 	EndProjectSection
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "flow2d3d_openda", "engines_gpl\flow2d3d\packages\flow2d3d_openda\flow2d3d_openda_vs2010.vfproj", "{3CC2C3DE-BC2D-4B23-BF62-47C9735C3F00}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "flow2d3d_openda_vs2010", "engines_gpl\flow2d3d\packages\flow2d3d_openda\flow2d3d_openda_vs2010.vfproj", "{3CC2C3DE-BC2D-4B23-BF62-47C9735C3F00}"
 	ProjectSection(ProjectDependencies) = postProject
 		{AAE44000-23CC-4039-B135-3E04708C6CE2} = {AAE44000-23CC-4039-B135-3E04708C6CE2}
 		{F9102D02-48CF-4954-B1C2-ED815BAA11A6} = {F9102D02-48CF-4954-B1C2-ED815BAA11A6}

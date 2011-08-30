@@ -93,6 +93,7 @@ subroutine wrsedd(lundia    ,error     ,mmax      ,nmaxus    ,irequest  , &
     lfbedfrm    => gdp%gdbedformpar%lfbedfrm
     lfbedfrmrou => gdp%gdbedformpar%lfbedfrmrou
     !
+    ierror = 0
     select case (irequest)
     case (1)
        !

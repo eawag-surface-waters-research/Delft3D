@@ -233,13 +233,16 @@ subroutine chkvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
        ! and set upper bound for VICUV
        ! (maximum value based on CFL stability criterion)
        !
+       ! Exclude DD coupling points: those values will be overwritten by
+       ! the other domain; resetting them is useless
+       !
        ! The first ten points for which vicuv is set to vicmax
        ! are printed in the diagnostic-file
        !
        error  = .false.
        icount = 0
        do nm = 1, nmmax
-          if (kfs(nm) == 1) then
+          if (kfs(nm)==1 .and. kcs(nm)/=3) then
              vicmax = 1.0/(guv(nm)*guv(nm)) + 1.0/(gvu(nm)*gvu(nm))
              vicmax = 0.9 / (4.0*hdt*vicmax)
              if (zmodel) then
@@ -250,7 +253,7 @@ subroutine chkvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                 kend   = kmax
              endif
              do k = kstart, kend
-                if (vicuv(nm,k) >= vicmax) then
+                if (vicuv(nm,k) > vicmax) then
                    vicuv(nm,k) = vicmax
                    error       = .true.
                    icount      = icount + 1
@@ -280,13 +283,16 @@ subroutine chkvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
           ! and set upper bound for DICUV
           ! (maximum value based on CFL stability criterion)
           !
+          ! Exclude DD coupling points: those values will be overwritten by
+          ! the other domain; resetting them is useless
+          !
           ! The first ten points for which dicuv is set to vicmax
           ! are printed in the diagnostic-file
           !
           error  = .false.
           icount = 0
           do nm = 1, nmmax
-             if (kfs(nm) == 1) then
+             if (kfs(nm)==1 .and. kcs(nm)/=3) then
                 vicmax = 1.0/(guv(nm)*guv(nm)) + 1.0/(gvu(nm)*gvu(nm))
                 vicmax = 0.9 / (4.0*hdt*vicmax)
                 !
@@ -301,7 +307,7 @@ subroutine chkvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                    kend   = kmax
                 endif
                 do k = kstart, kend
-                   if (dicuv(nm,k) >= dicmax) then
+                   if (dicuv(nm,k) > dicmax) then
                       dicuv(nm,k) = dicmax
                       error       = .true.
                       icount      = icount + 1
