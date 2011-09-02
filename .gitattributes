@@ -1079,7 +1079,6 @@ src/engines_gpl/flow2d3d/packages/manager/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/manager/manager.vfproj -text
 src/engines_gpl/flow2d3d/packages/manager/src/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/manager/src/tdatmain.f90 -text
-src/engines_gpl/flow2d3d/packages/manager/src/tricom.F90 -text
 src/engines_gpl/flow2d3d/packages/manager/src/tricom_finish.f90 -text
 src/engines_gpl/flow2d3d/packages/manager/src/tricom_init.F90 -text
 src/engines_gpl/flow2d3d/packages/manager/src/tricom_step.F90 -text

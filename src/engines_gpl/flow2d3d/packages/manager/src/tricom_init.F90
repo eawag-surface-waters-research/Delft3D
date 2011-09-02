@@ -1401,7 +1401,7 @@ subroutine tricom_init(gdp)
     !
     call rtc_comm_init(error     ,ch(nambar),i(kfs)    ,i(kfsmin) , &
                      & i(kfsmax) ,r(sig)    ,r(sig)    ,r(s1)     , &
-                     & d(dps)    ,r(r0)     ,gdp)
+                     & d(dps)    ,r(r1)     ,gdp)
     if (error) goto 9997
     !
     ! Initial reading phase has been passed
