@@ -912,7 +912,7 @@ subroutine tricom_step(gdp)
           call setwav(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
                     & nmaxus    ,itimc     ,ntwav     ,itlen     ,timwav    , &
                     & norow     ,noroco    ,i(irocol) ,ifcore    ,d(dps)    , &
-                    & r(s0)     ,r(uorb)   ,r(tp)     ,r(teta)   ,r(dis)    , &
+                    & r(s1)     ,r(uorb)   ,r(tp)     ,r(teta)   ,r(dis)    , &
                     & r(wsu)    ,r(wsv)    ,r(grmasu) ,r(grmasv) ,r(hrms)   , &
                     & r(tps)    ,r(ubot)   ,r(wlen)   ,r(hrmcom) ,r(tpcom)  , &
                     & r(dircom) ,r(discom) ,r(wsucom) ,r(wsvcom) ,r(msucom) , &
@@ -927,12 +927,12 @@ subroutine tricom_step(gdp)
           call timer_start(timer_tricom_rest, gdp)
           if (snelli) then
              call snel(mmax      ,nmax      ,norow     ,noroco   ,r(ubot)  , &
-                     & i(irocol) ,d(dps)    ,r(s0)     ,r(alfas) ,r(uorb)  , &
+                     & i(irocol) ,d(dps)    ,r(s1)     ,r(alfas) ,r(uorb)  , &
                      & r(tp)     ,r(teta)   ,r(hrms)   ,r(rlabda), &
                      & r(ewave0) ,r(wlen)   ,gdp      )
           endif
           call qkwcg(r(tp)     ,r(rlabda) ,r(teta)   ,r(qxkw)   ,r(qykw)   , &
-                   & r(qxkr)   ,r(qykr)   ,d(dps)    ,r(s0)     ,i(kcs)    , &
+                   & r(qxkr)   ,r(qykr)   ,d(dps)    ,r(s1)     ,i(kcs)    , &
                    & r(guu)    ,r(gvv)    ,r(cgc)    ,r(c)      ,i(irocol) , &
                    & norow     ,nocol     ,i(kfu)    ,i(kfv)    ,nmax      , &
                    & mmax      ,gdp       )
@@ -942,7 +942,7 @@ subroutine tricom_step(gdp)
        call timer_start(timer_tricom_rest, gdp)
        call psemnefis
        if (cnstwv) then
-          call constwave(nmmax     ,d(dps)    ,r(s0)     ,r(alfas)  ,r(ubot)   , &
+          call constwave(nmmax     ,d(dps)    ,r(s1)     ,r(alfas)  ,r(ubot)   , &
                        & r(uorb)   ,r(tp)     ,r(teta)   ,r(hrms)   ,r(rlabda) , &
                        & r(wlen)   ,gdp       )
        endif
