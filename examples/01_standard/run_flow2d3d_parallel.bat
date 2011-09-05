@@ -38,8 +38,9 @@ set D3D_HOME=%exedir%
 set PATH=%exedir%;%PATH%
 
     rem Run
-    rem start computation on all your local cores (2 for dual core; 4 for quad core etc.):
-mpiexec -n %NUMBER_OF_PROCESSORS% %exedir%\deltares_hydro.exe %argfile%
+    rem start computation on all your local cores (2 for dual core; 4 for quad core etc.)
+    rem note the flag "-localonly" which may be needed to avoid "Aborting: unable to connect to machinename.local"
+mpiexec -n %NUMBER_OF_PROCESSORS% -localonly %exedir%\deltares_hydro.exe %argfile%
 
 
     rem To prevent the DOS box from disappearing immediately: remove the rem on the following line
