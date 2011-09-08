@@ -917,8 +917,8 @@ subroutine tricom_step(gdp)
                     & r(tps)    ,r(ubot)   ,r(wlen)   ,r(hrmcom) ,r(tpcom)  , &
                     & r(dircom) ,r(discom) ,r(wsucom) ,r(wsvcom) ,r(msucom) , &
                     & r(msvcom) ,r(tpscom) ,r(ubcom)  ,r(wlcom)  ,r(rlabda) , &
-                    & r(dircos) ,r(dirsin) ,r(ewave0) ,roller    ,wavcmp    , &
-                    & r(ewabr0) ,gdp       )
+                    & r(dircos) ,r(dirsin) ,r(ewave1) ,roller    ,wavcmp    , &
+                    & r(ewabr1) ,gdp       )
           call timer_stop(timer_tricom_rest, gdp)
           if (error) goto 9998
        endif
@@ -929,7 +929,7 @@ subroutine tricom_step(gdp)
              call snel(mmax      ,nmax      ,norow     ,noroco   ,r(ubot)  , &
                      & i(irocol) ,d(dps)    ,r(s1)     ,r(alfas) ,r(uorb)  , &
                      & r(tp)     ,r(teta)   ,r(hrms)   ,r(rlabda), &
-                     & r(ewave0) ,r(wlen)   ,gdp      )
+                     & r(ewave1) ,r(wlen)   ,gdp      )
           endif
           call qkwcg(r(tp)     ,r(rlabda) ,r(teta)   ,r(qxkw)   ,r(qykw)   , &
                    & r(qxkr)   ,r(qykr)   ,d(dps)    ,r(s1)     ,i(kcs)    , &
