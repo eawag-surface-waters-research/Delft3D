@@ -1,3 +1,5 @@
+!> \file
+!! Writes the hyd file that determines everything for the Delwaq GUI
       subroutine wrwaqhyd ( filnam , itdate , tstart , tstop  , dt     , &
      &                      itwqff , itwqfl , itwqfi , nmax   , mmax   , &
      &                      kmax   , thick  , lsal   , ltem   , lsed   , &
@@ -5,8 +7,6 @@
      &                      nowalk , iwlk   , aggre  , flaggr , zmodel , &
      &                      ilaggr , nd     , nlb    , nub    , mlb    , &
      &                      mub    , kfsmin , ksrwaq )
-!>\file Writes the hyd file that determines everything for the Delwaq GUI
-
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     

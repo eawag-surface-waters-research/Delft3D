@@ -1,12 +1,12 @@
+!> \file
+!! computes and writes mass balance information per Delwaq time step
+!! writes flows of loads and withdrawals to an intermediate file
       subroutine wrwaqbal ( noseg     , noq12  , noq    , vol     , vol2   , &
      &                      flow      , horsurf, ifrmto , nmax    , mmax   , &
      &                      kmax      , isaggr , nolay  , nsrc    , mnksrc , &
      &                      discumwaq , loads  , nowalk , iwlk    , itim   , &
      &                      idt       , nobrk  , zmodel , mode    , naccum , &
      &                      lunsrctmp , lunwlk , dvol   , mtimstep, lundia )
-!>\file computes and writes mass balance infromation per Delwaq time step
-!!      writes flows of loads and withdrawals to an intermediate file
-
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     

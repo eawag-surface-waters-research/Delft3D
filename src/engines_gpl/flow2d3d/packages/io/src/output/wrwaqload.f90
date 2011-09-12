@@ -1,10 +1,10 @@
+!> \file
+!! Writes the last 'walking' record.
+!! Reads the intermediate sources file and writes the final sources file
       subroutine wrwaqload ( nsrc   , nmax   , mmax   , kmax     , mnksrc , &
      &                       nolay  , nobrk  , nowalk , iwlk     , isaggr , &
      &                       zmodel , itim   , ksrwaq , lunsrctmp,lunwlk  , &
      &                       lunsrc )
-!>\file Writes the last 'walkig' record.
-!!      Reads the intermediate sources file and writes the final sources file
-
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     

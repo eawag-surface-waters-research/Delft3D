@@ -33,20 +33,24 @@
 !
 !-------------------------------------------------------------------------------
 !
-!> @file runme.f90
+!> \file
 !! The dynamic library 'Delft3D-FLOW'.
 !! Flow-related routines are in trisim.f90 and below.
 !<
 
 ! Content specifically for the Doxygen-index page:
 !> \mainpage Delft3D-FLOW API docs
-!! \li \b Main \b program: deltares_hydro.F90
-!! \li \b Dynamic \b library \b entrance: runme.f90
-!! \li \b DD \b and \b RemoteOLV \b preparations, \b start \b all \b processes: hydra.cpp (Hydra::Execute)
-!! \li \b Global \b data: modules.f90 (flow, geometry, times, parameters, ...)
-!! \li \b Subdomain \b calculation \b toplevel: trisim.f90
-!! \li \b Preprocessor: \b Convert \b time \b related \b data: tdatom.f90
-!! \li \b Timeloop: trisol.f90
+!! \li <b> Main program</b>: deltares_hydro.F90
+!! \li <b> Dynamic library entrances</b>: flow2d3d_dll.f90
+!! \li <b> DD and RemoteOLV preparations, start all processes</b>: hydra.cpp (Hydra::Execute)
+!! \li <b> Global data</b>: globaldata.f90 (flow, geometry, times, parameters, ...)
+!! \li <b> Subdomain calculation toplevel</b>: trisim.f90
+!! \li <b> Preprocessor: Convert time related data</b>: tdatom.f90
+!! \li <b> Timeloop</b>: tricom_step.F90
+!! \li <b> Main routine within one time step</b>: 
+!! trisol.f90 (sigma layers)
+!! z_trisol.f90 (z layers, hydrostatic)
+!! z_trisol_nhfull.f90 (z layers, non-hydrostatic)
 !<
 
 !> Perform a Delft3D-FLOW computation, given a set of configuration parameters.
@@ -128,7 +132,8 @@ subroutine runme_core(max_keyval, keys   , values   , error_message)
           if (index(jarPath,'/') /= 0) then
              jarPath = trim(jarPath) // '/'
           else
-             jarPath = trim(jarPath) // '\'
+             ! Use char(92) instead of a backslash; Doxygen does not like it
+             jarPath = trim(jarPath) // char(92)
           endif
           jarPath  = trim(jarPath) // 'DelftOnline.jar'
        case ('remoteolv,jrepath')
