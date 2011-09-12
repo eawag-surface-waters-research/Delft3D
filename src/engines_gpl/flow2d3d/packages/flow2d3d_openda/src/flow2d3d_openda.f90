@@ -217,6 +217,7 @@ function getObservedLocalization(location_id_c, dist, nvals, values) result(retV
                                 'have length "mnmaxk" localization is ', &
                                 'not (yet) supported for this kind of ', &
                                 'vectors'
+               retVal = -1                 
             end if 
          endif
       enddo  
