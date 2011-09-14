@@ -46,7 +46,8 @@ Not supported functionality and limitations
 - walking discharge
 - Writing WAQ input files?
 - Moving obstacles
-- 2D skewed (not 1D-) Weirs 
+- 2D skewed (not 1D-) Weirs
+- Barriers
 - max(mmax,nmax)/npart <= 4 (is checked)
 
 
