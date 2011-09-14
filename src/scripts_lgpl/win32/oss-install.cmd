@@ -1,5 +1,7 @@
 @echo off
 
+set globalErrorLevel=0
+
 echo oss-install...
 
 rem Example calls:
@@ -33,6 +35,18 @@ if [%dest_main%] EQU [] (
     echo "ERROR: No target directory specified as argument of oss-install.cmd"
     goto end
 )
+
+rem ============================================================
+rem === if the command before a call to handle_error returns ===
+rem === an error, the script will return with an error       ===
+rem ============================================================
+:handle_error
+    if NOT %ErrorLevel% EQU 0 (
+        set globalErrorLevel=%ErrorLevel%
+    )
+    rem go back to call site
+goto :endproc
+
 
 rem Change to directory tree where this batch file resides (necessary when oss-install.cmd is called from outside of oss/trunk/src)
 cd %~dp0\..\..
@@ -95,6 +109,7 @@ rem ==========================
     if not exist !dest_bin!     mkdir !dest_bin!
 
     copy engines_gpl\deltares_hydro\bin\Release\deltares_hydro.exe                         !dest_bin!
+    call :handle_error
 goto :endproc
 
 
@@ -116,14 +131,23 @@ rem ====================
        rem One of these two dlls will not exist and cause an ErrorLevel=1. Reset it.
     set ErrorLevel=0
     copy engines_gpl\flow2d3d\scripts\meteo_old2new.m                                      !dest_bin!
+    call :handle_error
     copy third_party_open\DelftOnline\lib\Release\DelftOnline.dll                          !dest_bin!
+    call :handle_error
     copy third_party_open\DelftOnline\lib\Release\DelftOnlineJNI.dll                       !dest_bin!
+    call :handle_error
     copy third_party_open\DelftOnline\lib\Release\JavaLaunch.dll                           !dest_bin!
+    call :handle_error
     copy third_party_open\pthreads\bin\win32\pthreadVCE2.dll                               !dest_bin!
+    call :handle_error
     copy third_party_open\pthreads\bin\win32\pthreadvce.dll                                !dest_bin!
+    call :handle_error
     copy third_party_open\mpich2\bin\*.exe                                                 !dest_bin!
+    call :handle_error
     copy third_party_open\mpich2\lib\*.dll                                                 !dest_bin!
+    call :handle_error
     copy engines_gpl\flow2d3d\default\*.*                                                  !dest_default!
+    call :handle_error
 goto :endproc
 
 
@@ -143,14 +167,23 @@ rem ===========================
        rem One of these two dlls will not exist and cause an ErrorLevel=1. Reset it.
     set ErrorLevel=0
     copy engines_gpl\flow2d3d\scripts\meteo_old2new.m                                      !dest_bin!
+    call :handle_error
     copy third_party_open\DelftOnline\lib\Release\DelftOnline.dll                          !dest_bin!
+    call :handle_error
     copy third_party_open\DelftOnline\lib\Release\DelftOnlineJNI.dll                       !dest_bin!
+    call :handle_error
     copy third_party_open\DelftOnline\lib\Release\JavaLaunch.dll                           !dest_bin!
+    call :handle_error
     copy third_party_open\pthreads\bin\win32\pthreadVCE2.dll                               !dest_bin!
+    call :handle_error
     copy third_party_open\pthreads\bin\win32\pthreadvce.dll                                !dest_bin!
+    call :handle_error
     copy third_party_open\mpich2\bin\*.exe                                                 !dest_bin!
+    call :handle_error
     copy third_party_open\mpich2\lib\*.dll                                                 !dest_bin!
+    call :handle_error
     copy engines_gpl\flow2d3d\default\*.*                                                  !dest_default!
+    call :handle_error
 goto :endproc
 
 
@@ -170,10 +203,15 @@ rem ================
     if not exist !dest_lib!     mkdir !dest_lib!
 
     copy engines_gpl\wave\bin\release\wave.exe           !dest_bin!
+    call :handle_error
     copy third_party_open\swan\bin\win32\*.dll           !dest_bin!
+    call :handle_error
     copy third_party_open\swan\bin\win32\*.exe           !dest_bin!
+    call :handle_error
     copy engines_gpl\flow2d3d\default\dioconfig.ini      !dest_default!
+    call :handle_error
     copy third_party_open\swan\scripts\swan_install.bat  !dest_lib!\swan.bat
+    call :handle_error
 goto :endproc
 
 
@@ -189,6 +227,7 @@ rem ==========================
     if not exist !dest_bin!     mkdir !dest_bin!
 
     copy plugins_lgpl\plugin_culvert\bin\Release\plugin_culvert.dll                        !dest_bin!
+    call :handle_error
 goto :endproc
 
 
@@ -204,6 +243,7 @@ rem ====================================
     if not exist !dest_bin!     mkdir !dest_bin!
 
     copy plugins_lgpl\plugin_delftflow_traform\bin\Release\plugin_delftflow_traform.dll    !dest_bin!
+    call :handle_error
 goto :endproc
 
 
@@ -219,6 +259,7 @@ rem ==================
     if not exist !dest_bin!     mkdir !dest_bin!
 
     copy tools_gpl\datsel\bin\Release\datsel.exe                                           !dest_bin!
+    call :handle_error
 goto :endproc
 
 
@@ -234,6 +275,7 @@ rem ==================
     if not exist !dest_bin!     mkdir !dest_bin!
 
     copy tools_gpl\kubint\bin\Release\kubint.exe                                           !dest_bin!
+    call :handle_error
 goto :endproc
 
 
@@ -249,6 +291,7 @@ rem ================
     if not exist !dest_bin!     mkdir !dest_bin!
 
     copy tools_gpl\lint\bin\Release\lint.exe                                               !dest_bin!
+    call :handle_error
 goto :endproc
 
 
@@ -288,11 +331,11 @@ goto :endproc
 
 
 :end
-if NOT %ErrorLevel% EQU 0 (
+if NOT %globalErrorLevel% EQU 0 (
     rem
     rem Only jump to :end when the script is completely finished
-    rem
-    exit %ErrorLevel%
+    rem 
+    exit %globalErrorLevel%
 )
 
 :endproc
