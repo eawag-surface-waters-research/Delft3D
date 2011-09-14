@@ -3,8 +3,8 @@
 echo oss-install...
 
 rem Example calls:
-rem > install.cmd <dest directory>               # Install entire solution
-rem > install.cmd flow2d3d <dest directory>      # Install only project flow2d3d (and its dependencies)
+rem > install.cmd <dest directory>                # Install entire solution
+rem > install.cmd flow2d3d <dest directory>       # Install only project flow2d3d (and its dependencies)
 
 rem 0. defaults:
 set project=
