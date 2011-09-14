@@ -307,7 +307,9 @@ rem ====================
     if not exist !dest_bin!     mkdir !dest_bin!
 
     copy engines_gpl\flow2d3d\scripts\mormerge.tcl                                         !dest_bin!
+    call :handle_error
     copy tools_gpl\mormerge\bin\Release\mormerge.exe                                       !dest_bin!
+    call :handle_error
 goto :endproc
 
 
@@ -323,6 +325,7 @@ rem ==============
     if not exist !dest! mkdir !dest!
 
     copy tools_gpl\vs\bin\Release\vs.exe              !dest!
+    call :handle_error
 goto :endproc
 
 
