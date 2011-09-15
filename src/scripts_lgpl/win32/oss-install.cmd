@@ -36,6 +36,16 @@ if [%dest_main%] EQU [] (
     goto end
 )
 
+rem Change to directory tree where this batch file resides (necessary when oss-install.cmd is called from outside of oss/trunk/src)
+cd %~dp0\..\..
+
+call :!project!
+
+goto end
+
+rem  Actual install "routines"
+
+
 rem ============================================================
 rem === if the command before a call to handle_error returns ===
 rem === an error, the script will return with an error       ===
@@ -46,17 +56,6 @@ rem ============================================================
     )
     rem go back to call site
 goto :endproc
-
-
-rem Change to directory tree where this batch file resides (necessary when oss-install.cmd is called from outside of oss/trunk/src)
-cd %~dp0\..\..
-
-call :!project!
-
-goto end
-
-rem  Actual install "routines"
-
 
 rem ===============
 rem === INSTALL_ALL
