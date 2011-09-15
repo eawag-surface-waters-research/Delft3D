@@ -69,77 +69,77 @@ subroutine mom_fls &
 !
 ! Global variables
 !
-    integer                                                       :: icx
-    integer                                                       :: icy
-    integer                                                       :: kmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                                       :: nmmax  !  Description and declaration in dimens.igs
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in) :: kcs    !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in) :: kcu    !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in) :: kfu    !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in) :: kfv    !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in) :: kadu   !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in) :: kadv   !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax), intent(in) :: kspu   !  Description and declaration in esm_alloc_int.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in) :: s0     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in) :: hu     !  Description and declaration in esm_alloc_real.f90
+    integer                                                          :: icx
+    integer                                                          :: icy
+    integer                                                          :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                          :: nmmax  !  Description and declaration in dimens.igs
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in) :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in) :: kcu    !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in) :: kfu    !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in) :: kfv    !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in) :: kadu   !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in) :: kadv   !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax), intent(in) :: kspu   !  Description and declaration in esm_alloc_int.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in) :: s0     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in) :: hu     !  Description and declaration in esm_alloc_real.f90
     real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in) :: dps    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in) :: guu    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in) :: gvv    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in) :: gvd    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in) :: gvu    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in) :: gsqiu  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: ua
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: ub
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: bbk
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: ddk
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: qxk    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: qyk    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: u0     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: v1     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                     :: umean  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: dumm1
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: dumm2
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: dumm3
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: dumm4
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: dumm5
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: dumm6
-    real(fp), dimension(kmax)                                       :: thick  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in) :: guu    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in) :: gvv    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in) :: gvd    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in) :: gvu    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in) :: gsqiu  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: ua
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: ub
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: bbk
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: ddk
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: qxk    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: qyk    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: u0     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: v1     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                     :: umean  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: dumm1
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: dumm2
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: dumm3
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: dumm4
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: dumm5
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: dumm6
+    real(fp)  , dimension(kmax)                                       :: thick  !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !
-    real(fp)          :: dpsu
-    real(fp)          :: du1
-    real(fp)          :: du2
-    real(fp)          :: factor
-    real(fp)          :: hl
-    real(fp)          :: hr
-    integer           :: k
-    integer           :: kspu0k
-    integer           :: ndm
-    integer           :: ndmd
-    integer           :: ndmu
-    integer           :: nm
-    integer           :: nmd
-    integer           :: nmdd
-    integer           :: nmu
-    integer           :: num
-    integer           :: nuum
-    integer           :: numu
-    real(fp)          :: advecx
-    real(fp)          :: advecy
-    real(fp)          :: gsqi
-    real(fp)          :: gvndm
-    real(fp)          :: gvnm
-    real(fp)          :: qxup
-    real(fp)          :: qxdo
-    real(fp)          :: qyup
-    real(fp)          :: qydo
-    real(fp)          :: svvv
-    real(fp)          :: trsh
-    real(fp), external    :: ulim
-    real(fp)          :: uvdgdy
-    real(fp)          :: vvdgdx
-    real(fp)          :: vvv
+    integer            :: k
+    integer            :: kspu0k
+    integer            :: ndm
+    integer            :: ndmd
+    integer            :: ndmu
+    integer            :: nm
+    integer            :: nmd
+    integer            :: nmdd
+    integer            :: nmu
+    integer            :: num
+    integer            :: nuum
+    integer            :: numu
+    real(fp)           :: advecx
+    real(fp)           :: advecy
+    real(fp)           :: dpsu
+    real(fp)           :: du1
+    real(fp)           :: du2
+    real(fp)           :: factor
+    real(fp)           :: hl
+    real(fp)           :: hr
+    real(fp)           :: gsqi
+    real(fp)           :: gvndm
+    real(fp)           :: gvnm
+    real(fp)           :: qxup
+    real(fp)           :: qxdo
+    real(fp)           :: qyup
+    real(fp)           :: qydo
+    real(fp)           :: svvv
+    real(fp)           :: trsh
+    real(fp), external :: ulim
+    real(fp)           :: uvdgdy
+    real(fp)           :: vvdgdx
+    real(fp)           :: vvv
 !
 !! executable statements -------------------------------------------------------
 !
@@ -160,27 +160,33 @@ subroutine mom_fls &
        num  = icy
        nuum = num + icy
        do nm = 1, nmmax
-          ua(nm,k) = 0.0 
-          ub(nm,k) = 0.0
-          nmd  = nmd  + 1
-          nmdd = nmdd + 1
-          ndm  = ndm  + 1
-          nmu  = nmu  + 1
-          num  = num  + 1
-          nuum = nuum + 1
+          ua(nm,k) = 0.0_fp
+          ub(nm,k) = 0.0_fp
+          nmd      = nmd  + 1
+          nmdd     = nmdd + 1
+          ndm      = ndm  + 1
+          nmu      = nmu  + 1
+          num      = num  + 1
+          nuum     = nuum + 1
           !
           ! Compute UA (appr. of velocity in waterlevel points) at internal points
           ! At open boundary UA == U0 for inflow
           !
-          du2   = (u0(nm,k)  - u0(nmd,k)) * kfu(nm) * kfu(nmd)
-          if (kspu(nm,0) > 0 .or. kspu(nmd,0) > 0) du2=0.0
-          if (qxk(nm,k) + qxk(nmd,k) .gt. 0.0) then
-            du1      = (u0(nmd,k) - u0(nmdd,k)) * kfu(nmd) * kfu(nmdd) * kadu(nmd,k) * kadu(nmdd,k)
-            if (kspu(nmd,0) > 0 .or. kspu(nmdd,0) > 0 ) du1=0.0
+          du2 = (u0(nm,k)-u0(nmd,k)) * kfu(nm) * kfu(nmd)
+          if (kspu(nm,0) > 0 .or. kspu(nmd,0) > 0) then
+             du2 = 0.0_sp
+          endif
+          if (qxk(nm,k)+qxk(nmd,k) > 0.0_fp) then
+            du1      = (u0(nmd,k)-u0(nmdd,k)) * kfu(nmd) * kfu(nmdd) * kadu(nmd,k) * kadu(nmdd,k)
+            if (kspu(nmd,0)>0 .or. kspu(nmdd,0)>0 ) then
+               du1 = 0.0_fp
+            endif
             ua(nm,k) =  u0(nmd,k) + ulim(du1,du2)*du1
           else
-            du1      = (u0(nmu,k) - u0(nm,k)) * kfu(nmu) * kfu(nm) * kadu(nmu,k) * kadu(nm,k)
-            if (kspu(nm,0) > 0 .or. kspu(nmu,0) > 0 ) du1=0.0
+            du1      = (u0(nmu,k)-u0(nm,k)) * kfu(nmu) * kfu(nm) * kadu(nmu,k) * kadu(nm,k)
+            if (kspu(nm,0)>0 .or. kspu(nmu,0)>0 ) then
+               du1 = 0.0_fp
+            endif
             ua(nm,k) =  u0(nm,k)  - ulim(du1,du2)*du1
           endif
 
@@ -189,8 +195,8 @@ subroutine mom_fls &
           ! At open boundary UB == U0 for inflow
           ! In case thin dams in the transverse direction let UB = 0
           !
-          if (kfv(nm) * kfv(nmu) /= 0) then
-            if (qyk(nm,k) + qyk(nmu,k) .gt. 0) then
+          if (kfv(nm)*kfv(nmu) /= 0) then
+            if (qyk(nm,k)+qyk(nmu,k) > 0.0_fp) then
               du1      = (u0(nm ,k) - u0(ndm,k)) * kfu(nm)  * kfu(ndm) * kadu(nm,k) * kadu(ndm,k)
               du2      = (u0(num,k) - u0(nm ,k)) * kfu(num) * kfu(nm)  * kadu(nm,k) * kadu(num,k)
               ub(nm,k) =  u0(nm ,k) + ulim(du1,du2)*du1
@@ -202,39 +208,38 @@ subroutine mom_fls &
           endif
        enddo
     enddo
-
     do k = 1, kmax
        nmd  = -icx
        ndm  = -icy
        ndmd = -icx - icy
-       nmu  = icx
-       num  = icy
-       numu = icx + icy
-       ndmu = icx - icy
+       nmu  =  icx
+       num  =  icy
+       numu =  icx + icy
+       ndmu =  icx - icy
        do nm = 1, nmmax
-          nmd  = nmd + 1
-          ndm  = ndm + 1
-          ndmd = ndmd + 1
-          nmu  = nmu + 1
-          num  = num + 1
-          numu = numu + 1
-          ndmu = ndmu + 1
-          kspu0k= kspu(nm, 0)*kspu(nm, k)
+          nmd    = nmd  + 1
+          ndm    = ndm  + 1
+          ndmd   = ndmd + 1
+          nmu    = nmu  + 1
+          num    = num  + 1
+          numu   = numu + 1
+          ndmu   = ndmu + 1
+          kspu0k = kspu(nm,0) * kspu(nm,k)
           !
           ! Check for domain decomposition points = kcs(nm)*kcs(nmu) > 0
           !
           ! Note: abs(kcs) is needed here in parallel computations
           !
           if (kfu(nm)==1 .and. abs(kcs(nm)*kcs(nmu)) > 0 .and. kspu0k /=4 .and. kspu0k /=10) then
-             advecx = 0.0
-             advecy = 0.0
-             vvdgdx = 0.0
-             uvdgdy = 0.0
+             advecx = 0.0_fp
+             advecy = 0.0_fp
+             vvdgdx = 0.0_fp
+             uvdgdy = 0.0_fp
              hl     = real(dps(nm) ,fp) + s0(nm)
              hr     = real(dps(nmu),fp) + s0(nmu)
              factor = 1.0_fp
-             gvnm   = gvd(nm )
-             gvndm  = gvd(ndm)
+             gvnm   = gvd  (nm)
+             gvndm  = gvd  (ndm)
              gsqi   = gsqiu(nm)
              !
              ! Compute VVV
@@ -242,10 +247,10 @@ subroutine mom_fls &
              if (       (cstbnd .and. (kcs(nm)==2 .or. kcs(nmu)==2)) &
                  & .or. (kcs(nm)==3 .or. kcs(nmu)==3               )  ) then
                 svvv = max(kfv(ndm) + kfv(ndmu) + kfv(nm) + kfv(nmu), 1)
-                vvv = (v1(ndm, k)*kfv(ndm) + v1(ndmu, k)*kfv(ndmu) + v1(nm, k)  &
-                    & *kfv(nm) + v1(nmu, k)*kfv(nmu))/svvv
+                vvv  = (  v1(ndm,k)*kfv(ndm) + v1(ndmu,k)*kfv(ndmu)  &
+                     &  + v1(nm ,k)*kfv(nm ) + v1(nmu ,k)*kfv(nmu )   ) / svvv
              else
-                vvv = .25*(v1(ndm, k) + v1(ndmu, k) + v1(nm, k) + v1(nmu, k))
+                vvv = 0.25_fp * (v1(ndm,k)+v1(ndmu,k)+v1(nm,k)+v1(nmu,k))
              endif
              !
              ! ADVECTION IN U-DIRECTION; DU/DX AND CENTRIFUGAL ACCELERATION
@@ -263,7 +268,7 @@ subroutine mom_fls &
                 !
                 ! CURVATURE TERM DUE TO CONVECTION IN U-DIRECTION
                 !
-                uvdgdy = 0.5*vvv*gsqi*(gvnm - gvndm)
+                uvdgdy = vvv * gsqi * (gvnm-gvndm)
              endif
              if (comparereal(ub(ndm,k),0.0_fp) /= 0 .and. &
                & comparereal(ub(nm ,k),0.0_fp) /= 0        ) then
@@ -271,15 +276,15 @@ subroutine mom_fls &
                 !
                 ! CURVATURE TERM DUE TO ADVECTION IN V-DIRECTION
                 !
-                vvdgdx = 0.5*vvv*gsqi*(guu(nmu) - guu(nmd))
+                vvdgdx = vvv * gsqi * (guu(nmu)-guu(nmd))
              endif
              advecy = advecy - vvv*vvdgdx
              advecx = advecx + u0(nm,k)*uvdgdy
              !
              ! Switch from momentum conservation to energy conservation
              !
-             if (       (umean(nm) > 0.0 .and. (hl > hr) .and. kfu(nmu) == 1) &
-                 & .or. (umean(nm) < 0.0 .and. (hr > hl) .and. kfu(nmd) == 1)  ) then
+             if (       (umean(nm) > 0.0_fp .and. (hl > hr) .and. kfu(nmu) == 1) &
+                 & .or. (umean(nm) < 0.0_fp .and. (hr > hl) .and. kfu(nmd) == 1)  ) then
                  if (       (real(dps(nm),fp)          > real(dps(nmu),fp)+ dgcuni) & 
                      & .or. (real(dps(nm),fp) + dgcuni < real(dps(nmu),fp)        )  ) then
                     factor = ( hr * hl / (dpsu*dpsu) )
