@@ -4,9 +4,6 @@
 # === copyFile: handles error ===
 # ===============================
 function copyFile () {
-    echo file = "$1"
-    echo dest = "$2"
-
     # handle the error
     cp -fp $1 $2
     if [ $? != 0 ]; then
