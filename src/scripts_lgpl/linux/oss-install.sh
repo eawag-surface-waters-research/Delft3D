@@ -4,20 +4,21 @@
 # === copyFile: handles error ===
 # ===============================
 function copyFile () {
-    set file=$1
-    set dest=$2
-    
+    echo file = "$1"
+    echo dest = "$2"
+
     # handle the error
-    if cp -fp $file $dest; then
-        echo "can't to copy \"$file\" to \"$dest\"" 1>&2
+    cp -fp $1 $2
+    if [ $? != 0 ]; then
+        echo "can't to copy \"$1\" to \"$2\"" 1>&2
         set globalErrorLevel=1
     fi
 }
 
 
-# ===============
-# === INSTALL_ALL
-# ===============
+# ===================
+# === INSTALL_ALL ===
+# ===================
 function install_all () {
     echo "    installing all open source projects . . ."
 
@@ -69,7 +70,7 @@ function deltares_hydro () {
 
     mkdir -p $dest_bin
 
-    copyFile bin/deltares_hydro.exe                                    $dest_bin
+    copyFile "bin/deltares_hydro.exe" "$dest_bin"
 
     return
 }
