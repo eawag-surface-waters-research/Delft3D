@@ -578,8 +578,10 @@ function get_exchange_item_id_CI(location_id_c,quantity_id) result(id)
        
     elseif ((quantity_id == waterlevel)) then
        call find_monitorpoint(location_id_c, namst,nostat, location_id)    
-    elseif ((quantity_id == windu) .or. (quantity_id == windv)) then
-       location_id = 1    ! wind has only one location     
+    elseif ((quantity_id == windu) .or. (quantity_id == windv) .or.      &
+            (quantity_id == windgu) .or. (quantity_id == windgv)) then
+       location_id = 1    ! windu/windv have only one location; 
+                          ! noise field for gu and gv will be determined later on.      
     else
       print *,'SE_get_exchange_item_id_CI: only supported for wind, boundaries and monitor points'
       return
@@ -817,29 +819,35 @@ function set_noise_for_time_span(exchange_item_id, start_time, end_time, operati
 
     call get_location_id_and_quantity_id(exchange_item_id,location_id,quantity_id)
 
-    ! note: for now, all quantities are 1D so values is always one-dimensional. 
+    ! note: for now, all quantities except windgu and windgv are 1D so values is always one-dimensional. 
     if (quantity_id .eq. src_discharge) then
     !  call ei_accept_copy_disch(values, r(disch), location_id, gdp%d%nsrc)
 
     elseif (quantity_id .eq. windu) then
-       call set_openda_buffer(values(1),location_id, quantity_id, operation)
+       call set_openda_buffer(values(1),1,location_id, quantity_id, operation)
     elseif (quantity_id .eq. windv) then
-       call set_openda_buffer(values(1),location_id, quantity_id, operation)
-    
+       call set_openda_buffer(values(1),1,location_id, quantity_id, operation)
+
+   ! wind noise fields: The noise field contains nval parameters. Corresponding locations are also provided,
+   ! stored using triples (xloc, yloc, val) in values
+    elseif (quantity_id .eq. windgu) then
+       call set_openda_buffer(values(1:nvals),nvals, location_id, quantity_id, operation)
+    elseif (quantity_id .eq. windgv) then
+       call set_openda_buffer(values(1:nvals),nvals,location_id, quantity_id, operation)
     
     ! We also assume that for boundaries, ends a and b are simultaneously adjusted.
     ! Hence, also here, only one-dimensional values.
     elseif (quantity_id .eq. bound_HQ) then
-       call set_openda_buffer(values(1),location_id, quantity_id, operation)
+       call set_openda_buffer(values(1),1,location_id, quantity_id, operation)
 
     elseif (quantity_id .eq. bound_temp) then
-       call set_openda_buffer(values(1),location_id, quantity_id, operation)
+       call set_openda_buffer(values(1),1,location_id, quantity_id, operation)
        
     elseif (quantity_id .eq. bound_salt) then
-       call set_openda_buffer(values(1),location_id, quantity_id, operation)       
+       call set_openda_buffer(values(1),1,location_id, quantity_id, operation)       
 
     elseif (quantity_id .eq. bound_astroH) then
-       call set_openda_buffer(values(1),location_id, quantity_id, operation)
+       call set_openda_buffer(values(1),1,location_id, quantity_id, operation)
 
     endif
     

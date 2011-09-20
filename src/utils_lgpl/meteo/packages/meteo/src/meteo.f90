@@ -626,7 +626,7 @@ end function getmeteotypes
 !
 !===============================================================================
 function getmeteoval(runid, quantity, time, mfg, nfg, & 
-                   & nlb, nub, mlb, mub, qarray) result(success)
+                   & nlb, nub, mlb, mub, qarray, grid_size, gridnoise) result(success)
    !
    ! Function description:
    ! Put quantity values for given time for complete grid in qarray
@@ -656,10 +656,14 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
    real(fp)    , dimension(nlb:nub, mlb:mub), target, intent(out) :: qarray
    character(*)                                     , intent(in)  :: quantity
    character(*)                                     , intent(in)  :: runid
+   integer                                          , intent(in)  :: grid_size
+   real(fp), dimension(grid_size,3),optional        , intent(in)  :: gridnoise
 !
 ! Local variables
 !
+   integer                             :: dir
    integer                             :: i
+   integer, dimension(4)               :: ind
    integer                             :: iq
    integer                             :: k
    integer                             :: mx
@@ -669,7 +673,9 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
    integer                             :: it0
    integer                             :: ierr
    integer                             :: m
+   integer                             :: m_mg     ! loop variable on meteo grid
    integer                             :: n
+   integer                             :: n_mg     ! loop variable on meteo grid
    integer                             :: i1
    integer                             :: j1
    integer                             :: mv
@@ -685,8 +691,10 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
    real(fp)                            :: rcycl
    real(fp)                            :: x
    real(hp)                            :: x_hp
+   real(hp)                            :: x_mg    ! x-location on meteo grid
    real(fp)                            :: y
    real(hp)                            :: y_hp
+   real(hp)                            :: y_mg    ! y-location on meteo grid
    real(fp)                            :: xx
    real(fp)                            :: yy
    real(fp)                            :: x00_eye
@@ -722,6 +730,7 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
    real(hp), dimension(:,:,:), pointer :: v0        ! 3-dim array
    real(hp), dimension(:)    , pointer :: u1
    real(hp), dimension(:)    , pointer :: u0        ! 1-dim array
+   real(fp), dimension(:,:), allocatable :: meteo_noise
    character(20)                       :: tex
    type(tmeteo)              , pointer :: meteo     ! all meteo for one subdomain
    type(tmeteoitem)          , pointer :: meteoitem
@@ -927,6 +936,57 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
                v1    => meteoitem%field(it1)%arr3d
                v0    => meteoitem%field(it0)%arr3d
                grid  => meteoitem%grid
+               ! interpolate and add noise to the wind field
+               if (present(gridnoise)) then
+                  !interpolate towards the meteo grid. That means: loop over all
+                  ! meteo grid points; a bounding quadrangle on the coarse grid has to be found;
+                  ! (using findnm is not possible since the noisegrid does not contain 
+                  ! curvilinaer information (i.e. it has no nmax,mmax; it is one-dimensional!))
+                  ! Then, bilin5 is called to obtain the interpolation weights
+                  ! NOTE: the coarse grid must completely cover the meteogrid.
+                  ! The problem boils down to find four noisegrid points, in a quadrangle, in the neighbourhood of
+                  ! each meteo gridpoint. This quadrangle should ideally be covering the meteo gridpoint.
+                  !
+                  allocate(meteo_noise(grid%mmax, grid%nmax))  
+                  meteo_noise = 0.0 
+                  do m_mg = 1, grid%mmax
+                     do n_mg = 1, grid%nmax 
+                        x_mg = grid%x(m_mg,n_mg)
+                        y_mg = grid%y(m_mg,n_mg)
+                        call find_noisegrid_vertices(x_mg, y_mg, ind, grid_size, &
+                                                     gridnoise(:,2), gridnoise(:,3))
+                        do dir=1,4                                                     
+                           u_hp(dir) = real(gridnoise(ind(dir),2),hp)
+                           v_hp(dir) = real(gridnoise(ind(dir),3),hp)
+                        enddo   
+                        x_hp = real(x_mg, hp)
+                        y_hp = real(y_mg, hp)
+                        call bilin5(u_hp, v_hp, x_hp, y_hp, f_hp, ierr)
+
+                        if (ierr == 1) then
+                           meteomessage = 'noisegrid: error in bilin5'
+                           success = .false.
+                           return
+                        endif
+                        f    = real(f_hp, fp)
+                        w(1) = gridnoise(ind(1),1)  ! noise parameter in SW
+                        w(2) = gridnoise(ind(2),1)  ! noise parameter in SE
+                        w(3) = gridnoise(ind(3),1)  ! noise parameter in NE
+                        w(4) = gridnoise(ind(4),1)  ! noise parameter in NW
+                        meteo_noise(m_mg,n_mg) = w(1)*f(1) + w(2)*f(2) + w(3)*f(3) + w(4)*f(4)
+                     enddo
+                  enddo
+                  ! now add the noise field to the meteofields from file
+                  ! at two timelevels, since time interpolation has not occured yet.
+                   v0(:,:,1) = v0(:,:,1) + meteo_noise(:,:) 
+                   v1(:,:,1) = v1(:,:,1) + meteo_noise(:,:)
+                   ! here: debug output of noise possible
+                   deallocate(meteo_noise)
+               endif
+        !
+        !       interpolate the wind field towards the D3Dflow-grid
+        !       at this stage, the wind noise (if present) has already been added
+        ! 
                do m = 1,meteo%flowgrid%mmax
                   do n = 1,meteo%flowgrid%nmax
                      if (meteo%flowgrid%kcs(n, m) > 0) then
@@ -955,7 +1015,7 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
                         f_hp = real(f,hp)
                         call bilin5(u_hp, v_hp, x_hp, y_hp, f_hp, ierr)
                         if (ierr == 1) then
-                           meteomessage = 'error in bilin5'
+                           meteomessage = 'curvilinear meteo grid: error in bilin5'
                            success = .false.
                            return
                         endif
@@ -976,6 +1036,7 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
                      endif
                   enddo
                enddo
+               
             case ( meteo_on_spiderweb_grid )
                !
                ! Spiderweb arrays (spwf and spwarr) and corresponding time are all together updated
@@ -1332,6 +1393,78 @@ function findnm(xp, yp, mv, nv, mpoint, npoint, grid) result(success)
 end function findnm
 !
 !
+!
+!==================================================================================
+subroutine find_noisegrid_vertices(x_mg, y_mg, ind, ngrid, &
+                                      xgrid, ygrid)
+   implicit none
+   
+!
+! Global variables
+!
+
+    integer, dimension(4)       , intent(out) :: ind   ! indices of noise grid to form a quadrangle 
+                                                       ! covering x_mg,y_mg
+    real(fp)                    , intent(in)  :: x_mg  ! x-coordinate of meteo grid point
+    real(fp)                    , intent(in)  :: y_mg  ! y-coordinate of meteo grid point
+    integer                     , intent(in)  :: ngrid
+    real(fp), dimension(ngrid)  , intent(in)  :: xgrid
+    real(fp), dimension(ngrid)  , intent(in)  :: ygrid
+
+! local variables
+
+   integer                                    :: i
+   logical                                    :: lwest
+   logical                                    :: lsouth
+   real(fp)                                   :: distsqr
+   real(fp)                                   :: d2_sw
+   real(fp)                                   :: d2_se 
+   real(fp)                                   :: d2_nw
+   real(fp)                                   :: d2_ne
+!----------------------------------------------------------
+!body
+   ind = 0
+   d2_sw = 1E20;
+   d2_se = 1E20;
+   d2_ne = 1E20;
+   d2_nw = 1E20;
+
+!   look for the nearest coarse grid points southwest, southeast etc
+!   We assume that there is at least one grid point in each direction!   
+   do i = 1, ngrid
+      distsqr = (x_mg-xgrid(i))**2 + (y_mg-ygrid(i))**2
+      lsouth = (ygrid(i) < y_mg)
+      lwest = (xgrid(i) < x_mg)
+      if (lsouth .and. lwest) then           !SW (1)
+         if (distsqr < d2_sw ) then
+            d2_sw  = distsqr
+            ind(1) = i
+         endif
+      elseif (lsouth .and. .not. lwest) then ! SE(2)
+         if (distsqr < d2_se ) then
+            d2_se  = distsqr
+            ind(2) = i
+         endif       
+      elseif (.not. lsouth .and. lwest) then ! NW(4)
+         if (distsqr < d2_nw ) then
+            d2_nw  = distsqr
+            ind(4) = i
+         endif       
+      else                                   ! NE(3)
+         if (distsqr < d2_ne ) then
+            d2_ne  = distsqr
+            ind(3) = i
+         endif       
+      endif     
+   enddo
+   if (ind(1)*ind(2)*ind(3)*ind(4) == 0) then
+      print *,'error: noise grid cannot provide a bounding box ',ind
+      print *,'for meteo grid location ',x_mg,y_mg
+      write(*,*) 'coarse grid points:',(xgrid(i),ygrid(i),';',i=1,ngrid)
+   endif
+
+end subroutine find_noisegrid_vertices
+
 !===============================================================================
 subroutine pinpok(xl, yl, n, x, y, inside, maxhul)
    implicit none

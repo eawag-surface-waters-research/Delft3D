@@ -300,17 +300,17 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
        call checkmeteoresult(success, gdp)
        if (rhum_file) then
           success = getmeteoval(gdp%runid, 'relhum', time, gdp%gdparall%mfg, gdp%gdparall%nfg, &
-                              & gdp%d%nlb, gdp%d%nub, gdp%d%mlb, gdp%d%mub, rhumarr)
+                              & gdp%d%nlb, gdp%d%nub, gdp%d%mlb, gdp%d%mub, rhumarr , 0)
           call checkmeteoresult(success, gdp)
        endif
        if (tair_file) then
           success = getmeteoval(gdp%runid, 'airtemp', time, gdp%gdparall%mfg, gdp%gdparall%nfg,&
-                              & gdp%d%nlb, gdp%d%nub, gdp%d%mlb, gdp%d%mub, tairarr)
+                              & gdp%d%nlb, gdp%d%nub, gdp%d%mlb, gdp%d%mub, tairarr , 0 )
           call checkmeteoresult(success, gdp)
        endif
        if (clou_file) then
           success = getmeteoval(gdp%runid, 'cloud', time, gdp%gdparall%mfg, gdp%gdparall%nfg,&
-                              & gdp%d%nlb, gdp%d%nub, gdp%d%mlb, gdp%d%mub, clouarr)
+                              & gdp%d%nlb, gdp%d%nub, gdp%d%mlb, gdp%d%mub, clouarr , 0 )
           call checkmeteoresult(success, gdp)
        endif
     endif

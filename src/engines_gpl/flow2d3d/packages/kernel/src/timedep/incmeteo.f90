@@ -43,7 +43,7 @@ subroutine incmeteo(timhr  ,grdang ,windu  ,windv ,patm   , &
     use precision
     use dfparall
     use globaldata
-    use m_openda_exchange_items, only : get_openda_buffer
+    use m_openda_exchange_items, only : get_openda_buffer, get_openda_buffersize
     !
     implicit none
     !
@@ -82,8 +82,14 @@ subroutine incmeteo(timhr  ,grdang ,windu  ,windv ,patm   , &
 !
 ! Local variables
 !
-    real(fp)                 :: time
-    logical                  :: success
+    integer                                   :: igrid
+    real(fp)                                  :: time
+    logical                                   :: success
+    real(fp)   ,allocatable, dimension(:,:)   :: gridunoise
+    real(fp)   ,allocatable, dimension(:,:)   :: gridvnoise
+    integer                                   :: gugridsize
+    integer                                   :: gvgridsize
+
 !
 !! executable statements -------------------------------------------------------
 !
@@ -113,11 +119,47 @@ subroutine incmeteo(timhr  ,grdang ,windu  ,windv ,patm   , &
        !
        ! update wind arrays
        !
-       success = getmeteoval(gdp%runid, 'windu', time, gdp%gdparall%mfg, gdp%gdparall%nfg, nlb, nub, mlb, mub, windu)
+       
+       ! First: check if wind noise grid on curvilinear grid is available 
+       gugridsize = get_openda_buffersize('windgu')
+       if (gugridsize > 0) then
+          allocate(gridunoise(gugridsize,3))
+          gridunoise = 0.0
+          do igrid = 1, gugridsize
+             call get_openda_buffer('windgu', igrid, 1, 1, gridunoise(igrid,1))       
+             call get_openda_buffer('x_windgu', igrid, 1, 1, gridunoise(igrid,2))  
+             call get_openda_buffer('y_windgu', igrid, 1, 1, gridunoise(igrid,3))               
+          enddo
+          ! if gridnoise is not empty, call getmeteoval with extra argument: triple array to be interpolated.  
+          success = getmeteoval(gdp%runid, 'windu', time, gdp%gdparall%mfg, gdp%gdparall%nfg,   &
+                                nlb, nub, mlb, mub, windu, gugridsize,gridunoise)
+          deallocate(gridunoise)
+       else
+          success = getmeteoval(gdp%runid, 'windu', time, gdp%gdparall%mfg, gdp%gdparall%nfg,   &
+                                nlb, nub, mlb, mub, windu, 0)
+       endif  
        call checkmeteoresult(success, gdp)
-       success = getmeteoval(gdp%runid, 'windv', time, gdp%gdparall%mfg, gdp%gdparall%nfg, nlb, nub, mlb, mub, windv)
+ 
+       gvgridsize = get_openda_buffersize('windgv')
+       if (gvgridsize > 0) then
+          allocate(gridvnoise(gvgridsize,3))
+          gridvnoise = 0.0
+          do igrid = 1, gvgridsize
+             call get_openda_buffer('windgv', igrid, 1, 1, gridvnoise(igrid,1))       
+             call get_openda_buffer('x_windgv', igrid, 1, 1, gridvnoise(igrid,2))  
+             call get_openda_buffer('y_windgv', igrid, 1, 1, gridvnoise(igrid,3))               
+          enddo   
+          ! if gridnoise is not empty, call getmeteoval with extra argument: triple array to be interpolated.  
+          success = getmeteoval(gdp%runid, 'windv', time, gdp%gdparall%mfg, gdp%gdparall%nfg, &
+                                nlb, nub, mlb, mub, windv, gvgridsize, gridvnoise)
+          deallocate(gridvnoise)
+       else
+          success = getmeteoval(gdp%runid, 'windv', time, gdp%gdparall%mfg, gdp%gdparall%nfg, &
+          nlb, nub, mlb, mub, windv, 0)       
+       endif          
        call checkmeteoresult(success, gdp)
-       success = getmeteoval(gdp%runid,  'patm', time, gdp%gdparall%mfg, gdp%gdparall%nfg, nlb, nub, mlb, mub,  patm)
+
+       success = getmeteoval(gdp%runid,  'patm', time, gdp%gdparall%mfg, gdp%gdparall%nfg, nlb, nub, mlb, mub,  patm, 0)
        call checkmeteoresult(success, gdp)
     else
        success = getVal(ECHandle, patmECItemId , dtimmin,  patm, nlb, nub, mlb, mub)
@@ -128,7 +170,8 @@ subroutine incmeteo(timhr  ,grdang ,windu  ,windv ,patm   , &
        call checkResult(ECHandle, success)
     endif
     !
-    ! Get possible input from OpenDA
+    ! Get possible input from OpenDA. Here: scalar adjustment of windfiles. Noise on an entire grid
+    ! has already been precessed above, inside the getmeteoval call.
     !
     call get_openda_buffer('windu', 1, nub-nlb+1, mub-mlb+1, windu)
     call get_openda_buffer('windv', 1, nub-nlb+1, mub-mlb+1, windv)

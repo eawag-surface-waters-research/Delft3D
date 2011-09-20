@@ -48,10 +48,15 @@ integer, parameter :: bound_temp    = 10  !gives one value per timestep: both en
 integer, parameter :: bound_salt    = 11  !gives one value per timestep: both end A and end B
 integer, parameter :: bound_astroH  = 12  !gives one value per timestep: both end A and end B
 
+integer, parameter :: windgu         = 13
+integer, parameter :: x_windgu       = 14
+integer, parameter :: y_windgu       = 15
+integer, parameter :: windgv         = 16
+integer, parameter :: x_windgv       = 17
+integer, parameter :: y_windgv       = 18
 
-
-integer, parameter :: max_quantity_ids = 12
-integer, parameter :: max_location_ids = 100
+integer, parameter :: max_quantity_ids = 18
+integer, parameter :: max_location_ids = 200
 
 
 ! possible operation for modifying the boundary values
@@ -75,11 +80,13 @@ logical :: doLogging = .false.
 double precision :: ei_val(max_location_ids,max_quantity_ids)
 integer          :: ei_oper(max_location_ids,max_quantity_ids)
 
+integer          :: ei_locations_per_quantity(max_quantity_ids)
+
 contains 
 
 !------------------------
 
-  subroutine set_openda_buffer(val, location_id,quantity_id, operation)
+  subroutine set_openda_buffer(vals, nvals, location_id,quantity_id, operation)
 ! set the value of an exchange-item. This routine is typically called
 ! by an SE_setvalues routine (from OUTSIDE delft3D!) for a certain instance and exchange item (e.g. wind)
 ! In the case of forcings, the value can be a multiplier (1 + epsilon)
@@ -92,21 +99,76 @@ contains
  
   implicit none
   
-  integer, intent(in)          :: location_id   !   location identifier
-  integer, intent(in)          :: quantity_id   !   quantity identifier
-  double precision, intent(in) :: val           !   value to be set
-  integer, intent(in)          :: operation     !   operation: oper_multiply, oper_add, oper_set
+  integer, intent(in)                            :: location_id   !   location identifier
+  integer, intent(in)                            :: quantity_id   !   quantity identifier
+  integer, intent(in)                            :: nvals        
+  double precision, dimension(nvals), intent(in) :: vals          !   values to be set
+  integer, intent(in)                            :: operation     !   operation: oper_multiply, oper_add, oper_set
+  
+!------ local variables
+  integer                                        :: iloc
+  integer                                        :: ngrid  
   
   if (doLogging) then
-     print *, 'set_openda_buffer, loc-id=', location_id, ', q_id=', quantity_id, ', val=', val, ', oper:', operation
+     print *, 'set_openda_buffer, loc-id=', location_id, ', q_id=', quantity_id, ', val=', vals(1), ', oper:', operation
      call flush(6)
   endif
-  l_ei(location_id,quantity_id) = .true.
-  ei_val(location_id,quantity_id) = val
-  ei_oper(location_id,quantity_id) = operation
+  
+  if (nvals .eq. 1) then !standard situation
+     l_ei(location_id,quantity_id) = .true.
+     ei_val(location_id,quantity_id) = vals(1)
+     ei_oper(location_id,quantity_id) = operation
+  else
+      if (quantity_id /= windgu .and. quantity_id /=windgv) then
+        print *,'ERROR: set_openda_buffer: number of noise parameters should be 1 if no noise grid is present'
+        stop
+      endif
+      ! specific situation of a noise grid. The array vals in fact consists of triples
+      ! (xloc, yloc, value)
+      ! we  can use ei_val, to store these values. We need to store the xloc, yloc in some empty rows 
+      ! of ei_val. 
+      ! Be careful: we demand that nvals/3 <= max_location_ids!
+      ngrid = nvals/3
+      if (ngrid*3 /= nvals) then
+         print *,'ERROR set_openda_buffer: providing noise grid: number of grid parameters is inconsistent with meta information'
+         l_ei(1:max_location_ids,quantity_id) = .false.
+      endif
+      if (ngrid > max_location_ids) then
+          print *,'ERROR set_openda_buffer: noise grid is too large. Increase the allowed number of locations.'
+          l_ei(1:max_location_ids,quantity_id) = .false.
+      endif
+      do iloc = 1, ngrid
+         l_ei(iloc, quantity_id:quantity_id+2) = .true. ! set flag no true for both value and the locations
+         ei_val(iloc, quantity_id) = vals(iloc*3)
+         ei_val(iloc, quantity_id+1) = vals(iloc*3-2)   !quantity_id+1 is location for x_windgu or x_windgv
+         ei_val(iloc, quantity_id+2) = vals(iloc*3-1)   !quantity_id+2 is location for y_windgu or y_windgv
+       
+         ei_oper(iloc, quantity_id) = operation      
+         ei_oper(iloc, quantity_id+1) = oper_set      ! the locations are always set by openda
+         ei_oper(iloc, quantity_id+2) = oper_set      !    
+      enddo
+      ei_locations_per_quantity(quantity_id) = ngrid
+  endif
 
   end subroutine set_openda_buffer
 !---------------------------------------------------
+
+  function get_openda_buffersize(str_quantity) result (bsize)
+  !result
+  integer bsize
+
+  character(*) , intent (in) :: str_quantity  
+  
+  if (str_quantity .eq. 'windgu') then
+     bsize = ei_locations_per_quantity(windgu)
+  elseif (str_quantity .eq. 'windgv') then   
+     bsize = ei_locations_per_quantity(windgv)
+  else
+     bsize = 1 
+  endif  
+    
+  end function get_openda_buffersize
+!---------------------------------------------------  
 
   subroutine get_openda_buffer(str_quantity, loc_from_d3d, dim1, dim2, qarray)
   
@@ -122,38 +184,50 @@ contains
   integer          :: location_id, quantity_id
   double precision :: org_value
   
-  location_id = -1
-  quantity_id = -1
 
-  if (str_quantity .eq. 'windu') then
+
+  select case (str_quantity)
+       
+  case ('windu')
     location_id = 1
     quantity_id = windu 
-  endif
-
-  if (str_quantity .eq. 'windv') then
+  case ('windv') 
     location_id = 1
     quantity_id = windv 
-  endif
-  
-  if (str_quantity .eq. 'bound_HQ') then
+  case ('windgu') 
+    location_id = loc_from_d3d
+    quantity_id = windgu 
+  case ('windgv') 
+    location_id = loc_from_d3d
+    quantity_id = windgv 
+  case ('x_windgu') 
+    location_id = loc_from_d3d
+    quantity_id = x_windgu 
+  case ('x_windgv') 
+    location_id = loc_from_d3d
+    quantity_id = x_windgv 
+  case('y_windgu') 
+    location_id = loc_from_d3d
+    quantity_id = y_windgu 
+  case('y_windgv')
+    location_id = loc_from_d3d
+    quantity_id = y_windgv 
+  case('bound_HQ') 
     location_id = loc_from_d3d
     quantity_id = bound_HQ
-  endif
-  
-  if (str_quantity .eq. 'bound_temp') then
+  case('bound_temp') 
     location_id = loc_from_d3d
     quantity_id = bound_temp 
-  endif
- 
-  if (str_quantity .eq. 'bound_salt') then
+  case('bound_salt') 
      location_id = loc_from_d3d
      quantity_id = bound_salt 
-  endif 
-
-  if (str_quantity .eq. 'bound_astroH') then
+  case('bound_astroH') 
      location_id = loc_from_d3d
      quantity_id = bound_astroH 
-  endif 
+  case default 
+     location_id = -1
+     quantity_id = -1
+  endselect
   
   !print *, 'get_openda_buffer, loc-id=', location_id, ', q_id=', quantity_id
   !call flush(6)
@@ -190,6 +264,7 @@ contains
    implicit none
    
    l_ei = .false.  
+   ei_locations_per_quantity = 0
 
    end subroutine openda_buffer_initialize
    

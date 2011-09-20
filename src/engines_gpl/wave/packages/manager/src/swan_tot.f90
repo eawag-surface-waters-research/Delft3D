@@ -153,7 +153,7 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
             success = getmeteoval(swan_grids(i_swan)%grid_name, 'windu'     , wave_timmin, &
                                 & 1,1, 1, swan_input_fields%nmax   , &
                                 &      1, swan_input_fields%mmax   , &
-                                & windu_fp       )
+                                & windu_fp    , 0   )
             call checkmeteoresult_wave(success)
             swan_input_fields%windu = real(windu_fp, sp)
             !
@@ -163,7 +163,7 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
             success = getmeteoval(swan_grids(i_swan)%grid_name, 'windv'     , wave_timmin, &
                                 & 1, 1,  1, swan_input_fields%nmax   , &
                                 &        1, swan_input_fields%mmax   , &
-                                & windv_fp       )
+                                & windv_fp     , 0  )
             call checkmeteoresult_wave(success)
             swan_input_fields%windv = real(windv_fp, sp)
             !
@@ -173,7 +173,7 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
             !success = getmeteoval(swan_grids(i_swan)%grid_name, 'patm'      , wave_timmin, &
             !                    & 1, 1, 1, swan_input_fields%nmax   , &
             !                    &       1, swan_input_fields%mmax   , &
-            !                    & patm_fp        )
+            !                    & patm_fp   , 0     )
             !call checkmeteoresult_wave(success)
             !swan_input_fields%patm = real(patm_fp, sp)
             !
