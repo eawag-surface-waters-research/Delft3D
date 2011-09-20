@@ -1459,7 +1459,7 @@ subroutine find_noisegrid_vertices(x_mg, y_mg, ind, ngrid, &
    enddo
    if (ind(1)*ind(2)*ind(3)*ind(4) == 0) then
       print *,'error: noise grid cannot provide a bounding box ',ind
-      print *,'for meteo grid location ',x_mg,y_mg
+      print *,'for meteo grid location: ',x_mg,y_mg
       write(*,*) 'coarse grid points:',(xgrid(i),ygrid(i),';',i=1,ngrid)
    endif
 
