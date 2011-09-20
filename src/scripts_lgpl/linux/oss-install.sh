@@ -7,7 +7,7 @@ function copyFile () {
     # handle the error
     cp -fp $1 $2
     if [ $? != 0 ]; then
-        echo "can't to copy \"$1\" to \"$2\"" 1>&2
+        echo "can't copy \"$1\" to \"$2\"" 1>&2
         globalErrorLevel=1
     fi
 }
