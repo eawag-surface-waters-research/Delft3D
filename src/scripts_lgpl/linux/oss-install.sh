@@ -48,7 +48,7 @@ function delft3d_flow () {
 
     deltares_hydro
     flow2d3d
-    flow2d3d_openda
+    # Does not exist yet on Linux: flow2d3d_openda
     plugin_culvert
     plugin_delftflow_traform
     mormerge
