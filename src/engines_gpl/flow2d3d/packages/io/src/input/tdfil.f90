@@ -49,6 +49,8 @@ subroutine tdfil(lundia    ,luntd     ,error     ,filtd     ,fmttmp    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    integer, pointer      :: mfg
+    integer, pointer      :: nfg
 !
 ! Global variables
 !
@@ -61,8 +63,6 @@ subroutine tdfil(lundia    ,luntd     ,error     ,filtd     ,fmttmp    , &
 !
 ! Local variables
 !
-    integer, pointer      :: mfg
-    integer, pointer      :: nfg
     integer               :: ibeg   ! Begin position in the RECORD from where the search for data/record is started 
     integer               :: idef   ! Help var. containing default va- lue(s) for integer variable 
     integer               :: iend   ! Last position in the RECORD when the searched data/record is finished 
@@ -117,10 +117,10 @@ subroutine tdfil(lundia    ,luntd     ,error     ,filtd     ,fmttmp    , &
              endif
              goto 200
           endif
-          ival(1) = ival(1) -mfg +1
-          ival(2) = ival(2) -nfg +1
-          ival(3) = ival(3) -mfg +1
-          ival(4) = ival(4) -nfg +1
+          ival(1) = ival(1) - mfg + 1
+          ival(2) = ival(2) - nfg + 1
+          ival(3) = ival(3) - mfg + 1
+          ival(4) = ival(4) - nfg + 1
           !
           ! check if thin dams are fully (.TRUE.) or partly (.FALSE.) outside subdomain
           !

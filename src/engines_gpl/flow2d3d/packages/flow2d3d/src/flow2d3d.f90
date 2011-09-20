@@ -120,6 +120,7 @@ subroutine runme_core(max_keyval, keys   , values   , error_message)
           ! for debugging:
           ! get some time to attach debugger to process
           !
+          write(*,*) "Waiting for file """,trim(values(i)),""" to appear..."
           do
           inquire(file=trim(values(i)), exist=ex)
              if (ex) exit

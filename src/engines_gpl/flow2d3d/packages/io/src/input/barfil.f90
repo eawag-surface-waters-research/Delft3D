@@ -40,6 +40,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use dfparall
     !
     implicit none
     !
@@ -47,6 +48,8 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    integer, pointer      :: mfg
+    integer, pointer      :: nfg
 !
 ! Local parameters
 ! 
@@ -59,7 +62,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
     integer                                                                   , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                                                 :: nmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                                   , intent(in)  :: nmaxus !  Description and declaration in esm_alloc_int.f90
-    integer                                                                   , intent(in)  :: nsluv  !  Description and declaration in dimens.igs
+    integer                                                                                 :: nsluv  !  Description and declaration in dimens.igs
     integer      , dimension(5, nsluv)                                        , intent(out) :: mnbar  !  Description and declaration in esm_alloc_int.f90
     integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)              :: kspu   !  Description and declaration in esm_alloc_int.f90
     integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)              :: kspv   !  Description and declaration in esm_alloc_int.f90
@@ -68,10 +71,11 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
     character(*)                                                                            :: filbar !!  File name for Barriers/contr.gates
     character(20), dimension(nsluv)                                                         :: nambar !  Description and declaration in esm_alloc_char.f90
 !
-!
 ! Local variables
 !
-    integer                          :: ibar                 ! Loop variable 
+    integer                          :: ibar                 ! Loop variable counting the number of valid barriers
+                                                             ! When parallel, the total number of valid barriers in this partition may differ from nsluv.
+                                                             ! In that case, nsluv must be updated.
     integer                          :: ibeg                 ! Begin position in the RECORD from where the search for data/record is started 
     integer                          :: idef                 ! Help var. containing default va- lue(s) for integer variable 
     integer                          :: iend                 ! Last position in the RECORD when the searched data/record is finished 
@@ -93,11 +97,13 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
     integer, external                :: newlun
     integer                          :: nlook                ! Nr. of values to look for in a record 
     integer                          :: nrflds
+    integer                          :: numbarlinesread      ! Nr. of barier lines read. This will always sum up to (the old value of) nsluv.
     integer, dimension(4)            :: ival                 ! Help array (integer) where the data, recently read from the MD-file, are stored temporarily 
     integer, dimension(maxfld)       :: ifield
     integer, dimension(maxfld)       :: itype
     integer, dimension(maxfld)       :: lenchr 
     logical, external                :: exifil
+    logical                          :: outside              ! indicating whether a line of thin dams is outside subdomain (.TRUE.) or not (.FALSE.)
     real(fp)                         :: brlosc               ! Barrier energy loss coefficient 
     real(fp)                         :: gate                 ! Initial gate height for barrier 
     real(fp)                         :: rdef                 ! Help var. containing default va- lue(s) for real variable 
@@ -106,29 +112,30 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
     character(1)                     :: direct               ! Help string for reading direction 
     character(132)                   :: rec132               ! Standard rec. length in an attribute file (132) 
     character(20)                    :: btype                ! Barrier type
-    character(40)                    :: errmsg               ! Text string error messages 
+    character(40)                    :: errmsg               ! Text string error messages
+    character(300)                   :: msg
 !
 !
 !! executable statements -------------------------------------------------------
 !
+    mfg => gdp%gdparall%mfg
+    nfg => gdp%gdparall%nfg
     !
-    !
-    !
-    !-----initialize local parameters
+    ! initialize local parameters
     !
     direct = ' '
-    idef = 0
-    rdef = 0.0
-    lenc = 1
+    idef   = 0
+    rdef   = 0.0_fp
+    lenc   = 1
     errmsg = 'barrier '
     !
-    !-----test file existence
+    ! test file existence
     !
     call noextspaces(filbar    ,lfile     )
     error = .not.exifil(filbar(:lfile), lundia, 'G004', gdp)
     if (error) goto 9999
     !
-    !-----open formatted file, if not formatted IOCOND <> 0
+    ! open formatted file, if not formatted IOCOND <> 0
     !
     luntmp = newlun(gdp)
     open (luntmp, file = filbar(:lfile), form = 'formatted', status = 'old',    &
@@ -136,198 +143,221 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
     if (iocond/=0) then
        error = .true.
        call prterr(lundia    ,'G007'    ,filbar(:lfile)       )
-       !
        goto 9999
     endif
     !
-    !-----freeformatted file, skip lines starting with a '*'
+    ! freeformatted file, skip lines starting with a '*'
     !
     call skipstarlines(luntmp    )
     !
-    !-----freeformatted file, read input and test iocond
+    ! freeformatted file, read input and test iocond
     !
-    do ibar = 1, nsluv
+    numbarlinesread = 0
+    ibar            = 0
     ! --->
   100  continue
+       if (numbarlinesread >= nsluv) goto 200
        read (luntmp, '(a)', iostat = iocond) rec132
-       if (iocond/=0) then
-          if (iocond<0) then
-             call prterr(lundia    ,'G006'    ,filbar(:lfile)       )
-          !
+       if (iocond /= 0) then
+          if (iocond < 0) then
+             call prterr(lundia, 'G006', filbar(:lfile))
           else
-             call prterr(lundia    ,'G007'    ,filbar(:lfile)       )
-          !
+             call prterr(lundia, 'G007', filbar(:lfile))
           endif
           error = .true.
           goto 300
        endif
        !
-       !------- Ignore empty lines
+       !  Ignore empty lines
        !
        if (rec132==' ') goto 100
        ! <---
        !
-       !--------define barrier location name
+       ! Line read with a barrier description
        !
-       nambar(ibar) = rec132(:20)
-       call small(nambar(ibar)         ,20        )
+       numbarlinesread = numbarlinesread + 1
        !
-       !--------there must be a name defined !!
-       !
-       if (nambar(ibar)=='') then
-          errmsg(12:) = ': no name defined'
-          error = .true.
-          call prterr(lundia    ,'U021'    ,errmsg    )
-          !
-          goto 300
-       endif
-       !
-       !--------barrier direction is indicated by U or V string
+       ! scan the line (skipping the name)
        !
        ibeg = 21
        iend = 132
        call scannr(rec132    ,ibeg      ,iend      ,nrflds    ,itype     , &
                  & ifield    ,rfield    ,cfield    ,lenchr    ,maxfld    , &
                  & .true.    ,.false.   ,.false.   )
-       !
        if (nrflds<7 .or. itype(1)/=3) then
           error = .true.
           call prterr(lundia    ,'G007'    ,filbar(1:lfile)      )
-          !
           goto 300
        endif
-       direct = cfield(1)(1:1)
        !
-       !--------barrier location is defined in M,N coordinates
+       ! barrier location is defined in M,N coordinates
        !
        if (itype(2)/=1 .or. itype(3)/=1 .or. itype(4)/=1 .or. itype(5)/=1) then
           error = .true.
           call prterr(lundia    ,'G007'    ,filbar(1:lfile)      )
-          !
           goto 300
        endif
        !
-       m1 = ifield(2)
-       n1 = ifield(3)
-       m2 = ifield(4)
-       n2 = ifield(5)
-       mnbar(1, ibar) = m1
-       mnbar(2, ibar) = n1
-       mnbar(3, ibar) = m2
-       mnbar(4, ibar) = n2
+       ! Put the M,N indices in ival (partition safe) and put a copy in m/n1/2
+       ival(1) = ifield(2) - mfg + 1
+       ival(2) = ifield(3) - nfg + 1
+       ival(3) = ifield(4) - mfg + 1
+       ival(4) = ifield(5) - nfg + 1
+       m1      = ival(1)
+       n1      = ival(2)
+       m2      = ival(3)
+       n2      = ival(4)
        !
-       !--------Test contents of read coordinate pairs
+       ! Check if barrier is fully (.TRUE.) outside subdomain/partition
+       ! If partly outside, ival is changed, specifying the interior part
+       !
+       call adjlin (ival,outside,gdp%d%mmax,gdp%d%nmaxus)
+       if (.not. parll) then
+          !
+          ! If ival is changed (compared with the copy in m/n1/2) the barrier is partly outside the domain
+          ! This is not allowed when running sequential
+          !
+          if (       ival(1)/=m1 .or. ival(2)/=n1 &
+              & .or. ival(3)/=m2 .or. ival(4)/=n2) then
+             write(msg,'(3a)') "Barrier """, trim(rec132), """ lies partly outside the computational domain."
+             call prterr(lundia, 'U021', trim(msg))
+             error = .true.
+             goto 300
+          endif 
+       endif
+       if (outside) then
+          if (parll) then
+             !
+             ! A barrier outside this partition is allowed
+             ! do not increase ibar and process the next line from the input file
+             !
+             goto 100
+          else
+             write(msg,'(3a)') "Barrier """, trim(rec132), """ lies outside the computational domain."
+             call prterr(lundia, 'U021', trim(msg))
+             error = .true.
+             goto 300
+          endif
+       else
+          ibar          = ibar + 1
+          m1            = ival(1)
+          n1            = ival(2)
+          m2            = ival(3)
+          n2            = ival(4)
+          mnbar(1,ibar) = m1
+          mnbar(2,ibar) = n1
+          mnbar(3,ibar) = m2
+          mnbar(4,ibar) = n2
+       endif
+       !
+       ! define barrier location name
+       !
+       nambar(ibar) = rec132(:20)
+       call small(nambar(ibar)         ,20        )
+       !
+       ! there must be a name defined !!
+       !
+       if (nambar(ibar) == '') then
+          errmsg(12:) = ': no name defined'
+          error = .true.
+          call prterr(lundia    ,'U021'    ,errmsg    )
+          goto 300
+       endif
+       !
+       ! barrier direction is indicated by U or V string
+       !
+       direct = cfield(1)(1:1)
+       !
+       ! Test contents of read coordinate pairs
        !
        call increm(m1        ,n1        ,m2        ,n2        ,incx      , &
                  & incy      ,maxinc    ,error     )
-       !
-       !--------If error then no multiple of 45 degrees
-       !
        if (error) then
+          !
+          ! No multiple of 45 degrees
+          !
           errmsg(9:) = nambar(ibar)
           call prterr(lundia    ,'V231'    ,errmsg(:32)          )
-          !
           error = .true.
           goto 300
        endif
        !
-       !--------Inside computational domain ?
+       ! test for barrier type 'U' or 'V' and fill mask array
        !
-       if (m1>mmax .or. m1<1 .or. m2>mmax .or. m2<1) then
-          call prterr(lundia    ,'V232'    ,errmsg(:22)          )
-          !
-          error = .true.
-          goto 300
-       endif
-       if (n1>nmaxus .or. n1<1 .or. n2>nmaxus .or. n2<1) then
-          call prterr(lundia    ,'V232'    ,errmsg(:22)          )
-          !
-          error = .true.
-          goto 300
-       endif
-       !
-       !--------test for barrier type 'U' or 'V' and fill mask array
-       !
-       call small(direct    ,1         )
+       call small(direct, 1)
        m = m1 - incx
        n = n1 - incy
        !
-       !-----------First U-barriers
+       ! First U-barriers
        !
-       if (direct=='u') then
+       if (direct == 'u') then
           mnbar(5, ibar) = 0
           do inc = 1, maxinc + 1
              m = m + incx
              n = n + incy
              !
-             !-----------------Check for different structures defined (not allowed)
+             ! Check for different structures defined (not allowed)
              !
-             if (abs(kspu(n, m, 0))>2) then
+             if (abs(kspu(n, m, 0)) > 2) then
                 errmsg(1:) = nambar(ibar) // ' on other structure'
                 call prterr(lundia    ,'V235'    ,errmsg(:40)          )
-                !
                 error = .true.
                 goto 300
              endif
              !
-             !-----------------Define structure point masks for barrier as 3D-gate
+             ! Define structure point masks for barrier as 3D-gate
              !
              kspu(n, m, 0) = 4
           enddo
        !
-       !-----------V-barriers
+       ! V-barriers
        !
-       elseif (direct=='v') then
+       elseif (direct == 'v') then
           mnbar(5, ibar) = 1
           do inc = 1, maxinc + 1
              m = m + incx
              n = n + incy
              !
-             !-----------------Check for different structures defined (not allowed)
+             ! Check for different structures defined (not allowed)
              !
              if (abs(kspv(n, m, 0))>2) then
                 errmsg(1:) = nambar(ibar) // ' on other structure'
                 call prterr(lundia    ,'V235'    ,errmsg(:40)          )
-                !
                 error = .true.
                 goto 300
              endif
              !
-             !-----------------Define structure point masks for barrier as 3D-gate
+             ! Define structure point masks for barrier as 3D-gate
              !
              kspv(n, m, 0) = 4
           enddo
        else
           errmsg(23:26) = ' (' // direct // ')'
           call prterr(lundia    ,'V233'    ,errmsg(:11)          )
-          !
           error = .true.
           goto 300
        endif
        !
-       !--------switch between old barriers with BRLOSC and GATEHEIGHT versus
+       ! switch between old barriers with BRLOSC and GATEHEIGHT versus
        !        new barriers that continue with barrier formulation type
        !
-       if (itype(7)<3) then
+       if (itype(7) < 3) then
           !
           !--> old barrier format:
-          !--------read BRLOSC from record, default value not allowed
+          ! read BRLOSC from record, default value not allowed
           !
           if (itype(6)>2 .or. itype(7)>2) then
              error = .true.
              call prterr(lundia    ,'G007'    ,filbar(1:lfile)      )
-             !
              goto 300
           endif
-          !
           brlosc = rfield(6)
           gate   = rfield(7)
           !
-          !--------Value for loss coefficient permitted ?
+          ! Value for loss coefficient permitted ?
           !
-          if (brlosc<0.0) then
+          if (brlosc < 0.0_fp) then
              call prterr(lundia    ,'V234'    ,errmsg(:22)          )
-             !
              error = .true.
           endif
           cbuv(1, ibar) = gate
@@ -335,78 +365,76 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
           cbuv(3, ibar) = brlosc
        else
           !
-          !--> new barrier format:
+          !---> new barrier format:
           !
-          if (itype(6)>2) then
+          if (itype(6) > 2) then
              error = .true.
              call prterr(lundia    ,'G007'    ,filbar(1:lfile)      )
-             !
              goto 300
           endif
           cbuv(1, ibar) = rfield(6) ! gate height
-          !
-          btype = cfield(7)
-          call small(btype ,20 )
+          btype         = cfield(7)
+          call small(btype, 20)
           select case(btype)
           case('a')
              if (nrflds<8 .or. itype(8)>2) then
                 error = .true.
                 call prterr(lundia    ,'G007'    ,filbar(1:lfile)      )
-                !
                 goto 300
              endif
-             !
              cbuv(2, ibar) = 1.0_fp
              cbuv(3, ibar) = rfield(8) ! brlosc
              !
-             !--------Value for loss coefficient permitted ?
+             ! Value for loss coefficient permitted ?
              !
-             if (rfield(8)<0.0) then
+             if (rfield(8) < 0.0_fp) then
                 error = .true.
                 call prterr(lundia    ,'V234'    ,errmsg(:22)          )
-                !
                 goto 300
              endif
           case('b')
              if (nrflds<9 .or. itype(8)>2 .or. itype(9)>2) then
                 error = .true.
                 call prterr(lundia    ,'G007'    ,filbar(1:lfile)      )
-                !
                 goto 300
              endif
-             !
              cbuv(2, ibar) = 2.0_fp
              cbuv(3, ibar) = rfield(8)
              cbuv(4, ibar) = rfield(9)
              !
-             !--------Value for loss coefficient permitted ?
+             ! Value for loss coefficient permitted ?
              !
-             if (rfield(8)<0.0 .or. (rfield(8)+rfield(9))<0.0) then
+             if (rfield(8)<0.0_fp .or. (rfield(8)+rfield(9))<0.0_fp) then
                 error = .true.
                 call prterr(lundia    ,'V234'    ,errmsg(:22)          )
-                !
                 goto 300
              endif
           end select
        endif
-    enddo
+       !
+       ! process next line from the input file
+       !
+    goto 100
+  200 continue
     !
-    !-----Not twice the same barrier name
+    ! Finished reading input file
+    ! When running parallel: nsluv may be smaller for this partition:
+    nsluv = ibar
+    !
+    ! Not twice the same barrier name
     !
     do ibar = 1, nsluv
        do n = 1, ibar - 1
-          if (nambar(n)==nambar(ibar)) then
+          if (nambar(n) == nambar(ibar)) then
              error = .true.
              call prterr(lundia    ,'U021'    ,'Barrier name already used: ' // nambar(ibar)         )
-          !
           endif
        enddo
     enddo
     !
-    !-----close file
+    ! close file
     !
   300 continue
     close (luntmp)
-    !
  9999 continue
 end subroutine barfil

@@ -400,13 +400,19 @@ end function trisim_step
 !-----------------------------------------------------------------------
 integer function trisim_finish(gdp) result(retVal)
     use globaldata
+    use dfparall
     !    
     implicit none
-    !    
+    !
+    ! global    
     type(globdat),target :: gdp
-    integer            , pointer :: lundia
- 
-    lundia       => gdp%gdinout%lundia 
+    !
+    ! local
+    integer          :: i
+    integer, pointer :: lundia
+    !
+    ! body
+    lundia => gdp%gdinout%lundia 
     retval = 0
 
     call tricom_finish(gdp)
@@ -419,8 +425,15 @@ integer function trisim_finish(gdp) result(retVal)
     endif
     !
     ! Write diagnostics and close file
+    ! The "do-loop, dfsync, if i=inode" ensures that trisim_close is called sequentially for all partitions.
+    ! This is needed to avoid clashes, for example on general TMP-files that all partitions want to delete.
     !
-    retval = trisim_close(gdp)
+    do i=1,nproc
+       call dfsync(gdp)
+       if (i == inode) then
+          retval = trisim_close(gdp)
+       endif
+    enddo
     !
 end function trisim_finish
 !
