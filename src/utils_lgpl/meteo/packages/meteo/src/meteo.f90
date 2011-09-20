@@ -632,12 +632,11 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
    ! Put quantity values for given time for complete grid in qarray
    ! Spiderweb input is added to possible other types of meteo input
    !
- 
+   !
    ! Note that size(qarray) need not to be equal to the size of the
    ! meteo%flowgrid. When running in parallel, qarray is defined for a local 
    ! domain while the meteo information is always stored globally.
- 
-   
+   !
    implicit none
 !
 ! Return value
@@ -661,81 +660,81 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
 !
 ! Local variables
 !
-   integer                             :: dir
-   integer                             :: i
-   integer, dimension(4)               :: ind
-   integer                             :: iq
-   integer                             :: k
-   integer                             :: mx
-   integer                             :: nx
-   integer                             :: kx
-   integer                             :: it1
-   integer                             :: it0
-   integer                             :: ierr
-   integer                             :: m
-   integer                             :: m_mg     ! loop variable on meteo grid
-   integer                             :: n
-   integer                             :: n_mg     ! loop variable on meteo grid
-   integer                             :: i1
-   integer                             :: j1
-   integer                             :: mv
-   integer                             :: nv
-   integer                             :: iyx
-   integer                             :: iyy
-   real(fp)                            :: unival
-   real(fp)                            :: t1
-   real(fp)                            :: t0
-   real(fp)                            :: a1
-   real(fp)                            :: a0
-   real(fp)                            :: fm
-   real(fp)                            :: rcycl
-   real(fp)                            :: x
-   real(hp)                            :: x_hp
-   real(hp)                            :: x_mg    ! x-location on meteo grid
-   real(fp)                            :: y
-   real(hp)                            :: y_hp
-   real(hp)                            :: y_mg    ! y-location on meteo grid
-   real(fp)                            :: xx
-   real(fp)                            :: yy
-   real(fp)                            :: x00_eye
-   real(fp)                            :: y00_eye
-   real(fp)                            :: x01
-   real(fp)                            :: y01
-   real(fp)                            :: x01_eye
-   real(fp)                            :: y01_eye
-   real(fp)                            :: dx
-   real(fp)                            :: dy
-   real(fp)                            :: dx1
-   real(fp)                            :: dy1
-   real(fp)                            :: x1
-   real(fp)                            :: y1
-   real(fp)                            :: di1
-   real(fp)                            :: dj1
-   real(fp)                            :: vv0
-   real(fp)                            :: vv1
-   real(fp)                            :: wmag
-   real(fp)                            :: wdir
-   real(fp)                            :: wdir0
-   real(fp)                            :: wdir1
-   real(fp), dimension(3)              :: z         ! spiderweb wind_speed (1), wind_from_direction (2) and air_pressure (3)
-   real(fp), dimension(4)              :: f
-   real(fp), dimension(4)              :: u
-   real(fp), dimension(4)              :: v
-   real(hp), dimension(4)              :: f_hp
-   real(hp), dimension(4)              :: u_hp
-   real(hp), dimension(4)              :: v_hp
-   real(hp), dimension(4)              :: w         ! weighing factors
-   real(fp), dimension(:,:)  , pointer :: qdest
-   real(hp), dimension(:,:,:), pointer :: v1
-   real(hp), dimension(:,:,:), pointer :: v0        ! 3-dim array
-   real(hp), dimension(:)    , pointer :: u1
-   real(hp), dimension(:)    , pointer :: u0        ! 1-dim array
+   integer                               :: dir
+   integer                               :: i
+   integer, dimension(4)                 :: ind
+   integer                               :: iq
+   integer                               :: k
+   integer                               :: mx
+   integer                               :: nx
+   integer                               :: kx
+   integer                               :: it1
+   integer                               :: it0
+   integer                               :: ierr
+   integer                               :: m
+   integer                               :: m_mg     ! loop variable on meteo grid
+   integer                               :: n
+   integer                               :: n_mg     ! loop variable on meteo grid
+   integer                               :: i1
+   integer                               :: j1
+   integer                               :: mv
+   integer                               :: nv
+   integer                               :: iyx
+   integer                               :: iyy
+   real(fp)                              :: unival
+   real(fp)                              :: t1
+   real(fp)                              :: t0
+   real(fp)                              :: a1
+   real(fp)                              :: a0
+   real(fp)                              :: fm
+   real(fp)                              :: rcycl
+   real(fp)                              :: x
+   real(hp)                              :: x_hp
+   real(hp)                              :: x_mg    ! x-location on meteo grid
+   real(fp)                              :: y
+   real(hp)                              :: y_hp
+   real(hp)                              :: y_mg    ! y-location on meteo grid
+   real(fp)                              :: xx
+   real(fp)                              :: yy
+   real(fp)                              :: x00_eye
+   real(fp)                              :: y00_eye
+   real(fp)                              :: x01
+   real(fp)                              :: y01
+   real(fp)                              :: x01_eye
+   real(fp)                              :: y01_eye
+   real(fp)                              :: dx
+   real(fp)                              :: dy
+   real(fp)                              :: dx1
+   real(fp)                              :: dy1
+   real(fp)                              :: x1
+   real(fp)                              :: y1
+   real(fp)                              :: di1
+   real(fp)                              :: dj1
+   real(fp)                              :: vv0
+   real(fp)                              :: vv1
+   real(fp)                              :: wmag
+   real(fp)                              :: wdir
+   real(fp)                              :: wdir0
+   real(fp)                              :: wdir1
+   real(fp), dimension(3)                :: z         ! spiderweb wind_speed (1), wind_from_direction (2) and air_pressure (3)
+   real(fp), dimension(4)                :: f
+   real(fp), dimension(4)                :: u
+   real(fp), dimension(4)                :: v
+   real(hp), dimension(4)                :: f_hp
+   real(hp), dimension(4)                :: u_hp
+   real(hp), dimension(4)                :: v_hp
+   real(hp), dimension(4)                :: w         ! weighing factors
+   real(fp), dimension(:,:)  , pointer   :: qdest
+   real(hp), dimension(:,:,:), pointer   :: v1
+   real(hp), dimension(:,:,:), pointer   :: v0        ! 3-dim array
+   real(hp), dimension(:)    , pointer   :: u1
+   real(hp), dimension(:)    , pointer   :: u0        ! 1-dim array
    real(fp), dimension(:,:), allocatable :: meteo_noise
-   character(20)                       :: tex
-   type(tmeteo)              , pointer :: meteo     ! all meteo for one subdomain
-   type(tmeteoitem)          , pointer :: meteoitem
-   type(tgrid)               , pointer :: grid
-   type(tspiderweb)          , pointer :: spw
+   character(20)                         :: tex
+   type(tmeteo)              , pointer   :: meteo     ! all meteo for one subdomain
+   type(tmeteoitem)          , pointer   :: meteoitem
+   type(tgrid)               , pointer   :: grid
+   type(tspiderweb)          , pointer   :: spw
 !
 !! executable statements -------------------------------------------------------
 !
@@ -936,9 +935,12 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
                v1    => meteoitem%field(it1)%arr3d
                v0    => meteoitem%field(it0)%arr3d
                grid  => meteoitem%grid
+               !
                ! interpolate and add noise to the wind field
+               !
                if (present(gridnoise)) then
-                  !interpolate towards the meteo grid. That means: loop over all
+                  !
+                  ! Interpolate towards the meteo grid. That means: loop over all
                   ! meteo grid points; a bounding quadrangle on the coarse grid has to be found;
                   ! (using findnm is not possible since the noisegrid does not contain 
                   ! curvilinaer information (i.e. it has no nmax,mmax; it is one-dimensional!))
@@ -948,13 +950,13 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
                   ! each meteo gridpoint. This quadrangle should ideally be covering the meteo gridpoint.
                   !
                   allocate(meteo_noise(grid%mmax, grid%nmax))  
-                  meteo_noise = 0.0 
+                  meteo_noise = 0.0_fp
                   do m_mg = 1, grid%mmax
                      do n_mg = 1, grid%nmax 
                         x_mg = grid%x(m_mg,n_mg)
                         y_mg = grid%y(m_mg,n_mg)
                         call find_noisegrid_vertices(x_mg, y_mg, ind, grid_size, &
-                                                     gridnoise(:,2), gridnoise(:,3))
+                                                   & gridnoise(:,2), gridnoise(:,3))
                         do dir=1,4                                                     
                            u_hp(dir) = real(gridnoise(ind(dir),2),hp)
                            v_hp(dir) = real(gridnoise(ind(dir),3),hp)
@@ -962,7 +964,7 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
                         x_hp = real(x_mg, hp)
                         y_hp = real(y_mg, hp)
                         call bilin5(u_hp, v_hp, x_hp, y_hp, f_hp, ierr)
-
+                        !
                         if (ierr == 1) then
                            meteomessage = 'noisegrid: error in bilin5'
                            success = .false.
@@ -976,17 +978,21 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
                         meteo_noise(m_mg,n_mg) = w(1)*f(1) + w(2)*f(2) + w(3)*f(3) + w(4)*f(4)
                      enddo
                   enddo
+                  !
                   ! now add the noise field to the meteofields from file
                   ! at two timelevels, since time interpolation has not occured yet.
-                   v0(:,:,1) = v0(:,:,1) + meteo_noise(:,:) 
-                   v1(:,:,1) = v1(:,:,1) + meteo_noise(:,:)
-                   ! here: debug output of noise possible
-                   deallocate(meteo_noise)
+                  !
+                  v0(:,:,1) = v0(:,:,1) + meteo_noise(:,:) 
+                  v1(:,:,1) = v1(:,:,1) + meteo_noise(:,:)
+                  !
+                  ! here: debug output of noise possible
+                  !
+                  deallocate(meteo_noise)
                endif
-        !
-        !       interpolate the wind field towards the D3Dflow-grid
-        !       at this stage, the wind noise (if present) has already been added
-        ! 
+               !
+               ! interpolate the wind field towards the D3Dflow-grid
+               ! at this stage, the wind noise (if present) has already been added
+               ! 
                do m = 1,meteo%flowgrid%mmax
                   do n = 1,meteo%flowgrid%nmax
                      if (meteo%flowgrid%kcs(n, m) > 0) then
@@ -1398,11 +1404,9 @@ end function findnm
 subroutine find_noisegrid_vertices(x_mg, y_mg, ind, ngrid, &
                                       xgrid, ygrid)
    implicit none
-   
 !
 ! Global variables
 !
-
     integer, dimension(4)       , intent(out) :: ind   ! indices of noise grid to form a quadrangle 
                                                        ! covering x_mg,y_mg
     real(fp)                    , intent(in)  :: x_mg  ! x-coordinate of meteo grid point
@@ -1410,31 +1414,33 @@ subroutine find_noisegrid_vertices(x_mg, y_mg, ind, ngrid, &
     integer                     , intent(in)  :: ngrid
     real(fp), dimension(ngrid)  , intent(in)  :: xgrid
     real(fp), dimension(ngrid)  , intent(in)  :: ygrid
-
+!
 ! local variables
-
-   integer                                    :: i
-   logical                                    :: lwest
-   logical                                    :: lsouth
-   real(fp)                                   :: distsqr
-   real(fp)                                   :: d2_sw
-   real(fp)                                   :: d2_se 
-   real(fp)                                   :: d2_nw
-   real(fp)                                   :: d2_ne
-!----------------------------------------------------------
-!body
-   ind = 0
-   d2_sw = 1E20;
-   d2_se = 1E20;
-   d2_ne = 1E20;
-   d2_nw = 1E20;
-
-!   look for the nearest coarse grid points southwest, southeast etc
-!   We assume that there is at least one grid point in each direction!   
+!
+   integer     :: i
+   logical     :: lwest
+   logical     :: lsouth
+   real(fp)    :: distsqr
+   real(fp)    :: d2_sw
+   real(fp)    :: d2_se 
+   real(fp)    :: d2_nw
+   real(fp)    :: d2_ne
+!
+!! executable statements -------------------------------------------------------
+!
+   ind   = 0
+   d2_sw = 1.0E20_fp;
+   d2_se = 1.0E20_fp;
+   d2_ne = 1.0E20_fp;
+   d2_nw = 1.0E20_fp;
+   !
+   ! Look for the nearest coarse grid points southwest, southeast etc
+   ! We assume that there is at least one grid point in each direction!   
+   !
    do i = 1, ngrid
       distsqr = (x_mg-xgrid(i))**2 + (y_mg-ygrid(i))**2
-      lsouth = (ygrid(i) < y_mg)
-      lwest = (xgrid(i) < x_mg)
+      lsouth  = (ygrid(i) < y_mg)
+      lwest   = (xgrid(i) < x_mg)
       if (lsouth .and. lwest) then           !SW (1)
          if (distsqr < d2_sw ) then
             d2_sw  = distsqr
@@ -1458,13 +1464,14 @@ subroutine find_noisegrid_vertices(x_mg, y_mg, ind, ngrid, &
       endif     
    enddo
    if (ind(1)*ind(2)*ind(3)*ind(4) == 0) then
-      print *,'error: noise grid cannot provide a bounding box ',ind
-      print *,'for meteo grid location: ',x_mg,y_mg
+      write(*,*) 'error: noise grid cannot provide a bounding box ',ind
+      write(*,*) 'for meteo grid location: ',x_mg,y_mg
       write(*,*) 'coarse grid points:',(xgrid(i),ygrid(i),';',i=1,ngrid)
    endif
-
 end subroutine find_noisegrid_vertices
-
+!
+!
+!
 !===============================================================================
 subroutine pinpok(xl, yl, n, x, y, inside, maxhul)
    implicit none

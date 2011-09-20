@@ -51,16 +51,16 @@ subroutine incmeteo(timhr  ,grdang ,windu  ,windv ,patm   , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer  , pointer :: nmax
-    integer  , pointer :: mmax
-    integer  , pointer :: nlb
-    integer  , pointer :: nub
-    integer  , pointer :: mlb
-    integer  , pointer :: mub
-    integer  , pointer :: nmaxus
-    integer  , pointer :: kc
-    integer  , pointer :: itdate
-    real(fp) , pointer :: tzone
+    integer        , pointer :: nmax
+    integer        , pointer :: mmax
+    integer        , pointer :: nlb
+    integer        , pointer :: nub
+    integer        , pointer :: mlb
+    integer        , pointer :: mub
+    integer        , pointer :: nmaxus
+    integer        , pointer :: kc
+    integer        , pointer :: itdate
+    real(fp)       , pointer :: tzone
     type(tECHandle), pointer :: ECHandle
     integer        , pointer :: patmECItemId
     integer        , pointer :: uwindECItemId
@@ -83,12 +83,12 @@ subroutine incmeteo(timhr  ,grdang ,windu  ,windv ,patm   , &
 ! Local variables
 !
     integer                                   :: igrid
-    real(fp)                                  :: time
-    logical                                   :: success
-    real(fp)   ,allocatable, dimension(:,:)   :: gridunoise
-    real(fp)   ,allocatable, dimension(:,:)   :: gridvnoise
     integer                                   :: gugridsize
     integer                                   :: gvgridsize
+    logical                                   :: success
+    real(fp)                                  :: time
+    real(fp)   ,allocatable, dimension(:,:)   :: gridunoise
+    real(fp)   ,allocatable, dimension(:,:)   :: gridvnoise
 
 !
 !! executable statements -------------------------------------------------------
@@ -119,27 +119,30 @@ subroutine incmeteo(timhr  ,grdang ,windu  ,windv ,patm   , &
        !
        ! update wind arrays
        !
-       
+       !
        ! First: check if wind noise grid on curvilinear grid is available 
+       !
        gugridsize = get_openda_buffersize('windgu')
        if (gugridsize > 0) then
           allocate(gridunoise(gugridsize,3))
-          gridunoise = 0.0
+          gridunoise = 0.0_fp
           do igrid = 1, gugridsize
-             call get_openda_buffer('windgu', igrid, 1, 1, gridunoise(igrid,1))       
+             call get_openda_buffer('windgu'  , igrid, 1, 1, gridunoise(igrid,1))       
              call get_openda_buffer('x_windgu', igrid, 1, 1, gridunoise(igrid,2))  
              call get_openda_buffer('y_windgu', igrid, 1, 1, gridunoise(igrid,3))               
           enddo
+          !
           ! if gridnoise is not empty, call getmeteoval with extra argument: triple array to be interpolated.  
+          !
           success = getmeteoval(gdp%runid, 'windu', time, gdp%gdparall%mfg, gdp%gdparall%nfg,   &
-                                nlb, nub, mlb, mub, windu, gugridsize,gridunoise)
+                              & nlb, nub, mlb, mub, windu, gugridsize,gridunoise)
           deallocate(gridunoise)
        else
           success = getmeteoval(gdp%runid, 'windu', time, gdp%gdparall%mfg, gdp%gdparall%nfg,   &
-                                nlb, nub, mlb, mub, windu, 0)
+                              & nlb, nub, mlb, mub, windu, 0)
        endif  
        call checkmeteoresult(success, gdp)
- 
+       !
        gvgridsize = get_openda_buffersize('windgv')
        if (gvgridsize > 0) then
           allocate(gridvnoise(gvgridsize,3))
@@ -148,8 +151,10 @@ subroutine incmeteo(timhr  ,grdang ,windu  ,windv ,patm   , &
              call get_openda_buffer('windgv', igrid, 1, 1, gridvnoise(igrid,1))       
              call get_openda_buffer('x_windgv', igrid, 1, 1, gridvnoise(igrid,2))  
              call get_openda_buffer('y_windgv', igrid, 1, 1, gridvnoise(igrid,3))               
-          enddo   
+          enddo
+          !
           ! if gridnoise is not empty, call getmeteoval with extra argument: triple array to be interpolated.  
+          !
           success = getmeteoval(gdp%runid, 'windv', time, gdp%gdparall%mfg, gdp%gdparall%nfg, &
                                 nlb, nub, mlb, mub, windv, gvgridsize, gridvnoise)
           deallocate(gridvnoise)
@@ -158,7 +163,7 @@ subroutine incmeteo(timhr  ,grdang ,windu  ,windv ,patm   , &
           nlb, nub, mlb, mub, windv, 0)       
        endif          
        call checkmeteoresult(success, gdp)
-
+       !
        success = getmeteoval(gdp%runid,  'patm', time, gdp%gdparall%mfg, gdp%gdparall%nfg, nlb, nub, mlb, mub,  patm, 0)
        call checkmeteoresult(success, gdp)
     else
