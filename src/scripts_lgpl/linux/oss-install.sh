@@ -8,7 +8,7 @@ function copyFile () {
     cp -fp $1 $2
     if [ $? != 0 ]; then
         echo "can't to copy \"$1\" to \"$2\"" 1>&2
-        set globalErrorLevel=1
+        globalErrorLevel=1
     fi
 }
 
