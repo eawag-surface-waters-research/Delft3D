@@ -1,5 +1,7 @@
 #!/bin/bash
 
+globalErrorLevel=0
+
 # ===============================
 # === copyFile: handles error ===
 # ===============================
@@ -310,5 +312,6 @@ cd $scriptdir/../..
 $project
 
 cd $curdir
+
 
 exit $globalErrorLevel
