@@ -1409,8 +1409,8 @@ subroutine find_noisegrid_vertices(x_mg, y_mg, ind, ngrid, &
 !
     integer, dimension(4)       , intent(out) :: ind   ! indices of noise grid to form a quadrangle 
                                                        ! covering x_mg,y_mg
-    real(fp)                    , intent(in)  :: x_mg  ! x-coordinate of meteo grid point
-    real(fp)                    , intent(in)  :: y_mg  ! y-coordinate of meteo grid point
+    real(hp)                    , intent(in)  :: x_mg  ! x-coordinate of meteo grid point
+    real(hp)                    , intent(in)  :: y_mg  ! y-coordinate of meteo grid point
     integer                     , intent(in)  :: ngrid
     real(fp), dimension(ngrid)  , intent(in)  :: xgrid
     real(fp), dimension(ngrid)  , intent(in)  :: ygrid
