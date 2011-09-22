@@ -158,8 +158,10 @@ rem ===========================
     echo "installing flow2d3d_openda . . ."
 
     set dest_bin="!dest_main!\w32\flow\bin"
+    set dest_default="!dest_main!\w32\flow\default"
 
     if not exist !dest_bin!     mkdir !dest_bin!
+    if not exist !dest_default! mkdir !dest_default!
 
     copy engines_gpl\flow2d3d\bin\Release\flow2d3d_openda.dll                              !dest_bin!
     copy engines_gpl\flow2d3d\bin\Release\flow2d3d_openda_sp.dll                           !dest_bin!
