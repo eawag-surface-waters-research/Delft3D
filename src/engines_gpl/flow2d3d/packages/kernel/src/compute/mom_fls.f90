@@ -276,7 +276,7 @@ subroutine mom_fls &
                 !
                 ! CURVATURE TERM DUE TO ADVECTION IN V-DIRECTION
                 !
-                vvdgdx = vvv * gsqi * (guu(nmu)-guu(nmd))
+                vvdgdx = 0.5 * vvv * gsqi * (guu(nmu)-guu(nmd))
              endif
              advecy = advecy - vvv*vvdgdx
              advecx = advecx + u0(nm,k)*uvdgdy
