@@ -26,7 +26,9 @@
 	<Files>
 		<Filter Name="Source Files" Filter="fi;fd">
 		<File RelativePath="src\tdatmain.f90"/>
-		<File RelativePath="src\tricom_finish.f90"/>
+		<File RelativePath="src\tricom_finish.f90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration></File>
 		<File RelativePath="src\tricom_init.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes" BoundsCheck="false"/></FileConfiguration>
