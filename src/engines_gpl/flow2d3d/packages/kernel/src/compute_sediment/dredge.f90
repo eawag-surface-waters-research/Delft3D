@@ -261,7 +261,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
                 ! Reallocate and shift
                 !
                 istat = 0
-                call reallocP(pdredge%area         ,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdredge%area         ,globalnpnt,fill=0.0_fp,shift=localoffset,stat=istat)
                 call dredgecommunicate (pdredge%area, pdredge%npnt)
                 !
                 call reallocP(pdredge%hdune        ,globalnpnt       ,shift=localoffset,stat=istat)
@@ -320,7 +320,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
                 ! Reallocate and shift
                 !
                 istat = 0
-                call reallocP(pdump%area    ,globalnpnt       ,shift=localoffset,stat=istat)
+                call reallocP(pdump%area    ,globalnpnt,fill=0.0_fp,shift=localoffset,stat=istat)
                 call dredgecommunicate (pdump%area, pdump%npnt)
                 !
                 call reallocP(pdump%hdune   ,globalnpnt       ,shift=localoffset,stat=istat)
