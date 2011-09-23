@@ -112,6 +112,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
     character(1)                     :: direct               ! Help string for reading direction 
     character(132)                   :: rec132               ! Standard rec. length in an attribute file (132) 
     character(20)                    :: btype                ! Barrier type
+    character(20), dimension(2)      :: tmpbarnam            ! Temporary array containing lowercase version of barrier names to check on duplicates
     character(40)                    :: errmsg               ! Text string error messages
     character(300)                   :: msg
 !
@@ -253,7 +254,6 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
        ! define barrier location name
        !
        nambar(ibar) = rec132(:20)
-       call small(nambar(ibar)         ,20        )
        !
        ! there must be a name defined !!
        !
@@ -359,6 +359,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
           if (brlosc < 0.0_fp) then
              call prterr(lundia    ,'V234'    ,errmsg(:22)          )
              error = .true.
+             goto 300
           endif
           cbuv(1, ibar) = gate
           cbuv(2, ibar) = 1.0_fp
@@ -375,7 +376,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
           cbuv(1, ibar) = rfield(6) ! gate height
           btype         = cfield(7)
           call small(btype, 20)
-          select case(btype)
+          select case(trim(btype))
           case('a')
              if (nrflds<8 .or. itype(8)>2) then
                 error = .true.
@@ -424,10 +425,14 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
     ! Not twice the same barrier name
     !
     do ibar = 1, nsluv
+       tmpbarnam(1) = nambar(ibar)
+       call small(tmpbarnam(1), 20)
        do n = 1, ibar - 1
-          if (nambar(n) == nambar(ibar)) then
+          tmpbarnam(2) = nambar(n)
+          call small(tmpbarnam(2), 20)
+          if (tmpbarnam(1) == tmpbarnam(2)) then
              error = .true.
-             call prterr(lundia    ,'U021'    ,'Barrier name already used: ' // nambar(ibar)         )
+             call prterr(lundia, 'U021', 'Barrier name already used: ' // tmpbarnam(1))
           endif
        enddo
     enddo
