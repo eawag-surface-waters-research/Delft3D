@@ -112,7 +112,6 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
     character(1)                     :: direct               ! Help string for reading direction 
     character(132)                   :: rec132               ! Standard rec. length in an attribute file (132) 
     character(20)                    :: btype                ! Barrier type
-    character(20), dimension(2)      :: tmpbarnam            ! Temporary array containing lowercase version of barrier names to check on duplicates
     character(40)                    :: errmsg               ! Text string error messages
     character(300)                   :: msg
 !
@@ -254,6 +253,11 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
        ! define barrier location name
        !
        nambar(ibar) = rec132(:20)
+       !
+       ! The lower case names are not only used to detect duplicate barrier names,
+       ! but the lower case names must be passed to RTC when it is running online.
+       !
+       call small(nambar(ibar), 20)
        !
        ! there must be a name defined !!
        !
@@ -425,14 +429,10 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
     ! Not twice the same barrier name
     !
     do ibar = 1, nsluv
-       tmpbarnam(1) = nambar(ibar)
-       call small(tmpbarnam(1), 20)
        do n = 1, ibar - 1
-          tmpbarnam(2) = nambar(n)
-          call small(tmpbarnam(2), 20)
-          if (tmpbarnam(1) == tmpbarnam(2)) then
+          if (nambar(n) == nambar(ibar)) then
              error = .true.
-             call prterr(lundia, 'U021', 'Barrier name already used: ' // tmpbarnam(1))
+             call prterr(lundia, 'U021', 'Barrier name already used: ' // nambar(ibar))
           endif
        enddo
     enddo
