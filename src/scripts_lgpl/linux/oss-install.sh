@@ -54,6 +54,7 @@ function delft3d_flow () {
     plugin_culvert
     plugin_delftflow_traform
     mormerge
+    vs
 
     return
 }
@@ -137,6 +138,7 @@ function flow2d3d_openda () {
 # ========================
 function wave () {
     echo "installing wave . . ."
+
     dest_bin="$dest_main/intel/wave/bin"
     dest_default="$dest_main/intel/wave/default"
     dest_lib="$dest_main/intel/lib"
@@ -146,7 +148,7 @@ function wave () {
     mkdir -p $dest_lib
 
     copyFile bin/wave.exe                                        $dest_bin
-    copyFile third_party_open/swan/bin/linux/*.*                 $dest_bin
+    copyFile "third_party_open/swan/bin/linux/*.*"               $dest_bin
     copyFile engines_gpl/flow2d3d/default/dioconfig.ini          $dest_default
     copyFile third_party_open/swan/scripts/swan_install.sh       $dest_bin/swan.sh
 
