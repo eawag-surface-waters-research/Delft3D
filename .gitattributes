@@ -2075,6 +2075,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/colormaps/summer.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/winter.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/wjet.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/xhsv.clrmap -text
+src/tools_lgpl/matlab/quickplot/progsrc/columnpatch.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/compileonly/make_eco_exe.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/compileonly/make_exe.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/compileonly/wl_identification.c -text
@@ -2189,6 +2190,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/md_clock.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/md_colormap.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/md_paper.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/mdf.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/pathdistance.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/plot_tidalellipses.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/plotlimitingfactors.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/printdims.m -text
@@ -2312,7 +2314,6 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/netcdffil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/nfs_tritonfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/options.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/optionstransfer.m -text
-src/tools_lgpl/matlab/quickplot/progsrc/private/pathdistance.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/pcraster.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/pcrasterfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/pharosfil.m -text
