@@ -14,7 +14,7 @@
 #   maintanence.
 #
 #   Irv.Elshoff@Deltares.NL
-#   9 mar 11
+#   04 sep 11
 #
 #   Copyright © 2011, Stichting Deltares
 #-------------------------------------------------------------------------------
@@ -24,10 +24,11 @@ compiler='intel11'
 platform='ia32'
 debug=0
 noMake=0
+useSp=0
 
 
 function usage {
-    echo "Usage: `basename $0` [-intel10|-intel11|-intel12] [-debug] [-make] [-intel64] [-?]"
+    echo "Usage: `basename $0` [-intel10|-intel11|-intel12] [-debug] [-make] [-intel64] [-sp] [-?]"
     }
 
 function log {
@@ -56,6 +57,9 @@ while [ $# -gt 0 ]; do
             ;;
         -m|-make)
             noMake=1
+            ;;
+        -sp)
+            useSp=1
             ;;
         -?)
             usage
@@ -144,6 +148,20 @@ scripts="
 for file in $scripts; do
     chmod +x $file
 done
+
+
+#-----  When building single precision exes: execute sp-script
+
+if [ $useSp -eq 1 ]; then
+    spScript=utils_lgpl/precision/scripts/changeprecision.tcl
+    log "Single precision executables: executing script $spScript"
+    command="$spScript single"
+    eval $command
+    if [ $? -ne 0 ]; then
+        log 'Execution of script $spScript failed!'
+        exit 1
+    fi
+fi
 
 
 #-----  Create configure script
