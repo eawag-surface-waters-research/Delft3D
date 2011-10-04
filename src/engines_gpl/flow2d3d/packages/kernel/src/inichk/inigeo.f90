@@ -120,6 +120,10 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
     real(fp)               :: xcndmd
     real(fp)               :: xcnm
     real(fp)               :: xcnmd
+    real(fp)               :: xnm
+    real(fp)               :: xndm
+    real(fp)               :: xnmd
+    real(fp)               :: xndmd
     real(fp)               :: xcor_mean
     real(fp)               :: xdis
     real(fp)               :: xdis1
@@ -534,18 +538,68 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
        do m = 2, mmax - 1
           md = m - 1
           mu = m + 1
-          if (kcs(n, m) == 1) then
-             xz(n, m) = (xcor(n, m) + xcor(nd, m) + xcor(n, md) + xcor(nd, md)) / 4.
-             yz(n, m) = (ycor(n, m) + ycor(nd, m) + ycor(n, md) + ycor(nd, md)) / 4.
+          if (kcs(n, m) == 1) then   
              if (sferic) then
-                xm  = (xcor(n, m ) + xcor(nd, m )) / 2.
-                ym  = (ycor(n, m ) + ycor(nd, m )) / 2.
-                xmd = (xcor(n, md) + xcor(nd, md)) / 2.
-                ymd = (ycor(n, md) + ycor(nd, md)) / 2.
-                call angle(sferic      ,xmd       ,ymd       ,xm        ,ym        , &
-                         & alfas(n, m) ,gdp       )
-                alfas(n, m) = alfas(n, m) * raddeg
+                xndm  = xcor(nd,m)
+                xnmd  = xcor(n,md)
+                xndmd = xcor(nd,md)
+                !
+                ! Check if main coordinate is positive
+                !
+                if (xcor(n,m) > 0.0_fp) then
+                   !
+                   ! Check if current distance between coordinates is too great
+                   !
+                   if (abs(xcor(nd,m)-xcor(n,m)) > 180.0_fp) then
+                      xndm = xcor(nd,m) + 360.0_fp
+                   endif
+                   if (abs(xcor(n,md) - xcor(n,m)) > 180.0_fp) then
+	              xnmd = xcor(n,md) + 360.0_fp
+                   endif
+                   if (abs(xcor(nd,md) - xcor(n,m)) > 180.0_fp) then
+	              xndmd = xcor(nd,md) + 360.0_fp
+                   endif
+                else 
+                   !
+                   ! Main coordinate is negative
+                   ! Check if current distance between coordinates is too great
+                   !
+                   if (abs(xcor(nd,m) - xcor(n,m)) > 180.0_fp) then
+                      xndm = xcor(nd,m) - 360.0_fp
+                   endif
+                   if (abs(xcor(n,md) - xcor(n,m)) > 180.0_fp) then
+	              xnmd = xcor(n,md) - 360.0_fp
+                   endif
+                   if (abs(xcor(nd,md) - xcor(n,m)) > 180.0_fp) then
+	              xndmd = xcor(nd,md) - 360.0_fp
+                   endif    
+                endif
+                xz(n,m) = (xcor(n,m) + xndm + xnmd + xndmd)                   / 4.0_fp
+                yz(n,m) = (ycor(n,m) + ycor(nd,m) + ycor(n,md) + ycor(nd,md)) / 4.0_fp
+                if (xz(n,m) > 180.0_fp) then
+                   xz(n,m) = xz(n,m) - 360.0_fp
+                else if (xz(n,m) < -180.0_fp) then
+                   xz(n,m) = xz(n,m) + 360.0_fp
+                endif
+                xm  = (xcor(n,m)+xndm)        / 2.0_fp
+                ym  = (ycor(n,m)+ycor(nd,m )) / 2.0_fp
+                if (xm > 180.0_fp) then
+                   xm = xm - 360.0_fp
+                else if (xm < -180.0_fp) then
+                   xm = xm + 360.0_fp
+                endif
+                xmd = (xcor(n,md)+xndmd)        / 2.0_fp
+                ymd = (ycor(n,md)+ycor(nd, md)) / 2.0_fp
+                if (xmd > 180.0_fp) then
+                   xmd = xmd - 360.0_fp
+                else if (xmd < -180.0_fp) then
+                   xmd = xmd + 360.0_fp
+                endif                
+                call angle(sferic, xmd, ymd, xm, ym, alfas(n,m), gdp)
+                alfas(n,m) = alfas(n,m) * raddeg
              else
+                xz(n, m) = (xcor(n, m) + xcor(nd, m) + xcor(n, md) + xcor(nd, md)) / 4.
+                yz(n, m) = (ycor(n, m) + ycor(nd, m) + ycor(n, md) + ycor(nd, md)) / 4.
                 dydksi = (ycor(n, m) - ycor(n, md) + ycor(nd, m) - ycor(nd, md)) / 2.
                 dxdksi = (xcor(n, m) - xcor(n, md) + xcor(nd, m) - xcor(nd, md)) / 2.
                 if (abs(dxdksi) < small .and. abs(dydksi) < small) then
@@ -819,3 +873,4 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
        call d3stop (3,gdp)
     endif
 end subroutine inigeo
+
