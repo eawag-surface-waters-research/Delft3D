@@ -153,10 +153,13 @@ done
 #-----  When building single precision exes: execute sp-script
 
 if [ $useSp -eq 1 ]; then
-    spScript=utils_lgpl/precision/scripts/changeprecision.tcl
-    log "Single precision executables: executing script $spScript"
+    curDir=`pwd`
+    spScript=scripts/changeprecision.tcl
+    log "Single precision executables: executing script utils_lgpl/precision/$spScript"
+    cd utils_lgpl/precision
     command="$spScript single"
     eval $command
+    cd $curDir
     if [ $? -ne 0 ]; then
         log 'Execution of script $spScript failed!'
         exit 1
