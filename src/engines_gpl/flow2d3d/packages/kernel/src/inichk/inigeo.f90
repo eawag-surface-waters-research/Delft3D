@@ -576,25 +576,10 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
                 endif
                 xz(n,m) = (xcor(n,m) + xndm + xnmd + xndmd)                   / 4.0_fp
                 yz(n,m) = (ycor(n,m) + ycor(nd,m) + ycor(n,md) + ycor(nd,md)) / 4.0_fp
-                if (xz(n,m) > 180.0_fp) then
-                   xz(n,m) = xz(n,m) - 360.0_fp
-                else if (xz(n,m) < -180.0_fp) then
-                   xz(n,m) = xz(n,m) + 360.0_fp
-                endif
                 xm  = (xcor(n,m)+xndm)        / 2.0_fp
                 ym  = (ycor(n,m)+ycor(nd,m )) / 2.0_fp
-                if (xm > 180.0_fp) then
-                   xm = xm - 360.0_fp
-                else if (xm < -180.0_fp) then
-                   xm = xm + 360.0_fp
-                endif
                 xmd = (xcor(n,md)+xndmd)        / 2.0_fp
                 ymd = (ycor(n,md)+ycor(nd, md)) / 2.0_fp
-                if (xmd > 180.0_fp) then
-                   xmd = xmd - 360.0_fp
-                else if (xmd < -180.0_fp) then
-                   xmd = xmd + 360.0_fp
-                endif                
                 call angle(sferic, xmd, ymd, xm, ym, alfas(n,m), gdp)
                 alfas(n,m) = alfas(n,m) * raddeg
              else
