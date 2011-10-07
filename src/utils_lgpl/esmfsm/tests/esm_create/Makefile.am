@@ -20,4 +20,4 @@ esm_create_LDADD = \
 
 
 #	-ldl \
-#	$(FCLIBS) -lifcore -limf
+#	$(FCLIBS) -limf

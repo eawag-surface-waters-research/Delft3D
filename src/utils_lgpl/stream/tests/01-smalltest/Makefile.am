@@ -32,4 +32,4 @@ stream01test_exe_LDADD = \
 
 
 #	-ldl \
-#	$(FCLIBS) -lifcore -limf
+#	$(FCLIBS) -limf
