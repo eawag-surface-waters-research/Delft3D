@@ -1749,6 +1749,7 @@ src/third_party_open/swan/scripts/swan.bat -text
 src/third_party_open/swan/scripts/swan.sh -text
 src/third_party_open/swan/scripts/swan_install.bat -text
 src/third_party_open/swan/scripts/swan_install.sh -text
+src/third_party_open/tclkit/tclkit.exe -text
 src/third_party_open/version_number/Makefile.am -text
 src/third_party_open/version_number/bin/linux/version_number.exe -text
 src/third_party_open/version_number/bin/win32/version_number.exe -text
