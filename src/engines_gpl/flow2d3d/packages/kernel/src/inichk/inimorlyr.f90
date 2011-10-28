@@ -101,7 +101,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
     i_restart          => gdp%gdrestart%i_restart
     restid             => gdp%gdrestart%restid
     flcomp             => gdp%gdmorpar%flcomp
-    rhosol               => gdp%gdsedpar%rhosol
+    rhosol             => gdp%gdsedpar%rhosol
     !
     istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'iunderlyr', iunderlyr)
     if (istat==0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'nlyr'   , nlyr)

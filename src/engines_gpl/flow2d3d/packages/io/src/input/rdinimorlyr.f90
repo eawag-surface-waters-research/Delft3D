@@ -361,6 +361,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                       totfrac = totfrac + rtemp(nm,l)
                    enddo
                    if (comparereal(totfrac,1.0_fp) /= 0) err=.true.
+                   if (thtemp(nm)<0.0_fp) err=.true.
                    if (err) then
                       !
                       ! dummy
