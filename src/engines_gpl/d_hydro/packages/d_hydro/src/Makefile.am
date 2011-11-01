@@ -1,0 +1,1 @@
+link Makefile_dynamic.am
