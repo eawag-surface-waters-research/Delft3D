@@ -23,9 +23,9 @@ function install_all () {
 
     mkdir -p $dest_main
 
-    deltares_hydro
+    d_hydro
     flow2d3d
-    # Does not exist yet on Linux: flow2d3d_openda
+    flow2d3d_openda
     wave
     plugin_culvert
     plugin_delftflow_traform
@@ -48,9 +48,9 @@ function delft3d_flow () {
 
     mkdir -p $dest_main
 
-    deltares_hydro
+    d_hydro
     flow2d3d
-    # Does not exist yet on Linux: flow2d3d_openda
+    flow2d3d_openda
     plugin_culvert
     plugin_delftflow_traform
     mormerge
@@ -62,15 +62,16 @@ function delft3d_flow () {
 
 
 # ==========================
-# === INSTALL_DELTARES_HYDRO
+# === INSTALL_D_HYDRO
 # ==========================
-function deltares_hydro () {
-    echo "installing deltares_hydro . . ."
+function d_hydro () {
+    echo "installing d_hydro . . ."
     dest_bin="$dest_main/intel/flow/bin"
 
     mkdir -p $dest_bin
 
-    copyFile "bin/deltares_hydro.exe" "$dest_bin"
+    copyFile "bin/d_hydro.exe" "$dest_bin"
+    copyFile "third_party_open/tclkit/bin/intel/deltares_hydro.exe" "$dest_bin"
 
     return
 }

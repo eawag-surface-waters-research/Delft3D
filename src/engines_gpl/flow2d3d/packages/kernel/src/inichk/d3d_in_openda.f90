@@ -539,7 +539,6 @@ subroutine compute_secundary_state(gdp       )
     character*8                          , pointer :: dischy
     integer                              , pointer :: initia
     integer                              , pointer :: ite
-    character(256)                       , pointer :: runid
     integer                              , pointer :: initi
     integer                                        :: nmaxddb
     integer                                        :: nst
@@ -810,7 +809,6 @@ subroutine compute_secundary_state(gdp       )
     dischy              => gdp%gdtricom%dischy
     initia              => gdp%gdtricom%initia
     ite                 => gdp%gdtricom%ite
-    runid               => gdp%gdtricom%runid
     initi               => gdp%gdtricom%initi
 
 

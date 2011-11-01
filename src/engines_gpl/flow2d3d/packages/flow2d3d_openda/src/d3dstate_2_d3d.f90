@@ -162,7 +162,7 @@
    call array_copy(r(gdp%gdr_i_ch%procbc), d3d_state(imode)%pseudo%procbc,  1,4, 1,gdp%d%nto, 1,gdp%d%kmax, gdp%d%lstsc)
    call array_copy(r(gdp%gdr_i_ch%disch), d3d_state(imode)%pseudo%disch,  1,gdp%d%nsrc, 1,1, 1,1, 1)
 
-    d3d_state(imode)%pseudo%runid = gdp%gdtricom%runid
+    d3d_state(imode)%pseudo%runid = gdp%runid
     d3d_state(imode)%pseudo%trifil = gdp%gdtricom%trifil     
     d3d_state(imode)%pseudo%comfil = gdp%gdtricom%comfil 
         
@@ -306,7 +306,7 @@
 
    call array_copy(d3d_state(imode)%pseudo%disch, r(gdp%gdr_i_ch%disch),  1,gdp%d%nsrc, 1,1, 1,1, 1)
 
-    gdp%gdtricom%runid  =   d3d_state(imode)%pseudo%runid 
+    gdp%runid  =   d3d_state(imode)%pseudo%runid 
     gdp%gdtricom%trifil =   d3d_state(imode)%pseudo%trifil      
     gdp%gdtricom%comfil =   d3d_state(imode)%pseudo%comfil  
 

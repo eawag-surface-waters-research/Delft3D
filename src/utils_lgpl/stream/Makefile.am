@@ -1,4 +1,6 @@
 include $(top_srcdir)/common.am
 SUBDIRS = \
-         packages \
+         packages
+
+disabled = \
          tests

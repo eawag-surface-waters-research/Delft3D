@@ -54,7 +54,7 @@ subroutine tdatmain(runid, alone, subsys, filmrs, nuerr, gdp)
     integer                    :: nuerr  ! Exit code: 0 := ok, < 0 then error
     logical       , intent(in) :: alone  ! TRUE when flow runs stand-alone, FALSE when flow is part of morsys 
     character(4)  , intent(in) :: subsys ! Sub-system definition of Delft3D here SUBSYS = 'flow' 
-    character(256), intent(in) :: runid
+    character(*)  , intent(in) :: runid
     character(12) , intent(in) :: filmrs ! File name for DELFT3D_MOR FLOW input file (MD-flow.xxx) 
 !
 ! Local variables

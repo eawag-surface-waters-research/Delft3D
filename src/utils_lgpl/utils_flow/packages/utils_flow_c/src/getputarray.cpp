@@ -61,7 +61,7 @@ CREATESTREAM (
 
     char * filename = new char [filen_length+1];
 
-	fortstr2cstr (filen, filen_length, filename);
+    fortstr2cstr (filen, filen_length, filename);
 
     // Create a stream and write its handle to a file
 

@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id: lognormal.inc 47 2011-01-06 06:49:52Z jagers $
-!  $HeadURL: http://svn.oss.deltares.nl/repos/opendelft3d/trunk/src/engines_gpl/flow2d3d/packages/data/include/lognormal.inc $$
+!  $Id: sedparams.inc 878 2011-10-07 12:58:46Z mourits $
+!  $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/branches/research/Deltares/20110420_OnlineVisualisation/src/engines_gpl/flow2d3d/packages/data/include/sedparams.inc $$
 !-------------------------------------------------------------------------------
 integer, parameter :: SEDTYP_NONCOHESIVE_TOTALLOAD = 0
 integer, parameter :: SEDTYP_NONCOHESIVE_SUSPENDED = 1

@@ -45,10 +45,8 @@
 #   undef IN
 #   undef OUT
 #   include <win32.h>
-#   define STDCALL __cdecl
-#else
-#   define STDCALL
 #endif
+#define STDCALL
 
 
 namespace DOL {
@@ -163,11 +161,22 @@ class Server {
         SetDescription (
             const char *    description
             );
-
+#ifdef WIN32
+        //
+        // VisualStudio is afraid for some name clash with respect to CreateDirectory
+        // In delftonline.lib an "A" is added at the end of the name
+        // When compiling flowol.cpp, VS decides to add a "W" instead of an "A", resulting in an "unresolved external CreateDirectoryW"
+        // By forcing an A, it works
+        DLL void
+        CreateDirectoryA (
+            const char *    pathname
+            );
+#else
         DLL void
         CreateDirectory (
             const char *    pathname
             );
+#endif
 
         DLL void
         ChangeDirectory (

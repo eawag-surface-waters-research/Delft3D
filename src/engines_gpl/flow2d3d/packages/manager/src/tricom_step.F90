@@ -718,7 +718,7 @@ subroutine tricom_step(gdp)
     itlen               => gdp%gdtricom%itlen
     mainys              => gdp%gdtricom%mainys
     comfil              => gdp%gdtricom%comfil
-    runid               => gdp%gdtricom%runid
+    runid               => gdp%runid
     trifil              => gdp%gdtricom%trifil
     versio              => gdp%gdtricom%versio
     initi               => gdp%gdtricom%initi
@@ -768,7 +768,7 @@ subroutine tricom_step(gdp)
        call vsemnefis
        call timer_stop(timer_step2screen, gdp)
 #ifdef WITH_DELFTONLINE
-       call D3DOL_Timestep (nst, itstrt)
+       call FLOWOL_Timestep (nst)
 #endif
        !
        ! Status is: simulation is running / iteration
@@ -987,7 +987,7 @@ subroutine tricom_step(gdp)
     ! The sequence of the 2 next calls is important for the OLV client.
     !
 #ifdef WITH_DELFTONLINE
-    call D3DOL_Timestep (itstop, itstrt)
+    call FLOWOL_Timestep (nst)
     call setEndFlag( olv_handle, 1 ) !Tells the DOL client that the simulation has ended by passing an exception
 #endif
 

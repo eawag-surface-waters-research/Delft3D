@@ -8,11 +8,11 @@ Compiling on Windows
 ====================
   0) Be sure that you have installed:
      Visual Studio 2008, including Fortran compiler Intel 11.0
-  1) Open "src\deltares_hydro_open_source.sln" in Visual Studio
+  1) Open "src\d_hydro_open_source.sln" in Visual Studio
   2) Select the "solution configuration" you want: Debug or Release
   3) <Ctrl><Shift>B
   4) The binaries are installed in directory "bin\w32" (release) 
-     or in the subdirectory of the executable, e.g. "src\engines_gpl\deltares_hydro\bin\Debug" (debug)
+     or in the subdirectory of the executable, e.g. "src\engines_gpl\d_hydro\bin\Debug" (debug)
 
 
 Compiling on Linux

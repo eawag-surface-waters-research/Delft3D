@@ -267,10 +267,6 @@
        real(fp)                           :: tscale !  Description and declaration in rjdim.f90
        character(256)                     :: comfil !!  Communication file name
        character(256)                     :: filmd  ! File name for MD FLOW file 
-       character(256)                     :: runid  !!  Run identification code for the cur-
-                                                    !!  rent simulation (used to determine
-                                                    !!  the names of the in- /output files
-                                                    !!  used by the system)
        character(256)                     :: trifil !!  File name for TRISULA NEFIS output
                                                     !!  files (tri"h/m"-"casl""labl".dat/def)
        character(5)                       :: versio !!  Version nr. of the current package

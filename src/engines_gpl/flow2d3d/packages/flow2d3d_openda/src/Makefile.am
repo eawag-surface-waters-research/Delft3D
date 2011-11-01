@@ -4,94 +4,60 @@
 #   Irv.Elshoff@deltares.nl
 #   Adri.Mourits@deltares.nl
 #   Fedor.Baart@deltares.nl
-#   11 jan 2007
+#   18 oct 2011
 #
-#   Copyright (C) 2007, Deltares
+#   Copyright (C) 2011, Deltares
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libflow2d3d.la
+lib_LTLIBRARIES = libflow2d3d_openda.la
 
+INCLUDES = \
+    $(STANDARD_C_INCLUDES) \
+	-I../include
+ 
 FINCLUDES += \
-	-I$(top_srcdir)/utils_lgpl/esmfsm/include
+	-I$(top_srcdir)/utils_lgpl/precision/include \
+	-I$(top_srcdir)/utils_lgpl/esmfsm/include \
+	-I$(top_srcdir)/third_party_open/openda/core/native/include
+
+FMODULES += \
+	-I$(top_srcdir)/utils_lgpl/ec_module/packages/ec_module/src \
+	-I$(top_srcdir)/utils_lgpl/inifiles/packages/inifiles/src \
+	-I$(top_srcdir)/utils_lgpl/meteo/packages/meteo/src \
+	-I$(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow/src \
+	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/gdp \
+	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/basics \
+	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/manager/src \
+	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/inichk
 
 #-------------------------------------------------------------------------------
 #Sources
-libflow2d3d_la_SOURCES = \
+libflow2d3d_openda_la_SOURCES = \
          m_d3d_state.f90 \
          m_d3dstate_2_openda.f90 \
          d3dstate_2_d3d.f90 \
+         d3d_in_openda.f90 \
+         flow2d3d_f.f90 \
          flow2d3d_openda.f90 \
-         flow2d3d_openda_dll.f90
+         flow2d3d_openda_dll.f90 \
+         localization.f90 \
+         flow2d3d_openda_version.cpp
 
 #-------------------------------------------------------------------------------
 #Libraries
-libflow2d3d_la_LIBADD = \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/manager_dd/src/ddexec/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/manager_dd/src/hydra/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/manager/src/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/main/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/non_hydro/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/taylor/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/timedep/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/compute/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/compute_nearfar/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/compute_roller/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel_dd_f/src/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel_dd_c/src/mapper/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/io/src/preprocessor/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/io/src/output/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/inichk/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/dd/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/io/src/input/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/general/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/io_dol_f/src/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/io_dol_c/src/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/plugin_user/src/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/plugin_3dmortrafrm_c/src/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/allocation/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/general/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/gdp/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/basics/*.lo \
-    $(top_srcdir)/utils_lgpl/meteo/packages/meteo/src/libmeteo.a \
-    $(top_srcdir)/utils_lgpl/ec_module/packages/ec_module/src/libec_module.a \
-    $(top_srcdir)/utils_lgpl/delftio_sync/packages/delftio_sync/src/libdelftio_sync.a \
-    $(top_srcdir)/utils_lgpl/delftio/packages/delftio/src/diof90/libdelftio.a \
-    $(top_srcdir)/utils_lgpl/delftio/packages/delftio_shm/src/diof90/libdelftio_shm.a \
-    $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libfsm.a \
-    $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/libfsm_c.a \
-    $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/libesm_c.a \
-    $(top_srcdir)/utils_lgpl/inifiles/packages/inifiles/src/libinifiles.a \
-    $(top_srcdir)/utils_lgpl/nefis/packages/nefis/src/libnefis.a \
-    $(top_srcdir)/utils_lgpl/constants/packages/mathconsts/src/libmathconsts.a \
-    $(top_srcdir)/utils_lgpl/precision/packages/precision/src/libprecision.a \
-    $(top_srcdir)/utils_lgpl/semaphore/packages/semaphore/src/libsemaphore.a \
-    $(top_srcdir)/utils_lgpl/stream/packages/stream/src/libstream.a \
-    $(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow/src/libutils_flow.a \
-    $(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow_c/src/libutils_flow_c.a \
-    $(top_srcdir)/utils_lgpl/delftio_sync/packages/delftio_sync_version_number/src/libdelftio_sync_version_number.a \
-    $(top_srcdir)/utils_lgpl/delftio/packages/delftio_version_number/src/libdelftio_version_number.a \
-    $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_version_number/src/libesmfsm_version_number.a \
-    $(top_srcdir)/utils_lgpl/meteo/packages/meteo_version_number/src/libmeteo_version_number.a \
-    $(top_srcdir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.a \
-    $(top_srcdir)/utils_lgpl/stream/packages/stream_version_number/src/libstream_version_number.a \
-    $(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow_version_number/src/libutils_flow_version_number.a \
-    -L$(top_srcdir)/third_party_open/DelftOnline/lib -lDelftOnline -lDelftOnlineJNI -lJavaLaunch \
-    -L$(top_srcdir)/third_party_open/openda/core/native/lib -lcta \
-    $(EXTERNALSOURCES) \
-    $(MPILIBS) \
-    $(FCLIBS) \
-    $(X_PRE_LIBS) -lXt $(XPLIB) $(X_LIBS) -lX11 $(X_EXTRA_LIBS)
+libflow2d3d_openda_la_LIBADD = \
+	$(top_srcdir)/engines_gpl/flow2d3d/packages/flow2d3d/src/libflow2d3d.la \
+	$(top_srcdir)/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/src/libD_hydro.a
 
 
-BUILT_SOURCES = ./always \
-	../flow2d3d/src/flow2d3d_version.F90 
+BUILT_SOURCES = \
+	./always \
+	../include/flow2d3d_openda_version.h 
 
 ./always:
-	rm -rf ../flow2d3d/src/flow2d3d_version.F90 
+	rm -f ../include/flow2d3d_openda_version.h 
 
-../flow2d3d/src/flow2d3d_version.F90:
-	$(top_srcdir)/scripts/linux/update_version.sh ../flow2d3d/src/flow2d3d_version.F90 $(srcdir) ../flow2d3d/include/version_number.ini $(top_srcdir)
+../include/flow2d3d_openda_version.h:
+	$(top_srcdir)/scripts_lgpl/linux/update_version.sh ../include/flow2d3d_openda_version.h $(srcdir) ../include/version_number.ini $(top_srcdir)
 

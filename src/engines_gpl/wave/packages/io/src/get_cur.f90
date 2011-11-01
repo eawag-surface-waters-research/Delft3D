@@ -170,10 +170,7 @@ subroutine get_cur(wavetime  ,kfu       ,kfv       ,u1        ,v1        , &
     ielem = 1
     call putgtr(filnam    ,grpnm_sigma,nelmx    ,elmnm_sigma ,elmdm_sigma, &
               & elmqty    ,elmunt    ,elmdes    ,elmtp_sigma ,nbytsg     , &
-              & elmnm_sigma(ielem)   ,celidt    ,wrswch    ,error     ,rbuff     )
-    do k = 1, kmax
-       thick(k) = rbuff(k, 1, 1)
-    enddo
+              & elmnm_sigma(ielem)   ,celidt    ,wrswch    ,error     ,thick     )
 
     ntcur = ival(1)
     ielem = 1

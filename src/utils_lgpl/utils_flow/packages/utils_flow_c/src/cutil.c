@@ -26,14 +26,13 @@
 //------------------------------------------------------------------------------
 // $Id$
 // $HeadURL$
-/*------------------------------------------------------------------------------*/
-/*  Delft3D - C Utilities */
-/*  Internal (legacy) utility functions. */
-/* */
-/*  Irv.Elshoff@deltares.nl */
-/*  2 mar 05 */
-/* */
-/*------------------------------------------------------------------------------*/
+//------------------------------------------------------------------------------*/
+//  Delft3D - C Utilities
+//  Internal (legacy) utility functions
+//
+//  Irv.Elshoff@deltares.nl
+//  27 apr 11
+//------------------------------------------------------------------------------*/
 
 
 #include "util_mf.h"
@@ -399,40 +398,19 @@ getpath (
     char    *slash
     ) {
 
+    //  The ARCH and D3D_HOME envars are no longer necessary.
+    //  This routine now just returns dummy values.
+    //  Irv.Elshoff@Deltares.NL, 27 apr 11
 
-    /*----  Get the relevant environment variables */
+    *arch     = "ARCH";     // getenv ("ARCH");
+    *d3d_home = "D3D_HOME"; // getenv ("D3D_HOME");
+    *envpath  = *d3d_home;
 
-    *arch     = getenv ("ARCH");
-    *d3d_home = getenv ("D3D_HOME");
-
-
-    /*----  Make sure that D3D_HOME refer
-            to an existing directory.  Otherwise print and return an error. */
-
-    if (*d3d_home != NULL) {
-        if (isdir (*d3d_home))
-            *envpath = *d3d_home;
-        else {
-            report_error ("Environment variable D3D_HOME does not refer to a directory");
-            return FAILURE;
-        }
-    }
-    else {
-        report_error ("The D3D_HOME environment variables are not set");
-        return FAILURE;
-    }
-
-    /*----  Determine whether the system is UNIX or Windows based on what
-            type of slashes appear in the path */
-
+#ifdef WIN32
+    *slash = '\\';
+#else
     *slash = '/';
-    if (strchr (*envpath, *slash) == NULL) {
-        *slash = '\\';
-        if (strchr (*envpath, *slash) == NULL) {
-            report_error ("No slashes in D3D_HOME");
-        return FAILURE;
-        }
-    }
+#endif
 
     return SUCCESS;
 }

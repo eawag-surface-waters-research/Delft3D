@@ -32,22 +32,10 @@ IF "%version%" == "exported" (
    set version=000000
 )
 
-
-rem Generate version number source module using version_number.exe
-"%VN%" %version% "%3" "%1.svn" "%1.temp"
-
 if exist %1 (
-	fc %1 %1.temp > nul
-) else (
-	set ERRORLEVEL=1
+	del %1
 )
-
-IF %ERRORLEVEL%==1 (
-	move %1.temp %1
-	echo Done, new version number is: %version%
-) ELSE (
-	del %1.temp
-	echo Done, file is up to date, no need to update version
-)
+rem Generate version number source module using version_number.exe
+"%VN%" %version% "%3" "%1.svn" "%1"
 
 :end

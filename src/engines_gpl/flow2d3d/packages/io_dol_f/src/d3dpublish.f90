@@ -122,7 +122,7 @@ contains
         !-----  Set the run title
 
         call getfullversionstring_flow2d3d(cident)
-        call D3DOL_SetDescription (cident, "Delft3D-FLOW")
+        call FLOWOL_SetDescription (cident, "Delft3D-FLOW")
 
         ! Point to the correct parameter
         olv%nlb        => gdp%d%nlb
@@ -170,14 +170,14 @@ contains
         dimens(3) = olv%kmax
         dimens_k(1) = olv%kmax
 
-        call D3DOL_ArrayShape ("kmax",   1, dimens_k)
-        call D3DOL_ArrayShape ("nm",  2, dimens)
-        call D3DOL_ArrayShape ("nmk", 3, dimens)
+        call FLOWOL_ArrayShape ("kmax",   1, dimens_k)
+        call FLOWOL_ArrayShape ("nm",  2, dimens)
+        call FLOWOL_ArrayShape ("nmk", 3, dimens)
 
         ! For some arrays dimens(3)=kmax+1; So, the third dimension varies, quantity is defined at interfaces.
         !
         dimens(3) = olv%kmax+1
-        call D3DOL_ArrayShape ("nmk1", 3, dimens)
+        call FLOWOL_ArrayShape ("nmk1", 3, dimens)
 
         !-----  Fill rest of olv handle
         olv%runid    = runid
@@ -196,43 +196,43 @@ contains
         ! parameter codes     A               B              C      D   E           F        G           H
         !
         !The following parameters, always need to be published (descriptions can be found in esm_alloc_real.f90)!
-        call D3DOL_Publish( 'nlb',  '',                              '',    '', '',     DOL_INTEGER, olv%nlb,          DOL_OUT)
-        call D3DOL_Publish( 'nub',  '',                              '',    '', '',     DOL_INTEGER, olv%nub,          DOL_OUT)
-        call D3DOL_Publish( 'mlb',  '',                              '',    '', '',     DOL_INTEGER, olv%mlb,          DOL_OUT)
-        call D3DOL_Publish( 'mub',  '',                              '',    '', '',     DOL_INTEGER, olv%mub,          DOL_OUT)
-        call D3DOL_Publish( 'nmax', '',                              '',    '', '',     DOL_INTEGER, olv%nmax,         DOL_OUT)
-        call D3DOL_Publish( 'mmax', '',                              '',    '', '',     DOL_INTEGER, olv%mmax,         DOL_OUT)
-        call D3DOL_Publish( 'kmax', '',                              '',    '', '',     DOL_INTEGER, olv%kmax,         DOL_OUT)
-        call D3DOL_Publish( 'thick','Rel. layer thickness',          '',    '', 'kmax', realDouble,  r(olv%thick), DOL_OUT)      
-        call D3DOL_Publish( 'xcor', 'Grid X coordinates',            'm',   '', 'nm',   realDouble,  r(olv%xcor),  DOL_OUT)
-        call D3DOL_Publish( 'ycor', 'Grid Y coordinates',            'm',   '', 'nm',   realDouble,  r(olv%ycor),  DOL_OUT)
-        call D3DOL_Publish( 'gvz',  'Zeta-Grid cell distance (eta)', 'm',   '', 'nm',   realDouble,  r(olv%gvz),   DOL_OUT)
-        call D3DOL_Publish( 'guz',  'Zeta-Grid cell distance (ksi)', 'm',   '', 'nm',   realDouble,  r(olv%guz),   DOL_OUT)
-        call D3DOL_Publish( 'xz',   'Zeta-Grid X coord.',            'm',   '', 'nm',   realDouble,  r(olv%xz),    DOL_OUT)
-        call D3DOL_Publish( 'yz',   'Zeta-Grid Y coord.',            'm',   '', 'nm',   realDouble,  r(olv%yz),    DOL_OUT)
-        call D3DOL_Publish( 'kcs',  'KCS mask array',                '',    '', 'nm',   DOL_INTEGER, i(olv%kcs),   DOL_OUT)
-        call D3DOL_Publish( 'kfs',  'KFS mask array',                '',    '', 'nm',   DOL_INTEGER, i(olv%kfs),   DOL_OUT)
-        call D3DOL_Publish( 'kfu',  'KFU mask array',                '',    '', 'nm',   DOL_INTEGER, i(olv%kfu),   DOL_OUT)
-        call D3DOL_Publish( 'kfv',  'KFV mask array',                '',    '', 'nm',   DOL_INTEGER, i(olv%kfv),   DOL_OUT)
+        call FLOWOL_Publish( 'nlb',  '',                              '',    '', '',     DOL_INTEGER, olv%nlb,          DOL_OUT)
+        call FLOWOL_Publish( 'nub',  '',                              '',    '', '',     DOL_INTEGER, olv%nub,          DOL_OUT)
+        call FLOWOL_Publish( 'mlb',  '',                              '',    '', '',     DOL_INTEGER, olv%mlb,          DOL_OUT)
+        call FLOWOL_Publish( 'mub',  '',                              '',    '', '',     DOL_INTEGER, olv%mub,          DOL_OUT)
+        call FLOWOL_Publish( 'nmax', '',                              '',    '', '',     DOL_INTEGER, olv%nmax,         DOL_OUT)
+        call FLOWOL_Publish( 'mmax', '',                              '',    '', '',     DOL_INTEGER, olv%mmax,         DOL_OUT)
+        call FLOWOL_Publish( 'kmax', '',                              '',    '', '',     DOL_INTEGER, olv%kmax,         DOL_OUT)
+        call FLOWOL_Publish( 'thick','Rel. layer thickness',          '',    '', 'kmax', realDouble,  r(olv%thick), DOL_OUT)      
+        call FLOWOL_Publish( 'xcor', 'Grid X coordinates',            'm',   '', 'nm',   realDouble,  r(olv%xcor),  DOL_OUT)
+        call FLOWOL_Publish( 'ycor', 'Grid Y coordinates',            'm',   '', 'nm',   realDouble,  r(olv%ycor),  DOL_OUT)
+        call FLOWOL_Publish( 'gvz',  'Zeta-Grid cell distance (eta)', 'm',   '', 'nm',   realDouble,  r(olv%gvz),   DOL_OUT)
+        call FLOWOL_Publish( 'guz',  'Zeta-Grid cell distance (ksi)', 'm',   '', 'nm',   realDouble,  r(olv%guz),   DOL_OUT)
+        call FLOWOL_Publish( 'xz',   'Zeta-Grid X coord.',            'm',   '', 'nm',   realDouble,  r(olv%xz),    DOL_OUT)
+        call FLOWOL_Publish( 'yz',   'Zeta-Grid Y coord.',            'm',   '', 'nm',   realDouble,  r(olv%yz),    DOL_OUT)
+        call FLOWOL_Publish( 'kcs',  'KCS mask array',                '',    '', 'nm',   DOL_INTEGER, i(olv%kcs),   DOL_OUT)
+        call FLOWOL_Publish( 'kfs',  'KFS mask array',                '',    '', 'nm',   DOL_INTEGER, i(olv%kfs),   DOL_OUT)
+        call FLOWOL_Publish( 'kfu',  'KFU mask array',                '',    '', 'nm',   DOL_INTEGER, i(olv%kfu),   DOL_OUT)
+        call FLOWOL_Publish( 'kfv',  'KFV mask array',                '',    '', 'nm',   DOL_INTEGER, i(olv%kfv),   DOL_OUT)
         
-        call D3DOL_Publish( 'alfas','Cell orientations',    '',    '', 'nm',   realDouble,  r(olv%alfas), DOL_OUT)
+        call FLOWOL_Publish( 'alfas','Cell orientations',    '',    '', 'nm',   realDouble,  r(olv%alfas), DOL_OUT)
 
         !The following variables/parameters are optional
-        call D3DOL_Publish( 's1',  'Water level',            '',    '', 'nm',   realDouble,  r(olv%s1) ,   DOL_OUT)  
-        call D3DOL_Publish( 'dp',  'Depth',                  '',    '', 'nm',   realDouble,  r(olv%dp) ,   DOL_OUT)  
-        call D3DOL_Publish( 'dps', 'Bedlevel',               '',    '', 'nm',   DOL_DOUBLE,  d(olv%dps),   DOL_OUT)
-        call D3DOL_Publish( 'u1',  'Velocity ksi component', '',    '', 'nmk',  realDouble,  r(olv%u1) ,   DOL_OUT)
-        call D3DOL_Publish( 'v1',  'Velocity eta component', '',    '', 'nmk',  realDouble,  r(olv%v1) ,   DOL_OUT)  
+        call FLOWOL_Publish( 's1',  'Water level',            '',    '', 'nm',   realDouble,  r(olv%s1) ,   DOL_OUT)  
+        call FLOWOL_Publish( 'dp',  'Depth',                  '',    '', 'nm',   realDouble,  r(olv%dp) ,   DOL_OUT)  
+        call FLOWOL_Publish( 'dps', 'Bedlevel',               '',    '', 'nm',   DOL_DOUBLE,  d(olv%dps),   DOL_OUT)
+        call FLOWOL_Publish( 'u1',  'Velocity ksi component', '',    '', 'nmk',  realDouble,  r(olv%u1) ,   DOL_OUT)
+        call FLOWOL_Publish( 'v1',  'Velocity eta component', '',    '', 'nmk',  realDouble,  r(olv%v1) ,   DOL_OUT)  
 
-        !call D3DOL_Publish( 'rho',  'Density',              '',    '', 'nm',   realDouble,  r(rho),   DOL_INOUT)
+        !call FLOWOL_Publish( 'rho',  'Density',              '',    '', 'nm',   realDouble,  r(rho),   DOL_INOUT)
 
         ! The following variables are only necessary when the z-model is used. It has to be done in this manner,
         ! otherwise things will go wrong in the client (test if zmodel exists).
         if ( zmodel ) then 
-            call D3DOL_Publish( 'zbot',    '',               '',    '', '',     realDouble,  olv%zbot,     DOL_OUT)
-            call D3DOL_Publish( 'ztop',    '',               '',    '', '',     realDouble,  olv%ztop,     DOL_OUT)
-            call D3DOL_Publish( 'zmodel',  '',               '',    '', '',     DOL_LOGICAL, olv%zmodel,   DOL_OUT)
-            call D3DOL_Publish( 'kfsz1',  'KFSZ mask array', '',    '', 'nmk',  DOL_INTEGER, i(olv%kfsz1), DOL_OUT)
+            call FLOWOL_Publish( 'zbot',    '',               '',    '', '',     realDouble,  olv%zbot,     DOL_OUT)
+            call FLOWOL_Publish( 'ztop',    '',               '',    '', '',     realDouble,  olv%ztop,     DOL_OUT)
+            call FLOWOL_Publish( 'zmodel',  '',               '',    '', '',     DOL_LOGICAL, olv%zmodel,   DOL_OUT)
+            call FLOWOL_Publish( 'kfsz1',  'KFSZ mask array', '',    '', 'nmk',  DOL_INTEGER, i(olv%kfsz1), DOL_OUT)
         endif
     
 
@@ -253,7 +253,7 @@ contains
         ! by namcon.
         ! Character array namcon is defined as character(len=20).
         ! So here you must calculate the right offset in the large array "ch"
-        ! To pass the right character length to routine D3DOL_Publish the
+        ! To pass the right character length to routine FLOWOL_Publish the
         ! local character variable name is used.
         !
         ! Publish the "transportable quantities" by calculating their relative position:
@@ -275,7 +275,7 @@ contains
             enddo
             !name = p_ch(indx+(j-1)*20+1)
             !!name = p_ch(j)(1:20)
-            call D3DOL_Publish( name, name,  '',  '', 'nmk', realDouble, r(olv%r1+r_offset), DOL_OUT)  
+            call FLOWOL_Publish( name, name,  '',  '', 'nmk', realDouble, r(olv%r1+r_offset), DOL_OUT)  
         enddo
 
         ! Publish the "turbulence quantities" by calculating their relative position:
@@ -288,7 +288,7 @@ contains
             do k = 1, 20
                 name(k:k) = ch(indx)(k:k)
             enddo
-            call D3DOL_Publish( name, name, '', '', 'nm', realDouble, r(olv%rtur1+r_offset), DOL_OUT)
+            call FLOWOL_Publish( name, name, '', '', 'nm', realDouble, r(olv%rtur1+r_offset), DOL_OUT)
         enddo
 
         if ( associated( p_ch ) ) deallocate( p_ch )
@@ -308,11 +308,11 @@ contains
                 
         olv => olv_handle%fields
         
-        call D3DOL_Publish( 'runningFlag', '', '', '', '', DOL_INTEGER, olv%runningFlag,  DOL_OUT)
-        call D3DOL_Publish( 'currentStep', '', '', '', '', DOL_INTEGER, olv%currentStep,  DOL_OUT)
-        call D3DOL_Publish( 'endTimeStep', '', '', '', '', DOL_INTEGER, olv%endTimeStep,  DOL_OUT)
-        call D3DOL_Publish( 'endFlag'    , '', '', '', '', DOL_INTEGER, olv%endFlag    ,  DOL_OUT)
-        call D3DOL_Publish( 'timeStepInt', '', '', '', '', DOL_INTEGER, olv%timeStepInt,  DOL_INOUT)
+        call FLOWOL_Publish( 'runningFlag', '', '', '', '', DOL_INTEGER, olv%runningFlag,  DOL_OUT)
+        call FLOWOL_Publish( 'currentStep', '', '', '', '', DOL_INTEGER, olv%currentStep,  DOL_OUT)
+        call FLOWOL_Publish( 'endTimeStep', '', '', '', '', DOL_INTEGER, olv%endTimeStep,  DOL_OUT)
+        call FLOWOL_Publish( 'endFlag'    , '', '', '', '', DOL_INTEGER, olv%endFlag    ,  DOL_OUT)
+        call FLOWOL_Publish( 'timeStepInt', '', '', '', '', DOL_INTEGER, olv%timeStepInt,  DOL_INOUT)
 
     end subroutine publishUtils
 !---------------------------------------------------------------------------------------

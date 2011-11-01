@@ -64,7 +64,7 @@ rem ===============
     echo "    installing all open source projects . . ."
     if not exist !dest_main! mkdir !dest_main!
 
-    call :deltares_hydro
+    call :d_hydro
     call :flow2d3d
     call :flow2d3d_openda
     call :wave
@@ -86,7 +86,7 @@ rem ========================
     echo "    installing delft3d-flow . . ."
     if not exist !dest_main! mkdir !dest_main!
 
-    call :deltares_hydro
+    call :d_hydro
     call :flow2d3d
     call :flow2d3d_openda
     call :plugin_culvert
@@ -98,16 +98,18 @@ goto :endproc
 
 
 rem ==========================
-rem === INSTALL_DELTARES_HYDRO
+rem === INSTALL_D_HYDRO
 rem ==========================
-:deltares_hydro
-    echo "installing deltares_hydro . . ."
+:d_hydro
+    echo "installing d_hydro . . ."
 
     set dest_bin="!dest_main!\w32\flow\bin"
 
     if not exist !dest_bin!     mkdir !dest_bin!
 
-    copy engines_gpl\deltares_hydro\bin\Release\deltares_hydro.exe                         !dest_bin!
+    copy engines_gpl\d_hydro\bin\Release\d_hydro.exe                         !dest_bin!
+    call :handle_error
+    copy third_party_open\tclkit\bin\win32\deltares_hydro.exe                !dest_bin!
     call :handle_error
 goto :endproc
 
@@ -154,6 +156,8 @@ rem ====================
     call :handle_error
     copy third_party_open\mpich2\lib\*.dll                                                 !dest_bin!
     call :handle_error
+    copy third_party_open\expat\win32\bin\Release\libexpat.dll                             !dest_bin!
+    call :handle_error
     copy engines_gpl\flow2d3d\default\*.*                                                  !dest_default!
     call :handle_error
 goto :endproc
@@ -191,6 +195,12 @@ rem ===========================
     copy third_party_open\mpich2\bin\*.exe                                                 !dest_bin!
     call :handle_error
     copy third_party_open\mpich2\lib\*.dll                                                 !dest_bin!
+    call :handle_error
+    copy third_party_open\expat\win32\bin\Release\libexpat.dll                             !dest_bin!
+    call :handle_error
+    copy third_party_open\netcdf\lib\win32\release\netcdf.dll                              !dest_bin!
+    call :handle_error
+    copy third_party_open\openda\core\native\lib\win32\*.dll                               !dest_bin!
     call :handle_error
     copy engines_gpl\flow2d3d\default\*.*                                                  !dest_default!
     call :handle_error

@@ -93,6 +93,14 @@ subroutine d3stop(iexit, gdp)
     istate = -1
     idate  =  0
     !
+    ! In case of a serious problem:
+    ! A programmer may wish to stop the calculation immediately, without closing
+    ! all communications, but with the generation of a core dump.
+    ! The routine d_hydro_coredump causes a core dump if specified in the main input file.
+    ! This call must be the first serious action in d3stop.
+    !
+    call d_hydro_coredump
+    !
     ! Check if RTC-connection is active and if so
     ! send (negative) status to shut down RTC
     !

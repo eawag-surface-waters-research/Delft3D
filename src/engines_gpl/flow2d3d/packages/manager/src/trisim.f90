@@ -1,4 +1,4 @@
-subroutine trisim (numdom, nummap, context_id, fsm_flags, fsm_tracefile, runid)
+subroutine trisim (numdom, nummap, context_id, fsm_flags, runid)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -38,7 +38,7 @@ subroutine trisim (numdom, nummap, context_id, fsm_flags, fsm_tracefile, runid)
     use mod_trisim
     use precision
     use dfparall
-    !
+
     ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
     ! Activate the following line
     ! See also statements below
@@ -61,8 +61,7 @@ subroutine trisim (numdom, nummap, context_id, fsm_flags, fsm_tracefile, runid)
                                                  ! as detected by hydra
     integer       , intent(in)  :: nummap        ! Number of mappers (one for each DD boundaries connected with this subdomain)
                                                  ! as detected by hydra
-    character(*)  , intent(in)  :: fsm_tracefile
-    character(256)              :: runid
+    character(*)              :: runid
 !
 ! Local variables
 !
@@ -76,7 +75,8 @@ subroutine trisim (numdom, nummap, context_id, fsm_flags, fsm_tracefile, runid)
     ! INTEGER*4 OLD_FPE_FLAGS, NEW_FPE_FLAGS
 !
 !! executable statements -------------------------------------------------------
-!
+
+    ! Initialize MPI
     ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
     ! Activate the following two lines
     ! See also use statement above
@@ -88,11 +88,12 @@ subroutine trisim (numdom, nummap, context_id, fsm_flags, fsm_tracefile, runid)
     !
     allocate(gdp)
     !
-    ! is this necessary?
+    ! gdp%runid must be nullified before calling trisim_init
+    ! When trisim_init is called via OpenDA/OpenMI, gdp%runid is set before the call
     !
     nullify(gdp%runid)
     !
-    retval = trisim_init(numdom, nummap, context_id, fsm_flags, fsm_tracefile, runid, gdp)
+    retval = trisim_init(numdom, nummap, context_id, fsm_flags, runid, gdp)
     if (retval /= 0) then
        return
     endif

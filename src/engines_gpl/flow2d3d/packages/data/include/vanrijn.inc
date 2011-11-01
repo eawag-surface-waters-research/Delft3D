@@ -24,8 +24,8 @@
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id: lognormal.inc 283 2011-02-17 08:24:29Z jagers $
-!  $HeadURL: http://svn.oss.deltares.nl/repos/opendelft3d/trunk/src/engines_gpl/flow2d3d/packages/data/include/lognormal.inc $
+!  $Id: vanrijn.inc 878 2011-10-07 12:58:46Z mourits $
+!  $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/branches/research/Deltares/20110420_OnlineVisualisation/src/engines_gpl/flow2d3d/packages/data/include/vanrijn.inc $
 !-------------------------------------------------------------------------------
     real(fp), parameter :: dclay   =  8.0e-6_fp   !  grain size threshold clay   (vRijn:    8um)
     real(fp), parameter :: dsilt   = 32.0e-6_fp   !  grain size threshold silt   (vRijn:   32um)  

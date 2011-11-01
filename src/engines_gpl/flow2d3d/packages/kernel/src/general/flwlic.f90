@@ -108,7 +108,7 @@ subroutine flwlic(lunscr    ,error     ,username    ,version_full ,version_short
           endif
           write (lunscr, '(a)') txtfil
           write (lunscr, '(2a)') '       ', trim(version_full)
-          write (lunscr, '(3a)')  '       ',trim(libname),' entry RUNME'
+          write (lunscr, '(3a)')  '       ',trim(libname),' entry Flow2D3D::Run'
           write (lunscr, '(a)') txtfil
           write (lunscr, '(a)')
        endif

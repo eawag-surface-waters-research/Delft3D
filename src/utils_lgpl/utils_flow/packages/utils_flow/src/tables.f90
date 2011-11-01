@@ -37,7 +37,6 @@ module tables
     use precision
     !use utilities
     !
-    private
     public tablefiletype
     !
     public org_readtable

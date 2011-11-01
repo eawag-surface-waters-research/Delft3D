@@ -41,7 +41,7 @@ contains
 
 !
 !==============================================================================
-integer function trisim_init(numdom, nummap, context_id, fsm_flags, fsm_tracefile, runid_arg, gdp) result(retval)
+integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, gdp) result(retval)
 !
 !!--declarations----------------------------------------------------------------
 !
@@ -68,6 +68,7 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, fsm_tracefil
     integer                       , pointer :: numdomains
     integer                       , pointer :: nummappers
     character(6)                  , pointer :: prognm
+    character(256)                , pointer :: runid
     integer                       , pointer :: rtcmod
     include 'flow_steps_f.inc'
     include 'fsm.i'
@@ -80,8 +81,7 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, fsm_tracefil
                                                  ! as detected by hydra
     integer       , intent(in)  :: nummap        ! Number of mappers (one for each DD boundaries connected with this subdomain)
                                                  ! as detected by hydra
-    character(*)  , intent(in)  :: fsm_tracefile
-    character(256)              :: runid_arg
+    character(*)                :: runid_arg
 
 !
 ! Local variables
@@ -125,15 +125,9 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, fsm_tracefil
     character(4)                        :: subsys       ! Sub-system definition of Delft3D here SUBSYS = 'flow' 
     character(5)                        :: filid
     character(5)   , pointer            :: versio       ! Version nr. of the current package 
-    character(256) , pointer            :: runid
 !
 !! executable statements -------------------------------------------------------
 !
-    !
-    ! Start simulation performance measurement
-    !
-    call StartComputation
-    !
     ! Initialization using a semaphore
     ! Related vseminit is in tricom.f90
     !
@@ -159,10 +153,8 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, fsm_tracefil
     ! esm/fsm initialization
     !
     fsmstatus = fsmini (context_id, fsm_flags)
-    if (len (fsm_tracefile) > 0) then
-       fsmstatus = fsmtrf (fsm_tracefile)
-    endif
     !
+    runid        => gdp%runid
     lundia       => gdp%gdinout%lundia
     lunprt       => gdp%gdinout%lunprt
     iphisi       => gdp%gdinttim%iphisi
@@ -187,7 +179,6 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, fsm_tracefil
     mainys       => gdp%gdtricom%mainys
     tscale       => gdp%gdtricom%tscale
     comfil       => gdp%gdtricom%comfil
-    runid        => gdp%gdtricom%runid
     trifil       => gdp%gdtricom%trifil
     versio       => gdp%gdtricom%versio
     filmd        => gdp%gdtricom%filmd
@@ -195,7 +186,6 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, fsm_tracefil
     ! Initialize local parameters, including IPHISI and IPMAP(1)
     ! in case program crashes the test below can be performed anyway
     !
-    runid    = runid_arg
     
     init     = .true.
     filmrs   = ' '
@@ -213,10 +203,14 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, fsm_tracefil
     !
     numdomains = max(1,numdom)
     !
-    ! Store nummap (counted by Hydra) in nummapperss (in GDP-structure)
+    ! Store nummap (counted by Hydra) in nummappers (in GDP-structure)
     !
     nummappers = nummap
-    if (runid==' ') then
+    !
+    ! runid_arg may be set by the C main routines or by OpenDA/OpenMI
+    !
+    runid    = runid_arg
+    if (runid == ' ') then
        !
        ! First try to read runid from file called RUNID
        ! This simplifies fluidmud synchronisation
@@ -233,10 +227,13 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, fsm_tracefil
        endif
     else
        !
-       ! Remove (possible) trailing '\0' from c-code
+       ! Remove (possible) trailing '\0' (and all characters behind it) from c-code
        !
        do i = 1, len(runid)
-          if (ichar(runid(i:i)) == 0 .or. ichar(runid(i:i)) == 10) runid(i:i) = ' '
+          if (ichar(runid(i:i)) == 0 .or. ichar(runid(i:i)) == 10) then
+             runid(i:) = ' '
+             exit
+          endif
        enddo
     endif
     runid = adjustl(runid)
@@ -468,7 +465,7 @@ integer function trisim_close(gdp) result (retval)
     !
     ! body
     !
-    runid        => gdp%gdtricom%runid
+    runid        => gdp%runid
     versio       => gdp%gdtricom%versio
     filmd        => gdp%gdtricom%filmd
     lundia       => gdp%gdinout%lundia
@@ -532,7 +529,6 @@ integer function trisim_close(gdp) result (retval)
     !
     ! Stop simulation performance measurement
     !
-    call EndComputation
     !
     retval = 0  
     !

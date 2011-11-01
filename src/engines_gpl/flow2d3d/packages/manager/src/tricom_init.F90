@@ -754,7 +754,7 @@ subroutine tricom_init(gdp)
     mainys              => gdp%gdtricom%mainys
     tscale              => gdp%gdtricom%tscale
     comfil              => gdp%gdtricom%comfil
-    runid               => gdp%gdtricom%runid
+    runid               => gdp%runid
     trifil              => gdp%gdtricom%trifil
     versio              => gdp%gdtricom%versio
     lrdok               => gdp%gdtricom%lrdok

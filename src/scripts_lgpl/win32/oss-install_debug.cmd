@@ -40,7 +40,7 @@ rem ===============
 :install_all
     echo "    installing all open source projects (debug) . . ."
 
-    call :deltares_hydro
+    call :d_hydro
     call :flow2d3d
     call :flow2d3d_openda
     call :wave
@@ -57,10 +57,10 @@ goto :endproc
 
 
 rem ==========================
-rem === INSTALL_DELTARES_HYDRO
+rem === INSTALL_D_HYDRO
 rem ==========================
-:deltares_hydro
-    echo "installing deltares_hydro . . ."
+:d_hydro
+    echo "installing d_hydro . . ."
     echo "... nothing to be done"
 goto :endproc
 
@@ -72,7 +72,7 @@ rem ====================
 :flow2d3d
     echo "installing flow2d3d . . ."
 
-    set dest_bin="engines_gpl\deltares_hydro\bin\Debug"
+    set dest_bin="engines_gpl\d_hydro\bin\Debug"
 
     if not exist !dest_bin!     mkdir !dest_bin!
 
@@ -83,10 +83,11 @@ rem ====================
     copy third_party_open\DelftOnline\lib\Debug\DelftOnline.dll                          !dest_bin!
     copy third_party_open\DelftOnline\lib\Debug\DelftOnlineJNI.dll                       !dest_bin!
     copy third_party_open\DelftOnline\lib\Debug\JavaLaunch.dll                           !dest_bin!
-    copy third_party_open\pthreads\bin\win32\pthreadVCE2.dll                               !dest_bin!
-    copy third_party_open\pthreads\bin\win32\pthreadvce.dll                                !dest_bin!
-    copy third_party_open\mpich2\bin\*.exe                                                 !dest_bin!
-    copy third_party_open\mpich2\lib\*.dll                                                 !dest_bin!
+    copy third_party_open\pthreads\bin\win32\pthreadVCE2.dll                             !dest_bin!
+    copy third_party_open\pthreads\bin\win32\pthreadvce.dll                              !dest_bin!
+    copy third_party_open\mpich2\bin\*.exe                                               !dest_bin!
+    copy third_party_open\mpich2\lib\*.dll                                               !dest_bin!
+    copy third_party_open\expat\win32\bin\Release\libexpat.dll                           !dest_bin!
 goto :endproc
 
 
@@ -97,7 +98,7 @@ rem ===========================
 :flow2d3d_openda
     echo "installing flow2d3d_openda . . ."
 
-    set dest_bin="engines_gpl\deltares_hydro\bin\Debug"
+    set dest_bin="engines_gpl\d_hydro\bin\Debug"
 
     if not exist !dest_bin!     mkdir !dest_bin!
 
@@ -108,10 +109,13 @@ rem ===========================
     copy third_party_open\DelftOnline\lib\Debug\DelftOnline.dll                          !dest_bin!
     copy third_party_open\DelftOnline\lib\Debug\DelftOnlineJNI.dll                       !dest_bin!
     copy third_party_open\DelftOnline\lib\Debug\JavaLaunch.dll                           !dest_bin!
-    copy third_party_open\pthreads\bin\win32\pthreadVCE2.dll                               !dest_bin!
-    copy third_party_open\pthreads\bin\win32\pthreadvce.dll                                !dest_bin!
-    copy third_party_open\mpich2\bin\*.exe                                                 !dest_bin!
-    copy third_party_open\mpich2\lib\*.dll                                                 !dest_bin!
+    copy third_party_open\pthreads\bin\win32\pthreadVCE2.dll                             !dest_bin!
+    copy third_party_open\pthreads\bin\win32\pthreadvce.dll                              !dest_bin!
+    copy third_party_open\mpich2\bin\*.exe                                               !dest_bin!
+    copy third_party_open\mpich2\lib\*.dll                                               !dest_bin!
+    copy third_party_open\expat\win32\bin\Release\libexpat.dll                           !dest_bin!
+    copy third_party_open\netcdf\lib\win32\release\netcdf.dll                            !dest_bin!
+    copy third_party_open\openda\core\native\lib\win32\*.dll                             !dest_bin!
 goto :endproc
 
 
@@ -132,7 +136,7 @@ rem ==========================
 :plugin_culvert
     echo "installing plugin_culvert . . ."
 
-    set dest_bin="engines_gpl\deltares_hydro\bin\Debug"
+    set dest_bin="engines_gpl\d_hydro\bin\Debug"
 
     if not exist !dest_bin!     mkdir !dest_bin!
 
@@ -147,7 +151,7 @@ rem ====================================
 :plugin_delftflow_traform
     echo "installing plugin_delftflow_traform . . ."
 
-    set dest_bin="engines_gpl\deltares_hydro\bin\Debug"
+    set dest_bin="engines_gpl\d_hydro\bin\Debug"
 
     if not exist !dest_bin!     mkdir !dest_bin!
 

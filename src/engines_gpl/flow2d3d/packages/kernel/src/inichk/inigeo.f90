@@ -554,10 +554,10 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
                       xndm = xcor(nd,m) + 360.0_fp
                    endif
                    if (abs(xcor(n,md) - xcor(n,m)) > 180.0_fp) then
-	              xnmd = xcor(n,md) + 360.0_fp
+                      xnmd = xcor(n,md) + 360.0_fp
                    endif
                    if (abs(xcor(nd,md) - xcor(n,m)) > 180.0_fp) then
-	              xndmd = xcor(nd,md) + 360.0_fp
+                      xndmd = xcor(nd,md) + 360.0_fp
                    endif
                 else 
                    !
@@ -568,10 +568,10 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
                       xndm = xcor(nd,m) - 360.0_fp
                    endif
                    if (abs(xcor(n,md) - xcor(n,m)) > 180.0_fp) then
-	              xnmd = xcor(n,md) - 360.0_fp
+                      xnmd = xcor(n,md) - 360.0_fp
                    endif
                    if (abs(xcor(nd,md) - xcor(n,m)) > 180.0_fp) then
-	              xndmd = xcor(nd,md) - 360.0_fp
+                      xndmd = xcor(nd,md) - 360.0_fp
                    endif    
                 endif
                 xz(n,m) = (xcor(n,m) + xndm + xnmd + xndmd)                   / 4.0_fp

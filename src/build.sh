@@ -1,7 +1,7 @@
 #! /bin/bash
 
 #-------------------------------------------------------------------------------
-#   Top-Level Build Script for DeltaresHydro
+#   Top-Level Build Script for d_hydro
 #
 #   There are command-line options to select Fortran compiler and debug or not.
 #
@@ -14,13 +14,13 @@
 #   maintanence.
 #
 #   Irv.Elshoff@Deltares.NL
-#   04 sep 11
+#   28 oct 11
 #
 #   Copyright © 2011, Stichting Deltares
 #-------------------------------------------------------------------------------
 
 
-compiler='intel11'
+compiler=''
 platform='ia32'
 debug=0
 noMake=0
@@ -28,7 +28,7 @@ useSp=0
 
 
 function usage {
-    echo "Usage: `basename $0` [-intel10|-intel11|-intel12] [-debug] [-make] [-intel64] [-sp] [-?]"
+    echo "Usage: `basename $0` [-gnu|-intel10|-intel11|-intel12] [-debug] [-make] [-intel64] [-sp] [-?]"
     }
 
 function log {
@@ -40,6 +40,9 @@ function log {
 
 while [ $# -gt 0 ]; do
     case $1 in
+        -gnu)
+            compiler='gnu'
+            ;;
         -intel10)
             compiler='intel10'
             ;;
@@ -73,6 +76,12 @@ while [ $# -gt 0 ]; do
     shift
 done
 
+if [ "$compiler" == '' ]; then
+    echo "You must specify a compiler"
+    usage
+    exit 1
+fi
+
 mkdir -p logs
 
 if [ "$BASH_ENV" != '' ]; then
@@ -103,11 +112,20 @@ fi
 # Solution: don't use the svml library in commmon.am
 
 case $compiler in
+    gnu)
+        ifortInit=""
+        echo "Using default GNU compiler compiler"
+        echo "Warning: The source code is not yet GNU friendly. We welcome help."
+        echo -e "\n\n\n\n"
+        sleep 3
+        ;;
+
     intel12)
         ifortInit=". /opt/intel/bin/ifortvars.sh $platform"
         #idbInit='. /opt/intel/bin/idbvars.sh'
         echo "Using Intel 12 Fortran ($platform) compiler"
         ;;
+
     intel11)
         if [ -d /opt/intel/Compiler/11.1/072 ]; then
             ifortInit=". /opt/intel/Compiler/11.1/072/bin/ifortvars.sh $platform"
@@ -119,51 +137,41 @@ case $compiler in
             echo "Using Intel 11.0 Fortran ($platform) compiler"
         fi
         ;;
+
     intel10)
         ifortInit='. /opt/intel/fc/10/bin/ifortvars.sh'
         idbInit='. /opt/intel/idb/10/bin/idbvars.sh'
         echo "Using Intel 10 Fortran compiler"
         ;;
+
+    *)
+        ifortInit='/bin/true'
+        echo "Using default Linux Fortran compiler"
+        ;;
 esac
 
-eval $ifortInit
-if [ $? -ne 0 ]; then
-    echo 'Initialization of Intel Fortran compiler fails!'
-    exit 1
-fi
-
-#eval $idbInit
-#if [ $? -ne 0 ]; then
-#    echo 'Initialization of Intel debugger fails!'
-#    exit 1
-#fi
-
-
-#-----  Make scripts/binaries executable in case checked out via Windows
-
-scripts="
-    ./third_party_open/version_number/bin/linux/version_number.exe
-    "
-
-for file in $scripts; do
-    chmod +x $file
-done
-
-
-#-----  When building single precision exes: execute sp-script
-
-if [ $useSp -eq 1 ]; then
-    curDir=`pwd`
-    spScript=scripts/changeprecision.tcl
-    log "Single precision executables: executing script utils_lgpl/precision/$spScript"
-    cd utils_lgpl/precision
-    command="$spScript single"
-    eval $command
-    cd $curDir
+if [ "$ifortInit" != '' ]; then
+    eval $ifortInit
     if [ $? -ne 0 ]; then
-        log 'Execution of script $spScript failed!'
+        echo 'Initialization of the Fortran compiler fails!'
         exit 1
     fi
+fi
+
+
+#-----  Single precision executables require preparation before hand
+
+if [ $useSp -eq 1 ]; then
+    (
+        cd utils_lgpl/precision
+        command='scripts/changeprecision.tcl single'
+        log "Executing \"$command\" in \"$PWD\" for single-precision executables"
+        eval $command
+        if [ $? -ne 0 ]; then
+            log 'ABORT: Single-precision script failed'
+            exit 1
+        fi
+    )
 fi
 
 
@@ -191,23 +199,22 @@ else
     flags='-O2'
 fi
 
-if test "$platform" = "intel64"
-then
-   command=" \
-       CFLAGS='$flags -fPIC -m64 $CFLAGS' \
-       CXXFLAGS='$flags -fPIC -m64 $CXXFLAGS' \
-       FFLAGS='$flags -fPIC -m64 $FFLAGS' \
-       FCFLAGS='$flags -fPIC -m64 $FCFLAGS' \
-       ./configure --prefix=`pwd` &> $log \
-       "
+if [ "$platform" = "intel64" ]; then
+    command=" \
+        CFLAGS='$flags -fPIC -m64 $CFLAGS' \
+        CXXFLAGS='$flags -fPIC -m64 $CXXFLAGS' \
+        FFLAGS='$flags -fPIC -m64 $FFLAGS' \
+        FCFLAGS='$flags -fPIC -m64 $FCFLAGS' \
+            ./configure --prefix=`pwd` &> $log \
+        "
 else
-   command=" \
-       CFLAGS='$flags $CFLAGS' \
-       CXXFLAGS='$flags $CXXFLAGS' \
-       FFLAGS='$flags -DWITH_DELFTONLINE $FFLAGS' \
-       FCFLAGS='$flags $FCFLAGS' \
-       ./configure --prefix=`pwd` &> $log \
-       "
+    command=" \
+        CFLAGS='$flags $CFLAGS' \
+        CXXFLAGS='$flags $CXXFLAGS' \
+        FFLAGS='$flags -DWITH_DELFTONLINE $FFLAGS' \
+        FCFLAGS='$flags $FCFLAGS' \
+            ./configure --prefix=`pwd` &> $log \
+        "
 fi
 
 log "Running `echo $command | sed 's/ +/ /g'`"
@@ -222,7 +229,7 @@ fi
 #-----  Build and install everything
 
 if [ $noMake -eq 1 ]; then
-    log "Skipping make; execute the following command before manual makes:"
+    log "Skipping make; execute the following command before doing manual makes:"
     echo $ifortInit
     exit 0
 fi

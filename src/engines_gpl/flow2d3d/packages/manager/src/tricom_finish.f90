@@ -415,7 +415,7 @@ subroutine tricom_finish(gdp       )
     itlen               => gdp%gdtricom%itlen
     mainys              => gdp%gdtricom%mainys
     comfil              => gdp%gdtricom%comfil
-    runid               => gdp%gdtricom%runid
+    runid               => gdp%runid
     trifil              => gdp%gdtricom%trifil
     versio              => gdp%gdtricom%versio
     maxmn               => gdp%gdtricom%maxmn

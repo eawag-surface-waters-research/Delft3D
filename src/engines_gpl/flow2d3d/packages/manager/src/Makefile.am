@@ -1,19 +1,22 @@
 #-------------------------------------------------------------------------------
-#   Makefile for delftflow
+#   Makefile for d_hydro - Flow2D3D Component
 #
-#   Irv.Elshoff@deltares.nl
-#   Adri.Mourits@deltares.nl
-#   Fedor.Baart@deltares.nl
-#   11 jan 2007
+#   Adri.Mourits@Deltares.NL
+#   Fedor.Baart@Deltares.NL
+#   Irv.Elshoff@Deltares.NL
+#   31 may 11
 #
-#   Copyright (C) 2007, Deltares
+#   Copyright (C) 2011, Deltares
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libmanager.la
+
+lib_LTLIBRARIES = \
+    libtrisim.la
 
 #-------------------------------------------------------------------------------
-#Includes
+#   Includes
+
 FINCLUDES += \
 	-I$(top_srcdir)/utils_lgpl/esmfsm/include \
 	-I$(top_srcdir)/utils_lgpl/precision/include \
@@ -37,8 +40,9 @@ AM_FCFLAGS += \
         -fpp
 
 #-------------------------------------------------------------------------------
-#Sources
-libmanager_la_SOURCES = \
+#   Sources
+
+libtrisim_la_SOURCES = \
          tdatmain.f90 \
          tricom_init.F90 \
          tricom_step.F90 \
@@ -49,5 +53,59 @@ libmanager_la_SOURCES = \
          trisim.f90
 
 #-------------------------------------------------------------------------------
-#Libraries
+#   Libraries
 
+libtrisim_la_LIBADD = \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/main/*.lo \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/non_hydro/*.lo \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/taylor/*.lo \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/timedep/*.lo \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/compute/*.lo \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/compute_nearfar/*.lo \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/compute_roller/*.lo \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/*.lo \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel_dd_f/src/*.lo \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/io/src/preprocessor/*.lo \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/io/src/output/*.lo \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/inichk/*.lo \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/dd/*.lo \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/io/src/input/*.lo \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/general/*.lo \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/io_dol_f/src/*.lo \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/plugin_user/src/*.lo \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/plugin_3dmortrafrm_c/src/*.lo \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/allocation/*.lo \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/general/*.lo \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/gdp/*.lo \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/*.lo \
+    $(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/basics/*.lo \
+    $(top_srcdir)/utils_lgpl/meteo/packages/meteo/src/libmeteo.a \
+    $(top_srcdir)/utils_lgpl/ec_module/packages/ec_module/src/libec_module.a \
+    $(top_srcdir)/utils_lgpl/delftio_sync/packages/delftio_sync/src/libdelftio_sync.a \
+    $(top_srcdir)/utils_lgpl/delftio/packages/delftio/src/diof90/libdelftio.a \
+    $(top_srcdir)/utils_lgpl/delftio/packages/delftio_shm/src/diof90/libdelftio_shm.a \
+    $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libfsm.a \
+    $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/libfsm_c.a \
+    $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/libesm_c.a \
+    $(top_srcdir)/utils_lgpl/inifiles/packages/inifiles/src/libinifiles.a \
+    $(top_srcdir)/utils_lgpl/nefis/packages/nefis/src/libnefis.a \
+    $(top_srcdir)/utils_lgpl/constants/packages/mathconsts/src/libmathconsts.a \
+    $(top_srcdir)/utils_lgpl/precision/packages/precision/src/libprecision.a \
+    $(top_srcdir)/utils_lgpl/semaphore/packages/semaphore/src/libsemaphore.a \
+    $(top_srcdir)/utils_lgpl/stream/packages/stream/src/libstream.a \
+    $(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow/src/libutils_flow.a \
+    $(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow_c/src/libutils_flow_c.a \
+    $(top_srcdir)/utils_lgpl/delftio_sync/packages/delftio_sync_version_number/src/libdelftio_sync_version_number.a \
+    $(top_srcdir)/utils_lgpl/delftio/packages/delftio_version_number/src/libdelftio_version_number.a \
+    $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_version_number/src/libesmfsm_version_number.a \
+    $(top_srcdir)/utils_lgpl/meteo/packages/meteo_version_number/src/libmeteo_version_number.a \
+    $(top_srcdir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.a \
+    $(top_srcdir)/utils_lgpl/stream/packages/stream_version_number/src/libstream_version_number.a \
+    $(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow_version_number/src/libutils_flow_version_number.a \
+    $(EXTERNALSOURCES) \
+    $(MPILIBS) \
+    $(FCLIBS)
+
+#    -L/u/elshoff/2011/DelftOnline-2.15/lib -lDelftOnline -lDelftOnlineJNI \
+#    -L/u/elshoff/2011/JavaLaunch-1.3/lib -lJavaLaunch \
+#

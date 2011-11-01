@@ -1,42 +1,36 @@
 #-------------------------------------------------------------------------------
-#   Makefile for flow2d3d
+#   Makefile for d_hydro - Flow2D3D Component
 #
-#   Irv.Elshoff@deltares.nl
-#   Adri.Mourits@deltares.nl
-#   Fedor.Baart@deltares.nl
-#   11 jan 2007
-#
-#   Copyright (C) 2007, Deltares
+#   Irv.Elshoff@Deltares.NL
+#   18 oct 11
 #-------------------------------------------------------------------------------
 
+
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libflow2d3d.la
 
-FINCLUDES += \
-	-I$(top_srcdir)/utils_lgpl/esmfsm/include \
-	-I$(top_srcdir)/utils_lgpl/precision/include
+SUBDIRS = \
+    dd
 
-FMODULES += \
-	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/gdp \
-	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/basics \
-	-I$(top_srcdir)/utils_lgpl/inifiles/packages/inifiles/src \
-	-I$(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow/src \
-	-I$(top_srcdir)/utils_lgpl/ec_module/packages/ec_module/src \
-	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/manager/src \
-	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/inichk
+lib_LTLIBRARIES = \
+    libflow2d3d.la
+
+INCLUDES = \
+    $(STANDARD_C_INCLUDES) \
+    -I../include
 
 #-------------------------------------------------------------------------------
 #Sources
 libflow2d3d_la_SOURCES = \
-         flow2d3d_version.F90 \
-         flow2d3d.f90 \
-         flow2d3d_dll.f90
+    flow2d3d.cpp \
+    flowol.cpp \
+    flow2d3d_version.cpp
 
 #-------------------------------------------------------------------------------
 #Libraries
 libflow2d3d_la_LIBADD = \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/manager_dd/src/ddexec/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/manager_dd/src/hydra/*.lo \
+    dd/*.lo \
+    dd/iterators/*.lo \
+    dd/mapper/*.lo \
     $(top_srcdir)/engines_gpl/flow2d3d/packages/manager/src/*.lo \
     $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/main/*.lo \
     $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/non_hydro/*.lo \
@@ -47,7 +41,6 @@ libflow2d3d_la_LIBADD = \
     $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/compute_roller/*.lo \
     $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/*.lo \
     $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel_dd_f/src/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel_dd_c/src/mapper/*.lo \
     $(top_srcdir)/engines_gpl/flow2d3d/packages/io/src/preprocessor/*.lo \
     $(top_srcdir)/engines_gpl/flow2d3d/packages/io/src/output/*.lo \
     $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/inichk/*.lo \
@@ -55,7 +48,6 @@ libflow2d3d_la_LIBADD = \
     $(top_srcdir)/engines_gpl/flow2d3d/packages/io/src/input/*.lo \
     $(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/general/*.lo \
     $(top_srcdir)/engines_gpl/flow2d3d/packages/io_dol_f/src/*.lo \
-    $(top_srcdir)/engines_gpl/flow2d3d/packages/io_dol_c/src/*.lo \
     $(top_srcdir)/engines_gpl/flow2d3d/packages/plugin_user/src/*.lo \
     $(top_srcdir)/engines_gpl/flow2d3d/packages/plugin_3dmortrafrm_c/src/*.lo \
     $(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/allocation/*.lo \
@@ -68,6 +60,7 @@ libflow2d3d_la_LIBADD = \
     $(top_srcdir)/utils_lgpl/delftio_sync/packages/delftio_sync/src/libdelftio_sync.a \
     $(top_srcdir)/utils_lgpl/delftio/packages/delftio/src/diof90/libdelftio.a \
     $(top_srcdir)/utils_lgpl/delftio/packages/delftio_shm/src/diof90/libdelftio_shm.a \
+    $(top_srcdir)/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/src/libD_hydro.a \
     $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libfsm.a \
     $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/libfsm_c.a \
     $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/libesm_c.a \
@@ -86,18 +79,22 @@ libflow2d3d_la_LIBADD = \
     $(top_srcdir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.a \
     $(top_srcdir)/utils_lgpl/stream/packages/stream_version_number/src/libstream_version_number.a \
     $(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow_version_number/src/libutils_flow_version_number.a \
-    -L$(top_srcdir)/third_party_open/DelftOnline/lib -lDelftOnline -lDelftOnlineJNI -lJavaLaunch \
     $(EXTERNALSOURCES) \
     $(MPILIBS) \
-    $(FCLIBS)
+    $(FCLIBS) \
+    -lirc -lsvml \
+    -lmcheck
 
+#    -L$(top_srcdir)/third_party_open/DelftOnline/lib -lDelftOnline -lDelftOnlineJNI -lJavaLaunch \
+#
 
-BUILT_SOURCES = ./always \
-	./flow2d3d_version.F90 
+BUILT_SOURCES = \
+	./always \
+	../include/flow2d3d_version.h 
 
 ./always:
-	rm -rf ./flow2d3d_version.F90 
+	rm -f ../include/flow2d3d_version.h 
 
-./flow2d3d_version.F90:
-	$(top_srcdir)/scripts_lgpl/linux/update_version.sh $(srcdir)/flow2d3d_version.F90 $(srcdir) ../include/version_number.ini $(top_srcdir)
+../include/flow2d3d_version.h:
+	$(top_srcdir)/scripts_lgpl/linux/update_version.sh ../include/flow2d3d_version.h $(srcdir) ../include/version_number.ini $(top_srcdir)
 

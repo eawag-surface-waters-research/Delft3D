@@ -57,7 +57,7 @@ else
       BUILD_NUMBER="000000"; 
    fi;
    #   also write it to file
-   echo $BUILD_NUMBER > $MODDIR/BUILD_NUMBER
+   # echo $BUILD_NUMBER > $MODDIR/BUILD_NUMBER
 
 fi 
 
@@ -83,7 +83,7 @@ $VN_DIR/version_number.exe $BUILD_NUMBER $3 $4 $5
 #   Clean up
 #   =====================================
 
-rm -f $MODDIR/BUILD_NUMBER
+# rm -f $MODDIR/BUILD_NUMBER
 
 
 

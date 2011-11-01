@@ -163,7 +163,7 @@ Stream::Stream (
     // This is a blocking call that waits for a Connect from the peer that
     // initially created the stream.
 
-	Stream::initialize();
+        Stream::initialize();
 
     this->errorfunction = errorfunction;
     this->tracefunction = tracefunction;
@@ -534,7 +534,7 @@ Stream::receive_TCPIP (
 #if defined(WIN32)
         if ((got = recvfrom (stream->remote.sock, (char *) buffer, need, 0, NULL, 0)) < 0) {
             error ("Recvfrom %s fails (%s; %d)", stream->remote.handle, strerror (errno), WSAGetLastError());
-			return;} // Endless loop otherwise
+                        return;} // Endless loop otherwise
 #else
         if ((got = recvfrom (stream->remote.sock, (void *) buffer, need, 0, NULL, 0)) < 0)
             error ("Recvfrom %s fails (%s)", stream->remote.handle, strerror (errno));
@@ -665,7 +665,7 @@ Stream::initialize (
 #if defined(WIN32)
         // See: http://www.exegesis.uklinux.net/gandalf/winsock/winsock1.htm
         WORD wVersionRequested = MAKEWORD(1, 1);
-		WSADATA wsaData;
+                WSADATA wsaData;
         if ( WSAStartup( wVersionRequested, &wsaData ) != 0 )
             error("Initialising sockets on Windows failed");
 #else

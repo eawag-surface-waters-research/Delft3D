@@ -97,22 +97,22 @@ main (
 
     Stream::StreamType streamtype = Stream::UNDEFINED;
     int c;
-	int optind;
-	char * s;
-	optind=1;
+        int optind;
+        char * s;
+        optind=1;
     //while ((c = getopt (argc, argv, "b:Mm:n:r:SsTv?")) != -1) {
     while ( optind < argc ) {
-		s = argv[optind];
+                s = argv[optind];
         if (*s == '-') s++;
-		c = int(*s);
+                c = int(*s);
         switch (c) {
             case 'b':
-				optind++;
+                                optind++;
                 bufferSize = atoi (argv[optind]);
-				optind++;
+                                optind++;
                 break;
             case 'M':
-				optind++;
+                                optind++;
 #if defined (WITH_MPI)
                 streamtype = Stream::MPI;
 #else
@@ -120,46 +120,46 @@ main (
 #endif
                 break;
             case 'm':
-				optind++;
+                                optind++;
                 streamtype = Stream::TCPIP;
                 streamHandle = new char [strlen (argv[optind])];
                 strcpy (streamHandle, argv[optind]);
-				optind++;
+                                optind++;
                 break;
             case 'n':
-				optind++;
+                                optind++;
                 numMessages = atoi (argv[optind]);
-				optind++;
+                                optind++;
                 break;
             case 'r':
-				optind++;
+                                optind++;
 #if defined (WIN32)
                 Abort ("Remote host is not supported on Windows");
 #else
-				streamtype = Stream::TCPIP;
+                                streamtype = Stream::TCPIP;
                 remoteHost = new char [strlen (argv[optind])];
                 strcpy (remoteHost, argv[optind]);
-				optind++;
+                                optind++;
 #endif
-				break;
+                                break;
             case 'S':
-				optind++;
+                                optind++;
                 remote_shell = NULL;
                 break;
             case 's':
-				optind++;
+                                optind++;
 #if defined (WIN32)
                 Abort ("Remote shell is not supported on Windows");
 #else
-				remote_shell = "ssh";
+                                remote_shell = "ssh";
 #endif
-				break;
+                                break;
             case 'T':
-				optind++;
+                                optind++;
                 streamtype = Stream::TCPIP;
                 break;
             case 'v':
-				optind++;
+                                optind++;
                 verbose++;
                 break;
             case '?':
@@ -179,10 +179,10 @@ main (
 
 
 #if defined (WIN32)
-	// Always without remote_shell
-	remote_shell = NULL;
+        // Always without remote_shell
+        remote_shell = NULL;
     char * w32ExePath = new char [strlen (argv[0])];
-	exePath = w32ExePath;
+        exePath = w32ExePath;
 #else
     if (gethostname (hostname, sizeof hostname) != 0)
         Abort ("Cannot get hostname");
@@ -225,7 +225,7 @@ StartTCPIP (
 
 #if defined (WIN32)
 #else
-	// Get full run-time path name for this executable
+        // Get full run-time path name for this executable
 
     if ((exePath = getenv ("_")) == NULL)
         Abort ("Cannot get executable name from environment ($_)");
@@ -288,15 +288,15 @@ StartTCPIP (
 
     GetStartupInfo(&si);
 
-    CreateProcess(	NULL, (LPWSTR) command,	// Name of app to launch
-					NULL,					// Default process security attributes
-					NULL,					// Default thread security attributes
-					FALSE,					// Don't inherit handles from the parent
-					0,						// Normal priority
-					NULL,					// Use the same environment as the parent
-					NULL,					// Launch in the current directory
-					&si,					// Startup Information
-					&pi);					// Process information stored upon return
+    CreateProcess(      NULL, (LPWSTR) command, // Name of app to launch
+                                        NULL,                                   // Default process security attributes
+                                        NULL,                                   // Default thread security attributes
+                                        FALSE,                                  // Don't inherit handles from the parent
+                                        0,                                              // Normal priority
+                                        NULL,                                   // Use the same environment as the parent
+                                        NULL,                                   // Launch in the current directory
+                                        &si,                                    // Startup Information
+                                        &pi);                                   // Process information stored upon return
 #else
     int pid;
     if ((pid = fork ()) == 0) {
@@ -529,7 +529,7 @@ GetTime (
     void
     ) {
 #if defined (WIN32)
-	CTime t = CTime::GetCurrentTime();
+        CTime t = CTime::GetCurrentTime();
     return ((Timestamp) t.GetTime());
 #else
     struct timeval  tv;

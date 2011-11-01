@@ -131,7 +131,7 @@ module swan_input
        character(256)                          :: curlif
        character(256)                          :: depfil
        character(256)                          :: nesfil
-       character(256)                          :: vegfil
+       character(37)                           :: vegfil
        character(20)                           :: nesnam           ! dummy
        character(80), dimension(:), allocatable :: meteofile_dom
     end type swan_dom

@@ -12,4 +12,5 @@ SUBDIRS = \
          stream \
          utils_flow \
          meteo \
-         ec_module
+         ec_module \
+         d_hydro_lib

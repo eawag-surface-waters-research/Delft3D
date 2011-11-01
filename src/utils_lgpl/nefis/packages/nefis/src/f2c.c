@@ -124,9 +124,9 @@
 #else
 /* WIN32 or WIN64 */
 #if STDCALL
-#   define FTN_CALL  __stdcall
+#   define FTN_CALL
 #else
-#   define FTN_CALL  __cdecl
+#   define FTN_CALL
 #endif
 #   define CLOSE_DAT_FILE          CLDTNF
 #   define CLOSE_DEF_FILE          CLDFNF

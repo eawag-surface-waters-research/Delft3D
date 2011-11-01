@@ -33,7 +33,7 @@ subroutine get_vegi_map (sif, vegfil)
 use swan_flow_grid_maps
 implicit none
 type(input_fields)          :: sif
-character (37)              :: vegfil
+character(*)                :: vegfil
 real                        :: fac =1.
    call read_bot (sif%veg     ,sif%mmax  ,sif%nmax  ,vegfil    ,fac )
 end subroutine get_vegi_map

@@ -171,19 +171,19 @@ void STDCALL SEMEXIT(void)
 #if defined(WIN32)
     if ( inimutex != 0 )
     {
-		pthread_mutex_destroy(&inimutex);
-	}
+        pthread_mutex_destroy(&inimutex);
+    }
     if ( lunmutex != 0 )
     {
-		pthread_mutex_destroy(&lunmutex);
-	}
+        pthread_mutex_destroy(&lunmutex);
+    }
     if ( nfsmutex != 0 )
     {
-		pthread_mutex_destroy(&nfsmutex);
-	}
+        pthread_mutex_destroy(&nfsmutex);
+    }
     if ( finmutex != 0 )
     {
-		pthread_mutex_destroy(&finmutex);
-	}
+        pthread_mutex_destroy(&finmutex);
+    }
 #endif
 }

@@ -76,11 +76,11 @@ void sendMessages( char *host, Stream::StreamType streamtype ) {
     for ( int i = 1; i <= msgcount; i ++ ) {
         sprintf( msg, "Message %d", i );
         stream.Send( msg, sizeof(msg) ); /* NOTE: send and receive must use the same message size! */
-	    printf( "Sleep for 3 seconds ...\n" );
-    	Sleep ( 3 * SEC );
+            printf( "Sleep for 3 seconds ...\n" );
+        Sleep ( 3 * SEC );
     }
-	printf( "Sleep for 5 seconds ...\n" );
-	Sleep ( 5 * SEC );
+        printf( "Sleep for 5 seconds ...\n" );
+        Sleep ( 5 * SEC );
     exit(0);
 }
 

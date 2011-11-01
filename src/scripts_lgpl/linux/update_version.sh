@@ -45,7 +45,7 @@ else
       SVN_VERSION="000000";  
    fi;
    #   also write it to file
-   echo $SVN_VERSION > $MODDIR/$SVN_VERSION
+   # echo $SVN_VERSION > $MODDIR/$SVN_VERSION
 
 fi  
 

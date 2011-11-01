@@ -5,7 +5,7 @@ subroutine get_swan_depth (sif,botfil)
 use swan_flow_grid_maps
 implicit none
 type(input_fields)          :: sif
-character (256)             :: botfil
+character(*)                :: botfil
 real                        :: fac =1.
    call read_bot (sif%dps     ,sif%mmax  ,sif%nmax  ,botfil    ,fac )
 end subroutine get_swan_depth
@@ -53,7 +53,7 @@ subroutine read_bot(dpb       ,mb        ,nb        ,botfil    ,fac  )
     integer                , intent(in)  :: nb
     real                   , intent(in)  :: fac
     real, dimension(mb, nb)              :: dpb
-    character(256)         , intent(in)  :: botfil
+    character(*)           , intent(in)  :: botfil
 !
 ! Local variables
 !
