@@ -90,3 +90,4 @@ BUILT_SOURCES = \
 
 ../include/d_hydro_version.h:
 	$(top_srcdir)/scripts_lgpl/linux/update_version.sh ../include/d_hydro_version.h $(srcdir) ../include/version_number.ini $(top_srcdir)
+
