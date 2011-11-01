@@ -37,6 +37,10 @@
 
 #define DD_MAIN
 
+#ifdef WIN32
+#   define getpid GetCurrentProcessId
+#endif
+
 #include "flow2d3d.h"
 
 

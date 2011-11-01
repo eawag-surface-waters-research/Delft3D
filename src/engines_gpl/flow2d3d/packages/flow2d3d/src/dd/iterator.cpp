@@ -492,10 +492,11 @@ IteratorShell (
             throw new Exception (true, "Pthreads error in IteratorShell: Cannot set thread-specific key for iterator thread, errno=%d", errno);
 
         char * hnpid = GetHostnamePID ();
-        char threadName [strlen (hnpid) + 100];
+        char *threadName = new char[strlen (hnpid) + 100];
         sprintf (threadName, "%s slave:%d %s", hnpid, iter->node->nodeID, iter->name);
         iter->dd->log->RegisterThread (threadName);
         delete [] hnpid;
+        delete [] threadName;
 
         iter->dd->log->Write (Log::ITER_MAJOR, "IteratorShell \"%s\" \"%s\" is waiting for initialization signal",
                 iter->category->name,
