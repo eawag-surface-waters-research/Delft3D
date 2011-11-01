@@ -1451,6 +1451,7 @@ src/third_party_open/expat/xmlwf/xmlwf.dsp -text
 src/third_party_open/expat/xmlwf/xmlwin32url.cxx -text
 src/third_party_open/intel_fortran/lib/win32/libifcoremd.dll -text
 src/third_party_open/intel_fortran/lib/win32/libifportmd.dll -text
+src/third_party_open/intel_fortran/lib/win32/libmmd.dll -text
 src/third_party_open/lexyacc/bin/win32/byacc.exe -text
 src/third_party_open/lexyacc/bin/win32/cygwin1.dll -text
 src/third_party_open/lexyacc/bin/win32/flex.exe -text
