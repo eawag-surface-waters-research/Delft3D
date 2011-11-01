@@ -760,8 +760,13 @@ GetHostnamePID (
     char * hostnamePID = new char [bufsize];
     memset (hostnamePID, '\0', bufsize);
 
+#ifdef WIN32
+    // For some reason this goes wrong on Windows in example 02_domaindecomposition
+    gethostname (hostnamePID, bufsize);
+#else
     if (gethostname (hostnamePID, bufsize) != 0)
         throw new Exception (true, "Cannot get hostname for distributed DD");
+#endif
 
     // Chop off domain name if it's present
 
