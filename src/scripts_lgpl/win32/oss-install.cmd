@@ -130,12 +130,12 @@ rem ====================
         set ErrorLevel_flowdll=1
     )
     copy engines_gpl\flow2d3d\bin\Release\flow2d3d_sp.dll                                  !dest_bin!
-    if %ErrorLevel%!=0 (
+    if NOT !ErrorLevel!==0 (
         if NOT !ErrorLevel_flowdll! == 0 (
             set GlobalErrorLevel=1
         )
     )
-       rem One of these two dlls will not exist and cause an ErrorLevel=1. Reset it.
+    rem One of these two dlls will not exist and cause an ErrorLevel=1. Reset it.
     set ErrorLevel=0
     copy engines_gpl\flow2d3d\scripts\meteo_old2new.m                                      !dest_bin!
     call :handle_error
