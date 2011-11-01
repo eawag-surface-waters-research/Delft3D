@@ -15,16 +15,14 @@ Steps:
 
 1.  Go to directory .../src/engines_gpl/d_hydro/packages/d_hydro/src
 2.  Switch make files:
-        rm -f Makefile.am
-        ln -s Makefile_monolithic.am Makefile.am 
+        cp -f Makefile_monolithic.am Makefile.am 
 3.  Build and run as usual
 
 To restore:
 
 1.  Go to directory .../src/engines_gpl/d_hydro/packages/d_hydro/src
 2.  Switch make files:
-        rm -f Makefile.am
-        ln -s Makefile_dynamic.am Makefile.am 
+        cp -f Makefile_dynamic.am Makefile.am 
 
 ----
 Adri.Mourits@Deltares.NL
