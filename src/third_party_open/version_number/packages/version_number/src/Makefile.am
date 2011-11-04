@@ -18,5 +18,5 @@ version_number_exe_SOURCES = \
 	version_number.f90
 
 install-exec-local:
-	cp -fp $(top_srcdir)/third_party_open/version_number/packages/version_number/src/version_number.exe $(top_srcdir)/third_party_open/version_number/bin/linux
+	cp -fp $(top_builddir)/third_party_open/version_number/packages/version_number/src/version_number.exe $(top_builddir)/third_party_open/version_number/bin/linux
 

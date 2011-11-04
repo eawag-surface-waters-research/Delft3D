@@ -15,19 +15,19 @@ lib_LTLIBRARIES = libkernel_general.la
 #-------------------------------------------------------------------------------
 #Includes
 FINCLUDES += \
-	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/include
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/include
 
 FMODULES += \
-	-I$(top_srcdir)/utils_lgpl/delftio/packages/delftio/src/diof90 \
-	-I$(top_srcdir)/utils_lgpl/delftio_sync/packages/delftio_sync/src \
-	-I$(top_srcdir)/utils_lgpl/inifiles/packages/inifiles/src \
-	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/basics \
-	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi \
-	-I$(top_srcdir)/utils_lgpl/meteo/packages/meteo/src \
-	-I$(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow/src \
-	-I$(top_srcdir)/utils_lgpl/constants/packages/mathconsts/src \
-	-I$(top_srcdir)/utils_lgpl/ec_module/packages/ec_module/src \
-	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/general
+	-I$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90 \
+	-I$(top_builddir)/utils_lgpl/delftio_sync/packages/delftio_sync/src \
+	-I$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src \
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics \
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi \
+	-I$(top_builddir)/utils_lgpl/meteo/packages/meteo/src \
+	-I$(top_builddir)/utils_lgpl/utils_flow/packages/utils_flow/src \
+	-I$(top_builddir)/utils_lgpl/constants/packages/mathconsts/src \
+	-I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src \
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/general
 
 #-------------------------------------------------------------------------------
 #Sources

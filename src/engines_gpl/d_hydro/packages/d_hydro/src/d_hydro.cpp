@@ -41,6 +41,7 @@
 #include "d_hydro_version.h"
 
 #if defined(HAVE_CONFIG_H)
+#include "config.h"
 #include <dlfcn.h>
 #endif
 #include <expat.h>
@@ -278,10 +279,21 @@ DeltaresHydro::DeltaresHydro (
     if (library == NULL)
         library = startName;
 
+    //
+    //          linux windows   mac
+    // lib        so    dll     dylib
+    // module     so    dll     so
+
 #if defined (HAVE_CONFIG_H)
+#if defined (OSX)
+    // Macintosh:VERY SIMILAR TO LINUX
+    throw new Exception (true, "ABORT: %s has not be ported to Apple Mac OS/X yet", this->exeName);
+
+#else
+    // LINUX
     char lib [strlen (library) + 3+3+1];
     if (strchr (library, '/') == NULL && strchr (library, '.') == NULL) {
-        sprintf (lib, "lib%s.so", library);
+        sprintf (lib, "lib%s%s", library, D3D_PLUGIN_EXT);
         library = lib;
         }
 
@@ -297,11 +309,7 @@ DeltaresHydro::DeltaresHydro (
 
     this->log->Write (Log::DETAIL, "Calling entry function in start library");
     entryPoint (this);
-
-#elif defined (MACOSX)
-    // VERY SIMILAR TO LINUX
-    throw new Exception (true, "ABORT: %s has not be ported to Apple Mac OS/X yet", this->exeName);
-
+#endif
 #elif defined (WIN32)
     char * lib = new char[strlen (library) + 4+1];
     if (strchr (library, '/') == NULL && strchr (library, '\\') == NULL && strchr (library, '.') == NULL) {

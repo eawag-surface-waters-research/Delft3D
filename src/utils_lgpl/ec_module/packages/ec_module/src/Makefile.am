@@ -16,9 +16,9 @@ lib_LIBRARIES = libec_module.a
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
-	-I$(top_srcdir)/utils_lgpl/precision/packages/precision/src \
-	-I$(top_srcdir)/utils_lgpl/inifiles/packages/inifiles/src \
-	-I$(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow/src
+	-I$(top_builddir)/utils_lgpl/precision/packages/precision/src \
+	-I$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src \
+	-I$(top_builddir)/utils_lgpl/utils_flow/packages/utils_flow/src
 
 #-------------------------------------------------------------------------------
 #Sources

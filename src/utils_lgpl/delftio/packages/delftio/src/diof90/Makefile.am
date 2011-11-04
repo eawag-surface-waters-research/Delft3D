@@ -15,7 +15,7 @@ lib_LIBRARIES = libdelftio.a
 #-------------------------------------------------------------------------------
 #Includes
 FINCLUDES += \
-	-I$(top_srcdir)/utils_lgpl/delftio/include
+	-I$(top_builddir)/utils_lgpl/delftio/include
 
 #-------------------------------------------------------------------------------
 #Sources

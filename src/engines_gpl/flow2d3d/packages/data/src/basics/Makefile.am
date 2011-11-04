@@ -15,13 +15,13 @@ lib_LTLIBRARIES = libdata_basics.la
 #-------------------------------------------------------------------------------
 #Includes
 FINCLUDES += \
-	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/include
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/include
 
 FMODULES += \
-	-I$(top_srcdir)/utils_lgpl/delftio/packages/delftio/src/diof90 \
-	-I$(top_srcdir)/utils_lgpl/inifiles/packages/inifiles/src \
-	-I$(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow/src \
-	-I$(top_srcdir)/utils_lgpl/ec_module/packages/ec_module/src
+	-I$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90 \
+	-I$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src \
+	-I$(top_builddir)/utils_lgpl/utils_flow/packages/utils_flow/src \
+	-I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src
 
 #-------------------------------------------------------------------------------
 #Sources

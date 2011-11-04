@@ -14,8 +14,8 @@ lib_LIBRARIES = libfsm_c.a
 
 #-------------------------------------------------------------------------------
 #Includes
-INCLUDES = -I$(top_srcdir)/utils_lgpl/esmfsm/include \
-           -I$(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_c/include
+INCLUDES = -I$(top_builddir)/utils_lgpl/esmfsm/include \
+           -I$(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_c/include
 
 #-------------------------------------------------------------------------------
 #Sources

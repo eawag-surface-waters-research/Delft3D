@@ -1,0 +1,91 @@
+#-------------------------------------------------------------------------------
+#   WL Makefile -- Library Postamble with Build Rules
+#
+#   Assumes the global preamble has been included and the following variables
+#   have been defined (where appropriate):
+#   	- LIB	    	= target filename for library archive
+#   	- SRC_C     	= list of ANSI C source files (*.c)
+#   	- SRC_CPP   	= list of C++ source files (*.C)
+#   	- SRC_F77   	= list of Fortran77 source files (*.f)
+#   	- SRC_F77_PP   	= list of F77 sources that require preprocessing (*.F)
+#   	- SRC_F95   	= list of Fortran95 source files (*.f90)
+#   	- SRC_F95_PP	= list of F95 sources that require preprocessing (*.f90)
+#   	- MOD_F95   	= directory where to install Fortran95 module files
+#   	- SRC_FLEX  	= list of Flex lexical analyser source files (*.l)
+#   	- SRC_BISON  	= list of Bison parser generator source files (*.y)
+#       - JAVA_CLASSES  = Java classes to build
+#       - JAVA_REMOTE   = Java RMI classes
+#       - OTHER_TARGETS = Other targets to include as part of "make all"
+#   	- EXTRA_CLEANUP = additional files to remove for make clean/clobber/...
+#
+#   Irv.Elshoff@wldelft.nl
+#   17 may 06
+#
+#   Copyright (C) 2006, WL | Delft Hydraulics
+#-------------------------------------------------------------------------------
+
+
+
+MAKE_MAKEFILES = \
+    makefile \
+    $(TOPDIR)/make/include.mkf \
+    $(TOPDIR)/make/platform/$(MAKE_PLATFORM).mkf \
+    $(TOPDIR)/make/postamble-lib.mkf \
+    $(TOPDIR)/make/preamble.mkf \
+    $(TOPDIR)/make/rules.mkf \
+
+
+include $(TOPDIR)/make/include.mkf
+include $(TOPDIR)/make/rules.mkf
+
+
+#-----	Targets  ---------------------------------------------------------------
+
+all: $(LIBDIR)/$(LIB) $(JAVA_CLASSES) $(JAVA_REMOTE) $(OTHER_TARGETS)
+
+$(LIBDIR)/$(LIB): $(OBJECT_PATHS) $(MAKE_MAKEFILES)
+	@echo Creating and installing library $(subst $(TOPDIR)/,,$(LIBDIR))/$(LIB)
+	@mkdir -p $(LIBDIR)
+	@rm -f $(LIBDIR)/$(LIB)
+	@if [ "$$MAKE_VERBOSE" = 'YES' ]; then \
+	    echo ar cr $(LIBDIR)/$(LIB) $(OBJECT_PATHS) ; \
+	fi
+	@ar cr $(LIBDIR)/$(LIB) $(OBJECT_PATHS)
+	@if [ "$(MOD_F95)" != "" ]; then \
+	    echo Copying F95 Modules to $(MOD_F95)/$(MAKE_TARGETDIR) ; \
+	    mkdir -p $(MOD_F95)/$(MAKE_TARGETDIR) ; \
+	    cp -f *.mod $(MOD_F95)/$(MAKE_TARGETDIR) ; \
+	fi
+
+$(OBJECT_PATHS): $(ALL_INCLUDES)
+
+clean: $(OTHER_CLEAN)
+	@rm -f \
+	    *.o \
+	    *.mod \
+	    *.MOD \
+	    core \
+	    core.[1-9][0-9]* \
+	    *.bak \
+	    *.bck \
+	    $(EXTRA_CLEANUP)
+
+clobber: $(OTHER_CLOBBER)
+	@$(MAKE) clean
+	@rm -rf $(MAKE_TARGETDIR)
+	@rm -rf Debug Release
+	@rm -f $(LIBDIR)/$(LIB) $(LIB)
+	@if [ "$(MOD_F95)" != "" ]; then \
+	    rm -f $(MOD_F95)/$(MAKE_TARGETDIR)/*.mod ; \
+	    rm -f $(MOD_F95)/$(MAKE_TARGETDIR)/*.MOD ; \
+	fi
+	find . -name \*.class | while read f; do \
+	    if [ $$f != '*.class' ] && [ -r `basename $$f .class`.java ]; then \
+	    	rm -f $$f ; \
+	    fi ; \
+	done
+	if [ -d nl/wldelft ]; then \
+	    rm -rf nl/wldelft ; \
+	    rmdir --ignore-fail-on-non-empty nl ; \
+	fi
+

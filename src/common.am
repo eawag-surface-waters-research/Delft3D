@@ -15,27 +15,25 @@ AM_CFLAGS = \
 	-std=c99 \
 	-D_GNU_SOURCE \
 	-O2 \
-	-DSTR_LEN_AT_END
+	-DSTR_LEN_AT_END \
+    -DWITH_DELFTONLINE
 
 AM_CXXFLAGS = \
 	-std=c++98 \
 	-D_GNU_SOURCE \
 	-O2 \
-	-DSTR_LEN_AT_END
+	-DSTR_LEN_AT_END \
+    -DWITH_DELFTONLINE
 
 STANDARD_C_INCLUDES = \
-    -I. \
-    -I$(top_srcdir)/engines_gpl/d_hydro/include \
-    -I$(top_srcdir)/engines_gpl/flow2d3d/packages/flow2d3d/src \
-    -I$(top_srcdir)/engines_gpl/flow2d3d/packages/flow2d3d/src/dd \
-    -I$(top_srcdir)/engines_gpl/flow2d3d/packages/flow2d3d/src/dd/iterators \
-    -I$(top_srcdir)/engines_gpl/flow2d3d/packages/flow2d3d/src/dd/mapper \
-    -I$(top_srcdir)/third_party_open/DelftOnline/include \
-    -I$(top_srcdir)/third_party_open/DelftOnline/include/linux \
-    -I$(top_srcdir)/utils_lgpl/d_hydro_lib/include \
-    -I$(top_srcdir)/utils_lgpl/esmfsm/include \
-    -I$(top_srcdir)/utils_lgpl/precision/include \
-    -I$(top_srcdir)/utils_lgpl/stream/include
+    -I$(top_builddir)/engines_gpl/d_hydro/include \
+    -I$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d/include \
+    -I$(top_builddir)/third_party_open/DelftOnline/include \
+    -I$(top_builddir)/third_party_open/DelftOnline/include/linux \
+    -I$(top_builddir)/utils_lgpl/d_hydro_lib/include \
+    -I$(top_builddir)/utils_lgpl/esmfsm/include \
+    -I$(top_builddir)/utils_lgpl/precision/include \
+    -I$(top_builddir)/utils_lgpl/stream/include
 
 
 # Fortran 77/90 flags
@@ -43,11 +41,10 @@ STANDARD_C_INCLUDES = \
 FINCLUDES =
 
 FMODULES = \
-    -I$(top_srcdir)/utils_lgpl/precision/packages/precision/src
+    -I$(top_builddir)/utils_lgpl/precision/packages/precision/src
 
 
 AM_FCFLAGS = \
-    -fexceptions \
     $(FINCLUDES) \
     $(FMODULES) \
     -O2
@@ -74,56 +71,42 @@ srcdir = @srcdir@
 VPATH = @srcdir@
 
 
-#-----	Common external library locations  -------------------------------------
-
-
-#### ATTENTION:
-####    DO NOT DEFINE FCLIBS (AND MPILIBS) HERE !!!!
-
-#### # When FCLIBS IS NOT defined here, then:
-#### # - flow2d3d crashes on 8 of the 28 dd-testcases
-#### # - FCLIBS is defined by automake as: -L/opt/intel/fc/10.1.015/lib -L/usr/lib/gcc/i386-redhat-linux/3.4.6/ -L/usr/lib/gcc/i386-redhat-linux/3.4.6/../../../ -lifport -lifcore -limf -lm -lipgo -lirc -lgcc_s -lirc_s -ldl
-#### #   Note the dynamic link flag -ldl
-#### # - All modules compile and link
-#### # When FCLIBS IS defined here, then:
-#### # - flow2d3d runs fine on all dd-testcases
-#### # - Modules linked by the C++ linker do not link anymore: undefined reference to `dlsym'
-#### #   This problem is solved by adding the -ldl flag in the related Makefile.am
-
-# 32 bit:
-# FCLIBS = -L/opt/intel/Compiler/11.0/081/lib/ia32 -lifcoremt
-# MPILIBS = -L/opt/mpich2/lib -lmpichf90 -lmpich -lpthread
-
-# 64 bit:
-# FCLIBS = -L/opt/intel/Compiler/11.0/081/lib/intel64
-# MPILIBS = -L/opt/mpich2-1.0.8-intel64/lib -lmpichf90 -lmpich -lpthread
-
 #-------------------------------------------------------------------------------
 #   Custom make targets
 
 
 ds-install: install
 	( \
-	    cp -p $(top_srcdir)/third_party_open/DelftOnline/lib/*.so $(libdir) ; \
-	    cd $(top_srcdir) ; \
+	    cp -p $(top_builddir)/third_party_open/DelftOnline/lib/*.so $(libdir) ; \
+	    cd $(top_builddir) ; \
 	    ./install.sh ../bin \
 	)
+
+# Improved version_number:
+# Something like find . -?newer ../version_number.h....
+# make directory if it doesn't exist and add a version number
+# relative to build dir
+# make revision expects:
+# include/version_number.h:
+#	if [ ! -d include ]; then mkdir include; fi
+#	$(top_srcdir)/scripts/linux/make_revision.sh $(abs_top_builddir) $(abs_top_builddir) $(abs_srcdir) $(abs_builddir)
+
 
 # ToDo: make delftflow-dist part of ds-install?
 delftflow-dist: ds-install
 	( \
-	    export DEST=$(top_srcdir)/dist/delftflow-linux ; \
+	    export DEST=$(top_builddir)/dist/delftflow-linux ; \
 	    mkdir -p $$DEST ; \
-	    cp -p $(top_srcdir)/bin/d_hydro.exe $$DEST ; \
+	    cp -p $(top_builddir)/bin/d_hydro.exe $$DEST ; \
 	    cd $$DEST/.. ; \
 	    tar czf delftflow-linux.tgz delftflow-linux ; \
 	    rm -rf delftflow-linux \
 	)
 
 distclean-local:
+	rm -f $(top_builddir)/bin/*
+	rm -f $(top_builddir)/lib/*
+clean-local:
 	rm -f *.mod
-	rm -f $(top_srcdir)/bin/*
-	rm -f $(top_srcdir)/lib/*
 
-ds-clean: distclean distclean-local maintainer-clean maintainer-clean-am
-	rm -f Makefile.in
+ds-clean: distclean distclean-local clean-local maintainer-clean maintainer-clean-am

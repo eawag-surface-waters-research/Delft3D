@@ -20,6 +20,6 @@ allocate_local_exe_SOURCES = \
 #-------------------------------------------------------------------------------
 #Libraries
 allocate_local_exe_LDADD = \
-         $(top_srcdir)/extern/esmfsm/libsrc/esm/libesm.a \
-         $(top_srcdir)/extern/esmfsm/libsrc/fsm/libfsm.a
+         $(top_builddir)/extern/esmfsm/libsrc/esm/libesm.a \
+         $(top_builddir)/extern/esmfsm/libsrc/fsm/libfsm.a
 

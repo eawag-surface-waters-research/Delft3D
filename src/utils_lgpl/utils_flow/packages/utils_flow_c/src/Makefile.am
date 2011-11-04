@@ -14,7 +14,7 @@ lib_LIBRARIES = libutils_flow_c.a
 
 #-------------------------------------------------------------------------------
 #Includes
-INCLUDES = -I$(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow_c/include
+INCLUDES = -I$(top_builddir)/utils_lgpl/utils_flow/packages/utils_flow_c/include
 
 #-------------------------------------------------------------------------------
 #Sources

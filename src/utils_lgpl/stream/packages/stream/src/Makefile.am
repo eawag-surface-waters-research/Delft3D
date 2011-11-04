@@ -14,7 +14,7 @@ lib_LIBRARIES = libstream.a
 
 #-------------------------------------------------------------------------------
 #Includes
-INCLUDES = -I$(top_srcdir)/utils_lgpl/stream/include
+INCLUDES = -I$(top_builddir)/utils_lgpl/stream/include
  
 #-------------------------------------------------------------------------------
 #Sources

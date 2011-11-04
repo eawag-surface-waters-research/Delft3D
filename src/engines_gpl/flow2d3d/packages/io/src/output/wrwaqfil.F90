@@ -345,6 +345,9 @@
 !                    instead of unformatted.
 !                    Although it is not standard Fortran
 
+! This part is copied for binary and unformatted
+#ifdef HAVE_FC_FORM_BINARY
+
          lunvol    = newlun_nogdp()
          open  ( lunvol , file=trim(filnam)//'vol' , form = 'binary' )
          lunare    = newlun_nogdp()
@@ -383,6 +386,46 @@
             lunsrc    = newlun_nogdp()
             open  ( lunsrc , file=trim(filnam)//'src' )    ! final file
          endif
+#else
+         lunvol    = newlun_nogdp()
+         open  ( lunvol , file=trim(filnam)//'vol' , form = 'unformatted', access='stream')
+         lunare    = newlun_nogdp()
+         open  ( lunare , file=trim(filnam)//'are' , form = 'unformatted', access='stream')
+         lunflo    = newlun_nogdp()
+         open  ( lunflo , file=trim(filnam)//'flo' , form = 'unformatted', access='stream')
+         if ( lsal .gt. 0 ) then
+            lunsal    = newlun_nogdp()
+            open  ( lunsal , file=trim(filnam)//'sal' , form = 'unformatted', access='stream')
+         endif
+         if ( ltem .gt. 0 ) then
+            luntem    = newlun_nogdp()
+            open  ( luntem , file=trim(filnam)//'tem' , form = 'unformatted', access='stream')
+         endif
+         do l = 1, lsed
+            lunsed(l) = newlun_nogdp()
+            sf = "sed00"
+            write( sf(4:5), '(i2.2)' ) l
+            open  ( lunsed(l), file=trim(filnam)//sf  , form = 'unformatted', access='stream')
+         enddo
+         if ( ilaggr(kmax) .gt. 1 ) then
+            lunvdf    = newlun_nogdp()
+            open  ( lunvdf , file=trim(filnam)//'vdf' , form = 'unformatted', access='stream')
+         endif
+         luntau    = newlun_nogdp()
+         open  ( luntau , file=trim(filnam)//'tau' , form = 'unformatted', access='stream')
+ !       lunfmap   = newlun_nogdp()
+ !       open  ( lunfmap, file=trim(filnam)//'fmap', form = 'unformatted', access='stream')
+         if ( nsrc .gt. 0 ) then
+            lunsrctmp = newlun_nogdp()
+            open  ( lunsrctmp , file='TMP_'//trim(filnam)//'src' )
+            if ( nowalk .gt. 0 ) then
+               lunwlk    = newlun_nogdp()
+               open  ( lunwlk , file=trim(filnam)//'wlk' )
+            endif
+            lunsrc    = newlun_nogdp()
+            open  ( lunsrc , file=trim(filnam)//'src' )    ! final file
+         endif
+#endif
 
 !           write the .srf and .len file (non trivial with aggregation)
 

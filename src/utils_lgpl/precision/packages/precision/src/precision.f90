@@ -79,6 +79,7 @@ module precision
 ! NONE
 !!--declarations----------------------------------------------------------------
 use precision_basics
+use iso_c_binding
 implicit none
 !
 ! fp is the generally used precision in Delft3D-FLOW
@@ -99,6 +100,6 @@ integer, parameter :: fhp=sp
 ! = 4 for 32bit versions
 ! = 8 for 64bit versions
 !
-integer, parameter :: pntrsize=4
+integer, parameter :: pntrsize=c_size_t
 
 end module precision

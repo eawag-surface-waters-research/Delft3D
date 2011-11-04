@@ -1,0 +1,69 @@
+#-------------------------------------------------------------------------------
+#   DelftOnline Makefile -- Global Preamble with Definitions
+#   	    	    	    Platform-independent
+#
+#   Irv.Elshoff@wldelft.nl
+#   13 feb 07
+#
+#   Copyright (C) 2006-2007, WL | Delft Hydraulics
+#-------------------------------------------------------------------------------
+
+
+.PHONY : all clean clobber
+
+
+ifeq ($(strip $(MAKEFLAGS)),)
+    ifeq ($(MAKE_VERBOSE),NO)
+    	MAKEFLAGS = --no-print-directory --silent
+    else
+    	MAKEFLAGS = --print-directory
+    endif
+endif
+
+
+include $(TOPDIR)/make/platform/$(MAKE_PLATFORM).mkf
+
+
+PROGDIR = $(TOPDIR)/bin/$(MAKE_TARGETDIR)
+LIBDIR	= $(TOPDIR)/lib/$(MAKE_TARGETDIR)
+
+THISDIR = $(subst $(MAKE_HOME)/,,$(PWD))
+
+LIB_JAVALAUNCH = \
+    $(TOPDIR)/extern/JavaLaunch
+
+
+#-----	Fortran Compiler Settings  ---------------------------------------------
+
+FF = $(MAKE_FF)
+
+FINCLUDES = \
+
+FMODULES = \
+
+FFLAGS = \
+    $(FINCLUDES) \
+    $(FMODULES) \
+    $(MAKE_FFLAGS) \
+
+
+#-----	C++ Compiler Settings  -------------------------------------------------
+
+CC  = $(MAKE_CC)
+CPP = $(MAKE_CPP)
+
+CINCLUDES = \
+    -I$(TOPDIR)/include  \
+    -I$(LIB_JAVALAUNCH)/include  \
+
+CFLAGS = \
+    $(CINCLUDES) \
+    $(MAKE_CFLAGS) \
+
+
+#-----	Lex/Yacc Settings  -----------------------------------------------------
+
+
+FLEX  = $(MAKE_FLEX)
+BISON = $(MAKE_BISON)
+

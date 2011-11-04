@@ -1,0 +1,51 @@
+#-------------------------------------------------------------------------------
+#   WL Makefile -- Platform Definitions
+#
+#   Irv.Elshoff@Deltares.NL
+#   27 may 10
+#
+#   Copyright (C) 2006-2010, WL | Deltares
+#-------------------------------------------------------------------------------
+
+
+ARCH = intel
+
+MAKE_VERBOSE    = YES
+#-----	Java Settings  ---------------------------------------------------------
+
+MAKE_JAVAC  	= javac
+MAKE_JAVARMIC 	= rmic
+MAKE_JFLAGS 	= 
+
+MAKE_JINCLUDES = \
+	-I/System/Library/Frameworks/JavaVM.framework/Headers
+
+MAKE_JLIBRARIES = \
+	-L/System/Library/Frameworks/JavaVM.framework/Libraries \
+	-ljvm \
+
+#-----	C++ Compiler Settings  -------------------------------------------------
+
+MAKE_CC  = gcc-mp-4.4
+MAKE_CPP = g++-mp-4.4
+
+MAKE_COPTIBUG = -g -O
+
+MAKE_CFLAGS = \
+    -DLINUX \
+    $(MAKE_COPTIBUG) \
+    $(MAKE_JINCLUDES) \
+
+MAKE_CLIBS = # nothing special
+
+
+#-----	Link Loader Settings  --------------------------------------------------
+
+MAKE_LD = g++-mp-4.4
+
+MAKE_LDFLAGS = \
+    $(MAKE_COPTIBUG) \
+    $(MAKE_JLIBRARIES) \
+    -ldl \
+    -lpthread \
+

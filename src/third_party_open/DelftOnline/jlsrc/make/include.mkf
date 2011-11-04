@@ -1,0 +1,21 @@
+#-------------------------------------------------------------------------------
+#   WL Makefile -- List of Include Files
+#
+#   This file contains a comprehensive list of all include files and
+#   is used to trigger a complete recompile of all source if any include
+#   file is changed.  This is a quick and dirty measure in lieu of actual
+#   dependencies.  Can be disabled with "setup -i".
+#
+#   Irv.Elshoff@wldelft.nl
+#   07 nov 06
+#
+#   Copyright (C) 2006, WL | Delft Hydraulics
+#-------------------------------------------------------------------------------
+
+
+ifeq ($(MAKE_INCLUDES),YES)
+
+ALL_INCLUDES = \
+    $(TOPDIR)/include/JavaLaunch.h \
+
+endif

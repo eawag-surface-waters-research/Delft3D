@@ -15,11 +15,11 @@ lib_LIBRARIES = libmanager.a
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
-	-I$(top_srcdir)/engines_gpl/wave/packages/data/src \
-	-I$(top_srcdir)/engines_gpl/wave/packages/kernel/src \
-	-I$(top_srcdir)/utils_lgpl/precision/packages/precision/src \
-	-I$(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow/src \
-	-I$(top_srcdir)/utils_lgpl/meteo/packages/meteo/src
+	-I$(top_builddir)/engines_gpl/wave/packages/data/src \
+	-I$(top_builddir)/engines_gpl/wave/packages/kernel/src \
+	-I$(top_builddir)/utils_lgpl/precision/packages/precision/src \
+	-I$(top_builddir)/utils_lgpl/utils_flow/packages/utils_flow/src \
+	-I$(top_builddir)/utils_lgpl/meteo/packages/meteo/src
 
 #-------------------------------------------------------------------------------
 #Sources

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module relativePaths="true" type="JAVA_MODULE" version="4">
+  <component name="BuildJarSettings">
+    <containerInfo>
+      <containerElement type="module" name="DelftOnline">
+        <attribute name="method" value="1" />
+        <attribute name="URI" value="/" />
+      </containerElement>
+      <containerElement type="library" level="module">
+        <attribute name="method" value="2" />
+        <attribute name="URI" value="/" />
+        <url>jar://$MODULE_DIR$/lib/gnu.getopt.jar!/</url>
+      </containerElement>
+      <containerElement type="library" level="module">
+        <attribute name="method" value="2" />
+        <attribute name="URI" value="/" />
+        <url>jar://$MODULE_DIR$/lib/jline.jar!/</url>
+      </containerElement>
+    </containerInfo>
+    <setting name="jarUrl" value="file://$MODULE_DIR$/../classes/DelftOnline.jar" />
+    <setting name="buildJar" value="true" />
+    <setting name="mainClass" value="nl.wldelft.delftonline.client.Shell" />
+  </component>
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_6" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/classes" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/jline.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/lib/gnu.getopt.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" exported="" name="gnu.getopt" level="project" />
+    <orderEntry type="library" exported="" name="jline" level="project" />
+  </component>
+</module>
+

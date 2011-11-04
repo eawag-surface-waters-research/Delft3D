@@ -1,0 +1,5 @@
+This is the online communiction library that is one of the requirements for Delft3D. 
+These should be installed so Delft3D can find them during configure time. 
+See the INSTALL file for details on the installation. 
+
+If you don't install into the default location (/usr/local) then you should specify the location in the FCFLAGS and CFLAGS and in the LD_LIBRARY_PATH.

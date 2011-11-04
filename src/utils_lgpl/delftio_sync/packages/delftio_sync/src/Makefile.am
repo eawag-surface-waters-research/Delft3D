@@ -15,12 +15,12 @@ lib_LIBRARIES = libdelftio_sync.a
 #-------------------------------------------------------------------------------
 #Includes
 FINCLUDES += \
-	-I$(top_srcdir)/utils_lgpl/delftio/include
+	-I$(top_builddir)/utils_lgpl/delftio/include
 
 FMODULES += \
-	-I$(top_srcdir)/utils_lgpl/delftio/packages/delftio/src/diof90 \
-	-I$(top_srcdir)/utils_lgpl/inifiles/packages/inifiles/src \
-	-I$(top_srcdir)/utils_lgpl/precision/packages/precision/src
+	-I$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90 \
+	-I$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src \
+	-I$(top_builddir)/utils_lgpl/precision/packages/precision/src
 
 #-------------------------------------------------------------------------------
 #Sources

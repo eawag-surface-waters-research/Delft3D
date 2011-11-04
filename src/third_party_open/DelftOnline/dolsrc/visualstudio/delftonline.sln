@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DelftOnlineJNI", "delftonline_jni.vcproj", "{5837E186-9AFF-405E-871C-56FEA97502F0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FAF412D5-F6E2-4A83-84E2-8AFD4142B915} = {FAF412D5-F6E2-4A83-84E2-8AFD4142B915}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DelftOnline", "delftonline.vcproj", "{FAF412D5-F6E2-4A83-84E2-8AFD4142B915}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5837E186-9AFF-405E-871C-56FEA97502F0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{5837E186-9AFF-405E-871C-56FEA97502F0}.Debug|Win32.Build.0 = Debug|Win32
+		{5837E186-9AFF-405E-871C-56FEA97502F0}.Release|Win32.ActiveCfg = Release|Win32
+		{5837E186-9AFF-405E-871C-56FEA97502F0}.Release|Win32.Build.0 = Release|Win32
+		{FAF412D5-F6E2-4A83-84E2-8AFD4142B915}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FAF412D5-F6E2-4A83-84E2-8AFD4142B915}.Debug|Win32.Build.0 = Debug|Win32
+		{FAF412D5-F6E2-4A83-84E2-8AFD4142B915}.Release|Win32.ActiveCfg = Release|Win32
+		{FAF412D5-F6E2-4A83-84E2-8AFD4142B915}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

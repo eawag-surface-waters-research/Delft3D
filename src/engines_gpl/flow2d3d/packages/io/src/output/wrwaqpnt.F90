@@ -94,7 +94,12 @@
 
 !            write the 'total' lgrid table (currently a full matrix)
 
+#ifdef HAVE_FC_FORM_BINARY
+
       open  ( lunout , file=trim(filnam)//'lgt', form='binary' )
+#else
+      open  ( lunout , file=trim(filnam)//'lgt', form = 'unformatted', access='stream')
+#endif
       k     = 1
       do j = 1,mmax
          do i = 1,nmax
@@ -107,7 +112,12 @@
 
 !            write the lgrid tabel with zero's and bounds
 
+#ifdef HAVE_FC_FORM_BINARY
+
       open  ( lunout , file=trim(filnam)//'lgo', form='binary' )
+#else
+      open  ( lunout , file=trim(filnam)//'lgo', form = 'unformatted', access='stream')
+#endif
       write ( lunout ) nmax, mmax, mnmax, ilaggr(kmax)
       k     = 1
       nobnd = 0
@@ -131,8 +141,12 @@
       close ( lunout )
 
 !            make the 'from' 'to' pointer table and the aggregation table
+#ifdef HAVE_FC_FORM_BINARY
 
       open  ( lunout , file=trim(filnam)//'poi', form='binary' )
+#else
+      open  ( lunout , file=trim(filnam)//'poi', form = 'unformatted', access='stream')
+#endif
 !            determine the type of aggregation
       aggre = -1                                         ! no aggregation
       if ( flaggr .eq. 'active only' ) aggre = 0         ! active cells only
@@ -243,8 +257,12 @@
       close ( lunout )
 
 !            write the aggregated lgrid tabel with zero's and bounds
+#ifdef HAVE_FC_FORM_BINARY
 
       open  ( lunout , file=trim(filnam)//'lga', form='binary' )
+#else
+      open  ( lunout , file=trim(filnam)//'lga', form = 'unformatted', access='stream')
+#endif
       write ( lunout ) nmax, mmax, nosegl, ilaggr(kmax), noq1, noq2, noq3
       write ( lunout ) iapnt(1:mnmax)
       close ( lunout )

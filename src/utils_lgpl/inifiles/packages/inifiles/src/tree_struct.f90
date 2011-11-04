@@ -85,6 +85,8 @@ module TREE_STRUCTURES
               tree_get_datatype, tree_get_data_string,         &
               tree_traverse, tree_traverse_level, print_tree, &
               tree_fold, tree_destroy
+   ! nested function has to be public for gfortran
+   public ::  dealloc_tree_data
 
 contains
 
@@ -365,9 +367,9 @@ recursive subroutine tree_traverse( tree, handler, data, stop )
     interface
        subroutine handler( node, data, stop )
           use TREE_DATA_TYPES
-          type(TREE_DATA), pointer        :: node
-          character(len=1), dimension(:)  :: data
-          logical, intent(inout)          :: stop
+          type(TREE_DATA), pointer                    :: node
+          character(len=1), dimension(:), intent(in)  :: data
+          logical, intent(inout)                      :: stop
        end subroutine handler
     end interface
 
@@ -426,9 +428,9 @@ recursive subroutine tree_traverse_bottomup( tree, handler, data, stop )
     interface
        subroutine handler( node, data, stop )
           use TREE_DATA_TYPES
-          type(TREE_DATA), pointer        :: node
-          character(len=1), dimension(:)  :: data
-          logical, intent(inout)          :: stop
+          type(TREE_DATA), pointer                    :: node
+          character(len=1), dimension(:), intent(in)  :: data
+          logical, intent(inout)                      :: stop
        end subroutine handler
     end interface
 
@@ -465,14 +467,14 @@ recursive subroutine tree_traverse_bottomup( tree, handler, data, stop )
 end subroutine tree_traverse_bottomup
 
 
-!> Destroys a tree freeing up all its memory.
+!> Destroys a tree freeing up all its memory. (don't use a nested subroutine)
 subroutine tree_destroy(tree)
     type(TREE_DATA), pointer                   :: tree    !< Tree that should be destroyed.
     logical :: dummylog
 
     call tree_traverse_bottomup(tree, dealloc_tree_data, node_value, dummylog)
     nullify(tree)
-contains
+end subroutine tree_destroy
 
 !> Deallocates all node data for a tree root.
 !! Assumes that all child nodes's data is already deallocated.
@@ -498,7 +500,6 @@ subroutine dealloc_tree_data(tree, data, stop)
    end if
 end subroutine dealloc_tree_data
 
-end subroutine tree_destroy
 
 
 !> 'Fold' a tree together, using operations on child data, in a bottomup fashion.

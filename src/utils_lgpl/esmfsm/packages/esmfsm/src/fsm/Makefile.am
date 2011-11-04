@@ -15,11 +15,11 @@ lib_LIBRARIES = libfsm.a
 #-------------------------------------------------------------------------------
 #Includes
 FINCLUDES += \
-	-I$(top_srcdir)/utils_lgpl/esmfsm/include \
-	-I$(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm/include
+	-I$(top_builddir)/utils_lgpl/esmfsm/include \
+	-I$(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/include
 
 FMODULES += \
-	-I$(top_srcdir)/utils_lgpl/precision/packages/precision/src
+	-I$(top_builddir)/utils_lgpl/precision/packages/precision/src
 
 #-------------------------------------------------------------------------------
 #Sources

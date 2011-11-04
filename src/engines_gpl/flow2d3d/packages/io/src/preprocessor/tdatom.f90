@@ -289,7 +289,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     character(8)                                        :: dpuopt 
     character(55)                                       :: txtput 
     character(6)                                        :: soort       ! Help var. determining the prog. name currently active  
-    character(9)                                        :: keyw        ! Name of record to look for in the MD-file \ 
+    character(9)                                        :: keyw        ! Name of record to look for in the MD-file 
     character(5)                                        :: versio 
 ! 
 !! executable statements ------------------------------------------------------- 

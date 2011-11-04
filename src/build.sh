@@ -1,7 +1,7 @@
 #! /bin/bash
 
 #-------------------------------------------------------------------------------
-#   Top-Level Build Script for d_hydro
+#   Top-Level Build Script for Delft3D Open Source Code
 #
 #   There are command-line options to select Fortran compiler and debug or not.
 #
@@ -13,8 +13,10 @@
 #   keep up with every new compiler update.  This script should be ultra-low
 #   maintanence.
 #
+#   ToDo: Move DelftOnline to utils and treat it as an ordinary library
+#
 #   Irv.Elshoff@Deltares.NL
-#   28 oct 11
+#   4 Nov 11
 #
 #   Copyright © 2011, Stichting Deltares
 #-------------------------------------------------------------------------------
@@ -25,6 +27,35 @@ platform='ia32'
 debug=0
 noMake=0
 useSp=0
+
+export PATH="/opt/mpich2/bin:$PATH"
+export PKG_CONFIG_PATH=/opt/netcdf-4.1.1/ifort/lib/pkgconfig:$PKG_CONFIG_PATH
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/netcdf-4.1.1/ifort/lib:/opt/hdf5-1.8.5/lib
+
+# The updated autotools are not installed in the default location on the devux64,
+# So we have to set all these variables manually. 
+export ACLOCAL=/opt/automake-1.11.1/bin/aclocal
+export AUTOMAKE=/opt/automake-1.11.1/bin/automake
+export AUTOHEADER=/opt/autoconf-2.68/bin/autoheader
+export AUTOCONF=/opt/autoconf-2.68/bin/autoconf
+export LIBTOOLIZE=/opt/libtool-2.4.2/bin/libtoolize
+
+# The extra macros are in this directory:
+export AUTORECONF_FLAGS="-I /opt/automake-1.11.1/share/aclocal-1.11 -I/opt/libtool-2.4.2/share/aclocal -I/opt/autoconf-2.68/share/autoconf -I/usr/share/aclocal"
+
+# And add them to the path...
+export PATH=/opt/automake-1.11.1/bin:/opt/autoconf-2.68/bin:/opt/libtool-2.4.2/bin:$PATH
+
+# This is needed to find the 64 bit ifort based mpi compiler
+export MPIFC=/opt/mpich2-1.0.8-intel64/bin/mpif90  
+
+# This is needed because that is where we installed DelftOnline 
+# DelftOnline was prebuild in the repository
+# What you could do is add the configure to the main configure so DelftOnline is build automaticly 
+export LDFLAGS=-L`pwd`/lib 
+
+
+
 
 
 function usage {
@@ -89,21 +120,6 @@ if [ "$BASH_ENV" != '' ]; then
     unset BASH_ENV
 fi
 
-# extra for linux64:
-# - work-around to omit delft_online on linux-64bit
-# - test pointersize in precision
-if test "$platform" = "intel64"
-then
-    cp engines_gpl/flow2d3d/packages/flow2d3d/src/Makefile64bit.am engines_gpl/flow2d3d/packages/flow2d3d/src/Makefile.am
-    cp engines_gpl/flow2d3d/packages/data/src/parallel_mpi/Makefile64bit.am engines_gpl/flow2d3d/packages/data/src/parallel_mpi/Makefile.am 
-    chk8bit=`grep '^integer.*pntrsize.*8' utils_lgpl/precision/packages/precision/src/precision.f90`
-    if test -z "$chk8bit"
-    then
-        echo "Error: pntrsize in precision <> 8"
-        exit 1
-    fi
-fi
-
 #-----  Initialize Fortran compiler
 
 # Note:  If the 11.1 compiler is used and the svml library is used in common.am,
@@ -127,7 +143,11 @@ case $compiler in
         ;;
 
     intel11)
-        if [ -d /opt/intel/Compiler/11.1/072 ]; then
+        if [ -d /opt/intel/Compiler/11.1/072/bin/intel64 ]; then
+            ifortInit=". /opt/intel/Compiler/11.1/072/bin/intel64/ifortvars_intel64.sh $platform"
+            idbInit=". /opt/intel/Compiler/11.1/072/bin/intel64/idbvars.sh"
+            echo "Using Intel 11.1 Fortran ($platform) compiler on 64bit OperatingSystem"
+        elif [ -d /opt/intel/Compiler/11.1/072 ]; then
             ifortInit=". /opt/intel/Compiler/11.1/072/bin/ifortvars.sh $platform"
             idbInit=". /opt/intel/Compiler/11.1/072/bin/$platform/idbvars.sh"
             echo "Using Intel 11.1 Fortran ($platform) compiler"
@@ -188,6 +208,66 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+#----- To ensure that all libtool the ltmain.sh and m4 macros are updated.
+
+log='logs/libtoolize.log'
+command="libtoolize --force &> $log"
+
+log "Running $command"
+eval $command
+
+if [ $? -ne 0 ]; then
+    log 'Libtoolize fails!'
+    exit 1
+fi
+
+
+#-----  In DelftOnline:
+cd third_party_open/DelftOnline
+#----------  Create makefiles
+
+log='logs/configure_DelftOnline.log'
+command="./configure --prefix=`pwd` &> $log"
+
+log "Running $command"
+eval $command
+
+if [ $? -ne 0 ]; then
+    log 'Configure DelftOnline fails!'
+    exit 1
+fi
+
+#----------  Build
+
+log='logs/make_DelftOnline.log'
+command="make &> $log"
+
+log "Running $command"
+eval $command
+
+if [ $? -ne 0 ]; then
+    log 'Make DelftOnline fails!'
+    exit 1
+fi
+
+#----------  and install
+
+log='logs/install_DelftOnline.log'
+command="make install &> $log"
+
+log "Running $command"
+eval $command
+
+if [ $? -ne 0 ]; then
+    log 'Install DelftOnline fails!'
+    exit 1
+fi
+
+
+
+cd ../..
+
+
 
 #-----  Create makefiles
 
@@ -198,6 +278,12 @@ if [ $debug -eq 1 ]; then
 else
     flags='-O2'
 fi
+
+# fPIC is the result of the mixing of static and libtool libraries. 
+# If you want to avoid this you can use convenience libraries. 
+# Don't do this for non AMD64 because it will lead to worse performance. 
+# More information here:
+# http://www.gentoo.org/proj/en/base/amd64/howtos/index.xml?full=1#book_part1_chap3
 
 if [ "$platform" = "intel64" ]; then
     command=" \

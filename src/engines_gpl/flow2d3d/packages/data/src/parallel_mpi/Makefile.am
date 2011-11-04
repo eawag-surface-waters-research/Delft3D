@@ -17,16 +17,16 @@ lib_LTLIBRARIES = libparallel.la
 # TODO:/opt/mpich2/include should be configured....
 FINCLUDES += \
         -I/opt/mpich2/include \
-        -I$(top_srcdir)/utils_lgpl/parallel_mpi/include \
-        -I$(top_srcdir)/utils_lgpl/precision/include \
-        -I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/include
+        -I$(top_builddir)/utils_lgpl/parallel_mpi/include \
+        -I$(top_builddir)/utils_lgpl/precision/include \
+        -I$(top_builddir)/engines_gpl/flow2d3d/packages/data/include
 
 FMODULES += \
-        -I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi \
-	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/basics \
-        -I$(top_srcdir)/utils_lgpl/ec_module/packages/ec_module/src \
-        -I$(top_srcdir)/utils_lgpl/inifiles/packages/inifiles/src \
-        -I$(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow/src
+        -I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi \
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics \
+        -I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src \
+        -I$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src \
+        -I$(top_builddir)/utils_lgpl/utils_flow/packages/utils_flow/src
 
 # fpp is compiler dependent (convention is to use .F90 files for preprocessing)
 AM_FCFLAGS += \

@@ -1,0 +1,225 @@
+#-------------------------------------------------------------------------------
+#   WL Makefile -- Common make rules
+#
+#   Irv.Elshoff@wldelft.nl
+#   17 may 06
+#
+#   Copyright (C) 2006, WL | Delft Hydraulics
+#-------------------------------------------------------------------------------
+
+
+.SUFFIXES:
+.SUFFIXES: .F90 .f90 .F .f .cpp .c .l .y .o
+
+SOURCE = \
+    $(SRC_C) \
+    $(SRC_CPP) \
+    $(SRC_F77) \
+    $(SRC_F77_PP) \
+    $(SRC_F95) \
+    $(SRC_F95_PP) \
+    $(SRC_BISON) \
+    $(SRC_FLEX) \
+    $(SRC_JAVA) \
+
+OBJECT_NAMES = \
+    $(SRC_C:.c=.o) \
+    $(SRC_CPP:.cpp=.o) \
+    $(SRC_F77:.f=.o) \
+    $(SRC_F77_PP:.F=.o) \
+    $(SRC_F95:.f90=.o) \
+    $(SRC_F95_PP:.F90=.o) \
+    $(SRC_BISON:.y=.o) \
+    $(SRC_FLEX:.l=.o) \
+
+
+OBJECT_PATHS = $(addprefix $(MAKE_TARGETDIR)/, $(OBJECT_NAMES))
+
+
+#-------------------------------------------------------------------------------
+#   Fortran rules
+
+$(MAKE_TARGETDIR)/%.o: %.F90
+	@echo Compiling F95 with preprocessing $(THISDIR)/$<
+	@mkdir -p $(MAKE_TARGETDIR)
+	@if [ "$$MAKE_VERBOSE" = 'YES' ]; then \
+	    echo $(FF) $(FFLAGS) $(DEFINES) -c $< -o $@ ; \
+	fi
+	@$(FF) $(FFLAGS) $(DEFINES) -c $< -o $@ ; exitcode=$$? ; \
+	if [ $$exitcode -ne 0 ]; then \
+	    if [ "$$MAKE_CONTINUE" = 'NO' ]; then \
+		echo Exiting make because of problem compiling $(THISDIR)/$< ; \
+		exit $$exitcode ; \
+	    fi ; \
+	fi ; \
+
+$(MAKE_TARGETDIR)/%.o: %.f90
+	@echo Compiling F95 $(THISDIR)/$<
+	@mkdir -p $(MAKE_TARGETDIR)
+	@if [ "$$MAKE_VERBOSE" = 'YES' ]; then \
+	    echo $(FF) $(FFLAGS) $(DEFINES) -c $< -o $@ ; \
+	fi
+	@$(FF) $(FFLAGS) $(DEFINES) -c $< -o $@ ; exitcode=$$? ; \
+	if [ $$exitcode -ne 0 ]; then \
+	    if [ "$$MAKE_CONTINUE" = 'NO' ]; then \
+		echo Exiting make because of problem compiling $(THISDIR)/$< ; \
+		exit $$exitcode ; \
+	    fi ; \
+	fi ; \
+
+$(MAKE_TARGETDIR)/%.o: %.F
+	@echo Compiling F77 with preprocessing $(THISDIR)/$<
+	@mkdir -p $(MAKE_TARGETDIR)
+	@if [ "$$MAKE_VERBOSE" = 'YES' ]; then \
+	    echo $(FF) $(F77FLAGS) $(DEFINES) -c $< -o $@ ; \
+	fi
+	@$(FF) $(F77FLAGS) $(DEFINES) -c $< -o $@ ; exitcode=$$? ; \
+	if [ $$exitcode -ne 0 ]; then \
+	    if [ "$$MAKE_CONTINUE" = 'NO' ]; then \
+		echo Exiting make because of problem compiling $(THISDIR)/$< ; \
+		exit $$exitcode ; \
+	    fi ; \
+	fi ; \
+
+$(MAKE_TARGETDIR)/%.o: %.f
+	@echo Compiling F77 $(THISDIR)/$<
+	@mkdir -p $(MAKE_TARGETDIR)
+	@if [ "$$MAKE_VERBOSE" = 'YES' ]; then \
+	    echo $(FF) $(F77FLAGS) $(DEFINES) -c $< -o $@ ; \
+	fi
+	@$(FF) $(F77FLAGS) $(DEFINES) -c $< -o $@ ; exitcode=$$? ; \
+	if [ $$exitcode -ne 0 ]; then \
+	    if [ "$$MAKE_CONTINUE" = 'NO' ]; then \
+		echo Exiting make because of problem compiling $(THISDIR)/$< ; \
+		exit $$exitcode ; \
+	    fi ; \
+	fi ; \
+
+
+#-------------------------------------------------------------------------------
+#   C/C++ rules
+
+
+$(MAKE_TARGETDIR)/%.o: %.cpp
+	@echo Compiling C++ $(THISDIR)/$<
+	@mkdir -p $(MAKE_TARGETDIR)
+	@if [ "$$MAKE_VERBOSE" = 'YES' ]; then \
+	    echo $(CPP) $(CFLAGS) $(DEFINES) -c $< -o $@ ; \
+	fi
+	@$(CPP) $(CFLAGS) $(DEFINES) -c $< -o $@ ; exitcode=$$? ; \
+	if [ $$exitcode -ne 0 ]; then \
+	    if [ "$$MAKE_CONTINUE" = 'NO' ]; then \
+		echo Exiting make because of problem compiling $(THISDIR)/$< ; \
+		exit $$exitcode ; \
+	    fi ; \
+	fi ; \
+
+$(MAKE_TARGETDIR)/%.o: %.c
+	@echo Compiling C $(THISDIR)/$<
+	@mkdir -p $(MAKE_TARGETDIR)
+	@if [ "$$MAKE_VERBOSE" = 'YES' ]; then \
+	    echo $(CC) $(CFLAGS) $(DEFINES) -c $< -o $@ ; \
+	fi
+	@$(CC) $(CFLAGS) $(DEFINES) -c $< -o $@ ; exitcode=$$? ; \
+	if [ $$exitcode -ne 0 ]; then \
+	    if [ "$$MAKE_CONTINUE" = 'NO' ]; then \
+		echo Exiting make because of problem compiling $(THISDIR)/$< ; \
+		exit $$exitcode ; \
+	    fi ; \
+	fi ; \
+
+
+#-------------------------------------------------------------------------------
+#   Lex/Yacc (Flex/Bison) rules
+
+
+$(MAKE_TARGETDIR)/%.o: %.l
+	@echo Compiling Flex $(THISDIR)/$<
+	@if [ "$$MAKE_VERBOSE" = 'YES' ]; then \
+	    echo $(FLEX) -o$(<:.l=).cpp $< ; \
+	fi
+	@$(FLEX) -o$(<:.l=).cpp $< ; exitcode=$$? ; \
+	if [ $$exitcode -ne 0 ]; then \
+	    if [ "$$MAKE_CONTINUE" = 'NO' ]; then \
+		echo Exiting make because of problem compiling $(THISDIR)/$< ; \
+		rm -f $(<:.l=).cpp ; \
+		exit $$exitcode ; \
+	    fi ; \
+	fi
+	@if [ "$$MAKE_VERBOSE" = 'YES' ]; then \
+	    echo $(CPP) $(CFLAGS) $(DEFINES) -c $(<:.l=).cpp -o $@ ; \
+	fi
+	@$(CPP) $(CFLAGS) $(DEFINES) -c $(<:.l=).cpp -o $@ ; exitcode=$$? ; \
+	if [ $$exitcode -ne 0 ]; then \
+	    if [ "$$MAKE_CONTINUE" = 'NO' ]; then \
+		echo Exiting make because of problem compiling $(THISDIR)/$< ; \
+		rm -f $(<:.l=).cpp ; \
+		exit $$exitcode ; \
+	    fi ; \
+	fi
+	@rm -f $(<:.l=).cpp
+
+$(MAKE_TARGETDIR)/%.o: %.y
+	@echo Compiling Bison $(THISDIR)/$<
+	@if [ "$$MAKE_VERBOSE" = 'YES' ]; then \
+	    echo $(BISON) -d $< -o $(<:.y=).cpp ; \
+	fi
+	@$(BISON) -d $< -o $(<:.y=).cpp ; exitcode=$$? ; \
+	if [ $$exitcode -ne 0 ]; then \
+	    if [ "$$MAKE_CONTINUE" = 'NO' ]; then \
+		echo Exiting make because of problem compiling $(THISDIR)/$< ; \
+		rm -f $(<:.y=).cpp ; \
+		exit $$exitcode ; \
+	    fi ; \
+	fi
+	@mv $(<:.y=).hpp $(<:.y=).h
+	@if [ "$$MAKE_VERBOSE" = 'YES' ]; then \
+	    echo $(CPP) $(CFLAGS) $(DEFINES) -c $(<:.y=).cpp -o $@ ; \
+	fi
+	@$(CPP) $(CFLAGS) $(DEFINES) -c $(<:.y=).cpp -o $@ ; exitcode=$$? ; \
+	if [ $$exitcode -ne 0 ]; then \
+	    if [ "$$MAKE_CONTINUE" = 'NO' ]; then \
+		echo Exiting make because of problem compiling $(THISDIR)/$< ; \
+		rm -f $(<:.y=).cpp ; \
+		exit $$exitcode ; \
+	    fi ; \
+	fi
+	@rm -f $(<:.y=).cpp
+
+
+#-------------------------------------------------------------------------------
+#   Java rules
+
+
+%.class: %.java
+	@echo Compiling Java $(THISDIR)/$<
+	@mkdir -p $(MAKE_TARGETDIR)
+	@if [ "$$MAKE_VERBOSE" = 'YES' ]; then \
+	    echo CLASSPATH=\".:$$CLASSPATH\" $(MAKE_JAVAC) $(MAKE_JFLAGS) $< ; \
+	fi
+	@CLASSPATH=\".:$$CLASSPATH\" $(MAKE_JAVAC) $(MAKE_JFLAGS) $< ; exitcode=$$? ; \
+	if [ $$exitcode -ne 0 ]; then \
+	    if [ "$$MAKE_CONTINUE" = 'NO' ]; then \
+		echo Exiting make because of problem compiling $(THISDIR)/$< ; \
+		exit $$exitcode ; \
+	    fi ; \
+	fi
+	@mkdir -p $(MAKE_HOME)/classes/$(MAKE_JPACKDIR)
+	@cp -a $@ $(MAKE_HOME)/classes/$(MAKE_JPACKDIR)
+
+$(MAKE_JPACKDIR)/%_Stub.class: %.java
+	@echo Compiling Java RMI $(THISDIR)/$<
+	@mkdir -p $(MAKE_TARGETDIR)
+	@if [ "$$MAKE_VERBOSE" = 'YES' ]; then \
+	    echo CLASSPATH=\".:$$CLASSPATH\" $(MAKE_JAVARMIC) $(MAKE_JFLAGS) $(MAKE_JPACKAGE).`basename $< .java` ; \
+	fi
+	@CLASSPATH=".:$$CLASSPATH" $(MAKE_JAVARMIC) $(MAKE_JFLAGS) $(MAKE_JPACKAGE).`basename $< .java` ; exitcode=$$? ; \
+	if [ $$exitcode -ne 0 ]; then \
+	    if [ "$$MAKE_CONTINUE" = 'NO' ]; then \
+		echo Exiting make because of problem compiling $(THISDIR)/$< ; \
+		exit $$exitcode ; \
+	    fi ; \
+	fi
+	@mkdir -p $(MAKE_HOME)/classes/$(MAKE_JPACKDIR)
+	@cp -a $@ $(MAKE_HOME)/classes/$(MAKE_JPACKDIR)
+	@cp -a `echo $@ | sed 's/_Stub.class/_Skel.class/'` $(MAKE_HOME)/classes/$(MAKE_JPACKDIR)

@@ -40,6 +40,16 @@ module properties
     integer, private, parameter                   :: max_length = 256
     integer, private, parameter                   :: dp = kind(1.0d00)
     !
+    interface max_keylength
+       module procedure max_keylength
+    end interface
+    interface leaf_keylength
+       module procedure leaf_keylength
+    end interface
+    interface print_initree
+       module procedure print_initree
+    end interface
+
     interface prop_get
        module procedure prop_file
        module procedure prop_get_string
@@ -445,7 +455,7 @@ subroutine prop_write_inifile(mout, tree, error)
     ! Print the tree by traversing it depth-first, pass mout and lenmax by transfer into data variable.
     call tree_traverse(tree, print_initree, transfer((/ mout, transfer(lenmaxdata, 123) /), node_value), dummylog)
 
-contains
+end subroutine prop_write_inifile
 
 !> Selects the maximum keylength from childdata.
 !! to be used in call to tree_fold.
@@ -539,7 +549,6 @@ subroutine print_initree( tree, data, stop )
       write(mout,'(a,a,a,a)') '# ', trim(string), ' -- ', trim(type_string)
    end select
 end subroutine print_initree
-end subroutine prop_write_inifile
 
 
 

@@ -1,0 +1,76 @@
+#-------------------------------------------------------------------------------
+#   WL Makefile -- Library Postamble with Build Rules
+#
+#   Assumes the global preamble has been included and the following variables
+#   have been defined (where appropriate):
+#   	- PROG	    	= target filename for executable
+#   	- SRC_C     	= list of ANSI C source files (*.c)
+#   	- SRC_CPP   	= list of C++ source files (*.C)
+#   	- SRC_F77   	= list of Fortran77 source files (*.f)
+#   	- SRC_F77_PP   	= list of F77 sources that require preprocessing (*.F)
+#   	- SRC_F95   	= list of Fortran95 source files (*.f90)
+#   	- SRC_F95_PP	= list of F95 sources that require preprocessing (*.f90)
+#   	- MOD_F95   	= directory where to install Fortran95 module files
+#   	- SRC_FLEX  	= list of Flex lexical analyser source files (*.l)
+#   	- SRC_BISON  	= list of Bison parser generator source files (*.y)
+#       - OTHER_TARGETS = Other targets to include as part of "make all"
+#   	- EXTRA_CLEANUP = additional files to remove for make clean/clobber/...
+#   	- LIBS	    	= list of libraries needed to link executable
+#       - EXTRA_DEPS    = list of additional depencencies (which are not made)
+#       - EXTRA_LIBS    = list of external libraries needed to link executable
+#                           (-L and -l arguments)
+#
+#   Irv.Elshoff@wldelft.nl
+#   11 feb 07
+#
+#   Copyright (C) 2006-2007, WL | Delft Hydraulics
+#-------------------------------------------------------------------------------
+
+
+MAKE_MAKEFILES = \
+    makefile \
+    $(TOPDIR)/make/include.mkf \
+    $(TOPDIR)/make/platform/$(MAKE_PLATFORM).mkf \
+    $(TOPDIR)/make/postamble-exe.mkf \
+    $(TOPDIR)/make/preamble.mkf \
+    $(TOPDIR)/make/rules.mkf \
+
+
+include $(TOPDIR)/make/include.mkf
+include $(TOPDIR)/make/rules.mkf
+
+
+#-----	Targets  ---------------------------------------------------------------
+
+all: $(PROGDIR)/$(PROG) $(OTHER_TARGETS)
+
+$(PROGDIR)/$(PROG): $(OBJECT_PATHS) $(LIBS) $(EXTRA_DEPS) $(MAKE_MAKEFILES)
+	@echo Linking and installing $(subst $(TOPDIR)/,,$(PROGDIR))/$(PROG)
+	@mkdir -p $(PROGDIR)
+	$(MAKE_LD) \
+	    $(MAKE_LDFLAGS) \
+	    -o $(PROGDIR)/$(PROG) \
+	    $(OBJECT_PATHS) \
+	    $(LIBS) \
+	    $(EXTRA_LIBS) \
+	    $(MAKE_CLIBS) \
+	    $(MAKE_FORTLIBS)
+
+$(OBJECT_PATHS): $(ALL_INCLUDES)
+
+clean: $(OTHER_CLEAN)
+	@rm -f \
+	    *.o \
+	    *.mod \
+	    *.MOD \
+	    core \
+	    core.[1-9][0-9]* \
+	    *.bak \
+	    *.bck \
+	    $(EXTRA_CLEANUP)
+
+clobber: $(OTHER_CLOBBER)
+	@$(MAKE) clean
+	@rm -rf Debug Release
+	@rm -rf $(MAKE_TARGETDIR)
+	@rm -f $(PROG) $(PROGDIR)/$(PROG)

@@ -1,0 +1,60 @@
+#-------------------------------------------------------------------------------
+#   WL Makefile -- Platform Definitions
+#   	Java for DelftOnline 
+#
+#   Irv.Elshoff@Deltares.NL
+#   27 may 10
+#
+#   Copyright (C) 2006-2010, WL | Deltares
+#-------------------------------------------------------------------------------
+
+
+ARCH = intel
+
+
+#-----	Java Settings  ---------------------------------------------------------
+
+MAKE_JAVAC  	= javac
+MAKE_JAVARMIC 	= rmic
+MAKE_JFLAGS 	= 
+MAKE_JPACKAGE	= nl.wldelft.delftonline.server
+MAKE_JPACKDIR	= nl/wldelft/delftonline/server
+
+MAKE_JINCLUDES = \
+	-I/opt/jdk1.6/include \
+	-I/opt/jdk1.6/include/linux \
+
+MAKE_JLIBRARIES = \
+	-L/opt/jdk1.6/jre/lib/i386/client \
+	-ljvm \
+
+
+
+#-----	C++ Compiler Settings  -------------------------------------------------
+
+MAKE_CC  = icc
+MAKE_CPP = icpc
+
+MAKE_COPTIBUG = -g -O
+
+MAKE_CFLAGS = \
+    \
+    -DFTN_UNDERSCORE \
+    -DPTR_VOID_PTR \
+    -DLINUX \
+    $(MAKE_COPTIBUG) \
+    $(MAKE_JINCLUDES) \
+
+MAKE_CLIBS = # nothing special
+
+
+#-----	Link Loader Settings  --------------------------------------------------
+
+MAKE_LD = icpc
+
+MAKE_LDFLAGS = \
+    $(MAKE_COPTIBUG) \
+    $(MAKE_JLIBRARIES) \
+    -ldl \
+    -lpthread \
+

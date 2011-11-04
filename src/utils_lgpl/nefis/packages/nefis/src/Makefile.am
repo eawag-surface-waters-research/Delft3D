@@ -44,4 +44,4 @@ libnefis_a_SOURCES = \
 #Libraries
 
 #libnefis_a_LIBADD = \
-#	$(top_srcdir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.a
+#	$(top_builddir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.a

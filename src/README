@@ -30,6 +30,23 @@ Compiling on Linux
      Check http://oss.deltares.nl/web/opendelft3d/general/-/message_boards/view_message/46284
      Check http://oss.deltares.nl/web/opendelft3d/faq-compiling-code#How do I create a 64-bit executable?
 
+Compiling on OSX
+================
+The OSX version is only tested with Macports gcc45 + openmpi compilers. Make sure you also get libtool, autoconf, automake, gnu make from macports. The OSX version is very alpha (not tested) so please don't use it for anything serious and report any problems to the general forum. The steps to get it working are first install DelftOnline:
+   1) cd third_party_open/DelftOnline
+   2) autoreconf -i 
+   3) ./configure *
+   4) make
+   5) make install
+Then build Delft3D
+   1) cd delft3dsrcdirectory **
+   2) autoreconf -i 
+   3) ./configure (*,***)
+   4) make
+   5) make install 
+* If you don't want to install into /usr/local, use --prefix=abspath
+** Go back to the path where you did svn checkout 
+*** Set DYLD_LIBRARY_PATH to the directory containing DelftOnline if it's not in your default path
 
 Directory structure
 ===================
@@ -42,5 +59,5 @@ utils_lgpl  : Open source utils under LGPL conditions
 
 
 
-10 June 2011
+4 November 2011
 adri.mourits@deltares.nl

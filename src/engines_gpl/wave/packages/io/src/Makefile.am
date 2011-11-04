@@ -15,8 +15,8 @@ lib_LIBRARIES = libio.a
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
-	-I$(top_srcdir)/engines_gpl/wave/packages/data/src \
-	-I$(top_srcdir)/utils_lgpl/precision/packages/precision/src
+	-I$(top_builddir)/engines_gpl/wave/packages/data/src \
+	-I$(top_builddir)/utils_lgpl/precision/packages/precision/src
 
 #-------------------------------------------------------------------------------
 #Sources

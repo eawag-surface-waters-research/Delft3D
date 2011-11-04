@@ -1,0 +1,72 @@
+#-------------------------------------------------------------------------------
+#   WL Makefile -- Dynamic Library Postamble with Build Rules
+#
+#   Assumes the global preamble has been included and the following variables
+#   have been defined (where appropriate):
+#   	- LIB	    	= target filename for library archive
+#   	- SRC_C     	= list of ANSI C source files (*.c)
+#   	- SRC_CPP   	= list of C++ source files (*.C)
+#   	- SRC_F77   	= list of Fortran77 source files (*.f)
+#   	- SRC_F77_PP   	= list of F77 sources that require preprocessing (*.F)
+#   	- SRC_F95   	= list of Fortran95 source files (*.f90)
+#   	- SRC_F95_PP	= list of F95 sources that require preprocessing (*.f90)
+#   	- MOD_F95   	= directory where to install Fortran95 module files
+#   	- SRC_FLEX  	= list of Flex lexical analyser source files (*.l)
+#   	- SRC_BISON  	= list of Bison parser generator source files (*.y)
+#   	- EXTRA_CLEANUP = additional files to remove for make clean/clobber/...
+#   	- LIBS	    	= list of libraries needed to link executable
+#   	    	    	    (may be both archive named and -L and -l arguments)
+#
+#   Irv.Elshoff@wldelft.nl
+#   10 oct 06
+#
+#   Copyright (C) 2006, WL | Delft Hydraulics
+#-------------------------------------------------------------------------------
+
+
+MAKE_MAKEFILES = \
+    makefile \
+    $(TOPDIR)/make/include.mkf \
+    $(TOPDIR)/make/platform/$(MAKE_PLATFORM).mkf \
+    $(TOPDIR)/make/postamble-dll.mkf \
+    $(TOPDIR)/make/preamble.mkf \
+    $(TOPDIR)/make/rules.mkf \
+
+
+include $(TOPDIR)/make/include.mkf
+include $(TOPDIR)/make/rules.mkf
+
+
+#-----	Targets  ---------------------------------------------------------------
+
+all: $(LIBDIR)/$(LIB)
+
+$(LIBDIR)/$(LIB): $(OBJECT_PATHS) $(LIBS) $(MAKE_MAKEFILES)
+	@echo Linking and installing $(subst $(TOPDIR)/,,$(LIBDIR))/$(LIB)
+	@mkdir -p $(LIBDIR)
+	$(MAKE_LD) \
+	    -shared $(MAKE_LDFLAGS) \
+	    -o $(LIBDIR)/$(LIB) \
+	    $(OBJECT_PATHS) \
+	    $(LIBS) \
+	    $(MAKE_CLIBS) \
+	    $(MAKE_FORTLIBS)
+
+$(OBJECT_PATHS): $(ALL_INCLUDES)
+
+clean:
+	@rm -f \
+	    *.o \
+	    *.mod \
+	    *.MOD \
+	    core \
+	    core.[1-9][0-9]* \
+	    *.bak \
+	    *.bck \
+	    $(EXTRA_CLEANUP)
+
+clobber:
+	@$(MAKE) clean
+	@rm -rf Debug Release
+	@rm -rf $(MAKE_TARGETDIR)
+	@rm -f $(LIB) $(LIBDIR)/$(LIB)

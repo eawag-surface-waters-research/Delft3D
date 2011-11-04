@@ -8,7 +8,7 @@ kubint_SOURCES = \
 #Libraries 
 
 kubint_LDADD = \
-	$(top_srcdir)/tools_gpl/kubint/packages/kubint_f/src/libkubint_f.a \
-	$(top_srcdir)/tools_gpl/kubint/packages/kubint_version_number/src/libkubint_version_number.a \
+	$(top_builddir)/tools_gpl/kubint/packages/kubint_f/src/libkubint_f.a \
+	$(top_builddir)/tools_gpl/kubint/packages/kubint_version_number/src/libkubint_version_number.a \
 	-ldl \
 	$(FCLIBS) -lifcore -limf

@@ -77,3 +77,54 @@ else
 fi
 AC_LANG_POP([Fortran])dnl
 ])# AC_FC_LINE_LENGTH
+
+# AC_FC_PREPROCESS([ACTION-IF-SUCCESS],
+#		    [ACTION-IF-FAILURE = FAILURE])
+# Look for a compiler flag to make the Fortran (FC) compiler preprocess source
+# in the current (free- or fixed-format) source code, and adds it to FCFLAGS.
+# Call ACTION-IF-SUCCESS (defaults to nothing) if successful
+# (i.e. can compile code using new extension) and ACTION-IF-FAILURE (defaults
+# to failing with an error message) if not.  (Defined via DEFUN_ONCE to
+# prevent flag from being added to FCFLAGS multiple times.)
+# You should call AC_FC_FREEFORM or AC_FC_FIXEDFORM to set the desired format
+# prior to using this macro.
+#
+# The known flags are:
+# -fpp ifort
+# -cpp gfortran
+dnl this AC_FC_PREPROCESS macro checks for a preprocess flags.
+AC_DEFUN([AC_FC_PREPROCESS],
+[AC_LANG_PUSH([Fortran])dnl
+AC_CACHE_CHECK(
+[for Fortran flag needed to preprocess source],
+	       [ac_cv_fc_preprocess],
+[ac_cv_fc_preprocess=unknown
+ac_fc_preprocess_FCFLAGS_save=$FCFLAGS
+dnl a fortran program with some preprocess statement
+ac_fc_preprocess_test='program a
+#if defined (A)
+#endif
+end program'
+
+for ac_flag in -fpp \
+	       -cpp \ 
+               "-x f95-cpp-input"
+do
+  test "x$ac_flag" != xnone && FCFLAGS="$ac_fc_preprocess_FCFLAGS_save -Werror $ac_flag"
+  AC_COMPILE_IFELSE([[$ac_fc_preprocess_test]],
+		    [ac_cv_fc_preprocess=$ac_flag; break])
+done
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+FCFLAGS=$ac_fc_preprocess_FCFLAGS_save
+])
+if test "x$ac_cv_fc_preprocess" = xunknown; then
+  m4_default([$2],
+	     [AC_MSG_ERROR([Fortran does do preprocessing])])
+else
+  if test "x$ac_cv_fc_preprocess" != xnone; then
+    FCFLAGS="$FCFLAGS $ac_cv_fc_preprocess"
+  fi
+  $1
+fi
+AC_LANG_POP([Fortran])dnl
+])# AC_FC_PREPROCESS

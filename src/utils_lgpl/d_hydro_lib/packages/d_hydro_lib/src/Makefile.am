@@ -37,7 +37,7 @@ BUILT_SOURCES = ./always \
 	rm -rf ../include/d_hydro_lib_version.h
 
 ../include/d_hydro_lib_version.h:
-	$(top_srcdir)/scripts_lgpl/linux/update_version.sh ../include/d_hydro_lib_version.h $(srcdir) ../include/version_number.ini $(top_srcdir)
+	$(top_srcdir)/scripts_lgpl/linux/update_version.sh ../include/d_hydro_lib_version.h $(srcdir) ../include/version_number.ini $(top_builddir)
 
 #-------------------------------------------------------------------------------
 #Libraries

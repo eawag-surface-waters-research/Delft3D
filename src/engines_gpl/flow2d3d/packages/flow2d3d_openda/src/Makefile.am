@@ -17,19 +17,19 @@ INCLUDES = \
 	-I../include
  
 FINCLUDES += \
-	-I$(top_srcdir)/utils_lgpl/precision/include \
-	-I$(top_srcdir)/utils_lgpl/esmfsm/include \
-	-I$(top_srcdir)/third_party_open/openda/core/native/include
+	-I$(top_builddir)/utils_lgpl/precision/include \
+	-I$(top_builddir)/utils_lgpl/esmfsm/include \
+	-I$(top_builddir)/third_party_open/openda/core/native/include
 
 FMODULES += \
-	-I$(top_srcdir)/utils_lgpl/ec_module/packages/ec_module/src \
-	-I$(top_srcdir)/utils_lgpl/inifiles/packages/inifiles/src \
-	-I$(top_srcdir)/utils_lgpl/meteo/packages/meteo/src \
-	-I$(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow/src \
-	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/gdp \
-	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/basics \
-	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/manager/src \
-	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/kernel/src/inichk
+	-I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src \
+	-I$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src \
+	-I$(top_builddir)/utils_lgpl/meteo/packages/meteo/src \
+	-I$(top_builddir)/utils_lgpl/utils_flow/packages/utils_flow/src \
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/gdp \
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics \
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/manager/src \
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/kernel/src/inichk
 
 #-------------------------------------------------------------------------------
 #Sources
@@ -47,8 +47,8 @@ libflow2d3d_openda_la_SOURCES = \
 #-------------------------------------------------------------------------------
 #Libraries
 libflow2d3d_openda_la_LIBADD = \
-	$(top_srcdir)/engines_gpl/flow2d3d/packages/flow2d3d/src/libflow2d3d.la \
-	$(top_srcdir)/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/src/libD_hydro.a
+	$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d/src/libflow2d3d.la \
+	$(top_builddir)/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/src/libD_hydro.a
 
 
 BUILT_SOURCES = \
@@ -59,5 +59,5 @@ BUILT_SOURCES = \
 	rm -f ../include/flow2d3d_openda_version.h 
 
 ../include/flow2d3d_openda_version.h:
-	$(top_srcdir)/scripts_lgpl/linux/update_version.sh ../include/flow2d3d_openda_version.h $(srcdir) ../include/version_number.ini $(top_srcdir)
+	$(top_srcdir)/scripts_lgpl/linux/update_version.sh ../include/flow2d3d_openda_version.h $(srcdir) ../include/version_number.ini $(top_builddir)
 

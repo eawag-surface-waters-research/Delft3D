@@ -7,14 +7,14 @@ stream02test_exe_SOURCES = \
 #-------------------------------------------------------------------------------
 #Includes
 INCLUDES = \
-	-I$(top_srcdir)/utils_lgpl/stream/include
+	-I$(top_builddir)/utils_lgpl/stream/include
 
 #-------------------------------------------------------------------------------
 #Libraries 
 
 stream02test_exe_LDADD = \
-	$(top_srcdir)/utils_lgpl/stream/packages/stream/src/libstream.a \
-	$(top_srcdir)/utils_lgpl/stream/packages/stream_version_number/src/libstream_version_number.a
+	$(top_builddir)/utils_lgpl/stream/packages/stream/src/libstream.a \
+	$(top_builddir)/utils_lgpl/stream/packages/stream_version_number/src/libstream_version_number.a
 
 
 #	-ldl \

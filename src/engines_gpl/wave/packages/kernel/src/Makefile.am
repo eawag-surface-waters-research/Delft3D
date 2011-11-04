@@ -15,9 +15,9 @@ lib_LIBRARIES = libkernel.a
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
-	-I$(top_srcdir)/engines_gpl/wave/packages/data/src \
-	-I$(top_srcdir)/utils_lgpl/precision/packages/precision/src \
-	-I$(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow/src
+	-I$(top_builddir)/engines_gpl/wave/packages/data/src \
+	-I$(top_builddir)/utils_lgpl/precision/packages/precision/src \
+	-I$(top_builddir)/utils_lgpl/utils_flow/packages/utils_flow/src
 	
 #-------------------------------------------------------------------------------
 #Sources

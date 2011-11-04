@@ -11,7 +11,7 @@ bin_PROGRAMS = vs
 
 #-------------------------------------------------------------------------------
 #Includes
-INCLUDES = -I$(top_srcdir)/tools_gpl/vs/packages/vs/include
+INCLUDES = -I$(top_builddir)/tools_gpl/vs/packages/vs/include
 
 #-------------------------------------------------------------------------------
 #Sources
@@ -36,9 +36,9 @@ vs_SOURCES = \
 	viewsel.c
 
 vs_LDADD = $(LDADD) \
-	$(top_srcdir)/tools_gpl/vs/packages/vs_version_number/src/libvs_version_number.a \
-	$(top_srcdir)/utils_lgpl/nefis/packages/nefis/src/libnefis.a \
-	$(top_srcdir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.a
+	$(top_builddir)/tools_gpl/vs/packages/vs_version_number/src/libvs_version_number.a \
+	$(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libnefis.a \
+	$(top_builddir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.a
 	
 AM_LFLAGS = -L
 AM_YFLAGS = -d

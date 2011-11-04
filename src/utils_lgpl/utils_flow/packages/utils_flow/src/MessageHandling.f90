@@ -89,9 +89,7 @@ module MessageHandling
     module procedure message1char1int
     module procedure message1char2int
     module procedure message1char3int
-    module procedure message2int1char
     module procedure message1char1int1double
-    module procedure message1double1int1char
     end interface
     
     interface err
@@ -132,7 +130,7 @@ subroutine SetMessageHandling(write2screen, useLog, lunMessages, callback, thres
    integer, optional, intent(in)       :: lunMessages  !< File pointer whereto messages can be written.
    integer, optional, intent(in)       :: thresholdLevel  !< Messages with level lower than the thresholdlevel
                                                           !< will be discarded.
-   procedure(mh_callbackiface), optional :: callback
+   procedure(mh_callbackiface), optional, pointer :: callback
 
    if (present(write2screen) ) writeMessage2Screen = write2screen
    if (present(lunMessages) )  lunMess             = lunMessages

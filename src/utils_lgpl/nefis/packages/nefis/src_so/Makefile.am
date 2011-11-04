@@ -42,7 +42,7 @@ libnefis_la_SOURCES = \
 #Libraries
 
 libnefis_la_LIBADD = \
-	$(top_srcdir)/utils_lgpl/nefis/packages/nefis_version_number/src_so/version.lo \
-	$(top_srcdir)/utils_lgpl/nefis/packages/nefis_version_number/src_so/f2c.lo \
-	$(top_srcdir)/utils_lgpl/nefis/packages/nefis_version_number/src_so/c2c.lo \
+	$(top_builddir)/utils_lgpl/nefis/packages/nefis_version_number/src_so/version.lo \
+	$(top_builddir)/utils_lgpl/nefis/packages/nefis_version_number/src_so/f2c.lo \
+	$(top_builddir)/utils_lgpl/nefis/packages/nefis_version_number/src_so/c2c.lo \
 	-lltdl

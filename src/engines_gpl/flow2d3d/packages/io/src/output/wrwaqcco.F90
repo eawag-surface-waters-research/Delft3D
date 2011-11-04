@@ -67,7 +67,11 @@
       endif
 !
       lunout = newlun_nogdp()
+#ifdef HAVE_FC_FORM_BINARY
       open  ( lunout , file=trim(filnam)//'cco' , form = 'binary' )
+#else
+      open  ( lunout , file=trim(filnam)//'cco' , form = 'unformatted', access='stream')
+#endif
       x = xcor(1,1)
       y = ycor(1,1)
       write ( lunout ) mmax, nmax, x, y, 0, 0, kmax

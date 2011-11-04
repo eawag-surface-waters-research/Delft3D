@@ -65,7 +65,7 @@ subroutine dfwaitr ( field, work, worksize, ks, ke, request, tag, gdp )
     integer                                         , intent(in)    :: ke           ! last index in vertical direction
     integer                                         , intent(in)    :: ks           ! first index in vertical direction
     integer                                         , intent(in)    :: tag          ! unique tag
-    integer                                                         :: request(4,2) ! MPI communication handle
+    integer                                         , intent(inout) :: request(4,2) ! MPI communication handle (should be inout because mpi_wait is inout)
     integer                                         , intent(in)    :: worksize     ! 
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,ks:ke), intent(inout) :: field        ! real array for which halo values must
     real(fp), dimension(worksize,4,2)               , intent(inout) :: work         ! work array to store data to be sent to or received from neighbour be copied from neighbouring subdomains

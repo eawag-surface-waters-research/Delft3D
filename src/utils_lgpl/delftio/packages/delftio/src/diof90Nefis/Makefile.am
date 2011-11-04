@@ -15,10 +15,10 @@ lib_LIBRARIES = libdiof90Nefis.a
 #-------------------------------------------------------------------------------
 #Includes
 FINCLUDES += \
-	-I$(top_srcdir)/utils_lgpl/delftio/include
+	-I$(top_builddir)/utils_lgpl/delftio/include
 
 FMODULES += \
-	-I$(top_srcdir)/utils_lgpl/delftio/packages/delftio/src/diof90
+	-I$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90
 
 #-------------------------------------------------------------------------------
 #Sources
