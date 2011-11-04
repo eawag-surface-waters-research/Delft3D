@@ -6,7 +6,7 @@
 #   A "make distclean" doesn't do it all (yet), so we help it.
 #
 #   Irv.Elshoff@Deltares.NL
-#   2 jun 11
+#   2 nov 11
 #-------------------------------------------------------------------------------
 
 
@@ -34,6 +34,7 @@ find . \
             done
 
 rm -rf \
+    INSTALL \
     aclocal.m4 \
     autom4te.cache \
     bin \
@@ -46,10 +47,14 @@ rm -rf \
     engines_gpl/wave/packages/wave/src/wave_version.F90 \
     lib \
     logs \
+    third_party_open/version_number/bin/linux/version_number.exe \
+    tools_gpl/vs/packages/vs/src/vs_l.c \
+    tools_gpl/vs/packages/vs/src/vs_y.c \
+    tools_gpl/vs/packages/vs/src/vs_y.h \
     utils_lgpl/constants/packages/mathconsts/src/mathconsts_version.F90 \
+    utils_lgpl/d_hydro_lib/packages/d_hydro_lib/include/d_hydro_lib_version.h \
     utils_lgpl/inifiles/packages/inifiles/src/inifiles_version.F90 \
     utils_lgpl/precision/packages/precision/src/precision_version.F90 \
     utils_lgpl/semaphore/packages/semaphore/include/semaphore_version.h \
-
 
 
