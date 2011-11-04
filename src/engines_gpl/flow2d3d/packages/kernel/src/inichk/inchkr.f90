@@ -3,30 +3,30 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
                 & lturi     ,rouflo    ,rouwav    ,ktemp     ,temint    , &
                 & evaint    ,initia    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2011.                                     
-!                                                                               
-!  This program is free software: you can redistribute it and/or modify         
-!  it under the terms of the GNU General Public License as published by         
-!  the Free Software Foundation version 3.                                      
-!                                                                               
-!  This program is distributed in the hope that it will be useful,              
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
-!  GNU General Public License for more details.                                 
-!                                                                               
-!  You should have received a copy of the GNU General Public License            
-!  along with this program.  If not, see <http://www.gnu.org/licenses/>.        
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D" and "Deltares"    
-!  are registered trademarks of Stichting Deltares, and remain the property of  
-!  Stichting Deltares. All rights reserved.                                     
-!                                                                               
+!
+!  Copyright (C)  Stichting Deltares, 2011.
+!
+!  This program is free software: you can redistribute it and/or modify
+!  it under the terms of the GNU General Public License as published by
+!  the Free Software Foundation version 3.
+!
+!  This program is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!  GNU General Public License for more details.
+!
+!  You should have received a copy of the GNU General Public License
+!  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"
+!  are registered trademarks of Stichting Deltares, and remain the property of
+!  Stichting Deltares. All rights reserved.
+!
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
@@ -364,7 +364,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     real(fp)             :: grdang      !  Description and declaration in tricom.igs
     real(fp)             :: saleqs      !  Description and declaration in tricom.igs
     real(fp)             :: temeqs      !  Description and declaration in tricom.igs
-    real(fp), intent(in) :: timhr       !  Current timestep (in hours) TIMNOW * 2 * HDT / 3600. 
+    real(fp), intent(in) :: timhr       !  Current timestep (in hours) TIMNOW * 2 * HDT / 3600.
     character(*)         :: runid
     character(1)         :: evaint      !  Description and declaration in tricom.igs
     character(1)         :: temint      !  Description and declaration in tricom.igs
@@ -379,11 +379,11 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     integer                            :: ierror
     integer                            :: itype
     integer                            :: nmaxddb
-    integer                            :: nst     ! Current time step counter 
-    integer                            :: ntot0   ! Number of open boundary sections before the time series type 
+    integer                            :: nst     ! Current time step counter
+    integer                            :: ntot0   ! Number of open boundary sections before the time series type
     integer, dimension(:), allocatable :: kcucopy
     integer, dimension(:), allocatable :: kcvcopy
-    real(fp)                           :: timnow  ! Current timestep (multiples of dt) 
+    real(fp)                           :: timnow  ! Current timestep (multiples of dt)
     real(fp), dimension(1)             :: value
     logical                            :: success
 !
@@ -776,9 +776,9 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     !
     ! The global atmospheric pressure gapres (read and/or specified in rdporc.f90)
     ! is used as default value for patm in the meteo module.
-    ! The possible space varying pressure is read via incmeteo. 
+    ! The possible space varying pressure is read via incmeteo.
     ! This must be done before the call to caleva.
-    ! 
+    !
     !
     success = setmeteodefault('patm', gapres)
     call checkmeteoresult(success, gdp)
@@ -791,7 +791,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     call initem(runid, cyclic, timnow, ktemp, temint, r(patm), gdp)
     !
     ! The following arrays must be filled (when relevant)
-    ! before the first call to postpr. 
+    ! before the first call to postpr.
     ! - windu, windv, patm
     ! - rhumarr, tairarr, clouarr
     !
@@ -918,9 +918,9 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     if (cdwstruct) then
        !
        ! Define KSPU/V and POROSU/V for CDW type of structure (fixed gate with
-       ! - OPTIONALLY - layers with enhanced friction below it). 
+       ! - OPTIONALLY - layers with enhanced friction below it).
        ! Array SIG is passed on twice; the first one represents the SIGma coordinates
-       ! (zmodel == .FALSE.) the second represent the Z-coordinates (zmodel == .TRUE.). 
+       ! (zmodel == .FALSE.) the second represent the Z-coordinates (zmodel == .TRUE.).
        ! This is a trick to enable CDWKAD routine to be used for both coordinate types.
        ! Work array ZWORK has the length of 5*KMAX
        !
@@ -950,7 +950,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     ! check on stability not in initialisation
     ! herefore NST = -1
     ! Note:
-    ! HU0 and HV0 obtain their values for the first time in F0ISF1 
+    ! HU0 and HV0 obtain their values for the first time in F0ISF1
     !
     nst = -1
     call f0isf1(dischy    ,nst       ,zmodel    ,jstart    , &
@@ -1050,8 +1050,8 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     ! TAUBOT is called here with kcu/v instead of kfu/v, to ensure that
     ! also the temporary dry points contain a relevant cfurou(nm,1) value.
     ! These values are used when the point becomes wet.
-    ! kcu/v is used inside TAUBOT as weight factor to calculate v(u) 
-    ! in u(v) points. Therefore, kcu/v should not contain the value 
+    ! kcu/v is used inside TAUBOT as weight factor to calculate v(u)
+    ! in u(v) points. Therefore, kcu/v should not contain the value
     ! 2 (open boundary) or 3 (dd boundary). That's why the (cleaned)
     ! copies of kcu/v are used.
     !
@@ -1218,7 +1218,8 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
  9999 continue
     deallocate(kcucopy)
     deallocate(kcvcopy)
-end subroutine inchkr
+
+contains
 
 subroutine copykcuv(kcu, kcucopy, gdp)
     !
@@ -1241,3 +1242,5 @@ subroutine copykcuv(kcu, kcucopy, gdp)
        endif
     enddo
 end subroutine copykcuv
+
+end subroutine inchkr

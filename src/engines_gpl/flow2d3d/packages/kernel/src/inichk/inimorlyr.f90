@@ -2,30 +2,30 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
                    & lsedtot   ,mmax      ,nmax      ,nmaxus    ,nmmax     , &
                    & lundia    ,error     ,kcs       ,gdp  )
 !----- GPL ---------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2011.                                     
-!                                                                               
-!  This program is free software: you can redistribute it and/or modify         
-!  it under the terms of the GNU General Public License as published by         
-!  the Free Software Foundation version 3.                                      
-!                                                                               
-!  This program is distributed in the hope that it will be useful,              
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
-!  GNU General Public License for more details.                                 
-!                                                                               
-!  You should have received a copy of the GNU General Public License            
-!  along with this program.  If not, see <http://www.gnu.org/licenses/>.        
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D" and "Deltares"    
-!  are registered trademarks of Stichting Deltares, and remain the property of  
-!  Stichting Deltares. All rights reserved.                                     
-!                                                                               
+!
+!  Copyright (C)  Stichting Deltares, 2011.
+!
+!  This program is free software: you can redistribute it and/or modify
+!  it under the terms of the GNU General Public License as published by
+!  the Free Software Foundation version 3.
+!
+!  This program is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!  GNU General Public License for more details.
+!
+!  You should have received a copy of the GNU General Public License
+!  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"
+!  are registered trademarks of Stichting Deltares, and remain the property of
+!  Stichting Deltares. All rights reserved.
+!
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
@@ -85,7 +85,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
     integer                                       :: nmaxddb
     logical                                       :: err
     logical                                       :: success
-    character(11)                                 :: fmttmp   ! Format file ('formatted  ') 
+    character(11)                                 :: fmttmp   ! Format file ('formatted  ')
     character(300)                                :: message
     real(fp)         , dimension(lsedtot)         :: mfrac
     real(fp)                                      :: mfracsum
@@ -207,7 +207,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
              if (inisedunit(ised) /= inisedunit(1)) then
                 call prterr(lundia, 'U021', 'All sediment fields in the same layer should have unit.')
                 call d3stop(1, gdp)
-                error = 1
+                error = .true.
                 goto 9999
              endif
           enddo
@@ -258,7 +258,7 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
                        & 'Negative sediment thickness ',ised,' in file ', &
                        & trim(flsdbd(ised)),' at nm=',nm
                    call prterr(lundia, 'U021',trim(message))
-                   call d3stop(1, gdp)          
+                   call d3stop(1, gdp)
                 endif
              enddo
           elseif (kcs(nm) == 2) then
