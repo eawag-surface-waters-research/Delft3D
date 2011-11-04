@@ -15,20 +15,20 @@ lib_LTLIBRARIES = libio_output.la
 #-------------------------------------------------------------------------------
 #Includes
 FINCLUDES += \
-	-I$(top_srcdir)/utils_lgpl/esmfsm/include \
-	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/include
+	-I$(top_builddir)/utils_lgpl/esmfsm/include \
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/include
 
 FMODULES += \
-	-I$(top_srcdir)/utils_lgpl/precision/include \
-	-I$(top_srcdir)/utils_lgpl/constants/packages/mathconsts/src \
-	-I$(top_srcdir)/utils_lgpl/utils_flow/packages/utils_flow/src \
-	-I$(top_srcdir)/utils_lgpl/ec_module/packages/ec_module/src \
-	-I$(top_srcdir)/utils_lgpl/delftio/packages/delftio/src/diof90 \
-	-I$(top_srcdir)/utils_lgpl/delftio_sync/packages/delftio_sync/src \
-	-I$(top_srcdir)/utils_lgpl/inifiles/packages/inifiles/src \
-	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/basics \
-	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi \
-	-I$(top_srcdir)/engines_gpl/flow2d3d/packages/data/src/general
+	-I$(top_builddir)/utils_lgpl/precision/include \
+	-I$(top_builddir)/utils_lgpl/constants/packages/mathconsts/src \
+	-I$(top_builddir)/utils_lgpl/utils_flow/packages/utils_flow/src \
+	-I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src \
+	-I$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90 \
+	-I$(top_builddir)/utils_lgpl/delftio_sync/packages/delftio_sync/src \
+	-I$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src \
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics \
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi \
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/general
 
 
 #-------------------------------------------------------------------------------
@@ -118,8 +118,8 @@ libio_output_la_SOURCES = \
          wrtmap.f90 \
          wrwaqapnt.f90 \
          wrwaqbal.f90 \
-         wrwaqcco.f90 \
-         wrwaqfil.f90 \
+         wrwaqcco.F90 \
+         wrwaqfil.F90 \
          wrwaqflo.f90 \
          wrwaqhyd.f90 \
          wrwaqld0.f90 \
@@ -128,8 +128,8 @@ libio_output_la_SOURCES = \
          wrwaqload.f90 \
          wrwaqmakpnt.f90 \
          wrwaqnpnt.f90 \
-         wrwaqpnt.f90 \
-         wrwaqsrf.f90 \
+         wrwaqpnt.F90 \
+         wrwaqsrf.F90 \
          wrwaqvol.f90 \
          wrwavh.f90 \
          wrxbm.f90 \
