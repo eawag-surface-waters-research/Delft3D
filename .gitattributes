@@ -660,7 +660,7 @@ src/engines_gpl/flow2d3d/packages/io/src/output/wrtmap.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrwaqapnt.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrwaqbal.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrwaqcco.F90 -text
-src/engines_gpl/flow2d3d/packages/io/src/output/wrwaqfil.f90 -text
+src/engines_gpl/flow2d3d/packages/io/src/output/wrwaqfil.F90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrwaqflo.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrwaqhyd.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrwaqld0.f90 -text
