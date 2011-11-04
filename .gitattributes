@@ -670,7 +670,7 @@ src/engines_gpl/flow2d3d/packages/io/src/output/wrwaqload.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrwaqmakpnt.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrwaqnpnt.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrwaqpnt.F90 -text
-src/engines_gpl/flow2d3d/packages/io/src/output/wrwaqsrf.f90 -text
+src/engines_gpl/flow2d3d/packages/io/src/output/wrwaqsrf.F90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrwaqvol.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrwavh.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/wrxbm.f90 -text
