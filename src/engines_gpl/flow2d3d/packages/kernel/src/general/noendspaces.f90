@@ -52,7 +52,7 @@ subroutine noendspaces(name      ,length    )
 ! Local variables
 !
     integer                        :: endpos
-    character(1)                   :: achar
+    character(1)                   :: achr
 !
 !
 !! executable statements -------------------------------------------------------
@@ -66,8 +66,8 @@ subroutine noendspaces(name      ,length    )
     !-----skip backside spaces
     !
   100 continue
-    achar = name(endpos:endpos)
-    if (achar==' ') then
+    achr = name(endpos:endpos)
+    if (achr==' ') then
        endpos = endpos - 1
        if (endpos>0) goto 100
     endif
