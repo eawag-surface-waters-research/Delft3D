@@ -55,7 +55,7 @@ subroutine noextspaces(name      ,length    )
     integer                        :: begpos
     integer                        :: endpos
     integer                        :: pos
-    character(1)                   :: achar
+    character(1)                   :: string1
 !
 !
 !! executable statements -------------------------------------------------------
@@ -73,8 +73,8 @@ subroutine noextspaces(name      ,length    )
     !-----skip backside spaces
     !
   100 continue
-    achar = name(endpos:endpos)
-    if (achar==' ') then
+    string1 = name(endpos:endpos)
+    if (string1==' ') then
        endpos = endpos - 1
        if (endpos>0) goto 100
        length = 0
@@ -84,8 +84,8 @@ subroutine noextspaces(name      ,length    )
     !-----skip frontside spaces
     !
   200 continue
-    achar = name(begpos:begpos)
-    if ((achar==' ') .and. (begpos<endpos)) then
+    string1 = name(begpos:begpos)
+    if ((string1==' ') .and. (begpos<endpos)) then
        begpos = begpos + 1
        goto 200
     endif

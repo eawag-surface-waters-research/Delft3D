@@ -52,7 +52,7 @@ subroutine nointextspaces(name      ,length    )
 ! Local variables
 !
     integer                        :: pos
-    character(1)                   :: achar
+    character(1)                   :: string1
 !
 !
 !! executable statements -------------------------------------------------------
@@ -66,8 +66,8 @@ subroutine nointextspaces(name      ,length    )
     !-----remove all spaces
     !
     do while (pos<=length)
-       achar = name(pos:pos)
-       if (achar==' ') then
+       string1 = name(pos:pos)
+       if (string1==' ') then
           name(pos:length) = name(pos + 1:length) // ' '
           length = length - 1
        else
