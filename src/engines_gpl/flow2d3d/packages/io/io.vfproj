@@ -221,8 +221,16 @@
 		<File RelativePath="src\output\wrtmap.f90"/>
 		<File RelativePath="src\output\wrwaqapnt.f90"/>
 		<File RelativePath="src\output\wrwaqbal.f90"/>
-		<File RelativePath="src\output\wrwaqcco.f90"/>
-		<File RelativePath="src\output\wrwaqfil.f90"/>
+		<File RelativePath="src\output\wrwaqcco.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
+		<File RelativePath="src\output\wrwaqfil.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath="src\output\wrwaqflo.f90"/>
 		<File RelativePath="src\output\wrwaqhyd.f90"/>
 		<File RelativePath="src\output\wrwaqld0.f90"/>
@@ -231,8 +239,16 @@
 		<File RelativePath="src\output\wrwaqload.f90"/>
 		<File RelativePath="src\output\wrwaqmakpnt.f90"/>
 		<File RelativePath="src\output\wrwaqnpnt.f90"/>
-		<File RelativePath="src\output\wrwaqpnt.f90"/>
-		<File RelativePath="src\output\wrwaqsrf.f90"/>
+		<File RelativePath="src\output\wrwaqpnt.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
+		<File RelativePath="src\output\wrwaqsrf.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath="src\output\wrwaqvol.f90"/>
 		<File RelativePath="src\output\wrwavh.f90"/>
 		<File RelativePath="src\output\wrxbm.f90"/>
