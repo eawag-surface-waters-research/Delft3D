@@ -233,6 +233,7 @@
 		<File RelativePath="src\general\area4.f90"/>
 		<File RelativePath="src\general\chckit.f90"/>
 		<File RelativePath="src\general\checkmeteoresult.f90"/>
+		<File RelativePath=".\src\general\copykcuv.f90"/>
 		<File RelativePath="src\general\d3stop.f90"/>
 		<File RelativePath="src\general\dattim.f90"/>
 		<File RelativePath="src\general\defsub.f90"/>

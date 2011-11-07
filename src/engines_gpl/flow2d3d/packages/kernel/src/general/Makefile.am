@@ -36,6 +36,7 @@ libkernel_general_la_SOURCES = \
          area4.f90 \
          chckit.f90 \
          checkmeteoresult.f90 \
+         copykcuv.f90 \
          d3stop.f90 \
          dattim.f90 \
          defsub.f90 \

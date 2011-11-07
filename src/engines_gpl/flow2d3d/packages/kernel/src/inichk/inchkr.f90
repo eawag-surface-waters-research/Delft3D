@@ -1218,29 +1218,4 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
  9999 continue
     deallocate(kcucopy)
     deallocate(kcvcopy)
-
-contains
-
-subroutine copykcuv(kcu, kcucopy, gdp)
-    !
-    ! replace all 2 and 3 (in kcu) by 1 (in kcucopy)
-    !
-    use globaldata
-    !
-    implicit none
-    !
-    type(globdat),target :: gdp
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: kcu     !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: kcucopy !  Description and declaration in esm_alloc_int.f90
-    integer :: nm
-
-    do nm=gdp%d%nmlb, gdp%d%nmub
-       if (kcu(nm) == 0) then
-          kcucopy(nm) = 0
-       else
-          kcucopy(nm) = 1
-       endif
-    enddo
-end subroutine copykcuv
-
 end subroutine inchkr
