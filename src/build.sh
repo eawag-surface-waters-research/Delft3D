@@ -16,7 +16,7 @@
 #   ToDo: Move DelftOnline to utils and treat it as an ordinary library
 #
 #   Irv.Elshoff@Deltares.NL
-#   4 Nov 11
+#   6 nov 11
 #
 #   Copyright © 2011, Stichting Deltares
 #-------------------------------------------------------------------------------
@@ -59,7 +59,13 @@ export LDFLAGS=-L`pwd`/lib
 
 
 function usage {
-    echo "Usage: `basename $0` [-gnu|-intel10|-intel11|-intel12] [-debug] [-make] [-intel64] [-sp] [-?]"
+    echo "Usage: `basename $0` <compiler> [-debug] [-make] [-intel64] [-sp] [-?]"
+    echo "Compiler is one of:"
+    echo "    -gnu"
+    echo "    -intel10"
+    echo "    -intel11.0 (-intel11)"
+    echo "    -intel11.1"
+    echo "    -intel12"
     }
 
 function log {
@@ -77,8 +83,11 @@ while [ $# -gt 0 ]; do
         -intel10)
             compiler='intel10'
             ;;
-        -intel11)
-            compiler='intel11'
+        -intel11.0|-intel11)
+            compiler='intel11.0'
+            ;;
+        -intel11.1)
+            compiler='intel11.1'
             ;;
         -intel12)
             compiler='intel12'
@@ -122,11 +131,6 @@ fi
 
 #-----  Initialize Fortran compiler
 
-# Note:  If the 11.1 compiler is used and the svml library is used in common.am,
-# the following message will be produced when running delftflow.exe:
-# ./delftflow.exe: symbol lookup error: /opt/intel/Compiler/11.1/072/lib/ia32/libsvml.so: undefined symbol: __intel_cpu_indicator
-# Solution: don't use the svml library in commmon.am
-
 case $compiler in
     gnu)
         ifortInit=""
@@ -142,7 +146,7 @@ case $compiler in
         echo "Using Intel 12 Fortran ($platform) compiler"
         ;;
 
-    intel11)
+    intel11.1)
         if [ -d /opt/intel/Compiler/11.1/072/bin/intel64 ]; then
             ifortInit=". /opt/intel/Compiler/11.1/072/bin/intel64/ifortvars_intel64.sh $platform"
             idbInit=". /opt/intel/Compiler/11.1/072/bin/intel64/idbvars.sh"
@@ -151,7 +155,10 @@ case $compiler in
             ifortInit=". /opt/intel/Compiler/11.1/072/bin/ifortvars.sh $platform"
             idbInit=". /opt/intel/Compiler/11.1/072/bin/$platform/idbvars.sh"
             echo "Using Intel 11.1 Fortran ($platform) compiler"
-        elif [ -d /opt/intel/Compiler/11.0/081 ]; then
+        ;;
+
+    intel11.0)
+        if [ -d /opt/intel/Compiler/11.0/081 ]; then
             ifortInit=". /opt/intel/Compiler/11.0/081/bin/ifortvars.sh $platform"
             idbInit=". /opt/intel/Compiler/11.0/081/bin/$platform/idbvars.sh"
             echo "Using Intel 11.0 Fortran ($platform) compiler"
@@ -161,7 +168,7 @@ case $compiler in
     intel10)
         ifortInit='. /opt/intel/fc/10/bin/ifortvars.sh'
         idbInit='. /opt/intel/idb/10/bin/idbvars.sh'
-        echo "Using Intel 10 Fortran compiler"
+        echo "Using Intel 10 Fortran compiler (DEPRECATED!)"
         ;;
 
     *)
