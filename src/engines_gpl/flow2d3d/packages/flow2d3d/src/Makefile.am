@@ -28,9 +28,9 @@ libflow2d3d_la_SOURCES = \
 #-------------------------------------------------------------------------------
 #Libraries
 libflow2d3d_la_LIBADD = \
-    $(builddir)/dd/*.lo \
-    $(builddir)/dd/iterators/*.lo \
-    $(builddir)/dd/mapper/*.lo \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d/src/dd/*.lo \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d/src/dd/iterators/*.lo \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d/src/dd/mapper/*.lo \
     $(top_builddir)/engines_gpl/flow2d3d/packages/manager/src/*.lo \
     $(top_builddir)/engines_gpl/flow2d3d/packages/kernel/src/main/*.lo \
     $(top_builddir)/engines_gpl/flow2d3d/packages/kernel/src/non_hydro/*.lo \
