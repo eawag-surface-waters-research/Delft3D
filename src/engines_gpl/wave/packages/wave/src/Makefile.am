@@ -13,6 +13,9 @@ include $(top_srcdir)/common.am
 
 bin_PROGRAMS = wave.exe
 
+FCLIBS += \
+	-lpthread
+
 #-------------------------------------------------------------------------------
 #Includes
 FINCLUDES += \
