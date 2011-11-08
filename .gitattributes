@@ -1254,7 +1254,6 @@ src/m4/ax_check_flag.m4 -text
 src/m4/ax_ext_have_lib.m4 -text
 src/m4/ax_openmp.m4 -text
 src/m4/ax_prog_javah.m4 -text
-src/m4/fortran.m4 -text
 src/m4/fortran.m4.diff -text
 src/m4/fortranbinary.m4 -text
 src/m4/fortranextra.m4 -text
