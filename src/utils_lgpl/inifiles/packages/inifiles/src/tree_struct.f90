@@ -628,7 +628,7 @@ end subroutine tree_get_data_string
 
 subroutine print_tree( tree, data, stop )
    type(TREE_DATA), pointer               :: tree
-   character(len=1), dimension(:)         :: data
+   character(len=1), dimension(:), intent(in) :: data
    logical, intent(inout)                 :: stop
 
    character(len=1), dimension(:),pointer :: data_ptr
