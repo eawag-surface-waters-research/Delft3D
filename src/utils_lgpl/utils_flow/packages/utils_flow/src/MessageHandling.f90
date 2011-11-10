@@ -285,11 +285,11 @@ subroutine message4string(level, w1, w2, w3, w4)
     call SetMessage(level, rec)
 end subroutine message4string
 
-subroutine message2char1real(level, w1, w2, r1)
+subroutine message2char1real(level, w1, w2, r3)
 
-    real :: r1
+    real :: r3
     character(*) :: w1, w2
-    intent (in) r1
+    intent (in) r3
     integer         :: level
 
     integer :: l1, l2
@@ -300,15 +300,15 @@ subroutine message2char1real(level, w1, w2, r1)
     l2 = max(1, len_trim(w2))
     write (rec(1:), '(a)') w1(:l1)
     write (rec(2 + l1:), '(a)') w2(:l2)
-    write (rec(3 + l1 + l2:), '(f14.6)') r1
+    write (rec(3 + l1 + l2:), '(f14.6)') r3
     
     call SetMessage(level, rec)
 end subroutine message2char1real
 
-subroutine message2char2real(level, w1, w2, r1, r2)
-    real :: r1, r2
+subroutine message2char2real(level, w1, w2, r3, r4)
+    real :: r3, r4
     character(*) :: w1, w2
-    intent (in) r1, r2
+    intent (in) r3, r4
     integer         :: level
 
     integer :: l1, l2
@@ -319,15 +319,15 @@ subroutine message2char2real(level, w1, w2, r1, r2)
     l2 = max(1, len_trim(w2))
     write (rec(1:), '(a)') w1(:l1)
     write (rec(2 + l1:), '(a)') w2(:l2)
-    write (rec(3 + l1 + l2:), '(2f14.6)') r1, r2
+    write (rec(3 + l1 + l2:), '(2f14.6)') r3, r4
     
     call SetMessage(level, rec)
 end subroutine message2char2real
 
-subroutine message1char1real(level, w1, r1)
-    real :: r1
+subroutine message1char1real(level, w1, r2)
+    real :: r2
     character(*) :: w1
-    intent (in) r1
+    intent (in) r2
     integer         :: level
 
     integer :: l1
@@ -336,15 +336,15 @@ subroutine message1char1real(level, w1, r1)
     rec = ' '
     l1 = max(1, len_trim(w1))
     write (rec(1:), '(a)') w1(:l1)
-    write (rec(2 + l1:), '(F14.6)') r1
+    write (rec(2 + l1:), '(F14.6)') r2
     
     call SetMessage(level, rec)
 end subroutine message1char1real
 
-subroutine message1char1int(level, w1, i1)
-    integer :: i1
+subroutine message1char1int(level, w1, i2)
+    integer :: i2
     character(*) :: w1
-    intent (in) i1
+    intent (in) i2
     integer         :: level
 
     integer :: l1
@@ -353,15 +353,15 @@ subroutine message1char1int(level, w1, i1)
     rec = ' '
     l1 = max(1, len_trim(w1))
     write (rec(1:), '(a)') w1(:l1)
-    write (rec(2 + l1:), '(I14)') i1
+    write (rec(2 + l1:), '(I14)') i2
     
     call SetMessage(level, rec)
 end subroutine message1char1int
 
-subroutine message1char2int(level, w1, i1, i2)
-    integer :: i1, i2
+subroutine message1char2int(level, w1, i2, i3)
+    integer :: i2, i3
     character(*) :: w1
-    intent (in) i1, i2
+    intent (in) i2, i3
     integer         :: level
 
     integer :: l1
@@ -370,35 +370,35 @@ subroutine message1char2int(level, w1, i1, i2)
     rec = ' '
     l1 = max(1, len_trim(w1))
     write (rec(1:), '(a)') w1(:l1)
-    write (rec(2 + l1:), '(2I14)') i1, i2
+    write (rec(2 + l1:), '(2I14)') i2, i3
     
     call SetMessage(level, rec)
 
 end subroutine message1char2int
 
-subroutine message2int1char(level, i1, i2, w1)
+subroutine message2int1char(level, i1, i2, w3)
     integer :: i1, i2
-    character(*) :: w1
+    character(*) :: w3
     intent (in) i1, i2
     integer         :: level
 
-    integer :: l1
+    integer :: l3
     character(600) :: rec
 
     rec = ' '
-    l1 = max(1, len_trim(w1))
+    l3 = max(1, len_trim(w3))
     write (rec( 1:28), '(2I14)') i1, i2
-    write (rec(30:)  , '(a)'   ) w1(:l1)
+    write (rec(30:)  , '(a)'   ) w3(:l3)
 
     
     call SetMessage(level, rec)
 
 end subroutine message2int1char
 
-subroutine message1char3int(level, w1, i1, i2, i3)
-    integer :: i1, i2, i3
+subroutine message1char3int(level, w1, i2, i3, i4)
+    integer :: i2, i3, i4
     character(*) :: w1
-    intent (in) i1, i2, i3
+    intent (in) i2, i3, i4
     integer        :: level
     integer        :: l1
     character(600) :: rec
@@ -406,16 +406,16 @@ subroutine message1char3int(level, w1, i1, i2, i3)
     rec = ' '
     l1 = max(1, len_trim(w1))
     write (rec(1:), '(a)') w1(:l1)
-    write (rec(2 + l1:), '(3I14)') i1, i2, i3
+    write (rec(2 + l1:), '(3I14)') i2, i3, i4
     
     call SetMessage(level, rec)
 end subroutine message1char3int
 
-subroutine message1char2real(level, w1, r1, r2)
-    real         :: r1, r2
+subroutine message1char2real(level, w1, r2, r3)
+    real         :: r2, r3
     character(*) :: w1
     integer      :: level
-    intent(in)   :: level, w1, r1, r2
+    intent(in)   :: level, w1, r2, r3
 
     integer        :: l1
     character(600) :: rec
@@ -423,16 +423,16 @@ subroutine message1char2real(level, w1, r1, r2)
     rec = ' '
     l1 = max(1, len_trim(w1))
     write (rec(1:), '(a)') w1(:l1)
-    write (rec(2 + l1:), '(2F14.6)') r1, r2
+    write (rec(2 + l1:), '(2F14.6)') r2, r3
 
     call SetMessage(level, rec)
 end subroutine message1char2real
 
-subroutine message1char1int1double(level, w1, i1, d2)
+subroutine message1char1int1double(level, w1, i2, d3)
     integer          :: level
     character(*)     :: w1
-    integer          :: i1
-    double precision :: d2
+    integer          :: i2
+    double precision :: d3
 
     integer :: l1
     character(600) :: rec
@@ -440,26 +440,26 @@ subroutine message1char1int1double(level, w1, i1, d2)
     rec = ' '
     l1 = max(1, len_trim(w1))
     write (rec(1:), '(a)') w1(:l1)
-    write (rec(2 + l1:), '(i14)') i1
-    write (rec(16 + l1:), '(F14.6)') d2
+    write (rec(2 + l1:), '(i14)') i2
+    write (rec(16 + l1:), '(F14.6)') d3
 
     call SetMessage(level, rec)
 end subroutine message1char1int1double
 
-subroutine message1double1int1char(level, d2, i1, w1)
+subroutine message1double1int1char(level, d1, i2, w3)
     integer          :: level
-    character(*)     :: w1
-    integer          :: i1
-    double precision :: d2
+    character(*)     :: w3
+    integer          :: i2
+    double precision :: d1
 
-    integer :: l1
+    integer :: l3
     character(600) :: rec
 
     rec = ' '
-    l1 = max(1, len_trim(w1))
-    write (rec(1 :16), '(F16.6)') d2
-    write (rec(18:31), '(i14)'  ) i1
-    write (rec(33:  ), '(a)'    ) w1(:l1)
+    l3 = max(1, len_trim(w3))
+    write (rec(1 :16), '(F16.6)') d1
+    write (rec(18:31), '(i14)'  ) i2
+    write (rec(33:  ), '(a)'    ) w3(:l3)
 
     call SetMessage(level, rec)
 end subroutine message1double1int1char
@@ -488,54 +488,54 @@ subroutine error1char(w1)
     call mess(LEVEL_ERROR, w1)
 end subroutine error1char
 
-subroutine error2char1real(w1, w2, r1)
-    real :: r1
+subroutine error2char1real(w1, w2, r3)
+    real :: r3
     character(*) :: w1, w2
 
-    call mess(LEVEL_ERROR, w1, w2, r1)
+    call mess(LEVEL_ERROR, w1, w2, r3)
 end subroutine error2char1real
 
-subroutine error2char2real(w1, w2, r1, r2)
-    real :: r1, r2
+subroutine error2char2real(w1, w2, r3, r4)
+    real :: r3, r4
     character(*) :: w1, w2
 
-    call mess(LEVEL_ERROR, w1, w2, r1, r2)
+    call mess(LEVEL_ERROR, w1, w2, r3, r4)
 end subroutine error2char2real
 
-subroutine error1char1real(w1, r1)
-    real :: r1
+subroutine error1char1real(w1, r2)
+    real :: r2
     character(*) :: w1
 
-    call mess(LEVEL_ERROR, w1, r1)
+    call mess(LEVEL_ERROR, w1, r2)
 end subroutine error1char1real
 
-subroutine error1char1int(w1, i1)
-    integer :: i1
+subroutine error1char1int(w1, i2)
+    integer :: i2
     character(*) :: w1
 
-    call mess(LEVEL_ERROR, w1, i1)
+    call mess(LEVEL_ERROR, w1, i2)
 end subroutine error1char1int
 
-subroutine error1char2real(w1, r1, r2)
-    real :: r1, r2
+subroutine error1char2real(w1, r2, r3)
+    real :: r2, r3
     character(*) :: w1
 
-    call mess(LEVEL_ERROR, w1, r1, r2)
+    call mess(LEVEL_ERROR, w1, r2, r3)
 end subroutine error1char2real
 
-subroutine error1char2int(w1, i1, i2)
-    integer :: i1, i2
+subroutine error1char2int(w1, i2, i3)
+    integer :: i2, i3
     character(*) :: w1
 
-    call mess(LEVEL_ERROR, w1, i1, i2)
+    call mess(LEVEL_ERROR, w1, i2, i3)
 end subroutine error1char2int
 
-subroutine error1char1int1double(w1, i1, d1)
+subroutine error1char1int1double(w1, i2, d3)
     character(*)     :: w1
-    integer          :: i1
-    double precision :: d1
+    integer          :: i2
+    double precision :: d3
 
-    call mess(LEVEL_ERROR, w1, i1, d1)
+    call mess(LEVEL_ERROR, w1, i2, d3)
 end subroutine error1char1int1double
 
 
