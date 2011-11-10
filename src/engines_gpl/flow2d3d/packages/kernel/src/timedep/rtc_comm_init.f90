@@ -221,7 +221,9 @@ subroutine rtc_comm_init(error     ,nambar    ,kfs       ,kfsmin    , &
             do k = 1,kmax
                iloc = iloc + 1
                tparput(1,iloc) = zrtcsta(k,i)
-               tparput(2,iloc) = r0(mnrtcsta(2,i), mnrtcsta(1,i), k, lsal)
+               if (lsal>0) then
+                  tparput(2,iloc) = r0(mnrtcsta(2,i), mnrtcsta(1,i), k, lsal)
+               endif
             enddo
          enddo
          !

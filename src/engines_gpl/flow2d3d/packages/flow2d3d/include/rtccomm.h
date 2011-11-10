@@ -101,8 +101,8 @@ extern "C" {
     void STDCALL
     RTCCHARCOMMUNICATE (
         char    * strings,
-        int     numchar,
-        int     * numelements
+        int     * numelements,
+        int     numchar
         );
 
     void STDCALL

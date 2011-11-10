@@ -1397,13 +1397,6 @@ subroutine tricom_init(gdp)
        call timer_stop(timer_wait, gdp)
     endif
     !
-    ! Initialize RTC-communication
-    !
-    call rtc_comm_init(error     ,ch(nambar),i(kfs)    ,i(kfsmin) , &
-                     & i(kfsmax) ,r(sig)    ,r(sig)    ,r(s1)     , &
-                     & d(dps)    ,r(r1)     ,gdp)
-    if (error) goto 9997
-    !
     ! Initial reading phase has been passed
     !
     lrdok = .true.
@@ -1607,6 +1600,14 @@ subroutine tricom_init(gdp)
     ! related pseminit is in tricom.f90 at label 9996
     !
     call vseminit
+    !
+    ! Initialize RTC-communication (includes synchronisation across multiple
+    ! domains and hence needs to be outside semaphore block).
+    !
+    call rtc_comm_init(error     ,ch(nambar),i(kfs)    ,i(kfsmin) , &
+                     & i(kfsmax) ,r(sig)    ,r(sig)    ,r(s1)     , &
+                     & d(dps)    ,r(r1)     ,gdp)
+    if (error) goto 9997
     !
     ! The call to initfinished synchronises all subdomains up to this point
     ! (necessary in case of multiple domains and wave online)

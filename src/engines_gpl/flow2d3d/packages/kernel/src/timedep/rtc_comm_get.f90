@@ -111,6 +111,7 @@ subroutine rtc_comm_get(cursec    ,cbuvrt    ,nsluv     ,gdp       )
     !
     ! optionally get data back
     !
+    rtcsta = 0
     if (rtcmod == dataFromRTCToFLOW) then
        !
        ! communication with RTC occurs only by the master domain

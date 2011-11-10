@@ -80,7 +80,7 @@ Rtc_Function (
     // First time only: Receive numelements from all subdomains
 
     int inimesg[2];
-    Blob * initBlob = new Blob (inimesg, sizeof inimesg);
+    Blob * initBlob = new Blob (inimesg, sizeof(int)*2);
     for (int i = 0 ; i < npart ; i++) {
         bool firstRtc = true;
         int blobtype;
@@ -198,7 +198,7 @@ Rtc_Function (
 
         else if (currentblobtype == RTC::F2RC_strings) {
             char *mesg = new char[numelements];
-            Blob * mblob  = new Blob (mesg, sizeof mesg);
+            Blob * mblob  = new Blob (mesg, sizeof(char)*numelements);
 
             // Allocate the array that is going to contain the merged values
 
@@ -262,7 +262,7 @@ RTCSTARTCOMMUNICATION (
     // Use a copy of the integer obtained from the Fortran side
 
     int inimesg[2] = { 1, 1 };
-    Blob * initBlob = new Blob (inimesg, sizeof inimesg);
+    Blob * initBlob = new Blob (inimesg, sizeof(int)*2);
     rtcIterator->Send (initBlob, RTC::F2RC_init);
 
     // Receive the number of subdomains using Rtc
@@ -310,11 +310,11 @@ RTCCOMMUNICATE (
     Iterator * rtcIterator = FLOW2D3D->dd->rtc;
 
     int mesgsize = *numelements;
-    Blob *sblob = new Blob (&mesgsize, sizeof mesgsize);
+    Blob *sblob = new Blob (&mesgsize, sizeof(int));
     rtcIterator->Send (sblob, RTC::F2RC_values);
 
     REAL_FP *mesg = new REAL_FP[mesgsize];
-    Blob * mblob = new Blob (mesg, sizeof mesg);
+    Blob * mblob = new Blob (mesg, sizeof(REAL_FP)*mesgsize);
 
     // Copy values to mesg
     for (int i = 0 ; i < mesgsize ; i++)
@@ -349,8 +349,8 @@ extern "C" {
 void STDCALL
 RTCCHARCOMMUNICATE (
     char    * strings,
-    int     numchar,
-    int     * numelements
+    int     * numelements,
+    int     numchar
     ) {
 
     Iterator * self = IteratorSelf ();
@@ -368,11 +368,11 @@ RTCCHARCOMMUNICATE (
     Iterator * rtcIterator = FLOW2D3D->dd->rtc;
 
     int mesgsize = *numelements * numchar;
-    Blob *sblob = new Blob (&mesgsize, sizeof mesgsize);
+    Blob *sblob = new Blob (&mesgsize, sizeof(int));
     rtcIterator->Send (sblob, RTC::F2RC_strings);
 
     char *mesg = new char[mesgsize];
-    Blob *mblob = new Blob (mesg, sizeof mesg);
+    Blob *mblob = new Blob (mesg, sizeof(char)*mesgsize);
     // Copy strings to mesg
     for (int i = 0 ; i < mesgsize ; i++)
        mesg[i] = strings[i];
@@ -413,7 +413,7 @@ RTCNOCOMMUNICATION (
     // send -1 to Rtc iterator
 
     int inimesg[2] = { -1, -1 };
-    Blob * initBlob = new Blob (inimesg, sizeof inimesg);
+    Blob * initBlob = new Blob (inimesg, sizeof(int)*2);
     rtcIterator->Send (initBlob, RTC::F2RC_init);
     delete initBlob;
     }
