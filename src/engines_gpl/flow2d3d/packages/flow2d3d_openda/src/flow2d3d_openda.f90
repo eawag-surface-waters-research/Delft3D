@@ -150,9 +150,9 @@ function getObservedLocalization(location_id_c, dist, nvals, values) result(retV
     integer , pointer :: mmax
     integer , pointer :: nostat
     integer , dimension(:,:) , pointer :: mnstat
-    integer , pointer :: xz
-    integer , pointer :: yz
-    integer , pointer :: kcs
+    integer(pntrsize) , pointer :: xz
+    integer(pntrsize) , pointer :: yz
+    integer(pntrsize) , pointer :: kcs
     integer , pointer :: nub
     integer , pointer :: nlb
     integer , pointer :: mub

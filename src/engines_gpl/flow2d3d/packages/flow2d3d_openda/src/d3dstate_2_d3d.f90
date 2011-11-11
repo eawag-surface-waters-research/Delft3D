@@ -80,21 +80,21 @@
  
     integer :: imode
   
-    integer                      , pointer :: u1
-    integer                      , pointer :: v1
-    integer                      , pointer :: w1
-    integer                      , pointer :: vicuv
-    integer                      , pointer :: vicww
-    integer                      , pointer :: r1
-    integer                      , pointer :: s1
-    integer                      , pointer :: dp
-    integer                      , pointer :: umnldf 
-    integer                      , pointer :: vmnldf
-    integer                      , pointer :: rtur1    
+    integer(pntrsize)            , pointer :: u1
+    integer(pntrsize)            , pointer :: v1
+    integer(pntrsize)            , pointer :: w1
+    integer(pntrsize)            , pointer :: vicuv
+    integer(pntrsize)            , pointer :: vicww
+    integer(pntrsize)            , pointer :: r1
+    integer(pntrsize)            , pointer :: s1
+    integer(pntrsize)            , pointer :: dp
+    integer(pntrsize)            , pointer :: umnldf 
+    integer(pntrsize)            , pointer :: vmnldf
+    integer(pntrsize)            , pointer :: rtur1    
 
-    integer                      , pointer :: kfs
-    integer                      , pointer :: kfu   
-    integer                      , pointer :: kfv
+    integer(pntrsize)            , pointer :: kfs
+    integer(pntrsize)            , pointer :: kfu   
+    integer(pntrsize)            , pointer :: kfv
 
 
     
@@ -219,21 +219,21 @@
  
     integer :: imode
   
-    integer                      , pointer :: u1
-    integer                      , pointer :: v1
-    integer                      , pointer :: w1    
+    integer(pntrsize)                      , pointer :: u1
+    integer(pntrsize)                      , pointer :: v1
+    integer(pntrsize)                      , pointer :: w1    
     
-    integer                      , pointer :: vicuv 
-    integer                      , pointer :: vicww 
-    integer                      , pointer :: r1
-    integer                      , pointer :: s1
-    integer                      , pointer :: dp
-    integer                      , pointer :: umnldf 
-    integer                      , pointer :: vmnldf
-    integer                      , pointer :: rtur1    
-    integer                      , pointer :: kfs
-    integer                      , pointer :: kfu   
-    integer                      , pointer :: kfv
+    integer(pntrsize)                      , pointer :: vicuv 
+    integer(pntrsize)                      , pointer :: vicww 
+    integer(pntrsize)                      , pointer :: r1
+    integer(pntrsize)                      , pointer :: s1
+    integer(pntrsize)                      , pointer :: dp
+    integer(pntrsize)                      , pointer :: umnldf 
+    integer(pntrsize)                      , pointer :: vmnldf
+    integer(pntrsize)                      , pointer :: rtur1    
+    integer(pntrsize)                      , pointer :: kfs
+    integer(pntrsize)                      , pointer :: kfu   
+    integer(pntrsize)                      , pointer :: kfv
 
     
     integer :: ii
