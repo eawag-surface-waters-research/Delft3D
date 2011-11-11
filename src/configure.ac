@@ -27,7 +27,7 @@ dnl We're going to make it work with older versions also, this might not work (l
 LT_PREREQ(2.4)
 LT_INIT
 dnl LTDL_INIT dnl I don't think this is required anymore
-AC_PROG_LIBTOOL
+dnl AC_PROG_LIBTOOL
 AC_SUBST([LIBTOOL_DEPS])
 AC_CONFIG_SUBDIRS(libltdl)
 AC_SUBST(LIBLTDL)
@@ -193,14 +193,6 @@ fi
 
 # Make sure we throw errors when using invalid architecture files (otherwise OSX version might get linked against linux libs)
 
-# add this flag if possible
-AX_CHECK_LINK_FLAG(
-	[-arch_errors_fatal], 
-	LDFLAGS="$LDFLAGS -arch_errors_fatal", 
-	[AC_MSG_WARN([No flag found to disable incompatible library linking. This might break on non linux systems. Make sure you install DelftOnline first])],[])
-AX_EXT_HAVE_LIB([$(cd $srcdir;pwd)/third_party_open/DelftOnline/lib], [JavaLaunch], [main])
-AC_CHECK_LIB([DelftOnline], [main],, [AC_MSG_ERROR([Compiler can't find DelftOnline])])
-
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
@@ -243,231 +235,246 @@ AC_DEFINE_UNQUOTED(D3D_PLUGIN_EXT, ["$pluginext"], [Delft3D plugin extension])
 #   find . -name Makefile.am | egrep '/.+/' | sort | sed 's/.am$//'
 
 AC_CONFIG_FILES([Makefile
-		 utils_lgpl/Makefile
-		 utils_lgpl/delftio/Makefile
-		 utils_lgpl/delftio/packages/Makefile
-		 utils_lgpl/delftio/packages/delftio_shm/Makefile
-		 utils_lgpl/delftio/packages/delftio_shm/src/Makefile
-		 utils_lgpl/delftio/packages/delftio_shm/src/diof90/Makefile
-		 utils_lgpl/delftio/packages/delftio_version_number/Makefile
-		 utils_lgpl/delftio/packages/delftio_version_number/src/Makefile
-		 utils_lgpl/delftio/packages/delftio/Makefile
-		 utils_lgpl/delftio/packages/delftio/src/Makefile
-		 utils_lgpl/delftio/packages/delftio/src/diof90/Makefile
-		 utils_lgpl/delftio/packages/delftio/src/diof90Nefis/Makefile
-		 utils_lgpl/delftio_sync/Makefile
-		 utils_lgpl/delftio_sync/packages/Makefile
-		 utils_lgpl/delftio_sync/packages/delftio_sync_version_number/Makefile
-		 utils_lgpl/delftio_sync/packages/delftio_sync_version_number/src/Makefile
-		 utils_lgpl/delftio_sync/packages/delftio_sync/Makefile
-		 utils_lgpl/delftio_sync/packages/delftio_sync/src/Makefile
-		 utils_lgpl/esmfsm/Makefile
-		 utils_lgpl/esmfsm/packages/Makefile
-		 utils_lgpl/esmfsm/packages/esmfsm_c/Makefile
-		 utils_lgpl/esmfsm/packages/esmfsm_c/src/Makefile
-		 utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/Makefile
-		 utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/Makefile
-		 utils_lgpl/esmfsm/packages/esmfsm_version_number/Makefile
-		 utils_lgpl/esmfsm/packages/esmfsm_version_number/src/Makefile
-		 utils_lgpl/esmfsm/packages/esmfsm/Makefile
-		 utils_lgpl/esmfsm/packages/esmfsm/src/Makefile
-		 utils_lgpl/esmfsm/packages/esmfsm/src/fsm/Makefile
-		 utils_lgpl/esmfsm/tests/Makefile
-		 utils_lgpl/esmfsm/tests/esm_create/Makefile
-		 utils_lgpl/esmfsm/tests/esm_delete/Makefile
-		 utils_lgpl/esmfsm/tests/esm_info/Makefile
-		 utils_lgpl/ftnunit/Makefile
-		 utils_lgpl/ftnunit/packages/Makefile
-		 utils_lgpl/ftnunit/packages/ftnunit/Makefile
-		 utils_lgpl/ftnunit/packages/ftnunit/src/Makefile
-		 utils_lgpl/inifiles/Makefile
-		 utils_lgpl/inifiles/packages/Makefile
-		 utils_lgpl/inifiles/packages/inifiles/Makefile
-		 utils_lgpl/inifiles/packages/inifiles/src/Makefile
-		 utils_lgpl/meteo/Makefile
-		 utils_lgpl/meteo/packages/Makefile
-		 utils_lgpl/meteo/packages/meteo_version_number/Makefile
-		 utils_lgpl/meteo/packages/meteo_version_number/src/Makefile
-		 utils_lgpl/meteo/packages/meteo/Makefile
-		 utils_lgpl/meteo/packages/meteo/src/Makefile
-		 utils_lgpl/ec_module/Makefile
-		 utils_lgpl/ec_module/packages/Makefile
-		 utils_lgpl/ec_module/packages/ec_module_version_number/Makefile
-		 utils_lgpl/ec_module/packages/ec_module_version_number/src/Makefile
-		 utils_lgpl/ec_module/packages/ec_module/Makefile
-		 utils_lgpl/ec_module/packages/ec_module/src/Makefile
-		 utils_lgpl/ec_module/packages/ec_module/src/ectest/Makefile
-		 utils_lgpl/nefis/Makefile
-		 utils_lgpl/nefis/packages/Makefile
-		 utils_lgpl/nefis/packages/nefis_version_number/Makefile
-		 utils_lgpl/nefis/packages/nefis_version_number/src/Makefile
-		 utils_lgpl/nefis/packages/nefis_version_number/src_so/Makefile
-		 utils_lgpl/nefis/packages/nefis/Makefile
-		 utils_lgpl/nefis/packages/nefis/src/Makefile
-		 utils_lgpl/nefis/packages/nefis/src_so/Makefile
-		 utils_lgpl/nefis/tests/demo_00/Makefile
-		 utils_lgpl/nefis/tests/demo_01/Makefile
-		 utils_lgpl/nefis/tests/demo_02/Makefile
-		 utils_lgpl/nefis/tests/observations/Makefile
-		 utils_lgpl/nefis/tests/test_00/Makefile
-		 utils_lgpl/nefis/tests/test_01/Makefile
-		 utils_lgpl/nefis/tests/test_02/Makefile
-		 utils_lgpl/nefis/tests/test_03/Makefile
-		 utils_lgpl/nefis/tests/test_04/Makefile
-		 utils_lgpl/nefis/tests/test_05/Makefile
-		 utils_lgpl/nefis/tests/test_06/Makefile
-		 utils_lgpl/nefis/tests/test_07/Makefile
-		 utils_lgpl/nefis/tests/test_08/Makefile
-		 utils_lgpl/nefis/tests/test_09/Makefile
-		 utils_lgpl/nefis/tests/test_10/Makefile
-		 utils_lgpl/nefis/tests/test_11/Makefile
-		 utils_lgpl/nefis/tests/test_12/Makefile
-		 utils_lgpl/nefis/tests/test_13/Makefile
-		 utils_lgpl/nefis/tests/test_14/Makefile
-		 utils_lgpl/nefis/tests/test_15/Makefile
-		 utils_lgpl/nefis/tests/test_16/Makefile
-		 utils_lgpl/nefis/tests/test_17/Makefile
-	         utils_lgpl/nefis/tests/test_18/Makefile
-	         utils_lgpl/nefis/tests/test_19/Makefile
-		 utils_lgpl/constants/Makefile
-		 utils_lgpl/constants/packages/Makefile
-		 utils_lgpl/constants/packages/mathconsts/Makefile
-		 utils_lgpl/constants/packages/mathconsts/src/Makefile
-		 utils_lgpl/precision/Makefile
-		 utils_lgpl/precision/packages/Makefile
-		 utils_lgpl/precision/packages/precision/Makefile
-		 utils_lgpl/precision/packages/precision/src/Makefile
-		 utils_lgpl/semaphore/Makefile
-		 utils_lgpl/semaphore/packages/Makefile
-		 utils_lgpl/semaphore/packages/semaphore/Makefile
-		 utils_lgpl/semaphore/packages/semaphore/src/Makefile
-		 utils_lgpl/stream/Makefile
-		 utils_lgpl/stream/packages/Makefile
-		 utils_lgpl/stream/packages/stream_version_number/Makefile
-		 utils_lgpl/stream/packages/stream_version_number/src/Makefile
-		 utils_lgpl/stream/packages/stream/Makefile
-		 utils_lgpl/stream/packages/stream/src/Makefile
-		 utils_lgpl/stream/tests/Makefile
-		 utils_lgpl/stream/tests/01-smalltest/Makefile
-		 utils_lgpl/stream/tests/02-streamtest/Makefile
-		 utils_lgpl/utils_flow/Makefile
-		 utils_lgpl/utils_flow/packages/Makefile
-		 utils_lgpl/utils_flow/packages/utils_flow/Makefile
-		 utils_lgpl/utils_flow/packages/utils_flow/src/Makefile
-		 utils_lgpl/utils_flow/packages/utils_flow_c/Makefile
-		 utils_lgpl/utils_flow/packages/utils_flow_c/src/Makefile
-		 utils_lgpl/utils_flow/packages/utils_flow_version_number/Makefile
-		 utils_lgpl/utils_flow/packages/utils_flow_version_number/src/Makefile
-		 engines_gpl/Makefile
-		 engines_gpl/flow2d3d/Makefile
-		 engines_gpl/flow2d3d/packages/Makefile
-		 engines_gpl/flow2d3d/packages/data/Makefile
-		 engines_gpl/flow2d3d/packages/data/src/Makefile
-		 engines_gpl/flow2d3d/packages/data/src/allocation/Makefile
-		 engines_gpl/flow2d3d/packages/data/src/basics/Makefile
-		 engines_gpl/flow2d3d/packages/data/src/gdp/Makefile
-		 engines_gpl/flow2d3d/packages/data/src/parallel_mpi/Makefile
-		 engines_gpl/flow2d3d/packages/data/src/general/Makefile
-		 engines_gpl/flow2d3d/packages/plugin_3dmortrafrm_c/Makefile
-		 engines_gpl/flow2d3d/packages/plugin_3dmortrafrm_c/src/Makefile
-		 engines_gpl/flow2d3d/packages/plugin_user/Makefile
-		 engines_gpl/flow2d3d/packages/plugin_user/src/Makefile
-		 engines_gpl/flow2d3d/packages/io_dol_c/Makefile
-		 engines_gpl/flow2d3d/packages/io_dol_c/src/Makefile
-		 engines_gpl/flow2d3d/packages/io_dol_f/Makefile
-		 engines_gpl/flow2d3d/packages/io_dol_f/src/Makefile
-		 engines_gpl/flow2d3d/packages/io/Makefile
-		 engines_gpl/flow2d3d/packages/io/src/Makefile
-		 engines_gpl/flow2d3d/packages/io/src/input/Makefile
-		 engines_gpl/flow2d3d/packages/io/src/output/Makefile
-		 engines_gpl/flow2d3d/packages/io/src/preprocessor/Makefile
-		 engines_gpl/flow2d3d/packages/kernel_dd_c/Makefile
-		 engines_gpl/flow2d3d/packages/kernel_dd_c/src/Makefile
-		 engines_gpl/flow2d3d/packages/kernel_dd_c/src/mapper/Makefile
-		 engines_gpl/flow2d3d/packages/kernel_dd_f/Makefile
-		 engines_gpl/flow2d3d/packages/kernel_dd_f/src/Makefile
-		 engines_gpl/flow2d3d/packages/kernel/Makefile
-		 engines_gpl/flow2d3d/packages/kernel/src/Makefile
-		 engines_gpl/flow2d3d/packages/kernel/src/compute/Makefile
-		 engines_gpl/flow2d3d/packages/kernel/src/compute_nearfar/Makefile
-		 engines_gpl/flow2d3d/packages/kernel/src/compute_roller/Makefile
-		 engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/Makefile
-		 engines_gpl/flow2d3d/packages/kernel/src/dd/Makefile
-		 engines_gpl/flow2d3d/packages/kernel/src/general/Makefile
-		 engines_gpl/flow2d3d/packages/kernel/src/inichk/Makefile
-		 engines_gpl/flow2d3d/packages/kernel/src/main/Makefile
-		 engines_gpl/flow2d3d/packages/kernel/src/non_hydro/Makefile
-		 engines_gpl/flow2d3d/packages/kernel/src/taylor/Makefile
-		 engines_gpl/flow2d3d/packages/kernel/src/timedep/Makefile
-		 engines_gpl/flow2d3d/packages/manager_dd/Makefile
-		 engines_gpl/flow2d3d/packages/manager_dd/src/Makefile
-		 engines_gpl/flow2d3d/packages/manager_dd/src/ddexec/Makefile
-		 engines_gpl/flow2d3d/packages/manager_dd/src/hydra/Makefile
-		 engines_gpl/flow2d3d/packages/manager/Makefile
-		 engines_gpl/flow2d3d/packages/manager/src/Makefile
-		 engines_gpl/flow2d3d/packages/flow2d3d/Makefile
-		 engines_gpl/flow2d3d/packages/flow2d3d/src/Makefile
-		 engines_gpl/wave/Makefile
-		 engines_gpl/wave/packages/Makefile
-		 engines_gpl/wave/packages/data/Makefile
-		 engines_gpl/wave/packages/data/src/Makefile
-		 engines_gpl/wave/packages/io/Makefile
-		 engines_gpl/wave/packages/io/src/Makefile
-		 engines_gpl/wave/packages/kernel/Makefile
-		 engines_gpl/wave/packages/kernel/src/Makefile
-		 engines_gpl/wave/packages/manager/Makefile
-		 engines_gpl/wave/packages/manager/src/Makefile
-		 engines_gpl/wave/packages/wave/Makefile
-		 engines_gpl/wave/packages/wave/src/Makefile
-		 engines_gpl/deltares_hydro/Makefile
-		 engines_gpl/deltares_hydro/src/Makefile
-		 tools_gpl/Makefile
-		 tools_gpl/datsel/Makefile
-		 tools_gpl/datsel/packages/Makefile
-		 tools_gpl/datsel/packages/datsel_version_number/Makefile
-		 tools_gpl/datsel/packages/datsel_version_number/src/Makefile
-		 tools_gpl/datsel/packages/datsel_f/Makefile
-		 tools_gpl/datsel/packages/datsel_f/src/Makefile
-		 tools_gpl/datsel/packages/datsel/Makefile
-		 tools_gpl/datsel/packages/datsel/src/Makefile
-		 tools_gpl/kubint/Makefile
-		 tools_gpl/kubint/packages/Makefile
-		 tools_gpl/kubint/packages/kubint_version_number/Makefile
-		 tools_gpl/kubint/packages/kubint_version_number/src/Makefile
-		 tools_gpl/kubint/packages/kubint_f/Makefile
-		 tools_gpl/kubint/packages/kubint_f/src/Makefile
-		 tools_gpl/kubint/packages/kubint/Makefile
-		 tools_gpl/kubint/packages/kubint/src/Makefile
-		 tools_gpl/lint/Makefile
-		 tools_gpl/lint/packages/Makefile
-		 tools_gpl/lint/packages/lint_version_number/Makefile
-		 tools_gpl/lint/packages/lint_version_number/src/Makefile
-		 tools_gpl/lint/packages/lint_f/Makefile
-		 tools_gpl/lint/packages/lint_f/src/Makefile
-		 tools_gpl/lint/packages/lint/Makefile
-		 tools_gpl/lint/packages/lint/src/Makefile
-		 tools_gpl/mormerge/Makefile
-		 tools_gpl/mormerge/packages/Makefile
-		 tools_gpl/mormerge/packages/mormerge_version_number/Makefile
-		 tools_gpl/mormerge/packages/mormerge_version_number/src/Makefile
-		 tools_gpl/mormerge/packages/mormerge/Makefile
-		 tools_gpl/mormerge/packages/mormerge/src/Makefile
-		 tools_gpl/vs/Makefile
-		 tools_gpl/vs/packages/Makefile
-		 tools_gpl/vs/packages/vs_version_number/Makefile
-		 tools_gpl/vs/packages/vs_version_number/src/Makefile
-		 tools_gpl/vs/packages/vs/Makefile
-		 tools_gpl/vs/packages/vs/src/Makefile
-		 third_party_open/Makefile
-		 third_party_open/version_number/Makefile
-		 third_party_open/version_number/packages/Makefile
-		 third_party_open/version_number/packages/version_number/Makefile
-		 third_party_open/version_number/packages/version_number/src/Makefile
-		 plugins_lgpl/Makefile
-		 plugins_lgpl/plugin_delftflow_traform/Makefile
-		 plugins_lgpl/plugin_delftflow_traform/src/Makefile
-		 plugins_lgpl/plugin_culvert/Makefile
-		 plugins_lgpl/plugin_culvert/src/Makefile
+engines_gpl/d_hydro/Makefile
+engines_gpl/d_hydro/packages/d_hydro/Makefile
+engines_gpl/d_hydro/packages/d_hydro/src/Makefile
+engines_gpl/d_hydro/packages/Makefile
+engines_gpl/flow2d3d/Makefile
+engines_gpl/flow2d3d/packages/data/Makefile
+engines_gpl/flow2d3d/packages/data/src/allocation/Makefile
+engines_gpl/flow2d3d/packages/data/src/basics/Makefile
+engines_gpl/flow2d3d/packages/data/src/gdp/Makefile
+engines_gpl/flow2d3d/packages/data/src/general/Makefile
+engines_gpl/flow2d3d/packages/data/src/Makefile
+engines_gpl/flow2d3d/packages/data/src/parallel_mpi/Makefile
+engines_gpl/flow2d3d/packages/flow2d3d/Makefile
+engines_gpl/flow2d3d/packages/flow2d3d_openda/Makefile
+engines_gpl/flow2d3d/packages/flow2d3d_openda/src/Makefile
+engines_gpl/flow2d3d/packages/flow2d3d/src/dd/iterators/Makefile
+engines_gpl/flow2d3d/packages/flow2d3d/src/dd/Makefile
+engines_gpl/flow2d3d/packages/flow2d3d/src/dd/mapper/Makefile
+engines_gpl/flow2d3d/packages/flow2d3d/src/Makefile
+engines_gpl/flow2d3d/packages/io_dol_f/Makefile
+engines_gpl/flow2d3d/packages/io_dol_f/src/Makefile
+engines_gpl/flow2d3d/packages/io/Makefile
+engines_gpl/flow2d3d/packages/io/src/input/Makefile
+engines_gpl/flow2d3d/packages/io/src/Makefile
+engines_gpl/flow2d3d/packages/io/src/output/Makefile
+engines_gpl/flow2d3d/packages/io/src/preprocessor/Makefile
+engines_gpl/flow2d3d/packages/kernel_dd_f/Makefile
+engines_gpl/flow2d3d/packages/kernel_dd_f/src/Makefile
+engines_gpl/flow2d3d/packages/kernel/Makefile
+engines_gpl/flow2d3d/packages/kernel/src/compute/Makefile
+engines_gpl/flow2d3d/packages/kernel/src/compute_nearfar/Makefile
+engines_gpl/flow2d3d/packages/kernel/src/compute_roller/Makefile
+engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/Makefile
+engines_gpl/flow2d3d/packages/kernel/src/dd/Makefile
+engines_gpl/flow2d3d/packages/kernel/src/general/Makefile
+engines_gpl/flow2d3d/packages/kernel/src/inichk/Makefile
+engines_gpl/flow2d3d/packages/kernel/src/main/Makefile
+engines_gpl/flow2d3d/packages/kernel/src/Makefile
+engines_gpl/flow2d3d/packages/kernel/src/non_hydro/Makefile
+engines_gpl/flow2d3d/packages/kernel/src/taylor/Makefile
+engines_gpl/flow2d3d/packages/kernel/src/timedep/Makefile
+engines_gpl/flow2d3d/packages/Makefile
+engines_gpl/flow2d3d/packages/manager/Makefile
+engines_gpl/flow2d3d/packages/manager/src/Makefile
+engines_gpl/flow2d3d/packages/plugin_3dmortrafrm_c/Makefile
+engines_gpl/flow2d3d/packages/plugin_3dmortrafrm_c/src/Makefile
+engines_gpl/flow2d3d/packages/plugin_user/Makefile
+engines_gpl/flow2d3d/packages/plugin_user/src/Makefile
+engines_gpl/Makefile
+engines_gpl/wave/Makefile
+engines_gpl/wave/packages/data/Makefile
+engines_gpl/wave/packages/data/src/Makefile
+engines_gpl/wave/packages/io/Makefile
+engines_gpl/wave/packages/io/src/Makefile
+engines_gpl/wave/packages/kernel/Makefile
+engines_gpl/wave/packages/kernel/src/Makefile
+engines_gpl/wave/packages/Makefile
+engines_gpl/wave/packages/manager/Makefile
+engines_gpl/wave/packages/manager/src/Makefile
+engines_gpl/wave/packages/wave/Makefile
+engines_gpl/wave/packages/wave/src/Makefile
+plugins_lgpl/Makefile
+plugins_lgpl/plugin_culvert/Makefile
+plugins_lgpl/plugin_culvert/src/Makefile
+plugins_lgpl/plugin_delftflow_traform/Makefile
+plugins_lgpl/plugin_delftflow_traform/src/Makefile
+third_party_open/Makefile
+third_party_open/version_number/Makefile
+third_party_open/version_number/packages/Makefile
+third_party_open/version_number/packages/version_number/Makefile
+third_party_open/version_number/packages/version_number/src/Makefile
+tools_gpl/datsel/Makefile
+tools_gpl/datsel/packages/datsel_f/Makefile
+tools_gpl/datsel/packages/datsel_f/src/Makefile
+tools_gpl/datsel/packages/datsel/Makefile
+tools_gpl/datsel/packages/datsel/src/Makefile
+tools_gpl/datsel/packages/datsel_version_number/Makefile
+tools_gpl/datsel/packages/datsel_version_number/src/Makefile
+tools_gpl/datsel/packages/Makefile
+tools_gpl/kubint/Makefile
+tools_gpl/kubint/packages/kubint_f/Makefile
+tools_gpl/kubint/packages/kubint_f/src/Makefile
+tools_gpl/kubint/packages/kubint/Makefile
+tools_gpl/kubint/packages/kubint/src/Makefile
+tools_gpl/kubint/packages/kubint_version_number/Makefile
+tools_gpl/kubint/packages/kubint_version_number/src/Makefile
+tools_gpl/kubint/packages/Makefile
+tools_gpl/lint/Makefile
+tools_gpl/lint/packages/lint_f/Makefile
+tools_gpl/lint/packages/lint_f/src/Makefile
+tools_gpl/lint/packages/lint/Makefile
+tools_gpl/lint/packages/lint/src/Makefile
+tools_gpl/lint/packages/lint_version_number/Makefile
+tools_gpl/lint/packages/lint_version_number/src/Makefile
+tools_gpl/lint/packages/Makefile
+tools_gpl/Makefile
+tools_gpl/mormerge/Makefile
+tools_gpl/mormerge/packages/Makefile
+tools_gpl/mormerge/packages/mormerge/Makefile
+tools_gpl/mormerge/packages/mormerge/src/Makefile
+tools_gpl/mormerge/packages/mormerge_version_number/Makefile
+tools_gpl/mormerge/packages/mormerge_version_number/src/Makefile
+tools_gpl/vs/Makefile
+tools_gpl/vs/packages/Makefile
+tools_gpl/vs/packages/vs/Makefile
+tools_gpl/vs/packages/vs/src/Makefile
+tools_gpl/vs/packages/vs_version_number/Makefile
+tools_gpl/vs/packages/vs_version_number/src/Makefile
+utils_lgpl/constants/Makefile
+utils_lgpl/constants/packages/Makefile
+utils_lgpl/constants/packages/mathconsts/Makefile
+utils_lgpl/constants/packages/mathconsts/src/Makefile
+utils_lgpl/delftio/Makefile
+utils_lgpl/delftio/packages/delftio/Makefile
+utils_lgpl/delftio/packages/delftio_shm/Makefile
+utils_lgpl/delftio/packages/delftio_shm/src/diof90/Makefile
+utils_lgpl/delftio/packages/delftio_shm/src/Makefile
+utils_lgpl/delftio/packages/delftio/src/diof90/Makefile
+utils_lgpl/delftio/packages/delftio/src/diof90Nefis/Makefile
+utils_lgpl/delftio/packages/delftio/src/Makefile
+utils_lgpl/delftio/packages/delftio_version_number/Makefile
+utils_lgpl/delftio/packages/delftio_version_number/src/Makefile
+utils_lgpl/delftio/packages/Makefile
+utils_lgpl/delftio_sync/Makefile
+utils_lgpl/delftio_sync/packages/delftio_sync/Makefile
+utils_lgpl/delftio_sync/packages/delftio_sync/src/Makefile
+utils_lgpl/delftio_sync/packages/delftio_sync_version_number/Makefile
+utils_lgpl/delftio_sync/packages/delftio_sync_version_number/src/Makefile
+utils_lgpl/delftio_sync/packages/Makefile
+utils_lgpl/d_hydro_lib/Makefile
+utils_lgpl/d_hydro_lib/packages/d_hydro_lib/Makefile
+utils_lgpl/d_hydro_lib/packages/d_hydro_lib/src/Makefile
+utils_lgpl/d_hydro_lib/packages/Makefile
+utils_lgpl/ec_module/Makefile
+utils_lgpl/ec_module/packages/ec_module/Makefile
+utils_lgpl/ec_module/packages/ec_module/src/ectest/Makefile
+utils_lgpl/ec_module/packages/ec_module/src/Makefile
+utils_lgpl/ec_module/packages/ec_module_version_number/Makefile
+utils_lgpl/ec_module/packages/ec_module_version_number/src/Makefile
+utils_lgpl/ec_module/packages/Makefile
+utils_lgpl/esmfsm/Makefile
+utils_lgpl/esmfsm/packages/esmfsm_c/Makefile
+utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/Makefile
+utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/Makefile
+utils_lgpl/esmfsm/packages/esmfsm_c/src/Makefile
+utils_lgpl/esmfsm/packages/esmfsm/Makefile
+utils_lgpl/esmfsm/packages/esmfsm/src/fsm/Makefile
+utils_lgpl/esmfsm/packages/esmfsm/src/Makefile
+utils_lgpl/esmfsm/packages/esmfsm_version_number/Makefile
+utils_lgpl/esmfsm/packages/esmfsm_version_number/src/Makefile
+utils_lgpl/esmfsm/packages/Makefile
+utils_lgpl/esmfsm/tests/allocate_local/Makefile
+utils_lgpl/esmfsm/tests/esm_create/Makefile
+utils_lgpl/esmfsm/tests/esm_delete/Makefile
+utils_lgpl/esmfsm/tests/esm_info/Makefile
+utils_lgpl/esmfsm/tests/Makefile
+utils_lgpl/esmfsm/tests/test_01/Makefile
+utils_lgpl/esmfsm/tests/test_02/Makefile
+utils_lgpl/esmfsm/tests/test_03/Makefile
+utils_lgpl/esmfsm/tests/testesm/Makefile
+utils_lgpl/esmfsm/tests/testfill/Makefile
+utils_lgpl/esmfsm/tests/testfsm/Makefile
+utils_lgpl/ftnunit/Makefile
+utils_lgpl/ftnunit/packages/ftnunit/Makefile
+utils_lgpl/ftnunit/packages/ftnunit/src/Makefile
+utils_lgpl/ftnunit/packages/Makefile
+utils_lgpl/inifiles/Makefile
+utils_lgpl/inifiles/packages/inifiles/Makefile
+utils_lgpl/inifiles/packages/inifiles/src/Makefile
+utils_lgpl/inifiles/packages/Makefile
+utils_lgpl/inifiles/tests/01_initest/Makefile
+utils_lgpl/inifiles/tests/02_treetest/Makefile
+utils_lgpl/inifiles/tests/03_dredgedumptest/Makefile
+utils_lgpl/Makefile
+utils_lgpl/meteo/Makefile
+utils_lgpl/meteo/packages/Makefile
+utils_lgpl/meteo/packages/meteo/Makefile
+utils_lgpl/meteo/packages/meteo/src/Makefile
+utils_lgpl/meteo/packages/meteo_version_number/Makefile
+utils_lgpl/meteo/packages/meteo_version_number/src/Makefile
+utils_lgpl/nefis/Makefile
+utils_lgpl/nefis/packages/Makefile
+utils_lgpl/nefis/packages/nefis/Makefile
+utils_lgpl/nefis/packages/nefis/src/Makefile
+utils_lgpl/nefis/packages/nefis/src_so/Makefile
+utils_lgpl/nefis/packages/nefis_version_number/Makefile
+utils_lgpl/nefis/packages/nefis_version_number/src/Makefile
+utils_lgpl/nefis/packages/nefis_version_number/src_so/Makefile
+utils_lgpl/nefis/tests/demo_00/Makefile
+utils_lgpl/nefis/tests/demo_01/Makefile
+utils_lgpl/nefis/tests/demo_02/Makefile
+utils_lgpl/nefis/tests/Makefile
+utils_lgpl/nefis/tests/observations/Makefile
+utils_lgpl/nefis/tests/test_00/Makefile
+utils_lgpl/nefis/tests/test_01/Makefile
+utils_lgpl/nefis/tests/test_02/Makefile
+utils_lgpl/nefis/tests/test_03/Makefile
+utils_lgpl/nefis/tests/test_04/Makefile
+utils_lgpl/nefis/tests/test_05/Makefile
+utils_lgpl/nefis/tests/test_06/Makefile
+utils_lgpl/nefis/tests/test_07/Makefile
+utils_lgpl/nefis/tests/test_08/Makefile
+utils_lgpl/nefis/tests/test_09/Makefile
+utils_lgpl/nefis/tests/test_10/Makefile
+utils_lgpl/nefis/tests/test_11/Makefile
+utils_lgpl/nefis/tests/test_12/Makefile
+utils_lgpl/nefis/tests/test_13/Makefile
+utils_lgpl/nefis/tests/test_14/Makefile
+utils_lgpl/nefis/tests/test_15/Makefile
+utils_lgpl/nefis/tests/test_16/Makefile
+utils_lgpl/nefis/tests/test_17/Makefile
+utils_lgpl/nefis/tests/test_18/Makefile
+utils_lgpl/nefis/tests/test_19/Makefile
+utils_lgpl/ods/packages/ods/src/Makefile
+utils_lgpl/precision/Makefile
+utils_lgpl/precision/packages/Makefile
+utils_lgpl/precision/packages/precision/Makefile
+utils_lgpl/precision/packages/precision/src/Makefile
+utils_lgpl/semaphore/Makefile
+utils_lgpl/semaphore/packages/Makefile
+utils_lgpl/semaphore/packages/semaphore/Makefile
+utils_lgpl/semaphore/packages/semaphore/src/Makefile
+utils_lgpl/stream/Makefile
+utils_lgpl/stream/packages/Makefile
+utils_lgpl/stream/packages/stream/Makefile
+utils_lgpl/stream/packages/stream/src/Makefile
+utils_lgpl/stream/packages/stream_version_number/Makefile
+utils_lgpl/stream/packages/stream_version_number/src/Makefile
+utils_lgpl/stream/tests/01-smalltest/Makefile
+utils_lgpl/stream/tests/02-streamtest/Makefile
+utils_lgpl/stream/tests/Makefile
+utils_lgpl/utils_flow/Makefile
+utils_lgpl/utils_flow/packages/Makefile
+utils_lgpl/utils_flow/packages/utils_flow_c/Makefile
+utils_lgpl/utils_flow/packages/utils_flow_c/src/Makefile
+utils_lgpl/utils_flow/packages/utils_flow/Makefile
+utils_lgpl/utils_flow/packages/utils_flow/src/Makefile
+utils_lgpl/utils_flow/packages/utils_flow_version_number/Makefile
+utils_lgpl/utils_flow/packages/utils_flow_version_number/src/Makefile
 		 ])
+
 
 AC_OUTPUT

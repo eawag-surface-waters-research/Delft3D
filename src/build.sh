@@ -28,34 +28,46 @@ debug=0
 noMake=0
 useSp=0
 
-export PATH="/opt/mpich2/bin:$PATH"
-export PKG_CONFIG_PATH=/opt/netcdf-4.1.1/ifort/lib/pkgconfig:$PKG_CONFIG_PATH
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/netcdf-4.1.1/ifort/lib:/opt/hdf5-1.8.5/lib
+# export PATH="/opt/mpich2/bin:$PATH"
+# export PKG_CONFIG_PATH=/opt/netcdf-4.1.1/ifort/lib/pkgconfig:$PKG_CONFIG_PATH
+# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/netcdf-4.1.1/ifort/lib:/opt/hdf5-1.8.5/lib
 
 # The updated autotools are not installed in the default location on the devux64,
 # So we have to set all these variables manually. 
-export ACLOCAL=/opt/automake-1.11.1/bin/aclocal
-export AUTOMAKE=/opt/automake-1.11.1/bin/automake
-export AUTOHEADER=/opt/autoconf-2.68/bin/autoheader
-export AUTOCONF=/opt/autoconf-2.68/bin/autoconf
-export LIBTOOLIZE=/opt/libtool-2.4.2/bin/libtoolize
+# export ACLOCAL=/opt/automake-1.11.1/bin/aclocal
+# export AUTOMAKE=/opt/automake-1.11.1/bin/automake
+# export AUTOHEADER=/opt/autoconf-2.68/bin/autoheader
+# export AUTOCONF=/opt/autoconf-2.68/bin/autoconf
+# export LIBTOOLIZE=/opt/libtool-2.4.2/bin/libtoolize
 
 # The extra macros are in this directory:
-export AUTORECONF_FLAGS="-I /opt/automake-1.11.1/share/aclocal-1.11 -I/opt/libtool-2.4.2/share/aclocal -I/opt/autoconf-2.68/share/autoconf -I/usr/share/aclocal"
+# export AUTORECONF_FLAGS="-I /opt/automake-1.11.1/share/aclocal-1.11 -I/opt/libtool-2.4.2/share/aclocal -I/opt/autoconf-2.68/share/autoconf -I/usr/share/aclocal"
 
 # And add them to the path...
-export PATH=/opt/automake-1.11.1/bin:/opt/autoconf-2.68/bin:/opt/libtool-2.4.2/bin:$PATH
+# export PATH=/opt/automake-1.11.1/bin:/opt/autoconf-2.68/bin:/opt/libtool-2.4.2/bin:$PATH
 
 # This is needed to find the 64 bit ifort based mpi compiler
-export MPIFC=/opt/mpich2-1.0.8-intel64/bin/mpif90  
+# export MPIFC=/opt/mpich2-1.0.8-intel64/bin/mpif90  
 
 # This is needed because that is where we installed DelftOnline 
 # DelftOnline was prebuild in the repository
 # What you could do is add the configure to the main configure so DelftOnline is build automaticly 
-export LDFLAGS=-L`pwd`/lib 
+# export LDFLAGS=-L`pwd`/lib 
 
 
-
+echo "----------"
+echo "PKG_CONFIG_PATH : $PKG_CONFIG_PATH"
+echo "ACLOCAL         : $ACLOCAL"
+echo "AUTOMAKE        : $AUTOMAKE"
+echo "AUTOHEADER      : $AUTOHEADER"
+echo "AUTOCONF        : $AUTOCONF"
+echo "LIBTOOLIZE      : $LIBTOOLIZE"
+echo "AUTORECONF_FLAGS: $AUTORECONF_FLAGS"
+echo "MPIFC           : $MPIFC"
+echo "LDFLAGS         : $LDFLAGS"
+echo "LD_LIBRARY_PATH : $LD_LIBRARY_PATH"
+echo "PATH            : $PATH"
+echo "----------"
 
 
 function usage {
@@ -147,14 +159,19 @@ case $compiler in
         ;;
 
     intel11.1)
-        if [ -d /opt/intel/Compiler/11.1/072/bin/intel64 ]; then
-            ifortInit=". /opt/intel/Compiler/11.1/072/bin/intel64/ifortvars_intel64.sh $platform"
-            idbInit=". /opt/intel/Compiler/11.1/072/bin/intel64/idbvars.sh"
-            echo "Using Intel 11.1 Fortran ($platform) compiler on 64bit OperatingSystem"
-        elif [ -d /opt/intel/Compiler/11.1/072 ]; then
-            ifortInit=". /opt/intel/Compiler/11.1/072/bin/ifortvars.sh $platform"
-            idbInit=". /opt/intel/Compiler/11.1/072/bin/$platform/idbvars.sh"
-            echo "Using Intel 11.1 Fortran ($platform) compiler"
+        if [ "$platform" == 'intel64' ]; then
+            if [ -d /opt/intel/Compiler/11.1/072/bin/intel64 ]; then
+                ifortInit=". /opt/intel/Compiler/11.1/072/bin/intel64/ifortvars_intel64.sh $platform"
+                idbInit=". /opt/intel/Compiler/11.1/072/bin/intel64/idbvars.sh"
+                echo "Using Intel 11.1 Fortran ($platform) compiler"
+            fi
+        else
+            if [ -d /opt/intel/Compiler/11.1/072 ]; then
+                ifortInit=". /opt/intel/Compiler/11.1/072/bin/ifortvars.sh $platform"
+                idbInit=". /opt/intel/Compiler/11.1/072/bin/$platform/idbvars.sh"
+                echo "Using Intel 11.1 Fortran ($platform) compiler"
+            fi
+        fi
         ;;
 
     intel11.0)
@@ -201,20 +218,6 @@ if [ $useSp -eq 1 ]; then
     )
 fi
 
-
-#-----  Create configure script
-
-log='logs/autoreconf.log'
-command="autoreconf -ivf &> $log"
-
-log "Running $command"
-eval $command
-
-if [ $? -ne 0 ]; then
-    log 'Autoreconfig fails!'
-    exit 1
-fi
-
 #----- To ensure that all libtool the ltmain.sh and m4 macros are updated.
 
 log='logs/libtoolize.log'
@@ -229,52 +232,18 @@ if [ $? -ne 0 ]; then
 fi
 
 
-#-----  In DelftOnline:
-cd third_party_open/DelftOnline
-#----------  Create makefiles
+#-----  Create configure script
 
-log='logs/configure_DelftOnline.log'
-command="./configure --prefix=`pwd` &> $log"
+log='logs/autoreconf.log'
+command="autoreconf -ivf &> $log"
 
 log "Running $command"
 eval $command
 
 if [ $? -ne 0 ]; then
-    log 'Configure DelftOnline fails!'
+    log 'Autoreconfig fails!'
     exit 1
 fi
-
-#----------  Build
-
-log='logs/make_DelftOnline.log'
-command="make &> $log"
-
-log "Running $command"
-eval $command
-
-if [ $? -ne 0 ]; then
-    log 'Make DelftOnline fails!'
-    exit 1
-fi
-
-#----------  and install
-
-log='logs/install_DelftOnline.log'
-command="make install &> $log"
-
-log "Running $command"
-eval $command
-
-if [ $? -ne 0 ]; then
-    log 'Install DelftOnline fails!'
-    exit 1
-fi
-
-
-
-cd ../..
-
-
 
 #-----  Create makefiles
 
@@ -302,10 +271,10 @@ if [ "$platform" = "intel64" ]; then
         "
 else
     command=" \
-        CFLAGS='$flags $CFLAGS' \
-        CXXFLAGS='$flags $CXXFLAGS' \
-        FFLAGS='$flags -DWITH_DELFTONLINE $FFLAGS' \
-        FCFLAGS='$flags $FCFLAGS' \
+        CFLAGS='$flags -fPIC $CFLAGS' \
+        CXXFLAGS='$flags -fPIC $CXXFLAGS' \
+        FFLAGS='$flags -fPIC $FFLAGS' \
+        FCFLAGS='$flags -fPIC $FCFLAGS' \
             ./configure --prefix=`pwd` &> $log \
         "
 fi
