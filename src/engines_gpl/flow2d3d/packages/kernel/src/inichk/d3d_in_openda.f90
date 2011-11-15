@@ -111,7 +111,8 @@ contains
   
   if (doLogging) then
      print *, 'set_openda_buffer, loc-id=', location_id, ', q_id=', quantity_id, ', val=', vals(1), ', oper:', operation
-     call flush(6)
+     ! flush is no longer a standard intrinsic Fortran routine
+     ! call flush(6)
   endif
   
   if (nvals .eq. 1) then !standard situation

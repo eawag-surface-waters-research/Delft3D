@@ -37,7 +37,6 @@ libflow2d3d_openda_la_SOURCES = \
          m_d3d_state.f90 \
          m_d3dstate_2_openda.f90 \
          d3dstate_2_d3d.f90 \
-         d3d_in_openda.f90 \
          flow2d3d_f.f90 \
          flow2d3d_openda.f90 \
          flow2d3d_openda_dll.f90 \
