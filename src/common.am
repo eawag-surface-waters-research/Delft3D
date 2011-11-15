@@ -5,10 +5,11 @@
 #   Fedor.Baart@Deltares.NL
 #   Adri.MouritsDeltares.NL
 #   Irv.ElshoffDeltares.NL
-#   6 jun 11
+#   15 nov 11
 #-------------------------------------------------------------------------------
 
 
+#-------------------------------------------------------------------------------
 # C/C++ flags
 
 AM_CFLAGS = \
@@ -36,7 +37,8 @@ STANDARD_C_INCLUDES = \
     -I$(top_builddir)/utils_lgpl/stream/include
 
 
-# Fortran 77/90 flags
+#-------------------------------------------------------------------------------
+#   Fortran flags
 
 FINCLUDES =
 
@@ -44,13 +46,22 @@ FMODULES = \
     -I$(top_builddir)/utils_lgpl/precision/packages/precision/src
 
 
+#-------------------------------------------------------------------------------
+#   Fortran 90 flags
+
 AM_FCFLAGS = \
     $(FINCLUDES) \
     $(FMODULES) \
     -O2
 
 AM_FCFLAGS+=$(OPENMP_FCFLAGS)
+
+
+#-------------------------------------------------------------------------------
+#   Fortran 77 flags
+
 AM_FFLAGS = \
+    -extend-source 132 \
     $(FINCLUDES) \
     $(FMODULES) \
     -O2
@@ -58,12 +69,14 @@ AM_FFLAGS = \
 AM_FFLAGS+=$(OPENMP_FFLAGS)
 
 
+#-------------------------------------------------------------------------------
 #   (disabled) LEX and YACC flags
 
 #AM_LFLAGS += -L
 #AM_YFLAGS += -d
 
 
+#-------------------------------------------------------------------------------
 #   Allow to build in different subdirectories
 #   This is described in http://www.gnu.org/software/automake/manual/automake.html#VPATH-Builds
 
@@ -73,7 +86,6 @@ VPATH = @srcdir@
 
 #-------------------------------------------------------------------------------
 #   Custom make targets
-
 
 ds-install: install
 	( \
