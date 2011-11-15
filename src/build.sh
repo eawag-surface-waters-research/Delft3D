@@ -16,7 +16,7 @@
 #   ToDo: Move DelftOnline to utils and treat it as an ordinary library
 #
 #   Irv.Elshoff@Deltares.NL
-#   6 nov 11
+#   15 nov 11
 #
 #   Copyright © 2011, Stichting Deltares
 #-------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ useSp=0
 # export AUTORECONF_FLAGS="-I /opt/automake-1.11.1/share/aclocal-1.11 -I/opt/libtool-2.4.2/share/aclocal -I/opt/autoconf-2.68/share/autoconf -I/usr/share/aclocal"
 
 # And add them to the path...
-# export PATH=/opt/automake-1.11.1/bin:/opt/autoconf-2.68/bin:/opt/libtool-2.4.2/bin:$PATH
+# export PATH=/opt/automake/bin:/opt/autoconf/bin:/opt/libtool/bin:$PATH
 
 # This is needed to find the 64 bit ifort based mpi compiler
 # export MPIFC=/opt/mpich2-1.0.8-intel64/bin/mpif90  
@@ -55,19 +55,18 @@ useSp=0
 # export LDFLAGS=-L`pwd`/lib 
 
 
-echo "----------"
-echo "PKG_CONFIG_PATH : $PKG_CONFIG_PATH"
-echo "ACLOCAL         : $ACLOCAL"
-echo "AUTOMAKE        : $AUTOMAKE"
-echo "AUTOHEADER      : $AUTOHEADER"
-echo "AUTOCONF        : $AUTOCONF"
-echo "LIBTOOLIZE      : $LIBTOOLIZE"
-echo "AUTORECONF_FLAGS: $AUTORECONF_FLAGS"
-echo "MPIFC           : $MPIFC"
-echo "LDFLAGS         : $LDFLAGS"
-echo "LD_LIBRARY_PATH : $LD_LIBRARY_PATH"
-echo "PATH            : $PATH"
-echo "----------"
+echo "export PKG_CONFIG_PATH=\"$PKG_CONFIG_PATH\""
+echo "export ACLOCAL=\"$ACLOCAL\""
+echo "export AUTOMAKE=\"$AUTOMAKE\""
+echo "export AUTOHEADER=\"$AUTOHEADER\""
+echo "export AUTOCONF=\"$AUTOCONF\""
+echo "export LIBTOOLIZE=\"$LIBTOOLIZE\""
+echo "export AUTORECONF_FLAGS=\"$AUTORECONF_FLAGS\""
+echo "export MPIFC=\"$MPIFC\""
+echo "export LDFLAGS=\"$LDFLAGS\""
+echo "export LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\""
+echo "export PATH=\"$PATH\""
+echo
 
 
 function usage {
