@@ -1103,9 +1103,9 @@ Gaws::~Gaws(void)
 
     for ( int s = 0 ; s < this->nSeries ; s++ )
     {
-        delete this->eqSeries[s].pnt;
+        free(this->eqSeries[s].pnt);
     }
-    delete this->eqSeries;
+    free(this->eqSeries);
 
     if (this->logFile != NULL)
     {
