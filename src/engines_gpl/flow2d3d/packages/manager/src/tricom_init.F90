@@ -1453,20 +1453,20 @@ subroutine tricom_init(gdp)
     elseif (itmapf < itstrt) then
        iplus = ((itstrt - itmapf)/itmapi)*itmapi
        if (iplus < (itstrt-itmapf)) iplus = iplus + itmapi
+       itmapc = min(itmapf + iplus, itmapl)
     else
-       iplus = 0
+       itmapc = min(itmapf, itmapl)
     endif
-    itmapc = min(itmapf + iplus, itmapl)
     !
     if (ithisi == 0) then
        ithisc = -1
     elseif (ithisf < itstrt) then
        iplus = ((itstrt - ithisf)/ithisi)*ithisi
        if (iplus < (itstrt-ithisf)) iplus = iplus + ithisi
+       ithisc = min(ithisf + iplus, itfinish)
     else
-       iplus = 0
+       ithisc = min(ithisf, itfinish)
     endif
-    ithisc = min(ithisf + iplus, itfinish)
     !
     if (ithisi == 0) ithisc = -1
     itdroc = itdrof
