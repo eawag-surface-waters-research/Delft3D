@@ -88,7 +88,6 @@ examples/04_fluidmud/sed.mdf -text
 src/AUTHORS -text
 src/COPYING -text
 src/ChangeLog -text
-src/INSTALL -text
 src/Makefile.am -text
 src/NEWS -text
 src/README -text

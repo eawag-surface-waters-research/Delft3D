@@ -31,7 +31,7 @@
 //  DEFINITIONS
 //
 //  Irv.Elshoff@Deltares.NL
-//  1 jun 11
+//  17 nov 11
 //-------------------------------------------------------------------------------
 
 
@@ -39,9 +39,10 @@
 
 #include "flow2d3d.h"
 
+#ifdef WITH_DELFTONLINE
 #include "JavaLaunch.h"
 #include "DelftOnline.h"
-
+#endif
 
 //-------------------------------------------------------------------------------
 
@@ -70,10 +71,14 @@ class FlowOL {
     public:
         int     numSubdomains;
         DeltaresHydro * dh;     // DeltaresHydro object instance (only one)
+#ifdef WITH_DELFTONLINE
         DOL::Server *   dol;    // DOL server object reference (only one)
+#endif
 
     private:
+#ifdef WITH_DELFTONLINE
         JavaLaunch *    java;   // Java virtual machine
+#endif
 
     };
 

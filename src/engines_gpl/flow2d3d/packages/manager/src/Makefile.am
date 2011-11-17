@@ -4,7 +4,7 @@
 #   Adri.Mourits@Deltares.NL
 #   Fedor.Baart@Deltares.NL
 #   Irv.Elshoff@Deltares.NL
-#   31 may 11
+#   17 nov 11
 #
 #   Copyright (C) 2011, Deltares
 #-------------------------------------------------------------------------------
@@ -18,39 +18,39 @@ lib_LTLIBRARIES = \
 #   Includes
 
 FINCLUDES += \
-	-I$(top_builddir)/utils_lgpl/esmfsm/include \
-	-I$(top_builddir)/utils_lgpl/precision/include \
-	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/include \
-	-I$(top_builddir)/engines_gpl/flow2d3d/packages/io_dol_f/include
+    -I$(top_builddir)/utils_lgpl/esmfsm/include \
+    -I$(top_builddir)/utils_lgpl/precision/include \
+    -I$(top_builddir)/engines_gpl/flow2d3d/packages/data/include \
+    -I$(top_builddir)/engines_gpl/flow2d3d/packages/io_dol_f/include
 
 FMODULES += \
-	-I$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90 \
-	-I$(top_builddir)/utils_lgpl/delftio_sync/packages/delftio_sync/src \
-	-I$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src \
-	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics \
-	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi \
-	-I$(top_builddir)/utils_lgpl/meteo/packages/meteo/src \
-	-I$(top_builddir)/utils_lgpl/utils_flow/packages/utils_flow/src \
-	-I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src \
-	-I$(top_builddir)/engines_gpl/flow2d3d/packages/io_dol_f/src \
-	-I$(top_builddir)/engines_gpl/flow2d3d/packages/kernel/src/inichk
+    -I$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90 \
+    -I$(top_builddir)/utils_lgpl/delftio_sync/packages/delftio_sync/src \
+    -I$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src \
+    -I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics \
+    -I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi \
+    -I$(top_builddir)/utils_lgpl/meteo/packages/meteo/src \
+    -I$(top_builddir)/utils_lgpl/utils_flow/packages/utils_flow/src \
+    -I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src \
+    -I$(top_builddir)/engines_gpl/flow2d3d/packages/io_dol_f/src \
+    -I$(top_builddir)/engines_gpl/flow2d3d/packages/kernel/src/inichk
 
-# fpp is compiler dependent
 AM_FCFLAGS += \
-        -fpp
+    -fpp
+    # fpp is compiler dependent
 
 #-------------------------------------------------------------------------------
 #   Sources
 
 libtrisim_la_SOURCES = \
-         tdatmain.f90 \
-         tricom_init.F90 \
-         tricom_step.F90 \
-         tricom_finish.f90 \
-         triend.f90 \
-         tripoi.f90 \
-         trisim_mod.f90 \
-         trisim.f90
+     tdatmain.f90 \
+     tricom_init.F90 \
+     tricom_step.F90 \
+     tricom_finish.f90 \
+     triend.f90 \
+     tripoi.f90 \
+     trisim_mod.f90 \
+     trisim.f90
 
 #-------------------------------------------------------------------------------
 #   Libraries
@@ -105,7 +105,3 @@ libtrisim_la_LIBADD = \
     $(EXTERNALSOURCES) \
     $(MPILIBS) \
     $(FCLIBS)
-
-#    -L/u/elshoff/2011/DelftOnline-2.15/lib -lDelftOnline -lDelftOnlineJNI \
-#    -L/u/elshoff/2011/JavaLaunch-1.3/lib -lJavaLaunch \
-#

@@ -6,7 +6,7 @@
 #   A "make distclean" doesn't do it all (yet), so we help it.
 #
 #   Irv.Elshoff@Deltares.NL
-#   2 nov 11
+#   17 nov 11
 #-------------------------------------------------------------------------------
 
 
@@ -47,6 +47,11 @@ rm -rf \
     engines_gpl/wave/packages/wave/src/wave_version.F90 \
     lib \
     logs \
+    m4/libtool.m4 \
+    m4/lt~obsolete.m4 \
+    m4/ltsugar.m4 \
+    m4/ltversion.m4 \
+    m4/ltoptions.m4 \
     third_party_open/version_number/bin/linux/version_number.exe \
     tools_gpl/vs/packages/vs/src/vs_l.c \
     tools_gpl/vs/packages/vs/src/vs_y.c \
