@@ -118,6 +118,7 @@ src/engines_gpl/d_hydro/packages/d_hydro/src/d_hydro_version.cpp -text
 src/engines_gpl/d_hydro/packages/d_hydro/src/readme.txt -text
 src/engines_gpl/flow2d3d/Makefile.am -text
 src/engines_gpl/flow2d3d/default/dioconfig.ini -text
+src/engines_gpl/flow2d3d/default/files.def -text
 src/engines_gpl/flow2d3d/default/tabmom -text
 src/engines_gpl/flow2d3d/doc/delft3d/hydra.html -text
 src/engines_gpl/flow2d3d/doc/delft3d/im/hydranet.gif -text
