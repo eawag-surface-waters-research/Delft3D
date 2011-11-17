@@ -3,7 +3,7 @@
 #
 #   Irv.Elshoff@Deltares.NL
 #   Adri.Mourits@Deltares.NL
-#   29 oct 11
+#   17 nov 11
 #
 #   Copyright (C) 2011, Deltares
 #-------------------------------------------------------------------------------
@@ -42,7 +42,7 @@ MPILIBS = \
 #   Libraries
 
 d_hydro_exe_LDFLAGS = \
-    -ifcoremt
+    -lifcoremt
 
 d_hydro_exe_LDADD = \
     $(top_builddir)/lib/libflow2d3d.a \
