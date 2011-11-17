@@ -171,11 +171,11 @@ AC_CHECK_TYPES([struct shm_info])
 AC_CHECK_HEADER(expat.h,, [AC_MSG_ERROR([Compiler can't find <expat.h>])])
 AC_CHECK_LIB(expat, XML_Parse,, [AC_MSG_ERROR([Compiler can't find libexpat])])
 
-# When using the Intel compiler, check for the needed libraries
+# When using the Intel Fortran compiler, check for the needed libraries
 if test $FC == ifort; then
-    AC_CHECK_LIB([irc], [main],,)
-    AC_CHECK_LIB([svml], [main],,)
-    AC_CHECK_LIB([mcheck], [main],,)
+    AC_CHECK_LIB([irc], [main], [HAVE_LIBirc=1] [FCLIBS="$FCLIBS -lirc"],)
+    AC_CHECK_LIB([svml], [main], [HAVE_LIBsvml=1] [FCLIBS="$FCLIBS -lsvml"],)
+    AC_CHECK_LIB([mcheck], [main], [HAVE_LIBmcheck=1] [FCLIBS="$FCLIBS -lmcheck"],)
 fi
 
 # checks for pthreads
@@ -186,6 +186,7 @@ if test $enable_threads != "pthread"; then
 else
     AC_DEFINE(HAVE_PTHREAD,1,[Define if you have POSIX threads libraries and header files.])
     LIBS="$PTHREAD_LIBS $LIBS"
+    FCLIBS="$PTHREAD_LIBS $FCLIBS"
     CFLAGS="$PTHREAD_CFLAGS $CFLAGS"
     CXXFLAGS="$PTHREAD_CFLAGS $CXXFLAGS"
 fi
