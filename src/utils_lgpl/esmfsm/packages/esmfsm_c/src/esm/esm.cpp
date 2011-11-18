@@ -51,6 +51,7 @@ static int getpid() { return 0; }
 
 static pthread_once_t   ThreadInit = PTHREAD_ONCE_INIT;
 
+
 extern "C"
 {
 extern void getFullVersionString_ESMFSM( char * );
@@ -126,7 +127,7 @@ InitProcess (
     void
     ) {
 
-    //  This routine is called once to initialze ESM for this process
+    //  This routine is called once to initialize ESM for this process
 
     InitFails   = 0;
     NumThreads  = 0;
@@ -205,7 +206,11 @@ ESM_Init (
 
     ESM_DEBUG ((output, "Entering ESM_Init (flags=0x%x)", flags))
 
+ 
     pthread_once (&ThreadInit, InitProcess);
+
+	
+
     if (InitFails) {
         InitFails = 0;
         RETURN (ESM_ERROR)
@@ -515,4 +520,7 @@ ESM_TraceFile (
         }
     }
 
-
+int  ESM_Finish() {
+	ThreadInit.done = 0;
+	return 0;
+}

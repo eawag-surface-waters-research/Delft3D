@@ -57,6 +57,12 @@
 
     integer     fsmerr
     external    fsmerr
+    
+    integer     esminif
+    external    esminif   
+    
+    integer     esmcreatef
+    external    esmcreatef
 
 !-------------------------------------------------------------------------------
 !   FSM Pointer Type Definitions

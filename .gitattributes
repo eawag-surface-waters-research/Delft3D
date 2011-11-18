@@ -560,6 +560,7 @@ src/engines_gpl/flow2d3d/packages/io/src/input/reafou.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/restart_bdf_from_trim.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/restart_bodsed.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/restart_lyrs.f90 -text
+src/engines_gpl/flow2d3d/packages/io/src/input/roller_nefis_restart.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/rstfil.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/search2.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/input/srcfil.f90 -text
@@ -3116,6 +3117,7 @@ src/utils_lgpl/esmfsm/packages/esmfsm_c/include/globals-fsm.h -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/src/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/Makefile.am -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/esm.cpp -text
+src/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/esm_f.cpp -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/local.cpp -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/shared.cpp -text
 src/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/Makefile.am -text

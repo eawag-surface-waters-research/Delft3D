@@ -38,8 +38,8 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-use precision
-use properties
+    use precision
+    use properties
 !
     use globaldata
     !
@@ -50,6 +50,10 @@ use properties
     implicit none
     !
     type(globdat),target :: gdp
+    
+    
+    include 'fsm.i'
+    include 'tri-dyn.igd'
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
@@ -62,6 +66,7 @@ use properties
     logical        , pointer :: dp_from_map_file
     logical        , pointer :: kfuv_from_restart
     logical        , pointer :: rst_dp
+    logical        , pointer :: roller    
     character(256) , pointer :: restid
     real(hp)       , pointer :: morft
     real(hp)       , pointer :: morft0
@@ -100,8 +105,7 @@ use properties
     integer                               :: fds
     integer, external                     :: inqmxi
     integer, external                     :: neferr
-    integer                               :: i
-    integer                               :: j
+    integer                               :: ii
     integer                               :: itmapc
     integer                               :: max_index
     integer                               :: rst_lstci
@@ -118,8 +122,23 @@ use properties
     character(1024)                       :: error_string
     character(256)                        :: dat_file
     character(256)                        :: def_file
+    integer(pntrsize)           , pointer :: eroll1
+    integer(pntrsize)           , pointer :: ewave1
+    integer(pntrsize)           , pointer :: fxw
+    integer(pntrsize)           , pointer :: fyw
+    integer(pntrsize)           , pointer :: hrms    
+    integer(pntrsize)           , pointer :: qxkr
+    integer(pntrsize)           , pointer :: qxkw
+    integer(pntrsize)           , pointer :: qykr
+    integer(pntrsize)           , pointer :: qykw       
+    integer(pntrsize)           , pointer :: wsu
+    integer(pntrsize)           , pointer :: wsv  
+    integer(pntrsize)           , pointer :: guu
+    integer(pntrsize)           , pointer :: gvv
+    integer                               :: m    
     integer                     , pointer :: mfg
     integer                     , pointer :: mlg
+    integer                               :: n 
     integer                     , pointer :: nfg
     integer                     , pointer :: nlg
     integer                     , pointer :: nmaxgl
@@ -144,6 +163,7 @@ use properties
     temp                => gdp%gdprocs%temp
     const               => gdp%gdprocs%const
     htur2d              => gdp%gdprocs%htur2d
+    roller              => gdp%gdprocs%roller 
     i_restart           => gdp%gdrestart%i_restart
     dp_from_map_file    => gdp%gdrestart%dp_from_map_file
     kfuv_from_restart   => gdp%gdrestart%kfuv_from_restart
@@ -152,6 +172,19 @@ use properties
     morft               => gdp%gdmorpar%morft
     morft0              => gdp%gdmorpar%morft0
     bed                 => gdp%gdmorpar%bed
+    eroll1              => gdp%gdr_i_ch%eroll1
+    ewave1              => gdp%gdr_i_ch%ewave1
+    fxw                 => gdp%gdr_i_ch%fxw
+    fyw                 => gdp%gdr_i_ch%fyw
+    hrms                => gdp%gdr_i_ch%hrms    
+    qxkr                => gdp%gdr_i_ch%qxkr
+    qxkw                => gdp%gdr_i_ch%qxkw
+    qykr                => gdp%gdr_i_ch%qykr
+    qykw                => gdp%gdr_i_ch%qykw        
+    wsu                 => gdp%gdr_i_ch%wsu
+    wsv                 => gdp%gdr_i_ch%wsv    
+    guu                 => gdp%gdr_i_ch%guu
+    gvv                 => gdp%gdr_i_ch%gvv    
     mfg                 => gdp%gdparall%mfg
     mlg                 => gdp%gdparall%mlg
     nfg                 => gdp%gdparall%nfg
@@ -209,8 +242,6 @@ use properties
     
     ierror = getelt(fds, 'map-const', 'DT', cuindex, 1, 4, dtms)
 
- 
-
     dtm = dtms
     if (ierror/= 0) then
        ierror = neferr(0,error_string)
@@ -228,10 +259,11 @@ use properties
     !
     ! look for restart time on nefis map file
     !
+
     found = .false.
-    do i = max_index,1,-1 ! assume last time on map file has highest probability of being the requested time step
-       uindex (1,1) = i
-       uindex (2,1) = i
+    do ii = max_index,1,-1 ! assume last time on map file has highest probability of being the requested time step
+       uindex (1,1) = ii
+       uindex (2,1) = ii
        ierror = getelt(fds, 'map-info-series', 'ITMAPC', uindex, 1, 4, itmapc)
        if (ierror/= 0) then
           ierror = neferr(0,error_string)
@@ -242,7 +274,7 @@ use properties
        t_restart = dtm*itmapc
        if (abs(tstart-t_restart) < 0.5_fp*dtm) then
           write(lundia, '(a,i5,a,e20.4)') 'using field ',i,' associated with time T = ',t_restart
-          i_restart = i
+          i_restart = ii
           found     = .true.
           exit ! restart time found on map file
        end if
@@ -484,7 +516,6 @@ use properties
              write(lundia, *) 'Turbulence model is not compatible with previous simulation, default initialisation will be used'
           endif
        endif
-
     endif
     !
     !    end of master part
@@ -556,44 +587,44 @@ use properties
     ! put copies of parts of s1 etc for each subdomain 
     ! 
     call dfsync ( gdp ) 
-    do j = mfg, mlg 
-       do i = nfg, nlg 
-          s1(i-nfg+1,j-mfg+1) = s1_g(i,j) 
-          u1(i-nfg+1,j-mfg+1,1:kmax) = u1_g(i,j,1:kmax)
-          v1(i-nfg+1,j-mfg+1,1:kmax) = v1_g(i,j,1:kmax)           
-          kfu(i-nfg+1,j-mfg+1) = kfu_g(i,j)
-          kfv(i-nfg+1,j-mfg+1) = kfv_g(i,j)
+    do m = mfg, mlg 
+       do n = nfg, nlg 
+          s1(n-nfg+1,m-mfg+1) = s1_g(n,m) 
+          u1(n-nfg+1,m-mfg+1,1:kmax) = u1_g(n,m,1:kmax)
+          v1(n-nfg+1,m-mfg+1,1:kmax) = v1_g(n,m,1:kmax)           
+          kfu(n-nfg+1,m-mfg+1) = kfu_g(n,m)
+          kfv(n-nfg+1,m-mfg+1) = kfv_g(n,m)
        enddo 
     enddo 
     if (has_umean /= 0) then
-       do j = mfg, mlg 
-          do i = nfg, nlg 
-             umnldf(i-nfg+1,j-mfg+1) = umnldf_g(i,j)
-             vmnldf(i-nfg+1,j-mfg+1) = vmnldf_g(i,j)
+       do m = mfg, mlg 
+          do n = nfg, nlg 
+             umnldf(n-nfg+1,m-mfg+1) = umnldf_g(n,m)
+             vmnldf(n-nfg+1,m-mfg+1) = vmnldf_g(n,m)
           enddo 
        enddo 
     endif
 
     if (dp_from_map_file) then
-       do j = mfg, mlg 
-          do i = nfg, nlg 
-             dp(i-nfg+1,j-mfg+1) = dp_g(i,j)          
+       do m = mfg, mlg 
+          do n = nfg, nlg 
+             dp(n-nfg+1,m-mfg+1) = dp_g(n,m)          
           enddo
        enddo    
     endif
 
     if (lstsci > 0 .and. lstsci  == rst_lstci) then
-       do j = mfg, mlg 
-          do i = nfg, nlg 
-             r1(i-nfg+1,j-mfg+1,1:kmax,1:lstsci) = r1_g(i,j,1:kmax,1:lstsci)          
+       do m = mfg, mlg 
+          do n = nfg, nlg 
+             r1(n-nfg+1,m-mfg+1,1:kmax,1:lstsci) = r1_g(n,m,1:kmax,1:lstsci)          
           enddo
        enddo    
     endif 
        
     if (ltur > 0  .and. ltur == rst_ltur ) then
-       do j = mfg, mlg 
-          do i = nfg, nlg 
-             rtur1(i-nfg+1,j-mfg+1,0:kmax,1:ltur) = rtur1_g(i,j,0:kmax,1:ltur)          
+       do m = mfg, mlg 
+          do n = nfg, nlg 
+             rtur1(n-nfg+1,m-mfg+1,0:kmax,1:ltur) = rtur1_g(n,m,0:kmax,1:ltur)          
           enddo
        enddo   
     endif       
@@ -611,19 +642,27 @@ use properties
        call prterr(lundia, 'U021', 'flow_nefis_restart: memory de-allocate error')
     endif
 
+    call dfsync(gdp)
+
+
+    if (inode == master) then
+       if (associated(sbuff)) deallocate (sbuff)
+       if (associated(ibuff)) deallocate (ibuff)
+       ierror = clsnef(fds) 
+    endif
+
+    if (roller) then
+       call roller_nefis_restart(lundia    ,error     ,restid1,   &
+               & i_restart, r(ewave1) ,r(eroll1) ,r(qxkr)   , &
+                          & r(qykr)   ,r(qxkw)   ,r(qykw)   ,r(fxw)    ,r(fyw)    , &
+                          & r(wsu)    ,r(wsv)    ,r(guu)    ,r(gvv)    , &
+                          & r(hrms)   ,gdp       )  
+    endif   
                 
 9999 continue
 
-    
-    if (inode == master) then
-      if (associated(sbuff)) deallocate (sbuff)
-      if (associated(ibuff)) deallocate (ibuff)
-      ierror = clsnef(fds) 
-    endif
     !
     ! todo:
     ! no communication since last call to dfsync, so it can be removed?
     !
-    call dfsync(gdp)
-
 end subroutine flow_nefis_restart

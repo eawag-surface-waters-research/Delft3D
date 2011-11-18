@@ -152,7 +152,7 @@ subroutine dirint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
     !     this wave angle is splitted up in a cosine and a sine value based
     !     on the unity vector of 1. The weight of the vectors for
     !     interpolation is taken into account by the wave energy,
-    !     simplifiedto Hrms**2
+    !     simplified to Hrms**2
     !
     fac = atan(1.)*4./180.
     k = 1

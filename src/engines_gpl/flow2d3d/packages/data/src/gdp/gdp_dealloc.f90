@@ -246,7 +246,6 @@ subroutine gdp_dealloc(gdp)
        call clrsedpar(istat, gdp)
        call clrmorpar(istat, gdp)
        istat = clrmorlyr(gdp%gdmorlyr)
-       call clrdredge(istat, gdp)
     endif
     deallocate (gdp%gddredge)
     deallocate (gdp%gdeqtran)

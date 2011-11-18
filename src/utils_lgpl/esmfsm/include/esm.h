@@ -75,8 +75,20 @@
 #endif
 
 int
+Esm_Init_f (
+    int *    flags
+    );
+
+
+int
 ESM_Init (
     int     flags
+    );
+
+int
+ESM_Create_f (
+    int     shared,
+    int     pagesize
     );
 
 int
@@ -129,6 +141,9 @@ ESM_Shared_Info (
     FILE *  output
     );
 
+int ESM_Finish() ;
+
+
 #if defined (__cplusplus)
     }
 #endif
@@ -156,7 +171,7 @@ ESM_Shared_Info (
 /*  Flag Definitions  (coupled with definitions in "fsm.i") */
 
 
-#define ESM_SILENT      1       /* flag to suporess stderr output */
+#define ESM_SILENT      1       /* flag to suppress stderr output */
 #define ESM_TRACE       2       /* flag for trace output to stderr */
 
 

@@ -366,6 +366,34 @@ function fsm_pointer_index (ptr, keytype)
     fsm_pointer_index = ((ptr - base) / nbytes(keytype))
 end
 
+!--------------------------------------------------------------------------------
+integer function ESMINIF (flags)
+    use precision
+    implicit none
+
+    integer flags
+
+    include 'globals-fsm.i'
+    integer, external :: esm_init_f
+    
+    ESMINIF = ESM_Init_F (flags)
+    return
+end
+!--------------------------------------------------------------------------------
+integer function ESMCREATEF (shared,psize)
+    use precision
+    implicit none
+
+    integer shared
+    integer psize
+
+    include 'globals-fsm.i'
+    integer, external :: esm_create_f
+    
+    ESMCREATEF = ESM_Create_F (shared, psize)
+    return
+end
+
 
 !-------------------------------------------------------------------------------
 

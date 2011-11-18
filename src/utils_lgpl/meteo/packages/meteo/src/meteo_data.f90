@@ -178,13 +178,13 @@ module meteo_data
 !
 ! Module parameters
 !
-   integer                                                     :: num_meteopointers     = 0
-   integer                                                     :: message_count         = 0           ! Flag used to make sure message on the time zone shift is given only once
-   logical                                                     :: msferic               = .false.     ! true: meteo grid is sferical, false: cartesian
-   logical                                                     :: meteoint              = .true.      ! true: interpolate in time, false: block
-   real(fp)                                                    :: patm_default          = 101300.0_fp ! Default air pressure (Pa)
-   character(500)                                              :: meteomessage          = ' '         ! (error)messages are set in meteomessage.
-                                                                                                      ! function getmeteomessage returns the message
+   integer                                                     :: num_meteopointers     
+   integer                                                     :: message_count         ! Flag used to make sure message on the time zone shift is given only once
+   logical                                                     :: msferic               ! true: meteo grid is sferical, false: cartesian
+   logical                                                     :: meteoint              ! true: interpolate in time, false: block
+   real(fp)                                                    :: patm_default          ! Default air pressure (Pa)
+   character(500)                                              :: meteomessage          ! (error)messages are set in meteomessage.
+                                                                                        ! function getmeteomessage returns the message
 
    type(tmeteopointer), dimension(max_num_meteopointers),save  :: meteopointers
 
@@ -324,7 +324,10 @@ subroutine deallocmeteo(runid)
           if (associated(meteo%spiderweb%spwf))   deallocate (meteo%spiderweb%spwf)
           if (associated(meteo%spiderweb%spwarr)) deallocate (meteo%spiderweb%spwarr)
        endif
-       deallocate(meteo)
+       !
+       ! deallocating meteo here gives an error. Not sure why.
+       !
+      ! deallocate(meteo)
    endif
 end subroutine deallocmeteo
 

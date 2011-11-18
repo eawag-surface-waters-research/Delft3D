@@ -59,9 +59,8 @@ function Initialize(componentID, schemID) result(retVal)
 
     integer           :: idum, idum2
 
-    integer, external :: esm_init_f
-    integer, external :: ESM_Create_f
-    
+    include 'fsm.i'
+        
     !
     ! body
     
@@ -77,7 +76,7 @@ function Initialize(componentID, schemID) result(retVal)
 
     fsm_flags = 1        ! fsm_flags = ESM_SILENT (from esm.h)
 
-    !idum = ESM_Init_f(fsm_flags)
+    idum = ESMINIF(fsm_flags)
 
     !When DelftIO uses shared memory (on Linux only), the environment
     !parameter "DIO_SHM_ESM" is set.
@@ -88,9 +87,7 @@ function Initialize(componentID, schemID) result(retVal)
  ! shared memory context ID; should return -1000
     idum = 0
     idum2 = 0
-    !context_id = ESM_Create_f (idum,idum2)
-    context_id = -1000   !! this is wrong!!!
-        
+    context_id = ESMCREATEF (idum,idum2)
     !
     numdom = 0
     nummap = 0

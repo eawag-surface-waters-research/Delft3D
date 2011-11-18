@@ -156,7 +156,7 @@ subroutine frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
        endif
     endif
     !
-    ! Linear intepolation of wave functions
+    ! Linear interpolation of wave functions
     !
     do k = 1, kmaxk
        do m = 1, mmax

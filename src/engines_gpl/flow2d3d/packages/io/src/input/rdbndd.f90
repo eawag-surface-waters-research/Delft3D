@@ -472,7 +472,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        enddo
     endif
     !
-    ! test all read values comparing with defintions and domain
+    ! test all read values comparing with definitions and domain
     !
     ntest = 0
     !

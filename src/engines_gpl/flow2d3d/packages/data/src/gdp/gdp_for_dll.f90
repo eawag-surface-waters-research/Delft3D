@@ -78,10 +78,9 @@ subroutine gdpDealloc(componentID, schemID)
     endif
     
     ! deallocate gdp contents
-    !! TODORE call gdp_dealloc(gdp)
-    !! TODORE deallocate(gdp, stat=ierr)
-    !call gdp_dealloc(gdp)
-    !deallocate(gdp, stat=ierr)
+
+    call gdp_dealloc(gdp)
+    deallocate(gdp, stat=ierr)
 
 end subroutine gdpDealloc
 !

@@ -408,7 +408,9 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     call sysini(error     ,runid     ,filmrs    ,alone     ,soort     , & 
               & verify    ,versio    ,filmd     ,gdp       ) 
     ! 
-    ! Check if all necessary termporary files exist if they are reused 
+    if (error) goto 9990
+    !    
+    ! Check if all necessary temporary files exist if they are reused 
     ! 
     call tmpcheck( runid,  reusetmp,  tmpexist,  gdp ) 
     ! 

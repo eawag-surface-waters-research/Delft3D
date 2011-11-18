@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="esmfsm_c"
 	ProjectGUID="{5D050FBC-7AFA-4D3C-8AE8-D8C138F15596}"
 	RootNamespace="esmfsm_c"
@@ -157,6 +157,10 @@
 				>
 				<File
 					RelativePath=".\src\esm\esm.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\src\esm\esm_f.cpp"
 					>
 				</File>
 				<File
