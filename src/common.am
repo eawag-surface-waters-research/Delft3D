@@ -15,13 +15,11 @@
 AM_CFLAGS = \
     -std=c99 \
     -D_GNU_SOURCE \
-    -O2 \
     -DSTR_LEN_AT_END
 
 AM_CXXFLAGS = \
     -std=c++98 \
     -D_GNU_SOURCE \
-    -O2 \
     -DSTR_LEN_AT_END
 
 STANDARD_C_INCLUDES = \
@@ -47,8 +45,7 @@ FMODULES = \
 
 AM_FCFLAGS = \
     $(FINCLUDES) \
-    $(FMODULES) \
-    -O2
+    $(FMODULES)
 
 AM_FCFLAGS+=$(OPENMP_FCFLAGS)
 
@@ -59,8 +56,7 @@ AM_FCFLAGS+=$(OPENMP_FCFLAGS)
 AM_FFLAGS = \
     -extend-source 132 \
     $(FINCLUDES) \
-    $(FMODULES) \
-    -O2
+    $(FMODULES)
 
 AM_FFLAGS+=$(OPENMP_FFLAGS)
 
