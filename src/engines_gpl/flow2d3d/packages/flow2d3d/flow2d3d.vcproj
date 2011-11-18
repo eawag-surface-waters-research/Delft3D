@@ -62,7 +62,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="pthreadVCE2.lib DelftOnline.lib JavaLaunch.lib DelftOnlineJNI.lib libexpat.lib fmpich2.lib wsock32.lib netapi32.lib comctl32.lib user32.lib advapi32.lib comdlg32.lib gdi32.lib winspool.lib cxx.lib"
+				AdditionalDependencies="pthreadVCE2.lib libexpat.lib fmpich2.lib wsock32.lib netapi32.lib comctl32.lib user32.lib advapi32.lib comdlg32.lib gdi32.lib winspool.lib cxx.lib"
 				OutputFile="$(OutDir)\flow2d3d.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\..\..\third_party_open\pthreads\bin\win32;&quot;..\..\..\..\third_party_open\DelftOnline\lib\$(ConfigurationName)&quot;;..\..\..\..\third_party_open\expat\win32\bin\Release;..\..\..\..\third_party_open\mpich2\lib;&quot;$(IFORT_COMPILER11)\lib\ia32&quot;"
@@ -143,7 +143,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="pthreadVCE2.lib DelftOnline.lib JavaLaunch.lib DelftOnlineJNI.lib libexpat.lib fmpich2.lib wsock32.lib netapi32.lib comctl32.lib user32.lib advapi32.lib comdlg32.lib gdi32.lib winspool.lib cxx.lib"
+				AdditionalDependencies="pthreadVCE2.lib libexpat.lib fmpich2.lib wsock32.lib netapi32.lib comctl32.lib user32.lib advapi32.lib comdlg32.lib gdi32.lib winspool.lib cxx.lib"
 				OutputFile="$(OutDir)\flow2d3d.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\..\third_party_open\pthreads\bin\win32;&quot;..\..\..\..\third_party_open\DelftOnline\lib\$(ConfigurationName)&quot;;..\..\..\..\third_party_open\expat\win32\bin\Release;..\..\..\..\third_party_open\mpich2\lib;&quot;$(IFORT_COMPILER11)\lib\ia32&quot;"
