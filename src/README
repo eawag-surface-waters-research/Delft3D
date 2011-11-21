@@ -57,7 +57,44 @@ tools_gpl   : Open source tools under GPL conditions
 utils       : Libraries which are used by the engines and/or tools, but at least by more than one engine/tool
 utils_lgpl  : Open source utils under LGPL conditions
 
+Location where compiler flags are defined/added
+===============================================
+configure.ac
+------------
+Preprocessor:
+line 86: (AC_FC_PREPROCESS)
+
+OpenMP flags:
+line 66 and 95: (AX_OPENMP)
+
+-recursive -reentrancy threaded -traceback:
+line 112 and 120
+
+-lirc, -lsvml, -lmcheck:
+line 176, 177 and 178 respectively
+
+pthread:
+line 182 (ACX_PTHREAD)
 
 
-4 November 2011
+common.am
+=========
+F77 lines longer than 72 characters:
+line 57 (-extend-source 132)
+
+
+
+build.sh
+======
+debug or release:
+line 252/254: '-g -O0'  resp. '-O2'
+
+position independent code:
+line 265-276: -fPIC
+
+64bit:
+line 265-268: -m64
+
+
+21 November 2011
 adri.mourits@deltares.nl
