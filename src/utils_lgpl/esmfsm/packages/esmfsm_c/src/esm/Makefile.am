@@ -21,6 +21,7 @@ INCLUDES = -I$(top_builddir)/utils_lgpl/esmfsm/include \
 #Sources
 libesm_c_a_SOURCES = \
          esm.cpp \
+         esm_f.cpp \
          local.cpp \
          shared.cpp
 

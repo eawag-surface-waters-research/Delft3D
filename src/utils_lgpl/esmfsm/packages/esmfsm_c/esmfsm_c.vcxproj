@@ -82,6 +82,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\esm\esm.cpp" />
+    <ClCompile Include="src\esm\esm_f.cpp" />
     <ClCompile Include="src\esm\local.cpp" />
     <ClCompile Include="src\esm\shared.cpp" />
     <ClCompile Include="src\fsm\fsm.cpp" />

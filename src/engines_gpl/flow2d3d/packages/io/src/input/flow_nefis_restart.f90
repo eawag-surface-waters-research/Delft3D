@@ -273,7 +273,7 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
        endif
        t_restart = dtm*itmapc
        if (abs(tstart-t_restart) < 0.5_fp*dtm) then
-          write(lundia, '(a,i5,a,e20.4)') 'using field ',i,' associated with time T = ',t_restart
+          write(lundia, '(a,i5,a,e20.4)') 'using field ',ii,' associated with time T = ',t_restart
           i_restart = ii
           found     = .true.
           exit ! restart time found on map file

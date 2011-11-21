@@ -48,8 +48,6 @@ subroutine roller_nefis_restart(lundia    ,error     ,restid1 , &
     !
     type(globdat),target :: gdp
     !
-    include 'fsm.i'
-    !
     real(fp)       , pointer :: tstart
     real(fp)       , pointer :: dt
     !

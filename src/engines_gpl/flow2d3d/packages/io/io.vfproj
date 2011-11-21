@@ -123,11 +123,7 @@
 		<File RelativePath="src\input\restart_bdf_from_trim.f90"/>
 		<File RelativePath="src\input\restart_bodsed.f90"/>
 		<File RelativePath="src\input\restart_lyrs.f90"/>
-		<File RelativePath=".\src\input\roller_nefis_restart.f90">
-			<FileConfiguration Name="Debug|Win32">
-				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration>
-			<FileConfiguration Name="Release|Win32">
-				<Tool Name="VFFortranCompilerTool" WarnDeclarations="false" WarnUnusedVariables="false"/></FileConfiguration></File>
+		<File RelativePath="src\input\roller_nefis_restart.f90"/>
 		<File RelativePath="src\input\rstfil.f90"/>
 		<File RelativePath="src\input\search2.f90"/>
 		<File RelativePath="src\input\srcfil.f90"/>
@@ -139,7 +135,7 @@
 		<File RelativePath="src\output\addelm.f90"/>
 		<File RelativePath="src\output\calbed.f90"/>
 		<File RelativePath="src\output\defnewgrp.f90"/>
-		<File RelativePath=".\src\output\detectcelidt.f90"/>
+		<File RelativePath="src\output\detectcelidt.f90"/>
 		<File RelativePath="src\output\dirint.f90"/>
 		<File RelativePath="src\output\distance_nogdp.f90"/>
 		<File RelativePath="src\output\dp999.f90"/>
@@ -196,8 +192,8 @@
 		<File RelativePath="src\output\wribot.f90"/>
 		<File RelativePath="src\output\wridoc.f90"/>
 		<File RelativePath="src\output\wridro.f90"/>
-		<File RelativePath=".\src\output\wrihis.f90"/>
-		<File RelativePath=".\src\output\wrihisbal.f90"/>
+		<File RelativePath="src\output\wrihis.f90"/>
+		<File RelativePath="src\output\wrihisbal.f90"/>
 		<File RelativePath="src\output\wrihisdad.f90"/>
 		<File RelativePath="src\output\wrihisdis.f90"/>
 		<File RelativePath="src\output\wrimap.f90"/>
@@ -222,7 +218,7 @@
 		<File RelativePath="src\output\wrspcp.f90"/>
 		<File RelativePath="src\output\wrtdro.f90"/>
 		<File RelativePath="src\output\wrthis.f90"/>
-		<File RelativePath=".\src\output\wrthisbal.f90"/>
+		<File RelativePath="src\output\wrthisbal.f90"/>
 		<File RelativePath="src\output\wrthisdad.f90"/>
 		<File RelativePath="src\output\wrthisdis.f90"/>
 		<File RelativePath="src\output\wrtmap.f90"/>
