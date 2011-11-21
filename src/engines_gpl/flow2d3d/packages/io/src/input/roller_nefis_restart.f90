@@ -1,8 +1,8 @@
 subroutine roller_nefis_restart(lundia    ,error     ,restid1 , &
-                & i_restart  ,ewave1    ,eroll1    ,qxkr      , &
-                & qykr      ,qxkw      ,qykw      ,fxw       ,fyw       , &
-                & wsu       ,wsv       ,guu       ,gvv       , &
-                & hrms      ,gdp       )
+                              & i_restart ,ewave1    ,eroll1    ,qxkr      , &
+                              & qykr      ,qxkw      ,qykw      ,fxw       ,fyw       , &
+                              & wsu       ,wsv       ,guu       ,gvv       , &
+                              & hrms      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011.                                     
@@ -29,8 +29,8 @@ subroutine roller_nefis_restart(lundia    ,error     ,restid1 , &
 !  Stichting Deltares. All rights reserved.                                     
 !                                                                               
 !-------------------------------------------------------------------------------
-!  $Id: flow_nefis_restart.f90 424 2011-03-30 11:43:33Z spee $
-!  $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/engines_gpl/flow2d3d/packages/io/src/input/flow_nefis_restart.f90 $
+!  $Id$
+!  $HeadURL$
 !!--description-----------------------------------------------------------------
 ! Reads initial field condition records from an
 ! NEFIS flow output map file
@@ -40,11 +40,8 @@ subroutine roller_nefis_restart(lundia    ,error     ,restid1 , &
 !!--declarations----------------------------------------------------------------
     use precision
     use properties
-    !
     use globaldata
-    !
     use dfparall
-    !
     use nan_check_module
     !
     implicit none
@@ -61,55 +58,55 @@ subroutine roller_nefis_restart(lundia    ,error     ,restid1 , &
 ! Global variables
 !
     integer                                                      , intent(in)  :: i_restart
-    integer                                                                    :: lundia !  Description and declaration in inout.igs
+    integer                                                                    :: lundia    !  Description and declaration in inout.igs
     logical                                                      , intent(out) :: error
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: eroll1 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: ewave1 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: fxw    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: fyw    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: guu    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: gvv    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: hrms   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: qxkr   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: qxkw   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: qykr   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: qykw   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: wsu    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: wsv    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: eroll1    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: ewave1    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: fxw       !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: fyw       !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: guu       !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: gvv       !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: hrms      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: qxkr      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: qxkw      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: qykr      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: qykw      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: wsu       !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: wsv       !  Description and declaration in esm_alloc_real.f90
     character(*)                                                               :: restid1
 !
 ! Local variables
 !
-    integer                               :: lrid        ! character variables for files Help var., length of restid
-    integer, external                     :: crenef
-    integer, external                     :: getelt
-    integer, external                     :: clsnef
-    integer                               :: ierror
-    integer                               :: fds
-    integer, external                     :: inqmxi
-    integer, external                     :: neferr
-    integer                               :: i
-    integer                               :: j
-    integer                               :: max_index
-    integer, dimension(3,5)               :: cuindex
-    integer, dimension(3,5)               :: uindex
-    integer, dimension(:,:,:,:), pointer  :: ibuff
-    real(fp)                              :: dtm          ! time step in minutes (flexible precision)
-    real(sp)                              :: dtms         ! time step in minutes (single precision)
-    real(sp), dimension(:,:,:,:), pointer :: sbuff
-    character(1024)                       :: error_string
-    character(256)                        :: dat_file
-    character(256)                        :: def_file
-    integer                     , pointer :: mfg
-    integer                     , pointer :: mlg
-    integer                     , pointer :: nfg
-    integer                     , pointer :: nlg
-    integer                     , pointer :: nmaxgl
-    integer                     , pointer :: mmaxgl   
-
-    real(sp), dimension(:,:,:), allocatable   :: roll_g
-    integer                                   :: ier1, ier2
+    integer                                   :: ier1
+    integer                                   :: ier2
     integer                                   :: ierr
+    integer                     , pointer     :: mfg
+    integer                     , pointer     :: mlg
+    integer                     , pointer     :: nfg
+    integer                     , pointer     :: nlg
+    integer                     , pointer     :: nmaxgl
+    integer                     , pointer     :: mmaxgl   
+    integer                                   :: lrid        ! character variables for files Help var., length of restid
+    integer, external                         :: crenef
+    integer, external                         :: getelt
+    integer, external                         :: clsnef
+    integer                                   :: ierror
+    integer                                   :: fds
+    integer, external                         :: inqmxi
+    integer, external                         :: neferr
+    integer                                   :: i
+    integer                                   :: j
+    integer                                   :: max_index
+    integer, dimension(3,5)                   :: cuindex
+    integer, dimension(3,5)                   :: uindex
+    integer, dimension(:,:,:,:), pointer      :: ibuff
+    real(fp)                                  :: dtm          ! time step in minutes (flexible precision)
+    real(sp)                                  :: dtms         ! time step in minutes (single precision)
+    real(sp), dimension(:,:,:), allocatable   :: roll_g
+    real(sp), dimension(:,:,:,:), pointer     :: sbuff
+    character(1024)                           :: error_string
+    character(256)                            :: dat_file
+    character(256)                            :: def_file
 !
 !! executable statements -------------------------------------------------------
 !
@@ -266,17 +263,17 @@ subroutine roller_nefis_restart(lundia    ,error     ,restid1 , &
     ! 
     do j = mfg, mlg 
        do i = nfg, nlg 
-          hrms(i-nfg+1,j-mfg+1) = roll_g(i,j,1) / sqrt(2.0_fp)     
-          ewave1(i-nfg+1,j-mfg+1) = roll_g(i,j,2)             
-          eroll1(i-nfg+1,j-mfg+1) = roll_g(i,j,3) 
-          qxkr(i-nfg+1,j-mfg+1) = roll_g(i,j,4) * guu(i-nfg+1, j-mfg+1)
-          qykr(i-nfg+1,j-mfg+1) = roll_g(i,j,5) * gvv(i-nfg+1, j-mfg+1)          
-          qxkw(i-nfg+1,j-mfg+1) = roll_g(i,j,6) * guu(i-nfg+1, j-mfg+1)
-          qykw(i-nfg+1,j-mfg+1) = roll_g(i,j,7) * gvv(i-nfg+1, j-mfg+1)          
-          fxw(i-nfg+1,j-mfg+1) = roll_g(i,j,8) 
-          fyw(i-nfg+1,j-mfg+1) = roll_g(i,j,9) 
-          wsu(i-nfg+1,j-mfg+1) = roll_g(i,j,10) 
-          wsv(i-nfg+1,j-mfg+1) = roll_g(i,j,11)                               
+          hrms  (i-nfg+1,j-mfg+1) = roll_g(i,j, 1) / sqrt(2.0_fp)     
+          ewave1(i-nfg+1,j-mfg+1) = roll_g(i,j, 2)             
+          eroll1(i-nfg+1,j-mfg+1) = roll_g(i,j, 3) 
+          qxkr  (i-nfg+1,j-mfg+1) = roll_g(i,j, 4) * guu(i-nfg+1, j-mfg+1)
+          qykr  (i-nfg+1,j-mfg+1) = roll_g(i,j, 5) * gvv(i-nfg+1, j-mfg+1)          
+          qxkw  (i-nfg+1,j-mfg+1) = roll_g(i,j, 6) * guu(i-nfg+1, j-mfg+1)
+          qykw  (i-nfg+1,j-mfg+1) = roll_g(i,j, 7) * gvv(i-nfg+1, j-mfg+1)          
+          fxw   (i-nfg+1,j-mfg+1) = roll_g(i,j, 8) 
+          fyw   (i-nfg+1,j-mfg+1) = roll_g(i,j, 9) 
+          wsu   (i-nfg+1,j-mfg+1) = roll_g(i,j,10) 
+          wsv   (i-nfg+1,j-mfg+1) = roll_g(i,j,11)                               
        enddo
     enddo   
        
