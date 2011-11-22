@@ -324,10 +324,7 @@ subroutine deallocmeteo(runid)
           if (associated(meteo%spiderweb%spwf))   deallocate (meteo%spiderweb%spwf)
           if (associated(meteo%spiderweb%spwarr)) deallocate (meteo%spiderweb%spwarr)
        endif
-       !
-       ! deallocating meteo here gives an error. Not sure why.
-       !
-      ! deallocate(meteo)
+       deallocate(meteo)
    endif
 end subroutine deallocmeteo
 

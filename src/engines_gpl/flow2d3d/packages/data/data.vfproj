@@ -163,6 +163,7 @@
 		<Filter Name="gdp">
 		<File RelativePath="src\gdp\clradv2d.f90"/>
 		<File RelativePath="src\gdp\clrbedformpar.f90"/>
+		<File RelativePath=".\src\gdp\clrdredge.f90"/>
 		<File RelativePath="src\gdp\clreqtran.f90"/>
 		<File RelativePath="src\gdp\clrerosed.f90"/>
 		<File RelativePath="src\gdp\clrflwpar.f90"/>
