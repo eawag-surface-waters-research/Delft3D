@@ -520,7 +520,12 @@ ESM_TraceFile (
         }
     }
 
-int  ESM_Finish() {
-	ThreadInit.done = 0;
-	return 0;
+int 
+ESM_Finish(
+    void
+    ) {
+        // This does not work on Linx:
+        // ThreadInit.done = 0;
+        return 0;
 }
+

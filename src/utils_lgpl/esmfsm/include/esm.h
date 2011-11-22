@@ -141,7 +141,10 @@ ESM_Shared_Info (
     FILE *  output
     );
 
-int ESM_Finish() ;
+int 
+ESM_Finish(
+    void
+    ) ;
 
 
 #if defined (__cplusplus)
