@@ -1857,6 +1857,12 @@ src/third_party_open/tclkit/tcl_to_exe.bat -text
 src/third_party_open/tclkit/tcl_to_exe.sh -text
 src/third_party_open/tclkit/tclkit -text
 src/third_party_open/tclkit/tclkit.exe -text
+src/third_party_open/triangle/f2c.h -text
+src/third_party_open/triangle/triangle.c -text
+src/third_party_open/triangle/triangle.h -text
+src/third_party_open/triangle/triangle_c.vcproj -text
+src/third_party_open/triangle/triangle_c.vcxproj -text
+src/third_party_open/triangle/tricall2.c -text
 src/third_party_open/version_number/Makefile.am -text
 src/third_party_open/version_number/bin/win32/version_number.exe -text
 src/third_party_open/version_number/packages/Makefile.am -text
