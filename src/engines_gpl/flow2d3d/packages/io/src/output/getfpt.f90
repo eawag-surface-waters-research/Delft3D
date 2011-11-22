@@ -46,19 +46,19 @@ subroutine getfpt(nmax    ,mmax    ,kmax    ,nofou    ,ifou   ,gdp   )
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer        , dimension(:)        , pointer :: fconno
-    integer        , dimension(:)        , pointer :: flayno
-    integer        , dimension(:)        , pointer :: ifoupt
-    integer        , dimension(:)        , pointer :: iofset
-    character(16)  , dimension(:)        , pointer :: founam
+    integer          , dimension(:), pointer :: fconno
+    integer          , dimension(:), pointer :: flayno
+    integer(pntrsize), dimension(:), pointer :: ifoupt
+    integer          , dimension(:), pointer :: iofset
+    character(16)    , dimension(:), pointer :: founam
 !
 ! Global variables
 !
-    integer                          , intent(in)  :: ifou
-    integer                          , intent(in)  :: kmax    !  Description and declaration in esm_alloc_int.f90
-    integer                          , intent(in)  :: mmax    !  Description and declaration in esm_alloc_int.f90
-    integer                          , intent(in)  :: nmax    !  Description and declaration in esm_alloc_int.f90
-    integer                          , intent(in)  :: nofou   !  Description and declaration in dimens.igs
+    integer, intent(in)  :: ifou
+    integer, intent(in)  :: kmax    !  Description and declaration in esm_alloc_int.f90
+    integer, intent(in)  :: mmax    !  Description and declaration in esm_alloc_int.f90
+    integer, intent(in)  :: nmax    !  Description and declaration in esm_alloc_int.f90
+    integer, intent(in)  :: nofou   !  Description and declaration in dimens.igs
 !
 ! Local variables
 !
@@ -74,8 +74,7 @@ subroutine getfpt(nmax    ,mmax    ,kmax    ,nofou    ,ifou   ,gdp   )
     !
     ! get pointer and define off set layer and constituent
     !
-    ifoupt = getpointer(founam(ifou), gdp)
-    iofset = (fconno(ifou) - 1)*kmax*(nmax + 2*gdp%d%ddbound)                   &
-           & *(mmax + 4 + 2*gdp%d%ddbound) + (flayno(ifou) - 1)                 &
-           & *(nmax + 2*gdp%d%ddbound)*(mmax + 4 + 2*gdp%d%ddbound)
+    ifoupt(ifou) = getpointer(founam(ifou), gdp)
+    iofset(ifou) =   (fconno(ifou)-1)*kmax*(nmax+2*gdp%d%ddbound)*(mmax+4+2*gdp%d%ddbound) &
+                 & + (flayno(ifou)-1)     *(nmax+2*gdp%d%ddbound)*(mmax+4+2*gdp%d%ddbound)
 end subroutine getfpt

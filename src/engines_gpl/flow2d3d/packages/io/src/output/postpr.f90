@@ -97,24 +97,24 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     integer                              , pointer :: ntru
     integer                              , pointer :: nofou
     integer                              , pointer :: ndro
-    integer        , dimension(:)        , pointer :: fconno
-    integer        , dimension(:)        , pointer :: flayno
-    integer        , dimension(:)        , pointer :: fnumcy
+    integer          , dimension(:)      , pointer :: fconno
+    integer          , dimension(:)      , pointer :: flayno
+    integer          , dimension(:)      , pointer :: fnumcy
     integer                              , pointer :: fouwrt
-    integer        , dimension(:)        , pointer :: ftmsto
-    integer        , dimension(:)        , pointer :: ftmstr
-    integer        , dimension(:)        , pointer :: ifoupt
-    integer        , dimension(:)        , pointer :: iofset
-    real(fp)       , dimension(:)        , pointer :: fknfac
-    real(fp)       , dimension(:,:,:)    , pointer :: foucomp
-    real(fp)       , dimension(:)        , pointer :: foufas
-    real(fp)       , dimension(:,:,:)    , pointer :: fousma
-    real(fp)       , dimension(:,:,:)    , pointer :: fousmb
-    real(fp)       , dimension(:,:,:)    , pointer :: fouvec
-    real(fp)       , dimension(:)        , pointer :: fv0pu
-    character(1)   , dimension(:)        , pointer :: fouelp
-    character(16)  , dimension(:)        , pointer :: founam
-    character(1)   , dimension(:)        , pointer :: foutyp
+    integer          , dimension(:)      , pointer :: ftmsto
+    integer          , dimension(:)      , pointer :: ftmstr
+    integer(pntrsize), dimension(:)      , pointer :: ifoupt
+    integer          , dimension(:)      , pointer :: iofset
+    real(fp)         , dimension(:)      , pointer :: fknfac
+    real(fp)         , dimension(:,:,:)  , pointer :: foucomp
+    real(fp)         , dimension(:)      , pointer :: foufas
+    real(fp)         , dimension(:,:,:)  , pointer :: fousma
+    real(fp)         , dimension(:,:,:)  , pointer :: fousmb
+    real(fp)         , dimension(:,:,:)  , pointer :: fouvec
+    real(fp)         , dimension(:)      , pointer :: fv0pu
+    character(1)     , dimension(:)      , pointer :: fouelp
+    character(16)    , dimension(:)      , pointer :: founam
+    character(1)     , dimension(:)      , pointer :: foutyp
     integer                              , pointer :: itstrt
     integer                              , pointer :: itfinish
     integer                              , pointer :: itmapi
@@ -130,7 +130,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     integer                              , pointer :: itrsti
     integer                              , pointer :: iphisi
     integer                              , pointer :: iphisl
-    integer        , dimension(:)        , pointer :: ipmap
+    integer          , dimension(:)      , pointer :: ipmap
     integer                              , pointer :: julday
     real(fp)                             , pointer :: bed
     real(fp)                             , pointer :: tmor
@@ -140,7 +140,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     logical                              , pointer :: first
     integer                              , pointer :: nuprpg
     integer                              , pointer :: nuprln
-    character(131) , dimension(:)        , pointer :: header
+    character(131)   , dimension(:)      , pointer :: header
     logical                              , pointer :: wind
     logical                              , pointer :: culvert
     logical                              , pointer :: dredge
@@ -327,11 +327,11 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     real(fp)                             , pointer :: dt
     real(fp)                             , pointer :: timhr
     type (flwoutputtype)                 , pointer :: flwoutput
-    integer        , dimension(:, :)     , pointer :: mnit
-    integer        , dimension(:, :)     , pointer :: mnstat
+    integer          , dimension(:, :)   , pointer :: mnit
+    integer          , dimension(:, :)   , pointer :: mnstat
     character(4)                         , pointer :: rouflo
-    character(20)  , dimension(:)        , pointer :: namst
-    character(20)  , dimension(:)        , pointer :: namtra
+    character(20)    , dimension(:)      , pointer :: namst
+    character(20)    , dimension(:)      , pointer :: namtra
     logical                              , pointer :: firstwaq
     logical                              , pointer :: waqfil
     logical                              , pointer :: waqol
