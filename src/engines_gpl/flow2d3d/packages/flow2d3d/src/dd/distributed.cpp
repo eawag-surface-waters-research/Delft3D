@@ -31,7 +31,7 @@
 //  Domain Decomposition Distributed (MultiNode) Routines - IMPLEMENTATION
 //
 //  Irv.Elshoff@Deltares.NL
-//  31 oct 11
+//  24 nov 11
 //------------------------------------------------------------------------------
 
 
@@ -210,8 +210,8 @@ DD::MasterProcess (
     for (int id = 0 ; id < this->nodeSet->numNodes ; id++) {
         Node * node = this->nodeSet->node[id];
         int status;
-        waitpid (node->remotePID, &status, WNOHANG);
-        if (WIFEXITED (status))
+        int rc = waitpid (node->remotePID, &status, WNOHANG);
+        if (rc != 0 && WIFEXITED (status))
             throw new Exception (true, "Slave process for node %d on \"%s\" has exited prematurely", id, node->hostname);
         }
 
