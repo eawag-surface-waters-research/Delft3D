@@ -26,6 +26,7 @@ mdwfile=r17.mdw
 export ARCH=intel
 curdir=`pwd`
 export D3D_HOME=$curdir/../../bin
+libdir=$D3D_HOME/$ARCH/lib
 exedir=$D3D_HOME/$ARCH/flow/bin
 wavedir=$D3D_HOME/$ARCH/wave/bin
 swandir=$wavedir
@@ -36,9 +37,7 @@ swanbatdir=$wavedir
     #
 
     # Set some (environment) parameters
-    # Only needed for the debug version:
-    #. /opt/intel/Compiler/11.0/081/bin/ifortvars.sh ia32
-export LD_LIBRARY_PATH=$wavedir:$exedir:$LD_LIBRARY_PATH 
+export LD_LIBRARY_PATH=$wavedir:$exedir:$libdir:$LD_LIBRARY_PATH 
 export PATH=$swanbatdir:$PATH 
 
     # Run

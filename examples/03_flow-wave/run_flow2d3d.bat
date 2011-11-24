@@ -25,9 +25,10 @@ set mdwfile=r17.mdw
     rem
 set D3D_HOME=..\..\bin
 set exedir=%D3D_HOME%\w32\flow\bin
+set libdir=%D3D_HOME%\w32\lib
 set wavedir=%D3D_HOME%\w32\wave\bin
 set swandir=%wavedir%
-set swanbatdir=%D3D_HOME%\w32\lib
+set swanbatdir=%libdir%
 
     rem
     rem No adaptions needed below

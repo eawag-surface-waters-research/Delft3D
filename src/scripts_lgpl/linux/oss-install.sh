@@ -84,18 +84,20 @@ function d_hydro () {
 function flow2d3d () {
     echo "installing flow2d3d . . ."
     dest_bin="$dest_main/intel/flow/bin"
+    dest_lib="$dest_main/intel/flow/lib"
     dest_default="$dest_main/intel/flow/default"
 
     mkdir -p $dest_bin
+    mkdir -p $dest_lib
     mkdir -p $dest_default
 
     cp -fp lib/libflow2d3d.so                                        $dest_bin
     cp -fp lib/libflow2d3d_sp.so                                     $dest_bin
     copyFile engines_gpl/flow2d3d/scripts/meteo_old2new.m            $dest_bin
-    copyFile third_party_open/DelftOnline/lib/libDelftOnline.so      $dest_bin
-    copyFile third_party_open/DelftOnline/lib/libDelftOnlineJNI.so   $dest_bin
-    copyFile third_party_open/DelftOnline/lib/libJavaLaunch.so       $dest_bin
-    copyFile third_party_open/DelftOnline/lib/libjvm.so              $dest_bin
+    copyFile third_party_open/DelftOnline/lib/libDelftOnline.so      $dest_lib
+    copyFile third_party_open/DelftOnline/lib/libDelftOnlineJNI.so   $dest_lib
+    copyFile third_party_open/DelftOnline/lib/libJavaLaunch.so       $dest_lib
+    copyFile third_party_open/DelftOnline/lib/libjvm.so              $dest_lib
     copyFile bin/esm_create                                          $dest_bin
     copyFile bin/esm_delete                                          $dest_bin
     copyFile bin/esm_info                                            $dest_bin
@@ -112,18 +114,20 @@ function flow2d3d () {
 function flow2d3d_openda () {
     echo "installing flow2d3d_openda . . ."
     dest_bin="$dest_main/intel/flow/bin"
+    dest_lib="$dest_main/intel/flow/lib"
     dest_default="$dest_main/intel/flow/default"
 
     mkdir -p $dest_bin
+    mkdir -p $dest_lib
     mkdir -p $dest_default
 
     cp -fp lib/libflow2d3d_openda.so                                 $dest_bin
     cp -fp lib/libflow2d3d_openda_sp.so                              $dest_bin
     copyFile engines_gpl/flow2d3d/scripts/meteo_old2new.m            $dest_bin
-    copyFile third_party_open/DelftOnline/lib/libDelftOnline.so      $dest_bin
-    copyFile third_party_open/DelftOnline/lib/libDelftOnlineJNI.so   $dest_bin
-    copyFile third_party_open/DelftOnline/lib/libJavaLaunch.so       $dest_bin
-    copyFile third_party_open/DelftOnline/lib/libjvm.so              $dest_bin
+    copyFile third_party_open/DelftOnline/lib/libDelftOnline.so      $dest_lib
+    copyFile third_party_open/DelftOnline/lib/libDelftOnlineJNI.so   $dest_lib
+    copyFile third_party_open/DelftOnline/lib/libJavaLaunch.so       $dest_lib
+    copyFile third_party_open/DelftOnline/lib/libjvm.so              $dest_lib
     copyFile bin/esm_create                                          $dest_bin
     copyFile bin/esm_delete                                          $dest_bin
     copyFile bin/esm_info                                            $dest_bin

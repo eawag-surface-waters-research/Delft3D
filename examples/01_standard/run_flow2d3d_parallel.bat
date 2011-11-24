@@ -25,17 +25,16 @@ set argfile=config_flow2d3d.ini
     rem
     rem Set the directory containing ALL exes/dlls here (mpiexec.exe, delftflow.exe, flow2d3d.dll, mpich-dlls, DelftOnline dlls etc.)
     rem
-set exedir=..\..\src\engines_gpl\deltares_hydro\bin\release
+set D3D_HOME=..\..\bin
+set exedir=%D3D_HOME%\w32\flow\bin
+set libdir=%D3D_HOME%\w32\lib
 
     rem
     rem No adaptions needed below
     rem
 
     rem Set some (environment) parameters
-set D3D_HOME=%exedir%
-    rem Only needed for the debug version:
-    rem set inteldir=c:\Program Files\Intel\Compiler\11.0\072\fortran\lib\ia32
-set PATH=%exedir%;%PATH%
+set PATH=%exedir%;%libdir%;%PATH%
 
     rem Run
     rem start computation on all your local cores (2 for dual core; 4 for quad core etc.)

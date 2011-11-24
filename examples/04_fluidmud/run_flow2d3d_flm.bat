@@ -26,15 +26,14 @@ set argfilemud=config_flow2d3d_mud.ini
     rem
 set D3D_HOME=..\..\bin
 set exedir=%D3D_HOME%\w32\flow\bin
+set libdir=%D3D_HOME%\w32\lib
 
     rem
     rem No adaptions needed below
     rem
 
     rem Set some (environment) parameters
-    rem Only needed for the debug version:
-    rem set inteldir=c:\Program Files\Intel\Compiler\11.0\072\fortran\lib\ia32
-set PATH=%exedir%;%inteldir%;%PATH%
+set PATH=%exedir%;%libdir%;%PATH%
 
     rem Run
 start %exedir%\deltares_hydro.exe %argfilesed%

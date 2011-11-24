@@ -20,19 +20,19 @@ argfile=config_flow2d3d.ini
 
 
     #
-    # Set the directory containing deltares_hydro.exe and libflow2d3d.so here
+    # Set the directory containing delftflow.exe here
     #
 export ARCH=intel
 export D3D_HOME=../../bin
-exedir=$D3D_HOME/$ARCH/flow/bin 
-
-
+libdir=$D3D_HOME/$ARCH/lib
+exedir=$D3D_HOME/$ARCH/flow/bin
  
+    #
+    # No adaptions needed below
+    #
 
     # Set some (environment) parameters
-export LD_LIBRARY_PATH=$exedir:$LD_LIBRARY_PATH
-    # Only needed for the debug version:
-    # . /opt/intel/Compiler/11.0/081/bin/ifortvars.sh ia32
+export LD_LIBRARY_PATH=$exedir:$libdir:$LD_LIBRARY_PATH 
 
 
 

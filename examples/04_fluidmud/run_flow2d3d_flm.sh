@@ -16,6 +16,7 @@ argfilemud=config_flow2d3d_mud.ini
     #
 export ARCH=intel
 export D3D_HOME=../../bin
+libdir=$D3D_HOME/$ARCH/lib
 exedir=$D3D_HOME/$ARCH/flow/bin
 useSharedMem=1
 
@@ -29,9 +30,7 @@ useSharedMem=1
     #
 
     # Set some (environment) parameters
-    # Only needed for the debug version:
-    #. /opt/intel/Compiler/11.0/081/bin/ifortvars.sh ia32
-export LD_LIBRARY_PATH=$exedir:$LD_LIBRARY_PATH 
+export LD_LIBRARY_PATH=$exedir:$libdir:$LD_LIBRARY_PATH 
 
 
     #

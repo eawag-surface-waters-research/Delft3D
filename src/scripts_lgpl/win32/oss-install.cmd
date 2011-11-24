@@ -122,9 +122,11 @@ rem ====================
     echo "installing flow2d3d . . ."
 
     set dest_bin="!dest_main!\w32\flow\bin"
+    set dest_lib="!dest_main!\w32\lib"
     set dest_default="!dest_main!\w32\flow\default"
 
     if not exist !dest_bin!     mkdir !dest_bin!
+    if not exist !dest_lib!     mkdir !dest_lib!
     if not exist !dest_default! mkdir !dest_default!
 
     set ErrorLevel_flowdll=0
@@ -142,21 +144,21 @@ rem ====================
     set ErrorLevel=0
     copy engines_gpl\flow2d3d\scripts\meteo_old2new.m                                      !dest_bin!
     call :handle_error
-    copy third_party_open\DelftOnline\lib\Release\DelftOnline.dll                          !dest_bin!
+    copy third_party_open\DelftOnline\lib\Release\DelftOnline.dll                          !dest_lib!
     call :handle_error
-    copy third_party_open\DelftOnline\lib\Release\DelftOnlineJNI.dll                       !dest_bin!
+    copy third_party_open\DelftOnline\lib\Release\DelftOnlineJNI.dll                       !dest_lib!
     call :handle_error
-    copy third_party_open\DelftOnline\lib\Release\JavaLaunch.dll                           !dest_bin!
+    copy third_party_open\DelftOnline\lib\Release\JavaLaunch.dll                           !dest_lib!
     call :handle_error
-    copy third_party_open\pthreads\bin\win32\pthreadVCE2.dll                               !dest_bin!
-    call :handle_error
-    copy third_party_open\pthreads\bin\win32\pthreadvce.dll                                !dest_bin!
+    copy third_party_open\pthreads\bin\win32\*.dll                                         !dest_lib!
     call :handle_error
     copy third_party_open\mpich2\bin\*.exe                                                 !dest_bin!
     call :handle_error
-    copy third_party_open\mpich2\lib\*.dll                                                 !dest_bin!
+    copy third_party_open\mpich2\lib\*.dll                                                 !dest_lib!
     call :handle_error
-    copy third_party_open\expat\win32\bin\Release\libexpat.dll                             !dest_bin!
+    copy third_party_open\expat\win32\bin\Release\libexpat.dll                             !dest_lib!
+    call :handle_error
+    copy third_party_open\intel_fortran\lib\win32\*.dll                                    !dest_lib!
     call :handle_error
     copy engines_gpl\flow2d3d\default\*.*                                                  !dest_default!
     call :handle_error
@@ -171,9 +173,11 @@ rem ===========================
     echo "installing flow2d3d_openda . . ."
 
     set dest_bin="!dest_main!\w32\flow\bin"
+    set dest_lib="!dest_main!\w32\flow\lib"
     set dest_default="!dest_main!\w32\flow\default"
 
     if not exist !dest_bin!     mkdir !dest_bin!
+    if not exist !dest_lib!     mkdir !dest_lib!
     if not exist !dest_default! mkdir !dest_default!
 
     copy engines_gpl\flow2d3d\bin\Release\flow2d3d_openda.dll                              !dest_bin!
@@ -182,25 +186,25 @@ rem ===========================
     set ErrorLevel=0
     copy engines_gpl\flow2d3d\scripts\meteo_old2new.m                                      !dest_bin!
     call :handle_error
-    copy third_party_open\DelftOnline\lib\Release\DelftOnline.dll                          !dest_bin!
+    copy third_party_open\DelftOnline\lib\Release\DelftOnline.dll                          !dest_lib!
     call :handle_error
-    copy third_party_open\DelftOnline\lib\Release\DelftOnlineJNI.dll                       !dest_bin!
+    copy third_party_open\DelftOnline\lib\Release\DelftOnlineJNI.dll                       !dest_lib!
     call :handle_error
-    copy third_party_open\DelftOnline\lib\Release\JavaLaunch.dll                           !dest_bin!
+    copy third_party_open\DelftOnline\lib\Release\JavaLaunch.dll                           !dest_lib!
     call :handle_error
-    copy third_party_open\pthreads\bin\win32\pthreadVCE2.dll                               !dest_bin!
-    call :handle_error
-    copy third_party_open\pthreads\bin\win32\pthreadvce.dll                                !dest_bin!
+    copy third_party_open\pthreads\bin\win32\*.dll                                         !dest_lib!
     call :handle_error
     copy third_party_open\mpich2\bin\*.exe                                                 !dest_bin!
     call :handle_error
-    copy third_party_open\mpich2\lib\*.dll                                                 !dest_bin!
+    copy third_party_open\mpich2\lib\*.dll                                                 !dest_lib!
     call :handle_error
-    copy third_party_open\expat\win32\bin\Release\libexpat.dll                             !dest_bin!
+    copy third_party_open\expat\win32\bin\Release\libexpat.dll                             !dest_lib!
     call :handle_error
-    copy third_party_open\netcdf\lib\win32\release\netcdf.dll                              !dest_bin!
+    copy third_party_open\netcdf\lib\win32\release\netcdf.dll                              !dest_lib!
     call :handle_error
-    copy third_party_open\openda\core\native\lib\win32\*.dll                               !dest_bin!
+    copy third_party_open\openda\core\native\lib\win32\*.dll                               !dest_lib!
+    call :handle_error
+    copy third_party_open\intel_fortran\lib\win32\*.dll                                    !dest_lib!
     call :handle_error
     copy engines_gpl\flow2d3d\default\*.*                                                  !dest_default!
     call :handle_error
@@ -215,16 +219,16 @@ rem ================
     echo "installing wave . . ."
 
     set dest_bin="!dest_main!\w32\wave\bin"
-    set dest_default="!dest_main!\w32\wave\default"
     set dest_lib="!dest_main!\w32\lib"
+    set dest_default="!dest_main!\w32\wave\default"
 
     if not exist !dest_bin!     mkdir !dest_bin!
-    if not exist !dest_default! mkdir !dest_default!
     if not exist !dest_lib!     mkdir !dest_lib!
+    if not exist !dest_default! mkdir !dest_default!
 
     copy engines_gpl\wave\bin\release\wave.exe           !dest_bin!
     call :handle_error
-    copy third_party_open\swan\bin\win32\*.dll           !dest_bin!
+    copy third_party_open\swan\bin\win32\*.dll           !dest_lib!
     call :handle_error
     copy third_party_open\swan\bin\win32\*.exe           !dest_bin!
     call :handle_error
