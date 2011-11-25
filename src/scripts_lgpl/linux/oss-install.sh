@@ -153,7 +153,7 @@ function wave () {
     mkdir -p $dest_lib
 
     copyFile bin/wave.exe                                        $dest_bin
-    copyFile "third_party_open/swan/bin/linux/*.*"               $dest_bin
+    copyFile third_party_open/swan/bin/linux/*.*                 $dest_bin
     copyFile engines_gpl/flow2d3d/default/dioconfig.ini          $dest_default
     copyFile third_party_open/swan/scripts/swan_install.sh       $dest_bin/swan.sh
 
