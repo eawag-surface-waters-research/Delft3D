@@ -1787,6 +1787,12 @@ src/third_party_open/openda/core/native/include/cta_f77.inc -text
 src/third_party_open/openda/core/native/lib/win32/libcta.dll -text
 src/third_party_open/openda/core/native/lib/win32/libcta.lib -text
 src/third_party_open/openda/core/native/lib/win32/libxml2.dll -text
+src/third_party_open/openda/tests/bin/win32/test_seq_dlls.exe -text
+src/third_party_open/openda/tests/bin/win32/test_seq_dlls.exe.intermediate.manifest -text
+src/third_party_open/openda/tests/doc/README.txt -text
+src/third_party_open/openda/tests/test_seq_dlls/test_seq_dlls.F90 -text
+src/third_party_open/openda/tests/test_seq_dlls/test_seq_dlls.vfproj -text
+src/third_party_open/openda/tests/test_seq_dlls/test_seq_dlls_exe.F90 -text
 src/third_party_open/openmp/README.txt -text
 src/third_party_open/openmp/lib/win32/libiomp5md.dll -text
 src/third_party_open/openmp/lib/win32/libiomp5md.lib -text

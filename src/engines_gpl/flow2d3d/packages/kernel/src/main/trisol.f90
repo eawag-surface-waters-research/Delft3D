@@ -1683,7 +1683,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
           call timer_stop(timer_orbvel, gdp)
        endif
        !
-       ! CALBF: calculate bedform characteritics.
+       ! CALBF: calculate bedform characteristics.
        !
        if (lfbedfrm) then
           icx   = nmaxddb
@@ -2619,7 +2619,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
           call timer_stop(timer_orbvel, gdp)
        endif
        !
-       ! CALBF: calculate bedform characteritics.
+       ! CALBF: calculate bedform characteristics.
        !
        if (lfbedfrm) then
           icx   = nmaxddb
