@@ -2287,6 +2287,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/grib/wmo_2_v3.tab -text
 src/tools_lgpl/matlab/quickplot/progsrc/grib/wrf_2_200.tab -text
 src/tools_lgpl/matlab/quickplot/progsrc/grib/wwiiitab.tab -text
 src/tools_lgpl/matlab/quickplot/progsrc/hslice.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/isenvironment.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/landboundary.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/matlabversionnumber.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/md_clock.m -text
