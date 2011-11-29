@@ -206,10 +206,10 @@ ESM_Init (
 
     ESM_DEBUG ((output, "Entering ESM_Init (flags=0x%x)", flags))
 
- 
+
     pthread_once (&ThreadInit, InitProcess);
 
-	
+
 
     if (InitFails) {
         InitFails = 0;
@@ -520,7 +520,7 @@ ESM_TraceFile (
         }
     }
 
-int 
+int
 ESM_Finish(
     void
     ) {
