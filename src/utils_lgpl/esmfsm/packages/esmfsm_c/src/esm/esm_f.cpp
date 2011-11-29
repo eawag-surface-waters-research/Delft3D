@@ -4,9 +4,14 @@
 extern "C" {
 #endif
 
-#define STDCALL 
-#define ESM_INIT_F ESM_INIT_F
-#define ESM_CREATE_F ESM_CREATE_F
+#if HAVE_CONFIG_H
+#   include "config.h"
+#   define STDCALL 
+#   define ESM_INIT_F   FC_FUNC(esm_init_f,ESM_INIT_F)
+#   define ESM_CREATE_F FC_FUNC(esm_create_f,ESM_CREATE_F)
+#else
+#   define STDCALL
+#endif
 
 int STDCALL
 ESM_INIT_F (   int * flags
@@ -30,3 +35,4 @@ return res;
 #if ( defined(__cplusplus) || defined(salford32) )
 }
 #endif
+
