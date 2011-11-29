@@ -66,15 +66,15 @@ integer, parameter :: DioDayToSec = 86400
 !
 type DioStreamType
 
-    character*(DioMaxStreamLen) :: name   ! stream name
+    character(DioMaxStreamLen) :: name   ! stream name
     integer           :: id               ! stream id
 
-    character*(5)     :: mode             ! stream mode 'r' | 'w'
+    character(5)      :: mode             ! stream mode 'r' | 'w'
     logical           :: synched          ! stream synchronized?
     integer           :: streamType       ! type of stream
 
     integer           :: lun              ! file unit (ASCII/Binary/HIS)
-    character*(20)    :: form             ! stream format (ASCII/Binary/HIS)
+    character(20)     :: form             ! stream format (ASCII/Binary/HIS)
 
     integer           :: nefFileHandle    ! Nefis file handle
 
@@ -421,7 +421,6 @@ function DioStreamNameWithExtension(inName, streamType) result(outName)
     ! body:
     ! - check if stream has extension.
     ! - if not, add it, based on stream type
-
     outName = inName
     extStart = DioStreamGetExtension(outName, ext)
     if (extStart .eq. 0 ) then
@@ -440,7 +439,6 @@ function DioStreamNameWithExtension(inName, streamType) result(outName)
             outName(len_trim(outName)+1:) = ext
         endif
     endif
-
 end function DioStreamNameWithExtension
 
 
