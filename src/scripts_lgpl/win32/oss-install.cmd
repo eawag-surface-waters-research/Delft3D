@@ -144,12 +144,6 @@ rem ====================
     set ErrorLevel=0
     copy engines_gpl\flow2d3d\scripts\meteo_old2new.m                                      !dest_bin!
     call :handle_error
-    copy third_party_open\DelftOnline\lib\Release\DelftOnline.dll                          !dest_lib!
-    call :handle_error
-    copy third_party_open\DelftOnline\lib\Release\DelftOnlineJNI.dll                       !dest_lib!
-    call :handle_error
-    copy third_party_open\DelftOnline\lib\Release\JavaLaunch.dll                           !dest_lib!
-    call :handle_error
     copy third_party_open\pthreads\bin\win32\*.dll                                         !dest_lib!
     call :handle_error
     copy third_party_open\mpich2\bin\*.exe                                                 !dest_bin!
@@ -185,12 +179,6 @@ rem ===========================
        rem One of these two dlls will not exist and cause an ErrorLevel=1. Reset it.
     set ErrorLevel=0
     copy engines_gpl\flow2d3d\scripts\meteo_old2new.m                                      !dest_bin!
-    call :handle_error
-    copy third_party_open\DelftOnline\lib\Release\DelftOnline.dll                          !dest_lib!
-    call :handle_error
-    copy third_party_open\DelftOnline\lib\Release\DelftOnlineJNI.dll                       !dest_lib!
-    call :handle_error
-    copy third_party_open\DelftOnline\lib\Release\JavaLaunch.dll                           !dest_lib!
     call :handle_error
     copy third_party_open\pthreads\bin\win32\*.dll                                         !dest_lib!
     call :handle_error
