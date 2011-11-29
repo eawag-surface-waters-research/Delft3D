@@ -39,7 +39,6 @@ program waves_main
    use sync_flowwave
    use wave_data
    use meteo
-   use meteo_data
    !
    implicit none
 !
@@ -103,10 +102,6 @@ program waves_main
    call initialize_wavedata(wavedata)
    call setmode(wavedata, mode_in)
    call wave_init(mdw_file)
-   !    
-   ! meteo data initialisation
-   !
-   call init_meteo_data   
    !
    ! Read mdw file
    !

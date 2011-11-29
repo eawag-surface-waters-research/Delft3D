@@ -80,6 +80,12 @@ function initmeteo(runid) result(success)
    type(tmeteo), pointer :: meteopointer  ! All Meteo for one subdomain
    character(*)          :: runid
    character(300)        :: version_full  ! Version information
+   !
+   ! body
+   if (.not. meteodata_initialized) then
+      call init_meteo_data
+      meteodata_initialized = .true.
+   endif
    allocate(meteopointer)
    meteopointer%nummeteoitems        = 0
    meteopointer%spiderweb%active     = .false.

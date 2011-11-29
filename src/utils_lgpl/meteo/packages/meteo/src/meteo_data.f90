@@ -180,6 +180,7 @@ module meteo_data
 !
    integer                                                     :: num_meteopointers     
    integer                                                     :: message_count         ! Flag used to make sure message on the time zone shift is given only once
+   logical, save                                               :: meteodata_initialized = .false.
    logical                                                     :: msferic               ! true: meteo grid is sferical, false: cartesian
    logical                                                     :: meteoint              ! true: interpolate in time, false: block
    real(fp)                                                    :: patm_default          ! Default air pressure (Pa)

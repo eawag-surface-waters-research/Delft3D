@@ -49,7 +49,6 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, g
     use SyncRtcFlow
     use dfparall
     use timers
-    use meteo_data
     !
     use m_openda_exchange_items, only : openda_buffer_initialize
     !
@@ -153,10 +152,6 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, g
     ! esm/fsm initialization
     !
     fsmstatus = fsmini (context_id, fsm_flags)
-    !    
-    ! meteo data initialisation
-    !
-    call init_meteo_data
     !
     runid        => gdp%runid 
     lundia       => gdp%gdinout%lundia
@@ -443,7 +438,7 @@ end function trisim_finish
 !-----------------------------------------------------------------------
 integer function trisim_close(gdp) result (retval)
     use timers
-    use meteo_data
+    use meteo
     use globaldata
     !    
     implicit none
