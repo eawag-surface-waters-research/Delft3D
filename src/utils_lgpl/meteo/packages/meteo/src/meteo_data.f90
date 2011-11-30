@@ -307,6 +307,8 @@ subroutine deallocmeteo(runid)
    character(*), intent(in)  :: runid
    type(tmeteo), pointer     :: meteo     ! all meteo for one subdomain
    integer                   :: i
+
+   meteodata_initialized = .false.
    call getmeteopointer(runid, meteo)
    if (associated(meteo) )then
        do i = 1, meteo%nummeteoitems
