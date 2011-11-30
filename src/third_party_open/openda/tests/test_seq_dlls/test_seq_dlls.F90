@@ -153,10 +153,8 @@
     !first: dump final state (for exporting in append mode)
      doappend = .false.
      do run = 1,nmodes 
-       call SE_Select_Instance(instance_handles(run))
-       call SE_Export_Current_Instance(doappend)
-     ! TODO
-
+        call SE_Select_Instance(instance_handles(run))
+        call SE_Export_Current_Instance(doappend)
      enddo
      
      ! perform the finalization with one instantiation only     

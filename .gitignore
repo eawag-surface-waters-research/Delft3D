@@ -6,3 +6,4 @@ src/engines_gpl/flow2d3d/packages/flow2d3d_openda/[Dd]ebug
 src/engines_gpl/flow2d3d/packages/flow2d3d_openda/[Rr]elease
 src/engines_gpl/flow2d3d/packages/flow2d3d_openda/obj
 src/third_party_open/openda/tests/bin
+src/third_party_open/openda/tests/test_dll_noise/Release

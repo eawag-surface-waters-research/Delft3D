@@ -1788,6 +1788,17 @@ src/third_party_open/openda/core/native/lib/win32/libcta.dll -text
 src/third_party_open/openda/core/native/lib/win32/libcta.lib -text
 src/third_party_open/openda/core/native/lib/win32/libxml2.dll -text
 src/third_party_open/openda/tests/doc/README.txt -text
+src/third_party_open/openda/tests/test_dll_noise/fei.tem -text
+src/third_party_open/openda/tests/test_dll_noise/rot.enc -text
+src/third_party_open/openda/tests/test_dll_noise/rot.fil -text
+src/third_party_open/openda/tests/test_dll_noise/rot.fls -text
+src/third_party_open/openda/tests/test_dll_noise/rot.grd -text
+src/third_party_open/openda/tests/test_dll_noise/rot.mdf -text
+src/third_party_open/openda/tests/test_dll_noise/rot.obs -text
+src/third_party_open/openda/tests/test_dll_noise/rot.wnd -text
+src/third_party_open/openda/tests/test_dll_noise/start_new.bat -text
+src/third_party_open/openda/tests/test_dll_noise/test_dll_noise.F90 -text
+src/third_party_open/openda/tests/test_dll_noise/test_dll_noise.vfproj -text
 src/third_party_open/openda/tests/test_seq_dlls/test_seq_dlls.F90 -text
 src/third_party_open/openda/tests/test_seq_dlls/test_seq_dlls.vfproj -text
 src/third_party_open/openda/tests/test_seq_dlls/test_seq_dlls_exe.F90 -text

@@ -25,4 +25,36 @@
 !       (compare state dumps of both instances)
 !   3) test if different models can be run dll-wise.
 !      >   test_seq_dll.exe runid1 runid2 100000 100000
-!       (compare map- and his- files for both models with references)
+!     (compare map- and his- files for both models with references)
+
+----------------------------------------------------
+
+!
+!  PROGRAM: test_dll_noise
+!
+!  PURPOSE:  Testing of two (or more) instances of the same model using the flow2d3d_openda dll functions. 
+!            parameter timesteps_for_each_instance:
+!               = infinity: the instances are performed sequentially.
+!                           This is the easiest test
+!               = one     : each instance performs one time step; so all instances
+!                            proceed more or less in parallel. This is called the kalman0-test
+!                            If instances perform the same, the restart/state swapping is perfect.
+!               = (in between) : Most realistic for filtering purposes. Example: observations
+!                  available each hour, while model timestep is 7.5m. So value of this parameter is 8.
+!
+!
+!            Also, testing the effect of noise on certain exchange items.
+!
+!            This program should be used with the test rot in the same directory,
+!            because of the required combinations of exchange-items. For other model tests,
+!            different exchange-items should be chosen.
+!
+!  Arguments:
+!   1) runid (for example, rot in 01-general 
+
+The following can be tested:
+1) baddnoise = FALSE : alle states are the same.
+2) baddnoise = TRUE: instances 2..n differ from background instance 1 and are all pairwise different.
+
+
+
