@@ -94,10 +94,6 @@ function flow2d3d () {
     cp -fp lib/libflow2d3d.so                                        $dest_bin
     cp -fp lib/libflow2d3d_sp.so                                     $dest_bin
     copyFile engines_gpl/flow2d3d/scripts/meteo_old2new.m            $dest_bin
-    copyFile third_party_open/DelftOnline/lib/libDelftOnline.so      $dest_lib
-    copyFile third_party_open/DelftOnline/lib/libDelftOnlineJNI.so   $dest_lib
-    copyFile third_party_open/DelftOnline/lib/libJavaLaunch.so       $dest_lib
-    copyFile third_party_open/DelftOnline/lib/libjvm.so              $dest_lib
     copyFile bin/esm_create                                          $dest_bin
     copyFile bin/esm_delete                                          $dest_bin
     copyFile bin/esm_info                                            $dest_bin
@@ -124,10 +120,6 @@ function flow2d3d_openda () {
     cp -fp lib/libflow2d3d_openda.so                                 $dest_bin
     cp -fp lib/libflow2d3d_openda_sp.so                              $dest_bin
     copyFile engines_gpl/flow2d3d/scripts/meteo_old2new.m            $dest_bin
-    copyFile third_party_open/DelftOnline/lib/libDelftOnline.so      $dest_lib
-    copyFile third_party_open/DelftOnline/lib/libDelftOnlineJNI.so   $dest_lib
-    copyFile third_party_open/DelftOnline/lib/libJavaLaunch.so       $dest_lib
-    copyFile third_party_open/DelftOnline/lib/libjvm.so              $dest_lib
     copyFile bin/esm_create                                          $dest_bin
     copyFile bin/esm_delete                                          $dest_bin
     copyFile bin/esm_info                                            $dest_bin
