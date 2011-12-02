@@ -116,6 +116,7 @@ libio_input_la_SOURCES = \
          rdusrp.f90 \
          rdwaqpar.f90 \
          rdxyzo.f90 \
+         roller_nefis_restart.f90 \
          reacmp.f90 \
          readmd.f90 \
          read_triana.f90 \
