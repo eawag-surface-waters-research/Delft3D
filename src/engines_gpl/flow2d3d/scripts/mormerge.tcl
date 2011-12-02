@@ -20,7 +20,7 @@
 #
 
 global version
-set version "2.21"
+set version "2.22"
 
 global debug
 set debug 0
@@ -1181,7 +1181,12 @@ proc startMormerge { inputfilename workdir mergeexe localrun runid node } {
       }
       puts $scriptfile "\n# Set some environment parameters\n"
       #puts $scriptfile "export LD_LIBRARY_PATH=\"/opt/intel_cc_90/lib:/opt/intel_fc_90/lib:/opt/jdk1.5/jre/lib/i386:/opt/jdk1.5/jre/lib/i386/client:/u/elshoff/DOL/DelftOnline/lib:/u/elshoff/DOL/JavaLaunch/lib\""
-      puts $scriptfile ". /opt/intel/Compiler/11.0/081/bin/ifortvars.sh ia32"
+      # This line:
+      # puts $scriptfile ". /opt/intel/Compiler/11.0/081/bin/ifortvars.sh ia32"
+      # is replaced by:
+      set exedir [file dirname $mergeexe]
+      set libdir [file join $exedir ".." ".." "lib"]
+      puts $scriptfile "export LD_LIBRARY_PATH=$exedir:$libdir"
       
       if { $localrun } {
          set worksubdir $idstring
@@ -1378,14 +1383,18 @@ proc startFlow { inflist alist condition runids waveonline tdatomexe flowexe wav
       # for SWAN:
       # puts $scriptfile ". /opt/intel/cc/9.0/bin/iccvars.sh"
       # for Delft3D:
-      puts $scriptfile ". /opt/intel/Compiler/11.0/081/bin/ifortvars.sh ia32"
+      # This line:
+      # puts $scriptfile ". /opt/intel/Compiler/11.0/081/bin/ifortvars.sh ia32"
+      # is replaced by:
+      set flowexedir [file dirname $flowexe]
+      set waveexedir [file dirname $waveexe]
+      set libdir [file join $flowexedir ".." ".." "lib"]
+      puts $scriptfile "export LD_LIBRARY_PATH=$flowexedir:$waveexedir:$libdir"
  
       if { $waveonline } {
          # use a colon to separate directories
          puts $scriptfile "export PATH=$infillist(swanbatdir):\$PATH"
       }
-      # Add flowexe-path to LD_LIBRARY_PATH; needed to find .so files in that directory
-      puts $scriptfile "export LD_LIBRARY_PATH=\"[file dirname $flowexe]:\$LD_LIBRARY_PATH\""
 
       if { $infillist(localrun) } {
          set worksubdir $idstring
