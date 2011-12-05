@@ -172,11 +172,11 @@ AC_CHECK_HEADER(expat.h,, [AC_MSG_ERROR([Compiler can't find <expat.h>])])
 AC_CHECK_LIB(expat, XML_Parse,, [AC_MSG_ERROR([Compiler can't find libexpat])])
 
 # When using the Intel Fortran compiler, check for the needed libraries
-if test $FC == ifort; then
-    AC_CHECK_LIB([irc], [main], [HAVE_LIBirc=1] [FCLIBS="$FCLIBS -lirc"],)
-    AC_CHECK_LIB([svml], [main], [HAVE_LIBsvml=1] [FCLIBS="$FCLIBS -lsvml"],)
-    AC_CHECK_LIB([mcheck], [main], [HAVE_LIBmcheck=1] [FCLIBS="$FCLIBS -lmcheck"],)
-fi
+####if test $FC == ifort; then
+####    AC_CHECK_LIB([irc], [main], [HAVE_LIBirc=1] [FCLIBS="$FCLIBS -lirc"],)
+####    AC_CHECK_LIB([svml], [main], [HAVE_LIBsvml=1] [FCLIBS="$FCLIBS -lsvml"],)
+####    AC_CHECK_LIB([mcheck], [main], [HAVE_LIBmcheck=1] [FCLIBS="$FCLIBS -lmcheck"],)
+####fi
 
 # checks for pthreads
 ACX_PTHREAD([enable_threads="pthread"],[enable_threads="no"])
