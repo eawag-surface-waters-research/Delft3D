@@ -4,8 +4,9 @@ rem
 rem %1 - path to the target source file
 rem %2 - path to the folder to be used to check svnversion
 rem %3 - Single file with version number information version_number.ini
+rem %4 - --onlyifmissing: only regenerate when target source file does not exist (optional, default: off)
 
-echo Generating version number in the %1 ...
+echo Generating version number in '%1' ...
 
 set SCRIPT_DIRECTORY=%~dp0
 
@@ -32,9 +33,22 @@ IF "%version%" == "exported" (
    set version=000000
 )
 
+IF "%4" == "--onlyifmissing" (
+   IF EXIST "%1" (
+      echo %0: Leaving existing file '%1' as is.
+      goto end
+   ) ELSE (
+      echo %0: Create missing file '%1'.
+   )
+) ELSE (
+   echo %0: Regenerating existing file '%1'.
+)
+
+
 if exist %1 (
 	del %1
 )
+
 rem Generate version number source module using version_number.exe
 "%VN%" %version% "%3" "%1.svn" "%1"
 
