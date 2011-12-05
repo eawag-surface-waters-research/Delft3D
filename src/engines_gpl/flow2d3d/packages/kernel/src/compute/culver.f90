@@ -128,8 +128,8 @@ subroutine culver(icx       ,icy       ,kmax      ,nsrc      ,kfs       , &
     real(hp)          :: pos1_dll
     real(hp)          :: pos2_dll
     real(hp)          :: rmissval
-    integer           :: error
-    integer, external :: perf_function_culvert
+    integer(pntrsize) :: error_ptr
+    integer(pntrsize), external :: perf_function_culvert
     character(256)    :: errmsg
     character(256)    :: message     ! Contains message from
     !
@@ -138,7 +138,7 @@ subroutine culver(icx       ,icy       ,kmax      ,nsrc      ,kfs       , &
     integer                              , pointer :: max_strings
     character(256), dimension(:)         , pointer :: dll_function
     character(256), dimension(:)         , pointer :: dll_usrfil
-    integer,        dimension(:)         , pointer :: dll_handle
+    integer(pntrsize),dimension(:)         , pointer :: dll_handle
     integer       , dimension(:)         , pointer :: dll_integers
     real(hp)      , dimension(:)         , pointer :: dll_reals
     character(256), dimension(:)         , pointer :: dll_strings
@@ -347,14 +347,15 @@ subroutine culver(icx       ,icy       ,kmax      ,nsrc      ,kfs       , &
              pos2_dll     = rmissval
              message     = ' '
              call psemlun
-             error = perf_function_culvert(dll_handle(isrc), dll_function(isrc), &
-                                           dll_integers    , max_integers      , &
-                                           dll_reals       , max_reals         , &
-                                           dll_strings     , max_strings       , &
-                                           disch_dll       , pos1_dll          , &
-                                           pos2_dll        , message)
+             error_ptr = 0
+             error_ptr = perf_function_culvert(dll_handle(isrc), dll_function(isrc), &
+                                               dll_integers    , max_integers      , &
+                                               dll_reals       , max_reals         , &
+                                               dll_strings     , max_strings       , &
+                                               disch_dll       , pos1_dll          , &
+                                               pos2_dll        , message)
              call vsemlun
-             if (error /= 0) then
+             if (error_ptr /= 0) then
                 write(errmsg,'(a,a,a)') 'Cannot find function "',trim(dll_function(isrc)),'" in dynamic library.'
                 call prterr (lundia,'U021', trim(errmsg))
                 call d3stop(1, gdp)

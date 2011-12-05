@@ -60,7 +60,7 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
 !
 ! Global variables
 !
-    integer                         , intent(in)   :: dllhandle
+    integer(pntrsize)               , intent(in)   :: dllhandle
     integer                         , intent(in)   :: i2d3d
     integer                         , intent(in)   :: iform
     integer, dimension(numintpar)   , intent(inout):: intpar
@@ -136,10 +136,10 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
 !
 ! Local variables
 !
-    integer           :: ierror
+    integer(pntrsize) :: ierror_ptr
     integer           :: k
     integer           :: kvalue
-    integer, external :: perf_function_eqtran
+    integer(pntrsize), external :: perf_function_eqtran
     real(fp)          :: ag
     real(fp)          :: aks0
     real(fp)          :: alphaspir
@@ -246,7 +246,7 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    ierror    = 0
+    ierror_ptr= 0
     error     = .false.
     equi_conc = .false.
     sbc_total = .false.
@@ -801,17 +801,17 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
        ! psem/vsem is used to be sure this works fine in DD calculations
        !
        call psemlun
-       ierror = perf_function_eqtran(dllhandle       , dllfunc           , &
-                                     intpar          , numintpar         , &
-                                     realpar         , numrealpar        , &
-                                     strpar          , numstrpar         , &
-                                     sbc_total, sbc_dll  , sbcu_dll      , &
-                                     sbcv_dll , sbwu_dll , sbwv_dll      , &
-                                     equi_conc, cesus_dll, ssus_dll      , &
-                                     sswu_dll , sswv_dll , t_relax_dll   , &
-                                     message)
+       ierror_ptr = perf_function_eqtran(dllhandle       , dllfunc           , &
+                                         intpar          , numintpar         , &
+                                         realpar         , numrealpar        , &
+                                         strpar          , numstrpar         , &
+                                         sbc_total, sbc_dll  , sbcu_dll      , &
+                                         sbcv_dll , sbwu_dll , sbwv_dll      , &
+                                         equi_conc, cesus_dll, ssus_dll      , &
+                                         sswu_dll , sswv_dll , t_relax_dll   , &
+                                         message)
        call vsemlun
-       if (ierror /= 0) then
+       if (ierror_ptr /= 0) then
           write(lundia,'(a,a,a)') '*** ERROR Cannot find function "',trim(dllfunc),'" in dynamic library.'
           error = .true.
           return

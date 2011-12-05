@@ -60,13 +60,14 @@
 #  define PERFORM_FUNCTION_CULVERT PERF_FUNCTION_CULVERT
 #  define STDCALL __stdcall
 #elif defined(HAVE_CONFIG_H)
-#  define OPEN_SHARED_LIBRARY  open_shared_library_
-#  define CLOSE_SHARED_LIBRARY close_shared_library_
-#  define PERFORM_FUNCTION perf_function_
-#  define PERFORM_FUNCTION_EQTRAN  perf_function_eqtran_
-#  define PERFORM_FUNCTION_EROSILT perf_function_erosilt_
-#  define PERFORM_FUNCTION_FALLVE  perf_function_fallve_
-#  define PERFORM_FUNCTION_CULVERT perf_function_culvert_
+#   include "config.h"
+#  define OPEN_SHARED_LIBRARY      FC_FUNC(open_shared_library,OPEN_SHARED_LIBRARY)
+#  define CLOSE_SHARED_LIBRARY     FC_FUNC(close_shared_library,CLOSE_SHARED_LIBRARY)
+#  define PERFORM_FUNCTION         FC_FUNC(perf_function,PERFORM_FUNCTION)
+#  define PERFORM_FUNCTION_EQTRAN  FC_FUNC(perf_function_eqtran,PERFORM_FUNCTION_EQTRAN)
+#  define PERFORM_FUNCTION_EROSILT FC_FUNC(perf_function_erosilt,PERFORM_FUNCTION_EROSILT)
+#  define PERFORM_FUNCTION_FALLVE  FC_FUNC(perf_function_fallve,PERFORM_FUNCTION_FALLVE)
+#  define PERFORM_FUNCTION_CULVERT FC_FUNC(perf_function_culvert,PERFORM_FUNCTION_CULVERT)
 #  define STDCALL
 #endif
 

@@ -95,10 +95,10 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     integer                           , pointer :: npar
     character(256)  , dimension(:)    , pointer :: dll_function_settle
     character(256)  , dimension(:)    , pointer :: dll_name_settle
-    integer         , dimension(:)    , pointer :: dll_handle_settle
+    integer(pntrsize), dimension(:)    , pointer :: dll_handle_settle
     character(256)  , dimension(:)    , pointer :: dll_usrfil_settle
     character(256)  , dimension(:)    , pointer :: dll_function
-    integer         , dimension(:)    , pointer :: dll_handle
+    integer(pntrsize), dimension(:)    , pointer :: dll_handle
     character(256)  , dimension(:)    , pointer :: dll_usrfil
     character(256)  , dimension(:)    , pointer :: flstrn
     integer         , dimension(:)    , pointer :: iform
@@ -126,6 +126,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     integer                   :: iocond
     integer                   :: iopsus
     integer                   :: istat
+    integer(pntrsize)         :: istat_ptr
     integer                   :: j
     integer                   :: l
     integer                   :: lbl                 ! bedload fraction number: lbl = l - lsed
@@ -135,7 +136,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     integer                   :: n                   ! Temporary storage for nseddia(l)
     integer                   :: version
     integer        , external :: newlun
-    integer        , external :: open_shared_library
+    integer(pntrsize), external :: open_shared_library
     real(fp)                  :: logsedd50
     real(fp)                  :: rmissval
     real(fp)                  :: seddxx              ! Temporary storage for sediment diameter
@@ -580,9 +581,9 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                       rec(len_trim(rec)+1:) = '.so'
                    endif
                    dll_name_settle(l) = rec
-                   istat = 0
-                   istat = open_shared_library(dll_handle_settle(l), dll_name_settle(l))
-                   if (istat /= 0) then
+                   istat_ptr = 0
+                   istat_ptr = open_shared_library(dll_handle_settle(l), dll_name_settle(l))
+                   if (istat_ptr /= 0) then
                       write(errmsg,'(a,a)') 'Can not open shared library ', trim(dll_name_settle(l))
                       call prterr(lundia, 'P004', trim(errmsg))
                       call d3stop(1, gdp)

@@ -77,12 +77,13 @@ subroutine rdcul(nsrc, namsrc ,mnksrc, voldis, gdp)
     integer                  :: i
     integer                  :: isrc
     integer                  :: istat
+    integer(pntrsize)        :: istat_ptr
     integer                  :: j
     integer                  :: maxnumrel
     integer                  :: numculvert
     integer                  :: numrel
     integer                  :: scansofculvertfile
-    integer, external        :: open_shared_library
+    integer(pntrsize), external        :: open_shared_library
     character(80)            :: culvert_name
     character(80)            :: culvert_type
     character(256)           :: errmsg
@@ -101,7 +102,7 @@ subroutine rdcul(nsrc, namsrc ,mnksrc, voldis, gdp)
     character(256), dimension(:)         , pointer :: dll_function
     character(256), dimension(:)         , pointer :: dll_name
     character(256), dimension(:)         , pointer :: dll_usrfil
-    integer,        dimension(:)         , pointer :: dll_handle
+    integer(pntrsize),dimension(:)         , pointer :: dll_handle
     integer       , dimension(:)         , pointer :: dll_integers
     real(hp)      , dimension(:)         , pointer :: dll_reals
     character(256), dimension(:)         , pointer :: dll_strings
@@ -348,9 +349,9 @@ subroutine rdcul(nsrc, namsrc ,mnksrc, voldis, gdp)
                                   rec(len_trim(rec)+1:) = '.so'
                                endif
                                dll_name(isrc) = rec
-                               istat = 0
-                               istat = open_shared_library(dll_handle(isrc), dll_name(isrc))
-                               if (istat /= 0) then
+                               istat_ptr = 0
+                               istat_ptr = open_shared_library(dll_handle(isrc), dll_name(isrc))
+                               if (istat_ptr /= 0) then
                                   write(errmsg,'(a,a)') 'Can not open shared library ', trim(dll_name(isrc))
                                   call prterr(lundia, 'P004', trim(errmsg))
                                   call d3stop(1, gdp)

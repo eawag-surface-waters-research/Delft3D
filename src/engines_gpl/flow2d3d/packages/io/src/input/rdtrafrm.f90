@@ -56,13 +56,13 @@ subroutine rdtrafrm(error, lsedtot, gdp)
     integer                        , pointer :: npar
     character(256), dimension(:)   , pointer :: dll_function_settle
     character(256), dimension(:)   , pointer :: dll_name_settle
-    integer,        dimension(:)   , pointer :: dll_handle_settle
+    integer(pntrsize),dimension(:)   , pointer :: dll_handle_settle
     integer       , dimension(:)   , pointer :: dll_integers_settle
     real(hp)      , dimension(:)   , pointer :: dll_reals_settle
     character(256), dimension(:)   , pointer :: dll_strings_settle
     character(256), dimension(:)   , pointer :: dll_usrfil_settle
     character(256), dimension(:)   , pointer :: dll_function
-    integer,        dimension(:)   , pointer :: dll_handle
+    integer(pntrsize),dimension(:)   , pointer :: dll_handle
     integer       , dimension(:)   , pointer :: dll_integers
     real(hp)      , dimension(:)   , pointer :: dll_reals
     character(256), dimension(:)   , pointer :: dll_strings

@@ -42,8 +42,8 @@ subroutine clreqtran(istat     ,gdp       )
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer,        dimension(:)   , pointer :: dll_handle_settle
-    integer,        dimension(:)   , pointer :: dll_handle
+    integer(pntrsize),        dimension(:)   , pointer :: dll_handle_settle
+    integer(pntrsize),        dimension(:)   , pointer :: dll_handle
 !
 ! Global variables
 !
@@ -52,8 +52,8 @@ subroutine clreqtran(istat     ,gdp       )
 ! Local variables
 !
     integer           :: i
-    integer, external :: close_shared_library
-    integer           :: error
+    integer(pntrsize), external :: close_shared_library
+    integer(pntrsize)           :: error
 !
 !! executable statements -------------------------------------------------------
 !

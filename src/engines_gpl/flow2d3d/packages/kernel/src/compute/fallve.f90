@@ -71,7 +71,7 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
     real(fp)                         , pointer :: timsec
     !
     character(256), dimension(:)     , pointer :: dll_function
-    integer,        dimension(:)     , pointer :: dll_handle
+    integer(pntrsize),dimension(:)     , pointer :: dll_handle
     character(256), dimension(:)     , pointer :: dll_usrfil
     !
     integer                          , pointer :: max_integers
@@ -118,7 +118,7 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
 !
 ! Local variables
 !
-    integer           :: error
+    integer(pntrsize) :: error_ptr
     integer           :: k
     integer           :: kn
     integer           :: ku
@@ -130,7 +130,7 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
     integer           :: nm
     integer           :: ndm
     integer           :: nmd
-    integer, external :: perf_function_fallve
+    integer(pntrsize), external :: perf_function_fallve
     real(fp)          :: a
     real(fp)          :: b
     real(fp)          :: chezy
@@ -333,13 +333,14 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
                 ! psem/vsem is used to be sure this works fine in DD calculations
                 !
                 call psemlun
-                error = perf_function_fallve(dll_handle(l)       , dll_function(l)       , &
-                                             dll_integers        , max_integers          , &
-                                             dll_reals           , max_reals             , &
-                                             dll_strings         , max_strings           , &
-                                             ws_dll              , message)
+                error_ptr = 0
+                error_ptr = perf_function_fallve(dll_handle(l)       , dll_function(l)       , &
+                                                 dll_integers        , max_integers          , &
+                                                 dll_reals           , max_reals             , &
+                                                 dll_strings         , max_strings           , &
+                                                 ws_dll              , message)
                 call vsemlun
-                if (error /= 0) then
+                if (error_ptr /= 0) then
                    write(errmsg,'(a,a,a)') 'Cannot find function "',trim(dll_function(l)),'" in dynamic library.'
                    call prterr (lundia,'U021', trim(errmsg))
                    call d3stop(1, gdp)

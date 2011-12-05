@@ -181,7 +181,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     integer                              , pointer :: max_reals
     integer                              , pointer :: max_strings
     character(256), dimension(:)         , pointer :: dll_function
-    integer,        dimension(:)         , pointer :: dll_handle
+    integer(pntrsize),dimension(:)         , pointer :: dll_handle
     integer       , dimension(:)         , pointer :: dll_integers
     real(hp)      , dimension(:)         , pointer :: dll_reals
     character(256), dimension(:)         , pointer :: dll_strings

@@ -49,7 +49,7 @@ type sv_culver
     integer       , dimension(:)  , pointer :: numrel1              ! number of relations 1 for culvert
     integer       , dimension(:)  , pointer :: numrel2              ! number of relations 2 for culvert
     integer       , dimension(:)  , pointer :: numrel3              ! number of relations 3 for culvert
-    integer       , dimension(:)  , pointer :: dll_handle           ! handle of culvert dll
+    integer(pntrsize), dimension(:)  , pointer :: dll_handle           ! handle of culvert dll
     integer                                 :: max_integers
     integer                                 :: max_reals
     integer                                 :: max_strings

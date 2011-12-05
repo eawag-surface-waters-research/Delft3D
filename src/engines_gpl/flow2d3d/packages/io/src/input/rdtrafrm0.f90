@@ -53,7 +53,7 @@ subroutine rdtrafrm0(error, iform     , npar        , par, flname, &
     logical                      , intent(out) :: error
     integer                                    :: iform
     integer                      , intent(in)  :: npar
-    integer                                    :: dll_handle
+    integer(pntrsize)                          :: dll_handle
     real(fp)    , dimension(npar)              :: par
     character(*)                               :: flname
     character(*)                               :: name
@@ -66,9 +66,10 @@ subroutine rdtrafrm0(error, iform     , npar        , par, flname, &
     integer                   :: inp
     integer                   :: iost
     integer                   :: istat
+    integer(pntrsize)         :: istat_ptr
     integer                   :: lfile
     integer        , external :: newlun
-    integer        , external :: open_shared_library
+    integer(pntrsize), external :: open_shared_library
     logical                   :: lex
     character(3)              :: key
     character(10)             :: versionstring
@@ -130,9 +131,9 @@ subroutine rdtrafrm0(error, iform     , npar        , par, flname, &
              !
              ! Get handle to the DLL
              !
-             istat = 0
-             istat = open_shared_library(dll_handle, rec)
-             if (istat /= 0) then
+             istat_ptr = 0
+             istat_ptr = open_shared_library(dll_handle, rec)
+             if (istat_ptr /= 0) then
                 write(errmsg,'(a,a)') 'Can not open shared library ', trim(rec)
                 call prterr(lundia, 'P004', trim(errmsg))
                 call d3stop(1, gdp)

@@ -76,7 +76,7 @@ subroutine erosilt(thick    ,kmax     ,ws       ,wstau    ,entr     ,lundia   , 
     real(hp), dimension(numrealpar) , intent(inout):: realpar
     character(256), dimension(numstrpar), intent(inout):: strpar
     character(256)                  , intent(in)   :: dllfunc
-    integer                         , intent(in)   :: dllhandle
+    integer(pntrsize)               , intent(in)   :: dllhandle
 !
 ! Local variables
 !
@@ -92,8 +92,8 @@ subroutine erosilt(thick    ,kmax     ,ws       ,wstau    ,entr     ,lundia   , 
     !
     real(hp)          :: sink_dll
     real(hp)          :: sour_dll
-    integer           :: ierror
-    integer, external :: perf_function_erosilt
+    integer(pntrsize) :: ierror_ptr
+    integer(pntrsize), external :: perf_function_erosilt
     character(256)    :: message     ! Contains message from
 !
 !! executable statements ------------------
@@ -153,14 +153,15 @@ subroutine erosilt(thick    ,kmax     ,ws       ,wstau    ,entr     ,lundia   , 
           ! psem/vsem is used to be sure this works fine in DD calculations
           !
           call psemlun
-          ierror = perf_function_erosilt(dllhandle       , dllfunc           , &
-                                         intpar          , numintpar         , &
-                                         realpar         , numrealpar        , &
-                                         strpar          , numstrpar         , &
-                                         sink_dll        , sour_dll          , &
-                                         message)
+          ierror_ptr = 0
+          ierror_ptr = perf_function_erosilt(dllhandle       , dllfunc           , &
+                                             intpar          , numintpar         , &
+                                             realpar         , numrealpar        , &
+                                             strpar          , numstrpar         , &
+                                             sink_dll        , sour_dll          , &
+                                             message)
           call vsemlun
-          if (ierror /= 0) then
+          if (ierror_ptr /= 0) then
              write(lundia,'(a,a,a)') '*** ERROR Cannot find function "',trim(dllfunc),'" in dynamic library.'
              error = .true.
              return

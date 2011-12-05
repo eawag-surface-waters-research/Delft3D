@@ -50,5 +50,5 @@ void   STDCALL GETFULLVERSIONSTRING( char *, int );
 }
 #endif
 
-#endif FLOW2D3D_OPENDA_VERSION
+#endif // FLOW2D3D_OPENDA_VERSION
 
