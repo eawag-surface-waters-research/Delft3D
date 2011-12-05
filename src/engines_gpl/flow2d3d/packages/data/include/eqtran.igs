@@ -46,28 +46,28 @@ type sv_eqtran
     !
     ! pointers
     !
-    character(256), dimension(:)  , pointer :: dll_function_settle !  Name of subroutine in DLL that calculates the Settling velocity
-    character(256), dimension(:)  , pointer :: dll_name_settle     !  Name of DLL that contains the Settling velocity subroutine
+    character(256)   , dimension(:)  , pointer :: dll_function_settle !  Name of subroutine in DLL that calculates the Settling velocity
+    character(256)   , dimension(:)  , pointer :: dll_name_settle     !  Name of DLL that contains the Settling velocity subroutine
     integer(pntrsize), dimension(:)  , pointer :: dll_handle_settle   !  Handle of DLL that contains the Settling velocity subroutine
-    integer       , dimension(:)  , pointer :: dll_integers_settle !  Input integer array to shared library
-    real(hp)      , dimension(:)  , pointer :: dll_reals_settle    !  Input real array to shared library
-    character(256), dimension(:)  , pointer :: dll_strings_settle  !  Input character string array to shared library
-    character(256), dimension(:)  , pointer :: dll_usrfil_settle   !  Name of input file to be passed to subroutine in DLL
+    integer          , dimension(:)  , pointer :: dll_integers_settle !  Input integer array to shared library
+    real(hp)         , dimension(:)  , pointer :: dll_reals_settle    !  Input real array to shared library
+    character(256)   , dimension(:)  , pointer :: dll_strings_settle  !  Input character string array to shared library
+    character(256)   , dimension(:)  , pointer :: dll_usrfil_settle   !  Name of input file to be passed to subroutine in DLL
     !
-    character(256), dimension(:)  , pointer :: dll_function !  Name of subroutine in DLL that calculates the Sediment transport formula
+    character(256)   , dimension(:)  , pointer :: dll_function !  Name of subroutine in DLL that calculates the Sediment transport formula
     integer(pntrsize), dimension(:)  , pointer :: dll_handle   !  DLL containing Sediment transport formula
-    integer       , dimension(:)  , pointer :: dll_integers !  Input integer array to shared library
-    real(hp)      , dimension(:)  , pointer :: dll_reals    !  Input real array to shared library
-    character(256), dimension(:)  , pointer :: dll_strings  !  Input character string array to shared library
-    character(256), dimension(:)  , pointer :: dll_usrfil   !  Name of input file to be passed to subroutine in DLL
-    character(256), dimension(:)  , pointer :: flstrn       !  Sediment transport formula file names
-    integer       , dimension(:)  , pointer :: iform        !  Numbers of sediment transport formulae
-    character(256), dimension(:)  , pointer :: name         !  Sediment transport formula names
-    real(fp)      , dimension(:,:), pointer :: par          !  Sediment transport formula parameters
+    integer          , dimension(:)  , pointer :: dll_integers !  Input integer array to shared library
+    real(hp)         , dimension(:)  , pointer :: dll_reals    !  Input real array to shared library
+    character(256)   , dimension(:)  , pointer :: dll_strings  !  Input character string array to shared library
+    character(256)   , dimension(:)  , pointer :: dll_usrfil   !  Name of input file to be passed to subroutine in DLL
+    character(256)   , dimension(:)  , pointer :: flstrn       !  Sediment transport formula file names
+    integer          , dimension(:)  , pointer :: iform        !  Numbers of sediment transport formulae
+    character(256)   , dimension(:)  , pointer :: name         !  Sediment transport formula names
+    real(fp)         , dimension(:,:), pointer :: par          !  Sediment transport formula parameters
     ! 
     ! logicals
     !
-    logical                                 :: initlz
+    logical :: initlz
     !
     ! characters
 end type sv_eqtran

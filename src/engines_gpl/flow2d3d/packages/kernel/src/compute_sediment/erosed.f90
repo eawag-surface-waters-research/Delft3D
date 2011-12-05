@@ -79,21 +79,21 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                             , pointer :: z0v
     real(fp)                             , pointer :: vicmol
     integer                              , pointer :: nmudfrac
-    real(fp)      , dimension(:)         , pointer :: rhosol
-    real(fp)      , dimension(:,:,:)     , pointer :: logseddia
-    real(fp)      , dimension(:)         , pointer :: logsedsig
-    real(fp)      , dimension(:)         , pointer :: sedd10
-    real(fp)      , dimension(:)         , pointer :: sedd50
-    real(fp)      , dimension(:)         , pointer :: sedd90
-    real(fp)      , dimension(:)         , pointer :: sedd50fld
-    real(fp)      , dimension(:)         , pointer :: dstar
-    real(fp)      , dimension(:)         , pointer :: taucr
-    real(fp)      , dimension(:)         , pointer :: tetacr
-    real(fp)      , dimension(:)         , pointer :: ws0
-    real(fp)      , dimension(:)         , pointer :: salmax
-    real(fp)      , dimension(:)         , pointer :: mudcnt
-    integer       , dimension(:)         , pointer :: nseddia
-    integer       , dimension(:)         , pointer :: sedtyp
+    real(fp)           , dimension(:)    , pointer :: rhosol
+    real(fp)           , dimension(:,:,:), pointer :: logseddia
+    real(fp)           , dimension(:)    , pointer :: logsedsig
+    real(fp)           , dimension(:)    , pointer :: sedd10
+    real(fp)           , dimension(:)    , pointer :: sedd50
+    real(fp)           , dimension(:)    , pointer :: sedd90
+    real(fp)           , dimension(:)    , pointer :: sedd50fld
+    real(fp)           , dimension(:)    , pointer :: dstar
+    real(fp)           , dimension(:)    , pointer :: taucr
+    real(fp)           , dimension(:)    , pointer :: tetacr
+    real(fp)           , dimension(:)    , pointer :: ws0
+    real(fp)           , dimension(:)    , pointer :: salmax
+    real(fp)           , dimension(:)    , pointer :: mudcnt
+    integer            , dimension(:)    , pointer :: nseddia
+    integer            , dimension(:)    , pointer :: sedtyp
     logical                              , pointer :: anymud
     real(fp)                             , pointer :: thresh
     real(fp)                             , pointer :: bed
@@ -104,7 +104,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     integer                              , pointer :: i50
     integer                              , pointer :: i90
     integer                              , pointer :: nxx
-    real(fp)              , dimension(:) , pointer :: xx
+    real(fp)           , dimension(:)    , pointer :: xx
     logical                              , pointer :: multi
     logical                              , pointer :: wind
     logical                              , pointer :: salin
@@ -113,54 +113,54 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     logical                              , pointer :: sedim
     real(fp)                             , pointer :: eps
     integer                              , pointer :: ifirst
-    real(fp), dimension(:)               , pointer :: bc_mor_array
-    real(fp), dimension(:,:)             , pointer :: dbodsd
-    real(fp), dimension(:)               , pointer :: dcwwlc
-    real(fp), dimension(:)               , pointer :: dm
-    real(fp), dimension(:)               , pointer :: dg
-    real(fp), dimension(:,:)             , pointer :: dxx
-    real(fp), dimension(:)               , pointer :: dzduu
-    real(fp), dimension(:)               , pointer :: dzdvv
-    real(fp), dimension(:)               , pointer :: epsclc
-    real(fp), dimension(:)               , pointer :: epswlc
-    real(fp), dimension(:,:)             , pointer :: fixfac
-    real(fp), dimension(:,:)             , pointer :: frac
-    real(fp), dimension(:)               , pointer :: mudfrac
-    real(fp), dimension(:,:)             , pointer :: hidexp
-    real(fp), dimension(:)               , pointer :: rsdqlc
-    real(fp), dimension(:,:)             , pointer :: sbcu
-    real(fp), dimension(:,:)             , pointer :: sbcv
-    real(fp), dimension(:,:)             , pointer :: sbcuu
-    real(fp), dimension(:,:)             , pointer :: sbcvv
-    real(fp), dimension(:,:)             , pointer :: sbwu
-    real(fp), dimension(:,:)             , pointer :: sbwv
-    real(fp), dimension(:,:)             , pointer :: sbwuu
-    real(fp), dimension(:,:)             , pointer :: sbwvv
-    real(fp), dimension(:)               , pointer :: sddflc
-    real(fp), dimension(:,:)             , pointer :: sswu
-    real(fp), dimension(:,:)             , pointer :: sswv
-    real(fp), dimension(:,:)             , pointer :: sswuu
-    real(fp), dimension(:,:)             , pointer :: sswvv
-    real(fp), dimension(:,:)             , pointer :: sutot
-    real(fp), dimension(:,:)             , pointer :: svtot
-    real(fp), dimension(:,:)             , pointer :: sinkse
-    real(fp), dimension(:,:)             , pointer :: sourse
-    real(fp), dimension(:,:)             , pointer :: taurat
-    real(fp), dimension(:)               , pointer :: ust2
-    real(fp), dimension(:)               , pointer :: umod
-    real(fp), dimension(:)               , pointer :: uuu
-    real(fp), dimension(:)               , pointer :: vvv
-    real(fp), dimension(:)               , pointer :: wslc
-    real(fp), dimension(:)               , pointer :: zumod
+    real(fp)           , dimension(:)    , pointer :: bc_mor_array
+    real(fp)           , dimension(:,:)  , pointer :: dbodsd
+    real(fp)           , dimension(:)    , pointer :: dcwwlc
+    real(fp)           , dimension(:)    , pointer :: dm
+    real(fp)           , dimension(:)    , pointer :: dg
+    real(fp)           , dimension(:,:)  , pointer :: dxx
+    real(fp)           , dimension(:)    , pointer :: dzduu
+    real(fp)           , dimension(:)    , pointer :: dzdvv
+    real(fp)           , dimension(:)    , pointer :: epsclc
+    real(fp)           , dimension(:)    , pointer :: epswlc
+    real(fp)           , dimension(:,:)  , pointer :: fixfac
+    real(fp)           , dimension(:,:)  , pointer :: frac
+    real(fp)           , dimension(:)    , pointer :: mudfrac
+    real(fp)           , dimension(:,:)  , pointer :: hidexp
+    real(fp)           , dimension(:)    , pointer :: rsdqlc
+    real(fp)           , dimension(:,:)  , pointer :: sbcu
+    real(fp)           , dimension(:,:)  , pointer :: sbcv
+    real(fp)           , dimension(:,:)  , pointer :: sbcuu
+    real(fp)           , dimension(:,:)  , pointer :: sbcvv
+    real(fp)           , dimension(:,:)  , pointer :: sbwu
+    real(fp)           , dimension(:,:)  , pointer :: sbwv
+    real(fp)           , dimension(:,:)  , pointer :: sbwuu
+    real(fp)           , dimension(:,:)  , pointer :: sbwvv
+    real(fp)           , dimension(:)    , pointer :: sddflc
+    real(fp)           , dimension(:,:)  , pointer :: sswu
+    real(fp)           , dimension(:,:)  , pointer :: sswv
+    real(fp)           , dimension(:,:)  , pointer :: sswuu
+    real(fp)           , dimension(:,:)  , pointer :: sswvv
+    real(fp)           , dimension(:,:)  , pointer :: sutot
+    real(fp)           , dimension(:,:)  , pointer :: svtot
+    real(fp)           , dimension(:,:)  , pointer :: sinkse
+    real(fp)           , dimension(:,:)  , pointer :: sourse
+    real(fp)           , dimension(:,:)  , pointer :: taurat
+    real(fp)           , dimension(:)    , pointer :: ust2
+    real(fp)           , dimension(:)    , pointer :: umod
+    real(fp)           , dimension(:)    , pointer :: uuu
+    real(fp)           , dimension(:)    , pointer :: vvv
+    real(fp)           , dimension(:)    , pointer :: wslc
+    real(fp)           , dimension(:)    , pointer :: zumod
     logical                              , pointer :: scour
-    integer,        dimension(:)         , pointer :: iform
-    real(fp),       dimension(:,:)       , pointer :: par
+    integer            , dimension(:)    , pointer :: iform
+    real(fp)           , dimension(:,:)  , pointer :: par
     real(fp)                             , pointer :: factcr
     integer                              , pointer :: ihidexp
     real(fp)                             , pointer :: asklhe
     real(fp)                             , pointer :: mwwjhe
     real(fp)                             , pointer :: ffthresh
-    real(fp), dimension(:)               , pointer :: rksr
+    real(fp)           , dimension(:)    , pointer :: rksr
     real(fp)                             , pointer :: sus
     real(fp)                             , pointer :: espir
     real(fp)                             , pointer :: vonkar
@@ -180,21 +180,21 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     integer                              , pointer :: max_integers
     integer                              , pointer :: max_reals
     integer                              , pointer :: max_strings
-    character(256), dimension(:)         , pointer :: dll_function
-    integer(pntrsize),dimension(:)         , pointer :: dll_handle
-    integer       , dimension(:)         , pointer :: dll_integers
-    real(hp)      , dimension(:)         , pointer :: dll_reals
-    character(256), dimension(:)         , pointer :: dll_strings
-    character(256), dimension(:)         , pointer :: dll_usrfil
+    character(256)     , dimension(:)    , pointer :: dll_function
+    integer(pntrsize)  , dimension(:)    , pointer :: dll_handle
+    integer            , dimension(:)    , pointer :: dll_integers
+    real(hp)           , dimension(:)    , pointer :: dll_reals
+    character(256)     , dimension(:)    , pointer :: dll_strings
+    character(256)     , dimension(:)    , pointer :: dll_usrfil
     logical                              , pointer :: bsskin
-    real(fp)      , dimension(:)         , pointer :: thcmud
+    real(fp)           , dimension(:)    , pointer :: thcmud
     real(fp)                             , pointer :: kssilt
     real(fp)                             , pointer :: kssand
-    logical                          , pointer :: oldmudfrac
-    logical                          , pointer :: flmd2l
-    real(fp)      , dimension(:,:)   , pointer :: tcrdep
-    real(fp)      , dimension(:,:)   , pointer :: tcrero
-    real(fp)      , dimension(:,:)   , pointer :: eropar
+    logical                              , pointer :: oldmudfrac
+    logical                              , pointer :: flmd2l
+    real(fp)           , dimension(:,:)  , pointer :: tcrdep
+    real(fp)           , dimension(:,:)  , pointer :: tcrero
+    real(fp)           , dimension(:,:)  , pointer :: eropar
     include 'flow_steps_f.inc'
     include 'sedparams.inc'
     include 'trapar.inc'
@@ -340,7 +340,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp), dimension(kmax2d)   :: thck2d
     real(fp), dimension(kmax)     :: concin3d
     real(fp), dimension(kmax2d)   :: concin2d
-    character(256)    :: errmsg
+    character(256)                :: errmsg
     !
     data thck2d/0.1747, 0.1449, 0.1202, 0.0997, 0.0827, 0.0686, 0.0569, 0.0472, &
        & 0.0391, 0.0325, 0.0269, 0.0223, 0.0185, 0.0154, 0.0127, 0.0106, 0.0088,&

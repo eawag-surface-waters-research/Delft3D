@@ -50,33 +50,33 @@ subroutine erosilt(thick    ,kmax     ,ws       ,wstau    ,entr     ,lundia   , 
     include 'sedparams.inc'
     include 'trapar.inc'
     !
-    integer                                                   , intent(in)  :: kmax
-    integer                                                                 :: lundia   !  Description and declaration in inout.igs
-    real(fp)                                                  , intent(in)  :: entr
-    real(fp)  , dimension(0:kmax)                             , intent(in)  :: ws
-    real(fp)                                                  , intent(out) :: wstau
-    real(fp)  , dimension(kmax)                               , intent(in)  :: thick
-    real(fp)                                                  , intent(in)  :: h0
-    real(fp)                                                  , intent(in)  :: h1
-    logical                                                   , intent(out) :: error
-    real(fp)                                                  , intent(in)  :: fixfac
-    real(fp)                                                  , intent(in)  :: frac
-    real(fp)                                                  , intent(out) :: sinkse
-    real(fp)                                                  , intent(out) :: sourse
-    logical                                                   , intent(in)  :: oldmudfrac
-    logical                                                   , intent(in)  :: flmd2l
-    real(fp)                                                  , intent(in)  :: tcrdep
-    real(fp)                                                  , intent(in)  :: tcrero
-    real(fp)                                                  , intent(in)  :: eropar
-    integer                                                   , intent(in)  :: iform
-    integer, dimension(numintpar)   , intent(inout):: intpar
-    integer                         , intent(in)   :: numintpar
-    integer                         , intent(in)   :: numrealpar
-    integer                         , intent(in)   :: numstrpar
-    real(hp), dimension(numrealpar) , intent(inout):: realpar
-    character(256), dimension(numstrpar), intent(inout):: strpar
-    character(256)                  , intent(in)   :: dllfunc
-    integer(pntrsize)               , intent(in)   :: dllhandle
+    integer                             , intent(in)    :: kmax
+    integer                                             :: lundia   !  Description and declaration in inout.igs
+    real(fp)                            , intent(in)    :: entr
+    real(fp)       , dimension(0:kmax)  , intent(in)    :: ws
+    real(fp)                            , intent(out)   :: wstau
+    real(fp)       , dimension(kmax)    , intent(in)    :: thick
+    real(fp)                            , intent(in)    :: h0
+    real(fp)                            , intent(in)    :: h1
+    logical                             , intent(out)   :: error
+    real(fp)                            , intent(in)    :: fixfac
+    real(fp)                            , intent(in)    :: frac
+    real(fp)                            , intent(out)   :: sinkse
+    real(fp)                            , intent(out)   :: sourse
+    logical                             , intent(in)    :: oldmudfrac
+    logical                             , intent(in)    :: flmd2l
+    real(fp)                            , intent(in)    :: tcrdep
+    real(fp)                            , intent(in)    :: tcrero
+    real(fp)                            , intent(in)    :: eropar
+    integer                             , intent(in)    :: iform
+    integer       , dimension(numintpar), intent(inout) :: intpar
+    integer                             , intent(in)    :: numintpar
+    integer                             , intent(in)    :: numrealpar
+    integer                             , intent(in)    :: numstrpar
+    real(hp)     , dimension(numrealpar), intent(inout) :: realpar
+    character(256), dimension(numstrpar), intent(inout) :: strpar
+    character(256)                      , intent(in)    :: dllfunc
+    integer(pntrsize)                   , intent(in)    :: dllhandle
 !
 ! Local variables
 !
@@ -87,14 +87,14 @@ subroutine erosilt(thick    ,kmax     ,ws       ,wstau    ,entr     ,lundia   , 
     real(fp) :: taum
     real(fp) :: thick0
     real(fp) :: thick1
-
+    !
     ! Interface to dll is in High precision!
     !
-    real(hp)          :: sink_dll
-    real(hp)          :: sour_dll
-    integer(pntrsize) :: ierror_ptr
+    real(hp)                    :: sink_dll
+    real(hp)                    :: sour_dll
+    integer(pntrsize)           :: ierror_ptr
     integer(pntrsize), external :: perf_function_erosilt
-    character(256)    :: message     ! Contains message from
+    character(256)              :: message     ! Contains message from
 !
 !! executable statements ------------------
 !
@@ -104,7 +104,7 @@ subroutine erosilt(thick    ,kmax     ,ws       ,wstau    ,entr     ,lundia   , 
     !
     thick0 = thick(kmax) * h0
     thick1 = thick(kmax) * h1
-    taub = real(realpar(RP_TAUB), fp)
+    taub   = real(realpar(RP_TAUB), fp)
     !
     ! Bed transport following Partheniades and Krone
     ! but in case of fluid mud, source term is determined by

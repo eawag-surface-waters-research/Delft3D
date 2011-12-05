@@ -60,173 +60,173 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
 !
 ! Global variables
 !
-    integer(pntrsize)               , intent(in)   :: dllhandle
-    integer                         , intent(in)   :: i2d3d
-    integer                         , intent(in)   :: iform
-    integer, dimension(numintpar)   , intent(inout):: intpar
-    integer                         , intent(in)   :: iopsus
-    integer                         , intent(in)   :: iopkcw
-    integer                         , intent(in)   :: kmax     !  Description and declaration in esm_alloc_int.f90
-    integer                         , intent(out)  :: kmaxsd
-    integer                         , intent(in)   :: lsecfl   !  Description and declaration in esm_alloc_int.f90
-    integer                         , intent(in)   :: ltur     !  Description and declaration in esm_alloc_int.f90
-    integer                         , intent(in)   :: lundia   !  Description and declaration in inout.igs
-    integer                         , intent(in)   :: numintpar
-    integer                         , intent(in)   :: numrealpar
-    integer                         , intent(in)   :: numstrpar
-    integer                         , intent(in)   :: subiw
-    real(fp)                        , intent(in)   :: aks      !  Description and declaration in esm_alloc_real.f90
-    real(fp)                        , intent(in)   :: aksfac
-    real(fp)                        , intent(out)  :: akstmp
-    real(fp)                        , intent(in)   :: bed
-    real(fp)                        , intent(in)   :: bedw
-    real(fp)                        , intent(in)   :: camax
-    real(fp)                        , intent(out)  :: ce_nm
-    real(fp)                        , intent(out)  :: ce_nmtmp
-    real(fp), dimension(kmax)       , intent(out)  :: concin
-    real(fp)                        , intent(out)  :: crep
-    real(fp), dimension(0:kmax)     , intent(in)   :: dicww    !  Description and declaration in esm_alloc_real.f90
-    real(fp)                        , intent(out)  :: dss      !  Description and declaration in esm_alloc_real.f90
-    real(fp)                        , intent(in)   :: dzduu     !  Description and declaration in esm_alloc_real.f90
-    real(fp)                        , intent(in)   :: dzdvv     !  Description and declaration in esm_alloc_real.f90
-    real(fp)                        , intent(in)   :: eps
-    real(fp)                        , intent(in)   :: espir
-    real(fp)                        , intent(in)   :: fpco
-    real(fp)                        , intent(in)   :: frac     !  Description and declaration in esm_alloc_real.f90
-    real(fp)                        , intent(in)   :: pangle
-    real(fp), dimension(30)         , intent(inout):: par
-    real(fp)                        , intent(in)   :: rdc
-    real(fp)                        , intent(in)   :: rdw
-    real(fp)                        , intent(in)   :: rksrs    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(kmax)       , intent(out)  :: rsedeq   !  Description and declaration in esm_alloc_real.f90
-    real(fp)                        , intent(in)   :: rwave
-    real(fp)                        , intent(in)   :: salmax
-    real(fp)                        , intent(out)  :: sbcu
-    real(fp)                        , intent(out)  :: sbcv
-    real(fp)                        , intent(out)  :: sbwu
-    real(fp)                        , intent(out)  :: sbwv
-    real(fp), dimension(0:kmax)     , intent(out)  :: seddif   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(kmax)       , intent(in)   :: sig      !  Description and declaration in esm_alloc_real.f90
-    real(fp)                        , intent(in)   :: sigmol   !  Description and declaration in esm_alloc_real.f90
-    real(fp)                        , intent(in)   :: spirint  !  Spiral flow intensity
-    real(fp)                        , intent(out)  :: sswu
-    real(fp)                        , intent(out)  :: sswv
-    real(fp)                        , intent(in)   :: sus
-    real(fp)                        , intent(in)   :: susw
-    real(fp)                        , intent(out)  :: t_relax
-    real(fp)                        , intent(in)   :: tauadd
-    real(fp)                        , intent(in)   :: taucr0
-    real(fp)                        , intent(out)  :: taurat
-    real(fp)                        , intent(in)   :: tetacr
-    real(fp), dimension(kmax)       , intent(in)   :: thick    !  Description and declaration in esm_alloc_real.f90
-    real(fp)                        , intent(in)   :: ubot     !  Description and declaration in esm_alloc_real.f90
-    real(fp)                        , intent(out)  :: ustarc
-    real(fp)                        , intent(out)  :: ust2
-    real(fp), dimension(0:kmax)     , intent(in)   :: ws       !  Description and declaration in esm_alloc_real.f90
-    real(fp)                        , intent(in)   :: ws0
-    real(hp), dimension(numrealpar) , intent(inout):: realpar
-    logical                         , intent(in)   :: epspar
-    logical                         , intent(out)  :: error
-    logical                         , intent(in)   :: scour
-    logical                         , intent(in)   :: suspfrac !  suspended sediment fraction
-    logical                         , intent(in)   :: ubot_from_com
-    logical                         , intent(in)   :: wave
-    character(256)                  , intent(in)   :: dllfunc
-    character(256), dimension(numstrpar), intent(inout):: strpar
+    integer(pntrsize)                   , intent(in)    :: dllhandle
+    integer                             , intent(in)    :: i2d3d
+    integer                             , intent(in)    :: iform
+    integer      , dimension(numintpar) , intent(inout) :: intpar
+    integer                             , intent(in)    :: iopsus
+    integer                             , intent(in)    :: iopkcw
+    integer                             , intent(in)    :: kmax     !  Description and declaration in esm_alloc_int.f90
+    integer                             , intent(out)   :: kmaxsd
+    integer                             , intent(in)    :: lsecfl   !  Description and declaration in esm_alloc_int.f90
+    integer                             , intent(in)    :: ltur     !  Description and declaration in esm_alloc_int.f90
+    integer                             , intent(in)    :: lundia   !  Description and declaration in inout.igs
+    integer                             , intent(in)    :: numintpar
+    integer                             , intent(in)    :: numrealpar
+    integer                             , intent(in)    :: numstrpar
+    integer                             , intent(in)    :: subiw
+    real(fp)                            , intent(in)    :: aks      !  Description and declaration in esm_alloc_real.f90
+    real(fp)                            , intent(in)    :: aksfac
+    real(fp)                            , intent(out)   :: akstmp
+    real(fp)                            , intent(in)    :: bed
+    real(fp)                            , intent(in)    :: bedw
+    real(fp)                            , intent(in)    :: camax
+    real(fp)                            , intent(out)   :: ce_nm
+    real(fp)                            , intent(out)   :: ce_nmtmp
+    real(fp)     , dimension(kmax)      , intent(out)   :: concin
+    real(fp)                            , intent(out)   :: crep
+    real(fp)     , dimension(0:kmax)    , intent(in)    :: dicww    !  Description and declaration in esm_alloc_real.f90
+    real(fp)                            , intent(out)   :: dss      !  Description and declaration in esm_alloc_real.f90
+    real(fp)                            , intent(in)    :: dzduu     !  Description and declaration in esm_alloc_real.f90
+    real(fp)                            , intent(in)    :: dzdvv     !  Description and declaration in esm_alloc_real.f90
+    real(fp)                            , intent(in)    :: eps
+    real(fp)                            , intent(in)    :: espir
+    real(fp)                            , intent(in)    :: fpco
+    real(fp)                            , intent(in)    :: frac     !  Description and declaration in esm_alloc_real.f90
+    real(fp)                            , intent(in)    :: pangle
+    real(fp)     , dimension(30)        , intent(inout) :: par
+    real(fp)                            , intent(in)    :: rdc
+    real(fp)                            , intent(in)    :: rdw
+    real(fp)                            , intent(in)    :: rksrs    !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(kmax)      , intent(out)   :: rsedeq   !  Description and declaration in esm_alloc_real.f90
+    real(fp)                            , intent(in)    :: rwave
+    real(fp)                            , intent(in)    :: salmax
+    real(fp)                            , intent(out)   :: sbcu
+    real(fp)                            , intent(out)   :: sbcv
+    real(fp)                            , intent(out)   :: sbwu
+    real(fp)                            , intent(out)   :: sbwv
+    real(fp)     , dimension(0:kmax)    , intent(out)   :: seddif   !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(kmax)      , intent(in)    :: sig      !  Description and declaration in esm_alloc_real.f90
+    real(fp)                            , intent(in)    :: sigmol   !  Description and declaration in esm_alloc_real.f90
+    real(fp)                            , intent(in)    :: spirint  !  Spiral flow intensity
+    real(fp)                            , intent(out)   :: sswu
+    real(fp)                            , intent(out)   :: sswv
+    real(fp)                            , intent(in)    :: sus
+    real(fp)                            , intent(in)    :: susw
+    real(fp)                            , intent(out)   :: t_relax
+    real(fp)                            , intent(in)    :: tauadd
+    real(fp)                            , intent(in)    :: taucr0
+    real(fp)                            , intent(out)   :: taurat
+    real(fp)                            , intent(in)    :: tetacr
+    real(fp)     , dimension(kmax)      , intent(in)    :: thick    !  Description and declaration in esm_alloc_real.f90
+    real(fp)                            , intent(in)    :: ubot     !  Description and declaration in esm_alloc_real.f90
+    real(fp)                            , intent(out)   :: ustarc
+    real(fp)                            , intent(out)   :: ust2
+    real(fp)     , dimension(0:kmax)    , intent(in)    :: ws       !  Description and declaration in esm_alloc_real.f90
+    real(fp)                            , intent(in)    :: ws0
+    real(hp)     , dimension(numrealpar), intent(inout) :: realpar
+    logical                             , intent(in)    :: epspar
+    logical                             , intent(out)   :: error
+    logical                             , intent(in)    :: scour
+    logical                             , intent(in)    :: suspfrac !  suspended sediment fraction
+    logical                             , intent(in)    :: ubot_from_com
+    logical                             , intent(in)    :: wave
+    character(256)                      , intent(in)    :: dllfunc
+    character(256), dimension(numstrpar), intent(inout) :: strpar
 !
 ! Local variables
 !
-    integer(pntrsize) :: ierror_ptr
-    integer           :: k
-    integer           :: kvalue
+    integer(pntrsize)           :: ierror_ptr
+    integer                     :: k
+    integer                     :: kvalue
     integer(pntrsize), external :: perf_function_eqtran
-    real(fp)          :: ag
-    real(fp)          :: aks0
-    real(fp)          :: alphaspir
-    real(fp)          :: apower
-    real(fp)          :: avgcu
-    real(fp)          :: avgu
-    real(fp)          :: bakdif
-    real(fp)          :: cavg
-    real(fp)          :: cesus
-    real(fp)          :: chezy
-    real(fp)          :: cosa
-    real(fp)          :: d10
-    real(fp)          :: d90
-    real(fp)          :: deltas
-    real(fp)          :: delw
-    real(fp)          :: delm
-    real(fp)          :: delr
-    real(fp)          :: di50
-    real(fp)          :: diffbt
-    real(fp)          :: drho
-    real(fp)          :: dstar
-    real(fp)          :: dz
-    real(fp)          :: ee
-    real(fp)          :: epsbed
-    real(fp)          :: epsmax
-    real(fp)          :: epsmxc
-    real(fp)          :: facce
-    real(fp)          :: fact1
-    real(fp)          :: fc1
-    real(fp)          :: fcc
-    real(fp)          :: fdamp
-    real(fp)          :: ff
-    real(fp)          :: fi
-    real(fp)          :: fsilt
-    real(fp)          :: fw1
-    real(fp)          :: h1
-    real(fp)          :: hidexp
-    real(fp)          :: hrms
-    real(fp)          :: htdif
-    real(fp)          :: lci
-    real(fp)          :: muc
-    real(fp)          :: mudfrac
-    real(fp)          :: phicur
-    real(fp)          :: psi
-    real(fp)          :: ra
-    real(fp)          :: rhosol
-    real(fp)          :: rhowat
-    real(fp)          :: rlabda
-    real(fp)          :: sag
-    real(fp)          :: salinity
-    real(fp)          :: sbot
-    real(fp)          :: sina
-    real(fp)          :: sk
-    real(fp)          :: ssus
-    real(fp)          :: ssusx
-    real(fp)          :: ssusy
-    real(fp)          :: ta
-    real(fp)          :: taubcw
-    real(fp)          :: tauc
-    real(fp)          :: taucr1
-    real(fp)          :: tauwav
-    real(fp)          :: teta
-    real(fp)          :: tp
-    real(fp)          :: txg
-    real(fp)          :: tyg
-    real(fp)          :: u
-    real(fp)          :: u2dhim
-    real(fp)          :: umod
-    real(fp)          :: uon
-    real(fp)          :: uoff
-    real(fp)          :: uorb
-    real(fp)          :: usus
-    real(fp)          :: utot
-    real(fp)          :: uuu
-    real(fp)          :: uwb
-    real(fp)          :: uwbih
-    real(fp)          :: uwc
-    real(fp)          :: v
-    real(fp)          :: vicmol
-    real(fp)          :: vonkar
-    real(fp)          :: vvv
-    real(fp)          :: z
-    real(fp)          :: z0cur
-    real(fp)          :: z0rou
-    real(fp)          :: zumod
-    real(fp)          :: zusus
- 
+    real(fp)                    :: ag
+    real(fp)                    :: aks0
+    real(fp)                    :: alphaspir
+    real(fp)                    :: apower
+    real(fp)                    :: avgcu
+    real(fp)                    :: avgu
+    real(fp)                    :: bakdif
+    real(fp)                    :: cavg
+    real(fp)                    :: cesus
+    real(fp)                    :: chezy
+    real(fp)                    :: cosa
+    real(fp)                    :: d10
+    real(fp)                    :: d90
+    real(fp)                    :: deltas
+    real(fp)                    :: delw
+    real(fp)                    :: delm
+    real(fp)                    :: delr
+    real(fp)                    :: di50
+    real(fp)                    :: diffbt
+    real(fp)                    :: drho
+    real(fp)                    :: dstar
+    real(fp)                    :: dz
+    real(fp)                    :: ee
+    real(fp)                    :: epsbed
+    real(fp)                    :: epsmax
+    real(fp)                    :: epsmxc
+    real(fp)                    :: facce
+    real(fp)                    :: fact1
+    real(fp)                    :: fc1
+    real(fp)                    :: fcc
+    real(fp)                    :: fdamp
+    real(fp)                    :: ff
+    real(fp)                    :: fi
+    real(fp)                    :: fsilt
+    real(fp)                    :: fw1
+    real(fp)                    :: h1
+    real(fp)                    :: hidexp
+    real(fp)                    :: hrms
+    real(fp)                    :: htdif
+    real(fp)                    :: lci
+    real(fp)                    :: muc
+    real(fp)                    :: mudfrac
+    real(fp)                    :: phicur
+    real(fp)                    :: psi
+    real(fp)                    :: ra
+    real(fp)                    :: rhosol
+    real(fp)                    :: rhowat
+    real(fp)                    :: rlabda
+    real(fp)                    :: sag
+    real(fp)                    :: salinity
+    real(fp)                    :: sbot
+    real(fp)                    :: sina
+    real(fp)                    :: sk
+    real(fp)                    :: ssus
+    real(fp)                    :: ssusx
+    real(fp)                    :: ssusy
+    real(fp)                    :: ta
+    real(fp)                    :: taubcw
+    real(fp)                    :: tauc
+    real(fp)                    :: taucr1
+    real(fp)                    :: tauwav
+    real(fp)                    :: teta
+    real(fp)                    :: tp
+    real(fp)                    :: txg
+    real(fp)                    :: tyg
+    real(fp)                    :: u
+    real(fp)                    :: u2dhim
+    real(fp)                    :: umod
+    real(fp)                    :: uon
+    real(fp)                    :: uoff
+    real(fp)                    :: uorb
+    real(fp)                    :: usus
+    real(fp)                    :: utot
+    real(fp)                    :: uuu
+    real(fp)                    :: uwb
+    real(fp)                    :: uwbih
+    real(fp)                    :: uwc
+    real(fp)                    :: v
+    real(fp)                    :: vicmol
+    real(fp)                    :: vonkar
+    real(fp)                    :: vvv
+    real(fp)                    :: z
+    real(fp)                    :: z0cur
+    real(fp)                    :: z0rou
+    real(fp)                    :: zumod
+    real(fp)                    :: zusus
+    !
     ! Interface to dll is in High precision!
     !
     real(hp)          :: cesus_dll
@@ -246,12 +246,12 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    ierror_ptr= 0
-    error     = .false.
-    equi_conc = .false.
-    sbc_total = .false.
-    sus_total = .false.
-    akstmp    = aks
+    ierror_ptr = 0
+    error      = .false.
+    equi_conc  = .false.
+    sbc_total  = .false.
+    sus_total  = .false.
+    akstmp     = aks
     !
     uuu       = real(realpar(RP_UCHAR),fp)
     vvv       = real(realpar(RP_VCHAR),fp)

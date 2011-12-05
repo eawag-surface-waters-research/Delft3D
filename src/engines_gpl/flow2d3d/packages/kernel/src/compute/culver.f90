@@ -124,24 +124,24 @@ subroutine culver(icx       ,icy       ,kmax      ,nsrc      ,kfs       , &
 
     ! Interface to dll is in High precision!
     !
-    real(hp)          :: disch_dll
-    real(hp)          :: pos1_dll
-    real(hp)          :: pos2_dll
-    real(hp)          :: rmissval
-    integer(pntrsize) :: error_ptr
+    real(hp)                    :: disch_dll
+    real(hp)                    :: pos1_dll
+    real(hp)                    :: pos2_dll
+    real(hp)                    :: rmissval
+    integer(pntrsize)           :: error_ptr
     integer(pntrsize), external :: perf_function_culvert
-    character(256)    :: errmsg
-    character(256)    :: message     ! Contains message from
+    character(256)              :: errmsg
+    character(256)              :: message     ! Contains message from
     !
-    integer                              , pointer :: max_integers
-    integer                              , pointer :: max_reals
-    integer                              , pointer :: max_strings
-    character(256), dimension(:)         , pointer :: dll_function
-    character(256), dimension(:)         , pointer :: dll_usrfil
-    integer(pntrsize),dimension(:)         , pointer :: dll_handle
-    integer       , dimension(:)         , pointer :: dll_integers
-    real(hp)      , dimension(:)         , pointer :: dll_reals
-    character(256), dimension(:)         , pointer :: dll_strings
+    integer                        , pointer :: max_integers
+    integer                        , pointer :: max_reals
+    integer                        , pointer :: max_strings
+    character(256)   , dimension(:), pointer :: dll_function
+    character(256)   , dimension(:), pointer :: dll_usrfil
+    integer(pntrsize), dimension(:), pointer :: dll_handle
+    integer          , dimension(:), pointer :: dll_integers
+    real(hp)         , dimension(:), pointer :: dll_reals
+    character(256)   , dimension(:), pointer :: dll_strings
 !
 !! executable statements -------------------------------------------------------
 !

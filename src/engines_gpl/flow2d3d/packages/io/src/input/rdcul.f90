@@ -74,38 +74,38 @@ subroutine rdcul(nsrc, namsrc ,mnksrc, voldis, gdp)
 !
 ! Local variables
 !
-    integer                  :: i
-    integer                  :: isrc
-    integer                  :: istat
-    integer(pntrsize)        :: istat_ptr
-    integer                  :: j
-    integer                  :: maxnumrel
-    integer                  :: numculvert
-    integer                  :: numrel
-    integer                  :: scansofculvertfile
-    integer(pntrsize), external        :: open_shared_library
-    character(80)            :: culvert_name
-    character(80)            :: culvert_type
-    character(256)           :: errmsg
-    character(256)           :: message
-    character(80)            :: paragraph_name
-    character(256)           :: rec
-    character(20)            :: versionnr
-    character(20)            :: versionnrinput
-    type(tree_data), pointer :: cul_ptr
-    type(tree_data), pointer :: link_ptr
-    type(tree_data), pointer :: note_ptr
+    integer                     :: i
+    integer                     :: isrc
+    integer                     :: istat
+    integer(pntrsize)           :: istat_ptr
+    integer                     :: j
+    integer                     :: maxnumrel
+    integer                     :: numculvert
+    integer                     :: numrel
+    integer                     :: scansofculvertfile
+    integer(pntrsize), external :: open_shared_library
+    character(80)               :: culvert_name
+    character(80)               :: culvert_type
+    character(256)              :: errmsg
+    character(256)              :: message
+    character(80)               :: paragraph_name
+    character(256)              :: rec
+    character(20)               :: versionnr
+    character(20)               :: versionnrinput
+    type(tree_data)  , pointer  :: cul_ptr
+    type(tree_data)  , pointer  :: link_ptr
+    type(tree_data)  , pointer  :: note_ptr
     !
-    integer                              , pointer :: max_integers
-    integer                              , pointer :: max_reals
-    integer                              , pointer :: max_strings
-    character(256), dimension(:)         , pointer :: dll_function
-    character(256), dimension(:)         , pointer :: dll_name
-    character(256), dimension(:)         , pointer :: dll_usrfil
-    integer(pntrsize),dimension(:)         , pointer :: dll_handle
-    integer       , dimension(:)         , pointer :: dll_integers
-    real(hp)      , dimension(:)         , pointer :: dll_reals
-    character(256), dimension(:)         , pointer :: dll_strings
+    integer                        , pointer :: max_integers
+    integer                        , pointer :: max_reals
+    integer                        , pointer :: max_strings
+    character(256)   , dimension(:), pointer :: dll_function
+    character(256)   , dimension(:), pointer :: dll_name
+    character(256)   , dimension(:), pointer :: dll_usrfil
+    integer(pntrsize), dimension(:), pointer :: dll_handle
+    integer          , dimension(:), pointer :: dll_integers
+    real(hp)         , dimension(:), pointer :: dll_reals
+    character(256)   , dimension(:), pointer :: dll_strings
 !
 !! executable statements -------------------------------------------------------
 !
@@ -123,12 +123,12 @@ subroutine rdcul(nsrc, namsrc ,mnksrc, voldis, gdp)
     dll_reals        => gdp%gdculver%dll_reals
     dll_strings      => gdp%gdculver%dll_strings
     !
-    !-----statics
+    ! statics
     !
-    versionnr = '01.02'
+    versionnr      = '01.02'
     versionnrinput = '00.00'
     !
-    !-----Test for Culvert
+    ! Test for Culvert
     !
     call tree_create_node(gdp%input_tree, 'Culvert', cul_ptr)
     call tree_put_data(cul_ptr, transfer(trim(culverfile), node_value), 'STRING')
@@ -417,19 +417,16 @@ subroutine rdcul(nsrc, namsrc ,mnksrc, voldis, gdp)
                 if (istat .eq. 0) allocate (gdp%gdculver%dll_function(nsrc), stat = istat)
                 if (istat .eq. 0) allocate (gdp%gdculver%dll_handle(nsrc), stat = istat)
                 if (istat .eq. 0) allocate (gdp%gdculver%dll_usrfil(nsrc), stat = istat)
-                !
                 max_reals    =  7
                 max_integers =  8
                 max_strings  =  2
                 if (istat==0) allocate (gdp%gdculver%dll_integers(max_integers), stat = istat)
                 if (istat==0) allocate (gdp%gdculver%dll_reals   (max_reals   ), stat = istat)
                 if (istat==0) allocate (gdp%gdculver%dll_strings (max_strings ), stat = istat)
-                !
                 if (istat .ne. 0) then
                     call prterr(lundia, 'U021', 'Culvert: memory allocation error')
                     call d3stop(1, gdp)
                 endif
-                !
                 arcul            => gdp%gdculver%arcul
                 calfa            => gdp%gdculver%calfa
                 clcul            => gdp%gdculver%clcul
@@ -456,9 +453,7 @@ subroutine rdcul(nsrc, namsrc ,mnksrc, voldis, gdp)
                 voldis = 0.0_fp
                 dll_name = ' '
                 dll_function = ' '
-                !                                                    
             endif
         enddo
     endif
-    !
 end subroutine rdcul

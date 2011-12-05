@@ -60,26 +60,26 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
     real(fp)                         , pointer :: vonkar
     real(fp)                         , pointer :: vicmol
     real(fp)                         , pointer :: csoil
-    real(fp)      , dimension(:)     , pointer :: rhosol
-    real(fp)      , dimension(:)     , pointer :: ws0
-    real(fp)      , dimension(:)     , pointer :: wsm
-    real(fp)      , dimension(:)     , pointer :: salmax
-    real(fp)      , dimension(:)     , pointer :: sedd50
-    real(fp)      , dimension(:)     , pointer :: sedd50fld
-    integer,        dimension(:)     , pointer :: iform
-    integer       , dimension(:)     , pointer :: sedtyp
+    real(fp)           , dimension(:), pointer :: rhosol
+    real(fp)           , dimension(:), pointer :: ws0
+    real(fp)           , dimension(:), pointer :: wsm
+    real(fp)           , dimension(:), pointer :: salmax
+    real(fp)           , dimension(:), pointer :: sedd50
+    real(fp)           , dimension(:), pointer :: sedd50fld
+    integer,             dimension(:), pointer :: iform
+    integer            , dimension(:), pointer :: sedtyp
     real(fp)                         , pointer :: timsec
     !
-    character(256), dimension(:)     , pointer :: dll_function
-    integer(pntrsize),dimension(:)     , pointer :: dll_handle
-    character(256), dimension(:)     , pointer :: dll_usrfil
+    character(256)     , dimension(:), pointer :: dll_function
+    integer(pntrsize)  , dimension(:), pointer :: dll_handle
+    character(256)     , dimension(:), pointer :: dll_usrfil
     !
     integer                          , pointer :: max_integers
     integer                          , pointer :: max_reals
     integer                          , pointer :: max_strings
-    integer       , dimension(:)     , pointer :: dll_integers
-    real(hp)      , dimension(:)     , pointer :: dll_reals
-    character(256), dimension(:)     , pointer :: dll_strings
+    integer            , dimension(:), pointer :: dll_integers
+    real(hp)           , dimension(:), pointer :: dll_reals
+    character(256)     , dimension(:), pointer :: dll_strings
     include 'sedparams.inc'
 !
 ! Global variables
@@ -118,49 +118,49 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
 !
 ! Local variables
 !
-    integer(pntrsize) :: error_ptr
-    integer           :: k
-    integer           :: kn
-    integer           :: ku
-    integer           :: l
-    integer           :: ll
-    integer           :: lst
-    integer           :: n
-    integer           :: m
-    integer           :: nm
-    integer           :: ndm
-    integer           :: nmd
+    integer(pntrsize)           :: error_ptr
+    integer                     :: k
+    integer                     :: kn
+    integer                     :: ku
+    integer                     :: l
+    integer                     :: ll
+    integer                     :: lst
+    integer                     :: n
+    integer                     :: m
+    integer                     :: nm
+    integer                     :: ndm
+    integer                     :: nmd
     integer(pntrsize), external :: perf_function_fallve
-    real(fp)          :: a
-    real(fp)          :: b
-    real(fp)          :: chezy
-    real(fp)          :: coefw  
-    real(fp)          :: ee
-    real(fp)          :: h0  
-    real(fp)          :: hinset
-    real(fp)          :: rhoint
-    real(fp)          :: s
-    real(fp)          :: sag
-    real(fp)          :: salint
-    real(fp)          :: temint
-    real(fp)          :: ts
-    real(fp)          :: cgel
-    real(fp)          :: efloc
-    real(fp)          :: ffloc
-    real(fp)          :: ffloc0
-    real(fp)          :: fhulp
-    real(fp)          :: u
-    real(fp)          :: v
-    real(fp)          :: vcmol
-    real(fp)          :: w
-    real(fp)          :: um
-    real(fp)          :: vm
-    real(fp)          :: tur_k
-    real(fp)          :: tur_eps
-    real(fp)          :: z0rou
-    real(hp)          :: ws_dll
-    character(256)    :: errmsg
-    character(256)    :: message                 ! Contains message from shared library
+    real(fp)                    :: a
+    real(fp)                    :: b
+    real(fp)                    :: chezy
+    real(fp)                    :: coefw  
+    real(fp)                    :: ee
+    real(fp)                    :: h0  
+    real(fp)                    :: hinset
+    real(fp)                    :: rhoint
+    real(fp)                    :: s
+    real(fp)                    :: sag
+    real(fp)                    :: salint
+    real(fp)                    :: temint
+    real(fp)                    :: ts
+    real(fp)                    :: cgel
+    real(fp)                    :: efloc
+    real(fp)                    :: ffloc
+    real(fp)                    :: ffloc0
+    real(fp)                    :: fhulp
+    real(fp)                    :: u
+    real(fp)                    :: v
+    real(fp)                    :: vcmol
+    real(fp)                    :: w
+    real(fp)                    :: um
+    real(fp)                    :: vm
+    real(fp)                    :: tur_k
+    real(fp)                    :: tur_eps
+    real(fp)                    :: z0rou
+    real(hp)                    :: ws_dll
+    character(256)              :: errmsg
+    character(256)              :: message                 ! Contains message from shared library
 !
 !! executable statements -------------------------------------------------------
 !

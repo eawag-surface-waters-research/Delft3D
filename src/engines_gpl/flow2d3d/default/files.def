@@ -1,201 +1,91 @@
-[Settings]
-#Use delay=500, sleeptime=20 when delftio is used for synchronising, while data transfer is done via files
-#Delay=500
-#SleepTime=20
-# timeOut in communication DD;UU;MM;SS.S/100
-TimeOut=00;10:00:00.00
+7
+'com-'
+'XCOR','YCOR','ALFAS','GRID'
+14
+'initial bed level',         'DP0'  ,' '    ,'INITBOT' ,'CODB','TEMPOUT','d','NONE','NONE'
+'time-varying bed level',    'DP'   ,' '    ,'BOTTIM'  ,'CODB','TEMPOUT','d','BOTTIM','TIMBOT'
+'water level',               'S1'   ,' '    ,'CURTIM'  ,'KCS','KENMCNST','c','CURTIM','TIMCUR'
+'Hrms wave height'           'HRMS' ,' '    ,'WAVTIM'  ,'KCS','KENMCNST','c','WAVTIM','TIMWAV'
+'Hrms wave vector'           'HRMS' ,'DIR'  ,'WAVTIM'  ,'KCS','KENMCNST','w','WAVTIM','TIMWAV'
+'Tp wave period'             'TP'   ,' '    ,'WAVTIM'  ,'KCS','KENMCNST','c','WAVTIM','TIMWAV'
+'wave dissipation'           'DISS' ,' '    ,'WAVTIM'  ,'KCS','KENMCNST','c','WAVTIM','TIMWAV'
+'velocity',                  'U1'   ,'V1'   ,'CURTIM'  ,'KCS','KENMCNST','u','CURTIM','TIMCUR'
+'discharge',                 'QU'   ,'QV'   ,'CURTIM'  ,'KCS','KENMCNST','u','CURTIM','TIMCUR'
+'wave force',                'FX'   ,'FY'   ,'WAVTIM'  ,'KCS','KENMCNST','u','WAVTIM','TIMWAV'
+'mass flux',                 'MX'   ,'MY'   ,'WAVTIM'  ,'KCS','KENMCNST','u','WAVTIM','TIMWAV'
+'tide-avg bedload transport','TTXA' ,'TTYA' ,'TRANSTIM','KCS','KENMCNST','t','TRANSTIM','TSEDE'
+'tide-avg susp. transport',  'TTXSA','TTYSA','TRANSTIM','KCS','KENMCNST','u','TRANSTIM','TSEDE'
+'max. bottom friction'       'TAUMAX','  '  ,'TAUTIM'  ,'KCS','KENMCNST','c','CURTIM','TIMCUR'
+'tram-'
+'XCOR','YCOR','ALFAS','GRID'
+4
+'tide-avg bedload transport','TTXA' ,'TTYA' ,'MAPATRAN','CODW','TEMPOUT','t'
+'tide-avg susp. transport',  'TTXSA','TTYSA','MAPATRAN','CODW','TEMPOUT','u'
+'bed-load transport',        'SX'   ,'SY'   ,'MAPTTRAN','CODW','TEMPOUT','t'
+'susp. load transport',      'SXS'  ,'SYS'  ,'MAPTTRAN','CODW','TEMPOUT','u'
+'trim-'
+'XCOR','YCOR','ALFAS','map-const'
+13
+'initial bottom depth',      'DP0'  ,' '    ,'map-const' ,'CODB', 'TEMPOUT','d'
+'depth water level points',  'DP0'  ,' '    ,'map-const' ,'KCS','map-const','s'
+'water level',               'S1'   ,' '    ,'map-series','KCS','map-const','c'
+'velocity',                  'U1',   'V1',   'map-series','KCS','map-const','u'
+'bottom stress',             'TAUKSI','TAUETA','map-series','KCS','map-const','u'
+'thickness of bed layer',    'DPSED',' '    ,'map-sed-series','KCS','map-const','c'
+'time-varying depth',        'DPS',' '      ,'map-sed-series','KCS','map-const','c'
+'bottom sediment kg/m2',     'BODSED',' '   ,'map-sed-series','KCS','map-const','c'
+'bed load transport',        'SBUU' ,'SBVV' ,'map-sed-series','KCS','map-const','u'
+'susp. load transport',      'SSUU' ,'SSVV' ,'map-sed-series','KCS','map-const','u'
+'constituent',               'R1'   ,' '    ,'map-series','KCS','map-const','c'
+'average bed load transport','SBUUA' ,'SBVVA' ,'map-avg-series','KCS','map-const','u'
+'average susp. load transport','SSUUA' ,'SSVVA' ,'map-avg-series','KCS','map-const','u'
+'botm-'
+'XCOR','YCOR','ALFAS','GRID'
+1
+'time-integr. transport',    'TX',   'TY',   'MAPBOTTIM' ,'CODW', 'TEMPOUT','t'
+'hwgxy'
+'XP','YP','NONE','map-series'
+12
+'Hsig wave height',   'HSIGN'  ,' '   ,  'map-series','CODE','map-series','d'
+'Hsig wave vector',   'HSIGN'  ,'DIR' ,  'map-series','CODE','map-series','v'
+'wave period',        'PERIOD' ,' '   ,  'map-series','CODE','map-series','d'
+'directional spreading','DSPR' ,' '   ,  'map-series','CODE','map-series','d'
+'dissipation',        'DISSIP' ,' '   ,  'map-series','CODE','map-series','d'
+'leakage',            'LEAK'   ,' '   ,  'map-series','CODE','map-series','d'
+'fraction breaking',  'QB'     ,' '   ,  'map-series','CODE','map-series','d'
+'orbital velocity',   'UBOT'   ,' '   ,  'map-series','CODE','map-series','d'
+'wave steepness'  ,   'STEEPW' ,' '   ,  'map-series','CODE','map-series','d'
+'wave length'     ,   'WLENGTH',' '   ,  'map-series','CODE','map-series','d'
+'current velocity','VELOC-X','VELOC-Y'  ,'map-series','CODE','map-series','x'
+'energy transport','TRANSP-X','TRANSP-Y','map-series','CODE','map-series','x'
+'bagr-'
+'XCOR','YCOR','ALFAS','GRID'
+3
+'Contract dredging depth',  'DPBREF',' ','MAPBGREF','CODB','TEMPOUT','d'
+'Cumulative dredging depth','DDPBAG',' ','MAPTBAG', 'CODB','TEMPOUT','d'
+'Bed level',                'DP',    ' ','MAPTBAG', 'CODB','TEMPOUT','d'
+'wavm-'
+'XP','YP','NONE','map-series'
+13
+'Hsig wave height',   'HSIGN'  ,' '   ,  'map-series','CODE','map-series','d'
+'Hsig wave vector',   'HSIGN'  ,'DIR' ,  'map-series','CODE','map-series','v'
+'wave period',        'PERIOD' ,' '   ,  'map-series','CODE','map-series','d'
+'directional spreading','DSPR' ,' '   ,  'map-series','CODE','map-series','d'
+'dissipation',        'DISSIP' ,' '   ,  'map-series','CODE','map-series','d'
+'leakage',            'LEAK'   ,' '   ,  'map-series','CODE','map-series','d'
+'fraction breaking',  'QB'     ,' '   ,  'map-series','CODE','map-series','d'
+'orbital velocity',   'UBOT'   ,' '   ,  'map-series','CODE','map-series','d'
+'wave steepness'  ,   'STEEPW' ,' '   ,  'map-series','CODE','map-series','d'
+'wave length'     ,   'WLENGTH',' '   ,  'map-series','CODE','map-series','d'
+'current velocity','VELOC-X','VELOC-Y'  ,'map-series','CODE','map-series','x'
+'energy transport','TRANSP-X','TRANSP-Y','map-series','CODE','map-series','x'
+'peak period',        'RTP'    ,' '   ,  'map-series','CODE','map-series','d'
 
-[Defaults]
-#Defaults are used for online Coup connection: runid in Name
-StreamType=ASCII
-#StreamType=SharedMem
-OnLine=True
-Active=True
-
-NumberOfDatasets=37
-
-[Dataset1]
-Name=dio-U
-StreamType=SharedMem
-OnLine=True
-
-[Dataset2]
-Name=dio-V
-StreamType=SharedMem
-OnLine=True
-
-[Dataset3]
-Name=dio-S
-StreamType=SharedMem
-OnLine=True
-
-[Dataset4]
-Name=dio-CZU
-StreamType=SharedMem
-OnLine=True
-
-[Dataset5]
-Name=dio-CZV
-StreamType=SharedMem
-OnLine=True
-
-[Dataset6]
-Name=dio-RSED
-StreamType=SharedMem
-OnLine=True
-
-[Dataset7]
-Name=dio-WS
-StreamType=SharedMem
-OnLine=True
-
-[Dataset8]
-Name=dio-Entr
-StreamType=SharedMem
-OnLine=True
-
-[Dataset9]
-Name=FLOW2WAVE_DATA
-StreamType=ASCII
-OnLine=True
-
-[Dataset10]
-Name=WAVE2FLOW_DATA
-StreamType=ASCII
-OnLine=True
-
-[Dataset11]
-Name=MUD2WAVE_DATA
-StreamType=ASCII
-OnLine=True
-
-[Dataset12]
-Name=WAVE2MUD_DATA
-StreamType=ASCII
-OnLine=True
-
-[Dataset13]
-Name=InfoToRtc
-StreamType=SharedMem
-OnLine=True
-
-[Dataset14]
-Name=SignalToRtc
-StreamType=SharedMem
-OnLine=True
-
-[Dataset15]
-Name=SignalToFlow
-StreamType=SharedMem
-OnLine=True
-
-[Dataset16]
-Name=DataToFlow
-StreamType=SharedMem
-OnLine=True
-
-[Dataset17]
-Name=Sobek2D3D-Volume-VolumeLocs
-StreamType=SharedMem
-OnLine=True
-
-[Dataset18]
-Name=D3D2Sobek-Waterlevel-WaterlevelLocs
-StreamType=SharedMem
-OnLine=True
-
-[Dataset19]
-Name=Sobek2D3D-Volume-VolumeLocs_log.his
-StreamType=HIS
-OnLine=False
-
-[Dataset20]
-Name=D3D2Sobek-Waterlevel-WaterlevelLocs_log.his
-StreamType=HIS
-OnLine=False
-
-[Dataset21]
-Name=..\work\reachvol.his
-StreamType=HIS
-OnLine=False
-
-[Dataset22]
-Name=..\work\nodesvol.his
-StreamType=HIS
-OnLine=False
-
-[Dataset23]
-Name=..\work\qlat.his
-StreamType=HIS
-OnLine=False
-
-[Dataset24]
-Name=..\work\qwb.his
-StreamType=HIS
-OnLine=False
-
-[Dataset25]
-Name=..\work\reachflw.his
-StreamType=HIS
-OnLine=False
-
-[Dataset26]
-Name=..\work\struc.his
-StreamType=HIS
-OnLine=False
-
-[Dataset27]
-Name=..\work\calcpnt.his
-StreamType=HIS
-OnLine=False
-
-[Dataset28]
-Name=..\work\reachseg.his
-StreamType=HIS
-OnLine=False
-
-[Dataset29]
-Name=..\work\strucdim.his
-StreamType=HIS
-OnLine=False
-
-[Dataset30]
-Name=..\work\reachdim.his
-StreamType=HIS
-OnLine=False
-
-[Dataset31]
-Name=..\work\calcdim.his
-StreamType=HIS
-OnLine=False
-
-[Dataset32]
-Name=..\work\sbk_rtc.his
-StreamType=HIS
-OnLine=False
-
-[Dataset33]
-Name=..\work\PRE_RAIN.HIS
-StreamType=HIS
-OnLine=False
-
-[Dataset34]
-Name=..\work\PRE_WND.HIS
-StreamType=HIS
-OnLine=False
-
-[Dataset35]
-Name=..\work\RTCPARAL.HIS
-StreamType=HIS
-OnLine=False
-
-[Dataset36]
-Name=..\work\RTCSBALL.HIS
-StreamType=HIS
-OnLine=False
-
-[Dataset37]
-Name=..\work\RTC_SBK.HIS
-StreamType=HIS
-OnLine=False
-
+d scalar corner points
+c scalar centre points
+s scalar centre points, interpolated from depth points
+x vector x,y components, centre point
+t vector u,v components, centre point
+u vector u,v components, u,v points
+v vector magnitude/direction(deg.) corner point
+w vector magnitude/direction(deg.) centre point

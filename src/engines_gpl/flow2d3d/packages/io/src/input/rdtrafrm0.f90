@@ -62,21 +62,21 @@ subroutine rdtrafrm0(error, iform     , npar        , par, flname, &
 !
 ! Local variables
 !
-    integer                   :: i
-    integer                   :: inp
-    integer                   :: iost
-    integer                   :: istat
-    integer(pntrsize)         :: istat_ptr
-    integer                   :: lfile
-    integer        , external :: newlun
+    integer                     :: i
+    integer                     :: inp
+    integer                     :: iost
+    integer                     :: istat
+    integer(pntrsize)           :: istat_ptr
+    integer                     :: lfile
+    integer          , external :: newlun
     integer(pntrsize), external :: open_shared_library
-    logical                   :: lex
-    character(3)              :: key
-    character(10)             :: versionstring
-    character(80)             :: string
-    character(256)            :: errmsg
-    character(256)            :: rec
-    type(tree_data), pointer  :: tran_ptr
+    logical                     :: lex
+    character(3)                :: key
+    character(10)               :: versionstring
+    character(80)               :: string
+    character(256)              :: errmsg
+    character(256)              :: rec
+    type(tree_data)  , pointer  :: tran_ptr
 !
 !! executable statements -------------------------------------------------------
 !

@@ -50,60 +50,60 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    real(fp)                          , pointer :: csoil
-    real(fp)                          , pointer :: mdcuni
-    real(fp)                          , pointer :: kssilt
-    real(fp)                          , pointer :: kssand
-    integer                           , pointer :: nmudfrac
-    real(fp)        , dimension(:)    , pointer :: rhosol
-    real(fp)        , dimension(:,:,:), pointer :: logseddia
-    real(fp)        , dimension(:)    , pointer :: logsedsig
-    real(fp)        , dimension(:)    , pointer :: sedd10
-    real(fp)        , dimension(:)    , pointer :: sedd50
-    real(fp)        , dimension(:)    , pointer :: sedd50fld
-    real(fp)        , dimension(:)    , pointer :: seddm
-    real(fp)        , dimension(:)    , pointer :: sedd90
-    real(fp)        , dimension(:)    , pointer :: cdryb
-    real(fp)        , dimension(:)    , pointer :: dstar
-    real(fp)        , dimension(:)    , pointer :: taucr
-    real(fp)        , dimension(:)    , pointer :: tetacr
-    real(fp)        , dimension(:)    , pointer :: ws0
-    real(fp)        , dimension(:)    , pointer :: wsm
-    real(fp)        , dimension(:)    , pointer :: salmax
-    real(fp)        , dimension(:)    , pointer :: sdbuni
-    real(fp)        , dimension(:,:)  , pointer :: tcrdep
-    real(fp)        , dimension(:)    , pointer :: tcduni
-    real(fp)        , dimension(:,:)  , pointer :: tcrero
-    real(fp)        , dimension(:)    , pointer :: tceuni
-    real(fp)        , dimension(:)    , pointer :: thcmud
-    real(fp)        , dimension(:,:)  , pointer :: eropar
-    real(fp)        , dimension(:)    , pointer :: erouni
-    real(fp)        , dimension(:)    , pointer :: mudcnt
-    integer         , dimension(:)    , pointer :: nseddia
-    integer         , dimension(:)    , pointer :: sedtyp
-    character(10)   , dimension(:)    , pointer :: inisedunit
-    character(20)   , dimension(:)    , pointer :: namsed
-    character(256)  , dimension(:)    , pointer :: flsdbd
-    character(256)  , dimension(:)    , pointer :: flstcd
-    character(256)  , dimension(:)    , pointer :: flstce
-    character(256)  , dimension(:)    , pointer :: flsero
-    logical                           , pointer :: anymud
-    logical                           , pointer :: bsskin
-    character(256)                    , pointer :: flsdia
-    character(256)                    , pointer :: flsmdc
-    type (gd_sedpar)                  , pointer :: gdsedpar
-    integer                           , pointer :: npar
-    character(256)  , dimension(:)    , pointer :: dll_function_settle
-    character(256)  , dimension(:)    , pointer :: dll_name_settle
+    real(fp)                           , pointer :: csoil
+    real(fp)                           , pointer :: mdcuni
+    real(fp)                           , pointer :: kssilt
+    real(fp)                           , pointer :: kssand
+    integer                            , pointer :: nmudfrac
+    real(fp)         , dimension(:)    , pointer :: rhosol
+    real(fp)         , dimension(:,:,:), pointer :: logseddia
+    real(fp)         , dimension(:)    , pointer :: logsedsig
+    real(fp)         , dimension(:)    , pointer :: sedd10
+    real(fp)         , dimension(:)    , pointer :: sedd50
+    real(fp)         , dimension(:)    , pointer :: sedd50fld
+    real(fp)         , dimension(:)    , pointer :: seddm
+    real(fp)         , dimension(:)    , pointer :: sedd90
+    real(fp)         , dimension(:)    , pointer :: cdryb
+    real(fp)         , dimension(:)    , pointer :: dstar
+    real(fp)         , dimension(:)    , pointer :: taucr
+    real(fp)         , dimension(:)    , pointer :: tetacr
+    real(fp)         , dimension(:)    , pointer :: ws0
+    real(fp)         , dimension(:)    , pointer :: wsm
+    real(fp)         , dimension(:)    , pointer :: salmax
+    real(fp)         , dimension(:)    , pointer :: sdbuni
+    real(fp)         , dimension(:,:)  , pointer :: tcrdep
+    real(fp)         , dimension(:)    , pointer :: tcduni
+    real(fp)         , dimension(:,:)  , pointer :: tcrero
+    real(fp)         , dimension(:)    , pointer :: tceuni
+    real(fp)         , dimension(:)    , pointer :: thcmud
+    real(fp)         , dimension(:,:)  , pointer :: eropar
+    real(fp)         , dimension(:)    , pointer :: erouni
+    real(fp)         , dimension(:)    , pointer :: mudcnt
+    integer          , dimension(:)    , pointer :: nseddia
+    integer          , dimension(:)    , pointer :: sedtyp
+    character(10)    , dimension(:)    , pointer :: inisedunit
+    character(20)    , dimension(:)    , pointer :: namsed
+    character(256)   , dimension(:)    , pointer :: flsdbd
+    character(256)   , dimension(:)    , pointer :: flstcd
+    character(256)   , dimension(:)    , pointer :: flstce
+    character(256)   , dimension(:)    , pointer :: flsero
+    logical                            , pointer :: anymud
+    logical                            , pointer :: bsskin
+    character(256)                     , pointer :: flsdia
+    character(256)                     , pointer :: flsmdc
+    type (gd_sedpar)                   , pointer :: gdsedpar
+    integer                            , pointer :: npar
+    character(256)   , dimension(:)    , pointer :: dll_function_settle
+    character(256)   , dimension(:)    , pointer :: dll_name_settle
     integer(pntrsize), dimension(:)    , pointer :: dll_handle_settle
-    character(256)  , dimension(:)    , pointer :: dll_usrfil_settle
-    character(256)  , dimension(:)    , pointer :: dll_function
+    character(256)   , dimension(:)    , pointer :: dll_usrfil_settle
+    character(256)   , dimension(:)    , pointer :: dll_function
     integer(pntrsize), dimension(:)    , pointer :: dll_handle
-    character(256)  , dimension(:)    , pointer :: dll_usrfil
-    character(256)  , dimension(:)    , pointer :: flstrn
-    integer         , dimension(:)    , pointer :: iform
-    character(256)  , dimension(:)    , pointer :: name
-    real(fp)        , dimension(:,:)  , pointer :: par
+    character(256)   , dimension(:)    , pointer :: dll_usrfil
+    character(256)   , dimension(:)    , pointer :: flstrn
+    integer          , dimension(:)    , pointer :: iform
+    character(256)   , dimension(:)    , pointer :: name
+    real(fp)         , dimension(:,:)  , pointer :: par
     include 'lognormal.inc'
     include 'sedparams.inc'
 !
@@ -122,46 +122,46 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
 !
 ! Local variables
 !
-    integer                   :: i
-    integer                   :: iocond
-    integer                   :: iopsus
-    integer                   :: istat
-    integer(pntrsize)         :: istat_ptr
-    integer                   :: j
-    integer                   :: l
-    integer                   :: lbl                 ! bedload fraction number: lbl = l - lsed
-    integer                   :: lenc                ! Help var. (length of character var.) 
-    integer                   :: lfile
-    integer                   :: luninp
-    integer                   :: n                   ! Temporary storage for nseddia(l)
-    integer                   :: version
-    integer        , external :: newlun
+    integer                     :: i
+    integer                     :: iocond
+    integer                     :: iopsus
+    integer                     :: istat
+    integer(pntrsize)           :: istat_ptr
+    integer                     :: j
+    integer                     :: l
+    integer                     :: lbl                 ! bedload fraction number: lbl = l - lsed
+    integer                     :: lenc                ! Help var. (length of character var.) 
+    integer                     :: lfile
+    integer                     :: luninp
+    integer                     :: n                   ! Temporary storage for nseddia(l)
+    integer                     :: version
+    integer          , external :: newlun
     integer(pntrsize), external :: open_shared_library
-    real(fp)                  :: logsedd50
-    real(fp)                  :: rmissval
-    real(fp)                  :: seddxx              ! Temporary storage for sediment diameter
-    real(fp)                  :: sedsg               ! Temporary storage for geometric standard deviation
-    real(fp)                  :: xxinv               ! Help var. [1/xx or 1/(1-xx) in log unif distrib.]
-    real(fp)                  :: xm
-    logical                   :: found
-    logical                   :: ex
-    logical        , external :: stringsequalinsens
-    logical                   :: success
-    character(20)             :: sedname
-    character(256)            :: filsed
-    character(256)            :: filtrn
-    character(256)            :: rec
-    character(300)            :: message
-    character(80)             :: parname
-    character(20)             :: sedtype             ! Local variable for sediment type
-    character(78)             :: string
-    character(30)             :: txtput1
-    character(10)             :: txtput2
-    character(10)             :: versionstring
-    character(6)              :: seddxxstring
-    character(256)            :: errmsg
-    type(tree_data), pointer  :: sed_ptr
-    type(tree_data), pointer  :: sedblock_ptr
+    real(fp)                    :: logsedd50
+    real(fp)                    :: rmissval
+    real(fp)                    :: seddxx              ! Temporary storage for sediment diameter
+    real(fp)                    :: sedsg               ! Temporary storage for geometric standard deviation
+    real(fp)                    :: xxinv               ! Help var. [1/xx or 1/(1-xx) in log unif distrib.]
+    real(fp)                    :: xm
+    logical                     :: found
+    logical                     :: ex
+    logical          , external :: stringsequalinsens
+    logical                     :: success
+    character(20)               :: sedname
+    character(256)              :: filsed
+    character(256)              :: filtrn
+    character(256)              :: rec
+    character(300)              :: message
+    character(80)               :: parname
+    character(20)               :: sedtype             ! Local variable for sediment type
+    character(78)               :: string
+    character(30)               :: txtput1
+    character(10)               :: txtput2
+    character(10)               :: versionstring
+    character(6)                :: seddxxstring
+    character(256)              :: errmsg
+    type(tree_data)  , pointer  :: sed_ptr
+    type(tree_data)  , pointer  :: sedblock_ptr
 !
 !! executable statements -------------------------------------------------------
 !

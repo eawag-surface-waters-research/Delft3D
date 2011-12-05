@@ -45,34 +45,34 @@ subroutine rdtrafrm(error, lsedtot, gdp)
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    real(fp)                       , pointer :: rhow
-    real(fp)                       , pointer :: ag
-    integer                        , pointer :: max_integers
-    integer                        , pointer :: max_reals
-    integer                        , pointer :: max_strings
-    integer                        , pointer :: max_integers_settle
-    integer                        , pointer :: max_reals_settle
-    integer                        , pointer :: max_strings_settle
-    integer                        , pointer :: npar
-    character(256), dimension(:)   , pointer :: dll_function_settle
-    character(256), dimension(:)   , pointer :: dll_name_settle
-    integer(pntrsize),dimension(:)   , pointer :: dll_handle_settle
-    integer       , dimension(:)   , pointer :: dll_integers_settle
-    real(hp)      , dimension(:)   , pointer :: dll_reals_settle
-    character(256), dimension(:)   , pointer :: dll_strings_settle
-    character(256), dimension(:)   , pointer :: dll_usrfil_settle
-    character(256), dimension(:)   , pointer :: dll_function
-    integer(pntrsize),dimension(:)   , pointer :: dll_handle
-    integer       , dimension(:)   , pointer :: dll_integers
-    real(hp)      , dimension(:)   , pointer :: dll_reals
-    character(256), dimension(:)   , pointer :: dll_strings
-    character(256), dimension(:)   , pointer :: dll_usrfil
-    character(256), dimension(:)   , pointer :: flstrn
-    integer,        dimension(:)   , pointer :: iform
-    character(256), dimension(:)   , pointer :: name
-    real(fp),       dimension(:,:) , pointer :: par
-    type (sv_eqtran)               , pointer :: sveqtran
-    integer                        , pointer :: lundia
+    real(fp)                         , pointer :: rhow
+    real(fp)                         , pointer :: ag
+    integer                          , pointer :: max_integers
+    integer                          , pointer :: max_reals
+    integer                          , pointer :: max_strings
+    integer                          , pointer :: max_integers_settle
+    integer                          , pointer :: max_reals_settle
+    integer                          , pointer :: max_strings_settle
+    integer                          , pointer :: npar
+    character(256)   , dimension(:)  , pointer :: dll_function_settle
+    character(256)   , dimension(:)  , pointer :: dll_name_settle
+    integer(pntrsize), dimension(:)  , pointer :: dll_handle_settle
+    integer          , dimension(:)  , pointer :: dll_integers_settle
+    real(hp)         , dimension(:)  , pointer :: dll_reals_settle
+    character(256)   , dimension(:)  , pointer :: dll_strings_settle
+    character(256)   , dimension(:)  , pointer :: dll_usrfil_settle
+    character(256)   , dimension(:)  , pointer :: dll_function
+    integer(pntrsize), dimension(:)  , pointer :: dll_handle
+    integer          , dimension(:)  , pointer :: dll_integers
+    real(hp)         , dimension(:)  , pointer :: dll_reals
+    character(256)   , dimension(:)  , pointer :: dll_strings
+    character(256)   , dimension(:)  , pointer :: dll_usrfil
+    character(256)   , dimension(:)  , pointer :: flstrn
+    integer          , dimension(:)  , pointer :: iform
+    character(256)   , dimension(:)  , pointer :: name
+    real(fp)         , dimension(:,:), pointer :: par
+    type (sv_eqtran)                 , pointer :: sveqtran
+    integer                          , pointer :: lundia
     include 'trapar.inc'
 !
 ! Global variables
