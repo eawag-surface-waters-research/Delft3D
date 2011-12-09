@@ -75,7 +75,7 @@ subroutine wrimap(lundia    ,error     ,trifil    ,selmap    ,simdat    , &
     integer                         , pointer :: nmaxgl
     integer                         , pointer :: mmaxgl
     integer       , dimension(:)    , pointer :: order_sta
-    integer       , dimension(:)    , pointer :: line_orig    
+    integer       , dimension(:)    , pointer :: order_tra
 !
 ! Local parameters
 !
@@ -204,12 +204,12 @@ subroutine wrimap(lundia    ,error     ,trifil    ,selmap    ,simdat    , &
     mnstat     => gdp%gdstations%mnstat
     namst      => gdp%gdstations%namst
     namtra     => gdp%gdstations%namtra
-    line_orig  => gdp%gdstations%line_orig
     nefiselem  => gdp%nefisio%nefiselem(nefiswrimap)
     first      => nefiselem%first
     celidt     => nefiselem%celidt
     elmdms     => nefiselem%elmdms
     order_sta  => gdp%gdparall%order_sta
+    order_tra  => gdp%gdparall%order_tra
     !
     ! LSTSCI var. name in MAP FILE must remain LSTCI for GPP to work
     ! properly
@@ -255,7 +255,7 @@ subroutine wrimap(lundia    ,error     ,trifil    ,selmap    ,simdat    , &
        !
        ! Recalculates the effective global number of cross sections
        !
-       call dffind_duplicate(lundia, ntruv, ntruvto, ntruvgl, line_orig, gdp)
+       call dffind_duplicate(lundia, ntruv, ntruvto, ntruvgl, order_tra, gdp)
        !    
     else
        nostatto = nostat
@@ -966,7 +966,7 @@ subroutine wrimap(lundia    ,error     ,trifil    ,selmap    ,simdat    , &
           ! Filtering out duplicates from list
           !
           if (inode == master) allocate(mnstatgl(4,ntruvgl))
-          call dfgather_filter(lundia, ntruv, ntruvto, ntruvgl, 1, 4, line_orig, isbuff, mnstatgl, gdp)
+          call dfgather_filter(lundia, ntruv, ntruvto, ntruvgl, 1, 4, order_tra, isbuff, mnstatgl, gdp)
           if (inode == master) then
              ierror = putelt(fds, grnam2, 'MNTRA', uindex, 1, mnstatgl)
              deallocate(mnstatgl)
@@ -981,7 +981,7 @@ subroutine wrimap(lundia    ,error     ,trifil    ,selmap    ,simdat    , &
        !
        if (parll) then
           if (inode == master) allocate(csbuff2(ntruvgl))
-          call dfgather_filter(lundia, ntruv, ntruvto, ntruvgl, line_orig, namtra, csbuff2, gdp)
+          call dfgather_filter(lundia, ntruv, ntruvto, ntruvgl, order_tra, namtra, csbuff2, gdp)
           if (inode == master) then
              ierror = putelt(fds, grnam2, 'NAMTRA', uindex, 1, csbuff2)
              deallocate(csbuff2)

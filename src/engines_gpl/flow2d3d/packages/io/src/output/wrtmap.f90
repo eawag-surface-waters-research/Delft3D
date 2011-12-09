@@ -100,8 +100,6 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     integer                         , pointer :: nmaxgl
     integer                         , pointer :: mmaxgl
     integer                         , pointer :: nmmax
-    integer  , dimension(:)         , pointer :: order_sta
-    integer  , dimension(:)         , pointer :: order_tra
 !
 ! Global variables
 !
@@ -244,8 +242,6 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     tair_file      => gdp%gdheat%tair_file
     clou_file      => gdp%gdheat%clou_file
     free_convec    => gdp%gdheat%free_convec
-    order_tra      => gdp%gdparall%order_tra
-    order_sta      => gdp%gdparall%order_sta
     mfg            => gdp%gdparall%mfg
     mlg            => gdp%gdparall%mlg
     nfg            => gdp%gdparall%nfg

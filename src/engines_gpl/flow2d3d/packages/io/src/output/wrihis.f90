@@ -61,7 +61,6 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer       , dimension(:)    , pointer :: line_orig    
     integer       , dimension(:, :) , pointer :: mnit
     integer       , dimension(:, :) , pointer :: mnstat
     character(20) , dimension(:)    , pointer :: namst
@@ -157,6 +156,7 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
     character(64)  , dimension(nelmx)                 :: elmdes      ! Array with element description 
 !
     integer        , dimension(:)       , pointer     :: order_sta
+    integer        , dimension(:)       , pointer     :: order_tra
     integer                                           :: nostatgl  ! global number of stations (i.e. original number
                                                                    ! excluding duplicate stations located in the halo regions)
     integer                                           :: nostatto  ! total number of stations (including "duplicate" stations located in halo regions)
@@ -181,13 +181,13 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
     mnstat     => gdp%gdstations%mnstat
     namst      => gdp%gdstations%namst
     namtra     => gdp%gdstations%namtra
-    line_orig  => gdp%gdstations%line_orig
     nefiselem  => gdp%nefisio%nefiselem(nefiswrihis)
     first      => nefiselem%first
     celidt     => nefiselem%celidt
     elmdms     => nefiselem%elmdms
     xystat     => gdp%gdstations%xystat
     order_sta  => gdp%gdparall%order_sta
+    order_tra  => gdp%gdparall%order_tra
     mfg        => gdp%gdparall%mfg
     nfg        => gdp%gdparall%nfg
     !
@@ -227,8 +227,7 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
        ! Recalculates the effective global number of cross sections
        !
        call dfsync(gdp)
-       call dffind_duplicate(lundia, ntruv, ntruvto, ntruvgl, line_orig, gdp)
-       
+       call dffind_duplicate(lundia, ntruv, ntruvto, ntruvgl, order_tra, gdp)
     else
        nostatto = nostat
        nostatgl = nostat
@@ -583,33 +582,21 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
        !
        ! group 2, element 'MNTRA'
        !
-       allocate(ibuff(4,ntruv))
-       ibuff = 0
-       do k = 1, ntruv
-          !
-          ! mnit contains indices with respect to this partion
-          ! transfer into global indices
-          !
-          ibuff(1,k) = mnit(1,k) + mfg - 1
-          ibuff(2,k) = mnit(2,k) + nfg - 1
-          ibuff(3,k) = mnit(3,k) + mfg - 1
-          ibuff(4,k) = mnit(4,k) + nfg - 1
-       enddo
-       !
-       ! Filtering out duplicates from list
-       !
-       if (inode == master) allocate( mnstatgl(4,ntruvgl) )
-
-       if (parll) then
-          call dfgather_filter(lundia, ntruv, ntruvto, ntruvgl, 1, 4, line_orig, ibuff, mnstatgl, gdp)
-       else
-          mnstatgl = ibuff
-       endif   
        if (inode == master) then
-          ierror = putelt(fds, grnam2, 'MNTRA', uindex, 1, mnstatgl)
-          deallocate( mnstatgl )
+          allocate(ibuff(4,ntruvgl))
+          ibuff = 0
+          if (parll) then
+             do k = 1, ntruvgl
+                ibuff(:,k) = gdp%gdparall%mnit_global(:,k)
+             enddo
+          else
+             do k = 1, ntruvgl
+                ibuff(:,k) = mnit(:,k)
+             enddo
+          endif
+             ierror = putelt(fds, grnam2, 'MNTRA', uindex, 1, ibuff)
+          deallocate(ibuff)
        endif
-       deallocate(ibuff)
        if (ierror/=0) goto 999
        !
        ! group 2, element 'XYTRA'
@@ -631,21 +618,18 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
           rsbuff2(k,3) = real(xz(n2,m2),sp)
           rsbuff2(k,4) = real(yz(n2,m2),sp)
        enddo
-       if (parll) then 
-          if (inode == master) allocate(rsbuff2b(ntruvgl,4))
-          call dfgather_filter(lundia, ntruv, ntruvto, ntruvgl, 1, 4, line_orig, rsbuff2, rsbuff2b, gdp)
-          deallocate( rsbuff2 )
-          if (inode == master) then
-             allocate(rsbuff2(4,ntruvgl))
-             do k=1,ntruvgl
-                rsbuff2(:,k) = rsbuff2b(k,:)
-             enddo
-             deallocate(rsbuff2b)
-          endif
-       endif 
        if (inode == master) then
-          ierror = putelt(fds, grnam2, 'XYTRA', uindex, 1, rsbuff2)
-          deallocate(rsbuff2)
+          allocate(rsbuff2b(ntruvgl,4))
+       endif
+       if (parll) then 
+          call dfgather_filter(lundia, ntruv, ntruvto, ntruvgl, 1, 4, order_tra, rsbuff2, rsbuff2b, gdp)
+       else
+          rsbuff2b = rsbuff2
+       endif
+       deallocate( rsbuff2 )
+       if (inode == master) then
+          ierror = putelt(fds, grnam2, 'XYTRA', uindex, 1, rsbuff2b)
+          deallocate(rsbuff2b)
        endif
        if (ierror/=0) goto 999
        !
@@ -653,7 +637,7 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
        !
        if (inode == master) allocate( cbuff1(ntruvgl) )
        if (parll) then
-          call dfgather_filter(lundia, ntruv, ntruvto, ntruvgl, line_orig, namtra, cbuff1, gdp)
+          call dfgather_filter(lundia, ntruv, ntruvto, ntruvgl, order_tra, namtra, cbuff1, gdp)
        else
           cbuff1 = namtra
        endif     

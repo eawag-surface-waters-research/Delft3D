@@ -60,7 +60,6 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer       , dimension(:)    , pointer :: line_orig
     logical                         , pointer :: first
     integer                         , pointer :: celidt
     integer       , dimension(:, :) , pointer :: elmdms
@@ -68,6 +67,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     integer       , dimension(:, :) , pointer :: mnstat
     real(fp)      , dimension(:, :) , pointer :: xystat
     integer       , dimension(:)    , pointer :: order_sta
+    integer       , dimension(:)    , pointer :: order_tra
     character(20) , dimension(:)    , pointer :: namst
     integer                         , pointer :: mfg
     integer                         , pointer :: nfg
@@ -160,7 +160,6 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
 !
 !! executable statements -------------------------------------------------------
 !
-    line_orig  => gdp%gdstations%line_orig
     nefiselem  => gdp%nefisio%nefiselem(nefiswrthisinf)
     first      => nefiselem%first
     celidt     => nefiselem%celidt
@@ -168,6 +167,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     mnstat     => gdp%gdstations%mnstat
     xystat     => gdp%gdstations%xystat
     order_sta  => gdp%gdparall%order_sta
+    order_tra  => gdp%gdparall%order_tra
     namst      => gdp%gdstations%namst
     mfg        => gdp%gdparall%mfg
     nfg        => gdp%gdparall%nfg
@@ -196,7 +196,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
        ! Recalculates the effective global number of cross sections
        !
        call dfsync(gdp)
-       call dffind_duplicate(lundia, ntruv, ntruvto, ntruvgl, line_orig, gdp)
+       call dffind_duplicate(lundia, ntruv, ntruvto, ntruvgl, order_tra, gdp)
 
     else
        nostatto = nostat
@@ -756,7 +756,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
              rsbuff1 = 0.0
           endif
           if (parll) then  
-             call dfgather_filter(lundia, ntruv, ntruvto, ntruvgl, line_orig, fltr, rsbuff1, gdp, cross_sec )
+             call dfgather_filter(lundia, ntruv, ntruvto, ntruvgl, order_tra, fltr, rsbuff1, gdp, cross_sec )
           else
              rsbuff1 = real(fltr, sp) 
           endif
@@ -775,7 +775,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
              rsbuff1 = 0.0
           endif
           if (parll) then 
-             call dfgather_filter(lundia, ntruv, ntruvto, ntruvgl, line_orig, ctr, rsbuff1, gdp, cross_sec )
+             call dfgather_filter(lundia, ntruv, ntruvto, ntruvgl, order_tra, ctr, rsbuff1, gdp, cross_sec )
           else
              rsbuff1 = real(ctr, sp)
           endif
@@ -792,7 +792,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
        if (selhis(22:22)=='Y') then
           if (inode == master) allocate( rsbuff2(1:ntruvgl, 1:lstsci) )
           if (parll) then
-             call dfgather_filter(lundia, ntruv, ntruvto, ntruvgl, 1, lstsci, line_orig, atr, rsbuff2, gdp, cross_sec)
+             call dfgather_filter(lundia, ntruv, ntruvto, ntruvgl, 1, lstsci, order_tra, atr, rsbuff2, gdp, cross_sec)
           else
              rsbuff2 = real(atr, sp)
           endif
@@ -809,7 +809,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
        if (selhis(23:23)=='Y') then
           if (inode == master) allocate( rsbuff2(1:ntruvgl, 1:lstsci) )
           if (parll) then
-             call dfgather_filter(lundia, ntruv, ntruvto, ntruvgl, 1, lstsci, line_orig, dtr, rsbuff2, gdp, cross_sec)
+             call dfgather_filter(lundia, ntruv, ntruvto, ntruvgl, 1, lstsci, order_tra, dtr, rsbuff2, gdp, cross_sec)
           else
              rsbuff2 = real(dtr, sp)
           endif

@@ -53,7 +53,6 @@ subroutine chksit(lundia    ,error     ,nostat    ,ntruv     ,ntru      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer       , dimension(:)    , pointer :: line_orig    
     integer       , dimension(:, :) , pointer :: mnit
     integer       , dimension(:, :) , pointer :: mnstat
     character(20) , dimension(:)    , pointer :: namst
@@ -99,7 +98,6 @@ subroutine chksit(lundia    ,error     ,nostat    ,ntruv     ,ntru      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    line_orig          => gdp%gdstations%line_orig
     mnit               => gdp%gdstations%mnit
     mnstat             => gdp%gdstations%mnstat
     namst              => gdp%gdstations%namst

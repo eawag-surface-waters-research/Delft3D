@@ -624,6 +624,16 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     ! for parallel runs, determine if cross-section is inside subdomain and store it
     !
     if (parll .and. ntruv>0) then
+       if (inode == master) then
+          !
+          ! Store mnit in mnit_global
+          ! mnit will be adapted for this partition
+          !
+          allocate(gdp%gdparall%mnit_global(4,ntruv))
+          do n = 1, ntruv
+             gdp%gdparall%mnit_global(:,n) = mnit(:,n)
+          enddo
+       endif
        allocate(nsd(ntruv))
        nn  = 0
        nsd = 0

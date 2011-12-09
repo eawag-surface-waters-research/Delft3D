@@ -270,10 +270,10 @@ subroutine gdp_dealloc(gdp)
     endif
     deallocate (gdp%gdrtc)
     if (localscour) then
-       if (associated(gdp%gdscour%nmapp))     deallocate (gdp%gdscour%nmapp , STAT = istat)
-       if (associated(gdp%gdscour%nmref))     deallocate (gdp%gdscour%nmref , STAT = istat)
-       if (associated(gdp%gdscour%factor))    deallocate (gdp%gdscour%factor, STAT = istat)
-       if (associated(gdp%gdscour%tauv))      deallocate (gdp%gdscour%tauv  , STAT = istat)
+       if (associated(gdp%gdscour%nmapp))     deallocate (gdp%gdscour%nmapp    , STAT = istat)
+       if (associated(gdp%gdscour%nmref))     deallocate (gdp%gdscour%nmref    , STAT = istat)
+       if (associated(gdp%gdscour%factor))    deallocate (gdp%gdscour%factor   , STAT = istat)
+       if (associated(gdp%gdscour%tauv))      deallocate (gdp%gdscour%tauv     , STAT = istat)
        if (associated(gdp%gdscour%depchange)) deallocate (gdp%gdscour%depchange, STAT = istat)
     endif
     deallocate (gdp%gdscour)
@@ -304,8 +304,11 @@ subroutine gdp_dealloc(gdp)
     deallocate (gdp%runid)
     !
     if (parll) then
-       if (associated(gdp%gdparall%iblkad)) deallocate (gdp%gdparall%iblkad, STAT = istat)
-       if (associated(gdp%gdparall%iweig )) deallocate (gdp%gdparall%iweig , STAT = istat)
+       if (associated(gdp%gdparall%iblkad))       deallocate (gdp%gdparall%iblkad      , STAT = istat)
+       if (associated(gdp%gdparall%iweig ))       deallocate (gdp%gdparall%iweig       , STAT = istat)
+       if (associated(gdp%gdparall%order_tra ))   deallocate (gdp%gdparall%order_tra   , STAT = istat)
+       if (associated(gdp%gdparall%order_sta ))   deallocate (gdp%gdparall%order_sta   , STAT = istat)
+       if (associated(gdp%gdparall%mnit_global )) deallocate (gdp%gdparall%mnit_global , STAT = istat)
     endif
     deallocate (gdp%gdparall)
     !

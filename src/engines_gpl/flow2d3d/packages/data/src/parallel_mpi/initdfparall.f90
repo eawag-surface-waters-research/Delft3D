@@ -48,5 +48,8 @@ subroutine initdfparall(gdp)
     ! Initialize arrays for parallel Delft3D-FLOW
     !
     nullify(gdp%gdparall%iblkad)
-    nullify(gdp%gdparall%iweig )
+    nullify(gdp%gdparall%iweig)
+    nullify(gdp%gdparall%order_tra)
+    nullify(gdp%gdparall%order_sta)
+    nullify(gdp%gdparall%mnit_global)
 end subroutine initdfparall

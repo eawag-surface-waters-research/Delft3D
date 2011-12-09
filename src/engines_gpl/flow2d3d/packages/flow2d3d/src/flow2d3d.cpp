@@ -71,6 +71,13 @@
 
 #include "flow2d3d.h"
 
+#if defined(HAVE_CONFIG_H)
+#define Sleep sleep
+#endif
+#if defined (WIN32)
+#   include <windows.h>
+#endif
+
 
 DllExport void
 DeltaresHydroEntry (
@@ -169,6 +176,17 @@ void
 Flow2D3D::Run (
     void
     ) {
+    char * waitFile = this->config->GetAttrib ("waitFile");
+    if (waitFile != NULL) {
+        printf("Waiting for file \"%s\" to appear...\n", waitFile);
+        fflush (stdout);
+        FILE * filePtr = NULL;
+        do {
+            filePtr = fopen(waitFile, "r");
+            Sleep(1000);
+        } while (filePtr == NULL);
+        fclose(filePtr);
+    }
 
     try {
         if (this->dd != NULL)
