@@ -6,6 +6,10 @@ globalErrorLevel=0
 # === copyFile: handles error ===
 # ===============================
 function copyFile () {
+    # This function can handle wild characters in the arguments,
+    # as long as they are quoted
+    # example: copyFile "bin/*" targetdir
+
     # handle the error
     cp -fp $1 $2
     if [ $? != 0 ]; then
@@ -91,13 +95,13 @@ function flow2d3d () {
     mkdir -p $dest_lib
     mkdir -p $dest_default
 
-    cp -fp lib/libflow2d3d.so                                        $dest_bin
-    cp -fp lib/libflow2d3d_sp.so                                     $dest_bin
-    copyFile engines_gpl/flow2d3d/scripts/meteo_old2new.m            $dest_bin
-    copyFile bin/esm_create                                          $dest_bin
-    copyFile bin/esm_delete                                          $dest_bin
-    copyFile bin/esm_info                                            $dest_bin
-    copyFile engines_gpl/flow2d3d/default/*.*                        $dest_default
+    cp -fp lib/libflow2d3d.so                                 $dest_bin
+    cp -fp lib/libflow2d3d_sp.so                              $dest_bin
+    copyFile "engines_gpl/flow2d3d/scripts/meteo_old2new.m"   $dest_bin
+    copyFile "bin/esm_create"                                 $dest_bin
+    copyFile "bin/esm_delete"                                 $dest_bin
+    copyFile "bin/esm_info"                                   $dest_bin
+    copyFile "engines_gpl/flow2d3d/default/*.*"               $dest_default
 
     return
 }
@@ -119,11 +123,11 @@ function flow2d3d_openda () {
 
     cp -fp lib/libflow2d3d_openda.so                                 $dest_bin
     cp -fp lib/libflow2d3d_openda_sp.so                              $dest_bin
-    copyFile engines_gpl/flow2d3d/scripts/meteo_old2new.m            $dest_bin
-    copyFile bin/esm_create                                          $dest_bin
-    copyFile bin/esm_delete                                          $dest_bin
-    copyFile bin/esm_info                                            $dest_bin
-    copyFile engines_gpl/flow2d3d/default/*.*                        $dest_default
+    copyFile "engines_gpl/flow2d3d/scripts/meteo_old2new.m"            $dest_bin
+    copyFile "bin/esm_create"                                          $dest_bin
+    copyFile "bin/esm_delete"                                          $dest_bin
+    copyFile "bin/esm_info"                                            $dest_bin
+    copyFile "engines_gpl/flow2d3d/default/*.*"                        $dest_default
 
     return
 }
@@ -144,10 +148,10 @@ function wave () {
     mkdir -p $dest_default
     mkdir -p $dest_lib
 
-    copyFile bin/wave.exe                                        $dest_bin
-    copyFile third_party_open/swan/bin/linux/*.*                 $dest_bin
-    copyFile engines_gpl/flow2d3d/default/dioconfig.ini          $dest_default
-    copyFile third_party_open/swan/scripts/swan_install.sh       $dest_bin/swan.sh
+    copyFile "bin/wave.exe"                                        $dest_bin
+    copyFile "third_party_open/swan/bin/linux/*.*"                 $dest_bin
+    copyFile "engines_gpl/flow2d3d/default/dioconfig.ini"          $dest_default
+    copyFile "third_party_open/swan/scripts/swan_install.sh"       $dest_bin/swan.sh
 
     return
 }
@@ -163,7 +167,7 @@ function plugin_culvert () {
 
     mkdir -p $dest_bin
 
-    copyFile lib/libplugin_culvert.so            $dest_bin/plugin_culvert.so
+    copyFile "lib/libplugin_culvert.so"            $dest_bin/plugin_culvert.so
 
     return
 }
@@ -179,7 +183,7 @@ function plugin_delftflow_traform () {
 
     mkdir -p $dest_bin
 
-    copyFile lib/libplugin_delftflow_traform.so   $dest_bin/plugin_delftflow_traform.so
+    copyFile "lib/libplugin_delftflow_traform.so"   $dest_bin/plugin_delftflow_traform.so
 
     return
 }
@@ -195,7 +199,7 @@ function datsel () {
 
     mkdir -p $dest_bin
 
-    copyFile bin/datsel    $dest_bin
+    copyFile "bin/datsel"    $dest_bin
 
     return
 }
@@ -211,7 +215,7 @@ function kubint () {
 
     mkdir -p $dest_bin
 
-    copyFile bin/kubint  $dest_bin
+    copyFile "bin/kubint"  $dest_bin
 
     return
 }
@@ -227,7 +231,7 @@ function lint () {
 
     mkdir -p $dest_bin
 
-    copyFile bin/lint   $dest_bin
+    copyFile "bin/lint"   $dest_bin
 
     return
 }
@@ -243,8 +247,8 @@ function mormerge () {
 
     mkdir -p $dest_bin
 
-    copyFile engines_gpl/flow2d3d/scripts/mormerge.tcl                 $dest_bin
-    copyFile bin/mormerge.exe                                          $dest_bin
+    copyFile "engines_gpl/flow2d3d/scripts/mormerge.tcl"                 $dest_bin
+    copyFile "bin/mormerge.exe"                                          $dest_bin
 
     return
 }
@@ -260,7 +264,7 @@ function vs () {
 
     mkdir -p $dest
 
-    copyFile bin/vs  $dest
+    copyFile "bin/vs"  $dest
 
     return
 }
