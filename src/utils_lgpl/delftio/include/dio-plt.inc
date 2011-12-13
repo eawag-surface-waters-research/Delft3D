@@ -26,21 +26,21 @@
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
-C
-C     dio-plt.inc
-C
-C     F77 Interface to
-C     DelftIO Parameter-Location-Time Datasets
-C
-C     Stef.Hummel@deltares.nl
-C
-C     (c) Deltares, Feb 01
-C---------------------------------------------
-C
+!
+!     dio-plt.inc
+!
+!     F77 Interface to
+!     DelftIO Parameter-Location-Time Datasets
+!
+!     Stef.Hummel@deltares.nl
+!
+!     (c) Deltares, Feb 01
+!---------------------------------------------
+!
       include 'dio-streams.inc'
-C
-C     Sizes for character strings
-C
+!
+!     Sizes for character strings
+!
       integer DioMaxDsNameLen
       integer DioMaxParLen
       integer DioMaxLocLen
@@ -53,9 +53,9 @@ C
 
       integer     HisRunIdSize      , HisRunIdDim
       parameter ( HisRunIdSize = 40 , HisRunIdDim = 4)
-C
-C     Dataset Types
-C
+!
+!     Dataset Types
+!
       integer Dio_Plt_Unknown
       integer Dio_Plt_Integer
       integer Dio_Plt_Real
@@ -67,39 +67,39 @@ C
       parameter ( Dio_Plt_Real     = 2 )
       parameter ( Dio_Plt_Double   = 3 )
       parameter ( Dio_Plt_Logical  = 4 )
-C
-C     Manipulate Parameters or Locations?
-C
+!
+!     Manipulate Parameters or Locations?
+!
       integer Dio_Plt_Pars
       integer Dio_Plt_Locs
 
       parameter ( Dio_Plt_Pars  = 1 )
       parameter ( Dio_Plt_Locs  = 2 )
-C
-C     Function declarations
-C
-C     ORIGINAL interface (used by SRW)
-C
+!
+!     Function declarations
+!
+!     ORIGINAL interface (used by SRW)
+!
       integer DioDefinePltDataSet
       integer DioGetPltDataSetInfo
       logical DioGetPltDataSetReals
 
       external DioDefinePltDataSet
       external DioGetPltDataSetInfo, DioGetPltDataSetReals
-C
-C     ODS Server interface
-C
-      integer  DiofPltDefine_1 , DiofPltDefine_2, DiofPltDefine_2a,
-     +         DiofPltDefine_3 , DiofPltDefine_4, DiofPltDefine_4a,
-     +         DiofPltDefine_5 , DiofPltDefine_5a
-      external DiofPltDefine_1 , DiofPltDefine_2,
-     +         DiofPltDefine_3 , DiofPltDefine_4, DiofPltDefine_4a,
-     +         DiofPltDefine_5 , DiofPltDefine_5a
+!
+!     ODS Server interface
+!
+      integer  DiofPltDefine_1 , DiofPltDefine_2, DiofPltDefine_2a, &
+               DiofPltDefine_3 , DiofPltDefine_4, DiofPltDefine_4a, &
+               DiofPltDefine_5 , DiofPltDefine_5a
+      external DiofPltDefine_1 , DiofPltDefine_2,                   &
+               DiofPltDefine_3 , DiofPltDefine_4, DiofPltDefine_4a, &
+               DiofPltDefine_5 , DiofPltDefine_5a
 
-      integer  DiofPltDefine_11, DiofPltDefine_12, DiofPltDefine_12a,
-     +         DiofPltDefine_13, DiofPltDefine_14, DiofPltDefine_14a
-      external DiofPltDefine_11, DiofPltDefine_12, DiofPltDefine_12a,
-     +         DiofPltDefine_13, DiofPltDefine_14, DiofPltDefine_14a
+      integer  DiofPltDefine_11, DiofPltDefine_12, DiofPltDefine_12a, &
+               DiofPltDefine_13, DiofPltDefine_14, DiofPltDefine_14a
+      external DiofPltDefine_11, DiofPltDefine_12, DiofPltDefine_12a, &
+               DiofPltDefine_13, DiofPltDefine_14, DiofPltDefine_14a
 
       integer  DiofPltGetDataSet
       external DiofPltGetDataSet

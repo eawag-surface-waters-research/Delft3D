@@ -26,45 +26,45 @@
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
-C
-C     dio-streams.inc
-C
-C     F77 Interface to
-C     DelftIO Streams
-C
-C     Stef.Hummel@deltares.nl
-C
-C     (c) Deltares, Feb 01
-C---------------------------------------------
-C
+!
+!     dio-streams.inc
+!
+!     F77 Interface to
+!     DelftIO Streams
+!
+!     Stef.Hummel@deltares.nl
+!
+!     (c) Deltares, Feb 01
+!---------------------------------------------
+!
       include 'dio-time.inc'
-C
-C     Sizes for character strings
-C
+!
+!     Sizes for character strings
+!
       integer DioMaxStreamLen
       parameter ( DioMaxStreamLen = 256 )
-C
-C     Stream Types
-C
+!
+!     Stream Types
+!
       integer dio_ASCII_stream
       integer dio_Binary_stream
       integer dio_His_stream
       integer dio_Nefis_stream
 
-      parameter ( dio_ASCII_stream  = 1 ,
-     &            dio_Binary_stream = 2 ,
-     &            dio_His_stream    = 3 ,
-     &            dio_Nefis_stream  = 4 )
+      parameter ( dio_ASCII_stream  = 1 , &
+                  dio_Binary_stream = 2 , &
+                  dio_His_stream    = 3 , &
+                  dio_Nefis_stream  = 4 )
 
-C
-C     ORIGINAL interface (used by SRW)
-C
+!
+!     ORIGINAL interface (used by SRW)
+!
       integer DioCreateStream, DioCreateStreamSynched
       external DioCreateStream, DioCreateStreamSynched
       
-C
-C     ODS Server interface
-C
+!
+!     ODS Server interface
+!
       integer DiofMaxErrMsgLen
       parameter ( DiofMaxErrMsgLen = 256 )
 

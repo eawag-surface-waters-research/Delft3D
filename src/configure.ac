@@ -53,6 +53,11 @@ AC_PROG_MAKE_SET
 AC_PROG_LEX
 AC_PROG_YACC
 
+AC_LANG_PUSH([C++])
+dnl Check for MPI (sets MPIFC, MPILIBS, HAVE_MPI)
+ACX_MPI
+AC_LANG_POP
+
 ## This is copied from the libtool examples
 ## -------------------------- ##
 ## Fortran90 compiler checks. ##

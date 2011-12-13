@@ -13,64 +13,23 @@
 #   keep up with every new compiler update.  This script should be ultra-low
 #   maintanence.
 #
-#   ToDo: Move DelftOnline to utils and treat it as an ordinary library
-#
 #   Irv.Elshoff@Deltares.NL
-#   15 nov 11
+#   13 dec 11
 #
 #   Copyright © 2011, Stichting Deltares
 #-------------------------------------------------------------------------------
 
-
+# Default values
 compiler=''
 platform='ia32'
 debug=0
 noMake=0
 useSp=0
 
-# export PATH="/opt/mpich2/bin:$PATH"
-# export PKG_CONFIG_PATH=/opt/netcdf-4.1.1/ifort/lib/pkgconfig:$PKG_CONFIG_PATH
-# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/netcdf-4.1.1/ifort/lib:/opt/hdf5-1.8.5/lib
 
-# The updated autotools are not installed in the default location on the devux64,
-# So we have to set all these variables manually. 
-# export ACLOCAL=/opt/automake-1.11.1/bin/aclocal
-# export AUTOMAKE=/opt/automake-1.11.1/bin/automake
-# export AUTOHEADER=/opt/autoconf-2.68/bin/autoheader
-# export AUTOCONF=/opt/autoconf-2.68/bin/autoconf
-# export LIBTOOLIZE=/opt/libtool-2.4.2/bin/libtoolize
-
-# The extra macros are in this directory:
-# export AUTORECONF_FLAGS="-I /opt/automake-1.11.1/share/aclocal-1.11 -I/opt/libtool-2.4.2/share/aclocal -I/opt/autoconf-2.68/share/autoconf -I/usr/share/aclocal"
-
-# And add them to the path...
-# export PATH=/opt/automake/bin:/opt/autoconf/bin:/opt/libtool/bin:$PATH
-
-# This is needed to find the 64 bit ifort based mpi compiler
-# export MPIFC=/opt/mpich2-1.0.8-intel64/bin/mpif90  
-
-# This is needed because that is where we installed DelftOnline 
-# DelftOnline was prebuild in the repository
-# What you could do is add the configure to the main configure so DelftOnline is build automaticly 
-# export LDFLAGS=-L`pwd`/lib 
-
-
-echo "export PKG_CONFIG_PATH=\"$PKG_CONFIG_PATH\""
-echo "export ACLOCAL=\"$ACLOCAL\""
-echo "export AUTOMAKE=\"$AUTOMAKE\""
-echo "export AUTOHEADER=\"$AUTOHEADER\""
-echo "export AUTOCONF=\"$AUTOCONF\""
-echo "export LIBTOOLIZE=\"$LIBTOOLIZE\""
-echo "export AUTORECONF_FLAGS=\"$AUTORECONF_FLAGS\""
-echo "export MPIFC=\"$MPIFC\""
-echo "export LDFLAGS=\"$LDFLAGS\""
-echo "export LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\""
-echo "export PATH=\"$PATH\""
-echo
-
-
+#-------------------------------------------------------------------------------
 function usage {
-    echo "Usage: `basename $0` <compiler> [-debug] [-make] [-intel64] [-sp] [-?]"
+    echo "Usage: `basename $0` <compiler> [-debug] [-make] [-64bit] [-sp] [-?]"
     echo "Compiler is one of:"
     echo "    -gnu"
     echo "    -intel10"
@@ -79,12 +38,42 @@ function usage {
     echo "    -intel12"
     }
 
+
+#-------------------------------------------------------------------------------
+# Add date time to logging info
 function log {
     echo "`date +%Y%m%d.%H%M%S` :: $*"
     }
 
 
-#-----  Process command-line arguments
+
+#-------------------------------------------------------------------------------
+# Add a directory to an environment parameter
+function addpath {
+    path="$1"
+    shift
+
+    for dir in $*; do
+        if [ -d $dir ]; then
+            eval "export $path=\"$dir:\$$path\""
+        fi
+    done
+    }
+
+
+#-------------------------------------------------------------------------------
+# Identify which program is used
+function witch {
+    w=`which $1`
+    (
+        cd `dirname $w`
+        /bin/pwd
+    )
+    }
+
+
+#===============================================================================
+# Process command-line arguments
 
 while [ $# -gt 0 ]; do
     case $1 in
@@ -103,8 +92,8 @@ while [ $# -gt 0 ]; do
         -intel12)
             compiler='intel12'
             ;;
-        -intel64)
-            platform='intel64'
+        -64bit)
+            platform='64bit'
             ;;
         -d|-debug)
             debug=1
@@ -140,15 +129,15 @@ if [ "$BASH_ENV" != '' ]; then
     unset BASH_ENV
 fi
 
-#-----  Initialize Fortran compiler
+#===============================================================================
+# Initialize Fortran compiler
 
 case $compiler in
     gnu)
         ifortInit=""
-        echo "Using default GNU compiler compiler"
-        echo "Warning: The source code is not yet GNU friendly. We welcome help."
-        echo -e "\n\n\n\n"
-        sleep 3
+        addpath PATH /opt/gcc/bin
+        addpath LD_LIBRARY_PATH /opt/gcc/lib /opt/gcc/lib64
+        echo "Using GNU compilers in `witch gfortran`"
         ;;
 
     intel12)
@@ -158,7 +147,7 @@ case $compiler in
         ;;
 
     intel11.1)
-        if [ "$platform" == 'intel64' ]; then
+        if [ "$platform" == '64bit' ]; then
             if [ -d /opt/intel/Compiler/11.1/072/bin/intel64 ]; then
                 ifortInit=". /opt/intel/Compiler/11.1/072/bin/intel64/ifortvars_intel64.sh $platform"
                 idbInit=". /opt/intel/Compiler/11.1/072/bin/intel64/idbvars.sh"
@@ -202,7 +191,80 @@ if [ "$ifortInit" != '' ]; then
 fi
 
 
-#-----  Single precision executables require preparation before hand
+#===============================================================================
+# Use the correct Autotools
+
+# When the autotools are not installed in the default location,
+# point to them explicitly
+addpath PATH \
+    /opt/automake/bin \
+    /opt/autoconf/bin \
+    /opt/libtool/bin
+
+
+#===============================================================================
+# Additional library settings
+
+#---------------------
+# mpich2
+if [ "$compiler" = 'gnu' ]; then
+    addpath PATH /opt/mpich2-1.4.1-gcc-4.6.2/bin
+    export MPI_INCLUDE=/opt/mpich2-1.4.1-gcc-4.6.2/include
+    # export MPILIBS_ADDITIONAL="-L/opt/mpich2-1.4.1-gcc-4.6.2/lib -lfmpich"
+    export MPILIBS_ADDITIONAL=" "
+    export MPIFC=/opt/mpich2-1.4.1-gcc-4.6.2/bin/mpif90  
+else
+    # Intel compilers
+    addpath PATH /opt/mpich2/bin
+    export MPI_INCLUDE=/opt/mpich2/include
+    # export MPILIBS_ADDITIONAL="-L/opt/mpich2/lib -lfmpich"
+    export MPILIBS_ADDITIONAL=" "
+    if [ "$platform" = '64bit' ]; then
+        export MPIFC=/opt/mpich2-1.0.8-intel64/bin/mpif90  
+    fi
+fi
+
+
+#---------------------
+# Additional link flags/libraries
+if [ "$compiler" = 'gnu' ]; then
+    export LDFLAGSMT_ADDITIONAL=" "
+    export FCLIBS_ADDITIONAL=" "
+else
+    # Intel compilers
+    export LDFLAGSMT_ADDITIONAL="-lifcoremt"
+    export FCLIBS_ADDITIONAL="-lifcore -limf"
+fi
+
+
+#---------------------
+# netcdf
+# export PKG_CONFIG_PATH=/opt/netcdf-4.1.1/ifort/lib/pkgconfig:$PKG_CONFIG_PATH
+# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/netcdf-4.1.1/ifort/lib:/opt/hdf5-1.8.5/lib
+
+
+#===============================================================================
+echo "Current settings:"
+echo "export ACLOCAL=\"$ACLOCAL\""
+echo "export AUTOMAKE=\"$AUTOMAKE\""
+echo "export AUTOHEADER=\"$AUTOHEADER\""
+echo "export AUTOCONF=\"$AUTOCONF\""
+echo "export AUTORECONF_FLAGS=\"$AUTORECONF_FLAGS\""
+echo "export FCLIBS_ADDITIONAL=\"$FCLIBS_ADDITIONAL\""
+echo "export LIBTOOLIZE=\"$LIBTOOLIZE\""
+echo "export LDFLAGS=\"$LDFLAGS\""
+echo "export LDFLAGSMT_ADDITIONAL=\"$LDFLAGSMT_ADDITIONAL\""
+echo "export LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\""
+echo "export MPIFC=\"$MPIFC\""
+echo "export MPI_INCLUDE=\"$MPI_INCLUDE\""
+echo "export MPILIBS_ADDITIONAL=\"$MPILIBS_ADDITIONAL\""
+echo "export PKG_CONFIG_PATH=\"$PKG_CONFIG_PATH\""
+echo "export PATH=\"$PATH\""
+echo
+
+
+#===============================================================================
+# Single precision executables require preparation before hand
 
 if [ $useSp -eq 1 ]; then
     (
@@ -217,7 +279,8 @@ if [ $useSp -eq 1 ]; then
     )
 fi
 
-#----- To ensure that all libtool the ltmain.sh and m4 macros are updated.
+#===============================================================================
+# libtoolize: To ensure that all libtool the ltmain.sh and m4 macros are updated.
 
 log='logs/libtoolize.log'
 command="libtoolize --force &> $log"
@@ -231,7 +294,8 @@ if [ $? -ne 0 ]; then
 fi
 
 
-#-----  Create configure script
+#===============================================================================
+# autoreconf: Create configure script
 
 log='logs/autoreconf.log'
 command="autoreconf -ivf &> $log"
@@ -244,7 +308,8 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-#-----  Create makefiles
+#===============================================================================
+# configure: Create makefiles
 
 log='logs/configure.log'
 
@@ -260,7 +325,7 @@ fi
 # More information here:
 # http://www.gentoo.org/proj/en/base/amd64/howtos/index.xml?full=1#book_part1_chap3
 
-if [ "$platform" = "intel64" ]; then
+if [ "$platform" = '64bit' ]; then
     command=" \
         CFLAGS='$flags -fPIC -m64 $CFLAGS' \
         CXXFLAGS='$flags -fPIC -m64 $CXXFLAGS' \
@@ -287,7 +352,8 @@ if [ $? -ne 0 ]; then
 fi
 
 
-#-----  Build and install everything
+#===============================================================================
+# make: Build and install everything
 
 if [ $noMake -eq 1 ]; then
     log "Skipping make; execute the following command before doing manual makes:"

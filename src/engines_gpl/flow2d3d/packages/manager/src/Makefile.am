@@ -35,22 +35,18 @@ FMODULES += \
     -I$(top_builddir)/engines_gpl/flow2d3d/packages/io_dol_f/src \
     -I$(top_builddir)/engines_gpl/flow2d3d/packages/kernel/src/inichk
 
-AM_FCFLAGS += \
-    -fpp
-    # fpp is compiler dependent
-
 #-------------------------------------------------------------------------------
 #   Sources
 
 libtrisim_la_SOURCES = \
-     tdatmain.f90 \
+     tdatmain.F90 \
      tricom_init.F90 \
      tricom_step.F90 \
-     tricom_finish.f90 \
-     triend.f90 \
-     tripoi.f90 \
-     trisim_mod.f90 \
-     trisim.f90
+     tricom_finish.F90 \
+     triend.F90 \
+     tripoi.F90 \
+     trisim_mod.F90 \
+     trisim.F90
 
 #-------------------------------------------------------------------------------
 #   Libraries

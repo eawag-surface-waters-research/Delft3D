@@ -19,9 +19,9 @@ lib_LIBRARIES = libprecision.a
 #Sources
 libprecision_a_SOURCES = \
          precision_version.F90 \
-         precision_basics.f90 \
-         precision.f90 \
-         precision_sp.f90
+         precision_basics.F90 \
+         precision.F90 \
+         precision_sp.F90
 
 
 BUILT_SOURCES = ./always \

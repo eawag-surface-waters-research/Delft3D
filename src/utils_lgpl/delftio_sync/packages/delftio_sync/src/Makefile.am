@@ -30,7 +30,7 @@ libdelftio_sync_a_SOURCES = \
          d3s_get_discharges.f90 \
          d3s_put_levels.f90 \
          d3s_setup.f90 \
-         putget_dio.f \
+         putget_dio.f90 \
          sync_couple.f90 \
          sync_flm.f90 \
          sync_flowwave.f90 \

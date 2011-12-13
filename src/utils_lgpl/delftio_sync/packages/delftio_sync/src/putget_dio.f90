@@ -56,19 +56,19 @@
 !
       if ( first ) then
 !               Open data stream
-         dioOutStream = DioCreateStreamSynched ( dio_Binary_stream,
-     &                                           StreamName, 'w'  )
+         dioOutStream = DioCreateStreamSynched ( dio_Binary_stream, &
+                                                 StreamName, 'w'  )
 !               Create data set
          Nr_Locations = 1
          Nr_Variables = 1
          locs(1) = 'dioLocNam'
          vars(1) = 'dioVarNam'
          tims(1) = 'dioDate'
-         dioOutSet    = DioDefinePltDataSet    ( dioOutStream,
-     &                                           DataSetName ,
-     &                                           Dio_Plt_Real,
-     &                                           Nr_Variables, vars ,
-     &                                           Nr_Locations, locs )
+         dioOutSet    = DioDefinePltDataSet    ( dioOutStream,        &
+                                                 DataSetName ,        &
+                                                 Dio_Plt_Real,        &
+                                                 Nr_Variables, vars , &
+                                                 Nr_Locations, locs )
       endif
 !               Put dataset values
       values = 0.0
@@ -108,21 +108,21 @@
 !
       if ( first ) then
 !               Open data stream
-         dioInStream = DioCreateStreamSynched( dio_Binary_stream,
-     &                                         StreamName, 'r'  )
+         dioInStream = DioCreateStreamSynched( dio_Binary_stream, &
+                                               StreamName, 'r'  )
 !               Get data set info
-         dioInSet    = DioGetPltDataSetInfo  ( dioInStream,
-     &                                         DataSetName,
-     &                                         Nr_Variables, vars,
-     &                                         Nr_Locations, locs,
-     &                                         Nr_Times    , tims )
+         dioInSet    = DioGetPltDataSetInfo  ( dioInStream,        &
+                                               DataSetName,        &
+                                               Nr_Variables, vars, &
+                                               Nr_Locations, locs, &
+                                               Nr_Times    , tims )
       endif
 
 !               Get dataset values
-      getResult = DioGetPltDataSetReals ( dioInSet,tims(1),
-     &                                    Nr_Variables    ,
-     &                                    Nr_Locations    ,
-     &                                    values          )
+      getResult = DioGetPltDataSetReals ( dioInSet,tims(1), &
+                                          Nr_Variables    , &
+                                          Nr_Locations    , &
+                                          values          )
 
       return
       end subroutine getdio 

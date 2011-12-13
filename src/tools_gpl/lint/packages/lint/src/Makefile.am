@@ -11,4 +11,4 @@ lint_LDADD = \
 	$(top_builddir)/tools_gpl/lint/packages/lint_f/src/liblint_f.a \
 	$(top_builddir)/tools_gpl/lint/packages/lint_version_number/src/liblint_version_number.a \
 	-ldl \
-	$(FCLIBS) -lifcore -limf
+	$(FCLIBS) $(FCLIBS_ADDITIONAL)

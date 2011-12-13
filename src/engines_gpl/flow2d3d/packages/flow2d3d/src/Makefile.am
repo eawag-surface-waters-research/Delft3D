@@ -18,6 +18,8 @@ INCLUDES = \
     $(STANDARD_C_INCLUDES) \
     -I../include
 
+MPILIBS += $(MPILIBS_ADDITIONAL)
+
 #-------------------------------------------------------------------------------
 #Sources
 libflow2d3d_la_SOURCES = \

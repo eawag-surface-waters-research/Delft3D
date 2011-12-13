@@ -16,4 +16,4 @@ datsel_LDADD = \
 	$(top_builddir)/utils_lgpl/utils_flow/packages/utils_flow_c/src/libutils_flow_c.a \
 	$(top_builddir)/utils_lgpl/utils_flow/packages/utils_flow_version_number/src/libutils_flow_version_number.a \
 	-ldl \
-	$(FCLIBS) -lifcore -limf
+	$(FCLIBS) $(FCLIBS_ADDITIONAL)

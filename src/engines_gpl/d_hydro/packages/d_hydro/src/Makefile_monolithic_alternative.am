@@ -34,15 +34,15 @@ INCLUDES = \
 ####        -I$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src
 
 
-MPILIBS = \
-    -L/opt/mpich2/lib -lmpich
+MPILIBS += \
+    $(MPILIBS_ADDITIONAL)
 
 
 #-------------------------------------------------------------------------------
 #   Libraries
 
 d_hydro_exe_LDFLAGS = \
-    -lifcoremt
+    $(LDFLAGSMT_ADDITIONAL) 
 
 d_hydro_exe_LDADD = \
     $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d/src/*.lo \

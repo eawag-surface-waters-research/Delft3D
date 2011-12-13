@@ -16,7 +16,7 @@ lib_LTLIBRARIES = libparallel.la
 #Includes
 # TODO:/opt/mpich2/include should be configured....
 FINCLUDES += \
-        -I/opt/mpich2/include \
+        -I$(MPI_INCLUDE) \
         -I$(top_builddir)/utils_lgpl/parallel_mpi/include \
         -I$(top_builddir)/utils_lgpl/precision/include \
         -I$(top_builddir)/engines_gpl/flow2d3d/packages/data/include
@@ -30,53 +30,52 @@ FMODULES += \
 
 # fpp is compiler dependent (convention is to use .F90 files for preprocessing)
 AM_FCFLAGS += \
-        -DDFMPI \
-        -fpp
+        -DDFMPI
 
 #-------------------------------------------------------------------------------
 #Sources
 libparallel_la_SOURCES = \
-         dfparall.f90 \
-         initdfparall.f90 \
-         dfinitmpi.f90 \
-         dfsync.f90 \
-         dfexitmpi.f90 \
-         dfbroadc.f90 \
-         dfwaiti.f90 \
-         dfwaitr.f90 \
-         dfwaitd.f90 \
-         dfsendnb.f90 \
-         dfrecvnb.f90 \
-         dfsendi.f90 \
-         dfsendr.f90 \
-         dfsendd.f90 \
-         dfreduce.f90 \
-         cparri.f90 \
-         cparrd.f90 \
-         cparrr.f90 \
-         dfupdr.f90 \
-         dfupdd.f90 \
-         dfupdi.f90 \
-         dfexchg.f90 \
-         dfdecomp.f90 \
-         dfpartit.f90 \
-         dfbladm.f90 \
-         dforb.f90 \
-         dfupdgeo.f90 \
-         dfstrip.f90 \
-         dfmassc.f90 \
-         dffunctionals.f90 \
-         dfgather.f90 \
-         dfgather_grddim.f90 \
-         dfwrirst.f90 \
-         dfwrmorm1.f90 \
-         dfwrmorm2.f90 \
-         dfwrsedm.f90 \
-         dfwrsedmavg.f90 \
-         dfwrsedh.f90 \
-         adjlin.f90 \
-         rdencl.f90 \
-         strgrd.f90
+         dfparall.F90 \
+         initdfparall.F90 \
+         dfinitmpi.F90 \
+         dfsync.F90 \
+         dfexitmpi.F90 \
+         dfbroadc.F90 \
+         dfwaiti.F90 \
+         dfwaitr.F90 \
+         dfwaitd.F90 \
+         dfsendnb.F90 \
+         dfrecvnb.F90 \
+         dfsendi.F90 \
+         dfsendr.F90 \
+         dfsendd.F90 \
+         dfreduce.F90 \
+         cparri.F90 \
+         cparrd.F90 \
+         cparrr.F90 \
+         dfupdr.F90 \
+         dfupdd.F90 \
+         dfupdi.F90 \
+         dfexchg.F90 \
+         dfdecomp.F90 \
+         dfpartit.F90 \
+         dfbladm.F90 \
+         dforb.F90 \
+         dfupdgeo.F90 \
+         dfstrip.F90 \
+         dfmassc.F90 \
+         dffunctionals.F90 \
+         dfgather.F90 \
+         dfgather_grddim.F90 \
+         dfwrirst.F90 \
+         dfwrmorm1.F90 \
+         dfwrmorm2.F90 \
+         dfwrsedm.F90 \
+         dfwrsedmavg.F90 \
+         dfwrsedh.F90 \
+         adjlin.F90 \
+         rdencl.F90 \
+         strgrd.F90
 
 #-------------------------------------------------------------------------------
 #Libraries

@@ -143,4 +143,5 @@ else
         ifelse([$1],,[AC_DEFINE(HAVE_MPI,1,[Define if you have the MPI library.])],[$1])
         :
 fi
+AM_CONDITIONAL([HAVE_MPI], [test x"$HAVE_MPI" = x1])
 ])dnl ACX_MPI
