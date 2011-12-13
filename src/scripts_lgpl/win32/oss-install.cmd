@@ -199,7 +199,7 @@ rem ===========================
     echo "installing flow2d3d_openda . . ."
 
     set dest_bin="!dest_main!\w32\flow\bin"
-    set dest_lib="!dest_main!\w32\flow\lib"
+    set dest_lib="!dest_main!\w32\lib"
     set dest_default="!dest_main!\w32\flow\default"
 
     call :makeDir !dest_bin!
