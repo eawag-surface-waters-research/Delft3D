@@ -30,7 +30,7 @@
 		<File RelativePath=".\src\d3s_get_discharges.f90"/>
 		<File RelativePath=".\src\d3s_put_levels.f90"/>
 		<File RelativePath=".\src\d3s_setup.f90"/>
-		<File RelativePath=".\src\putget_dio.f"/>
+		<File RelativePath=".\src\putget_dio.f90"/>
 		<File RelativePath=".\src\sync_couple.f90"/>
 		<File RelativePath=".\src\sync_flm.f90"/>
 		<File RelativePath=".\src\sync_flowwave.f90"/>

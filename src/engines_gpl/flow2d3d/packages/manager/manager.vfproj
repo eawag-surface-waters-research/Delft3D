@@ -25,8 +25,8 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Source Files" Filter="fi;fd">
-		<File RelativePath="src\tdatmain.f90"/>
-		<File RelativePath="src\tricom_finish.f90">
+		<File RelativePath="src\tdatmain.F90"/>
+		<File RelativePath="src\tricom_finish.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration></File>
 		<File RelativePath="src\tricom_init.F90">
@@ -39,10 +39,10 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes" BoundsCheck="false"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath="src\triend.f90"/>
-		<File RelativePath="src\tripoi.f90">
+		<File RelativePath="src\triend.F90"/>
+		<File RelativePath="src\tripoi.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration></File>
-		<File RelativePath="src\trisim.f90"/>
-		<File RelativePath="src\trisim_mod.f90"/></Filter></Files>
+		<File RelativePath="src\trisim.F90"/>
+		<File RelativePath="src\trisim_mod.F90"/></Filter></Files>
 	<Globals/></VisualStudioProject>
