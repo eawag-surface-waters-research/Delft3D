@@ -4,7 +4,7 @@
 		<Platform Name="Win32"/></Platforms>
 	<Configurations>
 		<Configuration Name="Debug|Win32">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="../data/lib/$(ConfigurationName);../data/include;../manager/lib/$(ConfigurationName);../kernel/lib/$(ConfigurationName);../../../../utils_lgpl/utils_flow/lib/$(ConfigurationName)/static;../../../../utils_lgpl/ec_module/lib/$(ConfigurationName)/static;../../../../utils_lgpl/delftio/lib/$(ConfigurationName)/static;../../../../utils_lgpl/inifiles/lib/$(ConfigurationName)/static;../../../../utils_lgpl/precision/lib/$(ConfigurationName)/static;../../../../utils_lgpl/precision/include;../../../../utils_lgpl/esmfsm/include;../../../../third_party_open/mpich2/include;../../../../third_party_open/openda/core/native/include;./include" Interfaces="true" WarnInterfaces="true" Traceback="true" NullPointerCheck="true" UninitializedVariablesCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="../../../../engines_gpl/flow2d3d/packages/data/lib/$(ConfigurationName);../../../../engines_gpl/flow2d3d/packages/data/include;../../../../engines_gpl/flow2d3d/packages/manager/lib/$(ConfigurationName);../../../../engines_gpl/flow2d3d/packages/kernel/lib/$(ConfigurationName);../../../../utils_lgpl/utils_flow/lib/$(ConfigurationName)/static;../../../../utils_lgpl/ec_module/lib/$(ConfigurationName)/static;../../../../utils_lgpl/delftio/lib/$(ConfigurationName)/static;../../../../utils_lgpl/inifiles/lib/$(ConfigurationName)/static;../../../../utils_lgpl/precision/lib/$(ConfigurationName)/static;../../../../utils_lgpl/precision/include;../../../../utils_lgpl/esmfsm/include;../../../../third_party_open/mpich2/include;../../../../third_party_open/openda/core/native/include;./include" Interfaces="true" WarnInterfaces="true" Traceback="true" NullPointerCheck="true" UninitializedVariablesCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
 				<Tool Name="VFLinkerTool" OutputFile="..\bin\win32\\$(ProjectName).exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="D:\src\ds_openmi_openda\engines\delftflow\packages\d3df_dll\win32_debug\" GenerateDebugInformation="true" SubSystem="subSystemConsole"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
@@ -24,6 +24,5 @@
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
-		<File RelativePath=".\test_dll_noise.F90"/>
-	</Files>
+		<File RelativePath=".\test_dll_noise.F90"/></Files>
 	<Globals/></VisualStudioProject>
