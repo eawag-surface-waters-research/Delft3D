@@ -513,7 +513,6 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                        & mdfrec    ,rval      ,rdef      ,nodef     ,nrrec     , &
                        & ntrec     ,lundia    ,gdp       )
              if (lerror) then
-                error  = .true.
                 lerror = .false.
              else
                 if (        comparereal(rval(1),misval) /= 0 &
