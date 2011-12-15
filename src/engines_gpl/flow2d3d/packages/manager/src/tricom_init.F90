@@ -1600,7 +1600,6 @@ subroutine tricom_init(gdp)
     ! related pseminit is in tricom.f90 at label 9996
     !
     call vseminit
-    if (error) goto 9998
     !
     ! Initialize RTC-communication (includes synchronisation across multiple
     ! domains and hence needs to be outside semaphore block).

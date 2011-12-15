@@ -129,7 +129,6 @@ subroutine rtc_comm_init(error     ,nambar    ,kfs       ,kfsmin    , &
     tparget_names  => gdp%gdrtc%tparget_names
     zrtcsta        => gdp%gdrtc%zrtcsta
     !
-    error = .false.
     if (rtcmod == dataFromRTCToFLOW .or. rtcmod == dataFromFLOWToRTC) then
       if (rtcmod == dataFromFLOWToRTC) then
          !
