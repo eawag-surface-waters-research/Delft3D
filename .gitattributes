@@ -3724,3 +3724,4 @@ src/utils_lgpl/utils_flow/tests/01_test/test_01_lib.vfproj -text
 src/utils_lgpl/utils_flow/tests/01_test/testcase/readme.txt -text
 src/utils_lgpl/utils_flow/tests/01_test/testcase/run01test -text
 src/utils_lgpl/utils_flow/tests/01_test/testcase/run01test.bat -text
+/tsvn-auto-props -text
