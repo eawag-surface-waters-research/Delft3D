@@ -2454,6 +2454,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/qp_gettype.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_icon.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_interface.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_interface_update_options.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/qp_netcdf_get.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_plot.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_plot_default.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_plot_pnt.m -text
