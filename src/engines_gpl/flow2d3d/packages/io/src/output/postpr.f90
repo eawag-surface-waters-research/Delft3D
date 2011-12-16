@@ -248,7 +248,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     integer(pntrsize)                    , pointer :: vmean
     integer(pntrsize)                    , pointer :: vmnldf
     integer(pntrsize)                    , pointer :: voldis
-    integer(pntrsize)                    , pointer :: volum0
+    integer(pntrsize)                    , pointer :: volum1
     integer(pntrsize)                    , pointer :: vortic
     integer(pntrsize)                    , pointer :: w1
     integer(pntrsize)                    , pointer :: windu
@@ -585,7 +585,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     vmean               => gdp%gdr_i_ch%vmean
     vmnldf              => gdp%gdr_i_ch%vmnldf
     voldis              => gdp%gdr_i_ch%voldis
-    volum0              => gdp%gdr_i_ch%volum0
+    volum1              => gdp%gdr_i_ch%volum1
     vortic              => gdp%gdr_i_ch%vortic
     w1                  => gdp%gdr_i_ch%w1
     windu               => gdp%gdr_i_ch%windu
@@ -779,7 +779,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                 &  mub       , nmaxus    , nsrc      , i(kcs)    , i(kfsmin) ,  &
                 &  i(kfsmax) , nst       , runid     , r(xcor)   , r(ycor)   ,  &
                 &  r(xz)     , r(yz)     , r(guv)    , r(gvu)    , r(guu)    ,  &
-                &  r(gvv)    , r(gsqs)   , r(volum0) , dtsec     , itdate    ,  &
+                &  r(gvv)    , r(gsqs)   , r(volum1) , dtsec     , itdate    ,  &
                 &  tstart    , tstop     , dt        , r(thick)  , lsal      ,  &
                 &  ltem      , lsed      , r(r1)     , r(areau)  , r(areav)  ,  &
                 &  r(taubmx) , r(dicww)  , d(dps)    , r(cfurou) , r(cfvrou) ,  &
