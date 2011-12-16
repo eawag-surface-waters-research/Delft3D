@@ -1635,7 +1635,8 @@ subroutine tricom_init(gdp)
     !
 9998 continue
     if (error) then
-      gdp%errorcode = -1 
+      gdp%errorcode = -1
+      call d3stop(1, gdp)
     endif
     
 end subroutine tricom_init

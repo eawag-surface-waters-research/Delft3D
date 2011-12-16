@@ -58,8 +58,8 @@ D_Hydro_CoreDump (
     ) {
 
     // ToDo: Check whether the core dump was actually requested.
-
-    printf ("\n!! INTENDED CORE DUMP OF D_HYDRO FOR DEBUGGING PURPOSES !!\n\n");
+    //       Only activate the printf statement when a core dump is actually requested
+    // printf ("\n!! INTENDED CORE DUMP OF D_HYDRO FOR DEBUGGING PURPOSES !!\n\n");
     fflush (stdout);
     fflush (stderr);
 
