@@ -63,10 +63,10 @@ D_Hydro_CoreDump (
     fflush (stdout);
     fflush (stderr);
 
-    int * null = NULL;
-    int never = *null;
+    // When requested: generate a core dump:
+    // int * null = NULL;
+    // int never = *null;
 
-    // Bye-bye!
     }
 
 
