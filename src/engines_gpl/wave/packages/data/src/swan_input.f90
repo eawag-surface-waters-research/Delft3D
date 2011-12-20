@@ -3841,7 +3841,7 @@ subroutine write_swan_inp (wavedata, outcnt, &
     mudfil = 'MUDNOW'
     vegfil = 'VEGNOW'
     !
-    if (sr%swwindt .or. dom%n_meteofiles_dom > 0) wfil = 'WNDNOW'
+    if (dom%qextnd(q_wind)>0 .or. dom%n_meteofiles_dom > 0) wfil = 'WNDNOW'
     nb     = sr%nbound
     !
     mxfr       = 0 !swani(11)
@@ -4081,7 +4081,7 @@ subroutine write_swan_inp (wavedata, outcnt, &
     !
     !     File-name current field (temporary file)
     !
-    if (swuvt .or. swuvi) then
+    if (dom%qextnd(q_cur)>0 .or. swuvi) then
        lijn = 'INPGRID _'
        line(1:18) = 'CURREN CURV 0. 0. '
        write (line(19:28), '(2(I4,1X))')    dom%mxc, dom%myc
@@ -4177,7 +4177,7 @@ subroutine write_swan_inp (wavedata, outcnt, &
     !
     !     definition of grid for wind field
     !
-    if (varwin .or. dom%n_meteofiles_dom > 0) then
+    if (dom%qextnd(q_wind)>0 .or. dom%n_meteofiles_dom > 0) then
        !        *** definition of grid ***
        !
        if (.not.sr%curviwind) then

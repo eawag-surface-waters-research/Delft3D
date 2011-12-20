@@ -201,7 +201,7 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
                                     & 'BOTNOW', extr_var1, extr_var2, &
                                     & sumvars , positiveonly        )
          endif
-         if (swan_run%swuvt .or. swan_run%swuvi) then
+         if (dom%qextnd(q_cur)>0 .or. swan_run%swuvi) then
             !
             ! Write SWAN velocity file
             !
@@ -218,7 +218,7 @@ subroutine swan_tot (n_swan_grids, n_flow_grids, wavedata)
                                     & 'CURNOW', extr_var1, extr_var2, &
                                     & sumvars , positiveonly        )
          endif
-         if (swan_run%swwindt .or. dom%n_meteofiles_dom > 0) then
+         if (dom%qextnd(q_wind)>0 .or. dom%n_meteofiles_dom > 0) then
             !
             ! Write SWAN wind file
             !
