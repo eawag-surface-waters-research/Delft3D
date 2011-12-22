@@ -387,6 +387,7 @@ subroutine alloc_swan(sr)
       allocate (sr%bnd(i)%spectrum  (sr%maxsect(i)))
    enddo
    allocate (sr%dom     (sr%maxnest  ))
+   sr%dom(:)%n_meteofiles_dom = 0
 end subroutine alloc_swan
 !
 !
