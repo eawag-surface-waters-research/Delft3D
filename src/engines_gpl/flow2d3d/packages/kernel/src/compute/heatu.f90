@@ -367,19 +367,21 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
           qbl_out    => gdp%gdheat%qbl_out
           qin_out    => gdp%gdheat%qin_out
           qnet_out   => gdp%gdheat%qnet_out
-          hlc_out    => gdp%gdheat%hlc_out
           hfree_out  => gdp%gdheat%hfree_out
           efree_out  => gdp%gdheat%efree_out
-          qmis_out   => gdp%gdheat%qmis_out
           qeva_out  = 0.0_fp
           qco_out   = 0.0_fp
           qbl_out   = 0.0_fp
           qin_out   = 0.0_fp
           qnet_out  = 0.0_fp
-          hlc_out   = 0.0_fp
           hfree_out = 0.0_fp
           efree_out = 0.0_fp
-          qmis_out  = 0.0_fp          
+          if (ktemp == 3) then
+             hlc_out    => gdp%gdheat%hlc_out
+             qmis_out   => gdp%gdheat%qmis_out
+             hlc_out   = 0.0_fp
+             qmis_out  = 0.0_fp          
+          endif
        endif
     endif
     !
