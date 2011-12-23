@@ -64,6 +64,7 @@ echo ----------------------------------------------------------------------
 
     ### General for MPICH2, startup your MPICH2 communication network (you
     ### can check if it is already there with mpdtrace).
+mpd &
 mpdboot -n $NHOSTS -f $(pwd)/machinefile --ncpus=2
 
 # link mpich debug rubbish to /dev/null
@@ -76,7 +77,7 @@ done
 
     ### General, start delftflow in parallel by means of mpirun.
     ### The machines in the h4 cluster are dual core; start 2*NHOSTS parallel processes
-mpirun -np `expr $NHOSTS \* 2` $exedir/deltares_hydro.exe $argfile
+mpirun -np $NHOSTS $exedir/deltares_hydro.exe $argfile
     ### alternatives:
     ### mpiexec -n $DELTAQ_NumNodes delftflow_91.exe -r $inputfile.mdf
     ### mpiexec -n `expr $DELTAQ_NumNodes \* 2` $exedir/deltares_hydro.exe $argfile
