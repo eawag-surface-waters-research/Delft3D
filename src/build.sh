@@ -210,8 +210,8 @@ addpath PATH \
 if [ "$compiler" = 'gnu' ]; then
     addpath PATH /opt/mpich2-1.4.1-gcc-4.6.2/bin
     export MPI_INCLUDE=/opt/mpich2-1.4.1-gcc-4.6.2/include
-    # export MPILIBS_ADDITIONAL="-L/opt/mpich2-1.4.1-gcc-4.6.2/lib -lfmpich"
-    export MPILIBS_ADDITIONAL=" "
+    export MPILIBS_ADDITIONAL="-L/opt/mpich2-1.4.1-gcc-4.6.2/lib -lfmpich -lmpich -lmpl"
+    # export MPILIBS_ADDITIONAL=" "
     export MPIFC=/opt/mpich2-1.4.1-gcc-4.6.2/bin/mpif90  
 else
     # Intel compilers
