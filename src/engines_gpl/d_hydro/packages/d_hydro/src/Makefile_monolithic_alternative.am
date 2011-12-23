@@ -102,7 +102,7 @@ d_hydro_exe_LDADD = \
     $(EXTERNALSOURCES) \
     \
     $(MPILIBS) \
-    $(FCLIBS) -lirc_s -ldl -lmcheck -lsvml -lirc
+    $(FCLIBS) -ldl
 
 
 
