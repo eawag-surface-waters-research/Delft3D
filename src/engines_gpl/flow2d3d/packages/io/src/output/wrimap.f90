@@ -220,6 +220,7 @@ subroutine wrimap(lundia    ,error     ,trifil    ,selmap    ,simdat    , &
     error  = .false.
     filnam = trifil(1:3) // 'm' // trifil(5:)
     errmsg = ' '
+    lsedbl = lsedtot - lsed
     !
     call dfsync(gdp)
     mfg    => gdp%gdparall%mfg

@@ -73,6 +73,7 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     integer                      , external   :: getelt
     integer                      , external   :: clsnef
     integer                      , external   :: inqelm
+    integer                      , external   :: neferr
     integer                                   :: istat
     integer                                   :: rst_lsed
     integer                                   :: rst_lsedbl
@@ -107,11 +108,12 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     real(fp), dimension(:,:,:,:), allocatable :: msed_g     
     real(fp), dimension(:,:,:)  , allocatable :: thlyr_g
     character(len=256)                        :: dat_file
+    character(len=256)                        :: def_file
     character(len=8)                          :: elmtyp
     character(len=16)                         :: elmqty
     character(len=16)                         :: elmunt
     character(len=64)                         :: elmdes
-    character(len=256)                        :: def_file
+    character(len=1024)                       :: errmsg
     integer                                   :: layerfrac
 !
 !! executable statements -------------------------------------------------------
@@ -163,10 +165,29 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     ! 
     if ( inode /= master ) goto 50 
     !
+    ! determine number of suspended sediment fractions
+    !
     ierror = getelt(fds, 'map-const', 'LSED'  , cuindex, 1, 4, rst_lsed)
-    if (ierror/= 0) goto 9999
+    if (ierror /= 0) then
+       !
+       ! if LSED has not been written to the map-file then LSED=0
+       ! remove the error message from NEFIS error stack
+       !
+       rst_lsed   = 0
+       ierror     = neferr(0,errmsg)
+    endif
+    !
+    ! determine number of bedload sediment fractions
+    !
     ierror = getelt(fds, 'map-const', 'LSEDBL', cuindex, 1, 4, rst_lsedbl)
-    if (ierror/= 0) goto 9999
+    if (ierror /= 0) then
+       !
+       ! if LSEDBL has not been written to the map-file then LSEDBL=0
+       ! remove the error message from NEFIS error stack
+       !
+       rst_lsedbl = 0
+       ierror     = neferr(0,errmsg)
+    endif
     rst_lsedtot = rst_lsed + rst_lsedbl
     if (rst_lsedtot /= lsedtot) goto 9999
     !
@@ -333,8 +354,8 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     !
 9999 continue
     if (inode == master) then
-       if (associated(rst_msed)) deallocate (rst_msed)
-       if (associated(rst_thlyr))   deallocate (rst_thlyr)     
+       if (associated(rst_msed))  deallocate (rst_msed)
+       if (associated(rst_thlyr)) deallocate (rst_thlyr)     
        ierror = clsnef(fds) 
     endif
 end subroutine restart_lyrs
