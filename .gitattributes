@@ -2312,6 +2312,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/printdims.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/CloseSplashScreen.mexw32 -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/Contents.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/abbrevfn.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/adcircmesh.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/adddimension.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/addlocation.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/ai_ungen.m -text
@@ -2374,6 +2375,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/exepath.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/exepath.mexglx -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/filesequal.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/findseries.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/flexmeshfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/fls.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/flsfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/gencontour.m -text
@@ -2420,6 +2422,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/matlabfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/md_dialog.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/md_print.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/mike.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/mikemesh.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/mikezerofil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/morf.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/morftreefil.m -text
@@ -2427,6 +2430,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/multiline.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/nc_interpret.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/netcdffil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/nfs_tritonfil.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/nodelemesh.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/options.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/optionstransfer.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/pcraster.m -text
