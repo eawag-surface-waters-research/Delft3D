@@ -50,8 +50,19 @@ AC_PROG_CPP
 AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
-AC_PROG_LEX
-AC_PROG_YACC
+# These standard macros don't work well (don't throw an error on missing yacc)
+# According to docs we can better use AM_PROG_LEX and AC_PROG_YACC
+AC_PROG_YACC 
+AM_PROG_LEX
+# So we'll double check
+AC_CHECK_PROGS(LEXPROG, flex lex, :)
+if test "x$LEXPROG" = "x:"; then
+   AC_MSG_ERROR([Can't find lex, please install or set the LEX variable])
+fi
+AC_CHECK_PROGS(YACCPROG, 'bison -y' byacc yacc, :)
+if test "x$YACCPROG" = "x:"; then
+   AC_MSG_ERROR([Can't find yacc, please install or set the YACC variable])
+fi
 
 AC_LANG_PUSH([C++])
 dnl Check for MPI (sets MPIFC, MPILIBS, HAVE_MPI)

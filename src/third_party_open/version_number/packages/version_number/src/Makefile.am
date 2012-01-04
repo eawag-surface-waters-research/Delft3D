@@ -16,7 +16,6 @@ bin_PROGRAMS = version_number.exe
 #Sources
 version_number_exe_SOURCES = \
 	version_number.f90
-
-install-exec-local:
+all-local: version_number.exe
 	cp -fp $(top_builddir)/third_party_open/version_number/packages/version_number/src/version_number.exe $(top_builddir)/third_party_open/version_number/bin/linux
 

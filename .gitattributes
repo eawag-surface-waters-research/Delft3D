@@ -92,6 +92,7 @@ src/Makefile.am -text
 src/NEWS -text
 src/README -text
 src/TODO -text
+src/autogen.sh -text
 src/build.cmd -text
 src/build.sh -text
 src/clean.cmd -text
