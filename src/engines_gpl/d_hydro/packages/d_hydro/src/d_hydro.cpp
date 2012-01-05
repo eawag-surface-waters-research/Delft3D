@@ -43,6 +43,7 @@
 #if defined(HAVE_CONFIG_H)
 #include "config.h"
 #include <dlfcn.h>
+#include <libgen.h>
 #endif
 #include <expat.h>
 #include <limits.h>

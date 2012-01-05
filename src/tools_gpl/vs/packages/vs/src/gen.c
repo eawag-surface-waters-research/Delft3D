@@ -38,8 +38,17 @@
 #include <stdarg.h>
 #include <limits.h>
 
+#ifdef HAVE_CONFIG_H
+#ifdef HAVE_MALLOC_H
+#   include <malloc.h>
+#endif
+#ifdef HAVE_MALLOC_MALLOC_H
+#   include <malloc/malloc.h>
+#endif
+#else
 #if !defined (__convex)
 #   include <malloc.h>
+#endif
 #endif
 
 #if defined MSDOS || WIN32

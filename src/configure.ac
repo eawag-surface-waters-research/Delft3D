@@ -175,7 +175,7 @@ AC_ARG_ENABLE(double,
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([arpa/inet.h fcntl.h netdb.h netinet/in.h stdlib.h string.h sys/socket.h sys/time.h unistd.h malloc.h malloc/malloc.h])
+AC_CHECK_HEADERS([libgen.h arpa/inet.h fcntl.h netdb.h netinet/in.h stdlib.h string.h sys/socket.h sys/time.h unistd.h malloc.h malloc/malloc.h])
 
 #check for jni.h (for later)
 #AC_JNI_INCLUDE_DIR
