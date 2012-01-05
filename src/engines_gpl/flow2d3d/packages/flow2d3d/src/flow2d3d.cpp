@@ -33,37 +33,39 @@
 //  Irv.Elshoff@Deltares.NL
 //  29 oct 11
 //------------------------------------------------------------------------------
-//!
-//!> \file
-//!! The dynamic library 'Delft3D-FLOW'.
-//!! Flow-related routines are in trisim.f90 and below.
-//!<
+//
+/// \file
+/// The dynamic library 'Delft3D-FLOW'.
+/// Flow-related routines are in trisim.f90 and below.
+///
 
-//! Content specifically for the Doxygen-index page:
-//!> \mainpage Delft3D-FLOW API docs
-//!! \li <b> Main program</b>: d_hydro.cpp
-//!! \li <b> Dynamic library entrances</b>: flow2d3d_dll.f90
-//!! \li <b> DD and RemoteOLV preparations, start all processes</b>: hydra.cpp (Hydra::Execute)
-//!! \li <b> Global data</b>: globaldata.f90 (flow, geometry, times, parameters, ...)
-//!! \li <b> Subdomain calculation toplevel</b>: trisim.f90
-//!! \li <b> Preprocessor: Convert time related data</b>: tdatom.f90
-//!! \li <b> Timeloop</b>: tricom_step.F90
-//!! \li <b> Main routine within one time step</b>:
-//!! trisol.f90 (sigma layers)
-//!! z_trisol.f90 (z layers, hydrostatic)
-//!! z_trisol_nhfull.f90 (z layers, non-hydrostatic)
-//!<
+// Content specifically for the Doxygen-index page:
+/**
+ * \mainpage Delft3D-FLOW API docs
+ * \li <b> Main program</b>: d_hydro.cpp
+ * \li <b> Dynamic library entrances</b>: flow2d3d_dll.f90
+ * \li <b> DD and RemoteOLV preparations, start all processes</b>: hydra.cpp (Hydra::Execute)
+ * \li <b> Global data</b>: globaldata.f90 (flow, geometry, times, parameters, ...)
+ * \li <b> Subdomain calculation toplevel</b>: trisim.f90
+ * \li <b> Preprocessor: Convert time related data</b>: tdatom.f90
+ * \li <b> Timeloop</b>: tricom_step.F90
+ * \li <b> Main routine within one time step</b>:
+ * trisol.f90 (sigma layers)
+ * z_trisol.f90 (z layers, hydrostatic)
+ * z_trisol_nhfull.f90 (z layers, non-hydrostatic)
+ */
 
-//!> Perform a Delft3D-FLOW computation, given a set of configuration parameters.
-//!!
-//!! Phases:
-//!! - 1) Interpretation of the keys/values from the config file
-//!! - 2) Create runid, based on mdfFile/ddbFile
-//!! - 3) In dd_execute:
-//!!    - RemoteOLV initialization
-//!!    - DD initialization
-//!!    - Start all processes:
-
+/**
+ * Perform a Delft3D-FLOW computation, given a set of configuration parameters.
+ *
+ * Phases:
+ * - 1) Interpretation of the keys/values from the config file
+ * - 2) Create runid, based on mdfFile/ddbFile
+ * - 3) In dd_execute:
+ *    - RemoteOLV initialization
+ *    - DD initialization
+ *    - Start all processes:
+ */
 //------------------------------------------------------------------------------
 
 
