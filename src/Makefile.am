@@ -5,7 +5,8 @@ SUBDIRS = \
     utils_lgpl \
     engines_gpl \
     tools_gpl \
-    plugins_lgpl
+    plugins_lgpl \
+    scripts_lgpl
 
 ACLOCAL_AMFLAGS = -I m4
 EXTRA_DIST = m4

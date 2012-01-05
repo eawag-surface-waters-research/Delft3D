@@ -1279,6 +1279,8 @@ src/plugins_lgpl/plugin_delftflow_traform/src/partheniades_krone.f90 -text
 src/plugins_lgpl/plugin_delftflow_traform/src/settling_velocity.f90 -text
 src/plugins_lgpl/plugin_delftflow_traform/src/shld.f90 -text
 src/plugins_lgpl/plugin_delftflow_traform/src/vrijn84_riv_77.f90 -text
+src/scripts_lgpl/Makefile.am -text
+src/scripts_lgpl/deltares_hydro/Makefile.am -text
 src/scripts_lgpl/deltares_hydro/deltares_hydro.tcl -text
 src/scripts_lgpl/linux/make_revision.sh -text
 src/scripts_lgpl/linux/oss-install.sh -text
@@ -1870,7 +1872,6 @@ src/third_party_open/swan/scripts/swan_install.bat -text
 src/third_party_open/swan/scripts/swan_install.sh -text
 src/third_party_open/tclkit/bin/intel/deltares_hydro.exe -text
 src/third_party_open/tclkit/bin/win32/deltares_hydro.exe -text
-src/third_party_open/tclkit/deltares_hydro.tcl -text
 src/third_party_open/tclkit/sdx.kit -text
 src/third_party_open/tclkit/tcl_to_exe.bat -text
 src/third_party_open/tclkit/tcl_to_exe.sh -text

@@ -1,3 +1,4 @@
+#!/usr/bin/env tclsh
 # --------------------------------------------------------------------
 #   Author:    adri.mourits@deltares.nl
 # deltares_hydro.tcl

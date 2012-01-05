@@ -491,6 +491,8 @@ utils_lgpl/utils_flow/packages/utils_flow/Makefile
 utils_lgpl/utils_flow/packages/utils_flow/src/Makefile
 utils_lgpl/utils_flow/packages/utils_flow_version_number/Makefile
 utils_lgpl/utils_flow/packages/utils_flow_version_number/src/Makefile
+scripts_lgpl/Makefile
+scripts_lgpl/deltares_hydro/Makefile
 		 ])
 
 
