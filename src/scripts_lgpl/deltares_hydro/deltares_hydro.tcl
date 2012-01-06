@@ -178,7 +178,9 @@ proc writeXML { } {
 set xmlBaseName "TMP_config_flow2d3d"
 set xmlFile [format "%s_%s.xml" $xmlBaseName [pid]]
 set debug 0
-set exedir   [file dirname [file normalize [info nameofexecutable]]]
+# This probably only works if called as shell script.... not sure what argv0 is in the case of an exe....
+set exedir   [file dirname [file normalize $argv0]]
+# set exedir   [file dirname [file normalize [info nameofexecutable]]]
 set exename  "d_hydro.exe"
 set fullexename [file join $exedir $exename]
 set infile [lindex $argv 0]
