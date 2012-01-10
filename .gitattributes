@@ -1481,6 +1481,8 @@ src/third_party_open/mpich2/readme.txt -text
 src/third_party_open/mpich2/setup.jpg -text
 src/third_party_open/netcdf/bin/ncdump.exe -text
 src/third_party_open/netcdf/bin/ncgen.exe -text
+src/third_party_open/netcdf/bin/win32/ncdump.exe -text
+src/third_party_open/netcdf/bin/win32/ncgen.exe -text
 src/third_party_open/netcdf/lib/linux/netcdf.mod -text
 src/third_party_open/netcdf/lib/win32/debug/f77_netcdf.lib -text
 src/third_party_open/netcdf/lib/win32/debug/f90_netcdf.lib -text
