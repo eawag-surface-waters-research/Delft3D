@@ -78,7 +78,7 @@ subroutine read_bot(dpb       ,mb        ,nb        ,botfil    ,fac  )
     enddo
     return
   999 continue
-    write (*, '('' End of file, file '',A)') botfil
+    write (*, '('' Premature end of file while reading file: '',A)') botfil
     close (lunbot)
-    stop 'redbot'
+    stop
 end subroutine read_bot 
