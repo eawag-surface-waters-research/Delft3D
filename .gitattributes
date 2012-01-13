@@ -2459,6 +2459,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/qp_defaultaxessettings.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_export.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_figurebars.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_file2function.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/qp_filefilters.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_fmem.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_fontsettings.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_gettype.m -text
