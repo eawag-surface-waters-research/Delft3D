@@ -970,10 +970,10 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     !
     if (index(selmap(14:15),'Y') /= 0) then
 
-       allocate(rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub,kmax,1:ltur ))
+       allocate(rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub,0:kmax,1:ltur ))
        rbuff4(:,:,:,:) = -999.0_fp
        do l = 1, ltur
-          do k = 1, kmax
+          do k = 0, kmax
              do m = 1, mmax
                 do n = 1, nmaxus
                    if (zmodel) then
