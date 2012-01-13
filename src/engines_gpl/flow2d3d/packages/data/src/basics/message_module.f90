@@ -90,7 +90,7 @@ subroutine message_module_info(messages)
     ! body
     !
     call addmessage(messages,'$Id$')
-    call addmessage(messages,'$URL$')
+    call addmessage(messages,'@(#) $URL$'//char(0))
 end subroutine message_module_info
 !
 !
