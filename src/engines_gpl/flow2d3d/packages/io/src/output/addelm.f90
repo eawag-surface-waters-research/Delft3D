@@ -98,42 +98,42 @@ subroutine addelm(nefisgroup ,elmnms_new ,elmqty_new ,elmunt_new ,elmtps_new , &
     !
     !  Element number of bytes
     !
-    call reallocP(gdp%nefisio%nefiselem(nefisgroup)%nbytsg, ie, stat=istat)
+    if (istat==0) call reallocP(gdp%nefisio%nefiselem(nefisgroup)%nbytsg, ie, stat=istat)
     if (istat==0) then
        gdp%nefisio%nefiselem(nefisgroup)%nbytsg(ie) = nbytsg_new
     endif
     !
     !  Element unit
     !
-    call reallocP(gdp%nefisio%nefiselem(nefisgroup)%elmunt, ie, stat=istat)
+    if (istat==0) call reallocP(gdp%nefisio%nefiselem(nefisgroup)%elmunt, ie, stat=istat)
     if (istat==0) then
        gdp%nefisio%nefiselem(nefisgroup)%elmunt(ie) = elmunt_new
     endif
     !
     !  Element name
     !
-    call reallocP(gdp%nefisio%nefiselem(nefisgroup)%elmnms, ie, stat=istat)
+    if (istat==0) call reallocP(gdp%nefisio%nefiselem(nefisgroup)%elmnms, ie, stat=istat)
     if (istat==0) then
        gdp%nefisio%nefiselem(nefisgroup)%elmnms(ie) = elmnms_new
     endif
     !
     !  Element quantity
     !
-    call reallocP(gdp%nefisio%nefiselem(nefisgroup)%elmqty, ie, stat=istat)
+    if (istat==0) call reallocP(gdp%nefisio%nefiselem(nefisgroup)%elmqty, ie, stat=istat)
     if (istat==0) then
        gdp%nefisio%nefiselem(nefisgroup)%elmqty(ie) = elmqty_new
     endif
     !
     !  Element type
     !
-    call reallocP(gdp%nefisio%nefiselem(nefisgroup)%elmtps, ie, stat=istat)
+    if (istat==0) call reallocP(gdp%nefisio%nefiselem(nefisgroup)%elmtps, ie, stat=istat)
     if (istat==0) then
        gdp%nefisio%nefiselem(nefisgroup)%elmtps(ie) = elmtps_new
     endif
     !
     !  Element description
     !
-    call reallocP(gdp%nefisio%nefiselem(nefisgroup)%elmdes, ie, stat=istat)
+    if (istat==0) call reallocP(gdp%nefisio%nefiselem(nefisgroup)%elmdes, ie, stat=istat)
     if (istat==0) then
        gdp%nefisio%nefiselem(nefisgroup)%elmdes(ie) = elmdes_new
     endif
