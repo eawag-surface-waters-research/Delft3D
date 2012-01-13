@@ -1,28 +1,28 @@
 //---- LGPL --------------------------------------------------------------------
-//                                                                              
-// Copyright (C)  Stichting Deltares, 2011.                                     
-//                                                                              
-// This library is free software; you can redistribute it and/or                
-// modify it under the terms of the GNU Lesser General Public                   
-// License as published by the Free Software Foundation version 2.1.                 
-//                                                                              
-// This library is distributed in the hope that it will be useful,              
-// but WITHOUT ANY WARRANTY; without even the implied warranty of               
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// Lesser General Public License for more details.                              
-//                                                                              
-// You should have received a copy of the GNU Lesser General Public             
-// License along with this library; if not, see <http://www.gnu.org/licenses/>. 
-//                                                                              
-// contact: delft3d.support@deltares.nl                                         
-// Stichting Deltares                                                           
-// P.O. Box 177                                                                 
-// 2600 MH Delft, The Netherlands                                               
-//                                                                              
-// All indications and logos of, and references to, "Delft3D" and "Deltares"    
-// are registered trademarks of Stichting Deltares, and remain the property of  
-// Stichting Deltares. All rights reserved.                                     
-//                                                                              
+//
+// Copyright (C)  Stichting Deltares, 2011-2012.
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation version 2.1.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, see <http://www.gnu.org/licenses/>.
+//
+// contact: delft3d.support@deltares.nl
+// Stichting Deltares
+// P.O. Box 177
+// 2600 MH Delft, The Netherlands
+//
+// All indications and logos of, and references to, "Delft3D" and "Deltares"
+// are registered trademarks of Stichting Deltares, and remain the property of
+// Stichting Deltares. All rights reserved.
+//
 //------------------------------------------------------------------------------
 // $Id$
 // $HeadURL$
@@ -60,7 +60,7 @@ int main()
   BText   grp_name    ;
   BText   grp_defined ;
   BText   cel_names   ;
- 
+
   elm_name     = (BText) malloc( sizeof(BChar) * (MAX_NAME + 1) );
   elm_type     = (BText) malloc( sizeof(BChar) * (MAX_TYPE + 1) );
   elm_quantity = (BText) malloc( sizeof(BChar) * (MAX_NAME + 1) );
@@ -69,14 +69,14 @@ int main()
   elm_dimens   = (BInt4 *) malloc( sizeof(BInt4 ) * MAX_DIM  );
 
   cel_name     = (BText) malloc( sizeof(BChar) * (MAX_NAME + 1) );
- 
+
   grp_name     = (BText) malloc( sizeof(BChar) * (MAX_NAME + 1) );
   grp_defined  = (BText) malloc( sizeof(BChar) * (MAX_NAME + 1) );
 
   cel_names    = (BText) malloc( sizeof(BChar) * (MAX_NAME + 1) * MAX_DIM );
 
-/* 
- * Start of program 
+/*
+ * Start of program
  */
 
   fds = -1;
@@ -87,7 +87,7 @@ int main()
   if (error!=0) {error = Neferr( 1, error_string);}
 
   cel_num_dim = 100;
-  
+
 /*
  * Define elements
  */
@@ -124,7 +124,7 @@ int main()
     error  = Defcel( &fds, cel_name, cel_num_dim , elm_names);
   }
   if (error!=0) {error = Neferr( 1, error_string);}
-    
+
   error = Clsnef( &fds );
   return(0);
 }

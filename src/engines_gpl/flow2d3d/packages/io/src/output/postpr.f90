@@ -6,7 +6,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                 & itmapc    ,itdroc    ,itrstc    ,ktemp     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011.                                     
+!  Copyright (C)  Stichting Deltares, 2011-2012.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         

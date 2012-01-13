@@ -8,7 +8,7 @@ subroutine tcross(dtsec     ,prshis    ,selhis    ,ntruv     ,ntru      , &
                 & sbvv      ,ssuu      ,ssvv      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011.                                     
+!  Copyright (C)  Stichting Deltares, 2011-2012.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         

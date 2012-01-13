@@ -15,7 +15,7 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                   & kfuz1     ,kfvz1     ,dzs1      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011.                                     
+!  Copyright (C)  Stichting Deltares, 2011-2012.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         

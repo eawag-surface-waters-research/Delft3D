@@ -15,7 +15,7 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                 & hsurft    ,pkwav     ,diapl     ,rnpl      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011.                                     
+!  Copyright (C)  Stichting Deltares, 2011-2012.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
