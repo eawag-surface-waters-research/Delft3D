@@ -31,6 +31,7 @@
 		<File RelativePath="include\bcdat.igs"/>
 		<File RelativePath="include\bedformpar.igs"/>
 		<File RelativePath="include\betaro.igs"/>
+		<File RelativePath="include\bubble.igs"/>
 		<File RelativePath="include\cline.igs"/>
 		<File RelativePath="include\const.igs"/>
 		<File RelativePath="include\constd.igs"/>

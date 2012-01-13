@@ -107,20 +107,30 @@ subroutine cnvbub(kmax    ,nsrcd     ,nsrc      ,nbub      ,nxbub    , &
           ! Last bubble point:
           ! this point and the icount previous points belong to the same bubblescreen
           ! (only) if discharge volume is changed, update their disch array
+          ! Set disch to zero when it is outside this domain
           !
           if (flbub(idis)) then
              do ii = ibub-icount,ibub
-                disch(ii) = real(kmax,fp) * cpdis(idis) / real(icount+1,fp)
+                if (mnksrc(6, ii) == -1 ) then
+                   disch(ii) = 0.0_fp
+                else
+                   disch(ii) = real(kmax,fp) * cpdis(idis) / real(icount+1,fp)
+                endif
              enddo
           endif
        elseif (namsrc(ibub) /= chulp) then
           !
           ! This is the first bubble point having another name
           ! (only) if discharge volume is changed, update the icount previous points, excluding this one
+          ! Set disch to zero when it is outside this domain
           !
           if (flbub(idis)) then
-             do ii = ibub-icount,ibub-1 
-                disch(ii) = real(kmax,fp) * cpdis(idis) / real(icount,fp)
+             do ii = ibub-icount,ibub-1
+                if (mnksrc(6, ii) == -1 ) then
+                   disch(ii) = 0.0_fp
+                else
+                   disch(ii) = real(kmax,fp) * cpdis(idis) / real(icount,fp)
+                endif
              enddo
           endif
           !

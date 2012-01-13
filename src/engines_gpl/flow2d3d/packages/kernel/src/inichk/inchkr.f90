@@ -764,9 +764,9 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
        icy = 1
        call inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
                  & i(itdis)  ,itstrt    ,itfinish  ,sferic    ,grdang    , &
-                 & nsrcd     ,lstsc     ,jstart    ,nmmaxj    ,icx       , &
-                 & icy       ,ch(namsrc),ch(disint),ch(dismmt),ch(namcon), &
-                 & i(mnksrc) ,r(alfas)  ,r(disch)  , &
+                 & nsrc      ,nsrcd     ,lstsc     ,jstart    ,nmmaxj    , &
+                 & icx       ,icy       ,ch(namsrc),ch(disint),ch(dismmt), &
+                 & ch(namcon),i(mnksrc) ,r(alfas)  ,r(disch)  , &
                  & r(disch0) ,r(disch1) ,r(rint)   ,r(rint0)  ,r(rint1)  , &
                  & r(umdis)  ,r(umdis0) ,r(umdis1) ,r(vmdis)  ,r(vmdis0) , &
                  & r(vmdis1) ,bubble    ,kmax      ,i(kspu)   ,i(kspv)   , &

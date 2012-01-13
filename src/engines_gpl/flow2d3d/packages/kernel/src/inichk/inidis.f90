@@ -1,8 +1,8 @@
 subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
                 & itdis     ,itstrt    ,itfinish  ,sferic    ,grdang    , &
-                & nsrc      ,lstsc     ,j         ,nmmaxj    ,icx       , &
-                & icy       ,namsrc    ,disint    ,dismmt    ,namcon    , &
-                & mnksrc    ,alfas     ,disch     , &
+                & nsrc      ,nsrcd     ,lstsc     ,j         ,nmmaxj    , &
+                & icx       ,icy       ,namsrc    ,disint    ,dismmt    , &
+                & namcon    ,mnksrc    ,alfas     ,disch     , &
                 & disch0    ,disch1    ,rint      ,rint0     ,rint1     , &
                 & umdis     ,umdis0    ,umdis1    ,vmdis     ,vmdis0    , &
                 & vmdis1    ,bubble    ,kmax      ,kspu      ,kspv      , &
@@ -53,6 +53,7 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    integer  , pointer :: nxbub
     integer  , pointer :: itdate
     integer  , pointer :: lundis
     real(fp) , pointer :: tstop
@@ -72,8 +73,9 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
     integer                                                                     , intent(in)  :: lundia   !  Description and declaration in inout.igs
     integer                                                                     , intent(in)  :: nmmaxj   !  Description and declaration in dimens.igs
     integer                                                                     , intent(in)  :: nsrc     !  Description and declaration in esm_alloc_int.f90
+    integer                                                                     , intent(in)  :: nsrcd    !  Description and declaration in dimens.igs
     integer                                                                     , intent(in)  :: upwsrc   !  Description and declaration in esm_alloc_int.f90
-    integer      , dimension(5, nsrc)                                           , intent(out) :: itdis    !  Description and declaration in esm_alloc_int.f90
+    integer      , dimension(5, nsrcd)                                          , intent(out) :: itdis    !  Description and declaration in esm_alloc_int.f90
     integer      , dimension(7, nsrc)                                           , intent(in)  :: mnksrc   !  Description and declaration in esm_alloc_int.f90
     logical                                                                     , intent(in)  :: bubble   !  Description and declaration in procs.igs        
     logical                                                                     , intent(in)  :: cyclic   !!  Flag = TRUE if cyclic system assumed
@@ -82,21 +84,21 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
     real(fp)                                                                                  :: grdang   !  Description and declaration in tricom.igs
     real(fp)                                                                    , intent(in)  :: timnow
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)                             , intent(in)  :: alfas    !  Description and declaration in esm_alloc_real.f90
-    real(fp)     , dimension(lstsc, nsrc)                                                     :: rint     !  Description and declaration in esm_alloc_real.f90
-    real(fp)     , dimension(lstsc, nsrc)                                                     :: rint0    !  Description and declaration in esm_alloc_real.f90
-    real(fp)     , dimension(lstsc, nsrc)                                                     :: rint1    !  Description and declaration in esm_alloc_real.f90
-    real(fp)     , dimension(nsrc)                                                            :: disch    !  Description and declaration in esm_alloc_real.f90
-    real(fp)     , dimension(nsrc)                                                            :: disch0   !  Description and declaration in esm_alloc_real.f90
-    real(fp)     , dimension(nsrc)                                                            :: disch1   !  Description and declaration in esm_alloc_real.f90
-    real(fp)     , dimension(nsrc)                                                            :: umdis    !  Description and declaration in esm_alloc_real.f90
-    real(fp)     , dimension(nsrc)                                                            :: umdis0   !  Description and declaration in esm_alloc_real.f90
-    real(fp)     , dimension(nsrc)                                                            :: umdis1   !  Description and declaration in esm_alloc_real.f90
-    real(fp)     , dimension(nsrc)                                                            :: vmdis    !  Description and declaration in esm_alloc_real.f90
-    real(fp)     , dimension(nsrc)                                                            :: vmdis0   !  Description and declaration in esm_alloc_real.f90
-    real(fp)     , dimension(nsrc)                                                            :: vmdis1   !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(lstsc, nsrcd)                                                    :: rint     !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(lstsc, nsrcd)                                                    :: rint0    !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(lstsc, nsrcd)                                                    :: rint1    !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nsrcd)                                                           :: disch    !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nsrcd)                                                           :: disch0   !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nsrcd)                                                           :: disch1   !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nsrcd)                                                           :: umdis    !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nsrcd)                                                           :: umdis0   !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nsrcd)                                                           :: umdis1   !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nsrcd)                                                           :: vmdis    !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nsrcd)                                                           :: vmdis0   !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nsrcd)                                                           :: vmdis1   !  Description and declaration in esm_alloc_real.f90
     character(*)                                                                , intent(in)  :: runid
-    character(1) , dimension(nsrc)                                                            :: disint   !  Description and declaration in esm_alloc_char.f90
-    character(1) , dimension(nsrc)                                                            :: dismmt   !  Description and declaration in esm_alloc_char.f90
+    character(1) , dimension(nsrcd)                                                           :: disint   !  Description and declaration in esm_alloc_char.f90
+    character(1) , dimension(nsrcd)                                                           :: dismmt   !  Description and declaration in esm_alloc_char.f90
     character(20), dimension(lstsc)                                             , intent(in)  :: namcon   !  Description and declaration in esm_alloc_char.f90
     character(20), dimension(nsrc)                                                            :: namsrc   !  Description and declaration in esm_alloc_char.f90
     integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)                :: kspu     !  Description and declaration in esm_alloc_int.f90
@@ -104,45 +106,49 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
 !
 !> Local variables
 !
-    integer                                         :: ddb
-    integer                                         :: icxy    ! MAX value of ICX and ICY 
-    integer                                         :: iend
-    integer                                         :: ifound
-    integer                                         :: iocond
-    integer                                         :: irecrd  ! Counter of records if input file is a direct access file 
-    integer, dimension(nsrc)                        :: irecs
-    integer                                         :: isrc    ! Index number of discharge location 
-    integer                                         :: istart
-    integer                                         :: itfac   ! Interpolation factor 
-    integer                                         :: ja_upw  ! Default only around momentum discharge locations upwind is expected = 1 For no upwind JA_UPW = -1
-    integer                                         :: l       ! Loop counter over LSTSC 
-    integer                                         :: lrec    ! Record length of direct access file 
-    integer                                         :: lrid    ! Length of character string runid 
-    integer                                         :: m
-    integer                                         :: md
-    integer                                         :: n
-    integer                                         :: nd
-    integer                                         :: newlun
-    integer                                         :: nm      ! N,M index for discharge location 
-    integer                                         :: npara   ! Number of parameter records in time dependent direct access file 
-    integer                                         :: nparrd  ! NR. of parameter records actual read 
-    integer                                         :: ntimrd
-    real(fp)                                        :: alpha   !< linear interpolation factor
-    real(fp)                                        :: rtdis0  !< Previous  read time for discharge time-series 
-    real(fp)                                        :: rtdis1  !< Following read time for discharge time-series
-    logical                                         :: access  ! Flag to read file as direct access or sequential 
-    logical                                         :: opend   ! Help flag = TRUE when file is still open (Delft3D) and 
-    character(1)                                    :: dumchr  ! Dummy character (#) in first record of direct access file 
-    character(10)                                   :: cntent  ! String with <contents> input 
-    character(max(300,(4+lstsc)*16))                :: record  ! Record for DIS file (125 or 153) 
-    character(20)                                   :: chlp20
-    character(20)                                   :: namhlp  ! Name of NAMCON(L) in small characters 
-    character(256)                                  :: filnam  ! Help var. for file name 
-    character(36), dimension(:), allocatable        :: parnam  ! Number of parameter records in time dependent direct access files for DIS 
-    character(36), dimension(3)                     :: defpar  ! Default parameters 
+    integer                                    :: ddb
+    integer                                    :: icxy        ! MAX value of ICX and ICY 
+    integer                                    :: iend
+    integer                                    :: ifound
+    integer                                    :: iocond
+    integer                                    :: irecrd      ! Counter of records if input file is a direct access file 
+    integer, dimension(:), allocatable         :: irecs
+    integer                                    :: isrc        ! Index number of discharge location
+    integer                                    :: isrc_nodup  ! isrc, skipping duplicate discharges, introduced by bubble screens
+    integer                                    :: istart
+    integer                                    :: itfac       ! Interpolation factor 
+    integer                                    :: ja_upw      ! Default only around momentum discharge locations upwind is expected = 1 For no upwind JA_UPW = -1
+    integer                                    :: l           ! Loop counter over LSTSC 
+    integer                                    :: lrec        ! Record length of direct access file 
+    integer                                    :: lrid        ! Length of character string runid 
+    integer                                    :: m
+    integer                                    :: md
+    integer                                    :: n
+    integer                                    :: nd
+    integer                                    :: newlun
+    integer                                    :: nm          ! N,M index for discharge location 
+    integer                                    :: npara       ! Number of parameter records in time dependent direct access file 
+    integer                                    :: nparrd      ! NR. of parameter records actual read
+    integer                                    :: nst_nobub   !< Number of discharges excluding bubble points
+    integer                                    :: ntimrd
+    real(fp)                                   :: alpha       !< linear interpolation factor
+    real(fp)                                   :: rtdis0      !< Previous  read time for discharge time-series 
+    real(fp)                                   :: rtdis1      !< Following read time for discharge time-series
+    logical                                    :: access      ! Flag to read file as direct access or sequential 
+    logical                                    :: opend       ! Help flag = TRUE when file is still open (Delft3D) and 
+    character(1)                               :: dumchr      ! Dummy character (#) in first record of direct access file 
+    character(10)                              :: cntent      ! String with <contents> input 
+    character(max(300,(4+lstsc)*16))           :: record      ! Record for DIS file (125 or 153) 
+    character(20)                              :: chlp20
+    character(20)                              :: namhlp      ! Name of NAMCON(L) in small characters 
+    character(20)                              :: namhlp_old  ! Previous value of namhlp
+    character(256)                             :: filnam      ! Help var. for file name 
+    character(36), dimension(:), allocatable   :: parnam      ! Number of parameter records in time dependent direct access files for DIS 
+    character(36), dimension(3)                :: defpar      ! Default parameters 
 !
 !! executable statements -------------------------------------------------------
 !
+    nxbub   => gdp%d%nxbub
     timscl  => gdp%gdinidis%timscl
     lundis  => gdp%gdluntmp%lundis
     itdate  => gdp%gdexttim%itdate
@@ -151,9 +157,14 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
     scalef  => gdp%gdupddis%scalef
     !
     allocate(parnam(lstsc + 4))
+    if (parll) then
+       allocate(irecs(nsrcd))
+       irecs(:) = -1
+    endif
     !
-    ddb = gdp%d%ddbound
-    icxy = max(icx, icy)
+    ddb       = gdp%d%ddbound
+    icxy      = max(icx, icy)
+    nst_nobub = nsrcd - nxbub
     defpar(1) = 'flux/discharge rate '
     defpar(2) = 'flow magnitude      '
     defpar(3) = 'flow direction      '
@@ -184,7 +195,7 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
        endif
        close (lundis)
        !
-       ! for parallel runs, find locations of discharges in current subdomain
+       ! for parallel runs, for discharges in this partion: find locations of discharge in input file
        !
        if (parll) then
           irecrd = 0
@@ -198,17 +209,27 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
           iend   = len(record)
           istart = 1
           call srckey(record    ,istart    ,iend      ,ifound    ,gdp       )
-          if (ifound==3) then
+          if (ifound == 3) then
              !
              ! location keyword found
              !
              call keyinp(record(istart:iend)  ,chlp20   )
              call small(chlp20    ,len(chlp20)          )
+             isrc_nodup = 0
+             namhlp_old = ' '
              do isrc = 1, nsrc
                 namhlp = namsrc(isrc)
-                call small(namhlp    ,len(namhlp)          )
-                if ( chlp20 == namhlp ) then
-                   irecs(isrc) = irecrd - 2    ! correpond to record table-name
+                call small(namhlp, len(namhlp))
+                if (namhlp /= namhlp_old) then
+                   isrc_nodup = isrc_nodup + 1
+                endif
+                namhlp_old = namhlp
+                if (chlp20 == namhlp) then
+                   !
+                   ! Discharge record found in the input file
+                   ! Store the location of this record table-name in irecs
+                   !
+                   irecs(isrc_nodup) = irecrd - 2
                    exit
                 endif
              enddo
@@ -227,7 +248,7 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
        irecrd = 2
        access = .true.
        !
-       do isrc = 1, nsrc
+       do isrc = 1, nsrcd
           itdis(1, isrc) = -1
           itdis(2, isrc) = -1
           itdis(3, isrc) = -1
@@ -236,16 +257,17 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
        enddo
     endif
     !
-    ! Loop over NSRC discharge points
+    ! Loop over nsrcd discharge points
     !
-    do isrc = 1, nsrc
+    do isrc = 1, nsrcd
        !
-       ! skip this point when it is outside this partition
+       ! No bubble point: mnksrc(6,i) can be used to check whether this point is inside this partition
+       ! Bubble point   : mnksrc mismatches with isrc. This is repaired in cnvbub
        !
-       if (mnksrc(6,isrc) == -1) cycle
-
-       !
-       if (parll) irecrd = irecs(isrc)
+       if (isrc<=nst_nobub .and. mnksrc(6,isrc)==-1) cycle
+       if (parll) then
+          irecrd = irecs(isrc)
+       endif
        !
        ! Always read umdis/vmdis values from file
        !
@@ -336,16 +358,19 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
        ! Test over KCS is not necessary. Discharge location always
        ! in point with KCS = 1 (see CHKDIS)
        !
+       ! WARNING: nm is wrong for bubble points (due to extending mnksrc)
+       ! This does not harm because momentum is not used for bubble points
+       !
        nm = (mnksrc(5, isrc) + ddb) + ((mnksrc(4, isrc) - 1) + ddb)*icxy
        !
        ! Read first time step(s) and discharge data
        !
        call upddis(lundis    ,lundia    ,sferic    ,itdis     , &
-                & isrc      ,nm        ,grdang    ,timnow    ,dt        , &
-                & itfinish  ,timscl    ,nsrc      ,lstsc     ,j         , &
-                & nmmaxj    ,dismmt    ,alfas     , &
-                & disch0    ,disch1    ,rint0     ,rint1     , &
-                & umdis0    ,umdis1    ,vmdis0    ,vmdis1    ,gdp       )
+                 & isrc      ,nm        ,grdang    ,timnow    ,dt        , &
+                 & itfinish  ,timscl    ,nsrcd     ,lstsc     ,j         , &
+                 & nmmaxj    ,dismmt    ,alfas     , &
+                 & disch0    ,disch1    ,rint0     ,rint1     , &
+                 & umdis0    ,umdis1    ,vmdis0    ,vmdis1    ,gdp       )
        if (disint(isrc)=='Y') then
             if (itdis(1,isrc) == itdis(2,isrc)) then
                alpha = 0.0_fp
@@ -369,52 +394,58 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
             enddo
        endif
        !
-       ! Test and fill KSPU/V(nm,0) array 
+       ! Test and fill KSPU/V(nm,0) array
+       ! This does not work for bubble points, because n and m are wrong
+       ! (due to extending mnksrc)
+       ! This does not harm because a structure is not allowed at bubble points
        !
-       if (upwsrc==0) then
-            if (dismmt(isrc)=='Y') then
-                ja_upw = 1
-            else
-                ja_upw = -1
-            endif
-       else
-            ja_upw = upwsrc
+       if (isrc <= nst_nobub) then
+          if (upwsrc == 0) then
+               if (dismmt(isrc) == 'Y') then
+                   ja_upw = 1
+               else
+                   ja_upw = -1
+               endif
+          else
+               ja_upw = upwsrc
+          endif
+          !
+          ! Check whether a structure is positioned at intake/outlet
+          ! Floating structure is allowed
+          !
+          ! Intake
+          !
+          m  = mnksrc(1, isrc)
+          n  = mnksrc(2, isrc)
+          md = max(1, m - 1)
+          nd = max(1, n - 1)
+          if ( abs(kspu(n, m, 0))>2 .or. abs(kspu(n , md, 0))>2 .or.  &
+               abs(kspv(n, m, 0))>2 .or. abs(kspv(nd, m , 0))>2 ) then
+             call prterr(lundia, 'V057', namsrc(isrc))
+          endif
+          kspu(n , m , 0) = ja_upw
+          kspu(n , md, 0) = ja_upw
+          kspv(n , m , 0) = ja_upw
+          kspv(nd, m , 0) = ja_upw
+          !
+          ! Outfall
+          !
+          m  = mnksrc(4, isrc)
+          n  = mnksrc(5, isrc)
+          md = max(1, m - 1)
+          nd = max(1, n - 1)
+          if ( abs(kspu(n, m, 0))>2 .or. abs(kspu(n , md, 0))>2 .or.  &
+               abs(kspv(n, m, 0))>2 .or. abs(kspv(nd, m , 0))>2 ) then
+             call prterr(lundia, 'V057', namsrc(isrc))
+          endif
+          kspu(n , m , 0) = ja_upw
+          kspu(n , md, 0) = ja_upw
+          kspv(n , m , 0) = ja_upw
+          kspv(nd, m , 0) = ja_upw
        endif
-       !
-       ! Check whether a structure is positioned at intake/outlet
-       ! Floating structure is allowed
-       !
-       ! Intake
-       !
-       m  = mnksrc(1, isrc)
-       n  = mnksrc(2, isrc)
-       md = max(1, m - 1)
-       nd = max(1, n - 1)
-       if ( abs(kspu(n, m, 0))>2 .or. abs(kspu(n , md, 0))>2 .or.  &
-            abs(kspv(n, m, 0))>2 .or. abs(kspv(nd, m , 0))>2 ) then
-          call prterr(lundia, 'V057', namsrc(isrc))
-       endif
-       kspu(n , m , 0) = ja_upw
-       kspu(n , md, 0) = ja_upw
-       kspv(n , m , 0) = ja_upw
-       kspv(nd, m , 0) = ja_upw
-       !
-       ! Outfall
-       !
-       m  = mnksrc(4, isrc)
-       n  = mnksrc(5, isrc)
-       md = max(1, m - 1)
-       nd = max(1, n - 1)
-       if ( abs(kspu(n, m, 0))>2 .or. abs(kspu(n , md, 0))>2 .or.  &
-            abs(kspv(n, m, 0))>2 .or. abs(kspv(nd, m , 0))>2 ) then
-          call prterr(lundia, 'V057', namsrc(isrc))
-       endif
-       kspu(n , m , 0) = ja_upw
-       kspu(n , md, 0) = ja_upw
-       kspv(n , m , 0) = ja_upw
-       kspv(nd, m , 0) = ja_upw
     enddo
     !
  9999 continue
     deallocate(parnam)
+    if (parll) deallocate(irecs)
 end subroutine inidis

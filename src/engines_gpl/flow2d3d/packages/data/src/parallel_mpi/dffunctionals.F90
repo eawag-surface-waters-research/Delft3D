@@ -696,6 +696,10 @@ integer                         , pointer :: nfg
 integer                         , pointer :: nlg
 integer                         , pointer :: mfg
 integer                         , pointer :: mlg
+integer                                   :: iif
+integer                                   :: iil
+integer                                   :: jjf
+integer                                   :: jjl
 integer                                   :: ip
 integer                                   :: itag
 integer                                   :: istat
@@ -714,6 +718,7 @@ integer                                   :: lenlo
 integer                                   :: lengl
 integer                                   :: is
 integer, dimension(:), allocatable        :: tmp
+integer, dimension(:,:), allocatable      :: inparr_slice
 !
 !! executable statements -------------------------------------------------------
 !
@@ -738,7 +743,19 @@ integer, dimension(:), allocatable        :: tmp
     nsiz = nlg - nfg +1
     if (mod(nsiz,2)==0) nsiz = nsiz + 1
     lenlo = msiz*nsiz
-    call dfgather_lowlevel ( tmp, lengl, inparr(1-gdp%d%nlb+1:gdp%d%nmax-gdp%d%nlb+1,-1-gdp%d%mlb+1:gdp%d%mmax+2-gdp%d%mlb+1), lenlo, dfint, gdp )
+    iif   = 1-gdp%d%nlb+1
+    iil   = gdp%d%nmax-gdp%d%nlb+1
+    jjf   = -1-gdp%d%mlb+1
+    jjl   = gdp%d%mmax+2-gdp%d%mlb+1
+    !
+    ! When calling dfgather_lowlevel with 3rd argument inparr(iif:iil,jjf:jjl,kf:kl,lf:ll)
+    ! this (possibly big) array is placed on the stack
+    ! To avoid this, copy it to the local array inparr_slice (yes, again a copy action)
+    !
+    allocate(inparr_slice(iif:iil,jjf:jjl))
+    inparr_slice(iif:iil,jjf:jjl) = inparr(iif:iil,jjf:jjl)
+    call dfgather_lowlevel ( tmp, lengl, inparr_slice, lenlo, dfint, gdp )
+    deallocate(inparr_slice)
     if (inode == master) then
        nmaxgl => gdp%gdparall%nmaxgl
        mmaxgl => gdp%gdparall%mmaxgl
@@ -802,6 +819,10 @@ integer                      , pointer :: nfg
 integer                      , pointer :: nlg
 integer                      , pointer :: mfg
 integer                      , pointer :: mlg
+integer                                :: iif
+integer                                :: iil
+integer                                :: jjf
+integer                                :: jjl
 integer                                :: ip
 integer                                :: itag
 integer                                :: istat
@@ -820,6 +841,7 @@ integer                                :: lenlo
 integer                                :: lengl
 integer                                :: is
 real(sp), dimension(:), allocatable    :: tmp
+real(sp), dimension(:,:), allocatable  :: inparr_slice
 !
 !! executable statements -------------------------------------------------------
 !
@@ -844,7 +866,19 @@ real(sp), dimension(:), allocatable    :: tmp
     nsiz = nlg - nfg +1
     if (mod(nsiz,2)==0) nsiz = nsiz + 1
     lenlo = msiz*nsiz
-    call dfgather_lowlevel ( tmp, lengl, inparr(1-gdp%d%nlb+1:gdp%d%nmax-gdp%d%nlb+1,-1-gdp%d%mlb+1:gdp%d%mmax+2-gdp%d%mlb+1), lenlo, dfreal, gdp )
+    iif   = 1-gdp%d%nlb+1
+    iil   = gdp%d%nmax-gdp%d%nlb+1
+    jjf   = -1-gdp%d%mlb+1
+    jjl   = gdp%d%mmax+2-gdp%d%mlb+1
+    !
+    ! When calling dfgather_lowlevel with 3rd argument inparr(iif:iil,jjf:jjl,kf:kl,lf:ll)
+    ! this (possibly big) array is placed on the stack
+    ! To avoid this, copy it to the local array inparr_slice (yes, again a copy action)
+    !
+    allocate(inparr_slice(iif:iil,jjf:jjl))
+    inparr_slice(iif:iil,jjf:jjl) = inparr(iif:iil,jjf:jjl)
+    call dfgather_lowlevel ( tmp, lengl, inparr_slice, lenlo, dfreal, gdp )
+    deallocate(inparr_slice)
     if (inode == master) then
        nmaxgl => gdp%gdparall%nmaxgl
        mmaxgl => gdp%gdparall%mmaxgl
@@ -946,32 +980,38 @@ integer , dimension(0:nproc-1)  , intent(in)  :: ml
 !
 ! Local variables
 !
-integer                      , pointer :: nmaxgl
-integer                      , pointer :: mmaxgl
-integer                      , pointer :: nfg
-integer                      , pointer :: nlg
-integer                      , pointer :: mfg
-integer                      , pointer :: mlg
-integer                                :: kf, kl
-integer                                :: ip
-integer                                :: itag
-integer                                :: istat
-integer                                :: ierr
-integer                                :: nfi
-integer                                :: nla
-integer                                :: mfi
-integer                                :: mla
-integer                                :: nmdim
-integer                                :: k
-integer                                :: n
-integer                                :: m
-integer                                :: nm
-integer                                :: msiz
-integer                                :: nsiz
-integer                                :: lenlo
-integer                                :: lengl
-integer                                :: is
-real(sp), dimension(:), allocatable    :: tmp
+integer                       , pointer :: nmaxgl
+integer                       , pointer :: mmaxgl
+integer                       , pointer :: nfg
+integer                       , pointer :: nlg
+integer                       , pointer :: mfg
+integer                       , pointer :: mlg
+integer                                 :: iif
+integer                                 :: iil
+integer                                 :: jjf
+integer                                 :: jjl
+integer                                 :: kf
+integer                                 :: kl
+integer                                 :: ip
+integer                                 :: itag
+integer                                 :: istat
+integer                                 :: ierr
+integer                                 :: nfi
+integer                                 :: nla
+integer                                 :: mfi
+integer                                 :: mla
+integer                                 :: nmdim
+integer                                 :: k
+integer                                 :: n
+integer                                 :: m
+integer                                 :: nm
+integer                                 :: msiz
+integer                                 :: nsiz
+integer                                 :: lenlo
+integer                                 :: lengl
+integer                                 :: is
+real(sp), dimension(:)    , allocatable :: tmp
+real(sp), dimension(:,:,:), allocatable :: inparr_slice
 !
 !! executable statements -------------------------------------------------------
 !
@@ -999,7 +1039,19 @@ real(sp), dimension(:), allocatable    :: tmp
     nsiz = nlg - nfg +1
     if (mod(nsiz,2)==0) nsiz = nsiz + 1
     lenlo = msiz*nsiz*(kl-kf+1)
-    call dfgather_lowlevel ( tmp, lengl, inparr(1-gdp%d%nlb+1:gdp%d%nmax-gdp%d%nlb+1,-1-gdp%d%mlb+1:gdp%d%mmax+2-gdp%d%mlb+1,kf:kl), lenlo, dfreal, gdp )
+    iif   = 1-gdp%d%nlb+1
+    iil   = gdp%d%nmax-gdp%d%nlb+1
+    jjf   = -1-gdp%d%mlb+1
+    jjl   = gdp%d%mmax+2-gdp%d%mlb+1
+    !
+    ! When calling dfgather_lowlevel with 3rd argument inparr(iif:iil,jjf:jjl,kf:kl,lf:ll)
+    ! this (possibly big) array is placed on the stack
+    ! To avoid this, copy it to the local array inparr_slice (yes, again a copy action)
+    !
+    allocate(inparr_slice(iif:iil,jjf:jjl,kf:kl))
+    inparr_slice(iif:iil,jjf:jjl,kf:kl) = inparr(iif:iil,jjf:jjl,kf:kl)
+    call dfgather_lowlevel ( tmp, lengl, inparr_slice, lenlo, dfreal, gdp )
+    deallocate(inparr_slice)
     if (inode == master) then
        nmaxgl => gdp%gdparall%nmaxgl
        mmaxgl => gdp%gdparall%mmaxgl
@@ -1104,40 +1156,41 @@ integer , dimension(0:nproc-1)  , intent(in)  :: ml
 !
 ! Local variables
 !
-integer                      , pointer :: nmaxgl
-integer                      , pointer :: mmaxgl
-integer                      , pointer :: nfg
-integer                      , pointer :: nlg
-integer                      , pointer :: mfg
-integer                      , pointer :: mlg
-integer                                :: iif
-integer                                :: iil
-integer                                :: jjf
-integer                                :: jjl
-integer                                :: kf
-integer                                :: kl
-integer                                :: lf
-integer                                :: ll
-integer                                :: ip
-integer                                :: itag
-integer                                :: istat
-integer                                :: ierr
-integer                                :: nfi
-integer                                :: nla
-integer                                :: mfi
-integer                                :: mla
-integer                                :: nmdim
-integer                                :: k
-integer                                :: l
-integer                                :: n
-integer                                :: m
-integer                                :: nm
-integer                                :: msiz
-integer                                :: nsiz
-integer                                :: lenlo
-integer                                :: lengl
-integer                                :: is
-real(sp), dimension(:), allocatable    :: tmp
+integer                          , pointer :: nmaxgl
+integer                          , pointer :: mmaxgl
+integer                          , pointer :: nfg
+integer                          , pointer :: nlg
+integer                          , pointer :: mfg
+integer                          , pointer :: mlg
+integer                                    :: iif
+integer                                    :: iil
+integer                                    :: jjf
+integer                                    :: jjl
+integer                                    :: kf
+integer                                    :: kl
+integer                                    :: lf
+integer                                    :: ll
+integer                                    :: ip
+integer                                    :: itag
+integer                                    :: istat
+integer                                    :: ierr
+integer                                    :: nfi
+integer                                    :: nla
+integer                                    :: mfi
+integer                                    :: mla
+integer                                    :: nmdim
+integer                                    :: k
+integer                                    :: l
+integer                                    :: n
+integer                                    :: m
+integer                                    :: nm
+integer                                    :: msiz
+integer                                    :: nsiz
+integer                                    :: lenlo
+integer                                    :: lengl
+integer                                    :: is
+real(sp), dimension(:)      , allocatable  :: tmp
+real(sp), dimension(:,:,:,:), allocatable  :: inparr_slice
 !
 !! executable statements -------------------------------------------------------
 !
@@ -1172,7 +1225,15 @@ real(sp), dimension(:), allocatable    :: tmp
     iil = gdp%d%nmax-gdp%d%nlb+1
     jjf = -1-gdp%d%mlb+1
     jjl = gdp%d%mmax+2-gdp%d%mlb+1
-    call dfgather_lowlevel ( tmp, lengl, inparr(iif:iil,jjf:jjl,kf:kl,lf:ll), lenlo, dfreal, gdp )
+    !
+    ! When calling dfgather_lowlevel with 3rd argument inparr(iif:iil,jjf:jjl,kf:kl,lf:ll)
+    ! this (possibly big) array is placed on the stack
+    ! To avoid this, copy it to the local array inparr_slice (yes, again a copy action)
+    !
+    allocate(inparr_slice(iif:iil,jjf:jjl,kf:kl,lf:ll))
+    inparr_slice(iif:iil,jjf:jjl,kf:kl,lf:ll) = inparr(iif:iil,jjf:jjl,kf:kl,lf:ll)
+    call dfgather_lowlevel ( tmp, lengl, inparr_slice, lenlo, dfreal, gdp )
+    deallocate(inparr_slice)
     if (inode == master) then
        nmaxgl => gdp%gdparall%nmaxgl
        mmaxgl => gdp%gdparall%mmaxgl

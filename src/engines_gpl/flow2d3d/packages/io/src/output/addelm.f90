@@ -39,6 +39,7 @@ subroutine addelm(nefisgroup ,elmnms_new ,elmqty_new ,elmunt_new ,elmtps_new , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use m_alloc
     !
     implicit none
     !
@@ -46,15 +47,7 @@ subroutine addelm(nefisgroup ,elmnms_new ,elmqty_new ,elmunt_new ,elmtps_new , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer, dimension(:, :)    , pointer :: elmdms
-    type (nefiselement)         , pointer :: nefiselem
-    integer                     , pointer :: nelmx
-    integer      , dimension(:) , pointer :: nbytsg
-    character(10), dimension(:) , pointer :: elmunt
-    character(16), dimension(:) , pointer :: elmnms
-    character(16), dimension(:) , pointer :: elmqty
-    character(16), dimension(:) , pointer :: elmtps
-    character(64), dimension(:) , pointer :: elmdes
+    integer, pointer :: nelmx
 !
 ! Global variables
 !
@@ -80,87 +73,69 @@ subroutine addelm(nefisgroup ,elmnms_new ,elmqty_new ,elmunt_new ,elmtps_new , &
 !
 !! executable statements -------------------------------------------------------
 !
-    nefiselem => gdp%nefisio%nefiselem(nefisgroup)
-    elmdms  => nefiselem%elmdms
-    nelmx   => nefiselem%nelmx
-    nbytsg  => nefiselem%nbytsg
-    elmunt  => nefiselem%elmunt
-    elmnms  => nefiselem%elmnms
-    elmqty  => nefiselem%elmqty
-    elmtps  => nefiselem%elmtps
-    elmdes  => nefiselem%elmdes
+    nelmx   => gdp%nefisio%nefiselem(nefisgroup)%nelmx
+    !
+    ! Do not use local pointers to the gdp structure
+    ! when they are reallocated
     !
     !  Allocate memory: Update space allocated and set
     !                   element properties
     !
-    !  Element dimensions
-    !
     istat = 0
     ie    = nelmx + 1
-    allocate (nefiselem%elmdms(6,ie), stat = istat)
+    !
+    !  Element dimensions
+    !
+    call reallocP(gdp%nefisio%nefiselem(nefisgroup)%elmdms, (/ 6, ie /), stat=istat)
     if (istat==0) then
-       nefiselem%elmdms(1:6,1:nelmx) = elmdms(1:6,1:nelmx)
-       nefiselem%elmdms(1,ie) = dm1
-       nefiselem%elmdms(2,ie) = dm2
-       nefiselem%elmdms(3,ie) = dm3
-       nefiselem%elmdms(4,ie) = dm4
-       nefiselem%elmdms(5,ie) = dm5
-       nefiselem%elmdms(6,ie) = dm6
-       deallocate (elmdms, stat = istat)
+       gdp%nefisio%nefiselem(nefisgroup)%elmdms(1,ie) = dm1
+       gdp%nefisio%nefiselem(nefisgroup)%elmdms(2,ie) = dm2
+       gdp%nefisio%nefiselem(nefisgroup)%elmdms(3,ie) = dm3
+       gdp%nefisio%nefiselem(nefisgroup)%elmdms(4,ie) = dm4
+       gdp%nefisio%nefiselem(nefisgroup)%elmdms(5,ie) = dm5
+       gdp%nefisio%nefiselem(nefisgroup)%elmdms(6,ie) = dm6
     endif
     !
     !  Element number of bytes
     !
-    if (istat==0) allocate (nefiselem%nbytsg(ie), stat = istat)
+    call reallocP(gdp%nefisio%nefiselem(nefisgroup)%nbytsg, ie, stat=istat)
     if (istat==0) then
-       nefiselem%nbytsg(1:nelmx) = nbytsg(1:nelmx)
-       nefiselem%nbytsg(ie)      = nbytsg_new
-       deallocate (nbytsg, stat = istat)
+       gdp%nefisio%nefiselem(nefisgroup)%nbytsg(ie) = nbytsg_new
     endif
     !
     !  Element unit
     !
-    if (istat==0) allocate (nefiselem%elmunt(ie), stat = istat)
+    call reallocP(gdp%nefisio%nefiselem(nefisgroup)%elmunt, ie, stat=istat)
     if (istat==0) then
-       nefiselem%elmunt(1:nelmx) = elmunt(1:nelmx)
-       nefiselem%elmunt(ie)      = elmunt_new
-       deallocate (elmunt, stat = istat)
+       gdp%nefisio%nefiselem(nefisgroup)%elmunt(ie) = elmunt_new
     endif
     !
     !  Element name
     !
-    if (istat==0) allocate (nefiselem%elmnms(ie), stat = istat)
+    call reallocP(gdp%nefisio%nefiselem(nefisgroup)%elmnms, ie, stat=istat)
     if (istat==0) then
-       nefiselem%elmnms(1:nelmx) = elmnms(1:nelmx)
-       nefiselem%elmnms(ie)      = elmnms_new
-       deallocate (elmnms, stat = istat)
+       gdp%nefisio%nefiselem(nefisgroup)%elmnms(ie) = elmnms_new
     endif
     !
     !  Element quantity
     !
-    if (istat==0) allocate (nefiselem%elmqty(ie), stat = istat)
+    call reallocP(gdp%nefisio%nefiselem(nefisgroup)%elmqty, ie, stat=istat)
     if (istat==0) then
-       nefiselem%elmqty(1:nelmx) = elmqty(1:nelmx)
-       nefiselem%elmqty(ie)      = elmqty_new
-       deallocate (elmqty, stat = istat)
+       gdp%nefisio%nefiselem(nefisgroup)%elmqty(ie) = elmqty_new
     endif
     !
     !  Element type
     !
-    if (istat==0) allocate (nefiselem%elmtps(ie), stat = istat)
+    call reallocP(gdp%nefisio%nefiselem(nefisgroup)%elmtps, ie, stat=istat)
     if (istat==0) then
-       nefiselem%elmtps(1:nelmx) = elmtps(1:nelmx)
-       nefiselem%elmtps(ie)      = elmtps_new
-       deallocate (elmtps, stat = istat)
+       gdp%nefisio%nefiselem(nefisgroup)%elmtps(ie) = elmtps_new
     endif
     !
     !  Element description
     !
-    if (istat==0) allocate (nefiselem%elmdes(ie), stat = istat)
+    call reallocP(gdp%nefisio%nefiselem(nefisgroup)%elmdes, ie, stat=istat)
     if (istat==0) then
-       nefiselem%elmdes(1:nelmx) = elmdes(1:nelmx)
-       nefiselem%elmdes(ie)      = elmdes_new
-       deallocate (elmdes, stat = istat)
+       gdp%nefisio%nefiselem(nefisgroup)%elmdes(ie) = elmdes_new
     endif
     !
     !  Check for memory error
