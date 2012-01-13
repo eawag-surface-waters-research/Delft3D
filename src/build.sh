@@ -93,7 +93,7 @@ while [ $# -gt 0 ]; do
             compiler='intel12'
             ;;
         -64bit)
-            platform='64bit'
+            platform='intel64'
             ;;
         -d|-debug)
             debug=1
@@ -129,6 +129,7 @@ if [ "$BASH_ENV" != '' ]; then
     unset BASH_ENV
 fi
 
+
 #===============================================================================
 # Initialize Fortran compiler
 
@@ -147,7 +148,7 @@ case $compiler in
         ;;
 
     intel11.1)
-        if [ "$platform" == '64bit' ]; then
+        if [ "$platform" == 'intel64' ]; then
             if [ -d /opt/intel/Compiler/11.1/072/bin/intel64 ]; then
                 ifortInit=". /opt/intel/Compiler/11.1/072/bin/intel64/ifortvars_intel64.sh $platform"
                 idbInit=". /opt/intel/Compiler/11.1/072/bin/intel64/idbvars.sh"
@@ -219,7 +220,7 @@ else
     export MPI_INCLUDE=/opt/mpich2/include
     # export MPILIBS_ADDITIONAL="-L/opt/mpich2/lib -lfmpich"
     export MPILIBS_ADDITIONAL=" "
-    if [ "$platform" = '64bit' ]; then
+    if [ "$platform" = 'intel64' ]; then
         export MPIFC=/opt/mpich2-1.0.8-intel64/bin/mpif90  
     fi
 fi
@@ -279,34 +280,21 @@ if [ $useSp -eq 1 ]; then
     )
 fi
 
-#===============================================================================
-# libtoolize: To ensure that all libtool the ltmain.sh and m4 macros are updated.
 
-log='logs/libtoolize.log'
-command="libtoolize --force &> $log"
+#===============================================================================
+# autogen: sanity checks, libtoolize and autoreconf
+
+log='logs/autogen.log'
+command="./autogen.sh &> $log"
 
 log "Running $command"
 eval $command
 
 if [ $? -ne 0 ]; then
-    log 'Libtoolize fails!'
+    log 'Autogen fails! Check $log'
     exit 1
 fi
 
-
-#===============================================================================
-# autoreconf: Create configure script
-
-log='logs/autoreconf.log'
-command="autoreconf -ivf &> $log"
-
-log "Running $command"
-eval $command
-
-if [ $? -ne 0 ]; then
-    log 'Autoreconfig fails!'
-    exit 1
-fi
 
 #===============================================================================
 # configure: Create makefiles
@@ -325,7 +313,7 @@ fi
 # More information here:
 # http://www.gentoo.org/proj/en/base/amd64/howtos/index.xml?full=1#book_part1_chap3
 
-if [ "$platform" = '64bit' ]; then
+if [ "$platform" = 'intel64' ]; then
     command=" \
         CFLAGS='$flags -fPIC -m64 $CFLAGS' \
         CXXFLAGS='$flags -fPIC -m64 $CXXFLAGS' \

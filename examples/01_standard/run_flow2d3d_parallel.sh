@@ -4,6 +4,7 @@
 
 set NHOSTS manually here:
 export NHOSTS=3
+NPART=$NHOSTS
     #
     # This script starts a single-domain Delft3D-FLOW computation on Linux in parallel mode
     # asuming nodes are allocated manually
@@ -68,7 +69,7 @@ mpd &
 mpdboot -n $NHOSTS -f $(pwd)/machinefile --ncpus=2
 
 # link mpich debug rubbish to /dev/null
-node_number=numnode
+node_number=$NPART
 while test $node_number -ge 1
 do
    node_number=`expr $node_number - 1`
