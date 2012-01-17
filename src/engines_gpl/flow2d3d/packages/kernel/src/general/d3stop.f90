@@ -147,20 +147,21 @@ subroutine d3stop(iexit, gdp)
        call D3S_Finalize('D3D-FLOW', 'Sobek')
        write(*,*) '... continue'
     endif
-
-    !
-    !  finalize mpi, if needed
-    !
-    if (parll) then
-       call dfexitmpi(0)
-    endif
-    !
-    ! Terminate now
     !
     write(*,*) 'Flow exited abnormally'
     if (lundia /= 0) then
        call prterr(lundia, 'P004', 'Flow exited abnormally')
        write(*,*) 'Check diagnosis file'
     endif
+    !
+    ! Abort mpi, if needed
+    ! This may also cause a direct termination
+    !
+    if (parll) then
+       call dfexitmpi(1)
+    endif
+    !
+    ! Terminate now
+    !
     call cstop(iexit, char(0))
 end subroutine d3stop

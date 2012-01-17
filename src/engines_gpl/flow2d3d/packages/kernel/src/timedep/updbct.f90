@@ -90,7 +90,9 @@ subroutine updbct(lundia, filnam, ntof, nto, kcd, kmax, hydrbc, tprofu, error, g
     error = .false.
     if (htype == -999) then
        !
-       ! in case of reuse TMP files:
+       ! in case of:
+       ! - reuse TMP files
+       ! - parallel running and this is not the master
        !
        call flw_readtable(tseriesfile, filnam, julday, gdp)
     endif

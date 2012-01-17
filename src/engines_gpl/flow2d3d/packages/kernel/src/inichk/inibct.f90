@@ -275,6 +275,13 @@ subroutine inibct(lundia    ,error     ,runid     , &
        itbct(5, ito) = itbct(3, ito) - 1
     enddo
     !
+    ! lunbct is not used anymore after this point
+    ! The creation and usage of TMP_<runid>.bct should be removed
+    ! Basicly it is replaced using the table module
+    ! Now it is still only used for some minor things
+    !
+    close(lunbct)
+    !
     ! Read first time dep. input
     !
     if (nto > ntof) then
