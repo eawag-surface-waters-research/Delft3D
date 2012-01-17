@@ -63,7 +63,7 @@ subroutine write_wave_map_wind (sg, sof, n_swan_grids, wavedata, casl)
     character(16), dimension(nelmx) :: elmnms
     character(16), dimension(nelmx) :: elmqty
     character(16), dimension(nelmx) :: elmtps
-    character(37)                   :: filnam
+    character(256)                  :: filnam
     character(64), dimension(nelmx) :: elmdes
     character(256)                  :: gridnam
     !
@@ -87,7 +87,11 @@ subroutine write_wave_map_wind (sg, sof, n_swan_grids, wavedata, casl)
        write(filnam,'(2a)')'wavm-',trim(casl)
     else
        gridnam = sg%grid_name
-       ind = index(gridnam, '.')
+       ind = index(gridnam, '/', back = .true.)
+       if (ind > 0) gridnam = gridnam(ind+1:)
+       ind = index(gridnam, '\', back = .true.)
+       if (ind > 0) gridnam = gridnam(ind+1:)
+       ind = index(gridnam, '.', back = .true.)
        if (ind > 0) gridnam = gridnam(:ind-1)
        write(filnam,'(4a)')'wavm-',trim(casl),'-',trim(gridnam)
     endif
