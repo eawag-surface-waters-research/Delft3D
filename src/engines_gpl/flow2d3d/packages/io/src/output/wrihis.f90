@@ -475,24 +475,31 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
           xystat(2,k)    = yz(n,m)
           rsbuff2(k,1:2) = real((/xz(n,m), yz(n,m)/),sp)
        enddo
-       if (parll) then
-          if (inode == master) then
-             allocate(rsbuff2b(nostatgl,2))
-          endif
-          call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, 2, order_sta, rsbuff2, rsbuff2b, gdp)
-          deallocate(rsbuff2)
-          if (inode == master) then
-             allocate(rsbuff2(2,nostatgl))
-             do k=1,nostatgl
-                rsbuff2(:,k) = rsbuff2b(k,:)
-             enddo
-             deallocate(rsbuff2b)
-          endif
+       !
+       ! Gather location from other nodes (and swap arrays from dimension (nostat,2) to dimension (2,nostat))
+       !
+       if (inode == master) then
+          allocate(rsbuff2b(nostatgl,2))
        endif
+       if (parll) then
+          call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, 2, order_sta, rsbuff2, rsbuff2b, gdp)
+       else
+          rsbuff2b = rsbuff2   ! not parallel, so it is on the master node
+       endif
+       deallocate(rsbuff2)
+       if (inode == master) then
+          allocate(rsbuff2(2,nostatgl))
+          do k=1,nostatgl
+             rsbuff2(:,k) = rsbuff2b(k,:)
+          enddo
+          deallocate(rsbuff2b)
+       endif
+
        if (inode == master) then  
           ierror = putelt(fds, grnam2, 'XYSTAT', uindex, 1, rsbuff2)
-          deallocate(rsbuff2)
        endif
+       deallocate(rsbuff2)
+       
        if (ierror/=0) goto 999
        !
        ! group 2, element  'NAMST'
