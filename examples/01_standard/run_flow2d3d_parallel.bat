@@ -11,7 +11,9 @@
     rem This script starts a single-domain Delft3D-FLOW computation on Windows
     rem parallel
     rem
-
+    rem When using mpich2 for the first time on a machine:
+    rem Execute "smpd -install"
+    rem 
 
     rem
     rem Set the config file here
