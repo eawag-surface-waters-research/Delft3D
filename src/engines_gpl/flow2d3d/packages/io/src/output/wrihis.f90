@@ -484,7 +484,9 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
        if (parll) then
           call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, 2, order_sta, rsbuff2, rsbuff2b, gdp)
        else
-          rsbuff2b = rsbuff2   ! not parallel, so it is on the master node
+          if (inode == master) then
+             rsbuff2b = rsbuff2   ! not parallel, so it is on the master node
+          endif
        endif
        deallocate(rsbuff2)
        if (inode == master) then
@@ -493,12 +495,9 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
              rsbuff2(:,k) = rsbuff2b(k,:)
           enddo
           deallocate(rsbuff2b)
-       endif
-
-       if (inode == master) then  
           ierror = putelt(fds, grnam2, 'XYSTAT', uindex, 1, rsbuff2)
+          deallocate(rsbuff2)
        endif
-       deallocate(rsbuff2)
        
        if (ierror/=0) goto 999
        !
