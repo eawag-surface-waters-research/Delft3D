@@ -96,7 +96,7 @@ use bedcomposition_module
        !
        ! Define elements
        !
-       call addelm(nefiswrsedm,'MSED',' ','[   -   ]','REAL',4, &
+       call addelm(nefiswrsedm,'MSED',' ','[ KG/M2 ]','REAL',4, &
           & 'Mass of sediment in layer'               , &
           & 4      ,nmaxus ,mmax     ,nlyr     ,lsedtot  ,0      , &
           & lundia ,gdp    )
