@@ -96,7 +96,10 @@ use bedcomposition_module
     integer                         , pointer :: iunderlyr
     integer                         , pointer :: maxwarn
     integer                         , pointer :: neulyr
+    integer                         , pointer :: nfrac
     integer                         , pointer :: nlalyr
+    integer                         , pointer :: nmlb
+    integer                         , pointer :: nmub
     integer                         , pointer :: ttlform
     integer                         , pointer :: telform
     integer                         , pointer :: updbaselyr
@@ -124,6 +127,9 @@ use bedcomposition_module
     if (istat == 0) istat = bedcomp_getpointer_logical(gdp%gdmorlyr, 'ExchLyr'             , exchlyr)
     if (istat == 0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'NLaLyr'              , nlalyr)
     if (istat == 0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'NEuLyr'              , neulyr)
+    if (istat == 0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'NFrac'               , nfrac)
+    if (istat == 0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'nmLb'                , nmlb)
+    if (istat == 0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'nmUb'                , nmub)
     if (istat == 0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'ThEuLyr'             , theulyr)
     if (istat == 0) istat = bedcomp_getpointer_realfp (gdp%gdmorlyr, 'ThLaLyr'             , thlalyr)
     if (istat == 0) istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'UpdBaseLyr'          , updbaselyr)
@@ -134,6 +140,10 @@ use bedcomposition_module
        call prterr(lundia, 'U021', 'Memory problem in RDMORLYR')
        call d3stop(1, gdp)
     endif
+    !
+    nmlb  = gdp%d%nmlb
+    nmub  = gdp%d%nmub
+    nfrac = lsedtot
     !
     error      = .false.
     rmissval   = -999.0
@@ -160,7 +170,7 @@ use bedcomposition_module
     ! the data tree read from the input file
     !
     if (version < 2) then
-       if (allocmorlyr(gdp%gdmorlyr, gdp%d%nmlb, gdp%d%nmub, lsedtot) /= 0) then
+       if (allocmorlyr(gdp%gdmorlyr) /= 0) then
           call prterr(lundia, 'U021', 'RDMORLYR: memory alloc error')
           call d3stop(1, gdp)
        endif
@@ -337,7 +347,7 @@ use bedcomposition_module
     case default
     endselect
     !
-    if (allocmorlyr(gdp%gdmorlyr, gdp%d%nmlb, gdp%d%nmub, lsedtot) /= 0) then
+    if (allocmorlyr(gdp%gdmorlyr) /= 0) then
        call prterr(lundia, 'U021', 'RDMORLYR: memory alloc error')
        call d3stop(1, gdp)
     endif

@@ -185,7 +185,7 @@ contains
 subroutine bedcomposition_module_info(messages)
     use message_module
     !
-    type(message_stack), pointer :: messages
+    type(message_stack) :: messages
     !
     call addmessage(messages,'$Id$')
     call addmessage(messages,'$URL$')
@@ -1811,7 +1811,7 @@ end function initmorlyr
 !
 !
 !==============================================================================
-function allocmorlyr(this, nmlb, nmub, nfrac) result (istat)
+function allocmorlyr(this) result (istat)
 !!--description-----------------------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
@@ -1820,16 +1820,16 @@ function allocmorlyr(this, nmlb, nmub, nfrac) result (istat)
     !
     ! Function/routine arguments
     !
-    integer            , intent(in) :: nmlb
-    integer            , intent(in) :: nmub
-    integer            , intent(in) :: nfrac
-    type (bedcomp_data)             :: this    
-    integer                         :: istat
+    type (bedcomp_data)              :: this    
+    integer                          :: istat
     !
     ! Local variables
     !
     type (bedcomp_settings), pointer :: settings
     type (bedcomp_state), pointer    :: state
+    integer                          :: nmlb
+    integer                          :: nmub
+    integer                          :: nfrac
     !
     !! executable statements -------------------------------------------------------
     !
@@ -1849,9 +1849,9 @@ function allocmorlyr(this, nmlb, nmub, nfrac) result (istat)
        settings%keuler = settings%keuler + 1
     endif
     !
-    settings%nmlb = nmlb
-    settings%nmub = nmub
-    settings%nfrac = nfrac
+    nmlb  = settings%nmlb
+    nmub  = settings%nmub
+    nfrac = settings%nfrac
     !
     istat = 0
     if (istat == 0) allocate (state%bodsed(nfrac,nmlb:nmub), stat = istat)
@@ -2097,7 +2097,7 @@ function bedcomp_getpointer_integer_scalar(this, variable, val) result (istat)
     localname = variable
     call str_lower(localname)
     select case (localname)
-    case ('iunderlyr')
+    case ('bed_layering_type','iunderlyr')
        val => this%settings%iunderlyr
     case ('iporosity')
        val => this%settings%iporosity
@@ -2107,10 +2107,16 @@ function bedcomp_getpointer_integer_scalar(this, variable, val) result (istat)
        val => this%settings%nlyr
     case ('maxnumshortwarning')
        val => this%settings%morlyrnum%MaxNumShortWarning
-    case ('neulyr')
+    case ('number_of_eulerian_layers','neulyr')
        val => this%settings%neulyr
-    case ('nlalyr')
+    case ('number_of_lagrangian_layers','nlalyr')
        val => this%settings%nlalyr
+    case ('number_of_fractions','nfrac')
+       val => this%settings%nfrac
+    case ('first_cell_number','nmlb')
+       val => this%settings%nmlb
+    case ('last_cell_number','nmub')
+       val => this%settings%nmub
     case ('updbaselyr')
        val => this%settings%updbaselyr
     case default
