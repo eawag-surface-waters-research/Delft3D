@@ -575,7 +575,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     ! to be used in computation of skin friction (Soulsby 2004)
     !
     if (bsskin) then
-       call detthcmud(gdp%gdmorlyr  ,sedtyp    ,thcmud    )
+       call detthcmud(gdp%gdmorlyr  ,thcmud    )
     endif
     !
     ! Initialisation:
@@ -637,8 +637,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     ! compute the mud fraction.
     !
     if (lsedtot > 1) then
-       call getfrac(gdp%gdmorlyr,frac      ,sedtyp    ,anymud    , &
-                  & mudcnt      ,mudfrac   ,gdp%d%nmlb,gdp%d%nmub)
+       call getfrac(gdp%gdmorlyr,frac      ,anymud    ,mudcnt    , &
+                  & mudfrac     ,gdp%d%nmlb,gdp%d%nmub)
     endif
     !
     ! Calculate velocity components and magnitude at the zeta points

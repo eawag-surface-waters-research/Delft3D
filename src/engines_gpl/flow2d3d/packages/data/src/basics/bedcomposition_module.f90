@@ -140,6 +140,7 @@ type bedcomp_settings
     ! pointers
     !
     type (morlyrnumericstype) , pointer :: morlyrnum ! structure containing numerical settings
+    integer  , dimension(:)   , pointer :: sedtyp    ! sediment type: 0=total/1=noncoh/2=coh
     real(fp) , dimension(:)   , pointer :: thexlyr   ! thickness of exchange layer
     real(fp) , dimension(:)   , pointer :: thtrlyr   ! thickness of transport layer
     real(fp) , dimension(:)   , pointer :: phi       ! D50 diameter expressed on phi scale
@@ -427,7 +428,7 @@ function gettoplyr(this, dz_eros, dbodsd, messages  ) result (istat)
     !
     type(bedcomp_data)                                                                           :: this
     real(fp), dimension(this%settings%nfrac, this%settings%nmlb:this%settings%nmub), intent(out) :: dbodsd  !  change in sediment composition, units : kg/m2
-    real(fp), dimension(this%settings%nmlb:this%settings%nmub)                                   :: dz_eros !  change in sediment thickness, units : m
+    real(fp), dimension(this%settings%nmlb:this%settings%nmub)                     , intent(in)  :: dz_eros !  change in sediment thickness, units : m
     type(message_stack)                                                                          :: messages
     integer                                                                                      :: istat
     !
@@ -441,6 +442,7 @@ function gettoplyr(this, dz_eros, dbodsd, messages  ) result (istat)
     real(fp)                                :: thtrlyrnew
     real(fp)                                :: thick
     real(fp), dimension(this%settings%nfrac):: dmi 
+    real(fp)                                :: dz_togo
     type (bedcomp_work)                     :: work
     !
     character(message_len)                  :: message
@@ -506,13 +508,13 @@ function gettoplyr(this, dz_eros, dbodsd, messages  ) result (istat)
                    dbodsd (l, nm) = msed(l, 1, nm)
                    msed(l, 1, nm) = 0.0_fp
                 enddo
-                dz_eros(nm) = dz_eros(nm)-thlyr(1, nm)
+                dz_togo = dz_eros(nm)-thlyr(1, nm)
                 thick  = 0.0_fp
                 !
-                ! get remaining dz_eros from underlayers
+                ! get remaining dz_togo from underlayers
                 ! get dmi from underlayers 
                 !
-                call lyrerosion(this , nm, dz_eros(nm), dmi)
+                call lyrerosion(this , nm, dz_togo, dmi)
                 !
                 do l = 1, this%settings%nfrac
                    dbodsd(l, nm) = dbodsd(l, nm) + dmi(l)
@@ -1214,10 +1216,11 @@ end subroutine lyrsedimentation_eulerian
 !
 !
 !==============================================================================
-subroutine detthcmud(this, sedtyp, thcmud)
+subroutine detthcmud(this, thcmud)
 !!--description-----------------------------------------------------------------
 !
-!    Function: - Update underlayer bookkeeping system for erosion/sedimentation
+!    Function: - Determines the total thickness of mud fraction in the bed
+!    DEPRECATED FUNCTIONALITY; use mudfrac (sum of frac over mud fractions) instead
 !
 !!--declarations----------------------------------------------------------------
     use precision
@@ -1230,7 +1233,6 @@ subroutine detthcmud(this, sedtyp, thcmud)
 !
     type(bedcomp_data)                                        , intent(in)  :: this
     real(fp), dimension(this%settings%nmlb:this%settings%nmub), intent(out) :: thcmud  !  Total thickness of the mud layers
-    integer, dimension(this%settings%nfrac)                   , intent(in)  :: sedtyp
 !
 ! Local variables
 !
@@ -1247,7 +1249,9 @@ subroutine detthcmud(this, sedtyp, thcmud)
     do nm = this%settings%nmlb,this%settings%nmub
        thcmud (nm) = 0.0
         do l = 1, this%settings%nfrac
-           if (sedtyp(l) == SEDTYP_COHESIVE) thcmud(nm) = thcmud(nm) + real(bodsed(l, nm),fp)/rhofrac(l)
+           if (this%settings%sedtyp(l) == SEDTYP_COHESIVE) then
+              thcmud(nm) = thcmud(nm) + real(bodsed(l, nm),fp)/rhofrac(l)
+           endif
         enddo
     enddo
 end subroutine detthcmud
@@ -1258,7 +1262,8 @@ end subroutine detthcmud
 subroutine getalluvthick(this, seddep, nmfrom, nmto, nval)
 !!--description-----------------------------------------------------------------
 !
-!    Function: - Update underlayer bookkeeping system for erosion/sedimentation
+!    Function: - Determine sediment thickness optionally per sediment fraction
+!    DEPRECATED FUNCTIONALITY; use getsedthick instead.
 !
 !!--declarations----------------------------------------------------------------
     use precision 
@@ -1323,7 +1328,7 @@ end subroutine getalluvthick
 !
 !
 !==============================================================================
-subroutine getfrac(this, frac, sedtyp, anymud, mudcnt, mudfrac, nmfrom, nmto)
+subroutine getfrac(this, frac, anymud, mudcnt, mudfrac, nmfrom, nmto)
 !!--description-----------------------------------------------------------------
 !
 !    Function: Determines the (mass or volume) fractions
@@ -1340,7 +1345,6 @@ subroutine getfrac(this, frac, sedtyp, anymud, mudcnt, mudfrac, nmfrom, nmto)
     real(fp), dimension(nmfrom:nmto, this%settings%nfrac)             , intent(out) :: frac
     real(fp), dimension(nmfrom:nmto)                                  , intent(out) :: mudfrac
     real(fp), dimension(nmfrom:nmto)                                  , intent(in)  :: mudcnt
-    integer , dimension(this%settings%nfrac)                          , intent(in)  :: sedtyp
     integer                                                           , intent(in)  :: nmfrom
     integer                                                           , intent(in)  :: nmto
     !
@@ -1370,7 +1374,7 @@ subroutine getfrac(this, frac, sedtyp, anymud, mudcnt, mudfrac, nmfrom, nmto)
        !
        mudfrac = 0.0
        do l = 1, this%settings%nfrac
-          if (sedtyp(l) == SEDTYP_COHESIVE) then
+          if (this%settings%sedtyp(l) == SEDTYP_COHESIVE) then
              do nm = nmfrom, nmto
                 mudfrac(nm) = mudfrac(nm) + frac(nm,l)
              enddo
@@ -1661,7 +1665,7 @@ end subroutine setvfrac
 subroutine getsedthick_allpoints(this, seddep)
 !!--description-----------------------------------------------------------------
 !
-!    Function: Determines the volume fractions
+!    Function: Determines total thickness of sediment deposit at all points
 !
 !!--declarations----------------------------------------------------------------
     use precision 
@@ -1705,7 +1709,7 @@ end subroutine getsedthick_allpoints
 subroutine getsedthick_1point(this, nm, seddep)
 !!--description-----------------------------------------------------------------
 !
-!    Function: Determines the volume fractions
+!    Function: Determines total thickness of sediment deposit at one point
 !
 !!--declarations----------------------------------------------------------------
     use precision 
@@ -1859,6 +1863,8 @@ function allocmorlyr(this) result (istat)
     if (istat == 0) allocate (state%dpsed(nmlb:nmub), stat = istat)
     if (istat == 0) state%dpsed = 0.0_fp
     !
+    if (istat == 0) allocate (settings%sedtyp(nfrac), stat = istat)
+    if (istat == 0) settings%sedtyp = 0
     if (istat == 0) allocate (settings%rhofrac(nfrac), stat = istat)
     if (istat == 0) settings%rhofrac = 0.0_fp
     if (istat == 0) allocate (settings%phi(nfrac), stat = istat)
@@ -1973,6 +1979,11 @@ function clrmorlyr(this) result (istat)
        if (associated(settings%thexlyr))   deallocate(settings%thexlyr , STAT = istat)
        if (associated(settings%thtrlyr))   deallocate(settings%thtrlyr , STAT = istat)
        !
+       if (associated(settings%sedtyp))    deallocate(settings%sedtyp , STAT = istat)
+       if (associated(settings%phi))       deallocate(settings%phi    , STAT = istat)
+       if (associated(settings%rhofrac))   deallocate(settings%rhofrac, STAT = istat)
+       if (associated(settings%sigphi))    deallocate(settings%sigphi , STAT = istat)
+       !
        deallocate(this%settings, STAT = istat)
        nullify(this%settings)
     endif
@@ -1994,10 +2005,10 @@ end function clrmorlyr
 !
 !
 !==============================================================================
-subroutine setbedfracprop(this, sedd50, logsedsig, rhofrac)
+subroutine setbedfracprop(this, sedtyp, sedd50, logsedsig, rhofrac)
 !!--description-----------------------------------------------------------------
 !
-!    Function: - Get a scalar logical
+!    Function: - Set sediment fraction properties
 !
 !!--declarations----------------------------------------------------------------
     use string_module
@@ -2006,6 +2017,7 @@ subroutine setbedfracprop(this, sedd50, logsedsig, rhofrac)
     ! Call variables
     !
     type(bedcomp_data)                  :: this    
+    integer , dimension(:), intent(in)  :: sedtyp
     real(fp), dimension(:), intent(in)  :: sedd50
     real(fp), dimension(:), intent(in)  :: logsedsig
     real(fp), dimension(:), intent(in)  :: rhofrac
@@ -2017,6 +2029,7 @@ subroutine setbedfracprop(this, sedd50, logsedsig, rhofrac)
     !! executable statements -------------------------------------------------------
     !
     do l = 1, this%settings%nfrac
+       this%settings%sedtyp(l) = sedtyp(l)
        if (sedd50(l)<=0.0_fp) then
           this%settings%phi(l) = 13.9_fp ! -log(65um)/log(2)
        else
@@ -2060,7 +2073,7 @@ function bedcomp_getpointer_logical_scalar(this, variable, val) result (istat)
     localname = variable
     call str_lower(localname)
     select case (localname)
-    case ('exchlyr')
+    case ('exchange_layer','exchlyr')
        val => this%settings%exchlyr
     case default
        val => NULL()
@@ -2099,11 +2112,11 @@ function bedcomp_getpointer_integer_scalar(this, variable, val) result (istat)
     select case (localname)
     case ('bed_layering_type','iunderlyr')
        val => this%settings%iunderlyr
-    case ('iporosity')
+    case ('porosity_model_type','iporosity')
        val => this%settings%iporosity
     case ('keuler')
        val => this%settings%keuler
-    case ('nlyr')
+    case ('number_of_layers','nlyr')
        val => this%settings%nlyr
     case ('maxnumshortwarning')
        val => this%settings%morlyrnum%MaxNumShortWarning
@@ -2113,11 +2126,11 @@ function bedcomp_getpointer_integer_scalar(this, variable, val) result (istat)
        val => this%settings%nlalyr
     case ('number_of_fractions','nfrac')
        val => this%settings%nfrac
-    case ('first_cell_number','nmlb')
+    case ('first_column_number','nmlb')
        val => this%settings%nmlb
-    case ('last_cell_number','nmub')
+    case ('last_column_number','nmub')
        val => this%settings%nmub
-    case ('updbaselyr')
+    case ('base_layer_updating_type','updbaselyr')
        val => this%settings%updbaselyr
     case default
        val => NULL()
@@ -2155,9 +2168,9 @@ function bedcomp_getpointer_fp_scalar(this, variable, val) result (istat)
     localname = variable
     call str_lower(localname)
     select case (localname)
-    case ('theulyr')
+    case ('thickness_of_eulerian_layers','theulyr')
        val => this%settings%theulyr
-    case ('thlalyr')
+    case ('thickness_of_lagrangian_layers','thlalyr')
        val => this%settings%thlalyr
     case ('minmassshortwarning')
        val => this%settings%morlyrnum%MinMassShortWarning
@@ -2199,9 +2212,11 @@ function bedcomp_getpointer_fp_1darray(this, variable, val) result (istat)
     select case (localname)
     case ('dpsed')
        val => this%state%dpsed
-    case ('thexlyr')
+    case ('sediment_density')
+       val => this%settings%rhofrac
+    case ('thickness_of_exchange_layer','thexlyr')
        val => this%settings%thexlyr
-    case ('thtrlyr')
+    case ('thickness_of_transport_layer','thtrlyr')
        val => this%settings%thtrlyr
     case default
        val => NULL()
@@ -2239,9 +2254,9 @@ function bedcomp_getpointer_fp_2darray(this, variable, val) result (istat)
     localname = variable
     call str_lower(localname)
     select case (localname)
-    case ('svfrac')
+    case ('solid_volume_fraction','svfrac')
        val => this%state%svfrac
-    case ('thlyr')
+    case ('layer_thickness','thlyr')
        val => this%state%thlyr
     case default
        val => NULL()
@@ -2279,7 +2294,7 @@ function bedcomp_getpointer_fp_3darray(this, variable, val) result (istat)
     localname = variable
     call str_lower(localname)
     select case (localname)
-    case ('msed')
+    case ('layer_mass','msed')
        val => this%state%msed
     case default
        val => NULL()

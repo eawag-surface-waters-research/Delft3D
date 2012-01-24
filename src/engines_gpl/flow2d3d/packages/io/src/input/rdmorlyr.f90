@@ -646,14 +646,16 @@ use bedcomposition_module
        !
        ! porosity is fraction dependent and included in cdryb densities
        !
-       call setbedfracprop(gdp%gdmorlyr, gdp%gdsedpar%sedd50, &
-             & gdp%gdsedpar%logsedsig, gdp%gdsedpar%cdryb)
+       call setbedfracprop(gdp%gdmorlyr, gdp%gdsedpar%sedtyp, &
+             & gdp%gdsedpar%sedd50, gdp%gdsedpar%logsedsig, &
+             & gdp%gdsedpar%cdryb)
     else
        !
        ! porosity is simulated, the cdryb values are ignored
        !
-       call setbedfracprop(gdp%gdmorlyr, gdp%gdsedpar%sedd50, &
-             & gdp%gdsedpar%logsedsig, gdp%gdsedpar%rhosol)
+       call setbedfracprop(gdp%gdmorlyr, gdp%gdsedpar%sedtyp, &
+             & gdp%gdsedpar%sedd50, gdp%gdsedpar%logsedsig, &
+             & gdp%gdsedpar%rhosol)
        ! gdp%gdsedpar%cdryb = gdp%gdsedpar%rhosol
     endif
 end subroutine rdmorlyr
