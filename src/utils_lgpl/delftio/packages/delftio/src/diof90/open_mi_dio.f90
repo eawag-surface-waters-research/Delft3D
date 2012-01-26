@@ -239,7 +239,7 @@ end subroutine OD_Finalize
 ! Create provided exchange item (called by providing component)
 !
 !==============================================================================
-function OD_ExchItemCreate_WithIDs(quantID, elmsetID, elmIDs, role, startTime) result(success)
+function OD_ExchItemCreate_WithIDs(quantID, elmsetID, elmIDs, role, startTime, dumpDsName) result(success)
     !
     ! return value
     logical :: success  ! .true.: all OK
@@ -250,6 +250,10 @@ function OD_ExchItemCreate_WithIDs(quantID, elmsetID, elmIDs, role, startTime) r
     character(Len=*),dimension(:), intent(in) :: elmIDs     ! Element ID's in elm.set
     integer                      , intent(in) :: role       ! Providing / Accepting
     double precision             , intent(in) :: startTime  ! Start time for Dio PLT
+    character(Len=*)             , intent(in), &
+                                   optional   :: dumpDsName ! Name of dump file (his file), must be different
+                                                            ! from data set name (to be able to distinguish
+                                                            ! between them in the dio config)
     !
     ! locals
     type(t_od_exchange), pointer             :: od_exchange ! pointer to exchanged item
@@ -261,7 +265,11 @@ function OD_ExchItemCreate_WithIDs(quantID, elmsetID, elmIDs, role, startTime) r
         write(odLastError, '(4A)') 'OPENMI_DIO: ERROR 105: role must be PROVIDING for ', &
                                         trim(quantID), '/', trim(elmsetID)
     else
-        od_exchange => odAddExchange(quantID, elmsetID, role)
+        if (present(dumpDsName)) then
+            od_exchange => odAddExchange(quantID, elmsetID, role, dumpDsName)
+        else
+            od_exchange => odAddExchange(quantID, elmsetID, role)
+        endif
         if ( .not. associated(od_exchange) ) then
             write(odLastError, '(4A)') 'OPENMI_DIO: ERROR 104: could not create exchange item ', &
                                         trim(quantID), '/', trim(elmsetID)
@@ -539,7 +547,7 @@ end function OD_Get_2D
 ! Add exchanged item
 !
 !==============================================================================
-function odAddExchange(quantID, elmsetID, role) result(od_exchange)
+function odAddExchange(quantID, elmsetID, role, dumpDsName) result(od_exchange)
     !
     ! return value
     type(t_od_exchange), pointer  :: od_exchange
@@ -548,6 +556,10 @@ function odAddExchange(quantID, elmsetID, role) result(od_exchange)
     character(Len=*), intent(in) :: quantID     ! Quantity Identifier
     character(Len=*), intent(in) :: elmsetID    ! ElementSet Identifier
     integer         , intent(in) :: role        ! Providing / Accepting
+    character(Len=*), intent(in), &
+                      optional   :: dumpDsName  ! Name of dump file (his file), must be different
+                                                ! from data set name (to be able to distinguish
+                                                ! between them in the dio config)
     !
     ! locals
     character(Len=20)            :: inMemPrefix ! Prefix for in mem stream
@@ -571,11 +583,15 @@ function odAddExchange(quantID, elmsetID, role) result(od_exchange)
         od_exchange % exchDsName = trim(inMemPrefix) // '-' // &
                                    trim(quantID)     // '-' // &
                                    trim(elmsetID)    // '.shm'
-        !
-        ! Not only the extension, but also the base name must be different for the dumpDsName compared to the exchDsName
-        od_exchange % dumpDsName = trim(inMemPrefix) // '-' // &
-                                   trim(quantID)     // '-' // &
-                                   trim(elmsetID)    // '_log.his'
+        if (present(dumpDsName)) then
+            od_exchange % dumpDsName = dumpDsName
+        else
+            !
+            ! Not only the extension, but also the base name must be different for the dumpDsName compared to the exchDsName
+            od_exchange % dumpDsName = trim(inMemPrefix) // '-' // &
+                                       trim(quantID)     // '-' // &
+                                       trim(elmsetID)    // '_log.his'
+        endif                                         
     endif
 end function odAddExchange
 !
