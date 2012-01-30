@@ -309,6 +309,6 @@ subroutine updmassbal(newvol    ,qxk       ,qyk       ,kcs       ,r1        , &
        !
        ! At start of next step: reset fluxes to 0.
        !
-       resetfluxes = .true.
+       !resetfluxes = .true.
     endif
 end subroutine updmassbal

@@ -801,10 +801,6 @@ subroutine tricom_step(gdp)
        !
        ! Calculate post processing info and write to files if required.
        !
-       call updmassbal(.true.   ,r(qxk)    ,r(qyk)    ,i(kcs)    ,r(r1)     , &
-                     & r(volum1),r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   , &
-                     & r(gsqs)  ,r(guu)    ,r(gvv)    ,d(dps)    ,gdp       )
-       !
        ! WARNING: The following semaphore and the next semaphore MUST be of the same semaphore type
        ! Otherwise, DD with WAVE online will crash: semaphores are NOT synchronisation points!
        !
