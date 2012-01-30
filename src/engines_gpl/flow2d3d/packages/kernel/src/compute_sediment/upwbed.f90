@@ -129,6 +129,8 @@ subroutine upwbed(su        ,sv        ,suu       ,svv       ,kfu       , &
                    ! correction for domain decomposition:
                    !
                    suu(nm, l) = suv1
+                elseif (kcs(nm) == 3) then
+                   suu(nm, l) = suv2
                 elseif (sutot(nm, l)>0.0 .and. sutot(nmu, l)>0.0 .and. upwindbedload) then
                    suu(nm, l) = suv1
                 elseif (sutot(nm, l)<0.0 .and. sutot(nmu, l)<0.0 .and. upwindbedload) then
@@ -168,6 +170,8 @@ subroutine upwbed(su        ,sv        ,suu       ,svv       ,kfu       , &
                    ! correction for domain decomposition:
                    !
                    svv(nm, l) = suv1
+                elseif (kcs(nm) == 3) then
+                   svv(nm, l) = suv2
                 elseif (svtot(nm, l)>0.0 .and. svtot(num, l)>0.0 .and. upwindbedload) then
                    svv(nm, l) = suv1
                 elseif (svtot(nm, l)<0.0 .and. svtot(num, l)<0.0 .and. upwindbedload) then
