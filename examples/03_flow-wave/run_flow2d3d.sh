@@ -25,23 +25,27 @@ mdwfile=r17.mdw
     #
 export ARCH=intel
 curdir=`pwd`
-export D3D_HOME=$curdir/../../bin
-libdir=$D3D_HOME/$ARCH/lib
-exedir=$D3D_HOME/$ARCH/flow/bin
-wavedir=$D3D_HOME/$ARCH/wave/bin
-swandir=$wavedir
-swanbatdir=$wavedir
+export D3D_HOME=$curdir/../../bin/lnx
+flowexedir=$D3D_HOME/flow2d3d/bin
+flowlibdir=$D3D_HOME/flow2d3d/lib
+waveexedir=$D3D_HOME/wave/bin
+wavelibdir=$D3D_HOME/wave/lib
+swanexedir=$D3D_HOME/swan/bin
+swanlibdir=$D3D_HOME/swan/lib
+swanbatdir=$D3D_HOME/swan/scripts
  
     #
     # No adaptions needed below
     #
 
     # Set some (environment) parameters
-export LD_LIBRARY_PATH=$wavedir:$exedir:$libdir:$LD_LIBRARY_PATH 
-export PATH=$swanbatdir:$PATH 
 
     # Run
-$exedir/deltares_hydro.exe $argfile &
+export LD_LIBRARY_PATH=$flowexedir:$flowlibdir:$LD_LIBRARY_PATH 
+export PATH=$flowexedir:$PATH 
+$flowexedir/deltares_hydro.exe $argfile &
 
-$wavedir/wave.exe $mdwfile 1
+export LD_LIBRARY_PATH=$swanbatdir:$swanexedir:$swanlibdir:$waveexedir:$wavelibdir:$LD_LIBRARY_PATH 
+export PATH=$swanbatdir:$PATH 
+$waveexedir/wave.exe $mdwfile 1
 

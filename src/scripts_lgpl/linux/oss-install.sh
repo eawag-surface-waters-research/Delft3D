@@ -70,7 +70,7 @@ function delft3d_flow () {
 # ==========================
 function d_hydro () {
     echo "installing d_hydro . . ."
-    dest_bin="$dest_main/intel/flow/bin"
+    dest_bin="$dest_main/lnx/flow2d3d/bin"
 
     mkdir -p $dest_bin
 
@@ -87,21 +87,23 @@ function d_hydro () {
 # ========================
 function flow2d3d () {
     echo "installing flow2d3d . . ."
-    dest_bin="$dest_main/intel/flow/bin"
-    dest_lib="$dest_main/intel/flow/lib"
-    dest_default="$dest_main/intel/flow/default"
+    dest_bin="$dest_main/lnx/flow2d3d/bin"
+    dest_lib="$dest_main/lnx/flow2d3d/lib"
+    dest_default="$dest_main/lnx/flow2d3d/default"
+    dest_scripts="$dest_main/lnx/flow2d3d/scripts"
 
     mkdir -p $dest_bin
     mkdir -p $dest_lib
     mkdir -p $dest_default
+    mkdir -p $dest_scripts
 
     cp -fp lib/libflow2d3d.so                                 $dest_bin
     cp -fp lib/libflow2d3d_sp.so                              $dest_bin
-    copyFile "engines_gpl/flow2d3d/scripts/meteo_old2new.m"   $dest_bin
+    copyFile "engines_gpl/flow2d3d/scripts/meteo_old2new.m"   $dest_scripts
     copyFile "bin/esm_create"                                 $dest_bin
     copyFile "bin/esm_delete"                                 $dest_bin
     copyFile "bin/esm_info"                                   $dest_bin
-    copyFile "engines_gpl/flow2d3d/default/*.*"               $dest_default
+    copyFile "engines_gpl/flow2d3d/default/*"                 $dest_default
 
     return
 }
@@ -113,17 +115,19 @@ function flow2d3d () {
 # ===========================
 function flow2d3d_openda () {
     echo "installing flow2d3d_openda . . ."
-    dest_bin="$dest_main/intel/flow/bin"
-    dest_lib="$dest_main/intel/flow/lib"
-    dest_default="$dest_main/intel/flow/default"
+    dest_bin="$dest_main/lnx/flow2d3d/bin"
+    dest_lib="$dest_main/lnx/flow2d3d/lib"
+    dest_default="$dest_main/lnx/flow2d3d/default"
+    dest_scripts="$dest_main/lnx/flow2d3d/scripts"
 
     mkdir -p $dest_bin
     mkdir -p $dest_lib
     mkdir -p $dest_default
+    mkdir -p $dest_scripts
 
     cp -fp lib/libflow2d3d_openda.so                                 $dest_bin
     cp -fp lib/libflow2d3d_openda_sp.so                              $dest_bin
-    copyFile "engines_gpl/flow2d3d/scripts/meteo_old2new.m"            $dest_bin
+    copyFile "engines_gpl/flow2d3d/scripts/meteo_old2new.m"            $dest_scripts
     copyFile "bin/esm_create"                                          $dest_bin
     copyFile "bin/esm_delete"                                          $dest_bin
     copyFile "bin/esm_info"                                            $dest_bin
@@ -140,18 +144,24 @@ function flow2d3d_openda () {
 function wave () {
     echo "installing wave . . ."
 
-    dest_bin="$dest_main/intel/wave/bin"
-    dest_default="$dest_main/intel/wave/default"
-    dest_lib="$dest_main/intel/lib"
+    dest_bin="$dest_main/lnx/wave/bin"
+    dest_lib="$dest_main/lnx/wave/lib"
+    dest_default="$dest_main/lnx/wave/default"
+    dest_swan_bin="$dest_main/lnx/swan/bin"
+    dest_swan_lib="$dest_main/lnx/swan/lib"
+    dest_swan_scripts="$dest_main/lnx/swan/scripts"
 
     mkdir -p $dest_bin
-    mkdir -p $dest_default
     mkdir -p $dest_lib
+    mkdir -p $dest_default
+    mkdir -p $dest_swan_bin
+    mkdir -p $dest_swan_lib
+    mkdir -p $dest_swan_scripts
 
     copyFile "bin/wave.exe"                                        $dest_bin
-    copyFile "third_party_open/swan/bin/linux/*.*"                 $dest_bin
     copyFile "engines_gpl/flow2d3d/default/dioconfig.ini"          $dest_default
-    copyFile "third_party_open/swan/scripts/swan_install.sh"       $dest_bin/swan.sh
+    copyFile "third_party_open/swan/bin/linux/*.*"                 $dest_swan_bin
+    copyFile "third_party_open/swan/scripts/swan_install.sh"       $dest_swan_scripts/swan.sh
 
     return
 }
@@ -163,7 +173,7 @@ function wave () {
 # ==========================
 function plugin_culvert () {
     echo "installing plugin_culvert . . ."
-    dest_bin="$dest_main/intel/flow/bin"
+    dest_bin="$dest_main/lnx/flow2d3d/bin"
 
     mkdir -p $dest_bin
 
@@ -179,7 +189,7 @@ function plugin_culvert () {
 # ====================================
 function plugin_delftflow_traform () {
     echo "installing plugin_delftflow_traform . . ."
-    dest_bin="$dest_main/intel/flow/bin"
+    dest_bin="$dest_main/lnx/flow2d3d/bin"
 
     mkdir -p $dest_bin
 
@@ -195,7 +205,7 @@ function plugin_delftflow_traform () {
 # ==================
 function datsel () {
     echo "installing datsel . . ."
-    dest_bin="$dest_main/intel/flow/bin"
+    dest_bin="$dest_main/lnx/flow2d3d/bin"
 
     mkdir -p $dest_bin
 
@@ -211,7 +221,7 @@ function datsel () {
 # ==================
 function kubint () {
     echo "installing kubint . . ."
-    dest_bin="$dest_main/intel/flow/bin"
+    dest_bin="$dest_main/lnx/flow2d3d/bin"
 
     mkdir -p $dest_bin
 
@@ -227,7 +237,7 @@ function kubint () {
 # ================
 function lint () {
     echo "installing lint . . ."
-    dest_bin="$dest_main/intel/flow/bin"
+    dest_bin="$dest_main/lnx/flow2d3d/bin"
 
     mkdir -p $dest_bin
 
@@ -243,11 +253,13 @@ function lint () {
 # ====================
 function mormerge () {
     echo "installing mormerge . . ."
-    dest_bin="$dest_main/intel/flow/bin"
+    dest_bin="$dest_main/lnx/flow2d3d/bin"
+    dest_scripts="$dest_main/lnx/flow2d3d/scripts"
 
     mkdir -p $dest_bin
+    mkdir -p $dest_scripts
 
-    copyFile "engines_gpl/flow2d3d/scripts/mormerge.tcl"                 $dest_bin
+    copyFile "engines_gpl/flow2d3d/scripts/mormerge.tcl"                 $dest_scripts
     copyFile "bin/mormerge.exe"                                          $dest_bin
 
     return
@@ -260,7 +272,7 @@ function mormerge () {
 # ==============
 function vs () {
     echo "installing vs . . ."
-    dest="$dest_main/intel/util"
+    dest="$dest_main/lnx/util"
 
     mkdir -p $dest
 

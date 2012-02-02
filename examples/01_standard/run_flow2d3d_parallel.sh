@@ -27,9 +27,9 @@ argfile=config_flow2d3d.ini
     # Set the directory containing delftflow.exe here
     #
 export ARCH=intel
-export D3D_HOME=../../bin
-libdir=$D3D_HOME/$ARCH/lib
-exedir=$D3D_HOME/$ARCH/flow/bin
+export D3D_HOME=../../bin/lnx
+exedir=$D3D_HOME/flow2d3d/bin
+libdir=$D3D_HOME/flow2d3d/lib
  
     #
     # No adaptions needed below
