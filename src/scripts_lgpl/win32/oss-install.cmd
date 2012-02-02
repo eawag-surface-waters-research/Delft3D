@@ -138,14 +138,14 @@ rem ==========================
 :d_hydro
     echo "installing d_hydro . . ."
 
-    set dest_bin="!dest_main!\w32\flow\bin"
+    set dest_bin="!dest_main!\win32\flow2d3d\bin"
 
     call :makeDir !dest_bin!
 rem    if not exist !dest_bin!     mkdir !dest_bin!
     
-    call :copyFile engines_gpl\d_hydro\bin\Release\d_hydro.exe         !dest_bin!
+    call :copyFile engines_gpl\d_hydro\bin\Release\d_hydro.exe            !dest_bin!
 rem    call :handle_error
-    call :copyFile third_party_open\tclkit\bin\win32\deltares_hydro.exe    !dest_bin!
+    call :copyFile third_party_open\tclkit\bin\win32\deltares_hydro.exe   !dest_bin!
 rem    call :handle_error
 goto :endproc
 
@@ -157,23 +157,22 @@ rem ====================
 :flow2d3d
     echo "installing flow2d3d . . ."
 
-    set dest_bin="!dest_main!\w32\flow\bin"
-    set dest_lib="!dest_main!\w32\lib"
-    set dest_default="!dest_main!\w32\flow\default"
+    set dest_bin="!dest_main!\win32\flow2d3d\bin"
+    set dest_lib="!dest_main!\win32\flow2d3d\lib"
+    set dest_default="!dest_main!\win32\flow2d3d\default"
+    set dest_scripts="!dest_main!\win32\flow2d3d\scripts"
     
     call :makeDir !dest_bin!
-rem    if not exist !dest_bin!     mkdir !dest_bin!
     call :makeDir !dest_lib!
-rem    if not exist !dest_lib!     mkdir !dest_lib!
     call :makeDir !dest_default!
-rem    if not exist !dest_default! mkdir !dest_default!
+    call :makeDir !dest_scripts!
 
     set ErrorLevel_flowdll=0
-    copy engines_gpl\flow2d3d\bin\Release\flow2d3d.dll                                     !dest_bin!
+    copy engines_gpl\flow2d3d\bin\Release\flow2d3d.dll                       !dest_bin!
     if NOT %ErrorLevel%==0 (
         set ErrorLevel_flowdll=1
     )
-    copy engines_gpl\flow2d3d\bin\Release\flow2d3d_sp.dll                                  !dest_bin!
+    copy engines_gpl\flow2d3d\bin\Release\flow2d3d_sp.dll                    !dest_bin!
     if NOT !ErrorLevel!==0 (
         if NOT !ErrorLevel_flowdll!==0 (
             set GlobalErrorLevel=1
@@ -181,13 +180,13 @@ rem    if not exist !dest_default! mkdir !dest_default!
     )
     rem One of these two dlls will not exist and cause an ErrorLevel=1. Reset it.
     set ErrorLevel=0
-    call :copyFile engines_gpl\flow2d3d\scripts\meteo_old2new.m                                      !dest_bin!
-    call :copyFile third_party_open\pthreads\bin\win32\*.dll                                         !dest_lib!
-    call :copyFile third_party_open\mpich2\bin\*.exe                                                 !dest_bin!
-    call :copyFile third_party_open\mpich2\lib\*.dll                                                 !dest_lib!
-    call :copyFile third_party_open\expat\win32\bin\Release\libexpat.dll                             !dest_lib!
-    call :copyFile third_party_open\intel_fortran\lib\win32\*.dll                                    !dest_lib!
-    call :copyFile engines_gpl\flow2d3d\default\*.*                                                  !dest_default!
+    call :copyFile engines_gpl\flow2d3d\scripts\meteo_old2new.m              !dest_scripts!
+    call :copyFile third_party_open\pthreads\bin\win32\*.dll                 !dest_lib!
+    call :copyFile third_party_open\mpich2\bin\*.exe                         !dest_bin!
+    call :copyFile third_party_open\mpich2\lib\*.dll                         !dest_lib!
+    call :copyFile third_party_open\expat\win32\bin\Release\libexpat.dll     !dest_lib!
+    call :copyFile third_party_open\intel_fortran\lib\win32\*.dll            !dest_lib!
+    call :copyFile engines_gpl\flow2d3d\default\*                            !dest_default!
 goto :endproc
 
 
@@ -198,20 +197,22 @@ rem ===========================
 :flow2d3d_openda
     echo "installing flow2d3d_openda . . ."
 
-    set dest_bin="!dest_main!\w32\flow\bin"
-    set dest_lib="!dest_main!\w32\lib"
-    set dest_default="!dest_main!\w32\flow\default"
+    set dest_bin="!dest_main!\win32\flow2d3d\bin"
+    set dest_lib="!dest_main!\win32\flow2d3d\lib"
+    set dest_default="!dest_main!\win32\flow2d3d\default"
+    set dest_scripts="!dest_main!\win32\flow2d3d\scripts"
 
     call :makeDir !dest_bin!
     call :makeDir !dest_lib!
     call :makeDir !dest_default!
+    call :makeDir !dest_scripts!
 
     set ErrorLevel_opendadll=0
-    copy engines_gpl\flow2d3d\bin\Release\flow2d3d_openda.dll                              !dest_bin!
+    copy engines_gpl\flow2d3d\bin\Release\flow2d3d_openda.dll                !dest_bin!
     if NOT %ErrorLevel%==0 (
         set ErrorLevel_opendadll=1
     )
-    copy engines_gpl\flow2d3d\bin\Release\flow2d3d_openda_sp.dll                           !dest_bin!
+    copy engines_gpl\flow2d3d\bin\Release\flow2d3d_openda_sp.dll             !dest_bin!
     if NOT !ErrorLevel!==0 (
         if NOT !ErrorLevel_opendadll!==0 (
             set GlobalErrorLevel=1
@@ -219,15 +220,15 @@ rem ===========================
     )
     rem One of these two dlls will not exist and cause an ErrorLevel=1. Reset it.
     set ErrorLevel=0
-    call :copyFile engines_gpl\flow2d3d\scripts\meteo_old2new.m                                      !dest_bin!
-    call :copyFile third_party_open\pthreads\bin\win32\*.dll                                         !dest_lib!
-    call :copyFile third_party_open\mpich2\bin\*.exe                                                 !dest_bin!
-    call :copyFile third_party_open\mpich2\lib\*.dll                                                 !dest_lib!
-    call :copyFile third_party_open\expat\win32\bin\Release\libexpat.dll                             !dest_lib!
-    call :copyFile third_party_open\netcdf\lib\win32\release\netcdf.dll                              !dest_lib!
-    call :copyFile third_party_open\openda\core\native\lib\win32\*.dll                               !dest_lib!
-    call :copyFile third_party_open\intel_fortran\lib\win32\*.dll                                    !dest_lib!
-    call :copyFile engines_gpl\flow2d3d\default\*.*                                                  !dest_default!
+    call :copyFile engines_gpl\flow2d3d\scripts\meteo_old2new.m              !dest_scripts!
+    call :copyFile third_party_open\pthreads\bin\win32\*.dll                 !dest_lib!
+    call :copyFile third_party_open\mpich2\bin\*.exe                         !dest_bin!
+    call :copyFile third_party_open\mpich2\lib\*.dll                         !dest_lib!
+    call :copyFile third_party_open\expat\win32\bin\Release\libexpat.dll     !dest_lib!
+    call :copyFile third_party_open\netcdf\lib\win32\release\netcdf.dll      !dest_lib!
+    call :copyFile third_party_open\openda\core\native\lib\win32\*.dll       !dest_lib!
+    call :copyFile third_party_open\intel_fortran\lib\win32\*.dll            !dest_lib!
+    call :copyFile engines_gpl\flow2d3d\default\*.*                          !dest_default!
 goto :endproc
 
 
@@ -238,19 +239,25 @@ rem ================
 :wave
     echo "installing wave . . ."
 
-    set dest_bin="!dest_main!\w32\wave\bin"
-    set dest_lib="!dest_main!\w32\lib"
-    set dest_default="!dest_main!\w32\wave\default"
+    set dest_bin="!dest_main!\win32\wave\bin"
+    set dest_lib="!dest_main!\win32\wave\lib"
+    set dest_default="!dest_main!\win32\wave\default"
+    set dest_swan_bin="!dest_main!\win32\swan\bin"
+    set dest_swan_lib="!dest_main!\win32\swan\lib"
+    set dest_swan_scripts="!dest_main!\win32\swan\scripts"
 
     call :makeDir !dest_bin!
     call :makeDir !dest_lib!
     call :makeDir !dest_default!
+    call :makeDir !dest_swan_bin!
+    call :makeDir !dest_swan_lib!
+    call :makeDir !dest_swan_scripts!
 
     call :copyFile engines_gpl\wave\bin\release\wave.exe           !dest_bin!
-    call :copyFile third_party_open\swan\bin\win32\*.dll           !dest_lib!
-    call :copyFile third_party_open\swan\bin\win32\*.exe           !dest_bin!
     call :copyFile engines_gpl\flow2d3d\default\dioconfig.ini      !dest_default!
-    call :copyFile third_party_open\swan\scripts\swan_install.bat  !dest_lib!\swan.bat
+    call :copyFile third_party_open\swan\bin\win32\*.dll           !dest_swan_lib!
+    call :copyFile third_party_open\swan\bin\win32\*.exe           !dest_swan_bin!
+    call :copyFile third_party_open\swan\scripts\swan_install.bat  !dest_swan_scripts!\swan.bat
 goto :endproc
 
 
@@ -261,11 +268,11 @@ rem ==========================
 :plugin_culvert
     echo "installing plugin_culvert . . ."
 
-    set dest_bin="!dest_main!\w32\flow\bin"
+    set dest_bin="!dest_main!\win32\flow2d3d\bin"
 
     call :makeDir !dest_bin!
 
-    call :copyFile plugins_lgpl\plugin_culvert\bin\Release\plugin_culvert.dll                        !dest_bin!
+    call :copyFile plugins_lgpl\plugin_culvert\bin\Release\plugin_culvert.dll     !dest_bin!
 goto :endproc
 
 
@@ -276,7 +283,7 @@ rem ====================================
 :plugin_delftflow_traform
     echo "installing plugin_delftflow_traform . . ."
 
-    set dest_bin="!dest_main!\w32\flow\bin"
+    set dest_bin="!dest_main!\win32\flow2d3d\bin"
 
     call :makeDir !dest_bin!
 
@@ -291,11 +298,11 @@ rem ==================
 :datsel
     echo "installing datsel . . ."
 
-    set dest_bin="!dest_main!\w32\flow\bin"
+    set dest_bin="!dest_main!\win32\flow2d3d\bin"
 
     call :makeDir !dest_bin!
 
-    call :copyFile tools_gpl\datsel\bin\Release\datsel.exe                                           !dest_bin!
+    call :copyFile tools_gpl\datsel\bin\Release\datsel.exe     !dest_bin!
 goto :endproc
 
 
@@ -306,11 +313,11 @@ rem ==================
 :kubint
     echo "installing kubint . . ."
 
-    set dest_bin="!dest_main!\w32\flow\bin"
+    set dest_bin="!dest_main!\win32\flow2d3d\bin"
 
     call :makeDir !dest_bin!
 
-    call :copyFile tools_gpl\kubint\bin\Release\kubint.exe                                           !dest_bin!
+    call :copyFile tools_gpl\kubint\bin\Release\kubint.exe     !dest_bin!
 goto :endproc
 
 
@@ -321,11 +328,11 @@ rem ================
 :lint
     echo "installing lint . . ."
 
-    set dest_bin="!dest_main!\w32\flow\bin"
+    set dest_bin="!dest_main!\win32\flow2d3d\bin"
 
     call :makeDir !dest_bin!
 
-    call :copyFile tools_gpl\lint\bin\Release\lint.exe                                               !dest_bin!
+    call :copyFile tools_gpl\lint\bin\Release\lint.exe     !dest_bin!
 goto :endproc
 
 
@@ -336,12 +343,14 @@ rem ====================
 :mormerge
     echo "installing mormerge . . ."
 
-    set dest_bin="!dest_main!\w32\flow\bin"
+    set dest_bin="!dest_main!\win32\flow2d3d\bin"
+    set dest_scripts="!dest_main!\win32\flow2d3d\scripts"
 
     call :makeDir !dest_bin!
+    call :makeDir !dest_scripts!
 
-    call :copyFile engines_gpl\flow2d3d\scripts\mormerge.tcl                                         !dest_bin!
-    call :copyFile tools_gpl\mormerge\bin\Release\mormerge.exe                                       !dest_bin!
+    call :copyFile engines_gpl\flow2d3d\scripts\mormerge.tcl       !dest_scripts!
+    call :copyFile tools_gpl\mormerge\bin\Release\mormerge.exe     !dest_bin!
 goto :endproc
 
 
@@ -352,11 +361,11 @@ rem ==============
 :vs
     echo "installing vs . . ."
 
-    set dest="!dest_main!\w32\util"
+    set dest="!dest_main!\win32\util"
 
     call :makeDir !dest!
 
-    call :copyFile tools_gpl\vs\bin\Release\vs.exe              !dest!
+    call :copyFile tools_gpl\vs\bin\Release\vs.exe     !dest!
 goto :endproc
 
 

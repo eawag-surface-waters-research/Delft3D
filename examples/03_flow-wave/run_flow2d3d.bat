@@ -23,27 +23,26 @@ set mdwfile=r17.mdw
     rem
     rem Set the directory containing delftflow.exe
     rem
-set D3D_HOME=..\..\bin
-set exedir=%D3D_HOME%\w32\flow\bin
-set libdir=%D3D_HOME%\w32\lib
-set wavedir=%D3D_HOME%\w32\wave\bin
-set swandir=%wavedir%
-set swanbatdir=%libdir%
+set D3D_HOME=..\..\bin\win32
+set flowexedir=%D3D_HOME%\flow2d3d\bin
+set flowlibdir=%D3D_HOME%\flow2d3d\lib
+set waveexedir=%D3D_HOME%\wave\bin
+set wavelibdir=%D3D_HOME%\wave\lib
+set swanexedir=%D3D_HOME%\swan\bin
+set swanlibdir=%D3D_HOME%\swan\lib
+set swanbatdir=%D3D_HOME%\swan\scripts
 
     rem
     rem No adaptions needed below
     rem
 
-    rem Set some (environment) parameters
-    rem Only needed for the debug version:
-    rem set inteldir=c:\Program Files\Intel\Compiler\11.0\072\fortran\lib\ia32
-set PATH=%swanbatdir%;%exedir%;%swandir%;%inteldir%;%PATH%
-
 
     rem Run
-start %exedir%\deltares_hydro.exe %argfile%
+set PATH=%flowexedir%;%flowlibdir%;%PATH%
+start %flowexedir%\deltares_hydro.exe %argfile%
 
-%wavedir%\wave.exe %mdwfile% 1
+set PATH=%swanbatdir%;%swanexedir%;%swanlibdir%;%waveexedir%;%wavelibdir%;%PATH%
+%waveexedir%\wave.exe %mdwfile% 1
 
     rem To prevent the DOS box from disappearing immediately: remove the rem on the following line
 pause

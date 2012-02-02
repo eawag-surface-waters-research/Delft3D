@@ -1,6 +1,6 @@
 @echo off
 
-set swanexec=%D3D_HOME%\w32\wave\bin\swan_4072ABCDE_del_w32_i11_omp.exe
+set swanexec=%D3D_HOME%\swan\bin\swan_4072ABCDE_del_w32_i11_omp.exe
 
 rem
 rem swan40.72AB and newer runs parallel, using the total number of cores on the machine

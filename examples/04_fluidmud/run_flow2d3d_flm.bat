@@ -24,9 +24,9 @@ set argfilemud=config_flow2d3d_mud.ini
     rem
     rem Set the directory containing delftflow.exe here
     rem
-set D3D_HOME=..\..\bin
-set exedir=%D3D_HOME%\w32\flow\bin
-set libdir=%D3D_HOME%\w32\lib
+set D3D_HOME=..\..\bin\win32
+set exedir=%D3D_HOME%\flow2d3d\bin
+set libdir=%D3D_HOME%\flow2d3d\lib
 
     rem
     rem No adaptions needed below
