@@ -39,6 +39,9 @@ if [%dest_main%] EQU [] (
 rem Change to directory tree where this batch file resides (necessary when oss-install.cmd is called from outside of oss/trunk/src)
 cd %~dp0\..\..
 
+if not exist !dest_main! mkdir !dest_main!
+copy scripts_lgpl\win32\convert_win32_to_old_directory_structure_w32.bat !dest_main!
+
 call :!project!
 
 goto end
@@ -97,7 +100,6 @@ rem === INSTALL_ALL
 rem ===============
 :install_all
     echo "    installing all open source projects . . ."
-    if not exist !dest_main! mkdir !dest_main!
 
     call :d_hydro
     call :flow2d3d
@@ -119,7 +121,6 @@ rem === INSTALL_DELFT3D-FLOW
 rem ========================
 :delft3d-flow
     echo "    installing delft3d-flow . . ."
-    if not exist !dest_main! mkdir !dest_main!
 
     call :d_hydro
     call :flow2d3d
@@ -361,7 +362,7 @@ rem ==============
 :vs
     echo "installing vs . . ."
 
-    set dest="!dest_main!\win32\util"
+    set dest="!dest_main!\win32\util\bin"
 
     call :makeDir !dest!
 

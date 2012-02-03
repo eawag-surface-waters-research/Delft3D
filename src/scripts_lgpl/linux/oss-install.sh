@@ -25,8 +25,6 @@ function copyFile () {
 function install_all () {
     echo "    installing all open source projects . . ."
 
-    mkdir -p $dest_main
-
     d_hydro
     flow2d3d
     flow2d3d_openda
@@ -49,8 +47,6 @@ function install_all () {
 # ========================
 function delft3d_flow () {
     echo "    installing delft3d-flow . . ."
-
-    mkdir -p $dest_main
 
     d_hydro
     flow2d3d
@@ -272,7 +268,7 @@ function mormerge () {
 # ==============
 function vs () {
     echo "installing vs . . ."
-    dest="$dest_main/lnx/util"
+    dest="$dest_main/lnx/util/bin"
 
     mkdir -p $dest
 
@@ -323,6 +319,10 @@ curdir=`pwd`
 scriptdirname=`readlink \-f \$0`
 scriptdir=`dirname $scriptdirname`
 cd $scriptdir/../..
+
+
+mkdir -p $dest_main
+cp scripts_lgpl/linux/convert_lnx_to_old_directory_structure_intel.sh $dest_main
 
 $project
 
