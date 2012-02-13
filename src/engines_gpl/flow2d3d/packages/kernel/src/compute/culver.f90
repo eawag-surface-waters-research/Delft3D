@@ -184,17 +184,6 @@ subroutine culver(icx       ,icy       ,kmax      ,nsrc      ,kfs       , &
     icxy     = max(icx, icy)
     rmissval = -1.0e20_hp
     do isrc = 1, nsrc
-       select case (mnksrc(7,isrc))
-       case (3,4,5,7)
-          !
-          ! culvert: initialize disch on zero
-          !
-          disch(isrc) = 0.0_fp
-       case default
-          !
-          ! nothing
-          !
-       end select
        !
        ! Discharge relation through culvert (completely submerged culvert)
        ! for "normal" culvert: MNKSRC(7,.) = 3

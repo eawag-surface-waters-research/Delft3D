@@ -371,6 +371,23 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
                  & nmmaxj    ,dismmt    ,alfas     , &
                  & disch0    ,disch1    ,rint0     ,rint1     , &
                  & umdis0    ,umdis1    ,vmdis0    ,vmdis1    ,gdp       )
+       select case (mnksrc(7,isrc))
+       case (3,4,5,7)
+          !
+          ! culvert: initialize parameters on zero and cycle
+          !
+          disch(isrc) = 0.0_fp
+          umdis(isrc) = 0.0_fp
+          vmdis(isrc) = 0.0_fp
+          do l = 1, lstsc
+              rint(l, isrc) = 0.0_fp
+          enddo
+          cycle
+       case default
+          !
+          ! nothing
+          !
+       end select
        if (disint(isrc)=='Y') then
             if (itdis(1,isrc) == itdis(2,isrc)) then
                alpha = 0.0_fp
