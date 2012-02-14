@@ -220,6 +220,18 @@ subroutine incdis(lundia    ,sferic    ,grdang    ,timnow    ,nsrcd     , &
        ! Bubble point   : mnksrc mismatches with isrc. This is repaired in cnvbub
        !
        if (isrc<=nst_nobub .and. mnksrc(6,isrc)==-1) cycle
+       select case (mnksrc(7,isrc))
+       case (3,4,5,7)
+          !
+          ! Skip when discharge is a culvert
+          ! Culvert discharges are calculated in subroutine culver
+          !
+          cycle
+       case default
+          !
+          ! nothing
+          !
+       end select
        if (timnow >= real(itdis(2,isrc),fp)) then
           !
           ! Define discharge location
@@ -239,19 +251,6 @@ subroutine incdis(lundia    ,sferic    ,grdang    ,timnow    ,nsrcd     , &
                     & nmmaxj    ,dismmt    ,alfas     , &
                     & disch0    ,disch1    ,rint0     ,rint1     , &
                     & umdis0    ,umdis1    ,vmdis0    ,vmdis1    ,gdp       )
-          select case (mnksrc(7,isrc))
-          case (3,4,5,7)
-             !
-             ! If discharge is a culvert: call to upddis is needed (in case the next discharge is not a culvert),
-             ! but don't use the data read
-             !
-             cycle
-          case default
-             !
-             ! nothing
-             !
-          end select
-          !
           if (bubble) then
              flbub(isrc) = .true.
           endif
@@ -264,19 +263,6 @@ subroutine incdis(lundia    ,sferic    ,grdang    ,timnow    ,nsrcd     , &
                enddo
           endif
        endif
-       !
-       select case (mnksrc(7,isrc))
-       case (3,4,5,7)
-          !
-          ! If discharge is a culvert:
-          ! don't use the data read
-          !
-          cycle
-       case default
-          !
-          ! nothing
-          !
-       end select
        !
        if (disint(isrc) == 'Y') then
             if (itdis(1,isrc) == itdis(2,isrc)) then

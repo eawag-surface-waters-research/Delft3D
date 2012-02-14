@@ -354,23 +354,6 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
        endif
        itdis(5, isrc) = itdis(3, isrc) - 1
        !
-       ! Define discharge location
-       ! Test over KCS is not necessary. Discharge location always
-       ! in point with KCS = 1 (see CHKDIS)
-       !
-       ! WARNING: nm is wrong for bubble points (due to extending mnksrc)
-       ! This does not harm because momentum is not used for bubble points
-       !
-       nm = (mnksrc(5, isrc) + ddb) + ((mnksrc(4, isrc) - 1) + ddb)*icxy
-       !
-       ! Read first time step(s) and discharge data
-       !
-       call upddis(lundis    ,lundia    ,sferic    ,itdis     , &
-                 & isrc      ,nm        ,grdang    ,timnow    ,dt        , &
-                 & itfinish  ,timscl    ,nsrcd     ,lstsc     ,j         , &
-                 & nmmaxj    ,dismmt    ,alfas     , &
-                 & disch0    ,disch1    ,rint0     ,rint1     , &
-                 & umdis0    ,umdis1    ,vmdis0    ,vmdis1    ,gdp       )
        select case (mnksrc(7,isrc))
        case (3,4,5,7)
           !
@@ -388,6 +371,24 @@ subroutine inidis(lundia    ,error     ,runid     ,cyclic    ,timnow    , &
           ! nothing
           !
        end select
+       !
+       ! Define discharge location
+       ! Test over KCS is not necessary. Discharge location always
+       ! in point with KCS = 1 (see CHKDIS)
+       !
+       ! WARNING: nm is wrong for bubble points (due to extending mnksrc)
+       ! This does not harm because momentum is not used for bubble points
+       !
+       nm = (mnksrc(5, isrc) + ddb) + ((mnksrc(4, isrc) - 1) + ddb)*icxy
+       !
+       ! Read first time step(s) and discharge data
+       !
+       call upddis(lundis    ,lundia    ,sferic    ,itdis     , &
+                 & isrc      ,nm        ,grdang    ,timnow    ,dt        , &
+                 & itfinish  ,timscl    ,nsrcd     ,lstsc     ,j         , &
+                 & nmmaxj    ,dismmt    ,alfas     , &
+                 & disch0    ,disch1    ,rint0     ,rint1     , &
+                 & umdis0    ,umdis1    ,vmdis0    ,vmdis1    ,gdp       )
        if (disint(isrc)=='Y') then
             if (itdis(1,isrc) == itdis(2,isrc)) then
                alpha = 0.0_fp
