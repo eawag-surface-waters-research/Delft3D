@@ -2157,6 +2157,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/arbcross.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/average_trim.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/calldll.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/cellarea.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/classbar.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/clipgrid.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/clrmap.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/BrBu_11.clrmap -text
@@ -2351,7 +2352,6 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/boxfile.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/cfx.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/cfx1block.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/cfxfil.m -text
-src/tools_lgpl/matlab/quickplot/progsrc/private/classbar.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/clip2single.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/clockwise.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/colquiver.m -text
