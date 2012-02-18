@@ -2601,6 +2601,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/tekal2tba.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/thindam.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/tick.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/topodescription.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/tricontour.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/tricontourf.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/trirst.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/ui_inspectstruct.m -text
