@@ -17,6 +17,7 @@ set VN=%SCRIPT_DIRECTORY%\..\..\third_party_open\version_number\bin\win32\versio
 IF DEFINED BUILD_NUMBER (
 	set version=%BUILD_NUMBER%
 ) ELSE (
+        set version=000000
 	rem Obtain the svn version number 
 	"%SVNVERSION%" %2 | "%SED%" "s/\(.*\)/set version=\1/" > setversion.bat
  	call setversion.bat & del setversion.bat > NUL

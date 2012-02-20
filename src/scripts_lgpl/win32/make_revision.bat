@@ -55,12 +55,11 @@ IF DEFINED BUILD_NUMBER (
    REM Execute svnrevision
    REM =====================================
 
+   set BUILD_NUMBER=000000
    CD "%MODDIR%"
    IF EXIST "%SVN_DIR%\svnversion.exe" (
        echo %0: executing %SVN_DIR%\svnversion.exe -n
        FOR /F "tokens=*" %%i IN ('call "%SVN_DIR%\svnversion.exe" -n "%MODDIR%"') DO set BUILD_NUMBER=%%i 
-   ) ELSE (
-        set BUILD_NUMBER=000000
    )					         
 ) 
 
