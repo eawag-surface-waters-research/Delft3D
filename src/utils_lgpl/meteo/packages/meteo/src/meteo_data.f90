@@ -107,6 +107,7 @@ module meteo_data
       real(fp)                      :: nodata_value     ! Value used for undefined or missing data
       real(hp)                      :: p_conv           ! Conversion factor for air_pressure (to Pa)
       real(hp)                      :: spw_radius       ! Radius of spiderweb (in units specified in spw_rad_unit)
+      real(hp)                      :: spw_merge_frac   ! Fraction of radius for merging spw data with background wind
       real(hp)                      :: x_llcorner       ! X-coordinate of lower left corner of lower left cell of grid (in units specified in grid_unit)
                                                         ! (Only for meteo_on_equidistant_grid)
       real(hp)                      :: y_llcorner       ! Y-coordinate of lower left corner of lower left cell of grid (in units specified in grid_unit)

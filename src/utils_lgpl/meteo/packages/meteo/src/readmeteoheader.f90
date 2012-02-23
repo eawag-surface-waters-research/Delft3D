@@ -72,6 +72,7 @@ function readmeteoheader(minp, meteoitem) result(success)
     meteoitem%n_rows           = 0
     meteoitem%nodata_value     = 0.0_fp
     meteoitem%spw_radius       = 0.0_fp
+    meteoitem%spw_merge_frac   = 0.5_fp
     meteoitem%dx               = 0.0_hp
     meteoitem%dy               = 0.0_hp
     meteoitem%x_llcorner       = -9.990e+20_hp
@@ -154,6 +155,8 @@ function readmeteoheader(minp, meteoitem) result(success)
           read( rec(il:ir), *, iostat = ierr         )             meteoitem%dy
        elseif ( index(rec(1:il-2), 'spw_radius'      ) /=0)  then
           read( rec(il:ir), *, iostat = ierr         )             meteoitem%spw_radius
+       elseif ( index(rec(1:il-2), 'spw_merge_frac'  ) /=0)  then
+          read( rec(il:ir), *, iostat = ierr         )             meteoitem%spw_merge_frac
        elseif ( index(rec(1:il-2), 'spw_rad_unit'    ) /=0)  then
           read( rec(il:ir),'(a)', iostat = ierr      )             meteoitem%spw_rad_unit
           meteoitem%spw_rad_unit     = adjustl(meteoitem%spw_rad_unit    )

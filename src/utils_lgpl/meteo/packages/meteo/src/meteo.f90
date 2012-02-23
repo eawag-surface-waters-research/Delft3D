@@ -1074,6 +1074,15 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
                   x01   = a0*x00_eye + a1*x01_eye
                   y01   = a0*y00_eye + a1*y01_eye
                   rcycl = dy1 * real((nx-1),fp)
+                  !
+                  ! Factor used for merging spiderweb and background winds
+                  ! If spw_merge_frac is 0.5 (default), the smooth merging starts
+                  ! from 50 percent of spiderweb radius with background winds
+                  ! getting larger weight factor towards the edge of the spider web.
+                  ! spw_merge_frac is defined in the spw file.
+                  !
+                  fm0   = 1.0_fp/(1.0_fp - meteoitem%spw_merge_frac)
+                  !
                   do m = 1,meteo%flowgrid%mmax
                      do n = 1,meteo%flowgrid%nmax
                         if (meteo%flowgrid%kcs(n, m) /= 0) then
@@ -1107,7 +1116,7 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
                            !
                            ! Spatial merge function
                            !
-                           fm    = 2.0_fp*yy/rcycl - 1.0_fp
+                           fm = fm0*yy/rcycl - fm0 + 1.0_fp
                            spw%spwf(n, m) = max(0.0_fp, min(1.0_fp,fm))
                            x1  = xx / dx1
                            y1  = yy / dy1
