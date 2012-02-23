@@ -220,6 +220,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     real(fp)          :: h0             ! Total depth in velocity point of open boundary point 
     real(fp)          :: hu0            ! Total depth in velocity point of open boundary U-point. MAX (HU,0.01) 
     real(fp)          :: hv0            ! Total depth in velocity point of open boundary V-point. MAX (HV,0.01) 
+    real(fp)          :: pcr
     real(fp)          :: pdiff
     real(fp)          :: phasek
     real(fp)          :: q0avg
@@ -950,8 +951,28 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                                      & *qtfrc
                 enddo
              else
+                !
+                ! atmospheric pressure correction for Riemann boundaries
+                !
+                if (ibtype==6 .and. pcorr) then   
+                   pdiff = patm(np, mp) - paver
+                   if (posrel <= 2) then
+                      pcr = (-pdiff/(ag*rhow))*sqrt(ag/h0)
+                   else
+                      pcr = (pdiff/(ag*rhow))*sqrt(ag/h0)
+                   endif
+                   do k = 1, kmax
+                      circ3d(k, kp, kq) = pcr
+                   enddo
+                else
+                   do k = 1, kmax
+                      circ3d(k, kp, kq) = 0.0
+                   enddo
+                endif
+                !
                 do k = 1, kmax
-                   circ3d(k, kp, kq) = hydrbc(1*2 - 1, n1, k)                   &
+                   circ3d(k, kp, kq) = circ3d(k, kp, kq)                        &
+                                     & + hydrbc(1*2 - 1, n1, k)                 &
                                      & + frac*(hydrbc(1*2, n1, k)               &
                                      & - hydrbc(1*2 - 1, n1, k))
                 enddo
