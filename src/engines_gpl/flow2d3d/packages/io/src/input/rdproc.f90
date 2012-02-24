@@ -165,7 +165,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
     character(36)               :: tgfhlp      ! Help string to define right sequence components for Tide generating forces 
     character(256)              :: errmsg
     character(256)              :: stringval
-    character(120)              :: message
+    character(300)              :: message
 !
     data thulp/3*'            '/
 !
@@ -248,12 +248,12 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
     temeqs      = 15.0
     saleqs      = 0.0
     !
-    wstcof(1)   = 0.0025
-    wstcof(2)   = 0.0
-    wstcof(3)   = 0.0025
-    wstcof(4)   = 50.0
-    wstcof(5)   = 0.0025
-    wstcof(6)   = 100.0
+    wstcof(1)   = 0.0025_fp
+    wstcof(2)   = 0.0_fp
+    wstcof(3)   = 0.0025_fp
+    wstcof(4)   = 50.0_fp
+    wstcof(5)   = 0.0025_fp
+    wstcof(6)   = 100.0_fp
     rhoa        = 1.0
     !
     ! Density formula
@@ -631,7 +631,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
         case default
             write(message,'(3a)') 'Unknown density formulation ', trim(stringval),'. Use UNESCO or Eckart.'
             call prterr(lundia, 'P004', trim(message))
-            error = .true.            
+            error = .true.
     end select
     !
     ! MASEVA = 1: rain/evaporation in continuity equation
@@ -860,12 +860,12 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
        ntrec = nrrec
        nlook = 0
        rdef = wstcof(1)
-       rval(1) = 999.999
-       rval(2) = 999.999
-       rval(3) = 999.999
-       rval(4) = 999.999
-       rval(5) = 999.999
-       rval(6) = 999.999
+       rval(1) = 999.999_fp
+       rval(2) = 999.999_fp
+       rval(3) = 999.999_fp
+       rval(4) = 999.999_fp
+       rval(5) = 999.999_fp
+       rval(6) = 999.999_fp
        call read2r(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
                  & mdfrec    ,rval      ,rdef      ,defaul    ,nrrec     , &
                  & ntrec     ,lundia    ,gdp       )
@@ -874,12 +874,12 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
        !
        if (lerror) then
           lerror = .false.
-          wstcof(1) = 0.0025
-          wstcof(2) = 0.0
-          wstcof(3) = 0.0025
-          wstcof(4) = 50.0
-          wstcof(5) = 0.0025
-          wstcof(6) = 100.0
+          wstcof(1) =   0.0025_fp
+          wstcof(2) =   0.0000_fp
+          wstcof(3) =   0.0025_fp
+          wstcof(4) =  50.0000_fp
+          wstcof(5) =   0.0025_fp
+          wstcof(6) = 100.0000_fp
        else
           wstcof(1) = rval(1)
           !
@@ -889,19 +889,19 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
           !              WSTCOF(3) = WSTCOF(1)
           !              WSTCOF(4) = 100.
           !
-          if (rval(2)>999.9989 .and. rval(2)<999.9991) then
-             wstcof(2) = 0.0
+          if (rval(2)>999.9989_fp .and. rval(2)<999.9991_fp) then
+             wstcof(2) = 0.0_fp
              wstcof(3) = wstcof(1)
-             wstcof(4) = 100.0
+             wstcof(4) = 50.0_fp
              wstcof(5) = wstcof(1)
-             wstcof(6) = 100.0
+             wstcof(6) = 100.0_fp
              call prterr(lundia, 'G051', 'Number of pivot points to convert wind speed to wind drag coef.: 1')
-          elseif (rval(5)>999.9989 .and. rval(5)<999.9991) then
+          elseif (rval(5)>999.9989_fp .and. rval(5)<999.9991_fp) then
              wstcof(2) = rval(2)
              wstcof(3) = rval(3)
              wstcof(4) = rval(4)
              wstcof(5) = rval(3)
-             wstcof(6) = rval(4)+1.
+             wstcof(6) = rval(4) + 1.0_fp
              call prterr(lundia, 'G051', 'Number of pivot points to convert wind speed to wind drag coef.: 2')
           else
              wstcof(2) = rval(2)
@@ -910,6 +910,41 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
              wstcof(5) = rval(5)
              wstcof(6) = rval(6)
              call prterr(lundia, 'G051', 'Number of pivot points to convert wind speed to wind drag coef.: 3')
+          endif
+          !
+          ! check that w2 <= w4 <= w6
+          ! and if w2=w4 (w4=w6) then w1=w3 (w3=w5)
+          ! error otherwise
+          !
+          if (comparereal(wstcof(2),wstcof(4)) == 0) then
+             if (comparereal(wstcof(1),wstcof(3)) /= 0) then
+                write(message,'(2a,f6.2,a,f6.2,2a,f8.5,a,f8.5,a)') "Discontinuity in wind stress as function of wind speed:", &
+                     & "'Wstres' coeff. '2' (",wstcof(2)," m/s), is equal to coeff. '4' (",wstcof(4), " m/s), ", &
+                     & "while coeff. '1' (",wstcof(1),"), is not equal to coeff. '3' (",wstcof(3), ")"
+                call prterr(lundia, 'P004', trim(message))
+                error = .true.
+             else
+                wstcof(2) =  wstcof(2) - 1.0_fp
+             endif
+          elseif (comparereal(wstcof(2),wstcof(4)) == 1) then
+             write(message,'(a,f6.2,a,f6.2,a)') "'Wstres' coefficient '2' (",wstcof(2)," m/s), must be smaller than or equal to coefficient '4' (",wstcof(4), " m/s)"
+             call prterr(lundia, 'P004', trim(message))
+             error = .true.
+          endif
+          if (comparereal(wstcof(4),wstcof(6)) == 0) then
+             if (comparereal(wstcof(3),wstcof(5)) /= 0) then
+                write(message,'(2a,f6.2,a,f6.2,2a,f8.5,a,f8.5,a)') "Discontinuity in wind stress as function of wind speed:", &
+                     & "'Wstres' coeff. '4' (",wstcof(4)," m/s), is equal to coeff. '6' (",wstcof(6), " m/s), ", &
+                     & "while coeff. '3' (",wstcof(3),"), is not equal to coeff. '5' (",wstcof(5), ")"
+                call prterr(lundia, 'P004', trim(message))
+                error = .true.
+             else
+                wstcof(6) =  wstcof(6) + 1.0_fp
+             endif
+          elseif (comparereal(wstcof(4),wstcof(6)) == 1) then
+             write(message,'(a,f6.2,a,f6.2,a)') "'Wstres' coefficient '4' (",wstcof(4)," m/s), must be smaller than or equal to coefficient '6' (",wstcof(6), " m/s)"
+             call prterr(lundia, 'P004', trim(message))
+             error = .true.
           endif
        endif
        !
