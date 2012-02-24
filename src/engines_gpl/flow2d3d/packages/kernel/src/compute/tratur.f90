@@ -788,13 +788,9 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                          hpkwbt(nm) = ( - sig(kmax) + sig(1)) * h0
                       endif
                    enddo
-                endif
-                if (kfs(nm) == 1) then
                    !
                    ! calculate dfu and dfv in zeta points
                    !
-                   nmd    = nm - icx
-                   ndm    = nm - icy
                    fact   = max(kfu(nm) + kfu(nmd), 1)
                    dfus   = (dfu(nm) + dfu(nmd)) / fact
                    fact   = max(kfv(nm) + kfv(ndm), 1)
@@ -890,35 +886,37 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
           if (dpmveg) then
              do nm = 1,nmmax
                 h0 = max (0.01_fp , s1(nm)+real(dps(nm),fp))
-                do k = 1, kmax-1
-                   fac = cep2 * sqrt(cmukep)
-                   r3  = 1.0 / 3.0
-                   ku  = k + 1
-                   wu  = thick(k) / (thick(k)+thick(ku))
-                   wk  = 1.0 - wu
-                   rn  = wk*rnpl (nm,k) + wu*rnpl (nm,ku)
-                   dia = wk*diapl(nm,k) + wu*diapl(nm,ku)
-                   if (rn > 0) then
-                      ap1 = 1.0 - dia*dia*rn*pi*0.25
-                      !
-                      ! typical length between plants
-                      !
-                      xlveg = clplant * sqrt(ap1/rn)
-                      umk2  = u1(nm,k )*u1(nm,k ) + v1(nm,k )*v1(nm,k )
-                      umku2 = u1(nm,ku)*u1(nm,ku) + v1(nm,ku)*v1(nm,ku)
-                      um2   = wk*umk2 + wu*umku2
-                      if (um2 > 0) then
-                         fplant = 0.5 * dia * rn * um2
-                         wrkplt = fplant * sqrt(um2)
-                         tauinv = fac * (wrkplt/xlveg**2)**r3
-                         if (rtur0(nm,k,1) > 0) then
-                            tauifl = rtur0(nm,k,2)*cep2/rtur0(nm,k,1)
-                            tauinv = max(tauinv,tauifl)
+                if (kfs(nm) == 1) then
+                   do k = 1, kmax-1
+                      fac = cep2 * sqrt(cmukep)
+                      r3  = 1.0 / 3.0
+                      ku  = k + 1
+                      wu  = thick(k) / (thick(k)+thick(ku))
+                      wk  = 1.0 - wu
+                      rn  = wk*rnpl (nm,k) + wu*rnpl (nm,ku)
+                      dia = wk*diapl(nm,k) + wu*diapl(nm,ku)
+                      if (rn > 0) then
+                         ap1 = 1.0 - dia*dia*rn*pi*0.25
+                         !
+                         ! typical length between plants
+                         !
+                         xlveg = clplant * sqrt(ap1/rn)
+                         umk2  = u1(nm,k )*u1(nm,k ) + v1(nm,k )*v1(nm,k )
+                         umku2 = u1(nm,ku)*u1(nm,ku) + v1(nm,ku)*v1(nm,ku)
+                         um2   = wk*umk2 + wu*umku2
+                         if (um2 > 0) then
+                            fplant = 0.5 * dia * rn * um2
+                            wrkplt = fplant * sqrt(um2)
+                            tauinv = fac * (wrkplt/xlveg**2)**r3
+                            if (rtur0(nm,k,1) > 0) then
+                               tauifl = rtur0(nm,k,2)*cep2/rtur0(nm,k,1)
+                               tauinv = max(tauinv,tauifl)
+                            endif
+                            ddk(nm,k) = ddk(nm,k) + wrkplt*tauinv
                          endif
-                         ddk(nm,k) = ddk(nm,k) + wrkplt*tauinv
                       endif
-                   endif
-                enddo
+                   enddo
+                endif
              enddo
           endif
           !
@@ -1138,11 +1136,13 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
        !
        do k = 1, kmax
           do nm = 1, nmmax
-             bi          = 1.0_fp / bbk(nm, k)
-             aak (nm, k) = aak (nm, k) * bi
-             bbk (nm, k) = 1.0_fp
-             cck (nm, k) = cck (nm, k) * bi
-             ddk (nm, k) = ddk (nm, k) * bi
+             if (kfs(nm) == 1) then
+                bi          = 1.0_fp / bbk(nm, k)
+                aak (nm, k) = aak (nm, k) * bi
+                bbk (nm, k) = 1.0_fp
+                cck (nm, k) = cck (nm, k) * bi
+                ddk (nm, k) = ddk (nm, k) * bi
+             endif
           enddo
        enddo
        !

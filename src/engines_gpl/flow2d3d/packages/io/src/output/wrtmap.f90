@@ -706,7 +706,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           do m = 1, mmax
              do n = 1, nmaxus
                 do k = 1, kmax
-                   if (k<kfumin(n, m) .or. k>kfumax(n, m))  rbuff3(n, m, k) = -999.0
+                   if (k<kfumin(n, m) .or. k>kfumax(n, m))  rbuff3(n, m, k) = -999.0_fp
                 enddo
              enddo
           enddo
@@ -730,7 +730,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           do m = 1, mmax
              do n = 1, nmaxus
                 do k = 1, kmax
-                    if (k<kfvmin(n, m) .or. k>kfvmax(n, m))  rbuff3(n, m, k) = -999.0                
+                    if (k<kfvmin(n, m) .or. k>kfvmax(n, m))  rbuff3(n, m, k) = -999.0_fp                
                  enddo
              enddo
           enddo
@@ -756,7 +756,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           do m = 1, mmax
              do n = 1, nmaxus
                 do k = 0, kmax
-                   if (k<(kfsmin(n, m)-1) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0
+                   if (k<(kfsmin(n, m)-1) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
                 enddo   
              enddo
           enddo
@@ -782,7 +782,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           do m = 1, mmax
              do n = 1, nmaxus
                 do k = 1, kmax
-                    if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0
+                    if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
                 enddo
              enddo
           enddo
@@ -1001,13 +1001,12 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     !
     if (index(selmap(16:17),'Y') > 0) then
        allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
+       rbuff2(:, :) = -999.0_fp
        if (zmodel) then
           do m = 1, mmax
              do n = 1, nmaxus
                 km = kfumin(n, m)
-                if (km<1 .or. km>kmax) then
-                   rbuff2(n, m) = -999.0
-                else   
+                if (1<km .and. km<kmax) then
                    rbuff2(n, m) = ( taubpu(n, m)*u1(n, m, km) + taubsu(n, m) ) * rhow
                 endif
              enddo
@@ -1034,13 +1033,12 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        ! group 3: element 'TAUETA'
        !
        allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
+       rbuff2(:, :) = -999.0_fp
        if (zmodel) then
           do m = 1, mmax
              do n = 1, nmaxus
                 km = kfvmin(n, m)
-                if (km<1 .or. km>kmax) then
-                   rbuff2(n, m) = -999.0
-                else   
+                if (1<km .and. km<kmax) then
                    rbuff2(n, m) = ( taubpv(n, m)*v1(n, m, km) + taubsv(n, m) ) * rhow
                 endif   
              enddo
@@ -1088,7 +1086,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           do m = 1, mmax
              do n = 1, nmaxus
                 do k = 0 , kmax
-                    if (k<(kfsmin(n, m)-1) .or. k>kfsmax(n, m))  rbuff3(n, m, k) = -999.0
+                    if (k<(kfsmin(n, m)-1) .or. k>kfsmax(n, m))  rbuff3(n, m, k) = -999.0_fp
                 enddo
              enddo
           enddo
@@ -1115,7 +1113,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           do m = 1, mmax
              do n = 1, nmaxus
                 do k = 0, kmax
-                   if (k<(kfsmin(n, m)-1) .or. k>kfsmax(n, m))  rbuff3(n, m, k) = -999.0
+                   if (k<(kfsmin(n, m)-1) .or. k>kfsmax(n, m))  rbuff3(n, m, k) = -999.0_fp
                 enddo
              enddo
           enddo
@@ -1142,7 +1140,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           do m = 1, mmax
              do n = 1, nmaxus
                 do k = 0, kmax
-                   if (k<(kfsmin(n, m)-1) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0
+                   if (k<(kfsmin(n, m)-1) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
                 enddo
              enddo
           enddo
@@ -1170,7 +1168,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           do m = 1, mmax
              do n = 1, nmaxus
                 do k = 1, kmax
-                    if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0
+                    if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
                 enddo
              enddo
           enddo
@@ -1227,7 +1225,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           do m = 1, mmax
              do n = 1, nmaxus
                 do k = 1, kmax
-                   if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0
+                   if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
                 enddo
              enddo
           enddo
@@ -1276,7 +1274,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           do m = 1, mmax
              do n = 1, nmaxus
                 do k = 1, kmax
-                   if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0
+                   if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
                 enddo
              enddo
           enddo
@@ -1300,7 +1298,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           do m = 1, mmax
              do n = 1, nmaxus
                 do k = 1, kmax
-                   if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0
+                   if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
                 enddo
              enddo
           enddo
@@ -1325,7 +1323,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        do m = 1, mmax
           do n = 1, nmaxus
              do k = 1, kmax
-                if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0
+                if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
              enddo 
           enddo
        enddo
@@ -1456,6 +1454,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        ! element 'LAYER_INTERFACE'
        !
        allocate (zkt(nmaxus,mmax,0:kmax), stat=istat)
+       zkt(:, :, :) = -999.0_fp
        if (istat /= 0) then
           write(lundia, '(''ERROR: Memory allocation error in routine WRTMAP'')')
        endif
