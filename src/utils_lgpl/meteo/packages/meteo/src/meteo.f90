@@ -1082,7 +1082,7 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
                   ! getting larger weight factor towards the edge of the spider web.
                   ! spw_merge_frac is defined in the spw file.
                   !
-                  fm0   = 1.0_fp/(1.0_fp - meteoitem%spw_merge_frac)
+                  fm0   = 1.0_fp/(1.0_fp - real(meteoitem%spw_merge_frac,fp))
                   !
                   do m = 1,meteo%flowgrid%mmax
                      do n = 1,meteo%flowgrid%nmax

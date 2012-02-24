@@ -260,8 +260,8 @@ function checkmeteoheader(meteoitem) result(success)
        !
        ! Check merge frac
        !
-       if (comparereal(meteoitem%spw_merge_frac,0.0_fp) == -1 &
-         & .or. comparereal(meteoitem%spw_merge_frac,1.0_fp) == 1) then
+       if (comparereal(meteoitem%spw_merge_frac,0.0_hp) == -1 &
+         & .or. comparereal(meteoitem%spw_merge_frac,1.0_hp) == 1) then
           write(meteomessage, '(a,e10.3)') 'Meteo input: spw_merge_frac must be between 0.0 and 1.0, but getting ', meteoitem%spw_merge_frac
           success = .false.
           return
