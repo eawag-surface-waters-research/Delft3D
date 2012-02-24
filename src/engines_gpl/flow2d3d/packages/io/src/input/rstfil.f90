@@ -88,12 +88,11 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
     integer                                              :: idate
     integer                                              :: iocond  ! IO status for reading 
     integer                                              :: itime
+    integer                                              :: ipos    ! index to a position in a string
     integer                                              :: k       ! Help var. 
     integer                                              :: l       ! Help var. 
     integer                                              :: lengl
     integer                                              :: lenlo
-    integer                                              :: lfile   ! Help var. specifying the length of character variables for files 
-    integer                                              :: lrid    ! Help var., length of restid 
     integer                                              :: luntmp  ! Unit number file 
     integer                                              :: m       ! Help var. 
     integer                                              :: n       ! Help var. 
@@ -106,7 +105,9 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
     logical                                              :: ex
     logical                                              :: ex_nfs
     real(sp)      , dimension(:,:,:,:)     , allocatable :: sbuff   !!  Single precision buffer to read from file
+    character(16)                                        :: datetime
     character(300)                                       :: filtmp  ! File name restart file 300 = 256 + a bit
+    character(256)                                       :: filpath ! Path specification of restid
 !
 !! executable statements -------------------------------------------------------
 !
@@ -126,24 +127,31 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
     !
     write(lundia, '(a)') '*** Start of restart messages'
     !
-    call timdat(julday    ,tstart*60 ,idate     ,itime     )
-    call noextspaces(restid    ,lrid      )
-    filtmp = 'tri-rst.' // restid(1:lrid)
-    write (filtmp(8 + lrid + 1:8 + lrid + 16), '(a1,i8.8,a1,i6.6)') &
-        & '.', idate, '.', itime
-    lfile = 8 + lrid + 16
-    inquire (file = filtmp(1:lfile), exist = ex)
+    call timdat(julday, tstart*60, idate, itime)
+    write (datetime,'(a1,i8.8,a1,i6.6)') '.', idate, '.', itime
+    ipos = max(index(trim(restid), "/",.true.),index(trim(restid), "\",.true.))
+    if (ipos > 0) then
+       filpath = restid(1:ipos)
+       restid  = restid(ipos+1:)
+    else
+      filpath = ""
+    endif
+    write (filtmp, '(4a,a1,i8.8,a1,i6.6)') trim(filpath), 'tri-rst.', trim(restid), trim(datetime)
+    inquire (file = trim(filtmp), exist = ex)
     ex_nfs = .false.
     if (.not.ex) then
        !
        ! test file existence, second try 'tri-rst.<restid>'
        !
-       inquire (file = filtmp(1:8 + lrid), exist = ex)
+       write (filtmp, '(3a)') trim(filpath), 'tri-rst.', trim(restid)
+       inquire (file = trim(filtmp), exist = ex)
        if (.not.ex) then
           !
-          ! none of these two files exists
-          ! check new option: it may be a reference to a TRIM file.
+          ! None of these two files exists
+          ! Check new option: it may be a reference to a TRIM file.
+          ! Use restid, because flow_nefis_restart will put it's value in gdp%gdrestart%restid
           !
+          write (restid, '(2a)') trim(filpath), trim(restid)
           call flow_nefis_restart(lundia    ,error     ,restid    ,lturi     ,mmax      , &
                                 & nmaxus    ,kmax      ,lstsci    ,ltur      , &
                                 & s1        ,u1        ,v1        ,r1        ,rtur1     , &
@@ -151,17 +159,15 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
                                 & dp        ,ex_nfs    ,gdp       )
           if (error .and. .not.ex_nfs) then
              call prterr(lundia    ,'G004'    , &
-             & filtmp(:lfile) // ', ' // filtmp(:8 + lrid) // ' and ' // filtmp(9:8+lrid) // '.dat/.def')
+             & trim(filtmp) // trim(datetime) // ', ' // trim(filtmp) // ' and ' // trim(restid) // '.dat/.def')
           endif
-       else
-          lfile = 8 + lrid
        endif
     endif
     if (.not.error .and. .not.ex_nfs) then
        !
        ! restart file found
        !
-       write(lundia, '(a)') 'Restarting from ' // filtmp(:lfile)
+       write(lundia, '(a)') 'Restarting from ' // trim(filtmp)
        !
        ! Allocate temporary single precision array for the ENTIRE domain
        !
@@ -171,7 +177,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        !
        if (inode == master) then
           luntmp = newlun(gdp)
-          open (luntmp, file = filtmp(1:lfile), form = 'unformatted',              &
+          open (luntmp, file = trim(filtmp), form = 'unformatted',              &
                & status = 'old')
        endif
        !
@@ -195,9 +201,9 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        call dfbroadc(iocond, 1, dfint, gdp)
        if (iocond /= 0) then
           if (iocond < 0) then
-             call prterr(lundia    ,'G006'    ,filtmp(:lfile)       )
+             call prterr(lundia, 'G006', trim(filtmp))
           else
-             call prterr(lundia    ,'G007'    ,filtmp(:lfile)       )
+             call prterr(lundia, 'G007', trim(filtmp))
           endif
           error = .true.
           goto 200
@@ -230,9 +236,9 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
           call dfbroadc(iocond, 1, dfint, gdp)
           if (iocond /= 0) then
              if (iocond < 0) then
-                call prterr(lundia    ,'G006'    ,filtmp(:lfile)       )
+                call prterr(lundia, 'G006', trim(filtmp))
              else
-                call prterr(lundia    ,'G007'    ,filtmp(:lfile)       )
+                call prterr(lundia, 'G007', trim(filtmp))
              endif
              error = .true.
              goto 200
@@ -266,9 +272,9 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
           call dfbroadc(iocond, 1, dfint, gdp)
           if (iocond /= 0) then
              if (iocond < 0) then
-                call prterr(lundia    ,'G006'    ,filtmp(:lfile)       )
+                call prterr(lundia, 'G006', trim(filtmp))
              else
-                call prterr(lundia    ,'G007'    ,filtmp(:lfile)       )
+                call prterr(lundia, 'G007', trim(filtmp))
              endif
              error = .true.
              goto 200
@@ -306,9 +312,9 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
                 call dfbroadc(iocond, 1, dfint, gdp)
                 if (iocond /= 0) then
                    if (iocond < 0) then
-                      call prterr(lundia    ,'G006'    ,filtmp(:lfile)       )
+                      call prterr(lundia, 'G006', trim(filtmp))
                    else
-                      call prterr(lundia    ,'G007'    ,filtmp(:lfile)       )
+                      call prterr(lundia, 'G007', trim(filtmp))
                    endif
                    error = .true.
                    goto 200
@@ -355,7 +361,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
                       lturi = ltur
                       if (l==2) lturi = -ltur
                    else
-                      call prterr(lundia    ,'G007'    ,filtmp(:lfile)       )
+                      call prterr(lundia, 'G007', trim(filtmp))
                       error = .true.
                    endif
                    goto 200
