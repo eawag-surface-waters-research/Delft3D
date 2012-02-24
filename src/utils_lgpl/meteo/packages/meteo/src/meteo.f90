@@ -693,6 +693,7 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
    real(fp)                              :: a1
    real(fp)                              :: a0
    real(fp)                              :: fm
+   real(fp)                              :: fm0
    real(fp)                              :: rcycl
    real(fp)                              :: x
    real(hp)                              :: x_hp

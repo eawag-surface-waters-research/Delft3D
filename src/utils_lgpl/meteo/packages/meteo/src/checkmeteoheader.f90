@@ -258,6 +258,15 @@ function checkmeteoheader(meteoitem) result(success)
        meteoitem%dx = 2.0_fp * pi / real(meteoitem%n_cols-1, fp)          ! n_cols-1 intervals in angular direction
        meteoitem%dy = meteoitem%spw_radius / real(meteoitem%n_rows-1, fp) ! n_rows-1 intervals in radial direction
        !
+       ! Check merge frac
+       !
+       if (comparereal(meteoitem%spw_merge_frac,0.0_fp) == -1 &
+         & .or. comparereal(meteoitem%spw_merge_frac,1.0_fp) == 1) then
+          write(meteomessage, '(a,e10.3)') 'Meteo input: spw_merge_frac must be between 0.0 and 1.0, but getting ', meteoitem%spw_merge_frac
+          success = .false.
+          return
+       endif
+       !
        ! Check quantity names
        !
        if (meteoitem%quantities(1) /= 'wind_speed' ) then
