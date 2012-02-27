@@ -143,7 +143,7 @@ subroutine calrou(kn_sum    ,fracto    ,fracbu      ,depth     ,ch_lin_ser, &
        endif
        !
        ! Store calculated roughness and transform the calculated
-       ! Nikuradse rougness if not White-Colebrook.
+       ! Nikuradse roughness if not White-Colebrook.
        !
        kn_sum = max(kn_sum, 0.001_fp)
        if (rouflo=='WHIT') then
@@ -179,7 +179,7 @@ subroutine calrou(kn_sum    ,fracto    ,fracbu      ,depth     ,ch_lin_ser, &
        ch_sum      = 1.0_fp / sqrt(ch_sum_inv2 + ch_lin_ser + ch_pnt_ser)
        !
        ! Store calculated roughness and transform the calculated
-       ! Chezy rougness if not Chezy.
+       ! Chezy roughness if not Chezy.
        !
        if (rouflo=='WHIT') then
           rough = (12.0_fp*depth) / (10.0_fp**(ch_sum/18.0_fp))
