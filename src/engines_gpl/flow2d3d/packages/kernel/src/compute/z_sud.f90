@@ -18,7 +18,8 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
                & vnu2d     ,vicww     ,rxx       ,rxy       ,windu     , &
                & patm      ,fcorio    ,tgfsep    ,drhodx    ,zk        , &
                & p0        ,crbc      ,idry      ,porosu    ,ubrlsu    , &
-               & pship     ,diapl     ,rnpl      ,cfurou    ,gdp) 
+               & pship     ,diapl     ,rnpl      ,cfurou    ,precip    , &
+               & gdp) 
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -80,7 +81,6 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
     real(fp)               , pointer :: rhow
     real(fp)               , pointer :: ag
     integer                , pointer :: iro
-    real(fp)               , pointer :: precip
     integer                , pointer :: maseva
     logical                , pointer :: wind
     logical                , pointer :: culvert
@@ -167,6 +167,7 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                    :: gvz    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                    :: hu     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                    :: patm   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: precip !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                    :: pship  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                    :: s0     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                    :: s1     !  Description and declaration in esm_alloc_real.f90
@@ -252,7 +253,6 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
     zmodel     => gdp%gdprocs%zmodel
     wavcmp     => gdp%gdprocs%wavcmp
     bubble     => gdp%gdprocs%bubble
-    precip     => gdp%gdheat%precip
     maseva     => gdp%gdheat%maseva
     rhow       => gdp%gdphysco%rhow
     ag         => gdp%gdphysco%ag
@@ -345,9 +345,12 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
     !
     if (maseva>0) then
        do nm = 1, nmmax
-          if (kcs(nm)*kfs(nm)==1) then
+          if (kcs(nm)==1) then
              k = kfsmax(nm)
-             d0k(nm, k) = d0k(nm, k) + (precip - evap(nm)/rhow)
+             d0k(nm, k) = d0k(nm, k) + precip(nm)
+             if (kfs(nm)==1) then
+                d0k(nm, k) = d0k(nm, k) - evap(nm)/rhow
+             endif
           endif
        enddo
     endif

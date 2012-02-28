@@ -71,6 +71,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     real(fp)         , dimension(:)    , pointer :: wsm
     real(fp)         , dimension(:)    , pointer :: salmax
     real(fp)         , dimension(:)    , pointer :: sdbuni
+    real(fp)         , dimension(:)    , pointer :: sedtrcfac
     real(fp)         , dimension(:,:)  , pointer :: tcrdep
     real(fp)         , dimension(:)    , pointer :: tcduni
     real(fp)         , dimension(:,:)  , pointer :: tcrero
@@ -78,6 +79,9 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     real(fp)         , dimension(:)    , pointer :: thcmud
     real(fp)         , dimension(:,:)  , pointer :: eropar
     real(fp)         , dimension(:)    , pointer :: erouni
+    real(fp)         , dimension(:)    , pointer :: tcguni
+    real(fp)         , dimension(:,:)  , pointer :: gamtcr
+    real(fp)         , dimension(:)    , pointer :: gamflc
     real(fp)         , dimension(:)    , pointer :: mudcnt
     integer          , dimension(:)    , pointer :: nseddia
     integer          , dimension(:)    , pointer :: sedtyp
@@ -87,6 +91,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     character(256)   , dimension(:)    , pointer :: flstcd
     character(256)   , dimension(:)    , pointer :: flstce
     character(256)   , dimension(:)    , pointer :: flsero
+    character(256)   , dimension(:)    , pointer :: flstcg
     logical                            , pointer :: anymud
     logical                            , pointer :: bsskin
     character(256)                     , pointer :: flsdia
@@ -186,6 +191,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     wsm                  => gdp%gdsedpar%wsm
     salmax               => gdp%gdsedpar%salmax
     sdbuni               => gdp%gdsedpar%sdbuni
+    sedtrcfac            => gdp%gdsedpar%sedtrcfac
     tcrdep               => gdp%gdsedpar%tcrdep
     tcduni               => gdp%gdsedpar%tcduni
     tcrero               => gdp%gdsedpar%tcrero
@@ -193,6 +199,9 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     thcmud               => gdp%gdsedpar%thcmud
     eropar               => gdp%gdsedpar%eropar
     erouni               => gdp%gdsedpar%erouni
+    tcguni               => gdp%gdsedpar%tcguni
+    gamtcr               => gdp%gdsedpar%gamtcr
+    gamflc               => gdp%gdsedpar%gamflc
     mudcnt               => gdp%gdsedpar%mudcnt
     nseddia              => gdp%gdsedpar%nseddia
     sedtyp               => gdp%gdsedpar%sedtyp
@@ -202,6 +211,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     flstcd               => gdp%gdsedpar%flstcd
     flstce               => gdp%gdsedpar%flstce
     flsero               => gdp%gdsedpar%flsero
+    flstcg               => gdp%gdsedpar%flstcg
     anymud               => gdp%gdsedpar%anymud
     bsskin               => gdp%gdsedpar%bsskin
     flsdia               => gdp%gdsedpar%flsdia
@@ -240,12 +250,15 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        if (istat==0) allocate (gdsedpar%taucr     (                          lsedtot), stat = istat)
        if (istat==0) allocate (gdsedpar%tetacr    (                          lsedtot), stat = istat)
        if (istat==0) allocate (gdsedpar%sdbuni    (                          lsedtot), stat = istat)
+       if (istat==0) allocate (gdsedpar%sedtrcfac (                          lsedtot), stat = istat)
        if (istat==0) allocate (gdsedpar%flsdbd    (                          lsedtot), stat = istat)
        if (istat==0) allocate (gdsedpar%inisedunit(                          lsedtot), stat = istat)
        !
        if (istat==0) allocate (gdsedpar%ws0       (                      max(1,lsed)), stat = istat)
        if (istat==0) allocate (gdsedpar%wsm       (                      max(1,lsed)), stat = istat)
        if (istat==0) allocate (gdsedpar%salmax    (                      max(1,lsed)), stat = istat)
+       if (istat==0) allocate (gdsedpar%tcguni    (                      max(1,lsed)), stat = istat)
+       if (istat==0) allocate (gdsedpar%gamflc    (                      max(1,lsed)), stat = istat)
        !
        if (istat==0) allocate (gdsedpar%tcrdep    (gdp%d%nmlb:gdp%d%nmub,max(1,lsed)), stat = istat)
        if (istat==0) allocate (gdsedpar%tcduni    (                      max(1,lsed)), stat = istat)
@@ -255,6 +268,8 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        if (istat==0) allocate (gdsedpar%tceuni    (                      max(1,lsed)), stat = istat)
        if (istat==0) allocate (gdsedpar%thcmud    (gdp%d%nmlb:gdp%d%nmub            ), stat = istat)
        if (istat==0) allocate (gdsedpar%flstce    (                      max(1,lsed)), stat = istat)
+       if (istat==0) allocate (gdsedpar%flstcg    (                      max(1,lsed)), stat = istat)
+       if (istat==0) allocate (gdsedpar%gamtcr    (gdp%d%nmlb:gdp%d%nmub,max(1,lsed)), stat = istat)
        !
        if (istat==0) allocate (gdsedpar%eropar    (gdp%d%nmlb:gdp%d%nmub,max(1,lsed)), stat = istat)
        if (istat==0) allocate (gdsedpar%erouni    (                      max(1,lsed)), stat = istat)
@@ -283,6 +298,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        taucr         => gdp%gdsedpar%taucr
        tetacr        => gdp%gdsedpar%tetacr
        sdbuni        => gdp%gdsedpar%sdbuni
+       sedtrcfac     => gdp%gdsedpar%sedtrcfac
        flsdbd        => gdp%gdsedpar%flsdbd
        inisedunit    => gdp%gdsedpar%inisedunit
        !
@@ -305,6 +321,10 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        !
        mudcnt        => gdp%gdsedpar%mudcnt
        sedd50fld     => gdp%gdsedpar%sedd50fld
+       gamtcr        => gdp%gdsedpar%gamtcr
+       gamflc        => gdp%gdsedpar%gamflc
+       tcguni        => gdp%gdsedpar%tcguni
+       flstcg        => gdp%gdsedpar%flstcg
        !
        ! end check on assocation of gdsedpar%sedd50
        !
@@ -323,6 +343,8 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     seddm        = rmissval
     sedd90       = rmissval
     !
+    sedtrcfac    = rmissval
+    !
     dstar        = rmissval
     taucr        = rmissval
     tetacr       = rmissval
@@ -338,6 +360,10 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     !
     mudcnt       = rmissval
     sedd50fld    = rmissval
+    !
+    tcguni       = 1.5
+    gamtcr       = 1.5
+    gamflc       = 1.0
     !
     ! Initialization of local parameters/arrays
     !
@@ -601,6 +627,14 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                 call prop_get(sedblock_ptr, '*', 'WS0'   , ws0(l))
                 call prop_get(sedblock_ptr, '*', 'WSM'   , wsm(l))
                 !
+                ! Calibration parameter for flocculation
+                !
+                call prop_get(sedblock_ptr, '*', 'GamFloc', gamflc(l))
+                !
+                ! Tracer calibration factor
+                !
+                call prop_get(sedblock_ptr, '*', 'TracerCalibrationFactor', sedtrcfac(l))
+                !
                 ! First assume that 'TcrSed' contains a filename
                 ! If the file does not exist, assume that 'TcrSed' contains a uniform value (real)
                 !
@@ -660,6 +694,27 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                    erouni(l) = rmissval
                    call prop_get(sedblock_ptr, '*', 'EroPar', erouni(l))
                 endif
+                !
+                ! First assume that 'GamTcr' contains a filename
+                ! If the file does not exist, assume that 'GamTcr' contains a uniform value (real)
+                !
+                flstcg(l) = ' '
+                call prop_get_string(sedblock_ptr, '*', 'GamTcr', flstcg(l))
+                !
+                ! Intel 7.0 crashes on an inquire statement when file = ' '
+                !
+                if (flstcg(l) == ' ') then
+                   ex = .false.
+                else
+                   call combinepaths(filsed, flstcg(l))
+                   inquire (file = flstcg(l), exist = ex)
+                endif
+                if (.not. ex) then
+                   flstcg(l) = ' '
+                   tcguni(l) = 1.5
+                   call prop_get(sedblock_ptr, '*', 'GamTcr', tcguni(l))
+                endif
+                write(*,*)'flstcg ',flstcg(l)
              endif
              !
              cdryb(l) = rmissval
@@ -856,6 +911,10 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
           case (SEDTYP_COHESIVE)
              write (lundia, '(2a,a12)') txtput1, ':', 'mud'
        end select
+       if (sedtrcfac(l)>0.0_fp) then
+           txtput1 = '  Tracer calibration factor '
+           write (lundia, '(2a,e12.4)') txtput1, ':', sedtrcfac(l)
+       endif
        txtput1 = '  RHOSOL'
        write (lundia, '(2a,e12.4)') txtput1, ':', rhosol(l)
        if (flsdia /= ' ') then
@@ -1204,6 +1263,24 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
              call d3stop(1, gdp)
           endif
        endif
+       !
+       if (iform(l)==-2) then
+          !
+          ! Van Rijn 2007
+          !
+          if (flstcg(l) /= ' ') then
+             txtput1 = '  File GamTcr'
+             write (lundia, '(3a)') txtput1, ':  ', trim(flstcg(l))
+          else
+             txtput1 = '  Uniform GamTcr'
+             write (lundia, '(2a,e12.4)') txtput1, ':', tcguni(l)
+          endif
+          !
+          txtput1 = '  Flocculation factor GamFloc'
+          write (lundia, '(2a,e12.4)') txtput1, ':', gamflc(l)
+          !
+       endif
+       !
        if (flstrn(l) /= ' ') then
           txtput1 = '  Transport formula'
           write (lundia, '(a,a)') txtput1, ':  '

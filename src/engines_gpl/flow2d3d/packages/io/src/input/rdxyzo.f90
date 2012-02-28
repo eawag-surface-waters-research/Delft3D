@@ -1,8 +1,9 @@
 subroutine rdxyzo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 & noui      ,kmax      ,zbot      ,ztop      , &
                 & dx        ,dy        ,filrgf    ,fmtrgf    ,thick     , &
-                & anglat    ,grdang    ,sphere    ,sferic    ,zmodel    , &
-                & mmax      ,nmax      ,xcor      ,ycor      ,gdp       )
+                & anglat    ,anglon    ,grdang    ,sphere    ,sferic    , &
+                & zmodel    ,mmax      ,nmax      ,xcor      ,ycor      , &
+                & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -39,7 +40,7 @@ subroutine rdxyzo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !                grid dimensions : MNKMAX, FILCCO, FMTCCO,
 !                DXDY, THICK
 !              - Reads SPHERE
-!              - Reads ANGLAT & GRDANG
+!              - Reads ANGLAT, ANGLON & GRDANG
 ! Method used:
 !
 !!--pseudo code and references--------------------------------------------------
@@ -77,6 +78,9 @@ subroutine rdxyzo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                                                      !!  - In spherical coordinates this para-
                                                      !!    meter equals the angle of latitude
                                                      !!    for the origin (water level point)
+    real(fp)                               :: anglon !!  - Angle of longitude of the model
+                                                     !!    centre (used to determine solar
+                                                     !!    radiation)
     real(fp)                 , intent(out) :: dx     !!  Uniform grid-distance in the x-dir.
                                                      !!  in meters & in decimals
                                                      !!  if sferic = T dx := dphi
@@ -142,6 +146,7 @@ subroutine rdxyzo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     dy     = 0.0
     grdang = 0.0
     anglat = 0.0
+    anglon = 0.0
     sphere = 'N'
     fmtrgf = 'FR'
     do k = 1, kmax
@@ -329,6 +334,11 @@ subroutine rdxyzo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     anglat = rdef
     call prop_get(gdp%mdfile_ptr, '*', 'Anglat', anglat)
+    !
+    ! 'Anglon'
+    !
+    anglon = rdef
+    call prop_get(gdp%mdfile_ptr, '*', 'Anglon', anglon)
     !
     ! The check on anglat==0.0 is moved to subroutine iniphy
     !

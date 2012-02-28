@@ -8,7 +8,8 @@ subroutine z_momcor(nmmax     ,kmax      ,icx       ,icy       ,s1        , &
                   & w0        ,s0        ,disch     , &
                   & evap      ,mnksrc    ,nsrc      ,d0k       ,dps       , &
                   & norow     ,nocol     ,irocol    ,zk        ,            &
-                  & kfs       ,kfu       ,kfv       ,nst       ,gdp )
+                  & kfs       ,kfu       ,kfv       ,nst       ,precip    , &
+                  & gdp )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -53,7 +54,6 @@ subroutine z_momcor(nmmax     ,kmax      ,icx       ,icy       ,s1        , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     real(fp)               , pointer :: hdt
-    real(fp)               , pointer :: precip
     integer                , pointer :: maseva
     integer                , pointer :: lundia
     real(fp)               , pointer :: rhow
@@ -105,9 +105,10 @@ subroutine z_momcor(nmmax     ,kmax      ,icx       ,icy       ,s1        , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: dzu0 !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: dzv0 !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(nsrc)                                       :: disch  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: evap   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: evap   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: p0 !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: p1 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: precip !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: qxk !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: qyk !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: u1 !  Description and declaration in esm_alloc_real.f90
@@ -159,7 +160,6 @@ subroutine z_momcor(nmmax     ,kmax      ,icx       ,icy       ,s1        , &
     culvert    => gdp%gdprocs%culvert
     rhow       => gdp%gdphysco%rhow
     ag         => gdp%gdphysco%ag
-    precip     => gdp%gdheat%precip
     maseva     => gdp%gdheat%maseva
     lundia     => gdp%gdinout%lundia
     hdt        => gdp%gdnumeco%hdt
@@ -197,9 +197,12 @@ subroutine z_momcor(nmmax     ,kmax      ,icx       ,icy       ,s1        , &
     !
     if (maseva>0) then
        do nm = 1, nmmax
-          if (kcs(nm)*kfs(nm)==1) then
+          if (kcs(nm)==1) then
              k = kfsmax(nm)
-             d0k(nm, k) = d0k(nm, k) + (precip - evap(nm)/rhow)
+             d0k(nm, k) = d0k(nm, k) + precip(nm)
+             if (kfs(nm)==1) then
+                d0k(nm, k) = d0k(nm, k) - evap(nm)/rhow
+             endif
           endif
        enddo
     endif

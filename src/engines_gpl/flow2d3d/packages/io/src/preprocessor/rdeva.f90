@@ -1,7 +1,7 @@
 subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                & noui      ,runid     ,fileva    ,fmteva    ,rteva     , &
                & dt        ,itstrt    ,itfinish  ,mxevat    ,nevatm    , &
-               & precip    ,evapor    ,train     ,gdp       )
+               & precipt   ,evapor    ,train     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -71,7 +71,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     logical                         , intent(in)  :: noui       !  Flag for reading from User Interface
     real(fp)                        , intent(in)  :: dt         !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(mxevat) , intent(out) :: evapor     !  Description and declaration in heat.igs
-    real(fp)    , dimension(mxevat) , intent(out) :: precip     !  Description and declaration in heat.igs
+    real(fp)    , dimension(mxevat) , intent(out) :: precipt    !  Description and declaration in heat.igs
     real(fp)    , dimension(mxevat)               :: rteva      !  At most MXTEMT times for time varying rain/evaporation model data
     real(fp)    , dimension(mxevat) , intent(out) :: train      !  Description and declaration in heat.igs
     character(*)                                  :: fileva     !  File name for the time varying rain/evaporation model file
@@ -432,7 +432,7 @@ subroutine rdeva(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        !---------define precipitation, evaporation and rain temperature data
        !
-       precip(ieva) = rval(2)
+       precipt(ieva) = rval(2)
        evapor(ieva) = rval(3)
        train(ieva) = rval(4)
        !

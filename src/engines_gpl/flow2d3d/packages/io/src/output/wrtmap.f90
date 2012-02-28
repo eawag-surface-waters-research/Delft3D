@@ -12,7 +12,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                   & taubmx    ,windu     ,windv     ,velt      ,cvalu0    , &
                   & cvalv0    ,cfurou    ,cfvrou    ,rouflo    ,patm      , &
                   & z0ucur    ,z0vcur    ,z0urou    ,z0vrou    ,ktemp     , &
-                  & gdp       )
+                  & precip    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -88,10 +88,13 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     real(fp) , dimension(:)         , pointer :: rhumarr
     real(fp) , dimension(:)         , pointer :: tairarr
     real(fp) , dimension(:)         , pointer :: clouarr
+    real(fp) , dimension(:)         , pointer :: swrfarr
     real(fp) , dimension(:)         , pointer :: qmis_out
     logical                         , pointer :: rhum_file
     logical                         , pointer :: tair_file
     logical                         , pointer :: clou_file
+    logical                         , pointer :: prcp_file
+    logical                         , pointer :: swrf_file
     logical                         , pointer :: free_convec    
     integer                         , pointer :: mfg
     integer                         , pointer :: mlg
@@ -140,6 +143,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: vmnldf      !  Description and declaration in esm_alloc_real.f90
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: windu       !  Description and declaration in esm_alloc_real.f90
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: windv       !  Description and declaration in esm_alloc_real.f90
+    real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: precip      !  Description and declaration in esm_alloc_real.f90
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 3)            , intent(in)  :: cfurou      !  Description and declaration in esm_alloc_real.f90
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 3)            , intent(in)  :: cfvrou      !  Description and declaration in esm_alloc_real.f90
     real(fp)      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: cvalu0      !  Description and declaration in esm_alloc_real.f90
@@ -241,6 +245,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     rhum_file      => gdp%gdheat%rhum_file
     tair_file      => gdp%gdheat%tair_file
     clou_file      => gdp%gdheat%clou_file
+    prcp_file      => gdp%gdheat%prcp_file
     free_convec    => gdp%gdheat%free_convec
     mfg            => gdp%gdparall%mfg
     mlg            => gdp%gdparall%mlg
@@ -448,6 +453,12 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                 & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
                 & lundia    ,gdp       )
           endif
+          if (prcp_file) then
+             call addelm(nefiswrtmap,'PRECIP',' ','[  MM/H ]','REAL',4          , &
+                & 'Precipitation (zeta point)                          ', &
+                & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
+                & lundia    ,gdp       )
+          endif
        endif
        if (flwoutput%temperature) then
           if (ktemp == 3) then
@@ -461,8 +472,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
              call addelm(nefiswrtmap,'QNET', ' ' , '[W/M2 ]','REAL',4           , &
                 & 'Total nett heat flux in zeta point                          ', &
                 & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
-                & lundia    ,gdp       )
-          
+                & lundia    ,gdp       )          
           elseif (ktemp > 0) then
              call addelm(nefiswrtmap,'QEVA', ' ' , '[W/M2 ]','REAL',4           , &
                 & 'Evaporation heat flux in zeta point                         ', &
@@ -572,7 +582,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        first     => nefiselem%first
        celidt    => nefiselem%celidt
     endif
-    
+    !
     if (parll) then
        !
        ! allocate data arrays for collection data 
@@ -1485,7 +1495,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        if (ierror /= 0) goto 999
     endif
     !
-    ! Output of air parameters: wind, pressure, cloudiness, relative humidity and temperature
+    ! Output of air parameters: wind, pressure, cloudiness, relative humidity, temperature, and precipitation
     !
     if (flwoutput%air) then
        !
@@ -1526,7 +1536,23 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           ierror = putelt(fds, grnam3, 'PATM', uindex, 1, glbarr2)
        endif
        if (ierror /= 0) goto 999
-
+       !
+       if (prcp_file) then
+          !
+          ! element 'PRECIP'
+          !
+          if (parll) then
+             call dfgather(precip*3600000,nf,nl,mf,ml,iarrc,gdp)
+          else
+             call dfgather_seq(precip*3600000,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
+          endif       
+          if (inode == master) then
+             ierror = putelt(fds, grnam3, 'PRECIP', uindex, 1, glbarr2)
+          endif
+          !
+          if (ierror /= 0) goto 999
+       endif
+       !
        if (clou_file) then
           !
           ! element 'CLOUDS'
@@ -1593,15 +1619,12 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           endif
           if (ierror /= 0) goto 999
        endif
-
     endif
     !
     !
     ! Output of heat fluxes from temperature model
     !
     if (flwoutput%temperature) then
-
-
        if (ktemp == 3) then
           !
           ! element 'HLC'
@@ -1624,7 +1647,6 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
              endif
              if (ierror /= 0) goto 999
           endif
-
           !
           ! element 'QNET'
           !
@@ -1646,8 +1668,6 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
              endif
              if (ierror /= 0) goto 999
           endif
-
-
        elseif (ktemp > 0) then
           !
           ! element 'QEVA'
@@ -1754,7 +1774,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
              endif
              if (ierror /= 0) goto 999
           endif
-
+          !
           if (free_convec) then
              !
              ! element 'HFREE'

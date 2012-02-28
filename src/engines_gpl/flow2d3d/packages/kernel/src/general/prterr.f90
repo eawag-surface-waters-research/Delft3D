@@ -474,6 +474,9 @@ subroutine prterr(lundia, msgno, filtxt)
     case ('U183')
        msg = '*** WARNING Due to IWE values for DICOWW and ' //                 &
             & 'VICOWW are re-defined (0.)'
+    case ('U184')
+       msg = '*** WARNING Longitude of your model is 0 degrees,' //              &
+            & ' using solar radiation computed at Greenwich meridian'
     case ('U190')
        msg = '*** WARNING #'
     case ('U958')

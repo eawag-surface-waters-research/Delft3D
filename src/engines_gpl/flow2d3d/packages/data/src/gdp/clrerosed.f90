@@ -68,6 +68,7 @@ subroutine clrerosed(istat, gdp)
     real(fp), dimension(:,:) , pointer :: sbwuu
     real(fp), dimension(:,:) , pointer :: sbwvv
     real(fp), dimension(:)   , pointer :: sddflc
+    real(fp), dimension(:,:) , pointer :: srcmax
     real(fp), dimension(:,:) , pointer :: ssuuc
     real(fp), dimension(:,:) , pointer :: ssvvc
     real(fp), dimension(:,:) , pointer :: sswu
@@ -119,6 +120,7 @@ subroutine clrerosed(istat, gdp)
     sbwuu         => gdp%gderosed%sbwuu
     sbwvv         => gdp%gderosed%sbwvv
     sddflc        => gdp%gderosed%sddflc
+    srcmax        => gdp%gderosed%srcmax
     ssuuc         => gdp%gderosed%ssuuc
     ssvvc         => gdp%gderosed%ssvvc
     sswu          => gdp%gderosed%sswu
@@ -168,6 +170,7 @@ subroutine clrerosed(istat, gdp)
     if (associated(sverosed%sbwv))         deallocate(sverosed%sbwv        , STAT = istat)
     if (associated(sverosed%sbwuu))        deallocate(sverosed%sbwuu       , STAT = istat)
     if (associated(sverosed%sbwvv))        deallocate(sverosed%sbwvv       , STAT = istat)
+    if (associated(sverosed%srcmax))       deallocate(sverosed%srcmax      , STAT = istat)
     if (associated(sverosed%ssuuc))        deallocate(sverosed%ssuuc       , STAT = istat)
     if (associated(sverosed%ssvvc))        deallocate(sverosed%ssvvc       , STAT = istat)
     if (associated(sverosed%sswu))         deallocate(sverosed%sswu        , STAT = istat)

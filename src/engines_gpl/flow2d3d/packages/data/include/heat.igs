@@ -81,7 +81,7 @@ type gd_heat
                                          !  In UPDEVA redefined in m/s
                                          !  Evaporation in mm/hour
     real(fp)                :: devapo    !  Time increment of Evaporation
-    real(fp)                :: precip    !  Precipitation as input in mm/hour
+    real(fp)                :: precipt   !  Precipitation as input in mm/hour
                                          !  In UPDEVA redefined in m/s
                                          !  Precipitation in mm/hour
     real(fp)                :: dpreci    !  Time increment of Precipitation
@@ -121,6 +121,7 @@ type gd_heat
     real(fp) , dimension(:) , pointer :: rhumarr   ! Relative humidity array; used when read from file (rhum_file = true)
     real(fp) , dimension(:) , pointer :: tairarr   ! Air temperature   array; used when read from file (tair_file = true)
     real(fp) , dimension(:) , pointer :: clouarr   ! Cloudiness        array; used when read from file (clou_file = true)
+    real(fp) , dimension(:) , pointer :: swrfarr   ! Solar radiation   array; used when read from file (swrf_file = true)
     real(fp) , dimension(:) , pointer :: qeva_out  ! Evaporation heat flux
     real(fp) , dimension(:) , pointer :: qco_out   ! Heat flux of forced convection
     real(fp) , dimension(:) , pointer :: qbl_out   ! Nett back radation
@@ -136,6 +137,8 @@ type gd_heat
     logical :: rhum_file   = .false. !  True when relative humidity is read from input file
     logical :: tair_file   = .false. !  True when air temperature   is read from input file
     logical :: clou_file   = .false. !  True when cloudiness        is read from input file
+    logical :: prcp_file   = .false. !  True when precipitation     is read from input file
+    logical :: swrf_file   = .false. !  True when solar radiation   is read from input file
     logical :: free_convec = .false. !  True when free convection   is read from input file (only ktemp = 5)
     logical :: solrad_read = .false. !  True when solar radiation   is read from extra column in .tem file (only ktemp = 5)
 !

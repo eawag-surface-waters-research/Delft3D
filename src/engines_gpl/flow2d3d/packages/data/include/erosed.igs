@@ -53,6 +53,7 @@ type sv_erosed
     real(fp), dimension(:)  , pointer :: zumod
     real(fp), dimension(:,:), pointer :: dbodsd
     real(fp), dimension(:,:), pointer :: fixfac
+    real(fp), dimension(:,:), pointer :: srcmax  !  maximum cohesive sediment erosion flux
     real(fp), dimension(:,:), pointer :: frac    !  effective fraction of sediment in bed
                                                  !  available for transport
     real(fp), dimension(:)  , pointer :: mudfrac !  effective mud fraction in the part of

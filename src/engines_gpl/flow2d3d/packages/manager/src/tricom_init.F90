@@ -394,6 +394,7 @@ subroutine tricom_init(gdp)
     logical                             , pointer :: lrdok         ! Logical to check if reading phase has been passed. 
     logical                             , pointer :: waverd        ! Flag = TRUE if wave process and communication file exist 
     real(fp)                            , pointer :: anglat        ! Angle of latitude of the model centre (used to determine the coeff. for the coriolis force) 
+    real(fp)                            , pointer :: anglon        ! Angle of longitude of the model centre (used to determine solar radiation) 
     real(fp)                            , pointer :: dtsec         ! DT in seconds 
     real(fp)                            , pointer :: timnow        ! Current timestep (multiples of dt)  = number of time steps since itdate, 00:00:00 hours
     
@@ -778,6 +779,7 @@ subroutine tricom_init(gdp)
     timwav              => gdp%gdtricom%timwav
     waverd              => gdp%gdtricom%waverd        
     anglat              => gdp%gdtricom%anglat
+    anglon              => gdp%gdtricom%anglon
     dtsec               => gdp%gdtricom%dtsec        
     !
     call timer_start(timer_tricomtot, gdp)
@@ -826,7 +828,7 @@ subroutine tricom_init(gdp)
        !
        call readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt    , &
                  & filrgf    ,dx        ,dy        ,sferic    , &
-                 & anglat    ,grdang    ,tgfcmp    ,roumet    ,rouwav    , &
+                 & anglat    ,anglon    ,grdang    ,tgfcmp    ,roumet    ,rouwav    , &
                  & temeqs    ,saleqs    ,betac     ,dml       , &
                  & restid    ,icreep    ,trasol    , &
                  & forfuv    ,forfww    ,ktemp     ,keva      , &
@@ -1048,7 +1050,7 @@ subroutine tricom_init(gdp)
        ! will not happen.
        !
        call inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
-                 & dx        ,dy        ,anglat    ,grdang    , &
+                 & dx        ,dy        ,anglat    ,anglon    ,grdang    , &
                  & tgfcmp    ,riglid    , &
                  & temeqs    ,saleqs    ,ktemp     ,fclou     , &
                  & sarea     ,roumet    ,rouflo    ,restid    , &

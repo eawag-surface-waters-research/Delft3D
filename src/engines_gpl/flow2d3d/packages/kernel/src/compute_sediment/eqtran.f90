@@ -6,7 +6,7 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
                 & sbwv      ,sswu      ,sswv      ,lundia    , &
                 & taucr0    ,dss       ,rksrs     ,i2d3d     , &
                 & ce_nmtmp  ,akstmp    ,lsecfl    ,spirint   , &
-                & suspfrac  ,ust2      ,tetacr    , &
+                & suspfrac  ,ust2      ,tetacr    ,gamtcr    , &
                 & salmax    ,ws0       ,t_relax   ,concin    , &
                 & dzduu     ,dzdvv     ,ubot      ,tauadd    , &
                 & sus       ,bed       ,susw      ,bedw      ,espir     , &
@@ -93,6 +93,7 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     real(fp)                            , intent(in)    :: espir
     real(fp)                            , intent(in)    :: fpco
     real(fp)                            , intent(in)    :: frac     !  Description and declaration in esm_alloc_real.f90
+    real(fp)                            , intent(in)    :: gamtcr
     real(fp)                            , intent(in)    :: pangle
     real(fp)     , dimension(30)        , intent(inout) :: par
     real(fp)                            , intent(in)    :: rdc
@@ -317,7 +318,7 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
                        & delm      ,fc1       ,fw1       ,phicur    ,rksrs     , &
                        & i2d3d     ,mudfrac   ,fsilt     ,taucr1    ,psi       , &
                        & dzduu     ,dzdvv     ,eps       ,camax     ,iopsus    , &
-                       & ag        ,wave      ,tauadd    ) 
+                       & ag        ,wave      ,tauadd    ,gamtcr    ) 
        else
           call bedbc1993(tp        ,uorb      ,rhowat    ,h1        ,umod      , &
                        & zumod     ,di50      ,d90       ,z0cur     ,z0rou     , &

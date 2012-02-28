@@ -4,7 +4,8 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                & kfsmin    ,kspu      ,kspv      ,dzs0      ,dzs1      , &
                & sour      ,sink      ,r0        ,evap      ,dps       , &
                & s0        ,s1        ,thick     ,w10mag    ,patm      , &
-               & ycor      ,gsqs      ,xz        ,yz        ,gdp       )
+               & xcor      ,ycor      ,gsqs      ,xz        ,yz        , &
+               & anglon    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -95,9 +96,11 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     real(fp) , dimension(:) , pointer :: rhumarr
     real(fp) , dimension(:) , pointer :: tairarr
     real(fp) , dimension(:) , pointer :: clouarr
+    real(fp) , dimension(:) , pointer :: swrfarr
     logical                 , pointer :: rhum_file
     logical                 , pointer :: tair_file
     logical                 , pointer :: clou_file
+    logical                 , pointer :: swrf_file
     logical                 , pointer :: free_convec
     logical                 , pointer :: solrad_read
     integer                 , pointer :: lundia
@@ -133,6 +136,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                                                                                         !!    (used to determine the coef. for the coriolis force)
                                                                                         !!  - In spherical coordinates this parameter equals the angle of latitude
                                                                                         !!    for the origin (water level point) after INIPHY anglat = 0.
+    real(fp)                                                    , intent(in)  :: anglon !!  - Angle of longitude of the model centre
     real(fp)                                                    , intent(in)  :: timhr  !!  Current timestep (in hours), TIMNOW * DTSEC / 3600.
     real(prec) , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
     real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)                             :: evap   !  Description and declaration in esm_alloc_real.f90
@@ -141,6 +145,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: s0     !  Description and declaration in esm_alloc_real.f90
     real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: s1     !  Description and declaration in esm_alloc_real.f90
     real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: w10mag !  Description and declaration in esm_alloc_real.f90
+    real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: xcor   !  Description and declaration in esm_alloc_real.f90
     real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: ycor   !  Description and declaration in esm_alloc_real.f90
     real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: xz     !  Description and declaration in esm_alloc_real.f90
     real(fp)   , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: yz     !  Description and declaration in esm_alloc_real.f90
@@ -214,6 +219,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     real(fp)      :: rdry
     real(fp)      :: rhoa0
     real(fp)      :: rhoa10
+    real(fp)      :: rlon    ! Longitude positive E. For SFERIC RLON=XCOR (NM) else RLON is not used
     real(fp)      :: rlat    ! Latitude positive N. For SFERIC RLAT=YCOR (NM) else RLAT=ANGLAT
     real(fp)      :: rvap
     real(fp)      :: sc      ! Solar constant  1368.0 [W/m2]
@@ -225,7 +231,8 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     real(fp)      :: tkelvi
     real(fp)      :: tkelvn
     real(fp)      :: tl      ! Latent heat [j/kg]
-    real(fp)      :: tm      ! Actual time in hours after midnight January first (TIMJAN + TIMHR )
+    real(fp)      :: tm0     ! GMT time in hours after midnight January first (TIMJAN + TIMHR)
+    real(fp)      :: tm      ! Actual time in hours after midnight January first (TIMJAN + TIMHR + TIMEZONE)
     real(fp)      :: w0      ! Angular frequency of one year period (/hours)
     real(fp)      :: w1      ! Angular frequency of one day period (/hours)
     real(fp)      :: xnuair
@@ -274,9 +281,11 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     rhumarr     => gdp%gdheat%rhumarr
     tairarr     => gdp%gdheat%tairarr
     clouarr     => gdp%gdheat%clouarr
+    swrfarr     => gdp%gdheat%swrfarr
     rhum_file   => gdp%gdheat%rhum_file
     tair_file   => gdp%gdheat%tair_file
     clou_file   => gdp%gdheat%clou_file
+    swrf_file   => gdp%gdheat%swrf_file
     free_convec => gdp%gdheat%free_convec
     solrad_read => gdp%gdheat%solrad_read
     lundia      => gdp%gdinout%lundia
@@ -291,7 +300,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     zmodel      => gdp%gdprocs%zmodel
     !
     msgcount = 0
-    if (rhum_file .or. tair_file .or. clou_file) then
+    if (rhum_file .or. tair_file .or. clou_file .or. swrf_file) then
        !
        ! update meteo input (if necessary)
        !
@@ -311,6 +320,11 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
        if (clou_file) then
           success = getmeteoval(gdp%runid, 'cloud', time, gdp%gdparall%mfg, gdp%gdparall%nfg,&
                               & gdp%d%nlb, gdp%d%nub, gdp%d%mlb, gdp%d%mub, clouarr , 0 )
+          call checkmeteoresult(success, gdp)
+       endif
+       if (swrf_file) then
+          success = getmeteoval(gdp%runid, 'swrf', time, gdp%gdparall%mfg, gdp%gdparall%nfg,&
+                              & gdp%d%nlb, gdp%d%nub, gdp%d%mlb, gdp%d%mub, swrfarr , 0 )
           call checkmeteoresult(success, gdp)
        endif
     endif
@@ -862,11 +876,12 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
        !
        ! initialize local parameters
        !
+       rlon = anglon
        rlat = anglat
        !
        cccoef = 0.4_fp
        albedo = 0.06_fp
-       tm     = timjan + timhr
+       tm0    = timjan + timhr
        !
        decln  = 23.5_fp * degrad
        w0     = 2.0_fp * pi / (365.24_fp*24.0_fp)
@@ -929,13 +944,27 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                 !
                 qsn = qradin * (1-albedo)
                 !
+             elseif (swrf_file) then
+                !
+                ! Spatially varying solar radiation from file
+                !
+                qsn = swrfarr(nm)
+                !             
              else
                 !
                 ! Calculate solar radiation from cloud coverage specified in file
                 !
                 if (sferic) then
+                   !
+                   ! Time zone determined with longitude of grid cell
+                   ! Using latitude of grid cell for declination
+                   !
+                   rlon = xcor(nm)
                    rlat = ycor(nm)
+                   !
                 endif
+                !
+                tm = tm0 + 24.0_fp*rlon/360.0_fp - tzone
                 !
                 ! Calculate sine of the angle of the sun above the horizon: SNH
                 ! d is the declination angle 

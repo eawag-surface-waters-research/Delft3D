@@ -60,7 +60,7 @@ subroutine updeva(luneva    ,timnow    ,dt        ,inteva    ,first     , &
     real(fp)               , pointer :: rhow
     real(fp)               , pointer :: evapor
     real(fp)               , pointer :: devapo
-    real(fp)               , pointer :: precip
+    real(fp)               , pointer :: precipt
     real(fp)               , pointer :: dpreci
     real(fp)               , pointer :: train
     real(fp)               , pointer :: dtrain
@@ -93,7 +93,7 @@ subroutine updeva(luneva    ,timnow    ,dt        ,inteva    ,first     , &
 !
     evapor      => gdp%gdheat%evapor
     devapo      => gdp%gdheat%devapo
-    precip      => gdp%gdheat%precip
+    precipt     => gdp%gdheat%precipt
     dpreci      => gdp%gdheat%dpreci
     train       => gdp%gdheat%train
     dtrain      => gdp%gdheat%dtrain
@@ -136,7 +136,7 @@ subroutine updeva(luneva    ,timnow    ,dt        ,inteva    ,first     , &
        ! Calculate evaperature parameters
        ! transform unit from mm/hour to m/sec
        !
-       precip = rval(1) / 3600000.0_fp
+       precipt = rval(1) / 3600000.0_fp
        if (rval(2) < -998.0_fp) then
           keva = 1
        else
@@ -173,7 +173,7 @@ subroutine updeva(luneva    ,timnow    ,dt        ,inteva    ,first     , &
        !
        if (inteva) then
           rinc = (it1eva-it0eva) * 2.00_fp
-          dpreci = (dpreci - precip) / rinc
+          dpreci = (dpreci - precipt) / rinc
           devapo = (devapo - evapor) / rinc
           dtrain = (dtrain - train)  / rinc
        endif

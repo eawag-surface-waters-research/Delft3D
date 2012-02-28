@@ -1,5 +1,5 @@
 subroutine erosilt(thick    ,kmax     ,ws       ,wstau    ,entr     ,lundia   , &
-                 & h0       ,h1       ,error    ,fixfac   , &
+                 & h0       ,h1       ,error    ,fixfac   ,srcmax   , &
                  & frac     ,sinkse   ,sourse   ,oldmudfrac, flmd2l , tcrdep  , &
                  & tcrero   ,eropar   ,iform    , &
                  & numintpar,numrealpar,numstrpar,dllfunc ,dllhandle, &
@@ -60,6 +60,7 @@ subroutine erosilt(thick    ,kmax     ,ws       ,wstau    ,entr     ,lundia   , 
     real(fp)                            , intent(in)    :: h1
     logical                             , intent(out)   :: error
     real(fp)                            , intent(in)    :: fixfac
+    real(fp)                            , intent(in)    :: srcmax
     real(fp)                            , intent(in)    :: frac
     real(fp)                            , intent(out)   :: sinkse
     real(fp)                            , intent(out)   :: sourse
@@ -87,6 +88,7 @@ subroutine erosilt(thick    ,kmax     ,ws       ,wstau    ,entr     ,lundia   , 
     real(fp) :: taum
     real(fp) :: thick0
     real(fp) :: thick1
+    real(fp) :: ff
     !
     ! Interface to dll is in High precision!
     !
@@ -182,6 +184,7 @@ subroutine erosilt(thick    ,kmax     ,ws       ,wstau    ,entr     ,lundia   , 
     endif
     !
     wstau         = ws(kmax) * sink
+    !
     if (.not.flmd2l) then
        if (oldmudfrac) then
           sour = fixfac * sour
@@ -189,6 +192,9 @@ subroutine erosilt(thick    ,kmax     ,ws       ,wstau    ,entr     ,lundia   , 
           sour = fixfac * frac * sour
        endif
     endif
+    !
+    sour   = min(sour, srcmax)
+    !
     sourse = sour / thick0
     sinkse = wstau / thick1
 end subroutine erosilt

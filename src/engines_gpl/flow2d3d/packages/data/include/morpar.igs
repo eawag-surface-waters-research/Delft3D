@@ -121,6 +121,8 @@ type gd_morpar
     real(fp):: rwave      !  factor for calculating wave-related roughness from ripple dimensions
     real(fp):: alfabs     !  factor for longitudinal bed load transport
     real(fp):: alfabn     !  factor for transverse bed load transport
+    real(fp):: wetslope   !  maximum wet bed slope (used for avalanching)
+    real(fp):: avaltime   !  time scale in seconds (used for avalanching)
     real(fp):: camax      !  Maximum volumetric reference concentration
     real(fp):: dzmax      !  factor for limiting source and sink term in EROSED (percentage of water depth)
     real(fp):: sus        !  flag for calculating suspended load transport
@@ -208,6 +210,7 @@ type gd_morpar
     logical :: rouse               !  flag for setting equilibrium concentrations to standard Rouse profiles
     logical :: epspar
     logical :: eulerisoglm         !  Flag for using eulerian velocities for suspended transports    
+    logical :: glmisoeuler         !  Flag for using GLM velocities for bedload transports and reference concentrations   
     logical :: updinf              !  Flag for updating bottom at inflow openboundaries
     logical :: neglectentrainment  !  flag for neglecting entrainment and suspension in the mass balance (mass balance based on suspended load fluxes)
     logical :: oldmudfrac          !  true: use the old method for the mud source term calculation (without Frac multiplication)

@@ -1,5 +1,5 @@
 subroutine inieva(runid     ,cyclic    ,timnow    ,evaint    ,j         , &
-                & nmmaxj    ,nmmax     ,evap      ,gdp       )
+                & nmmaxj    ,nmmax     ,evap      ,precip    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -52,7 +52,7 @@ subroutine inieva(runid     ,cyclic    ,timnow    ,evaint    ,j         , &
     integer                , pointer :: luneva
     real(fp)               , pointer :: evapor
     real(fp)               , pointer :: devapo
-    real(fp)               , pointer :: precip
+    real(fp)               , pointer :: precipt
     real(fp)               , pointer :: dpreci
     real(fp)               , pointer :: train
     real(fp)               , pointer :: dtrain
@@ -72,6 +72,7 @@ subroutine inieva(runid     ,cyclic    ,timnow    ,evaint    ,j         , &
     real(fp)        :: timnow
                                    !!  Current timestep (ITSTRT * dt)
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: evap !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: precip !  Description and declaration in esm_alloc_real.f90
     character(*)    :: runid
                                    !!  Run identification code for the cur-
                                    !!  rent simulation (used to determine
@@ -99,7 +100,7 @@ subroutine inieva(runid     ,cyclic    ,timnow    ,evaint    ,j         , &
     fleva       => gdp%gdtmpfil%fleva
     evapor      => gdp%gdheat%evapor
     devapo      => gdp%gdheat%devapo
-    precip      => gdp%gdheat%precip
+    precipt     => gdp%gdheat%precipt
     dpreci      => gdp%gdheat%dpreci
     train       => gdp%gdheat%train
     dtrain      => gdp%gdheat%dtrain
@@ -114,12 +115,12 @@ subroutine inieva(runid     ,cyclic    ,timnow    ,evaint    ,j         , &
     !-----initilisation global parameters, initial pressure and common
     !     values of HEAT
     !
-    precip = 0.
-    dpreci = 0.
-    evapor = 0.
-    devapo = 0.
-    train = 0.
-    dtrain = 0.
+    precipt = 0.
+    dpreci  = 0.
+    evapor  = 0.
+    devapo  = 0.
+    train   = 0.
+    dtrain  = 0.
     !
     !-----define length of RUNID
     !
@@ -158,17 +159,18 @@ subroutine inieva(runid     ,cyclic    ,timnow    ,evaint    ,j         , &
        !        data when interpolation is requested
        !
        if (inteva) then
-          itfac = (int(timnow) - it0eva)*2
-          precip = precip + dpreci*itfac
-          evapor = evapor + devapo*itfac
-          train = train + dtrain*itfac
+          itfac   = (int(timnow) - it0eva)*2
+          precipt = precipt + dpreci*itfac
+          evapor  = evapor + devapo*itfac
+          train   = train + dtrain*itfac
        endif
        !
-       !--------Update evaporation (start value for both block function as
+       !--------Update evaporation and rainfall (start value for both block function as
        !        step interpolation)
        !
        do nm = 1, nmmax
           evap(nm) = evapor
+          precip(nm) = precipt
        enddo
     endif
 end subroutine inieva

@@ -58,6 +58,7 @@ subroutine initerosed(gdp)
     nullify(gdp%gderosed%epswlc)
     !
     nullify(gdp%gderosed%fixfac)
+    nullify(gdp%gderosed%srcmax)
     nullify(gdp%gderosed%frac)
     !
     nullify(gdp%gderosed%hidexp)

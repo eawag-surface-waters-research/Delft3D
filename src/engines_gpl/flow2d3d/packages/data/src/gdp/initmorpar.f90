@@ -90,6 +90,8 @@ subroutine initmorpar(gdp)
     real(fp)                             , pointer :: factcr
     real(fp)                             , pointer :: ttlalpha
     real(fp)                             , pointer :: ttlmin
+    real(fp)                             , pointer :: wetslope
+    real(fp)                             , pointer :: avaltime
     real(fp)              , dimension(:) , pointer :: xx
     !
     real(hp)              , dimension(:) , pointer :: mergebuf
@@ -106,6 +108,7 @@ subroutine initmorpar(gdp)
     logical                              , pointer :: varyingmorfac
     logical                              , pointer :: multi
     logical                              , pointer :: eulerisoglm
+    logical                              , pointer :: glmisoeuler
     character(256)                       , pointer :: bcmfilnam
     character(256)                       , pointer :: flcomp
     character(256)                       , pointer :: mmsyncfilnam
@@ -158,6 +161,8 @@ subroutine initmorpar(gdp)
     mwwjhe              => gdp%gdmorpar%mwwjhe
     ttlalpha            => gdp%gdmorpar%ttlalpha
     ttlmin              => gdp%gdmorpar%ttlmin
+    wetslope            => gdp%gdmorpar%wetslope
+    avaltime            => gdp%gdmorpar%avaltime
     !
     ihidexp             => gdp%gdmorpar%ihidexp
     itmor               => gdp%gdmorpar%itmor
@@ -205,6 +210,7 @@ subroutine initmorpar(gdp)
     factcr              => gdp%gdmorpar%factcr
     subiw               => gdp%gdmorpar%subiw
     eulerisoglm         => gdp%gdmorpar%eulerisoglm
+    glmisoeuler         => gdp%gdmorpar%glmisoeuler
     !
     gdp%gdmorpar%moroutput%transptype  = 2
     !
@@ -282,6 +288,8 @@ subroutine initmorpar(gdp)
     mwwjhe             = rmissval
     ttlalpha           = 0.1_fp
     ttlmin             = 0.0_fp
+    wetslope           = 10.0_fp
+    avaltime           = 86400.0_fp
     !
     ihidexp            = 1
     itmor              = 0
@@ -300,6 +308,7 @@ subroutine initmorpar(gdp)
     eqmbcsand          = .true.
     eqmbcmud           = .false.
     eulerisoglm        = .false.    
+    glmisoeuler        = .false.    
     densin             = .true.
     rouse              = .false.
     epspar             = .false.

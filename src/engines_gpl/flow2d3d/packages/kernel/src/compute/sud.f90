@@ -22,7 +22,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
              & cc        ,dd        ,tetau     ,aak       ,bbk       , &
              & cck       ,ddk       ,d0        ,d0k       ,bbka      , &
              & bbkc      ,ua        ,ub        ,soumud    ,dis_nf    , &
-             & gdp       )
+             & precip    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -89,7 +89,6 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
     !
     include 'flow_steps_f.inc'
     real(fp)               , pointer :: eps
-    real(fp)               , pointer :: precip
     integer                , pointer :: maseva
     integer                , pointer :: lundia
     integer                , pointer :: ntstep
@@ -170,6 +169,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)                             :: hu0
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)                             :: hu     !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)                             :: patm   !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: precip !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)                             :: pship  !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)                             :: rlabda !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)                             :: s0     !  Description and declaration in esm_alloc_real.f90
@@ -268,7 +268,6 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
 !! executable statements -------------------------------------------------------
 !
     eps         => gdp%gdconst%eps
-    precip      => gdp%gdheat%precip
     maseva      => gdp%gdheat%maseva
     lundia      => gdp%gdinout%lundia
     ntstep      => gdp%gdinttim%ntstep
@@ -377,8 +376,11 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
     !
     if (maseva>0) then
        do nm = 1, nmmax
-          if ( (kfs(nm)==1) .and. (kcs(nm)==1) ) then
-             d0k(nm, 1) = d0k(nm, 1) + (precip - evap(nm)/rhow)*gsqs(nm)
+          if (kcs(nm)==1) then
+             d0k(nm, 1) = d0k(nm, 1) + precip(nm)*gsqs(nm)
+             if (kfs(nm)==1) then
+                d0k(nm, 1) = d0k(nm, 1) - (evap(nm)/rhow)*gsqs(nm)
+             endif
           endif
        enddo
     endif

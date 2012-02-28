@@ -101,6 +101,8 @@ subroutine difu(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     real(fp)               , pointer :: ck
     integer                , pointer :: mfg
     integer                , pointer :: nfg
+    integer                , pointer :: nudge
+    real(fp)               , pointer :: hdt
 !
 ! Global variables
 !
@@ -275,6 +277,16 @@ real(fp)           :: sqrtbv
 real(fp)           :: timesti ! inverse of time step
 real(fp)           :: tsg
 character(20)      :: errtxt
+
+real(fp)           :: nudgefac
+real(fp)           :: tnudge
+real(fp)           :: rp
+real(fp)           :: rb
+real(fp), dimension(10) :: mu
+integer(fp), dimension(10) :: nms
+integer            :: jj
+integer            :: nnudge
+
 !
 !! executable statements -------------------------------------------------------
 !
@@ -286,6 +298,8 @@ character(20)      :: errtxt
     ck          => gdp%gdturcoe%ck
     mfg         => gdp%gdparall%mfg
     nfg         => gdp%gdparall%nfg
+    nudge       => gdp%gdnumeco%nudge
+    hdt         => gdp%gdnumeco%hdt
     !
     ! INITIALISATION
     !
@@ -1010,6 +1024,56 @@ character(20)      :: errtxt
        if (nhystp == d3dflow_solve_adi_conc) goto 111
        !
        ! DD code added end
+       !
+       ! Nudging of constituents at open boundaries
+       !
+       if (nudge==1) then
+          ! Nudging layer
+          nnudge    = 4
+          nudgefac  = 10.0
+          tnudge    = hdt
+          mu(1)     = 1.000 * max(hdt / tnudge, 1.0_fp)
+          do jj = 2, nnudge
+             mu(jj) = mu(jj-1) / nudgefac
+          enddo
+          !
+          do nm = 1, nmmax
+             nmu = nm + icx
+             nmd = nm - icx
+             if (kcs(nmd) == 2 .and. kcs(nm) == 1 ) then
+                nms(1) = nm
+                do jj = 2, nnudge
+                   nms(jj) = nms(jj-1) + icx
+                enddo
+                do jj = 1, nnudge
+                   do k = 1, kmax
+                      if (r1(nmd, k, l )>1.0e-6) then
+                         rb = r1(nmd, k, l )
+                         rp = r1(nms(jj), k, l)
+                         r1(nms(jj), k, l) = rp + mu(jj)*(rb-rp)
+                         r0(nms(jj), k, l) = r1(nms(jj), k, l)
+                      endif
+                   enddo
+                enddo
+             endif
+             if (kcs(nmu) == 2 .and. kcs(nm) == 1) then
+                nms(1) = nm
+                do jj = 2, nnudge
+                   nms(jj) = nms(jj-1) - icx
+                enddo
+                do jj = 1, nnudge
+                   do k = 1, kmax
+                      if (r1(nmu, k, l )>1.0e-6) then
+                         rb = r1(nmu, k, l )
+                         rp = r1(nms(jj), k, l)
+                         r1(nms(jj), k, l) = rp + mu(jj)*(rb-rp)
+                         r0(nms(jj), k, l) = r1(nms(jj), k, l)
+                      endif
+                   enddo
+                enddo
+             endif
+          enddo
+       endif
        !
     enddo
 end subroutine difu

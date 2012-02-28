@@ -25,7 +25,7 @@ subroutine z_predict_nhfull(j         ,nmmaxj    ,nmmax     ,kmax      , &
                           & wrkb2     ,wrkb3     ,wrkb4     ,wrkb5     ,wrkb6     , &
                           & wrkb7     ,wrkb8     ,zk        ,p0        ,crbc      , &
                           & hu0       ,hv0       ,hu2       ,dzu2      ,pship     , &
-                          & diapl     ,rnpl      ,gdp       )
+                          & diapl     ,rnpl      ,precip    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -145,6 +145,7 @@ subroutine z_predict_nhfull(j         ,nmmaxj    ,nmmax     ,kmax      , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)            :: hu2    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)            :: hv0    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)            :: patm   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)            :: precip !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)            :: pship  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)            :: s0     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)            :: s1     !  Description and declaration in esm_alloc_real.f90

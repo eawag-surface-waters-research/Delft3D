@@ -101,6 +101,7 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
     real(fp)               , pointer :: ck
     logical                , pointer :: nonhyd
     integer                , pointer :: nh_level
+    integer                , pointer :: nudge
 !
 ! Global variables
 !
@@ -243,6 +244,16 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
     real(fp)           :: volu
     real(fp)           :: z1
     character(256)     :: errtxt
+
+    real(fp)           :: nudgefac
+    real(fp)           :: tnudge
+    real(fp)           :: rp
+    real(fp)           :: rb
+    real(fp), dimension(10) :: mu
+    integer(fp), dimension(10) :: nms
+    integer            :: jj
+    integer            :: nnudge
+
 !
 !! executable statements -------------------------------------------------------
 !
@@ -257,6 +268,7 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
     ck          => gdp%gdturcoe%ck
     nonhyd      => gdp%gdprocs%nonhyd
     nh_level    => gdp%gdnonhyd%nh_level
+    nudge       => gdp%gdnumeco%nudge
     !
     if (lstsci==0) goto 9999
     !
@@ -591,6 +603,61 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
           call z_difu_solv_impl()
           !
        endif
+       !
+       ! Nudging (very experimental)
+       !
+       if (nudge==1) then
+          ! Nudging layer
+          nnudge    = 4
+          nudgefac  = 10.0
+          tnudge    = hdt
+          mu(1)     = 1.000 * max(hdt / tnudge, 1.0_fp)
+          do jj = 2, nnudge
+             mu(jj) = mu(jj-1) / nudgefac
+          enddo
+          !
+          do nm = 1, nmmax
+             nmu = nm + icx
+             nmd = nm - icx
+             if (kcs(nmd) == 2 .and. kcs(nm) == 1 ) then
+!                call nm_to_n_and_m(nm, n, m, gdp)
+                nms(1) = nm
+                do jj = 2, nnudge
+                   nms(jj) = nms(jj-1) + icx
+                enddo
+                do jj = 1, nnudge
+                   do k = kfsmin(nm), kmax
+                      if (r1(nmd, k, l )>1.0e-6) then
+                         rb = r1(nmd, k, l )
+                         rp = r1(nms(jj), k, l)
+                         r1(nms(jj), k, l) = rp + mu(jj)*(rb-rp)
+                         r0(nms(jj), k, l) = r1(nms(jj), k, l)
+!                        if (n==94 .and. l==2) then
+!                           write(*,'(6i5,10e14.4)')lstsci,l,k,jj,m,n,rb,rp,mu(jj),r1(nms(jj), k, l)
+!                        endif
+                      endif
+                   enddo
+                enddo
+             endif
+             if (kcs(nmu) == 2 .and. kcs(nm) == 1) then
+                nms(1) = nm
+                do jj = 2, nnudge
+                   nms(jj) = nms(jj-1) - icx
+                enddo
+                do jj = 1, nnudge
+                   do k = kfsmin(nm), kmax
+                      if (r1(nmu, k, l )>1.0e-6) then
+                         rb = r1(nmu, k, l )
+                         rp = r1(nms(jj), k, l)
+                         r1(nms(jj), k, l) = rp + mu(jj)*(rb-rp)
+                         r0(nms(jj), k, l) = r1(nms(jj), k, l)
+                      endif
+                   enddo
+                enddo
+             endif
+          enddo
+       endif
+       !
     enddo
  9999 continue    
 !

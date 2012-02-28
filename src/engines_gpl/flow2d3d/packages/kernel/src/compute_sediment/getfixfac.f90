@@ -1,5 +1,5 @@
 subroutine getfixfac(bedcomp   ,nmlb      ,nmub      ,nval      ,nmmax     , &
-                   & fixfac    ,ffthresh  )
+                   & fixfac    ,ffthresh  ,srcmax    ,cdryb     ,dt)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -48,7 +48,10 @@ subroutine getfixfac(bedcomp   ,nmlb      ,nmub      ,nval      ,nmmax     , &
     integer                                            , intent(in)  :: nval
     type(bedcomp_data)                                 , intent(in)  :: bedcomp
     real(fp)                                           , intent(in)  :: ffthresh
+    real(fp)                                           , intent(in)  :: dt
+    real(fp), dimension(nval)                          , intent(in)  :: cdryb
     real(fp), dimension(nmlb:nmub, nval)               , intent(out) :: fixfac
+    real(fp), dimension(nmlb:nmub, nval)               , intent(out) :: srcmax
 !
 ! Local variables
 !
@@ -61,9 +64,27 @@ subroutine getfixfac(bedcomp   ,nmlb      ,nmub      ,nval      ,nmmax     , &
 !
     call getalluvthick(bedcomp, fixfac, nmlb, nmub, nval)
     !
+    ! FIXFAC here is sediment thickness
+    !
     thresh = max(1.0e-10_fp,ffthresh)
     do l = 1, nval
        do nm = max(nmlb,1), min(nmmax,nmub)
+          !
+          ! Compute SRCMAX (only used for cohesive sediments)
+          !
+          if (ffthresh<1.0e-10_fp) then
+             !
+             ! If user-specified THRESH is <= 0.0, the erosion flux is not limited by FIXFAC,
+             ! but by the amount of sediment that is available
+             !
+             srcmax(nm, l) = fixfac(nm, l)*cdryb(l)/dt
+          else
+             !
+             ! Otherwise, only use conventional FIXFAC approach and set SRCMAX to
+             ! a very high number
+             !
+             srcmax(nm, l) = 1.0e+10_fp
+          endif
           fixfac(nm, l) = min(max(fixfac(nm, l)/thresh, 0.0_fp), 1.0_fp)
        enddo
     enddo

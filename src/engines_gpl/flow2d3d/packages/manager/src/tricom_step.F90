@@ -389,6 +389,7 @@ subroutine tricom_step(gdp)
     integer              , dimension(:) , pointer :: timwav  ! Array with time steps on comm. file for wave results 
     logical                             , pointer :: waverd  ! Flag = TRUE if wave process and communication file exist 
     real(fp)                            , pointer :: anglat  ! Angle of latitude of the model centre (used to determine the coeff. for the coriolis force) 
+    real(fp)                            , pointer :: anglon  ! Angle of longitude of the model centre (used to determine solar radiation) 
     real(fp)                            , pointer :: dtsec   ! DT in seconds 
     real(fp)                            , pointer :: timnow  ! Current timestep (multiples of dt)  = number of time steps since itdate, 00:00:00 hours
     include 'delftonline.i'
@@ -741,6 +742,7 @@ subroutine tricom_step(gdp)
     timwav              => gdp%gdtricom%timwav
     waverd              => gdp%gdtricom%waverd
     anglat              => gdp%gdtricom%anglat
+    anglon              => gdp%gdtricom%anglon
     dtsec               => gdp%gdtricom%dtsec
     !  
     call timer_start(timer_simulation, gdp)
@@ -954,7 +956,7 @@ subroutine tricom_step(gdp)
                     & forfww    ,nfltyp    , &
                     & saleqs    ,temeqs    , &
                     & sferic    ,grdang    ,ktemp     ,temint    ,keva      , &
-                    & evaint    ,anglat    ,rouflo    ,rouwav    , &
+                    & evaint    ,anglat    ,anglon    ,rouflo    ,rouwav    , &
                     & betac     ,tkemod    ,comfil    , &
                     & error     ,gdp       )
        else
@@ -964,7 +966,7 @@ subroutine tricom_step(gdp)
                                 & forfww    ,nfltyp    , &
                                 & saleqs    ,temeqs    , &
                                 & sferic    ,grdang    ,ktemp     ,temint    ,keva      , &
-                                & evaint    ,anglat    ,rouflo    ,rouwav    , &
+                                & evaint    ,anglat    ,anglon    ,rouflo    ,rouwav    , &
                                 & betac     ,tkemod    ,gdp       )
           else
              call z_trisol(dischy    ,solver    ,icreep    , &
@@ -972,7 +974,7 @@ subroutine tricom_step(gdp)
                          & forfww    ,nfltyp    , &
                          & saleqs    ,temeqs    , &
                          & sferic    ,grdang    ,ktemp     ,temint    ,keva      , &
-                         & evaint    ,anglat    ,rouflo    ,rouwav    , &
+                         & evaint    ,anglat    ,anglon    ,rouflo    ,rouwav    , &
                          & betac     ,tkemod    ,gdp       )
           endif
        endif

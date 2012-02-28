@@ -4,7 +4,7 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
                & forfuv    ,forfww    ,ktemp     ,temint    ,            &
                & keva      ,evaint    , &
                & dpsopt    ,dpuopt    ,zmodel    ,gammax    ,fwfac     , &
-               & gdp       )
+               & nudge     ,nudvic    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -86,6 +86,10 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     character(6)              :: momsol
     character(8)              :: dpsopt !  Description and declaration in numeco.igs
     character(8)              :: dpuopt
+
+    real(fp)                  :: nudvic !  Description and declaration in numeco.igs
+    integer                   :: nudge  !  Description and declaration in procs.igs
+
 !
 ! Local variables
 !
@@ -130,13 +134,15 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     dgcuni = 0.5_fp
     gammax = 1.0_fp
     fwfac  = 1.0_fp
+    nudvic = -1.0_fp
     !
     icreep = 999
     ibaroc = 1
     trasol = traopt(1)
     forfuv = 'Y'
     forfww = 'N'
-    !
+    nudge  = 0
+   !
     temint = 'Y'
     evaint = 'Y'
     !
@@ -460,6 +466,45 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
           if (chulp(:1)=='N' .or. chulp(:1)=='n') ibaroc = 0
        endif
     endif
+
+    !
+    ! locate 'Nudge'  Criterion for nudging on open boundary
+    !                 points (N=0, Y=1)
+    !
+    keyw  = 'Nudge'
+    ntrec = nrrec
+    lkw   = 6
+    call search(lunmd     ,lerror     ,newkw     ,nrrec     ,found     , &
+            & ntrec     ,mdfrec    ,itis      ,keyw      ,lkw       , &
+            & 'NO'      )
+    lerror = .false.
+    !
+    ! not found ?
+    ! Default value is 'Y' with means NUDGE=0
+    !
+    if (found) then
+       lenc = 1
+       cdef(:1) = 'Y'
+       call read2c(lunmd     ,lerror     ,keyw      ,newkw     ,nlook     , &
+                 & mdfrec    ,chulp(:lenc)         ,cdef(:lenc)          ,lenc      ,nrrec     , &
+                 & ntrec     ,lundia    ,gdp       )
+       !
+       ! reading error ?
+       !
+       if (lerror) then
+          lerror = .false.
+          nudge = 1
+       else
+          nudge = 1
+          if (chulp(:1)=='N' .or. chulp(:1)=='n') nudge = 0
+       endif
+       if (nudge==1) then
+          msg = 'Nudging of constituents applied at open boundaries'
+          call prterr(lundia    ,'Z013'    ,msg       ,gdp       )
+       endif
+    endif
+
+
     !
     ! Solver for transport and Forester filters only if LSTSCI <> 0
     !
@@ -656,6 +701,16 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
        gammax = rdef
        write (lundia,'(a,e12.2)') '*** MESSAGE Gammax specified by user to be ', gammax
     endif
+
+    ! Boundary viscosity for nudging
+    !
+    rdef = -999.0_fp
+    call prop_get(gdp%mdfile_ptr, '*', 'Nudvic', rdef)
+    if (comparereal(rdef, -999.0_fp) /= 0) then
+       nudvic = rdef
+       write (lundia,'(a,e12.2)') '*** MESSAGE Boundary viscosity specified by user to be ', nudvic
+    endif
+
     !
     ! FWFac
     ! See also rdmor

@@ -1,5 +1,5 @@
 subroutine inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
-                & dx        ,dy        ,anglat    ,grdang    , &
+                & dx        ,dy        ,anglat    ,anglon    ,grdang    , &
                 & tgfcmp    ,riglid    , &
                 & temeqs    ,saleqs    ,ktemp     ,fclou     , &
                 & sarea     ,roumet    ,rouflo    ,restid    , &
@@ -157,6 +157,8 @@ subroutine inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
     logical                , pointer :: dpmveg
     logical                , pointer :: fldry
     logical                , pointer :: fltd
+    logical                , pointer :: solrad_read
+    logical                , pointer :: swrf_file
     character(256)         , pointer :: flbdfh
     real(fp), dimension(:) , pointer :: duneheight
 !
@@ -174,6 +176,8 @@ subroutine inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
                             !!    meter equals the angle of latitude
                             !!    for the origin (water level point)
                             !!    after INIPHY anglat = 0.
+    real(fp)      :: anglon !!  - Angle of longitude of the model
+                            !!    centre (used to determine solar radiation)
     real(fp)      :: dx     !!  Uniform grid-distance in the x-dir.
                             !!  in meters
                             !!  if sferic = T dx := dphi
@@ -324,6 +328,8 @@ subroutine inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
     fltd       => gdp%gdtmpfil%fltd
     flbdfh     => gdp%gdbedformpar%flbdfh
     duneheight => gdp%gdbedformpar%duneheight
+    solrad_read => gdp%gdheat%solrad_read
+    swrf_file  => gdp%gdheat%swrf_file
     !
     icx     = 0
     icy     = 0
@@ -426,7 +432,8 @@ subroutine inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
               & nmax      ,mmax      ,kmax      ,lmax      ,ktemp     , &
               & temeqs    ,saleqs    ,fclou     ,sarea     ,wstcof    , &
               & rhow      ,rhoa      ,i(kcu)    ,i(kcv)    ,i(kcs)    , &
-              & r(cfurou) ,r(cfvrou) ,r(vicuv)  ,r(dicuv)  ,gdp       )
+              & r(cfurou) ,r(cfvrou) ,r(vicuv)  ,r(dicuv)  ,anglon    , &
+              & solrad_read,swrf_file,sferic    ,gdp       )
     if (error) goto 9999
     !
     ! CHKTRT: checks Trachytopes if defined

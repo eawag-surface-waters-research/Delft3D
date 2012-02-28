@@ -61,9 +61,12 @@ subroutine clrsedpar(istat     ,gdp       )
     real(fp)      , dimension(:)     , pointer :: tcduni
     real(fp)      , dimension(:,:)   , pointer :: tcrero
     real(fp)      , dimension(:)     , pointer :: tceuni
+    real(fp)      , dimension(:)     , pointer :: tcguni
     real(fp)      , dimension(:,:)   , pointer :: eropar
+    real(fp)      , dimension(:,:)   , pointer :: gamtcr
     real(fp)      , dimension(:)     , pointer :: erouni
     real(fp)      , dimension(:)     , pointer :: mudcnt
+    real(fp)      , dimension(:)     , pointer :: gamflc
     integer       , dimension(:)     , pointer :: nseddia
     integer       , dimension(:)     , pointer :: sedtyp
     character(10) , dimension(:)     , pointer :: inisedunit
@@ -72,6 +75,7 @@ subroutine clrsedpar(istat     ,gdp       )
     character(256), dimension(:)     , pointer :: flstcd
     character(256), dimension(:)     , pointer :: flstce
     character(256), dimension(:)     , pointer :: flsero
+    character(256), dimension(:)     , pointer :: flstcg
     type (gd_sedpar)                 , pointer :: gdsedpar
 !
 ! Global variables
@@ -91,6 +95,8 @@ subroutine clrsedpar(istat     ,gdp       )
     dstar       => gdp%gdsedpar%dstar
     taucr       => gdp%gdsedpar%taucr
     tetacr      => gdp%gdsedpar%tetacr
+    gamtcr      => gdp%gdsedpar%gamtcr
+    gamflc      => gdp%gdsedpar%gamflc
     ws0         => gdp%gdsedpar%ws0
     wsm         => gdp%gdsedpar%wsm
     salmax      => gdp%gdsedpar%salmax
@@ -99,6 +105,7 @@ subroutine clrsedpar(istat     ,gdp       )
     tcduni      => gdp%gdsedpar%tcduni
     tcrero      => gdp%gdsedpar%tcrero
     tceuni      => gdp%gdsedpar%tceuni
+    tcguni      => gdp%gdsedpar%tcguni
     eropar      => gdp%gdsedpar%eropar
     erouni      => gdp%gdsedpar%erouni
     mudcnt      => gdp%gdsedpar%mudcnt
@@ -110,6 +117,7 @@ subroutine clrsedpar(istat     ,gdp       )
     flstcd      => gdp%gdsedpar%flstcd
     flstce      => gdp%gdsedpar%flstce
     flsero      => gdp%gdsedpar%flsero
+    flstcg      => gdp%gdsedpar%flstcg
     gdsedpar    => gdp%gdsedpar
     !
     if (associated(gdsedpar%rhosol))     deallocate(gdsedpar%rhosol,     STAT = istat)
@@ -125,6 +133,8 @@ subroutine clrsedpar(istat     ,gdp       )
     if (associated(gdsedpar%dstar))      deallocate(gdsedpar%dstar,      STAT = istat)
     if (associated(gdsedpar%taucr))      deallocate(gdsedpar%taucr,      STAT = istat)
     if (associated(gdsedpar%tetacr))     deallocate(gdsedpar%tetacr,     STAT = istat)
+    if (associated(gdsedpar%gamtcr))     deallocate(gdsedpar%gamtcr,     STAT = istat)
+    if (associated(gdsedpar%gamflc))     deallocate(gdsedpar%gamflc,     STAT = istat)
     if (associated(gdsedpar%ws0))        deallocate(gdsedpar%ws0,        STAT = istat)
     if (associated(gdsedpar%wsm))        deallocate(gdsedpar%wsm,        STAT = istat)
     if (associated(gdsedpar%salmax))     deallocate(gdsedpar%salmax,     STAT = istat)
@@ -133,6 +143,7 @@ subroutine clrsedpar(istat     ,gdp       )
     if (associated(gdsedpar%tcduni))     deallocate(gdsedpar%tcduni,     STAT = istat)
     if (associated(gdsedpar%tcrero))     deallocate(gdsedpar%tcrero,     STAT = istat)
     if (associated(gdsedpar%tceuni))     deallocate(gdsedpar%tceuni,     STAT = istat)
+    if (associated(gdsedpar%tcguni))     deallocate(gdsedpar%tcguni,     STAT = istat)
     if (associated(gdsedpar%eropar))     deallocate(gdsedpar%eropar,     STAT = istat)
     if (associated(gdsedpar%erouni))     deallocate(gdsedpar%erouni,     STAT = istat)
     if (associated(gdsedpar%mudcnt))     deallocate(gdsedpar%mudcnt,     STAT = istat)
@@ -146,4 +157,5 @@ subroutine clrsedpar(istat     ,gdp       )
     if (associated(gdsedpar%flstcd))     deallocate(gdsedpar%flstcd,     STAT = istat)
     if (associated(gdsedpar%flstce))     deallocate(gdsedpar%flstce,     STAT = istat)
     if (associated(gdsedpar%flsero))     deallocate(gdsedpar%flsero,     STAT = istat)
+    if (associated(gdsedpar%flstcg))     deallocate(gdsedpar%flstcg,     STAT = istat)
 end subroutine clrsedpar

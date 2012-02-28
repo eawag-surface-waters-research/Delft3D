@@ -11,7 +11,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                 & teta      ,rlabda    ,aks       ,kfsed     ,saleqs    , &
                 & sbuut     ,sbvvt     ,entr      ,wstau     ,hu        , &
                 & hv        ,rca       ,dss       ,ubot      ,rtur0     , &
-                & temeqs    ,gdp       )
+                & temeqs    ,gsqs      ,guu       ,gvv       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -79,21 +79,22 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                             , pointer :: z0v
     real(fp)                             , pointer :: vicmol
     integer                              , pointer :: nmudfrac
-    real(fp)           , dimension(:)    , pointer :: rhosol
-    real(fp)           , dimension(:,:,:), pointer :: logseddia
-    real(fp)           , dimension(:)    , pointer :: logsedsig
-    real(fp)           , dimension(:)    , pointer :: sedd10
-    real(fp)           , dimension(:)    , pointer :: sedd50
-    real(fp)           , dimension(:)    , pointer :: sedd90
-    real(fp)           , dimension(:)    , pointer :: sedd50fld
-    real(fp)           , dimension(:)    , pointer :: dstar
-    real(fp)           , dimension(:)    , pointer :: taucr
-    real(fp)           , dimension(:)    , pointer :: tetacr
-    real(fp)           , dimension(:)    , pointer :: ws0
-    real(fp)           , dimension(:)    , pointer :: salmax
-    real(fp)           , dimension(:)    , pointer :: mudcnt
-    integer            , dimension(:)    , pointer :: nseddia
-    integer            , dimension(:)    , pointer :: sedtyp
+    real(fp)      , dimension(:)         , pointer :: rhosol
+    real(fp)      , dimension(:)         , pointer :: cdryb
+    real(fp)      , dimension(:,:,:)     , pointer :: logseddia
+    real(fp)      , dimension(:)         , pointer :: logsedsig
+    real(fp)      , dimension(:)         , pointer :: sedd10
+    real(fp)      , dimension(:)         , pointer :: sedd50
+    real(fp)      , dimension(:)         , pointer :: sedd90
+    real(fp)      , dimension(:)         , pointer :: sedd50fld
+    real(fp)      , dimension(:)         , pointer :: dstar
+    real(fp)      , dimension(:)         , pointer :: taucr
+    real(fp)      , dimension(:)         , pointer :: tetacr
+    real(fp)      , dimension(:)         , pointer :: ws0
+    real(fp)      , dimension(:)         , pointer :: salmax
+    real(fp)      , dimension(:)         , pointer :: mudcnt
+    integer       , dimension(:)         , pointer :: nseddia
+    integer       , dimension(:)         , pointer :: sedtyp
     logical                              , pointer :: anymud
     real(fp)                             , pointer :: thresh
     real(fp)                             , pointer :: bed
@@ -104,7 +105,9 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     integer                              , pointer :: i50
     integer                              , pointer :: i90
     integer                              , pointer :: nxx
-    real(fp)           , dimension(:)    , pointer :: xx
+    real(fp)              , dimension(:) , pointer :: xx
+    real(fp)                             , pointer :: morfac
+    real(fp)                             , pointer :: hdt
     logical                              , pointer :: multi
     logical                              , pointer :: wind
     logical                              , pointer :: salin
@@ -113,54 +116,56 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     logical                              , pointer :: sedim
     real(fp)                             , pointer :: eps
     integer                              , pointer :: ifirst
-    real(fp)           , dimension(:)    , pointer :: bc_mor_array
-    real(fp)           , dimension(:,:)  , pointer :: dbodsd
-    real(fp)           , dimension(:)    , pointer :: dcwwlc
-    real(fp)           , dimension(:)    , pointer :: dm
-    real(fp)           , dimension(:)    , pointer :: dg
-    real(fp)           , dimension(:,:)  , pointer :: dxx
-    real(fp)           , dimension(:)    , pointer :: dzduu
-    real(fp)           , dimension(:)    , pointer :: dzdvv
-    real(fp)           , dimension(:)    , pointer :: epsclc
-    real(fp)           , dimension(:)    , pointer :: epswlc
-    real(fp)           , dimension(:,:)  , pointer :: fixfac
-    real(fp)           , dimension(:,:)  , pointer :: frac
-    real(fp)           , dimension(:)    , pointer :: mudfrac
-    real(fp)           , dimension(:,:)  , pointer :: hidexp
-    real(fp)           , dimension(:)    , pointer :: rsdqlc
-    real(fp)           , dimension(:,:)  , pointer :: sbcu
-    real(fp)           , dimension(:,:)  , pointer :: sbcv
-    real(fp)           , dimension(:,:)  , pointer :: sbcuu
-    real(fp)           , dimension(:,:)  , pointer :: sbcvv
-    real(fp)           , dimension(:,:)  , pointer :: sbwu
-    real(fp)           , dimension(:,:)  , pointer :: sbwv
-    real(fp)           , dimension(:,:)  , pointer :: sbwuu
-    real(fp)           , dimension(:,:)  , pointer :: sbwvv
-    real(fp)           , dimension(:)    , pointer :: sddflc
-    real(fp)           , dimension(:,:)  , pointer :: sswu
-    real(fp)           , dimension(:,:)  , pointer :: sswv
-    real(fp)           , dimension(:,:)  , pointer :: sswuu
-    real(fp)           , dimension(:,:)  , pointer :: sswvv
-    real(fp)           , dimension(:,:)  , pointer :: sutot
-    real(fp)           , dimension(:,:)  , pointer :: svtot
-    real(fp)           , dimension(:,:)  , pointer :: sinkse
-    real(fp)           , dimension(:,:)  , pointer :: sourse
-    real(fp)           , dimension(:,:)  , pointer :: taurat
-    real(fp)           , dimension(:)    , pointer :: ust2
-    real(fp)           , dimension(:)    , pointer :: umod
-    real(fp)           , dimension(:)    , pointer :: uuu
-    real(fp)           , dimension(:)    , pointer :: vvv
-    real(fp)           , dimension(:)    , pointer :: wslc
-    real(fp)           , dimension(:)    , pointer :: zumod
+    real(fp), dimension(:)               , pointer :: bc_mor_array
+    real(fp), dimension(:,:)             , pointer :: dbodsd
+    real(fp), dimension(:)               , pointer :: dcwwlc
+    real(fp), dimension(:)               , pointer :: dm
+    real(fp), dimension(:)               , pointer :: dg
+    real(fp), dimension(:,:)             , pointer :: dxx
+    real(fp), dimension(:)               , pointer :: dzduu
+    real(fp), dimension(:)               , pointer :: dzdvv
+    real(fp), dimension(:)               , pointer :: epsclc
+    real(fp), dimension(:)               , pointer :: epswlc
+    real(fp), dimension(:,:)             , pointer :: fixfac
+    real(fp), dimension(:,:)             , pointer :: frac
+    real(fp), dimension(:,:)             , pointer :: gamtcr
+    real(fp), dimension(:)               , pointer :: mudfrac
+    real(fp), dimension(:,:)             , pointer :: hidexp
+    real(fp), dimension(:)               , pointer :: rsdqlc
+    real(fp), dimension(:,:)             , pointer :: sbcu
+    real(fp), dimension(:,:)             , pointer :: sbcv
+    real(fp), dimension(:,:)             , pointer :: sbcuu
+    real(fp), dimension(:,:)             , pointer :: sbcvv
+    real(fp), dimension(:,:)             , pointer :: sbwu
+    real(fp), dimension(:,:)             , pointer :: sbwv
+    real(fp), dimension(:,:)             , pointer :: sbwuu
+    real(fp), dimension(:,:)             , pointer :: sbwvv
+    real(fp), dimension(:)               , pointer :: sddflc
+    real(fp), dimension(:,:)             , pointer :: srcmax
+    real(fp), dimension(:,:)             , pointer :: sswu
+    real(fp), dimension(:,:)             , pointer :: sswv
+    real(fp), dimension(:,:)             , pointer :: sswuu
+    real(fp), dimension(:,:)             , pointer :: sswvv
+    real(fp), dimension(:,:)             , pointer :: sutot
+    real(fp), dimension(:,:)             , pointer :: svtot
+    real(fp), dimension(:,:)             , pointer :: sinkse
+    real(fp), dimension(:,:)             , pointer :: sourse
+    real(fp), dimension(:,:)             , pointer :: taurat
+    real(fp), dimension(:)               , pointer :: ust2
+    real(fp), dimension(:)               , pointer :: umod
+    real(fp), dimension(:)               , pointer :: uuu
+    real(fp), dimension(:)               , pointer :: vvv
+    real(fp), dimension(:)               , pointer :: wslc
+    real(fp), dimension(:)               , pointer :: zumod
     logical                              , pointer :: scour
-    integer            , dimension(:)    , pointer :: iform
-    real(fp)           , dimension(:,:)  , pointer :: par
+    integer,        dimension(:)         , pointer :: iform
+    real(fp),       dimension(:,:)       , pointer :: par
     real(fp)                             , pointer :: factcr
     integer                              , pointer :: ihidexp
     real(fp)                             , pointer :: asklhe
     real(fp)                             , pointer :: mwwjhe
     real(fp)                             , pointer :: ffthresh
-    real(fp)           , dimension(:)    , pointer :: rksr
+    real(fp), dimension(:)               , pointer :: rksr
     real(fp)                             , pointer :: sus
     real(fp)                             , pointer :: espir
     real(fp)                             , pointer :: vonkar
@@ -180,21 +185,23 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     integer                              , pointer :: max_integers
     integer                              , pointer :: max_reals
     integer                              , pointer :: max_strings
-    character(256)     , dimension(:)    , pointer :: dll_function
+    character(256), dimension(:)         , pointer :: dll_function
     integer(pntrsize)  , dimension(:)    , pointer :: dll_handle
-    integer            , dimension(:)    , pointer :: dll_integers
-    real(hp)           , dimension(:)    , pointer :: dll_reals
-    character(256)     , dimension(:)    , pointer :: dll_strings
-    character(256)     , dimension(:)    , pointer :: dll_usrfil
+    integer       , dimension(:)         , pointer :: dll_integers
+    real(hp)      , dimension(:)         , pointer :: dll_reals
+    character(256), dimension(:)         , pointer :: dll_strings
+    character(256), dimension(:)         , pointer :: dll_usrfil
     logical                              , pointer :: bsskin
-    real(fp)           , dimension(:)    , pointer :: thcmud
+    real(fp)      , dimension(:)         , pointer :: thcmud
     real(fp)                             , pointer :: kssilt
     real(fp)                             , pointer :: kssand
-    logical                              , pointer :: oldmudfrac
-    logical                              , pointer :: flmd2l
-    real(fp)           , dimension(:,:)  , pointer :: tcrdep
-    real(fp)           , dimension(:,:)  , pointer :: tcrero
-    real(fp)           , dimension(:,:)  , pointer :: eropar
+    logical                          , pointer :: oldmudfrac
+    logical                          , pointer :: flmd2l
+    real(fp)      , dimension(:,:)   , pointer :: tcrdep
+    real(fp)      , dimension(:,:)   , pointer :: tcrero
+    real(fp)      , dimension(:,:)   , pointer :: eropar
+    real(prec)    , dimension(:,:)   , pointer :: bodsed 
+    real(prec)    , dimension(:)     , pointer :: sedtrcfac
     include 'flow_steps_f.inc'
     include 'sedparams.inc'
     include 'trapar.inc'
@@ -218,6 +225,9 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     integer                                                                 :: lundia !  Description and declaration in inout.igs
     integer                                                   , intent(in)  :: nmmax  !  Description and declaration in dimens.igs
     integer                                                   , intent(in)  :: nst    !!
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: gsqs   !  Description and declaration in rjdim.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: guu    !  Description and declaration in rjdim.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: gvv    !  Description and declaration in rjdim.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kcu    !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kcv    !  Description and declaration in esm_alloc_int.f90
@@ -303,6 +313,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: difbot
     real(fp)                      :: drho
     real(fp)                      :: dstari
+    real(fp)                      :: dt
     real(fp)                      :: ee
     real(fp)                      :: fi
     real(fp)                      :: h0
@@ -332,6 +343,11 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: z0cur
     real(fp)                      :: z0rou
     real(fp)                      :: zvelb
+    !
+    real(fp)                      :: grkg
+    real(fp)                      :: grm2tot
+    real(fp)                      :: grm2
+    !
     real(fp), dimension(0:kmax2d) :: dcww2d
     real(fp), dimension(0:kmax2d) :: sddf2d
     real(fp), dimension(0:kmax2d) :: ws2d
@@ -340,7 +356,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp), dimension(kmax2d)   :: thck2d
     real(fp), dimension(kmax)     :: concin3d
     real(fp), dimension(kmax2d)   :: concin2d
-    character(256)                :: errmsg
+    character(256)    :: errmsg
     !
     data thck2d/0.1747, 0.1449, 0.1202, 0.0997, 0.0827, 0.0686, 0.0569, 0.0472, &
        & 0.0391, 0.0325, 0.0269, 0.0223, 0.0185, 0.0154, 0.0127, 0.0106, 0.0088,&
@@ -358,6 +374,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     sedim               => gdp%gdprocs%sedim
     nmudfrac            => gdp%gdsedpar%nmudfrac
     rhosol              => gdp%gdsedpar%rhosol
+    cdryb               => gdp%gdsedpar%cdryb
     logseddia           => gdp%gdsedpar%logseddia
     logsedsig           => gdp%gdsedpar%logsedsig
     sedd10              => gdp%gdsedpar%sedd10
@@ -370,9 +387,11 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     ws0                 => gdp%gdsedpar%ws0
     salmax              => gdp%gdsedpar%salmax
     mudcnt              => gdp%gdsedpar%mudcnt
+    gamtcr              => gdp%gdsedpar%gamtcr
     nseddia             => gdp%gdsedpar%nseddia
     sedtyp              => gdp%gdsedpar%sedtyp
     anymud              => gdp%gdsedpar%anymud
+    sedtrcfac           => gdp%gdsedpar%sedtrcfac
     thresh              => gdp%gdmorpar%thresh
     bed                 => gdp%gdmorpar%bed
     susw                => gdp%gdmorpar%susw
@@ -389,6 +408,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     asklhe              => gdp%gdmorpar%asklhe
     mwwjhe              => gdp%gdmorpar%mwwjhe
     ffthresh            => gdp%gdmorpar%thresh
+    morfac              => gdp%gdmorpar%morfac
     ag                  => gdp%gdphysco%ag
     z0                  => gdp%gdphysco%z0
     z0v                 => gdp%gdphysco%z0v
@@ -428,6 +448,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     svtot               => gdp%gderosed%svtot
     sinkse              => gdp%gderosed%sinkse
     sourse              => gdp%gderosed%sourse
+    srcmax              => gdp%gderosed%srcmax
     taurat              => gdp%gderosed%taurat
     ust2                => gdp%gderosed%ust2
     umod                => gdp%gderosed%umod
@@ -479,6 +500,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     tcrdep              => gdp%gdsedpar%tcrdep
     tcrero              => gdp%gdsedpar%tcrero
     eropar              => gdp%gdsedpar%eropar
+    hdt                 => gdp%gdnumeco%hdt
     !
     if (ifirst == 1) then
        ifirst = 0
@@ -505,6 +527,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        if (istat==0) allocate (gdp%gderosed%sddflc(0:kmax)                       , stat = istat)
        if (istat==0) allocate (gdp%gderosed%sinkse(gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
        if (istat==0) allocate (gdp%gderosed%sourse(gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%srcmax(gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
        if (istat==0) allocate (gdp%gderosed%sswu  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
        if (istat==0) allocate (gdp%gderosed%sswuu (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
        if (istat==0) allocate (gdp%gderosed%sswv  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
@@ -545,6 +568,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        sddflc              => gdp%gderosed%sddflc
        sinkse              => gdp%gderosed%sinkse
        sourse              => gdp%gderosed%sourse
+       srcmax              => gdp%gderosed%srcmax
        sswu                => gdp%gderosed%sswu
        sswuu               => gdp%gderosed%sswuu
        sswv                => gdp%gderosed%sswv
@@ -655,10 +679,31 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     call dfexchg( zumod,1, 1, dfloat, gdp)
     !
     ! Get the reduction factor if thickness of sediment at bed is less than
-    ! user specified threshold
+    ! user specified threshold. Also get maximum erosion source SRCMAX
+    ! (used for cohesive sediments).
+    !
+    dt = hdt*morfac
     !
     call getfixfac(gdp%gdmorlyr, gdp%d%nmlb, gdp%d%nmub, lsedtot, &
-                 & nmmax       , fixfac    , ffthresh  )
+                 & nmmax       , fixfac    , ffthresh  , srcmax , &
+                 & cdryb       , dt)
+    !
+    ! Set fixfac to 1.0 for tracer sediments and adjust frac
+    !
+    do l = 1, lsed
+       if (sedtrcfac(l)>0.0_fp) then
+          grkg = (1.0_fp - 0.4_fp) / (cdryb(l)*pi*sedd50(l)**3/6.0_fp) ! Number of grains per kg
+          grm2tot = 0.5_fp/(pi*sedd50(l)**2) ! Number of grains per m^2
+          istat = bedcomp_getpointer_realprec(gdp%gdmorlyr,'bodsed',bodsed)
+          do nm = 1, nmmax
+             fixfac(nm, l) = 1.0_fp
+             grm2 = bodsed(l, nm) * grkg
+             frac(nm, l) = grm2 / grm2tot
+             frac(nm, l) = max(min(frac(nm, l), 1.0_fp), 0.0_fp)
+             frac(nm, l) = frac(nm, l)*sedtrcfac(l)
+          enddo
+       endif
+    enddo
     !
     ! in case of multiple (non-mud) fractions, the following quantities
     ! --- that are initialized in INISED --- may be time-dependent and
@@ -926,7 +971,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              enddo
              !
              call erosilt(thick    ,kmax     ,wslc     ,wstau(nm),entr(nm) ,lundia   , &
-                        & h0       ,h1       ,error    ,fixfac(nm,l), &
+                        & h0       ,h1       ,error    ,fixfac(nm,l), srcmax(nm, l)  ,&
                         & frac(nm,l),sinkse(nm,l),sourse(nm,l),oldmudfrac,flmd2l  ,tcrdep(nm,l), &
                         & tcrero(nm,l) ,eropar(nm,l)   ,iform(l) , &
                         & max_integers,max_reals      ,max_strings  ,dll_function(l),dll_handle(l), &
@@ -1054,7 +1099,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & sbwv(nm,l)  ,sswu(nm,l)  ,sswv(nm,l)   ,lundia    , &
                        & taucr(l)    ,tdss        ,rksr(nm)     ,3         , &
                        & ce_nmtmp    ,akstmp      ,lsecfl       ,spirint   , &
-                       & suspfrac    ,ust2(nm)    ,tetacr(l)    , &
+                       & suspfrac    ,ust2(nm)    ,tetacr(l)    ,gamtcr(nm,l), &
                        & tsalmax     ,tws0        ,tsd          ,concin3d  , &
                        & dzduu(nm)   ,dzdvv(nm)   ,ubot(nm)     ,tauadd    , &
                        & sus         ,bed         ,susw         ,bedw      ,espir     , &
@@ -1135,7 +1180,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                        & sbwv(nm,l)  ,sswu(nm,l)  ,sswv(nm,l)   ,lundia     , &
                        & taucr(l)    ,tdss        ,rksr(nm)     ,2          , &
                        & ce_nmtmp    ,akstmp      ,lsecfl       ,spirint    , &
-                       & suspfrac    ,ust2(nm)    ,tetacr(l)    , &
+                       & suspfrac    ,ust2(nm)    ,tetacr(l)    ,gamtcr(nm,l), &
                        & tsalmax     ,tws0        ,tsd          ,concin2d   , &
                        & dzduu(nm)   ,dzdvv(nm)   ,ubot(nm)     ,tauadd     , &
                        & sus         ,bed         ,susw         ,bedw       ,espir      , &
@@ -1236,7 +1281,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
               & sbcuu     ,sbcvv     ,sbuut     ,sbvvt     ,dzduu     , &
               & dzdvv     ,taurat    ,frac      ,fixfac    ,ust2      , &
               & hu        ,hv        ,dm        ,hidexp    ,.true.    , &
-              & rhowat    ,kmax      ,gdp       )
+              & .true.    ,rhowat    ,kmax      ,dps       ,gsqs      , &
+              & guu       ,gvv       ,guv       ,gvu       ,gdp       )
     endif
     !
     ! Bed-slope and sediment availability effects for
@@ -1248,7 +1294,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
               & sbwuu     ,sbwvv     ,sbuut     ,sbvvt     ,dzduu     , &
               & dzdvv     ,taurat    ,frac      ,fixfac    ,ust2      , &
               & hu        ,hv        ,dm        ,hidexp    ,.true.    , &
-              & rhowat    ,kmax      ,gdp       )
+              & .false.   ,rhowat    ,kmax      ,dps       ,gsqs      , &
+              & guu       ,gvv       ,guv       ,gvu       ,gdp       )
     endif
     !
     ! Sediment availability effects for
@@ -1260,7 +1307,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
               & sswuu     ,sswvv     ,sbuut     ,sbvvt     ,dzduu     , &
               & dzdvv     ,taurat    ,frac      ,fixfac    ,ust2      , &
               & hu        ,hv        ,dm        ,hidexp    ,.false.   , &
-              & rhowat    ,kmax      ,gdp       )
+              & .false.   ,rhowat    ,kmax      ,dps       ,gsqs      , &
+              & guu       ,gvv       ,guv       ,gvu       ,gdp       )
     endif
     !
     ! Summation of current-related and wave-related transports

@@ -201,6 +201,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     integer(pntrsize)                    , pointer :: hv
     integer(pntrsize)                    , pointer :: mndro
     integer(pntrsize)                    , pointer :: patm
+    integer(pntrsize)                    , pointer :: precip
     integer(pntrsize)                    , pointer :: qu
     integer(pntrsize)                    , pointer :: qv
     integer(pntrsize)                    , pointer :: qxk
@@ -546,6 +547,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     qykr                => gdp%gdr_i_ch%qykr
     qykw                => gdp%gdr_i_ch%qykw
     patm                => gdp%gdr_i_ch%patm
+    precip              => gdp%gdr_i_ch%precip
     r1                  => gdp%gdr_i_ch%r1
     rbuff               => gdp%gdr_i_ch%rbuff
     rca                 => gdp%gdr_i_ch%rca
@@ -1047,7 +1049,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                           & r(taubmx)   ,r(windu)  ,r(windv)  ,velt      ,r(cvalu0)   , &
                           & r(cvalv0)   ,r(cfurou) ,r(cfvrou) ,rouflo    ,r(patm)     , &
                           & r(z0ucur)   ,r(z0vcur) ,r(z0urou) ,r(z0vrou) ,ktemp       , &
-                          & gdp       )
+                          & r(precip)   ,gdp       )
              if (error) goto 9999
              if (roller) then
                 call wrrolm(lundia    ,error     ,trifil    ,itmapc    ,nmax      , &

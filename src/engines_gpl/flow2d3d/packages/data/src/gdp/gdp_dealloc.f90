@@ -63,6 +63,8 @@ subroutine gdp_dealloc(gdp)
     logical :: localrhum_file
     logical :: localtair_file
     logical :: localclou_file
+    logical :: localprcp_file
+    logical :: localswrf_file
     logical :: localculvert
     logical :: localdrogue
     logical :: locallftrto
@@ -88,6 +90,8 @@ subroutine gdp_dealloc(gdp)
     localrhum_file   = gdp%gdheat%rhum_file
     localtair_file   = gdp%gdheat%tair_file
     localclou_file   = gdp%gdheat%clou_file
+    localprcp_file   = gdp%gdheat%prcp_file
+    localswrf_file   = gdp%gdheat%swrf_file
     localculvert     = gdp%gdprocs%culvert
     localdrogue      = gdp%gdprocs%drogue
     locallftrto      = gdp%gdprocs%lftrto
@@ -165,6 +169,9 @@ subroutine gdp_dealloc(gdp)
     endif
     if (localclou_file) then
        if (associated(gdp%gdheat%clouarr)) deallocate (gdp%gdheat%clouarr, STAT = istat)
+    endif
+    if (localswrf_file) then
+       if (associated(gdp%gdheat%swrfarr)) deallocate (gdp%gdheat%swrfarr, STAT = istat)
     endif
     deallocate (gdp%gdheat)
     deallocate (gdp%gdhtur2d)

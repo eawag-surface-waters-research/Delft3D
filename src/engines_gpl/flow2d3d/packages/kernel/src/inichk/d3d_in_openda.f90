@@ -462,6 +462,7 @@ subroutine compute_secundary_state(gdp       )
     integer(pntrsize)                    , pointer :: kfvz1
     integer(pntrsize)                    , pointer :: kcscut
     integer(pntrsize)                    , pointer :: evap
+    integer(pntrsize)                    , pointer :: precip
     integer(pntrsize)                    , pointer :: sour
     integer(pntrsize)                    , pointer :: sink
     integer(pntrsize)                    , pointer :: xz
@@ -502,9 +503,12 @@ subroutine compute_secundary_state(gdp       )
     real(fp), dimension(:)               , pointer :: rhumarr
     real(fp), dimension(:)               , pointer :: tairarr
     real(fp), dimension(:)               , pointer :: clouarr
+    real(fp), dimension(:)               , pointer :: swrfarr
     logical                              , pointer :: rhum_file
     logical                              , pointer :: tair_file
     logical                              , pointer :: clou_file
+    logical                              , pointer :: prcp_file
+    logical                              , pointer :: swrf_file
     real(fp)                             , pointer :: morfac
     integer                              , pointer :: morfacpar
     integer                              , pointer :: morfacrec
@@ -551,7 +555,8 @@ subroutine compute_secundary_state(gdp       )
 
 
     integer                              , pointer :: ktemp
-    real(fp),pointer                                      :: anglat  
+    real(fp)                             , pointer :: anglat
+    real(fp)                             , pointer :: anglon
     logical                              , pointer :: sferic    
     integer                              , pointer :: keva
 
@@ -617,9 +622,12 @@ subroutine compute_secundary_state(gdp       )
     rhumarr             => gdp%gdheat%rhumarr
     tairarr             => gdp%gdheat%tairarr
     clouarr             => gdp%gdheat%clouarr
+    swrfarr             => gdp%gdheat%swrfarr
     rhum_file           => gdp%gdheat%rhum_file
     tair_file           => gdp%gdheat%tair_file
     clou_file           => gdp%gdheat%clou_file
+    prcp_file           => gdp%gdheat%prcp_file
+    swrf_file           => gdp%gdheat%swrf_file
     morfac              => gdp%gdmorpar%morfac
     morfacpar           => gdp%gdmorpar%morfacpar
     morfacrec           => gdp%gdmorpar%morfacrec
@@ -818,8 +826,10 @@ subroutine compute_secundary_state(gdp       )
     nfltyp              => gdp%gdtricom%nfltyp
     
     evap                => gdp%gdr_i_ch%evap
+    precip              => gdp%gdr_i_ch%precip
     ktemp               => gdp%gdtricom%ktemp
     anglat              => gdp%gdtricom%anglat
+    anglon              => gdp%gdtricom%anglon
     sferic              => gdp%gdtricom%sferic
     keva                => gdp%gdtricom%keva    
     sour                => gdp%gdr_i_ch%sour    
@@ -1203,7 +1213,8 @@ subroutine compute_secundary_state(gdp       )
                    & i(kfsmin) ,i(kspu)   ,i(kspv)   ,r(dzs0)   ,r(dzs1)   , &
                    & r(sour)   ,r(sink)   ,r(r0)     ,r(evap)   ,d(dps)    , &
                    & r(s0)     ,r(s1)     ,r(thick)  ,r(w10mag) ,r(patm)   , &
-                   & r(ycor)   ,r(gsqs)   ,r(xz)     ,r(yz)     ,gdp       )
+                   & r(xcor)   ,r(ycor)   ,r(gsqs)   ,r(xz)     ,r(yz)     , &
+                   & anglon    ,gdp       )
      endif
     
     

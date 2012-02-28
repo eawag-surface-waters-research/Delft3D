@@ -3,7 +3,8 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
                         & suu       ,svv       ,sbuut     ,sbvvt     ,dzduu     , &
                         & dzdvv     ,taurat    ,frac      ,fixfac    ,ust2      , &
                         & hu        ,hv        ,dm        ,hidexp    ,slopecor  , &
-                        & rhowat    ,kmax      ,gdp       )
+                        & avalan    ,rhowat    ,kmax      ,dps       ,gsqs      , &
+                        & guu       ,gvv       ,guv       ,gvu       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -57,6 +58,8 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
     real(fp)      , dimension(:)     , pointer :: sedd50fld
     real(fp)                         , pointer :: alfabs
     real(fp)                         , pointer :: alfabn
+    real(fp)                         , pointer :: wetslope
+    real(fp)                         , pointer :: avaltime
     real(fp)                         , pointer :: ashld
     real(fp)                         , pointer :: bshld
     real(fp)                         , pointer :: cshld
@@ -66,6 +69,8 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
     integer                          , pointer :: islope
     integer       , dimension(:)     , pointer :: sedtyp
     real(fp)                         , pointer :: eps
+    real(fp)                         , pointer :: morfac
+    real(fp)                         , pointer :: hdt
     include 'sedparams.inc'
 !
 ! Global variables
@@ -78,6 +83,7 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
     integer                                               , intent(in)  :: kmax    !  Number of layers
     integer                                               , intent(in)  :: lsedtot !!  Total number of sediment fractions
     integer                                               , intent(in)  :: nmmax   !  Description and declaration in dimens.igs
+    logical                                               , intent(in)  :: avalan
     logical                                               , intent(in)  :: slopecor
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: kcs     !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: kcu     !  Description and declaration in esm_alloc_int.f90
@@ -85,8 +91,14 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: kfu     !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: kfv     !  Description and declaration in esm_alloc_int.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: dm
+    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: dps     !  Description and declaration in rjdim.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: dzduu
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: dzdvv
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: gsqs    !  Description and declaration in rjdim.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: guu    !  Description and declaration in rjdim.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: gvv    !  Description and declaration in rjdim.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: guv    !  Description and declaration in rjdim.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: gvu    !  Description and declaration in rjdim.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot) , intent(in)  :: fixfac
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot) , intent(in)  :: frac
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: hu      !  Description and declaration in esm_alloc_real.f90
@@ -141,6 +153,9 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
     real(fp) :: tphi
     real(fp) :: tratio
     real(fp) :: ust2avg
+    real(fp) :: avtime
+    real(fp) :: avflux
+    real(fp) :: slp
 !
 !! executable statements -------------------------------------------------------
 !
@@ -151,6 +166,8 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
     sedtyp              => gdp%gdsedpar%sedtyp
     alfabs              => gdp%gdmorpar%alfabs
     alfabn              => gdp%gdmorpar%alfabn
+    wetslope            => gdp%gdmorpar%wetslope
+    avaltime            => gdp%gdmorpar%avaltime
     ashld               => gdp%gdmorpar%ashld
     bshld               => gdp%gdmorpar%bshld
     cshld               => gdp%gdmorpar%cshld
@@ -158,7 +175,9 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
     alfpa               => gdp%gdmorpar%alfpa
     thcrpa              => gdp%gdmorpar%thcrpa
     islope              => gdp%gdmorpar%islope
+    morfac              => gdp%gdmorpar%morfac
     eps                 => gdp%gdconst%eps
+    hdt                 => gdp%gdnumeco%hdt
     !
     ! Make assumptions for friction angle
     !
@@ -391,6 +410,34 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
                          sbedcorr = sbedm * (cosa/tnorm)
                       endif
                    endselect
+                endif
+                ! 
+                if (avalan) then
+                   !               
+                   ! Avalanching (MvO, 2011-04-06)
+                   !
+                   ! To be used instead of avalanching routine that is called at the end of BOTT3D.
+                   ! Uses a maximum wet slope (keyword WetSlope in the mor file).
+                   ! The default for Wetslope is 10.0 (i.e. 10:1, extremely steep, so no avalanching).
+                   !
+                   ! Sediment flux (avflux) equals volume exchange between two adjacent cells that is required
+                   ! to reach maximum allowed slope, divided by avalanching time (1 day). This avalanching time has
+                   ! no real physical meaning! The sediment flux due to avalanching is added to the bed load transport.
+                   !
+                   ! The wet slope should really be a function of sediment characteristics. This has not yet been implemented.
+                   !
+                   slp = sqrt(dzduu(nm)**2 + dzdvv(nm)**2)
+                   !
+                   if (slp>wetslope) then
+                      if (idir == 1) then
+                         avflux = gsqs(nm)*((dps(nmu) - dps(nm) + wetslope*dzduu(nm)/slp/gvu(nm)) / (1.0 + gsqs(nm)/gsqs(nmu))) / avaltime
+                         sbedcorr = sbedcorr + frac(nm, l)*avflux*rhosol(l)/guu(nm)
+                      else
+                         avflux = gsqs(nm)*((dps(num) - dps(nm) + wetslope*dzdvv(nm)/slp/guv(nm)) / (1.0 + gsqs(nm)/gsqs(num))) / avaltime
+                         sbedcorr = sbedcorr + frac(nm, l)*avflux*rhosol(l)/gvv(nm)
+                      endif
+                   endif
+                   !
                 endif
                 !
                 ! apply upwind frac and fixfac. At an open (upstream) boundary the

@@ -26,7 +26,8 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                & wrkb7     ,wrkb8     ,wrkb9     ,wrkb10    ,zk        , &
                & p0        ,crbc      ,hu0       ,hv0       ,hu2       , &
                & dzu2      ,wrkb13    ,wrkb14    ,pship     ,diapl     , &
-               & rnpl      ,sbkol     ,cfurou    ,cfvrou    ,gdp       )
+               & rnpl      ,sbkol     ,cfurou    ,cfvrou    ,precip    , &
+               & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -150,6 +151,7 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)            :: hu2    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)            :: hv0    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)            :: patm   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)            :: precip !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)            :: pship  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)            :: s0     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)            :: s1     !  Description and declaration in esm_alloc_real.f90
@@ -335,7 +337,8 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                 & vnu2d     ,vicww     ,rxx       ,rxy       ,windu     , &
                 & patm      ,fcorio    ,tgfsep    ,drhodx    ,zk        , &
                 & p0        ,crbc(1, 1),idry      ,porosu    ,ubrlsu    , &
-                & pship     ,diapl     ,rnpl      ,cfurou    ,gdp)
+                & pship     ,diapl     ,rnpl      ,cfurou    ,precip    , &
+                & gdp)
        !
        call timer_stop(timer_1stsud, gdp)
        call timer_stop(timer_sud, gdp)
@@ -477,7 +480,8 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                 & vnu2d     ,vicww     ,ryy       ,rxy       ,windv     , &
                 & patm      ,fcorio    ,tgfsep    ,drhody    ,zk        , &
                 & p0        ,crbc(1, norow + 1)   ,idry      ,porosv    ,ubrlsv    , &
-                & pship     ,diapl     ,rnpl      ,cfvrou    ,gdp)
+                & pship     ,diapl     ,rnpl      ,cfvrou    ,precip    , &
+                & gdp)
        call timer_stop(timer_2ndsud, gdp)
        call timer_stop(timer_sud, gdp)
        !

@@ -792,6 +792,7 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
                a1 = (time-t0) / (t1-t0)
             endif
             a0 = 1.0_fp - a1
+
             select case (meteoitem%filetype)
             case ( uniuvp )
                !

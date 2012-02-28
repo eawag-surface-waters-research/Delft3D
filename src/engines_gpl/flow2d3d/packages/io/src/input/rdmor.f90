@@ -96,6 +96,8 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     real(fp)                               , pointer :: pangle
     real(fp)                               , pointer :: fpco
     real(fp)                               , pointer :: factcr
+    real(fp)                               , pointer :: wetslope
+    real(fp)                               , pointer :: avaltime
     real(fp)              , dimension(:)   , pointer :: xx
     real(fp)              , dimension(:,:) , pointer :: par
     logical                                , pointer :: bedupd
@@ -112,6 +114,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     logical                                , pointer :: multi
     logical                                , pointer :: anymud
     logical                                , pointer :: eulerisoglm
+    logical                                , pointer :: glmisoeuler
     character(256)         , dimension(:)  , pointer :: name
     character(256)                         , pointer :: bcmfilnam
     character(20)          , dimension(:)  , pointer :: namsed
@@ -272,6 +275,8 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     varyingmorfac       => gdp%gdmorpar%varyingmorfac
     multi               => gdp%gdmorpar%multi
     bcmfilnam           => gdp%gdmorpar%bcmfilnam
+    wetslope            => gdp%gdmorpar%wetslope
+    avaltime            => gdp%gdmorpar%avaltime
     fwfac               => gdp%gdnumeco%fwfac
     nmudfrac            => gdp%gdsedpar%nmudfrac
     namsed              => gdp%gdsedpar%namsed
@@ -282,6 +287,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     factcr              => gdp%gdmorpar%factcr
     subiw               => gdp%gdmorpar%subiw
     eulerisoglm         => gdp%gdmorpar%eulerisoglm
+    glmisoeuler         => gdp%gdmorpar%glmisoeuler
     !
     do j = 1, nto
        morbnd(j)%icond = 1
@@ -436,6 +442,14 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        !
        call prop_get(mor_ptr, 'Morphology', 'AlfaBn', alfabn)
        !
+       ! === maximum slope used in avalanching
+       !
+       call prop_get(mor_ptr, 'Morphology', 'WetSlope', wetslope)
+       !
+       ! === time scale for avalanching
+       !
+       call prop_get(mor_ptr, 'Morphology', 'AvalTime', avaltime)
+       !
        ! === factor for calculating suspended load transport
        !
        call prop_get(mor_ptr, 'Morphology', 'Sus', sus)
@@ -482,6 +496,10 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        ! === flag for using eulerian vel iso glm velocities for susp transports
        !
        call prop_get(mor_ptr, 'Morphology', 'EulerisoGLM', eulerisoglm)
+       !
+       ! === flag for using glm vel iso eulerian velocities for bed load transports and ref concentration
+       !
+       call prop_get(mor_ptr, 'Morphology', 'GLMisoEuler', glmisoeuler)
        !
        ! === phase lead for bed shear stress of Nielsen (1992) in TR2004
        !
@@ -933,6 +951,13 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     else
        txtput2 = '                  NO'
     endif
+    txtput3 = 'GLM velocities i.s.o Eulerian velocities for' //       &
+             & ' bed load transport and reference concentrations'
+    if (glmisoeuler) then
+       txtput2 = '                 YES'
+    else
+       txtput2 = '                  NO'
+    endif
     write (lundia, '(3a)') txtput3(1:82), ':', txtput2    
     txtput3 = 'EPSPAR: Always use Van Rijns param. mix. dist.'
     if (epspar) then
@@ -1039,6 +1064,13 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        write (lundia, '(2a,e20.4)') txtput1, ':', thcrpa
     case default
     endselect
+    !
+    if (wetslope<9.99_fp) then
+       txtput1 = 'Maximum wet slope used for avalanching'
+       write (lundia, '(2a,e20.4)') txtput1, ':', wetslope
+       txtput1 = 'Time scale avalanching (in seconds)'
+       write (lundia, '(2a,f20.0)') txtput1, ':', avaltime
+    endif
     !
     ! User requested sediment percentiles
     !

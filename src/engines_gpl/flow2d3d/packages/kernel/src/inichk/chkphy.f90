@@ -2,7 +2,8 @@ subroutine chkphy(lundia    ,error     ,salin     ,temp      ,wind      , &
                 & nmax      ,mmax      ,kmax      ,lmax      ,ktemp     , &
                 & temeqs    ,saleqs    ,fclou     ,sarea     ,wstcof    , &
                 & rhow      ,rhoa      ,kcu       ,kcv       ,kcs       , &
-                & cfurou    ,cfvrou    ,vicuv     ,dicuv     ,gdp       )
+                & cfurou    ,cfvrou    ,vicuv     ,dicuv     ,anglon    , &
+                & solrad_read,swrf_file,sferic    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -65,6 +66,10 @@ subroutine chkphy(lundia    ,error     ,salin     ,temp      ,wind      , &
     logical                                                                , intent(in)  :: salin  !  Description and declaration in procs.igs
     logical                                                                , intent(in)  :: temp   !  Description and declaration in procs.igs
     logical                                                                , intent(in)  :: wind   !  Description and declaration in procs.igs
+    logical                                                                , intent(in)  :: solrad_read !  Description and declaration in procs.igs
+    logical                                                                , intent(in)  :: swrf_file   !  Description and declaration in procs.igs
+    logical                                                                , intent(in)  :: sferic !  Description and declaration in procs.igs
+    real(fp)                                                               , intent(in)  :: anglon !  Description and declaration in heat.igs
     real(fp)                                                                             :: fclou  !  Description and declaration in heat.igs
     real(fp)                                                               , intent(in)  :: rhoa   !  Description and declaration in physco.igs
     real(fp)                                                               , intent(in)  :: rhow   !  Description and declaration in esm_alloc_real.f90
@@ -134,6 +139,16 @@ subroutine chkphy(lundia    ,error     ,salin     ,temp      ,wind      , &
        call prterr(lundia    ,'V061'    ,'Area par. for Excess T-model'  )
        error = .true.
     else
+    endif
+    !
+    ! Check ANGLON, only if KTEMP = 5, and solar radiation is NOT input
+    !
+    if (.not.sferic) then
+        if (ktemp==5 .and. .not.solrad_read .and. .not.swrf_file) then
+           if (comparereal(anglon , 0.0_fp) == 0) then
+              call prterr(lundia, 'U184', ' ')
+           endif
+        endif
     endif
     !
     ! check WSTCOF(1), (3) and RHOA for negative value,

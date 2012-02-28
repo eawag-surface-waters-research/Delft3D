@@ -1,10 +1,10 @@
 subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt    , &
-                & filrgf    ,dx        ,dy        ,sferic    ,anglat    ,grdang    , &
-                & tgfcmp    ,roumet    ,rouwav    ,temeqs    ,saleqs    ,betac     , &
-                & dml       ,restid    ,icreep    ,trasol    ,forfuv    ,forfww    , &
-                & ktemp     ,keva      ,temint    ,evaint    ,lturi     ,tkemod    , &
-                & riglid    ,tstprt    ,prsmap    ,prshis    ,selmap    ,selhis    , &
-                & filrol    ,gdp       )
+                & filrgf    ,dx        ,dy        ,sferic    ,anglat    ,anglon    , &
+                & grdang    ,tgfcmp    ,roumet    ,rouwav    ,temeqs    ,saleqs    , &
+                & betac     ,dml       ,restid    ,icreep    ,trasol    ,forfuv    , &
+                & forfww    ,ktemp     ,keva      ,temint    ,evaint    ,lturi     , &
+                & tkemod    ,riglid    ,tstprt    ,prsmap    ,prshis    ,selmap    , &
+                & selhis    ,filrol    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -154,6 +154,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     integer                       , pointer :: ndro
     integer                       , pointer :: nsluv
     integer                       , pointer :: upwsrc
+    integer                       , pointer :: nudge
     real(fp)                      , pointer :: chzmin
     real(fp)                      , pointer :: dco
     real(fp)                      , pointer :: dgcuni
@@ -162,6 +163,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     real(fp)                      , pointer :: gammax
     real(fp)                      , pointer :: rmincf
     real(fp)                      , pointer :: thetqh
+    real(fp)                      , pointer :: nudvic
     integer                       , pointer :: ibaroc
     integer                       , pointer :: iter1
     logical                       , pointer :: bndneu
@@ -268,6 +270,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     real(fp)                                    :: anglat  !!  - Angle of latitude of the model centre (used to determine the coef. for the coriolis force)
                                                            !!  - In spherical coordinates this parameter equals the angle of latitude
                                                            !!    for the origin (water level point) after INIPHY anglat = 0.
+    real(fp)                                    :: anglon  !!  - Angle of longitude of the model centre (used to determine solar radiation)
     real(fp)                                    :: betac   !  Description and declaration in tricom.igs
     real(fp)                      , intent(out) :: dml     !  Description and declaration in tricom.igs
     real(fp)                                    :: dx      !!  Uniform grid-distance in the x-dir. in meters & in decimals
@@ -426,6 +429,8 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     momsol              => gdp%gdnumeco%momsol
     paver               => gdp%gdnumeco%paver
     pcorr               => gdp%gdnumeco%pcorr
+    nudge               => gdp%gdnumeco%nudge
+    nudvic              => gdp%gdnumeco%nudvic
     rhow                => gdp%gdphysco%rhow
     rhoa                => gdp%gdphysco%rhoa
     rhofrac             => gdp%gdphysco%rhofrac
@@ -574,8 +579,9 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     call rdxyzo(lunmd     ,lundia    ,error          ,nrrec          ,mdfrec    , &
               & noui      ,kmax      ,zbot           ,ztop           , &
               & dx        ,dy        ,filrgf         ,fmtfil         ,r(thick)  , &
-              & anglat    ,grdang    ,sphere         ,sferic         ,zmodel    , &
-              & mmax      ,nmax      ,r(xcor+iofset) ,r(ycor+iofset) ,gdp       )
+              & anglat    ,anglon    ,grdang         ,sphere         ,sferic    , &
+              & zmodel    ,mmax      ,nmax      ,r(xcor+iofset) ,r(ycor+iofset) , &
+              & gdp       )
     if (error) goto 9999
     !
     ! GRID dimensions read in a group
@@ -742,7 +748,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
              & forfuv    ,forfww    ,ktemp     ,temint    , &
              & keva      ,evaint    , &
              & dpsopt    ,dpuopt    ,zmodel    ,gammax    ,fwfac     , &
-             & gdp       )
+             & nudge     ,nudvic    ,gdp       )
     !
     ! Space varying coriolis field or
     ! calculate for SFERIC = .true. depending on ANGLAT and DY or

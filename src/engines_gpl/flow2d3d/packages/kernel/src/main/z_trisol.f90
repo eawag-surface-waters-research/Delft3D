@@ -3,7 +3,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                   & forfww    ,nfltyp    , &
                   & saleqs    ,temeqs    , &
                   & sferic    ,grdang    ,ktemp     ,temint    ,keva      , &
-                  & evaint    ,anglat    ,rouflo    ,rouwav    , &
+                  & evaint    ,anglat    ,anglon    ,rouflo    ,rouwav    , &
                   & betac     ,tkemod    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -249,6 +249,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     integer(pntrsize)                    , pointer :: patm
     integer(pntrsize)                    , pointer :: porosu
     integer(pntrsize)                    , pointer :: porosv
+    integer(pntrsize)                    , pointer :: precip
     integer(pntrsize)                    , pointer :: procbc
     integer(pntrsize)                    , pointer :: pship
     integer(pntrsize)                    , pointer :: qtfrac
@@ -457,6 +458,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                                        !!    meter equals the angle of latitude
                                        !!    for the origin (water level point)
                                        !!    after INIPHY anglat = 0.
+    real(fp)            :: anglon      !!  - Angle of longitude of the model
+                                       !!    centre (used to determine solar radiation)
     real(fp)            :: betac       !  Description and declaration in tricom.igs
     real(fp)            :: grdang      !  Description and declaration in tricom.igs
     real(fp)            :: saleqs      !  Description and declaration in tricom.igs
@@ -679,6 +682,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     patm                => gdp%gdr_i_ch%patm
     porosu              => gdp%gdr_i_ch%porosu
     porosv              => gdp%gdr_i_ch%porosv
+    precip              => gdp%gdr_i_ch%precip
     procbc              => gdp%gdr_i_ch%procbc
     pship               => gdp%gdr_i_ch%pship
     qtfrac              => gdp%gdr_i_ch%qtfrac
@@ -1055,7 +1059,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     !
     if (keva > 0) then
        call inceva(timnow    ,evaint    ,jstart    ,nmmaxj    ,nmmax     , &
-                 & r(evap)   ,gdp       )
+                 & r(evap)   ,r(precip) ,gdp       )
     endif
     call timer_stop(timer_trisol_heat, gdp)
     !
@@ -1117,7 +1121,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                  & lstsc     ,lsal      ,ktemp     ,ltem      ,lsts      , &
                  & i(kfs)    ,i(kfsmin) ,i(kfsmax) ,r(gsqs)   ,r(thick)  , &
                  & r(s0)     ,d(dps)    ,r(volum0) ,r(sour)   ,r(sink)   , &
-                 & r(evap)   ,r(decay)  ,gdp       )
+                 & r(evap)   ,r(precip) ,r(decay)  ,i(kcs)    ,gdp       )
        call timer_stop(timer_sousin, gdp)
        !
        if (bubble) then
@@ -1289,7 +1293,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                 & r(wrkb7)  ,r(wrkb8)  ,r(wrkb9)  ,r(wrkb10) ,r(sig)    , &
                 & r(p0)     ,r(crbc)   ,r(hu0)    ,r(hv0)    ,r(wrkb11) , &
                 & r(wrkb12) ,r(wrkb13) ,r(wrkb14) ,r(pship)  ,r(diapl)  , &
-                & r(rnpl)   ,sbkol     ,r(cfurou) ,r(cfvrou) ,gdp       )
+                & r(rnpl)   ,sbkol     ,r(cfurou) ,r(cfvrou) ,r(precip) , &
+                & gdp       )
        call timer_stop(timer_1stadi, gdp)
        !
        ! Calculate tau_bottom values using local 'updated' values for
@@ -1394,7 +1399,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                    & i(kfsmin) ,i(kspu)   ,i(kspv)   ,r(dzs0)   ,r(dzs1)   , &
                    & r(sour)   ,r(sink)   ,r(r0)     ,r(evap)   ,d(dps)    , &
                    & r(s0)     ,r(s1)     ,r(thick)  ,r(w10mag) ,r(patm)   , &
-                   & r(ycor)   ,r(gsqs)   ,r(xz)     ,r(yz)     ,gdp       )
+                   & r(xcor)   ,r(ycor)   ,r(gsqs)   ,r(xz)     ,r(yz)     , &
+                   & anglon    ,gdp       )
           call timer_stop(timer_heatu, gdp)
        endif
        !
@@ -1684,7 +1690,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     !
     if (keva > 0) then
        call inceva(timnow    ,evaint    ,jstart    ,nmmaxj    ,nmmax     , &
-                 & r(evap)   ,gdp       )
+                 & r(evap)   ,r(precip) ,gdp       )
     endif
     call timer_stop(timer_trisol_heat, gdp)
     !
@@ -1745,7 +1751,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                  & lstsc     ,lsal      ,ktemp     ,ltem      ,lsts      , &
                  & i(kfs)    ,i(kfsmin) ,i(kfsmax) ,r(gsqs)   ,r(thick)  , &
                  & r(s0)     ,d(dps)    ,r(volum0) ,r(sour)   ,r(sink)   , &
-                 & r(evap)   ,r(decay)  ,gdp       )
+                 & r(evap)   ,r(precip) ,r(decay)  ,i(kcs)    ,gdp       )
        call timer_stop(timer_sousin, gdp)
        !
        if (bubble) then
@@ -1864,7 +1870,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                 & r(wrkb7)  ,r(wrkb8)  ,r(wrkb9)  ,r(wrkb10) ,r(sig)    , &
                 & r(p0)     ,r(crbc)   ,r(hu0)    ,r(hv0)    ,r(wrkb11) , &
                 & r(wrkb12) ,r(wrkb13) ,r(wrkb14) ,r(pship)  ,r(diapl)  , &
-                & r(rnpl)   ,sbkol     ,r(cfurou) ,r(cfvrou) ,gdp       )
+                & r(rnpl)   ,sbkol     ,r(cfurou) ,r(cfvrou) ,r(precip) , &
+                & gdp       )
        call timer_stop(timer_2ndadi, gdp)
        !
        ! Calculate tau_bottom values using local values for HU and HV
@@ -1969,7 +1976,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                    & i(kfsmin) ,i(kspu)   ,i(kspv)   ,r(dzs0)   ,r(dzs1)   , &
                    & r(sour)   ,r(sink)   ,r(r0)     ,r(evap)   ,d(dps)    , &
                    & r(s0)     ,r(s1)     ,r(thick)  ,r(w10mag) ,r(patm)   , &
-                   & r(ycor)   ,r(gsqs)   ,r(xz)     ,r(yz)     ,gdp       )
+                   & r(xcor)   ,r(ycor)   ,r(gsqs)   ,r(xz)     ,r(yz)     , &
+                   & anglon    ,gdp       )
           call timer_stop(timer_heatu, gdp)
        endif
        !
@@ -2170,7 +2178,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                       & r(w0)     ,r(s0)     ,r(disch)  ,            &
                       & r(evap)   ,i(mnksrc) ,nsrc      ,r(wrkb1)  ,d(dps)    , &
                       & norow     ,nocol     ,i(irocol) ,r(sig)    ,            &
-                      & i(kfs)    ,i(kfu)    ,i(kfv)    ,nst       ,gdp       )
+                      & i(kfs)    ,i(kfu)    ,i(kfv)    ,nst       ,r(precip) , &
+                      & gdp       )
           !
           !
           icx   = nmaxddb

@@ -291,6 +291,10 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     character(6)                                        :: soort       ! Help var. determining the prog. name currently active  
     character(9)                                        :: keyw        ! Name of record to look for in the MD-file 
     character(5)                                        :: versio 
+
+    integer                                             :: nudge       ! Nudging on open boundaries  
+    real(fp)                                            :: nudvic
+
 ! 
 !! executable statements ------------------------------------------------------- 
 ! 
@@ -402,6 +406,9 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     waveol      = .false. 
     wind        = .false. 
     nfl         = .false. 
+
+    nudge = 0
+
     ! 
     ! Initializing tdatom part of FLOW simulation program 
     ! 
@@ -534,7 +541,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
                  & forfuv    ,forfww    ,ktemp     ,temint    ,            & 
                  & keva      ,evaint    , & 
                  & dpsopt    ,dpuopt    ,zmodel    ,gammax    ,fwfac     , & 
-                 & gdp       ) 
+                 & nudge     ,nudvic    ,gdp       ) 
         ! 
         ! Read boundary definition. If specified in a separate file, 
         ! then check if TRIANA file is specified. If so, start tidals, the 

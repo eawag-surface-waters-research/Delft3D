@@ -172,6 +172,7 @@ type gd_r_i_ch
        integer(pntrsize) :: phibc      !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: porosu     !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: porosv     !  Description and declaration in esm_alloc_real.f90
+       integer(pntrsize) :: precip     !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: procbc     !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: pship      !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: qtfrac     !  Description and declaration in esm_alloc_real.f90

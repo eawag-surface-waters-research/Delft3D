@@ -9,7 +9,7 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
                    & delm      ,fc1       ,fw1       ,phicur    ,kscr      , &
                    & i2d3d     ,mudfrac   ,fsilt     ,taucr1    ,psi       , &
                    & dzduu     ,dzdvv     ,eps       ,camax     ,iopsus    , &
-                   & ag        ,wave      ,tauadd    ) 
+                   & ag        ,wave      ,tauadd    ,gamtcr    ) 
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -66,6 +66,7 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
     real(fp), intent(in)  :: dstar
     real(fp), intent(out) :: fc1
     real(fp), intent(out) :: fsilt
+    real(fp), intent(in)  :: gamtcr
     real(fp)              :: h1
     real(fp)              :: hrms   !  Description and declaration in esm_alloc_real.f90
     real(fp), intent(in)  :: kscr
@@ -338,7 +339,7 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
     fch1  = 1.0_fp
     if (d50 < dsand) then
        cmaxs = 0.65_fp
-       fch1  = max((dsand/d50)**1.5_fp , 1.0_fp)
+       fch1  = max((dsand/d50)**gamtcr, 1.0_fp)
        cmax  = min(max((d50/dsand)*cmaxs , 0.05_fp) , cmaxs)
        fpack = min(cmax/cmaxs , 1.0_fp)
     else

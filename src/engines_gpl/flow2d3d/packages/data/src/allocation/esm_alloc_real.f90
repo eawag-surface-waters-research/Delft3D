@@ -1824,6 +1824,12 @@ subroutine esm_alloc_real(lundia, error, gdp)
                              !  Evaporation in m/s
     if (ierr<= - 9) goto 9999
     !
+    pntnam = 'precip'          !  Global data
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
+                             !  Pointer of array EVAP
+                             !  Precipitation in m/s
+    if (ierr<= - 9) goto 9999
+    !
     !
     !-----arrays for: diffusion, concentrations
     !

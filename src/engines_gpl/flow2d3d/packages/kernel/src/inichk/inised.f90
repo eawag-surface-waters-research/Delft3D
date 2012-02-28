@@ -83,6 +83,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     real(fp)      , dimension(:)         , pointer :: tetacr
     real(fp)      , dimension(:)         , pointer :: ws0
     real(fp)      , dimension(:)         , pointer :: sdbuni
+    real(fp)      , dimension(:)         , pointer :: sedtrcfac
     real(fp)      , dimension(:,:)       , pointer :: tcrdep
     real(fp)      , dimension(:)         , pointer :: tcduni
     real(fp)      , dimension(:,:)       , pointer :: tcrero
@@ -90,12 +91,15 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     real(fp)      , dimension(:,:)       , pointer :: eropar
     real(fp)      , dimension(:)         , pointer :: erouni
     real(fp)      , dimension(:)         , pointer :: mudcnt
+    real(fp)      , dimension(:)         , pointer :: tcguni
+    real(fp)      , dimension(:,:)       , pointer :: gamtcr
     integer       , dimension(:)         , pointer :: nseddia
     integer       , dimension(:)         , pointer :: sedtyp
     character(10) , dimension(:)         , pointer :: inisedunit
     character(256), dimension(:)         , pointer :: flsdbd
     character(256), dimension(:)         , pointer :: flstcd
     character(256), dimension(:)         , pointer :: flstce
+    character(256), dimension(:)         , pointer :: flstcg
     character(256), dimension(:)         , pointer :: flsero
     logical                              , pointer :: anymud
     character(256)                       , pointer :: flsdia
@@ -166,12 +170,15 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     tetacr              => gdp%gdsedpar%tetacr
     ws0                 => gdp%gdsedpar%ws0
     sdbuni              => gdp%gdsedpar%sdbuni
+    sedtrcfac           => gdp%gdsedpar%sedtrcfac
     tcrdep              => gdp%gdsedpar%tcrdep
     tcduni              => gdp%gdsedpar%tcduni
     tcrero              => gdp%gdsedpar%tcrero
     tceuni              => gdp%gdsedpar%tceuni
     eropar              => gdp%gdsedpar%eropar
     erouni              => gdp%gdsedpar%erouni
+    tcguni              => gdp%gdsedpar%tcguni
+    gamtcr              => gdp%gdsedpar%gamtcr
     mudcnt              => gdp%gdsedpar%mudcnt
     nseddia             => gdp%gdsedpar%nseddia
     sedtyp              => gdp%gdsedpar%sedtyp
@@ -179,6 +186,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     flsdbd              => gdp%gdsedpar%flsdbd
     flstcd              => gdp%gdsedpar%flstcd
     flstce              => gdp%gdsedpar%flstce
+    flstcg              => gdp%gdsedpar%flstcg
     flsero              => gdp%gdsedpar%flsero
     anymud              => gdp%gdsedpar%anymud
     flsdia              => gdp%gdsedpar%flsdia
@@ -345,7 +353,37 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
                     & nmaxus    ,eropar(nmlb, ll)     ,1         ,1         , &
                     & gdp       )
           if (error) goto 9999
+       endif    
+       !
+       ! Calibration parameter GAMTCR for critical shear stress in Van Rijn (2004)
+       !
+       if (flstcg(ll) == ' ') then
+          !
+          ! Uniform data has been specified
+          !
+          gamtcr(:, ll) = tcguni(ll)
+       else
+          !
+          ! Space varying data has been specified
+          ! Use routine that also reads the depth file to read the data
+          !
+          call depfil(lundia    ,error     ,flstcg(ll),fmttmp    ,mmax      , &
+                    & nmaxus    ,gamtcr(nmlb, ll)     ,1         ,1         , &
+                    & gdp       )
+          if (error) goto 9999
        endif
+       !
+       ! Check whether gamtcr is zero somewhere
+       ! If so, give a warning for the first cell where that occurs
+       !
+       do nm = 1, nmmax
+          if (kcs(nm) == 1) then
+             if (comparereal(gamtcr(nm,ll), eps_fp) /= 1) then
+                call prterr(lundia, 'U021', 'Calibration parameter for critical shear stress is 0.0 in at least one cell')
+                call d3stop(1, gdp)
+             endif
+          endif
+       enddo
     enddo
     !
     ! Start filling array MUDCNT

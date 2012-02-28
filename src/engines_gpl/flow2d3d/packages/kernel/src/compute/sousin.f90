@@ -2,7 +2,7 @@ subroutine sousin(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
                 & lstsc     ,lsal      ,ktemp     ,ltem      ,lsts      , &
                 & kfs       ,kfsmin    ,kfsmax    ,gsqs      ,thick     , &
                 & s0        ,dps       ,volum0    ,sour      ,sink      , &
-                & evap      ,decay     ,gdp       )
+                & evap      ,precip    ,decay     ,kcs       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -52,7 +52,6 @@ subroutine sousin(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     real(fp)               , pointer :: rhow
-    real(fp)               , pointer :: precip
     real(fp)               , pointer :: train
     logical                , pointer :: temp
     logical                , pointer :: const
@@ -74,12 +73,14 @@ subroutine sousin(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     integer                                             , intent(in)  :: ltem   !  Description and declaration in dimens.igs
     integer                                             , intent(in)  :: nmmax  !  Description and declaration in dimens.igs
     integer                                                           :: nmmaxj !  Description and declaration in dimens.igs
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)           , intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)           , intent(in)  :: kfs    !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)           , intent(in)  :: kfsmax !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)           , intent(in)  :: kfsmin !  Description and declaration in esm_alloc_int.f90
     real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: evap   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: gsqs   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: precip !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: s0     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: volum0 !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)              :: sink   !  Description and declaration in esm_alloc_real.f90
@@ -102,7 +103,6 @@ subroutine sousin(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     const      => gdp%gdprocs%const
     sedim      => gdp%gdprocs%sedim
     zmodel     => gdp%gdprocs%zmodel
-    precip     => gdp%gdheat%precip
     train      => gdp%gdheat%train
     rhow       => gdp%gdphysco%rhow
     !
@@ -126,20 +126,19 @@ subroutine sousin(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
        ! EVAP is already multiplied with RHOW and has to be
        ! divided.
        !
-       sourt = precip*train
-       do nm = 1, nmmax
-          if (kfs(nm)/=0) then
+       do nm = 1, nmmax                 
+          if (kcs(nm)/=0) then
              if (zmodel) then
                 k0 = kfsmax(nm)
-                sour(nm, k0, ltem) = sourt*gsqs(nm)
-                if (ktemp==0) then
+                sour(nm, k0, ltem) = precip(nm)*train*gsqs(nm)
+                if (ktemp==0 .and. kfs(nm)/=0) then
                    sink(nm, k0, ltem) = evap(nm)*gsqs(nm)/rhow
                 endif
              else
                 k0 = 1
                 dz1 = max(0.01_fp, s0(nm) + real(dps(nm),fp))*thick(k0)
-                sour(nm, k0, ltem) = sourt/dz1
-                if (ktemp==0) then
+                sour(nm, k0, ltem) = precip(nm)*train/dz1
+                if (ktemp==0 .and. kfs(nm)/=0) then
                    sink(nm, k0, ltem) = evap(nm)/(rhow*dz1)
                 endif
              endif

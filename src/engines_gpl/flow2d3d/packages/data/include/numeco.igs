@@ -81,5 +81,10 @@
                               !  [MEAN/MAX/MIN/NO]
        character(8) :: dpuopt
        character(6) :: momsol
+       integer      :: nudge  !  Global data
+                              !  Nudging at open boundaries
+                              !  0 = No default
+                              !  1 = Yes 
+       real(fp)     :: nudvic !  Viscosity at open boundaries for nudging 
 !
     end type gd_numeco

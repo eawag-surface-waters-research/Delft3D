@@ -194,6 +194,7 @@ subroutine gtptrs(gdp)
     integer(pntrsize), pointer :: phibc
     integer(pntrsize), pointer :: porosu
     integer(pntrsize), pointer :: porosv
+    integer(pntrsize), pointer :: precip
     integer(pntrsize), pointer :: procbc
     integer(pntrsize), pointer :: pship
     integer(pntrsize), pointer :: qtfrac
@@ -662,6 +663,7 @@ subroutine gtptrs(gdp)
     phibc     => gdp%gdr_i_ch%phibc
     porosu    => gdp%gdr_i_ch%porosu
     porosv    => gdp%gdr_i_ch%porosv
+    precip    => gdp%gdr_i_ch%precip
     procbc    => gdp%gdr_i_ch%procbc
     pship     => gdp%gdr_i_ch%pship
     qtfrac    => gdp%gdr_i_ch%qtfrac
@@ -1203,6 +1205,7 @@ subroutine gtptrs(gdp)
     phibc  = gtrpnt('phibc' , gdp)
     porosu = gtrpnt('porosu', gdp)
     porosv = gtrpnt('porosv', gdp)
+    precip = gtrpnt('precip', gdp)
     procbc = gtrpnt('procbc', gdp)
     pship  = gtrpnt('pship' , gdp)
     qtfrac = gtrpnt('qtfrac', gdp)

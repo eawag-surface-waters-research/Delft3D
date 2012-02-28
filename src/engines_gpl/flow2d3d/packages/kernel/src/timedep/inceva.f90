@@ -1,5 +1,5 @@
 subroutine inceva(timnow    ,evaint    ,j         ,nmmaxj    ,nmmax     , &
-                & evap      ,gdp       )
+                & evap      ,precip    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -39,6 +39,13 @@ subroutine inceva(timnow    ,evaint    ,j         ,nmmaxj    ,nmmax     , &
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
+
+
+    use meteo
+!    use ec_module
+    use dfparall
+
+
     use precision
     use globaldata
     !
@@ -50,14 +57,18 @@ subroutine inceva(timnow    ,evaint    ,j         ,nmmaxj    ,nmmax     , &
     !
     integer           , pointer :: it0eva
     integer           , pointer :: it1eva
+    real(fp)          , pointer :: timhr
     real(fp)          , pointer :: dt
     integer           , pointer :: luneva
     real(fp)          , pointer :: evapor
+    real(fp)          , pointer :: precipt
     real(fp)          , pointer :: devapo
-    real(fp)          , pointer :: precip
     real(fp)          , pointer :: dpreci
     real(fp)          , pointer :: train
     real(fp)          , pointer :: dtrain
+    logical           , pointer :: prcp_file
+    integer           , pointer :: itdate
+    real(fp)          , pointer :: tzone
 !
 ! Global variables
 !
@@ -67,6 +78,7 @@ subroutine inceva(timnow    ,evaint    ,j         ,nmmaxj    ,nmmax     , &
     integer                                                     :: nmmaxj !  Description and declaration in dimens.igs
     real(fp)                                                    :: timnow !!  Current timestep (multiples of dt)
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: evap   !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: precip !  Description and declaration in esm_alloc_real.f90
     character(1)                                  , intent(in)  :: evaint !  Description and declaration in tricom.igs
 !
 ! Local variables
@@ -75,6 +87,7 @@ subroutine inceva(timnow    ,evaint    ,j         ,nmmaxj    ,nmmax     , &
     logical    :: first       ! Flag = TRUE in case a time-dependent file is read for the 1st time 
     logical    :: inteva      ! Interpolation method between consecutive data: 
                               ! N = No interpolation. Y = Linear interpolation. 
+    logical    :: success
 !
 !
 !! executable statements -------------------------------------------------------
@@ -82,14 +95,18 @@ subroutine inceva(timnow    ,evaint    ,j         ,nmmaxj    ,nmmax     , &
 !
     evapor      => gdp%gdheat%evapor
     devapo      => gdp%gdheat%devapo
-    precip      => gdp%gdheat%precip
+    precipt     => gdp%gdheat%precipt
     dpreci      => gdp%gdheat%dpreci
     train       => gdp%gdheat%train
     dtrain      => gdp%gdheat%dtrain
+    prcp_file   => gdp%gdheat%prcp_file
     luneva      => gdp%gdluntmp%luneva
     dt          => gdp%gdexttim%dt
     it0eva      => gdp%gdinttim%it0eva
     it1eva      => gdp%gdinttim%it1eva
+    timhr       => gdp%gdinttim%timhr
+    itdate      => gdp%gdexttim%itdate
+    tzone       => gdp%gdexttim%tzone
     !
     first = .false.
     if (evaint == 'Y') then
@@ -104,14 +121,15 @@ subroutine inceva(timnow    ,evaint    ,j         ,nmmaxj    ,nmmax     , &
     if (timnow > real(it1eva,fp)) then
        it0eva = it1eva
        if (.not. inteva) then
-          precip = dpreci
-          evapor = devapo
-          train  = dtrain
+          precipt = dpreci
+          evapor  = devapo
+          train   = dtrain
           !
           ! Update evaporation (block function)
           !
           do nm = 1, nmmax
-             evap(nm) = devapo
+             evap(nm)   = devapo
+             precip(nm) = dpreci
           enddo
        endif
        !
@@ -124,14 +142,29 @@ subroutine inceva(timnow    ,evaint    ,j         ,nmmaxj    ,nmmax     , &
     ! For interpolation INTEVA = .true. update data with step value
     !
     if (inteva) then
-       precip = precip + dpreci
-       evapor = evapor + devapo
-       train  = dtrain + train
+       precipt = precipt + dpreci
+       evapor  = evapor  + devapo
+       train   = dtrain  + train
        !
        ! Update evaporation (step interpolation)
        !
        do nm = 1, nmmax
           evap(nm) = evapor
+          precip(nm) = precipt
        enddo
     endif
+    !    
+    if (prcp_file) then
+       success = meteoupdate(gdp%runid, itdate, tzone, timhr*60)
+       success = getmeteoval(gdp%runid, 'precipitation', timhr*60, gdp%gdparall%mfg, gdp%gdparall%nfg, &
+                           & gdp%d%nlb, gdp%d%nub, gdp%d%mlb, gdp%d%mub, precip , 0)
+       call checkmeteoresult(success, gdp)
+       do nm = 1, nmmax
+          !
+          ! Convert from mm/h to m/s
+          !
+          precip(nm) = precip(nm)/3600000.0_fp
+       enddo
+    endif
+    !
 end subroutine inceva

@@ -199,12 +199,14 @@ function checkmeteoheader(meteoitem) result(success)
           & meteoitem%quantities(1) == 'air_pressure'      .or. &
           & meteoitem%quantities(1) == 'relative_humidity' .or. &
           & meteoitem%quantities(1) == 'air_temperature'   .or. &
+          & meteoitem%quantities(1) == 'precipitation'     .or. &
+          & meteoitem%quantities(1) == 'sw_radiation_flux' .or. &
           & meteoitem%quantities(1) == 'cloudiness'         )   then 
           !
           ! Correct quantity specified
           !
        else   
-          write(meteomessage, '(2a)') 'Meteo input: Incorrect quantity given, expecting x_wind, y_wind, air_pressure, relative_humidity, air_temperature or cloudiness, but getting ', &
+          write(meteomessage, '(2a)') 'Meteo input: Incorrect quantity given, expecting x_wind, y_wind, air_pressure, relative_humidity, air_temperature, cloudiness, precipitation, or sw_radiation_flux, but getting ', &
               & trim(meteoitem%quantities(1))
           success = .false.
           return
@@ -247,6 +249,15 @@ function checkmeteoheader(meteoitem) result(success)
                  & trim(meteoitem%units(1))
           success = .false.
           return
+       elseif (meteoitem%quantities(1) == 'precipitation' .and. meteoitem%units(1) /= 'mm/h') then
+          write(meteomessage, '(2a)') 'Meteo input: Incorrect unit given for precipitation, expecting mm/h, but getting ', &
+                 & trim(meteoitem%units(1))
+          success = .false.
+          return
+       elseif (meteoitem%quantities(1) == 'sw_radiation_flux' .and. meteoitem%units(1) /= 'W/m2') then
+          write(meteomessage, '(2a)') 'Meteo input: Incorrect unit given for precipitation, expecting W/m2, but getting ', &
+                 & trim(meteoitem%units(1))
+          success = .false.
         endif
     elseif (meteoitem%meteotype == 'meteo_on_spiderweb_grid') then
        !
@@ -338,12 +349,14 @@ function checkmeteoheader(meteoitem) result(success)
           & meteoitem%quantities(1) == 'air_pressure'      .or. &
           & meteoitem%quantities(1) == 'relative_humidity' .or. &
           & meteoitem%quantities(1) == 'air_temperature'   .or. &
+          & meteoitem%quantities(1) == 'precipitation'     .or. &
+          & meteoitem%quantities(1) == 'sw_radiation_flux' .or. &
           & meteoitem%quantities(1) == 'cloudiness'         )   then 
           !
           ! Correct quantity specified
           !
        else   
-          write(meteomessage, '(2a)') 'Meteo input: Incorrect quantity given, expecting x_wind, y_wind, air_pressure, relative_humidity, air_temperature or cloudiness, but getting ', &
+          write(meteomessage, '(2a)') 'Meteo input: Incorrect quantity given, expecting x_wind, y_wind, air_pressure, relative_humidity, air_temperature, cloudiness, precipitation, or sw_radiation_flux, but getting ', &
               & trim(meteoitem%quantities(1))
           success = .false.
           return
@@ -383,6 +396,15 @@ function checkmeteoheader(meteoitem) result(success)
                  & trim(meteoitem%units(1))
           success = .false.
           return
+       elseif (meteoitem%quantities(1) == 'precipipation' .and. meteoitem%units(1) /= 'mm/h') then
+          write(meteomessage, '(2a)') 'Meteo input: Incorrect unit given for precipitation, expecting mm/h, but getting ', &
+                 & trim(meteoitem%units(1))
+          success = .false.
+          return
+       elseif (meteoitem%quantities(1) == 'sw_radiation_flux' .and. meteoitem%units(1) /= 'W/m2') then
+          write(meteomessage, '(2a)') 'Meteo input: Incorrect unit given for precipitation, expecting W/m2, but getting ', &
+                 & trim(meteoitem%units(1))
+          success = .false.
        endif
        !
        ! For wind on a separate curvilinear grid the order of input may differ from the numbering
@@ -465,6 +487,10 @@ function checkmeteoheader(meteoitem) result(success)
        meteoitem%quantities(1) = 'cloud'
     elseif (   meteoitem%quantities(1) == 'air_temperature'      ) then
        meteoitem%quantities(1) = 'airtemp'
+    elseif (   meteoitem%quantities(1) == 'precipitaion'      ) then
+       meteoitem%quantities(1) = 'precip'
+    elseif (   meteoitem%quantities(1) == 'sw_radiation_flux'      ) then
+       meteoitem%quantities(1) = 'swrf'
     endif
     !
     if (       meteoitem%quantities(2) == 'wind_from_direction' &

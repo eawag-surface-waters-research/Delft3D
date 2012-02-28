@@ -70,10 +70,13 @@ subroutine rdmeteo(gdp, ecwind)
    real(fp), dimension(:)   , pointer :: rhumarr
    real(fp), dimension(:)   , pointer :: tairarr
    real(fp), dimension(:)   , pointer :: clouarr
+   real(fp), dimension(:)   , pointer :: swrfarr
    real(fp), dimension(:)   , pointer :: secchi
    logical                  , pointer :: rhum_file
    logical                  , pointer :: tair_file
    logical                  , pointer :: clou_file
+   logical                  , pointer :: prcp_file
+   logical                  , pointer :: swrf_file
    logical                  , pointer :: solrad_read
    type (gd_heat)           , pointer :: gdheat
    integer                  , pointer :: lundia
@@ -131,9 +134,12 @@ subroutine rdmeteo(gdp, ecwind)
    rhumarr       => gdp%gdheat%rhumarr
    tairarr       => gdp%gdheat%tairarr
    clouarr       => gdp%gdheat%clouarr
+   swrfarr       => gdp%gdheat%swrfarr
    rhum_file     => gdp%gdheat%rhum_file
    tair_file     => gdp%gdheat%tair_file
    clou_file     => gdp%gdheat%clou_file
+   prcp_file     => gdp%gdheat%prcp_file
+   swrf_file     => gdp%gdheat%swrf_file
    solrad_read   => gdp%gdheat%solrad_read
    gdheat        => gdp%gdheat
    lundia        => gdp%gdinout%lundia
@@ -439,6 +445,53 @@ subroutine rdmeteo(gdp, ecwind)
       clou_file = .false.
    endif
    !
+   ! Precipitation
+   !
+   filename = ' '
+   call prop_get_string(gdp%mdfile_ptr,'*','Fwndgpr',filename)
+   if (filename /= ' ') then
+      success = addmeteoitem(gdp%runid, filename, sferic, mmaxgl, nmaxgl)
+      call prterr(lundia, 'G051', 'Precipitation specified on a separate curvilinear grid')
+   else
+      call prop_get_string(gdp%mdfile_ptr,'*','Filwpr',filename)
+      if (filename /= ' ') then
+         success = addmeteoitem(gdp%runid, filename, sferic)
+         call prterr(lundia, 'G051', 'Precipitation specified on a separate equidistant grid')
+      endif
+   endif
+   if (filename /= ' ') then
+      prcp_file = .true.
+      call checkmeteoresult(success, gdp)
+   else
+      prcp_file = .false.
+   endif
+   !
+   ! Short-wave radiation flux
+   !
+   filename = ' '
+   call prop_get_string(gdp%mdfile_ptr,'*','Fwndgs',filename)
+   if (filename /= ' ') then
+      success = addmeteoitem(gdp%runid, filename, sferic, mmaxgl, nmaxgl)
+      call prterr(lundia, 'G051', 'Short-wave solar radiation specified on a separate curvilinear grid')
+   else
+      call prop_get_string(gdp%mdfile_ptr,'*','Filws',filename)
+      if (filename /= ' ') then
+         success = addmeteoitem(gdp%runid, filename, sferic)
+         call prterr(lundia, 'G051', 'Short-wave solar radiation specified on a separate equidistant grid')
+      endif
+   endif
+   if (filename /= ' ') then
+      swrf_file = .true.
+      call checkmeteoresult(success, gdp)
+      allocate (gdp%gdheat%swrfarr(gdp%d%nmlb:gdp%d%nmub), stat = istat)
+      if (istat/=0) then
+         call prterr(lundia, 'U021', 'Rdmeteo: memory alloc error')
+         call d3stop(1, gdp)
+      endif
+   else
+      swrf_file = .false.
+   endif
+   !
    ! If block 'interpolation', notify meteo module
    !
    interpolate = .true.
@@ -478,6 +531,16 @@ subroutine rdmeteo(gdp, ecwind)
    if (clou_file) then
       if (ktemp /= 5) then
          write(message,'(a,i2)') 'Cloudiness is not used in heat model (ktemp) = ',ktemp
+         call prterr(lundia, 'U021', trim(message))
+         call d3stop(1, gdp)
+      endif
+   endif
+   !
+   ! Short-wave radiation flux is only used for ktemp is 5
+   !
+   if (swrf_file) then
+      if (ktemp /= 5) then
+         write(message,'(a,i2)') 'Short-wave radiation is not used in heat model (ktemp) = ',ktemp
          call prterr(lundia, 'U021', trim(message))
          call d3stop(1, gdp)
       endif

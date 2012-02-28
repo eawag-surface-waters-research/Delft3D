@@ -69,6 +69,7 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
     integer,             dimension(:), pointer :: iform
     integer            , dimension(:), pointer :: sedtyp
     real(fp)                         , pointer :: timsec
+    real(fp)           , dimension(:), pointer :: gamflc
     !
     character(256)     , dimension(:), pointer :: dll_function
     integer(pntrsize)  , dimension(:), pointer :: dll_handle
@@ -175,6 +176,7 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
     sedtyp              => gdp%gdsedpar%sedtyp
     sedd50              => gdp%gdsedpar%sedd50
     sedd50fld           => gdp%gdsedpar%sedd50fld
+    gamflc              => gdp%gdsedpar%gamflc
     iform               => gdp%gdeqtran%iform
     !
     timsec              => gdp%gdinttim%timsec
@@ -414,6 +416,11 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
                          efloc = min(max(dsand/sedd50(l)-1.0_fp , 1.0_fp) , 3.0_fp)
                          ffloc0 = max(min(fhulp**efloc , 10.0_fp) , 1.0_fp)
                          ffloc = (ffloc0-1.0_fp) * min(1.0_fp,salint/salmax(l)) + 1.0_fp
+                         !
+                         ! Calibration parameter for flocculation
+                         !
+                         ffloc = ffloc * gamflc(l)
+                         !
                          ffloc = max(min(ffloc , 10.0_fp) , 1.0_fp)
                       endif
                    else

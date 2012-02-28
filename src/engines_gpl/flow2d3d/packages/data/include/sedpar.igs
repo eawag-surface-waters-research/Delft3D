@@ -59,12 +59,15 @@ type gd_sedpar
     real(fp)      , dimension(:)    , pointer :: cdryb      !  Dry bed concentration for determining
                                                             !  sediment depths
     real(fp)      , dimension(:)    , pointer :: dstar      !  Dimensionless grain size 
+    real(fp)      , dimension(:)    , pointer :: gamflc     !  Calibration factor on flocculation parameter in Van Rijn (2004) 
+    real(fp)      , dimension(:,:)  , pointer :: gamtcr     !  Calibration factor on critical shear stress in Van Rijn (2004)
     real(fp)      , dimension(:)    , pointer :: taucr      !  Critical shear stress 
     real(fp)      , dimension(:)    , pointer :: tetacr     !  Dimensionless critical shear stress (Shields parameter)
     real(fp)      , dimension(:)    , pointer :: ws0        !  Settling velocity fresh water
     real(fp)      , dimension(:)    , pointer :: wsm        !  Settling velocity saline water
     real(fp)      , dimension(:)    , pointer :: salmax     !  Maximum salinity [ppt]
     real(fp)      , dimension(:)    , pointer :: sdbuni     !  Uniform value of initial sediment mass at bed
+    real(fp)      , dimension(:)    , pointer :: sedtrcfac  !  Calibration factor for tracer sediments
     real(fp)      , dimension(:,:)  , pointer :: tcrdep     !  Critical stress deposition fields
     real(fp)      , dimension(:)    , pointer :: tcduni     !  Critical stress deposition uniform values
     real(fp)      , dimension(:,:)  , pointer :: tcrero     !  Critical stress erosion fields
@@ -72,6 +75,7 @@ type gd_sedpar
     real(fp)      , dimension(:)    , pointer :: thcmud     !  Critical stress erosion uniform values for mud
     real(fp)      , dimension(:,:)  , pointer :: eropar     !  Erosion parameter fields
     real(fp)      , dimension(:)    , pointer :: erouni     !  Erosion parameter uniform values
+    real(fp)      , dimension(:)    , pointer :: tcguni     !  Calibration factor on critical shear stress in Van Rijn (2004) uniform values
     real(fp)      , dimension(:)    , pointer :: mudcnt     !  mud content / mud fraction field (non-zero only if mud
                                                             !  is not included simulation)
     integer       , dimension(:)    , pointer :: nseddia    !  Number of characteristic sediment diameters
@@ -82,6 +86,7 @@ type gd_sedpar
     character(256), dimension(:)    , pointer :: flstcd     !  Critical stress deposition file names
     character(256), dimension(:)    , pointer :: flstce     !  Critical stress erosion file names
     character(256), dimension(:)    , pointer :: flsero     !  Erosion parameter file names
+    character(256), dimension(:)    , pointer :: flstcg     !  File name calibration factor on critical shear stress in Van Rijn (2004) uniform values
     ! 
     ! logicals
     !

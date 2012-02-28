@@ -263,6 +263,7 @@
        logical                            :: waverd ! Flag = TRUE if wave process and communication file exist 
 
        real(fp)                           :: anglat ! Angle of latitude of the model centre (used to determine the coeff. for the coriolis force) 
+       real(fp)                           :: anglon ! Angle of longitude of the model centre (used to determine solar radiation) 
        real(fp)                           :: dtsec  ! DT in seconds 
        real(fp)                           :: tscale !  Description and declaration in rjdim.f90
        character(256)                     :: comfil !!  Communication file name

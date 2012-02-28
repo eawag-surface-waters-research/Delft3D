@@ -63,9 +63,13 @@ subroutine initsedpar(gdp)
     real(fp)      , dimension(:)     , pointer :: tcduni
     real(fp)      , dimension(:,:)   , pointer :: tcrero
     real(fp)      , dimension(:)     , pointer :: tceuni
+    real(fp)      , dimension(:)     , pointer :: tcguni
     real(fp)      , dimension(:,:)   , pointer :: eropar
     real(fp)      , dimension(:)     , pointer :: erouni
+    real(fp)      , dimension(:,:)   , pointer :: gamtcr
+    real(fp)      , dimension(:)     , pointer :: gamflc
     real(fp)      , dimension(:)     , pointer :: mudcnt
+    real(fp)      , dimension(:)     , pointer :: sedtrcfac
     integer       , dimension(:)     , pointer :: nseddia
     integer       , dimension(:)     , pointer :: sedtyp
     character(10) , dimension(:)     , pointer :: inisedunit
@@ -74,6 +78,7 @@ subroutine initsedpar(gdp)
     character(256), dimension(:)     , pointer :: flstcd
     character(256), dimension(:)     , pointer :: flstce
     character(256), dimension(:)     , pointer :: flsero
+    character(256), dimension(:)     , pointer :: flstcg
     character(256)                   , pointer :: flsdia
     character(256)                   , pointer :: flsmdc
     include 'sedparams.inc'
@@ -103,15 +108,20 @@ subroutine initsedpar(gdp)
     tceuni      => gdp%gdsedpar%tceuni
     eropar      => gdp%gdsedpar%eropar
     erouni      => gdp%gdsedpar%erouni
+    tcguni      => gdp%gdsedpar%tcguni
+    gamtcr      => gdp%gdsedpar%gamtcr
+    gamflc      => gdp%gdsedpar%gamflc
     mudcnt      => gdp%gdsedpar%mudcnt
     nseddia     => gdp%gdsedpar%nseddia
     sedtyp      => gdp%gdsedpar%sedtyp
     inisedunit  => gdp%gdsedpar%inisedunit
+    sedtrcfac   => gdp%gdsedpar%sedtrcfac
     namsed      => gdp%gdsedpar%namsed
     flsdbd      => gdp%gdsedpar%flsdbd
     flstcd      => gdp%gdsedpar%flstcd
     flstce      => gdp%gdsedpar%flstce
     flsero      => gdp%gdsedpar%flsero
+    flstcg      => gdp%gdsedpar%flstcg
     flsdia      => gdp%gdsedpar%flsdia
     flsmdc      => gdp%gdsedpar%flsmdc
     !
@@ -132,6 +142,8 @@ subroutine initsedpar(gdp)
     nullify(gdp%gdsedpar%dstar)
     nullify(gdp%gdsedpar%taucr)
     nullify(gdp%gdsedpar%tetacr)
+    nullify(gdp%gdsedpar%gamtcr)
+    nullify(gdp%gdsedpar%gamflc)
     nullify(gdp%gdsedpar%ws0)
     nullify(gdp%gdsedpar%wsm)
     nullify(gdp%gdsedpar%salmax)
@@ -140,9 +152,11 @@ subroutine initsedpar(gdp)
     nullify(gdp%gdsedpar%tcduni)
     nullify(gdp%gdsedpar%tcrero)
     nullify(gdp%gdsedpar%tceuni)
+    nullify(gdp%gdsedpar%tcguni)
     nullify(gdp%gdsedpar%eropar)
     nullify(gdp%gdsedpar%erouni)
     nullify(gdp%gdsedpar%mudcnt)
+    nullify(gdp%gdsedpar%sedtrcfac)
     !
     nullify(gdp%gdsedpar%nseddia)
     nullify(gdp%gdsedpar%sedtyp)
@@ -153,6 +167,7 @@ subroutine initsedpar(gdp)
     nullify(gdp%gdsedpar%flstcd)
     nullify(gdp%gdsedpar%flstce)
     nullify(gdp%gdsedpar%flsero)
+    nullify(gdp%gdsedpar%flstcg)
     !
     flsdia = ' '
     flsmdc = ' '

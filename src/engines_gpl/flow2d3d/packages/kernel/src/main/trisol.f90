@@ -3,7 +3,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                 & forfww    ,nfltyp    , &
                 & saleqs    ,temeqs    , &
                 & sferic    ,grdang    ,ktemp     ,temint    ,keva      , &
-                & evaint    ,anglat    ,rouflo    ,rouwav    , &
+                & evaint    ,anglat    ,anglon    ,rouflo    ,rouwav    , &
                 & betac     ,tkemod    ,comfil    , &
                 & error     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
@@ -329,6 +329,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     integer(pntrsize)                    , pointer :: phibc
     integer(pntrsize)                    , pointer :: porosu
     integer(pntrsize)                    , pointer :: porosv
+    integer(pntrsize)                    , pointer :: precip
     integer(pntrsize)                    , pointer :: procbc
     integer(pntrsize)                    , pointer :: pship
     integer(pntrsize)                    , pointer :: qtfrac
@@ -573,6 +574,8 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                                         !!    for the coriolis force)
                                         !!  - In spherical coordinates this parameter equals the angle of latitude
                                         !!    for the origin (water level point) after INIPHY anglat = 0.
+    real(fp)             :: anglon      !!  - Angle of longitude of the model centre (used to determine solar
+                                        !!    radiation)
     real(fp)             :: betac       !  Description and declaration in tricom.igs
     real(fp)             :: grdang      !  Description and declaration in tricom.igs
     real(fp)             :: saleqs      !  Description and declaration in tricom.igs
@@ -879,6 +882,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     phibc               => gdp%gdr_i_ch%phibc
     porosu              => gdp%gdr_i_ch%porosu
     porosv              => gdp%gdr_i_ch%porosv
+    precip              => gdp%gdr_i_ch%precip
     procbc              => gdp%gdr_i_ch%procbc
     pship               => gdp%gdr_i_ch%pship
     qtfrac              => gdp%gdr_i_ch%qtfrac
@@ -1382,7 +1386,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     !
     if (keva > 0) then
        call inceva(timnow    ,evaint    ,jstart    ,nmmaxj    ,nmmax     , &
-                 & r(evap)   ,gdp       )
+                 & r(evap)   ,r(precip) ,gdp       )
     endif
     call timer_stop(timer_trisol_heat, gdp)
     !
@@ -1419,7 +1423,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                  & lstsc     ,lsal      ,ktemp     ,ltem      ,lsts      , &
                  & i(kfs)    ,i(kfsmin) ,i(kfsmax) ,r(gsqs)   ,r(thick)  , &
                  & r(s0)     ,d(dps)    ,r(volum0) ,r(sour)   ,r(sink)   , &
-                 & r(evap)   ,r(decay)  ,gdp       )
+                 & r(evap)   ,r(precip) ,r(decay)  ,i(kcs)    ,gdp       )
        call timer_stop(timer_sousin, gdp)
        !
        ! Run near field model and calculate source terms from
@@ -1644,7 +1648,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
               & r(wrkb1)  ,r(wrkb2)  ,r(wrkb3)  ,r(wrkb4)  ,r(wrkb5)  , &
               & r(wrkb6)  ,r(wrkb7)  ,r(wrkb8)  ,r(wrkb9)  ,r(wrkb10) , &
               & r(wrkb11) ,r(wrkb12) ,r(wrkb13) ,r(wrkb14) ,r(wrkb15) , &
-              & r(wrkb16) ,sbkol     ,r(disnf)  ,gdp       )
+              & r(wrkb16) ,sbkol     ,r(disnf)  ,r(precip) ,gdp       )
        call timer_stop(timer_1stadi, gdp)
        if (roller) then
           !
@@ -1852,7 +1856,8 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                    & i(kfsmin) ,i(kspu)   ,i(kspv)   ,r(dzs0)   ,r(dzs1)   , &
                    & r(sour)   ,r(sink)   ,r(r0)     ,r(evap)   ,d(dps)    , &
                    & r(s0)     ,r(s1)     ,r(thick)  ,r(w10mag) ,r(patm)   , &
-                   & r(ycor)   ,r(gsqs)   ,r(xz)     ,r(yz)     ,gdp       )
+                   & r(xcor)   ,r(ycor)   ,r(gsqs)   ,r(xz)     ,r(yz)     , &
+                   & anglon    ,gdp       )
           call timer_stop(timer_heatu, gdp)
        endif
        !
@@ -1939,7 +1944,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                  & r(teta)   ,r(rlabda) ,r(aks)    ,i(kfsed)  ,saleqs    , &
                  & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &
                  & r(hv)     ,r(rca)    ,r(dss)    ,r(ubot)   ,r(rtur0)  , &
-                 & temeqs    ,gdp       )
+                 & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,gdp       )
           call timer_stop(timer_erosed, gdp)
           call timer_stop(timer_3dmor, gdp)
        endif
@@ -2347,7 +2352,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     !
     if (keva > 0) then
        call inceva(timnow    ,evaint    ,jstart    ,nmmaxj    ,nmmax     , &
-                 & r(evap)   ,gdp       )
+                 & r(evap)   ,r(precip) ,gdp       )
     endif
     call timer_stop(timer_trisol_heat, gdp)
     !
@@ -2384,7 +2389,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                  & lstsc     ,lsal      ,ktemp     ,ltem      ,lsts      , &
                  & i(kfs)    ,i(kfsmin) ,i(kfsmax) ,r(gsqs)   ,r(thick)  , &
                  & r(s0)     ,d(dps)    ,r(volum0) ,r(sour)   ,r(sink)   , &
-                 & r(evap)   ,r(decay)  ,gdp       )
+                 & r(evap)   ,r(precip) ,r(decay)  ,i(kcs)    ,gdp       )
        call timer_stop(timer_sousin, gdp)
        !
        ! Calculate source and sink terms for fluid mud layer
@@ -2580,7 +2585,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
               & r(wrkb1)  ,r(wrkb2)  ,r(wrkb3)  ,r(wrkb4)  ,r(wrkb5)  , &
               & r(wrkb6)  ,r(wrkb7)  ,r(wrkb8)  ,r(wrkb9)  ,r(wrkb10) , &
               & r(wrkb11) ,r(wrkb12) ,r(wrkb13) ,r(wrkb14) ,r(wrkb15) , &
-              & r(wrkb16) ,sbkol     ,r(disnf)  ,gdp       )
+              & r(wrkb16) ,sbkol     ,r(disnf)  ,r(precip) ,gdp       )
        call timer_stop(timer_2ndadi, gdp)
        if (roller) then
           !
@@ -2836,7 +2841,8 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                    & i(kfsmin) ,i(kspu)   ,i(kspv)   ,r(dzs0)   ,r(dzs1)   , &
                    & r(sour)   ,r(sink)   ,r(r0)     ,r(evap)   ,d(dps)    , &
                    & r(s0)     ,r(s1)     ,r(thick)  ,r(w10mag) ,r(patm)   , &
-                   & r(ycor)   ,r(gsqs)   ,r(xz)     ,r(yz)     ,gdp       )
+                   & r(xcor)   ,r(ycor)   ,r(gsqs)   ,r(xz)     ,r(yz)     , &
+                   & anglon    ,gdp       )
           call timer_stop(timer_heatu, gdp)
        endif
        !
@@ -2923,7 +2929,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & r(teta)   ,r(rlabda) ,r(aks)    ,i(kfsed)  ,saleqs    , &
                     & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &
                     & r(hv)     ,r(rca)    ,r(dss)    ,r(ubot)   ,r(rtur0)  , &
-                    & temeqs    ,gdp       )
+                    & temeqs    ,r(gsqs)   ,r(guu)    ,r(gvv)    ,gdp       )
           call timer_stop(timer_erosed, gdp)
           call timer_stop(timer_3dmor, gdp)
        endif
