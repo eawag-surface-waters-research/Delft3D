@@ -714,7 +714,6 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                    tcguni(l) = 1.5
                    call prop_get(sedblock_ptr, '*', 'GamTcr', tcguni(l))
                 endif
-                write(*,*)'flstcg ',flstcg(l)
              endif
              !
              cdryb(l) = rmissval
