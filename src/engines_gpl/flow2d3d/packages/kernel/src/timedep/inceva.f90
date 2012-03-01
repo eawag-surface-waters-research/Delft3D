@@ -39,13 +39,8 @@ subroutine inceva(timnow    ,evaint    ,j         ,nmmaxj    ,nmmax     , &
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-
-
     use meteo
-!    use ec_module
     use dfparall
-
-
     use precision
     use globaldata
     !
@@ -89,9 +84,7 @@ subroutine inceva(timnow    ,evaint    ,j         ,nmmaxj    ,nmmax     , &
                               ! N = No interpolation. Y = Linear interpolation. 
     logical    :: success
 !
-!
 !! executable statements -------------------------------------------------------
-!
 !
     evapor      => gdp%gdheat%evapor
     devapo      => gdp%gdheat%devapo
@@ -155,8 +148,8 @@ subroutine inceva(timnow    ,evaint    ,j         ,nmmaxj    ,nmmax     , &
     endif
     !    
     if (prcp_file) then
-       success = meteoupdate(gdp%runid, itdate, tzone, timhr*60)
-       success = getmeteoval(gdp%runid, 'precipitation', timhr*60, gdp%gdparall%mfg, gdp%gdparall%nfg, &
+       success = meteoupdate(gdp%runid, itdate, tzone, timhr*60.0_fp)
+       success = getmeteoval(gdp%runid, 'precipitation', timhr*60.0_fp, gdp%gdparall%mfg, gdp%gdparall%nfg, &
                            & gdp%d%nlb, gdp%d%nub, gdp%d%mlb, gdp%d%mub, precip , 0)
        call checkmeteoresult(success, gdp)
        do nm = 1, nmmax

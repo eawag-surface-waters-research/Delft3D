@@ -69,14 +69,15 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     integer     , intent(in)  :: lstsci !  Description and declaration in esm_alloc_int.f90
     integer                   :: lundia !  Description and declaration in inout.igs
     integer                   :: lunmd  !  Description and declaration in inout.igs
-    integer                   :: nrrec  !!  Pointer to the record number in the
-                                        !!  MD-file
+    integer                   :: nrrec  !!  Pointer to the record number in the MD-file
+    integer                   :: nudge  !  Description and declaration in procs.igs
     logical     , intent(in)  :: zmodel !  Description and declaration in procs.igs
     real(fp)                  :: dco    !  Description and declaration in numeco.igs
     real(fp)                  :: dgcuni
     real(fp)                  :: dryflc !  Description and declaration in numeco.igs
     real(fp)                  :: fwfac  !  Description and declaration in numeco.igs
     real(fp)                  :: gammax !  Description and declaration in numeco.igs
+    real(fp)                  :: nudvic !  Description and declaration in numeco.igs
     character(*)              :: mdfrec !!  Standard rec. length in MD-file (300)
     character(1), intent(out) :: evaint !  Description and declaration in tricom.igs
     character(1)              :: forfuv !  Description and declaration in tricom.igs
@@ -86,10 +87,6 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     character(6)              :: momsol
     character(8)              :: dpsopt !  Description and declaration in numeco.igs
     character(8)              :: dpuopt
-
-    real(fp)                  :: nudvic !  Description and declaration in numeco.igs
-    integer                   :: nudge  !  Description and declaration in procs.igs
-
 !
 ! Local variables
 !
@@ -99,7 +96,8 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     integer                     :: ntrec  ! Help. var to keep track of NRREC 
     logical                     :: defaul ! Flag set to YES if default value may be applied in case var. read is empty (ier <= 0, or nrread < nlook) 
     logical                     :: found
-    logical                     :: lerror ! Flag=TRUE if an error is encountered 
+    logical                     :: lerror ! Flag=TRUE if an error is encountered
+    logical                     :: lvalue
     logical                     :: newkw  ! Logical var. specifying whether a new recnam should be read from the MD-file or just new data in the continuation line 
     real(fp)                    :: rdef   ! Help var. containing default va- lue(s) for real variable 
     real(fp), dimension(1)      :: rval   ! Help array (real) where the data, recently read from the MD-file, are stored temporarily 
@@ -466,45 +464,19 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
           if (chulp(:1)=='N' .or. chulp(:1)=='n') ibaroc = 0
        endif
     endif
-
     !
     ! locate 'Nudge'  Criterion for nudging on open boundary
     !                 points (N=0, Y=1)
     !
-    keyw  = 'Nudge'
-    ntrec = nrrec
-    lkw   = 6
-    call search(lunmd     ,lerror     ,newkw     ,nrrec     ,found     , &
-            & ntrec     ,mdfrec    ,itis      ,keyw      ,lkw       , &
-            & 'NO'      )
-    lerror = .false.
-    !
-    ! not found ?
-    ! Default value is 'Y' with means NUDGE=0
-    !
-    if (found) then
-       lenc = 1
-       cdef(:1) = 'Y'
-       call read2c(lunmd     ,lerror     ,keyw      ,newkw     ,nlook     , &
-                 & mdfrec    ,chulp(:lenc)         ,cdef(:lenc)          ,lenc      ,nrrec     , &
-                 & ntrec     ,lundia    ,gdp       )
-       !
-       ! reading error ?
-       !
-       if (lerror) then
-          lerror = .false.
-          nudge = 1
-       else
-          nudge = 1
-          if (chulp(:1)=='N' .or. chulp(:1)=='n') nudge = 0
-       endif
-       if (nudge==1) then
-          msg = 'Nudging of constituents applied at open boundaries'
-          call prterr(lundia    ,'Z013'    ,msg       ,gdp       )
-       endif
+    lvalue = .false.
+    call prop_get(gdp%mdfile_ptr,'*','Nudge',lvalue)
+    if (lvalue) then
+       nudge = 1
+       msg = 'Nudging of constituents applied at open boundaries'
+       call prterr(lundia, 'Z013', msg, gdp)
+    else
+       nudge = 0
     endif
-
-
     !
     ! Solver for transport and Forester filters only if LSTSCI <> 0
     !
@@ -701,7 +673,6 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
        gammax = rdef
        write (lundia,'(a,e12.2)') '*** MESSAGE Gammax specified by user to be ', gammax
     endif
-
     ! Boundary viscosity for nudging
     !
     rdef = -999.0_fp
@@ -710,7 +681,6 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
        nudvic = rdef
        write (lundia,'(a,e12.2)') '*** MESSAGE Boundary viscosity specified by user to be ', nudvic
     endif
-
     !
     ! FWFac
     ! See also rdmor

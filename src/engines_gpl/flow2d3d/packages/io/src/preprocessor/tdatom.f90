@@ -175,6 +175,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     integer                                             :: ntimtm      ! Actual number of times for which time varying data is allowed in the Md-file (dummy value)  
     integer                                             :: ntot0       ! Offset for time series bnd. in arrays NTOT0 = NTOF + NTOQ  
     integer                                             :: ntrec       ! Help. var to keep track of NRREC  
+    integer                                             :: nudge       ! Nudging on open boundaries
     integer, dimension(:,:), pointer                    :: mnbnd       ! Array containing the coordinates of the open boundary sections 
                                                                        !    MNBND(1,K)=X-Coor. of the begin pnt. 
                                                                        !    MNBND(2,K)=X-Coor. of the end   pnt. 
@@ -213,7 +214,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     logical                                             :: solrad_read ! Flag=TRUE means Nett Solar Radiation is to be read from .tem file 
     logical                                             :: lexist      ! Logical to determine file existence  
     logical                                             :: newkw       ! Logical var. specifying whether a new recnam should be read from the MD-file or just new data in the continuation line  
-    logical                                             :: noui        ! Flag for reading from User Interface  
+    logical                                             :: noui        ! Flag for reading from User Interface
     logical                                             :: sferic      ! Flag for spherical coordinates (TRUE or FALSE)  
     logical                                             :: tmpexist    ! Flag for call from TDATOM (.true.) for time varying data  
     logical                                             :: verify      ! Always FALSE, to be removed; was used for program=MD-VER
@@ -228,7 +229,8 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     real(fp)                                            :: dy 
     real(fp)                                            :: fwfac 
     real(fp)                                            :: gammax 
-    real(fp)                                            :: grdang 
+    real(fp)                                            :: grdang
+    real(fp)                                            :: nudvic
     real(fp)                                            :: rhoa        ! Density of air (kg/m3)  
     real(fp)                                            :: rmincf 
     real(fp)                                            :: saleqs      ! Salinity value used in eq. of state which will be applied uniformly over the vertical.  
@@ -291,10 +293,6 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     character(6)                                        :: soort       ! Help var. determining the prog. name currently active  
     character(9)                                        :: keyw        ! Name of record to look for in the MD-file 
     character(5)                                        :: versio 
-
-    integer                                             :: nudge       ! Nudging on open boundaries  
-    real(fp)                                            :: nudvic
-
 ! 
 !! executable statements ------------------------------------------------------- 
 ! 
@@ -406,9 +404,8 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     waveol      = .false. 
     wind        = .false. 
     nfl         = .false. 
-
-    nudge = 0
-
+    !
+    nudge       = 0
     ! 
     ! Initializing tdatom part of FLOW simulation program 
     ! 

@@ -90,18 +90,18 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     include 'flow_steps_f.inc'
-    real(fp)               , pointer :: hdt
-    real(fp)               , pointer :: rhow
-    real(fp)               , pointer :: ag
-    real(fp)               , pointer :: vicmol
-    real(fp)               , pointer :: dicoww
     integer                , pointer :: iro
-    character(13)          , pointer :: trasol
-    real(fp)               , pointer :: xlo
-    real(fp)               , pointer :: ck
-    logical                , pointer :: nonhyd
     integer                , pointer :: nh_level
     integer                , pointer :: nudge
+    logical                , pointer :: nonhyd
+    real(fp)               , pointer :: ag
+    real(fp)               , pointer :: ck
+    real(fp)               , pointer :: dicoww
+    real(fp)               , pointer :: hdt
+    real(fp)               , pointer :: rhow
+    real(fp)               , pointer :: vicmol
+    real(fp)               , pointer :: xlo
+    character(13)          , pointer :: trasol
 !
 ! Global variables
 !
@@ -194,66 +194,64 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
 !
 ! Local variables
 !
-    integer            :: ddb
-    integer            :: ic
-    integer            :: iter
-    integer            :: itr
-    integer            :: icxy
-    integer            :: k
-    integer            :: kfw
-    integer            :: kfsum
-    integer            :: kmin
-    integer            :: ksm
-    integer            :: l
-    integer            :: m
-    integer            :: mf
-    integer            :: mink
-    integer            :: mink2
-    integer            :: ml
-    integer            :: n
-    integer            :: ndm
-    integer            :: nhystp
-    integer            :: nm
-    integer            :: nmd
-    integer            :: nmf
-    integer            :: nml
-    integer            :: nmlu
-    integer            :: nmu
-    integer            :: nmuu
-    integer            :: num
-    integer            :: nuum
-    integer            :: ku
-    integer            :: kr
-    integer            :: kd
-    real(fp)           :: adza
-    real(fp)           :: adzc
-    real(fp)           :: bi
-    real(fp)           :: cfl
-    real(fp)           :: ddzc
-    real(fp)           :: delz
-    real(fp)           :: difiwe
-    real(fp)           :: diz1
-    real(fp)           :: epsitr
-    real(fp)           :: timest
-    real(fp)           :: flux
-    real(fp)           :: qzw
-    real(fp)           :: r00
-    real(fp), external :: reddic
-    real(fp)           :: rscal
-    real(fp)           :: sqrtbv
-    real(fp)           :: volu
-    real(fp)           :: z1
-    character(256)     :: errtxt
-
-    real(fp)           :: nudgefac
-    real(fp)           :: tnudge
-    real(fp)           :: rp
-    real(fp)           :: rb
+    integer                 :: ddb
+    integer                 :: ic
+    integer                 :: iter
+    integer                 :: itr
+    integer                 :: icxy
+    integer                 :: jj
+    integer                 :: k
+    integer                 :: kd
+    integer                 :: kfw
+    integer                 :: kfsum
+    integer                 :: kmin
+    integer                 :: kr
+    integer                 :: ksm
+    integer                 :: ku
+    integer                 :: l
+    integer                 :: m
+    integer                 :: mf
+    integer                 :: mink
+    integer                 :: mink2
+    integer                 :: ml
+    integer                 :: n
+    integer                 :: ndm
+    integer                 :: nhystp
+    integer                 :: nm
+    integer                 :: nmd
+    integer                 :: nmf
+    integer                 :: nml
+    integer                 :: nmlu
+    integer, dimension(10)  :: nms
+    integer                 :: nmu
+    integer                 :: nmuu
+    integer                 :: nnudge
+    integer                 :: num
+    integer                 :: nuum
+    real(fp)                :: adza
+    real(fp)                :: adzc
+    real(fp)                :: bi
+    real(fp)                :: cfl
+    real(fp)                :: ddzc
+    real(fp)                :: delz
+    real(fp)                :: difiwe
+    real(fp)                :: diz1
+    real(fp)                :: epsitr
+    real(fp)                :: flux
     real(fp), dimension(10) :: mu
-    integer(fp), dimension(10) :: nms
-    integer            :: jj
-    integer            :: nnudge
-
+    real(fp)                :: nudgefac
+    real(fp)                :: qzw
+    real(fp)                :: rb
+    real(fp)                :: rp
+    real(fp)                :: timest
+    real(fp)                :: tnudge
+    real(fp)                :: r00
+    real(fp), external      :: reddic
+    real(fp)                :: rscal
+    real(fp)                :: sqrtbv
+    real(fp)                :: volu
+    real(fp)                :: z1
+    character(256)          :: errtxt
 !
 !! executable statements -------------------------------------------------------
 !
@@ -609,9 +607,9 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
        if (nudge==1) then
           ! Nudging layer
           nnudge    = 4
-          nudgefac  = 10.0
+          nudgefac  = 10.0_fp
           tnudge    = hdt
-          mu(1)     = 1.000 * max(hdt / tnudge, 1.0_fp)
+          mu(1)     = max(hdt / tnudge, 1.0_fp)
           do jj = 2, nnudge
              mu(jj) = mu(jj-1) / nudgefac
           enddo

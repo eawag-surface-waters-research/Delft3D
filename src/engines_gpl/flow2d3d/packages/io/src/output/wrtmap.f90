@@ -1541,11 +1541,16 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           !
           ! element 'PRECIP'
           !
+          ! Convert to mm/h
+          !
+          allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
+          rbuff2 = precip * 3600000.0_fp
           if (parll) then
-             call dfgather(precip*3600000,nf,nl,mf,ml,iarrc,gdp)
+             call dfgather(rbuff2,nf,nl,mf,ml,iarrc,gdp)
           else
-             call dfgather_seq(precip*3600000,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
+             call dfgather_seq(rbuff2,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
           endif       
+          deallocate(rbuff2)
           if (inode == master) then
              ierror = putelt(fds, grnam3, 'PRECIP', uindex, 1, glbarr2)
           endif

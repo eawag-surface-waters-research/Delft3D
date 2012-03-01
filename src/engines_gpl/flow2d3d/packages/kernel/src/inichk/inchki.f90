@@ -222,114 +222,114 @@ subroutine inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
 !
 !! executable statements -------------------------------------------------------
 !
-    nmax       => gdp%d%nmax
-    mmax       => gdp%d%mmax
-    ddbound    => gdp%d%ddbound
-    nmaxus     => gdp%d%nmaxus
-    kmax       => gdp%d%kmax
-    nmaxd      => gdp%d%nmaxd
-    mmaxd      => gdp%d%mmaxd
-    jstart     => gdp%d%jstart
-    nmmaxj     => gdp%d%nmmaxj
-    nmmax      => gdp%d%nmmax
-    lmax       => gdp%d%lmax
-    lsts       => gdp%d%lsts
-    lstsc      => gdp%d%lstsc
-    lstsci     => gdp%d%lstsci
-    lsecfl     => gdp%d%lsecfl
-    lsec       => gdp%d%lsec
-    ltur       => gdp%d%ltur
-    kmxt       => gdp%d%kmxt
-    nlcest     => gdp%d%nlcest
-    noroco     => gdp%d%noroco
-    norow      => gdp%d%norow
-    nocol      => gdp%d%nocol
-    nto        => gdp%d%nto
-    kc         => gdp%d%kc
-    nopest     => gdp%d%nopest
-    nrob       => gdp%d%nrob
-    nostat     => gdp%d%nostat
-    ntruv      => gdp%d%ntruv
-    ntru       => gdp%d%ntru
-    iter2      => gdp%gdnumeco%iter2
-    rhow       => gdp%gdphysco%rhow
-    rhoa       => gdp%gdphysco%rhoa
-    ag         => gdp%gdphysco%ag
-    z0         => gdp%gdphysco%z0
-    vonkar     => gdp%gdphysco%vonkar
-    vicmol     => gdp%gdphysco%vicmol
-    vicoww     => gdp%gdphysco%vicoww
-    dicoww     => gdp%gdphysco%dicoww
-    sboltz     => gdp%gdphysco%sboltz
-    wstcof     => gdp%gdphysco%wstcof
-    iro        => gdp%gdphysco%iro
-    wind       => gdp%gdprocs%wind
-    salin      => gdp%gdprocs%salin
-    temp       => gdp%gdprocs%temp
-    wave       => gdp%gdprocs%wave
-    iweflg     => gdp%gdprocs%iweflg
-    struct     => gdp%gdprocs%struct
-    lftrto     => gdp%gdprocs%lftrto
-    dpmveg     => gdp%gdprocs%dpmveg
-    alfas      => gdp%gdr_i_ch%alfas
-    c          => gdp%gdr_i_ch%c
-    cfurou     => gdp%gdr_i_ch%cfurou
-    cfvrou     => gdp%gdr_i_ch%cfvrou
-    dicuv      => gdp%gdr_i_ch%dicuv
-    dp         => gdp%gdr_i_ch%dp
-    fcorio     => gdp%gdr_i_ch%fcorio
-    gsqd       => gdp%gdr_i_ch%gsqd
-    gsqs       => gdp%gdr_i_ch%gsqs
-    guu        => gdp%gdr_i_ch%guu
-    guv        => gdp%gdr_i_ch%guv
-    gvu        => gdp%gdr_i_ch%gvu
-    gvv        => gdp%gdr_i_ch%gvv
-    hu         => gdp%gdr_i_ch%hu
-    pship      => gdp%gdr_i_ch%pship
-    r1         => gdp%gdr_i_ch%r1
-    rho        => gdp%gdr_i_ch%rho
-    rob        => gdp%gdr_i_ch%rob
-    rtu2d0     => gdp%gdr_i_ch%rtu2d0
-    rtur1      => gdp%gdr_i_ch%rtur1
-    s1         => gdp%gdr_i_ch%s1
-    sig        => gdp%gdr_i_ch%sig
-    sigdif     => gdp%gdr_i_ch%sigdif
-    sigmol     => gdp%gdr_i_ch%sigmol
-    thick      => gdp%gdr_i_ch%thick
-    vicuv      => gdp%gdr_i_ch%vicuv
-    ws         => gdp%gdr_i_ch%ws
-    x2y        => gdp%gdr_i_ch%x2y
-    x3         => gdp%gdr_i_ch%x3
-    xcor       => gdp%gdr_i_ch%xcor
-    xy2        => gdp%gdr_i_ch%xy2
-    xz         => gdp%gdr_i_ch%xz
-    y3         => gdp%gdr_i_ch%y3
-    ycor       => gdp%gdr_i_ch%ycor
-    yz         => gdp%gdr_i_ch%yz
-    res        => gdp%gdr_i_ch%res
-    xj         => gdp%gdr_i_ch%xj
-    guz        => gdp%gdr_i_ch%guz
-    gvz        => gdp%gdr_i_ch%gvz
-    gud        => gdp%gdr_i_ch%gud
-    gvd        => gdp%gdr_i_ch%gvd
-    gsqiu      => gdp%gdr_i_ch%gsqiu
-    gsqiv      => gdp%gdr_i_ch%gsqiv
-    irocol     => gdp%gdr_i_ch%irocol
-    kcs        => gdp%gdr_i_ch%kcs
-    kcu        => gdp%gdr_i_ch%kcu
-    kcv        => gdp%gdr_i_ch%kcv
-    kfs        => gdp%gdr_i_ch%kfs
-    kspu       => gdp%gdr_i_ch%kspu
-    kspv       => gdp%gdr_i_ch%kspv
-    mnbnd      => gdp%gdr_i_ch%mnbnd
-    nob        => gdp%gdr_i_ch%nob
-    typbnd     => gdp%gdr_i_ch%typbnd
-    fldry      => gdp%gdtmpfil%fldry
-    fltd       => gdp%gdtmpfil%fltd
-    flbdfh     => gdp%gdbedformpar%flbdfh
-    duneheight => gdp%gdbedformpar%duneheight
+    nmax        => gdp%d%nmax
+    mmax        => gdp%d%mmax
+    ddbound     => gdp%d%ddbound
+    nmaxus      => gdp%d%nmaxus
+    kmax        => gdp%d%kmax
+    nmaxd       => gdp%d%nmaxd
+    mmaxd       => gdp%d%mmaxd
+    jstart      => gdp%d%jstart
+    nmmaxj      => gdp%d%nmmaxj
+    nmmax       => gdp%d%nmmax
+    lmax        => gdp%d%lmax
+    lsts        => gdp%d%lsts
+    lstsc       => gdp%d%lstsc
+    lstsci      => gdp%d%lstsci
+    lsecfl      => gdp%d%lsecfl
+    lsec        => gdp%d%lsec
+    ltur        => gdp%d%ltur
+    kmxt        => gdp%d%kmxt
+    nlcest      => gdp%d%nlcest
+    noroco      => gdp%d%noroco
+    norow       => gdp%d%norow
+    nocol       => gdp%d%nocol
+    nto         => gdp%d%nto
+    kc          => gdp%d%kc
+    nopest      => gdp%d%nopest
+    nrob        => gdp%d%nrob
+    nostat      => gdp%d%nostat
+    ntruv       => gdp%d%ntruv
+    ntru        => gdp%d%ntru
+    iter2       => gdp%gdnumeco%iter2
+    rhow        => gdp%gdphysco%rhow
+    rhoa        => gdp%gdphysco%rhoa
+    ag          => gdp%gdphysco%ag
+    z0          => gdp%gdphysco%z0
+    vonkar      => gdp%gdphysco%vonkar
+    vicmol      => gdp%gdphysco%vicmol
+    vicoww      => gdp%gdphysco%vicoww
+    dicoww      => gdp%gdphysco%dicoww
+    sboltz      => gdp%gdphysco%sboltz
+    wstcof      => gdp%gdphysco%wstcof
+    iro         => gdp%gdphysco%iro
+    wind        => gdp%gdprocs%wind
+    salin       => gdp%gdprocs%salin
+    temp        => gdp%gdprocs%temp
+    wave        => gdp%gdprocs%wave
+    iweflg      => gdp%gdprocs%iweflg
+    struct      => gdp%gdprocs%struct
+    lftrto      => gdp%gdprocs%lftrto
+    dpmveg      => gdp%gdprocs%dpmveg
+    alfas       => gdp%gdr_i_ch%alfas
+    c           => gdp%gdr_i_ch%c
+    cfurou      => gdp%gdr_i_ch%cfurou
+    cfvrou      => gdp%gdr_i_ch%cfvrou
+    dicuv       => gdp%gdr_i_ch%dicuv
+    dp          => gdp%gdr_i_ch%dp
+    fcorio      => gdp%gdr_i_ch%fcorio
+    gsqd        => gdp%gdr_i_ch%gsqd
+    gsqs        => gdp%gdr_i_ch%gsqs
+    guu         => gdp%gdr_i_ch%guu
+    guv         => gdp%gdr_i_ch%guv
+    gvu         => gdp%gdr_i_ch%gvu
+    gvv         => gdp%gdr_i_ch%gvv
+    hu          => gdp%gdr_i_ch%hu
+    pship       => gdp%gdr_i_ch%pship
+    r1          => gdp%gdr_i_ch%r1
+    rho         => gdp%gdr_i_ch%rho
+    rob         => gdp%gdr_i_ch%rob
+    rtu2d0      => gdp%gdr_i_ch%rtu2d0
+    rtur1       => gdp%gdr_i_ch%rtur1
+    s1          => gdp%gdr_i_ch%s1
+    sig         => gdp%gdr_i_ch%sig
+    sigdif      => gdp%gdr_i_ch%sigdif
+    sigmol      => gdp%gdr_i_ch%sigmol
+    thick       => gdp%gdr_i_ch%thick
+    vicuv       => gdp%gdr_i_ch%vicuv
+    ws          => gdp%gdr_i_ch%ws
+    x2y         => gdp%gdr_i_ch%x2y
+    x3          => gdp%gdr_i_ch%x3
+    xcor        => gdp%gdr_i_ch%xcor
+    xy2         => gdp%gdr_i_ch%xy2
+    xz          => gdp%gdr_i_ch%xz
+    y3          => gdp%gdr_i_ch%y3
+    ycor        => gdp%gdr_i_ch%ycor
+    yz          => gdp%gdr_i_ch%yz
+    res         => gdp%gdr_i_ch%res
+    xj          => gdp%gdr_i_ch%xj
+    guz         => gdp%gdr_i_ch%guz
+    gvz         => gdp%gdr_i_ch%gvz
+    gud         => gdp%gdr_i_ch%gud
+    gvd         => gdp%gdr_i_ch%gvd
+    gsqiu       => gdp%gdr_i_ch%gsqiu
+    gsqiv       => gdp%gdr_i_ch%gsqiv
+    irocol      => gdp%gdr_i_ch%irocol
+    kcs         => gdp%gdr_i_ch%kcs
+    kcu         => gdp%gdr_i_ch%kcu
+    kcv         => gdp%gdr_i_ch%kcv
+    kfs         => gdp%gdr_i_ch%kfs
+    kspu        => gdp%gdr_i_ch%kspu
+    kspv        => gdp%gdr_i_ch%kspv
+    mnbnd       => gdp%gdr_i_ch%mnbnd
+    nob         => gdp%gdr_i_ch%nob
+    typbnd      => gdp%gdr_i_ch%typbnd
+    fldry       => gdp%gdtmpfil%fldry
+    fltd        => gdp%gdtmpfil%fltd
+    flbdfh      => gdp%gdbedformpar%flbdfh
+    duneheight  => gdp%gdbedformpar%duneheight
     solrad_read => gdp%gdheat%solrad_read
-    swrf_file  => gdp%gdheat%swrf_file
+    swrf_file   => gdp%gdheat%swrf_file
     !
     icx     = 0
     icy     = 0
@@ -428,12 +428,12 @@ subroutine inchki(lundia    ,error     ,runid     ,sferic    ,filrgf    , &
     !
     ! CHKPHY: checks all physical coefficients
     !
-    call chkphy(lundia    ,error     ,salin     ,temp      ,wind      , &
-              & nmax      ,mmax      ,kmax      ,lmax      ,ktemp     , &
-              & temeqs    ,saleqs    ,fclou     ,sarea     ,wstcof    , &
-              & rhow      ,rhoa      ,i(kcu)    ,i(kcv)    ,i(kcs)    , &
-              & r(cfurou) ,r(cfvrou) ,r(vicuv)  ,r(dicuv)  ,anglon    , &
-              & solrad_read,swrf_file,sferic    ,gdp       )
+    call chkphy(lundia     ,error     ,salin     ,temp      ,wind      , &
+              & nmax       ,mmax      ,kmax      ,lmax      ,ktemp     , &
+              & temeqs     ,saleqs    ,fclou     ,sarea     ,wstcof    , &
+              & rhow       ,rhoa      ,i(kcu)    ,i(kcv)    ,i(kcs)    , &
+              & r(cfurou)  ,r(cfvrou) ,r(vicuv)  ,r(dicuv)  ,anglon    , &
+              & solrad_read,swrf_file ,sferic    ,gdp       )
     if (error) goto 9999
     !
     ! CHKTRT: checks Trachytopes if defined

@@ -1,9 +1,9 @@
-subroutine chkphy(lundia    ,error     ,salin     ,temp      ,wind      , &
-                & nmax      ,mmax      ,kmax      ,lmax      ,ktemp     , &
-                & temeqs    ,saleqs    ,fclou     ,sarea     ,wstcof    , &
-                & rhow      ,rhoa      ,kcu       ,kcv       ,kcs       , &
-                & cfurou    ,cfvrou    ,vicuv     ,dicuv     ,anglon    , &
-                & solrad_read,swrf_file,sferic    ,gdp       )
+subroutine chkphy(lundia     ,error     ,salin     ,temp      ,wind      , &
+                & nmax       ,mmax      ,kmax      ,lmax      ,ktemp     , &
+                & temeqs     ,saleqs    ,fclou     ,sarea     ,wstcof    , &
+                & rhow       ,rhoa      ,kcu       ,kcv       ,kcs       , &
+                & cfurou     ,cfvrou    ,vicuv     ,dicuv     ,anglon    , &
+                & solrad_read,swrf_file ,sferic    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                

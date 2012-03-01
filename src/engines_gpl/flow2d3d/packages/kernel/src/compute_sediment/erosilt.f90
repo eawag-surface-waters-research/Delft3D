@@ -88,7 +88,6 @@ subroutine erosilt(thick    ,kmax     ,ws       ,wstau    ,entr     ,lundia   , 
     real(fp) :: taum
     real(fp) :: thick0
     real(fp) :: thick1
-    real(fp) :: ff
     !
     ! Interface to dll is in High precision!
     !

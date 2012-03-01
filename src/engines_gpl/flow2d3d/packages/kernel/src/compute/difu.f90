@@ -93,16 +93,16 @@ subroutine difu(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     !
     include 'flow_steps_f.inc'
     include 'sedparams.inc'
-    real(fp)               , pointer :: eps
-    real(fp)               , pointer :: vicmol
-    real(fp)               , pointer :: dicoww
     integer                , pointer :: iro
-    real(fp)               , pointer :: xlo
-    real(fp)               , pointer :: ck
     integer                , pointer :: mfg
     integer                , pointer :: nfg
     integer                , pointer :: nudge
+    real(fp)               , pointer :: ck
+    real(fp)               , pointer :: dicoww
+    real(fp)               , pointer :: eps
     real(fp)               , pointer :: hdt
+    real(fp)               , pointer :: vicmol
+    real(fp)               , pointer :: xlo
 !
 ! Global variables
 !
@@ -218,75 +218,73 @@ real(fp), dimension(lstsci)                             , intent(in)  :: sigmol 
 !
 ! Local variables
 !
-integer            :: nmsta
-integer            :: ddb
-integer            :: iad1
-integer            :: iad2
-integer            :: iad3
-integer            :: ic
-integer            :: icxy
-integer            :: iter
-integer            :: itr
-integer            :: j1
-integer            :: j2
-integer            :: j3
-integer            :: k
-integer            :: kfw
-integer            :: l
-integer            :: ll
-integer            :: ls
-integer            :: lst
-integer            :: maskval
-integer            :: mf
-integer            :: ml
-integer            :: n
-integer            :: ndm
-integer            :: nhystp
-integer            :: nm
-integer            :: nmd
-integer            :: nmdd
-integer            :: nmf
-integer            :: nmfu
-integer            :: nml
-integer            :: nmlu
-integer            :: nmu
-integer            :: nmuu
-integer            :: num
-real(fp)           :: adza
-real(fp)           :: adzc
-real(fp)           :: bi
-real(fp)           :: cl
-real(fp)           :: cr
-real(fp)           :: d0k    ! Internal work array
-real(fp)           :: ddzc
-real(fp)           :: difiwe
-real(fp)           :: difl
-real(fp)           :: difr
-real(fp)           :: diz1
-real(fp)           :: epsitr ! Maximum value of relative error and absolute error of iteration process
-real(fp)           :: flux
-real(fp)           :: h0
-real(fp)           :: h0i
-real(fp)           :: h0new
-real(fp)           :: h0old
-real(fp)           :: qxu
-real(fp)           :: qyv
-real(fp)           :: qzw
-real(fp), external :: reddic
-real(fp)           :: sqrtbv
-real(fp)           :: timesti ! inverse of time step
-real(fp)           :: tsg
-character(20)      :: errtxt
-
-real(fp)           :: nudgefac
-real(fp)           :: tnudge
-real(fp)           :: rp
-real(fp)           :: rb
+integer                 :: nmsta
+integer                 :: ddb
+integer                 :: iad1
+integer                 :: iad2
+integer                 :: iad3
+integer                 :: ic
+integer                 :: icxy
+integer                 :: iter
+integer                 :: itr
+integer                 :: j1
+integer                 :: j2
+integer                 :: j3
+integer                 :: jj
+integer                 :: k
+integer                 :: kfw
+integer                 :: l
+integer                 :: ll
+integer                 :: ls
+integer                 :: lst
+integer                 :: maskval
+integer                 :: mf
+integer                 :: ml
+integer                 :: n
+integer                 :: ndm
+integer                 :: nhystp
+integer                 :: nm
+integer                 :: nmd
+integer                 :: nmdd
+integer                 :: nmf
+integer                 :: nmfu
+integer                 :: nml
+integer                 :: nmlu
+integer, dimension(10)  :: nms
+integer                 :: nmu
+integer                 :: nmuu
+integer                 :: nnudge
+integer                 :: num
+real(fp)                :: adza
+real(fp)                :: adzc
+real(fp)                :: bi
+real(fp)                :: cl
+real(fp)                :: cr
+real(fp)                :: d0k    ! Internal work array
+real(fp)                :: ddzc
+real(fp)                :: difiwe
+real(fp)                :: difl
+real(fp)                :: difr
+real(fp)                :: diz1
+real(fp)                :: epsitr ! Maximum value of relative error and absolute error of iteration process
+real(fp)                :: flux
+real(fp)                :: h0
+real(fp)                :: h0i
+real(fp)                :: h0new
+real(fp)                :: h0old
 real(fp), dimension(10) :: mu
-integer(fp), dimension(10) :: nms
-integer            :: jj
-integer            :: nnudge
-
+real(fp)                :: nudgefac
+real(fp)                :: qxu
+real(fp)                :: qyv
+real(fp)                :: qzw
+real(fp)                :: rb
+real(fp), external      :: reddic
+real(fp)                :: rp
+real(fp)                :: sqrtbv
+real(fp)                :: timesti ! inverse of time step
+real(fp)                :: tnudge
+real(fp)                :: tsg
+character(20)           :: errtxt
 !
 !! executable statements -------------------------------------------------------
 !
@@ -1030,9 +1028,9 @@ integer            :: nnudge
        if (nudge==1) then
           ! Nudging layer
           nnudge    = 4
-          nudgefac  = 10.0
+          nudgefac  = 10.0_fp
           tnudge    = hdt
-          mu(1)     = 1.000 * max(hdt / tnudge, 1.0_fp)
+          mu(1)     = max(hdt / tnudge, 1.0_fp)
           do jj = 2, nnudge
              mu(jj) = mu(jj-1) / nudgefac
           enddo
