@@ -201,7 +201,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)         , dimension(:,:)    , pointer :: tcrero
     real(fp)         , dimension(:,:)    , pointer :: eropar
     real(prec)       , dimension(:,:)    , pointer :: bodsed 
-    real(prec)       , dimension(:)      , pointer :: sedtrcfac
+    real(fp)         , dimension(:)      , pointer :: sedtrcfac
     include 'flow_steps_f.inc'
     include 'sedparams.inc'
     include 'trapar.inc'
