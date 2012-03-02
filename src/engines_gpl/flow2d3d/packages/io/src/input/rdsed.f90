@@ -326,15 +326,27 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        tcguni        => gdp%gdsedpar%tcguni
        flstcg        => gdp%gdsedpar%flstcg
        !
+       !
        ! end check on assocation of gdsedpar%sedd50
        !
     endif 
     !
     ! Initialization of the just allocated arrays
     !
-    sedtyp       = 0
-    flsdbd       = ' '
+    flsdbd              = ' '
+    filsed              = ' '
+    flsmdc              = ' '
+    flsdia              = ' '
+    dll_function_settle = ' '
+    dll_usrfil_settle   = ' '
+    flstcd              = ' '
+    flstce              = ' '
+    flsero              = ' '
+    flstcg              = ' '
+    filtrn              = ' '
+    flstrn              = ' '
     !
+    sedtyp              = 0
     nseddia      = 0        ! nseddia counts relevant data
     logseddia    = rmissval
     logsedsig    = rmissval
@@ -378,7 +390,6 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     !
     ! Sediment input is placed in input_tree in subroutine dimsedconst
     !
-    filsed = ' '
     call prop_get_string(gdp%mdfile_ptr, '*', 'Filsed', filsed)
     call tree_get_node_by_name( gdp%input_tree, 'Sediment Input', sed_ptr )
     !
@@ -395,7 +406,6 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        iopsus = 0
        call prop_get_integer(sed_ptr, 'SedimentOverall', 'IopSus', iopsus)
        !
-       flsmdc = ' '
        call prop_get_string(sed_ptr, 'SedimentOverall', 'MudCnt', flsmdc)
        !
        ! Intel 7.0 crashes on an inquire statement when file = ' '
@@ -527,7 +537,6 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
              ! varying grain size.
              !
              if (lsedtot == 1) then
-                flsdia = ' '
                 call prop_get_string(sedblock_ptr, '*', 'SedD50', flsdia)
                 if (flsdia == ' ') then
                    !
@@ -615,7 +624,6 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                       call d3stop(1, gdp)
                    endif
                    !
-                   dll_function_settle(l) = ' '
                    call prop_get_string(sedblock_ptr, '*', 'SettleFunction', dll_function_settle(l))
                    call prop_get_string(sedblock_ptr, '*', 'SettleInput'   , dll_usrfil_settle(l))
                 endif
@@ -638,7 +646,6 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                 ! First assume that 'TcrSed' contains a filename
                 ! If the file does not exist, assume that 'TcrSed' contains a uniform value (real)
                 !
-                flstcd(l) = ' '
                 call prop_get_string(sedblock_ptr, '*', 'TcrSed', flstcd(l))
                 !
                 ! Intel 7.0 crashes on an inquire statement when file = ' '
@@ -658,7 +665,6 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                 ! First assume that 'TcrEro' contains a filename
                 ! If the file does not exist, assume that 'TcrEro' contains a uniform value (real)
                 !
-                flstce(l) = ' '
                 call prop_get_string(sedblock_ptr, '*', 'TcrEro', flstce(l))
                 !
                 ! Intel 7.0 crashes on an inquire statement when file = ' '
@@ -678,7 +684,6 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                 ! First assume that 'EroPar' contains a filename
                 ! If the file does not exist, assume that 'EroPar' contains a uniform value (real)
                 !
-                flsero(l) = ' '
                 call prop_get_string(sedblock_ptr, '*', 'EroPar', flsero(l))
                 !
                 ! Intel 7.0 crashes on an inquire statement when file = ' '
@@ -698,7 +703,6 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                 ! First assume that 'GamTcr' contains a filename
                 ! If the file does not exist, assume that 'GamTcr' contains a uniform value (real)
                 !
-                flstcg(l) = ' '
                 call prop_get_string(sedblock_ptr, '*', 'GamTcr', flstcg(l))
                 !
                 ! Intel 7.0 crashes on an inquire statement when file = ' '
@@ -722,7 +726,6 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
              ! First assume that 'IniSedThick'/'SdBUni' contains a filename
              ! If the file does not exist, assume that 'SdBUni' contains a uniform value (real)
              !
-             flsdbd(l) = ' '
              call prop_get_string(sedblock_ptr, '*', 'IniSedThick', flsdbd(l))
              if (flsdbd(l) /= ' ') then
                 inisedunit(l) = 'm'
@@ -762,7 +765,6 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
                 call prop_get(sedblock_ptr, '*', 'FacDSS', facdss(l))
              endif
              !
-             filtrn = ' '
              call prop_get(sedblock_ptr, '*', 'TraFrm', filtrn)
              !
              ! Intel 7.0 crashes on an inquire statement when file = ' '
