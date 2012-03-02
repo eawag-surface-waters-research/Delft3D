@@ -919,30 +919,32 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
           if (comparereal(wstcof(2),wstcof(4)) == 0) then
              if (comparereal(wstcof(1),wstcof(3)) /= 0) then
                 write(message,'(2a,f6.2,a,f6.2,2a,f8.5,a,f8.5,a)') "Discontinuity in wind stress as function of wind speed:", &
-                     & "'Wstres' coeff. '2' (",wstcof(2)," m/s), is equal to coeff. '4' (",wstcof(4), " m/s), ", &
-                     & "while coeff. '1' (",wstcof(1),"), is not equal to coeff. '3' (",wstcof(3), ")"
+                     & "'Wstres' coeff. '2' (", wstcof(2), " m/s), is equal to coeff. '4' (", wstcof(4), " m/s), ", &
+                     & "while coeff. '1' (", wstcof(1), "), is not equal to coeff. '3' (", wstcof(3), ")"
                 call prterr(lundia, 'P004', trim(message))
                 error = .true.
              else
                 wstcof(2) =  wstcof(2) - 1.0_fp
              endif
           elseif (comparereal(wstcof(2),wstcof(4)) == 1) then
-             write(message,'(a,f6.2,a,f6.2,a)') "'Wstres' coefficient '2' (",wstcof(2)," m/s), must be smaller than or equal to coefficient '4' (",wstcof(4), " m/s)"
+             write(message,'(a,f6.2,a,f6.2,a)') "'Wstres' coefficient '2' (", wstcof(2), &
+                  & " m/s), must be smaller than or equal to coefficient '4' (", wstcof(4), " m/s)"
              call prterr(lundia, 'P004', trim(message))
              error = .true.
           endif
           if (comparereal(wstcof(4),wstcof(6)) == 0) then
              if (comparereal(wstcof(3),wstcof(5)) /= 0) then
                 write(message,'(2a,f6.2,a,f6.2,2a,f8.5,a,f8.5,a)') "Discontinuity in wind stress as function of wind speed:", &
-                     & "'Wstres' coeff. '4' (",wstcof(4)," m/s), is equal to coeff. '6' (",wstcof(6), " m/s), ", &
-                     & "while coeff. '3' (",wstcof(3),"), is not equal to coeff. '5' (",wstcof(5), ")"
+                     & "'Wstres' coeff. '4' (", wstcof(4), " m/s), is equal to coeff. '6' (", wstcof(6), " m/s), ", &
+                     & "while coeff. '3' (", wstcof(3), "), is not equal to coeff. '5' (", wstcof(5), ")"
                 call prterr(lundia, 'P004', trim(message))
                 error = .true.
              else
                 wstcof(6) =  wstcof(6) + 1.0_fp
              endif
           elseif (comparereal(wstcof(4),wstcof(6)) == 1) then
-             write(message,'(a,f6.2,a,f6.2,a)') "'Wstres' coefficient '4' (",wstcof(4)," m/s), must be smaller than or equal to coefficient '6' (",wstcof(6), " m/s)"
+             write(message,'(a,f6.2,a,f6.2,a)') "'Wstres' coefficient '4' (", wstcof(4), &
+                  & " m/s), must be smaller than or equal to coefficient '6' (", wstcof(6), " m/s)"
              call prterr(lundia, 'P004', trim(message))
              error = .true.
           endif
