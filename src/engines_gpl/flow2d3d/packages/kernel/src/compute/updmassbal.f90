@@ -178,7 +178,7 @@ subroutine updmassbal(newvol    ,qxk       ,qyk       ,kcs       ,r1        , &
     enddo
     !
     ! Accumulate constituent fluxes; the fluxu array is not yet available upon
-    ! the first call from TRICOM (tested by means of associated). However,
+    ! the first call from INCHKR (tested by means of associated). However,
     ! that's no problem since no fluxes have to be accumulated at that time.
     !
     if (associated(fluxu)) then
