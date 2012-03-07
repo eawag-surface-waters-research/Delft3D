@@ -14,7 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "semaphore", "semaphore", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "stream", "stream", "{25D05302-68AF-491F-8E32-66C31BF677D3}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "utils_flow", "utils_flow", "{A704B858-8B41-4DF7-B55A-8841B3D8A00F}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deltares_common", "deltares_common", "{A704B858-8B41-4DF7-B55A-8841B3D8A00F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "engines_gpl", "engines_gpl", "{FFF96C77-7996-40DE-B93D-76501B9078AC}"
 EndProject
@@ -109,23 +109,20 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "semaphore", "utils_lgpl\sem
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "stream", "utils_lgpl\stream\packages\stream\stream.vcxproj", "{E366AF30-9FFF-4B68-B291-CF9197F5B738}"
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "utils_flow", "utils_lgpl\utils_flow\packages\utils_flow\utils_flow.vfproj", "{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "deltares_common", "utils_lgpl\deltares_common\packages\deltares_common\deltares_common.vfproj", "{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}"
 	ProjectSection(ProjectDependencies) = postProject
-		{F1C7AF24-1D5A-4AC5-A000-D7F3250A9AF5} = {F1C7AF24-1D5A-4AC5-A000-D7F3250A9AF5}
 		{51065F4C-23D3-4C5F-AF5B-E70776409D7B} = {51065F4C-23D3-4C5F-AF5B-E70776409D7B}
 		{4C4CF4A4-C5F9-48EC-B39A-7D43427C6CE4} = {4C4CF4A4-C5F9-48EC-B39A-7D43427C6CE4}
 		{5E1814B7-3691-4CA6-8FE2-A374EC5A5904} = {5E1814B7-3691-4CA6-8FE2-A374EC5A5904}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "utils_flow_c", "utils_lgpl\utils_flow\packages\utils_flow_c\utils_flow_c.vcxproj", "{51065F4C-23D3-4C5F-AF5B-E70776409D7B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "deltares_common_c", "utils_lgpl\deltares_common\packages\deltares_common_c\deltares_common_c.vcxproj", "{51065F4C-23D3-4C5F-AF5B-E70776409D7B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "delftio_version_number", "utils_lgpl\delftio\packages\delftio_version_number\delftio_version_number.vcxproj", "{76C16D40-DB61-4E46-BADB-B3D2A5F7A304}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "esmfsm_version_number", "utils_lgpl\esmfsm\packages\esmfsm_version_number\esmfsm_version_number.vcxproj", "{73054CB6-9CC1-45D0-91A9-EDF50CF361A4}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "stream_version_number", "utils_lgpl\stream\packages\stream_version_number\stream_version_number.vcxproj", "{8330A3A9-BAB4-4D0A-B039-2770388D5225}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "utils_flow_version_number", "utils_lgpl\utils_flow\packages\utils_flow_version_number\utils_flow_version_number.vcxproj", "{F1C7AF24-1D5A-4AC5-A000-D7F3250A9AF5}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "kubint_version_number", "tools_gpl\kubint\packages\kubint_version_number\kubint_version_number.vcxproj", "{828C8956-8E10-40E6-95E1-25F29A74B701}"
 EndProject
@@ -448,10 +445,6 @@ Global
 		{8330A3A9-BAB4-4D0A-B039-2770388D5225}.Debug|Win32.Build.0 = Debug|Win32
 		{8330A3A9-BAB4-4D0A-B039-2770388D5225}.Release|Win32.ActiveCfg = Release|Win32
 		{8330A3A9-BAB4-4D0A-B039-2770388D5225}.Release|Win32.Build.0 = Release|Win32
-		{F1C7AF24-1D5A-4AC5-A000-D7F3250A9AF5}.Debug|Win32.ActiveCfg = Debug|Win32
-		{F1C7AF24-1D5A-4AC5-A000-D7F3250A9AF5}.Debug|Win32.Build.0 = Debug|Win32
-		{F1C7AF24-1D5A-4AC5-A000-D7F3250A9AF5}.Release|Win32.ActiveCfg = Release|Win32
-		{F1C7AF24-1D5A-4AC5-A000-D7F3250A9AF5}.Release|Win32.Build.0 = Release|Win32
 		{828C8956-8E10-40E6-95E1-25F29A74B701}.Debug|Win32.ActiveCfg = Debug|Win32
 		{828C8956-8E10-40E6-95E1-25F29A74B701}.Debug|Win32.Build.0 = Debug|Win32
 		{828C8956-8E10-40E6-95E1-25F29A74B701}.Release|Win32.ActiveCfg = Release|Win32
@@ -627,7 +620,6 @@ Global
 		{8330A3A9-BAB4-4D0A-B039-2770388D5225} = {25D05302-68AF-491F-8E32-66C31BF677D3}
 		{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118} = {A704B858-8B41-4DF7-B55A-8841B3D8A00F}
 		{51065F4C-23D3-4C5F-AF5B-E70776409D7B} = {A704B858-8B41-4DF7-B55A-8841B3D8A00F}
-		{F1C7AF24-1D5A-4AC5-A000-D7F3250A9AF5} = {A704B858-8B41-4DF7-B55A-8841B3D8A00F}
 		{E4A232C4-0921-4C21-845C-3BCFA69F4BC0} = {FFF96C77-7996-40DE-B93D-76501B9078AC}
 		{E03A9364-66E1-4C9E-8AD5-300595405751} = {FFF96C77-7996-40DE-B93D-76501B9078AC}
 		{69232C4D-43DF-40CF-AB26-5CDB4E555E61} = {FFF96C77-7996-40DE-B93D-76501B9078AC}

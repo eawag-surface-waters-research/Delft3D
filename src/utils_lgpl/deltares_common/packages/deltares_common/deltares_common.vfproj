@@ -5,7 +5,7 @@
 	<Configurations>
 		<Configuration Name="Debug|Win32" OutputDirectory="../../lib/$(ConfigurationName)/static" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.lib;$(TargetPath)" BuildLogFile="$(IntDir)\BuildLog.txt" ConfigurationType="typeStaticLibrary">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="../../../../utils_lgpl/precision/lib/$(ConfigurationName)/static" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OUTDIR)/" ObjectFile="$(INTDIR)/" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebugDLL" DisableDefaultLibSearch="true"/>
-				<Tool Name="VFLibrarianTool" OutputFile="$(OUTDIR)/utils_flow.lib" LinkLibraryDependencies="true"/>
+				<Tool Name="VFLibrarianTool" OutputFile="$(OUTDIR)/deltares_common.lib" LinkLibraryDependencies="true"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TypeLibraryName="$(IntDir)/$(InputName).tlb"/>
 				<Tool Name="VFCustomBuildTool"/>
@@ -15,7 +15,7 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" OutputDirectory="../../lib/$(ConfigurationName)/static" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.lib;$(TargetPath)" BuildLogFile="$(IntDir)\BuildLog.txt" ConfigurationType="typeStaticLibrary">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="../../../../utils_lgpl/precision/lib/$(ConfigurationName)/static" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OUTDIR)/" ObjectFile="$(INTDIR)/" RuntimeLibrary="rtMultiThreadedDLL" DisableDefaultLibSearch="true"/>
-				<Tool Name="VFLibrarianTool" AdditionalOptions="/LTCG" OutputFile="$(OUTDIR)/utils_flow.lib" LinkLibraryDependencies="true"/>
+				<Tool Name="VFLibrarianTool" AdditionalOptions="/LTCG" OutputFile="$(OUTDIR)/deltares_common.lib" LinkLibraryDependencies="true"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TypeLibraryName="$(IntDir)/$(InputName).tlb"/>
 				<Tool Name="VFCustomBuildTool"/>
@@ -27,13 +27,13 @@
 		<Filter Name="Source Files" Filter="fi;fd">
 		<File RelativePath="src\bilin5.f90"/>
 		<File RelativePath="src\buffer.f90"/>
-		<File RelativePath=".\src\combinepaths.f90"/>
+		<File RelativePath="src\combinepaths.f90"/>
 		<File RelativePath="src\handles.f90"/>
 		<File RelativePath="src\juldat.f90"/>
 		<File RelativePath="src\malloc.f90"/>
 		<File RelativePath="src\MessageHandling.f90"/>
 		<File RelativePath="src\nan_check_module.f90"/>
-      <File RelativePath="src\newunit.f90"/>
+		<File RelativePath="src\newunit.f90"/>
 		<File RelativePath="src\scannr.f90"/>
 		<File RelativePath="src\skipstarlines.f90"/>
 		<File RelativePath="src\small.f90"/>

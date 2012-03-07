@@ -4,7 +4,7 @@
 		<Platform Name="Win32"/></Platforms>
 	<Configurations>
 		<Configuration Name="Debug|Win32">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\..\..\lib\$(ConfigurationName)\static;..\..\..\..\..\precision\lib\$(ConfigurationName)\static;..\..\..\..\..\utils_flow\lib\$(ConfigurationName)\static" WarnInterfaces="true" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\..\..\lib\$(ConfigurationName)\static;..\..\..\..\..\precision\lib\$(ConfigurationName)\static;..\..\..\..\..\deltares_common\lib\$(ConfigurationName)\static" WarnInterfaces="true" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
 				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\extern;D:\sources\ds_src\engines\delftflow\packages\data_gdp\lib\Debug" IgnoreDefaultLibraryNames="libc.lib" GenerateDebugInformation="true" SubSystem="subSystemConsole" AdditionalDependencies="wsock32.lib netapi32.lib comctl32.lib user32.lib advapi32.lib comdlg32.lib gdi32.lib winspool.lib pbio.lib gribex.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
@@ -14,7 +14,7 @@
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="..\..\..\..\lib\$(ConfigurationName)\static;..\..\..\..\..\precision\lib\$(ConfigurationName)\static;..\..\..\..\..\utils_flow\lib\$(ConfigurationName)\static"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="..\..\..\..\lib\$(ConfigurationName)\static;..\..\..\..\..\precision\lib\$(ConfigurationName)\static;..\..\..\..\..\deltares_common\lib\$(ConfigurationName)\static"/>
 				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" SubSystem="subSystemConsole"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>

@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="utils_flow_version_number"
-	ProjectGUID="{F1C7AF24-1D5A-4AC5-A000-D7F3250A9AF5}"
-	RootNamespace="nefis_version_number"
+	Name="deltares_common_c"
+	ProjectGUID="{51065F4C-23D3-4C5F-AF5B-E70776409D7B}"
+	RootNamespace="util_mf_c"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -25,12 +25,9 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="call ..\..\..\..\scripts_lgpl\win32\make_revision.bat ..\..\..\.. ..\.. .\include\version_number.ini .\include\version_number.h.svn .\include\version_number.h&#x0D;&#x0A;if exist &quot;.\include\version_number.rc.svn&quot; call ..\..\..\..\scripts_lgpl\win32\make_revision.bat ..\..\..\.. ..\.. .\include\version_number.ini .\include\version_number.rc.svn .\include\version_number.rc&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
-				AdditionalDependencies=""
-				Outputs=""
 			/>
 			<Tool
 				Name="VCXMLDataGeneratorTool"
@@ -44,11 +41,9 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="./include"
-				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_WARNINGS"
-				GeneratePreprocessedFile="0"
-				MinimalRebuild="true"
-				BasicRuntimeChecks="3"
+				AdditionalIncludeDirectories="include;include/win32"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE"
+				MinimalRebuild="false"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
@@ -93,7 +88,6 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="call ..\..\..\..\scripts_lgpl\win32\make_revision.bat ..\..\..\.. ..\.. .\include\version_number.ini .\include\version_number.h.svn .\include\version_number.h&#x0D;&#x0A;if exist &quot;.\include\version_number.rc.svn&quot; call ..\..\..\..\scripts_lgpl\win32\make_revision.bat ..\..\..\.. ..\.. .\include\version_number.ini .\include\version_number.rc.svn .\include\version_number.rc&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -109,8 +103,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="./include"
-				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_WARNINGS"
+				AdditionalIncludeDirectories="include;include\win32"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
@@ -127,7 +121,6 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				LinkLibraryDependencies="true"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -156,23 +149,19 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\c2c.c"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						GeneratePreprocessedFile="0"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\src\f2c.c"
+				RelativePath=".\src\cutil.c"
 				>
 			</File>
 			<File
-				RelativePath=".\src\version.c"
+				RelativePath=".\src\getopt.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\getputarray.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\throwexception.cpp"
 				>
 			</File>
 		</Filter>
@@ -182,11 +171,31 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\include\version_number.h.svn"
+				RelativePath=".\include\getputarray.h"
 				>
 			</File>
 			<File
-				RelativePath=".\include\version_number.rc.svn"
+				RelativePath=".\include\platformst.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\win32\pthread.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\win32\sched.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\stream.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\throwexception.h"
+				>
+			</File>
+			<File
+				RelativePath=".\include\util_mf.h"
 				>
 			</File>
 		</Filter>
