@@ -33,7 +33,7 @@
 		<File RelativePath="src\malloc.f90"/>
 		<File RelativePath="src\MessageHandling.f90"/>
 		<File RelativePath="src\nan_check_module.f90"/>
-		<File RelativePath="src\newlun_nogdp.f90"/>
+      <File RelativePath="src\newunit.f90"/>
 		<File RelativePath="src\scannr.f90"/>
 		<File RelativePath="src\skipstarlines.f90"/>
 		<File RelativePath="src\small.f90"/>

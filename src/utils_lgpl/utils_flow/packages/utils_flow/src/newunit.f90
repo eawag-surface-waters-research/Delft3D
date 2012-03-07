@@ -1,4 +1,4 @@
-function newlun_nogdp( )
+function newunit( )
 !----- LGPL --------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -29,8 +29,12 @@ function newlun_nogdp( )
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-!    Function: This routine gets an available unit specifier. It
-!              returns an error if it didn't succeed.
+!    Function: This routine gets an unused logical unit specifier.
+!              It returns an error if it didn't succeed. The name
+!              of this function has been changed from newlun_nogdp
+!              to newunit to match the newunit keyword supported
+!              by Fortran 2008 in the OPEN call.
+!
 ! Method used:
 !
 !!--pseudo code and references--------------------------------------------------
@@ -39,8 +43,8 @@ function newlun_nogdp( )
 !
 ! Global variables
 !
-    integer         :: newlun_nogdp
-                                   !!  Ineteger function used to attach
+    integer         :: newunit
+                                   !!  Integer function used to attach
                                    !!  a new unit number to a var. LUN...
 !
 !
@@ -77,7 +81,7 @@ function newlun_nogdp( )
     !-----test if unit number is available
     !
     if (opened) then
-       newlun_nogdp = 0
+       newunit = 0
        write (*, *) ' *** FATAL ERROR - New unit number not available'
        write (*, *) ' Abnormal end'
        !
@@ -85,7 +89,7 @@ function newlun_nogdp( )
        !
        iexit = 2
     else
-       newlun_nogdp = lunit
+       newunit = lunit
     endif
     call vsemlun
-end function newlun_nogdp
+end function newunit

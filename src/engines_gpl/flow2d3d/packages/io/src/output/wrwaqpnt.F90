@@ -73,7 +73,7 @@
       integer(4) mnmax, notot              !!  nmax*mmax   and times kmax
       integer(4) nosegl                    !!  layer help variables
       logical    filex                     !!  TRUE if file exists
-      integer, external :: newlun_nogdp
+      integer, external :: newunit
       integer(4) lunout, lunaggr
       integer(4) istat                     !!  allocate return status
       character(300) message
@@ -81,7 +81,7 @@
 !
 !! executable statements -------------------------------------------------------
 !
-      lunout = newlun_nogdp()
+      lunout = newunit()
       mnmax  = nmax*mmax
       notot  = mnmax*kmax
                     allocate ( lgrid( nmax , mmax ) , stat=istat)    !!  lgrid-table is now a full matrix
@@ -153,7 +153,7 @@
       inquire ( file=flaggr, EXIST=filex )
       if ( filex ) then                          ! the dido aggregation file
          aggre = 1
-         lunaggr = newlun_nogdp()
+         lunaggr = newunit()
          open ( lunaggr , file=flaggr )
          read ( lunaggr , * , iostat=istat) n, m, k, i, j
          if ( istat /= 0) then

@@ -91,12 +91,12 @@
       integer  ( 4) kfmin, kfmax       !! help variables z-model
       character(256) filstring
       character(5) sf                  !! character variable for s(ediment)f(iles)
-      integer, external :: newlun_nogdp
+      integer, external :: newunit
       integer(4)    lunout
 !
 !! executable statements -------------------------------------------------------
 !
-      lunout = newlun_nogdp()
+      lunout = newunit()
       filstring = trim(filnam)//'hyd'
       open  ( lunout , file=trim(filstring) )
       write ( lunout , '(A      )' ) 'task      full-coupling'

@@ -54,7 +54,7 @@
       real(4), pointer :: cor(:,:)       !!  To deal with double precission
       integer(4) i, j                    !!  loop counters
       real   (4) x, y                    !!  for the first (x,y) point
-      integer, external :: newlun_nogdp
+      integer, external :: newunit
       integer(4) lunout
       integer(4) istat                   !!  allocate return status
 !
@@ -66,7 +66,7 @@
          return
       endif
 !
-      lunout = newlun_nogdp()
+      lunout = newunit()
 #ifdef HAVE_FC_FORM_BINARY
       open  ( lunout , file=trim(filnam)//'cco' , form = 'binary' )
 #else

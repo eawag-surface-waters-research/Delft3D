@@ -71,7 +71,7 @@ subroutine merge (inputfile, workdir, runid)
     integer                                             :: lunout
     integer                                             :: scanmode
     integer, external                                   :: createstream
-    integer, external                                   :: newlun_nogdp
+    integer, external                                   :: newunit
     integer       , dimension(:)  , allocatable         :: handles         ! data stream handles
     real(hp)                                            :: totalweight
     real(hp)      , dimension(:)  , allocatable         :: weight          ! weight of condition
@@ -110,7 +110,7 @@ subroutine merge (inputfile, workdir, runid)
    ! Output initialization
    !
    write(filnam,'(3a)') 'mormerge_', trim(runid), '.log'
-   lundia = newlun_nogdp()
+   lundia = newunit()
    open(lundia, file=trim(filnam), status='replace', action='write')
    write(lundia,'( a)') trim(version_full(5:))
    write(lundia,'( a)') ' '
@@ -198,7 +198,7 @@ subroutine merge (inputfile, workdir, runid)
    write(mmsyncfilnam,'(6a)') trim(workdir), slash, 'sync', slash, &
                                & 'merge', trim(runid)
    !write(*,*)'mmsyncfilnam:',trim(mmsyncfilnam)
-   lunfil = newlun_nogdp()
+   lunfil = newunit()
    open (lunfil, file=mmsyncfilnam, position='append', action='write', iostat=istat)
    if (istat /= 0) then
       write(*,*)' *** WARNING: unable to write in file ',trim(mmsyncfilnam)
@@ -289,7 +289,7 @@ subroutine merge (inputfile, workdir, runid)
       ! Synchronisation
       !
       if (mod(loopcount,10) == 0) then
-         lunfil = newlun_nogdp()
+         lunfil = newunit()
          open (lunfil, file=mmsyncfilnam, position='append', action='write', iostat=istat)
          if (istat /= 0) then
             write(*,*)' *** WARNING: unable to write in file ',trim(mmsyncfilnam)

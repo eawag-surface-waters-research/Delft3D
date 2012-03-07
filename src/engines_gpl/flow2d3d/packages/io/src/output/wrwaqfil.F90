@@ -170,7 +170,7 @@
       integer  (4) l                   !!  loop counter substances
       character(5) sf                  !!  character variable for s(ediment)f(iles)
       integer  (4) istat               !!  allocate return status
-      integer, external :: newlun_nogdp
+      integer, external :: newunit
 !
 !! executable statements -------------------------------------------------------
 !
@@ -348,81 +348,81 @@
 ! This part is copied for binary and unformatted
 #ifdef HAVE_FC_FORM_BINARY
 
-         lunvol    = newlun_nogdp()
+         lunvol    = newunit()
          open  ( lunvol , file=trim(filnam)//'vol' , form = 'binary' )
-         lunare    = newlun_nogdp()
+         lunare    = newunit()
          open  ( lunare , file=trim(filnam)//'are' , form = 'binary' )
-         lunflo    = newlun_nogdp()
+         lunflo    = newunit()
          open  ( lunflo , file=trim(filnam)//'flo' , form = 'binary' )
          if ( lsal .gt. 0 ) then
-            lunsal    = newlun_nogdp()
+            lunsal    = newunit()
             open  ( lunsal , file=trim(filnam)//'sal' , form = 'binary' )
          endif
          if ( ltem .gt. 0 ) then
-            luntem    = newlun_nogdp()
+            luntem    = newunit()
             open  ( luntem , file=trim(filnam)//'tem' , form = 'binary' )
          endif
          do l = 1, lsed
-            lunsed(l) = newlun_nogdp()
+            lunsed(l) = newunit()
             sf = "sed00"
             write( sf(4:5), '(i2.2)' ) l
             open  ( lunsed(l), file=trim(filnam)//sf  , form = 'binary' )
          enddo
          if ( ilaggr(kmax) .gt. 1 ) then
-            lunvdf    = newlun_nogdp()
+            lunvdf    = newunit()
             open  ( lunvdf , file=trim(filnam)//'vdf' , form = 'binary' )
          endif
-         luntau    = newlun_nogdp()
+         luntau    = newunit()
          open  ( luntau , file=trim(filnam)//'tau' , form = 'binary' )
- !       lunfmap   = newlun_nogdp()
+ !       lunfmap   = newunit()
  !       open  ( lunfmap, file=trim(filnam)//'fmap', form = 'binary' )
          if ( nsrc .gt. 0 ) then
-            lunsrctmp = newlun_nogdp()
+            lunsrctmp = newunit()
             open  ( lunsrctmp , file='TMP_'//trim(filnam)//'src' )
             if ( nowalk .gt. 0 ) then
-               lunwlk    = newlun_nogdp()
+               lunwlk    = newunit()
                open  ( lunwlk , file=trim(filnam)//'wlk' )
             endif
-            lunsrc    = newlun_nogdp()
+            lunsrc    = newunit()
             open  ( lunsrc , file=trim(filnam)//'src' )    ! final file
          endif
 #else
-         lunvol    = newlun_nogdp()
+         lunvol    = newunit()
          open  ( lunvol , file=trim(filnam)//'vol' , form = 'unformatted', access='stream')
-         lunare    = newlun_nogdp()
+         lunare    = newunit()
          open  ( lunare , file=trim(filnam)//'are' , form = 'unformatted', access='stream')
-         lunflo    = newlun_nogdp()
+         lunflo    = newunit()
          open  ( lunflo , file=trim(filnam)//'flo' , form = 'unformatted', access='stream')
          if ( lsal .gt. 0 ) then
-            lunsal    = newlun_nogdp()
+            lunsal    = newunit()
             open  ( lunsal , file=trim(filnam)//'sal' , form = 'unformatted', access='stream')
          endif
          if ( ltem .gt. 0 ) then
-            luntem    = newlun_nogdp()
+            luntem    = newunit()
             open  ( luntem , file=trim(filnam)//'tem' , form = 'unformatted', access='stream')
          endif
          do l = 1, lsed
-            lunsed(l) = newlun_nogdp()
+            lunsed(l) = newunit()
             sf = "sed00"
             write( sf(4:5), '(i2.2)' ) l
             open  ( lunsed(l), file=trim(filnam)//sf  , form = 'unformatted', access='stream')
          enddo
          if ( ilaggr(kmax) .gt. 1 ) then
-            lunvdf    = newlun_nogdp()
+            lunvdf    = newunit()
             open  ( lunvdf , file=trim(filnam)//'vdf' , form = 'unformatted', access='stream')
          endif
-         luntau    = newlun_nogdp()
+         luntau    = newunit()
          open  ( luntau , file=trim(filnam)//'tau' , form = 'unformatted', access='stream')
- !       lunfmap   = newlun_nogdp()
+ !       lunfmap   = newunit()
  !       open  ( lunfmap, file=trim(filnam)//'fmap', form = 'unformatted', access='stream')
          if ( nsrc .gt. 0 ) then
-            lunsrctmp = newlun_nogdp()
+            lunsrctmp = newunit()
             open  ( lunsrctmp , file='TMP_'//trim(filnam)//'src' )
             if ( nowalk .gt. 0 ) then
-               lunwlk    = newlun_nogdp()
+               lunwlk    = newunit()
                open  ( lunwlk , file=trim(filnam)//'wlk' )
             endif
-            lunsrc    = newlun_nogdp()
+            lunsrc    = newunit()
             open  ( lunsrc , file=trim(filnam)//'src' )    ! final file
          endif
 #endif

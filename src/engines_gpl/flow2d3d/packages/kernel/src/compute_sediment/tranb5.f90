@@ -67,7 +67,7 @@ subroutine tranb5(u         ,v         ,d50       ,d90       ,chezy     , &
 ! Local variables
 !
     integer                        :: ilun
-    integer, external              :: newlun_nogdp
+    integer, external              :: newunit
     logical, save                  :: crstr
     logical, save                  :: exist
     logical, save                  :: first
@@ -124,7 +124,7 @@ subroutine tranb5(u         ,v         ,d50       ,d90       ,chezy     , &
     if (first) then
        inquire (file = 'coef.inp', exist = exist)
        if (exist) then
-          ilun = newlun_nogdp()
+          ilun = newunit()
           open (ilun, file = 'coef.inp')
           read (ilun, *) faca
           read (ilun, *) facu

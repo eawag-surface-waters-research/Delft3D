@@ -83,14 +83,14 @@
       integer(4) nolay                      !!  number of layers in the model
       integer(4) nosegl, nobndl, noq3l
       real   (4), pointer :: surf(:), cc(:), dd(:)
-      integer, external :: newlun_nogdp
+      integer, external :: newunit
       integer(4) lunout
       integer(4) istat                      !!  allocate return status
 !
 !! executable statements -------------------------------------------------------
 !
 
-      lunout = newlun_nogdp()
+      lunout = newunit()
       nolay  = ilaggr(kmax)
       nosegl = noseg / nolay
       nobndl = nobnd / nolay

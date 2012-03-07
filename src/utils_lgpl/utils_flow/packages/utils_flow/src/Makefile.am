@@ -26,7 +26,7 @@ libutils_flow_a_SOURCES = \
          handles.f90 \
          tables.f90 \
          table_handles.f90 \
-         newlun_nogdp.f90 \
+         newunit.f90 \
          skipstarlines.f90 \
          small.f90 \
          stringsequal.f90 \

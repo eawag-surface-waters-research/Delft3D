@@ -74,7 +74,7 @@ subroutine osmom(hrms      ,diepte    ,tp        ,g         ,cr        , &
     integer                        :: lenpat
     integer                        :: lpathd
     integer                        :: utab
-    integer, external              :: newlun_nogdp
+    integer, external              :: newunit
     logical                        :: error
     real(fp)                       :: f0
     real(fp)                       :: f1
@@ -120,7 +120,7 @@ subroutine osmom(hrms      ,diepte    ,tp        ,g         ,cr        , &
        lpathd = index(pathd, ' ')
        if (lpathd==0) lpathd = lenpat + 1
        lpathd = lpathd - 1
-       utab = newlun_nogdp()
+       utab = newunit()
        open (utab, file = pathd(:lpathd) // 'tabmom')
        read (utab, *) iih, iit, dh, tstep
        do it = 1, iit
