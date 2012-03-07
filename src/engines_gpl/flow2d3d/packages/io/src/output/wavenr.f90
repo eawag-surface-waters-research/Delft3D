@@ -53,7 +53,6 @@ subroutine wavenr(h         ,t         ,k         ,ag        )
 !!--declarations----------------------------------------------------------------
     use precision
     use mathconsts
-    use globaldata
     !
     implicit none
     !
