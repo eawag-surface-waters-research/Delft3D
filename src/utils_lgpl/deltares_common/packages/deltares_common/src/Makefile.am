@@ -21,6 +21,7 @@ libdeltares_common_a_SOURCES = \
          buffer.f90 \
          bilin5.f90 \
          combinepaths.f90 \
+         deltares_common_version.F90 \
          juldat.f90 \
          scannr.f90 \
          handles.f90 \
@@ -37,4 +38,15 @@ libdeltares_common_a_SOURCES = \
 
 #-------------------------------------------------------------------------------
 #Libraries
+
+
+BUILT_SOURCES = ./always \
+	./deltares_common_version.F90 
+
+./always:
+	rm -rf ./deltares_common_version.F90 
+
+./deltares_common_version.F90:
+	$(top_srcdir)/scripts_lgpl/linux/update_version.sh $(srcdir)/deltares_common_version.F90 $(srcdir) ../include/version_number.ini $(top_builddir)
+
 

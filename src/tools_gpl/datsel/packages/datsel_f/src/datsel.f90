@@ -33,6 +33,7 @@ subroutine datsel ()
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use deltares_common_version_module
     implicit none
 ! Local parameters
 !
@@ -110,7 +111,7 @@ subroutine datsel ()
     character(16) , dimension(:)  , pointer  :: alfnam
     character(200)                           :: cas
     character(16)                            :: celnam
-    character(120)                           :: cident
+    character(256)                           :: cident
     character(64)                            :: elmdes
     character(16)                            :: elmqty
     character(8)                             :: elmtyp
@@ -142,7 +143,7 @@ subroutine datsel ()
     !     Identification string
     !
     cident = ' '
-    call getfullversionstring_UTILS_FLOW(cident)
+    call getfullversionstring_deltares_common(cident)
     call getfullversionstring_DATSEL(cident)
 
     k = len_trim(cident)
