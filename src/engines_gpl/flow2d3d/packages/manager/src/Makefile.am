@@ -30,7 +30,7 @@ FMODULES += \
     -I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics \
     -I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi \
     -I$(top_builddir)/utils_lgpl/meteo/packages/meteo/src \
-    -I$(top_builddir)/utils_lgpl/utils_flow/packages/utils_flow/src \
+    -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
     -I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src \
     -I$(top_builddir)/engines_gpl/flow2d3d/packages/io_dol_f/src \
     -I$(top_builddir)/engines_gpl/flow2d3d/packages/kernel/src/inichk
@@ -89,15 +89,15 @@ libtrisim_la_LIBADD = \
     $(top_builddir)/utils_lgpl/precision/packages/precision/src/libprecision.a \
     $(top_builddir)/utils_lgpl/semaphore/packages/semaphore/src/libsemaphore.a \
     $(top_builddir)/utils_lgpl/stream/packages/stream/src/libstream.a \
-    $(top_builddir)/utils_lgpl/utils_flow/packages/utils_flow/src/libutils_flow.a \
-    $(top_builddir)/utils_lgpl/utils_flow/packages/utils_flow_c/src/libutils_flow_c.a \
+    $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libdeltares_common.a \
+    $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_c/src/libdeltares_common_c.a \
     $(top_builddir)/utils_lgpl/delftio_sync/packages/delftio_sync_version_number/src/libdelftio_sync_version_number.a \
     $(top_builddir)/utils_lgpl/delftio/packages/delftio_version_number/src/libdelftio_version_number.a \
     $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_version_number/src/libesmfsm_version_number.a \
     $(top_builddir)/utils_lgpl/meteo/packages/meteo_version_number/src/libmeteo_version_number.a \
     $(top_builddir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.a \
     $(top_builddir)/utils_lgpl/stream/packages/stream_version_number/src/libstream_version_number.a \
-    $(top_builddir)/utils_lgpl/utils_flow/packages/utils_flow_version_number/src/libutils_flow_version_number.a \
+    $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_version_number/src/libdeltares_common_version_number.a \
     $(EXTERNALSOURCES) \
     $(MPILIBS) \
     $(FCLIBS)

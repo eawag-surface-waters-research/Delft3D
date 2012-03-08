@@ -17,7 +17,7 @@ lib_LIBRARIES = libkernel.a
 FMODULES += \
 	-I$(top_builddir)/engines_gpl/wave/packages/data/src \
 	-I$(top_builddir)/utils_lgpl/precision/packages/precision/src \
-	-I$(top_builddir)/utils_lgpl/utils_flow/packages/utils_flow/src
+	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
 	
 #-------------------------------------------------------------------------------
 #Sources

@@ -25,7 +25,7 @@ FMODULES += \
 	-I$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi \
-	-I$(top_builddir)/utils_lgpl/utils_flow/packages/utils_flow/src \
+	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
 	-I$(top_builddir)/utils_lgpl/constants/packages/mathconsts/src \
 	-I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src
 

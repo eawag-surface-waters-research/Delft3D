@@ -10,7 +10,7 @@ SUBDIRS = \
          delftio_sync \
          semaphore \
          stream \
-         utils_flow \
+         deltares_common \
          meteo \
          ec_module \
          d_hydro_lib

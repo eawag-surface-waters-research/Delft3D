@@ -31,10 +31,9 @@ mormerge_exe_SOURCES = \
 mormerge_exe_LDADD   = \
 $(top_builddir)/tools_gpl/mormerge/packages/mormerge_version_number/src/libmormerge_version_number.a \
 $(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src/libinifiles.a \
-$(top_builddir)/utils_lgpl/utils_flow/packages/utils_flow/src/libutils_flow.a \
-$(top_builddir)/utils_lgpl/utils_flow/packages/utils_flow_c/src/libutils_flow_c.a \
+$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libdeltares_common.a \
+$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_c/src/libdeltares_common_c.a \
 $(top_builddir)/utils_lgpl/semaphore/packages/semaphore/src/libsemaphore.a \
 $(top_builddir)/utils_lgpl/stream/packages/stream/src/libstream.a \
-$(top_builddir)/utils_lgpl/utils_flow/packages/utils_flow_version_number/src/libutils_flow_version_number.a \
 $(top_builddir)/utils_lgpl/stream/packages/stream_version_number/src/libstream_version_number.a \
 $(FCLIBS)

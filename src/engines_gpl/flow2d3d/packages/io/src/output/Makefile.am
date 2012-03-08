@@ -21,7 +21,7 @@ FINCLUDES += \
 FMODULES += \
 	-I$(top_builddir)/utils_lgpl/precision/include \
 	-I$(top_builddir)/utils_lgpl/constants/packages/mathconsts/src \
-	-I$(top_builddir)/utils_lgpl/utils_flow/packages/utils_flow/src \
+	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
 	-I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src \
 	-I$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90 \
 	-I$(top_builddir)/utils_lgpl/delftio_sync/packages/delftio_sync/src \
