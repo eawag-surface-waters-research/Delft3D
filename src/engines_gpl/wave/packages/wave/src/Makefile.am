@@ -58,7 +58,6 @@ $(top_builddir)/utils_lgpl/meteo/packages/meteo_version_number/src/libmeteo_vers
 $(top_builddir)/utils_lgpl/delftio/packages/delftio_version_number/src/libdelftio_version_number.a \
 $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_version_number/src/libesmfsm_version_number.a \
 $(top_builddir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.a \
-$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_version_number/src/libdeltares_common_version_number.a \
 $(EXTERNALSOURCES) \
 $(FCLIBS)
 

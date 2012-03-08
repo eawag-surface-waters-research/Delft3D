@@ -97,7 +97,6 @@ libtrisim_la_LIBADD = \
     $(top_builddir)/utils_lgpl/meteo/packages/meteo_version_number/src/libmeteo_version_number.a \
     $(top_builddir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.a \
     $(top_builddir)/utils_lgpl/stream/packages/stream_version_number/src/libstream_version_number.a \
-    $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_version_number/src/libdeltares_common_version_number.a \
     $(EXTERNALSOURCES) \
     $(MPILIBS) \
     $(FCLIBS)

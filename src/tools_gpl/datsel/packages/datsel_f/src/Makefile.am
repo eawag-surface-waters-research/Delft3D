@@ -1,6 +1,13 @@
 include $(top_srcdir)/common.am
 lib_LIBRARIES = libdatsel_f.a
 
+#-------------------------------------------------------------------------------
+#Includes
+FMODULES += \
+	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
+
+#-------------------------------------------------------------------------------
+
 libdatsel_f_a_SOURCES = \
 	precision.f90 \
 	co1cen.f90 \
@@ -15,3 +22,4 @@ libdatsel_f_a_SOURCES = \
 	vecmag.f90 \
 	pldep.F90 \
 	util.f90 
+
