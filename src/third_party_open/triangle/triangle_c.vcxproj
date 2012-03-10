@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{10773E35-F416-42D4-99D2-9BE1C81CEA65}</ProjectGuid>
+    <ProjectGuid>{A5638E14-9D2D-49ED-ACA3-A73833756311}</ProjectGuid>
     <RootNamespace>triangle_c</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
