@@ -1,4 +1,4 @@
-subroutine initsafe(gdp)
+subroutine initheat(gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -28,93 +28,32 @@ subroutine initsafe(gdp)
 !  $Id$
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
-!
 ! NONE
-!
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use sp_buffer
-    use message_module
-    use bedcomposition_module
     !
     use globaldata
     !
     implicit none
     !
     type(globdat),target :: gdp
-    !
-    integer :: istat
 !
 !! executable statements -------------------------------------------------------
 !
-    istat = 0
-    call tree_create  ( "Delft3D-FLOW input", gdp%input_tree )
-    nullify (gdp%mdfile_ptr)
-    !
-    call initadv2d     (gdp)
-    call initbcdat     (gdp)
-    call initbedformpar(gdp)
-    call initbubble    (gdp)
-    call initcline     (gdp)
-    call initculver    (gdp)
-    call initcoup      (gdp)
-    call initdischarge (gdp)
-    call initdefsub    (gdp)
-    call initdpmveg    (gdp)
-    call initdredge    (gdp)
-    call initeqtran    (gdp)
-    call initerosed    (gdp)
-    call initf0isf1    (gdp)
-    call initflwpar    (gdp)
-    call initfmtbcc    (gdp)
-    call initfmtbct    (gdp)
-    call initfmtdis    (gdp)
-    call initfourier   (gdp)
-    call initheat      (gdp)
-    call inithwid      (gdp)
-    call initincbc     (gdp)
-    call initincbcc    (gdp)
-    call initkeywtd    (gdp)
-    call initmassbal   (gdp)
-    call initmorpar    (gdp)
-    call initsedpar    (gdp)
-    call initstack     (gdp%messages)
-    istat = initmorlyr (gdp%gdmorlyr)
-    call initpostpr    (gdp)
-    call initrestart   (gdp)
-    call initprocs     (gdp)
-    call initrtc       (gdp)
-    call initscour     (gdp)
-    call initsnel      (gdp)
-    call initsobek     (gdp)
-    call initstations  (gdp)
-    call inittimers    (gdp)
-    call inittrachy    (gdp)
-    call inittrisol    (gdp)
-    call initupdbcc    (gdp)
-    call initupdbct    (gdp)
-    call initupddis    (gdp)
-    call initu_ppr     (gdp)
-    call initwaqpar    (gdp)
-    call initwrirst    (gdp)
-    call initwrline    (gdp)
-    call initz_initcg  (gdp)
-    call initzmodel    (gdp)
-    !
-    call sbuff_init
-    !
-    ! Delft3D-MOR
-    !
-    call initcrvout    (gdp)
-    !
-    call initdfparall  (gdp) 
-    ! 
-    ! Since GDP allocation has not yet succeeded, I can't call prterr(...,gdp) and d3stop(...)
-    !
-    if (istat /= 0) then
-       write(*,*) 'ERROR during initialization of GDP structure'
-       stop 1
-    endif
-end subroutine initsafe
+    nullify(gdp%gdheat%secchi)
+    nullify(gdp%gdheat%rhumarr)
+    nullify(gdp%gdheat%tairarr)
+    nullify(gdp%gdheat%clouarr)
+    nullify(gdp%gdheat%swrfarr)
+    nullify(gdp%gdheat%qeva_out)
+    nullify(gdp%gdheat%qco_out)
+    nullify(gdp%gdheat%qbl_out)
+    nullify(gdp%gdheat%qin_out)
+    nullify(gdp%gdheat%qnet_out)
+    nullify(gdp%gdheat%hlc_out)
+    nullify(gdp%gdheat%hfree_out)
+    nullify(gdp%gdheat%efree_out)
+    nullify(gdp%gdheat%qmis_out)
+end subroutine initheat
