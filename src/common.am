@@ -8,10 +8,14 @@
 #   17 nov 11
 #-------------------------------------------------------------------------------
 
+# Remove .exe extension (defaults to .exe on cygwin). 
+# .exe is already done by hand and if you don't specify this you get .exe.exe files.
+# TODO: remove .exe from executables in makefiles and use the .exe which is set
+# automatically on windows builds (cygwin)
+EXEEXT=
 
 #-------------------------------------------------------------------------------
 # C/C++ flags
-
 AM_CFLAGS = \
     -std=c99 \
     -D_GNU_SOURCE \
