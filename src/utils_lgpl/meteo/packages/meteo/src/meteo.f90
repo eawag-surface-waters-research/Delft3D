@@ -914,17 +914,6 @@ function getmeteoval(runid, quantity, time, mfg, nfg, &
                            success = .false.
                            return
                         endif
-                        !
-                        ! now transform to global arrays v0, v1
-                        i1 = i1 + mfg - 1
-                        j1 = j1 + nfg - 1
-                        if (i1 > size(v0,1) .or. j1 > size(v0,2)) then
-                           write(tex,'(2f10.1)') x1,y1
-                           write(meteomessage,'(2a)') 'Flow point outside global meteo grid x,y,:',trim(tex)
-                           success = .false.
-                           return
-                        endif                        
-                        
                         u(1) = v0(i1  , j1  , 1)
                         u(2) = v0(i1+1, j1  , 1)
                         u(3) = v0(i1+1, j1+1, 1)

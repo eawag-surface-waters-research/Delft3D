@@ -538,7 +538,7 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
        do m = 2, mmax - 1
           md = m - 1
           mu = m + 1
-          if (kcs(n, m) == 1) then   
+          if (abs(kcs(n, m)) == 1) then   
              if (sferic) then
                 xndm  = xcor(nd,m)
                 xnmd  = xcor(n,md)
