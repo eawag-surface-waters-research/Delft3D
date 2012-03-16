@@ -49,7 +49,7 @@ character(256) :: versionString
 !
 ! body
 versionString = '@(#)Deltares, version_number, version 1.00.00.00; Sep 22, 2008'
-if (iargc() /= 4) then
+if (COMMAND_ARGUMENT_COUNT() /= 4) then
    call printUsage()
    stop
 endif
@@ -57,10 +57,10 @@ builtNumber = ' '
 vnInputFile = ' '
 inputFile   = ' '
 outputFile  = ' '
-call getarg(1,builtNumber)
-call getarg(2,vnInputFile)
-call getarg(3,inputFile)
-call getarg(4,outputFile)
+call GET_COMMAND_ARGUMENT(1,builtNumber)
+call GET_COMMAND_ARGUMENT(2,vnInputFile)
+call GET_COMMAND_ARGUMENT(3,inputFile)
+call GET_COMMAND_ARGUMENT(4,outputFile)
 major    = '**'
 minor    = '**'
 revision = '**'

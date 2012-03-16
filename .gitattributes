@@ -1912,6 +1912,7 @@ src/third_party_open/version_number/packages/version_number/src/Makefile.am -tex
 src/third_party_open/version_number/packages/version_number/src/version_number.f90 -text
 src/third_party_open/version_number/packages/version_number/version_number.vfproj -text
 src/third_party_open/version_number/version_number.sln -text
+src/third_party_open/version_number/version_number_2010.sln -text
 src/tools_gpl/Makefile.am -text
 src/tools_gpl/datsel/Makefile.am -text
 src/tools_gpl/datsel/packages/Makefile.am -text
