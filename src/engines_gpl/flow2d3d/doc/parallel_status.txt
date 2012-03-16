@@ -12,9 +12,9 @@ wrong output
 ============
 his-file:
     his-const
-        XYTRA       Worden per partitie bepaald op basis van lokale m/n indices
-                    Dat zal mis gaan als een crosssectie in meerdere partities ligt
-                    Oplossing: gather_filter_merge routine schrijven die per crosssectie de correcte xylocaties eruit vist
+        XYTRA       Are set for each partition using local m/n indices
+                    Will be wrong when a crosssection lies in more than one partition
+                    Solution: write a routine gather_filter_merge collection the correct xy-locations per crosssection
 map-file:
     TEMPOUT         Wordt niet geschreven. Ik weet niet wat er mis gaat.
                     Oplossing: als TEMPOUT nog nodig is, moet er naar gekeken worden
