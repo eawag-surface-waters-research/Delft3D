@@ -257,7 +257,7 @@ subroutine SyncRtcFlow_Send(RtcStatus)
   if (RtcStatus .ge. 0) then
     ! Convert/copy data
     itemp = 933
-    open(itemp,file='rtc_d3d.dat',access='append')
+    open(itemp,file='rtc_d3d.dat',position='append')
     write(itemp,*) ' put data for timestep X for ', numBarriers, ' locations'
     do i = 1, numBarriers
       DataValuesOut(i, 1) = ValBar(1, i)

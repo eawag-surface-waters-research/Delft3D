@@ -52,7 +52,7 @@ function Dio2DFWriteHeaderNefis(f2D) result(retVal)
     ! externals
     integer, external :: defcel, defelm, defgrp, credat, &
                          putelt, putels, flsdef
-    integer, external :: Dio3DDefineValuesNefis
+    logical, external :: Dio3DDefineValuesNefis
 
     ! locals
 

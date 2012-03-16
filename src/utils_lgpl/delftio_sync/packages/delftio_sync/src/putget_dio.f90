@@ -104,7 +104,7 @@
       integer                  Nr_Variables
       integer                  Nr_Locations
       integer                  Nr_Times
-      integer                  getResult
+      logical                  getResult
 !
       if ( first ) then
 !               Open data stream
