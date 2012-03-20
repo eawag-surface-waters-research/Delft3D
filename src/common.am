@@ -22,7 +22,6 @@ AM_CFLAGS = \
     -DSTR_LEN_AT_END
 
 AM_CXXFLAGS = \
-    -std=c++98 \
     -D_GNU_SOURCE \
     -DSTR_LEN_AT_END
 

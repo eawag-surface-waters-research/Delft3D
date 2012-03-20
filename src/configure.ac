@@ -67,6 +67,7 @@ fi
 AC_LANG_PUSH([C++])
 dnl Check for MPI (sets MPIFC, MPILIBS, HAVE_MPI)
 ACX_MPI
+AC_CHECK_FUNCS([strdup vsnprintf])
 AC_LANG_POP
 
 ## This is copied from the libtool examples
@@ -175,7 +176,7 @@ AC_ARG_ENABLE(double,
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([libgen.h arpa/inet.h fcntl.h netdb.h netinet/in.h stdlib.h string.h sys/socket.h sys/time.h unistd.h malloc.h malloc/malloc.h])
+AC_CHECK_HEADERS([libgen.h arpa/inet.h fcntl.h netdb.h netinet/in.h stdlib.h string.h sys/socket.h sys/time.h errno.h unistd.h malloc.h malloc/malloc.h sys/ipc.h sys/shm.h])
 
 #check for jni.h (for later)
 #AC_JNI_INCLUDE_DIR
@@ -186,7 +187,7 @@ AC_CHECK_TYPES([struct shm_info])
 #Check for expat
 AC_CHECK_HEADER(expat.h,, [AC_MSG_ERROR([Compiler can't find <expat.h>])])
 AC_CHECK_LIB(expat, XML_Parse,, [AC_MSG_ERROR([Compiler can't find libexpat])])
-
+AC_FUNC_VPRINTF
 # When using the Intel Fortran compiler, check for the needed libraries
 ####if test $FC == ifort; then
 ####    AC_CHECK_LIB([irc], [main], [HAVE_LIBirc=1] [FCLIBS="$FCLIBS -lirc"],)

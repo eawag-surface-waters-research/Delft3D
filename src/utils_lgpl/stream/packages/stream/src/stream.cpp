@@ -820,11 +820,11 @@ Stream::lookup_dotaddr (
     if ((hostinfo = gethostbyaddr ((char *)&addr, 4, AF_INET)) == NULL)
         error ("Cannot get hostname of \"%s\" (0x%x) -- error code: %d\n", ipdotaddr, addr, WSAGetLastError());
 #else
-    if ((hostinfo = gethostbyaddr (&addr, sizeof addr, AF_INET)) == NULL)
+    if ((hostinfo = gethostbyaddr ((char *)&addr, sizeof addr, AF_INET)) == NULL)
         error ("Cannot get hostname of \"%s\" (0x%x)\n", ipdotaddr, addr);
 #endif
 
-    char * cp = hostinfo->h_name;
+    const char * cp = hostinfo->h_name;
     char * dp = hostname;
     while (cp != NULL && *cp != '\0' && *cp != '.')
         *dp++ = *cp++;
