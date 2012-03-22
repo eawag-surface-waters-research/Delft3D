@@ -3367,6 +3367,7 @@ src/utils_lgpl/nefis/doc/NL[!!-~]Memo[!!-~]061020.doc -text
 src/utils_lgpl/nefis/doc/nefis5_testen.xls -text
 src/utils_lgpl/nefis/nefis.sln -text
 src/utils_lgpl/nefis/nefis5.dsw -text
+src/utils_lgpl/nefis/nefis_vs2010.sln -text
 src/utils_lgpl/nefis/packages/Makefile.am -text
 src/utils_lgpl/nefis/packages/nefis/Makefile.am -text
 src/utils_lgpl/nefis/packages/nefis/include/btps.h -text
@@ -3424,6 +3425,7 @@ src/utils_lgpl/nefis/scripts/linux/regression_07.sh -text
 src/utils_lgpl/nefis/scripts/win32/install.bat -text
 src/utils_lgpl/nefis/tests/All[!!-~]test/All[!!-~]test.dsp -text
 src/utils_lgpl/nefis/tests/All[!!-~]test/All[!!-~]test.vcproj -text
+src/utils_lgpl/nefis/tests/All[!!-~]test/All[!!-~]test.vcxproj -text
 src/utils_lgpl/nefis/tests/Makefile.am -text
 src/utils_lgpl/nefis/tests/demo_00/Makefile.am -text
 src/utils_lgpl/nefis/tests/demo_00/demo_00.dsp -text
@@ -3450,17 +3452,20 @@ src/utils_lgpl/nefis/tests/test_00/Test_00.dsp -text
 src/utils_lgpl/nefis/tests/test_00/pre_c00.res -text
 src/utils_lgpl/nefis/tests/test_00/test_00.c -text
 src/utils_lgpl/nefis/tests/test_00/test_00.vcproj -text
+src/utils_lgpl/nefis/tests/test_00/test_00.vcxproj -text
 src/utils_lgpl/nefis/tests/test_01/Makefile.am -text
 src/utils_lgpl/nefis/tests/test_01/pre_c01.res -text
 src/utils_lgpl/nefis/tests/test_01/test_01.c -text
 src/utils_lgpl/nefis/tests/test_01/test_01.dsp -text
 src/utils_lgpl/nefis/tests/test_01/test_01.vcproj -text
+src/utils_lgpl/nefis/tests/test_01/test_01.vcxproj -text
 src/utils_lgpl/nefis/tests/test_01/vsd.ksh -text
 src/utils_lgpl/nefis/tests/test_02/Makefile.am -text
 src/utils_lgpl/nefis/tests/test_02/pre_c02.res -text
 src/utils_lgpl/nefis/tests/test_02/test_02.c -text
 src/utils_lgpl/nefis/tests/test_02/test_02.dsp -text
 src/utils_lgpl/nefis/tests/test_02/test_02.vcproj -text
+src/utils_lgpl/nefis/tests/test_02/test_02.vcxproj -text
 src/utils_lgpl/nefis/tests/test_02/vsd.ksh -text
 src/utils_lgpl/nefis/tests/test_03/Makefile.am -text
 src/utils_lgpl/nefis/tests/test_03/pre_c03.res -text
@@ -3468,6 +3473,7 @@ src/utils_lgpl/nefis/tests/test_03/test_03.c -text
 src/utils_lgpl/nefis/tests/test_03/test_03.c.bak -text
 src/utils_lgpl/nefis/tests/test_03/test_03.dsp -text
 src/utils_lgpl/nefis/tests/test_03/test_03.vcproj -text
+src/utils_lgpl/nefis/tests/test_03/test_03.vcxproj -text
 src/utils_lgpl/nefis/tests/test_03/vsd.ksh -text
 src/utils_lgpl/nefis/tests/test_04/Makefile.am -text
 src/utils_lgpl/nefis/tests/test_04/Test_04.dsp -text
@@ -3509,6 +3515,7 @@ src/utils_lgpl/nefis/tests/test_09/test_09.dsp -text
 src/utils_lgpl/nefis/tests/test_09/test_09.f -text
 src/utils_lgpl/nefis/tests/test_09/vsd.ksh -text
 src/utils_lgpl/nefis/tests/test_10/Makefile.am -text
+src/utils_lgpl/nefis/tests/test_10/Test_10.vcxproj -text
 src/utils_lgpl/nefis/tests/test_10/pre_c10.res -text
 src/utils_lgpl/nefis/tests/test_10/test_10.c -text
 src/utils_lgpl/nefis/tests/test_10/test_10.dsp -text
@@ -3521,6 +3528,7 @@ src/utils_lgpl/nefis/tests/test_11/sewage_1.wdi -text
 src/utils_lgpl/nefis/tests/test_11/test_11.c -text
 src/utils_lgpl/nefis/tests/test_11/test_11.dsp -text
 src/utils_lgpl/nefis/tests/test_11/test_11.vcproj -text
+src/utils_lgpl/nefis/tests/test_11/test_11.vcxproj -text
 src/utils_lgpl/nefis/tests/test_11/untitled.wdf -text
 src/utils_lgpl/nefis/tests/test_11/untitled.wdi -text
 src/utils_lgpl/nefis/tests/test_12/Makefile.am -text
@@ -3533,6 +3541,7 @@ src/utils_lgpl/nefis/tests/test_13/pre_c13.res -text
 src/utils_lgpl/nefis/tests/test_13/test_13.c -text
 src/utils_lgpl/nefis/tests/test_13/test_13.dsp -text
 src/utils_lgpl/nefis/tests/test_13/test_13.vcproj -text
+src/utils_lgpl/nefis/tests/test_13/test_13.vcxproj -text
 src/utils_lgpl/nefis/tests/test_14/Makefile.am -text
 src/utils_lgpl/nefis/tests/test_14/Test_14.vfproj -text
 src/utils_lgpl/nefis/tests/test_14/pre_c14.res -text
@@ -3554,6 +3563,7 @@ src/utils_lgpl/nefis/tests/test_17/pre_c17.res -text
 src/utils_lgpl/nefis/tests/test_17/test_17.c -text
 src/utils_lgpl/nefis/tests/test_17/test_17.dsp -text
 src/utils_lgpl/nefis/tests/test_17/test_17.vcproj -text
+src/utils_lgpl/nefis/tests/test_17/test_17.vcxproj -text
 src/utils_lgpl/nefis/tests/test_17/trim-f34.dat -text
 src/utils_lgpl/nefis/tests/test_17/trim-f34.dat.org -text
 src/utils_lgpl/nefis/tests/test_17/trim-f34.def -text svneol=unset#unset
@@ -3563,12 +3573,15 @@ src/utils_lgpl/nefis/tests/test_18/pre_c18.res -text
 src/utils_lgpl/nefis/tests/test_18/test_18.c -text
 src/utils_lgpl/nefis/tests/test_18/test_18.dsp -text
 src/utils_lgpl/nefis/tests/test_18/test_18.vcproj -text
+src/utils_lgpl/nefis/tests/test_18/test_18.vcxproj -text
 src/utils_lgpl/nefis/tests/test_19/Makefile.am -text
 src/utils_lgpl/nefis/tests/test_19/pre_c19.res -text
 src/utils_lgpl/nefis/tests/test_19/test_19.c -text
 src/utils_lgpl/nefis/tests/test_19/test_19.dsp -text
 src/utils_lgpl/nefis/tests/test_19/test_19.vcproj -text
+src/utils_lgpl/nefis/tests/test_19/test_19.vcxproj -text
 src/utils_lgpl/nefis/tests/test_999/Test_999.vcproj -text
+src/utils_lgpl/nefis/tests/test_999/Test_999.vcxproj -text
 src/utils_lgpl/nefis/tests/test_999/cp5.bat -text
 src/utils_lgpl/nefis/tests/test_999/datac16.dat -text
 src/utils_lgpl/nefis/tests/test_999/datac16.def -text svneol=unset#unset
