@@ -4,7 +4,7 @@ bin_PROGRAMS = nesthd2
 #-------------------------------------------------------------------------------
 #Includes
 FINCLUDES += \
-        -I$(top_srcdir)/tools/nesthd2/packages/nesthd2/include
+        -I$(top_srcdir)/tools_gpl/nesthd2/packages/nesthd2/include
 
 nesthd2_SOURCES = \
         nesthd2_version.F90 \
@@ -38,14 +38,13 @@ nesthd2_SOURCES = \
 #Libraries
 
 nesthd2_LDADD = \
-        $(top_srcdir)/tools/nesthd2/packages/nesthd2_f/src/libnesthd2_f.a \
-        $(top_srcdir)/tools/nesthd2/packages/nesthd2_version_number/src/libnesthd2_version_number.a \
         $(top_srcdir)/utils_lgpl/nefis/packages/nefis/src/libnefis.a \
         $(top_srcdir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.a \
         $(top_srcdir)/utils_lgpl/deltares_common/packages/deltares_common/src/libdeltares_common.a \
         $(top_srcdir)/utils_lgpl/deltares_common/packages/deltares_common_c/src/libdeltares_common_c.a \
         -ldl \
-        $(FCLIBS) -lifcore -limf
+        $(FCLIBS) $(FCLIBS_ADDITIONAL)
+
 BUILT_SOURCES = ./always \
 	./nesthd2_version.F90 
 

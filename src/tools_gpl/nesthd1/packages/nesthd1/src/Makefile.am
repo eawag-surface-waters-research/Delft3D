@@ -4,7 +4,7 @@ bin_PROGRAMS = nesthd1
 #-------------------------------------------------------------------------------
 #Includes
 FINCLUDES += \
-        -I$(top_srcdir)/tools/nesthd1/packages/nesthd1/include \
+        -I$(top_srcdir)/tools_gpl/nesthd1/packages/nesthd1/include \
         -I$(top_srcdir)/utils_lgpl/esmfsm/include 
 
 nesthd1_SOURCES = \
@@ -40,8 +40,6 @@ nesthd1_SOURCES = \
 #Libraries
 
 nesthd1_LDADD = \
-        $(top_srcdir)/tools/nesthd1/packages/nesthd1_f/src/libnesthd1_f.a \
-        $(top_srcdir)/tools/nesthd1/packages/nesthd1_version_number/src/libnesthd1_version_number.a \
         $(top_srcdir)/utils_lgpl/nefis/packages/nefis/src/libnefis.a \
         $(top_srcdir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.a \
         $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libfsm.a \
@@ -51,7 +49,7 @@ nesthd1_LDADD = \
         $(top_srcdir)/utils_lgpl/deltares_common/packages/deltares_common/src/libdeltares_common.a \
         $(top_srcdir)/utils_lgpl/deltares_common/packages/deltares_common_c/src/libdeltares_common_c.a \
         -ldl \
-        $(FCLIBS) -lifcore -limf
+        $(FCLIBS) $(FCLIBS_ADDITIONAL)
 
 
 BUILT_SOURCES = ./always \

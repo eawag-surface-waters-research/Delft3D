@@ -192,7 +192,7 @@
 
       call reargf(lun(3)   ,r(x2)  ,r(y2) ,mmax2  ,nmax2  ,mc2   ,nc2   , &
                &  spher_det)
-      if (spher_crs .ne. spher_det) stop 'Coarse and detailled model should be in the same coordinate system'
+      if (spher_crs .neqv. spher_det) stop 'Coarse and detailled model should be in the same coordinate system'
 
       call zeroi1(i(ipx)   ,maxnrp)
       call zeroi1(i(ipy)   ,maxnrp)

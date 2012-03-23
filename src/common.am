@@ -57,7 +57,6 @@ AM_FCFLAGS+=$(OPENMP_FCFLAGS)
 #   Fortran 77 flags
 
 AM_FFLAGS = \
-    -extend-source 132 \
     $(FINCLUDES) \
     $(FMODULES)
 
