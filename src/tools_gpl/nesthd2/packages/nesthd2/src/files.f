@@ -40,9 +40,9 @@
 ! subroutines called :
 !***********************************************************************
 
-      integer       lun    (7)
-      character*(*) filnam (7)
-	character*(*) CIDENT
+      integer       lun    (*)
+      character*(*) filnam (*)
+	  character*(*) CIDENT
       logical      ex
 
       write (*,'(/, 2a)') ' ', 'Overall model'

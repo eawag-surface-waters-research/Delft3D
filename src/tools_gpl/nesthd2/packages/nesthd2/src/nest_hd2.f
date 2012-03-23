@@ -54,7 +54,7 @@
 !***********************************************************************
       integer       itdate
 
-      integer       lun   (  6   ), cgen  (  6   )
+      integer       lun   (  *   ), cgen  (  6   )
 
       integer       mcbsp (nobnd ,2     )       ,
      *              ncbsp (nobnd ,2     )       ,
