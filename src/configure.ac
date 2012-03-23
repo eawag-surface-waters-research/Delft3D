@@ -355,6 +355,14 @@ tools_gpl/mormerge/packages/mormerge/Makefile
 tools_gpl/mormerge/packages/mormerge/src/Makefile
 tools_gpl/mormerge/packages/mormerge_version_number/Makefile
 tools_gpl/mormerge/packages/mormerge_version_number/src/Makefile
+tools_gpl/nesthd1/Makefile.am
+tools_gpl/nesthd1/packages/Makefile.am
+tools_gpl/nesthd1/packages/nesthd1/Makefile.am
+tools_gpl/nesthd1/packages/nesthd1/src/Makefile.am
+tools_gpl/nesthd2/Makefile.am
+tools_gpl/nesthd2/packages/Makefile.am
+tools_gpl/nesthd2/packages/nesthd2/Makefile.am
+tools_gpl/nesthd2/packages/nesthd2/src/Makefile.am
 tools_gpl/vs/Makefile
 tools_gpl/vs/packages/Makefile
 tools_gpl/vs/packages/vs/Makefile

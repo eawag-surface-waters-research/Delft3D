@@ -4,4 +4,6 @@ SUBDIRS = \
 	kubint \
 	lint \
 	mormerge \
+	nesthd1 \
+	nesthd2 \
 	vs
