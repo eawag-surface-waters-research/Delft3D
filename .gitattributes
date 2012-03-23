@@ -2036,13 +2036,13 @@ src/tools_gpl/mormerge/packages/mormerge_version_number/src/version.c -text
 src/tools_gpl/nesthd1/Makefile.am -text
 src/tools_gpl/nesthd1/packages/Makefile.am -text
 src/tools_gpl/nesthd1/packages/nesthd1/Makefile.am -text
-src/tools_gpl/nesthd1/packages/nesthd1/include/Makefile.am -text
 src/tools_gpl/nesthd1/packages/nesthd1/include/diagno.inc -text
 src/tools_gpl/nesthd1/packages/nesthd1/include/dimnhd1.inc -text
 src/tools_gpl/nesthd1/packages/nesthd1/include/params.inc -text
 src/tools_gpl/nesthd1/packages/nesthd1/include/tri-dyn.inc -text
 src/tools_gpl/nesthd1/packages/nesthd1/include/version_number.ini -text
 src/tools_gpl/nesthd1/packages/nesthd1/nesthd1.vfproj -text
+src/tools_gpl/nesthd1/packages/nesthd1/nesthd1_vs2010.vfproj -text
 src/tools_gpl/nesthd1/packages/nesthd1/src/Makefile.am -text
 src/tools_gpl/nesthd1/packages/nesthd1/src/avundf.f -text
 src/tools_gpl/nesthd1/packages/nesthd1/src/dattim.f90 -text
@@ -2075,11 +2075,11 @@ src/tools_gpl/nesthd1/packages/nesthd1/src/zero.f -text
 src/tools_gpl/nesthd2/Makefile.am -text
 src/tools_gpl/nesthd2/packages/Makefile.am -text
 src/tools_gpl/nesthd2/packages/nesthd2/Makefile.am -text
-src/tools_gpl/nesthd2/packages/nesthd2/include/Makefile.am -text
 src/tools_gpl/nesthd2/packages/nesthd2/include/diagno.inc -text
 src/tools_gpl/nesthd2/packages/nesthd2/include/procs.inc -text
 src/tools_gpl/nesthd2/packages/nesthd2/include/version_number.ini -text
 src/tools_gpl/nesthd2/packages/nesthd2/nesthd2.vfproj -text
+src/tools_gpl/nesthd2/packages/nesthd2/nesthd2_vs2010.vfproj -text
 src/tools_gpl/nesthd2/packages/nesthd2/src/Makefile.am -text
 src/tools_gpl/nesthd2/packages/nesthd2/src/addinp.f -text
 src/tools_gpl/nesthd2/packages/nesthd2/src/check.f90 -text
