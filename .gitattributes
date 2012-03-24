@@ -2651,6 +2651,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/update_option_positions.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/updateuicontrols.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/usrdeffil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/uv2cen.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/valuemap.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/var2str.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/vardiff.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/vec2str.m -text
