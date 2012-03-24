@@ -2291,6 +2291,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/colormaps/summer.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/winter.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/wjet.clrmap -text
 src/tools_lgpl/matlab/quickplot/progsrc/colormaps/xhsv.clrmap -text
+src/tools_lgpl/matlab/quickplot/progsrc/colquiver.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/columnpatch.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/compileonly/make_eco_exe.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/compileonly/make_exe.m -text
@@ -2444,7 +2445,6 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/cfx1block.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/cfxfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/clip2single.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/clockwise.m -text
-src/tools_lgpl/matlab/quickplot/progsrc/private/colquiver.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/compthresholds.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/computecomponent.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/contourfcorr.m -text
