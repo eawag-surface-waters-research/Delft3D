@@ -511,9 +511,19 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        enddo
     endif
     if (parll .and. .not.yestdd) then
-       nn  = 0
-       nn_t  =0       
-       nsd = 0
+       !
+       ! Store the original global mnbnd
+       ! Only mnbnd_global(1:4,:) is set yet, but that's all that's needed
+       !
+       allocate (gdp%gdbcdat%mnbnd_global(7, mxdnto), stat=istat)
+       if (istat /= 0) then
+          call prterr(lundia, 'P004', 'memory alloc error in rdbndd(mnbnd_global)')
+          call d3stop(1, gdp)
+       endif
+       gdp%gdbcdat%mnbnd_global = mnbnd
+       nn    = 0
+       nn_t  = 0       
+       nsd   = 0
        nsd_t = 0
        do n = 1, nto
           !

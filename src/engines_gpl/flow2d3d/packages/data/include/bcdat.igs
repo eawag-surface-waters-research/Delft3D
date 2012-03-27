@@ -27,23 +27,25 @@
 !  $Id$
 !  $HeadURL$$
 !-------------------------------------------------------------------------------
-    type gd_bcdat
-!
-       real(fp)                                :: timtap
-       real(fp)                                :: depbnd
-       integer                                 :: nmskf
-       integer                                 :: nmskl
-       integer                                 :: mmskf
-       integer                                 :: mmskl
-       integer                                 :: ncomp
-       integer                                 :: nsplit
-       integer     , dimension(:)    , pointer :: pindex    ! converts component number in internal database to component number
-                                                            ! used in hydrbc, hydrbcf and compnames
-       integer     , dimension(:)    , pointer :: bct_order ! stores the original order of the timeseries-boundaries in the bct file
-                                                            ! used for parallel
-       integer     , dimension(:)    , pointer :: ext_bnd   ! mask array to identify boundaries whose information is prescribed by external components (e.g. SobekSIM) instead of the (dummy) input file
-       character(1)                            :: ascon     ! 'Y' if open bnd. contains type 'A'
-       character(8), dimension(:)    , pointer :: compnames
-       real(fp)    , dimension(:,:,:), pointer :: hydrbcf
-!
-    end type gd_bcdat
+type gd_bcdat
+   real(fp)                                :: timtap
+   real(fp)                                :: depbnd
+   integer                                 :: nmskf
+   integer                                 :: nmskl
+   integer                                 :: mmskf
+   integer                                 :: mmskl
+   integer                                 :: ncomp
+   integer                                 :: nsplit
+   integer     , dimension(:)    , pointer :: pindex          ! converts component number in internal database to component number used in hydrbc, hydrbcf and compnames
+   integer     , dimension(:)    , pointer :: bct_order       ! stores the original order of the timeseries-boundaries in the bct file
+                                                              ! used for parallel
+   integer     , dimension(:,:)  , pointer :: mnbnd_global    ! Copy of mnbnd containing the boundary indices of all boundaries in global indices
+                                                              ! used for parallel
+   integer     , dimension(:)    , pointer :: ext_bnd         ! mask array to identify boundaries whose information is prescribed by external components (e.g. SobekSIM) instead of the (dummy) input file
+   character(1)                            :: ascon           ! 'Y' if open bnd. contains type 'A'
+   character(8), dimension(:)    , pointer :: compnames
+   real(fp)    , dimension(:,:)  , pointer :: dist_pivot_part ! When running parallel and boundary "ibnd" has pivot point(s) outside the partition:
+                                                              ! dist_pivot_part(1,ibnd) : distance between start-pivot-point and the partition, along the open boundary
+                                                              ! dist_pivot_part(2,ibnd) : distance between end  -pivot-point and the partition, along the open boundary
+   real(fp)    , dimension(:,:,:), pointer :: hydrbcf
+end type gd_bcdat

@@ -64,6 +64,7 @@ libkernel_inichk_la_SOURCES = \
          inchkr.f90 \
          increm.f90 \
          inibcc.f90 \
+         inibcparl.f90 \
          inibcq.f90 \
          inibct.f90 \
          inibnd.f90 \

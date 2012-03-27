@@ -1,8 +1,8 @@
 subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                 & kmax      ,nto       ,nrob      ,lstsc     ,noroco    , &
                 & tprofc    ,itbcc     ,mnbnd     ,nob       ,kstp      , &
-                & kfsmin    ,kfsmax    ,rob       ,rbnd      ,xz        , &
-                & yz        ,dps       ,s0        ,sig       ,procbc    , &
+                & kfsmin    ,kfsmax    ,rob       ,rbnd      ,guu       , &
+                & gvv       ,dps       ,s0        ,sig       ,procbc    , &
                 & zstep     ,dzs1      ,zk        ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -47,101 +47,115 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use dfparall
     use globaldata
     use m_openda_exchange_items, only : get_openda_buffer
     !
     implicit none
     !
+    ! Enumeration
+    !
+    integer, parameter :: start_pivot = 1
+    integer, parameter ::   end_pivot = 2
+    !
     type(globdat),target :: gdp
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer               , pointer :: ltem
-    integer               , pointer :: lsal
-    real(fp)              , pointer :: tstop
-    integer               , pointer :: itfinish
-    integer               , pointer :: lunbcc
-    logical               , pointer :: newstp
+    integer                 , pointer :: ltem
+    integer                 , pointer :: lsal
+    real(fp)                , pointer :: tstop
+    integer                 , pointer :: itfinish
+    integer                 , pointer :: lunbcc
+    logical                 , pointer :: newstp
+    real(fp), dimension(:,:), pointer :: dist_pivot_part
 !
 ! Global variables
 !
-    integer                                                                          :: kmax !  Description and declaration in esm_alloc_int.f90
-    integer                                                                          :: lstsc !  Description and declaration in dimens.igs
-    integer                                                                          :: lundia !  Description and declaration in inout.igs
-    integer                                                                          :: mmax !  Description and declaration in esm_alloc_int.f90
-    integer                                                                          :: nmax !  Description and declaration in esm_alloc_int.f90
-    integer                                                            , intent(in)  :: noroco !  Description and declaration in esm_alloc_int.f90
-    integer                                                            , intent(in)  :: nrob !  Description and declaration in esm_alloc_int.f90
-    integer                                                                          :: nto !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(7, nto)                                         , intent(in)  :: mnbnd !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(5, nto, lstsc)                                                :: itbcc !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(8, nrob)                                        , intent(in)  :: nob !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     :: kfsmax !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: kfsmin !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(nrob, lstsc)                                                  :: kstp !  Description and declaration in esm_alloc_int.f90
-    logical, intent(in)                                                              :: zmodel !  Description and declaration in procs.igs
-    real(fp)                                                                         :: timnow !!  Current timestep (multiples of dt)
-    real(fp), dimension(2, nto, lstsc)                                               :: zstep !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(4, nto, kmax, lstsc)                                         :: procbc !  Description and declaration in esm_alloc_real.f90
-    real(prec), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)    , intent(in)  :: dps !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: s0 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: xz !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: yz !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax), intent(in)  :: dzs1 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(kmax)                                          , intent(in)  :: sig !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(0:kmax)                                        , intent(in)  :: zk
-    real(fp), dimension(kmax, max(lstsc, 1), 2, noroco)                              :: rbnd !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(kmax, nrob)                                                  :: rob !  Description and declaration in esm_alloc_real.f90
-    character(10), dimension(nto, lstsc)                                             :: tprofc !  Description and declaration in esm_alloc_char.f90
+    integer                                                                                :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                :: lstsc  !  Description and declaration in dimens.igs
+    integer                                                                                :: lundia !  Description and declaration in inout.igs
+    integer                                                                                :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                  , intent(in)  :: noroco !  Description and declaration in esm_alloc_int.f90
+    integer                                                                  , intent(in)  :: nrob   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                :: nto    !  Description and declaration in esm_alloc_int.f90
+    integer      , dimension(7, nto)                                         , intent(in)  :: mnbnd  !  Description and declaration in esm_alloc_int.f90
+    integer      , dimension(5, nto, lstsc)                                                :: itbcc  !  Description and declaration in esm_alloc_int.f90
+    integer      , dimension(8, nrob)                                        , intent(in)  :: nob    !  Description and declaration in esm_alloc_int.f90
+    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                     :: kfsmax !  Description and declaration in esm_alloc_int.f90
+    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: kfsmin !  Description and declaration in esm_alloc_int.f90
+    integer      , dimension(nrob, lstsc)                                                  :: kstp   !  Description and declaration in esm_alloc_int.f90
+    logical                                                                  , intent(in)  :: zmodel !  Description and declaration in procs.igs
+    real(fp)                                                                               :: timnow !!  Current timestep (multiples of dt)
+    real(fp)     , dimension(2, nto, lstsc)                                                :: zstep  !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(4, nto, kmax, lstsc)                                          :: procbc !  Description and declaration in esm_alloc_real.f90
+    real(prec)   , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: s0     !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: guu    !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: gvv    !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax) , intent(in)  :: dzs1   !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(kmax)                                           , intent(in)  :: sig    !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(0:kmax)                                         , intent(in)  :: zk
+    real(fp)     , dimension(kmax, max(lstsc, 1), 2, noroco)                               :: rbnd   !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(kmax, nrob)                                                   :: rob    !  Description and declaration in esm_alloc_real.f90
+    character(10), dimension(nto, lstsc)                                                   :: tprofc !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !
-    integer   :: incx    ! Nr. of grid points-1 (in the x-dir.) between the begin and the end point of an opening section 
-    integer   :: incy    ! Nr. of grid points-1 (in the y-dir.) between the begin and the end point of an opening section 
-    integer   :: istsc   ! Index number of constituent 
-    integer   :: ito     ! Index number of open boundary loc. 
-    integer   :: j       ! Loop variable 
-    integer   :: k       ! Loop counter over KMAX 
-    integer   :: kp      ! First array index of array CIRC pointing to the nr. of row/column in array IROCOL
-    integer   :: kpc     ! First array index of array CIRC pointing to the column number in arra IROCOL 
-    integer   :: kpp     ! Hulp varible 
-    integer   :: kpr     ! First array index of array CIRC pointing to the row number in array IROCOL 
-    integer   :: kq      ! Second array index of array CIRC pointing to the nr. of row/column in array IROCOL 
-    integer   :: kqc     ! Second array index of array CIRC pointing to the column number in arra IROCOL 
-    integer   :: kqq     ! Hulp varible 
-    integer   :: kqr     ! Second array index of array CIRC pointing to the row number in array IROCOL 
-    integer   :: l       ! Loop variable for constituents 
-    integer   :: maxinc  ! Max. of (INCX,INCY,1) 
-    integer   :: mend    ! End coord. (in the x-dir.) of an open bound. section 
-    integer   :: mp
-    integer   :: msta    ! Starting coord. (in the x-dir.) of an open bound. section 
-    integer   :: n       ! Loop variable 
-    integer   :: n1      ! Pointer var. relating NOB to MNBND 
-    integer   :: nend    ! End coord. (in the y-dir.) of an open bound. section 
-    integer   :: np
-    integer   :: nsta    ! Starting coord. (in the y-dir.) of an open bound. section 
-    logical   :: first   ! Flag = TRUE in case a time-dependent file is read for the 1-st time 
-    real(fp)  :: dist    ! Real distance between an open bounda- ry point to the begin point of the related opening section 
-    real(fp)  :: distx   ! Incremental distance (in the x-dir.) between two consecutive open boundary points belonging to the same section 
-    real(fp)  :: disty   ! Incremental distance (in the x-dir.) between two consecutive open boundary points belonging to the same section 
-    real(fp)  :: frac    ! Fraction between DIST and the total length of an opening section 
-    real(fp)  :: h0
-    real(fp)  :: reldep
-    real(fp)  :: sigjmp
-    real(fp)  :: timscl  ! Multiple factor to create minutes from read times 
-    real(fp)  :: totl    ! Actual length of an openbnd. section 
-    real(fp)  :: zcord
-    real(fp)  :: zjmp
+    integer                                      :: i
+    integer                                      :: incx    ! Nr. of grid points-1 (in the x-dir.) between the begin and the end point of an opening section 
+    integer                                      :: incy    ! Nr. of grid points-1 (in the y-dir.) between the begin and the end point of an opening section 
+    integer                                      :: istsc   ! Index number of constituent 
+    integer                                      :: ito     ! Index number of open boundary loc. 
+    integer                                      :: j       ! Loop variable 
+    integer                                      :: k       ! Loop counter over KMAX 
+    integer                                      :: kp      ! First array index of array CIRC pointing to the nr. of row/column in array IROCOL
+    integer                                      :: kpc     ! First array index of array CIRC pointing to the column number in arra IROCOL 
+    integer                                      :: kpp     ! Hulp varible 
+    integer                                      :: kpr     ! First array index of array CIRC pointing to the row number in array IROCOL 
+    integer                                      :: kq      ! Second array index of array CIRC pointing to the nr. of row/column in array IROCOL 
+    integer                                      :: kqc     ! Second array index of array CIRC pointing to the column number in arra IROCOL 
+    integer                                      :: kqq     ! Hulp varible 
+    integer                                      :: kqr     ! Second array index of array CIRC pointing to the row number in array IROCOL 
+    integer                                      :: l       ! Loop variable for constituents 
+    integer                                      :: maxinc  ! Max. of (INCX,INCY,1) 
+    integer                                      :: mend    ! End coord. (in the x-dir.) of an open bound. section 
+    integer                                      :: mp
+    integer                                      :: msta    ! Starting coord. (in the x-dir.) of an open bound. section 
+    integer                                      :: n       ! Loop variable 
+    integer                                      :: n1      ! Pointer var. relating NOB to MNBND 
+    integer                                      :: nend    ! End coord. (in the y-dir.) of an open bound. section 
+    integer                                      :: np
+    integer                                      :: nsta    ! Starting coord. (in the y-dir.) of an open bound. section
+    integer                                      :: lb      ! lowerboundary of loopcounter
+    integer                                      :: ub      ! upperboundary of loopcounter
+    integer                                      :: mgg     ! M-coord. of the actual open boundary point, which may differ from the ori- ginal position due to grid staggering
+    integer                                      :: ngg     ! N-coord. of the actual open boundary point, which may differ from the ori- ginal position due to grid staggering
+    integer                                      :: posrel  ! code denoting the position of the open boundary, related to the complete grid
+    logical                                      :: first   ! Flag = TRUE in case a time-dependent file is read for the 1-st time 
+    real(fp)                                     :: dist    ! Real distance between an open bounda- ry point to the begin point of the related opening section 
+    real(fp)                                     :: distx   ! Incremental distance (in the x-dir.) between two consecutive open boundary points belonging to the same section 
+    real(fp)                                     :: disty   ! Incremental distance (in the x-dir.) between two consecutive open boundary points belonging to the same section 
+    real(fp)                                     :: frac    ! Fraction between DIST and the total length of an opening section 
+    real(fp)                                     :: h0
+    real(fp)                                     :: reldep
+    real(fp)                                     :: sigjmp
+    real(fp)                                     :: timscl  ! Multiple factor to create minutes from read times 
+    real(fp)                                     :: totl    ! Actual length of an openbnd. section 
+    real(fp)                                     :: zcord
+    real(fp)                                     :: zjmp
     real(fp), dimension(:, :, :, :), allocatable :: procbc_old
 !
 !! executable statements -------------------------------------------------------
 !
-    ltem        => gdp%d%ltem
-    lsal        => gdp%d%lsal
-    newstp      => gdp%gdincbcc%newstp
-    lunbcc      => gdp%gdluntmp%lunbcc
-    itfinish    => gdp%gdinttim%itfinish
-    tstop       => gdp%gdexttim%tstop
+    ltem            => gdp%d%ltem
+    lsal            => gdp%d%lsal
+    newstp          => gdp%gdincbcc%newstp
+    lunbcc          => gdp%gdluntmp%lunbcc
+    itfinish        => gdp%gdinttim%itfinish
+    tstop           => gdp%gdexttim%tstop
+    dist_pivot_part => gdp%gdbcdat%dist_pivot_part
     if (lsal .ne. 0 .or. ltem .ne. 0) then
        allocate(procbc_old(2, nto, kmax, max(lsal,ltem)))
     endif
@@ -232,6 +246,7 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
           nsta   = mnbnd(2, n1)
           mend   = mnbnd(3, n1)
           nend   = mnbnd(4, n1)
+          posrel = mnbnd(7, n1)
           incx   = mend - msta
           incy   = nend - nsta
           maxinc = max(1, abs(incx), abs(incy))
@@ -241,21 +256,90 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
           ! use coord. at zeta points to calculate the interpolated
           ! values from the two utmost points of the opening
           !
-          totl = 0.0
-          dist = 0.0
-          frac = 0.0
+          if (parll) then
+             !
+             ! If the start point/pivot is outside this partition,
+             ! add the distance from that point/pivot to the first point inside this partition
+             ! to totl and distl
+             !
+             totl = dist_pivot_part(start_pivot,n1)
+          else
+             totl = 0.0_fp
+          endif
+          dist = totl
+          frac  = 0.0_fp
           do j = 1, maxinc
              msta  = msta + incx
              nsta  = nsta + incy
-             distx = xz(nsta, msta) - xz(nsta - incy, msta - incx)
+             !
+             ! Pythagoras is used to calculate the distance from xz,yz(nsta-incy,msta-incx) to xz,yz(nsta,msta),
+             ! using distx = |xz,yz(nsta     ,msta-incx) - xz,yz(nsta,msta     )|
+             !       disty = |xz,yz(nsta-incy,msta-incx) - xz,yz(nsta,msta-incx)|
+             ! Assumption: the grid is more or less rectangular locally
+             !
+             if (incx == 0) then
+                distx = 0.0_fp
+             else
+                if (posrel == 4) then
+                   !
+                   ! Boundary on top side of the domain
+                   ! The correct gvv is one index down (staggered grid)
+                   !
+                   ngg = nsta - 1
+                else
+                   ngg = nsta
+                endif
+                !
+                ! General case: incx > 1
+                ! The distance in the x-direction between the two zeta points is:
+                ! 0.5*gvv(lowest_point) + sum(gvv(intermediate_points)) + 0.5*gvv(highest_point)
+                !
+                distx = 0.5_fp * (real(gvv(ngg,msta-incx),fp)+real(gvv(ngg,msta),fp))
+                lb = min(msta-incx,msta)
+                ub = max(msta-incx,msta)
+                do i=lb+1,ub-1
+                   distx = distx + real(gvv(ngg,i),fp)
+                enddo
+             endif
              distx = distx*distx
-             disty = yz(nsta, msta) - yz(nsta - incy, msta - incx)
+             if (incy == 0) then
+                disty = 0.0_fp
+             else
+                if (posrel == 3) then
+                   !
+                   ! Boundary on right side of the domain
+                   ! The correct guu is one index down (staggered grid)
+                   !
+                   mgg = msta - incx - 1
+                else
+                   mgg = msta - incx
+                endif
+                !
+                ! General case: incy > 1
+                ! The distance in the y-direction between the two zeta points is:
+                ! 0.5*guu(lowest_point) + sum(guu(intermediate_points)) + 0.5*guu(highest_point)
+                !
+                disty = 0.5_fp * (real(guu(nsta-incy,mgg),fp)+real(guu(nsta,mgg),fp))
+                lb = min(nsta-incy,nsta)
+                ub = max(nsta-incy,nsta)
+                do i=lb+1,ub-1
+                   disty = disty + real(guu(i,mgg),fp)
+                enddo
+             endif
              disty = disty*disty
              totl  = totl + sqrt(distx + disty)
              if (msta==nob(1, n) .and. nsta==nob(2, n)) then
                 dist = totl
              endif
           enddo
+          if (parll) then
+             !
+             ! If the end point/pivot is outside this partition,
+             ! add the distance from that point/pivot to the last point inside this partition
+             ! to totl
+             !
+             totl = totl + dist_pivot_part(end_pivot,n1)
+          endif
           if (totl > 0.) then
              frac = dist/totl
           endif

@@ -3,8 +3,8 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                & kc        ,nrob      ,noroco    , &
                & tprofu    ,itbct     ,mnbnd     ,nob       ,kfumin    , &
                & kfumax    ,kfvmin    ,kfvmax    ,hydrbc    ,circ2d    , &
-               & circ3d    ,patm      ,guu       ,gvv       ,xz        , &
-               & yz        ,hu        ,hv        ,omega     ,alpha     , &
+               & circ3d    ,patm      ,guu       ,gvv       , &
+               & hu        ,hv        ,omega     ,alpha     , &
                & z0urou    ,z0vrou    ,qxk       ,qyk       ,s0        , &
                & u0        ,v0        ,grmasu    ,grmasv    ,cfurou    , &
                & cfvrou    ,qtfrac    ,qtfrct    ,qtfrt2    ,thick     , &
@@ -68,11 +68,17 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
 !!--declarations----------------------------------------------------------------
     use precision
     use mathconsts
+    use dfparall
     use flow_tables
     use globaldata
     use m_openda_exchange_items, only : get_openda_buffer
     !
     implicit none
+    !
+    ! Enumeration
+    !
+    integer, parameter :: start_pivot = 1
+    integer, parameter ::   end_pivot = 2
     !
     type(globdat),target :: gdp
     !
@@ -102,6 +108,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     type (handletype)                  , pointer :: fbcrfile
     type (fbcrbndtype)  , dimension(:) , pointer :: fcrbnd
     logical                            , pointer :: fbccorrection
+    real(fp), dimension(:,:)           , pointer :: dist_pivot_part
 !
 ! Global variables
 !
@@ -138,8 +145,6 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: hv     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: patm   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: s0     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: xz     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: yz     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: z0urou !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: z0vrou !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 3)   , intent(in)  :: cfurou !  Description and declaration in esm_alloc_real.f90
@@ -163,6 +168,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
 !
 ! Local variables
 !
+    integer           :: i
     integer           :: ibtype         ! Type of open boundary: (see global var. NOB) 
     integer           :: incx           ! Nr. of grid points-1 (in the x-dir.) between the begin and the end point of an opening section 
     integer           :: incy           ! Nr. of grid points-1 (in the y-dir.) between the begin and the end point 
@@ -197,6 +203,8 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     integer           :: nsta           ! Starting coord. (in the y-dir.) of an open bound. section 
     integer           :: ntot0          ! Offset for open boundary sections of the Time-series type (NTOF+NTOQ) 
     integer           :: posrel         ! code denoting the position of the open boundary, related to the complete grid
+    integer           :: lb             ! lowerboundary of loopcounter
+    integer           :: ub             ! upperboundary of loopcounter
     logical           :: first          ! Flag = TRUE in case a time-dependent file is read for the 1-st time 
     logical           :: error          ! errorstatus
     logical           :: horiz          ! Flag=TRUE if open boundary lies parallel to x-/KSI-dir. 
@@ -267,6 +275,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     fbcrfile              => gdp%gdflwpar%fbcrfile
     fcrbnd                => gdp%gdflwpar%fcrbnd
     fbccorrection         => gdp%gdflwpar%fbccorrection
+    dist_pivot_part       => gdp%gdbcdat%dist_pivot_part
     !
     ! initialize local parameters
     ! omega in deg/hour & time in seconds !!, alfa = in minuten
@@ -567,19 +576,88 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
           !
           ! Initialize CIRC2D for KP,KQ
           !
-          totl = 0.0
-          dist = 0.0
-          frac = 0.0
+          if (parll) then
+             !
+             ! If the start point/pivot is outside this partition,
+             ! add the distance from that point/pivot to the first point inside this partition
+             ! to totl and distl
+             !
+             totl = dist_pivot_part(start_pivot,n1)
+          else
+             totl = 0.0_fp
+          endif
+          dist = totl
+          frac = 0.0_fp
           do j = 1, maxinc
              msta  = msta + incx
              nsta  = nsta + incy
-             distx = xz(nsta, msta) - xz(nsta - incy, msta - incx)
+             !
+             ! Pythagoras is used to calculate the distance from xz,yz(nsta-incy,msta-incx) to xz,yz(nsta,msta),
+             ! using distx = |xz,yz(nsta     ,msta-incx) - xz,yz(nsta,msta     )|
+             !       disty = |xz,yz(nsta-incy,msta-incx) - xz,yz(nsta,msta-incx)|
+             ! Assumption: the grid is more or less rectangular locally
+             !
+             if (incx == 0) then
+                distx = 0.0_fp
+             else
+                if (posrel == 4) then
+                   !
+                   ! Boundary on top side of the domain
+                   ! The correct gvv is one index down (staggered grid)
+                   !
+                   ngg = nsta - 1
+                else
+                   ngg = nsta
+                endif
+                !
+                ! General case: incx > 1
+                ! The distance in the x-direction between the two zeta points is:
+                ! 0.5*gvv(lowest_point) + sum(gvv(intermediate_points)) + 0.5*gvv(highest_point)
+                !
+                distx = 0.5_fp * (real(gvv(ngg,msta-incx),fp)+real(gvv(ngg,msta),fp))
+                lb = min(msta-incx,msta)
+                ub = max(msta-incx,msta)
+                do i=lb+1,ub-1
+                   distx = distx + real(gvv(ngg,i),fp)
+                enddo
+             endif
              distx = distx*distx
-             disty = yz(nsta, msta) - yz(nsta - incy, msta - incx)
+             if (incy == 0) then
+                disty = 0.0_fp
+             else
+                if (posrel == 3) then
+                   !
+                   ! Boundary on right side of the domain
+                   ! The correct guu is one index down (staggered grid)
+                   !
+                   mgg = msta - incx - 1
+                else
+                   mgg = msta - incx
+                endif
+                !
+                ! General case: incy > 1
+                ! The distance in the y-direction between the two zeta points is:
+                ! 0.5*guu(lowest_point) + sum(guu(intermediate_points)) + 0.5*guu(highest_point)
+                !
+                disty = 0.5_fp * (real(guu(nsta-incy,mgg),fp)+real(guu(nsta,mgg),fp))
+                lb = min(nsta-incy,nsta)
+                ub = max(nsta-incy,nsta)
+                do i=lb+1,ub-1
+                   disty = disty + real(guu(i,mgg),fp)
+                enddo
+             endif
              disty = disty*disty
              totl  = totl + sqrt(distx + disty)
              if (msta==mp .and. nsta==np) dist = totl
           enddo
+          if (parll) then
+             !
+             ! If the end point/pivot is outside this partition,
+             ! add the distance from that point/pivot to the last point inside this partition
+             ! to totl
+             !
+             totl = totl + dist_pivot_part(end_pivot,n1)
+          endif
           if (maxinc > 0) frac = dist/totl
           !
           ! Correction for atmosferic pressure only for Water-level open
@@ -662,9 +740,18 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
           ! of the opening
           ! Start filling CIRC3D and calculate CIRC2D
           !
-          dist  = 0.0
-          totl  = 0.0
-          frac  = 0.0
+          if (parll) then
+             !
+             ! If the start point/pivot is outside this partition,
+             ! add the distance from that point/pivot to the first point inside this partition
+             ! to totl and distl
+             !
+             totl = dist_pivot_part(start_pivot,n1)
+          else
+             totl = 0.0_fp
+          endif
+          dist = totl
+          frac  = 0.0_fp
           mgg   = msta
           ngg   = nsta
           horiz = .true.
@@ -702,6 +789,14 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                 endif
                 if (msta==mp .and. nsta==np) dist = totl
              enddo
+             if (parll) then
+                !
+                ! If the end point/pivot is outside this partition,
+                ! add the distance from that point/pivot to the last point inside this partition
+                ! to totl
+                !
+                totl = totl + dist_pivot_part(end_pivot,n1)
+             endif
              if (maxinc > 0) frac = dist/totl
           endif
           !

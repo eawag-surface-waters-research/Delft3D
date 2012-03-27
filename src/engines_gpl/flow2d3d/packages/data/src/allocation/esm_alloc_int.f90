@@ -170,10 +170,10 @@ subroutine esm_alloc_int(lundia, error, verify, zmodel, gdp)
     pntnam = 'MNBND'         !  Global data
     ierr = mkipnt(pntnam, 7*nto, gdp)
                              !  Coordinates of the open boundary sections
-                             !  MNBND(1,K)=X index of the begin pnt.
-                             !  MNBND(2,K)=X index of the end   pnt.
-                             !  MNBND(3,K)=Y index of the begin pnt.
-                             !  MNBND(4,K)=Y index of the end   pnt.
+                             !  MNBND(1,K)=M index of the begin pnt.
+                             !  MNBND(2,K)=N index of the begin pnt.
+                             !  MNBND(3,K)=M index of the end   pnt.
+                             !  MNBND(4,K)=N index of the end   pnt.
                              !  MNBND(5,K)=lowest  open Z index (default = 0: all layers are open)
                              !  MNBND(6,K)=highest open Z index
                              !  MNBND(7,K)=code denoting the position of the open boundary, related to the complete grid:

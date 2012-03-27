@@ -325,6 +325,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     integer(pntrsize)                    , pointer :: kfv
     integer(pntrsize)                    , pointer :: kspu
     integer(pntrsize)                    , pointer :: kspv
+    integer(pntrsize)                    , pointer :: mnbnd 
     integer(pntrsize)                    , pointer :: mndro
     integer(pntrsize)                    , pointer :: mnksrc
     integer(pntrsize)                    , pointer :: kcshyd
@@ -669,6 +670,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     kfv                 => gdp%gdr_i_ch%kfv
     kspu                => gdp%gdr_i_ch%kspu
     kspv                => gdp%gdr_i_ch%kspv
+    mnbnd               => gdp%gdr_i_ch%mnbnd 
     mndro               => gdp%gdr_i_ch%mndro
     mnksrc              => gdp%gdr_i_ch%mnksrc
     kcshyd              => gdp%gdr_i_ch%kcshyd
@@ -770,6 +772,10 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
                  & kmax      ,ch(nambnd),ch(namcon),ch(tprofc),r(procbc) , &
                  & r(zstep)  ,bubble    ,gdp       )
        if (error) goto 9999
+    endif
+    if (nto > 0) then
+       call inibcparl(nto    ,i(mnbnd)  ,ch(typbnd), &
+                    & r(guu) ,r(gvv)    ,gdp       )
     endif
     !
     ! INIDIS: read initial arrays values for time dependent data for

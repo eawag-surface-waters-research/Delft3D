@@ -979,8 +979,8 @@ subroutine tricom_init(gdp)
     ! Define start time and timesteps (in seconds)
     !
     dtsec = dt * tunit
-    dtmin = dtsec / 60.0
-    hdt   = 0.5 * dtsec
+    dtmin = dtsec / 60.0_fp
+    hdt   = 0.5_fp * dtsec
     !
     timnow = real(itstrt,fp)
     call setcurrentdatetime(timnow, gdp)

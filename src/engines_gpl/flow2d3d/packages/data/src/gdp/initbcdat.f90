@@ -52,9 +52,11 @@ gdp%gdbcdat%ncomp  = -999
 gdp%gdbcdat%nsplit = -999
 nullify(gdp%gdbcdat%pindex)
 nullify(gdp%gdbcdat%bct_order)
+nullify(gdp%gdbcdat%mnbnd_global)
 nullify(gdp%gdbcdat%ext_bnd)
 gdp%gdbcdat%ascon  = ' '
 nullify(gdp%gdbcdat%compnames)
+nullify(gdp%gdbcdat%dist_pivot_part)
 nullify(gdp%gdbcdat%hydrbcf)
 !
 end subroutine initbcdat

@@ -1007,6 +1007,7 @@ src/engines_gpl/flow2d3d/packages/kernel/src/inichk/inchki.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/inichk/inchkr.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/inichk/increm.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/inichk/inibcc.f90 -text
+src/engines_gpl/flow2d3d/packages/kernel/src/inichk/inibcparl.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/inichk/inibcq.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/inichk/inibct.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/inichk/inibnd.f90 -text

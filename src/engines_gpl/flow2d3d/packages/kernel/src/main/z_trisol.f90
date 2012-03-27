@@ -995,8 +995,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                 & kc        ,nrob      ,noroco    , &
                 & ch(tprofu),i(itbct)  ,i(mnbnd)  ,i(nob)    ,i(kfumin) , &
                 & i(kfumax) ,i(kfvmin) ,i(kfvmax) ,r(hydrbc) ,r(circ2d) , &
-                & r(circ3d) ,r(patm)   ,r(guu)    ,r(gvv)    ,r(xz)     , &
-                & r(yz)     ,r(hu)     ,r(hv)     ,r(omega)  ,r(alpha)  , &
+                & r(circ3d) ,r(patm)   ,r(guu)    ,r(gvv)    , &
+                & r(hu)     ,r(hv)     ,r(omega)  ,r(alpha)  , &
                 & r(z0urou) ,r(z0vrou) ,r(qxk)    ,r(qyk)    ,r(s0)     , &
                 & r(u0)     ,r(v0)     ,r(grmasu) ,r(grmasv) ,r(cfurou) , &
                 & r(cfvrou) ,r(qtfrac) ,r(qtfrct) ,r(qtfrt2) ,r(thick)  , &
@@ -1011,8 +1011,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           call incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                     & kmax      ,nto       ,nrob      ,lstsc     ,noroco    , &
                     & ch(tprofc),i(itbcc)  ,i(mnbnd)  ,i(nob)    ,i(kstp)   , &
-                    & i(kfsmin) ,i(kfsmax) ,r(rob)    ,r(rbnd)   ,r(xz)     , &
-                    & r(yz)     ,d(dps)    ,r(s0)     ,r(sig)    ,r(procbc) , &
+                    & i(kfsmin) ,i(kfsmax) ,r(rob)    ,r(rbnd)   ,r(guu)    , &
+                    & r(gvv)    ,d(dps)    ,r(s0)     ,r(sig)    ,r(procbc) , &
                     & r(zstep)  ,r(dzs1)   ,r(sig)    ,gdp       )
           call timer_stop(timer_incbcc, gdp)
        endif
@@ -1626,8 +1626,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                 & kc        ,nrob      ,noroco    , &
                 & ch(tprofu),i(itbct)  ,i(mnbnd)  ,i(nob)    ,i(kfumin) , &
                 & i(kfumax) ,i(kfvmin) ,i(kfvmax) ,r(hydrbc) ,r(circ2d) , &
-                & r(circ3d) ,r(patm)   ,r(guu)    ,r(gvv)    ,r(xz)     , &
-                & r(yz)     ,r(hu)     ,r(hv)     ,r(omega)  ,r(alpha)  , &
+                & r(circ3d) ,r(patm)   ,r(guu)    ,r(gvv)    , &
+                & r(hu)     ,r(hv)     ,r(omega)  ,r(alpha)  , &
                 & r(z0urou) ,r(z0vrou) ,r(qxk)    ,r(qyk)    ,r(s0)     , &
                 & r(u0)     ,r(v0)     ,r(grmasu) ,r(grmasv) ,r(cfurou) , &
                 & r(cfvrou) ,r(qtfrac) ,r(qtfrct) ,r(qtfrt2) ,r(thick)  , &
@@ -1642,8 +1642,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           call incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                     & kmax      ,nto       ,nrob      ,lstsc     ,noroco    , &
                     & ch(tprofc),i(itbcc)  ,i(mnbnd)  ,i(nob)    ,i(kstp)   , &
-                    & i(kfsmin) ,i(kfsmax) ,r(rob)    ,r(rbnd)   ,r(xz)     , &
-                    & r(yz)     ,d(dps)    ,r(s0)     ,r(sig)    ,r(procbc) , &
+                    & i(kfsmin) ,i(kfsmax) ,r(rob)    ,r(rbnd)   ,r(guu)    , &
+                    & r(gvv)    ,d(dps)    ,r(s0)     ,r(sig)    ,r(procbc) , &
                     & r(zstep)  ,r(dzs1)   ,r(sig)    ,gdp       )
           call timer_stop(timer_incbcc, gdp)
        endif
