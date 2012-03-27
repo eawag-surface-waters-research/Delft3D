@@ -615,7 +615,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           !
           ! Wave dissipation due to bottom friction
           !
-          if (tpu > 0.1) then
+          if (tpu > 0.1_fp) then
              !
              ! User-specified calibration factor FWFAC included to allow
              ! tuning of streaming stresses. Default = 1.0, off = 0.0
@@ -623,25 +623,29 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              ! Updated expression for bottom dissipation of wave energy
              ! is now consistent with Unibest-TC
              !
-             ks         = z0ucur(nm)*33.0
-             omega      = 2.0*pi/tpu
-             a          = uorbu/omega
-             fw         = 0.01
-             fw         = fw*fwfac
-             dfu(nm)    = costu*fw*uorbu**3/(sqrt(pi))
-             deltau(nm) = 0.09*alfaw*(ks/hu(nm))*(a/ks)**0.82
-             deltau(nm) = max(alfaw*ee*z0ucur(nm)/hu(nm), deltau(nm))
-             deltau(nm) = min(0.5_fp, deltau(nm))
+             ks         = z0ucur(nm) * 33.0_fp
+             omega      = 2.0_fp * pi / tpu
+             a          = uorbu / omega
+             if (a > 0.0_fp) then
+                fw = min(1.39_fp*(a/z0ucur(nm))**(-0.52_fp) , 0.3_fp)
+             else
+                fw = 0.3_fp
+             endif
+             fw         = fw * fwfac
+             dfu(nm)    = costu * fw * uorbu**3 / (sqrt(pi))
+             deltau(nm) = 0.09_fp * alfaw * (ks/hu(nm)) * (a/ks)**0.82_fp
+             deltau(nm) = max(alfaw*ee*z0ucur(nm)/hu(nm) , deltau(nm))
+             deltau(nm) = min(0.5_fp , deltau(nm))
           else
-             dfu(nm)    = 0.
-             deltau(nm) = 0.
+             dfu(nm)    = 0.0_fp
+             deltau(nm) = 0.0_fp
           endif
        else ! kfu(nm)<>1
           !
           !  this is essential for TRATUR
           !
-          dfu(nm)    = 0.0
-          deltau(nm) = 0.0
+          dfu(nm)    = 0.0_fp
+          deltau(nm) = 0.0_fp
        endif
     enddo
     !
