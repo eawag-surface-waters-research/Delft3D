@@ -191,7 +191,7 @@ subroutine inibcparl(nto    , mnbnd     ,typbnd    , &
     !
     ! loop over all boundaries that are (partly) inside this partition
     !
-    do n=1,nto
+    do n=1,nto - ntof - ntoq
        !
        ! loop over start_pivot (1) and end_pivot (2)
        do pivot=start_pivot,end_pivot

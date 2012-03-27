@@ -773,10 +773,8 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
                  & r(zstep)  ,bubble    ,gdp       )
        if (error) goto 9999
     endif
-    if (nto > 0) then
-       call inibcparl(nto    ,i(mnbnd)  ,ch(typbnd), &
-                    & r(guu) ,r(gvv)    ,gdp       )
-    endif
+    call inibcparl(nto    ,i(mnbnd)  ,ch(typbnd), &
+                 & r(guu) ,r(gvv)    ,gdp       )
     !
     ! INIDIS: read initial arrays values for time dependent data for
     ! discharges
