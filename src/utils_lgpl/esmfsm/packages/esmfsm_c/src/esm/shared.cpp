@@ -42,10 +42,11 @@
 #include "config.h"
 #endif
 
-#ifndef WIN32
+#if defined (HAVE_CONFIG_H)
 #include <errno.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+
 
 
 //------------------------------------------------------------------------------
