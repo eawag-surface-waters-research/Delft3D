@@ -1411,7 +1411,11 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        !
        ! element 'Z0UCUR'
        !
-       call dfgather(z0ucur,nf,nl,mf,ml,iarrc,gdp)
+       if (parll) then
+          call dfgather(z0ucur,nf,nl,mf,ml,iarrc,gdp)
+       else
+          call dfgather_seq(z0ucur,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
+       endif 
        if (inode == master) then
           ierror = putelt(fds, grnam3, 'Z0UCUR', uindex, 1, glbarr2)
        endif
