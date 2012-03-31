@@ -2681,6 +2681,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/qpsa.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/qpsf.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/qpsi.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/samples.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/setzcoord.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/shape.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/splitcellstr.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/stagprint.m -text
