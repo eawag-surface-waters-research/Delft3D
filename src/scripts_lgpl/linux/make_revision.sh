@@ -26,14 +26,8 @@ MODDIR=`pwd`
 # svn_dir is not needed to set explicitly
 # cmd_dir is not used on LINUX
 
-# I only tested this on OSX (10.5)
-if [ `uname` == 'Darwin' -o `uname -o` == 'Cygwin' ]
-then
-    # we just made this one. ( I think this should work for everyone, TODO: pls make this the default after tested )
-    VN_DIR=$TOPDIR/third_party_open/version_number/packages/version_number/src
-else
-    VN_DIR=$TOPDIR/third_party_open/version_number/bin/linux
-fi
+# we just made this one. ( I think this should work for everyone, TODO: pls make this the default after tested )
+VN_DIR=$TOPDIR/third_party_open/version_number/packages/version_number/src
 
 
 
