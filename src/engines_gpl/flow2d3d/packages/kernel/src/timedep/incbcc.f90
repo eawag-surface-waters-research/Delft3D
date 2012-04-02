@@ -361,7 +361,7 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                 !
                 disty = 0.5_fp * (real(guu(nsta-incy,mgg),fp)+real(guu(nsta,mgg),fp))
              endif
-             if (incx /=0 .and/ incy/=0) then
+             if (incx /=0 .and. incy/=0) then
                  distx = distx*distx
                  disty = disty*disty
                  totl  = totl + sqrt(distx + disty)
