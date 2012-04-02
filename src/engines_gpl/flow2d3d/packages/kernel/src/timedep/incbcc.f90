@@ -272,10 +272,15 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
              msta  = msta + incx
              nsta  = nsta + incy
              !
-             ! Pythagoras is used to calculate the distance from xz,yz(nsta-incy,msta-incx) to xz,yz(nsta,msta),
-             ! using distx = |xz,yz(nsta     ,msta-incx) - xz,yz(nsta,msta     )|
-             !       disty = |xz,yz(nsta-incy,msta-incx) - xz,yz(nsta,msta-incx)|
-             ! Assumption: the grid is more or less rectangular locally
+             ! In case of a diagonal water level boundary; example south-east boundary (ie incx=incxy=1):
+             ! Pythagoras is used to calculate the distance from xz,yz(m,n) to xz,yz(m+1,n+1),
+             ! using d_y((m,n),(m+1,n+1)) = 0.5*(guu(m-1,n  ) + guu(m-1,n+1))
+             !       d_x((m,n),(m+1,n+1)) = 0.5*(gvv(m  ,n+1) + gvv(m+1,n+1))
+             !       dist = sqrt(d_x*d_x + d_y*d_y) 
+             ! Assumption: the grid is more or less cartesian locally
+             !
+             !
+             ! Compute distance in xi-direction
              !
              if (incx == 0) then
                 distx = 0.0_fp
@@ -285,9 +290,27 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                    ! Boundary on top side of the domain
                    ! The correct gvv is one index down (staggered grid)
                    !
-                   ngg = nsta - 1
+                   if (incy==0) then
+                       ! horizontal topboundary
+                       ngg = nsta - 1
+                   elseif (incx == -incy) then
+                       ! north-east boundary
+                       ngg = nsta - 1 - 1
+                   elseif (incx == incy) then
+                       ! north-west boundary
+                       ngg = nsta - 1 - 1
+                   endif
                 else
-                   ngg = nsta
+                   if (incy==0) then
+                       ! horizontal bottom boundary
+                       ngg = nsta
+                   elseif (incx == -incy) then
+                       ! south-west boundary
+                       ngg = nsta + 1
+                   elseif (incx == incy) then
+                       ! south-east boundary
+                       ngg = nsta
+                   endif
                 endif
                 !
                 ! General case: incx > 1
@@ -295,24 +318,41 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                 ! 0.5*gvv(lowest_point) + sum(gvv(intermediate_points)) + 0.5*gvv(highest_point)
                 !
                 distx = 0.5_fp * (real(gvv(ngg,msta-incx),fp)+real(gvv(ngg,msta),fp))
-                lb = min(msta-incx,msta)
-                ub = max(msta-incx,msta)
-                do i=lb+1,ub-1
-                   distx = distx + real(gvv(ngg,i),fp)
-                enddo
              endif
-             distx = distx*distx
+             !
+             ! Compute distance in eta-direction
+             !
              if (incy == 0) then
                 disty = 0.0_fp
              else
-                if (posrel == 3) then
+                if (posrel == 4) then
+                   if (incx == -incy) then
+                       ! north-east boundary
+                       mgg = msta - 1
+                   elseif (incx == incy) then
+                       ! north-west boundary
+                       mgg = msta
+                   endif
+                elseif (posrel == 3) then
                    !
                    ! Boundary on right side of the domain
                    ! The correct guu is one index down (staggered grid)
                    !
-                   mgg = msta - incx - 1
+                   if (incx==0) then
+                       ! vertical topboundary
+                       mgg = msta - 1
+                   endif
                 else
-                   mgg = msta - incx
+                   if (incx==0) then
+                       ! vertical bottom boundary
+                       mgg = nsta
+                   elseif (incx == -incy) then
+                       ! south-west boundary
+                       mgg = msta 
+                   elseif (incx == incy) then
+                       ! south-east boundary
+                       mgg = msta - 1 - 1
+                   endif
                 endif
                 !
                 ! General case: incy > 1
@@ -320,14 +360,14 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                 ! 0.5*guu(lowest_point) + sum(guu(intermediate_points)) + 0.5*guu(highest_point)
                 !
                 disty = 0.5_fp * (real(guu(nsta-incy,mgg),fp)+real(guu(nsta,mgg),fp))
-                lb = min(nsta-incy,nsta)
-                ub = max(nsta-incy,nsta)
-                do i=lb+1,ub-1
-                   disty = disty + real(guu(i,mgg),fp)
-                enddo
              endif
-             disty = disty*disty
-             totl  = totl + sqrt(distx + disty)
+             if (incx /=0 .and/ incy/=0) then
+                 distx = distx*distx
+                 disty = disty*disty
+                 totl  = totl + sqrt(distx + disty)
+             else
+                 totl  = totl + distx + disty ! distx==0 or disty==0
+             endif
              if (msta==nob(1, n) .and. nsta==nob(2, n)) then
                 dist = totl
              endif
