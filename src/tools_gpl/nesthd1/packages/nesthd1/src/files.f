@@ -228,7 +228,7 @@
 
       iend = len_trim( cident )
       write (lun,'(''*'')')
-      write (lun,'(''* '',a)') cident(5:iend) 
+      write (lun,'(''* '',a)') cident(1:iend) 
       write (lun,'(''*'')')
       write (lun,'(''* Run date: '',a20)') rundat
       write (lun,'(''*'')')

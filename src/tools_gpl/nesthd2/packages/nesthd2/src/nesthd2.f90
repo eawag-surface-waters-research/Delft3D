@@ -92,11 +92,11 @@ program nesthd2
 !-----------------------------------------------------------------------
 
       length = len_trim(cident)
-      write (*     ,'(/, 2a)') ' ',CIDENT(5:length)
+      write (*     ,'(/, 2a)') ' ', trim(cident)
 
       call opnfl2(lun   ,extnef)
 
-      write (lun(5),'(/, 2a)') ' ',CIDENT(5:length)
+      write (lun(5),'(/, 2a)') ' ', trim(cident)
       write (lun(5),*) ' '
 
 !-----------------------------------------------------------------------
