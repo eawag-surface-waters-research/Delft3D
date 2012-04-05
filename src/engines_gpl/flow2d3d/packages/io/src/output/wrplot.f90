@@ -1,6 +1,6 @@
 subroutine wrplot(filnam    ,lundia    ,error     ,mmax      ,nmax      , &
                 & nmaxus    ,kcs       ,ibuff     ,xz        ,yz        , &
-                & rbuff     ,gdp       )
+                & rbuff     ,sferic    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -63,6 +63,7 @@ subroutine wrplot(filnam    ,lundia    ,error     ,mmax      ,nmax      , &
     integer                                                                        :: nmaxus !  Description and declaration in esm_alloc_int.f90
     integer     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
     integer     , dimension(nmaxus, mmax)                                          :: ibuff  !  Description and declaration in esm_alloc_int.f90
+    logical                                                          , intent(in)  :: sferic !  Description and declaration in tricom.igs
     logical                                                          , intent(out) :: error  !!  Flag=TRUE if an error is encountered
     real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: xz     !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: yz     !  Description and declaration in esm_alloc_real.f90
@@ -115,6 +116,11 @@ subroutine wrplot(filnam    ,lundia    ,error     ,mmax      ,nmax      , &
     !
     ierr = 0
     wrswch = .true.
+    !
+    if (sferic) then
+       elmunt(1) = '[  DEG  ]'
+       elmunt(2) = '[  DEG  ]'
+    endif
     !
     !-----Set up the element dimensions
     !

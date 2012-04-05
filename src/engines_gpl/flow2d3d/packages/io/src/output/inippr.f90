@@ -296,7 +296,7 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
        if (inode == master) then 
           call wrplot(comfil    ,lundia    ,error     ,mmax      ,nmax      , & 
                     & nmaxus    ,i(kcs)    ,i(ibuff)  ,r(xz)     ,r(yz)     , & 
-                    & r(rbuff)  ,gdp       ) 
+                    & r(rbuff)  ,sferic    ,gdp       ) 
           if (error) goto 9999 
        endif 
        soort = 'com' 

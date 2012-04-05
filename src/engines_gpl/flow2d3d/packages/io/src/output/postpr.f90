@@ -333,6 +333,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     character(4)                         , pointer :: rouflo
     character(20)    , dimension(:)      , pointer :: namst
     character(20)    , dimension(:)      , pointer :: namtra
+    logical                              , pointer :: sferic
     logical                              , pointer :: firstwaq
     logical                              , pointer :: waqfil
     logical                              , pointer :: waqol
@@ -675,6 +676,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     waqol               => gdp%gdwaqpar%waqol
     lfbedfrm            => gdp%gdbedformpar%lfbedfrm
     rouflo              => gdp%gdtricom%rouflo
+    sferic              => gdp%gdtricom%sferic
     !
     ! Initialisation
     !
@@ -942,7 +944,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                        & r(zvicww) ,r(zdicww) ,r(zrich)  ,r(zrho)   ,r(gro)    , &
                        & r(ztur)   ,r(zvort)  ,r(zenst)  ,r(hydprs) ,r(fltr)   , &
                        & r(ctr)    ,r(atr)    ,r(dtr)    ,velt      ,r(zdps)   , &
-                       & gdp       )
+                       & sferic    ,gdp       )
           if (error) goto 9999
           if (dredge .and. .not. dadsmonly) then
              call wrthisdad(lundia    ,error     ,trifil    ,ithisc    , &
@@ -954,7 +956,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                           & zmodel    ,kmax      ,lstsci    ,nsrc      , &
                           & i(mnksrc) ,r(disch)  ,d(dps)    ,r(rint)   , &
                           & r(s1)     ,r(sig)    ,r(sig)    ,r(voldis) , &
-                          & r(xcor)   ,r(ycor)   ,gdp      )
+                          & r(xcor)   ,r(ycor)   ,sferic    ,gdp      )
              if (error) goto 9999
           endif          
           !
@@ -1127,7 +1129,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
           ! write to NEFIS DRO files (trid-ext.dat and trid-ext.def)
           !
           call wrtdro(lundia    ,error     ,trifil    ,itdroc    ,itdrof    , &
-                    & itdroi    ,ndro      ,r(xydro)  ,gdp       )
+                    & itdroi    ,ndro      ,r(xydro)  ,sferic    ,gdp       )
           if (error) goto 9999
           !
           ! Update timestep to write drogue file

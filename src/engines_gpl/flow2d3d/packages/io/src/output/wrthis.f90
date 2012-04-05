@@ -6,7 +6,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
                   & zvicww    ,zdicww    ,zrich     ,zrho      ,gro       , &
                   & ztur      ,zvort     ,zenst     ,hydprs    ,fltr      , &
                   & ctr       ,atr       ,dtr       ,velt      ,zdps      , &
-                  & gdp       )
+                  & sferic    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -92,6 +92,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     integer                                                      :: ntruv  !  Description and declaration in dimens.igs
     integer      , dimension(nostat)                             :: zkfs   !  KFS in monitoring station
     logical                                        , intent(out) :: error  !!  Flag=TRUE if an error is encountered
+    logical                                        , intent(in)  :: sferic !  Description and declaration in tricom.igs
     logical                                        , intent(in)  :: zmodel !  Description and declaration in procs.igs
     real(fp)     , dimension(nostat)                             :: zdps   !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(nostat)                             :: ztauet !  Description and declaration in esm_alloc_real.f90
@@ -148,6 +149,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     real(sp)       , dimension(:)      , allocatable :: rsbuff1   ! work array
     real(sp)       , dimension(:,:)    , allocatable :: rsbuff2   ! work array
     real(sp)       , dimension(:,:,:)  , allocatable :: rsbuff3   ! work array
+    character(10)                                    :: coordunit ! Unit of X/Y coordinate: M or DEG
     character(16)                                    :: grnam1    ! Data-group name defined for the NEFIS-files group 1 
     character(16)                                    :: grnam3    ! Data-group name defined for the NEFIS-files group 3 
     character(256)                                   :: filnam    ! Help var. for FLOW file name 
@@ -176,6 +178,11 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     !
     filnam = trifil(1:3) // 'h' // trifil(5:)
     !
+    if (sferic) then
+       coordunit = '[  DEG  ]'
+    else
+       coordunit = '[   M   ]'
+    endif
     !
     errmsg = ' '
     !
@@ -315,7 +322,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
                    & lundia    ,gdp       )
              endif
           endif
-          call addelm(nefiswrthis,'XYSTAT',' ','[   M   ]','REAL',4              , &
+          call addelm(nefiswrthis,'XYSTAT',' ',coordunit,'REAL',4              , &
              & '(X,Y) coordinates of monitoring stations                      ', &
              & 2         ,2         ,nostatgl  ,0         ,0         ,0      , &
              & lundia    ,gdp       )

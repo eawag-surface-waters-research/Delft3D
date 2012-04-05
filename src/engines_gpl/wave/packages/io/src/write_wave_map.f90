@@ -138,6 +138,11 @@ subroutine write_wave_map (sg, sof, n_swan_grids, wavedata, casl)
     idum  = -1
     xdum  = -1.0
     !
+    if (sg.sferic) then
+       elmunt(17) = '[  DEG  ]'
+       elmunt(18) = '[  DEG  ]'
+    endif
+    !
     wrswch = .true.
     !
     ! Allocate and initialise possible additional output parameters

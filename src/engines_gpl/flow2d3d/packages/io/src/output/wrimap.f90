@@ -1,4 +1,4 @@
-subroutine wrimap(lundia    ,error     ,trifil    ,selmap    ,simdat    , &
+subroutine wrimap(lundia      ,error     ,trifil    ,selmap    ,simdat    , &
                   & itdate    ,tzone     ,tunit     ,dt        ,mmax      , &
                   & kmax      ,lmax      ,lstsci    ,ltur      ,nmaxus    , &
                   & noroco    ,norow     ,nostat    ,nsrc      ,ntruv     , &
@@ -66,7 +66,6 @@ subroutine wrimap(lundia    ,error     ,trifil    ,selmap    ,simdat    , &
     character(20) , dimension(:)    , pointer :: namtra
     logical                         , pointer :: first
     integer                         , pointer :: celidt
-    integer       , dimension(:, :) , pointer :: elmdms
     type (nefiselement)             , pointer :: nefiselem
     integer                         , pointer :: mfg
     integer                         , pointer :: mlg
@@ -143,11 +142,9 @@ subroutine wrimap(lundia    ,error     ,trifil    ,selmap    ,simdat    , &
     integer                                      :: i         ! WARNING: i and i+1, denoting the parameter to be written, can only be used when inode == master
     integer      , dimension(4,0:nproc-1)        :: iarrc     ! array containing collected grid indices 
     integer      , dimension(1)                  :: idummy    ! Help array to read/write Nefis files
-    integer                                      :: ierror   ! Local errorflag for NEFIS files
-    integer                                      :: indx      ! array index
+    integer                                      :: ierror    ! Local errorflag for NEFIS files
     integer                                      :: ip        ! node number 
     integer      , dimension(:,:)  , allocatable :: isbuff
-    integer                                      :: istart    ! start pointer for each subdomain in collected array
     integer      , dimension(2)                  :: ival      ! Local array for writing ITDATE and time (:= 00:00:00)
     integer                                      :: k
     integer                                      :: l
@@ -157,27 +154,22 @@ subroutine wrimap(lundia    ,error     ,trifil    ,selmap    ,simdat    , &
     integer                                      :: lhlp      ! Help variable for teller constituents and turbulent quantities 
     integer                                      :: lsedbl    ! Number of bed load fractions: lsedtot-lsed
     integer                                      :: m         ! Help variable 
-    integer                                      :: maxdim4   ! maximum size in 4'th dimension 
     integer      , dimension(0:nproc-1)          :: mf        ! first index w.r.t. global grid in x-direction
     integer      , dimension(0:nproc-1)          :: ml        ! last index w.r.t. global grid in x-direction
     integer      , dimension(:,:)  , allocatable :: mnstatgl  ! mn indices per partition (excluding duplicates)
-    integer                                      :: msiz      ! size of present subdomain in x-direction
     integer                                      :: n         ! Help variable 
     integer      , dimension(0:nproc-1)          :: nf        ! first index w.r.t. global grid in y-direction
     integer      , dimension(0:nproc-1)          :: nl        ! last index w.r.t. global grid in y-direction
     integer                                      :: nostatgl  ! global number of stations (i.e. original number excluding duplicate stations located in the halo regions)
     integer                                      :: nostatto  ! total number of stations (including "duplicate" stations located in halo regions)
-    integer                                      :: nsiz      ! size of present subdomain in y-direction
     integer                                      :: ntruvgl   ! global number of tracks (i.e. original number excluding duplicate stations located in the halo regions)
     integer                                      :: ntruvto   ! total number of tracks (including "duplicate" stations located in halo regions)
-    integer      , dimension(nelmx)              :: nbytsg    ! Array containing the number of by- tes of each single ELMTPS
     integer      , dimension(3,5)                :: uindex
     integer                        , external    :: inqmxi
     integer                        , external    :: neferr
     integer                        , external    :: clsnef
     integer                        , external    :: open_datdef
     integer                        , external    :: putelt
-    logical                                      :: wrswch    ! Flag to write file .TRUE. : write to  file .FALSE.: read from file
     real(sp)     , dimension(1)                  :: rdummy    ! Help array to read/write Nefis files
     real(sp)     , dimension(:)  , allocatable   :: sbuff1d
     real(sp)     , dimension(:,:), allocatable   :: sbuff2d
@@ -185,14 +177,11 @@ subroutine wrimap(lundia    ,error     ,trifil    ,selmap    ,simdat    , &
     character(16), dimension(1)                  :: cdum16    ! Help array to read/write Nefis files
     character(21), dimension(1)                  :: cdum21    ! Help array to read/write Nefis files
     character(20), dimension(:)    , allocatable :: csbuff2   ! work array for gathering names of stations (exc. duplicates)
-     character(10), dimension(nelmx)              :: elmunt    ! Array with element physical unit
-    character(16), dimension(nelmx)              :: elmnms    ! Element name defined for the NEFIS-files
-    character(16), dimension(nelmx)              :: elmqty    ! Array with element quantity
-    character(16), dimension(nelmx)              :: elmtps    ! Array containing the types of the elements (real, ch. , etc. etc.)
     character(256)                               :: errmsg    ! Character var. containing the errormessage to be written to file. The message depends on the error. 
     character(16)                                :: grnam2    ! Data-group name defined for the NEFIS-files
     character(256)                               :: filnam    ! Help var. for FLOW file name
     character(20), dimension(:)    , allocatable :: namhlp    ! Help array for name constituents and turbulent quantities
+    character(10)                                :: coordunit ! Unit of X/Y coordinate: M or DEG
 !
 ! Data statements
 !
@@ -207,7 +196,6 @@ subroutine wrimap(lundia    ,error     ,trifil    ,selmap    ,simdat    , &
     nefiselem  => gdp%nefisio%nefiselem(nefiswrimap)
     first      => nefiselem%first
     celidt     => nefiselem%celidt
-    elmdms     => nefiselem%elmdms
     order_sta  => gdp%gdparall%order_sta
     order_tra  => gdp%gdparall%order_tra
     !
@@ -238,13 +226,12 @@ subroutine wrimap(lundia    ,error     ,trifil    ,selmap    ,simdat    , &
     !
     call init_buffer()
     !
-    ! Redefine elmunt for sferic coordinates
+    ! Define coordinate unit
     !
     if (sferic) then
-       elmunt(15) = '[  DEG  ]'
-       elmunt(16) = '[  DEG  ]'
-       elmunt(17) = '[  DEG  ]'
-       elmunt(18) = '[  DEG  ]'
+       coordunit = '[  DEG  ]'
+    else
+       coordunit = '[   M   ]'
     endif
     
     if (parll) then
@@ -330,20 +317,20 @@ subroutine wrimap(lundia    ,error     ,trifil    ,selmap    ,simdat    , &
           & 'Edge between y-axis and real north                            ', &
           & 1         ,1         ,0         ,0         ,0         ,0      , &
           & lundia    ,gdp       )
-       call addelm(nefiswrimap,'XCOR',' ','[   M   ]','REAL',4   , &
-          & 'X-coord. bottom point in local system                         ', &
+       call addelm(nefiswrimap,'XCOR',' ',coordunit,'REAL',4   , &
+          & 'X-coordinate of grid points                                   ', &
           & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
           & lundia    ,gdp       )
-       call addelm(nefiswrimap,'YCOR',' ','[   M   ]','REAL',4   , &
-          & 'Y-coord. bottom point in local system                         ', &
+       call addelm(nefiswrimap,'YCOR',' ',coordunit,'REAL',4   , &
+          & 'Y-coordinate of grid points                                   ', &
           & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
           & lundia    ,gdp       )
-       call addelm(nefiswrimap,'XZ',' ','[   M   ]','REAL',4   , &
-          & 'X-coord. zeta point in local system                           ', &
+       call addelm(nefiswrimap,'XZ',' ',coordunit,'REAL',4   , &
+          & 'X-coordinate of cell centres                                  ', &
           & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
           & lundia    ,gdp       )
-       call addelm(nefiswrimap,'YZ',' ','[   M   ]','REAL',4   , &
-          & 'Y-coord. zeta point in local system                           ', &
+       call addelm(nefiswrimap,'YZ',' ',coordunit,'REAL',4   , &
+          & 'Y-coordinate of cell centres                                  ', &
           & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
           & lundia    ,gdp       )
        call addelm(nefiswrimap,'ALFAS',' ','[  DEG  ]','REAL',4   , &
@@ -485,9 +472,6 @@ subroutine wrimap(lundia    ,error     ,trifil    ,selmap    ,simdat    , &
        ! end of initialization, don't come here again
        !
        ierror = inqmxi(fds, grnam2, celidt)
-
-
-
        !
        ! group 2, element 'ITDATE'
        !

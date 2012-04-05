@@ -1,5 +1,5 @@
 subroutine wrtdro(lundia    ,error     ,trifil    ,itdroc    ,itdrof    , &
-                & itdroi    ,ndro      ,xydro     ,gdp       )
+                & itdroi    ,ndro      ,xydro     ,sferic    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -62,6 +62,7 @@ subroutine wrtdro(lundia    ,error     ,trifil    ,itdroc    ,itdrof    , &
     integer                          , intent(in)  :: itdroi !  Description and declaration in inttim.igs
     integer                                        :: lundia !  Description and declaration in inout.igs
     integer                                        :: ndro   !  Description and declaration in dimens.igs
+    logical                          , intent(in)  :: sferic !  Description and declaration in tricom.igs
     logical                          , intent(out) :: error  !!  Flag=TRUE if an error is encountered
     real(fp)    , dimension(2, ndro)               :: xydro  !  Description and declaration in esm_alloc_real.f90
     character(*)                     , intent(in)  :: trifil !!  File name for FLOW NEFIS output
@@ -113,6 +114,10 @@ subroutine wrtdro(lundia    ,error     ,trifil    ,itdroc    ,itdrof    , &
     nelmx3 = nelmx - 1
     ierror = 0
     celidt = int((itdroc - itdrof + 1.01*itdroi)/itdroi)
+    !
+    if (sferic) then
+       elmunt(2) = '[  DEG  ]'
+    endif
     !
     filnam = trifil(1:3) // 'd' // trifil(5:)
     errmsg = ' '

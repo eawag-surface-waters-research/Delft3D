@@ -1,7 +1,7 @@
 subroutine wrthisdis(lundia    ,error     ,trifil    ,ithisc    ,zmodel    , &
                    & kmax      ,lstsc     ,nsrc      ,mnksrc    ,disch     , &
                    & dps       ,rint      ,s1        ,sig       ,zk        , &
-                   & voldis    ,xcor      ,ycor      ,gdp       )
+                   & voldis    ,xcor      ,ycor      ,sferic    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -77,6 +77,7 @@ subroutine wrthisdis(lundia    ,error     ,trifil    ,ithisc    ,zmodel    , &
     real(fp)  , dimension(0:kmax)                                  , intent(in)  :: zk     ! See description and declaration of sig in esm_alloc_real.f90
     logical                                                        , intent(out) :: error  ! Description and declaration in tricom.f90
     logical                                                        , intent(in)  :: zmodel ! Description and declaration in procs.igs
+    logical                                                        , intent(in)  :: sferic  !  Description and declaration in tricom.igs
     character(*)                                                   , intent(in)  :: trifil ! Description and declaration in trisim.F90
     
 !
@@ -150,6 +151,13 @@ subroutine wrthisdis(lundia    ,error     ,trifil    ,ithisc    ,zmodel    , &
     elmdms           => nefiselem%elmdms
     !
     nelmx2 = nelmx - 1
+    !
+    if (sferic) then
+       elmunt( 9) = '[  DEG  ]'
+       elmunt(10) = '[  DEG  ]'
+       elmunt(15) = '[  DEG  ]'
+       elmunt(16) = '[  DEG  ]'
+    endif
     !
     ! Initialize local variables
     !
