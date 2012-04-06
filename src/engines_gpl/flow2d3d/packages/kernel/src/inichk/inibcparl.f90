@@ -1,4 +1,4 @@
-subroutine inibcparl(nto    , mnbnd     ,typbnd    , &
+subroutine inibcparl(nto       ,nrob      ,mnbnd     ,nob       ,typbnd    , &
                    & guu       ,gvv       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -83,7 +83,9 @@ subroutine inibcparl(nto    , mnbnd     ,typbnd    , &
 ! Global variables
 !
     integer                                                           , intent(in)  :: nto    !!  Max. number of open boundaries
+    integer                                                           , intent(in)  :: nrob   !  Description and declaration in esm_alloc_int.f90
     integer      , dimension(7, nto)                                  , intent(in)  :: mnbnd  !  Description and declaration in esm_alloc_int.f90
+    integer      , dimension(8, nrob)                                 , intent(in)  :: nob    !  Description and declaration in esm_alloc_int.f90
     character(1) , dimension(nto)                                     , intent(in)  :: typbnd !  Description and declaration in esm_alloc_char.f90
     real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: guu    !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: gvv    !  Description and declaration in esm_alloc_real.f90
@@ -106,6 +108,7 @@ subroutine inibcparl(nto    , mnbnd     ,typbnd    , &
     integer                                :: lengl        ! length of field containing collected data
     integer                                :: mgg          ! M-coord. of the actual open boundary point, which may differ from the ori- ginal position due to grid staggering
     integer                                :: ngg          ! N-coord. of the actual open boundary point, which may differ from the ori- ginal position due to grid staggering
+    integer                                :: np
     integer                                :: lb           ! lowerboundary of loopcounter
     integer                                :: ub           ! upperboundary of loopcounter
     integer , dimension(0:nproc-1)         :: mf           ! first index w.r.t. global grid in x-direction
@@ -191,7 +194,23 @@ subroutine inibcparl(nto    , mnbnd     ,typbnd    , &
     !
     ! loop over all boundaries that are (partly) inside this partition
     !
-    do n=1,nto - ntof - ntoq
+    do n=1,nto-ntof-ntoq
+       !
+       ! Find an index np for which nob(:,np) refers to a point belonging to this open boundary: nob(8,np)=n
+       ! np is needed to use nob(4,np) and nob(6,np) to detect the location of this open boundary related to the domain:
+       !   north      boundary: nob(4)=0, nob(6)=2, incy=0
+       !   north-east boundary: nob(4)=2, nob(6)=2, incx=-incy
+       !   east       boundary: nob(4)=2, nob(6)=0, incx=0
+       !   south-east boundary: nob(4)=2, nob(6)=1, incx= incy
+       !   south      boundary: nob(4)=0, nob(6)=1, incy=0
+       !   south-west boundary: nob(4)=1, nob(6)=1, incx=-incy
+       !   west       boundary: nob(4)=1, nob(6)=0, incx=0
+       !   north-west boundary: nob(4)=1, nob(6)=2, incx= incy
+       do np=1,nrob
+          if (nob(8,np) == n) then
+             exit
+          endif
+       enddo
        !
        ! loop over start_pivot (1) and end_pivot (2)
        do pivot=start_pivot,end_pivot
@@ -200,93 +219,189 @@ subroutine inibcparl(nto    , mnbnd     ,typbnd    , &
              ! (msta,nsta): boundary pivot point outside partition
              ! (mend,nend): first point along boundary inside partition
              !
-             msta   = mnbnd_global(1, bct_order(n))
-             nsta   = mnbnd_global(2, bct_order(n))
-             mend   = mnbnd(1, n)+mfg-1
-             nend   = mnbnd(2, n)+nfg-1
+             msta   = mnbnd_global(1,bct_order(n))
+             nsta   = mnbnd_global(2,bct_order(n))
+             mend   = mnbnd(1,n) + mfg - 1
+             nend   = mnbnd(2,n) + nfg - 1
           else ! end_pivot
              !
              ! (msta,nsta): first point along boundary inside partition
              ! (mend,nend): boundary pivot point outside partition
              !
-             msta   = mnbnd(3, n)+mfg-1
-             nsta   = mnbnd(4, n)+nfg-1
-             mend   = mnbnd_global(3, bct_order(n))
-             nend   = mnbnd_global(4, bct_order(n))
+             msta   = mnbnd(3,n) + mfg - 1
+             nsta   = mnbnd(4,n) + nfg - 1
+             mend   = mnbnd_global(3,bct_order(n))
+             nend   = mnbnd_global(4,bct_order(n))
           endif
           incx   = mend - msta
           incy   = nend - nsta
           maxinc = max(abs(incx), abs(incy))
-          incx   = incx/max(1, maxinc)
-          incy   = incy/max(1, maxinc)
+          incx   = incx / max(1,maxinc)
+          incy   = incy / max(1,maxinc)
           select case (typbnd(n))
              case ('Z')
                 ! Waterlevel boundary, ityp=2
-                do while ((msta<=mend) .and. (nsta<=nend))
+                do while ((msta/=mend) .or. (nsta/=nend))
                    !
                    ! This loop is NOT entered when the boundary is completely inside this partition
                    ! This loop is entered for horizontal (nsta=nend), vertical (msta=mend) and diagonal (msta!=mend,nsta!=nend) boundaries
-                   ! The easiest way to check that we reached the first point inside the partition is:
-                   if ((msta==mend) .and. (nsta==nend)) exit
+                   !
                    msta  = msta + incx
                    nsta  = nsta + incy
                    !
-                   ! Pythagoras is used to calculate the distance from xz,yz(nsta-incy,msta-incx) to xz,yz(nsta,msta),
-                   ! using distx = |xz,yz(nsta     ,msta-incx) - xz,yz(nsta,msta     )|
-                   !       disty = |xz,yz(nsta-incy,msta-incx) - xz,yz(nsta,msta-incx)|
-                   ! Assumption: the grid is more or less rectangular locally
+                   ! In case of a diagonal water level boundary; example south-east boundary (ie incx=incy=1):
+                   ! Pythagoras is used to calculate the distance from xz,yz(m,n) to xz,yz(m+1,n+1),
+                   ! using d_y((m,n),(m+1,n+1)) = 0.5*(guu(m-1,n  ) + guu(m-1,n+1))
+                   !       d_x((m,n),(m+1,n+1)) = 0.5*(gvv(m  ,n+1) + gvv(m+1,n+1))
+                   !       dist = sqrt(d_x*d_x + d_y*d_y) 
+                   ! Assumption: - the grid is more or less cartesian locally
+                   ! Note:       - incx and incy are -1, 0 or 1
+                   !             - Use guu_global/gvv_global inside the domain; they may not be defined outside the domain
+                   !               Since we are handling open boundaries, a rather laborious test is needed
+                   !               to check whether the indexes mgg and ngg must be adapted
+                   !
+                   !
+                   ! Compute distance in xi-direction
                    !
                    if (incx == 0) then
+                      !
+                      ! east or west boundary
+                      !
                       distx = 0.0_fp
                    else
-                      if (mnbnd(7,n) == 4) then
-                         !
-                         ! Boundary on top side of the domain
-                         ! The correct gvv is one index down (staggered grid)
-                         !
-                         ngg = nsta - 1
-                      else
-                         ngg = nsta
-                      endif
-                      !
-                      ! General case: incx > 1
-                      ! The distance in the x-direction between the two zeta points is:
-                      ! 0.5*gvv(lowest_point) + sum(gvv(intermediate_points)) + 0.5*gvv(highest_point)
-                      !
+                      ngg = nsta
+                      select case(nob(4,np))
+                      case (0)
+                         if (nob(6,np) == 1) then
+                            ! south boundary, ngg=nsta is ok
+                         elseif (nob(6,np) == 2) then
+                            ! north boundary, gvv(ngg,..) is outside domain
+                            ngg = ngg - 1
+                         else
+                            ! nob(6) is always 1 or 2 for open boundaries that are not east or west boundaries
+                         endif
+                      case (1)
+                         if (nob(6,np) == 1) then
+                            ! south-west boundary
+                            if (incy > 0) then
+                               ! ngg=nsta is ok
+                            else
+                               ! gvv(ngg,..) is (partly) outside domain
+                               ngg = ngg + 1
+                            endif
+                         elseif (nob(6,np) == 2) then
+                            ! north-west boundary
+                            if (incy > 0) then
+                               ! gvv(ngg,..) and gvv(ngg-1,..) are (partly) outside domain
+                               ngg = ngg - 2
+                            else
+                               ! gvv(ngg,..) is (partly) outside domain
+                               ngg = ngg - 1
+                            endif
+                         else
+                            ! nob(6) is always 1 or 2 for open boundaries that are not east or west boundaries
+                         endif
+                      case (2)
+                         if (nob(6,np) == 1) then
+                            ! south-east boundary
+                            if (incy > 0) then
+                               ! ngg=nsta is ok
+                            else
+                               ! gvv(ngg,..) is (partly) outside domain
+                               ngg = ngg + 1
+                            endif
+                         elseif (nob(6,np) == 2) then
+                            ! north-east boundary
+                            if (incy > 0) then
+                               ! gvv(ngg,..) and gvv(ngg-1,..) are (partly) outside domain
+                               ngg = ngg - 2
+                            else
+                               ! gvv(ngg,..) is (partly) outside domain
+                               ngg = ngg - 1
+                            endif
+                         else
+                            ! nob(6) is always 1 or 2 for open boundaries that are not east or west boundaries
+                         endif
+                      case default
+                         ! nob(4) is always 0, 1 or 2
+                      endselect
                       distx = 0.5_fp * (real(gvv_global(ngg,msta-incx),fp)+real(gvv_global(ngg,msta),fp))
-                      lb = min(msta-incx,msta)
-                      ub = max(msta-incx,msta)
-                      do i=lb+1,ub-1
-                         distx = distx + real(gvv_global(ngg,i),fp)
-                      enddo
                    endif
-                   distx = distx*distx
+                   !
+                   ! Compute distance in eta-direction
+                   !
                    if (incy == 0) then
+                      !
+                      ! north or south boundary
+                      !
                       disty = 0.0_fp
                    else
-                      if (mnbnd(7,n) == 3) then
-                         !
-                         ! Boundary on right side of the domain
-                         ! The correct guu is one index down (staggered grid)
-                         !
-                         mgg = msta - incx - 1
-                      else
-                         mgg = msta - incx
-                      endif
-                      !
-                      ! General case: incy > 1
-                      ! The distance in the y-direction between the two zeta points is:
-                      ! 0.5*guu(lowest_point) + sum(guu(intermediate_points)) + 0.5*guu(highest_point)
-                      !
+                      mgg = msta
+                      select case(nob(6,np))
+                      case (0)
+                         if (nob(4,np) == 1) then
+                            ! west boundary, mgg=msta is ok
+                         elseif (nob(4,np) == 2) then
+                            ! east boundary, guu(mgg,..) is outside domain
+                            mgg = mgg - 1
+                         else
+                            ! nob(4) is always 1 or 2 for open boundaries that are not north or south boundaries
+                         endif
+                      case (1)
+                         if (nob(4,np) == 1) then
+                            ! south-west boundary
+                            if (incx > 0) then
+                               ! mgg=msta is ok
+                            else
+                               ! guu(mgg,..) is (partly) outside domain
+                               mgg = mgg + 1
+                            endif
+                         elseif (nob(4,np) == 2) then
+                            ! south-east boundary
+                            if (incx > 0) then
+                               ! guu(mgg,..) and guu(mgg-1,..) are (partly) outside domain
+                               mgg = mgg - 2
+                            else
+                               ! guu(mgg,..) is (partly) outside domain
+                               mgg = mgg - 1
+                            endif
+                         else
+                            ! nob(4) is always 1 or 2 for open boundaries that are not north or south boundaries
+                         endif
+                      case (2)
+                         if (nob(4,np) == 1) then
+                            ! north-west boundary
+                            if (incx > 0) then
+                               ! mgg=nsta is ok
+                            else
+                               ! guu(mgg,..) is (partly) outside domain
+                               mgg = mgg + 1
+                            endif
+                         elseif (nob(4,np) == 2) then
+                            ! north-east boundary
+                            if (incx > 0) then
+                               ! guu(mgg,..) and guu(mgg-1,..) are (partly) outside domain
+                               mgg = mgg - 2
+                            else
+                               ! guu(mgg,..) is (partly) outside domain
+                               mgg = mgg - 1
+                            endif
+                         else
+                            ! nob(4) is always 1 or 2 for open boundaries that are not north or south boundaries
+                         endif
+                      case default
+                         ! nob(6) is always 0, 1 or 2
+                      endselect
                       disty = 0.5_fp * (real(guu_global(nsta-incy,mgg),fp)+real(guu_global(nsta,mgg),fp))
-                      lb = min(nsta-incy,nsta)
-                      ub = max(nsta-incy,nsta)
-                      do i=lb+1,ub-1
-                         disty = disty + real(guu_global(i,mgg),fp)
-                      enddo
                    endif
-                   disty = disty*disty
-                   dist_pivot_part(pivot,n) = dist_pivot_part(pivot,n) + sqrt(distx + disty)
+                   if (incx/=0 .and. incy/=0) then
+                      distx                    = distx * distx
+                      disty                    = disty * disty
+                      dist_pivot_part(pivot,n) = dist_pivot_part(pivot,n) + sqrt(distx + disty)
+                   else
+                      ! distx==0 or disty==0
+                      dist_pivot_part(pivot,n) = dist_pivot_part(pivot,n) + distx + disty
+                   endif
                 enddo
              case ('T')
                 !
@@ -314,13 +429,12 @@ subroutine inibcparl(nto    , mnbnd     ,typbnd    , &
                 ! Distance between points calculated
                 ! When MSTA/NSTA are updated first use lower GVV/GUU
                 !
-                do while ((msta<=mend) .and. (nsta<=nend))
+                do while ((msta/=mend) .or. (nsta/=nend))
                    !
                    ! This loop is NOT entered when the boundary is completely inside this partition
                    ! This loop is ONLY entered for horizontal (nsta=nend,incx=1) and vertical (msta=mend,incy=1) boundaries,
                    ! not for diagonal boundaries (compare with case ('Z'))
-                   ! The easiest way to check that we reached the first point inside the partition is:
-                   if ((msta==mend) .and. (nsta==nend)) exit
+                   !
                    msta = msta + incx
                    nsta = nsta + incy
                    if (horiz) then

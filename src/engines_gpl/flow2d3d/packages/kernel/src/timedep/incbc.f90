@@ -592,103 +592,162 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
              msta  = msta + incx
              nsta  = nsta + incy
              !
-             ! In case of a diagonal water level boundary; example south-east boundary (ie incx=incxy=1):
+             ! In case of a diagonal water level boundary; example south-east boundary (ie incx=incy=1):
              ! Pythagoras is used to calculate the distance from xz,yz(m,n) to xz,yz(m+1,n+1),
              ! using d_y((m,n),(m+1,n+1)) = 0.5*(guu(m-1,n  ) + guu(m-1,n+1))
              !       d_x((m,n),(m+1,n+1)) = 0.5*(gvv(m  ,n+1) + gvv(m+1,n+1))
              !       dist = sqrt(d_x*d_x + d_y*d_y) 
-             ! Assumption: the grid is more or less cartesian locally
+             ! Assumption: - the grid is more or less cartesian locally
+             ! Note:       - incx and incy are -1, 0 or 1
+             !             - Use guu/gvv inside the domain; they may not be defined outside the domain
+             !               Since we are handling open boundaries, a rather laborious test is needed
+             !               to check whether the indexes mgg and ngg must be adapted
              !
              !
              ! Compute distance in xi-direction
              !
              if (incx == 0) then
+                !
+                ! east or west boundary
+                !
                 distx = 0.0_fp
              else
-                if (posrel == 4) then
-                   !
-                   ! Boundary on top side of the domain
-                   ! The correct gvv is one index down (staggered grid)
-                   !
-                   if (incy==0) then
-                       ! horizontal topboundary
-                       ngg = nsta - 1
-                   elseif (incx == -incy) then
-                       ! north-east boundary
-                       ngg = nsta - 1 - 1
-                   elseif (incx == incy) then
-                       ! north-west boundary
-                       ngg = nsta - 1 - 1
+                ngg = nsta
+                select case(nob(4,n))
+                case (0)
+                   if (nob(6,n) == 1) then
+                      ! south boundary, ngg=nsta is ok
+                   elseif (nob(6,n) == 2) then
+                      ! north boundary, gvv(ngg,..) is outside domain
+                      ngg = ngg - 1
+                   else
+                      ! nob(6) is always 1 or 2 for open boundaries that are not east or west boundaries
                    endif
-                else
-                   if (incy==0) then
-                       ! horizontal bottom boundary
-                       ngg = nsta
-                   elseif (incx == -incy) then
-                       ! south-west boundary
-                       ngg = nsta + 1
-                   elseif (incx == incy) then
-                       ! south-east boundary
-                       ngg = nsta
+                case (1)
+                   if (nob(6,n) == 1) then
+                      ! south-west boundary
+                      if (incy > 0) then
+                         ! ngg=nsta is ok
+                      else
+                         ! gvv(ngg,..) is (partly) outside domain
+                         ngg = ngg + 1
+                      endif
+                   elseif (nob(6,n) == 2) then
+                      ! north-west boundary
+                      if (incy > 0) then
+                         ! gvv(ngg,..) and gvv(ngg-1,..) are (partly) outside domain
+                         ngg = ngg - 2
+                      else
+                         ! gvv(ngg,..) is (partly) outside domain
+                         ngg = ngg - 1
+                      endif
+                   else
+                      ! nob(6) is always 1 or 2 for open boundaries that are not east or west boundaries
                    endif
-                endif
-                !
-                ! General case: incx > 1
-                ! The distance in the x-direction between the two zeta points is:
-                ! 0.5*gvv(lowest_point) + sum(gvv(intermediate_points)) + 0.5*gvv(highest_point)
-                !
-                distx = 0.5_fp * (real(gvv(ngg,msta-incx),fp)+real(gvv(ngg,msta),fp))
+                case (2)
+                   if (nob(6,n) == 1) then
+                      ! south-east boundary
+                      if (incy > 0) then
+                         ! ngg=nsta is ok
+                      else
+                         ! gvv(ngg,..) is (partly) outside domain
+                         ngg = ngg + 1
+                      endif
+                   elseif (nob(6,n) == 2) then
+                      ! north-east boundary
+                      if (incy > 0) then
+                         ! gvv(ngg,..) and gvv(ngg-1,..) are (partly) outside domain
+                         ngg = ngg - 2
+                      else
+                         ! gvv(ngg,..) is (partly) outside domain
+                         ngg = ngg - 1
+                      endif
+                   else
+                      ! nob(6) is always 1 or 2 for open boundaries that are not east or west boundaries
+                   endif
+                case default
+                   ! nob(4) is always 0, 1 or 2
+                endselect
+                distx = 0.5_fp * (gvv(ngg,msta-incx) + gvv(ngg,msta))
              endif
              !
              ! Compute distance in eta-direction
              !
              if (incy == 0) then
+                !
+                ! north or south boundary
+                !
                 disty = 0.0_fp
              else
-                if (posrel == 4) then
-                   if (incx == -incy) then
-                       ! north-east boundary
-                       mgg = msta - 1
-                   elseif (incx == incy) then
-                       ! north-west boundary
-                       mgg = msta
+                mgg = msta
+                select case(nob(6,n))
+                case (0)
+                   if (nob(4,n) == 1) then
+                      ! west boundary, mgg=msta is ok
+                   elseif (nob(4,n) == 2) then
+                      ! east boundary, guu(mgg,..) is outside domain
+                      mgg = mgg - 1
+                   else
+                      ! nob(4) is always 1 or 2 for open boundaries that are not north or south boundaries
                    endif
-                elseif (posrel == 3) then
-                   !
-                   ! Boundary on right side of the domain
-                   ! The correct guu is one index down (staggered grid)
-                   !
-                   if (incx==0) then
-                       ! vertical topboundary
-                       mgg = msta - 1
+                case (1)
+                   if (nob(4,n) == 1) then
+                      ! south-west boundary
+                      if (incx > 0) then
+                         ! mgg=msta is ok
+                      else
+                         ! guu(mgg,..) is (partly) outside domain
+                         mgg = mgg + 1
+                      endif
+                   elseif (nob(4,n) == 2) then
+                      ! south-east boundary
+                      if (incx > 0) then
+                         ! guu(mgg,..) and guu(mgg-1,..) are (partly) outside domain
+                         mgg = mgg - 2
+                      else
+                         ! guu(mgg,..) is (partly) outside domain
+                         mgg = mgg - 1
+                      endif
+                   else
+                      ! nob(4) is always 1 or 2 for open boundaries that are not north or south boundaries
                    endif
-                else
-                   if (incx==0) then
-                       ! vertical bottom boundary
-                       mgg = nsta
-                   elseif (incx == -incy) then
-                       ! south-west boundary
-                       mgg = msta 
-                   elseif (incx == incy) then
-                       ! south-east boundary
-                       mgg = msta - 1 - 1
+                case (2)
+                   if (nob(4,n) == 1) then
+                      ! north-west boundary
+                      if (incx > 0) then
+                         ! mgg=nsta is ok
+                      else
+                         ! guu(mgg,..) is (partly) outside domain
+                         mgg = mgg + 1
+                      endif
+                   elseif (nob(4,n) == 2) then
+                      ! north-east boundary
+                      if (incx > 0) then
+                         ! guu(mgg,..) and guu(mgg-1,..) are (partly) outside domain
+                         mgg = mgg - 2
+                      else
+                         ! guu(mgg,..) is (partly) outside domain
+                         mgg = mgg - 1
+                      endif
+                   else
+                      ! nob(4) is always 1 or 2 for open boundaries that are not north or south boundaries
                    endif
-                endif
-                !
-                ! General case: incy > 1
-                ! The distance in the y-direction between the two zeta points is:
-                ! 0.5*guu(lowest_point) + sum(guu(intermediate_points)) + 0.5*guu(highest_point)
-                !
-                disty = 0.5_fp * (real(guu(nsta-incy,mgg),fp)+real(guu(nsta,mgg),fp))
+                case default
+                   ! nob(6) is always 0, 1 or 2
+                endselect
+                disty = 0.5_fp * (guu(nsta-incy,mgg) + guu(nsta,mgg))
              endif
-             if (incx /=0 .and. incy/=0) then
-                 distx = distx*distx
-                 disty = disty*disty
-                 totl  = totl + sqrt(distx + disty)
+             if (incx/=0 .and. incy/=0) then
+                distx = distx * distx
+                disty = disty * disty
+                totl  = totl + sqrt(distx + disty)
              else
-                 totl  = totl + distx + disty ! distx==0 or disty==0
+                ! distx==0 or disty==0
+                totl  = totl + distx + disty
              endif
-             if (msta==mp .and. nsta==np) dist = totl
+             if (msta==mp .and. nsta==np) then
+                dist = totl
+             endif
           enddo
           if (parll) then
              !

@@ -87,6 +87,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     integer                              , pointer :: lsecfl
     integer                              , pointer :: lsec
     integer                              , pointer :: ltur
+    integer                              , pointer :: nrob 
     integer                              , pointer :: nto
     integer                              , pointer :: ntof
     integer                              , pointer :: ntoq
@@ -344,6 +345,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     integer(pntrsize)                    , pointer :: kcscut
     integer(pntrsize)                    , pointer :: kcu45
     integer(pntrsize)                    , pointer :: kcv45
+    integer(pntrsize)                    , pointer :: nob
     integer(pntrsize)                    , pointer :: disint
     integer(pntrsize)                    , pointer :: dismmt
     integer(pntrsize)                    , pointer :: nambnd
@@ -432,6 +434,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     lsecfl              => gdp%d%lsecfl
     lsec                => gdp%d%lsec
     ltur                => gdp%d%ltur
+    nrob                => gdp%d%nrob 
     nto                 => gdp%d%nto
     ntof                => gdp%d%ntof
     ntoq                => gdp%d%ntoq
@@ -689,6 +692,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     kcscut              => gdp%gdr_i_ch%kcscut
     kcu45               => gdp%gdr_i_ch%kcu45
     kcv45               => gdp%gdr_i_ch%kcv45
+    nob                 => gdp%gdr_i_ch%nob
     disint              => gdp%gdr_i_ch%disint
     dismmt              => gdp%gdr_i_ch%dismmt
     nambnd              => gdp%gdr_i_ch%nambnd
@@ -773,7 +777,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
                  & r(zstep)  ,bubble    ,gdp       )
        if (error) goto 9999
     endif
-    call inibcparl(nto    ,i(mnbnd)  ,ch(typbnd), &
+    call inibcparl(nto    ,nrob      ,i(mnbnd)  ,i(nob)     ,ch(typbnd), &
                  & r(guu) ,r(gvv)    ,gdp       )
     !
     ! INIDIS: read initial arrays values for time dependent data for
