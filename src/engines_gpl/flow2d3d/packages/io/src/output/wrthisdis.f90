@@ -77,7 +77,7 @@ subroutine wrthisdis(lundia    ,error     ,trifil    ,ithisc    ,zmodel    , &
     real(fp)  , dimension(0:kmax)                                  , intent(in)  :: zk     ! See description and declaration of sig in esm_alloc_real.f90
     logical                                                        , intent(out) :: error  ! Description and declaration in tricom.f90
     logical                                                        , intent(in)  :: zmodel ! Description and declaration in procs.igs
-    logical                                                        , intent(in)  :: sferic  !  Description and declaration in tricom.igs
+    logical                                                        , intent(in)  :: sferic !  Description and declaration in tricom.igs
     character(*)                                                   , intent(in)  :: trifil ! Description and declaration in trisim.F90
     
 !
