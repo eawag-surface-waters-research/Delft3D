@@ -392,7 +392,7 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
           if (.not. parll) then 
              call wrplot(trifil    ,lundia    ,error     ,mmax      ,nmax      , & 
                        & nmaxus    ,i(kcs)    ,i(ibuff)  ,r(xz)     ,r(yz)     , & 
-                       & r(rbuff)  ,gdp       ) 
+                       & r(rbuff)  ,sferic    ,gdp       ) 
           endif 
           if (error) goto 9999 
        endif 
