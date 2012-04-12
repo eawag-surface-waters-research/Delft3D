@@ -600,8 +600,8 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
              ! Assumption: - the grid is more or less cartesian locally
              ! Note:       - incx and incy are -1, 0 or 1
              !             - Use guu/gvv inside the domain; they may not be defined outside the domain
-             !               Since we are handling open boundaries, a rather laborious test is needed
-             !               to check whether the indexes mgg and ngg must be adapted
+             !               Since we are handling (diagonal) open boundaries, a rather laborious test is
+             !               needed to check whether the indexes mgg and ngg must be adapted
              !
              !
              ! Compute distance in xi-direction
