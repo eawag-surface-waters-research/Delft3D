@@ -290,7 +290,7 @@ function nesthd1 () {
 
     mkdir -p $dest_bin
     mkdir -p $dest_lib
-    copyFile "tools_gpl/nesthd1/packages/nesthd1/release/nesthd1.exe"    $dest_bin
+    copyFile "tools_gpl/nesthd1/packages/nesthd1/Release/nesthd1.exe"    $dest_bin
 
     return
 }
@@ -308,7 +308,7 @@ function nesthd2 () {
     mkdir -p $dest_bin
     mkdir -p $dest_lib
 
-    copyFile "tools_gpl/nesthd2/packages/nesthd2/release/nesthd2.exe"    $dest_bin
+    copyFile "tools_gpl/nesthd2/packages/nesthd2/Release/nesthd2.exe"    $dest_bin
 
     return
 }

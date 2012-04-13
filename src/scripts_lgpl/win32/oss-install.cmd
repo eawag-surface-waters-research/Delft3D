@@ -384,7 +384,7 @@ rem ==================
     call :makeDir !dest_lib!
 
     call :copyFile third_party_open\pthreads\bin\win32\pthreadVCE2.dll                               !dest_lib!
-    call :copyFile tools_gpl\nesthd1\packages\nesthd1\release\nesthd1.exe                            !dest_bin!
+    call :copyFile tools_gpl\nesthd1\packages\nesthd1\Release\nesthd1.exe                            !dest_bin!
 goto :endproc
 
 
@@ -402,7 +402,7 @@ rem ==================
     call :makeDir !dest_lib!
 
     call :copyFile third_party_open\pthreads\bin\win32\pthreadVCE2.dll                               !dest_lib!
-    call :copyFile tools_gpl\nesthd2\packages\nesthd2\release\nesthd2.exe                            !dest_bin!
+    call :copyFile tools_gpl\nesthd2\packages\nesthd2\Release\nesthd2.exe                            !dest_bin!
 goto :endproc
 
 
