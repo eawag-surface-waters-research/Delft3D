@@ -8,7 +8,7 @@ examples/01_standard/f34.dep -text
 examples/01_standard/f34.dis -text
 examples/01_standard/f34.dry -text
 examples/01_standard/f34.enc -text
-examples/01_standard/f34.grd -text svneol=unset#application/octet-stream
+examples/01_standard/f34.grd -text
 examples/01_standard/f34.ldb -text
 examples/01_standard/f34.mdf -text
 examples/01_standard/f34.obs -text
