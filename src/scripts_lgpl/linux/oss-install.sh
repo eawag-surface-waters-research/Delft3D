@@ -279,6 +279,42 @@ function vs () {
 }
 
 
+
+# ====================
+# === INSTALL NESTHD1
+# ====================
+function nesthd1 () {
+    echo "installing nesthd1 . . ."
+    dest_bin="$dest_main/lnx/flow2d3d/bin"
+    dest_lib="$dest_main/lnx/flow2d3d/lib"
+
+    mkdir -p $dest_bin
+    mkdir -p $dest_lib
+    copyFile "tools_gpl/nesthd1/packages/nesthd1/release/nesthd1.exe"    $dest_bin
+
+    return
+}
+
+
+
+# ====================
+# === INSTALL NESTHD2
+# ====================
+function nesthd2 () {
+    echo "installing nesthd2 . . ."
+    dest_bin="$dest_main/lnx/flow2d3d/bin"
+    dest_lib="$dest_main/lnx/flow2d3d/lib"
+
+    mkdir -p $dest_bin
+    mkdir -p $dest_lib
+
+    copyFile "tools_gpl/nesthd2/packages/nesthd2/release/nesthd2.exe"    $dest_bin
+
+    return
+}
+
+
+
 # ============
 # === MAIN ===
 # ============

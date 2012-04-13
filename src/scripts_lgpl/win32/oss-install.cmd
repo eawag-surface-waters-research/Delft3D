@@ -371,6 +371,41 @@ goto :endproc
 
 
 
+rem ==================
+rem === INSTALL NESTHD1
+rem ==================
+:nesthd1
+    echo "installing nesthd1 . . ."
+
+    set dest_bin="!dest_main!\win32\flow2d3d\bin"
+    set dest_lib="!dest_main!\win32\flow2d3d\lib"
+
+    call :makeDir !dest_bin!
+    call :makeDir !dest_lib!
+
+    call :copyFile third_party_open\pthreads\bin\win32\pthreadVCE2.dll                               !dest_lib!
+    call :copyFile tools_gpl\nesthd1\packages\nesthd1\release\nesthd1.exe                            !dest_bin!
+goto :endproc
+
+
+
+rem ==================
+rem === INSTALL NESTHD2
+rem ==================
+:nesthd2
+    echo "installing nesthd2 . . ."
+
+    set dest_bin="!dest_main!\win32\flow2d3d\bin"
+    set dest_lib="!dest_main!\win32\flow2d3d\lib"
+
+    call :makeDir !dest_bin!
+    call :makeDir !dest_lib!
+
+    call :copyFile third_party_open\pthreads\bin\win32\pthreadVCE2.dll                               !dest_lib!
+    call :copyFile tools_gpl\nesthd2\packages\nesthd2\release\nesthd2.exe                            !dest_bin!
+goto :endproc
+
+
 
 
 
