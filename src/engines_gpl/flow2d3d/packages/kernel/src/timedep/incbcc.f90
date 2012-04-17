@@ -137,7 +137,9 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     real(fp)                                     :: dist    ! Real distance between an open bounda- ry point to the begin point of the related opening section 
     real(fp)                                     :: distx   ! Incremental distance (in the x-dir.) between two consecutive open boundary points belonging to the same section 
     real(fp)                                     :: disty   ! Incremental distance (in the x-dir.) between two consecutive open boundary points belonging to the same section 
-    real(fp)                                     :: frac    ! Fraction between DIST and the total length of an opening section 
+    real(fp)                                     :: frac    ! Fraction between DIST and the total length of an opening section
+    real(fp)                                     :: gg1
+    real(fp)                                     :: gg2
     real(fp)                                     :: h0
     real(fp)                                     :: reldep
     real(fp)                                     :: sigjmp
@@ -296,10 +298,13 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                 select case(nob(4,n))
                 case (0)
                    if (nob(6,n) == 1) then
-                      ! south boundary, ngg=nsta is ok
+                      ! south boundary, gvv(ngg,..) and gvv(ngg+1,..) are inside domain
+                      gg1 = (3.0_fp*gvv(ngg,msta)      - gvv(ngg+1,msta)     ) / 2.0_fp
+                      gg2 = (3.0_fp*gvv(ngg,msta-incx) - gvv(ngg+1,msta-incx)) / 2.0_fp
                    elseif (nob(6,n) == 2) then
-                      ! north boundary, gvv(ngg,..) is outside domain
-                      ngg = ngg - 1
+                      ! north boundary, gvv(ngg-1,..) and gvv(ngg-2,..) are inside domain
+                      gg1 = (3.0_fp*gvv(ngg-1,msta)      - gvv(ngg-2,msta)     ) / 2.0_fp
+                      gg2 = (3.0_fp*gvv(ngg-1,msta-incx) - gvv(ngg-2,msta-incx)) / 2.0_fp
                    else
                       ! nob(6) is always 1 or 2 for open boundaries that are not east or west boundaries
                    endif
@@ -307,19 +312,28 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                    if (nob(6,n) == 1) then
                       ! south-west boundary
                       if (incy > 0) then
-                         ! ngg=nsta is ok
+                         ! incx<0, msta     : gvv(ngg,..)   and gvv(ngg+1,..) are inside domain
+                         !         msta-incx: gvv(ngg-1,..) and gvv(ngg,..)   are inside domain
+                         gg1 = (3.0_fp*gvv(ngg  ,msta)      - gvv(ngg+1,msta)     ) / 2.0_fp
+                         gg2 = (3.0_fp*gvv(ngg-1,msta-incx) - gvv(ngg  ,msta-incx)) / 2.0_fp
                       else
-                         ! gvv(ngg,..) is (partly) outside domain
-                         ngg = ngg + 1
+                         ! incy<0, incx>0, msta     : gvv(ngg,..)   and gvv(ngg+1,..) are inside domain
+                         !                 msta-incx: gvv(ngg+1,..) and gvv(ngg+2,..) are inside domain
+                         gg1 = (3.0_fp*gvv(ngg  ,msta)      - gvv(ngg+1,msta)     ) / 2.0_fp
+                         gg2 = (3.0_fp*gvv(ngg+1,msta-incx) - gvv(ngg+2,msta-incx)) / 2.0_fp
                       endif
                    elseif (nob(6,n) == 2) then
                       ! north-west boundary
                       if (incy > 0) then
-                         ! gvv(ngg,..) and gvv(ngg-1,..) are (partly) outside domain
-                         ngg = ngg - 2
+                         ! incx>0, msta     : gvv(ngg-1,..) and gvv(ngg-2,..) are inside domain
+                         !         msta-incx: gvv(ngg-2,..) and gvv(ngg-3,..) are inside domain
+                         gg1 = (3.0_fp*gvv(ngg-1,msta)      - gvv(ngg-2,msta)     ) / 2.0_fp
+                         gg2 = (3.0_fp*gvv(ngg-2,msta-incx) - gvv(ngg-3,msta-incx)) / 2.0_fp
                       else
-                         ! gvv(ngg,..) is (partly) outside domain
-                         ngg = ngg - 1
+                         ! incy<0, incx<0, msta     : gvv(ngg-1,..) and gvv(ngg-2,..) are inside domain
+                         !                 msta-incx: gvv(ngg,..)   and gvv(ngg-1,..) are inside domain
+                         gg1 = (3.0_fp*gvv(ngg-1,msta)      - gvv(ngg-2,msta)     ) / 2.0_fp
+                         gg2 = (3.0_fp*gvv(ngg  ,msta-incx) - gvv(ngg-1,msta-incx)) / 2.0_fp
                       endif
                    else
                       ! nob(6) is always 1 or 2 for open boundaries that are not east or west boundaries
@@ -328,19 +342,28 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                    if (nob(6,n) == 1) then
                       ! south-east boundary
                       if (incy > 0) then
-                         ! ngg=nsta is ok
+                         ! incx>0, msta     : gvv(ngg,..)   and gvv(ngg+1,..) are inside domain
+                         !         msta-incx: gvv(ngg-1,..) and gvv(ngg,..)   are inside domain
+                         gg1 = (3.0_fp*gvv(ngg  ,msta)      - gvv(ngg+1,msta)     ) / 2.0_fp
+                         gg2 = (3.0_fp*gvv(ngg-1,msta-incx) - gvv(ngg  ,msta-incx)) / 2.0_fp
                       else
-                         ! gvv(ngg,..) is (partly) outside domain
-                         ngg = ngg + 1
+                         ! incy<0, incx<0, msta     : gvv(ngg,..)   and gvv(ngg+1,..) are inside domain
+                         !                 msta-incx: gvv(ngg+1,..) and gvv(ngg+2,..) are inside domain
+                         gg1 = (3.0_fp*gvv(ngg  ,msta)      - gvv(ngg+1,msta)     ) / 2.0_fp
+                         gg2 = (3.0_fp*gvv(ngg+1,msta-incx) - gvv(ngg+2,msta-incx)) / 2.0_fp
                       endif
                    elseif (nob(6,n) == 2) then
                       ! north-east boundary
                       if (incy > 0) then
-                         ! gvv(ngg,..) and gvv(ngg-1,..) are (partly) outside domain
-                         ngg = ngg - 2
+                         ! incx<0, msta     : gvv(ngg-1,..) and gvv(ngg-2,..) are inside domain
+                         !         msta-incx: gvv(ngg-2,..) and gvv(ngg-3,..) are inside domain
+                         gg1 = (3.0_fp*gvv(ngg-1,msta)      - gvv(ngg-2,msta)     ) / 2.0_fp
+                         gg2 = (3.0_fp*gvv(ngg-2,msta-incx) - gvv(ngg-3,msta-incx)) / 2.0_fp
                       else
-                         ! gvv(ngg,..) is (partly) outside domain
-                         ngg = ngg - 1
+                         ! incy<0, incx>0, msta     : gvv(ngg-1,..) and gvv(ngg-2,..) are inside domain
+                         !                 msta-incx: gvv(ngg,..)   and gvv(ngg-1,..) are inside domain
+                         gg1 = (3.0_fp*gvv(ngg-1,msta)      - gvv(ngg-2,msta)     ) / 2.0_fp
+                         gg2 = (3.0_fp*gvv(ngg  ,msta-incx) - gvv(ngg-1,msta-incx)) / 2.0_fp
                       endif
                    else
                       ! nob(6) is always 1 or 2 for open boundaries that are not east or west boundaries
@@ -348,7 +371,7 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                 case default
                    ! nob(4) is always 0, 1 or 2
                 endselect
-                distx = 0.5_fp * (gvv(ngg,msta-incx) + gvv(ngg,msta))
+                distx = 0.5_fp * (gg1 + gg2)
              endif
              !
              ! Compute distance in eta-direction
@@ -363,10 +386,13 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                 select case(nob(6,n))
                 case (0)
                    if (nob(4,n) == 1) then
-                      ! west boundary, mgg=msta is ok
+                      ! west boundary, guu(..,mgg) and guu(..,mgg+1) are inside domain
+                      gg1 = (3.0_fp*guu(nsta     ,mgg) - guu(nsta     ,mgg+1)) / 2.0_fp
+                      gg2 = (3.0_fp*guu(nsta-incy,mgg) - guu(nsta-incy,mgg+1)) / 2.0_fp
                    elseif (nob(4,n) == 2) then
-                      ! east boundary, guu(mgg,..) is outside domain
-                      mgg = mgg - 1
+                      ! east boundary, guu(..,mgg-1) and guu(..,mgg-2) are inside domain
+                      gg1 = (3.0_fp*guu(nsta     ,mgg-1) - guu(nsta     ,mgg-2)) / 2.0_fp
+                      gg2 = (3.0_fp*guu(nsta-incy,mgg-1) - guu(nsta-incy,mgg-2)) / 2.0_fp
                    else
                       ! nob(4) is always 1 or 2 for open boundaries that are not north or south boundaries
                    endif
@@ -374,19 +400,28 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                    if (nob(4,n) == 1) then
                       ! south-west boundary
                       if (incx > 0) then
-                         ! mgg=msta is ok
+                         ! incy<0, nsta     : guu(..,mgg)   and guu(..,mgg+1) are inside domain
+                         !         nsta-incy: guu(..,mgg-1) and guu(..,mgg)   are inside domain
+                         gg1 = (3.0_fp*guu(nsta     ,mgg)   - guu(nsta     ,mgg+1)) / 2.0_fp
+                         gg2 = (3.0_fp*guu(nsta-incy,mgg-1) - guu(nsta-incy,mgg)  ) / 2.0_fp
                       else
-                         ! guu(mgg,..) is (partly) outside domain
-                         mgg = mgg + 1
+                         ! incx<0, incy>0, nsta     : guu(..,mgg)   and guu(..,mgg+1) are inside domain
+                         !                 nsta-incy: guu(..,mgg+1) and guu(..,mgg+2) are inside domain
+                         gg1 = (3.0_fp*guu(nsta     ,mgg)   - guu(nsta     ,mgg+1)) / 2.0_fp
+                         gg2 = (3.0_fp*guu(nsta-incy,mgg+1) - guu(nsta-incy,mgg+2)) / 2.0_fp
                       endif
                    elseif (nob(4,n) == 2) then
                       ! south-east boundary
                       if (incx > 0) then
-                         ! guu(mgg,..) and guu(mgg-1,..) are (partly) outside domain
-                         mgg = mgg - 2
+                         ! incy>0, nsta     : guu(..,mgg-1) and guu(..,mgg-2) are inside domain
+                         !         nsta-incy: guu(..,mgg-2) and guu(..,mgg-3) are inside domain
+                         gg1 = (3.0_fp*guu(nsta     ,mgg-1) - guu(nsta     ,mgg-2)) / 2.0_fp
+                         gg2 = (3.0_fp*guu(nsta-incy,mgg-2) - guu(nsta-incy,mgg-3)) / 2.0_fp
                       else
-                         ! guu(mgg,..) is (partly) outside domain
-                         mgg = mgg - 1
+                         ! incx<0, incy<0, nsta     : guu(..,mgg-1) and guu(..,mgg-2) are inside domain
+                         !                 nsta-incy: guu(..,mgg)   and guu(..,mgg-1) are inside domain
+                         gg1 = (3.0_fp*guu(nsta     ,mgg-1) - guu(nsta     ,mgg-2)) / 2.0_fp
+                         gg2 = (3.0_fp*guu(nsta-incy,mgg)   - guu(nsta-incy,mgg-1)) / 2.0_fp
                       endif
                    else
                       ! nob(4) is always 1 or 2 for open boundaries that are not north or south boundaries
@@ -395,19 +430,28 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                    if (nob(4,n) == 1) then
                       ! north-west boundary
                       if (incx > 0) then
-                         ! mgg=nsta is ok
+                         ! incy>0, nsta     : guu(..,mgg)   and guu(..,mgg+1) are inside domain
+                         !         nsta-incy: guu(..,mgg-1) and guu(..,mgg)   are inside domain
+                         gg1 = (3.0_fp*guu(nsta     ,mgg)   - guu(nsta     ,mgg+1)) / 2.0_fp
+                         gg2 = (3.0_fp*guu(nsta-incy,mgg-1) - guu(nsta-incy,mgg)  ) / 2.0_fp
                       else
-                         ! guu(mgg,..) is (partly) outside domain
-                         mgg = mgg + 1
+                         ! incx<0, incy<0, nsta     : guu(..,mgg)   and guu(..,mgg+1) are inside domain
+                         !                 nsta-incy: guu(..,mgg+1) and guu(..,mgg+2) are inside domain
+                         gg1 = (3.0_fp*guu(nsta     ,mgg)   - guu(nsta     ,mgg+1)) / 2.0_fp
+                         gg2 = (3.0_fp*guu(nsta-incy,mgg+1) - guu(nsta-incy,mgg+2)) / 2.0_fp
                       endif
                    elseif (nob(4,n) == 2) then
                       ! north-east boundary
                       if (incx > 0) then
-                         ! guu(mgg,..) and guu(mgg-1,..) are (partly) outside domain
-                         mgg = mgg - 2
+                         ! incy<0, nsta     : guu(..,mgg-1) and guu(..,mgg-2) are inside domain
+                         !         nsta-incy: guu(..,mgg-2) and guu(..,mgg-3) are inside domain
+                         gg1 = (3.0_fp*guu(nsta     ,mgg-1) - guu(nsta     ,mgg-2)) / 2.0_fp
+                         gg2 = (3.0_fp*guu(nsta-incy,mgg-2) - guu(nsta-incy,mgg-3)) / 2.0_fp
                       else
-                         ! guu(mgg,..) is (partly) outside domain
-                         mgg = mgg - 1
+                         ! incx<0, incy>0, nsta     : guu(..,mgg-1) and guu(..,mgg-2) are inside domain
+                         !                 nsta-incy: guu(..,mgg)   and guu(..,mgg-1) are inside domain
+                         gg1 = (3.0_fp*guu(nsta     ,mgg-1) - guu(nsta     ,mgg-2)) / 2.0_fp
+                         gg2 = (3.0_fp*guu(nsta-incy,mgg)   - guu(nsta-incy,mgg-1)) / 2.0_fp
                       endif
                    else
                       ! nob(4) is always 1 or 2 for open boundaries that are not north or south boundaries
@@ -415,7 +459,7 @@ subroutine incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                 case default
                    ! nob(6) is always 0, 1 or 2
                 endselect
-                disty = 0.5_fp * (guu(nsta-incy,mgg) + guu(nsta,mgg))
+                disty = 0.5_fp * (gg1 + gg2)
              endif
              if (incx/=0 .and. incy/=0) then
                 distx = distx * distx
