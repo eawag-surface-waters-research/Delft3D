@@ -20,7 +20,7 @@
 #
 
 global version
-set version "2.3"
+set version "2.4"
 
 global debug
 set debug 0
@@ -1167,6 +1167,10 @@ proc startMormerge { inputfilename workdir mergeexe localrun runid node } {
    }
    lappend scriptscreated $scriptname
    set rundir [file nativename [file join $rootdir "merge"] ]
+   # Collect some directories to be added to PATH/LD_LIBRARY_PATH
+   set exedir [file dirname $mergeexe]
+   set libdir [file join $exedir ".." "lib"]
+
    set screenfile [format "mormerge_%s.scr" $runid]
    set logfile [format "mormerge_%s.log" $runid]
    file delete -force [file nativename [file join $rundir $screenfile] ]
@@ -1184,8 +1188,6 @@ proc startMormerge { inputfilename workdir mergeexe localrun runid node } {
       # This line:
       # puts $scriptfile ". /opt/intel/Compiler/11.0/081/bin/ifortvars.sh ia32"
       # is replaced by:
-      set exedir [file dirname $mergeexe]
-      set libdir [file join $exedir ".." "lib"]
       puts $scriptfile "export LD_LIBRARY_PATH=$exedir:$libdir"
       puts $scriptfile  "# TEMPORARY SOLUTION: setting LD_PRELOAD"
       puts $scriptfile "export LD_PRELOAD=[file join $libdir libgfortran.so.3]"
@@ -1244,6 +1246,7 @@ proc startMormerge { inputfilename workdir mergeexe localrun runid node } {
          puts $scriptfile [format "cd /D %s%s" $rootdir "\\merge"]
       }
       puts $scriptfile "\nrem Start mormerge\n"
+      puts $scriptfile "set PATH=$exedir;$libdir;%PATH%"
       puts $scriptfile "$mergeexe -i [file tail $inputfilename] -w $rundir -r $runid >$screenfile 2>&1"
       if { $localrun } {
          puts $scriptfile "\nrem Copy rundir data back to modeldir\n"
@@ -1361,6 +1364,21 @@ proc startFlow { inflist alist condition runids waveonline tdatomexe flowexe wav
    }
    lappend scriptscreated $scriptname
    set rundir [file nativename [file join $rootdir "merge"] ]
+   # Collect some directories to be added to PATH/LD_LIBRARY_PATH
+   set flowexedir [file dirname $flowexe]
+   set archpos [string last "flow2d3d" $flowexedir]
+   set flowhomedir [string range $flowexe 0 [expr $archpos-2]]
+   set flowlibdir [file join $flowhomedir "flow2d3d" "lib"]
+   if { $waveonline } {
+      set waveexedir [file dirname $waveexe]
+      set archpos [string last "wave" $waveexedir]
+      set wavehomedir [string range $waveexe 0 [expr $archpos-2]]
+      set wavelibdir [file join $wavehomedir "wave" "lib"]
+      set swanexedir [file join $wavehomedir "swan" "bin"]
+      set swanlibdir [file join $wavehomedir "swan" "lib"]
+      set swanbatdir $infillist(swanbatdir)
+   }
+
    set sfilname [file nativename [file join $rundir $scriptname] ]
    set scriptfile [open $sfilname w]
    if { [string equal $platform "linux"] } {
@@ -1370,29 +1388,12 @@ proc startFlow { inflist alist condition runids waveonline tdatomexe flowexe wav
          puts $scriptfile "\n. /opt/sge/InitSGE\n"
       }
       puts $scriptfile "\n# Set some environment parameters\n"
-      if { $arglist(testbank) } {
-         set archpos [string last flow $flowexe]
-         puts $scriptfile "export D3D_HOME=\"[string range $flowexe 0 [expr $archpos-2]]\""
-      } else {
-         puts $scriptfile "export D3D_HOME=\"[file dirname $flowexe]\""
-      }
+      puts $scriptfile "export D3D_HOME=\"$flowhomedir\""
       puts $scriptfile "export ARCH=\"$arch\""
       puts $scriptfile "export DHSDELFT_LICENSE_FILE=\"/f/license/\""
-      # This line:
-      # puts $scriptfile ". /opt/intel/Compiler/11.0/081/bin/ifortvars.sh ia32"
-      # is replaced by:
-      set flowexedir [file dirname $flowexe]
-      set waveexedir [file dirname $waveexe]
-      set libdir [file join $flowexedir ".." "lib"]
-      puts $scriptfile "export LD_LIBRARY_PATH=$flowexedir:$waveexedir:$libdir"
       puts $scriptfile  "# TEMPORARY SOLUTION: setting LD_PRELOAD"
-      puts $scriptfile "export LD_PRELOAD=[file join $libdir libgfortran.so.3]"
+      puts $scriptfile "export LD_PRELOAD=[file join $flowlibdir libgfortran.so.3]"
   
-      if { $waveonline } {
-         # use a colon to separate directories
-         puts $scriptfile "export PATH=$infillist(swanbatdir):\$PATH"
-      }
-
       if { $infillist(localrun) } {
          set worksubdir $idstring
          puts $scriptfile "\n# Running locally\n# Copy modeldir to workdir\n"
@@ -1420,9 +1421,13 @@ proc startFlow { inflist alist condition runids waveonline tdatomexe flowexe wav
       }
       if { $waveonline } {
          puts $scriptfile "\n# Start wave\n"
+         puts $scriptfile "export D3D_HOME=\"$wavehomedir\""
+         puts $scriptfile "export PATH=$swanbatdir:\$PATH"
+         puts $scriptfile "export LD_LIBRARY_PATH=$swanbatdir:$swanexedir:$swanlibdir:$waveexedir:$wavelibdir"
          puts $scriptfile "$waveexe $infillist(waveargs) >wave.scr 2>&1 &"
       }
       puts $scriptfile "\n# Start $infillist(flowexename)\n"
+      puts $scriptfile "export LD_LIBRARY_PATH=$flowexedir:$flowlibdir"
       puts $scriptfile "$flowexe $infillist(flowargs) >$infillist(flowexename).scr 2>&1"
       if { $infillist(localrun) } {
          puts $scriptfile "\n# Copy rundir data back to modeldir\n"
@@ -1442,18 +1447,9 @@ proc startFlow { inflist alist condition runids waveonline tdatomexe flowexe wav
       puts $scriptfile "@ echo off"
       puts $scriptfile "\nrem This script file is automatically generated by mormerge.tcl, version $version\n"
       puts $scriptfile "\nrem Set some environment parameters\n"
-      if { $arglist(testbank) } {
-         set archpos [string last "flow" $flowexe]
-         puts $scriptfile "set D3D_HOME=[file nativename [string range $flowexe 0 [expr $archpos-2]] ]"
-      } else {
-         puts $scriptfile "set D3D_HOME=[file nativename [file dirname $flowexe] ]"
-      }
+      puts $scriptfile "set D3D_HOME=$flowhomedir"
       puts $scriptfile "set ARCH=$arch"
       puts $scriptfile "set DHSDELFT_LICENSE_FILE=C:\\Program Files\\DS_Flex;D:\\delft3d\\licfiles"
-      if { $waveonline } {
-         # use a semicolon to separate directories
-         puts $scriptfile "set PATH=$infillist(swanbatdir);%PATH%"
-      }
       if { $infillist(localrun) } {
          set worksubdir $idstring
          puts $scriptfile "\nrem Running locally\nrem Copy modeldir to workdir\n"
@@ -1476,6 +1472,8 @@ proc startFlow { inflist alist condition runids waveonline tdatomexe flowexe wav
       }
       if { $waveonline } {
          puts $scriptfile "\nrem Start wave\n"
+         puts $scriptfile "set D3D_HOME=$wavehomedir"
+         puts $scriptfile "set PATH=$swanbatdir;$swanexedir;$swanlibdir;$waveexedir;$wavelibdir;%PATH%"
          if { [string equal $OS "XP"] } {
             set startOptions "/B"
          } else {
@@ -1484,6 +1482,7 @@ proc startFlow { inflist alist condition runids waveonline tdatomexe flowexe wav
          puts $scriptfile "start $startOptions $waveexe $infillist(waveargs) >wave.scr 2>&1"
       }
       puts $scriptfile "\nrem Start $infillist(flowexename)\n"
+      puts $scriptfile "set PATH=$flowexedir;$flowlibdir;%PATH%"
       puts $scriptfile "$flowexe $infillist(flowargs) >$infillist(flowexename).scr 2>&1"
       if { $infillist(localrun) } {
          puts $scriptfile "\nrem Copy rundir data back to modeldir\n"
