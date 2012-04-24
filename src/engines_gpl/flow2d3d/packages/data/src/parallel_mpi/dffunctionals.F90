@@ -1374,6 +1374,7 @@ character(20), dimension(:), allocatable    :: namto
        deallocate( nbarr )
     endif
     call dfbroadc( nbgl, 1, dfint, gdp)
+    call dfbroadc( nbto, 1, dfint, gdp)
 end subroutine dffind_duplicate_C
 !
 !
@@ -1437,6 +1438,7 @@ integer, dimension(:), allocatable          :: nbarr
        deallocate( nbarr )
     endif
     call dfbroadc( nbgl, 1, dfint, gdp)
+    call dfbroadc( nbto, 1, dfint, gdp)
 end subroutine dffind_duplicate_I
 !
 !

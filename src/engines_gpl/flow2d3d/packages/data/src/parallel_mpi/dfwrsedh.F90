@@ -71,47 +71,44 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
 !
 ! Global variables
 !
-    integer                             , intent(in)  :: ithisc !!  Current time counter for the his-
-                                                                !!  tory data file
-    integer                                           :: ithisi !  Description and declaration in inttim.igs
-    integer                                           :: itstrt !  Description and declaration in inttim.igs
-    integer                                           :: kmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                           :: lsed   !  Description and declaration in esm_alloc_int.f90
-    integer                                           :: lsedtot!  Description and declaration in esm_alloc_int.f90
-    integer                                           :: lundia !  Description and declaration in inout.igs
-    integer                                           :: nostat !  Description and declaration in dimens.igs
-    integer                                           :: ntruv  !  Description and declaration in dimens.igs
-    logical                             , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    real(fp), dimension(nostat)                       :: zdps   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat)                       :: zdpsed !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat, 0:kmax, lsed)         :: zws    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat, kmax, lsed)           :: zrsdeq !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat, lsedtot)              :: zbdsed !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat, lsed)                 :: zrca   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat, lsedtot), intent(in)  :: zsbu   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat, lsedtot), intent(in)  :: zsbv   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat, lsed)   , intent(in)  :: zssu   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nostat, lsed)   , intent(in)  :: zssv   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(ntruv, lsedtot) , intent(in)  :: sbtr   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(ntruv, lsedtot) , intent(in)  :: sbtrc  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(ntruv, lsed)    , intent(in)  :: sstr   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(ntruv, lsed)    , intent(in)  :: sstrc  !  Description and declaration in esm_alloc_real.f90
-    character(60)                       , intent(in)  :: trifil !!  File name for FLOW NEFIS output
-                                                                !!  files (tri"h/m"-"casl""labl".dat/def)
+    integer                             , intent(in)  :: ithisc  !!  Current time counter for the history data file
+    integer                                           :: ithisi  !  Description and declaration in inttim.igs
+    integer                                           :: itstrt  !  Description and declaration in inttim.igs
+    integer                                           :: kmax    !  Description and declaration in esm_alloc_int.f90
+    integer                                           :: lsed    !  Description and declaration in esm_alloc_int.f90
+    integer                                           :: lsedtot !  Description and declaration in esm_alloc_int.f90
+    integer                                           :: lundia  !  Description and declaration in inout.igs
+    integer                                           :: nostat  !  Description and declaration in dimens.igs
+    integer                                           :: ntruv   !  Description and declaration in dimens.igs
+    logical                             , intent(out) :: error   !!  Flag=TRUE if an error is encountered
+    real(fp), dimension(nostat)                       :: zdps    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat)                       :: zdpsed  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat, 0:kmax, lsed)         :: zws     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat, kmax, lsed)           :: zrsdeq  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat, lsedtot)              :: zbdsed  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat, lsed)                 :: zrca    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat, lsedtot), intent(in)  :: zsbu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat, lsedtot), intent(in)  :: zsbv    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat, lsed)   , intent(in)  :: zssu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nostat, lsed)   , intent(in)  :: zssv    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(ntruv, lsedtot) , intent(in)  :: sbtr    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(ntruv, lsedtot) , intent(in)  :: sbtrc   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(ntruv, lsed)    , intent(in)  :: sstr    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(ntruv, lsed)    , intent(in)  :: sstrc   !  Description and declaration in esm_alloc_real.f90
+    character(60)                       , intent(in)  :: trifil  !! File name for FLOW NEFIS output files (tri"h/m"-"casl""labl".dat/def)
 !
 ! Local variables
 !
     real(sp)                                :: sdummy
     real(fp)                                :: rhol
     integer                                 :: fds
-    integer                                 :: i      ! Help var. 
-    integer                                 :: ierror! Local errorflag for NEFIS files 
+    integer                                 :: i            ! Help var. 
+    integer                                 :: ierror       ! Local errorflag for NEFIS files 
     integer                                 :: k
     integer                                 :: l
     integer                                 :: lastcl
     integer                                 :: n
-    integer, dimension(ntruv)               :: norig
-    integer, dimension(1)                   :: idummy ! Help array to read/write Nefis files 
+    integer, dimension(1)                   :: idummy       ! Help array to read/write Nefis files 
     integer, dimension(3,5)                 :: uindex
     integer                      , external :: getelt
     integer                      , external :: putelt
@@ -121,21 +118,21 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
     integer                      , external :: neferr
     integer , dimension(:), pointer         :: order_sta
     integer , dimension(:), pointer         :: order_tra
-    integer                                 :: nostatgl  ! global number of stations (i.e. original number excluding duplicate stations located in the halo regions)
-    integer                                 :: nostatto  ! total number of stations (including "duplicate" stations located in halo regions)
-    integer                                 :: ntruvgl   ! global number of tracks (i.e. original number excluding duplicate stations located in the halo regions)
-    integer                                 :: ntruvto   ! total number of tracks (including "duplicate" stations located in halo regions)
-    integer , dimension(:), allocatable     :: nostatarr ! number of stations per partition
-    real(sp), dimension(:), allocatable     :: rsbuff    ! work array
-    real(sp), dimension(:,:), allocatable   :: rsbuff1   ! work array
-    real(sp), dimension(:,:,:), allocatable :: rsbuff2   ! work array
+    integer                                 :: nostatgl    ! global number of stations (i.e. original number excluding duplicate stations located in the halo regions)
+    integer                                 :: nostatto    ! total number of stations (including "duplicate" stations located in halo regions)
+    integer                                 :: ntruvgl     ! global number of tracks (i.e. original number excluding duplicate stations located in the halo regions)
+    integer                                 :: ntruvto     ! total number of tracks (including "duplicate" stations located in halo regions)
+    integer , dimension(:), allocatable     :: nostatarr   ! number of stations per partition
+    real(sp), dimension(:), allocatable     :: rsbuff      ! work array
+    real(sp), dimension(:,:), allocatable   :: rsbuff1     ! work array
+    real(sp), dimension(:,:,:), allocatable :: rsbuff2     ! work array
     character(2)                            :: sedunit
     character(10)                           :: transpunit
     character(16)                           :: grnam4
     character(16)                           :: grnam5
-    character(256)                          :: errmsg ! Character var. containing the errormessage to be written to file. The message depends on the error. 
-    character(60)                           :: filnam ! Help var. for FLOW file name 
-    logical                                 :: cross_sec ! option to sum results from cross-sections across partitions
+    character(256)                          :: errmsg      ! Character var. containing the errormessage to be written to file. The message depends on the error. 
+    character(60)                           :: filnam      ! Help var. for FLOW file name 
+    logical                                 :: cross_sec   ! option to sum results from cross-sections across partitions
 !
 ! Data statements
 !
@@ -293,8 +290,8 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
        ! Get start celidt for writing
        !
        nefiselem => gdp%nefisio%nefiselem(nefiswrsedhinf)
-    first               => nefiselem%first
-    celidt              => nefiselem%celidt
+       first     => nefiselem%first
+       celidt    => nefiselem%celidt
     endif
     !
     ierror = 0
@@ -592,11 +589,6 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
        cross_sec = .true.
        !
        ! group 5: element 'SBTR'
-       !
-       ! Re-arrange the order with line_orig
-       do n = 1, ntruv
-           norig( line_orig(n) ) = n
-       enddo
        !
        call sbuff_checksize(ntruvgl*lsedtot)
        if (inode == master) allocate( rsbuff1(1:ntruvgl, 1:lsedtot) )
