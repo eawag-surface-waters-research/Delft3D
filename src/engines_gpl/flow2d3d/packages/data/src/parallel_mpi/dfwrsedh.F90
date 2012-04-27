@@ -57,17 +57,20 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    logical                              , pointer :: first
     integer                              , pointer :: celidt
-    integer , dimension(:)               , pointer :: line_orig
-    type (nefiselement)                  , pointer :: nefiselem
+    integer       , dimension(:)         , pointer :: line_orig
+    integer       , dimension(:)         , pointer :: shlay
+    integer       , dimension(:)         , pointer :: order_sta
+    integer       , dimension(:)         , pointer :: order_tra
     real(hp)                             , pointer :: morft
     real(fp)                             , pointer :: morfac
     real(fp)                             , pointer :: sus
     real(fp)                             , pointer :: bed
-    type (moroutputtype)                 , pointer :: moroutput
     real(fp)      , dimension(:)         , pointer :: rhosol
     real(fp)      , dimension(:)         , pointer :: cdryb
+    logical                              , pointer :: first
+    type (moroutputtype)                 , pointer :: moroutput
+    type (nefiselement)                  , pointer :: nefiselem
 !
 ! Global variables
 !
@@ -105,6 +108,7 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
     integer                                 :: i            ! Help var. 
     integer                                 :: ierror       ! Local errorflag for NEFIS files 
     integer                                 :: k
+    integer                                 :: kmaxout      ! number of layers to be written to the (history) output files
     integer                                 :: l
     integer                                 :: lastcl
     integer                                 :: n
@@ -116,8 +120,6 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
     integer                      , external :: clsnef
     integer                      , external :: open_datdef
     integer                      , external :: neferr
-    integer , dimension(:), pointer         :: order_sta
-    integer , dimension(:), pointer         :: order_tra
     integer                                 :: nostatgl    ! global number of stations (i.e. original number excluding duplicate stations located in the halo regions)
     integer                                 :: nostatto    ! total number of stations (including "duplicate" stations located in halo regions)
     integer                                 :: ntruvgl     ! global number of tracks (i.e. original number excluding duplicate stations located in the halo regions)
@@ -143,19 +145,21 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
 !
     nefiselem   => gdp%nefisio%nefiselem(nefiswrsedhinf)
     line_orig   => gdp%gdstations%line_orig
-    first       => nefiselem%first
+    shlay       => gdp%gdpostpr%shlay
     celidt      => nefiselem%celidt
     morft       => gdp%gdmorpar%morft
     morfac      => gdp%gdmorpar%morfac
     sus         => gdp%gdmorpar%sus
     bed         => gdp%gdmorpar%bed
-    moroutput   => gdp%gdmorpar%moroutput
     rhosol      => gdp%gdsedpar%rhosol
     cdryb       => gdp%gdsedpar%cdryb
     order_tra   => gdp%gdparall%order_tra
     order_sta   => gdp%gdparall%order_sta
+    first       => nefiselem%first
+    moroutput   => gdp%gdmorpar%moroutput
     !
     !
+    kmaxout = size(shlay)
     filnam = trifil(1:3) // 'h' // trifil(5:)
     errmsg = ' '
     !
@@ -212,13 +216,20 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
        !
        if (nostatgl > 0) then
          if (lsed > 0) then
-           call addelm(nefiswrsedh,'ZWS',' ','[  M/S  ]','REAL',4              , &
-             & 'Settling velocity in station                                  ', &
-             &  3         ,nostatgl  ,kmax + 1  ,lsed      ,0         ,0       , &
-             &  lundia    ,gdp       )
+           if (kmaxout == kmax) then
+             call addelm(nefiswrsedh,'ZWS',' ','[  M/S  ]','REAL',4              , &
+               & 'Settling velocity in station                                  ', &
+               &  3         ,nostatgl  ,kmax + 1  ,lsed      ,0         ,0       , &
+               &  lundia    ,gdp       )
+           else
+             call addelm(nefiswrsedh,'ZWS',' ','[  M/S  ]','REAL',4              , &
+               & 'Settling velocity in station                                  ', &
+               &  3         ,nostatgl  ,kmaxout   ,lsed      ,0         ,0       , &
+               &  lundia    ,gdp       )
+           endif
            call addelm(nefiswrsedh,'ZRSDEQ',' ','[ KG/M3 ]','REAL',4           , &
              & 'Equilibrium concentration of sediment at station              ', &
-             &  3         ,nostatgl  ,kmax      ,lsed      ,0         ,0       , &
+             &  3         ,nostatgl  ,kmaxout   ,lsed      ,0         ,0       , &
              &  lundia    ,gdp       )
          endif
          call addelm(nefiswrsedh,'ZBDSED',' ','[ KG/M2 ]','REAL',4           , &
@@ -369,19 +380,32 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
           !
           ! group 5: element 'ZWS'
           !
-          call sbuff_checksize(nostatgl*(kmax+1)*lsed)
           if (inode == master) allocate( rsbuff2(1:nostatgl, 1:kmax+1, 1:lsed) )
           call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, kmax+1, 1, lsed, order_sta, zws, rsbuff2, gdp)
           if (inode == master) then
-             i = 0
-             do l = 1, lsed
-                do k = 1, kmax+1
-                   do n = 1, nostatgl
-                      i        = i+1
-                      sbuff(i) = rsbuff2(n, k, l)
+             if (kmaxout == kmax) then
+                call sbuff_checksize(nostatgl*(kmax+1)*lsed)
+                i = 0
+                do l = 1, lsed
+                   do k = 1, kmax+1
+                      do n = 1, nostatgl
+                         i        = i+1
+                         sbuff(i) = rsbuff2(n, k, l)
+                      enddo
                    enddo
                 enddo
-             enddo
+             else
+                call sbuff_checksize(nostatgl*(kmaxout)*lsed)
+                i = 0
+                do l = 1, lsed
+                   do k = 1, kmaxout
+                      do n = 1, nostatgl
+                         i        = i+1
+                         sbuff(i) = rsbuff2(n, shlay(k), l)
+                      enddo
+                   enddo
+                enddo
+             endif
              deallocate( rsbuff2 )
              ierror = putelt(fds, grnam5, 'ZWS', uindex, 1, sbuff)
              if (ierror/= 0) goto 9999
@@ -389,16 +413,16 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
           !
           ! group 5: element 'ZRSDEQ'
           !
-          call sbuff_checksize(nostatgl*kmax*lsed)
           if (inode == master) allocate( rsbuff2(1:nostatgl, 1:kmax, 1:lsed) )
           call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, kmax, 1, lsed, order_sta, zrsdeq, rsbuff2, gdp)
           if (inode == master) then
+             call sbuff_checksize(nostatgl*kmaxout*lsed)
              i = 0
              do l = 1, lsed
-                do k = 1, kmax
+                do k = 1, kmaxout
                    do n = 1, nostatgl
                       i        = i+1
-                      sbuff(i) = rsbuff2(n, k, l)
+                      sbuff(i) = rsbuff2(n, shlay(k), l)
                    enddo
                 enddo
              enddo

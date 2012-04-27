@@ -66,15 +66,20 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    logical                         , pointer :: first
+    integer                         , pointer :: mfg
+    integer                         , pointer :: mlg
+    integer                         , pointer :: nfg
+    integer                         , pointer :: nlg
+    integer                         , pointer :: nmaxgl
+    integer                         , pointer :: mmaxgl
+    integer                         , pointer :: nmmax
     integer                         , pointer :: celidt
     integer                         , pointer :: keva
-    type (nefiselement)             , pointer :: nefiselem
+    integer  , dimension(:)         , pointer :: smlay
     real(fp) , dimension(:,:,:)     , pointer :: fluxu
     real(fp) , dimension(:,:,:)     , pointer :: fluxuc
     real(fp) , dimension(:,:,:)     , pointer :: fluxv
     real(fp) , dimension(:,:,:)     , pointer :: fluxvc
-    type (flwoutputtype)            , pointer :: flwoutput
     real(fp)                        , pointer :: rhum
     real(fp)                        , pointer :: tair
     real(fp) , dimension(:)         , pointer :: qeva_out
@@ -90,19 +95,15 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     real(fp) , dimension(:)         , pointer :: clouarr
     real(fp) , dimension(:)         , pointer :: swrfarr
     real(fp) , dimension(:)         , pointer :: qmis_out
+    logical                         , pointer :: first
     logical                         , pointer :: rhum_file
     logical                         , pointer :: tair_file
     logical                         , pointer :: clou_file
     logical                         , pointer :: prcp_file
     logical                         , pointer :: swrf_file
     logical                         , pointer :: free_convec    
-    integer                         , pointer :: mfg
-    integer                         , pointer :: mlg
-    integer                         , pointer :: nfg
-    integer                         , pointer :: nlg
-    integer                         , pointer :: nmaxgl
-    integer                         , pointer :: mmaxgl
-    integer                         , pointer :: nmmax
+    type (nefiselement)             , pointer :: nefiselem
+    type (flwoutputtype)            , pointer :: flwoutput
 !
 ! Global variables
 !
@@ -180,6 +181,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     integer                                       :: istat
     integer                                       :: k            ! Help var.
     integer                                       :: km
+    integer                                       :: kmaxout      ! number of layers to be written to the (history) output files
     integer                                       :: l            ! Help var.
     integer                                       :: lastcl
     integer                                       :: m            ! Help var.
@@ -204,7 +206,8 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     real(fp)   , dimension(:,:)    , allocatable  :: rbuff2
     real(fp)   , dimension(:,:,:)  , allocatable  :: rbuff3
     real(fp)   , dimension(:,:,:,:), allocatable  :: rbuff4
-    real(fp)   , dimension(:,:,:)  , allocatable  :: zkt            ! Vertical coordinates of layering interfaces
+    real(fp)   , dimension(:,:,:)  , allocatable  :: zkt          ! Vertical coordinates of layering interfaces
+    real(sp)   , dimension(:,:,:)  , allocatable  :: rsbuff3      ! work array
     character(10)                                 :: runit
     character(16)                                 :: grnam1       ! Data-group name defined for the NEFIS-files group 1
     character(16)                                 :: grnam3       ! Data-group name defined for the NEFIS-files group 3
@@ -220,9 +223,16 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
 !! executable statements -------------------------------------------------------
 !
     nefiselem      => gdp%nefisio%nefiselem(nefiswrtmapinf)
-    first          => nefiselem%first
+    mfg            => gdp%gdparall%mfg
+    mlg            => gdp%gdparall%mlg
+    nfg            => gdp%gdparall%nfg
+    nlg            => gdp%gdparall%nlg
+    mmaxgl         => gdp%gdparall%mmaxgl
+    nmaxgl         => gdp%gdparall%nmaxgl
+    nmmax          => gdp%d%nmmax
     celidt         => nefiselem%celidt
     keva           => gdp%gdtricom%keva
+    smlay          => gdp%gdpostpr%smlay
     fluxu          => gdp%gdflwpar%fluxu
     fluxuc         => gdp%gdflwpar%fluxuc
     fluxv          => gdp%gdflwpar%fluxv
@@ -242,23 +252,18 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     rhumarr        => gdp%gdheat%rhumarr
     tairarr        => gdp%gdheat%tairarr
     clouarr        => gdp%gdheat%clouarr
+    first          => nefiselem%first
     rhum_file      => gdp%gdheat%rhum_file
     tair_file      => gdp%gdheat%tair_file
     clou_file      => gdp%gdheat%clou_file
     prcp_file      => gdp%gdheat%prcp_file
     free_convec    => gdp%gdheat%free_convec
-    mfg            => gdp%gdparall%mfg
-    mlg            => gdp%gdparall%mlg
-    nfg            => gdp%gdparall%nfg
-    nlg            => gdp%gdparall%nlg
-    mmaxgl         => gdp%gdparall%mmaxgl
-    nmaxgl         => gdp%gdparall%nmaxgl
-    nmmax          => gdp%d%nmmax
     !
     ! Initialize local variables
     !
-    filnam = trifil(1:3) // 'm' // trifil(5:)
-    errmsg = ' '
+    kmaxout = size(smlay)
+    filnam  = trifil(1:3) // 'm' // trifil(5:)
+    errmsg  = ' '
     !
     ! initialize group index time dependent data
     !
@@ -297,56 +302,70 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        if (index(selmap(2:3), 'Y') > 0) then
           call addelm(nefiswrtmap,'U1',' ','[  M/S  ]','REAL',4              , &
              & 'U-velocity per layer in U-point ('//trim(velt)//')', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax      ,0         ,0      , &
+             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
              & lundia    ,gdp       )
           call addelm(nefiswrtmap,'V1',' ','[  M/S  ]','REAL',4              , &
              & 'V-velocity per layer in V-point ('//trim(velt)//')', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax      ,0         ,0      , &
+             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
              & lundia    ,gdp       )
        endif
        if (selmap(4:4) == 'Y') then
-          call addelm(nefiswrtmap,'W',' ','[  M/S  ]','REAL',4               , &
-             & 'W-omega per layer in zeta point                             ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax + 1  ,0         ,0      , &
-             & lundia    ,gdp       )
+          if (kmaxout == kmax) then
+             call addelm(nefiswrtmap,'W',' ','[  M/S  ]','REAL',4               , &
+                & 'W-omega per layer in zeta point                             ', &
+                & 3         ,nmaxgl    ,mmaxgl    ,kmax + 1  ,0         ,0      , &
+                & lundia    ,gdp       )
+          else
+             call addelm(nefiswrtmap,'W',' ','[  M/S  ]','REAL',4               , &
+                & 'W-omega per layer in zeta point                             ', &
+                & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
+                & lundia    ,gdp       )
+          endif
        endif
        if (selmap(5:5) == 'Y') then
           call addelm(nefiswrtmap,'WPHY',' ','[  M/S  ]','REAL',4            , &
              & 'W-velocity per layer in zeta point                          ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax      ,0         ,0      , &
+             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
              & lundia    ,gdp       )
        endif
        if (index(selmap(6:13), 'Y') /= 0) then
           call addelm(nefiswrtmap,'R1',' ','[   -   ]','REAL',4              , &
              & 'Concentrations per layer in zeta point                      ', &
-             & 4         ,nmaxgl    ,mmaxgl    ,kmax      ,lstsci    ,0      , &
+             & 4         ,nmaxgl    ,mmaxgl    ,kmaxout   ,lstsci    ,0      , &
              & lundia    ,gdp       )
        endif
        if (flwoutput%difuflux) then
           call addelm(nefiswrtmap,'R1FLX_UU',' ','[   -   ]','REAL',4        , &
              & 'Constituent flux in u-direction (u point)                   ', &
-             & 4         ,nmaxgl    ,mmaxgl    ,kmax      ,lstsci    ,0      , &
+             & 4         ,nmaxgl    ,mmaxgl    ,kmaxout   ,lstsci    ,0      , &
              & lundia    ,gdp       )
           call addelm(nefiswrtmap,'R1FLX_VV',' ','[   -   ]','REAL',4        , &
              & 'Constituent flux in v-direction (v point)                   ', &
-             & 4         ,nmaxgl    ,mmaxgl    ,kmax      ,lstsci    ,0      , &
+             & 4         ,nmaxgl    ,mmaxgl    ,kmaxout   ,lstsci    ,0      , &
              & lundia    ,gdp       )
        endif
        if (flwoutput%cumdifuflux) then
           call addelm(nefiswrtmap,'R1FLX_UUC',' ','[   -   ]','REAL',4       , &
              & 'Cumulative constituent flux in u-direction (u point)        ', &
-             & 4         ,nmaxgl    ,mmaxgl    ,kmax      ,lstsci    ,0      , &
+             & 4         ,nmaxgl    ,mmaxgl    ,kmaxout   ,lstsci    ,0      , &
              & lundia    ,gdp       )
           call addelm(nefiswrtmap,'R1FLX_VVC',' ','[   -   ]','REAL',4       , &
              & 'Cumulative constituent flux in v-direction (v point)        ', &
-             & 4         ,nmaxgl    ,mmaxgl    ,kmax      ,lstsci    ,0      , &
+             & 4         ,nmaxgl    ,mmaxgl    ,kmaxout   ,lstsci    ,0      , &
              & lundia    ,gdp       )
        endif
        if (index(selmap(14:15),'Y') /= 0) then
-          call addelm(nefiswrtmap,'RTUR1',' ','[   -   ]','REAL',4           , &
-             & 'Turbulent quantity per layer in zeta point                  ', &
-             & 4         ,nmaxgl    ,mmaxgl    ,kmax + 1  ,ltur      ,0      , &
-             & lundia    ,gdp       )
+          if (kmaxout == kmax) then
+             call addelm(nefiswrtmap,'RTUR1',' ','[   -   ]','REAL',4           , &
+                & 'Turbulent quantity per layer in zeta point                  ', &
+                & 4         ,nmaxgl    ,mmaxgl    ,kmax + 1  ,ltur      ,0      , &
+                & lundia    ,gdp       )
+          else
+             call addelm(nefiswrtmap,'RTUR1',' ','[   -   ]','REAL',4           , &
+                & 'Turbulent quantity per layer in zeta point                  ', &
+                & 4         ,nmaxgl    ,mmaxgl    ,kmaxout   ,ltur      ,0      , &
+                & lundia    ,gdp       )
+          endif
        endif
        if (index(selmap(16:17), 'Y') > 0) then
           call addelm(nefiswrtmap,'TAUKSI',' ','[  N/M2 ]','REAL',4          , &
@@ -363,27 +382,48 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
              & lundia    ,gdp       )
        endif
        if (selmap(18:18) == 'Y') then
-          call addelm(nefiswrtmap,'VICWW',' ','[  M2/S ]','REAL',4           , &
-             & 'Vertical eddy viscosity-3D in zeta point                    ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax + 1  ,0         ,0      , &
-             & lundia    ,gdp       )
+          if (kmaxout == kmax) then
+             call addelm(nefiswrtmap,'VICWW',' ','[  M2/S ]','REAL',4           , &
+                & 'Vertical eddy viscosity-3D in zeta point                    ', &
+                & 3         ,nmaxgl    ,mmaxgl    ,kmax + 1  ,0         ,0      , &
+                & lundia    ,gdp       )
+          else
+             call addelm(nefiswrtmap,'VICWW',' ','[  M2/S ]','REAL',4           , &
+                & 'Vertical eddy viscosity-3D in zeta point                    ', &
+                & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
+                & lundia    ,gdp       )
+          endif
        endif
        if (selmap(19:19) == 'Y') then
-          call addelm(nefiswrtmap,'DICWW',' ','[  M2/S ]','REAL',4           , &
-             & 'Vertical eddy diffusivity-3D in zeta point                  ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax + 1  ,0         ,0      , &
-             & lundia    ,gdp       )
+          if (kmaxout == kmax) then
+             call addelm(nefiswrtmap,'DICWW',' ','[  M2/S ]','REAL',4           , &
+                & 'Vertical eddy diffusivity-3D in zeta point                  ', &
+                & 3         ,nmaxgl    ,mmaxgl    ,kmax + 1  ,0         ,0      , &
+                & lundia    ,gdp       )
+          else
+             call addelm(nefiswrtmap,'DICWW',' ','[  M2/S ]','REAL',4           , &
+                & 'Vertical eddy diffusivity-3D in zeta point                  ', &
+                & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
+                & lundia    ,gdp       )
+          endif
        endif
        if (index(selmap(18:19),'Y') > 0) then
-          call addelm(nefiswrtmap,'RICH',' ','[   -   ]','REAL',4            , &
-             & 'Richardson number                                           ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax + 1  ,0         ,0      , &
-             & lundia    ,gdp       )
+          if (kmaxout == kmax) then
+             call addelm(nefiswrtmap,'RICH',' ','[   -   ]','REAL',4            , &
+                & 'Richardson number                                           ', &
+                & 3         ,nmaxgl    ,mmaxgl    ,kmax + 1  ,0         ,0      , &
+                & lundia    ,gdp       )
+          else
+             call addelm(nefiswrtmap,'RICH',' ','[   -   ]','REAL',4            , &
+                & 'Richardson number                                           ', &
+                & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
+                & lundia    ,gdp       )
+          endif
        endif
        if (selmap(20:20) == 'Y') then
           call addelm(nefiswrtmap,'RHO',' ','[ KG/M3 ]','REAL',4             , &
              & 'Density per layer in zeta point                             ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax      ,0         ,0      , &
+             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
              & lundia    ,gdp       )
        endif
        if (selmap(21:21) == 'Y') then
@@ -397,7 +437,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
              & lundia    ,gdp       )
           call addelm(nefiswrtmap,'VICUV',' ','[ M2/S  ]','REAL',4           , &
              & 'Horizontal eddy viscosity in zeta point                     ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax      ,0         ,0      , &
+             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
              & lundia    ,gdp       )
        endif
        if (nsrc > 0) then
@@ -409,17 +449,17 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        if (index(selmap(2:3),'Y') > 0) then
           call addelm(nefiswrtmap,'VORTIC',' ','[  1/S  ]','REAL',4          , &
              & 'Vorticity at each layer in depth point                      ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax      ,0         ,0      , &
+             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
              & lundia    ,gdp       )
           call addelm(nefiswrtmap,'ENSTRO',' ','[  1/S2 ]','REAL',4          , &
              & 'Enstrophy at each layer in depth point                      ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmax      ,0         ,0      , &
+             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
              & lundia    ,gdp       )
        endif
        if (index(selmap(2:2), 'Y')>0 .and. zmodel) then
           call addelm(nefiswrtmap,'HYDPRES',' ','[  N/M2 ]','REAL',4         , &
              & 'Non-hydrostatic pressure at each layer in zeta point        ', &
-             & 3         ,nmaxus    ,mmax      ,kmax      ,0         ,0      , &
+             & 3         ,nmaxus    ,mmax      ,kmaxout   ,0         ,0      , &
              & lundia    ,gdp       )
        endif
        if (flwoutput%air) then
@@ -710,13 +750,15 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! group 3: element 'U1' & 'V1' only if SELMAP( 2: 3) <> 'NN'
     !
     if (index(selmap(2:3),'Y') > 0) then
-       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax),stat = istat )
-       rbuff3(:, :, :) = u1(:, :, :)
+       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout),stat = istat )
+       do k=1,kmaxout
+          rbuff3(:,:,k) = u1(:,:,smlay(k))
+       enddo
        if (zmodel) then
           do m = 1, mmax
              do n = 1, nmaxus
-                do k = 1, kmax
-                   if (k<kfumin(n, m) .or. k>kfumax(n, m))  rbuff3(n, m, k) = -999.0_fp
+                do k = 1, kmaxout
+                   if (smlay(k)<kfumin(n, m) .or. smlay(k)>kfumax(n, m))  rbuff3(n, m, k) = -999.0_fp
                 enddo
              enddo
           enddo
@@ -734,13 +776,15 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        !
        ! group 3: element 'V1'
        !
-       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax) )
-       rbuff3(:, :, :) = v1(:, :, :)
+       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout) )
+       do k=1,kmaxout
+          rbuff3(:,:,k) = v1(:,:,smlay(k))
+       enddo
        if (zmodel) then
           do m = 1, mmax
              do n = 1, nmaxus
-                do k = 1, kmax
-                    if (k<kfvmin(n, m) .or. k>kfvmax(n, m))  rbuff3(n, m, k) = -999.0_fp                
+                do k = 1, kmaxout
+                    if (smlay(k)<kfvmin(n, m) .or. smlay(k)>kfvmax(n, m))  rbuff3(n, m, k) = -999.0_fp                
                  enddo
              enddo
           enddo
@@ -760,16 +804,32 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! group 3: element 'W' only if kmax > 1 (:=  SELMAP( 4: 4) = 'Y')
     !
     if (selmap(4:4) == 'Y') then
-       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax) )
-       rbuff3(:, :, 0:kmax) = w1(:, :, 0:kmax)
-       if (zmodel) then
-          do m = 1, mmax
-             do n = 1, nmaxus
-                do k = 0, kmax
-                   if (k<(kfsmin(n, m)-1) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
-                enddo   
+       if (kmaxout == kmax) then
+          allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax) )
+          rbuff3(:, :, 0:kmax) = w1(:, :, 0:kmax)
+          if (zmodel) then
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   do k = 0, kmax
+                      if (k<(kfsmin(n, m)-1) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
+                   enddo   
+                enddo
              enddo
+          endif
+       else
+          allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:kmaxout) )
+          do k=1,kmaxout
+             rbuff3(:,:,k) = w1(:,:,smlay(k))
           enddo
+          if (zmodel) then
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   do k = 1, kmaxout
+                      if (smlay(k)<(kfsmin(n, m)-1) .or. smlay(k)>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
+                   enddo   
+                enddo
+             enddo
+          endif
        endif
        if (parll) then
           call dfgather(rbuff3,nf,nl,mf,ml,iarrc,gdp)
@@ -786,13 +846,15 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! group 3: element 'WPHY' only if KMAX > 1 (:=  SELMAP( 5: 5) = 'Y')
     !
     if (selmap(5:5) == 'Y') then
-       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax) )
-       rbuff3(:, :, :) = wphy(:, :, :)
+       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout) )
+       do k=1,kmaxout
+          rbuff3(:,:,k) = wphy(:,:,smlay(k))
+       enddo
        if (zmodel) then
           do m = 1, mmax
              do n = 1, nmaxus
-                do k = 1, kmax
-                    if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
+                do k = 1, kmaxout
+                    if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
                 enddo
              enddo
           enddo
@@ -816,18 +878,18 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        !
        !NB R1 works ok without reallocating array; RTUR1 NOT !
        !
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax,lstsci ))
+       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout,lstsci ))
        rbuff4(:,:,:,:) = -999.0_fp
        do l = 1, lstsci
-          do k = 1, kmax
+          do k = 1, kmaxout
              do m = 1, mmax
                 do n = 1, nmaxus
                    if (zmodel) then
-                      if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) then
+                      if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) then
                          cycle
                       endif
                    endif
-                   rbuff4(n,m,k,l) = r1(n,m,k,l)
+                   rbuff4(n,m,k,l) = r1(n,m,smlay(k),l)
                 enddo
              enddo
           enddo
@@ -848,19 +910,19 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           !
           ! element 'R1FLX_UU'
           !
-          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax,lstsci ))
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout,lstsci ))
           rbuff4(:, :, :, :) = -999.0_fp
           if (associated(fluxu)) then
              do l = 1, lstsci
-                do k = 1, kmax
+                do k = 1, kmaxout
                    do nm = 1, nmmax
                       call nm_to_n_and_m(nm, n, m, gdp)
                       if (zmodel) then
-                         if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) then
+                         if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) then
                             cycle
                          endif
                       endif
-                      rbuff4(n,m,k,l) = fluxu(nm,k,l)
+                      rbuff4(n,m,k,l) = fluxu(nm,smlay(k),l)
                    enddo
                 enddo
              enddo
@@ -879,19 +941,19 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           !
           ! element 'R1FLX_VV'
           !
-          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax,lstsci ))
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout,lstsci ))
           rbuff4(:, :, :, :) = -999.0_fp
           if (associated(fluxv)) then
              do l = 1, lstsci
-                do k = 1, kmax
+                do k = 1, kmaxout
                    do nm = 1, nmmax
                       call nm_to_n_and_m(nm, n, m, gdp)
                       if (zmodel) then
-                         if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) then
+                         if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) then
                             cycle
                          endif
                       endif
-                      rbuff4(n,m,k,l) = fluxv(nm,k,l)
+                      rbuff4(n,m,k,l) = fluxv(nm,smlay(k),l)
                    enddo
                 enddo
              enddo
@@ -913,19 +975,19 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           !
           ! element 'R1FLX_UUC'
           !
-          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax,lstsci ))
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout,lstsci ))
           rbuff4(:, :, :, :) = -999.0_fp
           if (associated(fluxuc)) then
              do l = 1, lstsci
-                do k = 1, kmax
+                do k = 1, kmaxout
                    do nm = 1, nmmax
                       call nm_to_n_and_m(nm, n, m, gdp)
                       if (zmodel) then
-                         if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) then
+                         if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) then
                             cycle
                          endif
                       endif
-                      rbuff4(n,m,k,l) = fluxuc(nm,k,l)
+                      rbuff4(n,m,k,l) = fluxuc(nm,smlay(k),l)
                    enddo
                 enddo
              enddo
@@ -944,19 +1006,19 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           !
           ! element 'R1FLX_VVC'
           !
-          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax,lstsci ))
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout,lstsci ))
           rbuff4(:, :, :, :) = -999.0_fp
           if (associated(fluxvc)) then
              do l = 1, lstsci
-                do k = 1, kmax
+                do k = 1, kmaxout
                    do nm = 1, nmmax
                       call nm_to_n_and_m(nm, n, m, gdp)
                       if (zmodel) then
-                         if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) then
+                         if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) then
                             cycle
                          endif
                       endif
-                      rbuff4(n,m,k,l) = fluxvc(nm,k,l)
+                      rbuff4(n,m,k,l) = fluxvc(nm,smlay(k),l)
                    enddo
                 enddo
              enddo
@@ -979,23 +1041,41 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! (:= SELMAP(14:15) <> 'NN')
     !
     if (index(selmap(14:15),'Y') /= 0) then
-
-       allocate(rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub,0:kmax,1:ltur ))
-       rbuff4(:,:,:,:) = -999.0_fp
-       do l = 1, ltur
-          do k = 0, kmax
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   if (zmodel) then
-                      if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) then
-                         cycle
+       if (kmaxout == kmax) then
+          allocate(rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub,0:kmax,1:ltur ))
+          rbuff4(:,:,:,:) = -999.0_fp
+          do l = 1, ltur
+             do k = 0, kmax
+                do m = 1, mmax
+                   do n = 1, nmaxus
+                      if (zmodel) then
+                         if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) then
+                            cycle
+                         endif
                       endif
-                   endif
-                   rbuff4(n,m,k,l) = rtur1(n,m,k,l)
+                      rbuff4(n,m,k,l) = rtur1(n,m,k,l)
+                   enddo
                 enddo
              enddo
           enddo
-       enddo
+       else
+          allocate(rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub,kmaxout,1:ltur ))
+          rbuff4(:,:,:,:) = -999.0_fp
+          do l = 1, ltur
+             do k = 1, kmaxout
+                do m = 1, mmax
+                   do n = 1, nmaxus
+                      if (zmodel) then
+                         if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) then
+                            cycle
+                         endif
+                      endif
+                      rbuff4(n,m,k,l) = rtur1(n,m,smlay(k),l)
+                   enddo
+                enddo
+             enddo
+          enddo
+       endif
        if (parll) then
           call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
        else
@@ -1090,16 +1170,32 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! vicww is defined on cell boundary planes
     !
     if (selmap(18:18) == 'Y') then
-       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax) )
-       rbuff3(:, :, :) = vicww(:, :, :)
-       if (zmodel) then
-          do m = 1, mmax
-             do n = 1, nmaxus
-                do k = 0 , kmax
-                    if (k<(kfsmin(n, m)-1) .or. k>kfsmax(n, m))  rbuff3(n, m, k) = -999.0_fp
+       if (kmaxout == kmax) then
+          allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax) )
+          rbuff3(:, :, :) = vicww(:, :, :)
+          if (zmodel) then
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   do k = 0 , kmax
+                       if (k<(kfsmin(n, m)-1) .or. k>kfsmax(n, m))  rbuff3(n, m, k) = -999.0_fp
+                   enddo
                 enddo
              enddo
+          endif
+       else
+          allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:kmaxout) )
+          do k=1,kmaxout
+             rbuff3(:,:,k) = vicww(:,:,smlay(k))
           enddo
+          if (zmodel) then
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   do k = 1 , kmaxout
+                       if (smlay(k)<(kfsmin(n, m)-1) .or. smlay(k)>kfsmax(n, m))  rbuff3(n, m, k) = -999.0_fp
+                   enddo
+                enddo
+             enddo
+          endif
        endif
        if (parll) then
           call dfgather(rbuff3,nf,nl,mf,ml,iarrc,gdp)
@@ -1117,16 +1213,32 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! dicww is defined on cell boundary planes
     !
     if (selmap(19:19) == 'Y') then
-       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax) )
-       rbuff3(:, :, :) = dicww(:, :, :)
-       if (zmodel) then
-          do m = 1, mmax
-             do n = 1, nmaxus
-                do k = 0, kmax
-                   if (k<(kfsmin(n, m)-1) .or. k>kfsmax(n, m))  rbuff3(n, m, k) = -999.0_fp
+       if (kmaxout == kmax) then
+          allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax) )
+          rbuff3(:, :, :) = dicww(:, :, :)
+          if (zmodel) then
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   do k = 0, kmax
+                      if (k<(kfsmin(n, m)-1) .or. k>kfsmax(n, m))  rbuff3(n, m, k) = -999.0_fp
+                   enddo
                 enddo
              enddo
+          endif
+       else
+          allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:kmaxout) )
+          do k=1,kmaxout
+             rbuff3(:,:,k) = dicww(:,:,smlay(k))
           enddo
+          if (zmodel) then
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   do k = 1, kmaxout
+                      if (smlay(k)<(kfsmin(n, m)-1) .or. smlay(k)>kfsmax(n, m))  rbuff3(n, m, k) = -999.0_fp
+                   enddo
+                enddo
+             enddo
+          endif
        endif
        if (parll) then
           call dfgather(rbuff3,nf,nl,mf,ml,iarrc,gdp)
@@ -1144,18 +1256,33 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! (:= SELMAP(18:19) <> 'NN')
     !
     if (index(selmap(18:19),'Y') > 0) then
-       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax) )
-       rbuff3(:, :, 0:kmax) = rich(:, :, 0:kmax)
-       if (zmodel) then
-          do m = 1, mmax
-             do n = 1, nmaxus
-                do k = 0, kmax
-                   if (k<(kfsmin(n, m)-1) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
+       if (kmaxout == kmax) then
+          allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax) )
+          rbuff3(:, :, 0:kmax) = rich(:, :, 0:kmax)
+          if (zmodel) then
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   do k = 0, kmax
+                      if (k<(kfsmin(n, m)-1) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
+                   enddo
                 enddo
              enddo
+          endif
+       else
+          allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:kmaxout) )
+          do k=1,kmaxout
+             rbuff3(:,:,k) = rich(:,:,smlay(k))
           enddo
+          if (zmodel) then
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   do k = 1, kmaxout
+                      if (smlay(k)<(kfsmin(n, m)-1) .or. smlay(k)>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
+                   enddo
+                enddo
+             enddo
+          endif
        endif
-       !
        if (parll) then
           call dfgather(rbuff3,nf,nl,mf,ml,iarrc,gdp)
        else
@@ -1172,13 +1299,15 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! (:= SELMAP(20:20) = 'Y')
     !
     if (selmap(20:20) == 'Y') then
-       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax) )
-       rbuff3(:, :, 1:kmax) = rho(:, :, :)
+       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout) )
+       do k=1,kmaxout
+          rbuff3(:,:,k) = rho(:,:,smlay(k))
+       enddo
        if (zmodel) then
           do m = 1, mmax
              do n = 1, nmaxus
-                do k = 1, kmax
-                    if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
+                do k = 1, kmaxout
+                    if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
                 enddo
              enddo
           enddo
@@ -1229,13 +1358,15 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        ! group 3: element 'VICUV'
        ! kmax+1 contains initial values and should not be written
        !
-       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax) )
-       rbuff3(:, :, 1:kmax) = vicuv(:, :, 1:kmax)
+       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout) )
+       do k=1,kmaxout
+          rbuff3(:,:,k) = vicuv(:,:,smlay(k))
+       enddo
        if (zmodel) then
           do m = 1, mmax
              do n = 1, nmaxus
-                do k = 1, kmax
-                   if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
+                do k = 1, kmaxout
+                   if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
                 enddo
              enddo
           enddo
@@ -1278,13 +1409,15 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! First VORTIC
     !
     if (index(selmap(2:3),'Y') > 0) then
-       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax) )
-       rbuff3(:, :, :) = vortic(:, :, :)
+       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout) )
+       do k=1,kmaxout
+          rbuff3(:,:,k) = vortic(:,:,smlay(k))
+       enddo
        if (zmodel) then
           do m = 1, mmax
              do n = 1, nmaxus
-                do k = 1, kmax
-                   if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
+                do k = 1, kmaxout
+                   if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
                 enddo
              enddo
           enddo
@@ -1302,13 +1435,15 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        !
        ! Next ENSTRO
        !
-       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax) )
-       rbuff3(:, :, :) = enstro(:, :, :)
+       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout) )
+       do k=1,kmaxout
+          rbuff3(:,:,k) = enstro(:,:,smlay(k))
+       enddo
        if (zmodel) then
           do m = 1, mmax
              do n = 1, nmaxus
-                do k = 1, kmax
-                   if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
+                do k = 1, kmaxout
+                   if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
                 enddo
              enddo
           enddo
@@ -1328,12 +1463,14 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! group 3: element 'HYDPRES'
     !
     if (index(selmap(4:4),'Y')>0 .and. zmodel) then
-       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax) )
-       rbuff3(:, :, :) = p1(:, :, :)
+       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout) )
+       do k=1,kmaxout
+          rbuff3(:,:,k) = p1(:,:,smlay(k))
+       enddo
        do m = 1, mmax
           do n = 1, nmaxus
-             do k = 1, kmax
-                if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
+             do k = 1, kmaxout
+                if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
              enddo 
           enddo
        enddo

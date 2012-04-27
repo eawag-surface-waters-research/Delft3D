@@ -27,13 +27,26 @@
 !  $Id$
 !  $HeadURL$$
 !-------------------------------------------------------------------------------
-    type sv_postpr
-!
-       integer :: nuprpg           !  Global data
-                                   !  Current page number print file
-       integer :: nuprln           !  Global data
-                                   !  Current line number in print page
-       character*131 :: header(10) !  Print file header
-       character*10  :: trans_unit !  Unit of the variables ATR and DTR
-!
-    end type sv_postpr
+type sv_postpr
+    !
+    ! doubles
+    !
+    ! reals
+    !
+    ! integers
+    !
+    integer :: nuprpg !  Current page number print file
+    integer :: nuprln !  Current line number in print page
+    !
+    ! pointers
+    !
+    integer, dimension(:)  , pointer :: smlay   !  layers to be written to map output (default all layers)
+    integer, dimension(:)  , pointer :: shlay   !  layers to be written to his output (default all layers)
+    ! 
+    ! logicals
+    !
+    !
+    ! characters
+    character*131 :: header(10) !  Print file header
+    character*10  :: trans_unit !  Unit of the variables ATR and DTR
+end type sv_postpr

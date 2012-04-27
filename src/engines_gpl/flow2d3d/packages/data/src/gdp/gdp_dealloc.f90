@@ -269,6 +269,8 @@ subroutine gdp_dealloc(gdp)
     deallocate (gdp%gdinibcc)
     deallocate (gdp%gdinibct)
     deallocate (gdp%gdinidis)
+    if (associated(gdp%gdpostpr%smlay))     deallocate (gdp%gdpostpr%smlay    , STAT = istat)
+    if (associated(gdp%gdpostpr%shlay))     deallocate (gdp%gdpostpr%shlay    , STAT = istat)
     deallocate (gdp%gdpostpr)
     deallocate (gdp%gdrestart)
     if (gdp%gdrtc%rtcmod == dataFromFLOWToRTC) then

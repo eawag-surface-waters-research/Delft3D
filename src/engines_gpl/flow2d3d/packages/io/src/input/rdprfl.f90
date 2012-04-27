@@ -52,6 +52,7 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use properties
     use globaldata
     !
     implicit none
@@ -60,8 +61,10 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer , pointer :: itis
-    logical , pointer :: htur2d
+    integer,               pointer :: itis
+    integer, dimension(:), pointer :: smlay
+    integer, dimension(:), pointer :: shlay
+    logical,               pointer :: htur2d
 !
 ! Global variables
 !
@@ -87,17 +90,23 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
 !
 ! Local variables
 !
-    integer       :: i
-    integer       :: lenc   ! Help var. (length of var. cvar to be looked for in the MD-file) 
-    integer       :: lkw    ! Length (in characters) of keyword 
-    integer       :: nlook  ! Help var.: nr. of data to look for in the MD-file 
-    integer       :: ntrec  ! Help. var to keep track of NRREC 
-    logical       :: found  ! FOUND=TRUE if KEYW in the MD-file was found 
-    logical       :: lerror ! Flag=TRUE if an error is encountered 
-    logical       :: newkw  ! Logical var. specifying whether a new recnam should be read from the MD-file or just new data in the continuation line 
-    character(10) :: cdef   ! Default value when CVAR not found 
-    character(10) :: chulp  ! Help var. 
-    character(6)  :: keyw   ! Name of record to look for in the MD-file (usually KEYWRD or RECNAM) 
+    integer                            :: i
+    integer                            :: icount
+    integer                            :: istat
+    integer                            :: j
+    integer                            :: kmaxout
+    integer                            :: lenc   ! Help var. (length of var. cvar to be looked for in the MD-file) 
+    integer                            :: lkw    ! Length (in characters) of keyword 
+    integer                            :: nlook  ! Help var.: nr. of data to look for in the MD-file 
+    integer                            :: ntrec  ! Help. var to keep track of NRREC 
+    integer, dimension(:), allocatable :: ival
+    logical                            :: found  ! FOUND=TRUE if KEYW in the MD-file was found 
+    logical                            :: lerror ! Flag=TRUE if an error is encountered 
+    logical                            :: newkw  ! Logical var. specifying whether a new recnam should be read from the MD-file or just new data in the continuation line 
+    character(10)                      :: cdef   ! Default value when CVAR not found 
+    character(10)                      :: chulp  ! Help var. 
+    character(6)                       :: keyw   ! Name of record to look for in the MD-file (usually KEYWRD or RECNAM)
+    character(256)                     :: message
 !
 !! executable statements -------------------------------------------------------
 !
@@ -452,6 +461,139 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     !
     if (htur2d) selmap(21:21) = 'Y'
     !
+    ! Layer specified output
+    !
+    !
+    ! SMlay
+    !
+                  allocate (gdp%gdpostpr%smlay(kmax), stat = istat)
+    if (istat==0) allocate (gdp%gdpostpr%shlay(kmax), stat = istat)
+    if (istat==0) allocate (ival(kmax), stat = istat)
+    !
+    if (istat /= 0) then
+       call prterr(lundia, 'U021', 'RDPRFL: memory alloc error')
+       call d3stop(1, gdp)
+    endif
+    smlay => gdp%gdpostpr%smlay
+    shlay => gdp%gdpostpr%shlay
+    ival = -999
+    call prop_get(gdp%mdfile_ptr, '*', 'SMlay', ival, kmax)
+    if (ival(1) == -999) then
+       !
+       ! No layers specified for map-output
+       ! Default: all layers to output
+       !
+       do i = 1, kmax
+          smlay(i) = i
+       enddo
+    else
+       !
+       ! layers specified for map-output
+       ! Detect the number of output layers(kmaxout):
+       !   Search for the first i for which ival(i) == -999. Then kmaxout = i-1
+       ! On the flow: check that the specified layers are valid
+       ! 
+       kmaxout = kmax
+       do i = 1, kmax
+          if (ival(i) == -999) then
+             kmaxout = i-1
+             exit
+          endif
+          if (ival(i)<1 .or. ival(i)>kmax) then
+             write (message,'(a,i0,a)') "Invalid layer specification '", ival(i), "' in keyword SMlay"
+             call prterr(lundia, 'U021', trim(message))
+             call d3stop(1, gdp)
+          endif
+       enddo
+       !
+       ! Adapt the size of array smlay in case kmaxout<kmax
+       !
+       if (kmaxout /= kmax) then
+          deallocate (gdp%gdpostpr%smlay, stat = istat)
+          allocate (gdp%gdpostpr%smlay(kmaxout), stat = istat)
+          if (istat /= 0) then
+             call prterr(lundia, 'U021', 'RDPRFL: memory alloc error')
+             call d3stop(1, gdp)
+          endif
+          smlay => gdp%gdpostpr%smlay
+       endif
+       !
+       ! Fill smlay with the values of ival in increasing order
+       !
+       icount = 1
+       do i = 1, kmax
+          do j = 1, kmaxout
+             if (ival(j) == i) then
+                smlay(icount) = i
+                icount        = icount + 1
+                exit
+             endif
+          enddo
+       enddo
+       write(message,*) "Map output is written for layer(s)",(smlay(i),i=1,size(smlay))
+       call prterr(lundia, 'G051',trim(message))
+    endif
+    !
+    ! SHlay
+    !
+    ival = -999
+    call prop_get(gdp%mdfile_ptr, '*', 'SHlay', ival, kmax)
+    if (ival(1) == -999) then
+       !
+       ! No layers specified for his-output
+       ! Default: all layers to output
+       !
+       do i = 1, kmax
+          shlay(i) = i
+       enddo
+    else
+       !
+       ! layers specified for map-output
+       ! Detect the number of output layers(kmaxout):
+       !   Search for the first i for which ival(i) == -999. Then kmaxout = i-1
+       ! On the flow: check that the specified layers are valid
+       ! 
+       kmaxout = kmax
+       do i = 1, kmax
+          if (ival(i) == -999) then
+             kmaxout = i-1
+             exit
+          endif
+          if (ival(i)<1 .or. ival(i)>kmax) then
+             write (message,'(a,i0,a)') "Invalid layer specification '", ival(i), "' in keyword SHlay"
+             call prterr(lundia, 'U021', trim(message))
+             call d3stop(1, gdp)
+          endif
+       enddo
+       !
+       ! Adapt the size of array shlay in case kmaxout<kmax
+       !
+       if (kmaxout /= kmax) then
+          deallocate (gdp%gdpostpr%shlay, stat = istat)
+          allocate (gdp%gdpostpr%shlay(kmaxout), stat = istat)
+          if (istat /= 0) then
+             call prterr(lundia, 'U021', 'RDPRFL: memory alloc error')
+             call d3stop(1, gdp)
+          endif
+          shlay => gdp%gdpostpr%shlay
+       endif
+       !
+       ! Fill shlay with the values of ival in increasing order
+       !
+       icount = 1
+       do i = 1, kmax
+          do j = 1, kmaxout
+             if (ival(j) == i) then
+                shlay(icount) = i
+                icount        = icount + 1
+                exit
+             endif
+          enddo
+       enddo
+       write(message,*) "History output is written for layer(s)",(shlay(i),i=1,size(shlay))
+       call prterr(lundia, 'G051',trim(message))
+    endif
+    !
     ! Read flag for test results in zsol file
     !
     keyw  = 'Tstprt'
@@ -480,4 +622,5 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
        tstprt = .false.
        if (chulp(:1)=='y' .or. chulp(:1)=='Y') tstprt = .true.
     endif
+    deallocate(ival, stat=istat)
 end subroutine rdprfl

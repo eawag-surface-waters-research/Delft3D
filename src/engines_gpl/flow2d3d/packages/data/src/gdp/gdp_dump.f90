@@ -137,7 +137,7 @@ subroutine gdp_dump(gdp       )
     write (*, *) 'GDP % gdinidis'
     write (*, *) gdp%gdinidis
     write (*, *) 'GDP % gdpostpr'
-    write (*, *) gdp%gdpostpr
+    ! write (*, *) gdp%gdpostpr
     write (*, *) 'GDP % gdtricom'
     write (*, *) gdp%gdtricom
     write (*, *) 'GDP % gdu_ppr'

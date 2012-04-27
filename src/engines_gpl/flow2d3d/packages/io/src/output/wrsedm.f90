@@ -54,6 +54,7 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
     integer                              , pointer :: celidt
     type (nefiselement)                  , pointer :: nefiselem
     integer                              , pointer :: nxx
+    integer  , dimension(:)              , pointer :: smlay
     type (moroutputtype)                 , pointer :: moroutput
     logical                              , pointer :: scour
     real(fp), dimension(:)               , pointer :: xx
@@ -119,6 +120,7 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
     integer                 :: fds
     integer                 :: i
     integer                 :: k          ! Help var. 
+    integer                 :: kmaxout    ! number of layers to be written to the (history) output files
     integer                 :: l          ! Help var. 
     integer                 :: m          ! Help var. 
     integer                 :: n          ! Help var. 
@@ -136,6 +138,7 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
     nefiselem => gdp%nefisio%nefiselem(nefiswrsedminf)
     celidt              => nefiselem%celidt
     nxx                 => gdp%gdmorpar%nxx
+    smlay               => gdp%gdpostpr%smlay
     moroutput           => gdp%gdmorpar%moroutput
     xx                  => gdp%gdmorpar%xx
     rhosol              => gdp%gdsedpar%rhosol
@@ -173,6 +176,7 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
     vvv                 => gdp%gderosed%vvv
     zumod               => gdp%gderosed%zumod
     !
+    kmaxout = size(smlay)
     select case (irequest)
     case (1)
        !
@@ -189,14 +193,21 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
        !
        ! map-sed-series
        !
-       call addelm(nefiswrsedm,'WS',' ','[  M/S  ]','REAL',4             , &
-          & 'Settling velocity per layer'                                , &
-          & 4         ,nmaxus    ,mmax      ,kmax+1    ,lsed      ,0     , &
-          & lundia    ,gdp       )
+       if (kmaxout == kmax) then
+          call addelm(nefiswrsedm,'WS',' ','[  M/S  ]','REAL',4             , &
+             & 'Settling velocity per layer'                                , &
+             & 4         ,nmaxus    ,mmax      ,kmax+1    ,lsed      ,0     , &
+             & lundia    ,gdp       )
+       else
+          call addelm(nefiswrsedm,'WS',' ','[  M/S  ]','REAL',4             , &
+             & 'Settling velocity per layer'                                , &
+             & 4         ,nmaxus    ,mmax      ,kmaxout   ,lsed      ,0     , &
+             & lundia    ,gdp       )
+       endif
        if (kmax==1) then
           call addelm(nefiswrsedm,'RSEDEQ',' ','[ KG/M3 ]','REAL',4         , &
              & 'Equilibrium concentration of sediment per layer'            , &
-             & 4         ,nmaxus    ,mmax      ,kmax      ,lsed      ,0     , &
+             & 4         ,nmaxus    ,mmax      ,kmaxout   ,lsed      ,0     , &
              & lundia    ,gdp       )
        endif
        if (moroutput%uuuvvv) then
@@ -415,18 +426,33 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
        !
        ! element 'WS'
        !
-       call sbuff_checksize(lsed*(kmax+1)*mmax*nmaxus)
-       i = 0
-       do l = 1, lsed
-          do k = 0, kmax
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   i        = i+1
-                   sbuff(i) = real(ws(n, m, k, l),sp)
+       if (kmaxout == kmax) then
+          call sbuff_checksize(lsed*(kmax+1)*mmax*nmaxus)
+          i = 0
+          do l = 1, lsed
+             do k = 0, kmax
+                do m = 1, mmax
+                   do n = 1, nmaxus
+                      i        = i+1
+                      sbuff(i) = real(ws(n, m, k, l),sp)
+                   enddo
                 enddo
              enddo
           enddo
-       enddo
+       else
+          call sbuff_checksize(lsed*(kmaxout)*mmax*nmaxus)
+          i = 0
+          do l = 1, lsed
+             do k = 1, kmaxout
+                do m = 1, mmax
+                   do n = 1, nmaxus
+                      i        = i+1
+                      sbuff(i) = real(ws(n, m, smlay(k), l),sp)
+                   enddo
+                enddo
+             enddo
+          enddo
+       endif
        ierror = putelt(fds, grpnam, 'WS', uindex, 1, sbuff)
        if (ierror/=0) goto 9999
        !
@@ -434,14 +460,14 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
           !
           ! element 'RSEDEQ'
           !
-          call sbuff_checksize(lsed*kmax*mmax*nmaxus)
+          call sbuff_checksize(lsed*kmaxout*mmax*nmaxus)
           i = 0
           do l = 1, lsed
-             do k = 1, kmax
+             do k = 1, kmaxout
                 do m = 1, mmax
                    do n = 1, nmaxus
                       i        = i+1
-                      sbuff(i) = real(rsedeq(n, m, k, l),sp)
+                      sbuff(i) = real(rsedeq(n, m, smlay(k), l),sp)
                    enddo
                 enddo
              enddo

@@ -1,4 +1,4 @@
-subroutine initpostpr(gdp       )
+subroutine initpostpr(gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -40,27 +40,12 @@ subroutine initpostpr(gdp       )
     implicit none
     !
     type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    integer , pointer :: nuprpg
-    integer , pointer :: nuprln
-!
-! Global variables
-!
-!
 !
 !! executable statements -------------------------------------------------------
 !
+    gdp%gdpostpr%nuprpg = 1
+    gdp%gdpostpr%nuprln = 10
     !
-    !
-    !-----Initialize statics for postpr
-    !
-    nuprpg  => gdp%gdpostpr%nuprpg
-    nuprln  => gdp%gdpostpr%nuprln
-    !
-    nuprpg = 1
-    !
-    nuprln = 10
-    !
+    nullify(gdp%gdpostpr%smlay)
+    nullify(gdp%gdpostpr%shlay)
 end subroutine initpostpr

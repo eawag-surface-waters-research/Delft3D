@@ -60,19 +60,19 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    logical                         , pointer :: first
     integer                         , pointer :: celidt
     integer       , dimension(:, :) , pointer :: elmdms
-    type (nefiselement)             , pointer :: nefiselem
     integer       , dimension(:, :) , pointer :: mnstat
-    real(fp)      , dimension(:, :) , pointer :: xystat
-    integer       , dimension(:)    , pointer :: order_sta
-    integer       , dimension(:)    , pointer :: order_tra
-    character(20) , dimension(:)    , pointer :: namst
     integer                         , pointer :: mfg
     integer                         , pointer :: nfg
-
+    integer       , dimension(:)    , pointer :: order_sta
+    integer       , dimension(:)    , pointer :: order_tra
+    integer       , dimension(:)    , pointer :: shlay
+    real(fp)      , dimension(:, :) , pointer :: xystat
+    logical                         , pointer :: first
+    character(20) , dimension(:)    , pointer :: namst
     character*(10)                  , pointer :: trans_unit !  Unit of the variables ATR and DTR
+    type (nefiselement)             , pointer :: nefiselem
 
 
 !
@@ -130,6 +130,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     integer        , dimension(1)                    :: idummy    ! Help array to read/write Nefis files 
     integer        , dimension(3,5)                  :: uindex
     integer                           , external     :: getelt
+    integer                                          :: kmaxout   ! number of layers to be written to the (history) output files
     integer                           , external     :: putelt
     integer                           , external     :: inqmxi
     integer                           , external     :: clsnef
@@ -148,7 +149,9 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     logical                                          :: cross_sec ! option to sum results from cross-sections across partitions
     real(sp)       , dimension(:)      , allocatable :: rsbuff1   ! work array
     real(sp)       , dimension(:,:)    , allocatable :: rsbuff2   ! work array
+    real(sp)       , dimension(:,:)    , allocatable :: rsbuff2b  ! work array
     real(sp)       , dimension(:,:,:)  , allocatable :: rsbuff3   ! work array
+    real(sp)       , dimension(:,:,:)  , allocatable :: rsbuff3b  ! work array
     character(10)                                    :: coordunit ! Unit of X/Y coordinate: M or DEG
     character(16)                                    :: grnam1    ! Data-group name defined for the NEFIS-files group 1 
     character(16)                                    :: grnam3    ! Data-group name defined for the NEFIS-files group 3 
@@ -167,16 +170,18 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     celidt     => nefiselem%celidt
     elmdms     => nefiselem%elmdms
     mnstat     => gdp%gdstations%mnstat
-    xystat     => gdp%gdstations%xystat
-    order_sta  => gdp%gdparall%order_sta
-    order_tra  => gdp%gdparall%order_tra
     namst      => gdp%gdstations%namst
     mfg        => gdp%gdparall%mfg
     nfg        => gdp%gdparall%nfg
+    order_sta  => gdp%gdparall%order_sta
+    order_tra  => gdp%gdparall%order_tra
+    shlay      => gdp%gdpostpr%shlay
+    xystat     => gdp%gdstations%xystat
     !
     ! Initialize local variables
     !
-    filnam = trifil(1:3) // 'h' // trifil(5:)
+    kmaxout = size(shlay)
+    filnam  = trifil(1:3) // 'h' // trifil(5:)
     !
     if (sferic) then
        coordunit = '[  DEG  ]'
@@ -245,40 +250,47 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
           if (index(selhis(2:3), 'Y')>0) then
              call addelm(nefiswrthis,'ZCURU',' ','[  M/S  ]','REAL',4              , &
                 & 'U-velocity per layer in station (zeta point, '//velt//')      ', &
-                & 2         ,nostatgl  ,kmax      ,0         ,0         ,0      , &
+                & 2         ,nostatgl  ,kmaxout   ,0         ,0         ,0      , &
                 & lundia    ,gdp       )
              call addelm(nefiswrthis,'ZCURV',' ','[  M/S  ]','REAL',4              , &
                 & 'V-velocity per layer in station (zeta point, '//velt//')      ', &
-                & 2         ,nostatgl  ,kmax      ,0         ,0         ,0      , &
+                & 2         ,nostatgl  ,kmaxout   ,0         ,0         ,0      , &
                 & lundia    ,gdp       )
           endif
           if (selhis(4:4)=='Y') then
              call addelm(nefiswrthis,'ZCURW',' ','[  M/S  ]','REAL',4              , &
                 & 'W-velocity per layer in station (zeta point)                  ', &
-                & 2         ,nostatgl  ,kmax      ,0         ,0         ,0      , &
+                & 2         ,nostatgl  ,kmaxout   ,0         ,0         ,0      , &
                 & lundia    ,gdp       )
           endif
           if (selhis(20:20)=='Y') then
              call addelm(nefiswrthis,'ZQXK',' ','[  M3/S ]','REAL',4              , &
                 & 'U-discharge per layer in station (zeta point)                 ', &
-                & 2         ,nostatgl  ,kmax      ,0         ,0         ,0      , &
+                & 2         ,nostatgl  ,kmaxout   ,0         ,0         ,0      , &
                 & lundia    ,gdp       )
              call addelm(nefiswrthis,'ZQYK',' ','[  M3/S ]','REAL',4              , &
                 & 'V-discharge per layer in station (zeta point)                 ', &
-                & 2         ,nostatgl  ,kmax      ,0         ,0         ,0      , &
+                & 2         ,nostatgl  ,kmaxout   ,0         ,0         ,0      , &
                 & lundia    ,gdp       )
           endif
           if (index(selhis(5:12), 'Y')/=0) then
              call addelm(nefiswrthis,'GRO',' ','[   -   ]','REAL',4              , &
                 & 'Concentrations per layer in station (zeta point)              ', &
-                & 3         ,nostatgl  ,kmax      ,lstsci    ,0         ,0      , &
+                & 3         ,nostatgl  ,kmaxout   ,lstsci    ,0         ,0      , &
                 & lundia    ,gdp       )
           endif
           if (index(selhis(13:14), 'Y')/=0) then
-             call addelm(nefiswrthis,'ZTUR',' ','[   -   ]','REAL',4              , &
-                & 'Turbulent quantity per layer in station (zeta point)          ', &
-                & 3         ,nostatgl  ,kmax + 1  ,ltur      ,0         ,0      , &
-                & lundia    ,gdp       )
+             if (kmaxout == kmax) then
+                call addelm(nefiswrthis,'ZTUR',' ','[   -   ]','REAL',4              , &
+                   & 'Turbulent quantity per layer in station (zeta point)          ', &
+                   & 3         ,nostatgl  ,kmax + 1  ,ltur      ,0         ,0      , &
+                   & lundia    ,gdp       )
+             else
+                call addelm(nefiswrthis,'ZTUR',' ','[   -   ]','REAL',4              , &
+                   & 'Turbulent quantity per layer in station (zeta point)          ', &
+                   & 3         ,nostatgl  ,kmaxout   ,ltur      ,0         ,0      , &
+                   & lundia    ,gdp       )
+             endif
           endif
           if (index(selhis(15:16), 'Y')>0) then
              call addelm(nefiswrthis,'ZTAUKS',' ','[  N/M2 ]','REAL',4              , &
@@ -291,34 +303,55 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
                 & lundia    ,gdp       )
           endif
           if (selhis(17:17)=='Y') then
-             call addelm(nefiswrthis,'ZVICWW',' ','[  M2/S ]','REAL',4              , &
-                & 'Vertical eddy viscosity-3D in station (zeta point)            ', &
-                & 2         ,nostatgl  ,kmax + 1  ,0         ,0         ,0      , &
-                & lundia    ,gdp       )
+             if (kmaxout == kmax) then
+                call addelm(nefiswrthis,'ZVICWW',' ','[  M2/S ]','REAL',4              , &
+                   & 'Vertical eddy viscosity-3D in station (zeta point)            ', &
+                   & 2         ,nostatgl  ,kmax + 1  ,0         ,0         ,0      , &
+                   & lundia    ,gdp       )
+             else
+                call addelm(nefiswrthis,'ZVICWW',' ','[  M2/S ]','REAL',4              , &
+                   & 'Vertical eddy viscosity-3D in station (zeta point)            ', &
+                   & 2         ,nostatgl  ,kmaxout   ,0         ,0         ,0      , &
+                   & lundia    ,gdp       )
+             endif
           endif
           if (selhis(18:18)=='Y') then
-             call addelm(nefiswrthis,'ZDICWW',' ','[  M2/S ]','REAL',4              , &
-                & 'Vertical eddy diffusivity-3D in station (zeta point)          ', &
-                & 2         ,nostatgl  ,kmax + 1  ,0         ,0         ,0      , &
-                & lundia    ,gdp       )
+             if (kmaxout == kmax) then
+                call addelm(nefiswrthis,'ZDICWW',' ','[  M2/S ]','REAL',4              , &
+                   & 'Vertical eddy diffusivity-3D in station (zeta point)          ', &
+                   & 2         ,nostatgl  ,kmax + 1  ,0         ,0         ,0      , &
+                   & lundia    ,gdp       )
+             else
+                call addelm(nefiswrthis,'ZDICWW',' ','[  M2/S ]','REAL',4              , &
+                   & 'Vertical eddy diffusivity-3D in station (zeta point)          ', &
+                   & 2         ,nostatgl  ,kmaxout   ,0         ,0         ,0      , &
+                   & lundia    ,gdp       )
+             endif
           endif
           if (index(selhis(17:18), 'Y')>0) then
-             call addelm(nefiswrthis,'ZRICH',' ','[   -   ]','REAL',4              , &
-                & 'Richardson number in station (zeta point)                     ', &
-                & 2         ,nostatgl  ,kmax + 1  ,0         ,0         ,0      , &
-                & lundia    ,gdp       )
+             if (kmaxout == kmax) then
+                call addelm(nefiswrthis,'ZRICH',' ','[   -   ]','REAL',4              , &
+                   & 'Richardson number in station (zeta point)                     ', &
+                   & 2         ,nostatgl  ,kmax + 1  ,0         ,0         ,0      , &
+                   & lundia    ,gdp       )
+             else
+                call addelm(nefiswrthis,'ZRICH',' ','[   -   ]','REAL',4              , &
+                   & 'Richardson number in station (zeta point)                     ', &
+                   & 2         ,nostatgl  ,kmaxout   ,0         ,0         ,0      , &
+                   & lundia    ,gdp       )
+             endif
           endif
           if (selhis(19:19)=='Y') then
              call addelm(nefiswrthis,'ZRHO',' ','[ KG/M3 ]','REAL',4              , &
                 & 'Density per layer in station (zeta point)                     ', &
-                & 2         ,nostatgl  ,kmax      ,0         ,0         ,0      , &
+                & 2         ,nostatgl  ,kmaxout   ,0         ,0         ,0      , &
                 & lundia    ,gdp       )
           endif
           if (zmodel) then
              if (selhis(2:2)=='Y') then
                 call addelm(nefiswrthis,'HYDPRES',' ','[  N/M2 ]','REAL',4              , &
                    & 'Non-hydrostatic pressure at station (zeta point)              ', &
-                   & 2         ,nostatgl  ,kmax      ,0         ,0         ,0      , &
+                   & 2         ,nostatgl  ,kmaxout   ,0         ,0         ,0      , &
                    & lundia    ,gdp       )
              endif
           endif
@@ -479,8 +512,17 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
              rsbuff2 = real(zcuru, sp)
           endif  
           if (inode == master) then
-             ierror = putelt(fds, grnam3, 'ZCURU', uindex, 1, rsbuff2)
-             deallocate( rsbuff2 )
+             if (kmaxout /= kmax) then
+                allocate(rsbuff2b(1:nostatgl, 1:kmaxout))
+                do i=1,kmaxout
+                   rsbuff2b(:,i) = rsbuff2(:,shlay(i))
+                enddo
+                ierror = putelt(fds, grnam3, 'ZCURU', uindex, 1, rsbuff2b)
+                deallocate(rsbuff2b)
+             else
+                ierror = putelt(fds, grnam3, 'ZCURU', uindex, 1, rsbuff2)
+             endif
+             deallocate(rsbuff2)
           endif
           if (ierror/=0) goto 999
           !
@@ -493,7 +535,16 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
              rsbuff2 = real(zcurv, sp)
           endif 
           if (inode == master) then
-             ierror = putelt(fds, grnam3, 'ZCURV', uindex, 1, rsbuff2)
+             if (kmaxout /= kmax) then
+                allocate(rsbuff2b(1:nostatgl, 1:kmaxout))
+                do i=1,kmaxout
+                   rsbuff2b(:,i) = rsbuff2(:,shlay(i))
+                enddo
+                ierror = putelt(fds, grnam3, 'ZCURV', uindex, 1, rsbuff2b)
+                deallocate(rsbuff2b)
+             else
+                ierror = putelt(fds, grnam3, 'ZCURV', uindex, 1, rsbuff2)
+             endif
              deallocate( rsbuff2 )
           endif
           if (ierror/=0) goto 999
@@ -510,7 +561,16 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
              rsbuff2 = real(zcurw, sp)
           endif  
           if (inode == master) then
-             ierror = putelt(fds, grnam3, 'ZCURW', uindex, 1, rsbuff2)
+             if (kmaxout /= kmax) then
+                allocate(rsbuff2b(1:nostatgl, 1:kmaxout))
+                do i=1,kmaxout
+                   rsbuff2b(:,i) = rsbuff2(:,shlay(i))
+                enddo
+                ierror = putelt(fds, grnam3, 'ZCURW', uindex, 1, rsbuff2b)
+                deallocate(rsbuff2b)
+             else
+                ierror = putelt(fds, grnam3, 'ZCURW', uindex, 1, rsbuff2)
+             endif
              deallocate( rsbuff2 )
           endif
           if (ierror/=0) goto 999
@@ -526,7 +586,16 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
              rsbuff2 = real(zqxk, sp)
           endif 
           if (inode == master) then
-             ierror = putelt(fds, grnam3, 'ZQXK', uindex, 1, rsbuff2)
+             if (kmaxout /= kmax) then
+                allocate(rsbuff2b(1:nostatgl, 1:kmaxout))
+                do i=1,kmaxout
+                   rsbuff2b(:,i) = rsbuff2(:,shlay(i))
+                enddo
+                ierror = putelt(fds, grnam3, 'ZQXK', uindex, 1, rsbuff2b)
+                deallocate(rsbuff2b)
+             else
+                ierror = putelt(fds, grnam3, 'ZQXK', uindex, 1, rsbuff2)
+             endif
              deallocate( rsbuff2 )
           endif
           if (ierror/=0) goto 999
@@ -540,7 +609,16 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
              rsbuff2 = real(zqyk, sp)
           endif 
           if (inode == master) then
-             ierror = putelt(fds, grnam3, 'ZQYK', uindex, 1, rsbuff2)
+             if (kmaxout /= kmax) then
+                allocate(rsbuff2b(1:nostatgl, 1:kmaxout))
+                do i=1,kmaxout
+                   rsbuff2b(:,i) = rsbuff2(:,shlay(i))
+                enddo
+                ierror = putelt(fds, grnam3, 'ZQYK', uindex, 1, rsbuff2b)
+                deallocate(rsbuff2b)
+             else
+                ierror = putelt(fds, grnam3, 'ZQYK', uindex, 1, rsbuff2)
+             endif
              deallocate( rsbuff2 )
           endif
           if (ierror/=0) goto 999
@@ -557,7 +635,16 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
              rsbuff3 = real(gro, sp)
           endif
           if (inode == master) then
-             ierror = putelt(fds, grnam3, 'GRO', uindex, 1, rsbuff3)
+             if (kmaxout /= kmax) then
+                allocate(rsbuff3b(1:nostatgl, 1:kmaxout, 1:lstsci))
+                do i=1,kmaxout
+                   rsbuff3b(:,i,:) = rsbuff3(:,shlay(i),:)
+                enddo
+                ierror = putelt(fds, grnam3, 'GRO', uindex, 1, rsbuff3b)
+                deallocate(rsbuff3b)
+             else
+                ierror = putelt(fds, grnam3, 'GRO', uindex, 1, rsbuff3)
+             endif
              deallocate( rsbuff3 )
           endif
           if (ierror/=0) goto 999
@@ -574,7 +661,16 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
              rsbuff3 = real(ztur, sp)
           endif
           if (inode == master) then
-             ierror = putelt(fds, grnam3, 'ZTUR', uindex, 1, rsbuff3)
+             if (kmaxout /= kmax) then
+                allocate(rsbuff3b(1:nostatgl, 1:kmaxout, 1:ltur))
+                do i=1,kmaxout
+                   rsbuff3b(:,i,:) = rsbuff3(:,shlay(i),:)
+                enddo
+                ierror = putelt(fds, grnam3, 'ZTUR', uindex, 1, rsbuff3b)
+                deallocate(rsbuff3b)
+             else
+                ierror = putelt(fds, grnam3, 'ZTUR', uindex, 1, rsbuff3)
+             endif
              deallocate( rsbuff3 )
           endif
           if (ierror/=0) goto 999
@@ -622,7 +718,16 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
              rsbuff2 = real(zvicww, sp)
           endif
           if (inode == master) then
-             ierror = putelt(fds, grnam3, 'ZVICWW', uindex, 1, rsbuff2)
+             if (kmaxout /= kmax) then
+                allocate(rsbuff2b(1:nostatgl, 1:kmaxout))
+                do i=1,kmaxout
+                   rsbuff2b(:,i) = rsbuff2(:,shlay(i))
+                enddo
+                ierror = putelt(fds, grnam3, 'ZVICWW', uindex, 1, rsbuff2b)
+                deallocate(rsbuff2b)
+             else
+                ierror = putelt(fds, grnam3, 'ZVICWW', uindex, 1, rsbuff2)
+             endif
              deallocate( rsbuff2 )
           endif
           if (ierror/=0) goto 999
@@ -639,7 +744,16 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
              rsbuff2 = real(zdicww, sp)
           endif 
           if (inode == master) then
-             ierror = putelt(fds, grnam3, 'ZDICWW', uindex, 1, rsbuff2)
+             if (kmaxout /= kmax) then
+                allocate(rsbuff2b(1:nostatgl, 1:kmaxout))
+                do i=1,kmaxout
+                   rsbuff2b(:,i) = rsbuff2(:,shlay(i))
+                enddo
+                ierror = putelt(fds, grnam3, 'ZDICWW', uindex, 1, rsbuff2b)
+                deallocate(rsbuff2b)
+             else
+                ierror = putelt(fds, grnam3, 'ZDICWW', uindex, 1, rsbuff2)
+             endif
              deallocate( rsbuff2 )
           endif
           if (ierror/=0) goto 999
@@ -656,7 +770,16 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
              zrich = real(rsbuff2, sp)
           endif
           if (inode == master) then
-             ierror = putelt(fds, grnam3, 'ZRICH', uindex, 1, rsbuff2)
+             if (kmaxout /= kmax) then
+                allocate(rsbuff2b(1:nostatgl, 1:kmaxout))
+                do i=1,kmaxout
+                   rsbuff2b(:,i) = rsbuff2(:,shlay(i))
+                enddo
+                ierror = putelt(fds, grnam3, 'ZRICH', uindex, 1, rsbuff2b)
+                deallocate(rsbuff2b)
+             else
+                ierror = putelt(fds, grnam3, 'ZRICH', uindex, 1, rsbuff2)
+             endif
              deallocate( rsbuff2 )
           endif
           if (ierror/=0) goto 999
@@ -673,7 +796,16 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
              rsbuff2 = real(zrho, sp)
           endif
           if (inode == master) then
-             ierror = putelt(fds, grnam3, 'ZRHO', uindex, 1, rsbuff2)
+             if (kmaxout /= kmax) then
+                allocate(rsbuff2b(1:nostatgl, 1:kmaxout))
+                do i=1,kmaxout
+                   rsbuff2b(:,i) = rsbuff2(:,shlay(i))
+                enddo
+                ierror = putelt(fds, grnam3, 'ZRHO', uindex, 1, rsbuff2b)
+                deallocate(rsbuff2b)
+             else
+                ierror = putelt(fds, grnam3, 'ZRHO', uindex, 1, rsbuff2)
+             endif
              deallocate( rsbuff2 )
           endif
           if (ierror/=0) goto 999
@@ -690,7 +822,16 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
              rsbuff2 = real(hydprs, sp)
           endif 
           if (inode == master) then
-             ierror = putelt(fds, grnam3, 'HYDPRES', uindex, 1, rsbuff2)
+             if (kmaxout /= kmax) then
+                allocate(rsbuff2b(1:nostatgl, 1:kmaxout))
+                do i=1,kmaxout
+                   rsbuff2b(:,i) = rsbuff2(:,shlay(i))
+                enddo
+                ierror = putelt(fds, grnam3, 'HYDPRES', uindex, 1, rsbuff2b)
+                deallocate(rsbuff2b)
+             else
+                ierror = putelt(fds, grnam3, 'HYDPRES', uindex, 1, rsbuff2)
+             endif
              deallocate( rsbuff2 )
           endif
           if (ierror/=0) goto 999

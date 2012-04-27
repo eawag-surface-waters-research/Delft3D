@@ -59,7 +59,6 @@ subroutine wrwavh(lundia    ,error     ,trifil    ,ithisc    , &
     integer                    , intent(in)  :: ithisc
     integer                                  :: ithisi !  Description and declaration in inttim.igs
     integer                                  :: itstrt !  Description and declaration in inttim.igs
-    integer                                  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                  :: lundia !  Description and declaration in inout.igs
     integer                                  :: nostat !  Description and declaration in dimens.igs
     integer                                  :: ntruv  !  Description and declaration in dimens.igs
