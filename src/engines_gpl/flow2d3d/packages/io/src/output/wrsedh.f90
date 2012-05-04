@@ -104,13 +104,15 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
     integer                         :: i           ! Help var. 
     integer                         :: ierror      ! Local errorflag for NEFIS files 
     integer                         :: k
-    integer                         :: kmaxout   ! number of layers to be written to the (history) output files
+    integer                         :: kmaxout       ! number of layers to be written to the (history) output files, 0 (possibly) included
+    integer                         :: kmaxout_restr ! number of layers to be written to the (history) output files, 0 excluded
     integer                         :: l
     integer                         :: lastcl
     integer                         :: n
     integer, dimension(ntruv)       :: norig
     integer, dimension(1)           :: idummy      ! Help array to read/write Nefis files
     integer, dimension(3,5)         :: uindex
+    integer, dimension(:), allocatable :: shlay_restr ! work array
     integer, external               :: getelt
     integer, external               :: putelt
     integer, external               :: inqmxi
@@ -145,6 +147,15 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
     moroutput           => gdp%gdmorpar%moroutput
     !
     kmaxout = size(shlay)
+    if (shlay(1) == 0) then
+       kmaxout_restr = kmaxout - 1
+       allocate(shlay_restr(kmaxout_restr))
+       shlay_restr   = shlay(2:)
+    else
+       kmaxout_restr = kmaxout
+       allocate(shlay_restr(kmaxout_restr))
+       shlay_restr   = shlay
+    endif
     filnam  = trifil(1:3) // 'h' // trifil(5:)
     errmsg  = ' '
     !
@@ -187,20 +198,13 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
        !
        if (nostat > 0) then
          if (lsed > 0) then
-           if (kmaxout == kmax) then
-              call addelm(nefiswrsedh,'ZWS',' ','[  M/S  ]','REAL',4              , &
-                & 'Settling velocity in station                                  ', &
-                &  3         ,nostat    ,kmax + 1  ,lsed      ,0         ,0       , &
-                &  lundia    ,gdp       )
-           else
-              call addelm(nefiswrsedh,'ZWS',' ','[  M/S  ]','REAL',4              , &
-                & 'Settling velocity in station                                  ', &
-                &  3         ,nostat    ,kmaxout   ,lsed      ,0         ,0       , &
-                &  lundia    ,gdp       )
-           endif
+           call addelm(nefiswrsedh,'ZWS',' ','[  M/S  ]','REAL',4              , &
+             & 'Settling velocity in station                                  ', &
+             &  3         ,nostat    ,kmaxout   ,lsed      ,0         ,0       , &
+             &  lundia    ,gdp       )
            call addelm(nefiswrsedh,'ZRSDEQ',' ','[ KG/M3 ]','REAL',4           , &
              & 'Equilibrium concentration of sediment at station              ', &
-             &  3         ,nostat    ,kmaxout   ,lsed      ,0         ,0       , &
+             &  3         ,nostat    ,kmaxout_restr,lsed      ,0         ,0       , &
              &  lundia    ,gdp       )
          endif
          call addelm(nefiswrsedh,'ZBDSED',' ','[ KG/M2 ]','REAL',4           , &
@@ -348,57 +352,31 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
           !
           ! group 5: element 'ZWS'
           !
-          if (kmaxout == kmax) then
-             call sbuff_checksize(nostat*(kmax+1)*lsed)
-             i = 0
-             do l = 1, lsed
-                do k = 0, kmax
-                   do n = 1, nostat
-                      i        = i+1
-                      sbuff(i) = real(zws(n, k, l),sp)
-                   enddo
+          call sbuff_checksize(nostat*(kmaxout)*lsed)
+          i = 0
+          do l = 1, lsed
+             do k = 1, kmaxout
+                do n = 1, nostat
+                   i        = i+1
+                   sbuff(i) = real(zws(n, shlay(k), l),sp)
                 enddo
              enddo
-          else
-             call sbuff_checksize(nostat*(kmaxout)*lsed)
-             i = 0
-             do l = 1, lsed
-                do k = 1, kmaxout
-                   do n = 1, nostat
-                      i        = i+1
-                      sbuff(i) = real(zws(n, shlay(k), l),sp)
-                   enddo
-                enddo
-             enddo
-          endif
+          enddo
           ierror = putelt(fds, grnam5, 'ZWS', uindex, 1, sbuff)
           if (ierror/= 0) goto 9999
           !
           ! group 5: element 'ZRSDEQ'
           !
-          if (kmaxout == kmax) then
-             call sbuff_checksize(nostat*kmax*lsed)
-             i = 0
-             do l = 1, lsed
-                do k = 1, kmax
-                   do n = 1, nostat
-                      i        = i+1
-                      sbuff(i) = real(zrsdeq(n, k, l),sp)
-                   enddo
+          call sbuff_checksize(nostat*kmaxout_restr*lsed)
+          i = 0
+          do l = 1, lsed
+             do k = 1, kmaxout_restr
+                do n = 1, nostat
+                   i        = i+1
+                   sbuff(i) = real(zrsdeq(n, shlay_restr(k), l),sp)
                 enddo
              enddo
-          else
-             call sbuff_checksize(nostat*kmaxout*lsed)
-             i = 0
-             do l = 1, lsed
-                do k = 1, kmaxout
-                   do n = 1, nostat
-                      i        = i+1
-                      sbuff(i) = real(zrsdeq(n, shlay(k), l),sp)
-                   enddo
-                enddo
-             enddo
-          endif
+          enddo
           ierror = putelt(fds, grnam5, 'ZRSDEQ', uindex, 1, sbuff)
           if (ierror/= 0) goto 9999
        endif
@@ -647,4 +625,5 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
        call prterr(lundia, 'P004', errmsg)
        error = .true.
     endif
+    deallocate(shlay_restr)
 end subroutine wrsedh

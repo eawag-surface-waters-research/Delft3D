@@ -29,8 +29,8 @@ static char modname_version_full  [] = {modname_company", "modname_program" Vers
 /* Needed for the output file headers */
 static char com_file_version       [] = {"3.54.11"};
 static char dro_file_version       [] = {"3.20.01"};
-static char his_file_version       [] = {"3.52.09"};
-static char map_file_version       [] = {"3.54.28"};
+static char his_file_version       [] = {"3.52.10"};
+static char map_file_version       [] = {"3.54.29"};
 
 #if HAVE_CONFIG_H
 #   include "config.h"

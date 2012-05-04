@@ -61,21 +61,24 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer       , dimension(:, :) , pointer :: mnit
-    integer       , dimension(:, :) , pointer :: mnstat
-    character(20) , dimension(:)    , pointer :: namst
-    character(20) , dimension(:)    , pointer :: namtra
-    logical                         , pointer :: first
-    integer                         , pointer :: celidt
-    integer       , dimension(:, :) , pointer :: elmdms
     type (nefiselement)             , pointer :: nefiselem
-    real(fp)      , dimension(:, :) , pointer :: xystat
     integer                         , pointer :: mfg
     integer                         , pointer :: nfg
+    integer       , dimension(:, :) , pointer :: mnit
+    integer       , dimension(:, :) , pointer :: mnstat
+    integer                         , pointer :: celidt
+    integer       , dimension(:, :) , pointer :: elmdms
+    integer       , dimension(:)    , pointer :: order_sta
+    integer       , dimension(:)    , pointer :: order_tra
+    integer       , dimension(:)    , pointer :: shlay
+    real(fp)      , dimension(:, :) , pointer :: xystat
+    logical                         , pointer :: first
+    character(20) , dimension(:)    , pointer :: namst
+    character(20) , dimension(:)    , pointer :: namtra
 !
 ! Local parameters
 !
-    integer, parameter :: nelmx = 28
+    integer, parameter :: nelmx = 29
 !
 ! Global variables
 !
@@ -120,7 +123,8 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
 !
     integer                                           :: fds
     integer                                           :: ierror     ! Local errorflag for NEFIS files 
-    integer                                           :: k      
+    integer                                           :: k
+    integer                                           :: kmaxout
     integer                                           :: l      
     integer                                           :: lhlp        ! Help var. for teller constituents and turbulent quantities 
     integer                                           :: lsedbl      ! Number of bed load fractions: lsedtot-lsed
@@ -154,9 +158,6 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
     character(256)                                    :: filnam      ! Help var. for FLOW file name 
     character(256)                                    :: errmsg      ! Character var. containing the errormessage to be written to file. The message depends on the error. 
     character(64)  , dimension(nelmx)                 :: elmdes      ! Array with element description 
-!
-    integer        , dimension(:)       , pointer     :: order_sta
-    integer        , dimension(:)       , pointer     :: order_tra
     integer                                           :: nostatgl  ! global number of stations (i.e. original number
                                                                    ! excluding duplicate stations located in the halo regions)
     integer                                           :: nostatto  ! total number of stations (including "duplicate" stations located in halo regions)
@@ -177,19 +178,20 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
 !
 !! executable statements -------------------------------------------------------
 !
-    mnit       => gdp%gdstations%mnit
-    mnstat     => gdp%gdstations%mnstat
-    namst      => gdp%gdstations%namst
-    namtra     => gdp%gdstations%namtra
     nefiselem  => gdp%nefisio%nefiselem(nefiswrihis)
-    first      => nefiselem%first
-    celidt     => nefiselem%celidt
-    elmdms     => nefiselem%elmdms
-    xystat     => gdp%gdstations%xystat
-    order_sta  => gdp%gdparall%order_sta
-    order_tra  => gdp%gdparall%order_tra
     mfg        => gdp%gdparall%mfg
     nfg        => gdp%gdparall%nfg
+    mnit       => gdp%gdstations%mnit
+    mnstat     => gdp%gdstations%mnstat
+    celidt     => nefiselem%celidt
+    elmdms     => nefiselem%elmdms
+    order_sta  => gdp%gdparall%order_sta
+    order_tra  => gdp%gdparall%order_tra
+    shlay      => gdp%gdpostpr%shlay
+    xystat     => gdp%gdstations%xystat
+    first      => nefiselem%first
+    namst      => gdp%gdstations%namst
+    namtra     => gdp%gdstations%namtra
     !
     ! LSTSCI var. name in HIS FILE must remain LSTCI for GPP to work
     ! properly
@@ -197,9 +199,10 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
     !
     ! Initialize local variables
     !
-    ierror = 0
-    celidt = 1
-    lsedbl = lsedtot - lsed
+    kmaxout = size(shlay)
+    ierror  = 0
+    celidt  = 1
+    lsedbl  = lsedtot - lsed
     !
     filnam = trifil(1:3) // 'h' // trifil(5:)
     errmsg = ' '
@@ -341,6 +344,9 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
        call addelm(nefiswrihis, 'LAYER_MODEL', ' ', '[   -   ]', 'CHARACTER', 16, &
           & 'Sigma-model or Z-model                                        ', &
           & 1         ,1         ,0         ,0         ,0         ,0         , lundia, gdp)
+       call addelm(nefiswrihis, 'OUTPUT_LAYERS', ' ', '[   -   ]', 'INTEGER', 4, &
+          & 'User selected output layers                                   ', &
+          & 1         ,kmaxout   ,0         ,0         ,0         ,0         , lundia, gdp)
        call defnewgrp(nefiswrihis ,filnam    ,grnam2   ,gdp)
        !
        ! Get start celidt for writing
@@ -735,6 +741,13 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
        ierror = putelt(fds, grnam2, 'LAYER_MODEL', uindex, 1, cdum16)
        if (ierror/=0) goto 999
     endif ! inode==master
+    if (inode == master) then
+       !
+       ! group 2, element 'OUTPUT_LAYERS'
+       !
+       ierror = putelt(fds, grnam2, 'OUTPUT_LAYERS', uindex, 1, shlay)
+    endif
+    if (ierror/=0) goto 999
     !
     if (inode == master) ierror = clsnef(fds)
     !

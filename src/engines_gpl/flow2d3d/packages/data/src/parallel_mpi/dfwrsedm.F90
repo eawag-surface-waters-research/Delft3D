@@ -274,21 +274,14 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
        !
        ! map-sed-series
        !
-       if (kmaxout == kmax) then
-          call addelm(nefiswrsedm,'WS',' ','[  M/S  ]','REAL',4             , &
-             & 'Settling velocity per layer'                                , &
-             & 4         ,nmaxgl    ,mmaxgl    ,kmax+1    ,lsed      ,0     , &
-             & lundia    ,gdp       )
-       else
-          call addelm(nefiswrsedm,'WS',' ','[  M/S  ]','REAL',4             , &
-             & 'Settling velocity per layer'                                , &
-             & 4         ,nmaxgl    ,mmaxgl    ,kmaxout   ,lsed      ,0     , &
-             & lundia    ,gdp       )
-       endif
+       call addelm(nefiswrsedm,'WS',' ','[  M/S  ]','REAL',4             , &
+          & 'Settling velocity per layer'                                , &
+          & 4         ,nmaxgl    ,mmaxgl    ,kmaxout   ,lsed      ,0     , &
+          & lundia    ,gdp       )
        if (kmax==1) then
           call addelm(nefiswrsedm,'RSEDEQ',' ','[ KG/M3 ]','REAL',4         , &
              & 'Equilibrium concentration of sediment per layer'            , &
-             & 4         ,nmaxgl    ,mmaxgl    ,kmaxout   ,lsed      ,0     , &
+             & 4         ,nmaxgl    ,mmaxgl    ,kmax      ,lsed      ,0     , &
              & lundia    ,gdp       )
        endif
        if (moroutput%uuuvvv) then
@@ -593,15 +586,10 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
     !
     ! group 5: element 'WS'
     !
-    if (kmaxout == kmax) then
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax+1, 1:lsed) )
-       rbuff4(:, :, 1:kmax+1, 1:lsed) = ws(:, :, 0:kmax, 1:lsed)
-    else
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout, 1:lsed) )
-       do k=1,kmaxout
-          rbuff4(:, :, k, 1:lsed) = ws(:, :, smlay(k), 1:lsed)
-       enddo
-    endif
+    allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout, 1:lsed) )
+    do k=1,kmaxout
+       rbuff4(:, :, k, 1:lsed) = ws(:, :, smlay(k), 1:lsed)
+    enddo
     call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
     deallocate(rbuff4)
     if (inode == master) then
@@ -612,10 +600,11 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
     if (kmax==1) then
        !
        ! group 5: element 'RSEDEQ'
+       ! kmax=1: don't use kmaxout/smlay
        !
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout, lsed) )
-       do k=1,kmaxout
-          rbuff4(:, :, k, 1:lsed) = rsedeq(:, :, smlay(k), 1:lsed)
+       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lsed) )
+       do k=1,kmax
+          rbuff4(:, :, k, 1:lsed) = rsedeq(:, :, k, 1:lsed)
        enddo
        call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
        deallocate(rbuff4)

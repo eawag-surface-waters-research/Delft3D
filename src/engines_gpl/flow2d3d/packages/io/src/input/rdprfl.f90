@@ -466,9 +466,9 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     !
     ! SMlay
     !
-                  allocate (gdp%gdpostpr%smlay(kmax), stat = istat)
-    if (istat==0) allocate (gdp%gdpostpr%shlay(kmax), stat = istat)
-    if (istat==0) allocate (ival(kmax), stat = istat)
+                  allocate (gdp%gdpostpr%smlay(kmax+1), stat = istat)
+    if (istat==0) allocate (gdp%gdpostpr%shlay(kmax+1), stat = istat)
+    if (istat==0) allocate (ival(kmax+1), stat = istat)
     !
     if (istat /= 0) then
        call prterr(lundia, 'U021', 'RDPRFL: memory alloc error')
@@ -477,14 +477,14 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     smlay => gdp%gdpostpr%smlay
     shlay => gdp%gdpostpr%shlay
     ival = -999
-    call prop_get(gdp%mdfile_ptr, '*', 'SMlay', ival, kmax)
+    call prop_get(gdp%mdfile_ptr, '*', 'SMlay', ival, kmax+1)
     if (ival(1) == -999) then
        !
        ! No layers specified for map-output
-       ! Default: all layers to output
+       ! Default: all layers to output, including zero: 0, 1, 2, ..., kmax
        !
-       do i = 1, kmax
-          smlay(i) = i
+       do i = 1, kmax+1
+          smlay(i) = i-1
        enddo
     else
        !
@@ -493,13 +493,13 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
        !   Search for the first i for which ival(i) == -999. Then kmaxout = i-1
        ! On the flow: check that the specified layers are valid
        ! 
-       kmaxout = kmax
-       do i = 1, kmax
+       kmaxout = kmax + 1
+       do i = 1, kmax+1
           if (ival(i) == -999) then
              kmaxout = i-1
              exit
           endif
-          if (ival(i)<1 .or. ival(i)>kmax) then
+          if (ival(i)<0 .or. ival(i)>kmax) then
              write (message,'(a,i0,a)') "Invalid layer specification '", ival(i), "' in keyword SMlay"
              call prterr(lundia, 'U021', trim(message))
              call d3stop(1, gdp)
@@ -508,7 +508,7 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
        !
        ! Adapt the size of array smlay in case kmaxout<kmax
        !
-       if (kmaxout /= kmax) then
+       if (kmaxout /= kmax+1) then
           deallocate (gdp%gdpostpr%smlay, stat = istat)
           allocate (gdp%gdpostpr%smlay(kmaxout), stat = istat)
           if (istat /= 0) then
@@ -521,7 +521,7 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
        ! Fill smlay with the values of ival in increasing order
        !
        icount = 1
-       do i = 1, kmax
+       do i = 0, kmax
           do j = 1, kmaxout
              if (ival(j) == i) then
                 smlay(icount) = i
@@ -537,14 +537,14 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
     ! SHlay
     !
     ival = -999
-    call prop_get(gdp%mdfile_ptr, '*', 'SHlay', ival, kmax)
+    call prop_get(gdp%mdfile_ptr, '*', 'SHlay', ival, kmax+1)
     if (ival(1) == -999) then
        !
        ! No layers specified for his-output
-       ! Default: all layers to output
+       ! Default: all layers to output, including zero: 0, 1, 2, ..., kmax
        !
-       do i = 1, kmax
-          shlay(i) = i
+       do i = 1, kmax+1
+          shlay(i) = i-1
        enddo
     else
        !
@@ -553,13 +553,13 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
        !   Search for the first i for which ival(i) == -999. Then kmaxout = i-1
        ! On the flow: check that the specified layers are valid
        ! 
-       kmaxout = kmax
-       do i = 1, kmax
+       kmaxout = kmax + 1
+       do i = 1, kmax+1
           if (ival(i) == -999) then
              kmaxout = i-1
              exit
           endif
-          if (ival(i)<1 .or. ival(i)>kmax) then
+          if (ival(i)<0 .or. ival(i)>kmax) then
              write (message,'(a,i0,a)') "Invalid layer specification '", ival(i), "' in keyword SHlay"
              call prterr(lundia, 'U021', trim(message))
              call d3stop(1, gdp)
@@ -581,7 +581,7 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
        ! Fill shlay with the values of ival in increasing order
        !
        icount = 1
-       do i = 1, kmax
+       do i = 0, kmax
           do j = 1, kmaxout
              if (ival(j) == i) then
                 shlay(icount) = i

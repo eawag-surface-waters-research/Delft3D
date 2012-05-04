@@ -60,13 +60,10 @@ subroutine wrimap(lundia      ,error     ,trifil    ,selmap    ,simdat    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    type (nefiselement)             , pointer :: nefiselem
     integer       , dimension(:, :) , pointer :: mnit
     integer       , dimension(:, :) , pointer :: mnstat
-    character(20) , dimension(:)    , pointer :: namst
-    character(20) , dimension(:)    , pointer :: namtra
-    logical                         , pointer :: first
     integer                         , pointer :: celidt
-    type (nefiselement)             , pointer :: nefiselem
     integer                         , pointer :: mfg
     integer                         , pointer :: mlg
     integer                         , pointer :: nfg
@@ -75,10 +72,14 @@ subroutine wrimap(lundia      ,error     ,trifil    ,selmap    ,simdat    , &
     integer                         , pointer :: mmaxgl
     integer       , dimension(:)    , pointer :: order_sta
     integer       , dimension(:)    , pointer :: order_tra
+    integer       , dimension(:)    , pointer :: smlay
+    logical                         , pointer :: first
+    character(20) , dimension(:)    , pointer :: namst
+    character(20) , dimension(:)    , pointer :: namtra
 !
 ! Local parameters
 !
-    integer, parameter :: nelmx = 46
+    integer, parameter :: nelmx = 47
 !
 ! Global variables
 !
@@ -147,6 +148,7 @@ subroutine wrimap(lundia      ,error     ,trifil    ,selmap    ,simdat    , &
     integer      , dimension(:,:)  , allocatable :: isbuff
     integer      , dimension(2)                  :: ival      ! Local array for writing ITDATE and time (:= 00:00:00)
     integer                                      :: k
+    integer                                      :: kmaxout
     integer                                      :: l
     integer                                      :: len       ! length of field of current subdomain
     integer                                      :: lengl     ! length of field containing collected data
@@ -189,15 +191,16 @@ subroutine wrimap(lundia      ,error     ,trifil    ,selmap    ,simdat    , &
 !
 !! executable statements -------------------------------------------------------
 !
+    nefiselem  => gdp%nefisio%nefiselem(nefiswrimap)
     mnit       => gdp%gdstations%mnit
     mnstat     => gdp%gdstations%mnstat
-    namst      => gdp%gdstations%namst
-    namtra     => gdp%gdstations%namtra
-    nefiselem  => gdp%nefisio%nefiselem(nefiswrimap)
-    first      => nefiselem%first
     celidt     => nefiselem%celidt
     order_sta  => gdp%gdparall%order_sta
     order_tra  => gdp%gdparall%order_tra
+    smlay      => gdp%gdpostpr%smlay
+    first      => nefiselem%first
+    namst      => gdp%gdstations%namst
+    namtra     => gdp%gdstations%namtra
     !
     ! LSTSCI var. name in MAP FILE must remain LSTCI for GPP to work
     ! properly
@@ -205,10 +208,11 @@ subroutine wrimap(lundia      ,error     ,trifil    ,selmap    ,simdat    , &
     !
     ! Initialize local variables
     !
-    error  = .false.
-    filnam = trifil(1:3) // 'm' // trifil(5:)
-    errmsg = ' '
-    lsedbl = lsedtot - lsed
+    kmaxout = size(smlay)
+    error   = .false.
+    filnam  = trifil(1:3) // 'm' // trifil(5:)
+    errmsg  = ' '
+    lsedbl  = lsedtot - lsed
     !
     call dfsync(gdp)
     mfg    => gdp%gdparall%mfg
@@ -459,6 +463,10 @@ subroutine wrimap(lundia      ,error     ,trifil    ,selmap    ,simdat    , &
           & 'Partition                                                     ', &
           & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
           & lundia    ,gdp       )
+       call addelm(nefiswrimap,'OUTPUT_LAYERS',' ','[   -   ]','INTEGER',4, &
+          & 'User selected output layers                                   ', &
+          & 1         ,kmaxout   ,0         ,0         ,0         ,0       , &
+          & lundia    ,gdp)
        call defnewgrp(nefiswrimap ,filnam    ,grnam2   ,gdp)
        !
        ! Get start celidt for writing
@@ -1071,6 +1079,13 @@ subroutine wrimap(lundia      ,error     ,trifil    ,selmap    ,simdat    , &
        enddo
        ierror = putelt(fds, grnam2, 'PPARTITION', uindex, 1, isbuff)
        deallocate( isbuff )
+       if (ierror/=0) goto 999
+    endif
+    !
+    ! group 2, element 'OUTPUT_LAYERS'
+    !
+    if (inode == master) then
+       ierror = putelt(fds, grnam2, 'OUTPUT_LAYERS', uindex, 1, smlay)
        if (ierror/=0) goto 999
     endif
     !

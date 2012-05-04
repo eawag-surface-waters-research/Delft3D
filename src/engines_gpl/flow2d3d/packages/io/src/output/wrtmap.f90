@@ -176,18 +176,19 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
 ! Local variables
 !
     integer                                       :: fds
-    integer                                       :: i            ! Help var.
-    integer                                       :: ierror       ! Local error flag for NEFIS files
+    integer                                       :: i             ! Help var.
+    integer                                       :: ierror        ! Local error flag for NEFIS files
     integer                                       :: istat
-    integer                                       :: k            ! Help var.
+    integer                                       :: k             ! Help var.
     integer                                       :: km
-    integer                                       :: kmaxout      ! number of layers to be written to the (history) output files
-    integer                                       :: l            ! Help var.
+    integer                                       :: kmaxout       ! number of layers to be written to the (history) output files, 0 (possibly) included
+    integer                                       :: kmaxout_restr ! number of layers to be written to the (history) output files, 0 excluded
+    integer                                       :: l             ! Help var.
     integer                                       :: lastcl
-    integer                                       :: m            ! Help var.
-    integer                                       :: n            ! Help var.
+    integer                                       :: m             ! Help var.
+    integer                                       :: n             ! Help var.
     integer                                       :: nm
-    integer    , dimension(1)                     :: idummy       ! Help array to read/write Nefis files
+    integer    , dimension(1)                     :: idummy        ! Help array to read/write Nefis files
     integer    , dimension(3,5)                   :: uindex
     integer                        , external     :: getelt
     integer                        , external     :: putelt
@@ -195,25 +196,26 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     integer                        , external     :: clsnef
     integer                        , external     :: open_datdef
     integer                        , external     :: neferr
-    integer    , dimension(4,0:nproc-1)           :: iarrc        ! array containing collected grid indices 
-    integer                                       :: lenlo        ! length of field of current subdomain
-    integer                                       :: lengl        ! length of field containing collected data
-    integer    , dimension(0:nproc-1)             :: mf           ! first index w.r.t. global grid in x-direction
-    integer    , dimension(0:nproc-1)             :: ml           ! last index w.r.t. global grid in x-direction
-    integer    , dimension(0:nproc-1)             :: nf           ! first index w.r.t. global grid in y-direction
-    integer    , dimension(0:nproc-1)             :: nl           ! last index w.r.t. global grid in y-direction
+    integer    , dimension(4,0:nproc-1)           :: iarrc         ! array containing collected grid indices 
+    integer                                       :: lenlo         ! length of field of current subdomain
+    integer                                       :: lengl         ! length of field containing collected data
+    integer    , dimension(0:nproc-1)             :: mf            ! first index w.r.t. global grid in x-direction
+    integer    , dimension(0:nproc-1)             :: ml            ! last index w.r.t. global grid in x-direction
+    integer    , dimension(0:nproc-1)             :: nf            ! first index w.r.t. global grid in y-direction
+    integer    , dimension(0:nproc-1)             :: nl            ! last index w.r.t. global grid in y-direction
     integer    , dimension(:,:)    , allocatable  :: ibuff2
+    integer    , dimension(:)      , allocatable  :: smlay_restr   ! copy of shlay, excluding layer zero
     real(fp)   , dimension(:,:)    , allocatable  :: rbuff2
     real(fp)   , dimension(:,:,:)  , allocatable  :: rbuff3
     real(fp)   , dimension(:,:,:,:), allocatable  :: rbuff4
-    real(fp)   , dimension(:,:,:)  , allocatable  :: zkt          ! Vertical coordinates of layering interfaces
-    real(sp)   , dimension(:,:,:)  , allocatable  :: rsbuff3      ! work array
+    real(fp)   , dimension(:,:,:)  , allocatable  :: zkt           ! Vertical coordinates of layering interfaces
+    real(sp)   , dimension(:,:,:)  , allocatable  :: rsbuff3       ! work array
     character(10)                                 :: runit
-    character(16)                                 :: grnam1       ! Data-group name defined for the NEFIS-files group 1
-    character(16)                                 :: grnam3       ! Data-group name defined for the NEFIS-files group 3
+    character(16)                                 :: grnam1        ! Data-group name defined for the NEFIS-files group 1
+    character(16)                                 :: grnam3        ! Data-group name defined for the NEFIS-files group 3
     character(64)                                 :: rdesc
-    character(256)                                :: filnam       ! Help var. for FLOW file name
-    character(6)                                  :: errmsg       ! Character var. containing the error message to be written to file. The message depend on the error.
+    character(256)                                :: filnam        ! Help var. for FLOW file name
+    character(6)                                  :: errmsg        ! Character var. containing the error message to be written to file. The message depend on the error.
 !
 ! Data statements
 !
@@ -262,6 +264,15 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! Initialize local variables
     !
     kmaxout = size(smlay)
+    if (smlay(1) == 0) then
+       kmaxout_restr = kmaxout - 1
+       allocate(smlay_restr(kmaxout_restr))
+       smlay_restr   = smlay(2:)
+    else
+       kmaxout_restr = kmaxout
+       allocate(smlay_restr(kmaxout_restr))
+       smlay_restr   = smlay
+    endif
     filnam  = trifil(1:3) // 'm' // trifil(5:)
     errmsg  = ' '
     !
@@ -302,70 +313,56 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        if (index(selmap(2:3), 'Y') > 0) then
           call addelm(nefiswrtmap,'U1',' ','[  M/S  ]','REAL',4              , &
              & 'U-velocity per layer in U-point ('//trim(velt)//')', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
+             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,0         ,0      , &
              & lundia    ,gdp       )
           call addelm(nefiswrtmap,'V1',' ','[  M/S  ]','REAL',4              , &
              & 'V-velocity per layer in V-point ('//trim(velt)//')', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
+             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,0         ,0      , &
              & lundia    ,gdp       )
        endif
        if (selmap(4:4) == 'Y') then
-          if (kmaxout == kmax) then
-             call addelm(nefiswrtmap,'W',' ','[  M/S  ]','REAL',4               , &
-                & 'W-omega per layer in zeta point                             ', &
-                & 3         ,nmaxgl    ,mmaxgl    ,kmax + 1  ,0         ,0      , &
-                & lundia    ,gdp       )
-          else
-             call addelm(nefiswrtmap,'W',' ','[  M/S  ]','REAL',4               , &
-                & 'W-omega per layer in zeta point                             ', &
-                & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
-                & lundia    ,gdp       )
-          endif
+          call addelm(nefiswrtmap,'W',' ','[  M/S  ]','REAL',4               , &
+             & 'W-omega per layer in zeta point                             ', &
+             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
+             & lundia    ,gdp       )
        endif
        if (selmap(5:5) == 'Y') then
           call addelm(nefiswrtmap,'WPHY',' ','[  M/S  ]','REAL',4            , &
              & 'W-velocity per layer in zeta point                          ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
+             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,0         ,0      , &
              & lundia    ,gdp       )
        endif
        if (index(selmap(6:13), 'Y') /= 0) then
           call addelm(nefiswrtmap,'R1',' ','[   -   ]','REAL',4              , &
              & 'Concentrations per layer in zeta point                      ', &
-             & 4         ,nmaxgl    ,mmaxgl    ,kmaxout   ,lstsci    ,0      , &
+             & 4         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,lstsci    ,0      , &
              & lundia    ,gdp       )
        endif
        if (flwoutput%difuflux) then
           call addelm(nefiswrtmap,'R1FLX_UU',' ','[   -   ]','REAL',4        , &
              & 'Constituent flux in u-direction (u point)                   ', &
-             & 4         ,nmaxgl    ,mmaxgl    ,kmaxout   ,lstsci    ,0      , &
+             & 4         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,lstsci    ,0      , &
              & lundia    ,gdp       )
           call addelm(nefiswrtmap,'R1FLX_VV',' ','[   -   ]','REAL',4        , &
              & 'Constituent flux in v-direction (v point)                   ', &
-             & 4         ,nmaxgl    ,mmaxgl    ,kmaxout   ,lstsci    ,0      , &
+             & 4         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,lstsci    ,0      , &
              & lundia    ,gdp       )
        endif
        if (flwoutput%cumdifuflux) then
           call addelm(nefiswrtmap,'R1FLX_UUC',' ','[   -   ]','REAL',4       , &
              & 'Cumulative constituent flux in u-direction (u point)        ', &
-             & 4         ,nmaxgl    ,mmaxgl    ,kmaxout   ,lstsci    ,0      , &
+             & 4         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,lstsci    ,0      , &
              & lundia    ,gdp       )
           call addelm(nefiswrtmap,'R1FLX_VVC',' ','[   -   ]','REAL',4       , &
              & 'Cumulative constituent flux in v-direction (v point)        ', &
-             & 4         ,nmaxgl    ,mmaxgl    ,kmaxout   ,lstsci    ,0      , &
+             & 4         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,lstsci    ,0      , &
              & lundia    ,gdp       )
        endif
        if (index(selmap(14:15),'Y') /= 0) then
-          if (kmaxout == kmax) then
-             call addelm(nefiswrtmap,'RTUR1',' ','[   -   ]','REAL',4           , &
-                & 'Turbulent quantity per layer in zeta point                  ', &
-                & 4         ,nmaxgl    ,mmaxgl    ,kmax + 1  ,ltur      ,0      , &
-                & lundia    ,gdp       )
-          else
-             call addelm(nefiswrtmap,'RTUR1',' ','[   -   ]','REAL',4           , &
-                & 'Turbulent quantity per layer in zeta point                  ', &
-                & 4         ,nmaxgl    ,mmaxgl    ,kmaxout   ,ltur      ,0      , &
-                & lundia    ,gdp       )
-          endif
+          call addelm(nefiswrtmap,'RTUR1',' ','[   -   ]','REAL',4           , &
+             & 'Turbulent quantity per layer in zeta point                  ', &
+             & 4         ,nmaxgl    ,mmaxgl    ,kmaxout   ,ltur      ,0      , &
+             & lundia    ,gdp       )
        endif
        if (index(selmap(16:17), 'Y') > 0) then
           call addelm(nefiswrtmap,'TAUKSI',' ','[  N/M2 ]','REAL',4          , &
@@ -382,48 +379,27 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
              & lundia    ,gdp       )
        endif
        if (selmap(18:18) == 'Y') then
-          if (kmaxout == kmax) then
-             call addelm(nefiswrtmap,'VICWW',' ','[  M2/S ]','REAL',4           , &
-                & 'Vertical eddy viscosity-3D in zeta point                    ', &
-                & 3         ,nmaxgl    ,mmaxgl    ,kmax + 1  ,0         ,0      , &
-                & lundia    ,gdp       )
-          else
-             call addelm(nefiswrtmap,'VICWW',' ','[  M2/S ]','REAL',4           , &
-                & 'Vertical eddy viscosity-3D in zeta point                    ', &
-                & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
-                & lundia    ,gdp       )
-          endif
+          call addelm(nefiswrtmap,'VICWW',' ','[  M2/S ]','REAL',4           , &
+             & 'Vertical eddy viscosity-3D in zeta point                    ', &
+             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
+             & lundia    ,gdp       )
        endif
        if (selmap(19:19) == 'Y') then
-          if (kmaxout == kmax) then
-             call addelm(nefiswrtmap,'DICWW',' ','[  M2/S ]','REAL',4           , &
-                & 'Vertical eddy diffusivity-3D in zeta point                  ', &
-                & 3         ,nmaxgl    ,mmaxgl    ,kmax + 1  ,0         ,0      , &
-                & lundia    ,gdp       )
-          else
-             call addelm(nefiswrtmap,'DICWW',' ','[  M2/S ]','REAL',4           , &
-                & 'Vertical eddy diffusivity-3D in zeta point                  ', &
-                & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
-                & lundia    ,gdp       )
-          endif
+          call addelm(nefiswrtmap,'DICWW',' ','[  M2/S ]','REAL',4           , &
+             & 'Vertical eddy diffusivity-3D in zeta point                  ', &
+             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
+             & lundia    ,gdp       )
        endif
        if (index(selmap(18:19),'Y') > 0) then
-          if (kmaxout == kmax) then
-             call addelm(nefiswrtmap,'RICH',' ','[   -   ]','REAL',4            , &
-                & 'Richardson number                                           ', &
-                & 3         ,nmaxgl    ,mmaxgl    ,kmax + 1  ,0         ,0      , &
-                & lundia    ,gdp       )
-          else
-             call addelm(nefiswrtmap,'RICH',' ','[   -   ]','REAL',4            , &
-                & 'Richardson number                                           ', &
-                & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
-                & lundia    ,gdp       )
-          endif
+          call addelm(nefiswrtmap,'RICH',' ','[   -   ]','REAL',4            , &
+             & 'Richardson number                                           ', &
+             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
+             & lundia    ,gdp       )
        endif
        if (selmap(20:20) == 'Y') then
           call addelm(nefiswrtmap,'RHO',' ','[ KG/M3 ]','REAL',4             , &
              & 'Density per layer in zeta point                             ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
+             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,0         ,0      , &
              & lundia    ,gdp       )
        endif
        if (selmap(21:21) == 'Y') then
@@ -437,7 +413,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
              & lundia    ,gdp       )
           call addelm(nefiswrtmap,'VICUV',' ','[ M2/S  ]','REAL',4           , &
              & 'Horizontal eddy viscosity in zeta point                     ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
+             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,0         ,0      , &
              & lundia    ,gdp       )
        endif
        if (nsrc > 0) then
@@ -449,17 +425,17 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        if (index(selmap(2:3),'Y') > 0) then
           call addelm(nefiswrtmap,'VORTIC',' ','[  1/S  ]','REAL',4          , &
              & 'Vorticity at each layer in depth point                      ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
+             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,0         ,0      , &
              & lundia    ,gdp       )
           call addelm(nefiswrtmap,'ENSTRO',' ','[  1/S2 ]','REAL',4          , &
              & 'Enstrophy at each layer in depth point                      ', &
-             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout   ,0         ,0      , &
+             & 3         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,0         ,0      , &
              & lundia    ,gdp       )
        endif
        if (index(selmap(2:2), 'Y')>0 .and. zmodel) then
           call addelm(nefiswrtmap,'HYDPRES',' ','[  N/M2 ]','REAL',4         , &
              & 'Non-hydrostatic pressure at each layer in zeta point        ', &
-             & 3         ,nmaxus    ,mmax      ,kmaxout   ,0         ,0      , &
+             & 3         ,nmaxus    ,mmax      ,kmaxout_restr,0         ,0      , &
              & lundia    ,gdp       )
        endif
        if (flwoutput%air) then
@@ -750,124 +726,26 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! group 3: element 'U1' & 'V1' only if SELMAP( 2: 3) <> 'NN'
     !
     if (index(selmap(2:3),'Y') > 0) then
-       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout),stat = istat )
-       do k=1,kmaxout
-          rbuff3(:,:,k) = u1(:,:,smlay(k))
-       enddo
-       if (zmodel) then
-          do m = 1, mmax
-             do n = 1, nmaxus
-                do k = 1, kmaxout
-                   if (smlay(k)<kfumin(n, m) .or. smlay(k)>kfumax(n, m))  rbuff3(n, m, k) = -999.0_fp
-                enddo
-             enddo
-          enddo
-       endif
-       if (parll) then
-          call dfgather(rbuff3,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(rbuff3,1-gdp%d%nlb,1-gdp%d%mlb,nmaxgl,mmaxgl)       
-       endif   
-       deallocate(rbuff3)
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'U1', uindex, 1, glbarr3)
-       endif
+       call wrtmap_nmk(1, kmax, ierror, u1, 'U1')
        if (ierror /= 0) goto 999
        !
        ! group 3: element 'V1'
        !
-       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout) )
-       do k=1,kmaxout
-          rbuff3(:,:,k) = v1(:,:,smlay(k))
-       enddo
-       if (zmodel) then
-          do m = 1, mmax
-             do n = 1, nmaxus
-                do k = 1, kmaxout
-                    if (smlay(k)<kfvmin(n, m) .or. smlay(k)>kfvmax(n, m))  rbuff3(n, m, k) = -999.0_fp                
-                 enddo
-             enddo
-          enddo
-       endif
-       if (parll) then
-          call dfgather(rbuff3,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(rbuff3, 1-gdp%d%nlb,1-gdp%d%mlb,nmaxgl, mmaxgl)
-       endif   
-       deallocate(rbuff3)
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'V1', uindex, 1, glbarr3)
-       endif
+       call wrtmap_nmk(1, kmax, ierror, v1, 'V1')
        if (ierror /= 0) goto 999
     endif
     !
     ! group 3: element 'W' only if kmax > 1 (:=  SELMAP( 4: 4) = 'Y')
     !
     if (selmap(4:4) == 'Y') then
-       if (kmaxout == kmax) then
-          allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax) )
-          rbuff3(:, :, 0:kmax) = w1(:, :, 0:kmax)
-          if (zmodel) then
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   do k = 0, kmax
-                      if (k<(kfsmin(n, m)-1) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
-                   enddo   
-                enddo
-             enddo
-          endif
-       else
-          allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:kmaxout) )
-          do k=1,kmaxout
-             rbuff3(:,:,k) = w1(:,:,smlay(k))
-          enddo
-          if (zmodel) then
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   do k = 1, kmaxout
-                      if (smlay(k)<(kfsmin(n, m)-1) .or. smlay(k)>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
-                   enddo   
-                enddo
-             enddo
-          endif
-       endif
-       if (parll) then
-          call dfgather(rbuff3,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(rbuff3,1-gdp%d%nlb,1-gdp%d%mlb,nmaxgl,mmaxgl)
-       endif   
-       deallocate(rbuff3)
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'W', uindex, 1, glbarr3)
-       endif
-      if (ierror /= 0) goto 999
+       call wrtmap_nmk(0, kmax, ierror, w1, 'W')
+       if (ierror /= 0) goto 999
     endif
     !
     ! group 3: element 'WPHY' only if KMAX > 1 (:=  SELMAP( 5: 5) = 'Y')
     !
     if (selmap(5:5) == 'Y') then
-       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout) )
-       do k=1,kmaxout
-          rbuff3(:,:,k) = wphy(:,:,smlay(k))
-       enddo
-       if (zmodel) then
-          do m = 1, mmax
-             do n = 1, nmaxus
-                do k = 1, kmaxout
-                    if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
-                enddo
-             enddo
-          enddo
-       endif
-       if (parll) then
-          call dfgather(rbuff3,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(rbuff3, 1-gdp%d%nlb,1-gdp%d%mlb,nmaxgl, mmaxgl)
-       endif   
-       deallocate(rbuff3)
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'WPHY', uindex, 1, glbarr3)
-       endif
+       call wrtmap_nmk(1, kmax, ierror, wphy, 'WPHY')
        if (ierror /= 0) goto 999
     endif
     !
@@ -875,216 +753,42 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! (:= SELMAP( 6:13) <> 'NNNNNNNN')
     !
     if (index(selmap(6:13),'Y') /= 0) then
-       !
-       !NB R1 works ok without reallocating array; RTUR1 NOT !
-       !
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout,lstsci ))
-       rbuff4(:,:,:,:) = -999.0_fp
-       do l = 1, lstsci
-          do k = 1, kmaxout
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   if (zmodel) then
-                      if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) then
-                         cycle
-                      endif
-                   endif
-                   rbuff4(n,m,k,l) = r1(n,m,smlay(k),l)
-                enddo
-             enddo
-          enddo
-       enddo
-       if (parll) then
-          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-       else 
-          call dfgather_seq(rbuff4,1-gdp%d%nlb,1-gdp%d%mlb,nmaxgl,mmaxgl)   
-       endif   
-       deallocate(rbuff4)
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'R1', uindex, 1, glbarr4)
-       endif
+       call wrtmap_nmkl(1, kmax, lstsci, ierror, r1, 'R1')
        if (ierror /= 0) goto 999
-
-
        if (flwoutput%difuflux) then
           !
           ! element 'R1FLX_UU'
           !
-          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout,lstsci ))
-          rbuff4(:, :, :, :) = -999.0_fp
-          if (associated(fluxu)) then
-             do l = 1, lstsci
-                do k = 1, kmaxout
-                   do nm = 1, nmmax
-                      call nm_to_n_and_m(nm, n, m, gdp)
-                      if (zmodel) then
-                         if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) then
-                            cycle
-                         endif
-                      endif
-                      rbuff4(n,m,k,l) = fluxu(nm,smlay(k),l)
-                   enddo
-                enddo
-             enddo
-          endif
-          if (parll) then
-             call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-          else
-             call dfgather_seq(rbuff4,1-gdp%d%nlb,1-gdp%d%mlb,nmaxgl,mmaxgl)
-          endif     
-          deallocate(rbuff4)
-          if (inode == master) then
-             ierror = putelt(fds, grnam3, 'R1FLX_UU', uindex, 1, glbarr4)
-          endif
+          call wrtmap_nmklflux(1, kmax, lstsci, ierror, fluxu, 'R1FLX_UU')
           if (ierror /= 0) goto 999
 
           !
           ! element 'R1FLX_VV'
           !
-          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout,lstsci ))
-          rbuff4(:, :, :, :) = -999.0_fp
-          if (associated(fluxv)) then
-             do l = 1, lstsci
-                do k = 1, kmaxout
-                   do nm = 1, nmmax
-                      call nm_to_n_and_m(nm, n, m, gdp)
-                      if (zmodel) then
-                         if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) then
-                            cycle
-                         endif
-                      endif
-                      rbuff4(n,m,k,l) = fluxv(nm,smlay(k),l)
-                   enddo
-                enddo
-             enddo
-          endif
-          if (parll) then
-             call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-          else
-             call dfgather_seq(rbuff4,1-gdp%d%nlb,1-gdp%d%mlb,nmaxgl,mmaxgl)
-          endif
-          deallocate(rbuff4)
-          if (inode == master) then
-             ierror = putelt(fds, grnam3, 'R1FLX_VV', uindex, 1, glbarr4)
-          endif
+          call wrtmap_nmklflux(1, kmax, lstsci, ierror, fluxv, 'R1FLX_VV')
           if (ierror /= 0) goto 999
-
        endif
-
+       !
        if (flwoutput%cumdifuflux) then
           !
           ! element 'R1FLX_UUC'
           !
-          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout,lstsci ))
-          rbuff4(:, :, :, :) = -999.0_fp
-          if (associated(fluxuc)) then
-             do l = 1, lstsci
-                do k = 1, kmaxout
-                   do nm = 1, nmmax
-                      call nm_to_n_and_m(nm, n, m, gdp)
-                      if (zmodel) then
-                         if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) then
-                            cycle
-                         endif
-                      endif
-                      rbuff4(n,m,k,l) = fluxuc(nm,smlay(k),l)
-                   enddo
-                enddo
-             enddo
-          endif
-          if (parll) then
-             call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-          else
-             call dfgather_seq(rbuff4,1-gdp%d%nlb,1-gdp%d%mlb,nmaxgl,mmaxgl)
-          endif     
-          deallocate(rbuff4)
-          if (inode == master) then
-             ierror = putelt(fds, grnam3, 'R1FLX_UUC', uindex, 1, glbarr4)
-          endif
+          call wrtmap_nmklflux(1, kmax, lstsci, ierror, fluxuc, 'R1FLX_UUC')
           if (ierror /= 0) goto 999
-
           !
           ! element 'R1FLX_VVC'
           !
-          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout,lstsci ))
-          rbuff4(:, :, :, :) = -999.0_fp
-          if (associated(fluxvc)) then
-             do l = 1, lstsci
-                do k = 1, kmaxout
-                   do nm = 1, nmmax
-                      call nm_to_n_and_m(nm, n, m, gdp)
-                      if (zmodel) then
-                         if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) then
-                            cycle
-                         endif
-                      endif
-                      rbuff4(n,m,k,l) = fluxvc(nm,smlay(k),l)
-                   enddo
-                enddo
-             enddo
-          endif
-          if (parll) then
-             call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-          else
-             call dfgather_seq(rbuff4,1-gdp%d%nlb,1-gdp%d%mlb,nmaxgl,mmaxgl)
-          endif     
-          deallocate(rbuff4)
-          if (inode == master) then
-             ierror = putelt(fds, grnam3, 'R1FLX_VVC', uindex, 1, glbarr4)
-          endif
+          call wrtmap_nmklflux(1, kmax, lstsci, ierror, fluxvc, 'R1FLX_VVC')
           if (ierror /= 0) goto 999
        endif
     endif
-
     !
     ! group 3: element 'RTUR1', only if LTUR > 0
     ! (:= SELMAP(14:15) <> 'NN')
     !
     if (index(selmap(14:15),'Y') /= 0) then
-       if (kmaxout == kmax) then
-          allocate(rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub,0:kmax,1:ltur ))
-          rbuff4(:,:,:,:) = -999.0_fp
-          do l = 1, ltur
-             do k = 0, kmax
-                do m = 1, mmax
-                   do n = 1, nmaxus
-                      if (zmodel) then
-                         if (k<kfsmin(n, m) .or. k>kfsmax(n, m)) then
-                            cycle
-                         endif
-                      endif
-                      rbuff4(n,m,k,l) = rtur1(n,m,k,l)
-                   enddo
-                enddo
-             enddo
-          enddo
-       else
-          allocate(rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub,kmaxout,1:ltur ))
-          rbuff4(:,:,:,:) = -999.0_fp
-          do l = 1, ltur
-             do k = 1, kmaxout
-                do m = 1, mmax
-                   do n = 1, nmaxus
-                      if (zmodel) then
-                         if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) then
-                            cycle
-                         endif
-                      endif
-                      rbuff4(n,m,k,l) = rtur1(n,m,smlay(k),l)
-                   enddo
-                enddo
-             enddo
-          enddo
-       endif
-       if (parll) then
-          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(rbuff4,1-gdp%d%nlb,1-gdp%d%mlb,nmaxgl,mmaxgl)
-       endif     
-        deallocate(rbuff4)
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'RTUR1', uindex, 1, glbarr4)
-       endif
+       call wrtmap_nmkl(0, kmax, ltur, ierror, rtur1, 'RTUR1')
+       if (ierror /= 0) goto 999
     endif
     !
     ! group 3: element 'TAUKSI' & 'TAUETA' only if SELMAP(16:17) <> 'NN'
@@ -1170,42 +874,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! vicww is defined on cell boundary planes
     !
     if (selmap(18:18) == 'Y') then
-       if (kmaxout == kmax) then
-          allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax) )
-          rbuff3(:, :, :) = vicww(:, :, :)
-          if (zmodel) then
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   do k = 0 , kmax
-                       if (k<(kfsmin(n, m)-1) .or. k>kfsmax(n, m))  rbuff3(n, m, k) = -999.0_fp
-                   enddo
-                enddo
-             enddo
-          endif
-       else
-          allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:kmaxout) )
-          do k=1,kmaxout
-             rbuff3(:,:,k) = vicww(:,:,smlay(k))
-          enddo
-          if (zmodel) then
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   do k = 1 , kmaxout
-                       if (smlay(k)<(kfsmin(n, m)-1) .or. smlay(k)>kfsmax(n, m))  rbuff3(n, m, k) = -999.0_fp
-                   enddo
-                enddo
-             enddo
-          endif
-       endif
-       if (parll) then
-          call dfgather(rbuff3,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(rbuff3,1-gdp%d%nlb,1-gdp%d%mlb,nmaxgl,mmaxgl)
-       endif      
-       deallocate(rbuff3)
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'VICWW', uindex, 1, glbarr3)
-       endif
+       call wrtmap_nmk(0, kmax, ierror, vicww, 'VICWW')
        if (ierror /= 0) goto 999
     endif
     !
@@ -1213,42 +882,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! dicww is defined on cell boundary planes
     !
     if (selmap(19:19) == 'Y') then
-       if (kmaxout == kmax) then
-          allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax) )
-          rbuff3(:, :, :) = dicww(:, :, :)
-          if (zmodel) then
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   do k = 0, kmax
-                      if (k<(kfsmin(n, m)-1) .or. k>kfsmax(n, m))  rbuff3(n, m, k) = -999.0_fp
-                   enddo
-                enddo
-             enddo
-          endif
-       else
-          allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:kmaxout) )
-          do k=1,kmaxout
-             rbuff3(:,:,k) = dicww(:,:,smlay(k))
-          enddo
-          if (zmodel) then
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   do k = 1, kmaxout
-                      if (smlay(k)<(kfsmin(n, m)-1) .or. smlay(k)>kfsmax(n, m))  rbuff3(n, m, k) = -999.0_fp
-                   enddo
-                enddo
-             enddo
-          endif
-       endif
-       if (parll) then
-          call dfgather(rbuff3,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(rbuff3,1-gdp%d%nlb,1-gdp%d%mlb,nmaxgl,mmaxgl)
-       endif   
-       deallocate(rbuff3)
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'DICWW', uindex, 1, glbarr3)
-       endif
+       call wrtmap_nmk(0, kmax, ierror, dicww, 'DICWW')
        if (ierror /= 0) goto 999
     endif
     !
@@ -1256,42 +890,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! (:= SELMAP(18:19) <> 'NN')
     !
     if (index(selmap(18:19),'Y') > 0) then
-       if (kmaxout == kmax) then
-          allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax) )
-          rbuff3(:, :, 0:kmax) = rich(:, :, 0:kmax)
-          if (zmodel) then
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   do k = 0, kmax
-                      if (k<(kfsmin(n, m)-1) .or. k>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
-                   enddo
-                enddo
-             enddo
-          endif
-       else
-          allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:kmaxout) )
-          do k=1,kmaxout
-             rbuff3(:,:,k) = rich(:,:,smlay(k))
-          enddo
-          if (zmodel) then
-             do m = 1, mmax
-                do n = 1, nmaxus
-                   do k = 1, kmaxout
-                      if (smlay(k)<(kfsmin(n, m)-1) .or. smlay(k)>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
-                   enddo
-                enddo
-             enddo
-          endif
-       endif
-       if (parll) then
-          call dfgather(rbuff3,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(rbuff3, 1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-       endif      
-       deallocate(rbuff3)
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'RICH', uindex, 1, glbarr3)
-       endif
+       call wrtmap_nmk(0, kmax, ierror, rich, 'RICH')
        if (ierror /= 0) goto 999
     endif
     !
@@ -1299,29 +898,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! (:= SELMAP(20:20) = 'Y')
     !
     if (selmap(20:20) == 'Y') then
-       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout) )
-       do k=1,kmaxout
-          rbuff3(:,:,k) = rho(:,:,smlay(k))
-       enddo
-       if (zmodel) then
-          do m = 1, mmax
-             do n = 1, nmaxus
-                do k = 1, kmaxout
-                    if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
-                enddo
-             enddo
-          enddo
-       endif
-       !
-       if (parll) then
-          call dfgather(rbuff3,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(rbuff3,1-gdp%d%nlb,1-gdp%d%mlb,nmaxgl,mmaxgl)
-       endif   
-       deallocate(rbuff3)
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'RHO', uindex, 1, glbarr3)
-       endif
+       call wrtmap_nmk(1, kmax, ierror, rho, 'RHO')
        if (ierror /= 0) goto 999
     endif
     !
@@ -1358,28 +935,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        ! group 3: element 'VICUV'
        ! kmax+1 contains initial values and should not be written
        !
-       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout) )
-       do k=1,kmaxout
-          rbuff3(:,:,k) = vicuv(:,:,smlay(k))
-       enddo
-       if (zmodel) then
-          do m = 1, mmax
-             do n = 1, nmaxus
-                do k = 1, kmaxout
-                   if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
-                enddo
-             enddo
-          enddo
-       endif
-       if (parll) then
-          call dfgather(rbuff3,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(rbuff3, 1-gdp%d%nlb,1-gdp%d%mlb,nmaxgl,mmaxgl)
-       endif      
-       deallocate(rbuff3)
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'VICUV', uindex, 1, glbarr3)
-       endif
+       call wrtmap_nmk(1, kmax+1, ierror, vicuv, 'VICUV')
        if (ierror /= 0) goto 999
     endif
     if (nsrc>0 .and. inode==master) then
@@ -1409,80 +965,19 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! First VORTIC
     !
     if (index(selmap(2:3),'Y') > 0) then
-       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout) )
-       do k=1,kmaxout
-          rbuff3(:,:,k) = vortic(:,:,smlay(k))
-       enddo
-       if (zmodel) then
-          do m = 1, mmax
-             do n = 1, nmaxus
-                do k = 1, kmaxout
-                   if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
-                enddo
-             enddo
-          enddo
-       endif
-       if (parll) then
-          call dfgather(rbuff3,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(rbuff3,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-       endif
-       deallocate(rbuff3)
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'VORTIC', uindex, 1, glbarr3)
-       endif
+       call wrtmap_nmk(1, kmax, ierror, vortic, 'VORTIC')
        if (ierror /= 0) goto 999
        !
        ! Next ENSTRO
        !
-       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout) )
-       do k=1,kmaxout
-          rbuff3(:,:,k) = enstro(:,:,smlay(k))
-       enddo
-       if (zmodel) then
-          do m = 1, mmax
-             do n = 1, nmaxus
-                do k = 1, kmaxout
-                   if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
-                enddo
-             enddo
-          enddo
-       endif
-       if (parll) then
-          call dfgather(rbuff3,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(rbuff3,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-       endif       
-       deallocate(rbuff3)
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'ENSTRO', uindex, 1, glbarr3)
-       endif
+       call wrtmap_nmk(1, kmax, ierror, enstro, 'ENSTRO')
        if (ierror /= 0) goto 999
     endif
     !
     ! group 3: element 'HYDPRES'
     !
     if (index(selmap(4:4),'Y')>0 .and. zmodel) then
-       allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout) )
-       do k=1,kmaxout
-          rbuff3(:,:,k) = p1(:,:,smlay(k))
-       enddo
-       do m = 1, mmax
-          do n = 1, nmaxus
-             do k = 1, kmaxout
-                if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) rbuff3(n, m, k) = -999.0_fp
-             enddo 
-          enddo
-       enddo
-       if (parll) then
-          call dfgather(rbuff3,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(rbuff3,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-       endif       
-       deallocate(rbuff3)
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'HYDPRES', uindex, 1, glbarr3)
-       endif
+       call wrtmap_nmk(1, kmax, ierror, p1, 'HYDPRES')
        if (ierror /= 0) goto 999
     endif
     !
@@ -1490,26 +985,12 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        !
        ! element 'CFUROU'
        !
-       if (parll) then
-          call dfgather(cvalu0,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(cvalu0,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-       endif       
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'CFUROU', uindex, 1, glbarr2)
-       endif
+       call wrtmap_nm(ierror, cvalu0, 'CFUROU')
        if (ierror /= 0) goto 999
        !
        ! element 'CFVROU'
        !
-       if (parll) then
-          call dfgather(cvalv0,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(cvalv0,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-       endif       
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'CFVROU', uindex, 1, glbarr2)
-       endif
+       call wrtmap_nm(ierror, cvalv0, 'CFVROU')
        if (ierror /= 0) goto 999
     endif
     if (flwoutput%roughness) then
@@ -1518,82 +999,40 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        !
        allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
        rbuff2(:,:) = cfurou(:,:,2)
-       if (parll) then
-          call dfgather(rbuff2,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(rbuff2,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-       endif       
+       call wrtmap_nm(ierror, rbuff2, 'ROUMETU')
        deallocate(rbuff2)
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'ROUMETU', uindex, 1, glbarr2)
-       endif
        if (ierror /= 0) goto 999
        !
        ! element 'ROUMETV'
        !
        allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
        rbuff2(:,:) = cfvrou(:,:,2)
-       if (parll) then
-          call dfgather(rbuff2,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(rbuff2,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-       endif       
+       call wrtmap_nm(ierror, rbuff2, 'ROUMETV')
        deallocate(rbuff2)
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'ROUMETV', uindex, 1, glbarr2)
-       endif
        if (ierror /= 0) goto 999
     endif
     if (flwoutput%z0cur) then
        !
        ! element 'Z0UCUR'
        !
-       if (parll) then
-          call dfgather(z0ucur,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(z0ucur,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-       endif 
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'Z0UCUR', uindex, 1, glbarr2)
-       endif
+       call wrtmap_nm(ierror, z0ucur, 'Z0UCUR')
        if (ierror /= 0) goto 999
        !
        ! element 'Z0VCUR'
        !
-       if (parll) then
-          call dfgather(z0vcur,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(z0vcur,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-       endif       
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'Z0VCUR', uindex, 1, glbarr2)
-       endif
+       call wrtmap_nm(ierror, z0vcur, 'Z0VCUR')
        if (ierror /= 0) goto 999
     endif
     if (flwoutput%z0rou) then
        !
        ! element 'Z0UROU'
        !
-       if (parll) then
-          call dfgather(z0urou,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(z0urou,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-       endif          
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'Z0UROU', uindex, 1, glbarr2)
-       endif
+       call wrtmap_nm(ierror, z0urou, 'Z0UROU')
        if (ierror /= 0) goto 999
        !
        ! element 'Z0VROU'
        !
-       if (parll) then
-       call dfgather(z0vrou,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(z0vrou,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-       endif       
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'Z0VROU', uindex, 1, glbarr2)
-       endif
+       call wrtmap_nm(ierror, z0vrou, 'Z0VROU')
        if (ierror /= 0) goto 999
     endif
     !
@@ -1642,40 +1081,17 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        !
        ! element 'WINDU'
        !
-       if (parll) then
-          call dfgather(windu,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(windu,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-       endif       
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'WINDU', uindex, 1, glbarr2)
-       endif
-       !
+       call wrtmap_nm(ierror, windu, 'WINDU')
        if (ierror /= 0) goto 999
        !
        ! element 'WINDV'
        !
-       if (parll) then
-          call dfgather(windv,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(windv,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-       endif       
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'WINDV', uindex, 1, glbarr2)
-       endif
-       !
+       call wrtmap_nm(ierror, windv, 'WINDV')
        if (ierror /= 0) goto 999
        !
        ! element 'PATM'
        !
-       if (parll) then
-          call dfgather(patm,nf,nl,mf,ml,iarrc,gdp)
-       else
-          call dfgather_seq(patm,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-       endif       
-       if (inode == master) then
-          ierror = putelt(fds, grnam3, 'PATM', uindex, 1, glbarr2)
-       endif
+       call wrtmap_nm(ierror, patm, 'PATM')
        if (ierror /= 0) goto 999
        !
        if (prcp_file) then
@@ -1686,16 +1102,8 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           !
           allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
           rbuff2 = precip * 3600000.0_fp
-          if (parll) then
-             call dfgather(rbuff2,nf,nl,mf,ml,iarrc,gdp)
-          else
-             call dfgather_seq(rbuff2,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-          endif       
+          call wrtmap_nm(ierror, rbuff2, 'PRECIP')
           deallocate(rbuff2)
-          if (inode == master) then
-             ierror = putelt(fds, grnam3, 'PRECIP', uindex, 1, glbarr2)
-          endif
-          !
           if (ierror /= 0) goto 999
        endif
        !
@@ -1709,15 +1117,8 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
              call nm_to_n_and_m(nm, n, m, gdp)
              rbuff2(n,m) = clouarr(nm)
           enddo
-          if (parll) then
-             call dfgather(rbuff2,nf,nl,mf,ml,iarrc,gdp)
-          else
-             call dfgather_seq(rbuff2,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-          endif          
+          call wrtmap_nm(ierror, rbuff2, 'CLOUDS')
           deallocate(rbuff2)
-          if (inode == master) then
-             ierror = putelt(fds, grnam3, 'CLOUDS', uindex, 1, glbarr2)
-          endif
           if (ierror /= 0) goto 999
        endif
 
@@ -1731,15 +1132,8 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
              call nm_to_n_and_m(nm, n, m, gdp)
              rbuff2(n,m) = rhumarr(nm)
           enddo
-          if (parll) then
-             call dfgather(rbuff2,nf,nl,mf,ml,iarrc,gdp)
-          else
-             call dfgather_seq(rbuff2,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-          endif          
+          call wrtmap_nm(ierror, rbuff2, 'AIRHUM')
           deallocate(rbuff2)
-          if (inode == master) then
-             ierror = putelt(fds, grnam3, 'AIRHUM', uindex, 1, glbarr2)
-          endif
           if (ierror /= 0) goto 999
        endif
 
@@ -1754,15 +1148,8 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
              call nm_to_n_and_m(nm, n, m, gdp)
              rbuff2(n,m) = tairarr(nm)
           enddo
-          if (parll) then
-             call dfgather(rbuff2,nf,nl,mf,ml,iarrc,gdp)
-          else
-             call dfgather_seq(rbuff2,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-          endif           
+          call wrtmap_nm(ierror, rbuff2, 'AIRTEM')
           deallocate(rbuff2)
-          if (inode == master) then
-             ierror = putelt(fds, grnam3, 'AIRTEM', uindex, 1, glbarr2)
-          endif
           if (ierror /= 0) goto 999
        endif
     endif
@@ -1782,15 +1169,8 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                 call nm_to_n_and_m(nm, n, m, gdp)
                 rbuff2(n,m) = hlc_out(nm)
              enddo
-             if (parll) then
-                call dfgather(rbuff2,nf,nl,mf,ml,iarrc,gdp)
-             else
-                call dfgather_seq(rbuff2,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-             endif             
+             call wrtmap_nm(ierror, rbuff2, 'HLC')
              deallocate(rbuff2)
-             if (inode == master) then
-                ierror = putelt(fds, grnam3, 'HLC', uindex, 1, glbarr2)
-             endif
              if (ierror /= 0) goto 999
           endif
           !
@@ -1803,15 +1183,8 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                 call nm_to_n_and_m(nm, n, m, gdp)
                 rbuff2(n,m) = qnet_out(nm)
              enddo
-             if (parll) then
-                call dfgather(rbuff2,nf,nl,mf,ml,iarrc,gdp)
-             else
-                call dfgather_seq(rbuff2,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-             endif             
+             call wrtmap_nm(ierror, rbuff2, 'QNET')
              deallocate(rbuff2)
-             if (inode == master) then
-                ierror = putelt(fds, grnam3, 'QNET', uindex, 1, glbarr2)
-             endif
              if (ierror /= 0) goto 999
           endif
        elseif (ktemp > 0) then
@@ -1825,15 +1198,8 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                 call nm_to_n_and_m(nm, n, m, gdp)
                 rbuff2(n,m) = qeva_out(nm)
              enddo
-             if (parll) then
-                call dfgather(rbuff2,nf,nl,mf,ml,iarrc,gdp)
-             else
-                call dfgather_seq(rbuff2,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-             endif             
+             call wrtmap_nm(ierror, rbuff2, 'QEVA')
              deallocate(rbuff2)
-             if (inode == master) then
-                ierror = putelt(fds, grnam3, 'QEVA', uindex, 1, glbarr2)
-             endif
              if (ierror /= 0) goto 999
           endif
           !
@@ -1846,15 +1212,8 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                 call nm_to_n_and_m(nm, n, m, gdp)
                 rbuff2(n,m) = qco_out(nm)
              enddo
-             if (parll) then
-                call dfgather(rbuff2,nf,nl,mf,ml,iarrc,gdp)
-             else
-                call dfgather_seq(rbuff2,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-             endif             
+             call wrtmap_nm(ierror, rbuff2, 'QCO')
              deallocate(rbuff2)
-             if (inode == master) then
-                ierror = putelt(fds, grnam3, 'QCO', uindex, 1, glbarr2)
-             endif
              if (ierror /= 0) goto 999
           endif
           !
@@ -1867,15 +1226,8 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                 call nm_to_n_and_m(nm, n, m, gdp)
                 rbuff2(n,m) = qbl_out(nm)
              enddo
-             if (parll) then
-                call dfgather(rbuff2,nf,nl,mf,ml,iarrc,gdp)
-             else
-                call dfgather_seq(rbuff2,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-             endif             
+             call wrtmap_nm(ierror, rbuff2, 'QBL')
              deallocate(rbuff2)
-             if (inode == master) then
-                ierror = putelt(fds, grnam3, 'QBL', uindex, 1, glbarr2)
-             endif
              if (ierror /= 0) goto 999
           endif
           !
@@ -1888,15 +1240,8 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                 call nm_to_n_and_m(nm, n, m, gdp)
                 rbuff2(n,m) = qin_out(nm)
              enddo
-             if (parll) then
-                call dfgather(rbuff2,nf,nl,mf,ml,iarrc,gdp)
-             else
-                call dfgather_seq(rbuff2,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-             endif             
+             call wrtmap_nm(ierror, rbuff2, 'QIN')
              deallocate(rbuff2)
-             if (inode == master) then
-                ierror = putelt(fds, grnam3, 'QIN', uindex, 1, glbarr2)
-             endif
              if (ierror /= 0) goto 999
           endif
           !
@@ -1909,15 +1254,8 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                 call nm_to_n_and_m(nm, n, m, gdp)
                 rbuff2(n,m) = qnet_out(nm)
              enddo
-             if (parll) then
-                call dfgather(rbuff2,nf,nl,mf,ml,iarrc,gdp)
-             else
-                call dfgather_seq(rbuff2,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-             endif             
+             call wrtmap_nm(ierror, rbuff2, 'QNET')
              deallocate(rbuff2)
-             if (inode == master) then
-                ierror = putelt(fds, grnam3, 'QNET', uindex, 1, glbarr2)
-             endif
              if (ierror /= 0) goto 999
           endif
           !
@@ -1932,15 +1270,8 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                    call nm_to_n_and_m(nm, n, m, gdp)
                    rbuff2(n,m) = hfree_out(nm)
                 enddo
-                if (parll) then
-                   call dfgather(rbuff2,nf,nl,mf,ml,iarrc,gdp)
-                else
-                   call dfgather_seq(rbuff2,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-                endif                
+                call wrtmap_nm(ierror, rbuff2, 'HFREE')
                 deallocate(rbuff2)
-                if (inode == master) then
-                   ierror = putelt(fds, grnam3, 'HFREE', uindex, 1, glbarr2)
-                endif
                 if (ierror /= 0) goto 999
              endif
              !
@@ -1953,15 +1284,8 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                    call nm_to_n_and_m(nm, n, m, gdp)
                    rbuff2(n,m) = efree_out(nm)
                 enddo
-                if (parll) then
-                   call dfgather(rbuff2,nf,nl,mf,ml,iarrc,gdp)
-                else
-                   call dfgather_seq(rbuff2,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-                endif                
+                call wrtmap_nm(ierror, rbuff2, 'EFREE')
                 deallocate(rbuff2)
-                if (inode == master) then
-                   ierror = putelt(fds, grnam3, 'EFREE', uindex, 1, glbarr2)
-                endif
                 if (ierror /= 0) goto 999
              endif
           endif
@@ -1977,20 +1301,14 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                    call nm_to_n_and_m(nm, n, m, gdp)
                    rbuff2(n,m) = qmis_out(nm)
                 enddo
-                if (parll) then
-                   call dfgather(rbuff2,nf,nl,mf,ml,iarrc,gdp)
-                else
-                   call dfgather_seq(rbuff2,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
-                endif                
+                call wrtmap_nm(ierror, rbuff2, 'QMIS')
                 deallocate(rbuff2)
-                if (inode == master) then
-                   ierror = putelt(fds, grnam3, 'QMIS', uindex, 1, glbarr2)
-                endif
                 if (ierror /= 0) goto 999
              endif
           endif
-
        else
+          !
+          ! ktemp = 0, no additional output
        endif
     endif
     !
@@ -2009,4 +1327,199 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        call prterr(lundia, 'P004', errmsg)
        error= .true.
     endif
+
+
+    contains
+    !
+    !======================================================================
+    subroutine wrtmap_nm(ierr, var, varnam_in)
+       integer                                                            :: ierr
+       real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) :: var
+       character(*)                                                       :: varnam_in
+       ! local
+       integer       :: namlen
+       character(16) :: varnam
+       ! body
+       namlen = min (16,len(varnam_in))
+       varnam = varnam_in(1:namlen)
+       if (parll) then
+          call dfgather(var,nf,nl,mf,ml,iarrc,gdp)
+       else
+          call dfgather_seq(var,1-gdp%d%nlb,1-gdp%d%mlb, nmaxgl,mmaxgl)
+       endif       
+       if (inode == master) then
+          ierr = putelt(fds, grnam3, varnam, uindex, 1, glbarr2)
+       endif
+    end subroutine wrtmap_nm
+    !
+    !======================================================================
+    subroutine wrtmap_nmk(lk, uk, ierr, var, varnam_in)
+       integer                                                                   :: lk, uk, ierr ! lowerbound dim3(0 or 1), upperbound dim3(kmax or kmax+1)
+       real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lk:uk) :: var
+       character(*)                                                              :: varnam_in
+       ! local
+       integer       :: namlen
+       character(16) :: varnam
+       ! body
+       namlen = min (16,len(varnam_in))
+       varnam = varnam_in(1:namlen)
+       if (lk == 0) then
+          allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:kmaxout),stat = istat )
+          do k=1,kmaxout
+             rbuff3(:,:,k) = var(:,:,smlay(k))
+          enddo
+          if (zmodel) then
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   do k = 1, kmaxout
+                      if (smlay(k)<kfumin(n, m) .or. smlay(k)>kfumax(n, m))  rbuff3(n, m, k) = -999.0_fp
+                   enddo
+                enddo
+             enddo
+          endif
+       else
+          allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:kmaxout_restr),stat = istat )
+          do k=1,kmaxout_restr
+             rbuff3(:,:,k) = var(:,:,smlay_restr(k))
+          enddo
+          if (zmodel) then
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   do k = 1, kmaxout_restr
+                      if (smlay_restr(k)<kfumin(n, m) .or. smlay_restr(k)>kfumax(n, m))  rbuff3(n, m, k) = -999.0_fp
+                   enddo
+                enddo
+             enddo
+          endif
+       endif
+       if (parll) then
+          call dfgather(rbuff3,nf,nl,mf,ml,iarrc,gdp)
+       else
+          call dfgather_seq(rbuff3,1-gdp%d%nlb,1-gdp%d%mlb,nmaxgl,mmaxgl)       
+       endif   
+       deallocate(rbuff3)
+       if (inode == master) then
+          ierr = putelt(fds, grnam3, varnam, uindex, 1, glbarr3)
+       endif
+    end subroutine wrtmap_nmk
+    !
+    !======================================================================
+    subroutine wrtmap_nmkl(lk, uk, ul, ierr, var, varnam_in)
+       integer                                                                       :: lk, uk, ul, ierr ! lowerbound dim3(0 or 1), upperbound dim3(kmax or kmax+1), upperbound dim4
+       real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lk:uk, ul) :: var
+       character(*)                                                                  :: varnam_in
+       ! local
+       integer       :: namlen
+       character(16) :: varnam
+       ! body
+       namlen = min (16,len(varnam_in))
+       varnam = varnam_in(1:namlen)
+       if (lk == 0) then
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout,ul ))
+          rbuff4(:,:,:,:) = -999.0_fp
+          do l = 1, ul
+             do k = 1, kmaxout
+                do m = 1, mmax
+                   do n = 1, nmaxus
+                      if (zmodel) then
+                         if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) then
+                            cycle
+                         endif
+                      endif
+                      rbuff4(n,m,k,l) = var(n,m,smlay(k),l)
+                   enddo
+                enddo
+             enddo
+          enddo
+       else
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout_restr,ul ))
+          rbuff4(:,:,:,:) = -999.0_fp
+          do l = 1, ul
+             do k = 1, kmaxout_restr
+                do m = 1, mmax
+                   do n = 1, nmaxus
+                      if (zmodel) then
+                         if (smlay_restr(k)<kfsmin(n, m) .or. smlay_restr(k)>kfsmax(n, m)) then
+                            cycle
+                         endif
+                      endif
+                      rbuff4(n,m,k,l) = var(n,m,smlay_restr(k),l)
+                   enddo
+                enddo
+             enddo
+          enddo
+       endif
+       if (parll) then
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+       else 
+          call dfgather_seq(rbuff4,1-gdp%d%nlb,1-gdp%d%mlb,nmaxgl,mmaxgl)   
+       endif   
+       deallocate(rbuff4)
+       if (inode == master) then
+          ierr = putelt(fds, grnam3, varnam, uindex, 1, glbarr4)
+       endif
+    end subroutine wrtmap_nmkl
+    !
+    !======================================================================
+    subroutine wrtmap_nmklflux(lk, uk, ul, ierr, varptr, varnam_in)
+       integer                                   :: lk, uk, ul, ierr ! lowerbound dim3(0 or 1), upperbound dim3(kmax or kmax+1), upperbound dim4
+       real(fp) , dimension(:,:,:)     , pointer :: varptr ! pointer to an array that may not be associated
+                                                           ! note that n and m are merged into one dimension
+       character(*)                              :: varnam_in
+       ! local
+       integer       :: namlen
+       character(16) :: varnam
+       ! body
+       namlen = min (16,len(varnam_in))
+       varnam = varnam_in(1:namlen)
+       if (lk == 0) then
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout,ul ))
+          rbuff4(:,:,:,:) = -999.0_fp
+          if (associated(varptr)) then
+             do l = 1, ul
+                do k = 1, kmaxout
+                   do nm = 1, nmmax
+                      call nm_to_n_and_m(nm, n, m, gdp)
+                      if (zmodel) then
+                         if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) then
+                            cycle
+                         endif
+                      endif
+                      rbuff4(n,m,k,l) = varptr(nm,smlay(k),l)
+                   enddo
+                enddo
+             enddo
+          endif
+       else
+          allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout_restr,ul ))
+          rbuff4(:,:,:,:) = -999.0_fp
+          if (associated(varptr)) then
+             do l = 1, ul
+                do k = 1, kmaxout_restr
+                   do nm = 1, nmmax
+                      call nm_to_n_and_m(nm, n, m, gdp)
+                      if (zmodel) then
+                         if (smlay_restr(k)<kfsmin(n, m) .or. smlay_restr(k)>kfsmax(n, m)) then
+                            cycle
+                         endif
+                      endif
+                      rbuff4(n,m,k,l) = varptr(nm,smlay_restr(k),l)
+                   enddo
+                enddo
+             enddo
+          endif
+       endif
+       if (parll) then
+          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+       else 
+          call dfgather_seq(rbuff4,1-gdp%d%nlb,1-gdp%d%mlb,nmaxgl,mmaxgl)   
+       endif   
+       deallocate(rbuff4)
+       if (inode == master) then
+          ierr = putelt(fds, grnam3, varnam, uindex, 1, glbarr4)
+       endif
+    end subroutine wrtmap_nmklflux
+
+
+
 end subroutine wrtmap
