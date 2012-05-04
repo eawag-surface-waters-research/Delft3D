@@ -49,6 +49,7 @@ Not supported functionality and limitations
 - 2D skewed (not 1D-) Weirs
 - Barriers
 - max(mmax,nmax)/npart <= 4 (is checked)
+- fourier output
 
 
 
