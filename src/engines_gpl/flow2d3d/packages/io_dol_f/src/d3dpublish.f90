@@ -85,7 +85,7 @@ contains
         integer                                     :: dimens_k(1)   ! 1D array to contain kmax array dimension
         integer                                     :: j
         integer                                     :: k
-        integer                                     :: indx
+        integer(pntrsize)                           :: indx
         integer                                     :: realDouble
         integer                                     :: size_stof
         integer                                     :: size_tur
