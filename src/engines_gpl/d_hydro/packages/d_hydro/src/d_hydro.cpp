@@ -158,7 +158,7 @@ DeltaresHydro::DeltaresHydro (
     this->slaveArg  = NULL;
     this->done      = false;
 
-    Log::Mask   logMask = Log::SILENT;  // selector of debugging/trace information
+    Log::Mask   logMask = Log::ALWAYS;  // selector of debugging/trace information
                                         // minLog: Log::SILENT  maxLog: Log::TRACE
     FILE *      logFile = stdout;       // log file descriptor
 
@@ -226,7 +226,6 @@ DeltaresHydro::DeltaresHydro (
 
     this->clock = new Clock ();
     this->log = new Log (logFile, this->clock, logMask);
-    this->log->Write (Log::ALWAYS, "STARTING");
 
     // Read XML configuration file into tree structure
 

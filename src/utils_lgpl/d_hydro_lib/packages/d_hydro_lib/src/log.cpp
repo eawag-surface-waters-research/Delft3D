@@ -56,8 +56,6 @@ Log::Log (
         throw new Exception (true, "Pthreads error in Log: Cannot create thread-specific key: %s", strerror (errno));
     if (pthread_setspecific (this->thkey, NULL) != 0)
         throw new Exception (true, "Pthreads error in Log constructor: Cannot set thread-specific key: %s", strerror (errno));
-
-    this->Write (Log::ALWAYS, "Log mask set to 0x%08x", this->mask);
     }
 
 
@@ -152,7 +150,7 @@ Log::Write (
     if (threadID == NULL)
         threadID = "<anonymous>";
 
-    fprintf (this->output, "D_Hydro [%s] %-36s >> %s\n",
+    fprintf (this->output, "D_Hydro [%s] %s >> %s\n",
                         clock,
                         threadID,
                         buffer
