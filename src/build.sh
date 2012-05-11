@@ -136,6 +136,7 @@ fi
 case $compiler in
     gnu)
         ifortInit=""
+        iccInit=""
         addpath PATH /opt/gcc/bin
         addpath LD_LIBRARY_PATH /opt/gcc/lib /opt/gcc/lib64
         echo "Using GNU compilers in `witch gfortran`"
@@ -143,6 +144,7 @@ case $compiler in
 
     intel12)
         ifortInit=". /opt/intel/bin/ifortvars.sh $platform"
+        iccInit=""
         #idbInit='. /opt/intel/bin/idbvars.sh'
         echo "Using Intel 12 Fortran ($platform) compiler"
         ;;
@@ -151,12 +153,14 @@ case $compiler in
         if [ "$platform" == 'intel64' ]; then
             if [ -d /opt/intel/Compiler/11.1/072/bin/intel64 ]; then
                 ifortInit=". /opt/intel/Compiler/11.1/072/bin/intel64/ifortvars_intel64.sh $platform"
+                iccInit=""
                 idbInit=". /opt/intel/Compiler/11.1/072/bin/intel64/idbvars.sh"
                 echo "Using Intel 11.1 Fortran ($platform) compiler"
             fi
         else
             if [ -d /opt/intel/Compiler/11.1/072 ]; then
                 ifortInit=". /opt/intel/Compiler/11.1/072/bin/ifortvars.sh $platform"
+                iccInit=""
                 idbInit=". /opt/intel/Compiler/11.1/072/bin/$platform/idbvars.sh"
                 echo "Using Intel 11.1 Fortran ($platform) compiler"
             fi
@@ -168,11 +172,14 @@ case $compiler in
             ifortInit=". /opt/intel/Compiler/11.0/081/bin/ifortvars.sh $platform"
             idbInit=". /opt/intel/Compiler/11.0/081/bin/$platform/idbvars.sh"
             echo "Using Intel 11.0 Fortran ($platform) compiler"
+            iccInit=". /opt/intel/Compiler/11.0/081/bin/iccvars.sh $platform"
+            echo "Using Intel 11.0 C ($platform) compiler"
         fi
         ;;
 
     intel10)
         ifortInit='. /opt/intel/fc/10/bin/ifortvars.sh'
+        iccInit=""
         idbInit='. /opt/intel/idb/10/bin/idbvars.sh'
         echo "Using Intel 10 Fortran compiler (DEPRECATED!)"
         ;;
@@ -180,6 +187,7 @@ case $compiler in
     *)
         ifortInit='/bin/true'
         echo "Using default Linux Fortran compiler"
+        iccInit=""
         ;;
 esac
 
@@ -187,6 +195,14 @@ if [ "$ifortInit" != '' ]; then
     eval $ifortInit
     if [ $? -ne 0 ]; then
         echo 'Initialization of the Fortran compiler fails!'
+        exit 1
+    fi
+fi
+
+if [ "$iccInit" != '' ]; then
+    eval $iccInit
+    if [ $? -ne 0 ]; then
+        echo 'Initialization of the C compiler fails!'
         exit 1
     fi
 fi
@@ -319,7 +335,7 @@ if [ "$platform" = 'intel64' ]; then
         CXXFLAGS='$flags -fPIC -m64 $CXXFLAGS' \
         FFLAGS='$flags -fPIC -m64 $FFLAGS' \
         FCFLAGS='$flags -fPIC -m64 $FCFLAGS' \
-            ./configure --prefix=`pwd` &> $log \
+            ./configure --prefix=`pwd` CC=icc CXX=icpc FC=ifort F77=ifort &> $log \
         "
 else
     command=" \
@@ -327,7 +343,7 @@ else
         CXXFLAGS='$flags -fPIC $CXXFLAGS' \
         FFLAGS='$flags -fPIC $FFLAGS' \
         FCFLAGS='$flags -fPIC $FCFLAGS' \
-            ./configure --prefix=`pwd` &> $log \
+            ./configure --prefix=`pwd` CC=icc CXX=icpc FC=ifort F77=ifort &> $log \
         "
 fi
 
