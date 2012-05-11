@@ -267,8 +267,6 @@ subroutine tricom_step(gdp)
     integer(pntrsize)                   , pointer :: thick
     integer(pntrsize)                   , pointer :: tp
     integer(pntrsize)                   , pointer :: tpcom
-    integer(pntrsize)                   , pointer :: tps
-    integer(pntrsize)                   , pointer :: tpscom
     integer(pntrsize)                   , pointer :: u1
     integer(pntrsize)                   , pointer :: umean
     integer(pntrsize)                   , pointer :: uorb
@@ -621,8 +619,6 @@ subroutine tricom_step(gdp)
     thick               => gdp%gdr_i_ch%thick
     tp                  => gdp%gdr_i_ch%tp
     tpcom               => gdp%gdr_i_ch%tpcom
-    tps                 => gdp%gdr_i_ch%tps
-    tpscom              => gdp%gdr_i_ch%tpscom
     u1                  => gdp%gdr_i_ch%u1
     umean               => gdp%gdr_i_ch%umean
     uorb                => gdp%gdr_i_ch%uorb
@@ -912,9 +908,9 @@ subroutine tricom_step(gdp)
                     & norow     ,noroco    ,i(irocol) ,ifcore    ,d(dps)    , &
                     & r(s1)     ,r(uorb)   ,r(tp)     ,r(teta)   ,r(dis)    , &
                     & r(wsu)    ,r(wsv)    ,r(grmasu) ,r(grmasv) ,r(hrms)   , &
-                    & r(tps)    ,r(ubot)   ,r(wlen)   ,r(hrmcom) ,r(tpcom)  , &
+                    & r(ubot)   ,r(wlen)   ,r(hrmcom) ,r(tpcom)  , &
                     & r(dircom) ,r(discom) ,r(wsucom) ,r(wsvcom) ,r(msucom) , &
-                    & r(msvcom) ,r(tpscom) ,r(ubcom)  ,r(wlcom)  ,r(rlabda) , &
+                    & r(msvcom) ,r(ubcom)  ,r(wlcom)  ,r(rlabda) , &
                     & r(dircos) ,r(dirsin) ,r(ewave1) ,roller    ,wavcmp    , &
                     & r(ewabr1) ,gdp       )
           call timer_stop(timer_tricom_rest, gdp)

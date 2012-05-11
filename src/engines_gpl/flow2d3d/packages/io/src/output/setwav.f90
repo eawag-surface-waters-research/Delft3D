@@ -3,9 +3,9 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
                 & norow     ,noroco    ,irocol    ,ifcore    ,dps       , &
                 & s0        ,uorb      ,tp        ,teta      ,dis       , &
                 & wsu       ,wsv       ,grmasu    ,grmasv    ,hrms      , &
-                & tps       ,ubot      ,wlen      ,hrmcom    ,tpcom     , &
+                & ubot      ,wlen      ,hrmcom    ,tpcom     , &
                 & dircom    ,discom    ,wsucom    ,wsvcom    ,msucom    , &
-                & msvcom    ,tpscom    ,ubcom     ,wlcom     ,rlabda    , &
+                & msvcom    ,ubcom     ,wlcom     ,rlabda    , &
                 & dircos    ,dirsin    ,ewave0    ,roller    ,wavcmp    , &
                 & ewabr0    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
@@ -105,7 +105,6 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: uorb   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: wsu    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: wsv    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: tps    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: ubot   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: wlen   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nmaxus, mmax, 2)                                       :: dircom !  Description and declaration in esm_alloc_real.f90
@@ -118,7 +117,6 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
     real(fp)  , dimension(nmaxus, mmax, 2)                                       :: tpcom  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nmaxus, mmax, 2)                                       :: wsucom !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nmaxus, mmax, 2)                                       :: wsvcom !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: tpscom !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nmaxus, mmax, 2)                                       :: ubcom  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nmaxus, mmax, 2)                                       :: wlcom  !  Description and declaration in esm_alloc_real.f90
     character(*)                                                                 :: comfil !!  Name for communication file
@@ -321,12 +319,25 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
               & atimw     ,btimw     ,hrms      ,hrmcom    ,gdp       )
     if (error) goto 9999
     !
-    funam = 'TP'
-    call frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
-              & nmax      ,kmaxk     ,nmaxus    ,grpnam    ,nelmx     , &
-              & elmnms    ,elmdms    ,elmqty    ,elmunt    ,elmdes    , &
-              & elmtps    ,nbytsg    ,funam     ,ntimwa    ,ntimwb    , &
-              & atimw     ,btimw     ,tp        ,tpcom     ,gdp       )
+    if (tps_from_com) then
+       !
+       ! Read TPS from the com-file instead of TP
+       ! Put it in array tp
+       !
+       funam = 'TPS'
+       call frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
+                 & nmax      ,kmaxk     ,nmaxus    ,grpnam    ,nelmx     , &
+                 & elmnms    ,elmdms    ,elmqty    ,elmunt    ,elmdes    , &
+                 & elmtps    ,nbytsg    ,funam     ,ntimwa    ,ntimwb    , &
+                 & atimw     ,btimw     ,tp        ,tpcom     ,gdp       )
+    else
+       funam = 'TP'
+       call frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
+                 & nmax      ,kmaxk     ,nmaxus    ,grpnam    ,nelmx     , &
+                 & elmnms    ,elmdms    ,elmqty    ,elmunt    ,elmdes    , &
+                 & elmtps    ,nbytsg    ,funam     ,ntimwa    ,ntimwb    , &
+                 & atimw     ,btimw     ,tp        ,tpcom     ,gdp       )
+    endif
     if (error) goto 9999
     !
     ! Read the direction and interpolate by calling dirint
@@ -381,16 +392,6 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
                  & atimw     ,btimw     ,grmasv    ,msvcom    ,gdp       )
        if (error) goto 9999
        !
-       if (tps_from_com) then
-          funam = 'TPS'
-          call frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
-                    & nmax      ,kmaxk     ,nmaxus    ,grpnam    ,nelmx     , &
-                    & elmnms    ,elmdms    ,elmqty    ,elmunt    ,elmdes    , &
-                    & elmtps    ,nbytsg    ,funam     ,ntimwa    ,ntimwb    , &
-                    & atimw     ,btimw     ,tps       ,tpscom    ,gdp       )
-          if (error) goto 9999
-       endif
-       !
        if (ubot_from_com) then
           funam = 'UBOT'
           call frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
@@ -416,13 +417,6 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
     !
     ifcore(1) = ntimwa
     ifcore(2) = ntimwb
-    !
-    ! The smoothed peak wave period TPS (read from the COM file) can be used 
-    ! instead of the standard peak wave period TP.
-    !
-    if (tps_from_com) then
-       tp = tps
-    endif
     !
     ! Compute the orbital velocity and wave length.
     !

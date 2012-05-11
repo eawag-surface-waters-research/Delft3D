@@ -68,6 +68,7 @@ libdata_gdp_la_SOURCES = \
          inithwid.f90 \
          initincbc.f90 \
          initincbcc.f90 \
+         initincwav.f90 \
          initkeywtd.f90 \
          initmassbal.f90 \
          initmorpar.f90 \

@@ -258,8 +258,6 @@ type gd_r_i_ch
        integer(pntrsize) :: tkepro     !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: tp         !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: tpcom      !  Description and declaration in esm_alloc_real.f90
-       integer(pntrsize) :: tps        !  Description and declaration in esm_alloc_real.f90
-       integer(pntrsize) :: tpscom     !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: u0         !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: u1         !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: ubrlsu     !  Description and declaration in esm_alloc_real.f90

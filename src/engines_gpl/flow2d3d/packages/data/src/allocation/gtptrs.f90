@@ -280,8 +280,6 @@ subroutine gtptrs(gdp)
     integer(pntrsize), pointer :: tkepro
     integer(pntrsize), pointer :: tp
     integer(pntrsize), pointer :: tpcom
-    integer(pntrsize), pointer :: tps
-    integer(pntrsize), pointer :: tpscom
     integer(pntrsize), pointer :: u0
     integer(pntrsize), pointer :: u1
     integer(pntrsize), pointer :: ubrlsu
@@ -749,8 +747,6 @@ subroutine gtptrs(gdp)
     tkepro    => gdp%gdr_i_ch%tkepro
     tp        => gdp%gdr_i_ch%tp
     tpcom     => gdp%gdr_i_ch%tpcom
-    tps       => gdp%gdr_i_ch%tps
-    tpscom    => gdp%gdr_i_ch%tpscom
     u0        => gdp%gdr_i_ch%u0
     u1        => gdp%gdr_i_ch%u1
     ubrlsu    => gdp%gdr_i_ch%ubrlsu
@@ -1289,8 +1285,6 @@ subroutine gtptrs(gdp)
     tkepro = gtrpnt('tkepro', gdp)
     tp     = gtrpnt('tp'    , gdp)
     tpcom  = gtrpnt('tpcom' , gdp)
-    tps    = gtrpnt('tps'   , gdp)
-    tpscom = gtrpnt('tpscom', gdp)
     u0     = gtrpnt('u0'    , gdp)
     u1     = gtrpnt('u1'    , gdp)
     ubrlsu = gtrpnt('ubrlsu', gdp)

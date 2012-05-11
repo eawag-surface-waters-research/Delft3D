@@ -6,7 +6,7 @@ subroutine incwav(timsec    ,j         ,nmmaxj    ,norow     ,icx       , &
                 & cgdghf    ,cgdghl    ,zmeanf    ,umeanf    ,zmeanl    , &
                 & umeanl    ,urf       ,dpu       ,s0        ,umean     , &
                 & xcor      ,ycor      ,hu        ,ncmax     ,ampbc     , &
-                & ombc      ,phibc     ,thetbc    ,gdp       )
+                & ombc      ,phibc     ,thetbc    ,first     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -49,6 +49,7 @@ subroutine incwav(timsec    ,j         ,nmmaxj    ,norow     ,icx       , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    integer                , pointer :: iro
     integer                , pointer :: ncomp
     integer                , pointer :: nsplit
     real(fp)               , pointer :: timtap
@@ -56,7 +57,6 @@ subroutine incwav(timsec    ,j         ,nmmaxj    ,norow     ,icx       , &
     real(fp)               , pointer :: gamdis
     real(fp)               , pointer :: rhow
     real(fp)               , pointer :: ag
-    integer                , pointer :: iro
 !
 ! Global variables
 !
@@ -103,6 +103,7 @@ subroutine incwav(timsec    ,j         ,nmmaxj    ,norow     ,icx       , &
     real(fp), dimension(norow)                 :: zetabl !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(norow)                 :: zmeanf !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(norow)                 :: zmeanl !  Description and declaration in esm_alloc_real.f90
+    logical                                    :: first
 !
 ! Local variables
 !
@@ -186,6 +187,12 @@ subroutine incwav(timsec    ,j         ,nmmaxj    ,norow     ,icx       , &
     ag       => gdp%gdphysco%ag
     iro      => gdp%gdphysco%iro
     !
+    if (first) then
+       ctbf  = 1.0_fp
+       ctbl  = 1.0_fp
+       stbf  = 0.0_fp
+       stbl  = 0.0_fp
+    endif
     icxy = max(icx, icy)
     ddb  = gdp%d%ddbound
     !
@@ -203,12 +210,14 @@ subroutine incwav(timsec    ,j         ,nmmaxj    ,norow     ,icx       , &
              !
              ! First (left) boundary
              !
-             n   = irocol(1, ic)
-             m   = irocol(2, ic) - 1
-             nmbu    = (n + ddb)*icy + (m + ddb)*icx - icxy
-             nmbs    = nmbu
+             n      = irocol(1, ic)
+             m      = irocol(2, ic) - 1
+             nmbu   = (n + ddb)*icy + (m + ddb)*icx - icxy
+             nmbs   = nmbu
              !
              ib     = irocol(4, ic)
+             ctb    = ctbf(ic)
+             stb    = stbf(ic)
              zm     = zmeanf(ic)
              um     = umeanf(ic)
              wenm   = wenfm(ic)
@@ -218,12 +227,14 @@ subroutine incwav(timsec    ,j         ,nmmaxj    ,norow     ,icx       , &
              !
              ! Second (right) boundary
              !
-             n   = irocol(1, ic)
-             m   = irocol(3, ic)
-             nmbu    = (n + ddb)*icy + (m + ddb)*icx - icxy
-             nmbs    = nmbu + icx
+             n      = irocol(1, ic)
+             m      = irocol(3, ic)
+             nmbu   = (n + ddb)*icy + (m + ddb)*icx - icxy
+             nmbs   = nmbu + icx
              !
              ib     = irocol(5, ic)
+             ctb    = ctbl(ic)
+             stb    = stbl(ic)
              zm     = zmeanl(ic)
              um     = umeanl(ic)
              wenm   = wenlm(ic)

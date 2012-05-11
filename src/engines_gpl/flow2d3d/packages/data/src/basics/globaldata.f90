@@ -120,6 +120,7 @@ module globaldata
     include 'f0isf1.igs'
     include 'incbc.igs'
     include 'incbcc.igs'
+    include 'incwav.igs'
     include 'inibcc.igs'
     include 'inibct.igs'
     include 'inidis.igs'
@@ -217,6 +218,7 @@ module globaldata
        type (sv_f0isf1)   , pointer :: gdf0isf1
        type (sv_incbc)    , pointer :: gdincbc
        type (sv_incbcc)   , pointer :: gdincbcc
+       type (sv_incwav)   , pointer :: gdincwav
        type (sv_inibcc)   , pointer :: gdinibcc
        type (sv_inibct)   , pointer :: gdinibct
        type (sv_inidis)   , pointer :: gdinidis

@@ -1972,8 +1972,6 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                        hrmcom(nmaxus,mmax   ,2) * kfacwv
     !                        tp    (nmaxddb  ,mmaxddb) * kfacwv
     !                        tpcom (nmaxus,mmax   ,2) * kfacwv
-    !                        tps   (nmaxddb  ,mmaxddb) * kfacwv
-    !                        tpscom(nmaxus,mmax   ,2) * kfacwv
     !                        grmasu(nmaxddb  ,mmaxddb)
     !                        msucom(nmaxus,mmax   ,2) * kfacwv
     !                        grmasv(nmaxddb  ,mmaxddb)
@@ -2101,20 +2099,6 @@ subroutine esm_alloc_real(lundia, error, gdp)
                              !  Help array to interpolate between
                              !  to consecutive timesteps for
                              !  period waves
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'tps'           !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv, gdp)
-                             !  Pointer of array TPS
-                             !  Smoothed period waves
-    if (ierr<= - 9) goto 9999
-    !
-    pntnam = 'tpscom'        !  Global data
-    ierr = mkfpnt(pntnam, nmaxus*mmax*2*kfacwv, gdp)
-                             !  Pointer of array TPSCOM
-                             !  Help array to interpolate between
-                             !  to consecutive timesteps for
-                             !  Smoothed period waves
     if (ierr<= - 9) goto 9999
     !
     pntnam = 'grmasu'        !  Global data

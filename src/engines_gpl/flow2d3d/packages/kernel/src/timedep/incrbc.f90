@@ -56,6 +56,7 @@ subroutine incrbc(timsec    ,j         ,nmmaxj    ,nmax      ,norow     , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    logical                , pointer :: first
 !
 ! Global variables
 !
@@ -123,6 +124,13 @@ subroutine incrbc(timsec    ,j         ,nmmaxj    ,nmax      ,norow     , &
 !
 !! executable statements -------------------------------------------------------
 !
+    ! The first time incwav is called for the rows,
+    ! AND the first time incwav is called for the columns,
+    ! parameter first must be true (= initial value).
+    ! After these two calls, first must be false (and keep that value)
+    !
+    first    => gdp%gdincwav%first
+    !
     urf = 0.01
     nmaxddb = nmax + 2*gdp%d%ddbound
     !
@@ -138,7 +146,7 @@ subroutine incrbc(timsec    ,j         ,nmmaxj    ,nmax      ,norow     , &
               & cgdghf(1) ,cgdghl(1) ,zmeanf(1) ,umeanf(1) ,zmeanl(1) , &
               & umeanl(1) ,urf       ,dpu       ,s0        ,u0        , &
               & xcor      ,ycor      ,hu        ,ncmax     ,ampbc     , &
-              & ombc      ,phibc     ,thetbc    ,gdp       )
+              & ombc      ,phibc     ,thetbc    ,first     ,gdp       )
     !
     ! Determine the coefficients to be used for the Riemann boundaries in CUCBP
     ! for left and right boundaries.
@@ -167,7 +175,7 @@ subroutine incrbc(timsec    ,j         ,nmmaxj    ,nmax      ,norow     , &
               & cgdghf(norow + 1)    ,cgdghl(norow + 1)    ,zmeanf(norow + 1)    ,umeanf(norow + 1)    ,zmeanl(norow + 1)    , &
               & umeanl(norow + 1)    ,urf       ,dpv       ,s0        ,v0        , &
               & xcor      ,ycor      ,hv        ,ncmax     ,ampbc     , &
-              & ombc      ,phibc     ,thetbc    ,gdp       )
+              & ombc      ,phibc     ,thetbc    ,first     ,gdp       )
     !
     ! Determine the coefficients to be used for the Riemann boundaries in
     ! CUCBP for bottom and top boundaries.
@@ -182,4 +190,6 @@ subroutine incrbc(timsec    ,j         ,nmmaxj    ,nmax      ,norow     , &
               & zetaif(norow + 1)    ,zetail(norow + 1)    ,zmeanf(norow + 1)    ,zmeanl(norow + 1)    ,umeanf(norow + 1)    , &
               & umeanl(norow + 1)    ,circ2d(1, norow + 1) ,guv       ,wsv       ,irocol(1, norow + 1) , &
               & timsec    ,hdt       ,gdp       )
+    !
+    first = .false.
 end subroutine incrbc

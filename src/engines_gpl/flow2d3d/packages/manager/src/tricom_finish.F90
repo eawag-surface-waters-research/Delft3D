@@ -254,8 +254,6 @@ subroutine tricom_finish(gdp       )
     integer(pntrsize)                   , pointer :: thick
     integer(pntrsize)                   , pointer :: tp
     integer(pntrsize)                   , pointer :: tpcom
-    integer(pntrsize)                   , pointer :: tps
-    integer(pntrsize)                   , pointer :: tpscom
     integer(pntrsize)                   , pointer :: u1
     integer(pntrsize)                   , pointer :: umean
     integer(pntrsize)                   , pointer :: uorb
@@ -621,8 +619,6 @@ subroutine tricom_finish(gdp       )
     thick               => gdp%gdr_i_ch%thick
     tp                  => gdp%gdr_i_ch%tp
     tpcom               => gdp%gdr_i_ch%tpcom
-    tps                 => gdp%gdr_i_ch%tps
-    tpscom              => gdp%gdr_i_ch%tpscom
     u1                  => gdp%gdr_i_ch%u1
     umean               => gdp%gdr_i_ch%umean
     uorb                => gdp%gdr_i_ch%uorb

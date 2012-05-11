@@ -258,8 +258,6 @@ function getpointer(pntnam, gdp)
     integer(pntrsize) , pointer :: tkepro
     integer(pntrsize) , pointer :: tp
     integer(pntrsize) , pointer :: tpcom
-    integer(pntrsize) , pointer :: tps
-    integer(pntrsize) , pointer :: tpscom
     integer(pntrsize) , pointer :: u0
     integer(pntrsize) , pointer :: u1
     integer(pntrsize) , pointer :: ubrlsu
@@ -602,8 +600,6 @@ function getpointer(pntnam, gdp)
     tkepro  => gdp%gdr_i_ch%tkepro
     tp      => gdp%gdr_i_ch%tp
     tpcom   => gdp%gdr_i_ch%tpcom
-    tps     => gdp%gdr_i_ch%tps
-    tpscom  => gdp%gdr_i_ch%tpscom
     u0      => gdp%gdr_i_ch%u0
     u1      => gdp%gdr_i_ch%u1
     ubrlsu  => gdp%gdr_i_ch%ubrlsu
@@ -1153,10 +1149,6 @@ function getpointer(pntnam, gdp)
        returnval = tp
     case ('tpcom')
        returnval = tpcom
-    case ('tps')
-       returnval = tps
-    case ('tpscom')
-       returnval = tpscom
     case ('u0')
        returnval = u0
     case ('u1')

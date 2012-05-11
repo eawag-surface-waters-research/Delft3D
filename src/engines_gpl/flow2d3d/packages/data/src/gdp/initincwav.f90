@@ -1,4 +1,4 @@
-subroutine trisim (numdom, nummap, context_id, fsm_flags, runid)
+subroutine initincwav(gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -29,91 +29,25 @@ subroutine trisim (numdom, nummap, context_id, fsm_flags, runid)
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-!    Function: Main routine for the 2d / 3d program
-! Method used:
+! NONE
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-    use mod_trisim
     use precision
-    use dfparall
-
-    ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
-    ! Activate the following line
-    ! See also statements below
-    !
-    use ifcore
-    !
-    ! global data declaration; compare with include 'globdat.igd'
-    !
     use globaldata
+    !
     implicit none
-    type(globDat),pointer :: gdp
     !
-    include 'fsm.i'
-!
-! Parameters
-!
-    integer       , intent(in)  :: context_id
-    integer       , intent(in)  :: fsm_flags
-    integer       , intent(in)  :: numdom        ! Number of subdomains (0 means single domain)
-                                                 ! as detected by hydra
-    integer       , intent(in)  :: nummap        ! Number of mappers (one for each DD boundaries connected with this subdomain)
-                                                 ! as detected by hydra
-    character(*)              :: runid
-!
-! Local variables
-!
-    integer :: ierr
-    integer :: retval
+    type(globdat),target :: gdp
     !
-    ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
-    ! Activate the following line
-    ! See also statements below
+    ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    INTEGER*4 OLD_FPE_FLAGS, NEW_FPE_FLAGS
+!
+! Global variables
+!
 !
 !! executable statements -------------------------------------------------------
-
-    ! Initialize MPI
-    ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
-    ! Activate the following two lines
-    ! See also use statement above
-    !
-    NEW_FPE_FLAGS = FPE_M_TRAP_OVF + FPE_M_TRAP_DIV0 + FPE_M_TRAP_INV
-    OLD_FPE_FLAGS = FOR_SET_FPE (NEW_FPE_FLAGS)
-    !
-    ! create and initialize GDP structure
-    !
-    allocate(gdp)
-    !
-    ! gdp%runid must be nullified before calling trisim_init
-    ! When trisim_init is called via OpenDA/OpenMI, gdp%runid is set before the call
-    !
-    nullify(gdp%runid)
-    !
-    retval = trisim_init(numdom, nummap, context_id, fsm_flags, runid, gdp)
-    if (retval /= 0) then
-       return
-    endif
-    !
-    retval = trisim_step(gdp)
-    if (retval /= 0) then
-       return
-    endif
-    !
-    retval = trisim_finish(gdp)
-    if (retval /= 0) then
-       return
-    endif
-    !
-    !! TODORE call gdp_dealloc(gdp)
-    !! TODORE deallocate(gdp, stat=ierr)
-    !
-    ! Finalizes MPI
-    !
-    if (parll) then
-       call dfexitmpi(0)
-    endif
-end subroutine trisim
+!
+    gdp%gdincwav%first = .true.
+end subroutine initincwav
