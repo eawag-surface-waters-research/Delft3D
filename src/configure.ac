@@ -35,9 +35,9 @@ AC_SUBST(INCLTDL)
 
 # c, c++ and c preprocessor
 # We should prefer gcc-mp-#.# for OSX (prefer macports over default compiler), Use CXX=g++-mp-#.# CC=gcc-mp-#.# to use the macports compiler..
-AC_PROG_CXX([icc])
-AC_PROG_CC([icc])
-AC_PROG_CPP([icpc])
+AC_PROG_CXX
+AC_PROG_CC
+AC_PROG_CPP
 
 #These are required for java
 #AC_PROG_JAVA
@@ -189,11 +189,11 @@ AC_CHECK_HEADER(expat.h,, [AC_MSG_ERROR([Compiler can't find <expat.h>])])
 AC_CHECK_LIB(expat, XML_Parse,, [AC_MSG_ERROR([Compiler can't find libexpat])])
 AC_FUNC_VPRINTF
 # When using the Intel Fortran compiler, check for the needed libraries
-if test $FC == ifort; then
-    AC_CHECK_LIB([irc], [main], [HAVE_LIBirc=1] [FCLIBS="$FCLIBS -lirc"],)
-    AC_CHECK_LIB([svml], [main], [HAVE_LIBsvml=1] [FCLIBS="$FCLIBS -lsvml"],)
-    AC_CHECK_LIB([mcheck], [main], [HAVE_LIBmcheck=1] [FCLIBS="$FCLIBS -lmcheck"],)
-fi
+####if test $FC == ifort; then
+####    AC_CHECK_LIB([irc], [main], [HAVE_LIBirc=1] [FCLIBS="$FCLIBS -lirc"],)
+####    AC_CHECK_LIB([svml], [main], [HAVE_LIBsvml=1] [FCLIBS="$FCLIBS -lsvml"],)
+####    AC_CHECK_LIB([mcheck], [main], [HAVE_LIBmcheck=1] [FCLIBS="$FCLIBS -lmcheck"],)
+####fi
 
 # checks for pthreads
 ACX_PTHREAD([enable_threads="pthread"],[enable_threads="no"])

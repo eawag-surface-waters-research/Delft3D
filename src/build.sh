@@ -335,7 +335,7 @@ if [ "$platform" = 'intel64' ]; then
         CXXFLAGS='$flags -fPIC -m64 $CXXFLAGS' \
         FFLAGS='$flags -fPIC -m64 $FFLAGS' \
         FCFLAGS='$flags -fPIC -m64 $FCFLAGS' \
-            ./configure --prefix=`pwd` CC=icc CXX=icpc FC=ifort F77=ifort &> $log \
+            ./configure --prefix=`pwd` &> $log \
         "
 else
     command=" \
@@ -343,7 +343,7 @@ else
         CXXFLAGS='$flags -fPIC $CXXFLAGS' \
         FFLAGS='$flags -fPIC $FFLAGS' \
         FCFLAGS='$flags -fPIC $FCFLAGS' \
-            ./configure --prefix=`pwd` CC=icc CXX=icpc FC=ifort F77=ifort &> $log \
+            ./configure --prefix=`pwd` &> $log \
         "
 fi
 
