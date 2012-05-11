@@ -280,7 +280,7 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
           & lundia    ,gdp       )
        if (kmax==1) then
           call addelm(nefiswrsedm,'RSEDEQ',' ','[ KG/M3 ]','REAL',4         , &
-             & 'Equilibrium concentration of sediment per layer'            , &
+             & 'Equilibrium concentration of sediment (2D only)'            , &
              & 4         ,nmaxgl    ,mmaxgl    ,kmax      ,lsed      ,0     , &
              & lundia    ,gdp       )
        endif

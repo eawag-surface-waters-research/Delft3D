@@ -202,10 +202,12 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
              & 'Settling velocity in station                                  ', &
              &  3         ,nostat    ,kmaxout   ,lsed      ,0         ,0       , &
              &  lundia    ,gdp       )
-           call addelm(nefiswrsedh,'ZRSDEQ',' ','[ KG/M3 ]','REAL',4           , &
-             & 'Equilibrium concentration of sediment at station              ', &
-             &  3         ,nostat    ,kmaxout_restr,lsed      ,0         ,0       , &
-             &  lundia    ,gdp       )
+           if (kmax == 1) then
+             call addelm(nefiswrsedh,'ZRSDEQ',' ','[ KG/M3 ]','REAL',4           , &
+               & 'Equilibrium concentration of sediment at station (2D only)    ', &
+               &  3         ,nostat    ,kmaxout_restr,lsed      ,0         ,0       , &
+               &  lundia    ,gdp       )
+           endif
          endif
          call addelm(nefiswrsedh,'ZBDSED',' ','[ KG/M2 ]','REAL',4           , &
            & 'Available mass of sediment at bed at station                  ', &
@@ -364,21 +366,24 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
           enddo
           ierror = putelt(fds, grnam5, 'ZWS', uindex, 1, sbuff)
           if (ierror/= 0) goto 9999
-          !
-          ! group 5: element 'ZRSDEQ'
-          !
-          call sbuff_checksize(nostat*kmaxout_restr*lsed)
-          i = 0
-          do l = 1, lsed
-             do k = 1, kmaxout_restr
-                do n = 1, nostat
-                   i        = i+1
-                   sbuff(i) = real(zrsdeq(n, shlay_restr(k), l),sp)
+          if (kmax == 1) then
+             !
+             ! group 5: element 'ZRSDEQ'
+             ! kmax=1: don't use kmaxout/shlay
+             !
+             call sbuff_checksize(nostat*kmax*lsed)
+             i = 0
+             do l = 1, lsed
+                do k = 1, kmax
+                   do n = 1, nostat
+                      i        = i+1
+                      sbuff(i) = real(zrsdeq(n, k, l),sp)
+                   enddo
                 enddo
              enddo
-          enddo
-          ierror = putelt(fds, grnam5, 'ZRSDEQ', uindex, 1, sbuff)
-          if (ierror/= 0) goto 9999
+             ierror = putelt(fds, grnam5, 'ZRSDEQ', uindex, 1, sbuff)
+             if (ierror/= 0) goto 9999
+          endif
        endif
        !
        ! group 5: element 'ZBDSED'

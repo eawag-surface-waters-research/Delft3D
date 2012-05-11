@@ -227,10 +227,12 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
                &  3         ,nostatgl  ,kmaxout   ,lsed      ,0         ,0       , &
                &  lundia    ,gdp       )
            endif
-           call addelm(nefiswrsedh,'ZRSDEQ',' ','[ KG/M3 ]','REAL',4           , &
-             & 'Equilibrium concentration of sediment at station              ', &
-             &  3         ,nostatgl  ,kmaxout   ,lsed      ,0         ,0       , &
-             &  lundia    ,gdp       )
+           if (kmax == 1) then
+             call addelm(nefiswrsedh,'ZRSDEQ',' ','[ KG/M3 ]','REAL',4           , &
+               & 'Equilibrium concentration of sediment at station (2D only)    ', &
+               &  3         ,nostatgl  ,kmaxout   ,lsed      ,0         ,0       , &
+               &  lundia    ,gdp       )
+           endif
          endif
          call addelm(nefiswrsedh,'ZBDSED',' ','[ KG/M2 ]','REAL',4           , &
            & 'Available mass of sediment at bed at station                  ', &
@@ -410,26 +412,29 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
              ierror = putelt(fds, grnam5, 'ZWS', uindex, 1, sbuff)
              if (ierror/= 0) goto 9999
           endif !inode==master
-          !
-          ! group 5: element 'ZRSDEQ'
-          !
-          if (inode == master) allocate( rsbuff2(1:nostatgl, 1:kmax, 1:lsed) )
-          call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, kmax, 1, lsed, order_sta, zrsdeq, rsbuff2, gdp)
-          if (inode == master) then
-             call sbuff_checksize(nostatgl*kmaxout*lsed)
-             i = 0
-             do l = 1, lsed
-                do k = 1, kmaxout
-                   do n = 1, nostatgl
-                      i        = i+1
-                      sbuff(i) = rsbuff2(n, shlay(k), l)
+          if (kmax == 1) then
+             !
+             ! group 5: element 'ZRSDEQ'
+             ! kmax=1: don't use kmaxout/shlay
+             !
+             if (inode == master) allocate( rsbuff2(1:nostatgl, 1:kmax, 1:lsed) )
+             call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, kmax, 1, lsed, order_sta, zrsdeq, rsbuff2, gdp)
+             if (inode == master) then
+                call sbuff_checksize(nostatgl*kmax*lsed)
+                i = 0
+                do l = 1, lsed
+                   do k = 1, kmax
+                      do n = 1, nostatgl
+                         i        = i+1
+                         sbuff(i) = rsbuff2(n, k, l)
+                      enddo
                    enddo
                 enddo
-             enddo
-             deallocate( rsbuff2 )
-             ierror = putelt(fds, grnam5, 'ZRSDEQ', uindex, 1, sbuff)
-             if (ierror/= 0) goto 9999
-          endif !inode==master
+                deallocate( rsbuff2 )
+                ierror = putelt(fds, grnam5, 'ZRSDEQ', uindex, 1, sbuff)
+                if (ierror/= 0) goto 9999
+             endif !inode==master
+          endif !kmax=1
        endif
        !
        ! group 5: element 'ZBDSED'
