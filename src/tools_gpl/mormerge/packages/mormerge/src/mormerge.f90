@@ -51,11 +51,11 @@ character(256)                            :: version_full   ! by calling getfull
 !
 call getfullversionstring_MORMERGE(version_full)
 !
-if (iargc() /= numarg) then
+if (COMMAND_ARGUMENT_COUNT() /= numarg) then
    call printUsage()
    stop 
 endif
-allocate(arguments(0:iargc()))
+allocate(arguments(0:COMMAND_ARGUMENT_COUNT()))
 !
 iindex = 0
 windex = 0

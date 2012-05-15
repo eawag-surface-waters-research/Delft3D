@@ -77,7 +77,7 @@ program waves_main
    ! ====================================================================================
    !
    mode_in = 0
-   select case(iargc())
+   select case(COMMAND_ARGUMENT_COUNT())
    case (1)
       call getarg(1,mdw_file)
    case (2)

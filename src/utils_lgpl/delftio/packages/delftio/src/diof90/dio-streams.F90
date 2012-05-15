@@ -308,7 +308,7 @@ subroutine DioStreamError(nr, text)
         call GetArg(0, exePath)
         call DioConfGetExeName(exePath, errFile)
         errFile = 'dio-' // trim(errFile) // '-errors.txt'
-        open(lun, file=errFile, access = 'append', iostat=ierr)
+        open(lun, file=errFile, position = 'append', iostat=ierr)
         if ( ierr == 0 ) then
             write(lun, '(A,I5,A,A)') 'DioError ', nr, ': ', trim(text)
             close(lun)
