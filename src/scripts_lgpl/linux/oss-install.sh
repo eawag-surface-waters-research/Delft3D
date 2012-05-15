@@ -16,14 +16,15 @@ function copyFile () {
         echo "can't copy \"$1\" to \"$2\"" 1>&2
         globalErrorLevel=1
     fi
+    
+    return
 }
-
 
 # ===================
 # === INSTALL_ALL ===
 # ===================
 function install_all () {
-    echo "    installing all open source projects . . ."
+    echo "installing all open source projects . . ."
 
     d_hydro
     flow2d3d
@@ -42,11 +43,11 @@ function install_all () {
 
 
 
-# ========================
-# === INSTALL_DELFT3D_FLOW
-# ========================
+# ============================
+# === INSTALL_DELFT3D_FLOW ===
+# ============================
 function delft3d_flow () {
-    echo "    installing delft3d-flow . . ."
+    echo "installing delft3d-flow . . ."
 
     d_hydro
     flow2d3d
@@ -61,17 +62,18 @@ function delft3d_flow () {
 
 
 
-# ==========================
-# === INSTALL_D_HYDRO
-# ==========================
+# =======================
+# === INSTALL_D_HYDRO ===
+# =======================
 function d_hydro () {
     echo "installing d_hydro . . ."
+    
     dest_bin="$dest_main/lnx/flow2d3d/bin"
 
     mkdir -p $dest_bin
 
-    copyFile "bin/d_hydro.exe" "$dest_bin"
-    copyFile "third_party_open/tclkit/bin/intel/deltares_hydro.exe" "$dest_bin"
+    copyFile "bin/d_hydro.exe" 					    $dest_bin
+    copyFile "third_party_open/tclkit/bin/intel/deltares_hydro.exe" $dest_bin
 
     return
 }
@@ -79,10 +81,11 @@ function d_hydro () {
 
 
 # ========================
-# === INSTALL FLOW2D3D
+# === INSTALL FLOW2D3D ===
 # ========================
 function flow2d3d () {
     echo "installing flow2d3d . . ."
+    
     dest_bin="$dest_main/lnx/flow2d3d/bin"
     dest_lib="$dest_main/lnx/flow2d3d/lib"
     dest_default="$dest_main/lnx/flow2d3d/default"
@@ -93,24 +96,25 @@ function flow2d3d () {
     mkdir -p $dest_default
     mkdir -p $dest_scripts
 
-    cp -fp lib/libflow2d3d.so                                 $dest_bin
-    cp -fp lib/libflow2d3d_sp.so                              $dest_bin
-    copyFile "engines_gpl/flow2d3d/scripts/meteo_old2new.m"   $dest_scripts
-    copyFile "bin/esm_create"                                 $dest_bin
-    copyFile "bin/esm_delete"                                 $dest_bin
-    copyFile "bin/esm_info"                                   $dest_bin
-    copyFile "engines_gpl/flow2d3d/default/*"                 $dest_default
+    copyFile "lib/libflow2d3d.so"                           $dest_bin
+    copyFile "lib/libflow2d3d_sp.so"                        $dest_bin
+    copyFile "engines_gpl/flow2d3d/scripts/meteo_old2new.m" $dest_scripts
+    copyFile "bin/esm_create"                               $dest_bin
+    copyFile "bin/esm_delete"                               $dest_bin
+    copyFile "bin/esm_info"                                 $dest_bin
+    copyFile "engines_gpl/flow2d3d/default/*"               $dest_default
 
     return
 }
 
 
 
-# ===========================
-# === INSTALL FLOW2D3D_OPENDA
-# ===========================
+# ===============================
+# === INSTALL FLOW2D3D_OPENDA ===
+# ===============================
 function flow2d3d_openda () {
     echo "installing flow2d3d_openda . . ."
+    
     dest_bin="$dest_main/lnx/flow2d3d/bin"
     dest_lib="$dest_main/lnx/flow2d3d/lib"
     dest_default="$dest_main/lnx/flow2d3d/default"
@@ -121,22 +125,22 @@ function flow2d3d_openda () {
     mkdir -p $dest_default
     mkdir -p $dest_scripts
 
-    cp -fp lib/libflow2d3d_openda.so                                 $dest_bin
-    cp -fp lib/libflow2d3d_openda_sp.so                              $dest_bin
-    copyFile "engines_gpl/flow2d3d/scripts/meteo_old2new.m"            $dest_scripts
-    copyFile "bin/esm_create"                                          $dest_bin
-    copyFile "bin/esm_delete"                                          $dest_bin
-    copyFile "bin/esm_info"                                            $dest_bin
-    copyFile "engines_gpl/flow2d3d/default/*.*"                        $dest_default
+    copyFile "lib/libflow2d3d_openda.so"                    $dest_bin
+    copyFile "lib/libflow2d3d_openda_sp.so"                 $dest_bin
+    copyFile "engines_gpl/flow2d3d/scripts/meteo_old2new.m" $dest_scripts
+    copyFile "bin/esm_create"                               $dest_bin
+    copyFile "bin/esm_delete"                               $dest_bin
+    copyFile "bin/esm_info"                                 $dest_bin
+    copyFile "engines_gpl/flow2d3d/default/*.*"             $dest_default
 
     return
 }
 
 
 
-# ========================
-# === INSTALL WAVE
-# ========================
+# ====================
+# === INSTALL WAVE ===
+# ====================
 function wave () {
     echo "installing wave . . ."
 
@@ -154,161 +158,171 @@ function wave () {
     mkdir -p $dest_swan_lib
     mkdir -p $dest_swan_scripts
 
-    copyFile "bin/wave.exe"                                        $dest_bin
-    copyFile "engines_gpl/flow2d3d/default/dioconfig.ini"          $dest_default
-    copyFile "third_party_open/swan/bin/linux/*.*"                 $dest_swan_bin
-    copyFile "third_party_open/swan/lib/linux/*.*"                 $dest_swan_lib
-    copyFile "third_party_open/swan/scripts/swan_install.sh"       $dest_swan_scripts/swan.sh
+    copyFile "bin/wave.exe"                                  $dest_bin
+    copyFile "engines_gpl/flow2d3d/default/dioconfig.ini"    $dest_default
+    copyFile "third_party_open/swan/bin/linux/*.*"           $dest_swan_bin
+    copyFile "third_party_open/swan/lib/linux/*.*"           $dest_swan_lib
+    copyFile "third_party_open/swan/scripts/swan_install.sh" $dest_swan_scripts/swan.sh
 
     return
 }
 
 
 
-# ==========================
-# === INSTALL PLUGIN_CULVERT
-# ==========================
+# ==============================
+# === INSTALL PLUGIN_CULVERT ===
+# ==============================
 function plugin_culvert () {
     echo "installing plugin_culvert . . ."
+    
     dest_bin="$dest_main/lnx/flow2d3d/bin"
 
     mkdir -p $dest_bin
 
-    copyFile "lib/libplugin_culvert.so"            $dest_bin/plugin_culvert.so
+    copyFile "lib/libplugin_culvert.so" $dest_bin/plugin_culvert.so
 
     return
 }
 
 
 
-# ====================================
-# === INSTALL PLUGIN_DELFTFLOW_TRAFORM
-# ====================================
+# ========================================
+# === INSTALL PLUGIN_DELFTFLOW_TRAFORM ===
+# ========================================
 function plugin_delftflow_traform () {
     echo "installing plugin_delftflow_traform . . ."
+    
     dest_bin="$dest_main/lnx/flow2d3d/bin"
 
     mkdir -p $dest_bin
 
-    copyFile "lib/libplugin_delftflow_traform.so"   $dest_bin/plugin_delftflow_traform.so
+    copyFile "lib/libplugin_delftflow_traform.so" $dest_bin/plugin_delftflow_traform.so
 
     return
 }
 
 
 
-# ==================
-# === INSTALL DATSEL
-# ==================
+# ======================
+# === INSTALL DATSEL ===
+# ======================
 function datsel () {
     echo "installing datsel . . ."
+    
     dest_bin="$dest_main/lnx/flow2d3d/bin"
 
     mkdir -p $dest_bin
 
-    copyFile "bin/datsel"    $dest_bin
+    copyFile "bin/datsel" $dest_bin
 
     return
 }
 
 
 
-# ==================
-# === INSTALL KUBINT
-# ==================
+# ======================
+# === INSTALL KUBINT ===
+# ======================
 function kubint () {
     echo "installing kubint . . ."
+    
     dest_bin="$dest_main/lnx/flow2d3d/bin"
 
     mkdir -p $dest_bin
 
-    copyFile "bin/kubint"  $dest_bin
+    copyFile "bin/kubint" $dest_bin
 
     return
 }
 
 
 
-# ================
-# === INSTALL LINT
-# ================
+# ====================
+# === INSTALL LINT ===
+# ====================
 function lint () {
     echo "installing lint . . ."
+    
     dest_bin="$dest_main/lnx/flow2d3d/bin"
 
     mkdir -p $dest_bin
 
-    copyFile "bin/lint"   $dest_bin
+    copyFile "bin/lint" $dest_bin
 
     return
 }
 
 
 
-# ====================
-# === INSTALL MORMERGE
-# ====================
+# ========================
+# === INSTALL MORMERGE ===
+# ========================
 function mormerge () {
     echo "installing mormerge . . ."
+    
     dest_bin="$dest_main/lnx/flow2d3d/bin"
     dest_scripts="$dest_main/lnx/flow2d3d/scripts"
 
     mkdir -p $dest_bin
     mkdir -p $dest_scripts
 
-    copyFile "engines_gpl/flow2d3d/scripts/mormerge.tcl"                 $dest_scripts
-    copyFile "bin/mormerge.exe"                                          $dest_bin
+    copyFile "engines_gpl/flow2d3d/scripts/mormerge.tcl" $dest_scripts
+    copyFile "bin/mormerge.exe"                          $dest_bin
 
     return
 }
 
 
 
-# ==============
-# === INSTALL VS
-# ==============
+# ==================
+# === INSTALL VS ===
+# ==================
 function vs () {
     echo "installing vs . . ."
+    
     dest="$dest_main/lnx/util/bin"
 
     mkdir -p $dest
 
-    copyFile "bin/vs"  $dest
+    copyFile "bin/vs" $dest
 
     return
 }
 
 
 
-# ====================
-# === INSTALL NESTHD1
-# ====================
+# =======================
+# === INSTALL NESTHD1 ===
+# =======================
 function nesthd1 () {
     echo "installing nesthd1 . . ."
+    
     dest_bin="$dest_main/lnx/flow2d3d/bin"
     dest_lib="$dest_main/lnx/flow2d3d/lib"
 
     mkdir -p $dest_bin
     mkdir -p $dest_lib
-    copyFile "tools_gpl/nesthd1/packages/nesthd1/Release/nesthd1.exe"    $dest_bin
+    
+    copyFile "tools_gpl/nesthd1/packages/nesthd1/Release/nesthd1.exe" $dest_bin
 
     return
 }
 
 
 
-# ====================
-# === INSTALL NESTHD2
-# ====================
+# =======================
+# === INSTALL NESTHD2 ===
+# =======================
 function nesthd2 () {
     echo "installing nesthd2 . . ."
+    
     dest_bin="$dest_main/lnx/flow2d3d/bin"
     dest_lib="$dest_main/lnx/flow2d3d/lib"
 
     mkdir -p $dest_bin
     mkdir -p $dest_lib
 
-    copyFile "tools_gpl/nesthd2/packages/nesthd2/Release/nesthd2.exe"    $dest_bin
+    copyFile "tools_gpl/nesthd2/packages/nesthd2/Release/nesthd2.exe" $dest_bin
 
     return
 }
@@ -328,7 +342,6 @@ echo oss-install...
 # 0. defaults:
 project=
 dest_main=
-
 
 if [ "$2" == '' ]; then
     # Install all engines, assume the first argument is a target directory
