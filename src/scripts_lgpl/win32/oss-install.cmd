@@ -87,8 +87,7 @@ rem =============================================================
 :copyFile
     set fileName=%~1
     set dest=%~2
-    xcopy /F /Y %fileName% %dest%
-rem    copy %fileName% %dest%
+    xcopy %fileName% %dest% /F /Y
     if NOT !ErrorLevel! EQU 0 (
         echo ERROR: while copying "!fileName!" to "!dest!"
     )
