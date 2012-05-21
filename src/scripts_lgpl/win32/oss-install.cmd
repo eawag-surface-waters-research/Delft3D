@@ -242,7 +242,9 @@ rem ================
     set dest_default="!dest_main!\win32\wave\default"
     set dest_swan_bin="!dest_main!\win32\swan\bin"
     set dest_swan_lib="!dest_main!\win32\swan\lib"
-    set dest_swan_scripts="!dest_main!\win32\swan\scripts"
+       rem When adding quotes here AND when using dest_swan_scripts, xcopy also gets confused
+       rem Neat solution: do not add quotes on defining the destination folders, but only at calling :copyFile
+    set dest_swan_scripts=!dest_main!\win32\swan\scripts
 
     call :makeDir !dest_bin!
     call :makeDir !dest_lib!
