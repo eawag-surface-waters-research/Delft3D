@@ -65,6 +65,7 @@ subroutine restart_bodsed (error     ,restid    ,i_restart ,bodsed    , &
     integer                     , external :: crenef
     integer                     , external :: getelt
     integer                     , external :: clsnef
+    integer                     , external :: neferr
     integer                                :: rst_lsed
     integer                                :: rst_lsedbl
     integer                                :: rst_lsedtot
@@ -75,6 +76,7 @@ subroutine restart_bodsed (error     ,restid    ,i_restart ,bodsed    , &
     real(sp), dimension(:,:,:,:), pointer  :: sbuff
     character(len=256)                     :: dat_file
     character(len=256)                     :: def_file
+    character(len=1024)                    :: errmsg
 !
 !! executable statements -------------------------------------------------------
 !
@@ -105,10 +107,29 @@ subroutine restart_bodsed (error     ,restid    ,i_restart ,bodsed    , &
     uindex (1,1) = i_restart
     uindex (2,1) = i_restart
     !
+    ! determine number of suspended sediment fractions
+    !
     ierror = getelt(fds, 'map-const', 'LSED'  , cuindex, 1, 4, rst_lsed)
-    if (ierror/= 0) goto 9999
+    if (ierror /= 0) then
+       !
+       ! if LSED has not been written to the map-file then LSED=0
+       ! remove the error message from NEFIS error stack
+       !
+       rst_lsed   = 0
+       ierror     = neferr(0,errmsg)
+    endif
+    !
+    ! determine number of bedload sediment fractions
+    !
     ierror = getelt(fds, 'map-const', 'LSEDBL', cuindex, 1, 4, rst_lsedbl)
-    if (ierror/= 0) goto 9999
+    if (ierror /= 0) then
+       !
+       ! if LSEDBL has not been written to the map-file then LSEDBL=0
+       ! remove the error message from NEFIS error stack
+       !
+       rst_lsedbl = 0
+       ierror     = neferr(0,errmsg)
+    endif
     rst_lsedtot = rst_lsed + rst_lsedbl
     if (rst_lsedtot /= lsedtot) goto 9999
     !
