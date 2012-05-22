@@ -83,10 +83,6 @@ int main()
   BInt4 * usr_order   ;
   BRea4 * zeta4;
   BRea8 * zeta8;
-  BRea4 *  a    ;
-  BRea4 ** cmp8 ;
-  BRea8 *  b    ;
-  BRea8 ** cmp16;
   BRea4 *  cmplx8 ;
   BRea8 *  cmplx16;
   BInt2 *  logical2;
@@ -101,27 +97,6 @@ int main()
   cmplx8       = (BRea4 * ) malloc( sizeof( BRea4   ) *  88 );
   cmplx16      = (BRea8 * ) malloc( sizeof( BRea8   ) * 176 );
 
-  cmp8         = (BRea4 ** ) malloc( sizeof( BRea4 ) * 11 );
-  a            = (BRea4  * ) malloc( sizeof( BRea4 ) * 11 * 2);
-  for ( jj=0; jj<11; jj++ )
-  {
-    cmp8[jj]     = (a + jj * 2 );
-  }
-
-  cmp16        = (BRea8 ** ) malloc( sizeof( BRea8 ) * 11 );
-  b            = (BRea8  * ) malloc( sizeof( BRea8 ) * 11 * 2 );
-  for ( jj=0; jj<11; jj++ )
-  {
-    cmp16[jj]     = (b + jj * 2 );
-  }
-/*
-  namst        = (BChar ** ) malloc( sizeof( BChar ) * 11 );
-  c            = (BChar  * ) malloc( sizeof( BChar ) * 11 * 21 );
-  for ( jj=0; jj<11; jj++ )
-  {
-    namst[jj]     = (c +  jj * 21 );
-  }
-*/
 /*
   namstat      = (BChar ** ) malloc( sizeof( BChar ) * 11);
   d            = (BChar  * ) malloc( sizeof( BChar ) * 11 * 21 );
@@ -1404,14 +1379,6 @@ int main()
   free( (BData) logical4    );
   free( (BData) cmplx8      );
   free( (BData) cmplx16     );
-  free( (BData) a           );
-  free( (BData) cmp8        );
-  free( (BData) b           );
-  free( (BData) cmp16       );
-/*  free( (BData) c           );
-  free( (BData) namst       ); */
-/*  free( (BData) d           );
-  free( (BData) namstat     ); */
   free( (BData) elm_name    );
   free( (BData) elm_type    );
   free( (BData) elm_quantity);
