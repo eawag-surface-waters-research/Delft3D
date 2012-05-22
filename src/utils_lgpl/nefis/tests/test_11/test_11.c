@@ -88,6 +88,7 @@ int main(){
     }
     strcpy( grp_name, "WANDA");
     strcpy( elm_name, "Wanda_version");
+    for ( i=0; i<buf_len; i++) { result[i]='\0'; }
     error = Getelt( &fd1      , grp_name , elm_name,
                      (BUInt4 *)usr_index, usr_order ,&buf_len , result   );
     printf(" Result: (%d),<%s>\n", strlen(result),  result);
@@ -101,6 +102,7 @@ int main(){
     }
     strcpy( grp_name, "WANDA");
     strcpy( elm_name, "Wanda_release");
+    for ( i=0; i<buf_len; i++) { result[i]='\0'; }
     error = Getelt( &fd1      , grp_name , elm_name,
                      (BUInt4 *)usr_index, usr_order ,&buf_len , result   );
     printf(" Result: (%d),<%s>\n", strlen(result),  result);
@@ -114,6 +116,7 @@ int main(){
     }
     strcpy( grp_name, "WANDA");
     strcpy( elm_name, "Licensee");
+    for ( i=0; i<buf_len; i++) { result[i]='\0'; }
     error = Getelt( &fd1      , grp_name , elm_name,
                      (BUInt4 *)usr_index, usr_order ,&buf_len , result   );
     printf(" Result: (%d),<%s>\n", strlen(result),  result);
@@ -141,6 +144,7 @@ int main(){
     }
     strcpy( grp_name, "WANDA");
     strcpy( elm_name, "Wanda_release");
+    for ( i=0; i<buf_len; i++) { result[i]='\0'; }
     error = Getelt( &fd2      , grp_name , elm_name,
                      (BUInt4 *)usr_index, usr_order ,&buf_len , result   );
     printf(" Result: (%d),<%s>\n", strlen(result),  result);
@@ -154,6 +158,7 @@ int main(){
     }
     strcpy( grp_name, "WANDA");
     strcpy( elm_name, "Licensee");
+    for ( i=0; i<buf_len; i++) { result[i]='\0'; }
     error = Getelt( &fd2      , grp_name , elm_name,
                      (BUInt4 *)usr_index, usr_order ,&buf_len , result   );
     printf(" Result: (%d),<%s>\n", strlen(result),  result);
@@ -167,6 +172,7 @@ int main(){
     }
     strcpy( grp_name, "WANDA");
     strcpy( elm_name, "Wanda_version");
+    for ( i=0; i<buf_len; i++) { result[i]='\0'; }
     error = Getelt( &fd1      , grp_name , elm_name,
                      (BUInt4 *)usr_index, usr_order ,&buf_len , result   );
     printf(" Result: (%d),<%s>\n", strlen(result),  result);
@@ -180,6 +186,7 @@ int main(){
     }
     strcpy( grp_name, "WANDA");
     strcpy( elm_name, "Wanda_release");
+    for ( i=0; i<buf_len; i++) { result[i]='\0'; }
     error = Getelt( &fd1      , grp_name , elm_name,
                      (BUInt4 *)usr_index, usr_order ,&buf_len , result   );
     printf(" Result: (%d),<%s>\n", strlen(result),  result);
@@ -193,6 +200,7 @@ int main(){
     }
     strcpy( grp_name, "WANDA");
     strcpy( elm_name, "Licensee");
+    for ( i=0; i<buf_len; i++) { result[i]='\0'; }
     error = Getelt( &fd1      , grp_name , elm_name,
                      (BUInt4 *)usr_index, usr_order ,&buf_len , result   );
     printf(" Result: (%d),<%s>\n", strlen(result),  result);
