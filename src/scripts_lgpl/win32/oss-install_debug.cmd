@@ -61,7 +61,11 @@ rem === INSTALL_D_HYDRO
 rem ==========================
 :d_hydro
     echo "installing d_hydro . . ."
-    echo "... nothing to be done"
+    set dest_bin="engines_gpl\d_hydro\bin\Debug"
+
+    if not exist !dest_bin!     mkdir !dest_bin!
+    
+    copy third_party_open\tclkit\bin\win32\deltares_hydro.exe   !dest_bin!
 goto :endproc
 
 
