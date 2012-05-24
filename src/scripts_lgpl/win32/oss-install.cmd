@@ -87,7 +87,11 @@ rem =============================================================
 :copyFile
     set fileName=%~1
     set dest=%~2
-    xcopy %fileName% %dest% /F /Y
+    rem
+    rem "echo f |" is (only) needed when dest does not exist
+    rem and does not harm in other cases
+    rem 
+    echo f | xcopy %fileName% %dest% /F /Y
     if NOT !ErrorLevel! EQU 0 (
         echo ERROR: while copying "!fileName!" to "!dest!"
     )
