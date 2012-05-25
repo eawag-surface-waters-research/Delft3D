@@ -104,8 +104,8 @@ memAbort (
 int
 main (
     int     argc,
-    char *  argv[],
-    char *  envp
+    char *  argv [],
+    char *  envp []
     ) {
 
 #if defined (MEMCHECK)
@@ -140,8 +140,8 @@ main (
 
 DeltaresHydro::DeltaresHydro (
     int     argc,
-    char *  argv[],
-    char *  envp
+    char *  argv [],
+    char *  envp []
     ) {
 
     this->exePath = strdup (argv[0]);
@@ -365,8 +365,14 @@ DeltaresHydro::Run (
     void
     ) {
 
-    if (this->done == true) return;
-    this->startComponent->Run ();
+    try {
+        if (this->done == true) return;
+        this->startComponent->Run ();
+        }
+
+    catch (Exception *ex) {
+        printf ("#### d_hydro ABORT: %s\n", ex->message);
+        }
     }
 
 

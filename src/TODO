@@ -1,5 +1,5 @@
 
---  Change references to DelftOnline and JavaLaunch in all Makefile.am files
+--  Change references to DelftOnline in all Makefile.am files
     from absolute path on devux32 to path to third_party_open.
 
 --  What to do with resolve_path in hydra.cpp?
@@ -7,27 +7,3 @@
 --  Deal with version numbering.
     Generate (?) engines_gpl/flow2d3d/packages/flow2d3d/src/flow2d3d_version.f90
     Preferable convert to C and store version strings in GDP
-
---  Set our own signal handlers.
-
-    DOL (and thus the JVM) is started before Hydra::Execute is called.
-    Hydra::Execute does something stupid like dereference a NULL-pointer.
-    The SEGV call stack had a Java handler, even though we're no "in" Java yet.
-    
-        #0  0x00a54402 in __kernel_vsyscall ()
-        #1  0x00f93df0 in raise () from /lib/libc.so.6
-        #2  0x00f95701 in abort () from /lib/libc.so.6
-        #3  0x058ac25f in os::abort(bool) () from /opt/jdk1.6/jre/lib/i386/client/libjvm.so
-        #4  0x0598d2c1 in VMError::report_and_die() () from /opt/jdk1.6/jre/lib/i386/client/libjvm.so
-        #5  0x058b31fc in JVM_handle_linux_signal () from /opt/jdk1.6/jre/lib/i386/client/libjvm.so
-        #6  0x058af144 in signalHandler(int, siginfo*, void*) ()
-           from /opt/jdk1.6/jre/lib/i386/client/libjvm.so
-        #7  <signal handler called>
-        #8  0x013fad83 in Hydra::Execute(char *, char *, Hydra::._111::ConfigFunction, bool) (
-            runid=0x858e668 "f34", ddbfile=0x0, configfunction=0, online=true) at hydra.cpp:72
-        #9  0x013f1132 in Flow2D3D::Flow2D3D (this=0x858e640, DHI=0x858d008) at Flow2D3D.cpp:67
-        #10 0x013f1298 in dEntry (DHI=0x858d008) at Flow2D3D.cpp:22
-        #11 0x08048f56 in DeltaresHydro::LoadAndStartLibrary(char*) ()
-        #12 0x0804999c in main ()
-    
-    

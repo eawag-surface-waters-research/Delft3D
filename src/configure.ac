@@ -24,7 +24,7 @@ dnl We're going to make it work with older versions also, this might not work (l
 ## Libtool initialisation. ##
 ## ----------------------- ##
 
-LT_PREREQ(2.4)
+#LT_PREREQ(2.4)
 LT_INIT
 dnl LTDL_INIT dnl I don't think this is required anymore
 dnl AC_PROG_LIBTOOL
@@ -390,6 +390,9 @@ utils_lgpl/delftio_sync/packages/delftio_sync/src/Makefile
 utils_lgpl/delftio_sync/packages/delftio_sync_version_number/Makefile
 utils_lgpl/delftio_sync/packages/delftio_sync_version_number/src/Makefile
 utils_lgpl/delftio_sync/packages/Makefile
+utils_lgpl/delftonline/Makefile
+utils_lgpl/delftonline/src/delftonline/Makefile
+utils_lgpl/delftonline/src/printcontents/Makefile
 utils_lgpl/d_hydro_lib/Makefile
 utils_lgpl/d_hydro_lib/packages/d_hydro_lib/Makefile
 utils_lgpl/d_hydro_lib/packages/d_hydro_lib/src/Makefile

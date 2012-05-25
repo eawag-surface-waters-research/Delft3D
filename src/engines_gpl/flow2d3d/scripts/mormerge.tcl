@@ -1184,7 +1184,7 @@ proc startMormerge { inputfilename workdir mergeexe localrun runid node } {
          puts $scriptfile "\n. /opt/sge/InitSGE\n"
       }
       puts $scriptfile "\n# Set some environment parameters\n"
-      #puts $scriptfile "export LD_LIBRARY_PATH=\"/opt/intel_cc_90/lib:/opt/intel_fc_90/lib:/opt/jdk1.5/jre/lib/i386:/opt/jdk1.5/jre/lib/i386/client:/u/elshoff/DOL/DelftOnline/lib:/u/elshoff/DOL/JavaLaunch/lib\""
+      #puts $scriptfile "export LD_LIBRARY_PATH=\"/opt/intel_cc_90/lib:/opt/intel_fc_90/lib:/opt/jdk1.5/jre/lib/i386:/opt/jdk1.5/jre/lib/i386/client:/u/elshoff/DOL/DelftOnline/lib\""
       # This line:
       # puts $scriptfile ". /opt/intel/Compiler/11.0/081/bin/ifortvars.sh ia32"
       # is replaced by:

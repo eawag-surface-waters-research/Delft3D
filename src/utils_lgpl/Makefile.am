@@ -1,5 +1,6 @@
 include $(top_srcdir)/common.am
 SUBDIRS = \
+         delftonline \
          precision \
          constants \
          delftio \

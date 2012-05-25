@@ -31,7 +31,7 @@
 //  DEFINITIONS
 //
 //  Irv.Elshoff@Deltares.NL
-//  17 nov 11
+//  26 apr 12
 //-------------------------------------------------------------------------------
 
 
@@ -40,7 +40,6 @@
 #include "flow2d3d.h"
 
 #ifdef WITH_DELFTONLINE
-#include "JavaLaunch.h"
 #include "DelftOnline.h"
 #endif
 
@@ -74,12 +73,6 @@ class FlowOL {
 #ifdef WITH_DELFTONLINE
         DOL::Server *   dol;    // DOL server object reference (only one)
 #endif
-
-    private:
-#ifdef WITH_DELFTONLINE
-        JavaLaunch *    java;   // Java virtual machine
-#endif
-
     };
 
 

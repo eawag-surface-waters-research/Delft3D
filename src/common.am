@@ -5,7 +5,7 @@
 #   Fedor.Baart@Deltares.NL
 #   Adri.MouritsDeltares.NL
 #   Irv.ElshoffDeltares.NL
-#   17 nov 11
+#   25 may 12
 #-------------------------------------------------------------------------------
 
 # Remove .exe extension (defaults to .exe on cygwin). 
@@ -16,19 +16,23 @@ EXEEXT=
 
 #-------------------------------------------------------------------------------
 # C/C++ flags
+
 AM_CFLAGS = \
     -std=c99 \
     -D_GNU_SOURCE \
-    -DSTR_LEN_AT_END
+    -DSTR_LEN_AT_END \
+    -DWITH_DELFTONLINE
 
 AM_CXXFLAGS = \
     -D_GNU_SOURCE \
-    -DSTR_LEN_AT_END
+    -DSTR_LEN_AT_END \
+    -DWITH_DELFTONLINE
 
 STANDARD_C_INCLUDES = \
     -I$(top_builddir)/engines_gpl/d_hydro/include \
     -I$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d/include \
     -I$(top_builddir)/utils_lgpl/d_hydro_lib/include \
+    -I$(top_builddir)/utils_lgpl/delftonline/include \
     -I$(top_builddir)/utils_lgpl/esmfsm/include \
     -I$(top_builddir)/utils_lgpl/precision/include \
     -I$(top_builddir)/utils_lgpl/stream/include
@@ -48,7 +52,8 @@ FMODULES = \
 
 AM_FCFLAGS = \
     $(FINCLUDES) \
-    $(FMODULES)
+    $(FMODULES) \
+    -DWITH_DELFTONLINE
 
 AM_FCFLAGS+=$(OPENMP_FCFLAGS)
 
@@ -58,7 +63,8 @@ AM_FCFLAGS+=$(OPENMP_FCFLAGS)
 
 AM_FFLAGS = \
     $(FINCLUDES) \
-    $(FMODULES)
+    $(FMODULES) \
+    -DWITH_DELFTONLINE
 
 AM_FFLAGS+=$(OPENMP_FFLAGS)
 

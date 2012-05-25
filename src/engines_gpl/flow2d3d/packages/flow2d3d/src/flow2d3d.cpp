@@ -216,7 +216,9 @@ Flow2D3D::Run (
             if (context_id == 0)
                 throw new Exception (true, "Cannot create memory context for Flow2D3D");
 
+            this->DH->log->Write (Log::MAJOR, "Calling TRISIM (Fortran)");
             TRISIM (&numsubdomains, &nummappers, &context_id, &fsm_flags, runid, strlen (runid));
+            this->DH->log->Write (Log::MAJOR, "TRISIM returns (Fortran)");
 
             if (this->flowol != NULL)
                 this->flowol->UnregisterSubdomain ();

@@ -31,12 +31,8 @@
 //  Interface to DelftOnline - IMPLEMENTATION
 //
 //  Irv.Elshoff@deltares.NL
-//  6 jun 11
+//  27 apr 12
 //-------------------------------------------------------------------------------
-
-
-// #define WITH_FLOWOL
-
 
 
 #ifdef WIN32
@@ -56,25 +52,16 @@ FlowOL::FlowOL (
     XmlTree * config
     ) {
 
-#if defined (WITH_FLOWOL)
+#if defined (WITH_DELFTONLINE)
     this->dh = dh;
     this->numSubdomains = 0;
 
     // Get DOL options from the configuration tree
 
-    char * jrePath = config->GetAttrib ("JREPath");
-    if (jrePath == NULL)
-        throw new Exception (true, "JREPath not specified in DelftOnline section of the configuration file");
-
-    char * jarPath = config->GetAttrib ("JARPath");
-    if (jarPath == NULL)
-        throw new Exception (true, "JARPath not specified in DelftOnline section of the configuration file");
-
     char * urlFile = config->GetAttrib ("URLFile");
     if (urlFile == NULL)
         throw new Exception (true, "URLFile not specified in DelftOnline section of the configuration file");
 
-    char * jvmOpts = config->GetAttrib ("JVMOpts");
     bool allowStart = ! config->GetBoolAttrib ("wait");
     bool allowControl = config->GetBoolAttrib ("control");
     allowControl |= ! allowStart;
@@ -94,21 +81,11 @@ FlowOL::FlowOL (
             throw new Exception (true, "Invalid verbosity value \"%s\" in DelftOnline section of the configuration file", verb);
         }
 
-    // Initialize the Java Virtual Machine
-
-    try {
-        this->dh->log->Write (Log::MINOR, "Starting Java virtual machine");
-        this->java = new JavaLaunch (jrePath, jarPath, jvmOpts);
-        }
-    catch (JavaLaunch::Exception * ex) {
-        throw new Exception (true, "Java initialization fails: %s", ex->message);
-        }
-
     // Initialize DelftOnline and write handle to URL file
 
     try {
         this->dh->log->Write (Log::MINOR, "Creating DOL server");
-        this->dol = new DOL::Server (allowStart, true, verbosity, NULL, this->java);
+        this->dol = new DOL::Server (allowStart, true, verbosity, NULL);
 
         char * url = this->dol->Handle ();
         this->dh->log->Write (Log::MAJOR, "DOL handle is \"%s\"", url);
@@ -117,7 +94,7 @@ FlowOL::FlowOL (
         if (f == NULL)
             throw new Exception ("Cannot create URL file \"%s\": %s", urlFile, strerror (errno));
 
-        fprintf (f, "'%s'\n", url);
+        fprintf (f, "%s\n", url);
         fclose (f);
         }
 
@@ -132,11 +109,9 @@ FlowOL::~FlowOL (
     void
     ) {
 
-#if defined (WITH_FLOWOL)
+#if defined (WITH_DELFTONLINE)
     this->dh->log->Write (Log::MINOR, "Shutting down DOL");
-
     delete this->dol;
-    delete this->java;
 #endif
     }
 
@@ -149,7 +124,7 @@ FlowOL::RegisterSubdomain (
     const char * name
     ) {
 
-#if defined (WITH_FLOWOL)
+#if defined (WITH_DELFTONLINE)
     if (this->dol == NULL) return;
 
     try {
@@ -195,20 +170,18 @@ createCString (
         if (fortString[end] != ' ')
             break;
 
-    if (end < 0) end = 0;       // all spaces becomes empty string
+    if (end < 0)
+        end = 0;    // all spaces (or fortlen == 0) becomes empty string
+    else
+        end++;      // include last non-space char
 
-    // Allocate a C buffer for the truncated string
+    // Allocate a C buffer for the truncated string and copy Fortran string
 
-    end++;
     char * cString = new char [end + 1 /* for EOL */];
-
-    // Copy Fortran to C string
-
     for (int i = 0 ; i < end ; i++)
         cString[i] = fortString[i];
 
     cString[end] = '\0';
-
     return cString;
     }
 
@@ -234,16 +207,16 @@ FLOWOL_ArrayShape (
 #endif
     ) {
 
-#if defined (WITH_FLOWOL)
+#if defined (WITH_DELFTONLINE)
     FlowOL * flowol = FLOW2D3D->flowol;
     if (flowol == NULL)
         return;
 
     char * name = createCString (ftn_name, len_name);
-    char * dir  = "";
+    const char * dir  = "";
 
     try {
-        flowol->dol->ArrayShape (dir, name, *dimensionality, dimensions);
+        flowol->dol->PublishArrayShape (dir, name, *dimensionality, dimensions);
         }
 
     catch (DOL::Exception * ex) {
@@ -261,7 +234,7 @@ FLOWOL_ChangeDirectory (
     int             len_dirname
     ) {
 
-#if defined (WITH_FLOWOL)
+#if defined (WITH_DELFTONLINE)
     FlowOL * flowol = FLOW2D3D->flowol;
     if (flowol == NULL)
         return;
@@ -314,7 +287,7 @@ FLOWOL_Publish_c (
 #endif
     ) {
 
-#if defined (WITH_FLOWOL)
+#if defined (WITH_DELFTONLINE)
     FlowOL * flowol = FLOW2D3D->flowol;
     if (flowol == NULL)
         return;
@@ -324,10 +297,10 @@ FLOWOL_Publish_c (
     char * units       = createCString (ftn_units, len_units);
     char * definedon   = createCString (ftn_definedon, len_definedon);
     char * arrayshape  = createCString (ftn_arrayshape, len_arrayshape);
-    char * dir = "";
+    const char * dir = "";
 
     try {
-        flowol->dol->Publish (dir, name, description, units, definedon, arrayshape, *basetype, address, *inout);
+        flowol->dol->Publish (dir, name, description, units, definedon, arrayshape, (DOL::BaseType) *basetype, address, (DOL::AccessMode) *inout);
         }
 
     catch (DOL::Exception * ex) {
@@ -378,7 +351,7 @@ FLOWOL_Publish_string_c (
 #endif
     ) {
 
-#if defined (WITH_FLOWOL)
+#if defined (WITH_DELFTONLINE)
     FlowOL * flowol = FLOW2D3D->flowol;
     if (flowol == NULL)
         return;
@@ -411,14 +384,14 @@ FLOWOL_PublishFunction (
 #endif
     ) {
 
-#if defined (WITH_FLOWOL)
+#if defined (WITH_DELFTONLINE)
     FlowOL * flowol = FLOW2D3D->flowol;
     if (flowol == NULL)
         return;
 
     char * name = createCString (ftn_name, len_name);
     char * description = createCString (ftn_description, len_description);
-    char * dir = "";
+    const char * dir = "";
 
     try {
         flowol->dol->PublishFunction (dir, name, description, DOL::FORTRAN, (int (STDCALL *)(void *, const int *)) address, dataptr);
@@ -449,7 +422,7 @@ FLOWOL_SetDescription (
 #endif
     ) {
 
-#if defined (WITH_FLOWOL)
+#if defined (WITH_DELFTONLINE)
     FlowOL * flowol = FLOW2D3D->flowol;
     if (flowol == NULL)
         return;
@@ -481,7 +454,7 @@ FLOWOL_Timestep (
     int *   timestep
     ) {
 
-#if defined (WITH_FLOWOL)
+#if defined (WITH_DELFTONLINE)
     FlowOL * flowol = FLOW2D3D->flowol;
     if (flowol == NULL || flowol->dol == NULL)
         return;
@@ -507,7 +480,7 @@ FLOWOL_Retract (
     int             len_name
     ) {
 
-#if defined (WITH_FLOWOL)
+#if defined (WITH_DELFTONLINE)
     FlowOL * flowol = FLOW2D3D->flowol;
     if (flowol == NULL)
         return;
@@ -533,7 +506,7 @@ FLOWOL_RetractArrayShape (
     int             len_name
     ) {
 
-#if defined (WITH_FLOWOL)
+#if defined (WITH_DELFTONLINE)
     FlowOL * flowol = FLOW2D3D->flowol;
     if (flowol == NULL)
         return;
@@ -559,7 +532,7 @@ FLOWOL_RetractFunction (
     int             len_name
     ) {
 
-#if defined (WITH_FLOWOL)
+#if defined (WITH_DELFTONLINE)
     FlowOL * flowol = FLOW2D3D->flowol;
     if (flowol == NULL)
         return;

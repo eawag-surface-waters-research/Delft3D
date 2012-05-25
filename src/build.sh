@@ -14,7 +14,7 @@
 #   maintanence.
 #
 #   Irv.Elshoff@Deltares.NL
-#   13 dec 11
+#   14 apr 12
 #
 #   Copyright © 2011, Stichting Deltares
 #-------------------------------------------------------------------------------
@@ -301,13 +301,13 @@ fi
 # autogen: sanity checks, libtoolize and autoreconf
 
 log='logs/autogen.log'
-command="./autogen.sh &> $log"
+command="./autogen.sh --verbose &> $log"
 
 log "Running $command"
 eval $command
 
 if [ $? -ne 0 ]; then
-    log 'Autogen fails! Check $log'
+    log "Autogen fails!"
     exit 1
 fi
 
@@ -351,7 +351,7 @@ log "Running `echo $command | sed 's/ +/ /g'`"
 eval $command
 
 if [ $? -ne 0 ]; then
-    log 'Configure fails!'
+    log "Configure fails!"
     exit 1
 fi
 
@@ -372,7 +372,7 @@ log "Running $command"
 eval $command
 
 if [ $? -ne 0 ]; then
-    log 'Make fails!'
+    log "Make fails!"
     exit 1
 fi
 

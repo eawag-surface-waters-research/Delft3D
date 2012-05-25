@@ -31,7 +31,7 @@
 //  DEFINITIONS
 //
 //  Irv.Elshoff@Deltares.NL
-//  24 oct 11
+//  26 apr 12
 //------------------------------------------------------------------------------
 
 
@@ -90,8 +90,8 @@ class DeltaresHydro {
     public:
         DeltaresHydro (
             int     argc,
-            char *  argv[],
-            char *  envp
+            char *  argv [],
+            char *  envp []
             );
     public:
         ~DeltaresHydro (

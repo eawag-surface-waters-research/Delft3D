@@ -85,8 +85,6 @@ rem ====================
        rem One of these two dlls will not exist and cause an ErrorLevel=1. Reset it.
     set ErrorLevel=0
     copy third_party_open\DelftOnline\lib\Debug\DelftOnline.dll                          !dest_bin!
-    copy third_party_open\DelftOnline\lib\Debug\DelftOnlineJNI.dll                       !dest_bin!
-    copy third_party_open\DelftOnline\lib\Debug\JavaLaunch.dll                           !dest_bin!
     copy third_party_open\pthreads\bin\win32\pthreadVCE2.dll                             !dest_bin!
     copy third_party_open\pthreads\bin\win32\pthreadvce.dll                              !dest_bin!
     copy third_party_open\mpich2\bin\*.exe                                               !dest_bin!
@@ -111,8 +109,6 @@ rem ===========================
        rem One of these two dlls will not exist and cause an ErrorLevel=1. Reset it.
     set ErrorLevel=0
     copy third_party_open\DelftOnline\lib\Debug\DelftOnline.dll                          !dest_bin!
-    copy third_party_open\DelftOnline\lib\Debug\DelftOnlineJNI.dll                       !dest_bin!
-    copy third_party_open\DelftOnline\lib\Debug\JavaLaunch.dll                           !dest_bin!
     copy third_party_open\pthreads\bin\win32\pthreadVCE2.dll                             !dest_bin!
     copy third_party_open\pthreads\bin\win32\pthreadvce.dll                              !dest_bin!
     copy third_party_open\mpich2\bin\*.exe                                               !dest_bin!
