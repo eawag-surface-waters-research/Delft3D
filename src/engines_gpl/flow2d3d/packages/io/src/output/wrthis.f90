@@ -839,7 +839,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
           if (typ == station) then
              call dfgather_filter(lundia, ub1, nostatto, nostatgl, lb2, ub2, lb3, ub3, order_sta, var, rsbuff3, gdp)
           else
-             ! The crosssection variant is not availabel
+             ! The crosssection variant is not available
           endif
        else
           rsbuff3 = real(var, sp)

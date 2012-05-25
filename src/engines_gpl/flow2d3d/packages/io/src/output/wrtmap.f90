@@ -726,26 +726,26 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! group 3: element 'U1' & 'V1' only if SELMAP( 2: 3) <> 'NN'
     !
     if (index(selmap(2:3),'Y') > 0) then
-       call wrtmap_nmk(1, kmax, ierror, u1, 'U1')
+       call wrtmap_nmk(1, kmax, ierror, u1, 'U1', kfumin, kfumax)
        if (ierror /= 0) goto 999
        !
        ! group 3: element 'V1'
        !
-       call wrtmap_nmk(1, kmax, ierror, v1, 'V1')
+       call wrtmap_nmk(1, kmax, ierror, v1, 'V1', kfvmin, kfvmax)
        if (ierror /= 0) goto 999
     endif
     !
     ! group 3: element 'W' only if kmax > 1 (:=  SELMAP( 4: 4) = 'Y')
     !
     if (selmap(4:4) == 'Y') then
-       call wrtmap_nmk(0, kmax, ierror, w1, 'W')
+       call wrtmap_nmk(0, kmax, ierror, w1, 'W', kfsmin, kfsmax)
        if (ierror /= 0) goto 999
     endif
     !
     ! group 3: element 'WPHY' only if KMAX > 1 (:=  SELMAP( 5: 5) = 'Y')
     !
     if (selmap(5:5) == 'Y') then
-       call wrtmap_nmk(1, kmax, ierror, wphy, 'WPHY')
+       call wrtmap_nmk(1, kmax, ierror, wphy, 'WPHY', kfsmin, kfsmax)
        if (ierror /= 0) goto 999
     endif
     !
@@ -874,7 +874,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! vicww is defined on cell boundary planes
     !
     if (selmap(18:18) == 'Y') then
-       call wrtmap_nmk(0, kmax, ierror, vicww, 'VICWW')
+       call wrtmap_nmk(0, kmax, ierror, vicww, 'VICWW', kfsmin, kfsmax)
        if (ierror /= 0) goto 999
     endif
     !
@@ -882,7 +882,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! dicww is defined on cell boundary planes
     !
     if (selmap(19:19) == 'Y') then
-       call wrtmap_nmk(0, kmax, ierror, dicww, 'DICWW')
+       call wrtmap_nmk(0, kmax, ierror, dicww, 'DICWW', kfsmin, kfsmax)
        if (ierror /= 0) goto 999
     endif
     !
@@ -890,7 +890,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! (:= SELMAP(18:19) <> 'NN')
     !
     if (index(selmap(18:19),'Y') > 0) then
-       call wrtmap_nmk(0, kmax, ierror, rich, 'RICH')
+       call wrtmap_nmk(0, kmax, ierror, rich, 'RICH', kfsmin, kfsmax)
        if (ierror /= 0) goto 999
     endif
     !
@@ -898,7 +898,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! (:= SELMAP(20:20) = 'Y')
     !
     if (selmap(20:20) == 'Y') then
-       call wrtmap_nmk(1, kmax, ierror, rho, 'RHO')
+       call wrtmap_nmk(1, kmax, ierror, rho, 'RHO', kfsmin, kfsmax)
        if (ierror /= 0) goto 999
     endif
     !
@@ -935,7 +935,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        ! group 3: element 'VICUV'
        ! kmax+1 contains initial values and should not be written
        !
-       call wrtmap_nmk(1, kmax+1, ierror, vicuv, 'VICUV')
+       call wrtmap_nmk(1, kmax+1, ierror, vicuv, 'VICUV', kfsmin, kfsmax)
        if (ierror /= 0) goto 999
     endif
     if (nsrc>0 .and. inode==master) then
@@ -965,19 +965,19 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! First VORTIC
     !
     if (index(selmap(2:3),'Y') > 0) then
-       call wrtmap_nmk(1, kmax, ierror, vortic, 'VORTIC')
+       call wrtmap_nmk(1, kmax, ierror, vortic, 'VORTIC', kfsmin, kfsmax)
        if (ierror /= 0) goto 999
        !
        ! Next ENSTRO
        !
-       call wrtmap_nmk(1, kmax, ierror, enstro, 'ENSTRO')
+       call wrtmap_nmk(1, kmax, ierror, enstro, 'ENSTRO', kfsmin, kfsmax)
        if (ierror /= 0) goto 999
     endif
     !
     ! group 3: element 'HYDPRES'
     !
     if (index(selmap(4:4),'Y')>0 .and. zmodel) then
-       call wrtmap_nmk(1, kmax, ierror, p1, 'HYDPRES')
+       call wrtmap_nmk(1, kmax, ierror, p1, 'HYDPRES', kfsmin, kfsmax)
        if (ierror /= 0) goto 999
     endif
     !
@@ -1353,10 +1353,14 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     end subroutine wrtmap_nm
     !
     !======================================================================
-    subroutine wrtmap_nmk(lk, uk, ierr, var, varnam_in)
-       integer                                                                   :: lk, uk, ierr ! lowerbound dim3(0 or 1), upperbound dim3(kmax or kmax+1)
-       real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lk:uk) :: var
-       character(*)                                                              :: varnam_in
+    subroutine wrtmap_nmk(lk, uk, ierr, var, varnam_in, kfmin, kfmax)
+       integer                                                                  , intent(in)  :: lk ! lowerbound dim3(0 or 1)
+       integer                                                                  , intent(in)  :: uk ! upperbound dim3(kmax or kmax+1)
+       integer                                                                                :: ierr
+       integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: kfmin
+       integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: kfmax
+       real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lk:uk), intent(in)  :: var
+       character(*)                                                             , intent(in)  :: varnam_in
        ! local
        integer       :: namlen
        character(16) :: varnam
@@ -1372,7 +1376,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
              do m = 1, mmax
                 do n = 1, nmaxus
                    do k = 1, kmaxout
-                      if (smlay(k)<kfumin(n, m) .or. smlay(k)>kfumax(n, m))  rbuff3(n, m, k) = -999.0_fp
+                      if (smlay(k)<(kfmin(n,m)-1) .or. smlay(k)>kfmax(n, m))  rbuff3(n, m, k) = -999.0_fp
                    enddo
                 enddo
              enddo
@@ -1386,7 +1390,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
              do m = 1, mmax
                 do n = 1, nmaxus
                    do k = 1, kmaxout_restr
-                      if (smlay_restr(k)<kfumin(n, m) .or. smlay_restr(k)>kfumax(n, m))  rbuff3(n, m, k) = -999.0_fp
+                      if (smlay_restr(k)<kfmin(n, m) .or. smlay_restr(k)>kfmax(n, m))  rbuff3(n, m, k) = -999.0_fp
                    enddo
                 enddo
              enddo
@@ -1422,7 +1426,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                 do m = 1, mmax
                    do n = 1, nmaxus
                       if (zmodel) then
-                         if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) then
+                         if (smlay(k)<(kfsmin(n,m)-1) .or. smlay(k)>kfsmax(n, m)) then
                             cycle
                          endif
                       endif
@@ -1481,7 +1485,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                    do nm = 1, nmmax
                       call nm_to_n_and_m(nm, n, m, gdp)
                       if (zmodel) then
-                         if (smlay(k)<kfsmin(n, m) .or. smlay(k)>kfsmax(n, m)) then
+                         if (smlay(k)<(kfsmin(n,m)-1) .or. smlay(k)>kfsmax(n, m)) then
                             cycle
                          endif
                       endif
