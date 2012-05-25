@@ -138,7 +138,7 @@ Server::LookupDirectory (
     if (pathname[1] == '\0')
         return this->rootDir;
 
-    char pathnameSlash [strlen (pathname) + 1];
+    char * pathnameSlash = new char [strlen (pathname) + 1];
     sprintf (pathnameSlash, "%s/", pathname+1);
     char * path = pathnameSlash;
 
@@ -156,12 +156,15 @@ Server::LookupDirectory (
             if (strcmp (prefix, subdir->name) == 0)
                 break;
         
-        if (subdir == NULL)
+        if (subdir == NULL) {
+            delete [] pathnameSlash;
             return NULL;
+            }
         
         dir = subdir;
         }
 
+    delete [] pathnameSlash;
     return dir;
     }
 

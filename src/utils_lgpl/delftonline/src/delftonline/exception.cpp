@@ -23,7 +23,7 @@ Exception::Exception (
 
     this->fatal = fatal;
 
-    int size = Exception::MaxErrorMesgLen;
+    const int size = Exception::MaxErrorMesgLen;
     char buffer [size];     // really big temporary buffer
 
     va_list arguments;

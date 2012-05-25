@@ -493,7 +493,7 @@ Server::Error (
     va_list arguments;
     va_start (arguments, reason);
 
-    int size = Exception::MaxErrorMesgLen;
+    const int size = Exception::MaxErrorMesgLen;
     char mesg [size + 1];
 
     if (vsnprintf (mesg, size, reason, arguments) < 0)

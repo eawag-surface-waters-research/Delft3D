@@ -13,17 +13,26 @@
 #pragma once
 
 
-#include <netinet/in.h>
 #include <pthread.h>
 #include <stdio.h>
 
 
 #ifdef WIN32
+#   include <io.h>
+#   include <winsock.h>
+// These undefs must be placed after the includes above
 #   undef IN
 #   undef OUT
-#   include <win32.h>
+#   undef OPAQUE
+#   undef ERROR
 #   define STDCALL __cdecl
+#   define uint8_t u_char
+#   define uint16_t u_short
+#   define uint32_t u_long
+#   define ssize_t int
+#   define DLL __declspec( dllexport )
 #else
+#   include <netinet/in.h>
 #   define STDCALL
 #   define DLL
 #endif
@@ -280,7 +289,7 @@ class Server {
                     );
 
                 ~Directory ();
-                
+
                 int
                 Serialize (
                     char *  buffer,
@@ -379,7 +388,7 @@ class Server {
                     );
 
                 ~ArrayShape ();
-                
+
                 size_t
                 Serialize (
                     char *  buffer,
@@ -409,7 +418,7 @@ class Server {
                     );
 
                 ~DataElement ();
-                
+
                 size_t
                 Serialize (
                     char *  buffer,
@@ -441,7 +450,7 @@ class Server {
                     );
 
                 ~Function ();
-                
+
                 size_t
                 Serialize (
                     char *  buffer,
@@ -491,7 +500,7 @@ class Server {
             };
 
         pthread_t   clientGreeter;  // thread to accept incoming client connections
-        
+
         Directory * rootDir;
         int         clientID;       // client sequence number
         LinkedList * clients;       // list of connected clients
@@ -556,7 +565,7 @@ class Server {
 
 
 //-------------------------------------------------------------------------------
-//  Client Classes    
+//  Client Classes
 
 
 class Client {
@@ -598,7 +607,7 @@ class Client {
             int thid
             );
 
-        //----  DOL Object 
+        //----  DOL Object
 
         DLL Directory *
         GetDirectory (
@@ -621,7 +630,7 @@ class Client {
             );
 
         //----  Directory Functions
-        
+
         DLL char *
         ChangeDirectory (
             const char * dirname

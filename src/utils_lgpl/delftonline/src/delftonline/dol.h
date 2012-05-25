@@ -8,7 +8,6 @@
 #pragma once
 
 #include <errno.h>
-#include <netdb.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,9 +15,18 @@
 #include <new>
 
 #if !defined (WIN32 )
+#   include <netdb.h>
 #   include <unistd.h>
+// #   define strerror strerror_r
 #else
+#   include <process.h>
+#   include <ws2tcpip.h>
 #   define DELFTONLINE_LIB
+#   define getpid _getpid
+#   define strdup _strdup
+#   define srandom srand
+#   define random rand
+// #   define strerror strerror_s
 #endif
 
 

@@ -9,7 +9,11 @@
 #pragma once
 
 #include <stdio.h>
-#include <sys/time.h>
+#ifdef WIN32
+#   include <time.h>
+#else
+#   include <sys/time.h>
+#endif
 
 #include "dol.h"
 
