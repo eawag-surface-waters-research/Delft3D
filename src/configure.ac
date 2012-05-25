@@ -392,7 +392,8 @@ utils_lgpl/delftio_sync/packages/delftio_sync_version_number/src/Makefile
 utils_lgpl/delftio_sync/packages/Makefile
 utils_lgpl/delftonline/Makefile
 utils_lgpl/delftonline/src/delftonline/Makefile
-utils_lgpl/delftonline/src/printcontents/Makefile
+utils_lgpl/delftonline/src/dolcli/Makefile
+utils_lgpl/delftonline/src/dolprint/Makefile
 utils_lgpl/d_hydro_lib/Makefile
 utils_lgpl/d_hydro_lib/packages/d_hydro_lib/Makefile
 utils_lgpl/d_hydro_lib/packages/d_hydro_lib/src/Makefile

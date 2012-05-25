@@ -3221,14 +3221,14 @@ src/utils_lgpl/delftonline/src/delftonline/server.cpp -text
 src/utils_lgpl/delftonline/src/delftonline/sortedbag.cpp -text
 src/utils_lgpl/delftonline/src/delftonline/sortedbag.h -text
 src/utils_lgpl/delftonline/src/delftonline/util.cpp -text
+src/utils_lgpl/delftonline/src/dolcli/Makefile.am -text
 src/utils_lgpl/delftonline/src/dolcli/dolcli.cpp -text
 src/utils_lgpl/delftonline/src/dolcli/dolcli.h -text
 src/utils_lgpl/delftonline/src/dolcli/lexan.l -text
-src/utils_lgpl/delftonline/src/dolcli/makefile -text
 src/utils_lgpl/delftonline/src/dolcli/parse.h -text
 src/utils_lgpl/delftonline/src/dolcli/parse.y -text
-src/utils_lgpl/delftonline/src/printcontents/Makefile.am -text
-src/utils_lgpl/delftonline/src/printcontents/printcontents.cpp -text
+src/utils_lgpl/delftonline/src/dolprint/Makefile.am -text
+src/utils_lgpl/delftonline/src/dolprint/dolprint.cpp -text
 src/utils_lgpl/deltares_common/Makefile.am -text
 src/utils_lgpl/deltares_common/doc/readme.txt -text
 src/utils_lgpl/deltares_common/packages/Makefile.am -text

@@ -8,14 +8,24 @@
 
 include $(top_srcdir)/common.am
 
-bin_PROGRAMS = printcontents
+bin_PROGRAMS = dolcli
 
-printcontents_SOURCES = \
-	printcontents.cpp
+dolcli_SOURCES = \
+	dolcli.cpp \
+        lexan.l \
+        parse.y
 
 INCLUDES = \
 	-I$(top_builddir)/utils_lgpl/delftonline/include
 
-printcontents_LDADD = \
-	-L$(top_builddir)/lib -lDelftOnline
+dolcli_LDADD = \
+	-L$(top_builddir)/lib -lDelftOnline \
+        -ll \
+        -lreadline \
+        -ltermcap
+
+	
+AM_LFLAGS = -L --c++
+AM_YFLAGS = -d
+
 

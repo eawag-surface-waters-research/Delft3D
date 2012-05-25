@@ -4,8 +4,6 @@
 //
 //  Irv.Elshoff@Deltares.NL
 //  21 jun 11
-//
-//  Copyright (C) 2012, WL | Deltares
 //-------------------------------------------------------------------------------
 
 #pragma once
