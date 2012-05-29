@@ -5,9 +5,7 @@
 //  definitions, but also (almost) all internal definitions.
 //
 //  Irv.Elshoff@Deltares.NL
-//  24 may 12
-//
-//  Copyright (C) 2006-2012, WL | Deltares
+//  26 may 12
 //-------------------------------------------------------------------------------
 
 #pragma once
@@ -17,24 +15,30 @@
 #include <stdio.h>
 
 
-#ifdef WIN32
+#if defined (WIN32)
 #   include <io.h>
 #   include <winsock.h>
-// These undefs must be placed after the includes above
+
+    // Undefine tokens we use, but Windows defines
 #   undef IN
 #   undef OUT
 #   undef OPAQUE
 #   undef ERROR
-#   define STDCALL __cdecl
-#   define uint8_t u_char
+
+#   define DLL      __declspec(dllexport)
+#   define STDCALL  __cdecl
+
+#   define ssize_t  int
 #   define uint16_t u_short
 #   define uint32_t u_long
-#   define ssize_t int
-#   define DLL __declspec( dllexport )
+#   define uint8_t  u_char
+
 #else
 #   include <netinet/in.h>
+
 #   define STDCALL
 #   define DLL
+
 #endif
 
 
@@ -186,7 +190,9 @@ class Server {
             bool            startRunning,
             bool            allowControl,
             Verbosity       verbosity,
-            const char *    logFile
+            const char *    logFile,
+            uint16_t        firstPort = 0,
+            uint16_t        lastPort = 0
             );
 
         DLL Server (
@@ -328,7 +334,9 @@ class Server {
                     size_t  size
                     );
 
+                void CallFunction       (void);
                 void ChangeDirectory    (void);
+                void PutData            (void);
                 void SendArrayShape     (void);
                 void SendDirectory      (void);
                 void SendData           (void);
@@ -773,7 +781,7 @@ class Client {
 
     private:
         char *          hostname;       // server hostname
-        int             port;           // server TCP port
+        uint16_t        port;           // server TCP port
         char *          key;            // authentication key
 
         int             sock;           // socket for client/server communication
@@ -795,8 +803,9 @@ class Client {
         char *
         CallServer (
             Message::Type   type,
-            int *           value,
-            const char *    argument,
+            int *           value     = NULL,
+            const char *    argument  = NULL,
+            size_t          argsize   = 0,
             size_t *        replysize = NULL
             );
 

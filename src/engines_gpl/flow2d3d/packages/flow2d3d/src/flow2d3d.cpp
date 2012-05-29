@@ -31,7 +31,7 @@
 //  IMPLEMENTATION
 //
 //  Irv.Elshoff@Deltares.NL
-//  29 oct 11
+//  25 may 12
 //------------------------------------------------------------------------------
 //
 /// \file
@@ -178,17 +178,23 @@ void
 Flow2D3D::Run (
     void
     ) {
-    char * waitFile = this->config->GetAttrib ("waitFile");
+
+    // The following waitFile code was introduced in r1099 by mourits for
+    // debugging parallem runs.  It should NOT be used for any other purpose!
+    // (elshoff, 25 may 12)
+
+    const char * waitFile = this->config->GetAttrib ("waitFile");
     if (waitFile != NULL) {
-        printf("Waiting for file \"%s\" to appear...\n", waitFile);
+        printf ("Waiting for file \"%s\" to appear...\n", waitFile);
         fflush (stdout);
-        FILE * filePtr = NULL;
+        FILE * f;
         do {
-            filePtr = fopen(waitFile, "r");
-            Sleep(1000);
-        } while (filePtr == NULL);
-        fclose(filePtr);
-    }
+            f = fopen (waitFile, "r");
+            Sleep (1000);
+            } while (f == NULL);
+
+        fclose (f);
+        }
 
     try {
         if (this->dd != NULL)

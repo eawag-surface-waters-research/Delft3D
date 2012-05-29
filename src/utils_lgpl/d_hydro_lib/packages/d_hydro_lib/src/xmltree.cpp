@@ -30,7 +30,7 @@
 //  Tree-representation of an XML file
 //
 //  Irv.Elshoff@Deltares.NL
-//  2 jun 11
+//  26 may 12
 //------------------------------------------------------------------------------
 
 
@@ -141,7 +141,7 @@ XmlTree::XmlTree (
 
     this->init ();
 
-    char * ppn;
+    const char * ppn;
     if (parent == NULL)
         ppn = "";
     else
@@ -255,7 +255,7 @@ XmlTree::Lookup (
     strcpy (path, pathname);
     char * remainder = strchr (path, '/');
     if (remainder == NULL)
-        remainder = "";
+        remainder = (char *) "";
     else
         *remainder++ = '\0';
 
@@ -280,7 +280,7 @@ XmlTree::Lookup (
 //------------------------------------------------------------------------------
 
 
-char *
+const char *
 XmlTree::GetAttrib (
     const char * name
     ) {
@@ -290,6 +290,7 @@ XmlTree::GetAttrib (
         char * path = strdup (name);
         (strchr (path, ':'))[0] = '\0';
         XmlTree * tree = this->Lookup (path);
+        free (path);
         if (tree == NULL)
             return NULL;
 
@@ -309,7 +310,7 @@ XmlTree::GetBoolAttrib (
     const char * name
     ) {
 
-    char * value = this->GetAttrib (name);
+    const char * value = this->GetAttrib (name);
 
     return (value != NULL && (
             strcmp (value, "true") == 0 ||
@@ -329,7 +330,7 @@ XmlTree::GetIntegerAttrib (
     const char * name
     ) {
 
-    char * value = this->GetAttrib (name);
+    const char * value = this->GetAttrib (name);
     if (value == NULL)
         return 0;
     else
@@ -342,7 +343,7 @@ XmlTree::GetFloatAttrib (
     const char * name
     ) {
 
-    char * value = this->GetAttrib (name);
+    const char * value = this->GetAttrib (name);
     if (value == NULL)
         return 0.0;
 

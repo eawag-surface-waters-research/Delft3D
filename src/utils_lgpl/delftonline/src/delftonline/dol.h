@@ -2,7 +2,7 @@
 //  DelftOnline -- Internal Include File
 //
 //  Irv.Elshoff@Deltares.NL
-//  6 may 12
+//  25 may 12
 //-------------------------------------------------------------------------------
 
 #pragma once
@@ -14,19 +14,20 @@
 #include <string.h>
 #include <new>
 
-#if !defined (WIN32 )
-#   include <netdb.h>
-#   include <unistd.h>
-// #   define strerror strerror_r
-#else
+#if defined (WIN32)
 #   include <process.h>
 #   include <ws2tcpip.h>
+
 #   define DELFTONLINE_LIB
-#   define getpid _getpid
-#   define strdup _strdup
-#   define srandom srand
-#   define random rand
-// #   define strerror strerror_s
+#   define getpid   _getpid
+#   define strdup   _strdup
+#   define srandom  srand
+#   define random   rand
+
+#else
+#   include <netdb.h>
+#   include <unistd.h>
+
 #endif
 
 
@@ -44,7 +45,7 @@ namespace DOL {
 
 typedef unsigned long long Timestamp;       // microseconds, since start of epoch
 
-const int maxMessagePayload = 1000*1000;    // size of static buffer for IPC
+const int maxMessagePayload = 10*1000*1000; // size of static buffer for IPC
 
 
 //-------------------------------------------------------------------------------

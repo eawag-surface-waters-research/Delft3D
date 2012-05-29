@@ -2,12 +2,11 @@
 //  DelftOnline - Sorted Bag of Tagged Non-negative Integers - IMPLEMENTTATION
 //
 //  Irv.Elshoff@Deltares.NL
-//  6 may 12
+//  26 may 12
 //-------------------------------------------------------------------------------
 
 
 #include "sortedbag.h"
-#include "DelftOnline.h"        // for Exception that after fixing ToDo is not necessary
 
 
 //------------------------------------------------------------------------------

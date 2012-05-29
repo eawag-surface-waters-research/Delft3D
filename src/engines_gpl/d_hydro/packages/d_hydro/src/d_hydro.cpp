@@ -30,7 +30,7 @@
 //  D_Hydro Main Program
 //
 //  Irv.Elshoff@Deltares.NL
-//  29 oct 11
+//  25 may 12
 //------------------------------------------------------------------------------
 
 
@@ -252,7 +252,7 @@ DeltaresHydro::DeltaresHydro (
 
     // ToDo: check the minimalVersion attribute against the actual version of this executable
 
-    char * startName = root->GetAttrib ("start");
+    const char * startName = root->GetAttrib ("start");
     if (startName == NULL)
         throw new Exception (true, "DeltaresHydro element in configuration file \"%s\" is missing a start attribute", this->configfile);
 
@@ -275,7 +275,7 @@ DeltaresHydro::DeltaresHydro (
     //  conventions.
     //  ToDo: deal with envar paths
 
-    char * library = this->start->GetAttrib ("library");
+    const char * library = this->start->GetAttrib ("library");
     if (library == NULL)
         library = startName;
 

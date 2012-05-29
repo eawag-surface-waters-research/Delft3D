@@ -31,7 +31,7 @@
 //  Domain Decomposition Initialization - IMPLEMENTATION
 //
 //  Irv.Elshoff@Deltares.NL
-//  31 oct 11
+//  25 may 12
 //------------------------------------------------------------------------------
 
 
@@ -109,7 +109,7 @@ DD::DD (
             }
 
         else {
-            char * nodeListFileName = this->multiNode->GetAttrib ("file");
+            const char * nodeListFileName = this->multiNode->GetAttrib ("file");
             if (nodeListFileName != NULL)
                 this->nodeSet->AddNodesFromFile (nodeListFileName);
             else if (this->multiNode->charDataLen > 0) {
@@ -277,7 +277,7 @@ DD::ReadConfig (
     void
     ) {
 
-    char * ddbfile = this->config->GetAttrib ("DDBounds:file");
+    const char * ddbfile = this->config->GetAttrib ("DDBounds:file");
     if (ddbfile == NULL)
         throw new Exception (true, "DD-bounds file not specified in configuration file");
 
@@ -293,7 +293,7 @@ DD::ReadConfig (
 
     rewind (input);
 
-    char * xmlhead = "<?xml ";
+    const char * xmlhead = "<?xml ";
     if (strncmp (line, xmlhead, strlen (xmlhead)) == 0) {
 #if defined (WIN32)
         throw new Exception (true, "XML DD-bounds file is currently not supported on Windows");
@@ -456,13 +456,13 @@ DD::JoinIterators (
 
     // Get IDs of the iterators to join
 
-    char * name1 = iter1->name;
+    const char * name1 = iter1->name;
     if (name1 == NULL) name1 = "";
     long id1 = (long) this->iteratorDict->Lookup (name1);
     if (id1 == Dictionary::NOTFOUND)
         throw new Exception (true, "Unknown iterator \"%s\" in JoinIterators", name1);
 
-    char * name2 = iter2->name;
+    const char * name2 = iter2->name;
     if (name2 == NULL) name2 = "";
     long id2 = (long) this->iteratorDict->Lookup (name2);
     if (id2 == Dictionary::NOTFOUND)

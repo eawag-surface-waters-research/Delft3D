@@ -2,7 +2,7 @@
 //  DelftOnline -- Server::ClientConnection Routines
 //
 //  Irv.Elshoff@Deltares.NL
-//  24 may 12
+//  27 may 12
 //-------------------------------------------------------------------------------
 
 
@@ -182,6 +182,11 @@ Server::ClientConnection::ServiceThread (
                 break;
                 }
 
+            case Message::CALL_FUNCTION: {
+                this->CallFunction ();
+                break;
+                }
+
             case Message::CHANGE_DIR: {
                 this->ChangeDirectory ();
                 break;
@@ -222,6 +227,25 @@ Server::ClientConnection::ServiceThread (
                 break;
                 }
 
+            case Message::GOODBYE: {
+                this->Reply (0, 0);
+                return;
+                }
+
+            case Message::PUT_DATA: {
+                this->PutData ();
+                break;
+                }
+
+            case Message::SERVER_STATUS: {
+                if (sizeof (Status) > Message::maxPayload)
+                    throw new Exception (true, "Status structure too big for message payload!");
+
+                memcpy (this->mesg->payload, &this->server->status, sizeof (Status));
+                this->Reply (0, sizeof (Status));
+                break;
+                }
+
             case Message::START: {
                 this->Reply ((int) this->server->Start (), 0);
                 break;
@@ -245,25 +269,12 @@ Server::ClientConnection::ServiceThread (
                 break;
                 }
 
-            case Message::SERVER_STATUS: {
-                if (sizeof (Status) > Message::maxPayload)
-                    throw new Exception (true, "Status structure too big for message payload!");
-
-                memcpy (this->mesg->payload, &this->server->status, sizeof (Status));
-                this->Reply (0, sizeof (Status));
-                break;
-                }
-
             case Message::TERMINATE: {
                 bool terminate = this->server->Terminate (this->clientID);
                 this->Reply ((int) terminate, 0);
                 if (terminate) exit (1);
                 break;
                 }
-
-            case Message::GOODBYE:
-                this->Reply (0, 0);
-                return;
 
             default:
                 throw new Exception (true, "Client request header type is invalid");
@@ -299,6 +310,25 @@ Server::ClientConnection::Reply (
 
 
 void
+Server::ClientConnection::CallFunction (
+    void
+    ) {
+
+    const char * pn = ResolvePathName (this->mesg->payload, this->curDir->pathname);
+    Function * func = this->server->LookupFunction (pn);
+    if (func == NULL) {
+        this->Reply ((int) false, 0);
+        return;
+        }
+
+    int argument = (long) this->mesg->value & 0xFFFFFFFF;
+    int value = (*func->function) (func->context, &argument);
+
+    this->Reply (value, 0);
+    }
+
+
+void
 Server::ClientConnection::ChangeDirectory (
     void
     ) {
@@ -319,6 +349,24 @@ Server::ClientConnection::ChangeDirectory (
     this->curDir = dir;
     memcpy (this->mesg->payload, dir->pathname, len);
     this->Reply ((int) true, len);
+    }
+
+
+void
+Server::ClientConnection::PutData (
+    void
+    ) {
+
+    const char * pn = ResolvePathName (this->mesg->payload, this->curDir->pathname);
+    Server::DataElement * elt = this->server->LookupDataElement (pn);
+    if (elt == NULL) {
+        this->Reply ((int) false, 0);
+        return;
+        }
+
+    char * data = this->mesg->payload + (long) this->mesg->value;
+    memcpy (elt->address, data, elt->size);
+    this->Reply ((int) true, 0);
     }
 
 

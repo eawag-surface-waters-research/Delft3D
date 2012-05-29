@@ -3199,6 +3199,7 @@ src/utils_lgpl/delftonline/Makefile.am -text
 src/utils_lgpl/delftonline/include/DelftOnline.h -text
 src/utils_lgpl/delftonline/include/DelftOnline.i -text
 src/utils_lgpl/delftonline/src/delftonline/Makefile.am -text
+src/utils_lgpl/delftonline/src/delftonline/TODO -text
 src/utils_lgpl/delftonline/src/delftonline/arrayshape.cpp -text
 src/utils_lgpl/delftonline/src/delftonline/barrier.cpp -text
 src/utils_lgpl/delftonline/src/delftonline/client.cpp -text
@@ -3225,9 +3226,8 @@ src/utils_lgpl/delftonline/src/delftonline/util.cpp -text
 src/utils_lgpl/delftonline/src/dolcli/Makefile.am -text
 src/utils_lgpl/delftonline/src/dolcli/dolcli.cpp -text
 src/utils_lgpl/delftonline/src/dolcli/dolcli.h -text
-src/utils_lgpl/delftonline/src/dolcli/lexan.l -text
-src/utils_lgpl/delftonline/src/dolcli/parse.h -text
-src/utils_lgpl/delftonline/src/dolcli/parse.y -text
+src/utils_lgpl/delftonline/src/dolcli/lexan.ll -text
+src/utils_lgpl/delftonline/src/dolcli/parse.yy -text
 src/utils_lgpl/delftonline/src/dolprint/Makefile.am -text
 src/utils_lgpl/delftonline/src/dolprint/dolprint.cpp -text
 src/utils_lgpl/deltares_common/Makefile.am -text

@@ -2,7 +2,7 @@
 //  DelftOnline -- C++ Client API Routines
 //
 //  Irv.Elshoff@Deltares.NL
-//  24 may 12
+//  28 may 12
 //-------------------------------------------------------------------------------
 
 
@@ -46,8 +46,6 @@ Client::Client (
         throw new Exception (true, "Client constructor: Malformed DOL URL: No authentication key");
 
     int port = atoi (colon);
-    if (port < TCPPORT_FIRST || port > TCPPORT_LAST)
-        throw new Exception (true, "Client constructor: Malformed DOL URL: Invalid port number");
 
     *slash++ = '\0';
     char * key = slash;
@@ -137,7 +135,7 @@ Client::~Client (
     ) {
 
     if (! this->terminated)
-        CallServer (Message::GOODBYE, NULL, NULL);    // tell server we're leaving
+        CallServer (Message::GOODBYE);    // tell server we're leaving
 
     free (this->hostname);
     free (this->key);
@@ -154,10 +152,11 @@ Client::CallServer (
     Message::Type   type,
     int *           value,
     const char *    argument,
+    size_t          argsize,
     size_t *        replysize       // default NULL
     ) {
 
-    size_t payloadSize = (argument == NULL) ? 0 : strlen (argument) + 1;
+    size_t payloadSize = (argument == NULL) ? 0 : argsize;
 
     LOCK
 
@@ -227,7 +226,7 @@ Client::GetDescription (
     ) {
 
     CheckIfTerminated ();
-    char * reply = CallServer (Message::GET_DESCRIPTION, NULL, NULL);
+    char * reply = CallServer (Message::GET_DESCRIPTION);
     if (reply == NULL)
         return NULL;
     
@@ -248,7 +247,7 @@ Client::ChangeDirectory (
 
     CheckIfTerminated ();
 
-    char * reply = CallServer (Message::CHANGE_DIR, NULL, dirname);
+    char * reply = CallServer (Message::CHANGE_DIR, NULL, dirname, strlen (dirname) + 1);
     if (reply == NULL)
         return NULL;
 
@@ -281,7 +280,7 @@ Client::GetThreadCount (
     CheckIfTerminated ();
 
     int count = 0;
-    CallServer (Message::GET_THREADCOUNT, &count, NULL);
+    CallServer (Message::GET_THREADCOUNT, &count);
     return count;
     }
 
@@ -292,7 +291,7 @@ Client::GetThreadName (
     ) {
 
     CheckIfTerminated ();
-    char * reply = CallServer (Message::GET_THREADNAME, &id, NULL);
+    char * reply = CallServer (Message::GET_THREADNAME, &id);
     char * name = strdup (reply);
     delete [] reply;
     return name;
@@ -310,7 +309,7 @@ Client::GetDirectory (
 
     CheckIfTerminated ();
 
-    char * reply = CallServer (Message::GET_DIR, NULL, dirname);
+    char * reply = CallServer (Message::GET_DIR, NULL, dirname, strlen (dirname) + 1);
     if (reply == NULL)
         throw new Exception (false, "Directory \"%s\" not found", dirname);
 
@@ -333,7 +332,7 @@ Client::GetArrayShape (
     CheckIfTerminated ();
 
     int value;
-    char * reply = CallServer (Message::ARRAY_SHAPE, &value, arrayname);
+    char * reply = CallServer (Message::ARRAY_SHAPE, &value, arrayname, strlen (arrayname) + 1);
     if (reply == NULL)
         return NULL;
 
@@ -361,7 +360,7 @@ Client::GetDataElement (
     CheckIfTerminated ();
 
     size_t replysize;
-    char * reply = CallServer (Message::GET_ELEMENT, NULL, eltname, &replysize);
+    char * reply = CallServer (Message::GET_ELEMENT, NULL, eltname, strlen (eltname) + 1, &replysize);
     if (reply == NULL)
         return NULL;
 
@@ -384,7 +383,7 @@ Client::GetFunction (
     CheckIfTerminated ();
 
     size_t replysize;
-    char * reply = CallServer (Message::GET_FUNCTION, NULL, funcname, &replysize);
+    char * reply = CallServer (Message::GET_FUNCTION, NULL, funcname, strlen (funcname) + 1, &replysize);
     if (reply == NULL)
         return NULL;
 
@@ -401,7 +400,7 @@ Client::GetFunction (
 
 void
 Client::GetData (
-    const char *    name,
+    const char *    eltname,
     unsigned char * buffer,
     size_t          size
     ) {
@@ -409,12 +408,12 @@ Client::GetData (
     CheckIfTerminated ();
 
     size_t replysize;
-    char * reply = CallServer (Message::GET_DATA, NULL, name, &replysize);
+    char * reply = CallServer (Message::GET_DATA, NULL, eltname, strlen (eltname) + 1, &replysize);
     if (reply == NULL)
-        throw new Exception (false, "Server does not return any data for element \"%s\"", name);
+        throw new Exception (false, "Server does not return any data for element \"%s\"", eltname);
 
     if (replysize > size)
-        throw new Exception (false, "Data returned by server for element \"%s\" does not fit in supplied buffer (%d < %d)\n", name, size, replysize);
+        throw new Exception (false, "Data returned by server for element \"%s\" does not fit in supplied buffer (%d < %d)\n", eltname, size, replysize);
 
     memcpy (buffer, reply, replysize);
     delete [] reply;
@@ -430,8 +429,13 @@ Client::PutData (
 
     CheckIfTerminated ();
 
-    // ToDo: Implement!
+    size_t namelen = strlen (eltname) + 1;
+    char * sendbuf = new char [namelen + size];
+    strcpy (sendbuf, eltname);
+    memcpy (sendbuf + namelen, buffer, size);
 
+    CallServer (Message::PUT_DATA, (int *) &namelen, sendbuf, namelen + size);
+    delete [] sendbuf;
     }
 
 
@@ -443,9 +447,10 @@ Client::CallFunction (
 
     CheckIfTerminated ();
 
-    // ToDo: Implement!
+    int result = argument;
+    CallServer (Message::CALL_FUNCTION, &result, funcname, strlen (funcname) + 1);
 
-    return 0;
+    return result;
     }
 
 
@@ -461,7 +466,7 @@ Client::Start (
     CheckIfTerminated ();
 
     int value;
-    CallServer (Message::START, &value, NULL);
+    CallServer (Message::START, &value);
     return (bool) value;
     }
 
@@ -474,7 +479,7 @@ Client::Step (
     CheckIfTerminated ();
 
     int value = steps;
-    CallServer (Message::STEP, &value, NULL);
+    CallServer (Message::STEP, &value);
     return (Milestone) value;
     }
 
@@ -487,7 +492,7 @@ Client::Stop (
     CheckIfTerminated ();
 
     int value;
-    CallServer (Message::STOP, &value, NULL);
+    CallServer (Message::STOP, &value);
     return (Milestone) value;
     }
 
@@ -500,7 +505,7 @@ Client::Terminate (
     CheckIfTerminated ();
 
     int value;
-    CallServer (Message::TERMINATE, &value, NULL);
+    CallServer (Message::TERMINATE, &value);
     return this->terminated = (bool) value;
     }
 
@@ -517,7 +522,7 @@ Client::ServerStatus (
     CheckIfTerminated ();
 
     Status * status = new Status;
-    char * reply = CallServer (Message::SERVER_STATUS, NULL, NULL);
+    char * reply = CallServer (Message::SERVER_STATUS);
     memcpy (status, reply, sizeof (Status));
     delete [] reply;
     return status;

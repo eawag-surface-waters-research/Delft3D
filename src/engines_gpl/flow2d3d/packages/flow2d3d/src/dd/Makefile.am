@@ -2,7 +2,7 @@
 #   Makefile for d_hydro - Flow2D3D Component
 #
 #   Irv.Elshoff@Deltares.NL
-#   6 jun 11
+#   25 may 12
 #-------------------------------------------------------------------------------
 
 
@@ -35,6 +35,7 @@ libDD_la_LIBADD = \
     iterators/*.lo \
     mapper/*.lo
 
-
+AM_CPPFLAGS = \
+    -Wno-int-to-pointer-cast
 
 

@@ -11,21 +11,24 @@ include $(top_srcdir)/common.am
 bin_PROGRAMS = dolcli
 
 dolcli_SOURCES = \
-	dolcli.cpp \
-        lexan.l \
-        parse.y
+    dolcli.cpp \
+    parse.yy \
+    lexan.ll
 
 INCLUDES = \
-	-I$(top_builddir)/utils_lgpl/delftonline/include
+    -I$(top_builddir)/utils_lgpl/delftonline/include
 
 dolcli_LDADD = \
-	-L$(top_builddir)/lib -lDelftOnline \
-        -ll \
-        -lreadline \
-        -ltermcap
+    -L$(top_builddir)/lib -lDelftOnline \
+    -ll \
+    -lreadline \
+    -ltermcap
 
 	
-AM_LFLAGS = -L --c++
+AM_LFLAGS = -L
 AM_YFLAGS = -d
 
-
+CLEANFILES = \
+    lexan.cc \
+    parse.cc \
+    parse.h

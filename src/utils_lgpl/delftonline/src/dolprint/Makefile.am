@@ -11,11 +11,11 @@ include $(top_srcdir)/common.am
 bin_PROGRAMS = dolprint
 
 dolprint_SOURCES = \
-	dolprint.cpp
+    dolprint.cpp
 
 INCLUDES = \
-	-I$(top_builddir)/utils_lgpl/delftonline/include
+    -I$(top_builddir)/utils_lgpl/delftonline/include
 
 dolprint_LDADD = \
-	-L$(top_builddir)/lib -lDelftOnline
+    -L$(top_builddir)/lib -lDelftOnline
 

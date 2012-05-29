@@ -3,13 +3,14 @@
 //  Clock Class - DEFINITIONS
 //
 //  Irv.Elshoff@Deltares.NL
-//  21 jun 11
+//  25 may 12
 //-------------------------------------------------------------------------------
 
 #pragma once
 
 #include <stdio.h>
-#ifdef WIN32
+
+#if defined (WIN32)
 #   include <time.h>
 #else
 #   include <sys/time.h>

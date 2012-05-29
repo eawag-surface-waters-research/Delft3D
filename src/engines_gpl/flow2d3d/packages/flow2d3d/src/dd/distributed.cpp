@@ -31,7 +31,7 @@
 //  Domain Decomposition Distributed (MultiNode) Routines - IMPLEMENTATION
 //
 //  Irv.Elshoff@Deltares.NL
-//  24 nov 11
+//  25 may 25
 //------------------------------------------------------------------------------
 
 
@@ -140,24 +140,24 @@ DD::MasterProcess (
     throw new Exception (true, "Remote execution is not supported on Microsoft Windows");
 #else
 
-    char * hnpid = GetHostnamePID ();
+    const char * hnpid = GetHostnamePID ();
     char threadName [strlen (hnpid) + 100];
     sprintf (threadName, "%s master", hnpid);
     this->log->RegisterThread (threadName);
     delete [] hnpid;
     this->log->Write (Log::ALWAYS, "Distributed DD master process started");
 
-    char * mainArgs = this->flow->DH->mainArgs;
-    char * exePath  = this->flow->DH->exePath;
+    const char * mainArgs = this->flow->DH->mainArgs;
+    const char * exePath  = this->flow->DH->exePath;
 
-    char * remoteShellCommand = this->multiNode->GetAttrib ("remoteShellCommand");
+    const char * remoteShellCommand = this->multiNode->GetAttrib ("remoteShellCommand");
     if (remoteShellCommand == NULL)
         remoteShellCommand = "ssh -n";
 
     // Get the current directory and LD_LIBRARY_PATH, which needs to be set on the remote nodes
 
-    char * pwd = getenv ("PWD");
-    char * libPath = getenv ("LD_LIBRARY_PATH");
+    const char * pwd = getenv ("PWD");
+    const char * libPath = getenv ("LD_LIBRARY_PATH");
     if (libPath == NULL) libPath = "";
 
     // Start slave processes on remote nodes

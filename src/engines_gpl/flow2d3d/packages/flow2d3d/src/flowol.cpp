@@ -31,7 +31,7 @@
 //  Interface to DelftOnline - IMPLEMENTATION
 //
 //  Irv.Elshoff@deltares.NL
-//  27 apr 12
+//  28 may 12
 //-------------------------------------------------------------------------------
 
 
@@ -58,7 +58,7 @@ FlowOL::FlowOL (
 
     // Get DOL options from the configuration tree
 
-    char * urlFile = config->GetAttrib ("URLFile");
+    const char * urlFile = config->GetAttrib ("URLFile");
     if (urlFile == NULL)
         throw new Exception (true, "URLFile not specified in DelftOnline section of the configuration file");
 
@@ -67,7 +67,7 @@ FlowOL::FlowOL (
     allowControl |= ! allowStart;
 
     DOL::Verbosity verbosity = DOL::SILENT;
-    char * verb = config->GetAttrib ("verbosity");
+    const char * verb = config->GetAttrib ("verbosity");
     if (verb != NULL) {
         if (strcasecmp (verb, "silent") == 0)
             verbosity = DOL::SILENT;
@@ -81,11 +81,30 @@ FlowOL::FlowOL (
             throw new Exception (true, "Invalid verbosity value \"%s\" in DelftOnline section of the configuration file", verb);
         }
 
+    uint16_t firstPort = 0;
+    uint16_t lastPort = 0;
+
+    const char * ports = config->GetAttrib ("port");
+    if (ports != NULL) {
+        const char * dash = strchr (ports, '-');
+        if (dash == NULL)
+            firstPort = atoi (ports);
+        else if (sscanf (ports, "%hu-%hu", &firstPort, &lastPort) != 2)
+            throw new Exception (true, "Invalid port range specification (\"%s\") in DelftOnline section of the configuration file", ports);
+
+        if (firstPort < 1024 || firstPort > 65535)
+            throw new Exception (true, "Invalid (first) port (%d) in DelftOnline section of the configuration file", firstPort);
+        if (lastPort != 0 && (lastPort < 1024 || lastPort > 65535))
+            throw new Exception (true, "Invalid last port (%d) in DelftOnline section of the configuration file", lastPort);
+        if (lastPort != 0 && firstPort > lastPort)
+            throw new Exception (true, "Invalid port range in DelftOnline section of the configuration file");
+        }
+
     // Initialize DelftOnline and write handle to URL file
 
     try {
         this->dh->log->Write (Log::MINOR, "Creating DOL server");
-        this->dol = new DOL::Server (allowStart, true, verbosity, NULL);
+        this->dol = new DOL::Server (allowStart, true, verbosity, NULL, firstPort, lastPort);
 
         char * url = this->dol->Handle ();
         this->dh->log->Write (Log::MAJOR, "DOL handle is \"%s\"", url);

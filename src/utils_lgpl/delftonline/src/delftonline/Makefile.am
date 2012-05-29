@@ -2,7 +2,7 @@
 #   Makefile for DelftOnline
 #
 #   Irv.Elshoff@Deltares.NL
-#   25 may 12
+#   26 may 12
 #-------------------------------------------------------------------------------
 
 
@@ -32,3 +32,6 @@ libDelftOnline_la_SOURCES = \
     sortedbag.cpp \
     util.cpp
 
+
+AM_CPPFLAGS = \
+    -Wno-int-to-pointer-cast
