@@ -18,6 +18,7 @@
 #if defined (WIN32)
 #   include <io.h>
 #   include <winsock.h>
+#   include <stdint.h>
 
     // Undefine tokens we use, but Windows defines
 #   undef IN
@@ -29,9 +30,6 @@
 #   define STDCALL  __cdecl
 
 #   define ssize_t  int
-#   define uint16_t u_short
-#   define uint32_t u_long
-#   define uint8_t  u_char
 
 #else
 #   include <netinet/in.h>

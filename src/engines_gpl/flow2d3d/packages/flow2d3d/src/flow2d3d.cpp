@@ -179,9 +179,8 @@ Flow2D3D::Run (
     void
     ) {
 
-    // The following waitFile code was introduced in r1099 by mourits for
+    // The following waitFile code is introduced for
     // debugging parallem runs.  It should NOT be used for any other purpose!
-    // (elshoff, 25 may 12)
 
     const char * waitFile = this->config->GetAttrib ("waitFile");
     if (waitFile != NULL) {
