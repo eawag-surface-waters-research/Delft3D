@@ -69,7 +69,7 @@ void DioSleep(
         float &fSleepTime = (float) sleepTime; //  / 1000.0 // TODO check
         sleep(fSleepTime);
 #elif (defined(WIN32))
-        _sleep(sleepTime);
+        Sleep(sleepTime);
 #else
         DIOSYNCcSLEEP(&sleepTime);
 #endif
