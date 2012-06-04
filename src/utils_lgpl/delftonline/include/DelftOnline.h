@@ -18,8 +18,13 @@
 #if defined (WIN32)
 #   include <io.h>
 #   include <winsock.h>
-#   include <stdint.h>
-
+#   if defined (VS2008)
+#      define uint16_t u_short
+#      define uint32_t u_long
+#      define uint8_t  u_char
+#   else
+#      include <stdint.h>
+#   endif
     // Undefine tokens we use, but Windows defines
 #   undef IN
 #   undef OUT

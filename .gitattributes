@@ -3207,6 +3207,7 @@ src/utils_lgpl/delftonline/src/delftonline/clock.cpp -text
 src/utils_lgpl/delftonline/src/delftonline/clock.h -text
 src/utils_lgpl/delftonline/src/delftonline/connection.cpp -text
 src/utils_lgpl/delftonline/src/delftonline/dataelement.cpp -text
+src/utils_lgpl/delftonline/src/delftonline/delftonline.vcproj -text
 src/utils_lgpl/delftonline/src/delftonline/delftonline.vcxproj -text
 src/utils_lgpl/delftonline/src/delftonline/dictionary.cpp -text
 src/utils_lgpl/delftonline/src/delftonline/dictionary.h -text
