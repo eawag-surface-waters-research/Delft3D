@@ -1225,7 +1225,7 @@ BInt4 open_nefis_file( BText   file_name  ,
       nefis_errcnt += 1;
       nefis_errno   = 8031;
       sprintf(error_text,
-        "File \'%s\' can not be opened as read only\n%s", file_name, strerror(errno) );
+        "File \'%s\' can not be opened as read only\n --- %s", file_name, strerror(errno) );
     }
   }
   else
@@ -1267,8 +1267,8 @@ BInt4 open_nefis_file( BText   file_name  ,
       nefis_errcnt += 1;
       nefis_errno   = 8029;
       sprintf(error_text,
-        "File \'%s\' cann't be opened with unsupported NEFIS access type \'%c\'\n%s",
-       file_name ,access_type, strerror( errno ));
+        "File \'%s\' cann't be opened with unsupported NEFIS access type \'%c\'\n --- %s",
+       file_name ,access_type, strerror(errno));
     }
   }
 
@@ -1293,7 +1293,7 @@ BInt4 open_nefis_file( BText   file_name  ,
       nefis_errcnt += 1;
       nefis_errno   = 8030;
       sprintf(error_text,
-        "Cannot open file \'%s\' for access type \'%c\'\n%s",
+        "Cannot open file \'%s\' for access type \'%c\'\n --- %s",
         file_name, access_type, strerror(errno));
     }
   }
