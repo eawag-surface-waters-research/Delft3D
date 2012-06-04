@@ -40,6 +40,7 @@
  *   Comment:
  *
  */
+#include <errno.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <stdlib.h>
@@ -653,7 +654,7 @@ BInt4 create_nefis_files ( BInt4 * fd_nefis   ,
         nefis_errcnt += 1;
         nefis_errno   = 8015;
         sprintf(error_text,
-          "during reading header of definition file \'%s\'",
+          "During reading header of definition file \'%s\'",
            nefis[set].def_name);
         return nefis_errno;
       }
@@ -909,7 +910,7 @@ BInt4 create_nefis_files ( BInt4 * fd_nefis   ,
                 nefis_errcnt += 1;
                 nefis_errno   = 8022;
                     sprintf(error_text,
-                    "during reading header of DefinitionData file \'%s\'",
+                    "During reading header of DefinitionData file \'%s\'",
                     nefis[set].daf_name);
                 return nefis_errno;
             }
@@ -1189,7 +1190,7 @@ BInt4 open_nefis_file( BText   file_name  ,
       nefis_errno   = 8029;
       sprintf(error_text,
         "File \'%s\' can not be opened with unsupported NEFIS access type \'%c\'",
-       file_name ,access_type);
+       file_name, access_type);
       return nefis_errno;
   }
 
@@ -1224,7 +1225,7 @@ BInt4 open_nefis_file( BText   file_name  ,
       nefis_errcnt += 1;
       nefis_errno   = 8031;
       sprintf(error_text,
-        "File \'%s\' can not be opened as read only", file_name );
+        "File \'%s\' can not be opened as read only\n%s", file_name, strerror(errno) );
     }
   }
   else
@@ -1266,8 +1267,8 @@ BInt4 open_nefis_file( BText   file_name  ,
       nefis_errcnt += 1;
       nefis_errno   = 8029;
       sprintf(error_text,
-        "File \'%s\' cann't be opened with unsupported NEFIS access type \'%c\'",
-       file_name ,access_type);
+        "File \'%s\' cann't be opened with unsupported NEFIS access type \'%c\'\n%s",
+       file_name ,access_type, strerror( errno ));
     }
   }
 
@@ -1292,8 +1293,8 @@ BInt4 open_nefis_file( BText   file_name  ,
       nefis_errcnt += 1;
       nefis_errno   = 8030;
       sprintf(error_text,
-        "Cannot open file \'%s\' for access type \'%c\'",
-        file_name, access_type);
+        "Cannot open file \'%s\' for access type \'%c\'\n%s",
+        file_name, access_type, strerror(errno));
     }
   }
 
