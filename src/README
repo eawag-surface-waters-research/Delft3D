@@ -42,6 +42,7 @@ Compiling on Linux
      Check http://oss.deltares.nl/web/opendelft3d/general/-/message_boards/view_message/46284
      Check http://oss.deltares.nl/web/opendelft3d/faq-compiling-code#How do I create a 64-bit executable?
 
+
 Compiling on OSX
 ================
 The OSX version is only tested with Macports gcc45 + openmpi compilers. Make sure you also get libtool, autoconf, automake, gnu make from macports. The OSX version is very alpha (not tested) so please don't use it for anything serious and report any problems to the general forum. The steps to get it working are first install DelftOnline:
@@ -53,6 +54,23 @@ The OSX version is only tested with Macports gcc45 + openmpi compilers. Make sur
 * If you don't want to install into /usr/local, use --prefix=abspath
 ** Set DYLD_LIBRARY_PATH to the directory containing DelftOnline if it's not in your default path
 
+
+Debugging in Microsoft Visual Studio
+====================================
+- Be sure to have compiled the "Debug configuration" (Build -> Configuration Manager...).
+  All resulting binaries are copied automatically to directory "...\src\engines_gpl\d_hydro\bin\Debug".
+- In your model input directory: put a copy of file "...\oss\src\engines_gpl\d_hydro\scripts\config_flow2d3d.xml",
+  open it in a text editor and fill in the correct name of the mdf-file.
+- In VisualStudio:
+  1) right-click on the project "d_hydro", Properties -> Configuration properties -> Debugging:
+     Command Arguments: config_flow2d3d.xml
+     Working directory: d:/full/path/to/your/model/input/directory
+     OK
+  2) In the source code: add a breakpoint. Click some line, then click in the gray bar in front of this line (or press F9). A red dot will appear.
+  3) right-click on the project "d_hydro", Debug -> Start new instance.
+     A window will allways appear saying source code has been changed. You can rebuild the source code or skip this if you are sure all source code is build correctly.
+     Then the calculation starts.
+
 Directory structure
 ===================
 engines     : Programs which perform a physical simulation
@@ -61,6 +79,7 @@ tools       : Programs which support the engines
 tools_gpl   : Open source tools under GPL conditions
 utils       : Libraries which are used by the engines and/or tools, but at least by more than one engine/tool
 utils_lgpl  : Open source utils under LGPL conditions
+
 
 Location where compiler flags are defined/added (Linux only)
 ============================================================
@@ -101,5 +120,5 @@ line 265-276: -fPIC
 line 265-268: -m64
 
 
-8 February 2012
+5 June 2012
 adri.mourits@deltares.nl

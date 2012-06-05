@@ -118,6 +118,7 @@ src/engines_gpl/d_hydro/packages/d_hydro/src/Makefile_monolithic_alternative.am 
 src/engines_gpl/d_hydro/packages/d_hydro/src/d_hydro.cpp -text
 src/engines_gpl/d_hydro/packages/d_hydro/src/d_hydro_version.cpp -text
 src/engines_gpl/d_hydro/packages/d_hydro/src/readme.txt -text
+src/engines_gpl/d_hydro/scripts/config_flow2d3d.xml -text
 src/engines_gpl/d_hydro/scripts/runddq.sh -text
 src/engines_gpl/flow2d3d/Makefile.am -text
 src/engines_gpl/flow2d3d/default/dioconfig.ini -text
