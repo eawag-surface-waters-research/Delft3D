@@ -800,7 +800,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           do m = 1, mmax
              do n = 1, nmaxus
                 km = kfumin(n, m)
-                if (1<km .and. km<kmax) then
+                if (1<=km .and. km<=kmax) then
                    rbuff2(n, m) = ( taubpu(n, m)*u1(n, m, km) + taubsu(n, m) ) * rhow
                 endif
              enddo
@@ -832,7 +832,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           do m = 1, mmax
              do n = 1, nmaxus
                 km = kfvmin(n, m)
-                if (1<km .and. km<kmax) then
+                if (1<=km .and. km<=kmax) then
                    rbuff2(n, m) = ( taubpv(n, m)*v1(n, m, km) + taubsv(n, m) ) * rhow
                 endif   
              enddo
