@@ -4,6 +4,34 @@
 //  Irv.Elshoff@Deltares.NL
 //  28 may 12
 //-------------------------------------------------------------------------------
+//---- LGPL --------------------------------------------------------------------
+//
+// Copyright (C)  Stichting Deltares, 2011-2012.
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation version 2.1.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, see <http://www.gnu.org/licenses/>.
+//
+// contact: delft3d.support@deltares.nl
+// Stichting Deltares
+// P.O. Box 177
+// 2600 MH Delft, The Netherlands
+//
+// All indications and logos of, and references to, "Delft3D" and "Deltares"
+// are registered trademarks of Stichting Deltares, and remain the property of
+// Stichting Deltares. All rights reserved.
+//
+//------------------------------------------------------------------------------
+// $Id:$
+// $HeadURL:$
 
 
 #include "dol.h"
@@ -123,8 +151,8 @@ Client::Client (
     // Setup a mutex to serialize client/server communications for multi-threaded clients
 
     if (pthread_mutex_init (&this->mutex, NULL) != 0)
-        throw new Exception (true, "Cannot create server communication mutex");    
-    
+        throw new Exception (true, "Cannot create server communication mutex");
+
     this->terminated = false;
     this->curDir = strdup ("/");
     }
@@ -229,13 +257,13 @@ Client::GetDescription (
     char * reply = CallServer (Message::GET_DESCRIPTION);
     if (reply == NULL)
         return NULL;
-    
+
     char * description = strdup (reply);
     delete [] reply;
     return description;
     }
 
-        
+
 //-------------------------------------------------------------------------------
 //  Client API - Directory Functions
 

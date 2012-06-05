@@ -4,6 +4,34 @@
 //  Irv.Elshoff@Deltares.NL
 //  27 may 12
 //-------------------------------------------------------------------------------
+//---- LGPL --------------------------------------------------------------------
+//
+// Copyright (C)  Stichting Deltares, 2011-2012.
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation version 2.1.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, see <http://www.gnu.org/licenses/>.
+//
+// contact: delft3d.support@deltares.nl
+// Stichting Deltares
+// P.O. Box 177
+// 2600 MH Delft, The Netherlands
+//
+// All indications and logos of, and references to, "Delft3D" and "Deltares"
+// are registered trademarks of Stichting Deltares, and remain the property of
+// Stichting Deltares. All rights reserved.
+//
+//------------------------------------------------------------------------------
+// $Id:$
+// $HeadURL:$
 
 
 #include "dol.h"
@@ -44,12 +72,12 @@ Server::ClientConnection::ClientConnection (
     this->port      = ntohs (inaddr->sin_port);
 
     uint32_t ipaddr = ntohl (inaddr->sin_addr.s_addr);
-    sprintf (this->ipaddr, "%u.%u.%u.%u", 
-                    ((uint8_t *) &ipaddr)[3], 
-                    ((uint8_t *) &ipaddr)[2], 
-                    ((uint8_t *) &ipaddr)[1], 
+    sprintf (this->ipaddr, "%u.%u.%u.%u",
+                    ((uint8_t *) &ipaddr)[3],
+                    ((uint8_t *) &ipaddr)[2],
+                    ((uint8_t *) &ipaddr)[1],
                     ((uint8_t *) &ipaddr)[0]
-                    ); 
+                    );
 
     // Setup a mutex to wait on for step or stop
 
@@ -98,7 +126,7 @@ clientServiceInitiator (
     catch (Exception * ex) {
         cc->log->Write (ERROR, "Connection thread for client %d terminating due to exception: %s", cc->clientID, ex->message);
         }
-        
+
     delete cc;
     return NULL;
     }
@@ -278,7 +306,7 @@ Server::ClientConnection::ServiceThread (
 
             default:
                 throw new Exception (true, "Client request header type is invalid");
-                
+
             }
         }
     }

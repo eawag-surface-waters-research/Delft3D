@@ -6,6 +6,34 @@
 //  Irv.Elshoff@Deltares.NL
 //  24 may 12
 //-------------------------------------------------------------------------------
+//---- LGPL --------------------------------------------------------------------
+//
+// Copyright (C)  Stichting Deltares, 2011-2012.
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation version 2.1.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, see <http://www.gnu.org/licenses/>.
+//
+// contact: delft3d.support@deltares.nl
+// Stichting Deltares
+// P.O. Box 177
+// 2600 MH Delft, The Netherlands
+//
+// All indications and logos of, and references to, "Delft3D" and "Deltares"
+// are registered trademarks of Stichting Deltares, and remain the property of
+// Stichting Deltares. All rights reserved.
+//
+//------------------------------------------------------------------------------
+// $Id:$
+// $HeadURL:$
 
 
 #include "dol.h"
@@ -20,19 +48,19 @@ class Stack {
         Stack (
             int capacity
             ) {
-            
+
             this->capacity = capacity;
             stack = new char * [capacity];
             top = 0;
             }
-        
+
         ~Stack () {}
-        
+
         void
         push (
             const char * string
             ) {
-            
+
             if (top == capacity)
                 throw new Exception (true, "[PrintContents] Directory stack capacity exceeded");
 
@@ -40,18 +68,18 @@ class Stack {
             strcpy (stack[top], string);
             top++;
             }
-        
+
         char *
         pop (
             void
             ) {
-            
+
             if (top > 0)
                 return stack[--top];
             else
                 return NULL;
             }
-        
+
     private:
         int capacity;
         int top;
@@ -98,7 +126,7 @@ Client::PrintContents (
 
     fprintf (outfile, "--------------------------------------------------------------\n");
     fprintf (outfile, "Threads:\n");
-    
+
     int numthreads = this->GetThreadCount ();
     for (int thid = 0 ; thid < numthreads ; thid++) {
         char * threadname = this->GetThreadName (thid);
@@ -173,7 +201,7 @@ Client::PrintContents (
         delete dirname;
         delete dir;
         }
-    
+
     delete stack;
     fprintf (outfile, "--------------------------------------------------------------\n");
     }

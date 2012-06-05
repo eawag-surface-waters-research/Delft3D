@@ -4,6 +4,34 @@
 //  Irv.Elshoff@Deltares.NL
 //  24 may 12
 //-------------------------------------------------------------------------------
+//---- LGPL --------------------------------------------------------------------
+//
+// Copyright (C)  Stichting Deltares, 2011-2012.
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation version 2.1.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, see <http://www.gnu.org/licenses/>.
+//
+// contact: delft3d.support@deltares.nl
+// Stichting Deltares
+// P.O. Box 177
+// 2600 MH Delft, The Netherlands
+//
+// All indications and logos of, and references to, "Delft3D" and "Deltares"
+// are registered trademarks of Stichting Deltares, and remain the property of
+// Stichting Deltares. All rights reserved.
+//
+//------------------------------------------------------------------------------
+// $Id:$
+// $HeadURL:$
 
 
 #include "dol.h"
@@ -24,19 +52,19 @@ Server::ArrayShape::ArrayShape (
 
     this->pathname = new char [strlen (name) + strlen (dir->pathname) + 2];
     sprintf (this->pathname, "%s/%s", dir->pathname, name);
-    
+
     this->name  = strdup (name);
     this->dir   = dir;
 
     this->dimensionality = dimensionality;
     this->dimensions = new int [dimensionality];
-    
+
     this->numelements = 1;
     for (int i = 0 ; i < dimensionality ; i++) {
         this->dimensions[i] = dimensions[i];
         this->numelements *= dimensions[i];
         }
-    
+
     this->dir->arrays->Append ((void *) this);
     }
 
@@ -44,7 +72,7 @@ Server::ArrayShape::ArrayShape (
 Server::ArrayShape::~ArrayShape (
     void
     ) {
-    
+
     this->dir->arrays->Delete ((void *) this);
 
     free (this->name);
@@ -133,7 +161,7 @@ Server::LookupArrayShape (
         if (dir == NULL)
             throw Error (false, "LookupArrayShape", "Parent directory \"%s\" of ArrayShape \"%s\" does not exist", pn, name);
         }
-    
+
     dir->arrays->Rewind ();
     ArrayShape * ash = NULL;
     while ((ash = (ArrayShape *) dir->arrays->Next ()) != NULL)
@@ -152,7 +180,7 @@ Server::LookupArrayShape (
 Client::ArrayShape::ArrayShape (
     void
     ) {
-    
+
     this->pathname = NULL;
     this->dimensionality = 0;
     this->dimensions = NULL;
@@ -188,7 +216,7 @@ Server::ArrayShape::Serialize (
     for (int i = 0 ; i < this->dimensionality ; i++)
         *ip++ = this->dimensions[i];
 
-    char * cp = (char *) ip;  
+    char * cp = (char *) ip;
     SERIALIZE_STRING (this->pathname)
 
     return size;
@@ -208,7 +236,7 @@ Client::ArrayShape::Unserialize (
     for (unsigned int i = 0 ; i < this->dimensionality ; i++)
         this->dimensions[i] = *ip++;
 
-    char * cp = (char *) ip;  
+    char * cp = (char *) ip;
     UNSERIALIZE_STRING (this->pathname)
     }
 

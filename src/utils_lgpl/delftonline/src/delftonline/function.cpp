@@ -4,6 +4,34 @@
 //  Irv.Elshoff@Deltares.NL
 //  24 may 12
 //-------------------------------------------------------------------------------
+//---- LGPL --------------------------------------------------------------------
+//
+// Copyright (C)  Stichting Deltares, 2011-2012.
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation version 2.1.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, see <http://www.gnu.org/licenses/>.
+//
+// contact: delft3d.support@deltares.nl
+// Stichting Deltares
+// P.O. Box 177
+// 2600 MH Delft, The Netherlands
+//
+// All indications and logos of, and references to, "Delft3D" and "Deltares"
+// are registered trademarks of Stichting Deltares, and remain the property of
+// Stichting Deltares. All rights reserved.
+//
+//------------------------------------------------------------------------------
+// $Id:$
+// $HeadURL:$
 
 
 #include "dol.h"
@@ -25,13 +53,13 @@ Server::Function::Function (
 
     this->pathname = new char [strlen (name) + strlen (dir->pathname) + 2];
     sprintf (this->pathname, "%s/%s", dir->pathname, name);
-    
+
     this->name          = strdup (name);
     this->dir           = dir;
     this->description   = strdup (description);
     this->function      = function;
     this->context       = context;
-    
+
     this->dir->functions->Append ((void *) this);
     }
 
@@ -39,7 +67,7 @@ Server::Function::Function (
 Server::Function::~Function (
     void
     ) {
-    
+
     this->dir->functions->Delete ((void *) this);
 
     free (this->name);
@@ -176,7 +204,7 @@ Server::LookupFunction (
         if (dir == NULL)
             throw Error (true, "LookupFunction", "Parent directory \"%s\" of function \"%s\" does not exist", pn, name);
         }
-    
+
     dir->functions->Rewind ();
     Function * func;
     while ((func = (Function *) dir->functions->Next ()) != NULL)
@@ -195,7 +223,7 @@ Server::LookupFunction (
 Client::Function::Function (
     void
     ) {
-    
+
     this->pathname    = NULL;
     this->description = NULL;
     this->context     = NULL;

@@ -4,6 +4,34 @@
 //  Irv.Elshoff@Deltares.NL
 //  24 may 12
 //-------------------------------------------------------------------------------
+//---- LGPL --------------------------------------------------------------------
+//
+// Copyright (C)  Stichting Deltares, 2011-2012.
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation version 2.1.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, see <http://www.gnu.org/licenses/>.
+//
+// contact: delft3d.support@deltares.nl
+// Stichting Deltares
+// P.O. Box 177
+// 2600 MH Delft, The Netherlands
+//
+// All indications and logos of, and references to, "Delft3D" and "Deltares"
+// are registered trademarks of Stichting Deltares, and remain the property of
+// Stichting Deltares. All rights reserved.
+//
+//------------------------------------------------------------------------------
+// $Id:$
+// $HeadURL:$
 
 
 #include "dol.h"
@@ -76,24 +104,24 @@ MessageTypeString (
     ) {
 
     return (
-        (type == Message::ARRAY_SHAPE)       ? "ARRAY_SHAPE" :     
-        (type == Message::CALL_FUNCTION)     ? "CALL_FUNCTION" :        
-        (type == Message::CHANGE_DIR)        ? "CHANGE_DIR" :     
-        (type == Message::GET_DATA)          ? "GET_DATA" :        
+        (type == Message::ARRAY_SHAPE)       ? "ARRAY_SHAPE" :
+        (type == Message::CALL_FUNCTION)     ? "CALL_FUNCTION" :
+        (type == Message::CHANGE_DIR)        ? "CHANGE_DIR" :
+        (type == Message::GET_DATA)          ? "GET_DATA" :
         (type == Message::GET_DESCRIPTION)   ? "GET_DESCRIPTION" :
-        (type == Message::GET_DIR)           ? "GET_DIR" :        
-        (type == Message::GET_ELEMENT)       ? "GET_ELEMENT" :        
-        (type == Message::GET_FUNCTION)      ? "GET_FUNCTION" :        
-        (type == Message::GET_THREADCOUNT)   ? "GET_THREADCOUNT" :        
-        (type == Message::GET_THREADNAME)    ? "GET_THREADNAME" :        
-        (type == Message::GOODBYE)           ? "GOODBYE" :          
-        (type == Message::HELLO)             ? "HELLO" :          
-        (type == Message::PUT_DATA)          ? "PUT_DATA" :        
-        (type == Message::SERVER_STATUS)     ? "SERVER_STATUS" :           
-        (type == Message::START)             ? "START" :          
-        (type == Message::STEP)              ? "STEP" :           
-        (type == Message::STOP)              ? "STOP" :           
-        (type == Message::TERMINATE)         ? "TERMINATE" :      
+        (type == Message::GET_DIR)           ? "GET_DIR" :
+        (type == Message::GET_ELEMENT)       ? "GET_ELEMENT" :
+        (type == Message::GET_FUNCTION)      ? "GET_FUNCTION" :
+        (type == Message::GET_THREADCOUNT)   ? "GET_THREADCOUNT" :
+        (type == Message::GET_THREADNAME)    ? "GET_THREADNAME" :
+        (type == Message::GOODBYE)           ? "GOODBYE" :
+        (type == Message::HELLO)             ? "HELLO" :
+        (type == Message::PUT_DATA)          ? "PUT_DATA" :
+        (type == Message::SERVER_STATUS)     ? "SERVER_STATUS" :
+        (type == Message::START)             ? "START" :
+        (type == Message::STEP)              ? "STEP" :
+        (type == Message::STOP)              ? "STOP" :
+        (type == Message::TERMINATE)         ? "TERMINATE" :
         "<unknown>"
         );
     }
@@ -175,7 +203,7 @@ ResolvePathName (
     sprintf (buffer, "%s/%s", curDir, pathname);
 
     //  Get rid of trailing slashes
-    
+
     for (int i = len-1 ; i >= 0 ; i--)
         if (buffer[i] == '/')
             buffer[i] = '\0';

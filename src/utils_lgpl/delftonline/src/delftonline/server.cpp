@@ -4,6 +4,34 @@
 //  Irv.Elshoff@Deltares.NL
 //  25 may 12
 //-------------------------------------------------------------------------------
+//---- LGPL --------------------------------------------------------------------
+//
+// Copyright (C)  Stichting Deltares, 2011-2012.
+//
+// This library is free software; you can redistribute it and/or
+// modify it under the terms of the GNU Lesser General Public
+// License as published by the Free Software Foundation version 2.1.
+//
+// This library is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public
+// License along with this library; if not, see <http://www.gnu.org/licenses/>.
+//
+// contact: delft3d.support@deltares.nl
+// Stichting Deltares
+// P.O. Box 177
+// 2600 MH Delft, The Netherlands
+//
+// All indications and logos of, and references to, "Delft3D" and "Deltares"
+// are registered trademarks of Stichting Deltares, and remain the property of
+// Stichting Deltares. All rights reserved.
+//
+//------------------------------------------------------------------------------
+// $Id:$
+// $HeadURL:$
 
 
 #include "dol.h"
@@ -140,7 +168,7 @@ Server::Server (
     // Setup a mutex to serialize server operations and a condition variable to start/stop
 
     if (pthread_mutex_init (&this->mutex, NULL) != 0)
-        throw Error (true, "Server", "Pthreads error: Cannot create server mutex: %s", strerror (errno)); 
+        throw Error (true, "Server", "Pthreads error: Cannot create server mutex: %s", strerror (errno));
     if (pthread_cond_init (&this->pause, NULL) != 0)
         throw Error (true, "Server", "Pthreads error: Cannot create condition variable for start/stop: %s", strerror (errno));
 
@@ -155,7 +183,7 @@ Server::Server (
 Server::Server (
     const char *    serverURL
     ) {
-    
+
     throw Error (true, "Server", "ToDo !! Implement slave server support");
     }
 
@@ -291,7 +319,7 @@ Server::GetThreadID (
     void * spec = pthread_getspecific (this->thread);
     if (spec < 0)
         throw Error (true, "GetThreadID", "Invalid thread-specific key");
-    
+
     return (long) spec & 0xFFFFFFFF;
     }
 
@@ -327,7 +355,7 @@ Server::PassMilestone (
 
     Milestone nextStop;
 
-    // Phase one: 
+    // Phase one:
     //      Wait for all server threads to pass this milestone
 
     LOCK
@@ -380,13 +408,13 @@ Server::PassMilestone (
 
     if (! this->status.running) {
         if (threadID == 1)
-            this->log->Write (INFO, "Pausing at milestone %d", milestone); 
+            this->log->Write (INFO, "Pausing at milestone %d", milestone);
 
         if (pthread_cond_wait (&this->pause, &this->mutex) != 0)
             throw Error (true, "PassMilestone", "Pthreads error: pthread_cond_wait fails in PassMilestone %s", strerror (errno));
 
         if (threadID == 1)
-            this->log->Write (INFO, "Resuming at milestone %d", milestone); 
+            this->log->Write (INFO, "Resuming at milestone %d", milestone);
         }
 
     UNLOCK
@@ -401,7 +429,7 @@ bool
 Server::Start (
     void
     ) {
-    
+
     if (! this->status.allowControl) return false;
     LOCK
 
@@ -424,7 +452,7 @@ Server::Step (
     int steps,
     ClientConnection * client
     ) {
-    
+
     if (! this->status.allowControl) return false;
     LOCK
 
@@ -446,7 +474,7 @@ bool
 Server::Stop (
     ClientConnection * client
     ) {
-    
+
     if (! this->status.allowControl) return false;
     LOCK
 
@@ -466,16 +494,16 @@ Server::StopAt (
     Milestone milestone,
     ClientConnection * client
     ) {
-    
+
     this->breakpoints->Add (milestone, client);
     UNLOCK
 
-    client->log->Write (TRACE, "Waiting for milestone %d", milestone); 
+    client->log->Write (TRACE, "Waiting for milestone %d", milestone);
 
     if (pthread_mutex_lock (&client->sync) != 0)
         throw new Exception (true, "Pthreads error: Cannot lock Server::ClientConnection step/stop mutex: %s", strerror (errno));
-    
-    client->log->Write (TRACE, "Resuming at milestone %d", milestone); 
+
+    client->log->Write (TRACE, "Resuming at milestone %d", milestone);
     }
 
 
@@ -483,7 +511,7 @@ bool
 Server::Terminate (
     int clientID
     ) {
-    
+
     if (! this->status.allowControl) return false;
 
     this->log->Write (ERROR, "Termination ordered by DOL client %d", clientID);
