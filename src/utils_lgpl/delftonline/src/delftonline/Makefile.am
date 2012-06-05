@@ -21,6 +21,7 @@ libDelftOnline_la_SOURCES = \
     clock.cpp \
     connection.cpp \
     dataelement.cpp \
+    delftonline_version.cpp \
     dictionary.cpp \
     directory.cpp \
     exception.cpp \
