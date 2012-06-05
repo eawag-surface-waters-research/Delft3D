@@ -305,3 +305,10 @@ LookupHostname (
     }
 
 }
+
+extern char * getfullversionstring_delftonline(void);
+char *  GETVERSION(void)
+{
+ return getfullversionstring_delftonline();
+}
+

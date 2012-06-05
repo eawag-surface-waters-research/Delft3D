@@ -3210,6 +3210,8 @@ src/utils_lgpl/delftonline/src/delftonline/connection.cpp -text
 src/utils_lgpl/delftonline/src/delftonline/dataelement.cpp -text
 src/utils_lgpl/delftonline/src/delftonline/delftonline.vcproj -text
 src/utils_lgpl/delftonline/src/delftonline/delftonline.vcxproj -text
+src/utils_lgpl/delftonline/src/delftonline/delftonline_version.cpp -text
+src/utils_lgpl/delftonline/src/delftonline/delftonline_version.h.svn -text
 src/utils_lgpl/delftonline/src/delftonline/dictionary.cpp -text
 src/utils_lgpl/delftonline/src/delftonline/dictionary.h -text
 src/utils_lgpl/delftonline/src/delftonline/directory.cpp -text
@@ -3225,6 +3227,7 @@ src/utils_lgpl/delftonline/src/delftonline/server.cpp -text
 src/utils_lgpl/delftonline/src/delftonline/sortedbag.cpp -text
 src/utils_lgpl/delftonline/src/delftonline/sortedbag.h -text
 src/utils_lgpl/delftonline/src/delftonline/util.cpp -text
+src/utils_lgpl/delftonline/src/delftonline/version_number.ini -text
 src/utils_lgpl/delftonline/src/dolcli/Makefile.am -text
 src/utils_lgpl/delftonline/src/dolcli/dolcli.cpp -text
 src/utils_lgpl/delftonline/src/dolcli/dolcli.h -text

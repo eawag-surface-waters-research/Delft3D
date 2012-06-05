@@ -69,6 +69,9 @@
       <AdditionalLibraryDirectories>..\..\..\..\third_party_open\pthreads\bin\win32</AdditionalLibraryDirectories>
       <ImportLibrary>$(OutDir)$(TargetName).lib</ImportLibrary>
     </Link>
+    <PreBuildEvent>
+      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\delftonline_version.h .\ .\version_number.ini</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <PreBuildEvent>
@@ -93,6 +96,9 @@
       <AdditionalLibraryDirectories>..\..\..\..\third_party_open\pthreads\bin\win32</AdditionalLibraryDirectories>
       <AdditionalDependencies>Ws2_32.lib;pthreadVCE2.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
+    <PreBuildEvent>
+      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\delftonline_version.h .\ .\version_number.ini</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="arrayshape.cpp" />
@@ -101,6 +107,7 @@
     <ClCompile Include="clock.cpp" />
     <ClCompile Include="connection.cpp" />
     <ClCompile Include="dataelement.cpp" />
+    <ClCompile Include="delftonline_version.cpp" />
     <ClCompile Include="dictionary.cpp" />
     <ClCompile Include="directory.cpp" />
     <ClCompile Include="exception.cpp" />
@@ -114,6 +121,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="clock.h" />
+    <ClInclude Include="delftonline_version.h" />
     <ClInclude Include="dictionary.h" />
     <ClInclude Include="dol.h" />
     <ClInclude Include="linkedlist.h" />
@@ -121,6 +129,8 @@
     <ClInclude Include="sortedbag.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="delftonline_version.h.svn" />
+    <None Include="version_number.ini" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
