@@ -185,6 +185,7 @@ DredgeMerge_Function (
         delete [] mergedvoldred;
         }
 
+    delete sblob;
     delete [] part;
 
     self->dd->log->Write (Log::ITER_MAJOR, "DredgeMerge iterator done");
@@ -292,6 +293,7 @@ DREDGECOMMUNICATE (
        voldred[i] = mesg[i];
 
     delete mblob;
+    delete sblob;
     delete [] mesg;
     }
 }
