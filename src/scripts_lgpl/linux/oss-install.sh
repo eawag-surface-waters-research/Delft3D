@@ -98,6 +98,7 @@ function flow2d3d () {
 
     copyFile "lib/libflow2d3d.so"                           $dest_bin
     copyFile "lib/libflow2d3d_sp.so"                        $dest_bin
+    copyFile "lib/libDelftOnline.so"                        $dest_bin
     copyFile "engines_gpl/flow2d3d/scripts/meteo_old2new.m" $dest_scripts
     copyFile "bin/esm_create"                               $dest_bin
     copyFile "bin/esm_delete"                               $dest_bin
