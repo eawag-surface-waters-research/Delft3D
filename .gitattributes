@@ -2612,6 +2612,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/reducepoints_r13_6p5.mexglx -tex
 src/tools_lgpl/matlab/quickplot/progsrc/private/reducepoints_r2007a_7p4.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/reducepoints_r2007a_7p4.mexglx -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/reducepoints_r2007a_7p4.mexw32 -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/reducepoints_r2007a_7p4.mexw64 -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/removequant.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/resourceobject.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/rgb2hls.m -text
@@ -2666,6 +2667,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/waquafil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/writeavi.cpp -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/writeavi.dll -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/writeavi.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/writeavi.mexw64 -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/writelog.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/xx_constants.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/xx_logo.m -text
