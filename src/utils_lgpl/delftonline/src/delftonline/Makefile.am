@@ -12,7 +12,8 @@ lib_LTLIBRARIES = \
     libDelftOnline.la
 
 INCLUDES = \
-    $(STANDARD_C_INCLUDES)
+    $(STANDARD_C_INCLUDES) \
+    -I../../include
 
 libDelftOnline_la_SOURCES = \
     arrayshape.cpp \
