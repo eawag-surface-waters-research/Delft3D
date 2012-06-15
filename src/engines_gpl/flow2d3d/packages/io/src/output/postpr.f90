@@ -965,7 +965,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
           ! only when (nostat+ntruv) > 0 and lsed > 0
           !
           if (.not. parll) then
-             if ((nostat+ntruv)>0 .and. lsed>0) then
+             if ((nostat+ntruv)>0 .and. lsedtot>0) then
                 call wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
                           & nostat    ,kmax      ,lsed      ,lsedtot   , &
                           & r(zws)    ,r(zrsdeq) ,r(zbdsed) ,r(zdpsed) ,r(zdps)   , &
@@ -975,7 +975,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
              endif
              if (error) goto 9999
           else
-             if (lsed>0) then
+             if (lsedtot>0) then
                 call dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
                             & nostat    ,kmax      ,lsed      ,lsedtot   , &
                             & r(zws)    ,r(zrsdeq) ,r(zbdsed) ,r(zdpsed) ,r(zdps)   , &

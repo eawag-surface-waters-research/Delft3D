@@ -621,7 +621,7 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
        enddo
     endif
     !
-    if (lsed>0) then
+    if (lsedtot>0) then
        call tstat_bed(nostat, lsedtot, nmax, zdpsed, zbdsed, gdp)
     endif
     !
