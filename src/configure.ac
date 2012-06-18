@@ -68,6 +68,7 @@ AC_LANG_PUSH([C++])
 dnl Check for MPI (sets MPIFC, MPILIBS, HAVE_MPI)
 ACX_MPI
 AC_CHECK_FUNCS([strdup vsnprintf])
+AC_MSG_CHECKING([whether to enable dolcli])
 AC_ARG_ENABLE(dolcli,
 AS_HELP_STRING([--enable-dolcli],
 [Enable the compilation of test executable delftonline/dolcli @<:@default no@:>@]),[enabledolcli='yes'],[enabledolcli='no'])
