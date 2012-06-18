@@ -68,6 +68,16 @@ AC_LANG_PUSH([C++])
 dnl Check for MPI (sets MPIFC, MPILIBS, HAVE_MPI)
 ACX_MPI
 AC_CHECK_FUNCS([strdup vsnprintf])
+AC_ARG_ENABLE(dolcli,
+AS_HELP_STRING([--enable-dolcli],
+[Enable the compilation of test executable delftonline/dolcli @<:@default no@:>@]),[enabledolcli='yes'],[enabledolcli='no'])
+dnl set compiler specific options here: 
+if test "$enabledolcli" = yes ; then
+        AC_MSG_RESULT([yes])
+        AC_CHECK_HEADERS([readline/history.h readline/readline.h],[],[AC_MSG_ERROR([Can't find readline header files. Please install libreadline6-dev (Ubuntu) or readline-devel (RedHat)])])
+else
+        AC_MSG_RESULT([no])
+fi
 AC_LANG_POP
 
 ## This is copied from the libtool examples
