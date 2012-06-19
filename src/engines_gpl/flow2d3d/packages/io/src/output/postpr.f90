@@ -338,6 +338,9 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     logical                              , pointer :: waqfil
     logical                              , pointer :: waqol
     logical                              , pointer :: lfbedfrm
+    integer                              , pointer :: itwqff
+    integer                              , pointer :: itwqfi
+    integer                              , pointer :: itwqfl
 !
 ! Global variables
 !
@@ -677,6 +680,9 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     lfbedfrm            => gdp%gdbedformpar%lfbedfrm
     rouflo              => gdp%gdtricom%rouflo
     sferic              => gdp%gdtricom%sferic
+    itwqff              => gdp%gdwaqpar%itwqff
+    itwqfi              => gdp%gdwaqpar%itwqfi
+    itwqfl              => gdp%gdwaqpar%itwqfl
     !
     ! Initialisation
     !
@@ -792,32 +798,55 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     !Create the stream for FLOW to get the answer from WAQ, Qinghua
     !
     if (waqol) then
-       if (firstwaq) then
-           !
-           ! Skip getting the bedlevel the very first time
-           ! (Nothing has been calculated yet)
-           !
-           firstwaq = .false.
-       else
-          call timer_start(timer_wait, gdp)
-          call waq2flow(d(dps), mmax, nmaxus, kmax, lundia, mlb, mub, nlb, nub)
-          call timer_stop(timer_wait, gdp)
-          call wribot(comfil, lundia, error , mmax    , nmax,  &
-                    & nmaxus, r(dp) , d(dps), r(rbuff), gdp     )
-       endif
        !
-       ! Recalculate DPU/DPV (depth at velocity points)
+       !  Take the coupling aggregation time steps into account.
        !
-       call caldpu( lundia    ,mmax      ,nmaxus    ,kmax      , &
-                 &  zmodel    , &
-                 &  i(kcs)    ,i(kcu)    ,i(kcv)    , &
-                 &  i(kspu)   ,i(kspv)   ,r(hkru)   ,r(hkrv)   , &
-                 &  r(umean)  ,r(vmean)  ,r(dp)     ,r(dpu)    ,r(dpv)   , &
-                 &  d(dps)    ,r(dzs1)   ,r(u1)     ,r(v1)     ,r(s1)    , &
-                 &  r(thick)  ,gdp       )
-       if (nst == itmapc) then
-          call wrsedwaqm(lundia , error     , trifil   , itmapc    , &
-                       & mmax   , nmaxus    , d(dps)   , gdp       )
+       if ((nst .ge. itwqff) .and. (nst .le. itwqfl) .and. (mod(nst-itwqff,itwqfi) .eq. 0)) then
+          if (firstwaq) then
+             !
+             ! Skip getting the bedlevel the very first time
+             ! (Nothing has been calculated yet)
+             !
+             firstwaq = .false.
+          else
+             call timer_start(timer_wait, gdp)
+             call waq2flow(d(dps), mmax, nmaxus, kmax, lundia, mlb, mub, nlb, nub)
+             call timer_stop(timer_wait, gdp)
+             call wribot(comfil, lundia, error , mmax    , nmax,  &
+                       & nmaxus, r(dp) , d(dps), r(rbuff), gdp     )
+          endif
+          !
+          ! Set DPS at the boundary cell which is not taken cared by WAQ (depth at water level points)
+          !
+          call upbdps(mmax      , nmax         , i(kcs), &
+                    & nmaxus    , r(dp)        , r(dps), gdp       )
+          !
+          ! Recalculate DPU/DPV (depth at velocity points)
+          !
+          call caldpu( lundia    ,mmax      ,nmaxus    ,kmax      , &
+                    &  zmodel    , &
+                    &  i(kcs)    ,i(kcu)    ,i(kcv)    , &
+                    &  i(kspu)   ,i(kspv)   ,r(hkru)   ,r(hkrv)   , &
+                    &  r(umean)  ,r(vmean)  ,r(dp)     ,r(dpu)    ,r(dpv)   , &
+                    &  d(dps)    ,r(dzs1)   ,r(u1)     ,r(v1)     ,r(s1)    , &
+                    &  r(thick)  ,gdp       )
+          if (nst == itmapc) then
+             !
+             ! for waq mor only...
+             !
+             ! call wrsedwaqm(lundia , error     , trifil   , itmapc    , &
+             !             & mmax   , nmaxus    , d(dps)   , gdp       )
+             !
+             ! for waq veg only....
+             !
+             if (lsedtot > 0) then 
+                !
+                ! for waq veg and without sediment only...
+                !
+                call wrsedmgrp(lundia    ,error     ,trifil    ,itmapc    ,mmax      , &
+                             & kmax      ,nmaxus    ,lsed      ,lsedtot   ,gdp       )
+             endif
+          endif
        endif
     endif
     !

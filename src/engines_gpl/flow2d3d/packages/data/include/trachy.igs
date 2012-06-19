@@ -52,6 +52,8 @@ type gd_trachy
     !
     ! pointers
     !
+    real(fp), dimension(:,:)  , pointer :: vegh2d !  Vegetation height on 2D grid (coming from WAQ)
+    real(fp), dimension(:,:)  , pointer :: vden2d !  Vegetation density (nD/m2) on 2D grid (coming from WAQ)
     integer , dimension(:,:)  , pointer :: ittaru !  Trachytope areas in M-direction (integer data)
     integer , dimension(:,:)  , pointer :: ittarv !  Trachytope areas in N-direction (integer data)
     integer , dimension(:,:)  , pointer :: ittdef !  Trachytope definitions (integer data)

@@ -62,6 +62,10 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     integer , dimension(:,:)   , pointer :: ittaru
     integer , dimension(:,:)   , pointer :: ittarv
     integer , dimension(:,:)   , pointer :: ittdef
+
+    real(fp), dimension(:,:)   , pointer :: vegh2d
+    real(fp), dimension(:,:)   , pointer :: vden2d
+    
     real(fp), dimension(:,:)   , pointer :: rgcalu
     real(fp), dimension(:,:)   , pointer :: rgcalv
     real(fp), dimension(:)     , pointer :: rttaru
@@ -71,6 +75,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     real(fp), dimension(:,:,:) , pointer :: rttfv
     type (gd_trachy)           , pointer :: gdtrachy
     real(fp)                   , pointer :: dryflc
+    logical                    , pointer :: waqol
 !
 ! Local parameters
 !
@@ -141,6 +146,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     ntrt           => gdp%gdtrachy%ntrt
     gdtrachy       => gdp%gdtrachy
     dryflc         => gdp%gdnumeco%dryflc
+    waqol          => gdp%gdwaqpar%waqol
 
     mfg            => gdp%gdparall%mfg
     nfg            => gdp%gdparall%nfg
@@ -148,6 +154,15 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     ! Allocate trachytope arrays that are used in main routines
     !
     if (.not. associated(gdtrachy%rttfu)) then
+       !
+       if (waqol) then
+          allocate(gdtrachy%vegh2d(gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub))
+          allocate(gdtrachy%vden2d(gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub))
+          vegh2d      => gdp%gdtrachy%vegh2d
+          vden2d      => gdp%gdtrachy%vden2d
+          vegh2d(gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub) = 0.0_fp
+          vden2d(gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub) = 0.0_fp
+       endif
        !
        allocate(gdtrachy%rttfu(gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub,kmax))
        allocate(gdtrachy%rttfv(gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub,kmax))
@@ -191,7 +206,6 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
                      allocate(gdtrachy%ittaru(nttaru,3)                               , stat = istat)
        if (istat==0) allocate(gdtrachy%ittarv(nttarv,3)                               , stat = istat)
        if (istat==0) allocate(gdtrachy%ittdef(ntrt,2)                                 , stat = istat)
-       !
        if (istat==0) allocate(gdtrachy%rgcalu(gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub), stat = istat)
        if (istat==0) allocate(gdtrachy%rgcalv(gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub), stat = istat)
        if (istat==0) allocate(gdtrachy%rttaru(nttaru)                                 , stat = istat)
@@ -208,7 +222,6 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
        ittaru         => gdp%gdtrachy%ittaru
        ittarv         => gdp%gdtrachy%ittarv
        ittdef         => gdp%gdtrachy%ittdef
-       !
        rgcalu         => gdp%gdtrachy%rgcalu
        rgcalv         => gdp%gdtrachy%rgcalv
        rttaru         => gdp%gdtrachy%rttaru

@@ -34,6 +34,5 @@
 		<File RelativePath=".\src\sync_couple.f90"/>
 		<File RelativePath=".\src\sync_flm.f90"/>
 		<File RelativePath=".\src\sync_flowwave.f90"/>
-		<File RelativePath=".\src\sync_rtcflow.f90"/>
-		<File RelativePath=".\src\waq2flow.f90"/></Filter></Files>
+		<File RelativePath=".\src\sync_rtcflow.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>

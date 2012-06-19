@@ -66,6 +66,11 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
     integer , dimension(:,:)   , pointer :: ittaru
     integer , dimension(:,:)   , pointer :: ittarv
     integer , dimension(:,:)   , pointer :: ittdef
+    !
+    logical                    , pointer :: waqol
+    real(fp), dimension(:,:)   , pointer :: vegh2d
+    real(fp), dimension(:,:)   , pointer :: vden2d 
+    !
     real(fp), dimension(:,:)   , pointer :: rgcalu
     real(fp), dimension(:,:)   , pointer :: rgcalv
     real(fp), dimension(:)     , pointer :: rttaru
@@ -96,6 +101,9 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
     integer , parameter :: line_rgh = 2
     integer , parameter :: pnt_rgh  = 3
     integer , parameter :: spec_rgh = 0
+    integer , parameter :: skip_rgh = -999
+
+
 !
 ! Global variables
 !
@@ -211,6 +219,8 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
     real(fp)                    :: uuu
     real(fp)                    :: uv0
     real(fp)                    :: vheigh
+    real(fp)                    :: vd2d
+    real(fp)                    :: vh2d
     real(fp)                    :: vvv
     real(fp)                    :: vz0
     character(12), dimension(2) :: cnum
@@ -241,6 +251,11 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
     ittaru          => gdp%gdtrachy%ittaru
     ittarv          => gdp%gdtrachy%ittarv
     ittdef          => gdp%gdtrachy%ittdef
+    !
+    waqol           => gdp%gdwaqpar%waqol
+    vegh2d          => gdp%gdtrachy%vegh2d
+    vden2d          => gdp%gdtrachy%vden2d
+    !
     rgcalu          => gdp%gdtrachy%rgcalu
     rgcalv          => gdp%gdtrachy%rgcalv
     rttaru          => gdp%gdtrachy%rttaru
@@ -427,6 +442,16 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
              rksru  = (rksr (nm) + rksr (nmu))*0.5_fp
              rksmru = (rksmr(nm) + rksmr(nmu))*0.5_fp
              rksdu  = (rksd (nm) + rksd (nmu))*0.5_fp
+             
+             if (waqol) then
+                !
+                ! 2D Vegetation characterics (coming from WAQ)
+                !
+                vd2d = vden2d(nc, mc) + vden2d(nc, mu)
+                vh2d = (vegh2d(nc, mc)*vden2d(nc,mc) + vegh2d(nc, mu)*vden2d(nc,mu))/max(vd2d,eps)
+                vd2d = vd2d*0.5 
+             endif
+             
           else
              call n_and_m_to_nm(nc, mc, nm, gdp) 
              call n_and_m_to_nm(nu, mc, num, gdp) 
@@ -463,6 +488,15 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
              rksru  = (rksr (nm) + rksr (num))*0.5_fp
              rksmru = (rksmr(nm) + rksmr(num))*0.5_fp
              rksdu  = (rksd (nm) + rksd (num))*0.5_fp
+             
+             if (waqol) then
+                !
+                ! 2D Vegetation characterics (coming from WAQ)
+                !
+                vd2d = vden2d(nc, mc) + vden2d(nu, mc)
+                vh2d = (vegh2d(nc, mc)*vden2d(nc,mc) + vegh2d(nu, mc)*vden2d(nu,mc))/max(vd2d,eps)
+                vd2d = vd2d*0.5
+             endif
           endif
           !
           ! Depth-average velocity (similar as in TAUBOT)
@@ -773,10 +807,21 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
              !
              vheigh = rttdef(itrt, 1)
              densit = rttdef(itrt, 2)
+             if (vheigh<0) then
+                vheigh = vh2d
+                densit = vd2d
+             endif
+
+             
              drag   = rttdef(itrt, 3)
              cbed   = rttdef(itrt, 4)
              !
-             if (ircod==153) then
+             rgh_type = ch_type
+             rgh_geom = area_rgh
+             !
+             if (vheigh<eps) then
+                rgh_geom = skip_rgh
+             elseif (ircod==153) then
                 if (depth>vheigh) then
                    ch_icode = 1.0_fp/sqrt(1.0_fp/(cbed*cbed) + &
                             &          (drag*densit*vheigh)/(2.0_fp*ag)) &

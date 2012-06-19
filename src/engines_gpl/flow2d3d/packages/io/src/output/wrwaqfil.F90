@@ -241,9 +241,9 @@
       if ( firsttime ) then
          firsttime = .false.
          mode = 0
-         mtimstep = -1.0
-         filnam ='com-'//trim(runid)//'.'
-
+       !filnam ='com-'//trim(runid)//'.'
+       filnam = trim(runid)//'.'
+       !
 !           allocate all integer arrays that are needed
 !                    ifrmto is the maximally dimensioned from,to,from-1,to+1 table
 !                    isaggr: pointer from i,j,k to segment nr (optionally aggregated)
@@ -349,36 +349,36 @@
 #ifdef HAVE_FC_FORM_BINARY
 
          lunvol    = newunit()
-         open  ( lunvol , file=trim(filnam)//'vol' , form = 'binary' )
+         open  ( lunvol , file=trim(filnam)//'vol' , form = 'binary' , SHARED )
          lunare    = newunit()
-         open  ( lunare , file=trim(filnam)//'are' , form = 'binary' )
+         open  ( lunare , file=trim(filnam)//'are' , form = 'binary' , SHARED )
          lunflo    = newunit()
-         open  ( lunflo , file=trim(filnam)//'flo' , form = 'binary' )
+         open  ( lunflo , file=trim(filnam)//'flo' , form = 'binary' , SHARED )
          if ( lsal .gt. 0 ) then
             lunsal    = newunit()
-            open  ( lunsal , file=trim(filnam)//'sal' , form = 'binary' )
+            open  ( lunsal , file=trim(filnam)//'sal' , form = 'binary' , SHARED )
          endif
          if ( ltem .gt. 0 ) then
             luntem    = newunit()
-            open  ( luntem , file=trim(filnam)//'tem' , form = 'binary' )
+            open  ( luntem , file=trim(filnam)//'tem' , form = 'binary' , SHARED )
          endif
          do l = 1, lsed
             lunsed(l) = newunit()
             sf = "sed00"
             write( sf(4:5), '(i2.2)' ) l
-            open  ( lunsed(l), file=trim(filnam)//sf  , form = 'binary' )
+            open  ( lunsed(l), file=trim(filnam)//sf  , form = 'binary' , SHARED )
          enddo
          if ( ilaggr(kmax) .gt. 1 ) then
             lunvdf    = newunit()
-            open  ( lunvdf , file=trim(filnam)//'vdf' , form = 'binary' )
+            open  ( lunvdf , file=trim(filnam)//'vdf' , form = 'binary' , SHARED )
          endif
          luntau    = newunit()
-         open  ( luntau , file=trim(filnam)//'tau' , form = 'binary' )
+         open  ( luntau , file=trim(filnam)//'tau' , form = 'binary' , SHARED )
  !       lunfmap   = newunit()
  !       open  ( lunfmap, file=trim(filnam)//'fmap', form = 'binary' )
          if ( nsrc .gt. 0 ) then
             lunsrctmp = newunit()
-            open  ( lunsrctmp , file='TMP_'//trim(filnam)//'src' )
+            open  ( lunsrctmp , file='TMP_'//trim(filnam)//'src' , SHARED )
             if ( nowalk .gt. 0 ) then
                lunwlk    = newunit()
                open  ( lunwlk , file=trim(filnam)//'wlk' )

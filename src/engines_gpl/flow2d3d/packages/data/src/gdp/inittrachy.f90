@@ -40,44 +40,18 @@ subroutine inittrachy(gdp       )
     implicit none
     !
     type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    integer , dimension(:,:)   , pointer :: ittaru
-    integer , dimension(:,:)   , pointer :: ittarv
-    integer , dimension(:,:)   , pointer :: ittdef
-    real(fp), dimension(:,:)   , pointer :: rgcalu
-    real(fp), dimension(:,:)   , pointer :: rgcalv
-    real(fp), dimension(:)     , pointer :: rttaru
-    real(fp), dimension(:)     , pointer :: rttarv
-    real(fp), dimension(:,:)   , pointer :: rttdef
-    real(fp), dimension(:,:,:) , pointer :: rttfu
-    real(fp), dimension(:,:,:) , pointer :: rttfv
-    logical                    , pointer :: flsedprop_rqrd
-    type (gd_trachy)           , pointer :: gdtrachy
 !
 ! Global variables
 !
 !! executable statements -------------------------------------------------------
 !
-    ! Initialize statics for trachy
-    !
-    ittaru        => gdp%gdtrachy%ittaru
-    ittarv        => gdp%gdtrachy%ittarv
-    ittdef        => gdp%gdtrachy%ittdef
-    rgcalu        => gdp%gdtrachy%rgcalu
-    rgcalv        => gdp%gdtrachy%rgcalv
-    rttaru        => gdp%gdtrachy%rttaru
-    rttarv        => gdp%gdtrachy%rttarv
-    rttdef        => gdp%gdtrachy%rttdef
-    rttfu         => gdp%gdtrachy%rttfu
-    rttfv         => gdp%gdtrachy%rttfv
-    flsedprop_rqrd=> gdp%gdtrachy%flsedprop_rqrd
-    gdtrachy      => gdp%gdtrachy
-    !
+
     nullify(gdp%gdtrachy%ittaru)
     nullify(gdp%gdtrachy%ittarv)
     nullify(gdp%gdtrachy%ittdef)
+    !
+    nullify(gdp%gdtrachy%vegh2d)
+    nullify(gdp%gdtrachy%vden2d)
     !
     nullify(gdp%gdtrachy%rgcalu)
     nullify(gdp%gdtrachy%rgcalv)
@@ -87,5 +61,5 @@ subroutine inittrachy(gdp       )
     nullify(gdp%gdtrachy%rttfu)
     nullify(gdp%gdtrachy%rttfv)
     !
-    flsedprop_rqrd = .false. 
+    gdp%gdtrachy%flsedprop_rqrd = .false. 
 end subroutine inittrachy

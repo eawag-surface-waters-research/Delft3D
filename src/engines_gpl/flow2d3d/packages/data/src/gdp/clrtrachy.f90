@@ -44,6 +44,10 @@ subroutine clrtrachy(istat     ,gdp       )
     integer , dimension(:,:)   , pointer :: ittaru
     integer , dimension(:,:)   , pointer :: ittarv
     integer , dimension(:,:)   , pointer :: ittdef
+    !
+    real(fp), dimension(:,:)   , pointer :: vegh2d
+    real(fp), dimension(:,:)   , pointer :: vden2d 
+    !
     real(fp), dimension(:,:)   , pointer :: rgcalu
     real(fp), dimension(:,:)   , pointer :: rgcalv
     real(fp), dimension(:)     , pointer :: rttaru
@@ -62,6 +66,10 @@ subroutine clrtrachy(istat     ,gdp       )
     ittaru        => gdp%gdtrachy%ittaru
     ittarv        => gdp%gdtrachy%ittarv
     ittdef        => gdp%gdtrachy%ittdef
+    !
+    vegh2d        => gdp%gdtrachy%vegh2d
+    vden2d        => gdp%gdtrachy%vden2d
+    !
     rgcalu        => gdp%gdtrachy%rgcalu
     rgcalv        => gdp%gdtrachy%rgcalv
     rttaru        => gdp%gdtrachy%rttaru
@@ -74,6 +82,9 @@ subroutine clrtrachy(istat     ,gdp       )
     if (associated(gdtrachy%ittaru)) deallocate (gdtrachy%ittaru, STAT = istat)
     if (associated(gdtrachy%ittarv)) deallocate (gdtrachy%ittarv, STAT = istat)
     if (associated(gdtrachy%ittdef)) deallocate (gdtrachy%ittdef, STAT = istat)
+    !
+    if (associated(gdtrachy%vegh2d)) deallocate (gdtrachy%vegh2d, STAT = istat)
+    if (associated(gdtrachy%vden2d)) deallocate (gdtrachy%vden2d, STAT = istat)
     !
     if (associated(gdtrachy%rgcalu)) deallocate (gdtrachy%rgcalu, STAT = istat)
     if (associated(gdtrachy%rgcalv)) deallocate (gdtrachy%rgcalv, STAT = istat)
