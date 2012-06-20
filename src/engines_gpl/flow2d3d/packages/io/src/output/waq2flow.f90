@@ -145,7 +145,6 @@ subroutine waq2flow(dps, mmax, nmaxus, kmax, lundia, mlb, mub, nlb, nub, gdp)
              thick(n,m)=parval(1,iseg)
           enddo
        enddo
-       !
        if (first) then
           first = .false.
           thick0=thick
@@ -162,13 +161,11 @@ subroutine waq2flow(dps, mmax, nmaxus, kmax, lundia, mlb, mub, nlb, nub, gdp)
              iseg=iseg+1
              vegh2d(n,m)=parval(1,iseg)
              vden2d(n,m)=parval(2,iseg)
-			 !write(113, *)m,n, vegh2d(n,m),vden2d(n,m)
           enddo
        enddo
        if (first) then
           first = .false.
-	   endif
-	   !write(113,*)'step--'
+       endif
     endif
 
 end subroutine waq2flow

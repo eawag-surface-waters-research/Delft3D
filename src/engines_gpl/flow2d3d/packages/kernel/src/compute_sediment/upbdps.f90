@@ -1,4 +1,4 @@
-subroutine upbdps(mmax      ,nmax      ,kcs	,	&
+subroutine upbdps(mmax      ,nmax      ,kcs       ,&
                 & nmaxus    ,dp        ,dps       ,gdp       )
 !!--copyright-------------------------------------------------------------------
 ! Copyright (c) 2008, WL | Delft Hydraulics. All rights reserved.
@@ -32,26 +32,21 @@ subroutine upbdps(mmax      ,nmax      ,kcs	,	&
     implicit none
 
     type(globdat),target :: gdp
-   !
-   ! include 'globdat.igd'
-   ! include 'morpar.igd'
-   ! include 'numeco.igd'
 !
 ! Local parameters
 !
     integer       :: ddb
-	integer		  :: m, n
-
+    integer       :: m, n
 !
 ! Global variables
 !
-    integer                     :: ierr                 ! Flag for error when writing to Communication file 
+    integer                     :: ierr   !  Flag for error when writing to Communication file 
     integer, intent(in)         :: mmax   !  Description and declaration in iidim.f90
     integer, intent(in)         :: nmax   !  Description and declaration in iidim.f90
-    integer, intent(in)			:: nmaxus !  Description and declaration in iidim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   :: dp !  Description and declaration in rjdim.f90
+    integer, intent(in)         :: nmaxus !  Description and declaration in iidim.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   :: dp  !  Description and declaration in rjdim.f90
     real(prec), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) :: dps !  Description and declaration in rjdim.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              :: kcs    !  Description and declaration in iidim.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kcs !  Description and declaration in iidim.f90
 !
 !
 ! Local variables
@@ -60,13 +55,7 @@ subroutine upbdps(mmax      ,nmax      ,kcs	,	&
 !
 !! executable statements -------------------------------------------------------
 !
-    !
-    !
-    !include 'morpar.igp'
-    !include 'numeco.igp'
-
     ddb = gdp%d%ddbound
-
     do n = 1 - ddb, nmaxus
        do m = 1 - ddb, mmax
           dps(n, mmax) = real(dps(n, mmax-1),fp)
@@ -75,9 +64,4 @@ subroutine upbdps(mmax      ,nmax      ,kcs	,	&
     enddo
 
  9999 continue
-    if (ierr /= 0) then
-!       ierr = neferr(0, errmsg)
-!       call prterr(lundia, 'P004', errmsg, gdp)
-!       fout = .true.
-    endif
 end subroutine upbdps
