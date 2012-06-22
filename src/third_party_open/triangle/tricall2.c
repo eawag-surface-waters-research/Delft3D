@@ -29,7 +29,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <windows.h>
+/* #include <windows.h>*/
 /* #include "triangle.h" */
 
 #define _STDLIB_H_

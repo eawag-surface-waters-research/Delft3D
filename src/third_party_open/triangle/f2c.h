@@ -1,13 +1,15 @@
- 
+/* TODO: ifort on Linux needs underscore, but detect this automatically, not hardcoded: */
+#define FTN_UNDERSCORE
+
 #if ! defined(WIN32)
 #define STDCALL
 #if defined (FTN_UNDERSCORE)
 
-#   define TRICALL2 tricall2_
+#   define TRICALL tricall_
 
 #else
 
-#   define TRICALL2 tricall2
+#   define TRICALL tricall
 
 #endif
 #else
