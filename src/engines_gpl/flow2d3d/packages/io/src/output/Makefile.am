@@ -72,7 +72,7 @@ libio_output_la_SOURCES = \
          tstat.f90 \
          tstat_bed.f90 \
          update_stat_locations.f90 \
-         updqs.f90 \
+         updbnddps.f90 \
          uv2zeta.f90 \
          wavenr.f90 \
          wrboun.f90 \
