@@ -44,10 +44,6 @@ subroutine clrtrachy(istat     ,gdp       )
     integer , dimension(:,:)   , pointer :: ittaru
     integer , dimension(:,:)   , pointer :: ittarv
     integer , dimension(:,:)   , pointer :: ittdef
-    !
-    real(fp), dimension(:,:)   , pointer :: vegh2d
-    real(fp), dimension(:,:)   , pointer :: vden2d 
-    !
     real(fp), dimension(:,:)   , pointer :: rgcalu
     real(fp), dimension(:,:)   , pointer :: rgcalv
     real(fp), dimension(:)     , pointer :: rttaru
@@ -55,6 +51,8 @@ subroutine clrtrachy(istat     ,gdp       )
     real(fp), dimension(:,:)   , pointer :: rttdef
     real(fp), dimension(:,:,:) , pointer :: rttfu
     real(fp), dimension(:,:,:) , pointer :: rttfv
+    real(fp), dimension(:,:)   , pointer :: vegh2d
+    real(fp), dimension(:,:)   , pointer :: vden2d 
     type (gd_trachy)           , pointer :: gdtrachy
 !
 ! Global variables
@@ -66,10 +64,6 @@ subroutine clrtrachy(istat     ,gdp       )
     ittaru        => gdp%gdtrachy%ittaru
     ittarv        => gdp%gdtrachy%ittarv
     ittdef        => gdp%gdtrachy%ittdef
-    !
-    vegh2d        => gdp%gdtrachy%vegh2d
-    vden2d        => gdp%gdtrachy%vden2d
-    !
     rgcalu        => gdp%gdtrachy%rgcalu
     rgcalv        => gdp%gdtrachy%rgcalv
     rttaru        => gdp%gdtrachy%rttaru
@@ -77,6 +71,8 @@ subroutine clrtrachy(istat     ,gdp       )
     rttdef        => gdp%gdtrachy%rttdef
     rttfu         => gdp%gdtrachy%rttfu
     rttfv         => gdp%gdtrachy%rttfv
+    vegh2d        => gdp%gdtrachy%vegh2d
+    vden2d        => gdp%gdtrachy%vden2d
     gdtrachy      => gdp%gdtrachy
     !
     if (associated(gdtrachy%ittaru)) deallocate (gdtrachy%ittaru, STAT = istat)

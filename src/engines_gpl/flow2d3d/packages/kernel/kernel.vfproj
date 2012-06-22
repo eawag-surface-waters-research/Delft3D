@@ -216,7 +216,7 @@
 		<File RelativePath="src\compute_sediment\tranb4.f90"/>
 		<File RelativePath="src\compute_sediment\tranb5.f90"/>
 		<File RelativePath="src\compute_sediment\tranb7.f90"/>
-		<File RelativePath=".\src\compute_sediment\Upbdps.f90"/>
+		<File RelativePath="src\compute_sediment\upbdps.f90"/>
 		<File RelativePath="src\compute_sediment\upwbed.f90"/>
 		<File RelativePath="src\compute_sediment\wave.f90"/></Filter>
 		<Filter Name="dd">

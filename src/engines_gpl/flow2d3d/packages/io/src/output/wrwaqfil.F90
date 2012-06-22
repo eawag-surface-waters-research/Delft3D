@@ -241,9 +241,9 @@
       if ( firsttime ) then
          firsttime = .false.
          mode = 0
-       !filnam ='com-'//trim(runid)//'.'
-       filnam = trim(runid)//'.'
-       !
+         mtimstep = -1.0
+         filnam ='com-'//trim(runid)//'.'
+
 !           allocate all integer arrays that are needed
 !                    ifrmto is the maximally dimensioned from,to,from-1,to+1 table
 !                    isaggr: pointer from i,j,k to segment nr (optionally aggregated)

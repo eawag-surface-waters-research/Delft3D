@@ -51,64 +51,51 @@ subroutine updqs(flupd     ,dstep     ,j         ,nmmaxj    ,kmax      , &
 !
 ! Global variables
 !
-    integer, intent(in)            :: j
-                                   !!  Begin pointer for arrays which have
-                                   !!  been transformed into 1D arrays.
-                                   !!  Due to the shift in the 2nd (M-)
-                                   !!  index, JSTART = -2*NMAX + 1
-    integer, intent(in)            :: kmax !  Description and declaration in esm_alloc_int.f90
-    integer, intent(in)            :: nmmaxj !  Description and declaration in dimens.igs
-    integer, intent(in)            :: nsrc !  Description and declaration in esm_alloc_int.f90
-    logical, intent(in)            :: flupd
-                                   !!  Flag to update (true) or initialize
-                                   !!  (false) the discharge arrays
-    real(fp), intent(in)               :: dstep
-                                   !!  1. / total number of timesteps
-                                   !!  (interval to write comm. file)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax) :: qu !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax) :: qv !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nsrc) :: discum !  Description and declaration in esm_alloc_real.f90
-!
+    integer                            , intent(in)  :: j      !!  Begin pointer for arrays which have been transformed into 1D arrays. Due to the shift in the 2nd (M-) index, JSTART = -2*NMAX + 1
+    integer                            , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer                            , intent(in)  :: nmmaxj !  Description and declaration in dimens.igs
+    integer                            , intent(in)  :: nsrc   !  Description and declaration in esm_alloc_int.f90
+    logical                            , intent(in)  :: flupd  !!  Flag to update (true) or initialize (false) the discharge arrays
+    real(fp)                           , intent(in)  :: dstep  !!  1. / total number of timesteps (interval to write comm. file)
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax) :: qu     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax) :: qv     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nsrc)                        :: discum !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !
-    integer                        :: k                    ! Loop counter 1,KMAX 
-    integer                        :: n                    ! Loop counter 1,NSRC 
-    integer                        :: nm                   ! Loop counter J,NMMAXJ 
-!
+    integer :: k  ! Loop counter 1,KMAX 
+    integer :: n  ! Loop counter 1,NSRC 
+    integer :: nm ! Loop counter J,NMMAXJ 
 !
 !! executable statements -------------------------------------------------------
 !
-    !
-    !
-    !
-    !-----For timestep NST = ITCOMC before writing to communication file
-    !     because QU, QV and DISCUM are calculated every half DT.
-    !     devide QU, QV and DISCUM by (2 * ITCOMI). here DSTEP=1/(2*ITCOMI)
+    ! For timestep NST = ITCOMC before writing to communication file
+    ! because QU, QV and DISCUM are calculated every half DT.
+    ! devide QU, QV and DISCUM by (2 * ITCOMI). here DSTEP=1/(2*ITCOMI)
     !
     if (flupd) then
        do nm = j, nmmaxj
           do k = 1, kmax
-             qu(nm, k) = qu(nm, k)*dstep
-             qv(nm, k) = qv(nm, k)*dstep
+             qu(nm, k) = qu(nm,k) * dstep
+             qv(nm, k) = qv(nm,k) * dstep
           enddo
        enddo
        do n = 1, nsrc
-          discum(n) = discum(n)*dstep
+          discum(n) = discum(n) * dstep
        enddo
     else
        !
-       !--------At timestep NST = ITCOMF - ITCOMI or after writing to commu-
-       !        cation file there will be a reset of QU, QV and DISCUM to 0.
+       ! At timestep NST = ITCOMF - ITCOMI or after writing to commu-
+       ! cation file there will be a reset of QU, QV and DISCUM to 0.
        !
        do nm = j, nmmaxj
           do k = 1, kmax
-             qu(nm, k) = 0.
-             qv(nm, k) = 0.
+             qu(nm, k) = 0.0_fp
+             qv(nm, k) = 0.0_fp
           enddo
        enddo
        do n = 1, nsrc
-          discum(n) = 0.
+          discum(n) = 0.0_fp
        enddo
     endif
 end subroutine updqs

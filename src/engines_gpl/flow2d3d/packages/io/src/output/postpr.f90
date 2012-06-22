@@ -801,7 +801,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
        !
        !  Take the coupling aggregation time steps into account.
        !
-       if ((nst .ge. itwqff) .and. (nst .le. itwqfl) .and. (mod(nst-itwqff,itwqfi) .eq. 0)) then
+       if ((nst >= itwqff) .and. (nst <= itwqfl) .and. (mod(nst-itwqff,itwqfi) == 0)) then
           if (firstwaq) then
              !
              ! Skip getting the bedlevel the very first time
@@ -816,7 +816,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                        & nmaxus, r(dp) , d(dps), r(rbuff), gdp     )
           endif
           !
-          ! Set DPS at the boundary cell which is not taken cared by WAQ (depth at water level points)
+          ! Set DPS at the boundary cell which is not taken care of by WAQ (depth at water level points)
           !
           call upbdps(mmax      , nmax         , i(kcs), &
                     & nmaxus    , r(dp)        , r(dps), gdp       )
@@ -833,6 +833,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
           if (nst == itmapc) then
              !
              ! for waq mor only...
+             ! Not enabled now. Will be used when morphology is moved from FLOW to WAQ
              !
              ! call wrsedwaqm(lundia , error     , trifil   , itmapc    , &
              !             & mmax   , nmaxus    , d(dps)   , gdp       )

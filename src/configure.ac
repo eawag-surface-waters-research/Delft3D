@@ -79,6 +79,7 @@ if test "$enabledolcli" = yes ; then
 else
         AC_MSG_RESULT([no])
 fi
+AC_SUBST(dolcli)
 AC_LANG_POP
 
 ## This is copied from the libtool examples
@@ -516,6 +517,5 @@ utils_lgpl/deltares_common/packages/deltares_common/src/Makefile
 scripts_lgpl/Makefile
 scripts_lgpl/deltares_hydro/Makefile
 		 ])
-
 
 AC_OUTPUT

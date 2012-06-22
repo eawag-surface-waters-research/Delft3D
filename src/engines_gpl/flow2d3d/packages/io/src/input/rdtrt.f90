@@ -58,14 +58,10 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     integer                    , pointer :: ntrt
     integer                    , pointer :: mfg
     integer                    , pointer :: nfg
-
     integer , dimension(:,:)   , pointer :: ittaru
     integer , dimension(:,:)   , pointer :: ittarv
     integer , dimension(:,:)   , pointer :: ittdef
-
-    real(fp), dimension(:,:)   , pointer :: vegh2d
-    real(fp), dimension(:,:)   , pointer :: vden2d
-    
+    real(fp)                   , pointer :: dryflc
     real(fp), dimension(:,:)   , pointer :: rgcalu
     real(fp), dimension(:,:)   , pointer :: rgcalv
     real(fp), dimension(:)     , pointer :: rttaru
@@ -73,9 +69,10 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     real(fp), dimension(:,:)   , pointer :: rttdef
     real(fp), dimension(:,:,:) , pointer :: rttfu
     real(fp), dimension(:,:,:) , pointer :: rttfv
-    type (gd_trachy)           , pointer :: gdtrachy
-    real(fp)                   , pointer :: dryflc
+    real(fp), dimension(:,:)   , pointer :: vegh2d
+    real(fp), dimension(:,:)   , pointer :: vden2d
     logical                    , pointer :: waqol
+    type (gd_trachy)           , pointer :: gdtrachy
 !
 ! Local parameters
 !
@@ -144,12 +141,11 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     nttaru         => gdp%gdtrachy%nttaru
     nttarv         => gdp%gdtrachy%nttarv
     ntrt           => gdp%gdtrachy%ntrt
-    gdtrachy       => gdp%gdtrachy
     dryflc         => gdp%gdnumeco%dryflc
-    waqol          => gdp%gdwaqpar%waqol
-
     mfg            => gdp%gdparall%mfg
     nfg            => gdp%gdparall%nfg
+    waqol          => gdp%gdwaqpar%waqol
+    gdtrachy       => gdp%gdtrachy
     !
     ! Allocate trachytope arrays that are used in main routines
     !
@@ -160,8 +156,8 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
           allocate(gdtrachy%vden2d(gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub))
           vegh2d      => gdp%gdtrachy%vegh2d
           vden2d      => gdp%gdtrachy%vden2d
-          vegh2d(gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub) = 0.0_fp
-          vden2d(gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub) = 0.0_fp
+          vegh2d = 0.0_fp
+          vden2d = 0.0_fp
        endif
        !
        allocate(gdtrachy%rttfu(gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub,kmax))

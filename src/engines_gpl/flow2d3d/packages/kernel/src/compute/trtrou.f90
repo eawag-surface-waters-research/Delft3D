@@ -49,16 +49,8 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    real(fp)                   , pointer :: eps
-    real(fp)                   , pointer :: rhow
-    real(fp)                   , pointer :: ag
-    real(fp)                   , pointer :: z0
-    real(fp)                   , pointer :: vonkar
-    real(fp)                   , pointer :: vicmol
-    real(fp)                   , pointer :: dryflc
-    !
-    real(fp)                   , pointer :: alf_area_ser
-    real(fp)                   , pointer :: trtminh
+    integer                    , pointer :: i50
+    integer                    , pointer :: i90
     integer                    , pointer :: iarea_avg
     integer                    , pointer :: nttaru
     integer                    , pointer :: nttarv
@@ -66,11 +58,15 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
     integer , dimension(:,:)   , pointer :: ittaru
     integer , dimension(:,:)   , pointer :: ittarv
     integer , dimension(:,:)   , pointer :: ittdef
-    !
-    logical                    , pointer :: waqol
-    real(fp), dimension(:,:)   , pointer :: vegh2d
-    real(fp), dimension(:,:)   , pointer :: vden2d 
-    !
+    real(fp)                   , pointer :: eps
+    real(fp)                   , pointer :: rhow
+    real(fp)                   , pointer :: ag
+    real(fp)                   , pointer :: z0
+    real(fp)                   , pointer :: vonkar
+    real(fp)                   , pointer :: vicmol
+    real(fp)                   , pointer :: dryflc
+    real(fp)                   , pointer :: alf_area_ser
+    real(fp)                   , pointer :: trtminh
     real(fp), dimension(:,:)   , pointer :: rgcalu
     real(fp), dimension(:,:)   , pointer :: rgcalv
     real(fp), dimension(:)     , pointer :: rttaru
@@ -78,13 +74,14 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
     real(fp), dimension(:,:)   , pointer :: rttdef
     real(fp), dimension(:,:,:) , pointer :: rttfu
     real(fp), dimension(:,:,:) , pointer :: rttfv
+    real(fp), dimension(:,:)   , pointer :: vegh2d
+    real(fp), dimension(:,:)   , pointer :: vden2d 
     logical                    , pointer :: flsedprop_rqrd
     logical                    , pointer :: spatial_bedform
+    logical                    , pointer :: waqol
     !
     real(fp), dimension(:,:)   , pointer :: dxx
     real(fp), dimension(:)     , pointer :: rhosol
-    integer                    , pointer :: i50
-    integer                    , pointer :: i90
     real(fp), dimension(:)     , pointer :: bedformD50
     real(fp), dimension(:)     , pointer :: bedformD90
     real(fp), dimension(:)     , pointer :: rksr
@@ -102,8 +99,6 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
     integer , parameter :: pnt_rgh  = 3
     integer , parameter :: spec_rgh = 0
     integer , parameter :: skip_rgh = -999
-
-
 !
 ! Global variables
 !
@@ -251,11 +246,6 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
     ittaru          => gdp%gdtrachy%ittaru
     ittarv          => gdp%gdtrachy%ittarv
     ittdef          => gdp%gdtrachy%ittdef
-    !
-    waqol           => gdp%gdwaqpar%waqol
-    vegh2d          => gdp%gdtrachy%vegh2d
-    vden2d          => gdp%gdtrachy%vden2d
-    !
     rgcalu          => gdp%gdtrachy%rgcalu
     rgcalv          => gdp%gdtrachy%rgcalv
     rttaru          => gdp%gdtrachy%rttaru
@@ -263,7 +253,10 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
     rttdef          => gdp%gdtrachy%rttdef
     rttfu           => gdp%gdtrachy%rttfu
     rttfv           => gdp%gdtrachy%rttfv
+    vegh2d          => gdp%gdtrachy%vegh2d
+    vden2d          => gdp%gdtrachy%vden2d
     flsedprop_rqrd  => gdp%gdtrachy%flsedprop_rqrd
+    waqol           => gdp%gdwaqpar%waqol
     !
     dxx             => gdp%gderosed%dxx
     rhosol          => gdp%gdsedpar%rhosol
@@ -442,16 +435,14 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
              rksru  = (rksr (nm) + rksr (nmu))*0.5_fp
              rksmru = (rksmr(nm) + rksmr(nmu))*0.5_fp
              rksdu  = (rksd (nm) + rksd (nmu))*0.5_fp
-             
              if (waqol) then
                 !
                 ! 2D Vegetation characterics (coming from WAQ)
                 !
-                vd2d = vden2d(nc, mc) + vden2d(nc, mu)
-                vh2d = (vegh2d(nc, mc)*vden2d(nc,mc) + vegh2d(nc, mu)*vden2d(nc,mu))/max(vd2d,eps)
-                vd2d = vd2d*0.5 
+                vd2d = vden2d(nc,mc) + vden2d(nc,mu)
+                vh2d = (vegh2d(nc,mc)*vden2d(nc,mc) + vegh2d(nc,mu)*vden2d(nc,mu)) / max(vd2d,eps)
+                vd2d = vd2d * 0.5_fp 
              endif
-             
           else
              call n_and_m_to_nm(nc, mc, nm, gdp) 
              call n_and_m_to_nm(nu, mc, num, gdp) 
@@ -488,14 +479,13 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
              rksru  = (rksr (nm) + rksr (num))*0.5_fp
              rksmru = (rksmr(nm) + rksmr(num))*0.5_fp
              rksdu  = (rksd (nm) + rksd (num))*0.5_fp
-             
              if (waqol) then
                 !
                 ! 2D Vegetation characterics (coming from WAQ)
                 !
-                vd2d = vden2d(nc, mc) + vden2d(nu, mc)
-                vh2d = (vegh2d(nc, mc)*vden2d(nc,mc) + vegh2d(nu, mc)*vden2d(nu,mc))/max(vd2d,eps)
-                vd2d = vd2d*0.5
+                vd2d = vden2d(nc,mc) + vden2d(nu,mc)
+                vh2d = (vegh2d(nc,mc)*vden2d(nc,mc) + vegh2d(nu,mc)*vden2d(nu,mc)) / max(vd2d,eps)
+                vd2d = vd2d * 0.5_fp
              endif
           endif
           !
@@ -807,19 +797,17 @@ subroutine trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
              !
              vheigh = rttdef(itrt, 1)
              densit = rttdef(itrt, 2)
-             if (vheigh<0) then
+             if (vheigh < 0.0_fp) then
                 vheigh = vh2d
                 densit = vd2d
              endif
-
-             
              drag   = rttdef(itrt, 3)
              cbed   = rttdef(itrt, 4)
              !
              rgh_type = ch_type
              rgh_geom = area_rgh
              !
-             if (vheigh<eps) then
+             if (vheigh < eps) then
                 rgh_geom = skip_rgh
              elseif (ircod==153) then
                 if (depth>vheigh) then
