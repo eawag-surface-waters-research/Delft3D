@@ -702,7 +702,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
        !
        if (nst == itcomf-itcomi) then
           flupd = .false.
-          call updqs(flupd     ,dstep     ,jstart    ,nmmaxj    ,kmax      , &
+          call updbnddps(flupd     ,dstep     ,jstart    ,nmmaxj    ,kmax      , &
                    & nsrc      ,r(qu)     ,r(qv)     ,r(discum) ,gdp       )
        !
        ! For timestep NST = ITCOMC
@@ -711,7 +711,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
        !
        elseif (nst == itcomc) then
           flupd = .true.
-          call updqs(flupd     ,dstep     ,jstart    ,nmmaxj    ,kmax      , &
+          call updbnddps(flupd     ,dstep     ,jstart    ,nmmaxj    ,kmax      , &
                    & nsrc      ,r(qu)     ,r(qv)     ,r(discum) ,gdp       )
           !
           ! Write time dependent info to the communication file
@@ -767,7 +767,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
           ! Set QU, QV and DISCUM to 0.
           !
           flupd = .false.
-          call updqs(flupd     ,dstep     ,jstart    ,nmmaxj    ,kmax      , &
+          call updbnddps(flupd     ,dstep     ,jstart    ,nmmaxj    ,kmax      , &
                    & nsrc      ,r(qu)     ,r(qv)     ,r(discum) ,gdp       )
           !
           ! Update timestep to write Communication file

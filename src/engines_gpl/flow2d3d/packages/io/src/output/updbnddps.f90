@@ -1,4 +1,4 @@
-subroutine updqs(flupd     ,dstep     ,j         ,nmmaxj    ,kmax      , &
+subroutine updbnddps(flupd     ,dstep     ,j         ,nmmaxj    ,kmax      , &
                & nsrc      ,qu        ,qv        ,discum    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -98,4 +98,4 @@ subroutine updqs(flupd     ,dstep     ,j         ,nmmaxj    ,kmax      , &
           discum(n) = 0.0_fp
        enddo
     endif
-end subroutine updqs
+end subroutine updbnddps
