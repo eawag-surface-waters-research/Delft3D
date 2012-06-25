@@ -107,7 +107,7 @@ static boolean FM_can_be_opened ( const BText file )
 {
     FILE * stream;
 
-    if (( stream = fopen ( file, "r+" )) != NULL ) {
+    if (( stream = fopen ( file, "r" )) != NULL ) {
         (BVoid)fclose ( stream );
         return TRUE;
     }
