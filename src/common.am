@@ -46,6 +46,7 @@ FINCLUDES =
 FMODULES = \
     -I$(top_builddir)/utils_lgpl/precision/packages/precision/src
 
+flow2d3dincludedir = $(includedir)/flow2d3d
 
 #-------------------------------------------------------------------------------
 #   Fortran 90 flags

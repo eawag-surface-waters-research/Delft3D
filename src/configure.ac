@@ -71,15 +71,23 @@ AC_CHECK_FUNCS([strdup vsnprintf])
 AC_MSG_CHECKING([whether to enable dolcli])
 AC_ARG_ENABLE(dolcli,
 AS_HELP_STRING([--enable-dolcli],
-[Enable the compilation of test executable delftonline/dolcli @<:@default no@:>@]),[enabledolcli='yes'],[enabledolcli='no'])
+[Enable the compilation of test executable delftonline/dolcli @<:@default no@:>@]),[enableval='yes'],[enableval='no'])
 dnl set compiler specific options here: 
-if test "$enabledolcli" = yes ; then
+if test "$enableval" = yes ; then
         AC_MSG_RESULT([yes])
         AC_CHECK_HEADERS([readline/history.h readline/readline.h],[],[AC_MSG_ERROR([Can't find readline header files. Please install libreadline6-dev (Ubuntu) or readline-devel (RedHat)])])
+	dnl define a variable in the header file
+	AC_DEFINE([ENABLE_DOLCLI], 1, [Use command line interface precision])
+	dnl define the lowercase variable dolcli (see the substitute)
+	dolcli=true
 else
         AC_MSG_RESULT([no])
+	dolcli=false
 fi
+dnl this variable ends up in the makefile.
 AC_SUBST(dolcli)
+AM_CONDITIONAL([ENABLE_DOLCLI], [test x$enableval = xyes])
+
 AC_LANG_POP
 
 ## This is copied from the libtool examples

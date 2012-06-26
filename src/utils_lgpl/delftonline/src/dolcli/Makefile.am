@@ -8,6 +8,7 @@
 
 include $(top_srcdir)/common.am
 
+if ENABLE_DOLCLI
 bin_PROGRAMS = dolcli
 
 dolcli_SOURCES = \
@@ -15,16 +16,19 @@ dolcli_SOURCES = \
     parse.yy \
     lexan.ll
 
-INCLUDES = \
-    -I$(top_builddir)/utils_lgpl/delftonline/include
-
+# TODO, check for these libs in configure.
+# The flags should then be automaticly added.
+# AC_CHECK_LIB(library, function)
 dolcli_LDADD = \
     -L$(top_builddir)/lib -lDelftOnline \
     -ll \
     -lreadline \
     -ltermcap
+endif
 
-	
+INCLUDES = \
+    -I$(top_builddir)/utils_lgpl/delftonline/include
+
 AM_LFLAGS = -L
 AM_YFLAGS = -d
 
