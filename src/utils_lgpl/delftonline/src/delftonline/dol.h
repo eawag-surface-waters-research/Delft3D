@@ -2,7 +2,7 @@
 //  DelftOnline -- Internal Include File
 //
 //  Irv.Elshoff@Deltares.NL
-//  25 may 12
+//  27 jun 12
 //-------------------------------------------------------------------------------
 //---- LGPL --------------------------------------------------------------------
 //
@@ -47,14 +47,17 @@
 #   include <ws2tcpip.h>
 
 #   define DELFTONLINE_LIB
+#   define errno    (WSAGetLastError ())
 #   define getpid   _getpid
-#   define strdup   _strdup
-#   define srandom  srand
 #   define random   rand
+#   define srandom  srand
+#   define strdup   _strdup
 
 #else
 #   include <netdb.h>
 #   include <unistd.h>
+
+#   define INVALID_SOCKET (-1)
 
 #endif
 

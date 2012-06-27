@@ -2,7 +2,7 @@
 //  DelftOnline -- Server API Routines
 //
 //  Irv.Elshoff@Deltares.NL
-//  25 may 12
+//  27 jun 12
 //-------------------------------------------------------------------------------
 //---- LGPL --------------------------------------------------------------------
 //
@@ -104,7 +104,7 @@ Server::Server (
 
     // Find an open a TCP port for clients to connect to
 
-    if ((this->sock = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1)
+    if ((this->sock = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET)
         throw Error (true, "Server", "Cannot create socket client connections: %s", strerror (errno));
 
     this->addr.sin_family = AF_INET;

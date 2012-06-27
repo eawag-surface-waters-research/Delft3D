@@ -31,7 +31,7 @@
 //  IMPLEMENTATION
 //
 //  Irv.Elshoff@Deltares.NL
-//  25 may 12
+//  27 jun 12
 //------------------------------------------------------------------------------
 //
 /// \file
@@ -86,7 +86,12 @@ DeltaresHydroEntry (
     DeltaresHydro * DH
     ) {
 
-    DH->startComponent = new Flow2D3D (DH);
+    try {
+        DH->startComponent = new Flow2D3D (DH);
+        }
+    catch (Exception * ex) {
+        DH->log->Write (Log::ALWAYS, "Cannot start Flow2D3D: %s", ex->message);
+        }
     }
 
 

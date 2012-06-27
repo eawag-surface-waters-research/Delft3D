@@ -2,7 +2,7 @@
 //  DelftOnline -- C++ Client API Routines
 //
 //  Irv.Elshoff@Deltares.NL
-//  28 may 12
+//  27 jun 12
 //-------------------------------------------------------------------------------
 //---- LGPL --------------------------------------------------------------------
 //
@@ -95,7 +95,7 @@ Client::Client (
     this->inaddr->sin_family = AF_INET;
     this->inaddr->sin_port = htons (this->port);
 
-    if ((this->sock = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1)
+    if ((this->sock = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET)
         throw new Exception (true, "Cannot create socket: %s\n", strerror (errno));
 
     socklen_t addrlen = sizeof (struct sockaddr);
