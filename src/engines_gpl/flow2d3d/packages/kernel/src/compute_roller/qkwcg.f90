@@ -1,5 +1,5 @@
 subroutine qkwcg(tp        ,rlabda    ,teta      ,qxkw      ,qykw      , &
-               & qxkr      ,qykr      ,dps       ,s         ,kcs       , &
+               & qxkr      ,qykr      ,dps       ,s         ,kfs       , &
                & guu       ,gvv       ,cgc       ,c         ,irocol    , &
                & norow     ,nocol     ,kfu       ,kfv       ,nmax      , &
                & mmax      ,gdp       )
@@ -63,7 +63,7 @@ subroutine qkwcg(tp        ,rlabda    ,teta      ,qxkw      ,qykw      , &
     integer                                                                   :: nocol  !  Description and declaration in esm_alloc_int.f90
     integer                                                                   :: norow  !  Description and declaration in esm_alloc_int.f90
     integer, dimension(5, *)                                                  :: irocol !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: kfs    !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: kfu    !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: kfv    !  Description and declaration in esm_alloc_int.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: c      !  Description and declaration in esm_alloc_real.f90
@@ -102,7 +102,7 @@ subroutine qkwcg(tp        ,rlabda    ,teta      ,qxkw      ,qykw      , &
     !
     do n = 1, nmax
        do m = 1, mmax
-          if (kcs(n, m)>0) then
+          if (kfs(n, m)>0) then
              h = max(real(dps(n, m),fp) + s(n, m), dryflc)
              !
              ! h = MAX (dps(n,m),dryflc)
@@ -145,26 +145,76 @@ subroutine qkwcg(tp        ,rlabda    ,teta      ,qxkw      ,qykw      , &
     !
     do n = 1, nmax
        do m = 1, mmax - 1
-          if (kcs(n, m)>0) then
+          if (kfu(n, m)>0) then
+             ! Normal active u point
              qxkw(n, m) = 0.5*(qxkw(n, m) + qxkw(n, m + 1))*guu(n, m)
              qxkr(n, m) = 0.5*(qxkr(n, m) + qxkr(n, m + 1))*guu(n, m)
+          elseif (kfs(n, m) > 0 .and. kfs(n, m + 1) > 0) then
+             ! Inactive velocity point (thin dam)
+             if (qxkw(n, m) > 0.0 .and. qxkw(n, m + 1) > 0.0) then
+                ! Use upwind approach in case of thin dams
+                qxkw(n, m) = qxkw(n, m)*guu(n, m)
+                qxkr(n, m) = qxkr(n, m)*guu(n, m)
+             elseif (qxkw(n, m) < 0.0 .and. qxkw(n, m + 1) < 0.0) then
+                ! Use upwind approach in case of thin dams
+                qxkw(n, m) = qxkw(n, m + 1)*guu(n, m) 
+                qxkr(n, m) = qxkr(n, m + 1)*guu(n, m)
+             else
+                qxkw(n, m) = 0.0 
+                qxkr(n, m) = 0.0
+             endif
+          elseif (kfs(n, m) > 0.0 .and. kfv(n, m + 1) == 0) then
+             ! Next cell to the right is dry 
+             qxkw(n, m) = qxkw(n, m)*guu(n, m)
+             qxkr(n, m) = qxkr(n, m)*guu(n, m)
+          elseif (kfs(n, m) == 0 .and. kfs(n, m + 1) > 0) then
+             ! This cell is dry
+             qxkw(n, m) = qxkw(n, m + 1)*guu(n, m)
+             qxkr(n, m) = qxkr(n, m + 1)*guu(n, m)
           else
-             qxkw(n, m) = 0.0
+              ! This should never happen
+             qxkw(n, m) = 0.0 
              qxkr(n, m) = 0.0
           endif
        enddo
     enddo
     do n = 1, nmax - 1
        do m = 1, mmax
-          if (kcs(n, m)>0) then
+          if (kfv(n, m)>0) then
+             ! Normal active v point
              qykw(n, m) = 0.5*(qykw(n, m) + qykw(n + 1, m))*gvv(n, m)
              qykr(n, m) = 0.5*(qykr(n, m) + qykr(n + 1, m))*gvv(n, m)
+          elseif (kfs(n, m) > 0 .and. kfs(n + 1, m) > 0) then
+             ! Inactive velocity point (thin dam)
+             if (qykw(n, m) > 0.0 .and. qykw(n + 1, m) > 0.0) then
+                ! Use upwind approach in case of thin dams
+                qykw(n, m) = qykw(n, m)*gvv(n, m)
+                qykr(n, m) = qykr(n, m)*gvv(n, m)
+             elseif (qykw(n, m) < 0.0 .and. qykw(n + 1, m) < 0.0) then
+                ! Use upwind approach in case of thin dams
+                qykw(n, m) = qykw(n + 1, m)*gvv(n, m) 
+                qykr(n, m) = qykr(n + 1, m)*gvv(n, m)
+             else
+                qykw(n, m) = 0.0 
+                qykr(n, m) = 0.0
+             endif
+          elseif (kfs(n, m) > 0.0 .and. kfv(n + 1, m) == 0) then
+             ! Next cell up is dry 
+             qykw(n, m) = qykw(n, m)*gvv(n, m)
+             qykr(n, m) = qykr(n, m)*gvv(n, m)
+          elseif (kfs(n, m) == 0 .and. kfs(n + 1, m) > 0) then
+             ! This cell is dry
+             qykw(n, m) = qykw(n + 1, m)*gvv(n, m)
+             qykr(n, m) = qykr(n + 1, m)*gvv(n, m)
           else
-             qykw(n, m) = 0.0
-             qykr(n, m) = 0.0
+              ! This should never happen
+              qykw(n, m) = 0.0 
+              qykr(n, m) = 0.0
           endif
        enddo
     enddo
+
+
     nmaxddb = nmax + 2*gdp%d%ddbound
     icx     = nmaxddb
     icy     = 1
