@@ -5,7 +5,7 @@ subroutine adv2d(timest    ,lundia    ,nst       ,icx       ,icy       , &
                & qxk       ,qyk       ,gsqs      ,e0        ,e1        , &
                & sour      ,sink      ,bbk       ,bdddx     ,bddx      , &
                & bdx       ,bux       ,buux      ,buuux     ,uvdwk     , &
-               & vvdwk     ,bbkl      ,ddkl      ,gdp       )
+               & vvdwk     ,bbkl      ,ddkl      ,irol      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -63,6 +63,7 @@ subroutine adv2d(timest    ,lundia    ,nst       ,icx       ,icy       , &
 !
     integer                                           , intent(in)  :: icx
     integer                                           , intent(in)  :: icy
+    integer                                           , intent(in)  :: irol
     integer                                           , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                           , intent(in)  :: layer
     integer                                                         :: lundia !  Description and declaration in inout.igs
@@ -206,8 +207,18 @@ subroutine adv2d(timest    ,lundia    ,nst       ,icx       ,icy       , &
        nmuu  = nmuu + 1
        !
        qxu = qxk(nm)
+       !
        if (qxu > 0.0_fp) then
-          iad1 =      kfu(nm)  *kadu(nm  ,kkad)
+          !
+          if (irol==1) then
+             !
+             ! In case roller model, always an outflux, even when velocity points are inactive
+             !
+             iad1 = 1
+          else
+             iad1 =      kfu(nm)  *kadu(nm  ,kkad)
+          endif
+          !
           iad2 = iad1*kfu(nmd) *kadu(nmd ,kkad)
           iad3 = iad2*kfu(nmdd)*kadu(nmdd,kkad)
           !
@@ -218,11 +229,28 @@ subroutine adv2d(timest    ,lundia    ,nst       ,icx       ,icy       , &
           bbk  (nm ) = bbk  (nm ) + qxu*j1/6.0_fp
           bdx  (nm ) = bdx  (nm ) + qxu*j2/6.0_fp
           bddx (nm ) = bddx (nm ) + qxu*j3/6.0_fp
-          bdx  (nmu) = bdx  (nmu) - qxu*j1/6.0_fp
-          bddx (nmu) = bddx (nmu) - qxu*j2/6.0_fp
-          bdddx(nmu) = bdddx(nmu) - qxu*j3/6.0_fp
+          !
+          if (kfu(nm)*kadu(nm ,kkad) == 1 .or. irol==0) then
+             !
+             ! In case roller model:
+             ! Only influx of energy if the cell face is open
+             ! Otherwise the energy is considered dissipated
+             ! 
+             bdx  (nmu) = bdx  (nmu) - qxu*j1/6.0_fp
+             bddx (nmu) = bddx (nmu) - qxu*j2/6.0_fp
+             bdddx(nmu) = bdddx(nmu) - qxu*j3/6.0_fp
+             !
+          endif
        else
-          iad1 =        kfu(nm)   * kadu(nm  ,kkad)
+          if (irol==1) then
+             !
+             ! In case roller model, always an outflux, even when velocity points are inactive
+             !
+             iad1 = 1
+          else
+             iad1 =        kfu(nm)   * kadu(nm  ,kkad)
+          endif
+          !
           iad2 = iad1 * kfu(nmu)  * kadu(nmu ,kkad)
           iad3 = iad2 * kfu(nmuu) * kadu(nmuu,kkad)
           !
@@ -230,12 +258,23 @@ subroutine adv2d(timest    ,lundia    ,nst       ,icx       ,icy       , &
           j2 =        - 3*iad2 - 2*iad3
           j3 =                     iad3
           !
-          bux  (nm ) = bux  (nm ) + qxu*j1/6.0_fp
-          buux (nm ) = buux (nm ) + qxu*j2/6.0_fp
-          buuux(nm ) = buuux(nm ) + qxu*j3/6.0_fp
+          ! Always an outflux
+          !
           bbk  (nmu) = bbk  (nmu) - qxu*j1/6.0_fp
           bux  (nmu) = bux  (nmu) - qxu*j2/6.0_fp
           buux (nmu) = buux (nmu) - qxu*j3/6.0_fp
+          !
+          if (kfu(nm)*kadu(nm ,kkad) == 1 .or. irol==0) then
+             !
+             ! In case roller model:
+             ! Only influx of energy if the cell face is open
+             ! Otherwise the energy is considered dissipated
+             ! 
+             bux  (nm ) = bux  (nm ) + qxu*j1/6.0_fp
+             buux (nm ) = buux (nm ) + qxu*j2/6.0_fp
+             buuux(nm ) = buuux(nm ) + qxu*j3/6.0_fp
+             !
+          endif
        endif
     enddo
     !
@@ -249,22 +288,60 @@ subroutine adv2d(timest    ,lundia    ,nst       ,icx       ,icy       , &
        num = num + 1
        !
        qyv = qyk(nm)
-       iad1 = kfv(nm) * kadv(nm, kkad)
+       !
+       if (irol==1) then
+          !
+          ! In case roller model, always an outflux
+          !
+          iad1 = 1
+       else
+          iad1 = kfv(nm) * kadv(nm, kkad)
+       endif
        !iad2 = iad1 * kfv(num) *kadv(num,kkad) * kfv(ndm) * kadv(ndm,kkad)
        if (kcs(nm) == 2 .or. kcs(num) == 2) then
           iad2 = 0
        else
           iad2 = iad1
        endif
+       !
        if (qyv > 0.0_fp) then
-          d0k = 0.5_fp*qyv*( (2*iad1 - iad2)*e0(nm)   &
-              &             +          iad2 *e0(num))
-       else
-          d0k = 0.5_fp*qyv*( (2*iad1 - iad2)*e0(num)  &
-              &             +          iad2 *e0(nm ))
+          !
+          d0k = 0.5*qyv*( (2*iad1 - iad2)*e0(nm)   &
+              &          +          iad2 *e0(num))
+          if (kcs(nm) == 1) then
+             !
+             ! Always an outflux
+             !
+             ddkl(nm)  = ddkl(nm)  - d0k
+          endif
+          if (kcs(num) == 1) then
+             if (kfv(nm) * kadv(nm, kkad) == 1 .or. irol==0) then
+                !
+                ! Only influx of energy if the cell face is open
+                ! Otherwise the energy is considered dissipated
+                ! 
+                ddkl(num) = ddkl(num) + d0k
+             endif
+          endif
+       elseif (qyv < 0.0_fp) then
+          d0k = 0.5*qyv*( (2*iad1 - iad2)*e0(num)  &
+              &          +          iad2 *e0(nm ))
+          if (kcs(nm) == 1)  then
+             if (kfv(nm) * kadv(nm, kkad) == 1 .or. irol==0) then
+                !
+                ! Only influx of energy if the cell face is open
+                ! Otherwise the energy is considered dissipated
+                ! 
+                ddkl(nm)  = ddkl(nm)  - d0k
+             endif
+          endif
+          if (kcs(num) == 1) then
+             !
+             ! Always an outflux
+             !
+             ddkl(num) = ddkl(num) + d0k
+          endif
        endif
-       if (kcs(nm) == 1)  ddkl(nm)  = ddkl(nm)  - d0k
-       if (kcs(num) == 1) ddkl(num) = ddkl(num) + d0k
     enddo
     !
     do nm = 1, nmmax
