@@ -292,7 +292,7 @@ subroutine difuwe(timest    ,lundia    ,nst       ,icx       ,icy       , &
              & qxk       ,qyk       ,gsqs      ,e0        ,e1        , &
              & sour      ,sink      ,bbk       ,bdddx     ,bddx      , &
              & bdx       ,bux       ,buux      ,buuux     ,uvdwk     , &
-             & vvdwk     ,bbkl      ,ddkl      ,gdp       )
+             & vvdwk     ,bbkl      ,ddkl      ,1         ,gdp       )
     !
     if (quant==2) then
        qxk  = qxk / 2.0_fp
