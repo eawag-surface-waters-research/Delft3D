@@ -926,7 +926,7 @@ subroutine tricom_step(gdp)
                      & r(ewave1) ,r(wlen)   ,gdp      )
           endif
           call qkwcg(r(tp)     ,r(rlabda) ,r(teta)   ,r(qxkw)   ,r(qykw)   , &
-                   & r(qxkr)   ,r(qykr)   ,d(dps)    ,r(s1)     ,i(kcs)    , &
+                   & r(qxkr)   ,r(qykr)   ,d(dps)    ,r(s1)     ,i(kfs)    , &
                    & r(guu)    ,r(gvv)    ,r(cgc)    ,r(c)      ,i(irocol) , &
                    & norow     ,nocol     ,i(kfu)    ,i(kfv)    ,nmax      , &
                    & mmax      ,gdp       )
