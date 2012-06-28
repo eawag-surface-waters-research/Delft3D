@@ -418,7 +418,7 @@ subroutine calbf(stage     ,nmmax     ,nmaxddb   ,dps       ,s1        , &
                 & qbedformx ,qbedformy ,gsqs      ,duneheight,e1        , &
                 & sour      ,sink      ,bbk       ,bdddx     ,bddx      , &
                 & bdx       ,bux       ,buux      ,buuux     ,uvdwk     , &
-                & vvdwk     ,bbkl      ,ddkl      ,gdp       )
+                & vvdwk     ,bbkl      ,ddkl      ,0         ,gdp       )
     else
        call adv2d(hdtb      ,lundia    ,nst       ,icy       ,icx       , &
                 & nmmax     ,nocol     ,irocol(1, norow+1)   ,kadv      ,kadu      , &
@@ -427,7 +427,7 @@ subroutine calbf(stage     ,nmmax     ,nmaxddb   ,dps       ,s1        , &
                 & qbedformy ,qbedformx ,gsqs      ,duneheight,e1        , &
                 & sour      ,sink      ,bbk       ,bdddx     ,bddx      , &
                 & bdx       ,bux       ,buux      ,buuux     ,uvdwk     , &
-                & vvdwk     ,bbkl      ,ddkl      ,gdp       )
+                & vvdwk     ,bbkl      ,ddkl      ,0         ,gdp       )
     endif
     !
     ! Copy solution back to duneheight
