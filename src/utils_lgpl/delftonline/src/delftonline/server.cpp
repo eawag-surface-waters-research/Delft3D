@@ -2,7 +2,7 @@
 //  DelftOnline -- Server API Routines
 //
 //  Irv.Elshoff@Deltares.NL
-//  27 jun 12
+//  28 jun 12
 //-------------------------------------------------------------------------------
 //---- LGPL --------------------------------------------------------------------
 //
@@ -38,6 +38,24 @@
 
 namespace DOL {
 
+bool Server::initialized = false;
+
+void
+Server::initialize (
+    void
+    ) {
+
+    if (! Server::initialized) {
+        Server::initialized = true;
+#if defined (WIN32)
+        WORD versionRequested = MAKEWORD (1, 1);
+        WSADATA wsaData;
+        if (WSAStartup (versionRequested, &wsaData) != 0)
+            throw new Exception (true, "Windows Socket API initialization fails");
+#endif
+        }
+    }
+
 
 //-------------------------------------------------------------------------------
 
@@ -66,6 +84,8 @@ Server::Server (
     uint16_t        firstPort,
     uint16_t        lastPort
     ) {
+
+    Server::initialize ();
 
     // Process constructor arguments
 
@@ -105,7 +125,7 @@ Server::Server (
     // Find an open a TCP port for clients to connect to
 
     if ((this->sock = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET)
-        throw Error (true, "Server", "Cannot create socket client connections: %s", strerror (errno));
+        throw Error (true, "Server", "Cannot create socket client connections: (%d) %s", errno, strerror (errno));
 
     this->addr.sin_family = AF_INET;
     this->addr.sin_addr.s_addr = INADDR_ANY;
@@ -118,7 +138,7 @@ Server::Server (
         port = firstPort;
         this->addr.sin_port = htons (port);
         if (bind (this->sock, (struct sockaddr *) &this->addr, sizeof (struct sockaddr)) != 0)
-            throw Error (true, "Server", "Cannot bind to explicitly requested port %d: %s", port, strerror (errno));
+            throw Error (true, "Server", "Cannot bind to explicitly requested port %d: (%d) %s", port, errno, strerror (errno));
         }
 
     else {
@@ -133,7 +153,7 @@ Server::Server (
         throw Error (true, "Server", "Cannot bind socket for clients to any port in range [%d,%d]", first, last);
 
     if (listen (this->sock, TCP_BACKLOG) != 0)
-        throw Error (true, "Server", "Cannot listen to TCP/IP socket: %s", strerror (errno));
+        throw Error (true, "Server", "Cannot listen to TCP/IP socket: (%d) %s", errno, strerror (errno));
 
     // Generate URL handle
 

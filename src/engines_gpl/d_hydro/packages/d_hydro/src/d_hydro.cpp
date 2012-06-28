@@ -30,7 +30,7 @@
 //  D_Hydro Main Program
 //
 //  Irv.Elshoff@Deltares.NL
-//  25 may 12
+//  29 jun 12
 //------------------------------------------------------------------------------
 
 
@@ -70,7 +70,7 @@ static void printUsage          (char * exeName);
 
 
 #if defined (MONOLITHIC_FLOW2D3D)
-void
+bool
 FLOW2D3D_MonolithicInit (
     DeltaresHydro * DH
     );
@@ -115,6 +115,7 @@ main (
 
     try {
         DeltaresHydro * DH = new DeltaresHydro (argc, argv, envp);
+        if (! DH->ready) return 1;
         DH->Run ();
         delete DH;
         return 0;
@@ -265,7 +266,7 @@ DeltaresHydro::DeltaresHydro (
     //  ToDo: make sure the start component is Flow2D3D.
     //  The monolithic version is for the moment a possible work around for a Linux problem.
 
-    FLOW2D3D_MonolithicInit (this);
+    this->ready = FLOW2D3D_MonolithicInit (this);
 
 #else
     //  Load the library for the start component and invoke its entry function.  If the
@@ -308,7 +309,7 @@ DeltaresHydro::DeltaresHydro (
         throw new Exception (true, "Cannot find function \"%s\" in library \"%s\"", this->startEntry, library);
 
     this->log->Write (Log::DETAIL, "Calling entry function in start library");
-    entryPoint (this);
+    this->ready = entryPoint (this);
 #endif
 #elif defined (WIN32)
     char * lib = new char[strlen (library) + 4+1];
@@ -329,7 +330,7 @@ DeltaresHydro::DeltaresHydro (
         throw new Exception (true, "Cannot find function \"%s\" in library \"%s\". Return code: %d", this->startEntry, library, GetLastError());
 
     this->log->Write (Log::DETAIL, "Calling entry function in start library");
-    (entryPoint) ((LPWSTR) this);
+    this->ready = ((entryPoint) ((LPWSTR) this));
 #endif
 #endif      // MONOLITHIC_FLOW2D3D
     }
@@ -387,7 +388,7 @@ printAbout (
     GETFULLVERSIONSTRING (strout, strlen (strout));
     printf ("\n\
 %s \n\
-Copyright (C) 2011, Stichting Deltares. \n\
+Copyright (C) 2012, Stichting Deltares. \n\
 GNU General Public License, see <http://www.gnu.org/licenses/>. \n\n\
 delft3d.support@deltares.nl \n", strout);
     GETURLSTRING (strout, strlen (strout));

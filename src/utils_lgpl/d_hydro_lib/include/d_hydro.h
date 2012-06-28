@@ -31,7 +31,7 @@
 //  DEFINITIONS
 //
 //  Irv.Elshoff@Deltares.NL
-//  26 apr 12
+//  29 jun 12
 //------------------------------------------------------------------------------
 
 
@@ -85,7 +85,7 @@ class Log;
 
 class DeltaresHydro {
     public:
-        typedef void (*StartComponentEntry) (DeltaresHydro *);
+        typedef bool (*StartComponentEntry) (DeltaresHydro *);
 
     public:
         DeltaresHydro (
@@ -104,6 +104,7 @@ class DeltaresHydro {
             );
 
     public:
+        bool        ready;      // true means constructor succeeded and DH ready to run
         char *      exePath;    // name of running d_hydro executable (argv[0])
         char *      exeName;    // short name of executable
         Clock *     clock;      // timing facility

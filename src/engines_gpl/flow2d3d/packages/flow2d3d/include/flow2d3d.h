@@ -31,7 +31,7 @@
 //  DEFINITIONS
 //
 //  Irv.Elshoff@Deltares.NL
-//  25 may 12
+//  29 jun 12
 //------------------------------------------------------------------------------
 
 
@@ -94,7 +94,7 @@ extern "C" {
 
 
 extern "C" {
-    DllExport void
+    DllExport bool
     DeltaresHydroEntry (
         DeltaresHydro * DHI
         );

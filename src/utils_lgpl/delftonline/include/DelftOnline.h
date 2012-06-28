@@ -5,7 +5,7 @@
 //  definitions, but also (almost) all internal definitions.
 //
 //  Irv.Elshoff@Deltares.NL
-//  26 may 12
+//  28 jun 12
 //-------------------------------------------------------------------------------
 //---- LGPL --------------------------------------------------------------------
 //
@@ -513,6 +513,8 @@ class Server {
 
         //-----------------------------------------------------------------------
 
+        static bool initialized;    // for pan-instance initialization
+
         bool        startRunning;
         bool        ready;          // set to true when first thread passes milestone
         Status      status;
@@ -546,6 +548,11 @@ class Server {
         SortedBag * breakpoints;    // ordered list of milestones at which to stop
 
         //-----------------------------------------------------------------------
+
+        void
+        initialize (
+            void
+            );
 
         DLL int
         CallFunction (
@@ -811,6 +818,8 @@ class Client {
             };
 
     private:
+        static bool initialized;        // for pan-instance initialization
+
         char *          hostname;       // server hostname
         uint16_t        port;           // server TCP port
         char *          key;            // authentication key
@@ -826,6 +835,11 @@ class Client {
         Message::Header * mesg;         // fixed buffer (header + payload) for client/server communication
 
     private:
+        void
+        initialize (
+            void
+            );
+
         ArrayShape *
         getArrayShape (
             const char *    methodname

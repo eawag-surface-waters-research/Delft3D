@@ -6,7 +6,7 @@
 #   A "make distclean" doesn't do it all (yet), so we help it.
 #
 #   Irv.Elshoff@Deltares.NL
-#   14 apr 12
+#   28 jun 12
 #-------------------------------------------------------------------------------
 
 
@@ -59,6 +59,7 @@ rm -rf \
     tools_gpl/vs/packages/vs/src/vs_y.h \
     utils_lgpl/constants/packages/mathconsts/src/mathconsts_version.F90 \
     utils_lgpl/d_hydro_lib/packages/d_hydro_lib/include/d_hydro_lib_version.h \
+    utils_lgpl/delftonline/src/delftonline/delftonline_version.h \
     utils_lgpl/deltares_common/packages/deltares_common/src/deltares_common_version.F90 \
     utils_lgpl/inifiles/packages/inifiles/src/inifiles_version.F90 \
     utils_lgpl/precision/packages/precision/src/precision_version.F90 \

@@ -2,7 +2,7 @@
 //  DelftOnline -- C++ Client API Routines
 //
 //  Irv.Elshoff@Deltares.NL
-//  27 jun 12
+//  28 jun 12
 //-------------------------------------------------------------------------------
 //---- LGPL --------------------------------------------------------------------
 //
@@ -44,6 +44,24 @@
 
 namespace DOL {
 
+bool Client::initialized = false;
+
+void
+Client::initialize (
+    void
+    ) {
+
+    if (! Client::initialized) {
+        Client::initialized = true;
+#if defined (WIN32)
+        WORD versionRequested = MAKEWORD (1, 1);
+        WSADATA wsaData;
+        if (WSAStartup (versionRequested, &wsaData) != 0)
+            throw new Exception (true, "Windows Socket API initialization fails");
+#endif
+        }
+    }
+
 
 //-------------------------------------------------------------------------------
 //  Constructor/Destructor
@@ -54,6 +72,8 @@ Client::Client (
     int             verbosity,
     const char *    logfile
     ) {
+
+    Client::initialize ();
 
     // Unpack the URL string
 
@@ -96,11 +116,11 @@ Client::Client (
     this->inaddr->sin_port = htons (this->port);
 
     if ((this->sock = socket (PF_INET, SOCK_STREAM, IPPROTO_TCP)) == INVALID_SOCKET)
-        throw new Exception (true, "Cannot create socket: %s\n", strerror (errno));
+        throw new Exception (true, "Cannot create socket: (%d) %s\n", errno, strerror (errno));
 
     socklen_t addrlen = sizeof (struct sockaddr);
     if (connect (this->sock, &this->addr, addrlen) != 0)
-        throw new Exception (true, "Cannot connect to server : %s", strerror (errno));
+        throw new Exception (true, "Cannot connect to server: (%d) %s", errno, strerror (errno));
 
     // Allocate a message buffer for communication; both sends (requests) and receives (replies)
 

@@ -31,7 +31,7 @@
 //  IMPLEMENTATION
 //
 //  Irv.Elshoff@Deltares.NL
-//  27 jun 12
+//  29 jun 12
 //------------------------------------------------------------------------------
 //
 /// \file
@@ -81,26 +81,29 @@
 #endif
 
 
-DllExport void
+DllExport bool
 DeltaresHydroEntry (
     DeltaresHydro * DH
     ) {
 
     try {
         DH->startComponent = new Flow2D3D (DH);
+        return true;
         }
     catch (Exception * ex) {
-        DH->log->Write (Log::ALWAYS, "Cannot start Flow2D3D: %s", ex->message);
+        bool written = DH->log->Write (Log::ALWAYS, "Cannot start Flow2D3D: %s", ex->message);
+        if (! written) printf ("ABORT: Cannot start Flow2D3D: %s\n", ex->message);
+        return false;
         }
     }
 
 
-void
+bool
 FLOW2D3D_MonolithicInit (
     DeltaresHydro * DH
     ) {
 
-    DeltaresHydroEntry (DH);
+    return DeltaresHydroEntry (DH);
     }
 
 
