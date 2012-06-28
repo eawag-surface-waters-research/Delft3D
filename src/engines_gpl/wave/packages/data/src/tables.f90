@@ -109,13 +109,13 @@ contains
 subroutine org_readtable(this, lunbcm, filnam, refjulday, errorstring)
 !!--description-----------------------------------------------------------------
 !
-!    Function: Read table files (i.e. BCT/BCC/BCM)
+!    Function: Read table files (i.e. BCT/BCC/BCM/BCW)
 !
 !!------------------------------------------------------------------------------
 !
 ! Local parameters
 !
-    integer, parameter :: MAXFLD = 20
+    integer, parameter :: MAXFLD = 200
 !
 ! Global variables
 !

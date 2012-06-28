@@ -243,21 +243,21 @@ subroutine update_wavecond_mdw(sr,wavetime)
       !
       if (bnd%ts_tp(1)>0) then
          n = bnd%ts_tp(3)
-         call gettabledata(sr%tseriesfile, bnd%ts_tp, bnd%waveheight(1:n), &
+         call gettabledata(sr%tseriesfile, bnd%ts_tp, bnd%period(1:n), &
                          & timhr, sr%refjulday, errorstring)
          if (n==1) bnd%waveheight=bnd%waveheight(1)
       endif
       !
       if (bnd%ts_wd(1)>0) then
          n = bnd%ts_wd(3)
-         call gettabledata(sr%tseriesfile, bnd%ts_wd, bnd%waveheight(1:n), &
+         call gettabledata(sr%tseriesfile, bnd%ts_wd, bnd%direction(1:n), &
                          & timhr, sr%refjulday, errorstring)
          if (n==1) bnd%waveheight=bnd%waveheight(1)
       endif
       !
       if (bnd%ts_ds(1)>0) then
          n = bnd%ts_ds(3)
-         call gettabledata(sr%tseriesfile, bnd%ts_ds, bnd%waveheight(1:n), &
+         call gettabledata(sr%tseriesfile, bnd%ts_ds, bnd%dirspread(1:n), &
                          & timhr, sr%refjulday, errorstring)
          if (n==1) bnd%waveheight=bnd%waveheight(1)
       endif
