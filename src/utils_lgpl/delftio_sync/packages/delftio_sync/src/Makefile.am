@@ -34,8 +34,7 @@ libdelftio_sync_a_SOURCES = \
          sync_couple.f90 \
          sync_flm.f90 \
          sync_flowwave.f90 \
-         sync_rtcflow.f90 \
-         waq2flow.f90
+         sync_rtcflow.f90
 
 #-------------------------------------------------------------------------------
 #Libraries

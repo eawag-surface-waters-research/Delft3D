@@ -98,7 +98,7 @@ libdata_gdp_la_SOURCES = \
          nefisio_dealloc.f90
 
 
-flow2d3dinclude_HEADERS=*.mod
+# flow2d3dinclude_HEADERS=*.mod
 #-------------------------------------------------------------------------------
 #Libraries
 
