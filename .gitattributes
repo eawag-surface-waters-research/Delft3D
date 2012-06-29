@@ -1290,6 +1290,7 @@ src/scripts_lgpl/Makefile.am -text
 src/scripts_lgpl/deltares_hydro/Makefile.am -text
 src/scripts_lgpl/deltares_hydro/deltares_hydro.tcl -text
 src/scripts_lgpl/linux/convert_lnx_to_old_directory_structure_intel.sh -text
+src/scripts_lgpl/linux/gatherlibraries.rb -text
 src/scripts_lgpl/linux/make_revision.sh -text
 src/scripts_lgpl/linux/oss-install.sh -text
 src/scripts_lgpl/linux/update_version.sh -text
