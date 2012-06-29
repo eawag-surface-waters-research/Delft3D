@@ -5,6 +5,3 @@ libtriangle_c_a_SOURCES = \
 	tricall2.c \
 	triangle.h \
 	f2c.h
-
-ACLOCAL_AMFLAGS = -I m4
-EXTRA_DIST = m4
