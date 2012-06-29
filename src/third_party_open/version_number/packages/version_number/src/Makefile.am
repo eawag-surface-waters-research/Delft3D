@@ -7,7 +7,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-bin_PROGRAMS = version_number.exe
+noinst_PROGRAMS = version_number.exe
 
 #-------------------------------------------------------------------------------
 #Includes
