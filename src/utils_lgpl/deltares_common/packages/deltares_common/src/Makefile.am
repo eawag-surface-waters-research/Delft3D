@@ -36,6 +36,9 @@ libdeltares_common_a_SOURCES = \
          nan_check_module.f90 \
          util.f90
 
+EXTRA_DIST = \
+         deltares_common_version.F90.svn
+
 #-------------------------------------------------------------------------------
 #Libraries
 
