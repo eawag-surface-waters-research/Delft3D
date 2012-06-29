@@ -23,6 +23,8 @@ libprecision_a_SOURCES = \
          precision.F90 \
          precision_sp.F90
 
+EXTRA_DIST = \
+	precision_version.F90.svn
 
 BUILT_SOURCES = ./always \
 	./precision_version.F90 
