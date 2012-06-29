@@ -519,10 +519,12 @@ utils_lgpl/stream/tests/Makefile
 utils_lgpl/deltares_common/Makefile
 utils_lgpl/deltares_common/packages/Makefile
 utils_lgpl/deltares_common/packages/deltares_common_c/Makefile
+utils_lgpl/deltares_common/packages/deltares_common_c/include/Makefile
 utils_lgpl/deltares_common/packages/deltares_common_c/src/Makefile
 utils_lgpl/deltares_common/packages/deltares_common/Makefile
 utils_lgpl/deltares_common/packages/deltares_common/src/Makefile
 scripts_lgpl/Makefile
+scripts_lgpl/linux/Makefile
 scripts_lgpl/deltares_hydro/Makefile
 		 ])
 
