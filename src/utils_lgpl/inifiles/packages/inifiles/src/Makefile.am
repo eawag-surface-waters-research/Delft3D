@@ -11,13 +11,15 @@
 
 include $(top_srcdir)/common.am
 lib_LIBRARIES = libinifiles.a
-
 #-------------------------------------------------------------------------------
 #Sources
 libinifiles_a_SOURCES = \
          inifiles_version.F90 \
          tree_struct.f90 \
          properties.f90
+
+EXTRA_DIST = \
+	inifiles_version.F90.svn
 
 BUILT_SOURCES = ./always \
     ./inifiles_version.F90 
