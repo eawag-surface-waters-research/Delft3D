@@ -2,7 +2,7 @@
 //  DelftOnline -- General Utilities
 //
 //  Irv.Elshoff@Deltares.NL
-//  24 may 12
+//  30 jun 12
 //-------------------------------------------------------------------------------
 //---- LGPL --------------------------------------------------------------------
 //
@@ -308,20 +308,18 @@ LookupHostname (
 
     //  This routine looks up the specified hostname (unqualified, FQDN, or
     //  dot notation IP-address) and fills in the provided sockaddr structure
-    //  Returns true is all went well, false otherwise.
+    //  Returns true if all went well, false otherwise.
 
     struct protoent *proto;
     if ((proto = getprotobyname ("tcp")) == NULL)
         return false;
 
     struct addrinfo hints;
+    memset ((void *) &hints, 0, sizeof hints);
     hints.ai_flags = AI_CANONNAME;
     hints.ai_family = PF_INET;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = proto->p_proto;
-    hints.ai_addrlen = 0;
-    hints.ai_addr = 0;
-    hints.ai_canonname = NULL;
 
     struct addrinfo *result;
     if (getaddrinfo (hostname, NULL, &hints, &result) != 0 || result == NULL)
@@ -334,9 +332,16 @@ LookupHostname (
 
 }
 
-extern char * getfullversionstring_delftonline(void);
-char *  GETVERSION(void)
-{
- return getfullversionstring_delftonline();
-}
+
+//-------------------------------------------------------------------------------
+
+
+char *
+GETVERSION (
+    void
+    ) {
+
+    extern char * getfullversionstring_delftonline (void);
+    return getfullversionstring_delftonline();
+    }
 

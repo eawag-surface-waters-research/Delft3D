@@ -163,7 +163,7 @@ Stream::Stream (
     // This is a blocking call that waits for a Connect from the peer that
     // initially created the stream.
 
-        Stream::initialize();
+    Stream::initialize();
 
     this->errorfunction = errorfunction;
     this->tracefunction = tracefunction;
