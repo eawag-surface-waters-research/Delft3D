@@ -771,7 +771,7 @@ subroutine tricom_finish(gdp       )
               & initi     ,dtsec     , &
               & nst       ,iphisc    ,npmap     ,itcomc    ,itimc     , &
               & itcur     ,ntcur     ,ithisc    ,itmapc    ,itdroc    , &
-              & itrstc    ,ktemp     ,gdp       )
+              & itrstc    ,ktemp     ,.false.   ,gdp       )
     if (waveol) then
        !
        ! Perform (last) wave computation (if required) and close communication with

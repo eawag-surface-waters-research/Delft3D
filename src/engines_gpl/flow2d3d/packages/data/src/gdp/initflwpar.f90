@@ -94,6 +94,7 @@ subroutine initflwpar(gdp)
     flwoutput%chezy       = .false.
     flwoutput%cumdifuflux = .false.
     flwoutput%difuflux    = .false.
+    flwoutput%halfdt      = .false.
     flwoutput%layering    = .false.
     flwoutput%roughness   = .false.
     flwoutput%temperature = .false.

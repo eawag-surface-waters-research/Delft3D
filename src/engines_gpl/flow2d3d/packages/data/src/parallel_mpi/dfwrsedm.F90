@@ -138,7 +138,6 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
     integer                                   :: k          ! Help var. 
     integer                                   :: kmaxout    ! number of layers to be written to the (history) output files
     integer                                   :: l          ! Help var. 
-    integer                                   :: lastcl
     integer                                   :: m          ! Help var. 
     integer                                   :: n          ! Help var. 
     integer                                   :: nm         ! Help var. 
@@ -534,27 +533,6 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
        !
        celidt = celidt + 1
        !
-       ! group 4: element 'ITMAPS'
-       ! ITMAPS is a copy of element 'ITMAPC' in group 'map-info-series'
-       ! Overwriting instead of appending if time is already on file
-       !
-       !-->
- 10    continue
-       if (celidt>1) then
-          idummy(1)   = -1
-          lastcl      = celidt - 1
-          uindex(1,1) = lastcl
-          uindex(2,1) = lastcl
-          ierror     = getelt(fds, grnam4, 'ITMAPS', uindex, 1, 4, idummy)
-          if (ierror/=0) goto 9999
-          if (idummy(1)>=itmapc) then
-             celidt = lastcl
-             goto 10
-          endif
-       else
-          celidt = 1
-       endif
-       !<--
        idummy(1)   = itmapc
        uindex(1,1) = celidt
        uindex(2,1) = celidt
@@ -568,7 +546,6 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
        ! Neat solution in pseudo code:
        ! subroutine wrsedm
        !    integer :: celidt
-       !    celidt = detectcelidt(nefiswrsedminf)
        !    call wrsedminfsed(celidt)
        !    call wrsedmsed(celidt)
        ! end subroutine

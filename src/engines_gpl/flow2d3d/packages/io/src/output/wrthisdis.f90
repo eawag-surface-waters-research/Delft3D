@@ -88,7 +88,6 @@ subroutine wrthisdis(lundia    ,error     ,trifil    ,ithisc    ,zmodel    , &
     integer                                           :: ierror         ! Local error flag for NEFIS files
     integer                                           :: isrc           ! Index number of discharge location 
     integer                                           :: k
-    integer                                           :: lastcl
     integer                                           :: m
     integer                                           :: n    
     integer       , dimension(nelmx)                  :: nbytsg         ! Array containing the number of bytes of each single ELMTPS
@@ -215,24 +214,6 @@ subroutine wrthisdis(lundia    ,error     ,trifil    ,ithisc    ,zmodel    , &
     endif
     !
     ! element 'ITHISC'
-    !
-    wrswch = .false.
-    !-->
-  10 continue
-    if (celidt>1) then
-       idummy(1) = -1
-       lastcl = celidt - 1
-       call putgti(filnam    ,grnam     ,nelmx     ,elmnms    ,elmdms    , &
-                 & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-                 & elmnms(1) ,lastcl    ,wrswch    ,ierror   ,idummy    )
-       if (idummy(1)>=ithisc) then
-          celidt = lastcl
-          goto 10
-       endif
-    else
-       celidt = 1
-    endif
-    !<--
     !
     wrswch = .true.
     idummy(1) = ithisc

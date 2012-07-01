@@ -184,7 +184,6 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     integer                                       :: kmaxout       ! number of layers to be written to the (history) output files, 0 (possibly) included
     integer                                       :: kmaxout_restr ! number of layers to be written to the (history) output files, 0 excluded
     integer                                       :: l             ! Help var.
-    integer                                       :: lastcl
     integer                                       :: m             ! Help var.
     integer                                       :: n             ! Help var.
     integer                                       :: nm
@@ -636,33 +635,10 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        !
        celidt = celidt + 1
        !
-       ! Overwriting instead of appending if time is already on file
-       !
-       ! group 1: element 'ITMAPC'
-       !
-       !-->
- 10 continue
-       if (celidt > 1) then
-          idummy(1)   = -1
-          lastcl      = celidt - 1
-          uindex(1,1) = lastcl
-          uindex(2,1) = lastcl
-          ierror      = getelt(fds, grnam1, 'ITMAPC', uindex, 1, 4, idummy)
-          if (ierror/=0) goto 999
-          if (idummy(1)>=itmapc) then
-             celidt = lastcl
-             goto 10
-          endif
-       else
-          celidt = 1
-       endif
-       !<--
        idummy(1)   = itmapc
        uindex(1,1) = celidt
        uindex(2,1) = celidt
        !
-       ! celidt is obtained by investigating group map-inf-series, identified
-       ! with nefiswrtmapinf.
        ! Group map-series, identified with nefiswrtmap, must use the same
        ! value for celidt.
        ! Easy solution:
@@ -670,7 +646,6 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        ! Neat solution in pseudo code:
        ! subroutine wrtmap
        ! integer :: celidt
-       ! celidt = detectcelidt(nefiswrtmapinf)
        ! call wrtmapinf(celidt)
        ! call wrtmapdat(celidt)
        ! end subroutine

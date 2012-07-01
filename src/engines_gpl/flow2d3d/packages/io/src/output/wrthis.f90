@@ -126,7 +126,6 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     integer                                          :: fds
     integer                                          :: i             ! Help var. 
     integer                                          :: ierror        ! Local errorflag for NEFIS files 
-    integer                                          :: lastcl
     integer        , dimension(1)                    :: idummy        ! Help array to read/write Nefis files 
     integer        , dimension(3,5)                  :: uindex
     integer                            , external    :: getelt
@@ -404,33 +403,10 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
        !
        celidt = celidt + 1
        !
-       ! Overwriting instead of appending if time is already on file
-       !
-       ! group 1, element 1 'ITHISC'
-       !
-       !-->
-      10 continue
-       if (celidt>1) then
-          idummy(1) = -1
-          lastcl = celidt - 1
-          uindex(1,1) = lastcl
-          uindex(2,1) = lastcl
-          ierror     = getelt(fds, grnam1, 'ITHISC', uindex, 1, 4, idummy)
-          if (ierror/=0) goto 999
-          if (idummy(1)>=ithisc) then
-             celidt = lastcl
-             goto 10
-          endif
-       else
-          celidt = 1
-       endif
-       !<--
        idummy(1) = ithisc
        uindex(1,1) = celidt
        uindex(2,1) = celidt
        !
-       ! celidt is obtained by investigating group his-inf-series, identified
-       ! with nefiswrthisinf.
        ! Group his-series, identified with nefiswrthis, must use the same
        ! value for celidt.
        ! Easy solution:
@@ -438,7 +414,6 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
        ! Neat solution in pseudo code:
        ! subroutine wrthis
        ! integer :: celidt
-       ! celidt = detectcelidt(nefiswrthisinf)
        ! call wrthisinf(celidt)
        ! call wrthisdat(celidt)
        ! end subroutine

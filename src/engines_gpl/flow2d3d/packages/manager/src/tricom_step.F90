@@ -810,7 +810,7 @@ subroutine tricom_step(gdp)
                  & initi     ,dtsec     , &
                  & nst       ,iphisc    ,npmap     ,itcomc    ,itimc     , &
                  & itcur     ,ntcur     ,ithisc    ,itmapc    ,itdroc    , &
-                 & itrstc    ,ktemp     ,gdp       )
+                 & itrstc    ,ktemp     ,.false.   ,gdp       )
        call timer_stop(timer_postpr, gdp)
        call vsemnefis
        if (error) goto 9998

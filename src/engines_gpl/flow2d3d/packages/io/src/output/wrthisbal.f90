@@ -177,8 +177,6 @@ subroutine wrthisbal(ithisc    ,trifil    ,lundia    ,error     ,gdp       )
     endif
     !
     celidt = celidt + 1
-    call detectcelidt(fds, grpnam, 'ITHISC', ithisc, celidt, ierror, gdp)
-    if (ierror/=0) goto 9999
     !
     ! initialize group index time dependent data
     !

@@ -71,7 +71,6 @@ subroutine wrsedwaqm( lundia , error     , trifil    , itmapc    , &
     integer                 :: ierror     ! Local errorflag for NEFIS files 
     integer                 :: fds
     integer                 :: i
-    integer                 :: lastcl
     integer                 :: m          ! Help var. 
     integer                 :: n          ! Help var. 
     integer, dimension(1)   :: idummy     ! Help array to read/write Nefis files 
@@ -154,32 +153,11 @@ subroutine wrsedwaqm( lundia , error     , trifil    , itmapc    , &
     celidt = celidt + 1
     !
     ! group 4: element 'ITMAPS'
-    ! ITMAPS is a copy of element 'ITMAPC' in group 'map-info-series'
-    ! Overwriting instead of appending if time is already on file
     !
-    !-->
- 10 continue
-    if (celidt>1) then
-       idummy(1)   = -1
-       lastcl      = celidt - 1
-       uindex(1,1) = lastcl
-       uindex(2,1) = lastcl
-       ierror     = getelt(fds, grnam4, 'ITMAPS', uindex, 1, 4, idummy)
-       if (ierror/=0) goto 9999
-       if (idummy(1)>=itmapc) then
-          celidt = lastcl
-          goto 10
-       endif
-    else
-       celidt = 1
-    endif
-    !<--
     idummy(1)   = itmapc
     uindex(1,1) = celidt
     uindex(2,1) = celidt
     !
-    ! celidt is obtained by investigating group map-infsed-serie, identified
-    ! with nefiswrsedminf.
     ! Group map-sed-series, identified with nefiswrsedm, must use the same
     ! value for celidt.
     ! Easy solution:
@@ -187,7 +165,6 @@ subroutine wrsedwaqm( lundia , error     , trifil    , itmapc    , &
     ! Neat solution in pseudo code:
     ! subroutine wrsedwaqm
     !    integer :: celidt
-    !    celidt = detectcelidt(nefiswrsedminf)
     !    call wrsedminfsed(celidt)
     !    call wrsedmsed(celidt)
     ! end subroutine

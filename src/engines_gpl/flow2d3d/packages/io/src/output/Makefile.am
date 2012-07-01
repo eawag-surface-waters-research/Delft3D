@@ -37,7 +37,6 @@ libio_output_la_SOURCES = \
          addelm.f90 \
          calbed.f90 \
          defnewgrp.f90 \
-         detectcelidt.f90 \
          dirint.f90 \
          distance_nogdp.f90 \
          dp999.f90 \
@@ -53,6 +52,7 @@ libio_output_la_SOURCES = \
          layer_interfaces.f90 \
          pinpol.f90 \
          postpr.f90 \
+         postpr_hdt.f90 \
          pppsol.f90 \
          prhead.f90 \
          prihis.f90 \

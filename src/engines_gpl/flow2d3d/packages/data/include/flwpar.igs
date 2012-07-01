@@ -33,6 +33,7 @@ type flwoutputtype
     logical :: chezy
     logical :: cumdifuflux
     logical :: difuflux
+    logical :: halfdt
     logical :: layering
     logical :: roughness
     logical :: temperature

@@ -2209,6 +2209,11 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        call D3S_put_levels(ntstep, mlb, mub, nlb, nub, r(s1), i(kfs))
        call timer_stop(timer_wait, gdp)
     endif
+    !
+    if (gdp%gdflwpar%flwoutput%halfdt) then
+       call postpr_hdt(nst, gdp)
+    endif
+    !
     !+++++++++++++++++++++++ COMPLETION OF HALF TIMESTEP++++++++++++++++++++
     !
     timnow = timnow + 0.5_fp

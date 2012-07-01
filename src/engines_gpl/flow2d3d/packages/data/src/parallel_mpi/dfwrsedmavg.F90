@@ -89,7 +89,6 @@ subroutine dfwrsedmavg(lundia    ,error     ,trifil    ,nst       ,mmax      , &
     integer                 :: fds
     integer                 :: i
     integer                 :: l          ! Help var. 
-    integer                 :: lastcl
     integer                 :: m          ! Help var. 
     integer                 :: n          ! Help var. 
     integer                 :: nm         ! Help var. 
@@ -252,25 +251,6 @@ subroutine dfwrsedmavg(lundia    ,error     ,trifil    ,nst       ,mmax      , &
     ierror = inqmxi(fds, grnam6, celidt)
     if (initi==4 .or. moroutput%cumavg) then
        celidt = celidt + 1
-       !-->
- 1010  continue
-       if (celidt > 1) then
-          idummy(1) = -1
-          lastcl = celidt - 1
-          !
-          uindex(1,1) = lastcl
-          uindex(2,1) = lastcl
-          !
-          ierror = getelt(fds, grnam6, 'ITAVGS', uindex, 1, 4, idummy)
-          if (ierror/= 0) goto 9999
-          if (idummy(1) >= nst) then
-             celidt = lastcl
-             goto 1010
-          endif
-       else
-          celidt = 1
-       endif
-    !<--
     endif
     idummy(1)   = nst
     uindex(1,1) = celidt

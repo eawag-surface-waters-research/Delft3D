@@ -110,7 +110,6 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
     integer                                 :: k
     integer                                 :: kmaxout      ! number of layers to be written to the (history) output files
     integer                                 :: l
-    integer                                 :: lastcl
     integer                                 :: n
     integer, dimension(1)                   :: idummy       ! Help array to read/write Nefis files 
     integer, dimension(3,5)                 :: uindex
@@ -322,28 +321,9 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
     !
     celidt = celidt + 1
     if (inode == master) then
-    !
-    ! group 4: element 'ITHISS'
-    ! ITHISS is a copy of element 'ITHISC' in group 'his-info-series'
-    ! Overwriting instead of appending if time is already on file
-    !
-    !-->
- 10    continue
-       if (celidt > 1) then
-          idummy(1)   = -1
-          lastcl      = celidt - 1
-          uindex(1,1) = lastcl
-          uindex(2,1) = lastcl
-          ierror     = getelt(fds, grnam4, 'ITHISS', uindex, 1, 4, idummy)
-          if (ierror/= 0) goto 9999
-          if (idummy(1) >= ithisc) then
-             celidt = lastcl
-             goto 10
-          endif
-       else
-          celidt = 1
-       endif
-       !<--
+       !
+       ! group 4: element 'ITHISS'
+       !
        idummy(1)   = ithisc
        uindex(1,1) = celidt
        uindex(2,1) = celidt
@@ -357,7 +337,6 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
        ! Neat solution in pseudo code:
        ! subroutine wrsedh
        !    integer :: celidt
-       !    celidt = detectcelidt(nefiswrsedhinf)
        !    call wrsedhinf(celidt)
        !    call wrsedhdat(celidt)
        ! end subroutine

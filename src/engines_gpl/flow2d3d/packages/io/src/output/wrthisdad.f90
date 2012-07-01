@@ -76,7 +76,6 @@ subroutine wrthisdad(lundia    ,error     ,trifil    ,ithisc    , &
 !
     integer                                    :: i           ! Data-group name defined for the NEFIS-files group 1 Data-group name defined for the NEFIS-files group 3 Help var.
     integer                                    :: ierror      ! Local errorflag for NEFIS files
-    integer                                    :: lastcl
     integer       , dimension(1)               :: idummy      ! Help array to read/write Nefis files
     integer       , dimension(nelmx)           :: nbytsg      ! Array containing the number of bytes of each single ELMTPS
     integer                         , external :: neferr
@@ -157,24 +156,6 @@ subroutine wrthisdad(lundia    ,error     ,trifil    ,ithisc    , &
     endif
     !
     ! element 'ITHISC'
-    !
-    wrswch = .false.
-    !-->
-   10 continue
-    if (celidt>1) then
-       idummy(1) = -1
-       lastcl = celidt - 1
-       call putgti(filnam    ,grnam     ,nelmx     ,elmnms    ,elmdms    , &
-                 & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-                 & elmnms(1) ,lastcl    ,wrswch    ,ierror   ,idummy    )
-       if (idummy(1)>=ithisc) then
-          celidt = lastcl
-          goto 10
-       endif
-    else
-       celidt = 1
-    endif
-    !<--
     !
     wrswch = .true.
     idummy(1) = ithisc

@@ -461,6 +461,10 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     call prop_get_logical(gdp%mdfile_ptr, '*', 'HeaOut' , flwoutput%temperature)
     !
+    ! Flag for output at half time steps
+    !
+    call prop_get_logical(gdp%mdfile_ptr, '*', 'HdtOut' , flwoutput%halfdt)
+    !
     ! Flag for additional timers (print extra timers in tri-diag file)
     !
     call prop_get_logical(gdp%mdfile_ptr, '*', 'AddTim', flwoutput%addtim)

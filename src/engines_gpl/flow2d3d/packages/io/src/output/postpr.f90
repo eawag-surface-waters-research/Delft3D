@@ -3,7 +3,8 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                 & selmap    ,selhis    ,rhow      ,grdang    , &
                 & initi     ,dtsec     ,nst       ,iphisc    ,npmap     , &
                 & itcomc    ,itimc     ,itcur     ,ntcur     ,ithisc    , &
-                & itmapc    ,itdroc    ,itrstc    ,ktemp     ,gdp       )
+                & itmapc    ,itdroc    ,itrstc    ,ktemp     ,halftime  , &
+                & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -362,6 +363,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     integer                     :: nst    !!  Current time step counter
     integer                     :: ntcur  !!  Total number of timesteps on communication file (to write to)
     logical                     :: error  !!  Flag=TRUE if an error is encountered
+    logical       , intent(in)  :: halftime !!  Update time of next write if Flag=TRUE
     logical       , intent(in)  :: mainys !!  Flag for running main routines
     real(fp)                    :: dtsec  !!  Integration time step [in seconds]
     real(fp)                    :: grdang !  Description and declaration in tricom.igs
@@ -692,6 +694,8 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     ftstat = .false.
     ftcros = .false.
     !
+    if (halftime) goto 100
+    !
     ! Communication file
     !
     if (itcomi > 0) then
@@ -851,6 +855,8 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
        endif
     endif
     !
+100 continue
+    !
     ! Calculate adjusted velocities for mass flux
     !
     icx   = nmaxddb
@@ -958,7 +964,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
           ! Update timestep to print HIS data
           ! ITSTRT <= IPHISF <= IPHISC <= IPHISL <= ITFINISH
           !
-          if (iphisc+iphisi <= iphisl) iphisc = iphisc + iphisi
+          if (.not.halftime .and. iphisc+iphisi <= iphisl) iphisc = iphisc + iphisi
        endif
        !
        ! Write to NEFIS HIS files (trih-ext.dat and trih-ext.def)
@@ -1029,7 +1035,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
           ! Update timestep to write HIS files
           ! ITSTRT <= ITHISF <= ITHISC <= ITHISL <= ITFINISH
           !
-          if (nst==ithisc .and. ithisc+ithisi<=ithisl) then
+          if (.not.halftime .and. nst==ithisc .and. ithisc+ithisi<=ithisl) then
              ithisc = ithisc + ithisi
           endif
        endif
@@ -1056,7 +1062,9 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
           ! Update timestep to print MAP data
           ! ITSTRT <= IPMAP (NPMAP) <= IPMAP (NPMAP+1) <= ITFINISH
           !
-          npmap = npmap + 1
+          if (.not.halftime) then
+             npmap = npmap + 1
+          endif
        endif
        !
        ! NEFIS MAP files
@@ -1144,7 +1152,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
           ! Update timestep to write MAP files
           ! ITSTRT <= ITMAPF <= ITMAPC <= ITMAPL <= ITFINISH
           !
-          if (nst==itmapc .and. itmapc+itmapi<=itmapl) then
+          if (.not.halftime .and. nst==itmapc .and. itmapc+itmapi<=itmapl) then
              itmapc = itmapc + itmapi
           endif
        endif
@@ -1154,7 +1162,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
        !
        ! Only in case NST = ITDROC
        !
-       if (drogue .and. nst==itdroc) then
+       if (drogue .and. nst==itdroc .and. .not.halftime) then
           !
           ! write to NEFIS DRO files (trid-ext.dat and trid-ext.def)
           !
@@ -1170,6 +1178,8 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
           endif
        endif
     endif
+    !
+    if (halftime) goto 9999
     !
     ! Fourier analysis to "TEKAL" data file
     !

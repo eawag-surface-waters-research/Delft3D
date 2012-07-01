@@ -74,7 +74,6 @@ subroutine wrwavh(lundia    ,error     ,trifil    ,ithisc    , &
 !
     integer                 :: fds
     integer                 :: ierror        ! Local error flag for NEFIS files 
-    integer                 :: lastcl
     integer                 :: n 
     integer, dimension(1)   :: idummy
     integer, dimension(3,5) :: uindex
@@ -173,26 +172,7 @@ subroutine wrwavh(lundia    ,error     ,trifil    ,ithisc    , &
     celidt = celidt + 1
     !
     ! group 4: element 'ITHISW'
-    ! ITHISW is a copy of element 'ITHISC' in group 'his-info-series'
-    ! Overwriting instead of appending if time is already on file
     !
-    !-->
- 10 continue
-    if (celidt > 1) then
-       idummy(1)   = -1
-       lastcl      = celidt - 1
-       uindex(1,1) = lastcl
-       uindex(2,1) = lastcl
-       ierror     = getelt(fds, grnam4, 'ITHISW', uindex, 1, 4, idummy)
-       if (ierror/= 0) goto 9999
-       if (idummy(1) >= ithisc) then
-          celidt = lastcl
-          goto 10
-       endif
-    else
-       celidt = 1
-    endif
-    !<--
     idummy(1)   = ithisc
     uindex(1,1) = celidt
     uindex(2,1) = celidt
@@ -206,7 +186,6 @@ subroutine wrwavh(lundia    ,error     ,trifil    ,ithisc    , &
     ! Neat solution in pseudo code:
     ! subroutine wrwavh
     !    integer :: celidt
-    !    celidt = detectcelidt(nefiswrwavhinf)
     !    call wrwavhinf(celidt)
     !    call wrwavhdat(celidt)
     ! end subroutine

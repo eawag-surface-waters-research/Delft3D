@@ -135,7 +135,6 @@
 		<File RelativePath="src\output\addelm.f90"/>
 		<File RelativePath="src\output\calbed.f90"/>
 		<File RelativePath="src\output\defnewgrp.f90"/>
-		<File RelativePath="src\output\detectcelidt.f90"/>
 		<File RelativePath="src\output\dirint.f90"/>
 		<File RelativePath="src\output\distance_nogdp.f90"/>
 		<File RelativePath="src\output\dp999.f90"/>
@@ -157,6 +156,7 @@
 		<File RelativePath="src\output\postpr.f90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration></File>
+		<File RelativePath=".\src\output\postpr_hdt.f90"/>
 		<File RelativePath="src\output\pppsol.f90"/>
 		<File RelativePath="src\output\prhead.f90"/>
 		<File RelativePath="src\output\prihis.f90"/>

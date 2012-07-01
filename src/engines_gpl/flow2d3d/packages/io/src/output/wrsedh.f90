@@ -107,7 +107,6 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
     integer                         :: kmaxout       ! number of layers to be written to the (history) output files, 0 (possibly) included
     integer                         :: kmaxout_restr ! number of layers to be written to the (history) output files, 0 excluded
     integer                         :: l
-    integer                         :: lastcl
     integer                         :: n
     integer, dimension(ntruv)       :: norig
     integer, dimension(1)           :: idummy      ! Help array to read/write Nefis files
@@ -296,33 +295,10 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
     !
     celidt = celidt + 1
     !
-    ! group 4: element 'ITHISS'
-    ! ITHISS is a copy of element 'ITHISC' in group 'his-info-series'
-    ! Overwriting instead of appending if time is already on file
-    !
-    !-->
- 10 continue
-    if (celidt > 1) then
-       idummy(1)   = -1
-       lastcl      = celidt - 1
-       uindex(1,1) = lastcl
-       uindex(2,1) = lastcl
-       ierror     = getelt(fds, grnam4, 'ITHISS', uindex, 1, 4, idummy)
-       if (ierror/= 0) goto 9999
-       if (idummy(1) >= ithisc) then
-          celidt = lastcl
-          goto 10
-       endif
-    else
-       celidt = 1
-    endif
-    !<--
     idummy(1)   = ithisc
     uindex(1,1) = celidt
     uindex(2,1) = celidt
     !
-    ! celidt is obtained by investigating group his-infsed-serie, identified
-    ! with nefiswrsedhinf.
     ! Group his-sed-series, identified with nefiswrsedh, must use the same
     ! value for celidt.
     ! Easy solution:
@@ -330,7 +306,6 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
     ! Neat solution in pseudo code:
     ! subroutine wrsedh
     !    integer :: celidt
-    !    celidt = detectcelidt(nefiswrsedhinf)
     !    call wrsedhinf(celidt)
     !    call wrsedhdat(celidt)
     ! end subroutine

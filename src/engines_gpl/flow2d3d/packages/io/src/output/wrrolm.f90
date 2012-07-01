@@ -87,7 +87,6 @@ subroutine wrrolm(lundia    ,error     ,trifil    ,itmapc    ,nmax      , &
 !
     integer                         :: i
     integer                         :: ierror
-    integer                         :: lastcl
     integer                         :: m
     integer                         :: n
     integer                         :: nelmx1
@@ -188,27 +187,6 @@ subroutine wrrolm(lundia    ,error     ,trifil    ,itmapc    ,nmax      , &
     !
     celidt = celidt + 1
     !
-    ! group 1: element 1 'ITMAPS'
-    ! ITMAPS is a copy of element 'ITMAPC' in group 'map-info-series'
-    ! Overwriting instead of appending if time is already on file
-    !
-    wrswch = .false.
-    !-->
-   10 continue
-    if (celidt>1) then
-       idummy(1) = -1
-       lastcl = celidt - 1
-       call putgti(filnam    ,grnam1    ,nelmx1    ,elmnms    ,elmdms    , &
-                 & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-                 & elmnms(1) ,lastcl    ,wrswch    ,ierror   ,idummy    )
-       if (idummy(1)>=itmapc) then
-          celidt = lastcl
-          goto 10
-       endif
-    else
-       celidt = 1
-    endif
-    !<--
     wrswch = .true.
     idummy(1) = itmapc
     call putgti(filnam    ,grnam1    ,nelmx1    ,elmnms    ,elmdms    , &
