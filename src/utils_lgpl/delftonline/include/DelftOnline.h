@@ -5,7 +5,7 @@
 //  definitions, but also (almost) all internal definitions.
 //
 //  Irv.Elshoff@Deltares.NL
-//  28 jun 12
+//  1 jul 12
 //-------------------------------------------------------------------------------
 //---- LGPL --------------------------------------------------------------------
 //
@@ -201,7 +201,7 @@ class Message {
             int         magic;              // magic number for sanity check
             void *      value;              // simple payload
             size_t      size;               // additional payload size
-            char        payload[0];         // message contents
+            char        payload[4];         // message payload (actual space is allocated and larger)
             } Header;
 
         static const size_t maxPayload = 1000*1000;    // size of buffer for client/server communication

@@ -2,7 +2,7 @@
 //  DelftOnline -- Server::ClientConnection Routines
 //
 //  Irv.Elshoff@Deltares.NL
-//  27 may 12
+//  1 jul 12
 //-------------------------------------------------------------------------------
 //---- LGPL --------------------------------------------------------------------
 //
@@ -158,7 +158,7 @@ Server::ClientConnection::ServiceThread (
     if (this->mesg->type != Message::HELLO)
         throw new Exception (false, "Initial client message is not HELLO");
     if (mesg->size != received - sizeof (Message::Header))
-        throw new Exception (true, "HELLO reply has wrong message size");
+        throw new Exception (true, "HELLO message is wrong size");
 
     char * clientKey = this->mesg->payload;
     char * serverKey = &this->server->handle[strlen (this->server->handle) - URLkeyLength];

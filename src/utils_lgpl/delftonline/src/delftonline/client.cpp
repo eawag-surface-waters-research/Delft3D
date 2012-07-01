@@ -2,7 +2,7 @@
 //  DelftOnline -- C++ Client API Routines
 //
 //  Irv.Elshoff@Deltares.NL
-//  28 jun 12
+//  1 jul 12
 //-------------------------------------------------------------------------------
 //---- LGPL --------------------------------------------------------------------
 //
@@ -152,9 +152,11 @@ Client::Client (
 
     try {
         memset (this->mesg, 0, sizeof (Message::Header));
-        if (Receive (this->sock, this->mesg) != sizeof (Message::Header))
-        throw new Exception (true, "HELLO reply has non-empty payload");
+        size_t received = Receive (this->sock, this->mesg);
+        if (received != sizeof (Message::Header))
+            throw new Exception (true, "HELLO reply has non-empty payload; expected %d, got %d bytes");
         }
+
     catch (char * explanation) {
         throw new Exception (true, "Cannot receive HELLO reply: %s", explanation);
         }
