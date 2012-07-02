@@ -525,6 +525,7 @@ utils_lgpl/deltares_common/packages/deltares_common/Makefile
 utils_lgpl/deltares_common/packages/deltares_common/src/Makefile
 scripts_lgpl/Makefile
 scripts_lgpl/deltares_hydro/Makefile
+scripts_lgpl/linux/Makefile
 		 ])
 
 AC_OUTPUT
