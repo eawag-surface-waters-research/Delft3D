@@ -14,22 +14,22 @@
 #   maintanence.
 #
 #   Irv.Elshoff@Deltares.NL
-#   14 apr 12
+#   2 jul 12
 #
 #   Copyright © 2011, Stichting Deltares
 #-------------------------------------------------------------------------------
 
 # Default values
 compiler=''
-platform='ia32'
+configureArgs=''
 debug=0
 noMake=0
+platform='ia32'
 useSp=0
-
 
 #-------------------------------------------------------------------------------
 function usage {
-    echo "Usage: `basename $0` <compiler> [-debug] [-make] [-64bit] [-sp] [-?]"
+    echo "Usage: `basename $0` <compiler> [-debug] [-make] [-64bit] [-sp] [-configure <args>] [-?]"
     echo "Compiler is one of:"
     echo "    -gnu"
     echo "    -intel10"
@@ -77,6 +77,16 @@ function witch {
 
 while [ $# -gt 0 ]; do
     case $1 in
+        -64bit)
+            platform='intel64'
+            ;;
+        -c|-configure)
+            shift
+            configureArgs="$1"
+            ;;
+        -d|-debug)
+            debug=1
+            ;;
         -gnu)
             compiler='gnu'
             ;;
@@ -91,12 +101,6 @@ while [ $# -gt 0 ]; do
             ;;
         -intel12)
             compiler='intel12'
-            ;;
-        -64bit)
-            platform='intel64'
-            ;;
-        -d|-debug)
-            debug=1
             ;;
         -m|-make)
             noMake=1
@@ -335,7 +339,7 @@ if [ "$platform" = 'intel64' ]; then
         CXXFLAGS='$flags -fPIC -m64 $CXXFLAGS' \
         FFLAGS='$flags -fPIC -m64 $FFLAGS' \
         FCFLAGS='$flags -fPIC -m64 $FCFLAGS' \
-            ./configure --prefix=`pwd` &> $log \
+            ./configure --prefix=`pwd` $configureArgs &> $log \
         "
 else
     command=" \
@@ -343,7 +347,7 @@ else
         CXXFLAGS='$flags -fPIC $CXXFLAGS' \
         FFLAGS='$flags -fPIC $FFLAGS' \
         FCFLAGS='$flags -fPIC $FCFLAGS' \
-            ./configure --prefix=`pwd` &> $log \
+            ./configure --prefix=`pwd` $configureArgs &> $log \
         "
 fi
 

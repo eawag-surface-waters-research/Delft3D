@@ -2,7 +2,7 @@
 //  DelftOnline -- Server::ClientConnection Routines
 //
 //  Irv.Elshoff@Deltares.NL
-//  1 jul 12
+//  3 jul 12
 //-------------------------------------------------------------------------------
 //---- LGPL --------------------------------------------------------------------
 //
@@ -168,6 +168,7 @@ Server::ClientConnection::ServiceThread (
     if (strcmp (clientKey, serverKey) != 0) {
         try {
             this->mesg->type = Message::GOODBYE;
+            this->mesg->size = 0;
             Send (this->sock, this->mesg);
             }
         catch (char * explanation) {
@@ -176,7 +177,7 @@ Server::ClientConnection::ServiceThread (
         throw new Exception (false, "Client key does not match server key (\"%s\" != \"%s\"", clientKey, serverKey);
         }
 
-    this->mesg->value = (void *) this->clientID;
+    this->mesg->value = (uint64_t) this->clientID;
     this->mesg->size = 0;
 
     try {
@@ -200,7 +201,7 @@ Server::ClientConnection::ServiceThread (
         if (this->mesg->magic != DOL_MAGIC_NUMBER)
             throw new Exception (false, "Client request message contains an invalid magic number.  Do client and server versions match?");
 
-        int value = (long) this->mesg->value & 0xFFFFFFFF;
+        int value = ((unsigned int) this->mesg->value) & 0xFFFFFFFF;
 
         this->log->Write (TRACE, "ServiceThread got %s request", MessageTypeString (mesg->type));
 
@@ -321,7 +322,7 @@ Server::ClientConnection::Reply (
     if (size > Message::maxPayload)
           throw new Exception (false, "Reply message exceeds send buffer capacity (%d > %d)", size, Message::maxPayload);
 
-    this->mesg->value = (void *) value;
+    this->mesg->value = (uint64_t) value;
     this->mesg->size = size;
 
     try {
@@ -349,7 +350,7 @@ Server::ClientConnection::CallFunction (
         return;
         }
 
-    int argument = (long) this->mesg->value & 0xFFFFFFFF;
+    int argument = ((unsigned int) this->mesg->value) & 0xFFFFFFFF;
     int value = (*func->function) (func->context, &argument);
 
     this->Reply (value, 0);
@@ -392,7 +393,7 @@ Server::ClientConnection::PutData (
         return;
         }
 
-    char * data = this->mesg->payload + (long) this->mesg->value;
+    char * data = this->mesg->payload + (((unsigned int) this->mesg->value) & 0xFFFFFFFF);
     memcpy (elt->address, data, elt->size);
     this->Reply ((int) true, 0);
     }

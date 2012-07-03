@@ -2,7 +2,7 @@
 //  DelftOnline -- C++ Client API Routines
 //
 //  Irv.Elshoff@Deltares.NL
-//  1 jul 12
+//  3 jul 12
 //-------------------------------------------------------------------------------
 //---- LGPL --------------------------------------------------------------------
 //
@@ -154,7 +154,7 @@ Client::Client (
         memset (this->mesg, 0, sizeof (Message::Header));
         size_t received = Receive (this->sock, this->mesg);
         if (received != sizeof (Message::Header))
-            throw new Exception (true, "HELLO reply has non-empty payload; expected %d, got %d bytes");
+            throw new Exception (true, "HELLO reply has non-empty payload; expected %d, got %d bytes", sizeof (Message::Header), received);
         }
 
     catch (char * explanation) {
@@ -168,7 +168,7 @@ Client::Client (
     if (mesg->type != Message::HELLO)
         throw new Exception (true, "Initial reply is not HELLO");
 
-    this->clientID = ((long) mesg->value & 0xFFFFFFFF);
+    this->clientID = ((unsigned int) mesg->value & 0xFFFFFFFF);
 
     // Setup a mutex to serialize client/server communications for multi-threaded clients
 
@@ -214,7 +214,7 @@ Client::CallServer (
 
     this->mesg->type = type;
     this->mesg->magic = DOL_MAGIC_NUMBER;
-    this->mesg->value = (void *) ((value == NULL) ? 0 : *value);
+    this->mesg->value = (uint64_t) ((value == NULL) ? 0 : *value);
     this->mesg->size = payloadSize;
 
     if (this->mesg->size > Message::maxPayload)
@@ -248,7 +248,7 @@ Client::CallServer (
         throw new Exception (true, "%s reply has wrong message size", MessageTypeString (type));
 
     if (value != NULL)
-        *value = ((long) mesg->value & 0xFFFFFFFF);
+        *value = ((unsigned int) mesg->value & 0xFFFFFFFF);
     if (replysize != NULL)
         *replysize = mesg->size;
 

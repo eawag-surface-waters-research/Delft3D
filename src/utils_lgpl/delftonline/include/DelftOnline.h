@@ -5,7 +5,7 @@
 //  definitions, but also (almost) all internal definitions.
 //
 //  Irv.Elshoff@Deltares.NL
-//  1 jul 12
+//  2 jul 12
 //-------------------------------------------------------------------------------
 //---- LGPL --------------------------------------------------------------------
 //
@@ -199,7 +199,7 @@ class Message {
         typedef struct {
             Type        type;               // what to do or what was done
             int         magic;              // magic number for sanity check
-            void *      value;              // simple payload
+            uint64_t    value;              // simple payload
             size_t      size;               // additional payload size
             char        payload[4];         // message payload (actual space is allocated and larger)
             } Header;
