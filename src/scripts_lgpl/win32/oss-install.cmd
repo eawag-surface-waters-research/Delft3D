@@ -121,6 +121,14 @@ goto :endproc
 
 
 
+rem ===================
+rem === INSTALL_DELFT3D
+rem ===================
+:delft3d
+    call delft3d-flow
+
+
+
 rem ========================
 rem === INSTALL_DELFT3D-FLOW
 rem ========================
@@ -133,6 +141,8 @@ rem ========================
     call :plugin_culvert
     call :plugin_delftflow_traform
     call :mormerge
+    call :nesthd1
+    call :nesthd2
 goto :endproc
 
 
