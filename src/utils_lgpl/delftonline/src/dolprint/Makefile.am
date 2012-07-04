@@ -2,7 +2,7 @@
 #   Makefile for DelftOnline
 #
 #   Irv.Elshoff@Deltares.NL
-#   25 may 12
+#   4 jul 12
 #-------------------------------------------------------------------------------
 
 
@@ -17,5 +17,5 @@ INCLUDES = \
     -I$(top_builddir)/utils_lgpl/delftonline/include
 
 dolprint_LDADD = \
-    -L$(top_builddir)/lib -lDelftOnline
+    ../delftonline/libDelftOnline.la
 

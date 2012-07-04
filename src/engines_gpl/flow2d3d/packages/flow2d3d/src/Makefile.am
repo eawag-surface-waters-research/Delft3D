@@ -2,7 +2,7 @@
 #   Makefile for d_hydro - Flow2D3D Component
 #
 #   Irv.Elshoff@Deltares.NL
-#   25 may 12
+#   4 jul 12
 #-------------------------------------------------------------------------------
 
 
@@ -57,30 +57,30 @@ libflow2d3d_la_LIBADD = \
     $(top_builddir)/engines_gpl/flow2d3d/packages/data/src/gdp/*.lo \
     $(top_builddir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/*.lo \
     $(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics/*.lo \
-    $(top_builddir)/lib/libmeteo.a \
-    $(top_builddir)/lib/libec_module.a \
-    $(top_builddir)/lib/libdelftio_sync.a \
-    $(top_builddir)/lib/libdelftio.a \
-    $(top_builddir)/lib/libdelftio_shm.a \
-    $(top_builddir)/lib/libD_hydro.a \
-    $(top_builddir)/lib/libfsm.a \
-    $(top_builddir)/lib/libfsm_c.a \
-    $(top_builddir)/lib/libesm_c.a \
-    $(top_builddir)/lib/libinifiles.a \
-    $(top_builddir)/lib/libnefis.a \
-    $(top_builddir)/lib/libmathconsts.a \
-    $(top_builddir)/lib/libprecision.a \
-    $(top_builddir)/lib/libsemaphore.a \
-    $(top_builddir)/lib/libstream.a \
-    $(top_builddir)/lib/libdeltares_common.a \
-    $(top_builddir)/lib/libdeltares_common_c.a \
-    $(top_builddir)/lib/libdelftio_sync_version_number.a \
-    $(top_builddir)/lib/libdelftio_version_number.a \
-    $(top_builddir)/lib/libesmfsm_version_number.a \
-    $(top_builddir)/lib/libmeteo_version_number.a \
-    $(top_builddir)/lib/libnefis_version_number.a \
-    $(top_builddir)/lib/libstream_version_number.a \
-    -L$(top_builddir)/lib -lDelftOnline \
+    $(top_builddir)/utils_lgpl/meteo/packages/meteo/src/libmeteo.a \
+    $(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src/libec_module.a \
+    $(top_builddir)/utils_lgpl/delftio_sync/packages/delftio_sync/src/libdelftio_sync.a \
+    $(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90/libdelftio.a \
+    $(top_builddir)/utils_lgpl/delftio/packages/delftio_shm/src/diof90/libdelftio_shm.a \
+    $(top_builddir)/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/src/libD_hydro.a \
+    $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libfsm.a \
+    $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/libfsm_c.a \
+    $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/libesm_c.a \
+    $(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src/libinifiles.a \
+    $(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libnefis.a \
+    $(top_builddir)/utils_lgpl/constants/packages/mathconsts/src/libmathconsts.a \
+    $(top_builddir)/utils_lgpl/precision/packages/precision/src/libprecision.a \
+    $(top_builddir)/utils_lgpl/semaphore/packages/semaphore/src/libsemaphore.a \
+    $(top_builddir)/utils_lgpl/stream/packages/stream/src/libstream.a \
+    $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libdeltares_common.a \
+    $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_c/src/libdeltares_common_c.a \
+    $(top_builddir)/utils_lgpl/delftio_sync/packages/delftio_sync_version_number/src/libdelftio_sync_version_number.a \
+    $(top_builddir)/utils_lgpl/delftio/packages/delftio_version_number/src/libdelftio_version_number.a \
+    $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_version_number/src/libesmfsm_version_number.a \
+    $(top_builddir)/utils_lgpl/meteo/packages/meteo_version_number/src/libmeteo_version_number.a \
+    $(top_builddir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.a \
+    $(top_builddir)/utils_lgpl/stream/packages/stream_version_number/src/libstream_version_number.a \
+    $(top_builddir)/utils_lgpl/delftonline/src/delftonline/libDelftOnline.la \
     $(MPILIBS) \
     $(FCLIBS)
 

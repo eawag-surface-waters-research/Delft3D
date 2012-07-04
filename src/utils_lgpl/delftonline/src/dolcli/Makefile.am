@@ -2,13 +2,14 @@
 #   Makefile for DelftOnline
 #
 #   Irv.Elshoff@Deltares.NL
-#   25 may 12
+#   4 jul 12
 #-------------------------------------------------------------------------------
 
 
 include $(top_srcdir)/common.am
 
 if ENABLE_DOLCLI
+
 bin_PROGRAMS = dolcli
 
 dolcli_SOURCES = \
@@ -20,11 +21,10 @@ dolcli_SOURCES = \
 # The flags should then be automaticly added.
 # AC_CHECK_LIB(library, function)
 dolcli_LDADD = \
-    -L$(top_builddir)/lib -lDelftOnline \
+    ../delftonline/libDelftOnline.la \
     -ll \
     -lreadline \
     -ltermcap
-endif
 
 INCLUDES = \
     -I$(top_builddir)/utils_lgpl/delftonline/include
@@ -36,3 +36,5 @@ CLEANFILES = \
     lexan.cc \
     parse.cc \
     parse.h
+
+endif

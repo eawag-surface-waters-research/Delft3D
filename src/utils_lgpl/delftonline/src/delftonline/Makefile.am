@@ -37,6 +37,7 @@ libDelftOnline_la_SOURCES = \
 
 AM_CPPFLAGS = \
     -Wno-int-to-pointer-cast
+
 BUILT_SOURCES = ./always \
 	delftonline_version.h
 
