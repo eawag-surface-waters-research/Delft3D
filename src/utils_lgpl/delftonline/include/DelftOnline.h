@@ -47,8 +47,9 @@
 #   include <io.h>
 #   include <winsock.h>
 #   if defined (VS2008)
-#      define uint16_t u_short
+#      define uint64_t _ULonglong
 #      define uint32_t u_long
+#      define uint16_t u_short
 #      define uint8_t  u_char
 #   else
 #      include <stdint.h>
