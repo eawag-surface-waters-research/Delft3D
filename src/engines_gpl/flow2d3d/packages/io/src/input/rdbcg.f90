@@ -2,7 +2,8 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                & noui      ,itlfsm    ,tlfsmo    ,dt        ,tunit     , &
                & nto       ,mxnto     ,lstsc     ,bndneu    ,cstbnd    , &
                & nambnd    ,typbnd    ,rettim    ,ntoq      ,thetqh    , &
-               & restid    ,filic     ,paver     ,pcorr     ,gdp       )
+               & restid    ,filic     ,paver     ,pcorr     ,tstart    , &
+               & tstop     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -75,7 +76,9 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     real(fp)                                   :: dt     !  Description and declaration in esm_alloc_real.f90
     real(fp)                                   :: paver  !  Description and declaration in numeco.igs
     real(fp)                                   :: thetqh !  Description and declaration in numeco.igs
-    real(fp)                                   :: tlfsmo !!  Timespan for smoothing (in minutes)
+    real(fp)                                   :: tlfsmo !  Timespan for smoothing (in minutes)
+    real(fp)                     , intent(in)  :: tstart !  Flow start time in minutes
+    real(fp)                     , intent(in)  :: tstop  !  Flow stop time in minutes
     real(fp)                     , intent(in)  :: tunit  !  Description and declaration in exttim.igs
     real(fp), dimension(nto, 2)                :: rettim !  Description and declaration in esm_alloc_real.f90
     character(*)                               :: filic  !!  File name of initial condition file
@@ -107,6 +110,7 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     real(fp)               :: rdef    ! Help var. containing default va- lue(s) for real variable 
     real(sp)               :: rhelp   ! Help var. for reading paver from MDF-file 
     real(fp)               :: t
+    real(fp)               :: smofrac ! Fraction of smoothing time over total simulation time (0-100.0).
     real(fp), dimension(1) :: rval    ! Help array (real) where the data, recently read from the MD-file, are stored temporarily 
     character(1)           :: cdef    ! Default value for character string 
     character(1)           :: chulp   ! Help string to read character string 
@@ -124,6 +128,7 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     nodef  = .false.
     found  = .false.
     rdef   = 0.0
+    smofrac = 0.0_fp
     !
     ! initialize parameters that are to be read
     !
@@ -153,6 +158,7 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     ! test time constistency
     ! tlfsmo <> n * dt not allowed
+    ! tlfsmo > total simulation time is not allowed
     !
     itlfsm = nint(tlfsmo/dt)
     if (dtn(itlfsm, tlfsmo, dt)) then
@@ -160,6 +166,15 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        if (noui) error = .true.
     endif
     if (itlfsm > 0) then
+       smofrac = 100.0_fp * tlfsmo/(tstop-tstart)
+       if (smofrac > 100.0_fp) then
+          call prterr(lundia, 'P004' ,'Smoothing time is bigger than simulation time' )
+          call d3stop(1         ,gdp       )
+       elseif (smofrac > 25.0_fp) then
+          message = ' '
+          write (message, '(a,f7.1,a)') 'Smoothing time is ', smofrac, '% of simulation time'
+          call prterr(lundia, 'Z013', trim(message))
+       endif
        if (restid /= ' ') then
           call prterr(lundia ,'Z013' ,'Using Smoothing time and restart file' )
        endif
@@ -424,6 +439,7 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     if (.not. present) then
        pcorr = .false.
     else
+       message = ' '
        write(message,'(a,f14.3,a)') 'Specified pressure for boundary correction = ', paver, ' Pa'
        call prterr(lundia, 'G051', trim(message))
        pcorr = .true.

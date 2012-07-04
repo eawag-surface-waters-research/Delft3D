@@ -662,7 +662,8 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
                 & noui      ,itlfsm    ,tlfsmo    ,dt        ,tunit     , &
                 & nto       ,nto       ,lstsc     ,bndneu    ,cstbnd    , &
                 & ch(nambnd),ch(typbnd),r(rettim) ,ntoq      ,thetqh    , &
-                & restid    ,filic     ,paver     ,pcorr     ,gdp       )
+                & restid    ,filic     ,paver     ,pcorr     ,tstart    , &
+                & tstop     ,gdp       )
        if (error) goto 9999
     endif
     !
