@@ -132,7 +132,7 @@ subroutine upwhu(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     ! In SIGMA case HU(initial) is computed with the mean water level
     ! In Z-model HU(initial) is always computed with the upwind
     ! formulation for the water level
-    ! HU is always computed and therefore set out the IF (KCU == 1)
+    ! HU must always be computed, even if KCU is not 1
     ! condition
     !
     do nm = 1, nmmax
