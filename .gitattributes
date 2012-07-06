@@ -2424,6 +2424,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/plot_tidalellipses.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/plotlimitingfactors.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/printdims.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/CloseSplashScreen.mexw32 -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/CloseSplashScreen.mexw64 -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/Contents.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/abbrevfn.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/adcircmesh.m -text
