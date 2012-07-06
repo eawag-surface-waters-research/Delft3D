@@ -774,12 +774,6 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
               & r(cdwlsu) ,r(cdwlsv) ,gdp)
     if (error) goto 9999
     !
-    ! Physical Coefficients, Trachytope Roughness Description
-    !
-    call rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
-             & nmax      ,nmaxus    ,kmax      ,itimtt    ,gdp       )
-    if (error) goto 9999
-    !
     ! Discharge sources Time series        , only if NSRC  > 0
     ! Temperature Time series              , only if KTEMP > 0
     ! Precipitation/Evaporation Time series, only if KEVA  > 0
@@ -831,6 +825,13 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     ! Read waq parameters, such as output flag for writing binary waq files
     !
     call rdwaqpar(lundia, error, kmax, dt, itcomf, itcomi, itcoml, gdp)
+    if (error) goto 9999
+    !
+    ! Physical Coefficients, Trachytope Roughness Description
+    ! Trachytope reading should be called after rdwaqpar since the WAQOL is read in rdwaqpar.
+    !
+    call rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
+             & nmax      ,nmaxus    ,kmax      ,itimtt    ,gdp       )
     if (error) goto 9999
     !
     ! Read bedform characteristics
