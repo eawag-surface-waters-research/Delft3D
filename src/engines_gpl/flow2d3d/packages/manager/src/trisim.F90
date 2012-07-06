@@ -38,6 +38,7 @@ subroutine trisim (numdom, nummap, context_id, fsm_flags, runid)
     use mod_trisim
     use precision
     use dfparall
+    use d3d_olv_class
 
     ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
     ! Activate the following line
@@ -67,6 +68,7 @@ subroutine trisim (numdom, nummap, context_id, fsm_flags, runid)
 !
     integer :: ierr
     integer :: retval
+    type(OLVHandle) :: olv_handle
     !
     ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
     ! Activate the following line
@@ -93,17 +95,17 @@ subroutine trisim (numdom, nummap, context_id, fsm_flags, runid)
     !
     nullify(gdp%runid)
     !
-    retval = trisim_init(numdom, nummap, context_id, fsm_flags, runid, gdp)
+    retval = trisim_init(numdom, nummap, context_id, fsm_flags, runid, gdp, olv_handle) ! also called from openda
     if (retval /= 0) then
        return
     endif
     !
-    retval = trisim_step(gdp)
+    retval = trisim_step(gdp, olv_handle) ! also called from openda
     if (retval /= 0) then
        return
     endif
     !
-    retval = trisim_finish(gdp)
+    retval = trisim_finish(gdp, olv_handle) ! also called from openda
     if (retval /= 0) then
        return
     endif

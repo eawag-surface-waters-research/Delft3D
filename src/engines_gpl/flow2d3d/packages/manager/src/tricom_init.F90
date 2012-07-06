@@ -1,4 +1,4 @@
-subroutine tricom_init(gdp)
+subroutine tricom_init(gdp, olv_handle)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -50,16 +50,12 @@ subroutine tricom_init(gdp)
     use sync_flowcouple
     use sync_flowwave
     use timers
-#ifdef WITH_DELFTONLINE
     use D3DOnline
     use D3DPublish
-#endif
     use D3D_Sobek 
     use globaldata
     use dfparall
-#ifdef WITH_DELFTONLINE
     use d3d_olv_class
-#endif
     !
     implicit none
     !
@@ -452,9 +448,7 @@ subroutine tricom_init(gdp)
     character(60)                                 :: txtput        ! Text to be print
     character(300)                                :: message
     character(256)                                :: errstring
-#ifdef WITH_DELFTONLINE
     type(olvhandle)                               :: olv_handle
-#endif
 !
 !! executable statements -------------------------------------------------------
 !
@@ -1574,18 +1568,13 @@ subroutine tricom_init(gdp)
     !
     ! Make D3D data available to online applications
     !
-#ifdef WITH_DELFTONLINE
     olv_handle = new_olv()
     call publishGDP(olv_handle, gdp, runid, zmodel)
-#endif
     !
     ! Not multi threaded
     !
-#ifdef WITH_DELFTONLINE
     call publishUtils(olv_handle)
     call setEndTimeStep(olv_handle, itstop)
-#endif
-    
     !
     ! Synchronisation point 2
     ! =======================

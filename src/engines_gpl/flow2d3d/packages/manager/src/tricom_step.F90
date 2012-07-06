@@ -1,4 +1,4 @@
-subroutine tricom_step(gdp)
+subroutine tricom_step(gdp, olv_handle)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -55,16 +55,12 @@ subroutine tricom_step(gdp)
     use sync_flowcouple
     use sync_flowwave
     use timers
-#ifdef WITH_DELFTONLINE
     use D3DOnline
     use D3DPublish
-#endif
     use D3D_Sobek 
     use globaldata
     use dfparall
-#ifdef WITH_DELFTONLINE
     use d3d_olv_class
-#endif
     !
     implicit none
     !
@@ -419,9 +415,7 @@ subroutine tricom_step(gdp)
     logical                                       :: ex            ! Help flag = TRUE when file is found 
     real(fp)                                      :: zini
     character(60)                                 :: txtput        ! Text to be print
-#ifdef WITH_DELFTONLINE
     type(olvhandle)                               :: olv_handle
-#endif
 !
 !! executable statements -------------------------------------------------------
 !
@@ -749,9 +743,8 @@ subroutine tricom_step(gdp)
     !
     ! Simulation time loop
     !
-#ifdef WITH_DELFTONLINE
     call setRunningFlag( olv_handle, 0, itstrt)    !status is: started
-#endif
+
     do nst = itstrt, itstop - 1, 1
        call timer_start(timer_timeintegr, gdp)
        !
@@ -765,15 +758,13 @@ subroutine tricom_step(gdp)
        endif
        call vsemnefis
        call timer_stop(timer_step2screen, gdp)
-#ifdef WITH_DELFTONLINE
+
        call FLOWOL_Timestep (nst)
-#endif
+
        !
        ! Status is: simulation is running / iteration
        !
-#ifdef WITH_DELFTONLINE
        call setRunningFlag(olv_handle, 1, nst)
-#endif
        !
        ! Set timsec and current date and time.
        !
@@ -980,11 +971,7 @@ subroutine tricom_step(gdp)
     
     ! The sequence of the 2 next calls is important for the OLV client.
     !
-#ifdef WITH_DELFTONLINE
     call FLOWOL_Timestep (nst)
-    call setEndFlag( olv_handle, 1 ) !Tells the DOL client that the simulation has ended by passing an exception
-#endif
-
     !
     call timer_stop(timer_simulation, gdp)
     !

@@ -1,4 +1,4 @@
-subroutine tricom_finish(gdp       )
+subroutine tricom_finish(gdp, olv_handle)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -56,13 +56,16 @@ subroutine tricom_finish(gdp       )
     use sync_flowcouple
     use sync_flowwave
     use timers
+    use d3d_olv_class
     use D3D_Sobek 
+    use D3DPublish
     use globaldata
     use dfparall
     !
     implicit none
     !
-    type(globdat),target :: gdp
+    type(globdat), target :: gdp
+    type(olvhandle)       :: olv_handle
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
@@ -887,6 +890,11 @@ subroutine tricom_finish(gdp       )
        call timer_stop(timer_wait, gdp)
        write(*,*) '... continue'
     endif
+    !
+    ! Close Communication with delftonline
+    !
+    call setEndFlag( olv_handle, 1 ) !Tells the DOL client that the simulation has ended by passing an exception
+    call free_olv( olv_handle )
     !
     ! Mormerge synchronisation
     !

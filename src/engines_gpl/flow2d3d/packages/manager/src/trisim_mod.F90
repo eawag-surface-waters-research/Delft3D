@@ -41,7 +41,7 @@ contains
 
 !
 !==============================================================================
-integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, gdp) result(retval)
+integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, gdp, opt_olv_handle) result(retval)
 !
 !!--declarations----------------------------------------------------------------
 !
@@ -49,6 +49,7 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, g
     use SyncRtcFlow
     use dfparall
     use timers
+    use d3d_olv_class
     !
     use m_openda_exchange_items, only : openda_buffer_initialize
     !
@@ -56,7 +57,8 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, g
     !
     use globaldata
     implicit none
-    type(globDat),target :: gdp
+    type(globDat)  , target   :: gdp
+    type(olvhandle), optional :: opt_olv_handle
     !
     integer                       , pointer :: lundia
     integer                       , pointer :: lunprt
@@ -124,7 +126,7 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, g
     character(4)                        :: subsys       ! Sub-system definition of Delft3D here SUBSYS = 'flow' 
     character(5)                        :: filid
     character(5)   , pointer            :: versio       ! Version nr. of the current package 
-!
+    type(olvhandle)                     :: olv_handle
 !! executable statements -------------------------------------------------------
 !
     ! Initialization using a semaphore
@@ -351,7 +353,14 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, g
     !
     ! Start FLOW simulation
     !
-    call tricom_init(gdp)
+    olv_handle%fields => null()
+    if (present(opt_olv_handle)) then 
+        olv_handle = opt_olv_handle
+    endif
+    call tricom_init(gdp, olv_handle)
+    if (present(opt_olv_handle)) then 
+        opt_olv_handle = olv_handle
+    endif
     !
     ! Error status of tricom_init is returned via gdp%errorcode
     !
@@ -370,19 +379,31 @@ end function trisim_init
 !
 !
 !----------------------------------------------------------------------
-integer function trisim_step(gdp) result(retval)
+integer function trisim_step(gdp, opt_olv_handle) result(retval)
     use globaldata
+    use d3d_olv_class
     !
     implicit none
     !
-    type(globdat),target :: gdp
+    type(globdat)  , target   :: gdp
+    type(olvhandle), optional :: opt_olv_handle
+    !
+    type(olvhandle)           :: olv_handle
     !
     RetVal = 0
     !
     ! the subroutine called 'tricom_verify' form the BAW-version contains
     ! part VII and VIII of the initialisation. That subroutine is not needed here and
     ! part VII and VIII can be found at the end of tricom_init. (VT)
-    call tricom_step(gdp)
+    !
+    olv_handle%fields => null()
+    if (present(opt_olv_handle)) then 
+        olv_handle = opt_olv_handle
+    endif
+    call tricom_step(gdp, olv_handle)
+    if (present(opt_olv_handle)) then 
+        opt_olv_handle = olv_handle
+    endif
     if (gdp%errorcode /= 0) then
         retVal = -1
     else
@@ -394,24 +415,34 @@ end function trisim_step
 !
 !
 !-----------------------------------------------------------------------
-integer function trisim_finish(gdp) result(retVal)
+integer function trisim_finish(gdp, opt_olv_handle) result(retVal)
     use globaldata
     use dfparall
+    use d3d_olv_class
     !    
     implicit none
     !
     ! global    
-    type(globdat),target :: gdp
+    type(globdat)  , target   :: gdp
+    type(olvhandle), optional :: opt_olv_handle
     !
     ! local
     integer          :: i
     integer, pointer :: lundia
+    type(olvhandle)  :: olv_handle
     !
     ! body
     lundia => gdp%gdinout%lundia 
     retval = 0
 
-    call tricom_finish(gdp)
+    olv_handle%fields => null()
+    if (present(opt_olv_handle)) then 
+        olv_handle = opt_olv_handle
+    endif
+    call tricom_finish(gdp, olv_handle)
+    if (present(opt_olv_handle)) then 
+        opt_olv_handle = olv_handle
+    endif
 
     write(lundia,*)
     write(lundia,'(a)') '*** Simulation finished *******************************************************'
@@ -443,7 +474,7 @@ integer function trisim_close(gdp) result (retval)
     !    
     implicit none
     !    
-    type(globdat),target :: gdp
+    type(globdat), target :: gdp
     !  
     character(256)                , pointer :: filmd        ! File name for MD FLOW file 
     integer                       , pointer :: lundia
