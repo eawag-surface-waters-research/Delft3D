@@ -88,10 +88,13 @@
       integer , dimension(:)  , pointer :: ifrmto    ! from-to pointer table
       integer , dimension(:)  , pointer :: kmk       ! WAQ features at start of step
       integer , dimension(:)  , pointer :: ksrwaq    ! stored value of nr of layers source locations
-      integer , dimension(:)  , pointer :: lunsed    ! file unit numbers to sediment output files
+      integer , dimension(:)  , pointer :: lunsed    ! file unit numbers to sediment concentration output files
+      integer , dimension(:,:), pointer :: lunsedflx ! file unit numbers to sediment sedimentation and resuspension flux output files
       real(fp), dimension(:,:), pointer :: quwaq     ! Cumulative qxk
       real(fp), dimension(:,:), pointer :: qvwaq     ! Cumulative qyk
       real(fp), dimension(:,:), pointer :: qwwaq     ! Cumulative qzk
+      real(fp), dimension(:,:), pointer :: cumsedflx ! Cumulative sedimentation flux
+      real(fp), dimension(:,:), pointer :: cumresflx ! Cumulative resuspension flux
       real(fp), dimension(:)  , pointer :: discumwaq ! Cumulated sources m3/s*nstep
       real(sp), dimension(:)  , pointer :: vol       ! WAQ volume at start of step
       real(sp), dimension(:)  , pointer :: vol2      ! WAQ volume at end of step
@@ -168,7 +171,8 @@
       integer  (4) noq1, noq2, noq3    !!  initially needed nr of exchanges in 3 dir.
       integer  (4) idim                !!  dimension work array
       integer  (4) l                   !!  loop counter substances
-      character(5) sf                  !!  character variable for s(ediment)f(iles)
+      character(5) sf                  !!  character variable for s(ediment concentration)f(iles)
+      character(8) ssrff               !!  character variable for s(ediment) s(edimentation and) r(esuspension) f(lux) f(iles)
       integer  (4) istat               !!  allocate return status
       integer, external :: newunit
 !
@@ -209,9 +213,12 @@
       kmk        => gdp%gdwaqpar%kmk
       ksrwaq     => gdp%gdwaqpar%ksrwaq
       lunsed     => gdp%gdwaqpar%lunsed
+      lunsedflx  => gdp%gdwaqpar%lunsedflx
       quwaq      => gdp%gdwaqpar%quwaq
       qvwaq      => gdp%gdwaqpar%qvwaq
       qwwaq      => gdp%gdwaqpar%qwwaq
+      cumsedflx  => gdp%gdwaqpar%cumsedflx
+      cumresflx  => gdp%gdwaqpar%cumresflx
       discumwaq  => gdp%gdwaqpar%discumwaq
       vol        => gdp%gdwaqpar%vol
       vol2       => gdp%gdwaqpar%vol2
@@ -250,10 +257,11 @@
 !                    iqaggr: pointer from i,j,k to flow nr    (optionally aggregated)
 !                    ilaggr: pointer from k to waq layer nr   (optionally aggregated)
 
-                       allocate ( gdp%gdwaqpar%ifrmto(12*nmaxus*mmax*kmax) , stat=istat)
-         if (istat==0) allocate ( gdp%gdwaqpar%isaggr(   nmaxus*mmax*kmax) , stat=istat)
-         if (istat==0) allocate ( gdp%gdwaqpar%iqaggr( 3*nmaxus*mmax*kmax) , stat=istat)
-         if (istat==0) allocate ( gdp%gdwaqpar%lunsed( max(1,lsed)       ) , stat=istat)
+                       allocate ( gdp%gdwaqpar%ifrmto   (12*nmaxus*mmax*kmax) , stat=istat)
+         if (istat==0) allocate ( gdp%gdwaqpar%isaggr   (   nmaxus*mmax*kmax) , stat=istat)
+         if (istat==0) allocate ( gdp%gdwaqpar%iqaggr   ( 3*nmaxus*mmax*kmax) , stat=istat)
+         if (istat==0) allocate ( gdp%gdwaqpar%lunsed   ( max(1,lsed)       ) , stat=istat)
+         if (istat==0) allocate ( gdp%gdwaqpar%lunsedflx( lsed     , 2      ) , stat=istat)
          if (istat/=0) then
             write(*,*) '*** ERROR: wrwaqfil: memory allocation error'
             return
@@ -274,6 +282,7 @@
          isaggr     => gdp%gdwaqpar%isaggr
          iqaggr     => gdp%gdwaqpar%iqaggr
          lunsed     => gdp%gdwaqpar%lunsed
+         lunsedflx  => gdp%gdwaqpar%lunsedflx
          kmk        => gdp%gdwaqpar%kmk
 
 !           write the .lga .lgo .lgt and the .poi file
@@ -367,6 +376,16 @@
             sf = "sed00"
             write( sf(4:5), '(i2.2)' ) l
             open  ( lunsed(l), file=trim(filnam)//sf  , form = 'binary' , SHARED )
+            ! sedimentation
+            lunsedflx(l,1) = newunit()
+            ssrff = "sedflx00"
+            write( ssrff(7:8), '(i2.2)' ) l
+            open  ( lunsedflx(l,1), file=trim(filnam)//ssrff  , form = 'binary' , SHARED )
+            ! resuspension
+            lunsedflx(l,2) = newunit()
+            ssrff = "resflx00"
+            write( ssrff(7:8), '(i2.2)' ) l
+            open  ( lunsedflx(l,2), file=trim(filnam)//ssrff  , form = 'binary' , SHARED )
          enddo
          if ( ilaggr(kmax) .gt. 1 ) then
             lunvdf    = newunit()
@@ -406,6 +425,16 @@
             sf = "sed00"
             write( sf(4:5), '(i2.2)' ) l
             open  ( lunsed(l), file=trim(filnam)//sf  , form = 'unformatted', access='stream')
+            ! sedimentation
+            lunsedflx(l,1) = newunit()
+            ssrff = "sedflx00"
+            write( sf(7:8), '(i2.2)' ) l
+            open  ( lunsedflx(l,1), file=trim(filnam)//ssrff  , form = 'unformatted', access='stream')
+            ! resuspension
+            lunsedflx(l,2) = newunit()
+            ssrff = "resflx00"
+            write( sf(7:8), '(i2.2)' ) l
+            open  ( lunsedflx(l,2), file=trim(filnam)//ssrff  , form = 'unformatted', access='stream')
          enddo
          if ( ilaggr(kmax) .gt. 1 ) then
             lunvdf    = newunit()
@@ -449,7 +478,8 @@
      &                   lsed   , r1     , tau    , vdiff  , isaggr ,    &
      &                   noseg  , vol    , sag    , sag2   , zmodel ,    &
      &                   ilaggr , mode   , lunvol , lunsal , luntem ,    &
-     &                   lunsed , lunvdf , luntau , itdate )
+     &                   lunsed , lunvdf , luntau , itdate , cumsedflx,  &
+     &                   cumresflx, lunsedflx, itwqfi*2    )
 
 !           write first part of the sources files where appropriate
 
@@ -520,7 +550,8 @@
      &                lsed   , r1     , tau    , vdiff  , isaggr ,    &
      &                noseg  , vol2   , sag    , sag2   , zmodel ,    &
      &                ilaggr , mode   , lunvol , lunsal , luntem ,    &
-     &                lunsed , lunvdf , luntau , itdate )
+     &                lunsed , lunvdf , luntau , itdate , cumsedflx,  &
+     &                cumresflx, lunsedflx, itwqfi*2    )
 !
 !           Check mass balance, write loads and write deficiencies
 !

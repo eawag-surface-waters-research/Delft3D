@@ -221,18 +221,22 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     real(fp) :: dsdnm
     real(fp) :: dv
     real(fp) :: dz
+    real(fp) :: eroflx
     real(fp) :: fact
     real(fp) :: gsqsmin
+    real(fp) :: gsqsinv
     real(fp) :: h1
     real(fp) :: hdtmor
     real(fp) :: htdif
     real(fp) :: rate
     real(fp) :: r1avg
+    real(fp) :: sedflx
     real(fp) :: thet
     real(fp) :: thick0
     real(fp) :: thick1
     real(fp) :: totdbodsd
     real(fp) :: totfixfrac
+    real(fp) :: trndiv
     real(fp) :: z
     logical  :: bedload
     logical  :: from_ndm
@@ -695,7 +699,10 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                 num = nm + icy
                 nmd = nm - icx
                 ndm = nm - icy
-                dsdnm = 0.0
+                trndiv = 0.0
+                sedflx = 0.0
+                eroflx = 0.0
+                gsqsinv = 1.0_fp/gsqs(nm)
                 if (sus/=0.0 .and. .not. bedload) then
                    if (neglectentrainment) then
                       !
@@ -706,12 +713,12 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                         !
                         ! Only cross-shore component
                         !
-                        dsdnm = dsdnm + hdt*morfac/gsqs(nm)                        &
-                              & *(  ssuu(nmd, l)*guu(nmd) - ssuu(nm, l)*guu(nm))
+                        trndiv = trndiv + gsqsinv                                   &
+                               & *(  ssuu(nmd, l)*guu(nmd) - ssuu(nm, l)*guu(nm))
                       else
-                        dsdnm = dsdnm + hdt*morfac/gsqs(nm)                        &
-                              & *(  ssuu(nmd, l)*guu(nmd) - ssuu(nm, l)*guu(nm)    &
-                              &   + ssvv(ndm, l)*gvv(ndm) - ssvv(nm, l)*gvv(nm))
+                        trndiv = trndiv + gsqsinv                                   &
+                               & *(  ssuu(nmd, l)*guu(nmd) - ssuu(nm, l)*guu(nm)    &
+                               &   + ssvv(ndm, l)*gvv(ndm) - ssvv(nm, l)*gvv(nm))
                       endif
                    else
                       !
@@ -726,11 +733,10 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                       !thick0 = thick(k)*max(0.01_fp, s0(nm) + real(dps(nm),fp))    ! This introduces a mass balance error!
                       !thick1 = thick(k)*max(0.01_fp, s1(nm) + real(dps(nm),fp))    ! dps should also be taken from previous half time step, or use following code
                       !
-                      thick0 = volum0(nm,k) / gsqs(nm)
-                      thick1 = volum1(nm,k) / gsqs(nm)
-                      dsdnm  = dsdnm                                                &
-                             & + hdt*morfac*(  sinkse(nm, l)*r1(nm, k, ll)*thick1   &
-                             &               - sourse(nm, l)              *thick0  )
+                      thick0 = volum0(nm,k)*gsqsinv
+                      thick1 = volum1(nm,k)*gsqsinv
+                      sedflx = sinkse(nm, l)*r1(nm, k, ll)*thick1
+                      eroflx = sourse(nm, l)              *thick0
                       !
                       ! add suspended transport correction vector
                       !
@@ -738,12 +744,12 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                          !
                          ! Only cross-shore component
                          !
-                         dsdnm = dsdnm + hdt*morfac/gsqs(nm)                          &
-                               &         *( sucor(nmd,l)*guu(nmd)-sucor(nm,l)*guu(nm))
+                         trndiv = trndiv + gsqsinv                                     &
+                                &         *( sucor(nmd,l)*guu(nmd)-sucor(nm,l)*guu(nm))
                       else
-                         dsdnm = dsdnm + hdt*morfac/gsqs(nm)                          &
-                               &         *( sucor(nmd,l)*guu(nmd)-sucor(nm,l)*guu(nm) &
-                               &           +svcor(ndm,l)*gvv(ndm)-svcor(nm,l)*gvv(nm))
+                         trndiv = trndiv + gsqsinv                                     &
+                                &         *( sucor(nmd,l)*guu(nmd)-sucor(nm,l)*guu(nm) &
+                                &           +svcor(ndm,l)*gvv(ndm)-svcor(nm,l)*gvv(nm))
                       endif
                    endif
                 endif
@@ -752,14 +758,15 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                      !
                      ! Only cross-shore component
                      !
-                     dsdnm = dsdnm + hdt*morfac/gsqs(nm)                          &
-                           &         *( sbuu(nmd,l)*guu(nmd)-sbuu(nm,l)*guu(nm))
+                     trndiv = trndiv + gsqsinv                                     &
+                            &         *( sbuu(nmd,l)*guu(nmd)-sbuu(nm,l)*guu(nm))
                    else
-                     dsdnm = dsdnm + hdt*morfac/gsqs(nm)                          &
-                           &         *( sbuu(nmd,l)*guu(nmd)-sbuu(nm,l)*guu(nm)   &
-                           &           +sbvv(ndm,l)*gvv(ndm)-sbvv(nm,l)*gvv(nm))
+                     trndiv = trndiv + gsqsinv                                     &
+                            &         *( sbuu(nmd,l)*guu(nmd)-sbuu(nm,l)*guu(nm)   &
+                            &           +sbvv(ndm,l)*gvv(ndm)-sbvv(nm,l)*gvv(nm))
                    endif
                 endif
+                dsdnm = (trndiv + sedflx - eroflx)*hdt*morfac
                 !
                 ! Warn if bottom changes are very large,
                 ! depth change NOT LIMITED
@@ -785,6 +792,8 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                 ! Update dbodsd value at nm
                 !
                 dbodsd(l, nm) = dbodsd(l, nm) + dsdnm
+                !
+                call updwaqflxsed(nst, nm, l, trndiv, sedflx, eroflx, gdp)
              endif ! kcs*kfs = 1
           enddo    ! nm
        enddo       ! l

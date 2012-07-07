@@ -75,7 +75,8 @@ libkernel_compute_sediment_la_SOURCES = \
          tranb7.f90 \
          upwbed.f90 \
          wave.f90 \
-         upbdps.f90
+         upbdps.f90 \
+         updwaqflxsed.f90
 
 #-------------------------------------------------------------------------------
 #Libraries

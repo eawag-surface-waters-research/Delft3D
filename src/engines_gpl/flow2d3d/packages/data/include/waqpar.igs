@@ -75,11 +75,14 @@ type gd_waqpar
     integer , dimension(:)  , pointer :: ifrmto    ! from-to pointer table
     integer , dimension(:)  , pointer :: kmk       ! WAQ features at start of step
     integer , dimension(:)  , pointer :: ksrwaq    ! stored value of nr of layers source locations
-    integer , dimension(:)  , pointer :: lunsed    ! file unit numbers to sediment output files
+    integer , dimension(:)  , pointer :: lunsed    ! file unit numbers to sediment concentration output files
+    integer , dimension(:,:), pointer :: lunsedflx ! file unit numbers to sediment sedimentation and resuspension flux output files
     real(fp), dimension(:,:), pointer :: quwaq     ! Cumulative qxk
     real(fp), dimension(:,:), pointer :: qvwaq     ! Cumulative qyk
     real(fp), dimension(:,:), pointer :: qwwaq     ! Cumulative qzk
     real(fp), dimension(:)  , pointer :: discumwaq ! Cumulated sources m3/s*nstep
+    real(fp), dimension(:,:), pointer :: cumsedflx ! Cumulative sedimentation flux
+    real(fp), dimension(:,:), pointer :: cumresflx ! Cumulative resuspension flux
     real(sp), dimension(:)  , pointer :: vol       ! WAQ volume at start of step
     real(sp), dimension(:)  , pointer :: vol2      ! WAQ volume at end of step
     real(sp), dimension(:)  , pointer :: sag       ! WAQ segment aggregator

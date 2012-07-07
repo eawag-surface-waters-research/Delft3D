@@ -904,6 +904,7 @@ src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/tranb4.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/tranb5.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/tranb7.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/upbdps.f90 -text
+src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/updwaqflxsed.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/upwbed.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/wave.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/dd/Makefile.am -text

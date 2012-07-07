@@ -824,7 +824,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     !
     ! Read waq parameters, such as output flag for writing binary waq files
     !
-    call rdwaqpar(lundia, error, kmax, dt, itcomf, itcomi, itcoml, gdp)
+    call rdwaqpar(lundia, error, kmax, lsed, dt, itcomf, itcomi, itcoml, gdp)
     if (error) goto 9999
     !
     ! Physical Coefficients, Trachytope Roughness Description

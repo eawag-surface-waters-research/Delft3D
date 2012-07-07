@@ -1,4 +1,4 @@
-subroutine rdwaqpar(lundia, error, kmax, dt, itcomf, itcomi, itcoml, gdp)
+subroutine rdwaqpar(lundia, error, kmax, lsed, dt, itcomf, itcomi, itcoml, gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -55,6 +55,8 @@ subroutine rdwaqpar(lundia, error, kmax, dt, itcomf, itcomi, itcoml, gdp)
     real(fp)      , dimension(:,:), pointer :: quwaq     ! Cumulative qxk
     real(fp)      , dimension(:,:), pointer :: qvwaq     ! Cumulative qyk
     real(fp)      , dimension(:,:), pointer :: qwwaq     ! Cumulative qzk
+    real(fp)      , dimension(:,:), pointer :: cumsedflx ! Cumulative sedimentation flux
+    real(fp)      , dimension(:,:), pointer :: cumresflx ! Cumulative resuspension flux
     real(fp)      , dimension(:)  , pointer :: discumwaq ! Cumulated sources m3/s*nstep 
     logical                       , pointer :: waqfil
     logical                       , pointer :: waqol
@@ -63,6 +65,7 @@ subroutine rdwaqpar(lundia, error, kmax, dt, itcomf, itcomi, itcoml, gdp)
 ! Global variables
 !
     integer   , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90 
+    integer   , intent(in)  :: lsed   !!  Number of sediment fractions
     integer                 :: lundia !  Description and declaration in inout.igs
     integer                 :: itcomf !  Description and declaration in inttim.igs
     integer                 :: itcomi !  Description and declaration in inttim.igs
@@ -294,10 +297,12 @@ subroutine rdwaqpar(lundia, error, kmax, dt, itcomf, itcomi, itcoml, gdp)
        !
        ! allocate all arrays needed for writing binary waq files
        !
-       if (istat==0) allocate (gdp%gdwaqpar%quwaq    (gdp%d%nmlb:gdp%d%nmub,  kmax), stat = istat)
-       if (istat==0) allocate (gdp%gdwaqpar%qvwaq    (gdp%d%nmlb:gdp%d%nmub,  kmax), stat = istat)
-       if (istat==0) allocate (gdp%gdwaqpar%qwwaq    (gdp%d%nmlb:gdp%d%nmub,0:kmax), stat = istat)
-       if (istat==0) allocate (gdp%gdwaqpar%discumwaq(gdp%d%nsrc)                  , stat = istat)
+       if (istat==0) allocate (gdp%gdwaqpar%quwaq    (gdp%d%nmlb:gdp%d%nmub,  kmax)     , stat = istat)
+       if (istat==0) allocate (gdp%gdwaqpar%qvwaq    (gdp%d%nmlb:gdp%d%nmub,  kmax)     , stat = istat)
+       if (istat==0) allocate (gdp%gdwaqpar%qwwaq    (gdp%d%nmlb:gdp%d%nmub,0:kmax)     , stat = istat)
+       if (istat==0) allocate (gdp%gdwaqpar%discumwaq(gdp%d%nsrc)                       , stat = istat)
+       if (istat==0) allocate (gdp%gdwaqpar%cumsedflx(gdp%d%nmlb:gdp%d%nmub,  lsed)     , stat = istat)
+       if (istat==0) allocate (gdp%gdwaqpar%cumresflx(gdp%d%nmlb:gdp%d%nmub,  lsed)     , stat = istat)
        !
        if (istat /= 0) then
           call prterr(lundia, 'U021', 'RDWAQPAR: memory alloc error')
@@ -310,6 +315,8 @@ subroutine rdwaqpar(lundia, error, kmax, dt, itcomf, itcomi, itcoml, gdp)
        qvwaq      => gdp%gdwaqpar%qvwaq
        qwwaq      => gdp%gdwaqpar%qwwaq
        discumwaq  => gdp%gdwaqpar%discumwaq 
+       cumsedflx  => gdp%gdwaqpar%cumsedflx
+       cumresflx  => gdp%gdwaqpar%cumresflx
     endif
     !
     ! Initialize arrays allocated
@@ -318,5 +325,7 @@ subroutine rdwaqpar(lundia, error, kmax, dt, itcomf, itcomi, itcoml, gdp)
     qvwaq     = 0.0_fp
     qwwaq     = 0.0_fp
     discumwaq = 0.0_fp
+    cumsedflx = 0.0_fp
+    cumresflx = 0.0_fp
     deallocate(ilaggrInput)
 end subroutine rdwaqpar

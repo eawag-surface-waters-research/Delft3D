@@ -70,5 +70,9 @@ subroutine clrwaqpar(istat, gdp)
     if (associated(gdwaqpar%kmk))        deallocate(gdwaqpar%kmk       , stat = istat)
     if (associated(gdwaqpar%loads))      deallocate(gdwaqpar%loads     , stat = istat)
     if (associated(gdwaqpar%iwlk))       deallocate(gdwaqpar%iwlk      , stat = istat) 
+    if (associated(gdwaqpar%lunsed))     deallocate(gdwaqpar%lunsed    , stat = istat) 
+    if (associated(gdwaqpar%lunsedflx))  deallocate(gdwaqpar%lunsedflx , stat = istat) 
+    if (associated(gdwaqpar%cumsedflx))  deallocate(gdwaqpar%cumsedflx , stat = istat) 
+    if (associated(gdwaqpar%cumresflx))  deallocate(gdwaqpar%cumresflx , stat = istat) 
     !
 end subroutine clrwaqpar

@@ -4,7 +4,8 @@
      &                      lsed   , conc   , tau    , vdiff  , isaggr , &
      &                      noseg  , vol    , sag    , con    , zmodel , &
      &                      ilaggr , mode   , lunvol , lunsal , luntem , &
-     &                      lunsed , lunvdf , luntau , itdate )
+     &                      lunsed , lunvdf , luntau , itdate , cmsedf , &
+     &                      cmresf , lunsdf , naccum )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -77,13 +78,18 @@
       integer( 4), intent(in   ) :: lunvdf                  !!  file unit number to an output file
       integer( 4), intent(in   ) :: luntau                  !!  file unit number to an output file
       integer( 4), intent(in   ) :: itdate                  !!  reference time in YYYYMMDD
+      real   (fp), intent(inout) :: cmsedf(nlb:nub,mlb:mub,lsed) !!  Array with cumulative sedimentation fluxes
+      real   (fp), intent(inout) :: cmresf(nlb:nub,mlb:mub,lsed) !!  Array with cumulative resuspension fluxes
+      integer( 4), intent(in   ) :: lunsdf(lsed, 2)         !!  file unit numbers to sediment flux output files
+      integer( 4), intent(in   ) :: naccum                  !!  number of fluxes accumulated
 !
 !           Local variables
 !
-      integer  ( 4) i, j, k, l, ml, iseg
+      integer  ( 4) i, j, ij, k, l, ml, iseg
       integer  ( 4) ilay
       integer  ( 4) kfmin, kfmax
       real     ( 4) amin
+      real     ( 4) flx2day
 !
 !! executable statements -------------------------------------------------------
 !
@@ -259,6 +265,68 @@
          do l = 1,lsed
             write ( lunsed(l) ) itim, sag(1:noseg,l)
          enddo
+         !
+         flx2day = 1.0/86400.0/naccum
+         !
+         ! sedimentation in kg/day
+         !
+         sag = 0.0
+         con = 0.0 ! used here to (re)compute horsurf
+         kfmin = kmax
+         do j = 1,mmax
+            do i = 1,nmax
+               if (kcs(i,j) .eq. 1) then
+                  if ( zmodel ) kfmin = kfsmin(i,j)
+                  iseg = isaggr(i,j,kfmin)
+                  if ( gsqs(i,j) .gt. 1.0E-25 ) then
+                     do l = 1,lsed
+                        sag(iseg,l) = sag(iseg,l) + cmsedf(i,j,l)*gsqs(i,j)
+                     enddo
+                     con(iseg) = con(iseg) + gsqs(i,j)
+                  endif
+               endif
+            enddo
+         enddo
+         do i = 1,noseg
+            if ( con(i) .gt. 1.0E-25 ) then
+               do l = 1,lsed
+                  sag(i,l) = sag(i,l) / con(i) * flx2day
+               enddo
+            endif
+         enddo
+         do l = 1,lsed
+            write ( lunsdf(l,1) ) itim, sag(1:noseg,l)
+         enddo
+         cmsedf    = 0.0_fp
+         !
+         ! resuspension in kg/day
+         !
+         sag = 0.0
+         kfmin = kmax
+         do j = 1,mmax
+            do i = 1,nmax
+               if (kcs(i,j) .eq. 1) then
+                  if ( zmodel ) kfmin = kfsmin(i,j)
+                  iseg = isaggr(i,j,kfmin)
+                  if ( gsqs(i,j) .gt. 1.0E-25 ) then
+                     do l = 1,lsed
+                        sag(iseg,l) = sag(iseg,l) + cmresf(i,j,l)*gsqs(i,j)
+                     enddo
+                  endif
+               endif
+            enddo
+         enddo
+         do i = 1,noseg
+            if ( con(i) .gt. 1.0E-25 ) then
+               do l = 1,lsed
+                  sag(i,l) = sag(i,l) / con(i) * flx2day
+               enddo
+            endif
+         enddo
+         do l = 1,lsed
+            write ( lunsdf(l,2) ) itim, sag(1:noseg,l)
+         enddo
+         cmresf    = 0.0_fp
       endif
 
 !

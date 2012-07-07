@@ -1,4 +1,5 @@
-subroutine initwaqpar(gdp)
+subroutine updwaqflxsed(nst       ,nm        ,l         ,trndiv    ,sedflx    , &
+                      & eroflx    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -28,7 +29,9 @@ subroutine initwaqpar(gdp)
 !  $Id$
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
-! NONE
+!
+!    Function: Update cumulative sedimentation and resuspension fluxes for WAQ
+!
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
@@ -42,94 +45,44 @@ subroutine initwaqpar(gdp)
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer           , pointer :: itwqff
-    integer           , pointer :: itwqfi
-    integer           , pointer :: itwqfl
-    integer           , pointer :: lunvol
-    integer           , pointer :: lunare
-    integer           , pointer :: lunflo
-    integer           , pointer :: lunsal
-    integer           , pointer :: luntem
-    integer           , pointer :: lunvdf
-    integer           , pointer :: luntau
-    integer           , pointer :: lunsrctmp
-    integer           , pointer :: lunwlk
-    integer           , pointer :: lunsrc
-    integer           , pointer :: lunkmk
-    logical           , pointer :: first_cf
-    logical           , pointer :: firsttime
-    logical           , pointer :: firstwaq
-    logical           , pointer :: waqfil
-    logical           , pointer :: waqol
-    character(256)    , pointer :: flaggr
+    integer                 , pointer :: itwqff
+    integer                 , pointer :: itwqfl
+    real(fp), dimension(:,:), pointer :: cumsedflx ! Cumulative sedimentation flux
+    real(fp), dimension(:,:), pointer :: cumresflx ! Cumulative resuspension flux
+    logical                 , pointer :: waqfil
+!
+! Global variables
+!
+    integer                                                  :: nst    !!  Time step number
+    integer                                                  :: nm     !!  Grid point
+    integer                                                  :: l      !!  Sediment fraction
+    real(fp)                                                 :: trndiv !!  Deposition flux due to divergence of bed/total load
+    real(fp)                                                 :: sedflx !!  Sedimentation flux
+    real(fp)                                                 :: eroflx !!  Erosion flux
+!
+! Local variables
+!
+!   NONE
 !
 !! executable statements -------------------------------------------------------
 !
     itwqff     => gdp%gdwaqpar%itwqff
-    itwqfi     => gdp%gdwaqpar%itwqfi
     itwqfl     => gdp%gdwaqpar%itwqfl
-    lunvol     => gdp%gdwaqpar%lunvol
-    lunare     => gdp%gdwaqpar%lunare
-    lunflo     => gdp%gdwaqpar%lunflo
-    lunsal     => gdp%gdwaqpar%lunsal
-    luntem     => gdp%gdwaqpar%luntem
-    lunvdf     => gdp%gdwaqpar%lunvdf
-    luntau     => gdp%gdwaqpar%luntau
-    lunsrctmp  => gdp%gdwaqpar%lunsrctmp
-    lunwlk     => gdp%gdwaqpar%lunwlk
-    lunsrc     => gdp%gdwaqpar%lunsrc
-    lunkmk     => gdp%gdwaqpar%lunkmk
-    first_cf   => gdp%gdwaqpar%first_cf
-    firsttime  => gdp%gdwaqpar%firsttime
-    firstwaq   => gdp%gdwaqpar%firstwaq
+    cumsedflx  => gdp%gdwaqpar%cumsedflx
+    cumresflx  => gdp%gdwaqpar%cumresflx
     waqfil     => gdp%gdwaqpar%waqfil
-    waqol      => gdp%gdwaqpar%waqol
-    flaggr     => gdp%gdwaqpar%flaggr
     !
-    first_cf  = .true.
-    firsttime = .true.
-    firstwaq  = .true.
-    waqfil    = .false.
-    waqol     = .false.
+    if (.not.waqfil) return
+    if (nst<itwqff .or. nst>=itwqfl) return
     !
-    itwqff    = 0
-    itwqfi    = 0
-    itwqfl    = 0
-    lunvol    = 0
-    lunare    = 0
-    lunflo    = 0
-    lunsal    = 0
-    luntem    = 0
-    lunvdf    = 0
-    luntau    = 0
-    lunsrctmp = 0
-    lunwlk    = 0
-    lunsrc    = 0
-    lunkmk    = 0
+    ! calculate cumulative sedimentation and resuspension fluxes
     !
-    nullify(gdp%gdwaqpar%quwaq)
-    nullify(gdp%gdwaqpar%qvwaq)
-    nullify(gdp%gdwaqpar%qwwaq)
-    nullify(gdp%gdwaqpar%discumwaq)
-    nullify(gdp%gdwaqpar%ifrmto)
-    nullify(gdp%gdwaqpar%isaggr)
-    nullify(gdp%gdwaqpar%iqaggr)
-    nullify(gdp%gdwaqpar%ilaggr)
-    nullify(gdp%gdwaqpar%ifsmax)
-    nullify(gdp%gdwaqpar%vol)
-    nullify(gdp%gdwaqpar%sag)
-    nullify(gdp%gdwaqpar%vol2)
-    nullify(gdp%gdwaqpar%sag2)
-    nullify(gdp%gdwaqpar%qag)
-    nullify(gdp%gdwaqpar%horsurf)
-    nullify(gdp%gdwaqpar%kmk)
-    nullify(gdp%gdwaqpar%ksrwaq)
-    nullify(gdp%gdwaqpar%loads)
-    nullify(gdp%gdwaqpar%iwlk)
-    nullify(gdp%gdwaqpar%lunsed)
-    nullify(gdp%gdwaqpar%lunsedflx)
-    nullify(gdp%gdwaqpar%cumsedflx)
-    nullify(gdp%gdwaqpar%cumresflx)
+    cumsedflx(nm, l) = cumsedflx(nm, l) + sedflx
+    cumresflx(nm, l) = cumresflx(nm, l) + eroflx
     !
-    flaggr = ' '
-end subroutine initwaqpar
+    if (trndiv>0) then
+       cumsedflx(nm, l) = cumsedflx(nm, l) + trndiv
+    else
+       cumresflx(nm, l) = cumresflx(nm, l) - trndiv
+    endif
+end subroutine updwaqflxsed
