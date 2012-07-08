@@ -428,12 +428,12 @@
             ! sedimentation
             lunsedflx(l,1) = newunit()
             ssrff = "sedflx00"
-            write( sf(7:8), '(i2.2)' ) l
+            write( ssrff(7:8), '(i2.2)' ) l
             open  ( lunsedflx(l,1), file=trim(filnam)//ssrff  , form = 'unformatted', access='stream')
             ! resuspension
             lunsedflx(l,2) = newunit()
             ssrff = "resflx00"
-            write( sf(7:8), '(i2.2)' ) l
+            write( ssrff(7:8), '(i2.2)' ) l
             open  ( lunsedflx(l,2), file=trim(filnam)//ssrff  , form = 'unformatted', access='stream')
          enddo
          if ( ilaggr(kmax) .gt. 1 ) then
