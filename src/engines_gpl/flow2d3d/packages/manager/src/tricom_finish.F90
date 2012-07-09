@@ -1,4 +1,4 @@
-subroutine tricom_finish(gdp, olv_handle)
+subroutine tricom_finish(olv_handle, gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                

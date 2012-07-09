@@ -41,7 +41,7 @@ contains
 
 !
 !==============================================================================
-integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, gdp, opt_olv_handle) result(retval)
+integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, olv_handle, gdp) result(retval)
 !
 !!--declarations----------------------------------------------------------------
 !
@@ -58,7 +58,6 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, g
     use globaldata
     implicit none
     type(globDat)  , target   :: gdp
-    type(olvhandle), optional :: opt_olv_handle
     !
     integer                       , pointer :: lundia
     integer                       , pointer :: lunprt
@@ -83,7 +82,7 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, g
     integer       , intent(in)  :: nummap        ! Number of mappers (one for each DD boundaries connected with this subdomain)
                                                  ! as detected by hydra
     character(*)                :: runid_arg
-
+    type(olvhandle)             :: olv_handle
 !
 ! Local variables
 !
@@ -126,7 +125,6 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, g
     character(4)                        :: subsys       ! Sub-system definition of Delft3D here SUBSYS = 'flow' 
     character(5)                        :: filid
     character(5)   , pointer            :: versio       ! Version nr. of the current package 
-    type(olvhandle)                     :: olv_handle
 !! executable statements -------------------------------------------------------
 !
     ! Initialization using a semaphore
@@ -354,13 +352,7 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, g
     ! Start FLOW simulation
     !
     olv_handle%fields => null()
-    if (present(opt_olv_handle)) then 
-        olv_handle = opt_olv_handle
-    endif
-    call tricom_init(gdp, olv_handle)
-    if (present(opt_olv_handle)) then 
-        opt_olv_handle = olv_handle
-    endif
+    call tricom_init(olv_handle, gdp)
     !
     ! Error status of tricom_init is returned via gdp%errorcode
     !
@@ -379,15 +371,13 @@ end function trisim_init
 !
 !
 !----------------------------------------------------------------------
-integer function trisim_step(gdp, opt_olv_handle) result(retval)
+integer function trisim_step(olv_handle, gdp) result(retval)
     use globaldata
     use d3d_olv_class
     !
     implicit none
     !
     type(globdat)  , target   :: gdp
-    type(olvhandle), optional :: opt_olv_handle
-    !
     type(olvhandle)           :: olv_handle
     !
     RetVal = 0
@@ -397,13 +387,7 @@ integer function trisim_step(gdp, opt_olv_handle) result(retval)
     ! part VII and VIII can be found at the end of tricom_init. (VT)
     !
     olv_handle%fields => null()
-    if (present(opt_olv_handle)) then 
-        olv_handle = opt_olv_handle
-    endif
-    call tricom_step(gdp, olv_handle)
-    if (present(opt_olv_handle)) then 
-        opt_olv_handle = olv_handle
-    endif
+    call tricom_step(olv_handle, gdp)
     if (gdp%errorcode /= 0) then
         retVal = -1
     else
@@ -415,7 +399,7 @@ end function trisim_step
 !
 !
 !-----------------------------------------------------------------------
-integer function trisim_finish(gdp, opt_olv_handle) result(retVal)
+integer function trisim_finish(olv_handle, gdp) result(retVal)
     use globaldata
     use dfparall
     use d3d_olv_class
@@ -423,26 +407,19 @@ integer function trisim_finish(gdp, opt_olv_handle) result(retVal)
     implicit none
     !
     ! global    
+    type(olvhandle)           :: olv_handle
     type(globdat)  , target   :: gdp
-    type(olvhandle), optional :: opt_olv_handle
     !
     ! local
     integer          :: i
     integer, pointer :: lundia
-    type(olvhandle)  :: olv_handle
     !
     ! body
     lundia => gdp%gdinout%lundia 
     retval = 0
 
     olv_handle%fields => null()
-    if (present(opt_olv_handle)) then 
-        olv_handle = opt_olv_handle
-    endif
-    call tricom_finish(gdp, olv_handle)
-    if (present(opt_olv_handle)) then 
-        opt_olv_handle = olv_handle
-    endif
+    call tricom_finish(olv_handle, gdp)
 
     write(lundia,*)
     write(lundia,'(a)') '*** Simulation finished *******************************************************'

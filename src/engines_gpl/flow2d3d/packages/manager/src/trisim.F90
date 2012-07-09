@@ -66,8 +66,8 @@ subroutine trisim (numdom, nummap, context_id, fsm_flags, runid)
 !
 ! Local variables
 !
-    integer :: ierr
-    integer :: retval
+    integer         :: ierr
+    integer         :: retval
     type(OLVHandle) :: olv_handle
     !
     ! To raise floating-point invalid, divide-by-zero, and overflow exceptions:
@@ -95,17 +95,17 @@ subroutine trisim (numdom, nummap, context_id, fsm_flags, runid)
     !
     nullify(gdp%runid)
     !
-    retval = trisim_init(numdom, nummap, context_id, fsm_flags, runid, gdp, olv_handle) ! also called from openda
+    retval = trisim_init(numdom, nummap, context_id, fsm_flags, runid, olv_handle, gdp)
     if (retval /= 0) then
        return
     endif
     !
-    retval = trisim_step(gdp, olv_handle) ! also called from openda
+    retval = trisim_step(olv_handle, gdp)
     if (retval /= 0) then
        return
     endif
     !
-    retval = trisim_finish(gdp, olv_handle) ! also called from openda
+    retval = trisim_finish(olv_handle, gdp)
     if (retval /= 0) then
        return
     endif

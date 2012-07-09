@@ -69,6 +69,16 @@ end module m_openda_quantities
 
 !-----------------------------------
 
+module m_openda_olv
+
+use d3d_olv_class
+
+type(OLVHandle) :: openda_olv_handle
+
+end module m_openda_olv
+
+!-----------------------------------
+
 module m_openda_exchange_items
 
 use m_openda_quantities

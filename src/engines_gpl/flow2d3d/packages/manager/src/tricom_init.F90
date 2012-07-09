@@ -1,4 +1,4 @@
-subroutine tricom_init(gdp, olv_handle)
+subroutine tricom_init(olv_handle, gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                

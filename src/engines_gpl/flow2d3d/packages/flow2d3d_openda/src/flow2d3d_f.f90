@@ -36,6 +36,7 @@
 function Initialize(componentID, schemID) result(retVal)
     use gdp_entry     ! gdpAlloc
     use mod_trisim
+    use m_openda_olv
     !
     implicit none
     !
@@ -95,7 +96,7 @@ function Initialize(componentID, schemID) result(retVal)
     !
 !------------------------------------------------------------    
 
-    retval = trisim_init(numdom, nummap, context_id, fsm_flags, runID, gdp)
+    retval = trisim_init(numdom, nummap, context_id, fsm_flags, runID, openda_olv_handle, gdp)
     if(retVal < 0) return
 
     retval = trisim_initialise_single_step(gdp)
@@ -193,6 +194,7 @@ function PerformTimeStep(componentID, schemID, time_step) result(retVal)
     use gdp_entry    
     use mod_trisim
     use m_openda_exchange_items
+    use m_openda_olv
 
     implicit none  
 
@@ -219,7 +221,7 @@ function PerformTimeStep(componentID, schemID, time_step) result(retVal)
     endif
     doLogging = .true.
 
-    retVal = trisim_step(gdp)
+    retVal = trisim_step(openda_olv_handle, gdp)
 
     retVal = trisim_prepare_next_step(gdp) 
     doLogging = .false. 
@@ -231,6 +233,7 @@ end function PerformTimeStep
 function Finalize(componentID, schemID) result(retVal)
     use gdp_entry  ! gdpDealloc
     use mod_trisim
+    use m_openda_olv
     
     implicit none
 
@@ -243,7 +246,7 @@ function Finalize(componentID, schemID) result(retVal)
 
 
     ! body
-    retval = trisim_finish(gdp)
+    retval = trisim_finish(openda_olv_handle, gdp)
 
     call gdpDealloc(componentID, schemID)
 
