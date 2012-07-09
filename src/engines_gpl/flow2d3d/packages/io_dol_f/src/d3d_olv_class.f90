@@ -137,50 +137,60 @@ end function
 subroutine free_olv(handle)
     type(OLVHandle) :: handle
 
+    integer                     :: istat
     type(olv_handle_t), pointer :: olv
 
     if (isNull_olv(handle)) return
 
     olv => handle%fields
 
-    if ( associated( olv%mmax   ) ) deallocate( olv%mmax   )
-    if ( associated( olv%nmax   ) ) deallocate( olv%nmax   )
-    if ( associated( olv%nlb    ) ) deallocate( olv%nlb    )
-    if ( associated( olv%nub    ) ) deallocate( olv%nub    )
-    if ( associated( olv%mlb    ) ) deallocate( olv%mlb    )
-    if ( associated( olv%mub    ) ) deallocate( olv%mub    )
-    if ( associated( olv%kmax   ) ) deallocate( olv%kmax   )
-    if ( associated( olv%thick  ) ) deallocate( olv%thick  )
-
-    if ( associated( olv%ltur   ) ) deallocate( olv%ltur   )
-    if ( associated( olv%lstsci ) ) deallocate( olv%lstsci )
-    if ( associated( olv%xcor   ) ) deallocate( olv%xcor   )
-    if ( associated( olv%ycor   ) ) deallocate( olv%ycor   )
-    if ( associated( olv%gvz    ) ) deallocate( olv%gvz    )
-    if ( associated( olv%guz    ) ) deallocate( olv%guz    )
-    if ( associated( olv%xz     ) ) deallocate( olv%xz     )
-    if ( associated( olv%yz     ) ) deallocate( olv%yz     )
-    if ( associated( olv%kcs    ) ) deallocate( olv%kcs    )
-    if ( associated( olv%kfs    ) ) deallocate( olv%kfs    )
-    if ( associated( olv%kfu    ) ) deallocate( olv%kfu    )
-    if ( associated( olv%kfv    ) ) deallocate( olv%kfv    )
-    if ( associated( olv%kfsz1  ) ) deallocate( olv%kfsz1  )
-    if ( associated( olv%alfas  ) ) deallocate( olv%alfas  )
-    if ( associated( olv%s1     ) ) deallocate( olv%s1     )
-    if ( associated( olv%dp     ) ) deallocate( olv%dp     )
-    if ( associated( olv%dps    ) ) deallocate( olv%dps    )
-    if ( associated( olv%u1     ) ) deallocate( olv%u1     )
-    if ( associated( olv%v1     ) ) deallocate( olv%v1     )
-    if ( associated( olv%r1     ) ) deallocate( olv%r1     )
-    if ( associated( olv%rtur1  ) ) deallocate( olv%rtur1  )
-    if ( associated( olv%namcon ) ) deallocate( olv%namcon )
+    olv%runid  = ''
+    !
+    ! The following pointers point to the GDP structure
+    ! Deallocation is the responsibility of the GDP related routines
+    ! Here: just stop pointing to the GDP structure
+    ! TO DO: check whether these pointers are really necessary: why not using the GDP structure directly?
+    !    
+    olv%mmax   => null()
+    olv%nmax   => null()
+    olv%nlb    => null()
+    olv%nub    => null()
+    olv%mlb    => null()
+    olv%mub    => null()
+    olv%kmax   => null()
+    olv%thick  => null()
     
-    if ( associated( olv%zbot   ) ) deallocate( olv%zbot   )
-    if ( associated( olv%ztop   ) ) deallocate( olv%ztop   )
-
+    olv%ltur   => null()
+    olv%lstsci => null()
+    olv%xcor   => null()
+    olv%ycor   => null()
+    olv%gvz    => null()
+    olv%guz    => null()
+    olv%xz     => null()
+    olv%yz     => null()
+    olv%kcs    => null()
+    olv%kfs    => null()
+    olv%kfu    => null()
+    olv%kfv    => null()
+    olv%kfsz1  => null()
+    olv%alfas  => null()
+    olv%s1     => null()
+    olv%dp     => null()
+    olv%dps    => null()
+    olv%u1     => null()
+    olv%v1     => null()
+    olv%r1     => null()
+    olv%rtur1  => null()
+    olv%namcon => null()
+    
+    olv%zbot   => null()
+    olv%ztop   => null()
     olv%zmodel = .false.
-    
-    handle%fields => null()
+    !
+    ! Deallocate the olv structure
+    ! Catch stat to avoid aborts; don't bother whether it succeeded or not
+    ! 
+    deallocate(handle%fields,stat=istat)
 end subroutine
 !
 !------------------------------------------------------------------------------
