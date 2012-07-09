@@ -17,5 +17,6 @@ noinst_PROGRAMS = version_number.exe
 version_number_exe_SOURCES = \
 	version_number.f90
 all-local: version_number.exe
-	${INSTALL} -pD $(top_builddir)/third_party_open/version_number/packages/version_number/src/version_number.exe $(top_builddir)/third_party_open/version_number/bin/linux
+	${INSTALL} -d $(top_builddir)/third_party_open/version_number/bin/linux
+	${INSTALL}    $(top_builddir)/third_party_open/version_number/packages/version_number/src/version_number.exe $(top_builddir)/third_party_open/version_number/bin/linux
 
