@@ -94,7 +94,6 @@ contains
         character(len=20)                           :: name        ! character length MUST be 20 according namcon!!!
         character(120)                              :: cident
         
-        character(len=20), dimension(:), pointer    :: p_ch => null()
 
         if (isNull_olv(olv_handle)) return
 
@@ -263,8 +262,6 @@ contains
         ! Do an allocate of the same array size as ch from esm/fsm
         ! character length is 20 for both arrays
         !
-        allocate( p_ch(1:olv%lstsci) )
-        p_ch = ch
 
         do j = 1, olv%lstsci
             ch_offset = (j-1) * 20
@@ -273,8 +270,6 @@ contains
             do k = 1, 20
                 name(k:k) = ch(indx)(k:k)
             enddo
-            !name = p_ch(indx+(j-1)*20+1)
-            !!name = p_ch(j)(1:20)
             call FLOWOL_Publish( name, name,  '',  '', 'nmk', realDouble, r(olv%r1+r_offset), DOL_OUT)  
         enddo
 
@@ -291,7 +286,6 @@ contains
             call FLOWOL_Publish( name, name, '', '', 'nm', realDouble, r(olv%rtur1+r_offset), DOL_OUT)
         enddo
 
-        if ( associated( p_ch ) ) deallocate( p_ch )
 
     end subroutine publishGDP
 !
