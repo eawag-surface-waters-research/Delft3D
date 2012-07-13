@@ -41,12 +41,12 @@ subroutine upbdps(mmax      ,nmax      ,kcs       ,&
 ! Global variables
 !
     integer                     :: ierr   !  Flag for error when writing to Communication file 
-    integer, intent(in)         :: mmax   !  Description and declaration in iidim.f90
-    integer, intent(in)         :: nmax   !  Description and declaration in iidim.f90
-    integer, intent(in)         :: nmaxus !  Description and declaration in iidim.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   :: dp  !  Description and declaration in rjdim.f90
-    real(prec), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) :: dps !  Description and declaration in rjdim.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kcs !  Description and declaration in iidim.f90
+    integer, intent(in)         :: mmax   !  Description and declaration in esm_alloc_int.f90
+    integer, intent(in)         :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer, intent(in)         :: nmaxus !  Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)   :: dp  !  Description and declaration in esm_alloc_real.f90
+    real(prec), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) :: dps !  Description and declaration in esm_alloc_real.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kcs !  Description and declaration in esm_alloc_int.f90
 !
 !
 ! Local variables

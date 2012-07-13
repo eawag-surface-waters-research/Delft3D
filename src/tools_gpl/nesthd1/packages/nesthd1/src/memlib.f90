@@ -343,7 +343,7 @@
 !            $Source: /u/trisula/cvsroot/trisula/main/memlib.f,v $
 !          $Revision: 1 $
 !-----------------------------------------------------------------------
-!   Calling routine :              various (CKDIM )
+!   Calling routine :              various (esm_alloc_char.f90)
 !-----------------------------------------------------------------------
 !   Called  routines:              CHNULL
 !                                  ERRPNT

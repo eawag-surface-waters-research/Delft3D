@@ -220,8 +220,8 @@
                                                     !!     information from the communication
                                                     !!     file
                                                     !!  =3 no initialization
-       integer                            :: it01   !  Description and declaration in iidim.f90
-       integer                            :: it02   !  Description and declaration in iidim.f90
+       integer                            :: it01   !  Description and declaration in esm_alloc_int.f90
+       integer                            :: it02   !  Description and declaration in esm_alloc_int.f90
        integer                            :: itb    !!  Start time of computational interval
                                                     !!  for a stand alone system the input
                                                     !!  value from TRISIM: ITB = 1
@@ -230,7 +230,7 @@
                                                     !!  value from TRISIM: ITE = -1
        integer                            :: itima  !!  Time to start simulation (N * tscale)
                                                     !!  according to DELFT3D conventions
-       integer                            :: itlen  !  Description and declaration in iidim.f90
+       integer                            :: itlen  !  Description and declaration in esm_alloc_int.f90
        
        integer                            :: initi  ! Control parameter 
        integer                            :: iphisc ! Current time counter for printing history data 
@@ -265,7 +265,7 @@
        real(fp)                           :: anglat ! Angle of latitude of the model centre (used to determine the coeff. for the coriolis force) 
        real(fp)                           :: anglon ! Angle of longitude of the model centre (used to determine solar radiation) 
        real(fp)                           :: dtsec  ! DT in seconds 
-       real(fp)                           :: tscale !  Description and declaration in rjdim.f90
+       real(fp)                           :: tscale !  Description and declaration in esm_alloc_real.f90
        character(256)                     :: comfil !!  Communication file name
        character(256)                     :: filmd  ! File name for MD FLOW file 
        character(256)                     :: trifil !!  File name for TRISULA NEFIS output

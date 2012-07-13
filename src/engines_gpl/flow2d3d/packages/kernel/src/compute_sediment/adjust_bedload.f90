@@ -91,14 +91,14 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: kfu     !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: kfv     !  Description and declaration in esm_alloc_int.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: dm
-    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: dps     !  Description and declaration in rjdim.f90
+    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: dps     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: dzduu
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: dzdvv
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: gsqs    !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: guu    !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: gvv    !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: guv    !  Description and declaration in rjdim.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: gvu    !  Description and declaration in rjdim.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: gsqs    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: guu    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: gvv    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: guv    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: gvu    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot) , intent(in)  :: fixfac
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot) , intent(in)  :: frac
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in)  :: hu      !  Description and declaration in esm_alloc_real.f90
