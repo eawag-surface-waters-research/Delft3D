@@ -117,6 +117,10 @@ rem ===============
     call :lint
     call :mormerge
     call :vs
+    call :nesthd1
+    call :nesthd2
+    call :nestwq1
+    call :nestwq2
 goto :endproc
 
 
@@ -419,6 +423,40 @@ rem ===================
 
     call :copyFile third_party_open\pthreads\bin\win32\pthreadVCE2.dll    !dest_lib!
     call :copyFile tools_gpl\nesthd2\packages\nesthd2\Release\nesthd2.exe !dest_bin!
+goto :endproc
+
+
+
+rem ===================
+rem === INSTALL NESTWQ1
+rem ===================
+:nestwq1
+    echo "installing nestwq1 . . ."
+
+    set dest_bin="!dest_main!\win32\flow2d3d\bin"
+    set dest_lib="!dest_main!\win32\flow2d3d\lib"
+
+    call :makeDir !dest_bin!
+    call :makeDir !dest_lib!
+
+    call :copyFile tools\nestwq1\packages\nestwq1\Release\nestwq1.exe !dest_bin!
+goto :endproc
+
+
+
+rem ===================
+rem === INSTALL NESTWQ2
+rem ===================
+:nestwq2
+    echo "installing nestwq2 . . ."
+
+    set dest_bin="!dest_main!\win32\flow2d3d\bin"
+    set dest_lib="!dest_main!\win32\flow2d3d\lib"
+
+    call :makeDir !dest_bin!
+    call :makeDir !dest_lib!
+
+    call :copyFile tools\nestwq2\packages\nestwq2\Release\nestwq2.exe !dest_bin!
 goto :endproc
 
 
