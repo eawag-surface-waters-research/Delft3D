@@ -788,7 +788,7 @@ subroutine timers_finish (gdp)
     write(lundia,*)
     !
     deallocate(gdp%gdtimers%usedcp)
-    !deallocate(gdp%gdtimers%names)
+    deallocate(gdp%gdtimers%names)
     !
     ! When using DD, timer_start/timerstop calls occur after closing diagnosis
     ! file. Use logical initialized to recognize that situation
