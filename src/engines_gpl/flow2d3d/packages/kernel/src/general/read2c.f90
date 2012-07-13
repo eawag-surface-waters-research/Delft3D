@@ -106,7 +106,11 @@ subroutine read2c(lunmd     ,error     ,keyw      ,newkw     ,nlook     , &
     !
     if (.not.found) then
        if (nlook>0) then
-          call prterr(lundia    ,'U100'    ,keyw      )
+          !
+          ! DELFT3D-15581
+          ! if fmtcco, fmt*** etc. keywords are not in mdf file, the warning messages are not given as well
+          !
+          !call prterr(lundia    ,'U100'    ,keyw      )
           !
           nlook = -1
           error = .true.
