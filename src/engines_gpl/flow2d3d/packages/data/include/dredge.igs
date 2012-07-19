@@ -39,6 +39,12 @@
     integer, parameter :: DREDGETYPE_SANDMINING    = 2
     integer, parameter :: DREDGETYPE_NOURISHMENT   = 3
 !
+! Dredge trigger type enumeration
+!
+    integer, parameter :: DREDGETRIG_POINTBYPOINT  = 1
+    integer, parameter :: DREDGETRIG_ALLBYONE      = 2
+    integer, parameter :: DREDGETRIG_ALLBYAVG      = 3
+!
 ! Dredge distribution enumeration
 !
     integer, parameter :: DREDGEDISTR_UNIFORM      = 1
@@ -97,6 +103,9 @@ type dredtype
                                                                ! 2 = depth relative to water level
                                                                ! 3 = depth relative to maximum of reference plane and water level
                                                                ! 4 = depth relative to minimum of reference plane and water level
+    integer                                 :: triggertype     ! 1 = trigger point by point (previous trigger_all = .false.)
+                                                               ! 2 = one point triggers all (previous trigger_all = .true. )
+                                                               ! 3 = average value triggers dredging (of all points)
     integer                                 :: dredgedistr     ! 1 = dredge uniformly
                                                                ! 2 = dredge high locations first
                                                                ! 3 = dredge proportionally (default)
@@ -130,8 +139,6 @@ type dredtype
     logical                                 :: if_morfac_0     ! T: allow instanteneous dredging while morfac equals 0
     logical                                 :: in1domain       ! T: dredge area located in only 1 domain
     logical                                 :: obey_cmp        ! T: stop dredging if bed composition is empty
-    logical                                 :: trigger_all     ! T: one point above reference level triggers dredging
-                                                               !    at all points down to reference level plus clearance
     !
     character( 80)                          :: name            ! name identifying dredge area
 end type dredtype

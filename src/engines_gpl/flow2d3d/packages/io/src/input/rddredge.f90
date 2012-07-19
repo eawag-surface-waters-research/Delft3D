@@ -114,6 +114,7 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     integer                                 :: def_dredgedistr
     integer                                 :: def_dumpdistr
     integer                                 :: def_dr2dudistr
+    integer                                 :: def_drtrigger
     integer                                 :: i
     integer                                 :: ia
     integer                                 :: ic
@@ -164,9 +165,9 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     logical                                 :: def_dumpwhendry
     logical                                 :: def_if_morfac_0
     logical                                 :: def_obey_cmp
-    logical                                 :: def_trigger_all
     logical                                 :: lastdumparea
     logical                                 :: sfound
+    logical                                 :: triggerall
     character(11)                           :: fmttmp            ! Format file ('formatted  ') 
     character(80)                           :: name
     character(80)                           :: parname
@@ -287,7 +288,7 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     def_dumpwhendry   = .false.
     def_if_morfac_0   = .true.
     def_obey_cmp      = .true.
-    def_trigger_all   = .false.
+    def_drtrigger     = DREDGETRIG_POINTBYPOINT
     def_dredge_depth  = 1.0e10_fp
     def_maxvolrate    = -999.0_fp
     def_mindumpdepth  = -999.0_fp
@@ -383,7 +384,14 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
        call prterr(lundia, 'U021', 'UseDunes: Dunes can only be used when modelled.')
     endif
     call prop_get_logical(dad_ptr, 'General', 'ObeyCmp'           , def_obey_cmp)
-    call prop_get_logical(dad_ptr, 'General', 'TriggerAll'        , def_trigger_all)
+    triggerall = .false.
+    call prop_get_logical(dad_ptr, 'General', 'TriggerAll'        , triggerall)
+    if (triggerall) then
+       def_drtrigger = DREDGETRIG_ALLBYONE
+    else
+       def_drtrigger = DREDGETRIG_POINTBYPOINT
+    endif
+    call prop_get        (dad_ptr, 'General', 'DredgeTrigger'     , def_drtrigger)
     call prop_get_logical(dad_ptr, 'General', 'DredgeWhileMorfac0', def_if_morfac_0)
     !
     sfound = .false.
@@ -701,7 +709,7 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                 pdredge%in1domain     = .false.
                 pdredge%if_morfac_0   = def_if_morfac_0
                 pdredge%obey_cmp      = def_obey_cmp
-                pdredge%trigger_all   = def_trigger_all
+                pdredge%triggertype   = def_drtrigger
                 pdredge%dredgedistr   = def_dredgedistr
                 pdredge%dumpdistr     = def_dr2dudistr
                 pdredge%totalvolsupl  = 0.0_fp
@@ -863,7 +871,22 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                    pdredge%if_morfac_0 = .false.
                 endif
                 call prop_get(link_ptr, '*', 'ObeyCmp'    , pdredge%obey_cmp)
-                call prop_get(link_ptr, '*', 'TriggerAll' , pdredge%trigger_all)
+                triggerall = .false.
+                call prop_get(link_ptr, '*', 'TriggerAll' , triggerall)
+                if (triggerall) then
+                   ! TriggerAll = #YES# was explicitly specified
+                   pdredge%triggertype = DREDGETRIG_ALLBYONE
+                else
+                   ! triggerall may be false because it was specified or just because we set the default to false.
+                   ! we need to distinguish, so let's change the default setting
+                   triggerall = .true.
+                   call prop_get(link_ptr, '*', 'TriggerAll' , triggerall)
+                   if (.not.triggerall) then
+                      ! now we know that TriggerAll = #NO# was explicitly specified
+                      pdredge%triggertype = DREDGETRIG_POINTBYPOINT
+                   endif
+                endif
+                call prop_get(link_ptr, '*', 'DredgeTrigger', pdredge%triggertype)
                 !
                 ! Read the coordinates of the corresponding polygon
                 !
@@ -986,7 +1009,7 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                 pdredge%in1domain     = .false.
                 pdredge%if_morfac_0   = .false.
                 pdredge%obey_cmp      = .true.
-                pdredge%trigger_all   = .false.
+                pdredge%triggertype   = DREDGETRIG_POINTBYPOINT
                 pdredge%depthdef      = DEPTHDEF_REFPLANE
                 pdredge%dredgedistr   = 0
                 pdredge%dumpdistr     = def_dr2dudistr
@@ -1407,6 +1430,23 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                 exit
              endif
           enddo
+          !
+          ! or if total percentage is less than 100%
+          !
+          if (pdredge%outletlink==0) then
+             do lsed = 1, lsedtot
+                sumperc = 0.0_fp
+                do j = 1, nalink
+                   if (link_def(j,1) /= i) cycle
+                   sumperc = sumperc + link_percentage(j,lsed)
+                enddo
+                if (comparereal(100.0_fp,sumperc) /= 0 .and. pdredge%outletlink==0) then
+                   noutletlinks       = noutletlinks + 1
+                   pdredge%outletlink = nalink + noutletlinks
+                   exit
+                endif
+             enddo
+          endif
        case (DR2DUDISTR_SEQUENTIAL)
           !
           ! Add an outlet if all dump areas can be full.
