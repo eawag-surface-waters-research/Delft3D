@@ -1278,7 +1278,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
                            & r(wrkb2)  ,r(wrkb3)  ,r(wrkb4)  ,r(wrkb5)  ,r(wrkb6)  , &
                            & r(wrkb7)  ,r(wrkb8)  ,r(sig)    ,r(p0)     ,r(crbc)   , &
                            & r(hu0)    ,r(hv0)    ,r(wrkb11) ,r(wrkb12) ,r(pship)  , &
-                           & r(diapl)  ,r(rnpl)   ,gdp       )
+                           & r(diapl)  ,r(rnpl)   ,r(precip) ,gdp       )
        !
        ! Non hydrostatic pressure
        ! w0 = non-hydrostatic vertical velocity after complete time step
