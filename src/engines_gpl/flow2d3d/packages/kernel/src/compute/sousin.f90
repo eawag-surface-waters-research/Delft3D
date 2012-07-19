@@ -127,9 +127,9 @@ subroutine sousin(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
        ! divided.
        !
        do nm = 1, nmmax                 
-          if (kcs(nm)/=0) then
+          if (kcs(nm)>0) then
              if (zmodel) then
-                k0 = kfsmax(nm)
+                k0 = max(kfsmin(nm), kfsmax(nm))
                 sour(nm, k0, ltem) = precip(nm)*train*gsqs(nm)
                 if (ktemp==0 .and. kfs(nm)/=0) then
                    sink(nm, k0, ltem) = evap(nm)*gsqs(nm)/rhow
