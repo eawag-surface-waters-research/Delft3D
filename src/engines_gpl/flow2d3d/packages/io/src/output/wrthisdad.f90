@@ -36,7 +36,8 @@ subroutine wrthisdad(lundia    ,error     ,trifil    ,ithisc    , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    !
+    use sp_buffer
+    use dfparall
     use globaldata
     !
     implicit none
@@ -50,19 +51,17 @@ subroutine wrthisdad(lundia    ,error     ,trifil    ,ithisc    , &
     real(fp)            , dimension(:)   , pointer :: totvoldred
     real(fp)            , dimension(:,:) , pointer :: voldump
     real(fp)            , dimension(:)   , pointer :: totvoldump
+    integer             , dimension(:)   , pointer :: ndredged
+    integer             , dimension(:)   , pointer :: nploughed
     integer                              , pointer :: nadred
     integer                              , pointer :: nadump
     integer                              , pointer :: nasupl
     integer                              , pointer :: nalink
+    integer                              , pointer :: ntimaccum
     character(24)                        , pointer :: date_time
     logical                              , pointer :: first
     integer                              , pointer :: celidt
-    integer             , dimension(:, :), pointer :: elmdms
     type (nefiselement)                  , pointer :: nefiselem
-!
-! Local parameters
-!
-    integer, parameter :: nelmx = 5
 !
 ! Global variables
 !
@@ -74,37 +73,26 @@ subroutine wrthisdad(lundia    ,error     ,trifil    ,ithisc    , &
 !
 ! Local variables
 !
-    integer                                    :: i           ! Data-group name defined for the NEFIS-files group 1 Data-group name defined for the NEFIS-files group 3 Help var.
-    integer                                    :: ierror      ! Local errorflag for NEFIS files
-    integer       , dimension(1)               :: idummy      ! Help array to read/write Nefis files
-    integer       , dimension(nelmx)           :: nbytsg      ! Array containing the number of bytes of each single ELMTPS
-    integer                         , external :: neferr
-    logical                                    :: wrswch      ! tes of each single ELMTPS Flag to write file
-    character(10) , dimension(nelmx)           :: elmunt
-    character(16)                              :: grnam
-    character(16) , dimension(nelmx)           :: elmnms
-    character(16) , dimension(nelmx)           :: elmqty
-    character(16) , dimension(nelmx)           :: elmtps
-    character(256)                             :: filnam
-    character(256)                             :: errmsg
-    character(64) , dimension(nelmx)           :: elmdes
-    character(24) , dimension(1)               :: datetimearr ! putgtc expects an array
+    integer                                       :: fds
+    integer                                       :: i
+    integer                                       :: l
+    integer                                       :: ierror      ! Local errorflag for NEFIS files
+    integer    , dimension(1)                     :: idummy      ! Help array to read/write Nefis files
+    integer    , dimension(3,5)                   :: uindex
+    integer                        , external     :: putelt
+    integer                        , external     :: inqmxi
+    integer                        , external     :: clsnef
+    integer                        , external     :: open_datdef
+    integer                        , external     :: neferr
+    real(fp)                                      :: tfrac
+    character(16)                                 :: grnam
+    character(256)                                :: filnam
+    character(256)                                :: errmsg
+    character(24) , dimension(1)                  :: datetimearr ! putgtc expects an array
 !
 ! Data statements
 !
     data grnam/'his-dad-series'/
-    data elmnms/'ITHISC', 'DATE_TIME', 'LINK_SUM', 'DREDGE_VOLUME',   &
-         &      'DUMP_VOLUME'/
-    data elmqty/5*' '/
-    data elmunt/'[   -   ]', '[   -   ]', '[  M3   ]', '[  M3   ]', '[  M3   ]'/
-    data elmtps/'INTEGER', 'CHARACTER', 'REAL', 'REAL', 'REAL'/
-    data nbytsg/4,24,4,4,4/
-    data (elmdes(i), i = 1, 5)                                                    &
-         & /'timestep number (ITHISC*DT*TUNIT := time in sec from ITDATE)  ',     &
-         &  'Current simulation date and time [YYYY-MM-DD HH:MM:SS.FFFF]   ',     &
-         &  'Cumulative dredged material transported via this link         ',     &
-         &  'Cumulative dredged material for this dredge area              ',     &
-         &  'Cumulative dumped material for this dump area                 '/
 !
 !! executable statements -------------------------------------------------------
 !
@@ -113,93 +101,152 @@ subroutine wrthisdad(lundia    ,error     ,trifil    ,ithisc    , &
     totvoldred        => gdp%gddredge%totvoldred
     voldump           => gdp%gddredge%voldump
     totvoldump        => gdp%gddredge%totvoldump
+    ndredged          => gdp%gddredge%ndredged
+    nploughed         => gdp%gddredge%nploughed
     nadred            => gdp%gddredge%nadred
     nadump            => gdp%gddredge%nadump
     nasupl            => gdp%gddredge%nasupl
     nalink            => gdp%gddredge%nalink
+    ntimaccum         => gdp%gddredge%ntimaccum
     date_time         => gdp%gdinttim%date_time
     nefiselem => gdp%nefisio%nefiselem(nefiswrthisdad)
     first             => nefiselem%first
     celidt            => nefiselem%celidt
-    elmdms            => nefiselem%elmdms
     !
     !
     ! Initialize local variables
     !
+    ierror = 0
     filnam = trifil(1:3) // 'h' // trifil(5:)
-    !
-    wrswch = .false.
-    if (first) then
-       call getcel(filnam    ,grnam     ,nelmx     ,elmnms    ,elmdms    , &
-                 & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-                 & elmnms(1) ,celidt    ,wrswch    ,ierror   )
-    endif
-    celidt = celidt + 1
-    !
     errmsg = ' '
-    wrswch = .true.
     !
-    ! Set up the element dimensions
-    !
-    if (first) then
-       first = .false.
-       call filldm(elmdms    ,1         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,2         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,3         ,2         ,nalink    ,lsedtot   , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,4         ,1         ,nadred+nasupl,0      , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,5         ,1         ,nadump    ,0         , &
-                 & 0         ,0         ,0         )
+    if (first .and. inode == master) then
+       !
+       ! Set up the element chracteristics
+       !
+       call addelm(nefiswrthisdad,'ITHISC',' ','[   -   ]','INTEGER',4      , &
+          & 'timestep number (ITHISC*DT*TUNIT := time in sec from ITDATE)  ', &
+          & 1, 1, 0, 0, 0, 0, lundia, gdp)
+       call addelm(nefiswrthisdad,'DATE_TIME',' ','[   -   ]','CHARACTER',24, &
+          & 'Current simulation date and time [YYYY-MM-DD HH:MM:SS.FFFF]   ', &
+          & 1, 1, 0, 0, 0, 0, lundia, gdp)
+       call addelm(nefiswrthisdad,'LINK_SUM',' ','[  M3   ]','REAL',4       , &
+          & 'Cumulative dredged material transported via this link         ', &
+          & 2, nalink, lsedtot, 0, 0, 0, lundia, gdp)
+       call addelm(nefiswrthisdad,'DREDGE_VOLUME',' ','[  M3   ]','REAL',4  , &
+          & 'Cumulative dredged material for this dredge area              ', &
+          & 1, nadred+nasupl, 0, 0, 0, 0, lundia, gdp)
+       call addelm(nefiswrthisdad,'DUMP_VOLUME',' ','[  M3   ]','REAL',4    , &
+          & 'Cumulative dumped material for this dump area                 ', &
+          & 1, nadump, 0, 0, 0, 0, lundia, gdp)
+       call addelm(nefiswrthisdad,'DREDGE_TFRAC',' ','[   -   ]','REAL',4   , &
+          & 'Time fraction spent dredging                                  ', &
+          & 1, nadred+nasupl, 0, 0, 0, 0, lundia, gdp)
+       call addelm(nefiswrthisdad,'PLOUGH_TFRAC',' ','[   -   ]','REAL',4   , &
+          & 'Time fraction spent sploughing                                ', &
+          & 1, nadred+nasupl, 0, 0, 0, 0, lundia, gdp)
+       !
+       call defnewgrp(nefiswrthisdad ,filnam    ,grnam   ,gdp)
     endif
     !
-    ! element 'ITHISC'
-    !
-    wrswch = .true.
-    idummy(1) = ithisc
-    call putgti(filnam    ,grnam     ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(1) ,celidt    ,wrswch    ,ierror   ,idummy    )
-    if (ierror/=0) goto 999
-    !
-    !element 'DATE_TIME'
-    !
-    datetimearr(1)=date_time
-    call putgtc(filnam    ,grnam     ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(2) ,celidt    ,wrswch    ,ierror   ,datetimearr )
-    if (ierror/=0) goto 999
-    !
-    !element 'LINK_SUM'
-    !
-    call putgtr(filnam    ,grnam     ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(3) ,celidt    ,wrswch    ,ierror   ,link_sum  )
-    if (ierror/=0) goto 999
-    !
-    !element 'Dredge volumes'
-    !
-    call putgtr(filnam    ,grnam     ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(4) ,celidt    ,wrswch    ,ierror   ,totvoldred)
-    if (ierror/=0) goto 999
-    !
-    !element 'Dump volumes'
-    !
-    call putgtr(filnam    ,grnam     ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(5) ,celidt    ,wrswch    ,ierror   ,totvoldump)
-    if (ierror/=0) goto 999
-    !
-    ! write error message if error occurred and set error = .true.
-    ! the files will be closed in clsnef (called in triend)
-    !
-  999 continue
-    if (ierror/= 0) then
-       ierror = neferr(0, errmsg)
-       call prterr(lundia, 'P004', errmsg)
-       error = .true.
+    if (inode == master) then
+       ierror = open_datdef(filnam   ,fds      )
+       if (ierror /= 0) goto 9999
+       !
+       if (first) then
+          !
+          ! end of initialization, don't come here again
+          !
+          ierror = inqmxi(fds, grnam, celidt)
+          first = .false.
+       endif
+       !
+       ! initialize group index
+       !
+       celidt = celidt + 1
+       uindex (1,1) = celidt ! start index
+       uindex (2,1) = celidt ! end index
+       uindex (3,1) = 1 ! increment in time
+       !
+       ! element 'ITHISC'
+       !
+       idummy(1) = ithisc
+       ierror = putelt(fds, grnam, 'ITHISC', uindex, 1, idummy)
+       if (ierror/= 0) goto 9999
+       !
+       ! element 'DATE_TIME'
+       !
+       datetimearr(1)=date_time
+       ierror = putelt(fds, grnam, 'DATE_TIME', uindex, 1, datetimearr)
+       if (ierror/= 0) goto 9999
+       !
+       ! element 'LINK_SUM'
+       !
+       call sbuff_checksize(nalink*lsedtot)
+       do l = 1, lsedtot
+          do i = 1, nalink
+             sbuff(i+(lsedtot-1)*nalink) = link_sum(i,l)
+          enddo
+       enddo
+       ierror = putelt(fds, grnam, 'LINK_SUM', uindex, 1, sbuff)
+       if (ierror/= 0) goto 9999
+       !
+       ! element 'DREDGE_VOLUME'
+       !
+       call sbuff_checksize(nadred+nasupl)
+       do i = 1, nadred+nasupl
+          sbuff(i) = totvoldred(i)
+       enddo
+       ierror = putelt(fds, grnam, 'DREDGE_VOLUME', uindex, 1, sbuff)
+       if (ierror/= 0) goto 9999
+       !
+       ! element 'DUMP_VOLUME'
+       !
+       call sbuff_checksize(nadump)
+       do i = 1, nadump
+          sbuff(i) = totvoldump(i)
+       enddo
+       ierror = putelt(fds, grnam, 'DUMP_VOLUME', uindex, 1, sbuff)
+       if (ierror/= 0) goto 9999
+       !
+       if (ntimaccum==0) then
+          tfrac = 1.0_fp
+       else
+          tfrac = 1.0_fp/ntimaccum
+       endif
+       !
+       ! element 'DREDGE_TFRAC'
+       !
+       call sbuff_checksize(nadred+nasupl)
+       do i = 1, nadred+nasupl
+          sbuff(i) = tfrac*ndredged(i)
+       enddo
+       ierror = putelt(fds, grnam, 'DREDGE_TFRAC', uindex, 1, sbuff)
+       if (ierror/= 0) goto 9999
+       !
+       ! element 'PLOUGH_TFRAC'
+       !
+       call sbuff_checksize(nadred+nasupl)
+       do i = 1, nadred+nasupl
+          sbuff(i) = tfrac*nploughed(i)
+       enddo
+       ierror = putelt(fds, grnam, 'PLOUGH_TFRAC', uindex, 1, sbuff)
+       if (ierror/= 0) goto 9999
+       !
+       ntimaccum = 0
+       ndredged  = 0
+       nploughed = 0
+       !
+       ierror = clsnef(fds)
+       !
+       ! write error message if error occured and set error= .true.
+       ! the files will be closed in clsnef (called in triend)
+       !
+9999   continue
+       if (ierror /= 0) then
+          ierror = neferr(0, errmsg)
+          call prterr(lundia, 'P004', errmsg)
+          error= .true.
+       endif
     endif
 end subroutine wrthisdad

@@ -56,17 +56,16 @@ subroutine initdredge(gdp       )
     real(fp)      , dimension(:)   , pointer :: localareadump
     real(fp)      , dimension(:)   , pointer :: globalareadump
     real(fp)      , dimension(:)   , pointer :: globaldumpcap
-    real(fp)                       , pointer :: alpha_dh
     integer                        , pointer :: dredge_domainnr
     integer                        , pointer :: dredge_ndomains
     integer                        , pointer :: nadred
     integer                        , pointer :: nadump
     integer                        , pointer :: nasupl
     integer                        , pointer :: nalink
+    integer                        , pointer :: ntimaccum
     integer       , dimension(:,:) , pointer :: link_def
     logical                        , pointer :: tsmortime
     logical                        , pointer :: firstdredge
-    logical                        , pointer :: use_dunes
     character(256)                 , pointer :: dredgefile
     character( 80), dimension(:)   , pointer :: dredge_areas
     character( 80), dimension(:)   , pointer :: dump_areas
@@ -92,17 +91,16 @@ subroutine initdredge(gdp       )
     localareadump     => gdp%gddredge%localareadump
     globalareadump    => gdp%gddredge%globalareadump
     globaldumpcap     => gdp%gddredge%globaldumpcap
-    alpha_dh          => gdp%gddredge%alpha_dh
     dredge_domainnr   => gdp%gddredge%dredge_domainnr
     dredge_ndomains   => gdp%gddredge%dredge_ndomains
     nadred            => gdp%gddredge%nadred
     nadump            => gdp%gddredge%nadump
     nasupl            => gdp%gddredge%nasupl
     nalink            => gdp%gddredge%nalink
+    ntimaccum         => gdp%gddredge%ntimaccum
     link_def          => gdp%gddredge%link_def
     tsmortime         => gdp%gddredge%tsmortime
     firstdredge       => gdp%gddredge%firstdredge
-    use_dunes         => gdp%gddredge%use_dunes
     dredgefile        => gdp%gddredge%dredgefile
     dredge_areas      => gdp%gddredge%dredge_areas
     dump_areas        => gdp%gddredge%dump_areas
@@ -127,17 +125,18 @@ subroutine initdredge(gdp       )
     !
     dredge_domainnr = 0
     dredge_ndomains = 0
-    nadred  = 0
-    nadump  = 0
-    nasupl  = 0
-    nalink  = 0
-    alpha_dh = 0.5_fp
+    nadred    = 0
+    nadump    = 0
+    nasupl    = 0
+    nalink    = 0
+    ntimaccum = 0
     !
     nullify(gdp%gddredge%link_def)
+    nullify(gdp%gddredge%ndredged)
+    nullify(gdp%gddredge%nploughed)
     !
     tsmortime = .false.
     firstdredge = .true.
-    use_dunes = .false.
     !
     nullify(gdp%gddredge%dredge_areas)
     nullify(gdp%gddredge%dump_areas)

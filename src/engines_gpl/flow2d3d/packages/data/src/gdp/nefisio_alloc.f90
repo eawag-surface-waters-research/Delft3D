@@ -93,8 +93,8 @@ subroutine nefisio_alloc(gdp)
     nelems(nefiswrwavhinf)    = 0
     nelems(nefiswrwavh)       = 0
     nelems(nefiswrrolm)       = 12
-    nelems(nefiswrihisdad)    = 8
-    nelems(nefiswrthisdad)    = 5
+    nelems(nefiswrihisdad)    = 0
+    nelems(nefiswrthisdad)    = 0
     nelems(nefiswrihisdis)    = 4
     nelems(nefiswrthisdis)    = 17
     nelems(nefiswrcomwind)    = 0

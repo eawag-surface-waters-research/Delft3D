@@ -189,7 +189,6 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     integer                                       :: nm
     integer    , dimension(1)                     :: idummy        ! Help array to read/write Nefis files
     integer    , dimension(3,5)                   :: uindex
-    integer                        , external     :: getelt
     integer                        , external     :: putelt
     integer                        , external     :: inqmxi
     integer                        , external     :: clsnef

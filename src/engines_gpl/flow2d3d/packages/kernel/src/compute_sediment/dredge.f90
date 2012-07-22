@@ -63,17 +63,18 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
     real(fp)      , dimension(:)   , pointer :: globalareadump
     real(fp)      , dimension(:)   , pointer :: globaldumpcap
     real(fp)      , dimension(:)   , pointer :: duneheight
-    real(fp)                       , pointer :: alpha_dh
     integer                        , pointer :: dredge_domainnr
     integer                        , pointer :: dredge_ndomains
     integer                        , pointer :: nadred
     integer                        , pointer :: nadump
     integer                        , pointer :: nasupl
     integer                        , pointer :: nalink
+    integer                        , pointer :: ntimaccum
     integer       , dimension(:,:) , pointer :: link_def
+    integer       , dimension(:)   , pointer :: ndredged
+    integer       , dimension(:)   , pointer :: nploughed
     logical                        , pointer :: tsmortime
     logical                        , pointer :: firstdredge
-    logical                        , pointer :: use_dunes
     type (dredtype), dimension(:)  , pointer :: dredge_prop
     type (dumptype), dimension(:)  , pointer :: dump_prop
     real(fp)                       , pointer :: morfac
@@ -128,7 +129,9 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
     integer  :: localoffset
     real(fp) :: areatim
     real(fp) :: availvolume ! volume available for dredging
+    real(fp) :: avg_alphadune
     real(fp) :: avg_depth
+    real(fp) :: avg_trigdepth
     real(fp) :: clr
     real(fp) :: ddp
     real(fp) :: div2h
@@ -147,6 +150,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
     real(fp) :: ltimhr
     real(fp) :: maxdumpvol ! (maximum) volume to be dumped in current time step
     real(fp) :: maxvol     ! maximum volume to be dredged in current time step
+    real(fp) :: plough_fac ! fraction of dune height that remains after ploughing
     real(fp) :: qua_dz
     real(fp) :: requiredvolume
     real(fp) :: voltim     ! local volume variable, various meanings
@@ -159,6 +163,8 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
     real(fp) :: zmin
     real(fp) :: zmax
     logical  :: local_cap
+    logical  :: dredged
+    logical  :: ploughed
     type(dredtype), pointer :: pdredge
     type(dumptype), pointer :: pdump
     real(fp), dimension(:), pointer :: numpoints
@@ -192,17 +198,16 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
     localareadump       => gdp%gddredge%localareadump
     globalareadump      => gdp%gddredge%globalareadump
     globaldumpcap       => gdp%gddredge%globaldumpcap
-    alpha_dh            => gdp%gddredge%alpha_dh
     dredge_domainnr     => gdp%gddredge%dredge_domainnr
     dredge_ndomains     => gdp%gddredge%dredge_ndomains
     nadred              => gdp%gddredge%nadred
     nadump              => gdp%gddredge%nadump
     nasupl              => gdp%gddredge%nasupl
     nalink              => gdp%gddredge%nalink
+    ntimaccum           => gdp%gddredge%ntimaccum
     link_def            => gdp%gddredge%link_def
     tsmortime           => gdp%gddredge%tsmortime
     firstdredge         => gdp%gddredge%firstdredge
-    use_dunes           => gdp%gddredge%use_dunes
     dredge_prop         => gdp%gddredge%dredge_prop
     dump_prop           => gdp%gddredge%dump_prop
     morfac              => gdp%gdmorpar%morfac
@@ -366,6 +371,8 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
        firstdredge = .false.
     endif
     !
+    ntimaccum = ntimaccum+1
+    !
     ! DREDGING areas include SANDMINING areas.
     !
     ! Verify for each dredge and nourishment area whether dredging
@@ -527,7 +534,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
           !
           bedlevel(i) = -real(dps(nm),fp)
           !
-          if (use_dunes) hdune(i) = duneheight(nm)
+          if (pdredge%use_dunes) hdune(i) = duneheight(nm)
           !
           select case (pdredge%depthdef)
           case (DEPTHDEF_REFPLANE)
@@ -539,16 +546,6 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
           case (DEPTHDEF_MINREFWL)
              reflevel(i) = min(s1(nm),refplane(nm))
           end select
-          !
-          ! Do all the calculations relative to the reference plane if the
-          ! dredge distribution concern shallow or deep areas. In the other
-          ! cases we will use absoluted bed levels.
-          !
-          if ((pdredge%dredgedistr==DREDGEDISTR_SHALLOWEST  ) .or. &
-            & (pdredge%dredgedistr==DREDGEDISTR_SHALLOWFIRST) .or. &
-            & (pdredge%dredgedistr==DREDGEDISTR_DEEPFIRST   )) then
-             bedlevel(i) = bedlevel(i) - reflevel(i)
-          endif
           !
           ! The sediment depth is stored always as a separate thickness instead
           ! of the bottom of the sediment column as a "rock level" for reasons
@@ -588,7 +585,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
           ! Derive the other characteristic levels from the bed level.
           !
           dunetoplevel(i) = bedlevel(i) + hdune(i)/2
-          triggerlevel(i) = bedlevel(i) + alpha_dh*hdune(i)
+          triggerlevel(i) = bedlevel(i) + pdredge%alpha_dh*hdune(i)
           troughlevel(i) = bedlevel(i) - hdune(i)/2
        enddo
        !
@@ -605,9 +602,13 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
           pdredge%stilldredging = .false.
        endif
        !
-       !-----------------------------------------------------------------------
-       ! Trigger dredging
+       dredged = .false.
+       ploughed = .false.
        !
+       !-----------------------------------------------------------------------
+       ! Trigger dredging and ploughing
+       !
+       plough_fac = 1.0_fp - pdredge%plough_effic
        select case (pdredge%triggertype)
        case (DREDGETRIG_POINTBYPOINT,DREDGETRIG_ALLBYONE)
           !
@@ -619,25 +620,9 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
              do i = 1, pdredge%npnt
                 !
                 ! The check on the bed levels will be whether
-                !     z_bed > z_ref - dredgedepth
-                ! In the cases where dredging concerns shallow or deep areas all
-                ! the "bedlevel" and the "triggerlevel" determined above are
-                ! defined relative to the reference plane. Hence, in those cases
-                ! we write the condition above as
-                !     triggerlevel = z_bed - z_ref > - dredgedepth
-                ! where the z_ref adjustment on the right hand side was already
-                ! taken into account above. In the other cases z_ref is not
-                ! included in the trigger level and we will need to take it into
-                ! account here on the right hand side
-                !     triggerlevel = z_bed > z_ref - dredgedepth
+                ! triggerlevel = z_bed (+duneheight) > z_dredge = z_ref - dredgedepth
                 !
-                if (pdredge%dredgedistr/=DREDGEDISTR_SHALLOWEST .and. &
-                  & pdredge%dredgedistr/=DREDGEDISTR_SHALLOWFIRST .and. &
-                  & pdredge%dredgedistr/=DREDGEDISTR_DEEPFIRST) then
-                   z_dredge = reflevel(i) - ddp
-                else
-                   z_dredge = - ddp
-                endif
+                z_dredge = reflevel(i) - ddp
                 if (z_dredge<triggerlevel(i) .and. sedimentdepth(i)>0.0_fp) then
                    !
                    ! If dredging is triggered, then dredge all points
@@ -660,14 +645,22 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
              ! (unless clearance has been added above due to
              ! trigger all or continuation of previous time step).
              !
-             if (pdredge%dredgedistr/=DREDGEDISTR_SHALLOWEST .and. &
-               & pdredge%dredgedistr/=DREDGEDISTR_SHALLOWFIRST .and. &
-               & pdredge%dredgedistr/=DREDGEDISTR_DEEPFIRST) then
-                z_dredge = reflevel(i) - ddp
-             else
-                z_dredge = - ddp
-             endif
-             if (z_dredge<triggerlevel(i) .and. sedimentdepth(i)>0.0_fp) then
+             z_dredge = reflevel(i) - ddp
+             if (triggerlevel(i)>z_dredge .and. sedimentdepth(i)>0.0_fp) then
+                !
+                if (plough_fac<1.0_fp) then
+                   if (bedlevel(i)+plough_fac*pdredge%alpha_dh*hdune(i) < z_dredge-clr) then
+                      !
+                      ! if just ploughing the dunes is sufficient to satisfy
+                      ! the critical depth plus clearance, then just plough
+                      ! the dunes.
+                      !
+                      ploughed = .true.
+                      hdune(i) = hdune(i)*plough_fac
+                      dz_dredge(i) = 0.0_fp
+                      cycle
+                   endif
+                endif
                 !
                 ! If dredging is triggered, lower dredging level by
                 ! clearance.
@@ -704,17 +697,13 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
           ! In case of average triggers all: check whether the average bed
           ! level is above the critical level for triggering dredging.
           !
-          avg_depth   = 0.0_fp
-          dredge_area = 0.0_fp
+          avg_depth     = 0.0_fp
+          avg_trigdepth = 0.0_fp
+          dredge_area   = 0.0_fp
           do i = 1, pdredge%npnt
-             if (pdredge%dredgedistr/=DREDGEDISTR_SHALLOWEST .and. &
-               & pdredge%dredgedistr/=DREDGEDISTR_SHALLOWFIRST .and. &
-               & pdredge%dredgedistr/=DREDGEDISTR_DEEPFIRST) then
-                avg_depth   = avg_depth   + (reflevel(i)-bedlevel(i))*area(i)
-             else
-                avg_depth   = avg_depth   - bedlevel(i)*area(i)
-             endif
-             dredge_area = dredge_area + area(i)
+             avg_depth     = avg_depth     + (reflevel(i)-bedlevel(i))*area(i)
+             avg_trigdepth = avg_trigdepth + (reflevel(i)-triggerlevel(i))*area(i)
+             dredge_area   = dredge_area   + area(i)
              !
              ! maximum depth to dredge is the amount of sediment available
              ! all points with sediment are triggered
@@ -725,18 +714,40 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
                 triggered(i) = .true.
              endif
           enddo
-          avg_depth = avg_depth/dredge_area
+          avg_depth     = avg_depth/dredge_area
+          avg_trigdepth = avg_trigdepth/dredge_area
           !
-          if (avg_depth<ddp) then
+          if (avg_trigdepth<ddp) then
              !
              ! If dredging is triggered, lower dredging level by
              ! clearance.
              !
-             requiredvolume = (ddp - avg_depth + clr)*dredge_area
+             avg_alphadune = avg_trigdepth - avg_depth
+             if (avg_depth-plough_fac*avg_alphadune < ddp-clr) then
+                !
+                ! if just ploughing the dunes is sufficient to satisfy
+                ! the critical depth plus clearance, then just plough
+                ! the dunes.
+                !
+                ploughed = .true.
+                do i = 1, pdredge%npnt
+                   hdune(i) = hdune(i)*plough_fac
+                enddo
+                requiredvolume = 0.0_fp
+             else
+                requiredvolume = (ddp - avg_trigdepth + clr)*dredge_area
+             endif
           else 
              requiredvolume = 0.0_fp
           endif
        end select
+       !
+       if (ploughed) then
+           nploughed(ia) = nploughed(ia)+1
+       endif
+       if (requiredvolume > 0.0_fp .and. (maxvol < 0.0_fp .or. maxvol > 0.0_fp)) then
+           ndredged(ia) = ndredged(ia)+1
+       endif
        !
        !-----------------------------------------------------------------------
        ! Perform dredging
@@ -747,7 +758,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
           !
           dz_dredge = 0.0_fp
        elseif ((maxvol > 0.0_fp .and. requiredvolume > maxvol) .or. &
-             & requiredvolume<availvolume) then
+             & (requiredvolume > 0.0_fp .and. requiredvolume < availvolume)) then
           !
           ! a) we need to dredge more than we can dredge per time step, or
           ! b) dredging has been triggered by an average level and we still
@@ -812,6 +823,15 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
              ! Make sure that points that are not triggered for dredging
              ! do not actively participate in the dredging.
              !
+             if (dredge_prop(ia)%dredgedistr==DREDGEDISTR_SHALLOWEST) then
+                do i=1,pdredge%npnt
+                   bedlevel(i)     = bedlevel(i)     - reflevel(i)
+                   dunetoplevel(i) = dunetoplevel(i) - reflevel(i)
+                   triggerlevel(i) = triggerlevel(i) - reflevel(i)
+                   troughlevel(i)  = troughlevel(i)  - reflevel(i)
+                enddo
+             endif
+             !
              do i=1,pdredge%npnt
                 if (.not.triggered(i)) dunetoplevel(i) = -1.0E11_fp
              enddo
@@ -871,7 +891,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
              ! imindunes:imaxdunes have troughlevel below/equal zmin
              ! and dunetoplevel above/equal zmax
              !
-             if (use_dunes) then
+             if (pdredge%use_dunes) then
                 !
                 !  * sort the first imaxdunes points based on decreasing troughlevel:
                 !    the highest point (max troughlevel) will become 1,
@@ -1020,7 +1040,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
                 !
                 voltim = voltim + dz_dredge(inm)*area(inm)
                 !
-                if (use_dunes) then
+                if (pdredge%use_dunes) then
                    hdune(inm) = 0.0_fp
                 endif
              enddo
@@ -1084,7 +1104,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
                 !
                 dz_dredge(inm) = bedlevel(inm)-z_dredge
                 !
-                if (use_dunes) then
+                if (pdredge%use_dunes) then
                    hdune(inm) = 0.0_fp
                 endif
              enddo
@@ -1097,7 +1117,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
                 !
                 dz_dredge(inm) = dz**2*div2h
                 !
-                if (use_dunes) then
+                if (pdredge%use_dunes) then
                    hdune(inm) = 0.0_fp
                 endif
              enddo
@@ -1121,6 +1141,15 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
              !
              ! Make sure that points that are not triggered for dredging
              ! do not actively participate in the dredging.
+             !
+             if (dredge_prop(ia)%dredgedistr==DREDGEDISTR_SHALLOWFIRST) then
+                do i=1,pdredge%npnt
+                   bedlevel(i)     = bedlevel(i)     - reflevel(i)
+                   dunetoplevel(i) = dunetoplevel(i) - reflevel(i)
+                   triggerlevel(i) = triggerlevel(i) - reflevel(i)
+                   troughlevel(i)  = troughlevel(i)  - reflevel(i)
+                enddo
+             endif
              !
              do i=1,pdredge%npnt
                 if (.not.triggered(i)) dunetoplevel(i) = -1.0E11_fp
@@ -1163,6 +1192,15 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
              ! Make sure that points that are not triggered for dredging
              ! do not actively participate in the dredging.
              !
+             if (dredge_prop(ia)%dredgedistr==DREDGEDISTR_DEEPFIRST) then
+                do i=1,pdredge%npnt
+                   bedlevel(i)     = bedlevel(i)     - reflevel(i)
+                   dunetoplevel(i) = dunetoplevel(i) - reflevel(i)
+                   triggerlevel(i) = triggerlevel(i) - reflevel(i)
+                   troughlevel(i)  = troughlevel(i)  - reflevel(i)
+                enddo
+             endif
+             !
              do i=1,pdredge%npnt
                 if (.not.triggered(i)) dunetoplevel(i) = 1.0E11_fp
              enddo
@@ -1198,7 +1236,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
           ! Dredging not limited by maximum volume, so we will dredge the
           ! dz_dredge amount already computed.
           !
-          if (use_dunes) then 
+          if (pdredge%use_dunes) then 
              do i = 1, pdredge%npnt
                 nm = pdredge%nm(i)
                 !
@@ -1214,7 +1252,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
           if (nm==0) cycle
           !
           dzdred(nm) = dz_dredge(i)
-          if (use_dunes) duneheight(nm) = hdune(i)
+          if (pdredge%use_dunes) duneheight(nm) = hdune(i)
        enddo
        !
        ! Update sediment administration for sandmining/dredging only
@@ -1430,7 +1468,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
           if (nm==0) cycle
           !
           bedlevel(i) = -real(dps(nm),fp)
-          if (use_dunes) hdune(i) = duneheight(nm)
+          if (pdump%use_dunes) hdune(i) = duneheight(nm)
           !
           if (kfsed(nm)==1 .or. pdump%dumpwhendry) then
              if (pdump%dumpcapaflag) then
@@ -1442,10 +1480,6 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
              endif
           else
              dz_dump(i) = 0.0_fp
-          endif
-          !
-          if (pdump%dumpdistr == DUMPDISTR_DEEPEST) then
-             bedlevel(i) = bedlevel(i) - reflevel(i)
           endif
        enddo
        !
@@ -1510,6 +1544,12 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
           !  * sort nm points based on increasing bedlevel:
           !    deepest point (min bedlevel) will become 1,
           !    shallowest point (max bedlevel) will become pdump%npnt.
+          !
+          if (pdump%dumpdistr == DUMPDISTR_DEEPEST) then
+             do i=1,pdump%npnt
+                bedlevel(i) = bedlevel(i) - reflevel(i)
+             enddo
+          endif
           !
           call sortindices(pdump%inm,pdump%npnt, &
              & bedlevel, 1, pdump%npnt,.true.)
@@ -1630,7 +1670,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
           enddo
           !
           dps(nm) = dps(nm) - real(dz_dump(i), prec)
-          if (use_dunes) duneheight(nm) = hdune(i)
+          if (pdump%use_dunes) duneheight(nm) = hdune(i)
        enddo
     enddo
     !

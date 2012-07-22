@@ -68,14 +68,14 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     real(fp)      , dimension(:)     , pointer :: localareadump
     real(fp)      , dimension(:)     , pointer :: globalareadump
     real(fp)      , dimension(:)     , pointer :: globaldumpcap
-    real(fp)                         , pointer :: alpha_dh
     integer                          , pointer :: nadred
     integer                          , pointer :: nadump
     integer                          , pointer :: nasupl
     integer                          , pointer :: nalink
     integer       , dimension(:,:)   , pointer :: link_def
+    integer       , dimension(:)     , pointer :: ndredged
+    integer       , dimension(:)     , pointer :: nploughed
     logical                          , pointer :: tsmortime
-    logical                          , pointer :: use_dunes
     character(256)                   , pointer :: dredgefile
     character( 80), dimension(:)     , pointer :: dredge_areas
     character( 80), dimension(:)     , pointer :: dump_areas
@@ -153,6 +153,8 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     real(fp)                                :: def_dredge_depth
     real(fp)                                :: def_maxvolrate
     real(fp)                                :: def_mindumpdepth
+    real(fp)                                :: def_alpha_dh
+    real(fp)                                :: def_plough_effic
     real(fp)                                :: rmissval
     real(sp)                                :: versionnr
     real(sp)                                :: versionnrinput
@@ -165,6 +167,7 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     logical                                 :: def_dumpwhendry
     logical                                 :: def_if_morfac_0
     logical                                 :: def_obey_cmp
+    logical                                 :: def_use_dunes
     logical                                 :: lastdumparea
     logical                                 :: sfound
     logical                                 :: triggerall
@@ -191,13 +194,11 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
 !! executable statements -------------------------------------------------------
 !
     tseriesfile       => gdp%gddredge%tseriesfile
-    alpha_dh          => gdp%gddredge%alpha_dh
     nadred            => gdp%gddredge%nadred
     nadump            => gdp%gddredge%nadump
     nasupl            => gdp%gddredge%nasupl
     nalink            => gdp%gddredge%nalink
     tsmortime         => gdp%gddredge%tsmortime
-    use_dunes         => gdp%gddredge%use_dunes
     dredgefile        => gdp%gddredge%dredgefile
     lundia            => gdp%gdinout%lundia
     namsed            => gdp%gdsedpar%namsed
@@ -292,6 +293,9 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     def_dredge_depth  = 1.0e10_fp
     def_maxvolrate    = -999.0_fp
     def_mindumpdepth  = -999.0_fp
+    def_use_dunes     = .false.
+    def_alpha_dh      = 0.5_fp
+    def_plough_effic  = 0.0_fp
     !
     ! Allocate array for refplane
     !
@@ -341,11 +345,13 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
        call prterr(lundia, 'U021', 'Invalid default dredge distribution')
        call d3stop(1, gdp)
     endif
-    call prop_get(dad_ptr, 'General', 'AlphaDuneHeight', alpha_dh)
-    if ((alpha_dh > 0.5_fp) .or. (alpha_dh < 0.0_fp)) then
-       call prterr(lundia, 'U021', 'AlphaDuneHeight should be a real number between 0.0 and 0.5')
+    call prop_get_logical(dad_ptr, 'General', 'UseDunes'        , def_use_dunes)
+    if (def_use_dunes .and. .not. lfbedfrm) then
+       call prterr(lundia, 'U021', 'UseDunes: Dunes can only be used when modelled.')
        call d3stop(1, gdp)
     endif
+    call prop_get(dad_ptr, 'General', 'AlphaDuneHeight', def_alpha_dh)
+    call prop_get(dad_ptr, 'General', 'PloughEfficiency', def_plough_effic)
     call prop_get_integer(dad_ptr, 'General', 'DumpDistr', def_dumpdistr)
     if (def_dumpdistr < 1 .or. def_dumpdistr > DUMPDISTR_MAX) then
        call prterr(lundia, 'U021', 'Invalid default dump distribution')
@@ -379,10 +385,6 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     call prop_get        (dad_ptr, 'General', 'MinimumDumpDepth', def_mindumpdepth)
     call prop_get_logical(dad_ptr, 'General', 'DredgeWhenDry'   , def_dredgewhendry)
     call prop_get_logical(dad_ptr, 'General', 'DumpWhenDry'     , def_dumpwhendry)
-    call prop_get_logical(dad_ptr, 'General', 'UseDunes'        , use_dunes)
-    if (use_dunes .and. .not. lfbedfrm) then
-       call prterr(lundia, 'U021', 'UseDunes: Dunes can only be used when modelled.')
-    endif
     call prop_get_logical(dad_ptr, 'General', 'ObeyCmp'           , def_obey_cmp)
     triggerall = .false.
     call prop_get_logical(dad_ptr, 'General', 'TriggerAll'        , triggerall)
@@ -472,10 +474,6 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     ! Add dredgid's and dumpid's to the polygons in the input_tree
     ! They are used during reading
     !
-    ! Unfortunately, almost the complete input tree must be scanned, just
-    ! to get the dimensions.
-    ! Result: the following giant if loop
-    !
     nadred  = 0
     nadump  = 0
     nasupl  = 0
@@ -484,6 +482,10 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     totnpdu = 0
     !
     if ( associated(dad_ptr%child_nodes) ) then
+       !
+       ! Unfortunately, almost the complete input tree must be scanned, just
+       ! to get the dimensions.
+       !
        do i = 1, size(dad_ptr%child_nodes)
           link_ptr => dad_ptr%child_nodes(i)%node_ptr
           dredgetype = tree_get_name( link_ptr )
@@ -495,7 +497,8 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
           select case ( dredgetype )
           case ('dredge', 'sandmining')
              !
-             ! Dredge area specification found - name must be unique
+             ! Dredge or sandmining area specification found - name must be unique
+             ! nadred incremented by register_polygon call
              !
              areatp  = 'dredge'
              unique  = .true.
@@ -508,6 +511,7 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                 do j = 1, size(link_ptr%child_nodes)
                    !
                    ! Does link_ptr contain one or more children with name 'Dump'?
+                   ! nadump incremented by register_polygon call
                    !
                    node_ptr => link_ptr%child_nodes(j)%node_ptr
                    parname = tree_get_name( node_ptr )
@@ -520,6 +524,9 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                 enddo
              endif
           case ('nourishment')
+             !
+             ! Nourishment specification found
+             !
              nasupl = nasupl + 1        
              if ( associated(link_ptr%child_nodes) ) then
                 areatp = 'dump'
@@ -554,6 +561,8 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     ! Allocate arrays used during computation
     !
                   allocate (gdp%gddredge%link_def        (nalink               ,2        ), stat = istat)
+    if (istat==0) allocate (gdp%gddredge%ndredged        (nadred+nasupl                  ), stat = istat)
+    if (istat==0) allocate (gdp%gddredge%nploughed       (nadred+nasupl                  ), stat = istat)
     !
     if (istat==0) allocate (gdp%gddredge%link_percentage (nalink               ,lsedtot  ), stat = istat)
     if (istat==0) allocate (gdp%gddredge%link_distance   (nalink                         ), stat = istat)
@@ -583,6 +592,8 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     ! update local pointers
     !
     link_def          => gdp%gddredge%link_def
+    ndredged          => gdp%gddredge%ndredged
+    nploughed         => gdp%gddredge%nploughed
     !
     link_percentage   => gdp%gddredge%link_percentage
     link_distance     => gdp%gddredge%link_distance
@@ -626,6 +637,8 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     ! necessary initializations
     !
     link_def        = 0
+    ndredged        = 0
+    nploughed       = 0
     !
     link_percentage = 0.0_fp
     link_distance   = 0.0_fp
@@ -688,7 +701,7 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
              select case ( dredgetype )
              case ('dredge', 'sandmining')
                 !
-                ! Dredge area specification found
+                ! Dredge or sandmining area specification found
                 !
                 cntdred = cntdred + 1
                 cntssrc = cntssrc + 1
@@ -715,6 +728,9 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                 pdredge%totalvolsupl  = 0.0_fp
                 pdredge%outletlink    = 0
                 pdredge%npnt          = 0
+                pdredge%use_dunes     = def_use_dunes
+                pdredge%alpha_dh      = def_alpha_dh
+                pdredge%plough_effic  = def_plough_effic
                 nullify(pdredge%nm)
                 nullify(pdredge%inm)
                 nullify(pdredge%area)
@@ -887,6 +903,23 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                    endif
                 endif
                 call prop_get(link_ptr, '*', 'DredgeTrigger', pdredge%triggertype)
+                call prop_get(link_ptr, '*', 'UseDunes'     , pdredge%use_dunes)
+                if (pdredge%use_dunes .and. .not. lfbedfrm) then
+                   call prterr(lundia, 'U021', 'UseDunes: Dunes can only be used when modelled.')
+                   call d3stop(1, gdp)
+                endif
+                if (pdredge%use_dunes) then
+                   call prop_get(link_ptr, '*', 'AlphaDuneHeight', pdredge%alpha_dh)
+                   if ((pdredge%alpha_dh > 0.5_fp) .or. (pdredge%alpha_dh < 0.0_fp)) then
+                      call prterr(lundia, 'U021', 'AlphaDuneHeight should be a real number between 0.0 and 0.5')
+                      call d3stop(1, gdp)
+                   endif
+                   call prop_get(link_ptr, '*', 'PloughEfficiency', pdredge%plough_effic)
+                   if ((pdredge%plough_effic > 1.0_fp) .or. (pdredge%plough_effic < 0.0_fp)) then
+                      call prterr(lundia, 'U021', 'PloughEfficiency should be a real number between 0.0 and 1.0')
+                      call d3stop(1, gdp)
+                   endif
+                endif
                 !
                 ! Read the coordinates of the corresponding polygon
                 !
@@ -982,7 +1015,7 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
                 endif
             case ('nourishment')
                 !
-                ! Dredge area specification found
+                ! Nourishment specification found
                 !
                 cntssrc = cntssrc + 1
                 cntsupl = cntsupl + 1
@@ -1273,6 +1306,7 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
        pdump%dumpwhendry  = def_dumpwhendry
        pdump%in1domain    = .false.
        pdump%ichkloc      = def_chkloc
+       pdump%use_dunes    = def_use_dunes
        pdump%npnt         = 0
        nullify(pdump%nm)
        nullify(pdump%inm)
@@ -1341,6 +1375,12 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
              call prop_get_logical(link_ptr, '*', 'DumpWhenDry'  , pdump%dumpwhendry)
              call prop_get(link_ptr, '*', 'MinimumDumpDepth', pdump%mindumpdepth)
              pdump%dumpcapaflag = comparereal(pdump%mindumpdepth,-999.0_fp) /= 0
+             !
+             call prop_get(link_ptr, '*', 'UseDunes'     , pdump%use_dunes)
+             if (pdump%use_dunes .and. .not. lfbedfrm) then
+                call prterr(lundia, 'U021', 'UseDunes: Dunes can only be used when modelled.')
+                call d3stop(1, gdp)
+             endif
           case default
              !
              ! Ignore any other child (like 'dredge')

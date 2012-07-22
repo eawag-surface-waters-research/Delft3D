@@ -36,6 +36,8 @@ subroutine wrihisdad(lundia    ,error     ,trifil    ,itdate    , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use sp_buffer
+    use dfparall
     use globaldata
     !
     implicit none
@@ -54,13 +56,7 @@ subroutine wrihisdad(lundia    ,error     ,trifil    ,itdate    , &
     character( 80), dimension(:)   , pointer :: dredge_areas
     character( 80), dimension(:)   , pointer :: dump_areas
     logical                        , pointer :: first
-    integer                        , pointer :: celidt
-    integer, dimension(:, :)       , pointer :: elmdms
     type (nefiselement)            , pointer :: nefiselem
-!
-! Local parameters
-!
-    integer, parameter :: nelmx = 8
 !
 ! Global variables
 !
@@ -74,40 +70,23 @@ subroutine wrihisdad(lundia    ,error     ,trifil    ,itdate    , &
 !
 ! Local variables
 !
-    integer                                             :: i      ! Data-group name defined for the NEFIS-files Help var.
-    integer                                             :: ierror ! Local errorflag for NEFIS files
-    integer       , dimension(2)                        :: ival   ! Local array for writing ITDATE and
-    integer       , dimension(nelmx)                    :: nbytsg ! Help array for name constituents and turbulent quantities Array containing the number of by-
-    integer                                  , external :: neferr
-    real(fp)      , dimension(:), allocatable           :: rdummy ! putgtr expects an array
-    logical                                             :: wrswch ! Flag to write file
-    character(10) , dimension(nelmx)                    :: elmunt
-    character(16)                                       :: grnam
-    character(16) , dimension(nelmx)                    :: elmnms
-    character(16) , dimension(nelmx)                    :: elmqty
-    character(16) , dimension(nelmx)                    :: elmtps
-    character(256)                                      :: filnam
-    character(256)                                      :: errmsg
-    character(64) , dimension(nelmx)                    :: elmdes
+    integer                                       :: fds
+    integer                                       :: i
+    integer                                       :: l
+    integer                                       :: ierror ! Local errorflag for NEFIS files
+    integer       , dimension(2)                  :: ival   ! Local array for writing ITDATE and
+    character(16)                                 :: grnam
+    character(256)                                :: filnam
+    character(256)                                :: errmsg
+    integer    , dimension(3,5)                   :: uindex
+    integer                        , external     :: clsnef
+    integer                        , external     :: open_datdef
+    integer                        , external     :: putelt
+    integer                        , external     :: neferr
 !
 ! Data statements
 !
     data grnam/'his-dad-const'/
-    data elmnms/'ITDATE', 'TUNIT', 'DT', 'DREDGE_AREAS', 'DUMP_AREAS', 'LINK_DEF', &
-             &  'LINK_PERCENTAGES', 'LINK_DISTANCE'/
-    data elmqty/8*' '/
-    data elmunt/'[YYYYMMDD]', '[   S   ]', 4*'[   -   ]', '[   %   ]', '[   M   ]'/
-    data elmtps/'INTEGER', 2*'REAL', 2*'CHARACTER', 'INTEGER', 2*'REAL'/
-    data nbytsg/3*4, 2*80, 3*4/
-    data (elmdes(i), i = 1, 8)                                                   &
-         & /'Initial date (input) & time (default 00:00:00)                ',    &
-         & 'Time scale related to seconds                                 ',     &
-         & 'Time step (DT*TUNIT sec)                                      ',     &
-         & 'Names identifying dredge areas/dredge polygons                ',     &
-         & 'Names identifying dump areas/dump polygons                    ',     &
-         & 'Actual transports from dredge(1st col) to dump(2nd col) areas ',     &
-         & 'Distribution of dredged material from dredge to dump areas    ',     &
-         & 'Link Distance between dredge and dump areas                   '/
 !
 !! executable statements -------------------------------------------------------
 !
@@ -122,109 +101,122 @@ subroutine wrihisdad(lundia    ,error     ,trifil    ,itdate    , &
     dump_areas        => gdp%gddredge%dump_areas
     nefiselem => gdp%nefisio%nefiselem(nefiswrihisdad)
     first             => nefiselem%first
-    celidt            => nefiselem%celidt
-    elmdms            => nefiselem%elmdms
     !
     ! Initialize local variables
     !
     ierror = 0
-    celidt = 1
-    allocate(rdummy(nalink))
-    !
     filnam = trifil(1:3) // 'h' // trifil(5:)
     errmsg = ' '
-    wrswch = .true.
     !
-    ! Set up the element dimensions
-    !
-    if (first) then
+    if (first .and. inode == master) then
+       !
+       ! Set up the element chracteristics
+       !
+       call addelm(nefiswrihisdad,'ITDATE',' ','[YYYYMMDD]','INTEGER',4     , &
+          & 'Initial date (input) & time (default 00:00:00)                ', &
+          & 1, 2, 0, 0, 0, 0, lundia, gdp)
+       call addelm(nefiswrihisdad,'TUNIT',' ','[   S   ]','REAL',4          , &
+          & 'Time scale related to seconds                                 ', &
+          & 1, 1, 0, 0, 0, 0, lundia, gdp)
+       call addelm(nefiswrihisdad,'DT',' ','[   -   ]','REAL',4             , &
+          & 'Time step (DT*TUNIT sec)                                      ', &
+          & 1, 1, 0, 0, 0, 0, lundia, gdp)
+       call addelm(nefiswrihisdad,'DREDGE_AREAS',' ','[   -   ]','CHARACTER',80, &
+          & 'Names identifying dredge areas/dredge polygons                ', &
+          & 1, nadred+nasupl, 0, 0, 0, 0, lundia, gdp)
+       call addelm(nefiswrihisdad,'DUMP_AREAS',' ','[   -   ]','CHARACTER',80, &
+          & 'Names identifying dump areas/dump polygons                    ', &
+          & 1, nadump, 0, 0, 0, 0, lundia, gdp)
+       call addelm(nefiswrihisdad,'LINK_DEF',' ','[   -   ]','INTEGER',4    , &
+          & 'Actual transports from dredge(1st col) to dump(2nd col) areas ', &
+          & 1, nalink, 0, 0, 0, 0, lundia, gdp)
+       call addelm(nefiswrihisdad,'LINK_PERCENTAGES',' ','[   %   ]','REAL',4, &
+          & 'Distribution of dredged material from dredge to dump areas    ', &
+          & 2, nalink, lsedtot, 0, 0, 0, lundia, gdp)
+       call addelm(nefiswrihisdad,'LINK_DISTANCE',' ','[   M   ]','REAL',4  , &
+          & 'Link Distance between dredge and dump areas                   ', &
+          & 2, nalink, 1, 0, 0, 0, lundia, gdp)
+       !
+       call defnewgrp(nefiswrihisdad ,filnam    ,grnam   ,gdp)
        first = .false.
-       call filldm(elmdms    ,1         ,1         ,2         ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,2         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,3         ,1         ,1         ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,4         ,1         ,nadred+nasupl    ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,5         ,1         ,nadump    ,0         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,6         ,2         ,nalink    ,2         , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,7         ,2         ,nalink    ,lsedtot   , &
-                 & 0         ,0         ,0         )
-       call filldm(elmdms    ,8         ,2         ,nalink    ,1         , &
-                 & 0         ,0         ,0         )
     endif
     !
-    ! element 'ITDATE'
+    ! initialize group index
     !
-    ival(1) = itdate
-    ival(2) = 000000
-    call putgti(filnam    ,grnam     ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(1) ,celidt    ,wrswch    ,ierror    ,ival      )
-    if (ierror/=0) goto 999
+    uindex (1,1) = 1 ! start index
+    uindex (2,1) = 1 ! end index
+    uindex (3,1) = 1 ! increment in time
     !
-    ! element 'TUNIT'
-    !
-    rdummy(1) = tunit
-    call putgtr(filnam    ,grnam     ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(2) ,celidt    ,wrswch    ,ierror    ,rdummy    )
-    if (ierror/=0) goto 999
-    !
-    ! element 'DT'
-    !
-    rdummy(1) = dt
-    call putgtr(filnam    ,grnam     ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(3) ,celidt    ,wrswch    ,ierror    ,rdummy    )
-    if (ierror/=0) goto 999
-    !
-    ! element 'DREDGE_AREAS'
-    !
-    call putgtc(filnam    ,grnam     ,nelmx     ,elmnms    ,elmdms       , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg       , &
-              & elmnms(4) ,celidt    ,wrswch    ,ierror    ,dredge_areas )
-    if (ierror/=0) goto 999
-    !
-    ! element 'DUMP_AREAS'
-    !
-    call putgtc(filnam    ,grnam     ,nelmx     ,elmnms    ,elmdms     , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg     , &
-              & elmnms(5) ,celidt    ,wrswch    ,ierror    ,dump_areas )
-    if (ierror/=0) goto 999
-    !
-    ! element 'LINK_DEF'
-    !
-    call putgti(filnam    ,grnam     ,nelmx     ,elmnms    ,elmdms    , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-              & elmnms(6) ,celidt    ,wrswch    ,ierror    ,link_def  )
-    if (ierror/=0) goto 999
-    !
-    ! element 'LINK_PERCENTAGE'
-    !
-    call putgtr(filnam    ,grnam     ,nelmx     ,elmnms    ,elmdms          , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg          , &
-              & elmnms(7) ,celidt    ,wrswch    ,ierror    ,link_percentage )
-    if (ierror/=0) goto 999
-    !
-    ! element 'LINK_DISTANCE'
-    !
-    call putgtr(filnam    ,grnam     ,nelmx     ,elmnms    ,elmdms          , &
-              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg          , &
-              & elmnms(8) ,celidt    ,wrswch    ,ierror    ,link_distance )
-    if (ierror/=0) goto 999
-    !
-    ! write errormessage if error occurred and set error = .true.
-    ! the files will be closed in clsnef (called in triend)
-    !
-  999 continue
-    if (ierror/= 0) then
-       ierror = neferr(0, errmsg)
-       call prterr(lundia, 'P004', errmsg)
-       error = .true.
+    if (inode == master) then
+       ierror = open_datdef(filnam   ,fds      )
+       if (ierror /= 0) goto 9999
+       !
+       ! element 'ITDATE'
+       !
+       ival(1) = itdate
+       ival(2) = 000000
+       ierror = putelt(fds, grnam, 'ITDATE', uindex, 1, ival)
+       if (ierror/= 0) goto 9999
+       !
+       ! element 'TUNIT'
+       !
+       call sbuff_checksize(1)
+       sbuff(1) = tunit
+       ierror = putelt(fds, grnam, 'TUNIT', uindex, 1, sbuff)
+       if (ierror/= 0) goto 9999
+       !
+       ! element 'DT'
+       !
+       call sbuff_checksize(1)
+       sbuff(1) = dt
+       ierror = putelt(fds, grnam, 'DT', uindex, 1, sbuff)
+       if (ierror/= 0) goto 9999
+       !
+       ! element 'DREDGE_AREAS'
+       !
+       ierror = putelt(fds, grnam, 'DREDGE_AREAS', uindex, 1, dredge_areas)
+       if (ierror/= 0) goto 9999
+       !
+       ! element 'DUMP_AREAS'
+       !
+       ierror = putelt(fds, grnam, 'DUMP_AREAS', uindex, 1, dump_areas)
+       if (ierror/= 0) goto 9999
+       !
+       ! element 'LINK_DEF'
+       !
+       ierror = putelt(fds, grnam, 'LINK_DEF', uindex, 1, link_def)
+       if (ierror/= 0) goto 9999
+       !
+       ! element 'LINK_PERCENTAGE'
+       !
+       call sbuff_checksize(nalink*lsedtot)
+       do l = 1, lsedtot
+          do i = 1, nalink
+             sbuff(i+(lsedtot-1)*nalink) = link_percentage(i,l)
+          enddo
+       enddo
+       ierror = putelt(fds, grnam, 'LINK_PERCENTAGE', uindex, 1, sbuff)
+       if (ierror/= 0) goto 9999
+       !
+       ! element 'LINK_DISTANCE'
+       !
+       call sbuff_checksize(nalink)
+       do i = 1, nalink
+          sbuff(i) = link_distance(i)
+       enddo
+       ierror = putelt(fds, grnam, 'LINK_DISTANCE', uindex, 1, sbuff)
+       if (ierror/= 0) goto 9999
+       !
+       ierror = clsnef(fds)
+       !
+       ! write error message if error occured and set error= .true.
+       ! the files will be closed in clsnef (called in triend)
+       !
+9999   continue
+       if (ierror /= 0) then
+          ierror = neferr(0, errmsg)
+          call prterr(lundia, 'P004', errmsg)
+          error= .true.
+       endif
     endif
-    deallocate(rdummy)
 end subroutine wrihisdad

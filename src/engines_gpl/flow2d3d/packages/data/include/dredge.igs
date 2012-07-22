@@ -81,9 +81,12 @@
 ! collection of dredging area related parameters
 !
 type dredtype
+    real(fp)                                :: alpha_dh        ! multiplication factor between 0.0 and 0.5 
+                                                               ! when including duneheights in the trigger height
     real(fp)                                :: dredge_depth    ! dredge depth of dredge area
     real(fp)                                :: maxvolrate      ! maximum dredging volume rate
     real(fp)                                :: clearance       ! extra depth when dredging
+	real(fp)                                :: plough_effic    ! efficiency of dune ploughing in reducing dune height
     real(fp), dimension(2)                  :: dredgeloc       ! dredgelocation (x,y)
     real(fp)                                :: totalvolsupl    ! total volume to be nourished.
     real(fp)      , dimension(:)  , pointer :: area            ! (npnt)   grid cell area at nm point (gsqs)
@@ -139,6 +142,7 @@ type dredtype
     logical                                 :: if_morfac_0     ! T: allow instanteneous dredging while morfac equals 0
     logical                                 :: in1domain       ! T: dredge area located in only 1 domain
     logical                                 :: obey_cmp        ! T: stop dredging if bed composition is empty
+    logical                                 :: use_dunes       ! T: include effect of dune heights on dredging and vice versa
     !
     character( 80)                          :: name            ! name identifying dredge area
 end type dredtype
@@ -173,6 +177,7 @@ type dumptype
     logical                                 :: dumpwhendry     ! T: dump also at dry points (kfsed /= 1)
     logical                                 :: dumpcapaflag    ! T: dump area is capacity limited (mindumpdepth /= -999)
     logical                                 :: in1domain       ! T: dump area located in only 1 domain
+    logical                                 :: use_dunes       ! T: include effect of dune heights on dumping and vice versa
     !
     character( 80)                          :: name            ! name identifying dredge area
 end type dumptype
@@ -201,22 +206,21 @@ type sv_dredge
     real(fp)      , dimension(:)  , pointer :: globalareadump  ! (nadump) global area for dumping (over all domains)
     real(fp)      , dimension(:)  , pointer :: globaldumpcap   ! (nadump) global dump capacity (over all domains)
     !
-    real(fp)                                :: alpha_dh        ! multiplication factor between 0.0 and 0.5 
-                                                               ! when including duneheights in the trigger height
-    !
     integer                                 :: dredge_domainnr ! domain number of dredge
     integer                                 :: dredge_ndomains ! number of domains that use dredge&dump functionality
     integer                                 :: nadred          ! number of dredge areas
     integer                                 :: nadump          ! number of dump areas
     integer                                 :: nasupl          ! number of nourishment areas
     integer                                 :: nalink          ! number of links
+	integer                                 :: ntimaccum       ! number of (half) timesteps over which ndredge and nplough has been accumulated
     !
     integer       , dimension(:,:), pointer :: link_def        ! (nalink,2) actual transports from dredge (1st column)
                                                                !            to dump (2nd column) areas
+    integer       , dimension(:)  , pointer :: ndredged        ! (nadred) number of (half) timesteps dredged
+    integer       , dimension(:)  , pointer :: nploughed       ! (nadred) number of (half) timesteps ploughed
     !
     logical                                 :: tsmortime       ! T: time scale of time-series is morphological time
     logical                                 :: firstdredge     ! T: first time in computational dredge routine
-    logical                                 :: use_dunes       ! T: include dredge and dump effects on dune height (and vice versa)
     !
     character(256)                          :: dredgefile      ! name of dredge input file
     character( 80), dimension(:)  , pointer :: dredge_areas    ! (nadred) names identifying dredge areas
