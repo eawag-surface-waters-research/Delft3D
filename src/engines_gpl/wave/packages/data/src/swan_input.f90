@@ -2877,6 +2877,7 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
             & trim(vers), ' is not supported.'
        goto 1002
     endif
+    write(*,*)'hello'
     rccnt = rccnt + skcomc(iuni)
     rccnt = rccnt + 1
 !------SWAN version number------------------------------------
@@ -4879,6 +4880,7 @@ subroutine write_swan_inp (wavedata, outcnt, &
        ! Output curves specified in a Tekal file
        ! Handle in a separate subroutine
        !
+       write(*,'(1X,A)') ' Output curves are specified in a polyline file'
        call outputCurvesFromFile
     endif
     line(1:2) = '$ '
@@ -5191,7 +5193,13 @@ subroutine outputCurvesFromFile()
        endselect
        stop
     endif
-
+    !
+    ! if no line exists in the polyline file
+    !
+    if(.not. associated(pol_ptr%child_nodes) ) then
+        write(*,'(1X,A)') ' Error! 0 output curve is specified in the polyline file!'
+        stop
+    endif
     do i = 1,size(pol_ptr%child_nodes)
        cur_ptr => pol_ptr%child_nodes(i)%node_ptr
        curname = tree_get_name(cur_ptr)
