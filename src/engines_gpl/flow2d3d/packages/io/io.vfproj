@@ -136,7 +136,6 @@
 		<File RelativePath="src\output\calbed.f90"/>
 		<File RelativePath="src\output\defnewgrp.f90"/>
 		<File RelativePath="src\output\dirint.f90"/>
-		<File RelativePath="src\output\distance_nogdp.f90"/>
 		<File RelativePath="src\output\dp999.f90"/>
 		<File RelativePath="src\output\filldm.f90"/>
 		<File RelativePath="src\output\findnm_kcs.f90"/>

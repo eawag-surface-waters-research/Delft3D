@@ -241,7 +241,7 @@
 		<File RelativePath="src\general\defsub.f90"/>
 		<File RelativePath="src\general\delfil.f90"/>
 		<File RelativePath="src\general\delnef.f90"/>
-		<File RelativePath="src\general\distance.f90"/>
+		<File RelativePath="src\general\distance_gdp.f90"/>
 		<File RelativePath="src\general\dittar.f90"/>
 		<File RelativePath="src\general\dtn.f90"/>
 		<File RelativePath="src\general\endscr.f90"/>

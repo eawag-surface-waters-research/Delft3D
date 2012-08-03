@@ -1,6 +1,5 @@
-subroutine distance_nogdp(sferic    ,x1        ,y1        , &
-                        & x2        ,y2        ,d12       , &
-                        & dearthrad                       )
+subroutine distance_gdp(sferic    ,x1        ,y1        ,x2        ,y2        , &
+                  & d12       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -41,59 +40,31 @@ subroutine distance_nogdp(sferic    ,x1        ,y1        , &
     use precision
     use mathconsts
     !
+    use globaldata
+    !
     implicit none
+    !
+    type(globdat),target :: gdp
+    !
+    ! The following list of pointer parameters is used to point inside the gdp structure
+    !
+    real(hp) , pointer :: dearthrad
 !
 ! Global variables
 !
-    logical , intent(in)  :: sferic    !  Description and declaration in tricom.igs
-    real(fp), intent(out) :: d12       !  Calculated distance from 1 to 2
-    real(fp), intent(in)  :: x1        !  X coordinate of point 1 (deg or m)
-    real(fp), intent(in)  :: x2        !  X coordinate of point 2 (deg or m)
-    real(fp), intent(in)  :: y1        !  Y coordinate of point 1 (deg or m)
-    real(fp), intent(in)  :: y2        !  Y coordinate of point 2 (deg or m)
-    real(hp), intent(in)  :: dearthrad !  Earth radius
+    logical , intent(in)  :: sferic !  Description and declaration in tricom.igs
+    real(fp), intent(out) :: d12    !!  Calculated distance from 1 to 2
+    real(fp), intent(in)  :: x1     !!  X coordinate of point 1 (deg or m)
+    real(fp), intent(in)  :: x2     !!  X coordinate of point 2 (deg or m)
+    real(fp), intent(in)  :: y1     !!  Y coordinate of point 1 (deg or m)
+    real(fp), intent(in)  :: y2     !!  Y coordinate of point 2 (deg or m)
 !
 ! Local variables
 !
-    real(hp) :: alpha  ! Half angle (in radials) between points 1 and 2
-    real(hp) :: d128   ! Double precision d12
-    real(hp) :: dslin  ! Linear distance between points 1 and 2
-    real(hp) :: x1rad  ! X1 in radials
-    real(hp) :: x2rad  ! X2 in radials
-    real(hp) :: y1rad  ! Y1 in radials
-    real(hp) :: y2rad  ! Y2 in radials
-    real(hp) :: xcrd1  ! X coordinate of point 1
-    real(hp) :: xcrd2  ! X coordinate of point 2
-    real(hp) :: ycrd1  ! Y coordinate of point 1
-    real(hp) :: ycrd2  ! Y coordinate of point 2
-    real(hp) :: zcrd1  ! Z coordinate of point 1
-    real(hp) :: zcrd2  ! Z coordinate of point 2
+!   NONE
 !
 !! executable statements -------------------------------------------------------
 !
-    if (sferic) then
-       x1rad = real(x1,hp)*degrad_hp
-       x2rad = real(x2,hp)*degrad_hp
-       y1rad = real(y1,hp)*degrad_hp
-       y2rad = real(y2,hp)*degrad_hp
-       !
-       xcrd1 = cos(y1rad)*sin(x1rad)
-       ycrd1 = cos(y1rad)*cos(x1rad)
-       zcrd1 = sin(y1rad)
-       !
-       xcrd2 = cos(y2rad)*sin(x2rad)
-       ycrd2 = cos(y2rad)*cos(x2rad)
-       zcrd2 = sin(y2rad)
-       !
-       dslin = sqrt((xcrd2-xcrd1)**2 + (ycrd2-ycrd1)**2 + (zcrd2-zcrd1)**2)
-       alpha = asin(dslin/2.0_hp)
-       d128  = dearthrad*2.0_hp*alpha
-    else
-       xcrd1 = real(x1,hp)
-       xcrd2 = real(x2,hp)
-       ycrd1 = real(y1,hp)
-       ycrd2 = real(y2,hp)
-       d128  = sqrt((xcrd2 - xcrd1)**2 + (ycrd2 - ycrd1)**2)
-    endif
-    d12 = real(d128,fp)
-end subroutine distance_nogdp
+    call distance(sferic    ,x1        ,y1        ,x2        ,y2        , &
+                & d12       ,gdp%gdconstd%dearthrad       )
+end subroutine distance_gdp

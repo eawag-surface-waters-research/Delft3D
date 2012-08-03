@@ -69,6 +69,8 @@ subroutine distance2(sferic    ,x1        ,y1        ,x2        ,y2        , &
 !
 !! executable statements -------------------------------------------------------
 !
+! TODO: CALL distance.f90 IN deltares_common INSTEAD OF DOUBLE CODE
+!
     if (x1==x2 .and. y1==y2) then
        d12 = 0.0_fp
        return

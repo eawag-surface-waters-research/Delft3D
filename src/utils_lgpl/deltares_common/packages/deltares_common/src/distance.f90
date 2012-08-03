@@ -1,20 +1,21 @@
-subroutine distance(sferic    ,x1        ,y1        ,x2        ,y2        , &
-                  & d12       ,gdp       )
-!----- GPL ---------------------------------------------------------------------
+subroutine distance(sferic    ,x1        ,y1        , &
+                  & x2        ,y2        ,d12       , &
+                  & dearthrad                       )
+!----- LGPL --------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
 !                                                                               
-!  This program is free software: you can redistribute it and/or modify         
-!  it under the terms of the GNU General Public License as published by         
-!  the Free Software Foundation version 3.                                      
+!  This library is free software; you can redistribute it and/or                
+!  modify it under the terms of the GNU Lesser General Public                   
+!  License as published by the Free Software Foundation version 2.1.                 
 !                                                                               
-!  This program is distributed in the hope that it will be useful,              
+!  This library is distributed in the hope that it will be useful,              
 !  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
-!  GNU General Public License for more details.                                 
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
+!  Lesser General Public License for more details.                              
 !                                                                               
-!  You should have received a copy of the GNU General Public License            
-!  along with this program.  If not, see <http://www.gnu.org/licenses/>.        
+!  You should have received a copy of the GNU Lesser General Public             
+!  License along with this library; if not, see <http://www.gnu.org/licenses/>. 
 !                                                                               
 !  contact: delft3d.support@deltares.nl                                         
 !  Stichting Deltares                                                           
@@ -40,34 +41,27 @@ subroutine distance(sferic    ,x1        ,y1        ,x2        ,y2        , &
     use precision
     use mathconsts
     !
-    use globaldata
-    !
     implicit none
-    !
-    type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    real(hp) , pointer :: dearthrad
 !
 ! Global variables
 !
-    logical , intent(in)  :: sferic !  Description and declaration in tricom.igs
-    real(fp), intent(out) :: d12    !!  Calculated distance from 1 to 2
-    real(fp), intent(in)  :: x1     !!  X coordinate of point 1 (deg or m)
-    real(fp), intent(in)  :: x2     !!  X coordinate of point 2 (deg or m)
-    real(fp), intent(in)  :: y1     !!  Y coordinate of point 1 (deg or m)
-    real(fp), intent(in)  :: y2     !!  Y coordinate of point 2 (deg or m)
+    logical , intent(in)  :: sferic    !  Description and declaration in tricom.igs
+    real(fp), intent(out) :: d12       !  Calculated distance from 1 to 2
+    real(fp), intent(in)  :: x1        !  X coordinate of point 1 (deg or m)
+    real(fp), intent(in)  :: x2        !  X coordinate of point 2 (deg or m)
+    real(fp), intent(in)  :: y1        !  Y coordinate of point 1 (deg or m)
+    real(fp), intent(in)  :: y2        !  Y coordinate of point 2 (deg or m)
+    real(hp), intent(in)  :: dearthrad !  Earth radius
 !
 ! Local variables
 !
     real(hp) :: alpha  ! Half angle (in radials) between points 1 and 2
-    real(hp) :: d128   ! Double precision d12 
+    real(hp) :: d128   ! Double precision d12
     real(hp) :: dslin  ! Linear distance between points 1 and 2
-    real(hp) :: x1rad  ! X1 in radials 
-    real(hp) :: x2rad  ! X2 in radials 
-    real(hp) :: y1rad  ! Y1 in radials 
-    real(hp) :: y2rad  ! Y2 in radials 
+    real(hp) :: x1rad  ! X1 in radials
+    real(hp) :: x2rad  ! X2 in radials
+    real(hp) :: y1rad  ! Y1 in radials
+    real(hp) :: y2rad  ! Y2 in radials
     real(hp) :: xcrd1  ! X coordinate of point 1
     real(hp) :: xcrd2  ! X coordinate of point 2
     real(hp) :: ycrd1  ! Y coordinate of point 1
@@ -77,31 +71,29 @@ subroutine distance(sferic    ,x1        ,y1        ,x2        ,y2        , &
 !
 !! executable statements -------------------------------------------------------
 !
-    dearthrad  => gdp%gdconstd%dearthrad
-    !
     if (sferic) then
-       x1rad = real(x1, hp)*degrad_hp
-       x2rad = real(x2, hp)*degrad_hp
-       y1rad = real(y1, hp)*degrad_hp
-       y2rad = real(y2, hp)*degrad_hp
+       x1rad = real(x1,hp)*degrad_hp
+       x2rad = real(x2,hp)*degrad_hp
+       y1rad = real(y1,hp)*degrad_hp
+       y2rad = real(y2,hp)*degrad_hp
        !
-       xcrd1 = dcos(y1rad)*dsin(x1rad)
-       ycrd1 = dcos(y1rad)*dcos(x1rad)
-       zcrd1 = dsin(y1rad)
+       xcrd1 = cos(y1rad)*sin(x1rad)
+       ycrd1 = cos(y1rad)*cos(x1rad)
+       zcrd1 = sin(y1rad)
        !
-       xcrd2 = dcos(y2rad)*dsin(x2rad)
-       ycrd2 = dcos(y2rad)*dcos(x2rad)
-       zcrd2 = dsin(y2rad)
+       xcrd2 = cos(y2rad)*sin(x2rad)
+       ycrd2 = cos(y2rad)*cos(x2rad)
+       zcrd2 = sin(y2rad)
        !
-       dslin = dsqrt((xcrd2-xcrd1)**2 + (ycrd2-ycrd1)**2 + (zcrd2-zcrd1)**2)
+       dslin = sqrt((xcrd2-xcrd1)**2 + (ycrd2-ycrd1)**2 + (zcrd2-zcrd1)**2)
        alpha = asin(dslin/2.0_hp)
        d128  = dearthrad*2.0_hp*alpha
     else
-       xcrd1 = real(x1, hp)
-       xcrd2 = real(x2, hp)
-       ycrd1 = real(y1, hp)
-       ycrd2 = real(y2, hp)
-       d128  = dsqrt((xcrd2 - xcrd1)**2 + (ycrd2 - ycrd1)**2)
+       xcrd1 = real(x1,hp)
+       xcrd2 = real(x2,hp)
+       ycrd1 = real(y1,hp)
+       ycrd2 = real(y2,hp)
+       d128  = sqrt((xcrd2 - xcrd1)**2 + (ycrd2 - ycrd1)**2)
     endif
-    d12 = real(d128, fp)
+    d12 = real(d128,fp)
 end subroutine distance

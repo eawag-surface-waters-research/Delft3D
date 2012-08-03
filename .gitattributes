@@ -578,7 +578,6 @@ src/engines_gpl/flow2d3d/packages/io/src/output/addelm.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/calbed.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/defnewgrp.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/dirint.f90 -text
-src/engines_gpl/flow2d3d/packages/io/src/output/distance_nogdp.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/dp999.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/filldm.f90 -text
 src/engines_gpl/flow2d3d/packages/io/src/output/findnm_kcs.f90 -text
@@ -928,7 +927,7 @@ src/engines_gpl/flow2d3d/packages/kernel/src/general/dattim.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/defsub.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/delfil.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/delnef.f90 -text
-src/engines_gpl/flow2d3d/packages/kernel/src/general/distance.f90 -text
+src/engines_gpl/flow2d3d/packages/kernel/src/general/distance_gdp.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/dittar.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/dtn.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/general/endscr.f90 -text
@@ -3256,6 +3255,7 @@ src/utils_lgpl/deltares_common/packages/deltares_common/src/bilin5.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/buffer.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/combinepaths.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/deltares_common_version.F90.svn -text
+src/utils_lgpl/deltares_common/packages/deltares_common/src/distance.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/handles.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/juldat.f90 -text
 src/utils_lgpl/deltares_common/packages/deltares_common/src/malloc.f90 -text

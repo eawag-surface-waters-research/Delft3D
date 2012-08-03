@@ -22,6 +22,7 @@ libdeltares_common_a_SOURCES = \
          bilin5.f90 \
          combinepaths.f90 \
          deltares_common_version.F90 \
+         distance.f90 \
          juldat.f90 \
          scannr.f90 \
          handles.f90 \

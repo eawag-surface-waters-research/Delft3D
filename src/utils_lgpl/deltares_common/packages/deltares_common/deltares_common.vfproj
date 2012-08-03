@@ -36,6 +36,7 @@
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath=".\src\deltares_common_version.F90.svn"/>
+		<File RelativePath="src\distance.f90"/>
 		<File RelativePath="src\handles.f90"/>
 		<File RelativePath="src\juldat.f90"/>
 		<File RelativePath="src\malloc.f90"/>

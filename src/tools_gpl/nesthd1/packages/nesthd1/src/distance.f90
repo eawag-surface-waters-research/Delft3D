@@ -69,6 +69,8 @@ subroutine distance(sferic    ,x1        ,y1        ,x2        ,y2        , &
 !
 !! executable statements -------------------------------------------------------
 !
+! TODO: CALL distance.f90 IN deltares_common INSTEAD OF DOUBLE CODE
+!
     pi         = acos(-1.)
     ddegrad    = pi/180.
     dearthrad  = 6378137.0

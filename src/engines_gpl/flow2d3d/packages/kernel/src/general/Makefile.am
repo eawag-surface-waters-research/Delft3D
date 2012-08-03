@@ -42,7 +42,7 @@ libkernel_general_la_SOURCES = \
          defsub.f90 \
          delfil.f90 \
          delnef.f90 \
-         distance.f90 \
+         distance_gdp.f90 \
          dittar.f90 \
          dtn.f90 \
          endscr.f90 \

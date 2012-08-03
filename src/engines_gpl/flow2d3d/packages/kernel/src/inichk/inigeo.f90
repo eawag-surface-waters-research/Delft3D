@@ -182,8 +182,8 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
        do m = 1, mmax - 1
           mu = m + 1
           if (kcs(n, m) == 1 .or. abs(kcs(n, mu)) == 1) then
-             call distance(sferic    ,xcor(n, m), ycor(n, m), xcor(nd, m), ycor(nd, m), &
-                         & guu(n, m) ,gdp       )
+             call distance_gdp(sferic    ,xcor(n, m), ycor(n, m), xcor(nd, m), ycor(nd, m), &
+                             & guu(n, m) ,gdp       )
           endif
        enddo
     enddo
@@ -210,8 +210,8 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
        do n = 1, nmaxus - 1
           nu = n + 1
           if (kcs(n, m) == 1 .or. abs(kcs(nu, m)) == 1) then
-             call distance(sferic    ,xcor(n, m), ycor(n, m), xcor(n, md), ycor(n, md), &
-                         & gvv(n, m) ,gdp       )
+             call distance_gdp(sferic    ,xcor(n, m), ycor(n, m), xcor(n, md), ycor(n, md), &
+                             & gvv(n, m) ,gdp       )
           endif
        enddo
     enddo
@@ -301,10 +301,10 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
                 !
                 ! xdis at y(n,m), xdis at y(n,md), ydis at x(n,m), ydis at x(n,md)
                 !
-                call distance(sferic, xcor(n,m ), ycor(n,m ), xcor(n,md), ycor(n,m ), xdis1, gdp)
-                call distance(sferic, xcor(n,m ), ycor(n,md), xcor(n,md), ycor(n,md), xdis2, gdp)
-                call distance(sferic, xcor(n,m ), ycor(n,m ), xcor(n,m ), ycor_min  , ydis1, gdp)
-                call distance(sferic, xcor(n,md), ycor(n,md), xcor(n,md), ycor_min  , ydis2, gdp)
+                call distance_gdp(sferic, xcor(n,m ), ycor(n,m ), xcor(n,md), ycor(n,m ), xdis1, gdp)
+                call distance_gdp(sferic, xcor(n,m ), ycor(n,md), xcor(n,md), ycor(n,md), xdis2, gdp)
+                call distance_gdp(sferic, xcor(n,m ), ycor(n,m ), xcor(n,m ), ycor_min  , ydis1, gdp)
+                call distance_gdp(sferic, xcor(n,md), ycor(n,md), xcor(n,md), ycor_min  , ydis2, gdp)
                 !
                 ! average xdis and ydis
                 !
@@ -317,10 +317,10 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
                 !
                 ! xdis at y(n,md), xdis at y(nd,md), ydis at x(n,md), ydis at x(nd,md)
                 !
-                call distance(sferic, xcor(n ,md), ycor(n ,md), xcor(nd,md), ycor(n ,md), xdis1, gdp)
-                call distance(sferic, xcor(n ,md), ycor(nd,md), xcor(nd,md), ycor(nd,md), xdis2, gdp)
-                call distance(sferic, xcor(n ,md), ycor(n ,md), xcor(n ,md), ycor_min   , ydis1, gdp)
-                call distance(sferic, xcor(nd,md), ycor(nd,md), xcor(nd,md), ycor_min   , ydis2, gdp)
+                call distance_gdp(sferic, xcor(n ,md), ycor(n ,md), xcor(nd,md), ycor(n ,md), xdis1, gdp)
+                call distance_gdp(sferic, xcor(n ,md), ycor(nd,md), xcor(nd,md), ycor(nd,md), xdis2, gdp)
+                call distance_gdp(sferic, xcor(n ,md), ycor(n ,md), xcor(n ,md), ycor_min   , ydis1, gdp)
+                call distance_gdp(sferic, xcor(nd,md), ycor(nd,md), xcor(nd,md), ycor_min   , ydis2, gdp)
                 !
                 ! average xdis and ydis
                 !
@@ -333,10 +333,10 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
                 !
                 ! xdis at y(nd,md), xdis at y(nd,m), ydis at x(nd,md), ydis at x(nd,m)
                 !
-                call distance(sferic, xcor(nd,md), ycor(nd,md), xcor(nd,m ), ycor(nd,md), xdis1, gdp)
-                call distance(sferic, xcor(nd,md), ycor(nd,m ), xcor(nd,m ), ycor(nd,m ), xdis2, gdp)
-                call distance(sferic, xcor(nd,md), ycor(nd,md), xcor(nd,md), ycor_min   , ydis1, gdp)
-                call distance(sferic, xcor(nd,m ), ycor(nd,m ), xcor(nd,m ), ycor_min   , ydis2, gdp)
+                call distance_gdp(sferic, xcor(nd,md), ycor(nd,md), xcor(nd,m ), ycor(nd,md), xdis1, gdp)
+                call distance_gdp(sferic, xcor(nd,md), ycor(nd,m ), xcor(nd,m ), ycor(nd,m ), xdis2, gdp)
+                call distance_gdp(sferic, xcor(nd,md), ycor(nd,md), xcor(nd,md), ycor_min   , ydis1, gdp)
+                call distance_gdp(sferic, xcor(nd,m ), ycor(nd,m ), xcor(nd,m ), ycor_min   , ydis2, gdp)
                 !
                 ! average xdis and ydis
                 !
@@ -349,10 +349,10 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
                 !
                 ! xdis at y(nd,m), xdis at y(n,m), ydis at x(nd,m), ydis at x(n,m)
                 !
-                call distance(sferic, xcor(nd,m), ycor(nd,m), xcor(n ,m), ycor(nd,m), xdis1, gdp)
-                call distance(sferic, xcor(nd,m), ycor(n ,m), xcor(n ,m), ycor(n ,m), xdis2, gdp)
-                call distance(sferic, xcor(nd,m), ycor(nd,m), xcor(nd,m), ycor_min  , ydis1, gdp)
-                call distance(sferic, xcor(n ,m), ycor(n ,m), xcor(n ,m), ycor_min  , ydis2, gdp)
+                call distance_gdp(sferic, xcor(nd,m), ycor(nd,m), xcor(n ,m), ycor(nd,m), xdis1, gdp)
+                call distance_gdp(sferic, xcor(nd,m), ycor(n ,m), xcor(n ,m), ycor(n ,m), xdis2, gdp)
+                call distance_gdp(sferic, xcor(nd,m), ycor(nd,m), xcor(nd,m), ycor_min  , ydis1, gdp)
+                call distance_gdp(sferic, xcor(n ,m), ycor(n ,m), xcor(n ,m), ycor_min  , ydis2, gdp)
                 !
                 ! average xdis and ydis
                 !
