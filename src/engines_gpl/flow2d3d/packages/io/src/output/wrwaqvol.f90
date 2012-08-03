@@ -290,7 +290,7 @@
          do i = 1,noseg
             if ( con(i) .gt. 1.0E-25 ) then
                do l = 1,lsed
-                  sag(i,l) = sag(i,l) / con(i) * flx2day
+                  sag(i,l) = flx2day * sag(i,l)  / con(i)
                enddo
             endif
          enddo
@@ -319,7 +319,7 @@
          do i = 1,noseg
             if ( con(i) .gt. 1.0E-25 ) then
                do l = 1,lsed
-                  sag(i,l) = sag(i,l) / con(i) * flx2day
+                  sag(i,l) = flx2day * sag(i,l) / con(i)
                enddo
             endif
          enddo
