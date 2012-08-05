@@ -2873,8 +2873,6 @@ src/utils_lgpl/delftio/packages/delftio_version_number/src/Makefile.am -text
 src/utils_lgpl/delftio/packages/delftio_version_number/src/c2c.c -text
 src/utils_lgpl/delftio/packages/delftio_version_number/src/f2c.c -text
 src/utils_lgpl/delftio/packages/delftio_version_number/src/version.c -text
-src/utils_lgpl/delftio/packages/diostates/bin/win32/dio_states.mod -text
-src/utils_lgpl/delftio/packages/diostates/bin/win32/dio_states_impl.mod -text
 src/utils_lgpl/delftio/packages/diostates/bin/win32/diostates.lib -text
 src/utils_lgpl/delftio/packages/diostates/restartmodule.F90 -text
 src/utils_lgpl/delftio/scripts/conv2ux -text

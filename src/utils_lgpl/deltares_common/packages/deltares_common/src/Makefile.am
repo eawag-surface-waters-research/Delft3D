@@ -15,6 +15,9 @@ lib_LIBRARIES = libdeltares_common.a
 #-------------------------------------------------------------------------------
 #Includes
 
+FMODULES += \
+        -I$(top_builddir)/utils_lgpl/constants/packages/mathconsts/src
+
 #-------------------------------------------------------------------------------
 #Sources
 libdeltares_common_a_SOURCES = \
