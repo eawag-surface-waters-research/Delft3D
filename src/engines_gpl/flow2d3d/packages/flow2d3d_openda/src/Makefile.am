@@ -29,7 +29,8 @@ FMODULES += \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/gdp \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/manager/src \
-	-I$(top_builddir)/engines_gpl/flow2d3d/packages/kernel/src/inichk
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/kernel/src/inichk \
+	-I$(top_builddir)/engines_gpl/flow2d3d/packages/io_dol_f/src
 
 #-------------------------------------------------------------------------------
 #Sources
