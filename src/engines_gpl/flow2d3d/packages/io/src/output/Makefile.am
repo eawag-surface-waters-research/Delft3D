@@ -38,7 +38,6 @@ libio_output_la_SOURCES = \
          calbed.f90 \
          defnewgrp.f90 \
          dirint.f90 \
-         distance_nogdp.f90 \
          dp999.f90 \
          filldm.f90 \
          fouana.f90 \
