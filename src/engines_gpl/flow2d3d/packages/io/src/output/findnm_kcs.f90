@@ -133,13 +133,13 @@ subroutine findnm_kcs (xp    , yp    , x     , y     , mlb   , mub   , &
                    mp  = m
                    np  = n
                    !
-                   call  distance_nogdp(spher ,xx(1),yy(1),xx(2),yy(2),a,dearthrad)
-                   call  distance_nogdp(spher ,xx(1),yy(1),xp   ,yp   ,b,dearthrad)
-                   call  distance_nogdp(spher ,xx(2),yy(2),xp   ,yp   ,c,dearthrad)
+                   call  distance(spher ,xx(1),yy(1),xx(2),yy(2),a,dearthrad)
+                   call  distance(spher ,xx(1),yy(1),xp   ,yp   ,b,dearthrad)
+                   call  distance(spher ,xx(2),yy(2),xp   ,yp   ,c,dearthrad)
                    rmp = 0.5 + (b*b - c*c)/(2*a*a)
                    !
-                   call  distance_nogdp(spher ,xx(1),yy(1),xx(4),yy(4),a,dearthrad)
-                   call  distance_nogdp(spher ,xx(4),yy(4),xp   ,yp   ,c,dearthrad)
+                   call  distance(spher ,xx(1),yy(1),xx(4),yy(4),a,dearthrad)
+                   call  distance(spher ,xx(4),yy(4),xp   ,yp   ,c,dearthrad)
                    rnp = 0.5 + (b*b - c*c)/(2*a*a)
                    exit outerloop
                 endif
