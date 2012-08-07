@@ -266,7 +266,7 @@
             write ( lunsed(l) ) itim, sag(1:noseg,l)
          enddo
          !
-         flx2day = 1.0/86400.0/naccum
+         flx2day = 86400.0/naccum
          !
          ! sedimentation in kg/day
          !
