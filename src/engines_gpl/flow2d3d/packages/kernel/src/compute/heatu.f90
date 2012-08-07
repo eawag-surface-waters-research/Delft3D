@@ -402,6 +402,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
           endif
        endif
     endif
+    
     !
     !
     ! KTEMP=1
@@ -510,6 +511,17 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                    qmis_out(nm) = qeva - evap(nm)*tl
                 endif
              endif
+          else  ! dry points
+             if (flwoutput%temperature) then
+                qeva_out(nm)  = 0.0_fp
+                qco_out(nm)   = 0.0_fp
+                qbl_out(nm)   = 0.0_fp
+                qin_out(nm)   = 0.0_fp
+                qnet_out(nm)  = 0.0_fp
+                if (keva == 3) then
+                   qmis_out(nm) = 0.0_fp
+                endif
+             endif
           endif
        enddo
     !
@@ -613,6 +625,17 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                    qmis_out(nm) = qeva - evap(nm)*tl
                 endif
              endif
+          else  ! dry points
+             if (flwoutput%temperature) then
+                qeva_out(nm)  = 0.0_fp
+                qco_out(nm)   = 0.0_fp
+                qbl_out(nm)   = 0.0_fp
+                qin_out(nm)   = 0.0_fp
+                qnet_out(nm)  = 0.0_fp
+                if (keva == 3) then
+                   qmis_out(nm) = 0.0_fp
+                endif
+             endif
           endif
        enddo
     !
@@ -687,6 +710,11 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
              if (flwoutput%temperature) then
                 hlc_out(nm)  = hlc 
                 qnet_out(nm) = -hlc*(r0(nm, k0, ltem) - tback)
+             endif
+          else  ! dry points
+             if (flwoutput%temperature) then
+                hlc_out(nm)  = 0.0_fp
+                qnet_out(nm) = 0.0_fp
              endif
           endif
        enddo
@@ -863,6 +891,17 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                    ! qeva - evap*tl : mismatch between calculated and derived heat flux
                    !
                    qmis_out(nm) = qeva - evap(nm)*tl
+                endif
+             endif
+          else  ! dry points
+             if (flwoutput%temperature) then
+                qeva_out(nm)  = 0.0_fp
+                qco_out(nm)   = 0.0_fp
+                qbl_out(nm)   = 0.0_fp
+                qin_out(nm)   = 0.0_fp
+                qnet_out(nm)  = 0.0_fp
+                if (keva == 3) then
+                   qmis_out(nm) = 0.0_fp
                 endif
              endif
           endif
@@ -1198,6 +1237,21 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                    ! qeva - evap*tl : mismatch between calculated and derived heat flux
                    !
                    qmis_out(nm) = qeva - evap(nm)*tl
+                endif
+             endif
+          else  ! dry points
+             if (flwoutput%temperature) then
+                qeva_out(nm) = 0.0_fp
+                qco_out(nm)  = 0.0_fp
+                qbl_out(nm)  = 0.0_fp
+                qin_out(nm)  = 0.0_fp
+                qnet_out(nm) = 0.0_fp
+                if (free_convec) then
+                   hfree_out(nm) = 0.0_fp
+                   efree_out(nm) = 0.0_fp
+                endif
+                if (keva == 3) then
+                   qmis_out(nm) = 0.0_fp
                 endif
              endif
           endif
