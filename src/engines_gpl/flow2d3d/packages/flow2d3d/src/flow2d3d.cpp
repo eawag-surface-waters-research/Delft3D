@@ -213,7 +213,7 @@ Flow2D3D::Run (
             // By convention the runid is the part of the MD file name before the extension
 
             this->runid = strdup (this->mdfile);
-            char * dot = strchr (this->runid, '.');
+            char * dot = strrchr (this->runid, '.'); // search last dot
             if (dot != NULL) *dot = '\0';
 
             if (this->flowol != NULL) {
