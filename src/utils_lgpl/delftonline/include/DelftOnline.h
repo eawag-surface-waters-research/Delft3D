@@ -61,7 +61,9 @@
 #   undef ERROR
 
 #   define DLL      __declspec(dllexport)
-#   define STDCALL  __cdecl
+#   if !defined(STDCALL)
+#      define STDCALL  __cdecl
+#   endif
 
 #   define ssize_t  int
 
