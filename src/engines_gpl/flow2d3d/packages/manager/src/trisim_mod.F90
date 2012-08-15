@@ -386,7 +386,6 @@ integer function trisim_step(olv_handle, gdp) result(retval)
     ! part VII and VIII of the initialisation. That subroutine is not needed here and
     ! part VII and VIII can be found at the end of tricom_init. (VT)
     !
-    olv_handle%fields => null()
     call tricom_step(olv_handle, gdp)
     if (gdp%errorcode /= 0) then
         retVal = -1
