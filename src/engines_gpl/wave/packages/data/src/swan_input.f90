@@ -2877,7 +2877,6 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
             & trim(vers), ' is not supported.'
        goto 1002
     endif
-    write(*,*)'hello'
     rccnt = rccnt + skcomc(iuni)
     rccnt = rccnt + 1
 !------SWAN version number------------------------------------
