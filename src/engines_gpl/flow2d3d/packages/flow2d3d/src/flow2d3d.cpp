@@ -78,6 +78,7 @@
 #endif
 #if defined (WIN32)
 #   include <windows.h>
+#   define strdup _strdup
 #endif
 
 
