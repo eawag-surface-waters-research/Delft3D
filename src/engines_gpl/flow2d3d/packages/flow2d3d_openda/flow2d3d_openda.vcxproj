@@ -70,6 +70,7 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\flow2d3d_openda
       <StackReserveSize>20000000</StackReserveSize>
       <LargeAddressAware>true</LargeAddressAware>
       <TargetMachine>MachineX86</TargetMachine>
+      <OutputFile>$(OutDir)\flow2d3d_openda.dll</OutputFile>
     </Link>
     <PostBuildEvent>
       <Command>echo "This file is overwritten by the post-build command of the project flow2d3d_openda" &gt; .\include\flow2d3d_openda_version.h
@@ -106,6 +107,7 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\flow2d3d_openda
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <TargetMachine>MachineX86</TargetMachine>
+      <OutputFile>$(OutDir)\flow2d3d_openda.dll</OutputFile>
     </Link>
     <PostBuildEvent>
       <Command>echo "This file is overwritten by the post-build command of the project flow2d3d_openda" &gt; .\include\flow2d3d_openda_version.h
