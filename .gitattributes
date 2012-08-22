@@ -3912,4 +3912,12 @@ src/utils_lgpl/stream/tests/04-mpithreads/mpistream -text
 src/utils_lgpl/stream/tests/04-mpithreads/mpithreads.cpp -text
 src/utils_lgpl/stream/tests/04-mpithreads/mpithreadstreams.cpp -text
 src/utils_lgpl/stream/tests/Makefile.am -text
+src/utils_lgpl/system_information/Makefile -text
+src/utils_lgpl/system_information/src/cpuinfo.cpp -text
+src/utils_lgpl/system_information/src/cpuinfo.h -text
+src/utils_lgpl/system_information/src/main.cpp -text
+src/utils_lgpl/system_information/src/meminfo.cpp -text
+src/utils_lgpl/system_information/src/meminfo.h -text
+src/utils_lgpl/system_information/sys_info.sln -text
+src/utils_lgpl/system_information/sys_info.vcxproj -text
 /tsvn-auto-props -text
