@@ -6,7 +6,7 @@ unsigned __int64 MemInfo::GetTotalMemSize()
 {
 	MEMORYSTATUSEX status;
     status.dwLength = sizeof(status);
-    GlobalMemoryStatusEx(&status);	
+    GlobalMemoryStatusEx(&status);
  	return unsigned __int64 (status.ullTotalPhys);
 }
 
@@ -14,9 +14,9 @@ unsigned __int64 MemInfo::GetTotalMemSize()
 
 unsigned long long MemInfo::GetTotalMemSize()
 {
-	long pages = sysconf(_SC_PHYS_PAGES);
-    long page_size = sysconf(_SC_PAGE_SIZE);
-    return pages * page_size;
+	long long pages = sysconf(_SC_PHYS_PAGES);
+    long long page_size = sysconf(_SC_PAGE_SIZE);
+    return (pages * page_size);
 }
 
 #endif
