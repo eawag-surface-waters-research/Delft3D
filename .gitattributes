@@ -3723,6 +3723,13 @@ src/utils_lgpl/nefis/tests/test_19/test_19.c -text
 src/utils_lgpl/nefis/tests/test_19/test_19.dsp -text
 src/utils_lgpl/nefis/tests/test_19/test_19.vcproj -text
 src/utils_lgpl/nefis/tests/test_19/test_19.vcxproj -text
+src/utils_lgpl/nefis/tests/test_20/Makefile.am -text
+src/utils_lgpl/nefis/tests/test_20/btps.h -text
+src/utils_lgpl/nefis/tests/test_20/main.c -text
+src/utils_lgpl/nefis/tests/test_20/nef-def.h -text
+src/utils_lgpl/nefis/tests/test_20/nef-tag.h -text
+src/utils_lgpl/nefis/tests/test_20/nefis_test_20.vcxproj -text
+src/utils_lgpl/nefis/tests/test_20/pre_c20.res -text
 src/utils_lgpl/nefis/tests/test_999/Test_999.vcproj -text
 src/utils_lgpl/nefis/tests/test_999/Test_999.vcxproj -text
 src/utils_lgpl/nefis/tests/test_999/cp5.bat -text
