@@ -300,12 +300,6 @@ subroutine radstr(ewave1    ,eroll1    ,sinkr     ,c         ,cgc       , &
                        &        / max(c(n,mp1),1.0e-1_fp) * cos(dir(n, mp1) * degrad)   )
              if (hu(n, m)<2.0*dryflc) wsu(n, m) = 0.0
              !
-             if (wavcmp) then
-                fxw(n, m) = fxw(n, m) - wsu(n, m)
-             else
-                fxw(n, m) = 0.0
-             endif
-             !
              ds1k1v    = (sr(1, 1, 1) + sr(1, 0, 1) - sr(1, 1, -1) - sr(1, 0, -1)) &
                        & *0.25
              ds1k2v    = sr(1, 1, 0) - sr(1, 0, 0)

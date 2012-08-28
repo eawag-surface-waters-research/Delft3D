@@ -599,8 +599,10 @@ subroutine timers_finish (gdp)
        ! Timer information is only interesting for TRISIM (calculation part of FLOW)
        ! deallocate and return in all other modes
        !
-       deallocate(gdp%gdtimers%usedcp)
-       deallocate(gdp%gdtimers%names)
+       if (associated(gdp%gdtimers%usedcp)) deallocate(gdp%gdtimers%usedcp)
+       nullify(gdp%gdtimers%usedcp)
+       if (associated(gdp%gdtimers%names)) deallocate(gdp%gdtimers%names)
+       nullify(gdp%gdtimers%names)
        return
     endif
     nmax    => gdp%d%nmaxus
@@ -787,8 +789,10 @@ subroutine timers_finish (gdp)
     write(lundia,'(a)') '|---------------------------------------------------------------------|'
     write(lundia,*)
     !
-    deallocate(gdp%gdtimers%usedcp)
-    deallocate(gdp%gdtimers%names)
+    if (associated(gdp%gdtimers%usedcp)) deallocate(gdp%gdtimers%usedcp)
+    nullify (gdp%gdtimers%usedcp)
+    if (associated(gdp%gdtimers%names))  deallocate(gdp%gdtimers%names)
+    nullify (gdp%gdtimers%names)
     !
     ! When using DD, timer_start/timerstop calls occur after closing diagnosis
     ! file. Use logical initialized to recognize that situation
