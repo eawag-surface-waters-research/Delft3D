@@ -130,7 +130,7 @@ subroutine wrihisdad(lundia    ,error     ,trifil    ,itdate    , &
        call addelm(nefiswrihisdad,'LINK_DEF',' ','[   -   ]','INTEGER',4    , &
           & 'Actual transports from dredge(1st col) to dump(2nd col) areas ', &
           & 1, nalink, 0, 0, 0, 0, lundia, gdp)
-       call addelm(nefiswrihisdad,'LINK_PERCENTAGES',' ','[   %   ]','REAL',4, &
+       call addelm(nefiswrihisdad,'LINK_PERCENTAGE',' ','[   %   ]','REAL',4, &
           & 'Distribution of dredged material from dredge to dump areas    ', &
           & 2, nalink, lsedtot, 0, 0, 0, lundia, gdp)
        call addelm(nefiswrihisdad,'LINK_DISTANCE',' ','[   M   ]','REAL',4  , &
