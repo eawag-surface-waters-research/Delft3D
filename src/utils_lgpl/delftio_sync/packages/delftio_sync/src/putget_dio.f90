@@ -28,8 +28,6 @@
 !  $HeadURL$
       subroutine putdio ( StreamName, DataSetName, first, dioOutSet )
 !     
-!     Deltares | Deltares
-!
 !     Created             : jan  2001 by J.v.Gils
 !
 !     Function            : Gives permission to DIO to proceed
@@ -78,8 +76,6 @@
       end subroutine putdio 
 !
       subroutine getdio ( StreamName, DataSetName, first, dioInSet )
-!
-!     Deltares | Deltares
 !
 !     Created             : jan  2001 by J.v.Gils
 !
