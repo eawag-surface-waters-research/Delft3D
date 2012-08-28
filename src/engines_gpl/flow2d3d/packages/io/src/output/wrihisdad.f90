@@ -130,7 +130,7 @@ subroutine wrihisdad(lundia    ,error     ,trifil    ,itdate    , &
        call addelm(nefiswrihisdad,'LINK_DEF',' ','[   -   ]','INTEGER',4    , &
           & 'Actual transports from dredge(1st col) to dump(2nd col) areas ', &
           & 1, nalink, 0, 0, 0, 0, lundia, gdp)
-       call addelm(nefiswrihisdad,'LINK_PERCENTAGE',' ','[   %   ]','REAL',4, &
+       call addelm(nefiswrihisdad,'LINK_PERCENTAGES',' ','[   %   ]','REAL',4, &
           & 'Distribution of dredged material from dredge to dump areas    ', &
           & 2, nalink, lsedtot, 0, 0, 0, lundia, gdp)
        call addelm(nefiswrihisdad,'LINK_DISTANCE',' ','[   M   ]','REAL',4  , &
@@ -187,7 +187,7 @@ subroutine wrihisdad(lundia    ,error     ,trifil    ,itdate    , &
        ierror = putelt(fds, grnam, 'LINK_DEF', uindex, 1, link_def)
        if (ierror/= 0) goto 9999
        !
-       ! element 'LINK_PERCENTAGE'
+       ! element 'LINK_PERCENTAGES'
        !
        call sbuff_checksize(nalink*lsedtot)
        do l = 1, lsedtot
@@ -195,7 +195,7 @@ subroutine wrihisdad(lundia    ,error     ,trifil    ,itdate    , &
              sbuff(i+(lsedtot-1)*nalink) = link_percentage(i,l)
           enddo
        enddo
-       ierror = putelt(fds, grnam, 'LINK_PERCENTAGE', uindex, 1, sbuff)
+       ierror = putelt(fds, grnam, 'LINK_PERCENTAGES', uindex, 1, sbuff)
        if (ierror/= 0) goto 9999
        !
        ! element 'LINK_DISTANCE'
