@@ -530,7 +530,10 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
              endif
           enddo
        enddo
-       write(message,*) "Map output is written for layer(s)",(smlay(i),i=1,size(smlay))
+       write(message,'(a)') "Map output is written for layer(s)"
+       do i=1, size(smlay)
+          write(message,'(a,a,i0)') trim(message), ' ', smlay(i)
+       enddo
        call prterr(lundia, 'G051',trim(message))
     endif
     !
@@ -590,7 +593,10 @@ subroutine rdprfl(lunmd     ,lundia    ,nrrec     ,mdfrec    ,tstprt    , &
              endif
           enddo
        enddo
-       write(message,*) "History output is written for layer(s)",(shlay(i),i=1,size(shlay))
+       write(message,'(a)') "History output is written for layer(s)"
+       do i=1, size(shlay)
+          write(message,'(a,a,i0)') trim(message), ' ', shlay(i)
+       enddo
        call prterr(lundia, 'G051',trim(message))
     endif
     !
