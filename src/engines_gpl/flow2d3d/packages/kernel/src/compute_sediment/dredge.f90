@@ -210,6 +210,8 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
     firstdredge         => gdp%gddredge%firstdredge
     dredge_prop         => gdp%gddredge%dredge_prop
     dump_prop           => gdp%gddredge%dump_prop
+    ndredged            => gdp%gddredge%ndredged
+    nploughed           => gdp%gddredge%nploughed
     morfac              => gdp%gdmorpar%morfac
     thresh              => gdp%gdmorpar%thresh
     bed                 => gdp%gdmorpar%bed
