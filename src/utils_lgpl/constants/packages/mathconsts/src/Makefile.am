@@ -14,6 +14,8 @@ lib_LIBRARIES = libmathconsts.a
 
 #-------------------------------------------------------------------------------
 #Includes
+FMODULES += \
+	-I$(top_builddir)/utils_lgpl/precision/packages/precision/src
 
 #-------------------------------------------------------------------------------
 #Sources
