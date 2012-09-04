@@ -186,15 +186,7 @@ subroutine wrihisdad(lundia    ,error     ,trifil    ,itdate    , &
        !
        ! element 'LINK_DEF'
        !
-       call sbuff_checksize(nalink*2)
-       i = 0
-       do k = 1, 2
-          do j = 1, nalink
-             i = i+1       
-             sbuff(i) = link_def(j, k)
-          enddo
-       enddo
-       ierror = putelt(fds, grnam, 'LINK_DEF', uindex, 1, sbuff)
+       ierror = putelt(fds, grnam, 'LINK_DEF', uindex, 1, link_def)
        if (ierror/= 0) goto 9999
        !
        ! element 'LINK_PERCENTAGES'
