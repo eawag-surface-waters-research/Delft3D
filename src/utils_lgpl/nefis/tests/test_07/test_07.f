@@ -31,7 +31,7 @@
       INTEGER clsdat,
      *        clsdef,
      *        getiat,
-     *        getrat,
+     *        getrat
       INTEGER getsat,
      *        opndat,
      *        opndef,
