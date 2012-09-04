@@ -73,6 +73,8 @@ subroutine wrihisdad(lundia    ,error     ,trifil    ,itdate    , &
     integer                                       :: fds
     integer                                       :: i
     integer                                       :: l
+    integer                                       :: j
+    integer                                       :: k
     integer                                       :: ierror ! Local errorflag for NEFIS files
     integer       , dimension(2)                  :: ival   ! Local array for writing ITDATE and
     character(16)                                 :: grnam
@@ -129,7 +131,7 @@ subroutine wrihisdad(lundia    ,error     ,trifil    ,itdate    , &
           & 1, nadump, 0, 0, 0, 0, lundia, gdp)
        call addelm(nefiswrihisdad,'LINK_DEF',' ','[   -   ]','INTEGER',4    , &
           & 'Actual transports from dredge(1st col) to dump(2nd col) areas ', &
-          & 1, nalink, 0, 0, 0, 0, lundia, gdp)
+          & 2, nalink, 2, 0, 0, 0, lundia, gdp)
        call addelm(nefiswrihisdad,'LINK_PERCENTAGES',' ','[   %   ]','REAL',4, &
           & 'Distribution of dredged material from dredge to dump areas    ', &
           & 2, nalink, lsedtot, 0, 0, 0, lundia, gdp)
@@ -184,7 +186,15 @@ subroutine wrihisdad(lundia    ,error     ,trifil    ,itdate    , &
        !
        ! element 'LINK_DEF'
        !
-       ierror = putelt(fds, grnam, 'LINK_DEF', uindex, 1, link_def)
+       call sbuff_checksize(nalink*2)
+       i = 0
+       do k = 1, 2
+          do j = 1, nalink
+             i = i+1       
+             sbuff(i) = link_def(j, k)
+          enddo
+       enddo
+       ierror = putelt(fds, grnam, 'LINK_DEF', uindex, 1, sbuff)
        if (ierror/= 0) goto 9999
        !
        ! element 'LINK_PERCENTAGES'
