@@ -48,7 +48,7 @@
       INTEGER Getelt
       INTEGER error,
      *        idum,
-     *        i, m, n, k, nt
+     *        i, m, n, k, nt,
      *        UINDEX(3,1),
      *        usrord(5)
       real    rbuff3(mmax, nmax, kmax)
