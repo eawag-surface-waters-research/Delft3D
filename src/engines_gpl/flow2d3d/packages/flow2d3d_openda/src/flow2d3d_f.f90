@@ -34,6 +34,7 @@
 !-------------------------------------------------------------------------------
 !
 function Initialize(componentID, schemID) result(retVal)
+    use precision     ! pntrsize, used in fsm.i
     use gdp_entry     ! gdpAlloc
     use mod_trisim
     use m_openda_olv
@@ -349,6 +350,7 @@ end function get_exchange_item_id_II
 !-------------------------------------------------
 
 function get_exchange_item_id_CI(location_id_c,quantity_id) result(id)
+    use precision     ! pntrsize, used in fsm.i
     use gdp_entry 
 
     use globaldata
@@ -422,12 +424,13 @@ end function get_exchange_item_id_CI
 subroutine find_boundary(location_id_c, nambnd,nto,ntof,ntoq,location_id)
   
    implicit none
-   character(20), dimension(nto) , intent(in)  :: nambnd
-
-   character(*)     :: location_id_c
 
    integer,          intent(in) :: nto, ntof, ntoq 
    integer,          intent(out) :: location_id
+
+   character(20), dimension(nto) , intent(in)  :: nambnd
+
+   character(*)     :: location_id_c
    
    integer :: i, lenid
    logical :: lfound
@@ -543,6 +546,7 @@ end function get_values_count_for_time_span
 
 
 function get_values_for_time_span(exchange_item_id, start_time, end_time, nvals,values) result(ret_val)
+    use precision     ! pntrsize, used in fsm.i
     use m_openda_quantities
     use gdp_entry
     
@@ -565,6 +569,8 @@ function get_values_for_time_span(exchange_item_id, start_time, end_time, nvals,
     integer(pntrsize)            , pointer :: s1
     integer(pntrsize)            , pointer :: zcuru
     integer(pntrsize)            , pointer :: zcurv
+    integer(pntrsize)            , pointer :: zqxk
+    integer(pntrsize)            , pointer :: zqyk
     integer   , dimension(:,:)   , pointer :: mnstat
     
     ! body
@@ -574,6 +580,8 @@ function get_values_for_time_span(exchange_item_id, start_time, end_time, nvals,
    ! zwl          => gdp%gdr_i_ch%zwl
     zcuru        => gdp%gdr_i_ch%zcuru
     zcurv        => gdp%gdr_i_ch%zcurv
+    zqxk         => gdp%gdr_i_ch%zqxk
+    zqyk         => gdp%gdr_i_ch%zqyk
     
     ret_val = -1 ! indices not ok
 

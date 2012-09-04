@@ -86,7 +86,7 @@ type dredtype
     real(fp)                                :: dredge_depth    ! dredge depth of dredge area
     real(fp)                                :: maxvolrate      ! maximum dredging volume rate
     real(fp)                                :: clearance       ! extra depth when dredging
-	real(fp)                                :: plough_effic    ! efficiency of dune ploughing in reducing dune height
+    real(fp)                                :: plough_effic    ! efficiency of dune ploughing in reducing dune height
     real(fp), dimension(2)                  :: dredgeloc       ! dredgelocation (x,y)
     real(fp)                                :: totalvolsupl    ! total volume to be nourished.
     real(fp)      , dimension(:)  , pointer :: area            ! (npnt)   grid cell area at nm point (gsqs)
@@ -212,7 +212,7 @@ type sv_dredge
     integer                                 :: nadump          ! number of dump areas
     integer                                 :: nasupl          ! number of nourishment areas
     integer                                 :: nalink          ! number of links
-	integer                                 :: ntimaccum       ! number of (half) timesteps over which ndredge and nplough has been accumulated
+    integer                                 :: ntimaccum       ! number of (half) timesteps over which ndredge and nplough has been accumulated
     !
     integer       , dimension(:,:), pointer :: link_def        ! (nalink,2) actual transports from dredge (1st column)
                                                                !            to dump (2nd column) areas

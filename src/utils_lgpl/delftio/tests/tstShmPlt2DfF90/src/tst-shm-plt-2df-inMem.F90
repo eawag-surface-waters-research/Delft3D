@@ -82,6 +82,9 @@ program DatasetsInMem
         pointer, dimension(:,:) :: ints    ! received integers
 
     logical                     :: diffVal ! result of difference check
+    double precision            :: dTempVal
+    integer                     :: iTempVal
+    real                        :: rTempVal
 
 
     open(resLun, file=resFile)

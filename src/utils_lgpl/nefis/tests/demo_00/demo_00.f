@@ -77,6 +77,7 @@ C                 .. ARRAY TO CONTAIN VELOCITY-ELEMENT INFO OF 4 POINTS
 C                 .. ARRAY TO CONTAIN DEPTHS
      +         ,OBSDAT(4,100,10)
 C                 .. ARRAY TO CONTAIN OBSERVED DATA
+     +         ,CPU1 ,CPU2
 C     ..
 C     .. EXTERNAL FUNCTIONS ..
       INTEGER   OPNDAT
@@ -101,6 +102,10 @@ C                 ..                 ELEMENTS FROM DATA FILE
 C                 .. NEFIS-FUNCTION: CLOSE A DATA FILE
      +         ,CLSDEF
 C                 .. NEFIS-FUNCTION: CLOSE A DEFINITION FILE
+     +         ,INQDAT
+C                 .. NEFIS-FUNCTION: INQUIRE A DATA FILE
+     +         ,NEFERR
+C                 .. NEFIS-FUNCTION: RETRIEVE ERROR STRING
 C=======================================================================
 C                 ..
       OBSFIL = 11

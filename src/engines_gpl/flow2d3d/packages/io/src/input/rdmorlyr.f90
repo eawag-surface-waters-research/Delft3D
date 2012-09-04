@@ -146,7 +146,7 @@ use bedcomposition_module
     nfrac = lsedtot
     !
     error      = .false.
-    rmissval   = -999.0
+    rmissval   = -999.0_fp
     fmttmp     = 'formatted'
     !
     ! allocate memory for boundary conditions
@@ -291,6 +291,7 @@ use bedcomposition_module
        write (lundia, '(2a,i20)') txtput1, ':', neulyr
        !
        if (mxnulyr > 0) then
+          thunlyr = rmissval
           call prop_get(mor_ptr, 'Underlayer', 'ThUnLyr', thunlyr)
           theulyr = thunlyr
           thlalyr = thunlyr

@@ -77,10 +77,6 @@ subroutine wrimap(lundia      ,error     ,trifil    ,selmap    ,simdat    , &
     character(20) , dimension(:)    , pointer :: namst
     character(20) , dimension(:)    , pointer :: namtra
 !
-! Local parameters
-!
-    integer, parameter :: nelmx = 47
-!
 ! Global variables
 !
     integer                                                         , intent(in)  :: itdate  !  Description and declaration in exttim.igs

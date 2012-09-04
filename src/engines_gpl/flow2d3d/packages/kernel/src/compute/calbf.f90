@@ -162,9 +162,11 @@ subroutine calbf(stage     ,nmmax     ,nmaxddb   ,dps       ,s1        , &
     ag                      => gdp%gdphysco%ag
     bdfC_Hn                 => gdp%gdbedformpar%bdfC_Hn
     bdfC_Hp                 => gdp%gdbedformpar%bdfC_Hp
+    bdfGmin                 => gdp%gdbedformpar%bdfGmin
     bdfHmax                 => gdp%gdbedformpar%bdfHmax
     bdfL_Hc                 => gdp%gdbedformpar%bdfL_Hc
     bdfL_Hp                 => gdp%gdbedformpar%bdfL_Hp
+    bdfPmax                 => gdp%gdbedformpar%bdfPmax
     bdfrlxtype              => gdp%gdbedformpar%bdfrlxtype
     cdpar                   => gdp%gdbedformpar%cdpar
     bedformL_H              => gdp%gdbedformpar%bedformL_H

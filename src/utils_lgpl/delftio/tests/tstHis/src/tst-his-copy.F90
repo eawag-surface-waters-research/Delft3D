@@ -37,7 +37,7 @@ program test_get_dio_f90
 
     type(DioStreamType) :: hisInStream_Copy
 
-    integer :: resLun
+    integer :: i,resLun
 
     logical :: readRes
     double precision :: julTime

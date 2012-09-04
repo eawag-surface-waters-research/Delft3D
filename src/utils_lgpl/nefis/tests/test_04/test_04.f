@@ -43,8 +43,12 @@
       INTEGER error,
      *        idum,
      *        i,
+     *        imax,
+     *        start,
      *        UINDEX(3,1)
-      REAL    buffer
+      REAL    buffer,
+     *        cpu1,
+     *        cpu2
       CHARACTER coding*1
       CHARACTER*1024 errstr
 c

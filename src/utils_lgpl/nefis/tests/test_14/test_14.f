@@ -50,8 +50,10 @@ c
      *        defgrp,
      *        getelt
       INTEGER crenef,
-     *        putelt
-      INTEGER error,
+     *        putelt,
+     *        clsnef,
+     *        neferr
+      INTEGER error, ierror,
      *        i, j,
      *        grpdms(1),
      *        grpord(1),

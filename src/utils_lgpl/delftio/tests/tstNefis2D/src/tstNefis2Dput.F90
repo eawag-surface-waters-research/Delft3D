@@ -42,6 +42,7 @@ program test_put_dio_f90
     real,     dimension(numM,numN)                :: values
     double precision, dimension(numMDble,numNDble):: dbleValues
     integer, dimension(numM,numN)                 :: intValues
+    integer                                       :: i
 
     type(DioStreamType) :: outStream
     type(Dio2DFType)  :: outSet

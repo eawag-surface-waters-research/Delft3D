@@ -72,7 +72,6 @@ subroutine difuwe(timest    ,lundia    ,nst       ,icx       ,icy       , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    include 'flow_steps_f.inc'
     real(fp)               , pointer :: rhow
     real(fp)               , pointer :: ag
     integer                , pointer :: iro

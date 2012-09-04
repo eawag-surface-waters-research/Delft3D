@@ -44,7 +44,7 @@ program his_get_hisstep
 
     type(DioPltType)   :: hisInSet
 
-    integer            :: resLun
+    integer            :: i, resLun
 
 !   Open file for storing results
 

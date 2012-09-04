@@ -1229,8 +1229,8 @@ subroutine regulate(w0, w1, a0, a1, w)
    implicit none
    real(fp)              , intent(in)  :: a0
    real(fp)              , intent(in)  :: a1
-   real(hp), dimension(4), intent(in)  :: w0
-   real(hp), dimension(4), intent(in)  :: w1
+   real(hp), dimension(4)              :: w0
+   real(hp), dimension(4)              :: w1
    real(hp), dimension(4), intent(out) :: w
 !
 ! local

@@ -71,7 +71,9 @@ subroutine waq2flow(dps, mmax, nmaxus, kmax, lundia, mlb, mub, nlb, nub, gdp)
     integer                           :: noseg
     integer                           :: nrtims
     integer                           :: nrvar
+    logical, external                 :: diogetpltdatasetreals
     logical, save                     :: first = .true.
+    logical                           :: success
     real, allocatable     , save      :: dps0(:,:)
     real, allocatable     , save      :: parval(:,:)
     real, allocatable     , save      :: thick(:,:) ! sediment thickness in m
@@ -133,8 +135,8 @@ subroutine waq2flow(dps, mmax, nmaxus, kmax, lundia, mlb, mub, nlb, nub, gdp)
     endif
     !
     write(*,*) 'FLOW: waiting for GetPltDataSetReals waq2flow (datawaq2flow)'
-    call diogetpltdatasetreals(diooutset, tims(1), nrvar, noseg, parval)
-    write(*,*) 'FLOW: GetPltDataSetReals waq2flow (datawaq2flow) returned'
+    success = diogetpltdatasetreals(diooutset, tims(1), nrvar, noseg, parval)
+    write(*,*) 'FLOW: GetPltDataSetReals waq2flow (datawaq2flow) returned ', success
     write(*,*) '--------------' 
     !
     if (nrvar == 1) then

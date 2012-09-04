@@ -412,7 +412,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     call sysini(error     ,runid     ,filmrs    ,alone     ,soort     , & 
               & verify    ,versio    ,filmd     ,gdp       ) 
     ! 
-    if (error) goto 9990
+    if (error) goto 9991
     !    
     ! Check if all necessary temporary files exist if they are reused 
     ! 
@@ -827,6 +827,8 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
            close (lundia) 
         endif 
     endif 
+    ! 
+ 9991 continue 
     ! 
     ! Close MD-file 
     ! 

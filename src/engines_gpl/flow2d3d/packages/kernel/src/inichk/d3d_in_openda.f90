@@ -73,7 +73,7 @@ module m_openda_olv
 
 use d3d_olv_class
 
-type(OLVHandle) :: openda_olv_handle
+type(OLVHandle), save :: openda_olv_handle
 
 end module m_openda_olv
 
@@ -583,8 +583,6 @@ subroutine compute_secundary_state(gdp       )
     integer, dimension(:), allocatable :: kcucopy
     integer, dimension(:), allocatable :: kcvcopy
     real(fp), dimension(1)             :: value
-    
-    logical                            :: error       !!  Flag=TRUE if an erroris encountered
 !
 !! executable statements -------------------------------------------------------
 !
@@ -1005,12 +1003,10 @@ subroutine compute_secundary_state(gdp       )
                  & r(cfurou) ,rouflo    ,.true.    ,r(guu)    ,r(gvu)    , &
                  & r(hu)     ,i(kcu)    ,r(u1)     ,r(v1)     ,r(sig)    , &
                  & r(z0urou) ,1         ,gdp       )
-       if (error) goto 9999
        call trtrou(lundia    ,nmax      ,mmax      ,nmaxus    ,kmax      , &
                  & r(cfvrou) ,rouflo    ,.true.    ,r(gvv)    ,r(guv)    , &
                  & r(hv)     ,i(kcv)    ,r(v1)     ,r(u1)     ,r(sig)    , &
                  & r(z0vrou) ,2         ,gdp       )
-       if (error) goto 9999
     endif
     !
     ! INITAU: calculate inital roughness heights Z0U(V)ROU

@@ -62,6 +62,4 @@ subroutine upbdps(mmax      ,nmax      ,kcs       ,&
           dp (n, mmax) = real( dp(n, mmax-1),fp)
        enddo
     enddo
-
- 9999 continue
 end subroutine upbdps

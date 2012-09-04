@@ -167,6 +167,7 @@ contains
 !----------------------------------------------------------
 
 subroutine m_d3d_dump_d3d_state(d3d_state,lun,fname)
+    use precision     ! pntrsize, used in fsm.i
 
     implicit none
 

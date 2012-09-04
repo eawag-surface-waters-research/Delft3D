@@ -70,7 +70,6 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, o
     character(6)                  , pointer :: prognm
     character(256)                , pointer :: runid
     integer                       , pointer :: rtcmod
-    include 'flow_steps_f.inc'
     include 'fsm.i'
 !
 ! Parameters
@@ -463,7 +462,6 @@ integer function trisim_close(gdp) result (retval)
     character(5)                  , pointer :: versio
     !
     include 'flow_steps_f.inc'
-    include 'fsm.i'
     !
     integer                     :: nhystp
     logical                     :: opend        ! Help logical var. to determine whether each of the output files was opened 

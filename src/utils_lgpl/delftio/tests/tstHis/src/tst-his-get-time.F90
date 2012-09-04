@@ -46,7 +46,7 @@ program his_get_time
 
     type(DioPltType)   :: hisInSet
 
-    integer            :: resLun
+    integer            :: i, resLun
 
 !   Open file for storing results
 

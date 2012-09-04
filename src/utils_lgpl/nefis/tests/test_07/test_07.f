@@ -31,13 +31,14 @@
       INTEGER clsdat,
      *        clsdef,
      *        getiat,
-     *        getrat
+     *        getrat,
       INTEGER getsat,
      *        opndat,
      *        opndef,
      *        putiat,
      *        putrat,
-     *        putsat
+     *        putsat,
+     *        neferr
       INTEGER error, ival
       CHARACTER attrib*16, attval*16, coding*1
       REAL    rval

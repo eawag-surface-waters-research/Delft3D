@@ -44,7 +44,7 @@ program test_get_dio_f90
     integer                                            :: nPar ! #pars
     integer                                            :: nLoc ! #locs
 
-    integer resLun
+    integer :: i,resLun
 
 !   Initialize dio library
     call DioInit

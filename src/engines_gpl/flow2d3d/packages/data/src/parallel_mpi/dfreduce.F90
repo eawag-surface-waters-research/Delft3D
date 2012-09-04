@@ -51,7 +51,7 @@ subroutine dfreduce ( iptr, ilen, itype, ityprd, gdp )
 !
 ! Global variables
 !
-    integer, intent(in) :: iptr   ! pointer to first element of array to be collect
+    integer             :: iptr   ! pointer to first element of array to be collect
     integer, intent(in) :: ilen   ! length of array to be collect
     integer, intent(in) :: itype  ! type of data
     integer, intent(in) :: ityprd ! type of reduction

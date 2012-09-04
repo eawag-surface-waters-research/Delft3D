@@ -27,17 +27,18 @@
 !  $Id$
 !  $HeadURL$
 program testfill
+    use precision     ! pntrsize, used in fsm.i
     implicit none
     include 'fsm.i'
 
-    integer len_lvl
-    integer len_u
-    integer ierror
-    integer ilvl
-    integer iu
-    integer status
-    real level
-    real u_vel
+    integer                :: len_lvl
+    integer                :: len_u
+    integer(kind=pntrsize) :: ierror
+    integer(kind=pntrsize) :: ilvl
+    integer(kind=pntrsize) :: iu
+    integer                :: status
+    real                   :: level
+    real                   :: u_vel
 
     len_lvl = 5
     len_u   = 7

@@ -26,7 +26,7 @@
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
-subroutine getDatasets(synched, auto, resFileName)
+subroutine getDatasets_pltget(synched, auto, resFileName)
 
     use Dio_Plt_Tst
 
@@ -72,7 +72,7 @@ subroutine getDatasets(synched, auto, resFileName)
     call DioGetIdent(dioIdent)
     write(resLun,*) 'dioVersion: ', trim(dioVersion)
     write(resLun,*) 'dioIdent: ', trim(dioIdent)
-    write(resLun,*) 'getDatasets: ', synched, auto
+    write(resLun,*) 'getDatasets_pltget: ', synched, auto
 
 !   Initialise expected Data
 
@@ -248,7 +248,7 @@ subroutine getDatasets(synched, auto, resFileName)
 
     close(resLun)
 
-end subroutine getDatasets
+end subroutine getDatasets_pltget
 
 
 program test_get_dio_f90
@@ -258,14 +258,14 @@ program test_get_dio_f90
 ! initialise Dio
 
     call DioInit
-    call getDatasets(.true., .false., 'TESTPltSynch-res.txt')     ! get synched streams
-    call getDatasets(.false., .false., 'TESTPltSerial-res.txt')   ! get non synched streams
+    call getDatasets_pltget(.true., .false., 'TESTPltSynch-res.txt')     ! get synched streams
+    call getDatasets_pltget(.false., .false., 'TESTPltSerial-res.txt')   ! get non synched streams
 
     call DioInit('dioconfigShm.ini')
-    call getDatasets(.true., .true., 'TESTPltAutoShm-res.txt')    ! get synched streams
+    call getDatasets_pltget(.true., .true., 'TESTPltAutoShm-res.txt')    ! get synched streams
 
     call DioInit('dioconfigFiles.ini')
-    call getDatasets(.false., .true., 'TESTPltAutoFiles-res.txt') ! get non synched streams
+    call getDatasets_pltget(.false., .true., 'TESTPltAutoFiles-res.txt') ! get non synched streams
 
 end
 

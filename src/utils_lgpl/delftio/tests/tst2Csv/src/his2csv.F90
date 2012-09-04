@@ -137,16 +137,16 @@ program his2csv
             ! full his file
             do par = 1, nPar
                 write(outFileHandle, '(2A)') 'parameter: ', trim(parsCopy(par))
-                write(outFileHandle,'(A,$)') 'Time Stamp'
+                write(outFileHandle,'(A)') 'Time Stamp'
                 do loc = 1, nLoc
-                    write(outFileHandle, '(2A,$)') ',', trim(locsCopy(loc))
+                    write(outFileHandle, '(2A)') ',', trim(locsCopy(loc))
                 enddo
                 write(outFileHandle,'(A)') ''
                 do t = 1, nTim
-                    write(outFileHandle, '(A,$)') DioDsJulian2DioTime(timesCopy(t))
+                    write(outFileHandle, '(A)') DioDsJulian2DioTime(timesCopy(t))
                     do loc = 1, nLoc
                         write(valueString,'(G15.7)') rValues(par,loc,t)
-                        write(outFileHandle, '(2A,$)') ',', trim(valueString)
+                        write(outFileHandle, '(2A)') ',', trim(valueString)
                     enddo
                     write(outFileHandle, '(A)') ''
                 enddo

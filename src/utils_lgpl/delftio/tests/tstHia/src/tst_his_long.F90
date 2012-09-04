@@ -26,7 +26,7 @@
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
-subroutine write_his_long
+subroutine write_his_long_l
 
     use Dio_Plt_Rw
     
@@ -40,6 +40,7 @@ subroutine write_his_long
     character(Len=200), dimension(nVars):: vars
     character(Len=200), dimension(nLocs):: locs
     real * 4, dimension(nVars,nLocs):: values
+    integer :: i,j
 
     type(DioPltType)  :: hisOutSet
 
@@ -57,7 +58,7 @@ subroutine write_his_long
                                & en vervelende locatie naam' /
 
     data runId / 'myTestRun', 'check if long names work', &
-                 'write_his_long', ' ' /
+                 'write_his_long_l', ' ' /
 
 !   Create HIS OUT data set
 
@@ -89,10 +90,10 @@ subroutine write_his_long
 
     write (*, *) 'Have destroyed HIS OUT sets'
 
-end subroutine write_his_long
+end subroutine write_his_long_l
 
 
-subroutine read_his_long
+subroutine read_his_long_l
 
     use Dio_Plt_Rw
 
@@ -107,7 +108,7 @@ subroutine read_his_long
     character(Len=DioMaxLocLen), dimension(:), pointer :: locs
 
     logical :: readRes
-    integer :: ierr
+    integer :: i, ierr
 
 !   Open file for storing results
 
@@ -154,13 +155,13 @@ subroutine read_his_long
     ! write (*, *) 'Got Everything, GIVE ENTER'
     ! read(*,*)
 
-end subroutine read_his_long
+end subroutine read_his_long_l
 
 
 program test_his_long
 
-    call write_his_long
-    call read_his_long
+    call write_his_long_l
+    call read_his_long_l
 
 end program test_his_long
 

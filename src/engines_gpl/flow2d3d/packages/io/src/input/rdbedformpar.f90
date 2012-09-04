@@ -124,9 +124,11 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
 !
     bdfC_Hn                 => gdp%gdbedformpar%bdfC_Hn
     bdfC_Hp                 => gdp%gdbedformpar%bdfC_Hp
+    bdfGmin                 => gdp%gdbedformpar%bdfGmin
     bdfHmax                 => gdp%gdbedformpar%bdfHmax
     bdfL_Hc                 => gdp%gdbedformpar%bdfL_Hc
     bdfL_Hp                 => gdp%gdbedformpar%bdfL_Hp
+    bdfPmax                 => gdp%gdbedformpar%bdfPmax
     bdfrpt                  => gdp%gdbedformpar%bdfrpt
     bdfrlxtype              => gdp%gdbedformpar%bdfrlxtype
     bdfuni                  => gdp%gdbedformpar%bdfuni

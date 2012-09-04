@@ -528,14 +528,14 @@ function DioStreamConnect(stream, alsoForAsync) result(retVal)
             else if ( DioStreamUsesLun(stream)) then
                 if (stream % lun .gt. 0) then
 #if (defined(WIN32))
-                    open (stream % lun, file=stream % name, action='read', &
-                                shared, status='old', form= stream % form, iostat=ierr)
+                    open (stream%lun, file=stream % name, action='read', &
+                              shared, status='old', form= stream % form, iostat=ierr)
 #elif (defined(salford32))
-                    open (stream % lun, file=stream % name, action='read', &
+                    open (stream%lun, file=stream % name, action='read', &
           access='transparent', share='DENYWR', status='old', form= stream % form, iostat=ierr)
 #else
-                    open (stream % lun, file=stream % name, action='read', &
-                                status='old', form= stream % form, iostat=ierr)
+                    open (stream%lun, file=stream % name, action='read', &
+                              status='old', form= stream % form, iostat=ierr)
 #endif
                 endif
             endif
@@ -545,14 +545,14 @@ function DioStreamConnect(stream, alsoForAsync) result(retVal)
             else if ( DioStreamUsesLun(stream)) then
                 if (stream % lun .gt. 0) then
 #if (defined(WIN32))
-                    open (stream % lun, file=stream % name, action='write', &
-                                shared, form= stream % form, iostat=ierr)
+                    open (stream%lun, file=stream % name, action='write', &
+                              shared, form= stream % form, iostat=ierr)
 #elif (defined(salford32))
-                    open (stream % lun, file=stream % name, action='write', &
+                    open (stream%lun, file=stream % name, action='write', &
           access='transparent', share='DENYWR', form= stream % form, iostat=ierr)
 #else
-                    open (stream % lun, file=stream % name, action='write', &
-                                form= stream % form, iostat=ierr)
+                    open (stream%lun, file=stream % name, action='write', &
+                              form= stream % form, iostat=ierr)
 #endif
                 endif
             endif
@@ -643,7 +643,7 @@ subroutine DioStreamDisconnect(stream, alsoForAsync)
                     ! call flush(stream % lun)   ! Flush before close seems senseless
                                                  ! but avoids the nfs problem: file is there,
                                                  ! content not yet.
-                    close( stream % lun )
+                    close( stream%lun )
                 endif
             else if(stream % streamType .eq. dio_Nefis_stream) then
 #if (defined(DIO_NEFIS_INCLUDED))

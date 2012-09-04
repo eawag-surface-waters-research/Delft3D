@@ -473,7 +473,7 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     if (lvalue) then
        nudge = 1
        msg = 'Nudging of constituents applied at open boundaries'
-       call prterr(lundia, 'Z013', msg, gdp)
+       call prterr(lundia, 'Z013', msg)
     else
        nudge = 0
     endif

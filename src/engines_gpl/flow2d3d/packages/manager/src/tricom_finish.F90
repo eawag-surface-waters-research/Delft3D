@@ -70,7 +70,6 @@ subroutine tricom_finish(olv_handle, gdp)
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     include 'fsm.i'
-    include 'flow_steps_f.inc'
     include 'tri-dyn.igd'
     real(fp)                            , pointer :: thr
     integer                             , pointer :: ncmax
@@ -350,11 +349,6 @@ subroutine tricom_finish(olv_handle, gdp)
     character(23)                       , pointer :: prshis
     character(23)                       , pointer :: selhis
     character(36)                       , pointer :: tgfcmp
-    include 'delftonline.i'
-!
-! Local parameters
-!
-    integer, parameter :: maxtim = 1500
 !
 ! Global variables: NONE
 !

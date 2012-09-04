@@ -77,6 +77,7 @@ C     .. Declarations of NEFIS-functions
      +         ,FLSDAT
      +         ,OPNDAT
      +         ,OPNDEF
+     +         ,NEFERR
 C
       EXTERNAL  CLSDAT
      +         ,CLSDEF
@@ -84,6 +85,7 @@ C
      +         ,FLSDAT
      +         ,OPNDAT
      +         ,OPNDEF
+     +         ,NEFERR
 C     ..
 C     .. Executable statements
 C
@@ -141,10 +143,12 @@ C
      +         ,DEFELM
      +         ,DEFGRP
      +         ,FLSDEF
+     +         ,NEFERR
       EXTERNAL  DEFCEL
      +         ,DEFELM
      +         ,DEFGRP
      +         ,FLSDEF
+     +         ,NEFERR
 C     ..
 C     .. Executable statements
 C
@@ -200,8 +204,10 @@ C
 C
       INTEGER   FLSDAT
      +         ,PUTELT
+     +         ,NEFERR
       EXTERNAL  FLSDAT
      +         ,PUTELT
+     +         ,NEFERR
 C     ..
 C     .. Executable statements
 C
@@ -280,7 +286,9 @@ C
       INTEGER   ARRAY (7,3,5)
 C
       INTEGER   GETELT
+     +         ,NEFERR
       EXTERNAL  GETELT
+     +         ,NEFERR
 C     ..
 C     .. Executable statements
 C
@@ -341,7 +349,9 @@ C
       INTEGER   ARRAY (4,2,3)
 C
       INTEGER   GETELT
+     +         ,NEFERR
       EXTERNAL  GETELT
+     +         ,NEFERR
 C     ..
 C     .. Executable statements
 C

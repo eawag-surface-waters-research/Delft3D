@@ -28,7 +28,7 @@
 !  $HeadURL$
       program test_get_shmds_f77
 
-      integer t, nTimes
+      integer t, nTimes, nGetTimes, nRealTimes
       double precision curTime, otherTime
       character*(100) name
 

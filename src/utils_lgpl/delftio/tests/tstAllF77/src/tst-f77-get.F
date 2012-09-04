@@ -26,7 +26,7 @@
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
-      subroutine getDatasets(synched, resFileName)
+      subroutine getDatasets_f77get(synched, resFileName)
 
       implicit none
 
@@ -35,46 +35,53 @@
 
 C     ! arguments
       
-      logical       synched
-      character*(*) resFileName
+      logical       :: synched
+      character*(*) :: resFileName
 
 C     ! timeframe
 
-      integer NTIMES
-#if (defined(WIN32))
-      parameter (NTIMES = 100 )
-#else
-      parameter (NTIMES = 10  )
-#endif
+    integer, parameter :: ra = 1 ! dataset/stream reals/ASCII
+    integer, parameter :: da = 2 ! dataset/stream doubles/ASCII
+    integer, parameter :: ia = 3 ! dataset/stream ints/ASCII
+    integer, parameter :: rb = 4 ! dataset/stream reals/Binary
+    integer, parameter :: db = 5 ! dataset/stream doubles/Binary
+    integer, parameter :: ib = 6 ! dataset/stream ints/Binary
 
+#if (defined(WIN32))
+      integer, parameter :: NTIMES = 100
+#else
+      integer, parameter :: NTIMES = 10
+#endif
+      integer, parameter :: NSETS            =  6
+      integer, parameter :: DioMaxTimLen     = 25
 C     ! locals
 
-      integer        resLun
+      integer         :: resLun
 
-      integer         stream(NSETS)
-      integer         set(NSETS)
-      character*(100) name(NSETS)
+      integer         :: stream(NSETS)
+      integer         :: set(NSETS)
+      character(100)  :: name(NSETS)
 
-      character*(DioMaxParLen) pars(NPARS)
-      character*(DioMaxLocLen) locs(NLOCS)
-      character*(DioMaxTimLen) tims(NTIMES)
+      character(DioMaxParLen) :: pars(NPARS)
+      character(DioMaxLocLen) :: locs(NLOCS)
+      character(DioMaxTimLen) :: tims(NTIMES)
 
-      real*4           rValues(NPARS,NLOCS)
+      real*4    ::       rValues(NPARS,NLOCS)
 
-      real*4           checkRValues(NPARS,NLOCS)
+      real*4    ::       checkRValues(NPARS,NLOCS)
 
-      double precision diffValues(NPARS,NLOCS)
+      double precision :: diffValues(NPARS,NLOCS)
 
-      integer nPar, nLoc, nTim
+      integer :: nPar, nLoc, nTim
 
-      integer ds, t, i, j
+      integer :: ds, t, i, j
 
 C     !   Open file for results, write DioVersion
 
       resLun = 11
       open(resLun,file=resFileName)
 
-      write(resLun,*) 'getDatasets: ', synched
+      write(resLun,*) 'getDatasets_f77get: ', synched
 
 C     !   Initialise expected Data
 
@@ -89,7 +96,7 @@ C     !   Initialize data set names
 
       do ds = 1, NSETS
           if ( synched ) then
-              name(ds) = 'sync.' // name(ds)
+              name(ds) = 'sync.' // trim(name(ds))
           endif
       enddo
 
@@ -211,8 +218,8 @@ C     !   cleanup
 C     ! initialise Dio
 
       call DiofInit
-      call getDatasets(.true., 'TESTF77Synch-res.txt')
-      call getDatasets(.false., 'TESTF77Serial-res.txt')
+      call getDatasets_f77get(.true., 'TESTF77Synch-res.txt')
+      call getDatasets_f77get(.false., 'TESTF77Serial-res.txt')
 
       end
 

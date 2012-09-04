@@ -26,7 +26,7 @@
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
-subroutine getDatasets(synched, auto, resFileName)
+subroutine write_his_long_2dget(synched, auto, resFileName)
 
     use Dio_2D_Tst
 
@@ -55,7 +55,10 @@ subroutine getDatasets(synched, auto, resFileName)
 
     double precision,dimension(MMAX,NMAX) :: diffValues   ! diff in values
 
+    integer                   :: i
     integer                   :: ds      ! dataset counter
+    integer                   :: numM
+    integer                   :: numN
     integer                   :: numSets ! actual #sets (3 for Auto)
 
 !   Open file for results, write DioVersion
@@ -225,7 +228,7 @@ subroutine getDatasets(synched, auto, resFileName)
 
     close(resLun)
 
-end subroutine getDatasets
+end subroutine write_his_long_2dget
 
 
 program test_get_dio_f90
@@ -233,14 +236,14 @@ program test_get_dio_f90
     use Dio_2D_Tst
 
     call DioInit
-    call getDatasets(.true., .false., 'TEST2DFSynch-res.txt')    ! get synched streams
-    call getDatasets(.false., .false., 'TEST2DFSerial-res.txt')  ! get non synched streams
+    call write_his_long_2dget(.true., .false., 'TEST2DFSynch-res.txt')    ! get synched streams
+    call write_his_long_2dget(.false., .false., 'TEST2DFSerial-res.txt')  ! get non synched streams
 
     call DioInit('dioconfigShm.ini')
-    call getDatasets(.true., .true., 'TEST2DFAutoShm-res.txt')   ! get synched streams
+    call write_his_long_2dget(.true., .true., 'TEST2DFAutoShm-res.txt')   ! get synched streams
 
     call DioInit('dioconfigFiles.ini')
-    call getDatasets(.false., .true., 'TEST2DFAutoFiles-res.txt')! get non synched streams
+    call write_his_long_2dget(.false., .true., 'TEST2DFAutoFiles-res.txt')! get non synched streams
 
 end
 

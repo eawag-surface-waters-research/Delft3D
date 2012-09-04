@@ -430,7 +430,10 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
        ! group 3: element 'ZKFS' only if SELHIS( 1: 1) = 'Y'
        !
        if (selhis(1:1)=='Y') then
-          if (inode == master) allocate( ibuff1(1:nostatgl) )
+          if (inode == master) then
+             allocate( ibuff1(1:nostatgl) )
+             ibuff1 = 0
+          endif
           if (parll) then    
              call dfgather_filter(lundia, nostat, nostatto, nostatgl, order_sta, zkfs, ibuff1, gdp )
           else

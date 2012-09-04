@@ -36,7 +36,7 @@ subroutine read_his_long(datasetName)
 
     type(DioPltType)                   :: hisInSet
 
-    integer :: resLun, ls
+    integer :: i, resLun, ls
     integer :: nPar, NLoc
     character(Len=DioMaxParLen), dimension(:), pointer :: pars
     character(Len=DioMaxLocLen), dimension(:), pointer :: locs

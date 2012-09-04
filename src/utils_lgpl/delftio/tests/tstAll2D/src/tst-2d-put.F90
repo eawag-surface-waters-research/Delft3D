@@ -26,7 +26,7 @@
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
-subroutine putDatasets(synched, auto)
+subroutine putDatasets_2dput(synched, auto)
 
     use Dio_2D_Tst
 
@@ -46,7 +46,9 @@ subroutine putDatasets(synched, auto)
     double precision,dimension(MMAX,NMAX)    :: dValues ! double values in dataset
     integer,         dimension(MMAX,NMAX)    :: iValues ! integer values in dataset
 
+    integer :: i
     integer :: ds ! dataset counter
+    integer :: numSets
 
 !   Initialise Data to be put
 
@@ -149,7 +151,7 @@ subroutine putDatasets(synched, auto)
 
     endif
 
-end subroutine putDatasets
+end subroutine putDatasets_2dput
 
 
 
@@ -166,13 +168,13 @@ program test_put_dio_f90
 
     write(*,*) dioVersion, dioIdent
 
-    call putDatasets(.false., .false.) ! put non synched streams
-    call putDatasets(.true., .false.)  ! put synched streams
+    call putDatasets_2dput(.false., .false.) ! put non synched streams
+    call putDatasets_2dput(.true., .false.)  ! put synched streams
 
     call DioInit('dioconfigFiles.ini')
-    call putDatasets(.false., .true.) ! put non synched streams
+    call putDatasets_2dput(.false., .true.) ! put non synched streams
 
     call DioInit('dioconfigShm.ini')
-    call putDatasets(.true., .true.)  ! put synched streams
+    call putDatasets_2dput(.true., .true.)  ! put synched streams
 
 end

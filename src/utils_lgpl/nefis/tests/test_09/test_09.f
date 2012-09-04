@@ -27,7 +27,7 @@
 !  $Id$
 !  $HeadURL$
       program test9
-      INTEGER*4 fds
+      INTEGER*4 fds,datfds
       INTEGER START, STOP, INCR
       PARAMETER (START=1, STOP=2, INCR=3)
       INTEGER Opndef,
@@ -45,6 +45,8 @@
      *        idum ,
      *        i    ,
      *        UINDEX(3,1)
+      REAL    cpu1,
+     *        cpu2
       COMPLEX*16 val
       CHARACTER coding*1
       CHARACTER ERRSTR*1024

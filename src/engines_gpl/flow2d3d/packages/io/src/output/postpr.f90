@@ -814,7 +814,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
              firstwaq = .false.
           else
              call timer_start(timer_wait, gdp)
-             call waq2flow(d(dps), mmax, nmaxus, kmax, lundia, mlb, mub, nlb, nub)
+             call waq2flow(d(dps), mmax, nmaxus, kmax, lundia, mlb, mub, nlb, nub, gdp)
              call timer_stop(timer_wait, gdp)
              call wribot(comfil, lundia, error , mmax    , nmax,  &
                        & nmaxus, r(dp) , d(dps), r(rbuff), gdp     )

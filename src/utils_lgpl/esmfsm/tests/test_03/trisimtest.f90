@@ -27,6 +27,7 @@
 !  $Id$
 !  $HeadURL$
 subroutine trisimtest (context_id, fsm_flags)
+    use precision     ! pntrsize, used in fsm.i
     implicit none
     !
     include 'fsm.i'
@@ -38,8 +39,8 @@ subroutine trisimtest (context_id, fsm_flags)
 !
 ! Local variables
 !
-    integer         :: fsmstatus
-    integer         :: mkpnt
+    integer                :: fsmstatus
+    integer(kind=pntrsize) :: mkpnt
 
     fsmstatus = fsmini (context_id, fsm_flags)
 

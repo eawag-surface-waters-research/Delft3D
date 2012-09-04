@@ -391,8 +391,6 @@ subroutine tricom_init(olv_handle, gdp)
     real(fp)                            , pointer :: anglon        ! Angle of longitude of the model centre (used to determine solar radiation) 
     real(fp)                            , pointer :: dtsec         ! DT in seconds 
     real(fp)                            , pointer :: timnow        ! Current timestep (multiples of dt)  = number of time steps since itdate, 00:00:00 hours
-    
-    include 'delftonline.i'
 !
 ! Local parameters
 !

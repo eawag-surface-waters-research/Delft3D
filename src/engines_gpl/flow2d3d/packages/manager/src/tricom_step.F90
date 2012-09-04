@@ -69,7 +69,6 @@ subroutine tricom_step(olv_handle, gdp)
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     include 'fsm.i'
-    include 'flow_steps_f.inc'
     include 'tri-dyn.igd'
     real(fp)                            , pointer :: thr
     integer                             , pointer :: ncmax
@@ -386,7 +385,6 @@ subroutine tricom_step(olv_handle, gdp)
     real(fp)                            , pointer :: anglon  ! Angle of longitude of the model centre (used to determine solar radiation) 
     real(fp)                            , pointer :: dtsec   ! DT in seconds 
     real(fp)                            , pointer :: timnow  ! Current timestep (multiples of dt)  = number of time steps since itdate, 00:00:00 hours
-    include 'delftonline.i'
 !
 ! Local parameters
 !

@@ -26,7 +26,7 @@
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
-subroutine putDatasets(synched, auto)
+subroutine putDatasets_pltput(synched, auto)
 
     use Dio_Plt_Tst
 
@@ -49,10 +49,12 @@ subroutine putDatasets(synched, auto)
     double precision,dimension(NPARS,NLOCS)    :: dValues ! double values in dataset
     integer,         dimension(NPARS,NLOCS)    :: iValues ! integer values in dataset
 
+    integer :: ds ! dataset counter
+    integer :: i
+    integer :: numSets
+
     data pars   / 'Aa', 'Bb', 'Cc', 'Dd', 'Ee' /     ! parameter names
     data locs   / '11', '22', '33' /                 ! location names
-
-    integer :: ds ! dataset counter
 
 !   Initialise Data to be put
 
@@ -156,7 +158,7 @@ subroutine putDatasets(synched, auto)
 
     endif
 
-end subroutine putDatasets
+end subroutine putDatasets_pltput
 
 
 
@@ -175,14 +177,14 @@ program test_put_dio_f90
 
     write(*,*) dioVersion, dioIdent
 
-    call putDatasets(.false., .false.) ! put non synched streams
+    call putDatasets_pltput(.false., .false.) ! put non synched streams
 
-    call putDatasets(.true., .false.)  ! put synched streams
+    call putDatasets_pltput(.true., .false.)  ! put synched streams
 
     call DioInit('dioconfigFiles.ini')
-    call putDatasets(.false., .true.) ! put non synched streams
+    call putDatasets_pltput(.false., .true.) ! put non synched streams
 
     call DioInit('dioconfigShm.ini')
-    call putDatasets(.true., .true.)  ! put synched streams
+    call putDatasets_pltput(.true., .true.)  ! put synched streams
 
 end

@@ -1273,11 +1273,11 @@ subroutine getalluvthick(this, seddep, nmfrom, nmto, nval)
 !
 ! Function/routine arguments
 !
-    type(bedcomp_data)                                                , intent(in)  :: this
-    real(fp), dimension(nmfrom:nmto, nval)                            , intent(out) :: seddep
     integer                                                           , intent(in)  :: nmfrom
     integer                                                           , intent(in)  :: nmto
     integer                                                           , intent(in)  :: nval
+    type(bedcomp_data)                                                , intent(in)  :: this
+    real(fp), dimension(nmfrom:nmto, nval)                            , intent(out) :: seddep
 !
 ! Local variables
 !
@@ -1340,13 +1340,13 @@ subroutine getfrac(this, frac, anymud, mudcnt, mudfrac, nmfrom, nmto)
     !
     ! Function/routine arguments
     !
+    integer                                                           , intent(in)  :: nmfrom
+    integer                                                           , intent(in)  :: nmto
     type(bedcomp_data)                                                , intent(in)  :: this    
     logical                                                           , intent(in)  :: anymud
     real(fp), dimension(nmfrom:nmto, this%settings%nfrac)             , intent(out) :: frac
     real(fp), dimension(nmfrom:nmto)                                  , intent(out) :: mudfrac
     real(fp), dimension(nmfrom:nmto)                                  , intent(in)  :: mudcnt
-    integer                                                           , intent(in)  :: nmfrom
-    integer                                                           , intent(in)  :: nmto
     !
     ! Local variables
     !
@@ -1409,10 +1409,10 @@ subroutine getmfrac(this, frac, nmfrom, nmto)
     !
     ! Function/routine arguments
     !
-    type(bedcomp_data)                                                , intent(in)  :: this
-    real(fp), dimension(nmfrom:nmto, this%settings%nfrac)             , intent(out) :: frac
     integer                                                           , intent(in)  :: nmfrom
     integer                                                           , intent(in)  :: nmto
+    type(bedcomp_data)                                                , intent(in)  :: this
+    real(fp), dimension(nmfrom:nmto, this%settings%nfrac)             , intent(out) :: frac
     !
     ! Local variables
     !
@@ -1475,10 +1475,10 @@ subroutine setmfrac(this, frac, nmfrom, nmto)
     !
     ! Function/routine arguments
     !
-    type(bedcomp_data)                                                              :: this
-    real(fp), dimension(nmfrom:nmto, this%settings%nfrac)             , intent(in)  :: frac
     integer                                                           , intent(in)  :: nmfrom
     integer                                                           , intent(in)  :: nmto
+    type(bedcomp_data)                                                              :: this
+    real(fp), dimension(nmfrom:nmto, this%settings%nfrac)             , intent(in)  :: frac
     !
     ! Local variables
     !
@@ -1533,10 +1533,10 @@ subroutine getvfrac(this, frac, nmfrom, nmto)
     !
     ! Function/routine arguments
     !
-    type(bedcomp_data)                                                , intent(in)  :: this
-    real(fp), dimension(nmfrom:nmto, this%settings%nfrac)             , intent(out) :: frac
     integer                                                           , intent(in)  :: nmfrom
     integer                                                           , intent(in)  :: nmto
+    type(bedcomp_data)                                                , intent(in)  :: this
+    real(fp), dimension(nmfrom:nmto, this%settings%nfrac)             , intent(out) :: frac
     !
     ! Local variables
     !
@@ -1600,10 +1600,10 @@ subroutine setvfrac(this, frac, nmfrom, nmto)
     !
     ! Function/routine arguments
     !
-    type(bedcomp_data)                                                              :: this    
-    real(fp), dimension(nmfrom:nmto, this%settings%nfrac)             , intent(in)  :: frac
     integer                                                           , intent(in)  :: nmfrom
     integer                                                           , intent(in)  :: nmto
+    type(bedcomp_data)                                                              :: this    
+    real(fp), dimension(nmfrom:nmto, this%settings%nfrac)             , intent(in)  :: frac
     !
     ! Local variables
     !

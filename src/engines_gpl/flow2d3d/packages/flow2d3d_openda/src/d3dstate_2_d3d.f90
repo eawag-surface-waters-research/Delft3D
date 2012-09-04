@@ -70,6 +70,7 @@
 
   subroutine get_d3d_state_from_d3d(imode)
 
+    use precision     ! pntrsize, used in fsm.i
     use gdp_entry
     use m_d3d_state
       
@@ -209,6 +210,7 @@
 
   subroutine set_d3d_state_to_d3d(imode)
 
+    use precision     ! pntrsize, used in fsm.i
     use gdp_entry
     use m_d3d_state
       

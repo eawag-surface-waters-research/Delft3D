@@ -127,6 +127,7 @@ end function Finalize_openda
 !==============================================================================
 !
 function getObservedLocalization(location_id_c, dist, nvals, values) result(retVal)
+    use precision     ! pntrsize, used in fsm.i
     use gdp_entry 
     use m_openda_quantities
     use m_d3dstate_2_openda
@@ -173,12 +174,12 @@ function getObservedLocalization(location_id_c, dist, nvals, values) result(retV
        return
     endif  
 
+    nmax       => gdp%d%nmax
+    mmax       => gdp%d%mmax
     if (sub_core_offsets(9)-1 /= nvals) then
        write(*,*) 'compute localization weights: incompatible lenghts ', nvals, nmax*mmax
        return
     else
-       nmax       => gdp%d%nmax
-       mmax       => gdp%d%mmax
        nostat     => gdp%d%nostat
        mnstat     => gdp%gdstations%mnstat
        namst      => gdp%gdstations%namst

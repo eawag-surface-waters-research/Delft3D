@@ -47,6 +47,7 @@
 
 
 program test
+    use precision     ! pntrsize, used in fsm.i
     implicit none
     include 'fsm.i'
     
@@ -62,7 +63,7 @@ program test
 
     !status = fsmini (0, FSM_SILENT)
     status = fsmini (0, FSM_TRACE)
-    call fsmtrf ("trace.out")
+    status = fsmtrf ("trace.out")
 
     open (10, file='input',  iostat=iostat, status='old', form='formatted')
     if (iostat /= 0) then
@@ -88,11 +89,11 @@ program test
         endif
 
         if (operation == 'makptr') then
-            call makepointer (11, name, type, length)
+            call makepointer_l (11, name, type, length)
         elseif (operation == 'getptr') then
-            call getpointer (11, name)
+            call getpointer_l (11, name)
         elseif (operation == 'relptr') then
-            call releasepointer (11, name)
+            call releasepointer_l (11, name)
         else
             write (*,*) 'Error: Unknown operation in input:', operation, 'on line ', line
         endif
@@ -106,7 +107,8 @@ end
 !-------------------------------------------------------------------------------
 
 
-subroutine makepointer (unit, keyname, type, length)
+subroutine makepointer_l (unit, keyname, type, length)
+    use precision     ! pntrsize, used in fsm.i
     implicit none
     integer unit
     character keyname*(*)
@@ -115,52 +117,57 @@ subroutine makepointer (unit, keyname, type, length)
 
     include 'fsm.i'
 
-    integer result
+    integer                :: result
+    integer(kind=pntrsize) :: presult
     character message*1000
     
-    result = MAKPTR (keyname, type, length)
-    if (result == 0) then
+    presult = MAKPTR (keyname, type, length)
+    if (presult == 0) then
         result = FSMERR (message)
         write (unit,*) 'MAKPTR ', keyname, 'Error: ', message(1:len_trim(message))
     else
         write (unit,*) 'MAKPTR ', keyname, 'OK => ', result
     endif
-end
+end subroutine makepointer_l
 
-subroutine getpointer (unit, keyname)
+subroutine getpointer_l (unit, keyname)
+    use precision     ! pntrsize, used in fsm.i
     implicit none
     integer unit
     character keyname*(*)
 
     include 'fsm.i'
 
-    integer result
+    integer                :: result
+    integer(kind=pntrsize) :: presult
     character message*1000
     
-    result = GETPTR (keyname)
-    if (result == 0) then
+    presult = GETPTR (keyname)
+    if (presult == 0) then
         result = FSMERR (message)
         write (unit,*) 'GETPTR ', keyname, 'Error: ', message(1:len_trim(message))
     else
         write (unit,*) 'GETPTR ', keyname, 'OK => ', result
     endif
-end
+end subroutine getpointer_l
 
-subroutine releasepointer (unit, keyname)
+subroutine releasepointer_l (unit, keyname)
+    use precision     ! pntrsize, used in fsm.i
     implicit none
     integer unit
     character keyname*(*)
 
     include 'fsm.i'
 
-    integer result
+    integer                :: result
+    integer(kind=pntrsize) :: presult
     character message*1000
     
-    result = RELPTR (keyname)
-    if (result == 0) then
+    presult = RELPTR (keyname)
+    if (presult == 0) then
         result = FSMERR (message)
         write (unit,*) 'RELPTR ', keyname, 'Error: ', message(1:len_trim(message))
     else
         write (unit,*) 'RELPTR ', keyname, 'OK => ', result
     endif
-end
+end subroutine releasepointer_l

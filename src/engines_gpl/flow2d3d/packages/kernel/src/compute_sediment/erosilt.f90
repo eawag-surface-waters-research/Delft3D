@@ -50,34 +50,34 @@ subroutine erosilt(thick    ,kmax     ,ws       ,wstau    ,entr     ,lundia   , 
     include 'sedparams.inc'
     include 'trapar.inc'
     !
+    integer                             , intent(in)    :: iform
+    integer                             , intent(in)    :: numintpar
+    integer                             , intent(in)    :: numrealpar
+    integer                             , intent(in)    :: numstrpar
     integer                             , intent(in)    :: kmax
     integer                                             :: lundia   !  Description and declaration in inout.igs
+    integer       , dimension(numintpar), intent(inout) :: intpar
+    integer(pntrsize)                   , intent(in)    :: dllhandle
     real(fp)                            , intent(in)    :: entr
     real(fp)       , dimension(0:kmax)  , intent(in)    :: ws
     real(fp)                            , intent(out)   :: wstau
     real(fp)       , dimension(kmax)    , intent(in)    :: thick
     real(fp)                            , intent(in)    :: h0
     real(fp)                            , intent(in)    :: h1
-    logical                             , intent(out)   :: error
     real(fp)                            , intent(in)    :: fixfac
     real(fp)                            , intent(in)    :: srcmax
     real(fp)                            , intent(in)    :: frac
     real(fp)                            , intent(out)   :: sinkse
     real(fp)                            , intent(out)   :: sourse
-    logical                             , intent(in)    :: oldmudfrac
-    logical                             , intent(in)    :: flmd2l
     real(fp)                            , intent(in)    :: tcrdep
     real(fp)                            , intent(in)    :: tcrero
     real(fp)                            , intent(in)    :: eropar
-    integer                             , intent(in)    :: iform
-    integer       , dimension(numintpar), intent(inout) :: intpar
-    integer                             , intent(in)    :: numintpar
-    integer                             , intent(in)    :: numrealpar
-    integer                             , intent(in)    :: numstrpar
     real(hp)     , dimension(numrealpar), intent(inout) :: realpar
+    logical                             , intent(out)   :: error
+    logical                             , intent(in)    :: oldmudfrac
+    logical                             , intent(in)    :: flmd2l
     character(256), dimension(numstrpar), intent(inout) :: strpar
     character(256)                      , intent(in)    :: dllfunc
-    integer(pntrsize)                   , intent(in)    :: dllhandle
 !
 ! Local variables
 !

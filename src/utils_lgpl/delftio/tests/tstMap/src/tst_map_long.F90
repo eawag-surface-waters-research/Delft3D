@@ -40,6 +40,7 @@ subroutine write_map_long
     character(Len=200), dimension(nVars):: vars
     character(Len=200), dimension(nLocs):: locs
     real * 4, dimension(nVars,nLocs):: values
+    integer :: i,j
 
     type(DioPltType)  :: outSet
 
@@ -107,8 +108,10 @@ subroutine read_map_long
     character(Len=DioMaxLocLen), dimension(:), pointer :: locs
 
     logical :: readRes
-    integer :: ierr
+    integer :: i, ierr
 
+    nullify(pars)
+    nullify(locs)
 !   Open file for storing results
 
     resLun = 11

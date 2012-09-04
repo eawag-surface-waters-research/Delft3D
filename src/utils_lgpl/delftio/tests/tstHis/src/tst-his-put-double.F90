@@ -38,6 +38,7 @@ program his_put_double
     character(10), dimension(3) :: locs
     double precision, dimension(5,3)    :: values
     integer, dimension(3)       :: intIds
+    integer                     :: i,j
 
     character(HisRunIdSize), dimension(HisRunIdDim) :: runId
 

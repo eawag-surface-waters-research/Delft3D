@@ -27,13 +27,14 @@
 !  $Id$
 !  $HeadURL$
       program test_02
-          implicit none
+      use precision     ! pntrsize, used in fsm.i
+      implicit none
 !
       include 'fsm.i'
 !     
-      integer     i 
-      integer     iptr
-          character*6 pntnam
+      integer                :: i 
+      integer(kind=pntrsize) :: iptr
+      character*6            :: pntnam
 !      
       integer fsm_flags
       integer mcid

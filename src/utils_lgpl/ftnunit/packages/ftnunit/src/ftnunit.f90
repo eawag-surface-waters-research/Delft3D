@@ -69,7 +69,7 @@ subroutine ftnunit_get_lun( lun )
     integer, save :: prevlun = 0
 
     if ( prevlun /= 0 ) then
-        inquire( unit = lun, opened = opend )
+        inquire( unit = prevlun, opened = opend )
         if ( .not. opend ) then
             lun = prevlun
             return

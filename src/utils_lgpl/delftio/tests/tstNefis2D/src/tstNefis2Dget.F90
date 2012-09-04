@@ -37,7 +37,7 @@ program test_get_dio_f90
     type(Dio2DFType)  :: inSet
     type(Dio2DFType)  :: inSetDble
 
-    integer resLun
+    integer :: i,resLun
 
 !   Initialize dio library
     call DioInit

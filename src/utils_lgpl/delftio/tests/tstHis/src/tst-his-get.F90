@@ -44,7 +44,7 @@ subroutine his_get(resFileName, datasetName)
 
     type(DioPltType)  :: hisInSet
 
-    integer           :: resLun
+    integer           :: i,resLun
 
 !   Open file for storing results
 

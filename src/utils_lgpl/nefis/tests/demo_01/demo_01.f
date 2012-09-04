@@ -101,6 +101,8 @@ C                 ..                 ELEMENTS FROM DATA FILE
 C                 .. NEFIS-FUNCTION: CLOSE A DATA FILE
      +         ,CLSDEF
 C                 .. NEFIS-FUNCTION: CLOSE A DEFINITION FILE
+     +         ,NEFERR
+C                 .. NEFIS-FUNCTION: RETRIEVE ERROR STRING
 C=======================================================================
 C                 ..
       OBSFIL = 11

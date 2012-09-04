@@ -54,7 +54,7 @@ subroutine checkNefisError(success, nefisRetVal, errString)
         success = .false.
         resOfErrorCall = NefErr(0, nefErrorString)
         if ( resOfErrorCall == 0 ) then
-            write(errString, '(A'','',I7,'': ''A)') trim(errString), nefisRetVal, trim(nefErrorString)
+            write(errString, '(A,'','',I7,'': '',A)') trim(errString), nefisRetVal, trim(nefErrorString)
         else
             write(errString, '(A,I7)') trim(errString), nefisRetVal
         endif

@@ -198,11 +198,11 @@ subroutine InitData(dsDat)
     if ( dsDat % dsType .eq. pltType ) then
         allocate(dsDat % pars(dsDat % numM))
         do par = 1, dsDat % numM
-            write(dsDat % pars(par),'(A,I)') trim(dsDat % Name) // ' par ', par
+            write(dsDat % pars(par),'(A,I0)') trim(dsDat % Name) // ' par ', par
         enddo
         allocate(dsDat % locs(dsDat % numN))
         do loc = 1, dsDat % numN
-            write(dsDat % locs(loc),'(A,I)') trim(dsDat % Name) // ' loc ', loc
+            write(dsDat % locs(loc),'(A,I0)') trim(dsDat % Name) // ' loc ', loc
         enddo
     endif
 

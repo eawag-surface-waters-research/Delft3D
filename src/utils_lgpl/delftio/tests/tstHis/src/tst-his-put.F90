@@ -40,6 +40,7 @@ subroutine his_put(datasetName)
     character(10), dimension(3) :: locs
     real, dimension(5,3)        :: values
     integer, dimension(3)       :: intIds
+    integer                     :: i,j
 
     type(DioPltType)  :: hisOutSet
 

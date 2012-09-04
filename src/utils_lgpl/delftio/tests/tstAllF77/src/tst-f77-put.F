@@ -26,7 +26,7 @@
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
-      subroutine putDatasets(synched)
+      subroutine putDatasets_f77put(synched)
 
       implicit none
 
@@ -34,29 +34,35 @@
       include 'dio-plt.inc'
 
 C     ! arguments
-      logical       synched
+      logical :: synched
 
 C     ! timeframe
 
-      integer NTIMES
-#if (defined(WIN32))
-      parameter (NTIMES = 100 )
-#else
-      parameter (NTIMES = 10  )
-#endif
+    integer, parameter :: ra = 1 ! dataset/stream reals/ASCII
+    integer, parameter :: da = 2 ! dataset/stream doubles/ASCII
+    integer, parameter :: ia = 3 ! dataset/stream ints/ASCII
+    integer, parameter :: rb = 4 ! dataset/stream reals/Binary
+    integer, parameter :: db = 5 ! dataset/stream doubles/Binary
+    integer, parameter :: ib = 6 ! dataset/stream ints/Binary
 
+#if (defined(WIN32))
+      integer, parameter :: NTIMES = 100
+#else
+      integer, parameter :: NTIMES = 10
+#endif
+      integer, parameter :: NSETS  =  6
 C     ! locals
 
-      integer            stream(NSETS)
-      integer            set(NSETS)
-      character*(100) name(NSETS)
+      integer        :: stream(NSETS)
+      integer        :: set(NSETS)
+      character(100) :: name(NSETS)
 
-      character*(DioMaxParLen) pars(NPARS)
-      character*(DioMaxLocLen) locs(NLOCS)
+      character(DioMaxParLen) :: pars(NPARS)
+      character(DioMaxLocLen) :: locs(NLOCS)
 
-      real*4           rValues(NPARS,NLOCS)
+      real*4 :: rValues(NPARS,NLOCS)
 
-      integer ds, i
+      integer :: ds, i
 
       data pars   / 'Aa', 'Bb', 'Cc', 'Dd', 'Ee' /
       data locs   / '11', '22', '33' /
@@ -74,7 +80,7 @@ C     !   Initialize data set names
 
       do ds = 1, NSETS
           if ( synched ) then
-              name(ds) = 'sync.' // name(ds)
+              name(ds) = 'sync.' // trim(name(ds))
           endif
       enddo
 
@@ -145,8 +151,8 @@ C     !   cleanup
 C     ! initialise Dio
 
       call DiofInit
-      call putDatasets(.false.)
-      call putDatasets(.true.)
+      call putDatasets_f77put(.false.)
+      call putDatasets_f77put(.true.)
 
       end
 

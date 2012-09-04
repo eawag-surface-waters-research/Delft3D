@@ -124,7 +124,7 @@ subroutine DioPltReadHeaderShm(plt)
             header % pars = ''
             call  DioShmDsReadHdr(shmHandle, header % nPar, DioMaxParLen, header % pars)
         endif
-        if ( header % nLoc .gt. 0 .and. streamType /= Dio_WQMap_Stream) then
+        if ( header % nLoc .gt. 0 .and. plt % ds % inStream % streamType /= Dio_WQMap_Stream) then
             allocate(header % locs(header % nLoc))
             header % locs = ''
             call  DioShmDsReadHdr(shmHandle, header % nLoc, DioMaxLocLen, header % locs)

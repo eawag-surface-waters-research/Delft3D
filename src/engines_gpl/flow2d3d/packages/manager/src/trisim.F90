@@ -51,8 +51,6 @@ subroutine trisim (numdom, nummap, context_id, fsm_flags, runid)
     use globaldata
     implicit none
     type(globDat),pointer :: gdp
-    !
-    include 'fsm.i'
 !
 ! Parameters
 !

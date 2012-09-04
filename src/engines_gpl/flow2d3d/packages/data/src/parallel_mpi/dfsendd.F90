@@ -66,7 +66,7 @@ subroutine dfsendd ( field, work, worksize, ks, ke, request, tag, gdp )
     integer                                         , intent(in)    :: tag         ! unique tag
     integer                                         , intent(in)    :: worksize    ! 
     integer                                          ,intent(inout) :: request(4,2)! MPI communication handle
-    real(hp), dimension(gdp%d%nmlb:gdp%d%nmub,ks:ke), intent(inout) :: field       ! real array for which halo values must
+    real(hp), dimension(gdp%d%nmlb:gdp%d%nmub,ks:ke), intent(in)    :: field       ! real array for which halo values must
     real(hp), dimension(worksize,4,2)               , intent(inout) :: work        ! work array to store data to be sent to or received from neighbour be copied from neighbouring subdomains
 !
 ! Local variables

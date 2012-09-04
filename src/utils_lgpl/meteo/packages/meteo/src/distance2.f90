@@ -57,10 +57,6 @@ subroutine distance2(sferic    ,x1        ,y1        ,x2        ,y2        , &
     real(hp) :: ddegrad
     real(hp) :: dearthrad
     real(hp) :: d128      ! Double precision d12 
-    real(hp) :: dacos
-    real(hp) :: dcos
-    real(hp) :: dsin
-    real(hp) :: dsqrt
     real(hp) :: phi       ! Angle 
     real(hp) :: x1rad     ! X1 in radials 
     real(hp) :: x2rad     ! X2 in radials 

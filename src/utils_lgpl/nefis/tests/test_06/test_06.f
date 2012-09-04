@@ -35,10 +35,12 @@
      *        credat,
      *        defcel,
      *        defgrp,
-     *        getelt
+     *        getelt,
+     *        neferr
       INTEGER opndat,
      *        opndef,
-     *        putelt
+     *        putelt,
+     *        neferr
       INTEGER error,
      *        i, j, k, l, m, n, im,
      *        grpdms(5),
@@ -980,7 +982,6 @@ c        call clock(cpu1)
       write(*,'(''DATAGRP_TEST_3D'',
      *          '' read in [sec]'',1PE13.5)') cpu2-cpu1
 
- 9999 continue
 
       error= Clsdat( fds)
       IF (ERROR.NE.0) ERROR = NEFERR( 1, ERRSTR)

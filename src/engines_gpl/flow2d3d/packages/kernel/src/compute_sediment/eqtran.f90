@@ -63,7 +63,6 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     integer(pntrsize)                   , intent(in)    :: dllhandle
     integer                             , intent(in)    :: i2d3d
     integer                             , intent(in)    :: iform
-    integer      , dimension(numintpar) , intent(inout) :: intpar
     integer                             , intent(in)    :: iopsus
     integer                             , intent(in)    :: iopkcw
     integer                             , intent(in)    :: kmax     !  Description and declaration in esm_alloc_int.f90
@@ -75,7 +74,8 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     integer                             , intent(in)    :: numrealpar
     integer                             , intent(in)    :: numstrpar
     integer                             , intent(in)    :: subiw
-    real(fp)                            , intent(in)    :: aks      !  Description and declaration in esm_alloc_real.f90
+    integer      , dimension(numintpar) , intent(inout) :: intpar
+    real(fp)                                            :: aks      !  Description and declaration in esm_alloc_real.f90
     real(fp)                            , intent(in)    :: aksfac
     real(fp)                            , intent(out)   :: akstmp
     real(fp)                            , intent(in)    :: bed
@@ -682,8 +682,8 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
        !          & dzdvv     ,par        ,sbcu      ,sbcv      ,ssusx     , &
        !          & ssusy     )
        !
-       sbc_total = .false.
-       sus_total = .false.
+       ! sbc_total = .false.
+       ! sus_total = .false.
     elseif (iform == 7) then
        !
        ! Van Rijn (1984, modified)
@@ -706,8 +706,8 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
        !          & dzdvv     ,par       ,sbcu      ,sbcv       ,ssusx     , &
        !          & ssusy     )
        !
-       sbc_total = .false.
-       sus_total = .false.
+       ! sbc_total = .false.
+       ! sus_total = .false.
     elseif (iform == 9) then
        !
        ! Silt module
@@ -718,8 +718,8 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
        !
        !call tranb9(utot      ,h1        ,alfs      ,sbot      ,ssus      )
        !
-       sbc_total = .true.
-       sus_total = .true.
+       ! sbc_total = .true.
+       ! sus_total = .true.
     elseif (iform == 10) then
        !
        ! Ashida and Michiue
@@ -732,8 +732,8 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
        !          & sina      ,dzduu     ,dzdvv     ,par        ,sbot      , &
        !          & ssus      )
        !
-       sbc_total = .true.
-       sus_total = .true.
+       ! sbc_total = .true.
+       ! sus_total = .true.
     elseif (iform == 11) then
        !
        ! Soulsby and Van Rijn

@@ -115,7 +115,7 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
 ! Global variables
 !
     integer                                  , intent(in)  :: lsal    !  Description and declaration in dimens.igs
-    integer                                  , intent(in)  :: lsed    !  Description and declaration in esm_alloc_int.f90
+    integer                                                :: lsed    !  Description and declaration in esm_alloc_int.f90
     integer                                  , intent(in)  :: lsedtot !  Description and declaration in esm_alloc_int.f90
     integer                                  , intent(in)  :: lstsci  !  Description and declaration in esm_alloc_int.f90
     integer                                  , intent(in)  :: ltem    !  Description and declaration in dimens.igs

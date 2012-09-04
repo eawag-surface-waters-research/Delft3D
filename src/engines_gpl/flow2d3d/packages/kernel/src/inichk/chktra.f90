@@ -136,7 +136,6 @@ subroutine chktra(lundia    ,error     ,nmax      ,mmax      ,ittdef    , &
              exit
           endif
        enddo
-   20  continue
        if (.not.lfound) then
           !
           ! Check if this trachytope was used before.

@@ -27,6 +27,7 @@
 !  $Id$
 !  $HeadURL$
       program test15
+      INTEGER ntimes, mmax, nmax, kmax, nsrc
       parameter (ntimes = 3,
      *   mmax = 9,
      *   nmax = 7,
@@ -47,7 +48,7 @@
       INTEGER Getelt
       INTEGER error,
      *        idum,
-     *        i,
+     *        i, m, n, k, nt
      *        UINDEX(3,1),
      *        usrord(5)
       real    rbuff3(mmax, nmax, kmax)
