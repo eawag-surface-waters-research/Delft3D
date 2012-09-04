@@ -39,8 +39,7 @@
      *        neferr
       INTEGER opndat,
      *        opndef,
-     *        putelt,
-     *        neferr
+     *        putelt
       INTEGER error,
      *        i, j, k, l, m, n, im,
      *        grpdms(5),
