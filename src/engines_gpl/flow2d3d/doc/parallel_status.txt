@@ -46,6 +46,7 @@ Not supported functionality and limitations
 - roller model
 - dredge and dump
 - mormerge
+- mass balance polygons
 
 
 
