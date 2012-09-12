@@ -299,6 +299,7 @@ subroutine radstr(ewave1    ,eroll1    ,sinkr     ,c         ,cgc       , &
                        &      + inmp1 * sinkr(n,mp1) * eroll1(n,mp1)                      &
                        &        / max(c(n,mp1),1.0e-1_fp) * cos(dir(n, mp1) * degrad)   )
              if (hu(n, m)<2.0*dryflc) wsu(n, m) = 0.0
+             fxw(n, m) = fxw(n, m) - wsu(n, m)
              !
              ds1k1v    = (sr(1, 1, 1) + sr(1, 0, 1) - sr(1, 1, -1) - sr(1, 0, -1)) &
                        & *0.25
@@ -342,6 +343,7 @@ subroutine radstr(ewave1    ,eroll1    ,sinkr     ,c         ,cgc       , &
                        &      + inp1m * sinkr(np1,m) * eroll1(np1,m)                 &
                        &        / max(c(np1,m),1.0e-1_fp) * sin(dir(np1,m) * degrad)   )
              if (hv(n, m)<2.0*dryflc) wsv(n, m) = 0.0
+             fyw(n, m) = fyw(n, m) - wsv(n, m)
           else
              fxw(n, m) = 0.0
              fyw(n, m) = 0.0
