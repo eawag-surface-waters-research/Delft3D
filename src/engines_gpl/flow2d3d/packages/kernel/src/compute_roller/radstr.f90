@@ -342,12 +342,6 @@ subroutine radstr(ewave1    ,eroll1    ,sinkr     ,c         ,cgc       , &
                        &      + inp1m * sinkr(np1,m) * eroll1(np1,m)                 &
                        &        / max(c(np1,m),1.0e-1_fp) * sin(dir(np1,m) * degrad)   )
              if (hv(n, m)<2.0*dryflc) wsv(n, m) = 0.0
-             !
-             if (wavcmp) then
-                fyw(n, m) = fyw(n, m) - wsv(n, m)
-             else
-                fyw(n, m) = 0.0
-             endif
           else
              fxw(n, m) = 0.0
              fyw(n, m) = 0.0
