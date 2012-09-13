@@ -49,6 +49,7 @@
 
 #if defined (WIN32)
 //#include <Winsock2.h>
+#   define close _close
 #endif
 
 #if defined (ALTIX)
