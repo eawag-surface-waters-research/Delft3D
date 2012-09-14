@@ -302,15 +302,34 @@ function free_EC(handle) result(success)
   !
   ! body
   success = .true.
-  if (isNull(handle)) return
+  if (isNull(handle)) then
+     !
+     ! Nothing to free
+     !
+  else
+     this => handle%fields
+     !
+     success = free(this%ECData)
+     success = free(this%converters)
+     success = free(this%providers)
+     ! Do not use the "this" pointer here
+     deallocate(handle%fields, STAT = istat)
+     nullify(handle%fields)
+  endif
   !
-  this => handle%fields
+  ! This is not the right place to free public_fields
+  ! But, as long as it is not seriously used....
   !
-  success = free(this%ECData)
-  success = free(this%converters)
-  success = free(this%providers)
-  ! Do not use the "this" pointer here
-  deallocate(handle%fields, STAT = istat)
+  if (associated(public_fields)) then
+     this => public_fields
+     !
+     success = free(this%ECData)
+     success = free(this%converters)
+     success = free(this%providers)
+     ! Do not use the "this" pointer here
+     deallocate(public_fields, STAT = istat)
+     nullify(public_fields)
+  endif
 end function free_EC
 !
 !

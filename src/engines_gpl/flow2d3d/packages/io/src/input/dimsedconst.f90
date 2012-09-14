@@ -305,7 +305,7 @@ subroutine dimsedconst(lundia    ,error     ,sedim     ,const     , &
              endif
           endif
        enddo
-       deallocate(namsedim)
+       deallocate(namsedim, stat=istat)
        write(message,'(i4,2a)') lsedbl, ' bed load fraction(s) found in sediment file: ', &
                               & trim(filsed)
        call prterr(lundia, 'G051', trim(message))
@@ -323,12 +323,22 @@ subroutine dimsedconst(lundia    ,error     ,sedim     ,const     , &
        !
     endif
  9999 continue
-    deallocate(namconst)
+    deallocate(namconst, stat=istat)
     lsedtot = lsed + lsedbl
     !
     ! rhosol, namsed and sedtyp must always be allocated
+    ! They may already be allocated, because this code
+    ! is visited twice (TDATOM and TRISIM)
     !
-                    allocate (gdsedpar%rhosol(lsedtot), stat = istat)
-    if (istat == 0) allocate (gdsedpar%namsed(lsedtot), stat = istat)
-    if (istat == 0) allocate (gdsedpar%sedtyp(lsedtot), stat = istat)
+    if (associated(gdsedpar%rhosol)) deallocate(gdsedpar%rhosol, stat=istat)
+    if (associated(gdsedpar%namsed)) deallocate(gdsedpar%namsed, stat=istat)
+    if (associated(gdsedpar%sedtyp)) deallocate(gdsedpar%sedtyp, stat=istat)
+    istat = 0
+    if (istat == 0) allocate (gdsedpar%rhosol(lsedtot), stat=istat)
+    if (istat == 0) allocate (gdsedpar%namsed(lsedtot), stat=istat)
+    if (istat == 0) allocate (gdsedpar%sedtyp(lsedtot), stat=istat)
+    if (istat /= 0) then
+       call prterr(lundia, 'P004', "dimsedconst: memory alloc error")
+       call d3stop(1, gdp)
+    endif
 end subroutine dimsedconst

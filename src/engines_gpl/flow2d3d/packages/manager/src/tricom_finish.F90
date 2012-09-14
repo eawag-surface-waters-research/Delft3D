@@ -65,7 +65,6 @@ subroutine tricom_finish(olv_handle, gdp)
     implicit none
     !
     type(globdat), target :: gdp
-    type(olvhandle)       :: olv_handle
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
@@ -349,62 +348,57 @@ subroutine tricom_finish(olv_handle, gdp)
     character(23)                       , pointer :: prshis
     character(23)                       , pointer :: selhis
     character(36)                       , pointer :: tgfcmp
+    integer                             , pointer :: ite           !!  End time of computational interval for a stand alone system the input value from TRISIM: ITE = -1
+    integer                             , pointer :: itima         !!  Time to start simulation (N * tscale) according to DELFT3D conventions
+    integer                             , pointer :: itlen         !  Description and declaration in esm_alloc_int.f90
+    logical                             , pointer :: mainys        !!  Logical flag for TRISULA is main program (TRUE) for writing output
+    character(256)                      , pointer :: comfil        !!  Communication file name
+    character(256)                      , pointer :: runid         !!  Run identification code for the current simulation (used to determine the names of the in- /output files used by the system)
+    character(256)                      , pointer :: trifil        !!  File name for TRISULA NEFIS output files (tri"h/m"-"casl""labl".dat/def)
+    character(5)                        , pointer :: versio        !!  Version nr. of the current package
+    integer                             , pointer :: itcomc        ! Current time counter for the communication file 
+    integer                             , pointer :: itcur         ! Current time counter for the communication file, where starting point depend on CYCLIC 
+    integer                             , pointer :: itdroc        ! Current time counter for the drogue data file 
+    integer                             , pointer :: ithisc        ! Current time counter for the history file 
+    integer                             , pointer :: itimc         ! Current time step counter for 2D system 
+    integer                             , pointer :: itiwec        ! Current time counter for the calibration of internal wave energy 
+    integer                             , pointer :: itmapc        ! Current time counter for the map file 
+    integer                             , pointer :: itp           ! Timestep for computation 2D system 
+    integer                             , pointer :: itrstc        ! Current time counter for the restart file. Start writing after first interval is passed. Last time will always be written to file for ITRSTI > 0 
+    integer                             , pointer :: itwav         ! Current time counter for executation of a wave computation (online coupling with wave)
+    integer                             , pointer :: itrw          ! Time to read the wave information in case of online wave coupling
+    integer                             , pointer :: initi         ! Control parameter 
+    integer                             , pointer :: iphisc        ! Current time counter for printing history data 
+    integer                             , pointer :: maxmn         ! Maximum of MMAX and NMAX 
+    integer                             , pointer :: npmap         ! Current array counter for printing map data 
+    integer                             , pointer :: ntcur         ! Total number of timesteps on comm. file (to write to) 
+    logical                             , pointer :: lrdok         ! Logical to check if reading phase has been passed. 
+    real(fp)                            , pointer :: dtsec         ! DT in seconds 
 !
-! Global variables: NONE
+! Global variables
 !
-    integer, pointer                   :: ite     !!  End time of computational interval for a stand alone system the input value from TRISIM: ITE = -1
-    integer, pointer                   :: itima   !!  Time to start simulation (N * tscale) according to DELFT3D conventions
-    integer, pointer                   :: itlen   !  Description and declaration in esm_alloc_int.f90
-    logical, pointer                   :: mainys  !!  Logical flag for TRISULA is main program (TRUE) for writing output
-    character(256), pointer            :: comfil  !!  Communication file name
-    character(256), pointer            :: runid   !!  Run identification code for the current simulation (used to determine the names of the in- /output files used by the system)
-    character(256), pointer            :: trifil  !!  File name for TRISULA NEFIS output files (tri"h/m"-"casl""labl".dat/def)
-    character(5)  , pointer            :: versio  !!  Version nr. of the current package
+    type(olvhandle) :: olv_handle
 !
 ! Local variables
 !
-    integer ,pointer                                      :: itcomc        ! Current time counter for the communication file 
-    integer ,pointer                                      :: itcur         ! Current time counter for the communication file, where starting point depend on CYCLIC 
-    integer ,pointer                                      :: itdroc        ! Current time counter for the drogue data file 
-    integer ,pointer                                      :: ithisc        ! Current time counter for the history file 
-    integer ,pointer                                      :: itimc         ! Current time step counter for 2D system 
-    integer ,pointer                                      :: itiwec        ! Current time counter for the calibration of internal wave energy 
-    integer ,pointer                                      :: itmapc        ! Current time counter for the map file 
-    integer ,pointer                                      :: itp           ! Timestep for computation 2D system 
-    integer ,pointer                                      :: itrstc        ! Current time counter for the restart file. Start writing after first interval is passed. Last time will always be written to file for ITRSTI > 0 
-    integer ,pointer                                      :: itwav         ! Current time counter for executation of a wave computation (online coupling with wave)
-    integer ,pointer                                      :: itrw          ! Time to read the wave information in case of online wave coupling
-
-
-    integer, pointer                                       :: initi         ! Control parameter 
-    integer, pointer                                       :: iphisc        ! Current time counter for printing history data 
-
     integer                                       :: istat
     integer                                       :: lunfil
-    integer, pointer                                       :: maxmn         ! Maximum of MMAX and NMAX 
-
     integer                            , external :: modlen
     integer                            , external :: newlun
-    integer, pointer                                       :: npmap         ! Current array counter for printing map data 
     integer                                       :: nst           ! Current time step counter 
     integer                                       :: nst2go        ! Number of timesteps left 
-    integer, pointer                                       :: ntcur         ! Total number of timesteps on comm. file (to write to) 
     integer(pntrsize)                  , external :: gtcpnt
     integer(pntrsize)                  , external :: gtipnt
     integer(pntrsize)                  , external :: gtrpnt
     logical                                       :: error         ! Flag=TRUE if an error is encountered 
-    logical , pointer                             :: lrdok         ! Logical to check if reading phase has been passed. 
     logical                                       :: success       ! Flag = false when an error is encountered
-    real(fp), pointer                                      :: dtsec         ! DT in seconds 
     real(fp)                                      :: zini
     character(60)                                 :: txtput        ! Text to be print
-
+!
 !! executable statements -------------------------------------------------------
 !
-
     initi               => gdp%gdtricom%initi
     iphisc              => gdp%gdtricom%iphisc
-   
     ite                 => gdp%gdtricom%ite
     itima               => gdp%gdtricom%itima
     itlen               => gdp%gdtricom%itlen
@@ -417,7 +411,6 @@ subroutine tricom_finish(olv_handle, gdp)
     npmap               => gdp%gdtricom%npmap
     ntcur               => gdp%gdtricom%ntcur
     dtsec               => gdp%gdtricom%dtsec
-
     itcomc              => gdp%gdtricom%itcomc
     itcur               => gdp%gdtricom%itcur
     itdroc              => gdp%gdtricom%itdroc
@@ -429,8 +422,6 @@ subroutine tricom_finish(olv_handle, gdp)
     itrstc              => gdp%gdtricom%itrstc
     itwav               => gdp%gdtricom%itwav
     itrw                => gdp%gdtricom%itrw    
-    
-
     thr                 => gdp%gdbetaro%thr
     ncmax               => gdp%d%ncmax
     nmax                => gdp%d%nmax
@@ -887,8 +878,8 @@ subroutine tricom_finish(olv_handle, gdp)
     !
     ! Close Communication with delftonline
     !
-    call setEndFlag( olv_handle, 1 ) !Tells the DOL client that the simulation has ended by passing an exception
-    call free_olv( olv_handle )
+    call setEndFlag(olv_handle, 1) !Tells the DOL client that the simulation has ended by passing an exception
+    call free_olv(olv_handle)
     !
     ! Mormerge synchronisation
     !

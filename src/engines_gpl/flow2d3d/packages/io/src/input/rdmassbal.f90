@@ -356,4 +356,5 @@ subroutine rdmassbal(xz        ,yz        ,kcs       ,gsqs      , &
     fluxes    = 0.0_fp
     fluxes_r1 = 0.0_fp
     fluxes_sd = 0.0_fp
+    call tree_destroy(pol_ptr)
 end subroutine rdmassbal

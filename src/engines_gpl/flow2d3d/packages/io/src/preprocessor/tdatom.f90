@@ -146,7 +146,8 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     integer                                             :: ibarco      ! Barocline pressure correction for open boundary points 0 = no 1 = yes Default 
     integer                                             :: icreep      ! Identification for special approach horizontal gradients 0 = no anti creep 1 = yes anti creep  
     integer                                             :: iend        ! Help var.  
-    integer                                             :: irov 
+    integer                                             :: irov
+    integer                                             :: istat
     integer                                             :: idensform 
     integer                                             :: it 
     integer                                             :: iter1       ! Loop parameter for iteration over continuity equation  
@@ -406,6 +407,29 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     nfl         = .false. 
     !
     nudge       = 0
+    !
+    nullify(hydrbc)
+    nullify(rval  )
+    nullify(cval  ) 
+    nullify(namcon) 
+    nullify(mnbnd )
+    nullify(mnksrc)
+    nullify(kspu  )
+    nullify(kspv  )
+    nullify(nhsub )
+    nullify(wstcof)
+    nullify(omega )
+    nullify(thick )
+    nullify(alpha )
+    nullify(rtime )
+    nullify(disint)
+    nullify(datbnd)
+    nullify(typbnd)
+    nullify(runtxt)
+    nullify(statns)
+    nullify(namsrc)
+    nullify(nambnd)
+    nullify(tprofu)
     ! 
     ! Initializing tdatom part of FLOW simulation program 
     ! 
@@ -443,30 +467,35 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
                  & dpmveg    ,waveol    ,lrdamp    ,sbkol     ,bubble    , & 
                  & nfl       ,nflmod    ,gdp       ) 
         if (error) goto 9990 
-        ! 
-        allocate(hydrbc(4, mxnto, mxkc))
-        allocate(rval(4, mxtime, mxnto, lstsc)) 
-        allocate(cval(mxnto, lstsc)) 
-        allocate(namcon(lstsc)) 
         !
-        allocate(mnbnd (7, mxnto))
-        allocate(mnksrc(7, mxnsrc))
-        allocate(kspu  (mxnpnt, -1:mxnpnt + 2, 0:mxkmax))
-        allocate(kspv  (mxnpnt, -1:mxnpnt + 2, 0:mxkmax))
-        allocate(nhsub (mxnto))
-        allocate(wstcof(6))
-        allocate(omega (mxkc))
-        allocate(thick (mxkmax))
-        allocate(alpha (mxnto ))
-        allocate(rtime (mxtime))
-        allocate(disint(mxnsrc))
-        allocate(datbnd(mxnto ))
-        allocate(typbnd(mxnto ))
-        allocate(runtxt(10    ))
-        allocate(statns(mxnto,2))
-        allocate(namsrc(mxnsrc))
-        allocate(nambnd(mxnto))
-        allocate(tprofu(mxnto))
+        istat = 0
+        if (istat==0) allocate(hydrbc(4, mxnto, mxkc)                 , stat = istat)
+        if (istat==0) allocate(rval(4, mxtime, mxnto, lstsc)          , stat = istat) 
+        if (istat==0) allocate(cval(mxnto, lstsc)                     , stat = istat) 
+        if (istat==0) allocate(namcon(lstsc)                          , stat = istat) 
+        !
+        if (istat==0) allocate(mnbnd (7, mxnto)                       , stat = istat)
+        if (istat==0) allocate(mnksrc(7, mxnsrc)                      , stat = istat)
+        if (istat==0) allocate(kspu  (mxnpnt, -1:mxnpnt + 2, 0:mxkmax), stat = istat)
+        if (istat==0) allocate(kspv  (mxnpnt, -1:mxnpnt + 2, 0:mxkmax), stat = istat)
+        if (istat==0) allocate(nhsub (mxnto)                          , stat = istat)
+        if (istat==0) allocate(wstcof(6)                              , stat = istat)
+        if (istat==0) allocate(omega (mxkc)                           , stat = istat)
+        if (istat==0) allocate(thick (mxkmax)                         , stat = istat)
+        if (istat==0) allocate(alpha (mxnto )                         , stat = istat)
+        if (istat==0) allocate(rtime (mxtime)                         , stat = istat)
+        if (istat==0) allocate(disint(mxnsrc)                         , stat = istat)
+        if (istat==0) allocate(datbnd(mxnto )                         , stat = istat)
+        if (istat==0) allocate(typbnd(mxnto )                         , stat = istat)
+        if (istat==0) allocate(runtxt(10    )                         , stat = istat)
+        if (istat==0) allocate(statns(mxnto,2)                        , stat = istat)
+        if (istat==0) allocate(namsrc(mxnsrc)                         , stat = istat)
+        if (istat==0) allocate(nambnd(mxnto)                          , stat = istat)
+        if (istat==0) allocate(tprofu(mxnto)                          , stat = istat)
+        if (istat/=0) then
+           call prterr(lundia, 'U021', 'Tdatom: memory alloc error')
+           call d3stop(1, gdp)
+        endif
         ! 
         do j = 1, 4 
            do l = 1, lstsc 
@@ -747,29 +776,29 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
         ! 
       999 continue 
         ! 
-        deallocate(hydrbc) 
-        deallocate(rval) 
-        deallocate(cval) 
-        deallocate(namcon) 
+        if (associated(hydrbc)) deallocate(hydrbc, stat = istat) 
+        if (associated(rval  )) deallocate(rval  , stat = istat) 
+        if (associated(cval  )) deallocate(cval  , stat = istat) 
+        if (associated(namcon)) deallocate(namcon, stat = istat) 
 
-        deallocate(mnbnd )
-        deallocate(mnksrc)
-        deallocate(kspu  )
-        deallocate(kspv  )
-        deallocate(nhsub )
-        deallocate(wstcof)
-        deallocate(omega )
-        deallocate(thick )
-        deallocate(alpha )
-        deallocate(rtime )
-        deallocate(disint)
-        deallocate(datbnd)
-        deallocate(typbnd)
-        deallocate(runtxt)
-        deallocate(statns)
-        deallocate(namsrc)
-        deallocate(nambnd)
-        deallocate(tprofu)
+        if (associated(mnbnd )) deallocate(mnbnd , stat = istat)
+        if (associated(mnksrc)) deallocate(mnksrc, stat = istat)
+        if (associated(kspu  )) deallocate(kspu  , stat = istat)
+        if (associated(kspv  )) deallocate(kspv  , stat = istat)
+        if (associated(nhsub )) deallocate(nhsub , stat = istat)
+        if (associated(wstcof)) deallocate(wstcof, stat = istat)
+        if (associated(omega )) deallocate(omega , stat = istat)
+        if (associated(thick )) deallocate(thick , stat = istat)
+        if (associated(alpha )) deallocate(alpha , stat = istat)
+        if (associated(rtime )) deallocate(rtime , stat = istat)
+        if (associated(disint)) deallocate(disint, stat = istat)
+        if (associated(datbnd)) deallocate(datbnd, stat = istat)
+        if (associated(typbnd)) deallocate(typbnd, stat = istat)
+        if (associated(runtxt)) deallocate(runtxt, stat = istat)
+        if (associated(statns)) deallocate(statns, stat = istat)
+        if (associated(namsrc)) deallocate(namsrc, stat = istat)
+        if (associated(nambnd)) deallocate(nambnd, stat = istat)
+        if (associated(tprofu)) deallocate(tprofu, stat = istat)
         ! 
      9990 continue 
         ! 

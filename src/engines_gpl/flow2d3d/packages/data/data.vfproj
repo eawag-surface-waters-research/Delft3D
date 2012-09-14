@@ -94,6 +94,7 @@
 		<File RelativePath="include\rivpro.igs"/>
 		<File RelativePath="include\scour.igs"/>
 		<File RelativePath="include\sedpar.igs"/>
+		<File RelativePath="include\sedparams.inc"/>
 		<File RelativePath="include\snel.igs"/>
 		<File RelativePath="include\stations.igs"/>
 		<File RelativePath="include\tablefile.igs"/>

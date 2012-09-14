@@ -275,6 +275,11 @@ module globaldata
        ! pointer to tree structure containing "all" input
        !
        type(tree_data)    , pointer :: input_tree
+       !
+       ! mdfile_ptr is a pointer to a sub-tree of input_tree,
+       ! containing the full contents of the mdf-file.
+       ! On deallocation, only input_tree has to be deallocated.
+       !
        type(tree_data)    , pointer :: mdfile_ptr
     end type globdat
 end module globaldata

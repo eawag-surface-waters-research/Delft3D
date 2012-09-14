@@ -81,5 +81,5 @@ subroutine clrflwpar(istat, gdp)
     !
     if (associated(gdflwpar%flwoutput)) deallocate(gdflwpar%flwoutput, STAT = istat)
     call cleartable(gdflwpar%fbcrfile)
-    !
+    if (associated(gdflwpar%fbcrfile))  deallocate(gdflwpar%fbcrfile , STAT = istat)
 end subroutine clrflwpar

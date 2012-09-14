@@ -302,6 +302,7 @@ subroutine merge (inputfile, workdir, runid)
    !
    ! Currently, this finishing part is never reached
    !
+   call tree_destroy(infile_root)
    deallocate(cond   )
    deallocate(weight )
    deallocate(handles)

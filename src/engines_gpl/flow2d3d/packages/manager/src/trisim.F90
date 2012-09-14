@@ -108,8 +108,8 @@ subroutine trisim (numdom, nummap, context_id, fsm_flags, runid)
        return
     endif
     !
-    !! TODORE call gdp_dealloc(gdp)
-    !! TODORE deallocate(gdp, stat=ierr)
+    call gdp_dealloc(gdp)
+    deallocate(gdp, stat=ierr)
     !
     ! Finalizes MPI
     !

@@ -86,10 +86,13 @@ public isNull_olv
 contains
 !
 !------------------------------------------------------------------------------
-type(OLVHandle) function new_olv() result(res)
-
+subroutine new_olv(handle)
+    type(OLVHandle) :: handle
+    !
+    ! locals
     type(olv_handle_t), pointer :: olv
-
+    !
+    ! body
     allocate( olv )
 
     olv%runid  = ''
@@ -130,8 +133,8 @@ type(OLVHandle) function new_olv() result(res)
     olv%ztop   => null()
     olv%zmodel = .false.
 
-    res%fields => olv
-end function
+    handle%fields => olv
+end subroutine new_olv
 !
 !------------------------------------------------------------------------------
 subroutine free_olv(handle)
@@ -191,6 +194,7 @@ subroutine free_olv(handle)
     ! Catch stat to avoid aborts; don't bother whether it succeeded or not
     ! 
     deallocate(handle%fields,stat=istat)
+    nullify(handle%fields)
 end subroutine
 !
 !------------------------------------------------------------------------------

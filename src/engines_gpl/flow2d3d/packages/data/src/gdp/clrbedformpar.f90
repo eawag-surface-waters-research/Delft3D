@@ -65,4 +65,6 @@ subroutine clrbedformpar(istat, gdp)
     if (associated(gdp%gdbedformpar%kdpar))          deallocate(gdp%gdbedformpar%kdpar, STAT = istat)
     if (associated(gdp%gdbedformpar%cdpar))          deallocate(gdp%gdbedformpar%cdpar, STAT = istat)
     !
+    if (associated(gdp%gdbedformpar%bedformD50))     deallocate(gdp%gdbedformpar%bedformD50, STAT = istat)
+    if (associated(gdp%gdbedformpar%bedformD90))     deallocate(gdp%gdbedformpar%bedformD90, STAT = istat)
 end subroutine clrbedformpar

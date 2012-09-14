@@ -396,7 +396,9 @@ subroutine tricom_init(olv_handle, gdp)
 !
     integer, parameter :: maxtim = 1500
 !
-! Global variables: NONE
+! Global variables
+!
+    type(olvhandle) :: olv_handle
 !
 ! Local variables
 !
@@ -412,7 +414,6 @@ subroutine tricom_init(olv_handle, gdp)
     integer                                       :: nhystp
     integer                                       :: nmaxddb
     integer                                       :: nst           ! Current time step counter 
-
     integer                                       :: ntmin
     integer                                       :: numtimesteps  ! total nr of timesteps 
     integer                                       :: timrst        ! Restart time in combination with restart option from comm. file 
@@ -433,7 +434,6 @@ subroutine tricom_init(olv_handle, gdp)
     real(fp)                                      :: riglid        ! Rigid lid factor to reduce horizontal wet area (incompressible) 
     real(fp)                                      :: tdif
     real(fp)                                      :: vscale        ! Difference between the integer value of (dt*tunit) / tscale and it's real value (should be at most correct to machine accuarcy). 
-
     real(hp)                                      :: delta_T
     real(hp)                                      :: Tstart_Julian
     character(1)                                  :: roumet        ! Bed stress formulation specified: C : Chezy    W : White Colebrook M : Manning  Z : roughness par. 
@@ -446,7 +446,6 @@ subroutine tricom_init(olv_handle, gdp)
     character(60)                                 :: txtput        ! Text to be print
     character(300)                                :: message
     character(256)                                :: errstring
-    type(olvhandle)                               :: olv_handle
 !
 !! executable statements -------------------------------------------------------
 !
@@ -1566,7 +1565,7 @@ subroutine tricom_init(olv_handle, gdp)
     !
     ! Make D3D data available to online applications
     !
-    olv_handle = new_olv()
+    call new_olv(olv_handle)
     call publishGDP(olv_handle, gdp, runid, zmodel)
     !
     ! Not multi threaded

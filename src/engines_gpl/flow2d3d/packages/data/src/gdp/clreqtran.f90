@@ -58,12 +58,18 @@ subroutine clreqtran(istat     ,gdp       )
 !! executable statements -------------------------------------------------------
 !
     dll_handle_settle    => gdp%gdeqtran%dll_handle_settle
-    dll_handle    => gdp%gdeqtran%dll_handle
+    dll_handle           => gdp%gdeqtran%dll_handle
     !
-    do i = 1,size(dll_handle)
-       error = close_shared_library(dll_handle_settle(i))
-       error = close_shared_library(dll_handle(i))
-    enddo
+    if (associated(dll_handle)) then
+       do i = 1,size(dll_handle)
+          if (dll_handle_settle(i) /= 0) then
+             error = close_shared_library(dll_handle_settle(i))
+          endif
+          if (dll_handle(i) /= 0) then
+             error = close_shared_library(dll_handle(i))
+          endif
+       enddo
+    endif
     !
     if (associated(gdp%gdeqtran%dll_function_settle)) deallocate(gdp%gdeqtran%dll_function_settle, STAT = istat)
     if (associated(gdp%gdeqtran%dll_name_settle    )) deallocate(gdp%gdeqtran%dll_name_settle    , STAT = istat)

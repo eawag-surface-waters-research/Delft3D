@@ -40,94 +40,12 @@ subroutine initsedpar(gdp)
     !
     type(globdat),target :: gdp
     !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    real(fp)                         , pointer :: mdcuni
-    integer                          , pointer :: nmudfrac
-    real(fp)      , dimension(:)     , pointer :: rhosol
-    real(fp)      , dimension(:,:,:) , pointer :: logseddia
-    real(fp)      , dimension(:)     , pointer :: logsedsig
-    real(fp)      , dimension(:)     , pointer :: sedd10
-    real(fp)      , dimension(:)     , pointer :: sedd50
-    real(fp)      , dimension(:)     , pointer :: sedd50fld
-    real(fp)      , dimension(:)     , pointer :: sedd90
-    real(fp)      , dimension(:)     , pointer :: cdryb
-    real(fp)      , dimension(:)     , pointer :: dstar
-    real(fp)      , dimension(:)     , pointer :: taucr
-    real(fp)      , dimension(:)     , pointer :: tetacr
-    real(fp)      , dimension(:)     , pointer :: ws0
-    real(fp)      , dimension(:)     , pointer :: wsm
-    real(fp)      , dimension(:)     , pointer :: salmax
-    real(fp)      , dimension(:)     , pointer :: sdbuni
-    real(fp)      , dimension(:,:)   , pointer :: tcrdep
-    real(fp)      , dimension(:)     , pointer :: tcduni
-    real(fp)      , dimension(:,:)   , pointer :: tcrero
-    real(fp)      , dimension(:)     , pointer :: tceuni
-    real(fp)      , dimension(:)     , pointer :: tcguni
-    real(fp)      , dimension(:,:)   , pointer :: eropar
-    real(fp)      , dimension(:)     , pointer :: erouni
-    real(fp)      , dimension(:,:)   , pointer :: gamtcr
-    real(fp)      , dimension(:)     , pointer :: gamflc
-    real(fp)      , dimension(:)     , pointer :: mudcnt
-    real(fp)      , dimension(:)     , pointer :: sedtrcfac
-    integer       , dimension(:)     , pointer :: nseddia
-    integer       , dimension(:)     , pointer :: sedtyp
-    character(10) , dimension(:)     , pointer :: inisedunit
-    character(20) , dimension(:)     , pointer :: namsed
-    character(256), dimension(:)     , pointer :: flsdbd
-    character(256), dimension(:)     , pointer :: flstcd
-    character(256), dimension(:)     , pointer :: flstce
-    character(256), dimension(:)     , pointer :: flsero
-    character(256), dimension(:)     , pointer :: flstcg
-    character(256)                   , pointer :: flsdia
-    character(256)                   , pointer :: flsmdc
     include 'sedparams.inc'
 !
 !! executable statements -------------------------------------------------------
 !
-    mdcuni      => gdp%gdsedpar%mdcuni
-    nmudfrac    => gdp%gdsedpar%nmudfrac
-    rhosol      => gdp%gdsedpar%rhosol
-    logseddia   => gdp%gdsedpar%logseddia
-    logsedsig   => gdp%gdsedpar%logsedsig
-    sedd10      => gdp%gdsedpar%sedd10
-    sedd50      => gdp%gdsedpar%sedd50
-    sedd50fld   => gdp%gdsedpar%sedd50fld
-    sedd90      => gdp%gdsedpar%sedd90
-    cdryb       => gdp%gdsedpar%cdryb
-    dstar       => gdp%gdsedpar%dstar
-    taucr       => gdp%gdsedpar%taucr
-    tetacr      => gdp%gdsedpar%tetacr
-    ws0         => gdp%gdsedpar%ws0
-    wsm         => gdp%gdsedpar%wsm
-    salmax      => gdp%gdsedpar%salmax
-    sdbuni      => gdp%gdsedpar%sdbuni
-    tcrdep      => gdp%gdsedpar%tcrdep
-    tcduni      => gdp%gdsedpar%tcduni
-    tcrero      => gdp%gdsedpar%tcrero
-    tceuni      => gdp%gdsedpar%tceuni
-    eropar      => gdp%gdsedpar%eropar
-    erouni      => gdp%gdsedpar%erouni
-    tcguni      => gdp%gdsedpar%tcguni
-    gamtcr      => gdp%gdsedpar%gamtcr
-    gamflc      => gdp%gdsedpar%gamflc
-    mudcnt      => gdp%gdsedpar%mudcnt
-    nseddia     => gdp%gdsedpar%nseddia
-    sedtyp      => gdp%gdsedpar%sedtyp
-    inisedunit  => gdp%gdsedpar%inisedunit
-    sedtrcfac   => gdp%gdsedpar%sedtrcfac
-    namsed      => gdp%gdsedpar%namsed
-    flsdbd      => gdp%gdsedpar%flsdbd
-    flstcd      => gdp%gdsedpar%flstcd
-    flstce      => gdp%gdsedpar%flstce
-    flsero      => gdp%gdsedpar%flsero
-    flstcg      => gdp%gdsedpar%flstcg
-    flsdia      => gdp%gdsedpar%flsdia
-    flsmdc      => gdp%gdsedpar%flsmdc
-    !
-    mdcuni   = 0.0
-    !
-    nmudfrac = 0
+    gdp%gdsedpar%mdcuni   = 0.0
+    gdp%gdsedpar%nmudfrac = 0
     !
     nullify(gdp%gdsedpar%rhosol)
     !
@@ -169,6 +87,6 @@ subroutine initsedpar(gdp)
     nullify(gdp%gdsedpar%flsero)
     nullify(gdp%gdsedpar%flstcg)
     !
-    flsdia = ' '
-    flsmdc = ' '
+    gdp%gdsedpar%flsdia = ' '
+    gdp%gdsedpar%flsmdc = ' '
 end subroutine initsedpar

@@ -416,7 +416,6 @@ integer function trisim_finish(olv_handle, gdp) result(retVal)
     lundia => gdp%gdinout%lundia 
     retval = 0
 
-    olv_handle%fields => null()
     call tricom_finish(olv_handle, gdp)
 
     write(lundia,*)

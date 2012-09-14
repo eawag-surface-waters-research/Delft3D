@@ -52,6 +52,7 @@ public message_stack
 !
 public message_module_info
 public initstack
+public clearstack
 public isempty
 public addmessage
 public adderror
@@ -116,6 +117,31 @@ end subroutine initstack
 !
 !
 !==============================================================================
+subroutine clearstack(stack)
+    !    Function: - Empty a message stack
+    !                This function is identical to writemessages, except the
+    !                writing part
+    !
+    implicit none
+    !
+    ! Call variables
+    !
+    type(message_stack)          :: stack
+    !
+    ! Local variables
+    !
+    character(message_len)       :: message
+    !
+    ! body
+    !
+    do while (.not.isempty(stack))
+       call getmessage(stack,message)
+    end do
+end subroutine clearstack
+!
+!
+!
+!==============================================================================
 subroutine addmessage(stack,newmessage)
     !    Function: - Add a new message to the bottom of the message stack
     !
@@ -128,6 +154,7 @@ subroutine addmessage(stack,newmessage)
     !
     ! Local variables
     !
+    integer                     :: istat
     type(message_type), pointer :: localstack
     !
     ! body
@@ -137,15 +164,23 @@ subroutine addmessage(stack,newmessage)
        do while (associated(localstack%other_messages))
           localstack => localstack%other_messages
        end do
-       allocate(localstack%other_messages)
-       localstack => localstack%other_messages
-       localstack%message = newmessage
-       nullify(localstack%other_messages)
+       allocate(localstack%other_messages, stat = istat)
+       if (istat /= 0) then
+          localstack%message = "ERROR message module: memory alloc error"
+       else
+          localstack => localstack%other_messages
+          localstack%message = newmessage
+          nullify(localstack%other_messages)
+       endif
     else
-       allocate(stack%message_list)
-       localstack => stack%message_list
-       localstack%message = newmessage
-       nullify(localstack%other_messages)
+       allocate(stack%message_list, stat = istat)
+       if (istat /= 0) then
+          stack%message_list%message = "ERROR message module: memory alloc error"
+       else
+          localstack => stack%message_list
+          localstack%message = newmessage
+          nullify(localstack%other_messages)
+       endif
     endif
 end subroutine addmessage
 !

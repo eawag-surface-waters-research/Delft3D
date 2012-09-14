@@ -573,6 +573,7 @@ subroutine timers_finish (gdp)
 ! Local variables
 !
    integer                                :: i
+   integer                                :: istat
    integer                      , pointer :: lundia
    integer                      , pointer :: nmax
    integer                      , pointer :: mmax
@@ -789,9 +790,9 @@ subroutine timers_finish (gdp)
     write(lundia,'(a)') '|---------------------------------------------------------------------|'
     write(lundia,*)
     !
-    if (associated(gdp%gdtimers%usedcp)) deallocate(gdp%gdtimers%usedcp)
+    if (associated(gdp%gdtimers%usedcp)) deallocate(gdp%gdtimers%usedcp, stat = istat)
     nullify (gdp%gdtimers%usedcp)
-    if (associated(gdp%gdtimers%names))  deallocate(gdp%gdtimers%names)
+    if (associated(gdp%gdtimers%names))  deallocate(gdp%gdtimers%names, stat = istat)
     nullify (gdp%gdtimers%names)
     !
     ! When using DD, timer_start/timerstop calls occur after closing diagnosis

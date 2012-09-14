@@ -174,17 +174,22 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     ! Allocate arrays for stations and cross sections
     !
-    allocate( gdp%gdstations%line_orig  (   ntruv ) )
-    allocate( gdp%gdstations%stat_type  (   nostat) )
-    allocate( gdp%gdstations%stat_drogue(   nostat) )
-    allocate( gdp%gdstations%stat_table (   nostat) )
-    allocate( gdp%gdstations%stat_par   (   nostat) )
-    allocate( gdp%gdstations%stat_tabidx(   nostat) )
-    allocate( gdp%gdstations%mnit       (4, ntruv ) )
-    allocate( gdp%gdstations%mnstat     (2, nostat) )
-    allocate( gdp%gdstations%xystat     (2, nostat) )
-    allocate( gdp%gdstations%namst      (   nostat) )
-    allocate( gdp%gdstations%namtra     (   ntruv ) )
+    istat = 0
+    if (istat == 0) allocate( gdp%gdstations%line_orig  (   ntruv ), stat=istat)
+    if (istat == 0) allocate( gdp%gdstations%stat_type  (   nostat), stat=istat)
+    if (istat == 0) allocate( gdp%gdstations%stat_drogue(   nostat), stat=istat)
+    if (istat == 0) allocate( gdp%gdstations%stat_table (   nostat), stat=istat)
+    if (istat == 0) allocate( gdp%gdstations%stat_par   (   nostat), stat=istat)
+    if (istat == 0) allocate( gdp%gdstations%stat_tabidx(   nostat), stat=istat)
+    if (istat == 0) allocate( gdp%gdstations%mnit       (4, ntruv ), stat=istat)
+    if (istat == 0) allocate( gdp%gdstations%mnstat     (2, nostat), stat=istat)
+    if (istat == 0) allocate( gdp%gdstations%xystat     (2, nostat), stat=istat)
+    if (istat == 0) allocate( gdp%gdstations%namst      (   nostat), stat=istat)
+    if (istat == 0) allocate( gdp%gdstations%namtra     (   ntruv ), stat=istat)
+    if (istat /= 0) then
+       call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
+       call d3stop(1, gdp)
+    endif
     !    
     moving_stat_file => gdp%gdstations%moving_stat_file
     line_orig        => gdp%gdstations%line_orig
@@ -342,7 +347,11 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     ! for parallel runs, determine which observation points are inside subdomain (excluding the halo) and store them
     !
     if (parll .and. nostat>0) then
-       allocate(nsd(nostat))
+       allocate(nsd(nostat), stat=istat)
+       if (istat /= 0) then
+          call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
+          call d3stop(1, gdp)
+       endif
        nn  = 0
        nsd = 0
        if (idir == 1) then
@@ -426,13 +435,22 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        ! order_sta is set to 0 when the partition does not contain
        ! any station
        if (nn == 0) then
-          allocate(gdp%gdparall%order_sta(1))
+          allocate(gdp%gdparall%order_sta(1), stat=istat)
+          if (istat /= 0) then
+             call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
+             call d3stop(1, gdp)
+          endif
           order_sta => gdp%gdparall%order_sta
           order_sta(1) = 0
        else
-          allocate(ctemp(nn))
-          allocate(itmp1(2,nn))
-          allocate(gdp%gdparall%order_sta(nn))
+          istat = 0
+          if (istat == 0) allocate(ctemp(nn)                 , stat=istat)
+          if (istat == 0) allocate(itmp1(2,nn)               , stat=istat)
+          if (istat == 0) allocate(gdp%gdparall%order_sta(nn), stat=istat)
+          if (istat /= 0) then
+             call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
+             call d3stop(1, gdp)
+          endif
           order_sta => gdp%gdparall%order_sta
        endif
        do n = 1, nn
@@ -449,8 +467,8 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           mnstat(1,n) = itmp1(1,n)
           mnstat(2,n) = itmp1(2,n)
        enddo
-       if (nn /= 0) deallocate(ctemp,itmp1)
-       deallocate(nsd)
+       if (nn /= 0) deallocate(ctemp,itmp1, stat=istat)
+       deallocate(nsd, stat=istat)
        !
        ! dummy values (nostat = 1) if final number found
        ! is 0 to avoid using a null ptr in subsequent
@@ -629,12 +647,20 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           ! Store mnit in mnit_global
           ! mnit will be adapted for this partition
           !
-          allocate(gdp%gdparall%mnit_global(4,ntruv))
+          allocate(gdp%gdparall%mnit_global(4,ntruv), stat=istat)
+          if (istat /= 0) then
+             call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
+             call d3stop(1, gdp)
+          endif
           do n = 1, ntruv
              gdp%gdparall%mnit_global(:,n) = mnit(:,n)
           enddo
        endif
-       allocate(nsd(ntruv))
+       allocate(nsd(ntruv), stat=istat)
+       if (istat /= 0) then
+          call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
+          call d3stop(1, gdp)
+       endif
        nn  = 0
        nsd = 0
        do n = 1, ntruv
@@ -683,14 +709,23 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        ! any cross section
        !
        if (nn == 0) then
-          allocate(gdp%gdparall%order_tra(1))
+          allocate(gdp%gdparall%order_tra(1), stat=istat)
+          if (istat /= 0) then
+             call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
+             call d3stop(1, gdp)
+          endif
           order_tra => gdp%gdparall%order_tra
           order_tra(1) = 0
        else
-          allocate(ctemp(nn))
-          allocate(itmp1(4,nn))
-          allocate(itmp3(nn))
-          allocate(gdp%gdparall%order_tra(nn))
+          istat = 0
+          if (istat == 0) allocate(ctemp(nn)                 , stat=istat)
+          if (istat == 0) allocate(itmp1(4,nn)               , stat=istat)
+          if (istat == 0) allocate(itmp3(nn)                 , stat=istat)
+          if (istat == 0) allocate(gdp%gdparall%order_tra(nn), stat=istat)
+          if (istat /= 0) then
+             call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
+             call d3stop(1, gdp)
+          endif
           order_tra => gdp%gdparall%order_tra
        endif
        do n = 1, nn
@@ -712,13 +747,18 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        nullify(line_orig)
        nullify(mnit)
        nullify(namtra)
-       deallocate( gdp%gdstations%line_orig )
-       deallocate( gdp%gdstations%mnit )
-       deallocate( gdp%gdstations%namtra )
+       deallocate(gdp%gdstations%line_orig, stat=istat)
+       deallocate(gdp%gdstations%mnit     , stat=istat)
+       deallocate(gdp%gdstations%namtra   , stat=istat)
        ntruv = max(1, nn)
-       allocate( gdp%gdstations%line_orig(ntruv) )
-       allocate( gdp%gdstations%mnit(4,ntruv) )
-       allocate( gdp%gdstations%namtra(ntruv) )
+       istat = 0
+       if (istat == 0) allocate(gdp%gdstations%line_orig(ntruv), stat=istat)
+       if (istat == 0) allocate(gdp%gdstations%mnit(4,ntruv)   , stat=istat)
+       if (istat == 0) allocate(gdp%gdstations%namtra(ntruv)   , stat=istat)
+       if (istat /= 0) then
+          call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
+          call d3stop(1, gdp)
+       endif
        line_orig  => gdp%gdstations%line_orig
        mnit       => gdp%gdstations%mnit
        namtra     => gdp%gdstations%namtra
@@ -735,8 +775,8 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              line_orig(n) = itmp3(n)
           enddo
        endif
-       if (nn /= 0) deallocate(ctemp,itmp1,itmp3)
-       deallocate(nsd)
+       if (nn /= 0) deallocate(ctemp,itmp1,itmp3, stat=istat)
+       deallocate(nsd, stat=istat)
     endif
     !
     ! read info of drogues, from attribute file or from md-file
@@ -895,7 +935,11 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     ! for parallel runs, determine which drogue points are inside subdomain and store them
     !
     if ( parll ) then
-       allocate(nsd(ndro))
+       allocate(nsd(ndro), stat=istat)
+       if (istat /= 0) then
+          call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
+          call d3stop(1, gdp)
+       endif
        nn  = 0
        nsd = 0
        do n = 1, ndro
@@ -917,10 +961,15 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        ! restore itdro, mndro, dxydro and namdro of own subdomain
        !
-       allocate(ctemp(nn))
-       allocate(itmp1(2,nn))
-       allocate(itmp2(2,nn))
-       allocate(rtemp(2,nn))
+       istat = 0
+       if (istat == 0) allocate(ctemp(nn)  , stat=istat)
+       if (istat == 0) allocate(itmp1(2,nn), stat=istat)
+       if (istat == 0) allocate(itmp2(2,nn), stat=istat)
+       if (istat == 0) allocate(rtemp(2,nn), stat=istat)
+       if (istat /= 0) then
+          call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
+          call d3stop(1, gdp)
+       endif
        do n = 1, nn
           ctemp(n)   = namdro(nsd(n))
           itmp1(1,n) = mndro(1,nsd(n))
@@ -944,7 +993,7 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           dxydro(1,n) = rtemp(1,n)
           dxydro(2,n) = rtemp(2,n)
        enddo
-       deallocate(nsd,ctemp,itmp1,itmp2,rtemp)
+       deallocate(nsd,ctemp,itmp1,itmp2,rtemp, stat=istat)
     endif
     !
     !
@@ -964,10 +1013,11 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        call dimstr(lunmd, filrtc, lundia, error, nrrec, stacnt, gdp)
        !
-                       allocate(gdp%gdrtc%mnrtcsta (2         ,stacnt), stat = istat)
-       if (istat==0) allocate(gdp%gdrtc%namrtcsta(stacnt) , stat = istat)
-       if (istat==0) allocate(gdp%gdrtc%zrtcsta(gdp%d%kmax,stacnt) , stat = istat)
-       if (istat/=0) then
+       istat = 0
+       if (istat == 0) allocate(gdp%gdrtc%mnrtcsta (2,stacnt)        , stat = istat)
+       if (istat == 0) allocate(gdp%gdrtc%namrtcsta(stacnt)          , stat = istat)
+       if (istat == 0) allocate(gdp%gdrtc%zrtcsta(gdp%d%kmax,stacnt) , stat = istat)
+       if (istat /= 0) then
           call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
           call d3stop(1, gdp)
        endif

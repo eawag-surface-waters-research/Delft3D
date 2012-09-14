@@ -59,33 +59,33 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
 !
 ! Global variables
 !
-    logical      , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    character(*)               :: filmd  !!  File name for MD FLOW file
-    character(*)               :: runid  !!  Run identification
-    character(12), intent(in)  :: filmrs !!  File name for DELFT3D_MOR FLOW input file (MD-flow.xxx)
-    character(6) , intent(in)  :: soort  !!  Help var. determining the prog. name
-                                         !!  currently active
+    logical      , intent(out) :: error  !  Flag=TRUE if an error is encountered
+    character(*)               :: filmd  !  File name for MD FLOW file
+    character(*)               :: runid  !  Run identification
+    character(12), intent(in)  :: filmrs !  File name for DELFT3D_MOR FLOW input file (MD-flow.xxx)
+    character(6) , intent(in)  :: soort  !  Help var. determining the prog. name currently active
 !
 ! Local variables
 !
     integer           :: iocond
     integer           :: lfil
-    integer           :: linod   ! Help variable to extend length file name with node number
-    integer           :: lrid    ! Help var. to determine the actual length of RUNID 
-    integer           :: lunid   ! Unit nr. for the file 'runid' where the runid is specified : 'pc  ' or 'unix' 
+    integer           :: linod             ! Help variable to extend length file name with node number
+    integer           :: lrid              ! Help var. to determine the actual length of RUNID 
+    integer           :: lunid             ! Unit nr. for the file 'runid' where the runid is specified : 'pc  ' or 'unix' 
     integer           :: luntmp
     integer           :: n
     integer, external :: newlun
     integer           :: nrec
-    integer           :: pos     ! Help var. for adjusting runid 
-    logical           :: ex      ! Help flag = TRUE when file is found 
+    integer           :: pos               ! Help var. for adjusting runid 
+    logical           :: ex                ! Help flag = TRUE when file is found 
     logical, external :: exifil
-    logical           :: found   ! Flag to see if MD file name is found 
-    logical           :: opend   ! Help flag = TRUE when file is still open (DELFT3D) 
-    character(256)    :: errmsg  ! String containing error messages 
-    character(256)    :: filtmp  ! Help var. to specify file name 
-    character(5)      :: filid   ! Var. containing file name 'runid' 
-    character(512)    :: outlin  ! Output line
+    logical           :: found             ! Flag to see if MD file name is found
+    logical           :: mdfile_ptr_isnull ! F: Contents of mdfile are already placed in gdp%mdfile_ptr
+    logical           :: opend             ! Help flag = TRUE when file is still open (DELFT3D) 
+    character(256)    :: errmsg            ! String containing error messages 
+    character(256)    :: filtmp            ! Help var. to specify file name 
+    character(5)      :: filid             ! Var. containing file name 'runid' 
+    character(512)    :: outlin            ! Output line
 !
 !! executable statements -------------------------------------------------------
 !
@@ -94,7 +94,16 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
     lunprt  => gdp%gdinout%lunprt
     lunscr  => gdp%gdinout%lunscr
     !
-    call tree_create_node( gdp%input_tree, "md-file", gdp%mdfile_ptr )
+    if (associated(gdp%mdfile_ptr)) then
+       !
+       ! Contents of mdfile are already placed in gdp%mdfile_ptr
+       ! Don't add it again
+       !
+       mdfile_ptr_isnull = .false.
+    else
+       mdfile_ptr_isnull = .true.
+       call tree_create_node(gdp%input_tree, "md-file", gdp%mdfile_ptr)
+    endif
     filmd = ' '
     !
     ! In Delft3D version 3.00 and higher the new convention for mdf
@@ -151,13 +160,15 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
           ! Subroutine prop_file must be called before the md-file
           ! is opened for a long time.
           !
-          call tree_put_data( gdp%mdfile_ptr, transfer(filmd(1:lfil),node_value), "STRING" )
-          call prop_file('ini',filmd(1:lfil),gdp%mdfile_ptr,iocond)
-          if (iocond /= 0) then
-             write(errmsg,'(i0,a)') iocond,' occured on reading md-file'
-             call prterr(lunscr    ,'P004'    ,errmsg   )
-             error = .true.
-             goto 9999
+          if (mdfile_ptr_isnull) then
+             call tree_put_data( gdp%mdfile_ptr, transfer(filmd(1:lfil),node_value), "STRING" )
+             call prop_file('ini',filmd(1:lfil),gdp%mdfile_ptr,iocond)
+             if (iocond /= 0) then
+                write(errmsg,'(i0,a)') iocond,' occured on reading md-file'
+                call prterr(lunscr    ,'P004'    ,errmsg   )
+                error = .true.
+                goto 9999
+             endif
           endif
           !
           lunmd = newlun(gdp)
@@ -177,13 +188,15 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
              ! Subroutine prop_file must be called before the md-file
              ! is opened for a long time.
              !
-             call tree_put_data( gdp%mdfile_ptr, transfer(filmd(1:lfil),node_value), "STRING" )
-             call prop_file('ini',filmd(1:lfil),gdp%mdfile_ptr,iocond)
-             if (iocond /= 0) then
-                write(errmsg,'(i0,a)') iocond,' occured on reading md-file'
-                call prterr(lunscr    ,'P004'    ,errmsg   )
-                error = .true.
-                goto 9999
+             if (mdfile_ptr_isnull) then
+                call tree_put_data( gdp%mdfile_ptr, transfer(filmd(1:lfil),node_value), "STRING" )
+                call prop_file('ini',filmd(1:lfil),gdp%mdfile_ptr,iocond)
+                if (iocond /= 0) then
+                   write(errmsg,'(i0,a)') iocond,' occured on reading md-file'
+                   call prterr(lunscr    ,'P004'    ,errmsg   )
+                   error = .true.
+                   goto 9999
+                endif
              endif
              !
              lunmd = newlun(gdp)
@@ -204,13 +217,15 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
              ! Subroutine prop_file must be called before the md-file
              ! is opened for a long time.
              !
-             call tree_put_data( gdp%mdfile_ptr, transfer(filmd(1:lfil),node_value), "STRING" )
-             call prop_file('ini',filmd(1:lfil),gdp%mdfile_ptr,iocond)
-             if (iocond /= 0) then
-                write(errmsg,'(i0,a)') iocond,' occured on reading md-file'
-                call prterr(lunscr    ,'P004'    ,errmsg   )
-                error = .true.
-                goto 9999
+             if (mdfile_ptr_isnull) then
+                call tree_put_data( gdp%mdfile_ptr, transfer(filmd(1:lfil),node_value), "STRING" )
+                call prop_file('ini',filmd(1:lfil),gdp%mdfile_ptr,iocond)
+                if (iocond /= 0) then
+                   write(errmsg,'(i0,a)') iocond,' occured on reading md-file'
+                   call prterr(lunscr    ,'P004'    ,errmsg   )
+                   error = .true.
+                   goto 9999
+                endif
              endif
              !
              lunmd = newlun(gdp)
@@ -312,13 +327,15 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
           ! Subroutine prop_file must be called before the md-file
           ! is opened for a long time.
           !
-          call tree_put_data( gdp%mdfile_ptr, transfer(filmd(1:lfil),node_value), "STRING" )
-          call prop_file('ini',filmd(1:lfil),gdp%mdfile_ptr,iocond)
-          if (iocond /= 0) then
-             write(errmsg,'(i0,a)') iocond,' occured on reading md-file'
-             call prterr(lunscr    ,'P004'    ,errmsg   )
-             error = .true.
-             goto 9999
+          if (mdfile_ptr_isnull) then
+             call tree_put_data( gdp%mdfile_ptr, transfer(filmd(1:lfil),node_value), "STRING" )
+             call prop_file('ini',filmd(1:lfil),gdp%mdfile_ptr,iocond)
+             if (iocond /= 0) then
+                write(errmsg,'(i0,a)') iocond,' occured on reading md-file'
+                call prterr(lunscr    ,'P004'    ,errmsg   )
+                error = .true.
+                goto 9999
+             endif
           endif
           !
           lunmd = newlun(gdp)

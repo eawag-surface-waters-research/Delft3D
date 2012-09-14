@@ -33,85 +33,45 @@ subroutine initflwpar(gdp)
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    !
     use globaldata
     !
     implicit none
     !
     type(globdat),target :: gdp
     !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    real(fp), dimension(:,:,:)         , pointer :: fluxu
-    real(fp), dimension(:,:,:)         , pointer :: fluxuc
-    real(fp), dimension(:,:,:)         , pointer :: fluxv
-    real(fp), dimension(:,:,:)         , pointer :: fluxvc
-    real(fp), dimension(:,:,:)         , pointer :: fluxw
-    real(fp), dimension(:,:,:)         , pointer :: fluxwc
-    type (flwoutputtype)               , pointer :: flwoutput
-    type (handletype)                  , pointer :: fbcrfile
-    type (fbcrbndtype)  , dimension(:) , pointer :: fcrbnd
-    logical                            , pointer :: fbccorrection
-    character(256)                     , pointer :: fbcrfilnam
-    type (gd_flwpar)                   , pointer :: gdflwpar
+    ! local parameters
     !
     integer  :: istat
 !
 !! executable statements -------------------------------------------------------
 !
-    fluxu          => gdp%gdflwpar%fluxu
-    fluxuc         => gdp%gdflwpar%fluxuc
-    fluxv          => gdp%gdflwpar%fluxv
-    fluxvc         => gdp%gdflwpar%fluxvc
-    fluxw          => gdp%gdflwpar%fluxw
-    fluxwc         => gdp%gdflwpar%fluxwc
-    flwoutput      => gdp%gdflwpar%flwoutput
-    fbcrfile       => gdp%gdflwpar%fbcrfile
-    fcrbnd         => gdp%gdflwpar%fcrbnd
-    fbccorrection  => gdp%gdflwpar%fbccorrection
-    fbcrfilnam     => gdp%gdflwpar%fbcrfilnam
-    gdflwpar       => gdp%gdflwpar
-    !
     istat = 0
-    allocate (gdflwpar%flwoutput, stat = istat)
-    allocate (gdflwpar%fbcrfile , stat = istat) 
+    allocate (gdp%gdflwpar%flwoutput, stat = istat)
+    allocate (gdp%gdflwpar%fbcrfile , stat = istat) 
     !
-    fluxu          => gdp%gdflwpar%fluxu
-    fluxuc         => gdp%gdflwpar%fluxuc
-    fluxv          => gdp%gdflwpar%fluxv
-    fluxvc         => gdp%gdflwpar%fluxvc
-    fluxw          => gdp%gdflwpar%fluxw
-    fluxwc         => gdp%gdflwpar%fluxwc
-    flwoutput      => gdp%gdflwpar%flwoutput
-    fbcrfile       => gdp%gdflwpar%fbcrfile
-    fcrbnd         => gdp%gdflwpar%fcrbnd
-    fbccorrection  => gdp%gdflwpar%fbccorrection
-    fbcrfilnam     => gdp%gdflwpar%fbcrfilnam
-    gdflwpar       => gdp%gdflwpar
+    gdp%gdflwpar%flwoutput%air         = .false.
+    gdp%gdflwpar%flwoutput%addtim      = .false.
+    gdp%gdflwpar%flwoutput%chezy       = .false.
+    gdp%gdflwpar%flwoutput%cumdifuflux = .false.
+    gdp%gdflwpar%flwoutput%difuflux    = .false.
+    gdp%gdflwpar%flwoutput%halfdt      = .false.
+    gdp%gdflwpar%flwoutput%layering    = .false.
+    gdp%gdflwpar%flwoutput%roughness   = .false.
+    gdp%gdflwpar%flwoutput%temperature = .false.
+    gdp%gdflwpar%flwoutput%veuler      = .true.
+    gdp%gdflwpar%flwoutput%z0cur       = .false.
+    gdp%gdflwpar%flwoutput%z0rou       = .false.
     !
-    flwoutput%air         = .false.
-    flwoutput%addtim      = .false.
-    flwoutput%chezy       = .false.
-    flwoutput%cumdifuflux = .false.
-    flwoutput%difuflux    = .false.
-    flwoutput%halfdt      = .false.
-    flwoutput%layering    = .false.
-    flwoutput%roughness   = .false.
-    flwoutput%temperature = .false.
-    flwoutput%veuler      = .true.
-    flwoutput%z0cur       = .false.
-    flwoutput%z0rou       = .false.
+    nullify(gdp%gdflwpar%fluxu)
+    nullify(gdp%gdflwpar%fluxuc)
+    nullify(gdp%gdflwpar%fluxv)
+    nullify(gdp%gdflwpar%fluxvc)
+    nullify(gdp%gdflwpar%fluxw)
+    nullify(gdp%gdflwpar%fluxwc)
     !
-    nullify(gdflwpar%fluxu)
-    nullify(gdflwpar%fluxuc)
-    nullify(gdflwpar%fluxv)
-    nullify(gdflwpar%fluxvc)
-    nullify(gdflwpar%fluxw)
-    nullify(gdflwpar%fluxwc)
+    nullify(gdp%gdflwpar%fcrbnd) 
     !
-    nullify(gdflwpar%fcrbnd) 
+    gdp%gdflwpar%fbccorrection = .false.
     !
-    fbccorrection = .false.
-    !
-    fbcrfilnam    = ' '
+    gdp%gdflwpar%fbcrfilnam    = ' '
 end subroutine initflwpar

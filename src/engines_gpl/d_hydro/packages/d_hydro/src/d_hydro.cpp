@@ -145,15 +145,16 @@ DeltaresHydro::DeltaresHydro (
     char *  envp []
     ) {
 
-    this->exePath = strdup (argv[0]);
+    this->exePath = _strdup (argv[0]);
 
 #if defined(HAVE_CONFIG_H)
-    this->exeName = strdup (basename (argv[0]));
+    this->exeName = _strdup (basename (argv[0]));
 #else
     char * ext = new char[5];
     this->exeName = new char[MAXSTRING];
     _splitpath (argv[0], NULL, NULL, this->exeName, ext);
     StringCbCatA (this->exeName, MAXSTRING, ext);
+    delete [] ext;
 #endif
 
     this->slaveArg  = NULL;
@@ -331,6 +332,7 @@ DeltaresHydro::DeltaresHydro (
 
     this->log->Write (Log::DETAIL, "Calling entry function in start library");
     this->ready = ((entryPoint) ((LPWSTR) this));
+    delete [] lib;
 #endif
 #endif      // MONOLITHIC_FLOW2D3D
     }
@@ -350,10 +352,18 @@ DeltaresHydro::~DeltaresHydro (
 
     delete this->startComponent;
 
+#if defined(HAVE_CONFIG_H)
     free (this->exeName);
-    delete this->config;
-
+#else
+    delete [] this->exeName;
+#endif
     this->log->Write (Log::ALWAYS, "d_hydro shutting down normally");
+
+   delete this->clock;
+   delete this->config;
+   free (this->exePath);
+   delete this->log;
+   delete [] this->mainArgs;
     }
 
 

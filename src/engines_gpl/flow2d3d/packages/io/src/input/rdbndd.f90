@@ -751,7 +751,9 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     enddo
     !
     ! Allocate and initialize the mask array for boundaries coupled to SobekSIM
+    ! ext_bnd may be already allocated when rdbndd was called by TDATOM
     !
+    if (associated(gdp%gdbcdat%ext_bnd)) deallocate(gdp%gdbcdat%ext_bnd, stat=istat)
     allocate (gdp%gdbcdat%ext_bnd(nto), stat=istat)
     if (istat /= 0) then
        call prterr(lundia, 'P004', 'memory alloc error in rdbndd(ext_bnd)')

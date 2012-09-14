@@ -1,4 +1,4 @@
-subroutine nefisio_dealloc(gdp       )
+subroutine nefisio_dealloc(gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -50,19 +50,20 @@ subroutine nefisio_dealloc(gdp       )
 ! Local variables
 !
     integer                        :: i
-    type (nefiselement) , pointer  ::nefiselem
+    integer                        :: istat
+    type (nefiselement) , pointer  :: nefiselem
 !
 !! executable statements -------------------------------------------------------
 !
     do i = 1, nrnefisfiles
        nefiselem => gdp%nefisio%nefiselem(i)
-       if (associated(nefiselem%elmdms)) deallocate (nefiselem%elmdms)
-       if (associated(nefiselem%nbytsg)) deallocate (nefiselem%nbytsg)
-       if (associated(nefiselem%elmunt)) deallocate (nefiselem%elmunt)
-       if (associated(nefiselem%elmnms)) deallocate (nefiselem%elmnms)
-       if (associated(nefiselem%elmqty)) deallocate (nefiselem%elmqty)
-       if (associated(nefiselem%elmtps)) deallocate (nefiselem%elmtps)
-       if (associated(nefiselem%elmdes)) deallocate (nefiselem%elmdes)
+       if (associated(nefiselem%elmdms)) deallocate (nefiselem%elmdms, stat=istat)
+       if (associated(nefiselem%nbytsg)) deallocate (nefiselem%nbytsg, stat=istat)
+       if (associated(nefiselem%elmunt)) deallocate (nefiselem%elmunt, stat=istat)
+       if (associated(nefiselem%elmnms)) deallocate (nefiselem%elmnms, stat=istat)
+       if (associated(nefiselem%elmqty)) deallocate (nefiselem%elmqty, stat=istat)
+       if (associated(nefiselem%elmtps)) deallocate (nefiselem%elmtps, stat=istat)
+       if (associated(nefiselem%elmdes)) deallocate (nefiselem%elmdes, stat=istat)
     enddo
-    deallocate (gdp%nefisio)
+    deallocate (gdp%nefisio, stat=istat)
 end subroutine nefisio_dealloc

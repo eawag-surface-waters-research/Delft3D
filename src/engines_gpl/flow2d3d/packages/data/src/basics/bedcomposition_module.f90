@@ -1799,6 +1799,10 @@ function initmorlyr(this) result (istat)
     !
     nullify(settings%thexlyr)
     nullify(settings%thtrlyr)
+    nullify(settings%sedtyp)
+    nullify(settings%phi)
+    nullify(settings%rhofrac)
+    nullify(settings%sigphi)
     !
     nullify(state%preload)
     nullify(state%svfrac)

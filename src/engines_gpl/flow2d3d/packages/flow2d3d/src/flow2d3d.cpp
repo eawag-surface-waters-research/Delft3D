@@ -236,6 +236,7 @@ Flow2D3D::Run (
 
             if (this->flowol != NULL)
                 this->flowol->UnregisterSubdomain ();
+            int result = ESM_Delete(context_id);
             }
         }
 

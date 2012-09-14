@@ -484,19 +484,22 @@ subroutine dealloc_tree_data(tree, data, stop)
     character(len=1), dimension(:), intent(in)    :: data !< Help data, not used, may be empty
     logical,                        intent(inout) :: stop !< Whether to continue or stop.
 
+    integer :: error
+
     if (associated(tree)) then
         if (associated(tree%node_name)) then
-            deallocate(tree%node_name)
-        end if
+            deallocate(tree%node_name, stat = error )
+        endif
         if (associated(tree%node_data)) then
-            deallocate(tree%node_data)
-        end if
+            deallocate(tree%node_data, stat = error )
+        endif
         if (associated(tree%node_data_type)) then
-            deallocate(tree%node_data_type)
-        end if
+            deallocate(tree%node_data_type, stat = error )
+        endif
         if (associated(tree%child_nodes)) then
-            deallocate(tree%child_nodes)
-        end if
+            deallocate(tree%child_nodes, stat = error )
+        endif
+        deallocate(tree, stat = error )
    end if
 end subroutine dealloc_tree_data
 

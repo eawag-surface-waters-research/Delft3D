@@ -50,7 +50,7 @@ subroutine initsafe(gdp)
 !! executable statements -------------------------------------------------------
 !
     istat = 0
-    call tree_create  ( "Delft3D-FLOW input", gdp%input_tree )
+    call tree_create("Delft3D-FLOW input", gdp%input_tree)
     nullify (gdp%mdfile_ptr)
     !
     call initadv2d     (gdp)

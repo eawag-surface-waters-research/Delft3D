@@ -151,17 +151,22 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     !
     if (.not. associated(gdtrachy%rttfu)) then
        !
+       istat = 0
        if (waqol) then
-          allocate(gdtrachy%vegh2d(gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub))
-          allocate(gdtrachy%vden2d(gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub))
+          if (istat==0) allocate(gdtrachy%vegh2d(gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub), stat = istat)
+          if (istat==0) allocate(gdtrachy%vden2d(gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub), stat = istat)
           vegh2d      => gdp%gdtrachy%vegh2d
           vden2d      => gdp%gdtrachy%vden2d
           vegh2d = 0.0_fp
           vden2d = 0.0_fp
        endif
        !
-       allocate(gdtrachy%rttfu(gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub,kmax))
-       allocate(gdtrachy%rttfv(gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub,kmax))
+       if (istat==0) allocate(gdtrachy%rttfu(gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub,kmax), stat = istat)
+       if (istat==0) allocate(gdtrachy%rttfv(gdp%d%nlb:gdp%d%nub,gdp%d%mlb:gdp%d%mub,kmax), stat = istat)
+       if (istat/=0) then
+          call prterr(lundia, 'U021', 'RDTRT: memory alloc error')
+          call d3stop(1, gdp)
+       endif
        !
        ! update local pointers
        !
