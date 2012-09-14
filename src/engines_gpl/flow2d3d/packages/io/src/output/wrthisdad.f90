@@ -185,7 +185,7 @@ subroutine wrthisdad(lundia    ,error     ,trifil    ,ithisc    , &
        call sbuff_checksize(nalink*lsedtot)
        do l = 1, lsedtot
           do i = 1, nalink
-             sbuff(i+(lsedtot-1)*nalink) = link_sum(i,l)
+             sbuff(i+(l-1)*nalink) = link_sum(i,l)
           enddo
        enddo
        ierror = putelt(fds, grnam, 'LINK_SUM', uindex, 1, sbuff)

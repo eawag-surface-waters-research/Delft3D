@@ -1556,16 +1556,16 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
     if (noutletlinks > 0) then
        !
        istat = 0
-       if (istat == 0) call reallocP(gdp%gddredge%link_percentage, (/nalink+noutletlinks,lsedtot/), stat = istat)
-       if (istat == 0) call reallocP(gdp%gddredge%link_distance, nalink+noutletlinks, stat = istat)
-       if (istat == 0) call reallocP(gdp%gddredge%link_sum, (/nalink+noutletlinks,lsedtot/), stat = istat)
-       if (istat == 0) call reallocP(gdp%gddredge%voldump, (/nadump+1,lsedtot/), stat = istat)
-       if (istat == 0) call reallocP(gdp%gddredge%totvoldump, nadump+1, stat = istat)
-       if (istat == 0) call reallocP(gdp%gddredge%localareadump, nadump+1, stat = istat)
-       if (istat == 0) call reallocP(gdp%gddredge%globalareadump, nadump+1, stat = istat)
-       if (istat == 0) call reallocP(gdp%gddredge%globaldumpcap, nadump+1, stat = istat)
-       if (istat == 0) call reallocP(gdp%gddredge%link_def, (/nalink+noutletlinks,2/), stat = istat)
-       if (istat == 0) call reallocP(gdp%gddredge%dump_areas, nadump+1, stat = istat)
+       if (istat == 0) call reallocP(gdp%gddredge%link_percentage, (/nalink+noutletlinks,lsedtot/), fill = 100.0_fp, stat = istat)
+       if (istat == 0) call reallocP(gdp%gddredge%link_distance, nalink+noutletlinks, fill = 0.0_fp, stat = istat)
+       if (istat == 0) call reallocP(gdp%gddredge%link_sum, (/nalink+noutletlinks,lsedtot/), fill = 0.0_fp, stat = istat)
+       if (istat == 0) call reallocP(gdp%gddredge%voldump, (/nadump+1,lsedtot/), fill = 0.0_fp, stat = istat)
+       if (istat == 0) call reallocP(gdp%gddredge%totvoldump, nadump+1, fill = 0.0_fp, stat = istat)
+       if (istat == 0) call reallocP(gdp%gddredge%localareadump, nadump+1, fill = 0.0_fp, stat = istat)
+       if (istat == 0) call reallocP(gdp%gddredge%globalareadump, nadump+1, fill = 0.0_fp, stat = istat)
+       if (istat == 0) call reallocP(gdp%gddredge%globaldumpcap, nadump+1, fill = 0.0_fp, stat = istat)
+       if (istat == 0) call reallocP(gdp%gddredge%link_def, (/nalink+noutletlinks,2/), fill = 0, stat = istat)
+       if (istat == 0) call reallocP(gdp%gddredge%dump_areas, nadump+1, fill = ' ', stat = istat)
        if (istat == 0) then
           allocate(gdp%gddredge%dump_prop(nadump+1), stat=istat)
           if (istat == 0) then
@@ -1621,6 +1621,7 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
        pdump%dumpdistr    = DUMPDISTR_UNIFORM
        pdump%dumpwhendry  = .false.
        pdump%npnt         = 0
+       pdump%use_dunes    = .false.
        nullify(pdump%nm)
        nullify(pdump%inm)
        nullify(pdump%reflevel)
