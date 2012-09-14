@@ -4,9 +4,21 @@ set globalErrorLevel=0
 
 echo oss-install...
 
+rem Usage:
+rem > oss-install.cmd <destiny>
+rem > oss-install.cmd [project] <destiny>
+rem > oss-install.cmd [project] <destiny> ["compiler_dir"]
+rem with:
+rem   <destiny>        : Target directory where all binaries etc. are going to be installed by this script
+rem   [project]        : (optional) project to install. If missing, "everything" is installed
+rem   ["compiler_dir"] : (optional) Directory containing compiler specific dll's to be installed,
+rem                      surrounded by quotes to be able to handle white spaces in the path
+rem
 rem Example calls:
 rem > install.cmd <dest directory>                # Install entire solution
 rem > install.cmd flow2d3d <dest directory>       # Install only project flow2d3d (and its dependencies)
+rem > install.cmd flow2d3d <dest directory> "c:\Program Files (x86)\Intel\Composer XE 2011 SP1\redist\ia32\compiler\"      # Install only project flow2d3d (and its dependencies)
+rem                                                                                                                          including compiler specific dll's
 
 rem 0. defaults:
 set project=
@@ -34,6 +46,15 @@ if [%2] EQU [] (
 if [%dest_main%] EQU [] (
     echo "ERROR: No target directory specified as argument of oss-install.cmd"
     goto end
+)
+
+if [%3] EQU [] (
+    set compiler_dir=""
+) else (
+    set compiler_dir_read=%3
+    rem Remove leading and trailing quote (")
+    rem These quotes MUST be present in argument number 3, because "compiler_dir" may contain white spaces
+    set compiler_dir=!compiler_dir_read:~1,-1!
 )
 
 rem Change to directory tree where this batch file resides (necessary when oss-install.cmd is called from outside of oss/trunk/src)
@@ -91,7 +112,7 @@ rem =============================================================
     rem "echo f |" is (only) needed when dest does not exist
     rem and does not harm in other cases
     rem 
-    echo f | xcopy %fileName% %dest% /F /Y
+    echo f | xcopy "%fileName%" %dest% /F /Y
     if NOT !ErrorLevel! EQU 0 (
         echo ERROR: while copying "!fileName!" to "!dest!"
     )
@@ -204,6 +225,18 @@ rem ====================
     call :copyFile "third_party_open\intel_fortran\lib\win32\*.dll"           !dest_lib!
     call :copyFile "engines_gpl\flow2d3d\default\*"                           !dest_default!
     call :copyFile utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll !dest_bin!
+    rem
+    rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
+    rem Some (older) libraries will be overwritten.
+    rem
+    if !compiler_dir!=="" (
+        rem Compiler_dir not set
+    ) else (
+        rem "Compiler_dir:!compiler_dir!"
+        set localstring="!compiler_dir!*.dll"
+        rem Note the awkward usage of !-characters
+        call :copyFile !!localstring! !dest_lib!!
+    )
 goto :endproc
 
 
@@ -247,6 +280,18 @@ rem ===========================
     call :copyFile "third_party_open\intel_fortran\lib\win32\*.dll"           !dest_lib!
     call :copyFile "engines_gpl\flow2d3d\default\*.*"                         !dest_default!
     call :copyFile utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll !dest_bin!
+    rem
+    rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
+    rem Some (older) libraries will be overwritten.
+    rem
+    if !compiler_dir!=="" (
+        rem Compiler_dir not set
+    ) else (
+        rem "Compiler_dir:!compiler_dir!"
+        set localstring="!compiler_dir!*.dll"
+        rem Note the awkward usage of !-characters
+        call :copyFile !!localstring! !dest_lib!!
+    )
 goto :endproc
 
 
@@ -279,6 +324,18 @@ rem ================
     call :copyFile "third_party_open\swan\lib\win32\*.*"            !dest_swan_lib!
     call :copyFile "third_party_open\swan\bin\win32\*.*"            !dest_swan_bin!
     call :copyFile third_party_open\swan\scripts\swan_install.bat " !dest_swan_scripts!\swan.bat"
+    rem
+    rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
+    rem Some (older) libraries will be overwritten.
+    rem
+    if !compiler_dir!=="" (
+        rem Compiler_dir not set
+    ) else (
+        rem "Compiler_dir:!compiler_dir!"
+        set localstring="!compiler_dir!*.dll"
+        rem Note the awkward usage of !-characters
+        call :copyFile !!localstring! !dest_lib!!
+    )
 goto :endproc
 
 
