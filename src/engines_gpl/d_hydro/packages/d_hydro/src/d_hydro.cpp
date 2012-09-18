@@ -62,6 +62,7 @@ using namespace std;
 #   include "getopt.h"
 #   include <Strsafe.h>
 #   include <windows.h>
+#  define strdup _strdup
 #endif
 
 
@@ -145,10 +146,10 @@ DeltaresHydro::DeltaresHydro (
     char *  envp []
     ) {
 
-    this->exePath = _strdup (argv[0]);
+    this->exePath = strdup (argv[0]);
 
 #if defined(HAVE_CONFIG_H)
-    this->exeName = _strdup (basename (argv[0]));
+    this->exeName = strdup (basename (argv[0]));
 #else
     char * ext = new char[5];
     this->exeName = new char[MAXSTRING];
