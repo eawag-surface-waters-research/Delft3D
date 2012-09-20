@@ -71,6 +71,7 @@ subroutine read_triana(lundia    ,error     ,kc       ,statns    ,nto        ,gd
     integer                                      :: i                ! Help var. 
     integer                                      :: ii
     integer                                      :: ierrs
+    integer                                      :: istat
     integer                                      :: j                ! Help var. 
     integer                                      :: k                ! Help var. 
     integer                                      :: ks 
@@ -220,11 +221,12 @@ subroutine read_triana(lundia    ,error     ,kc       ,statns    ,nto        ,gd
     enddo
     !
  9999 continue
-    deallocate(ampl)
-    deallocate(phas)
+    deallocate(ampl,stat=istat)
+    deallocate(phas,stat=istat)
     if (with_corrections) then
-       deallocate(ampl_corr)
-       deallocate(phas_corr)
+       deallocate(ampl_corr,stat=istat)
+       deallocate(phas_corr,stat=istat)
     endif
-    deallocate(pindex) ! pindex is no longer used
+    deallocate(gdp%gdbcdat%pindex,stat=istat) ! pindex is no longer used
+    nullify(pindex)
 end subroutine read_triana
