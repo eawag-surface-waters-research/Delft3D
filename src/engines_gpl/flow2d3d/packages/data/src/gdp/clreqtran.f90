@@ -1,4 +1,4 @@
-subroutine clreqtran(istat     ,gdp       )
+subroutine clreqtran(istat, gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -39,11 +39,6 @@ subroutine clreqtran(istat     ,gdp       )
     implicit none
     !
     type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    integer(pntrsize),        dimension(:)   , pointer :: dll_handle_settle
-    integer(pntrsize),        dimension(:)   , pointer :: dll_handle
 !
 ! Global variables
 !
@@ -51,22 +46,19 @@ subroutine clreqtran(istat     ,gdp       )
 !
 ! Local variables
 !
-    integer           :: i
+    integer                     :: i
     integer(pntrsize), external :: close_shared_library
     integer(pntrsize)           :: error
 !
 !! executable statements -------------------------------------------------------
 !
-    dll_handle_settle    => gdp%gdeqtran%dll_handle_settle
-    dll_handle           => gdp%gdeqtran%dll_handle
-    !
-    if (associated(dll_handle)) then
-       do i = 1,size(dll_handle)
-          if (dll_handle_settle(i) /= 0) then
-             error = close_shared_library(dll_handle_settle(i))
+    if (associated(gdp%gdeqtran%dll_handle)) then
+       do i = 1,size(gdp%gdeqtran%dll_handle)
+          if (gdp%gdeqtran%dll_handle_settle(i) /= 0) then
+             error = close_shared_library(gdp%gdeqtran%dll_handle_settle(i))
           endif
-          if (dll_handle(i) /= 0) then
-             error = close_shared_library(dll_handle(i))
+          if (gdp%gdeqtran%dll_handle(i) /= 0) then
+             error = close_shared_library(gdp%gdeqtran%dll_handle(i))
           endif
        enddo
     endif

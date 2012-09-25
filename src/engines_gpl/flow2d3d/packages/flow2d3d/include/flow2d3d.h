@@ -87,6 +87,7 @@ extern "C" {
 
 #ifdef WIN32
 #   define DllExport   __declspec( dllexport )
+#  define strdup _strdup
 #else
 #   define DllExport
 #endif

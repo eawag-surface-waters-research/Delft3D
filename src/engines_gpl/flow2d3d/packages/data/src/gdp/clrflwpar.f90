@@ -40,18 +40,6 @@ subroutine clrflwpar(istat, gdp)
     implicit none
     !
     type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    real(fp), dimension(:,:,:)         , pointer :: fluxu
-    real(fp), dimension(:,:,:)         , pointer :: fluxuc
-    real(fp), dimension(:,:,:)         , pointer :: fluxv
-    real(fp), dimension(:,:,:)         , pointer :: fluxvc
-    real(fp), dimension(:,:,:)         , pointer :: fluxw
-    real(fp), dimension(:,:,:)         , pointer :: fluxwc
-    type (flwoutputtype)               , pointer :: flwoutput
-    type (handletype)                  , pointer :: fbcrfile
-    type (gd_flwpar)                   , pointer :: gdflwpar
 !
 ! Global variables
 !
@@ -62,24 +50,14 @@ subroutine clrflwpar(istat, gdp)
 !
 !! executable statements -------------------------------------------------------
 !
-    fluxu          => gdp%gdflwpar%fluxu
-    fluxuc         => gdp%gdflwpar%fluxuc
-    fluxv          => gdp%gdflwpar%fluxv
-    fluxvc         => gdp%gdflwpar%fluxvc
-    fluxw          => gdp%gdflwpar%fluxw
-    fluxwc         => gdp%gdflwpar%fluxwc
-    flwoutput      => gdp%gdflwpar%flwoutput
-    fbcrfile       => gdp%gdflwpar%fbcrfile
-    gdflwpar       => gdp%gdflwpar
+    if (associated(gdp%gdflwpar%fluxu))     deallocate(gdp%gdflwpar%fluxu    , STAT = istat)
+    if (associated(gdp%gdflwpar%fluxuc))    deallocate(gdp%gdflwpar%fluxuc   , STAT = istat)
+    if (associated(gdp%gdflwpar%fluxv))     deallocate(gdp%gdflwpar%fluxv    , STAT = istat)
+    if (associated(gdp%gdflwpar%fluxvc))    deallocate(gdp%gdflwpar%fluxvc   , STAT = istat)
+    if (associated(gdp%gdflwpar%fluxw))     deallocate(gdp%gdflwpar%fluxw    , STAT = istat)
+    if (associated(gdp%gdflwpar%fluxwc))    deallocate(gdp%gdflwpar%fluxwc   , STAT = istat)
     !
-    if (associated(gdflwpar%fluxu))     deallocate(gdflwpar%fluxu    , STAT = istat)
-    if (associated(gdflwpar%fluxuc))    deallocate(gdflwpar%fluxuc   , STAT = istat)
-    if (associated(gdflwpar%fluxv))     deallocate(gdflwpar%fluxv    , STAT = istat)
-    if (associated(gdflwpar%fluxvc))    deallocate(gdflwpar%fluxvc   , STAT = istat)
-    if (associated(gdflwpar%fluxw))     deallocate(gdflwpar%fluxw    , STAT = istat)
-    if (associated(gdflwpar%fluxwc))    deallocate(gdflwpar%fluxwc   , STAT = istat)
-    !
-    if (associated(gdflwpar%flwoutput)) deallocate(gdflwpar%flwoutput, STAT = istat)
-    call cleartable(gdflwpar%fbcrfile)
-    if (associated(gdflwpar%fbcrfile))  deallocate(gdflwpar%fbcrfile , STAT = istat)
+    if (associated(gdp%gdflwpar%flwoutput)) deallocate(gdp%gdflwpar%flwoutput, STAT = istat)
+    call cleartable(gdp%gdflwpar%fbcrfile)
+    if (associated(gdp%gdflwpar%fbcrfile))  deallocate(gdp%gdflwpar%fbcrfile , STAT = istat)
 end subroutine clrflwpar

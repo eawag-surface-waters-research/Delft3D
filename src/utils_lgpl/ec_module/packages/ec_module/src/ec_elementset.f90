@@ -92,7 +92,7 @@ function free_elementSets(elementSets) result (success)
     if (associated(elementSets(k)%x  )) deallocate (elementSets(k)%x  , STAT = istat)
     if (associated(elementSets(k)%y  )) deallocate (elementSets(k)%y  , STAT = istat)
   enddo
-  deallocate (elementSets, STAT = istat)
+  if (associated(elementSets)) deallocate (elementSets, STAT = istat)
   success = .true.
 end function free_elementSets
 !
@@ -374,7 +374,7 @@ function increaseSize_elementSets(elementSets) result (k)
   endif
   success = copyArray_elementSets(elementSets,newElSets)
   if (.not. success) k=0
-  deallocate(elementSets, STAT = istat)
+  if (associated(elementSets)) deallocate(elementSets, STAT = istat)
   elementSets => newElSets
 end function increaseSize_elementSets
 !

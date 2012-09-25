@@ -80,7 +80,7 @@ Category::~Category (
     void
     ) {
 
-    delete this->name;
+    delete [] this->name;
     }
 
 

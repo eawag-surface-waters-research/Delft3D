@@ -1,4 +1,4 @@
-subroutine clrdredge(istat     ,gdp       )
+subroutine clrdredge(istat, gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -40,32 +40,6 @@ subroutine clrdredge(istat     ,gdp       )
     implicit none
     !
     type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    type (handletype)              , pointer :: tseriesfile
-    real(fp)      , dimension(:,:) , pointer :: link_percentage
-    real(fp)      , dimension(:)   , pointer :: link_distance
-    real(fp)      , dimension(:,:) , pointer :: link_sum
-    real(fp)      , dimension(:)   , pointer :: dzdred
-    real(fp)      , dimension(:)   , pointer :: refplane
-    real(fp)      , dimension(:,:) , pointer :: voldred
-    real(fp)      , dimension(:)   , pointer :: voldune
-    real(fp)      , dimension(:)   , pointer :: totvoldred
-    real(fp)      , dimension(:)   , pointer :: globalareadred
-    real(fp)      , dimension(:,:) , pointer :: voldump
-    real(fp)      , dimension(:,:) , pointer :: percsupl
-    real(fp)      , dimension(:)   , pointer :: totvoldump
-    real(fp)      , dimension(:)   , pointer :: localareadump
-    real(fp)      , dimension(:)   , pointer :: globalareadump
-    real(fp)      , dimension(:)   , pointer :: globaldumpcap
-    integer                        , pointer :: nadred
-    integer                        , pointer :: nadump
-    integer       , dimension(:,:) , pointer :: link_def
-    character( 80), dimension(:)   , pointer :: dredge_areas
-    character( 80), dimension(:)   , pointer :: dump_areas
-    type (dredtype), dimension(:)  , pointer :: dredge_prop
-    type (dumptype), dimension(:)  , pointer :: dump_prop
 !
 ! Global variables
 !
@@ -73,36 +47,10 @@ subroutine clrdredge(istat     ,gdp       )
 !
 ! Local variables
 !
-    integer                 :: i
-    type(dredtype), pointer :: pdredge
-    type(dumptype), pointer :: pdump
+    integer :: i
 !
 !! executable statements -------------------------------------------------------
 !
-    tseriesfile       => gdp%gddredge%tseriesfile
-    link_percentage   => gdp%gddredge%link_percentage
-    link_distance     => gdp%gddredge%link_distance
-    link_sum          => gdp%gddredge%link_sum
-    dzdred            => gdp%gddredge%dzdred
-    refplane          => gdp%gddredge%refplane
-    voldred           => gdp%gddredge%voldred
-    voldune           => gdp%gddredge%voldune
-    totvoldred        => gdp%gddredge%totvoldred
-    globalareadred    => gdp%gddredge%globalareadred
-    voldump           => gdp%gddredge%voldump
-    percsupl          => gdp%gddredge%percsupl
-    totvoldump        => gdp%gddredge%totvoldump
-    localareadump     => gdp%gddredge%localareadump
-    globalareadump    => gdp%gddredge%globalareadump
-    globaldumpcap     => gdp%gddredge%globaldumpcap
-    nadred            => gdp%gddredge%nadred
-    nadump            => gdp%gddredge%nadump
-    link_def          => gdp%gddredge%link_def
-    dredge_areas      => gdp%gddredge%dredge_areas
-    dump_areas        => gdp%gddredge%dump_areas
-    dredge_prop       => gdp%gddredge%dredge_prop
-    dump_prop         => gdp%gddredge%dump_prop
-    !
     if (associated(gdp%gddredge%link_percentage)) deallocate (gdp%gddredge%link_percentage, STAT = istat)
     if (associated(gdp%gddredge%link_distance))   deallocate (gdp%gddredge%link_distance  , STAT = istat)
     if (associated(gdp%gddredge%link_sum))        deallocate (gdp%gddredge%link_sum       , STAT = istat)
@@ -125,34 +73,32 @@ subroutine clrdredge(istat     ,gdp       )
     if (associated(gdp%gddredge%dump_areas))      deallocate (gdp%gddredge%dump_areas     , STAT = istat)
     !
     if (associated(gdp%gddredge%dredge_prop)) then
-       do i = 1, nadred
-          pdredge => gdp%gddredge%dredge_prop(i)
-          if (associated(pdredge%nm))             deallocate (pdredge%nm                  , STAT = istat)
-          if (associated(pdredge%inm))            deallocate (pdredge%inm                 , STAT = istat)
-          if (associated(pdredge%area))           deallocate (pdredge%area                , STAT = istat)
-          if (associated(pdredge%hdune))          deallocate (pdredge%hdune               , STAT = istat)
-          if (associated(pdredge%dz_dredge))      deallocate (pdredge%dz_dredge           , STAT = istat)
-          if (associated(pdredge%dunetoplevel))   deallocate (pdredge%dunetoplevel        , STAT = istat)
-          if (associated(pdredge%triggerlevel))   deallocate (pdredge%triggerlevel        , STAT = istat)
-          if (associated(pdredge%bedlevel))       deallocate (pdredge%bedlevel            , STAT = istat)
-          if (associated(pdredge%troughlevel))    deallocate (pdredge%troughlevel         , STAT = istat)
-          if (associated(pdredge%sedimentdepth))  deallocate (pdredge%sedimentdepth       , STAT = istat)
-          if (associated(pdredge%sortvar))        deallocate (pdredge%sortvar             , STAT = istat)
-          if (associated(pdredge%triggered))      deallocate (pdredge%triggered           , STAT = istat)
+       do i = 1, gdp%gddredge%nadred
+          if (associated(gdp%gddredge%dredge_prop(i)%nm))             deallocate (gdp%gddredge%dredge_prop(i)%nm                  , STAT = istat)
+          if (associated(gdp%gddredge%dredge_prop(i)%inm))            deallocate (gdp%gddredge%dredge_prop(i)%inm                 , STAT = istat)
+          if (associated(gdp%gddredge%dredge_prop(i)%area))           deallocate (gdp%gddredge%dredge_prop(i)%area                , STAT = istat)
+          if (associated(gdp%gddredge%dredge_prop(i)%hdune))          deallocate (gdp%gddredge%dredge_prop(i)%hdune               , STAT = istat)
+          if (associated(gdp%gddredge%dredge_prop(i)%dz_dredge))      deallocate (gdp%gddredge%dredge_prop(i)%dz_dredge           , STAT = istat)
+          if (associated(gdp%gddredge%dredge_prop(i)%dunetoplevel))   deallocate (gdp%gddredge%dredge_prop(i)%dunetoplevel        , STAT = istat)
+          if (associated(gdp%gddredge%dredge_prop(i)%triggerlevel))   deallocate (gdp%gddredge%dredge_prop(i)%triggerlevel        , STAT = istat)
+          if (associated(gdp%gddredge%dredge_prop(i)%bedlevel))       deallocate (gdp%gddredge%dredge_prop(i)%bedlevel            , STAT = istat)
+          if (associated(gdp%gddredge%dredge_prop(i)%troughlevel))    deallocate (gdp%gddredge%dredge_prop(i)%troughlevel         , STAT = istat)
+          if (associated(gdp%gddredge%dredge_prop(i)%sedimentdepth))  deallocate (gdp%gddredge%dredge_prop(i)%sedimentdepth       , STAT = istat)
+          if (associated(gdp%gddredge%dredge_prop(i)%sortvar))        deallocate (gdp%gddredge%dredge_prop(i)%sortvar             , STAT = istat)
+          if (associated(gdp%gddredge%dredge_prop(i)%triggered))      deallocate (gdp%gddredge%dredge_prop(i)%triggered           , STAT = istat)
        enddo
        deallocate (gdp%gddredge%dredge_prop    , STAT = istat)
     endif
     !
     if (associated(gdp%gddredge%dump_prop)) then
-       do i = 1, nadump
-          pdump => gdp%gddredge%dump_prop(i)
-          if (associated(pdump%nm))               deallocate (pdump%nm                    , STAT = istat)
-          if (associated(pdump%inm))              deallocate (pdump%inm                   , STAT = istat)
-          if (associated(pdump%area))             deallocate (pdump%area                  , STAT = istat)
-          if (associated(pdump%hdune))            deallocate (pdump%hdune                 , STAT = istat)
-          if (associated(pdump%bedlevel))         deallocate (pdump%bedlevel              , STAT = istat)
-          if (associated(pdump%dz_dump))          deallocate (pdump%dz_dump               , STAT = istat)
-          if (associated(pdump%sortvar))          deallocate (pdump%sortvar               , STAT = istat)
+       do i = 1, gdp%gddredge%nadump
+          if (associated(gdp%gddredge%dump_prop(i)%nm))               deallocate (gdp%gddredge%dump_prop(i)%nm                    , STAT = istat)
+          if (associated(gdp%gddredge%dump_prop(i)%inm))              deallocate (gdp%gddredge%dump_prop(i)%inm                   , STAT = istat)
+          if (associated(gdp%gddredge%dump_prop(i)%area))             deallocate (gdp%gddredge%dump_prop(i)%area                  , STAT = istat)
+          if (associated(gdp%gddredge%dump_prop(i)%hdune))            deallocate (gdp%gddredge%dump_prop(i)%hdune                 , STAT = istat)
+          if (associated(gdp%gddredge%dump_prop(i)%bedlevel))         deallocate (gdp%gddredge%dump_prop(i)%bedlevel              , STAT = istat)
+          if (associated(gdp%gddredge%dump_prop(i)%dz_dump))          deallocate (gdp%gddredge%dump_prop(i)%dz_dump               , STAT = istat)
+          if (associated(gdp%gddredge%dump_prop(i)%sortvar))          deallocate (gdp%gddredge%dump_prop(i)%sortvar               , STAT = istat)
        enddo
        deallocate (gdp%gddredge%dump_prop      , STAT = istat)
     endif

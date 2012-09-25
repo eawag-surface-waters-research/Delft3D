@@ -39,54 +39,6 @@ subroutine clrerosed(istat, gdp)
     implicit none
     !
     type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    real(fp), dimension(:)   , pointer :: bc_mor_array
-    real(fp), dimension(:,:) , pointer :: dbodsd
-    real(fp), dimension(:)   , pointer :: dcwwlc
-    real(fp), dimension(:)   , pointer :: dm
-    real(fp), dimension(:)   , pointer :: dg
-    real(fp), dimension(:,:) , pointer :: dxx
-    real(fp), dimension(:)   , pointer :: dzduu
-    real(fp), dimension(:)   , pointer :: dzdvv
-    real(fp), dimension(:)   , pointer :: epsclc
-    real(fp), dimension(:)   , pointer :: epswlc
-    real(fp), dimension(:,:) , pointer :: fixfac
-    real(fp), dimension(:,:) , pointer :: frac
-    real(fp), dimension(:)   , pointer :: mudfrac
-    real(fp), dimension(:,:) , pointer :: hidexp
-    real(fp), dimension(:)   , pointer :: rsdqlc
-    real(fp), dimension(:,:) , pointer :: sbcu
-    real(fp), dimension(:,:) , pointer :: sbcv
-    real(fp), dimension(:,:) , pointer :: sbcuu
-    real(fp), dimension(:,:) , pointer :: sbcvv
-    real(fp), dimension(:,:) , pointer :: sbuuc
-    real(fp), dimension(:,:) , pointer :: sbvvc
-    real(fp), dimension(:,:) , pointer :: sbwu
-    real(fp), dimension(:,:) , pointer :: sbwv
-    real(fp), dimension(:,:) , pointer :: sbwuu
-    real(fp), dimension(:,:) , pointer :: sbwvv
-    real(fp), dimension(:)   , pointer :: sddflc
-    real(fp), dimension(:,:) , pointer :: srcmax
-    real(fp), dimension(:,:) , pointer :: ssuuc
-    real(fp), dimension(:,:) , pointer :: ssvvc
-    real(fp), dimension(:,:) , pointer :: sswu
-    real(fp), dimension(:,:) , pointer :: sswv
-    real(fp), dimension(:,:) , pointer :: sswuu
-    real(fp), dimension(:,:) , pointer :: sswvv
-    real(fp), dimension(:,:) , pointer :: sucor
-    real(fp), dimension(:,:) , pointer :: svcor
-    real(fp), dimension(:,:) , pointer :: sutot
-    real(fp), dimension(:,:) , pointer :: svtot
-    real(fp), dimension(:,:) , pointer :: taurat
-    real(fp), dimension(:)   , pointer :: ust2
-    real(fp), dimension(:)   , pointer :: umod
-    real(fp), dimension(:)   , pointer :: uuu
-    real(fp), dimension(:)   , pointer :: vvv
-    real(fp), dimension(:)   , pointer :: wslc
-    real(fp), dimension(:)   , pointer :: zumod
-    type (sv_erosed)         , pointer :: sverosed
 !
 ! Global variables
 !
@@ -94,94 +46,48 @@ subroutine clrerosed(istat, gdp)
 !
 !! executable statements -------------------------------------------------------
 !
-    bc_mor_array  => gdp%gderosed%bc_mor_array
-    dbodsd        => gdp%gderosed%dbodsd
-    dcwwlc        => gdp%gderosed%dcwwlc
-    dm            => gdp%gderosed%dm
-    dg            => gdp%gderosed%dg
-    dxx           => gdp%gderosed%dxx
-    dzduu         => gdp%gderosed%dzduu
-    dzdvv         => gdp%gderosed%dzdvv
-    epsclc        => gdp%gderosed%epsclc
-    epswlc        => gdp%gderosed%epswlc
-    fixfac        => gdp%gderosed%fixfac
-    frac          => gdp%gderosed%frac
-    mudfrac       => gdp%gderosed%mudfrac
-    hidexp        => gdp%gderosed%hidexp
-    rsdqlc        => gdp%gderosed%rsdqlc
-    sbcu          => gdp%gderosed%sbcu
-    sbcv          => gdp%gderosed%sbcv
-    sbcuu         => gdp%gderosed%sbcuu
-    sbcvv         => gdp%gderosed%sbcvv
-    sbuuc         => gdp%gderosed%sbuuc
-    sbvvc         => gdp%gderosed%sbvvc
-    sbwu          => gdp%gderosed%sbwu
-    sbwv          => gdp%gderosed%sbwv
-    sbwuu         => gdp%gderosed%sbwuu
-    sbwvv         => gdp%gderosed%sbwvv
-    sddflc        => gdp%gderosed%sddflc
-    srcmax        => gdp%gderosed%srcmax
-    ssuuc         => gdp%gderosed%ssuuc
-    ssvvc         => gdp%gderosed%ssvvc
-    sswu          => gdp%gderosed%sswu
-    sswv          => gdp%gderosed%sswv
-    sswuu         => gdp%gderosed%sswuu
-    sswvv         => gdp%gderosed%sswvv
-    sucor         => gdp%gderosed%sucor
-    svcor         => gdp%gderosed%svcor
-    sutot         => gdp%gderosed%sutot
-    svtot         => gdp%gderosed%svtot
-    taurat        => gdp%gderosed%taurat
-    ust2          => gdp%gderosed%ust2
-    umod          => gdp%gderosed%umod
-    uuu           => gdp%gderosed%uuu
-    vvv           => gdp%gderosed%vvv
-    wslc          => gdp%gderosed%wslc
-    zumod         => gdp%gderosed%zumod
-    sverosed      => gdp%gderosed
-    !
-    if (associated(sverosed%bc_mor_array)) deallocate(sverosed%bc_mor_array, STAT = istat)
-    if (associated(sverosed%dcwwlc))       deallocate(sverosed%dcwwlc      , STAT = istat)
-    if (associated(sverosed%epsclc))       deallocate(sverosed%epsclc      , STAT = istat)
-    if (associated(sverosed%epswlc))       deallocate(sverosed%epswlc      , STAT = istat)
-    if (associated(sverosed%rsdqlc))       deallocate(sverosed%rsdqlc      , STAT = istat)
-    if (associated(sverosed%sddflc))       deallocate(sverosed%sddflc      , STAT = istat)
-    if (associated(sverosed%umod))         deallocate(sverosed%umod        , STAT = istat)
-    if (associated(sverosed%ust2))         deallocate(sverosed%ust2        , STAT = istat)
-    if (associated(sverosed%uuu))          deallocate(sverosed%uuu         , STAT = istat)
-    if (associated(sverosed%vvv))          deallocate(sverosed%vvv         , STAT = istat)
-    if (associated(sverosed%wslc))         deallocate(sverosed%wslc        , STAT = istat)
-    if (associated(sverosed%zumod))        deallocate(sverosed%zumod       , STAT = istat)
-    if (associated(sverosed%dbodsd))       deallocate(sverosed%dbodsd      , STAT = istat)
-    if (associated(sverosed%fixfac))       deallocate(sverosed%fixfac      , STAT = istat)
-    if (associated(sverosed%frac))         deallocate(sverosed%frac        , STAT = istat)
-    if (associated(sverosed%mudfrac))      deallocate(sverosed%mudfrac     , STAT = istat)
-    if (associated(sverosed%dm))           deallocate(sverosed%dm          , STAT = istat)
-    if (associated(sverosed%dg))           deallocate(sverosed%dg          , STAT = istat)
-    if (associated(sverosed%dxx))          deallocate(sverosed%dxx         , STAT = istat)
-    if (associated(sverosed%hidexp))       deallocate(sverosed%hidexp      , STAT = istat)
-    if (associated(sverosed%sbcu))         deallocate(sverosed%sbcu        , STAT = istat)
-    if (associated(sverosed%sbcv))         deallocate(sverosed%sbcv        , STAT = istat)
-    if (associated(sverosed%sbcuu))        deallocate(sverosed%sbcuu       , STAT = istat)
-    if (associated(sverosed%sbcvv))        deallocate(sverosed%sbcvv       , STAT = istat)
-    if (associated(sverosed%sbuuc))        deallocate(sverosed%sbuuc       , STAT = istat)
-    if (associated(sverosed%sbvvc))        deallocate(sverosed%sbvvc       , STAT = istat)
-    if (associated(sverosed%sbwu))         deallocate(sverosed%sbwu        , STAT = istat)
-    if (associated(sverosed%sbwv))         deallocate(sverosed%sbwv        , STAT = istat)
-    if (associated(sverosed%sbwuu))        deallocate(sverosed%sbwuu       , STAT = istat)
-    if (associated(sverosed%sbwvv))        deallocate(sverosed%sbwvv       , STAT = istat)
-    if (associated(sverosed%srcmax))       deallocate(sverosed%srcmax      , STAT = istat)
-    if (associated(sverosed%ssuuc))        deallocate(sverosed%ssuuc       , STAT = istat)
-    if (associated(sverosed%ssvvc))        deallocate(sverosed%ssvvc       , STAT = istat)
-    if (associated(sverosed%sswu))         deallocate(sverosed%sswu        , STAT = istat)
-    if (associated(sverosed%sswv))         deallocate(sverosed%sswv        , STAT = istat)
-    if (associated(sverosed%sswuu))        deallocate(sverosed%sswuu       , STAT = istat)
-    if (associated(sverosed%sswvv))        deallocate(sverosed%sswvv       , STAT = istat)
-    if (associated(sverosed%sucor))        deallocate(sverosed%sucor       , STAT = istat)
-    if (associated(sverosed%svcor))        deallocate(sverosed%svcor       , STAT = istat)
-    if (associated(sverosed%sutot))        deallocate(sverosed%sutot       , STAT = istat)
-    if (associated(sverosed%svtot))        deallocate(sverosed%svtot       , STAT = istat)
-    if (associated(sverosed%dzduu))        deallocate(sverosed%dzduu       , STAT = istat)
-    if (associated(sverosed%dzdvv))        deallocate(sverosed%dzdvv       , STAT = istat)
-    if (associated(sverosed%taurat))       deallocate(sverosed%taurat      , STAT = istat)
+    if (associated(gdp%gderosed%bc_mor_array)) deallocate(gdp%gderosed%bc_mor_array, STAT = istat)
+    if (associated(gdp%gderosed%dcwwlc))       deallocate(gdp%gderosed%dcwwlc      , STAT = istat)
+    if (associated(gdp%gderosed%epsclc))       deallocate(gdp%gderosed%epsclc      , STAT = istat)
+    if (associated(gdp%gderosed%epswlc))       deallocate(gdp%gderosed%epswlc      , STAT = istat)
+    if (associated(gdp%gderosed%rsdqlc))       deallocate(gdp%gderosed%rsdqlc      , STAT = istat)
+    if (associated(gdp%gderosed%sddflc))       deallocate(gdp%gderosed%sddflc      , STAT = istat)
+    if (associated(gdp%gderosed%umod))         deallocate(gdp%gderosed%umod        , STAT = istat)
+    if (associated(gdp%gderosed%ust2))         deallocate(gdp%gderosed%ust2        , STAT = istat)
+    if (associated(gdp%gderosed%uuu))          deallocate(gdp%gderosed%uuu         , STAT = istat)
+    if (associated(gdp%gderosed%vvv))          deallocate(gdp%gderosed%vvv         , STAT = istat)
+    if (associated(gdp%gderosed%wslc))         deallocate(gdp%gderosed%wslc        , STAT = istat)
+    if (associated(gdp%gderosed%zumod))        deallocate(gdp%gderosed%zumod       , STAT = istat)
+    if (associated(gdp%gderosed%dbodsd))       deallocate(gdp%gderosed%dbodsd      , STAT = istat)
+    if (associated(gdp%gderosed%fixfac))       deallocate(gdp%gderosed%fixfac      , STAT = istat)
+    if (associated(gdp%gderosed%frac))         deallocate(gdp%gderosed%frac        , STAT = istat)
+    if (associated(gdp%gderosed%mudfrac))      deallocate(gdp%gderosed%mudfrac     , STAT = istat)
+    if (associated(gdp%gderosed%dm))           deallocate(gdp%gderosed%dm          , STAT = istat)
+    if (associated(gdp%gderosed%dg))           deallocate(gdp%gderosed%dg          , STAT = istat)
+    if (associated(gdp%gderosed%dxx))          deallocate(gdp%gderosed%dxx         , STAT = istat)
+    if (associated(gdp%gderosed%hidexp))       deallocate(gdp%gderosed%hidexp      , STAT = istat)
+    if (associated(gdp%gderosed%sbcu))         deallocate(gdp%gderosed%sbcu        , STAT = istat)
+    if (associated(gdp%gderosed%sbcv))         deallocate(gdp%gderosed%sbcv        , STAT = istat)
+    if (associated(gdp%gderosed%sbcuu))        deallocate(gdp%gderosed%sbcuu       , STAT = istat)
+    if (associated(gdp%gderosed%sbcvv))        deallocate(gdp%gderosed%sbcvv       , STAT = istat)
+    if (associated(gdp%gderosed%sbuuc))        deallocate(gdp%gderosed%sbuuc       , STAT = istat)
+    if (associated(gdp%gderosed%sbvvc))        deallocate(gdp%gderosed%sbvvc       , STAT = istat)
+    if (associated(gdp%gderosed%sbwu))         deallocate(gdp%gderosed%sbwu        , STAT = istat)
+    if (associated(gdp%gderosed%sbwv))         deallocate(gdp%gderosed%sbwv        , STAT = istat)
+    if (associated(gdp%gderosed%sbwuu))        deallocate(gdp%gderosed%sbwuu       , STAT = istat)
+    if (associated(gdp%gderosed%sbwvv))        deallocate(gdp%gderosed%sbwvv       , STAT = istat)
+    if (associated(gdp%gderosed%srcmax))       deallocate(gdp%gderosed%srcmax      , STAT = istat)
+    if (associated(gdp%gderosed%ssuuc))        deallocate(gdp%gderosed%ssuuc       , STAT = istat)
+    if (associated(gdp%gderosed%ssvvc))        deallocate(gdp%gderosed%ssvvc       , STAT = istat)
+    if (associated(gdp%gderosed%sswu))         deallocate(gdp%gderosed%sswu        , STAT = istat)
+    if (associated(gdp%gderosed%sswv))         deallocate(gdp%gderosed%sswv        , STAT = istat)
+    if (associated(gdp%gderosed%sswuu))        deallocate(gdp%gderosed%sswuu       , STAT = istat)
+    if (associated(gdp%gderosed%sswvv))        deallocate(gdp%gderosed%sswvv       , STAT = istat)
+    if (associated(gdp%gderosed%sucor))        deallocate(gdp%gderosed%sucor       , STAT = istat)
+    if (associated(gdp%gderosed%svcor))        deallocate(gdp%gderosed%svcor       , STAT = istat)
+    if (associated(gdp%gderosed%sutot))        deallocate(gdp%gderosed%sutot       , STAT = istat)
+    if (associated(gdp%gderosed%svtot))        deallocate(gdp%gderosed%svtot       , STAT = istat)
+    if (associated(gdp%gderosed%dzduu))        deallocate(gdp%gderosed%dzduu       , STAT = istat)
+    if (associated(gdp%gderosed%dzdvv))        deallocate(gdp%gderosed%dzdvv       , STAT = istat)
+    if (associated(gdp%gderosed%taurat))       deallocate(gdp%gderosed%taurat      , STAT = istat)
 end subroutine clrerosed

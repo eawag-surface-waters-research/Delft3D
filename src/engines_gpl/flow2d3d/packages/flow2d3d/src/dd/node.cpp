@@ -61,7 +61,7 @@ Node::~Node (
     void
     ) {
 
-    delete this->hostname;
+    free((void *)this->hostname);
     }
 
 

@@ -40,19 +40,6 @@ subroutine clrmorpar(istat, gdp)
     implicit none
     !
     type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    real(fp)                             , pointer :: morfac
-    type (handletype)                    , pointer :: bcmfile
-    type (handletype)                    , pointer :: morfacfile
-    type (moroutputtype)                 , pointer :: moroutput
-    type (mornumericstype)               , pointer :: mornum
-    type (bedbndtype)     , dimension(:) , pointer :: morbnd
-    type (cmpbndtype)     , dimension(:) , pointer :: cmpbnd
-    real(hp)              , dimension(:) , pointer :: mergebuf
-    real(fp)              , dimension(:) , pointer :: xx
-    type (gd_morpar)                     , pointer :: gdmorpar
 !
 ! Global variables
 !
@@ -64,33 +51,21 @@ subroutine clrmorpar(istat, gdp)
 !
 !! executable statements -------------------------------------------------------
 !
-    morfac              => gdp%gdmorpar%morfac
-    bcmfile             => gdp%gdmorpar%bcmfile
-    morfacfile          => gdp%gdmorpar%morfacfile
-    moroutput           => gdp%gdmorpar%moroutput
-    mornum              => gdp%gdmorpar%mornum
-    morbnd              => gdp%gdmorpar%morbnd
-    cmpbnd              => gdp%gdmorpar%cmpbnd
-    mergebuf            => gdp%gdmorpar%mergebuf
-    xx                  => gdp%gdmorpar%xx
-    gdmorpar            => gdp%gdmorpar
-    !
-    if (associated(gdmorpar%morbnd)) then
-       do i = 1, size(gdmorpar%morbnd)
-          if (associated(morbnd(i)%idir))      deallocate(morbnd(i)%idir,      STAT = istat)
-          if (associated(morbnd(i)%nm))        deallocate(morbnd(i)%nm,        STAT = istat)
-          if (associated(morbnd(i)%nxmx))      deallocate(morbnd(i)%nxmx,      STAT = istat)
-          if (associated(morbnd(i)%alfa_dist)) deallocate(morbnd(i)%alfa_dist, STAT = istat)
-          if (associated(morbnd(i)%alfa_mag))  deallocate(morbnd(i)%alfa_mag,  STAT = istat)
+    if (associated(gdp%gdmorpar%morbnd)) then
+       do i = 1, size(gdp%gdmorpar%morbnd)
+          if (associated(gdp%gdmorpar%morbnd(i)%idir))      deallocate(gdp%gdmorpar%morbnd(i)%idir,      STAT = istat)
+          if (associated(gdp%gdmorpar%morbnd(i)%nm))        deallocate(gdp%gdmorpar%morbnd(i)%nm,        STAT = istat)
+          if (associated(gdp%gdmorpar%morbnd(i)%nxmx))      deallocate(gdp%gdmorpar%morbnd(i)%nxmx,      STAT = istat)
+          if (associated(gdp%gdmorpar%morbnd(i)%alfa_dist)) deallocate(gdp%gdmorpar%morbnd(i)%alfa_dist, STAT = istat)
+          if (associated(gdp%gdmorpar%morbnd(i)%alfa_mag))  deallocate(gdp%gdmorpar%morbnd(i)%alfa_mag,  STAT = istat)
        enddo
-       deallocate(gdmorpar%morbnd, STAT = istat)
+       deallocate(gdp%gdmorpar%morbnd, STAT = istat)
     endif
-    if (associated(gdmorpar%cmpbnd))    deallocate(gdmorpar%cmpbnd,    STAT = istat)
-    if (associated(gdmorpar%xx))        deallocate(gdmorpar%xx,        STAT = istat)
-    if (associated(gdmorpar%mergebuf))  deallocate(gdmorpar%mergebuf,  STAT = istat)
-    if (associated(gdmorpar%moroutput)) deallocate(gdmorpar%moroutput, STAT = istat)
-    if (associated(gdmorpar%mornum))    deallocate(gdmorpar%mornum,    STAT = istat)
-    call cleartable(gdmorpar%bcmfile)
-    call cleartable(gdmorpar%morfacfile)
-    !
+    if (associated(gdp%gdmorpar%cmpbnd))    deallocate(gdp%gdmorpar%cmpbnd,    STAT = istat)
+    if (associated(gdp%gdmorpar%xx))        deallocate(gdp%gdmorpar%xx,        STAT = istat)
+    if (associated(gdp%gdmorpar%mergebuf))  deallocate(gdp%gdmorpar%mergebuf,  STAT = istat)
+    if (associated(gdp%gdmorpar%moroutput)) deallocate(gdp%gdmorpar%moroutput, STAT = istat)
+    if (associated(gdp%gdmorpar%mornum))    deallocate(gdp%gdmorpar%mornum,    STAT = istat)
+    call cleartable(gdp%gdmorpar%bcmfile)
+    call cleartable(gdp%gdmorpar%morfacfile)
 end subroutine clrmorpar

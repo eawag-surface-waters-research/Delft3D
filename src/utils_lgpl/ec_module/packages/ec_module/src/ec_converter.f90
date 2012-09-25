@@ -194,7 +194,7 @@ function free_converter_array(converter_array) result (success)
   do k = 1,size(converter_array)
     success = free(converter_array(k))
   enddo
-  deallocate(converter_array, STAT = istat)
+  if (associated(converter_array)) deallocate(converter_array, STAT = istat)
   success = .true.
 end function free_converter_array
 !

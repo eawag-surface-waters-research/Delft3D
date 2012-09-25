@@ -151,6 +151,7 @@ DD::~DD (
     void
     ) {
 
+    delete this->nodeSet;
     delete this->categoryDict;
     delete this->iteratorDict;
     delete this->joinDict;

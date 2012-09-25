@@ -1,4 +1,4 @@
-subroutine clrsedpar(istat     ,gdp       )
+subroutine clrsedpar(istat, gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -39,44 +39,6 @@ subroutine clrsedpar(istat     ,gdp       )
     implicit none
     !
     type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    real(fp)      , dimension(:)     , pointer :: rhosol
-    real(fp)      , dimension(:,:,:) , pointer :: logseddia
-    real(fp)      , dimension(:)     , pointer :: logsedsig
-    real(fp)      , dimension(:)     , pointer :: sedd10
-    real(fp)      , dimension(:)     , pointer :: sedd50
-    real(fp)      , dimension(:)     , pointer :: sedd50fld
-    real(fp)      , dimension(:)     , pointer :: sedd90
-    real(fp)      , dimension(:)     , pointer :: cdryb
-    real(fp)      , dimension(:)     , pointer :: dstar
-    real(fp)      , dimension(:)     , pointer :: taucr
-    real(fp)      , dimension(:)     , pointer :: tetacr
-    real(fp)      , dimension(:)     , pointer :: ws0
-    real(fp)      , dimension(:)     , pointer :: wsm
-    real(fp)      , dimension(:)     , pointer :: salmax
-    real(fp)      , dimension(:)     , pointer :: sdbuni
-    real(fp)      , dimension(:,:)   , pointer :: tcrdep
-    real(fp)      , dimension(:)     , pointer :: tcduni
-    real(fp)      , dimension(:,:)   , pointer :: tcrero
-    real(fp)      , dimension(:)     , pointer :: tceuni
-    real(fp)      , dimension(:)     , pointer :: tcguni
-    real(fp)      , dimension(:,:)   , pointer :: eropar
-    real(fp)      , dimension(:,:)   , pointer :: gamtcr
-    real(fp)      , dimension(:)     , pointer :: erouni
-    real(fp)      , dimension(:)     , pointer :: mudcnt
-    real(fp)      , dimension(:)     , pointer :: gamflc
-    integer       , dimension(:)     , pointer :: nseddia
-    integer       , dimension(:)     , pointer :: sedtyp
-    character(10) , dimension(:)     , pointer :: inisedunit
-    character(20) , dimension(:)     , pointer :: namsed
-    character(256), dimension(:)     , pointer :: flsdbd
-    character(256), dimension(:)     , pointer :: flstcd
-    character(256), dimension(:)     , pointer :: flstce
-    character(256), dimension(:)     , pointer :: flsero
-    character(256), dimension(:)     , pointer :: flstcg
-    type (gd_sedpar)                 , pointer :: gdsedpar
 !
 ! Global variables
 !
@@ -84,78 +46,42 @@ subroutine clrsedpar(istat     ,gdp       )
 !
 !! executable statements -------------------------------------------------------
 !
-    rhosol      => gdp%gdsedpar%rhosol
-    logseddia   => gdp%gdsedpar%logseddia
-    logsedsig   => gdp%gdsedpar%logsedsig
-    sedd10      => gdp%gdsedpar%sedd10
-    sedd50      => gdp%gdsedpar%sedd50
-    sedd50fld   => gdp%gdsedpar%sedd50fld
-    sedd90      => gdp%gdsedpar%sedd90
-    cdryb       => gdp%gdsedpar%cdryb
-    dstar       => gdp%gdsedpar%dstar
-    taucr       => gdp%gdsedpar%taucr
-    tetacr      => gdp%gdsedpar%tetacr
-    gamtcr      => gdp%gdsedpar%gamtcr
-    gamflc      => gdp%gdsedpar%gamflc
-    ws0         => gdp%gdsedpar%ws0
-    wsm         => gdp%gdsedpar%wsm
-    salmax      => gdp%gdsedpar%salmax
-    sdbuni      => gdp%gdsedpar%sdbuni
-    tcrdep      => gdp%gdsedpar%tcrdep
-    tcduni      => gdp%gdsedpar%tcduni
-    tcrero      => gdp%gdsedpar%tcrero
-    tceuni      => gdp%gdsedpar%tceuni
-    tcguni      => gdp%gdsedpar%tcguni
-    eropar      => gdp%gdsedpar%eropar
-    erouni      => gdp%gdsedpar%erouni
-    mudcnt      => gdp%gdsedpar%mudcnt
-    nseddia     => gdp%gdsedpar%nseddia
-    inisedunit  => gdp%gdsedpar%inisedunit
-    namsed      => gdp%gdsedpar%namsed
-    sedtyp      => gdp%gdsedpar%sedtyp
-    flsdbd      => gdp%gdsedpar%flsdbd
-    flstcd      => gdp%gdsedpar%flstcd
-    flstce      => gdp%gdsedpar%flstce
-    flsero      => gdp%gdsedpar%flsero
-    flstcg      => gdp%gdsedpar%flstcg
-    gdsedpar    => gdp%gdsedpar
+    if (associated(gdp%gdsedpar%rhosol))     deallocate(gdp%gdsedpar%rhosol,     STAT = istat)
     !
-    if (associated(gdsedpar%rhosol))     deallocate(gdsedpar%rhosol,     STAT = istat)
+    if (associated(gdp%gdsedpar%logseddia))  deallocate(gdp%gdsedpar%logseddia,  STAT = istat)
+    if (associated(gdp%gdsedpar%logsedsig))  deallocate(gdp%gdsedpar%logsedsig,  STAT = istat)
+    if (associated(gdp%gdsedpar%sedd10))     deallocate(gdp%gdsedpar%sedd10,     STAT = istat)
+    if (associated(gdp%gdsedpar%sedd50))     deallocate(gdp%gdsedpar%sedd50,     STAT = istat)
+    if (associated(gdp%gdsedpar%sedd50fld))  deallocate(gdp%gdsedpar%sedd50fld,  STAT = istat)
+    if (associated(gdp%gdsedpar%sedd90))     deallocate(gdp%gdsedpar%sedd90,     STAT = istat)
     !
-    if (associated(gdsedpar%logseddia))  deallocate(gdsedpar%logseddia,  STAT = istat)
-    if (associated(gdsedpar%logsedsig))  deallocate(gdsedpar%logsedsig,  STAT = istat)
-    if (associated(gdsedpar%sedd10))     deallocate(gdsedpar%sedd10,     STAT = istat)
-    if (associated(gdsedpar%sedd50))     deallocate(gdsedpar%sedd50,     STAT = istat)
-    if (associated(gdsedpar%sedd50fld))  deallocate(gdsedpar%sedd50fld,  STAT = istat)
-    if (associated(gdsedpar%sedd90))     deallocate(gdsedpar%sedd90,     STAT = istat)
+    if (associated(gdp%gdsedpar%cdryb))      deallocate(gdp%gdsedpar%cdryb,      STAT = istat)
+    if (associated(gdp%gdsedpar%dstar))      deallocate(gdp%gdsedpar%dstar,      STAT = istat)
+    if (associated(gdp%gdsedpar%taucr))      deallocate(gdp%gdsedpar%taucr,      STAT = istat)
+    if (associated(gdp%gdsedpar%tetacr))     deallocate(gdp%gdsedpar%tetacr,     STAT = istat)
+    if (associated(gdp%gdsedpar%gamtcr))     deallocate(gdp%gdsedpar%gamtcr,     STAT = istat)
+    if (associated(gdp%gdsedpar%gamflc))     deallocate(gdp%gdsedpar%gamflc,     STAT = istat)
+    if (associated(gdp%gdsedpar%ws0))        deallocate(gdp%gdsedpar%ws0,        STAT = istat)
+    if (associated(gdp%gdsedpar%wsm))        deallocate(gdp%gdsedpar%wsm,        STAT = istat)
+    if (associated(gdp%gdsedpar%salmax))     deallocate(gdp%gdsedpar%salmax,     STAT = istat)
+    if (associated(gdp%gdsedpar%sdbuni))     deallocate(gdp%gdsedpar%sdbuni,     STAT = istat)
+    if (associated(gdp%gdsedpar%tcrdep))     deallocate(gdp%gdsedpar%tcrdep,     STAT = istat)
+    if (associated(gdp%gdsedpar%tcduni))     deallocate(gdp%gdsedpar%tcduni,     STAT = istat)
+    if (associated(gdp%gdsedpar%tcrero))     deallocate(gdp%gdsedpar%tcrero,     STAT = istat)
+    if (associated(gdp%gdsedpar%tceuni))     deallocate(gdp%gdsedpar%tceuni,     STAT = istat)
+    if (associated(gdp%gdsedpar%tcguni))     deallocate(gdp%gdsedpar%tcguni,     STAT = istat)
+    if (associated(gdp%gdsedpar%eropar))     deallocate(gdp%gdsedpar%eropar,     STAT = istat)
+    if (associated(gdp%gdsedpar%erouni))     deallocate(gdp%gdsedpar%erouni,     STAT = istat)
+    if (associated(gdp%gdsedpar%mudcnt))     deallocate(gdp%gdsedpar%mudcnt,     STAT = istat)
     !
-    if (associated(gdsedpar%cdryb))      deallocate(gdsedpar%cdryb,      STAT = istat)
-    if (associated(gdsedpar%dstar))      deallocate(gdsedpar%dstar,      STAT = istat)
-    if (associated(gdsedpar%taucr))      deallocate(gdsedpar%taucr,      STAT = istat)
-    if (associated(gdsedpar%tetacr))     deallocate(gdsedpar%tetacr,     STAT = istat)
-    if (associated(gdsedpar%gamtcr))     deallocate(gdsedpar%gamtcr,     STAT = istat)
-    if (associated(gdsedpar%gamflc))     deallocate(gdsedpar%gamflc,     STAT = istat)
-    if (associated(gdsedpar%ws0))        deallocate(gdsedpar%ws0,        STAT = istat)
-    if (associated(gdsedpar%wsm))        deallocate(gdsedpar%wsm,        STAT = istat)
-    if (associated(gdsedpar%salmax))     deallocate(gdsedpar%salmax,     STAT = istat)
-    if (associated(gdsedpar%sdbuni))     deallocate(gdsedpar%sdbuni,     STAT = istat)
-    if (associated(gdsedpar%tcrdep))     deallocate(gdsedpar%tcrdep,     STAT = istat)
-    if (associated(gdsedpar%tcduni))     deallocate(gdsedpar%tcduni,     STAT = istat)
-    if (associated(gdsedpar%tcrero))     deallocate(gdsedpar%tcrero,     STAT = istat)
-    if (associated(gdsedpar%tceuni))     deallocate(gdsedpar%tceuni,     STAT = istat)
-    if (associated(gdsedpar%tcguni))     deallocate(gdsedpar%tcguni,     STAT = istat)
-    if (associated(gdsedpar%eropar))     deallocate(gdsedpar%eropar,     STAT = istat)
-    if (associated(gdsedpar%erouni))     deallocate(gdsedpar%erouni,     STAT = istat)
-    if (associated(gdsedpar%mudcnt))     deallocate(gdsedpar%mudcnt,     STAT = istat)
+    if (associated(gdp%gdsedpar%nseddia))    deallocate(gdp%gdsedpar%nseddia,    STAT = istat)
+    if (associated(gdp%gdsedpar%sedtyp))     deallocate(gdp%gdsedpar%sedtyp,     STAT = istat)
     !
-    if (associated(gdsedpar%nseddia))    deallocate(gdsedpar%nseddia,    STAT = istat)
-    if (associated(gdsedpar%sedtyp))     deallocate(gdsedpar%sedtyp,     STAT = istat)
-    !
-    if (associated(gdsedpar%inisedunit)) deallocate(gdsedpar%inisedunit, STAT = istat)
-    if (associated(gdsedpar%namsed))     deallocate(gdsedpar%namsed,     STAT = istat)
-    if (associated(gdsedpar%flsdbd))     deallocate(gdsedpar%flsdbd,     STAT = istat)
-    if (associated(gdsedpar%flstcd))     deallocate(gdsedpar%flstcd,     STAT = istat)
-    if (associated(gdsedpar%flstce))     deallocate(gdsedpar%flstce,     STAT = istat)
-    if (associated(gdsedpar%flsero))     deallocate(gdsedpar%flsero,     STAT = istat)
-    if (associated(gdsedpar%flstcg))     deallocate(gdsedpar%flstcg,     STAT = istat)
+    if (associated(gdp%gdsedpar%inisedunit)) deallocate(gdp%gdsedpar%inisedunit, STAT = istat)
+    if (associated(gdp%gdsedpar%namsed))     deallocate(gdp%gdsedpar%namsed,     STAT = istat)
+    if (associated(gdp%gdsedpar%flsdbd))     deallocate(gdp%gdsedpar%flsdbd,     STAT = istat)
+    if (associated(gdp%gdsedpar%flstcd))     deallocate(gdp%gdsedpar%flstcd,     STAT = istat)
+    if (associated(gdp%gdsedpar%flstce))     deallocate(gdp%gdsedpar%flstce,     STAT = istat)
+    if (associated(gdp%gdsedpar%flsero))     deallocate(gdp%gdsedpar%flsero,     STAT = istat)
+    if (associated(gdp%gdsedpar%flstcg))     deallocate(gdp%gdsedpar%flstcg,     STAT = istat)
 end subroutine clrsedpar

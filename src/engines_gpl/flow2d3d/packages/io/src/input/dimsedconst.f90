@@ -42,13 +42,6 @@ subroutine dimsedconst(lundia    ,error     ,sedim     ,const     , &
     implicit none
     !
     type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    real(fp)         , dimension(:)     , pointer :: rhosol
-    character(20)    , dimension(:)     , pointer :: namsed
-    integer          , dimension(:)     , pointer :: sedtyp
-    type (gd_sedpar)                    , pointer :: gdsedpar
 !
 ! Global variables
 !
@@ -81,11 +74,6 @@ subroutine dimsedconst(lundia    ,error     ,sedim     ,const     , &
 !
 !! executable statements -------------------------------------------------------
 !
-    rhosol      => gdp%gdsedpar%rhosol
-    namsed      => gdp%gdsedpar%namsed
-    sedtyp      => gdp%gdsedpar%sedtyp
-    gdsedpar    => gdp%gdsedpar
-    !
     lconst        = 0
     lsedbl        = 0
     lsed          = 0
@@ -330,13 +318,13 @@ subroutine dimsedconst(lundia    ,error     ,sedim     ,const     , &
     ! They may already be allocated, because this code
     ! is visited twice (TDATOM and TRISIM)
     !
-    if (associated(gdsedpar%rhosol)) deallocate(gdsedpar%rhosol, stat=istat)
-    if (associated(gdsedpar%namsed)) deallocate(gdsedpar%namsed, stat=istat)
-    if (associated(gdsedpar%sedtyp)) deallocate(gdsedpar%sedtyp, stat=istat)
+    if (associated(gdp%gdsedpar%rhosol)) deallocate(gdp%gdsedpar%rhosol, stat=istat)
+    if (associated(gdp%gdsedpar%namsed)) deallocate(gdp%gdsedpar%namsed, stat=istat)
+    if (associated(gdp%gdsedpar%sedtyp)) deallocate(gdp%gdsedpar%sedtyp, stat=istat)
     istat = 0
-    if (istat == 0) allocate (gdsedpar%rhosol(lsedtot), stat=istat)
-    if (istat == 0) allocate (gdsedpar%namsed(lsedtot), stat=istat)
-    if (istat == 0) allocate (gdsedpar%sedtyp(lsedtot), stat=istat)
+    if (istat == 0) allocate (gdp%gdsedpar%rhosol(lsedtot), stat=istat)
+    if (istat == 0) allocate (gdp%gdsedpar%namsed(lsedtot), stat=istat)
+    if (istat == 0) allocate (gdp%gdsedpar%sedtyp(lsedtot), stat=istat)
     if (istat /= 0) then
        call prterr(lundia, 'P004', "dimsedconst: memory alloc error")
        call d3stop(1, gdp)

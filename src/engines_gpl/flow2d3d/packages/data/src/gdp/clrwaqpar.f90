@@ -39,10 +39,6 @@ subroutine clrwaqpar(istat, gdp)
     implicit none
     !
     type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    type (gd_waqpar)  , pointer :: gdwaqpar
 !
 ! Global variables
 !
@@ -50,29 +46,27 @@ subroutine clrwaqpar(istat, gdp)
 !
 !! executable statements -------------------------------------------------------
 !
-    gdwaqpar  => gdp%gdwaqpar
-    !
-    if (associated(gdwaqpar%quwaq))      deallocate(gdwaqpar%quwaq     , stat = istat)
-    if (associated(gdwaqpar%qvwaq))      deallocate(gdwaqpar%qvwaq     , stat = istat)
-    if (associated(gdwaqpar%qwwaq))      deallocate(gdwaqpar%qwwaq     , stat = istat)
-    if (associated(gdwaqpar%discumwaq))  deallocate(gdwaqpar%discumwaq , stat = istat)
-    if (associated(gdwaqpar%ifrmto))     deallocate(gdwaqpar%ifrmto    , stat = istat)
-    if (associated(gdwaqpar%isaggr))     deallocate(gdwaqpar%isaggr    , stat = istat)
-    if (associated(gdwaqpar%iqaggr))     deallocate(gdwaqpar%iqaggr    , stat = istat)
-    if (associated(gdwaqpar%ilaggr))     deallocate(gdwaqpar%ilaggr    , stat = istat)
-    if (associated(gdwaqpar%ifsmax))     deallocate(gdwaqpar%ifsmax    , stat = istat)
-    if (associated(gdwaqpar%vol))        deallocate(gdwaqpar%vol       , stat = istat)
-    if (associated(gdwaqpar%sag))        deallocate(gdwaqpar%sag       , stat = istat)
-    if (associated(gdwaqpar%vol2))       deallocate(gdwaqpar%vol2      , stat = istat)
-    if (associated(gdwaqpar%sag2))       deallocate(gdwaqpar%sag2      , stat = istat)
-    if (associated(gdwaqpar%qag))        deallocate(gdwaqpar%qag       , stat = istat)
-    if (associated(gdwaqpar%horsurf))    deallocate(gdwaqpar%horsurf   , stat = istat)
-    if (associated(gdwaqpar%kmk))        deallocate(gdwaqpar%kmk       , stat = istat)
-    if (associated(gdwaqpar%loads))      deallocate(gdwaqpar%loads     , stat = istat)
-    if (associated(gdwaqpar%iwlk))       deallocate(gdwaqpar%iwlk      , stat = istat) 
-    if (associated(gdwaqpar%lunsed))     deallocate(gdwaqpar%lunsed    , stat = istat) 
-    if (associated(gdwaqpar%lunsedflx))  deallocate(gdwaqpar%lunsedflx , stat = istat) 
-    if (associated(gdwaqpar%cumsedflx))  deallocate(gdwaqpar%cumsedflx , stat = istat) 
-    if (associated(gdwaqpar%cumresflx))  deallocate(gdwaqpar%cumresflx , stat = istat) 
+    if (associated(gdp%gdwaqpar%quwaq))      deallocate(gdp%gdwaqpar%quwaq     , stat = istat)
+    if (associated(gdp%gdwaqpar%qvwaq))      deallocate(gdp%gdwaqpar%qvwaq     , stat = istat)
+    if (associated(gdp%gdwaqpar%qwwaq))      deallocate(gdp%gdwaqpar%qwwaq     , stat = istat)
+    if (associated(gdp%gdwaqpar%discumwaq))  deallocate(gdp%gdwaqpar%discumwaq , stat = istat)
+    if (associated(gdp%gdwaqpar%ifrmto))     deallocate(gdp%gdwaqpar%ifrmto    , stat = istat)
+    if (associated(gdp%gdwaqpar%isaggr))     deallocate(gdp%gdwaqpar%isaggr    , stat = istat)
+    if (associated(gdp%gdwaqpar%iqaggr))     deallocate(gdp%gdwaqpar%iqaggr    , stat = istat)
+    if (associated(gdp%gdwaqpar%ilaggr))     deallocate(gdp%gdwaqpar%ilaggr    , stat = istat)
+    if (associated(gdp%gdwaqpar%ifsmax))     deallocate(gdp%gdwaqpar%ifsmax    , stat = istat)
+    if (associated(gdp%gdwaqpar%vol))        deallocate(gdp%gdwaqpar%vol       , stat = istat)
+    if (associated(gdp%gdwaqpar%sag))        deallocate(gdp%gdwaqpar%sag       , stat = istat)
+    if (associated(gdp%gdwaqpar%vol2))       deallocate(gdp%gdwaqpar%vol2      , stat = istat)
+    if (associated(gdp%gdwaqpar%sag2))       deallocate(gdp%gdwaqpar%sag2      , stat = istat)
+    if (associated(gdp%gdwaqpar%qag))        deallocate(gdp%gdwaqpar%qag       , stat = istat)
+    if (associated(gdp%gdwaqpar%horsurf))    deallocate(gdp%gdwaqpar%horsurf   , stat = istat)
+    if (associated(gdp%gdwaqpar%kmk))        deallocate(gdp%gdwaqpar%kmk       , stat = istat)
+    if (associated(gdp%gdwaqpar%loads))      deallocate(gdp%gdwaqpar%loads     , stat = istat)
+    if (associated(gdp%gdwaqpar%iwlk))       deallocate(gdp%gdwaqpar%iwlk      , stat = istat) 
+    if (associated(gdp%gdwaqpar%lunsed))     deallocate(gdp%gdwaqpar%lunsed    , stat = istat) 
+    if (associated(gdp%gdwaqpar%lunsedflx))  deallocate(gdp%gdwaqpar%lunsedflx , stat = istat) 
+    if (associated(gdp%gdwaqpar%cumsedflx))  deallocate(gdp%gdwaqpar%cumsedflx , stat = istat) 
+    if (associated(gdp%gdwaqpar%cumresflx))  deallocate(gdp%gdwaqpar%cumresflx , stat = istat) 
     !
 end subroutine clrwaqpar

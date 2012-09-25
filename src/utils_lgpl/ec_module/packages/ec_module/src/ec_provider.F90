@@ -204,7 +204,7 @@ function free_provider_array(provider_array) result (success)
     success = free(provider_array(k))
   enddo
   !
-  deallocate(provider_array, STAT = istat)
+  if (associated(provider_array)) deallocate(provider_array, STAT = istat)
 end function free_provider_array
 !
 !

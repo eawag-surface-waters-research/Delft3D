@@ -352,6 +352,7 @@ BInt4 create_nefis_files ( BInt4 * fd_nefis   ,
             strcat(dathdr, ", NEFIS Data File; ");
             getFileVersionString_NEFIS(string);
             strcat(dathdr, string);
+            free(string);
         }
 
         if (coding == 'N' || coding == 'n') coding = 'L';
@@ -562,6 +563,7 @@ BInt4 create_nefis_files ( BInt4 * fd_nefis   ,
             strcat(defhdr, ", NEFIS Definition File; ");
             getFileVersionString_NEFIS(string);
             strcat(defhdr, string);
+            free(string);
         }
 
       if (coding == 'N' || coding == 'n') coding = 'L';

@@ -160,7 +160,7 @@ function increaseSize_ECItemPtrs(ECItemPtrs) result (k)
   endif
   success = copyArray_ECItemPtrs(ECItemPtrs,newECItemPtrs)
   if (.not. success) k=0
-  deallocate (ECItemPtrs, STAT = istat)
+  if (associated(ECItemPtrs)) deallocate (ECItemPtrs, STAT = istat)
   ECItemPtrs => newECItemPtrs
 end function increaseSize_ECItemPtrs
 !
@@ -226,7 +226,7 @@ function free_ECItemPtrs(ECItemPtrs) result (success)
       deallocate(ECItemPtrs(k)%ECItemPtr, STAT = istat)
     endif
   enddo
-  deallocate (ECItemPtrs, STAT = istat)
+  if (associated(ECItemPtrs)) deallocate (ECItemPtrs, STAT = istat)
   success = .true.
 end function free_ECItemPtrs
 !

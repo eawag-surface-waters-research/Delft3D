@@ -339,7 +339,7 @@ function free_quantities(quantities) result (success)
   integer :: istat
   !
   ! body
-  deallocate (quantities, STAT = istat)
+  if(associated(quantities)) deallocate (quantities, STAT = istat)
   success = .true.
 end function free_quantities
 !
@@ -367,7 +367,7 @@ function free_connectionPtrs(connectionPtrs) result (success)
       deallocate(connectionPtrs(k)%ECConnectionPtr, STAT = istat)
     endif
   enddo
-  deallocate (connectionPtrs, STAT = istat)
+  if (associated(connectionPtrs)) deallocate (connectionPtrs, STAT = istat)
 end function free_connectionPtrs
 !
 !

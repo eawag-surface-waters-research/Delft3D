@@ -74,7 +74,7 @@ Semaphore::~Semaphore (
     void
     ) {
 
-    delete this->name;
+    delete [] this->name;
 
     if (this->log != NULL)
         this->log->Write (Log::CONFIG_MINOR, "Semaphore \"%s\" (0x%x) destroyed", this->name, (char *) this);
