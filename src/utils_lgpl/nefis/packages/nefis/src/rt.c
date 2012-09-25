@@ -53,6 +53,12 @@
 #include "nef-def.h"
 #include "rt.h"
 
+/*
+ * Parameter "index_copy" is used as a workaround for a consistent crash
+ * when using the Intel compilers version 11.0, 64-bit
+ */
+static BInt4* index_copy;
+
 static BInt4 RT_update_var_array( BInt4    ,
                                   BInt4    ,
                                   BUInt8 * );
@@ -522,8 +528,11 @@ static BInt4 RT_update_var_array( BInt4    set         ,
         start_table = *grp_pointer+(BUInt8)SIZE_DAT_BUF-3*SIZE_BINT4+SIZE_BINT4;
     }
 
+    index_copy = malloc(sizeof(BInt4));
+
     error = RT_update_var_index_array( set  , gd   , start_table,
                                        level, index, &max_index  );
+    free(index_copy);
     if ( error == 0 )
     {
         retrieve_var[set][gd][0] = *grp_pointer;
@@ -612,6 +621,7 @@ BInt4 RT_update_var_index_array( BInt4    set          ,
                  *  retrieve_var declared in fuction open_nefis_files,
                  *  will be freed in fuction close_nefis_files.
                  */
+                *index_copy=index;
                 found[gd] = 1;
 
                 if (*max_index == -1 )
@@ -620,7 +630,13 @@ BInt4 RT_update_var_index_array( BInt4    set          ,
                     retrieve_var[set][gd] =
                     (BUInt8 *) realloc( retrieve_var[set][gd], (index+3) * sizeof(BUInt8) );
                 }
-                for ( i=0; i<index+3; i++ )
+                /*
+                 * When using the Intel compilers version 11.0, 64-bit,
+                 * parameter "index" has the wrong value when used in the for-statement below.
+                 * It seems to be an optimization problem when using recursive functions.
+                 * Workaround: use "index_copy"
+                 */
+                for ( i=0; i<*index_copy+3; i++ )
                 {
                     retrieve_var[set][gd][i] = (BUInt8) ULONG_MAX;
                 }
