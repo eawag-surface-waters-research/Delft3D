@@ -24,13 +24,12 @@ IF DEFINED BUILD_NUMBER (
 )
 
 rem ==========================================================================
-rem If the source has been obtained using a svn export command, the "exported"
+rem If the source has been obtained using a svn export command, the "Unversioned directory"
 rem string has been generated, but this cannot be used within *.rc files
 rem Replace it using 000000 (only necessary on Windows systems)
 rem ==========================================================================
 
-set version=%version:~0,8%
-IF "%version%" == "exported" (
+IF "%version:~0,11%" == "Unversioned" (
    set version=000000
 )
 
@@ -51,6 +50,6 @@ if exist %1 (
 )
 
 rem Generate version number source module using version_number.exe
-"%VN%" %version% "%3" "%1.svn" "%1"
+"%VN%" "%version%" "%3" "%1.svn" "%1"
 
 :end
