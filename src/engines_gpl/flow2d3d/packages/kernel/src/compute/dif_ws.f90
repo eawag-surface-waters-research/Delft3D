@@ -101,7 +101,7 @@ subroutine dif_ws(j         ,nmmaxj    ,nmmax     ,kmax      ,lsal      , &
        ! *** Purpose is to reduce upward numerical diffusion        ***
        !
        !             if (sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) then
-       !                maxlay = kmxsed(nm)
+       !                maxlay = kmxsed(nm,l)
        !             else
        !                maxlay = kmax
        !             endif

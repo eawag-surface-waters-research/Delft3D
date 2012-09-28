@@ -725,6 +725,11 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                       ! mass balance includes entrainment and deposition
                       !
                       if (sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) then
+                         !
+                         ! l runs from 1 to lsedtot, kmxsed is defined for 1:lsed
+                         ! The first lsed fractions are the suspended fractions,
+                         ! so this goes right
+                         !
                          k = kmxsed(nm, l)
                       else
                          k = kmax
