@@ -160,8 +160,8 @@ if [ ${ready} -eq 0 ]; then
             if [ -e $print_filename ]
             then
                mv $print_filename ${1}.prt-$slot_number               
-               export printext=$(sed 's/ //g' <<< $(date))
-	       export printex2=$(sed 's/://g' <<< $printext)
+               export printext=$(sed 's/ /_/g' <<< $(date))
+	       export printex2=$(sed 's/:/_/g' <<< $printext)
 	       cp ${1}.prt-$slot_number ${1}.prt-$slot_number.$printex2
             fi
             slot_number=`expr $slot_number - 1`
@@ -174,8 +174,8 @@ if [ ${ready} -eq 0 ]; then
          #
          ${SWANEXEC}
          #
-         export printext=$(sed 's/ //g' <<< $(date))
-	 export printex2=$(sed 's/://g' <<< $printext)
+         export printext=$(sed 's/ /_/g' <<< $(date))
+	 export printex2=$(sed 's/:/_/g' <<< $printext)
 	 cp PRINT PRINT.$printex2
          #
          # Move PRINT file to output file
