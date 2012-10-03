@@ -1923,6 +1923,7 @@ src/third_party_open/swan/scripts/swan.bat -text
 src/third_party_open/swan/scripts/swan.sh -text
 src/third_party_open/swan/scripts/swan_install.bat -text
 src/third_party_open/swan/scripts/swan_install.sh -text
+src/third_party_open/swan/scripts/swan_install_PRINT_for_debugging.sh -text
 src/third_party_open/swan/swan_license_info.txt -text
 src/third_party_open/tclkit/bin/intel/deltares_hydro.exe -text
 src/third_party_open/tclkit/bin/win32/deltares_hydro.exe -text
