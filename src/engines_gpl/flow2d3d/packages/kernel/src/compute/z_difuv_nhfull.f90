@@ -60,7 +60,7 @@ subroutine z_difuv_nhfull(lundia   ,nst       ,icx       ,icy       ,j         ,
 ! - Sinks are integrated implicitly.
 !
 ! COMMENT:
-! For the Thatcher Harlemann boundaries the boundary points for outflow
+! For the Thatcher Harleman boundaries the boundary points for outflow
 ! are reflected from the inner points; for inflow the boundary conditions are
 ! used (see also thahbc.for).
 !

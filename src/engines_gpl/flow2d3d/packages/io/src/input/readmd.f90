@@ -655,12 +655,12 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     if (error) goto 9999
     !
     ! Boundary conditions general (only if nto > 0)
-    ! smoothing and Thatcher Harlemann return times
+    ! smoothing and Thatcher Harleman return times
     !
     if (nto > 0) then
        call rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 & noui      ,itlfsm    ,tlfsmo    ,dt        ,tunit     , &
-                & nto       ,nto       ,lstsc     ,bndneu    ,cstbnd    , &
+                & nto       ,lstsc     ,bndneu    ,cstbnd    , &
                 & ch(nambnd),ch(typbnd),r(rettim) ,ntoq      ,thetqh    , &
                 & restid    ,filic     ,paver     ,pcorr     ,tstart    , &
                 & tstop     ,gdp       )

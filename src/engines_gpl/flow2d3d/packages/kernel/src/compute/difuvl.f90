@@ -68,7 +68,7 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
 !              Conservative Difference Scheme, II Monotonicity
 !              and Conservation, combined in a second-order scheme,
 !              J. Computational Phys. 14, 1974, 361-370)
-!     Comment: For the Thatcher Harlemann boundaries the boundary
+!     Comment: For the Thatcher Harleman boundaries the boundary
 !              points for outflow are reflected from the inner
 !              points; for inflow the boundary conditions are
 !              used (see also thahbc.for).

@@ -584,20 +584,24 @@ subroutine prop_get_string(tree, chapterin ,keyin     ,value, success)
     !
     ! Parameters
     !
-    type(tree_data), pointer  :: tree
-    character(*),intent(in)   :: chapterin
-    character(*),intent(in)   :: keyin
-    character(*)              :: value
+    type(tree_data), pointer        :: tree
+    character(*),intent(in)         :: chapterin
+    character(*),intent(in)         :: keyin
+    character(*)                    :: value
     logical, optional, intent (out) :: success
     !
     ! Local variables
     !
-    logical :: ignore
-    logical :: success_
-    integer :: k
-    character(255) :: chapter
-    character(255) :: key
-    character(max_length) :: localvalue
+    logical                   :: ignore
+    logical                   :: success_
+    integer                   :: free_space ! Length of parameter "value" that is not written yet
+    integer                   :: i          ! Childnode number with node_name = key
+                                            ! All following child nodes with node_name = " " are also added
+    integer                   :: k
+    character(80)             :: nodename
+    character(255)            :: chapter
+    character(255)            :: key
+    character(max_length)     :: localvalue
     type(tree_data), pointer  :: thechapter
     type(tree_data), pointer  :: anode
     !
@@ -631,22 +635,56 @@ subroutine prop_get_string(tree, chapterin ,keyin     ,value, success)
     !    Work around an apparent problem with the SUN Fortran 90
     !    compiler
     !
-    call tree_get_node_by_name( thechapter, trim(key), anode)
+    call tree_get_node_by_name( thechapter, trim(key), anode, i)
     if ( associated(anode) ) then
-         call tree_get_data_string( anode, localvalue, success_ )
-        !
-        ! Remove possible delimiters #
-        !
-        if (localvalue(1:1)=='#') then
-           localvalue = localvalue(2:)
-           k = index(localvalue, '#')
-           if (k>0) then
-              localvalue = localvalue(1:k-1)
+        free_space = len(value)
+        do
+           call tree_get_data_string( anode, localvalue, success_ )
+           !
+           ! Remove possible delimiters #
+           !
+           if (localvalue(1:1)=='#') then
+              localvalue = localvalue(2:)
+              k = index(localvalue, '#')
+              if (k>0) then
+                 localvalue = localvalue(1:k-1)
+              endif
+              localvalue = adjustl(localvalue)
            endif
-           localvalue = adjustl(localvalue)
-        endif
-        value = ' '
-        value = localvalue(:min(len(value),len(localvalue)))
+           !
+           ! Write to parameter "value"
+           !
+           if (free_space == len(value)) then
+              ! First write to "value": Write as much as possible
+              value = ' '
+              value = localvalue(:min(free_space,len_trim(localvalue)))
+           else
+              ! Follow up write to "value": Only add when there is enough free space
+              ! This is to avoid "half values" being added
+              if (len_trim(localvalue) > free_space - 1) then
+                 ! Not enough free space in parameter "value" anymore. Exit this do-loop.
+                 exit
+              endif
+              ! Add a space between the values
+              value = trim(value) // ' ' // localvalue(:len_trim(localvalue))
+           endif
+           free_space = len(value) - len_trim(value)
+           !
+           ! Check if the next child node has name " "
+           !
+           i = i + 1
+           if (i <= size(thechapter%child_nodes)) then
+              nodename = "dummy value"
+              nodename = tree_get_name( thechapter%child_nodes(i)%node_ptr )
+              if (nodename == " ") then
+                 ! Yes: add this data string to parameter "value" (in the next do-loop)
+                 anode => thechapter%child_nodes(i)%node_ptr
+              else
+                 ! No: exit do-loop
+                 exit
+              endif
+           endif
+        enddo
     else
         ! Key not found
     endif
@@ -877,16 +915,16 @@ subroutine prop_get_reals(tree  ,chapter ,key ,value ,valuelength, success)
     !
     ! Local variables
     !
-    integer        :: i
-    integer        :: k
-    integer        :: length
-    integer        :: valcount
-    integer        :: ierr
-    character(15)  :: realchars = '0123456789-+.eE'
-    character(20)  :: fmt
-    character(255) :: avalue
-    character(255) :: prop_value
-    logical        :: digitfound
+    integer         :: i
+    integer         :: k
+    integer         :: length
+    integer         :: valcount
+    integer         :: ierr
+    character(15)   :: realchars = '0123456789-+.eE'
+    character(20)   :: fmt
+    character(255)  :: avalue
+    character(1000) :: prop_value
+    logical         :: digitfound
     !
     !! executable statements -------------------------------------------------------
     !
@@ -1028,16 +1066,16 @@ subroutine prop_get_doubles(tree  ,chapter ,key ,value ,valuelength,success)
     !
     ! Local variables
     !
-    integer        :: i
-    integer        :: k
-    integer        :: length
-    integer        :: valcount
-    integer        :: ierr
-    character(17)  :: realchars = '0123456789-+.eEdD'
-    character(20)  :: fmt
-    character(255) :: avalue
-    character(255) :: prop_value
-    logical        :: digitfound
+    integer         :: i
+    integer         :: k
+    integer         :: length
+    integer         :: valcount
+    integer         :: ierr
+    character(17)   :: realchars = '0123456789-+.eEdD'
+    character(20)   :: fmt
+    character(255)  :: avalue
+    character(1000) :: prop_value
+    logical         :: digitfound
     !
     !! executable statements -------------------------------------------------------
     !

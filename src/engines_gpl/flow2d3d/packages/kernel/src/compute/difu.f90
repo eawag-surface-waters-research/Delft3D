@@ -71,7 +71,7 @@ subroutine difu(icreep    ,timest    ,lundia    ,nst       ,icx       , &
 !              - Vertical Diffusion : implicit
 !              - Sources are integrated explicitly.
 !              - Sinks are integrated implicitly.
-!     Comment: For the Thatcher Harlemann boundaries the boundary
+!     Comment: For the Thatcher Harleman boundaries the boundary
 !              points for outflow are reflected from the inner
 !              points; for inflow the boundary conditions are
 !              used (see also thahbc.for).

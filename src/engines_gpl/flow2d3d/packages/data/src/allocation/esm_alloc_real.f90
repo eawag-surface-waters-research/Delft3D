@@ -306,8 +306,8 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                           circ2d  (4     ,nlcest       )
     !                           rbnd    (kmax  ,lstsc ,2     ,nlcest)
     !                           rthbnd  (kmax  ,lstsc ,2     ,nlcest)
-    !                           thtim   (kmax  ,2     ,nlcest)
-    !                           rettim  (nto   ,2     )
+    !                           thtim   (kmax  ,lstsc ,2     ,nlcest)
+    !                           rettim  (nto   ,lstc  ,2     )
     !                           qtfrac  (nopest)
     !                           qtfrct  (nto   )
     !                           qtfrt2  (nto   )
@@ -416,19 +416,16 @@ subroutine esm_alloc_real(lundia, error, gdp)
                              !  Pointer of array RTHBND
                              ! 
                              !  Array containing the last outflow
-                             !  (Th.Harlemann) value of Boundary
+                             !  (Th.Harleman) value of Boundary
                              !  Conditions for constituents
     if (ierr<= - 9) goto 9999
     !
-    pntnam = 'thtim'         !  Global data
-    ierr = mkfpnt(pntnam, kmax*2*nlcest, gdp)
-                             !  Pointer of array THTIM
-                             !  Actual Thatcher Harlemann time
+    pntnam = 'thtim'         !  Actual Thatcher Harleman time
+    ierr = mkfpnt(pntnam, kmax*lstsc*2*nlcest, gdp)
     if (ierr<= - 9) goto 9999
     !
-    pntnam = 'rettim'        !  Global data
-    ierr = mkfpnt(pntnam, 2*nto, gdp)
-                             !  Pointer of array RETTIM
+    pntnam = 'rettim'        !  User defined delay for Thatcher Harleman return time
+    ierr = mkfpnt(pntnam, 2*nto*lstsc, gdp)
     if (ierr<= - 9) goto 9999
     !
     pntnam = 'qtfrac'        !  Global data

@@ -1861,7 +1861,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
           call timer_stop(timer_heatu, gdp)
        endif
        !
-       ! Thatcher harlemann return times;
+       ! Thatcher Harleman return times;
        ! constituent (excl. turbulence & secondary flow)
        !
        if (lstsc > 0) then
@@ -2851,7 +2851,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
           call timer_stop(timer_heatu, gdp)
        endif
        !
-       ! Thatcher harlemann return times;
+       ! Thatcher Harleman return times;
        ! constituent (excl. turbulence & secondary flow)
        !
        if (lstsc > 0) then

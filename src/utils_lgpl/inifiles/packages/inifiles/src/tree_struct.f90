@@ -230,16 +230,18 @@ end function tree_get_datatype
 !    The argument node points to a new, empty node or is
 !    not associated
 !
-subroutine tree_get_node_by_name( tree, name, node )
+subroutine tree_get_node_by_name( tree, name, node, i_return )
    character(len=*), intent(in)    :: name
    type(TREE_DATA), pointer        :: tree
    type(TREE_DATA), pointer        :: node
 
    character(len=80)               :: node_name
    character(len=80)               :: low_name
+   integer, optional               :: i_return
 
    integer                         :: i
 
+   if (present(i_return)) i_return = 0
    nullify( node )
    low_name = name
    call lowercase(low_name,999)
@@ -255,6 +257,7 @@ subroutine tree_get_node_by_name( tree, name, node )
 
          if ( node_name .eq. low_name ) then
             node => tree%child_nodes(i)%node_ptr
+            if (present(i_return)) i_return = i
             exit
          endif
       enddo

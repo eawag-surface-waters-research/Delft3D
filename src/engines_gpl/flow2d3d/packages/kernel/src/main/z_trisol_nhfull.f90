@@ -1475,7 +1475,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
           call timer_stop(timer_heatu, gdp)
        endif
        !
-       ! Thatcher harlemann return times;
+       ! Thatcher Harleman return times;
        ! constituent (excl. turbulence & secondary flow)
        !
        if (lstsc > 0) then

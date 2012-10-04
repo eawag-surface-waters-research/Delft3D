@@ -1,6 +1,6 @@
 subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                & noui      ,itlfsm    ,tlfsmo    ,dt        ,tunit     , &
-               & nto       ,mxnto     ,lstsc     ,bndneu    ,cstbnd    , &
+               & nto       ,lstsc     ,bndneu    ,cstbnd    , &
                & nambnd    ,typbnd    ,rettim    ,ntoq      ,thetqh    , &
                & restid    ,filic     ,paver     ,pcorr     ,tstart    , &
                & tstop     ,gdp       )
@@ -36,7 +36,7 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !
 !    Function: - Reads TLFSMO-rec. from the MD-file
 !              - Tests whether TLFSMO is a multiple of DT
-!              - Reads RETTIM (TH.HARLEMANN) from the MD-file
+!              - Reads RETTIM (TH.HARLEMAN) from the MD-file
 !                only when lstsc > 0
 !              - Test wether RETTIM is not negative
 ! Method used:
@@ -55,6 +55,8 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    integer , pointer :: lsal
+    integer , pointer :: ltem
     integer , pointer :: itis
 !
 ! Global variables
@@ -63,16 +65,14 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                      , intent(in)  :: lstsc  !  Description and declaration in dimens.igs
     integer                                    :: lundia !  Description and declaration in inout.igs
     integer                                    :: lunmd  !  Description and declaration in inout.igs
-    integer                                    :: mxnto  !!  Not Used any more (old UI)
-    integer                                    :: nrrec  !!  Pointer to the record number in the MD-file
+    integer                                    :: nrrec  !  Pointer to the record number in the MD-file
     integer                      , intent(in)  :: nto    !  Description and declaration in esm_alloc_int.f90
     integer                      , intent(in)  :: ntoq   !  Description and declaration in dimens.igs
     logical                                    :: bndneu !  Description and declaration in numeco.igs
     logical                                    :: cstbnd !  Description and declaration in numeco.igs
-    logical                      , intent(out) :: error  !!  Flag=TRUE if an error is encountered
-    logical                      , intent(in)  :: noui   !!  Flag=true if not User Interface
-    logical                                    :: pcorr  !  Flag=TRUE when using pressure correction 
-                                                         !!  on boundaries using PAVER
+    logical                      , intent(out) :: error  !  Flag=TRUE if an error is encountered
+    logical                      , intent(in)  :: noui   !  Flag=true if not User Interface
+    logical                                    :: pcorr  !  Flag=TRUE when using pressure correction on boundaries using PAVER
     real(fp)                                   :: dt     !  Description and declaration in esm_alloc_real.f90
     real(fp)                                   :: paver  !  Description and declaration in numeco.igs
     real(fp)                                   :: thetqh !  Description and declaration in numeco.igs
@@ -80,21 +80,18 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     real(fp)                     , intent(in)  :: tstart !  Flow start time in minutes
     real(fp)                     , intent(in)  :: tstop  !  Flow stop time in minutes
     real(fp)                     , intent(in)  :: tunit  !  Description and declaration in exttim.igs
-    real(fp), dimension(nto, 2)                :: rettim !  Description and declaration in esm_alloc_real.f90
-    character(*)                               :: filic  !!  File name of initial condition file
-    character(*)                               :: mdfrec !!  Standard rec. length in MD-file (300)
-    character(*)                               :: restid !!  Run identification of the restart
-                                                         !!  file. If RESTID = non-blank then
-                                                         !!  current simulation will use this
-                                                         !!  file to for setting the initial
-                                                         !!  conditions
+    real(fp), dimension(nto, lstsc, 2)         :: rettim !  Description and declaration in esm_alloc_real.f90
+    character(*)                               :: filic  !  File name of initial condition file
+    character(*)                               :: mdfrec !  Standard rec. length in MD-file (300)
+    character(*)                               :: restid !  Run identification of the restart file
     character(1) , dimension(nto), intent(in)  :: typbnd !  Description and declaration in esm_alloc_char.f90
     character(20), dimension(nto), intent(in)  :: nambnd !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !
     integer                :: intor
-    integer                :: it      ! Help integer var. for time par. 
+    integer                :: it      ! Help integer var. for time par.
+    integer                :: l       ! Loop parameter for constituents
     integer                :: lenc
     integer                :: lkw     ! Length of keyword 
     integer                :: n       ! Help var. loop 
@@ -112,29 +109,31 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     real(fp)               :: t
     real(fp)               :: smofrac ! Fraction of smoothing time over total simulation time (0-100.0).
     real(fp), dimension(1) :: rval    ! Help array (real) where the data, recently read from the MD-file, are stored temporarily 
-    character(1)           :: cdef    ! Default value for character string 
-    character(1)           :: chulp   ! Help string to read character string 
-    character(29)          :: errmsg  ! Help text for error messages 
+    character(1)           :: cdef    ! Default value for character string
+    character(1)           :: chulp   ! Help string to read character string
+    character(300)         :: errmsg  ! Help text for error messages
     character(6)           :: keyw    ! Name of record to look for in the MD-file (usually KEYWRD or RECNAM) 
     character(256)         :: message ! Help text for messages 
 !
 !! executable statements -------------------------------------------------------
 !
+    lsal  => gdp%d%lsal
+    ltem  => gdp%d%ltem
     itis  => gdp%gdrdpara%itis
     !
-    lerror = .false.
-    newkw  = .true.
-    defaul = .true.
-    nodef  = .false.
-    found  = .false.
-    rdef   = 0.0
+    lerror  = .false.
+    newkw   = .true.
+    defaul  = .true.
+    nodef   = .false.
+    found   = .false.
+    rdef    = 0.0_fp
     smofrac = 0.0_fp
     !
     ! initialize parameters that are to be read
     !
     bndneu = .false.
     cstbnd = .false.
-    tlfsmo = 0.0
+    tlfsmo = 0.0_fp
     itlfsm = 0
     !
     ! locate 'Tlfsmo' record for smoothing time
@@ -190,132 +189,70 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     ! (only if lstsc > 0) possible keyword not in md-file
     !
     if (lstsc > 0) then
-       keyw  = 'Rettis'
-       ntrec = nrrec
-       nlook = nto
-       lkw   = 6
-       call search(lunmd     ,lerror    ,newkw     ,nrrec     ,found     , &
-                 & ntrec     ,mdfrec    ,itis      ,keyw      ,lkw       , &
-                 & 'NO'      )
-       !
-       ! keyword in md-file (found)  default value allowed (:=rdef)
-       !
-       if (found) then
-          call read2r(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-                    & mdfrec    ,rettim    ,rdef      ,nodef     ,nrrec     , &
-                    & ntrec     ,lundia    ,gdp       )
+       rettim = 0.0_fp
           !
-          ! reading error?
+          ! Old parameter Rettim: use it for both the bottom and the surface layer
           !
-          if (lerror) then
-             lerror = .false.
-             do n = 1, nto
-                rettim(n, 1) = rdef
-             enddo
-          endif
-          !
-          ! test value of rettim not negative
-          !
+          call prop_get(gdp%mdfile_ptr, '*', 'Rettim', rettim(:,1,1), nto)
           do n = 1, nto
-             if (rettim(n, 1) < 0.) then
-                errmsg = 'Th. Harlemann opening nr. ...'
-                write (errmsg(27:29), '(i3)') n
-                call prterr(lundia    ,'U075'    ,errmsg    )
-                write (lundia, '(2a)') '            In the boundary ',          &
-                                      & 'point the constituent value'
-                write (lundia, '(2a)') '            will be reflected ',        &
-                                      & 'from the inner point.'
-             endif
+             do l = 2, lstsc
+                rettim(n,:,:) = rettim(n,1,1)
+             enddo
           enddo
           !
-          ! locate 'Rettib' record for constituent return time at the bottom
+          ! Constituent independent input: if present, overwrite current values
           !
-          keyw = 'Rettib'
-          call read2r(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-                    & mdfrec    ,rettim(1, 2)         ,rdef      ,nodef     ,nrrec     , &
-                    & ntrec     ,lundia    ,gdp       )
+          call prop_get(gdp%mdfile_ptr, '*', 'Rettis', rettim(:,1,1), nto)
+          call prop_get(gdp%mdfile_ptr, '*', 'Rettib', rettim(:,1,2), nto)
           !
-          ! reading error?
+          ! Copy to all constituents
           !
-          if (lerror) then
-             lerror = .false.
-             do n = 1, nto
-                rettim(n, 2) = rdef
+          do n =  1, nto
+             do l = 2, lstsc
+                rettim(n,l,:) = rettim(n,1,:)
              enddo
-          endif
+          enddo
           !
-          ! test value of rettim not negative
+          ! Constituent dependent input: if present, overwrite current values
           !
-          do n = 1, nto
-             if (rettim(n, 2) < 0.) then
-                errmsg = 'Th. Harlemann opening nr. ...'
-                write (errmsg(27:29), '(i3)') n
-                call prterr(lundia    ,'U076'    ,errmsg    )
-                write (lundia, '(2a,f12.3)') &
-                    & '            Will be re-', 'defined to surface value: ', rettim(n, 1)
-                rettim(n, 2) = rettim(n, 1)
+          do l = 1, lstsc
+             if (l == lsal) then
+                call prop_get(gdp%mdfile_ptr, '*', 'RetsS', rettim(:,l,1), nto)
+                call prop_get(gdp%mdfile_ptr, '*', 'RetbS', rettim(:,l,2), nto)
+             elseif (l == ltem) then
+                call prop_get(gdp%mdfile_ptr, '*', 'RetsT', rettim(:,l,1), nto)
+                call prop_get(gdp%mdfile_ptr, '*', 'RetbT', rettim(:,l,2), nto)
+             else
+                write(keyw,'(a,i2.2)') "Rets", l-max(ltem,lsal)
+                call prop_get(gdp%mdfile_ptr, '*', keyw, rettim(:,l,1), nto)
+                write(keyw,'(a,i2.2)') "Retb", l-max(ltem,lsal)
+                call prop_get(gdp%mdfile_ptr, '*', keyw, rettim(:,l,2), nto)
              endif
           enddo
-       else
-          !
-          ! version 2_03; keyword Rettim
-          !
-          ! locate 'Rettim' record for constituent return time
-          ! possible keyword not yet in md-file
-          !
-          keyw  = 'Rettim'
-          ntrec = nrrec
-          nlook = nto
-          lkw   = 6
-          call search(lunmd     ,lerror    ,newkw     ,nrrec     ,found     , &
-                    & ntrec     ,mdfrec    ,itis      ,keyw      ,lkw       , &
-                    & 'NO'      )
-          !
-          ! keyword in md-file (found) then default value allowed (:= RDEF)
-          !
-          if (found) then
-             call read2r(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-                       & mdfrec    ,rettim    ,rdef      ,nodef     ,nrrec     , &
-                       & ntrec     ,lundia    ,gdp       )
-             !
-             ! reading error?
-             !
-             if (lerror) then
-                lerror = .false.
-                do n = 1, nto
-                   rettim(n, 1) = rdef
-                enddo
-             endif
-             !
-             ! copy values read in RETTIM(N,1) to RETTIM(N,2)
-             !
-             do n = 1, nto
-                rettim(n, 2) = rettim(n, 1)
-             enddo
-             !
-             ! test value of rettim not negative
-             !
-             do n = 1, nto
-                if (rettim(n, 1)<0.) then
-                   errmsg = 'Th. Harlemann opening nr. ...'
-                   write (errmsg(27:29), '(i3)') n
-                   call prterr(lundia    ,'U075'    ,errmsg    )
-                   write (lundia, '(2a)') &
-                       & '            In the boundary ', 'point the constituent value'
-                   write (lundia, '(2a)') &
-                       & '            will be reflected ', 'from the inner point.'
-                endif
-             enddo
-          endif
-       endif
-    endif
-    !
-    ! Define RETTIM in TUNIT units
-    !
-    if (noui) then
        do n = 1, nto
-          rettim(n, 1) = rettim(n, 1)*tunit
-          rettim(n, 2) = rettim(n, 2)*tunit
+          do l = 1, lstsc
+          !
+          ! test value of rettim not negative
+          !
+          if (comparereal(rettim(n,l,1),0.0_fp) == -1) then
+             write (errmsg, '(a,i0,a)') 'Thatcher-Harleman return time delay at surface of open boundary nr. ', n, ' < 0.:'
+             call prterr(lundia, 'U190', errmsg)
+             write (lundia, '(a,i0,a)') '            In the boundary point, constituent nr.', l, ':'
+             write (lundia, '(a)')      '            The value will be reflected from the inner point.'
+          endif
+          if (comparereal(rettim(n,l,2),0.0_fp) == -1) then
+             write (errmsg, '(a,i0,a)')  'Thatcher-Harleman return time delay at bed level of open boundary nr. ', n, ' < 0.:'
+             call prterr(lundia, 'U190', errmsg)
+             write (lundia, '(a,i0,a)')  '            In the boundary point, constituent nr.', l, ':'
+             write (lundia, '(a,f12.3)') '            The surface value will be used: ', rettim(n,l,1)
+             rettim(n,l,2) = rettim(n,l,1)
+          endif
+          !
+          ! Define RETTIM in TUNIT units
+          !
+          rettim(n,l,1) = rettim(n,l,1) * tunit
+          rettim(n,l,2) = rettim(n,l,2) * tunit
+          enddo
        enddo
     endif
     !
