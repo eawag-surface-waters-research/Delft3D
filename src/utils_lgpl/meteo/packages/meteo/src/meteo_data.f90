@@ -308,6 +308,7 @@ subroutine deallocmeteo(runid)
    character(*), intent(in)  :: runid
    type(tmeteo), pointer     :: meteo     ! all meteo for one subdomain
    integer                   :: i
+   integer                   :: istat
 
    meteodata_initialized = .false.
    call getmeteopointer(runid, meteo)
@@ -320,15 +321,16 @@ subroutine deallocmeteo(runid)
            endif
        enddo
        if (meteo%flowgrid%initialized) then
-          if (associated(meteo%flowgrid%kcs))     deallocate (meteo%flowgrid%kcs)
-          if (associated(meteo%flowgrid%xz))      deallocate (meteo%flowgrid%xz)
-          if (associated(meteo%flowgrid%yz))      deallocate (meteo%flowgrid%yz)
+          if (associated(meteo%flowgrid%kcs))     deallocate (meteo%flowgrid%kcs, stat=istat)
+          if (associated(meteo%flowgrid%xz))      deallocate (meteo%flowgrid%xz, stat=istat)
+          if (associated(meteo%flowgrid%yz))      deallocate (meteo%flowgrid%yz, stat=istat)
        endif
        if (meteo%spiderweb%active) then
-          if (associated(meteo%spiderweb%spwf))   deallocate (meteo%spiderweb%spwf)
-          if (associated(meteo%spiderweb%spwarr)) deallocate (meteo%spiderweb%spwarr)
+          if (associated(meteo%spiderweb%spwf))   deallocate (meteo%spiderweb%spwf, stat=istat)
+          if (associated(meteo%spiderweb%spwarr)) deallocate (meteo%spiderweb%spwarr, stat=istat)
        endif
-       deallocate(meteo)
+       ! Do not deallocate(meteo)
+       ! meteo is a pointer to an element in a fixed, static, saved module array
    endif
 end subroutine deallocmeteo
 
