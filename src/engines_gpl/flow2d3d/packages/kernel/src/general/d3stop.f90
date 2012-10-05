@@ -152,6 +152,7 @@ subroutine d3stop(iexit, gdp)
     if (lundia /= 0) then
        call prterr(lundia, 'P004', 'Flow exited abnormally')
        write(*,*) 'Check diagnosis file'
+       close (lundia)
     endif
     !
     ! Abort mpi, if needed
