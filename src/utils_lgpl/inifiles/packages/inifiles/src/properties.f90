@@ -683,6 +683,8 @@ subroutine prop_get_string(tree, chapterin ,keyin     ,value, success)
                  ! No: exit do-loop
                  exit
               endif
+           else
+              exit
            endif
         enddo
     else
