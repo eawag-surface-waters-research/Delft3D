@@ -199,9 +199,14 @@ subroutine prop_inifile(filename , tree, error)
         multiple_lines = .false.
         do ! Check on line continuation
             read (lu, '(a)', iostat = eof) linecont
+            linecont = adjustl(linecont)
             lcend = len_trim(linecont)
             if (lcend == 0) then
                 ! Empty line, leave continuation loop
+                exit
+            endif
+            if (linecont(1:1) == '#') then
+                ! Comment line, leave continuation loop
                 exit
             endif
             ! There could be a comment (started by #) after line continuation backslash
@@ -249,9 +254,10 @@ subroutine prop_inifile(filename , tree, error)
             end if
         end do
        !
-       ! Remove leading spaces
+       ! Remove leading spaces, cycle when line is empty
        !
        line = adjustl(line)
+       if (len_trim(line) == 0) cycle
        !
        ! Chapters
        !
