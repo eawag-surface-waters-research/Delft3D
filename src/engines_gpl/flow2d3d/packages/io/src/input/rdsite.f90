@@ -346,95 +346,12 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     ! for parallel runs, determine which observation points are inside subdomain (excluding the halo) and store them
     !
-    if (parll .and. nostat>0) then
-       allocate(nsd(nostat), stat=istat)
-       if (istat /= 0) then
-          call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
-          call d3stop(1, gdp)
-       endif
-       nn  = 0
-       nsd = 0
-       if (idir == 1) then
+    if (parll) then
+       if (nostat == 0) then
           !
-          ! n direction is split
+          ! No observation points in the complete model:
+          ! order_sta must be allocated with length 1 and value 0
           !
-          mfl = 1
-          mll = gdp%d%mmax
-          if (nfg == 1) then
-             !
-             ! first part; no halo in front of nfl
-             !
-             nfl = 1
-          else
-             !
-             ! exclude halo in front of nfl
-             !
-             nfl = 1 + ihalon
-          endif
-          if (nlg == gdp%gdparall%nmaxgl) then
-             !
-             ! last part; no halo behind nll
-             !
-             nll = gdp%d%nmaxus
-          else
-             !
-             ! exclude halo behind nll
-             !
-             nll = gdp%d%nmaxus - ihalon
-          endif
-       elseif (idir == 2) then
-          !
-          ! m direction is split
-          !
-          nfl = 1
-          nll = gdp%d%nmaxus
-          if (mfg == 1) then
-             !
-             ! first part; no halo in front of mfl
-             !
-             mfl = 1
-          else
-             !
-             ! exclude halo in front of mfl
-             !
-             mfl = 1 + ihalom
-          endif
-          if (mlg == gdp%gdparall%mmaxgl) then
-             !
-             ! last part; no halo behind mll
-             !
-             mll = gdp%d%mmax
-          else
-             !
-             ! exclude halo behind mll
-             !
-             mll = gdp%d%mmax - ihalom
-          endif
-       endif
-       do n = 1, nostat
-          m1 = mnstat(1,n) - mfg +1
-          n1 = mnstat(2,n) - nfg +1
-          !
-          ! check if observation point is inside or outside subdomain, excluding the halo
-          !
-          if ( m1>=mfl .and. n1>=nfl .and. m1<=mll .and. n1<=nll ) then
-             !
-             ! observation point is inside subdomain, store sequence number
-             !
-             mnstat(1,n) = m1
-             mnstat(2,n) = n1
-             nn          = nn +1
-             nsd(nn)     = n
-          endif
-       enddo
-       !
-       ! restore mnstat and namst of own subdomain
-       !
-       ! in the parallel case, the original ordering of the
-       ! stations is kept (for comparisons purpose) in order_sta
-       ! order_sta is set to 0 when the partition does not contain
-       ! any station
-       if (nn == 0) then
           allocate(gdp%gdparall%order_sta(1), stat=istat)
           if (istat /= 0) then
              call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
@@ -443,41 +360,141 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           order_sta => gdp%gdparall%order_sta
           order_sta(1) = 0
        else
-          istat = 0
-          if (istat == 0) allocate(ctemp(nn)                 , stat=istat)
-          if (istat == 0) allocate(itmp1(2,nn)               , stat=istat)
-          if (istat == 0) allocate(gdp%gdparall%order_sta(nn), stat=istat)
+          !
+          ! nostat > 0
+          !
+          allocate(nsd(nostat), stat=istat)
           if (istat /= 0) then
              call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
              call d3stop(1, gdp)
           endif
-          order_sta => gdp%gdparall%order_sta
-       endif
-       do n = 1, nn
-          order_sta(n) = nsd(n)
-          ctemp(n)   = namst(nsd(n))
-          itmp1(1,n) = mnstat(1,nsd(n))
-          itmp1(2,n) = mnstat(2,nsd(n))
-       enddo
-       namst  = ' '
-       mnstat = 0
-       nostat = nn
-       do n = 1, nostat
-          namst(n)    = ctemp(n)
-          mnstat(1,n) = itmp1(1,n)
-          mnstat(2,n) = itmp1(2,n)
-       enddo
-       if (nn /= 0) deallocate(ctemp,itmp1, stat=istat)
-       deallocate(nsd, stat=istat)
-       !
-       ! dummy values (nostat = 1) if final number found
-       ! is 0 to avoid using a null ptr in subsequent
-       ! routine calls
-       !
-       if (nn == 0) nostat = 1
-       if (nostat == 1 .and. order_sta(1) == 0) then
-          mnstat(1:2,1) = (/1,1/)
-          namst(1) = ''
+          nn  = 0
+          nsd = 0
+          if (idir == 1) then
+             !
+             ! n direction is split
+             !
+             mfl = 1
+             mll = gdp%d%mmax
+             if (nfg == 1) then
+                !
+                ! first part; no halo in front of nfl
+                !
+                nfl = 1
+             else
+                !
+                ! exclude halo in front of nfl
+                !
+                nfl = 1 + ihalon
+             endif
+             if (nlg == gdp%gdparall%nmaxgl) then
+                !
+                ! last part; no halo behind nll
+                !
+                nll = gdp%d%nmaxus
+             else
+                !
+                ! exclude halo behind nll
+                !
+                nll = gdp%d%nmaxus - ihalon
+             endif
+          elseif (idir == 2) then
+             !
+             ! m direction is split
+             !
+             nfl = 1
+             nll = gdp%d%nmaxus
+             if (mfg == 1) then
+                !
+                ! first part; no halo in front of mfl
+                !
+                mfl = 1
+             else
+                !
+                ! exclude halo in front of mfl
+                !
+                mfl = 1 + ihalom
+             endif
+             if (mlg == gdp%gdparall%mmaxgl) then
+                !
+                ! last part; no halo behind mll
+                !
+                mll = gdp%d%mmax
+             else
+                !
+                ! exclude halo behind mll
+                !
+                mll = gdp%d%mmax - ihalom
+             endif
+          endif
+          do n = 1, nostat
+             m1 = mnstat(1,n) - mfg +1
+             n1 = mnstat(2,n) - nfg +1
+             !
+             ! check if observation point is inside or outside subdomain, excluding the halo
+             !
+             if ( m1>=mfl .and. n1>=nfl .and. m1<=mll .and. n1<=nll ) then
+                !
+                ! observation point is inside subdomain, store sequence number
+                !
+                mnstat(1,n) = m1
+                mnstat(2,n) = n1
+                nn          = nn +1
+                nsd(nn)     = n
+             endif
+          enddo
+          !
+          ! restore mnstat and namst of own subdomain
+          !
+          ! in the parallel case, the original ordering of the
+          ! stations is kept (for comparisons purpose) in order_sta
+          ! order_sta is set to 0 when the partition does not contain
+          ! any station
+          if (nn == 0) then
+             allocate(gdp%gdparall%order_sta(1), stat=istat)
+             if (istat /= 0) then
+                call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
+                call d3stop(1, gdp)
+             endif
+             order_sta => gdp%gdparall%order_sta
+             order_sta(1) = 0
+          else
+             istat = 0
+             if (istat == 0) allocate(ctemp(nn)                 , stat=istat)
+             if (istat == 0) allocate(itmp1(2,nn)               , stat=istat)
+             if (istat == 0) allocate(gdp%gdparall%order_sta(nn), stat=istat)
+             if (istat /= 0) then
+                call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
+                call d3stop(1, gdp)
+             endif
+             order_sta => gdp%gdparall%order_sta
+          endif
+          do n = 1, nn
+             order_sta(n) = nsd(n)
+             ctemp(n)   = namst(nsd(n))
+             itmp1(1,n) = mnstat(1,nsd(n))
+             itmp1(2,n) = mnstat(2,nsd(n))
+          enddo
+          namst  = ' '
+          mnstat = 0
+          nostat = nn
+          do n = 1, nostat
+             namst(n)    = ctemp(n)
+             mnstat(1,n) = itmp1(1,n)
+             mnstat(2,n) = itmp1(2,n)
+          enddo
+          if (nn /= 0) deallocate(ctemp,itmp1, stat=istat)
+          deallocate(nsd, stat=istat)
+          !
+          ! dummy values (nostat = 1) if final number found
+          ! is 0 to avoid using a null ptr in subsequent
+          ! routine calls
+          !
+          if (nn == 0) nostat = 1
+          if (nostat == 1 .and. order_sta(1) == 0) then
+             mnstat(1:2,1) = (/1,1/)
+             namst(1) = ''
+          endif
        endif
     endif
     !
@@ -641,74 +658,12 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     ! for parallel runs, determine if cross-section is inside subdomain and store it
     !
-    if (parll .and. ntruv>0) then
-       if (inode == master) then
+    if (parll) then
+       if (ntruv == 0) then
           !
-          ! Store mnit in mnit_global
-          ! mnit will be adapted for this partition
+          ! No cross-sections in the complete model:
+          ! order_tra must be allocated with length 1 and value 0
           !
-          allocate(gdp%gdparall%mnit_global(4,ntruv), stat=istat)
-          if (istat /= 0) then
-             call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
-             call d3stop(1, gdp)
-          endif
-          do n = 1, ntruv
-             gdp%gdparall%mnit_global(:,n) = mnit(:,n)
-          enddo
-       endif
-       allocate(nsd(ntruv), stat=istat)
-       if (istat /= 0) then
-          call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
-          call d3stop(1, gdp)
-       endif
-       nn  = 0
-       nsd = 0
-       do n = 1, ntruv
-          m1 = mnit(1, n) -mfg +1
-          n1 = mnit(2, n) -nfg +1
-          m2 = mnit(3, n) -mfg +1
-          n2 = mnit(4, n) -nfg +1
-          !
-          ! check if cross-section points (begin, end) are fully inside or (partly) outside subdomain
-          !
-          if ( min(m1,m2) < 1 .or. min(n1,n2) < 1 .or. max(m1,m2) > gdp%d%mmax .or. max(n1,n2) > gdp%d%nmaxus ) then
-             !
-             ! check if one of the two points are outside subdomain
-             !
-             if ( min(m1,m2) <= gdp%d%mmax .and. min(n1,n2) <= gdp%d%nmaxus .and. max(m1,m2) >= 1 .and. max(n1,n2) >= 1 ) then
-                !
-                ! solution: clip the begin- and end points in this subdomain. 
-                ! 
-                mnit(1, n) = min(max(m1,1),gdp%d%mmax )
-                mnit(2, n) = min(max(n1,1),gdp%d%nmaxus)
-                mnit(3, n) = min(max(m2,1),gdp%d%mmax )
-                mnit(4, n) = min(max(n2,1),gdp%d%nmaxus)
-                write (lundia, '(10x,''remap n='',i4,'' mnit1 = '',2i4,'' mint2 = '', 2i4,'' - node number '',i3.3)') n, mnit(1, n), mnit(2, n), mnit(3, n), mnit(4, n), inode
-                nn = nn +1
-                nsd(nn) = n
-             endif
-          else
-             !
-             ! cross-section is inside subdomain, store sequence number
-             !
-             mnit(1, n) = m1
-             mnit(2, n) = n1
-             mnit(3, n) = m2
-             mnit(4, n) = n2
-             nn = nn +1
-             nsd(nn) = n
-          endif
-       enddo
-       !
-       ! restore mnit and namtra of own subdomain
-       !
-       !
-       ! in the parallel case, the original ordering of the
-       ! cross sections is kept (for comparisons purpose) in order_tra
-       ! order_tra is set to 0 when the partition does not contain
-       ! any cross section
-       !
-       if (nn == 0) then
           allocate(gdp%gdparall%order_tra(1), stat=istat)
           if (istat /= 0) then
              call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
@@ -717,66 +672,145 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           order_tra => gdp%gdparall%order_tra
           order_tra(1) = 0
        else
-          istat = 0
-          if (istat == 0) allocate(ctemp(nn)                 , stat=istat)
-          if (istat == 0) allocate(itmp1(4,nn)               , stat=istat)
-          if (istat == 0) allocate(itmp3(nn)                 , stat=istat)
-          if (istat == 0) allocate(gdp%gdparall%order_tra(nn), stat=istat)
+          !
+          ! ntruv > 0
+          !
+          if (inode == master) then
+             !
+             ! Store mnit in mnit_global
+             ! mnit will be adapted for this partition
+             !
+             allocate(gdp%gdparall%mnit_global(4,ntruv), stat=istat)
+             if (istat /= 0) then
+                call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
+                call d3stop(1, gdp)
+             endif
+             do n = 1, ntruv
+                gdp%gdparall%mnit_global(:,n) = mnit(:,n)
+             enddo
+          endif
+          allocate(nsd(ntruv), stat=istat)
           if (istat /= 0) then
              call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
              call d3stop(1, gdp)
           endif
-          order_tra => gdp%gdparall%order_tra
-       endif
-       do n = 1, nn
-          order_tra(n) = nsd(n)
-          ctemp(n) = namtra(nsd(n))
-          do i = 1, 4
-             itmp1(i,n) = mnit(i,nsd(n))
-          enddo
-          itmp3(n) = line_orig(nsd(n))
-       enddo
-       !
-       ! Resets effective nb of cross sections on each
-       ! partition and reallocates arrays accordingly
-       ! with dummy values if final nb found ntruv
-       ! is 0 (to avoid using null ptr in subsequent
-       ! routine calls)
-       !
-       namtra = ' '
-       nullify(line_orig)
-       nullify(mnit)
-       nullify(namtra)
-       deallocate(gdp%gdstations%line_orig, stat=istat)
-       deallocate(gdp%gdstations%mnit     , stat=istat)
-       deallocate(gdp%gdstations%namtra   , stat=istat)
-       ntruv = max(1, nn)
-       istat = 0
-       if (istat == 0) allocate(gdp%gdstations%line_orig(ntruv), stat=istat)
-       if (istat == 0) allocate(gdp%gdstations%mnit(4,ntruv)   , stat=istat)
-       if (istat == 0) allocate(gdp%gdstations%namtra(ntruv)   , stat=istat)
-       if (istat /= 0) then
-          call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
-          call d3stop(1, gdp)
-       endif
-       line_orig  => gdp%gdstations%line_orig
-       mnit       => gdp%gdstations%mnit
-       namtra     => gdp%gdstations%namtra
-       if (ntruv == 1 .and. order_tra(1) == 0) then
-          mnit(1:4,1) = (/1,1,1,1/)
-          namtra(1) = ''
-          line_orig(1) = 0
-       else
+          nn  = 0
+          nsd = 0
           do n = 1, ntruv
-             namtra(n) = ctemp(n)
-             do i = 1, 4
-                mnit(i,n) = itmp1(i,n)
-             enddo
-             line_orig(n) = itmp3(n)
+             m1 = mnit(1, n) -mfg +1
+             n1 = mnit(2, n) -nfg +1
+             m2 = mnit(3, n) -mfg +1
+             n2 = mnit(4, n) -nfg +1
+             !
+             ! check if cross-section points (begin, end) are fully inside or (partly) outside subdomain
+             !
+             if ( min(m1,m2) < 1 .or. min(n1,n2) < 1 .or. max(m1,m2) > gdp%d%mmax .or. max(n1,n2) > gdp%d%nmaxus ) then
+                !
+                ! check if one of the two points are outside subdomain
+                !
+                if ( min(m1,m2) <= gdp%d%mmax .and. min(n1,n2) <= gdp%d%nmaxus .and. max(m1,m2) >= 1 .and. max(n1,n2) >= 1 ) then
+                   !
+                   ! solution: clip the begin- and end points in this subdomain. 
+                   ! 
+                   mnit(1, n) = min(max(m1,1),gdp%d%mmax )
+                   mnit(2, n) = min(max(n1,1),gdp%d%nmaxus)
+                   mnit(3, n) = min(max(m2,1),gdp%d%mmax )
+                   mnit(4, n) = min(max(n2,1),gdp%d%nmaxus)
+                   write (lundia, '(10x,''remap n='',i4,'' mnit1 = '',2i4,'' mint2 = '', 2i4,'' - node number '',i3.3)') n, mnit(1, n), mnit(2, n), mnit(3, n), mnit(4, n), inode
+                   nn = nn +1
+                   nsd(nn) = n
+                endif
+             else
+                !
+                ! cross-section is inside subdomain, store sequence number
+                !
+                mnit(1, n) = m1
+                mnit(2, n) = n1
+                mnit(3, n) = m2
+                mnit(4, n) = n2
+                nn = nn +1
+                nsd(nn) = n
+             endif
           enddo
+          !
+          ! restore mnit and namtra of own subdomain
+          !
+          !
+          ! in the parallel case, the original ordering of the
+          ! cross sections is kept (for comparisons purpose) in order_tra
+          ! order_tra is set to 0 when the partition does not contain
+          ! any cross section
+          !
+          if (nn == 0) then
+             allocate(gdp%gdparall%order_tra(1), stat=istat)
+             if (istat /= 0) then
+                call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
+                call d3stop(1, gdp)
+             endif
+             order_tra => gdp%gdparall%order_tra
+             order_tra(1) = 0
+          else
+             istat = 0
+             if (istat == 0) allocate(ctemp(nn)                 , stat=istat)
+             if (istat == 0) allocate(itmp1(4,nn)               , stat=istat)
+             if (istat == 0) allocate(itmp3(nn)                 , stat=istat)
+             if (istat == 0) allocate(gdp%gdparall%order_tra(nn), stat=istat)
+             if (istat /= 0) then
+                call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
+                call d3stop(1, gdp)
+             endif
+             order_tra => gdp%gdparall%order_tra
+          endif
+          do n = 1, nn
+             order_tra(n) = nsd(n)
+             ctemp(n) = namtra(nsd(n))
+             do i = 1, 4
+                itmp1(i,n) = mnit(i,nsd(n))
+             enddo
+             itmp3(n) = line_orig(nsd(n))
+          enddo
+          !
+          ! Resets effective nb of cross sections on each
+          ! partition and reallocates arrays accordingly
+          ! with dummy values if final nb found ntruv
+          ! is 0 (to avoid using null ptr in subsequent
+          ! routine calls)
+          !
+          namtra = ' '
+          nullify(line_orig)
+          nullify(mnit)
+          nullify(namtra)
+          deallocate(gdp%gdstations%line_orig, stat=istat)
+          deallocate(gdp%gdstations%mnit     , stat=istat)
+          deallocate(gdp%gdstations%namtra   , stat=istat)
+          ntruv = max(1, nn)
+          istat = 0
+          if (istat == 0) allocate(gdp%gdstations%line_orig(ntruv), stat=istat)
+          if (istat == 0) allocate(gdp%gdstations%mnit(4,ntruv)   , stat=istat)
+          if (istat == 0) allocate(gdp%gdstations%namtra(ntruv)   , stat=istat)
+          if (istat /= 0) then
+             call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
+             call d3stop(1, gdp)
+          endif
+          line_orig  => gdp%gdstations%line_orig
+          mnit       => gdp%gdstations%mnit
+          namtra     => gdp%gdstations%namtra
+          if (ntruv == 1 .and. order_tra(1) == 0) then
+             mnit(1:4,1) = (/1,1,1,1/)
+             namtra(1) = ''
+             line_orig(1) = 0
+          else
+             do n = 1, ntruv
+                namtra(n) = ctemp(n)
+                do i = 1, 4
+                   mnit(i,n) = itmp1(i,n)
+                enddo
+                line_orig(n) = itmp3(n)
+             enddo
+          endif
+          if (nn /= 0) deallocate(ctemp,itmp1,itmp3, stat=istat)
+          deallocate(nsd, stat=istat)
        endif
-       if (nn /= 0) deallocate(ctemp,itmp1,itmp3, stat=istat)
-       deallocate(nsd, stat=istat)
     endif
     !
     ! read info of drogues, from attribute file or from md-file
