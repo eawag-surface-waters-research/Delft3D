@@ -1579,8 +1579,8 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
           call d3stop(1, gdp)
        endif
        !
-       if (istat == 0) call reallocP(ipdu, nadump+1, stat = istat)
-       if (istat == 0) call reallocP(npdu, nadump+1, stat = istat)
+       if (istat == 0) call reallocP(ipdu, nadump+1, stat = istat, fill=0)
+       if (istat == 0) call reallocP(npdu, nadump+1, stat = istat, fill=0)
        !
        ! update local pointers
        !
@@ -1620,8 +1620,10 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
        pdump%dumpcapaflag = .false.
        pdump%dumpdistr    = DUMPDISTR_UNIFORM
        pdump%dumpwhendry  = .false.
-       pdump%npnt         = 0
+       ! pdump%npnt         = 0 will be set by loop over dump polygons below
        pdump%use_dunes    = .false.
+       pdump%depthdef     = DEPTHDEF_REFPLANE
+       pdump%ichkloc      = CHKLOC_CENTRE
        nullify(pdump%nm)
        nullify(pdump%inm)
        nullify(pdump%reflevel)
