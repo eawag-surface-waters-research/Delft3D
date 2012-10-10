@@ -679,7 +679,7 @@ subroutine prop_get_string(tree, chapterin ,keyin     ,value, success)
            ! Check if the next child node has name " "
            !
            i = i + 1
-           if (i <= size(thechapter%child_nodes)) then
+           if (associated(thechapter%child_nodes) .and. i<=size(thechapter%child_nodes)) then
               nodename = "dummy value"
               nodename = tree_get_name( thechapter%child_nodes(i)%node_ptr )
               if (nodename == " ") then
@@ -1600,16 +1600,18 @@ subroutine count_occurrences(input_ptr, group, keyword, npars)
     !
     ! Read dimensions from input tree
     !
-    do i = 1,size(group_ptr%child_nodes)
-       !
-       ! Does group_ptr contain one or more children with name keyword?
-       !
-       node_ptr => group_ptr%child_nodes(i)%node_ptr
-       parname = tree_get_name(node_ptr)
-       if (parname == keyword) then
-          npars = npars + 1
-       endif
-    enddo
+    if (associated(group_ptr%child_nodes)) then
+       do i = 1,size(group_ptr%child_nodes)
+          !
+          ! Does group_ptr contain one or more children with name keyword?
+          !
+          node_ptr => group_ptr%child_nodes(i)%node_ptr
+          parname = tree_get_name(node_ptr)
+          if (parname == keyword) then
+             npars = npars + 1
+          endif
+       enddo
+    endif
 end subroutine count_occurrences
 
 end module properties
