@@ -65,6 +65,11 @@ echo ----------------------------------------------------------------------
 
     ### General for MPICH2, startup your MPICH2 communication network (you
     ### can check if it is already there with mpdtrace).
+    ###
+    ### Optionally:
+    ### Add option --rsh=/usr/bin/rsh to mpdboot
+    ### This is needed when the following error appears:
+    ### mpdboot_xh5000 (handle_mpd_output 420): from mpd on xh5001, invalid port info: no_port
 mpd &
 mpdboot -n $NHOSTS -f $(pwd)/machinefile --ncpus=2
 
