@@ -205,7 +205,7 @@ subroutine prop_inifile(filename , tree, error)
                 ! Empty line, leave continuation loop
                 exit
             endif
-            if (linecont(1:1) == '#') then
+            if (linecont(1:1)=='#' .or. linecont(1:1) == '*') then
                 ! Comment line, leave continuation loop
                 exit
             endif
