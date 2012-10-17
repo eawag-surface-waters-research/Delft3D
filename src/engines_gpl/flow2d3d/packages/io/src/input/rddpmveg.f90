@@ -95,7 +95,7 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
     real(fp)                                :: versionnrlow
     character(30)                           :: node_type
     character(80)                           :: parname
-    character(80)                           :: message
+    character(300)                          :: message
     character(256)                          :: inputstring
     character(20)                           :: versionnrinput
     character(256)                          :: polygonfile
