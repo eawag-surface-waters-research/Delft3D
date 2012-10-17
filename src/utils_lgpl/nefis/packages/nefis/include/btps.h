@@ -85,7 +85,7 @@
 
 #if defined PTR8
 # undef  ULONG_MAX
-# define ULONG_MAX -1
+# define ULONG_MAX (BUInt8) -1
 #endif
 /*
  * TRUE and FALSE defined as enumerator
