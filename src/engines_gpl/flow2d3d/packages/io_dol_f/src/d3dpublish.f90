@@ -324,6 +324,10 @@ contains
 
         olv => olv_handle%fields
         
+        if (value==0) then
+            write(*,*) 'Waiting on Delft Online conection'
+        endif 
+
         olv%runningFlag = value
         olv%currentStep = nst
 

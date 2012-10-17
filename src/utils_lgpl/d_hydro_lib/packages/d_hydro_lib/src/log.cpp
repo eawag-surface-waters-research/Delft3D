@@ -42,6 +42,10 @@
 #include <string.h>
 
 
+#if defined (WIN32)
+#   define strdup _strdup
+#endif
+
 Log::Log (
     FILE *  output,
     Clock * clock,

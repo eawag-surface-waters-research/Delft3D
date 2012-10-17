@@ -40,6 +40,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+#if defined (WIN32)
+#   define strdup _strdup
+#endif
 
 #define IS_WHITESPACE(C) ( \
     (C) == '\f' || \

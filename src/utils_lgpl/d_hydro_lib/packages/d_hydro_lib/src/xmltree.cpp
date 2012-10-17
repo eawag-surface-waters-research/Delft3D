@@ -36,6 +36,10 @@
 
 #include "xmltree.h"
 
+#if defined (WIN32)
+#   define strdup _strdup
+#endif
+
 
 static void starttag (void *, const XML_Char *, const XML_Char **);
 static void endtag   (void *, const XML_Char *);
