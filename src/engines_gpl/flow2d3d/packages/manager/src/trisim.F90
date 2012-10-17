@@ -111,6 +111,11 @@ subroutine trisim (numdom, nummap, context_id, fsm_flags, runid)
     call gdp_dealloc(gdp)
     deallocate(gdp, stat=ierr)
     !
+    ! Finish using a semaphore
+    ! Related psemnefis is in tricom.f90
+    !
+    call vsemfinish
+    !
     ! Finalizes MPI
     !
     if (parll) then

@@ -515,16 +515,7 @@ integer function trisim_close(gdp) result (retval)
        endif
     endif
     !
-
     call deallocmeteo(gdp%runid)
-  
-
-    !
-    ! Finish using a semaphore
-    ! Related psemnefis is in tricom.f90
-    ! This used to be a vsemfinish
-    !
-    call vsemfinish
     !
     ! Tell gaws (Global ADI Wang Solver) and mapper we're done.
     !
