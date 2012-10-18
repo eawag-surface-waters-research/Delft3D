@@ -1918,7 +1918,10 @@ src/third_party_open/swan/lib/linux/libimf.so -text
 src/third_party_open/swan/lib/linux/libintlc.so.5 -text
 src/third_party_open/swan/lib/linux/libiomp5.so -text
 src/third_party_open/swan/lib/linux/libsvml.so -text
+src/third_party_open/swan/lib/win32/libifcoremd.dll -text
+src/third_party_open/swan/lib/win32/libifportmd.dll -text
 src/third_party_open/swan/lib/win32/libiomp5md.dll -text
+src/third_party_open/swan/lib/win32/libmmd.dll -text
 src/third_party_open/swan/scripts/swan.bat -text
 src/third_party_open/swan/scripts/swan.sh -text
 src/third_party_open/swan/scripts/swan_install.bat -text
