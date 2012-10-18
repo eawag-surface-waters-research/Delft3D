@@ -26,7 +26,7 @@ cp lnx/flow2d3d/default/* intel/flow/default
 
 cp lnx/swan/bin/*     intel/wave/bin
 cp lnx/swan/lib/*     intel/wave/bin
-cp lnx/swan/scripts/* intel/lib
+cp lnx/swan/scripts/* intel/wave/bin
 cp lnx/wave/bin/*     intel/wave/bin
 cp lnx/wave/lib/*     intel/wave/bin
 cp lnx/wave/default/* intel/wave/default
