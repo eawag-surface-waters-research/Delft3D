@@ -28,6 +28,7 @@ cp lnx/swan/bin/*     intel/wave/bin
 cp lnx/swan/lib/*     intel/wave/bin
 cp lnx/swan/scripts/* intel/lib
 cp lnx/wave/bin/*     intel/wave/bin
+cp lnx/wave/lib/*     intel/wave/bin
 cp lnx/wave/default/* intel/wave/default
 
 cp lnx/util/bin/*     intel/util

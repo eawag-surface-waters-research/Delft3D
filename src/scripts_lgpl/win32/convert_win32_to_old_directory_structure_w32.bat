@@ -28,6 +28,7 @@ copy win32\swan\bin\*     w32\wave\bin
 copy win32\swan\lib\*     w32\wave\bin
 copy win32\swan\scripts\* w32\lib
 copy win32\wave\bin\*     w32\wave\bin
+copy win32\wave\lib\*     w32\wave\bin
 copy win32\wave\default\* w32\wave\default
 
 copy win32\util\bin\*     w32\util
