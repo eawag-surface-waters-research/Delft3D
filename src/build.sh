@@ -236,12 +236,11 @@ if [ "$compiler" = 'gnu' ]; then
     export MPIFC=/opt/mpich2-1.4.1-gcc-4.6.2/bin/mpif90  
 else
     # Intel compilers
-    addpath PATH /opt/mpich2/bin
-    export MPI_INCLUDE=/opt/mpich2/include
-    # export MPILIBS_ADDITIONAL="-L/opt/mpich2/lib -lfmpich"
-    export MPILIBS_ADDITIONAL=" "
+    addpath PATH /opt/mpich2-1.0.8-intel64/bin
+    export MPI_INCLUDE=/opt/mpich2-1.0.8-intel64-PIC/include
+    export MPILIBS_ADDITIONAL="-L/opt/mpich2-1.0.8-intel64-PIC/lib -lfmpich -lmpich"
     if [ "$platform" = 'intel64' ]; then
-        export MPIFC=/opt/mpich2-1.0.8-intel64/bin/mpif90  
+        export MPIFC=/opt/mpich2-1.0.8-intel64-PIC/bin/mpif90  
     fi
 fi
 
@@ -254,7 +253,7 @@ if [ "$compiler" = 'gnu' ]; then
 else
     # Intel compilers
     export LDFLAGSMT_ADDITIONAL="-lifcoremt"
-    export FCLIBS_ADDITIONAL="-lifcore -limf"
+    export FCLIBS_ADDITIONAL="-lifcoremt -limf"
 fi
 
 
@@ -337,8 +336,8 @@ if [ "$platform" = 'intel64' ]; then
     command=" \
         CFLAGS='$flags -fPIC -m64 $CFLAGS' \
         CXXFLAGS='$flags -fPIC -m64 $CXXFLAGS' \
-        FFLAGS='$flags -fPIC -m64 $FFLAGS' \
-        FCFLAGS='$flags -fPIC -m64 $FCFLAGS' \
+        FFLAGS='$flags -threads -fPIC -m64 $FFLAGS' \
+        FCFLAGS='$flags -threads -fPIC -m64 $FCFLAGS' \
             ./configure --prefix=`pwd` $configureArgs &> $log \
         "
 else
