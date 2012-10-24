@@ -109,6 +109,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     type (fbcrbndtype)  , dimension(:) , pointer :: fcrbnd
     logical                            , pointer :: fbccorrection
     real(fp), dimension(:,:)           , pointer :: dist_pivot_part
+
 !
 ! Global variables
 !
@@ -280,11 +281,14 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     fcrbnd                => gdp%gdflwpar%fcrbnd
     fbccorrection         => gdp%gdflwpar%fbccorrection
     dist_pivot_part       => gdp%gdbcdat%dist_pivot_part
+
+    
     !
     ! initialize local parameters
     ! omega in deg/hour & time in seconds !!, alfa = in minuten
     ! TIMSCL will not been used in UPDBCC
     !
+   
     first  = .false.
     horiz  = .false.
     udir   = .false.
@@ -384,6 +388,8 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
              !  qtfrac(n)  = dpvel*width
           endif
           qtfrct(n1) = qtfrct(n1) + qtfrac(n)
+          
+
        elseif (nob(3,n) == 2) then
           !
           ! waterlevel boundary might be QH boundary
@@ -411,6 +417,10 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        else
        endif
     enddo
+    !
+    ! Update the total discharge boundaries for the overall domain by summing up among those  
+    !
+    call dfreduce( qtfrct, nto, dfloat, dfsum, gdp )
     !
     ! Update QH values if necessary
     ! Necessary if: the discharge is not in the selected range

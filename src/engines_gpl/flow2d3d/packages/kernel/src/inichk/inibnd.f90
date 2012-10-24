@@ -40,6 +40,7 @@ subroutine inibnd(lundia    ,error      ,nto       ,nopest    ,nrob      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+
     !
     use globaldata
     !
@@ -153,8 +154,10 @@ subroutine inibnd(lundia    ,error      ,nto       ,nopest    ,nrob      , &
     !
     if (nrob > nopest) then
        error   = .true.
-       errornr = 'V026'
+       errornr = 'V026' 
+       goto 9999
     endif
+   
  9999 continue
     if (error) call prterr(lundia, errornr, ' ')
 end subroutine inibnd
