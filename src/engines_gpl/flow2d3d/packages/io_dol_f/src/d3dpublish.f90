@@ -324,9 +324,10 @@ contains
 
         olv => olv_handle%fields
         
-        if (value==0) then
-            write(*,*) 'Waiting on Delft Online conection'
-        endif 
+        ! This write statement is confusing: it appears always, even if DOL is not activated
+        ! if (value==0) then
+        !     write(*,*) 'Waiting on Delft Online connection'
+        ! endif 
 
         olv%runningFlag = value
         olv%currentStep = nst

@@ -11,7 +11,7 @@
 
 
 if [ -f Makefile ]; then
-    make distclean
+    make ds-clean
 fi
 
 
