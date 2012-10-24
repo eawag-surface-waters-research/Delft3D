@@ -20,7 +20,7 @@
 #
 
 global version
-set version "2.4"
+set version "2.5"
 
 global debug
 set debug 0
@@ -1024,7 +1024,10 @@ proc waitForNodes { mergedir alist inflist } {
    }
    puts $scriptfile "\n# End of script\n"
    close $scriptfile
-   exec chmod u+x $scriptnamewait
+   if { [catch {exec chmod u+x $scriptnamewait} errmsg] } {
+      putsDebug "\nWARNING : Unable to chmod file $scriptnamewait:"
+      putsDebug   "          $errmsg"
+   }
    #
    set scriptfile [open $sfilnamego w]
    puts $scriptfile "#!/bin/sh"
@@ -1049,7 +1052,10 @@ proc waitForNodes { mergedir alist inflist } {
    }
    puts $scriptfile "\n# End of script\n"
    close $scriptfile
-   exec chmod u+x $scriptnamego
+   if { [catch {exec chmod u+x $scriptnamego} errmsg] } {
+      putsDebug "\nWARNING : Unable to chmod file $scriptnamego:"
+      putsDebug   "          $errmsg"
+   }
 
    puts "Waiting for qsub to assign $infillist(numnodes) nodes"
    puts "The mormerge script is started automatically by qsub when the nodes are available"
@@ -1290,8 +1296,14 @@ proc startMormerge { inputfilename workdir mergeexe localrun runid node } {
 
    cd $rundir
    if { [string equal $platform "linux"] } {
-      exec chmod u+x $scriptname
-      exec chmod u+x $shellscriptname
+      if { [catch {exec chmod u+x $scriptname} errmsg] } {
+         putsDebug "\nWARNING : Unable to chmod file $scriptname:"
+         putsDebug   "          $errmsg"
+      }
+      if { [catch {exec chmod u+x $shellscriptname} errmsg] } {
+         putsDebug "\nWARNING : Unable to chmod file $shellscriptname:"
+         putsDebug   "          $errmsg"
+      }
    }
    
    putsDebug "mormergeruncommand:$shellscriptname"
@@ -1526,8 +1538,14 @@ proc startFlow { inflist alist condition runids waveonline tdatomexe flowexe wav
 
    cd $rundir
    if { [string equal $platform "linux"] } {
-      exec chmod u+x $scriptname
-      exec chmod u+x $shellscriptname
+      if { [catch {exec chmod u+x $scriptname} errmsg] } {
+         putsDebug "\nWARNING : Unable to chmod file $scriptname:"
+         putsDebug   "          $errmsg"
+      }
+      if { [catch {exec chmod u+x $shellscriptname} errmsg] } {
+         putsDebug "\nWARNING : Unable to chmod file $scriptname:"
+         putsDebug   "          $errmsg"
+      }
       after $waittime
    }
    
