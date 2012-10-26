@@ -2284,6 +2284,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/Contents.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/ap2ep.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/arbcross.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/average_trim.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/bct_io.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/calldll.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/cellarea.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/classbar.m -text
@@ -2476,7 +2477,6 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/bagdpt.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/bagdptfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/bagmap.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/balanceplot.m -text
-src/tools_lgpl/matlab/quickplot/progsrc/private/bct_io.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/bctfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/bil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/bilhdrfil.m -text
