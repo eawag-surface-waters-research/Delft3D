@@ -413,7 +413,7 @@ subroutine dfgather_filter_R1D_hphp(lundia, nblocal, nbtotal, nbglobal, order, &
 !!--description-----------------------------------------------------------------
 !
 !    Function: gather point-wise quantities, excluding duplicates over partitions
-!              the input of this function is in high precision, and output is in single precision.  This function is used for incbc.
+!              the input of this function is in high precision, and output is in high precision.  This function is used for incbc.
 !    Method used:
 !
 !!--pseudo code and references--------------------------------------------------
@@ -454,22 +454,15 @@ integer                                   :: itag
 !
 !! executable statements -------------------------------------------------------
 !
-!    allocate(rbuff(nblocal))
-!    rbuff = real(inbuff,sp)
-!    call dfgather_filter_R1D_sp(lundia, nblocal, nbtotal, nbglobal, order, &
-!                                 & rbuff, oubuff, gdp, crosec_case )
-!    deallocate(rbuff)
-! end subroutine dfgather_filter_R1D_hphp
-!
     if (inode == master) then
        allocate( rbuff(nbtotal) )
        allocate( ibuff(1:nbtotal) )
-       rbuff = 0.0 
+       rbuff = 0.0_hp 
     endif
     call dfgather_lowlevel ( rbuff, nbtotal, inbuff, nblocal, dfdble, gdp )
     call dfgather_lowlevel ( ibuff, nbtotal, order, nblocal, dfint, gdp )
     if (inode == master) then
-       oubuff = 0.0
+       oubuff = 0.0_hp
        if (present(crosec_case)) then
           do n = 1, nbtotal
              if (ibuff(n) /= 0) oubuff(ibuff(n)) = oubuff(ibuff(n)) + rbuff(n)

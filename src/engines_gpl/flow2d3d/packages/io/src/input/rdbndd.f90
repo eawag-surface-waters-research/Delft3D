@@ -511,6 +511,16 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        enddo
     endif
     if (parll .and. .not.yestdd) then
+       !      
+       ! bct_order must have the dimension of the global number of boundary conditions (mxdnto).
+       ! nto is the number of open boundaries in this specific partition
+       !
+       allocate(gdp%gdbcdat%bct_order(mxdnto), stat=istat)
+       if (istat /= 0) then
+          call prterr(lundia, 'P004', 'memory alloc error in rdbndd(bct_order)')
+          call d3stop(1, gdp)
+       endif    
+       bct_order => gdp%gdbcdat%bct_order
        !
        ! Store the original global mnbnd
        ! Only mnbnd_global(1:4,:) is set yet, but that's all that's needed
@@ -629,21 +639,12 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              nhsub(ntof) = nsd(n)
           endif
        enddo
-      
-       !allocate(gdp%gdbcdat%bct_order(nto-ntof-ntoq), stat=istat)
-       allocate(gdp%gdbcdat%bct_order(mxdnto), stat=istat)
-       if (istat /= 0) then
-          call prterr(lundia, 'P004', 'memory alloc error in rdbndd(bct_order)')
-          call d3stop(1, gdp)
-       endif
-    
-       do n = 1, nto-ntof-ntoq               ! n = 1, nn_t
-          gdp%gdbcdat%bct_order(n) = nsd_t(n)
+       !  
+       do n = 1, nto-ntof-ntoq ! nto-ntof-ntoq is the same as nn_t
+          bct_order(n) = nsd_t(n)
        enddo
-
-       deallocate(ctmp1,ctmp2,ctmp3,itemp,rtemp)
-       
-            
+       !
+       deallocate(ctmp1,ctmp2,ctmp3,itemp,rtemp, stat=istat)
     endif ! parll and not.yestdd
     do n = 1, nto
        !
