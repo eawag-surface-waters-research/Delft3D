@@ -41,7 +41,7 @@ set swanbatdir=%D3D_HOME%\swan\scripts
 set PATH=%flowexedir%;%flowlibdir%;%PATH%
 start %flowexedir%\deltares_hydro.exe %argfile%
 
-set PATH=%swanbatdir%;%swanexedir%;%swanlibdir%;%waveexedir%;%wavelibdir%;%PATH%
+set PATH=%waveexedir%;%wavelibdir%;%swanbatdir%;%swanexedir%;%swanlibdir%;%PATH%
 %waveexedir%\wave.exe %mdwfile% 1
 
     rem To prevent the DOS box from disappearing immediately: remove the rem on the following line
