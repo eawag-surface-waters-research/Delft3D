@@ -52,6 +52,7 @@ module dffunctionals
       module procedure dfgather_filter_I2D
       module procedure dfgather_filter_R1D_sp
       module procedure dfgather_filter_R1D_hp
+      module procedure dfgather_filter_R1D_hphp
       module procedure dfgather_filter_R2D_sp
       module procedure dfgather_filter_R2D_hp
       module procedure dfgather_filter_R3D_sp
@@ -369,6 +370,7 @@ subroutine dfgather_filter_R1D_hp(lundia, nblocal, nbtotal, nbglobal, order, &
 !!--description-----------------------------------------------------------------
 !
 !    Function: gather point-wise quantities, excluding duplicates over partitions
+!              the input of this function is in high precision, and output is in single precision.  This function is used to wrihis.
 !    Method used:
 !
 !!--pseudo code and references--------------------------------------------------
@@ -403,6 +405,85 @@ real(sp), dimension(:), allocatable       :: rbuff
     deallocate(rbuff)
 end subroutine dfgather_filter_R1D_hp
 !
+!
+!
+!===============================================================================
+subroutine dfgather_filter_R1D_hphp(lundia, nblocal, nbtotal, nbglobal, order, &
+                             & inbuff, oubuff, gdp, crosec_case )
+!!--description-----------------------------------------------------------------
+!
+!    Function: gather point-wise quantities, excluding duplicates over partitions
+!              the input of this function is in high precision, and output is in single precision.  This function is used for incbc.
+!    Method used:
+!
+!!--pseudo code and references--------------------------------------------------
+! NONE
+!!--declarations----------------------------------------------------------------
+#if defined (DFMPI)
+    use mpi
+#endif
+    use precision
+    use dfparall
+    use globaldata
+!
+! Global variables
+!
+type(globdat), target                                 :: gdp
+integer                                               :: lundia !  Description and declaration in inout.igs
+integer                                               :: nblocal
+integer                                               :: nbtotal
+integer                                               :: nbglobal
+integer , dimension(nblocal)   , intent(in)           :: order
+real(hp), dimension(1:nblocal) , intent(in)           :: inbuff
+real(hp), dimension(1:nbglobal)                       :: oubuff
+logical                        , intent(in), optional :: crosec_case
+!
+! Local variables
+!
+integer                                   :: m
+integer                                   :: n
+real(hp), dimension(:), allocatable       :: rbuff
+integer , dimension(:), allocatable       :: ibuff
+integer                                   :: onode
+integer                                   :: ierr                   ! error value of MPI call
+#if defined (DFMPI)
+    integer                               :: istat(mpi_status_size) ! MPI status array
+#endif
+character(80)                             :: msgstr                 ! string to pass message
+integer                                   :: itag
+!
+!! executable statements -------------------------------------------------------
+!
+!    allocate(rbuff(nblocal))
+!    rbuff = real(inbuff,sp)
+!    call dfgather_filter_R1D_sp(lundia, nblocal, nbtotal, nbglobal, order, &
+!                                 & rbuff, oubuff, gdp, crosec_case )
+!    deallocate(rbuff)
+! end subroutine dfgather_filter_R1D_hphp
+!
+    if (inode == master) then
+       allocate( rbuff(nbtotal) )
+       allocate( ibuff(1:nbtotal) )
+       rbuff = 0.0 
+    endif
+    call dfgather_lowlevel ( rbuff, nbtotal, inbuff, nblocal, dfdble, gdp )
+    call dfgather_lowlevel ( ibuff, nbtotal, order, nblocal, dfint, gdp )
+    if (inode == master) then
+       oubuff = 0.0
+       if (present(crosec_case)) then
+          do n = 1, nbtotal
+             if (ibuff(n) /= 0) oubuff(ibuff(n)) = oubuff(ibuff(n)) + rbuff(n)
+          enddo
+       else
+          do n = 1, nbtotal
+             if (ibuff(n) /= 0) oubuff(ibuff(n)) = rbuff(n)
+          enddo
+       endif
+       deallocate( ibuff )
+       deallocate( rbuff )
+    endif
+    call dfsync(gdp)
+end subroutine dfgather_filter_R1D_hphp
 !
 !
 !===============================================================================

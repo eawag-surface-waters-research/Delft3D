@@ -62,6 +62,11 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
 !              - Vertical profile functions set for velocity
 !                and discharge boundary. Profiles are uniform,
 !                logarithmic or 3d
+!                This function is called even if nto <= 0, since 
+!                nto is referred to the number of boundaries in 
+!                subdomains in parallel case. When nto <= 0, 
+!                nrob should be 0, most part of the function should
+!                be skipped.
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
@@ -69,6 +74,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     use precision
     use mathconsts
     use dfparall
+    use dffunctionals
     use flow_tables
     use globaldata
     use m_openda_exchange_items, only : get_openda_buffer
@@ -77,8 +83,9 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     !
     ! Enumeration
     !
-    integer, parameter :: start_pivot = 1
-    integer, parameter ::   end_pivot = 2
+    integer, parameter :: start_pivot  = 1
+    integer, parameter ::   end_pivot  = 2
+    logical, parameter :: sum_elements = .true.
     !
     type(globdat),target :: gdp
     !
@@ -109,7 +116,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     type (fbcrbndtype)  , dimension(:) , pointer :: fcrbnd
     logical                            , pointer :: fbccorrection
     real(fp), dimension(:,:)           , pointer :: dist_pivot_part
-
+    
 !
 ! Global variables
 !
@@ -169,90 +176,94 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
 !
 ! Local variables
 !
-    integer           :: i
-    integer           :: ibtype         ! Type of open boundary: (see global var. NOB) 
-    integer           :: incx           ! Nr. of grid points-1 (in the x-dir.) between the begin and the end point of an opening section 
-    integer           :: incy           ! Nr. of grid points-1 (in the y-dir.) between the begin and the end point 
-    integer           :: ito            ! Index number of open boundary loc. 
-    integer           :: j              ! Loop variable 
-    integer           :: k              ! Loop variable 
-    integer           :: k1st
-    integer           :: k2nd
-    integer           :: kcuv           ! Value of KCU or KCV in boundary point
-    integer           :: kp             ! First array index of array CIRC2/3D pointing to the nr. of row/column in array IROCOL
-    integer           :: kpc            ! First array index of array CIRC2/3D pointing to the column number in arra IROCOL 
-    integer           :: kpp            ! Hulp varible 
-    integer           :: kpr            ! First array index of array CIRC2/3D pointing to the row number in array IROCOL 
-    integer           :: kq             ! Second array index of array CIRC2/3D pointing to the nr. of row/column in array IROCOL 
-    integer           :: kqc            ! Second array index of array CIRC2/3D pointing to the column number in arra IROCOL 
-    integer           :: kqq            ! Hulp varible 
-    integer           :: kqr            ! Second array index of array CIRC2/3D pointing to the row number in array IROCOL 
-    integer           :: lunsol
-    integer           :: maxinc         ! Max. of (INCX,INCY,1) 
-    integer           :: mend           ! End coord. (in the x-dir.) of an open bound. section 
-    integer           :: mgg            ! M-coord. of the actual open boundary point, which may differ from the ori- ginal position due to grid staggering 
-    integer           :: mp
-    integer           :: mpbt
-    integer           :: msta           ! Starting coord. (in the x-dir.) of an open bound. section 
-    integer           :: n              ! Loop variable 
-    integer           :: n1             ! Pointer var. relating NOB to MNBND 
-    integer           :: nend           ! End coord. (in the y-dir.) of an open bound. section 
-    integer, external :: newlun
-    integer           :: ngg            ! N-coord. of the actual open boundary point, which may differ from the ori- ginal position due to grid staggering 
-    integer           :: np
-    integer           :: npbt
-    integer           :: nsta           ! Starting coord. (in the y-dir.) of an open bound. section 
-    integer           :: ntot0          ! Offset for open boundary sections of the Time-series type (NTOF+NTOQ) 
-    integer           :: posrel         ! code denoting the position of the open boundary, related to the complete grid
-    integer           :: lb             ! lowerboundary of loopcounter
-    integer           :: ub             ! upperboundary of loopcounter
-    logical           :: first          ! Flag = TRUE in case a time-dependent file is read for the 1-st time 
-    logical           :: error          ! errorstatus
-    logical           :: horiz          ! Flag=TRUE if open boundary lies parallel to x-/KSI-dir. 
-    logical           :: udir
-    logical           :: vdir
-    real(fp)          :: amplik
-    real(fp)          :: angle          ! The actual phase of the 'Harmonics' at this time step 
-    real(fp)          :: czbed
-    real(fp)          :: czeff
-    real(fp)          :: diff           ! Difference between the actual bounda- ry value and the initial value at the openings 
-    real(fp)          :: dini           ! Initial value of the prescribed sig- nal at open boundary. For water ele- cation type opening DINI = S0. For Other opening types DINI = 0.0 
-    real(fp)          :: dist           ! Real distance between an open bounda- ry point to the begin point of the related opening section 
-    real(fp)          :: distx          ! Incremental distance (in the x-dir.) between two consecutive open boundary points belonging to the same section 
-    real(fp)          :: disty          ! Incremental distance (in the x-dir.) between two consecutive open boundary points belonging to the same section 
-    real(fp)          :: dpvel
-    real(fp)          :: dz0
-    real(fp)          :: dz1
-    real(fp)          :: frac           ! Fraction between DIST and the total length of an opening section 
-    real(fp)          :: fbcr_array(2)  ! Corrective flow boundary conditions array
-    real(fp)          :: guuz1
-    real(fp)          :: guuz2
-    real(fp)          :: gvvz1
-    real(fp)          :: gvvz2
-    real(fp)          :: grmass
-    real(fp)          :: h0             ! Total depth in velocity point of open boundary point 
-    real(fp)          :: hu0            ! Total depth in velocity point of open boundary U-point. MAX (HU,0.01) 
-    real(fp)          :: hv0            ! Total depth in velocity point of open boundary V-point. MAX (HV,0.01) 
-    real(fp)          :: pcr
-    real(fp)          :: pdiff
-    real(fp)          :: phasek
-    real(fp)          :: q0avg
-    real(fp)          :: qtfrc
-    real(fp)          :: sig1           ! Layer thickness as fraction of previous layer 
-    real(fp)          :: sig2           ! Layer thickness as fraction 
-    real(fp)          :: tcur           ! Current time in hours since last nodal update time
-    real(fp)          :: tdif           ! Time difference (in minutes) between TIMNOW and TSTART 
-    real(fp)          :: tfrac          ! Fraction of TDIF and Smoothing time 
-    real(fp)          :: thickOpen      ! When mnbnd(5,n) <> 0: sum of thickness of all open layers
-    real(fp)          :: timscl         ! Multiple factor to create minutes from read times 
-    real(fp)          :: totl           ! Actual length of an openbnd. section 
-    real(fp)          :: ttfhsum        ! Temporary variable for depth-averaging RTTFU/V resistance
-    real(fp)          :: width
-    real(fp)          :: z1             ! Previous layer: (1+SIG1)*H0 
-    real(fp)          :: z2             ! Currect layer: (1+SIG2)*H0 
-    real(fp)          :: zbulk          ! Sommation of all layers ZLAYER*THICK 
-    real(fp)          :: zl             ! Z for layer: (Z1+Z2)/2. 
-    real(fp)          :: zlayer         ! Z layer: LOG (1.+ZL/Z0) 
+    integer                             :: i
+    integer                             :: ibtype         ! Type of open boundary: (see global var. NOB) 
+    integer                             :: incx           ! Nr. of grid points-1 (in the x-dir.) between the begin and the end point of an opening section 
+    integer                             :: incy           ! Nr. of grid points-1 (in the y-dir.) between the begin and the end point 
+    integer                             :: ito            ! Index number of open boundary loc. 
+    integer                             :: j              ! Loop variable 
+    integer                             :: k              ! Loop variable 
+    integer                             :: k1st
+    integer                             :: k2nd
+    integer                             :: kcuv           ! Value of KCU or KCV in boundary point
+    integer                             :: kp             ! First array index of array CIRC2/3D pointing to the nr. of row/column in array IROCOL
+    integer                             :: kpc            ! First array index of array CIRC2/3D pointing to the column number in arra IROCOL 
+    integer                             :: kpp            ! Hulp varible 
+    integer                             :: kpr            ! First array index of array CIRC2/3D pointing to the row number in array IROCOL 
+    integer                             :: kq             ! Second array index of array CIRC2/3D pointing to the nr. of row/column in array IROCOL 
+    integer                             :: kqc            ! Second array index of array CIRC2/3D pointing to the column number in arra IROCOL 
+    integer                             :: kqq            ! Hulp varible 
+    integer                             :: kqr            ! Second array index of array CIRC2/3D pointing to the row number in array IROCOL 
+    integer                             :: lunsol
+    integer                             :: maxinc         ! Max. of (INCX,INCY,1) 
+    integer                             :: mend           ! End coord. (in the x-dir.) of an open bound. section 
+    integer                             :: mgg            ! M-coord. of the actual open boundary point, which may differ from the ori- ginal position due to grid staggering 
+    integer                             :: mp
+    integer                             :: mpbt
+    integer                             :: msta           ! Starting coord. (in the x-dir.) of an open bound. section 
+    integer                             :: n              ! Loop variable 
+    integer                             :: n1             ! Pointer var. relating NOB to MNBND 
+    integer                             :: nend           ! End coord. (in the y-dir.) of an open bound. section 
+    integer, external                   :: newlun
+    integer                             :: ngg            ! N-coord. of the actual open boundary point, which may differ from the ori- ginal position due to grid staggering 
+    integer                             :: np
+    integer                             :: npbt
+    integer                             :: nsta           ! Starting coord. (in the y-dir.) of an open bound. section 
+    integer                             :: ntot0          ! Offset for open boundary sections of the Time-series type (NTOF+NTOQ) 
+    integer                             :: posrel         ! code denoting the position of the open boundary, related to the complete grid
+    integer                             :: lb             ! lowerboundary of loopcounter
+    integer                             :: ub             ! upperboundary of loopcounter
+    logical                             :: first          ! Flag = TRUE in case a time-dependent file is read for the 1-st time 
+    logical                             :: error          ! errorstatus
+    logical                             :: horiz          ! Flag=TRUE if open boundary lies parallel to x-/KSI-dir. 
+    logical                             :: udir
+    logical                             :: vdir
+    real(fp)                            :: amplik
+    real(fp)                            :: angle          ! The actual phase of the 'Harmonics' at this time step 
+    real(fp)                            :: czbed
+    real(fp)                            :: czeff
+    real(fp)                            :: diff           ! Difference between the actual bounda- ry value and the initial value at the openings 
+    real(fp)                            :: dini           ! Initial value of the prescribed sig- nal at open boundary. For water ele- cation type opening DINI = S0. For Other opening types DINI = 0.0 
+    real(fp)                            :: dist           ! Real distance between an open bounda- ry point to the begin point of the related opening section 
+    real(fp)                            :: distx          ! Incremental distance (in the x-dir.) between two consecutive open boundary points belonging to the same section 
+    real(fp)                            :: disty          ! Incremental distance (in the x-dir.) between two consecutive open boundary points belonging to the same section 
+    real(fp)                            :: dpvel
+    real(fp)                            :: dz0
+    real(fp)                            :: dz1
+    real(fp)                            :: frac           ! Fraction between DIST and the total length of an opening section 
+    real(fp)                            :: fbcr_array(2)  ! Corrective flow boundary conditions array
+    real(fp)                            :: guuz1
+    real(fp)                            :: guuz2
+    real(fp)                            :: gvvz1
+    real(fp)                            :: gvvz2
+    real(fp)                            :: grmass
+    real(fp)                            :: h0             ! Total depth in velocity point of open boundary point 
+    real(fp)                            :: hu0            ! Total depth in velocity point of open boundary U-point. MAX (HU,0.01) 
+    real(fp)                            :: hv0            ! Total depth in velocity point of open boundary V-point. MAX (HV,0.01) 
+    real(fp)                            :: pcr
+    real(fp)                            :: pdiff
+    real(fp)                            :: phasek
+    real(fp)                            :: q0avg
+    real(fp)                            :: qtfrc
+    real(fp)                            :: sig1           ! Layer thickness as fraction of previous layer 
+    real(fp)                            :: sig2           ! Layer thickness as fraction 
+    real(fp)                            :: tcur           ! Current time in hours since last nodal update time
+    real(fp)                            :: tdif           ! Time difference (in minutes) between TIMNOW and TSTART 
+    real(fp)                            :: tfrac          ! Fraction of TDIF and Smoothing time 
+    real(fp)                            :: thickOpen      ! When mnbnd(5,n) <> 0: sum of thickness of all open layers
+    real(fp)                            :: timscl         ! Multiple factor to create minutes from read times 
+    real(fp)                            :: totl           ! Actual length of an openbnd. section 
+    real(fp)                            :: ttfhsum        ! Temporary variable for depth-averaging RTTFU/V resistance
+    real(fp)                            :: width
+    real(fp)                            :: z1             ! Previous layer: (1+SIG1)*H0 
+    real(fp)                            :: z2             ! Currect layer: (1+SIG2)*H0 
+    real(fp)                            :: zbulk          ! Sommation of all layers ZLAYER*THICK 
+    real(fp)                            :: zl             ! Z for layer: (Z1+Z2)/2. 
+    real(fp)                            :: zlayer         ! Z layer: LOG (1.+ZL/Z0) 
+    real(fp), dimension(:), allocatable :: qtfrct_global  ! work array
+    integer                             :: nobcgl         ! global number of open boudnaries (i.e. original number excluding duplicate open boudnaries located in the halo regions)
+    integer                             :: nobcto         ! total number of open boundaries (including "duplicate" open boudnaries located in halo regions)
+    integer                             :: istat
 !
 !! executable statements -------------------------------------------------------
 !
@@ -282,7 +293,6 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     fbccorrection         => gdp%gdflwpar%fbccorrection
     dist_pivot_part       => gdp%gdbcdat%dist_pivot_part
 
-    
     !
     ! initialize local parameters
     ! omega in deg/hour & time in seconds !!, alfa = in minuten
@@ -300,6 +310,19 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     k1st  = -999
     k2nd  = -999
     dpvel = -999.0_fp
+  
+    
+    if (parll) then 
+       !
+       ! Recalculates the effective global number of open boundary conditions
+       !
+       call dfsync(gdp)
+       call dffind_duplicate(lundia, nto, nobcto, nobcgl,  gdp%gdbcdat%bct_order, gdp)
+    else
+       nobcto = nto
+       nobcgl = nto
+    endif
+
     !
     ! calculate total discharge fractions
     ! calculate qtot for QH boundaries
@@ -420,8 +443,22 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     !
     ! Update the total discharge boundaries for the overall domain by summing up among those  
     !
-    call dfreduce( qtfrct, nto, dfloat, dfsum, gdp )
-    !
+    if (parll) then
+       call dfsync(gdp)
+       allocate( qtfrct_global(nobcgl), stat=istat)
+       if (istat /= 0) then
+          call prterr(lundia, 'P004', 'memory alloc error in incbc')
+          call d3stop(1, gdp)
+       endif
+       qtfrct_global = 0.0_fp
+       call dfgather_filter(lundia, nto, nobcto, nobcgl, gdp%gdbcdat%bct_order, qtfrct, qtfrct_global, gdp, sum_elements)
+       call dfbroadc(qtfrct_global, nobcgl, dfloat, gdp)
+       do n1 = 1, nto
+           qtfrct(n1) = qtfrct_global(gdp%gdbcdat%bct_order(n1))
+       enddo
+       if (allocated(qtfrct_global)) deallocate(qtfrct_global, stat=istat)
+    endif 
+
     ! Update QH values if necessary
     ! Necessary if: the discharge is not in the selected range
     ! or the QH table has not yet been read: itbct(5,ito)<0

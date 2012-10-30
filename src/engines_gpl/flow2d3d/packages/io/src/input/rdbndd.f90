@@ -630,7 +630,8 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           endif
        enddo
       
-       allocate(gdp%gdbcdat%bct_order(nto-ntof-ntoq), stat=istat)
+       !allocate(gdp%gdbcdat%bct_order(nto-ntof-ntoq), stat=istat)
+       allocate(gdp%gdbcdat%bct_order(mxdnto), stat=istat)
        if (istat /= 0) then
           call prterr(lundia, 'P004', 'memory alloc error in rdbndd(bct_order)')
           call d3stop(1, gdp)
