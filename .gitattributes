@@ -105,6 +105,7 @@ src/common.am -text
 src/configure.ac -text
 src/d_hydro_open_source.sln -text
 src/d_hydro_open_source_vs2010.sln -text
+src/d_hydro_open_source_vs2010_intel13.sln -text
 src/doxyfile_delft3d -text
 src/engines_gpl/Makefile.am -text
 src/engines_gpl/d_hydro/Makefile.am -text
@@ -383,6 +384,7 @@ src/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/wrscr.F90 -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/flow2d3d.vcproj -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/flow2d3d.vcxproj -text
+src/engines_gpl/flow2d3d/packages/flow2d3d/flow2d3d_intel13.vcxproj -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/include/blob.h -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/include/category.h -text
 src/engines_gpl/flow2d3d/packages/flow2d3d/include/context-flowside.h -text
@@ -459,6 +461,7 @@ src/engines_gpl/flow2d3d/packages/flow2d3d/src/readxmldd.cpp -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_openda/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_openda/flow2d3d_openda.vcproj -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_openda/flow2d3d_openda.vcxproj -text
+src/engines_gpl/flow2d3d/packages/flow2d3d_openda/flow2d3d_openda_intel13.vcxproj -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_openda/flow2d3d_openda_lib.vfproj -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_openda/include/flow2d3d_openda_version.h.svn -text
 src/engines_gpl/flow2d3d/packages/flow2d3d_openda/include/version_number.ini -text
@@ -1243,6 +1246,7 @@ src/engines_gpl/wave/packages/wave/src/wave.f90 -text
 src/engines_gpl/wave/packages/wave/src/wave_version.F90.svn -text
 src/engines_gpl/wave/packages/wave/wave.vfproj -text
 src/engines_gpl/wave/packages/wave/wave_vs2010.vfproj -text
+src/engines_gpl/wave/packages/wave/wave_vs2010_intel13.vfproj -text
 src/install.cmd -text
 src/install.sh -text
 src/m4/COPYING.gwqt -text
@@ -1963,6 +1967,7 @@ src/tools_gpl/datsel/packages/Makefile.am -text
 src/tools_gpl/datsel/packages/datsel/Makefile.am -text
 src/tools_gpl/datsel/packages/datsel/datsel.vcproj -text
 src/tools_gpl/datsel/packages/datsel/datsel.vcxproj -text
+src/tools_gpl/datsel/packages/datsel/datsel_intel13.vcxproj -text
 src/tools_gpl/datsel/packages/datsel/src/Makefile.am -text
 src/tools_gpl/datsel/packages/datsel/src/main.cpp -text
 src/tools_gpl/datsel/packages/datsel_f/Makefile.am -text
@@ -1998,6 +2003,7 @@ src/tools_gpl/kubint/packages/Makefile.am -text
 src/tools_gpl/kubint/packages/kubint/Makefile.am -text
 src/tools_gpl/kubint/packages/kubint/kubint.vcproj -text
 src/tools_gpl/kubint/packages/kubint/kubint.vcxproj -text
+src/tools_gpl/kubint/packages/kubint/kubint_intel13.vcxproj -text
 src/tools_gpl/kubint/packages/kubint/src/Makefile.am -text
 src/tools_gpl/kubint/packages/kubint/src/main.cpp -text
 src/tools_gpl/kubint/packages/kubint_f/Makefile.am -text
@@ -2031,6 +2037,7 @@ src/tools_gpl/lint/packages/Makefile.am -text
 src/tools_gpl/lint/packages/lint/Makefile.am -text
 src/tools_gpl/lint/packages/lint/lint.vcproj -text
 src/tools_gpl/lint/packages/lint/lint.vcxproj -text
+src/tools_gpl/lint/packages/lint/lint_intel13.vcxproj -text
 src/tools_gpl/lint/packages/lint/src/Makefile.am -text
 src/tools_gpl/lint/packages/lint/src/main.cpp -text
 src/tools_gpl/lint/packages/lint_f/Makefile.am -text
