@@ -1,5 +1,6 @@
 * text=auto !eol
 examples/01_standard/config_flow2d3d.ini -text
+examples/01_standard/config_flow2d3d.xml -text
 examples/01_standard/f34.bca -text
 examples/01_standard/f34.bch -text
 examples/01_standard/f34.bnd -text
@@ -21,6 +22,8 @@ examples/01_standard/run_flow2d3d.sh -text
 examples/01_standard/run_flow2d3d_parallel.bat -text
 examples/01_standard/run_flow2d3d_parallel.sh -text
 examples/01_standard/run_flow2d3d_parallel_sge.sh -text
+examples/01_standard/run_flow2d3d_xml.bat -text
+examples/01_standard/run_flow2d3d_xml.sh -text
 examples/02_domaindecomposition/bak_1.enc -text
 examples/02_domaindecomposition/bak_1.grd -text
 examples/02_domaindecomposition/bak_2.enc -text
