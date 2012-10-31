@@ -279,7 +279,7 @@ Iterator::Send (
 
     // Find entry in join table for sender and receiver
 
-    int senderid = this->dd->GetThreadID ();
+    int senderid = this->dd->DDGetThreadID ();
     if (this->id == senderid)
         throw new Exception (true, "Iterator \"%s\" in \"%s\" is trying to send itself a message",
                         this->name,
@@ -321,7 +321,7 @@ Iterator::Receive (
 
     int tag;
 
-    int senderid = this->dd->GetThreadID ();
+    int senderid = this->dd->DDGetThreadID ();
     if (this->id == senderid)
         throw new Exception (true, "Iterator \"%s\" in \"%s\" is trying to receive a message from itself",
                         this->name,
@@ -470,7 +470,7 @@ IteratorSelf (
     void
     ) {
 
-    int iid = FLOW2D3D->dd->GetThreadID ();
+    int iid = FLOW2D3D->dd->DDGetThreadID ();
     return FLOW2D3D->dd->iterator[iid].iterator;
     }
 

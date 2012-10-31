@@ -93,7 +93,7 @@ DD::InitThreads (
 
 
 int
-DD::GetThreadID (
+DD::DDGetThreadID (
     void
     ) {
 
