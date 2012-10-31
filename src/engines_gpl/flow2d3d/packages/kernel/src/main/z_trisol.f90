@@ -986,26 +986,29 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           write(*,*) '1st half time step: d3s_get_discharges DONE'
           call timer_stop(timer_wait, gdp)
        endif
-       !
-       ! Boundary conditions; hydrodynamic conditions
-       !
-       call timer_start(timer_incbc, gdp)
-       call incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
-                & kmax      ,kcd       ,nto       ,ntof      ,ntoq      , &
-                & kc        ,nrob      ,noroco    , &
-                & ch(tprofu),i(itbct)  ,i(mnbnd)  ,i(nob)    ,i(kfumin) , &
-                & i(kfumax) ,i(kfvmin) ,i(kfvmax) ,r(hydrbc) ,r(circ2d) , &
-                & r(circ3d) ,r(patm)   ,r(guu)    ,r(gvv)    , &
-                & r(hu)     ,r(hv)     ,r(omega)  ,r(alpha)  , &
-                & r(z0urou) ,r(z0vrou) ,r(qxk)    ,r(qyk)    ,r(s0)     , &
-                & r(u0)     ,r(v0)     ,r(grmasu) ,r(grmasv) ,r(cfurou) , &
-                & r(cfvrou) ,r(qtfrac) ,r(qtfrct) ,r(qtfrt2) ,r(thick)  , &
-                & r(dzu1)   ,r(dzv1)   ,r(zwork)  ,i(kcu)    ,i(kcv)    , &
-                & timhr     ,ch(nambnd),gdp       )
-       call timer_stop(timer_incbc, gdp)
-       !
-       ! Constituent (excl. turbulence & secondary flow)
-       !
+    endif       
+    !
+    ! Boundary conditions; hydrodynamic conditions
+    ! Incbc must be called even if nto<=0 due to synchronisation when running parallel
+    !
+    call timer_start(timer_incbc, gdp)
+    call incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
+             & kmax      ,kcd       ,nto       ,ntof      ,ntoq      , &
+             & kc        ,nrob      ,noroco    , &
+             & ch(tprofu),i(itbct)  ,i(mnbnd)  ,i(nob)    ,i(kfumin) , &
+             & i(kfumax) ,i(kfvmin) ,i(kfvmax) ,r(hydrbc) ,r(circ2d) , &
+             & r(circ3d) ,r(patm)   ,r(guu)    ,r(gvv)    , &
+             & r(hu)     ,r(hv)     ,r(omega)  ,r(alpha)  , &
+             & r(z0urou) ,r(z0vrou) ,r(qxk)    ,r(qyk)    ,r(s0)     , &
+             & r(u0)     ,r(v0)     ,r(grmasu) ,r(grmasv) ,r(cfurou) , &
+             & r(cfvrou) ,r(qtfrac) ,r(qtfrct) ,r(qtfrt2) ,r(thick)  , &
+             & r(dzu1)   ,r(dzv1)   ,r(zwork)  ,i(kcu)    ,i(kcv)    , &
+             & timhr     ,ch(nambnd),gdp       )
+    call timer_stop(timer_incbc, gdp)
+    !
+    ! Constituent (excl. turbulence & secondary flow)
+    !
+    if (nto > 0) then
        if (lstsc > 0) then
           call timer_start(timer_incbcc, gdp)
           call incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
@@ -1617,26 +1620,28 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           write(*,*) '2nd half time step: d3s_get_discharges DONE'
           call timer_stop(timer_wait, gdp)
        endif
-       !
-       ! Boundary conditions; hydrodynamic conditions
-       !
-       call timer_start(timer_incbc, gdp)
-       call incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
-                & kmax      ,kcd       ,nto       ,ntof      ,ntoq      , &
-                & kc        ,nrob      ,noroco    , &
-                & ch(tprofu),i(itbct)  ,i(mnbnd)  ,i(nob)    ,i(kfumin) , &
-                & i(kfumax) ,i(kfvmin) ,i(kfvmax) ,r(hydrbc) ,r(circ2d) , &
-                & r(circ3d) ,r(patm)   ,r(guu)    ,r(gvv)    , &
-                & r(hu)     ,r(hv)     ,r(omega)  ,r(alpha)  , &
-                & r(z0urou) ,r(z0vrou) ,r(qxk)    ,r(qyk)    ,r(s0)     , &
-                & r(u0)     ,r(v0)     ,r(grmasu) ,r(grmasv) ,r(cfurou) , &
-                & r(cfvrou) ,r(qtfrac) ,r(qtfrct) ,r(qtfrt2) ,r(thick)  , &
-                & r(dzu1)   ,r(dzv1)   ,r(zwork)  ,i(kcu)    ,i(kcv)    , &
-                & timhr     ,ch(nambnd),gdp       )
-       call timer_stop(timer_incbc, gdp)
-       !
-       ! Constituent (excl. turbulence & secondary flow)
-       !
+    endif
+    !
+    ! Boundary conditions; hydrodynamic conditions
+    !
+    call timer_start(timer_incbc, gdp)
+    call incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
+             & kmax      ,kcd       ,nto       ,ntof      ,ntoq      , &
+             & kc        ,nrob      ,noroco    , &
+             & ch(tprofu),i(itbct)  ,i(mnbnd)  ,i(nob)    ,i(kfumin) , &
+             & i(kfumax) ,i(kfvmin) ,i(kfvmax) ,r(hydrbc) ,r(circ2d) , &
+             & r(circ3d) ,r(patm)   ,r(guu)    ,r(gvv)    , &
+             & r(hu)     ,r(hv)     ,r(omega)  ,r(alpha)  , &
+             & r(z0urou) ,r(z0vrou) ,r(qxk)    ,r(qyk)    ,r(s0)     , &
+             & r(u0)     ,r(v0)     ,r(grmasu) ,r(grmasv) ,r(cfurou) , &
+             & r(cfvrou) ,r(qtfrac) ,r(qtfrct) ,r(qtfrt2) ,r(thick)  , &
+             & r(dzu1)   ,r(dzv1)   ,r(zwork)  ,i(kcu)    ,i(kcv)    , &
+             & timhr     ,ch(nambnd),gdp       )
+    call timer_stop(timer_incbc, gdp)
+    !
+    ! Constituent (excl. turbulence & secondary flow)
+    !
+    if (nto > 0) then
        if (lstsc > 0) then
           call timer_start(timer_incbcc, gdp)
           call incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
