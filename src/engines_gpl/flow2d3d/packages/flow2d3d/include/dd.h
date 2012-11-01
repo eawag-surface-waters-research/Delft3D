@@ -176,7 +176,7 @@ class DD {
             } join [MAXJOINS];
 
     public:
-        int     GetThreadID     (void);
+        int     DDGetThreadID     (void);
 
     public:
         Flow2D3D *  flow;               // reference to overall Flow object
