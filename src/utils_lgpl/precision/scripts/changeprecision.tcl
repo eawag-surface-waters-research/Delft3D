@@ -37,8 +37,10 @@ lappend files [file join $rootdir "include" "tri-dyn.igd"]
 lappend files [file join $rootdir "include" "precision.h"]
 lappend files [file join $rootdir ".." ".." "engines_gpl" "flow2d3d" "packages" "flow2d3d" "flow2d3d.vcproj"]
 lappend files [file join $rootdir ".." ".." "engines_gpl" "flow2d3d" "packages" "flow2d3d" "flow2d3d.vcxproj"]
+lappend files [file join $rootdir ".." ".." "engines_gpl" "flow2d3d" "packages" "flow2d3d" "flow2d3d_intel13.vcxproj"]
 lappend files [file join $rootdir ".." ".." "engines_gpl" "flow2d3d" "packages" "flow2d3d_openda" "flow2d3d_openda.vcproj"]
 lappend files [file join $rootdir ".." ".." "engines_gpl" "flow2d3d" "packages" "flow2d3d_openda" "flow2d3d_openda.vcxproj"]
+lappend files [file join $rootdir ".." ".." "engines_gpl" "flow2d3d" "packages" "flow2d3d_openda" "flow2d3d_openda_intel13.vcxproj"]
 # parse flow2d3d/Makefile.am twice for two strings to be replaced
 lappend files [file join $rootdir ".." ".." "engines_gpl" "flow2d3d" "packages" "flow2d3d" "src" "Makefile.am"]
 lappend files [file join $rootdir ".." ".." "engines_gpl" "flow2d3d" "packages" "flow2d3d" "src" "Makefile.am"]
@@ -58,7 +60,9 @@ lappend filetypes "c"
 # flow2d3d vcproj/vcxproj:
 lappend filetypes "o"
 lappend filetypes "o"
+lappend filetypes "o"
 # flow2d3d_openda vcproj/vcxproj:
+lappend filetypes "o"
 lappend filetypes "o"
 lappend filetypes "o"
 # flow2d3d/Makefile.am:
@@ -76,7 +80,9 @@ lappend hplines "#define FLOW_DOUBLE_PRECISION"
 # flow2d3d vcproj/vcxproj:
 lappend hplines "flow2d3d.dll"
 lappend hplines "flow2d3d.dll"
+lappend hplines "flow2d3d.dll"
 # flow2d3d_openda vcproj/vcxproj:
+lappend hplines "flow2d3d_openda.dll"
 lappend hplines "flow2d3d_openda.dll"
 lappend hplines "flow2d3d_openda.dll"
 # flow2d3d/Makefile.am:
@@ -94,7 +100,9 @@ lappend splines "#undef FLOW_DOUBLE_PRECISION"
 # flow2d3d vcproj/vcxproj:
 lappend splines "flow2d3d_sp.dll"
 lappend splines "flow2d3d_sp.dll"
+lappend splines "flow2d3d_sp.dll"
 # flow2d3d_openda vcproj/vcxproj:
+lappend splines "flow2d3d_openda_sp.dll"
 lappend splines "flow2d3d_openda_sp.dll"
 lappend splines "flow2d3d_openda_sp.dll"
 # flow2d3d/Makefile.am:
