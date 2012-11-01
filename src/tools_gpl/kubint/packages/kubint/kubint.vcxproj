@@ -79,7 +79,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <OutputFile>$(OutDir)$(ProjectName).exe</OutputFile>
+      <OutputFile>$(OutDir)\kubint.exe</OutputFile>
       <AdditionalLibraryDirectories>$(IFORT_COMPILER12)\compiler\lib\ia32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -128,6 +128,7 @@
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalDependencies>..\kubint_f\$(ConfigurationName)\kubint_f.lib;libifcoremt.lib;ifconsol.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)\kubint.exe</OutputFile>
     </Link>
     <PostBuildEvent>
       <Command>..\..\..\..\scripts_lgpl\win32\oss-install.cmd kubint ..\bin</Command>
