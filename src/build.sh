@@ -246,6 +246,16 @@ fi
 
 
 #---------------------
+# Additional compile flags
+if [ "$compiler" = 'gnu' ]; then
+    fflags=''
+else
+    # Intel compilers
+    fflags='-threads'
+fi
+
+
+#---------------------
 # Additional link flags/libraries
 if [ "$compiler" = 'gnu' ]; then
     export LDFLAGSMT_ADDITIONAL=" "
@@ -336,16 +346,16 @@ if [ "$platform" = 'intel64' ]; then
     command=" \
         CFLAGS='$flags -fPIC -m64 $CFLAGS' \
         CXXFLAGS='$flags -fPIC -m64 $CXXFLAGS' \
-        FFLAGS='$flags -threads -fPIC -m64 $FFLAGS' \
-        FCFLAGS='$flags -threads -fPIC -m64 $FCFLAGS' \
+        FFLAGS='$flags $fflags -fPIC -m64 $FFLAGS' \
+        FCFLAGS='$flags $fflags -fPIC -m64 $FCFLAGS' \
             ./configure --prefix=`pwd` $configureArgs &> $log \
         "
 else
     command=" \
         CFLAGS='$flags -fPIC $CFLAGS' \
         CXXFLAGS='$flags -fPIC $CXXFLAGS' \
-        FFLAGS='$flags -fPIC $FFLAGS' \
-        FCFLAGS='$flags -fPIC $FCFLAGS' \
+        FFLAGS='$flags $fflags -fPIC $FFLAGS' \
+        FCFLAGS='$flags $fflags -fPIC $FCFLAGS' \
             ./configure --prefix=`pwd` $configureArgs &> $log \
         "
 fi
