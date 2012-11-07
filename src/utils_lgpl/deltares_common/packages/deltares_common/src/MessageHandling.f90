@@ -114,7 +114,7 @@ private
    integer           , dimension(maxMessages), private :: Levels
    integer                                   , private :: messagecount 
    integer                                   , private :: maxErrorLevel = 0 
-   integer                                   , private :: thresholdLvl = 0 
+   integer                                   , public  :: thresholdLvl = 0 
    integer, save                  :: lunMess          = 0
    logical, save                  :: writeMessage2Screen = .false.
    logical, save                  :: useLogging = .true.
