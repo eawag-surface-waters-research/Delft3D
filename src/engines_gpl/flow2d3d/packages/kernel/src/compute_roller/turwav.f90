@@ -81,7 +81,6 @@ subroutine turwav(nmmax     ,kmax      ,kfs       , &
     ! HORIZONTAL EDDY VISCOSITIES
     !
     do nm = 1, nmmax
-       vicuv(nm, khtur) = thr
        if (kfs(nm) == 1) then
           h = max(0.01_fp, s0(nm) + real(dps(nm),fp))
           !
@@ -93,7 +92,9 @@ subroutine turwav(nmmax     ,kmax      ,kfs       , &
           else
             vicuv(nm, khtur) = (dis(nm)/rhow)**(1.0/3.0)*h
           endif
+          vicuv(nm, khtur) = max(vicuv(nm, khtur), thr)
+       else
+          vicuv(nm, khtur) = thr
        endif
-       vicuv(nm, khtur) = max(vicuv(nm, khtur), thr)
     enddo
 end subroutine turwav
