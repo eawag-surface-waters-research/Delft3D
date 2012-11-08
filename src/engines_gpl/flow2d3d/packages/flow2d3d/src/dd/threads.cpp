@@ -98,6 +98,7 @@ DD::DDGetThreadID (
     ) {
 
     int * idp;
+    this->log->Write (Log::ITER_MINOR, "DDGetThreadID called");
     if ((idp = (int *) pthread_getspecific (this->thiter)) == NULL)
         throw new Exception (true, "Pthreads error: pthread_getspecific fails: %s", strerror (errno));
 

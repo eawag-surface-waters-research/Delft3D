@@ -30,10 +30,12 @@ set processes {}
 global processhandles
 set processhandles {}
 
+global flags
+set flags {}
 # Versionnumber must be between 4.01 and 4.99
 # to avoid clash with Delft3D-FLOW executable "deltares_hydro.exe" version 4.00.xx
 global version
-set version "4.99.02" 
+set version "4.99.03" 
 
 # --------------------------------------------------------------------
 #   Author:    Arjen Markus
@@ -101,7 +103,8 @@ proc getInput {channel} {
 proc usage { } {
    set xmlFile [format "%s_%s.xml" $::xmlBaseName "<processId>"]
    puts "Usage:"
-   puts "deltares_hydro.exe <config.ini> \[-keepXML\]"
+   puts "deltares_hydro.exe [flags] <config.ini> \[-keepXML\]"
+   puts "    flags        : To be passed through to d_hydro.exe"
    puts "    <config.ini> : Name of configuration file in ini format"
    puts "                   Example configuration file:"
    puts "                   \[Component\]"
@@ -180,6 +183,9 @@ set xmlFile [format "%s_%s.xml" $xmlBaseName [pid]]
 set debug 0
 # This probably only works if called as shell script.... not sure what argv0 is in the case of an exe....
 set exedir   [file dirname [file normalize $argv0]]
+if {[string first "deltares_hydro.exe" $exedir]} {
+   set exedir   [file dirname $exedir]
+}
 # set exedir   [file dirname [file normalize [info nameofexecutable]]]
 set exename  "d_hydro.exe"
 set fullexename [file join $exedir $exename]
@@ -188,13 +194,20 @@ set keepXML 0
 
 #
 # Initial checks
-if {[llength $argv] == 2} {
-   if {[string first "-k" [lindex $argv 1]] >= 0} {
+if {[llength $argv] >= 2} {
+   if {[string first "-k" [lindex $argv end]] >= 0} {
       set keepXML 1
+      set infile [lindex $argv [expr [llength $argv]-2]]
+      set flagsEndIndex [expr [llength $argv]-3]
+      if {$flagsEndIndex >= 0} {
+         set flags [lrange $argv 0 $flagsEndIndex]
+      }
    } else {
-      puts "ERROR: Unexpected second argument [lindex $argv 1]"
-      usage
-      exit
+      set infile [lindex $argv end]
+      set flagsEndIndex [expr [llength $argv]-2]
+      if {$flagsEndIndex >= 0} {
+         set flags [lrange $argv 0 $flagsEndIndex]
+      }
    }
 } elseif {[llength $argv] != 1} {
    puts "ERROR: Start \"deltares_hydro.exe\" with 1 or 2 arguments."
@@ -257,7 +270,7 @@ writeXML
 
 #
 # Start Delft3D-FLOW 5.xx calculation
-set command "$fullexename $xmlFile"
+set command "$fullexename [join $flags] $xmlFile"
 puts "Executing \"$command\" ..."
 runcmd $command
 vwait finished

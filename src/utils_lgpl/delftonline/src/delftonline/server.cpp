@@ -336,6 +336,8 @@ Server::GetThreadID (
     void
     ) {
 
+    // The following print statement is added for debug purpose and will be removed again as soon as possible
+    printf("GetThreadID called\n");
     void * spec = pthread_getspecific (this->thread);
     if (spec < 0)
         throw Error (true, "GetThreadID", "Invalid thread-specific key");

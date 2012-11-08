@@ -279,6 +279,7 @@ Iterator::Send (
 
     // Find entry in join table for sender and receiver
 
+    this->dd->log->Write (Log::ITER_MINOR, "IteratorSend called");
     int senderid = this->dd->DDGetThreadID ();
     if (this->id == senderid)
         throw new Exception (true, "Iterator \"%s\" in \"%s\" is trying to send itself a message",
@@ -321,6 +322,7 @@ Iterator::Receive (
 
     int tag;
 
+    this->dd->log->Write (Log::ITER_MINOR, "IteratorReceive called");
     int senderid = this->dd->DDGetThreadID ();
     if (this->id == senderid)
         throw new Exception (true, "Iterator \"%s\" in \"%s\" is trying to receive a message from itself",
@@ -470,6 +472,7 @@ IteratorSelf (
     void
     ) {
 
+    FLOW2D3D->dd->log->Write (Log::ITER_MINOR, "IteratorSelf called");
     int iid = FLOW2D3D->dd->DDGetThreadID ();
     return FLOW2D3D->dd->iterator[iid].iterator;
     }
