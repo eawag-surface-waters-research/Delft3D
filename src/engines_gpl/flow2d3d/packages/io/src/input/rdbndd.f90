@@ -501,6 +501,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     enddo
     if (.not.parll .and. .not.yestdd) then
        allocate (gdp%gdbcdat%bct_order(nto - ntof - ntoq), stat=istat)
+       gdp%gdbcdat%bct_order = 0
        if (istat /= 0) then
           call prterr(lundia, 'P004', 'memory alloc error in rdbndd')
           call d3stop(1, gdp)
@@ -516,6 +517,7 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        ! nto is the number of open boundaries in this specific partition
        !
        allocate(gdp%gdbcdat%bct_order(mxdnto), stat=istat)
+       gdp%gdbcdat%bct_order = 0
        if (istat /= 0) then
           call prterr(lundia, 'P004', 'memory alloc error in rdbndd(bct_order)')
           call d3stop(1, gdp)
@@ -638,12 +640,16 @@ subroutine rdbndd(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              ! determine which harmonic boundary sections belong to which subdomains
              nhsub(ntof) = nsd(n)
           endif
-       enddo
-       !  
-       do n = 1, nto-ntof-ntoq ! nto-ntof-ntoq is the same as nn_t
-          bct_order(n) = nsd_t(n)
+          bct_order(n) = nsd(n)         
        enddo
        !
+       ! bct_order is used to map the boundary acrossing the parallel subdomains. sensitive in timeseries. 
+       !
+       do n = 1, nto-ntof-ntoq ! nto-ntof-ntoq is the same as nn_t
+          if(typbnd(n)=='T'.or.datbnd(n)=='Q'.or.typbnd(n)=='R') then
+             bct_order(n) = nsd_t(n)
+          endif
+       enddo
        deallocate(ctmp1,ctmp2,ctmp3,itemp,rtemp, stat=istat)
     endif ! parll and not.yestdd
     do n = 1, nto

@@ -9,7 +9,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                & u0        ,v0        ,grmasu    ,grmasv    ,cfurou    , &
                & cfvrou    ,qtfrac    ,qtfrct    ,qtfrt2    ,thick     , &
                & dzu1      ,dzv1      ,thklay    ,kcu       ,kcv       , &
-               & timhr     ,nambnd    ,gdp       )
+               & timhr     ,nambnd    ,typbnd    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -173,6 +173,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     real(fp), dimension(nto)                                                         :: qtfrt2 !  Description and declaration in esm_alloc_real.f90
     character(20), dimension(nto)                                                    :: tprofu !  Description and declaration in esm_alloc_char.f90
     character(20), dimension(nto)                                      , intent(in)  :: nambnd !  Description and declaration in esm_alloc_char.f90
+    character(1) , dimension(nto)                                      , intent(in)  :: typbnd !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !
@@ -292,7 +293,6 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     fcrbnd                => gdp%gdflwpar%fcrbnd
     fbccorrection         => gdp%gdflwpar%fbccorrection
     dist_pivot_part       => gdp%gdbcdat%dist_pivot_part
-
     !
     ! initialize local parameters
     ! omega in deg/hour & time in seconds !!, alfa = in minuten
@@ -322,7 +322,6 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        nobcto = nto
        nobcgl = nto
     endif
-
     !
     ! calculate total discharge fractions
     ! calculate qtot for QH boundaries
@@ -440,25 +439,6 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        else
        endif
     enddo
-    !
-    ! Update the total discharge boundaries for the overall domain by summing up among those  
-    !
-    if (parll) then
-       call dfsync(gdp)
-       allocate( qtfrct_global(nobcgl), stat=istat)
-       if (istat /= 0) then
-          call prterr(lundia, 'P004', 'memory alloc error in incbc')
-          call d3stop(1, gdp)
-       endif
-       qtfrct_global = 0.0_fp
-       call dfgather_filter(lundia, nto, nobcto, nobcgl, gdp%gdbcdat%bct_order, qtfrct, qtfrct_global, gdp, sum_elements)
-       call dfbroadc(qtfrct_global, nobcgl, dfloat, gdp)
-       do n1 = 1, nto
-           qtfrct(n1) = qtfrct_global(gdp%gdbcdat%bct_order(n1))
-       enddo
-       if (allocated(qtfrct_global)) deallocate(qtfrct_global, stat=istat)
-    endif 
-
     ! Update QH values if necessary
     ! Necessary if: the discharge is not in the selected range
     ! or the QH table has not yet been read: itbct(5,ito)<0
@@ -487,6 +467,26 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        !
        qtfrt2(ito) = qtfrct(ito)
     enddo
+    !
+    ! Update the total discharge boundaries for the overall domain by summing up among those  (typbnd(n1)=='T')
+    !
+    if (parll) then
+       call dfsync(gdp)
+       allocate( qtfrct_global(nobcgl), stat=istat)
+       if (istat /= 0) then
+          call prterr(lundia, 'P004', 'memory alloc error in incbc')
+          call d3stop(1, gdp)
+       endif
+       qtfrct_global = 0.0_fp
+       call dfgather_filter(lundia, nto, nobcto, nobcgl, gdp%gdbcdat%bct_order, qtfrct, qtfrct_global, gdp, sum_elements)
+       call dfbroadc(qtfrct_global, nobcgl, dfloat, gdp)
+       do n1 = 1, nto
+          if(typbnd(n1)=='T') then
+             qtfrct(n1) = qtfrct_global(gdp%gdbcdat%bct_order(n1))
+          endif
+       enddo
+       if (allocated(qtfrct_global)) deallocate(qtfrct_global, stat=istat)
+    endif 
     !
     ! Enable relaxation in following time steps if thetqh>0
     !

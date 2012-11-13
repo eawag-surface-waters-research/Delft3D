@@ -207,7 +207,7 @@ integer                                   :: itag
     call dfgather_lowlevel ( tempbuff, nbtotal, inbuff, nblocal, dfint, gdp )
     call dfgather_lowlevel ( ibuff   , nbtotal, order , nblocal, dfint, gdp )
     if (inode == master) then
-       oubuff = 0.0
+       oubuff = 0
        if (present(crosec_case)) then
           do n = 1, nbtotal
              if (ibuff(n) /= 0) oubuff(ibuff(n)) = oubuff(ibuff(n)) + tempbuff(n)
@@ -281,6 +281,7 @@ integer                                   :: itag
     call dfgather_lowlevel ( rbuff, (jl-jf+1)*nbtotal, inbuff, (jl-jf+1)*nblocal, dfint, gdp )
     call dfgather_lowlevel ( ibuff, nbtotal, order, nblocal, dfint, gdp )
     if (inode == master) then
+       oubuff = 0
        do n = 1, nbtotal
           if (ibuff(n) /= 0) oubuff(jf:jl, ibuff(n)) = rbuff(jf:jl, n)
        enddo

@@ -556,6 +556,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     character(20), dimension(:)          , pointer :: procs
     logical                              , pointer :: dryrun
     logical                              , pointer :: eulerisoglm
+    integer(pntrsize)                    , pointer :: typbnd
 !
     include 'tri-dyn.igd'
 !
@@ -1108,6 +1109,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     procs               => gdp%gdusrpar%procs
     dryrun              => gdp%gdtmpfil%dryrun
     nrcmp               => gdp%gdtfzeta%nrcmp
+    typbnd              => gdp%gdr_i_ch%typbnd
     !
     icx     = 0
     icy     = 0
@@ -1313,7 +1315,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
              & r(u0)     ,r(v0)     ,r(grmasu) ,r(grmasv) ,r(cfurou) , &
              & r(cfvrou) ,r(qtfrac) ,r(qtfrct) ,r(qtfrt2) ,r(thick)  , &
              & r(dzu1)   ,r(dzv1)   ,r(zwork)  ,i(kcu)    ,i(kcv)    , &
-             & timhr     ,ch(nambnd),gdp       )
+             & timhr     ,ch(nambnd),ch(typbnd),gdp       )
     call timer_stop(timer_incbc, gdp)
     !
     ! Boundary conditions; hydrodynamic conditions Riemann with wave forcing
@@ -2306,7 +2308,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
              & r(u0)     ,r(v0)     ,r(grmasu) ,r(grmasv) ,r(cfurou) , &
              & r(cfvrou) ,r(qtfrac) ,r(qtfrct) ,r(qtfrt2) ,r(thick)  , &
              & r(dzu1)   ,r(dzv1)   ,r(zwork)  ,i(kcu)    ,i(kcv)    , &
-             & timhr     ,ch(nambnd),gdp       )
+             & timhr     ,ch(nambnd),ch(typbnd),gdp       )
     call timer_stop(timer_incbc, gdp)
     !
     ! Constituent (excl. turbulence & secondary flow)
