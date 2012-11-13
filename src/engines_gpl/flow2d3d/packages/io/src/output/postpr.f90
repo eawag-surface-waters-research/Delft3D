@@ -1284,20 +1284,12 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
        ! multiple flow calls because wrfou gets called multiple times and this
        ! messes up the averageing.
        !
-       if (.not. parll) then
-          if (nst == fouwrt) then
-             call wrfou(nmax      ,mmax      ,nmaxus    ,kmax      ,lmax       , &
-                      & nofou     ,runid     ,dtsec     ,versio    ,ch(namcon) , &
-                      & i(kcs)    ,r(xz)     ,r(yz)     ,r(alfas)  ,r(xcor)    , &
-                      & r(ycor)   ,i(kfu)    ,i(kfv)    ,itdate    ,gdp        )
-             if (error) goto 9999
-          endif
-       else
-          !
-          ! when running in parallel, should NOT use Fourier output.
-          !
-          call prterr(lundia    ,'P004'    ,'When running in parallel mode, Fourier output function is NOT support yet.')
-          call d3stop(1         ,gdp       )
+       if (nst == fouwrt) then
+          call wrfou(nmax      ,mmax      ,nmaxus    ,kmax      ,lmax       , &
+                   & nofou     ,runid     ,dtsec     ,versio    ,ch(namcon) , &
+                   & i(kcs)    ,r(xz)     ,r(yz)     ,r(alfas)  ,r(xcor)    , &
+                   & r(ycor)   ,i(kfu)    ,i(kfv)    ,itdate    ,gdp        )
+          if (error) goto 9999
        endif
     endif
     !

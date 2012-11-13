@@ -86,6 +86,7 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
     logical                       , pointer :: fl45
     logical                       , pointer :: waqol
     integer                       , pointer :: itcomi
+    integer                       , pointer :: nofou
 !
 ! Global variables
 !
@@ -117,6 +118,7 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
     nto                 => gdp%d%nto
     ntoq                => gdp%d%ntoq
     ndro                => gdp%d%ndro
+    nofou               => gdp%d%nofou
     multi               => gdp%gdmorpar%multi
     dpsopt              => gdp%gdnumeco%dpsopt
     dpuopt              => gdp%gdnumeco%dpuopt
@@ -406,11 +408,19 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
           call prterr(lundia ,'U021' ,errtxt )
           ierror = ierror+ 1
        endif
+       !
+       ! when running in parallel, should NOT use Fourier output.
+       !
+       if (nofou > 0) then
+          errtxt = 'When running in parallel mode, Fourier output function is NOT support yet'
+          call prterr(lundia ,'U021' ,errtxt )
+          ierror = ierror+ 1
+       endif
     endif
     !
     !
     !
-    if (ierror> 0) then
+    if (ierror > 0) then
        error = .true.
     endif
 end subroutine chkset
