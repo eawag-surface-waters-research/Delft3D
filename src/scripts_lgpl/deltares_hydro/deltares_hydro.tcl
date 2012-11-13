@@ -35,7 +35,7 @@ set flags {}
 # Versionnumber must be between 4.01 and 4.99
 # to avoid clash with Delft3D-FLOW executable "deltares_hydro.exe" version 4.00.xx
 global version
-set version "4.99.03" 
+set version "4.99.04" 
 
 # --------------------------------------------------------------------
 #   Author:    Arjen Markus
@@ -103,7 +103,7 @@ proc getInput {channel} {
 proc usage { } {
    set xmlFile [format "%s_%s.xml" $::xmlBaseName "<processId>"]
    puts "Usage:"
-   puts "deltares_hydro.exe [flags] <config.ini> \[-keepXML\]"
+   puts "deltares_hydro.exe \[flags\] <config.ini> \[-keepXML\]"
    puts "    flags        : To be passed through to d_hydro.exe"
    puts "    <config.ini> : Name of configuration file in ini format"
    puts "                   Example configuration file:"
@@ -210,7 +210,7 @@ if {[llength $argv] >= 2} {
       }
    }
 } elseif {[llength $argv] != 1} {
-   puts "ERROR: Start \"deltares_hydro.exe\" with 1 or 2 arguments."
+   puts "ERROR: Start \"deltares_hydro.exe\" with at least 1 argument."
    usage
    exit
 }
