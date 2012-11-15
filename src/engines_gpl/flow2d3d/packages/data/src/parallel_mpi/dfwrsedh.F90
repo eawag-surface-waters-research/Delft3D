@@ -361,32 +361,19 @@ subroutine dfwrsedh(lundia    ,error     ,trifil    ,ithisc    , &
           !
           ! group 5: element 'ZWS'
           !
-          if (inode == master) allocate( rsbuff2(1:nostatgl, 1:kmax+1, 1:lsed) )
-          call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, kmax+1, 1, lsed, order_sta, zws, rsbuff2, gdp)
+          if (inode == master) allocate( rsbuff2(1:nostatgl, 0:kmax, 1:lsed) )
+          call dfgather_filter(lundia, nostat, nostatto, nostatgl, 0, kmax, 1, lsed, order_sta, zws, rsbuff2, gdp)
           if (inode == master) then
-             if (kmaxout == kmax) then
-                call sbuff_checksize(nostatgl*(kmax+1)*lsed)
-                i = 0
-                do l = 1, lsed
-                   do k = 1, kmax+1
-                      do n = 1, nostatgl
-                         i        = i+1
-                         sbuff(i) = rsbuff2(n, k, l)
-                      enddo
+             call sbuff_checksize(nostatgl*(kmaxout)*lsed)
+             i = 0
+             do l = 1, lsed
+                do k = 1, kmaxout
+                   do n = 1, nostatgl
+                      i        = i+1
+                      sbuff(i) = rsbuff2(n, shlay(k), l)
                    enddo
                 enddo
-             else
-                call sbuff_checksize(nostatgl*(kmaxout)*lsed)
-                i = 0
-                do l = 1, lsed
-                   do k = 1, kmaxout
-                      do n = 1, nostatgl
-                         i        = i+1
-                         sbuff(i) = rsbuff2(n, shlay(k), l)
-                      enddo
-                   enddo
-                enddo
-             endif
+             enddo
              deallocate( rsbuff2 )
              ierror = putelt(fds, grnam5, 'ZWS', uindex, 1, sbuff)
              if (ierror/= 0) goto 9999
