@@ -75,6 +75,7 @@ subroutine c_vort(mmax      ,nmax      ,kmax      ,nmaxus    ,kfu       , &
     integer          :: nd
     integer          :: nu
     integer          :: num
+    integer          :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -83,6 +84,7 @@ subroutine c_vort(mmax      ,nmax      ,kmax      ,nmaxus    ,kfu       , &
     vortic = 0.0
     enstro = 0.0
     wrkarr = 0.0
+    nm_pos = 1
     !
     do n = 1, nmaxus
        do m = 1, mmax
@@ -118,7 +120,7 @@ subroutine c_vort(mmax      ,nmax      ,kmax      ,nmaxus    ,kfu       , &
     !
     ! exchange vortic with neighbours for parallel runs
     !
-    call dfexchg ( vortic, 1, kmax, dfloat, gdp )
+    call dfexchg ( vortic, 1, kmax, dfloat, nm_pos, gdp )
     do n = 1, nmaxus
        do m = 1, mmax
           do k = 1, kmax

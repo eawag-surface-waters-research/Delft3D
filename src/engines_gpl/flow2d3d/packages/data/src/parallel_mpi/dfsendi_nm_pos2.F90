@@ -1,4 +1,4 @@
-subroutine dfsendi ( field, work, worksize, ks, ke, request, tag, gdp )
+subroutine dfsendi_nm_pos2 ( field, work, worksize, ks, ke, request, tag, gdp )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -66,7 +66,7 @@ subroutine dfsendi ( field, work, worksize, ks, ke, request, tag, gdp )
     integer                                        , intent(in)    :: tag          ! unique tag
     integer                                        , intent(in)    :: worksize     ! 
     integer                                        , intent(inout) :: request(4,2) ! MPI communication handle
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub,ks:ke), intent(in)    :: field        ! real array for which halo values must
+    integer, dimension(ks:ke,gdp%d%nmlb:gdp%d%nmub), intent(in)    :: field        ! real array for which halo values must
     integer, dimension(worksize,4,2)               , intent(inout) :: work         ! work array to store data to be sent to or received from neighbour be copied from neighbouring subdomains
 !
 ! Local variables
@@ -124,7 +124,7 @@ subroutine dfsendi ( field, work, worksize, ks, ke, request, tag, gdp )
              n                            = mod(iblkad(istart+j)-1,gdp%d%nmax) + 1
              m                            = ((iblkad(istart+j)-1)/gdp%d%nmax)+1
              indxddb                      = (m-1+gdp%d%ddbound)*(gdp%d%nmax+2*gdp%d%ddbound) + n + gdp%d%ddbound
-             work((k-ks)*novlu+j, inb, 1) = field(indxddb,k)
+             work((k-ks)*novlu+j, inb, 1) = field(k,indxddb)
           enddo
        enddo
        !
@@ -148,4 +148,4 @@ subroutine dfsendi ( field, work, worksize, ks, ke, request, tag, gdp )
        endif
 #endif
     enddo
-end subroutine dfsendi
+end subroutine dfsendi_nm_pos2

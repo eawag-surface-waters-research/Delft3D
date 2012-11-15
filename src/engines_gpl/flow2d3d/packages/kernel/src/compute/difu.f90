@@ -285,6 +285,7 @@ real(fp)                :: timesti ! inverse of time step
 real(fp)                :: tnudge
 real(fp)                :: tsg
 character(20)           :: errtxt
+integer                 :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -301,8 +302,9 @@ character(20)           :: errtxt
     !
     ! INITIALISATION
     !
-    ddb  = gdp%d%ddbound
-    icxy = max(icx, icy)
+    ddb    = gdp%d%ddbound
+    icxy   = max(icx, icy)
+    nm_pos = 1
     !
     !  INITIALIZE
     !
@@ -738,7 +740,7 @@ character(20)           :: errtxt
              !
              ! exchange r1 with neighbours for parallel runs
              !
-             call dfexchg ( r1(:,:,l), 1, kmax, dfloat, gdp )
+             call dfexchg ( r1(:,:,l), 1, kmax, dfloat, nm_pos, gdp )
              !
              cycle
           endif
@@ -820,7 +822,7 @@ character(20)           :: errtxt
        !
        ! exchange r1 with neighbours for parallel runs
        !
-       call dfexchg ( r1(:,:,l), 1, kmax, dfloat, gdp )
+       call dfexchg ( r1(:,:,l), 1, kmax, dfloat, nm_pos, gdp )
        !
        ! assure that loop starts at point of correct color in own subdomain
        !
@@ -934,7 +936,7 @@ character(20)           :: errtxt
          call timer_start(timer_difu_solve6v, gdp)
        end if
        !
-       call dfexchg ( r1(:,:,l), 1, kmax, dfloat, gdp )
+       call dfexchg ( r1(:,:,l), 1, kmax, dfloat, nm_pos, gdp )
        !
        ! loop starts at point of other color now (black respectively red)
        !
@@ -999,7 +1001,7 @@ character(20)           :: errtxt
        else
          call timer_stop(timer_difu_solve7v, gdp)
        end if
-       call dfexchg ( r1(:,:,l), 1, kmax, dfloat, gdp )
+       call dfexchg ( r1(:,:,l), 1, kmax, dfloat, nm_pos, gdp )
        !
        ! determine global maximum of 'itr' over all nodes
        ! Note: this enables to synchronize the iteration process

@@ -67,6 +67,10 @@ subroutine dfupdgeo ( alfas     ,fcorio    ,xcor      ,ycor      ,xz        , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(inout) :: ycor   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(inout) :: yz     !  Description and declaration in esm_alloc_real.f90
 !
+! Local variables
+!
+    integer               :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
+!
 !! executable statements -------------------------------------------------------
 !
     ! if not parallel, return
@@ -75,26 +79,27 @@ subroutine dfupdgeo ( alfas     ,fcorio    ,xcor      ,ycor      ,xz        , &
     !
     ! exchange geometrical information (obtained with inigeo) with neighbours
     !
-    call dfexchg ( alfas , 1, 1, dfloat, gdp )
-    call dfexchg ( fcorio, 1, 1, dfloat, gdp )
-    call dfexchg ( gsqd  , 1, 1, dfloat, gdp )
-    call dfexchg ( gsqiu , 1, 1, dfloat, gdp )
-    call dfexchg ( gsqiv , 1, 1, dfloat, gdp )
-    call dfexchg ( gsqs  , 1, 1, dfloat, gdp )
-    call dfexchg ( gud   , 1, 1, dfloat, gdp )
+    nm_pos = 1
+    call dfexchg ( alfas , 1, 1, dfloat, nm_pos, gdp )
+    call dfexchg ( fcorio, 1, 1, dfloat, nm_pos, gdp )
+    call dfexchg ( gsqd  , 1, 1, dfloat, nm_pos, gdp )
+    call dfexchg ( gsqiu , 1, 1, dfloat, nm_pos, gdp )
+    call dfexchg ( gsqiv , 1, 1, dfloat, nm_pos, gdp )
+    call dfexchg ( gsqs  , 1, 1, dfloat, nm_pos, gdp )
+    call dfexchg ( gud   , 1, 1, dfloat, nm_pos, gdp )
 !
 !   Note: for obvious reasons (?), guu and gvv do not have to be exchanged.
 !    
 !    call dfexchg ( guu   , 1, 1, dfloat, gdp )
-    call dfexchg ( guv   , 1, 1, dfloat, gdp )
-    call dfexchg ( guz   , 1, 1, dfloat, gdp )
-    call dfexchg ( gvd   , 1, 1, dfloat, gdp )
-    call dfexchg ( gvu   , 1, 1, dfloat, gdp )
+    call dfexchg ( guv   , 1, 1, dfloat, nm_pos, gdp )
+    call dfexchg ( guz   , 1, 1, dfloat, nm_pos, gdp )
+    call dfexchg ( gvd   , 1, 1, dfloat, nm_pos, gdp )
+    call dfexchg ( gvu   , 1, 1, dfloat, nm_pos, gdp )
 !    call dfexchg ( gvv   , 1, 1, dfloat, gdp )
-    call dfexchg ( gvz   , 1, 1, dfloat, gdp )
-    call dfexchg ( xcor  , 1, 1, dfloat, gdp )
-    call dfexchg ( xz    , 1, 1, dfloat, gdp )
-    call dfexchg ( ycor  , 1, 1, dfloat, gdp )
-    call dfexchg ( yz    , 1, 1, dfloat, gdp )
+    call dfexchg ( gvz   , 1, 1, dfloat, nm_pos, gdp )
+    call dfexchg ( xcor  , 1, 1, dfloat, nm_pos, gdp )
+    call dfexchg ( xz    , 1, 1, dfloat, nm_pos, gdp )
+    call dfexchg ( ycor  , 1, 1, dfloat, nm_pos, gdp )
+    call dfexchg ( yz    , 1, 1, dfloat, nm_pos, gdp )
     !
 end subroutine dfupdgeo

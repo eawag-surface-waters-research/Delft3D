@@ -118,6 +118,7 @@ subroutine initur(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)                       :: z00
     real(fp)                       :: zw
     real(fp)                       :: zwc
+    integer                        :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -131,6 +132,7 @@ subroutine initur(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     z0          => gdp%gdphysco%z0
     z0v         => gdp%gdphysco%z0v
     vonkar      => gdp%gdphysco%vonkar
+    nm_pos      =  1
     !
     allocate(z0scratch(gdp%d%nmlb:gdp%d%nmub, kmax))
     !
@@ -296,6 +298,6 @@ subroutine initur(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     !
     ! exchange turbulence values with neighbours for parallel runs
     !
-    call dfexchg ( rtur0(:,:,1), 0, kmax, dfloat, gdp )
-    call dfexchg ( rtur0(:,:,2), 0, kmax, dfloat, gdp )
+    call dfexchg ( rtur0(:,:,1), 0, kmax, dfloat, nm_pos, gdp )
+    call dfexchg ( rtur0(:,:,2), 0, kmax, dfloat, nm_pos, gdp )
 end subroutine initur

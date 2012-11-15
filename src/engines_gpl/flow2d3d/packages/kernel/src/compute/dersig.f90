@@ -72,6 +72,7 @@ subroutine dersig(j         ,nmmaxj    ,nmmax     ,icx       ,icy       , &
     integer                        :: nmd
     integer                        :: nmu
     integer                        :: num
+    integer                        :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -112,8 +113,9 @@ subroutine dersig(j         ,nmmaxj    ,nmmax     ,icx       ,icy       , &
     !
     ! exchange transformation coefficients with neighbours for parallel runs
     !
-    call dfexchg ( dzdksi, 1, 1, dfloat, gdp )
-    call dfexchg ( dddeta, 1, 1, dfloat, gdp )
-    call dfexchg ( dzdeta, 1, 1, dfloat, gdp )
-    call dfexchg ( dddksi, 1, 1, dfloat, gdp )
+    nm_pos = 1
+    call dfexchg ( dzdksi, 1, 1, dfloat, nm_pos, gdp )
+    call dfexchg ( dddeta, 1, 1, dfloat, nm_pos, gdp )
+    call dfexchg ( dzdeta, 1, 1, dfloat, nm_pos, gdp )
+    call dfexchg ( dddksi, 1, 1, dfloat, nm_pos, gdp )
 end subroutine dersig

@@ -98,6 +98,7 @@ subroutine caldps(nmmax     ,nfltyp    ,icx       , &
     real(fp)          :: dep
     real(fp)          :: fact
     real(fp)          :: rmissval
+    integer           :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -105,6 +106,7 @@ subroutine caldps(nmmax     ,nfltyp    ,icx       , &
     rst_dp             => gdp%gdrestart%rst_dp
     !
     rmissval = -999.0
+    nm_pos   = 1
     !
     if (dpsopt=='MEAN') then
        nfltyp = 1
@@ -247,8 +249,8 @@ subroutine caldps(nmmax     ,nfltyp    ,icx       , &
     !
     ! exchange depths with neighbours for parallel runs
     !
-    call dfexchg (  dp, 1, 1, dfloat, gdp )
-    call dfexchg ( dps, 1, 1, dfprec, gdp )
+    call dfexchg (  dp, 1, 1, dfloat, nm_pos, gdp )
+    call dfexchg ( dps, 1, 1, dfprec, nm_pos, gdp )
     !
     ! Adapt kcs: if dps = missval, kcs = 0
     ! Note: do not adapt in halo area in case of parallel runs, i.e. kcs = -1

@@ -68,6 +68,10 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     !
     implicit none
     !
+    ! Enumeration
+    !
+     
+    !
     type(globdat),target :: gdp
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
@@ -243,6 +247,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     logical  :: from_nmd
     logical  :: from_nmu
     logical  :: from_num
+    integer  :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -303,14 +308,15 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     lstart  = max(lsal, ltem)
     bedload = .false.
     hdtmor  = hdt*morfac
+    nm_pos  = 1
     !
     ! parallel case: exchange arrays in the overlapping regions
     ! other arrays are their overlap data exchanged in erosed.f90
     !
-    call dfexchg( aks,   1, 1, dfloat, gdp)
-    call dfexchg( fixfac,1, lsedtot, dfloat, gdp)
-    call dfexchg( frac,  1, lsedtot, dfloat, gdp)
-    call dfexchg( rca,   1, lsed, dfloat, gdp)
+    call dfexchg( aks,   1, 1,       dfloat, nm_pos, gdp)
+    call dfexchg( fixfac,1, lsedtot, dfloat, nm_pos, gdp)
+    call dfexchg( frac,  1, lsedtot, dfloat, nm_pos, gdp)
+    call dfexchg( rca,   1, lsed,    dfloat, nm_pos, gdp)
     !
     !   Calculate suspended sediment transport correction vector (for SAND)
     !   Note: uses GLM velocites, consistent with DIFU
@@ -340,8 +346,8 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
              ll = lstart + l
              if (sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) then
                 !
-                call dfexchg( fluxu(:,:,ll) ,1, kmax, dfloat, gdp)
-                call dfexchg( fluxv(:,:,ll) ,1, kmax, dfloat, gdp)
+                call dfexchg( fluxu(:,:,ll) ,1, kmax, dfloat, nm_pos, gdp)
+                call dfexchg( fluxv(:,:,ll) ,1, kmax, dfloat, nm_pos, gdp)
                 do nm = 1, nmmax
                    nmu = nm + icx
                    num = nm + icy
@@ -524,8 +530,8 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           enddo       ! l
        endif          ! kmax>1
        !
-       call dfexchg( sucor,   1, lsed, dfloat, gdp)
-       call dfexchg( svcor,   1, lsed, dfloat, gdp)
+       call dfexchg( sucor,   1, lsed, dfloat, nm_pos, gdp)
+       call dfexchg( svcor,   1, lsed, dfloat, nm_pos, gdp)
        !
        ! Calculate suspended sediment transport vector components for
        ! output
@@ -571,8 +577,8 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
        endif        ! sscomp .or. nst>=itmor
     endif           ! sus /= 0.0
     !
-    call dfexchg( ssuu,   1, lsed, dfloat, gdp)
-    call dfexchg( ssvv,   1, lsed, dfloat, gdp)
+    call dfexchg( ssuu,   1, lsed, dfloat, nm_pos, gdp)
+    call dfexchg( ssvv,   1, lsed, dfloat, nm_pos, gdp)
     !
     ! if morphological computations have started
     !
@@ -677,12 +683,12 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           endif       ! icond = 4 or 5 (boundary with transport condition)
        enddo          ! jb (open boundary) 
        !
-       call dfexchg( sbuu,   1, lsedtot, dfloat, gdp)
-       call dfexchg( sbvv,   1, lsedtot, dfloat, gdp)
+       call dfexchg( sbuu,   1, lsedtot, dfloat, nm_pos, gdp)
+       call dfexchg( sbvv,   1, lsedtot, dfloat, nm_pos, gdp)
        !
        ! Update quantity of bottom sediment
        !
-       dbodsd = 0.0
+       dbodsd = 0.0_fp
        !
        ! compute change in bodsed (dbodsd)
        !
@@ -807,7 +813,9 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           write (lundia,'(12x,2(a,i0))') 'Total number of Bed change messages for timestep ',ntstep,' : ',bedchangemesscount
        endif
        !
-       call dfexchg( dbodsd,1, lsedtot, dfloat, gdp)
+       nm_pos = 2
+       call dfexchg( dbodsd, 1, lsedtot, dfloat, nm_pos, gdp)
+       nm_pos = 1
        !
        ! Re-distribute erosion near dry and shallow points to allow erosion
        ! of dry banks
@@ -935,7 +943,9 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           endif          ! kcs*kfs*kfsed == 1
        enddo             ! nm
        !
-       call dfexchg( dbodsd,1, lsedtot, dfloat, gdp)
+       nm_pos = 2
+       call dfexchg( dbodsd, 1, lsedtot, dfloat, nm_pos, gdp)
+       nm_pos = 1
        !
        ! Modifications for running parallel conditions
        !
@@ -974,10 +984,10 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           enddo
        enddo
        !
-       call dfexchg( sbuuc,   1, lsedtot, dfloat, gdp)
-       call dfexchg( sbvvc,   1, lsedtot, dfloat, gdp)
-       call dfexchg( ssuuc,   1, lsed, dfloat, gdp)
-       call dfexchg( ssvvc,   1, lsed, dfloat, gdp)
+       call dfexchg( sbuuc,   1, lsedtot, dfloat, nm_pos, gdp)
+       call dfexchg( sbvvc,   1, lsedtot, dfloat, nm_pos, gdp)
+       call dfexchg( ssuuc,   1, lsed,    dfloat, nm_pos, gdp)
+       call dfexchg( ssvvc,   1, lsed,    dfloat, nm_pos, gdp)
        !
        ! Apply erosion and sedimentation to bookkeeping system
        !
@@ -1016,7 +1026,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           enddo
        endif
        !
-       call dfexchg( depchg, 1, 1, dfloat, gdp)
+       call dfexchg( depchg, 1, 1, dfloat, nm_pos, gdp)
        !
        ! Bed boundary conditions
        !
@@ -1116,7 +1126,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
        enddo
     endif ! nst >= itmor
     !
-    call dfexchg( depchg, 1, 1, dfloat, gdp)
+    call dfexchg( depchg, 1, 1, dfloat, nm_pos, gdp)
     !
     ! Update bottom elevations
     !
@@ -1174,7 +1184,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           endif
        enddo
        !
-       call dfexchg( kcsbot, 1, 1, dfint, gdp)
+       call dfexchg( kcsbot, 1, 1, dfint, nm_pos, gdp)
        !
        ! Dredging and Dumping
        !
@@ -1205,6 +1215,6 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                     &           + depchg(nmu)*gsqs(nmu) + depchg(numu)*gsqs(numu))/fact
           endif
        enddo
-       call dfexchg( dp,   1, 1, dfloat, gdp)
+       call dfexchg( dp,   1, 1, dfloat, nm_pos, gdp)
     endif
 end subroutine bott3d

@@ -1,4 +1,4 @@
-subroutine dfupdd ( field, ks, ke, gdp )
+subroutine dfupdi_nm_pos1 ( field, ks, ke, gdp )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -29,7 +29,7 @@ subroutine dfupdd ( field, ks, ke, gdp )
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-!   Updates field array of type double precision through exchanging halo values
+!   Updates field array of type integer through exchanging halo values
 !   between neighbouring subdomains
 !
 !!--pseudo code and references--------------------------------------------------
@@ -46,7 +46,6 @@ subroutine dfupdd ( field, ks, ke, gdp )
 !
 !
 !!--declarations----------------------------------------------------------------
-    use precision
     use dfparall
     use globaldata
     !
@@ -56,26 +55,27 @@ subroutine dfupdd ( field, ks, ke, gdp )
 !
 ! Global variables
 !
-    integer, intent(in)                                             :: ke    ! last index in vertical direction
-    integer, intent(in)                                             :: ks    ! first index in vertical direction
-    real(hp), dimension(gdp%d%nmlb:gdp%d%nmub,ks:ke), intent(inout) :: field !  real array for which halo values must
-                                                                          ! be copied from neighbouring subdomains
+    integer, intent(in)                                            :: ke    ! last index in vertical direction
+    integer, intent(in)                                            :: ks    ! first index in vertical direction
+!
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub,ks:ke), intent(inout) :: field ! real array for which halo values must
+                                                                            ! be copied from neighbouring subdomains
 !
 ! Local variables
 !
     integer, dimension(:), pointer      :: iblkad
-    integer                             :: idom   ! subdomain number
-    integer                             :: inb    ! neighbour counter
-    integer                             :: istart ! pointer in array IBLKAD
-    integer                             :: itag   ! message tag for sending and receiving
-    integer                             :: j      ! loop counter
-    integer                             :: k      ! loop counter in vertical direction
-    integer                             :: ksiz   ! size in vertical direction (e.g. total number of sigma layers)
-    integer                             :: nneigh ! number of neighbouring subdomains
-    integer                             :: novlu  ! number of overlapping unknowns
+    integer                            :: idom   ! subdomain number
+    integer                            :: inb    ! neighbour counter
+    integer                            :: istart ! pointer in array IBLKAD
+    integer                            :: itag   ! message tag for sending and receiving
+    integer                            :: j      ! loop counter
+    integer                            :: k      ! loop counter in vertical direction
+    integer                            :: ksiz   ! size in vertical direction (e.g. total number of sigma layers)
+    integer                            :: nneigh ! number of neighbouring subdomains
+    integer                            :: novlu  ! number of overlapping unknowns
     integer                             :: worksize  ! 
     integer                             :: request(4,2)  ! 
-    real(hp), dimension(:,:,:), allocatable :: work   ! work array to store data to be sent to or received from neighbour
+    integer, dimension(:,:,:), allocatable :: work   ! work array to store data to be sent to or received from neighbour
 !
 !! executable statements -------------------------------------------------------
 !
@@ -88,13 +88,12 @@ subroutine dfupdd ( field, ks, ke, gdp )
     worksize = ksiz*max(ihalom,ihalon)*max(gdp%d%mmax,gdp%d%nmax)
     allocate(work(worksize, 4, 2))
     !
-    !
     ! for all neighbouring subdomains do
     !
     itag = 2
-    call dfsendd ( field, work, worksize, ks, ke, request, itag, gdp )
-    call dfwaitd ( field, work, worksize, ks, ke, request, itag, gdp )
+    call dfsendi_nm_pos1 ( field, work, worksize, ks, ke, request, itag, gdp )
+    call dfwaiti_nm_pos1 ( field, work, worksize, ks, ke, request, itag, gdp )
     !
     deallocate(work)
 
-end subroutine dfupdd
+end subroutine dfupdi_nm_pos1

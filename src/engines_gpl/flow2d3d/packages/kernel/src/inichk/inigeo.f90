@@ -146,6 +146,7 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
     real(fp), dimension(4) :: kenmgsqd        ! Mask array for qsqd determination
     character(20)          :: errmsg          ! Character var. containing the error message to be written to file. The message depend on the error.
     character(300)         :: message
+    integer                :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -160,6 +161,7 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
     ddb    = gdp%d%ddbound
     !
     success = .true.
+    nm_pos  = 1
     !
     ! Temporary solution: the new method for determining GSQS, GSQD, GSQIU and GSQIV is switched off
     ! leads to difference in test bench results
@@ -231,8 +233,8 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
        enddo
     enddo
     !
-    call dfexchg ( dfguu   , 1, 1, dfloat, gdp )
-    call dfexchg ( dfgvv   , 1, 1, dfloat, gdp )
+    call dfexchg ( dfguu   , 1, 1, dfloat, nm_pos, gdp )
+    call dfexchg ( dfgvv   , 1, 1, dfloat, nm_pos, gdp )
     !
     ! Compute GUV only if one of the GUU values <> 0. (KCS's <> 0)
     ! (GUV is GUU at V-velocity point)

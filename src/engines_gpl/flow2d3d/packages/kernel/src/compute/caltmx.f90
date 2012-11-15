@@ -82,6 +82,7 @@ subroutine caltmx(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     integer    :: nm    ! Index number 
     integer    :: nmd   ! NM - ICX 
     real(fp)   :: h1    ! water depth in cell centre 
+    integer    :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -117,5 +118,6 @@ subroutine caltmx(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     !
     ! exchange taubmx with neighbours for parallel runs
     !
-    call dfexchg ( taubmx, 1, 1, dfloat, gdp )
+    nm_pos = 1
+    call dfexchg ( taubmx, 1, 1, dfloat, nm_pos, gdp )
 end subroutine caltmx

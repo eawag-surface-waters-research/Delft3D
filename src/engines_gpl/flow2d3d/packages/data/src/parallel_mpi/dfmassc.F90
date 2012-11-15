@@ -74,11 +74,12 @@ subroutine dfmassc (s1        ,u1        ,qxk       ,hu        ,d0        , &
 !
 ! Local variables
 !
-    integer               :: k   ! loop variable
-    integer               :: nm  ! loop variable
+    integer               :: k      ! loop variable
+    integer               :: nm     ! loop variable
     real(fp),     pointer :: hdt
-    real(fp)              :: qx  ! discharge in x-direction
+    real(fp)              :: qx     ! discharge in x-direction
     character(6), pointer :: momsol
+    integer               :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -110,7 +111,8 @@ subroutine dfmassc (s1        ,u1        ,qxk       ,hu        ,d0        , &
     !
     ! exchange s1 with neighbours
     !
-    call dfexchg ( s1, 1, 1, dfloat, gdp )
+    nm_pos = 1
+    call dfexchg ( s1, 1, 1, dfloat, nm_pos, gdp )
     !
     ! re-compute waterdepth at u-point and u-velocity at coupling boundary based on adapted waterlevel
     !

@@ -77,6 +77,7 @@ subroutine comvol(nmmax     ,kmax      ,zmodel    ,kcs       ,kcu       , &
     integer                            :: nm
     integer, dimension(:), allocatable :: masks ! temporary array for masking volumes
     integer, dimension(:), allocatable :: masku ! temporary array for masking areas
+    integer                            :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -87,8 +88,9 @@ allocate(masks(gdp%d%nmlb:gdp%d%nmub))
 allocate(masku(gdp%d%nmlb:gdp%d%nmub))
 masks(:) = min(1, kcs(:))
 masku(:) = min(1, kcu(:))
-call dfexchg ( masks, 1, 1, dfint, gdp )
-call dfexchg ( masku, 1, 1, dfint, gdp )
+nm_pos   = 1
+call dfexchg ( masks, 1, 1, dfint, nm_pos, gdp )
+call dfexchg ( masku, 1, 1, dfint, nm_pos, gdp )
 !
 if (.not.zmodel) then
    do k = 1, kmax

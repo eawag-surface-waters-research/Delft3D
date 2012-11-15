@@ -84,6 +84,7 @@ subroutine checku(hu        ,s1        ,dpu       ,umean     , &
     real(fp):: htrsh
     real(fp):: hucres
     real(fp):: trsh
+    integer :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -92,6 +93,7 @@ subroutine checku(hu        ,s1        ,dpu       ,umean     , &
     !
     htrsh = 0.5_fp * dryflc
     trsh  = dryflc
+    nm_pos= 1
     !
     call upwhu(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              & zmodel    ,kcs       ,kcu       ,kspu      ,dps       , &
@@ -129,5 +131,5 @@ subroutine checku(hu        ,s1        ,dpu       ,umean     , &
     !
     ! exchange mask array kfu with neighbours for parallel runs
     !
-    call dfexchg ( kfu, 1, 1, dfint, gdp )
+    call dfexchg ( kfu, 1, 1, dfint, nm_pos, gdp )
 end subroutine checku

@@ -89,7 +89,7 @@ subroutine incmeteo(timhr  ,grdang ,windu  ,windv ,patm   , &
     real(fp)                                  :: time
     real(fp)   ,allocatable, dimension(:,:)   :: gridunoise
     real(fp)   ,allocatable, dimension(:,:)   :: gridvnoise
-
+    integer                                   :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -109,7 +109,8 @@ subroutine incmeteo(timhr  ,grdang ,windu  ,windv ,patm   , &
     vwindECItemId => gdp%vwindECItemId
     dtimmin       => gdp%gdinttim%dtimmin
     !
-    time = timhr*60.0  ! time in minutes
+    time          = timhr*60.0  ! time in minutes
+    nm_pos        = 1
     !
     ! update all meteo items (if necessary)
     !
@@ -185,19 +186,19 @@ subroutine incmeteo(timhr  ,grdang ,windu  ,windv ,patm   , &
     ! NB: wind velocities might not be required
     !     Patm required as gradient calculated in cucnp
     !
-    call dfexchg(patm, 1, 1, dfloat, gdp)    
-    call dfexchg(windu, 1, 1, dfloat, gdp)    
-    call dfexchg(windv, 1, 1, dfloat, gdp)    
+    call dfexchg(patm,  1, 1, dfloat, nm_pos, gdp)    
+    call dfexchg(windu, 1, 1, dfloat, nm_pos, gdp)    
+    call dfexchg(windv, 1, 1, dfloat, nm_pos, gdp)    
     call windtostress(mmax ,nmax ,nmaxus, grdang, kcs, w10mag, windu, windv, windsu, windsv, gdp)
     !
     ! Exchange data between partitions
     !
-    call dfexchg(windsu, 1, 1, dfloat, gdp)
-    call dfexchg(windsv, 1, 1, dfloat, gdp)
+    call dfexchg(windsu, 1, 1, dfloat, nm_pos, gdp)
+    call dfexchg(windsv, 1, 1, dfloat, nm_pos, gdp)
     call windtogridc (mmax  ,nmax  ,nmaxus,kcs   ,alfas ,windsu,windsv       ,gdp)
     !
     ! Exchange data between partitions
     !
-    call dfexchg(windsu, 1, 1, dfloat, gdp)
-    call dfexchg(windsv, 1, 1, dfloat, gdp)
+    call dfexchg(windsu, 1, 1, dfloat, nm_pos, gdp)
+    call dfexchg(windsv, 1, 1, dfloat, nm_pos, gdp)
 end subroutine incmeteo

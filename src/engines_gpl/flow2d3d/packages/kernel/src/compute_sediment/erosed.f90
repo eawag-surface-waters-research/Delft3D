@@ -356,6 +356,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp), dimension(kmax)     :: concin3d
     real(fp), dimension(kmax2d)   :: concin2d
     character(256)                :: errmsg
+    integer                       :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
     !
     data thck2d/0.1747, 0.1449, 0.1202, 0.0997, 0.0827, 0.0686, 0.0569, 0.0472, &
        & 0.0391, 0.0325, 0.0269, 0.0223, 0.0185, 0.0154, 0.0127, 0.0106, 0.0088,&
@@ -501,6 +502,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     eropar              => gdp%gdsedpar%eropar
     hdt                 => gdp%gdnumeco%hdt
     !
+    nm_pos              =  1
     if (ifirst == 1) then
        ifirst = 0
        !
@@ -644,7 +646,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     sutot = 0.0_fp
     svtot = 0.0_fp
     !
-    call dfexchg( dps,1, 1, dfloat, gdp)
+    call dfexchg( dps,1, 1, dfloat, nm_pos, gdp)
     !
     do nm = 1, nmmax
        if ((s1(nm) + real(dps(nm),fp))*kfs(nm) > sedthr) then
@@ -654,7 +656,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        endif
     enddo
     !
-    call dfexchg( kfsed,1, 1, dfint, gdp)
+    call dfexchg( kfsed,1, 1, dfint, nm_pos, gdp)
     !
     ! Determine fractions of all sediments the top layer and
     ! compute the mud fraction.
@@ -672,10 +674,10 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
               & u0eul     ,v0eul     ,uuu       ,vvv       ,umod      , &
               & zumod     ,sig       ,hu        ,hv        ,kfsed     , &
               & gdp       )
-    call dfexchg( uuu,1, 1, dfloat, gdp)
-    call dfexchg( vvv,1, 1, dfloat, gdp)
-    call dfexchg( umod,1, 1, dfloat, gdp)
-    call dfexchg( zumod,1, 1, dfloat, gdp)
+    call dfexchg( uuu,  1, 1, dfloat, nm_pos, gdp)
+    call dfexchg( vvv,  1, 1, dfloat, nm_pos, gdp)
+    call dfexchg( umod, 1, 1, dfloat, nm_pos, gdp)
+    call dfexchg( zumod,1, 1, dfloat, nm_pos, gdp)
     !
     ! Get the reduction factor if thickness of sediment at bed is less than
     ! user specified threshold. Also get maximum erosion source SRCMAX
@@ -747,8 +749,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        endif
     enddo
     !
-    call dfexchg( dzduu,1, 1, dfloat, gdp)
-    call dfexchg( dzdvv,1, 1, dfloat, gdp)
+    call dfexchg( dzduu,1, 1, dfloat, nm_pos, gdp)
+    call dfexchg( dzdvv,1, 1, dfloat, nm_pos, gdp)
     !
     !================================================================
     !    Start of sand part
@@ -759,12 +761,12 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     ! coefficients, and bed-load transport vector components at water
     ! level points
     !
-    call dfexchg( z0ucur,1, 1, dfloat, gdp)
-    call dfexchg( z0vcur,1, 1, dfloat, gdp)
-    call dfexchg( z0urou,1, 1, dfloat, gdp)
-    call dfexchg( z0vrou,1, 1, dfloat, gdp)
+    call dfexchg( z0ucur,1, 1, dfloat, nm_pos, gdp)
+    call dfexchg( z0vcur,1, 1, dfloat, nm_pos, gdp)
+    call dfexchg( z0urou,1, 1, dfloat, nm_pos, gdp)
+    call dfexchg( z0vrou,1, 1, dfloat, nm_pos, gdp)
     do l = 1, lsedtot
-       call dfexchg( ws(:,:,l),0, kmax, dfloat, gdp)
+       call dfexchg( ws(:,:,l),0, kmax, dfloat, nm_pos, gdp)
     enddo
     !
     do nm = 1, nmmax
@@ -1229,12 +1231,12 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     ! Fill sutot and svtot
     !
     do l = 1,lsedtot
-       call dfexchg( sbcu(:,l) ,1, 1, dfloat, gdp)
-       call dfexchg( sbwu(:,l) ,1, 1, dfloat, gdp)
-       call dfexchg( sswu(:,l) ,1, 1, dfloat, gdp)
-       call dfexchg( sbcv(:,l) ,1, 1, dfloat, gdp)
-       call dfexchg( sbwv(:,l) ,1, 1, dfloat, gdp)
-       call dfexchg( sswv(:,l) ,1, 1, dfloat, gdp)
+       call dfexchg( sbcu(:,l) ,1, 1, dfloat, nm_pos, gdp)
+       call dfexchg( sbwu(:,l) ,1, 1, dfloat, nm_pos, gdp)
+       call dfexchg( sswu(:,l) ,1, 1, dfloat, nm_pos, gdp)
+       call dfexchg( sbcv(:,l) ,1, 1, dfloat, nm_pos, gdp)
+       call dfexchg( sbwv(:,l) ,1, 1, dfloat, nm_pos, gdp)
+       call dfexchg( sswv(:,l) ,1, 1, dfloat, nm_pos, gdp)
        if (sedtyp(l)/=SEDTYP_COHESIVE) then
           do nm = 1, nmmax
              sutot(nm, l) = sbcu(nm, l) + sbwu(nm, l) + sswu(nm, l)
@@ -1338,8 +1340,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           sour(nm, k, ll) = sour(nm, k, ll) + sourse(nm, l)
           sink(nm, k, ll) = sink(nm, k, ll) + sinkse(nm, l)
        enddo
-       call dfexchg( sour(:,:,l),1, kmax, dfloat, gdp)
-       call dfexchg( sink(:,:,l),1, kmax, dfloat, gdp)
+       call dfexchg( sour(:,:,l),1, kmax, dfloat, nm_pos, gdp)
+       call dfexchg( sink(:,:,l),1, kmax, dfloat, nm_pos, gdp)
     enddo
     !
     ! DD-Mapper: copy sbuu and sbvv

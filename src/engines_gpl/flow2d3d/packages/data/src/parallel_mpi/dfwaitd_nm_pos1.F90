@@ -1,4 +1,4 @@
-subroutine dfsendr ( field, work, worksize, ks, ke, request, tag, gdp )
+subroutine dfwaitd_nm_pos1 ( field, work, worksize, ks, ke, request, tag, gdp )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -44,6 +44,8 @@ subroutine dfsendr ( field, work, worksize, ks, ke, request, tag, gdp )
 !      receive next array and store in WORK
 !      store the received data
 !
+!   Jan Thorbecke
+!   June 2009
 !
 !!--declarations----------------------------------------------------------------
     use precision
@@ -62,10 +64,10 @@ subroutine dfsendr ( field, work, worksize, ks, ke, request, tag, gdp )
     integer                                         , intent(in)    :: ke           ! last index in vertical direction
     integer                                         , intent(in)    :: ks           ! first index in vertical direction
     integer                                         , intent(in)    :: tag          ! unique tag
+    integer                                         , intent(inout) :: request(4,2) ! MPI communication handle (should be inout because it's passed to inout mpi_wait)
     integer                                         , intent(in)    :: worksize     ! 
-    integer                                         , intent(inout) :: request(4,2) ! MPI communication handle
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,ks:ke), intent(in)    :: field        ! real array for which halo values must
-    real(fp), dimension(worksize,4,2)               , intent(inout) :: work         ! work array to store data to be sent to or received from neighbour be copied from neighbouring subdomains
+    real(hp), dimension(gdp%d%nmlb:gdp%d%nmub,ks:ke), intent(inout) :: field        ! real array for which halo values must
+    real(hp), dimension(worksize,4,2)               , intent(inout) :: work         ! work array to store data to be sent to or received from neighbour be copied from neighbouring subdomains
 !
 ! Local variables
 !
@@ -84,13 +86,16 @@ subroutine dfsendr ( field, work, worksize, ks, ke, request, tag, gdp )
     integer                        :: m
     integer                        :: indxddb
     integer                        :: ierr     ! error value of MPI call
-    integer                        :: reqsend  ! MPI communication handle
-    character(1000)                :: msgstr   ! string to pass message
+#if defined (DFMPI)
+    integer                        :: istat(mpi_status_size) ! MPI status array
+    integer                        :: mpistatus(mpi_status_size)
+#endif
+    character(80)                  :: msgstr   ! string to pass message
 !
 !! executable statements -------------------------------------------------------
 !
-    lundia => gdp%gdinout%lundia
     iblkad => gdp%gdparall%iblkad
+    lundia => gdp%gdinout%lundia
     !
     if (.not.parll) return
     !
@@ -107,8 +112,21 @@ subroutine dfsendr ( field, work, worksize, ks, ke, request, tag, gdp )
        istart = iblkad(3*inb+1)
        novlu  = iblkad(istart)
        !
-       ! store data to be sent in array WORK
+       ! wait for array WORK
        !
+#if defined (DFMPI)
+       ! waiting for the send call
+       call mpi_wait(request(inb,1), mpistatus, ierr)
+       if ( ierr /= MPI_SUCCESS ) then
+          write (msgstr,'(a,i5,a,i3.3)') 'MPI wait produces some internal error - return code is ',ierr,' and node number is ',inode
+          call prterr(lundia, 'U021', trim(msgstr))
+          call d3stop(1, gdp)
+       endif
+       ! waiting for the recv call
+       call mpi_wait(request(inb,2), mpistatus, ierr)
+#endif
+       !
+       ! store the received data
        !
        do k = ks, ke
           do j = 1, novlu
@@ -119,30 +137,12 @@ subroutine dfsendr ( field, work, worksize, ks, ke, request, tag, gdp )
              ! used in iblkad are done BEFORE the extension of the array sizes
              ! with ddbound
              !
-             n                            = mod(iblkad(istart+j)-1,gdp%d%nmax)+1
-             m                            = ((iblkad(istart+j)-1)/gdp%d%nmax)+1
-             indxddb                      = (m-1+gdp%d%ddbound)*(gdp%d%nmax+2*gdp%d%ddbound) + n + gdp%d%ddbound
-             work((k-ks)*novlu+j, inb, 1) = field(indxddb,k)
+             n                 = mod(iblkad(istart+novlu+j)-1,gdp%d%nmax) + 1
+             m                 = ((iblkad(istart+novlu+j)-1)/gdp%d%nmax)+1
+             indxddb           = (m-1+gdp%d%ddbound)*(gdp%d%nmax+2*gdp%d%ddbound) + n + gdp%d%ddbound
+             field(indxddb, k) = work((k-ks)*novlu+j, inb, 2)
           enddo
        enddo
-       !
-       ! send array WORK
-       !
-       itag = tag
-       !
-#if defined (DFMPI)
-       call mpi_isend ( work(1,inb,1), novlu*ksiz, MPI_REAL, idom-1, itag, MPI_COMM_WORLD, request(inb,1), ierr )
-       if ( ierr /= MPI_SUCCESS ) then
-          write (msgstr,'(a,i5,a,i3.3)') 'MPI produces some internal error - return code is ',ierr,' and node number is ',inode
-          call prterr(lundia, 'U021', trim(msgstr))
-          call d3stop(1, gdp)
-       endif
-       call mpi_irecv ( work(1,inb,2), novlu*ksiz, MPI_REAL, idom-1, itag, MPI_COMM_WORLD, request(inb,2), ierr )
-       if ( ierr /= MPI_SUCCESS ) then
-          write (msgstr,'(a,i5,a,i3.3)') 'MPI produces some internal error - return code is ',ierr,' and node number is ',inode
-          call prterr(lundia, 'U021', trim(msgstr))
-          call d3stop(1, gdp)
-       endif
-#endif
     enddo
-end subroutine dfsendr
+end subroutine dfwaitd_nm_pos1
+

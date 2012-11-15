@@ -253,6 +253,7 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     real(fp)                                                        :: uuu
     real(fp)                                                        :: vvv
     real(fp), dimension(:,:,:), allocatable                         :: dummy 
+    integer                                                         :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -272,6 +273,7 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     icxy = max(icx, icy) 
     !
     istat = 0
+    nm_pos= 1
     if (.not. associated(gdp%gdflwpar%fluxu)) then
         if (istat==0) allocate (gdp%gdflwpar%fluxu(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), stat = istat)
         if (istat==0) allocate (gdp%gdflwpar%fluxv(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), stat = istat)
@@ -776,7 +778,7 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
              ! 
              ! exchange r1 with neighbours for parallel runs 
              ! 
-             call dfexchg ( r1(:,:,l), 1, kmax, dfloat, gdp ) 
+             call dfexchg ( r1(:,:,l), 1, kmax, dfloat, nm_pos, gdp ) 
              cycle
           endif
        endif
@@ -859,7 +861,7 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
        !
        ! exchange r1 with neighbours for parallel runs 
        ! 
-       call dfexchg ( r1(:,:,l), 1, kmax, dfloat, gdp ) 
+       call dfexchg ( r1(:,:,l), 1, kmax, dfloat, nm_pos, gdp ) 
        ! 
        ! DD code added:
        !

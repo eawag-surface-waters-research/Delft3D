@@ -85,6 +85,7 @@ subroutine upwhu(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)            :: h2
     real(fp)            :: level
     real(fp) , external :: slim
+    integer             :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -94,6 +95,7 @@ subroutine upwhu(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     dpuopt   => gdp%gdnumeco%dpuopt
     momsol   => gdp%gdnumeco%momsol
     nh_level => gdp%gdnonhyd%nh_level
+    nm_pos   =  1
     !
     ! In case DPUOPT = 'UPW' apply upwind approach for for the total
     ! water depth. This implies that upwind also applies for DPU (both
@@ -118,7 +120,7 @@ subroutine upwhu(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        !
        ! exchange depth with neighbours for parallel runs
        !
-       call dfexchg ( dpu, 1, 1, dfloat, gdp )
+       call dfexchg ( dpu, 1, 1, dfloat, nm_pos, gdp )
     endif
     !
     ! Apply Upwind of water level if:
@@ -202,7 +204,7 @@ subroutine upwhu(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     !
     ! exchange height with neighbours for parallel runs
     !
-    call dfexchg ( hu, 1, 1, dfloat, gdp )
+    call dfexchg ( hu, 1, 1, dfloat, nm_pos, gdp )
     call upwhu_dd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                 & zmodel    ,kcs       ,kcu       ,kspu      ,dps       , &
                 & s0        ,dpu       ,umean     ,hu        ,gdp       )

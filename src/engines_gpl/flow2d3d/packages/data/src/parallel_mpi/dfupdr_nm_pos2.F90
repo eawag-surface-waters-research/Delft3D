@@ -1,4 +1,4 @@
-subroutine dfupdr ( field, ks, ke, gdp )
+subroutine dfupdr_nm_pos2 ( field, ks, ke, gdp )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -59,7 +59,7 @@ subroutine dfupdr ( field, ks, ke, gdp )
     integer, intent(in)                                             :: ke    ! last index in vertical direction
     integer, intent(in)                                             :: ks    ! first index in vertical direction
 !
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,ks:ke), intent(inout) :: field ! real array for which halo values must
+    real(fp), dimension(ks:ke,gdp%d%nmlb:gdp%d%nmub), intent(inout) :: field ! real array for which halo values must
                ! be copied from neighbouring subdomains
 !
 ! Local variables
@@ -94,9 +94,9 @@ subroutine dfupdr ( field, ks, ke, gdp )
     ! for all neighbouring subdomains do
     !
     itag = 2
-    call dfsendr ( field, work, worksize, ks, ke, request, itag, gdp )
-    call dfwaitr ( field, work, worksize, ks, ke, request, itag, gdp )
+    call dfsendr_nm_pos2 ( field, work, worksize, ks, ke, request, itag, gdp )
+    call dfwaitr_nm_pos2 ( field, work, worksize, ks, ke, request, itag, gdp )
     !
     deallocate(work)
 
-end subroutine dfupdr
+end subroutine dfupdr_nm_pos2

@@ -117,6 +117,7 @@ subroutine chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lsec      , &
     integer , dimension(:), allocatable :: mask   ! temporary array for masking flow arrays
     real(fp):: hucres
     real(fp):: hvcres
+    integer :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -125,6 +126,7 @@ subroutine chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lsec      , &
     dryflc             => gdp%gdnumeco%dryflc
     kfuv_from_restart  => gdp%gdrestart%kfuv_from_restart
     restid             => gdp%gdrestart%restid
+    nm_pos             =  1
     !
     if (initia > 0) then
        if ( restid .ne. 'STATE' ) then
@@ -238,7 +240,7 @@ subroutine chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lsec      , &
        !
        ! exchange mask array kfs with neighbours for parallel runs
        !
-       call dfexchg ( kfs, 1, 1, dfint, gdp )
+       call dfexchg ( kfs, 1, 1, dfint, nm_pos, gdp )
     endif
     !
     ! initialize global arrays
@@ -304,8 +306,8 @@ subroutine chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lsec      , &
           !
           ! exchange mask arrays kfu and kfv with neighbours for parallel runs
           !
-          call dfexchg ( kfu, 1, 1, dfint, gdp )
-          call dfexchg ( kfv, 1, 1, dfint, gdp )
+          call dfexchg ( kfu, 1, 1, dfint, nm_pos, gdp )
+          call dfexchg ( kfv, 1, 1, dfint, nm_pos, gdp )
        endif
     endif
     !
@@ -314,7 +316,7 @@ subroutine chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lsec      , &
     !
     allocate(mask(gdp%d%nmlb:gdp%d%nmub))
     mask(:) = min(1, abs(kcs(:)))
-    call dfexchg ( mask, 1, 1, dfint, gdp )
+    call dfexchg ( mask, 1, 1, dfint, nm_pos, gdp )
     !
     ! arrays s1, u1, v1, r1 and rtur1 can be computed redundantly to
     ! avoid communication at coupling interfaces
@@ -372,5 +374,5 @@ subroutine chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lsec      , &
     !
     ! exchange mask array kfs with neighbours for parallel runs
     !
-    call dfexchg ( kfs, 1, 1, dfint, gdp )
+    call dfexchg ( kfs, 1, 1, dfint, nm_pos, gdp )
 end subroutine chkdry

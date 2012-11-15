@@ -1,4 +1,4 @@
-subroutine dfwaitr ( field, work, worksize, ks, ke, request, tag, gdp )
+subroutine dfwaiti_nm_pos2 ( field, work, worksize, ks, ke, request, tag, gdp )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -44,31 +44,30 @@ subroutine dfwaitr ( field, work, worksize, ks, ke, request, tag, gdp )
 !      receive next array and store in WORK
 !      store the received data
 !
+!   Jan Thorbecke
+!   June 2009
 !
 !!--declarations----------------------------------------------------------------
     use precision
 #if defined (DFMPI)
     use mpi
 #endif
-    use globaldata
     use dfparall
+    use globaldata
     !
     implicit none
     !
-    type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
+    type(globdat), target    :: gdp
 !
 ! Global variables
 !
-    integer                                         , intent(in)    :: ke           ! last index in vertical direction
-    integer                                         , intent(in)    :: ks           ! first index in vertical direction
-    integer                                         , intent(in)    :: tag          ! unique tag
-    integer                                         , intent(inout) :: request(4,2) ! MPI communication handle (should be inout because mpi_wait is inout)
-    integer                                         , intent(in)    :: worksize     ! 
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,ks:ke), intent(inout) :: field        ! real array for which halo values must
-    real(fp), dimension(worksize,4,2)               , intent(inout) :: work         ! work array to store data to be sent to or received from neighbour be copied from neighbouring subdomains
+    integer                                        , intent(in)    :: ke           ! last index in vertical direction
+    integer                                        , intent(in)    :: ks           ! first index in vertical direction
+    integer                                        , intent(in)    :: tag          ! unique tag
+    integer                                        , intent(inout) :: request(4,2) ! MPI communication handle (should be inout, becaused it's defined that way in mpi_wait)
+    integer                                        , intent(in)    :: worksize     ! 
+    integer, dimension(ks:ke,gdp%d%nmlb:gdp%d%nmub), intent(inout) :: field        ! real array for which halo values must
+    integer, dimension(worksize,4,2)               , intent(inout) :: work         ! work array to store data to be sent to or received from neighbour be copied from neighbouring subdomains
 !
 ! Local variables
 !
@@ -141,9 +140,9 @@ subroutine dfwaitr ( field, work, worksize, ks, ke, request, tag, gdp )
              n                 = mod(iblkad(istart+novlu+j)-1,gdp%d%nmax) + 1
              m                 = ((iblkad(istart+novlu+j)-1)/gdp%d%nmax)+1
              indxddb           = (m-1+gdp%d%ddbound)*(gdp%d%nmax+2*gdp%d%ddbound) + n + gdp%d%ddbound
-             field(indxddb, k) = work((k-ks)*novlu+j, inb, 2)
+             field(k, indxddb) = work((k-ks)*novlu+j, inb, 2)
           enddo
        enddo
     enddo
-end subroutine dfwaitr
+end subroutine dfwaiti_nm_pos2
 

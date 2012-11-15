@@ -100,6 +100,7 @@ subroutine caldpu(lundia    ,mmax      ,nmaxus    ,kmax      , &
     real(fp)      :: dpvw
     character(25) :: errms1 ! Help. var. for error message 
     character(25) :: errms2 ! Help. var. for error message 
+    integer       :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -109,7 +110,8 @@ subroutine caldpu(lundia    ,mmax      ,nmaxus    ,kmax      , &
     errms1 = '(      ,      ) in U-dir.'
     errms2 = '(      ,      ) in V-dir.'
     !
-    ddb = gdp%d%ddbound
+    ddb    = gdp%d%ddbound
+    nm_pos = 1
     !
     !   Determine UMEAN and VMEAN
     !
@@ -351,8 +353,8 @@ subroutine caldpu(lundia    ,mmax      ,nmaxus    ,kmax      , &
     !
     ! exchange depths and heights with neighbours for parallel runs
     !
-    call dfexchg (  dpu, 1, 1, dfloat, gdp )
-    call dfexchg (  dpv, 1, 1, dfloat, gdp )
-    call dfexchg ( hkru, 1, 1, dfloat, gdp )
-    call dfexchg ( hkrv, 1, 1, dfloat, gdp )
+    call dfexchg (  dpu, 1, 1, dfloat, nm_pos, gdp )
+    call dfexchg (  dpv, 1, 1, dfloat, nm_pos, gdp )
+    call dfexchg ( hkru, 1, 1, dfloat, nm_pos, gdp )
+    call dfexchg ( hkrv, 1, 1, dfloat, nm_pos, gdp )
 end subroutine caldpu

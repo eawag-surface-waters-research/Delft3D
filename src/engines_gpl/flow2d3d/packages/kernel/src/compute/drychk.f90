@@ -78,14 +78,15 @@ subroutine drychk(idry      ,s1        ,qxk       ,qyk       ,icx       , &
 !
 ! Local variables
 !
-    integer :: k
+    integer       :: k
     integer       :: lungrd
     integer       :: n
     integer       :: m
-    integer :: ndm
-    integer :: nm
-    integer :: nmd
+    integer       :: ndm
+    integer       :: nm
+    integer       :: nmd
     character(18) :: tmpname
+    integer       :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -94,7 +95,8 @@ subroutine drychk(idry      ,s1        ,qxk       ,qyk       ,icx       , &
     sedim      => gdp%gdprocs%sedim
     mudlay     => gdp%gdprocs%mudlay
     !
-    idry = 0
+    idry   = 0
+    nm_pos = 1
     if (nfltyp/=0) then
        do nm = 1, nmmax
           if ( (kcs(nm)==1 .or. kcs(nm)==2) ) then
@@ -139,7 +141,7 @@ subroutine drychk(idry      ,s1        ,qxk       ,qyk       ,icx       , &
           kfs(nm) = max(kfu(nm), kfu(nmd), kfv(nm), kfv(ndm))
        endif
     enddo
-    call dfexchg ( kfs, 1,    1, dfint , gdp )
+    call dfexchg ( kfs, 1,    1, dfint, nm_pos, gdp )
     do nm = 1, nmmax
        nmd = nm - icx
        ndm = nm - icy
@@ -153,10 +155,10 @@ subroutine drychk(idry      ,s1        ,qxk       ,qyk       ,icx       , &
     !
     ! exchange kfu, kfv, qxk and qyk with neighbours for parallel runs
     !
-    call dfexchg ( kfu, 1,    1, dfint , gdp )
-    call dfexchg ( kfv, 1,    1, dfint , gdp )
-    call dfexchg ( qxk, 1, kmax, dfloat, gdp )
-    call dfexchg ( qyk, 1, kmax, dfloat, gdp )
+    call dfexchg ( kfu, 1,    1, dfint , nm_pos, gdp )
+    call dfexchg ( kfv, 1,    1, dfint , nm_pos, gdp )
+    call dfexchg ( qxk, 1, kmax, dfloat, nm_pos, gdp )
+    call dfexchg ( qyk, 1, kmax, dfloat, nm_pos, gdp )
     !
     ! Re-define bottom by adding erosion / sedimentation
     ! Only for IDRY=0 or NFLTYP=0 and if mudlay == .true.
@@ -167,6 +169,6 @@ subroutine drychk(idry      ,s1        ,qxk       ,qyk       ,icx       , &
              dps(nm) = dps(nm) - real(hdt*excbed(nm)/cbed,prec)
           endif
        enddo
-       call dfexchg ( dps, 1, 1, dfprec, gdp )
+       call dfexchg ( dps, 1, 1, dfprec, nm_pos, gdp )
     endif
 end subroutine drychk

@@ -264,6 +264,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
     real(fp)      :: dxiu
     real(fp)      :: dxid
     character(80) :: errtxt
+    integer       :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -286,6 +287,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
     nfl         => gdp%gdprocs%nfl
     zmodel      => gdp%gdprocs%zmodel
     wavcmp      => gdp%gdprocs%wavcmp
+    nm_pos      =  1
     !
     call timer_start(timer_sud_rest, gdp)
     !
@@ -628,10 +630,10 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
           !
           ! exchange coefficients a, b, c and d with neighbours for parallel runs
           !
-          call dfexchg ( a, 1, 1, dfloat, gdp )
-          call dfexchg ( b, 1, 1, dfloat, gdp )
-          call dfexchg ( c, 1, 1, dfloat, gdp )
-          call dfexchg ( d, 1, 1, dfloat, gdp )
+          call dfexchg ( a, 1, 1, dfloat, nm_pos, gdp )
+          call dfexchg ( b, 1, 1, dfloat, nm_pos, gdp )
+          call dfexchg ( c, 1, 1, dfloat, nm_pos, gdp )
+          call dfexchg ( d, 1, 1, dfloat, nm_pos, gdp )
           call dfsync(gdp)
           !
           if ( mod(inode,2) == icol ) then
@@ -706,7 +708,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
           !
           ! exchange s1 with neighbours for parallel runs
           !
-          call dfexchg ( s1, 1, 1, dfloat, gdp )
+          call dfexchg ( s1, 1, 1, dfloat, nm_pos, gdp )
           !
           ! insert block Jacobi equation in coupling points
           !
@@ -857,7 +859,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
     !
     ! exchange kfu with neighbours for parallel runs
     !
-    call dfexchg ( kfu, 1, 1, dfint, gdp )
+    call dfexchg ( kfu, 1, 1, dfint, nm_pos, gdp )
     !
     ! adapt discharge boundary conditions
     !
@@ -882,7 +884,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
     !
     ! exchange u1 with neighbours for parallel runs
     !
-    call dfexchg ( u1, 1, kmax, dfloat, gdp )
+    call dfexchg ( u1, 1, kmax, dfloat, nm_pos, gdp )
     !
     ! compute horizontal discharge
     !
@@ -944,7 +946,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
        !
        ! exchange w1 with neighbours for parallel runs
        !
-       call dfexchg ( w1, 0, kmax, dfloat, gdp )
+       call dfexchg ( w1, 0, kmax, dfloat, nm_pos, gdp )
        !
        ! compute vertical discharge
        !

@@ -282,6 +282,7 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     real(fp):: z00
     real(fp):: zw
     real(fp):: zwc
+    integer :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
     data epsd/1.0e-20/
 !
@@ -317,6 +318,7 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     !
     nmaxddb = nmax + 2*gdp%d%ddbound
     mmaxddb = mmax + 2*gdp%d%ddbound
+    nm_pos  = 1
     !
     icxy = max(icx, icy)
     if (dischy=='cn') then
@@ -503,7 +505,7 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
           !
           ! exchange rtur1 with neighbours for parallel runs
           !
-          call dfexchg ( rtur1(:, :, l), 1, kmax-1, dfloat, gdp )
+          call dfexchg ( rtur1(:, :, l), 1, kmax-1, dfloat, nm_pos, gdp )
        enddo
     enddo
     !
@@ -1177,6 +1179,6 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
        !
        ! exchange rtur1 with neighbours for parallel runs
        !
-       call dfexchg ( rtur1(:, :, l), 0, kmax, dfloat, gdp )
+       call dfexchg ( rtur1(:, :, l), 0, kmax, dfloat, nm_pos, gdp )
     enddo
 end subroutine tratur

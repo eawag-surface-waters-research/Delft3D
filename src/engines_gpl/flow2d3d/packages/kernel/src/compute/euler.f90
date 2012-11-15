@@ -110,6 +110,7 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
     real(fp)                       :: tpu
     real(fp)                       :: ustokes
     real(fp)                       :: z
+    integer                        :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -118,6 +119,7 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
     struct     => gdp%gdprocs%struct
     zmodel     => gdp%gdprocs%zmodel
     roller     => gdp%gdprocs%roller
+    nm_pos     =  1
     !
     !
     ! Correct Velocities with mass flux
@@ -261,6 +263,6 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
     !
     ! exchange corrected velocities with neighbours for parallel runs
     !
-    call dfexchg ( uwork, 1, kmax, dfloat, gdp )
-    call dfexchg ( vwork, 1, kmax, dfloat, gdp )
+    call dfexchg ( uwork, 1, kmax, dfloat, nm_pos, gdp )
+    call dfexchg ( vwork, 1, kmax, dfloat, nm_pos, gdp )
 end subroutine euler

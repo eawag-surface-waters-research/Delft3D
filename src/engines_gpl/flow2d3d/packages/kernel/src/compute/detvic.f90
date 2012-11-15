@@ -124,6 +124,7 @@ subroutine detvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
     real(fp)       :: vicmax
     real(fp)       :: vvv    ! Mean v-velocity in zeta point 
     character(256) :: errmsg
+    integer        :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -143,6 +144,7 @@ subroutine detvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
     icount = 0
     error  = .false.
     sag    = sqrt(ag)
+    nm_pos = 1
     !
     ! The HLES contribution to vicuv/dicuv is stored in array element kmax+2
     ! The background contribution is stored in array element kmax+1
@@ -211,6 +213,6 @@ subroutine detvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
     !
     ! exchange horizontal viscosity and diffusivity with neighbours for parallel runs
     !
-    call dfexchg ( vicuv(:,khtur), 1, 1, dfloat, gdp )
-    call dfexchg ( dicuv(:,khtur), 1, 1, dfloat, gdp )
+    call dfexchg ( vicuv(:,khtur), 1, 1, dfloat, nm_pos, gdp )
+    call dfexchg ( dicuv(:,khtur), 1, 1, dfloat, nm_pos, gdp )
 end subroutine detvic

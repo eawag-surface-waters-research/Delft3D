@@ -108,6 +108,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
     character(16)                                        :: datetime
     character(300)                                       :: filtmp  ! File name restart file 300 = 256 + a bit
     character(256)                                       :: filpath ! Path specification of restid
+    integer                                              :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -122,6 +123,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
     nmaxgl      => gdp%gdparall%nmaxgl
     !
     error = .false.
+    nm_pos = 1
     !
     ! test file existence, first 'tri-rst.<restid>.idate.itime'
     !
@@ -225,7 +227,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        else
           s1(1:nmaxus,1:mmax) = sbuff(1:nmaxus,1:mmax,1,1)
        endif
-       call dfexchg ( s1, 1, 1, dfloat, gdp )
+       call dfexchg ( s1, 1, 1, dfloat, nm_pos, gdp )
        !
        ! per layer k: nmaxus mmax values in u1 array
        !
@@ -261,7 +263,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        else
           u1(1:nmaxus,1:mmax,1:kmax) = sbuff(1:nmaxus,1:mmax,1:kmax,1)
        endif
-       call dfexchg ( u1, 1, kmax, dfloat, gdp )
+       call dfexchg ( u1, 1, kmax, dfloat, nm_pos, gdp )
        !
        ! per layer k: nmaxus mmax values in v1 array
        !
@@ -297,7 +299,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        else
           v1(1:nmaxus,1:mmax,1:kmax) = sbuff(1:nmaxus,1:mmax,1:kmax,1)
        endif
-       call dfexchg ( v1, 1, kmax, dfloat, gdp )
+       call dfexchg ( v1, 1, kmax, dfloat, nm_pos, gdp )
        !
        ! per constituent l: kmax nmaxus mmax values in r1 array
        ! only Salinity, Temperature, real constituents and secondary
@@ -336,7 +338,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
                 enddo
              enddo
              do l = 1, lstsci
-                call dfexchg ( r1(:,:,:,l), 1, kmax, dfloat, gdp )
+                call dfexchg ( r1(:,:,:,l), 1, kmax, dfloat, nm_pos, gdp )
              enddo
           else
              r1(1:nmaxus,1:mmax,1:kmax,1:lstsci) = sbuff(1:nmaxus,1:mmax,1:kmax,1:lstsci)
@@ -383,7 +385,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
                 enddo
              enddo
              do l = 1, ltur
-                call dfexchg ( rtur1(:,:,:,l), 0, kmax, dfloat, gdp )
+                call dfexchg ( rtur1(:,:,:,l), 0, kmax, dfloat, nm_pos, gdp )
              enddo
           else
              rtur1(1:nmaxus,1:mmax,0:kmax,1:ltur) = sbuff(1:nmaxus,1:mmax,0:kmax,1:ltur)
@@ -413,7 +415,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        else
           umnldf(1:nmaxus,1:mmax) = sbuff(1:nmaxus,1:mmax,1,1)
        endif
-       call dfexchg ( umnldf, 1, 1, dfloat, gdp )
+       call dfexchg ( umnldf, 1, 1, dfloat, nm_pos, gdp )
        !
        if (inode == master) then
           read (luntmp, iostat = iocond) ((sbuff(n, m, 1, 1), m = 1, mmaxgl), n = 1, nmaxgl)
@@ -435,7 +437,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        else
           vmnldf(1:nmaxus,1:mmax) = sbuff(1:nmaxus,1:mmax,1,1)
        endif
-       call dfexchg ( vmnldf, 1, 1, dfloat, gdp )
+       call dfexchg ( vmnldf, 1, 1, dfloat, nm_pos, gdp )
        !
        ! stop reading file
        !

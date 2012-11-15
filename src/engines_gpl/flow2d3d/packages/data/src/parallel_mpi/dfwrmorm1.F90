@@ -151,6 +151,7 @@ subroutine dfwrmorm1(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
        ! element 'BODSED'
        !
        allocate(rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsedtot))
+       rbuff3 = 0.0_fp
        do l = 1, lsedtot
           do m = 1, mmax
              do n = 1, nmaxus
@@ -169,6 +170,7 @@ subroutine dfwrmorm1(lundia    ,error     ,mmax      ,nmaxus    ,lsedtot   , &
        ! element 'DPSED'
        !
        allocate(rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub))
+       rbuff2 = 0.0_fp
        do m = 1, mmax
           do n = 1, nmaxus
              call n_and_m_to_nm(n, m, nm, gdp)

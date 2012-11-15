@@ -41,21 +41,30 @@ libparallel_la_SOURCES = \
          dfsync.F90 \
          dfexitmpi.F90 \
          dfbroadc.F90 \
-         dfwaiti.F90 \
-         dfwaitr.F90 \
-         dfwaitd.F90 \
+         dfsendd_nm_pos1.F90 \
+         dfsendd_nm_pos2.F90 \
+         dfsendi_nm_pos1.F90 \
+         dfsendi_nm_pos2.F90 \
+         dfsendr_nm_pos1.F90 \
+         dfsendr_nm_pos2.F90 \
+         dfupdd_nm_pos1.F90 \
+         dfupdd_nm_pos2.F90 \
+         dfupdi_nm_pos1.F90 \
+         dfupdi_nm_pos2.F90 \
+         dfupdr_nm_pos1.F90 \
+         dfupdr_nm_pos2.F90 \
+         dfwaitd_nm_pos1.F90 \
+         dfwaitd_nm_pos2.F90 \
+         dfwaiti_nm_pos1.F90 \
+         dfwaiti_nm_pos2.F90 \
+         dfwaitr_nm_pos1.F90 \
+         dfwaitr_nm_pos2.F90 \
          dfsendnb.F90 \
          dfrecvnb.F90 \
-         dfsendi.F90 \
-         dfsendr.F90 \
-         dfsendd.F90 \
          dfreduce.F90 \
          cparri.F90 \
          cparrd.F90 \
          cparrr.F90 \
-         dfupdr.F90 \
-         dfupdd.F90 \
-         dfupdi.F90 \
          dfexchg.F90 \
          dfdecomp.F90 \
          dfpartit.F90 \

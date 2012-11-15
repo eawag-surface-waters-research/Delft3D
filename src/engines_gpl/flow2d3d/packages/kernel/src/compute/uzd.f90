@@ -300,6 +300,7 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     real(fp)           :: www
     real(fp)           :: zz
     character(20)      :: errtxt
+    integer            :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -328,8 +329,9 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     !  INITIALIZE
     !
     call timer_start(timer_uzd_ini, gdp)
-    ddb  = gdp%d%ddbound
-    icxy = max(icx, icy)
+    ddb    = gdp%d%ddbound
+    icxy   = max(icx, icy)
+    nm_pos = 1
     !
     ! factor in maximum wave force 1/4 alpha rho g gammax**2 h**2 / tp /(sqrt(g h)
     ! = facmax * h**1.5/tp
@@ -1019,7 +1021,7 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
           !
        ! exchange u1 with neighbours for parallel runs
        !
-       call dfexchg ( u1, 1, kmax, dfloat, gdp )
+       call dfexchg ( u1, 1, kmax, dfloat, nm_pos, gdp )
        !
        ! loop starts at point of other color now (black respectively red)
        !
@@ -1087,7 +1089,7 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     !
        ! exchange u1 with neighbours for parallel runs
        !
-       call dfexchg ( u1, 1, kmax, dfloat, gdp )
+       call dfexchg ( u1, 1, kmax, dfloat, nm_pos, gdp )
        !
        ! set right-hand side to u1 in the halo area so that convergence check can be done safely
        !

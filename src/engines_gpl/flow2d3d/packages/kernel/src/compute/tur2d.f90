@@ -205,6 +205,7 @@ subroutine tur2d(dischy    ,j         ,nmmaxj    ,nmmax     ,nmax      , &
     real(fp):: vicu
     real(fp):: vup
     real(fp):: vvv
+    integer :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -219,6 +220,7 @@ subroutine tur2d(dischy    ,j         ,nmmaxj    ,nmmax     ,nmax      , &
     !
     nmaxddb = nmax + 2*gdp%d%ddbound
     mmaxddb = mmax + 2*gdp%d%ddbound
+    nm_pos  = 1
     !
     icxy = max(icx, icy)
     if (dischy=='cn') then
@@ -242,7 +244,7 @@ subroutine tur2d(dischy    ,j         ,nmmaxj    ,nmmax     ,nmax      , &
        !
        kfd(nm) = kfu(nm)*kfu(num)*kfv(nmu)*kfv(nm)
     enddo
-    call dfexchg ( kfd, 1, 1, dfint, gdp )
+    call dfexchg ( kfd, 1, 1, dfint, nm_pos, gdp )
     !
     !  mean horizontal velocities at depth point and
     !  depth-averaged vertical viscosity and
@@ -524,7 +526,7 @@ subroutine tur2d(dischy    ,j         ,nmmaxj    ,nmmax     ,nmax      , &
           !
           ! exchange rtu2d1 with neighbours for parallel runs
           !
-          call dfexchg ( rtu2d1(:, l), 1, 1, dfloat, gdp )
+          call dfexchg ( rtu2d1(:, l), 1, 1, dfloat, nm_pos, gdp )
        enddo
        !
        ! Second stage: production-dissipation and diffusion
