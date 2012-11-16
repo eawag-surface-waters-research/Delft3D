@@ -1,7 +1,7 @@
 subroutine compdiam(frac      ,seddm     ,sedd50    ,sedtyp    ,lsedtot   , &
                   & logsedsig ,nseddia   ,logseddia ,nmmax     ,nmlb      , &
                   & nmub      ,xx        ,nxx       ,sedd50fld ,dm        , &
-                  & dg        ,dxx       )
+                  & dg        ,dxx       ,dgsd      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -80,6 +80,7 @@ subroutine compdiam(frac      ,seddm     ,sedd50    ,sedtyp    ,lsedtot   , &
     real(fp), dimension(nmlb:nmub)                      , intent(out) :: dg        ! geometric mean diameter field
     real(fp), dimension(nmlb:nmub)                      , intent(out) :: dm        ! arithmetic mean diameter field
     real(fp), dimension(nmlb:nmub, nxx)                 , intent(out) :: dxx       ! diameters corresponding to percentiles
+    real(fp), dimension(nmlb:nmub)                      , intent(out) :: dgsd      ! geometric standard deviation
 !
 ! Local variables
 !
@@ -108,33 +109,34 @@ subroutine compdiam(frac      ,seddm     ,sedd50    ,sedtyp    ,lsedtot   , &
 !
 !! executable statements -------------------------------------------------------
 !
-    if (lsedtot==1 .and. seddm(1)<0.0 .and. sedtyp(1) /= SEDTYP_COHESIVE) then
+    if (lsedtot==1 .and. seddm(1)<0.0_fp .and. sedtyp(1) /= SEDTYP_COHESIVE) then
        !
        ! Handle case with spatially varying sediment diameter
        ! separately using the same approximation of the lognormal
        ! distribution used in the more general case with multiple
        ! fractions each with a constant sediment diameter.
        !
-       mulfac = exp(0.5 * logsedsig(1) * logsedsig(1))
+       mulfac = exp(0.5_fp * logsedsig(1) * logsedsig(1))
        do nm = 1,nmmax
-          dm(nm) = sedd50fld(nm)*mulfac
-          dg(nm) = sedd50fld(nm)
+          dm(nm)   = sedd50fld(nm)*mulfac
+          dg(nm)   = sedd50fld(nm)
+          dgsd(nm) = 0.0_fp
        enddo
        !
        sedsg = exp(logsedsig(1))
        nn    = size(ilognormal)
        do i = 1, nxx
-          xxperc = xx(i) * 100.0
+          xxperc = xx(i) * 100.0_fp
           if (xxperc <= real(ilognormal(1),fp)) then
-             p1  = 0.0
-             mf1 = -3.0
+             p1  =  0.0_fp
+             mf1 = -3.0_fp
              p2  = real(ilognormal(1),fp)
              mf2 = lognormal(ilognormal(1))
           elseif (xxperc >= real(ilognormal(nn),fp)) then
              p1  = real(ilognormal(nn),fp)
              mf1 = lognormal(ilognormal(nn))
-             p2  = 100.0
-             mf2 = 3.0
+             p2  = 100.0_fp
+             mf2 =   3.0_fp
           else
              do n = 2, nn
                 if (xxperc <= real(ilognormal(n),fp)) then
@@ -156,9 +158,9 @@ subroutine compdiam(frac      ,seddm     ,sedd50    ,sedtyp    ,lsedtot   , &
           !
           ! Compute Dm and Dg values
           !
-          fracnonmud = 0.0
-          dm(nm)     = 0.0
-          dg(nm)     = 1.0
+          fracnonmud = 0.0_fp
+          dm(nm)     = 0.0_fp
+          dg(nm)     = 1.0_fp
           do l = 1, lsedtot
              if (sedtyp(l) /= SEDTYP_COHESIVE) then
                 dm(nm)     = dm(nm) + frac(nm,l) * seddm(l)
@@ -166,11 +168,32 @@ subroutine compdiam(frac      ,seddm     ,sedd50    ,sedtyp    ,lsedtot   , &
                 fracnonmud = fracnonmud + frac(nm,l)
              endif
           enddo
-          if (fracnonmud > 0.0) then
+          if (fracnonmud > 0.0_fp) then
              dm(nm) = dm(nm) / fracnonmud
              dg(nm) = dg(nm)**(1.0/fracnonmud)
           else
-             dg(nm) = 0.0
+             dg(nm) = 0.0_fp
+          endif
+          !
+          ! Compute dgsd (geometric standard deviation of grain size distribution)
+          ! note that this is true geometric standard deviation of grain size as there is an error in
+          ! Gaeuman et al 2009. They use the arithmetic standard deviation of GSD on phi scale.
+          !
+          ! seperate loop required as dg needs to be calculated first
+          !
+          dgsd(nm) = 0.0_fp
+          do l = 1, lsedtot
+             if (sedtyp(l) /= 'mud') then
+                dgsd(nm) = dgsd(nm) + frac(nm,l)*(log(sedd50(l))-log(dg(nm)))**2
+             endif
+          enddo
+          !
+          ! fracnonmud computed above when calculating dm & dg
+          !
+          if (fracnonmud > 0.0_fp) then
+             dgsd(nm) = exp(sqrt(dgsd(nm)/fracnonmud))
+          else
+             dgsd(nm) = 0.0_fp
           endif
           !
           ! Compute Dxx values
@@ -188,8 +211,8 @@ subroutine compdiam(frac      ,seddm     ,sedd50    ,sedtyp    ,lsedtot   , &
           ! Fraccum indicates the cumulative fraction starting from
           ! the finest sediment up to the last diameter (logdprev).
           !
-          logdprev = 0.0
-          fraccum  = 0.0
+          logdprev = 0.0_fp
+          fraccum  = 0.0_fp
           i        = 1
           fracreq  = xx(1) * fracnonmud
           !
@@ -198,9 +221,9 @@ subroutine compdiam(frac      ,seddm     ,sedd50    ,sedtyp    ,lsedtot   , &
              ! Find the smallest diameter not yet considered and calculate
              ! the density (cdf) in the considered range.
              !
-             logdiam  = 999.999
+             logdiam  = 999.999_fp
              ltrigger = -1
-             dens     = 0.0
+             dens     = 0.0_fp
              do l = 1, lsedtot
                 s = stage(l)
                 if (s<nseddia(l)) then

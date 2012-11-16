@@ -50,21 +50,23 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer,        dimension(:)         , pointer :: iform
-    real(fp), dimension(:)               , pointer :: dm
-    real(fp), dimension(:)               , pointer :: dg
-    real(fp), dimension(:,:)             , pointer :: dxx
-    real(fp), dimension(:,:)             , pointer :: frac
-    real(fp), dimension(:)               , pointer :: mudfrac
-    real(fp), dimension(:,:)             , pointer :: hidexp
-    real(fp), dimension(:,:)             , pointer :: sbuuc
-    real(fp), dimension(:,:)             , pointer :: sbvvc
-    real(fp), dimension(:,:)             , pointer :: ssuuc
-    real(fp), dimension(:,:)             , pointer :: ssvvc
-    real(fp), dimension(:,:)             , pointer :: sucor
-    real(fp), dimension(:,:)             , pointer :: svcor
+    integer       , dimension(:)         , pointer :: iform
+    real(fp)      , dimension(:)         , pointer :: dm
+    real(fp)      , dimension(:)         , pointer :: dg
+    real(fp)      , dimension(:)         , pointer :: dgsd
+    real(fp)      , dimension(:,:)       , pointer :: dxx
+    real(fp)      , dimension(:,:)       , pointer :: frac
+    real(fp)      , dimension(:)         , pointer :: mudfrac
+    real(fp)      , dimension(:)         , pointer :: sandfrac
+    real(fp)      , dimension(:,:)       , pointer :: hidexp
+    real(fp)      , dimension(:,:)       , pointer :: sbuuc
+    real(fp)      , dimension(:,:)       , pointer :: sbvvc
+    real(fp)      , dimension(:,:)       , pointer :: ssuuc
+    real(fp)      , dimension(:,:)       , pointer :: ssvvc
+    real(fp)      , dimension(:,:)       , pointer :: sucor
+    real(fp)      , dimension(:,:)       , pointer :: svcor
     integer                              , pointer :: nxx
-    real(fp)              , dimension(:) , pointer :: xx
+    real(fp)      , dimension(:)         , pointer :: xx
     integer                              , pointer :: ihidexp
     real(fp)                             , pointer :: asklhe
     real(fp)                             , pointer :: mwwjhe
@@ -109,17 +111,17 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
 !
 ! Global variables
 !
-    integer                                                         , intent(in)  :: lsed    !  Description and declaration in esm_alloc_int.f90
-    integer                                                         , intent(in)  :: lsedtot !  Description and declaration in esm_alloc_int.f90
-    integer                                                         , intent(in)  :: lundia  !  Description and declaration in inout.igs
-    integer                                                         , intent(in)  :: mmax    !  Description and declaration in esm_alloc_int.f90
-    integer                                                         , intent(in)  :: nmax    !  Description and declaration in esm_alloc_int.f90
-    integer                                                         , intent(in)  :: nmaxus  !  Description and declaration in esm_alloc_int.f90
-    integer                                                         , intent(in)  :: nmmax   !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                    , intent(in)  :: kcs     !  Description and declaration in esm_alloc_int.f90
-    logical                                                                       :: error   !!  Flag=TRUE if an error is encountered
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsed)              , intent(out) :: dss     !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(lsed)                                     , intent(in)  :: facdss  !  Description and declaration in esm_alloc_real.f90
+    integer                                            , intent(in)  :: lsed    !  Description and declaration in esm_alloc_int.f90
+    integer                                            , intent(in)  :: lsedtot !  Description and declaration in esm_alloc_int.f90
+    integer                                            , intent(in)  :: lundia  !  Description and declaration in inout.igs
+    integer                                            , intent(in)  :: mmax    !  Description and declaration in esm_alloc_int.f90
+    integer                                            , intent(in)  :: nmax    !  Description and declaration in esm_alloc_int.f90
+    integer                                            , intent(in)  :: nmaxus  !  Description and declaration in esm_alloc_int.f90
+    integer                                            , intent(in)  :: nmmax   !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kcs     !  Description and declaration in esm_alloc_int.f90
+    logical                                                          :: error   !  Flag=TRUE if an error is encountered
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsed) , intent(out) :: dss     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(lsed)                        , intent(in)  :: facdss  !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !
@@ -140,9 +142,11 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     iform               => gdp%gdeqtran%iform
     dm                  => gdp%gderosed%dm
     dg                  => gdp%gderosed%dg
+    dgsd                => gdp%gderosed%dg
     dxx                 => gdp%gderosed%dxx
     frac                => gdp%gderosed%frac
     mudfrac             => gdp%gderosed%mudfrac
+    sandfrac            => gdp%gderosed%sandfrac
     hidexp              => gdp%gderosed%hidexp
     sbuuc               => gdp%gderosed%sbuuc
     sbvvc               => gdp%gderosed%sbvvc
@@ -203,18 +207,20 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     fmttmp = 'formatted'
     istat  = 0
     if (.not. associated(gdp%gderosed%dm)) then
-                     allocate (gdp%gderosed%dm     (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%dg     (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%dxx    (gdp%d%nmlb:gdp%d%nmub,nxx)    , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%frac   (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%mudfrac(gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%hidexp (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sbuuc  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sbvvc  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
-       if (istat==0) allocate (gdp%gderosed%ssuuc  (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%ssvvc  (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%sucor  (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
-       if (istat==0) allocate (gdp%gderosed%svcor  (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
+                     allocate (gdp%gderosed%dm      (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%dg      (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%dgsd    (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%dxx     (gdp%d%nmlb:gdp%d%nmub,nxx)    , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%frac    (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%mudfrac (gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%sandfrac(gdp%d%nmlb:gdp%d%nmub)        , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%hidexp  (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%sbuuc   (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%sbvvc   (gdp%d%nmlb:gdp%d%nmub,lsedtot), stat = istat)
+       if (istat==0) allocate (gdp%gderosed%ssuuc   (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%ssvvc   (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%sucor   (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
+       if (istat==0) allocate (gdp%gderosed%svcor   (gdp%d%nmlb:gdp%d%nmub,lsed)   , stat = istat)
        if (istat/=0) then
           call prterr(lundia, 'U021', 'Inised: memory alloc error')
           call d3stop(1, gdp)
@@ -222,9 +228,11 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
        !
        dm                  => gdp%gderosed%dm
        dg                  => gdp%gderosed%dg
+       dgsd                => gdp%gderosed%dgsd
        dxx                 => gdp%gderosed%dxx
        frac                => gdp%gderosed%frac
        mudfrac             => gdp%gderosed%mudfrac
+       sandfrac            => gdp%gderosed%sandfrac
        hidexp              => gdp%gderosed%hidexp
        sbuuc               => gdp%gderosed%sbuuc
        sbvvc               => gdp%gderosed%sbvvc
@@ -233,22 +241,24 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
        sucor               => gdp%gderosed%sucor
        svcor               => gdp%gderosed%svcor
        !
-       dm      = 0.0
-       dg      = 0.0
-       dxx     = 0.0
-       frac    = 0.0
-       mudfrac = 0.0
-       hidexp  = 0.0
-       sucor   = 0.0
-       svcor   = 0.0
+       dm       = 0.0_fp
+       dg       = 0.0_fp
+       dgsd     = 0.0_fp
+       dxx      = 0.0_fp
+       frac     = 0.0_fp
+       mudfrac  = 0.0_fp
+       sandfrac = 0.0_fp
+       hidexp   = 0.0_fp
+       sucor    = 0.0_fp
+       svcor    = 0.0_fp
     endif
     !
     ! Initialise cumulative sediment transport arrays
     !
-    sbuuc = 0.0
-    sbvvc = 0.0
-    ssuuc = 0.0
-    ssvvc = 0.0
+    sbuuc = 0.0_fp
+    sbvvc = 0.0_fp
+    ssuuc = 0.0_fp
+    ssvvc = 0.0_fp
     !
     ! Start filling array SEDD50FLD
     !
@@ -477,7 +487,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     call compdiam(frac      ,sedd50    ,sedd50    ,sedtyp    ,lsedtot   , &
                 & logsedsig ,nseddia   ,logseddia ,nmmax     ,nmlb      , &
                 & nmub      ,xx        ,nxx       ,sedd50fld ,dm        , &
-                & dg        ,dxx       )
+                & dg        ,dxx       ,dgsd      )
     !
     ! Determine hiding & exposure factors
     !
@@ -495,14 +505,14 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
        if (sedtyp(ll) == SEDTYP_NONCOHESIVE_SUSPENDED) then
           s = rhosol(ll)/rhow
           !
-          if (sedd50(ll) < 1.5*dsand) then
-             ws0(ll) = (s - 1.0)*ag*sedd50(ll)**2/(18.0*vicmol)
-          elseif (sedd50(ll) < 0.5*dgravel) then
-             ws0(ll) = 10.0*vicmol/sedd50(ll)                      &
-                & *(sqrt(1.0 + (s - 1.0)*ag*sedd50(ll)**3          &
-                &                      /(100.0*vicmol**2)) - 1.0)
+          if (sedd50(ll) < 1.5_fp*dsand) then
+             ws0(ll) = (s - 1.0_fp)*ag*sedd50(ll)**2/(18.0_fp*vicmol)
+          elseif (sedd50(ll) < 0.5_fp*dgravel) then
+             ws0(ll) = 10.0_fp*vicmol/sedd50(ll)                      &
+                & *(sqrt(1.0_fp + (s - 1.0_fp)*ag*sedd50(ll)**3          &
+                &                      /(100.0_fp*vicmol**2)) - 1.0_fp)
           else
-             ws0(ll) = 1.1*sqrt((s - 1.0)*ag*sedd50(ll))
+             ws0(ll) = 1.1_fp*sqrt((s - 1.0_fp)*ag*sedd50(ll))
           endif
        endif
     enddo

@@ -121,6 +121,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)         , dimension(:)      , pointer :: dcwwlc
     real(fp)         , dimension(:)      , pointer :: dm
     real(fp)         , dimension(:)      , pointer :: dg
+    real(fp)         , dimension(:)      , pointer :: dgsd
     real(fp)         , dimension(:,:)    , pointer :: dxx
     real(fp)         , dimension(:)      , pointer :: dzduu
     real(fp)         , dimension(:)      , pointer :: dzdvv
@@ -130,6 +131,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)         , dimension(:,:)    , pointer :: frac
     real(fp)         , dimension(:,:)    , pointer :: gamtcr
     real(fp)         , dimension(:)      , pointer :: mudfrac
+    real(fp)         , dimension(:)      , pointer :: sandfrac
     real(fp)         , dimension(:,:)    , pointer :: hidexp
     real(fp)         , dimension(:)      , pointer :: rsdqlc
     real(fp)         , dimension(:,:)    , pointer :: sbcu
@@ -421,6 +423,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     dcwwlc              => gdp%gderosed%dcwwlc
     dm                  => gdp%gderosed%dm
     dg                  => gdp%gderosed%dg
+    dgsd                => gdp%gderosed%dgsd
     dxx                 => gdp%gderosed%dxx
     dzduu               => gdp%gderosed%dzduu
     dzdvv               => gdp%gderosed%dzdvv
@@ -429,6 +432,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     fixfac              => gdp%gderosed%fixfac
     frac                => gdp%gderosed%frac
     mudfrac             => gdp%gderosed%mudfrac
+    sandfrac            => gdp%gderosed%sandfrac
     hidexp              => gdp%gderosed%hidexp
     rsdqlc              => gdp%gderosed%rsdqlc
     sbcu                => gdp%gderosed%sbcu
@@ -722,13 +726,19 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        call compdiam(frac      ,sedd50    ,sedd50    ,sedtyp    ,lsedtot   , &
                    & logsedsig ,nseddia   ,logseddia ,nmmax     ,gdp%d%nmlb, &
                    & gdp%d%nmub,xx        ,nxx       ,sedd50fld ,dm        , &
-                   & dg        ,dxx       )
+                   & dg        ,dxx       ,dgsd      )
        !
        ! determine hiding & exposure factors
        !
        call comphidexp(frac      ,dm        ,nmmax     ,lsedtot   , &
                      & sedd50    ,hidexp    ,ihidexp   ,asklhe    , &
                      & mwwjhe    ,gdp%d%nmlb,gdp%d%nmub)
+       !
+       ! compute sand fraction
+       !
+       call compsandfrac(frac   ,sedd50       ,nmmax     ,lsedtot   , &
+                    & sedtyp    ,sandfrac     ,sedd50fld , &
+                    & gdp%d%nmlb,gdp%d%nmub)
     endif
     !
     do nm = 1, nmmax
@@ -882,10 +892,10 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           call prterr (lundia,'U021', trim(errmsg))
           call d3stop(1, gdp)
        endif
-       dll_reals(RP_TIME ) = real(timsec ,hp)
-       dll_reals(RP_UMEAN) = real(umean  ,hp)
-       dll_reals(RP_VMEAN) = real(vmean  ,hp)
-       dll_reals(RP_VELMN) = real(velm   ,hp)
+       dll_reals(RP_TIME ) = real(timsec    ,hp)
+       dll_reals(RP_UMEAN) = real(umean     ,hp)
+       dll_reals(RP_VMEAN) = real(vmean     ,hp)
+       dll_reals(RP_VELMN) = real(velm      ,hp)
        dll_reals(RP_UCHAR) = real(uuu(nm)   ,hp)
        dll_reals(RP_VCHAR) = real(vvv(nm)   ,hp)
        dll_reals(RP_VELCH) = real(umod(nm)  ,hp)
@@ -894,10 +904,10 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        dll_reals(RP_CHEZY) = real(chezy     ,hp)
        if (wave) then
           dll_reals(RP_HRMS ) = real(min(gammax*h1, hrms(nm)) ,hp)
-          dll_reals(RP_TPEAK) = real(tp(nm)    ,hp)
-          dll_reals(RP_TETA ) = real(teta(nm)  ,hp)
-          dll_reals(RP_RLAMB) = real(rlabda(nm),hp)
-          dll_reals(RP_UORB ) = real(uorb(nm)  ,hp)
+          dll_reals(RP_TPEAK) = real(tp(nm)                   ,hp)
+          dll_reals(RP_TETA ) = real(teta(nm)                 ,hp)
+          dll_reals(RP_RLAMB) = real(rlabda(nm)               ,hp)
+          dll_reals(RP_UORB ) = real(uorb(nm)                 ,hp)
        else
           dll_reals(RP_HRMS ) = 0.0_hp
           dll_reals(RP_TPEAK) = 0.0_hp
@@ -915,18 +925,21 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        ! dll_reals(RP_SETVL) = settling velocity
        ! dll_reals(RP_RHOSL) = specific density
        dll_reals(RP_RHOWT) = real(rhowat(nm,kmax),hp) ! Density of water
-       dll_reals(RP_SALIN) = real(salinity,hp)
-       dll_reals(RP_TEMP ) = real(temperature,hp)
-       dll_reals(RP_GRAV ) = real(ag     ,hp)
-       dll_reals(RP_VICML) = real(vicmol ,hp)
-       dll_reals(RP_TAUB ) = real(taub   ,hp) !taubmx incremented with tauadd
-       dll_reals(RP_UBED ) = real(ubed   ,hp)
-       dll_reals(RP_VBED ) = real(vbed   ,hp)
-       dll_reals(RP_VELBD) = real(velb   ,hp)
-       dll_reals(RP_ZVLBD) = real(zvelb  ,hp)
-       dll_reals(RP_VNKAR) = real(vonkar ,hp)
-       dll_reals(RP_Z0CUR) = real(z0cur  ,hp)
-       dll_reals(RP_Z0ROU) = real(z0rou  ,hp)
+       dll_reals(RP_SALIN) = real(salinity       ,hp)
+       dll_reals(RP_TEMP ) = real(temperature    ,hp)
+       dll_reals(RP_GRAV ) = real(ag             ,hp)
+       dll_reals(RP_VICML) = real(vicmol         ,hp)
+       dll_reals(RP_TAUB ) = real(taub           ,hp) !taubmx incremented with tauadd
+       dll_reals(RP_UBED ) = real(ubed           ,hp)
+       dll_reals(RP_VBED ) = real(vbed           ,hp)
+       dll_reals(RP_VELBD) = real(velb           ,hp)
+       dll_reals(RP_ZVLBD) = real(zvelb          ,hp)
+       dll_reals(RP_VNKAR) = real(vonkar         ,hp)
+       dll_reals(RP_Z0CUR) = real(z0cur          ,hp)
+       dll_reals(RP_Z0ROU) = real(z0rou          ,hp)
+       dll_reals(RP_DG   ) = real(dg(nm)         ,hp)
+       dll_reals(RP_SNDFR) = real(sandfrac(nm)   ,hp)
+       dll_reals(RP_DGSD ) = real(dgsd(nm)       ,hp)
        if (ltur>=1) then
           dll_reals(RP_KTUR ) = real(rtur0(nm,kmax,1),hp)
        endif

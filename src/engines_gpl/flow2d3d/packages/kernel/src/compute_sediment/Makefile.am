@@ -45,6 +45,7 @@ libkernel_compute_sediment_la_SOURCES = \
          compbsskin.f90 \
          compdiam.f90 \
          comphidexp.f90 \
+         compsandfrac.f90 \
          compthick.f90 \
          dredgedump.f90 \
          dwnvel.f90 \
@@ -66,6 +67,9 @@ libkernel_compute_sediment_la_SOURCES = \
          trab11.f90 \
          trab12.f90 \
          trab14.f90 \
+         trabg.f90 \
+         trabwc.f90 \
+         trabwc2.f90 \
          tran9t.f90 \
          tranb1.f90 \
          tranb2.f90 \

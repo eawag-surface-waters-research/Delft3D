@@ -1,4 +1,6 @@
-subroutine initerosed(gdp)
+subroutine compsandfrac(frac      ,seddm     ,nmmax     ,lsedtot   , &
+                      & sedtyp    ,sandfrac  ,sedd50fld , &
+                      & nmlb      ,nmub      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -28,7 +30,11 @@ subroutine initerosed(gdp)
 !  $Id$
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
-! NONE
+!
+!  compsandfrac returns the total proportion of sand sized material on the bed
+!  surface (sandfrac). This is required in order to implement the Wilcock and
+!  Crowe sediment transport formula.
+!
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
@@ -37,72 +43,56 @@ subroutine initerosed(gdp)
     use globaldata
     !
     implicit none
-    !
-    type(globdat),target :: gdp
+!
+! Global variables
+!
+    integer                                 , intent(in)  :: lsedtot   ! number of sediment fractions
+    integer                                 , intent(in)  :: nmmax     ! last space index to be processed
+    integer                                 , intent(in)  :: nmlb      ! start space index
+    integer                                 , intent(in)  :: nmub      ! end space index
+    real(fp), dimension(nmlb:nmub, lsedtot) , intent(in)  :: frac      ! fractional composition of sediment
+    real(fp), dimension(lsedtot)            , intent(in)  :: seddm     ! mean diameter of sediment fraction
+    real(fp), dimension(nmlb:nmub)          , intent(out) :: sandfrac  ! sand fraction
+    real(fp), dimension(nmlb:nmub)          , intent(in)  :: sedd50fld ! D50 field (in case of 1 sediment fraction)
+    character(4), dimension(lsedtot)        , intent(in)  :: sedtyp    ! sediment type: sand/mud/bedload
+!
+! Local variables
+!
+    integer  :: l
+    integer  :: nm
+    real(fp) :: fracnonmud
+    
 !
 !! executable statements -------------------------------------------------------
 !
-    gdp%gderosed%ifirst = 1
-    !
-    nullify(gdp%gderosed%bc_mor_array)
-    !
-    nullify(gdp%gderosed%dbodsd)
-    nullify(gdp%gderosed%dcwwlc)
-    nullify(gdp%gderosed%dg)
-    nullify(gdp%gderosed%dgsd)
-    nullify(gdp%gderosed%dm)
-    nullify(gdp%gderosed%dxx)
-    nullify(gdp%gderosed%dzduu)
-    nullify(gdp%gderosed%dzdvv)
-    !
-    nullify(gdp%gderosed%epsclc)
-    nullify(gdp%gderosed%epswlc)
-    !
-    nullify(gdp%gderosed%fixfac)
-    nullify(gdp%gderosed%srcmax)
-    nullify(gdp%gderosed%frac)
-    !
-    nullify(gdp%gderosed%hidexp)
-    !
-    nullify(gdp%gderosed%mudfrac)
-    nullify(gdp%gderosed%sandfrac)
-    !
-    nullify(gdp%gderosed%rsdqlc)
-    !
-    nullify(gdp%gderosed%sbcu)
-    nullify(gdp%gderosed%sbcuu)
-    nullify(gdp%gderosed%sbcv)
-    nullify(gdp%gderosed%sbcvv)
-    nullify(gdp%gderosed%sbuuc)
-    nullify(gdp%gderosed%sbvvc)
-    nullify(gdp%gderosed%sbwu)
-    nullify(gdp%gderosed%sbwuu)
-    nullify(gdp%gderosed%sbwv)
-    nullify(gdp%gderosed%sbwvv)
-    nullify(gdp%gderosed%sddflc)
-    nullify(gdp%gderosed%sinkse)
-    nullify(gdp%gderosed%sourse)
-    nullify(gdp%gderosed%ssuuc)
-    nullify(gdp%gderosed%ssvvc)
-    nullify(gdp%gderosed%sswu)
-    nullify(gdp%gderosed%sswuu)
-    nullify(gdp%gderosed%sswv)
-    nullify(gdp%gderosed%sswvv)
-    nullify(gdp%gderosed%sucor)
-    nullify(gdp%gderosed%sutot)
-    nullify(gdp%gderosed%svcor)
-    nullify(gdp%gderosed%svtot)
-    !
-    nullify(gdp%gderosed%taurat)
-    !
-    nullify(gdp%gderosed%umod)
-    nullify(gdp%gderosed%ust2)
-    nullify(gdp%gderosed%uuu)
-    !
-    nullify(gdp%gderosed%vvv)
-    !
-    nullify(gdp%gderosed%wslc)
-    !
-    nullify(gdp%gderosed%zumod)
-    !
-end subroutine initerosed
+    if (lsedtot==1 .and. sedtyp(1) /= 'mud') then
+      ! Single size fraction
+      do nm = 1, nmmax
+        if (sedd50fld(nm) < 0.002_fp) then
+          sandfrac(nm) = 1
+        else
+          sandfrac(nm) = 0
+        endif
+      enddo
+    else
+      ! Multiple size fractions
+      do nm = 1, nmmax
+        fracnonmud = 0.0_fp
+        sandfrac(nm) = 0.0_fp
+        do l = 1, lsedtot
+          if (sedtyp(l) /= 'mud') then
+            fracnonmud = fracnonmud + frac(nm,l)
+            if (seddm(l) < 0.002_fp) then
+              sandfrac(nm) = sandfrac(nm) + frac(nm,l)                
+            endif  
+          endif         
+           
+        enddo
+        
+        if (fracnonmud > 0.0_fp) then
+             sandfrac(nm) = sandfrac(nm) / fracnonmud
+        endif
+        
+      enddo
+    endif
+end subroutine compsandfrac

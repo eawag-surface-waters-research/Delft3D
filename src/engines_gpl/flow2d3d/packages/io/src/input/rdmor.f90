@@ -674,8 +674,10 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        !
        call prop_get_logical(mor_ptr, 'Output', 'Dm'                          , moroutput%dm)
        call prop_get_logical(mor_ptr, 'Output', 'Dg'                          , moroutput%dg)
+       call prop_get_logical(mor_ptr, 'Output', 'Dgsd'                        , moroutput%dgsd)
        call prop_get_logical(mor_ptr, 'Output', 'Frac'                        , moroutput%frac)
        call prop_get_logical(mor_ptr, 'Output', 'MudFrac'                     , moroutput%mudfrac)
+       call prop_get_logical(mor_ptr, 'Output', 'SandFrac'                    , moroutput%sandfrac)
        call prop_get_logical(mor_ptr, 'Output', 'FixFac'                      , moroutput%fixfac)
        call prop_get_logical(mor_ptr, 'Output', 'HidExp'                      , moroutput%hidexp)
        !

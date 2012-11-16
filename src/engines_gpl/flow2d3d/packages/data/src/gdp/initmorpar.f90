@@ -216,12 +216,14 @@ subroutine initmorpar(gdp)
     !
     gdp%gdmorpar%moroutput%cumavg      = .false.
     gdp%gdmorpar%moroutput%dg          = .false.
+    gdp%gdmorpar%moroutput%dgsd        = .false.
     gdp%gdmorpar%moroutput%dm          = .false.
     gdp%gdmorpar%moroutput%dzduuvv     = .false.
     gdp%gdmorpar%moroutput%fixfac      = .false.
     gdp%gdmorpar%moroutput%hidexp      = .false.
     gdp%gdmorpar%moroutput%frac        = .false.
     gdp%gdmorpar%moroutput%mudfrac     = .false.
+    gdp%gdmorpar%moroutput%sandfrac    = .false.
     gdp%gdmorpar%moroutput%percentiles = .false.
     gdp%gdmorpar%moroutput%sbcuv       = .false.
     gdp%gdmorpar%moroutput%sbcuuvv     = .false.

@@ -229,7 +229,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp), dimension(8, 4)          :: qq         ! Coefficient q(i) in expression for parameter q 
     real(fp), dimension(:),allocatable :: ka         ! Apparent bed roughness (Van Rijn, 2004)
 !
-! Data statemens
+! Data statements
 !
     data bb/      0.29,  0.65,  0.27,  0.73,  0.22,  0.32,  0.47, -0.06, & 
                   0.55,  0.29,  0.51,  0.40,  0.73,  0.55,  0.29,  0.26, &

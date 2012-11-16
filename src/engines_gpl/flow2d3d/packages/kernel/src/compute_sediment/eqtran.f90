@@ -160,6 +160,8 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     real(fp)                    :: delr
     real(fp)                    :: di50
     real(fp)                    :: diffbt
+    real(fp)                    :: dg
+    real(fp)                    :: dgsd
     real(fp)                    :: drho
     real(fp)                    :: dstar
     real(fp)                    :: dz
@@ -191,6 +193,7 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     real(fp)                    :: rlabda
     real(fp)                    :: sag
     real(fp)                    :: salinity
+    real(fp)                    :: sandfrac
     real(fp)                    :: sbot
     real(fp)                    :: sina
     real(fp)                    :: sk
@@ -198,6 +201,7 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     real(fp)                    :: ssusx
     real(fp)                    :: ssusy
     real(fp)                    :: ta
+    real(fp)                    :: taub
     real(fp)                    :: taubcw
     real(fp)                    :: tauc
     real(fp)                    :: taucr1
@@ -266,27 +270,30 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
     rlabda    = real(realpar(RP_RLAMB),fp)
     uorb      = real(realpar(RP_UORB) ,fp)
     di50      = real(realpar(RP_D50)  ,fp)
-    !realpar(RP_DSS) = real(dss,hp)
+    ! realpar(RP_DSS) = real(dss,hp)
     dstar     = real(realpar(RP_DSTAR),fp)
     d10       = real(realpar(RP_D10MX),fp)
     d90       = real(realpar(RP_D90MX),fp)
     mudfrac   = real(realpar(RP_MUDFR),fp)
     hidexp    = real(realpar(RP_HIDEX),fp)
-    !ws        = real(realpar(RP_SETVL),fp)
+    ! ws        = real(realpar(RP_SETVL),fp)
     rhosol    = real(realpar(RP_RHOSL),fp)
     rhowat    = real(realpar(RP_RHOWT),fp)
     salinity  = real(realpar(RP_SALIN),fp)
-    !temp      = real(realpar(RP_TEMP) ,fp)
+    ! temp      = real(realpar(RP_TEMP) ,fp)
     ag        = real(realpar(RP_GRAV) ,fp)
     vicmol    = real(realpar(RP_VICML),fp)
-    !taub      = real(realpar(RP_TAUB) ,fp)
-    !ubed      = real(realpar(RP_UBED ),fp)
-    !vbed      = real(realpar(RP_VBED ),fp)
-    !velb      = real(realpar(RP_VELBD),fp)
-    !zvelb     = real(realpar(RP_ZVLBD),fp)
+    taub      = real(realpar(RP_TAUB) ,fp)
+    ! ubed      = real(realpar(RP_UBED ),fp)
+    ! vbed      = real(realpar(RP_VBED ),fp)
+    ! velb      = real(realpar(RP_VELBD),fp)
+    ! zvelb     = real(realpar(RP_ZVLBD),fp)
     vonkar    = real(realpar(RP_VNKAR),fp)
     z0cur     = real(realpar(RP_Z0CUR),fp)
-    z0rou     = real(realpar(RP_z0ROU),fp)
+    z0rou     = real(realpar(RP_Z0ROU),fp)
+    dg        = real(realpar(RP_DG)   ,fp)
+    sandfrac  = real(realpar(RP_SNDFR),fp)
+    dgsd      = real(realpar(RP_DGSD) ,fp)
     !
     cesus  = 0.0_fp
     sbot   = 0.0_fp
@@ -769,6 +776,33 @@ subroutine eqtran(sig       ,thick     ,kmax      , &
        !
        call trab14(utot      ,di50      ,chezy     ,par        ,hidexp    , &
                  & sbot      ,ssus      )
+       !
+       sbc_total = .true.
+       sus_total = .true.
+    elseif (iform == 16) then 
+       !
+       ! Wilcock & Crowe
+       !
+       call trabwc(utot      ,di50      ,taub      ,par       ,sbot      , &
+                 & ssus      ,dg        ,sandfrac  ,chezy     )
+       !
+       sbc_total = .true.
+       sus_total = .true. 
+    elseif (iform == 17) then 
+       !
+       ! Modified Wilcock & Crowe
+       !
+       call trabwc2(utot       ,di50      ,taub       ,par       ,sbot      , &
+                  & ssus       ,dg        ,dgsd       ,chezy     )
+       !
+       sbc_total = .true.
+       sus_total = .true.
+    elseif (iform == 18) then 
+       !
+       ! Gaeuman et al. (development of Wilcock & Crowe
+       !
+       call trabg(utot       ,di50      ,taub       ,par       ,sbot      , &
+                & ssus       ,dg        ,dgsd       ,chezy     )
        !
        sbc_total = .true.
        sus_total = .true.

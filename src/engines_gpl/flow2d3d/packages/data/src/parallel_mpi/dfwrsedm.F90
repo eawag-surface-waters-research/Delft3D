@@ -70,12 +70,14 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
     real(fp), dimension(:)               , pointer :: cdryb
     real(fp), dimension(:)               , pointer :: dm
     real(fp), dimension(:)               , pointer :: dg
+    real(fp), dimension(:)               , pointer :: dgsd
     real(fp), dimension(:,:)             , pointer :: dxx
     real(fp), dimension(:)               , pointer :: dzduu
     real(fp), dimension(:)               , pointer :: dzdvv
     real(fp), dimension(:,:)             , pointer :: fixfac
     real(fp), dimension(:,:)             , pointer :: frac
     real(fp), dimension(:)               , pointer :: mudfrac
+    real(fp), dimension(:)               , pointer :: sandfrac
     real(fp), dimension(:,:)             , pointer :: hidexp
     real(fp), dimension(:,:)             , pointer :: sbcu
     real(fp), dimension(:,:)             , pointer :: sbcv
@@ -192,12 +194,14 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
     scour               => gdp%gdscour%scour
     dm                  => gdp%gderosed%dm
     dg                  => gdp%gderosed%dg
+    dgsd                => gdp%gderosed%dgsd
     dxx                 => gdp%gderosed%dxx
     dzduu               => gdp%gderosed%dzduu
     dzdvv               => gdp%gderosed%dzdvv
     fixfac              => gdp%gderosed%fixfac
     frac                => gdp%gderosed%frac
     mudfrac             => gdp%gderosed%mudfrac
+    sandfrac            => gdp%gderosed%sandfrac
     hidexp              => gdp%gderosed%hidexp
     sbcu                => gdp%gderosed%sbcu
     sbcv                => gdp%gderosed%sbcv
@@ -449,6 +453,12 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
              & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0     , &
              & lundia    ,gdp       )
        endif
+       if (moroutput%dgsd) then
+          call addelm(nefiswrsedm,'DGSD',' ','[   -   ]','REAL',4           , &
+             & 'Geometric standard deviation of particle size mix'                 , &
+             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0     , &
+             & lundia    ,gdp       )
+       endif
        if (moroutput%percentiles) then
           do l = 1, nxx
              write(dxname,'(A,I2.2)') 'DXX',l
@@ -470,6 +480,12 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
           call addelm(nefiswrsedm,'MUDFRAC',' ','[   -   ]','REAL',4        , &
              & 'Mud fraction in top layer'                                  , &
              & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0     , &
+             & lundia    ,gdp       )
+       endif
+       if (moroutput%sandfrac) then
+          call addelm(nefiswrsedm,'SANDFRAC',' ','[   -   ]','REAL',4        , &
+             & 'Sand fraction in top layer'                                  , &
+             & 2         ,nmaxgl    ,mmaxgl    ,0         ,0         ,0      , &
              & lundia    ,gdp       )
        endif
        if (moroutput%fixfac) then
@@ -1442,6 +1458,24 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
        if (ierror/=0) goto 9999
     endif
     !
+    ! group 5: element 'DGSD'
+    !
+    if (moroutput%dgsd) then
+       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1, 1) )
+       do m = 1, mmax
+          do n = 1, nmaxus
+             call n_and_m_to_nm(n, m, nm, gdp)
+             rbuff4(n, m, 1, 1) = dgsd(nm)
+          enddo
+       enddo
+       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+       deallocate(rbuff4)
+       if (inode == master) then
+          ierror = putelt(fds, grnam5, 'DGSD', uindex, 1, glbarr4)
+       endif
+       if (ierror/=0) goto 9999
+    endif
+    !
     if (moroutput%percentiles) then
        allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1, 1) )
        do l = 1, nxx
@@ -1497,6 +1531,25 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
        deallocate(rbuff4)
        if (inode == master) then
           ierror = putelt(fds, grnam5, 'MUDFRAC', uindex, 1, glbarr4)
+       endif
+       if (ierror/=0) goto 9999
+    endif
+    
+    if (moroutput%sandfrac) then
+       !
+       ! group 5: element 'SANDFRAC'
+       !
+       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1, 1) )
+       do m = 1, mmax
+          do n = 1, nmaxus
+             call n_and_m_to_nm(n, m, nm, gdp)
+             rbuff4(n, m, 1, 1) = sandfrac(nm)
+          enddo
+       enddo
+       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+       deallocate(rbuff4)
+       if (inode == master) then
+          ierror = putelt(fds, grnam5, 'SANDFRAC', uindex, 1, glbarr4)
        endif
        if (ierror/=0) goto 9999
     endif

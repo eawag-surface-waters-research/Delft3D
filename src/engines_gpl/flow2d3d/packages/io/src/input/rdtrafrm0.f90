@@ -259,6 +259,21 @@ subroutine rdtrafrm0(error, iform     , npar        , par, flname, &
                 write (lundia, '(a,a)') '    Using Dynamic library'
                 call prterr(lundia, 'P004', 'Transport formula in dynamic library is only possible when the trafrm-file is in ini-file format.')
                 call d3stop(1, gdp)
+             elseif (iform==16) then
+                do i = 11, 11
+                   read (inp, *) par(i)
+                   write (lundia, *) '        ',par(i)
+                enddo
+             elseif (iform==17) then
+                do i = 11, 12
+                   read (inp, *) par(i)
+                   write (lundia, *) '        ',par(i)
+                enddo
+             elseif (iform==18) then
+                do i = 11, 12
+                   read (inp, *) par(i)
+                   write (lundia, *) '        ',par(i)
+                enddo
              else
                 error  = .true.
                 errmsg = 'Transport formula number is not implemented'

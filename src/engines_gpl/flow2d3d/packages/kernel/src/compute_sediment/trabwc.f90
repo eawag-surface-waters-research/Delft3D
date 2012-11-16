@@ -1,4 +1,5 @@
-subroutine initerosed(gdp)
+subroutine trabwc(utot      ,di        ,taub      ,par       ,sbot      , &
+                & ssus      ,dg        ,fs        ,chezy     )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -28,81 +29,73 @@ subroutine initerosed(gdp)
 !  $Id$
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
-! NONE
+!
+!  Computes sediment transport according to the Wilcock and Crowe sediment
+!  transport formula. See: Wilcock and Crowe "Surface based transport for mixed 
+!  size sediment", Journal of Hydraulic Engineering, Feb 2003
+! 
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
     !
-    use globaldata
-    !
     implicit none
-    !
-    type(globdat),target :: gdp
+!
+! Global variables
+!
+    real(fp)               , intent(in)  :: utot   ! flow velocity
+    real(fp)               , intent(in)  :: di     ! Grain size specified as d50
+    real(fp)               , intent(in)  :: taub   ! bed shear stress [N/m2]
+    real(fp)               , intent(out) :: sbot   ! bed load transport, magnitude [m3/m/s]
+    real(fp)               , intent(out) :: ssus   ! suspended sediment transport
+    real(fp)               , intent(in)  :: dg     ! mean surface grain size [m]
+    real(fp)               , intent(in)  :: fs     ! sand fraction on surface
+    real(fp)               , intent(in)  :: chezy  ! local Chézy value [m1/2/s]
+    real(fp), dimension(30), intent(in)  :: par    ! sediment parameter list
+!
+! Local variables
+!
+    real(fp) :: ag
+    real(fp) :: rhosol
+    real(fp) :: rhow
+    real(fp) :: delta  ! relative density of sediment particle
+    real(fp) :: a
+    real(fp) :: ustar  ! shear velocity (m/s)
+    real(hp) :: wistar ! 
+    real(hp) :: phi    ! 
+    real(hp) :: taurm  ! 
+    real(hp) :: tauri  ! 
+    real(hp) :: b      ! 
+    real(hp) :: sag    ! 
 !
 !! executable statements -------------------------------------------------------
 !
-    gdp%gderosed%ifirst = 1
-    !
-    nullify(gdp%gderosed%bc_mor_array)
-    !
-    nullify(gdp%gderosed%dbodsd)
-    nullify(gdp%gderosed%dcwwlc)
-    nullify(gdp%gderosed%dg)
-    nullify(gdp%gderosed%dgsd)
-    nullify(gdp%gderosed%dm)
-    nullify(gdp%gderosed%dxx)
-    nullify(gdp%gderosed%dzduu)
-    nullify(gdp%gderosed%dzdvv)
-    !
-    nullify(gdp%gderosed%epsclc)
-    nullify(gdp%gderosed%epswlc)
-    !
-    nullify(gdp%gderosed%fixfac)
-    nullify(gdp%gderosed%srcmax)
-    nullify(gdp%gderosed%frac)
-    !
-    nullify(gdp%gderosed%hidexp)
-    !
-    nullify(gdp%gderosed%mudfrac)
-    nullify(gdp%gderosed%sandfrac)
-    !
-    nullify(gdp%gderosed%rsdqlc)
-    !
-    nullify(gdp%gderosed%sbcu)
-    nullify(gdp%gderosed%sbcuu)
-    nullify(gdp%gderosed%sbcv)
-    nullify(gdp%gderosed%sbcvv)
-    nullify(gdp%gderosed%sbuuc)
-    nullify(gdp%gderosed%sbvvc)
-    nullify(gdp%gderosed%sbwu)
-    nullify(gdp%gderosed%sbwuu)
-    nullify(gdp%gderosed%sbwv)
-    nullify(gdp%gderosed%sbwvv)
-    nullify(gdp%gderosed%sddflc)
-    nullify(gdp%gderosed%sinkse)
-    nullify(gdp%gderosed%sourse)
-    nullify(gdp%gderosed%ssuuc)
-    nullify(gdp%gderosed%ssvvc)
-    nullify(gdp%gderosed%sswu)
-    nullify(gdp%gderosed%sswuu)
-    nullify(gdp%gderosed%sswv)
-    nullify(gdp%gderosed%sswvv)
-    nullify(gdp%gderosed%sucor)
-    nullify(gdp%gderosed%sutot)
-    nullify(gdp%gderosed%svcor)
-    nullify(gdp%gderosed%svtot)
-    !
-    nullify(gdp%gderosed%taurat)
-    !
-    nullify(gdp%gderosed%umod)
-    nullify(gdp%gderosed%ust2)
-    nullify(gdp%gderosed%uuu)
-    !
-    nullify(gdp%gderosed%vvv)
-    !
-    nullify(gdp%gderosed%wslc)
-    !
-    nullify(gdp%gderosed%zumod)
-    !
-end subroutine initerosed
+    sbot  = 0.0_fp
+    ssus  = 0.0_fp
+    if (chezy < 1.0e-6_fp) then
+        return
+    endif
+    if (dg < 1.0e-6_fp) then
+        return
+    endif
+    ag     = par(1)
+    rhow   = par(2)
+    rhosol = par(3)
+    delta  = par(4)      ! delta = (rhosol - rhow) / rhow = rhosol / rhow - 1
+    a      = par(11)     ! alpha: calibration coeficient specified by user
+    sag    = sqrt(ag)
+    ustar  = sag * utot / chezy
+    !ustar   = sqrt(taub / rhow)
+    b       = 0.67_fp / (1.0_fp + exp(1.5_fp - (di / dg)))
+    taurm   = (0.021_fp + 0.015_fp * exp(-20.0_fp * fs)) * (rhosol - rhow) * ag * dg
+    tauri   = taurm * (di / dg)**b
+    phi     = taub / tauri
+    if (phi < 1.35_fp) then
+        wistar  = 0.002_fp * phi**7.5_fp
+    else
+        wistar  = 14.0_fp * (1.0_fp - (0.894_fp / sqrt(phi)))**4.5_fp
+    endif
+    ! bed load magnitude [m3/m/s]
+    sbot    = a * wistar * ustar**3 / (delta * ag)
+    ! note: proportion of size fraction on surface (fi) is included elsewhere
+end subroutine trabwc

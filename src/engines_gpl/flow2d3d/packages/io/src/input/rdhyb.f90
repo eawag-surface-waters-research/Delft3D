@@ -140,6 +140,7 @@ subroutine rdhyb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     call prop_get_string(gdp%mdfile_ptr, '*', 'Filrgh', filrgh)
     if (filrgh /= ' ') then
        !
+       ! spatially varying roughness file specified
        ! locate 'Fmtrgh' record for format definition of input file
        !
        fmtrgh = 'FR'

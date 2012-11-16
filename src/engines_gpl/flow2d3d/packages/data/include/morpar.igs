@@ -36,12 +36,14 @@ type moroutputtype
                                ! 2 = volume excluding pores
     logical :: cumavg
     logical :: dg
+    logical :: dgsd
     logical :: dm
     logical :: dzduuvv
     logical :: fixfac
     logical :: hidexp
     logical :: frac
     logical :: mudfrac
+    logical :: sandfrac
     logical :: percentiles
     logical :: sbcuv
     logical :: sbcuuvv

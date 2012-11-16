@@ -63,7 +63,7 @@ subroutine depfil(lundia    ,error     ,fildep    ,fmttmp    ,mmax      , &
     logical                                                            , intent(out) :: error  !  Flag=TRUE if an error is encountered 
     real(fp), dimension(nfld, gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: array  !  data array to fill
     character(*)                                                                     :: fildep !  Name of the relevant file 
-    character(11)                                                      , intent(in)  :: fmttmp !  Fornat switch for the attribute file 
+    character(11)                                                      , intent(in)  :: fmttmp !  Format switch for the attribute file 
 ! 
 ! Local variables 
 ! 

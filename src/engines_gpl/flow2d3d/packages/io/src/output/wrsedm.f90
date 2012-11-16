@@ -62,12 +62,14 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
     real(fp), dimension(:)               , pointer :: cdryb
     real(fp), dimension(:)               , pointer :: dm
     real(fp), dimension(:)               , pointer :: dg
+    real(fp), dimension(:)               , pointer :: dgsd
     real(fp), dimension(:,:)             , pointer :: dxx
     real(fp), dimension(:)               , pointer :: dzduu
     real(fp), dimension(:)               , pointer :: dzdvv
     real(fp), dimension(:,:)             , pointer :: fixfac
     real(fp), dimension(:,:)             , pointer :: frac
     real(fp), dimension(:)               , pointer :: mudfrac
+    real(fp), dimension(:)               , pointer :: sandfrac
     real(fp), dimension(:,:)             , pointer :: hidexp
     real(fp), dimension(:,:)             , pointer :: sbcu
     real(fp), dimension(:,:)             , pointer :: sbcv
@@ -146,12 +148,14 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
     scour               => gdp%gdscour%scour
     dm                  => gdp%gderosed%dm
     dg                  => gdp%gderosed%dg
+    dgsd                => gdp%gderosed%dgsd
     dxx                 => gdp%gderosed%dxx
     dzduu               => gdp%gderosed%dzduu
     dzdvv               => gdp%gderosed%dzdvv
     fixfac              => gdp%gderosed%fixfac
     frac                => gdp%gderosed%frac
     mudfrac             => gdp%gderosed%mudfrac
+    sandfrac            => gdp%gderosed%sandfrac
     hidexp              => gdp%gderosed%hidexp
     sbcu                => gdp%gderosed%sbcu
     sbcv                => gdp%gderosed%sbcv
@@ -369,6 +373,12 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
              & 2         ,nmaxus    ,mmax      ,0         ,0         ,0     , &
              & lundia    ,gdp       )
        endif
+       if (moroutput%dgsd) then
+          call addelm(nefiswrsedm,'DGSD',' ','[   M   ]','REAL',4           , &
+             & 'Geometric standard deviation of particle size mix'          , &
+             & 2         ,nmaxus    ,mmax      ,0         ,0         ,0     , &
+             & lundia    ,gdp       )
+       endif
        if (moroutput%percentiles) then
           do l = 1, nxx
              write(dxname,'(A,I2.2)') 'DXX',l
@@ -389,6 +399,12 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
        if (moroutput%mudfrac) then
           call addelm(nefiswrsedm,'MUDFRAC',' ','[   -   ]','REAL',4        , &
              & 'Mud fraction in top layer'                                  , &
+             & 2         ,nmaxus    ,mmax      ,0         ,0         ,0     , &
+             & lundia    ,gdp       )
+       endif
+       if (moroutput%sandfrac) then
+          call addelm(nefiswrsedm,'SANDFRAC',' ','[   -   ]','REAL',4        , &
+             & 'Sand fraction in top layer'                                  , &
              & 2         ,nmaxus    ,mmax      ,0         ,0         ,0     , &
              & lundia    ,gdp       )
        endif
@@ -1238,6 +1254,22 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
           if (ierror/=0) goto 9999
        endif
        !
+       ! element 'DGSD'
+       !
+       if (moroutput%dgsd) then
+          call sbuff_checksize(mmax*nmaxus)
+          i = 0
+          do m = 1, mmax
+             do n = 1, nmaxus
+                i        = i+1
+                call n_and_m_to_nm(n, m, nm, gdp)
+                sbuff(i) = real(dgsd(nm),sp)
+             enddo
+          enddo
+          ierror = putelt(fds, grpnam, 'DGSD', uindex, 1, sbuff)
+          if (ierror/=0) goto 9999
+       endif
+       !
        if (moroutput%percentiles) then
           call sbuff_checksize(mmax*nmaxus)
           do l = 1, nxx
@@ -1290,6 +1322,23 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
           ierror = putelt(fds, grpnam, 'MUDFRAC', uindex, 1, sbuff)
           if (ierror/=0) goto 9999
        endif
+       !
+       if (moroutput%sandfrac) then
+          !
+          ! element 'SANDFRAC'
+          !
+          call sbuff_checksize(mmax*nmaxus)
+          i = 0
+          do m = 1, mmax
+             do n = 1, nmaxus
+                i        = i+1
+                call n_and_m_to_nm(n, m, nm, gdp)
+                sbuff(i) = real(sandfrac(nm),sp)
+             enddo
+          enddo
+          ierror = putelt(fds, grpnam, 'SANDFRAC', uindex, 1, sbuff)
+          if (ierror/=0) goto 9999
+       endif       
        !
        if (moroutput%fixfac) then
           !

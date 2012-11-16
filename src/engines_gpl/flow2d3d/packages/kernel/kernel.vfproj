@@ -205,8 +205,9 @@
 		<File RelativePath="src\compute_sediment\calseddf1993.f90"/>
 		<File RelativePath="src\compute_sediment\calseddf2004.f90"/>
 		<File RelativePath="src\compute_sediment\compbsskin.f90"/>
-		<File RelativePath=".\src\compute_sediment\compdiam.f90"/>
+		<File RelativePath="src\compute_sediment\compdiam.f90"/>
 		<File RelativePath="src\compute_sediment\comphidexp.f90"/>
+		<File RelativePath="src\compute_sediment\compsandfrac.f90"/>
 		<File RelativePath="src\compute_sediment\compthick.f90"/>
 		<File RelativePath="src\compute_sediment\dredge.f90"/>
 		<File RelativePath="src\compute_sediment\dredgedump.f90">
@@ -232,6 +233,9 @@
 		<File RelativePath="src\compute_sediment\trab11.f90"/>
 		<File RelativePath="src\compute_sediment\trab12.f90"/>
 		<File RelativePath="src\compute_sediment\trab14.f90"/>
+		<File RelativePath="src\compute_sediment\trabg.f90"/>
+		<File RelativePath="src\compute_sediment\trabwc.f90"/>
+		<File RelativePath="src\compute_sediment\trabwc2.f90"/>
 		<File RelativePath="src\compute_sediment\tran9t.f90"/>
 		<File RelativePath="src\compute_sediment\tranb1.f90"/>
 		<File RelativePath="src\compute_sediment\tranb2.f90"/>
@@ -240,7 +244,7 @@
 		<File RelativePath="src\compute_sediment\tranb5.f90"/>
 		<File RelativePath="src\compute_sediment\tranb7.f90"/>
 		<File RelativePath="src\compute_sediment\upbdps.f90"/>
-		<File RelativePath=".\src\compute_sediment\updwaqflxsed.f90"/>
+		<File RelativePath="src\compute_sediment\updwaqflxsed.f90"/>
 		<File RelativePath="src\compute_sediment\upwbed.f90"/>
 		<File RelativePath="src\compute_sediment\wave.f90"/></Filter>
 		<Filter Name="dd">
@@ -258,7 +262,7 @@
 		<File RelativePath="src\general\area4.f90"/>
 		<File RelativePath="src\general\chckit.f90"/>
 		<File RelativePath="src\general\checkmeteoresult.f90"/>
-		<File RelativePath=".\src\general\copykcuv.f90"/>
+		<File RelativePath="src\general\copykcuv.f90"/>
 		<File RelativePath="src\general\d3stop.f90"/>
 		<File RelativePath="src\general\dattim.f90"/>
 		<File RelativePath="src\general\defsub.f90"/>
