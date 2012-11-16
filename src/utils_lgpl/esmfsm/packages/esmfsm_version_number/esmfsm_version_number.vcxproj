@@ -91,6 +91,7 @@ if exist ".\include\version_number.rc.svn" call ..\..\..\..\scripts_lgpl\win32\m
       </PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <PostBuildEvent>
       <Command>

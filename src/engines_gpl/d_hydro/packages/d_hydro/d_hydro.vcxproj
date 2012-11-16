@@ -88,11 +88,11 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <AdditionalDependencies>..\..\..\..\utils_lgpl\d_hydro_lib\lib\$(ConfigurationName)\static\d_hydro_lib.lib;..\..\..\..\utils_lgpl\deltares_common\lib\$(ConfigurationName)\static\deltares_common.lib;pthreadVCE2.lib;libexpat.lib;%(AdditionalDependencies)</AdditionalDependencies>
