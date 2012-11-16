@@ -68,10 +68,6 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     !
     implicit none
     !
-    ! Enumeration
-    !
-     
-    !
     type(globdat),target :: gdp
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
