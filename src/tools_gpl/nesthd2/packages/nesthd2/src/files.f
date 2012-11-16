@@ -42,7 +42,7 @@
 
       integer       lun    (*)
       character*(*) filnam (*)
-	  character*(*) CIDENT
+      character*(*) CIDENT
       logical      ex
 
       write (*,'(/, 2a)') ' ', 'Overall model'

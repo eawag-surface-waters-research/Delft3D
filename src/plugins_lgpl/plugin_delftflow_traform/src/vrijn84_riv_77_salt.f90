@@ -322,7 +322,7 @@ endif
        thetcr = shld(dstar)
     else 
        thetcr = thetcr0
-	endif
+    endif
     tbcr = (rhosol - rhowat)*ag*d50*thetcr
     t = (tbce - tbcr)/tbcr
     !

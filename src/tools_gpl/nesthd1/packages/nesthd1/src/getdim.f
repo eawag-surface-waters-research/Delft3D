@@ -56,14 +56,14 @@
 !     reading dimensions for grid file overall model
 
       call dimgrd(lungrd1, lunadm, mmax1 , nmax1,' overall model ')
-	mmax1 = mmax1 + 1 
-	nmax1 = nmax1 + 1 
+      mmax1 = mmax1 + 1 
+      nmax1 = nmax1 + 1 
 
 !     reading dimensions for grid file detail model
 
       call dimgrd(lungrd2, lunadm, mmax2 , nmax2,' detail model  ')
-	mmax2 = mmax2 + 1 
-	nmax2 = nmax2 + 1 
+      mmax2 = mmax2 + 1 
+      nmax2 = nmax2 + 1 
 
 !     reading number of boundary segments
 
@@ -73,8 +73,8 @@
 
       maxnrp1  = nmax1*(mmax1 + 4)       
       maxnrp2  = nmax2*(mmax2 + 4)  
-	maxnrp   = max(maxnrp1,maxnrp2)     
-	return
+      maxnrp   = max(maxnrp1,maxnrp2)     
+      return
       end
 
 

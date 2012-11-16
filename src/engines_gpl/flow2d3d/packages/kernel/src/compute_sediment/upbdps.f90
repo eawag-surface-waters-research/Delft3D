@@ -14,10 +14,8 @@ subroutine upbdps(mmax      ,nmax      ,kcs       ,&
 ! license and any modifications to this license, if applicable. These documents
 ! are available upon request.
 !!--version information---------------------------------------------------------
-! $Author$
-!		Qinghua, YE
-! $Date$
-! $Revision$
+!  $Id:  $
+!  $HeadURL:  $
 !!--description-----------------------------------------------------------------
 !
 !

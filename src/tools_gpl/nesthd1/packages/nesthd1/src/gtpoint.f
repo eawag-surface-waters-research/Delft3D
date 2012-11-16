@@ -1,5 +1,5 @@
       subroutine gtpoint(x1     ,y1     ,icom1 ,
-     *	               x2     ,y2     ,icom2 ,
+     *                   x2     ,y2     ,icom2 ,
      *                   typbnd ,nambnd ,
      *                   angle  ,mcbsp  ,ncbsp ,
      *                   xbnd   ,ybnd   ,mcnes ,ncnes,
@@ -48,7 +48,7 @@
 !***********************************************************************
 !
       EXTERNAL GTIPNT, GTRPNT, GTCPNT
-	integer  GTIPNT, GTRPNT, GTCPNT
+      integer  GTIPNT, GTRPNT, GTCPNT
 !
 !     FMM pointers
 !

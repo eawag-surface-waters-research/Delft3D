@@ -53,7 +53,7 @@
       do 10 ibnd = 1, nobnd
          do 10 isize = 1, 2
             !
-            ! Case sensitive, nesthd2 interpreted the strings	    
+            ! Case sensitive, nesthd2 interpreted the strings    
             !
             if (type .eq. 'WL') then
                write (lun   ,'(''Nest administration for water level'',

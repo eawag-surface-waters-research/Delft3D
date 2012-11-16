@@ -77,7 +77,7 @@
          k1 = index(record,'(M,N)')+9  ! case sensitive
          k2 = index(record(k1:),',')-1
          read (record(k1:k1+k2-1),*) m
-	   k1 = k1+k2+1
+         k1 = k1+k2+1
          read (record(k1:k1+k2-1),*) n
 
          if (m .eq. mcbsp .and. n .eq. ncbsp) then
@@ -85,7 +85,7 @@
 !-----------read orientation for velocity boundary
 !
             if (typbnd .eq. 'c') then
-               k1 = index(record,'Angle') + 7	! case sensitive
+               k1 = index(record,'Angle') + 7    ! case sensitive
                read (record(k1:),*) angle
                angle = angle*pi/180.
             endif

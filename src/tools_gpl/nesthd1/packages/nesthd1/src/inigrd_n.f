@@ -141,7 +141,7 @@
 
       include 'params.inc'
 
-	fout = 0 
+      fout = 0 
 !-----------------------------------------------------------------------
 !-----initialisation local parameters
 !     maxnrp is check for array dimensions
