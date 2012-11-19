@@ -84,6 +84,7 @@ use bedcomposition_module
     type(tree_data), pointer :: morbound_ptr
     !
     logical                         , pointer :: exchlyr
+    logical                         , pointer :: lfbedfrm
     real(fp)                        , pointer :: bed
     real(fp)                        , pointer :: minmass
     real(fp)                        , pointer :: theulyr
@@ -112,6 +113,7 @@ use bedcomposition_module
 !
 !! executable statements -------------------------------------------------------
 !
+    lfbedfrm            => gdp%gdbedformpar%lfbedfrm
     bed                 => gdp%gdmorpar%bed
     ttlalpha            => gdp%gdmorpar%ttlalpha
     ttlmin              => gdp%gdmorpar%ttlmin
@@ -418,7 +420,13 @@ use bedcomposition_module
           call prop_get(mor_ptr, 'Underlayer', 'TTLMin'  , ttlmin)
           !
           txtput2 = ' max(a*H,b)'
-          if (ttlform == 3) txtput2 = ' max(a*Hdune,b)'
+          if (ttlform == 3) then
+            txtput2 = ' max(a*Hdune,b)'
+            if (.not.lfbedfrm) then
+                call prterr(lundia, 'U021', 'TTLForm=3 can only be used when dunes are computed')
+                call d3stop(1, gdp)
+            endif
+          endif
           write(lundia,'(3a)') txtput1, ':', txtput2
           txtput1 = '  a'
           write(lundia,'(2a,e20.4)') txtput1, ':', ttlalpha
