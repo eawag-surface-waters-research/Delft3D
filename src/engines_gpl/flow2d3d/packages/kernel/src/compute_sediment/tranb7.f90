@@ -68,7 +68,7 @@ subroutine tranb7(utot      ,d50       ,d90       ,h         ,par       , &
     real(fp)       :: rksc
     real(fp)       :: rmuc
     real(fp)       :: rnu    ! laminar viscosity of water
-    real(fp)       :: t      ! time in seconds
+    real(fp)       :: t      ! dimensionless relative shear stress
     real(fp)       :: tbc
     real(fp)       :: tbce
     real(fp)       :: tbcr
