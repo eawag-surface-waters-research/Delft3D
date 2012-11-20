@@ -199,16 +199,8 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
           call prterr(lundia    ,'M002'    ,'Explicit method'    )
           iwarn = iwarn + 1
        endif
-       if (wave) then
-          call prterr(lundia    ,'M002'    ,'Wave effect'        )
-          iwarn = iwarn + 1
-       endif
        if (sferic) then
           call prterr(lundia    ,'M002'    ,'Spherical coordinate'          )
-          iwarn = iwarn + 1
-       endif
-       if (sedim) then
-          call prterr(lundia    ,'M002'    ,'3D Morphology'      )
           iwarn = iwarn + 1
        endif
        if (momsol /= 'cyclic') then
