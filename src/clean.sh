@@ -39,6 +39,7 @@ rm -rf \
     bin \
     config \
     config.h.in \
+    config.log \
     configure \
     engines_gpl/d_hydro/packages/d_hydro/include/d_hydro_version.h \
     engines_gpl/flow2d3d/packages/flow2d3d/include/flow2d3d_version.h \

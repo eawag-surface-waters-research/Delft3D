@@ -6,7 +6,7 @@
 #   There are command-line options to select Fortran compiler and debug or not.
 #
 #   ToDo:  Remove stripping of executables when the debug flag is set.
-#   It's even debatable whether stipping belongs in the build.  I think not.
+#   It's even debatable whether stripping belongs in the build.  I think not.
 #
 #   ToDo: Don't preintialize the compiler, the user should do this himself
 #   so that he's aware exactly which version he's using.  Besides, we can't
@@ -149,7 +149,6 @@ case $compiler in
     intel12)
         ifortInit=". /opt/intel/bin/ifortvars.sh $platform"
         iccInit=""
-        #idbInit='. /opt/intel/bin/idbvars.sh'
         echo "Using Intel 12 Fortran ($platform) compiler"
         ;;
 
