@@ -9,9 +9,16 @@ NPART=$NHOSTS
     # This script starts a single-domain Delft3D-FLOW computation on Linux in parallel mode
     # asuming nodes are allocated manually
     #
-    # Usage example (requesting 2 nodes/hosts):
-    # qsub -pe distrib 2 run_flow2d3d_parallel.sh
+    # Usage example:
+    # Create a file named machinefile as described below
+    # Execute this script
     #
+    # In case the error "unable to find mpd.conf" occurs:
+    # Your home directory MUST contain file .mpd.conf with contents:
+    # secretword=bla
+    # and with file access permissions:
+    # -r--------
+    # 
 
 
     #
