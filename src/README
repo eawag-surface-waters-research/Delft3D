@@ -24,7 +24,7 @@ Compiling on Linux
   1) In directory "src", do one of the following two options:
      Option A):
          ./autogen.sh
-	 ./configure --prefix=`pwd`
+	 CFLAGS='-O2 -fPIC -m64' CXXFLAGS='-O2 -fPIC -m64' FFLAGS='-O2 -fPIC -m64' FCFLAGS='-O2 -fPIC -m64' ./configure --prefix=`pwd`
          make ds-install
      Option B):
          Use script build.sh. Executing "./build.sh" will show the usage. The following example line is used to create the latest fully tested version:
