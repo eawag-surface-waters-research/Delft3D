@@ -183,7 +183,7 @@ subroutine compdiam(frac      ,seddm     ,sedd50    ,sedtyp    ,lsedtot   , &
           !
           dgsd(nm) = 0.0_fp
           do l = 1, lsedtot
-             if (sedtyp(l) /= 'mud') then
+             if (sedtyp(l) /= SEDTYP_COHESIVE) then
                 dgsd(nm) = dgsd(nm) + frac(nm,l)*(log(sedd50(l))-log(dg(nm)))**2
              endif
           enddo
