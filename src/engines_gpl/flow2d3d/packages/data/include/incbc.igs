@@ -29,6 +29,9 @@
 !-------------------------------------------------------------------------------
     type sv_incbc
 !
+       real(fp), dimension(:), pointer :: cwidth  ! cumulative width of boundary
+       real(fp), dimension(:), pointer :: zavg    ! average waterlevel at boundary (only computed for total discharge boundary).
+!
        logical :: relxqh
 !
     end type sv_incbc

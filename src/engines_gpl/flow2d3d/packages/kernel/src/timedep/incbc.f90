@@ -9,7 +9,8 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                & u0        ,v0        ,grmasu    ,grmasv    ,cfurou    , &
                & cfvrou    ,qtfrac    ,qtfrct    ,qtfrt2    ,thick     , &
                & dzu1      ,dzv1      ,thklay    ,kcu       ,kcv       , &
-               & timhr     ,nambnd    ,typbnd    ,gdp       )
+               & kfu       ,kfv       ,timhr     ,nambnd    ,typbnd    , &
+               & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -108,6 +109,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     integer                            , pointer :: iro
     real(fp)                           , pointer :: paver
     real(fp)                           , pointer :: thetqh
+    logical                            , pointer :: use_zavg_for_qtot
     logical                            , pointer :: pcorr
     real(fp), dimension(:,:,:)         , pointer :: rttfu
     real(fp), dimension(:,:,:)         , pointer :: rttfv
@@ -116,7 +118,8 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     type (fbcrbndtype)  , dimension(:) , pointer :: fcrbnd
     logical                            , pointer :: fbccorrection
     real(fp), dimension(:,:)           , pointer :: dist_pivot_part
-    
+    real(fp), dimension(:)             , pointer :: cwidth
+    real(fp), dimension(:)             , pointer :: zavg    
 !
 ! Global variables
 !
@@ -136,6 +139,8 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     integer , dimension(8, nrob)                                       , intent(in)  :: nob    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: kcu    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: kcv    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: kfu    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: kfv    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: kfumax !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: kfumin !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in)  :: kfvmax !  Description and declaration in esm_alloc_int.f90
@@ -200,7 +205,8 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     integer                             :: mend           ! End coord. (in the x-dir.) of an open bound. section 
     integer                             :: mgg            ! M-coord. of the actual open boundary point, which may differ from the ori- ginal position due to grid staggering 
     integer                             :: mp
-    integer                             :: mpbt
+    integer                             :: mpbi           ! M index of point at boundary inside domain
+    integer                             :: mpbt           ! M index of boundary point
     integer                             :: msta           ! Starting coord. (in the x-dir.) of an open bound. section 
     integer                             :: n              ! Loop variable 
     integer                             :: n1             ! Pointer var. relating NOB to MNBND 
@@ -208,7 +214,8 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     integer, external                   :: newlun
     integer                             :: ngg            ! N-coord. of the actual open boundary point, which may differ from the ori- ginal position due to grid staggering 
     integer                             :: np
-    integer                             :: npbt
+    integer                             :: npbi           ! N index of point at boundary inside domain
+    integer                             :: npbt           ! N index of boundary point
     integer                             :: nsta           ! Starting coord. (in the y-dir.) of an open bound. section 
     integer                             :: ntot0          ! Offset for open boundary sections of the Time-series type (NTOF+NTOQ) 
     integer                             :: posrel         ! code denoting the position of the open boundary, related to the complete grid
@@ -256,6 +263,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     real(fp)                            :: totl           ! Actual length of an openbnd. section 
     real(fp)                            :: ttfhsum        ! Temporary variable for depth-averaging RTTFU/V resistance
     real(fp)                            :: width
+    real(fp)                            :: wlvl
     real(fp)                            :: z1             ! Previous layer: (1+SIG1)*H0 
     real(fp)                            :: z2             ! Currect layer: (1+SIG2)*H0 
     real(fp)                            :: zbulk          ! Sommation of all layers ZLAYER*THICK 
@@ -271,6 +279,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     relxqh                => gdp%gdincbc%relxqh
     paver                 => gdp%gdnumeco%paver
     thetqh                => gdp%gdnumeco%thetqh
+    use_zavg_for_qtot     => gdp%gdnumeco%use_zavg_for_qtot
     pcorr                 => gdp%gdnumeco%pcorr
     rhow                  => gdp%gdphysco%rhow
     ag                    => gdp%gdphysco%ag
@@ -311,7 +320,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     k2nd  = -999
     dpvel = -999.0_fp
   
-    
+    write(*,*) use_zavg_for_qtot
     if (parll) then 
        !
        ! Recalculates the effective global number of open boundary conditions
@@ -326,10 +335,116 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     ! calculate total discharge fractions
     ! calculate qtot for QH boundaries
     !
-    do n1 = 1, nto
-       qtfrct(n1) = 0.0
-    enddo
+    if (.not.associated(gdp%gdincbc%cwidth)) then
+       allocate(gdp%gdincbc%cwidth(nto), stat=istat)
+       if (istat == 0) allocate(gdp%gdincbc%zavg(nto), stat=istat)
+       if (istat /= 0) then
+          call prterr(lundia, 'P004', 'memory alloc error in incbc')
+          call d3stop(1, gdp)
+       endif
+    endif
+    cwidth                => gdp%gdincbc%cwidth
+    zavg                  => gdp%gdincbc%zavg
+    !
+    qtfrct = 0.0_fp
+    cwidth = 1.0e-9_fp
+    !
+    ! Determine average water level for total discharge boundaries
+    !
     do n = 1, nrob
+       ! only do something for total discharge boundaries (7)
+       if (nob(3, n)/=7) then
+          cycle
+       endif
+       qtfrac(n) = 0.0
+       n1        = nob(8, n)
+       mpbt      = nob(1, n)
+       npbt      = nob(2, n)
+       if (nob(4, n)==2) then
+          mpbt = mpbt - 1
+          mpbi = mpbt
+       else
+          mpbi = mpbt + 1
+       endif
+       if (nob(6, n)==2) then
+          npbt = npbt - 1
+          npbi = npbt
+       else
+          npbi = npbt + 1
+       endif
+       !
+       ! Determine direction dependent parameters
+       !
+       if (nob(4,n) > 0) then
+          udir  = .true.
+          vdir  = .false.
+          wlvl = s0(npbi, mpbi)
+          if (kfu(npbt, mpbt)) then
+             width = guu(npbt, mpbt)
+          else
+             width = 0.0_fp
+          endif
+       elseif (nob(6,n) > 0) then
+          udir  = .false.
+          vdir  = .true.
+          wlvl = s0(npbi, mpbi)
+          if (kfv(npbt, mpbt)) then
+             width = gvv(npbt, mpbt)
+          else
+             width = 0.0_fp
+          endif
+       else
+       endif
+       !
+       qtfrct(n1) = qtfrct(n1) + wlvl*width
+       cwidth(n1) = cwidth(n1) + width
+    enddo
+    !
+    ! accumulate information across MPI partitions
+    !
+    if (parll) then
+       call dfsync(gdp)
+       allocate( qtfrct_global(nobcgl), stat=istat)
+       if (istat /= 0) then
+          call prterr(lundia, 'P004', 'memory alloc error in incbc')
+          call d3stop(1, gdp)
+       endif
+       !
+       ! exchange cwidth data
+       !
+       qtfrct_global = 0.0_fp
+       call dfgather_filter(lundia, nto, nobcto, nobcgl, gdp%gdbcdat%bct_order, cwidth, qtfrct_global, gdp, sum_elements)
+       call dfbroadc(qtfrct_global, nobcgl, dfloat, gdp)
+       do n1 = 1, nto
+          if(typbnd(n1)=='T') then
+             cwidth(n1) = qtfrct_global(gdp%gdbcdat%bct_order(n1))
+          endif
+       enddo
+       !
+       ! exchange qtfrct data
+       !
+       qtfrct_global = 0.0_fp
+       call dfgather_filter(lundia, nto, nobcto, nobcgl, gdp%gdbcdat%bct_order, qtfrct, qtfrct_global, gdp, sum_elements)
+       call dfbroadc(qtfrct_global, nobcgl, dfloat, gdp)
+       do n1 = 1, nto
+          if(typbnd(n1)=='T') then
+             qtfrct(n1) = qtfrct_global(gdp%gdbcdat%bct_order(n1))
+          endif
+       enddo
+       !
+       if (allocated(qtfrct_global)) deallocate(qtfrct_global, stat=istat)
+    endif 
+    !
+    ! calculate total discharge fractions
+    ! calculate qtot for QH boundaries
+    !
+    do n1 = 1, nto
+       zavg(n1) = qtfrct(n1)/cwidth(n1)
+       qtfrct(n1) = 0.0_fp
+    enddo
+    !
+    do n = 1, nrob
+       ! only do something for total discharge boundaries (7) and water level boundaries (2) of type QH
        if (nob(3, n)/=7 .and. nob(3, n)/=2) then
           cycle
        endif
@@ -337,8 +452,18 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        n1        = nob(8, n)
        mpbt      = nob(1, n)
        npbt      = nob(2, n)
-       if (nob(4, n)==2) mpbt = mpbt - 1
-       if (nob(6, n)==2) npbt = npbt - 1
+       if (nob(4, n)==2) then
+          mpbt = mpbt - 1
+          mpbi = mpbt
+       else
+          mpbi = mpbt + 1
+       endif
+       if (nob(6, n)==2) then
+          npbt = npbt - 1
+          npbi = npbt
+       else
+          npbi = npbt + 1
+       endif
        !
        ! Determine direction dependent parameters
        !
@@ -346,7 +471,11 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        if (nob(4,n) > 0) then
           udir  = .true.
           vdir  = .false.
-          dpvel = max(0.0_fp, hu(npbt, mpbt))
+          if (use_zavg_for_qtot) then
+             dpvel = max(0.0_fp, hu(npbt, mpbt)-s0(npbi, mpbi)+zavg(n1))
+          else
+             dpvel = max(0.0_fp, hu(npbt, mpbt))
+          endif
           width = guu(npbt, mpbt)
           czbed = cfurou(npbt, mpbt, 1)
           kcuv  = kcu(npbt, mpbt)
@@ -368,7 +497,11 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        elseif (nob(6,n) > 0) then
           udir  = .false.
           vdir  = .true.
-          dpvel = max(0.0_fp, hv(npbt, mpbt))
+          if (use_zavg_for_qtot) then
+             dpvel = max(0.0_fp, hv(npbt, mpbt)-s0(npbi, mpbi)+zavg(n1))
+          else
+             dpvel = max(0.0_fp, hv(npbt, mpbt))
+          endif
           width = gvv(npbt, mpbt)
           czbed = cfvrou(npbt, mpbt, 1)
           kcuv  = kcv(npbt, mpbt)

@@ -125,8 +125,8 @@ subroutine gdp_dump(gdp       )
     write (*, *) gdp%gddefsub
     write (*, *) 'GDP % gdf0isf1'
     write (*, *) gdp%gdf0isf1
-    write (*, *) 'GDP % gdincbc'
-    write (*, *) gdp%gdincbc
+    ! write (*, *) 'GDP % gdincbc'
+    ! write (*, *) gdp%gdincbc
     write (*, *) 'GDP % gdincbcc'
     write (*, *) gdp%gdincbcc
     write (*, *) 'GDP % gdinibcc'

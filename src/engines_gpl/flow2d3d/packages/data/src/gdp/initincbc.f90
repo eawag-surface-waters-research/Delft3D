@@ -56,6 +56,8 @@ subroutine initincbc(gdp       )
     !-----Initialize statics for incbc
     !
     relxqh  => gdp%gdincbc%relxqh
+    nullify(gdp%gdincbc%cwidth)
+    nullify(gdp%gdincbc%zavg)
     !
     relxqh = .false.
 end subroutine initincbc

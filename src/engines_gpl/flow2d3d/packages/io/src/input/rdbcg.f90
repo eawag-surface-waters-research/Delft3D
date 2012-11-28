@@ -58,6 +58,7 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer , pointer :: lsal
     integer , pointer :: ltem
     integer , pointer :: itis
+    logical , pointer :: use_zavg_for_qtot
 !
 ! Global variables
 !
@@ -120,6 +121,7 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     lsal  => gdp%d%lsal
     ltem  => gdp%d%ltem
     itis  => gdp%gdrdpara%itis
+    use_zavg_for_qtot => gdp%gdnumeco%use_zavg_for_qtot
     !
     lerror  = .false.
     newkw   = .true.
@@ -256,27 +258,17 @@ subroutine rdbcg(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        enddo
     endif
     !
-    ! Locate and read 'ThetQH' relaxation parameter, def. 0 (no relax)
+    ! Relaxation parameter for QH boundaries; by default 0 (no relaxation)
     !
     thetqh = 0.0
     if (ntoq > 0) then
-       keyw  = 'ThetQH'
-       ntrec = nrrec
-       rdef  = thetqh
-       nlook = 1
-       newkw = .true.
-       lkw   = 6
-       call search(lunmd     ,lerror    ,newkw     ,nrrec     ,found     , &
-                 & ntrec     ,mdfrec    ,itis      ,keyw      ,lkw       , &
-                 & 'NO'      )
-       if (found) then
-          call read2r(lunmd     ,lerror    ,keyw      ,newkw     ,nlook     , &
-                    & mdfrec    ,rval      ,rdef      ,defaul    ,nrrec     , &
-                    & ntrec     ,lundia    ,gdp       )
-          !
-          thetqh = rval(1)
-       endif
+       call prop_get(gdp%mdfile_ptr, '*', 'ThetQH', thetqh)
     endif
+    !
+    ! Flag for discharge distribution at Qtot boundaries; by default now based on average waterlevel
+    !
+    use_zavg_for_qtot = .true.
+    call prop_get(gdp%mdfile_ptr, '*', 'ZAvgQT', use_zavg_for_qtot)
     !
     ! read flag for CoaST BouNDary
     !
