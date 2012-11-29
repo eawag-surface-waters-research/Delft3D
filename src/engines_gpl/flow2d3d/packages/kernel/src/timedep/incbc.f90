@@ -313,14 +313,13 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     udir   = .false.
     vdir   = .false.
     ntot0  = ntof + ntoq
-    timscl = 1.0
+    timscl = 1.0_fp
     tcur   = (timnow - time_nodal_update_bnd)*dt*tunit/3600.0_fp
     !
     k1st  = -999
     k2nd  = -999
     dpvel = -999.0_fp
   
-    write(*,*) use_zavg_for_qtot
     if (parll) then 
        !
        ! Recalculates the effective global number of open boundary conditions
@@ -332,8 +331,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        nobcgl = nto
     endif
     !
-    ! calculate total discharge fractions
-    ! calculate qtot for QH boundaries
+    ! calculate zavg, using cwidth
     !
     if (.not.associated(gdp%gdincbc%cwidth)) then
        allocate(gdp%gdincbc%cwidth(nto), stat=istat)
@@ -343,30 +341,31 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
           call d3stop(1, gdp)
        endif
     endif
-    cwidth                => gdp%gdincbc%cwidth
-    zavg                  => gdp%gdincbc%zavg
+    cwidth => gdp%gdincbc%cwidth
+    zavg   => gdp%gdincbc%zavg
     !
     qtfrct = 0.0_fp
     cwidth = 1.0e-9_fp
     !
-    ! Determine average water level for total discharge boundaries
-    !
     do n = 1, nrob
-       ! only do something for total discharge boundaries (7)
-       if (nob(3, n)/=7) then
+       !
+       ! only for total discharge boundaries (7):
+       ! Determine average water level
+       !
+       if (nob(3,n) /= 7) then
           cycle
        endif
-       qtfrac(n) = 0.0
-       n1        = nob(8, n)
-       mpbt      = nob(1, n)
-       npbt      = nob(2, n)
-       if (nob(4, n)==2) then
+       qtfrac(n) = 0.0_fp
+       n1        = nob(8,n)
+       mpbt      = nob(1,n)
+       npbt      = nob(2,n)
+       if (nob(4,n) == 2) then
           mpbt = mpbt - 1
           mpbi = mpbt
        else
           mpbi = mpbt + 1
        endif
-       if (nob(6, n)==2) then
+       if (nob(6,n) == 2) then
           npbt = npbt - 1
           npbi = npbt
        else
@@ -376,20 +375,20 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        ! Determine direction dependent parameters
        !
        if (nob(4,n) > 0) then
-          udir  = .true.
-          vdir  = .false.
+          udir = .true.
+          vdir = .false.
           wlvl = s0(npbi, mpbi)
-          if (kfu(npbt, mpbt)) then
-             width = guu(npbt, mpbt)
+          if (kfu(npbt,mpbt) == 1) then
+             width = guu(npbt,mpbt)
           else
              width = 0.0_fp
           endif
        elseif (nob(6,n) > 0) then
-          udir  = .false.
-          vdir  = .true.
+          udir = .false.
+          vdir = .true.
           wlvl = s0(npbi, mpbi)
-          if (kfv(npbt, mpbt)) then
-             width = gvv(npbt, mpbt)
+          if (kfv(npbt,mpbt) == 1) then
+             width = gvv(npbt,mpbt)
           else
              width = 0.0_fp
           endif
@@ -416,7 +415,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        call dfgather_filter(lundia, nto, nobcto, nobcgl, gdp%gdbcdat%bct_order, cwidth, qtfrct_global, gdp, sum_elements)
        call dfbroadc(qtfrct_global, nobcgl, dfloat, gdp)
        do n1 = 1, nto
-          if(typbnd(n1)=='T') then
+          if(typbnd(n1) == 'T') then
              cwidth(n1) = qtfrct_global(gdp%gdbcdat%bct_order(n1))
           endif
        enddo
@@ -427,13 +426,13 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        call dfgather_filter(lundia, nto, nobcto, nobcgl, gdp%gdbcdat%bct_order, qtfrct, qtfrct_global, gdp, sum_elements)
        call dfbroadc(qtfrct_global, nobcgl, dfloat, gdp)
        do n1 = 1, nto
-          if(typbnd(n1)=='T') then
+          if(typbnd(n1) == 'T') then
              qtfrct(n1) = qtfrct_global(gdp%gdbcdat%bct_order(n1))
           endif
        enddo
        !
        if (allocated(qtfrct_global)) deallocate(qtfrct_global, stat=istat)
-    endif 
+    endif
     !
     ! calculate total discharge fractions
     ! calculate qtot for QH boundaries
