@@ -19,6 +19,13 @@
 #   Copyright © 2011, Stichting Deltares
 #-------------------------------------------------------------------------------
 
+# This script must be executed in the directory where it resides
+orgdir=`pwd`
+scriptdirname=`readlink \-f \$0`
+maindir=`dirname $scriptdirname`
+cd $maindir
+
+
 # Default values
 compiler=''
 configureArgs=''
@@ -110,10 +117,12 @@ while [ $# -gt 0 ]; do
             ;;
         -?)
             usage
+            cd $orgdir
             exit 0
             ;;
         *)
             usage
+            cd $orgdir
             exit 1
             ;;
     esac
@@ -123,6 +132,7 @@ done
 if [ "$compiler" == '' ]; then
     echo "You must specify a compiler"
     usage
+    cd $orgdir
     exit 1
 fi
 
@@ -198,6 +208,7 @@ if [ "$ifortInit" != '' ]; then
     eval $ifortInit
     if [ $? -ne 0 ]; then
         echo 'Initialization of the Fortran compiler fails!'
+        cd $orgdir
         exit 1
     fi
 fi
@@ -206,6 +217,7 @@ if [ "$iccInit" != '' ]; then
     eval $iccInit
     if [ $? -ne 0 ]; then
         echo 'Initialization of the C compiler fails!'
+        cd $orgdir
         exit 1
     fi
 fi
@@ -303,6 +315,7 @@ if [ $useSp -eq 1 ]; then
         eval $command
         if [ $? -ne 0 ]; then
             log 'ABORT: Single-precision script failed'
+            cd $orgdir
             exit 1
         fi
     )
@@ -320,6 +333,7 @@ eval $command
 
 if [ $? -ne 0 ]; then
     log "Autogen fails!"
+    cd $orgdir
     exit 1
 fi
 
@@ -364,6 +378,7 @@ eval $command
 
 if [ $? -ne 0 ]; then
     log "Configure fails!"
+    cd $orgdir
     exit 1
 fi
 
@@ -374,6 +389,7 @@ fi
 if [ $noMake -eq 1 ]; then
     log "Skipping make; execute the following command before doing manual makes:"
     echo $ifortInit
+    cd $orgdir
     exit 0
 fi
 
@@ -385,8 +401,10 @@ eval $command
 
 if [ $? -ne 0 ]; then
     log "Make fails!"
+    cd $orgdir
     exit 1
 fi
 
 log "Build finished"
+cd $orgdir
 exit 0
