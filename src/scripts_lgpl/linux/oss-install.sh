@@ -18,12 +18,15 @@ function copyFile () {
     # example: copyFile "bin/*" targetdir
 
     # handle the error
-    cp -fp $1 $2
-    if [ $? != 0 ]; then
-        echo "can't copy \"$1\" to \"$2\"" 1>&2
-        globalErrorLevel=1
-    fi
-    
+    for file in $1
+    do
+        eval cp -fp $file $2
+        if [ $? != 0 ]; then
+            echo "can't copy \"$file\" to \"$2\"" 1>&2
+            globalErrorLevel=1
+        fi
+    done
+
     return
 }
 
@@ -74,7 +77,7 @@ function delft3d_flow () {
 # =======================
 function d_hydro () {
     echo "installing d_hydro . . ."
-    
+
     dest_bin="$dest_main/lnx/flow2d3d/bin"
     dest_lib="$dest_main/lnx/flow2d3d/lib"
 
@@ -86,7 +89,6 @@ function d_hydro () {
 
     echo "Gathering libraries for d_hydro..."
     cp -u `$gatherScript bin/d_hydro.exe | eval grep -v $gatherFilter` $dest_lib
-    echo "... Finished gathering libraries"
     return
 }
 
@@ -97,7 +99,7 @@ function d_hydro () {
 # ========================
 function flow2d3d () {
     echo "installing flow2d3d . . ."
-    
+
     dest_bin="$dest_main/lnx/flow2d3d/bin"
     dest_lib="$dest_main/lnx/flow2d3d/lib"
     dest_default="$dest_main/lnx/flow2d3d/default"
@@ -119,7 +121,6 @@ function flow2d3d () {
 
     echo "Gathering libraries for flow2d3d..."
     cp -u `$gatherScript lib/libflow2d3d*.so lib/libDelftOnline.so bin/esm_* | eval grep -v $gatherFilter` $dest_lib
-    echo "... Finished gathering libraries"
     return
 }
 
@@ -130,7 +131,7 @@ function flow2d3d () {
 # ===============================
 function flow2d3d_openda () {
     echo "installing flow2d3d_openda . . ."
-    
+
     dest_bin="$dest_main/lnx/flow2d3d/bin"
     dest_lib="$dest_main/lnx/flow2d3d/lib"
     dest_default="$dest_main/lnx/flow2d3d/default"
@@ -152,7 +153,6 @@ function flow2d3d_openda () {
 
     echo "Gathering libraries for flow2d3d_openda..."
     cp -u `$gatherScript lib/libflow2d3d_openda*.so lib/libDelftOnline.so bin/esm_* | eval grep -v $gatherFilter` $dest_lib
-    echo "... Finished gathering libraries"
     return
 }
 
@@ -186,10 +186,8 @@ function wave () {
 
     echo "Gathering libraries for wave..."
     cp -u `$gatherScript bin/wave.exe | eval grep -v $gatherFilter` $dest_lib
-    echo "... Finished gathering libraries"
     echo "Gathering libraries for swan..."
     cp -u `$gatherScript third_party_open/swan/bin/linux/*.exe | eval grep -v $gatherFilter` $dest_swan_lib
-    echo "... Finished gathering libraries"
     return
 }
 
@@ -200,7 +198,7 @@ function wave () {
 # ==============================
 function plugin_culvert () {
     echo "installing plugin_culvert . . ."
-    
+
     dest_bin="$dest_main/lnx/flow2d3d/bin"
     dest_lib="$dest_main/lnx/flow2d3d/lib"
 
@@ -211,7 +209,6 @@ function plugin_culvert () {
 
     echo "Gathering libraries for plugin_culvert..."
     cp -u `$gatherScript lib/libplugin_culvert.so | eval grep -v $gatherFilter` $dest_lib
-    echo "... Finished gathering libraries"
     return
 }
 
@@ -222,7 +219,7 @@ function plugin_culvert () {
 # ========================================
 function plugin_delftflow_traform () {
     echo "installing plugin_delftflow_traform . . ."
-    
+
     dest_bin="$dest_main/lnx/flow2d3d/bin"
     dest_lib="$dest_main/lnx/flow2d3d/lib"
 
@@ -233,7 +230,6 @@ function plugin_delftflow_traform () {
 
     echo "Gathering libraries for plugin_delftflow_traform..."
     cp -u `$gatherScript lib/libplugin_delftflow_traform.so | eval grep -v $gatherFilter` $dest_lib
-    echo "... Finished gathering libraries"
     return
 }
 
@@ -244,7 +240,7 @@ function plugin_delftflow_traform () {
 # ======================
 function datsel () {
     echo "installing datsel . . ."
-    
+
     dest_bin="$dest_main/lnx/flow2d3d/bin"
     dest_lib="$dest_main/lnx/flow2d3d/lib"
 
@@ -255,7 +251,6 @@ function datsel () {
 
     echo "Gathering libraries for datsel..."
     cp -u `$gatherScript bin/datsel | eval grep -v $gatherFilter` $dest_lib
-    echo "... Finished gathering libraries"
     return
 }
 
@@ -266,7 +261,7 @@ function datsel () {
 # ======================
 function kubint () {
     echo "installing kubint . . ."
-    
+
     dest_bin="$dest_main/lnx/flow2d3d/bin"
     dest_lib="$dest_main/lnx/flow2d3d/lib"
 
@@ -277,7 +272,6 @@ function kubint () {
 
     echo "Gathering libraries for kubint..."
     cp -u `$gatherScript bin/kubint | eval grep -v $gatherFilter` $dest_lib
-    echo "... Finished gathering libraries"
     return
 }
 
@@ -288,7 +282,7 @@ function kubint () {
 # ====================
 function lint () {
     echo "installing lint . . ."
-    
+
     dest_bin="$dest_main/lnx/flow2d3d/bin"
     dest_lib="$dest_main/lnx/flow2d3d/lib"
 
@@ -299,7 +293,6 @@ function lint () {
 
     echo "Gathering libraries for lint..."
     cp -u `$gatherScript bin/lint | eval grep -v $gatherFilter` $dest_lib
-    echo "... Finished gathering libraries"
     return
 }
 
@@ -310,7 +303,7 @@ function lint () {
 # ========================
 function mormerge () {
     echo "installing mormerge . . ."
-    
+
     dest_bin="$dest_main/lnx/flow2d3d/bin"
     dest_lib="$dest_main/lnx/flow2d3d/lib"
     dest_scripts="$dest_main/lnx/flow2d3d/scripts"
@@ -324,7 +317,6 @@ function mormerge () {
 
     echo "Gathering libraries for mormerge..."
     cp -u `$gatherScript bin/mormerge.exe | eval grep -v $gatherFilter` $dest_lib
-    echo "... Finished gathering libraries"
     return
 }
 
@@ -335,7 +327,7 @@ function mormerge () {
 # ==================
 function vs () {
     echo "installing vs . . ."
-    
+
     dest="$dest_main/lnx/util/bin"
     dest_lib="$dest_main/lnx/util/lib"
 
@@ -346,7 +338,6 @@ function vs () {
 
     echo "Gathering libraries for vs..."
     cp -u `$gatherScript bin/vs | eval grep -v $gatherFilter` $dest_lib
-    echo "... Finished gathering libraries"
     return
 }
 
@@ -357,18 +348,17 @@ function vs () {
 # =======================
 function nesthd1 () {
     echo "installing nesthd1 . . ."
-    
+
     dest_bin="$dest_main/lnx/flow2d3d/bin"
     dest_lib="$dest_main/lnx/flow2d3d/lib"
 
     mkdir -p $dest_bin
     mkdir -p $dest_lib
-    
+
     copyFile "bin/nesthd1" $dest_bin
 
     echo "Gathering libraries for nesthd1..."
     cp -u `$gatherScript bin/nesthd1 | eval grep -v $gatherFilter` $dest_lib
-    echo "... Finished gathering libraries"
     return
 }
 
@@ -379,7 +369,7 @@ function nesthd1 () {
 # =======================
 function nesthd2 () {
     echo "installing nesthd2 . . ."
-    
+
     dest_bin="$dest_main/lnx/flow2d3d/bin"
     dest_lib="$dest_main/lnx/flow2d3d/lib"
 
@@ -390,7 +380,6 @@ function nesthd2 () {
 
     echo "Gathering libraries for nesthd2..."
     cp -u `$gatherScript bin/nesthd2 | eval grep -v $gatherFilter` $dest_lib
-    echo "... Finished gathering libraries"
     return
 }
 
