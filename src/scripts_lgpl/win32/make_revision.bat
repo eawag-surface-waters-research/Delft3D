@@ -69,7 +69,7 @@ REM string has been generated, but this cannot be used within *.rc files
 REM Replace it using 000000 (only necessary on Windows systems)
 REM ==========================================================================
 
-set BUILD_NUMBER=%BUILD_NUMBER:~0,8%
+set BUILD_NUMBER=%BUILD_NUMBER:~0,12%
 IF "%BUILD_NUMBER%" == "exported" (
    SET BUILD_NUMBER=000000
 )
