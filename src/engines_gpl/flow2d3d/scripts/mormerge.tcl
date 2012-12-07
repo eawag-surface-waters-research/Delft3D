@@ -20,7 +20,7 @@
 #
 
 global version
-set version "2.5"
+set version "2.6"
 
 global debug
 set debug 0
@@ -711,11 +711,13 @@ proc readInputFile { inputfilename iflist } {
    #
    # reset flowexedir, to use pwd notation
    #
+   cd $curdir
    cd $flowexedir
    set flowexedir [file nativename [pwd] ]
    #
    # reset mormergeexedir, to use pwd notation
    #
+   cd $curdir
    if { ! [string equal $mormergeexedir " "] } {
       cd $mormergeexedir
       set mormergeexedir [file nativename [pwd] ]
@@ -723,6 +725,7 @@ proc readInputFile { inputfilename iflist } {
    #
    # reset waveexedir, to use pwd notation
    #
+   cd $curdir
    if { ! [string equal $waveexedir " "] } {
       cd $waveexedir
       set waveexedir [file nativename [pwd] ]
@@ -730,6 +733,7 @@ proc readInputFile { inputfilename iflist } {
    #
    # reset swanbatdir, to use pwd notation
    #
+   cd $curdir
    if { ! [string equal $swanbatdir " "] } {
       cd $swanbatdir
       set swanbatdir [file nativename [pwd] ]
