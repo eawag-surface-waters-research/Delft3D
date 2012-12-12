@@ -71,8 +71,37 @@ subroutine dfinitmpi
     !
     mpi_is_initialized = .false.
     ierr = MPI_SUCCESS
+    
+    !
+    ! use an environment variable to check whether MPI should be activated.
+    ! unfornately only the MPI calls are standardized, not the environment variables.
+    ! so, we have to check a couple of different environment variables ...
+    !
+    ! verify whether MPICH2 (or derived) environment is used
+    !
     call get_environment_variable('PMI_RANK', rankstr, len)
     usempi = (len > 0)
+    !
+    ! if not, verify whether OpenMPI 1.3 (or derived) environment is used
+    !
+    if (.not. usempi) then
+       call get_environment_variable('OMPI_COMM_WORLD_RANK', rankstr, len)
+       usempi = (len > 0)
+    endif
+    !
+    ! if not, verify whether OpenMPI 1.2 (or derived) environment is used
+    !
+    if (.not. usempi) then
+       call get_environment_variable('OMPI_MCA_ns_nds_vpid', rankstr, len)
+       usempi = (len > 0)
+    endif
+    !
+    ! if not, verify whether MVAPICH 1.1 environment is used
+    !
+    if (.not. usempi) then
+       call get_environment_variable('MPIRUN_RANK', rankstr, len)
+       usempi = (len > 0)
+    endif
 
     if (usempi) then
        !
