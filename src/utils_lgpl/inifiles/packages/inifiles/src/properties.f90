@@ -1479,7 +1479,7 @@ subroutine pp_double(value, strvalue)
     character(len=*), intent(out) :: strvalue
 
     ! adjustl not working in gfortran, so writing to a temp array
-    character(len=100000) :: strtmp
+    character(len=10000) :: strtmp
 
     integer :: i, iz, j, n
 
