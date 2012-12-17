@@ -1354,6 +1354,7 @@ subroutine prop_set_doubles(tree, chapter, key, value, anno, success)
         strvalue(iv+2:iv+is+1) = strscalar(1:is)
         iv  = iv+is+1
     end do
+    
 
  10 continue ! Put the string representation into the tree
     if (present(anno)) then
@@ -1477,46 +1478,49 @@ subroutine pp_double(value, strvalue)
     real(kind=dp),    intent(in)  :: value
     character(len=*), intent(out) :: strvalue
 
-    integer :: i, iz, j, n
-    
-    write (strvalue,*) value
+    ! adjustl not working in gfortran, so writing to a temp array
+    character(len=100000) :: strtmp
 
-    i = index(strvalue, '.')
+    integer :: i, iz, j, n
+
+    write(strtmp,*) value
+
+    i = index(strtmp, '.')
     if (i == 0) then
-        strvalue = adjustl(strvalue)
+        strtmp = adjustl(strtmp)
         return
     end if
 
-    n = len_trim(strvalue)
+    n = len_trim(strtmp)
     iz = -1
     do
         i = i+1
         if (i == n+1) then
             ! End of number string, erase any trailing zeros.
             if (iz > 0) then
-                strvalue(iz:n) = ' '
+                strtmp(iz:n) = ' '
             end if
             exit
         end if
 
         ! Check for a zero, mark position if the previous char wasn't already a zero.
-        if (strvalue(i:i) == '0') then
+        if (strtmp(i:i) == '0') then
             if (iz < 0) then
                 iz = i
             end if
             cycle
-        else if (index('EeDd', strvalue(i:i)) > 0) then
+        else if (index('EeDd', strtmp(i:i)) > 0) then
             if (iz > 0) then ! Place exponent part over tail of trailing zeros.
                 do j=i+2,n
-                    if (strvalue(j:j) /= '0') exit
+                    if (strtmp(j:j) /= '0') exit
                 end do
                 if (j==n+1) then ! Entirely remove 'E+000'
-                    strvalue(iz:n) = ' '
+                    strtmp(iz:n) = ' '
                 else
-                    strvalue(iz:iz)       = 'd'
-                    strvalue(iz+1:iz+1)   = strvalue(i+1:i+1)
-                    strvalue(iz+2:iz+n-j+2) = strvalue(j:n)
-                    strvalue(iz+n-j+3:n)  = ' '
+                    strtmp(iz:iz)       = 'd'
+                    strtmp(iz+1:iz+1)   = strtmp(i+1:i+1)
+                    strtmp(iz+2:iz+n-j+2) = strtmp(j:n)
+                    strtmp(iz+n-j+3:n)  = ' '
                 end if
             end if
             exit
@@ -1526,7 +1530,7 @@ subroutine pp_double(value, strvalue)
         end if
     end do
 
-    strvalue = adjustl(strvalue)
+    strvalue = adjustl(trim(strtmp))
 end subroutine pp_double
 !
 !
