@@ -126,9 +126,18 @@
       do j = 1,mmax
          do i = 1,nmax
             if ( kcs (i,j) .ne. 0 ) then
-               if ( kcs (i,j) .eq. 2 .or. kcs(i,j) .eq. 3 ) then
-                  nobnd = nobnd+1
-                  iapnt(k) = -nobnd
+               if ( kcs (i,j) .eq. 2 .or. kcs(i,j) .eq. 3 .or. kcs(i,j) .eq. -1) then
+                  if (      kcs(i,j) .eq. -1 &
+                      .and. kcs(max(1   ,i-1),         j   ) .ne. 1 &
+                      .and. kcs(min(nmax,i+1),         j   ) .ne. 1 &
+                      .and. kcs(         i   ,max(1   ,j-1)) .ne. 1 &
+                      .and. kcs(         i   ,min(mmax,j+1)) .ne. 1  ) then
+                    ! In the halo (kcs=-1) and not next to an internal point:
+                    ! Handle this point as kcs=0: nothing to do
+                  else
+                     nobnd = nobnd+1
+                     iapnt(k) = -nobnd
+                  endif
                else
                   iapnt(k) = k
                endif
@@ -190,9 +199,18 @@
             do j = 1,mmax
                do i = 1,nmax
                   if ( kcs (i,j) .ne. 0 ) then
-                     if ( kcs (i,j) .eq. 2 .or. kcs(i,j) .eq. 3 ) then
-                        nobnd = nobnd+1
-                        iapnt(k) = -nobnd
+                     if ( kcs (i,j) .eq. 2 .or. kcs(i,j) .eq. 3 .or. kcs(i,j) .eq. -1) then
+                        if (      kcs(i,j) .eq. -1 &
+                            .and. kcs(max(1   ,i-1),         j   ) .ne. 1 &
+                            .and. kcs(min(nmax,i+1),         j   ) .ne. 1 &
+                            .and. kcs(         i   ,max(1   ,j-1)) .ne. 1 &
+                            .and. kcs(         i   ,min(mmax,j+1)) .ne. 1  ) then
+                           ! In the halo (kcs=-1) and not next to an internal point:
+                           ! Handle this point as kcs=0: nothing to do
+                        else
+                           nobnd = nobnd+1
+                           iapnt(k) = -nobnd
+                        endif
                      else
                         noseg = noseg + 1
                         iapnt(k) = noseg ! this is the difference with line 123

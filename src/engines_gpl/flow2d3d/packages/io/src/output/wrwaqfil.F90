@@ -45,6 +45,7 @@
 !     wrwaqpnt      to write the grid files and pointer files initially
 !!--declarations----------------------------------------------------------------
       use precision
+      use dfparall
 !
       use globaldata
       !
@@ -249,8 +250,11 @@
          firsttime = .false.
          mode = 0
          mtimstep = -1.0
-         filnam ='com-'//trim(runid)//'.'
-
+         if (parll) then
+            write(filnam,'(3a,i3.3,a)') 'com-', trim(runid), '-', inode, '.'
+         else
+            filnam ='com-'//trim(runid)//'.'
+         endif
 !           allocate all integer arrays that are needed
 !                    ifrmto is the maximally dimensioned from,to,from-1,to+1 table
 !                    isaggr: pointer from i,j,k to segment nr (optionally aggregated)
