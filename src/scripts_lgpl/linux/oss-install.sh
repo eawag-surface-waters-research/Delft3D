@@ -112,7 +112,8 @@ function flow2d3d () {
 
     copyFile "lib/libflow2d3d.so"                           $dest_bin
     copyFile "lib/libflow2d3d_sp.so"                        $dest_bin
-    copyFile "lib/libDelftOnline.so"                        $dest_bin
+    # For some reason, libflow2d3d.so depends on libDelftOnline.so.0 instead of libDelftOnline.so. Both are links to libDelftOnline.so.0.0.0
+    copyFile "lib/libDelftOnline.so.0"                      $dest_bin
     copyFile "engines_gpl/flow2d3d/scripts/meteo_old2new.m" $dest_scripts
     copyFile "bin/esm_create"                               $dest_bin
     copyFile "bin/esm_delete"                               $dest_bin
