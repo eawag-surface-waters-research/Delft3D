@@ -1,9 +1,9 @@
-subroutine z_cucbp_nhfull(kmax    ,norow     ,icx       , &
+subroutine z_cucbp_nhfull(kmax      ,norow     ,icx       , &
                         & icy       ,irocol    ,kcs       ,kfu       , &
-                        & kfumin    ,kfumax    ,s0        ,u0        ,dpu       , &
-                        & hu        ,umean     ,tetau     ,guu       ,gvu       , &
-                        & dzu1      ,thick     ,circ2d    ,circ3d    ,            &
-                        & aak       ,bbk       ,cck       ,ddk       ,            &
+                        & kfumin    ,kfumx0    ,s0        ,u0        , &
+                        & hu        ,umean     ,guu       ,gvu       , &
+                        & dzu0      ,circ2d    ,circ3d    ,dpu       , &
+                        & aak       ,bbk       ,cck       ,ddk       , &
                         & crbc      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -35,7 +35,10 @@ subroutine z_cucbp_nhfull(kmax    ,norow     ,icx       , &
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-!    Function: Coefficients at boundary points MF, MFU, ML, and
+!    Function: For the fully non-hydrostatic approach, boundary 
+!              conditions should be set in the momentum equations
+!              of the prediction step (Z_UZD).
+!              Coefficients at boundary points MF, MFU, ML, and
 !              MLU are set. The coefficients are stored in the
 !              arrays AAK, BBK, CCK, and DDK (velocity points).
 !              For the depth-averaged equations the coefficients
@@ -62,7 +65,6 @@ subroutine z_cucbp_nhfull(kmax    ,norow     ,icx       , &
     real(fp)               , pointer :: hdt
     real(fp)               , pointer :: ag
     logical                , pointer :: wavcmp
-    logical                , pointer :: zmodel
 !
 ! Global variables
 !
@@ -73,7 +75,7 @@ subroutine z_cucbp_nhfull(kmax    ,norow     ,icx       , &
     integer, dimension(5, norow)                    , intent(in)  :: irocol !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kfu    !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kfumax !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kfumx0 !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kfumin !  Description and declaration in esm_alloc_int.f90
     real(fp), dimension(12, norow)                  , intent(in)  :: crbc   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(4, norow)                   , intent(in)  :: circ2d !  Description and declaration in esm_alloc_real.f90
@@ -82,15 +84,13 @@ subroutine z_cucbp_nhfull(kmax    ,norow     ,icx       , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: gvu    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: hu     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: s0     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: tetau  !!  Factor for upwind approach S0 can be 0.0, 0.5 or 1.0 depending on value of HU, DCO, KSPU and UMEAN
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: umean  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(out) :: aak    !!  Internal work array (in CUCNP & UZD)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(out) :: bbk    !!  Internal work array (in CUCNP & UZD)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(out) :: cck    !!  Internal work array (in CUCNP & UZD)
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                    :: umean  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(out) :: aak    !!  Internal work array (in Z_CUCNP & Z_UZD)
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(out) :: bbk    !!  Internal work array (in Z_CUCNP & Z_UZD)
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(out) :: cck    !!  Internal work array (in Z_CUCNP & Z_UZD)
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(out) :: ddk    !!  Internal work array, diagonal space at (N,M,K)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in)  :: dzu1   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in)  :: dzu0   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in)  :: u0     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(kmax)                       , intent(in)  :: thick  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(kmax, 2, norow)             , intent(in)  :: circ3d !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
@@ -110,12 +110,15 @@ subroutine z_cucbp_nhfull(kmax    ,norow     ,icx       , &
     integer       :: mf
     integer       :: ml
     integer       :: n
+    integer       :: nm
     integer       :: nmf
     integer       :: nmfd
     integer       :: nmfu
     integer       :: nml
     integer       :: nmlu
     real(fp)      :: alfas
+    real(fp)      :: hnm
+    real(fp)      :: tetau
     real(fp)      :: alfau
     real(fp)      :: dep
     real(fp)      :: dt
@@ -130,10 +133,13 @@ subroutine z_cucbp_nhfull(kmax    ,norow     ,icx       , &
     hdt      => gdp%gdnumeco%hdt
     ag       => gdp%gdphysco%ag
     wavcmp   => gdp%gdprocs%wavcmp
-    zmodel   => gdp%gdprocs%zmodel
     !
     icxy = max(icx, icy)
     ddb  = gdp%d%ddbound
+    !
+    ! subroutine used for full timestep of non-hydrostatic model
+    ! only in combination with Z-layers 
+    !
     dt   = 2.0_fp * hdt
     !
     ! SET BOUNDARY CONDITIONS
@@ -153,17 +159,10 @@ subroutine z_cucbp_nhfull(kmax    ,norow     ,icx       , &
        nml  = (n+ddb)*icy + (ml+ddb)*icx - icxy
        nmlu = nml + icx
        !
-       if (zmodel) then
-          k0f = kfumin(nmf)
-          k1f = kfumax(nmf)
-          k0l = kfumin(nml)
-          k1l = kfumax(nml)
-       else
-          k0f = 1
-          k1f = kmax
-          k0l = 1
-          k1l = kmax
-       endif
+       k0f = kfumin(nmf)
+       k1f = kfumx0(nmf)
+       k0l = kfumin(nml)
+       k1l = kfumx0(nml)
        !
        ! SET COEFFICIENTS FOR BEGIN OF ROW IN THE CASE OF A CLOSED BOUNDARY
        !
@@ -179,10 +178,34 @@ subroutine z_cucbp_nhfull(kmax    ,norow     ,icx       , &
           enddo
        else
           !
-          ! SET COEFFICIENTS FOR BEGIN OF ROW IN THE CASE OF AN OPEN BOUNDAY
+          ! SET COEFFICIENTS FOR BEGIN OF ROW IN THE CASE OF AN OPEN BOUNDARY
           !
+          !
+          ! DETERMINE TETAU (for boundary conditions)
+          !
+          ! Determine umean again based on the velocities in the whole water column
+          ! instead of only the velocities in the top layer(s) as done in z_checku
+          ! needed in cucbp for alpha-coefficient on open boundary.
+          !
+          umean(nmf) = 0.0_fp
+          hnm        = 0.0_fp
+          do k = kfumin(nmf), kfumx0(nmf)
+             umean(nmf) = umean(nmf) + u0(nmf,k)*dzu0(nmf,k)
+             hnm        = hnm + dzu0(nmf,k)
+          enddo
+          umean(nmf) = umean(nmf) / max(hnm, 0.01_fp)
+          if (umean(nmf) >= 0.001_fp) then
+             tetau = 1.0_fp
+          elseif (umean(nmf) <= -0.001_fp) then
+             tetau = 0.0_fp
+          else
+             tetau = 1.0_fp
+             if (s0(nmfu) > s0(nmf)) then
+                tetau = 0.0_fp
+             endif
+          endif
           dep  = dpu(nmf)
-          sepu = tetau(nmf)*s0(nmf) + (1.0_fp-tetau(nmf))*s0(nmfu)
+          sepu = tetau*s0(nmf) + (1.0_fp-tetau)*s0(nmfu)
           !
           if (ibf==2 .and. .not.wavcmp) then
              !
@@ -197,9 +220,9 @@ subroutine z_cucbp_nhfull(kmax    ,norow     ,icx       , &
              alfas   = alfau * sqrt(ag/(dep+sepu))
              facc    = 1.0_fp + alfau
              do k = k0f, k1f
-                aak(nmf,k) = alfas * tetau(nmf) / facc
+                aak(nmf,k) = alfas * tetau / facc
                 bbk(nmf,k) = 1.0_fp
-                cck(nmf,k) = alfas * (1.0_fp-tetau(nmf)) / facc
+                cck(nmf,k) = alfas * (1.0_fp-tetau) / facc
                 ddk(nmf,k) = (circ3d(k,1,ic)+alfau*u0(nmf,k)+alfas*sepu) / facc
              enddo
           elseif (ibf==5 .or. ibf==7) then
@@ -207,15 +230,10 @@ subroutine z_cucbp_nhfull(kmax    ,norow     ,icx       , &
              ! DISCHARGE BOUNDARY
              !
              do k = k0f, k1f
-                if (zmodel) then
-                   relthk = dzu1(nmf,k)
-                else
-                   relthk = hu(nmf) * thick(k)
-                endif
                 aak(nmf,k) = 0.0_fp
                 bbk(nmf,k) = 1.0_fp
                 cck(nmf,k) = 0.0_fp
-                ddk(nmf,k) = circ3d(k,1,ic) / (guu(nmf)*relthk)
+                ddk(nmf,k) = circ3d(k,1,ic) / (guu(nmf)*dzu0(nmf,k))
              enddo
           elseif ((ibf==6.or.ibf==2) .and. wavcmp) then
              !
@@ -240,9 +258,9 @@ subroutine z_cucbp_nhfull(kmax    ,norow     ,icx       , &
              !
              alfas = sqrt(ag/(dep+sepu))
              do k = k0f, k1f
-                aak(nmf,k) = alfas * tetau(nmf)
+                aak(nmf,k) = alfas * tetau
                 bbk(nmf,k) = 1.0_fp
-                cck(nmf,k) = alfas * (1.0_fp-tetau(nmf))
+                cck(nmf,k) = alfas * (1.0_fp-tetau)
                 ddk(nmf,k) = circ3d(k, 1, ic) + alfas*sepu  &
                            & - 2.0_fp*sqrt(ag*(dep+sepu))   &
                            & + 2.0_fp*sqrt(ag*dep)
@@ -286,10 +304,33 @@ subroutine z_cucbp_nhfull(kmax    ,norow     ,icx       , &
           enddo
        else
           !
-          ! SET COEFFICIENTS FOR END OF ROW IN THE CASE OF AN OPEN BOUNDAY
+          ! SET COEFFICIENTS FOR END OF ROW IN THE CASE OF AN OPEN BOUNDARY
           !
-          sepu = tetau(nml)*s0(nml) + (1.0_fp-tetau(nml))*s0(nmlu)
+          ! DETERMINE TETAU (for boundary conditions)
+          !
+          ! Determine umean again based on the velocities in the whole water column
+          ! instead of only the velocities in the top layer(s) as done in z_checku
+          ! needed in cucbp for alpha-coefficient on open boundary.
+          !
+          umean(nml) = 0.0_fp
+          hnm        = 0.0_fp
+          do k = kfumin(nml), kfumx0(nml)
+             umean(nml) = umean(nml) + u0(nml,k)*dzu0(nml,k)
+             hnm        = hnm + dzu0(nml,k)
+          enddo
+          umean(nml) = umean(nml) / max(hnm, 0.01_fp)
+          if (umean(nml) >= 0.001_fp) then
+             tetau = 1.0_fp
+          elseif (umean(nml) <= -0.001_fp) then
+             tetau = 0.0_fp
+          else
+             tetau = 1.0_fp
+             if (s0(nmlu) > s0(nml)) then
+                tetau = 0.0_fp
+             endif
+          endif
           dep = dpu(nml)
+          sepu = tetau*s0(nml) + (1.0_fp-tetau)*s0(nmlu)
           !
           if (ibl==2 .and. .not.wavcmp) then
              !
@@ -304,9 +345,9 @@ subroutine z_cucbp_nhfull(kmax    ,norow     ,icx       , &
              alfas = -alfau * sqrt(ag/(dep+sepu))
              facc  = 1.0_fp + alfau
              do k = k0l, k1l
-                aak(nml,k) = alfas*tetau(nml)/facc
+                aak(nml,k) = alfas*tetau/facc
                 bbk(nml,k) = 1.0_fp
-                cck(nml,k) = alfas*(1.0_fp - tetau(nml))/facc
+                cck(nml,k) = alfas*(1.0_fp - tetau)/facc
                 ddk(nml,k) = (circ3d(k,2,ic)+alfau*u0(nml,k)+alfas*sepu) / facc
              enddo
           elseif (ibl==5 .or. ibl==7) then
@@ -314,15 +355,10 @@ subroutine z_cucbp_nhfull(kmax    ,norow     ,icx       , &
              ! DISCHARGE BOUNDARY
              !
              do k = k0l, k1l
-                if (zmodel) then
-                   relthk = dzu1(nml,k)
-                else
-                   relthk = hu(nml) * thick(k)
-                endif
                 aak(nml,k) = 0.0_fp
                 bbk(nml,k) = 1.0_fp
                 cck(nml,k) = 0.0_fp
-                ddk(nml,k) = circ3d(k,2,ic) / (guu(nml)*relthk)
+                ddk(nml,k) = circ3d(k,2,ic) / (guu(nml)*dzu0(nml,k))
              enddo
           elseif ((ibl==6 .or. ibl==2) .and. wavcmp) then
              !
@@ -346,9 +382,9 @@ subroutine z_cucbp_nhfull(kmax    ,norow     ,icx       , &
              !
              alfas = sqrt(ag/(dep+sepu))
              do k = k0l, k1l
-                aak(nml,k) = -alfas * tetau(nml)
+                aak(nml,k) = -alfas * tetau
                 bbk(nml,k) = 1.0_fp
-                cck(nml,k) = -alfas * (1.0_fp-tetau(nml))
+                cck(nml,k) = -alfas * (1.0_fp-tetau)
                 ddk(nml,k) = circ3d(k,2,ic) - alfas*sepu  &
                            & + 2.0_fp*sqrt(ag*(dep+sepu)) &
                            & - 2.0_fp*sqrt(ag*dep)

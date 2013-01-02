@@ -5,7 +5,7 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
                 & rtur0     ,thick     ,sig       ,rho       ,vicuv     , &
                 & vicww     ,dicuv     ,dicww     ,windsu    ,windsv    , &
                 & z0urou    ,z0vrou    ,bruvai    ,rich      ,dudz      , &
-                & dvdz      ,gdp       )
+                & dvdz      ,ueul      ,veul      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -109,6 +109,8 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: rho    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: u0     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: v0     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: ueul   !!  Eulerian velocity in X-direction (including Stokes drift)
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: veul   !!  Eulerian velocity in Y-direction (including Stokes drift)
     real(fp)  , dimension(kmax)                               , intent(in)  :: sig    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(kmax)                               , intent(in)  :: thick  !  Description and declaration in esm_alloc_real.f90
     character(12)                                             , intent(in)  :: tkemod !  Description and declaration in tricom.igs
@@ -228,6 +230,7 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
              dudz(nm, k) = 0.0
              if (kfu(nm)==1) then
                 dudz(nm, k) = (u0(nm, k) - u0(nm, kup))/(hu(nm)*tsg)
+                !dudz(nm, k) = (ueul(nm, k) - ueul(nm, kup))/(hu(nm)*tsg)
              endif
           enddo
        enddo
@@ -291,8 +294,10 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
                    else
                       maskval = kcs(nm)
                    endif
-                   uuu = 0.5*maskval*sqrt((u0(nm, k) + u0(nmd, k))              &
-                       & **2 + (v0(nm, k) + v0(ndm, k))**2)
+                   uuu = 0.5*maskval*sqrt(  (u0(nm, k) + u0(nmd, k))**2              &
+                       &                  + (v0(nm, k) + v0(ndm, k))**2 )
+                   !uuu = 0.5*maskval*sqrt(  (ueul(nm, k) + ueul(nmd, k))**2         &
+                   !    &                  + (veul(nm, k) + veul(ndm, k))**2 )
                    !
                    ! bottom is assumed at Z0
                    !
@@ -315,8 +320,10 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
                 else
                    maskval = kcs(nm)
                 endif
-                uuu = 0.5*maskval*sqrt((u0(nm, kmax) + u0(nmd, kmax))           &
-                    & **2 + (v0(nm, kmax) + v0(ndm, kmax))**2)
+                uuu = 0.5*maskval*sqrt(  (u0(nm, kmax) + u0(nmd, kmax))**2          &
+                    &                  + (v0(nm, kmax) + v0(ndm, kmax))**2  )
+                !uuu = 0.5*maskval*sqrt(  (ueul(nm, kmax) + ueul(nmd, kmax))**2     &
+                !    &                  + (veul(nm, kmax) + veul(ndm, kmax))**2 )
                 !
                 ! bottom is assumed at Z0
                 !
@@ -477,8 +484,10 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
              else
                 maskval = kcs(nm)
              endif
-             uuu = 0.5*maskval*sqrt((u0(nm, kmax) + u0(nmd, kmax))              &
-                 & **2 + (v0(nm, kmax) + v0(ndm, kmax))**2)
+             uuu = 0.5*maskval*sqrt(  (u0(nm, kmax) + u0(nmd, kmax))**2           &
+                 &                  + (v0(nm, kmax) + v0(ndm, kmax))**2 )
+             !uuu = 0.5*maskval*sqrt(  (ueul(nm, kmax) + ueul(nmd, kmax))**2      &
+             !    &                  + (veul(nm, kmax) + veul(ndm, kmax))**2 )
              rz = 1.0 + (1. + sig(kmax))*h0/dicww(nm, kmax)
              ustbot = abs(uuu)*vonkar/log(rz)
              vicww(nm, kmax) = vonkar*ustbot*dicww(nm, kmax)

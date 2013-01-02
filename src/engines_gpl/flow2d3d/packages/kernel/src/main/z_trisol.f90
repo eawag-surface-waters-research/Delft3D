@@ -38,6 +38,25 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
 ! Z-model
 ! This routine basically carries out the hydrodynamics
 ! and the online advection diffusion computation for one complete time step.
+! 
+! Usage of 0/1-arrays  (e.g. S0 and S1 for the water levels at the beginning 
+!                      and end of a half time step):
+!                      Up to and including the call to Z_ADI (solution of the 
+!                      coupled momentum and continuity equations), the 0-arrays
+!                      are used.
+!                      After Z_ADI, the new layering administration has been
+!                      updated and all 1-arrays should be used.
+!                      EXCEPTION: routines related to transport of constituents
+!                      use the old geometry as the R0 array is also only
+!                      available at this level. Special measures to update the
+!                      concentrations in newly activated layers or cells are
+!                      taken in Z_DIFU and in HEATU for implicit treatment of 
+!                      sinks.
+!                      Routines where this is the case are Z_DISCHA, HEATU, 
+!                      THAHBC.
+!                      Routine Z_DIFUFLUX requires different treatment
+!                      based on the selected advection option
+!                      (explicit/implicit) for constituent transport.
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
@@ -228,6 +247,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     integer(pntrsize)                    , pointer :: fcorio
     integer(pntrsize)                    , pointer :: fuiwe
     integer(pntrsize)                    , pointer :: fviwe
+    integer(pntrsize)                    , pointer :: fxw
+    integer(pntrsize)                    , pointer :: fyw
     integer(pntrsize)                    , pointer :: grmasu
     integer(pntrsize)                    , pointer :: grmasv
     integer(pntrsize)                    , pointer :: grmsur
@@ -339,6 +360,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     integer(pntrsize)                    , pointer :: ws
     integer(pntrsize)                    , pointer :: wsu
     integer(pntrsize)                    , pointer :: wsv
+    integer(pntrsize)                    , pointer :: wsbodyu
+    integer(pntrsize)                    , pointer :: wsbodyv
     integer(pntrsize)                    , pointer :: xcor
     integer(pntrsize)                    , pointer :: xydro
     integer(pntrsize)                    , pointer :: xz
@@ -406,8 +429,11 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     integer(pntrsize)                    , pointer :: kfumx0
     integer(pntrsize)                    , pointer :: kfvmx0
     integer(pntrsize)                    , pointer :: kfsmx0
+    integer(pntrsize)                    , pointer :: kfsz0
     integer(pntrsize)                    , pointer :: kfsz1
+    integer(pntrsize)                    , pointer :: kfuz0
     integer(pntrsize)                    , pointer :: kfuz1
+    integer(pntrsize)                    , pointer :: kfvz0
     integer(pntrsize)                    , pointer :: kfvz1
     integer(pntrsize)                    , pointer :: kcscut
     integer(pntrsize)                    , pointer :: kcu45
@@ -663,6 +689,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     fcorio              => gdp%gdr_i_ch%fcorio
     fuiwe               => gdp%gdr_i_ch%fuiwe
     fviwe               => gdp%gdr_i_ch%fviwe
+    fxw                 => gdp%gdr_i_ch%fxw
+    fyw                 => gdp%gdr_i_ch%fyw
     grmasu              => gdp%gdr_i_ch%grmasu
     grmasv              => gdp%gdr_i_ch%grmasv
     grmsur              => gdp%gdr_i_ch%grmsur
@@ -774,6 +802,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     ws                  => gdp%gdr_i_ch%ws
     wsu                 => gdp%gdr_i_ch%wsu
     wsv                 => gdp%gdr_i_ch%wsv
+    wsbodyu             => gdp%gdr_i_ch%wsbodyu
+    wsbodyv             => gdp%gdr_i_ch%wsbodyv
     xcor                => gdp%gdr_i_ch%xcor
     xydro               => gdp%gdr_i_ch%xydro
     xz                  => gdp%gdr_i_ch%xz
@@ -841,6 +871,9 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     kfumx0              => gdp%gdr_i_ch%kfumx0
     kfvmx0              => gdp%gdr_i_ch%kfvmx0
     kfsmx0              => gdp%gdr_i_ch%kfsmx0
+    kfsz0               => gdp%gdr_i_ch%kfsz0
+    kfuz0               => gdp%gdr_i_ch%kfuz0
+    kfvz0               => gdp%gdr_i_ch%kfvz0
     kfsz1               => gdp%gdr_i_ch%kfsz1
     kfuz1               => gdp%gdr_i_ch%kfuz1
     kfvz1               => gdp%gdr_i_ch%kfvz1
@@ -935,10 +968,10 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
              call z_disbub(kmax      ,nsrcd     ,nsrc      ,nxbub     , &
                          & lstsci    ,lstsc     ,icx       ,icy       , &
                          & ch(namsrc),i(mnksrc) , &
-                         & i(kfsmin) ,i(kfsmax) ,r(gsqs)   ,r(disinp) , &
+                         & i(kfsmin) ,i(kfsmx0) ,r(gsqs)   ,r(disinp) , &
                          & r(sour)   ,r(sink)   ,r(xcor)   ,r(ycor)   , &
                          & r(r0)     ,r(disch)  ,r(rint)   ,r(sig)    , &
-                         & r(s1)     ,d(dps)    ,ifirst    ,gdp       )
+                         & r(s0)     ,d(dps)    ,ifirst    ,gdp       )
           endif
        endif
        !
@@ -1018,9 +1051,9 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           call incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                     & kmax      ,nto       ,nrob      ,lstsc     ,noroco    , &
                     & ch(tprofc),i(itbcc)  ,i(mnbnd)  ,i(nob)    ,i(kstp)   , &
-                    & i(kfsmin) ,i(kfsmax) ,r(rob)    ,r(rbnd)   ,r(guu)    , &
+                    & i(kfsmin) ,i(kfsmx0) ,r(rob)    ,r(rbnd)   ,r(guu)    , &
                     & r(gvv)    ,d(dps)    ,r(s0)     ,r(sig)    ,r(procbc) , &
-                    & r(zstep)  ,r(dzs1)   ,r(sig)    ,gdp       )
+                    & r(zstep)  ,r(dzs0)   ,r(sig)    ,gdp       )
           call timer_stop(timer_incbcc, gdp)
        endif
     endif
@@ -1048,7 +1081,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        if (culvert) then
            call timer_start(timer_culver, gdp)
            call culver(icx       ,icy       ,kmax      ,nsrcd     ,i(kfs)    , &
-                     & i(kfsmax) ,i(kfsmin) ,i(mnksrc) ,r(disch)  ,d(dps)    , &
+                     & i(kfsmx0) ,i(kfsmin) ,i(mnksrc) ,r(disch)  ,d(dps)    , &
                      & r(s0)     ,r(sig)    ,r(thick)  ,r(voldis) ,timsec    , &
                      & gdp       )
            call timer_stop(timer_culver, gdp)
@@ -1099,7 +1132,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           call timer_start(timer_dens, gdp)
           call dens(jstart    ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
                   & lsal      ,ltem      ,lsed      ,saleqs    ,temeqs    , &
-                  & densin    ,zmodel    ,r(thick)  ,r(r1)     ,r(rho)    , &
+                  & densin    ,zmodel    ,r(thick)  ,r(r0)     ,r(rho)    , &
                   & r(sumrho) ,r(rhowat) ,rhosol    ,gdp       )
           call timer_stop(timer_dens, gdp)
           !
@@ -1109,8 +1142,9 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           icy = 1
           call timer_start(timer_dengra, gdp)
           call z_dengra(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
-                      & icy       ,i(kfsz1)  ,i(kfumin) ,i(kfumx0) ,i(kfvmin) , &
-                      & i(kfvmx0) ,r(rho)    ,r(gvu)    ,r(guv)    ,r(drhodx) , &
+                      & icy       ,i(kfsz0)  ,i(kfumin) ,i(kfumx0) ,i(kfvmin) , &
+                      & i(kfvmx0) ,i(kfu)    ,i(kfv)    , &
+                      & r(rho)    ,r(gvu)    ,r(guv)    ,r(drhodx) , &
                       & r(drhody) ,r(dzu0)   ,r(dzv0)   ,gdp       )
           call timer_stop(timer_dengra, gdp)
        endif
@@ -1126,7 +1160,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        call timer_start(timer_sousin, gdp)
        call sousin(jstart    ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
                  & lstsc     ,lsal      ,ktemp     ,ltem      ,lsts      , &
-                 & i(kfs)    ,i(kfsmin) ,i(kfsmax) ,r(gsqs)   ,r(thick)  , &
+                 & i(kfs)    ,i(kfsmin) ,i(kfsmx0) ,r(gsqs)   ,r(thick)  , &
                  & r(s0)     ,d(dps)    ,r(volum0) ,r(sour)   ,r(sink)   , &
                  & r(evap)   ,r(precip) ,r(decay)  ,i(kcs)    ,gdp       )
        call timer_stop(timer_sousin, gdp)
@@ -1153,14 +1187,15 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                 call z_disbub(kmax      ,nsrcd     ,nsrc      ,nxbub     , &
                             & lstsci    ,lstsc     ,icx       ,icy       , &
                             & ch(namsrc),i(mnksrc) , &
-                            & i(kfsmin) ,i(kfsmax) ,r(gsqs)   ,r(disinp) , &
+                            & i(kfsmin) ,i(kfsmx0) ,r(gsqs)   ,r(disinp) , &
                             & r(sour)   ,r(sink)   ,r(xcor)   ,r(ycor)   , &
                             & r(r0)     ,r(disch)  ,r(rint)   ,r(sig)    , &
-                            & r(s1)     ,d(dps)    ,ifirst    ,gdp       )
+                            & r(s0)     ,d(dps)    ,ifirst    ,gdp       )
              endif
           endif
           call timer_stop(timer_trisol_rest, gdp)
        endif
+       !
        ! Eddy viscosity and diffusivity
        ! Use SIG for array ZK
        !
@@ -1170,14 +1205,14 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        call timer_start(timer_turclo, gdp)
        call z_turclo(jstart    ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
                    & icx       ,icy       ,tkemod    , &
-                   & i(kcs)    ,i(kfu)    ,i(kfv)    ,i(kfs)    ,i(kfuz1)  , &
-                   & i(kfvz1)  ,i(kfsz1)  ,i(kfumin) ,i(kfumax) ,i(kfvmin) , &
-                   & i(kfvmax) ,i(kfsmin) ,i(kfsmax) ,r(s1)     ,d(dps)    , &
-                   & r(hu)     ,r(hv)     ,r(u1)     ,r(v1)     ,r(rtur1)  , &
+                   & i(kcs)    ,i(kfu)    ,i(kfv)    ,i(kfs)    ,i(kfuz0)  , &
+                   & i(kfvz0)  ,i(kfsz0)  ,i(kfumin) ,i(kfumx0) ,i(kfvmin) , &
+                   & i(kfvmx0) ,i(kfsmin) ,i(kfsmx0) ,r(s0)     ,d(dps)    , &
+                   & r(hu)     ,r(hv)     ,r(u0)     ,r(v0)     ,r(rtur1)  , &
                    & r(thick)  ,r(sig)    ,r(rho)    ,r(vicuv)  ,r(vicww)  , &
                    & r(dicuv)  ,r(dicww)  ,r(windsu) ,r(windsv) ,r(z0urou) , &
                    & r(z0vrou) ,r(bruvai) ,r(rich)   ,r(dudz)   ,r(dvdz)   , &
-                   & r(dzu1)   ,r(dzv1)   ,r(dzs1)   ,r(sig)    ,gdp       )
+                   & r(dzu0)   ,r(dzv0)   ,r(dzs0)   ,r(sig)    ,gdp       )
        call timer_stop(timer_turclo, gdp)
        call timer_stop(timer_turbulence, gdp)
        !
@@ -1189,7 +1224,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           call chkvic(lundia    ,jstart    ,nmmaxj    ,nmmax     ,kmax      , &
                     & icx       ,icy       ,timnow    ,i(kfs)    ,i(kfu)    , &
                     & i(kfv)    ,i(kcs)    ,lstsci    ,r(guv)    ,r(gvu)    , &
-                    & r(vicuv)  ,r(dicuv)  ,itype     ,i(kfsmin) ,i(kfsmax) , &
+                    & r(vicuv)  ,r(dicuv)  ,itype     ,i(kfsmin) ,i(kfsmx0) , &
                     & gdp       )
           call timer_stop(timer_chkvic, gdp)
        endif
@@ -1202,8 +1237,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
              itiwec = itiwec + itiwei
              call timer_start(timer_iwe00, gdp)
              call iwe_00(nmax      ,mmax      ,kmax      ,kmxdt     ,npiwe     , &
-                       & ltur      ,lundia    ,r(w10mag) ,r(s1)     ,d(dps)    , &
-                       & r(u1)     ,r(v1)     ,r(dudz)   ,r(dvdz)   ,r(windsu) , &
+                       & ltur      ,lundia    ,r(w10mag) ,r(s0)     ,d(dps)    , &
+                       & r(u0)     ,r(v0)     ,r(dudz)   ,r(dvdz)   ,r(windsu) , &
                        & r(windsv) ,r(taubpu) ,r(taubpv) ,r(sig)    ,r(thick)  , &
                        & r(rich)   ,r(bruvai) ,r(rtur0)  ,r(vicww)  ,i(kfs)    , &
                        & i(kfu)    ,i(kfv)    ,r(tgarkx) ,r(tgarkt) ,r(tgarnp) , &
@@ -1230,15 +1265,15 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        !
        if (cdwstruct) then
           call timer_start(timer_cdwkad, gdp)
-          call cdwkad(nmmax     ,kmax      ,zmodel    ,i(kspu)   ,i(kfsmax) , &
-                    & i(kfsmin) ,i(kfumax) ,i(kfumin) ,r(sig)    ,r(thick)  , &
+          call cdwkad(nmmax     ,kmax      ,zmodel    ,i(kspu)   ,i(kfsmx0) , &
+                    & i(kfsmin) ,i(kfumx0) ,i(kfumin) ,r(sig)    ,r(thick)  , &
                     & r(sig)    ,r(zwork)  ,r(zwork+kmax)  ,r(zwork+2*kmax) , &
-                    & r(dpu)    ,r(hu)     ,r(dzu1)   ,r(porosu) ,r(ubrlsu) , &
+                    & r(dpu)    ,r(hu)     ,r(dzu0)   ,r(porosu) ,r(ubrlsu) , &
                     & r(cdwztu) ,r(cdwzbu) ,r(cdwlsu) ,gdp       )
-          call cdwkad(nmmax     ,kmax      ,zmodel    ,i(kspv)   ,i(kfsmax) , &
-                    & i(kfsmin) ,i(kfvmax) ,i(kfvmin) ,r(sig)    ,r(thick)  , &
+          call cdwkad(nmmax     ,kmax      ,zmodel    ,i(kspv)   ,i(kfsmx0) , &
+                    & i(kfsmin) ,i(kfvmx0) ,i(kfvmin) ,r(sig)    ,r(thick)  , &
                     & r(sig)    ,r(zwork)  ,r(zwork+kmax)  ,r(zwork+2*kmax) , &
-                    & r(dpv)    ,r(hv)     ,r(dzv1)   ,r(porosv) ,r(ubrlsv) , &
+                    & r(dpv)    ,r(hv)     ,r(dzv0)   ,r(porosv) ,r(ubrlsv) , &
                     & r(cdwztv) ,r(cdwzbv) ,r(cdwlsv) ,gdp       )
           call timer_stop(timer_cdwkad, gdp)
        endif
@@ -1259,7 +1294,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           call timer_start(timer_updbar, gdp)
           call updbar(nsluv     ,i(mnbar)  ,r(cbuv)   ,r(cbuvrt) ,nmax      , &
                     & mmax      ,kmax      ,r(thick)  ,i(kspu)   ,i(kspv)   , &
-                    & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,r(ubrlsu) , &
+                    & i(kfumin) ,i(kfumx0) ,i(kfvmin) ,i(kfvmx0) ,r(ubrlsu) , &
                     & r(ubrlsv) ,r(hu)     ,r(hv)     ,r(dpu)    ,r(dpv)    , &
                     & r(sig)    ,r(zwork)  ,gdp       )
           call timer_stop(timer_updbar, gdp)
@@ -1279,6 +1314,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                 & i(kspu)   ,i(kspv)   ,i(kadu)   ,i(kadv)   ,i(kcs)    , &
                 & i(kcu)    ,i(kcv)    ,i(kfsmin) ,i(kfsmax) ,i(kfsmx0) , &
                 & i(kfumin) ,i(kfumax) ,i(kfumx0) ,i(kfvmin) ,i(kfvmax) , &
+                & i(kfuz0)  ,i(kfvz0)  ,i(kfsz0)  , &
                 & i(kfvmx0) ,i(kfuz1)  ,i(kfvz1)  ,i(kfsz1)  ,i(kcu45)  , &
                 & i(kcv45)  ,i(kcscut) ,r(porosu) ,r(porosv) ,r(areau)  , &
                 & r(areav)  ,r(volum1) ,r(s0)     ,r(s1)     ,r(w1)     , &
@@ -1288,7 +1324,9 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                 & r(dzv0)   ,r(dzs0)   ,r(dzu1)   ,r(dzv1)   ,r(dzs1)   , &
                 & r(qxk)    ,r(qyk)    ,r(qzk)    ,r(evap)   ,r(circ2d) , &
                 & r(circ3d) ,r(drhodx) ,r(drhody) ,r(disch)  ,r(umdis)  , &
-                & r(vmdis)  ,r(wsu)    ,r(wsv)    ,r(gud)    ,r(gvd)    , &
+                & r(vmdis)  ,r(wsu)    ,r(wsv)    ,r(dfu)    ,r(dfv)    , &
+                & r(deltau) ,r(deltav) ,r(tp)     ,r(rlabda) ,r(wsbodyu), &
+                & r(wsbodyv),r(fxw)    ,r(fyw)    ,r(gud)    ,r(gvd)    , &
                 & r(guu)    ,r(guv)    ,r(gvv)    ,r(gvu)    ,r(guz)    , &
                 & r(gvz)    ,r(gsqs)   ,r(gsqiu)  ,r(gsqiv)  ,r(taubpu) , &
                 & r(taubpv) ,r(taubsu) ,r(taubsv) ,r(vicuv)  ,r(vnu2d)  , &
@@ -1300,8 +1338,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                 & r(wrkb7)  ,r(wrkb8)  ,r(wrkb9)  ,r(wrkb10) ,r(sig)    , &
                 & r(p0)     ,r(crbc)   ,r(hu0)    ,r(hv0)    ,r(wrkb11) , &
                 & r(wrkb12) ,r(wrkb13) ,r(wrkb14) ,r(pship)  ,r(diapl)  , &
-                & r(rnpl)   ,sbkol     ,r(cfurou) ,r(cfvrou) ,r(precip) , &
-                & gdp       )
+                & r(rnpl)   ,sbkol     ,r(cfurou) ,r(cfvrou) ,r(r0)     , &
+                & lstsci    ,r(precip)  ,gdp       )
        call timer_stop(timer_1stadi, gdp)
        !
        ! Calculate tau_bottom values using local 'updated' values for
@@ -1314,13 +1352,44 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        ! CVALU0 and CVALV0 contain the actual 2D-chezy value
        ! to be used in detvic
        !
+       ! Adapt velocities U1 and V1 for mass fluxes due to waves
+       !
+       icx = nmaxddb
+       icy = 1
+       call timer_start(timer_euler, gdp)
+       call euler(jstart    ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
+                & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumax) , &
+                & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
+                & r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
+                & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
+                & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   ,r(grmsur) , &
+                & r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
+       call timer_stop(timer_euler, gdp)
+       !
+       ! Update bed shear stress in U-direction
+       !
+       call timer_start(timer_taubot, gdp)
+       icx = nmaxddb
+       icy = 1
+       call taubot(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
+                 & icy       ,rouflo    ,rouwav    ,i(kfu)    ,i(kfv)    , &
+                 & i(kfumin) ,i(kfumax) ,i(kspu)   ,i(kcs)    ,i(kcscut) , &
+                 & d(dps)    ,r(s1)     ,r(wrkb3)  ,r(wrkb4)  , &
+                 & r(guu)    ,r(xcor)   ,r(ycor)   ,r(rho)    , &
+                 & r(taubpu) ,r(taubsu) ,r(wrka1)  ,r(dis)    ,r(rlabda) , &
+                 & r(teta)   ,r(uorb)   ,r(tp)     ,r(wsu)    ,r(wsv)    , &
+                 & r(grmasu) ,r(dfu)    ,r(deltau) ,r(hrms)   , &
+                 & r(cfurou) ,r(z0urou) ,r(hu)     ,r(dzu1)   ,r(sig)    , &
+                 & r(z0ucur) ,r(cvalu0) ,r(grmsur) ,r(grfacu) ,gdp       )
+       !
+       ! Update bed shear stress in V-direction
+       !
        icx = 1
        icy = nmaxddb
-       call timer_start(timer_taubot, gdp)
        call taubot(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                  & icy       ,rouflo    ,rouwav    ,i(kfv)    ,i(kfu)    , &
                  & i(kfvmin) ,i(kfvmax) ,i(kspv)   ,i(kcs)    ,i(kcscut) , &
-                 & d(dps)    ,r(s1)     ,r(v1)     ,r(u1)     ,r(vmean)  , &
+                 & d(dps)    ,r(s1)     ,r(wrkb4)  ,r(wrkb3)  , &
                  & r(gvv)    ,r(ycor)   ,r(xcor)   ,r(rho)    , &
                  & r(taubpv) ,r(taubsv) ,r(wrka2)  ,r(dis)    ,r(rlabda) , &
                  & r(teta)   ,r(uorb)   ,r(tp)     ,r(wsv)    ,r(wsu)    , &
@@ -1402,7 +1471,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           call timer_start(timer_heatu, gdp)
           call heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                    & ltem      ,lstsci    ,icx       ,icy       , &
-                   & nmmax     ,kmax      ,i(kfs)    ,i(kfsmx0) , &
+                   & nmmax     ,kmax      ,i(kfs)    ,i(kfsmx0) ,i(kfsmax) , &
                    & i(kfsmin) ,i(kspu)   ,i(kspv)   ,r(dzs0)   ,r(dzs1)   , &
                    & r(sour)   ,r(sink)   ,r(r0)     ,r(evap)   ,d(dps)    , &
                    & r(s0)     ,r(s1)     ,r(thick)  ,r(w10mag) ,r(patm)   , &
@@ -1421,11 +1490,10 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           call thahbc(jstart    ,nmmaxj    ,icx       ,icy       ,kmax      , &
                     & lstsci    ,lstsc     ,nrob      ,noroco    ,nto       , &
                     & nst       ,i(kfsmin) ,i(nob)    ,r(thtim)  ,r(rettim) , &
-                    & r(u1)     ,r(v1)     ,r(r0)     ,r(rbnd)   ,r(rthbnd) , &
-                    & r(sig)    ,r(dzs1)   ,d(dps)    ,r(s1)     ,gdp       )
+                    & r(u0)     ,r(v0)     ,r(r0)     ,r(rbnd)   ,r(rthbnd) , &
+                    & r(sig)    ,r(dzs0)   ,d(dps)    ,r(s0)     ,gdp       )
           call timer_stop(timer_thahbc, gdp)
        endif
-       !
        !
        ! Define KADU/V for transport and turbulence
        !
@@ -1439,7 +1507,6 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        !
        ! Transport turbulence
        !
-       
        if (lstsci>0 .and. nst<itdiag) then
           call timer_start(timer_difu, gdp)
           icx = nmaxddb
@@ -1450,29 +1517,33 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           call timer_start(timer_tritra, gdp)
           call timer_start(timer_1stdifu, gdp)
           call z_difu(lundia    ,nst       ,icx       ,icy       ,jstart    , &
-                    & nmmaxj    ,nmmax     ,kmax      ,lstsci    ,norow     , &
-                    & i(irocol) ,i(kcs)    ,i(kcu)    ,i(kfs)    , &
+                    & nmmaxj    ,nmmax     ,kmax      ,lstsci    ,norow     ,nocol     , &
+                    & i(irocol) ,i(kcs)    ,i(kcu)    ,i(kcv)    ,i(kfs)    , &
                     & i(kfsmin) ,i(kfsmax) ,i(kfsmx0) ,i(kfumin) ,i(kfumx0) , &
-                    & i(kfvmin) ,i(kfvmx0) ,i(kfsz1)  ,i(kfuz1)  ,i(kfvz1)  , &
+                    & i(kfumax) ,i(kfvmin) ,i(kfvmx0) ,i(kfvmax) , &
+                    & i(kfsz0)  ,i(kfuz0)  ,i(kfvz0)  ,i(kfu)    ,i(kfv)    , &
+                    & i(kfsz1)  ,i(kfuz1)  ,i(kfvz1)  , &
                     & r(qxk)    ,r(qyk)    ,r(qzk)    ,r(u1)     ,r(v1)     , &
                     & r(guv)    ,r(gvu)    ,r(gsqs)   ,r(rbnd)   ,r(sigdif) , &
-                    & r(sigmol) ,r(dicuv)  ,r(dicww)  ,r(r0)     ,r(r1)     , &
+                    & r(sigmol) ,r(dicuv)  ,r(vicww)  ,r(r0)     ,r(r1)     , &
                     & r(sour)   ,r(sink)   ,r(wrkb1)  ,r(wrkb2)  ,r(wrkb3)  , &
                     & r(wrkb5)  ,r(wrkb6)  ,r(wrkb7)  ,r(wrkb8)  ,r(wrkb13) , &
-                    & r(wrkb14) ,r(wrkb18) , &
-                    & r(wrkc1)  ,r(wrkc2)  ,r(wrkc3)  ,r(wrkc4)  ,r(dzs0)   ,r(dzs1)   , &
-                    & r(dzu0)   ,r(dzv0)   ,r(areau)  ,r(areav)  ,r(volum0) , &
-                    & r(volum1) ,r(guu)    ,r(gvv)    ,r(bruvai) ,r(rho)    , &
-                    & r(s1)     ,d(dps)    ,ltem      ,gdp       )
+                    & r(wrkb14) ,r(wrkb18) ,r(dzu1)   ,r(dzv1)   , &
+                    & r(wrkc1)  ,r(wrkc2)  ,r(wrkc3)  ,r(wrkc4)  ,r(dzs1)   , &
+                    & r(areau)  ,r(areav)  ,r(volum0) , &
+                    & r(volum1) ,r(guu)    ,r(gvv)    ,r(bruvai) , &
+                    & ltem      ,gdp       )
           !
           ! z_difu can be called again for correction
           !
           call timer_stop(timer_1stdifu, gdp)
           call z_difuflux(stage  ,lundia ,kmax      ,nmmax     ,nmmaxj    , &
-                  & lstsci    ,r(r0)     ,r(qxk)    ,r(qyk)    , &
+                  & lstsci    ,r(r0)     ,r(r1)     ,r(qxk)    ,r(qyk)    , &
                   & r(u1)     ,r(v1)     ,&
                   & r(dicuv)  ,r(guv)    ,r(gvu)    ,r(areau)  ,r(areav)  , &
                   & i(kfuz1)  ,i(kfvz1)  ,i(kfsz1)  ,i(kcs)    ,i(kfs)    , &
+                  & i(kfu)    ,i(kfuz0)  ,i(kfv)    ,i(kfvz0)  ,&
+                  & i(kfsmx0) ,i(kfsmax) ,i(kfsz0)  ,&
                   & i(kfumin) ,i(kfumx0) ,i(kfvmin) ,i(kfvmx0) ,r(sigdif) , &
                   & hdt       ,icx       ,icy       ,gdp       )
           call timer_stop(timer_tritra, gdp)
@@ -1546,16 +1617,30 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                     & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
                     & nsrc      ,r(disch)  ,gdp       )
        !
+       ! Check Courant numbers for U and V velocities in U-points
+       ! Check in V-points is done only after second half ADI-step
+       ! Check is done based upon old geometry (corresponding to S0)
+       !
+       icx = nmaxddb
+       icy = 1
+       call z_chkadv(lundia    ,nmmax     ,kmax      ,icx       , &
+                   & icy       ,i(kfu)    ,i(kfuz0)  ,i(kfvz0)  , &
+                   & r(guu)    ,r(gvu)    ,r(u0)     ,r(v0)     , &
+                   & i(kfumx0) ,i(kfumin) ,r(dzu0)   ,r(dzs0)   , &
+                   & nst       ,i(kcs)    ,gdp       )
+       !
        ! Reset arrays for next half time step
        ! S0=S1, U0=U1, V0=V1, R0=R1 etc
        !
        call timer_start(timer_f0isf1, gdp)
-       call f0isf1(dischy    ,nst       ,zmodel    ,jstart    , &
+       call f0isf1(stage     ,dischy    ,nst       ,zmodel    ,jstart    , &
                  & nmmax     ,nmmaxj    ,nmax      ,kmax      ,lstsci    , &
                  & ltur      ,nsrc      ,i(kcu)    ,i(kcv)    ,i(kcs)    , &
                  & i(kfs)    ,i(kfu)    ,i(kfv)    ,i(kfsmin) ,i(kfsmax) , &
                  & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,i(kfsmx0) , &
-                 & i(kfumx0) ,i(kfvmx0) ,r(s0)     ,r(s1)     ,r(u0)     , &
+                 & i(kfumx0) ,i(kfvmx0) ,i(kfsz0)  ,i(kfuz0)  ,i(kfvz0)  , &
+                 & i(kfsz1)  ,i(kfuz1)  ,i(kfvz1)  , &
+                 & r(s0)     ,r(s1)     ,r(u0)     , &
                  & r(u1)     ,r(v0)     ,r(v1)     ,r(volum0) ,r(volum1) , &
                  & r(r0)     ,r(r1)     ,r(rtur0)  ,r(rtur1)  ,r(disch)  , &
                  & r(discum) ,r(hu)     ,r(hv)     ,r(dzu1)   ,r(dzv1)   , &
@@ -1570,7 +1655,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     !
     if (rtcact) then
        call rtc_comm_put(i(kfs)    ,i(kfsmin) ,i(kfsmax) ,r(sig)    , &
-                       & r(sig)    ,r(s1)     ,d(dps)    ,r(r0)     , &
+                       & r(sig)    ,r(s1)     ,d(dps)    ,r(r1)     , &
                        & gdp)
     endif
     !
@@ -1607,9 +1692,9 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        !
        call timer_start(timer_incmeteo, gdp)
        call incmeteo(timhr     , grdang   , &
-                   & r (windu ),r (windv ),r (patm  ), &
-                   & i (kcs   ),r (alfas ), &
-                   & r (windsu),r (windsv),r (w10mag), gdp)
+                   & r(windu ) , r(windv ), r(patm  ),    &
+                   & i(kcs   ) , r(alfas ),               &
+                   & r(windsu) , r(windsv), r(w10mag), gdp)
        call timer_stop(timer_incmeteo, gdp)
     endif
     if (nto > 0) then
@@ -1652,9 +1737,9 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           call incbcc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                     & kmax      ,nto       ,nrob      ,lstsc     ,noroco    , &
                     & ch(tprofc),i(itbcc)  ,i(mnbnd)  ,i(nob)    ,i(kstp)   , &
-                    & i(kfsmin) ,i(kfsmax) ,r(rob)    ,r(rbnd)   ,r(guu)    , &
+                    & i(kfsmin) ,i(kfsmx0) ,r(rob)    ,r(rbnd)   ,r(guu)    , &
                     & r(gvv)    ,d(dps)    ,r(s0)     ,r(sig)    ,r(procbc) , &
-                    & r(zstep)  ,r(dzs1)   ,r(sig)    ,gdp       )
+                    & r(zstep)  ,r(dzs0)   ,r(sig)    ,gdp       )
           call timer_stop(timer_incbcc, gdp)
        endif
     endif
@@ -1682,7 +1767,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        if (culvert) then
            call timer_start(timer_culver, gdp)
            call culver(icx       ,icy       ,kmax      ,nsrcd     ,i(kfs)    , &
-                     & i(kfsmax) ,i(kfsmin) ,i(mnksrc) ,r(disch)  ,d(dps)    , &
+                     & i(kfsmx0) ,i(kfsmin) ,i(mnksrc) ,r(disch)  ,d(dps)    , &
                      & r(s0)     ,r(sig)    ,r(thick)  ,r(voldis) ,timsec    , &
                      & gdp       )
            call timer_stop(timer_culver, gdp)
@@ -1733,7 +1818,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           call timer_start(timer_dens, gdp)
           call dens(jstart    ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
                   & lsal      ,ltem      ,lsed      ,saleqs    ,temeqs    , &
-                  & densin    ,zmodel    ,r(thick)  ,r(r1)     ,r(rho)    , &
+                  & densin    ,zmodel    ,r(thick)  ,r(r0)     ,r(rho)    , &
                   & r(sumrho) ,r(rhowat) ,rhosol    ,gdp       )
           call timer_stop(timer_dens, gdp)
           !
@@ -1743,8 +1828,9 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           icy = 1
           call timer_start(timer_dengra, gdp)
           call z_dengra(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
-                      & icy       ,i(kfsz1)  ,i(kfumin) ,i(kfumax) ,i(kfvmin) , &
-                      & i(kfvmax) ,r(rho)    ,r(gvu)    ,r(guv)    ,r(drhodx) , &
+                      & icy       ,i(kfsz0)  ,i(kfumin) ,i(kfumx0) ,i(kfvmin) , &
+                      & i(kfvmx0) ,i(kfu)    ,i(kfv)    , &
+                      & r(rho)    ,r(gvu)    ,r(guv)    ,r(drhodx) , &
                       & r(drhody) ,r(dzu0)   ,r(dzv0)   ,gdp       )
           call timer_stop(timer_dengra, gdp)
        endif
@@ -1759,7 +1845,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        call timer_start(timer_sousin, gdp)
        call sousin(jstart    ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
                  & lstsc     ,lsal      ,ktemp     ,ltem      ,lsts      , &
-                 & i(kfs)    ,i(kfsmin) ,i(kfsmax) ,r(gsqs)   ,r(thick)  , &
+                 & i(kfs)    ,i(kfsmin) ,i(kfsmx0) ,r(gsqs)   ,r(thick)  , &
                  & r(s0)     ,d(dps)    ,r(volum0) ,r(sour)   ,r(sink)   , &
                  & r(evap)   ,r(precip) ,r(decay)  ,i(kcs)    ,gdp       )
        call timer_stop(timer_sousin, gdp)
@@ -1786,10 +1872,10 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                 call z_disbub(kmax      ,nsrcd     ,nsrc      ,nxbub     , &
                             & lstsci    ,lstsc     ,icx       ,icy       , &
                             & ch(namsrc),i(mnksrc) , &
-                            & i(kfsmin) ,i(kfsmax) ,r(gsqs)   ,r(disinp) , &
+                            & i(kfsmin) ,i(kfsmx0) ,r(gsqs)   ,r(disinp) , &
                             & r(sour)   ,r(sink)   ,r(xcor)   ,r(ycor)   , &
                             & r(r0)     ,r(disch)  ,r(rint)   ,r(sig)    , &
-                            & r(s1)     ,d(dps)    ,ifirst    ,gdp       )
+                            & r(s0)     ,d(dps)    ,ifirst    ,gdp       )
              endif
           endif
           call timer_stop(timer_trisol_rest, gdp)
@@ -1812,15 +1898,15 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        !
        if (cdwstruct) then
           call timer_start(timer_cdwkad, gdp)
-          call cdwkad(nmmax     ,kmax      ,zmodel    ,i(kspu)   ,i(kfsmax) , &
-                    & i(kfsmin) ,i(kfumax) ,i(kfumin) ,r(sig)    ,r(thick)  , &
-                    & r(sig)    ,r(zwork)  ,r(zwork+kmax)  ,r(zwork+2*kmax) , &
-                    & r(dpu)    ,r(hu)     ,r(dzu1)   ,r(porosu) ,r(ubrlsu) , &
+          call cdwkad(nmmax     ,kmax      ,zmodel        ,i(kspu)         ,i(kfsmx0) , &
+                    & i(kfsmin) ,i(kfumx0) ,i(kfumin)     ,r(sig)          ,r(thick)  , &
+                    & r(sig)    ,r(zwork)  ,r(zwork+kmax) ,r(zwork+2*kmax) , &
+                    & r(dpu)    ,r(hu)     ,r(dzu0)       ,r(porosu)       ,r(ubrlsu) , &
                     & r(cdwztu) ,r(cdwzbu) ,r(cdwlsu) ,gdp       )
-          call cdwkad(nmmax     ,kmax      ,zmodel    ,i(kspv)   ,i(kfsmax) , &
-                    & i(kfsmin) ,i(kfvmax) ,i(kfvmin) ,r(sig)    ,r(thick)  , &
-                    & r(sig)    ,r(zwork)  ,r(zwork+kmax)  ,r(zwork+2*kmax) , &
-                    & r(dpv)    ,r(hv)     ,r(dzv1)   ,r(porosv) ,r(ubrlsv) , &
+          call cdwkad(nmmax     ,kmax      ,zmodel        ,i(kspv)         ,i(kfsmx0) , &
+                    & i(kfsmin) ,i(kfvmx0) ,i(kfvmin)     ,r(sig)          ,r(thick)  , &
+                    & r(sig)    ,r(zwork)  ,r(zwork+kmax) ,r(zwork+2*kmax) , &
+                    & r(dpv)    ,r(hv)     ,r(dzv0)       ,r(porosv)       ,r(ubrlsv) , &
                     & r(cdwztv) ,r(cdwzbv) ,r(cdwlsv) ,gdp       )
           call timer_stop(timer_cdwkad, gdp)
        endif
@@ -1841,7 +1927,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           call timer_start(timer_updbar, gdp)
           call updbar(nsluv     ,i(mnbar)  ,r(cbuv)   ,r(cbuvrt) ,nmax      , &
                     & mmax      ,kmax      ,r(thick)  ,i(kspu)   ,i(kspv)   , &
-                    & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,r(ubrlsu) , &
+                    & i(kfumin) ,i(kfumx0) ,i(kfvmin) ,i(kfvmx0) ,r(ubrlsu) , &
                     & r(ubrlsv) ,r(hu)     ,r(hv)     ,r(dpu)    ,r(dpv)    , &
                     & r(sig)    ,r(zwork)  ,gdp       )
           call timer_stop(timer_updbar, gdp)
@@ -1859,6 +1945,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                 & i(kspu)   ,i(kspv)   ,i(kadu)   ,i(kadv)   ,i(kcs)    , &
                 & i(kcu)    ,i(kcv)    ,i(kfsmin) ,i(kfsmax) ,i(kfsmx0) , &
                 & i(kfumin) ,i(kfumax) ,i(kfumx0) ,i(kfvmin) ,i(kfvmax) , &
+                & i(kfuz0)  ,i(kfvz0)  ,i(kfsz0)  , &
                 & i(kfvmx0) ,i(kfuz1)  ,i(kfvz1)  ,i(kfsz1)  ,i(kcu45)  , &
                 & i(kcv45)  ,i(kcscut) ,r(porosu) ,r(porosv) ,r(areau)  , &
                 & r(areav)  ,r(volum1) ,r(s0)     ,r(s1)     ,r(w1)     , &
@@ -1868,7 +1955,9 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                 & r(dzv0)   ,r(dzs0)   ,r(dzu1)   ,r(dzv1)   ,r(dzs1)   , &
                 & r(qxk)    ,r(qyk)    ,r(qzk)    ,r(evap)   ,r(circ2d) , &
                 & r(circ3d) ,r(drhodx) ,r(drhody) ,r(disch)  ,r(umdis)  , &
-                & r(vmdis)  ,r(wsu)    ,r(wsv)    ,r(gud)    ,r(gvd)    , &
+                & r(vmdis)  ,r(wsu)    ,r(wsv)    ,r(dfu)    ,r(dfv)    , &
+                & r(deltau) ,r(deltav) ,r(tp)     ,r(rlabda) ,r(wsbodyu), &
+                & r(wsbodyv),r(fxw)    ,r(fyw)    ,r(gud)    ,r(gvd)    , &
                 & r(guu)    ,r(guv)    ,r(gvv)    ,r(gvu)    ,r(guz)    , &
                 & r(gvz)    ,r(gsqs)   ,r(gsqiu)  ,r(gsqiv)  ,r(taubpu) , &
                 & r(taubpv) ,r(taubsu) ,r(taubsv) ,r(vicuv)  ,r(vnu2d)  , &
@@ -1880,8 +1969,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                 & r(wrkb7)  ,r(wrkb8)  ,r(wrkb9)  ,r(wrkb10) ,r(sig)    , &
                 & r(p0)     ,r(crbc)   ,r(hu0)    ,r(hv0)    ,r(wrkb11) , &
                 & r(wrkb12) ,r(wrkb13) ,r(wrkb14) ,r(pship)  ,r(diapl)  , &
-                & r(rnpl)   ,sbkol     ,r(cfurou) ,r(cfvrou) ,r(precip) , &
-                & gdp       )
+                & r(rnpl)   ,sbkol     ,r(cfurou) ,r(cfvrou) ,r(r0)     , &
+                & lstsci    ,r(precip)  ,gdp       )
        call timer_stop(timer_2ndadi, gdp)
        !
        ! Calculate tau_bottom values using local values for HU and HV
@@ -1894,19 +1983,50 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        ! CVALU0 and CVALV0 contain the actual 2D-chezy value
        ! to be used in detvic
        !
+       ! Adapt velocities U1 and V1 for mass fluxes due to waves
+       !
        icx = nmaxddb
        icy = 1
+       call timer_start(timer_euler, gdp)
+       call euler(jstart    ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
+                & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumax) , &
+                & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
+                & r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
+                & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
+                & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   ,r(grmsur) , &
+                & r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
+       call timer_stop(timer_euler, gdp)
+       !
+       ! Update bed shear stress in U-direction
+       !
        call timer_start(timer_taubot, gdp)
+       icx = nmaxddb
+       icy = 1
        call taubot(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                  & icy       ,rouflo    ,rouwav    ,i(kfu)    ,i(kfv)    , &
                  & i(kfumin) ,i(kfumax) ,i(kspu)   ,i(kcs)    ,i(kcscut) , &
-                 & d(dps)    ,r(s1)     ,r(u1)     ,r(v1)     ,r(umean)  , &
+                 & d(dps)    ,r(s1)     ,r(wrkb3)  ,r(wrkb4)  , &
                  & r(guu)    ,r(xcor)   ,r(ycor)   ,r(rho)    , &
                  & r(taubpu) ,r(taubsu) ,r(wrka1)  ,r(dis)    ,r(rlabda) , &
                  & r(teta)   ,r(uorb)   ,r(tp)     ,r(wsu)    ,r(wsv)    , &
                  & r(grmasu) ,r(dfu)    ,r(deltau) ,r(hrms)   , &
                  & r(cfurou) ,r(z0urou) ,r(hu)     ,r(dzu1)   ,r(sig)    , &
                  & r(z0ucur) ,r(cvalu0) ,r(grmsur) ,r(grfacu) ,gdp       )
+       !
+       ! Update bed shear stress in V-direction
+       !
+       icx = 1
+       icy = nmaxddb
+       call taubot(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
+                 & icy       ,rouflo    ,rouwav    ,i(kfv)    ,i(kfu)    , &
+                 & i(kfvmin) ,i(kfvmax) ,i(kspv)   ,i(kcs)    ,i(kcscut) , &
+                 & d(dps)    ,r(s1)     ,r(wrkb4)  ,r(wrkb3)  , &
+                 & r(gvv)    ,r(ycor)   ,r(xcor)   ,r(rho)    , &
+                 & r(taubpv) ,r(taubsv) ,r(wrka2)  ,r(dis)    ,r(rlabda) , &
+                 & r(teta)   ,r(uorb)   ,r(tp)     ,r(wsv)    ,r(wsu)    , &
+                 & r(grmasv) ,r(dfv)    ,r(deltav) ,r(hrms)   , &
+                 & r(cfvrou) ,r(z0vrou) ,r(hv)     ,r(dzv1)   ,r(sig)    , &
+                 & r(z0vcur) ,r(cvalv0) ,r(grmsvr) ,r(grfacv) ,gdp       )
        call timer_stop(timer_taubot, gdp)
        !
        icx = nmaxddb
@@ -1982,7 +2102,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           call timer_start(timer_heatu, gdp)
           call heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                    & ltem      ,lstsci    ,icx       ,icy       , &
-                   & nmmax     ,kmax      ,i(kfs)    ,i(kfsmx0) , &
+                   & nmmax     ,kmax      ,i(kfs)    ,i(kfsmx0) ,i(kfsmax) , &
                    & i(kfsmin) ,i(kspu)   ,i(kspv)   ,r(dzs0)   ,r(dzs1)   , &
                    & r(sour)   ,r(sink)   ,r(r0)     ,r(evap)   ,d(dps)    , &
                    & r(s0)     ,r(s1)     ,r(thick)  ,r(w10mag) ,r(patm)   , &
@@ -2028,29 +2148,33 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           call timer_start(timer_tritra, gdp)
           call timer_start(timer_2nddifu, gdp)
           call z_difu(lundia    ,nst       ,icx       ,icy       ,jstart    , &
-                    & nmmaxj    ,nmmax     ,kmax      ,lstsci    ,nocol     , &
-                    & i(irocol + 5*norow)  ,i(kcs)    ,i(kcv)    ,i(kfs)    , &
+                    & nmmaxj    ,nmmax     ,kmax      ,lstsci    ,nocol     ,norow     , &
+                    & i(irocol + 5*norow)  ,i(kcs)    ,i(kcv)    ,i(kcu)    ,i(kfs)    , &
                     & i(kfsmin) ,i(kfsmax) ,i(kfsmx0) ,i(kfvmin) ,i(kfvmx0) , &
-                    & i(kfumin) ,i(kfumx0) ,i(kfsz1)  ,i(kfvz1)  ,i(kfuz1)  , &
-                    & r(qyk)    ,r(qxk)    ,r(qzk)    ,r(v1)     ,r(u1)     , &
+                    & i(kfvmax) ,i(kfumin) ,i(kfumx0) ,i(kfumax) , &
+                    & i(kfsz0)  ,i(kfvz0)  ,i(kfuz0)  ,i(kfv)    ,i(kfu)    , &
+                    & i(kfsz1)  ,i(kfvz1)  ,i(kfuz1)  , &
+                    & r(qyk)    ,r(qxk)    ,r(qzk)    ,r(v0)     ,r(u0)     , &
                     & r(gvu)    ,r(guv)    ,r(gsqs)   ,r(rbnd + kmax*lstsc*2*norow)    ,r(sigdif) , &
-                    & r(sigmol) ,r(dicuv)  ,r(dicww)  ,r(r0)     ,r(r1)     , &
+                    & r(sigmol) ,r(dicuv)  ,r(vicww)  ,r(r0)     ,r(r1)     , &
                     & r(sour)   ,r(sink)   ,r(wrkb1)  ,r(wrkb2)  ,r(wrkb3)  , &
                     & r(wrkb5)  ,r(wrkb6)  ,r(wrkb7)  ,r(wrkb8)  ,r(wrkb13) , &
-                    & r(wrkb14) ,r(wrkb18) , &
-                    & r(wrkc1)  ,r(wrkc2)  ,r(wrkc3)  ,r(wrkc4)  ,r(dzs0)   ,r(dzs1)   , &
-                    & r(dzv0)   ,r(dzu0)   ,r(areav)  ,r(areau)  ,r(volum0) , &
-                    & r(volum1) ,r(gvv)    ,r(guu)    ,r(bruvai) ,r(rho)    , &
-                    & r(s1)     ,d(dps)    ,ltem      ,gdp       )
+                    & r(wrkb14) ,r(wrkb18) ,r(dzv1)   ,r(dzu1)   , &
+                    & r(wrkc1)  ,r(wrkc2)  ,r(wrkc3)  ,r(wrkc4)  ,r(dzs1)   , &
+                    & r(areav)  ,r(areau)  ,r(volum0) , &
+                    & r(volum1) ,r(gvv)    ,r(guu)    ,r(bruvai) , &
+                    & ltem      ,gdp       )
           !
           ! z_difu can be called again for correction
           !
           call timer_stop(timer_2nddifu, gdp)
           call z_difuflux(stage  ,lundia ,kmax      ,nmmax     ,nmmaxj    , &
-                  & lstsci    ,r(r0)     ,r(qyk)    ,r(qxk)    , &
+                  & lstsci    ,r(r0)     ,r(r1)     ,r(qyk)    ,r(qxk)    , &
                   & r(v0)     ,r(u0)     ,&
                   & r(dicuv)  ,r(gvu)    ,r(guv)    ,r(areav)  ,r(areau)  , &
                   & i(kfvz1)  ,i(kfuz1)  ,i(kfsz1)  ,i(kcs)    ,i(kfs)    , &
+                  & i(kfv)    ,i(kfvz0)  ,i(kfu)    ,i(kfuz0)  ,&
+                  & i(kfsmx0) ,i(kfsmax) ,i(kfsz0)  ,&
                   & i(kfvmin) ,i(kfvmx0) ,i(kfumin) ,i(kfumx0) ,r(sigdif) , &
                   & hdt       ,icx       ,icy       ,gdp       )
           call timer_stop(timer_tritra, gdp)
@@ -2073,7 +2197,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                       & r(sig)    ,r(guu)    ,r(gvv)    ,r(guv)    ,r(gvu)    , &
                       & r(vicww)  ,r(dicww)  ,r(cfurou) ,r(cfvrou) ,r(z0urou) , &
                       & r(z0vrou) ,r(windsu) ,r(windsv) ,r(bruvai) ,r(dudz)   , &
-                      & r(dvdz)   ,r(tkepro) ,r(tkedis) ,r(deltau) ,r(dfu)    , &
+                      & r(dvdz)   ,r(tkepro) ,r(tkedis) ,r(deltau) ,r(deltav) ,r(dfu)    , &
                       & r(dfv)    ,r(dis)    ,r(hrms)   ,r(uorb)   ,r(tp)     , &
                       & r(wrkb1)  ,r(wrkb2)  ,r(wrkb3)  ,r(wrkb4)  ,r(wrkb6)  , &
                       & r(wrkb7)  ,r(wrkb8)  ,r(wrkb9)  ,r(wrkb10) ,r(wrkb11) , &
@@ -2203,16 +2327,16 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           call z_drychk(itemp     ,jstart    ,nmmaxj    ,nmmax     ,kmax      , &
                       & nfltyp    ,icx       ,icy       ,i(kfu)    ,i(kfv)    , &
                       & i(kfs)    ,i(kcs)    ,i(kfuz1)  ,i(kfvz1)  ,i(kfsz1)  , &
-                      & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,i(kfsmin) , &
-                      & i(kfsmax) ,i(kfsmx0) ,r(s1)     ,r(s0)     ,d(dps)    , &
-                      & r(qxk)    ,r(qyk)    ,r(w1)     ,r(dzu1)   ,r(dzv1)   , &
-                      & r(dzs1)   ,r(sig)    ,gdp       )
+                      & i(kfsmin) ,i(kfsmax) ,i(kfsmx0) ,r(s1)     ,r(r1)     , &
+                      & d(dps)    ,r(qxk)    ,r(qyk)    ,r(w1)     ,lstsci    , &
+                      & r(dzs1)   ,r(sig)    ,nst       ,gdp       )
           !
           ! Re-Compute Volume (Areas actually need no update) to be used in routines that computes 
           ! the transport of matter (consistency with WAQ)
           !
-          call z_updtvol(nmmax     ,kmax      ,i(kcs)    , r(gsqs)   ,r(dzs1)   , &
-                       & r(volum1) ,gdp       ) 
+          call z_updtvol(nmmax     ,kmax      ,i(kcs)    ,i(kcu)    ,i(kcv)    , &
+                       & r(gsqs)   ,r(dzs1)   ,r(dzu0)   ,r(dzv0)   , &
+                       & r(volum1) ,r(areau)  ,r(areav)  ,gdp       )
           call timer_stop(timer_nonhyd, gdp)
        endif
        !
@@ -2220,16 +2344,30 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                     & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
                     & nsrc      ,r(disch)  ,gdp       )
        !
+       ! Check Courant numbers for U and V velocities in V-points
+       ! Check in U-points is done only after first half ADI-step
+       ! Check is done based upon old geometry (corresponding to S0)
+       !
+       icx = 1
+       icy = nmaxddb
+       call z_chkadv(lundia    ,nmmax     ,kmax      ,icx       , &
+                   & icy       ,i(kfv)    ,i(kfvz0)  ,i(kfuz0)  , &
+                   & r(gvv)    ,r(guv)    ,r(v0)     ,r(u0)     , &
+                   & i(kfvmx0) ,i(kfvmin) ,r(dzv0)   ,r(dzs0)   , &
+                   & nst       ,i(kcs)    ,gdp       )
+       !
        ! Reset arrays for next half time step
        ! S0=S1, U0=U1, V0=V1, R0=R1 etc
        !
        call timer_start(timer_f0isf1, gdp)
-       call f0isf1(dischy    ,nst       ,zmodel    ,jstart    , &
+       call f0isf1(stage     ,dischy    ,nst       ,zmodel    ,jstart    , &
                  & nmmax     ,nmmaxj    ,nmax      ,kmax      ,lstsci    , &
                  & ltur      ,nsrc      ,i(kcu)    ,i(kcv)    ,i(kcs)    , &
                  & i(kfs)    ,i(kfu)    ,i(kfv)    ,i(kfsmin) ,i(kfsmax) , &
                  & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,i(kfsmx0) , &
-                 & i(kfumx0) ,i(kfvmx0) ,r(s0)     ,r(s1)     ,r(u0)     , &
+                 & i(kfumx0) ,i(kfvmx0) ,i(kfsz0)  ,i(kfuz0)  ,i(kfvz0)  , &
+                 & i(kfsz1)  ,i(kfuz1)  ,i(kfvz1)  , &
+                 & r(s0)     ,r(s1)     ,r(u0)     , &
                  & r(u1)     ,r(v0)     ,r(v1)     ,r(volum0) ,r(volum1) , &
                  & r(r0)     ,r(r1)     ,r(rtur0)  ,r(rtur1)  ,r(disch)  , &
                  & r(discum) ,r(hu)     ,r(hv)     ,r(dzu1)   ,r(dzv1)   , &
@@ -2244,7 +2382,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     !
     if (rtcact) then
        call rtc_comm_put(i(kfs)    ,i(kfsmin) ,i(kfsmax) ,r(sig)    , &
-                       & r(sig)    ,r(s1)     ,d(dps)    ,r(r0)     , &
+                       & r(sig)    ,r(s1)     ,d(dps)    ,r(r1)     , &
                        & gdp)
     endif
     if (sbkol) then

@@ -52,8 +52,8 @@ module swan_flow_grid_maps
        integer                            :: nmax            ! number of rows
        integer                            :: kmax            ! number of layers
        integer                            :: npts            ! number of points
-       integer, dimension(:,:), pointer   :: kcs             ! mask-arrray inactive points
-       integer, dimension(:,:), pointer   :: covered         ! mask-arrray points covered by "other" program
+       integer, dimension(:,:), pointer   :: kcs             ! mask-array inactive points
+       integer, dimension(:,:), pointer   :: covered         ! mask-array points covered by "other" program
        real                               :: xymiss          ! missing value
        real(kind=hp), dimension(:,:), pointer   :: x         ! x-coordinates cell center
        real(kind=hp), dimension(:,:), pointer   :: y         ! y-coordinates cell center
@@ -65,6 +65,7 @@ module swan_flow_grid_maps
        character (37)                     :: tmp_name        ! temporary filename
        character (4)                      :: grid_file_type  ! type of grid file (SWAN/FLOW/COM/TRIM)
        character (6)                      :: xy_loc          ! location of xy coords (CORNER/CENTER)
+       character (16)                     :: layer_model     ! Vertical layering type: "Sigma-model" or "Z-model"
     end type   grid
     !
     type input_fields
@@ -98,9 +99,11 @@ module swan_flow_grid_maps
        real, dimension(:,:), pointer      :: depth           !
        real, dimension(:,:), pointer      :: fx              !
        real, dimension(:,:), pointer      :: fy              !
+       real, dimension(:,:), pointer      :: wsbodyu         !
+       real, dimension(:,:), pointer      :: wsbodyv         !
        real, dimension(:,:), pointer      :: mx              !
        real, dimension(:,:), pointer      :: my              !
-       real, dimension(:,:), pointer      :: dissip          !
+       real, dimension(:,:,:), pointer    :: dissip          !
        real, dimension(:,:), pointer      :: ubot            !
        real, dimension(:,:), pointer      :: steep           !
        real, dimension(:,:), pointer      :: wlen            !
@@ -179,7 +182,8 @@ subroutine alloc_and_get_grid(g,grid_name,grid_file_type,xy_loc)
          ! read data from com-file
          !
          call get_gri(g%grid_name ,g%x   ,g%y      ,g%guu  ,g%gvv , &
-             &        g%alfas     ,g%kcs ,g%covered,g%mmax ,g%nmax,g%kmax, g%xymiss  )
+             &        g%alfas     ,g%kcs    ,g%covered     ,g%mmax ,g%nmax, &
+             &        g%kmax      ,g%xymiss ,g%layer_model )
          !
          ! In case of DomainDecomposition, some adaptions are necessary
          !
@@ -448,6 +452,8 @@ subroutine dealloc_output_fields (outfld)
    deallocate (outfld%depth , stat=ierr)
    deallocate (outfld%fx    , stat=ierr)
    deallocate (outfld%fy    , stat=ierr)
+   deallocate (outfld%wsbodyu, stat=ierr)
+   deallocate (outfld%wsbodyv, stat=ierr)
    deallocate (outfld%mx    , stat=ierr)
    deallocate (outfld%my    , stat=ierr)
    deallocate (outfld%dissip, stat=ierr)
@@ -503,9 +509,11 @@ subroutine alloc_output_fields (g,outfld)
    allocate (outfld%depth (outfld%mmax,outfld%nmax))
    allocate (outfld%fx    (outfld%mmax,outfld%nmax))
    allocate (outfld%fy    (outfld%mmax,outfld%nmax))
+   allocate (outfld%wsbodyu(outfld%mmax,outfld%nmax))
+   allocate (outfld%wsbodyv(outfld%mmax,outfld%nmax))
    allocate (outfld%mx    (outfld%mmax,outfld%nmax))
    allocate (outfld%my    (outfld%mmax,outfld%nmax))
-   allocate (outfld%dissip(outfld%mmax,outfld%nmax))
+   allocate (outfld%dissip(outfld%mmax,outfld%nmax,4))
    allocate (outfld%ubot  (outfld%mmax,outfld%nmax))
    allocate (outfld%steep (outfld%mmax,outfld%nmax))
    allocate (outfld%wlen  (outfld%mmax,outfld%nmax))
@@ -543,6 +551,8 @@ subroutine alloc_output_fields (g,outfld)
    outfld%depth   = 0.
    outfld%fx      = 0.
    outfld%fy      = 0.
+   outfld%wsbodyu = 0.
+   outfld%wsbodyv = 0.
    outfld%mx      = 0.
    outfld%my      = 0.
    outfld%dissip  = 0.

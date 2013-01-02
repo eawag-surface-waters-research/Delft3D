@@ -28,8 +28,11 @@
 !  $HeadURL$$
 !-------------------------------------------------------------------------------
 type flwoutputtype
+    integer :: cntcflmsg           ! Counter of number of warnings concerning high advective Courant numbers
+    integer :: maxcflmsg           ! Maximum number of warnings concerning high advective Courant numbers
     logical :: air
     logical :: addtim              ! Flag for additional timings output
+    logical :: cflmsg              ! Flag for always writing warnings concerning high advective Courant numbers
     logical :: chezy
     logical :: cumdifuflux
     logical :: difuflux

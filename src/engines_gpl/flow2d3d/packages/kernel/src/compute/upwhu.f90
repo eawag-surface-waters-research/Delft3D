@@ -104,7 +104,7 @@ subroutine upwhu(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     !             number in rapidly varied shallow water flows"; by
     !             GS Stelling and SPA Duijnmeijer
     !
-    if (dpuopt=='UPW') then
+    if (dpuopt=='UPW' .and. momsol /= 'finvol') then
        do nm = 1, nmmax
           nmu = nm + icx
           if (kcu(nm)==1) then
@@ -139,27 +139,20 @@ subroutine upwhu(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     !
     do nm = 1, nmmax
        nmu = nm + icx
-       if (zmodel) then
-          if (nonhyd .and. nh_level==nh_full) then
+       if (.not. zmodel) then
             hu(nm) = 0.5*(s0(nm) + s0(nmu)) + dpu(nm)
-          else
-            hu(nm) = max(s0(nmu), s0(nm)) + dpu(nm)
-          endif
-       else
-          hu(nm) = 0.5*(s0(nm) + s0(nmu)) + dpu(nm)
        endif
        if (kcu(nm) == 1) then
-          if (hu(nm)<dco .or. kspu(nm, 0)>0 .or. dpuopt=='UPW' .or. zmodel) then
-             if (nonhyd .and. nh_level==nh_full) then
-                hu(nm) = 0.5*(s0(nm) + s0(nmu)) + dpu(nm)
+          if ( hu(nm) < dco    .or. &
+             & kspu(nm, 0) > 0 .or. &
+             & dpuopt == 'UPW' .or. &
+             & zmodel               ) then
+             if (umean(nm) > 0.001_fp) then
+                hu(nm) = s0(nm) + dpu(nm)
+             elseif (umean(nm) <= -0.001) then
+                hu(nm) = s0(nmu) + dpu(nm)
              else
-                if (umean(nm)>=0.001) then
-                   hu(nm) = s0(nm) + dpu(nm)
-                elseif (umean(nm)<= - 0.001) then
-                   hu(nm) = s0(nmu) + dpu(nm)
-                else
-                   hu(nm) = max(s0(nmu), s0(nm)) + dpu(nm)
-                endif
+                hu(nm) = max(s0(nmu), s0(nm)) + dpu(nm)
              endif
           endif
           !

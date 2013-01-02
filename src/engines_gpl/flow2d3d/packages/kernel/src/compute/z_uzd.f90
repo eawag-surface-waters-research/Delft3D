@@ -1,19 +1,23 @@
 subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                & icy       ,nsrc      ,kcs       ,kcs45     ,kcscut    , &
-               & kcu       ,kfu       ,kfuz1     ,kfumin    ,kfumax    , &
-               & kfv       ,kfvz1     ,kfs       ,kfsz1     ,kfsmin    , kfsmax    , &
-               & u0        ,v1        ,w1        ,hu        ,dzu1      , &
+               & kcu       ,kfu       ,kfuz0     ,kfumin    ,kfumx0    , &
+               & kfv       ,kfvz0     ,kfvmin    ,kfvmx0    ,dzv0      , &
+               & kfs       ,kfsz0     ,kfsmin    ,kfsmx0    , &
+               & u0        ,v0        ,w0        ,hu        ,dzu0      ,dzs0      , &
                & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
                & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
                & disch     ,umdis     ,kspu      ,mnksrc    ,dismmt    , &
                & aak       ,bbk       ,cck       ,ddk       ,bdx       , &
-               & bux       ,bdy       ,buy       , &
-               & vicuv     ,vnu2d     ,vicww     ,tgfsep    , &
+               & bux       ,bdy       ,buy       ,buxuy     ,buxdy     , & 
+               & bdxuy     ,bdxdy     ,uvdwk     ,vvdwk     ,circ2d    ,circ3d    , &
+               & vicuv     ,vnu2d     ,vicww     ,tgfsep    ,dps       , &
+               & dfu       ,deltau    ,tp        ,rlabda    ,fxw       ,wsbodyu   , &
                & drhodx    ,wsu       ,taubpu    ,taubsu    ,rxx       , &
                & rxy       ,windu     ,patm      ,fcorio    ,p0        , &
-               & ubrlsu    ,pship     ,diapl     ,rnpl      ,nst       , &
-               & u1        ,s0        ,cfurou    ,uvdwk     ,vvdwk     , &
-               & norow     ,irocol    ,gdp       )
+               & ubrlsu    ,pship     ,diapl     ,rnpl      ,cfurou    , &
+               & u1        ,s0        ,dpu       ,qxk       ,qyk       , &
+               & norow     ,nocol     ,irocol    ,nst       ,umean     , &
+               & crbc      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -44,21 +48,32 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-! This subroutine evaluates/solves at each half time
-! step the momentum equation with implicit advection
-! approximation, and implicit diffusion in the ver-
-! tical direction.
+! This subroutine evaluates/solves the horizontal momentum equation for a Z-layer
+! vertical grid. It is called at each half time step for the case of a
+! hydrostatic flow model or in the prediction step of the full non-hydrostatic method
+! (full time step).
+! For the spatial and temporal dsicretisation there are different options.
 ! Reference : A.O.I. - scheme (G.S. Stelling and
 ! J.J. Leendertse, Approximation of Convective
 ! Processes by Cyclic AOI Methods, Proceedings,
 ! ASCE Conference, Tampa, 1991).
-! - Horizontal Advection: depending on the flag MOMSOL. Options: 
-!    implicit, upwind scheme (IUPW)
-!    explicit, multi-directional upwind (MDUE)
 !
-! - Horizontal Diffusion:                explicit, along Z-planes
-! - Vertical Advection :                 implicit, central scheme
-! - Vertical Diffusion :                 implicit
+! Z_UZD has the following options in the evaluation: 
+!
+! For the horizontal advection:
+! - Horizontal Advection: depending on the flag MOMSOL. Options: 
+!    implicit, upwind scheme            (IUPW)
+!    explicit, multi-directional upwind (MDUE)
+!    implicit, multi-directional upwind (MDUI)
+!    explicit, finite volume approach, conservation of momentum (FINVOL)
+!    explicit, combination of conservation of momentum and energy following
+!              Stelling and Duinmeyer   (FLOOD)
+! The vertical viscosity term is integrated implicitly
+! - Horizontal Viscosity is integrated implicitly, along Z-planes
+! - Vertical Advection is integrated with a flux formulation:
+!              implicitly, central scheme 
+!              explicitly, flux formulation
+! - Vertical viscosity is always integrated implicitly.
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
@@ -94,7 +109,11 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     logical                , pointer :: wind
     logical                , pointer :: wave
     logical                , pointer :: roller
+    logical                , pointer :: xbeach
     logical                , pointer :: dpmveg
+    integer                , pointer :: nh_level
+    logical                , pointer :: nonhyd
+    real(fp)               , pointer :: dzmin
 !
 ! Global variables
 !
@@ -110,24 +129,36 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     integer                                                 , intent(in) :: nsrc   !  Description and declaration in esm_alloc_int.f90
     integer                                                 , intent(in) :: nst    !!  Time step number
     integer     , dimension(7, nsrc)                        , intent(in) :: mnksrc !  Description and declaration in esm_alloc_int.f90
+    integer                                                              :: nocol  !  Description and declaration in esm_alloc_int.f90
     integer                                                              :: norow  !  Description and declaration in esm_alloc_int.f90
     integer     , dimension(5, norow)                                    :: irocol !  Description and declaration in esm_alloc_int.f90
     integer     , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: kcs    !  Description and declaration in esm_alloc_int.f90
     integer     , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: kfs    !  Description and declaration in esm_alloc_int.f90
-    integer     , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in) :: kfsmax !  Description and declaration in esm_alloc_int.f90
     integer     , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in) :: kfsmin !  Description and declaration in esm_alloc_int.f90
+    integer     , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in) :: kfsmx0 !  Description and declaration in esm_alloc_int.f90
     integer     , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: kfu    !  Description and declaration in esm_alloc_int.f90
-    integer     , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: kfumax !  Description and declaration in esm_alloc_int.f90
     integer     , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: kfumin !  Description and declaration in esm_alloc_int.f90
+    integer     , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: kfumx0 !  Description and declaration in esm_alloc_int.f90
+    integer     , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: kfvmin !  Description and declaration in esm_alloc_int.f90
+    integer     , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: kfvmx0 !  Description and declaration in esm_alloc_int.f90
     integer     , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: kfv    !  Description and declaration in esm_alloc_int.f90
     integer     , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)  , intent(in) :: kspu   !  Description and declaration in esm_alloc_int.f90
     integer     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                 :: kcs45
     integer     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)    , intent(in) :: kcscut !  Description and declaration in esm_alloc_int.f90
-    integer     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                 :: kfsz1  !  Description and declaration in esm_alloc_int.f90
     integer     , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: kcu    !  Description and declaration in esm_alloc_int.f90
-    integer     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                 :: kfuz1  !  Description and declaration in esm_alloc_int.f90
-    integer     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                 :: kfvz1  !  Description and declaration in esm_alloc_int.f90
+    integer     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                 :: kfsz0  !  Description and declaration in esm_alloc_int.f90
+    integer     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                 :: kfuz0  !  Description and declaration in esm_alloc_int.f90
+    integer     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                 :: kfvz0  !  Description and declaration in esm_alloc_int.f90
+    real(fp)    , dimension(4, norow)                                    :: circ2d !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(kmax, 2, norow)                              :: circ3d !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, 3)                    :: cfurou !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(12, norow)                                   :: crbc   !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: deltau !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: dfu    !  Description and declaration in esm_alloc_real.f90
+    real(prec)  , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in) :: dps    !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: dpu    !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in) :: fcorio !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: fxw    !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in) :: gsqiu  !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in) :: gsqs   !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: gud    !  Description and declaration in esm_alloc_real.f90
@@ -141,15 +172,19 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in) :: hu     !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in) :: patm   !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in) :: pship  !  Description and declaration in esm_alloc_real.f90
-    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, 3)                    :: cfurou !  Description and declaration in esm_alloc_real.f90    
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: rlabda !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: s0     !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: taubpu !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in) :: taubsu !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in) :: tgfsep !!  Water elevation induced by tide generating forces
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: tp     !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: umean  !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: vnu2d  !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in) :: windu  !  Description and declaration in esm_alloc_real.f90
-    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in) :: wsu    !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: wsu    !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: wsbodyu !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)  , intent(in) :: vicww  !  Description and declaration in esm_alloc_real.f90
-    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)  , intent(in) :: w1     !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)  , intent(in) :: w0     !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax + 2)             :: vicuv  !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                 :: aak    !!  Internal work array, lower diagonal tridiagonal matrix, implicit coupling
                                                                                    !!  of layer velocity in (N,M,K) with layer velocity in (N,M,K-1)
@@ -166,22 +201,33 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                                                                                    !!  with layer velocity in (N,M+1,K)
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                 :: buy    !!  Internal work array, implicit coupling of layer velocity in (N,M,K)
                                                                                    !!  with layer velocity in (N+1,M,K)
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                 :: buxuy  !!  Internal work array, implicit coupling of layer velocity in (N,M,K)
+                                                                                   !!  with layer velocity in (N+1,M+1,K)
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                 :: buxdy  !!  Internal work array, implicit coupling of layer velocity in (N,M,K)
+                                                                                   !!  with layer velocity in (N-1,M+1,K)
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                 :: bdxuy  !!  Internal work array, implicit coupling of layer velocity in (N,M,K)
+                                                                                   !!  with layer velocity in (N+1,M-1,K)
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                 :: bdxdy  !!  Internal work array, implicit coupling of layer velocity in (N,M,K)
+                                                                                   !!  with layer velocity in (N-1,M-1,K)
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                 :: diapl  !  Description and declaration in esm_alloc_real.f90
-    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)    , intent(in) :: dzu1   !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)    , intent(in) :: drhodx !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)    , intent(in) :: dzs0   !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)    , intent(in) :: dzu0   !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)    , intent(in) :: dzv0   !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)    , intent(in) :: p0     !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                 :: qxk    !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                 :: qyk    !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                 :: rnpl   !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                 :: rxx    !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                 :: rxy    !  Description and declaration in esm_alloc_real.f90
-    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: s0     !  Description and declaration in esm_alloc_real.f90
-    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)    , intent(in) :: drhodx !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                 :: u0     !  Description and declaration in esm_alloc_real.f90
-    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)    , intent(in) :: ubrlsu !  Description and declaration in esm_alloc_real.f90
-    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                 :: v1     !  Description and declaration in esm_alloc_real.f90
-    real(fp)    , dimension(nsrc)                           , intent(in) :: disch  !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                 :: u1     !  Description and declaration in esm_alloc_real.f90
-    real(fp)    , dimension(nsrc)                           , intent(in) :: umdis  !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)    , intent(in) :: ubrlsu !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                 :: v0     !  Description and declaration in esm_alloc_real.f90
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                 :: uvdwk  !!  Internal work array for Jac.iteration
     real(fp)    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                 :: vvdwk  !!  Internal work array for Jac.iteration
+    real(fp)    , dimension(nsrc)                           , intent(in) :: disch  !  Description and declaration in esm_alloc_real.f90
+    real(fp)    , dimension(nsrc)                           , intent(in) :: umdis  !  Description and declaration in esm_alloc_real.f90
     character(1), dimension(nsrc)                           , intent(in) :: dismmt !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
@@ -231,6 +277,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)           :: adza
     real(fp)           :: adzb
     real(fp)           :: adzc
+    real(fp)           :: area
     real(fp)           :: bdmwrp
     real(fp)           :: bdmwrs
     real(fp)           :: bi
@@ -245,12 +292,14 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)           :: ddzc
     real(fp)           :: dgeta
     real(fp)           :: dgvnm
+    real(fp)           :: dpsmax
     real(fp)           :: dux
     real(fp)           :: duy
     real(fp)           :: dz
     real(fp)           :: dzdo
     real(fp)           :: dzup
     real(fp)           :: eps1
+    real(fp)           :: facmax
     real(fp)           :: ff
     real(fp)           :: geta
     real(fp)           :: getad
@@ -259,10 +308,13 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)           :: gksid
     real(fp)           :: gksiu
     real(fp)           :: gsqi
+    real(fp)           :: hnm
+    real(fp)           :: htrsh
     real(fp)           :: hugsqs  ! HU(NM/NMD) * GSQS(NM) Depending on UMDIS the HU of point NM or NMD will be used 
     real(fp)           :: qwind
     real(fp), external :: redvic
     real(fp)           :: smax
+    real(fp)           :: thvert     ! theta coefficient for vertical advection terms
     real(fp)           :: timest
     real(fp)           :: uuu
     real(fp)           :: uweir
@@ -271,6 +323,8 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)           :: viznmd
     real(fp)           :: vvv
     real(fp)           :: www
+    real(fp)           :: wavg0
+    real(fp)           :: wsumax
     real(fp)           :: zz
     character(20)      :: errtxt
 !
@@ -294,17 +348,62 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     wind       => gdp%gdprocs%wind
     wave       => gdp%gdprocs%wave
     roller     => gdp%gdprocs%roller
+    xbeach     => gdp%gdprocs%xbeach
     dpmveg     => gdp%gdprocs%dpmveg
     dpsopt     => gdp%gdnumeco%dpsopt
+    nh_level   => gdp%gdnonhyd%nh_level
+    nonhyd     => gdp%gdprocs%nonhyd
+    dzmin      => gdp%gdzmodel%dzmin
     !
-    if (momsol == 'iupw  ') then
+    htrsh = 0.5_fp*dryflc
+    !
+    ! Flag for vertical advection set to 1.0 by default = Central implicit discretisation of 
+    ! advection in vertical (0.0 means 1st order upwind explicit)
+    ! 
+    thvert = 1.0_fp
+    !
+    ! Determine umean again based on the velocities in the whole water column
+    ! instead of only the velocities in the top layer(s) as in z_checku
+    !
+    ! needed in z_hormom_fls and in z_cucbp_nhfull for alpha-coefficient on open boundary
+    !
+    umean = 0.0_fp
+    do nm = 1, nmmax
+       if (kfu(nm) == 1) then
+          hnm = 0.0_fp
+          do k = kfumin(nm), kfumx0(nm)
+             umean(nm) = umean(nm) + u0(nm,k)*dzu0(nm,k)
+             hnm       = hnm + dzu0(nm,k)
+          enddo
+          umean(nm) = umean(nm) / max(hnm, 0.01_fp)
+       else
+       endif
+    enddo
+    !
+    if (momsol /= 'mdue  ' .or. (nonhyd .and. nh_level == nh_full) ) then
        !
-       ! Implicit upwind method (first order) for horizontal advection
+       ! Horizontal momentum using either ADI-scheme or in a fully non-hydrostatic computation
        !
        call timer_start(timer_uzd_ini, gdp)
        ddb      = gdp%d%ddbound
        icxy     = max(icx, icy)
-       timest   = hdt
+       if (nonhyd .and. nh_level == nh_full) then
+          !
+          ! Fully non-hydrostatic mode: one whole timestep
+          !
+          timest = 2.0_fp * hdt
+       else
+          !
+          ! Hydrostatic mode (ADI): half a time step
+          !
+          timest = hdt
+       endif
+       !
+       !
+       ! factor in maximum wave force 1/4 alpha rho g gammax**2 h**2 / tp /(sqrt(g h)
+       ! = facmax * h**1.5/tp
+       !
+       facmax = 0.25_fp*sqrt(ag)*rhow*gammax**2
        !
        if (icx==1) then
           ff = -1.0_fp
@@ -323,6 +422,10 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        bdy  = 0.0_fp
        bux  = 0.0_fp
        buy  = 0.0_fp
+       bdxuy= 0.0_fp
+       bdxdy= 0.0_fp
+       buxuy= 0.0_fp
+       buxdy= 0.0_fp
        !
        call timer_stop(timer_uzd_ini, gdp)
        !
@@ -334,35 +437,116 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           nmu        = nm + icx
           ndmu       = nm + icx - icy
           gksi       = gvu(nm)
-          if (kfu(nm)==1) then
-             do k = kfumin(nm), kfumax(nm)
-                if (kfuz1(nm, k)==1 .and. kcs(nm)*kcs(nmu)>0) then
+          if (kfu(nm) == 1) then
+             do k = kfumin(nm), kfumx0(nm)
+                if (kfuz0(nm, k)==1 .and. kcs(nm)*kcs(nmu)>0) then
                    !
                    ! BAROCLINIC PRESSURE, CORIOLIS, ATMOSPHERIC PRES. and TIDE GEN. FORCE
                    !
-                   vvv        = 0.25_fp*(v1(ndm, k) + v1(ndmu, k) + v1(nm, k) + v1(nmu, k))
+                   vvv        = 0.25_fp*(v0(ndm, k) + v0(ndmu, k) + v0(nm, k) + v0(nmu, k))
                    ddk(nm, k) = u0(nm, k)/timest                                   &
                               & - ag*(s0(nmu) - s0(nm))/gksi                       &
                               & + ff*fcorio(nm)*vvv                                &
-                              & - ag/rhow*drhodx(nm, k)*kfsz1(nm, k)*kfsz1(nmu, k) &
+                              & - ag/rhow*drhodx(nm, k)*kfsz0(nm, k)*kfsz0(nmu, k) &
                               & - (patm(nmu) - patm(nm))/(gksi*rhow)               &
                               & - (pship(nmu) - pship(nm))/(gksi*rhow)             &
                               & + ag*(tgfsep(nmu) - tgfsep(nm))/gksi               &
-                              & - (p0(nmu, k) - p0(nm, k))/(gksi*rhow)
+                              & - (p0(nmu, k) - p0(nm, k))*kfsz0(nmu,k)*kfsz0(nm,k)/(gksi*rhow)
+                else
+                   ddk(nm, k) = u0(nm,k)/timest
                 endif
              enddo
           endif
        enddo
        call timer_stop(timer_uzd_rhs, gdp)
        !
-       ! Horizontal advection (first order upwind implicit)
+       ! Horizontal advection
        !
        call timer_start(timer_uzd_momsol, gdp)
-       call z_impl_upw(nmmax     ,kmax      ,icx       ,icy       ,kcs     , &
-                     & kcscut    ,kfu       ,kfuz1     ,kfumin    ,kfumax  , &
-                     & kfvz1     ,u0        ,v1        ,guu       ,gvu     , &
-                     & gvd       ,guz       ,gsqiu     ,bdx       ,bux     , &
-                     & bbk       ,bdy       ,ddk       ,buy       ,gdp     )
+       if (momsol == 'iupw  ') then
+          !
+          ! Horizontal advection (first order upwind implicit)
+          !
+          call z_hormom_iupw(nmmax     ,kmax      ,icx       ,icy       ,kcs     , &
+                           & kcscut    ,kfu       ,kfuz0     ,kfumin    ,kfumx0  , &
+                           & kfvz0     ,u0        ,v0        ,guu       ,gvu     , &
+                           & gvd       ,guz       ,gsqiu     ,bdx       ,bux     , &
+                           & bbk       ,bdy       ,ddk       ,buy       ,gdp     )
+       elseif (momsol == 'mdui  ') then
+          !
+          ! Multi-direction upwind implicit advection
+          !
+          call z_hormom_mdui(nmmax     ,kmax      ,icx       , &
+                           & icy       ,kcs       ,kcs45     ,kcscut    , &
+                           & kfu       ,kfuz0     ,kfumin    ,kfumx0    , &
+                           & kfvz0     ,kfsmin    ,kfsmx0    , &
+                           & u0        ,v0        ,hu        ,bdx       ,&
+                           & bux       ,bdy       ,buy       ,buxuy     ,buxdy     , & 
+                           & bdxuy     ,bdxdy     ,bbk       , &
+                           & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
+                           & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
+                           & ddk       ,gdp       )
+          !
+       elseif (momsol == 'mdue  ') then
+          !
+          ! Advection determined explicitly using multi-directional upwind method
+          ! Using the whole time step (fully non-hydrostatic mode)
+          !
+          call z_hormom_mdue(nmmax     ,kmax      ,icx       , &
+                            & icy       ,kcs       ,kcs45     ,kcscut    , &
+                            & kfu       ,kfuz0     ,kfumin    ,kfumx0    , &
+                            & kfvz0     ,kfsmin    ,kfsmx0    , &
+                            & u0        ,v0        ,hu        , &
+                            & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
+                            & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
+                            & ddk       ,gdp       )
+          !
+       elseif (momsol == 'finvol') then
+          !
+          ! Finite volume approach for horizontal advection
+          !
+          ! Temporary switch for vertical advection of horizontal momentum
+          ! THVERT = 0 means explicit 1st order upwind vertical advection
+          !
+          thvert = 0.0_fp
+          ! 
+          call z_hormom_finvol(nmmax     ,kmax      ,icx       ,icy       ,kcs       , &
+                             & kfu       ,kcu       ,kfv       ,kfuz0     ,kfumin    , &
+                             & kfumx0    ,kfvz0     ,kfs       ,kfsz0     ,kfsmin    , &
+                             & kfsmx0    ,u0        ,v0        ,w0        ,dzs0      , &
+                             & dzu0      ,dzv0      ,s0        ,guu       ,gvv       , &
+                             & gvu       ,guv       ,gsqs      ,gud       ,gvd       , &
+                             & guz       ,gvz       ,ddk       ,p0        ,gdp       )
+          !
+       elseif (momsol == 'flood ') then
+          !
+          ! Flooding solver for horizontal advection
+          !
+          ! Temporary switch for vertical advection of horizontal momentum (PvdP 2009)
+          ! THVERT = 0 means explicit 1st order upwind vertical advection
+          !
+          thvert = 0.0_fp
+          !
+          call z_hormom_fls(nmmax     ,kmax      ,icx       , &
+                          & icy       ,kcs       ,kcs45     ,kcscut    , &
+                          & kfu       ,kfuz0     ,kfumin    ,kfumx0    ,kfv       , &
+                          & kfvz0     ,kfsz0     ,kfsmin    ,kfsmx0    ,kspu      , &
+                          & u0        ,v0        ,hu        ,kfvmin    ,kfvmx0    , &
+                          & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
+                          & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
+                          & qxk       ,qyk       ,dzu0      ,dzv0      ,dzs0      , &
+                          & ddk       ,umean     ,dps       ,s0        ,uvdwk     , &
+                          & vvdwk     ,gdp       )
+          !
+          ! Reset arrays uvdwk and vvdwk which have been used as workarrays in z_hormom_fls
+          !
+          uvdwk = 0.0_fp
+          vvdwk = 0.0_fp
+       else
+          !
+          ! No correct advection option specified: error?
+          !
+       endif
        call timer_stop(timer_uzd_momsol, gdp)
        !
        ! 2D Weir not included
@@ -370,7 +554,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        !
        call timer_start(timer_uzd_eloss, gdp)
        call usrbrl(icx       ,icy       ,nmmax     ,kmax      ,kfu       , &
-                  & kspu      ,gvu       ,u0        ,v1        ,bbk       , &
+                 & kspu      ,gvu       ,u0        ,v0        ,bbk       , &
                   & ubrlsu    ,diapl     ,rnpl      ,gdp       )
        call timer_stop(timer_uzd_eloss, gdp)
        !
@@ -379,7 +563,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           nmu  = nm + icx
           kmin = kfumin(nm)
           if (kfu(nm) == 1 .and. kcs(nm)*kcs(nmu) > 0) then
-             kkmax = max(1, kfumax(nm))
+             kkmax = max(kmin, kfumx0(nm))
              !
              ! WIND AND BOTTOM FRICTION
              !
@@ -398,29 +582,80 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              ! weir.
              ! Gates are excluded
              !
-             if (dpsopt == 'DP  ') then
-                if (kfu(nm) == 1 .and. abs(u0(nm,kmin)) <= 1.0e-15 .and. kspu(nm, 0) /= 4 .and. kspu(nm, 0) /= 10) then
+             if (dpsopt == 'dp') then
+                if (kfu(nm) == 1 .and. abs(u0(nm,kmin)) <= 1.0e-15_fp .and. kspu(nm, 0) /= 4 .and. kspu(nm, 0) /= 10) then
                    !
                    ! cfurou(nm,1) contains u/u*
                    !
-                   uweir      = sqrt(2.0 / 3.0 * ag * max(hu(nm), 0.01_fp))
-                   taubpu(nm) = uweir / (cfurou(nm,1)**2)
+                   uweir      = sqrt( 2.0_fp/3.0_fp*ag*max(hu(nm),htrsh) )
+                   taubpu(nm) = uweir / (cfurou(nm,1)**2.0_fp)
                 endif
              endif
+
+             !
+             ! Slope correction for steep slopes
+             !
+             nmu = nm + icx
+             dpsmax = max(-dps(nm),-dps(nmu))
+             if (s0(nm) < dpsmax) then
+                do k = kfumin(nm), kfumx0(nm)
+                   ddk(nm,k) = ddk(nm,k)-ag*(s0(nm)-dpsmax)/gvu(nm)
+                enddo
+             elseif (s0(nmu) < dpsmax) then
+                do k = kfumin(nm), kfumx0(nm)
+                   ddk(nm,k) = ddk(nm,k) + ag*(s0(nmu)-dpsmax)/gvu(nm)
+                enddo
+             endif
+             !
+             ! End of inundation
+             !
              cbot           = taubpu(nm)
-             qwind          = windu(nm)/dzu1(nm, kkmax)
-             bdmwrp         = cbot/dzu1(nm, kmin)
-             bdmwrs         = taubsu(nm)/dzu1(nm, kmin)
+             qwind          = windu(nm) / max(dzu0(nm, kkmax),htrsh)
+             bdmwrp         = cbot / max(dzu0(nm, kmin),htrsh)
+             bdmwrs         = taubsu(nm) / max(dzu0(nm, kmin),htrsh)
              bbk(nm, kmin)  = bbk(nm, kmin) + bdmwrp
              ddk(nm, kkmax) = ddk(nm, kkmax) - qwind/rhow
              ddk(nm, kmin)  = ddk(nm, kmin) + bdmwrs
              !
              ! WAVE FORCE AT SURFACE
              !
-             ddk(nm, kkmax) = ddk(nm, kkmax) + wsu(nm)/(rhow*dzu1(nm, kkmax))
+             !
+             ! physical limit to wsu
+             !
+             if (wave) then
+                wsumax = facmax*hu(nm)**(1.5)/max(0.1_fp, tp(nm))
+                wsu(nm) = sign(min(abs(wsu(nm)), wsumax), wsu(nm))
+                !
+                ddk(nm, kkmax) = ddk(nm, kkmax) + wsu(nm)/(rhow*max(dzu0(nm, kkmax),htrsh))
+                !
+                ! WAVE INDUCED BODY FORCE
+                !
+                if (roller .or. xbeach) then
+                   fxw(nm) = sign(min(abs(fxw(nm)), wsumax), fxw(nm))
+                   do k = kfumin(nm), kfumx0(nm)
+                      ddk(nm, k) = ddk(nm, k) + fxw(nm)/(rhow*hu(nm))
+                   enddo
+                else
+                   wsbodyu(nm) = sign(min(abs(wsbodyu(nm)), wsumax), wsbodyu(nm))
+                   do k = kfumin(nm), kfumx0(nm)
+                      ddk(nm, k) = ddk(nm, k) + wsbodyu(nm)/(rhow*hu(nm))
+                   enddo
+                endif
+             endif
           endif
        enddo
        call timer_stop(timer_uzd_stress, gdp)
+       !
+       ! In case of 3D waves:
+       ! Added shear stress in wave boundary layer due to streaming
+       !
+       call timer_start(timer_uzd_shrwav, gdp)
+       if (wave .and. kmax>1) then
+          call z_shrwav(nmmax     ,kmax      ,icx       ,dfu       ,deltau    , &
+                      & tp        ,rlabda    ,hu        ,kfu       ,ddk       , &
+                      & kfumin    ,kfumx0    ,dzu0      ,gdp       )
+       endif
+       call timer_stop(timer_uzd_shrwav, gdp)
        !
        ! DISCHARGE ADDITION OF MOMENTUM
        !
@@ -446,9 +681,9 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                    enddo
                 else
                    bbk(nmdis, kk) = bbk(nmdis, kk) + disch(isrc)                   &
-                                  & /(dzu1(nmdis, kk)*gsqs(nm))
+                                  & /(dzu0(nmdis, kk)*gsqs(nm))
                    ddk(nmdis, kk) = ddk(nmdis, kk) + umdis(isrc)*disch(isrc)       &
-                                  & /(dzu1(nmdis, kk)*gsqs(nm))
+                                  & /(dzu0(nmdis, kk)*gsqs(nm))
                 endif
              endif
           endif
@@ -459,11 +694,11 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        !
        call timer_start(timer_uzd_advdiffv, gdp)
        do nm = 1, nmmax
-          if (kfumax(nm) > kfumin(nm)) then
+          if (kfu(nm)==1 .and. kfumx0(nm)>kfumin(nm)) then
              kmaxtl = 1
              nmu    = nm + icx
-             do k = kfumin(nm), kfumax(nm)
-                if (kfuz1(nm, k) == 1) then
+             do k = kfumin(nm), kfumx0(nm)
+                if (kfuz0(nm, k) == 1) then
                    kfad = 0
                    kdo  = k - 1
                    kup  = k + 1
@@ -471,7 +706,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                       kfad = 1
                       kdo  = k
                    endif
-                   if (k == kfumax(nm)) then
+                   if (k == kfumx0(nm)) then
                       kfad = -1
                       kup  = k
                    endif
@@ -485,32 +720,67 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                       iadc = max(1 - (kspu(nm, k) + kspu(nm, kup)), 0)
                    endif
                    !
-                   dzup = dzu1(nm, k) + dzu1(nm, kup)
-                   dzdo = dzu1(nm, k) + dzu1(nm, kdo)
+                   dzup = dzu0(nm, k) + dzu0(nm, kup)
+                   dzdo = dzu0(nm, k) + dzu0(nm, kdo)
                    !
                    ! ADVECTION IN VERTICAL DIRECTION; W*DU/DZ
                    !
-                   !
                    ! Is this correct at the surface when there are no neighbours?
                    !
-                   maskval = min(kcs(nm), 2)*min(kcs(nmu), 2)
-                   www     = 0.25_fp*maskval*(w1(nm, k - 1) + w1(nm, k) + w1(nmu, k - 1) + w1(nmu, k))
-                   if (www < 0.0_fp) then
-                      adza = -2.0_fp*www/(dzup + dzdo)*(1 - abs(kfad))
-                      adzc =  2.0_fp*www/(dzup + dzdo)*(1 - abs(kfad)) + kfad*(1 + kfad)*www/dzup
+                   if (thvert == 1.0_fp) then
+                      !
+                      ! Central implicit
+                      !
+                      maskval = min(kcs(nm), 2)*min(kcs(nmu), 2)
+                      www     = 0.25_fp*maskval*(w0(nm, k - 1) + w0(nm, k) + w0(nmu, k - 1) + w0(nmu, k))
+                      if (www < 0.0_fp) then
+                         adza = -2.0_fp*www/(dzup + dzdo)*(1 - abs(kfad))
+                         adzc =  2.0_fp*www/(dzup + dzdo)*(1 - abs(kfad)) + kfad*(1 + kfad)*www/dzup
+                      else
+                         adza = -2.0_fp*www/(dzup + dzdo)*(1 - abs(kfad)) + abs(kfad)*( - 1 + kfad)*www/dzdo
+                         adzc =  2.0_fp*www/(dzup + dzdo)*(1 - abs(kfad))
+                      endif
+                      adza = iada*adza
+                      adzc = iadc*adzc
+                      adzb = -adza - adzc
                    else
-                      adza = -2.0_fp*www/(dzup + dzdo)*(1 - abs(kfad)) + abs(kfad)*( - 1 + kfad)*www/dzdo
-                      adzc =  2.0_fp*www/(dzup + dzdo)*(1 - abs(kfad))
+                      !
+                      ! First order upwind explicit
+                      !
+                      adza = 0.0_fp
+                      adzc = 0.0_fp
+                      adzb = 0.0_fp
+                      !
+                      ! downwards face
+                      !
+                      if (k > kfumin(nm)) then
+                          area  = guu(nm) * gvu(nm)
+                          wavg0 = 0.5_fp * (w0(nm,k-1)+w0(nmu,k-1))
+                          if (wavg0 > 0.0_fp) then
+                              ddk(nm,k) = ddk(nm,k) + area*wavg0*u0(nm,k-1)
+                          else
+                              ddk(nm,k) = ddk(nm,k) + area*wavg0*u0(nm,k)
+                          endif
+                      endif
+                      !
+                      ! upwards face
+                      !
+                      if (k < kfumx0(nm)) then
+                          area  = guu(nm) * gvu(nm)
+                          wavg0 = 0.5_fp * (w0(nm,k)+w0(nmu,k))
+                          if (wavg0 > 0.0_fp) then
+                              ddk(nm,k) = ddk(nm,k) - area*wavg0*u0(nm,k)
+                          else
+                              ddk(nm,k) = ddk(nm,k) - area*wavg0*u0(nm,k+1)
+                          endif
+                      endif
                    endif
-                   adza = iada*adza
-                   adzc = iadc*adzc
-                   adzb = -adza - adzc
                    !
                    ! Subtitution in coefficients
                    !
-                   aak (nm, k) = adza
+                   aak (nm, k) = aak(nm, k) + adza
                    bbk (nm, k) = bbk(nm, k) + adzb
-                   cck (nm, k) = adzc
+                   cck (nm, k) = cck(nm, k) + adzc
                    !
                    ! VERTICAL VISCOSITY
                    !
@@ -528,7 +798,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                    viznm  = 0.25_fp * (2 + kfad*(1 - kfad))               &
                           & * (2.0_fp*vicmol + redvic(vicww(nm , k), gdp) &
                           &                  + redvic(vicww(nmu, k), gdp))
-                   dz    = dzu1(nm, k)
+                   dz    = dzu0(nm, k)
                    !
                    ddza = iada * 2.0_fp * viznmd / (dzdo*dz)
                    ddzc = iadc * 2.0_fp * viznm  / (dzup*dz)
@@ -555,10 +825,10 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           !
           call z_vihrov(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                       & icy       ,kcs45     ,kcs       ,kfu       ,kfv       , &
-                      & kfs       ,u0        ,v1        ,vicuv     ,vnu2d     , &
+                      & kfs       ,u0        ,v0        ,vicuv     ,vnu2d     , &
                       & gud       ,guu       ,gvd       ,gvu       ,gvz       , &
-                      & ddk       ,rxx       ,rxy       ,kfuz1     ,kfvz1     , &
-                      & kfsz1     ,kfumin    ,kfumax    ,gdp       )
+                      & ddk       ,rxx       ,rxy       ,kfuz0     ,kfvz0     , &
+                      & kfsz0     ,kfumin    ,kfumx0    ,gdp       )
        !
        ! for Crank Nicolson method: is computed here (implicitly for the whole time step)
        ! for fractional step method: is computed in z_cucnp (explicitly for the whole time step)
@@ -573,17 +843,17 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              numu = nm + icx + icy
              ndmu = nm + icx - icy
              numd = nm - icx + icy
-             do k = kfumin(nm), kfumax(nm)
+             do k = kfumin(nm), kfumx0(nm)
                 if (kfu(nm) == 1 .and. kcs(nm)*kcs(nmu) > 0) then
-                   if (kfuz1(nm, k)==1) then
+                   if (kfuz0(nm, k) == 1) then
                       gksid = gvz(nm)
                       gksiu = gvz(nmu)
                       gksi  = gvu(nm)
                       getad = gud(ndm)
                       getau = gud(nm)
                       geta  = guu(nm)
-                      idifd = kfvz1(ndm, k)*kfvz1(ndmu, k)*kfuz1(ndm, k)
-                      idifu = kfvz1(nm, k)*kfvz1(nmu, k)*kfuz1(num, k)
+                      idifd = kfvz0(ndm, k)*kfvz0(ndmu, k)*kfuz0(ndm, k)
+                      idifu = kfvz0(nm , k)*kfvz0(nmu , k)*kfuz0(num, k)
                       idifc = abs(2 - kcs(nm))*abs(2 - kcs(nmu))
                       !
                       ! EDDY VISCOSITY FOR KMAX = 1, USING LAPLACE OPERATOR
@@ -610,47 +880,69 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        ! BOUNDARY CONDITIONS
        !
        call timer_start(timer_uzd_bouncond, gdp)
-       do ic = 1, norow
+       !
+       ! For fully non-hydrostatic simulations the boundary conditions are handled in z_cucbp_nhfull
+       !
+       if (nonhyd .and. nh_level == nh_full) then
+          call z_cucbp_nhfull(kmax      ,norow     ,icx       , &
+                            & icy       ,irocol    ,kcs       ,kfu       , &
+                            & kfumin    ,kfumx0    ,s0        ,u0        , &
+                            & hu        ,umean     ,guu       ,gvu       , &
+                            & dzu0      ,circ2d    ,circ3d    ,dpu       , &
+                            & aak       ,bbk       ,cck       ,ddk       , &
+                            & crbc      ,gdp       )
+       else
           !
-          n   = irocol(1, ic)
-          mf  = irocol(2, ic) - 1
-          ml  = irocol(3, ic)
-          ibf = irocol(4, ic)
-          ibl = irocol(5, ic)
-          nmf = (n + ddb)*icy + (mf + ddb)*icx - icxy
-          nml = (n + ddb)*icy + (ml + ddb)*icx - icxy
-          !
-          ! IMPLEMENTATION OF BOUNDARY CONDITIONS
-          !
-          if (kcu(nmf)*kfu(nmf) == 1) then
-             if (ibf==3 .or. ibf==5 .or. ibf==6 .or. ibf==7) then
-                do k = kfumin(nmf), kfumax(nmf)
-                   aak (nmf, k) = 0.0_fp
-                   bbk (nmf, k) = 1.0_fp
-                   bux (nmf, k) = 0.0_fp
-                   bdx (nmf, k) = 0.0_fp
-                   buy (nmf, k) = 0.0_fp
-                   bdy (nmf, k) = 0.0_fp
-                   cck (nmf, k) = 0.0_fp
-                   ddk (nmf, k) = u0(nmf, k)
-                enddo
+          do ic = 1, norow
+             !
+             n   = irocol(1, ic)
+             mf  = irocol(2, ic) - 1
+             ml  = irocol(3, ic)
+             ibf = irocol(4, ic)
+             ibl = irocol(5, ic)
+             nmf = (n + ddb)*icy + (mf + ddb)*icx - icxy
+             nml = (n + ddb)*icy + (ml + ddb)*icx - icxy
+             !
+             ! IMPLEMENTATION OF BOUNDARY CONDITIONS
+             !
+             if (kcu(nmf)*kfu(nmf) == 1) then
+                if (ibf==3 .or. ibf==5 .or. ibf==6 .or. ibf==7) then
+                   do k = kfumin(nmf), kfumx0(nmf)
+                      aak  (nmf, k) = 0.0_fp
+                      bbk  (nmf, k) = 1.0_fp
+                      bux  (nmf, k) = 0.0_fp
+                      bdx  (nmf, k) = 0.0_fp
+                      buy  (nmf, k) = 0.0_fp
+                      bdy  (nmf, k) = 0.0_fp
+                      buxuy(nmf, k) = 0.0_fp
+                      bdxuy(nmf, k) = 0.0_fp
+                      buxdy(nmf, k) = 0.0_fp
+                      bdxdy(nmf, k) = 0.0_fp
+                      cck  (nmf, k) = 0.0_fp
+                      ddk  (nmf, k) = u0(nmf, k)
+                   enddo
+                endif
              endif
-          endif
-          if (kcu(nml)*kfu(nml) == 1) then
-             if (ibl==3 .or. ibl==5 .or. ibl==6 .or. ibl==7) then
-                do k = kfumin(nml), kfumax(nml)
-                   aak (nml, k) = 0.0_fp
-                   bbk (nml, k) = 1.0_fp
-                   bux (nml, k) = 0.0_fp
-                   bdx (nml, k) = 0.0_fp
-                   buy (nml, k) = 0.0_fp
-                   bdy (nml, k) = 0.0_fp
-                   cck (nml, k) = 0.0_fp
-                   ddk (nml, k) = u0(nml, k)
-                enddo
+             if (kcu(nml)*kfu(nml) == 1) then
+                if (ibl==3 .or. ibl==5 .or. ibl==6 .or. ibl==7) then
+                   do k = kfumin(nml), kfumx0(nml)
+                      aak  (nml, k) = 0.0_fp
+                      bbk  (nml, k) = 1.0_fp
+                      bux  (nml, k) = 0.0_fp
+                      bdx  (nml, k) = 0.0_fp
+                      buy  (nml, k) = 0.0_fp
+                      bdy  (nml, k) = 0.0_fp
+                      buxuy(nml, k) = 0.0_fp
+                      bdxuy(nml, k) = 0.0_fp
+                      buxdy(nml, k) = 0.0_fp
+                      bdxdy(nml, k) = 0.0_fp
+                      cck  (nml, k) = 0.0_fp
+                      ddk  (nml, k) = u0(nml, k)
+                   enddo
+                endif
              endif
-          endif
-       enddo
+          enddo
+       endif
        call timer_stop(timer_uzd_bouncond, gdp)
        !
        ! left hand-side is now set by Delft3D-FLOW instead of the mapper
@@ -658,7 +950,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        call timer_start(timer_uzd_lhs, gdp)
        do nm = 1, nmmax
           if (kcu(nm) == 3) then
-             do k = kfumin(nm), kfumax(nm)
+             do k = kfumin(nm), kfumx0(nm)
                 aak(nm,k) = 0.0_fp
                 bbk(nm,k) = 1.0_fp
                 cck(nm,k) = 0.0_fp
@@ -693,17 +985,23 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        !
        call timer_start(timer_uzd_rowsc, gdp)
        do nm = 1, nmmax
-          do k = kfumin(nm), kfumax(nm)
-             bi          = 1.0_fp / bbk(nm, k)
-             aak (nm, k) = aak (nm, k) * bi
-             bbk (nm, k) = 1.0_fp
-             bux (nm, k) = bux (nm, k) * bi
-             bdx (nm, k) = bdx (nm, k) * bi
-             buy (nm, k) = buy (nm, k) * bi
-             bdy (nm, k) = bdy (nm, k) * bi
-             cck (nm, k) = cck (nm, k) * bi
-             ddk (nm, k) = ddk (nm, k) * bi
-          enddo
+          if (kfu(nm) == 1) then
+             do k = kfumin(nm), kfumx0(nm)
+                bi           = 1.0_fp / bbk(nm, k)
+                aak  (nm, k) = aak  (nm, k) * bi
+                bbk  (nm, k) = 1.0_fp
+                bux  (nm, k) = bux  (nm, k) * bi
+                bdx  (nm, k) = bdx  (nm, k) * bi
+                buy  (nm, k) = buy  (nm, k) * bi
+                bdy  (nm, k) = bdy  (nm, k) * bi
+                buxuy(nm, k) = buxuy(nm, k) * bi
+                bdxuy(nm, k) = bdxuy(nm, k) * bi
+                buxdy(nm, k) = buxdy(nm, k) * bi
+                bdxdy(nm, k) = bdxdy(nm, k) * bi
+                cck  (nm, k) = cck  (nm, k) * bi
+                ddk  (nm, k) = ddk  (nm, k) * bi
+             enddo
+          endif
        enddo
        call timer_stop(timer_uzd_rowsc, gdp)
        !
@@ -718,11 +1016,13 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        ! because of row scaling
        !
        do nm = 1, nmmax
-          do k = kfumin(nm)+1, kfumax(nm)
-             bi         = 1.0_fp/(bbk(nm, k) - aak(nm, k)*cck(nm, k - 1))
-             bbk(nm, k) = bi
-             cck(nm, k) = cck(nm, k)*bi
-          enddo
+          if (kfu(nm) == 1) then
+             do k = kfumin(nm)+1, kfumx0(nm)
+                bi         = 1.0_fp/(bbk(nm, k) - aak(nm, k)*cck(nm, k - 1))
+                bbk(nm, k) = bi
+                cck(nm, k) = cck(nm, k)*bi
+             enddo
+          endif
        enddo
        call timer_stop(timer_uzd_solve1, gdp)
        !
@@ -731,10 +1031,12 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        call timer_start(timer_uzd_solve2, gdp)
        iter = 0
        do nm = 1, nmmax
-          do k = kfumin(nm), kfumax(nm)
-             u1   (nm, k) = u0(nm, k)
-             uvdwk(nm, k) = u0(nm, k)
-          enddo
+          if (kfu(nm) == 1) then
+             do k = kfumin(nm), kfumx0(nm)
+                u1   (nm, k) = u0(nm, k)
+                uvdwk(nm, k) = u0(nm, k)
+             enddo
+          endif
        enddo
        call timer_stop(timer_uzd_solve2, gdp)
        !
@@ -761,16 +1063,22 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           call timer_start(timer_uzd_solve5v, gdp)
        end if
        do nm = 1, nmmax, 2
-          do k = kfumin(nm), kfumax(nm)
-             !
-             ! COMPUTE RIGHT HAND SIDE
-             !
-             uvdwk(nm, k) = ddk(nm,k)                     &
-                          & - bdx (nm,k)*u1(nm-icx    ,k) &
-                          & - bdy (nm,k)*u1(nm-icy    ,k) &
-                          & - buy (nm,k)*u1(nm+icy    ,k) &
-                          & - bux (nm,k)*u1(nm+icx    ,k) 
-          enddo
+          if (kfu(nm) == 1) then
+             do k = kfumin(nm), kfumx0(nm)
+                !
+                ! COMPUTE RIGHT HAND SIDE
+                !
+                uvdwk(nm, k) = ddk(nm,k)                      &
+                             & - bdx  (nm,k)*u1(nm-icx    ,k) &
+                             & - bdy  (nm,k)*u1(nm-icy    ,k) &
+                             & - buy  (nm,k)*u1(nm+icy    ,k) &
+                             & - bux  (nm,k)*u1(nm+icx    ,k) &
+                             & - bdxdy(nm,k)*u1(nm-icx-icy,k) &
+                             & - bdxuy(nm,k)*u1(nm-icx+icy,k) &
+                             & - buxuy(nm,k)*u1(nm+icx+icy,k) &
+                             & - buxdy(nm,k)*u1(nm+icx-icy,k)
+             enddo
+          endif
        enddo
        if(icx == 1) then
          call timer_stop(timer_uzd_solve3u, gdp)
@@ -781,19 +1089,25 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        end if
 !
        do nm = 1, nmmax, 2
-          kmin = kfumin(nm)
-          vvdwk(nm, kmin) = uvdwk(nm, kmin)*bbk(nm, kmin)
+          if (kfu(nm) == 1) then
+             kmin = kfumin(nm)
+             vvdwk(nm, kmin) = uvdwk(nm, kmin)*bbk(nm, kmin)
+          endif
        enddo
        do nm = 1, nmmax, 2
-          do k = kfumin(nm)+1, kfumax(nm)
-             vvdwk(nm, k) = (uvdwk(nm, k) - aak(nm, k)*vvdwk(nm, k - 1))*bbk(nm, k)
-          enddo
+          if (kfu(nm) == 1) then
+             do k = kfumin(nm)+1, kfumx0(nm)
+                vvdwk(nm, k) = (uvdwk(nm, k) - aak(nm, k)*vvdwk(nm, k - 1))*bbk(nm, k)
+             enddo
+          endif
        enddo
-       
+       !       
        do nm = 1, nmmax, 2
-          do k = kfumax(nm)-1, kfumin(nm), -1
-             vvdwk(nm, k) = vvdwk(nm, k) - cck(nm, k)*vvdwk(nm, k + 1)
-          enddo
+          if (kfu(nm) == 1) then
+             do k = kfumx0(nm)-1, kfumin(nm), -1
+                vvdwk(nm, k) = vvdwk(nm, k) - cck(nm, k)*vvdwk(nm, k + 1)
+             enddo
+          endif
        enddo
        !
        ! CHECK FOR CONVERGENCE
@@ -801,8 +1115,10 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        smax = 0.0
        do nm = 1, nmmax, 2
           if (kfu(nm) == 1) then
-             do k = kfumin(nm), kfumax(nm)
-                if (abs(vvdwk(nm,k)-u1(nm,k)) > eps) itr = 1
+             do k = kfumin(nm), kfumx0(nm)
+                if (abs(vvdwk(nm,k)-u1(nm,k)) > eps) then
+                   itr = 1
+                endif
                 zz = abs(vvdwk(nm, k) - u1(nm, k))
                 if (zz > smax) then
                    smax = zz
@@ -821,16 +1137,23 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        end if
        !
        do nm = 2, nmmax, 2
-          do k = kfumin(nm), kfumax(nm)
-             !
-             ! COMPUTE RIGHT HAND SIDE
-             !
-             uvdwk(nm, k) = ddk(nm,k)                     &
-                          & - bdx (nm,k)*u1(nm-icx    ,k) &
-                          & - bdy (nm,k)*u1(nm-icy    ,k) &
-                          & - buy (nm,k)*u1(nm+icy    ,k) &
-                          & - bux (nm,k)*u1(nm+icx    ,k) 
-          enddo
+          if (kfu(nm) == 1) then
+             do k = kfumin(nm), kfumx0(nm)
+                !
+                ! COMPUTE RIGHT HAND SIDE
+                !
+                uvdwk(nm, k) = ddk(nm,k)                      &
+                             & - bdx  (nm,k)*u1(nm-icx    ,k) &
+                             & - bdy  (nm,k)*u1(nm-icy    ,k) &
+                             & - buy  (nm,k)*u1(nm+icy    ,k) &
+                             & - bux  (nm,k)*u1(nm+icx    ,k) &
+                             & - bdxdy(nm,k)*u1(nm-icx-icy,k) &
+                             & - bdxuy(nm,k)*u1(nm-icx+icy,k) &
+                             & - buxuy(nm,k)*u1(nm+icx+icy,k) &
+                             & - buxdy(nm,k)*u1(nm+icx-icy,k)
+                         
+             enddo
+          endif
        enddo
        !
        if(icx == 1) then
@@ -842,26 +1165,34 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        end if
        !
        do nm = 2, nmmax, 2
-          kmin=kfumin(nm)
-          vvdwk(nm,kmin) = uvdwk(nm,kmin) * bbk(nm, kmin)
+          if (kfu(nm) == 1) then
+             kmin           = kfumin(nm)
+             vvdwk(nm,kmin) = uvdwk(nm,kmin) * bbk(nm, kmin)
+          endif
        enddo
        do nm = 2, nmmax, 2
-          do k = kfumin(nm)+1, kfumax(nm)
-             vvdwk(nm,k) = (uvdwk(nm,k) - aak(nm,k)*vvdwk(nm,k-1)) * bbk(nm,k)
-          enddo
+          if (kfu(nm) == 1) then
+             do k = kfumin(nm)+1, kfumx0(nm)
+                vvdwk(nm,k) = (uvdwk(nm,k) - aak(nm,k)*vvdwk(nm,k-1)) * bbk(nm,k)
+             enddo
+          endif
        enddo
        do nm = 2, nmmax, 2
-          do k = kfumax(nm)-1, kfumin(nm), -1
-             vvdwk(nm,k) = vvdwk(nm,k) - cck(nm,k)*vvdwk(nm,k+1)
-          enddo
+          if (kfu(nm) == 1) then
+             do k = kfumx0(nm)-1, kfumin(nm), -1
+                vvdwk(nm,k) = vvdwk(nm,k) - cck(nm,k)*vvdwk(nm,k+1)
+             enddo
+          endif
        enddo
        !
        ! CHECK FOR CONVERGENCE
        !
        do nm = 2, nmmax, 2
           if (kfu(nm) == 1) then
-             do k = kfumin(nm), kfumax(nm)
-                if (abs(vvdwk(nm,k)-u1(nm,k)) > eps) itr = 1
+             do k = kfumin(nm), kfumx0(nm)
+                if (abs(vvdwk(nm,k)-u1(nm,k)) > eps) then
+                   itr = 1
+                endif
                 zz = abs(vvdwk(nm, k) - u1(nm, k))
                 if (zz > smax) then
                    smax = zz
@@ -901,7 +1232,12 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        !
        ! End Domain decomposition addition
        !
-    elseif (momsol == 'mdue  ') then
+    else       ! if (momsol == 'mdue  ') then
+       !
+       !  Time integration following the original approach of Bijvelds and Stelling
+       !  with a dummy UZD (velocities are computed in Z_SUD/Z_CUCNP and frozen
+       !  for the second half timestep. This is done in his part.
+       !
        call timer_start(timer_uzd_ini, gdp)
        !
        ! Initialise aak, bbk and cck for all (nm, k)
@@ -913,10 +1249,12 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        call timer_stop(timer_uzd_ini, gdp)
        call timer_start(timer_uzd_rhs, gdp)
        !
-       do k = 1, kmax
-          do nm = 1, nmmax
-             ddk(nm, k) = u1(nm, k)
-          enddo
+       do nm = 1, nmmax
+          if (kfu(nm) == 1) then
+             do k = 1, kmax
+                ddk(nm, k) = u0(nm, k)
+             enddo
+          endif
        enddo
        call timer_stop(timer_uzd_rhs, gdp)
        !

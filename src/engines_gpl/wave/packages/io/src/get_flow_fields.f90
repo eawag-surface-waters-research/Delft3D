@@ -104,7 +104,7 @@ subroutine get_flow_fields (sif, fg, f2s, wavedata, sr, flowVelocityType)
       !
       call get_cur (wavedata%time, &
                   & fif%kfu, fif%kfv, fif%u1, fif%v1, fif%mmax, fif%nmax, &
-                  & fg%kmax, fg%grid_name, flowVelocityType, &
+                  & fg%kmax, fg%grid_name, fg%layer_model, flowVelocityType, &
                   & fif%dps, fif%s1)
       !
       ! Convert to Cartesian, cell centres

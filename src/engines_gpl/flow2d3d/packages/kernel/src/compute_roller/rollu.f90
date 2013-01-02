@@ -52,19 +52,19 @@ subroutine rollu(nmmax     ,kfs       ,sourr     ,df        , &
 !
 ! Global variables
 !
-    integer                                     , intent(in)  :: nmmax  !  Description and declaration in dimens.igs
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: kfs    !  Description and declaration in esm_alloc_int.f90
-    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: s0     !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: c      !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: dis    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: eroll0 !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: ewave0 !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: sinkr  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: sinkw  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: df     !  Description and declaration in esm_alloc_real.f90    
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub), intent(out) :: sourr  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: tp     !  Description and declaration in esm_alloc_real.f90
+    integer                                       , intent(in)  :: nmmax  !  Description and declaration in dimens.igs
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: kfs    !  Description and declaration in esm_alloc_int.f90
+    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: s0     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: c      !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub,4), intent(out) :: dis    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: eroll0 !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: ewave0 !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(out) :: sinkr  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: sinkw  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: df     !  Description and declaration in esm_alloc_real.f90    
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(out) :: sourr  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: tp     !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !
@@ -82,7 +82,7 @@ subroutine rollu(nmmax     ,kfs       ,sourr     ,df        , &
     ag        => gdp%gdphysco%ag
     !
     do nm = 1, nmmax
-       dis(nm) = 0.0_fp
+       dis(nm,:) = 0.0_fp
        if (kfs(nm) /= 0) then
           if (c(nm) > 0.01_fp) then
              if (betarol < 0.0_fp) then
@@ -95,7 +95,7 @@ subroutine rollu(nmmax     ,kfs       ,sourr     ,df        , &
              endif
              sinkr(nm) = 2.0_fp * ag * btr / c(nm)
              if (eroll0(nm) > 0.01_fp) then
-               dis(nm) = sinkr(nm) * eroll0(nm)
+               dis(nm,:) = sinkr(nm) * eroll0(nm)
              endif
              if (ewave0(nm) < 0.0_fp) then
                 src = 0.0_fp

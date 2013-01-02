@@ -6,7 +6,7 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                   & sig       ,guu       ,gvv       ,guv       ,gvu       , &
                   & vicww     ,dicww     ,cfurou    ,cfvrou    ,z0urou    , &
                   & z0vrou    ,windsu    ,windsv    ,bruvai    ,dudz      , &
-                  & dvdz      ,tkepro    ,tkedis    ,deltau    ,dfu       , &
+                  & dvdz      ,tkepro    ,tkedis    ,deltau    ,deltav    ,dfu       , &
                   & dfv       ,dis       ,hrms      ,uorb      ,tp        , &
                   & aak       ,bbk       ,cck       ,ddk       ,bdx       , &
                   & bux       ,bdy       ,buy       ,umea      ,vmea      , &
@@ -92,6 +92,8 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     real(fp)               , pointer :: vicmol
     integer                , pointer :: iro
     integer                , pointer :: irov
+    integer                , pointer :: lundia
+    real(fp)               , pointer :: cde
     real(fp)               , pointer :: cmukep
     real(fp)               , pointer :: cep1
     real(fp)               , pointer :: cep2
@@ -99,6 +101,7 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     real(fp)               , pointer :: sigrho
     real(fp)               , pointer :: cewall
     real(fp)               , pointer :: ck
+    logical                , pointer :: wave
 !
 ! Global variables
 !
@@ -131,9 +134,10 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub,3)                          :: cfurou !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub,3)                          :: cfvrou !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: deltau !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: deltav !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: dfu    !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: dfv    !  Description and declaration in esm_alloc_real.f90
-    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: dis    !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub,4)                          :: dis    !  Description and declaration in esm_alloc_real.f90
     real(prec)   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: guu    !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: guv    !  Description and declaration in esm_alloc_real.f90
@@ -208,22 +212,38 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     real(fp)     :: buoflu
     real(fp)     :: cu
     real(fp)     :: cv
+    real(fp)     :: deltas
+    real(fp)     :: dfus
+    real(fp)     :: dfvs
+    real(fp)     :: dfdis
     real(fp)     :: difd
     real(fp)     :: difu
+    real(fp)     :: du
+    real(fp)     :: dv
     real(fp)     :: dx
     real(fp)     :: dy
     real(fp)     :: dz
     real(fp)     :: ee
     real(fp)     :: epsd
+    real(fp)     :: epswav
     real(fp)     :: epswin
+    real(fp)     :: fact
     real(fp)     :: h0
+    real(fp)     :: hsurf
+    real(fp)     :: laydep
+    real(fp)     :: pkwbt0
     real(fp)     :: pransm
     real(fp)     :: rz
     real(fp)     :: s
     real(fp)     :: timest
     real(fp)     :: tkebot
     real(fp)     :: tkewin
+    real(fp)     :: tkewav
+    real(fp)     :: us
     real(fp)     :: utot
+    real(fp)     :: uu
+    real(fp)     :: vs
+    real(fp)     :: vv
     real(fp)     :: uuu
     real(fp)     :: vcc
     real(fp)     :: viww
@@ -232,12 +252,15 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     real(fp)     :: wup
     real(fp)     :: www
     real(fp)     :: z0s
+    real(fp)     :: zlev
     real(fp)     :: zw
 !
     data epsd/1.E-20/
 !
 !! executable statements -------------------------------------------------------
 !
+    lundia      => gdp%gdinout%lundia
+    cde         => gdp%gdturcoe%cde
     cmukep      => gdp%gdturcoe%cmukep
     cep1        => gdp%gdturcoe%cep1
     cep2        => gdp%gdturcoe%cep2
@@ -253,6 +276,7 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     iro         => gdp%gdphysco%iro
     irov        => gdp%gdphysco%irov
     hdt         => gdp%gdnumeco%hdt
+    wave        => gdp%gdprocs%wave
     !
     ddb    = gdp%d%ddbound
     icxy   = max(icx, icy)
@@ -554,14 +578,139 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
           ! production term horizontal and vertical gradients
           !
           do nm = 1, nmmax
-             do k = kfsmin(nm), kfsmax(nm) - 1
-                if (kfs(nm) == 1) then
+             if (kfs(nm) == 1) then
+                pkwav(nm, kfsmin(nm)) = 0.
+                pkwbt(nm, kfsmin(nm)) = 0.
+                pkwav(nm, kfsmax(nm)) = 0.
+                !
+                do k = kfsmin(nm)+1, kfsmax(nm)-1
+                   !
+                   ! Reset pkwav and pkwbt tke sources due to waves
+                   !
+                   pkwav(nm, k   )       = 0.
+                   pkwbt(nm, k   )       = 0.
+                   !
                    ddk(nm, k) = ddk(nm, k) + 2*(vicmol + vicww(nm, k))*bdy(nm, k)
+                enddo
+             endif
+          enddo
+          !
+          ! production term due to breaking of waves
+          !
+          ! first: determine length (vertical) of distribution of
+          !        turbulent energy and fill production term in right hand side
+          !
+          if (wave) then
+             do nm = 1, nmmax
+                if (kfs(nm) == 1) then
+                   h0         = max(0.01_fp, s1(nm) + real(dps(nm),fp))
+                   pkwav(nm, kfsmax(nm)) =  4.0_fp*(dis(nm,2)+dis(nm,3))/(rhow*max(hrms(nm),0.01_fp))
+                   zw  = 0.0_fp
+                   do k = kfsmax(nm)-1, kfsmin(nm), -1
+                      zw  = zw  + dzs1(nm,k+1)
+                      if (0.5_fp*hrms(nm) > zw) then
+                         pkwav(nm,k) = pkwav(nm,kfsmax(nm))*(1.0_fp - zw/(0.5_fp*hrms(nm)))
+                         ddk(nm,k)   = ddk(nm,k) + pkwav(nm, k)   
+                      else
+                         kdismx(nm)=k+1
+                         exit
+                      endif
+                   enddo
                 endif
              enddo
-          enddo
+             !
+             ! Added turbulent production due wave diss. in wave boundary layer
+             !
+             do nm = 1, nmmax
+                h0 = max(0.01_fp, s1(nm) + real(dps(nm),fp))
+                if (kfs(nm) == 1) then
+                   !
+                   !  delta thickness boundary layer due to waves in [m], by change of definition in TAUBOT 
+                   !
+                   nmd    = nm - icx
+                   ndm    = nm - icy
+                   fact   = max(kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm), 1)
+                   deltas = (deltau(nm) + deltau(nmd) + deltav(nm) + deltav(ndm)) / fact
+                   fact   = max(kfu(nm) + kfu(nmd), 1)
+                   dfus   = (dfu(nm) + dfu(nmd)) / fact
+                   fact   = max(kfv(nm) + kfv(ndm), 1)
+                   dfvs   = (dfv(nm) + dfv(ndm)) / fact
+                   pkwbt0 = 2.0_fp * sqrt(dfus**2 + dfvs**2) / (rhow*max(deltas,0.01_fp))
+                   zw     = 0.0_fp
+                   do k = kfsmin(nm), kfsmax(nm)
+                      zw  = zw  + dzs1(nm,k) 
+                      if (zw < deltas) then
+                         pkwbt(nm, k) = pkwbt0 * (1.0_fp - zw/deltas)
+                         !
+                         ! Production term due to waves near the bottom switched off
+                         ! Is already included in increased z0
+                         !
+                         ddk  (nm, k) = ddk(nm, k) + pkwbt(nm, k)
+                      elseif (k == kfsmax(nm)) then
+                         !
+                         ! we got to the top and haven't defined kpwbt and hpkwbt
+                         !
+                         kpkwbt(nm) = kfsmax(nm)
+                         if (deltas>h0) then  
+                            call prterr(lundia, 'P004', 'Deltas > water depth in TRATUR ')
+                         endif  
+                      else
+                         kpkwbt(nm) = k - 1
+                         exit
+                      endif
+                   enddo
+                endif
+             enddo
+          endif
+          !
+          ! Addition of wall production due to slip on vertical walls
+          !
+          ! !!!! Must still be changed from SIGMA implementation to Z !!!!
+          !
+          !if (irov == 1) then
+          !   do k = 1, kmax - 1
+          !      ku = k + 1
+          !      do nm = 1, nmmax
+          !         if (kfs(nm)*kcs(nm) == 1) then
+          !            nmd = nm - icx
+          !            ndm = nm - icy
+          !            nmu = nm + icx
+          !            num = nm + icy
+          !            if (kcs(num) == 0) then
+          !               uu = 0.25 * (u1(nm, k) + u1(nmd, k) + u1(nm, ku) + u1(nmd, ku))
+          !               us = vonkar * uu / log((0.25*(guu(nm) + guu(nmd)) + z0v)/z0v)
+          !               du = abs(us) / (0.25*(guu(nm) + guu(nmd)) + z0v)
+          !               ddk(nm, k) = ddk(nm, k) + 0.5*du*us*us
+          !               bdy(nm, k) = bdy(nm, k) + 0.5*du*du
+          !            endif
+          !            if (kcs(ndm) == 0) then
+          !               uu = 0.25 * (u1(nm, k) + u1(nmd, k) + u1(nm, ku) + u1(nmd, ku))
+          !               us = vonkar * uu / log((0.25*(guu(nm) + guu(nmd)) + z0v)/z0v)
+          !               du = abs(us) / (0.25*(guu(nm) + guu(nmd)) + z0v)
+          !               ddk(nm, k) = ddk(nm, k) + 0.5*du*us*us
+          !               bdy(nm, k) = bdy(nm, k) + 0.5*du*du
+          !            endif
+          !            if (kcs(nmu) == 0) then
+          !               vv = 0.25 * (v1(nm, k) + v1(ndm, k) + v1(nm, ku) + v1(ndm, ku))
+          !               vs = vonkar * vv / log((0.25*(gvv(nm) + gvv(nmd)) + z0v)/z0v)
+          !               dv = abs(vs) / (0.25*(guu(nm) + guu(nmd)) + z0v)
+          !               ddk(nm, k) = ddk(nm, k) + 0.5*dv*vs*vs
+          !               bdy(nm, k) = bdy(nm, k) + 0.5*dv*dv
+          !            endif
+          !            if (kcs(nmd) == 0) then
+          !               vv = 0.25 * (v1(nm, k) + v1(ndm, k) + v1(nm, ku) + v1(ndm, ku))
+          !               vs = vonkar * vv / log((0.25*(gvv(nm) + gvv(nmd)) + z0v)/z0v)
+          !               dv = abs(vs) / (0.25*(guu(nm) + guu(nmd)) + z0v)
+          !               ddk(nm, k) = ddk(nm, k) + 0.5*dv*vs*vs
+          !               bdy(nm, k) = bdy(nm, k) + 0.5*dv*dv
+          !            endif
+          !         endif
+          !      enddo
+          !   enddo
+          !endif
        else
           !
+          ! EPSILON equation
           ! buoyancy term
           !
           do nm = 1, nmmax
@@ -596,6 +745,25 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                 endif
              enddo
           enddo
+          if (wave) then
+             do nm = 1, nmmax
+                if (kfs(nm) == 1) then
+                   !
+                   ! production term breaking waves in epsilon
+                   !
+                   do k = kdismx(nm),kfsmax(nm)
+                      ddk(nm, k) = ddk(nm, k) + cep1*pkwav(nm, k)*rtur0(nm, k, 2)/max(rtur0(nm, k, 1), epsd)
+                   enddo
+                   !
+                   ! production term wave dissipation in bottom boundary layer
+                   ! is switched off just as in the production of turb. kinetic energy
+                   !
+                   do k = kfsmin(nm), kpkwbt(nm)   
+                      ddk(nm, k) = ddk(nm, k) + cep1*pkwbt(nm, k)*rtur0(nm, k, 2)/max(rtur0(nm, k, 1), epsd)
+                   enddo
+                endif
+             enddo
+          endif
        endif
        if (ltur == 1) then
           !
@@ -653,6 +821,24 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                 bbk(nm, kfsmax(nm)) = 1.0
                 cck(nm, kfsmax(nm)) = 0.0
                 ddk(nm, kfsmax(nm)) = tkewin
+                !
+                ! Added production due to waves
+                !
+                if (wave) then
+                   ! 
+                   ! Flux boundary type
+                   !
+                   h0     = max(0.01_fp, s1(nm) + real(dps(nm),fp))
+                   !
+                   epswav = 4.0_fp * (dis(nm,2)+dis(nm,3)) / (rhow*max(hrms(nm),0.01_fp))
+                   !
+                   ! Change to Nikuradse length scale for surface waves in case of breaking
+                   !
+                   tkewav = (epswav*vonkar* 0.5_fp*hrms(nm)/cde)**(2.0_fp/3.0_fp)
+                   !tkewav = (epswav*vonkar* 0.5*hrms(nm)/(30.0*cde))**(2.0/3.0)
+                   !
+                   ddk(nm, kfsmax(nm)) = ddk(nm, kfsmax(nm)) + tkewav
+                endif
                 !
                 ! at bottom
                 !
@@ -715,6 +901,21 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                 bbk(nm, kfsmax(nm)) = 1.0
                 cck(nm, kfsmax(nm)) = 0.0
                 ddk(nm, kfsmax(nm)) = epswin
+                !
+                ! Added production due to waves
+                !
+                if (wave) then
+                   h0 = max(0.01_fp, s1(nm) + real(dps(nm),fp))
+                   !
+                   ! need to calculate tkewav in same manner as above
+                   ! (note, for this pransm should = 1)
+                   ! and then adjust for differences between k flux and epsilon flux
+                   ! this should include the difference in pransm
+                   !
+                   epswav = 4.0_fp * (dis(nm,2)+dis(nm,3)) /(rhow*max(hrms(nm),0.01_fp))
+                   !
+                   ddk(nm, kfsmax(nm)) = ddk(nm, kfsmax(nm)) + epswav
+                endif
                 !
                 ! at bottom
                 !

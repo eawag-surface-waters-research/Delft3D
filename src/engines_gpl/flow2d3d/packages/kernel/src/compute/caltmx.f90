@@ -86,8 +86,8 @@ subroutine caltmx(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
 !
 !! executable statements -------------------------------------------------------
 !
-    ! Calculate TAU_MAX in zeta points                       |nm
-    !     Scalair adding of four velocity point components nmd - + - nm
+    ! Calculate TAU_MAX in zeta points                           |nm
+    !     Scalar adding of four velocity point components  nmd - + - nm
     !                                                            |ndm
     if (.not.zmodel) then
        ndm = -icy
@@ -98,7 +98,7 @@ subroutine caltmx(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           nmd        = nmd + 1
           kfuv       = max(1, kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm))
           taubmx(nm) = (taubxu(nm)*kfu(nm)*hu(nm) + taubxu(nmd)*kfu(nmd)*hu(nmd) + &
-                      & taubxv(nm)*kfv(nm)*hv(nm) + taubxv(ndm)*kfv(ndm)*hv(ndm))/kfuv
+                     &  taubxv(nm)*kfv(nm)*hv(nm) + taubxv(ndm)*kfv(ndm)*hv(ndm))/kfuv
           taubmx(nm) = taubmx(nm)/h1
        enddo
     else
@@ -107,11 +107,9 @@ subroutine caltmx(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           nmd = nm - icx
           if (kfs(nm)==1) then
              kmin = kfsmin(nm)
-             kfuv = max(1, kfuz1(nm, kmin) + kfuz1(nmd, kmin) + kfvz1(nm, kmin) &
-                  & + kfvz1(ndm, kmin))
-             taubmx(nm) = (taubxu(nm)*kfuz1(nm, kmin) + taubxu(nmd)             &
-                        & *kfuz1(nmd, kmin) + taubxv(nm)*kfvz1(nm, kmin)        &
-                        & + taubxv(ndm)*kfvz1(nm, kmin))/kfuv
+             kfuv = max(1, kfuz1(nm, kmin) + kfuz1(nmd, kmin) + kfvz1(nm, kmin) + kfvz1(ndm, kmin))
+             taubmx(nm) = ( taubxu(nm)*kfuz1(nm, kmin) + taubxu(nmd)*kfuz1(nmd, kmin) &
+                        & + taubxv(nm)*kfvz1(nm, kmin) + taubxv(ndm)*kfvz1(ndm, kmin) )/kfuv
           endif
        enddo
     endif

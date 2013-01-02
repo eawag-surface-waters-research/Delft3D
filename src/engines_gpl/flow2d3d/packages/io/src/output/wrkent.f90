@@ -115,7 +115,7 @@ subroutine wrkent(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
     !
     !-----Initialize local variables
     !
-    ierr = 0
+    ierr   = 0
     wrswch = .true.
     nelmx1 = 1
     nelmx2 = nelmx - nelmx1

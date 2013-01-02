@@ -310,6 +310,10 @@ type gd_r_i_ch
        integer(pntrsize) :: wsucom     !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: wsv        !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: wsvcom     !  Description and declaration in esm_alloc_real.f90
+       integer(pntrsize) :: wsbodyu    !  Description and declaration in esm_alloc_real.f90
+       integer(pntrsize) :: wsbodyucom !  Description and declaration in esm_alloc_real.f90
+       integer(pntrsize) :: wsbodyv    !  Description and declaration in esm_alloc_real.f90
+       integer(pntrsize) :: wsbodyvcom !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: x2y        !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: x3         !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: xcor       !  Description and declaration in esm_alloc_real.f90

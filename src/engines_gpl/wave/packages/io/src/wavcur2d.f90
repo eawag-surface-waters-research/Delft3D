@@ -1,6 +1,7 @@
-subroutine wavcur2d(wavetime  ,kfu       ,kfv       ,u1        , &
-                  & mmax      ,nmax      ,kmax      ,filnam    , &
-                  & dps       ,s1        ,thick     ,rbuffu)
+subroutine wavcur2d(wavetime  ,layer_model ,kfu       ,kfv       , &
+                  & u1        ,mmax        ,nmax      ,kmax      , &
+                  & filnam    ,dps         ,s1        ,thick     , &
+                  & dzu1      ,rbuffu       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -54,8 +55,10 @@ subroutine wavcur2d(wavetime  ,kfu       ,kfv       ,u1        , &
     real   , dimension(mmax, nmax)      , intent(in)  :: s1
     real   , dimension(kmax)            , intent(in)  :: thick
     real   , dimension(mmax, nmax)      , intent(out) :: u1
+    real   , dimension(mmax, nmax, kmax), intent(in)  :: dzu1
     real   , dimension(nmax, mmax, kmax), intent(in)  :: rbuffu
     character(37)                       , intent(in)  :: filnam
+    character(*)                        , intent(in)  :: layer_model
     type(wave_time_type)                , intent(in)  :: wavetime
 !
 ! Local variables
@@ -67,6 +70,7 @@ subroutine wavcur2d(wavetime  ,kfu       ,kfv       ,u1        , &
     integer                                 :: ifind
     integer                                 :: iwave
     integer                                 :: k
+    integer                                 :: kd
     integer                                 :: m
     integer                                 :: md
     integer                                 :: n
@@ -77,6 +81,7 @@ subroutine wavcur2d(wavetime  ,kfu       ,kfv       ,u1        , &
     integer, dimension(6, nelmx)            :: elmdms
     integer, dimension(nelmx)               :: nbytsg
     real                                    :: cosharg
+    real                                    :: dep
     real                                    :: eps
     real                                    :: pi
     real, dimension(:,:), allocatable       :: rlabda
@@ -191,56 +196,123 @@ subroutine wavcur2d(wavetime  ,kfu       ,kfv       ,u1        , &
     call putgtr(filnam    ,grpnam(2) ,nelems    ,elmnms(3) ,elmdms(1, 3)         , &
               & elmqty(3) ,elmunt(3) ,elmdes(3) ,elmtps(3) ,nbytsg(3) , &
               & elmnms(ielem)        ,celidt    ,wrswch    ,error     ,rlabda     ) 
-    sig(1) = -thick(1) / 2.0_fp
-    do k=2,kmax
-       sig(k) = -(sum(thick(1:k-1)) + thick(k)/2.0_fp)
-    enddo
-    do m = 1, mmax
-       do n = 1, nmax
-          md = max(m-1, 1)
-          nd = max(n-1, 1)
-          u1(m,n) = 0.0
-          !
-          ! compute weighted depth-averaged velocity for use in SWAN
-          ! note: velocities are (avareged!) in zeta-points, wave pars are in zeta-points
-          ! note: this produces ONE velocity based on "significant" wavelength
-          !       really, each spectral component should have its own "equivalent" velocity...
-          !       can't do that using SWAN.
-          !
-          if (kfu(m,n) /= 0 .or. kfu(md,n) /= 0 .or. kfv(m,n) /= 0 .or. kfv(m,nd) /= 0 ) then
-             if (rlabda(n,m) > 0.1) then
-                waveku = 2.0 * pi / rlabda(n,m)
-             else
-                waveku = 99.0
-             endif
-             wghtsum = 0.0
-             do k = 1, kmax
-                !
-                ! z is 0 at bed and H at surface
-                !
-                z = (1.0+sig(k)) * (s1(m,n)+dps(m,n))
-                !
-                ! weight velocities according to Dingemans(1997)
-                !
-                cosharg = 2.0*waveku*z
-                if (cosharg > 50.0) then
-                   !
-                   ! very "deep" water
-                   ! use surface velocity
-                   !
-                   u1(m,n) = rbuffu(n,m,1)
-                   wghtsum = 1.0
-                   exit
-                endif
-                wght = cosh(cosharg)
-                wght = wght * thick(k)
-                u1(m,n) = u1(m,n) + rbuffu(n,m,k)*wght
-                wghtsum = wghtsum + wght
-             enddo
-             u1(m,n) = u1(m,n) / max(eps, wghtsum)
-          endif
+    !
+    if (layer_model(1:11) == 'SIGMA-MODEL') then
+       !
+       ! FLOW model used Sigma-layering in the vertical
+       !
+       sig(1) = -thick(1) / 2.0_fp
+       do k=2,kmax
+          sig(k) = -(sum(thick(1:k-1)) + thick(k)/2.0_fp)
        enddo
-    enddo
+       do m = 1, mmax
+          do n = 1, nmax
+             md = max(m-1, 1)
+             nd = max(n-1, 1)
+             u1(m,n) = 0.0
+             !
+             ! compute weighted depth-averaged velocity for use in SWAN
+             ! note: velocities are (averaged!) in zeta-points, wave pars are in zeta-points
+             ! note: this produces ONE velocity based on "significant" wavelength
+             !       really, each spectral component should have its own "equivalent" velocity...
+             !       can't do that using SWAN.
+             !
+             if (kfu(m,n) /= 0 .or. kfu(md,n) /= 0 .or. kfv(m,n) /= 0 .or. kfv(m,nd) /= 0 ) then
+                if (rlabda(n,m) > 0.1) then
+                   waveku = 2.0 * pi / rlabda(n,m)
+                else
+                   waveku = 99.0
+                endif
+                wghtsum = 0.0
+                do k = 1, kmax
+                   !
+                   ! z is 0 at bed and H at surface
+                   !
+                   z = (1.0+sig(k)) * (s1(m,n)+dps(m,n))
+                   !
+                   ! weight velocities according to Dingemans(1997)
+                   !
+                   cosharg = 2.0*waveku*z
+                   if (cosharg > 50.0) then
+                      !
+                      ! very "deep" water
+                      ! use surface velocity
+                      !
+                      u1(m,n) = rbuffu(n,m,1)
+                      wghtsum = 1.0
+                      exit
+                   endif
+                   wght = cosh(cosharg)
+                   wght = wght * thick(k)
+                   u1(m,n) = u1(m,n) + rbuffu(n,m,k)*wght
+                   wghtsum = wghtsum + wght
+                enddo
+                u1(m,n) = u1(m,n) / max(eps, wghtsum)
+             endif
+          enddo
+       enddo
+    elseif (layer_model(1:7) == 'Z-MODEL') then
+       !
+       ! FLOW model used Z-layering in the vertical
+       !
+       do m = 1, mmax
+          do n = 1, nmax
+             md = max(m-1, 1)
+             nd = max(n-1, 1)
+             u1(m,n) = 0.0
+             !
+             ! compute weighted depth-averaged velocity for use in SWAN
+             ! note: velocities are (averaged!) in zeta-points, wave pars are in zeta-points
+             ! note: this produces ONE velocity based on "significant" wavelength
+             !       really, each spectral component should have its own "equivalent" velocity...
+             !       can't do that using SWAN.
+             !
+             if (kfu(m,n) /= 0 .or. kfu(md,n) /= 0 .or. kfv(m,n) /= 0 .or. kfv(m,nd) /= 0 ) then
+                dep = max(0.01, s1(m,n)+dps(m,n))
+                if (rlabda(n,m) > 0.1) then
+                   waveku = 2.0 * pi / rlabda(n,m)
+                else
+                   waveku = 99.0
+                endif
+                wghtsum = 0.0
+                z       = -0.5*dzu1(m,n,1)
+                do k = 1, kmax
+                   if (dzu1(m,n,k) > 0.0) then
+                      !
+                      ! z is 0 at bed and H at surface
+                      !
+                      kd = max(1,k-1)
+                      z  = z + 0.5*(dzu1(m,n,k)+dzu1(m,n,kd))
+                      !
+                      ! weight velocities according to Dingemans(1997)
+                      !
+                      cosharg = 2.0*waveku*z
+                      if (cosharg > 50.0) then
+                         !
+                         ! very "deep" water
+                         ! use surface velocity
+                         !
+                         u1(m,n) = rbuffu(n,m,1)
+                         wghtsum = 1.0
+                         exit
+                      endif
+                      wght = cosh(cosharg)
+                      wght = wght * dzu1(m,n,k) / dep
+                      u1(m,n) = u1(m,n) + rbuffu(n,m,k)*wght
+                      wghtsum = wghtsum + wght
+                   endif
+                enddo
+                u1(m,n) = u1(m,n) / max(eps, wghtsum)
+             endif
+          enddo
+       enddo
+    else
+       !
+       ! Erroneous vertical layering definition found on COM-FILE
+       !
+       write(*, '(2a)') '*** ERROR: Erroneous vertical layering definition found on COM-FILE: LAYER_MODEL = ', trim(layer_model)
+       stop
+    endif
     !
     ! Normal end
     ! skip error solving part
@@ -251,14 +323,35 @@ subroutine wavcur2d(wavetime  ,kfu       ,kfv       ,u1        , &
     ! Error. Probably not able to read WAVNT/WAVTIM from com-file
     ! Use depth averaged velocity
     !
-    do m = 1, mmax
-       do n = 1, nmax
-          u1(m, n) = 0.0
-          do k = 1,kmax
-             u1(m,n) = u1(m,n) + thick(k) * rbuffu(n,m,k)
+    if (layer_model(1:11) == 'SIGMA-MODEL') then
+       do m = 1, mmax
+          do n = 1, nmax
+             u1(m, n) = 0.0
+             do k = 1,kmax
+                u1(m,n) = u1(m,n) + thick(k) * rbuffu(n,m,k)
+             enddo
           enddo
        enddo
-    enddo
+    elseif (layer_model(1:7) == 'Z-MODEL') then
+       do m = 1, mmax
+          do n = 1, nmax
+             u1(m, n) = 0.0
+             dep      = 0.0 
+             do k = 1, kmax
+                u1(m, n) = u1(m, n) + dzu1(m, n, k) * rbuffu(n, m, k)
+                dep      = dep + dzu1(m, n, k)
+             enddo
+             dep     = max(dep, 0.01)
+             u1(m,n) = u1(m,n)/dep
+          enddo
+       enddo
+    else
+       !
+       ! Erroneous vertical layering definition found on COM-FILE
+       !
+       write(*, '(2a)') '*** ERROR: Erroneous vertical layering definition found on COM-FILE: LAYER_MODEL = ', trim(layer_model)
+       stop
+    endif
     !
     ! assuming error is solved
     !

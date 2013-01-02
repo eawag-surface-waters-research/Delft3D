@@ -12,7 +12,8 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                 & aak       ,bbk       ,cck       ,ddk       ,bdx       , &
                 & bux       ,bdy       ,buy       ,umea      ,vmea      , &
                 & ubnd      ,pkwbt     ,kpkwbt    ,hpkwbt    ,kdismx    , &
-                & hsurft    ,pkwav     ,diapl     ,rnpl      ,gdp       )
+                & hsurft    ,pkwav     ,diapl     ,rnpl      ,ueul      , &
+                & veul      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -143,7 +144,7 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: deltav !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: dfu    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: dfv    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: dis    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub,4)            , intent(in)  :: dis    !  Description and declaration in esm_alloc_real.f90
     real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: guu    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: guv    !  Description and declaration in esm_alloc_real.f90
@@ -182,8 +183,10 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: tkedis !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: tkepro !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: u1     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: ueul   !!  Eulerian velocity in X-direction (including Stokes drift)
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: umea   !!  Mean horizontal velocity
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: v1     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: veul   !! Eulerian velocity in Y-direction (including Stokes drift)
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: vmea   !!  Mean horizontal velocity
     real(fp)  , dimension(kmax)                               , intent(in)  :: sig    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(kmax)                               , intent(in)  :: thick  !  Description and declaration in esm_alloc_real.f90
@@ -720,7 +723,7 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
           ! production term due to breaking of waves
           !
           ! first: determine length (vertical) of distribution of
-          !        turbulent energy
+          !        turbulent energy and fill production term in right hand side
           !
           if (wave) then
              do nm = 1, nmmax
@@ -752,11 +755,11 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                 if (kfs(nm) == 1) then
                    h0    = max(0.01_fp, s1(nm) + real(dps(nm),fp))
                    hsurf = thick(1) * h0 / 4.0
-                   pkwav(nm, 0) = (2.*dis(nm)/(rhow*hsurft(nm))) * (1.0 - hsurf/hsurft(nm))
+                   pkwav(nm, 0) = (2.*(dis(nm,2)+dis(nm,3))/(rhow*hsurft(nm))) * (1.0 - hsurf/hsurft(nm))
                    if (kdismx(nm) > 1) then
                       do k = 1, kdismx(nm) - 1
                          hsurf        = h0 * ( - sig(k) - sig(k + 1)) / 2.0
-                         pkwav(nm, k) = (2.*dis(nm)/(rhow*hsurft(nm))) * (1.0 - hsurf/hsurft(nm))
+                         pkwav(nm, k) = (2.*(dis(nm,2)+dis(nm,3))/(rhow*hsurft(nm))) * (1.0 - hsurf/hsurft(nm))
                          ddk(nm, k)   = ddk(nm, k) + pkwav(nm, k)
                       enddo
                    endif
@@ -769,12 +772,12 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                 h0 = max(0.01_fp, s1(nm) + real(dps(nm),fp))
                 if (kfs(nm) == 1) then
                    !
-                   ! compute deltau at zeta point
+                   !  delta  thickness boundary layer due to waves in [m], by change of definition in TAUBOT 
                    !
-                   nmd        = nm - icx
-                   ndm        = nm - icy
-                   fact       = max(kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm), 1)
-                   deltas     = (deltau(nm) + deltau(nmd) + deltav(nm) + deltav(ndm)) / fact
+                   nmd    = nm - icx
+                   ndm    = nm - icy
+                   fact   = max(kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm), 1)
+                   deltas = (deltau(nm) + deltau(nmd) + deltav(nm) + deltav(ndm)) / fact
                    hpkwbt(nm) = ( - sig(kmax) + sig(kmax-1)) * h0
                    do k = kmax - 2, 1, -1
                       if (( - sig(kmax) + sig(k)) > deltas) then
@@ -790,14 +793,18 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                          hpkwbt(nm) = ( - sig(kmax) + sig(1)) * h0
                       endif
                    enddo
+                endif
+                if (kfs(nm) == 1) then
                    !
                    ! calculate dfu and dfv in zeta points
                    !
+                   nmd    = nm - icx
+                   ndm    = nm - icy
                    fact   = max(kfu(nm) + kfu(nmd), 1)
                    dfus   = (dfu(nm) + dfu(nmd)) / fact
                    fact   = max(kfv(nm) + kfv(ndm), 1)
                    dfvs   = (dfv(nm) + dfv(ndm)) / fact
-                   pkwbt0 = 2. * sqrt(dfus**2 + dfvs**2) / hpkwbt(nm)
+                   pkwbt0 = 2. * sqrt(dfus**2 + dfvs**2) / (rhow*hpkwbt(nm))
                    do k = kmax - 1, kpkwbt(nm), -1
                       dfdis        = h0 * ( - sig(kmax) + (sig(k) + sig(k + 1))/2.0)
                       pkwbt(nm, k) = pkwbt0 * (1.0 - dfdis/hpkwbt(nm))
@@ -947,6 +954,7 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                    enddo
                    !
                    ! production term wave dissipation in bottom boundary layer
+                   ! is switched off just as in the production of turb. kinetic energy
                    !
                    do k = kmax - 1, kpkwbt(nm), -1
                       ddk(nm, k) = ddk(nm, k) + cep1*pkwbt(nm, k)*rtur0(nm, k, 2)/max(rtur0(nm, k, 1), epsd)
@@ -1030,19 +1038,27 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                    !
                    h0     = max(0.01_fp, s1(nm) + real(dps(nm),fp))
                    !
-                   epswav = 2.0 * dis(nm) / (max(0.5*hrms(nm),hsurft(nm))*rhow)
+                   !epswav = 4.0 * (dis(nm,2)+dis(nm,3)) / (rhow*max(hrms(nm),0.01_fp))
+                   !
+                   ! Change to Nikuradse length scale for surface waves in case of breaking
+                   !
+                   !tkewav = (epswav*vonkar* 0.5*hrms(nm)/(cde))**(2.0/3.0)
+                   !tkewav = (epswav*vonkar* 0.5*hrms(nm)/(30.0*cde))**(2.0/3.0)
+                   epswav = 2.0 * (dis(nm,2)+dis(nm,3)) / (max(0.5*hrms(nm),hsurft(nm))*rhow)
                    tkewav = (epswav*vonkar*max(0.5*hrms(nm),hsurft(nm))/cde)**(2.0/3.0)
                    !
                    ddk(nm, 0) = ddk(nm, 0) + tkewav
                 endif
                 !
-                ! at bottom
+                ! at bottom, using Eulerian velocities (corrected for Stokes drift)
                 !
                 aak(nm, kmax) = 0.0
                 bbk(nm, kmax) = 1.0
                 cck(nm, kmax) = 0.0
                 uuu  = 0.5*(u1(nmd, kmax) + u1(nm, kmax))*maskval
                 vvv  = 0.5*(v1(ndm, kmax) + v1(nm, kmax))*maskval
+                !uuu  = 0.5*(ueul(nmd, kmax) + ueul(nm, kmax))*maskval
+                !vvv  = 0.5*(veul(ndm, kmax) + veul(nm, kmax))*maskval
                 utot = sqrt(uuu*uuu + vvv*vvv)
                 h0   = max(0.01_fp, s1(nm) + real(dps(nm),fp))
                 dz   = 0.5 * thick(kmax) * h0
@@ -1093,14 +1109,17 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                    ! and then adjust for differences between k flux and epsilon flux
                    ! this should include the difference in pransm
                    !
-                   epswav = 2.0 * dis(nm) / (max(0.5*hrms(nm),hsurft(nm))*rhow)
+                   epswav = 4.0 * (dis(nm,2)+dis(nm,3)) /(rhow*max(hrms(nm),0.01_fp))
+                   epswav = 2.0 * (dis(nm,2)+dis(nm,3)) / (max(0.5*hrms(nm),hsurft(nm))*rhow)
                    ddk(nm, 0) = ddk(nm, 0) + epswav
                 endif
                 !
-                ! at bottom
+                ! at bottom, using Eulerian velocities (corrected for Stokes drift)
                 !
                 uuu  = 0.5 * (u1(nmd, kmax) + u1(nm, kmax)) * maskval
                 vvv  = 0.5 * (v1(ndm, kmax) + v1(nm, kmax)) * maskval
+                !uuu  = 0.5 * (ueul(nmd, kmax) + ueul(nm, kmax)) * maskval
+                !vvv  = 0.5 * (veul(ndm, kmax) + veul(nm, kmax)) * maskval
                 utot = sqrt(uuu*uuu + vvv*vvv)
                 h0   = max(0.01_fp, s1(nm) + real(dps(nm),fp))
                 dz   = 0.5 * thick(kmax) * h0

@@ -296,6 +296,8 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     integer(pntrsize)                    , pointer :: zwl
     integer(pntrsize)                    , pointer :: zws
     integer(pntrsize)                    , pointer :: dzs1
+    integer(pntrsize)                    , pointer :: dzu1
+    integer(pntrsize)                    , pointer :: dzv1
     integer(pntrsize)                    , pointer :: res
     integer(pntrsize)                    , pointer :: rl
     integer(pntrsize)                    , pointer :: xj
@@ -388,6 +390,8 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     integer                  :: ifou           ! Loop counter for NOFOU 
     integer                  :: ilin           ! Loop counter for HEADER (5) 
     integer                  :: ipmapc         ! Current time counter for printing map data (IPMAP (NPMAPC)) 
+    integer                  :: kmaxz          ! = KMAX for Z-model, = 0 for sigma-model
+                                               ! Needed for correct dimensioning of DZU1 and DZV1
     integer                  :: msteps
     integer                  :: nmaxddb
     integer(pntrsize)        :: velu           ! U velocity array (FSM r-index)
@@ -640,6 +644,8 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     zwl                 => gdp%gdr_i_ch%zwl
     zws                 => gdp%gdr_i_ch%zws
     dzs1                => gdp%gdr_i_ch%dzs1
+    dzu1                => gdp%gdr_i_ch%dzu1
+    dzv1                => gdp%gdr_i_ch%dzv1
     res                 => gdp%gdr_i_ch%res
     rl                  => gdp%gdr_i_ch%rl
     xj                  => gdp%gdr_i_ch%xj
@@ -752,13 +758,19 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
              !
              icel = 1
           endif
+          if (zmodel) then
+             kmaxz = kmax
+          else
+             kmaxz = 0
+          endif
           call wrcomt(comfil    ,lundia    ,error     ,icel      ,ntcur     , &
                     & itimc     ,mmax      ,nmax      ,kmax      ,nmaxus    , &
                     & nsrc      ,i(mnksrc) ,lstsci    ,lsal      ,ltem      , &
                     & lsecfl    ,i(kfu)    ,i(kfv)    ,i(ibuff)  ,r(s1)     , &
                     & r(u1)     ,r(v1)     ,r(qu)     ,r(qv)     ,r(taubmx) , &
                     & r(r1)     ,r(dicuv)  ,r(dicww)  ,r(discum) ,r(rbuff)  , &
-                    & r(windu)  ,r(windv)  ,gdp       )
+                    & r(windu)  ,r(windv)  ,r(dzu1)   ,r(dzv1)   ,kmaxz     , &
+                    & r(hu)     ,r(hv)     ,r(thick)  ,gdp       )
           if (couplemod .and. coupleact) then
              call timer_start(timer_wait, gdp)
              call syncflowcouple_send(1, gdp%gdcoup%flowtocouple, &
@@ -799,7 +811,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                 &  r(taubmx) , r(dicww)  , d(dps)    , r(cfurou) , r(cfvrou) ,  &
                 &  chez      , i(mnksrc) , ch(namsrc), zmodel    , gdp       )
     !
-    !Create the stream for FLOW to get the answer from WAQ, Qinghua
+    ! Create the stream for FLOW to get the answer from WAQ
     !
     if (waqol) then
        !
@@ -862,9 +874,10 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     icx   = nmaxddb
     icy   = 1
     call euler(jstart    ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
-             & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfsmax) , &
-             & i(kfsmin) ,r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
-             & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     ,r(dzs1)   , &
+             & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumax) , &
+             & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
+             & r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
+             & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
              & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   ,r(grmsur) , &
              & r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
     if (flwoutput%veuler) then

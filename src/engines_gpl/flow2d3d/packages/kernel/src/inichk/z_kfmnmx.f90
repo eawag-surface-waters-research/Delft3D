@@ -1,6 +1,7 @@
 subroutine z_kfmnmx(j         ,nmmaxj    ,kmax      ,nm        ,nmref     , &
                   & dep       ,dzmin     ,s1v       ,kfmin     ,kfmax     , &
-                  & kf        ,zk        ,dz1       ,gdp       )
+                  & kf        ,zk        ,dz1       ,r1ordummy ,lstsci    , &
+                  & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -46,33 +47,37 @@ subroutine z_kfmnmx(j         ,nmmaxj    ,kmax      ,nm        ,nmref     , &
 !
 ! Global variables
 !
-    integer                                                  :: j
-    integer                                     , intent(in) :: kmax !  Description and declaration in esm_alloc_int.f90
-    integer                                     , intent(in) :: nm
-    integer                                                  :: nmmaxj !  Description and declaration in dimens.igs
-    integer                                     , intent(in) :: nmref
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)                :: kf
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)                :: kfmax
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)                :: kfmin
-    real(fp)                                    , intent(in) :: dep
-    real(fp)                                    , intent(in) :: dzmin
-    real(fp)                                    , intent(in) :: s1v
+    integer                                                      :: j
+    integer                                         , intent(in) :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                         , intent(in) :: lstsci !  Description and declaration in esm_alloc_int.f90
+    integer                                         , intent(in) :: nm
+    integer                                                      :: nmmaxj !  Description and declaration in dimens.igs
+    integer                                         , intent(in) :: nmref
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                   :: kf
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                   :: kfmax
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                   :: kfmin
+    real(fp)                                        , intent(in) :: dep
+    real(fp)                                        , intent(in) :: dzmin
+    real(fp)                                        , intent(in) :: s1v
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: dz1
-    real(fp), dimension(0:kmax)                 , intent(in) :: zk
+    real(fp), dimension(kmax, lstsci)                            :: r1ordummy ! Array only contains r1(nm) when z_kfmnmx is called for zeta-points
+    real(fp), dimension(0:kmax)                     , intent(in) :: zk
 !
 ! Local variables
 !
     integer :: k
+    integer :: l
     logical :: found
     logical :: found1
 !
 !! executable statements -------------------------------------------------------
 !
+    !
     found = .false.
     !
     do k = 1, kmax
        dz1(nm, k) = dz1(nmref, k)
-       if (zk(k) - dzmin> - dep .and. .not. found) then
+       if ((zk(k)-dzmin>-dep .or. k==kmax) .and. .not. found) then
           kfmin(nm) = k
           dz1(nm, k) = dep + zk(k)
           found = .true.
@@ -102,14 +107,48 @@ subroutine z_kfmnmx(j         ,nmmaxj    ,kmax      ,nm        ,nmref     , &
                 endif
              endif
           enddo
+       else
+          kfmax(nm) = kfmin(nm)
+          !
+          ! kfmin(nm) not found but cell contains water: something went wrong
+          !
        endif
     else
        !
        ! Dry point
        !
-       kfmax(nm) = -1
+       kfmax(nm) = max(kfmin(nm),1)
        do k = max(kfmin(nm),1), kmax
           dz1(nm, k) = 0.0_fp
        enddo
+    endif
+    !
+    ! Modification of near bed layer thicknesses to obtain 
+    ! a smoother approximation of the bed shear stress
+    ! (see also routines Z_DRYCHK and Z_DRYCHKU)
+    !
+    if (kfmax(nm) > kfmin(nm) ) then
+       k = kfmin(nm)
+       if (dz1(nm,k) < dz1(nm,k+1)) then
+          !
+          ! Ensure conservation of constituents
+          !
+          do l = 1, lstsci
+             r1ordummy(k,l) = (        r1ordummy(k+1,l)*(dz1(nm,k+1)-dz1(nm,k)) +     &
+                            &   2.0_fp*r1ordummy(k  ,l)* dz1(nm,k)                 ) / &
+                            & (dz1(nm,k+1) + dz1(nm,k))
+          enddo
+       elseif (dz1(nm,k) > dz1(nm,k+1)) then
+          !
+          ! Ensure conservation of constituents
+          !
+          do l = 1, lstsci
+             r1ordummy(k+1,l) = (        r1ordummy(k  ,l)*(dz1(nm,k)-dz1(nm,k+1)) +     &
+                              &   2.0_fp*r1ordummy(k+1,l)* dz1(nm,k+1)                 ) / &
+                              & (dz1(nm,k+1) + dz1(nm,k))
+          enddo
+       endif
+       dz1(nm, k  ) = 0.5_fp*(dep+min(zk(k+1),s1v))
+       dz1(nm, k+1) = dz1(nm,k)
     endif
 end subroutine z_kfmnmx

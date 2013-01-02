@@ -42,6 +42,7 @@ libkernel_compute_la_SOURCES = \
          caltmx.f90 \
          cdwkad.f90 \
          checku.f90 \
+         chkadv.f90 \
          cline.f90 \
          cnvbub.f90 \
          comvol.f90 \
@@ -122,26 +123,31 @@ libkernel_compute_la_SOURCES = \
          wphys.f90 \
          z_adi.f90 \
          z_checku.f90 \
+         z_chkadv.f90 \
          z_cucbp_nhfull.f90 \
          z_cucnp.f90 \
          z_dengra.f90 \
          z_difhor_nhfull.f90 \
          z_difu.f90 \
          z_difuflux.f90 \
-         z_difuv_nhfull.f90 \
          z_disbub.f90 \
          z_discha.f90 \
          z_drychk.f90 \
-         z_expl_dir_upw.f90 \
+         z_drychku.f90 \
          z_forfil.f90 \
-         z_impl_upw.f90 \
+         z_hormom_finvol.f90 \
+         z_hormom_fls.f90 \
+         z_hormom_iupw.f90 \
+         z_hormom_mdue.f90 \
+         z_hormom_mdui.f90 \
          z_predict_nhfull.f90 \
+         z_shrwav.f90 \
          z_sud.f90 \
          z_tratur.f90 \
          z_turclo.f90 \
          z_updtvol.f90 \
          z_uzd.f90 \
-         z_uzd_nhfull.f90 \
+         z_vermom_finvol.f90 \
          z_vihrov.f90
 
 #-------------------------------------------------------------------------------

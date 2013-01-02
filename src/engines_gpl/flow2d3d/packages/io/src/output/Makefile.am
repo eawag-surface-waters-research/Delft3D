@@ -63,6 +63,7 @@ libio_output_la_SOURCES = \
          putgtr.f90 \
          rdtimc.f90 \
          rdtimw.f90 \
+         realfileversion.f90 \
          rstcom.f90 \
          rwbotc.f90 \
          rwbotc_double.f90 \

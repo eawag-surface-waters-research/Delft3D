@@ -290,8 +290,8 @@ subroutine reallocPInt(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_:uindex), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (associated(b) .and. localErr==0) then
-  arr(mlind:muind) = b(mlind-shift_:muind-shift_)
+   if (associated(b) .and. localErr==0 .and. size(b)>0) then
+      arr(mlind:muind) = b(mlind-shift_:muind-shift_)
       deallocate(b, stat = localErr)
    endif
    if (present(stat)) stat = localErr
@@ -353,8 +353,8 @@ subroutine reallocInt(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_:uindex), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (allocated(b) .and. localErr==0) then
-  arr(mlind:muind) = b(mlind:muind)
+   if (allocated(b) .and. localErr==0 .and. size(b)>0) then
+      arr(mlind:muind) = b(mlind:muind)
       deallocate(b, stat = localErr)
    endif
    if (present(stat)) stat = localErr
@@ -418,7 +418,7 @@ subroutine reallocPInt2(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (associated(b) .and. localErr==0) then
+   if (associated(b) .and. localErr==0 .and. size(b)>0) then
       do i2 = mlind(2),muind(2)
          do i1 = mlind(1),muind(1)
              arr(i1,i2) = b(i1-shift_(1),i2-shift_(2))
@@ -489,7 +489,7 @@ subroutine reallocInt2(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (allocated(b) .and. localErr==0) then
+   if (allocated(b) .and. localErr==0 .and. size(b)>0) then
       do i2 = mlind(2),muind(2)
          do i1 = mlind(1),muind(1)
              arr(i1,i2) = b(i1,i2)
@@ -558,7 +558,7 @@ subroutine reallocPInt3(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2),lindex_(3):uindex(3)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (associated(b) .and. localErr==0) then
+   if (associated(b) .and. localErr==0 .and. size(b)>0) then
       do i3 = mlind(3),muind(3)
          do i2 = mlind(2),muind(2)
             do i1 = mlind(1),muind(1)
@@ -633,7 +633,7 @@ subroutine reallocInt3(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2),lindex_(3):uindex(3)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (allocated(b) .and. localErr==0) then
+   if (allocated(b) .and. localErr==0 .and. size(b)>0) then
       do i3 = mlind(3),muind(3)
          do i2 = mlind(2),muind(2)
             do i1 = mlind(1),muind(1)
@@ -704,7 +704,7 @@ subroutine reallocPInt4(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2),lindex_(3):uindex(3),lindex_(4):uindex(4)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (associated(b) .and. localErr==0) then
+   if (associated(b) .and. localErr==0 .and. size(b)>0) then
       do i4 = mlind(4),muind(4)
          do i3 = mlind(3),muind(3)
             do i2 = mlind(2),muind(2)
@@ -783,7 +783,7 @@ subroutine reallocInt4(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2),lindex_(3):uindex(3),lindex_(4):uindex(4)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (allocated(b) .and. localErr==0) then
+   if (allocated(b) .and. localErr==0 .and. size(b)>0) then
       do i4 = mlind(4),muind(4)
          do i3 = mlind(3),muind(3)
             do i2 = mlind(2),muind(2)
@@ -856,8 +856,8 @@ subroutine reallocPCharacter(arr, uindex, lindex, stat, fill, shift, keepExistin
        allocate(arr(lindex_:uindex), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (associated(b) .and. localErr==0) then
-  arr(mlind:muind) = b(mlind-shift_:muind-shift_)
+   if (associated(b) .and. localErr==0 .and. size(b)>0) then
+      arr(mlind:muind) = b(mlind-shift_:muind-shift_)
       deallocate(b, stat = localErr)
    endif
    if (present(stat)) stat = localErr
@@ -919,8 +919,8 @@ subroutine reallocCharacter(arr, uindex, lindex, stat, fill, shift, keepExisting
        allocate(arr(lindex_:uindex), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (allocated(b) .and. localErr==0) then
-  arr(mlind:muind) = b(mlind:muind)
+   if (allocated(b) .and. localErr==0 .and. size(b)>0) then
+      arr(mlind:muind) = b(mlind:muind)
       deallocate(b, stat = localErr)
    endif
    if (present(stat)) stat = localErr
@@ -984,7 +984,7 @@ subroutine reallocPCharacter2(arr, uindex, lindex, stat, fill, shift, keepExisti
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (associated(b) .and. localErr==0) then
+   if (associated(b) .and. localErr==0 .and. size(b)>0) then
       do i2 = mlind(2),muind(2)
          do i1 = mlind(1),muind(1)
              arr(i1,i2) = b(i1-shift_(1),i2-shift_(2))
@@ -1055,7 +1055,7 @@ subroutine reallocCharacter2(arr, uindex, lindex, stat, fill, shift, keepExistin
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (allocated(b) .and. localErr==0) then
+   if (allocated(b) .and. localErr==0 .and. size(b)>0) then
       do i2 = mlind(2),muind(2)
          do i1 = mlind(1),muind(1)
              arr(i1,i2) = b(i1,i2)
@@ -1124,7 +1124,7 @@ subroutine reallocPCharacter3(arr, uindex, lindex, stat, fill, shift, keepExisti
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2),lindex_(3):uindex(3)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (associated(b) .and. localErr==0) then
+   if (associated(b) .and. localErr==0 .and. size(b)>0) then
       do i3 = mlind(3),muind(3)
          do i2 = mlind(2),muind(2)
             do i1 = mlind(1),muind(1)
@@ -1199,7 +1199,7 @@ subroutine reallocCharacter3(arr, uindex, lindex, stat, fill, shift, keepExistin
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2),lindex_(3):uindex(3)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (allocated(b) .and. localErr==0) then
+   if (allocated(b) .and. localErr==0 .and. size(b)>0) then
       do i3 = mlind(3),muind(3)
          do i2 = mlind(2),muind(2)
             do i1 = mlind(1),muind(1)
@@ -1270,7 +1270,7 @@ subroutine reallocPCharacter4(arr, uindex, lindex, stat, fill, shift, keepExisti
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2),lindex_(3):uindex(3),lindex_(4):uindex(4)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (associated(b) .and. localErr==0) then
+   if (associated(b) .and. localErr==0 .and. size(b)>0) then
       do i4 = mlind(4),muind(4)
          do i3 = mlind(3),muind(3)
             do i2 = mlind(2),muind(2)
@@ -1349,7 +1349,7 @@ subroutine reallocCharacter4(arr, uindex, lindex, stat, fill, shift, keepExistin
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2),lindex_(3):uindex(3),lindex_(4):uindex(4)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (allocated(b) .and. localErr==0) then
+   if (allocated(b) .and. localErr==0 .and. size(b)>0) then
       do i4 = mlind(4),muind(4)
          do i3 = mlind(3),muind(3)
             do i2 = mlind(2),muind(2)
@@ -1422,8 +1422,8 @@ subroutine reallocPReal(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_:uindex), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (associated(b) .and. localErr==0) then
-  arr(mlind:muind) = b(mlind-shift_:muind-shift_)
+   if (associated(b) .and. localErr==0 .and. size(b)>0) then
+      arr(mlind:muind) = b(mlind-shift_:muind-shift_)
       deallocate(b, stat = localErr)
    endif
    if (present(stat)) stat = localErr
@@ -1485,8 +1485,8 @@ subroutine reallocReal(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_:uindex), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (allocated(b) .and. localErr==0) then
-  arr(mlind:muind) = b(mlind:muind)
+   if (allocated(b) .and. localErr==0 .and. size(b)>0) then
+      arr(mlind:muind) = b(mlind:muind)
       deallocate(b, stat = localErr)
    endif
    if (present(stat)) stat = localErr
@@ -1550,7 +1550,7 @@ subroutine reallocPReal2(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (associated(b) .and. localErr==0) then
+   if (associated(b) .and. localErr==0 .and. size(b)>0) then
       do i2 = mlind(2),muind(2)
          do i1 = mlind(1),muind(1)
              arr(i1,i2) = b(i1-shift_(1),i2-shift_(2))
@@ -1621,7 +1621,7 @@ subroutine reallocReal2(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (allocated(b) .and. localErr==0) then
+   if (allocated(b) .and. localErr==0 .and. size(b)>0) then
       do i2 = mlind(2),muind(2)
          do i1 = mlind(1),muind(1)
              arr(i1,i2) = b(i1,i2)
@@ -1690,7 +1690,7 @@ subroutine reallocPReal3(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2),lindex_(3):uindex(3)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (associated(b) .and. localErr==0) then
+   if (associated(b) .and. localErr==0 .and. size(b)>0) then
       do i3 = mlind(3),muind(3)
          do i2 = mlind(2),muind(2)
             do i1 = mlind(1),muind(1)
@@ -1765,7 +1765,7 @@ subroutine reallocReal3(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2),lindex_(3):uindex(3)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (allocated(b) .and. localErr==0) then
+   if (allocated(b) .and. localErr==0 .and. size(b)>0) then
       do i3 = mlind(3),muind(3)
          do i2 = mlind(2),muind(2)
             do i1 = mlind(1),muind(1)
@@ -1836,7 +1836,7 @@ subroutine reallocPReal4(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2),lindex_(3):uindex(3),lindex_(4):uindex(4)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (associated(b) .and. localErr==0) then
+   if (associated(b) .and. localErr==0 .and. size(b)>0) then
       do i4 = mlind(4),muind(4)
          do i3 = mlind(3),muind(3)
             do i2 = mlind(2),muind(2)
@@ -1915,7 +1915,7 @@ subroutine reallocReal4(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2),lindex_(3):uindex(3),lindex_(4):uindex(4)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (allocated(b) .and. localErr==0) then
+   if (allocated(b) .and. localErr==0 .and. size(b)>0) then
       do i4 = mlind(4),muind(4)
          do i3 = mlind(3),muind(3)
             do i2 = mlind(2),muind(2)
@@ -1988,8 +1988,8 @@ subroutine reallocPDouble(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_:uindex), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (associated(b) .and. localErr==0) then
-  arr(mlind:muind) = b(mlind-shift_:muind-shift_)
+   if (associated(b) .and. localErr==0 .and. size(b)>0) then
+      arr(mlind:muind) = b(mlind-shift_:muind-shift_)
       deallocate(b, stat = localErr)
    endif
    if (present(stat)) stat = localErr
@@ -2051,8 +2051,8 @@ subroutine reallocDouble(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_:uindex), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (allocated(b) .and. localErr==0) then
-  arr(mlind:muind) = b(mlind:muind)
+   if (allocated(b) .and. localErr==0 .and. size(b)>0) then
+      arr(mlind:muind) = b(mlind:muind)
       deallocate(b, stat = localErr)
    endif
    if (present(stat)) stat = localErr
@@ -2116,7 +2116,7 @@ subroutine reallocPDouble2(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (associated(b) .and. localErr==0) then
+   if (associated(b) .and. localErr==0 .and. size(b)>0) then
       do i2 = mlind(2),muind(2)
          do i1 = mlind(1),muind(1)
              arr(i1,i2) = b(i1-shift_(1),i2-shift_(2))
@@ -2187,7 +2187,7 @@ subroutine reallocDouble2(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (allocated(b) .and. localErr==0) then
+   if (allocated(b) .and. localErr==0 .and. size(b)>0) then
       do i2 = mlind(2),muind(2)
          do i1 = mlind(1),muind(1)
              arr(i1,i2) = b(i1,i2)
@@ -2256,7 +2256,7 @@ subroutine reallocPDouble3(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2),lindex_(3):uindex(3)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (associated(b) .and. localErr==0) then
+   if (associated(b) .and. localErr==0 .and. size(b)>0) then
       do i3 = mlind(3),muind(3)
          do i2 = mlind(2),muind(2)
             do i1 = mlind(1),muind(1)
@@ -2331,7 +2331,7 @@ subroutine reallocDouble3(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2),lindex_(3):uindex(3)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (allocated(b) .and. localErr==0) then
+   if (allocated(b) .and. localErr==0 .and. size(b)>0) then
       do i3 = mlind(3),muind(3)
          do i2 = mlind(2),muind(2)
             do i1 = mlind(1),muind(1)
@@ -2402,7 +2402,7 @@ subroutine reallocPDouble4(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2),lindex_(3):uindex(3),lindex_(4):uindex(4)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (associated(b) .and. localErr==0) then
+   if (associated(b) .and. localErr==0 .and. size(b)>0) then
       do i4 = mlind(4),muind(4)
          do i3 = mlind(3),muind(3)
             do i2 = mlind(2),muind(2)
@@ -2481,7 +2481,7 @@ subroutine reallocDouble4(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2),lindex_(3):uindex(3),lindex_(4):uindex(4)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (allocated(b) .and. localErr==0) then
+   if (allocated(b) .and. localErr==0 .and. size(b)>0) then
       do i4 = mlind(4),muind(4)
          do i3 = mlind(3),muind(3)
             do i2 = mlind(2),muind(2)
@@ -2554,8 +2554,8 @@ subroutine reallocPLogical(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_:uindex), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (associated(b) .and. localErr==0) then
-  arr(mlind:muind) = b(mlind-shift_:muind-shift_)
+   if (associated(b) .and. localErr==0 .and. size(b)>0) then
+      arr(mlind:muind) = b(mlind-shift_:muind-shift_)
       deallocate(b, stat = localErr)
    endif
    if (present(stat)) stat = localErr
@@ -2617,8 +2617,8 @@ subroutine reallocLogical(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_:uindex), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (allocated(b) .and. localErr==0) then
-  arr(mlind:muind) = b(mlind:muind)
+   if (allocated(b) .and. localErr==0 .and. size(b)>0) then
+      arr(mlind:muind) = b(mlind:muind)
       deallocate(b, stat = localErr)
    endif
    if (present(stat)) stat = localErr
@@ -2682,7 +2682,7 @@ subroutine reallocPLogical2(arr, uindex, lindex, stat, fill, shift, keepExisting
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (associated(b) .and. localErr==0) then
+   if (associated(b) .and. localErr==0 .and. size(b)>0) then
       do i2 = mlind(2),muind(2)
          do i1 = mlind(1),muind(1)
              arr(i1,i2) = b(i1-shift_(1),i2-shift_(2))
@@ -2753,7 +2753,7 @@ subroutine reallocLogical2(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (allocated(b) .and. localErr==0) then
+   if (allocated(b) .and. localErr==0 .and. size(b)>0) then
       do i2 = mlind(2),muind(2)
          do i1 = mlind(1),muind(1)
              arr(i1,i2) = b(i1,i2)
@@ -2822,7 +2822,7 @@ subroutine reallocPLogical3(arr, uindex, lindex, stat, fill, shift, keepExisting
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2),lindex_(3):uindex(3)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (associated(b) .and. localErr==0) then
+   if (associated(b) .and. localErr==0 .and. size(b)>0) then
       do i3 = mlind(3),muind(3)
          do i2 = mlind(2),muind(2)
             do i1 = mlind(1),muind(1)
@@ -2897,7 +2897,7 @@ subroutine reallocLogical3(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2),lindex_(3):uindex(3)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (allocated(b) .and. localErr==0) then
+   if (allocated(b) .and. localErr==0 .and. size(b)>0) then
       do i3 = mlind(3),muind(3)
          do i2 = mlind(2),muind(2)
             do i1 = mlind(1),muind(1)
@@ -2968,7 +2968,7 @@ subroutine reallocPLogical4(arr, uindex, lindex, stat, fill, shift, keepExisting
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2),lindex_(3):uindex(3),lindex_(4):uindex(4)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (associated(b) .and. localErr==0) then
+   if (associated(b) .and. localErr==0 .and. size(b)>0) then
       do i4 = mlind(4),muind(4)
          do i3 = mlind(3),muind(3)
             do i2 = mlind(2),muind(2)
@@ -3047,7 +3047,7 @@ subroutine reallocLogical4(arr, uindex, lindex, stat, fill, shift, keepExisting)
        allocate(arr(lindex_(1):uindex(1),lindex_(2):uindex(2),lindex_(3):uindex(3),lindex_(4):uindex(4)), stat = localErr)
    endif
    if (present(fill) .and. localErr==0) arr = fill
-   if (allocated(b) .and. localErr==0) then
+   if (allocated(b) .and. localErr==0 .and. size(b)>0) then
       do i4 = mlind(4),muind(4)
          do i3 = mlind(3),muind(3)
             do i2 = mlind(2),muind(2)

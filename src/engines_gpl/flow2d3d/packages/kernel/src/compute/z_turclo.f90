@@ -539,6 +539,16 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
              ustwin = sqrt(ustwkw)
              vicww(nm, kfsmax(nm)) = vonkar*zw*ustwin
              dicww(nm, kfsmax(nm)) = vonkar*zw*ustwin
+             !
+             ! Rtur1 can be used to determine viscosity at surface
+             ! Only for k-eps model
+             !
+             if (ltur == 2) then
+                vicww(nm, kfsmax(nm)) = cmukep*rtur1(nm, kfsmax(nm), 1)**2   &
+                                      & /max(rtur1(nm, kfsmax(nm), 2), epsd)
+                dicww(nm, kfsmax(nm)) = vicww(nm, kfsmax(nm))
+             endif
+             
           else
              !
              ! make vicww and dicww small for points
@@ -580,7 +590,7 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
                             & + dicuv(nm, kbg) + dicuv(nm, khtur)
             endif
          enddo
-       endif         
+       endif
     enddo
  2000 continue
 end subroutine z_turclo

@@ -49,8 +49,12 @@ subroutine initflwpar(gdp)
     allocate (gdp%gdflwpar%flwoutput, stat = istat)
     allocate (gdp%gdflwpar%fbcrfile , stat = istat) 
     !
+    gdp%gdflwpar%flwoutput%cntcflmsg   = 0
+    gdp%gdflwpar%flwoutput%maxcflmsg   = 100
+    !
     gdp%gdflwpar%flwoutput%air         = .false.
     gdp%gdflwpar%flwoutput%addtim      = .false.
+    gdp%gdflwpar%flwoutput%cflmsg      = .false.
     gdp%gdflwpar%flwoutput%chezy       = .false.
     gdp%gdflwpar%flwoutput%cumdifuflux = .false.
     gdp%gdflwpar%flwoutput%difuflux    = .false.

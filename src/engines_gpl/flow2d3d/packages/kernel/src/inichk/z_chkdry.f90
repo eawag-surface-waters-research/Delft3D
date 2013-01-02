@@ -7,7 +7,7 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
                   & hkru      ,hkrv      ,s1        ,dps       ,u1        , &
                   & v1        ,umean     ,vmean     ,r1        ,rtur1     , &
                   & guu       ,gvv       ,qxk       ,qyk       ,dzu1      , &
-                  & dzv1      ,gdp       )
+                  & dzv1      ,zk        ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -64,6 +64,8 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     real(fp)       , pointer :: dryflc
     logical        , pointer :: zmodel
     logical        , pointer :: kfuv_from_restart
+    real(fp)       , pointer :: dzmin
+    
 !
 ! Global variables
 !
@@ -86,10 +88,10 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: kfsmax !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfsmin !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: kfu    !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfumax !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: kfumax !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfumin !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: kfv    !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfvmax !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: kfvmax !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfvmin !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)                    :: kspu   !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)                    :: kspv   !  Description and declaration in esm_alloc_int.f90
@@ -116,10 +118,13 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: u1     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: v1     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)              :: r1     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(0:kmax)                             , intent(in)  :: zk
 !             
 ! Local variables
 !
     integer :: k      ! Help var. 
+    integer :: kkmin   ! Help var. 
+    integer :: kkmax   ! Help var. 
     integer :: kd
     integer :: ku
     integer :: l      ! Help var. 
@@ -127,77 +132,118 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     integer :: ndm    ! Help var. NM-ICY 
     integer :: nm     ! Help var. loops 1,nmmax and j,nmmaxj 
     integer :: nmd
+    integer :: nmu
+    integer :: num
+    real(fp):: hnm
     real(fp):: htrsh
     real(fp):: hucres
     real(fp):: hvcres
+    real(fp):: s1u
+    real(fp):: s1v
 !
 !! executable statements -------------------------------------------------------
 !
     zmodel             => gdp%gdprocs%zmodel
     dryflc             => gdp%gdnumeco%dryflc
     kfuv_from_restart  => gdp%gdrestart%kfuv_from_restart
+    dzmin              => gdp%gdzmodel%dzmin
     !
-    htrsh = .5*dryflc
+    htrsh = 0.5_fp*dryflc
     !
     !NOTE: that the contents of KFS are here identical to KCS
     !      (except for boundary points)
     !
-    if (initia>0) then
+    if (initia > 0) then
        !
-       !-----initialize global arrays
-       !     (HU, HV, QXK and QYK are initialized in esm_alloc_real)
-       !     (KFS/U/V are already initialised in Z_INIZM)
+       ! Initialize global arrays
+       ! (HU, HV, QXK and QYK are initialized in esm_alloc_real)
+       ! (KFS/U/V are already initialised in Z_INIZM)
        !
-       do nm = j, nmmaxj
-          umean(nm) = 0.0
-          vmean(nm) = 0.0
+       umean = 0.0_fp
+       vmean = 0.0_fp
+       !
+       do nm = 1, nmmax
           !
-          !---------check based on KFU/V but also on HU because HU can be zero
-          !         despite KFU/V = 1. Altering of KFU/V value (to 0, when
-          !         velocity point is dry)is done after UPWHU
+          ! Check based on KFU/V but also on HU because HU can be zero
+          ! despite KFU/V = 1. Altering of KFU/V value (to 0, when
+          ! velocity point is dry)is done after UPWHU
           !
-          if (kfu(nm)==1 .and. hu(nm)>=htrsh) then
-             do k = kfumin(nm), kfumax(nm)
-                umean(nm) = umean(nm) + (dzu1(nm, k)/hu(nm)) * u1(nm, k)
+          ! First determine umean for the top layer(s) of cells NM and NMU
+          ! to find the upwind direction
+          !
+          nmu   = nm + icx
+          !
+          ! Determine layers participating in velocity point
+          !
+          kkmin = min(kfsmax(nm), kfsmax(nmu))
+          kkmax = max(kfsmax(nm), kfsmax(nmu))
+          !
+          ! kkmin below the bottom in NM or NMU?
+          !
+          kkmin = max( kkmin, max(kfsmin(nm), kfsmin(nmu)) )
+          !
+          if (kfu(nm) == 1 .and. hu(nm)>=htrsh) then
+             hnm = 0.0_fp
+             do k = kkmin, kkmax
+                umean(nm) = umean(nm) + u1(nm,k)*dzu1(nm,k)
+                hnm       = hnm + dzu1(nm,k)
              enddo
+             umean(nm) = umean(nm) / max(hnm, 0.01_fp)
+          else
           endif
-          if (kfv(nm)==1 .and. hv(nm)>=htrsh) then
-             do k = kfvmin(nm), kfvmax(nm)
-                vmean(nm) = vmean(nm) + (dzv1(nm, k)/hv(nm)) * v1(nm, k)
+          !
+          num   = nm + icy
+          !
+          ! Determine layers participating in velocity point
+          !
+          kkmin = min(kfsmax(nm), kfsmax(num))
+          kkmax = max(kfsmax(nm), kfsmax(num))
+          !
+          ! kkmin below the bottom in NM or NUM?
+          !
+          kkmin = max( kkmin, max(kfsmin(nm), kfsmin(num)) )
+          !
+          if (kfv(nm) == 1 .and. hv(nm)>=htrsh) then
+             hnm = 0.0_fp
+             do k = kkmin, kkmax
+                vmean(nm) = vmean(nm) + v1(nm,k)*dzv1(nm,k)
+                hnm       = hnm + dzv1(nm,k)
              enddo
+             vmean(nm) = vmean(nm) / max(hnm, 0.01_fp)
+          else
           endif
        enddo
        !
-       !-----redefine S1 in case they are smaller then DPS and reset the mask
-       !     arrays KFU,KFV and KFS
-       !     -icx := -1 in m-direction, -icy := -1 in n-direction
-       !     In Z_INIZM all relevant depths and waterlevels are already checked.
-       !     This may be redundant
+       ! Redefine S1 in case they are smaller then DPS and reset the mask
+       ! arrays KFU,KFV and KFS
+       ! -icx := -1 in m-direction, -icy := -1 in n-direction
+       ! In Z_INIZM all relevant depths and waterlevels are already checked.
+       ! This may be redundant
        !
        do nm = 1, nmmax
           nmd = nm - icx
           ndm = nm - icy
-          if (kcs(nm)>0) then
+          if (kcs(nm) > 0) then
              if (s1(nm)<= - real(dps(nm),fp)) then
-                s1(nm) = -real(dps(nm),fp)
-                kfu(nm) = 0
+                s1(nm)   = -real(dps(nm),fp)
+                kfu(nm)  = 0
                 kfu(nmd) = 0
-                kfv(nm) = 0
+                kfv(nm)  = 0
                 kfv(ndm) = 0
-                kfs(nm) = 0
+                kfs(nm)  = 0
                 do k = 1, kmax
-                   kfuz1(nm, k) = 0
+                   kfuz1(nm, k)  = 0
                    kfuz1(nmd, k) = 0
-                   kfvz1(nm, k) = 0
+                   kfvz1(nm, k)  = 0
                    kfvz1(ndm, k) = 0
-                   kfsz1(nm, k) = 0
+                   kfsz1(nm, k)  = 0
                 enddo
              endif
           endif
        enddo
     endif
     !
-    !-----calculate HU and HV
+    ! Calculate HU and HV
     !
     call upwhu(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              & zmodel    ,kcs       ,kfu       ,kspu      ,dps       , &
@@ -206,78 +252,23 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
              & zmodel    ,kcs       ,kfv       ,kspv      ,dps       , &
              & s1        ,dpv       ,vmean     ,hv        ,gdp       )
     !
-    !-----check for dry velocity points
-    !     Approach for 2D weirs (following WAQUA)
-    !     HUCRES is initially set to extreme large value to guarantee
-    !     the MIN operator works as planned
-    !
-    if (initia>0) then
-       do nm = 1, nmmax
-          hucres = 1E9
-          !
-          !-----------set hucres / hvcres
-          !
-          if (abs(kspu(nm, 0))==9) then
-             if (umean(nm)>=0.001) then
-                hucres = s1(nm) + hkru(nm)
-             elseif (umean(nm)<= - 0.001) then
-                hucres = s1(nm + icx) + hkru(nm)
-             else
-                hucres = max(s1(nm + icx), s1(nm)) + hkru(nm)
-             endif
-          endif
-          !
-          hvcres = 1E9
-          if (abs(kspv(nm, 0))==9) then
-             if (vmean(nm)>=0.001) then
-                hvcres = s1(nm) + hkrv(nm)
-             elseif (vmean(nm)<= - 0.001) then
-                hvcres = s1(nm + icy) + hkrv(nm)
-             else
-                hvcres = max(s1(nm + icy), s1(nm)) + hkrv(nm)
-             endif
-          endif
-          !
-          !-----------check for dry velocity points
-          !
-          if (kfu(nm)*min(hu(nm), hucres)<dryflc .and. kcu(nm)*kfu(nm)==1) then
-             !            if (hu (nm) .lt. htrsh) then
-             if (.not.kfuv_from_restart) then
-                kfu(nm) = 0
-             endif
-             do k = 1, kmax
-                kfuz1(nm, k) = 0
-             enddo
-          endif
-          if (kfv(nm)*min(hv(nm), hvcres)<dryflc .and. kcv(nm)*kfv(nm)==1) then
-             !            if (hv (nm).lt. htrsh) then
-             if (.not.kfuv_from_restart) then
-                kfv(nm) = 0
-             endif
-             do k = 1, kmax
-                kfvz1(nm, k) = 0
-             enddo
-          endif
-       enddo
-    endif
-    !
     ! set KFS to 0 if the surrounding velocity points are dry
     !
     do nm = 1, nmmax
-       if (kcs(nm)>0) then
+       if (kcs(nm) > 0) then
           nmd = nm - icx
           ndm = nm - icy
           kfs(nm) = max(kfu(nm), kfu(nmd), kfv(nm), kfv(ndm))
-          if (kfs(nm)==1) then
+          if (kfs(nm) == 1) then
              do k = kfsmin(nm), kmax
-                if (k<=kfsmax(nm)) then
+                if (k <= kfsmax(nm)) then
                    kfsz1(nm, k) = 1
                 else
                    kfsz1(nm, k) = 0
                 endif
              enddo
           else
-             kfsmax(nm) = -1
+             !kfsmax(nm) = -1
              do k = kfsmin(nm), kmax
                 kfsz1(nm, k) = 0
              enddo
@@ -285,7 +276,123 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
        endif
     enddo
     !
-    !-----mask initial arrays
+    ! Check for dry velocity points
+    ! Approach for 2D weirs (following WAQUA)
+    ! HUCRES is initially set to extreme large value to guarantee
+    ! the MIN operator works as planned
+    !
+    if (initia > 0) then
+       do nm = 1, nmmax
+          nmu = nm + icx
+          num = nm + icy
+          !
+          ! s1u is used for setting kfumax
+          !
+          if (umean(nm) > 0.0_fp) then
+             s1u = s1(nm)
+          elseif (umean(nm) < 0.0_fp) then
+             s1u = s1(nmu)
+          else
+             s1u = max(s1(nm), s1(nmu))
+          endif
+          !
+          ! s1v is used for setting kfvmax
+          !
+          if (vmean(nm) > 0.0_fp) then
+             s1v = s1(nm)
+          elseif (vmean(nm) < 0.0_fp) then
+             s1v = s1(num)
+          else
+             s1v = max(s1(nm), s1(num))
+          endif
+          !
+          ! set hucres / hvcres
+          !
+          hucres = 1.0e+9_fp
+          if (abs(kspu(nm, 0)) == 9) then
+             hucres = s1u + hkru(nm)
+          endif
+          !
+          hvcres = 1.0e+9_fp
+          if (abs(kspv(nm, 0)) == 9) then
+             hvcres = s1v + hkrv(nm)
+          endif         
+          !
+          ! Determine KFUMAX, using S1U, starting from the top layer KMAX
+          !
+          do k = kmax, kfumin(nm), -1
+             kfuz1(nm, k) = 0
+             !
+             ! 15-3-2007 change to allow S1 > ZK(KMAX), needed for NH-models
+             !
+             if ( kcu(nm) /= 0 .and. (zk(k - 1)+dzmin <= s1u .or. (s1u>zk(kmax) .and. k==kmax)) ) then
+                kfumax(nm) = k
+                exit
+             endif
+          enddo
+          !
+          ! Set kfuz1 but overwrite kfuz1 at points with gates
+          !
+          kkmin = min(kfsmin(nm), kfsmin(nmu))
+          kkmax = max(kfsmax(nm), kfsmax(nmu))
+          do k = kkmin, kfumin(nm)-1
+             kfuz1(nm,k) = 0
+          enddo
+          do k = kfumin(nm), kkmax
+             if (kspu(nm, 0)*kspu(nm, k)==4 .or. kspu(nm, 0)*kspu(nm, k)==10) then
+                kfuz1(nm, k) = 0
+             else
+                if (umean(nm) > 0.0_fp) then
+                   kfuz1(nm, k) = kfsz1(nm,k)
+                elseif (umean(nm) < 0.0_fp) then
+                   kfuz1(nm, k) = kfsz1(nmu,k)
+                elseif (k <= kfumax(nm)) then
+                   kfuz1(nm, k) = 1
+                else
+                   kfuz1(nm, k) = 0
+                endif
+             endif
+          enddo
+          !
+          ! Determine KFVMAX, using S1V, starting from the top layer KMAX
+          !
+          do k = kmax, kfvmin(nm), -1
+             kfvz1(nm, k) = 0
+             !
+             ! 15-3-2007 change to allow S1 > ZK(KMAX), needed for NH-models
+             !
+             if ( kcv(nm) /= 0 .and. (zk(k - 1)+dzmin <= s1v .or. (s1v>zk(kmax) .and. k==kmax)) ) then
+                kfvmax(nm) = k
+                exit
+             endif
+          enddo
+          !
+          ! Set kfuz1 but overwrite kfuz1 at points with gates
+          !
+          kkmin = min(kfsmin(nm), kfsmin(num))
+          kkmax = max(kfsmax(nm), kfsmax(num))
+          do k = kkmin, kfvmin(nm)-1
+             kfvz1(nm,k) = 0
+          enddo
+          do k = kfvmin(nm), kkmax
+             if (kspv(nm, 0)*kspv(nm, k)==4 .or. kspv(nm, 0)*kspv(nm, k)==10) then
+                kfvz1(nm, k) = 0
+             else
+                if (vmean(nm) > 0.0_fp) then
+                   kfvz1(nm, k) = kfsz1(nm,k)
+                elseif (vmean(nm) < 0.0_fp) then
+                   kfvz1(nm, k) = kfsz1(num,k)
+                elseif (k <= kfvmax(nm)) then
+                   kfvz1(nm, k) = 1
+                else
+                   kfvz1(nm, k) = 0
+                endif
+             endif
+          enddo
+       enddo
+    endif
+    !
+    ! Mask initial arrays
     !
     do nm = 1, nmmax
        mask = min(1, kcs(nm))
@@ -307,7 +414,7 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
           !
           do k = 1, kmax
              do l = 1, lstsci
-                r1(nm, k, l) = 0.0
+                r1(nm, k, l) = 0.0_fp
              enddo
           enddo
        endif
@@ -321,13 +428,13 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
        enddo
     enddo
     !
-    !-----calculate flows in x- and y- direction
+    ! Calculate flows in x- and y- direction
     !
     do nm = 1, nmmax
        do k = 1, kmax
-          u1(nm, k)  = u1(nm, k)* kfuz1(nm, k)
+          u1 (nm, k) = u1(nm, k)* kfuz1(nm, k)
           qxk(nm, k) = guu(nm)  * dzu1(nm, k) * u1(nm, k)
-          v1(nm, k)  = v1(nm, k)* kfvz1(nm, k)
+          v1 (nm, k) = v1(nm, k)* kfvz1(nm, k)
           qyk(nm, k) = gvv(nm)  * dzv1(nm, k) * v1(nm, k)
        enddo
     enddo

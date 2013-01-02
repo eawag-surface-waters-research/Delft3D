@@ -61,92 +61,92 @@ subroutine z_vermom(nmmax     ,kmax      ,icx       ,icy       ,u0        , &
 !
 ! Global variables
 !
-    integer                                        , intent(in) :: icx
-    integer                                        , intent(in) :: icy
-    integer                                        , intent(in) :: kmax !  Description and declaration in esm_alloc_int.f90
-    integer                                        , intent(in) :: nmmax !  Description and declaration in dimens.igs
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: kcs !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: kfs !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: kfsmax !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: kfsmin !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: kcshyd !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in) :: kfsz1 !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in) :: kfuz1 !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in) :: kfvz1 !  Description and declaration in esm_alloc_int.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: guu !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: guv !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: gvu !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: gvv !  Description and declaration in esm_alloc_real.f90
+    integer                                            , intent(in) :: icx
+    integer                                            , intent(in) :: icy
+    integer                                            , intent(in) :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                            , intent(in) :: nmmax  !  Description and declaration in dimens.igs
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: kfs    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: kfsmax !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: kfsmin !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: kcshyd !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: kfsz1  !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: kfuz1  !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: kfvz1  !  Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: guu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: guv    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: gvu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: gvv    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)              :: aak
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)              :: bbk
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)              :: cck
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)              :: ddk
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax) , intent(in) :: vicww !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax) , intent(in) :: w0 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)              :: w1 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: dzs1 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: dzu0 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: dzv0 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: p0 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: rxz !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ryz !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: u0 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: v0 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax) , intent(in) :: vicww  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax) , intent(in) :: w0     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)              :: w1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: dzs1   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: dzu0   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: dzv0   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: p0     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: rxz    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ryz    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: u0     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: v0     !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !
-    integer :: ddb
-    integer :: icxy
-    integer :: ifkx
-    integer :: ifky
-    integer :: ikenx
-    integer :: ikeny
-    integer :: k
-    integer :: kfad
-    integer :: ku
-    integer :: kup
-    integer :: m
-    integer :: maxk
-    integer :: ndelta
-    integer :: ndm
-    integer :: ndmd
-    integer :: ndmu
-    integer :: nm
-    integer :: nmd
-    integer :: nmst
-    integer :: nmstart
-    integer :: nmu
-    integer :: num
-    integer :: numd
-    integer :: numu
-    real(fp):: advecx
-    real(fp):: advecy
-    real(fp):: adza
-    real(fp):: adzc
-    real(fp):: bi
-    real(fp):: cuu
-    real(fp):: cvv
-    real(fp):: ddza
-    real(fp):: ddzb
-    real(fp):: ddzc
-    real(fp):: dt
-    real(fp):: dz
-    real(fp):: dzdo
-    real(fp):: dzu
-    real(fp):: dzup
-    real(fp):: dzv
-    real(fp):: geta
-    real(fp):: gksi
-    real(fp):: uuu
-    real(fp):: viscow
-    real(fp):: visk
-    real(fp):: viskup
-    real(fp):: vix
-    real(fp):: viy
-    real(fp):: vvv
-    real(fp):: wdo
-    real(fp):: wup
-    real(fp):: www
+    integer  :: ddb
+    integer  :: icxy
+    integer  :: ifkx
+    integer  :: ifky
+    integer  :: ikenx
+    integer  :: ikeny
+    integer  :: k
+    integer  :: kfad
+    integer  :: ku
+    integer  :: kup
+    integer  :: m
+    integer  :: maxk
+    integer  :: ndelta
+    integer  :: ndm
+    integer  :: ndmd
+    integer  :: ndmu
+    integer  :: nm
+    integer  :: nmd
+    integer  :: nmst
+    integer  :: nmstart
+    integer  :: nmu
+    integer  :: num
+    integer  :: numd
+    integer  :: numu
+    real(fp) :: advecx
+    real(fp) :: advecy
+    real(fp) :: adza
+    real(fp) :: adzc
+    real(fp) :: bi
+    real(fp) :: cuu
+    real(fp) :: cvv
+    real(fp) :: ddza
+    real(fp) :: ddzb
+    real(fp) :: ddzc
+    real(fp) :: dt
+    real(fp) :: dz
+    real(fp) :: dzdo
+    real(fp) :: dzu
+    real(fp) :: dzup
+    real(fp) :: dzv
+    real(fp) :: geta
+    real(fp) :: gksi
+    real(fp) :: uuu
+    real(fp) :: viscow
+    real(fp) :: visk
+    real(fp) :: viskup
+    real(fp) :: vix
+    real(fp) :: viy
+    real(fp) :: vvv
+    real(fp) :: wdo
+    real(fp) :: wup
+    real(fp) :: www
 !
 !! executable statements -------------------------------------------------------
 !
@@ -158,21 +158,21 @@ subroutine z_vermom(nmmax     ,kmax      ,icx       ,icy       ,u0        , &
     vicmol   => gdp%gdphysco%vicmol
     hdt      => gdp%gdnumeco%hdt
     !
-    ddb = gdp%d%ddbound
+    ddb  = gdp%d%ddbound
     icxy = max(icx, icy)
-    dt = 2*hdt
+    dt   = 2.0_fp*hdt
     !
-    ndelta = n2_nhy - n1_nhy
+    ndelta  = n2_nhy - n1_nhy
     nmstart = (n1_nhy + ddb) + (m1_nhy - 1 + ddb)*icxy
     !
     ! initialisatie
     !
     do nm = 1, nmmax
        do k = 1, kmax
-          aak(nm, k) = 0.
-          bbk(nm, k) = 1.
-          cck(nm, k) = 0.
-          ddk(nm, k) = 0.
+          aak(nm, k) = 0.0_fp
+          bbk(nm, k) = 1.0_fp
+          cck(nm, k) = 0.0_fp
+          ddk(nm, k) = 0.0_fp
        enddo
     enddo
     !
@@ -184,8 +184,8 @@ subroutine z_vermom(nmmax     ,kmax      ,icx       ,icy       ,u0        , &
           nmu = nm + icx
           num = nm + icy
           do k = 1, kmax
-             rxz(nm, k) = 0.
-             ryz(nm, k) = 0.
+             rxz(nm, k) = 0.0_fp
+             ryz(nm, k) = 0.0_fp
              kup = min(kmax, k + 1)
              if (k<kmax) then
                 ifkx = kfuz1(nm, k)*kfuz1(nm, kup)*kfsz1(nm, k)*kfsz1(nmu, k)
@@ -194,17 +194,17 @@ subroutine z_vermom(nmmax     ,kmax      ,icx       ,icy       ,u0        , &
                 ifkx = 0
                 ifky = 0
              endif
-             vix = .5*(vicww(nm, k) + vicww(nmu, k))
-             viy = .5*(vicww(nm, k) + vicww(num, k))
-             dzu = .5*(dzu0(nm, k) + dzu0(nm, kup))
-             dzv = .5*(dzv0(nm, k) + dzv0(nm, kup))
+             vix = 0.5_fp*(vicww(nm, k) + vicww(nmu, k))
+             viy = 0.5_fp*(vicww(nm, k) + vicww(num, k))
+             dzu = 0.5_fp*(dzu0 (nm, k) + dzu0 (nm , kup))
+             dzv = 0.5_fp*(dzv0 (nm, k) + dzv0 (nm , kup))
              if (ifkx==1) then
-                rxz(nm, k) = vix*((w1(nmu, k) - w1(nm, k))/gvu(nm) + (u0(nm, kup&
-                           & ) - u0(nm, k))/dzu)
+                rxz(nm, k) = vix*((w1(nmu, k)   - w1(nm, k))/gvu(nm) +  &
+                           &      (u0(nm , kup) - u0(nm, k))/dzu)
              endif
              if (ifky==1) then
-                ryz(nm, k) = viy*((w1(num, k) - w1(nm, k))/guv(nm) + (v0(nm, kup&
-                           & ) - v0(nm, k))/dzv)
+                ryz(nm, k) = viy*((w1(num, k)   - w1(nm, k))/guv(nm) +  &
+                           &      (v0(nm , kup) - v0(nm, k))/dzv)
              endif
           enddo
        enddo
@@ -215,26 +215,26 @@ subroutine z_vermom(nmmax     ,kmax      ,icx       ,icy       ,u0        , &
     do m = m1_nhy, m2_nhy
        nmst = nmstart + (m - m1_nhy)*icxy
        do nm = nmst, nmst + ndelta
-          if (kfs(nm)*kcs(nm)==1) then
-             nmd = nm - icx
-             ndm = nm - icy
+          if (kfs(nm)*kcs(nm) == 1) then
+             nmd  = nm - icx
+             ndm  = nm - icy
              ndmd = nm - icx - icy
-             nmu = nm + icx
-             num = nm + icy
+             nmu  = nm + icx
+             num  = nm + icy
              numu = nm + icx + icy
              ndmu = nm + icx - icy
              numd = nm - icx + icy
              gksi = gvu(nm)
              geta = guu(nm)
              do k = kfsmin(nm), kfsmax(nm)
-                ku = min(kfsmax(nm), k + 1)
-                vvv = 0.25*(v0(ndm, k) + v0(nm, k) + v0(ndm, ku) + v0(nm, ku))
-                uuu = 0.25*(u0(nmd, k) + u0(nm, k) + u0(nmd, ku) + u0(nm, ku))
-                cvv = vvv/geta
-                cuu = uuu/gksi
-                advecx = 0.0
-                advecy = 0.0
-                if (uuu>=0.0 .and. vvv>=0.0) then
+                ku     = min(kfsmax(nm), k + 1)
+                vvv    = 0.25_fp*(v0(ndm, k) + v0(nm, k) + v0(ndm, ku) + v0(nm, ku))
+                uuu    = 0.25_fp*(u0(nmd, k) + u0(nm, k) + u0(nmd, ku) + u0(nm, ku))
+                cvv    = vvv / geta
+                cuu    = uuu / gksi
+                advecx = 0.0_fp
+                advecy = 0.0_fp
+                if (uuu>=0.0_fp .and. vvv>=0.0_fp) then
                    if (cuu>cvv) then
                       ikenx = kfuz1(nmd ,k)*kfuz1(nmd ,ku)*kfsz1(nm ,k)*kfsz1(nmd ,k)
                       ikeny = kfvz1(ndmd,k)*kfvz1(ndmd,ku)*kfsz1(nmd,k)*kfsz1(ndmd,k)
@@ -254,7 +254,7 @@ subroutine z_vermom(nmmax     ,kmax      ,icx       ,icy       ,u0        , &
                          advecy = ikeny*vvv*(w1(nm, k) - w1(ndm, k))/guv(ndm)
                       endif
                    endif
-                elseif (uuu<0.0 .and. vvv>=0.0) then
+                elseif (uuu<0.0_fp .and. vvv>=0.0_fp) then
                    if ( - cuu>cvv) then
                       ikenx = kfuz1(nm  ,k)*kfuz1(nm  ,ku)*kfsz1(nmu,k)*kfsz1(nm  ,k)
                       ikeny = kfvz1(ndmu,k)*kfvz1(ndmu,ku)*kfsz1(nmu,k)*kfsz1(ndmu,k)
@@ -274,7 +274,7 @@ subroutine z_vermom(nmmax     ,kmax      ,icx       ,icy       ,u0        , &
                          advecy = ikeny*vvv*(w1(nm, k) - w1(ndm, k))/guv(ndm)
                       endif
                    endif
-                elseif (uuu>=0.0 .and. vvv<0.0) then
+                elseif (uuu>=0.0_fp .and. vvv<0.0_fp) then
                    if (cuu> - cvv) then
                       ikenx = kfuz1(nmd,k)*kfuz1(nmd,ku)*kfsz1(nm  ,k)*kfsz1(nmd,k)
                       ikeny = kfvz1(nmd,k)*kfvz1(nmd,ku)*kfsz1(numd,k)*kfsz1(nmd,k)
@@ -294,7 +294,7 @@ subroutine z_vermom(nmmax     ,kmax      ,icx       ,icy       ,u0        , &
                          advecy = ikeny*vvv*(w1(num, k) - w1(nm, k))/guv(nm)
                       endif
                    endif
-                elseif (uuu<0.0 .and. vvv<0.0) then
+                elseif (uuu<0.0_fp .and. vvv<0.0_fp) then
                    if ( - cuu> - cvv) then
                       ikenx = kfuz1(nm ,k)*kfuz1(nm ,ku)*kfsz1(nmu,k)*kfsz1(nm  ,k)
                       ikeny = kfvz1(nmu,k)*kfvz1(nmu,ku)*kfsz1(nmu,k)*kfsz1(numu,k)
@@ -319,33 +319,33 @@ subroutine z_vermom(nmmax     ,kmax      ,icx       ,icy       ,u0        , &
                 !
                 ! vertical advection
                 !
-                dz = .5*(dzs1(nm, k) + dzs1(nm, ku))
+                dz   = 0.5_fp*(dzs1(nm, k) + dzs1(nm, ku))
                 kfad = 0
-                kup = k + 1
-                if (k==kfsmin(nm)) then
+                kup  = k + 1
+                if (k == kfsmin(nm)) then
                    kfad = 1
                 endif
-                if (k==kfsmax(nm)) then
+                if (k == kfsmax(nm)) then
                    kfad = -1
-                   kup = k
+                   kup  = k
                 endif
                 dzup = dzs1(nm, kup)
                 dzdo = dzs1(nm, k)
-                if (k<=kfsmax(nm) - 2) then
-                   if (kfs(nm)*kcs(nm)==1) then
+                if (k <= kfsmax(nm)-2) then
+                   if (kfs(nm)*kcs(nm) == 1) then
                       www = w1(nm, k)
-                      if (www<0.0) then
-                         adza = -www*dzup/(dzdo*(dzup + dzdo))*(1 - abs(kfad))
-                         adzc = www*dzdo/(dzup*(dzup + dzdo))*(1 - abs(kfad))   &
-                              & + kfad*(1 + kfad)*www/(2.*dzup)
+                      if (www < 0.0_fp) then
+                         adza = -www / (dzup+dzdo) * real(1-abs(kfad),fp)
+                         adzc =  www / (dzup+dzdo) * real(1-abs(kfad),fp)   &
+                              & + kfad*(1+kfad)*www/(2.0_fp*dzup)
                       else
-                         adza = -www*dzup/(dzdo*(dzup + dzdo))*(1 - abs(kfad))  &
-                              & + abs(kfad)*( - 1 + kfad)*www/(2.*dzdo)
-                         adzc = www*dzdo/(dzup*(dzup + dzdo))*(1 - abs(kfad))
+                         adza = -www / (dzup+dzdo) * real(1-abs(kfad),fp)  &
+                              & + abs(kfad)*(-1+kfad)*www/(2.0_fp*dzdo)
+                         adzc =  www / (dzup+dzdo) * real(1-abs(kfad),fp)
                       endif
                    endif
                    aak(nm, k) = adza
-                   bbk(nm, k) = 1./dt - adza - adzc
+                   bbk(nm, k) = 1.0_fp/dt - adza - adzc
                    cck(nm, k) = adzc
                 !
                 ! advection first order upwind for two upper most grid cells to avoid
@@ -355,44 +355,48 @@ subroutine z_vermom(nmmax     ,kmax      ,icx       ,icy       ,u0        , &
                    ku = min(kfsmax(nm), k + 1)
                    if (kfs(nm)*kcs(nm)==1) then
                       www = w1(nm, k)
-                      wdo = 0.5*(www + abs(www))/dzs1(nm, k)
-                      wup = 0.5*(www - abs(www))/dzs1(nm, ku)
-                      if (k==kfsmin(nm)) wdo = 0.0
-                      if (k==kfsmax(nm)) wup = 0.0
+                      wdo = 0.5_fp*(www + abs(www))/dzs1(nm, k)
+                      wup = 0.5_fp*(www - abs(www))/dzs1(nm, ku)
+                      if (k==kfsmin(nm)) then
+                         wdo = 0.0_fp
+                      endif
+                      if (k==kfsmax(nm)) then
+                         wup = 0.0_fp
+                      endif
                       aak(nm, k) = -wdo
-                      bbk(nm, k) = 1./dt + wdo - wup
+                      bbk(nm, k) = 1.0_fp/dt + wdo - wup
                       cck(nm, k) = wup
                    endif
                 endif
                 !
                 ! vertical viscosity (rzz)
                 !
-                viskup = .125*(2 + kfad*(1 - kfad))                             &
+                viskup = 0.125_fp*(2 + kfad*(1 - kfad))                             &
                        & *(2*vicmol + vicww(nm, k) + vicww(nm, kup))
-                visk = .5*(2*vicmol + vicww(nm, k) + vicww(nm, k - 1))
+                visk = 0.5_fp*(2.0_fp*vicmol + vicww(nm, k) + vicww(nm, k - 1))
                 dzup = dzs1(nm, kup)
                 dzdo = dzs1(nm, k)
-                dz = .5*(dzup + dzdo)
-                ddza = visk/(dzdo*dz)
+                dz   = 0.5_fp*(dzup + dzdo)
+                ddza = visk  /(dzdo*dz)
                 ddzc = viskup/(dzup*dz)
                 ddzb = -ddza - ddzc
                 aak(nm, k) = aak(nm, k) - ddza
                 bbk(nm, k) = bbk(nm, k) - ddzb
                 cck(nm, k) = cck(nm, k) - ddzc
                 !
-                viscow = (rxz(nm, k) - rxz(nmd, k))/(.5*(gvv(nm) + gvv(ndm)))   &
-                       & + (ryz(nm, k) - ryz(ndm, k))/(.5*(guu(nm) + gvv(nmd)))
+                viscow = (rxz(nm, k) - rxz(nmd, k))/(0.5_fp*(gvv(nm) + gvv(ndm))) + &
+                       & (ryz(nm, k) - ryz(ndm, k))/(0.5_fp*(guu(nm) + gvv(nmd)))
                 if (k/=kfsmax(nm)) then
                    ddk(nm, k) = w0(nm, k)/dt - (advecx + advecy) + viscow -     &
                               & (p0(nm, ku) - p0(nm, k))/(dz*rhow)
                 else
                    ddk(nm, k) = w0(nm, k)/dt - (advecx + advecy) + viscow
                 endif
-                if (k==kfsmin(nm)) then
-                   aak(nm, k - 1) = 0.
-                   bbk(nm, k - 1) = 1.
-                   cck(nm, k - 1) = 0.
-                   ddk(nm, k - 1) = 0.
+                if (k == kfsmin(nm)) then
+                   aak(nm, k - 1) = 0.0_fp
+                   bbk(nm, k - 1) = 1.0_fp
+                   cck(nm, k - 1) = 0.0_fp
+                   ddk(nm, k - 1) = 0.0_fp
                 endif
              enddo
           endif
@@ -405,9 +409,9 @@ subroutine z_vermom(nmmax     ,kmax      ,icx       ,icy       ,u0        , &
        nmst = nmstart + (m - m1_nhy)*icxy
        do nm = nmst, nmst + ndelta
           if (kfsmax(nm) - kfsmin(nm)>0 .and. kcs(nm)==1) then
-             maxk = kfsmin(nm) - 1
-             bi = 1./bbk(nm, maxk)
-             bbk(nm, maxk) = 1.
+             maxk          = kfsmin(nm) - 1
+             bi            = 1.0_fp/bbk(nm, maxk)
+             bbk(nm, maxk) = 1.0_fp
              cck(nm, maxk) = cck(nm, maxk)*bi
              ddk(nm, maxk) = ddk(nm, maxk)*bi
           endif
@@ -419,7 +423,7 @@ subroutine z_vermom(nmmax     ,kmax      ,icx       ,icy       ,u0        , &
        do nm = nmst, nmst + ndelta
           if (kfs(nm)*kcs(nm)==1) then
              do k = kfsmin(nm), kfsmax(nm)
-                bi = 1./(bbk(nm, k) - aak(nm, k)*cck(nm, k - 1))
+                bi         = 1.0_fp/(bbk(nm, k) - aak(nm, k)*cck(nm, k - 1))
                 cck(nm, k) = cck(nm, k)*bi
                 ddk(nm, k) = (ddk(nm, k) - aak(nm, k)*ddk(nm, k - 1))*bi
              enddo
@@ -430,8 +434,8 @@ subroutine z_vermom(nmmax     ,kmax      ,icx       ,icy       ,u0        , &
     do m = m1_nhy, m2_nhy
        nmst = nmstart + (m - m1_nhy)*icxy
        do nm = nmst, nmst + ndelta
-          if (kcs(nm)==1) then
-              if (kfsmax(nm)>=kfsmin(nm)) then
+          if (kcs(nm) == 1) then
+              if (kfsmax(nm) >= kfsmin(nm)) then
                  w1(nm, kfsmax(nm)) = ddk(nm, kfsmax(nm))
               endif
           endif
@@ -441,10 +445,10 @@ subroutine z_vermom(nmmax     ,kmax      ,icx       ,icy       ,u0        , &
     do m = m1_nhy, m2_nhy
        nmst = nmstart + (m - m1_nhy)*icxy
        do nm = nmst, nmst + ndelta
-          if (kcs(nm)==1) then
+          if (kcs(nm) == 1) then
              do k = kfsmax(nm) - 1, kfsmin(nm) - 1, -1
                 ddk(nm, k) = ddk(nm, k) - cck(nm, k)*ddk(nm, k + 1)
-                w1(nm, k) = ddk(nm, k)
+                w1 (nm, k) = ddk(nm, k)
              enddo
           endif
        enddo

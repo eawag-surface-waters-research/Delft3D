@@ -1215,7 +1215,7 @@ subroutine compute_secundary_state(gdp       )
 
           call heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                    & ltem      ,lstsci    ,icx       ,icy       , &
-                   & nmmax     ,kmax      ,i(kfs)    ,i(kfsmax) , &
+                   & nmmax     ,kmax      ,i(kfs)    ,i(kfsmx0) ,i(kfsmax) , &
                    & i(kfsmin) ,i(kspu)   ,i(kspv)   ,r(dzs0)   ,r(dzs1)   , &
                    & r(sour)   ,r(sink)   ,r(r0)     ,r(evap)   ,d(dps)    , &
                    & r(s0)     ,r(s1)     ,r(thick)  ,r(w10mag) ,r(patm)   , &

@@ -1,5 +1,6 @@
-subroutine z_updtvol(nmmax     ,kmax      ,kcs       , gsqs      ,dzs1      , &
-                   & volum1    ,gdp       ) 
+subroutine z_updtvol(nmmax     ,kmax      ,kcs       ,kcu       ,kcv       , &
+                   & gsqs      ,dzs1      ,dzu0      ,dzv0      , &
+                   & volum1    ,areau     ,areav     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -45,15 +46,23 @@ subroutine z_updtvol(nmmax     ,kmax      ,kcs       , gsqs      ,dzs1      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    logical                , pointer :: nonhyd
+    integer                , pointer :: nh_level
 !
 ! Global variables
 !
-    integer                                     , intent(in)  :: kmax
-    integer                                     , intent(in)  :: nmmax
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)   , intent(in)  :: kcs
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: gsqs
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in)  :: dzs1
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(out) :: volum1
+    integer                                         , intent(in)  :: kmax    !  Description and declaration in esm_alloc_int.f90
+    integer                                         , intent(in)  :: nmmax   !  Description and declaration in dimens.igs
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kcs     !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kcu     !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kcv     !  Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: areau   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: areav   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in)  :: dzu0    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in)  :: dzv0    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in)  :: dzs1    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: gsqs    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(out) :: volum1  !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !
@@ -62,9 +71,21 @@ subroutine z_updtvol(nmmax     ,kmax      ,kcs       , gsqs      ,dzs1      , &
 !
 !! executable statements -------------------------------------------------------
 !
-do k = 1, kmax
-   do nm = 1, nmmax
-      volum1(nm, k) = dzs1(nm, k)*gsqs(nm)*min(1,kcs(nm))
-   enddo
-enddo
+    nonhyd      => gdp%gdprocs%nonhyd
+    nh_level    => gdp%gdnonhyd%nh_level
+    !
+    do k = 1, kmax
+       do nm = 1, nmmax
+          volum1(nm, k) = dzs1(nm, k)*gsqs(nm)*min(1,kcs(nm))
+       enddo
+    enddo
+    !
+    if (nonhyd .and. nh_level==nh_full) then
+       do k = 1, kmax
+          do nm = 1, nmmax
+             areau(nm, k) = dzu0(nm, k)*gsqs(nm)*min(1,kcu(nm))
+             areav(nm, k) = dzv0(nm, k)*gsqs(nm)*min(1,kcv(nm))
+          enddo
+       enddo
+    endif
 end subroutine z_updtvol

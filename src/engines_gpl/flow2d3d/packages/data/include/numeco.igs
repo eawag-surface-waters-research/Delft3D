@@ -31,6 +31,8 @@
 !
        real(fp)     :: chzmin !  Minimal chezy coefficient (used with secondary flow)
        real(fp)     :: dco    !  Marginal depth for upwind approach in shallow areas [m]
+       real(fp)     :: depini !  Global data
+                              !  Initial water depth for dry cells [m]
        real(fp)     :: dgcuni
        real(fp)     :: dryflc !  Drying & flooding threshold [m]
        real(fp)     :: fwfac  !  factor for adjusting intensity of energy dissipation in wave boundary layer

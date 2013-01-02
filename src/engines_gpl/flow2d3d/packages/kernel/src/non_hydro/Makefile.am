@@ -38,6 +38,8 @@ libkernel_non_hydro_la_SOURCES = \
          z_solcg.f90 \
          z_solcg_nhfull.f90 \
          z_vermom.f90 \
+         z_vermom_horadv_iupw.f90 \
+         z_vermom_horadv_mdue.f90 \
          z_vermom_nhfull.f90
 
 #-------------------------------------------------------------------------------

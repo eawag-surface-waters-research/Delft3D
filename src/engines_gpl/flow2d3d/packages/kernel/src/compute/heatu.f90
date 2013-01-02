@@ -1,6 +1,6 @@
 subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                & ltem      ,lstsci    ,icx       ,icy       , &
-               & nmmax     ,kmax      ,kfs       ,kfsmax    , &
+               & nmmax     ,kmax      ,kfs       ,kfsmx0    ,kfsmax    , &
                & kfsmin    ,kspu      ,kspv      ,dzs0      ,dzs1      , &
                & sour      ,sink      ,r0        ,evap      ,dps       , &
                & s0        ,s1        ,thick     ,w10mag    ,patm      , &
@@ -104,6 +104,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     logical                 , pointer :: free_convec
     logical                 , pointer :: solrad_read
     integer                 , pointer :: lundia
+    real(fp)                , pointer :: dryflc
     real(fp)                , pointer :: rhow
     real(fp)                , pointer :: rhoa
     real(fp)                , pointer :: ag
@@ -128,6 +129,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     integer                                                     , intent(in)  :: nmmax  !  Description and declaration in dimens.igs
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                , intent(in)  :: kfs    !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                , intent(in)  :: kfsmax !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                , intent(in)  :: kfsmx0 !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                , intent(in)  :: kfsmin !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)        , intent(in)  :: kspu   !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)        , intent(in)  :: kspv   !  Description and declaration in esm_alloc_int.f90
@@ -195,6 +197,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     real(fp)      :: hcp     ! Specific heat capacity 1004. [j/kg/K] 
     real(fp)      :: hfree   ! Free convection of sensible heat
     real(fp)      :: hlc
+    real(fp)      :: htrsh
     real(fp)      :: pr2
     real(fp)      :: prair
     real(fp)      :: presa   ! Actual atmospheric pressure at Water- level points (mbar)
@@ -289,6 +292,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     free_convec => gdp%gdheat%free_convec
     solrad_read => gdp%gdheat%solrad_read
     lundia      => gdp%gdinout%lundia
+    dryflc      => gdp%gdnumeco%dryflc
     rhow        => gdp%gdphysco%rhow
     rhoa        => gdp%gdphysco%rhoa
     ag          => gdp%gdphysco%ag
@@ -300,6 +304,8 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
     zmodel      => gdp%gdprocs%zmodel
     !
     msgcount = 0
+    htrsh    = 0.5_fp * dryflc
+    !
     if (rhum_file .or. tair_file .or. clou_file .or. swrf_file) then
        !
        ! update meteo input (if necessary)
@@ -419,7 +425,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                                   & kspv(nm, 0) /= 2 .or. kspv(ndm, 0) /= 2     ) ) then
              !
              if (zmodel) then
-                k0 = kfsmax(nm)
+                k0 = kfsmx0(nm)
              else
                 k0 = 1
              endif
@@ -541,7 +547,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                                   & kspv(nm, 0) /= 2 .or. kspv(ndm, 0) /= 2     ) ) then            
              !
              if (zmodel) then
-                k0 = kfsmax(nm)
+                k0 = kfsmx0(nm)
              else
                 k0 = 1
              endif
@@ -654,7 +660,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                                 & kspv(nm, 0) /= 2 .or. kspv(ndm, 0) /= 2     ) ) then
              !
              if (zmodel) then
-                k0 = kfsmax(nm)
+                k0 = kfsmx0(nm)
              else
                 k0 = 1
              endif
@@ -666,7 +672,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
              endif
              !
              if (zmodel) then
-                h0new = dzs1(nm, kfsmax(nm))
+                h0new = max(0.01_fp, dzs1(nm, kfsmax(nm)))
              else
                 h0new = max(0.01_fp, s1(nm) + real(dps(nm),fp))*thick(1)
              endif
@@ -741,7 +747,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                                 & kspv(nm, 0) /= 2 .or. kspv(ndm, 0) /= 2     ) ) then
              !
              if (zmodel) then
-                k0 = kfsmax(nm)
+                k0 = kfsmx0(nm)
              else
                 k0 = 1
              endif
@@ -828,10 +834,10 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
              ztop    = 0.0_fp
              zbottom = -h0old
              if (zmodel) then
-                k1    = kfsmax(nm) - 1
+                k1    = kfsmx0(nm) - 1
                 k2    = kfsmin(nm)
                 kstep = -1
-                zdown = -dzs0(nm, kfsmax(nm))
+                zdown = -dzs0(nm, kfsmx0(nm))
              else
                 k1    = 2
                 k2    = kmax
@@ -863,7 +869,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
              do k = k1, k2, kstep
                 ztop = zdown
                 if (zmodel) then
-                   zdown = zdown - dzs1(nm, k)
+                   zdown = zdown - dzs0(nm, k)
                 else
                    zdown = zdown - thick(k)*h0old
                 endif
@@ -957,7 +963,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                                     & kspv(nm, 0) /= 2 .or. kspv(ndm, 0) /= 2     ) ) then
              !
              if (zmodel) then
-                k0 = kfsmax(nm)
+                k0 = kfsmx0(nm)
              else
                 k0 = 1
              endif
@@ -1169,54 +1175,88 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
              h0new   = max(0.01_fp, s1(nm) + real(dps(nm),fp))
              ztop    = 0.0_fp
              zbottom = -h0old
-             if (zmodel) then
-                k1    = kfsmax(nm) - 1
-                k2    = kfsmin(nm)
-                kstep = -1
-                zdown = -dzs0(nm, kfsmax(nm))
-             else
-                k1    = 2
-                k2    = kmax
-                kstep = 1
-                zdown = -thick(1)*h0old
-             endif
              !
-             extinc = 1.7_fp/secchi(nm)
-             corr  = 1.0_fp / ( (1.0_fp - exp(extinc*zbottom)) / extinc )
-             qink  = corr * qsn * (1.0_fp - exp(extinc*zdown)) / extinc
-             qtotk = (qink-ql) / (rhow*cp)
-             if (zmodel) then
-                if (qtotk > 0.0_fp) then
-                   sour(nm, k0, ltem) = sour(nm, k0, ltem) + qtotk*gsqs(nm)
-                elseif (r0(nm, k0, ltem) > 0.0_fp) then
-                   sink(nm, k0, ltem) = sink(nm, k0, ltem) - qtotk*gsqs(nm)/r0(nm, k0, ltem)
-                else
-                   msgcount = msgcount + 1
-                endif
-             else
-                if (qtotk > 0.0_fp) then
-                   sour(nm, k0, ltem) = sour(nm, k0, ltem) + qtotk/(thick(k0)*h0old)
-                elseif (r0(nm, k0, ltem) > 0.0_fp) then
-                   sink(nm, k0, ltem) = sink(nm, k0, ltem) - qtotk/(thick(k0)*h0new*r0(nm, k0, ltem))
-                else
-                   msgcount = msgcount + 1
-                endif
-             endif
-             do k = k1, k2, kstep
-                ztop = zdown
+             ! For thin layers of water: no heat flux calculations
+             ! to avoid large fluxes in small bodies of water
+             !
+             !if (h0old > htrsh) then
                 if (zmodel) then
-                   zdown = zdown - dzs1(nm, k)
+                   k1    = kfsmx0(nm) - 1
+                   k2    = kfsmin(nm)
+                   kstep = -1
+                   zdown = -max(0.01_fp,dzs0(nm, kfsmx0(nm)))
                 else
-                   zdown = zdown - thick(k)*h0old
+                   k1    = 2
+                   k2    = kmax
+                   kstep = 1
+                   zdown = -thick(1)*h0old
                 endif
-                qink  = corr * qsn * (exp(extinc*ztop) - exp(extinc*zdown)) / extinc
-                qtotk = qink / (rhow*cp)
+                !
+                extinc = 1.7_fp/secchi(nm)
+                corr  = 1.0_fp / ( (1.0_fp - exp(extinc*zbottom)) / extinc )
+                qink  = corr * qsn * (1.0_fp - exp(extinc*zdown)) / extinc
+                qtotk = (qink-ql) / (rhow*cp)
+                !
+                ! Reduction of solar radiation at shallow areas
+                !
+                !if (h0old < secchi(nm) ) then
+                !   qtotk = qtotk * (1.0_fp - exp(extinc*zdown))
+                !endif    
+                !
                 if (zmodel) then
-                   sour(nm, k, ltem) = sour(nm, k, ltem) + qtotk*gsqs(nm)
+                   if (qtotk > 0.0_fp) then
+                      sour(nm, k0, ltem) = sour(nm, k0, ltem) + qtotk*gsqs(nm)
+                   elseif (r0(nm, k0, ltem) > 0.01_fp) then
+                      sink(nm, k0, ltem) = sink(nm, k0, ltem) - qtotk*gsqs(nm)/r0(nm, k0, ltem)
+                   elseif (r0(nm, k0, ltem) > 0.0_fp .and. r0(nm, k0, ltem) < 0.01_fp) then
+                      !
+                      ! No addition to sink when the water temperature is lower than 0.01 degree.
+                      !
+                   else
+                      msgcount = msgcount + 1
+                   endif
                 else
-                   sour(nm, k, ltem) = sour(nm, k, ltem) + qtotk/(thick(k)*h0old)
+                   if (qtotk > 0.0_fp) then
+                      sour(nm, k0, ltem) = sour(nm, k0, ltem) + qtotk/(thick(k0)*h0old)
+                   elseif (r0(nm, k0, ltem) > 0.01_fp) then
+                      sink(nm, k0, ltem) = sink(nm, k0, ltem) - qtotk/(thick(k0)*h0new*r0(nm, k0, ltem))
+                   elseif (r0(nm, k0, ltem) > 0.0_fp .and. r0(nm, k0, ltem) < 0.01_fp) then
+                      !
+                      ! No addition to sink when the water temperature is lower than 0.01 degree.
+                      !                   
+                   else
+                      msgcount = msgcount + 1
+                   endif
                 endif
-             enddo
+                do k = k1, k2, kstep
+                   ztop = zdown
+                   if (zmodel) then
+                      zdown = zdown - dzs0(nm, k)
+                   else
+                      zdown = zdown - thick(k)*h0old
+                   endif
+                   qink  = corr * qsn * (exp(extinc*ztop) - exp(extinc*zdown)) / extinc
+                   qtotk = qink / (rhow*cp)
+                   if (zmodel) then
+                      sour(nm, k, ltem) = sour(nm, k, ltem) + qtotk*gsqs(nm)
+                   else
+                      sour(nm, k, ltem) = sour(nm, k, ltem) + qtotk/(thick(k)*h0old)
+                   endif
+                enddo
+             !else
+             !   !
+             !   ! Thin layer of water: no heat fluxes
+             !   !
+             !   qsn   = 0.0_fp
+             !   qeva  = 0.0_fp
+             !   qco   = 0.0_fp
+             !   qbl   = 0.0_fp
+             !   ql    = 0.0_fp
+             !   if (free_convec) then
+             !      hfree = 0.0_fp
+             !      efree = 0.0_fp
+             !   endif
+             !endif
              !
              ! Filling of output arrays
              !

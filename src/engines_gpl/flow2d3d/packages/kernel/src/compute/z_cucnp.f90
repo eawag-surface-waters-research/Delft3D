@@ -1,16 +1,19 @@
 subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                  & icy       ,nsrc      ,kcs       ,kcs45     ,kcscut    , &
-                 & kfu       ,kfuz1     ,kfumin    ,kfumax    ,kfv       , &
-                 & kfvz1     ,kfs       ,kfsz1     ,kfsmin    ,kfsmax    , &
-                 & u0        ,v1        ,w1        ,hu        ,dzu1      , &
+                 & kfu       ,kfuz0     ,kfumin    ,kfumx0    ,kfv       , &
+                 & kfvz0     ,kfvmin    ,kfvmx0    ,dzv0      ,dzs0      , &
+                 & kfs       ,kfsz0     ,kfsmin    ,kfsmx0    ,kcu       , &
+                 & u0        ,v1        ,w0        ,hu        ,dzu0      , &
                  & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
                  & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
                  & disch     ,umdis     ,kspu      ,mnksrc    ,dismmt    , &
                  & aak       ,bbk       ,cck       ,ddk       ,bbka      , &
                  & bbkc      ,vicuv     ,vnu2d     ,vicww     ,tgfsep    , &
-                 & drhodx    ,wsu       ,taubpu    ,taubsu    ,rxx       , &
+                 & drhodx    ,wsu       ,wsbodyu   ,taubpu    ,taubsu    ,rxx       , &
                  & rxy       ,windu     ,patm      ,fcorio    ,p0        , &
+                 & tp        ,rlabda    ,dfu       ,deltau    ,fxw       , &
                  & ubrlsu    ,pship     ,diapl     ,rnpl      ,cfurou    , &
+                 & qxk       ,qyk       ,umean     ,dps       ,s0        , &
                  & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -81,6 +84,8 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    real(fp)               , pointer :: dryflc
+    real(fp)               , pointer :: gammax
     character(8)           , pointer :: dpsopt
     character(6)           , pointer :: momsol
     real(fp)               , pointer :: hdt
@@ -89,6 +94,10 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)               , pointer :: vicmol
     integer                , pointer :: iro
     integer                , pointer :: irov
+    logical                , pointer :: wave
+    logical                , pointer :: roller
+    logical                , pointer :: xbeach
+    real(fp)               , pointer :: dzmin
 !
 ! Global variables
 !
@@ -107,21 +116,28 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     integer                                           , intent(in)  :: nsrc   !  Description and declaration in esm_alloc_int.f90
     integer , dimension(7, nsrc)                      , intent(in)  :: mnksrc !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kcu    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfs    !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: kfsmax !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: kfsmx0 !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: kfsmin !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfu    !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfumax !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfumx0 !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfumin !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfvmx0 !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfvmin !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfv    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax), intent(in)  :: kspu   !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: kcs45
     integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: kcscut !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: kfsz1  !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: kfuz1  !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: kfvz1  !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: kfsz0  !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: kfuz0  !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: kfvz0  !  Description and declaration in esm_alloc_int.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 3)                   :: cfurou !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: deltau !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: dfu    !  Description and declaration in esm_alloc_real.f90
+    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: fcorio !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: fxw    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: gsqiu  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: gsqs   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: gud    !  Description and declaration in esm_alloc_real.f90
@@ -135,14 +151,19 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: hu     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: patm   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: pship  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: rlabda !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: s0     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: taubpu !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: taubsu !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: tgfsep !!  Water elev. induced by tide gen.force
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: tp     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: umean  !  Description and declaration in esm_alloc_real.f90    
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: vnu2d  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: windu  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: wsu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: wsu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: wsbodyu !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax), intent(in)  :: vicww  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax), intent(in)  :: w1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax), intent(in)  :: w0     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax + 2)            :: vicuv  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: aak    !!  Internal work array, coupling of la-
                                                                               !!  yer velocity in (N,M,K) with water
@@ -157,12 +178,16 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ddk    !!  Internal work array, diagonal space
                                                                               !!  at (N,M,K)
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: diapl  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: dzu1   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: dzs0   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: dzu0   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: dzv0   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: p0     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: rnpl   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: rxx    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: rxy    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: drhodx !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: qxk    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: qyk    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: u0     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: ubrlsu !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: v1     !  Description and declaration in esm_alloc_real.f90
@@ -206,6 +231,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)           :: adza
     real(fp)           :: adzb
     real(fp)           :: adzc
+    real(fp)           :: area
     real(fp)           :: bdmwrp
     real(fp)           :: bdmwrs
     real(fp)           :: bi
@@ -220,6 +246,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)           :: ddzc
     real(fp)           :: dgeta
     real(fp)           :: dgvnm
+    real(fp)           :: dpsmax
     real(fp)           :: dux
     real(fp)           :: duy
     real(fp)           :: dz
@@ -227,6 +254,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)           :: dzup
     real(fp)           :: ff
     real(fp)           :: fac
+    real(fp)           :: facmax
     real(fp)           :: geta
     real(fp)           :: getad
     real(fp)           :: getau
@@ -234,9 +262,11 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)           :: gksid
     real(fp)           :: gksiu
     real(fp)           :: gsqi
+    real(fp)           :: htrsh
     real(fp)           :: hugsqs  ! HU(NM/NMD) * GSQS(NM) Depending on UMDIS the HU of point NM or NMD will be used 
     real(fp)           :: qwind
     real(fp), external :: redvic
+    real(fp)           :: thvert     ! theta coefficient for vertical advection terms
     real(fp)           :: timest
     real(fp)           :: uuu
     real(fp)           :: uweir
@@ -244,29 +274,47 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)           :: viznm
     real(fp)           :: viznmd
     real(fp)           :: vvv
+    real(fp)           :: wsumax
     real(fp)           :: www
+    real(fp)           :: wavg0
 !
 !! executable statements -------------------------------------------------------
 !
+    dryflc   => gdp%gdnumeco%dryflc
     dpsopt   => gdp%gdnumeco%dpsopt
     momsol   => gdp%gdnumeco%momsol
+    gammax   => gdp%gdnumeco%gammax
     rhow     => gdp%gdphysco%rhow
     ag       => gdp%gdphysco%ag
     vicmol   => gdp%gdphysco%vicmol
     iro      => gdp%gdphysco%iro
     irov     => gdp%gdphysco%irov
+    wave     => gdp%gdprocs%wave
+    roller   => gdp%gdprocs%roller
+    xbeach   => gdp%gdprocs%xbeach
     hdt      => gdp%gdnumeco%hdt
+    dzmin    => gdp%gdzmodel%dzmin
     !
     call timer_start(timer_cucnp_ini, gdp)
     !
     ddb    = gdp%d%ddbound
     icxy   = max(icx, icy)
+    !
+    ! factor in maximum wave force 1/4 alpha rho g gammax**2 h**2 / tp /(sqrt(g h)
+    facmax = 0.25*sqrt(ag)*rhow*gammax**2
+    !
     if (icx==1) then
        ff = -1.0_fp
     else
        ff = 1.0_fp
     endif
     kmaxtl = 0
+    htrsh  = 0.5_fp * dryflc
+    !
+    ! Flag for vertical advection set to 1.0 by default = Central implicit discretisation of 
+    ! advection in vertical (0.0 means 1st order upwind explicit)
+    ! 
+    thvert = 1.0_fp
     !
     ! Initialise arrays aak, bbk, cck and ddk for all (nm, k)
     !
@@ -287,25 +335,74 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        !
        timest = 2.0_fp*hdt
        !
-    elseif (momsol == 'iupw  ') then
+       ! Horizontal advection: multi-directional upwind explicit (mdue) method
        !
-       ! Advection determined implicitly using first order upwind method in z_uzd
+       call z_hormom_mdue(nmmax     ,kmax      ,icx       , &
+                        & icy       ,kcs       ,kcs45     ,kcscut    , &
+                        & kfu       ,kfuz0     ,kfumin    ,kfumx0    , &
+                        & kfvz0     ,kfsmin    ,kfsmx0    , &
+                        & u0        ,v1        ,hu        , &
+                        & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
+                        & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
+                        & ddk       ,gdp       )
+    elseif (momsol == 'iupw  ' .or. momsol == 'mdui  ') then
+       !
+       ! Advection determined implicitly in z_uzd
        !
        timest = hdt
        !
+       ! Horizontal advection: multi-directional upwind explicit (mdue) method
+       !
+       call z_hormom_mdue(nmmax     ,kmax      ,icx       , &
+                        & icy       ,kcs       ,kcs45     ,kcscut    , &
+                        & kfu       ,kfuz0     ,kfumin    ,kfumx0    , &
+                        & kfvz0     ,kfsmin    ,kfsmx0    , &
+                        & u0        ,v1        ,hu        , &
+                        & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
+                        & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
+                        & ddk       ,gdp       )
+    elseif (momsol == 'finvol') then
+       !
+       ! Finite volume approach for horizontal advection
+       !
+       ! Temporary switch for vertical advection of horizontal momentum
+       ! THVERT = 0 means explicit 1st order upwind vertical advection
+       !
+       thvert = 0.0_fp
+       timest = hdt
+       ! 
+       call z_hormom_finvol(nmmax     ,kmax      ,icx       ,icy       ,kcs       , &
+                          & kfu       ,kcu       ,kfv       ,kfuz0     ,kfumin    , &
+                          & kfumx0    ,kfvz0     ,kfs       ,kfsz0     ,kfsmin    , &
+                          & kfsmx0    ,u0        ,v1        ,w0        ,dzs0      , &
+                          & dzu0      ,dzv0      ,s0        ,guu       ,gvv       , &
+                          & gvu       ,guv       ,gsqs      ,gud       ,gvd       , &
+                          & guz       ,gvz       ,ddk       ,p0        ,gdp       )
+       !
+    elseif (momsol == 'flood ') then
+       !
+       timest = hdt
+       !
+       ! Flooding solver for horizontal advection (both here and in z_uzd)
+       !
+       call z_hormom_fls(nmmax     ,kmax      ,icx       , &
+                       & icy       ,kcs       ,kcs45     ,kcscut    , &
+                       & kfu       ,kfuz0     ,kfumin    ,kfumx0    ,kfv       , &
+                       & kfvz0     ,kfsz0     ,kfsmin    ,kfsmx0    ,kspu      , &
+                       & u0        ,v1        ,hu        ,kfvmin    ,kfvmx0    , &
+                       & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
+                       & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
+                       & qxk       ,qyk       ,dzu0      ,dzv0      ,dzs0      , &
+                       & ddk       ,umean     ,dps       ,s0        ,bbka      , &
+                       & bbkc      ,gdp       )
+       !
+       ! Reset the arrays bbka and bbkc which have been used as work arrays in z_hormom_fls
+       !
+       bbka = 0.0_fp
+       bbkc = 0.0_fp
     else
-       !
-       ! No correct advection option specified: ToDo generate error message or set default
-       !
+       ! No correct advection option specified: error?
     endif
-    call z_expl_dir_upw(nmmax     ,kmax      ,icx       , &
-                      & icy       ,kcs       ,kcs45     ,kcscut    , &
-                      & kfu       ,kfuz1     ,kfumin    ,kfumax    , &
-                      & kfvz1     ,kfsz1     ,kfsmin    ,kfsmax    , &
-                      & u0        ,v1        ,hu        , &
-                      & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
-                      & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
-                      & ddk       ,gdp       )
     call timer_stop(timer_cucnp_momsol, gdp)
     !
     ! Fill the array elements and the right hand side
@@ -317,8 +414,8 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           nmu        = nm + icx
           ndmu       = nm + icx - icy
           gksi       = gvu(nm)
-          do k = kfumin(nm), kfumax(nm)
-             if (kfuz1(nm, k)==1 .and. kcs(nm)*kcs(nmu)>0) then
+          do k = kfumin(nm), kfumx0(nm)
+             if (kfuz0(nm, k)==1 .and. kcs(nm)*kcs(nmu)>0) then
                 !
                 ! BAROCLINIC PRESSURE, CORIOLIS, ATMOSPHERIC PRES. and TIDE GEN. FORCE
                 ! Surface gradient is fully accounted for here and not in z_uzd:
@@ -332,7 +429,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                 ddk(nm, k) = ddk(nm, k)                                       & 
                          & + u0(nm, k)/timest                                 &
                          & + ff*fcorio(nm)*vvv                                &
-                         & - ag/rhow*drhodx(nm, k)*kfsz1(nm, k)*kfsz1(nmu, k) &
+                         & - ag/rhow*drhodx(nm, k)*kfsz0(nm, k)*kfsz0(nmu, k) &
                          & - (patm(nmu) - patm(nm))/(gksi*rhow)               &
                          & - (pship(nmu) - pship(nm))/(gksi*rhow)             &
                          & + ag*(tgfsep(nmu) - tgfsep(nm))/gksi               &
@@ -357,7 +454,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        nmu  = nm + icx
        kmin = kfumin(nm)
        if (kfu(nm)==1 .and. kcs(nm)*kcs(nmu)>0) then
-          kkmax = max(1, kfumax(nm))
+          kkmax = max(kmin, kfumx0(nm))
           !
           ! WIND AND BOTTOM FRICTION
           !
@@ -381,25 +478,71 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                 !
                 ! cfurou(nm,1) contains u/u*
                 !
-                uweir      = sqrt(2.0 / 3.0 * ag * max(hu(nm), 0.01_fp))
+                uweir      = sqrt(2.0 / 3.0 * ag * max(hu(nm), htrsh))
                 taubpu(nm) = uweir / (cfurou(nm,1)**2)
              endif
           endif
           !
+          ! Slope correction for steep slopes
+          !
+          nmu = nm + icx
+          dpsmax = max(-dps(nm),-dps(nmu))
+          if (s0(nm) < dpsmax) then
+             do k = kfumin(nm), kfumx0(nm)
+                ddk(nm,k) = ddk(nm,k)-ag*(s0(nm)-dpsmax)/gvu(nm)
+             enddo
+          elseif (s0(nmu) < dpsmax) then
+             do k = kfumin(nm), kfumx0(nm)
+                ddk(nm,k) = ddk(nm,k) + ag*(s0(nmu)-dpsmax)/gvu(nm)
+             enddo
+          endif
+          !
+          ! End of inundation
+          !
           cbot           = taubpu(nm)
-          qwind          = windu(nm)/dzu1(nm, kkmax)
-          bdmwrp         = cbot/dzu1(nm, kmin)
-          bdmwrs         = taubsu(nm)/dzu1(nm, kmin)
+          qwind          = windu(nm)/max(dzu0(nm, kkmax),htrsh)
+          bdmwrp         = cbot/max(dzu0(nm, kmin),htrsh)
+          bdmwrs         = taubsu(nm)/max(dzu0(nm, kmin),htrsh)
           bbk(nm, kmin)  = bbk(nm, kmin) + bdmwrp
           ddk(nm, kkmax) = ddk(nm, kkmax) - qwind/rhow
           ddk(nm, kmin)  = ddk(nm, kmin) + bdmwrs
           !
           ! WAVE FORCE AT SURFACE
           !
-          ddk(nm, kkmax) = ddk(nm, kkmax) + wsu(nm)/(rhow*dzu1(nm, kkmax))
+          if (wave) then
+             wsumax = facmax*hu(nm)**(1.5)/max(0.1_fp, tp(nm))
+             wsu(nm) = sign(min(abs(wsu(nm)), wsumax), wsu(nm))
+             !
+             ddk(nm, kkmax) = ddk(nm, kkmax) + wsu(nm)/(rhow*dzu0(nm, kkmax))          !
+             !
+             ! WAVE INDUCED BODY FORCE
+             !
+             if (roller .or. xbeach) then
+                fxw(nm) = sign(min(abs(fxw(nm)), wsumax), fxw(nm))
+                do k = kfumin(nm), kfumx0(nm)
+                   ddk(nm, k) = ddk(nm, k) + fxw(nm)/(rhow*hu(nm))
+                enddo
+             else
+                wsbodyu(nm) = sign(min(abs(wsbodyu(nm)), wsumax), wsbodyu(nm))
+                do k = kfumin(nm), kfumx0(nm)
+                   ddk(nm, k) = ddk(nm, k) + wsbodyu(nm)/(rhow*hu(nm))
+                enddo
+             endif
+          endif
        endif
     enddo
     call timer_stop(timer_cucnp_stress, gdp)
+    !
+    ! In case of 3D waves:
+    ! Added shear stress in wave boundary layer due to streaming
+    !
+    call timer_start(timer_cucnp_shrwav, gdp)
+    if (wave .and. kmax>1) then
+       call z_shrwav(nmmax     ,kmax      ,icx       ,dfu       ,deltau    , &
+                   & tp        ,rlabda    ,hu        ,kfu       ,ddk       , &
+                   & kfumin    ,kfumx0    ,dzu0      ,gdp       )
+    endif
+    call timer_stop(timer_cucnp_shrwav, gdp)
     !
     ! DISCHARGE ADDITION OF MOMENTUM
     !
@@ -425,9 +568,9 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                 enddo
              else
                 bbk(nmdis, kk) = bbk(nmdis, kk) + disch(isrc)                   &
-                               & /(dzu1(nmdis, kk)*gsqs(nm))
+                               & /(dzu0(nmdis, kk)*gsqs(nm))
                 ddk(nmdis, kk) = ddk(nmdis, kk) + umdis(isrc)*disch(isrc)       &
-                               & /(dzu1(nmdis, kk)*gsqs(nm))
+                               & /(dzu0(nmdis, kk)*gsqs(nm))
              !
              endif
           endif
@@ -435,15 +578,15 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     enddo
     call timer_stop(timer_cucnp_dismmt, gdp)
     !
-    ! VERTICAL ADVECTION AND VISCOSITY, IMPLICIT
+    ! VERTICAL ADVECTION AND VISCOSITY
     !
     call timer_start(timer_cucnp_advdiffv, gdp)
     do nm = 1, nmmax
-       if (kfumax(nm) > kfumin(nm)) then
+       if (kfu(nm)==1 .and. kfumx0(nm)>kfumin(nm)) then
           kmaxtl = 1
           nmu    = nm + icx
-          do k = kfumin(nm), kfumax(nm)
-             if (kfuz1(nm, k) == 1) then
+          do k = kfumin(nm), kfumx0(nm)
+             if (kfuz0(nm, k) == 1) then
                 kfad = 0
                 kdo  = k - 1
                 kup  = k + 1
@@ -451,7 +594,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                    kfad = 1
                    kdo  = k
                 endif
-                if (k==kfumax(nm)) then
+                if (k==kfumx0(nm)) then
                    kfad = -1
                    kup  = k
                 endif
@@ -465,26 +608,61 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                    iadc = max(1 - (kspu(nm, k) + kspu(nm, kup)), 0)
                 endif
                 !
-                dzup = dzu1(nm, k) + dzu1(nm, kup)
-                dzdo = dzu1(nm, k) + dzu1(nm, kdo)
+                dzup = dzu0(nm, k) + dzu0(nm, kup)
+                dzdo = dzu0(nm, k) + dzu0(nm, kdo)
                 !
                 !   ADVECTION IN VERTICAL DIRECTION; W*DU/DZ
                 !
-                !
                 ! Is this correct at the surface when there are no neighbours?
                 !
-                maskval = min(kcs(nm), 2)*min(kcs(nmu), 2)
-                www     = 0.25_fp*maskval*(w1(nm, k - 1) + w1(nm, k) + w1(nmu, k - 1) + w1(nmu, k))
-                if (www < 0.0_fp) then
-                   adza = -2.0_fp*www/(dzup + dzdo)*(1 - abs(kfad))
-                   adzc =  2.0_fp*www/(dzup + dzdo)*(1 - abs(kfad)) + kfad*(1 + kfad)*www/dzup
+                if (thvert == 1.0_fp) then
+                   !
+                   ! Central implicit
+                   !
+                   maskval = min(kcs(nm), 2)*min(kcs(nmu), 2)
+                   www     = 0.25_fp*maskval*(w0(nm, k - 1) + w0(nm, k) + w0(nmu, k - 1) + w0(nmu, k))
+                   if (www < 0.0_fp) then
+                      adza = -2.0_fp*www/(dzup + dzdo)*(1 - abs(kfad))
+                      adzc =  2.0_fp*www/(dzup + dzdo)*(1 - abs(kfad)) + kfad*(1 + kfad)*www/dzup
+                   else
+                      adza = -2.0_fp*www/(dzup + dzdo)*(1 - abs(kfad)) + abs(kfad)*(-1 + kfad)*www/dzdo
+                      adzc =  2.0_fp*www/(dzup + dzdo)*(1 - abs(kfad))
+                   endif
+                   adza = iada*adza
+                   adzc = iadc*adzc
+                   adzb = -adza - adzc
                 else
-                   adza = -2.0_fp*www/(dzup + dzdo)*(1 - abs(kfad)) + abs(kfad)*(-1 + kfad)*www/dzdo
-                   adzc =  2.0_fp*www/(dzup + dzdo)*(1 - abs(kfad))
+                   !
+                   ! First order upwind explicit
+                   !
+                   adza = 0.0_fp
+                   adzc = 0.0_fp
+                   adzb = 0.0_fp
+                   !
+                   ! downwards face
+                   !
+                   if (k > kfumin(nm)) then
+                       area  = guu(nm) * gvu(nm)
+                       wavg0 = 0.5_fp * (w0(nm,k-1)+w0(nmu,k-1))
+                       if (wavg0 > 0.0_fp) then
+                           ddk(nm,k) = ddk(nm,k) + area*wavg0*u0(nm,k-1)
+                       else
+                           ddk(nm,k) = ddk(nm,k) + area*wavg0*u0(nm,k)
+                       endif
+                   endif
+                   !
+                   ! upwards face
+                   !
+                   if (k < kfumx0(nm)) then
+                       area  = guu(nm) * gvu(nm)
+                       wavg0 = 0.5_fp * (w0(nm,k)+w0(nmu,k))
+                       if (wavg0 > 0.0_fp) then
+                           ddk(nm,k) = ddk(nm,k) - area*wavg0*u0(nm,k)
+                       else
+                           ddk(nm,k) = ddk(nm,k) - area*wavg0*u0(nm,k+1)
+                       endif
+                   endif
                 endif
-                adza = iada*adza
-                adzc = iadc*adzc
-                adzb = -adza - adzc
                 !
                 ! Subtitution in coefficients
                 !
@@ -508,7 +686,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                 viznm  = 0.25_fp * (2 + kfad*(1 - kfad))               &
                        & * (2.0_fp*vicmol + redvic(vicww(nm , k), gdp) &
                        &                  + redvic(vicww(nmu, k), gdp))
-                dz    = dzu1(nm, k)
+                dz    = dzu0(nm, k)
                 !
                 ddza = iada * 2.0_fp * viznmd / (dzdo*dz)
                 ddzc = iadc * 2.0_fp * viznm  / (dzup*dz)
@@ -537,8 +715,8 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                    & icy       ,kcs45     ,kcs       ,kfu       ,kfv       , &
                    & kfs       ,u0        ,v1        ,vicuv     ,vnu2d     , &
                    & gud       ,guu       ,gvd       ,gvu       ,gvz       , &
-                   & ddk       ,rxx       ,rxy       ,kfuz1     ,kfvz1     , &
-                   & kfsz1     ,kfumin    ,kfumax    ,gdp       )
+                   & ddk       ,rxx       ,rxy       ,kfuz0     ,kfvz0     , &
+                   & kfsz0     ,kfumin    ,kfumx0    ,gdp       )
     !
     ! for Crank Nicolson method: is computed in routine uzd (implicitly)
     ! for fractional step method: is computed here (explicitly)
@@ -554,17 +732,17 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              numu = nm + icx + icy
              ndmu = nm + icx - icy
              numd = nm - icx + icy
-             do k = kfumin(nm), kfumax(nm)
+             do k = kfumin(nm), kfumx0(nm)
                 if (kfu(nm) == 1 .and. kcs(nm)*kcs(nmu) > 0) then
-                   if (kfuz1(nm, k)==1) then
+                   if (kfuz0(nm, k)==1) then
                       gksid = gvz(nm)
                       gksiu = gvz(nmu)
                       gksi  = gvu(nm)
                       getad = gud(ndm)
                       getau = gud(nm)
                       geta  = guu(nm)
-                      idifd = kfvz1(ndm, k)*kfvz1(ndmu, k)*kfuz1(ndm, k)
-                      idifu = kfvz1(nm, k)*kfvz1(nmu, k)*kfuz1(num, k)
+                      idifd = kfvz0(ndm, k)*kfvz0(ndmu, k)*kfuz0(ndm, k)
+                      idifu = kfvz0(nm, k)*kfvz0(nmu, k)*kfuz0(num, k)
                       idifc = abs(2 - kcs(nm))*abs(2 - kcs(nmu))
                       !
                       ! EDDY VISCOSITY FOR KMAX = 1, USING LAPLACE OPERATOR
@@ -597,8 +775,8 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     call timer_start(timer_cucnp_lhs, gdp)
     if (kmaxtl > 0) then
        do nm = 1, nmmax
-          if (kfumin(nm) /= 0 .and. kfumax(nm) > 1) then
-             maxk           = kfumax(nm)
+          if (kfumin(nm) /= 0 .and. kfumx0(nm) > 1) then
+             maxk           = kfumx0(nm)
              bi             = 1.0_fp/bbk(nm, maxk)
              bbk (nm, maxk) = 1.0_fp
              bbka(nm, maxk) = bbka(nm, maxk)*bi
@@ -608,7 +786,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           endif
        enddo
        do nm = 1, nmmax
-          do k = kfumax(nm) - 1, kfumin(nm), -1
+          do k = kfumx0(nm) - 1, kfumin(nm), -1
              bi          = 1.0_fp/(bbk(nm, k) - bbkc(nm, k)*bbka(nm, k + 1))
              bbk (nm, k) = 1.0_fp
              bbka(nm, k) = bbka(nm, k)*bi
@@ -621,7 +799,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        ! back sweep
        !
        do nm = 1, nmmax
-          do k = kfumin(nm) + 1, kfumax(nm)
+          do k = kfumin(nm) + 1, kfumx0(nm)
              aak(nm, k) = aak(nm, k) - bbka(nm, k)*aak(nm, k - 1)
              cck(nm, k) = cck(nm, k) - bbka(nm, k)*cck(nm, k - 1)
              ddk(nm, k) = ddk(nm, k) - bbka(nm, k)*ddk(nm, k - 1)

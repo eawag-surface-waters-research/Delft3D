@@ -657,15 +657,28 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        !
        ! Defined HU/HV as in TAUBOT as > 0.01
        !
-       hu0 = max(hu(npbt, mpbt), 0.01_fp)
-       hv0 = max(hv(npbt, mpbt), 0.01_fp)
+       if (.not. zmodel) then
+          hu0 = max(hu(npbt, mpbt), 0.01_fp)
+          hv0 = max(hv(npbt, mpbt), 0.01_fp)
+       else
+          !
+          hu0 = 0.0_fp
+          do k = kfumin(npbt, mpbt), kfumax(npbt, mpbt)
+             hu0 = hu0 + dzu1(npbt, mpbt,k)
+          enddo
+          !
+          hv0 = 0.0_fp
+          do k = kfvmin(npbt, mpbt), kfvmax(npbt, mpbt)
+             hv0 = hv0 + dzv1(npbt, mpbt,k)
+          enddo
+       endif
        !
        ! Determine direction dependent parameters
        !
        if (nob(4,n) > 0) then
           udir  = .true.
           vdir  = .false.
-          dpvel = max(0.0_fp, hu(npbt, mpbt))
+          dpvel = max(0.0_fp, hu0)
           h0    = hu0
           z0    = z0urou(npbt, mpbt)
           !
@@ -675,7 +688,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        elseif (nob(6,n) > 0) then
           udir  = .false.
           vdir  = .true.
-          dpvel = max(0.0_fp, hv(npbt, mpbt))
+          dpvel = max(0.0_fp, hv0)
           h0    = hv0
           z0    = z0vrou(npbt, mpbt)
           !
@@ -704,7 +717,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
           thklay(k) = 0.0
        enddo
        do k = k1st, k2nd
-          if (dpvel > 0.0) then
+          if (dpvel > 0.0_fp) then
              if (zmodel) then
                 if (udir) then
                    thklay(k) = dzu1(npbt, mpbt, k)/dpvel
@@ -724,6 +737,12 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
              thklay(k) = thick(k)
           endif
        enddo
+       !
+       ! Avoid division by zero in inactive velocity points
+       !
+       hu0 = max(hu0, 0.01_fp)
+       hv0 = max(hv0, 0.01_fp)
+       h0  = max(h0 , 0.01_fp)
        !
        ! calculate CIRC2/3D array
        ! where nob (4,n) := sort opening and
@@ -1315,6 +1334,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
                       endif
                       zlayer = log(1. + zl/z0)
                       zbulk = zbulk + zlayer*thklay(k)
+                      zbulk = max(zbulk, 0.01_fp)
                       circ3d(k, kp, kq) = circ2d(kp, kq)*zlayer
                    enddo
                    !

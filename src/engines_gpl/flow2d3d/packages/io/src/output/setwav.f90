@@ -1,13 +1,14 @@
-subroutine setwav(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
-                & nmaxus    ,itimc     ,ntwav     ,itlen     ,timwav    , &
-                & norow     ,noroco    ,irocol    ,ifcore    ,dps       , &
-                & s0        ,uorb      ,tp        ,teta      ,dis       , &
-                & wsu       ,wsv       ,grmasu    ,grmasv    ,hrms      , &
-                & ubot      ,wlen      ,hrmcom    ,tpcom     , &
-                & dircom    ,discom    ,wsucom    ,wsvcom    ,msucom    , &
-                & msvcom    ,ubcom     ,wlcom     ,rlabda    , &
-                & dircos    ,dirsin    ,ewave0    ,roller    ,wavcmp    , &
-                & ewabr0    ,gdp       )
+subroutine setwav(comfil    ,lundia    ,error     ,mmax       ,nmax       , &
+                & nmaxus    ,itimc     ,ntwav     ,itlen      ,timwav     , &
+                & norow     ,noroco    ,irocol    ,ifcore     ,dps        , &
+                & s0        ,uorb      ,tp        ,teta       ,dis        , &
+                & wsu       ,wsv       ,grmasu    ,grmasv     ,hrms       , &
+                & ubot      ,wlen      ,hrmcom     ,tpcom      , &
+                & dircom    ,discom    ,wsucom    ,wsvcom     ,msucom     , &
+                & msvcom    ,ubcom     ,wlcom      ,rlabda     , &
+                & dircos    ,dirsin    ,ewave0    ,roller     ,wavcmp     , &
+                & ewabr0    ,wsbodyu   ,wsbodyv   ,wsbodyucom ,wsbodyvcom , &
+                & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -65,69 +66,80 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
     logical                  , pointer :: tps_from_com
     logical                  , pointer :: ubot_from_com
     logical                  , pointer :: wlen_from_com
+    logical                  , pointer :: only_distot_from_com
 !
 ! Local parameters
 !
-    integer, parameter :: nelmx = 12
+    integer, parameter :: nelmx = 17
 !
 ! Global variables
 !
-    integer                                                        , intent(in)  :: itimc  !!  Current time step counter for 2D
-                                                                                           !!  system
-    integer                                                        , intent(in)  :: itlen  !  Description and declaration in esm_alloc_int.f90
-    integer                                                                      :: lundia !  Description and declaration in inout.igs
-    integer                                                                      :: mmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                                                      :: nmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                                                      :: nmaxus !  Description and declaration in esm_alloc_int.f90
-    integer                                                        , intent(in)  :: noroco !  Description and declaration in esm_alloc_int.f90
-    integer                                                        , intent(in)  :: norow  !  Description and declaration in esm_alloc_int.f90
-    integer                                                        , intent(in)  :: ntwav  !!  Total number of timesteps on com-
-                                                                                           !!  munication file (to read from)
-    integer   , dimension(2)                                                     :: ifcore !!  Time indices (cell id's) of the wave
-                                                                                           !!  functions which are in core available
-    integer   , dimension(5, noroco)                               , intent(in)  :: irocol !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(ntwav)                                   , intent(in)  :: timwav !!  Array with time steps on comm. file
-                                                                                           !!  for wave results
-    logical                                                                      :: error  !!  Flag=TRUE if an error is encountered
-    logical                                                        , intent(in)  :: roller
-    logical                                                        , intent(in)  :: wavcmp
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: dis    !  Description and declaration in esm_alloc_real.f90
-    real(prec), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: ewabr0 !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: ewave0 !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: grmasu !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: grmasv !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: hrms   !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: rlabda !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: s0     !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: teta   !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: tp     !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: uorb   !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: wsu    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: wsv    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: ubot   !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              :: wlen   !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: dircom !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: dircos !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: dirsin !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: discom !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: hrmcom !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: msucom !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: msvcom !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: tpcom  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: wsucom !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: wsvcom !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: ubcom  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nmaxus, mmax, 2)                                       :: wlcom  !  Description and declaration in esm_alloc_real.f90
-    character(*)                                                                 :: comfil !!  Name for communication file
-                                                                                           !!  com-<case><label>
+    integer                                                          , intent(in)  :: itimc      !!  Current time step counter for 2D
+                                                                                                 !!  system
+    integer                                                          , intent(in)  :: itlen      !  Description and declaration in esm_alloc_int.f90
+    integer                                                                        :: lundia     !  Description and declaration in inout.igs
+    integer                                                                        :: mmax       !  Description and declaration in esm_alloc_int.f90
+    integer                                                                        :: nmax       !  Description and declaration in esm_alloc_int.f90
+    integer                                                                        :: nmaxus     !  Description and declaration in esm_alloc_int.f90
+    integer                                                          , intent(in)  :: noroco     !  Description and declaration in esm_alloc_int.f90
+    integer                                                          , intent(in)  :: norow      !  Description and declaration in esm_alloc_int.f90
+    integer                                                          , intent(in)  :: ntwav      !!  Total number of timesteps on com-
+                                                                                                 !!  munication file (to read from)
+    integer   , dimension(2)                                                       :: ifcore     !!  Time indices (cell id's) of the wave
+                                                                                                 !!  functions which are in core available
+    integer   , dimension(5, noroco)                                 , intent(in)  :: irocol     !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(ntwav)                                     , intent(in)  :: timwav     !!  Array with time steps on comm. file
+                                                                                                 !!  for wave results
+    logical                                                                        :: error      !!  Flag=TRUE if an error is encountered
+    logical                                                          , intent(in)  :: roller
+    logical                                                          , intent(in)  :: wavcmp
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub,4)              :: dis        !  Description and declaration in esm_alloc_real.f90
+    real(prec), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)  , intent(in)  :: dps        !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)  , intent(out) :: ewabr0     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)  , intent(out) :: ewave0     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                :: grmasu     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                :: grmasv     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                :: hrms       !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                :: rlabda     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)  , intent(in)  :: s0         !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                :: teta       !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                :: tp         !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                :: uorb       !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                :: wsu        !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                :: wsv        !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                :: wsbodyu    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                :: wsbodyv    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                :: ubot       !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                :: wlen       !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                         :: dircom     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                         :: dircos     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                         :: dirsin     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                         :: discom     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                         :: hrmcom     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                         :: msucom     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                         :: msvcom     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                         :: tpcom      !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                         :: ubcom      !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                         :: wlcom      !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                         :: wsucom     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                         :: wsvcom     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                         :: wsbodyucom !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nmaxus, mmax, 2)                                         :: wsbodyvcom !  Description and declaration in esm_alloc_real.f90
+    character(*)                                                                   :: comfil     !!  Name for communication file
+                                                                                                 !!  com-<case><label>
 !
 ! Local variables
 !
+    integer                         :: datlen
+    integer                         :: deflen
+    integer                         :: elmndm
+    integer                         :: fd_nef ! NEFIS file descriptor
     integer                         :: i      ! Hulp var. 
     integer                         :: ibf    ! Code for open boundary corresponding with cell irocol(1),irocol(2) 
     integer                         :: ibl    ! Code for open boundary corresponding with cell irocol(1),irocol(3) 
     integer                         :: ic
+    integer                         :: ierror
+    integer                         :: ind
     integer                         :: kmaxk  ! Number of layers in the z-dir. for frdint which is 1 here (2dh) 
     integer                         :: m
     integer                         :: mf
@@ -137,16 +149,24 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
     integer                         :: n
     integer                         :: nf
     integer                         :: nfu
-    integer                         :: nhulp  ! Hulp var. 
+    integer                         :: nhulp                ! Hulp var. 
     integer                         :: nl
     integer                         :: nlu
-    integer                         :: nready ! Flag for determination of inter- polation coefficient 
-    integer                         :: ntimwa ! Time index of first function 
-    integer                         :: ntimwb ! Time index of second function 
-    integer                         :: tact   ! Actual time step number 
-    integer, dimension(nelmx)       :: nbytsg ! Array containing the number of by- tes of each single ELMTPS 
-    real(fp)                        :: atimw  ! Interpolation factor for first function 
-    real(fp)                        :: btimw  ! Interpolation factor for second function 
+    integer                         :: nready               ! Flag for determination of inter- polation coefficient 
+    integer                         :: ntimwa               ! Time index of first function 
+    integer                         :: ntimwb               ! Time index of second function 
+    integer                         :: tact                 ! Actual time step number 
+    integer      , dimension(3)     :: uindex               !  Lowest allowed reference number
+    integer      , dimension(nelmx) :: nbytsg               ! Array containing the number of bytes of each single ELMTPS 
+    integer      , external         :: clsnef
+    integer      , external         :: crenef
+    integer      , external         :: getels
+    integer      , external         :: inqelm
+    real(fp)     , external         :: realfileversion
+    real(fp)                        :: atimw                ! Interpolation factor for first function 
+    real(fp)                        :: btimw                ! Interpolation factor for second function
+    real(fp)                        :: latestcomfileversion ! Latest version of COM-files
+    real(fp)                        :: actualcomfileversion ! Actual version of the COM-file
     real(fp)                        :: hw
     real(fp)                        :: k
     real(fp)                        :: k0
@@ -154,50 +174,64 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
     real(fp)                        :: omega
     real(fp)                        :: per
     real(fp)                        :: uorb1
-    character(10), dimension(nelmx) :: elmunt ! Array with element physical unit 
-    character(16)                   :: funam  ! Name of element which has to be read 
-    character(16)                   :: grpnam ! Data-group name defined for the COM-files (WAVTIM) 
-    character(16), dimension(nelmx) :: elmnms ! Element name defined for the COM-files 
-    character(16), dimension(nelmx) :: elmqty ! Array with element quantity 
-    character(16), dimension(nelmx) :: elmtps ! Array containing the types of the elements (real, ch. , etc. etc.) 
-    character(64), dimension(nelmx) :: elmdes ! Array with element description 
+    character(16), dimension(1)     :: cdum16               ! Help array to read/write Nefis files 
+    character(256)                  :: datnam
+    character(256)                  :: defnam
+    character(16), dimension(nelmx) :: elmunt               ! Array with element physical unit 
+    character(16)                   :: funam                ! Name of element which has to be read 
+    character(16)                   :: grpnam               ! Data-group name defined for the COM-files (WAVTIM) 
+    character(16), dimension(nelmx) :: elmnms               ! Element name defined for the COM-files 
+    character(16), dimension(nelmx) :: elmqty               ! Array with element quantity 
+    character(16), dimension(nelmx) :: elmtps               ! Array containing the types of the elements (real, ch. , etc. etc.) 
+    character(64), dimension(nelmx) :: elmdes               ! Array with element description 
+    character(80)                   :: message              ! Message to diagnostic file
 !
 ! Data statements
 !
     data grpnam/'WAVTIM'/
-    data elmnms/'TIMWAV', 'HRMS', 'TP', 'DIR', 'DISS', 'FX', 'FY', 'MX', 'MY', 'TPS', 'UBOT', 'WLEN'/
+    data elmnms/'TIMWAV' , 'HRMS'  , 'TP' , 'DIR' , 'DISTOT', 'DISSURF', &
+              & 'DISWCAP', 'DISBOT', 'FX' , 'FY'  , 'WSBU'  , 'WSBV'   , &
+              & 'MX'     , 'MY'    , 'TPS', 'UBOT', 'WLEN'/
     data elmqty/nelmx*' '/
-    data elmunt/'[ TSCALE]', '[   M   ]', '[   S   ]', '[  DEG  ]', '[  W/M2 ]',&
-        & '[  N/M2 ]', '[  N/M2 ]', '[ M3/SM ]', '[ M3/SM ]', '[   S   ]', '[  M/S  ]', '[   M   ]'/
-    data elmtps/'INTEGER', 11*'REAL'/
+    data elmunt/'[ TSCALE]', '[   M   ]', '[   S   ]', '[  DEG  ]', '[  W/M2 ]', &
+              & '[  W/M2 ]', '[  W/M2 ]', '[  W/M2 ]', '[  N/M2 ]', '[  N/M2 ]', &
+              & '[  N/M2 ]', '[  N/M2 ]', '[ M3/SM ]', '[ M3/SM ]', '[   S   ]', &
+              & '[  M/S  ]', '[   M   ]'/
+    data elmtps/'INTEGER', 16*'REAL'/
     data nbytsg/nelmx*4/
-    data elmdes/'Time of wave field rel. to reference date/time                '&
-       & , 'Root mean square wave height                                  ',    &
-        & 'Peak wave period                                              ',      &
-        & 'Mean direction of wave propagation relative to east ccw       ',      &
-        & 'Wave energy dissipation rate                                  ',      &
-        & 'Wave forcing term in u-point                                  ',      &
-        & 'Wave forcing term in v-point                                  ',      &
-        & 'Wave-induced volume flux in u-point                           ',      &
-        & 'Wave-induced volume flux in v-point                           ',      &
-        & 'Smoothed peak wave period                                     ',      &
-        & 'Orbital motion near the bottom                                ',      &
+    data elmdes/'Time of wave field rel. to reference date/time                ', &
+        & 'Root mean square wave height                                  ', &
+        & 'Peak wave period                                              ', &
+        & 'Mean direction of wave propagation relative to east ccw       ', &
+        & 'Wave energy dissipation rate (total)                          ', &
+        & 'Wave energy dissipation rate at the free surface              ', &
+        & 'Wave energy dissipation rate due to white capping             ', &
+        & 'Wave energy dissipation rate at the bottom                    ', &
+        & 'Wave forcing term at surface level in u-point                 ', &
+        & 'Wave forcing term at surface level in v-point                 ', &
+        & 'Wave forcing term in water body in u-point                    ', &
+        & 'Wave forcing term in water body in v-point                    ', &
+        & 'Wave-induced volume flux in u-point                           ', &
+        & 'Wave-induced volume flux in v-point                           ', &
+        & 'Smoothed peak wave period                                     ', &
+        & 'Orbital motion near the bottom                                ', &
         & 'Mean wave length                                              '/
 !
 !! executable statements -------------------------------------------------------
 !
     nefiselem => gdp%nefisio%nefiselem(nefissetwav)
     !
-    eps             => gdp%gdconst%eps
-    first           => nefiselem%first
-    elmdms          => nefiselem%elmdms
-    gammax          => gdp%gdnumeco%gammax
-    rhow            => gdp%gdphysco%rhow
-    ag              => gdp%gdphysco%ag
-    iro             => gdp%gdphysco%iro
-    tps_from_com    => gdp%gdprocs%tps_from_com
-    ubot_from_com   => gdp%gdprocs%ubot_from_com
-    wlen_from_com   => gdp%gdprocs%wlen_from_com
+    eps                  => gdp%gdconst%eps
+    first                => nefiselem%first
+    elmdms               => nefiselem%elmdms
+    gammax               => gdp%gdnumeco%gammax
+    rhow                 => gdp%gdphysco%rhow
+    ag                   => gdp%gdphysco%ag
+    iro                  => gdp%gdphysco%iro
+    tps_from_com         => gdp%gdprocs%tps_from_com
+    ubot_from_com        => gdp%gdprocs%ubot_from_com
+    wlen_from_com        => gdp%gdprocs%wlen_from_com
+    only_distot_from_com => gdp%gdprocs%only_distot_from_com
     !
     ! Initialize local variables
     !
@@ -232,6 +266,62 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
                  & 0         ,0         ,0         )
        call filldm(elmdms    ,12        ,2         ,nmaxus    ,mmax      , &
                  & 0         ,0         ,0         )
+       call filldm(elmdms    ,13        ,2         ,nmaxus    ,mmax      , &
+                 & 0         ,0         ,0         )
+       call filldm(elmdms    ,14        ,2         ,nmaxus    ,mmax      , &
+                 & 0         ,0         ,0         )
+       call filldm(elmdms    ,15        ,2         ,nmaxus    ,mmax      , &
+                 & 0         ,0         ,0         )
+       call filldm(elmdms    ,16        ,2         ,nmaxus    ,mmax      , &
+                 & 0         ,0         ,0         )
+       call filldm(elmdms    ,17        ,2         ,nmaxus    ,mmax      , &
+                 & 0         ,0         ,0         )
+       !
+       ! Set the latest COM-file version
+       !
+       !cdum16(1) = '00.00.00.00'
+       !call getcomfileversionstring_flow2d3d(cdum16(1))
+       !latestcomfileversion = realfileversion(cdum16(1), 16)
+       !
+       ! Aggregate file names
+       !
+       ind = len_trim(comfil)+1
+       datnam              = comfil
+       datnam(ind:ind + 3) = '.dat'
+       call noextspaces(datnam, datlen)
+       !
+       defnam              = comfil
+       defnam(ind:ind + 3) = '.def'
+       call noextspaces(defnam, deflen)
+       !
+       ! Read the actual COM-file version from the COM-file
+       !
+       fd_nef               = 0
+       ierror               = 0
+       ierror               = crenef(fd_nef, datnam(1:datlen), defnam(1:deflen), ' ', 'r')
+       uindex(1:3)          = 1
+       cdum16               = '00.00.00.00'
+       ierror               = getels(fd_nef, 'com-version', 'FILE-VERSION', uindex, 1, 16, cdum16 )
+       actualcomfileversion = realfileversion(cdum16(1), 16)
+       ierror               = clsnef(fd_nef)
+       !
+       if (ierror /= 0) goto 9999
+       !
+       ! Now set flags for which parameters are to be read/written from/to the COM-file
+       ! for the present COM-fileversion
+       !
+       if (actualcomfileversion > 3.54_fp) then
+          only_distot_from_com = .false.
+       else
+          only_distot_from_com = .true.
+          !
+          ! Using old COM-file, will read only total dissipation from it
+          ! Write warning to the diagnostic file
+          !
+          write (message, '(2a)') 'Using old COM-file with version ', cdum16
+          call prterr(lundia, 'G051', message)
+          write (lundia, '(a)') '            Not reading/writing all available data from/to it'
+       endif
     endif
     !
     ! determination of reduced time and extrapolation coefficient
@@ -352,13 +442,66 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
     if (error) goto 9999
     !
     if (.not. roller) then
-       funam = 'DISS'
-       call frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
-                 & nmax      ,kmaxk     ,nmaxus    ,grpnam    ,nelmx     , &
-                 & elmnms    ,elmdms    ,elmqty    ,elmunt    ,elmdes    , &
-                 & elmtps    ,nbytsg    ,funam     ,ntimwa    ,ntimwb    , &
-                 & atimw     ,btimw     ,dis       ,discom    ,gdp       )
-       if (error) goto 9999
+       if (.not. only_distot_from_com) then
+          !
+          ! Read parameter DISTOT from the COM-file
+          !
+          funam = 'DISTOT'
+          call frdint(comfil    ,lundia    ,error     ,ifcore  ,mmax      , &
+                    & nmax      ,kmaxk     ,nmaxus    ,grpnam  ,nelmx     , &
+                    & elmnms    ,elmdms    ,elmqty    ,elmunt  ,elmdes    , &
+                    & elmtps    ,nbytsg    ,funam     ,ntimwa  ,ntimwb    , &
+                    & atimw     ,btimw     ,dis(:,:,1),discom  ,gdp       )
+          if (error) goto 9999
+          !
+          ! Parameters DISSURF, DISWCAP and DISBOT will also be on the COM-file
+          ! when DISTOT is there
+          !
+          funam = 'DISSURF'
+          call frdint(comfil    ,lundia    ,error     ,ifcore  ,mmax      , &
+                    & nmax      ,kmaxk     ,nmaxus    ,grpnam  ,nelmx     , &
+                    & elmnms    ,elmdms    ,elmqty    ,elmunt  ,elmdes    , &
+                    & elmtps    ,nbytsg    ,funam     ,ntimwa  ,ntimwb    , &
+                    & atimw     ,btimw     ,dis(:,:,2),discom  ,gdp       )
+          if (error) goto 9999
+          !
+          funam = 'DISWCAP'
+          call frdint(comfil    ,lundia    ,error     ,ifcore  ,mmax      , &
+                    & nmax      ,kmaxk     ,nmaxus    ,grpnam  ,nelmx     , &
+                    & elmnms    ,elmdms    ,elmqty    ,elmunt  ,elmdes    , &
+                    & elmtps    ,nbytsg    ,funam     ,ntimwa  ,ntimwb    , &
+                    & atimw     ,btimw     ,dis(:,:,3),discom  ,gdp       )
+          if (error) goto 9999
+          !
+          funam = 'DISBOT'
+          call frdint(comfil    ,lundia    ,error     ,ifcore  ,mmax      , &
+                    & nmax      ,kmaxk     ,nmaxus    ,grpnam  ,nelmx     , &
+                    & elmnms    ,elmdms    ,elmqty    ,elmunt  ,elmdes    , &
+                    & elmtps    ,nbytsg    ,funam     ,ntimwa  ,ntimwb    , &
+                    & atimw     ,btimw     ,dis(:,:,4),discom  ,gdp       )
+          if (error) goto 9999
+
+       else
+          ! 
+          ! Only read DISS (total wave dissipation) from the COM-file in case of old COM-file.
+          !
+          error     = .false.
+          funam     = 'DISS'
+          elmnms(5) = 'DISS'
+          call frdint(comfil    ,lundia    ,error     ,ifcore  ,mmax      , &
+                    & nmax      ,kmaxk     ,nmaxus    ,grpnam    ,nelmx     , &
+                    & elmnms    ,elmdms    ,elmqty    ,elmunt    ,elmdes    , &
+                    & elmtps    ,nbytsg    ,funam     ,ntimwa    ,ntimwb    , &
+                    & atimw     ,btimw     ,dis(:,:,1),discom    ,gdp       )
+          if (error) goto 9999
+          !
+          ! Set the other components of the dissipation array, such that 
+          ! they are used correctly in the turbulence model
+          !
+          dis(:,:,2) = dis(:,:,1)
+          dis(:,:,3) = 0.0_fp
+          dis(:,:,4) = 0.0_fp
+       endif
        !
        funam = 'FX'
        call frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
@@ -375,6 +518,31 @@ subroutine setwav(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
                  & elmtps    ,nbytsg    ,funam     ,ntimwa    ,ntimwb    , &
                  & atimw     ,btimw     ,wsv       ,wsvcom    ,gdp       )
        if (error) goto 9999
+       !
+       if (.not. only_distot_from_com) then
+          !
+          ! Parameters WSBU and WSBV will only be on the COM-file when DISTOT
+          ! is there
+          !
+          funam = 'WSBU'
+          call frdint(comfil    ,lundia    ,error     ,ifcore     ,mmax      , &
+                    & nmax      ,kmaxk     ,nmaxus    ,grpnam     ,nelmx     , &
+                    & elmnms    ,elmdms    ,elmqty    ,elmunt     ,elmdes    , &
+                    & elmtps    ,nbytsg    ,funam     ,ntimwa     ,ntimwb    , &
+                    & atimw     ,btimw     ,wsbodyu   ,wsbodyucom ,gdp       )
+          if (error) goto 9999
+          !
+          funam = 'WSBV'
+          call frdint(comfil    ,lundia    ,error     ,ifcore     ,mmax      , &
+                    & nmax      ,kmaxk     ,nmaxus    ,grpnam     ,nelmx     , &
+                    & elmnms    ,elmdms    ,elmqty    ,elmunt     ,elmdes    , &
+                    & elmtps    ,nbytsg    ,funam     ,ntimwa     ,ntimwb    , &
+                    & atimw     ,btimw     ,wsbodyv   ,wsbodyvcom ,gdp       )
+          if (error) goto 9999
+       else
+          wsbodyu = 0.0_fp
+          wsbodyv = 0.0_fp
+       endif
        !
        funam = 'MX'
        call frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &

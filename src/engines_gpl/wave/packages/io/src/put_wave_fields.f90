@@ -13,16 +13,16 @@ type (grid)                :: fg       ! flow grid
 type (output_fields)       :: fof      ! wave output fields defined on flow grid
 type (wave_time_type)      :: wavetime
    !
-   call crewav(fg%grid_name ,itide    ,fof%hrms  ,fof%tp  ,fof%dir  , &
-             & fof%dissip   ,fof%fx   ,fof%fy    ,fof%mx  ,fof%my   , &
-             & fof%tps      ,fof%ubot ,fof%wlen  ,                    &
-             & fof%mmax     ,fof%nmax ,swflux    ,wavetime )
+   call crewav(fg%grid_name ,itide    ,fof%hrms  ,fof%tp      ,fof%dir     , &
+             & fof%dissip   ,fof%fx   ,fof%fy    ,fof%mx      ,fof%my      , &
+             & fof%tps      ,fof%ubot ,fof%wlen  ,fof%wsbodyu ,fof%wsbodyv , &
+             & fof%mmax     ,fof%nmax ,swflux    ,wavetime    )
 end subroutine put_wave_fields
 
 
 subroutine crewav(filnam   ,itide    ,hrms     ,tp       ,dir      , &
                 & diss     ,fx       ,fy       ,mx       ,my       , &
-                & tps      ,ubot     ,wlen     ,                     &
+                & tps      ,ubot     ,wlen     ,wsbu     ,wsbv     , &
                 & mmax     ,nmax     ,swflux   ,wavetime )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -63,27 +63,29 @@ subroutine crewav(filnam   ,itide    ,hrms     ,tp       ,dir      , &
 !
 ! Local parameters
 !
-    integer, parameter :: nelmx = 14
+    integer, parameter :: nelmx = 19
 !
 ! Global variables
 !
-    character(37)              , intent(in)  :: filnam
-    integer                    , intent(in)  :: itide
-    integer                    , intent(in)  :: mmax
-    integer                    , intent(in)  :: nmax
-    real, dimension(mmax, nmax), intent(in)  :: dir
-    real, dimension(mmax, nmax), intent(in)  :: diss
-    real, dimension(mmax, nmax), intent(in)  :: fx
-    real, dimension(mmax, nmax), intent(in)  :: fy
-    real, dimension(mmax, nmax), intent(in)  :: hrms
-    real, dimension(mmax, nmax), intent(in)  :: mx
-    real, dimension(mmax, nmax), intent(in)  :: my
-    real, dimension(mmax, nmax), intent(in)  :: tp
-    real, dimension(mmax, nmax), intent(in)  :: tps
-    real, dimension(mmax, nmax), intent(in)  :: ubot
-    real, dimension(mmax, nmax), intent(in)  :: wlen
-    logical                    , intent(in)  :: swflux
-    type (wave_time_type)                    :: wavetime
+    character(37)                 , intent(in)  :: filnam
+    integer                       , intent(in)  :: itide
+    integer                       , intent(in)  :: mmax
+    integer                       , intent(in)  :: nmax
+    real, dimension(mmax, nmax)   , intent(in)  :: dir
+    real, dimension(mmax, nmax, 4), intent(in)  :: diss
+    real, dimension(mmax, nmax)   , intent(in)  :: fx
+    real, dimension(mmax, nmax)   , intent(in)  :: fy
+    real, dimension(mmax, nmax)   , intent(in)  :: hrms
+    real, dimension(mmax, nmax)   , intent(in)  :: mx
+    real, dimension(mmax, nmax)   , intent(in)  :: my
+    real, dimension(mmax, nmax)   , intent(in)  :: tp
+    real, dimension(mmax, nmax)   , intent(in)  :: tps
+    real, dimension(mmax, nmax)   , intent(in)  :: ubot
+    real, dimension(mmax, nmax)   , intent(in)  :: wlen
+    real, dimension(mmax, nmax)   , intent(in)  :: wsbu
+    real, dimension(mmax, nmax)   , intent(in)  :: wsbv
+    logical                       , intent(in)  :: swflux
+    type (wave_time_type)                       :: wavetime
 
 !
 ! Local variables
@@ -99,7 +101,7 @@ subroutine crewav(filnam   ,itide    ,hrms     ,tp       ,dir      , &
     integer, dimension(1)                   :: ival
     integer, dimension(6, nelmx)            :: elmdms
     integer, dimension(nelmx)               :: nbytsg
-    real, dimension(:,:), allocatable       :: rbuff
+    real   , dimension(:,:), allocatable    :: rbuff
     logical                                 :: wrswch
     logical, dimension(1)                   :: lval
     character(10), dimension(nelmx)         :: elmunt
@@ -110,28 +112,35 @@ subroutine crewav(filnam   ,itide    ,hrms     ,tp       ,dir      , &
     character(64), dimension(nelmx)         :: elmdes
     !
     data grpnam/'WAVNT', 'WAVTIM'/
-    data elmnms/'NTWAV', 'SWFLUX', 'TIMWAV', 'HRMS', 'TP  ', 'DIR   ', 'DISS',  &
-        & 'FX  ', 'FY  ', 'MX  ', 'MY    ', 'TPS', 'UBOT', 'WLEN' /
-    data elmdes/'Number of wave fields in group WAVTIM                         '&
-       & , 'Mass flux written to comm. file (.true. or .false.            ',    &
-        & 'Time of wave field rel. to reference date/time                ',      &
-        & 'Root mean square wave height                                  ',      &
-        & 'Peak wave period                                              ',      &
-        & 'Mean direction of wave propagation relative to ksi-dir. ccw   ',      &
-        & 'Wave energy dissipation rate                                  ',      &
-        & 'Wave forcing term in u-point                                  ',      &
-        & 'Wave forcing term in v-point                                  ',      &
-        & 'Wave-induced volume flux in u-point                           ',      &
-        & 'Wave-induced volume flux in v-point                           ',      &
-        & 'Smoothed peak period                                          ',      &
-        & 'Orbital motion near the bottom                                ',      &
-        & 'Mean wave length                                              '/
+    data elmnms/'NTWAV'  , 'SWFLUX' , 'TIMWAV', 'HRMS', 'TP', 'DIR' , 'DISTOT', &
+              & 'DISSURF', 'DISWCAP', 'DISBOT', 'FX'  , 'FY', 'WSBU', 'WSBV'  , &
+              & 'MX'     , 'MY'     , 'TPS'   , 'UBOT', 'WLEN'/
+    data elmdes/'Number of wave fields in group WAVTIM                         ', &
+              & 'Mass flux written to comm. file (.true. or .false.)           ', &
+              & 'Time of wave field rel. to reference date/time                ', &
+              & 'Root mean square wave height                                  ', &
+              & 'Peak wave period                                              ', &
+              & 'Mean direction of wave propagation relative to ksi-dir. ccw   ', &
+              & 'Total wave energy dissipation rate                            ', &
+              & 'Wave energy dissipation rate at the free surface              ', &
+              & 'Wave energy dissipation rate due to white capping             ', &
+              & 'Wave energy dissipation rate at the bottom                    ', &
+              & 'Wave forcing term at the free surface in u-point              ', &
+              & 'Wave forcing term at the free surface in v-point              ', &
+              & 'Wave forcing term in water body in u-point                    ', &
+              & 'Wave forcing term in water body in v-point                    ', &
+              & 'Wave-induced volume flux in u-point                           ', &
+              & 'Wave-induced volume flux in v-point                           ', &
+              & 'Smoothed peak period                                          ', &
+              & 'Orbital motion near the bottom                                ', &
+              & 'Mean wave length                                              '/
     data elmqty/nelmx*' '/
-    data elmunt/'[   -   ]', '[   -   ]', '[ TSCALE]', '[   M   ]', '[   S   ]',&
-        & '[  DEG  ]', '[  W/M2 ]', '[  N/M2 ]', '[  N/M2 ]', '[ M3/SM ]',       &
-        & '[ M3/SM ]', '[   S   ]', '[  M/S  ]', '[   M   ]'/
-    data elmtps/'INTEGER', 'LOGICAL', 'INTEGER', 11*'REAL'/
-    data nbytsg/14*4/
+    data elmunt/'[   -   ]', '[   -   ]', '[ TSCALE]', '[   M   ]', '[   S   ]', &
+              & '[  DEG  ]', '[  W/M2 ]', '[  W/M2 ]', '[  W/M2 ]', '[  W/M2 ]', &
+              & '[ N/M2  ]', '[ N/M2  ]', '[ N/M2  ]', '[ N/M2  ]', '[ M3/SM ]', &
+              & '[ M3/SM ]', '[   S   ]', '[  M/S  ]', '[   M   ]'/
+    data elmtps/'INTEGER', 'LOGICAL', 'INTEGER', 16*'REAL'/
+    data nbytsg/nelmx*4/
 !
 !! executable statements -------------------------------------------------------
 !
@@ -168,6 +177,16 @@ subroutine crewav(filnam   ,itide    ,hrms     ,tp       ,dir      , &
               & 0         ,0         ,0         )
     call filldm(elmdms    ,14        ,2         ,nmax, mmax      , &
               & 0         ,0         ,0         )
+    call filldm(elmdms    ,15        ,2         ,nmax, mmax      , &
+              & 0         ,0         ,0         )
+    call filldm(elmdms    ,16        ,2         ,nmax, mmax      , &
+              & 0         ,0         ,0         )
+    call filldm(elmdms    ,17        ,2         ,nmax, mmax      , &
+              & 0         ,0         ,0         )
+    call filldm(elmdms    ,18        ,2         ,nmax, mmax      , &
+              & 0         ,0         ,0         )
+    call filldm(elmdms    ,19        ,2         ,nmax, mmax      , &
+              & 0         ,0         ,0         )
     !
     !        Write all elements to file, or read them from file; all
     !        definition and creation of files, data groups, cells and
@@ -197,7 +216,7 @@ subroutine crewav(filnam   ,itide    ,hrms     ,tp       ,dir      , &
     call putgtl(filnam    ,grpnam(1) ,nelems    ,elmnms    ,elmdms    , &
               & elmqty(1) ,elmunt(1) ,elmdes(1) ,elmtps    ,nbytsg    , &
               & elmnms(ielem)        ,celidt    ,wrswch    ,error     ,lval      )
-    nelems = 12
+    nelems = 17
     celidt = iwave
     ielem = 3
     ival(1) = wavetime%timtscale
@@ -244,15 +263,54 @@ subroutine crewav(filnam   ,itide    ,hrms     ,tp       ,dir      , &
               & elmqty(3) ,elmunt(3) ,elmdes(3) ,elmtps(3) ,nbytsg(3) , &
               & elmnms(ielem)        ,celidt    ,wrswch    ,error     ,rbuff     )
 !
-!    Diss
+!    Distot
 !
     do m = 1, mmax
        do n = 1, nmax
-          rbuff (n,m) = diss (m,n)
+          rbuff (n,m) = diss (m,n,1)
        enddo
     enddo
 
     ielem = 7
+    call putgtr(filnam    ,grpnam(2) ,nelems    ,elmnms(3) ,elmdms(1, 3)         , &
+              & elmqty(3) ,elmunt(3) ,elmdes(3) ,elmtps(3) ,nbytsg(3) , &
+              & elmnms(ielem)        ,celidt    ,wrswch    ,error     ,rbuff     )
+!
+!    Dissurf
+!
+    do m = 1, mmax
+       do n = 1, nmax
+          rbuff (n,m) = diss (m,n,2)
+       enddo
+    enddo
+
+    ielem = 8
+    call putgtr(filnam    ,grpnam(2) ,nelems    ,elmnms(3) ,elmdms(1, 3)         , &
+              & elmqty(3) ,elmunt(3) ,elmdes(3) ,elmtps(3) ,nbytsg(3) , &
+              & elmnms(ielem)        ,celidt    ,wrswch    ,error     ,rbuff     )
+!
+!    Diswcap
+!
+    do m = 1, mmax
+       do n = 1, nmax
+          rbuff (n,m) = diss (m,n,3)
+       enddo
+    enddo
+
+    ielem = 9
+    call putgtr(filnam    ,grpnam(2) ,nelems    ,elmnms(3) ,elmdms(1, 3)         , &
+              & elmqty(3) ,elmunt(3) ,elmdes(3) ,elmtps(3) ,nbytsg(3) , &
+              & elmnms(ielem)        ,celidt    ,wrswch    ,error     ,rbuff     )
+!
+!    Disbot
+!
+    do m = 1, mmax
+       do n = 1, nmax
+          rbuff (n,m) = diss (m,n,4)
+       enddo
+    enddo
+
+    ielem = 10
     call putgtr(filnam    ,grpnam(2) ,nelems    ,elmnms(3) ,elmdms(1, 3)         , &
               & elmqty(3) ,elmunt(3) ,elmdes(3) ,elmtps(3) ,nbytsg(3) , &
               & elmnms(ielem)        ,celidt    ,wrswch    ,error     ,rbuff     )
@@ -265,7 +323,7 @@ subroutine crewav(filnam   ,itide    ,hrms     ,tp       ,dir      , &
        enddo
     enddo
 
-    ielem = 8
+    ielem = 11
     call putgtr(filnam    ,grpnam(2) ,nelems    ,elmnms(3) ,elmdms(1, 3)         , &
               & elmqty(3) ,elmunt(3) ,elmdes(3) ,elmtps(3) ,nbytsg(3) , &
               & elmnms(ielem)        ,celidt    ,wrswch    ,error     ,rbuff     )
@@ -278,7 +336,33 @@ subroutine crewav(filnam   ,itide    ,hrms     ,tp       ,dir      , &
        enddo
     enddo
 
-    ielem = 9
+    ielem = 12
+    call putgtr(filnam    ,grpnam(2) ,nelems    ,elmnms(3) ,elmdms(1, 3)         , &
+              & elmqty(3) ,elmunt(3) ,elmdes(3) ,elmtps(3) ,nbytsg(3) , &
+              & elmnms(ielem)        ,celidt    ,wrswch    ,error     ,rbuff     )
+!
+!    Wsbu
+!
+    do m = 1, mmax
+       do n = 1, nmax
+          rbuff (n,m) = wsbu (m,n)
+       enddo
+    enddo
+
+    ielem = 13
+    call putgtr(filnam    ,grpnam(2) ,nelems    ,elmnms(3) ,elmdms(1, 3)         , &
+              & elmqty(3) ,elmunt(3) ,elmdes(3) ,elmtps(3) ,nbytsg(3) , &
+              & elmnms(ielem)        ,celidt    ,wrswch    ,error     ,rbuff     )
+!
+!    Wsbv
+!
+    do m = 1, mmax
+       do n = 1, nmax
+          rbuff (n,m) = wsbv (m,n)
+       enddo
+    enddo
+
+    ielem = 14
     call putgtr(filnam    ,grpnam(2) ,nelems    ,elmnms(3) ,elmdms(1, 3)         , &
               & elmqty(3) ,elmunt(3) ,elmdes(3) ,elmtps(3) ,nbytsg(3) , &
               & elmnms(ielem)        ,celidt    ,wrswch    ,error     ,rbuff     )
@@ -291,7 +375,7 @@ subroutine crewav(filnam   ,itide    ,hrms     ,tp       ,dir      , &
        enddo
     enddo
 
-    ielem = 10
+    ielem = 15
     call putgtr(filnam    ,grpnam(2) ,nelems    ,elmnms(3) ,elmdms(1, 3)         , &
               & elmqty(3) ,elmunt(3) ,elmdes(3) ,elmtps(3) ,nbytsg(3) , &
               & elmnms(ielem)        ,celidt    ,wrswch    ,error     ,rbuff     )
@@ -304,7 +388,7 @@ subroutine crewav(filnam   ,itide    ,hrms     ,tp       ,dir      , &
        enddo
     enddo
 
-    ielem = 11
+    ielem = 16
     call putgtr(filnam    ,grpnam(2) ,nelems    ,elmnms(3) ,elmdms(1, 3)         , &
               & elmqty(3) ,elmunt(3) ,elmdes(3) ,elmtps(3) ,nbytsg(3) , &
               & elmnms(ielem)        ,celidt    ,wrswch    ,error     ,rbuff     )
@@ -317,7 +401,7 @@ subroutine crewav(filnam   ,itide    ,hrms     ,tp       ,dir      , &
        enddo
     enddo
 
-    ielem = 12
+    ielem = 17
     call putgtr(filnam    ,grpnam(2) ,nelems    ,elmnms(3) ,elmdms(1, 3)         , &
               & elmqty(3) ,elmunt(3) ,elmdes(3) ,elmtps(3) ,nbytsg(3) , &
               & elmnms(ielem)        ,celidt    ,wrswch    ,error     ,rbuff     )
@@ -330,7 +414,7 @@ subroutine crewav(filnam   ,itide    ,hrms     ,tp       ,dir      , &
        enddo
     enddo
 
-    ielem = 13
+    ielem = 18
     call putgtr(filnam    ,grpnam(2) ,nelems    ,elmnms(3) ,elmdms(1, 3)         , &
               & elmqty(3) ,elmunt(3) ,elmdes(3) ,elmtps(3) ,nbytsg(3) , &
               & elmnms(ielem)        ,celidt    ,wrswch    ,error     ,rbuff     )
@@ -343,7 +427,7 @@ subroutine crewav(filnam   ,itide    ,hrms     ,tp       ,dir      , &
        enddo
     enddo
 
-    ielem = 14
+    ielem = 19
     call putgtr(filnam    ,grpnam(2) ,nelems    ,elmnms(3) ,elmdms(1, 3)         , &
               & elmqty(3) ,elmunt(3) ,elmdes(3) ,elmtps(3) ,nbytsg(3) , &
               & elmnms(ielem)        ,celidt    ,wrswch    ,error     ,rbuff     )

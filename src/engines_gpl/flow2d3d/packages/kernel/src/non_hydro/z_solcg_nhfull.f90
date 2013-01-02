@@ -1,8 +1,9 @@
 subroutine z_solcg_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
                         & bbka      ,bbkc      ,ddk       ,kmax      ,icx       , &
-                        & icy       ,nmmax     ,nst       ,kfsz1     ,pnhcor    , &
+                        & icy       ,nmmax     ,nst       ,kfsz0     ,pnhcor    , &
                         & pj        ,rj        ,apj       ,dinv      ,pbbk      , &
-                        & pbbkc     ,p1        ,gdp       )
+                        & pbbkc     ,p1        ,kfs       ,kfsmin    ,kfsmx0    , &
+                        & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -66,7 +67,10 @@ subroutine z_solcg_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2      
     integer                                                      :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                      :: nmmax  !  Description and declaration in dimens.igs
     integer                                         , intent(in) :: nst
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: kfsz1  !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                   :: kfs    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: kfsmin !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: kfsmx0 !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: kfsz0  !  Description and declaration in esm_alloc_int.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: aak
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: aak2
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: apj
@@ -134,15 +138,18 @@ subroutine z_solcg_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2      
     !
     call z_matpro(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
                 & bbka      ,bbkc      ,kmax      ,icx       ,icy       , &
-                & nmmax     ,kfsz1     ,pnhcor    ,rj        ,gdp       )
+                & nmmax     ,kfsz0     ,pnhcor    ,rj        ,kfs       , &
+                & kfsmin    ,kfsmx0    ,gdp       )
     do m = m1_nhy, m2_nhy
        nmst = nmstart + (m - m1_nhy)*icxy
        do nm = nmst, nmst + ndelta
-          do k = 1, kmax
-             if (kfsz1(nm,k) /= 0) then
-                rj(nm, k) = ddk(nm, k) - rj(nm, k)
-             endif
-          enddo
+          if (kfs(nm) == 1) then
+             do k = 1, kmax
+                if (kfsz0(nm,k) /= 0) then
+                   rj(nm, k) = ddk(nm, k) - rj(nm, k)
+                endif
+             enddo
+          endif
        enddo
     enddo
     !
@@ -153,14 +160,16 @@ subroutine z_solcg_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2      
     do m = m1_nhy, m2_nhy
        nmst = nmstart + (m - m1_nhy)*icxy
        do nm = nmst, nmst + ndelta
-         do k = 1, kmax
-           if (kfsz1(nm,k) /= 0) then
-             normb = normb + ddk(nm, k)*ddk(nm, k)/(dinv(nm, k)*dinv(nm, k))
-             if (abs(ddk(nm,k)/dinv(nm,k)) > abs(normbinf)) then
-                normbinf = abs(ddk(nm, k)/dinv(nm, k))
-             endif
-           endif
-         enddo
+          if (kfs(nm) == 1) then
+             do k = 1, kmax
+                if (kfsz0(nm,k) /= 0) then
+                   normb = normb + ddk(nm, k)*ddk(nm, k)/(dinv(nm, k)*dinv(nm, k))
+                   if (abs(ddk(nm,k)/dinv(nm,k)) > abs(normbinf)) then
+                      normbinf = abs(ddk(nm, k)/dinv(nm, k))
+                   endif
+                endif
+             enddo
+          endif
        enddo
     enddo
     normb = sqrt(normb)
@@ -170,42 +179,47 @@ subroutine z_solcg_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2      
     if (precon == 'ilu') then
        call z_precon_ilu(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
                        & bbka      ,bbkc      ,kmax      ,icx       ,icy       , &
-                       & nmmax     ,kfsz1     ,rj        ,p1        ,gdp       )
+                       & nmmax     ,kfsz0     ,rj        ,p1        ,kfs       , &
+                       & kfsmin    ,kfsmx0    ,gdp       )
     endif
      if (precon == 'tridiag') then
        call z_precon(bbka      ,bbkc      ,pbbk      ,pbbkc     ,kmax      , &
-                   & icx       ,icy       ,nmmax     ,kfsz1     ,rj        , &
-                   & p1        ,gdp       )
+                   & icx       ,icy       ,nmmax     ,kfsz0     ,rj        , &
+                   & p1        ,kfs       ,kfsmin    ,kfsmx0    ,gdp       )
     endif
-       if ((precon=='none') .or. (precon=='diag')) then
+    if ((precon=='none') .or. (precon=='diag')) then
        do m = m1_nhy, m2_nhy
           nmst = nmstart + (m - m1_nhy)*icxy
           do nm = nmst, nmst + ndelta
-             do k = 1, kmax
-                if (kfsz1(nm,k) /= 0) then
-                   p1(nm, k) = rj(nm,k)
-                endif
-             enddo
+             if (kfs(nm) == 1) then
+                do k = 1, kmax
+                   if (kfsz0(nm,k) /= 0) then
+                      p1(nm, k) = rj(nm,k)
+                   endif
+                enddo
+             endif
           enddo
        enddo
-     endif
+    endif
     !
     !  compute (initial) search direction pj
     !
     do m = m1_nhy, m2_nhy
        nmst = nmstart + (m - m1_nhy)*icxy
        do nm = nmst, nmst + ndelta
-          do k = 1, kmax
-             if (kfsz1(nm,k) /= 0) then
-                pj(nm,k) = p1(nm,k)
-             endif
-          enddo
+          if (kfs(nm) == 1) then
+             do k = 1, kmax
+                if (kfsz0(nm,k) /= 0) then
+                   pj(nm,k) = p1(nm,k)
+                endif
+             enddo
+          endif
        enddo
     enddo
     !
     !  compute inner product of initial residu
     !
-    alphat = z_ainpro(rj, p1, kmax, kfsz1, icx, icy, gdp)
+    alphat = z_ainpro(rj, p1, kmax, kfs, kfsz0, icx, icy, gdp)
     !
     !  start iteration process
     !  Noted that array p1 contains A_inv * rj
@@ -217,14 +231,16 @@ subroutine z_solcg_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2      
        do m = m1_nhy, m2_nhy
           nmst = nmstart + (m - m1_nhy)*icxy
           do nm = nmst, nmst + ndelta
-             do k = 1, kmax
-                if (kfsz1(nm,k) /= 0) then
-                   rk = rk + rj(nm, k)*rj(nm, k)/(dinv(nm, k)*dinv(nm, k))
-                   if (abs(rj(nm,k)/dinv(nm, k)) > abs(rkinf)) then
-                      rkinf = abs(rj(nm,k)/dinv(nm,k))
+             if (kfs(nm) == 1) then
+                do k = 1, kmax
+                   if (kfsz0(nm,k) /= 0) then
+                      rk = rk + rj(nm, k)*rj(nm, k)/(dinv(nm, k)*dinv(nm, k))
+                      if (abs(rj(nm,k)/dinv(nm, k)) > abs(rkinf)) then
+                         rkinf = abs(rj(nm,k) / dinv(nm,k))
+                      endif
                    endif
-                endif
-             enddo
+                enddo
+             endif
           enddo
        enddo
        rk = sqrt(abs(rk))
@@ -248,11 +264,12 @@ subroutine z_solcg_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2      
        !
        call z_matpro(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
                    & bbka      ,bbkc      ,kmax      ,icx       ,icy       , &
-                   & nmmax     ,kfsz1     ,pj        ,apj       ,gdp       )
+                   & nmmax     ,kfsz0     ,pj        ,apj       ,kfs       , &
+                   & kfsmin    ,kfsmx0    ,gdp       )
        !
        ! inner product
        !
-       alphan = z_ainpro(pj, apj, kmax, kfsz1, icx, icy, gdp)
+       alphan = z_ainpro(pj, apj, kmax, kfs, kfsz0, icx, icy, gdp)
        alphaj = alphat / alphan
        !
        ! next iteration
@@ -260,12 +277,14 @@ subroutine z_solcg_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2      
        do m = m1_nhy, m2_nhy
           nmst = nmstart + (m - m1_nhy)*icxy
           do nm = nmst, nmst + ndelta
-             do k = 1, kmax
-                if (kfsz1(nm,k) /= 0) then
-                   pnhcor(nm,k) = pnhcor(nm,k) + alphaj*pj (nm,k)
-                   rj    (nm,k) = rj    (nm,k) - alphaj*apj(nm,k)
-                endif
-             enddo
+             if (kfs(nm) == 1) then
+                do k = 1, kmax
+                   if (kfsz0(nm,k) /= 0) then
+                      pnhcor(nm,k) = pnhcor(nm,k) + alphaj*pj (nm,k)
+                      rj(nm,k)     = rj(nm,k)     - alphaj*apj(nm,k)
+                   endif
+                enddo
+             endif
           enddo
        enddo
        !
@@ -274,35 +293,40 @@ subroutine z_solcg_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2      
        if (precon == 'ilu') then
           call z_precon_ilu(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
                           & bbka      ,bbkc      ,kmax      ,icx       ,icy       , &
-                          & nmmax     ,kfsz1     ,rj        ,p1        ,gdp       )
+                          & nmmax     ,kfsz0     ,rj        ,p1        ,kfs       , &
+                          & kfsmin    ,kfsmx0    ,gdp       )
        endif
        if (precon == 'tridiag') then
           call z_precon(bbka      ,bbkc      ,pbbk      ,pbbkc     ,kmax      , &
-                      & icx       ,icy       ,nmmax     ,kfsz1     ,rj        , &
-                      & p1        ,gdp       )
+                      & icx       ,icy       ,nmmax     ,kfsz0     ,rj        , &
+                      & p1        ,kfs       ,kfsmin    ,kfsmx0    ,gdp       )
        endif
-        if ((precon == 'none') .or. (precon == 'diag')) then
+       if ((precon == 'none') .or. (precon == 'diag')) then
           do m = m1_nhy, m2_nhy
              nmst = nmstart + (m - m1_nhy)*icxy
              do nm = nmst, nmst + ndelta
-                do k = 1, kmax
-                   if (kfsz1(nm,k) /= 0) then
-                      p1(nm,k) = rj(nm,k)
-                   endif
-                enddo
+                if (kfs(nm) == 1) then
+                   do k = 1, kmax
+                      if (kfsz0(nm,k) /= 0) then
+                         p1(nm,k) = rj(nm,k)
+                      endif
+                   enddo
+                endif
              enddo
           enddo
-        endif
-        betat = z_ainpro(rj, p1, kmax, kfsz1, icx, icy, gdp)
-       betaj  = betat / alphat
+       endif
+       betat = z_ainpro(rj, p1, kmax, kfs, kfsz0, icx, icy, gdp)
+       betaj = betat / alphat
        do m = m1_nhy, m2_nhy
           nmst = nmstart + (m - m1_nhy)*icxy
           do nm = nmst, nmst + ndelta
-             do k = 1, kmax
-                if (kfsz1(nm,k) /= 0) then
-                   pj(nm,k) = p1(nm,k) + betaj*pj(nm,k)
-                endif
-             enddo
+             if (kfs(nm) == 1) then
+                do k = 1, kmax
+                   if (kfsz0(nm,k) /= 0) then
+                      pj(nm,k) = p1(nm,k) + betaj*pj(nm,k)
+                   endif
+                enddo
+             endif
           enddo
        enddo
        !
@@ -322,20 +346,22 @@ subroutine z_solcg_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2      
     !
     ! now convergence
     !
-    !
     ! Calculate the true residual and store it in rj.
     !
     call z_matpro(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
                 & bbka      ,bbkc      ,kmax      ,icx       ,icy       , &
-                & nmmax     ,kfsz1     ,pnhcor    ,rj        ,gdp       )
+                & nmmax     ,kfsz0     ,pnhcor    ,rj        ,kfs       , & 
+                & kfsmin    ,kfsmx0    ,gdp       )
     do m = m1_nhy, m2_nhy
        nmst = nmstart + (m - m1_nhy)*icxy
        do nm = nmst, nmst + ndelta
-          do k = 1, kmax
-             if (kfsz1(nm,k) /= 0) then
-                rj(nm,k) = (ddk(nm,k)-rj(nm,k)) / dinv(nm,k)
-             endif
-          enddo
+          if (kfs(nm) == 1) then
+             do k = 1, kmax
+                if (kfsz0(nm,k) /= 0) then
+                   rj(nm,k) = (ddk(nm,k)-rj(nm,k)) / dinv(nm,k)
+                endif
+             enddo
+          endif
        enddo
     enddo
     !
@@ -346,14 +372,16 @@ subroutine z_solcg_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2      
     do m = m1_nhy, m2_nhy
        nmst = nmstart + (m - m1_nhy)*icxy
        do nm = nmst, nmst + ndelta
-         do k = 1, kmax
-           if (kfsz1(nm,k) /= 0) then
-             rk = rk + rj(nm,k)*rj(nm,k)/(dinv(nm,k)*dinv(nm,k))
-             if (abs(rj(nm,k)/dinv(nm,k)) > abs(rkinf)) then
-                rkinf = abs(rj(nm,k)/dinv(nm,k))
-             endif
-           endif
-         enddo
+          if (kfs(nm) == 1) then
+             do k = 1, kmax
+                if (kfsz0(nm,k) /= 0) then
+                   rk = rk + rj(nm,k)*rj(nm,k)/(dinv(nm,k)*dinv(nm,k))
+                   if (abs(rj(nm,k)/dinv(nm,k)) > abs(rkinf)) then
+                      rkinf = abs(rj(nm,k) / dinv(nm,k))
+                   endif
+                endif
+             enddo
+          endif
        enddo
     enddo
     rk = sqrt(rk)
@@ -363,13 +391,15 @@ subroutine z_solcg_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2      
     do m = m1_nhy, m2_nhy
        nmst = nmstart + (m - m1_nhy)*icxy
        do nm = nmst, nmst + ndelta
-          do k = 1, kmax
-             if (kfsz1(nm,k) /= 0) then
-                p1(nm,k) = pnhcor(nm,k) * dinv(nm,k)
-             else
-                p1(nm,k) = 0.0_fp
-             endif
-          enddo
+          if (kfs(nm) == 1) then
+             do k = 1, kmax
+                if (kfsz0(nm,k) /= 0) then
+                   p1(nm,k) = pnhcor(nm,k) * dinv(nm,k)
+                else
+                   p1(nm,k) = 0.0_fp
+                endif
+             enddo
+          endif
        enddo
     enddo
     !
@@ -378,12 +408,12 @@ subroutine z_solcg_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2      
     !
    if (l2norm) then
       conv = rk / rk0
-      conv = conv**(1.0/max(1, iter))
+      conv = conv**(1.0_fp/real(max(1, iter),fp))
          write (lundia,'(a,f5.2,a,i4,4(a,e9.3))') 'conv (L2 norm)=', &
               & conv,'  iter=',iter,' ',rk0,' ',rk,' ',rkinf0,' ',rkinf
    else
       conv = rk / rk0
-      conv = conv**(1.0/max(1, iter))
+      conv = conv**(1.0_fp/real(max(1, iter),fp))
          write (lundia,'(a,f5.2,a,i4,4(a,e9.3))') 'conv (Linf norm)=', &
               & conv,'  iter=',iter,' ',rk0,' ',rk,' ',rkinf0,' ',rkinf
    endif

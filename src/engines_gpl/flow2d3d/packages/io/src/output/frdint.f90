@@ -76,7 +76,7 @@ subroutine frdint(comfil    ,lundia    ,error     ,ifcore    ,mmax      , &
                                                                                                 !!  of the function
     character(*)                                                                      :: comfil !!  Name for communication file
                                                                                                 !!  com-<case><label>
-    character(10), dimension(nelmx)                                                   :: elmunt !!  Array with element physical unit
+    character(16), dimension(nelmx)                                                   :: elmunt !!  Array with element physical unit
     character(16)                                                                     :: funam  !!  Name of element which has to be read
     character(16)                                                                     :: grpnam !!  Data-group name defined for the
                                                                                                 !!  COM-files (CURTIM)

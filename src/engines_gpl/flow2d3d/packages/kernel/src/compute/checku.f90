@@ -125,7 +125,9 @@ subroutine checku(hu        ,s1        ,dpu       ,umean     , &
        !
        if (  flood .and. kfu(nm)==0 .and. kcu(nm)==1 &
            & .and. max(s1(nm),s1(nm+icx)) - max(-real(dps(nm),fp),-real(dps(nm+icx),fp)) >= trsh) then
-          if (min(hu(nm), hucres)>trsh) kfu(nm) = 1
+          if (min(hu(nm), hucres)>trsh) then
+            kfu(nm) = 1
+          endif
        endif
     enddo
     !

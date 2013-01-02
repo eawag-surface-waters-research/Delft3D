@@ -87,7 +87,7 @@ subroutine esm_alloc_int(lundia, error, verify, zmodel, gdp)
 ! Local variables
 !
     integer           :: ddb
-    integer           :: ierr    ! errorflag 
+    integer           :: ierr    ! Errorflag 
     integer           :: kfacvr  ! Multiple factor; 0 if VERIFY=TRUE 1 if VERIFY=FALSE for arrays before fcorio, which are not used with verify 
     integer           :: kfacz   ! Multiple factor; 0 if ZMODEL=TRUE 1 if ZMODEL=FALSE for vertical grid arrays 
     integer           :: mmaxdb
@@ -475,65 +475,106 @@ subroutine esm_alloc_int(lundia, error, verify, zmodel, gdp)
     !
     ! arrays for fixed layer approach
     !
+    pntnam = 'kfsz0'         !  Global data
+    ierr = mkipnt(pntnam, max(1, nmaxddb*mmaxddb*kmax*kfacz), gdp)
+                             !  3D Mask array for cells for
+                             !  for each layer in a z-model
+                             !  For the geometry at the current/old time step
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'kfuz0'         !  Global data
+    ierr = mkipnt(pntnam, max(1, nmaxddb*mmaxddb*kmax*kfacz), gdp)
+                             !  3D Mask array for U-cell interfaces for
+                             !  for each layer in a z-model
+                             !  For the geometry at the current/old time step
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'kfvz0'         !  Global data
+    ierr = mkipnt(pntnam, max(1, nmaxddb*mmaxddb*kmax*kfacz), gdp)
+                             !  3D Mask array for V-cell interfaces for
+                             !  for each layer in a z-model
+                             !  For the geometry at the current/old time step
+    if (ierr <= -9) goto 9999
+    !
     pntnam = 'kfsz1'         !  Global data
     ierr = mkipnt(pntnam, max(1, nmaxddb*mmaxddb*kmax*kfacz), gdp)
-                             !  no description (yet)
+                             !  3D Mask array for cells for
+                             !  for each layer in a z-model
+                             !  For the geometry at the new time step
     if (ierr <= -9) goto 9999
     !
     pntnam = 'kfuz1'         !  Global data
     ierr = mkipnt(pntnam, max(1, nmaxddb*mmaxddb*kmax*kfacz), gdp)
-                             !  no description (yet)
+                             !  3D Mask array for U-cell interfaces for
+                             !  for each layer in a z-model
+                             !  For the geometry at the new time step
     if (ierr <= -9) goto 9999
     !
     pntnam = 'kfvz1'         !  Global data
     ierr = mkipnt(pntnam, max(1, nmaxddb*mmaxddb*kmax*kfacz), gdp)
-                             !  no description (yet)
+                             !  3D Mask array for V-cell interfaces for
+                             !  for each layer in a z-model
+                             !  For the geometry at the new time step
     if (ierr <= -9) goto 9999
     !
     pntnam = 'kfsmin'        !  Global data
     ierr = mkipnt(pntnam, max(1, nmaxddb*mmaxddb*kfacz), gdp)
-                             !  Index of the 1st active water level point
+                             !  Index of the 1st active (bed) layer in a water level point
+                             !  in a z-model
     if (ierr <= -9) goto 9999
     !
     pntnam = 'kfsmax'        !  Global data
     ierr = mkipnt(pntnam, max(1, nmaxddb*mmaxddb*kfacz), gdp)
-                             !  Index of the last active water level point
-                             !  (at the bottom) at each point in the z-model
+                             !  Index of the last active (surface level) layer in a water level point
+                             !  in a z-model
+                             !  For the geometry at the new time step
     if (ierr <= -9) goto 9999
     !
     pntnam = 'kfumin'        !  Global data
     ierr = mkipnt(pntnam, max(1, nmaxddb*mmaxddb*kfacz), gdp)
-                             !  no description (yet)
+                             !  Index of the first active (bed) layer in a U-velocity point
+                             !  in a z-model
     if (ierr <= -9) goto 9999
     !
     pntnam = 'kfumax'        !  Global data
     ierr = mkipnt(pntnam, max(1, nmaxddb*mmaxddb*kfacz), gdp)
-                             !  no description (yet)
+                             !  Index of the last active (surface level) layer in a U-velocity point
+                             !  in a z-model
+                             !  For the geometry at the new time step
     if (ierr <= -9) goto 9999
     !
     pntnam = 'kfvmin'        !  Global data
     ierr = mkipnt(pntnam, max(1, nmaxddb*mmaxddb*kfacz), gdp)
-                             !  no description (yet)
+                             !  Index of the first active (bed) layer in a V-velocity point
+                             !  in a z-model
     if (ierr <= -9) goto 9999
     !
     pntnam = 'kfvmax'        !  Global data
     ierr = mkipnt(pntnam, max(1, nmaxddb*mmaxddb*kfacz), gdp)
-                             !  no description (yet)
+                             !  Index of the last active (surface level) layer in a U-velocity point
+                             !  in a z-model
+                             !  For the geometry at the new time step
     if (ierr <= -9) goto 9999
     !
     pntnam = 'kfsmx0'        !  Global data
     ierr = mkipnt(pntnam, max(1, nmaxddb*mmaxddb*kfacz), gdp)
-                             !  no description (yet)
+                             !  Index of the last active (surface level) layer in a water level point
+                             !  in a z-model
+                             !  For the geometry at the current/old time step
     if (ierr <= -9) goto 9999
     !
     pntnam = 'kfumx0'        !  Global data
     ierr = mkipnt(pntnam, max(1, nmaxddb*mmaxddb*kfacz), gdp)
-                             !  no description (yet)
+                             !  Index of the last active (surface level) layer in a U-velocity point
+                             !  in a z-model
+                             !  For the geometry at the current/old time step
     if (ierr <= -9) goto 9999
     !
     pntnam = 'kfvmx0'        !  Global data
     ierr = mkipnt(pntnam, max(1, nmaxddb*mmaxddb*kfacz), gdp)
-                             !  no description (yet)
+                             !  Index of the last active (surface level) layer in a V-velocity point
+                             !  in a z-model
+                             !  For the geometry at the current/old time step
     if (ierr <= -9) goto 9999
     !
     pntnam = 'kcshyd'        !  Global data

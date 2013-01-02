@@ -278,6 +278,10 @@ subroutine tricom_init(olv_handle, gdp)
     integer(pntrsize)                   , pointer :: wsucom
     integer(pntrsize)                   , pointer :: wsv
     integer(pntrsize)                   , pointer :: wsvcom
+    integer(pntrsize)                   , pointer :: wsbodyu
+    integer(pntrsize)                   , pointer :: wsbodyucom
+    integer(pntrsize)                   , pointer :: wsbodyv
+    integer(pntrsize)                   , pointer :: wsbodyvcom
     integer(pntrsize)                   , pointer :: xcor
     integer(pntrsize)                   , pointer :: xz
     integer(pntrsize)                   , pointer :: ycor
@@ -657,6 +661,10 @@ subroutine tricom_init(olv_handle, gdp)
     wsucom              => gdp%gdr_i_ch%wsucom
     wsv                 => gdp%gdr_i_ch%wsv
     wsvcom              => gdp%gdr_i_ch%wsvcom
+    wsbodyu             => gdp%gdr_i_ch%wsbodyu
+    wsbodyucom          => gdp%gdr_i_ch%wsbodyucom
+    wsbodyv             => gdp%gdr_i_ch%wsbodyv
+    wsbodyvcom          => gdp%gdr_i_ch%wsbodyvcom
     xcor                => gdp%gdr_i_ch%xcor
     xz                  => gdp%gdr_i_ch%xz
     ycor                => gdp%gdr_i_ch%ycor
@@ -760,14 +768,14 @@ subroutine tricom_init(olv_handle, gdp)
     itrstc              => gdp%gdtricom%itrstc
     itrw                => gdp%gdtricom%itrw
     maxmn               => gdp%gdtricom%maxmn
-    npmap               => gdp%gdtricom%npmap    
+    npmap               => gdp%gdtricom%npmap
     ntcur               => gdp%gdtricom%ntcur
     ntwav               => gdp%gdtricom%ntwav
     timwav              => gdp%gdtricom%timwav
-    waverd              => gdp%gdtricom%waverd        
+    waverd              => gdp%gdtricom%waverd
     anglat              => gdp%gdtricom%anglat
     anglon              => gdp%gdtricom%anglon
-    dtsec               => gdp%gdtricom%dtsec        
+    dtsec               => gdp%gdtricom%dtsec
     !
     call timer_start(timer_tricomtot, gdp)
     !
@@ -1327,16 +1335,17 @@ subroutine tricom_init(olv_handle, gdp)
     !
     itimc = modlen(itstrt*itp, itlen)
     if (waverd) then
-       call setwav(comfil    ,lundia    ,error     ,mmax      ,nmax      , &
-                 & nmaxus    ,itimc     ,ntwav     ,itlen     ,timwav    , &
-                 & norow     ,noroco    ,i(irocol) ,ifcore    ,d(dps)    , &
-                 & r(s1)     ,r(uorb)   ,r(tp)     ,r(teta)   ,r(dis)    , &
-                 & r(wsu)    ,r(wsv)    ,r(grmasu) ,r(grmasv) ,r(hrms)   , &
-                 & r(ubot)   ,r(wlen)   ,r(hrmcom) ,r(tpcom)  , &
-                 & r(dircom) ,r(discom) ,r(wsucom) ,r(wsvcom) ,r(msucom) , &
-                 & r(msvcom) ,r(ubcom)  ,r(wlcom)  ,r(rlabda) , &
-                 & r(dircos) ,r(dirsin) ,r(ewave1) ,roller    ,wavcmp    , &
-                 & r(ewabr1) ,gdp       )
+       call setwav(comfil    ,lundia     ,error      ,mmax          ,nmax          , &
+                 & nmaxus    ,itimc      ,ntwav      ,itlen         ,timwav        , &
+                 & norow     ,noroco     ,i(irocol)  ,ifcore        ,d(dps)        , &
+                 & r(s1)     ,r(uorb)    ,r(tp)      ,r(teta)       ,r(dis)        , &
+                 & r(wsu)    ,r(wsv)     ,r(grmasu)  ,r(grmasv)     ,r(hrms)       , &
+                 & r(ubot)   ,r(wlen)    ,r(hrmcom)  ,r(tpcom)      , &
+                 & r(dircom) ,r(discom)  ,r(wsucom)  ,r(wsvcom)     ,r(msucom)     , &
+                 & r(msvcom) ,r(ubcom)   ,r(wlcom)   ,r(rlabda)     , &
+                 & r(dircos) ,r(dirsin)  ,r(ewave1)  ,roller        ,wavcmp        , &
+                 & r(ewabr1) ,r(wsbodyu) ,r(wsbodyv) ,r(wsbodyucom) ,r(wsbodyvcom) , &
+                 & gdp       )
        if (error) goto 9997
     endif
     !
@@ -1490,7 +1499,7 @@ subroutine tricom_init(olv_handle, gdp)
     ! Write initial input to output files after checking output file times
     !
     call inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
-              & initi     ,selhis    ,selmap    ,tscale    , &
+              & initi     ,selhis    ,selmap    ,tscale    ,commrd    , &
               & itlen     ,itcur     ,itimc     , &
               & it01      ,it02      ,sferic    ,grdang    , &
               & rouflo    ,nfltyp    , &

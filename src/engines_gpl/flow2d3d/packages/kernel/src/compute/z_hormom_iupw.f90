@@ -1,11 +1,11 @@
-subroutine z_impl_upw(nmmax     ,kmax      ,icx       ,icy       ,kcs     , &
-                    & kcscut    ,kfu       ,kfuz1     ,kfumin    ,kfumax  , &
-                    & kfvz1     ,u0        ,v1        ,guu       ,gvu     , &
-                    & gvd       ,guz       ,gsqiu     ,bdx       ,bux     , &
-                    & bbk       ,bdy       ,ddk       ,buy       ,gdp     )
+subroutine z_hormom_iupw(nmmax     ,kmax      ,icx       ,icy       ,kcs     , &
+                       & kcscut    ,kfu       ,kfuz0     ,kfumin    ,kfumx0  , &
+                       & kfvz0     ,u0        ,v0        ,guu       ,gvu     , &
+                       & gvd       ,guz       ,gsqiu     ,bdx       ,bux     , &
+                       & bbk       ,bdy       ,ddk       ,buy       ,gdp     )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2012.                                
+!  Copyright (C)  Stichting Deltares, 2011-2012.                                     
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -56,11 +56,11 @@ subroutine z_impl_upw(nmmax     ,kmax      ,icx       ,icy       ,kcs     , &
     integer                                                        :: nmmax  !  Description and declaration in dimens.igs
     integer  , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kcs    !  Description and declaration in esm_alloc_int.f90
     integer  , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfu    !  Description and declaration in esm_alloc_int.f90
-    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfumax !  Description and declaration in esm_alloc_int.f90
+    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfumx0 !  Description and declaration in esm_alloc_int.f90
     integer  , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfumin !  Description and declaration in esm_alloc_int.f90
     integer  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in) :: kcscut !  Description and declaration in esm_alloc_int.f90
-    integer  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: kfuz1  !  Description and declaration in esm_alloc_int.f90
-    integer  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: kfvz1  !  Description and declaration in esm_alloc_int.f90
+    integer  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: kfuz0  !  Description and declaration in esm_alloc_int.f90
+    integer  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: kfvz0  !  Description and declaration in esm_alloc_int.f90
     real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: gsqiu  !  Description and declaration in esm_alloc_real.f90
     real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: guu    !  Description and declaration in esm_alloc_real.f90
     real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: guz    !  Description and declaration in esm_alloc_real.f90
@@ -77,7 +77,7 @@ subroutine z_impl_upw(nmmax     ,kmax      ,icx       ,icy       ,kcs     , &
     real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: bbk    !!  Internal work array, coefficient layer velocity in (N,M,K) implicit part
     real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: ddk    !!  Internal work array, diagonal space at (N,M,K)
     real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: u0     !  Description and declaration in esm_alloc_real.f90
-    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: v1     !  Description and declaration in esm_alloc_real.f90
+    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: v0     !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !
@@ -125,12 +125,12 @@ subroutine z_impl_upw(nmmax     ,kmax      ,icx       ,icy       ,kcs     , &
           dgvnm = gvd(nm)  - gvd(ndm)
           gsqi  = gsqiu(nm)
           !
-          do k = kfumin(nm), kfumax(nm)
-             if (kfuz1(nm, k)==1 .and. kcs(nm)*kcs(nmu)>0) then
-                vvv   = 0.25_fp*(v1(ndm, k) + v1(ndmu, k) + v1(nm, k) + v1(nmu, k))
+          do k = kfumin(nm), kfumx0(nm)
+             if (kfuz0(nm, k)==1 .and. kcs(nm)*kcs(nmu)>0) then
+                vvv   = 0.25_fp*(v0(ndm, k) + v0(ndmu, k) + v0(nm, k) + v0(nmu, k))
                 uuu   = u0(nm, k)
-                idifd = kfvz1(ndm, k)*kfvz1(ndmu, k)*kfuz1(ndm, k)
-                idifu = kfvz1(nm, k)*kfvz1(nmu, k)*kfuz1(num, k)
+                idifd = kfvz0(ndm, k)*kfvz0(ndmu, k)*kfuz0(ndm, k)
+                idifu = kfvz0(nm , k)*kfvz0(nmu , k)*kfuz0(num, k)
                 !
                 ! For 1:n stair case (cut-cell) boundary:
                 ! - check dgvnm
@@ -138,10 +138,10 @@ subroutine z_impl_upw(nmmax     ,kmax      ,icx       ,icy       ,kcs     , &
                 ! - reset vvv
                 !
                 if (kcscut(nm, k)==1 .or. kcscut(nmu, k)==1) then
-                   kenm = max(1, kfvz1(nm, k) + kfvz1(ndm, k) + kfvz1(ndmu, k)  &
-                        & + kfvz1(nmu, k))
-                   vvv  = v1(nm, k)*kfvz1(nm, k) + v1(ndm, k)*kfvz1(ndm, k)      &
-                        & + v1(ndmu, k)*kfvz1(ndmu, k) + v1(nmu, k)*kfvz1(nmu, k)
+                   kenm = max(1, kfvz0(nm, k) + kfvz0(ndm, k) + kfvz0(ndmu, k)         &
+                        &      + kfvz0(nmu, k))
+                   vvv  =   v0(nm  , k)*kfvz0(nm  , k) + v0(ndm, k)*kfvz0(ndm, k)      &
+                        & + v0(ndmu, k)*kfvz0(ndmu, k) + v0(nmu, k)*kfvz0(nmu, k)
                    vvv  = vvv/kenm
                 endif
                 !
@@ -159,13 +159,13 @@ subroutine z_impl_upw(nmmax     ,kmax      ,icx       ,icy       ,kcs     , &
                 ! therefore factor 2.0_fp in discretisation
                 !
                 if (uuu >= 0.0_fp) then
-                   bbk(nm, k) = bbk(nm, k) + fac*kfuz1(nmd, k)*uuu/gksi
-                   bdx(nm, k) = bdx(nm, k) - fac*kfuz1(nmd, k)*uuu/gksi
-                   ddk(nm, k) = ddk(nm, k) - fac*kfuz1(nmd, k)*uuu*uvdgdy
+                   bbk(nm, k) = bbk(nm, k) + fac*kfuz0(nmd, k)*uuu/gksi
+                   bdx(nm, k) = bdx(nm, k) - fac*kfuz0(nmd, k)*uuu/gksi
+                   ddk(nm, k) = ddk(nm, k) - fac*kfuz0(nmd, k)*uuu*uvdgdy
                 else
-                   bbk(nm, k) = bbk(nm, k) - fac*kfuz1(nmu, k)*uuu/gksi
-                   bux(nm, k) = bux(nm, k) + fac*kfuz1(nmu, k)*uuu/gksi
-                   ddk(nm, k) = ddk(nm, k) - fac*kfuz1(nmu, k)*uuu*uvdgdy
+                   bbk(nm, k) = bbk(nm, k) - fac*kfuz0(nmu, k)*uuu/gksi
+                   bux(nm, k) = bux(nm, k) + fac*kfuz0(nmu, k)*uuu/gksi
+                   ddk(nm, k) = ddk(nm, k) - fac*kfuz0(nmu, k)*uuu*uvdgdy
                 endif
                 if (vvv >= 0.0_fp) then
                    bbk(nm, k) = bbk(nm, k) + fac*idifd*vvv/geta
@@ -180,4 +180,4 @@ subroutine z_impl_upw(nmmax     ,kmax      ,icx       ,icy       ,kcs     , &
           enddo
        endif
     enddo
-end subroutine z_impl_upw
+end subroutine z_hormom_iupw

@@ -1,8 +1,9 @@
 subroutine wrcurt(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
                 & itimc     ,mmax      ,nmax      ,kmax      ,nmaxus    , &
                 & lstsci    ,lsecfl    ,s1        ,u1        ,v1        , &
-                & r1        ,qu        ,qv        , &
-                & rbuff     ,gdp       )
+                & r1        ,qu        ,qv        ,dzu1      ,dzv1      , &
+                & rbuff     ,kmaxz     ,hu        ,hv        ,thick     , &
+                & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -46,6 +47,8 @@ subroutine wrcurt(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    logical                  , pointer :: only_distot_from_com
+    logical                  , pointer :: zmodel
     logical                  , pointer :: first
     integer                  , pointer :: celidt
     integer, dimension(:, :) , pointer :: elmdms
@@ -53,7 +56,7 @@ subroutine wrcurt(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
 !
 ! Local parameters
 !
-    integer, parameter :: nelmx = 8
+    integer, parameter :: nelmx = 10
 !
 ! Global variables
 !
@@ -63,6 +66,8 @@ subroutine wrcurt(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
     integer                                                                    , intent(in)  :: itimc  !!  Current time step counter for 2D
                                                                                                        !!  system
     integer                                                                                  :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                                  :: kmaxz  !!  = KMAX for Z-model, = 0 for sigma-model
+                                                                                                       !!  Needed for correct dimensioning of DZU1 and DZV1
     integer                                                                    , intent(in)  :: lsecfl !  Description and declaration in dimens.igs
     integer                                                                    , intent(in)  :: lstsci !  Description and declaration in esm_alloc_int.f90
     integer                                                                                  :: lundia !  Description and declaration in inout.igs
@@ -72,12 +77,17 @@ subroutine wrcurt(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
     integer                                                                    , intent(in)  :: ntcur  !!  Total number of timesteps on com-
                                                                                                        !!  munication file (to write to)
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: s1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxz)                     :: dzu1   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxz)                     :: dzv1   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                            :: hu     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)                            :: hv     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: qu     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: qv     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: u1     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: v1     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci), intent(in)  :: r1     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(nmaxus, mmax, kmax)                                                  :: rbuff  !  Description and declaration in r-i-ch.igs
+    real(fp), dimension(kmax)                                                                :: thick  !  Description and declaration in esm_alloc_real.f90
     logical                                                                    , intent(out) :: error  !!  Flag=TRUE if an error is encountered
     character(*)                                                                             :: comfil !!  Name for communication file
                                                                                                        !!  com-<case><label>
@@ -107,12 +117,12 @@ subroutine wrcurt(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
 !
     data grnam1/'CURNT'/
     data grnam2/'CURTIM'/
-    data elmnms/'NTCUR', 'TIMCUR', 'QU', 'QV', 'S1', 'U1', 'V1', 'RSP'/
-    data elmqty/8*' '/
+    data elmnms/'NTCUR', 'TIMCUR', 'QU', 'QV', 'S1', 'U1', 'V1', 'RSP', 'DZU1', 'DZV1'/
+    data elmqty/10*' '/
     data elmunt/'[   -   ]', '[ TSCALE]', '[ M3/S  ]', '[ M3/S  ]', '[   M   ]', &
-              & '[  M/S  ]', '[  M/S  ]', '[  M/S  ]'/
-    data elmtps/2*'INTEGER', 6*'REAL'/
-    data nbytsg/8*4/
+              & '[  M/S  ]', '[  M/S  ]', '[  M/S  ]', '[   M   ]', '[   M   ]'/
+    data elmtps/2*'INTEGER', 8*'REAL'/
+    data nbytsg/10*4/
     data elmdes/'Number of current fields in groups CURTIM and KENMTIM         ', &
               & 'Time of current field rel.to reference date/time              ', &
               & 'Time-average over latest interval of discharge in u-point     ', &
@@ -120,11 +130,15 @@ subroutine wrcurt(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
               & 'Water level in zeta point at end of time interval             ', &
               & 'Velocity in u-point at end of time interval                   ', &
               & 'Velocity in v-point at end of time interval                   ', &
-              & 'Spiral flow intensity                                         '/
+              & 'Spiral flow intensity                                         ', &
+              & 'Layer thickness in u-point at end of time interval            ', &
+              & 'Layer thickness in v-point at end of time interval            '/
 !
 !! executable statements -------------------------------------------------------
 !
-    nefiselem => gdp%nefisio%nefiselem(nefiswrcurt)
+    only_distot_from_com => gdp%gdprocs%only_distot_from_com
+    zmodel               => gdp%gdprocs%zmodel
+    nefiselem            => gdp%nefisio%nefiselem(nefiswrcurt)
     first   => nefiselem%first
     celidt  => nefiselem%celidt
     elmdms  => nefiselem%elmdms
@@ -160,6 +174,14 @@ subroutine wrcurt(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
           call filldm(elmdms, 7, 2, nmaxus, mmax, 0   , 0, 0)
        endif
        call filldm(elmdms,  8, 2, nmaxus, mmax, 0, 0, 0)
+       if (kmax>1) then
+          call filldm(elmdms, 9 , 3, nmaxus, mmax, kmax, 0, 0)
+          call filldm(elmdms, 10, 3, nmaxus, mmax, kmax, 0, 0)
+       else
+          call filldm(elmdms, 9 , 2, nmaxus, mmax, 0   , 0, 0)
+          call filldm(elmdms, 10, 2, nmaxus, mmax, 0   , 0, 0)
+       endif
+
     endif
     !
     ! Write all elements to file; all definition and creation of files,
@@ -251,7 +273,7 @@ subroutine wrcurt(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
               & elmnms(7) ,celidt    ,wrswch    ,ierr      ,rbuff        )
     if (ierr/=0) goto 9999
     !
-    ! element  9 RSP for group CURTIM (cel number ITCUR)
+    ! element  7 RSP for group CURTIM (cel number ITCUR)
     ! if secondary flow is defined then r1(n,m,1,lsecfl) else 0.
     !
     do m = 1, mmax
@@ -267,6 +289,58 @@ subroutine wrcurt(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
               & elmqty(2)  ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2)    , &
               & elmnms(8)  ,celidt    ,wrswch    ,ierr      ,rbuff        )
     if (ierr/=0) then
+    endif
+    if (.not. only_distot_from_com) then
+       !
+       ! element  8 DZU1  for group CURTIM (cel number ITCUR)
+       !
+       rbuff = 0.0_fp
+       if (zmodel) then
+          do k = 1, kmax
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   rbuff(n, m, k) = dzu1(n, m, k)
+                enddo
+             enddo
+          enddo
+       else
+          do k = 1, kmax
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   rbuff(n, m, k) = hu(n, m)*thick(k)
+                enddo
+             enddo
+          enddo
+       endif
+       call putgtr(comfil    ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2) , &
+                 & elmqty(2) ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2)    , &
+                 & elmnms(9) ,celidt    ,wrswch    ,ierr      ,rbuff        )
+       if (ierr/=0) goto 9999
+       !
+       ! element  9 DZV1  for group CURTIM (cel number ITCUR)
+       !
+       rbuff = 0.0_fp
+       if (zmodel) then
+          do k = 1, kmax
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   rbuff(n, m, k) = dzv1(n, m, k)
+                enddo
+             enddo
+          enddo
+       else
+          do k = 1, kmax
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   rbuff(n, m, k) = hv(n, m)*thick(k)
+                enddo
+             enddo
+          enddo
+       endif
+       call putgtr(comfil     ,grnam2    ,nelmx2    ,elmnms(2) ,elmdms(1, 2) , &
+                 & elmqty(2)  ,elmunt(2) ,elmdes(2) ,elmtps(2) ,nbytsg(2)    , &
+                 & elmnms(10) ,celidt    ,wrswch    ,ierr      ,rbuff        )
+       if (ierr/=0) goto 9999
     endif
     !
  9999 continue

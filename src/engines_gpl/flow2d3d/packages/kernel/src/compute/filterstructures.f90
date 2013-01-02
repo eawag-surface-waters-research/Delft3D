@@ -66,7 +66,7 @@ subroutine filterstructures(j         ,nmmaxj    ,nmmax     ,kmax      ,icx     
     integer, dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax), intent(in)  :: kspu   !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax), intent(in)  :: kspv   !  Description and declaration in esm_alloc_int.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(out) :: df     !  Description and declaration in esm_alloc_real.f90    
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(out) :: dis    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub,4)     , intent(out) :: dis    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(out) :: evap   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(out) :: grmasu !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(out) :: grmasv !  Description and declaration in esm_alloc_real.f90
@@ -122,11 +122,11 @@ subroutine filterstructures(j         ,nmmaxj    ,nmmax     ,kmax      ,icx     
           evap(nm)   = 0.0_fp
           w10mag(nm) = 0.0_fp
           if (wave) then
-             uorb(nm) = 0.0_fp
-             tp(nm)   = 0.0_fp
-             teta(nm) = 0.0_fp
-             dis(nm)  = 0.0_fp
-             df(nm)   = 0.0_fp             
+             uorb(nm)  = 0.0_fp
+             tp(nm)    = 0.0_fp
+             teta(nm)  = 0.0_fp
+             dis(nm,:) = 0.0_fp
+             df(nm)    = 0.0_fp
           endif
        endif
     enddo

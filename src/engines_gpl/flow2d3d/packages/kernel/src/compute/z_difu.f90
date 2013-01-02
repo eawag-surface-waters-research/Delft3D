@@ -1,18 +1,20 @@
 subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
-                & nmmaxj    ,nmmax     ,kmax      ,lstsci    ,norow     , &
-                & irocol    ,kcs       ,kcu       ,kfs       , &
+                & nmmaxj    ,nmmax     ,kmax      ,lstsci    ,norow     ,nocol     , &
+                & irocol    ,kcs       ,kcu       ,kcv       ,kfs       , &
                 & kfsmin    ,kfsmax    ,kfsmx0    ,kfumin    ,kfumx0    , &
-                & kfvmin    ,kfvmx0    ,kfsz1     ,kfuz1     ,kfvz1     , &
+                & kfumax    ,kfvmin    ,kfvmx0    ,kfvmax    , &
+                & kfsz0     ,kfuz0     ,kfvz0     ,kfu       ,kfv       , &
+                & kfsz1     ,kfuz1     ,kfvz1     , &
                 & qxk       ,qyk       ,qzk       ,u         ,v         , &
                 & guv       ,gvu       ,gsqs      ,rbnd      ,sigdif    , &
                 & sigmol    ,dicuv     ,vicww     ,r0        ,r1        , &
                 & sour      ,sink      ,aak       ,bbk       ,cck       , &
                 & bdx       ,bux       ,bdy       ,buy       ,uvdwk     , &
-                & vvdwk     ,rscale    , &
-                & aakl      ,bbkl      ,cckl      ,ddkl      ,dzs0      ,dzs1      , &
-                & dzu0      ,dzv0      ,areau     ,areav     ,volum0    , &
-                & volum1    ,guu       ,gvv       ,bruvai    ,rho       , &
-                & s1        ,dps       ,ltem      ,gdp       )
+                & vvdwk     ,rscale    ,dzu1      ,dzv1      , &
+                & aakl      ,bbkl      ,cckl      ,ddkl      ,dzs1      , &
+                & areau     ,areav     ,volum0    , &
+                & volum1    ,guu       ,gvv       ,bruvai    , &
+                & ltem      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -90,106 +92,111 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     include 'flow_steps_f.inc'
-    integer                , pointer :: iro
-    integer                , pointer :: nh_level
-    integer                , pointer :: nudge
-    logical                , pointer :: nonhyd
-    real(fp)               , pointer :: ag
-    real(fp)               , pointer :: ck
-    real(fp)               , pointer :: dicoww
-    real(fp)               , pointer :: hdt
-    real(fp)               , pointer :: rhow
-    real(fp)               , pointer :: vicmol
-    real(fp)               , pointer :: xlo
-    character(13)          , pointer :: trasol
+    real(fp)                            , pointer :: hdt
+    real(fp)                            , pointer :: ag
+    real(fp)                            , pointer :: vicmol
+    real(fp)                            , pointer :: dicoww
+    integer                             , pointer :: iro
+    character(13)                       , pointer :: trasol
+    real(fp)                            , pointer :: xlo
+    real(fp)                            , pointer :: ck
+    logical                             , pointer :: nonhyd
+    integer                             , pointer :: nh_level
+    integer                             , pointer :: nudge
+    integer                             , pointer :: lsed
 !
 ! Global variables
 !
-    integer                                                               :: icx    !!  Increment in the X-dir., if ICX= NMAX
-                                                                                    !!  then computation proceeds in the X-
-                                                                                    !!  dir. If icx=1 then computation pro-
-                                                                                    !!  ceeds in the Y-dir.
-    integer                                                               :: icy    !!  Increment in the Y-dir. (see ICX)
-    integer                                                               :: j      !!  Begin pointer for arrays which have
-                                                                                    !!  been transformed into 1D arrays.
-                                                                                    !!  Due to the shift in the 2nd (M-)
-                                                                                    !!  index, J = -2*NMAX + 1
-    integer                                                               :: kmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                                               :: lstsci !  Description and declaration in esm_alloc_int.f90
-    integer                                                               :: lundia !  Description and declaration in inout.igs
-    integer                                                               :: nmmax  !  Description and declaration in dimens.igs
-    integer                                                               :: nmmaxj !  Description and declaration in dimens.igs
-    integer                                                 , intent(in)  :: norow  !  Description and declaration in esm_alloc_int.f90
-    integer                                                               :: nst
-    integer , dimension(5, norow)                           , intent(in)  :: irocol !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: kcs    !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kcu    !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfs    !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfsmax !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfsmin !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfsmx0 !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: kfumin !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: kfumx0 !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: kfvmin !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: kfvmx0 !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: kfsz1  !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: kfuz1  !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: kfvz1  !  Description and declaration in esm_alloc_int.f90
-    integer                                                 , intent(in)  :: ltem   !  Description and declaration in dimens.igs
-    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)            , intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: gsqs   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: guu    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: guv    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: gvu    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: gvv    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)                    :: bruvai !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)      , intent(in)  :: vicww  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)      , intent(in)  :: qzk    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: aak    !!  Internal work array (in CUCNP & UZD)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: bbk    !!  Internal work array (in CUCNP & UZD)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: cck    !!  Internal work array (in CUCNP & UZD)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: bdx    !!  Internal work array (in CUCNP & UZD)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: bux    !!  Internal work array (in CUCNP & UZD)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: bdy    !!  Internal work array (in CUCNP & UZD)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: buy    !!  Internal work array (in CUCNP & UZD)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: uvdwk  !!  Internal work array for Jac.iteration
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: vvdwk  !!  Internal work array for Jac.iteration
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: rscale !!  Internal work array for Jac.iteration
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax+2)                    :: dicuv  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: areau  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: areav  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: dzs0   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: dzs1   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: rho    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: volum0 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: volum1 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: dzu0   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: dzv0   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: qxk    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: qyk    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: u
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: v
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)              :: aakl   !!  Internal work array, lower diagonal
-                                                                                    !!  tridiagonal matrix, implicit coupling
-                                                                                    !!  of concentration in (N,M,K) with con-
-                                                                                    !!  centration in (N,M,K-1)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)              :: bbkl   !!  Internal work array, main diagonal
-                                                                                    !!  tridiagonal matrix, implicit coupling
-                                                                                    !!  of concentration in (N,M,K)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)              :: cckl   !!  Internal work array, upper diagonal
-                                                                                    !!  tridiagonal matrix, implicit coupling
-                                                                                    !!  of concentration in (N,M,K) with con-
-                                                                                    !!  centration in (N,M,K+1)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)              :: ddkl   !!  Internal work array, diagonal space
-                                                                                    !!  at (N,M,K,L)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)              :: r0     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)              :: r1     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: s1     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), intent(in)  :: sink   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), intent(in)  :: sour   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(kmax, max(lstsci, 1), 2, norow)     , intent(in)  :: rbnd   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(lstsci)                                           :: sigdif !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(lstsci)                             , intent(in)  :: sigmol !  Description and declaration in esm_alloc_real.f90
+    integer                                                                :: icx    !!  Increment in the X-dir., if ICX= NMAX
+                                                                                     !!  then computation proceeds in the X-
+                                                                                     !!  dir. If icx=1 then computation pro-
+                                                                                     !!  ceeds in the Y-dir.
+    integer                                                                :: icy    !!  Increment in the Y-dir. (see ICX)
+    integer                                                                :: j      !!  Begin pointer for arrays which have
+                                                                                     !!  been transformed into 1D arrays.
+                                                                                     !!  Due to the shift in the 2nd (M-)
+                                                                                     !!  index, J = -2*NMAX + 1
+    integer                                                                :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                :: lstsci !  Description and declaration in esm_alloc_int.f90
+    integer                                                                :: lundia !  Description and declaration in inout.igs
+    integer                                                                :: nmmax  !  Description and declaration in dimens.igs
+    integer                                                                :: nmmaxj !  Description and declaration in dimens.igs
+    integer                                                  , intent(in)  :: nocol  !  Description and declaration in esm_alloc_int.f90
+    integer                                                  , intent(in)  :: norow  !  Description and declaration in esm_alloc_int.f90
+    integer                                                                :: nst
+    integer , dimension(5, norow+nocol)                      , intent(in)  :: irocol !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kcu    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kcv    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfs    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfu    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfv    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfsmax !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfsmin !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfsmx0 !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfumin !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfumx0 !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfumax !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfvmin !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfvmx0 !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfvmax !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in)  :: kfsz0  !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in)  :: kfsz1  !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in)  :: kfuz0  !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in)  :: kfuz1  !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in)  :: kfvz0  !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in)  :: kfvz1  !  Description and declaration in esm_alloc_int.f90
+    integer                                                  , intent(in)  :: ltem   !  Description and declaration in dimens.igs
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: gsqs   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: guu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: guv    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: gvu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: gvv    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)                     :: bruvai !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)       , intent(in)  :: vicww  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)       , intent(in)  :: qzk    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                       :: aak    !!  Internal work array (in Z_CUCNP & Z_UZD)
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                       :: bbk    !!  Internal work array (in Z_CUCNP & Z_UZD)
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                       :: cck    !!  Internal work array (in Z_CUCNP & Z_UZD)
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                       :: bdx    !!  Internal work array (in Z_CUCNP & Z_UZD)
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                       :: bux    !!  Internal work array (in Z_CUCNP & Z_UZD)
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                       :: bdy    !!  Internal work array (in Z_CUCNP & Z_UZD)
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                       :: buy    !!  Internal work array (in Z_CUCNP & Z_UZD)
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                       :: uvdwk  !!  Internal work array for Jac.iteration
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                       :: vvdwk  !!  Internal work array for Jac.iteration
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                       :: rscale !!  Internal work array for Jac.iteration
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax+2)                     :: dicuv  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in)  :: areau  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in)  :: areav  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in)  :: dzs1   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in)  :: volum0 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in)  :: volum1 !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in)  :: dzu1   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in)  :: dzv1   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in)  :: qxk    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in)  :: qyk    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in)  :: u
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in)  :: v
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)               :: aakl   !!  Internal work array, lower diagonal
+                                                                                     !!  tridiagonal matrix, implicit coupling
+                                                                                     !!  of concentration in (N,M,K) with con-
+                                                                                     !!  centration in (N,M,K-1)
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)               :: bbkl   !!  Internal work array, main diagonal
+                                                                                     !!  tridiagonal matrix, implicit coupling
+                                                                                     !!  of concentration in (N,M,K)
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)               :: cckl   !!  Internal work array, upper diagonal
+                                                                                     !!  tridiagonal matrix, implicit coupling
+                                                                                     !!  of concentration in (N,M,K) with con-
+                                                                                     !!  centration in (N,M,K+1)
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)               :: ddkl   !!  Internal work array, diagonal space
+                                                                                     !!  at (N,M,K,L)
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)               :: r0     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)               :: r1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci) , intent(in)  :: sink   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci) , intent(in)  :: sour   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax, max(lstsci, 1), 2, norow+nocol), intent(in)  :: rbnd   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(lstsci)                                            :: sigdif !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(lstsci)                              , intent(in)  :: sigmol !  Description and declaration in esm_alloc_real.f90
 
 !
 ! Local variables
@@ -199,12 +206,16 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
     integer                 :: iter
     integer                 :: itr
     integer                 :: icxy
+    integer                 :: istat
     integer                 :: jj
     integer                 :: k
     integer                 :: kd
+    integer                 :: kenu
+    integer                 :: kenv
     integer                 :: kfw
     integer                 :: kfsum
     integer                 :: kmin
+    integer                 :: kkmax
     integer                 :: kr
     integer                 :: ksm
     integer                 :: ku
@@ -213,21 +224,30 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
     integer                 :: mf
     integer                 :: mink
     integer                 :: mink2
+    integer                 :: mink_old
+    integer                 :: mink_new
     integer                 :: ml
     integer                 :: n
     integer                 :: ndm
     integer                 :: nhystp
+    integer                 :: nf
+    integer                 :: nfm
+    integer                 :: nfum
+    integer                 :: nl
+    integer                 :: nlm
+    integer                 :: nlum
     integer                 :: nm
     integer                 :: nmd
     integer                 :: nmf
+    integer                 :: nmfu
     integer                 :: nml
     integer                 :: nmlu
     integer, dimension(10)  :: nms
     integer                 :: nmu
     integer                 :: nmuu
-    integer                 :: nnudge
     integer                 :: num
     integer                 :: nuum
+    integer                 :: nnudge
     real(fp)                :: adza
     real(fp)                :: adzc
     real(fp)                :: bi
@@ -241,14 +261,14 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
     real(fp), dimension(10) :: mu
     real(fp)                :: nudgefac
     real(fp)                :: qzw
-    real(fp)                :: rb
-    real(fp)                :: rp
-    real(fp)                :: timest
-    real(fp)                :: tnudge
     real(fp)                :: r00
     real(fp), external      :: reddic
     real(fp)                :: rscal
+    real(fp)                :: rb
+    real(fp)                :: rp
     real(fp)                :: sqrtbv
+    real(fp)                :: timest
+    real(fp)                :: tnudge
     real(fp)                :: volu
     real(fp)                :: z1
     character(256)          :: errtxt
@@ -256,7 +276,6 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
 !! executable statements -------------------------------------------------------
 !
     hdt         => gdp%gdnumeco%hdt
-    rhow        => gdp%gdphysco%rhow
     ag          => gdp%gdphysco%ag
     vicmol      => gdp%gdphysco%vicmol
     dicoww      => gdp%gdphysco%dicoww
@@ -267,8 +286,9 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
     nonhyd      => gdp%gdprocs%nonhyd
     nh_level    => gdp%gdnonhyd%nh_level
     nudge       => gdp%gdnumeco%nudge
+    lsed        => gdp%d%lsed
     !
-    if (lstsci==0) goto 9999
+    if (lstsci == 0) goto 9999
     !
     ddb  = gdp%d%ddbound
     icxy = max(icx, icy)
@@ -301,15 +321,15 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
              if (kfsmax(nm) == kfsmx0(nm) .or. kmax == 1) then
                 do k = kfsmin(nm), kfsmax(nm)
                    bbkl(nm, k, l) = volum1(nm, k) / timest
-                   aakl(nm, k, l) = 0.0
-                   cckl(nm, k, l) = 0.0
+                   aakl(nm, k, l) = 0.0_fp
+                   cckl(nm, k, l) = 0.0_fp
                    ddkl(nm, k, l) = volum0(nm, k) * r0(nm, k, l) / timest
                 enddo
              elseif (kfsmax(nm) > kfsmx0(nm)) then
                 do k = kfsmin(nm), kmin
                    bbkl(nm, k, l) = volum1(nm, k) / timest
-                   aakl(nm, k, l) = 0.0
-                   cckl(nm, k, l) = 0.0
+                   aakl(nm, k, l) = 0.0_fp
+                   cckl(nm, k, l) = 0.0_fp
                    ddkl(nm, k, l) = volum0(nm, k) * r0(nm, k, l) / timest
                 enddo
                 do k = kmin + 1, kfsmax(nm)
@@ -322,23 +342,23 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
                    !
                    ddkl(nm, kmin, l) = ddkl(nm, kmin, l) &
                                    & + volum0(nm, k)*r0(nm, kmin, l)/timest
-                   aakl(nm, k, l) = 0.0
-                   bbkl(nm, k, l) = 1.0
-                   cckl(nm, k, l) = 0.0
-                   ddkl(nm, k, l) = 0.0
+                   aakl(nm, k, l) = 0.0_fp
+                   bbkl(nm, k, l) = 1.0_fp
+                   cckl(nm, k, l) = 0.0_fp
+                   ddkl(nm, k, l) = 0.0_fp
                 enddo
              else
                 do k = kfsmin(nm), kmin
                    bbkl(nm, k, l) = volum1(nm, k) / timest
-                   aakl(nm, k, l) = 0.0
-                   cckl(nm, k, l) = 0.0
+                   aakl(nm, k, l) = 0.0_fp
+                   cckl(nm, k, l) = 0.0_fp
                    ddkl(nm, k, l) = volum0(nm, k) * r0(nm, k, l) / timest
                 enddo
                 do k = kmin + 1, kfsmx0(nm)
-                   bbkl(nm, k, l) = 1.0
-                   aakl(nm, k, l) = 0.0
-                   cckl(nm, k, l) = 0.0
-                   ddkl(nm, k, l) = 0.0
+                   bbkl(nm, k, l) = 1.0_fp
+                   aakl(nm, k, l) = 0.0_fp
+                   cckl(nm, k, l) = 0.0_fp
+                   ddkl(nm, k, l) = 0.0_fp
                    ddkl(nm, kmin, l) = ddkl(nm, kmin, l) + volum0(nm, k)*r0(nm, k, l)/timest
                 enddo
              endif
@@ -364,23 +384,6 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
        !
     endif
     call timer_stop(timer_difu_horadv, gdp)
-    !
-    call timer_start(timer_difu_rest, gdp)
-    !
-    ! Summation of fluxes for cells which do not have a horizontal neighbour cell
-    !
-    do l = 1, lstsci
-       do nm = 1, nmmax
-          if (kfs(nm) /= 0) then
-             kmin = min(kfsmax(nm), kfsmx0(nm))
-             do k = kmin + 1, kmax
-                ddkl(nm, kmin, l) = ddkl(nm, kmin, l) + ddkl(nm, k, l)
-                ddkl(nm, k   , l) = 0.0_fp
-             enddo
-          endif
-       enddo
-    enddo
-    call timer_stop(timer_difu_rest, gdp)
     !
     ! Diffusion in horizontal direction
     !
@@ -420,21 +423,35 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
                    ddkl(nm, k, l) = ddkl(nm, k, l) + sour(nm, k, l)
                 enddo
              else
-                kmin = min(kfsmax(nm), kfsmx0(nm))
+                kmin  = min(kfsmax(nm), kfsmx0(nm))
+                kkmax = max(kfsmax(nm), kfsmx0(nm))
                 do k = kfsmin(nm), kmin
                    bbkl(nm, k, l) = bbkl(nm, k, l) + sink(nm, k, l)
                    ddkl(nm, k, l) = ddkl(nm, k, l) + sour(nm, k, l)
                 enddo
-                if (kfsmax(nm) > kfsmx0(nm)) then
-                   do k = kmin + 1, kfsmax(nm)
-                      bbkl(nm, kmin, l) = bbkl(nm, kmin, l) + sink(nm, k, l)
-                      ddkl(nm, kmin, l) = ddkl(nm, kmin, l) + sour(nm, k, l)
-                   enddo
-                endif
+                do k = kmin + 1, kkmax
+                   bbkl(nm, kmin, l) = bbkl(nm, kmin, l) + sink(nm, k, l)
+                   ddkl(nm, kmin, l) = ddkl(nm, kmin, l) + sour(nm, k, l)
+                enddo
              endif
           endif
        enddo
        call timer_stop(timer_difu_sourcesink, gdp) 
+       !
+       call timer_start(timer_difu_rest, gdp)
+       !
+       ! Summation of fluxes for cells which do not have a horizontal neighbour cell
+       !
+       do nm = 1, nmmax
+          if (kfs(nm) /= 0) then
+             kmin = min(kfsmax(nm), kfsmx0(nm))
+             do k = kmin + 1, kmax
+                ddkl(nm, kmin, l) = ddkl(nm, kmin, l) + ddkl(nm, k, l)
+             enddo
+          endif
+       enddo
+       call timer_stop(timer_difu_rest, gdp)
+       !
        call timer_start(timer_difu_vertadv, gdp)  
        !
        do nm = 1, nmmax
@@ -451,20 +468,21 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
                 !
                 ! second order central
                 !
-                if (kfs(nm) == 1) then
-                   qzw = qzk(nm, k)
-                   if (qzw < 0.0) then
-                      adza = 0.5 *qzw * (1 - kfw)
-                      adzc = 0.5 *qzw * (1 + kfw)
-                   else
-                      adza = 0.5 *qzw * (1 + kfw)
-                      adzc = 0.5 *qzw * (1 - kfw)
-                   endif
-                   aakl(nm, k + 1, l) = aakl(nm, k + 1, l) - adza
-                   bbkl(nm, k + 1, l) = bbkl(nm, k + 1, l) - adzc
-                   bbkl(nm, k    , l) = bbkl(nm, k    , l) + adza
-                   cckl(nm, k    , l) = cckl(nm, k    , l) + adzc
+                qzw = qzk(nm, k)
+                if (qzw < 0.0_fp) then
+                   adza = 0.5_fp * qzw * (1 - kfw)
+                   adzc = 0.5_fp * qzw * (1 + kfw)
+                elseif (qzw > 0.0_fp) then
+                   adza = 0.5_fp * qzw * (1 + kfw)
+                   adzc = 0.5_fp * qzw * (1 - kfw)
+                else 
+                   adza = 0.0_fp
+                   adzc = 0.0_fp
                 endif
+                aakl(nm, k + 1, l) = aakl(nm, k + 1, l) - adza
+                bbkl(nm, k + 1, l) = bbkl(nm, k + 1, l) - adzc
+                bbkl(nm, k    , l) = bbkl(nm, k    , l) + adza
+                cckl(nm, k    , l) = cckl(nm, k    , l) + adzc
              enddo
           endif
        enddo
@@ -474,16 +492,16 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
        !
        call timer_start(timer_difu_vertdiff, gdp)
        do nm = 1, nmmax
+          if (kfs(nm) == 1) then
           ksm = min(kfsmx0(nm), kfsmax(nm))
-          if (kfs(nm) == 1 ) then
              do k = kfsmin(nm), ksm - 1
-                delz = max(0.1_fp, 0.5*(dzs1(nm, k) + dzs1(nm, k + 1)))
+                delz = max(0.1_fp, 0.5_fp*(dzs1(nm, k) + dzs1(nm, k + 1)))
                 !
                 ! Internal wave contribution
                 !
                 sqrtbv = max(0.0_fp, bruvai(nm, k))
                 sqrtbv = sqrt(sqrtbv)
-                difiwe = 0.2 * sqrtbv * xlo**2
+                difiwe = 0.2_fp * sqrtbv * xlo**2
                 !
                 ! dicoww-restriction is moved from TURCLO to here (in reddic)
                 ! vicww is used instead of dicww
@@ -504,11 +522,11 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
        call timer_start(timer_difu_bounopen, gdp)
        do nm = 1, nmmax
           if (kcs(nm) == 2) then
-             do k = kfsmin(nm), kfsmax(nm)
+             do k = kfsmin(nm), kmax
                 ddkl(nm, k, l) = r0(nm, k, l)
-                aakl(nm, k, l) = 0.0
-                bbkl(nm, k, l) = 1.0
-                cckl(nm, k, l) = 0.0
+                aakl(nm, k, l) = 0.0_fp
+                bbkl(nm, k, l) = 1.0_fp
+                cckl(nm, k, l) = 0.0_fp
              enddo
           endif
        enddo
@@ -523,23 +541,60 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
           nml = (n + ddb)*icy + (ml + ddb)*icx - icxy
           nmlu = nml + icx
           if (kcu(nmf) == 1) then
-             do k = kfsmin(nmf), kfsmax(nmf)
-                aakl(nmf, k, l) = 0.0
-                bbkl(nmf, k, l) = 1.0
-                cckl(nmf, k, l) = 0.0
+             do k = kfsmin(nmf), kmax
+                aakl(nmf, k, l) = 0.0_fp
+                bbkl(nmf, k, l) = 1.0_fp
+                cckl(nmf, k, l) = 0.0_fp
                 ddkl(nmf, k, l) = rbnd(k, l, 1, ic)
              enddo
           endif
           if (kcu(nml) == 1) then
-             do k = kfsmin(nmlu), kfsmax(nmlu)
-                aakl(nmlu, k, l) = 0.0
-                bbkl(nmlu, k, l) = 1.0
-                cckl(nmlu, k, l) = 0.0
+             do k = kfsmin(nmlu), kmax
+                aakl(nmlu, k, l) = 0.0_fp
+                bbkl(nmlu, k, l) = 1.0_fp
+                cckl(nmlu, k, l) = 0.0_fp
                 ddkl(nmlu, k, l) = rbnd(k, l, 2, ic)
              enddo
           endif
        enddo
        call timer_stop(timer_difu_bounopen, gdp) 
+       !
+       ! For the fully non-hydrostatic module, transport is done in both directions in one step.
+       ! Include also boundary conditions in Y-direction
+       ! In hydrostatic mode (or weakly non-hydrostatic) the transport in X- and Y-direction are done in two separate calls to z_difu. 
+       !
+       if (nonhyd .and. nh_level==nh_full) then
+          !
+          ! IMPLEMENTATION OF BOUNDARY CONDITIONS IN Y-DIRECTION
+          !
+          do ic = norow+1, norow+nocol
+             m    = irocol(1,ic)
+             nf   = irocol(2,ic) - 1
+             nl   = irocol(3,ic)
+             !
+             ! WATCH OUT: icx and icy are swapped
+             !
+             nfm  = (m+ddb)*icx + (nf+ddb)*icy - icxy
+             nlm  = (m+ddb)*icx + (nl+ddb)*icy - icxy
+             nlum = nlm + icy
+             if (kcv(nfm) == 1) then
+                do k = kfsmin(nfm), kmax
+                   ddkl(nfm,k,l) = rbnd(k,l,1,ic)
+                   aakl(nfm,k,l) = 0.0_fp
+                   bbkl(nfm,k,l) = 1.0_fp
+                   cckl(nfm,k,l) = 0.0_fp
+                enddo
+             endif
+             if (kcv(nlm) == 1) then
+                do k = kfsmin(nlum), kmax
+                   ddkl(nlum,k,l) = rbnd(k,l,2,ic)
+                   aakl(nlum,k,l) = 0.0_fp
+                   bbkl(nlum,k,l) = 1.0_fp
+                   cckl(nlum,k,l) = 0.0_fp
+                enddo
+             endif
+          enddo
+       endif
        !
        !   set concentrations in temporary dry points and in open boundary points
        !
@@ -556,10 +611,24 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
              enddo
           endif
        enddo
+       !
+       ! Check volume in order to circumvent very small volumes
+       !
+       do nm = 1, nmmax
+          if (kfs(nm)*kcs(nm) == 1) then
+             kmin = min(kfsmax(nm), kfsmx0(nm))
+             do k = kfsmin(nm), kmin
+                if ( bbkl(nm,k,l) .lt. 0.01_fp) then
+                   bbkl(nm,k,l) = bbkl(nm,k,l) + 0.01_fp
+                   ddkl(nm,k,l) = ddkl(nm,k,l) + 0.01_fp * r0(nm,k,l)
+                endif
+             enddo
+          endif
+       enddo
        call timer_stop(timer_difu_rest, gdp)
        call timer_start(timer_difu_lhs, gdp)
        do nm = 1, nmmax
-          if (kcs(nm) == 3 ) then
+          if (kcs(nm) == 3) then
              !
              ! left hand-side is now set by Delft3D-FLOW instead of the mapper
              !
@@ -574,7 +643,8 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
                 !
                 !***SCALE ROWS OF MATRIX/RIGHT HAND SIDE VECTOR
                 !
-                do k = kfsmin(nm), kfsmx0(nm)
+                mink = min(kfsmx0(nm), kfsmax(nm))
+                do k = kfsmin(nm), mink
                    rscale(nm, k)  = 1.0_fp / bbkl(nm, k, l)
                    aakl(nm, k, l) = aakl(nm, k, l) * rscale(nm, k)
                    bbkl(nm, k, l) = 1.0_fp
@@ -684,60 +754,52 @@ subroutine z_difu_horadv_expl()
        nmd  = nm  - icx
        nmu  = nm  + icx
        nmuu = nmu + icx
-       if (kfs(nm)*kfs(nmu) /= 0) then
+       if (kfu(nm) /= 0) then
           kmin = max(kfumin(nm), 1)
           do k = kmin, kmax
-             cfl = u(nm, k) * timest / gvu(nm)
-             if (qxk(nm, k) > 0.0) then
-                do l = 1, lstsci
-                   rr1 = abs(r0(nmd, k, l) - 2.0_fp*r0(nm, k, l) + r0(nmu, k, l))
-                   rr2 = abs(r0(nmd, k, l) - r0(nmu, k, l))
-                   if (kfsz1(nmd, k)*kfsz1(nmu, k) == 0 .or. rr1 >= rr2 .or. rr2 < eps_fp) then 
-                      if (kfsz1(nm,k) == 1) then
+             if (kfuz0(nm,k) == 1) then
+                cfl = u(nm, k) * timest / gvu(nm)
+                if (qxk(nm, k) > 0.0_fp) then
+                   do l = 1, lstsci
+                      rr1 = abs(r0(nmd, k, l) - 2.0_fp*r0(nm, k, l) + r0(nmu, k, l))
+                      rr2 = abs(r0(nmd, k, l) - r0(nmu, k, l))
+                      if (kfsz0(nmd, k)*kfsz0(nmu, k) == 0 .or. rr1 >= rr2 .or. rr2 < eps_fp .or. kcs(nm)==3 .or. kcs(nmu)==3) then 
                          r00 = r0(nm, k, l)
                       else
-                         mink2 = min(kfsmx0(nm),kfsmax(nm))
-                         r00 = r0(nm, mink2, l)
+                         r00 = r0(nm , k, l)                                     &
+                             & + (1.0_fp - cfl)*(r0(nm , k, l) - r0(nmd, k, l))  &
+                             &                 *(r0(nmu, k, l) - r0(nm , k, l))  &
+                             &                 /(r0(nmu, k, l) - r0(nmd, k, l))
                       endif
-                   else
-                      r00 = r0(nm , k, l)                                     &
-                          & + (1.0_fp - cfl)*(r0(nm , k, l) - r0(nmd, k, l))  &
-                          &                 *(r0(nmu, k, l) - r0(nm , k, l))  &
-                          &                 /(r0(nmu, k, l) - r0(nmd, k, l))
-                   endif
-                   flux = qxk(nm, k) * r00
-                   if (kcs(nm) == 1) then
-                      ddkl(nm, k, l) = ddkl(nm, k, l) - flux
-                   endif
-                   if (kcs(nm + icx) == 1) then
-                      ddkl(nm + icx, k, l) = ddkl(nm + icx, k , l) + flux
-                   endif
-                enddo
-             else
-                do l = 1, lstsci
-                   rr1 = abs(r0(nmuu, k, l) - 2.0_fp*r0(nmu, k, l) + r0(nm, k, l))
-                   rr2 = abs(r0(nmuu, k, l) - r0(nm, k, l))
-                   if (kfsz1(nm, k)*kfsz1(nmuu, k) == 0 .or. rr1 >= rr2 .or. rr2 < eps_fp) then
-                      if (kfsz1(nmu,k) == 1) then
+                      flux = qxk(nm, k) * r00
+                      if (kcs(nm) == 1) then
+                         ddkl(nm, k, l) = ddkl(nm, k, l) - flux
+                      endif
+                      if (kcs(nmu) == 1) then
+                         ddkl(nmu, k, l) = ddkl(nmu, k , l) + flux
+                      endif
+                   enddo
+                elseif (qxk(nm, k) < 0.0_fp) then
+                   do l = 1, lstsci
+                      rr1 = abs(r0(nmuu, k, l) - 2.0_fp*r0(nmu, k, l) + r0(nm, k, l))
+                      rr2 = abs(r0(nmuu, k, l) - r0(nm, k, l))
+                      if (kfsz0(nm, k)*kfsz0(nmuu, k) == 0 .or. rr1 >= rr2 .or. rr2 < eps_fp .or. kcs(nm)==3 .or. kcs(nmu)==3) then
                          r00 = r0(nmu, k, l)
                       else
-                         mink2 = min(kfsmx0(nmu),kfsmax(nmu))
-                         r00 = r0(nmu, mink2, l)
+                         r00 = r0(nmu, k, l)                                      &
+                             & + (1.0_fp + cfl)*(r0(nm , k, l) - r0(nmu , k, l))  &
+                             &                 *(r0(nmu, k, l) - r0(nmuu, k, l))  &
+                             &                 /(r0(nm , k, l) - r0(nmuu, k, l))
                       endif
-                   else
-                      r00 = r0(nmu, k, l)                                      &
-                          & + (1.0_fp + cfl)*(r0(nm , k, l) - r0(nmu , k, l))  &
-                          &                 *(r0(nmu, k, l) - r0(nmuu, k, l))  &
-                          &                 /(r0(nm , k, l) - r0(nmuu, k, l))
-                   endif
-                   flux = qxk(nm, k) * r00
-                   if (kcs(nm) == 1) then
-                      ddkl(nm, k, l) = ddkl(nm, k, l) - flux
-                   endif
-                   if (kcs(nm + icx) == 1) then
-                      ddkl(nm + icx, k, l) = ddkl(nm + icx, k , l) + flux
-                   endif
-                enddo
+                      flux = qxk(nm, k) * r00
+                      if (kcs(nm) == 1) then
+                         ddkl(nm, k, l) = ddkl(nm, k, l) - flux
+                      endif
+                      if (kcs(nmu) == 1) then
+                         ddkl(nmu, k, l) = ddkl(nmu, k , l) + flux
+                      endif
+                   enddo
+                endif
              endif
           enddo
        endif
@@ -747,60 +809,52 @@ subroutine z_difu_horadv_expl()
        ndm  = nm  - icy
        num  = nm  + icy
        nuum = num + icy
-       if (kfs(nm)*kfs(num) /= 0) then
+       if (kfv(nm) /= 0) then
           kmin = max(kfvmin(nm), 1)
           do k = kmin, kmax
-             cfl = v(nm, k) * timest / guv(nm)
-             if (qyk(nm, k) > 0.0) then
-                do l = 1, lstsci
-                   rr1 = abs(r0(ndm, k, l) - 2.0_fp*r0(nm, k, l) + r0(num, k, l))
-                   rr2 = abs(r0(ndm, k, l) - r0(num, k, l))
-                   if (kfsz1(ndm, k)*kfsz1(num, k) == 0 .or. rr1 >= rr2 .or. rr2 < eps_fp) then
-                      if (kfsz1(nm,k) == 1) then
+             if (kfvz0(nm,k) == 1) then
+                cfl = v(nm, k) * timest / guv(nm)
+                if (qyk(nm, k) > 0.0_fp) then
+                   do l = 1, lstsci
+                      rr1 = abs(r0(ndm, k, l) - 2.0_fp*r0(nm, k, l) + r0(num, k, l))
+                      rr2 = abs(r0(ndm, k, l) - r0(num, k, l))
+                      if (kfsz0(ndm, k)*kfsz0(num, k) == 0 .or. rr1 >= rr2 .or. rr2 < eps_fp .or. kcs(nm)==3 .or. kcs(num)==3) then
                          r00 = r0(nm, k, l)
                       else
-                         mink2 = min(kfsmx0(nm),kfsmax(nm))
-                         r00 = r0(nm, mink2, l)
+                         r00 = r0(nm , k, l)                                     &
+                             & + (1.0_fp - cfl)*(r0(nm , k, l) - r0(ndm, k, l))  &
+                             &                 *(r0(num, k, l) - r0(nm , k, l))  &
+                             &                 /(r0(num, k, l) - r0(ndm, k, l))
                       endif
-                   else
-                      r00 = r0(nm , k, l)                                     &
-                          & + (1.0_fp - cfl)*(r0(nm , k, l) - r0(ndm, k, l))  &
-                          &                 *(r0(num, k, l) - r0(nm , k, l))  &
-                          &                 /(r0(num, k, l) - r0(ndm, k, l))
-                   endif
-                   flux = qyk(nm, k) * r00
-                   if (kcs(nm) == 1) then 
-                      ddkl(nm, k, l) = ddkl(nm, k, l) - flux
-                   endif
-                   if (kcs(nm + icy) == 1 ) then
-                      ddkl(nm + icy, k, l) = ddkl(nm + icy, k , l) + flux
-                   endif
-                enddo
-             else
-                do l = 1, lstsci
-                   rr1 = abs(r0(nuum, k, l) - 2.0_fp*r0(num, k, l) + r0(nm, k, l))
-                   rr2 = abs(r0(nuum, k, l) - r0(nm, k, l))
-                   if (kfsz1(nm, k)*kfsz1(nuum, k) == 0 .or. rr1 >= rr2 .or. rr2 < eps_fp) then
-                      if (kfsz1(num,k) == 1) then
+                      flux = qyk(nm, k) * r00
+                      if (kcs(nm) == 1) then 
+                         ddkl(nm, k, l) = ddkl(nm, k, l) - flux
+                      endif
+                      if (kcs(num) == 1 ) then
+                         ddkl(num, k, l) = ddkl(num, k , l) + flux
+                      endif
+                   enddo
+                elseif (qyk(nm, k) < 0.0_fp) then
+                   do l = 1, lstsci
+                      rr1 = abs(r0(nuum, k, l) - 2.0_fp*r0(num, k, l) + r0(nm, k, l))
+                      rr2 = abs(r0(nuum, k, l) - r0(nm, k, l))
+                      if (kfsz0(nm, k)*kfsz0(nuum, k) == 0 .or. rr1 >= rr2 .or. rr2 < eps_fp .or. kcs(nm)==3 .or. kcs(num)==3) then
                          r00 = r0(num, k, l)
                       else
-                         mink2 = min(kfsmx0(num),kfsmax(num))
-                         r00 = r0(num, mink2, l)
+                         r00 = r0(num, k, l)                                      &
+                             & + (1.0_fp + cfl)*(r0(nm , k, l) - r0(num , k, l))  &
+                             &                 *(r0(num, k, l) - r0(nuum, k, l))  &
+                             &                 /(r0(nm , k, l) - r0(nuum, k, l))
                       endif
-                   else
-                      r00 = r0(num, k, l)                                      &
-                          & + (1.0_fp + cfl)*(r0(nm , k, l) - r0(num , k, l))  &
-                          &                 *(r0(num, k, l) - r0(nuum, k, l))  &
-                          &                 /(r0(nm , k, l) - r0(nuum, k, l))
-                   endif
-                   flux = qyk(nm, k) * r00
-                   if (kcs(nm) == 1) then
-                      ddkl(nm, k, l) = ddkl(nm, k, l) - flux
-                   endif
-                   if (kcs(nm + icy) == 1) then
-                      ddkl(nm + icy, k, l) = ddkl(nm + icy, k , l) + flux
-                   endif
-                enddo
+                      flux = qyk(nm, k) * r00
+                      if (kcs(nm) == 1) then
+                         ddkl(nm, k, l) = ddkl(nm, k, l) - flux
+                      endif
+                      if (kcs(num) == 1) then
+                         ddkl(num, k, l) = ddkl(num, k , l) + flux
+                      endif
+                   enddo
+                endif
              endif
           enddo
        endif
@@ -812,34 +866,34 @@ end subroutine z_difu_horadv_expl
 !===============================================================================
 subroutine z_difu_horadv_impl()
     !
+    ! local variables
+    !
+    integer     :: kkmin
+    integer     :: kkminu
+    !
     ! Horizontal advection using first order upwind method (implicit)
     !
     do nm = 1, nmmax
        !
        ! HORIZONTAL ADVECTION IN X-DIRECTION
        !
-       nmd  = nm - icx
        nmu  = nm + icx
-       if (kfs(nm)*kfs(nmu) /= 0) then
+       if (kfu(nm) /= 0 .and. kcs(nm)*kcs(nmu) /= 0) then
           kmin = max(kfumin(nm), 1)
-          mink = min(kfsmax(nm), kfsmx0(nm))
-          do k = kmin, kmax
+          kkmin  = min(kfsmx0(nm), kfsmax(nm))
+          kkminu = min(kfsmx0(nmu), kfsmax(nmu))
+          do k = kmin, min(kkmin, kkminu)
              if (qxk(nm, k) > 0.0_fp) then
-                if (kfsz1(nm, k) * kfsz1(nmu, k) == 1) then
+                if (kfuz0(nm, k) == 1) then
                    if (kcs(nmu) == 1) then
-                      bdx(nmu, k) = - qxk(nm, k)*kfuz1(nm, k)
+                      bdx(nmu, k) = - qxk(nm, k)
                    endif
                    do l = 1, lstsci
-                      bbkl(nm, k, l) = bbkl(nm, k, l) + qxk(nm, k)*kfuz1(nm, k)
+                      bbkl(nm, k, l) = bbkl(nm, k, l) + qxk(nm, k)
                    enddo
                 else
                    do l = 1, lstsci
-                      if (kfsz1(nm, k) == 1) then
-                         flux = qxk(nm, k) * r0(nm, k, l)
-                      else
-                         mink2 = min(kfsmx0(nm),kfsmax(nm))
-                         flux = qxk(nm, k) * r0(nm, mink2, l)
-                      endif
+                      flux = qxk(nm, k) * r0(nm, k, l)
                       if (kcs(nm) == 1) then 
                          ddkl(nm, k, l) = ddkl(nm, k, l) - flux
                       endif
@@ -848,23 +902,18 @@ subroutine z_difu_horadv_impl()
                       endif
                    enddo
                 endif
-             else
-                if (kfsz1(nm, k) * kfsz1(nmu, k) == 1) then
+             elseif (qxk(nm,k) < 0.0_fp) then
+                if (kfuz0(nmu, k) == 1) then
                    if (kcs(nm) == 1) then
-                      bux(nm, k) = qxk(nm, k)*kfuz1(nm, k)
+                      bux(nm, k) = qxk(nm, k)
                    endif
                    do l = 1, lstsci
-                      bbkl(nmu, k, l) = bbkl(nmu, k, l) - qxk(nm, k)*kfuz1(nm, k)
+                      bbkl(nmu, k, l) = bbkl(nmu, k, l) - qxk(nm, k)
                    enddo
                 else
                    do l = 1, lstsci
-                      if (kfsz1(nmu, k) == 1) then
-                         flux = qxk(nm, k) * r0(nmu, k, l)
-                      else
-                         mink2 = min(kfsmx0(nmu),kfsmax(nmu))
-                         flux = qxk(nm, k) * r0(nmu, mink2, l)
-                      endif
-                      if (kcs(nm)== 1) then 
+                      flux = qxk(nm, k) * r0(nmu, k, l)
+                      if (kcs(nm) == 1) then 
                          ddkl(nm, k, l) = ddkl(nm, k, l) - flux
                       endif
                       if (kcs(nmu) == 1) then
@@ -874,31 +923,58 @@ subroutine z_difu_horadv_impl()
                 endif
              endif
           enddo
+          if (kfumx0(nm) > min(kkmin,kkminu)) then
+             !
+             ! Top layer has decreased
+             ! Make sure that advection fluxes in layer(s) above the new top layer (KFUMAX(NM))
+             ! are added to this new top layer
+             ! Switch to first order upwind explicit method
+             !
+             do k = min(kkmin,kkminu)+1, kfumx0(nm)
+                if (qxk(nm, k) > 0.0_fp) then
+                   do l = 1, lstsci
+                      flux = qxk(nm, k) * r0(nm , k, l)
+                      if (kcs(nm) == 1) then
+                         ddkl(nm, k, l) = ddkl(nm, k, l) - flux
+                      endif
+                      if (kcs(nmu) == 1) then
+                         ddkl(nmu, kkminu, l) = ddkl(nmu, kkminu, l) + flux
+                      endif
+                   enddo
+                elseif (qxk(nm, k) < 0.0_fp) then
+                   do l = 1, lstsci
+                      flux = qxk(nm, k) * r0(nmu, k, l)
+                      if (kcs(nm) == 1) then
+                         ddkl(nm, kkmin, l) = ddkl(nm, kkmin, l) - flux
+                      endif
+                      if (kcs(nmu) == 1) then
+                         ddkl(nmu, k, l) = ddkl(nmu, k , l) + flux
+                      endif
+                   enddo
+                endif
+             enddo
+          endif
        endif
        !
        ! HORIZONTAL ADVECTION IN Y-DIRECTION
        !
-       ndm  = nm - icy
        num  = nm + icy
-       if (kfs(nm)*kfs(num)/=0) then
+       if (kfv(nm) /= 0  .and. kcs(nm)*kcs(num) /= 0) then
           kmin = max(kfvmin(nm), 1)
-          do k = kmin, kmax
+          kkmin  = min(kfsmx0(nm), kfsmax(nm))
+          kkminu = min(kfsmx0(num), kfsmax(num))
+          do k = kmin, min(kkmin,kkminu)
              if (qyk(nm, k) > 0.0_fp) then
-                if (kfsz1(nm, k) * kfsz1(num, k) == 1) then
+                if (kfvz0(nm, k) == 1) then
                    if (kcs(num) == 1) then
-                      bdy(num, k) = - qyk(nm, k)*kfvz1(nm, k)
+                      bdy(num, k) = - qyk(nm, k)
                    endif
                    do l = 1, lstsci
-                      bbkl(nm, k, l) = bbkl(nm, k, l) + qyk(nm, k)*kfvz1(nm, k)
+                      bbkl(nm, k, l) = bbkl(nm, k, l) + qyk(nm, k)
                    enddo
                 else
                    do l = 1, lstsci
-                      if (kfsz1(nm, k) == 1) then
-                         flux = qyk(nm, k) * r0(nm, k, l)
-                      else
-                         mink2 = min(kfsmx0(nm),kfsmax(nm))
-                         flux = qyk(nm, k) * r0(nm, mink2, l)
-                      endif
+                      flux = qyk(nm, k) * r0(nm, k, l)
                       if (kcs(nm) == 1) then 
                          ddkl(nm, k, l) = ddkl(nm, k, l) - flux
                       endif
@@ -907,22 +983,17 @@ subroutine z_difu_horadv_impl()
                       endif
                    enddo
                 endif
-             else
-                if (kfsz1(nm, k) * kfsz1(num, k) == 1) then
+             elseif (qyk(nm, k) < 0.0_fp) then
+                if (kfvz0(num, k) == 1) then
                    if (kcs(nm) == 1) then
-                      buy(nm, k) = qyk(nm, k)*kfvz1(nm, k)
+                      buy(nm, k) = qyk(nm, k)
                    endif
                    do l = 1, lstsci
-                      bbkl(num, k, l) = bbkl(num, k, l) - qyk(nm, k)*kfvz1(nm, k)
+                      bbkl(num, k, l) = bbkl(num, k, l) - qyk(nm, k)
                    enddo
                 else
                    do l = 1, lstsci
-                      if (kfsz1(num, k) == 1) then
-                         flux = qyk(nm, k) * r0(num, k, l)
-                      else
-                         mink2 = min(kfsmx0(num),kfsmax(num))
-                         flux = qyk(nm, k) * r0(num, mink2, l)
-                      endif
+                      flux = qyk(nm, k) * r0(num, k, l)
                       if (kcs(nm) == 1) then 
                          ddkl(nm, k, l) = ddkl(nm, k, l) - flux
                       endif
@@ -933,6 +1004,37 @@ subroutine z_difu_horadv_impl()
                 endif
              endif
           enddo
+          if (kfvmx0(nm) > min(kkmin,kkminu)) then
+             !
+             ! Top layer has decreased
+             ! Make sure that advection fluxes in layer(s) above the new top layer (KFVMAX(NM))
+             ! are added to this new top layer
+             ! Switch to first order upwind explicit method
+             !
+             do k = min(kkmin,kkminu)+1, kfvmx0(nm)
+                if (qyk(nm, k) > 0.0_fp) then
+                   do l = 1, lstsci
+                      flux = qyk(nm, k) * r0(nm , k, l)
+                      if (kcs(nm) == 1) then
+                         ddkl(nm, k, l) = ddkl(nm, k, l) - flux
+                      endif
+                      if (kcs(num) == 1) then
+                         ddkl(num, kkminu, l) = ddkl(num, kkminu, l) + flux
+                      endif
+                   enddo
+                elseif (qyk(nm, k) < 0.0_fp) then
+                   do l = 1, lstsci
+                      flux = qyk(nm, k) * r0(num, k, l)
+                      if (kcs(nm) == 1) then
+                         ddkl(nm, kkmin, l) = ddkl(nm, kkmin, l) - flux
+                      endif
+                      if (kcs(num) == 1) then
+                         ddkl(num, k, l) = ddkl(num, k, l) + flux
+                      endif
+                   enddo
+                endif
+             enddo
+          endif
        endif
     enddo
     !
@@ -959,20 +1061,21 @@ subroutine z_difu_difhor_expl( )
     do l = 1, lstsci
        do nm = 1, nmmax
           nmu = nm + icx
-          mink = min( min(kfsmx0(nm), kfsmx0(nmu)), kfumx0(nm) )
-          do k = kfumin(nm), mink
-             if (kfuz1(nm, k)==1 .and. kfsz1(nm, k)*kfsz1(nmu, k)/=0) then
-                cl = r0(nm, k, l)
-                difl = dicuv(nm, k)
-                cr = r0(nmu, k, l)
-                difr = dicuv(nmu, k)
-                flux = 0.5*(cr - cl)*(difl + difr)/(0.7_fp*gvu(nm))
-                maskval = abs(2 - kcs(nmu))
-                ddkl(nm, k, l) = ddkl(nm, k, l) + areau(nm, k)*flux*maskval
-                maskval = abs(2 - kcs(nm))
-                ddkl(nmu, k, l) = ddkl(nmu, k, l) - areau(nm, k)*flux*maskval
-             endif
-          enddo
+          if (kfs(nm)*kfs(nmu) == 1) then
+             do k = kfumin(nm), kmax
+                if (kfuz0(nm, k)==1 .and. kfsz0(nm, k)*kfsz0(nmu, k)==1) then
+                   cl      = r0   (nm , k, l)
+                   difl    = dicuv(nm , k)
+                   cr      = r0   (nmu, k, l)
+                   difr    = dicuv(nmu, k)
+                   flux    = 0.5_fp*(cr - cl)*(difl + difr)/(0.7_fp*gvu(nm))
+                   maskval = max(0, abs(2 - kcs(nmu)))
+                   ddkl (nm , k, l) = ddkl (nm , k, l) + areau(nm, k)*flux*real(maskval,fp)
+                   maskval          = max(0, abs(2 - kcs(nm)))
+                   ddkl (nmu, k, l) = ddkl (nmu, k, l) - areau(nm, k)*flux*real(maskval,fp)
+                endif
+             enddo
+          endif
        enddo
     enddo
     !
@@ -981,20 +1084,21 @@ subroutine z_difu_difhor_expl( )
     do l = 1, lstsci
        do nm = 1, nmmax
           num = nm + icy
-          mink = min( min(kfsmx0(nm), kfsmx0(num)), kfvmx0(nm) )
-          do k = kfvmin(nm), mink
-             if (kfvz1(nm, k)==1 .and. kfsz1(nm, k)*kfsz1(num, k)/=0) then
-                cl = r0(nm, k, l)
-                difl = dicuv(nm, k)
-                cr = r0(num, k, l)
-                difr = dicuv(num, k)
-                flux = 0.5*(cr - cl)*(difl + difr)/(0.7_fp*guv(nm))
-                maskval = abs(2 - kcs(num))
-                ddkl(nm, k, l) = ddkl(nm, k, l) + areav(nm, k)*flux*maskval
-                maskval = abs(2 - kcs(nm))
-                ddkl(num, k, l) = ddkl(num, k, l) - areav(nm, k)*flux*maskval
-             endif
-          enddo
+          if (kfs(nm)*kfs(num) == 1) then
+             do k = kfvmin(nm), kmax
+                if (kfvz0(nm, k)==1 .and. kfsz0(nm, k)*kfsz0(num, k)==1) then
+                   cl      = r0   (nm , k, l)
+                   difl    = dicuv(nm , k)
+                   cr      = r0   (num, k, l)
+                   difr    = dicuv(num, k)
+                   flux    = 0.5_fp*(cr - cl)*(difl + difr)/(0.7_fp*guv(nm))
+                   maskval = max(0, abs(2 - kcs(num)))
+                   ddkl (nm , k, l) = ddkl (nm , k, l) + areav(nm, k)*flux*real(maskval,fp)
+                   maskval          = max(0, abs(2 - kcs(nm)))
+                   ddkl (num, k, l) = ddkl (num, k, l) - areav(nm, k)*flux*real(maskval,fp)
+                endif
+             enddo
+          endif
        enddo
     enddo
     !
@@ -1012,51 +1116,61 @@ subroutine z_difu_difhor_impl( )
     !
     integer :: maskval1
     integer :: maskval2
+    real(fp):: areau1
+    real(fp):: areav1
     real(fp):: difl
     real(fp):: difr
     !
     ! IN X-DIRECTION
     !
     do nm = 1, nmmax
-       nmu = nm + icx
-       mink = min( min(kfsmx0(nm), kfsmx0(nmu)), kfumx0(nm) )
-       do k = kfumin(nm), mink
-          if (kfuz1(nm, k) == 1 .and. kfsz1(nm, k)*kfsz1(nmu, k) /= 0) then
-             difl = dicuv(nm, k)
-             difr = dicuv(nmu, k)
-             flux = 0.5_fp * (difl + difr) / (0.7_fp*gvu(nm))
-             maskval1 = abs(2 - kcs(nmu))
-             maskval2 = abs(2 - kcs(nm ))
-             bux(nm , k) = bux(nm , k) - areau(nm, k)*flux*maskval1
-             bdx(nmu, k) = bdx(nmu, k) - areau(nm, k)*flux*maskval2
-             do l = 1, lstsci
-                bbkl(nm , k, l) = bbkl(nm , k, l) + areau(nm, k)*flux*maskval1
-                bbkl(nmu, k, l) = bbkl(nmu, k, l) + areau(nm, k)*flux*maskval2
-             enddo
-          endif
-       enddo
+       if (kfu(nm) == 1) then
+          nmu      = nm + icx
+          mink_old = min(kfsmx0(nm),kfsmx0(nmu))
+          mink_new = min(kfsmax(nm),kfsmax(nmu))
+          mink     = min(mink_old  ,mink_new)
+          do k = kfumin(nm), mink   !_old
+             if (kfuz0(nm, k)==1 .and. kfsz0(nm, k)*kfsz0(nmu, k)==1) then
+                difl = dicuv(nm, k)
+                difr = dicuv(nmu, k)
+                flux = 0.5_fp * (difl + difr) / (0.7_fp*gvu(nm))
+                maskval1    = max(0, abs(2 - kcs(nmu)))
+                maskval2    = max(0, abs(2 - kcs(nm )))
+                bux(nm , k) = bux(nm , k) - areau(nm, k)*flux*real(maskval1,fp)
+                bdx(nmu, k) = bdx(nmu, k) - areau(nm, k)*flux*real(maskval2,fp)
+                do l = 1, lstsci
+                   bbkl(nm , k, l) = bbkl(nm , k, l) + areau(nm, k)*flux*real(maskval1,fp)
+                   bbkl(nmu, k, l) = bbkl(nmu, k, l) + areau(nm, k)*flux*real(maskval2,fp)
+                enddo
+             endif
+          enddo
+       endif
     enddo
     !
     ! IN Y-DIRECTION
     !
     do nm = 1, nmmax
-       num = nm + icy
-       mink = min( min(kfsmx0(nm), kfsmx0(num)), kfvmx0(nm) )
-       do k = kfvmin(nm), mink
-          if (kfvz1(nm, k) == 1 .and. kfsz1(nm, k)*kfsz1(num, k) /= 0) then
-             difl = dicuv(nm, k)
-             difr = dicuv(num, k)
-             flux = 0.5_fp * (difl + difr) / (0.7_fp*guv(nm))
-             maskval1 = abs(2 - kcs(num))
-             maskval2 = abs(2 - kcs(nm ))
-             buy(nm , k) = buy(nm , k) - areav(nm, k)*flux*maskval1
-             bdy(num, k) = bdy(num, k) - areav(nm, k)*flux*maskval2
-             do l = 1, lstsci
-                bbkl(nm , k, l) = bbkl(nm , k, l) + areav(nm, k)*flux*maskval1
-                bbkl(num, k, l) = bbkl(num, k, l) + areav(nm, k)*flux*maskval2
-             enddo
-          endif
-       enddo
+       if (kfv(nm) == 1) then
+          num      = nm + icy
+          mink_old = min(kfsmx0(nm),kfsmx0(num))
+          mink_new = min(kfsmax(nm),kfsmax(num))
+          mink     = min(mink_old  ,mink_new)
+          do k = kfvmin(nm), mink      !_old
+             if (kfvz0(nm, k)==1 .and. kfsz0(nm, k)*kfsz0(num, k)==1) then
+                difl = dicuv(nm, k)
+                difr = dicuv(num, k)
+                flux = 0.5_fp * (difl + difr) / (0.7_fp*guv(nm))
+                maskval1    = max(0, abs(2 - kcs(num)))
+                maskval2    = max(0, abs(2 - kcs(nm )))
+                buy(nm , k) = buy(nm , k) - areav(nm, k)*flux*real(maskval1,fp)
+                bdy(num, k) = bdy(num, k) - areav(nm, k)*flux*real(maskval2,fp)
+                do l = 1, lstsci
+                   bbkl(nm , k, l) = bbkl(nm , k, l) + areav(nm, k)*flux*real(maskval1,fp)
+                   bbkl(num, k, l) = bbkl(num, k, l) + areav(nm, k)*flux*real(maskval2,fp)
+                enddo
+             endif
+          enddo
+       endif
     enddo
     !
 end subroutine z_difu_difhor_impl
@@ -1109,19 +1223,13 @@ subroutine z_difu_solv_expl( )
           enddo
           if (kfsmx0(nm)>kfsmax(nm)) then
              do k = kmin + 1, kmax
-                kfsum = kfuz1(nm,k) + kfuz1(nmd,k) + &
-                      & kfvz1(nm,k) + kfvz1(ndm,k)
-                if (kfsum == 0) then
-                   r1(nm, k, l) = 0.
-                endif
+                r1(nm, k, l) = r0(nm, k, l)
              enddo
           elseif (kfsmx0(nm)<kfsmax(nm)) then
              do k = kmin + 1, kmax
                 r1(nm, k, l) = r1(nm, kmin, l)
-                kfsum = kfuz1(nm,k) + kfuz1(nmd,k) + &
-                      & kfvz1(nm,k) + kfvz1(ndm,k)
-                if (k > kfsmax(nm) .and. kfsum == 0) then
-                   r1(nm, k, l) = 0.
+                if (k > kfsmax(nm)) then
+                   r1(nm, k, l) = 0.0_fp
                 endif
              enddo
           else
@@ -1200,15 +1308,14 @@ subroutine z_difu_solv_impl( )
     do nm = 1, nmmax
        if (kcs(nm) == 3) then
           mink = kfsmin(nm)
-          kmin = min(kfsmx0(nm), kfsmax(nm))
-          do k = mink, kmin
+          do k = mink, kmax
              r1(nm, k, l) = ddkl(nm, k, l)
           enddo
        endif
     enddo
     !
     do nm = 1, nmmax
-       if (kcs(nm)*kfs(nm) == 1) then
+       if (kcs(nm) /= 3 .and. kfs(nm) /= 0) then
           mink = kfsmin(nm)
           kmin = min(kfsmx0(nm), kfsmax(nm))
           do k = mink, kmin
@@ -1253,24 +1360,14 @@ subroutine z_difu_solv_impl( )
           !
           if (kfsmx0(nm) > kfsmax(nm)) then
              do k = kmin + 1, kmax
-                kfsum = kfuz1(nm,k) + kfuz1(nmd,k) + &
-                      & kfvz1(nm,k) + kfvz1(ndm,k)
-                if (kfsum == 0) then
-                   r1(nm, k, l) = 0.0_fp
-                endif
-                if (kfsum == 0) then 
+                r1(nm, k, l) = r0(nm, k, l)
                    vvdwk(nm, k) = 0.0_fp
-                endif
              enddo
           elseif (kfsmx0(nm) < kfsmax(nm)) then
              do k = kmin + 1, kmax
                 r1(nm, k, l) = r1(nm, kmin, l)
-                kfsum = kfuz1(nm,k) + kfuz1(nmd,k) + &
-                      & kfvz1(nm,k) + kfvz1(ndm,k)
-                if (k > kfsmax(nm) .and. kfsum == 0) then
+                if (k > kfsmax(nm)) then
                    r1(nm, k, l) = 0.0_fp
-                endif
-                if (k > kfsmax(nm) .and. kfsum == 0) then
                    vvdwk(nm, k) = 0.0_fp
                 endif
              enddo
@@ -1285,7 +1382,7 @@ subroutine z_difu_solv_impl( )
        if (kcs(nm)*kfs(nm) == 1) then
           mink = kfsmin(nm)
           kmin = min(kfsmx0(nm), kfsmax(nm))
-          do k = mink,kmin
+          do k = mink, kmin
              epsitr = max(1.0e-8_fp, 0.5e-3_fp*abs(r1(nm, k, l)))
              if (abs(vvdwk(nm, k) - r1(nm, k, l)) > epsitr) then
                 itr = 1

@@ -12,14 +12,15 @@ logical                        :: cart
    north    = sr%northdir
    cart     = .not.sr%nautconv
    call hisout( &
-        & sof%hs     ,sof%dir    ,sof%dirc  ,sof%dirs ,sof%period , &
-        & sof%depth  ,sof%fx     ,sof%fy    ,sof%mx   ,sof%my     , &
-        & sof%dissip ,sof%ubot   ,sof%steep ,sof%wlen ,sof%u      , &
-        & sof%v      ,sof%dspr   ,sof%rleak ,sof%qb   ,sof%nmax   , &
-        & sof%mmax   ,north      ,cart      , &
-        & sof%rtp    ,sof%pdir   ,sof%windu , &
-        & sof%windv  ,sof%tps    ,sof%tm02  ,sof%tmm10,sof%dhsign , &
-        & sof%drtm01 ,sof%setup  ,sof%n_outpars, sof%add_out_vals  )
+        & sof%hs     ,sof%dir    ,sof%dirc      ,sof%dirs  ,sof%period , &
+        & sof%depth  ,sof%fx     ,sof%fy        ,sof%mx    ,sof%my     , &
+        & sof%dissip(:,:,1)      ,sof%ubot      ,sof%steep ,sof%wlen   ,sof%u      , &
+        & sof%v      ,sof%dspr   ,sof%rleak     ,sof%qb    ,sof%nmax   , &
+        & sof%mmax   ,north      ,cart          , &
+        & sof%dissip(:,:,2)      ,sof%dissip(:,:,3)        ,sof%dissip(:,:,4)      , &
+        & sof%rtp    ,sof%pdir   ,sof%windu     , &
+        & sof%windv  ,sof%tps    ,sof%tm02      ,sof%tmm10 ,sof%dhsign , &
+        & sof%drtm01 ,sof%setup  ,sof%n_outpars ,sof%add_out_vals  )
 end subroutine read_swan_output
 
 
@@ -27,7 +28,7 @@ subroutine hisout(hs        ,dir       ,dirc      ,dirs      ,period    , &
                 & depth     ,fx        ,fy        ,mx        ,my        , &
                 & dissip    ,ubot      ,steep     ,wlen      ,u         , &
                 & v         ,dspr      ,rleak     ,qb        ,n         , &
-                & m         ,north     ,cart      , &
+                & m         ,north     ,cart      ,dissurf   ,diswcap   ,disbot , &
                 & rtp       ,pdir      ,windu     , &
                 & windv     ,tps       ,tm02      ,tmm10     ,dhsign    , &
                 & drtm01    ,setup     ,n_outpars ,add_out_vals)
@@ -80,6 +81,9 @@ subroutine hisout(hs        ,dir       ,dirc      ,dirs      ,period    , &
     real    , dimension(*), intent(out) :: dirc
     real    , dimension(*), intent(out) :: dirs
     real    , dimension(*)              :: dissip
+    real    , dimension(*)              :: dissurf
+    real    , dimension(*)              :: diswcap
+    real    , dimension(*)              :: disbot
     real    , dimension(*), intent(out) :: drtm01
     real    , dimension(*)              :: dspr
     real    , dimension(*), intent(out) :: fx
@@ -117,10 +121,10 @@ subroutine hisout(hs        ,dir       ,dirc      ,dirs      ,period    , &
     integer, external :: new_lun
     integer           :: outfile          ! The SWAN output is written to n_outfiles files
     integer           :: n_outfiles       ! Can be 2 or 3, depending on whether additional output is requested
+    integer           :: neg_dissip_found ! = 1,2,3,4 when a negative dissip, dissurf, diswcap or disbot is found in the swanout file, repectively
     logical           :: neg_hs_found     ! = true when a negative hs     is found in the swanout file
     logical           :: neg_period_found ! = true when a negative period is found in the swanout file
     logical           :: neg_dspr_found   ! = true when a negative dspr   is found in the swanout file
-    logical           :: neg_dissip_found ! = true when a negative dissip is found in the swanout file
     logical           :: neg_rleak_found  ! = true when a negative rleak  is found in the swanout file
     logical           :: neg_qb_found     ! = true when a negative qb     is found in the swanout file
     logical           :: neg_steep_found  ! = true when a negative steep  is found in the swanout file
@@ -156,10 +160,10 @@ subroutine hisout(hs        ,dir       ,dirc      ,dirs      ,period    , &
     !
     ! Set flags for negative values found to false.
     !
+    neg_dissip_found = 0
     neg_hs_found     = .false.
     neg_period_found = .false.
     neg_dspr_found   = .false.
-    neg_dissip_found = .false.
     neg_rleak_found  = .false.
     neg_qb_found     = .false.
     neg_steep_found  = .false.
@@ -239,7 +243,7 @@ subroutine hisout(hs        ,dir       ,dirc      ,dirs      ,period    , &
                 endif
                 if (dissip(i) < 0.0) then
                    dissip(i)        = 0.0
-                   neg_dissip_found = .true.
+                   neg_dissip_found = 1
                 endif
                 if (rleak(i)  < 0.0) then
                    rleak(i)         = 0.0
@@ -264,7 +268,7 @@ subroutine hisout(hs        ,dir       ,dirc      ,dirs      ,period    , &
              elseif (outfile == 2) then
                 read (record, *, iostat = iocond) &
                    & tps(i)   , tm02(i)  , tmm10(i) , dhsign(i), drtm01(i), &
-                   & setup(i)
+                   & setup(i) , dissurf(i) , diswcap(i) , disbot(i)
                 !
                 ! Replace all missingValues by zero
                 !
@@ -274,6 +278,21 @@ subroutine hisout(hs        ,dir       ,dirc      ,dirs      ,period    , &
                 if (comparereal(missingValue,dhsign(i)) == 0) dhsign(i)  = 0.0
                 if (comparereal(missingValue,drtm01(i)) == 0) drtm01(i)  = 0.0
                 if (comparereal(missingValue,setup(i))  == 0) setup(i)   = 0.0
+                if (comparereal(missingValue,dissurf(i))== 0) dissurf(i) = 0.0
+                if (comparereal(missingValue,diswcap(i))== 0) diswcap(i) = 0.0
+                if (comparereal(missingValue,disbot(i)) == 0) disbot(i)  = 0.0
+                if (dissurf(i) < 0.0) then
+                   dissurf(i)       = 0.0
+                   neg_dissip_found = 2
+                endif
+                if (diswcap(i) < 0.0) then
+                   diswcap(i)       = 0.0
+                   neg_dissip_found = 3
+                endif
+                if (disbot(i) < 0.0) then
+                   disbot(i)        = 0.0
+                   neg_dissip_found = 4
+                endif
              elseif (outfile == 3) then
                 read (record, *, iostat = iocond) &
                    & (add_out_vals((k-1)*npnt+i), k=1,n_outpars)
@@ -345,8 +364,8 @@ subroutine hisout(hs        ,dir       ,dirc      ,dirs      ,period    , &
        write (*, '(a)') '  WARNING: Found negative value(s) for DSPR in swanout1 file;'
        write (*, '(a)') '           value(s) set to zero'
     endif
-    if (neg_dissip_found) then
-       write (*, '(a)') '  WARNING: Found negative value(s) for DISSIP in swanout1 file;'
+    if (neg_dissip_found > 0) then
+       write (*, '(a,i1,a)') '  WARNING: Found negative value(s) for dissip(', neg_dissip_found,') in swanout file;'
        write (*, '(a)') '           value(s) set to zero'
     endif
     if (neg_rleak_found) then

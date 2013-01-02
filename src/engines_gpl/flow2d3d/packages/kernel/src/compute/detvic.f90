@@ -199,7 +199,9 @@ subroutine detvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
           !
           dicuv(nm, khtur) = vicuv(nm, khtur)
           !
-          ! add vicmol and dicmol to viscosity and diffusivity
+          ! Add vicmol and dicmol to viscosity and diffusivity
+          ! For 3D simulations, vicmol and dicmol are added in turclo.f90, via the vertical eddy viscosity/diffusivity
+          ! coming from the vertical turbulence model
           !
           if (kmax == 1) then
              vicuv(nm, khtur) = vicuv(nm, khtur) + vicmol

@@ -1,6 +1,6 @@
-subroutine get_cur(wavetime  ,kfu       ,kfv       ,u1        ,v1        , &
-                 & mmax      ,nmax      ,kmax      ,filnam    ,flowVelocityType, &
-                 & dps       ,s1)
+subroutine get_cur(wavetime  ,kfu       ,kfv       ,u1        ,v1         , &
+                 & mmax      ,nmax      ,kmax      ,filnam    ,layer_model, &
+                 & flowVelocityType     ,dps       ,s1)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -40,7 +40,7 @@ subroutine get_cur(wavetime  ,kfu       ,kfv       ,u1        ,v1        , &
 !
 ! Local parameters
 !
-    integer, parameter :: nelmx = 7
+    integer, parameter :: nelmx = 9
     integer, parameter :: nelmt = 1
     integer, parameter :: nelmk = 3
 !
@@ -57,6 +57,7 @@ subroutine get_cur(wavetime  ,kfu       ,kfv       ,u1        ,v1        , &
     real   , dimension(mmax, nmax), intent(out) :: v1
     type(wave_time_type)                        :: wavetime
     integer                                     :: flowVelocityType
+    character(*)                                :: layer_model
 !
 ! Local variables
 !
@@ -84,6 +85,8 @@ subroutine get_cur(wavetime  ,kfu       ,kfv       ,u1        ,v1        , &
     real         , dimension(:,:,:), allocatable :: rbuff
     real         , dimension(:,:)  , allocatable :: rlabda
     real         , dimension(:)    , allocatable :: thick
+    real         , dimension(:,:,:), allocatable :: dzu1
+    real         , dimension(:,:,:), allocatable :: dzv1
     logical                                      :: wrswch
     character(10), dimension(nelmk)              :: elmunk
     character(10), dimension(nelmt)              :: elmutt
@@ -110,7 +113,7 @@ subroutine get_cur(wavetime  ,kfu       ,kfv       ,u1        ,v1        , &
     !
     data grpnmt/'CURNT'/, elmnmt/'NTCUR'/, elmtpt/'INTEGER'/, nbytst/4/
     data grpnam/'CURTIM'/, elmnms/'TIMCUR', 'QU', 'QV', 'S1', 'U1', 'V1',       &
-       & 'RSP'/, elmtps/'INTEGER', 6*'REAL'/, nbytsg/nelmx*4/
+       & 'RSP', 'DZU1', 'DZV1'/, elmtps/'INTEGER', 8*'REAL'/, nbytsg/nelmx*4/
     data grpnmk/'KENMTIM'/, elmnmk/'TIMCUR', 'KFU ', 'KFV '/,                   &
         & elmtpk/nelmk*'INTEGER'/, nbytsk/nelmk*4/
     data grpnm_sigma/'GRID'/, elmnm_sigma/'THICK'/, elmtp_sigma/'REAL'/, nbyts_sigma/4/
@@ -144,6 +147,17 @@ subroutine get_cur(wavetime  ,kfu       ,kfv       ,u1        ,v1        , &
     endif
     call filldm(elmdms    ,7         ,2         ,nmax      ,mmax      , &
               & 0         ,0         ,0         )
+    if (kmax>1) then
+       call filldm(elmdms    ,8         ,3         ,nmax      ,mmax      , &
+                 & kmax      ,0         ,0         )
+       call filldm(elmdms    ,9         ,3         ,nmax      ,mmax      , &
+                 & kmax      ,0         ,0         )
+    else
+       call filldm(elmdms    ,8         ,2         ,nmax      ,mmax      , &
+                 & 0         ,0         ,0         )
+       call filldm(elmdms    ,9         ,2         ,nmax      ,mmax      , &
+                 & 0         ,0         ,0         )
+    endif
     call filldm(elmdmk    ,1         ,1         ,1         ,0         , &
               & 0         ,0         ,0         )
     call filldm(elmdmk    ,2         ,2         ,nmax      ,mmax      , &
@@ -158,6 +172,8 @@ subroutine get_cur(wavetime  ,kfu       ,kfv       ,u1        ,v1        , &
     allocate (rbuff (nmax,mmax,kmax))    ! Note com-file dimensions are nmax,mmax
     allocate (ibuff (nmax,mmax))         ! Note com-file dimensions are nmax,mmax
     allocate (thick (kmax))              ! Thickness of the sigma layers
+    allocate (dzu1  (mmax,nmax,kmax))    ! Note com-file dimensions are nmax,mmax
+    allocate (dzv1  (mmax,nmax,kmax))    ! Note com-file dimensions are nmax,mmax
     !
     ielem  = 1
     wrswch = .false.
@@ -171,7 +187,7 @@ subroutine get_cur(wavetime  ,kfu       ,kfv       ,u1        ,v1        , &
     call putgtr(filnam    ,grpnm_sigma,nelmx    ,elmnm_sigma ,elmdm_sigma, &
               & elmqty    ,elmunt    ,elmdes    ,elmtp_sigma ,nbytsg     , &
               & elmnm_sigma(ielem)   ,celidt    ,wrswch    ,error     ,thick     )
-
+    !
     ntcur = ival(1)
     ielem = 1
     ifind = 0
@@ -209,63 +225,58 @@ subroutine get_cur(wavetime  ,kfu       ,kfv       ,u1        ,v1        , &
        enddo
     enddo
 
+    ielem = 8
+    call putgtr(filnam    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
+              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
+              & elmnms(ielem)        ,celidt    ,wrswch    ,error     ,rbuff     )
+    do m = 1, mmax
+       do n = 1, nmax
+          do k = 1, kmax
+             dzu1(m, n, k) = rbuff(n, m, k)
+          enddo
+       enddo
+    enddo
+
+    ielem = 9
+    call putgtr(filnam    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
+              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
+              & elmnms(ielem)        ,celidt    ,wrswch    ,error     ,rbuff     )
+    do m = 1, mmax
+       do n = 1, nmax
+          do k = 1, kmax
+             dzv1(m, n, k) = rbuff(n, m, k)
+          enddo
+       enddo
+    enddo
+    
     ielem = 5
     call putgtr(filnam    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
               & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
               & elmnms(ielem)        ,celidt    ,wrswch    ,error     ,rbuff     )
+    !
+    ! Compute flow velocity U1 depending on layer_model and flowVelocityType
+    !
+    call compvel(wavetime ,layer_model ,flowVelocityType ,kfu       ,kfv     , &
+               & u1       ,mmax        ,nmax             ,kmax      ,filnam  , &
+               & dps      ,s1          ,thick            ,dzu1      ,rbuff   )
 
-    if ( flowVelocityType == FVT_SURFACE_LAYER ) then
-       do m = 1, mmax
-          do n = 1, nmax
-             u1(m, n) = rbuff(n, m, 1)
-          enddo
-       enddo
-    elseif ( flowVelocityType == FVT_DEPTH_AVERAGED ) then
-       do m = 1, mmax
-          do n = 1, nmax
-             u1(m, n) = 0.0
-             do k = 1,kmax
-                u1(m, n) = u1(m, n) + thick(k) * rbuff(n, m, k)
-             enddo
-          enddo
-       enddo
-    elseif ( flowVelocityType == FVT_WAVE_DEPENDENT ) then
-       call wavcur2d(wavetime  ,kfu       ,kfv       ,u1        , &
-                   & mmax      ,nmax      ,kmax      ,filnam    , &
-                   & dps       ,s1        ,thick     ,rbuff)
-    else
-       stop 'get_cur: flowVelocityType value unrecognised'
-    endif
     ielem = 6
     call putgtr(filnam    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
               & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
               & elmnms(ielem)        ,celidt    ,wrswch    ,error     ,rbuff     )
-    if ( flowVelocityType == FVT_SURFACE_LAYER ) then
-       do m = 1, mmax
-          do n = 1, nmax
-             v1(m, n) = rbuff(n, m, 1)
-          enddo
-       enddo
-    elseif ( flowVelocityType == FVT_DEPTH_AVERAGED ) then
-       do m = 1, mmax
-          do n = 1, nmax
-             v1(m, n) = 0.0
-             do k = 1,kmax
-                v1(m, n) = v1(m, n) + thick(k) * rbuff(n, m, k)
-             enddo
-          enddo
-       enddo
-    elseif ( flowVelocityType == FVT_WAVE_DEPENDENT ) then
-       call wavcur2d(wavetime  ,kfu       ,kfv       ,v1        , &
-                   & mmax      ,nmax      ,kmax      ,filnam    , &
-                   & dps       ,s1        ,thick     ,rbuff)
-    else
-       stop 'get_cur: flowVelocityType value unrecognised'
-    endif
+    !
+    ! Compute flow velocity V1 depending on layer_model and flowVelocityType
+    !
+    call compvel(wavetime ,layer_model ,flowVelocityType ,kfu       ,kfv     , &
+               & v1       ,mmax        ,nmax             ,kmax      ,filnam  , &
+               & dps      ,s1          ,thick            ,dzv1      ,rbuff   )
+
  1000 continue
     deallocate (rbuff, stat=ierr)
     deallocate (ibuff, stat=ierr)
     deallocate (thick, stat=ierr)
+    deallocate (dzu1 , stat=ierr)
+    deallocate (dzv1 , stat=ierr)
   if (error /= 0) then
      write(*,'(2a)') '*** ERROR: Unable to read velocities from file ', trim(filnam)
      stop

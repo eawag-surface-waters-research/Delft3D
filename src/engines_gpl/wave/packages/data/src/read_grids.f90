@@ -41,12 +41,13 @@ contains
 !
 !==============================================================================
 subroutine get_gri(filnam    ,xz        ,yz        ,guu       ,gvv       , &
-                &  alfas     ,kcs       ,covered   ,mmax      ,nmax      ,kmax, xymiss)
+                &  alfas     ,kcs       ,covered   ,mmax      ,nmax      , &
+                &  kmax      ,xymiss    ,layer_model)
     implicit none
 !
 ! Local parameters
 !
-    integer, parameter :: nelmx  = 16
+    integer, parameter :: nelmx  = 17
     integer, parameter :: nelmx2 =  4
     integer, parameter :: nelmx3 =  3
 !
@@ -66,6 +67,7 @@ subroutine get_gri(filnam    ,xz        ,yz        ,guu       ,gvv       , &
     real(kind=hp)   , dimension(:,:), pointer     :: xz
     real(kind=hp)   , dimension(:,:), pointer     :: yz
     character(*)                    , intent(in)  :: filnam
+    character(*)                    , intent(out) :: layer_model
 !
 ! Local variables
 !
@@ -82,6 +84,7 @@ subroutine get_gri(filnam    ,xz        ,yz        ,guu       ,gvv       , &
     integer, dimension(6, nelmx)    :: elmdms
     integer, dimension(nelmx)       :: nbytsg
     logical                         :: wrswch
+    character(16), dimension(1)     :: cval
     character(10), dimension(nelmx) :: elmunt
     character(16)                   :: grpnam
     character(16), dimension(nelmx) :: elmnms
@@ -113,9 +116,9 @@ subroutine get_gri(filnam    ,xz        ,yz        ,guu       ,gvv       , &
     data grpnam/'GRID'/
     data elmnms/'MMAX', 'NMAX', 'XORI', 'YORI', 'ALFORI', 'XCOR', &
               & 'YCOR', 'GUU',  'GVV',  'GUV',  'GVU',    'GSQS', 'GSQD', &
-              & 'ALFAS','KMAX', 'THICK'/
-    data elmtps/2*'INTEGER', 12*'REAL','INTEGER','REAL'/
-    data nbytsg/nelmx*4/
+              & 'ALFAS','KMAX', 'THICK', 'LAYER_MODEL'/
+    data elmtps/2*'INTEGER', 12*'REAL','INTEGER','REAL', 'CHARACTER'/
+    data nbytsg/16*4,16/
     data grpna2/'TEMPOUT'/
     data elmnm2/'XWAT','YWAT','CODB','CODW'/
     data elmtp2/2*'REAL',2*'INTEGER'/
@@ -141,7 +144,9 @@ subroutine get_gri(filnam    ,xz        ,yz        ,guu       ,gvv       , &
               & 0         ,0         ,0         )
     call filldm(elmdms    ,15        ,1         ,1         ,0         , &
               & 0         ,0         ,0         )
-
+    call filldm(elmdms    ,17        ,1         ,1         ,0         , &
+              & 0         ,0         ,0         )
+    
     wrswch = .false.
     ielem  = 1     ! MMAX
     call putgti(filnam    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
@@ -160,6 +165,12 @@ subroutine get_gri(filnam    ,xz        ,yz        ,guu       ,gvv       , &
               & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
               & elmnms(ielem)        ,celidt    ,wrswch    ,error     ,ival(1)   )
     kmax   = ival(1)
+
+    ielem = 17     ! LAYER_MODEL
+    call putgtc(filnam    ,grpnam    ,nelmx     ,elmnms    ,elmdms    , &
+              & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
+              & elmnms(ielem)        ,celidt    ,wrswch    ,error     ,cval      )
+    layer_model = cval(1)
 
     call filldm(elmdms    ,3         ,1         ,1         ,0         , &
               & 0         ,0         ,0         )
@@ -600,7 +611,7 @@ subroutine readregulargrid(filnam, sferic_exp, xorigin, yorigin, alpha, &
     endif
     read(rec,*,err=8888)  mmax, nmax
     !
-    ! poles? no fences!
+    ! poles? no, fences!
     !
     allocate (xy (2,mmax,nmax))
     xy   = 0.

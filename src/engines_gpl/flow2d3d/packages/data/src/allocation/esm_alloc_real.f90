@@ -113,7 +113,7 @@ subroutine esm_alloc_real(lundia, error, gdp)
 !
 ! Local variables
 !
-    integer           :: ierr     ! errorflag 
+    integer           :: ierr     ! Errorflag 
     integer           :: kfacrl   ! Multiplication factor; 1 if ROLLER='Y', else 0 
     integer           :: kfaccdw  ! Multiplication factor; 1 if CDWSTRUCT='Y', else 0 
     integer           :: kfacdpmv ! Multiplication factor; 1 if DPMV='Y', else 0 
@@ -1955,8 +1955,8 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !
     !-----arrays for: waves
     !
-    !                        dis   (nmaxddb  ,mmaxddb) * kfacwv
-    !                        discom(maxus,mmax   ,2) * kfacwv
+    !                        dis   (nmaxddb  ,mmaxddb) * kfacwv * 4
+    !                        discom(nmaxus,mmax   ,2) * kfacwv
     !                        rlabda(nmaxddb  ,mmaxddb) * kfacwv
     !                        teta  (nmaxddb  ,mmaxddb) * kfacwv
     !                        dircom(nmaxus,mmax   ,2) * kfacwv
@@ -1977,6 +1977,10 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                        wsucom(nmaxus,mmax   ,2) * kfacwv
     !                        wsv   (nmaxddb  ,mmaxddb)
     !                        wsvcom(nmaxus,mmax   ,2) * kfacwv
+    !                        wsbu  (nmaxddb  ,mmaxddb)
+    !                        wsbuc (nmaxus,mmax   ,2) * kfacwv
+    !                        wsbv  (nmaxddb  ,mmaxddb)
+    !                        wsbvc (nmaxus,mmax   ,2) * kfacwv
     !                        wlen  (nmaxus,mmax   ,2) * kfacwv
     !                        wlcom (nmaxus,mmax   ,2) * kfacwv
     !                        qxkw  (nmaxddb  ,mmaxddb) * kfacwv *kfacrl
@@ -2002,7 +2006,7 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                        deltau(nmaxddb  ,mmaxddb)
     !                        deltav(nmaxddb  ,mmaxddb)
     pntnam = 'dis'           !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv, gdp)
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kfacwv*4, gdp)
                              !  Pointer of array DIS
                              !  Dissipation waves
     if (ierr<= - 9) goto 9999
@@ -2157,10 +2161,8 @@ subroutine esm_alloc_real(lundia, error, gdp)
     pntnam = 'wsu'           !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
                              !  Pointer of array WSU
-                             !  Fall velocity
                              !  Local x-component of the flow-driving
                              !  force due to wave breaking (:= WSU)
-                             !  Wave stresses (in the x-/y-direction)
                              !  Wave stresses (in the x-direction)
                              ! 
     if (ierr<= - 9) goto 9999
@@ -2185,6 +2187,37 @@ subroutine esm_alloc_real(lundia, error, gdp)
                              !  Help array to interpolate between
                              !  to consecutive timesteps for
                              !  wave stresses (in the y-direction)
+    if (ierr<= - 9) goto 9999
+    !
+    pntnam = 'wsbu'          !  Global data
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
+                             !  Pointer of array WSBODYU
+                             !  Local x-component of the flow-driving
+                             !  force due to waves in the water column (:= WSBODYU)
+                             !  Wave stresses in the water column (in the x-direction)
+                             ! 
+    if (ierr<= - 9) goto 9999
+    !
+    pntnam = 'wsbuc'         !  Global data
+    ierr = mkfpnt(pntnam, nmaxus*mmax*2*kfacwv, gdp)
+                             !  Help array to interpolate between
+                             !  to consecutive timesteps for
+                             !  wave stresses in the water column (in the x-direction)
+    if (ierr<= - 9) goto 9999
+    !
+    pntnam = 'wsbv'          !  Global data
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
+                             !  Pointer of array WSBODYV
+                             !  Local y-component of the flow-driving
+                             !  force due to waves in the water column (:= WSBODYV)
+                             !  Wave stresses in the water column (in the y-direction)
+    if (ierr<= - 9) goto 9999
+    !
+    pntnam = 'wsbvc'         !  Global data
+    ierr = mkfpnt(pntnam, nmaxus*mmax*2*kfacwv, gdp)
+                             !  Help array to interpolate between
+                             !  to consecutive timesteps for
+                             !  wave stresses in the water column (in the y-direction)
     if (ierr<= - 9) goto 9999
     !
     pntnam = 'wlen'          !  Global data
@@ -2356,7 +2389,7 @@ subroutine esm_alloc_real(lundia, error, gdp)
     if (ierr<= - 9) goto 9999
     !
     ! overview workarrays for version v240:
-    ! 14 2D arrays (r 80-88 + 88a-88e)
+    ! 16 2D arrays (r 80-88 + 88a-88e)
     ! 17 3D arrays (r 89-109)
     !  4 3D arrays (r 94-97)
     !
@@ -2449,8 +2482,8 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !-----arrays for: coefficient matrices (double kmax dimension)
     !     for the array rbuff we use wrkb1 or wrkc1 dependent on the value
     !     of lmax
-    ! NB. arrays wrkb1, wrkb2, wrkb3 en wrkb4 have 1 extra layer
-    ! due to new turbulence model
+    ! NB. arrays wrkb1, wrkb2, wrkb3, wrkb4, wrkb5 and wrkb6 have 1 extra layer
+    ! due to new turbulence model and fully non-hydrostatic module
     !
     !                        wrkb1   (nmaxddb  ,mmaxddb,0:kmax  )
     !                      := rbuff max ((nmaxus,mmax  ,0:kmax,lmax  ),
@@ -2460,7 +2493,7 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                        wrkb3   (nmaxddb  ,mmaxddb,0:kmax  )
     !                        wrkb4   (nmaxddb  ,mmaxddb,0:kmax  )
     !                        wrkb5   (nmaxddb  ,mmaxddb,0:kmax  )
-    !                        wrkb6   (nmaxddb  ,mmaxddb,kmax  )
+    !                        wrkb6   (nmaxddb  ,mmaxddb,0:kmax  )
     !                        wrkb7   (nmaxddb  ,mmaxddb,kmax  )
     !                        wrkb8   (nmaxddb  ,mmaxddb,kmax  )
     !                        wrkb9   (nmaxddb  ,mmaxddb,kmax  )
@@ -2508,7 +2541,7 @@ subroutine esm_alloc_real(lundia, error, gdp)
     if (ierr<= - 9) goto 9999
     !
     pntnam = 'wrkb6'         !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*kmax, gdp)
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*(kmax+1), gdp)
                              !  Internal work array
     if (ierr<= - 9) goto 9999
     !

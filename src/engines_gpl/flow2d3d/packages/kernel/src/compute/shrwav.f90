@@ -1,7 +1,6 @@
-subroutine shrwav(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
-                & icy       ,dfu       ,deltau    ,tp        ,rlabda    , &
-                & hu        ,kfu       ,sig       ,ddk       ,thick     , &
-                & gdp       )
+subroutine shrwav(nmmax     ,kmax      ,icx       ,dfu       ,deltau    , &
+                & tp        ,rlabda    ,hu        ,kfu       , &
+                & ddk       ,thick     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -47,17 +46,14 @@ subroutine shrwav(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    real(fp)                                          , pointer    :: rhow    !  Density of water
 !
 ! Global variables
 !
     integer                                         , intent(in) :: icx     !!  Increment in the X-dir., if ICX= NMAX then computation proceeds in the X-dir.
                                                                             !!  If icx=1 then computation proceeds in the Y-dir.
-    integer                                                      :: icy     !!  Increment in the Y-dir. (see ICX)
-    integer                                                      :: j       !!  Begin pointer for arrays which have been transformed into 1D arrays.
-                                                                            !!  Due to the shift in the 2nd (M-) index, J = -2*NMAX + 1
     integer                                         , intent(in) :: kmax    !  Description and declaration in esm_alloc_int.f90
     integer                                         , intent(in) :: nmmax   !  Description and declaration in dimens.igs
-    integer                                                      :: nmmaxj  !  Description and declaration in dimens.igs
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: kfu     !  Description and declaration in esm_alloc_int.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: deltau  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: dfu     !  Description and declaration in esm_alloc_real.f90
@@ -65,9 +61,7 @@ subroutine shrwav(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: rlabda  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: tp      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: ddk     !!  Internal work array, diagonal space at (N,M,K)
-    real(fp), dimension(kmax)                                    :: sig     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(kmax)                       , intent(in) :: thick   !  Description and declaration in esm_alloc_real.f90
-!
 !
 ! Local variables
 !
@@ -83,10 +77,14 @@ subroutine shrwav(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)   :: thsum
     real(fp)   :: tpu
     real(fp)   :: vdist
+    real(fp)   :: zbot
+    real(fp)   :: ztop
+    real(fp)   :: frac
 !
 !
 !! executable statements -------------------------------------------------------
 !
+    rhow        => gdp%gdphysco%rhow
     !
     ! Initialisation
     !
@@ -96,6 +94,7 @@ subroutine shrwav(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        nmu = icx
        thsum = thsum + thick(k)
        do nm = 1, nmmax
+
           nmu = nmu + 1
           if (kfu(nm)==1) then
              !
@@ -125,7 +124,7 @@ subroutine shrwav(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                    ! Add term for streaming
                    !
                    if (vdist<=deltuu) then
-                      ddk(nm, k) = ddk(nm, k) + (rzzb - rzza)/(thick(k)*hu(nm))
+                      ddk(nm, k) = ddk(nm, k) + (rzzb - rzza)/(rhow*thick(k)*hu(nm))
                    endif
                 endif
              endif

@@ -21,7 +21,7 @@ subroutine adi(dischy    ,solver    ,icreep    ,stage     ,nst       , &
              & deltau    ,deltav    ,tp        ,rlabda    ,dzu1      , &
              & dzv1      ,vicuv     ,vnu2d     ,vicww     ,rxx       , &
              & rxy       ,ryy       ,cfurou    ,cfvrou    , &
-             & r0        ,diapl     ,rnpl      , &
+             & r0        ,diapl     ,rnpl      ,wsbodyu   ,wsbodyv   , &
              & windsu    ,windsv    ,patm      ,fcorio    ,dpdksi    , &
              & dpdeta    ,ubrlsu    ,ubrlsv    ,uwtypu    ,uwtypv    , &
              & pship     ,tgfsep    ,soumud    ,excbed    ,wrka1     , &
@@ -87,171 +87,173 @@ subroutine adi(dischy    ,solver    ,icreep    ,stage     ,nst       , &
 !
 ! Global variables
 !
-    integer                                                  :: icreep !  Description and declaration in tricom.igs
-    integer                                                  :: j      !!  Begin pointer for arrays which have
-                                                                       !!  been transformed into 1D arrays.
-                                                                       !!  Due to the shift in the 2nd (M-)
-                                                                       !!  index, J = -2*NMAX + 1
-    integer                                                  :: kmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                                  :: lsecfl !  Description and declaration in dimens.igs
-    integer                                                  :: lstsci !  Description and declaration in esm_alloc_int.f90
-    integer                                                  :: mmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                                  :: nfltyp !  Description and declaration in esm_alloc_int.f90
-    integer                                                  :: nmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                                  :: nmmax  !  Description and declaration in dimens.igs
-    integer                                                  :: nmmaxj !  Description and declaration in dimens.igs
-    integer                                                  :: nocol  !  Description and declaration in esm_alloc_int.f90
-    integer                                                  :: norow  !  Description and declaration in esm_alloc_int.f90
-    integer                                                  :: nsrc   !  Description and declaration in esm_alloc_int.f90
-    integer                                                  :: nst    !!  Time step number
-    integer    , dimension(5, norow + nocol)                 :: irocol !  Description and declaration in esm_alloc_int.f90
-    integer    , dimension(7, nsrc)                          :: mnksrc !  Description and declaration in esm_alloc_int.f90
-    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)            :: kcs    !  Description and declaration in esm_alloc_int.f90
-    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)            :: kcu    !  Description and declaration in esm_alloc_int.f90
-    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)            :: kcv    !  Description and declaration in esm_alloc_int.f90
-    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)            :: kfs    !  Description and declaration in esm_alloc_int.f90
-    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)            :: kfu    !  Description and declaration in esm_alloc_int.f90
-    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)            :: kfumax !  Description and declaration in esm_alloc_int.f90
-    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)            :: kfumin !  Description and declaration in esm_alloc_int.f90
-    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)            :: kfv    !  Description and declaration in esm_alloc_int.f90
-    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)            :: kfvmax !  Description and declaration in esm_alloc_int.f90
-    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)            :: kfvmin !  Description and declaration in esm_alloc_int.f90
-    integer    , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)    :: kspu   !  Description and declaration in esm_alloc_int.f90
-    integer    , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)    :: kspv   !  Description and declaration in esm_alloc_int.f90
-    integer    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)      :: kadu   !  Description and declaration in esm_alloc_int.f90
-    integer    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)      :: kadv   !  Description and declaration in esm_alloc_int.f90
-    logical                                                  :: sbkol  !  Description and declaration in procs.igs
-    logical                                                  :: zmodel !  Description and declaration in procs.igs
-    real(fp)                                                 :: betac  !  Description and declaration in tricom.igs
-    real(fp), dimension(12, norow + nocol)                   :: crbc   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(4, norow + nocol)                    :: circ2d !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: dddeta !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: dddksi !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: deltau !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: deltav !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: dfu    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: dfv    !  Description and declaration in esm_alloc_real.f90
-    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)             :: dps    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: dpu    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: dpv    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: dteu   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: dtev   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: dzdeta !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: dzdksi !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: evap   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: excbed !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: fcorio !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: fxw    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: fyw    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: gsqiu  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: gsqiv  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: gsqs   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: gud    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: guu    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: guv    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: guz    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: gvd    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: gvu    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: gvv    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: gvz    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: hkru   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: hkrv   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: hu     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: hv     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: hu0    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: hv0    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: patm   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: precip !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: pship  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: rlabda !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: s0     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: s1     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: soumud !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: taubpu !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: taubpv !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: taubsu !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: taubsv !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: tgfsep !!  Water elev. induced by tide gen.force
-                                                                       !!  Internal work array WRKB17 used
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: tp     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: umean  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: uwtypu !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: uwtypv !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: vmean  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: vnu2d  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: windsu !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: windsv !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka1  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka15 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka16 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka2  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka3  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka4  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka5  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka6  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka7  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka8  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka9  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wsu    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wsv    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)       :: qzk    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)       :: vicww  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)       :: w1     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 3)            :: cfurou !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 3)            :: cfvrou !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax + 2)     :: vicuv  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: areau  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: areav  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: diapl  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: dpdeta !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: dpdksi !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: dzu1   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: dzv1   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: porosu !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: porosv !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: qxk    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: qyk    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: rho    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: rnpl   !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: rxx    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: rxy    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: ryy    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: sumrho !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: u0     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: u1     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: ubrlsu !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: ubrlsv !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: v0     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: v1     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: volum1 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb1  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb10 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb11 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb12 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb13 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb14 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb15 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb16 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb2  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb3  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb4  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb5  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb6  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb7  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb8  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb9  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: dis_nf !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci) :: r0     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(kmax)                                :: sig    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(kmax)                                :: thick  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(kmax, 2, norow + nocol)              :: circ3d !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nsrc)                                :: disch  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nsrc)                                :: umdis  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nsrc)                                :: vmdis  !  Description and declaration in esm_alloc_real.f90
-    character(1), dimension(nsrc)                            :: dismmt !  Description and declaration in esm_alloc_char.f90
-    character(8)                                             :: dischy !  Description and declaration in tricom.igs
-    character(8)                                             :: solver !  Description and declaration in tricom.igs
-    character(8)                               , intent(in)  :: stage  !!  First or Second half time step
+    integer                                                  :: icreep  !  Description and declaration in tricom.igs
+    integer                                                  :: j       !!  Begin pointer for arrays which have
+                                                                        !!  been transformed into 1D arrays.
+                                                                        !!  Due to the shift in the 2nd (M-)
+                                                                        !!  index, J = -2*NMAX + 1
+    integer                                                  :: kmax    !  Description and declaration in esm_alloc_int.f90
+    integer                                                  :: lsecfl  !  Description and declaration in dimens.igs
+    integer                                                  :: lstsci  !  Description and declaration in esm_alloc_int.f90
+    integer                                                  :: mmax    !  Description and declaration in esm_alloc_int.f90
+    integer                                                  :: nfltyp  !  Description and declaration in esm_alloc_int.f90
+    integer                                                  :: nmax    !  Description and declaration in esm_alloc_int.f90
+    integer                                                  :: nmmax   !  Description and declaration in dimens.igs
+    integer                                                  :: nmmaxj  !  Description and declaration in dimens.igs
+    integer                                                  :: nocol   !  Description and declaration in esm_alloc_int.f90
+    integer                                                  :: norow   !  Description and declaration in esm_alloc_int.f90
+    integer                                                  :: nsrc    !  Description and declaration in esm_alloc_int.f90
+    integer                                                  :: nst     !!  Time step number
+    integer    , dimension(5, norow + nocol)                 :: irocol  !  Description and declaration in esm_alloc_int.f90
+    integer    , dimension(7, nsrc)                          :: mnksrc  !  Description and declaration in esm_alloc_int.f90
+    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)            :: kcs     !  Description and declaration in esm_alloc_int.f90
+    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)            :: kcu     !  Description and declaration in esm_alloc_int.f90
+    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)            :: kcv     !  Description and declaration in esm_alloc_int.f90
+    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)            :: kfs     !  Description and declaration in esm_alloc_int.f90
+    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)            :: kfu     !  Description and declaration in esm_alloc_int.f90
+    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)            :: kfumax  !  Description and declaration in esm_alloc_int.f90
+    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)            :: kfumin  !  Description and declaration in esm_alloc_int.f90
+    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)            :: kfv     !  Description and declaration in esm_alloc_int.f90
+    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)            :: kfvmax  !  Description and declaration in esm_alloc_int.f90
+    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)            :: kfvmin  !  Description and declaration in esm_alloc_int.f90
+    integer    , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)    :: kspu    !  Description and declaration in esm_alloc_int.f90
+    integer    , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)    :: kspv    !  Description and declaration in esm_alloc_int.f90
+    integer    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)      :: kadu    !  Description and declaration in esm_alloc_int.f90
+    integer    , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)      :: kadv    !  Description and declaration in esm_alloc_int.f90
+    logical                                                  :: sbkol   !  Description and declaration in procs.igs
+    logical                                                  :: zmodel  !  Description and declaration in procs.igs
+    real(fp)                                                 :: betac   !  Description and declaration in tricom.igs
+    real(fp), dimension(12, norow + nocol)                   :: crbc    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(4, norow + nocol)                    :: circ2d  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: dddeta  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: dddksi  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: deltau  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: deltav  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: dfu     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: dfv     !  Description and declaration in esm_alloc_real.f90
+    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)             :: dps     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: dpu     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: dpv     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: dteu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: dtev    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: dzdeta  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: dzdksi  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: evap    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: excbed  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: fcorio  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: fxw     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: fyw     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: gsqiu   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: gsqiv   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: gsqs    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: gud     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: guu     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: guv     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: guz     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: gvd     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: gvu     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: gvv     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: gvz     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: hkru    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: hkrv    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: hu      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: hv      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: hu0     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: hv0     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: patm    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: precip  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: pship   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: rlabda  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: s0      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: s1      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: soumud  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: taubpu  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: taubpv  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: taubsu  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: taubsv  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: tgfsep  !!  Water elev. induced by tide gen.force
+                                                                        !!  Internal work array WRKB17 used
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: tp      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: umean   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: uwtypu  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: uwtypv  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: vmean   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: vnu2d   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: windsu  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: windsv  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka1   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka15  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka16  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka2   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka3   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka4   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka5   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka6   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka7   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka8   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wrka9   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wsu     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wsv     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wsbodyu !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)               :: wsbodyv !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)       :: qzk     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)       :: vicww   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)       :: w1      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 3)            :: cfurou  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 3)            :: cfvrou  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax + 2)     :: vicuv   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: areau   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: areav   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: diapl   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: dpdeta  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: dpdksi  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: dzu1    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: dzv1    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: porosu  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: porosv  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: qxk     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: qyk     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: rho     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: rnpl    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: rxx     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: rxy     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: ryy     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: sumrho  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: u0      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: u1      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: ubrlsu  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: ubrlsv  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: v0      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: v1      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: volum1  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb1   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb10  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb11  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb12  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb13  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb14  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb15  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb16  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb2   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb3   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb4   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb5   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb6   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb7   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb8   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: wrkb9   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         :: dis_nf  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci) :: r0      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax)                                :: sig     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax)                                :: thick   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax, 2, norow + nocol)              :: circ3d  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nsrc)                                :: disch   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nsrc)                                :: umdis   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nsrc)                                :: vmdis   !  Description and declaration in esm_alloc_real.f90
+    character(1), dimension(nsrc)                            :: dismmt  !  Description and declaration in esm_alloc_char.f90
+    character(8)                                             :: dischy  !  Description and declaration in tricom.igs
+    character(8)                                             :: solver  !  Description and declaration in tricom.igs
+    character(8)                               , intent(in)  :: stage   !!  First or Second half time step
 !
 ! Local variables
 !
@@ -311,7 +313,7 @@ subroutine adi(dischy    ,solver    ,icreep    ,stage     ,nst       , &
               & wrkb6     ,wrkb7     ,wrkb8     ,wrkb9     ,wrkb10    , &
               & wrkb11    ,wrkb12    ,wrkb13    ,wrkb14    ,wrkb15    , &
               & wrkb16    ,taubpv    ,taubsv    ,rho       ,sumrho    , &
-              & thick     ,sig       ,dps       ,wsv       ,fyw       , &
+              & thick     ,sig       ,dps       ,wsv       ,fyw       ,wsbodyv   , &
               & vicuv     ,vnu2d     ,vicww     ,ryy       ,rxy       , &
               & dfv       ,deltav    ,tp        ,rlabda    , &
               & diapl     ,rnpl      , &
@@ -367,8 +369,8 @@ subroutine adi(dischy    ,solver    ,icreep    ,stage     ,nst       , &
               & circ2d(1, 1)         ,circ3d(1, 1, 1)      ,disch     , &
               & umdis     ,umean     ,hu        ,dpu       ,dzu1      , &
               & dpdksi    ,thick     ,sig       ,dps       ,taubpu    , &
-              & taubsu    ,rho       ,sumrho    ,wsu       ,idry      , &
-              & fxw       ,crbc(1,1) ,vicuv     ,wrka9     , &
+              & taubsu    ,rho       ,sumrho    ,wsu       ,fxw       ,wsbodyu   , &
+              & idry      ,crbc(1,1) ,vicuv     ,wrka9     , &
               & vnu2d     ,vicww     ,rxx       ,rxy       ,dfu       , &
               & deltau    ,tp        ,rlabda    ,cfurou    ,cfvrou    , &
               & rttfu     ,diapl     ,rnpl      , &
@@ -472,7 +474,7 @@ subroutine adi(dischy    ,solver    ,icreep    ,stage     ,nst       , &
               & wrkb6     ,wrkb7     ,wrkb8     ,wrkb9     ,wrkb10    , &
               & wrkb11    ,wrkb12    ,wrkb13    ,wrkb14    ,wrkb15    , &
               & wrkb16    ,taubpu    ,taubsu    ,rho       ,sumrho    , &
-              & thick     ,sig       ,dps       ,wsu       ,fxw       , &
+              & thick     ,sig       ,dps       ,wsu       ,fxw       ,wsbodyu   , &
               & vicuv     ,vnu2d     ,vicww     ,rxx       ,rxy       , &
               & dfu       ,deltau    ,tp        ,rlabda    , &
               & diapl     ,rnpl      , &
@@ -525,8 +527,8 @@ subroutine adi(dischy    ,solver    ,icreep    ,stage     ,nst       , &
               & circ2d(1, norow + 1) ,circ3d(1, 1, norow + 1)         ,disch     , &
               & vmdis     ,vmean     ,hv        ,dpv       ,dzv1      , &
               & dpdeta    ,thick     ,sig       ,dps       ,taubpv    , &
-              & taubsv    ,rho       ,sumrho    ,wsv       ,idry      , &
-              & fyw       ,crbc(1, norow + 1)   ,vicuv     ,wrka9     , &
+              & taubsv    ,rho       ,sumrho    ,wsv       ,fyw       ,wsbodyv   , &
+              & idry      ,crbc(1, norow + 1)   ,vicuv     ,wrka9     , &
               & vnu2d     ,vicww     ,ryy       ,rxy       ,dfv       , &
               & deltav    ,tp        ,rlabda    ,cfvrou    ,cfurou    , &
               & rttfv     ,diapl     ,rnpl      , &

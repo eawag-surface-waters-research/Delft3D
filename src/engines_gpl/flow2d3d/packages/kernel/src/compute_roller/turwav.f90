@@ -56,7 +56,7 @@ subroutine turwav(nmmax     ,kmax      ,kfs       , &
     integer                                       , intent(in) :: kmax  !  Description and declaration in esm_alloc_int.f90
     integer                                       , intent(in) :: nmmax !  Description and declaration in dimens.igs
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in) :: kfs   !  Description and declaration in esm_alloc_int.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in) :: dis   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub,4), intent(in) :: dis   !  Description and declaration in esm_alloc_real.f90
     real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in) :: dps   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in) :: s0    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax + 2)     :: vicuv !  Description and declaration in esm_alloc_real.f90
@@ -85,12 +85,12 @@ subroutine turwav(nmmax     ,kmax      ,kfs       , &
           h = max(0.01_fp, s0(nm) + real(dps(nm),fp))
           !
           ! check on HLES
-          !in that case wave generated visc. should be added
+          ! in that case wave generated visc. should be added
           !
           if (htur2d) then
-            vicuv(nm, khtur) = vicuv(nm, khtur)+(dis(nm)/rhow)**(1.0/3.0)*h
+            vicuv(nm, khtur) = vicuv(nm, khtur)+(dis(nm,1)/rhow)**(1.0/3.0)*h
           else
-            vicuv(nm, khtur) = (dis(nm)/rhow)**(1.0/3.0)*h
+            vicuv(nm, khtur) = (dis(nm,1)/rhow)**(1.0/3.0)*h
           endif
           vicuv(nm, khtur) = max(vicuv(nm, khtur), thr)
        else

@@ -8,18 +8,22 @@ implicit none
 type (output_fields) :: fof
 type (swan)          :: sr
 
-   call hiscom(fof%hs   ,fof%dir  ,fof%period ,fof%depth  ,fof%fx   , &
-             & fof%fy   ,fof%mx   ,fof%my     ,fof%dissip ,fof%mmax , &
-             & fof%nmax ,fof%hrms ,fof%tp     ,sr%grav    ,sr%swflux, &
-             & sr%swdis ,sr%rho   ,sr%gamma0  )
+   call hiscom(fof%hs             ,fof%dir           ,fof%period         ,fof%depth         , &
+             & fof%fx             ,fof%fy            ,fof%mx             ,fof%my            , &
+             & fof%dissip(:,:,1)  ,fof%dissip(:,:,2) ,fof%dissip(:,:,3)  ,fof%dissip(:,:,4) , &
+             & fof%mmax           ,fof%nmax          ,fof%hrms           ,fof%tp            , &
+             & sr%grav            ,sr%swflux         ,sr%swdis           ,sr%rho            , &
+             & sr%gamma0          ,fof%wsbodyu       ,fof%wsbodyv )
 
 end subroutine wave2com
 
 
-subroutine hiscom(hs        ,dir       ,period    ,depth     ,fx        , &
-                & fy        ,mx        ,my        ,dissip    ,m         , &
-                & n         ,hrms      ,tp        ,grav      ,swflux    , &
-                & swdis     ,rho       ,gamma0)
+subroutine hiscom(hs        ,dir       ,period    ,depth     , &
+                & fx        ,fy        ,mx        ,my        , &
+                & distot    ,dissurf   ,diswcap   ,disbot    , &
+                & m         ,n         ,hrms      ,tp        , &
+                & grav      ,swflux    ,swdis     ,rho       , &
+                & gamma0    ,wsbodyu   ,wsbodyv   )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -63,9 +67,13 @@ subroutine hiscom(hs        ,dir       ,period    ,depth     ,fx        , &
 !
     integer                , intent(in)  :: m
     integer                , intent(in)  :: n
+    integer                              :: swdis
     real   , dimension(m*n)              :: depth
     real   , dimension(m*n)              :: dir
-    real   , dimension(m*n)              :: dissip
+    real   , dimension(m*n)              :: distot
+    real   , dimension(m*n)              :: dissurf
+    real   , dimension(m*n)              :: diswcap
+    real   , dimension(m*n)              :: disbot
     real   , dimension(m*n)              :: fx
     real   , dimension(m*n)              :: fy
     real                   , intent(in)  :: gamma0 ! JONSWAP peak enhancement factor
@@ -77,7 +85,8 @@ subroutine hiscom(hs        ,dir       ,period    ,depth     ,fx        , &
     real   , dimension(m*n), intent(in)  :: period
     real                                 :: rho
     real   , dimension(m*n), intent(out) :: tp
-    logical                              :: swdis
+    real   , dimension(m*n)              :: wsbodyu
+    real   , dimension(m*n)              :: wsbodyv
     logical                              :: swflux
 !
 ! Local variables
@@ -85,12 +94,12 @@ subroutine hiscom(hs        ,dir       ,period    ,depth     ,fx        , &
     integer                        :: ierr
     integer                        :: l
     integer                        :: npnt
-    integer                        :: option
     logical                        :: corht
     logical                        :: ldep
     real                           :: deph
     real                           :: dirh
     real                           :: dish
+    real                           :: diss
     real                           :: dismax
     real                           :: dr
     real                           :: fxhis
@@ -103,6 +112,8 @@ subroutine hiscom(hs        ,dir       ,period    ,depth     ,fx        , &
     real                           :: tpp
     real                           :: wavek
     real                           :: wavel
+    real                           :: wsbodyuu
+    real                           :: wsbodyvv
 !
 !! executable statements -------------------------------------------------------
 !
@@ -131,7 +142,8 @@ subroutine hiscom(hs        ,dir       ,period    ,depth     ,fx        , &
     tpp   = period(l)*perfac
     fxhis = fx(l)
     fyhis = fy(l)
-    dish  = dissip(l)
+    dish  = distot(l)
+    diss  = dissurf(l) + diswcap(l)
     !
     call corrht(hrm      ,deph      ,tpp       ,wavel     ,wavek     , &
               & ldep     ,dish      ,dismax    ,corht     ,rho       , &
@@ -140,17 +152,21 @@ subroutine hiscom(hs        ,dir       ,period    ,depth     ,fx        , &
     ! If .not. swdis use fx, fy from SWAN
     ! else compute forces based on dissipation and celerity
     !
+    wsbodyuu = 0.0
+    wsbodyvv = 0.0
     call wapar(hrm       ,dirh      ,deph      ,tpp       ,fxhis     , &
-             & fyhis     ,dish      ,wavel     ,wavek     ,ldep      , &
-             & option    ,fxx       ,fyy       ,qbsli     ,dismax    , &
-             & corht     ,swdis     ,grav      )
-    hrms(l)   = hrm
-    dir(l)    = dirh
-    depth(l)  = deph
-    tp(l)     = tpp
-    fx(l)     = fxx
-    fy(l)     = fyy
-    dissip(l) = dish
+             & fyhis     ,dish      ,diss      ,wavel     ,wavek     , &
+             & ldep      ,fxx       ,fyy       ,qbsli     ,dismax    , &
+             & corht     ,swdis     ,grav      ,wsbodyuu  ,wsbodyvv  )
+    hrms(l)    = hrm
+    dir(l)     = dirh
+    depth(l)   = deph
+    tp(l)      = tpp
+    fx(l)      = fxx
+    fy(l)      = fyy
+    wsbodyu(l) = wsbodyuu
+    wsbodyv(l) = wsbodyvv
+    distot(l)  = dish
     if (.not.ldep) then
        if (wavel>1.0E-6 .and. swflux) then
           mx(l) = .125*grav*hrm*hrm*tpp/wavel*cos(dirh*dr)

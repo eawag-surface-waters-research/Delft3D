@@ -454,6 +454,8 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     integer(pntrsize)                    , pointer :: wstau
     integer(pntrsize)                    , pointer :: wsu
     integer(pntrsize)                    , pointer :: wsv
+    integer(pntrsize)                    , pointer :: wsbodyu
+    integer(pntrsize)                    , pointer :: wsbodyv
     integer(pntrsize)                    , pointer :: x2y
     integer(pntrsize)                    , pointer :: x3
     integer(pntrsize)                    , pointer :: xcor
@@ -531,7 +533,11 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     integer(pntrsize)                    , pointer :: kfumx0
     integer(pntrsize)                    , pointer :: kfvmx0
     integer(pntrsize)                    , pointer :: kfsmx0
+    integer(pntrsize)                    , pointer :: kfsz0
+    integer(pntrsize)                    , pointer :: kfsz1
+    integer(pntrsize)                    , pointer :: kfuz0
     integer(pntrsize)                    , pointer :: kfuz1
+    integer(pntrsize)                    , pointer :: kfvz0
     integer(pntrsize)                    , pointer :: kfvz1
     integer(pntrsize)                    , pointer :: kcscut
     integer(pntrsize)                    , pointer :: disint
@@ -1008,6 +1014,8 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     wstau               => gdp%gdr_i_ch%wstau
     wsu                 => gdp%gdr_i_ch%wsu
     wsv                 => gdp%gdr_i_ch%wsv
+    wsbodyu             => gdp%gdr_i_ch%wsbodyu
+    wsbodyv             => gdp%gdr_i_ch%wsbodyv
     x2y                 => gdp%gdr_i_ch%x2y
     x3                  => gdp%gdr_i_ch%x3
     xcor                => gdp%gdr_i_ch%xcor
@@ -1085,6 +1093,10 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     kfumx0              => gdp%gdr_i_ch%kfumx0
     kfvmx0              => gdp%gdr_i_ch%kfvmx0
     kfsmx0              => gdp%gdr_i_ch%kfsmx0
+    kfsz0               => gdp%gdr_i_ch%kfsz0
+    kfuz0               => gdp%gdr_i_ch%kfuz0
+    kfvz0               => gdp%gdr_i_ch%kfvz0
+    kfsz1               => gdp%gdr_i_ch%kfsz1
     kfuz1               => gdp%gdr_i_ch%kfuz1
     kfvz1               => gdp%gdr_i_ch%kfvz1
     kcscut              => gdp%gdr_i_ch%kcscut
@@ -1180,21 +1192,23 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     ! f0isf1 moved to here for OpenDA (before dmpveg since it uses s0)
     !
     call timer_start(timer_f0isf1, gdp)
-    call f0isf1(dischy    ,nst       ,zmodel    ,jstart    , &
-              & nmmax     ,nmmaxj    ,nmax      ,kmax      ,lstsci    , &
-              & ltur      ,nsrc      ,i(kcu)    ,i(kcv)    ,i(kcs)    , &
-              & i(kfs)    ,i(kfu)    ,i(kfv)    ,i(kfsmin) ,i(kfsmax) , &
-              & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,i(kfsmx0) , &
-              & i(kfumx0) ,i(kfvmx0) ,r(s0)     ,r(s1)     ,r(u0)     , &
-              & r(u1)     ,r(v0)     ,r(v1)     ,r(volum0) ,r(volum1) , &
-              & r(r0)     ,r(r1)     ,r(rtur0)  ,r(rtur1)  ,r(disch)  , &
-              & r(discum) ,r(hu)     ,r(hv)     ,r(dzu1)   ,r(dzv1)   , &
-              & r(dzs1)   ,r(dzu0)   ,r(dzv0)   ,r(dzs0)   ,r(qxk)    , &
-              & r(qyk)    ,r(qu)     ,r(qv)     ,r(s00)    ,r(w0)     , &
-              & r(w1)     ,r(p0)     ,r(p1)     ,r(hu0)    ,r(hv0)    , &
-              & r(ewabr0) ,r(ewabr1) , &
-              & r(ewave0) ,r(ewave1) ,r(eroll0) ,r(eroll1) ,roller    , &
-              & gdp       )
+       call f0isf1(stage     ,dischy    ,nst       ,zmodel    ,jstart    , &
+                 & nmmax     ,nmmaxj    ,nmax      ,kmax      ,lstsci    , &
+                 & ltur      ,nsrc      ,i(kcu)    ,i(kcv)    ,i(kcs)    , &
+                 & i(kfs)    ,i(kfu)    ,i(kfv)    ,i(kfsmin) ,i(kfsmax) , &
+                 & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,i(kfsmx0) , &
+                 & i(kfumx0) ,i(kfvmx0) ,i(kfsz0)  ,i(kfuz0)  ,i(kfvz0)  , &
+                 & i(kfsz1)  ,i(kfuz1)  ,i(kfvz1)  , &
+                 & r(s0)     ,r(s1)     ,r(u0)     , &
+                 & r(u1)     ,r(v0)     ,r(v1)     ,r(volum0) ,r(volum1) , &
+                 & r(r0)     ,r(r1)     ,r(rtur0)  ,r(rtur1)  ,r(disch)  , &
+                 & r(discum) ,r(hu)     ,r(hv)     ,r(dzu1)   ,r(dzv1)   , &
+                 & r(dzs1)   ,r(dzu0)   ,r(dzv0)   ,r(dzs0)   ,r(qxk)    , &
+                 & r(qyk)    ,r(qu)     ,r(qv)     ,r(s00)    ,r(w0)     , &
+                 & r(w1)     ,r(p0)     ,r(p1)     ,r(hu0)    ,r(hv0)    , &
+                 & r(ewabr0) ,r(ewabr1) , &
+                 & r(ewave0) ,r(ewave1) ,r(eroll0) ,r(eroll1) ,roller    , &
+                 & gdp       )
     call timer_stop(timer_f0isf1, gdp)
     !
     if (dpmveg) then
@@ -1490,6 +1504,22 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
           call timer_stop(timer_trisol_rest, gdp)
        endif
        !
+       ! The velocities from previous half timestep are corrected for
+       ! mass flux and temporary set in WRKB3 (UEUL) and WRKB4
+       ! (VEUL) these are used in TURCLO
+       !
+       icx = nmaxddb
+       icy = 1
+       call timer_start(timer_euler, gdp)
+       call euler(jstart    ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
+                & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumx0) , &
+                & i(kfumin) ,i(kfvmx0) ,i(kfvmin) ,r(dzu0)   ,r(dzv0)   , &
+                & r(u0)     ,r(wrkb3)  ,r(v0)     ,r(wrkb4)  , &
+                & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
+                & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   ,r(grmsur) , &
+                & r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
+       call timer_stop(timer_euler, gdp)
+       !
        ! Eddy viscosity and diffusivity
        !
        call timer_start(timer_turbulence, gdp)
@@ -1503,7 +1533,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                  & r(rtur0)  ,r(thick)  ,r(sig)    ,r(rho)    ,r(vicuv)  , &
                  & r(vicww)  ,r(dicuv)  ,r(dicww)  ,r(windsu) ,r(windsv) , &
                  & r(z0urou) ,r(z0vrou) ,r(bruvai) ,r(rich)   ,r(dudz)   , &
-                 & r(dvdz)   ,gdp       )
+                 & r(dvdz)   ,r(wrkb3)  ,r(wrkb4)  ,gdp       )
        call timer_stop(timer_turclo, gdp)
        call timer_stop(timer_turbulence, gdp)
        if (htur2d .or. irov>0) then
@@ -1646,7 +1676,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
               & r(deltau) ,r(deltav) ,r(tp)     ,r(rlabda) ,r(dzu1)   , &
               & r(dzv1)   ,r(vicuv)  ,r(vnu2d)  ,r(vicww)  ,r(rxx)    , &
               & r(rxy)    ,r(ryy)    ,r(cfurou) ,r(cfvrou) , &
-              & r(r0)     ,r(diapl)  ,r(rnpl)   , &
+              & r(r0)     ,r(diapl)  ,r(rnpl)   ,r(wsbodyu) ,r(wsbodyv) , &
               & r(windsu) ,r(windsv) ,r(patm)   ,r(fcorio) ,r(dpdksi) , &
               & r(dpdeta) ,r(ubrlsu) ,r(ubrlsv) ,r(uwtypu) ,r(uwtypv) , &
               & r(pship)  ,r(wrkb17) ,r(soumud) ,r(excbed) ,r(wrka1)  , &
@@ -1680,9 +1710,10 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        icy = 1
        call timer_start(timer_euler, gdp)
        call euler(jstart    ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
-                & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfsmax) , &
-                & i(kfsmin) ,r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
-                & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     ,r(dzs1)   , &
+                & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumax) , &
+                & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
+                & r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
+                & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
                 & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   ,r(grmsur) , &
                 & r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
        call timer_stop(timer_euler, gdp)
@@ -1737,7 +1768,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        call taubot(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                  & icy       ,rouflo    ,rouwav    ,i(kfu)    ,i(kfv)    , &
                  & i(kfumin) ,i(kfumax) ,i(kspu)   ,i(kcs)    ,i(kcscut) , &
-                 & d(dps)    ,r(s1)     ,r(wrkb3)  ,r(wrkb4)  ,r(umean)  , &
+                 & d(dps)    ,r(s1)     ,r(wrkb3)  ,r(wrkb4)  , &
                  & r(guu)    ,r(xcor)   ,r(ycor)   ,r(rho)    , &
                  & r(taubpu) ,r(taubsu) ,r(wrka1)  ,r(dis)    ,r(rlabda) , &
                  & r(teta)   ,r(uorb)   ,r(tp)     ,r(wsu)    ,r(wsv)    , &
@@ -1757,7 +1788,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        call taubot(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                  & icy       ,rouflo    ,rouwav    ,i(kfv)    ,i(kfu)    , &
                  & i(kfvmin) ,i(kfvmax) ,i(kspv)   ,i(kcs)    ,i(kcscut) , &
-                 & d(dps)    ,r(s1)     ,r(wrkb4)  ,r(wrkb3)  ,r(vmean)  , &
+                 & d(dps)    ,r(s1)     ,r(wrkb4)  ,r(wrkb3)  , &
                  & r(gvv)    ,r(ycor)   ,r(xcor)   ,r(rho)    , &
                  & r(taubpv) ,r(taubsv) ,r(wrka2)  ,r(dis)    ,r(rlabda) , &
                  & r(teta)   ,r(uorb)   ,r(tp)     ,r(wsv)    ,r(wsu)    , &
@@ -1859,7 +1890,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
           call timer_start(timer_heatu, gdp)
           call heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                    & ltem      ,lstsci    ,icx       ,icy       , &
-                   & nmmax     ,kmax      ,i(kfs)    ,i(kfsmax) , &
+                   & nmmax     ,kmax      ,i(kfs)    ,i(kfsmx0) ,i(kfsmax) , &
                    & i(kfsmin) ,i(kspu)   ,i(kspv)   ,r(dzs0)   ,r(dzs1)   , &
                    & r(sour)   ,r(sink)   ,r(r0)     ,r(evap)   ,d(dps)    , &
                    & r(s0)     ,r(s1)     ,r(thick)  ,r(w10mag) ,r(patm)   , &
@@ -1923,9 +1954,10 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
           icy = 1
           call timer_start(timer_euler, gdp)
           call euler(jstart    ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
-                   & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfsmax) , &
-                   & i(kfsmin) ,r(u0)     ,r(wrkb5)  ,r(v0)     ,r(wrkb6)  , &
-                   & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     ,r(dzs1)   , &
+                   & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumax) , &
+                   & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
+                   & r(u0)     ,r(wrkb5)  ,r(v0)     ,r(wrkb6)  , &
+                   & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
                    & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   ,r(grmsur) , &
                    & r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
           call timer_stop(timer_euler, gdp)
@@ -1995,6 +2027,23 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        !
        call timer_start(timer_turbulence, gdp)
        if (ltur > 0) then
+          !
+          ! The velocities from previous half timestep are corrected for
+          ! mass flux and temporary set in WRKB13 (UEUL) and WRKB14
+          ! (VEUL) these are used in TRATUR
+          !
+          icx = nmaxddb
+          icy = 1
+          call timer_start(timer_euler, gdp)
+          call euler(jstart    ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
+                   & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumax) , &
+                   & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
+                   & r(u1)     ,r(wrkb13) ,r(v1)     ,r(wrkb14) , &
+                   & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
+                   & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   ,r(grmsur) , &
+                   & r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
+          call timer_stop(timer_euler, gdp)
+          !
           icx = nmaxddb
           icy = 1
           call timer_start(timer_tratur, gdp)
@@ -2012,7 +2061,8 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & r(wrkb1)  ,r(wrkb2)  ,r(wrkb3)  ,r(wrkb4)  ,r(wrkb6)  , &
                     & r(wrkb7)  ,r(wrkb8)  ,r(wrkb9)  ,r(wrkb10) ,r(wrkb11) , &
                     & r(ubnd)   ,r(wrkb12) ,i(iwrk1)  ,r(wrka1)  ,i(iwrk2)  , &
-                    & r(wrka2)  ,r(wrkb5)  ,r(diapl)  ,r(rnpl)   ,gdp       )
+                    & r(wrka2)  ,r(wrkb5)  ,r(diapl)  ,r(rnpl)   ,r(wrkb13) , &
+                    & r(wrkb14) , gdp       )
           call timer_stop(timer_tratur, gdp)
        endif
        !
@@ -2066,9 +2116,10 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
           icy = 1
           call timer_start(timer_euler, gdp)
           call euler(jstart    ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
-                   & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfsmax) , &
-                   & i(kfsmin) ,r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
-                   & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     ,r(dzs1)   , &
+                   & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumax) , &
+                   & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
+                   & r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
+                   & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
                    & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   ,r(grmsur) , &
                    & r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
           call timer_stop(timer_euler, gdp)
@@ -2132,9 +2183,10 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
           if (eulerisoglm) then
              call timer_start(timer_euler, gdp)
              call euler(jstart    ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
-                      & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfsmax) , &
-                      & i(kfsmin) ,r(u0)     ,r(wrkb5)  ,r(v0)     ,r(wrkb6)  , &
-                      & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     ,r(dzs1)   , &
+                      & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumax) , &
+                      & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
+                      & r(u0)     ,r(wrkb5)  ,r(v0)     ,r(wrkb6)  , &
+                      & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
                       & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   ,r(grmsur) , &
                       & r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
              call timer_stop(timer_euler, gdp)
@@ -2180,16 +2232,38 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                      & r(volum1),r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   , &
                      & r(gsqs)  ,r(guu)    ,r(gvv)    ,d(dps)    ,gdp       )
        !
+       ! Check Courant numbers for U and V velocities in U-points
+       ! Check is done based upon old/original geometry (corresponding to S0)
+       !
+       icx = nmaxddb
+       icy = 1
+       call chkadv(lundia    ,nmmax     ,kmax      ,icx       , &
+                 & icy       ,i(kfu)    ,i(kfv)    ,nst       , &
+                 & r(guu)    ,r(gvu)    ,r(u0)     ,r(v0)     , &
+                 & i(kcs)    ,gdp       )
+       !
+       ! Check Courant numbers for U and V velocities in V-points
+       ! Check is done based upon old/original geometry (corresponding to S0)
+       !
+       icx = 1
+       icy = nmaxddb
+       call chkadv(lundia    ,nmmax     ,kmax      ,icx       , &
+                 & icy       ,i(kfv)    ,i(kfu)    ,nst       , &
+                 & r(gvv)    ,r(guv)    ,r(v0)     ,r(u0)     , &
+                 & i(kcs)    ,gdp       )
+       !
        ! Reset arrays for next half time step
        ! S0=S1, U0=U1, V0=V1, R0=R1 etc
        !
        call timer_start(timer_f0isf1, gdp)
-       call f0isf1(dischy    ,nst       ,zmodel    ,jstart    , &
+       call f0isf1(stage     ,dischy    ,nst       ,zmodel    ,jstart    , &
                  & nmmax     ,nmmaxj    ,nmax      ,kmax      ,lstsci    , &
                  & ltur      ,nsrc      ,i(kcu)    ,i(kcv)    ,i(kcs)    , &
                  & i(kfs)    ,i(kfu)    ,i(kfv)    ,i(kfsmin) ,i(kfsmax) , &
                  & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,i(kfsmx0) , &
-                 & i(kfumx0) ,i(kfvmx0) ,r(s0)     ,r(s1)     ,r(u0)     , &
+                 & i(kfumx0) ,i(kfvmx0) ,i(kfsz0)  ,i(kfuz0)  ,i(kfvz0)  , &
+                 & i(kfsz1)  ,i(kfuz1)  ,i(kfvz1)  , &
+                 & r(s0)     ,r(s1)     ,r(u0)     , &
                  & r(u1)     ,r(v0)     ,r(v1)     ,r(volum0) ,r(volum1) , &
                  & r(r0)     ,r(r1)     ,r(rtur0)  ,r(rtur1)  ,r(disch)  , &
                  & r(discum) ,r(hu)     ,r(hv)     ,r(dzu1)   ,r(dzv1)   , &
@@ -2454,6 +2528,22 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
           call timer_stop(timer_trisol_rest, gdp)
        endif
        !
+       ! The velocities from previous half timestep are corrected for
+       ! mass flux and temporary set in WRKB3 (UEUL) and WRKB4
+       ! (VEUL) these are used in TURCLO
+       !
+       icx = nmaxddb
+       icy = 1
+       call timer_start(timer_euler, gdp)
+       call euler(jstart    ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
+                & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumx0) , &
+                & i(kfumin) ,i(kfvmx0) ,i(kfvmin) ,r(dzu0)   ,r(dzv0)   , &
+                & r(u0)     ,r(wrkb3)  ,r(v0)     ,r(wrkb4)  , &
+                & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
+                & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   ,r(grmsur) , &
+                & r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
+       call timer_stop(timer_euler, gdp)
+       !
        ! Eddy viscosity and diffusivity
        !
        icx = nmaxddb
@@ -2467,7 +2557,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                  & r(rtur0)  ,r(thick)  ,r(sig)    ,r(rho)    ,r(vicuv)  , &
                  & r(vicww)  ,r(dicuv)  ,r(dicww)  ,r(windsu) ,r(windsv) , &
                  & r(z0urou) ,r(z0vrou) ,r(bruvai) ,r(rich)   ,r(dudz)   , &
-                 & r(dvdz)   ,gdp       )
+                 & r(dvdz)   ,r(wrkb3)  ,r(wrkb4)  ,gdp       )
        call timer_stop(timer_turclo, gdp)
        call timer_stop(timer_turbulence, gdp)
        !
@@ -2593,7 +2683,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
               & r(deltau) ,r(deltav) ,r(tp)     ,r(rlabda) ,r(dzu1)   , &
               & r(dzv1)   ,r(vicuv)  ,r(vnu2d)  ,r(vicww)  ,r(rxx)    , &
               & r(rxy)    ,r(ryy)    ,r(cfurou) ,r(cfvrou) , &
-              & r(r0)     ,r(diapl)  ,r(rnpl)   , &
+              & r(r0)     ,r(diapl)  ,r(rnpl)   ,r(wsbodyu) ,r(wsbodyv) , &
               & r(windsu) ,r(windsv) ,r(patm)   ,r(fcorio) ,r(dpdksi) , &
               & r(dpdeta) ,r(ubrlsu) ,r(ubrlsv) ,r(uwtypu) ,r(uwtypv) , &
               & r(pship)  ,r(wrkb17) ,r(soumud) ,r(excbed) ,r(wrka1)  , &
@@ -2627,9 +2717,10 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        icy = 1
        call timer_start(timer_euler, gdp)
        call euler(jstart    ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
-                & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfsmax) , &
-                & i(kfsmin) ,r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
-                & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     ,r(dzs1)   , &
+                & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumax) , &
+                & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
+                & r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
+                & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
                 & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   ,r(grmsur) , &
                 & r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
        call timer_stop(timer_euler, gdp)
@@ -2708,7 +2799,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        call taubot(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                  & icy       ,rouflo    ,rouwav    ,i(kfu)    ,i(kfv)    , &
                  & i(kfumin) ,i(kfumax) ,i(kspu)   ,i(kcs)    ,i(kcscut) , &
-                 & d(dps)    ,r(s1)     ,r(wrkb3)  ,r(wrkb4)  ,r(umean)  , &
+                 & d(dps)    ,r(s1)     ,r(wrkb3)  ,r(wrkb4)  , &
                  & r(guu)    ,r(xcor)   ,r(ycor)   ,r(rho)    , &
                  & r(taubpu) ,r(taubsu) ,r(wrka1)  ,r(dis)    ,r(rlabda) , &
                  & r(teta)   ,r(uorb)   ,r(tp)     ,r(wsu)    ,r(wsv)    , &
@@ -2751,7 +2842,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        call taubot(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                  & icy       ,rouflo    ,rouwav    ,i(kfv)    ,i(kfu)    , &
                  & i(kfvmin) ,i(kfvmax) ,i(kspv)   ,i(kcs)    ,i(kcscut) , &
-                 & d(dps)    ,r(s1)     ,r(wrkb4)  ,r(wrkb3)  ,r(vmean)  , &
+                 & d(dps)    ,r(s1)     ,r(wrkb4)  ,r(wrkb3)  , &
                  & r(gvv)    ,r(ycor)   ,r(xcor)   ,r(rho)    , &
                  & r(taubpv) ,r(taubsv) ,r(wrka2)  ,r(dis)    ,r(rlabda) , &
                  & r(teta)   ,r(uorb)   ,r(tp)     ,r(wsv)    ,r(wsu)    , &
@@ -2854,7 +2945,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
           call timer_start(timer_heatu, gdp)
           call heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                    & ltem      ,lstsci    ,icx       ,icy       , &
-                   & nmmax     ,kmax      ,i(kfs)    ,i(kfsmax) , &
+                   & nmmax     ,kmax      ,i(kfs)    ,i(kfsmx0) ,i(kfsmax) , &
                    & i(kfsmin) ,i(kspu)   ,i(kspv)   ,r(dzs0)   ,r(dzs1)   , &
                    & r(sour)   ,r(sink)   ,r(r0)     ,r(evap)   ,d(dps)    , &
                    & r(s0)     ,r(s1)     ,r(thick)  ,r(w10mag) ,r(patm)   , &
@@ -2918,9 +3009,10 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
           icy = 1
           call timer_start(timer_euler, gdp)
           call euler(jstart    ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
-                   & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfsmax) , &
-                   & i(kfsmin) ,r(u0)     ,r(wrkb5)  ,r(v0)     ,r(wrkb6)  , &
-                   & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     ,r(dzs1)   , &
+                   & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumax) , &
+                   & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
+                   & r(u0)     ,r(wrkb5)  ,r(v0)     ,r(wrkb6)  , &
+                   & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
                    & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   ,r(grmsur) , &
                    & r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
           call timer_stop(timer_euler, gdp)
@@ -2990,6 +3082,23 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        !
        call timer_start(timer_turbulence, gdp)
        if (ltur > 0) then
+          !
+          ! The velocities from previous half timestep are corrected for
+          ! mass flux and temporary set in WRKB13 (UEUL) and
+          ! WRKB14 (VEUL) these are used in TRATUR
+          !
+          icx = nmaxddb
+          icy = 1
+          call timer_start(timer_euler, gdp)
+          call euler(jstart    ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
+                   & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumax) , &
+                   & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
+                   & r(u1)     ,r(wrkb13) ,r(v1)     ,r(wrkb14) , &
+                   & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
+                   & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   ,r(grmsur) , &
+                   & r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
+          call timer_stop(timer_euler, gdp)
+          !
           icx = nmaxddb
           icy = 1
           call timer_start(timer_tratur, gdp)
@@ -3007,7 +3116,8 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & r(wrkb1)  ,r(wrkb2)  ,r(wrkb3)  ,r(wrkb4)  ,r(wrkb6)  , &
                     & r(wrkb7)  ,r(wrkb8)  ,r(wrkb9)  ,r(wrkb10) ,r(wrkb11) , &
                     & r(ubnd)   ,r(wrkb12) ,i(iwrk1)  ,r(wrka1)  ,i(iwrk2)  , &
-                    & r(wrka2)  ,r(wrkb5)  ,r(diapl)  ,r(rnpl)   ,gdp       )
+                    & r(wrka2)  ,r(wrkb5)  ,r(diapl)  ,r(rnpl)   ,r(wrkb13) , &
+                    & r(wrkb14) ,gdp       )
           call timer_stop(timer_tratur, gdp)
        endif
        !
@@ -3061,9 +3171,10 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
           icy = 1
           call timer_start(timer_euler, gdp)
           call euler(jstart    ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
-                   & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfsmax) , &
-                   & i(kfsmin) ,r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
-                   & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     ,r(dzs1)   , &
+                   & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumax) , &
+                   & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
+                   & r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
+                   & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
                    & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   ,r(grmsur) , &
                    & r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
           call timer_stop(timer_euler, gdp)
@@ -3127,9 +3238,10 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
           if (eulerisoglm) then
              call timer_start(timer_euler, gdp)
              call euler(jstart    ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
-                      & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfsmax) , &
-                      & i(kfsmin) ,r(u0)     ,r(wrkb5)  ,r(v0)     ,r(wrkb6)  , &
-                      & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     ,r(dzs1)   , &
+                      & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumax) , &
+                      & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
+                      & r(u0)     ,r(wrkb5)  ,r(v0)     ,r(wrkb6)  , &
+                      & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
                       & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   ,r(grmsur) , &
                       & r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
              call timer_stop(timer_euler, gdp)
@@ -3174,6 +3286,26 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        call updmassbal(nst+1 == ithisc,r(qxk)    ,r(qyk)    ,i(kcs)    ,r(r1)     , &
                      & r(volum1),r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   , &
                      & r(gsqs)  ,r(guu)    ,r(gvv)    ,d(dps)    ,gdp       )
+       !
+       ! Check Courant numbers for U and V velocities in U-points
+       ! Check is done based upon old/original geometry (corresponding to S0)
+       !
+       icx = nmaxddb
+       icy = 1
+       call chkadv(lundia    ,nmmax     ,kmax      ,icx       , &
+                 & icy       ,i(kfu)    ,i(kfv)    ,nst       , &
+                 & r(guu)    ,r(gvu)    ,r(u0)     ,r(v0)     , &
+                 & i(kcs)    ,gdp       )
+       !
+       ! Check Courant numbers for U and V velocities in V-points
+       ! Check is done based upon old/original geometry (corresponding to S0)
+       !
+       icx = 1
+       icy = nmaxddb
+       call chkadv(lundia    ,nmmax     ,kmax      ,icx       , &
+                 & icy       ,i(kfv)    ,i(kfu)    ,nst       , &
+                 & r(gvv)    ,r(guv)    ,r(v0)     ,r(u0)     , &
+                 & i(kcs)    ,gdp       )
        !
        ! The f0isf1 call at this location is removed.
        ! f0isf1 is now called at the START of the routine trisol.

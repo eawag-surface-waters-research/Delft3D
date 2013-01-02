@@ -4,7 +4,8 @@ subroutine wrcomt(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
                 & lsecfl    ,kfu       ,kfv       ,ibuff     ,s1        , &
                 & u1        ,v1        ,qu        ,qv        ,taubmx    , &
                 & r1        ,dicuv     ,dicww     ,discum    ,rbuff     , &
-                & windu     ,windv     ,gdp       )
+                & windu     ,windv     ,dzu1      ,dzv1      ,kmaxz     , &
+                & hu        ,hv        ,thick     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -58,6 +59,8 @@ subroutine wrcomt(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
     integer                                                                     :: itimc  !!  Current time step counter for 2D
                                                                                           !!  system
     integer                                                                     :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                                     :: kmaxz  !!  = KMAX for Z-model, = 0 for sigma-model
+                                                                                          !!  Needed for correct dimensioning of DZU1 and DZV1
     integer                                                                     :: lsal   !  Description and declaration in dimens.igs
     integer                                                                     :: lsecfl !  Description and declaration in dimens.igs
     integer                                                                     :: lstsci !  Description and declaration in esm_alloc_int.f90
@@ -77,15 +80,20 @@ subroutine wrcomt(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: taubmx !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax)       :: dicww  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax + 2)     :: dicuv  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxz)        :: dzu1   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxz)        :: dzv1   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: hu     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: hv     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: qu     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: qv     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: u1     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: v1     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: windu  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)         :: windv  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: windu  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: windv  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci) :: r1     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(nmaxus, mmax, kmax)                                     :: rbuff  !  Description and declaration in r-i-ch.igs
     real(fp), dimension(nsrc)                                                   :: discum !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax)                                                   :: thick  !  Description and declaration in esm_alloc_real.f90
     logical                                                                     :: error  !!  Flag=TRUE if an error is encountered
     character(*)                                                                :: comfil !!  Name for communication file
                                                                                           !!  com-<case><label>
@@ -109,8 +117,9 @@ subroutine wrcomt(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
     call wrcurt(comfil    ,lundia    ,error     ,itcur     ,ntcur     , &
               & itimc     ,mmax      ,nmax      ,kmax      ,nmaxus    , &
               & lstsci    ,lsecfl    ,s1        ,u1        ,v1        , &
-              & r1        ,qu        ,qv        , &
-              & rbuff     ,gdp       )
+              & r1        ,qu        ,qv        ,dzu1      ,dzv1      , &
+              & rbuff     ,kmaxz     ,hu        ,hv        ,thick     , &
+              & gdp       )
     !
     if (error) goto 9999
     !

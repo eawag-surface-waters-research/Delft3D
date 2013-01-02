@@ -291,7 +291,7 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
              !
              do k = k0f, k1f
                 if (zmodel) then
-                   relthk = dzu1(nmf, k)
+                   relthk = max(dzu1(nmf, k), 0.01_fp)
                 else
                    relthk = hu(nmf)*thick(k)
                 endif
@@ -483,7 +483,7 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
              !
              do k = k0l, k1l
                 if (zmodel) then
-                   relthk = dzu1(nml, k)
+                   relthk = max(dzu1(nml, k), 0.01_fp)
                 else
                    relthk = hu(nml)*thick(k)
                 endif

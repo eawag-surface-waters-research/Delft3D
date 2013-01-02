@@ -11,7 +11,7 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
              & bdx       ,bux       ,buux      ,bddy      ,bdy       , &
              & buy       ,buuy      ,uvdwk     ,vvdwk     ,ua        , &
              & ub        ,taubpu    ,taubsu    ,rho       ,sumrho    , &
-             & thick     ,sig       ,dps       ,wsu       ,fxw       , &
+             & thick     ,sig       ,dps       ,wsu       ,fxw       ,wsbodyu   , &
              & vicuv     ,vnu2d     ,vicww     ,rxx       ,rxy       , &
              & dfu       ,deltau    ,tp        ,rlabda    , &
              & diapl     ,rnpl      , &
@@ -116,98 +116,99 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
 !
 ! Global variables
 !
-    integer                                             , intent(in)  :: icreep !  Description and declaration in tricom.igs
-    integer                                             , intent(in)  :: icx    !!  Increment in the X-dir., if ICX= NMAX then computation proceeds in the X-dir. If icx=1 then computation proceeds in the Y-dir.
-    integer                                             , intent(in)  :: icy    !!  Increment in the Y-dir. (see ICX)
-    integer                                                           :: j      !!  Begin pointer for arrays which have been transformed into 1D arrays. Due to the shift in the 2nd (M-) index, J = -2*NMAX + 1
-    integer                                                           :: kmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                                           :: lsecfl !  Description and declaration in dimens.igs
-    integer                                                           :: lstsci !  Description and declaration in esm_alloc_int.f90
-    integer                                                           :: nmmax  !  Description and declaration in dimens.igs
-    integer                                                           :: nmmaxj !  Description and declaration in dimens.igs
-    integer                                             , intent(in)  :: norow  !  Description and declaration in esm_alloc_int.f90
-    integer                                             , intent(in)  :: nsrc   !  Description and declaration in esm_alloc_int.f90
-    integer                                             , intent(in)  :: nst    !!  Time step number
-    integer   , dimension(5, norow)                     , intent(in)  :: irocol !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(7, nsrc)                      , intent(in)  :: mnksrc !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kcs    !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: kcu    !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfs    !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfu    !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfv    !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)              :: kspu   !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: kadu   !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: kadv   !  Description and declaration in esm_alloc_int.f90
-    real(fp)                                                          :: betac  !  Description and declaration in tricom.igs
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: deltau !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: dfu    !  Description and declaration in esm_alloc_real.f90
-    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: dps    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: dteu   !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: fcorio !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: fxw    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: gsqiu  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: gsqs   !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: gud    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: guu    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: gvd    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: gvu    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: gvv    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: gvz    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: hkru   !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: hu     !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: patm   !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: pship  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: rlabda !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: s0     !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: taubpu !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: taubsu !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: tgfsep !!  Water elev. induced by tide gen.force
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: tp     !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: umean  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: vnu2d  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: windsu !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: wsu    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax), intent(in)  :: vicww  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax), intent(in)  :: w1     !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, 3)                   :: cfurou !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, 3)                   :: cfvrou !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: aak    !!  Internal work array, lower diagonal tridiagonal matrix, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N,M,K-1)
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bbk    !!  Internal work array, coefficient la=yer velocity in (N,M,K) implicit part
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bddx   !!  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N,M-2,K)
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bddy   !!  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N-2,M,K)
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bdx    !!  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N,M-1,K)
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bdy    !!  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N-1,M,K)
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: buux   !!  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N,M+2,K)
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: buuy   !!  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N+2,M,K)
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bux    !!  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N,M+1,K)
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: buy    !!  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N+1,M,K)
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: cck    !!  Internal work array, upper diagonal tridiagonal matrix, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N,M,K+1)
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ddk    !!  Internal work array, diagonal space at (N,M,K)
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: diapl  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: dpdksi !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: qxk    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: qyk    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: rho    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: rnpl   !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: rttfu  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: rxx    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: rxy    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: sumrho !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: u0     !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: u1     !  Description and declaration in esm_alloc_real.f90
+    integer                                             , intent(in)  :: icreep  !  Description and declaration in tricom.igs
+    integer                                             , intent(in)  :: icx     !!  Increment in the X-dir., if ICX= NMAX then computation proceeds in the X-dir. If icx=1 then computation proceeds in the Y-dir.
+    integer                                             , intent(in)  :: icy     !!  Increment in the Y-dir. (see ICX)
+    integer                                                           :: j       !!  Begin pointer for arrays which have been transformed into 1D arrays. Due to the shift in the 2nd (M-) index, J = -2*NMAX + 1
+    integer                                                           :: kmax    !  Description and declaration in esm_alloc_int.f90
+    integer                                                           :: lsecfl  !  Description and declaration in dimens.igs
+    integer                                                           :: lstsci  !  Description and declaration in esm_alloc_int.f90
+    integer                                                           :: nmmax   !  Description and declaration in dimens.igs
+    integer                                                           :: nmmaxj  !  Description and declaration in dimens.igs
+    integer                                             , intent(in)  :: norow   !  Description and declaration in esm_alloc_int.f90
+    integer                                             , intent(in)  :: nsrc    !  Description and declaration in esm_alloc_int.f90
+    integer                                             , intent(in)  :: nst     !!  Time step number
+    integer   , dimension(5, norow)                     , intent(in)  :: irocol  !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(7, nsrc)                      , intent(in)  :: mnksrc  !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kcs     !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: kcu     !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfs     !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfu     !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfv     !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)              :: kspu    !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: kadu    !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: kadv    !  Description and declaration in esm_alloc_int.f90
+    real(fp)                                                          :: betac   !  Description and declaration in tricom.igs
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: deltau  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: dfu     !  Description and declaration in esm_alloc_real.f90
+    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: dps     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: dteu    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: fcorio  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: fxw     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: gsqiu   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: gsqs    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: gud     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: guu     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: gvd     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: gvu     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: gvv     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: gvz     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: hkru    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: hu      !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: patm    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: pship   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: rlabda  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: s0      !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: taubpu  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: taubsu  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: tgfsep  !!  Water elev. induced by tide gen.force
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: tp      !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: umean   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: vnu2d   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: windsu  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: wsu     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: wsbodyu !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax), intent(in)  :: vicww   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax), intent(in)  :: w1      !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, 3)                   :: cfurou  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, 3)                   :: cfvrou  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: aak     !!  Internal work array, lower diagonal tridiagonal matrix, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N,M,K-1)
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bbk     !!  Internal work array, coefficient la=yer velocity in (N,M,K) implicit part
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bddx    !!  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N,M-2,K)
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bddy    !!  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N-2,M,K)
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bdx     !!  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N,M-1,K)
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bdy     !!  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N-1,M,K)
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: buux    !!  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N,M+2,K)
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: buuy    !!  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N+2,M,K)
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bux     !!  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N,M+1,K)
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: buy     !!  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N+1,M,K)
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: cck     !!  Internal work array, upper diagonal tridiagonal matrix, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N,M,K+1)
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ddk     !!  Internal work array, diagonal space at (N,M,K)
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: diapl   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: dpdksi  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: qxk     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: qyk     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: rho     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: rnpl    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: rttfu   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: rxx     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: rxy     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: sumrho  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: u0      !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: u1      !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ua
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ub
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ubrlsu !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: uvdwk  !!  Internal work array for Jac.iteration
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: v      !!  V-velocities
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax+2)              :: vicuv  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: vvdwk  !!  Internal work array for Jac.iteration
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)        :: r0     !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(kmax)                                       :: sig    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(kmax)                                       :: thick  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nsrc)                         , intent(in)  :: disch  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(nsrc)                         , intent(in)  :: umdis  !  Description and declaration in esm_alloc_real.f90
-    character(1), dimension(nsrc)                       , intent(in)  :: dismmt !  Description and declaration in esm_alloc_char.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ubrlsu  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: uvdwk   !!  Internal work array for Jac.iteration
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: v       !!  V-velocities
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax+2)              :: vicuv   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: vvdwk   !!  Internal work array for Jac.iteration
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)        :: r0      !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(kmax)                                       :: sig     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(kmax)                                       :: thick   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nsrc)                         , intent(in)  :: disch   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(nsrc)                         , intent(in)  :: umdis   !  Description and declaration in esm_alloc_real.f90
+    character(1), dimension(nsrc)                       , intent(in)  :: dismmt  !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !
@@ -266,6 +267,7 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     real(fp)           :: bi
     real(fp)           :: cbot
     real(fp)           :: cnurh
+    real(fp)           :: dpsmax
     real(fp)           :: ddza
     real(fp)           :: ddzb
     real(fp)           :: ddzc
@@ -504,7 +506,24 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
           !
           ! BOTTOM STRESS DUE TO FLOW AND WAVES
           !
-          ! Adaption for inundation is not needed here; only in cucnp
+          ! Adaption for inundation is not needed here (no flooding); only in cucnp  ISSUE: DELFT3D-14744
+          !
+          !
+          ! Slope correction for steep slopes
+          !
+          !nmu    = nm + icx
+          !dpsmax = max(-dps(nm),-dps(nmu))
+          !if (s0(nm) < dpsmax) then
+          !   do k = 1, kmax
+          !      ddk(nm,k) = ddk(nm,k) - ag*(s0(nm)-dpsmax)/gvu(nm)
+          !   enddo
+          !elseif (s0(nmu) < dpsmax) then
+          !     do k = 1, kmax
+          !        ddk(nm,k) = ddk(nm,k) + ag*(s0(nmu)-dpsmax)/gvu(nm)
+          !     enddo
+          !endif
+          !
+          ! End slope correction
           !
           cbot   = taubpu(nm)
           qwind  = h0i*windsu(nm)/thick(1)
@@ -521,14 +540,22 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
           if (wave) then
              wsumax = facmax*hu(nm)**(1.5)/max(0.1_fp, tp(nm))
              wsu(nm) = sign(min(abs(wsu(nm)), wsumax), wsu(nm))
-          endif
-          !
-          ddk(nm, 1) = ddk(nm, 1) + wsu(nm)*h0i/(rhow*thick(1))
-          if (roller .or. xbeach) then
-             fxw(nm) = sign(min(abs(fxw(nm)), wsumax), fxw(nm))
-             do k = 1, kmax
-                ddk(nm, k) = ddk(nm, k) + fxw(nm)*h0i/rhow
-             enddo
+             !
+             ddk(nm, 1) = ddk(nm, 1) + wsu(nm)*h0i/(rhow*thick(1))
+             !
+             ! WAVE INDUCED BODY FORCE
+             !
+             if (roller .or. xbeach) then
+                fxw(nm) = sign(min(abs(fxw(nm)), wsumax), fxw(nm))
+                do k = 1, kmax
+                   ddk(nm, k) = ddk(nm, k) + fxw(nm)*h0i/rhow
+                enddo
+             else
+                wsbodyu(nm) = sign(min(abs(wsbodyu(nm)), wsumax), wsbodyu(nm))
+                do k = 1, kmax
+                   ddk(nm, k) = ddk(nm, k) + wsbodyu(nm)*h0i/rhow
+                enddo
+             endif
           endif
        endif
     enddo
@@ -539,10 +566,9 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     !
     call timer_start(timer_uzd_shrwav, gdp)
     if (wave .and. kmax>1) then
-       call shrwav(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
-                 & icy       ,dfu       ,deltau    ,tp        ,rlabda    , &
-                 & hu        ,kfu       ,sig       ,ddk       ,thick     , &
-                 & gdp       )
+       call shrwav(nmmax     ,kmax      ,icx       ,dfu       ,deltau    , &
+                 & tp        ,rlabda    ,hu        ,kfu       , &
+                 & ddk       ,thick     ,gdp       )
     endif
     call timer_stop(timer_uzd_shrwav, gdp)
     !

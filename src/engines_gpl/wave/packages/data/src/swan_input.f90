@@ -204,6 +204,7 @@ module swan_input
        integer                                 :: refjulday
        integer                                 :: whitecap         ! 0: off, 1: on, 2: westhuysen
        integer                                 :: nloc
+       integer                                 :: swdis
        !
        integer       , dimension(4)            :: ts_wl
        integer       , dimension(4)            :: ts_xv
@@ -236,7 +237,6 @@ module swan_input
        logical                                 :: setup
        logical                                 :: sferic
        logical                                 :: swbot
-       logical                                 :: swdis
        logical                                 :: swflux
        logical                                 :: swmor
        logical                                 :: swuvi
@@ -1623,9 +1623,11 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     call lowercase(parname, len(parname))
     select case (parname)
     case ('radiation stresses')
-      sr%swdis = .false.
+      sr%swdis = 1
     case ('dissipation',' ')
-      sr%swdis = .true.
+      sr%swdis = 2
+    case ('dissipation 3d')
+      sr%swdis = 3
     case default
        write(*,*) 'SWAN_INPUT: invalid method to compute wave forces'
        goto 999
@@ -2964,7 +2966,7 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
           myr = dom%myc
        endif
        !
-       ! poles? no fences!
+       ! poles? no, fences!
        !
        dom%mxc = dom%mxc-1
        dom%myc = dom%myc-1
@@ -2987,7 +2989,7 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
           read(line,*, err =1002, end = 1009) dom%depfil
           call readgriddims(dom%depfil, dom%mxb, dom%myb)
           !
-          ! poles? no fences!
+          ! poles? no, fences!
           !
           dom%mxb = dom%mxb-1
           dom%myb = dom%myb-1
@@ -3332,7 +3334,7 @@ subroutine read_swan_mdw(casl      ,wavedata  , &
     read (iuni, *, err = 1002, end = 1009) carn, setup, swdiss
     sr%nautconv = carn==1
     sr%setup    = setup/=0
-    sr%swdis    = swdiss/=1
+    sr%swdis    = swdiss
     !
     !  Wind, only when not using FLOW wind
     !
@@ -3806,7 +3808,7 @@ subroutine write_swan_inp (wavedata, outcnt, &
     real                        :: tap
     character(6)                :: oldhot
     character(7), dimension(20) :: varnam1
-    character(7), dimension(6)  :: varnam2
+    character(7), dimension(9)  :: varnam2
     character(8)                :: casl_short
     character(15)               :: tbegc
     character(15)               :: tendc
@@ -3824,12 +3826,12 @@ subroutine write_swan_inp (wavedata, outcnt, &
     !
     ! Do not add more variables to varnam1
     !
-    data varnam1/'HSIGN  ', 'DIR   ', 'TM01  ', 'DEPTH ', 'VELOC ',     &
-         &       'TRANSP ', 'DSPR  ', 'DISSIP', 'LEAK  ', 'QB    ',     &
-         &       'XP     ', 'YP    ', 'DIST  ', 'UBOT  ', 'STEEPW',     &
-         &       'WLENGTH', 'FORCES', 'RTP   ', 'PDIR  ', 'WIND  '      /
-    data varnam2/'TPS    ', 'TM02  ', 'TMM10 ', 'DHSIGN', 'DRTM01',     &
-         &       'SETUP  '                                              /
+    data varnam1/'HSIGN  ', 'DIR    ', 'TM01   ', 'DEPTH ', 'VELOC ',     &
+         &       'TRANSP ', 'DSPR   ', 'DISSIP ', 'LEAK  ', 'QB    ',     &
+         &       'XP     ', 'YP     ', 'DIST   ', 'UBOT  ', 'STEEPW',     &
+         &       'WLENGTH', 'FORCES ', 'RTP    ', 'PDIR  ', 'WIND  '      /
+    data varnam2/'TPS    ', 'TM02   ', 'TMM10  ', 'DHSIGN', 'DRTM01',     &
+         &       'SETUP  ', 'DISSURF', 'DISWCAP', 'DISBOT'                /
 !
 !! executable statements -------------------------------------------------------
 !
@@ -4044,7 +4046,7 @@ subroutine write_swan_inp (wavedata, outcnt, &
        call readregulargrid(fname, sferic, xpb, ypb, alpb, &
                           & dom%mxb, dom%myb, dxb, dyb)
        !
-       ! poles? no fences!
+       ! poles? no, fences!
        !
        dom%mxb = dom%mxb - 1
        dom%myb = dom%myb - 1

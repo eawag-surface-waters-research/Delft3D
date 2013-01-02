@@ -1,5 +1,5 @@
-function z_ainpro(vect1     ,vect2     ,kmax      ,kfsz1     ,icx       , &
-                & icy       ,gdp       )
+function z_ainpro(vect1     ,vect2     ,kmax      ,kfs      ,kfsz0     , &
+                & icx       ,icy       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -51,13 +51,14 @@ function z_ainpro(vect1     ,vect2     ,kmax      ,kfsz1     ,icx       , &
 !
 ! Global variables
 !
-    integer                                        , intent(in) :: icx
-    integer                                        , intent(in) :: icy
-    integer                                        , intent(in) :: kmax !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in) :: kfsz1 !  Description and declaration in esm_alloc_int.f90
-    real(fp)                                                    :: z_ainpro
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: vect1
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: vect2
+    integer                                         , intent(in) :: icx
+    integer                                         , intent(in) :: icy
+    integer                                         , intent(in) :: kmax     !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: kfs      !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in) :: kfsz0    !  Description and declaration in esm_alloc_int.f90
+    real(fp)                                                     :: z_ainpro
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in) :: vect1
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in) :: vect2
 !
 ! Local variables
 !
@@ -88,11 +89,13 @@ function z_ainpro(vect1     ,vect2     ,kmax      ,kfsz1     ,icx       , &
     do m = m1_nhy, m2_nhy
        nmst = nmstart + (m - m1_nhy)*icxy
        do nm = nmst, nmst + ndelta
-          do k = 1, kmax
-             if (kfsz1(nm, k)/=0) then
-                sum = sum + vect1(nm, k)*vect2(nm, k)
-             endif
-          enddo
+          if (kfs(nm) == 1) then
+             do k = 1, kmax
+                if (kfsz0(nm, k)/=0) then
+                   sum = sum + vect1(nm, k)*vect2(nm, k)
+                endif
+             enddo
+          endif
        enddo
     enddo
     z_ainpro = sum

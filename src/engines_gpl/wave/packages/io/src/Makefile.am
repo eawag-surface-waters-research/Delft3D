@@ -21,6 +21,7 @@ FMODULES += \
 #-------------------------------------------------------------------------------
 #Sources
 libio_a_SOURCES = \
+         compvel.f90 \
          cp_file.f90 \
          dam_cod.f90 \
          deletehotfile.f90 \
@@ -34,8 +35,10 @@ libio_a_SOURCES = \
          get_vegi_map.f90 \
          get_visc.f90 \
          get_wind.f90 \
+         noextspaces.f90 \
          out2d.f90 \
          put_wave_fields.f90 \
+         putgtc.f90 \
          putgti.f90 \
          putgtl.f90 \
          putgtr.f90 \

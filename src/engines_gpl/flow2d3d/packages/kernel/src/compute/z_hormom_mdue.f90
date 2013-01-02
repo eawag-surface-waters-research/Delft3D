@@ -1,11 +1,11 @@
-subroutine z_expl_dir_upw(nmmax     ,kmax      ,icx       , &
-                        & icy       ,kcs       ,kcs45     ,kcscut    , &
-                        & kfu       ,kfuz1     ,kfumin    ,kfumax    , &
-                        & kfvz1     ,kfsz1     ,kfsmin    ,kfsmax    , &
-                        & u0        ,v1        ,hu        , &
-                        & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
-                        & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
-                        & ddk       ,gdp       )
+subroutine z_hormom_mdue(nmmax     ,kmax      ,icx       , &
+                       & icy       ,kcs       ,kcs45     ,kcscut    , &
+                       & kfu       ,kfuz0     ,kfumin    ,kfumx0    , &
+                       & kfvz0     ,kfsmin    ,kfsmx0    , &
+                       & u0        ,v1        ,hu        , &
+                       & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
+                       & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
+                       & ddk       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -59,16 +59,15 @@ subroutine z_expl_dir_upw(nmmax     ,kmax      ,icx       , &
     integer                                                         :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                         :: nmmax  !  Description and declaration in dimens.igs
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kcs    !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: kfsmax !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: kfsmx0 !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: kfsmin !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfu    !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfumax !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfumx0 !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfumin !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: kcs45
     integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: kcscut !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: kfsz1  !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: kfuz1  !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: kfvz1  !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: kfuz0  !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: kfvz0  !  Description and declaration in esm_alloc_int.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: gsqiu  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: gsqs   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: gud    !  Description and declaration in esm_alloc_real.f90
@@ -121,7 +120,7 @@ subroutine z_expl_dir_upw(nmmax     ,kmax      ,icx       , &
        nmd = nm - icx
        ndm = nm - icy
        if (kcs(nm) > 0) then
-          do k = kfsmin(nm), kfsmax(nm)
+          do k = kfsmin(nm), kfsmx0(nm)
              if (kcs45(nm, k)==3) then
                 v1(ndm, k) = -u0(nm, k)*guu(nm)/gvv(nm)
                 u0(nmd, k) = -v1(nm, k)*gvv(nm)/guu(nm)
@@ -155,14 +154,14 @@ subroutine z_expl_dir_upw(nmmax     ,kmax      ,icx       , &
           dgvnm = gvd(nm) - gvd(ndm)
           gsqi  = gsqiu(nm)
           !
-          do k = kfumin(nm), kfumax(nm)
-             if (kfuz1(nm, k)==1 .and. kcs(nm)*kcs(nmu)>0) then
-                vvv   = .25*(v1(ndm, k) + v1(ndmu, k) + v1(nm, k) + v1(nmu, k))
+          do k = kfumin(nm), kfumx0(nm)
+             if (kfuz0(nm, k)==1 .and. kcs(nm)*kcs(nmu)>0) then
+                vvv   = 0.25_fp * (v1(ndm,k)+v1(ndmu,k)+v1(nm,k)+v1(nmu,k))
                 uuu   = u0(nm, k)
                 cvv   = vvv/geta
                 cuu   = uuu/gksi
-                idifd = kfvz1(ndm, k)*kfvz1(ndmu, k)*kfuz1(ndm, k)
-                idifu = kfvz1(nm, k)*kfvz1(nmu, k)*kfuz1(num, k)
+                idifd = kfvz0(ndm,k) * kfvz0(ndmu,k) * kfuz0(ndm,k)
+                idifu = kfvz0(nm ,k) * kfvz0(nmu ,k) * kfuz0(num,k)
                 !
                 ! For 1:n stair case (cut-cell) boundary:
                 ! - check dgvnm
@@ -170,10 +169,9 @@ subroutine z_expl_dir_upw(nmmax     ,kmax      ,icx       , &
                 ! - reset vvv
                 !
                 if (kcscut(nm, k)==1 .or. kcscut(nmu, k)==1) then
-                   kenm = max(1, kfvz1(nm, k) + kfvz1(ndm, k) + kfvz1(ndmu, k)  &
-                        & + kfvz1(nmu, k))
-                   vvv  = v1(nm, k)*kfvz1(nm, k) + v1(ndm, k)*kfvz1(ndm, k)      &
-                        & + v1(ndmu, k)*kfvz1(ndmu, k) + v1(nmu, k)*kfvz1(nmu, k)
+                   kenm = max(1 , kfvz0(nm,k)+kfvz0(ndm,k)+kfvz0(ndmu,k)+kfvz0(nmu,k))
+                   vvv  =   v1(nm  ,k)*kfvz0(nm  ,k) + v1(ndm,k)*kfvz0(ndm,k) &
+                        & + v1(ndmu,k)*kfvz0(ndmu,k) + v1(nmu,k)*kfvz0(nmu,k)
                    vvv  = vvv/kenm
                 endif
                 !
@@ -185,29 +183,29 @@ subroutine z_expl_dir_upw(nmmax     ,kmax      ,icx       , &
                 ! tests for cuu and cvv are not based on local courant-number but
                 ! based on an average velocity and gksi/geta
                 !
-                if (kcs45(nm, k)/=3 .and. kcs45(nm, k)/=9 .and. kcs45(nmu, k)   &
-                  & /=6 .and. kcs45(nmu, k)/=12) then
+                if (        kcs45(nm ,k)/=3 .and. kcs45(nm ,k)/= 9 &
+                    & .and. kcs45(nmu,k)/=6 .and. kcs45(nmu,k)/=12  ) then
                    !
                    ! All cases except 45 degrees staircase
                    !
-                   if (uuu>=0.0 .and. vvv>=0.0) then
+                   if (uuu>=0.0_fp .and. vvv>=0.0_fp) then
                       if (cuu>cvv) then
-                         advecx = kfuz1(nmd, k)                                 &
+                         advecx = kfuz0(nmd, k)                                 &
                                 & *(uuu*((u0(nm, k) - u0(nmd, k))/gksi +        &
                                 & vvv*gsqi*dgvnm))
-                         if (kfuz1(nmd, k)*kfuz1(ndmd, k)==0) then
+                         if (kfuz0(nmd, k)*kfuz0(ndmd, k) == 0) then
                             advecy = idifd*(cvv*(u0(nm, k) - u0(ndm, k))        &
-                                   & - 0.5*vvv*vvv*gsqi*dgeta)
+                                   & - 0.5_fp*vvv*vvv*gsqi*dgeta)
                          else
-                            advecy = kfvz1(ndm, k)                              &
+                            advecy = kfvz0(ndm, k)                              &
                                    & *(cvv*(u0(nmd, k) - u0(ndmd, k))           &
-                                   & - 0.5*vvv*vvv*gsqi*dgeta)
+                                   & - 0.5_fp*vvv*vvv*gsqi*dgeta)
                          endif
                       else
                          advecy = idifd*(vvv*(u0(nm, k) - u0(ndm, k))           &
-                                & /geta - 0.5*vvv*vvv*gsqi*dgeta)
-                         if (kfuz1(ndmd, k)*kfuz1(ndm, k)*kfvz1(ndm, k)==0) then
-                            advecx = kfuz1(nmd, k)                              &
+                                & /geta - 0.5_fp*vvv*vvv*gsqi*dgeta)
+                         if (kfuz0(ndmd, k)*kfuz0(ndm, k)*kfvz0(ndm, k) == 0) then
+                            advecx = kfuz0(nmd, k)                              &
                                    & *(uuu*((u0(nm, k) - u0(nmd, k))            &
                                    & /gksi + vvv*gsqi*dgvnm))
                          else
@@ -215,25 +213,24 @@ subroutine z_expl_dir_upw(nmmax     ,kmax      ,icx       , &
                                    & /gksi + vvv*gsqi*dgvnm)
                          endif
                       endif
-                   elseif (uuu<0.0 .and. vvv>=0.0) then
+                   elseif (uuu<0.0_fp .and. vvv>=0.0_fp) then
                       if ( - cuu>cvv) then
-                         advecx = kfuz1(nmu, k)                                 &
+                         advecx = kfuz0(nmu, k)                                 &
                                 & *(uuu*((u0(nmu, k) - u0(nm, k))/gksi +        &
                                 & vvv*gsqi*dgvnm))
-                         if (kfuz1(nmu, k)*kfuz1(ndmu, k)==0) then
+                         if (kfuz0(nmu, k)*kfuz0(ndmu, k) == 0) then
                             advecy = idifd*(cvv*(u0(nm, k) - u0(ndm, k))        &
-                                   & - 0.5*vvv*vvv*gsqi*dgeta)
+                                   & - 0.5_fp*vvv*vvv*gsqi*dgeta)
                          else
-                            advecy = kfvz1(ndmu, k)                             &
+                            advecy = kfvz0(ndmu, k)                             &
                                    & *(cvv*(u0(nmu, k) - u0(ndmu, k))           &
-                                   & - 0.5*vvv*vvv*gsqi*dgeta)
+                                   & - 0.5_fp*vvv*vvv*gsqi*dgeta)
                          endif
                       else
                          advecy = idifd*(vvv*(u0(nm, k) - u0(ndm, k))           &
-                                & /geta - 0.5*vvv*vvv*gsqi*dgeta)
-                         if (kfuz1(ndmu, k)*kfuz1(ndm, k)*kfvz1(ndmu, k)==0)    &
-                           & then
-                            advecx = kfuz1(nmu, k)                              &
+                                & /geta - 0.5_fp*vvv*vvv*gsqi*dgeta)
+                         if (kfuz0(ndmu, k)*kfuz0(ndm, k)*kfvz0(ndmu, k) == 0) then
+                            advecx = kfuz0(nmu, k)                              &
                                    & *(uuu*((u0(nmu, k) - u0(nm, k))            &
                                    & /gksi + vvv*gsqi*dgvnm))
                          else
@@ -241,24 +238,24 @@ subroutine z_expl_dir_upw(nmmax     ,kmax      ,icx       , &
                                    & /gksi + vvv*gsqi*dgvnm)
                          endif
                       endif
-                   elseif (uuu>=0.0 .and. vvv<0.0) then
+                   elseif (uuu>=0.0_fp .and. vvv<0.0_fp) then
                       if (cuu> - cvv) then
-                         advecx = kfuz1(nmd, k)                                 &
+                         advecx = kfuz0(nmd, k)                                 &
                                 & *(uuu*((u0(nm, k) - u0(nmd, k))/gksi +        &
                                 & vvv*gsqi*dgvnm))
-                         if (kfuz1(numd, k)*kfuz1(nmd, k)==0) then
+                         if (kfuz0(numd, k)*kfuz0(nmd, k) == 0) then
                             advecy = idifu*(cvv*(u0(num, k) - u0(nm, k))        &
-                                   & - 0.5*vvv*vvv*gsqi*dgeta)
+                                   & - 0.5_fp*vvv*vvv*gsqi*dgeta)
                          else
-                            advecy = kfvz1(nm, k)                               &
+                            advecy = kfvz0(nm, k)                               &
                                    & *(cvv*(u0(numd, k) - u0(nmd, k))           &
-                                   & - 0.5*vvv*vvv*gsqi*dgeta)
+                                   & - 0.5_fp*vvv*vvv*gsqi*dgeta)
                          endif
                       else
                          advecy = idifu*(vvv*(u0(num, k) - u0(nm, k))           &
-                                & /geta - 0.5*vvv*vvv*gsqi*dgeta)
-                         if (kfuz1(num, k)*kfuz1(numd, k)*kfvz1(nm, k)==0) then
-                            advecx = kfuz1(nmd, k)                              &
+                                & /geta - 0.5_fp*vvv*vvv*gsqi*dgeta)
+                         if (kfuz0(num, k)*kfuz0(numd, k)*kfvz0(nm, k) == 0) then
+                            advecx = kfuz0(nmd, k)                              &
                                    & *(uuu*((u0(nm, k) - u0(nmd, k))            &
                                    & /gksi + vvv*gsqi*dgvnm))
                          else
@@ -266,24 +263,24 @@ subroutine z_expl_dir_upw(nmmax     ,kmax      ,icx       , &
                                    & /gksi + vvv*gsqi*dgvnm)
                          endif
                       endif
-                   elseif (uuu<0.0 .and. vvv<0.0) then
+                   elseif (uuu<0.0_fp .and. vvv<0.0_fp) then
                       if ( - cuu> - cvv) then
-                         advecx = kfuz1(nmu, k)                                 &
+                         advecx = kfuz0(nmu, k)                                 &
                                 & *(uuu*((u0(nmu, k) - u0(nm, k))/gksi +        &
                                 & vvv*gsqi*dgvnm))
-                         if (kfuz1(numu, k)*kfuz1(nmu, k)==0) then
+                         if (kfuz0(numu, k)*kfuz0(nmu, k) == 0) then
                             advecy = idifu*(cvv*(u0(num, k) - u0(nm, k))        &
-                                   & - 0.5*vvv*vvv*gsqi*dgeta)
+                                   & - 0.5_fp*vvv*vvv*gsqi*dgeta)
                          else
-                            advecy = kfvz1(nmu, k)                              &
+                            advecy = kfvz0(nmu, k)                              &
                                    & *(cvv*(u0(numu, k) - u0(nmu, k))           &
-                                   & - 0.5*vvv*vvv*gsqi*dgeta)
+                                   & - 0.5_fp*vvv*vvv*gsqi*dgeta)
                          endif
                       else
                          advecy = idifu*(vvv*(u0(num, k) - u0(nm, k))           &
-                                & /geta - 0.5*vvv*vvv*gsqi*dgeta)
-                         if (kfuz1(numu, k)*kfuz1(num, k)*kfvz1(nmu, k)==0) then
-                            advecx = kfuz1(nmu, k)                              &
+                                & /geta - 0.5_fp*vvv*vvv*gsqi*dgeta)
+                         if (kfuz0(numu, k)*kfuz0(num, k)*kfvz0(nmu, k) == 0) then
+                            advecx = kfuz0(nmu, k)                              &
                                    & *(uuu*((u0(nmu, k) - u0(nm, k))            &
                                    & /gksi + vvv*gsqi*dgvnm))
                          else
@@ -297,19 +294,15 @@ subroutine z_expl_dir_upw(nmmax     ,kmax      ,icx       , &
                    !
                    ! 45 degree staircase
                    !
-                   if (uuu>0.) then
-                      advecx = (uuu*((u0(nm, k) - u0(nmd, k))/gksi + vvv*gsqi*  &
-                             & dgvnm))
+                   if (uuu > 0.0_fp) then
+                      advecx = uuu*((u0(nm ,k) - u0(nmd,k))/gksi + vvv*gsqi*dgvnm)
                    else
-                      advecx = (uuu*((u0(nmu, k) - u0(nm, k))/gksi + vvv*gsqi*  &
-                             & dgvnm))
+                      advecx = uuu*((u0(nmu,k) - u0(nm ,k))/gksi + vvv*gsqi*dgvnm)
                    endif
-                   if (vvv>0) then
-                      advecy = (vvv*(u0(nm, k) - u0(ndm, k))                    &
-                             & /geta - 0.5*vvv*vvv*gsqi*dgeta)
+                   if (vvv > 0.0_fp) then
+                      advecy = vvv*(u0(nm ,k)-u0(ndm,k))/geta - 0.5_fp*vvv*vvv*gsqi*dgeta
                    else
-                      advecy = (vvv*(u0(num, k) - u0(nm, k))                    &
-                             & /geta - 0.5*vvv*vvv*gsqi*dgeta)
+                      advecy = vvv*(u0(num,k)-u0(nm ,k))/geta - 0.5_fp*vvv*vvv*gsqi*dgeta
                    endif
                 endif
                 ddk(nm, k) = ddk(nm, k) - advecx - advecy
@@ -317,4 +310,4 @@ subroutine z_expl_dir_upw(nmmax     ,kmax      ,icx       , &
           enddo
        endif
     enddo
-end subroutine z_expl_dir_upw
+end subroutine z_hormom_mdue

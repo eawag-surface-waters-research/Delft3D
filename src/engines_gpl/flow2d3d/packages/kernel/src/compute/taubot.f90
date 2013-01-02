@@ -1,7 +1,7 @@
 subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                 & icy       ,rouflo    ,rouwav    ,kfu       ,kfv       , &
                 & kfumin    ,kfumax    ,kspu      ,kcs       ,kcscut    , &
-                & dps       ,s1        ,u1        ,v1        ,umean     , &
+                & dps       ,s1        ,u1        ,v1        , &
                 & guu       ,xcor      ,ycor      ,rho       , &
                 & taubpu    ,taubsu    ,taubxu    ,dis       ,rlabda    , &
                 & teta      ,uorb      ,tp        ,wsu       ,wsv       , &
@@ -106,7 +106,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(out) :: cvalu0 !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: deltau !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(out) :: dfu    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: dis    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub,4)                  :: dis    !  Description and declaration in esm_alloc_real.f90
     real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)                    :: dps    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: grmasu !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: grmsur !  Description and declaration in esm_alloc_real.f90
@@ -122,7 +122,6 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                                                                               !!  in the u-point (scalar)
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: teta   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: tp     !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: umean  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: uorb   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: wsu    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: wsv    !  Description and declaration in esm_alloc_real.f90
@@ -526,7 +525,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              if (zmodel) then
                 u2dh = (umod/hu(nm)                                             &
                      & *((hu(nm) + z0urou(nm))*log(1.0 + hu(nm)/z0urou(nm))     &
-                     & - hu(nm)))/log(1.0 + 0.5*dzu1(nm, kfumin(nm))/z0urou(nm))
+                     & - hu(nm)))/log(1.0 + 0.5*(max(dzu1(nm, kfumin(nm)),0.01_fp))/z0urou(nm))
              else
                 u2dh = (umod/hu(nm)                                             &
                      & *((hu(nm) + z0urou(nm))*log(1.0 + hu(nm)/z0urou(nm))     &
@@ -626,16 +625,26 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              ks         = z0ucur(nm) * 33.0_fp
              omega      = 2.0_fp * pi / tpu
              a          = uorbu / omega
+             !
+             ! Change back to original formulation Manual Eq. (9.183) but still with calibration option fwfac
+             !
              if (a > 0.0_fp) then
                 fw = min(1.39_fp*(a/z0ucur(nm))**(-0.52_fp) , 0.3_fp)
              else
                 fw = 0.3_fp
              endif
-             fw         = fw * fwfac
-             dfu(nm)    = costu * fw * uorbu**3 / (sqrt(pi))
+             fw         = fw*fwfac
+             !
+             ! Change of definition dfu: dimension [W/m**2]
+             ! to make it more consistent with definition dissipation wave breaking
+             !
+             dfu(nm)    = rhow * costu * fw * uorbu**3 / (sqrt(pi))
              deltau(nm) = 0.09_fp * alfaw * (ks/hu(nm)) * (a/ks)**0.82_fp
              deltau(nm) = max(alfaw*ee*z0ucur(nm)/hu(nm) , deltau(nm))
-             deltau(nm) = min(0.5_fp , deltau(nm))
+             !
+             ! Change of definition deltau: dimension [m]
+             !
+             deltau(nm) = min(0.5_fp, deltau(nm)) !*hu(nm)
           else
              dfu(nm)    = 0.0_fp
              deltau(nm) = 0.0_fp
@@ -802,6 +811,10 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              umod = sqrt(uuu*uuu + vvv*vvv)
              ust  = sqrt(umod*taubpu(nm))
              if (ust > waveps) then
+                !
+                ! Limit exponent used in computation ofz0urou to 40 to avoid over/underflow
+                ! 
+                !cfurou(nm, 1) = min(umod/ust,40.0_fp)
                 cfurou(nm, 1) = umod/ust
                 if (kmax > 1) then
                    if (zmodel) then

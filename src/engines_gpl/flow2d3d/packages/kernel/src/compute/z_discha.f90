@@ -112,7 +112,7 @@ subroutine z_discha(kmax      ,nsrc      ,nbub      ,lstsci    ,lstsc     ,j    
     real(fp)         :: concin
     real(fp)         :: concinWrite
     real(fp)         :: sumrelthk
-    character(20)    :: chulp   ! Help charatcter string
+    character(20)    :: chulp       ! Help character string
     character(200)   :: filename
 !
 !! executable statements -------------------------------------------------------

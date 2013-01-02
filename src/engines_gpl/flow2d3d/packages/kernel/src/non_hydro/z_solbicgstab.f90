@@ -1,9 +1,9 @@
 subroutine z_solbicgstab(aak       ,bbk       ,cck      ,aak2      ,cck2      , &
                        & bbka      ,bbkc      ,ddk      ,kmax      ,icx       , &
-                       & icy       ,nmmax     ,nst      ,kfsz1     ,pnhcor    , &
+                       & icy       ,nmmax     ,nst      ,kfsz0     ,pnhcor    , &
                        & pj        ,rj        ,vj       ,dinv      ,pbbk      , &
                        & pbbkc     ,p1        ,rjshadow ,sj        ,sjprec    , &
-                       & tj        ,gdp       )
+                       & tj        ,kfs       ,kfsmin   ,kfsmx0    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -87,7 +87,10 @@ subroutine z_solbicgstab(aak       ,bbk       ,cck      ,aak2      ,cck2      , 
     integer                                                      :: kmax      !  Description and declaration in esm_alloc_int.f90
     integer                                                      :: nmmax     !  Description and declaration in dimens.igs
     integer                                         , intent(in) :: nst
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: kfsz1     !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                   :: kfs       !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                   :: kfsmin    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                   :: kfsmx0    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: kfsz0     !  Description and declaration in esm_alloc_int.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: aak
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: aak2
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: vj
@@ -102,10 +105,10 @@ subroutine z_solbicgstab(aak       ,bbk       ,cck      ,aak2      ,cck2      , 
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: pbbk
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: pbbkc
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: pj
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: rjshadow  ! Extra array for BiCGSTAB, Ullmann 21/02/2008
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: sj        ! Extra array for BiCGSTAB, Ullmann 21/02/2008
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: sjprec    ! Extra array for BiCGSTAB, Ullmann 21/02/2008
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: tj        ! Extra array for BiCGSTAB, Ullmann 21/02/2008
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: rjshadow  ! Extra array for BiCGSTAB
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: sj        ! Extra array for BiCGSTAB
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: sjprec    ! Extra array for BiCGSTAB
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: tj        ! Extra array for BiCGSTAB
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: pnhcor    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: rj
 !
@@ -159,227 +162,249 @@ subroutine z_solbicgstab(aak       ,bbk       ,cck      ,aak2      ,cck2      , 
     errtxt  = '         ;NHITER:             '
     ndelta  = n2_nhy - n1_nhy
     nmstart = (n1_nhy+ddb) + (m1_nhy-1+ddb)*icxy
-
+    !
+    pj   = 0.0_fp
     iter = 0
     !
     ! Enter restart-loop. Runs as long as there is a breakdown.
     ! Usually the loop is run only once, because breakdowns should be rare.
     !
     do
-      breakdown = 0
-      !
-      ! Compute residual, shadow residual and initial search direction from rj.
-      !
-      call z_matpro(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
-                  & bbka      ,bbkc      ,kmax      ,icx       ,icy       , &
-                  & nmmax     ,kfsz1     ,pnhcor    ,rj        ,gdp       )
-      do m = m1_nhy, m2_nhy
-         nmst = nmstart + (m-m1_nhy)*icxy
-         do nm = nmst, nmst+ndelta
-           do k = 1, kmax
-             if (kfsz1(nm,k) /= 0) then
-               rj      (nm,k) = ddk(nm,k) - rj(nm,k)
-               rjshadow(nm,k) = rj (nm,k)
-               pj      (nm,k) = rj (nm,k)
+       breakdown = 0
+       !
+       ! Compute residual, shadow residual and initial search direction from rj.
+       !
+       call z_matpro(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
+                   & bbka      ,bbkc      ,kmax      ,icx       ,icy       , &
+                   & nmmax     ,kfsz0     ,pnhcor    ,rj        ,kfs       , &
+                   & kfsmin    ,kfsmx0    ,gdp       )
+       do m = m1_nhy, m2_nhy
+          nmst = nmstart + (m-m1_nhy)*icxy
+          do nm = nmst, nmst+ndelta
+             if (kfs(nm) == 1) then
+                do k = 1, kmax
+                   if (kfsz0(nm,k) /= 0) then
+                      rj      (nm,k) = ddk(nm,k) - rj(nm,k)
+                      rjshadow(nm,k) = rj (nm,k)
+                      pj      (nm,k) = rj (nm,k)
+                   endif
+                enddo
              endif
-           enddo
-         enddo
-      enddo
-      !
-      ! Compute norm of the right hand side.
-      !
-      normb    = 0.0_fp
-      normbinf = 0.0_fp
-      do m = m1_nhy, m2_nhy
-         nmst = nmstart + (m-m1_nhy)*icxy
-         do nm = nmst, nmst+ndelta
-           do k = 1, kmax
-             if (kfsz1(nm,k) /= 0) then
-               normb = normb + ddk(nm,k)*ddk(nm,k)/(dinv(nm,k)*dinv(nm,k))
-               if (abs(ddk(nm,k)/dinv(nm,k)) > abs(normbinf)) then
-                  normbinf = abs(ddk(nm,k) / dinv(nm,k))
-               endif
+          enddo
+       enddo
+       !
+       ! Compute norm of the right hand side.
+       !
+       normb    = 0.0_fp
+       normbinf = 0.0_fp
+       do m = m1_nhy, m2_nhy
+          nmst = nmstart + (m-m1_nhy)*icxy
+          do nm = nmst, nmst+ndelta
+             if (kfs(nm) == 1) then
+                do k = 1, kmax
+                   if (kfsz0(nm,k) /= 0) then
+                      normb = normb + ddk(nm,k)*ddk(nm,k)/(dinv(nm,k)*dinv(nm,k))
+                      if (abs(ddk(nm,k)/dinv(nm,k)) > abs(normbinf)) then
+                         normbinf = abs(ddk(nm,k) / dinv(nm,k))
+                      endif
+                   endif
+                enddo
              endif
-           enddo
-         enddo
-      enddo
-      normb = sqrt(normb)
-      !
-      ! Compute initial rho.
-      !
-      rho_new = z_ainpro(rj, rjshadow, kmax, kfsz1, icx, icy, gdp)
-      !
-      !  Start iteration loop. When the loop is entered the first time, iter == 1.
-      !  We start with iter+1. In the worst case, when BiCGSTAB breaks down every time
-      !  it enters this loop, we ensure maximal 'nhiter' restarts of the algorithm.
-      !  Noted that array p1 contains preconditioned search direction.
-      !
-      do iter = iter+1,nhiter
-         !
-         ! Calculate the norms of the updated, unscaled residual.
-         !
-         rk    = 0.0_fp
-         rkinf = 0.0_fp
-         do m = m1_nhy, m2_nhy
-            nmst = nmstart + (m-m1_nhy)*icxy
-            do nm = nmst, nmst+ndelta
-              do k = 1, kmax
-                if (kfsz1(nm,k) /= 0) then
-                  rk = rk + rj(nm,k)*rj(nm,k)/(dinv(nm,k)*dinv(nm,k))
-                  if (abs(rj(nm, k)/dinv(nm, k)) > abs(rkinf)) then
-                     rkinf = abs(rj(nm,k) / dinv(nm,k))
-                  endif
+          enddo
+       enddo
+       normb = sqrt(normb)
+       !
+       ! Compute initial rho.
+       !
+       rho_new = z_ainpro(rj, rjshadow, kmax, kfs, kfsz0, icx, icy, gdp)
+       !
+       !  Start iteration loop. When the loop is entered the first time, iter == 1.
+       !  We start with iter+1. In the worst case, when BiCGSTAB breaks down every time
+       !  it enters this loop, we ensure maximal 'nhiter' restarts of the algorithm.
+       !  Noted that array p1 contains preconditioned search direction.
+       !
+       do iter = iter+1,nhiter
+          !
+          ! Calculate the norms of the updated, unscaled residual.
+          !
+          rk    = 0.0_fp
+          rkinf = 0.0_fp
+          do m = m1_nhy, m2_nhy
+             nmst = nmstart + (m-m1_nhy)*icxy
+             do nm = nmst, nmst+ndelta
+                if (kfs(nm) == 1) then
+                   do k = 1, kmax
+                      if (kfsz0(nm,k) /= 0) then
+                         rk = rk + rj(nm,k)*rj(nm,k)/(dinv(nm,k)*dinv(nm,k))
+                         if (abs(rj(nm, k)/dinv(nm, k)) > abs(rkinf)) then
+                            rkinf = abs(rj(nm,k) / dinv(nm,k))
+                         endif
+                      endif
+                   enddo
                 endif
-              enddo
-            enddo
-         enddo
-         rk = sqrt(rk)
-         ! 
-         ! Store initial residual norms.
-         !
-         if (iter==1) then
-            rk0    = rk
-            rkinf0 = rkinf
-         endif
-         !
-         ! print convergence behaviour
-         ! print *, 'number of iterations in CG:', iter
-         !
-         ! If residual norm is small enough, then stop.
-         ! Note that if the iter == 1 and the residual is already small enough,
-         ! we don't need to iterate at all.
-         !
-         if (l2norm) then
-            if (rk < normb*rel_epsnh) exit
-            if (rk < epsnh) exit
-         else
-            if (rkinf < normbinf*rel_epsnh) exit
-            if (rkinf < epsnh) exit
-         endif
-         !
-         ! Calculate the preconditioned search direction and store it in p1.
-         !
-         if (precon == 'ilu') then
-            call z_precon_ilu(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
-                            & bbka      ,bbkc      ,kmax      ,icx       ,icy       , &
-                            & nmmax     ,kfsz1     ,pj        ,p1        ,gdp       )
-         endif
-         if (precon == 'tridiag') then
-            call z_precon(bbka      ,bbkc      ,pbbk      ,pbbkc     ,kmax      , &
-                        & icx       ,icy       ,nmmax     ,kfsz1     ,pj        , &
-                        & p1        ,gdp       )
-         endif
-         if (precon=='none' .or. precon=='diag') then
-            do m = m1_nhy, m2_nhy
-               nmst = nmstart + (m-m1_nhy)*icxy
-               do nm = nmst, nmst+ndelta
-                  do k = 1, kmax
-                    if (kfsz1(nm,k) /= 0) then   
-                       p1(nm,k) = pj(nm,k)
-                    endif
-                  enddo
-               enddo
-            enddo
-         endif
-         !
-         ! Calculate A*p1 and store the result in vj.
-         !
-         call z_matpro(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
-                     & bbka      ,bbkc      ,kmax      ,icx       ,icy       , &
-                     & nmmax     ,kfsz1     ,p1        ,vj        ,gdp       )
-         alpha = rho_new / z_ainpro(rjshadow, vj, kmax, kfsz1, icx, icy, gdp)
-         !
-         ! Calculate scaled intermediate residual sj.
-         !
-         do m = m1_nhy, m2_nhy
-            nmst = nmstart + (m-m1_nhy)*icxy
-            do nm = nmst, nmst + ndelta
-              do k = 1, kmax
-                if (kfsz1(nm,k) /= 0) then
-                  sj(nm,k) = rj(nm,k) - alpha*vj(nm,k)
+             enddo
+          enddo
+          rk = sqrt(rk)
+          ! 
+          ! Store initial residual norms.
+          !
+          if (iter==1) then
+             rk0    = rk
+             rkinf0 = rkinf
+          endif
+          !
+          ! print convergence behaviour
+          ! print *, 'number of iterations in CG:', iter
+          !
+          ! If residual norm is small enough, then stop.
+          ! Note that if the iter == 1 and the residual is already small enough,
+          ! we don't need to iterate at all.
+          !
+          if (l2norm) then
+             if (rk < normb*rel_epsnh) exit
+             if (rk < epsnh) exit
+          else
+             if (rkinf < normbinf*rel_epsnh) exit
+             if (rkinf < epsnh) exit
+          endif
+          !
+          ! Calculate the preconditioned search direction and store it in p1.
+          !
+          if (precon == 'ilu') then
+             call z_precon_ilu(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
+                             & bbka      ,bbkc      ,kmax      ,icx       ,icy       , &
+                             & nmmax     ,kfsz0     ,pj        ,p1        ,kfs       , &
+                             & kfsmin    ,kfsmx0    ,gdp       )
+          endif
+          if (precon == 'tridiag') then
+             call z_precon(bbka      ,bbkc      ,pbbk      ,pbbkc     ,kmax      , &
+                         & icx       ,icy       ,nmmax     ,kfsz0     ,pj        , &
+                         & p1        ,kfs       ,kfsmin    ,kfsmx0    ,gdp       )
+          endif
+          if (precon=='none' .or. precon=='diag') then
+             do m = m1_nhy, m2_nhy
+                nmst = nmstart + (m-m1_nhy)*icxy
+                do nm = nmst, nmst+ndelta
+                   if (kfs(nm) == 1) then
+                      do k = 1, kmax
+                         if (kfsz0(nm,k) /= 0) then   
+                            p1(nm,k) = pj(nm,k)
+                         endif
+                      enddo
+                   endif
+                enddo
+             enddo
+          endif
+          !
+          ! Calculate A*p1 and store the result in vj.
+          !
+          call z_matpro(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
+                      & bbka      ,bbkc      ,kmax      ,icx       ,icy       , &
+                      & nmmax     ,kfsz0     ,p1        ,vj        ,kfs       , &
+                      & kfsmin    ,kfsmx0    ,gdp       )
+          alpha = rho_new / z_ainpro(rjshadow, vj, kmax, kfs, kfsz0, icx, icy, gdp)
+          !
+          ! Calculate scaled intermediate residual sj.
+          !
+          do m = m1_nhy, m2_nhy
+             nmst = nmstart + (m-m1_nhy)*icxy
+             do nm = nmst, nmst + ndelta
+                if (kfs(nm) == 1) then
+                   do k = 1, kmax
+                      if (kfsz0(nm,k) /= 0) then
+                         sj(nm,k) = rj(nm,k) - alpha*vj(nm,k)
+                      endif
+                   enddo
                 endif
-              enddo
-            enddo
-         enddo
-         !
-         ! Calculate the preconditioned search direction and store it in sjprec.
-         !
-         if (precon == 'ilu') then
-            call z_precon_ilu(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
-                            & bbka      ,bbkc      ,kmax      ,icx       ,icy       , &
-                            & nmmax     ,kfsz1     ,sj        ,sjprec    ,gdp       )
-         endif
-         if (precon == 'tridiag') then
-            call z_precon(bbka      ,bbkc      ,pbbk      ,pbbkc     ,kmax      , &
-                        & icx       ,icy       ,nmmax     ,kfsz1     ,sj        , &
-                        & sjprec    ,gdp       )
-         endif
-         if (precon=='none' .or. precon=='diag') then
-            do m = m1_nhy, m2_nhy
-               nmst = nmstart + (m-m1_nhy)*icxy
-               do nm = nmst, nmst+ndelta
-                  do k = 1, kmax
-                     if (kfsz1(nm,k) /= 0) then
-                        sjprec(nm,k) = sj(nm,k)
-                     endif
-                  enddo
-               enddo
-            enddo
-         endif
-         !
-         ! Calculate A*sjprec and store the result in tj.
-         !
-         call z_matpro(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
-                     & bbka      ,bbkc      ,kmax      ,icx       ,icy       , &
-                     & nmmax     ,kfsz1     ,sjprec    ,tj        ,gdp       )
-         omega = z_ainpro(tj, sj, kmax, kfsz1, icx, icy, gdp)
-         omega = omega / z_ainpro(tj, tj, kmax, kfsz1, icx, icy, gdp)
-         if (omega == 0) then
-            !
-            ! We check if omega is zero because we do not want to divide by zero.
-            !
-            breakdown = 1
-            write (lundia,'(a)') 'RESTARTING: omega is zero, break down'
-            exit  ! iteration loop
-         endif
-         !
-         ! Calculate scaled solution pnhcor and scaled residual rj.
-         !
-         do m = m1_nhy, m2_nhy
-            nmst = nmstart + (m-m1_nhy)*icxy
-            do nm = nmst, nmst+ndelta
-              do k = 1, kmax
-                if (kfsz1(nm,k) /= 0) then
-                  pnhcor(nm,k) = pnhcor(nm,k) + alpha*p1(nm,k) + omega*sjprec(nm,k)
-                  rj(nm,k)     = sj(nm,k) - omega*tj(nm,k)
+             enddo
+          enddo
+          !
+          ! Calculate the preconditioned search direction and store it in sjprec.
+          !
+          if (precon == 'ilu') then
+             call z_precon_ilu(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
+                             & bbka      ,bbkc      ,kmax      ,icx       ,icy       , &
+                             & nmmax     ,kfsz0     ,sj        ,sjprec    ,kfs       , &
+                             & kfsmin    ,kfsmx0    ,gdp       )
+          endif
+          if (precon == 'tridiag') then
+             call z_precon(bbka      ,bbkc      ,pbbk      ,pbbkc     ,kmax      , &
+                         & icx       ,icy       ,nmmax     ,kfsz0     ,sj        , &
+                         & sjprec    ,kfs       ,kfsmin    ,kfsmx0    ,gdp       )
+          endif
+          if (precon=='none' .or. precon=='diag') then
+             do m = m1_nhy, m2_nhy
+                nmst = nmstart + (m-m1_nhy)*icxy
+                do nm = nmst, nmst+ndelta
+                   if (kfs(nm) == 1) then
+                      do k = 1, kmax
+                         if (kfsz0(nm,k) /= 0) then
+                            sjprec(nm,k) = sj(nm,k)
+                         endif
+                      enddo
+                   endif
+                enddo
+             enddo
+          endif
+          !
+          ! Calculate A*sjprec and store the result in tj.
+          !
+          call z_matpro(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
+                      & bbka      ,bbkc      ,kmax      ,icx       ,icy       , &
+                      & nmmax     ,kfsz0     ,sjprec    ,tj        ,kfs       , &
+                      & kfsmin    ,kfsmx0    ,gdp       )
+          omega = z_ainpro(tj, sj, kmax, kfs, kfsz0, icx, icy, gdp)
+          omega = omega / z_ainpro(tj, tj, kmax, kfs, kfsz0, icx, icy, gdp)
+          if (omega == 0) then
+             !
+             ! We check if omega is zero because we do not want to divide by zero.
+             !
+             breakdown = 1
+             write (lundia,'(a)') 'RESTARTING: omega is zero, break down'
+             exit  ! iteration loop
+          endif
+          !
+          ! Calculate scaled solution pnhcor and scaled residual rj.
+          !
+          do m = m1_nhy, m2_nhy
+             nmst = nmstart + (m-m1_nhy)*icxy
+             do nm = nmst, nmst+ndelta
+                if (kfs(nm) == 1) then
+                   do k = 1, kmax
+                      if (kfsz0(nm,k) /= 0) then
+                         pnhcor(nm,k) = pnhcor(nm,k) + alpha*p1(nm,k) + omega*sjprec(nm,k)
+                         rj(nm,k)     = sj(nm,k) - omega*tj(nm,k)
+                      endif
+                   enddo
                 endif
-              enddo
-            enddo
-         enddo
-         rho_old = rho_new
-         rho_new = z_ainpro(rjshadow, rj, kmax, kfsz1, icx, icy, gdp)
-         if (rho_new == 0) then
-            !
-            ! We check if rho_new is zero because we do not want to divide by zero.
-            !
-            breakdown = 1
-            write (lundia,'(a)') 'RESTARTING: rho is zero, break down'
-            exit  ! iteration loop
-         endif
-         beta   = (rho_new/rho_old) * (alpha/omega)
-         !
-         ! compute new search direction
-         !
-         do m = m1_nhy, m2_nhy
-            nmst = nmstart + (m-m1_nhy)*icxy
-            do nm = nmst, nmst+ndelta
-              do k = 1, kmax
-                if (kfsz1(nm,k) /= 0) then
-                  pj(nm,k) = rj(nm,k) + beta*(pj(nm,k) - omega*vj(nm,k))
+             enddo
+          enddo
+          rho_old = rho_new
+          rho_new = z_ainpro(rjshadow, rj, kmax, kfs, kfsz0, icx, icy, gdp)
+          if (rho_new == 0) then
+             !
+             ! We check if rho_new is zero because we do not want to divide by zero.
+             !
+             breakdown = 1
+             write (lundia,'(a)') 'RESTARTING: rho is zero, break down'
+             exit  ! iteration loop
+          endif
+          beta = (rho_new/rho_old) * (alpha/omega)
+          !
+          ! compute new search direction
+          !
+          do m = m1_nhy, m2_nhy
+             nmst = nmstart + (m-m1_nhy)*icxy
+             do nm = nmst, nmst+ndelta
+                if (kfs(nm) == 1) then
+                   do k = 1, kmax
+                      if (kfsz0(nm,k) /= 0) then
+                         pj(nm,k) = rj(nm,k) + beta*(pj(nm,k) - omega*vj(nm,k))
+                      endif
+                   enddo
                 endif
-              enddo
-            enddo
-         enddo
+             enddo
+          enddo
          !
          ! convergence check
          !
@@ -389,87 +414,94 @@ subroutine z_solbicgstab(aak       ,bbk       ,cck      ,aak2      ,cck2      , 
             call prterr(lundia    ,'Z021'    ,trim(errtxt)    )
             exit
          endif
-      end do
+      enddo
       !
       ! Calculate A*pnhcor and store the result in rj.
       !
       call z_matpro(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
-                  & bbka      ,bbkc      ,kmax      ,icx       ,icy       , &
-                  & nmmax     ,kfsz1     ,pnhcor    ,rj        ,gdp       )
-      !
-      ! Calculate the true residual and store it in rj.
-      !
-      do m = m1_nhy, m2_nhy
-         nmst = nmstart + (m-m1_nhy)*icxy
-         do nm = nmst, nmst+ndelta
-           do k = 1, kmax
-             if (kfsz1(nm,k) /= 0) then
-               rj(nm,k) = (ddk(nm,k)-rj(nm,k)) / dinv(nm,k)
+                   & bbka      ,bbkc      ,kmax      ,icx       ,icy       , &
+                   & nmmax     ,kfsz0     ,pnhcor    ,rj        ,kfs       , &
+                   & kfsmin    ,kfsmx0    ,gdp       )
+       !
+       ! Calculate the true residual and store it in rj.
+       !
+       do m = m1_nhy, m2_nhy
+          nmst = nmstart + (m-m1_nhy)*icxy
+          do nm = nmst, nmst+ndelta
+             if (kfs(nm) == 1) then
+                do k = 1, kmax
+                   if (kfsz0(nm,k) /= 0) then
+                      rj(nm,k) = (ddk(nm,k)-rj(nm,k)) / dinv(nm,k)
+                   endif
+                enddo
              endif
-           enddo
-         enddo
-      enddo
-      !
-      ! Calculate the norms of rj.
-      !
-      rktrue    = 0.0_fp
-      rkinftrue = 0.0_fp
-      do m = m1_nhy, m2_nhy
-         nmst = nmstart + (m-m1_nhy)*icxy
-         do nm = nmst, nmst+ndelta
-           do k = 1, kmax
-             if (kfsz1(nm,k) /= 0) then
-               rktrue = rktrue + rj(nm,k)*rj(nm,k)/(dinv(nm,k)*dinv(nm,k))
-               if (abs(rj(nm,k)/dinv(nm,k)) > abs(rkinftrue)) then
-                  rkinftrue = abs(rj(nm,k)/dinv(nm,k))
-               endif
+          enddo
+       enddo
+       !
+       ! Calculate the norms of rj.
+       !
+       rktrue    = 0.0_fp
+       rkinftrue = 0.0_fp
+       do m = m1_nhy, m2_nhy
+          nmst = nmstart + (m-m1_nhy)*icxy
+          do nm = nmst, nmst+ndelta
+             if (kfs(nm) == 1) then
+                do k = 1, kmax
+                   if (kfsz0(nm,k) /= 0) then
+                      rktrue = rktrue + rj(nm,k)*rj(nm,k)/(dinv(nm,k)*dinv(nm,k))
+                      if (abs(rj(nm,k)/dinv(nm,k)) > abs(rkinftrue)) then
+                         rkinftrue = abs(rj(nm,k)/dinv(nm,k))
+                      endif
+                   endif
+                enddo
              endif
-           enddo
-         enddo
-      enddo
-      rktrue = sqrt(rktrue)
-      !
-      ! Check if the true residual norm is smaller than the updated residual norm.
-      ! The updated residual norm may have accumulated roundoff errors, especially in
-      ! case the method nearly suffered from break down. That's why it is 
-      ! generally not not save to trust the updated residual as a stopping criterium.
-      !
-      if (l2norm) then
-         if (rktrue>normb*rel_epsnh .or. rktrue>epsnh) then
-           breakdown = 1
-           write (lundia,'(a)') 'RESTARTING: 2-norm of true residual is too large'
-         endif
-      else
-         if (rkinftrue>normb*rel_epsnh .or. rkinftrue>epsnh) then
-           breakdown = 1
-           write (lundia,'(a)') 'RESTARTING: inf-norm of true residual is too large'
-         endif
-      endif
-      !
-      ! Don't restart if there was no breakdown.
-      !
-      if (breakdown == 0) exit
-      !
-      ! Don't restart if the maximum number of iterations is reached.
-      !
-      if (iter == nhiter) exit   
-      !
-      ! Restart, because there was a break down and the maximum number of iteration is not yet reached.
-      !
-   enddo
+          enddo
+       enddo
+       rktrue = sqrt(rktrue)
+       !
+       ! Check if the true residual norm is smaller than the updated residual norm.
+       ! The updated residual norm may have accumulated roundoff errors, especially in
+       ! case the method nearly suffered from break down. That's why it is 
+       ! generally not not save to trust the updated residual as a stopping criterium.
+       !
+       if (l2norm) then
+          if (rktrue>normb*rel_epsnh .or. rktrue>epsnh) then
+             breakdown = 1
+             write (lundia,'(a)') 'RESTARTING: 2-norm of true residual is too large'
+          endif
+       else
+          if (rkinftrue>normbinf*rel_epsnh .or. rkinftrue>epsnh) then
+             breakdown = 1
+             write (lundia,'(a)') 'RESTARTING: inf-norm of true residual is too large'
+          endif
+       endif
+       !
+       ! Don't restart if there was no breakdown.
+       !
+       if (breakdown == 0) exit
+       !
+       ! Don't restart if the maximum number of iterations is reached.
+       !
+       if (iter == nhiter) exit   
+       !
+       ! Restart, because there was a break down and the maximum number of iteration is not yet reached.
+       !
+    enddo
     !
     ! Now convergence or too many iterations or too many breakdowns.
     !
     do m = m1_nhy, m2_nhy
        nmst = nmstart + (m-m1_nhy)*icxy
        do nm = nmst, nmst+ndelta
-          do k = 1, kmax
-             if (kfsz1(nm,k) /= 0) then
-                p1(nm,k) = pnhcor(nm,k)
-             else
-                p1(nm,k) = 0.0_fp
-             endif
-          enddo
+          if (kfs(nm) == 1) then
+             do k = 1, kmax
+                if (kfsz0(nm,k) /= 0) then
+                   p1(nm,k) = pnhcor(nm,k)
+                else
+                   p1(nm,k) = 0.0_fp
+                endif
+             enddo
+          endif
        enddo
     enddo
     !
@@ -478,11 +510,13 @@ subroutine z_solbicgstab(aak       ,bbk       ,cck      ,aak2      ,cck2      , 
     do m = m1_nhy, m2_nhy
        nmst = nmstart + (m-m1_nhy)*icxy
        do nm = nmst, nmst+ndelta
-          do k = 1, kmax
-             if (kfsz1(nm,k) /= 0) then
-                p1(nm,k) = p1(nm,k) * dinv(nm,k)
-             endif
-          enddo
+          if (kfs(nm) == 1) then
+             do k = 1, kmax
+                if (kfsz0(nm,k) /= 0) then
+                   p1(nm,k) = p1(nm,k) * dinv(nm,k)
+                endif
+             enddo
+          endif
        enddo
     enddo
     !

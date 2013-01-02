@@ -35,10 +35,13 @@ subroutine thahbc(j         ,nmmaxj    ,icx       ,icy       ,kmax      , &
 !
 ! Computes boundary values at open boundaries,
 ! based on Thatcher Harleman concept.
-! -At each half timestep the bnd. condition at all boundary points are updated.
-!  This is done to keep the routine as simple as possible
-! -For negative times the boundary value will be
-!  replaced by the inner value from R0
+! - At each half timestep the bnd. condition at all boundary points are updated.
+!   This is done to keep the routine as simple as possible
+! - For negative times the boundary value will be
+!   replaced by the inner value from R0
+! - NOTE: For Z-model simulations, THAHBC is completely based on the old geometry 
+!   corresponding to S0, so:
+!   DZS1 = DZS0, S1 = S0, U1 = U0 and V1 = V0.
 !
 !!--pseudo code and references--------------------------------------------------
 !
@@ -135,7 +138,7 @@ subroutine thahbc(j         ,nmmaxj    ,icx       ,icy       ,kmax      , &
     dtsec = 2.0_fp * hdt
     icxy  = max(icx, icy)
     !
-    ! for all open boundary points nrob we are only interested in those
+    ! For all open boundary points nrob we are only interested in those
     ! which are in the same direction as difu (first rows, then columns)
     ! if icy = 1    then row direction
     ! if icy = nmax then column direction
@@ -156,7 +159,7 @@ subroutine thahbc(j         ,nmmaxj    ,icx       ,icy       ,kmax      , &
        endif
        nseg = nob(8, i)
        !
-       ! only if a RETTIM time for NSEG is given (per definition > 0)
+       ! Only if a RETTIM time for NSEG is given (per definition > 0)
        ! and only if a row is an open boundary the Th. Harleman boundary
        ! conditions will be calculated and set in rbnd (for inflow)
        !
@@ -182,7 +185,7 @@ subroutine thahbc(j         ,nmmaxj    ,icx       ,icy       ,kmax      , &
              nmr0   = nmudir
           endif
           !
-          ! for oblique boundaries the other direction component must
+          ! For oblique boundaries the other direction component must
           ! taken into consideration as well
           ! if IFLC  = 1 -> treat as first boundary point
           !                 velocity from point NMVDIR = NM
@@ -202,8 +205,8 @@ subroutine thahbc(j         ,nmmaxj    ,icx       ,icy       ,kmax      , &
              nmvdir = nm
           endif
           !
-          ! loop over all layers for RETTIM > 0
-          ! calculate the dominant velocity by comparing the modula
+          ! Loop over all layers for RETTIM > 0
+          ! Calculate the dominant velocity by comparing the modula
           ! of the U1 (NMUDIR,K) and V1 (NMVDIR,K)
           ! In case of Z-MODEL array SIG contains the vertical coordinates
           !
@@ -296,6 +299,6 @@ subroutine thahbc(j         ,nmmaxj    ,icx       ,icy       ,kmax      , &
                 ! rettim(nseg,ll,surface) == 0.0_fp
              endif
           enddo
-       endif
-    enddo
-end subroutine thahbc
+        endif
+     enddo
+ end subroutine thahbc

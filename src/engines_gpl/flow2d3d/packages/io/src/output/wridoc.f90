@@ -1,4 +1,4 @@
-subroutine wridoc(error, neffil, soort, simdat, runtxt, gdp)
+subroutine wridoc(error, neffil, soort, simdat, runtxt, commrd, gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -51,6 +51,7 @@ subroutine wridoc(error, neffil, soort, simdat, runtxt, gdp)
     integer                    , pointer :: lundia    !  Description and declaration in inout.igs
     integer                    , pointer :: lunprt    !  Description and declaration in inout.igs
     character*131, dimension(:), pointer :: header    !  Description and declaration in postpr.igs
+    logical                              :: commrd
     type (nefiselement)        , pointer :: nefiselem
 !
 ! Local parameters
@@ -73,18 +74,28 @@ subroutine wridoc(error, neffil, soort, simdat, runtxt, gdp)
 !
 ! Local variables
 !
+    integer                            :: datlen
+    integer                            :: deflen
+    integer                            :: fd_nef
     integer                            :: i            ! Help var. 
                                                        ! and last 2 char. (\n) from SYSTXT lines Help var.
     integer                            :: ierror       ! Local errorflag for NEFIS files 
-    integer                            :: iheader      ! Loop counter for writing header 
+    integer                            :: iheader      ! Loop counter for writing header
+    integer                            :: ind
     integer                            :: lrid         ! Help var. to determine the actual length of RUNID 
     integer                            :: lridmx       ! Help var. for lunprt: LRID < 47 
     integer                            :: n
     integer                            :: na
     integer, dimension(nelmx)          :: nbytsg       ! Array containing the number of by- tes of each single ELMTPS 
+    integer, dimension(3)              :: uindex
+    integer, external                  :: clsnef
+    integer, external                  :: crenef
+    integer, external                  :: getels
     integer, external                  :: neferr
     logical                            :: wrswch       ! Flag to write file .TRUE. : write to  file .FALSE.: read from file 
-    character(10)                      :: date        ! Date to be filled in the header 
+    character(10)                      :: date         ! Date to be filled in the header 
+    character(256)                     :: datnam
+    character(256)                     :: defnam
     character(10), dimension(nelmx)    :: elmunt       ! Array with element physical unit 
     character(16), dimension(1)        :: cdum16       ! Help array to read/write Nefis files 
     character(16), dimension(nelmx)    :: elmnms       ! Element name defined for the NEFIS-files 
@@ -233,9 +244,48 @@ subroutine wridoc(error, neffil, soort, simdat, runtxt, gdp)
           call getcomfileversionstring_flow2d3d(cdum16(1))
        else
        endif
-       call putgtc(filnam    ,grnam4    ,nelmx     ,elmnms    ,elmdms    , &
-                 & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
-                 & elmnms(4) ,celidt    ,wrswch    ,ierror    ,cdum16    )
+       if (soort(1:1)=='c') then
+          !
+          ! Check if COM-file is a new one or an existing one
+          !
+          if (.not. commrd) then
+             !
+             ! COM-file has been newly generated and
+             ! does not have a version number
+             ! So write it to the COM-file
+             !
+!          ! First aggregate file names
+!          !
+!          ind                 = len_trim(filnam)+1
+!          datnam              = filnam
+!          datnam(ind:ind + 3) = '.dat'
+!          call noextspaces(datnam, datlen)
+!          !
+!          defnam              = filnam
+!          defnam(ind:ind + 3) = '.def'
+!          call noextspaces(defnam, deflen)
+!          !
+!          fd_nef      = 0
+!          ierror      = 0
+!          ierror      = crenef(fd_nef, datnam(1:datlen), defnam(1:deflen), ' ', 'r')
+!          uindex(1:3) = 1
+!          cdum16(1)   = ' '
+!          ierror      = getels(fd_nef, 'com-version', 'FILE-VERSION', uindex, 1, 16, cdum16(1) )
+!          ierror      = clsnef(fd_nef)
+!          if (cdum16(1) == ' ') then
+!             !
+!             ! No version number information on COM-file yet: newly written COM-file
+!             ! Write current version number to file
+!             !
+             call putgtc(filnam    ,grnam4    ,nelmx     ,elmnms    ,elmdms    , &
+                       & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
+                       & elmnms(4) ,celidt    ,wrswch    ,ierror    ,cdum16    )
+          endif
+       else
+          call putgtc(filnam    ,grnam4    ,nelmx     ,elmnms    ,elmdms    , &
+                    & elmqty    ,elmunt    ,elmdes    ,elmtps    ,nbytsg    , &
+                    & elmnms(4) ,celidt    ,wrswch    ,ierror    ,cdum16    )
+       endif
        if (ierror/=0) then
        endif
     endif

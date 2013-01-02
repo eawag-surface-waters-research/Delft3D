@@ -126,6 +126,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     type (handletype)                    , pointer :: morfacfile
     logical                              , pointer :: densin
     logical                              , pointer :: varyingmorfac
+    integer                              , pointer :: nh_level
     real(fp)                             , pointer :: rhow
     real(fp)                             , pointer :: ag
     real(fp)                             , pointer :: z0
@@ -339,8 +340,11 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     integer(pntrsize)                    , pointer :: kfumx0
     integer(pntrsize)                    , pointer :: kfvmx0
     integer(pntrsize)                    , pointer :: kfsmx0
+    integer(pntrsize)                    , pointer :: kfsz0
     integer(pntrsize)                    , pointer :: kfsz1
+    integer(pntrsize)                    , pointer :: kfuz0
     integer(pntrsize)                    , pointer :: kfuz1
+    integer(pntrsize)                    , pointer :: kfvz0
     integer(pntrsize)                    , pointer :: kfvz1
     integer(pntrsize)                    , pointer :: kcscut
     integer(pntrsize)                    , pointer :: kcu45
@@ -398,6 +402,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     real(fp)                           :: timnow  ! Current timestep (multiples of dt)
     real(fp), dimension(1)             :: value
     logical                            :: success
+    character(8)                       :: stage       !! First or second half time step
 !
 !! executable statements -------------------------------------------------------
 !
@@ -473,6 +478,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     morfacfile          => gdp%gdmorpar%morfacfile
     densin              => gdp%gdmorpar%densin
     varyingmorfac       => gdp%gdmorpar%varyingmorfac
+    nh_level            => gdp%gdnonhyd%nh_level
     rhow                => gdp%gdphysco%rhow
     ag                  => gdp%gdphysco%ag
     z0                  => gdp%gdphysco%z0
@@ -686,8 +692,11 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     kfumx0              => gdp%gdr_i_ch%kfumx0
     kfvmx0              => gdp%gdr_i_ch%kfvmx0
     kfsmx0              => gdp%gdr_i_ch%kfsmx0
+    kfsz0               => gdp%gdr_i_ch%kfsz0
     kfsz1               => gdp%gdr_i_ch%kfsz1
+    kfuz0               => gdp%gdr_i_ch%kfuz0
     kfuz1               => gdp%gdr_i_ch%kfuz1
+    kfvz0               => gdp%gdr_i_ch%kfvz0
     kfvz1               => gdp%gdr_i_ch%kfvz1
     kcscut              => gdp%gdr_i_ch%kcscut
     kcu45               => gdp%gdr_i_ch%kcu45
@@ -898,7 +907,8 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
                   & i(kfvmin) ,i(kfvmax) ,i(kspu)   ,i(kspv)   ,i(kcshyd) , &
                   & d(dps)    ,r(dpu)    ,r(dpv)    ,r(s1)     ,r(thick)  , &
                   & r(hu)     ,r(hv)     ,r(dzu1)   ,r(dzu0)   ,r(dzv1)   , &
-                  & r(dzv0)   ,r(dzs1)   ,r(dzs0)   ,r(sig)    ,gdp       )
+                  & r(dzv0)   ,r(dzs1)   ,r(dzs0)   ,r(sig)    ,r(r1)     , &
+                  & lstsci    ,gdp       )
        if (error) goto 9999
        call inicut(lundia    ,error     ,runid     ,nmax      ,mmax      , &
                  & nmaxus    ,kmax      ,flcut     ,fl45      ,i(kcu)    , &
@@ -939,7 +949,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
                    & r(hkru)   ,r(hkrv)   ,r(s1)     ,d(dps)    ,r(u1)     , &
                    & r(v1)     ,r(umean)  ,r(vmean)  ,r(r1)     ,r(rtur1)  , &
                    & r(guu)    ,r(gvv)    ,r(qxk)    ,r(qyk)    ,r(dzu1)   , &
-                   & r(dzv1)   ,gdp       )
+                   & r(dzv1)   ,r(sig)    ,gdp       )
     endif
     !
     ! Convert the coordinates of the fixed gate using DPU/DPV as reference
@@ -990,14 +1000,21 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     ! herefore NST = -1
     ! Note:
     ! HU0 and HV0 obtain their values for the first time in F0ISF1
+    ! Call f0isf1 as if at end of whole time step: stage = stage2
     !
     nst = -1
-    call f0isf1(dischy    ,nst       ,zmodel    ,jstart    , &
+    !
+    ! Copy both U- and V-components
+    !
+    stage = 'both'
+    call f0isf1(stage     ,dischy    ,nst       ,zmodel    ,jstart    , &
               & nmmax     ,nmmaxj    ,nmax      ,kmax      ,lstsci    , &
               & ltur      ,nsrc      ,i(kcu)    ,i(kcv)    ,i(kcs)    , &
               & i(kfs)    ,i(kfu)    ,i(kfv)    ,i(kfsmin) ,i(kfsmax) , &
               & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,i(kfsmx0) , &
-              & i(kfumx0) ,i(kfvmx0) ,r(s0)     ,r(s1)     ,r(u0)     , &
+              & i(kfumx0) ,i(kfvmx0) ,i(kfsz0)  ,i(kfuz0)  ,i(kfvz0)  , &
+              & i(kfsz1)  ,i(kfuz1)  ,i(kfvz1)  , &
+              & r(s0)     ,r(s1)     ,r(u0)     , &
               & r(u1)     ,r(v0)     ,r(v1)     ,r(volum0) ,r(volum1) , &
               & r(r0)     ,r(r1)     ,r(rtur0)  ,r(rtur1)  ,r(disch)  , &
               & r(discum) ,r(hu)     ,r(hv)     ,r(dzu1)   ,r(dzv1)   , &
@@ -1012,7 +1029,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     !
     call dens(jstart    ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
             & lsal      ,ltem      ,lsed      ,saleqs    ,temeqs    , &
-            & densin    ,zmodel    ,r(thick)  ,r(r1)     ,r(rho)    , &
+            & densin    ,zmodel    ,r(thick)  ,r(r0)     ,r(rho)    , &
             & r(sumrho) ,r(rhowat) ,rhosol    ,gdp       )
     !
     ! Z_DENGRA: compute DRHODX/DRHODY terms (only in Z-MODEL)
@@ -1022,7 +1039,8 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
        icy = 1
        call z_dengra(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                    & icy       ,i(kfsz1)  ,i(kfumin) ,i(kfumax) ,i(kfvmin) , &
-                   & i(kfvmax) ,r(rho)    ,r(gvu)    ,r(guv)    ,r(drhodx) , &
+                   & i(kfvmax) ,i(kfu)    ,i(kfv)    , &
+                   & r(rho)    ,r(gvu)    ,r(guv)    ,r(drhodx) , &
                    & r(drhody) ,r(dzu1)   ,r(dzv1)   ,gdp       )
     endif
     !
@@ -1068,9 +1086,10 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     icx = nmaxddb
     icy = 1
     call euler(jstart    ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
-             & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfsmax) , &
-             & i(kfsmin) ,r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
-             & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     ,r(dzs1)   , &
+             & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumax) , &
+             & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
+             & r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
+             & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
              & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   ,r(grmsur) , &
              & r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
     !
@@ -1104,7 +1123,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     call taubot(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
               & icy       ,rouflo    ,rouwav    ,kcucopy   ,kcvcopy   , &
               & i(kfumin) ,i(kfumax) ,i(kspu)   ,i(kcs)    ,i(kcscut) , &
-              & d(dps)    ,r(s1)     ,r(wrkb3)  ,r(wrkb4)  ,r(umean)  , &
+              & d(dps)    ,r(s1)     ,r(wrkb3)  ,r(wrkb4)  , &
               & r(guu)    ,r(xcor)   ,r(ycor)   ,r(rho)    , &
               & r(taubpu) ,r(taubsu) ,r(wrka1)  ,r(dis)    ,r(rlabda) , &
               & r(teta)   ,r(uorb)   ,r(tp)     ,r(wsu)    ,r(wsv)    , &
@@ -1121,7 +1140,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     call taubot(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
               & icy       ,rouflo    ,rouwav    ,kcvcopy   ,kcucopy   , &
               & i(kfvmin) ,i(kfvmax) ,i(kspv)   ,i(kcs)    ,i(kcscut) , &
-              & d(dps)    ,r(s1)     ,r(wrkb4)  ,r(wrkb3)  ,r(vmean)  , &
+              & d(dps)    ,r(s1)     ,r(wrkb4)  ,r(wrkb3)  , &
               & r(gvv)    ,r(ycor)   ,r(xcor)   ,r(rho)    , &
               & r(taubpv) ,r(taubsv) ,r(wrka2)  ,r(dis)    ,r(rlabda) , &
               & r(teta)   ,r(uorb)   ,r(tp)     ,r(wsv)    ,r(wsu)    , &
@@ -1217,7 +1236,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
           call z_initur(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                       & icy       ,ltur      ,lturi     ,i(kfu)    ,i(kfv)    , &
                       & i(kfs)    ,i(kcs)    ,i(kfumin) ,i(kfumax) ,i(kfvmin) , &
-                      & i(kfvmax) ,i(kfsmin) ,i(kfsmax) ,r(rtur0)  , &
+                      & i(kfvmax) ,i(kfsmin) ,i(kfsmax) ,r(rtur1)  , &
                       & r(s1)     ,d(dps)    ,r(u1)     ,r(v1)     ,r(windsu) , &
                       & r(windsv) ,r(z0urou) ,r(z0vrou) ,r(wrkb1)  ,r(wrkb2)  , &
                       & r(dzu1)   ,r(dzv1)   ,r(dzs1)   ,gdp       )

@@ -1,6 +1,7 @@
 subroutine z_precon_ilu(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
                       & bbka      ,bbkc      ,kmax      ,icx       ,icy       , &
-                      & nmmax     ,kfsz1     ,rj        ,p1        ,gdp       )
+                      & nmmax     ,kfsz0     ,rj        ,p1        ,kfs       , &
+                      & kfsmin    ,kfsmx0    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -52,20 +53,23 @@ subroutine z_precon_ilu(aak       ,bbk       ,cck       ,aak2      ,cck2      , 
 !
 ! Global variables
 !
-    integer                                         , intent(in) :: icx
-    integer                                         , intent(in) :: icy
-    integer                                         , intent(in) :: kmax  !  Description and declaration in esm_alloc_int.f90
-    integer                                                      :: nmmax !  Description and declaration in dimens.igs
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in) :: kfsz1 !  Description and declaration in esm_alloc_int.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: aak
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: aak2
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: bbk
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: bbka
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: bbkc
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: cck
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: cck2
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: p1     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in) :: rj
+    integer                                          , intent(in) :: icx
+    integer                                          , intent(in) :: icy
+    integer                                          , intent(in) :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                       :: nmmax  !  Description and declaration in dimens.igs
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfs    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfsmin !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfsmx0 !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in) :: kfsz0  !  Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: aak
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: aak2
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: bbk
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: bbka
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: bbkc
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: cck
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: cck2
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: p1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in) :: rj
 !
 ! Local variables
 !
@@ -73,6 +77,8 @@ subroutine z_precon_ilu(aak       ,bbk       ,cck       ,aak2      ,cck2      , 
     integer :: icxy
     integer :: k
     integer :: m
+    integer :: maxk
+    integer :: mink
     integer :: ndelta
     integer :: nm
     integer :: nmst
@@ -94,45 +100,50 @@ subroutine z_precon_ilu(aak       ,bbk       ,cck       ,aak2      ,cck2      , 
     !
     ndelta  = n2_nhy - n1_nhy
     nmstart = (n1_nhy + ddb) + (m1_nhy - 1 + ddb)*icxy
-
     do m = m1_nhy, m2_nhy
        nmst = nmstart + (m - m1_nhy)*icxy
        do nm = nmst, nmst+ndelta
-          nmu = nm + icx
-          num = nm + icy
-          nmd = nm - icx
-          ndm = nm - icy
-          if (kfsz1(nm,1) /= 0) then
-             p1(nm,1) = rj(nm,1) - aak2(nm,1)*p1(ndm,1) &
-                      &          - aak (nm,1)*p1(nmd,1)
-          endif
-          do k = 2, kmax
-             if (kfsz1(nm,1) /= 0) then
-                p1(nm,k) = rj(nm,k) - bbka(nm,k)*p1(nm ,k-1) &
-                         &          - aak2(nm,k)*p1(ndm,k  ) &
-                         &          - aak (nm,k)*p1(nmd,k  )
+          if (kfs(nm) == 1) then
+             nmu  = nm + icx
+             num  = nm + icy
+             nmd  = nm - icx
+             ndm  = nm - icy
+             mink = kfsmin(nm)
+             if (kfsz0(nm,mink) /= 0) then
+                p1(nm,mink) = rj(nm,mink) - aak2(nm,mink)*p1(ndm,mink) &
+                         &                - aak (nm,mink)*p1(nmd,mink)
              endif
-          enddo
+             do k = mink+1, kfsmx0(nm)
+                if (kfsz0(nm,k) /= 0) then
+                   p1(nm,k) = rj(nm,k) - bbka(nm,k)*p1(nm ,k-1) &
+                            &          - aak2(nm,k)*p1(ndm,k  ) &
+                            &          - aak (nm,k)*p1(nmd,k  )
+                endif
+             enddo
+          endif
        enddo
     enddo
     do m = m2_nhy, m1_nhy, -1
        nmst = nmstart + (m - m1_nhy)*icxy
        do nm = nmst+ndelta, nmst, -1
-          nmu = nm + icx
-          num = nm + icy
-          nmd = nm - icx
-          ndm = nm - icy
-          if (kfsz1(nm,1) /= 0) then
-             p1(nm,kmax) = p1(nm,kmax) - cck2(nm,kmax)*p1(num,kmax) &
-                         &             - cck (nm,kmax)*p1(nmu,kmax)
-          endif
-          do k = kmax-1,1,-1
-             if (kfsz1(nm,1) /= 0) then
-                p1(nm,k) = p1(nm,k) - bbkc(nm,k)*p1(nm ,k+1) &
-                         &          - cck2(nm,k)*p1(num,k)   &
-                         &          - cck (nm,k)*p1(nmu,k)
+          if (kfs(nm) == 1) then
+             nmu  = nm + icx
+             num  = nm + icy
+             nmd  = nm - icx
+             ndm  = nm - icy
+             maxk = kfsmx0(nm)
+             if (kfsz0(nm,maxk) /= 0) then
+                p1(nm,maxk) = p1(nm,maxk) - cck2(nm,maxk)*p1(num,maxk) &
+                            &             - cck (nm,maxk)*p1(nmu,maxk)
              endif
-          enddo
+             do k = maxk-1, kfsmin(nm), -1
+                if (kfsz0(nm,k) /= 0) then
+                   p1(nm,k) = p1(nm,k) - bbkc(nm,k)*p1(nm ,k+1) &
+                            &          - cck2(nm,k)*p1(num,k)   &
+                            &          - cck (nm,k)*p1(nmu,k)
+                endif
+             enddo
+          endif
        enddo
     enddo
 end subroutine z_precon_ilu

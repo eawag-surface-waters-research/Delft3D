@@ -1,5 +1,5 @@
 subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
-                & initi     ,selhis    ,selmap    ,tscale    , & 
+                & initi     ,selhis    ,selmap    ,tscale    ,commrd    , & 
                 & itlen     ,itcur     ,itimc     , & 
                 & it01      ,it02      ,sferic    ,grdang    , & 
                 & rouflo    ,nfltyp    , &
@@ -160,6 +160,7 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
     logical                                    :: error  !!  Flag=TRUE if an error is encountered 
     logical                       , intent(in) :: mainys !!  Logical flag for FLOW is main 
                                                          !!  program (TRUE) for writing output 
+    logical                                    :: commrd
     logical                                    :: sferic !  Description and declaration in tricom.igs 
     real(fp)                                   :: grdang !  Description and declaration in tricom.igs 
     real(fp)                                   :: tscale !  Description and declaration in esm_alloc_real.f90 
@@ -301,7 +302,7 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
        endif 
        soort = 'com' 
        call wridoc(error     ,comfil    ,soort     ,simdat    ,runtxt    , & 
-                 & gdp       ) 
+                 & commrd    ,gdp       ) 
        if (error) goto 9999 
        ! 
        ! Write group WIND 
@@ -331,7 +332,7 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
           call prihis(gdp) 
           soort = 'ascii' 
           call wridoc(error     ,trifil    ,soort     ,simdat    ,runtxt    , & 
-                    & gdp       ) 
+                    & commrd    ,gdp       ) 
           if (error) goto 9999 
        endif 
        if (ithisi > 0) then 
@@ -347,7 +348,7 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
           soort = 'his' 
           if (.not.parll .or. (parll .and. inode==master)) then 
              call wridoc(error     ,trifil    ,soort     ,simdat    ,runtxt    , & 
-                       & gdp       ) 
+                       & commrd    ,gdp       ) 
           endif 
           if (error) goto 9999 
           if (dredge .and. .not. dadsmonly) then 
@@ -382,7 +383,7 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
           soort = 'map' 
           if (.not.parll .or. (parll .and. inode==master)) then 
              call wridoc(error     ,trifil    ,soort     ,simdat    ,runtxt    , & 
-                       & gdp       ) 
+                       & commrd    ,gdp       ) 
           endif 
           if (error) goto 9999 
           ! 
@@ -408,7 +409,7 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
           if (error) goto 9999 
           soort = 'dro' 
           call wridoc(error     ,trifil    ,soort     ,simdat    ,runtxt    , & 
-                    & gdp       ) 
+                    & commrd    ,gdp       ) 
           if (error) then 
           endif 
        endif 

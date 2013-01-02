@@ -5,7 +5,8 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                  & kfvmin    ,kfvmax    ,kspu      ,kspv      ,kcshyd    , &
                  & dps       ,dpu       ,dpv       ,s1        ,thick     , &
                  & hu        ,hv        ,dzu1      ,dzu0      ,dzv1      , &
-                 & dzv0      ,dzs1      ,dzs0      ,zk        ,gdp       )
+                 & dzv0      ,dzs1      ,dzs0      ,zk        ,r1        , &
+                 & lstsci    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -52,17 +53,18 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    real(fp)       , pointer :: dryflc
-    integer        , pointer :: lundia
-    real(fp)       , pointer :: dzmin
-    real(fp)       , pointer :: zbot
-    real(fp)       , pointer :: ztop
-    integer        , pointer :: m1_nhy
-    integer        , pointer :: m2_nhy
-    integer        , pointer :: n1_nhy
-    integer        , pointer :: n2_nhy
-    logical        , pointer :: nonhyd
-    logical        , pointer :: kfuv_from_restart
+    real(fp)          , pointer :: dryflc
+    real(fp)          , pointer :: depini
+    integer           , pointer :: lundia
+    real(fp)          , pointer :: dzmin
+    real(fp)          , pointer :: zbot
+    real(fp)          , pointer :: ztop
+    integer           , pointer :: m1_nhy
+    integer           , pointer :: m2_nhy
+    integer           , pointer :: n1_nhy
+    integer           , pointer :: n2_nhy
+    logical           , pointer :: nonhyd
+    logical           , pointer :: kfuv_from_restart
 !
 ! Global variables
 !
@@ -76,6 +78,7 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                                                                               !!  Due to the shift in the 2nd (M-)
                                                                               !!  index, J = -2*NMAX + 1
     integer                                                         :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                         :: lstsci !  Description and declaration in esm_alloc_int.f90
     integer                                          , intent(in)   :: nmmax  !  Description and declaration in dimens.igs
     integer                                                         :: nmmaxj !  Description and declaration in dimens.igs
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)   :: kcs    !  Description and declaration in esm_alloc_int.f90
@@ -109,6 +112,7 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: dzu1   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(out) :: dzv0   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: dzv1   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)        :: r1     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(kmax)                         , intent(in)  :: thick  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(0:kmax)                                     :: zk
 !
@@ -129,6 +133,7 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)       :: s1u
     real(fp)       :: s1v
     real(fp)       :: s1max
+    real(fp), dimension(:,:), allocatable :: rdummy
     character(300) :: errmsg
 !
 !! executable statements -------------------------------------------------------
@@ -138,6 +143,7 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     ztop               => gdp%gdzmodel%ztop
     lundia             => gdp%gdinout%lundia
     dryflc             => gdp%gdnumeco%dryflc
+    depini             => gdp%gdnumeco%depini
     m1_nhy             => gdp%gdnonhyd%m1_nhy
     m2_nhy             => gdp%gdnonhyd%m2_nhy
     n1_nhy             => gdp%gdnonhyd%n1_nhy
@@ -176,7 +182,7 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     ! zbot should be lower then maximum depth (zbot<-dpsmax => dpsmax+zbot<0)
     ! otherwise an error is given
     !
-    if (dpsmax+zbot > 0) then
+    if (dpsmax+zbot > 0.0_fp) then
        write (errmsg, '(a,g10.3,a)') 'Depth value ', dpsmax, &
              & ' (m) exceeds ZBOT specified in input; change ZBOT to this value'
        call prterr(lundia, 'P004', trim(errmsg))
@@ -216,7 +222,7 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     nmref = 0
     gridheight = abs(ztop - zbot)
     do k = 1, kmax
-       dzs1(nmref, k) = gridheight*thick(k)
+       dzs1(nmref, k) = gridheight * thick(k)
        dzu1(nmref, k) = dzs1(nmref, k)
        dzv1(nmref, k) = dzs1(nmref, k)
     enddo
@@ -233,13 +239,13 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     enddo
     s1max = -999.0_fp
     do nm = 1, nmmax
-        if (kcs(nm)==1) then
+        if (kcs(nm) == 1) then
            s1(nm) = max(s1(nm), - real(dps(nm),fp))
            !
            ! Minimum water depth equal to dzmin
            !
-           if ((s1(nm) + real(dps(nm),fp)) < dzmin) then
-              s1(nm) = -dps(nm) + dzmin
+           if ((s1(nm) + real(dps(nm),fp)) < depini) then
+              s1(nm) = -dps(nm) + depini
            endif
            s1max = max(s1max, s1(nm))
         endif
@@ -248,9 +254,9 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     ! ztop should be higher than maximum water level 's1max'
     ! otherwise a warning is given
     !
-    if (s1max > ztop) then
+    if (s1max > (ztop + 0.5 * dzs1(nmref, kmax))) then
         write (errmsg, '(a,g10.3,2a)') 'Maximum water level ', s1max, &
-              & ' (m) exceeds ZTOP specified in input; changing ZTOP to above this value', &
+              & ' (m); Top layer is too thick. Changing ZTOP', &
               & ' is strongly advised'
         call prterr(lundia, 'U190', trim(errmsg))
     endif
@@ -261,52 +267,67 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     ! Determine the initial number of layers and layer thickness
     ! assuming the maximum waterlevel at a velocity point (dry)
     !
+    allocate(rdummy(kmax, lstsci))
+    !
     do nm = 1, nmmax
-       if (kcu(nm)/=0) then
+       if (kcu(nm) /= 0) then
           nmu = nm + icx
           s1u = max(s1(nm), s1(nmu))
           hu(nm) = s1u + dpu(nm)
-          call z_kfmnmx(j         ,nmmaxj    ,kmax      ,nm        ,nmref     , &
-                      & dpu(nm)   ,dzmin     ,s1u       ,kfumin    ,kfumax    , &
-                      & kfu       ,zk        ,dzu1      ,gdp       )
+          call z_kfmnmx(j         ,nmmaxj    ,kmax      ,nm         ,nmref     , &
+                      & dpu(nm)   ,dzmin     ,s1u       ,kfumin     ,kfumax    , &
+                      & kfu       ,zk        ,dzu1      ,rdummy     ,lstsci    ,gdp       )
        endif
     enddo
     do nm = 1, nmmax
-       if (kcv(nm)/=0) then
+       if (kcv(nm) /= 0) then
           num = nm + icy
           s1v = max(s1(nm), s1(num))
           hv(nm) = s1v + dpv(nm)
-          call z_kfmnmx(j         ,nmmaxj    ,kmax      ,nm        ,nmref     , &
-                      & dpv(nm)   ,dzmin     ,s1v       ,kfvmin    ,kfvmax    , &
-                      & kfv       ,zk        ,dzv1      ,gdp       )
+          call z_kfmnmx(j         ,nmmaxj    ,kmax      ,nm         ,nmref     , &
+                      & dpv(nm)   ,dzmin     ,s1v       ,kfvmin     ,kfvmax    , &
+                      & kfv       ,zk        ,dzv1      ,rdummy     ,lstsci    ,gdp       )
        endif
     enddo
     do nm = 1, nmmax
-       if (kcs(nm)/=0) then
-          call z_kfmnmx(j         ,nmmaxj    ,kmax      ,nm        ,nmref     , &
+       if (kcs(nm) /= 0) then
+          call z_kfmnmx(j         ,nmmaxj    ,kmax      ,nm         ,nmref     , &
                       & real(dps(nm),fp) ,dzmin     ,s1(nm)    ,kfsmin    ,kfsmax    , &
-                      & kfs       ,zk        ,dzs1      ,gdp       )
+                      & kfs       ,zk        ,dzs1      ,r1(nm,:,:) ,lstsci    ,gdp       )
        endif
     enddo
+    !
+    deallocate(rdummy)
+    !
     do nm = 1, nmmax
        do k = 1, kmax
           dzu0(nm, k) = dzu1(nm, k)
           dzs0(nm, k) = dzs1(nm, k)
           dzv0(nm, k) = dzv1(nm, k)
-          if (k>=kfumin(nm) .and. k<=kfumax(nm) .and. kfu(nm)==1) &
-           & kfuz1(nm, k) = 1
-          if (k>=kfvmin(nm) .and. k<=kfvmax(nm) .and. kfv(nm)==1 .and. &
-              & (kspv(nm, k)/=4 .and. kspv(nm, k) /=10)                 ) &
-           & kfvz1(nm, k) = 1
-          if (k>=kfsmin(nm) .and. k<=kfsmax(nm) .and. kfs(nm)==1) &
-           & kfsz1(nm, k) = 1
+          if (k>=kfumin(nm) .and. k<=kfumax(nm) .and. kfu(nm)==1) then
+             kfuz1(nm, k) = 1
+          else
+             kfuz1(nm, k) = 0
+          endif
+          if (k>=kfvmin(nm) .and. k<=kfvmax(nm) .and. kfv(nm)==1) then
+             kfvz1(nm, k) = 1
+          else
+             kfvz1(nm, k) = 0
+          endif
+          if (k>=kfsmin(nm) .and. k<=kfsmax(nm) .and. kfs(nm)==1) then
+             kfsz1(nm, k) = 1
+          else
+             kfsz1(nm, k) = 0
+          endif
           !
           ! overwrite KFUZ1 at points with gates
           !
-          if (kspu(nm, 0)*kspu(nm, k)==4 .or. kspu(nm, 0)*kspu(nm, k)==10) &
-           & kfuz1(nm, k) = 0
-          if (kspv(nm, 0)*kspv(nm, k)==4 .or. kspv(nm, 0)*kspv(nm, k)==10) &
-           & kfuz1(nm, k) = 0
+          if (kspu(nm, 0)*kspu(nm, k)==4 .or. kspu(nm, 0)*kspu(nm, k)==10) then
+             kfuz1(nm, k) = 0
+          endif
+          if (kspv(nm, 0)*kspv(nm, k)==4 .or. kspv(nm, 0)*kspv(nm, k)==10) then
+             kfvz1(nm, k) = 0
+          endif
        enddo
     enddo
     if (nonhyd) then
@@ -319,14 +340,16 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              !
              ! for all non hydrostatic points:
              !
-             if (kcs(nm)==1) kcshyd(nm) = 1
+             if (kcs(nm) == 1) then
+                kcshyd(nm) = 1
+             endif
           enddo
        enddo
        do nm = 1, nmmax
           !
           ! leave out points at or near coupling points
           !
-          if (kcs(nm)==3) then
+          if (kcs(nm) == 3) then
              kcshyd(nm + icx) = 0
              kcshyd(nm - icx) = 0
              kcshyd(nm + icy) = 0

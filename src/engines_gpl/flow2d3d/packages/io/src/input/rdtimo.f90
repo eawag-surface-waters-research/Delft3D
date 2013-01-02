@@ -473,6 +473,11 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     call prop_get_logical(gdp%mdfile_ptr, '*', 'LayOut' , flwoutput%layering)
     !
+    ! Flag for writing warnings concerning too high advective Courant numbers 
+    ! during the whole simulation period instead of with a maximum of 100 warnings
+    !
+    call prop_get_logical(gdp%mdfile_ptr, '*', 'CflMsg' , flwoutput%cflmsg)
+    !
     ! smax
     !
     sval = smiss

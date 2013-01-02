@@ -43,6 +43,7 @@ $(top_builddir)/engines_gpl/wave/packages/manager/src/libmanager.a \
 $(top_builddir)/engines_gpl/wave/packages/kernel/src/libkernel.a \
 $(top_builddir)/engines_gpl/wave/packages/io/src/libio.a \
 $(top_builddir)/engines_gpl/wave/packages/data/src/libdata.a \
+$(top_builddir)/engines_gpl/wave/packages/io/src/libio.a \
 $(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90/libdelftio.a \
 $(top_builddir)/utils_lgpl/delftio/packages/delftio_shm/src/diof90/libdelftio_shm.a \
 $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libfsm.a \

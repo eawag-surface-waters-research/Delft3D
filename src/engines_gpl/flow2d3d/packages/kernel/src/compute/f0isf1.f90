@@ -1,9 +1,11 @@
-subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
+subroutine f0isf1(stage     ,dischy    ,nst       ,zmodel    ,j         , &
                 & nmmax     ,nmmaxj    ,nmax      ,kmax      ,lstsci    , &
                 & ltur      ,nsrc      ,kcu       ,kcv       ,kcs       , &
                 & kfs       ,kfu       ,kfv       ,kfsmin    ,kfsmax    , &
                 & kfumin    ,kfumax    ,kfvmin    ,kfvmax    ,kfsmx0    , &
-                & kfumx0    ,kfvmx0    ,s0        ,s1        ,u0        , &
+                & kfumx0    ,kfvmx0    ,kfsz0     ,kfuz0     ,kfvz0     , &
+                & kfsz1     ,kfuz1     ,kfvz1     , &
+                & s0        ,s1        ,u0        , &
                 & u1        ,v0        ,v1        ,volum0    ,volum1    , &
                 & r0        ,r1        ,rtur0     ,rtur1     ,disch     , &
                 & discum    ,hu        ,hv        ,dzu1      ,dzv1      , &
@@ -86,35 +88,41 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
 !
 ! Global variables
 !
-    integer                                                , intent(in)  :: j      !!  Begin pointer for arrays which have
-                                                                                   !!  been transformed into 1D arrays.
-                                                                                   !!  Due to the shift in the 2nd (M-)
-                                                                                   !!  index, J = -2*NMAX + 1
-    integer                                                , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                                , intent(in)  :: lstsci !  Description and declaration in esm_alloc_int.f90
-    integer                                                , intent(in)  :: ltur   !  Description and declaration in esm_alloc_int.f90
-    integer                                                , intent(in)  :: nmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                                , intent(in)  :: nmmax  !  Description and declaration in dimens.igs
-    integer                                                , intent(in)  :: nmmaxj !  Description and declaration in dimens.igs
-    integer                                                , intent(in)  :: nsrc   !  Description and declaration in esm_alloc_int.f90
-    integer                                                , intent(in)  :: nst    !!  Current time step counter
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kcu    !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kcv    !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfs    !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfsmax !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfsmin !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(out) :: kfsmx0 !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfu    !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfumax !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfumin !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(out) :: kfumx0 !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfv    !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfvmax !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfvmin !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(out) :: kfvmx0 !  Description and declaration in esm_alloc_int.f90
-    logical                                                , intent(in)  :: roller
-    logical                                                , intent(in)  :: zmodel !  Description and declaration in procs.igs
+    integer                                                 , intent(in)  :: j      !!  Begin pointer for arrays which have
+                                                                                    !!  been transformed into 1D arrays.
+                                                                                    !!  Due to the shift in the 2nd (M-)
+                                                                                    !!  index, J = -2*NMAX + 1
+    integer                                                 , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                 , intent(in)  :: lstsci !  Description and declaration in esm_alloc_int.f90
+    integer                                                 , intent(in)  :: ltur   !  Description and declaration in esm_alloc_int.f90
+    integer                                                 , intent(in)  :: nmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                 , intent(in)  :: nmmax  !  Description and declaration in dimens.igs
+    integer                                                 , intent(in)  :: nmmaxj !  Description and declaration in dimens.igs
+    integer                                                 , intent(in)  :: nsrc   !  Description and declaration in esm_alloc_int.f90
+    integer                                                 , intent(in)  :: nst    !!  Current time step counter
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kcu    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kcv    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfs    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfsmax !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfsmin !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(out) :: kfsmx0 !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfu    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfumax !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfumin !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(out) :: kfumx0 !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfv    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfvmax !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfvmin !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(out) :: kfvmx0 !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(out) :: kfsz0  !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(out) :: kfuz0  !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(out) :: kfvz0  !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: kfsz1  !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: kfuz1  !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: kfvz1  !  Description and declaration in esm_alloc_int.f90
+    logical                                                 , intent(in)  :: roller
+    logical                                                 , intent(in)  :: zmodel !  Description and declaration in procs.igs
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(out) :: eroll0 !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: eroll1 !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(out) :: ewabr0 !  Description and declaration in esm_alloc_real.f90
@@ -154,7 +162,8 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)              :: r1     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(nsrc)                               , intent(in)  :: disch  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(nsrc)                                             :: discum !  Description and declaration in esm_alloc_real.f90
-    character(8)                                                         :: dischy !  Description and declaration in tricom.igs
+    character(8)                                                          :: dischy !  Description and declaration in tricom.igs
+    character(8)                                                          :: stage  ! First or second half time step     
 !
 ! Local variables
 !
@@ -430,14 +439,39 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
     !
     if (zmodel) then
        do nm = 1, nmmax
-          kfumx0(nm) = kfumax(nm)
-          kfvmx0(nm) = kfvmax(nm)
+          if (stage == 'stage2') then
+             kfvmx0(nm) = kfvmax(nm)
+             if (kfs(nm) == 1) then
+                do k = kfsmin(nm), kmax
+                   kfvz0(nm, k) = kfvz1(nm, k)
+                   dzv0 (nm, k) = dzv1 (nm, k)
+                enddo
+             endif
+          elseif (stage == 'stage1') then
+             kfumx0(nm) = kfumax(nm)
+             if (kfs(nm) == 1) then
+                do k = kfsmin(nm), kmax
+                   kfuz0(nm, k) = kfuz1(nm, k)
+                   dzu0 (nm, k) = dzu1 (nm, k)
+                enddo
+             endif
+          elseif (stage == 'both') then
+             kfumx0(nm) = kfumax(nm)
+             kfvmx0(nm) = kfvmax(nm)
+             if (kfs(nm) == 1) then
+                do k = kfsmin(nm), kmax
+                   kfuz0(nm, k) = kfuz1(nm, k)
+                   kfvz0(nm, k) = kfvz1(nm, k)
+                   dzu0 (nm, k) = dzu1 (nm, k)
+                   dzv0 (nm, k) = dzv1 (nm, k)
+                enddo
+             endif
+          endif
           kfsmx0(nm) = kfsmax(nm)
           if (kfs(nm) == 1) then
              do k = kfsmin(nm), kmax
-                dzu0(nm, k) = dzu1(nm, k)
-                dzv0(nm, k) = dzv1(nm, k)
-                dzs0(nm, k) = dzs1(nm, k)
+                kfsz0(nm, k) = kfsz1(nm, k)
+                dzs0 (nm, k) = dzs1 (nm, k)
              enddo
           endif
        enddo
@@ -445,6 +479,7 @@ subroutine f0isf1(dischy    ,nst       ,zmodel    ,j         , &
        ! values for hydrodynamic pressure
        !
        if (nonhyd) then
+          p0 = 0.0_fp
           do nm = 1, nmmax
              do k = kfsmin(nm), kmax
                 if (kcs(nm) /= 0) then

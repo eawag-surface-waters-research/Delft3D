@@ -59,9 +59,10 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
     integer                       , pointer :: ntoq
     integer                       , pointer :: ndro
     logical                       , pointer :: multi
-    logical                       , pointer :: nonhyd
+    integer                       , pointer :: nh_level
     character(8)                  , pointer :: dpsopt
     character(8)                  , pointer :: dpuopt
+
     character(6)                  , pointer :: momsol
     logical                       , pointer :: drogue
     logical                       , pointer :: temp
@@ -74,6 +75,7 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
     logical                       , pointer :: sedim
     logical                       , pointer :: htur2d
     logical                       , pointer :: mudlay
+    logical                       , pointer :: nonhyd
     logical                       , pointer :: couplemod
     logical                       , pointer :: zmodel
     logical                       , pointer :: roller
@@ -120,6 +122,7 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
     ndro                => gdp%d%ndro
     nofou               => gdp%d%nofou
     multi               => gdp%gdmorpar%multi
+    nh_level            => gdp%gdnonhyd%nh_level
     dpsopt              => gdp%gdnumeco%dpsopt
     dpuopt              => gdp%gdnumeco%dpuopt
     momsol              => gdp%gdnumeco%momsol
@@ -162,15 +165,19 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
        !
        if (iweflg) then
           call prterr(lundia    ,'M001'    ,'Internal Wave option'          )
-          ierror = ierror+ 1
+          ierror = ierror + 1
        endif
        if (mudlay) then
           call prterr(lundia    ,'M001'    ,'Fluid Mud'          )
-          ierror = ierror+ 1
+          ierror = ierror + 1
        endif
        if (solver(1:2)=='gs') then
           call prterr(lundia    ,'M001'    ,'Gauss Seidel solver')
-          ierror = ierror+ 1
+          ierror = ierror + 1
+       endif
+       if (nonhyd .and. nh_level == nh_full) then
+          call prterr(lundia    ,'P004'    ,'The combination of fully non-hydrostatic mode and domain decomposition is not allowed')
+          ierror = ierror + 1
        endif
        !
        ! warnings
@@ -257,10 +264,6 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
           call prterr(lundia    ,'Z011'    ,'Explicit method'    )
           ierror = ierror+ 1
        endif
-       if (wave) then
-          call prterr(lundia    ,'Z011'    ,'Wave effect'        )
-          ierror = ierror+ 1
-       endif
        if (roller) then
           call prterr(lundia    ,'Z011'    ,'Roller model'       )
           ierror = ierror+ 1
@@ -318,6 +321,11 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
           errtxt = 'Combination of sigma-model and cut cells is not available'
           call prterr(lundia ,'U021' ,errtxt )
           ierror = ierror+ 1
+       endif
+       if (nonhyd) then
+          errtxt = 'Combination of sigma-model and non-hydrostatic mode is not available'
+          call prterr(lundia ,'U021' ,errtxt )
+          ierror = ierror + 1
        endif
        !
        ! warnings

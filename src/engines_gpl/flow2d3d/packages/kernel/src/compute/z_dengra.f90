@@ -1,6 +1,7 @@
 subroutine z_dengra(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
-                  & icy       ,kfsz1     ,kfumin    ,kfumax    ,kfvmin    , &
-                  & kfvmax    ,rho       ,gvu       ,guv       ,drhodx    , &
+                  & icy       ,kfsz0     ,kfumin    ,kfumx0    ,kfvmin    , &
+                  & kfvmx0    ,kfu       ,kfv       , &
+                  & rho       ,gvu       ,guv       ,drhodx    , &
                   & drhody    ,dzu0      ,dzv0      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -55,24 +56,26 @@ subroutine z_dengra(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
 !
 ! Global variables
 !
-    integer, intent(in)            :: icx
-    integer, intent(in)            :: icy
-    integer         :: j
-    integer, intent(in)            :: kmax !  Description and declaration in esm_alloc_int.f90
-    integer, intent(in)            :: nmmax !  Description and declaration in dimens.igs
-    integer         :: nmmaxj !  Description and declaration in dimens.igs
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kfumax !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kfumin !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kfvmax !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kfvmin !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in) :: kfsz1 !  Description and declaration in esm_alloc_int.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: guv !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: gvu !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax) :: drhodx !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax) :: drhody !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in) :: dzu0 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in) :: dzv0 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in) :: rho !  Description and declaration in esm_alloc_real.f90
+    integer                                         , intent(in) :: icx
+    integer                                         , intent(in) :: icy
+    integer                                                      :: j
+    integer                                         , intent(in) :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                         , intent(in) :: nmmax  !  Description and declaration in dimens.igs
+    integer                                                      :: nmmaxj !  Description and declaration in dimens.igs
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: kfu    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: kfv    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: kfumx0 !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: kfumin !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: kfvmx0 !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: kfvmin !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in) :: kfsz0  !  Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: guv    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: gvu    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: drhodx !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: drhody !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in) :: dzu0   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in) :: dzv0   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in) :: rho    !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !
@@ -90,42 +93,46 @@ subroutine z_dengra(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     do nm = 1, nmmax
        nmu = nm + icx
        num = nm + icy
-       if (kfumin(nm)<=kfumax(nm)) then
-          drhodx(nm, kfumax(nm)) = 0.
-          do k = kfumax(nm), kfumin(nm), -1
-             kup = k + 1
-             if (k==kfumax(nm)) then
-                iken = kfsz1(nm, k)*kfsz1(nmu, k)
-                drhodx(nm, k) = iken*dzu0(nm, k)*.5*(rho(nmu, k) - rho(nm, k))  &
-                              & /gvu(nm)
-             else
-                ikenup = kfsz1(nm, kup)*kfsz1(nmu, kup)
-                iken = kfsz1(nm, k)*kfsz1(nmu, k)
-                drhodx(nm, k) = drhodx(nm, kup) + ikenup*.5*dzu0(nm, kup)       &
-                              & *(rho(nmu, kup) - rho(nm, kup))/gvu(nm)         &
-                              & + iken*.5*dzu0(nm, k)*(rho(nmu, k) - rho(nm, k))&
-                              & /gvu(nm)
-             endif
-          enddo
+       if (kfu(nm) == 1) then
+          if (kfumin(nm) <= kfumx0(nm)) then
+             drhodx(nm, kfumx0(nm)) = 0.
+             do k = kfumx0(nm), kfumin(nm), -1
+                kup = k + 1
+                if (k == kfumx0(nm)) then
+                   iken          = kfsz0(nm, k)*kfsz0(nmu, k)
+                   drhodx(nm, k) = iken*dzu0(nm, k)*.5*(rho(nmu, k) - rho(nm, k))  &
+                                 & /gvu(nm)
+                else
+                   ikenup        = kfsz0(nm, kup)*kfsz0(nmu, kup)
+                   iken          = kfsz0(nm, k)*kfsz0(nmu, k)
+                   drhodx(nm, k) = drhodx(nm, kup) + ikenup*.5*dzu0(nm, kup)       &
+                                 & *(rho(nmu, kup) - rho(nm, kup))/gvu(nm)         &
+                                 & + iken*.5*dzu0(nm, k)*(rho(nmu, k) - rho(nm, k))&
+                                 & /gvu(nm)
+                endif
+             enddo
+          endif
        endif
        !
-       if (kfvmin(nm)<=kfvmax(nm)) then
-          drhody(nm, kfvmax(nm)) = 0.
-          do k = kfvmax(nm), kfvmin(nm), -1
-             kup = k + 1
-             if (k==kfvmax(nm)) then
-                iken = kfsz1(num, k)*kfsz1(nm, k)
-                drhody(nm, k) = iken*dzv0(nm, k)*.5*(rho(num, k) - rho(nm, k))  &
-                              & /guv(nm)
-             else
-                ikenup = kfsz1(nm, kup)*kfsz1(num, kup)
-                iken = kfsz1(nm, k)*kfsz1(num, k)
-                drhody(nm, k) = drhody(nm, kup) + ikenup*.5*dzv0(nm, kup)       &
-                              & *(rho(num, kup) - rho(nm, kup))/guv(nm)         &
-                              & + iken*.5*dzv0(nm, k)*(rho(num, k) - rho(nm, k))&
-                              & /guv(nm)
-             endif
-          enddo
+       if (kfv(nm) == 1) then
+          if (kfvmin(nm) <= kfvmx0(nm)) then
+             drhody(nm, kfvmx0(nm)) = 0.
+             do k = kfvmx0(nm), kfvmin(nm), -1
+                kup = k + 1
+                if (k == kfvmx0(nm)) then
+                   iken          = kfsz0(num, k)*kfsz0(nm, k)
+                   drhody(nm, k) = iken*dzv0(nm, k)*.5*(rho(num, k) - rho(nm, k))  &
+                                 & /guv(nm)
+                else
+                   ikenup        = kfsz0(nm, kup)*kfsz0(num, kup)
+                   iken          = kfsz0(nm, k)*kfsz0(num, k)
+                   drhody(nm, k) = drhody(nm, kup) + ikenup*.5*dzv0(nm, kup)       &
+                                 & *(rho(num, kup) - rho(nm, kup))/guv(nm)         &
+                                 & + iken*.5*dzv0(nm, k)*(rho(num, k) - rho(nm, k))&
+                                 & /guv(nm)
+                endif
+             enddo
+          endif
        endif
     enddo
 end subroutine z_dengra

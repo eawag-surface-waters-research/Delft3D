@@ -198,6 +198,7 @@
 		<File RelativePath="src\output\putgtr.f90"/>
 		<File RelativePath="src\output\rdtimc.f90"/>
 		<File RelativePath="src\output\rdtimw.f90"/>
+		<File RelativePath="src\output\realfileversion.f90"/>
 		<File RelativePath="src\output\rstcom.f90"/>
 		<File RelativePath="src\output\rwbotc.f90"/>
 		<File RelativePath="src\output\rwbotc_double.f90"/>

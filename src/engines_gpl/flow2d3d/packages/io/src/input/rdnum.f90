@@ -55,6 +55,7 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    real(fp), pointer :: depini
     integer , pointer :: itis
     logical , pointer :: chz_k2d
 !
@@ -111,7 +112,8 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
 !
 !! executable statements -------------------------------------------------------
 !
-    itis  => gdp%gdrdpara%itis
+    depini  => gdp%gdnumeco%depini
+    itis    => gdp%gdrdpara%itis
     chz_k2d => gdp%gdrivpro%chz_k2d
     !
     ! initialize local parameters
@@ -197,11 +199,13 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     !
     ! Solver for momentum equation
     ! options:
-    !     Cyclic (default for sigma-model)
+    !     Cyclic ( Default for sigma-model )
     !     Waqua
     !     Flood
-    !     MDUE ( Multi-Directional Upwind Explicit (default for z-model)
-    !     IUPW ( Implicit Upwind)
+    !     MDUE   ( Multi-Directional Upwind Explicit (default for z-model) )
+    !     MDUI   ( Multi-Directional Upwind Implicit )
+    !     IUPW   ( Implicit Upwind (first order accurate) ) 
+    !     FINVOL ( Conservative Finite Volume approach )
     ! If parameter momsol == 'waqua ', before reading Momsol from md-file,
     ! then the waqua option has been enabled in the old fashioned way
     ! (Waqopt=#Yes#).
@@ -244,7 +248,13 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
              if (zmodel) then
                 if (momsol == 'mdue  ') then
                    call prterr(lundia    ,'V079'    ,momsol    )
+                elseif (momsol == 'mdui  ') then
+                   call prterr(lundia    ,'V079'    ,momsol    )
                 elseif (momsol == 'iupw  ') then
+                   call prterr(lundia    ,'V079'    ,momsol    )
+                elseif (momsol == 'flood ') then
+                   call prterr(lundia    ,'V079'    ,momsol    )
+                elseif (momsol == 'finvol') then
                    call prterr(lundia    ,'V079'    ,momsol    )
                 else
                    msg = 'Using default momentum solver "Multi Directional Upwind Explicit"'
@@ -371,6 +381,11 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     ! 'Dryflc': threshold depth for drying flooding
     !
     call prop_get(gdp%mdfile_ptr,'*','Dryflc',dryflc)
+    !
+    ! 'DepIni': Initial water depth in all dry cells
+    !
+    depini = 0.1_fp * dryflc
+    call prop_get(gdp%mdfile_ptr, '*', 'DepIni', depini)
     !
     ! locate 'Dco' Criterion under which HU/HV is spatially smoothed
     !              when a point is almost dry

@@ -46,6 +46,7 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
+		<File RelativePath=".\src\compvel.f90"/>
 		<File RelativePath=".\src\cp_file.f90"/>
 		<File RelativePath=".\src\dam_cod.f90"/>
 		<File RelativePath=".\src\deletehotfile.f90"/>
@@ -59,8 +60,10 @@
 		<File RelativePath=".\src\get_vegi_map.f90"/>
 		<File RelativePath=".\src\get_visc.f90"/>
 		<File RelativePath=".\src\get_wind.f90"/>
+		<File RelativePath=".\src\noextspaces.f90"/>
 		<File RelativePath=".\src\out2d.f90"/>
 		<File RelativePath=".\src\put_wave_fields.f90"/>
+		<File RelativePath=".\src\putgtc.f90"/>
 		<File RelativePath=".\src\putgti.f90"/>
 		<File RelativePath=".\src\putgtl.f90"/>
 		<File RelativePath=".\src\putgtr.f90"/>

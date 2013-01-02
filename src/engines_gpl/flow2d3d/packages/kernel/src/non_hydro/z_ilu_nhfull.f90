@@ -1,8 +1,7 @@
 subroutine z_ilu_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
                       & bbka      ,bbkc      ,kmax      ,icx       , &
-                      & icy       ,nmmax     ,kfsz1     , &
-                      & dinv      ,gdp)
-
+                      & icy       ,nmmax     ,kfsz0     ,kfsmin    , kfsmx0   , &
+                      & dinv      ,kfs       ,gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -57,9 +56,12 @@ subroutine z_ilu_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2      , 
 !
     integer                                         , intent(in)  :: icx
     integer                                         , intent(in)  :: icy
-    integer                                         , intent(in)  :: kmax  !  Description and declaration in esm_alloc_int.f90
-    integer                                                       :: nmmax !  Description and declaration in dimens.igs
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in)  :: kfsz1 !  Description and declaration in esm_alloc_int.f90
+    integer                                         , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                       :: nmmax  !  Description and declaration in dimens.igs
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfs    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfsmin !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfsmx0 !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in)  :: kfsz0  !  Description and declaration in esm_alloc_int.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in)  :: bbk
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in)  :: bbka
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in)  :: bbkc
@@ -68,7 +70,6 @@ subroutine z_ilu_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2      , 
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: cck
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: cck2
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: dinv
-    
 !
 ! Local variables
 !
@@ -76,6 +77,7 @@ subroutine z_ilu_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2      , 
     integer  :: icxy
     integer  :: k
     integer  :: m
+    integer  :: mink
     integer  :: ndelta
     integer  :: nm
     integer  :: nmst
@@ -100,6 +102,8 @@ subroutine z_ilu_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2      , 
     ndelta  = n2_nhy - n1_nhy
     nmstart = (n1_nhy+ddb) + (m1_nhy-1+ddb)*icxy
     !
+    dinv = 1.0_fp
+    !
     if ((milu > 0.00001_fp) .and. (milu < 1.1_fp)) then
        !
        ! Modified ILU, should usually only be done for 0<=milu<=1.
@@ -107,53 +111,61 @@ subroutine z_ilu_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2      , 
        do m = m1_nhy, m2_nhy
           nmst = nmstart + (m-m1_nhy)*icxy
           do nm = nmst, nmst + ndelta
-             nmd = nm - icx
-             ndm = nm - icy
-             if (kfsz1(nm,1) /= 0) then
-                dinv(nm, 1) = 1.0_fp / (bbk(nm, 1)                                                                 &
-                            &           - aak2(nm,1) * dinv(ndm,1) * (cck2(ndm,1)+milu*(bbkc(ndm,1)+cck (ndm,1)))  &
-                            &           - aak (nm,1) * dinv(nmd,1) * (cck (nmd,1)+milu*(bbkc(nmd,1)+cck2(nmd,1))) )
-             endif
-             do k = 2, kmax
-                if (kfsz1(nm,k) /= 0) then
-                   dinv(nm,k) = 1.0_fp / (bbk(nm,k)                                                                     &
-                              &           - bbka(nm,k) * dinv(nm,k-1) * (bbkc(nm,k-1)+milu*(cck2(nm,k-1)+cck (nm,k-1))) &
-                              &           - aak2(nm,k) * dinv(ndm,k)  * (cck2(ndm,k) +milu*(bbkc(ndm,k) +cck (ndm,k)))  &
-                              &           - aak (nm,k) * dinv(nmd,k)  * (cck (nmd,k) +milu*(bbkc(nmd,k) +cck2(nmd,k))) )
+             if (kfs(nm) == 1) then
+                nmd  = nm - icx
+                ndm  = nm - icy
+                mink = kfsmin(nm)
+                if (kfsz0(nm,mink) /= 0) then
+                   dinv(nm, mink) = 1.0_fp / (bbk(nm, mink)                                                                          &
+                                  &        - aak2(nm,mink) * dinv(ndm,mink) * (cck2(ndm,mink)+milu*(bbkc(ndm,mink)+cck (ndm,mink)))  &
+                                  &        - aak (nm,mink) * dinv(nmd,mink) * (cck (nmd,mink)+milu*(bbkc(nmd,mink)+cck2(nmd,mink))) )
                 endif
-             enddo
+                do k = mink+1, kfsmx0(nm)
+                   if (kfsz0(nm,k) /= 0) then
+                      dinv(nm,k) = 1.0_fp / (bbk(nm,k)                                                                     &
+                                 &           - bbka(nm,k) * dinv(nm,k-1) * (bbkc(nm,k-1)+milu*(cck2(nm,k-1)+cck (nm,k-1))) &
+                                 &           - aak2(nm,k) * dinv(ndm,k)  * (cck2(ndm,k) +milu*(bbkc(ndm,k) +cck (ndm,k)))  &
+                                 &           - aak (nm,k) * dinv(nmd,k)  * (cck (nmd,k) +milu*(bbkc(nmd,k) +cck2(nmd,k)))  )
+                   endif
+                enddo
+             endif
           enddo
        enddo
     else
        do m = m1_nhy, m2_nhy
           nmst = nmstart + (m-m1_nhy)*icxy
           do nm = nmst, nmst+ndelta
-             nmd = nm - icx
-             ndm = nm - icy
-             if (kfsz1(nm,1) /= 0) then
-                dinv(nm,1) = 1.0_fp / (bbk(nm,1) &
-                           &           - aak2(nm,1) * dinv(ndm,1) * cck2(ndm,1) &
-                           &           - aak (nm,1) * dinv(nmd,1) * cck (nmd,1) )
+             if (kfs(nm) == 1) then
+                nmd  = nm - icx
+                ndm  = nm - icy
+                mink = kfsmin(nm)
+                if (kfsz0(nm,mink) /= 0) then
+                   dinv(nm,mink) = 1.0_fp / (bbk(nm,mink)                                   &
+                                 &        - aak2(nm,mink) * dinv(ndm,mink) * cck2(ndm,mink) &
+                                 &        - aak (nm,mink) * dinv(nmd,mink) * cck (nmd,mink) )
+                endif
+                do k = mink+1, kfsmx0(nm)
+                   if (kfsz0(nm,k) /= 0) then
+                      dinv(nm,k) = 1.0_fp / (bbk(nm,k)                                &
+                                 &        - bbka(nm,k) * dinv(nm,k-1) * bbkc(nm, k-1) &
+                                 &        - aak2(nm,k) * dinv(ndm,k)  * cck2(ndm,k)   &
+                                 &        - aak (nm,k) * dinv(nmd,k)  * cck (nmd,k)   )
+                   endif
+                enddo
              endif
-             do k = 2, kmax
-                if (kfsz1(nm,k) /= 0) then
-                   dinv(nm,k) = 1.0_fp / (bbk(nm,k)                                   &
-                              &           - bbka(nm,k) * dinv(nm,k-1) * bbkc(nm, k-1) &
-                              &           - aak2(nm,k) * dinv(ndm,k)  * cck2(ndm,k)   &
-                              &           - aak (nm,k) * dinv(nmd,k)  * cck (nmd,k) )
-               endif
-            enddo
           enddo
        enddo
     endif
     do m = m1_nhy, m2_nhy
        nmst = nmstart + (m-m1_nhy)*icxy
        do nm = nmst, nmst+ndelta
-          do k = 1, kmax
-             if (kfsz1(nm,k) /= 0) then
-                dinv(nm,k) = sqrt(dinv(nm,k))
-             endif
-          enddo
+          if (kfs(nm) == 1) then
+             do k = kfsmin(nm), kfsmx0(nm)
+                if (kfsz0(nm,k) /= 0) then
+                   dinv(nm,k) = sqrt(dinv(nm,k))
+                endif
+             enddo
+          endif
        enddo
     enddo
 end subroutine z_ilu_nhfull

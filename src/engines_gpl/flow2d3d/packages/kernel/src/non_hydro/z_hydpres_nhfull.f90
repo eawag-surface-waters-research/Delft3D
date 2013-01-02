@@ -1,18 +1,18 @@
 subroutine z_hydpres_nhfull(mmax      ,nmax      ,j         ,nmmaxj    ,nmmax     , &
-                   & kmax      ,nst       ,icx       ,icy       ,nsrc      , &
-                   & norow     ,nocol     ,irocol    ,s1        ,s0        , &
-                   & u1        ,v1        ,w1        ,guu       ,gvv       , &
-                   & u0        ,v0        ,w0        ,circ2d    ,            &
-                   & guv       ,gvu       ,gsqs      ,guz       ,gvz       , &
-                   & kfu       ,kfv       ,kfs       ,kcs       ,kfuz1     , &
-                   & kfvz1     ,kfsz1     ,kfsmin    ,kfsmax    ,kcshyd    , &
-                   & mnksrc    ,umean     ,vmean     ,dps       , &
-                   & dzu0      ,dzv0      ,dzs1      ,disch     , &
-                   & p1        ,p0        ,pnhcor    ,aak       ,zk        , &
-                   & bbk       ,cck       ,ddk       ,bbka      ,bbkc      , &
-                   & aak2      ,cck2      ,dinv      ,pbbk      ,pbbkc     , &
-                   & vj        ,rj        ,pj        ,rjshadow  ,sj        , &
-                   & sjprec    ,tj        ,gdp       )
+                          & kmax      ,nst       ,icx       ,icy       ,nsrc      , &
+                          & norow     ,nocol     ,irocol    ,s1        ,s0        , &
+                          & u1        ,v1        ,w1        ,guu       ,gvv       , &
+                          & u0        ,v0        ,w0        ,circ2d    ,            &
+                          & guv       ,gvu       ,gsqs      ,guz       ,gvz       , &
+                          & kfu       ,kfv       ,kfs       ,kcs       ,kfuz0     , &
+                          & kfvz0     ,kfsz0     ,kfsmin    ,kfsmx0    ,kcshyd    , &
+                          & mnksrc    ,umean     ,vmean     ,dps       , &
+                          & dzu0      ,dzv0      ,dzs0      ,disch     , &
+                          & p1        ,p0        ,pnhcor    ,aak       ,zk        , &
+                          & bbk       ,cck       ,ddk       ,bbka      ,bbkc      , &
+                          & aak2      ,cck2      ,dinv      ,pbbk      ,pbbkc     , &
+                          & vj        ,rj        ,pj        ,rjshadow  ,sj        , &
+                          & sjprec    ,tj        ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -97,13 +97,13 @@ subroutine z_hydpres_nhfull(mmax      ,nmax      ,j         ,nmmaxj    ,nmmax   
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: kcshyd    !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: kcs       !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfs       !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: kfsmax    !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: kfsmin    !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: kfsmx0    !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: kfu       !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: kfv       !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: kfsz1     !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: kfuz1     !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: kfvz1     !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: kfsz0     !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: kfuz0     !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: kfvz0     !  Description and declaration in esm_alloc_int.f90
     real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: dps       !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in) :: gsqs      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in) :: guu       !  Description and declaration in esm_alloc_real.f90
@@ -128,7 +128,7 @@ subroutine z_hydpres_nhfull(mmax      ,nmax      ,j         ,nmmaxj    ,nmmax   
     real(fp), dimension(4, norow+nocol)               , intent(in) :: circ2d    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: ddk
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: dinv
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in) :: dzs1      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in) :: dzs0      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in) :: dzu0      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in) :: dzv0      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: p0        !  Description and declaration in esm_alloc_real.f90
@@ -189,11 +189,10 @@ subroutine z_hydpres_nhfull(mmax      ,nmax      ,j         ,nmmaxj    ,nmmax   
     integer       :: nmstart
     integer       :: nmu
     integer       :: num
+    real(fp)      :: corr
     real(fp)      :: dt
-    real(fp)      :: dx
     real(fp)      :: dxd
     real(fp)      :: dxu
-    real(fp)      :: dy
     real(fp)      :: dyd
     real(fp)      :: dyu
     real(fp)      :: dzdo
@@ -202,6 +201,11 @@ subroutine z_hydpres_nhfull(mmax      ,nmax      ,j         ,nmmaxj    ,nmmax   
     real(fp)      :: alfa
     real(fp)      :: alfai
     real(fp)      :: alfae
+    real(fp)      :: coef
+    real(fp)      :: alfak
+    real(fp)      :: alfakm1
+    real(fp)      :: z_k
+    real(fp)      :: z_km1
     character(6)  :: method
     character(20) :: errtxt
 !
@@ -239,6 +243,7 @@ subroutine z_hydpres_nhfull(mmax      ,nmax      ,j         ,nmmaxj    ,nmmax   
     ddk  = 0.0_fp
     bbka = 0.0_fp
     bbkc = 0.0_fp
+    p1   = 0.0_fp
     !
     ! inner area, closed boundaries: homogeneous Neumann horizontal gradients of velocity
     ! coefficients:
@@ -256,39 +261,67 @@ subroutine z_hydpres_nhfull(mmax      ,nmax      ,j         ,nmmaxj    ,nmmax   
           nmu = nm + icx
           ndm = nm - icy
           num = nm + icy
-          do k = kfsmin(nm), kfsmax(nm)
+          do k = kfsmin(nm), kfsmx0(nm)
+             !
+             ! Construction of full system of equations for pressure
+             ! loop over all cells where continuity equation is applied, i.e., over
+             ! all (partially) filled cells, which includes bottom cells and surface cells
+             !
+             !    Construction includes boundary conditions at vertical faces (boundaries left/right,
+             !    vertical bottom walls, etc.) by means of using switches kf...
+             !
              kdo  = max( k-1, kfsmin(nm) )
-             kup  = min( k+1, kfsmax(nm) )
+             kup  = min( k+1, kfsmx0(nm) )
              dxu  = gvu(nm)
              dxd  = gvu(nmd)
-             dx   = gvz(nm)
              dyu  = guv(nm)
              dyd  = guv(ndm)
-             dy   = guz(nm)
-             dzup = 0.5_fp * (zk(k)-zk(k-1)+zk(kup)-zk(kup-1))
-             dzdo = 0.5_fp * (zk(k)-zk(k-1)+zk(kdo)-zk(kdo-1))
-             aak2(nm, k) = -  dt * dzv0(ndm, k)*gvv(ndm)/ (dyd*rhow)        &
-                         &      * kfvz1(ndm, k) * kfsz1(ndm, k)
-             cck2(nm, k) = -  dt * dzv0(nm , k)*gvv(nm) / (dyu*rhow)        &
-                         &      * kfvz1(nm , k) * kfsz1(num, k)
+             dzup        = 0.5_fp * (zk(k)-zk(k-1)+zk(kup)-zk(kup-1))
+             dzdo        = 0.5_fp * (zk(k)-zk(k-1)+zk(kdo)-zk(kdo-1))
+             aak2(nm, k) = -  dt * dzv0(ndm, k)*gvv(ndm)/ (dyd*rhow)       &
+                         &       * kfvz0(ndm, k) * kfsz0(ndm, k)
+             cck2(nm, k) = -  dt * dzv0(nm , k)*gvv(nm) / (dyu*rhow)       &
+                         &       * kfvz0(nm , k) * kfsz0(num, k)
              bbka(nm, k) = -  dt *gsqs(nm)/ (dzdo*rhow)
              bbkc(nm, k) = -  dt *gsqs(nm)/ (dzup*rhow)
-             aak(nm, k) = -  dt * dzu0(nmd, k)*guu(nmd) / (dxd*rhow)        &
-                        &      * kfuz1(nmd, k) * kfsz1(nmd, k)
-             cck(nm, k) = -  dt * dzu0( nm, k)*guu(nm ) / (dxu*rhow)        &
-                        &      * kfuz1(nm, k) * kfsz1(nmu, k)
-             bbk(nm, k) = - aak(nm, k) - cck(nm, k) - aak2(nm, k)         &
-                        & - cck2(nm, k) - bbka(nm, k) - bbkc(nm, k)
-             ddk(nm, k) = - ( u1(nm , k)*dzu0(nm , k)*guu(nm )                     &
-                        &   - u1(nmd, k)*dzu0(nmd, k)*guu(nmd) )                &
-                        & - ( v1(nm , k)*dzv0(nm , k)*gvv(nm )                     &
-                        &   - v1(ndm, k)*dzv0(ndm, k)*gvv(ndm) )              &
-                        & - w1(nm, k)*gsqs(nm) + w1(nm, k - 1)*gsqs(nm)
+             aak (nm, k) = -  dt * dzu0(nmd, k)*guu(nmd) / (dxd*rhow)      &
+                         &       * kfuz0(nmd, k) * kfsz0(nmd, k)
+             cck (nm, k) = -  dt * dzu0( nm, k)*guu(nm ) / (dxu*rhow)      &
+                         &       * kfuz0(nm, k) * kfsz0(nmu, k)
+             bbk (nm, k) = - aak (nm, k) - cck (nm, k) - aak2(nm, k)       &
+                         & - cck2(nm, k) - bbka(nm, k) - bbkc(nm, k)
+             ddk (nm, k) = - ( u1(nm , k)*dzu0(nm , k)*guu(nm )            &
+                         &   - u1(nmd, k)*dzu0(nmd, k)*guu(nmd) )          &
+                         & - ( v1(nm , k)*dzv0(nm , k)*gvv(nm )            &
+                         &   - v1(ndm, k)*dzv0(ndm, k)*gvv(ndm) )          &
+                         & - w1(nm, k)*gsqs(nm) + w1(nm, k - 1)*gsqs(nm)
+             !
+             ! If outflow at a vertical free-surface wall then hor.mom.eq. applied => horizontal
+             ! pressure gradient required, but no pressure outside flow domain => increase only
+             ! diagonal of system of equations
+             !
+             !coef = 0.0_fp
+             !if ( kfvz0(ndm,k)==1 .and. kfsz0(ndm,k)==0 ) then
+             !   coef = coef + dt * dzv0(ndm, k)*gvv(ndm) / (dyd*rhow)
+             !endif
+             !if ( kfvz0(nm ,k)==1 .and. kfsz0(num,k)==0 ) then
+             !   coef = coef + dt * dzv0(nm , k)*gvv(nm ) / (dyu*rhow)
+             !endif
+             !if ( kfuz0(nmd,k)==1 .and. kfsz0(nmd,k)==0 ) then
+             !   coef = coef + dt * dzu0(nmd, k)*guu(nmd) / (dxd*rhow)
+             !endif
+             !if ( kfuz0(nm, k)==1 .and. kfsz0(nmu,k)==0 ) then
+             !   coef = coef + dt * dzu0(nm , k)*guu(nm ) / (dxu*rhow)
+             !endif
+             !bbk(nm,k) = bbk(nm,k) + coef
           enddo
        endif
     enddo
     !
-    ! boundary conditions bottom and free surface
+    ! Boundary conditions at free surface and at bottom
+    ! First the free surface, then the bottom, because the free-surface procedure uses pressure
+    ! in 2 grid layers, which in case of flow in only 1 layer are put together in the bottom
+    ! procedure.
     !
     do nm = 1,nmmax
        nmu = nm + icx
@@ -296,45 +329,71 @@ subroutine z_hydpres_nhfull(mmax      ,nmax      ,j         ,nmmaxj    ,nmmax   
        nmd = nm - icx
        ndm = nm - icy
        if (kcs(nm)*kfs(nm) == 1) then
-          k = kfsmin(nm)
-          if (k == kfsmin(nm)) then
-             bbk (nm,k) = bbk(nm,k) + bbka(nm,k)
-             bbka(nm,k) = 0.0_fp
-          endif
-          k = kfsmax(nm)
-          if (k==kfsmax(nm) .and. kfsmax(nm)/=kfsmin(nm)) then
-             dx = 0.5_fp * (gvv(nm)+gvv(ndm))
-             dy = 0.5_fp * (guu(nm)+guu(nmd))
-             dz = 0.5_fp * (zk(kfsmax(nm))-zk(kfsmax(nm)-2))
-             if (flag_pp) then
-                alfa = (0.5_fp*(zk(kfsmax(nm)-1)+zk(kfsmax(nm)))-s0(nm)) / dz
+          !
+          k = kfsmx0(nm)
+          !
+          ! surface: insert dp/dz=0 at surface and add dzeta/dt effect
+          !
+          bbk (nm,k) = bbk(nm,k) + bbkc(nm,k)
+          bbkc(nm,k) = 0.0_fp
+          !
+          if ( flag_pp ) then
+             !
+             ! Non-hydrostatic pressure at free surface equal to zero
+             !
+             z_k = 0.5_fp * ( zk(k) + zk(k-1) )
+             if ( k > 2 ) then
+                !
+                ! interpolation possible
+                !
+                z_km1 = 0.5_fp * ( zk(k-1) + zk(k-2) )
              else
-                alfa = 0.0_fp
+                !
+                ! extrapolation
+                !
+                z_km1 = 1.5_fp * zk(k-1) - 0.5_fp * zk(k)
              endif
-             alfai      = alfa
-             alfae      = alfa
-             aak2(nm,k) = aak2(nm,k) * tetaz * tetaq
-             cck2(nm,k) = cck2(nm,k) * tetaz * tetaq
-             aak (nm,k) = aak (nm,k) * tetaz * tetaq
-             cck (nm,k) = cck (nm,k) * tetaz * tetaq
-             bbka(nm,k) = bbka(nm,k) * tetaz * tetaq
-             bbk (nm,k) = (bbk(nm,k)+bbkc(nm,k))*tetaz*tetaq + (1.0_fp-alfai)*gsqs(nm)/(dt*ag*rhow)
-             bbkc(nm,k) = 0.0_fp
-             bbka(nm,k) = bbka(nm,k) + alfai*gsqs(nm)/(dt*ag*rhow)
-             ddk(nm, k) = - tetaz*tetaq*(  u1(nm , k)*dzu0(nm ,k)*guu(nm)                &
-                        &                - u1(nmd, k)*dzu0(nmd,k)*guu(nmd) )             &
-                        & - tetaz*tetaq*(  v1(nm , k)*dzv0(nm ,k)*gvv(nm)                &
-                        &                - v1(ndm, k)*dzv0(ndm,k) )*gvv(ndm)             &
-                        & + tetaz*tetaq*w1(nm,k-1)*gsqs(nm)                              &
-                        & - tetaq*(1.0_fp-tetaz)*(  u0(nm ,k)*dzu0(nm ,k)*guu(nm)        &
-                        &                         - u0(nmd,k)*dzu0(nmd,k)*guu(nmd) )     &
-                        & - tetaq*(1.0_fp-tetaz)*(  v0(nm ,k)*dzv0(nm ,k)*gvv(nm)        &
-                        &                         - v0(ndm,k)*dzv0(ndm,k) )*gvv(ndm)     &
-                        & + tetaq*(1.0_fp-tetaz)*w0(nm,k-1)*gsqs(nm)                     &
-                        & - alfae         /(dt*ag*rhow)*p0(nm,kfsmax(nm)-1)*gsqs(nm)     &
-                        & - (1.0_fp-alfae)/(dt*ag*rhow)*p0(nm,kfsmax(nm)  )*gsqs(nm)
-
+             coef = gsqs(nm) / dt / tetaq / tetaz                                       &
+                  / ( (z_k - z_km1) *ag*rhow ) ! - p0(nm,k) + p0(nm,k-1) ) ! extra linearization
+             !
+             ! Correction for neglecting dq/dz at the free surface
+             !
+             corr    = 1.0_fp
+             !corr   = 1.0_fp / (1.0_fp-((p0(nm,k)-p0(nm,k-1))/(ag*rhow*(z_k-z_km1))))
+             !
+             alfak   = coef * (s0(nm) - z_km1 ) * corr
+             alfakm1 = coef * (z_k    - s0(nm)) * corr
+          else
+             !
+             ! Top non-hydrostatic pressure equal to zero => hydrostatic pressure in top layer
+             !
+             alfak   = gsqs(nm) / dt / tetaq / tetaz / ( ag*rhow )
+             alfakm1 = 0.0_fp
           endif
+          !
+          bbk (nm, k) = bbk (nm,k) + alfak
+          bbka(nm, k) = bbka(nm,k) + alfakm1
+          !
+          ddk (nm, k) = ddk(nm,k)     + w1(nm,k)*gsqs(nm)     & ! Should not be necessary
+                      - (1.0_fp-tetaz)/tetaz *                                        &
+                                      (  (  u0(nm , k)*dzu0(nm , k)*guu(nm )          &
+                                          - u0(nmd, k)*dzu0(nmd, k)*guu(nmd) )        &
+                                       + (  v0(nm , k)*dzv0(nm , k)*gvv(nm )          &
+                                          - v0(ndm, k)*dzv0(ndm, k)*gvv(ndm) )        &
+                                       - w0(nm, k - 1)*gsqs(nm)                )      &
+                      - (  alfakm1 * p0(nm,k-1) & !!! + ag*rhow*(s0(nm)-z_km1) )       &
+                         + alfak   * p0(nm,k  ) ) !!! + ag*rhow*(s0(nm)-z_k  ) ) )
+
+
+          k = kfsmin(nm)
+          !
+          ! bottom: insert dp/dz = 0 at bottom
+          !
+          ! dp/dn = 0 at vertical bottom walls as well. Already set above because those sides
+          ! are closed => switches kfuz1 etc. set equal to 0 => coefficients cck, etc. set to 0
+          !
+          bbk (nm,k) = bbk(nm,k) + bbka(nm,k)
+          bbka(nm,k) = 0.0_fp
        endif
     enddo
     !
@@ -346,18 +405,21 @@ subroutine z_hydpres_nhfull(mmax      ,nmax      ,j         ,nmmaxj    ,nmmax   
           k    = mnksrc(3, i)
           kenm = min(1, kfu(nm)+kfu(nm-icx)+kfv(nm)+kfv(nm-icy))
           if (kenm/=0 .or. disch(i)>=0.0_fp) then
-             if (k /= 0) then
-                if (k > kfsmax(nm)) then
-                   k = kfsmax(nm)
+             if (k/=0 .or. kfsmx0(nm)<=kfsmin(nm)) then
+                !
+                ! The order is important at dry points
+                !
+                if (k > kfsmx0(nm)) then
+                   k = kfsmx0(nm)
                 endif
                 if (k < kfsmin(nm)) then
                    k = kfsmin(nm)
                 endif
                 ddk(nm,k) = ddk(nm,k) + disch(i)/gsqs(nm)
              else
-                do kk = kfsmin(nm), kfsmax(nm)
-                   ddk(nm,kk) = ddk(nm,kk) + disch(i)*dzs1(nm,kk)                &
-                              & /((real(dps(nm),fp)+s1(nm))*gsqs(nm))
+                do kk = kfsmin(nm), kfsmx0(nm)
+                   ddk(nm,kk) = ddk(nm,kk) + disch(i)*dzs0(nm,kk)                &
+                              & /((real(dps(nm),fp)+s0(nm))*gsqs(nm))
                 enddo
              endif
           endif
@@ -370,27 +432,21 @@ subroutine z_hydpres_nhfull(mmax      ,nmax      ,j         ,nmmaxj    ,nmmax   
           k    = mnksrc(3,i)
           kenm = min(1, kfu(nm)+kfu(nm-icx)+kfv(nm)+kfv(nm-icy))
           if (kenm/=0 .or. -disch(i)>=0.0_fp) then
-             if (k /= 0) then
+             if (k/=0 .or. kfsmx0(nm)<=kfsmin(nm)) then
                 !
-                ! The order is inportant at dry points (kfsmax=-1)
+                ! The order is important at dry points
                 !
-                if (k > kfsmax(nm)) then
-                   k = kfsmax(nm)
+                if (k > kfsmx0(nm)) then
+                   k = kfsmx0(nm)
                 endif
                 if (k < kfsmin(nm)) then
                    k = kfsmin(nm)
                 endif
                 ddk(nm,k) = ddk(nm,k) - disch(i)/gsqs(nm)
              else
-                do kk = 1, kmax
-                   !
-                   ! Source term addition is zero when dzs1 = 0.0
-                   ! Do not add source term in that case: dps+s1 may be 0.0!
-                   !
-                   if (dzs1(nm,kk) > 0.0_fp) then
-                      ddk(nm,kk) = ddk(nm,kk) - disch(i)*dzs1(nm,kk)            &
+                do kk = kfsmin(nm), kfsmx0(nm)
+                      ddk(nm,kk) = ddk(nm,kk) - disch(i)*dzs0(nm,kk)            &
                                  & /((real(dps(nm),fp)+s0(nm))*gsqs(nm))
-                   endif
                 enddo
              endif
           elseif (mnksrc(7,i) /= 3) then
@@ -401,7 +457,7 @@ subroutine z_hydpres_nhfull(mmax      ,nmax      ,j         ,nmmaxj    ,nmmax   
              call prterr(lundia, 'S208', trim(errtxt))
           else
           endif
-       endif  
+       endif
     enddo
     !
     !
@@ -420,25 +476,25 @@ subroutine z_hydpres_nhfull(mmax      ,nmax      ,j         ,nmmaxj    ,nmmax   
        nml  = (n+ddb)*icy + (ml+ddb)*icx - icxy
        nmlu =  nml + icx 
        if (ibf == 2) then
-          do k = kfsmin(nmfu), kfsmax(nmfu)
+          do k = kfsmin(nmfu), kfsmx0(nmfu)
              ddk(nmfu,k) = ddk(nmfu,k) - aak(nmfu,k)*tetaq*ag*rhow*(circ2d(1,ic)-s0(nmf))
              aak(nmfu,k) = 0.0_fp
           enddo
        endif
        if (ibf > 2) then
-          do k = kfsmin(nmfu), kfsmax(nmfu)
+          do k = kfsmin(nmfu), kfsmx0(nmfu)
              bbk(nmfu,k) = bbk(nmfu,k) + aak(nmfu,k)
              aak(nmfu,k) = 0.0_fp
           enddo
        endif
        if (ibl == 2) then
-          do k = kfsmin(nml), kfsmax(nml)
+          do k = kfsmin(nml), kfsmx0(nml)
              ddk(nml,k) = ddk(nml,k) - cck(nml,k)*tetaq*ag*rhow*(circ2d(2,ic)-s0(nmlu))
              cck(nml,k) = 0.0_fp
           enddo
        endif
        if (ibl > 2) then
-          do k = kfsmin(nml), kfsmax(nml)
+          do k = kfsmin(nml), kfsmx0(nml)
              bbk(nml,k) = bbk(nml,k) + cck(nml,k)
              cck(nml,k) = 0.0_fp
           enddo
@@ -455,25 +511,25 @@ subroutine z_hydpres_nhfull(mmax      ,nmax      ,j         ,nmmaxj    ,nmmax   
        nlm  = (nl+ddb)*icy + (m+ddb)*icx - icxy
        nlum = nlm + icy
        if (ibf == 2) then
-          do k = kfsmin(nfum), kfsmax(nfum)
+          do k = kfsmin(nfum), kfsmx0(nfum)
              ddk (nfum,k) = ddk(nfum, k)- aak2(nfum,k)*tetaq*ag*rhow*(circ2d(1,ic)-s0(nfm))
              aak2(nfum,k) = 0.0_fp
           enddo
        endif
        if (ibf > 2) then
-          do k = kfsmin(nfum), kfsmax(nfum)
+          do k = kfsmin(nfum), kfsmx0(nfum)
              bbk (nfum,k) = bbk(nfum, k) + aak2(nfum, k)
              aak2(nfum,k) = 0.0_fp
           enddo
        endif
        if (ibl == 2) then
-          do k = kfsmin(nlm), kfsmax(nlm)
+          do k = kfsmin(nlm), kfsmx0(nlm)
              ddk (nlm,k) = ddk(nlm, k)-cck2(nlm, k)*tetaq*ag*rhow*(circ2d(2,ic)-s0(nlum))
              cck2(nlm,k) = 0.0_fp
           enddo
        endif
        if (ibl > 2) then
-          do k = kfsmin(nlm), kfsmax(nlm)
+          do k = kfsmin(nlm), kfsmx0(nlm)
              bbk (nlm,k)  = bbk(nlm,k) + cck2(nlm,k)
              cck2(nlm,k) = 0.0_fp
           enddo
@@ -485,16 +541,16 @@ subroutine z_hydpres_nhfull(mmax      ,nmax      ,j         ,nmmaxj    ,nmmax   
     !
     call z_initcg_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
                        & bbka      ,bbkc      ,ddk       ,kmax      ,icx       , &
-                       & icy       ,nmmax     ,nst       ,kfsz1     ,dinv      , &
-                       & pbbk      ,pbbkc     ,pnhcor    ,rj        ,p0        , &
-                       & p1        ,s1        ,gdp       )
+                       & icy       ,nmmax     ,nst       ,kfsz0     ,dinv      , &
+                       & pbbk      ,pbbkc     ,pnhcor    ,rj        ,kfs       , &
+                       & kfsmin    ,kfsmx0    ,gdp       )
     if ( krylov == 'bicgstab') then
         call z_solbicgstab(aak       ,bbk       ,cck      ,aak2      ,cck2      , &
                          & bbka      ,bbkc      ,ddk      ,kmax      ,icx       , &
-                         & icy       ,nmmax     ,nst      ,kfsz1     ,pnhcor    , &
+                         & icy       ,nmmax     ,nst      ,kfsz0     ,pnhcor    , &
                          & pj        ,rj        ,vj       ,dinv      ,pbbk      , &
                          & pbbkc     ,p1        ,rjshadow ,sj        ,sjprec    , &
-                         & tj        ,gdp       )
+                         & tj        ,kfs       ,kfsmin   ,kfsmx0    ,gdp       )
  
     elseif ( krylov == 'cg') then
        !
@@ -502,9 +558,10 @@ subroutine z_hydpres_nhfull(mmax      ,nmax      ,j         ,nmmaxj    ,nmmax   
        !
        call z_solcg_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
                          & bbka      ,bbkc      ,ddk       ,kmax      ,icx       , &
-                         & icy       ,nmmax     ,nst       ,kfsz1     ,pnhcor    , &
+                         & icy       ,nmmax     ,nst       ,kfsz0     ,pnhcor    , &
                          & pj        ,rj        ,vj        ,dinv      ,pbbk      , &
-                         & pbbkc     ,p1        ,gdp       )
+                         & pbbkc     ,p1        ,kfs       ,kfsmin    ,kfsmx0    , &
+                         & gdp       )
     else 
         write (lundia,*) '*** ERROR:z_hydpres_nhfull: THIS IS NOT ALLOWED'
     endif
@@ -523,16 +580,16 @@ subroutine z_hydpres_nhfull(mmax      ,nmax      ,j         ,nmmaxj    ,nmmax   
        nmlu = nml + icx
        if (ibf == 2) then
           s1(nmf) = circ2d(1,ic) 
-          do k = kfsmin(nmf), kfsmax(nmf)
+          do k = kfsmin(nmf), kfsmx0(nmf)
              p1(nmf,k) = tetaq * ag * rhow * (s1(nmf)-s0(nmf))
              p0(nmf,k) = 0.0_fp
           enddo
        endif
        if (ibl == 2) then
           s1(nmlu) = circ2d(2,ic)
-          do k = kfsmin(nmlu), kfsmax(nmlu)
+          do k = kfsmin(nmlu), kfsmx0(nmlu)
              p1(nmlu,k) = tetaq * ag * rhow * (s1(nmlu)-s0(nmlu))
-             p0(nmlu,k) = 0._fp
+             p0(nmlu,k) = 0.0_fp
           enddo
        endif
     enddo
@@ -548,14 +605,14 @@ subroutine z_hydpres_nhfull(mmax      ,nmax      ,j         ,nmmaxj    ,nmmax   
        nlum = nlm + icy
        if (ibf == 2) then
           s1(nfm) = circ2d(1,ic)
-          do k = kfsmin(nfm), kfsmax(nfm)
+          do k = kfsmin(nfm), kfsmx0(nfm)
              p1(nfm,k) = tetaq * ag * rhow * (s1(nfm)-s0(nfm))
              p0(nfm,k) = 0.0_fp
           enddo
        endif
        if (ibl == 2) then
           s1(nlum) = circ2d(2,ic)
-          do k = kfsmin(nlum), kfsmax(nlum)
+          do k = kfsmin(nlum), kfsmx0(nlum)
              p1(nlum,k) = tetaq * ag * rhow * (s1(nlum)-s0(nlum))
              p0(nlum,k) = 0.0_fp
           enddo
