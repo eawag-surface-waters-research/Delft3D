@@ -439,7 +439,7 @@ subroutine f0isf1(stage     ,dischy    ,nst       ,zmodel    ,j         , &
     !
     if (zmodel) then
        do nm = 1, nmmax
-          if (stage == 'stage2') then
+          if (stage == 'stage1') then
              kfvmx0(nm) = kfvmax(nm)
              if (kfs(nm) == 1) then
                 do k = kfsmin(nm), kmax
@@ -447,7 +447,7 @@ subroutine f0isf1(stage     ,dischy    ,nst       ,zmodel    ,j         , &
                    dzv0 (nm, k) = dzv1 (nm, k)
                 enddo
              endif
-          elseif (stage == 'stage1') then
+          elseif (stage == 'stage2') then
              kfumx0(nm) = kfumax(nm)
              if (kfs(nm) == 1) then
                 do k = kfsmin(nm), kmax

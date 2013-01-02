@@ -194,7 +194,7 @@ subroutine detvic(lundia    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
           endif
           !
           ! Compute diffusivity from viscosity
-          ! Do not devide by Prandtl-Schmidt number here! 
+          ! Do not divide by Prandtl-Schmidt number here! 
           ! (Once is enough; see TURCLO.f90)
           !
           dicuv(nm, khtur) = vicuv(nm, khtur)
