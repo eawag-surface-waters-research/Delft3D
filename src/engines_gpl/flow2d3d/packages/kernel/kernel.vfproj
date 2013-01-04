@@ -333,7 +333,8 @@
 		<File RelativePath="src\general\txtstr.f90"/>
 		<File RelativePath="src\general\vermdf.f90"/>
 		<File RelativePath="src\general\wrline.f90"/>
-		<File RelativePath="src\general\z_ainpro.f90"/></Filter>
+		<File RelativePath="src\general\z_ainpro.f90"/>
+		<File RelativePath=".\src\general\z_taubotmodifylayers.f90"/></Filter>
 		<Filter Name="inichk">
 		<File RelativePath="src\inichk\allocadv2d.f90"/>
 		<File RelativePath="src\inichk\caldps.f90"/>

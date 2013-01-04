@@ -878,8 +878,8 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
              & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
              & r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
              & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
-             & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   ,r(grmsur) , &
-             & r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
+             & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   , &
+             & r(grmsur) ,r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
     if (flwoutput%veuler) then
        velu = wrkb3
        velv = wrkb4

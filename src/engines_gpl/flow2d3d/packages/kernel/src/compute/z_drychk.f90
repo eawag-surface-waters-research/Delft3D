@@ -227,39 +227,6 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
        endif
     enddo
     !
-    ! Modification of near bed layer thicknesses to obtain 
-    ! a smoother approximation of the bed shear stress
-    ! (see also routines Z_DRYCHKU and Z_KFMNMX)
-    !
-    do nm = 1, nmmax
-       if (kfs(nm) == 1) then
-          if (kfsmax(nm) > kfsmin(nm)) then
-              k = kfsmin(nm)
-              if (dzs1(nm,k) < dzs1(nm,k+1)) then
-                 !
-                 ! Ensure conservation of constituents
-                 !
-                 do l = 1, lstsci
-                    r1(nm,k,l) = (        r1(nm,k+1,l)*(dzs1(nm,k+1)-dzs1(nm,k)) +     &
-                               &   2.0_fp*r1(nm,k  ,l)* dzs1(nm,k)                 ) / &
-                               & (dzs1(nm,k+1) + dzs1(nm,k))
-                 enddo
-              elseif (dzs1(nm,k) > dzs1(nm,k+1)) then
-                 !
-                 ! Ensure conservation of constituents
-                 !
-                 do l = 1, lstsci
-                    r1(nm,k+1,l) = (        r1(nm,k  ,l)*(dzs1(nm,k)-dzs1(nm,k+1)) +     &
-                                 &   2.0_fp*r1(nm,k+1,l)* dzs1(nm,k+1)                 ) / &
-                                 & (dzs1(nm,k+1) + dzs1(nm,k))
-                 enddo
-              endif
-              dzs1(nm, k  ) = 0.5_fp*(real(dps(nm),fp)+min(zk(k+1),s1(nm)))
-              dzs1(nm, k+1) = dzs1(nm,k)
-           endif
-       endif
-    enddo
-    !
     ! A "trick" to ensure that "wet" points that were dry
     ! obtain a velocity (see also Z_CHECKU and Z_DIFU)
     !

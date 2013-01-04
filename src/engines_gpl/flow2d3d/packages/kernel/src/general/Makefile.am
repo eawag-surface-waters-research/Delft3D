@@ -93,6 +93,7 @@ libkernel_general_la_SOURCES = \
          vermdf.f90 \
          wrline.f90 \
          z_ainpro.f90 \
+         z_taubotmodifylayers.f90 \
          search.f90
 
 #-------------------------------------------------------------------------------

@@ -81,6 +81,8 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    integer , dimension(:) , pointer :: modify_dzsuv
+    logical                , pointer :: ztbml
     include 'flow_steps_f.inc'
 !
 ! Global variables
@@ -260,6 +262,8 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
 !
 !! executable statements -------------------------------------------------------
 !
+    modify_dzsuv       => gdp%gdzmodel%modify_dzsuv
+    ztbml              => gdp%gdzmodel%ztbml
     !
     nmaxddb = nmax + 2*gdp%d%ddbound
     !
@@ -396,6 +400,25 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                     & umean     ,u0        ,u1        ,dzu0      ,dzu1      , &
                     & dzs1      ,zk        ,kfsmx0    ,guu       ,qxk       , &
                     & gdp       )
+       !
+       ! ISSUE: DELFT3D-14744: modify the near-bed layering to obtain smoother 
+       ! bottom shear stress representation in z-layer models
+       ! If requested by keyword ZTBML 
+       ! (Z-model TauBottom Modified Layering: equistant near-bed layering 
+       ! for smoother bottom shear stress):
+       !
+       if (ztbml) then
+          !
+          ! Call with modify_dzsuv(1:2) = 1, to modify dzs1 and dzu1
+          !
+          modify_dzsuv(1:2) = 1
+          modify_dzsuv(3)   = 0
+          call z_taubotmodifylayers(nmmax  , kmax   , lstsci , icx          , icy    , & 
+                                  & kfs    , kfsmin , kfsmax , dps          , dzs1   , &
+                                  & kfu    , kfumin , kfumax , dpu          , dzu1   , &
+                                  & kfv    , kfvmin , kfvmax , dpv          , dzv1   , &
+                                  & r0     , s1     , zk     , modify_dzsuv , gdp    )
+       endif
        !
        ! Compute Volume and Areas to be used in routines that computes 
        ! the transport of matter (consistency with WAQ)
@@ -561,6 +584,25 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                     & vmean     ,v0        ,v1        ,dzv0      ,dzv1      , &
                     & dzs1      ,zk        ,kfsmx0    ,gvv       ,qyk       , &
                     & gdp       )
+       !
+       ! ISSUE: DELFT3D-14744: Modification of near bed layer thicknesses to obtain 
+       ! If requested by keyword ZTBML 
+       ! (Z-model TauBottom Modified Layering: equistant near-bed layering for smoother bottom shear stress):
+       ! --> modify the near-bed layering to obtain smoother bottom shear stress representation in z-layer models
+       !
+       if (ztbml) then
+          !
+          ! Call with modify_dzsuv(1) = 1 and modify_dzsuv(3) = 1, to modify dzs1 and dzv1
+          !
+          modify_dzsuv(1) = 1
+          modify_dzsuv(2) = 0
+          modify_dzsuv(3) = 1
+          call z_taubotmodifylayers(nmmax  , kmax   , lstsci , icx          , icy    , & 
+                                  & kfs    , kfsmin , kfsmax , dps          , dzs1   , &
+                                  & kfu    , kfumin , kfumax , dpu          , dzu1   , &
+                                  & kfv    , kfvmin , kfvmax , dpv          , dzv1   , &
+                                  & r0     , s1     , zk     , modify_dzsuv , gdp    )
+       endif
        !
        ! Compute Volume and Areas to be used in routines that computes 
        ! the transport of matter (consistency with WAQ)

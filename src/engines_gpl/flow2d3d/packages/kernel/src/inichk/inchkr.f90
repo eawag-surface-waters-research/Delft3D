@@ -402,7 +402,10 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     real(fp)                           :: timnow  ! Current timestep (multiples of dt)
     real(fp), dimension(1)             :: value
     logical                            :: success
-    character(8)                       :: stage       !! First or second half time step
+    character(8)                       :: stage   ! First or second half time step
+                                                  ! Stage = 'both' means that in F0ISF1 the layering administration
+                                                  ! is copied for both the U- and the V-direction
+
 !
 !! executable statements -------------------------------------------------------
 !
@@ -1000,7 +1003,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     ! herefore NST = -1
     ! Note:
     ! HU0 and HV0 obtain their values for the first time in F0ISF1
-    ! Call f0isf1 as if at end of whole time step: stage = stage2
+    ! Call f0isf1 as such that the complete layering administration is copied: stage = 'both'
     !
     nst = -1
     !
@@ -1090,8 +1093,8 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
              & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
              & r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
              & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
-             & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   ,r(grmsur) , &
-             & r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
+             & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   , &
+             & r(grmsur) ,r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
     !
     ! TAUBOT: calculate bottom stress coefficients
     ! to calculate tau_bottom values using local values

@@ -516,6 +516,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     integer      :: nreal       ! Pointer to real array RCOUSR for UDF particle wind factor parameters 
     logical      :: success      
     character(8) :: stage       ! First or second half time step 
+                                ! Stage = 'both' means that in F0ISF1 the layering administration
+                                ! is copied for both the U- and the V-direction
 !
 !! executable statements -------------------------------------------------------
 !
@@ -1362,8 +1364,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                 & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
                 & r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
                 & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
-                & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   ,r(grmsur) , &
-                & r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
+                & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   , &
+                & r(grmsur) ,r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
        call timer_stop(timer_euler, gdp)
        !
        ! Update bed shear stress in U-direction
@@ -1993,8 +1995,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                 & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
                 & r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
                 & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
-                & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   ,r(grmsur) , &
-                & r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
+                & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   , &
+                & r(grmsur) ,r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
        call timer_stop(timer_euler, gdp)
        !
        ! Update bed shear stress in U-direction

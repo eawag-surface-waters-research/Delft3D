@@ -95,6 +95,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
     real(fp)                   , pointer :: ti_nodal
     logical                    , pointer :: xbeach
     real(fp)                   , pointer :: tunit
+    logical                    , pointer :: ztbml
 !
 ! Global variables
 !
@@ -209,6 +210,7 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
     ti_nodal  => gdp%gdinttim%ti_nodal
     xbeach    => gdp%gdprocs%xbeach
     tunit     => gdp%gdexttim%tunit
+    ztbml     => gdp%gdzmodel%ztbml
     include 'tfzeta.gdt'
     !
     ! initialize local parameters
@@ -224,17 +226,18 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
     !
     ! initialize parameters that are to be read
     !
-    ktemp       = 0
-    fclou       = 0.0
-    sarea       = 0.0
-    ivapop      = 0
-    ivapop2     = 0
-    keva        = 0
-    gapres      = 101300.0_fp
-    lambda      = -1.0_fp
-    qtotmx      = 0.0_fp
-    solrad_read = .false.     
+    ktemp        = 0
+    fclou        = 0.0
+    sarea        = 0.0
+    ivapop       = 0
+    ivapop2      = 0
+    keva         = 0
+    gapres       = 101300.0_fp
+    lambda       = -1.0_fp
+    qtotmx       = 0.0_fp
+    solrad_read  = .false.     
     solrad_read2 = .false.
+    ztbml        = .false.
     !
     stanton     = 1.30e-3
     dalton      = 1.30e-3
@@ -1273,5 +1276,15 @@ subroutine rdproc(error    ,nrrec     ,mdfrec   ,noui        ,htur2d      , &
     ! Flag to activate XBeach wave driver
     !
     call prop_get(gdp%mdfile_ptr, '*', 'XBeach', xbeach)
+    !
+    ! Flag to switch on modification of near-bed layering for smoother bottom shear stress representation
+    ! (used in Z-model only)
+    !
+    call prop_get(gdp%mdfile_ptr, '*', 'Ztbml', ztbml)
+    if (ztbml) then
+       write (message,'(a)') 'Found Keyword Ztbml = #Y#: modifying near-bed layering to obtain '
+       call prterr(lundia, 'G051', trim(message))
+       write (lundia, '(a)') '            smooth bottom shear stress representation (Z-model only)'
+    endif
  9999 continue
 end subroutine rdproc

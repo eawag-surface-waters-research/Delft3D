@@ -490,6 +490,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     integer      :: nhystp
     integer      :: nmaxddb
     integer      :: nreal       ! Pointer to real array RCOUSR for UDF particle wind factor parameters
+    real(fp)     :: timest
     logical      :: success      
     character(8) :: stage       ! First or second half time step
 !
@@ -1455,8 +1456,8 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
                 & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
                 & r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
                 & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
-                & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   ,r(grmsur) , &
-                & r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
+                & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   , &
+                & r(grmsur) ,r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
        call timer_stop(timer_euler, gdp)
        !
        ! Update bed shear stress in U-direction
@@ -1627,13 +1628,16 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
                     & r(volum1) ,r(guu)    ,r(gvv)    ,r(bruvai) , &
                     & ltem      ,gdp       )
           !
+          timest = 2.0_fp*hdt
           call z_difuflux(stage  ,lundia ,kmax      ,nmmax     ,nmmaxj    , &
-                  & lstsci    ,r(r0)     ,r(qxk)    ,r(qyk)    , &
+                  & lstsci    ,r(r0)     ,r(r1)     ,r(qxk)    ,r(qyk)    , &
                   & r(u1)     ,r(v1)     ,&
                   & r(dicuv)  ,r(guv)    ,r(gvu)    ,r(areau)  ,r(areav)  , &
                   & i(kfuz1)  ,i(kfvz1)  ,i(kfsz1)  ,i(kcs)    ,i(kfs)    , &
+                  & i(kfu)    ,i(kfuz0)  ,i(kfv)    ,i(kfvz0)  , &
+                  & i(kfsmx0) ,i(kfsmax) ,i(kfsz0)  , &
                   & i(kfumin) ,i(kfumx0) ,i(kfvmin) ,i(kfvmx0) ,r(sigdif) , &
-                  & hdt       ,icx       ,icy       ,gdp       )
+                  & timest    ,icx       ,icy       ,gdp       )
           call timer_stop(timer_tritra, gdp)
           call timer_stop(timer_difu, gdp)
        endif

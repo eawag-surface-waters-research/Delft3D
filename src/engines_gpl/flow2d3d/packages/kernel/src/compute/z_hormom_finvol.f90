@@ -111,7 +111,7 @@ subroutine z_hormom_finvol(nmmax     ,kmax      ,icx       ,icy       ,kcs      
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: s0     !  Description and declaration in rjdim.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax), intent(in)  :: w0     !  Description and declaration in rjdim.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ddk    !!  Internal work array, diagonal space at (N,M,K)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: dzs0  !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: dzs0   !  Description and declaration in rjdim.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: dzu0   !  Description and declaration in rjdim.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: dzv0   !  Description and declaration in rjdim.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: p0     !  Description and declaration in rjdim.f90
@@ -121,6 +121,9 @@ subroutine z_hormom_finvol(nmmax     ,kmax      ,icx       ,icy       ,kcs      
 ! Local variables
 !
     integer            :: k
+    integer            :: kadx
+    integer            :: kady
+    integer            :: kadz
     integer            :: kk
     integer            :: kd
     integer            :: kdd
@@ -138,21 +141,18 @@ subroutine z_hormom_finvol(nmmax     ,kmax      ,icx       ,icy       ,kcs      
     integer            :: nuum
     integer            :: nmuu
     integer            :: numu
-    integer            :: sfad       ! temporary work variable
+    integer            :: sfad     ! temporary work variable
     real(fp)           :: wsurfr
     real(fp)           :: wsurfl
-    real(fp)           :: vol0       ! size of HU volume  
-    real(fp)           :: area       ! area of flux interface (east)
-    real(fp)           :: uavg0      ! transport velocity at interface, east
-    real(fp)           :: vavg0      ! transport velocity at interface, north
-    real(fp)           :: wavg0      ! transport velocity at interface, top
-    real(fp)           :: pcoef      ! temporary value for coefficient pressure derivative
-    real(fp)           :: ddkadx = 0.0_fp
-    real(fp)           :: ddkady = 0.0_fp
-    real(fp)           :: ddkadz = 0.0_fp
-    integer            :: kadx = 1
-    integer            :: kady = 1
-    integer            :: kadz = 1
+    real(fp)           :: vol0     ! size of HU volume  
+    real(fp)           :: area     ! area of flux interface (east)
+    real(fp)           :: uavg0    ! transport velocity at interface, east
+    real(fp)           :: vavg0    ! transport velocity at interface, north
+    real(fp)           :: wavg0    ! transport velocity at interface, top
+    real(fp)           :: pcoef    ! temporary value for coefficient pressure derivative
+    real(fp)           :: ddkadx
+    real(fp)           :: ddkady
+    real(fp)           :: ddkadz
 !
 !! executable statements -------------------------------------------------------
 !
@@ -171,8 +171,7 @@ subroutine z_hormom_finvol(nmmax     ,kmax      ,icx       ,icy       ,kcs      
        numu  = nm + icx + icy
        ndmu  = nm + icx - icy
        ndmuu = nm + icx + icx - icy
-       numd  = nm - icx + icy 
-
+       numd  = nm - icx + icy
        do k = 1, kmax
           ku = k + 1
           kd = k - 1
@@ -183,14 +182,14 @@ subroutine z_hormom_finvol(nmmax     ,kmax      ,icx       ,icy       ,kcs      
              !
              ! CONVECTIVE FLUXES
              !
+             kadx   = 1
+             kady   = 1
+             kadz   = 1
              ddkadx = 0.0_fp
              ddkady = 0.0_fp
              ddkadz = 0.0_fp
-             kadx = 1
-             kady = 1
-             kadz = 1
              ! 
-             ! fluxes west
+             ! Fluxes west
              !
              if (kfsz0(nm,k) == 0) then ! .or. (kfu(nmd) /= 0 .and. k > kfumx0(nmd))
                 !
@@ -201,38 +200,39 @@ subroutine z_hormom_finvol(nmmax     ,kmax      ,icx       ,icy       ,kcs      
                 ddkadx = ddkadx + area*(u0(nm,k)**2)
              else
                 !
-                ! internal domain
+                ! Internal domain
                 !
                 if (kcs(nm) == 2) then
-                   if (u0(nm,k) < 0.0_fp) then !.or. kfsz0(nmu,k) == 0) then 
+                   if (u0(nm,k) < 0.0_fp) then !.or. kfsz0(nmu,k) == 0) then
                       !
-                      ! constant extrapolation outwards
+                      ! Constant extrapolation outwards
                       !
                       area  = guu(nm)*dzs0(nm,k)
-                      ddkadx = ddkadx + area*(u0(nm,k)**2)                            
-                   else !if (kfsz0(nmu,k) == 1) then 
+                      ddkadx = ddkadx + area*(u0(nm,k)**2)
+                   else !if (kfsz0(nmu,k) == 1) then
                       !
-                      ! no convection inwards
-                      ! set west flux equal to the east flux that is computed below
+                      ! No convection inwards
+                      ! Set west flux equal to the east flux that is computed below
                       !
                       kadx = 0
                    endif
                 else
-                   ! rectangular volumes at free surface
+                   !
+                   ! Rectangular volumes at free surface
+                   !
 !                   if ( k == kfsmx0(nm) .or. k == kfsmx0(nmu) ) then
 !                       area = guz(nm) * ( dzs0(nm,k) + dzs0(nmu,k) ) / real(kfsz0(nm,k)+kfsz0(nmu,k),fp)
 !                   else
                        area  = guz(nm)*dzs0(nm,k)
 !                   endif
-                   uavg0 = 0.5_fp * (u0(nmd,k)+u0(nm,k))
+                   uavg0  = 0.5_fp * (u0(nmd,k)+u0(nm,k))
                    ddkadx = ddkadx + area*( 0.5_fp*(uavg0+abs(uavg0))*u0(nmd,k) + 0.5_fp*(uavg0-abs(uavg0))*u0(nm,k) )
                 endif
              endif
-
-             ! 
-             ! fluxes east
-             !                    
-             if (kfsz0(nmu,k) == 0) then ! .or. (kfu(nmu) /= 0 .and. k > kfumx0(nmu) ) 
+             !
+             ! Fluxes east
+             !
+             if (kfsz0(nmu,k) == 0) then ! .or. (kfu(nmu) /= 0 .and. k > kfumx0(nmu) )
                 !
                 ! Velocity point active, right cell non-active, therefore velocity to the right
                 ! Outflow into a non-active cell
@@ -241,35 +241,37 @@ subroutine z_hormom_finvol(nmmax     ,kmax      ,icx       ,icy       ,kcs      
                 ddkadx = ddkadx - area*( u0(nm,k)**2 )
              else
                 !
-                ! internal domain
+                ! Internal domain
                 !
                 if (kcs(nmu) == 2) then
-                   if ( u0(nm,k) > 0.0_fp ) then !.or. kfsz0(nm,k) == 0) then 
+                   if ( u0(nm,k) > 0.0_fp ) then !.or. kfsz0(nm,k) == 0) then
                       !
-                      ! constant extrapolation outwards
+                      ! Constant extrapolation outwards
                       !
                       area  = guu(nm)*dzs0(nmu,k)
                       ddkadx = ddkadx - area*(u0(nm,k)**2)
                    else !if (kfsz0(nm,k) == 1) then
                       !
-                      ! no convection inwards
-                      ! set east flux equal to the west flux that is computed above
+                      ! No convection inwards
+                      ! Set east flux equal to the west flux that is computed above
                       !
-                      kadx = 0                               
+                      kadx = 0
                    endif
                 else
-                   ! rectangular volumes at free surface
+                   !
+                   ! Rectangular volumes at free surface
+                   !
 !                   if ( k == kfsmx0(nm) .or. k == kfsmx0(nmu) ) then
 !                       area = guz(nm) * ( dzs0(nm,k) + dzs0(nmu,k) ) / real(kfsz0(nm,k)+kfsz0(nmu,k),fp)
 !                   else
                        area  = guz(nm)*dzs0(nmu,k)
 !                   endif
-                   uavg0 = 0.5_fp * (u0(nm,k)+u0(nmu,k))
+                   uavg0  = 0.5_fp * (u0(nm,k)+u0(nmu,k))
                    ddkadx = ddkadx - area*( 0.5_fp*(uavg0+abs(uavg0))*u0(nm,k) + 0.5_fp*(uavg0-abs(uavg0))*u0(nmu,k) )
                 endif
-             endif           
+             endif
              !
-             ! vertical fluxes
+             ! Vertical fluxes
              ! 1) add flux through upper face of volume and scale
              ! if necessary (constant flux extrapolation),
              ! 2) add flux through lower face
@@ -348,7 +350,7 @@ subroutine z_hormom_finvol(nmmax     ,kmax      ,icx       ,icy       ,kcs      
 !                ddkadz = ddkadz + area*( 0.5_fp*(wavg0+abs(wavg0))*u0(nm,kd) + 0.5_fp*(wavg0-abs(wavg0))*u0(nm,k) )
 !             endif
              !
-             ! update system coefficients
+             ! Update system coefficients
              !
              vol0  = ( guz(nm )*gvz(nm )*dzs0(nm ,k) + &
                    &   guz(nmu)*gvz(nmu)*dzs0(nmu,k) ) / real(kfsz0(nm,k)+kfsz0(nmu,k),fp) ! ( max(1,kfsz0(nm,k)+kfsz0(nmu,k)) )

@@ -57,6 +57,7 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
      real(fp)     , pointer :: dryflc
      real(fp)     , pointer :: dzmin
      real(fp)     , pointer :: zbot
+     logical      , pointer :: ztbml
      logical      , pointer :: zmodel
      logical      , pointer :: nonhyd
      integer      , pointer :: nh_level
@@ -100,8 +101,8 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
     integer  :: kkmin
     integer  :: kkmax
     integer  :: nm
-    integer  :: nmu
     integer  :: nmd
+    integer  :: nmu
     real(fp) :: dzutot
     real(fp) :: hnm
     real(fp) :: htrsh
@@ -113,6 +114,7 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
 !
     dzmin    => gdp%gdzmodel%dzmin
     zbot     => gdp%gdzmodel%zbot
+    ztbml    => gdp%gdzmodel%ztbml
     dryflc   => gdp%gdnumeco%dryflc
     zmodel   => gdp%gdprocs%zmodel
     nonhyd   => gdp%gdprocs%nonhyd
@@ -162,6 +164,7 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
              & zmodel    ,kcs       ,kcu       ,kspu      ,dps       , &
              & s0        ,dpu       ,umean     ,hu        ,gdp       )
     do nm = 1, nmmax
+       nmd = nm - icx
        nmu = nm + icx
        if (kcu(nm) /= 0) then
           !
@@ -209,14 +212,14 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
                    !
                    ! Set kfumx0 in flooded points,using s1u
                    !
-                  found = .false.
-                  do k = kfumin(nm), kmax
-                     if (.not. found .and. zk(k) + dzmin>=s1u .or. &
-                         & (s1u>zk(kmax) .and. k==kmax  )) then
-                        kfumx0(nm) = k
-                        found = .true.
-                     endif
-                  enddo
+                   found = .false.
+                   do k = kfumin(nm), kmax
+                      if (.not. found .and. zk(k) + dzmin>=s1u .or. &
+                          & (s1u>zk(kmax) .and. k==kmax  )) then
+                         kfumx0(nm) = k
+                         found = .true.
+                      endif
+                   enddo
                    !
                    ! determine layer thickness new wet point. We assume that only one or two layers can be active
                    !
@@ -244,6 +247,20 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
                     do k = kfumx0(nm) + 1, kmax
                        dzu0(nm, k) = 0.0_fp
                     enddo
+                    !
+                    ! ISSUE: DELFT3D-14744: modify the near-bed layering to obtain smoother 
+                    ! bottom shear stress representation in z-layer models
+                    ! If requested by keyword ZTBML 
+                    ! (Z-model TauBottom Modified Layering: equistant near-bed layering 
+                    ! for smoother bottom shear stress):
+                    !
+                    if (ztbml) then
+                       if (kfumx0(nm) > kfumin(nm)) then
+                          k             = kfumin(nm)
+                          dzu0(nm, k  ) = 0.5_fp*(dpu(nm)+min(zk(k+1),s1u))
+                          dzu0(nm, k+1) = dzu0(nm,k)
+                       endif
+                    endif
                     !
                     ! A "trick" to ensure that "wet" cells that were dry
                     ! obtain a velocity

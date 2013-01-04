@@ -286,15 +286,6 @@ subroutine z_drychku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
              dzu1(nm, k) = 0.0_fp
           enddo
           !
-          ! Modification of near bed layer thicknesses to obtain 
-          ! a smoother approximation of the bed shear stress
-          ! (see also routines Z_DRYCHK and Z_KFMNMX)
-          !
-          if (kfumax(nm) > kfumin(nm)) then
-             dzu1(nm, kfumin(nm)  ) = 0.5_fp*(dpu(nm)+min(zk(kfumin(nm)+1),s1u))
-             dzu1(nm, kfumin(nm)+1) = dzu1(nm,kfumin(nm))
-          endif
-          !
           ! A "trick" to ensure that "wet" cells that were dry
           ! obtain a velocity
           !

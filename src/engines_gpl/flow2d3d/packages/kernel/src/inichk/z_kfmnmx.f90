@@ -1,7 +1,6 @@
-subroutine z_kfmnmx(j         ,nmmaxj    ,kmax      ,nm        ,nmref     , &
+subroutine z_kfmnmx(j         ,kmax      ,nm        ,nmref     , &
                   & dep       ,dzmin     ,s1v       ,kfmin     ,kfmax     , &
-                  & kf        ,zk        ,dz1       ,r1ordummy ,lstsci    , &
-                  & gdp       )
+                  & kf        ,zk        ,dz1       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -49,9 +48,7 @@ subroutine z_kfmnmx(j         ,nmmaxj    ,kmax      ,nm        ,nmref     , &
 !
     integer                                                      :: j
     integer                                         , intent(in) :: kmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                         , intent(in) :: lstsci !  Description and declaration in esm_alloc_int.f90
     integer                                         , intent(in) :: nm
-    integer                                                      :: nmmaxj !  Description and declaration in dimens.igs
     integer                                         , intent(in) :: nmref
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                   :: kf
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                   :: kfmax
@@ -60,13 +57,11 @@ subroutine z_kfmnmx(j         ,nmmaxj    ,kmax      ,nm        ,nmref     , &
     real(fp)                                        , intent(in) :: dzmin
     real(fp)                                        , intent(in) :: s1v
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: dz1
-    real(fp), dimension(kmax, lstsci)                            :: r1ordummy ! Array only contains r1(nm) when z_kfmnmx is called for zeta-points
     real(fp), dimension(0:kmax)                     , intent(in) :: zk
 !
 ! Local variables
 !
     integer :: k
-    integer :: l
     logical :: found
     logical :: found1
 !
@@ -78,9 +73,9 @@ subroutine z_kfmnmx(j         ,nmmaxj    ,kmax      ,nm        ,nmref     , &
     do k = 1, kmax
        dz1(nm, k) = dz1(nmref, k)
        if ((zk(k)-dzmin>-dep .or. k==kmax) .and. .not. found) then
-          kfmin(nm) = k
+          kfmin(nm)  = k
           dz1(nm, k) = dep + zk(k)
-          found = .true.
+          found      = .true.
        else
           if (.not. found) dz1(nm, k) = 0.0_fp
        endif
@@ -98,7 +93,7 @@ subroutine z_kfmnmx(j         ,nmmaxj    ,kmax      ,nm        ,nmref     , &
              if ((zk(k) + dzmin >= s1v) .or. k == kmax) then
                 if (.not. found1) then
                    kfmax(nm) = k
-                   found1 = .true.
+                   found1    = .true.
                 endif
                 if (k /= kfmin(nm)) then
                    dz1(nm, k) = max(0.0_fp, s1v - max( - dep, zk(k - 1)))
@@ -122,33 +117,5 @@ subroutine z_kfmnmx(j         ,nmmaxj    ,kmax      ,nm        ,nmref     , &
           dz1(nm, k) = 0.0_fp
        enddo
     endif
-    !
-    ! Modification of near bed layer thicknesses to obtain 
-    ! a smoother approximation of the bed shear stress
-    ! (see also routines Z_DRYCHK and Z_DRYCHKU)
-    !
-    if (kfmax(nm) > kfmin(nm) ) then
-       k = kfmin(nm)
-       if (dz1(nm,k) < dz1(nm,k+1)) then
-          !
-          ! Ensure conservation of constituents
-          !
-          do l = 1, lstsci
-             r1ordummy(k,l) = (        r1ordummy(k+1,l)*(dz1(nm,k+1)-dz1(nm,k)) +     &
-                            &   2.0_fp*r1ordummy(k  ,l)* dz1(nm,k)                 ) / &
-                            & (dz1(nm,k+1) + dz1(nm,k))
-          enddo
-       elseif (dz1(nm,k) > dz1(nm,k+1)) then
-          !
-          ! Ensure conservation of constituents
-          !
-          do l = 1, lstsci
-             r1ordummy(k+1,l) = (        r1ordummy(k  ,l)*(dz1(nm,k)-dz1(nm,k+1)) +     &
-                              &   2.0_fp*r1ordummy(k+1,l)* dz1(nm,k+1)                 ) / &
-                              & (dz1(nm,k+1) + dz1(nm,k))
-          enddo
-       endif
-       dz1(nm, k  ) = 0.5_fp*(dep+min(zk(k+1),s1v))
-       dz1(nm, k+1) = dz1(nm,k)
-    endif
+    ! 
 end subroutine z_kfmnmx

@@ -53,18 +53,20 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    real(fp)          , pointer :: dryflc
-    real(fp)          , pointer :: depini
-    integer           , pointer :: lundia
-    real(fp)          , pointer :: dzmin
-    real(fp)          , pointer :: zbot
-    real(fp)          , pointer :: ztop
-    integer           , pointer :: m1_nhy
-    integer           , pointer :: m2_nhy
-    integer           , pointer :: n1_nhy
-    integer           , pointer :: n2_nhy
-    logical           , pointer :: nonhyd
-    logical           , pointer :: kfuv_from_restart
+    integer                 , pointer :: lundia
+    real(fp)                , pointer :: dryflc
+    real(fp)                , pointer :: depini
+    integer                 , pointer :: m1_nhy
+    integer                 , pointer :: m2_nhy
+    integer                 , pointer :: n1_nhy
+    integer                 , pointer :: n2_nhy
+    logical                 , pointer :: nonhyd
+    logical                 , pointer :: kfuv_from_restart
+    real(fp)                , pointer :: dzmin
+    real(fp)                , pointer :: zbot
+    real(fp)                , pointer :: ztop
+    integer  , dimension(:) , pointer :: modify_dzsuv
+    logical                 , pointer :: ztbml
 !
 ! Global variables
 !
@@ -133,14 +135,10 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)       :: s1u
     real(fp)       :: s1v
     real(fp)       :: s1max
-    real(fp), dimension(:,:), allocatable :: rdummy
     character(300) :: errmsg
 !
 !! executable statements -------------------------------------------------------
 !
-    dzmin              => gdp%gdzmodel%dzmin
-    zbot               => gdp%gdzmodel%zbot
-    ztop               => gdp%gdzmodel%ztop
     lundia             => gdp%gdinout%lundia
     dryflc             => gdp%gdnumeco%dryflc
     depini             => gdp%gdnumeco%depini
@@ -150,6 +148,11 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     n2_nhy             => gdp%gdnonhyd%n2_nhy
     nonhyd             => gdp%gdprocs%nonhyd
     kfuv_from_restart  => gdp%gdrestart%kfuv_from_restart
+    dzmin              => gdp%gdzmodel%dzmin
+    zbot               => gdp%gdzmodel%zbot
+    ztop               => gdp%gdzmodel%ztop
+    modify_dzsuv       => gdp%gdzmodel%modify_dzsuv
+    ztbml              => gdp%gdzmodel%ztbml
     !
     ddb     = gdp%d%ddbound
     dzmin   = 0.1_fp*dryflc
@@ -267,16 +270,14 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     ! Determine the initial number of layers and layer thickness
     ! assuming the maximum waterlevel at a velocity point (dry)
     !
-    allocate(rdummy(kmax, lstsci))
-    !
     do nm = 1, nmmax
        if (kcu(nm) /= 0) then
-          nmu = nm + icx
-          s1u = max(s1(nm), s1(nmu))
+          nmu    = nm + icx
+          s1u    = max(s1(nm), s1(nmu))
           hu(nm) = s1u + dpu(nm)
-          call z_kfmnmx(j         ,nmmaxj    ,kmax      ,nm         ,nmref     , &
+          call z_kfmnmx(j         ,kmax      ,nm         ,nmref     , &
                       & dpu(nm)   ,dzmin     ,s1u       ,kfumin     ,kfumax    , &
-                      & kfu       ,zk        ,dzu1      ,rdummy     ,lstsci    ,gdp       )
+                      & kfu       ,zk        ,dzu1      ,gdp       )
        endif
     enddo
     do nm = 1, nmmax
@@ -284,20 +285,34 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           num = nm + icy
           s1v = max(s1(nm), s1(num))
           hv(nm) = s1v + dpv(nm)
-          call z_kfmnmx(j         ,nmmaxj    ,kmax      ,nm         ,nmref     , &
+          call z_kfmnmx(j         ,kmax      ,nm         ,nmref     , &
                       & dpv(nm)   ,dzmin     ,s1v       ,kfvmin     ,kfvmax    , &
-                      & kfv       ,zk        ,dzv1      ,rdummy     ,lstsci    ,gdp       )
+                      & kfv       ,zk        ,dzv1      ,gdp       )
        endif
     enddo
     do nm = 1, nmmax
        if (kcs(nm) /= 0) then
-          call z_kfmnmx(j         ,nmmaxj    ,kmax      ,nm         ,nmref     , &
+          call z_kfmnmx(j         ,kmax      ,nm         ,nmref     , &
                       & real(dps(nm),fp) ,dzmin     ,s1(nm)    ,kfsmin    ,kfsmax    , &
-                      & kfs       ,zk        ,dzs1      ,r1(nm,:,:) ,lstsci    ,gdp       )
+                      & kfs       ,zk        ,dzs1      ,gdp       )
        endif
     enddo
     !
-    deallocate(rdummy)
+    ! ISSUE: DELFT3D-14744: If requested by keyword ZTBML 
+    ! (Z-model TauBottom Modified Layering: equistant near-bed layering for smoother bottom shear stress):
+    ! --> modify the near-bed layering to obtain smoother bottom shear stress representation in z-layer models
+    !
+    if (ztbml) then
+       !
+       ! Call with modify_dzsuv set to 1 for all 3 components, to modify both dzs1, dzu1 and dzv1
+       !
+       modify_dzsuv(:) = 1
+       call z_taubotmodifylayers(nmmax  , kmax   , lstsci , icx          , icy    , & 
+                               & kfs    , kfsmin , kfsmax , dps          , dzs1   , &
+                               & kfu    , kfumin , kfumax , dpu          , dzu1   , &
+                               & kfv    , kfvmin , kfvmax , dpv          , dzv1   , &
+                               & r1     , s1     , zk     , modify_dzsuv , gdp    )
+    endif
     !
     do nm = 1, nmmax
        do k = 1, kmax

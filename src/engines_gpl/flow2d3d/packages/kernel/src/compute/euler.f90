@@ -3,7 +3,7 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
                & kfumin    ,kfvmax    ,kfvmin    ,dzu1      ,dzv1      , &
                & u1        ,uwork     ,v1        ,vwork     , &
                & grmasu    ,grmasv    ,hu        ,hv        , &
-               & tp        ,hrms      ,sig       ,teta      ,            &
+               & tp        ,hrms      ,sig       ,teta      , &
                & grmsur    ,grmsvr    ,grfacu    ,grfacv    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
