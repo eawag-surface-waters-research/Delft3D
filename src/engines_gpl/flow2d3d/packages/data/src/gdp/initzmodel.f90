@@ -40,31 +40,13 @@ subroutine initzmodel(gdp       )
     implicit none
     !
     type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    real(fp) , pointer :: dzmin
-    real(fp) , pointer :: zbot
-    real(fp) , pointer :: ztop
-    real(fp) , pointer :: theta
-!
-! Global variables
-!
-!
 !
 !! executable statements -------------------------------------------------------
 !
-    !
-    !
-    !-----Initialize statics for zmodel
-    !
-    dzmin  => gdp%gdzmodel%dzmin
-    zbot   => gdp%gdzmodel%zbot
-    ztop   => gdp%gdzmodel%ztop
-    theta  => gdp%gdzmodel%theta
-    !
-    dzmin = 0.0
-    zbot = 0.0
-    ztop = 0.0
-    theta = 0.0
+    gdp%gdzmodel%modify_dzsuv = 0
+    gdp%gdzmodel%dzmin        = 0.0_fp
+    gdp%gdzmodel%zbot         = 0.0_fp
+    gdp%gdzmodel%ztop         = 0.0_fp
+    gdp%gdzmodel%theta        = 0.0_fp
+    gdp%gdzmodel%ztbml        = .false.
 end subroutine initzmodel
