@@ -6,7 +6,7 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                  & dps       ,dpu       ,dpv       ,s1        ,thick     , &
                  & hu        ,hv        ,dzu1      ,dzu0      ,dzv1      , &
                  & dzv0      ,dzs1      ,dzs0      ,zk        ,r1        , &
-                 & lstsci    ,gdp       )
+                 & lstsci    ,gsqs      ,qzk       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -56,6 +56,7 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     integer                 , pointer :: lundia
     real(fp)                , pointer :: dryflc
     real(fp)                , pointer :: depini
+    real(fp)                , pointer :: hdt
     integer                 , pointer :: m1_nhy
     integer                 , pointer :: m2_nhy
     integer                 , pointer :: n1_nhy
@@ -105,6 +106,7 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)                    :: dps    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: dpu    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: dpv    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: gsqs   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(out) :: hu     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(out) :: hv     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: s1     !  Description and declaration in esm_alloc_real.f90
@@ -115,6 +117,7 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(out) :: dzv0   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: dzv1   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)        :: r1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)              :: qzk    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(kmax)                         , intent(in)  :: thick  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(0:kmax)                                     :: zk
 !
@@ -142,6 +145,7 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     lundia             => gdp%gdinout%lundia
     dryflc             => gdp%gdnumeco%dryflc
     depini             => gdp%gdnumeco%depini
+    hdt                => gdp%gdnumeco%hdt
     m1_nhy             => gdp%gdnonhyd%m1_nhy
     m2_nhy             => gdp%gdnonhyd%m2_nhy
     n1_nhy             => gdp%gdnonhyd%n1_nhy
@@ -307,11 +311,12 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        ! Call with modify_dzsuv set to 1 for all 3 components, to modify both dzs1, dzu1 and dzv1
        !
        modify_dzsuv(:) = 1
-       call z_taubotmodifylayers(nmmax  , kmax   , lstsci , icx          , icy    , & 
-                               & kfs    , kfsmin , kfsmax , dps          , dzs1   , &
-                               & kfu    , kfumin , kfumax , dpu          , dzu1   , &
-                               & kfv    , kfvmin , kfvmax , dpv          , dzv1   , &
-                               & r1     , s1     , zk     , modify_dzsuv , gdp    )
+       call z_taubotmodifylayers(nmmax   ,kmax     ,lstsci   ,icx      ,icy          , & 
+                               & kfs     ,kfsmin   ,kfsmax   ,dps      ,dzs1         , &
+                               & kfu     ,kfumin   ,kfumax   ,dpu      ,dzu1         , &
+                               & kfv     ,kfvmin   ,kfvmax   ,dpv      ,dzv1         , &
+                               & r1      ,s1       ,s1       ,zk       ,modify_dzsuv , &
+                               & hdt     ,gsqs     ,kfsmax   ,qzk      ,gdp          )
     endif
     !
     do nm = 1, nmmax

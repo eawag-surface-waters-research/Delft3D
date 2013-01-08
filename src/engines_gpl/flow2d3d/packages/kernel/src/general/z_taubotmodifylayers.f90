@@ -1,8 +1,9 @@
-subroutine z_taubotmodifylayers(nmmax  , kmax   , lstsci , icx          , icy    , & 
-                              & kfs    , kfsmin , kfsmax , dps          , dzs1   , &
-                              & kfu    , kfumin , kfumax , dpu          , dzu1   , &
-                              & kfv    , kfvmin , kfvmax , dpv          , dzv1   , &
-                              & r1     , s1     , zk     , modify_dzsuv , gdp    )
+subroutine z_taubotmodifylayers(nmmax  ,kmax     ,lstsci   ,icx     ,icy          , & 
+                              & kfs    ,kfsmin   ,kfsmax   ,dps     ,dzs1         , &
+                              & kfu    ,kfumin   ,kfumax   ,dpu     ,dzu1         , &
+                              & kfv    ,kfvmin   ,kfvmax   ,dpv     ,dzv1         , &
+                              & r0     ,s0       ,s1       ,zk      ,modify_dzsuv , &
+                              & hdt    ,gsqs     ,kfsmx0   ,qzk     ,gdp          )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -62,18 +63,23 @@ subroutine z_taubotmodifylayers(nmmax  , kmax   , lstsci , icx          , icy   
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: kfsmin   !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: kfumin   !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: kfvmin   !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: kfsmx0   !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: kfsmax   !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: kfumax   !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: kfvmax   !  Description and declaration in esm_alloc_int.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                   :: dps
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                   :: dpu
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                   :: dpv
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                   :: s1
-    real(fp), dimension(0:kmax)                                  :: zk
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: dzs1
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: dzu1
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: dzv1
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)     :: r1
+    real(fp)                                        , intent(in) :: hdt
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: gsqs     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: dps      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                   :: dpu      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                   :: dpv      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                   :: s0       !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                   :: s1       !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(0:kmax)                                  :: zk       !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: dzs1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: dzu1     !  Description and declaration in esm_alloc_real.f90 
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: dzv1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)     :: r0       !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)           :: qzk      !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !
@@ -84,6 +90,7 @@ subroutine z_taubotmodifylayers(nmmax  , kmax   , lstsci , icx          , icy   
     integer  :: num
     real(fp) :: s1u
     real(fp) :: s1v
+    real(fp) :: dzh
 !
 !! executable statements -------------------------------------------------------
 !
@@ -92,36 +99,64 @@ subroutine z_taubotmodifylayers(nmmax  , kmax   , lstsci , icx          , icy   
     ! a smoother approximation of the bed shear stress,
 	! including mass conserving approach for constituents
     !
+    ! Modification of layer thickness in cell centres
+    !
     if (modify_dzsuv(1)==1) then
+       !
+       ! First ensure conservation of constituents for the modified layering
+       !
        do nm = 1, nmmax
+          !
+          ! Only in case of more than 1 layer
+          ! 
           if (kfs(nm)==1 .and. kfsmax(nm)>kfsmin(nm)) then
-              k = kfsmin(nm)
-              if (dzs1(nm,k) < dzs1(nm,k+1)) then
-                 !
-                 ! Ensure conservation of constituents
-                 !
-                 do l = 1, lstsci
-                    r1(nm,k,l) = (        r1(nm,k+1,l)*(dzs1(nm,k+1)-dzs1(nm,k)) +     &
-                               &   2.0_fp*r1(nm,k  ,l)* dzs1(nm,k)                 ) / &
-                               & (dzs1(nm,k+1) + dzs1(nm,k))
-                 enddo
-              elseif (dzs1(nm,k) > dzs1(nm,k+1)) then
-                 !
-                 ! Ensure conservation of constituents
-                 !
-                 do l = 1, lstsci
-                    r1(nm,k+1,l) = (        r1(nm,k  ,l)*(dzs1(nm,k)-dzs1(nm,k+1)) +     &
-                                 &   2.0_fp*r1(nm,k+1,l)* dzs1(nm,k+1)                 ) / &
-                                 & (dzs1(nm,k+1) + dzs1(nm,k))
-                 enddo
-              endif
-              dzs1(nm, k  ) = 0.5_fp*(real(dps(nm),fp)+min(zk(k+1),s1(nm)))
-              dzs1(nm, k+1) = dzs1(nm,k)
+             k = kfsmin(nm)
+             if (dzs1(nm,k) < dzs1(nm,k+1)) then
+                do l = 1, lstsci
+                   r0(nm,k,l) = (        r0(nm,k+1,l)*(dzs1(nm,k+1)-dzs1(nm,k)) +     &
+                              &   2.0_fp*r0(nm,k  ,l)* dzs1(nm,k)                 ) / &
+                              & (dzs1(nm,k+1) + dzs1(nm,k))
+                enddo
+             elseif (dzs1(nm,k) > dzs1(nm,k+1)) then
+                do l = 1, lstsci
+                   r0(nm,k+1,l) = (        r0(nm,k  ,l)*(dzs1(nm,k)-dzs1(nm,k+1)) +     &
+                                &   2.0_fp*r0(nm,k+1,l)* dzs1(nm,k+1)                 ) / &
+                                & (dzs1(nm,k+1) + dzs1(nm,k))
+                enddo
+             endif
+             !
+             ! Take the movement of the free surface into account if it is or was located 
+             ! in the second layer from the bottom.
+             ! Specifically if the water level crosses the interface between layers 
+             ! kfsmin(nm)+1 and kfsmin(nm)+2, the modification is adapted.
+             ! These effects are taken into account via a balancing flux qzk(nm,kfsmin(nm))
+             ! across the interface between layers kfsmin(nm) and kfsmin(nm)+1
+             !
+             if (kfsmax(nm) == k+1) then
+                if (kfsmx0(nm) == k+2) then
+                   qzk(nm,k) = qzk(nm,k) - 0.5_fp*gsqs(nm)*(s1(nm)-zk(k+1))/hdt
+                else
+                   qzk(nm,k) = qzk(nm,k) - 0.5_fp*gsqs(nm)*(s1(nm)-s0(nm))/hdt
+                endif 
+             elseif (kfsmx0(nm) == k+1) then
+                if (kfsmax(nm) == k+2) then
+                   qzk(nm,k) = qzk(nm,k) + 0.5_fp*gsqs(nm)*(s0(nm)-zk(k+1))/hdt
+                else
+                   qzk(nm,k) = qzk(nm,k) - 0.5_fp*gsqs(nm)*(s1(nm)-s0(nm))/hdt
+                endif 
+             endif
+             !
+             ! Now the actual layer remapping to an equidistant distribution of the 
+             ! two near-bed layers
+             !
+             dzh           = 0.5_fp*(dzs1(nm, k) + dzs1(nm, k+1))
+             dzs1(nm, k  ) = dzh
+             dzs1(nm, k+1) = dzs1(nm,k)
           endif
        enddo
     endif
     !
-    ! Layer thicknesses in U-velocity points
+    ! Modification of layer thickness in U-velocity points
     !
     if (modify_dzsuv(2)==1) then
        do nm = 1, nmmax
@@ -135,7 +170,7 @@ subroutine z_taubotmodifylayers(nmmax  , kmax   , lstsci , icx          , icy   
        enddo
     endif
     !
-    ! Layer thicknesses in V-velocity points
+    ! Modification of layer thickness in V-velocity points
     !
     if (modify_dzsuv(3)==1) then
        do nm = 1, nmmax

@@ -228,6 +228,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     integer(pntrsize)                    , pointer :: qv
     integer(pntrsize)                    , pointer :: qxk
     integer(pntrsize)                    , pointer :: qyk
+    integer(pntrsize)                    , pointer :: qzk
     integer(pntrsize)                    , pointer :: r0
     integer(pntrsize)                    , pointer :: r1
     integer(pntrsize)                    , pointer :: rho
@@ -583,6 +584,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     qv                  => gdp%gdr_i_ch%qv
     qxk                 => gdp%gdr_i_ch%qxk
     qyk                 => gdp%gdr_i_ch%qyk
+    qzk                 => gdp%gdr_i_ch%qzk
     r0                  => gdp%gdr_i_ch%r0
     r1                  => gdp%gdr_i_ch%r1
     rho                 => gdp%gdr_i_ch%rho
@@ -911,7 +913,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
                   & d(dps)    ,r(dpu)    ,r(dpv)    ,r(s1)     ,r(thick)  , &
                   & r(hu)     ,r(hv)     ,r(dzu1)   ,r(dzu0)   ,r(dzv1)   , &
                   & r(dzv0)   ,r(dzs1)   ,r(dzs0)   ,r(sig)    ,r(r1)     , &
-                  & lstsci    ,gdp       )
+                  & lstsci    ,r(gsqs)   ,r(qzk)    ,gdp       )
        if (error) goto 9999
        call inicut(lundia    ,error     ,runid     ,nmax      ,mmax      , &
                  & nmaxus    ,kmax      ,flcut     ,fl45      ,i(kcu)    , &

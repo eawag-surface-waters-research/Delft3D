@@ -81,6 +81,7 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    real(fp)               , pointer :: hdt
     integer , dimension(:) , pointer :: modify_dzsuv
     logical                , pointer :: ztbml
     include 'flow_steps_f.inc'
@@ -262,6 +263,7 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
 !
 !! executable statements -------------------------------------------------------
 !
+    hdt                => gdp%gdnumeco%hdt
     modify_dzsuv       => gdp%gdzmodel%modify_dzsuv
     ztbml              => gdp%gdzmodel%ztbml
     !
@@ -413,11 +415,12 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
           !
           modify_dzsuv(1:2) = 1
           modify_dzsuv(3)   = 0
-          call z_taubotmodifylayers(nmmax  , kmax   , lstsci , icx          , icy    , & 
-                                  & kfs    , kfsmin , kfsmax , dps          , dzs1   , &
-                                  & kfu    , kfumin , kfumax , dpu          , dzu1   , &
-                                  & kfv    , kfvmin , kfvmax , dpv          , dzv1   , &
-                                  & r0     , s1     , zk     , modify_dzsuv , gdp    )
+          call z_taubotmodifylayers(nmmax  ,kmax     ,lstsci   ,icx     ,icy          , & 
+                                  & kfs    ,kfsmin   ,kfsmax   ,dps     ,dzs1         , &
+                                  & kfu    ,kfumin   ,kfumax   ,dpu     ,dzu1         , &
+                                  & kfv    ,kfvmin   ,kfvmax   ,dpv     ,dzv1         , &
+                                  & r0     ,s0       ,s1       ,zk      ,modify_dzsuv , &
+                                  & hdt    ,gsqs     ,kfsmx0   ,qzk     ,gdp          )
        endif
        !
        ! Compute Volume and Areas to be used in routines that computes 
@@ -597,11 +600,12 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
           modify_dzsuv(1) = 1
           modify_dzsuv(2) = 0
           modify_dzsuv(3) = 1
-          call z_taubotmodifylayers(nmmax  , kmax   , lstsci , icx          , icy    , & 
-                                  & kfs    , kfsmin , kfsmax , dps          , dzs1   , &
-                                  & kfu    , kfumin , kfumax , dpu          , dzu1   , &
-                                  & kfv    , kfvmin , kfvmax , dpv          , dzv1   , &
-                                  & r0     , s1     , zk     , modify_dzsuv , gdp    )
+          call z_taubotmodifylayers(nmmax  ,kmax     ,lstsci   ,icx      ,icy          , & 
+                                  & kfs    ,kfsmin   ,kfsmax   ,dps      ,dzs1         , &
+                                  & kfu    ,kfumin   ,kfumax   ,dpu      ,dzu1         , &
+                                  & kfv    ,kfvmin   ,kfvmax   ,dpv      ,dzv1         , &
+                                  & r0     ,s0       ,s1       ,zk       ,modify_dzsuv , &
+                                  & hdt    ,gsqs     ,kfsmx0   ,qzk      ,gdp          )  
        endif
        !
        ! Compute Volume and Areas to be used in routines that computes 
