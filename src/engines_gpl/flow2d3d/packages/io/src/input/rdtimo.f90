@@ -59,6 +59,7 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     type (flwoutputtype)               , pointer :: flwoutput
     integer                            , pointer :: ifis
     integer                            , pointer :: itis
+    logical                            , pointer :: ztbml
 !
 ! Global variables
 !
@@ -140,6 +141,7 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     flwoutput      => gdp%gdflwpar%flwoutput
     ifis           => gdp%gdrdpara%ifis
     itis           => gdp%gdrdpara%itis
+    ztbml          => gdp%gdzmodel%ztbml
     !
     lerror = .false.
     newkw  = .true.
@@ -471,6 +473,13 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     ! Flag for output of vertical coordinates of layer interfaces to the MAP-file
     !
+    if (ztbml) then
+       !
+       ! In case of modified layering for smooth bottom shear stress in z-layer models:
+       ! write layering to output file by default.
+       !
+       flwoutput%layering = .true.
+    endif
     call prop_get_logical(gdp%mdfile_ptr, '*', 'LayOut' , flwoutput%layering)
     !
     ! Flag for writing warnings concerning too high advective Courant numbers 

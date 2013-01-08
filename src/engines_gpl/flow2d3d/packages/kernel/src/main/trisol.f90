@@ -1191,24 +1191,26 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     !
     ! f0isf1 moved to here for OpenDA (before dmpveg since it uses s0)
     !
+    stage = 'stage1'
+    !
     call timer_start(timer_f0isf1, gdp)
-       call f0isf1(stage     ,dischy    ,nst       ,zmodel    ,jstart    , &
-                 & nmmax     ,nmmaxj    ,nmax      ,kmax      ,lstsci    , &
-                 & ltur      ,nsrc      ,i(kcu)    ,i(kcv)    ,i(kcs)    , &
-                 & i(kfs)    ,i(kfu)    ,i(kfv)    ,i(kfsmin) ,i(kfsmax) , &
-                 & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,i(kfsmx0) , &
-                 & i(kfumx0) ,i(kfvmx0) ,i(kfsz0)  ,i(kfuz0)  ,i(kfvz0)  , &
-                 & i(kfsz1)  ,i(kfuz1)  ,i(kfvz1)  , &
-                 & r(s0)     ,r(s1)     ,r(u0)     , &
-                 & r(u1)     ,r(v0)     ,r(v1)     ,r(volum0) ,r(volum1) , &
-                 & r(r0)     ,r(r1)     ,r(rtur0)  ,r(rtur1)  ,r(disch)  , &
-                 & r(discum) ,r(hu)     ,r(hv)     ,r(dzu1)   ,r(dzv1)   , &
-                 & r(dzs1)   ,r(dzu0)   ,r(dzv0)   ,r(dzs0)   ,r(qxk)    , &
-                 & r(qyk)    ,r(qu)     ,r(qv)     ,r(s00)    ,r(w0)     , &
-                 & r(w1)     ,r(p0)     ,r(p1)     ,r(hu0)    ,r(hv0)    , &
-                 & r(ewabr0) ,r(ewabr1) , &
-                 & r(ewave0) ,r(ewave1) ,r(eroll0) ,r(eroll1) ,roller    , &
-                 & gdp       )
+    call f0isf1(stage     ,dischy    ,nst       ,zmodel    ,jstart    , &
+              & nmmax     ,nmmaxj    ,nmax      ,kmax      ,lstsci    , &
+              & ltur      ,nsrc      ,i(kcu)    ,i(kcv)    ,i(kcs)    , &
+              & i(kfs)    ,i(kfu)    ,i(kfv)    ,i(kfsmin) ,i(kfsmax) , &
+              & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,i(kfsmx0) , &
+              & i(kfumx0) ,i(kfvmx0) ,i(kfsz0)  ,i(kfuz0)  ,i(kfvz0)  , &
+              & i(kfsz1)  ,i(kfuz1)  ,i(kfvz1)  , &
+              & r(s0)     ,r(s1)     ,r(u0)     , &
+              & r(u1)     ,r(v0)     ,r(v1)     ,r(volum0) ,r(volum1) , &
+              & r(r0)     ,r(r1)     ,r(rtur0)  ,r(rtur1)  ,r(disch)  , &
+              & r(discum) ,r(hu)     ,r(hv)     ,r(dzu1)   ,r(dzv1)   , &
+              & r(dzs1)   ,r(dzu0)   ,r(dzv0)   ,r(dzs0)   ,r(qxk)    , &
+              & r(qyk)    ,r(qu)     ,r(qv)     ,r(s00)    ,r(w0)     , &
+              & r(w1)     ,r(p0)     ,r(p1)     ,r(hu0)    ,r(hv0)    , &
+              & r(ewabr0) ,r(ewabr1) , &
+              & r(ewave0) ,r(ewave1) ,r(eroll0) ,r(eroll1) ,roller    , &
+              & gdp       )
     call timer_stop(timer_f0isf1, gdp)
     !
     if (dpmveg) then
@@ -1649,8 +1651,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        !
        ! Computation of V1, i.e. evaluate momentum equation for one half
        ! timest calculate HV and set KFV = 0 for HV < HTRSH (.5*DRYFLC)
-       !
-       stage = 'stage1'
        !
        call timer_start(timer_1stadi, gdp)
        call adi(dischy    ,solver    ,icreep    ,stage     ,nst       , &
@@ -2255,6 +2255,8 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        ! Reset arrays for next half time step
        ! S0=S1, U0=U1, V0=V1, R0=R1 etc
        !
+       stage = 'stage2'
+       !
        call timer_start(timer_f0isf1, gdp)
        call f0isf1(stage     ,dischy    ,nst       ,zmodel    ,jstart    , &
                  & nmmax     ,nmmaxj    ,nmax      ,kmax      ,lstsci    , &
@@ -2656,8 +2658,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        !
        ! Computation of U1, i.e. evaluate momentum equation for one half
        ! timest calculate HU and set KFU = 0 for HU < HTRSH (.5*DRYFLC)
-       !
-       stage = 'stage2'
        !
        call timer_start(timer_2ndadi, gdp)
        call adi(dischy    ,solver    ,icreep    ,stage     ,nst       , &

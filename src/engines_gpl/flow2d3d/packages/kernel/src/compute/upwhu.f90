@@ -139,8 +139,14 @@ subroutine upwhu(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     !
     do nm = 1, nmmax
        nmu = nm + icx
-       if (.not. zmodel) then
+       if (zmodel) then
+          if (nonhyd .and. nh_level==nh_full) then
             hu(nm) = 0.5*(s0(nm) + s0(nmu)) + dpu(nm)
+          else
+            hu(nm) = max(s0(nmu), s0(nm)) + dpu(nm)
+          endif
+       else
+          hu(nm) = 0.5*(s0(nm) + s0(nmu)) + dpu(nm)
        endif
        if (kcu(nm) == 1) then
           if ( hu(nm) < dco    .or. &
