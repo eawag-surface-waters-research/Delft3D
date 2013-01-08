@@ -2679,6 +2679,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/qp_createfig.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_createscroller.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_datafield_name2prop.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_defaultaxessettings.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/qp_dimsqueeze.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_export.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_figurebars.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_file2function.m -text
@@ -2700,6 +2701,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/qp_preferences_interface.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_prefs.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_proj_rotatepole.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_refresh.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/qp_scalarfield.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_settings.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_showabout.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_state_startup.m -text
