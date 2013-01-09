@@ -106,6 +106,7 @@ subroutine z_solcg(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
     real(fp)                 :: rk
     real(fp)                 :: rk0
     real(fp)                 :: rkinf
+    real(fp)                 :: rkinf0
     real(fp)      , external :: z_ainpro
     character(30)            :: errtxt
 !
@@ -139,7 +140,9 @@ subroutine z_solcg(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
     iter = iter + 1
     !
     rk    = 0.0_fp
+    rk0   = 0.0_fp
     rkinf = 0.0_fp
+    rkinf0 = 0.0_fp
     do m = m1_nhy, m2_nhy
        nmst = nmstart + (m - m1_nhy)*icxy
        do nm = nmst, nmst + ndelta
@@ -147,9 +150,9 @@ subroutine z_solcg(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
              if (kfsz0(nm, k) /= 0) then
                 if (l2norm) then
                    rk = rk + rj(nm, k)*rj(nm, k)
-                   if (abs(rj(nm, k))>abs(rkinf)) rkinf = abs(rj(nm, k))
-                else
-                   if (abs(rj(nm, k))>abs(rk)) rk = abs(rj(nm, k))
+                endif
+                if (abs(rj(nm, k)) > rkinf) then
+                   rkinf = abs(rj(nm, k))
                 endif
              endif
           enddo
@@ -157,7 +160,8 @@ subroutine z_solcg(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
     enddo
     !
     if (iter == 1) then
-       rk0 = rk
+       rk0    = rk
+       rkinf0 = rkinf
     endif
     if (rk0 < 1.0e-6_fp) then
        rk0 = 1.0e-6_fp
@@ -167,12 +171,13 @@ subroutine z_solcg(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
     ! Use L2NORM or Linfinity norm
     !
     if (l2norm) then
-       !       write (lundia,*) 'iter:', iter,sqrt(rk)
-       if ((sqrt(rk)<sqrt(rk0)*epsnh .and. iter>0) .or. (rkinf<1.0e-2_fp)) goto 999
-    !       write (lundia,*) 'iter:', iter,abs(rk)
-    elseif ((abs(rk)<abs(rk0)*epsnh .and. iter>0) .or. (rkinf<1.0e-2_fp)) then
-       goto 999
+       if ((sqrt(rk)<sqrt(rk0)*epsnh .and. iter>0) .or. rkinf<1.0e-2_fp) then
+          goto 999
+       endif
     else
+       if ((rkinf<rkinf0*epsnh .and. iter>0) .or. rkinf<1.0e-2_fp) then
+          goto 999
+       endif
     endif
     !
     ! product matrix vector
@@ -195,7 +200,7 @@ subroutine z_solcg(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
           do k = 1, kmax
              if (kfsz0(nm, k) /= 0) then
                 pnhcor(nm, k) = pnhcor(nm, k) + alphaj*pj(nm, k)
-                rj(nm, k) = rj(nm, k) - alphaj*apj(nm, k)
+                rj(nm, k)     = rj(nm, k) - alphaj*apj(nm, k)
              endif
           enddo
        enddo
@@ -228,7 +233,7 @@ subroutine z_solcg(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
     !
     ! convergence check
     !
-    if (iter>nhiter) then
+    if (iter > nhiter) then
        write (errtxt(1:8), '(i8)') nst
        write (errtxt(25:30), '(i6)') nhiter
        call prterr(lundia    ,'Z021'    ,trim(errtxt)    )
@@ -271,12 +276,10 @@ subroutine z_solcg(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
     if (l2norm) then
        conv = sqrt(rk) / sqrt(rk0)
        conv = conv**(1.0_fp/real(max(1, iter),fp))
-    !       write (lundia,*) 'conv-l2', conv,iter,sqrt(rk0),sqrt(rk),
-    !    *        rkinf
+       !write (lundia,*) 'conv-l2', conv,iter,sqrt(rk0),sqrt(rk),rkinf
     else
-       conv = abs(rk) / abs(rk0)
+       conv = rkinf / rkinf0
        conv = conv**(1.0_fp/real(max(1, iter),fp))
-    !       write (lundia,*) 'conv-linf', conv,iter,abs(rk0),abs(rk),
-    !    *        rkinf
+       !write (lundia,*) 'conv-linf', conv,iter,rkinf0,rkinf
     endif
 end subroutine z_solcg

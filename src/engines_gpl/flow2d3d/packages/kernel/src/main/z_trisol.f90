@@ -466,6 +466,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     character*20 , dimension(:)          , pointer :: procs
     logical                              , pointer :: dryrun
     integer(pntrsize)                    , pointer :: typbnd
+    integer      , dimension(:)          , pointer :: modify_dzsuv
+    logical                              , pointer :: ztbml
 !    
     include 'tri-dyn.igd'
 !
@@ -910,6 +912,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     dryrun              => gdp%gdtmpfil%dryrun
     nrcmp               => gdp%gdtfzeta%nrcmp
     typbnd              => gdp%gdr_i_ch%typbnd
+    modify_dzsuv        => gdp%gdzmodel%modify_dzsuv
+    ztbml               => gdp%gdzmodel%ztbml
     !
     icx     = 0
     icy     = 0
@@ -2332,6 +2336,25 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                       & i(kfsmin) ,i(kfsmax) ,i(kfsmx0) ,r(s1)     ,r(r1)     , &
                       & d(dps)    ,r(qxk)    ,r(qyk)    ,r(w1)     ,lstsci    , &
                       & r(dzs1)   ,r(sig)    ,nst       ,gdp       )
+          !
+          ! ISSUE: DELFT3D-14744: If requested by keyword ZTBML 
+          ! (Z-model TauBottom Modified Layering: equistant near-bed layering for smoother bottom shear stress):
+          ! --> modify the near-bed layering to obtain smoother bottom shear stress representation in z-layer models
+          !
+          if (ztbml) then
+             !
+             ! Call with modify_dzsuv set to 1 only for the first component, to modify dzs1 only
+             ! (and possibly R1 and qzk)
+             !
+             modify_dzsuv(1)   = 1
+             modify_dzsuv(2:3) = 0
+             call z_taubotmodifylayers(nmmax   ,kmax       ,lstsci    ,icx      ,icy          , & 
+                                     & i(kfs)  ,i(kfsmin)  ,i(kfsmax) ,d(dps)   ,r(dzs1)      , &
+                                     & i(kfu)  ,i(kfumin)  ,i(kfumax) ,r(dpu)   ,r(dzu1)      , &
+                                     & i(kfv)  ,i(kfvmin)  ,i(kfvmax) ,r(dpv)   ,r(dzv1)      , &
+                                     & r(r1)   ,r(s00)     ,r(s1)     ,r(sig)   ,modify_dzsuv , &
+                                     & hdt     ,r(gsqs)    ,i(kfsmx0) ,r(qzk)   ,gdp          )
+          endif
           !
           ! Re-Compute Volume (Areas actually need no update) to be used in routines that computes 
           ! the transport of matter (consistency with WAQ)

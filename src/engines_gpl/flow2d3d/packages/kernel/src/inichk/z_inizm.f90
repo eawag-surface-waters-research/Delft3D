@@ -309,6 +309,7 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     if (ztbml) then
        !
        ! Call with modify_dzsuv set to 1 for all 3 components, to modify both dzs1, dzu1 and dzv1
+       ! (and possibly R1 and qzk)
        !
        modify_dzsuv(:) = 1
        call z_taubotmodifylayers(nmmax   ,kmax     ,lstsci   ,icx      ,icy          , & 
