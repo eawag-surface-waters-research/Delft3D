@@ -1064,14 +1064,14 @@ subroutine z_difu_difhor_expl( )
           if (kfs(nm)*kfs(nmu) == 1) then
              do k = kfumin(nm), kmax
                 if (kfuz0(nm, k)==1 .and. kfsz0(nm, k)*kfsz0(nmu, k)==1) then
-                   cl      = r0   (nm , k, l)
-                   difl    = dicuv(nm , k)
-                   cr      = r0   (nmu, k, l)
-                   difr    = dicuv(nmu, k)
-                   flux    = 0.5_fp*(cr - cl)*(difl + difr)/(0.7_fp*gvu(nm))
-                   maskval = max(0, abs(2 - kcs(nmu)))
-                   ddkl (nm , k, l) = ddkl (nm , k, l) + areau(nm, k)*flux*real(maskval,fp)
+                   cl               = r0   (nm , k, l)
+                   difl             = dicuv(nm , k)
+                   cr               = r0   (nmu, k, l)
+                   difr             = dicuv(nmu, k)
+                   flux             = 0.5_fp*(cr - cl)*(difl + difr)/(0.7_fp*gvu(nm))
                    maskval          = max(0, abs(2 - kcs(nm)))
+                   ddkl (nm , k, l) = ddkl (nm , k, l) + areau(nm, k)*flux*real(maskval,fp)
+                   maskval          = max(0, abs(2 - kcs(nmu)))
                    ddkl (nmu, k, l) = ddkl (nmu, k, l) - areau(nm, k)*flux*real(maskval,fp)
                 endif
              enddo
@@ -1087,14 +1087,14 @@ subroutine z_difu_difhor_expl( )
           if (kfs(nm)*kfs(num) == 1) then
              do k = kfvmin(nm), kmax
                 if (kfvz0(nm, k)==1 .and. kfsz0(nm, k)*kfsz0(num, k)==1) then
-                   cl      = r0   (nm , k, l)
-                   difl    = dicuv(nm , k)
-                   cr      = r0   (num, k, l)
-                   difr    = dicuv(num, k)
-                   flux    = 0.5_fp*(cr - cl)*(difl + difr)/(0.7_fp*guv(nm))
-                   maskval = max(0, abs(2 - kcs(num)))
-                   ddkl (nm , k, l) = ddkl (nm , k, l) + areav(nm, k)*flux*real(maskval,fp)
+                   cl               = r0   (nm , k, l)
+                   difl             = dicuv(nm , k)
+                   cr               = r0   (num, k, l)
+                   difr             = dicuv(num, k)
+                   flux             = 0.5_fp*(cr - cl)*(difl + difr)/(0.7_fp*guv(nm))
                    maskval          = max(0, abs(2 - kcs(nm)))
+                   ddkl (nm , k, l) = ddkl (nm , k, l) + areav(nm, k)*flux*real(maskval,fp)
+                   maskval          = max(0, abs(2 - kcs(num)))
                    ddkl (num, k, l) = ddkl (num, k, l) - areav(nm, k)*flux*real(maskval,fp)
                 endif
              enddo
@@ -1131,11 +1131,11 @@ subroutine z_difu_difhor_impl( )
           mink     = min(mink_old  ,mink_new)
           do k = kfumin(nm), mink   !_old
              if (kfuz0(nm, k)==1 .and. kfsz0(nm, k)*kfsz0(nmu, k)==1) then
-                difl = dicuv(nm, k)
-                difr = dicuv(nmu, k)
-                flux = 0.5_fp * (difl + difr) / (0.7_fp*gvu(nm))
-                maskval1    = max(0, abs(2 - kcs(nmu)))
-                maskval2    = max(0, abs(2 - kcs(nm )))
+                difl        = dicuv(nm, k)
+                difr        = dicuv(nmu, k)
+                flux        = 0.5_fp * (difl + difr) / (0.7_fp*gvu(nm))
+                maskval1    = max(0, abs(2 - kcs(nm )))
+                maskval2    = max(0, abs(2 - kcs(nmu)))
                 bux(nm , k) = bux(nm , k) - areau(nm, k)*flux*real(maskval1,fp)
                 bdx(nmu, k) = bdx(nmu, k) - areau(nm, k)*flux*real(maskval2,fp)
                 do l = 1, lstsci
@@ -1157,11 +1157,11 @@ subroutine z_difu_difhor_impl( )
           mink     = min(mink_old  ,mink_new)
           do k = kfvmin(nm), mink      !_old
              if (kfvz0(nm, k)==1 .and. kfsz0(nm, k)*kfsz0(num, k)==1) then
-                difl = dicuv(nm, k)
-                difr = dicuv(num, k)
-                flux = 0.5_fp * (difl + difr) / (0.7_fp*guv(nm))
-                maskval1    = max(0, abs(2 - kcs(num)))
-                maskval2    = max(0, abs(2 - kcs(nm )))
+                difl        = dicuv(nm, k)
+                difr        = dicuv(num, k)
+                flux        = 0.5_fp * (difl + difr) / (0.7_fp*guv(nm))
+                maskval1    = max(0, abs(2 - kcs(nm)))
+                maskval2    = max(0, abs(2 - kcs(num)))
                 buy(nm , k) = buy(nm , k) - areav(nm, k)*flux*real(maskval1,fp)
                 bdy(num, k) = bdy(num, k) - areav(nm, k)*flux*real(maskval2,fp)
                 do l = 1, lstsci
@@ -1184,13 +1184,13 @@ subroutine z_difu_solv_expl( )
     call timer_start(timer_difu_solve1, gdp) 
     do nm = 1, nmmax
        if (kfs(nm)/=0) then
-          mink = kfsmin(nm)
-          kmin = min(kfsmx0(nm), kfsmax(nm))
-          bi = 1./bbkl(nm, mink, l)
+          mink              = kfsmin(nm)
+          kmin              = min(kfsmx0(nm), kfsmax(nm))
+          bi                = 1./bbkl(nm, mink, l)
           cckl(nm, mink, l) = cckl(nm, mink, l)*bi
           ddkl(nm, mink, l) = ddkl(nm, mink, l)*bi
           do k = mink + 1, kmin
-             bi = 1./(bbkl(nm, k, l) - aakl(nm, k, l)*cckl(nm, k - 1, l))
+             bi             = 1./(bbkl(nm, k, l) - aakl(nm, k, l)*cckl(nm, k - 1, l))
              cckl(nm, k, l) = cckl(nm, k, l) * bi
              ddkl(nm, k, l) = (ddkl(nm, k, l) - aakl(nm, k, l)*ddkl(nm, k - 1, l)) * bi
           enddo
@@ -1261,7 +1261,7 @@ subroutine z_difu_solv_impl( )
           mink = kfsmin(nm)
           kmin = min(kfsmx0(nm), kfsmax(nm))
           do k = mink + 1, kmin
-             bi = 1.0_fp/(bbkl(nm, k, l) - aakl(nm, k, l)*cckl(nm, k - 1, l))
+             bi             = 1.0_fp/(bbkl(nm, k, l) - aakl(nm, k, l)*cckl(nm, k - 1, l))
              bbkl(nm, k, l) = bi
              cckl(nm, k, l) = cckl(nm, k, l) * bi
           enddo
