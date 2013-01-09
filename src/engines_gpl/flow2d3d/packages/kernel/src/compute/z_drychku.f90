@@ -222,11 +222,6 @@ subroutine z_drychku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
           !
           do k = kmax, kfumin(nm), -1
              kfuz1(nm, k) = 0
-             !if (k == 1) then
-             !   zkk = zbot
-             !else
-             !   zkk = zk(k - 1)
-             !endif
              !
              ! 15-3-2007 change to allow S1 > ZK(KMAX), needed for NH-models
              !

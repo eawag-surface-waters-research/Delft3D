@@ -97,9 +97,13 @@ subroutine z_taubotmodifylayers(nmmax  ,kmax     ,lstsci   ,icx     ,icy        
     !
     ! ISSUE: DELFT3D-14744: Modification of near bed layer thicknesses to obtain 
     ! a smoother approximation of the bed shear stress,
-	! including mass conserving approach for constituents
     !
     ! Modification of layer thickness in cell centres
+    !     (including mass conserving approach for constituents)
+    ! Modification of layer thickness in velocity points
+    !     (is additionally done in subroutine z_checku in case of flooding)
+    !
+    ! First ensure conservation of constituents for the modified layering
     !
     if (modify_dzsuv(1)==1) then
        !
