@@ -284,23 +284,22 @@ subroutine z_drychku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
           ! A "trick" to ensure that "wet" cells that were dry
           ! obtain a velocity
           !
-          !if (kfumax(nm) > kfumx0(nm)) then
+          ! If it is a dry point, the velocity is not copied.
+          !
+          if (kfu(nm) /= 0) then 
              do k = kfumx0(nm)+1, kfumax(nm)
                 u1(nm, k) = u1(nm, kfumx0(nm))
-                !qxk(nm,k) = dzu1(nm,k) * u1(nm,k) * guu(nm)
              enddo
              if (kfsmax(nm) >= kfsmax(nmu)) then
                 do k = kfumax(nm)+1, kfsmax(nm)
                    u1(nm, k) = u1(nm, kfumx0(nm))
-                   !qxk(nm,k) = dzs1(nm,k) * u1(nm,k) * guu(nm)
                 enddo
              else
                 do k = kfumax(nm)+1, kfsmax(nmu)
                    u1(nm, k) = u1(nm, kfumx0(nm))
-                   !qxk(nm,k) = dzs1(nmu,k) * u1(nm,k) * guu(nm)
                 enddo
              endif
-          !endif
+          endif
        endif
     enddo
     !
