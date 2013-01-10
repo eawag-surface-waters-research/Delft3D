@@ -412,7 +412,7 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
        if (ztbml) then
           !
           ! Call with modify_dzsuv(1:2) = 1, to modify dzs1 and dzu1
-          ! (and possibly R1 and qzk)
+          ! (and possibly R0 and qzk)
           !
           modify_dzsuv(1:2) = 1
           modify_dzsuv(3)   = 0
@@ -597,7 +597,7 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
        if (ztbml) then
           !
           ! Call with modify_dzsuv(1) = 1 and modify_dzsuv(3) = 1, to modify dzs1 and dzv1
-          ! (and possibly R1 and qzk)
+          ! (and possibly R0 and qzk)
           !
           modify_dzsuv(1) = 1
           modify_dzsuv(2) = 0
