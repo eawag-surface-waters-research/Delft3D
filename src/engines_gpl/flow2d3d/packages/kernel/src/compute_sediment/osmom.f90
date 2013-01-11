@@ -64,6 +64,7 @@ subroutine osmom(hrms      ,diepte    ,tp        ,g         ,cr        , &
 !
 ! Local variables
 !
+    integer                        :: ierr
     integer                        :: if
     integer                        :: ih
     integer                        :: ih0
@@ -71,8 +72,6 @@ subroutine osmom(hrms      ,diepte    ,tp        ,g         ,cr        , &
     integer                        :: it
     integer                        :: it0
     integer                        :: it1
-    integer                        :: lenpat
-    integer                        :: lpathd
     integer                        :: utab
     integer, external              :: newunit
     logical                        :: error
@@ -104,24 +103,23 @@ subroutine osmom(hrms      ,diepte    ,tp        ,g         ,cr        , &
 !
 !! executable statements -------------------------------------------------------
 !
-    !
-    if (itabel==0) then
+    if (itabel == 0) then
        !
        ! This part is only performed the first time
        ! The central moments are read from file momtab and put in 3d-array 'tabel'.
        !
        error = .false.
-       call getmp(error     ,pathd     )
+       call getmp(error, pathd)
        if (error) then
-          write (*, '(A,/,A,A)') ' File tabmom not found', 'path = ', pathd
+          write (*, '(a)') "ERROR: Directory ""default"" not found"
           stop
        endif
-       lenpat = len(pathd)
-       lpathd = index(pathd, ' ')
-       if (lpathd==0) lpathd = lenpat + 1
-       lpathd = lpathd - 1
        utab = newunit()
-       open (utab, file = pathd(:lpathd) // 'tabmom')
+       open (utab, file = trim(pathd) // 'tabmom', status='old', action='read', iostat=ierr)
+       if (ierr /= 0) then
+          write (*, '(3a)') "ERROR: File """,trim(pathd) // 'tabmom', """ not found"
+          stop
+       endif
        read (utab, *) iih, iit, dh, tstep
        do it = 1, iit
           do ih = 1, iih

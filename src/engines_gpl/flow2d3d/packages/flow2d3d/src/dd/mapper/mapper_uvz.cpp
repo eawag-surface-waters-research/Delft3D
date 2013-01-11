@@ -344,6 +344,7 @@ void D3dFlowMapper::CheckDepthUV(
                     printf("WARNING: Depth difference on couple boundary above %f\n",threshold);
                     printf("         context[%2d].DPU(%2d,%2d) = %f , context[%2d].DPU(%2d,%2d) = %f\n",
                         ctx, m2, n, thisDpu, oCtx, oM2, oN, otherDpu);
+                    fflush(stdout);
                 }
                 // printf("QXK(%2d,%2d): %f other QXK(%2d,%2d): %f\n",
                         // m2, n, qxk, oM2,oN, otherqxk);
@@ -375,6 +376,7 @@ void D3dFlowMapper::CheckDepthUV(
                     printf("WARNING: Depth difference on couple boundary above %f\n",threshold);
                     printf("context[%2d].DPV(%2d,%2d) = %f , context[%2d].DPV(%2d,%2d) = %f\n",
                         ctx, m, n2, thisDpv, oCtx, oM, oN2, otherDpv);
+                    fflush(stdout);
                 }
             }
         }

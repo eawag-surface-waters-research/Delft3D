@@ -248,7 +248,6 @@ CUTIL_SYSTEM (
 static    int     getpath         (char **, char **, char **, char *);
 static    void    report_error    (char *);
 
-
 void STDCALL
 CUTIL_GETMP (
 #if !defined (WIN32)
@@ -263,38 +262,47 @@ CUTIL_GETMP (
 #endif
     ) {
 
-    char *  arch        = NULL;
-    char *  d3d_home    = NULL;
-
-    char *  envpath        = NULL;
     char    slash;                    /* UNIX or Windows directory separator */
-    char    buf [10000];
+    char    buf [1000];
+    char    path_buffer[1000];
+    char    drive[1000];
+    char    dir[1000];
+    char    fname[1000];
+    char    ext[1000];
+    int     err;
+    int     len;
+    len = 1000;
+    /*----  Get and validate default directory using the location of this binary */
 
-
-    /*----  Get and validate paths from environment variables */
-
-    if (getpath (&arch, &d3d_home, &envpath, &slash) == FAILURE) {
-    *result = FAILURE;
-    return;
+#ifdef WIN32
+    slash = '\\';
+    GetModuleFileName(NULL,path_buffer,len);
+    err = _splitpath_s(path_buffer, drive, len, dir, len, fname, len, ext, len);
+    if (err != 0) {
+        report_error ("Unable to read/split the executable directory");
+        *result = FAILURE;
+        return;
         }
+    sprintf (path_buffer, "%s%s", drive, dir);
+#else
+    slash = '/';
+    readlink("/proc/self/exe", path_buffer,len);
+    sprintf (path_buffer, "%s%c", dirname(path_buffer), slash);
+#endif
+    /*---- release version: directory default should be next to directory bin */
+    sprintf (buf, "%s..%cdefault", path_buffer, slash);
 
-    /*----  Assemble final path string */
-
-    if (envpath = d3d_home) {
-        if (arch == NULL)
-            sprintf (buf, "%s%cflow%cdefault%c", envpath, slash, slash, slash);
-        else
-            sprintf (buf, "%s%c%s%cflow%cdefault%c", envpath, slash, arch, slash, slash, slash);
+    if (!isdir(buf)) {
+        /*---- Try the (Windows) debug location way down in the source code tree itself */
+        sprintf (buf, "%s..%c..%c..%cflow2d3d%cdefault", path_buffer, slash, slash, slash, slash);
+        if (!isdir(buf)) {
+            report_error ("Directory \"default\" does not exist");
+            *result = FAILURE;
+            return;
+            }
         }
-    else
-        sprintf (buf, "%s%cdefault%c", envpath, slash, slash);
-
-    if ((int) strlen (buf) >= *lenpath) {
-        report_error ("The D3D_HOME environment variable is too long");
-    *result = FAILURE;
-    return;
-        }
-
+    /*---- The path should end with a slash. Must be added after being checked with isdir. */
+    sprintf (buf, "%s%c", buf, slash);
     cstr2fstr (buf, *lenpath, path);
     *result = SUCCESS;
     }
@@ -414,7 +422,6 @@ getpath (
 
     return SUCCESS;
 }
-
 
 static void
 report_error (
