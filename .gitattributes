@@ -2612,6 +2612,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/gensurface.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/gentext.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/gentextfld.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/geodist.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/geomesh.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/get_matching_grid.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/get_nondialogs.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/getdata.m -text
