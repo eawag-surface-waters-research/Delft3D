@@ -254,7 +254,10 @@ subroutine rdhyb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           if (irou==0) then
              call prterr(lundia    ,'V048'    ,' '       )
              !
-             rouwav = ccdef
+             ! It should be possible to select no wave effect on shear stress
+             ! so instead of: rouwav = ccdef
+             !
+             rouwav = '    '
           endif
        endif
     else

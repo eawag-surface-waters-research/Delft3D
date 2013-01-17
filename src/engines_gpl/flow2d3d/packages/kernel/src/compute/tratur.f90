@@ -725,90 +725,56 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
           ! first: determine length (vertical) of distribution of
           !        turbulent energy and fill production term in right hand side
           !
+          ! The extent of wave dissipation due to breaking of waves
+          ! is HRMS from the free surface downwards.
+          !
           if (wave) then
              do nm = 1, nmmax
                 if (kfs(nm) == 1) then
-                   h0         = max(0.01_fp, s1(nm) + real(dps(nm),fp))
-                   hsurft(nm) = -sig(1) * h0
-                   kdismx(nm) = 1
-                   do k = 2, kmax - 1
-                      if (0.5*hrms(nm) < ( - sig(k)*h0)) then
-                         hsurft(nm) = -sig(k-1) * h0
-                         kdismx(nm) = k - 1
-                         !
-                         ! note kdismx is set to the layer number that the distribution stops in the
-                         ! MIDDLE of
+                   h0           = max(0.01_fp, s1(nm) + real(dps(nm),fp))
+                   pkwav(nm, 0) =  2.0_fp*(dis(nm,2)+dis(nm,3))/(rhow*max(hrms(nm),0.01_fp))
+                   zw = 0.0_fp
+                   do k = 1, kmax
+                      zw = zw+thick(k)*h0
+                      if (hrms(nm) > zw) then
+                         pkwav(nm,k) = pkwav(nm,0)*(1.0_fp - zw/(hrms(nm)))
+                         ddk(nm,k)   = ddk(nm,k) + pkwav(nm, k)
+                      else
+                         kdismx(nm) = k-1
                          !
                          exit
                       endif
                    enddo
-                endif
-             enddo
-             !
-             ! If kdismx(nm).eq.1 then Pkwav only in Top half layer
-             !
-             ! production term due to breaking of waves
-             !
-             ! second: determine turbulence across vertical
-             !
-             do nm = 1, nmmax
-                if (kfs(nm) == 1) then
-                   h0    = max(0.01_fp, s1(nm) + real(dps(nm),fp))
-                   hsurf = thick(1) * h0 / 4.0
-                   pkwav(nm, 0) = (2.*(dis(nm,2)+dis(nm,3))/(rhow*hsurft(nm))) * (1.0 - hsurf/hsurft(nm))
-                   if (kdismx(nm) > 1) then
-                      do k = 1, kdismx(nm) - 1
-                         hsurf        = h0 * ( - sig(k) - sig(k + 1)) / 2.0
-                         pkwav(nm, k) = (2.*(dis(nm,2)+dis(nm,3))/(rhow*hsurft(nm))) * (1.0 - hsurf/hsurft(nm))
-                         ddk(nm, k)   = ddk(nm, k) + pkwav(nm, k)
-                      enddo
-                   endif
-                endif
-             enddo
-             !
-             ! Added turbulent production due wave diss. in wave boundary layer
-             !
-             do nm = 1, nmmax
-                h0 = max(0.01_fp, s1(nm) + real(dps(nm),fp))
-                if (kfs(nm) == 1) then
                    !
-                   !  delta  thickness boundary layer due to waves in [m], by change of definition in TAUBOT 
+                   ! Turbulent production due to wave diss. in wave boundary layer
+                   !
+                   ! Thickness boundary layer due to waves (delta) in [m], by change of definition in TAUBOT 
                    !
                    nmd    = nm - icx
                    ndm    = nm - icy
                    fact   = max(kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm), 1)
                    deltas = (deltau(nm) + deltau(nmd) + deltav(nm) + deltav(ndm)) / fact
-                   hpkwbt(nm) = ( - sig(kmax) + sig(kmax-1)) * h0
-                   do k = kmax - 2, 1, -1
-                      if (( - sig(kmax) + sig(k)) > deltas) then
-                         kpkwbt(nm) = k + 1
-                         hpkwbt(nm) = ( - sig(kmax) + sig(k + 1)) * h0
-                         exit
+                   zw     = 0.0_fp
+                   do k = kmax - 1, 1, -1
+                      !
+                      ! Deltas absolute coordinate, by change of definition in TAUBOT 
+                      !
+                      zw = zw+thick(k)*h0 
+                      if (zw < deltas) then
+                         !
+                         ! Turbulent production due to waves is switched off
+                         ! Already accounted for in increased z0 (in subroutine TAUBOT)
+                         !
                       elseif (k == 1) then
                          !
-                         ! ie we got to the top and haven't defined kpwbt and hpkwbt
+                         ! We got to the top and haven't defined kpwbt and hpkwbt
                          !
-                         call prterr(lundia, 'P004', 'Deltas > water depth in TRATUR ')
                          kpkwbt(nm) = 1
-                         hpkwbt(nm) = ( - sig(kmax) + sig(1)) * h0
+                         call prterr(lundia, 'P004', 'Deltas > water depth in TRATUR ')
+                      else
+                         kpkwbt(nm) = k + 1
+                         exit
                       endif
-                   enddo
-                endif
-                if (kfs(nm) == 1) then
-                   !
-                   ! calculate dfu and dfv in zeta points
-                   !
-                   nmd    = nm - icx
-                   ndm    = nm - icy
-                   fact   = max(kfu(nm) + kfu(nmd), 1)
-                   dfus   = (dfu(nm) + dfu(nmd)) / fact
-                   fact   = max(kfv(nm) + kfv(ndm), 1)
-                   dfvs   = (dfv(nm) + dfv(ndm)) / fact
-                   pkwbt0 = 2. * sqrt(dfus**2 + dfvs**2) / (rhow*hpkwbt(nm))
-                   do k = kmax - 1, kpkwbt(nm), -1
-                      dfdis        = h0 * ( - sig(kmax) + (sig(k) + sig(k + 1))/2.0)
-                      pkwbt(nm, k) = pkwbt0 * (1.0 - dfdis/hpkwbt(nm))
-                      ddk  (nm, k) = ddk(nm, k) + pkwbt(nm, k)
                    enddo
                 endif
              enddo
@@ -955,10 +921,8 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                    !
                    ! production term wave dissipation in bottom boundary layer
                    ! is switched off just as in the production of turb. kinetic energy
+                   ! Already accounted for in increased z0 (in subroutine TAUBOT)
                    !
-                   do k = kmax - 1, kpkwbt(nm), -1
-                      ddk(nm, k) = ddk(nm, k) + cep1*pkwbt(nm, k)*rtur0(nm, k, 2)/max(rtur0(nm, k, 1), epsd)
-                   enddo
                 endif
              enddo
           endif
@@ -1038,14 +1002,15 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                    !
                    h0     = max(0.01_fp, s1(nm) + real(dps(nm),fp))
                    !
-                   !epswav = 4.0 * (dis(nm,2)+dis(nm,3)) / (rhow*max(hrms(nm),0.01_fp))
+                   epswav = 4.0_fp * (dis(nm,2)+dis(nm,3)) / (rhow*max(hrms(nm),0.01_fp))
                    !
-                   ! Change to Nikuradse length scale for surface waves in case of breaking
+                   ! Hrms/2 is the characteristic length scale for the wave dissipation
+                   ! which can be compared to a Nikuradse length scale near the bottom 
+                   ! The roughness height due to wave breaking, needed in the boundary 
+                   ! condition for k is assumed to scale in the same fashion as z0 = ks/30:
+                   ! (zw = 0.5_fp*hrms(nm)/30.0_fp)
                    !
-                   !tkewav = (epswav*vonkar* 0.5*hrms(nm)/(cde))**(2.0/3.0)
-                   !tkewav = (epswav*vonkar* 0.5*hrms(nm)/(30.0*cde))**(2.0/3.0)
-                   epswav = 2.0 * (dis(nm,2)+dis(nm,3)) / (max(0.5*hrms(nm),hsurft(nm))*rhow)
-                   tkewav = (epswav*vonkar*max(0.5*hrms(nm),hsurft(nm))/cde)**(2.0/3.0)
+                   tkewav = (epswav*vonkar*0.5_fp*hrms(nm)/(30.0_fp*cde))**(2.0_fp/3.0_fp)
                    !
                    ddk(nm, 0) = ddk(nm, 0) + tkewav
                 endif
@@ -1055,10 +1020,8 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                 aak(nm, kmax) = 0.0
                 bbk(nm, kmax) = 1.0
                 cck(nm, kmax) = 0.0
-                uuu  = 0.5*(u1(nmd, kmax) + u1(nm, kmax))*maskval
-                vvv  = 0.5*(v1(ndm, kmax) + v1(nm, kmax))*maskval
-                !uuu  = 0.5*(ueul(nmd, kmax) + ueul(nm, kmax))*maskval
-                !vvv  = 0.5*(veul(ndm, kmax) + veul(nm, kmax))*maskval
+                uuu  = 0.5_fp*(ueul(nmd, kmax) + ueul(nm, kmax))*maskval
+                vvv  = 0.5_fp*(veul(ndm, kmax) + veul(nm, kmax))*maskval
                 utot = sqrt(uuu*uuu + vvv*vvv)
                 h0   = max(0.01_fp, s1(nm) + real(dps(nm),fp))
                 dz   = 0.5 * thick(kmax) * h0
@@ -1109,17 +1072,14 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                    ! and then adjust for differences between k flux and epsilon flux
                    ! this should include the difference in pransm
                    !
-                   epswav = 4.0 * (dis(nm,2)+dis(nm,3)) /(rhow*max(hrms(nm),0.01_fp))
-                   epswav = 2.0 * (dis(nm,2)+dis(nm,3)) / (max(0.5*hrms(nm),hsurft(nm))*rhow)
+                   epswav = 4.0_fp * (dis(nm,2)+dis(nm,3)) /(rhow*max(hrms(nm),0.01_fp))
                    ddk(nm, 0) = ddk(nm, 0) + epswav
                 endif
                 !
                 ! at bottom, using Eulerian velocities (corrected for Stokes drift)
                 !
-                uuu  = 0.5 * (u1(nmd, kmax) + u1(nm, kmax)) * maskval
-                vvv  = 0.5 * (v1(ndm, kmax) + v1(nm, kmax)) * maskval
-                !uuu  = 0.5 * (ueul(nmd, kmax) + ueul(nm, kmax)) * maskval
-                !vvv  = 0.5 * (veul(ndm, kmax) + veul(nm, kmax)) * maskval
+                uuu  = 0.5_fp * (ueul(nmd, kmax) + ueul(nm, kmax)) * maskval
+                vvv  = 0.5_fp * (veul(ndm, kmax) + veul(nm, kmax)) * maskval
                 utot = sqrt(uuu*uuu + vvv*vvv)
                 h0   = max(0.01_fp, s1(nm) + real(dps(nm),fp))
                 dz   = 0.5 * thick(kmax) * h0

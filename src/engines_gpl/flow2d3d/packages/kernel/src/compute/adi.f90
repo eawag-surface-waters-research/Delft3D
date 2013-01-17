@@ -83,6 +83,8 @@ subroutine adi(dischy    ,solver    ,icreep    ,stage     ,nst       , &
     !
     real(fp), dimension(:,:,:) , pointer :: rttfu
     real(fp), dimension(:,:,:) , pointer :: rttfv
+    real(fp), dimension(:,:)   , pointer :: ustokes
+    real(fp), dimension(:,:)   , pointer :: vstokes
     include 'flow_steps_f.inc'
 !
 ! Global variables
@@ -268,6 +270,8 @@ subroutine adi(dischy    ,solver    ,icreep    ,stage     ,nst       , &
 !
     rttfu         => gdp%gdtrachy%rttfu
     rttfv         => gdp%gdtrachy%rttfv
+    ustokes       => gdp%gdtrisol%ustokes
+    vstokes       => gdp%gdtrisol%vstokes
     !
     nmaxddb = nmax + 2*gdp%d%ddbound
     !
@@ -319,7 +323,7 @@ subroutine adi(dischy    ,solver    ,icreep    ,stage     ,nst       , &
               & diapl     ,rnpl      , &
               & cfvrou    ,cfurou    ,rttfv     ,r0        ,windsv    , &
               & patm      ,fcorio    ,ubrlsv    ,hkrv      , &
-              & pship     ,tgfsep    ,dtev      ,gdp       )
+              & pship     ,tgfsep    ,dtev      ,vstokes   ,gdp       )
        call timer_stop(timer_1stuzd, gdp)
        call timer_stop(timer_uzd, gdp)
        !
@@ -380,7 +384,7 @@ subroutine adi(dischy    ,solver    ,icreep    ,stage     ,nst       , &
               & wrka7     ,wrka8     ,wrka15    ,wrkb1     ,wrkb2     , &
               & wrkb3     ,wrkb4     ,wrkb5     ,wrkb6     ,wrkb7     , &
               & wrkb8     ,wrkb15    ,wrkb16    ,soumud    ,dis_nf    , &
-              & precip    ,gdp       )
+              & precip    ,ustokes   ,gdp       )
        call timer_stop(timer_1stsud, gdp)
        call timer_stop(timer_sud, gdp)
        !
@@ -480,7 +484,7 @@ subroutine adi(dischy    ,solver    ,icreep    ,stage     ,nst       , &
               & diapl     ,rnpl      , &
               & cfurou    ,cfvrou    ,rttfu     ,r0        ,windsu    , &
               & patm      ,fcorio    ,ubrlsu    ,hkru      , &
-              & pship     ,tgfsep    ,dteu      ,gdp       )
+              & pship     ,tgfsep    ,dteu      ,ustokes   ,gdp       )
        call timer_stop(timer_2nduzd, gdp)
        call timer_stop(timer_uzd, gdp)
        !
@@ -538,7 +542,7 @@ subroutine adi(dischy    ,solver    ,icreep    ,stage     ,nst       , &
               & wrka7     ,wrka8     ,wrka16    ,wrkb1     ,wrkb2     , &
               & wrkb3     ,wrkb4     ,wrkb5     ,wrkb6     ,wrkb7     , &
               & wrkb8     ,wrkb15    ,wrkb16    ,soumud    ,dis_nf    , &
-              & precip    ,gdp       )
+              & precip    ,vstokes   ,gdp       )
        call timer_stop(timer_2ndsud, gdp)
        call timer_stop(timer_sud, gdp)
        !

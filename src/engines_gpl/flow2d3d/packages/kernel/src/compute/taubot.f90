@@ -633,7 +633,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              else
                 fw = 0.3_fp
              endif
-             fw         = fw*fwfac
+             fw = fw*fwfac
              !
              ! Change of definition dfu: dimension [W/m**2]
              ! to make it more consistent with definition dissipation wave breaking
@@ -644,7 +644,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              !
              ! Change of definition deltau: dimension [m]
              !
-             deltau(nm) = min(0.5_fp, deltau(nm)) !*hu(nm)
+             deltau(nm) = min(0.5_fp, deltau(nm))*hu(nm)
           else
              dfu(nm)    = 0.0_fp
              deltau(nm) = 0.0_fp
@@ -814,8 +814,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                 !
                 ! Limit exponent used in computation ofz0urou to 40 to avoid over/underflow
                 ! 
-                !cfurou(nm, 1) = min(umod/ust,40.0_fp)
-                cfurou(nm, 1) = umod/ust
+                cfurou(nm, 1) = min(umod/ust,40.0_fp)
                 if (kmax > 1) then
                    if (zmodel) then
                       z0urou(nm) = dz/(exp(vonkar*cfurou(nm, 1)) - 1.0)
@@ -826,6 +825,11 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                 else
                    z0urou(nm) = hu(nm)/((exp(vonkar*cfurou(nm, 1)) - 1.0)*ee)
                 endif
+                !
+                ! Limit z0rou to 10 m (required in large water depths when umod/ust is small)
+                !
+                z0urou(nm) = min(z0urou(nm), 10.0_fp)
+                !
              endif
              if (modind == 9) then
                 z0urou(nm) = max(3.33e-5_fp , ka(nm)/30.0)

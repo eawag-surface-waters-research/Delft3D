@@ -496,7 +496,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
              if (zmodel) then
                 sour(nm, k0, ltem) = sour(nm, k0, ltem) + qtot*gsqs(nm)
              else
-                h0old = max( 0.01_fp, s0(nm)+real(dps(nm),fp) ) * thick(k0)
+                h0old              = max( htrsh, s0(nm)+real(dps(nm),fp) ) * thick(k0)
                 sour(nm, k0, ltem) = sour(nm, k0, ltem) + qtot/h0old
              endif
              !
@@ -610,7 +610,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
              if (zmodel) then
                 sour(nm, k0, ltem) = sour(nm, k0, ltem) + qtot*gsqs(nm)
              else
-                h0old = max( 0.01_fp, s0(nm)+real(dps(nm),fp) ) * thick(k0)
+                h0old              = max(htrsh, s0(nm)+real(dps(nm),fp) ) * thick(k0)
                 sour(nm, k0, ltem) = sour(nm, k0, ltem) + qtot/h0old
              endif
              !
@@ -672,9 +672,9 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
              endif
              !
              if (zmodel) then
-                h0new = max(0.01_fp, dzs1(nm, kfsmax(nm)))
+                h0new = max(htrsh, dzs1(nm, kfsmax(nm)))
              else
-                h0new = max(0.01_fp, s1(nm) + real(dps(nm),fp))*thick(1)
+                h0new = max(htrsh, s1(nm) + real(dps(nm),fp))*thick(1)
              endif
              !
              ! limiting value of qle by updating hlc
@@ -707,7 +707,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
              if (zmodel) then
                 sour(nm, k0, ltem) = sour(nm, k0, ltem) + flux*gsqs(nm)
              else
-                h0old = max( 0.01_fp, s0(nm)+real(dps(nm),fp) ) * thick(k0)
+                h0old = max(htrsh, s0(nm)+real(dps(nm),fp) ) * thick(k0)
                 sour(nm, k0, ltem) = sour(nm, k0, ltem) + flux/h0old
              endif
              !
@@ -829,8 +829,8 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
              albedo = 0.09_fp
              qsn    = qsun * (1.0_fp-albedo)
              !
-             h0old   = max(0.01_fp, s0(nm) + real(dps(nm),fp))
-             h0new   = max(0.01_fp, s1(nm) + real(dps(nm),fp))
+             h0old   = max(htrsh, s0(nm) + real(dps(nm),fp))
+             h0new   = max(htrsh, s1(nm) + real(dps(nm),fp))
              ztop    = 0.0_fp
              zbottom = -h0old
              if (zmodel) then
@@ -1171,20 +1171,20 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
              ! net heat flux [W/m^2] into water, solar radiation excluded
              !
              ql      = qbl + qco + qeva
-             h0old   = max(0.01_fp, s0(nm) + real(dps(nm),fp))
-             h0new   = max(0.01_fp, s1(nm) + real(dps(nm),fp))
+             h0old   = max(htrsh, s0(nm) + real(dps(nm),fp))
+             h0new   = max(htrsh, s1(nm) + real(dps(nm),fp))
              ztop    = 0.0_fp
              zbottom = -h0old
              !
              ! For thin layers of water: no heat flux calculations
              ! to avoid large fluxes in small bodies of water
              !
-             !if (h0old > htrsh) then
+             if (h0old > htrsh) then
                 if (zmodel) then
                    k1    = kfsmx0(nm) - 1
                    k2    = kfsmin(nm)
                    kstep = -1
-                   zdown = -max(0.01_fp,dzs0(nm, kfsmx0(nm)))
+                   zdown = -max(htrsh,dzs0(nm, kfsmx0(nm)))
                 else
                    k1    = 2
                    k2    = kmax
@@ -1199,9 +1199,9 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                 !
                 ! Reduction of solar radiation at shallow areas
                 !
-                !if (h0old < secchi(nm) ) then
-                !   qtotk = qtotk * (1.0_fp - exp(extinc*zdown))
-                !endif    
+                if (h0old < secchi(nm) ) then
+                   qtotk = qtotk * (1.0_fp - exp(extinc*zdown))
+                endif    
                 !
                 if (zmodel) then
                    if (qtotk > 0.0_fp) then
@@ -1243,20 +1243,20 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                       sour(nm, k, ltem) = sour(nm, k, ltem) + qtotk/(thick(k)*h0old)
                    endif
                 enddo
-             !else
-             !   !
-             !   ! Thin layer of water: no heat fluxes
-             !   !
-             !   qsn   = 0.0_fp
-             !   qeva  = 0.0_fp
-             !   qco   = 0.0_fp
-             !   qbl   = 0.0_fp
-             !   ql    = 0.0_fp
-             !   if (free_convec) then
-             !      hfree = 0.0_fp
-             !      efree = 0.0_fp
-             !   endif
-             !endif
+             else
+                !
+                ! Thin layer of water: no heat fluxes
+                !
+                qsn   = 0.0_fp
+                qeva  = 0.0_fp
+                qco   = 0.0_fp
+                qbl   = 0.0_fp
+                ql    = 0.0_fp
+                if (free_convec) then
+                   hfree = 0.0_fp
+                   efree = 0.0_fp
+                endif
+             endif
              !
              ! Filling of output arrays
              !

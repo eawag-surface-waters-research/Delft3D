@@ -81,9 +81,11 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    real(fp)               , pointer :: hdt
-    integer , dimension(:) , pointer :: modify_dzsuv
-    logical                , pointer :: ztbml
+    real(fp)                 , pointer :: hdt
+    real(fp), dimension(:,:) , pointer :: ustokes
+    real(fp), dimension(:,:) , pointer :: vstokes
+    integer , dimension(:)   , pointer :: modify_dzsuv
+    logical                  , pointer :: ztbml
     include 'flow_steps_f.inc'
 !
 ! Global variables
@@ -264,6 +266,8 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
 !! executable statements -------------------------------------------------------
 !
     hdt                => gdp%gdnumeco%hdt
+    ustokes            => gdp%gdtrisol%ustokes
+    vstokes            => gdp%gdtrisol%vstokes
     modify_dzsuv       => gdp%gdzmodel%modify_dzsuv
     ztbml              => gdp%gdzmodel%ztbml
     !
@@ -309,7 +313,7 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                 & ubrlsv    ,pship     ,diapl     ,rnpl      ,cfvrou      , &
                 & v1        ,s0        ,dpv       ,qyk       ,qxk         , &
                 & nocol     ,norow     ,irocol(1, norow + 1) ,nst         ,vmean       , &
-                & crbc(1,norow + 1)    ,gdp       )
+                & crbc(1,norow + 1)    ,vstokes   ,gdp       )
        call timer_stop(timer_1stuzd, gdp)
        call timer_stop(timer_uzd, gdp)
        !
@@ -366,7 +370,7 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                 & patm      ,fcorio    ,tgfsep    ,drhodx    ,zk        , &
                 & p0        ,crbc(1, 1),idry      ,porosu    ,ubrlsu    , &
                 & pship     ,diapl     ,rnpl      ,cfurou    ,precip    , &
-                & gdp)
+                & ustokes   ,gdp       )
        call timer_stop(timer_1stsud, gdp)
        call timer_stop(timer_sud, gdp)
        !
@@ -403,11 +407,9 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                     & dzs1      ,zk        ,kfsmx0    ,guu       ,qxk       , &
                     & gdp       )
        !
-       ! ISSUE: DELFT3D-14744: modify the near-bed layering to obtain smoother 
-       ! bottom shear stress representation in z-layer models
        ! If requested by keyword ZTBML 
-       ! (Z-model TauBottom Modified Layering: equistant near-bed layering 
-       ! for smoother bottom shear stress):
+       ! (Z-model TauBottom Modified Layering)
+       ! --> modify the near-bed layering to obtain smoother bottom shear stress representation in z-layer models
        !
        if (ztbml) then
           !
@@ -502,7 +504,7 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                 & ubrlsu    ,pship     ,diapl     ,rnpl      ,cfurou      , &
                 & u1        ,s0        ,dpu       ,qxk       ,qyk         , &
                 & norow     ,nocol     ,irocol(1, 1)         ,nst         ,umean       , &
-                & crbc(1,1) ,gdp       )
+                & crbc(1,1) ,ustokes   ,gdp       )
        call timer_stop(timer_2nduzd, gdp)
        call timer_stop(timer_uzd, gdp)
        !
@@ -552,7 +554,7 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                 & patm      ,fcorio    ,tgfsep    ,drhody    ,zk        , &
                 & p0        ,crbc(1, norow + 1)   ,idry      ,porosv    ,ubrlsv       , &
                 & pship     ,diapl     ,rnpl      ,cfvrou    ,precip    , &
-                & gdp)
+                & vstokes   ,gdp       )
        call timer_stop(timer_2ndsud, gdp)
        call timer_stop(timer_sud, gdp)
        !
@@ -589,9 +591,8 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                     & dzs1      ,zk        ,kfsmx0    ,gvv       ,qyk       , &
                     & gdp       )
        !
-       ! ISSUE: DELFT3D-14744: Modification of near bed layer thicknesses to obtain 
        ! If requested by keyword ZTBML 
-       ! (Z-model TauBottom Modified Layering: equistant near-bed layering for smoother bottom shear stress):
+       ! (Z-model TauBottom Modified Layering)
        ! --> modify the near-bed layering to obtain smoother bottom shear stress representation in z-layer models
        !
        if (ztbml) then

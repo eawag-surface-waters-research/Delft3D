@@ -82,7 +82,7 @@ subroutine rollu(nmmax     ,kfs       ,sourr     ,df        , &
     ag        => gdp%gdphysco%ag
     !
     do nm = 1, nmmax
-       dis(nm,:) = 0.0_fp
+       dis(nm,2) = 0.0_fp
        if (kfs(nm) /= 0) then
           if (c(nm) > 0.01_fp) then
              if (betarol < 0.0_fp) then
@@ -95,7 +95,7 @@ subroutine rollu(nmmax     ,kfs       ,sourr     ,df        , &
              endif
              sinkr(nm) = 2.0_fp * ag * btr / c(nm)
              if (eroll0(nm) > 0.01_fp) then
-               dis(nm,:) = sinkr(nm) * eroll0(nm)
+               dis(nm,2) = sinkr(nm) * eroll0(nm)
              endif
              if (ewave0(nm) < 0.0_fp) then
                 src = 0.0_fp
@@ -111,5 +111,6 @@ subroutine rollu(nmmax     ,kfs       ,sourr     ,df        , &
           sinkr(nm) = 0.0_fp
           sourr(nm) = 0.0_fp
        endif
+       dis(nm,1) = dis(nm,2) + dis(nm,3) + dis(nm,4)
     enddo
 end subroutine rollu

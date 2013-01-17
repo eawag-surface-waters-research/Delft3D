@@ -12,7 +12,8 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                   & bux       ,bdy       ,buy       ,umea      ,vmea      , &
                   & ubnd      ,pkwbt     ,kpkwbt    ,hpkwbt    ,kdismx    , &
                   & hsurft    ,pkwav     ,kfsmin    ,kfsmax    ,kfsmx0    , &
-                  & kfuz1     ,kfvz1     ,dzs1      ,gdp       )
+                  & kfuz1     ,kfvz1     ,dzs1      ,ueul      ,veul      , &
+                  & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -176,8 +177,11 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: tkedis !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: tkepro !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: u1     !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: ueul   !!  Eulerian velocity in X-direction (including Stokes drift)
+
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: umea   !!  Mean horizontal velocity
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: v1     !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: veul   !! Eulerian velocity in Y-direction (including Stokes drift)
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: vmea   !!  Mean horizontal velocity
     real(fp)     , dimension(kmax)                                             :: sig    !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(kmax)                                             :: thick  !  Description and declaration in esm_alloc_real.f90
@@ -603,49 +607,36 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
           if (wave) then
              do nm = 1, nmmax
                 if (kfs(nm) == 1) then
-                   h0         = max(0.01_fp, s1(nm) + real(dps(nm),fp))
-                   pkwav(nm, kfsmax(nm)) =  4.0_fp*(dis(nm,2)+dis(nm,3))/(rhow*max(hrms(nm),0.01_fp))
+                   h0                    = max(0.01_fp, s1(nm) + real(dps(nm),fp))
+                   pkwav(nm, kfsmax(nm)) =  2.0_fp*(dis(nm,2)+dis(nm,3))/(rhow*max(hrms(nm),0.01_fp))
                    zw  = 0.0_fp
                    do k = kfsmax(nm)-1, kfsmin(nm), -1
                       zw  = zw  + dzs1(nm,k+1)
-                      if (0.5_fp*hrms(nm) > zw) then
-                         pkwav(nm,k) = pkwav(nm,kfsmax(nm))*(1.0_fp - zw/(0.5_fp*hrms(nm)))
+                      if (hrms(nm) > zw) then
+                         pkwav(nm,k) = pkwav(nm,kfsmax(nm))*(1.0_fp - zw/(hrms(nm)))
                          ddk(nm,k)   = ddk(nm,k) + pkwav(nm, k)   
                       else
                          kdismx(nm)=k+1
                          exit
                       endif
                    enddo
-                endif
-             enddo
-             !
-             ! Added turbulent production due wave diss. in wave boundary layer
-             !
-             do nm = 1, nmmax
-                h0 = max(0.01_fp, s1(nm) + real(dps(nm),fp))
-                if (kfs(nm) == 1) then
                    !
-                   !  delta thickness boundary layer due to waves in [m], by change of definition in TAUBOT 
+                   ! Turbulent production due wave diss. in wave boundary layer
+                   !
+                   ! Thickness boundary layer due to waves (delta) in [m], by change of definition in TAUBOT 
                    !
                    nmd    = nm - icx
                    ndm    = nm - icy
                    fact   = max(kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm), 1)
                    deltas = (deltau(nm) + deltau(nmd) + deltav(nm) + deltav(ndm)) / fact
-                   fact   = max(kfu(nm) + kfu(nmd), 1)
-                   dfus   = (dfu(nm) + dfu(nmd)) / fact
-                   fact   = max(kfv(nm) + kfv(ndm), 1)
-                   dfvs   = (dfv(nm) + dfv(ndm)) / fact
-                   pkwbt0 = 2.0_fp * sqrt(dfus**2 + dfvs**2) / (rhow*max(deltas,0.01_fp))
                    zw     = 0.0_fp
                    do k = kfsmin(nm), kfsmax(nm)
                       zw  = zw  + dzs1(nm,k) 
                       if (zw < deltas) then
-                         pkwbt(nm, k) = pkwbt0 * (1.0_fp - zw/deltas)
                          !
                          ! Production term due to waves near the bottom switched off
-                         ! Is already included in increased z0
+                         ! Already accounted for in increased z0 (in subroutine TAUBOT)
                          !
-                         ddk  (nm, k) = ddk(nm, k) + pkwbt(nm, k)
                       elseif (k == kfsmax(nm)) then
                          !
                          ! we got to the top and haven't defined kpwbt and hpkwbt
@@ -757,10 +748,8 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                    !
                    ! production term wave dissipation in bottom boundary layer
                    ! is switched off just as in the production of turb. kinetic energy
+                   ! Already accounted for in increased z0 (in subroutine TAUBOT)
                    !
-                   do k = kfsmin(nm), kpkwbt(nm)   
-                      ddk(nm, k) = ddk(nm, k) + cep1*pkwbt(nm, k)*rtur0(nm, k, 2)/max(rtur0(nm, k, 1), epsd)
-                   enddo
                 endif
              enddo
           endif
@@ -832,10 +821,13 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                    !
                    epswav = 4.0_fp * (dis(nm,2)+dis(nm,3)) / (rhow*max(hrms(nm),0.01_fp))
                    !
-                   ! Change to Nikuradse length scale for surface waves in case of breaking
+                   ! Hrms/2 is the characteristic length scale for the wave dissipation
+                   ! which can be compared to a Nikuradse length scale near the bottom 
+                   ! The roughness height due to wave breaking, needed in the boundary 
+                   ! condition for k is assumed to scale in the same fashion as z0 = ks/30:
+                   ! (zw = 0.5_fp*hrms(nm)/30.0_fp)
                    !
-                   tkewav = (epswav*vonkar* 0.5_fp*hrms(nm)/cde)**(2.0_fp/3.0_fp)
-                   !tkewav = (epswav*vonkar* 0.5*hrms(nm)/(30.0*cde))**(2.0/3.0)
+                   tkewav = (epswav*vonkar*0.5*hrms(nm)/(30.0*cde))**(2.0/3.0)
                    !
                    ddk(nm, kfsmax(nm)) = ddk(nm, kfsmax(nm)) + tkewav
                 endif
@@ -850,15 +842,15 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                 !
                 kmin = kfsmin(nm)
                 if (kfsmin(nm) /= kfsmax(nm)) then
-                   uuu = (u1(nmd, kmin + 1) + u1(nm, kmin + 1))                 &
+                   uuu = (ueul(nmd, kmin + 1) + ueul(nm, kmin + 1))                 &
                        & /max(1, kfuz1(nmd, kmin + 1) + kfuz1(nm, kmin + 1))
-                   vvv = (v1(ndm, kmin + 1) + v1(nm, kmin + 1))                 &
+                   vvv = (veul(ndm, kmin + 1) + veul(nm, kmin + 1))                 &
                        & /max(1, kfvz1(ndm, kmin + 1) + kfvz1(nm, kmin + 1))
                    dz  = dzs1(nm, kmin) + 0.5*dzs1(nm, kmin + 1)
                 else
-                   uuu = (u1(nmd, kmin) + u1(nm, kmin))                         &
+                   uuu = (ueul(nmd, kmin) + ueul(nm, kmin))                         &
                        & /max(1, kfuz1(nmd, kmin) + kfuz1(nm, kmin))
-                   vvv = (v1(ndm, kmin) + v1(nm, kmin))                         &
+                   vvv = (veul(ndm, kmin) + veul(nm, kmin))                         &
                        & /max(1, kfvz1(ndm, kmin) + kfvz1(nm, kmin))
                    dz  = dzs1(nm, kmin)/ee
                 endif
@@ -923,15 +915,15 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                 !
                 kmin = kfsmin(nm)
                 if (kfsmin(nm) /= kfsmax(nm)) then
-                   uuu = (u1(nmd, kmin + 1) + u1(nm, kmin + 1))                 &
+                   uuu = (ueul(nmd, kmin + 1) + ueul(nm, kmin + 1))                 &
                        & /max(1, kfuz1(nmd, kmin + 1) + kfuz1(nm, kmin + 1))
-                   vvv = (v1(ndm, kmin + 1) + v1(nm, kmin + 1))                 &
+                   vvv = (veul(ndm, kmin + 1) + veul(nm, kmin + 1))                 &
                        & /max(1, kfvz1(ndm, kmin + 1) + kfvz1(nm, kmin + 1))
                    dz = dzs1(nm, kmin) + 0.5*dzs1(nm, kmin + 1)
                 else
-                   uuu = (u1(nmd, kmin) + u1(nm, kmin))                         &
+                   uuu = (ueul(nmd, kmin) + ueul(nm, kmin))                         &
                        & /max(1, kfuz1(nmd, kmin) + kfuz1(nm, kmin))
-                   vvv = (v1(ndm, kmin) + v1(nm, kmin))                         &
+                   vvv = (veul(ndm, kmin) + veul(nm, kmin))                         &
                        & /max(1, kfvz1(ndm, kmin) + kfvz1(nm, kmin))
                    dz = dzs1(nm, kmin) / ee
                 endif

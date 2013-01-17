@@ -14,7 +14,7 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
                & r0        ,diapl     ,rnpl      ,taubpu    ,taubsu    , &
                & windsu    ,patm      ,fcorio    ,ubrlsu    ,uwtypu    , &
                & hkru      ,pship     ,tgfsep    ,dteu      ,ua        , &
-               & ub        ,gdp       )
+               & ub        ,ustokes   ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -89,23 +89,24 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    real(fp)               , pointer :: gammax
-    real(fp)               , pointer :: hdt
-    integer                , pointer :: ibaroc
-    logical                , pointer :: cstbnd
-    character(8)           , pointer :: dpsopt
-    character(6)           , pointer :: momsol
-    real(fp)               , pointer :: rhow
-    real(fp)               , pointer :: rhofrac
-    real(fp)               , pointer :: ag
-    real(fp)               , pointer :: vicmol
-    integer                , pointer :: iro
-    integer                , pointer :: irov
-    logical                , pointer :: wind
-    logical                , pointer :: wave
-    logical                , pointer :: roller
-    logical                , pointer :: xbeach
-    logical                , pointer :: dpmveg
+    real(fp)                , pointer :: gammax
+    real(fp)                , pointer :: hdt
+    integer                 , pointer :: ibaroc
+    logical                 , pointer :: cstbnd
+    character(8)            , pointer :: dpsopt
+    character(6)            , pointer :: momsol
+    logical                 , pointer :: slplim
+    real(fp)                , pointer :: rhow
+    real(fp)                , pointer :: rhofrac
+    real(fp)                , pointer :: ag
+    real(fp)                , pointer :: vicmol
+    integer                 , pointer :: iro
+    integer                 , pointer :: irov
+    logical                 , pointer :: wind
+    logical                 , pointer :: wave
+    logical                 , pointer :: roller
+    logical                 , pointer :: xbeach
+    logical                 , pointer :: dpmveg
 !
 ! Global variables
 !
@@ -192,6 +193,7 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ua
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ub
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ubrlsu  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ustokes !  Description and declaration in trisol.igs
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: v1      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax+2)              :: vicuv   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)        :: r0      !  Description and declaration in esm_alloc_real.f90
@@ -276,6 +278,7 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
     cstbnd     => gdp%gdnumeco%cstbnd
     dpsopt     => gdp%gdnumeco%dpsopt
     momsol     => gdp%gdnumeco%momsol
+    slplim     => gdp%gdnumeco%slplim
     rhow       => gdp%gdphysco%rhow
     rhofrac    => gdp%gdphysco%rhofrac
     ag         => gdp%gdphysco%ag
@@ -453,7 +456,7 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
           !
           ! BOTTOM STRESS DUE TO FLOW AND WAVES
           !
-          ! For inundation
+          ! Special measures for inundation
           !
           ! Estimate velocity on the basis of local equilibrium by solving u(nm)
           ! with an explicit procedure. So that high velocities can be avoided
@@ -462,7 +465,7 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
           ! weir. 
           ! Gates are excluded
           !
-          if (dpsopt == 'DP  ') then
+          if (dpsopt == 'DP  ' .or. slplim) then
              if (kfu(nm) == 1 .and. abs(u0(nm,kmax)) <= 1.0e-15 .and. kspu(nm, 0) /= 4 .and. kspu(nm, 0) /= 10) then
                 !
                 ! cfurou(nm,1) contains u/u*
@@ -472,26 +475,30 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
              endif
           endif
           !
-          ! Slope correction for steep slopes  ISSUE: DELFT3D-14744
+          ! Slope correction for steep slopes
           !
-          !nmu    = nm + icx
-          !dpsmax = max(-dps(nm),-dps(nmu))
-          !if (s0(nm) < dpsmax) then
-          !   do k = 1, kmax
-          !      ddk(nm,k) = ddk(nm,k) - ag*(s0(nm)-dpsmax)/gvu(nm)
-          !   enddo
-          !elseif (s0(nmu) < dpsmax) then
-          !   do k = 1, kmax
-          !      ddk(nm,k) = ddk(nm,k) + ag*(s0(nmu)-dpsmax)/gvu(nm)
-          !   enddo
-          !endif
+          if (slplim) then
+             nmu    = nm + icx
+             dpsmax = max(-dps(nm),-dps(nmu))
+             if (s0(nm) < dpsmax) then
+                do k = 1, kmax
+                   ddk(nm,k) = ddk(nm,k) - 2.0_fp*ag*(s0(nm)-dpsmax)/gvu(nm)
+                enddo
+             elseif (s0(nmu) < dpsmax) then
+                do k = 1, kmax
+                   ddk(nm,k) = ddk(nm,k) + 2.0_fp*ag*(s0(nmu)-dpsmax)/gvu(nm)
+                enddo
+             endif
+          endif
           !
-          ! End of inundation
+          ! End of special measures for smooth inundation
           !
-          cbot   = taubpu(nm)
-          qwind  = h0i*windsu(nm)/thick(1)
-          bdmwrp = h0i*cbot/thick(kmax)
-          bdmwrs = h0i*taubsu(nm)/thick(kmax)
+          ! Bottom and wind shear stress
+          !
+          cbot         = taubpu(nm)
+          qwind        = h0i*windsu(nm)/thick(1)
+          bdmwrp       = h0i*cbot/thick(kmax)
+          bdmwrs       = h0i*taubsu(nm)/thick(kmax)
           bbk(nm,kmax) = bbk(nm, kmax) + bdmwrp
           ddk(nm,1)    = ddk(nm, 1) - qwind/rhow
           ddk(nm,kmax) = ddk(nm, kmax) + bdmwrs
@@ -649,6 +656,11 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
                 bbka(nm, k) = -ddza
                 bbk (nm, k) = bbk(nm, k) - ddzb
                 bbkc(nm, k) = -ddzc
+                !
+                ! Effect of waves, due to Stokes drift
+                !
+                ddk(nm, k) = ddk(nm,k) - ( ddza*(ustokes(nm,kdo)-ustokes(nm,k  )) -   &
+                                        &  ddzc*(ustokes(nm,k  )-ustokes(nm,kup))   )
                 !
                 ! advection in vertical direction; w*du/dz
                 !

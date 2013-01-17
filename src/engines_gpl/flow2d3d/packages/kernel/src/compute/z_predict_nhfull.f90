@@ -79,6 +79,8 @@ subroutine z_predict_nhfull(j         ,nmmaxj    ,nmmax     ,kmax      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    real(fp)     , dimension(:,:)        , pointer :: ustokes
+    real(fp)     , dimension(:,:)        , pointer :: vstokes
     include 'flow_steps_f.inc'
 !
 ! Global variables
@@ -221,6 +223,9 @@ subroutine z_predict_nhfull(j         ,nmmaxj    ,nmmax     ,kmax      , &
 !
 !! executable statements -------------------------------------------------------
 !
+    ustokes             => gdp%gdtrisol%ustokes
+    vstokes             => gdp%gdtrisol%vstokes
+    !
     nmaxddb = nmax + 2*gdp%d%ddbound
     !
     ! Calculate HU and set KFU = 0 for HU < HTRSH (.5*DRYFLC)
@@ -280,7 +285,7 @@ subroutine z_predict_nhfull(j         ,nmmaxj    ,nmmax     ,kmax      , &
              & ubrlsu    ,pship     ,diapl     ,rnpl      ,cfurou    , &
              & u1        ,s0        ,dpu       ,qxk       ,qyk       , &
              & norow     ,nocol     ,irocol(1, 1)         ,nst       ,umean     , &
-             & crbc(1,1) ,gdp       )
+             & crbc(1,1) ,ustokes   ,gdp       )
     !
     ! Computation of V1, i.e. evaluate momentum equation for one half timest
     !     calculate hv and set kfv = 0 for hv < htrsh (.5*dryflc)
@@ -309,7 +314,7 @@ subroutine z_predict_nhfull(j         ,nmmaxj    ,nmmax     ,kmax      , &
              & ubrlsv    ,pship     ,diapl     ,rnpl      ,cfvrou    , &
              & v1        ,s0        ,dpv       ,qyk       ,qxk       , &
              & nocol     ,norow     ,irocol(1, norow + 1) ,nst       ,vmean     , &
-             & crbc(1,norow + 1)    ,gdp       )
+             & crbc(1,norow + 1)    ,vstokes   ,gdp       )
     call timer_stop(timer_uzd, gdp)
     !
     ! DD code added:

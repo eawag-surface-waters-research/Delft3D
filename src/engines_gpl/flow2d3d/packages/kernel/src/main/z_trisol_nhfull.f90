@@ -1102,7 +1102,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
        !
        ! Compute densities
        !
-       if (lsal>0 .or. ltem>0 .or. (lsed>0 .and. densin)) then
+       if (lsal>0 .or. ltem>0 .or. (lsed>0 .and. densin) .and. nst<itdiag) then
           !
           ! note: DENS may still be called if sal or tem even if densin = false
           !
@@ -1177,6 +1177,23 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
        ! Use SIG for array ZK
        !
        call timer_start(timer_turbulence, gdp)
+       !
+       ! The velocities are corrected for mass flux and
+       ! temporary set in WRKB3 (UEUL) and WRKB4
+       ! (VEUL) these are used in Z_TURCLO
+       !
+       icx = nmaxddb
+       icy = 1
+       call timer_start(timer_euler, gdp)
+       call euler(jstart    ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
+                & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumax) , &
+                & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
+                & r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
+                & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
+                & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   , &
+                & r(grmsur) ,r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
+       call timer_stop(timer_euler, gdp)
+       !
        icx = nmaxddb
        icy = 1
        call timer_start(timer_turclo, gdp)
@@ -1189,7 +1206,8 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
                    & r(thick)  ,r(sig)    ,r(rho)    ,r(vicuv)  ,r(vicww)  , &
                    & r(dicuv)  ,r(dicww)  ,r(windsu) ,r(windsv) ,r(z0urou) , &
                    & r(z0vrou) ,r(bruvai) ,r(rich)   ,r(dudz)   ,r(dvdz)   , &
-                   & r(dzu0)   ,r(dzv0)   ,r(dzs0)   ,r(sig)    ,gdp       )
+                   & r(dzu0)   ,r(dzv0)   ,r(dzs0)   ,r(sig)    ,r(wrkb3)  , &
+                   & r(wrkb4)  ,gdp       )
        call timer_stop(timer_turclo, gdp)
        call timer_stop(timer_turbulence, gdp)
        !
@@ -1432,8 +1450,8 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
                           & gdp       )
           endif
           !
-          ! ISSUE: DELFT3D-14744: If requested by keyword ZTBML 
-          ! (Z-model TauBottom Modified Layering: equistant near-bed layering for smoother bottom shear stress):
+          ! If requested by keyword ZTBML 
+          ! (Z-model TauBottom Modified Layering)
           ! --> modify the near-bed layering to obtain smoother bottom shear stress representation in z-layer models
           !
           if (ztbml) then
@@ -1668,6 +1686,23 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
        !
        call timer_start(timer_turbulence, gdp)
        if (ltur > 0) then
+          !
+          ! The velocities are corrected for mass flux and
+          ! temporary set in WRKB13 (UEUL) and WRKB14 (VEUL)
+          ! these are used in Z_TRATUR
+          !
+          icx = nmaxddb
+          icy = 1
+          call timer_start(timer_euler, gdp)
+          call euler(jstart    ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
+                   & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumax) , &
+                   & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
+                   & r(u1)     ,r(wrkb13) ,r(v1)     ,r(wrkb14) , &
+                   & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
+                   & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   , &
+                   & r(grmsur) ,r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
+          call timer_stop(timer_euler, gdp)
+          !
           icx = nmaxddb
           icy = 1
           call timer_start(timer_tratur, gdp)
@@ -1685,24 +1720,9 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
                       & r(wrkb7)  ,r(wrkb8)  ,r(wrkb9)  ,r(wrkb10) ,r(wrkb11) , &
                       & r(ubnd)   ,r(wrkb12) ,i(iwrk1)  ,r(wrka1)  ,i(iwrk2)  , &
                       & r(wrka2)  ,r(wrkb5)  ,i(kfsmin) ,i(kfsmax) ,i(kfsmx0) , &
-                      & i(kfuz1)  ,i(kfvz1)  ,r(dzs1)   ,gdp       )
+                      & i(kfuz1)  ,i(kfvz1)  ,r(dzs1)   ,r(wrkb13) ,r(wrkb14) , &
+                      & gdp       )
           call timer_stop(timer_tratur, gdp)
-          !
-          ! Eddy viscosity and diffusivity
-          ! Use SIG for array ZK
-          !
-          icx = nmaxddb
-          icy = 1
-          call z_turclo(jstart    ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
-                      & icx       ,icy       ,tkemod    , &
-                      & i(kcs)    ,i(kfu)    ,i(kfv)    ,i(kfs)    ,i(kfuz1)  , &
-                      & i(kfvz1)  ,i(kfsz1)  ,i(kfumin) ,i(kfumax) ,i(kfvmin) , &
-                      & i(kfvmax) ,i(kfsmin) ,i(kfsmax) ,r(s1)     ,d(dps)    , &
-                      & r(hu)     ,r(hv)     ,r(u1)     ,r(v1)     ,r(rtur1)  , &
-                      & r(thick)  ,r(sig)    ,r(rho)    ,r(vicuv)  ,r(vicww)  , &
-                      & r(dicuv)  ,r(dicww)  ,r(windsu) ,r(windsv) ,r(z0urou) , &
-                      & r(z0vrou) ,r(bruvai) ,r(rich)   ,r(dudz)   ,r(dvdz)   , &
-                      & r(dzu1)   ,r(dzv1)   ,r(dzs1)   ,r(sig)    ,gdp       )
           !
           ! Check horizontal eddy viscosity and diffusivity
           !

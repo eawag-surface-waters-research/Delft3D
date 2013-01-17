@@ -95,7 +95,7 @@ subroutine z_taubotmodifylayers(nmmax  ,kmax     ,lstsci   ,icx     ,icy        
 !! executable statements -------------------------------------------------------
 !
     !
-    ! ISSUE: DELFT3D-14744: Modification of near bed layer thicknesses to obtain 
+    ! Modification of near bed layer thicknesses to obtain 
     ! a smoother approximation of the bed shear stress,
     !
     ! Modification of layer thickness in cell centres

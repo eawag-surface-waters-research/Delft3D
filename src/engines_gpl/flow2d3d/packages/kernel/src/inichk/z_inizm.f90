@@ -302,8 +302,8 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        endif
     enddo
     !
-    ! ISSUE: DELFT3D-14744: If requested by keyword ZTBML 
-    ! (Z-model TauBottom Modified Layering: equistant near-bed layering for smoother bottom shear stress):
+    ! If requested by keyword ZTBML 
+    ! (Z-model TauBottom Modified Layering)
     ! --> modify the near-bed layering to obtain smoother bottom shear stress representation in z-layer models
     !
     if (ztbml) then

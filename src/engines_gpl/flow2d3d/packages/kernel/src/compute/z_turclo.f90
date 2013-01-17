@@ -7,7 +7,8 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
                   & thick     ,sig       ,rho       ,vicuv     ,vicww     , &
                   & dicuv     ,dicww     ,windsu    ,windsv    ,z0urou    , &
                   & z0vrou    ,bruvai    ,rich      ,dudz      ,dvdz      , &
-                  & dzu1      ,dzv1      ,dzs1      ,zk        ,gdp       )
+                  & dzu1      ,dzv1      ,dzs1      ,zk        ,ueul      , &
+                  & veul      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -128,7 +129,9 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: dzv1   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: rho    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: u1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: ueul   !!  Eulerian velocity in X-direction (including Stokes drift)
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: v1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: veul   !!  Eulerian velocity in Y-direction (including Stokes drift)
     real(fp), dimension(kmax)                                             :: sig    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(kmax)                                             :: thick  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(0:kmax)                                           :: zk
@@ -264,9 +267,9 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
              do k = 1, kmax
                 dudz(nm, k) = 0.0
                 if (k>=kfumin(nm) .and. k<=kfumax(nm) - 1) then
-                   kup = k + 1
-                   dz = .5*(dzu1(nm, k) + dzu1(nm, kup))
-                   dudz(nm, k) = (u1(nm, kup) - u1(nm, k))/dz
+                   kup         = k + 1
+                   dz          = 0.5_fp*(dzu1(nm, k) + dzu1(nm, kup))
+                   dudz(nm, k) = (ueul(nm, kup) - ueul(nm, k))/dz
                 endif
              enddo
           endif
@@ -276,9 +279,9 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
              do k = 1, kmax
                 dvdz(nm, k) = 0.0
                 if (k>=kfvmin(nm) .and. k<=kfvmax(nm) - 1) then
-                   kup = k + 1
-                   dz = .5*(dzv1(nm, k) + dzv1(nm, kup))
-                   dvdz(nm, k) = (v1(nm, kup) - v1(nm, k))/dz
+                   kup         = k + 1
+                   dz          = 0.5_fp*(dzv1(nm, k) + dzv1(nm, kup))
+                   dvdz(nm, k) = (veul(nm, kup) - veul(nm, k))/dz
                 endif
              enddo
           endif
@@ -290,16 +293,18 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
              ndm = nm - icy
              if (kfs(nm)==1) then
                 h0     = max(s1(nm) + real(dps(nm),fp), 0.01_fp)
-                dz     = .5*(dzs1(nm, k) + dzs1(nm, kup))
+                dz     = 0.5_fp*(dzs1(nm, k) + dzs1(nm, kup))
                 drhodz = (rho(nm, kup) - rho(nm, k))/dz
                 if (kcs(nm)==3) then
                    maskval = kcs(nm) - 2
                 else
                    maskval = kcs(nm)
                 endif
-                shear = maskval*0.5*(  dudz(nm, k)**2 + dudz(nmd, k)**2         &
-                      &              + dvdz(nm, k)**2 + dvdz(ndm, k)**2)
-                if (shear<1E-8) shear = 1E-8
+                shear = maskval*0.5_fp*(  dudz(nm, k)**2 + dudz(nmd, k)**2         &
+                      &                 + dvdz(nm, k)**2 + dvdz(ndm, k)**2)
+                if (shear<1E-8) then
+                   shear = 1E-8
+                endif
                 bruvai(nm, k) = -ag*drhodz/rho(nm, k)
                 rich  (nm, k) = bruvai(nm, k)/shear
              endif
@@ -317,9 +322,9 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
              zcord = 0.
              if (kfs(nm)==1) then
                 do k = kfsmin(nm), kfsmax(nm)
-                   uuu = (u1(nmd, k) + u1(nm, k))                               &
+                   uuu = (ueul(nmd, k) + ueul(nm, k))                               &
                        & /max(1, kfuz1(nmd, k) + kfuz1(nm, k))
-                   vvv = (v1(ndm, k) + v1(nm, k))                               &
+                   vvv = (veul(ndm, k) + veul(nm, k))                               &
                        & /max(1, kfvz1(ndm, k) + kfvz1(nm, k))
                    utot = sqrt(uuu*uuu + vvv*vvv)
                    !
@@ -344,15 +349,15 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
              if (kfs(nm)==1) then
                 kmin = kfsmin(nm)
                 if (kfsmin(nm)/=kfsmax(nm)) then
-                   uuu = (u1(nmd, kmin + 1) + u1(nm, kmin + 1))                 &
+                   uuu = (ueul(nmd, kmin + 1) + ueul(nm, kmin + 1))                 &
                        & /max(1, kfuz1(nmd, kmin + 1) + kfuz1(nm, kmin + 1))
-                   vvv = (v1(ndm, kmin + 1) + v1(nm, kmin + 1))                 &
+                   vvv = (veul(ndm, kmin + 1) + veul(nm, kmin + 1))                 &
                        & /max(1, kfvz1(ndm, kmin + 1) + kfvz1(nm, kmin + 1))
-                   dz = dzs1(nm, kmin) + 0.5*dzs1(nm, kmin + 1)
+                   dz = dzs1(nm, kmin) + 0.5_fp*dzs1(nm, kmin + 1)
                 else
-                   uuu = (u1(nmd, kmin) + u1(nm, kmin))                         &
+                   uuu = (ueul(nmd, kmin) + ueul(nm, kmin))                         &
                        & /max(1, kfuz1(nmd, kmin) + kfuz1(nm, kmin))
-                   vvv = (v1(ndm, kmin) + v1(nm, kmin))                         &
+                   vvv = (veul(ndm, kmin) + veul(nm, kmin))                         &
                        & /max(1, kfvz1(ndm, kmin) + kfvz1(nm, kmin))
                    dz = dzs1(nm, kmin)/ee
                 endif
@@ -360,8 +365,8 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
                 !
                 ! bottom is assumed at Z0
                 !
-                rz = 1.0 + dz/dicww(nm, kmax)
-                ustbot = utot*vonkar/log(rz)
+                rz              = 1.0_fp + dz/dicww(nm, kmax)
+                ustbot          = utot*vonkar/log(rz)
                 vicww(nm, kmax) = max(vicww(nm, kmax), ustbot)
              endif
           enddo
@@ -491,20 +496,20 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
              !
              kmin = kfsmin(nm)
              if (kfsmin(nm)/=kfsmax(nm)) then
-                uuu = (u1(nmd, kmin + 1) + u1(nm, kmin + 1))                    &
+                uuu = (ueul(nmd, kmin + 1) + ueul(nm, kmin + 1))                    &
                     & /max(1, kfuz1(nmd, kmin + 1) + kfuz1(nm, kmin + 1))
-                vvv = (v1(ndm, kmin + 1) + v1(nm, kmin + 1))                    &
+                vvv = (veul(ndm, kmin + 1) + veul(nm, kmin + 1))                    &
                     & /max(1, kfvz1(ndm, kmin + 1) + kfvz1(nm, kmin + 1))
                 dz = dzs1(nm, kmin) + 0.5*dzs1(nm, kmin + 1)
              else
-                uuu = (u1(nmd, kmin) + u1(nm, kmin))                            &
+                uuu = (ueul(nmd, kmin) + ueul(nm, kmin))                            &
                     & /max(1, kfuz1(nmd, kmin) + kfuz1(nm, kmin))
-                vvv = (v1(ndm, kmin) + v1(nm, kmin))                            &
+                vvv = (veul(ndm, kmin) + veul(nm, kmin))                            &
                     & /max(1, kfvz1(ndm, kmin) + kfvz1(nm, kmin))
                 dz = dzs1(nm, kmin)/ee
              endif
-             utot = sqrt(uuu*uuu + vvv*vvv)
-             rz = 1.0 + dz/dicww(nm, kmax)
+             utot   = sqrt(uuu*uuu + vvv*vvv)
+             rz     = 1.0 + dz/dicww(nm, kmax)
              ustbot = abs(utot)*vonkar/log(rz)
              !
              vicww(nm, kmin - 1) = vonkar*ustbot*dicww(nm, kmax)

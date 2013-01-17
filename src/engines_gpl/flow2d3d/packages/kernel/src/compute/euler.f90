@@ -54,11 +54,13 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    logical  , pointer :: wave
-    logical  , pointer :: struct
-    logical  , pointer :: zmodel
-    logical  , pointer :: roller
-    real(fp) , pointer :: ag
+    logical                 , pointer :: wave
+    logical                 , pointer :: struct
+    logical                 , pointer :: zmodel
+    logical                 , pointer :: roller
+    real(fp)                , pointer :: ag
+    real(fp), dimension(:,:), pointer :: ustokes
+    real(fp), dimension(:,:), pointer :: vstokes
 !
 ! Global variables
 !
@@ -114,7 +116,6 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
     real(fp)      :: p2
     real(fp)      :: sintv
     real(fp)      :: tpu
-    real(fp)      :: ustokes
     real(fp)      :: z
     integer                        :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
@@ -125,7 +126,8 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
     struct     => gdp%gdprocs%struct
     zmodel     => gdp%gdprocs%zmodel
     roller     => gdp%gdprocs%roller
-    nm_pos     =  1
+    ustokes    => gdp%gdtrisol%ustokes
+    vstokes    => gdp%gdtrisol%vstokes
     !
     ! Correct Velocities with mass flux
     ! Added vertical structure of mass flux according to 2nd Order Stokes
@@ -175,24 +177,24 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
                    !
                    if (.not. zmodel) then
                       do k = 1, kmax
-                         z            = (1.0_fp+sig(k)) * h
-                         p1           = max(-25.0_fp,  2.0_fp*kwav*(z-h))
-                         p2           = max(-25.0_fp, -4.0_fp*kwav*z)
-                         f2           = exp(p1) * (1.0_fp+exp(p2))
-                         ustokes      = f1 * (f2/f3)
-                         uwork(nm, k) = u1(nm, k) - ustokes*costu - &
-                                      & (grmsur(nm) + grfacu(nm))/hu(nm)
+                         z             = (1.0_fp+sig(k)) * h
+                         p1            = max(-25.0_fp,  2.0_fp*kwav*(z-h))
+                         p2            = max(-25.0_fp, -4.0_fp*kwav*z)
+                         f2            = exp(p1) * (1.0_fp+exp(p2))
+                         ustokes(nm,k) = f1 * (f2/f3) * costu
+                         uwork  (nm,k) = u1(nm,k) - ustokes(nm,k)          &
+                                       & - (grmsur(nm) + grfacu(nm))/hu(nm)
                       enddo
                    else
                       z = 0.0_fp
                       do k = kfumin(nm), kfumax(nm)
-                         z            = z + dzu1(nm, k)
-                         p1           = max(-25.0_fp,  2.0_fp*kwav*(z-h))
-                         p2           = max(-25.0_fp, -4.0_fp*kwav*z)
-                         f2           = exp(p1) * (1.0_fp+exp(p2))
-                         ustokes      = f1 * (f2/f3)
-                         uwork(nm, k) = u1(nm, k) - ustokes*costu -      &
-                                      & (grmsur(nm) + grfacu(nm))/hu(nm)
+                         z             = z + dzu1(nm, k)
+                         p1            = max(-25.0_fp,  2.0_fp*kwav*(z-h))
+                         p2            = max(-25.0_fp, -4.0_fp*kwav*z)
+                         f2            = exp(p1) * (1.0_fp+exp(p2))
+                         ustokes(nm,k) = f1 * (f2/f3) * costu
+                         uwork  (nm,k) = u1(nm,k) - ustokes(nm,k)           &
+                                       & - (grmsur(nm) + grfacu(nm))/hu(nm)
                       enddo
                    endif
                 else
@@ -237,24 +239,24 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
                    !
                    if (.not. zmodel) then
                       do k = 1, kmax
-                         z            = (1.0_fp+sig(k)) * h
-                         p1           = max(-25.0_fp,  2.0_fp*kwav*(z - h))
-                         p2           = max(-25.0_fp, -4.0_fp*kwav*z)
-                         f2           = exp(p1) * (1.0_fp+exp(p2))
-                         ustokes      = f1 * (f2/f3)
-                         vwork(nm, k) = v1(nm, k) - ustokes*sintv - &
-                                      & (grmsvr(nm) + grfacv(nm))/hv(nm) 
+                         z             = (1.0_fp+sig(k)) * h
+                         p1            = max(-25.0_fp,  2.0_fp*kwav*(z - h))
+                         p2            = max(-25.0_fp, -4.0_fp*kwav*z)
+                         f2            = exp(p1) * (1.0_fp+exp(p2))
+                         vstokes(nm,k) = f1 * (f2/f3) * sintv
+                         vwork  (nm,k) = v1(nm,k) - vstokes(nm,k)          &
+                                       & - (grmsvr(nm) + grfacv(nm))/hv(nm) 
                       enddo
                    else
                       z = 0.0_fp
                       do k = kfvmin(nm), kfvmax(nm)
-                         z            = z + dzv1(nm, k)
-                         p1           = max(-25.0_fp,  2.0_fp*kwav*(z - h))
-                         p2           = max(-25.0_fp, -4.0_fp*kwav*z)
-                         f2           = exp(p1) * (1.0_fp+exp(p2))
-                         ustokes      = f1 * (f2/f3)
-                         vwork(nm, k) = v1(nm, k) - ustokes*sintv -      &
-                                      & (grmsvr(nm) + grfacv(nm))/hv(nm) 
+                         z             = z + dzv1(nm, k)
+                         p1            = max(-25.0_fp,  2.0_fp*kwav*(z - h))
+                         p2            = max(-25.0_fp, -4.0_fp*kwav*z)
+                         f2            = exp(p1) * (1.0_fp+exp(p2))
+                         vstokes(nm,k) = f1 * (f2/f3) * sintv
+                         vwork  (nm,k) = v1(nm,k) - vstokes(nm,k)          &
+                                       & - (grmsvr(nm) + grfacv(nm))/hv(nm) 
                       enddo
                    endif
                 else

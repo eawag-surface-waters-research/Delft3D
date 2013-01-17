@@ -56,6 +56,7 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     real(fp), pointer :: depini
+    logical , pointer :: slplim
     integer , pointer :: itis
     logical , pointer :: chz_k2d
 !
@@ -106,13 +107,14 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     character(13)               :: chulp  ! Help character variable 
     character(13), dimension(3) :: traopt ! Transport model options cyclic-method and van leer-2 
     character(6)                :: keyw   ! Name of record to look for in the MD-file (usually KEYWRD or RECNAM) 
-    character(80)               :: msg
+    character(200)              :: msg
 !
     data traopt/'cyclic-method', 'van leer-2   ', 'iupw         '/
 !
 !! executable statements -------------------------------------------------------
 !
     depini  => gdp%gdnumeco%depini
+    slplim  => gdp%gdnumeco%slplim
     itis    => gdp%gdrdpara%itis
     chz_k2d => gdp%gdrivpro%chz_k2d
     !
@@ -142,9 +144,11 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     forfuv = 'Y'
     forfww = 'N'
     nudge  = 0
-   !
+    !
     temint = 'Y'
     evaint = 'Y'
+    !
+    slplim = .false.
     !
     ! locate and read 'Dpuopt' record for determining DPU procedure
     ! dpuopt initialised as ' ', to allow special checks on combinations  
@@ -258,7 +262,7 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
                    call prterr(lundia    ,'V079'    ,momsol    )
                 else
                    msg = 'Using default momentum solver "Multi Directional Upwind Explicit"'
-                   call prterr(lundia    ,'Z013'    ,msg       )
+                   call prterr(lundia    ,'Z013'    ,trim(msg)   )
                    msg = momsol//' can not be used as momentum solver in z-model'
                    write (lundia,'(a,a)') '            ',trim(msg)
                    momsol = 'mdue  '
@@ -268,7 +272,7 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
                    call prterr(lundia    ,'V079'    ,momsol    )
                 else   
                    msg = 'Using default momentum solver "Cyclic"'
-                   call prterr(lundia    ,'Z013'    ,msg       )
+                   call prterr(lundia    ,'Z013'    ,trim(msg)   )
                    msg = momsol//' can not be used as momentum solver in sigma-model'
                    write (lundia,'(a,a)') '            ',trim(msg)
                    momsol = 'cyclic'
@@ -488,7 +492,7 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     if (lvalue) then
        nudge = 1
        msg = 'Nudging of constituents applied at open boundaries'
-       call prterr(lundia, 'Z013', msg)
+       call prterr(lundia, 'Z013', trim(msg))
     else
        nudge = 0
     endif
@@ -688,6 +692,7 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
        gammax = rdef
        write (lundia,'(a,e12.2)') '*** MESSAGE Gammax specified by user to be ', gammax
     endif
+    !
     ! Boundary viscosity for nudging
     !
     rdef = -999.0_fp
@@ -701,4 +706,13 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     ! See also rdmor
     !
     call prop_get(gdp%mdfile_ptr, '*', 'FWFac' , fwfac)
+    !
+    ! Flag to switch on slope limiter to avoid high velocities along steep slopes
+    ! (used in cucnp/z_cucnp and uzd/z_uzd)
+    !
+    call prop_get(gdp%mdfile_ptr, '*', 'SlpLim', slplim)
+    if (slplim) then
+       write (msg,'(a)') 'Found Keyword SlpLim = #Y#: switching on slope limiter to avoid high velocities along steep slopes'
+       call prterr(lundia, 'G051', trim(msg))
+    endif
 end subroutine rdnum

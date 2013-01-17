@@ -22,7 +22,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
              & cc        ,dd        ,tetau     ,aak       ,bbk       , &
              & cck       ,ddk       ,d0        ,d0k       ,bbka      , &
              & bbkc      ,ua        ,ub        ,soumud    ,dis_nf    , &
-             & precip    ,gdp       )
+             & precip    ,ustokes   ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -215,6 +215,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                       :: ua
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                       :: ub
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                       :: ubrlsu  !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                       :: ustokes !  Description and declaration in trisol.igs
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                       :: v1      !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax+2)                     :: vicuv   !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                       :: dis_nf  !  Description and declaration in esm_alloc_real.f90
@@ -360,7 +361,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
              & r0        ,diapl     ,rnpl      ,taubpu    ,taubsu    , &
              & windsu    ,patm      ,fcorio    ,ubrlsu    ,uwtypu    , &
              & hkru      ,pship     ,tgfsep    ,dteu      ,ua        , &
-             & ub        ,gdp       )
+             & ub        ,ustokes   ,gdp       )
     call timer_stop(timer_sud_cucnp, gdp)
     !
     ! INITIALISATION OF ITERATION OVER CONTINUITY EQUATION

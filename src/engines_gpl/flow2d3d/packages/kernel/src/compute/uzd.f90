@@ -17,7 +17,7 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
              & diapl     ,rnpl      , &
              & cfurou    ,cfvrou    ,rttfu     ,r0        ,windsu    , &
              & patm      ,fcorio    ,ubrlsu    ,hkru      , &
-             & pship     ,tgfsep    ,dteu      ,gdp       )
+             & pship     ,tgfsep    ,dteu      ,ustokes   ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -92,27 +92,28 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     include 'flow_steps_f.inc'
-    real(fp)               , pointer :: eps
-    integer                , pointer :: lundia
-    real(fp)               , pointer :: dryflc
-    real(fp)               , pointer :: gammax
-    real(fp)               , pointer :: hdt
-    integer                , pointer :: ibaroc
-    logical                , pointer :: cstbnd
-    character(6)           , pointer :: momsol
-    real(fp)               , pointer :: rhow
-    real(fp)               , pointer :: rhofrac
-    real(fp)               , pointer :: ag
-    real(fp)               , pointer :: vicmol
-    integer                , pointer :: iro
-    integer                , pointer :: irov
-    logical                , pointer :: wind
-    logical                , pointer :: wave
-    logical                , pointer :: roller
-    logical                , pointer :: xbeach
-    logical                , pointer :: dpmveg
-    integer                , pointer :: mfg
-    integer                , pointer :: nfg
+    real(fp)                , pointer :: eps
+    integer                 , pointer :: lundia
+    real(fp)                , pointer :: dryflc
+    real(fp)                , pointer :: gammax
+    real(fp)                , pointer :: hdt
+    integer                 , pointer :: ibaroc
+    logical                 , pointer :: cstbnd
+    character(6)            , pointer :: momsol
+    logical                 , pointer :: slplim
+    real(fp)                , pointer :: rhow
+    real(fp)                , pointer :: rhofrac
+    real(fp)                , pointer :: ag
+    real(fp)                , pointer :: vicmol
+    integer                 , pointer :: iro
+    integer                 , pointer :: irov
+    logical                 , pointer :: wind
+    logical                 , pointer :: wave
+    logical                 , pointer :: roller
+    logical                 , pointer :: xbeach
+    logical                 , pointer :: dpmveg
+    integer                 , pointer :: mfg
+    integer                 , pointer :: nfg
 !
 ! Global variables
 !
@@ -199,6 +200,7 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ua
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ub
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ubrlsu  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub,kmax)                 :: ustokes !  Description and declaration in trisol.igs
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: uvdwk   !!  Internal work array for Jac.iteration
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: v       !!  V-velocities
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax+2)              :: vicuv   !  Description and declaration in esm_alloc_real.f90
@@ -314,6 +316,7 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     ibaroc     => gdp%gdnumeco%ibaroc
     cstbnd     => gdp%gdnumeco%cstbnd
     momsol     => gdp%gdnumeco%momsol
+    slplim     => gdp%gdnumeco%slplim
     rhow       => gdp%gdphysco%rhow
     rhofrac    => gdp%gdphysco%rhofrac
     ag         => gdp%gdphysco%ag
@@ -506,24 +509,25 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
           !
           ! BOTTOM STRESS DUE TO FLOW AND WAVES
           !
-          ! Adaption for inundation is not needed here (no flooding); only in cucnp  ISSUE: DELFT3D-14744
-          !
+          ! Adaption for inundation is not needed here (no flooding); only in cucnp
           !
           ! Slope correction for steep slopes
           !
-          !nmu    = nm + icx
-          !dpsmax = max(-dps(nm),-dps(nmu))
-          !if (s0(nm) < dpsmax) then
-          !   do k = 1, kmax
-          !      ddk(nm,k) = ddk(nm,k) - ag*(s0(nm)-dpsmax)/gvu(nm)
-          !   enddo
-          !elseif (s0(nmu) < dpsmax) then
-          !     do k = 1, kmax
-          !        ddk(nm,k) = ddk(nm,k) + ag*(s0(nmu)-dpsmax)/gvu(nm)
-          !     enddo
-          !endif
+          if (slplim) then
+             nmu    = nm + icx
+             dpsmax = max(-dps(nm),-dps(nmu))
+             if (s0(nm) < dpsmax) then
+                do k = 1, kmax
+                   ddk(nm,k) = ddk(nm,k) - 2.0_fp*ag*(s0(nm)-dpsmax)/gvu(nm)
+                enddo
+             elseif (s0(nmu) < dpsmax) then
+                  do k = 1, kmax
+                     ddk(nm,k) = ddk(nm,k) + 2.0_fp*ag*(s0(nmu)-dpsmax)/gvu(nm)
+                  enddo
+             endif
+          endif
           !
-          ! End slope correction
+          ! Bottom and wind shear stress
           !
           cbot   = taubpu(nm)
           qwind  = h0i*windsu(nm)/thick(1)
@@ -780,6 +784,11 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
                 aak(nm, k) = aak(nm, k) - ddza
                 bbk(nm, k) = bbk(nm, k) - ddzb
                 cck(nm, k) = cck(nm, k) - ddzc
+                !
+                ! Effect of waves, due to Stokes drift 
+                !
+                ddk(nm, k) = ddk(nm,k) - ( ddza*(ustokes(nm,kdo)-ustokes(nm,k  )) -  &
+                                        &  ddzc*(ustokes(nm,k  )-ustokes(nm,kup))   )
              endif
           enddo
        enddo

@@ -177,70 +177,103 @@ subroutine waveu(nmmax     ,kfs       ,sourw     , &
           enddo
        endif
     else
-       !
-       ! Formulation Baldock(1998)
-       !      
-       if (comparereal(gamdis,-2.0_fp) == 0) then
-           !
-           ! Gamma according to Battjes & Stive (1985)
-           ! Initialize hrms0 & rlabda0
-           ! reading of wavecon file for time series of waves
-           ! name is built using runid as extension
-           !
-           if (cnstwv .or. snelli) then
-              write(wavnam,'(a,a)') 'wavecon.', trim(gdp%runid)
-              nwav   = 7
-              call varcon(wavnam, timmin, wavcon, isdir, nwav, gdp)
-              hrms0  = wavcon(1) / sqrt(2.0_fp)
-              tp0    = wavcon(2)
-              !
-              ! Compute the wave length. considering deep water at the boundary 
-              !
-              rlabda0 = ag * (tp0**2) / (2*pi)
-              !
-              ! Compute Gamma
-              !
-              gamBaSti = 0.5_fp + 0.4_fp*tanh(33.0_fp*hrms0/rlabda0)
-           else
-              call prterr(lundia, 'U021', 'Battjes & Stive formulation can not be used without wavecon file')
-              call d3stop(1, gdp)
-           endif   
-       endif
-       !
-       do nm = 1, nmmax
-          sinkw(nm) = 0.0_fp
-          sourw(nm) = 0.0_fp
-          df(nm)    = 0.0_fp
-          if (kfs(nm) /= 0) then
-             hdis = max (0.1_fp , s0(nm)+real(dps(nm),fp))           
-             if (tp(nm)<0.02_fp .or. ewave0(nm)<0.01_fp) then
-                afp = 1.0_fp
-             else
-                afp  = alfarol / tp(nm)
-                kwav = 2.0_fp* pi / (c(nm)*tp(nm))
-                if (comparereal(gamdis,-1.0_fp) == 0) then
-                   !
-                   ! gamma according to Ruessink et al (2003) 
-                   !
-                   gamdisi = 0.76_fp*kwav*hdis + 0.29_fp
-                elseif (comparereal(gamdis,-2.0_fp) == 0) then
-                   !
-                   ! gamma according to Battjes & Stive (1985) 
-                   !
-                   gamdisi = gamBaSti
+       if (disform == 'R2004') then
+          !
+          ! Formulation Roelvink (2004)
+          !
+          do nm = 1, nmmax
+             sinkw(nm)  = 0.0_fp
+             sourw(nm)  = 0.0_fp
+             ewabr1(nm) = min(ewabr1(nm),1.0_fp)
+             ewabr1(nm) = max(ewabr1(nm),0.0_fp)
+             if (kfs(nm) /= 0) then
+                hdis = max (0.01_fp , s0(nm)+real(dps(nm),fp))
+                if (tp(nm) < 0.02_fp) then
+                   afp = 1.0_fp
                 else
-                   gamdisi = gamdis
+                   afp = alfarol/tp(nm)
                 endif
-                if (f_lam < 0.0_fp) then
-                   hdis = hbd(nm)
+                if (ewave0(nm) < 1.0e-6_fp) then
+                   whdis = 1.0e-6_fp
+                else
+                   whdis = sqrt(8.0_fp * ewave0(nm) / (rhow*ag))
                 endif
-                hb2       = (0.88_fp / kwav * tanh(gamdisi/0.88_fp*kwav*hdis) )**2
-                hrms2     = ewave0(nm) * 8.0_fp/ rhow / ag
-                dw        = 0.25_fp * afp * rhow * ag * exp(-hb2/hrms2) * (hb2+hrms2)
-                df(nm)    = rhow * fwee * (pi**2.5_fp) * ( sqrt(hrms2)/(tp(nm)*sinh(kwav*hdis)) )**3
-                sinkw(nm) = (dw+df(nm)) / ewave0(nm)
+                sinkw(nm) = 2.0_fp * afp * whdis / hdis * ewabr1(nm)
+                df(nm)  = sinkw(nm)*ewave0(nm)
+              if (whdis > gamdis*hdis) then
+                   ewabr1(nm)=1.0_fp
+                endif
+                if (whdis < 0.3_fp*hdis) then
+                   ewabr1(nm)=0.0_fp
+                endif
              endif
+          enddo
+       else
+          !
+          ! Formulation Baldock(1998)
+          !      
+          if (comparereal(gamdis,-2.0_fp) == 0) then
+              !
+              ! Gamma according to Battjes & Stive (1985)
+              ! Initialize hrms0 & rlabda0
+              ! reading of wavecon file for time series of waves
+              ! name is built using runid as extension
+              !
+              if (cnstwv .or. snelli) then
+                 write(wavnam,'(a,a)') 'wavecon.', trim(gdp%runid)
+                 nwav   = 7
+                 call varcon(wavnam, timmin, wavcon, isdir, nwav, gdp)
+                 hrms0  = wavcon(1) / sqrt(2.0_fp)
+                 tp0    = wavcon(2)
+                 !
+                 ! Compute the wave length. considering deep water at the boundary 
+                 !
+                 rlabda0 = ag * (tp0**2) / (2*pi)
+                 !
+                 ! Compute Gamma
+                 !
+                 gamBaSti = 0.5_fp + 0.4_fp*tanh(33.0_fp*hrms0/rlabda0)
+              else
+                 call prterr(lundia, 'U021', 'Battjes & Stive formulation can not be used without wavecon file')
+                 call d3stop(1, gdp)
+              endif   
           endif
-       enddo      
+          !
+          do nm = 1, nmmax
+             sinkw(nm) = 0.0_fp
+             sourw(nm) = 0.0_fp
+             df(nm)    = 0.0_fp
+             if (kfs(nm) /= 0) then
+                hdis = max (0.1_fp , s0(nm)+real(dps(nm),fp))           
+                if (tp(nm)<0.02_fp .or. ewave0(nm)<0.01_fp) then
+                   afp = 1.0_fp
+                else
+                   afp  = alfarol / tp(nm)
+                   kwav = 2.0_fp* pi / (c(nm)*tp(nm))
+                   if (comparereal(gamdis,-1.0_fp) == 0) then
+                      !
+                      ! gamma according to Ruessink et al (2003) 
+                      !
+                      gamdisi = 0.76_fp*kwav*hdis + 0.29_fp
+                   elseif (comparereal(gamdis,-2.0_fp) == 0) then
+                      !
+                      ! gamma according to Battjes & Stive (1985) 
+                      !
+                      gamdisi = gamBaSti
+                   else
+                      gamdisi = gamdis
+                   endif
+                   if (f_lam < 0.0_fp) then
+                      hdis = hbd(nm)
+                   endif
+                   hb2       = (0.88_fp / kwav * tanh(gamdisi/0.88_fp*kwav*hdis) )**2
+                   hrms2     = ewave0(nm) * 8.0_fp/ rhow / ag
+                   dw        = 0.25_fp * afp * rhow * ag * exp(-hb2/hrms2) * (hb2+hrms2)
+                   df(nm)    = rhow * fwee * (pi**2.5_fp) * ( sqrt(hrms2)/(tp(nm)*sinh(kwav*hdis)) )**3
+                   sinkw(nm) = (dw+df(nm)) / ewave0(nm)
+                endif
+             endif
+          enddo
+       endif
     endif
 end subroutine waveu

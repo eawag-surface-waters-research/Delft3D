@@ -58,6 +58,8 @@
        logical      :: use_zavg_for_qtot
                               !  Flag indicating whether discharge distribution at total discharge is based
                               !  on local water level (false) or average water level (true)
+       logical      :: slplim !  Flag to switch on slope limiter to avoid high velocities along steep slopes
+                              !  (used in cucnp/z_cucnp and uzd/z_uzd)
        character(8) :: dpsopt !  Drying & Flooding procedure at cell centres
                               !  [MEAN/MAX/MIN/NO]
        character(8) :: dpuopt

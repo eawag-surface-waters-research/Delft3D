@@ -43,7 +43,6 @@ subroutine inittrisol(gdp       )
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer , pointer :: ifirst
 !
 ! Global variables
 !
@@ -51,11 +50,7 @@ subroutine inittrisol(gdp       )
 !
 !! executable statements -------------------------------------------------------
 !
-    !
-    !
-    !-----Initialize statics for trisol
-    !
-    ifirst  => gdp%gdtrisol%ifirst
-    !
-    ifirst = 1
+    gdp%gdtrisol%ifirst = 1
+    nullify(gdp%gdtrisol%ustokes)
+    nullify(gdp%gdtrisol%vstokes)
 end subroutine inittrisol

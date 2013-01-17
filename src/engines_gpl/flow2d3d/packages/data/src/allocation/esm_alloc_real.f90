@@ -57,54 +57,56 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer , pointer :: ncmax
-    integer , pointer :: nmax
-    integer , pointer :: mmax
-    integer , pointer :: nlb
-    integer , pointer :: nub
-    integer , pointer :: mlb
-    integer , pointer :: mub
-    integer , pointer :: ddbound
-    integer , pointer :: nmaxus
-    integer , pointer :: kmax
-    integer , pointer :: nmaxd
-    integer , pointer :: mmaxd
-    integer , pointer :: lmax
-    integer , pointer :: lsts
-    integer , pointer :: lstsc
-    integer , pointer :: lstsci
-    integer , pointer :: lsed
-    integer , pointer :: lsedtot
-    integer , pointer :: ltur
-    integer , pointer :: kmxdt
-    integer , pointer :: npiwe
-    integer , pointer :: nbub
-    integer , pointer :: nlcest
-    integer , pointer :: nto
-    integer , pointer :: kc
-    integer , pointer :: kcd
-    integer , pointer :: nopest
-    integer , pointer :: nsrc
-    integer , pointer :: nostat
-    integer , pointer :: ntruv
-    integer , pointer :: ntru
-    integer , pointer :: nofou
-    integer , pointer :: ndro
-    integer , pointer :: nsluv
-    integer , pointer :: nrpntr
-    logical , pointer :: wind
-    logical , pointer :: salin
-    logical , pointer :: temp
-    logical , pointer :: const
-    logical , pointer :: drogue
-    logical , pointer :: wave
-    logical , pointer :: struct
-    logical , pointer :: cdwstruct
-    logical , pointer :: sedim
-    logical , pointer :: zmodel
-    logical , pointer :: roller
-    logical , pointer :: dpmveg
-    logical , pointer :: bubble
+    integer                 , pointer :: ncmax
+    integer                 , pointer :: nmax
+    integer                 , pointer :: mmax
+    integer                 , pointer :: nlb
+    integer                 , pointer :: nub
+    integer                 , pointer :: mlb
+    integer                 , pointer :: mub
+    integer                 , pointer :: ddbound
+    integer                 , pointer :: nmaxus
+    integer                 , pointer :: kmax
+    integer                 , pointer :: nmaxd
+    integer                 , pointer :: mmaxd
+    integer                 , pointer :: lmax
+    integer                 , pointer :: lsts
+    integer                 , pointer :: lstsc
+    integer                 , pointer :: lstsci
+    integer                 , pointer :: lsed
+    integer                 , pointer :: lsedtot
+    integer                 , pointer :: ltur
+    integer                 , pointer :: kmxdt
+    integer                 , pointer :: npiwe
+    integer                 , pointer :: nbub
+    integer                 , pointer :: nlcest
+    integer                 , pointer :: nto
+    integer                 , pointer :: kc
+    integer                 , pointer :: kcd
+    integer                 , pointer :: nopest
+    integer                 , pointer :: nsrc
+    integer                 , pointer :: nostat
+    integer                 , pointer :: ntruv
+    integer                 , pointer :: ntru
+    integer                 , pointer :: nofou
+    integer                 , pointer :: ndro
+    integer                 , pointer :: nsluv
+    integer                 , pointer :: nrpntr
+    logical                 , pointer :: wind
+    logical                 , pointer :: salin
+    logical                 , pointer :: temp
+    logical                 , pointer :: const
+    logical                 , pointer :: drogue
+    logical                 , pointer :: wave
+    logical                 , pointer :: struct
+    logical                 , pointer :: cdwstruct
+    logical                 , pointer :: sedim
+    logical                 , pointer :: zmodel
+    logical                 , pointer :: roller
+    logical                 , pointer :: dpmveg
+    logical                 , pointer :: bubble
+    real(fp), dimension(:,:), pointer :: ustokes
+    real(fp), dimension(:,:), pointer :: vstokes
 !
 ! Global variables
 !
@@ -114,6 +116,7 @@ subroutine esm_alloc_real(lundia, error, gdp)
 ! Local variables
 !
     integer           :: ierr     ! Errorflag 
+    integer           :: istat
     integer           :: kfacrl   ! Multiplication factor; 1 if ROLLER='Y', else 0 
     integer           :: kfaccdw  ! Multiplication factor; 1 if CDWSTRUCT='Y', else 0 
     integer           :: kfacdpmv ! Multiplication factor; 1 if DPMV='Y', else 0 
@@ -3516,6 +3519,27 @@ subroutine esm_alloc_real(lundia, error, gdp)
                              !  Integration time step in seconds
                              !  TSCALE = dt*tunit
     if (ierr<= - 9) goto 9999
+    !
+    !
+    !
+    ! GDP arrays
+    !
+    if (.not. associated(gdp%gdtrisol%ustokes)) then
+       allocate (gdp%gdtrisol%ustokes(gdp%d%nmlb:gdp%d%nmub,kmax), stat = istat)
+       if (istat /= 0) then
+          call prterr(lundia, 'U021', 'esm_alloc_real: memory alloc error')
+          call d3stop(1, gdp)
+       endif
+       gdp%gdtrisol%ustokes = 0.0_fp
+    endif
+    if (.not. associated(gdp%gdtrisol%vstokes)) then
+       allocate (gdp%gdtrisol%vstokes(gdp%d%nmlb:gdp%d%nmub,kmax), stat = istat)
+       if (istat /= 0) then
+          call prterr(lundia, 'U021', 'esm_alloc_real: memory alloc error')
+          call d3stop(1, gdp)
+       endif
+       gdp%gdtrisol%vstokes = 0.0_fp
+    endif
     !
     !
     !

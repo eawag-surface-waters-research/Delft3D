@@ -248,11 +248,9 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
                        dzu0(nm, k) = 0.0_fp
                     enddo
                     !
-                    ! ISSUE: DELFT3D-14744: modify the near-bed layering to obtain smoother 
-                    ! bottom shear stress representation in z-layer models
                     ! If requested by keyword ZTBML 
-                    ! (Z-model TauBottom Modified Layering: equistant near-bed layering 
-                    ! for smoother bottom shear stress):
+                    ! (Z-model TauBottom Modified Layering)
+                    ! --> modify the near-bed layering to obtain smoother bottom shear stress representation in z-layer models
                     !
                     if (ztbml) then
                        if (kfumx0(nm) > kfumin(nm)) then

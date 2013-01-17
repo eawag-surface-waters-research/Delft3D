@@ -27,17 +27,33 @@
 !  $Id$
 !  $HeadURL$$
 !-------------------------------------------------------------------------------
-    type sv_trisol
-!
-       real(fp) :: windxt    !  Global windspeed toplayer (x-dir) for UDF particle wind factor
-                             !  not implemented yet (set 0.)
-       real(fp) :: windyt    !  Global windspeed toplayer (y-dir) for UDF particle wind factor
-                             !  not implemented yet (set 0.)
-       real(fp) :: windft    !  Windfactor toplayer (e.g. 1% or 2%) for UDF particle wind factor
-                             !  not implemented yet (set 0.)
-       integer :: ifirst
-       integer :: nubnd      !  Flag for user defined boundary
-                             !  conditions 0 = no, 1 = yes
-       integer(pntrsize) :: ubnd !  User def. array with boundary conditions for turbulent quantities
-!
-    end type sv_trisol
+type sv_trisol
+    !
+    ! doubles
+    !
+    ! reals
+    !
+    real(fp) :: windxt    !  Global windspeed toplayer (x-dir) for UDF particle wind factor
+                          !  not implemented yet (set 0.)
+    real(fp) :: windyt    !  Global windspeed toplayer (y-dir) for UDF particle wind factor
+                          !  not implemented yet (set 0.)
+    real(fp) :: windft    !  Windfactor toplayer (e.g. 1% or 2%) for UDF particle wind factor
+                          !  not implemented yet (set 0.)
+    !
+    ! integers
+    !
+    integer           :: ifirst
+    integer           :: nubnd  !  Flag for user defined boundary
+                                !  conditions 0 = no, 1 = yes
+    integer(pntrsize) :: ubnd   !  User def. array with boundary conditions for turbulent quantities
+    !
+    ! pointers
+    !
+    real(fp), dimension(:,:), pointer :: ustokes
+    real(fp), dimension(:,:), pointer :: vstokes
+    ! 
+    ! logicals
+    !
+    !
+    ! characters
+end type sv_trisol

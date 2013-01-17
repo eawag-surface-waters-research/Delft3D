@@ -88,9 +88,9 @@ subroutine turwav(nmmax     ,kmax      ,kfs       , &
           ! in that case wave generated visc. should be added
           !
           if (htur2d) then
-            vicuv(nm, khtur) = vicuv(nm, khtur)+(dis(nm,1)/rhow)**(1.0/3.0)*h
+            vicuv(nm, khtur) = vicuv(nm, khtur)+(dis(nm,2)/rhow)**(1.0/3.0)*h
           else
-            vicuv(nm, khtur) = (dis(nm,1)/rhow)**(1.0/3.0)*h
+            vicuv(nm, khtur) = (dis(nm,2)/rhow)**(1.0/3.0)*h
           endif
           vicuv(nm, khtur) = max(vicuv(nm, khtur), thr)
        else
