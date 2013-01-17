@@ -50,6 +50,7 @@
 #else
 #   include <sys/times.h>
 #   include <unistd.h>
+#   include <libgen.h>
 #endif
 
 #define MAX_CMD 1000
