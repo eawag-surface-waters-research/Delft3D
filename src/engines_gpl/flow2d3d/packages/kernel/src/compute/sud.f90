@@ -254,7 +254,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
     integer       :: nmlu
     integer       :: nmu
     logical       :: error   ! Flag for detection of closure error in mass-balance
-    real(fp)      :: bi
+    real(hp)      :: bi
     real(fp)      :: epsomb
     real(fp)      :: fac
     real(fp)      :: hdti
@@ -565,11 +565,11 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
        !
        call timer_start(timer_sud_rowsc, gdp)
        do nm = 1, nmmax
-          bi    = 1.0_fp / b(nm)
-          a(nm) = a(nm) * bi
+          bi    = 1.0_hp / real(b(nm),hp)
+          a(nm) = real(a(nm),hp) * bi
           b(nm) = 1.0_fp
-          c(nm) = c(nm) * bi
-          d(nm) = d(nm) * bi
+          c(nm) = real(c(nm),hp) * bi
+          d(nm) = real(d(nm),hp) * bi
        enddo
        call timer_stop(timer_sud_rowsc, gdp)
        !
@@ -604,9 +604,9 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
                 do n = 1, nmaxddb
                    nm = nm + icy
                    if (kcs(nm) > 0) then
-                      bi    = 1./(b(nm) - a(nm)*c(nm - icx))
-                      c(nm) = c(nm)*bi
-                      d(nm) = (d(nm) - a(nm)*d(nm - icx))*bi
+                      bi    = 1.0_hp / (real(b(nm),hp) - real(a(nm),hp)*real(c(nm-icx),hp))
+                      c(nm) = real(c(nm),hp) * bi
+                      d(nm) = (real(d(nm),hp) - real(a(nm),hp)*real(d(nm-icx),hp)) * bi
                    endif
                 enddo
              enddo
@@ -622,9 +622,9 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
                 do n = 1, nmaxddb
                    nm = nm + icy
                    if (kcs(nm) > 0) then
-                      bi    = 1./(b(nm) - c(nm)*a(nm + icx))
-                      a(nm) = a(nm)*bi
-                      d(nm) = (d(nm) - c(nm)*d(nm + icx))*bi
+                      bi    = 1.0_hp / (real(b(nm),hp) - real(c(nm),hp)*real(a(nm+icx),hp))
+                      a(nm) = real(a(nm),hp) * bi
+                      d(nm) = (real(d(nm),hp) - real(c(nm),hp)*real(d(nm+icx),hp)) * bi
                    endif
                 enddo
              enddo
@@ -647,9 +647,9 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
                 do n = 1, nmaxddb
                    nm = nm + icy
                    if (kcs(nm) == -1) then
-                      bi     = 1./(b(nm) - a(nm)*c(nm - icx))
-                      c (nm) = c(nm)*bi
-                      d (nm) = (d(nm) - a(nm)*d(nm - icx))*bi
+                      bi     = 1.0_fp / (real(b(nm),hp) - real(a(nm),hp)*real(c(nm-icx),hp))
+                      c (nm) = real(c(nm),hp) * bi
+                      d (nm) = (real(d(nm),hp) - real(a(nm),hp)*real(d(nm-icx),hp)) * bi
                       s1(nm) = d(nm)
                    endif
                 enddo
@@ -681,9 +681,9 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
                 do n = 1, nmaxddb
                    nm = nm + icy
                    if (kcs(nm) == -1) then
-                      bi     = 1./(b(nm) - c(nm)*a(nm + icx))
-                      a (nm) = a(nm)*bi
-                      d (nm) = (d(nm) - c(nm)*d(nm + icx))*bi
+                      bi     = 1.0_hp / (real(b(nm),hp) - real(c(nm),hp)*real(a(nm+icx),hp))
+                      a (nm) = real(a(nm),hp) * bi
+                      d (nm) = (real(d(nm),hp) - real(c(nm),hp)*real(d(nm+icx),hp)) * bi
                       s1(nm) = d(nm)
                    endif
                 enddo

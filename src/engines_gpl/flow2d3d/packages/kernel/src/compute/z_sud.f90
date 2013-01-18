@@ -247,7 +247,7 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
     integer       :: nmf
     integer       :: nmlu
     integer       :: nmu
-    real(fp)      :: bi
+    real(hp)      :: bi
     real(fp)      :: dxid
     real(fp)      :: dxiu
     real(fp)      :: eps
@@ -563,9 +563,9 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
        do n = 1, nmaxddb
           nmf = nmf + icy
           if (kcs(nmf) /= 0) then
-             bi     = 1.0_fp / b(nmf)
-             c(nmf) = c(nmf) * bi
-             d(nmf) = d(nmf) * bi
+             bi     = 1.0_hp / real(b(nmf),hp)
+             c(nmf) = real(c(nmf),hp) * bi
+             d(nmf) = real(d(nmf),hp) * bi
           endif
        enddo
        do m = 2, mmaxddb
@@ -573,9 +573,9 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
           do n = 1, nmaxddb
              nm = nm + icy
              if (kcs(nm) /= 0) then
-                bi    = 1.0_fp/(b(nm) - a(nm)*c(nm - icx))
-                c(nm) = c(nm) * bi
-                d(nm) = (d(nm) - a(nm)*d(nm - icx)) * bi
+                bi    = 1.0_hp / (real(b(nm),hp) - real(a(nm),hp)*real(c(nm-icx),hp))
+                c(nm) = real(c(nm),hp) * bi
+                d(nm) = (real(d(nm),hp) - real(a(nm),hp)*real(d(nm-icx),hp)) * bi
              endif
           enddo
        enddo
