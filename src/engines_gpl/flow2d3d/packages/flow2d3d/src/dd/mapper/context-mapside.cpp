@@ -487,7 +487,7 @@ void D3dFlowContextMapSide::CreateMapperStrips(void)
     CREATE_REAL_FP( umean,    (char*)"umean"  ,    size    );
 
     if (Zmodel>0) CREATE_INT( kfumin,     (char*)"kfumin"   ,    size    );
-    if (Zmodel>0) CREATE_INT( kfumax,     (char*)"kfumax"   ,    size    );
+    if (Zmodel>0) CREATE_INT( kfumx0,     (char*)"kfumx0"   ,    size    );
 
     //
     // 2-dimensional var.s in V-points
@@ -502,7 +502,7 @@ void D3dFlowContextMapSide::CreateMapperStrips(void)
     CREATE_REAL_FP( vmean,    (char*)"vmean"  ,    size    );
 
     if (Zmodel>0) CREATE_INT( kfvmin,     (char*)"kfvmin"   ,    size    );
-    if (Zmodel>0) CREATE_INT( kfvmax,     (char*)"kfvmax"   ,    size    );
+    if (Zmodel>0) CREATE_INT( kfvmx0,     (char*)"kfvmx0"   ,    size    );
 
     if (Roller>0) CREATE_REAL_FP( qxkr  ,     (char*)"qxkr"     ,    size    );
     if (Roller>0) CREATE_REAL_FP( qykr  ,     (char*)"qykr"     ,    size    );
@@ -526,8 +526,8 @@ void D3dFlowContextMapSide::CreateMapperStrips(void)
 
     CREATE_REAL_FP( cfurou,   (char*)"cfurou" ,    size_Cf );
 
-    if (Zmodel>0) CREATE_INT( kfuz1,     (char*)"kfuz1"   ,    size    );
-    if (Zmodel>0) CREATE_INT( kfvz1,     (char*)"kfvz1"   ,    size    );
+    if (Zmodel>0) CREATE_INT( kfuz0,     (char*)"kfuz0"   ,    size    );
+    if (Zmodel>0) CREATE_INT( kfvz0,     (char*)"kfvz0"   ,    size    );
 
     //
     // 3-dimensional var.s in U-points

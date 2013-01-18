@@ -96,8 +96,8 @@ D3dFlowContext::D3dFlowContext(void)
     kcu     = NULL;     kcv     = NULL;     kcs     = NULL;
 
     kfu     = NULL;     kfv     = NULL;     kfs     = NULL;
-    kfuz1   = NULL;     kfvz1   = NULL;
-    kfumax  = NULL;     kfvmax  = NULL;
+    kfuz0   = NULL;     kfvz0   = NULL;
+    kfumx0  = NULL;     kfvmx0  = NULL;
     kfumin  = NULL;     kfvmin  = NULL;
 
     qxkr    = NULL;
@@ -195,12 +195,12 @@ D3dFlowContext::~D3dFlowContext(void)
         FREEVAR( this->kcv      );
         FREEVAR( this->kcs      );
         FREEVAR( this->kfu      );
-        FREEVAR( this->kfuz1    );
-        FREEVAR( this->kfumax   );
+        FREEVAR( this->kfuz0    );
+        FREEVAR( this->kfumx0   );
         FREEVAR( this->kfumin   );
         FREEVAR( this->kfv      );
-        FREEVAR( this->kfvz1    );
-        FREEVAR( this->kfvmax   );
+        FREEVAR( this->kfvz0    );
+        FREEVAR( this->kfvmx0   );
         FREEVAR( this->kfvmin   );
         FREEVAR( this->kfs      );
 
@@ -306,12 +306,12 @@ void D3dFlowContext::AttachVars(
     ATTACH( cntxtId,    kcv,    (char*)"kcv"    );
     ATTACH( cntxtId,    kcs,    (char*)"kcs"    );
     ATTACH( cntxtId,    kfu,    (char*)"kfu"    );
-    ATTACH( cntxtId,    kfuz1,  (char*)"kfuz1"  );
-    ATTACH( cntxtId,    kfumax, (char*)"kfumax" );
+    ATTACH( cntxtId,    kfuz0,  (char*)"kfuz0"  );
+    ATTACH( cntxtId,    kfumx0, (char*)"kfumx0" );
     ATTACH( cntxtId,    kfumin, (char*)"kfumin" );
     ATTACH( cntxtId,    kfv,    (char*)"kfv"    );
-    ATTACH( cntxtId,    kfvz1,  (char*)"kfvz1"  );
-    ATTACH( cntxtId,    kfvmax, (char*)"kfvmax" );
+    ATTACH( cntxtId,    kfvz0,  (char*)"kfvz0"  );
+    ATTACH( cntxtId,    kfvmx0, (char*)"kfvmx0" );
     ATTACH( cntxtId,    kfvmin, (char*)"kfvmin" );
     ATTACH( cntxtId,    kfs,    (char*)"kfs"    );
 

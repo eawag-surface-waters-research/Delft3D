@@ -387,7 +387,7 @@ void D3dFlowContext::FillVarInfoCollection(void)
         if (Zmodel>0)
         {
             varInfoColl->AddVarInfo(VarKfuMin, &kfumin[0], IntegerType, blockInfo_2D_U);
-            varInfoColl->AddVarInfo(VarKfuMax, &kfumax[0], IntegerType, blockInfo_2D_U);
+            varInfoColl->AddVarInfo(VarKfuMx0, &kfumx0[0], IntegerType, blockInfo_2D_U);
         }
 
         //
@@ -408,7 +408,7 @@ void D3dFlowContext::FillVarInfoCollection(void)
         if (Zmodel>0)
         {
             varInfoColl->AddVarInfo(VarKfvMin, &kfvmin[0], IntegerType, blockInfo_2D_V);
-            varInfoColl->AddVarInfo(VarKfvMax, &kfvmax[0], IntegerType, blockInfo_2D_V);
+            varInfoColl->AddVarInfo(VarKfvMx0, &kfvmx0[0], IntegerType, blockInfo_2D_V);
         }
 
         //
@@ -479,7 +479,7 @@ void D3dFlowContext::FillVarInfoCollection(void)
 
         if (Zmodel>0)
         {
-            varInfoColl->AddVarInfo(VarKfuZ1, &kfuz1[0], IntegerType, blockInfo_3D_U);
+            varInfoColl->AddVarInfo(VarKfuZ0, &kfuz0[0], IntegerType, blockInfo_3D_U);
         }
 
         //
@@ -501,7 +501,7 @@ void D3dFlowContext::FillVarInfoCollection(void)
 
         if (Zmodel>0)
         {
-            varInfoColl->AddVarInfo(VarKfvZ1, &kfvz1[0], IntegerType, blockInfo_3D_V);
+            varInfoColl->AddVarInfo(VarKfvZ0, &kfvz0[0], IntegerType, blockInfo_3D_V);
         }
 
         //
@@ -638,11 +638,11 @@ void D3dFlowContext::FillVarInfoCollection(void)
         if ( Zmodel > 0 )
         {
             varInfoColl->AddVarToGroup(MapDistrib_Initial, VarKfuMin );
-            varInfoColl->AddVarToGroup(MapDistrib_Initial, VarKfuMax );
+            varInfoColl->AddVarToGroup(MapDistrib_Initial, VarKfuMx0 );
             varInfoColl->AddVarToGroup(MapDistrib_Initial, VarKfvMin );
-            varInfoColl->AddVarToGroup(MapDistrib_Initial, VarKfvMax );
-            varInfoColl->AddVarToGroup(MapDistrib_Initial, VarKfuZ1  );
-            varInfoColl->AddVarToGroup(MapDistrib_Initial, VarKfvZ1  );
+            varInfoColl->AddVarToGroup(MapDistrib_Initial, VarKfvMx0 );
+            varInfoColl->AddVarToGroup(MapDistrib_Initial, VarKfuZ0  );
+            varInfoColl->AddVarToGroup(MapDistrib_Initial, VarKfvZ0  );
         }
 
 
@@ -689,11 +689,11 @@ void D3dFlowContext::FillVarInfoCollection(void)
         if ( Zmodel > 0 )
         {
             varInfoColl->AddVarToGroup(MapDistrib_Solve_UV, VarKfuMin );
-            varInfoColl->AddVarToGroup(MapDistrib_Solve_UV, VarKfuMax );
+            varInfoColl->AddVarToGroup(MapDistrib_Solve_UV, VarKfuMx0 );
             varInfoColl->AddVarToGroup(MapDistrib_Solve_UV, VarKfvMin );
-            varInfoColl->AddVarToGroup(MapDistrib_Solve_UV, VarKfvMax );
-            varInfoColl->AddVarToGroup(MapDistrib_Solve_UV, VarKfuZ1  );
-            varInfoColl->AddVarToGroup(MapDistrib_Solve_UV, VarKfvZ1  );
+            varInfoColl->AddVarToGroup(MapDistrib_Solve_UV, VarKfvMx0 );
+            varInfoColl->AddVarToGroup(MapDistrib_Solve_UV, VarKfuZ0  );
+            varInfoColl->AddVarToGroup(MapDistrib_Solve_UV, VarKfvZ0  );
         }
 
 
@@ -803,11 +803,11 @@ void D3dFlowContext::FillVarInfoCollection(void)
                     break;
 
                 case VarKfuMin:
-                case VarKfuMax:
+                case VarKfuMx0:
                 case VarKfvMin:
-                case VarKfvMax:
-                case VarKfuZ1:
-                case VarKfvZ1:
+                case VarKfvMx0:
+                case VarKfuZ0:
+                case VarKfvZ0:
                     if ( Zmodel > 0 )
                     {
                         varInfoColl->AddVarToGroup(MapDistrib_All, vId);

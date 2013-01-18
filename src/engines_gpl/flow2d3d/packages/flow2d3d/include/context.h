@@ -188,11 +188,11 @@ enum{
     VarUMean,
     VarVMean,
     VarKfuMin,    // 35              Z-Model, 2-dim
-    VarKfuMax,
+    VarKfuMx0,
     VarKfvMin,
-    VarKfvMax,
-    VarKfuZ1,
-    VarKfvZ1,     // 40
+    VarKfvMx0,
+    VarKfuZ0,
+    VarKfvZ0,     // 40
     VarWrkb17,
     VarQxkr,
     VarQykr,
@@ -369,12 +369,12 @@ class D3dFlowContext
     int   * kcv     ;
     int   * kcs     ;
     int   * kfu     ;
-    int   * kfuz1   ;
-    int   * kfumax  ;
+    int   * kfuz0   ;
+    int   * kfumx0  ;
     int   * kfumin  ;
     int   * kfv     ;
-    int   * kfvz1   ;
-    int   * kfvmax  ;
+    int   * kfvz0   ;
+    int   * kfvmx0  ;
     int   * kfvmin  ;
     int   * kfs     ;
     int   * nmax    ;
