@@ -460,6 +460,7 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
        ! If not in a dredging interval then go to next dredge/nourishment area
        !
        if (.not. pdredge%active) cycle
+       if (pdredge%npnt==0) cycle
        !
        ! Maximum dredging volume depends on morphological time step.
        ! Although during the initial period morfac is arbitrary,
@@ -749,6 +750,8 @@ subroutine dredge(nmmax  ,lsedtot,nst    , &
        endif
        if (requiredvolume > 0.0_fp .and. (maxvol < 0.0_fp .or. maxvol > 0.0_fp)) then
            ndredged(ia) = ndredged(ia)+1
+       else
+           cycle
        endif
        !
        !-----------------------------------------------------------------------
