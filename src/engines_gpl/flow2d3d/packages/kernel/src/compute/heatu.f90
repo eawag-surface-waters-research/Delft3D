@@ -849,6 +849,12 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
              corr  = 1.0_fp/( (1.0_fp - exp(extinc*zbottom))/extinc )
              qink  = corr * qsn * ( 1.0_fp - exp(extinc*zdown) ) / extinc
              qtotk = (qink - ql) / (rhow*cp)
+             !
+             ! Reduction of solar radiation at shallow areas
+             !
+             if (h0old<secchi(nm) .and. qtotk>0.0_fp) then
+                qtotk = qtotk * (1.0_fp - exp(extinc*zdown))
+             endif    
              if (zmodel) then
                 if (qtotk > 0.0_fp) then
                    sour(nm, k0, ltem) = sour(nm, k0, ltem) + qtotk*gsqs(nm)
@@ -1199,7 +1205,7 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
                 !
                 ! Reduction of solar radiation at shallow areas
                 !
-                if (h0old < secchi(nm) ) then
+                if (h0old<secchi(nm) .and. qtotk>0.0_fp) then
                    qtotk = qtotk * (1.0_fp - exp(extinc*zdown))
                 endif    
                 !
