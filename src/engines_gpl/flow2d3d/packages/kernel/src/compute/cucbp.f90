@@ -284,10 +284,14 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
              !
              ! DISCHARGE BOUNDARY
              !
-             hnm = 0.0_fp
-             do k = kfumin(nmf), kfumx0(nmf)
-                hnm = hnm + dzu0(nmf,k)
-             enddo
+             if (zmodel) then
+                hnm = 0.0_fp
+                do k = kfumin(nmf), kfumx0(nmf)
+                   hnm = hnm + dzu0(nmf,k)
+                enddo
+             else
+                hnm = hu(nmf)
+             endif
              aa(nmf) = 0.0
              bb(nmf) = 1.0
              cc(nmf) = 0.0
@@ -299,7 +303,7 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
                 if (zmodel) then
                    relthk = max(dzu0(nmf, k), dzmin)
                 else
-                   relthk = hu(nmf)*thick(k)
+                   relthk = hnm*thick(k)
                 endif
                 aak(nmf, k) = 0.0
                 bbk(nmf, k) = 1.0
@@ -479,10 +483,14 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
              !
              ! DISCHARGE BOUNDARY
              !
-             hnm = 0.0_fp
-             do k = kfumin(nml), kfumx0(nml)
-                hnm = hnm + dzu0(nml,k)
-             enddo
+             if (zmodel) then
+                hnm = 0.0_fp
+                do k = kfumin(nml), kfumx0(nml)
+                   hnm = hnm + dzu0(nml,k)
+                enddo
+             else
+                hnm = hu(nml)
+             endif
              aa(nml) = 0.0
              bb(nml) = 1.0
              cc(nml) = 0.0
@@ -494,7 +502,7 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
                 if (zmodel) then
                    relthk = max(dzu0(nml, k), dzmin)
                 else
-                   relthk = hu(nml)*thick(k)
+                   relthk = hnm*thick(k)
                 endif
                 aak(nml, k) = 0.0
                 bbk(nml, k) = 1.0
