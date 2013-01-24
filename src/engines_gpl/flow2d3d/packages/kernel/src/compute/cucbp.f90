@@ -1,8 +1,8 @@
 subroutine cucbp(kmax      ,norow     ,icx       , &
                & icy       ,zmodel    ,irocol    ,kcs       ,kfu       , &
-               & kfumin    ,kfumax    ,s0        ,u0        ,dpu       , &
+               & kfumin    ,kfumx0    ,s0        ,u0        ,dpu       , &
                & hu        ,umean     ,tetau     ,guu       ,gvu       , &
-               & dzu1      ,thick     ,circ2d    ,circ3d    ,a         , &
+               & dzu0      ,thick     ,circ2d    ,circ3d    ,a         , &
                & b         ,c         ,d         ,aa        ,bb        , &
                & cc        ,dd        ,aak       ,bbk       ,cck       , &
                & ddk       ,crbc      ,wavcmp    ,gdp       )
@@ -61,6 +61,7 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
     real(fp)               , pointer :: hdt
     real(fp)               , pointer :: ag
     integer                , pointer :: iro
+    real(fp)               , pointer :: dzmin
 !
 ! Global variables
 !
@@ -74,7 +75,7 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
     integer, dimension(5, norow)                    , intent(in)  :: irocol !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kfu    !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kfumax !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kfumx0 !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kfumin !  Description and declaration in esm_alloc_int.f90
     logical                                         , intent(in)  :: wavcmp
     logical                                         , intent(in)  :: zmodel !  Description and declaration in procs.igs
@@ -112,7 +113,7 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(out) :: cck    !!  Internal work array (in CUCNP & UZD)
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(out) :: ddk    !!  Internal work array, diagonal space
                                                                             !!  at (N,M,K)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in)  :: dzu1   !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in)  :: dzu0   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in)  :: u0     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(kmax)                       , intent(in)  :: thick  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(kmax, 2, norow)             , intent(in)  :: circ3d !  Description and declaration in esm_alloc_real.f90
@@ -152,6 +153,7 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
     real(fp)      :: dep
     real(fp)      :: dt
     real(fp)      :: facc
+    real(fp)      :: hnm
     real(fp)      :: relthk
     real(fp)      :: sepu
     character(24) :: errtxt
@@ -162,6 +164,7 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
     hdt      => gdp%gdnumeco%hdt
     ag       => gdp%gdphysco%ag
     iro      => gdp%gdphysco%iro
+    dzmin    => gdp%gdzmodel%dzmin
     !
     icxy = max(icx, icy)
     ddb  = gdp%d%ddbound
@@ -186,9 +189,9 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
        !
        if (zmodel) then
           k0f = kfumin(nmf)
-          k1f = kfumax(nmf)
+          k1f = kfumx0(nmf)
           k0l = kfumin(nml)
-          k1l = kfumax(nml)
+          k1l = kfumx0(nml)
        else
           k0f = 1
           k1f = kmax
@@ -271,8 +274,7 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
                 aak(nmf, k) = aa(nmf)
                 bbk(nmf, k) = 1.0
                 cck(nmf, k) = cc(nmf)
-                ddk(nmf, k) = (circ3d(k, 1, ic) + alfau*u0(nmf, k) + alfas*sepu)&
-                            & /facc
+                ddk(nmf, k) = (circ3d(k, 1, ic) + alfau*u0(nmf, k) + alfas*sepu)/facc
              enddo
              a(nmf) =  0.0
              b(nmf) =  1.0
@@ -282,16 +284,20 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
              !
              ! DISCHARGE BOUNDARY
              !
+             hnm = 0.0_fp
+             do k = kfumin(nmf), kfumx0(nmf)
+                hnm = hnm + dzu0(nmf,k)
+             enddo
              aa(nmf) = 0.0
              bb(nmf) = 1.0
              cc(nmf) = 0.0
-             dd(nmf) = circ2d(1, ic)/(guu(nmf)*hu(nmf))
+             dd(nmf) = circ2d(1, ic)/(guu(nmf)*hnm)
              !
              ! LAYER VELOCITIES ( VELOCITY PROFILE )
              !
              do k = k0f, k1f
                 if (zmodel) then
-                   relthk = max(dzu1(nmf, k), 0.01_fp)
+                   relthk = max(dzu0(nmf, k), dzmin)
                 else
                    relthk = hu(nmf)*thick(k)
                 endif
@@ -462,8 +468,7 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
                 aak(nml, k) = aa(nml)
                 bbk(nml, k) = 1.0
                 cck(nml, k) = cc(nml)
-                ddk(nml, k) = (circ3d(k, 2, ic) + alfau*u0(nml, k) + alfas*sepu)&
-                            & /facc
+                ddk(nml, k) = (circ3d(k, 2, ic) + alfau*u0(nml, k) + alfas*sepu)/facc
              enddo
              !
              a(nmlu) = -1.0
@@ -474,16 +479,20 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
              !
              ! DISCHARGE BOUNDARY
              !
+             hnm = 0.0_fp
+             do k = kfumin(nml), kfumx0(nml)
+                hnm = hnm + dzu0(nml,k)
+             enddo
              aa(nml) = 0.0
              bb(nml) = 1.0
              cc(nml) = 0.0
-             dd(nml) = circ2d(2, ic)/(guu(nml)*hu(nml))
+             dd(nml) = circ2d(2, ic)/(guu(nml)*hnm)
              !
              ! LAYER VELOCITIES ( VELOCITY PROFILE )
              !
              do k = k0l, k1l
                 if (zmodel) then
-                   relthk = max(dzu1(nml, k), 0.01_fp)
+                   relthk = max(dzu0(nml, k), dzmin)
                 else
                    relthk = hu(nml)*thick(k)
                 endif

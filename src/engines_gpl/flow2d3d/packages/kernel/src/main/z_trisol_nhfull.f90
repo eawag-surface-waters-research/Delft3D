@@ -1009,13 +1009,13 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
              & kmax      ,kcd       ,nto       ,ntof      ,ntoq      , &
              & kc        ,nrob      ,noroco    , &
              & ch(tprofu),i(itbct)  ,i(mnbnd)  ,i(nob)    ,i(kfumin) , &
-             & i(kfumax) ,i(kfvmin) ,i(kfvmax) ,r(hydrbc) ,r(circ2d) , &
+             & i(kfumx0) ,i(kfvmin) ,i(kfvmx0) ,r(hydrbc) ,r(circ2d) , &
              & r(circ3d) ,r(patm)   ,r(guu)    ,r(gvv)    , &
              & r(hu)     ,r(hv)     ,r(omega)  ,r(alpha)  , &
              & r(z0urou) ,r(z0vrou) ,r(qxk)    ,r(qyk)    ,r(s0)     , &
              & r(u0)     ,r(v0)     ,r(grmasu) ,r(grmasv) ,r(cfurou) , &
              & r(cfvrou) ,r(qtfrac) ,r(qtfrct) ,r(qtfrt2) ,r(thick)  , &
-             & r(dzu1)   ,r(dzv1)   ,r(zwork)  ,i(kcu)    ,i(kcv)    , &
+             & r(dzu0)   ,r(dzv0)   ,r(zwork)  ,i(kcu)    ,i(kcv)    , &
              & i(kfu)    ,i(kfv)    ,timhr     ,ch(nambnd),ch(typbnd), &
              & gdp       )
     call timer_stop(timer_incbc, gdp)
