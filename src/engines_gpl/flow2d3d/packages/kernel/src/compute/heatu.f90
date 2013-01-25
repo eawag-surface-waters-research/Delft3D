@@ -850,7 +850,10 @@ subroutine heatu(ktemp     ,anglat    ,sferic    ,timhr     ,keva      , &
              qink  = corr * qsn * ( 1.0_fp - exp(extinc*zdown) ) / extinc
              qtotk = (qink - ql) / (rhow*cp)
              !
-             ! Reduction of solar radiation at shallow areas
+             ! Reduction of total heat flux at shallow areas
+             ! This is needed to avoid extreme high temperatures. The idea is that when it is very shallow, 
+             ! some heat is absorped by the ground below it.
+             ! Restriction on qsn instead of qtotk seems appropriate, but does not work fine; that still caused unwanted heat fluctuations.
              !
              if (h0old<secchi(nm) .and. qtotk>0.0_fp) then
                 qtotk = qtotk * (1.0_fp - exp(extinc*zdown))

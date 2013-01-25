@@ -132,7 +132,8 @@ subroutine z_drychku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
     umean = 0.0_fp
     !
     do nm = 1, nmmax
-       if (kcu(nm) /= 0) then
+       nmu = nm + icx
+       if (kcu(nm)/=0 .and. kcs(nm)*kcs(nmu)>0) then
           !
           ! First determine umean for the top layer(s) of cells NM and NMU
           ! to find the upwind direction
@@ -150,7 +151,6 @@ subroutine z_drychku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
           !
           if (kfu(nm) == 1) then
              hnm = 0.0_fp
-          !   do k = kkmin, kkmax
              do k = kfumin(nm), kfumx0(nm)
                 umean(nm) = umean(nm) + u0(nm,k)*dzu0(nm,k)
                 hnm       = hnm + dzu0(nm,k)
@@ -190,14 +190,13 @@ subroutine z_drychku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
     call upwhu(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              & zmodel    ,kcs       ,kcu       ,kspu      ,dps       , &
              & s1        ,dpu       ,umean     ,hu        ,gdp       )
-    !          
     do nm = 1, nmmax
        nmu = nm + icx
        nmd = nm - icx
        !
        ! Set new layer administration in the computational points
        !
-       if (kcu(nm) /= 0) then
+       if (kcu(nm)/=0 .and. kcs(nm)*kcs(nmu)>0) then
           !
           ! s1u is used for setting kfumax
           !
