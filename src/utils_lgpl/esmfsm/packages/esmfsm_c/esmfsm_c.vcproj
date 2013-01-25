@@ -191,11 +191,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\globals-esm.h"
+				RelativePath="include\globals-esm.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\include\globals-fsm.h"
+				RelativePath="include\globals-fsm.h"
 				>
 			</File>
 			<File

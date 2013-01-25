@@ -57,18 +57,18 @@
 #include <sys/types.h>
 
 
-#ifndef SHM_R
-#define SHM_R      0440   /* defined on most systems, except cygwin */
-#endif
-#ifndef SHM_W
-#define SHM_W      0220   /* defined on most systems, except cygwin */
-#endif
-
 #if (!defined (WIN32))
 #   include <sys/ipc.h>
 #   include <sys/shm.h>
 #   include <sys/sem.h>
 #   include <unistd.h>
+#endif
+
+#ifndef SHM_R
+#define SHM_R      0440   /* defined on most systems, except cygwin */
+#endif
+#ifndef SHM_W
+#define SHM_W      0220   /* defined on most systems, except cygwin */
 #endif
 
 #if (defined (WIN32))

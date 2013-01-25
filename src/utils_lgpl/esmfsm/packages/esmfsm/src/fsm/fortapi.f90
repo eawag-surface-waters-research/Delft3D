@@ -255,11 +255,12 @@ end
 
 
 block data FSMBYT
+    use precision
     implicit none
     common /fsmglo/ nbytes, alignment
 
     integer nbytes (7)
-    integer alignment (7)
+    integer(pntrsize) alignment (7)
 
     data nbytes     /  4,  4,  8, 16,  8,  4,  1 /
     data alignment  / 16,  4,  8, 16, 16,  8,  4 /

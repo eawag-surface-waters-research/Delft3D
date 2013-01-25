@@ -744,7 +744,7 @@ end subroutine dump_ECData
 function ecdataECConnectionInit(ECData, ECConnectionId) result(success)
   !
   ! result
-  integer :: success
+  logical :: success
   !
   ! arguments
   type(tECData)             :: ECData
@@ -821,7 +821,7 @@ end function ecdataAddConnection_ids
 function ecdataECConnectionAddSource(ECData, ECConnectionId, ECItemId) result(success)
   !
   ! result
-  integer :: success
+  logical :: success
   !
   ! arguments
   type(tECData)             :: ECData
@@ -843,7 +843,7 @@ end function ecdataECConnectionAddSource
 function ecdataECConnectionAddTarget(ECData, ECConnectionId, ECItemId) result(success)
   !
   ! result
-  integer :: success
+  logical :: success
   !
   ! arguments
   type(tECData)             :: ECData

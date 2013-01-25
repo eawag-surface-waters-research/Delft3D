@@ -65,7 +65,7 @@
 !   Fortran data in "fsmf.f"
 
     integer nbytes (7)
-    integer alignment (7)
+    integer(pntrsize) alignment (7)
     common /fsmglo/ nbytes, alignment
 
 
