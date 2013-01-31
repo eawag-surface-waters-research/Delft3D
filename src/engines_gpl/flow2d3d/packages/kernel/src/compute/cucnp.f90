@@ -482,11 +482,11 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
              dpsmax = max(-dps(nm),-dps(nmu))
              if (s0(nm) < dpsmax) then
                 do k = 1, kmax
-                   ddk(nm,k) = ddk(nm,k) - 2.0_fp*ag*(s0(nm)-dpsmax)/gvu(nm)
+                   ddk(nm,k) = ddk(nm,k) - ag*(s0(nm)-dpsmax)/gvu(nm)
                 enddo
              elseif (s0(nmu) < dpsmax) then
                 do k = 1, kmax
-                   ddk(nm,k) = ddk(nm,k) + 2.0_fp*ag*(s0(nmu)-dpsmax)/gvu(nm)
+                   ddk(nm,k) = ddk(nm,k) + ag*(s0(nmu)-dpsmax)/gvu(nm)
                 enddo
              endif
           endif
