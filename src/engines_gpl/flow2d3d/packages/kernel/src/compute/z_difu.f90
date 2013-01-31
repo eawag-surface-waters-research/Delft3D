@@ -94,6 +94,7 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
     include 'flow_steps_f.inc'
     real(fp)                            , pointer :: hdt
     real(fp)                            , pointer :: ag
+    real(fp)                            , pointer :: dzmin
     real(fp)                            , pointer :: vicmol
     real(fp)                            , pointer :: dicoww
     integer                             , pointer :: iro
@@ -287,6 +288,7 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
     nh_level    => gdp%gdnonhyd%nh_level
     nudge       => gdp%gdnumeco%nudge
     lsed        => gdp%d%lsed
+    dzmin       => gdp%gdzmodel%dzmin
     !
     if (lstsci == 0) goto 9999
     !
@@ -618,9 +620,9 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
           if (kfs(nm)*kcs(nm) == 1) then
              kmin = min(kfsmax(nm), kfsmx0(nm))
              do k = kfsmin(nm), kmin
-                if ( bbkl(nm,k,l) .lt. 0.01_fp) then
-                   bbkl(nm,k,l) = bbkl(nm,k,l) + 0.01_fp
-                   ddkl(nm,k,l) = ddkl(nm,k,l) + 0.01_fp * r0(nm,k,l)
+                if (bbkl(nm,k,l) .lt. dzmin) then
+                   bbkl(nm,k,l) = bbkl(nm,k,l) + dzmin
+                   ddkl(nm,k,l) = ddkl(nm,k,l) + dzmin * r0(nm,k,l)
                 endif
              enddo
           endif
