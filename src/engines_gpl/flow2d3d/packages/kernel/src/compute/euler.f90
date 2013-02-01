@@ -117,7 +117,7 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
     real(fp)      :: sintv
     real(fp)      :: tpu
     real(fp)      :: z
-    integer                        :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
+    integer       :: nm_pos ! indicating the nm index (u1(nm,k): nm_pos=1, dbodsd(lsedtot,nm): nm_pos=2)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -140,7 +140,8 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
     ! Furthermore correction for breaker delay
     ! in 3D grmasu/grmasv contains breaker delay scaling factors
     ! in 2DH grmsur/grmsvr contains breaker delay scaling factors
-    ! 
+    !
+    nm_pos = 1
     kwav = 0.0_fp
     p1   = 0.0_fp
     p2   = 0.0_fp
