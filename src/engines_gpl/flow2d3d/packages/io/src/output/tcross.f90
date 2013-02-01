@@ -133,13 +133,13 @@ subroutine tcross(dtsec     ,prshis    ,selhis    ,ntruv     ,ntru      , &
 !
 !! executable statements -------------------------------------------------------
 !
-    mnit               => gdp%gdstations%mnit
-    mfg                => gdp%gdparall%mfg
-    mlg                => gdp%gdparall%mlg
-    nfg                => gdp%gdparall%nfg
-    nlg                => gdp%gdparall%nlg
-    mmaxgl             => gdp%gdparall%mmaxgl
-    nmaxgl             => gdp%gdparall%nmaxgl
+    mnit    => gdp%gdstations%mnit
+    mfg     => gdp%gdparall%mfg
+    mlg     => gdp%gdparall%mlg
+    nfg     => gdp%gdparall%nfg
+    nlg     => gdp%gdparall%nlg
+    mmaxgl  => gdp%gdparall%mmaxgl
+    nmaxgl  => gdp%gdparall%nmaxgl
     !
     ! Flows flux
     !
@@ -167,21 +167,23 @@ subroutine tcross(dtsec     ,prshis    ,selhis    ,ntruv     ,ntru      , &
           ctr(i) = 0.0
           !
           ! in the parallel case, sections that are entirely in the halo regions
-          ! (low end part of subdomain) are discarded  from calculation not to be
-          ! counted twice; these sections are accounted for in the lower-ranked PE
+          ! (low end halo or high end halo of partition) are discarded  from calculation not to be
+          ! counted twice; these sections are accounted for in the neighbouring partition
           !
-          if (.not.(mfg /= 1 .and. mnit(1,i)==mnit(3,i) .and. mnit(1,i)<=2*ihalom)) then
-          do n = nnm, nnx
-             !
-             ! For in-active (dry) grid points in the section
-             ! there will be no transport => kfu = 0
-             !
-             if (kfu(n, m)/=0) then
-                do k = 1, kmax
-                   ctr(i) = ctr(i) + qxk(n, m, k)
-                enddo
-             endif
-          enddo
+          if (.not.(mnit(1,i)==mnit(3,i)                                 &
+                    .and. (    (mfg/=1      .and. mnit(1,i)<=ihalom    ) &
+                           .or.(mlg/=mmaxgl .and. mnit(1,i)>mmax-ihalom)))) then
+             do n = nnm, nnx
+                !
+                ! For in-active (dry) grid points in the section
+                ! there will be no transport => kfu = 0
+                !
+                if (kfu(n,m) /= 0) then
+                   do k = 1, kmax
+                      ctr(i) = ctr(i) + qxk(n, m, k)
+                   enddo
+                endif
+             enddo
           endif
           fltr(i) = fltr(i) + dtsec*ctr(i)
        enddo
@@ -208,21 +210,23 @@ subroutine tcross(dtsec     ,prshis    ,selhis    ,ntruv     ,ntru      , &
           ctr(i) = 0.0
           !
           ! in the parallel case, sections that are entirely in the halo regions
-          ! (low end part of subdomain) are discarded  from calculation not to be
-          ! counted twice; these sections are accounted for in the lower-ranked PE
+          ! (low end halo or high end halo of partition) are discarded  from calculation not to be
+          ! counted twice; these sections are accounted for in the neighbouring partition
           !
-          if (.not.(nfg /= 1 .and. mnit(2,i)==mnit(4,i) .and. mnit(2,i)<=2*ihalon)) then
-          do m = mmm, mmx
-             !
-             ! For in-active (dry) grid points in the section
-             ! there will be no transport => kfv = 0
-             !
-             if (kfv(n, m)/=0) then
-                do k = 1, kmax
-                   ctr(i) = ctr(i) + qyk(n, m, k)
-                enddo
-             endif
-          enddo
+          if (.not.(mnit(2,i)==mnit(4,i)                                 &
+                    .and. (    (nfg/=1      .and. mnit(2,i)<=ihalon    ) &
+                           .or.(nlg/=nmaxgl .and. mnit(2,i)>nmaxus-ihalon)))) then
+             do m = mmm, mmx
+                !
+                ! For in-active (dry) grid points in the section
+                ! there will be no transport => kfv = 0
+                !
+                if (kfv(n,m) /= 0) then
+                   do k = 1, kmax
+                      ctr(i) = ctr(i) + qyk(n, m, k)
+                   enddo
+                endif
+             enddo
           endif
           fltr(i) = fltr(i) + dtsec*ctr(i)
        enddo
@@ -259,41 +263,43 @@ subroutine tcross(dtsec     ,prshis    ,selhis    ,ntruv     ,ntru      , &
           enddo
           !
           ! in the parallel case, sections that are entirely in the halo regions
-          ! (low end part of subdomain) are discarded  from calculation not to be
-          ! counted twice; these sections are accounted for in the lower-ranked PE
+          ! (low end halo or high end halo of partition) are discarded  from calculation not to be
+          ! counted twice; these sections are accounted for in the neighbouring partition
           !
-          if (.not.(mfg /= 1 .and. mnit(1,i)==mnit(3,i) .and. mnit(1,i)<=2*ihalom)) then
-          do n = nnm, nnx
-             !
-             ! For in-active (dry) grid points in the section
-             ! there will be no transport => kfu = 0
-             !
-             if (kfu(n, m)/=0) then
-                do k = 1, kmax
-                   dfcatu = 0.5*(dicuv(n, m, k) + dicuv(n, mu, k))
-                   facdtr = dtsec*hu(n, m)*guu(n, m)*thick(k)*dfcatu
-                   facatr = dtsec*qxk(n, m, k)
-                   do l = 1, lstsci
-                      rp1       = r1(n, m, k, l)
-                      rp2       = r1(n, mu, k, l)
-                      atr(i, l) = atr(i, l) + facatr*0.5*(rp1 + rp2)
-                      dtr(i, l) = dtr(i, l) + facdtr*(rp1 - rp2)/gvu(n, m)
+          if (.not.(mnit(1,i)==mnit(3,i)                                 &
+                    .and. (    (mfg/=1      .and. mnit(1,i)<=ihalom    ) &
+                           .or.(mlg/=mmaxgl .and. mnit(1,i)>mmax-ihalom)))) then
+             do n = nnm, nnx
+                !
+                ! For in-active (dry) grid points in the section
+                ! there will be no transport => kfu = 0
+                !
+                if (kfu(n,m) /= 0) then
+                   do k = 1, kmax
+                      dfcatu = 0.5*(dicuv(n, m, k) + dicuv(n, mu, k))
+                      facdtr = dtsec*hu(n, m)*guu(n, m)*thick(k)*dfcatu
+                      facatr = dtsec*qxk(n, m, k)
+                      do l = 1, lstsci
+                         rp1       = r1(n, m, k, l)
+                         rp2       = r1(n, mu, k, l)
+                         atr(i, l) = atr(i, l) + facatr*0.5*(rp1 + rp2)
+                         dtr(i, l) = dtr(i, l) + facdtr*(rp1 - rp2)/gvu(n, m)
+                      enddo
                    enddo
-                enddo
-                !
-                ! integrate bed-load and suspended-load sediment
-                ! transport over cross section:
-                ! - units of sbtr and sstr are KG/S
-                ! - units of sbtrc and sstrc are KG
-                !
-                do ls = 1, lsedtot
-                   sbtr(i, ls) = sbtr(i, ls) + sbuu(n, m, ls)*guu(n, m)
-                enddo
-                do ls = 1, lsed
-                   sstr(i, ls) = sstr(i, ls) + ssuu(n, m, ls)*guu(n, m)
-                enddo
-             endif
-          enddo
+                   !
+                   ! integrate bed-load and suspended-load sediment
+                   ! transport over cross section:
+                   ! - units of sbtr and sstr are KG/S
+                   ! - units of sbtrc and sstrc are KG
+                   !
+                   do ls = 1, lsedtot
+                      sbtr(i, ls) = sbtr(i, ls) + sbuu(n, m, ls)*guu(n, m)
+                   enddo
+                   do ls = 1, lsed
+                      sstr(i, ls) = sstr(i, ls) + ssuu(n, m, ls)*guu(n, m)
+                   enddo
+                endif
+             enddo
           endif
           !
           ! integrate over time and add to cumulative transports
@@ -334,41 +340,43 @@ subroutine tcross(dtsec     ,prshis    ,selhis    ,ntruv     ,ntru      , &
           enddo
           !
           ! in the parallel case, sections that are entirely in the halo regions
-          ! (low end part of subdomain) are discarded  from calculation not to be
-          ! counted twice; these sections are accounted for in the lower-ranked PE
+          ! (low end halo or high end halo of partition) are discarded  from calculation not to be
+          ! counted twice; these sections are accounted for in the neighbouring partition
           !
-          if (.not.(nfg /= 1 .and. mnit(2,i)==mnit(4,i) .and. mnit(2,i)<=2*ihalon)) then
-          do m = mmm, mmx
-             !
-             ! For in-active (dry) grid points in the section
-             ! there will be no transport => kfv = 0
-             !
-             if (kfv(n, m)/=0) then
-                do k = 1, kmax
-                   dfcatv = 0.5*(dicuv(n, m, k) + dicuv(nu, m, k))
-                   facdtr = dtsec*hv(n, m)*gvv(n, m)*thick(k)*dfcatv
-                   facatr = dtsec*qyk(n, m, k)
-                   do l = 1, lstsci
-                      rp1       = r1(n, m, k, l)
-                      rp2       = r1(nu, m, k, l)
-                      atr(i, l) = atr(i, l) + facatr*0.5*(rp1 + rp2)
-                      dtr(i, l) = dtr(i, l) + facdtr*(rp1 - rp2)/guv(n, m)
+          if (.not.(mnit(2,i)==mnit(4,i)                                 &
+                    .and. (    (nfg/=1      .and. mnit(2,i)<=ihalon    ) &
+                           .or.(nlg/=nmaxgl .and. mnit(2,i)>nmaxus-ihalon)))) then
+             do m = mmm, mmx
+                !
+                ! For in-active (dry) grid points in the section
+                ! there will be no transport => kfv = 0
+                !
+                if (kfv(n,m) /= 0) then
+                   do k = 1, kmax
+                      dfcatv = 0.5*(dicuv(n, m, k) + dicuv(nu, m, k))
+                      facdtr = dtsec*hv(n, m)*gvv(n, m)*thick(k)*dfcatv
+                      facatr = dtsec*qyk(n, m, k)
+                      do l = 1, lstsci
+                         rp1       = r1(n, m, k, l)
+                         rp2       = r1(nu, m, k, l)
+                         atr(i, l) = atr(i, l) + facatr*0.5*(rp1 + rp2)
+                         dtr(i, l) = dtr(i, l) + facdtr*(rp1 - rp2)/guv(n, m)
+                      enddo
                    enddo
-                enddo
-                !
-                ! integrate bed-load and suspended-load sediment
-                ! transport over cross section
-                ! - units of sbtr and sstr are KG/S
-                ! - note: units of sbtrc and sstrc are KG
-                !
-                do ls = 1, lsedtot
-                   sbtr(i, ls) = sbtr(i, ls) + sbvv(n, m, ls)*gvv(n, m)
-                enddo
-                do ls = 1, lsed
-                   sstr(i, ls) = sstr(i, ls) + ssvv(n, m, ls)*gvv(n, m)
-                enddo
-             endif
-          enddo
+                   !
+                   ! integrate bed-load and suspended-load sediment
+                   ! transport over cross section
+                   ! - units of sbtr and sstr are KG/S
+                   ! - note: units of sbtrc and sstrc are KG
+                   !
+                   do ls = 1, lsedtot
+                      sbtr(i, ls) = sbtr(i, ls) + sbvv(n, m, ls)*gvv(n, m)
+                   enddo
+                   do ls = 1, lsed
+                      sstr(i, ls) = sstr(i, ls) + ssvv(n, m, ls)*gvv(n, m)
+                   enddo
+                endif
+             enddo
           endif
           !
           ! integrate over time and add to cumulative transports

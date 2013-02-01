@@ -70,6 +70,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     integer                         , pointer :: nfg
     integer       , dimension(:)    , pointer :: order_sta
     integer       , dimension(:)    , pointer :: order_tra
+    integer       , dimension(:)    , pointer :: line_orig
     integer       , dimension(:)    , pointer :: shlay
     real(fp)      , dimension(:, :) , pointer :: xystat
     logical                         , pointer :: first
@@ -127,6 +128,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     integer                                          :: i             ! Help var. 
     integer                                          :: ierror        ! Local errorflag for NEFIS files 
     integer        , dimension(1)                    :: idummy        ! Help array to read/write Nefis files 
+    integer                                          :: istat
     integer        , dimension(3,5)                  :: uindex
     integer                            , external    :: getelt
     integer                                          :: kmaxout       ! number of layers to be written to the (history) output files, 0 (possibly) included
@@ -145,6 +147,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     integer        , dimension(:)      , allocatable :: ibuff1        ! work array
     integer        , dimension(:,:)    , allocatable :: ibuff2        ! work array
     integer        , dimension(:,:)    , allocatable :: ibuff2b       ! work array
+    integer        , dimension(:)      , allocatable :: norig
     integer        , dimension(:)      , allocatable :: nostatarr     ! number of stations per partition
     integer        , dimension(:)      , allocatable :: shlay_restr   ! copy of shlay, excluding layer zero
     logical                                          :: cross_sec     ! option to sum results from cross-sections across partitions
@@ -176,6 +179,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     nfg        => gdp%gdparall%nfg
     order_sta  => gdp%gdparall%order_sta
     order_tra  => gdp%gdparall%order_tra
+    line_orig  => gdp%gdstations%line_orig
     shlay      => gdp%gdpostpr%shlay
     xystat     => gdp%gdstations%xystat
     !
@@ -219,12 +223,15 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
        !
        call dfsync(gdp)
        call dffind_duplicate(lundia, ntruv, ntruvto, ntruvgl, order_tra, gdp)
-
+       !
+       ! When order_tra points to line_orig, both partition-related and re-ordering-related stuff is taken care of
+       !
+       order_tra => gdp%gdstations%line_orig
     else
        nostatto = nostat
        nostatgl = nostat
-       ntruvto = ntruv
-       ntruvgl = ntruv
+       ntruvto  = ntruv
+       ntruvgl  = ntruv
     endif
 
     !
@@ -603,6 +610,20 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     !
     if (ntruvgl > 0) then
        cross_sec = .true.
+       if (.not.parll) then
+          !
+          ! Re-arrange the order with the inverse of line_orig
+          ! Parallel: order_tra points to line_orig and solves the re-ordering
+          !
+          allocate (norig(ntruvgl), stat=istat)
+          if (istat /= 0) then
+             call prterr(lundia, 'U021', 'wrihis: memory alloc error')
+             call d3stop(1, gdp)
+          endif
+          do n = 1, ntruv
+              norig( line_orig(n) ) = n
+          enddo
+       endif
        !
        ! group 3: element 20 'FLTR' only if SELHIS(20:20) = 'Y'
        !
@@ -633,6 +654,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
           call wrthis_nl(crosssection, ntruv, 1, lstsci, ierror, dtr, 'DTR')
           if (ierror/=0) goto 999
        endif
+       deallocate (norig, stat=istat)
     endif
     !
     if (inode == master) ierror = clsnef(fds)
@@ -663,6 +685,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
        character(*)                           :: varnam_in
        ! local
        integer       :: namlen
+       integer       :: i_l
        character(16) :: varnam
        ! body
        namlen = min (16,len(varnam_in))
@@ -678,10 +701,22 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
           if (typ == station) then
              call dfgather_filter(lundia, ub1, nostatto, nostatgl, order_sta, var, rsbuff1, gdp)
           else
+             !
+             ! order_tra re-orders the cross sections
+             !
              call dfgather_filter(lundia, ub1, ntruvto, ntruvgl, order_tra, var, rsbuff1, gdp, cross_sec)
           endif
        else
-          rsbuff1 = real(var, sp)
+          if (typ == station) then
+             rsbuff1 = real(var, sp)
+          else
+             !
+             ! re-order the cross sections using norig
+             !
+             do i_l=1,ub1
+                rsbuff1(i_l) = real(var(norig(i_l)), sp)
+             enddo
+          endif
        endif  
        if (inode == master) then
           ierr = putelt(fds, grnam3, varnam, uindex, 1, rsbuff1)
@@ -696,6 +731,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
        character(*)                           :: varnam_in
        ! local
        integer       :: namlen
+       integer       :: i_l
        character(16) :: varnam
        ! body
        namlen = min (16,len(varnam_in))
@@ -711,10 +747,22 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
           if (typ == station) then
              call dfgather_filter(lundia, ub1, nostatto, nostatgl, lb2, ub2, order_sta, var, rsbuff2, gdp)
           else
+             !
+             ! order_tra re-orders the cross sections
+             !
              call dfgather_filter(lundia, ub1, ntruvto, ntruvgl, lb2, ub2, order_tra, var, rsbuff2, gdp, cross_sec)
           endif
        else
-          rsbuff2 = real(var, sp)
+          if (typ == station) then
+             rsbuff2 = real(var, sp)
+          else
+             !
+             ! re-order the cross sections using norig
+             !
+             do i_l=1,ub1
+                rsbuff2(i_l,:) = real(var(norig(i_l),:), sp)
+             enddo
+          endif
        endif  
        if (inode == master) then
           if (kmaxout /= kmax+1) then
@@ -769,6 +817,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
        character(*)                           :: varnam_in
        ! local
        integer       :: namlen
+       integer       :: i_l
        character(16) :: varnam
        ! body
        namlen = min (16,len(varnam_in))
@@ -784,10 +833,22 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
           if (typ == station) then
              call dfgather_filter(lundia, ub1, nostatto, nostatgl, lb2, ub2, order_sta, var, rsbuff2, gdp)
           else
+             !
+             ! order_tra re-orders the cross sections
+             !
              call dfgather_filter(lundia, ub1, ntruvto, ntruvgl, lb2, ub2, order_tra, var, rsbuff2, gdp, cross_sec)
           endif
        else
-          rsbuff2 = real(var, sp)
+          if (typ == station) then
+             rsbuff2 = real(var, sp)
+          else
+             !
+             ! re-order the cross sections using norig
+             !
+             do i_l=1,ub1
+                rsbuff2(i_l,:) = real(var(norig(i_l),:), sp)
+             enddo
+          endif
        endif  
        if (inode == master) then
           ierr = putelt(fds, grnam3, varnam, uindex, 1, rsbuff2)
@@ -802,6 +863,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
        character(*)                                    :: varnam_in
        ! local
        integer       :: namlen
+       integer       :: i_l
        character(16) :: varnam
        ! body
        namlen = min (16,len(varnam_in))
@@ -820,7 +882,16 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
              ! The crosssection variant is not available
           endif
        else
-          rsbuff3 = real(var, sp)
+          if (typ == station) then
+             rsbuff3 = real(var, sp)
+          else
+             !
+             ! re-order the cross sections using norig
+             !
+             do i_l=1,ub1
+                rsbuff3(i_l,:,:) = real(var(norig(i_l),:,:), sp)
+             enddo
+          endif
        endif  
        if (inode == master) then
           if (kmaxout /= kmax+1) then

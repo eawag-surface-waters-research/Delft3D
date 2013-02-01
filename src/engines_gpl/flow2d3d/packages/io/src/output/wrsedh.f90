@@ -93,37 +93,37 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
     real(fp), dimension(ntruv, lsedtot) , intent(in)  :: sbtrc  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(ntruv, lsed)    , intent(in)  :: sstr   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(ntruv, lsed)    , intent(in)  :: sstrc  !  Description and declaration in esm_alloc_real.f90
-    character(60)                       , intent(in)  :: trifil !!  File name for FLOW NEFIS output
-                                                                !!  files (tri"h/m"-"casl""labl".dat/def)
+    character(60)                       , intent(in)  :: trifil !!  File name for FLOW NEFIS output files (tri"h/m"-"casl""labl".dat/def)
 !
 ! Local variables
 !
-    real(sp)                        :: sdummy
-    real(fp)                        :: rhol
-    integer                         :: fds
-    integer                         :: i           ! Help var. 
-    integer                         :: ierror      ! Local errorflag for NEFIS files 
-    integer                         :: k
-    integer                         :: kmaxout       ! number of layers to be written to the (history) output files, 0 (possibly) included
-    integer                         :: kmaxout_restr ! number of layers to be written to the (history) output files, 0 excluded
-    integer                         :: l
-    integer                         :: n
-    integer, dimension(ntruv)       :: norig
-    integer, dimension(1)           :: idummy      ! Help array to read/write Nefis files
-    integer, dimension(3,5)         :: uindex
-    integer, dimension(:), allocatable :: shlay_restr ! work array
-    integer, external               :: getelt
-    integer, external               :: putelt
-    integer, external               :: inqmxi
-    integer, external               :: clsnef
-    integer, external               :: open_datdef
-    integer, external               :: neferr
-    character(2)                    :: sedunit
-    character(10)                   :: transpunit
-    character(16)                   :: grnam4
-    character(16)                   :: grnam5
-    character(256)                  :: errmsg      ! Character var. containing the errormessage to be written to file. The message depends on the error. 
-    character(60)                   :: filnam      ! Help var. for FLOW file name 
+    real(sp)                           :: sdummy
+    real(fp)                           :: rhol
+    integer                            :: fds
+    integer                            :: i              ! Help var. 
+    integer                            :: ierror         ! Local errorflag for NEFIS files
+    integer                            :: istat
+    integer                            :: k
+    integer                            :: kmaxout        ! number of layers to be written to the (history) output files, 0 (possibly) included
+    integer                            :: kmaxout_restr  ! number of layers to be written to the (history) output files, 0 excluded
+    integer                            :: l
+    integer                            :: n
+    integer, dimension(:), allocatable :: norig
+    integer, dimension(1)              :: idummy         ! Help array to read/write Nefis files
+    integer, dimension(3,5)            :: uindex
+    integer, dimension(:), allocatable :: shlay_restr    ! work array
+    integer, external                  :: getelt
+    integer, external                  :: putelt
+    integer, external                  :: inqmxi
+    integer, external                  :: clsnef
+    integer, external                  :: open_datdef
+    integer, external                  :: neferr
+    character(2)                       :: sedunit
+    character(10)                      :: transpunit
+    character(16)                      :: grnam4
+    character(16)                      :: grnam5
+    character(256)                     :: errmsg         ! Character var. containing the errormessage to be written to file. The message depends on the error. 
+    character(60)                      :: filnam         ! Help var. for FLOW file name 
 !
 ! Data statements
 !
@@ -132,18 +132,18 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
 !
 !! executable statements -------------------------------------------------------
 !
-    nefiselem           => gdp%nefisio%nefiselem(nefiswrsedhinf)
-    line_orig           => gdp%gdstations%line_orig
-    shlay               => gdp%gdpostpr%shlay
-    celidt              => nefiselem%celidt
-    morft               => gdp%gdmorpar%morft
-    morfac              => gdp%gdmorpar%morfac
-    sus                 => gdp%gdmorpar%sus
-    bed                 => gdp%gdmorpar%bed
-    rhosol              => gdp%gdsedpar%rhosol
-    cdryb               => gdp%gdsedpar%cdryb
-    first               => nefiselem%first
-    moroutput           => gdp%gdmorpar%moroutput
+    nefiselem  => gdp%nefisio%nefiselem(nefiswrsedhinf)
+    line_orig  => gdp%gdstations%line_orig
+    shlay      => gdp%gdpostpr%shlay
+    celidt     => nefiselem%celidt
+    morft      => gdp%gdmorpar%morft
+    morfac     => gdp%gdmorpar%morfac
+    sus        => gdp%gdmorpar%sus
+    bed        => gdp%gdmorpar%bed
+    rhosol     => gdp%gdsedpar%rhosol
+    cdryb      => gdp%gdsedpar%cdryb
+    first      => nefiselem%first
+    moroutput  => gdp%gdmorpar%moroutput
     !
     kmaxout = size(shlay)
     if (shlay(1) == 0) then
@@ -499,13 +499,17 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
     ! his-sed-series: cross-sections
     !
     if (ntruv>0) then
-       !
-       ! group 5: element 'SBTR'
-       !
-       ! Re-arrange the order with line_orig
+       allocate (norig(ntruv), stat=istat)
+       if (istat /= 0) then
+          call prterr(lundia, 'U021', 'wrsedh: memory alloc error')
+          call d3stop(1, gdp)
+       endif
        do n = 1, ntruv
            norig( line_orig(n) ) = n
        enddo
+       !
+       !
+       ! group 5: element 'SBTR'
        !
        call sbuff_checksize(ntruv*lsedtot)
        i = 0
@@ -592,6 +596,7 @@ subroutine wrsedh(lundia    ,error     ,trifil    ,ithisc    , &
           ierror = putelt(fds, grnam5, 'SSTRC', uindex, 1, sbuff)
           if (ierror/= 0) goto 9999
        endif
+       deallocate (norig, stat=istat)
     endif
     !
     ierror = clsnef(fds)

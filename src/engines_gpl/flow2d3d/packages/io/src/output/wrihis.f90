@@ -70,6 +70,7 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
     integer       , dimension(:, :) , pointer :: elmdms
     integer       , dimension(:)    , pointer :: order_sta
     integer       , dimension(:)    , pointer :: order_tra
+    integer       , dimension(:)    , pointer :: line_orig
     integer       , dimension(:)    , pointer :: shlay
     real(fp)      , dimension(:, :) , pointer :: xystat
     logical                         , pointer :: first
@@ -122,7 +123,8 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
 ! Local variables
 !
     integer                                           :: fds
-    integer                                           :: ierror     ! Local errorflag for NEFIS files 
+    integer                                           :: ierror      ! Local errorflag for NEFIS files
+    integer                                           :: istat
     integer                                           :: k
     integer                                           :: kmaxout
     integer                                           :: l      
@@ -138,6 +140,7 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
     integer        , dimension(1)                     :: idummy      ! Help array to read/write Nefis files 
     integer        , dimension(2)                     :: ival        ! Local array for writing ITDATE and time (:= 00:00:00) 
     integer        , dimension(nelmx)                 :: nbytsg      ! Array containing the number of by- tes of each single ELMTPS 
+    integer        , dimension(:)       , allocatable :: norig
     integer        , dimension(3,5)                   :: uindex
     integer                            , external     :: getelt
     integer                            , external     :: putelt
@@ -158,19 +161,19 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
     character(256)                                    :: filnam      ! Help var. for FLOW file name 
     character(256)                                    :: errmsg      ! Character var. containing the errormessage to be written to file. The message depends on the error. 
     character(64)  , dimension(nelmx)                 :: elmdes      ! Array with element description 
-    integer                                           :: nostatgl  ! global number of stations (i.e. original number
-                                                                   ! excluding duplicate stations located in the halo regions)
-    integer                                           :: nostatto  ! total number of stations (including "duplicate" stations located in halo regions)
-    integer        , dimension(:)       , allocatable :: nostatarr ! number of stations per partition
-    integer        , dimension(:,:)     , allocatable :: mnstatgl  ! mn indices per partition (excluding duplicates)
-    integer                                           :: ntruvgl   ! global number of tracks (i.e. original number
-                                                                   ! excluding duplicate stations located in the halo regions)
-    integer                                           :: ntruvto   ! total number of tracks (including "duplicate" stations located in halo regions)
-    integer        , dimension(:)       , allocatable :: ntruvarr  ! number of tracks per partition
-    real(sp)       , dimension(:)       , allocatable :: rsbuff    ! work array for gathering reals (1 dim)
-    real(sp)       , dimension(:,:)     , allocatable :: rsbuff2   ! work array for gathering reals (2 dim)
-    real(sp)       , dimension(:,:)     , allocatable :: rsbuff2b  ! work array for gathering reals (2 dim)
-    character(20)  , dimension(:)       , allocatable :: cbuff1   ! work array for gathering names of stations/cross sections
+    integer                                           :: nostatgl    ! global number of stations (i.e. original number
+                                                                     ! excluding duplicate stations located in the halo regions)
+    integer                                           :: nostatto    ! total number of stations (including "duplicate" stations located in halo regions)
+    integer        , dimension(:)       , allocatable :: nostatarr   ! number of stations per partition
+    integer        , dimension(:,:)     , allocatable :: mnstatgl    ! mn indices per partition (excluding duplicates)
+    integer                                           :: ntruvgl     ! global number of tracks (i.e. original number
+                                                                     ! excluding duplicate stations located in the halo regions)
+    integer                                           :: ntruvto     ! total number of tracks (including "duplicate" stations located in halo regions)
+    integer        , dimension(:)       , allocatable :: ntruvarr    ! number of tracks per partition
+    real(sp)       , dimension(:)       , allocatable :: rsbuff      ! work array for gathering reals (1 dim)
+    real(sp)       , dimension(:,:)     , allocatable :: rsbuff2     ! work array for gathering reals (2 dim)
+    real(sp)       , dimension(:,:)     , allocatable :: rsbuff2b    ! work array for gathering reals (2 dim)
+    character(20)  , dimension(:)       , allocatable :: cbuff1      ! work array for gathering names of stations/cross sections
 !
 ! Data statements
 !
@@ -192,6 +195,7 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
     first      => nefiselem%first
     namst      => gdp%gdstations%namst
     namtra     => gdp%gdstations%namtra
+    line_orig  => gdp%gdstations%line_orig
     !
     ! LSTSCI var. name in HIS FILE must remain LSTCI for GPP to work
     ! properly
@@ -204,8 +208,8 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
     celidt  = 1
     lsedbl  = lsedtot - lsed
     !
-    filnam = trifil(1:3) // 'h' // trifil(5:)
-    errmsg = ' '
+    filnam  = trifil(1:3) // 'h' // trifil(5:)
+    errmsg  = ' '
     !
     ! initialize group index time dependent data
     !
@@ -231,11 +235,15 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
        !
        call dfsync(gdp)
        call dffind_duplicate(lundia, ntruv, ntruvto, ntruvgl, order_tra, gdp)
+       !
+       ! When order_tra points to line_orig, both partition-related and re-ordering-related stuff is taken care of
+       !
+       order_tra => gdp%gdstations%line_orig
     else
        nostatto = nostat
        nostatgl = nostat
-       ntruvto = ntruv
-       ntruvgl = ntruv
+       ntruvto  = ntruv
+       ntruvgl  = ntruv
     endif
     !
     ! Set up the element dimensions
@@ -449,9 +457,9 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
        !
        ! group 2, element 'MNSTAT'
        !
-       if (inode == master) allocate(mnstatgl(2,nostatgl))       
+       if (inode == master) allocate(mnstatgl(2,nostatgl), stat=istat)
        if (parll) then
-          allocate(ibuff(2,nostat))
+          allocate(ibuff(2,nostat), stat=istat)
           do k=1,nostat
              !
              ! mnstat contains indices with respect to this partition
@@ -461,19 +469,19 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
              ibuff(2,k) = mnstat(2,k) + nfg - 1
           enddo
           call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, 2, order_sta, ibuff, mnstatgl, gdp)
-          deallocate(ibuff)
+          deallocate(ibuff, stat=istat)
        else
           mnstatgl = mnstat   
        endif 
        if (inode == master) then
           ierror = putelt(fds, grnam2, 'MNSTAT', uindex, 1, mnstatgl)
-          deallocate(mnstatgl)
+          deallocate(mnstatgl, stat=istat)
        endif
        if (ierror/=0) goto 999
        !
        ! group 2, element 'XYSTAT'
        !
-       allocate(rsbuff2(nostat,2))
+       allocate(rsbuff2(nostat,2), stat=istat)
        do k = 1, nostat
           m              = mnstat(1,k)
           n              = mnstat(2,k)
@@ -485,7 +493,7 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
        ! Gather location from other nodes (and swap arrays from dimension (nostat,2) to dimension (2,nostat))
        !
        if (inode == master) then
-          allocate(rsbuff2b(nostatgl,2))
+          allocate(rsbuff2b(nostatgl,2), stat=istat)
        endif
        if (parll) then
           call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, 2, order_sta, rsbuff2, rsbuff2b, gdp)
@@ -494,15 +502,15 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
              rsbuff2b = rsbuff2   ! not parallel, so it is on the master node
           endif
        endif
-       deallocate(rsbuff2)
+       deallocate(rsbuff2, stat=istat)
        if (inode == master) then
-          allocate(rsbuff2(2,nostatgl))
+          allocate(rsbuff2(2,nostatgl), stat=istat)
           do k=1,nostatgl
              rsbuff2(:,k) = rsbuff2b(k,:)
           enddo
-          deallocate(rsbuff2b)
+          deallocate(rsbuff2b, stat=istat)
           ierror = putelt(fds, grnam2, 'XYSTAT', uindex, 1, rsbuff2)
-          deallocate(rsbuff2)
+          deallocate(rsbuff2, stat=istat)
        endif
        
        if (ierror/=0) goto 999
@@ -512,7 +520,7 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
        ! Filtering out duplicates from names list
        !
        call dfsync(gdp)
-       if (inode == master) allocate( cbuff1(nostatgl) )
+       if (inode == master) allocate(cbuff1(nostatgl), stat=istat)
        if (parll) then 
           call dfgather_filter(lundia, nostat, nostatto, nostatgl, order_sta, namst, cbuff1, gdp)
        else
@@ -520,7 +528,7 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
        endif     
        if (inode == master) then
           ierror = putelt(fds, grnam2, 'NAMST', uindex, 1, cbuff1)
-          deallocate( cbuff1 )
+          deallocate(cbuff1, stat=istat)
        endif
        if (ierror/=0) goto 999
     endif  ! nostatgl > 0 
@@ -544,7 +552,7 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
           n = mnstat(2, k)
           rbuff(k) = alfas(n, m)
        enddo
-       if (inode == master) allocate( rsbuff(nostatgl) )
+       if (inode == master) allocate(rsbuff(nostatgl), stat=istat)
        if (parll) then
           call dfgather_filter(lundia, nostat, nostatto, nostatgl, order_sta, rbuff, rsbuff, gdp)
        else
@@ -552,7 +560,7 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
        endif
        if (inode == master) then
           ierror = putelt(fds, grnam2, 'ALFAS', uindex, 1, rsbuff)
-          deallocate( rsbuff )
+          deallocate(rsbuff, stat=istat)
        endif
        if (ierror/=0) goto 999
        !
@@ -563,7 +571,7 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
           n = mnstat(2, k)
           rbuff(k) = real(dps(n, m),fp)
        enddo
-       if (inode == master) allocate( rsbuff(nostatgl) )
+       if (inode == master) allocate(rsbuff(nostatgl), stat=istat)
 
        if (parll) then
           call dfgather_filter(lundia, nostat, nostatto, nostatgl, order_sta, rbuff, rsbuff, gdp)
@@ -572,7 +580,7 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
        endif   
        if (inode == master) then
           ierror = putelt(fds, grnam2, 'DPS', uindex, 1, rsbuff)
-          deallocate( rsbuff )
+          deallocate(rsbuff, stat=istat)
        endif
        if (ierror/=0) goto 999
     endif
@@ -580,10 +588,10 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
        !
        ! group 2, element 'THICK'
        !
-       allocate(rsbuff(kmax))
+       allocate(rsbuff(kmax), stat=istat)
        rsbuff=real(thick,sp)
        ierror = putelt(fds, grnam2, 'THICK', uindex, 1, rsbuff)
-       deallocate(rsbuff)
+       deallocate(rsbuff, stat=istat)
     endif
     if (ierror/=0) goto 999
     !
@@ -591,23 +599,44 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
     ! the next element of group 3 will be written
     !
     if (ntruvgl > 0) then
+       if (.not.parll) then
+          !
+          ! Re-arrange the order with the inverse of line_orig
+          ! Parallel: order_tra points to line_orig and solves the re-ordering
+          !
+          allocate(norig(ntruvgl), stat=istat)
+          if (istat /= 0) then
+             call prterr(lundia, 'U021', 'wrihis: memory alloc error')
+             call d3stop(1, gdp)
+          endif
+          do n = 1, ntruv
+              norig( line_orig(n) ) = n
+          enddo
+       endif
        !
        ! group 2, element 'MNTRA'
        !
        if (inode == master) then
-          allocate(ibuff(4,ntruvgl))
+          allocate(ibuff(4,ntruvgl), stat=istat)
           ibuff = 0
           if (parll) then
              do k = 1, ntruvgl
+                !
+                ! mnit_global contains the global mn indices of all partitions, before local re-ordering
+                ! so don't use gather_filter
+                !
                 ibuff(:,k) = gdp%gdparall%mnit_global(:,k)
              enddo
           else
-             do k = 1, ntruvgl
-                ibuff(:,k) = mnit(:,k)
+             do k = 1, ntruv
+                !
+                ! mnit is re-ordered; use norig to get the original order
+                !
+                ibuff(:,k) = mnit(:,norig(k))
              enddo
           endif
              ierror = putelt(fds, grnam2, 'MNTRA', uindex, 1, ibuff)
-          deallocate(ibuff)
+          deallocate(ibuff, stat=istat)
        endif
        if (ierror/=0) goto 999
        !
@@ -619,7 +648,7 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
        ! This must be solved in a new subroutine called dfgather_filter_combine, using information
        ! of multiple partitions.
        !
-       allocate(rsbuff2(ntruv,4))
+       allocate(rsbuff2(ntruv,4), stat=istat)
        do k = 1, ntruv
           m1           = mnit(1,k)
           n1           = mnit(2,k)
@@ -631,40 +660,58 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
           rsbuff2(k,4) = real(yz(n2,m2),sp)
        enddo
        if (inode == master) then
-          allocate(rsbuff2b(ntruvgl,4))
+          allocate(rsbuff2b(ntruvgl,4), stat=istat)
        endif
-       if (parll) then 
+       if (parll) then
+          !
+          ! combine all local values (re-ordered) into global values (original global order)
+          !
           call dfgather_filter(lundia, ntruv, ntruvto, ntruvgl, 1, 4, order_tra, rsbuff2, rsbuff2b, gdp)
        else
-          rsbuff2b = rsbuff2
+          !
+          ! xytra is re-ordered; use norig to get the original order
+          !
+          do k = 1, ntruv
+             rsbuff2b(k,:) = rsbuff2(norig(k),:)
+          enddo
        endif
-       deallocate( rsbuff2 )
+       deallocate(rsbuff2, stat=istat)
        if (inode == master) then
           ierror = putelt(fds, grnam2, 'XYTRA', uindex, 1, rsbuff2b)
-          deallocate(rsbuff2b)
+          deallocate(rsbuff2b, stat=istat)
        endif
        if (ierror/=0) goto 999
        !
        ! group 2, element 'NAMTRA'
        !
-       if (inode == master) allocate( cbuff1(ntruvgl) )
+       if (inode == master) allocate(cbuff1(ntruvgl), stat=istat)
        if (parll) then
+          !
+          ! combine all local values (re-ordered) into global values (original global order)
+          !
           call dfgather_filter(lundia, ntruv, ntruvto, ntruvgl, order_tra, namtra, cbuff1, gdp)
        else
-          cbuff1 = namtra
-       endif     
+          !
+          ! namtra is re-ordered; use norig to get the original order
+          !
+          do k = 1, ntruv
+             cbuff1(k) = namtra(norig(k))
+          enddo
+       endif
        if (inode == master) then
           ierror = putelt(fds, grnam2, 'NAMTRA', uindex, 1, cbuff1)
-          deallocate( cbuff1 )
+          deallocate(cbuff1, stat=istat)
        endif
+       deallocate(norig, stat=istat)
        if (ierror/=0) goto 999
     endif  ! (ntruvgl > 0)
+    !
     if (inode == master) then
        !
        ! group 2, only if lmax   > 0 (:= selhis( 5:14) <> 'NNNNNNNNNN')
        !
        if (index(selhis(5:14), 'Y')>0 .or. index(selhis(22:23), 'Y')>0) then
-          allocate(namhlp(lstsci+ltur))
+          allocate(namhlp(lstsci+ltur), stat=istat)
           lhlp = 0
           if (index(selhis(5:12), 'Y')>0 .or. index(selhis(22:23), 'Y')/=0) then
              do l = 1, lstsci
@@ -682,7 +729,7 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
           !
           ierror = putelt(fds, grnam2, 'NAMCON', uindex, 1, namhlp)
           if (ierror/=0) goto 999
-          deallocate(namhlp)
+          deallocate(namhlp, stat=istat)
        endif
        !
        ! group 2, element 'LSED'
@@ -711,14 +758,14 @@ subroutine wrihis(lundia    ,error     ,trifil    ,selhis    ,simdat    , &
        ! group 2, element 'ZK'
        !
        if (zmodel) then
-          allocate( rsbuff(kmax+1))
+          allocate(rsbuff(kmax+1), stat=istat)
           do k = 1, kmax
              rsbuff(k + 1) = zk(k)
           enddo
           rsbuff(1) = zbot
           ierror = putelt(fds, grnam2, 'ZK', uindex, 1, rsbuff)
           if (ierror/=0) goto 999
-          deallocate(rsbuff)
+          deallocate(rsbuff, stat=istat)
        endif
        !
        ! group 2, element 'COORDINATES'

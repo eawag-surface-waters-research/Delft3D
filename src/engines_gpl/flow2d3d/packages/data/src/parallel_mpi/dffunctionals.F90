@@ -196,9 +196,15 @@ integer                                   :: ierr                   ! error valu
 #endif
 character(80)                             :: msgstr                 ! string to pass message
 integer                                   :: itag
+logical                                   :: crosec_case_l
 !
 !! executable statements -------------------------------------------------------
 !
+    if (present(crosec_case)) then
+        crosec_case_l = crosec_case
+    else
+        crosec_case_l = .false.
+    endif
     if (inode == master) then
        allocate( tempbuff(nbtotal) )
        allocate( ibuff(1:nbtotal) )
@@ -208,7 +214,7 @@ integer                                   :: itag
     call dfgather_lowlevel ( ibuff   , nbtotal, order , nblocal, dfint, gdp )
     if (inode == master) then
        oubuff = 0
-       if (present(crosec_case)) then
+       if (crosec_case_l) then
           do n = 1, nbtotal
              if (ibuff(n) /= 0) oubuff(ibuff(n)) = oubuff(ibuff(n)) + tempbuff(n)
           enddo
@@ -336,9 +342,15 @@ integer                                   :: ierr                   ! error valu
 #endif
 character(80)                             :: msgstr                 ! string to pass message
 integer                                   :: itag
+logical                                   :: crosec_case_l
 !
 !! executable statements -------------------------------------------------------
 !
+    if (present(crosec_case)) then
+        crosec_case_l = crosec_case
+    else
+        crosec_case_l = .false.
+    endif
     if (inode == master) then
        allocate( rbuff(nbtotal) )
        allocate( ibuff(1:nbtotal) )
@@ -348,7 +360,7 @@ integer                                   :: itag
     call dfgather_lowlevel ( ibuff, nbtotal, order, nblocal, dfint, gdp )
     if (inode == master) then
        oubuff = 0.0
-       if (present(crosec_case)) then
+       if (crosec_case_l) then
           do n = 1, nbtotal
              if (ibuff(n) /= 0) oubuff(ibuff(n)) = oubuff(ibuff(n)) + rbuff(n)
           enddo
@@ -452,9 +464,15 @@ integer                                   :: ierr                   ! error valu
 #endif
 character(80)                             :: msgstr                 ! string to pass message
 integer                                   :: itag
+logical                                   :: crosec_case_l
 !
 !! executable statements -------------------------------------------------------
 !
+    if (present(crosec_case)) then
+        crosec_case_l = crosec_case
+    else
+        crosec_case_l = .false.
+    endif
     if (inode == master) then
        allocate( rbuff(nbtotal) )
        allocate( ibuff(1:nbtotal) )
@@ -464,7 +482,7 @@ integer                                   :: itag
     call dfgather_lowlevel ( ibuff, nbtotal, order, nblocal, dfint, gdp )
     if (inode == master) then
        oubuff = 0.0_hp
-       if (present(crosec_case)) then
+       if (crosec_case_l) then
           do n = 1, nbtotal
              if (ibuff(n) /= 0) oubuff(ibuff(n)) = oubuff(ibuff(n)) + rbuff(n)
           enddo
@@ -528,9 +546,15 @@ integer                                   :: ierr                   ! error valu
 #endif
 character(80)                             :: msgstr                 ! string to pass message
 integer                                   :: itag
+logical                                   :: crosec_case_l
 !
 !! executable statements -------------------------------------------------------
 !
+    if (present(crosec_case)) then
+        crosec_case_l = crosec_case
+    else
+        crosec_case_l = .false.
+    endif
     allocate( tbuff(jf:jl, 1:nblocal) )
     do m = jf, jl
        do n = 1, nblocal
@@ -546,7 +570,7 @@ integer                                   :: itag
     deallocate( tbuff )
     if (inode == master) then
        oubuff = 0.0
-       if (present(crosec_case)) then
+       if (crosec_case_l) then
        ! for cross section records, we sum the contributions from each partition
           do n = 1, nbtotal
              if (ibuff(n) /= 0) oubuff(ibuff(n), jf:jl) = oubuff(ibuff(n), jf:jl) + rbuff(jf:jl, n)

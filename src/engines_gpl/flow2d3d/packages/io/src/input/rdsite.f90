@@ -615,11 +615,20 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           endif
        enddo
     enddo
-    !
-    ! Reorders sections in U-V directions order
-    ! to ensure that the original ordering will
-    ! be kept in the parallel case
-    ! since sections are later on reordered in this way
+    if (parll .and. inode==master) then
+       !
+       ! Store mnit in mnit_global before any re-ordering/partition related removements
+       ! mnit will be adapted for each partition
+       !
+       allocate(gdp%gdparall%mnit_global(4,ntruv), stat=istat)
+       if (istat /= 0) then
+          call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
+          call d3stop(1, gdp)
+       endif
+       do n = 1, ntruv
+          gdp%gdparall%mnit_global(:,n) = mnit(:,n)
+       enddo
+    endif
     !
     ! line_orig is initialized here instead of chksit
     ! This makes the remapping in each partition easier
@@ -628,30 +637,35 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        line_orig(n) = n       
     enddo
     !
+    ! Reorder sections in U-V directions
+    ! All U-oriented sections are placed in front of the V-oriented sections
+    ! line_orig is used to store the original order
+    ! Output is written in the original order
+    !
     nn = 1
-    i = nn
+    i  = nn
     do while (i <= ntruv)
        !
        ! test first for U points (m1=m2)
        !
        if (mnit(1,i) == mnit(3,i)) then
-          m1 = mnit(1, nn)
-          n1 = mnit(2, nn)
-          m2 = mnit(3, nn)
-          n2 = mnit(4, nn)
-          chulp            = namtra(nn)
-          n = line_orig(nn)
+          m1            = mnit(1, nn)
+          n1            = mnit(2, nn)
+          m2            = mnit(3, nn)
+          n2            = mnit(4, nn)
+          chulp         = namtra(nn)
+          n             = line_orig(nn)
           !
-          mnit(1:4, nn)    = mnit(1:4, i)
-          namtra(nn)       = namtra(i)
+          mnit(1:4, nn) = mnit(1:4, i)
+          namtra(nn)    = namtra(i)
           line_orig(nn) = line_orig(i)
           !
-          mnit(1:4, i)   = (/m1, n1, m2, n2/)
-          namtra(i)        = chulp
-          line_orig(i) = n
+          mnit(1:4, i)  = (/m1, n1, m2, n2/)
+          namtra(i)     = chulp
+          line_orig(i)  = n
           !
-          i = nn
-          nn = nn + 1
+          i             = nn
+          nn            = nn + 1
        endif
        i = i + 1
     enddo
@@ -675,20 +689,6 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           !
           ! ntruv > 0
           !
-          if (inode == master) then
-             !
-             ! Store mnit in mnit_global
-             ! mnit will be adapted for this partition
-             !
-             allocate(gdp%gdparall%mnit_global(4,ntruv), stat=istat)
-             if (istat /= 0) then
-                call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
-                call d3stop(1, gdp)
-             endif
-             do n = 1, ntruv
-                gdp%gdparall%mnit_global(:,n) = mnit(:,n)
-             enddo
-          endif
           allocate(nsd(ntruv), stat=istat)
           if (istat /= 0) then
              call prterr(lundia, 'U021', 'Rdsite: memory alloc error')
@@ -697,10 +697,10 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           nn  = 0
           nsd = 0
           do n = 1, ntruv
-             m1 = mnit(1, n) -mfg +1
-             n1 = mnit(2, n) -nfg +1
-             m2 = mnit(3, n) -mfg +1
-             n2 = mnit(4, n) -nfg +1
+             m1 = mnit(1,n) - mfg + 1
+             n1 = mnit(2,n) - nfg + 1
+             m2 = mnit(3,n) - mfg + 1
+             n2 = mnit(4,n) - nfg + 1
              !
              ! check if cross-section points (begin, end) are fully inside or (partly) outside subdomain
              !
@@ -712,24 +712,24 @@ subroutine rdsite(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                    !
                    ! solution: clip the begin- and end points in this subdomain. 
                    ! 
-                   mnit(1, n) = min(max(m1,1),gdp%d%mmax )
-                   mnit(2, n) = min(max(n1,1),gdp%d%nmaxus)
-                   mnit(3, n) = min(max(m2,1),gdp%d%mmax )
-                   mnit(4, n) = min(max(n2,1),gdp%d%nmaxus)
+                   mnit(1,n) = min(max(m1,1),gdp%d%mmax )
+                   mnit(2,n) = min(max(n1,1),gdp%d%nmaxus)
+                   mnit(3,n) = min(max(m2,1),gdp%d%mmax )
+                   mnit(4,n) = min(max(n2,1),gdp%d%nmaxus)
                    write (lundia, '(10x,''remap n='',i4,'' mnit1 = '',2i4,'' mint2 = '', 2i4,'' - node number '',i3.3)') n, mnit(1, n), mnit(2, n), mnit(3, n), mnit(4, n), inode
-                   nn = nn +1
+                   nn      = nn + 1
                    nsd(nn) = n
                 endif
              else
                 !
                 ! cross-section is inside subdomain, store sequence number
                 !
-                mnit(1, n) = m1
-                mnit(2, n) = n1
-                mnit(3, n) = m2
-                mnit(4, n) = n2
-                nn = nn +1
-                nsd(nn) = n
+                mnit(1,n) = m1
+                mnit(2,n) = n1
+                mnit(3,n) = m2
+                mnit(4,n) = n2
+                nn        = nn + 1
+                nsd(nn)   = n
              endif
           enddo
           !
