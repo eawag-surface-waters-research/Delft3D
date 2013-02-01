@@ -10,13 +10,12 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libtestfill.a
+lib_LTLIBRARIES = libtestfill.la
 
 #-------------------------------------------------------------------------------
 #Sources
-libtestfill_a_SOURCES = \
+libtestfill_la_SOURCES = \
          testfill.f90
 
 #-------------------------------------------------------------------------------
 #Libraries
-

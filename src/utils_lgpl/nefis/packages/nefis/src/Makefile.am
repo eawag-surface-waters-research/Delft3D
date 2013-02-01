@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libnefis.a
+lib_LTLIBRARIES = libnefis.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -27,7 +27,7 @@ AM_CXXFLAGS += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libnefis_a_SOURCES = \
+libnefis_la_SOURCES = \
          c2c.c \
          df.c \
          er.c \
@@ -43,5 +43,5 @@ libnefis_a_SOURCES = \
 #-------------------------------------------------------------------------------
 #Libraries
 
-#libnefis_a_LIBADD = \
-#	$(top_builddir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.a
+#libnefisla_LIBADD = \
+#	$(top_builddir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.la

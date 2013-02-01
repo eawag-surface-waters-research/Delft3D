@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libdeltares_common.a
+lib_LTLIBRARIES = libdeltares_common.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -20,7 +20,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libdeltares_common_a_SOURCES = \
+libdeltares_common_la_SOURCES = \
          buffer.f90 \
          bilin5.f90 \
          combinepaths.f90 \
@@ -46,14 +46,19 @@ EXTRA_DIST = \
 #-------------------------------------------------------------------------------
 #Libraries
 
+libdeltares_common_la_LIBADD=\
+	$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_c/src/libdeltares_common_c.la \
+	$(top_builddir)/utils_lgpl/stream/packages/stream/src/libstream.la \
+	$(top_builddir)/utils_lgpl/semaphore/packages/semaphore/src/libsemaphore.la \
+	$(top_builddir)/utils_lgpl/precision/packages/precision/src/libprecision.la \
+	$(top_builddir)/utils_lgpl/constants/packages/mathconsts/src/libmathconsts.la
+
 
 BUILT_SOURCES = ./always \
-	./deltares_common_version.F90 
+	./deltares_common_version.F90
 
 ./always:
-	rm -rf ./deltares_common_version.F90 
+	rm -rf ./deltares_common_version.F90
 
 ./deltares_common_version.F90:
 	$(top_srcdir)/scripts_lgpl/linux/update_version.sh $(srcdir)/deltares_common_version.F90 $(srcdir) ../include/version_number.ini $(top_builddir)
-
-

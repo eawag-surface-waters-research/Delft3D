@@ -8,6 +8,9 @@
 
 include $(top_srcdir)/common.am
 
+AM_LFLAGS = -L
+AM_YFLAGS = -d
+
 if ENABLE_DOLCLI
 
 bin_PROGRAMS = dolcli
@@ -28,9 +31,6 @@ dolcli_LDADD = \
 
 INCLUDES = \
     -I$(top_builddir)/utils_lgpl/delftonline/include
-
-AM_LFLAGS = -L
-AM_YFLAGS = -d
 
 CLEANFILES = \
     lexan.cc \

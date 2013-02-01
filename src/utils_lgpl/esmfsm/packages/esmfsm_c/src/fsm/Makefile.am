@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libfsm_c.a
+lib_LTLIBRARIES = libfsm_c.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -19,9 +19,8 @@ INCLUDES = -I$(top_builddir)/utils_lgpl/esmfsm/include \
 
 #-------------------------------------------------------------------------------
 #Sources
-libfsm_c_a_SOURCES = \
+libfsm_c_la_SOURCES = \
          fsm.cpp
 
 #-------------------------------------------------------------------------------
 #Libraries
-

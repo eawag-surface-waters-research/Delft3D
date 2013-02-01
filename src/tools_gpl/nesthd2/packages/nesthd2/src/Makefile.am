@@ -32,25 +32,24 @@ nesthd2_SOURCES = \
         wricon2.f \
         wrihyd.f \
         wrihyd2.f \
-        wrista.f 
+        wrista.f
 
 #-------------------------------------------------------------------------------
 #Libraries
 
 nesthd2_LDADD = \
-        $(top_srcdir)/utils_lgpl/nefis/packages/nefis/src/libnefis.a \
-        $(top_srcdir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.a \
-        $(top_srcdir)/utils_lgpl/deltares_common/packages/deltares_common/src/libdeltares_common.a \
-        $(top_srcdir)/utils_lgpl/deltares_common/packages/deltares_common_c/src/libdeltares_common_c.a \
+        $(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libnefis.la \
+        $(top_builddir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.la \
+        $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libdeltares_common.la \
+        $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_c/src/libdeltares_common_c.la \
         -ldl \
         $(FCLIBS) $(FCLIBS_ADDITIONAL)
 
 BUILT_SOURCES = ./always \
-	./nesthd2_version.F90 
+	./nesthd2_version.F90
 
 ./always:
-	rm -rf ./nesthd2_version.F90 
+	rm -rf ./nesthd2_version.F90
 
 ./nesthd2_version.F90:
 	$(top_srcdir)/scripts_lgpl/linux/update_version.sh $(srcdir)/nesthd2_version.F90 $(srcdir) ../include/version_number.ini $(top_builddir)
-

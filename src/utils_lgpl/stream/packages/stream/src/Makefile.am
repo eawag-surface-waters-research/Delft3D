@@ -10,17 +10,18 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libstream.a
+lib_LTLIBRARIES = libstream.la
 
 #-------------------------------------------------------------------------------
 #Includes
 INCLUDES = -I$(top_builddir)/utils_lgpl/stream/include
- 
+
 #-------------------------------------------------------------------------------
 #Sources
-libstream_a_SOURCES = \
+libstream_la_SOURCES = \
          stream.cpp
 
 #-------------------------------------------------------------------------------
 #Libraries
-
+libstream_la_LIBADD = \
+	$(top_builddir)/utils_lgpl/stream/packages/stream_version_number/src/libstream_version_number.la

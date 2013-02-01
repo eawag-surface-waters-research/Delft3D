@@ -10,14 +10,13 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = lib01_initest.a
+lib_LTLIBRARIES = lib01_initest.la
 
 #-------------------------------------------------------------------------------
 #Sources
-lib01_initest_a_SOURCES = \
+lib01_initest_la_SOURCES = \
          initest.f90 \
          main.c
 
 #-------------------------------------------------------------------------------
 #Libraries
-

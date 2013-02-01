@@ -8,15 +8,15 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libdelftio_sync_version_number.a
+lib_LTLIBRARIES = libdelftio_sync_version_number.la
 
 #-------------------------------------------------------------------------------
 #Includes
-INCLUDES = -I../include 
+INCLUDES = -I../include
 
 #-------------------------------------------------------------------------------
 #Sources
-libdelftio_sync_version_number_a_SOURCES = \
+libdelftio_sync_version_number_la_SOURCES = \
          c2c.c \
          f2c.c \
          version.c
@@ -31,4 +31,3 @@ BUILT_SOURCES = ../include/always \
 	$(top_srcdir)/scripts_lgpl/linux/make_revision.sh $(top_builddir) ../../.. ../include/version_number.ini ../include/version_number.h.svn ../include/version_number.h
 #-------------------------------------------------------------------------------
 #Libraries
-

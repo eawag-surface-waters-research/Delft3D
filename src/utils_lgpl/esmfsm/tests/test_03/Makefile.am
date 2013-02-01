@@ -10,11 +10,11 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libtest_03.a
+lib_LTLIBRARIES = libtest_03.la
 
 #-------------------------------------------------------------------------------
 #Sources
-libtest_03_a_SOURCES = \
+libtest_03_la_SOURCES = \
          chnull.f90 \
          inull.f90 \
          rnull.f90 \
@@ -23,4 +23,3 @@ libtest_03_a_SOURCES = \
 
 #-------------------------------------------------------------------------------
 #Libraries
-

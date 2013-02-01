@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = rd_token.a
+lib_LTLIBRARIES = librd_token.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -16,7 +16,7 @@ lib_LIBRARIES = rd_token.a
 
 #-------------------------------------------------------------------------------
 #Sources
-timers_a_SOURCES = \
+librd_token_la_SOURCES = \
        gettok.f \
        mestok.f \
        rdtok1.f \

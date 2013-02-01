@@ -10,14 +10,14 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libprecision.a
+lib_LTLIBRARIES = libprecision.la
 
 #-------------------------------------------------------------------------------
 #Includes
 
 #-------------------------------------------------------------------------------
 #Sources
-libprecision_a_SOURCES = \
+libprecision_la_SOURCES = \
          precision_version.F90 \
          precision_basics.F90 \
          precision.F90 \
@@ -27,11 +27,10 @@ EXTRA_DIST = \
 	precision_version.F90.svn
 
 BUILT_SOURCES = ./always \
-	./precision_version.F90 
+	./precision_version.F90
 
 ./always:
-	rm -rf ./precision_version.F90 
+	rm -rf ./precision_version.F90
 
 ./precision_version.F90:
 	$(top_srcdir)/scripts_lgpl/linux/update_version.sh $(srcdir)/precision_version.F90 $(srcdir) ../include/version_number.ini $(top_builddir)
-

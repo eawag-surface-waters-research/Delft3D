@@ -12,7 +12,7 @@ lib_LIBRARIES = libkernel_f.a
 
 #-------------------------------------------------------------------------------
 #Includes
-FMODULES = \
+FMODULES += \
 	-I../../data_f/src \
 	-I../../utils_f/src \
 	-I../../io_f/src
@@ -25,7 +25,7 @@ libkernel_f_a_SOURCES = \
          inipart.f90 \
          part01.f90 \
          part10.f90 \
-         plotgr.f90 \ 
+         plotgr.f90 \
          part03.f90 \
          part21.f90 \
          part14.f90 \
@@ -42,4 +42,3 @@ libkernel_f_a_SOURCES = \
 
 #-------------------------------------------------------------------------------
 #Libraries
-

@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libsemaphore.a
+lib_LTLIBRARIES = libsemaphore.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -18,7 +18,7 @@ INCLUDES = -I../include
 
 #-------------------------------------------------------------------------------
 #Sources
-libsemaphore_a_SOURCES = \
+libsemaphore_la_SOURCES = \
          sems.cpp \
          semaphore_version.cpp
 
@@ -33,4 +33,3 @@ BUILT_SOURCES = ./always \
 
 #-------------------------------------------------------------------------------
 #Libraries
-

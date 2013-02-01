@@ -15,7 +15,7 @@ lib_LTLIBRARIES = libflow2d3d_openda.la
 INCLUDES = \
     $(STANDARD_C_INCLUDES) \
 	-I../include
- 
+
 FINCLUDES += \
 	-I$(top_builddir)/utils_lgpl/precision/include \
 	-I$(top_builddir)/utils_lgpl/esmfsm/include \
@@ -48,16 +48,15 @@ libflow2d3d_openda_la_SOURCES = \
 #Libraries
 libflow2d3d_openda_la_LIBADD = \
 	$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d/src/libflow2d3d.la \
-	$(top_builddir)/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/src/libD_hydro.a
+	$(top_builddir)/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/src/libD_hydro.la
 
 
 BUILT_SOURCES = \
 	./always \
-	../include/flow2d3d_openda_version.h 
+	../include/flow2d3d_openda_version.h
 
 ./always:
-	rm -f ../include/flow2d3d_openda_version.h 
+	rm -f ../include/flow2d3d_openda_version.h
 
 ../include/flow2d3d_openda_version.h:
 	$(top_srcdir)/scripts_lgpl/linux/update_version.sh ../include/flow2d3d_openda_version.h $(srcdir) ../include/version_number.ini $(top_builddir)
-

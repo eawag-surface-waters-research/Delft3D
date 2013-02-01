@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libdelftio_shm.a
+lib_LTLIBRARIES = libdelftio_shm.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -19,7 +19,7 @@ INCLUDES = -I$(top_builddir)/utils_lgpl/delftio/packages/delftio_shm/include \
 
 #-------------------------------------------------------------------------------
 #Sources
-libdelftio_shm_a_SOURCES = \
+libdelftio_shm_la_SOURCES = \
          dio-sync-ux.cpp \
          dio_shm.cpp \
          dio_shm_datablock.cpp \
@@ -29,4 +29,3 @@ libdelftio_shm_a_SOURCES = \
 
 #-------------------------------------------------------------------------------
 #Libraries
-

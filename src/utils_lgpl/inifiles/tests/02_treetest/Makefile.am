@@ -10,14 +10,13 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = lib02_treetest.a
+lib_LTLIBRARIES = lib02_treetest.la
 
 #-------------------------------------------------------------------------------
 #Sources
-lib02_treetest_a_SOURCES = \
+lib02_treetest_la_SOURCES = \
          main.c \
          treetest.f90
 
 #-------------------------------------------------------------------------------
 #Libraries
-

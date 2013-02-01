@@ -11,7 +11,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libec_module.a
+lib_LTLIBRARIES = libec_module.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -22,7 +22,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libec_module_a_SOURCES = \
+libec_module_la_SOURCES = \
          ec_typedefs.f90 \
          ec_message.f90 \
          openexistingfile.f90 \
@@ -41,4 +41,3 @@ libec_module_a_SOURCES = \
 
 #-------------------------------------------------------------------------------
 #Libraries
-

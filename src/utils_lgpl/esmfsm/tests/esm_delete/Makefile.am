@@ -10,10 +10,10 @@ INCLUDES = \
 	-I$(top_builddir)/utils_lgpl/esmfsm/include
 
 #-------------------------------------------------------------------------------
-#Libraries 
+#Libraries
 
 esm_delete_LDADD = \
-	$(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libfsm.a \
-	$(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/libfsm_c.a \
-	$(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/libesm_c.a \
-	$(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_version_number/src/libesmfsm_version_number.a
+	$(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libfsm.la \
+	$(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/libfsm_c.la \
+	$(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/libesm_c.la \
+	$(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_version_number/src/libesmfsm_version_number.la

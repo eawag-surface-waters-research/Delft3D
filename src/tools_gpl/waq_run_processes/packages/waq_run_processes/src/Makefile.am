@@ -39,19 +39,19 @@ run_processes_LDADD = \
     $(top_srcdir)/engines/waq/packages/waq_utils_f/src/waq_utils/libwaq_utils.a \
     $(top_srcdir)/engines/waq/packages/waq_utils_f/src/mod_couplib/libmod_couplib.a \
     $(top_srcdir)/engines/waq/packages/waq_utils_f/src/mod_timings/libmod_timings.a \
-    $(top_srcdir)/utils_lgpl/delftio/packages/delftio/src/diof90/libdelftio.a \
-    $(top_srcdir)/utils_lgpl/delftio/packages/delftio_shm/src/diof90/libdelftio_shm.a \
-    $(top_srcdir)/utils_lgpl/delftio/packages/delftio_version_number/src/libdelftio_version_number.a \
+    $(top_srcdir)/utils_lgpl/delftio/packages/delftio/src/diof90/libdelftio.la \
+    $(top_srcdir)/utils_lgpl/delftio/packages/delftio_shm/src/diof90/libdelftio_shm.la \
+    $(top_srcdir)/utils_lgpl/delftio/packages/delftio_version_number/src/libdelftio_version_number.la \
     $(top_srcdir)/engines/waq/packages/waq_io/src/ods/libods.a \
-    $(top_srcdir)/utils_lgpl/nefis/packages/nefis/src/libnefis.a \
+    $(top_srcdir)/utils_lgpl/nefis/packages/nefis/src/libnefis.la \
     $(top_srcdir)/engines/waq/packages/waq_utils_f/src/interact/libinteract.a \
     $(top_srcdir)/engines/waq/packages/waq_utils_c/src/libwaq_utils_c.a \
     $(top_srcdir)/engines/waq/packages/delwaq2_version_number/src/libdelwaq2_version_number.a \
-    $(top_srcdir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.a \
-    $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libfsm.a \
-    $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/libfsm_c.a \
-    $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/libesm_c.a \
-    $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_version_number/src/libesmfsm_version_number.a \
+    $(top_srcdir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.la \
+    $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libfsm.la \
+    $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/libfsm_c.la \
+    $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/libesm_c.la \
+    $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_version_number/src/libesmfsm_version_number.la \
     $(top_srcdir)/third_party/wlauth/bin/linux/libWL_auth.a \
     /opt/mpich2/lib/libmpich.a \
     -lpthread

@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libmeteo.a
+lib_LTLIBRARIES = libmeteo.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -21,7 +21,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libmeteo_a_SOURCES = \
+libmeteo_la_SOURCES = \
          meteo_data.f90 \
          distance2.f90 \
          meteo_read.f90 \
@@ -33,4 +33,3 @@ libmeteo_a_SOURCES = \
 
 #-------------------------------------------------------------------------------
 #Libraries
-

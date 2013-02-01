@@ -44,31 +44,30 @@ $(top_builddir)/engines_gpl/wave/packages/kernel/src/libkernel.a \
 $(top_builddir)/engines_gpl/wave/packages/io/src/libio.a \
 $(top_builddir)/engines_gpl/wave/packages/data/src/libdata.a \
 $(top_builddir)/engines_gpl/wave/packages/io/src/libio.a \
-$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90/libdelftio.a \
-$(top_builddir)/utils_lgpl/delftio/packages/delftio_shm/src/diof90/libdelftio_shm.a \
-$(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libfsm.a \
-$(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/libfsm_c.a \
-$(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/libesm_c.a \
-$(top_builddir)/utils_lgpl/meteo/packages/meteo/src/libmeteo.a \
-$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src/libinifiles.a \
-$(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libnefis.a \
-$(top_builddir)/utils_lgpl/precision/packages/precision/src/libprecision.a \
-$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libdeltares_common.a \
-$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_c/src/libdeltares_common_c.a \
-$(top_builddir)/utils_lgpl/meteo/packages/meteo_version_number/src/libmeteo_version_number.a \
-$(top_builddir)/utils_lgpl/delftio/packages/delftio_version_number/src/libdelftio_version_number.a \
-$(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_version_number/src/libesmfsm_version_number.a \
-$(top_builddir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.a \
+$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90/libdelftio.la \
+$(top_builddir)/utils_lgpl/delftio/packages/delftio_shm/src/diof90/libdelftio_shm.la \
+$(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libfsm.la \
+$(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/libfsm_c.la \
+$(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/libesm_c.la \
+$(top_builddir)/utils_lgpl/meteo/packages/meteo/src/libmeteo.la \
+$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src/libinifiles.la \
+$(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libnefis.la \
+$(top_builddir)/utils_lgpl/precision/packages/precision/src/libprecision.la \
+$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libdeltares_common.la \
+$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_c/src/libdeltares_common_c.la \
+$(top_builddir)/utils_lgpl/meteo/packages/meteo_version_number/src/libmeteo_version_number.la \
+$(top_builddir)/utils_lgpl/delftio/packages/delftio_version_number/src/libdelftio_version_number.la \
+$(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_version_number/src/libesmfsm_version_number.la \
+$(top_builddir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.la \
 $(EXTERNALSOURCES) \
 $(FCLIBS)
 
 
 BUILT_SOURCES = ./always \
-	./wave_version.F90 
+	./wave_version.F90
 
 ./always:
-	rm -rf ./wave_version.F90 
+	rm -rf ./wave_version.F90
 
 ./wave_version.F90:
 	$(top_srcdir)/scripts_lgpl/linux/update_version.sh $(srcdir)/wave_version.F90 $(srcdir) ../include/version_number.ini $(top_builddir)
-  

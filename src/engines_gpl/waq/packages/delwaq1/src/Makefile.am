@@ -36,12 +36,12 @@ delwaq1_LDADD = \
     $(top_srcdir)/engines_gpl/part/packages/utils_f/src/libutils_f.a \
     $(top_srcdir)/engines_gpl/part/packages/data_f/src/libdata_f.a \
     $(top_srcdir)/engines_gpl/part/packages/version_number/src/libpart_version_number.a \
-    $(top_srcdir)/utils_lgpl/nefis/packages/nefis/src/libnefis.a \
+    $(top_srcdir)/utils_lgpl/nefis/packages/nefis/src/libnefis.la \
     $(top_srcdir)/engines_gpl/waq/packages/waq_utils_f/src/interact/libinteract.a \
     $(top_srcdir)/engines_gpl/waq/packages/delwaq1_version_number/src/libdelwaq1_version_number.a \
-    $(top_srcdir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.a \
-    $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libfsm.a \
-    $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/libfsm_c.a \
-    $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/libesm_c.a \
-    $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_version_number/src/libesmfsm_version_number.a \
+    $(top_srcdir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.la \
+    $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libfsm.la \
+    $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/libfsm_c.la \
+    $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/libesm_c.la \
+    $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_version_number/src/libesmfsm_version_number.la \
     -lpthread

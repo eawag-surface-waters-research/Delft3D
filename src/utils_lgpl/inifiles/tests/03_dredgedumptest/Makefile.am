@@ -10,14 +10,13 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = lib03_dredgedumptest.a
+lib_LTLIBRARIES = lib03_dredgedumptest.la
 
 #-------------------------------------------------------------------------------
 #Sources
-lib03_dredgedumptest_a_SOURCES = \
+lib03_dredgedumptest_la_SOURCES = \
          dredgedumptest.f90 \
          main.c
 
 #-------------------------------------------------------------------------------
 #Libraries
-

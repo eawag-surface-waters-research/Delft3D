@@ -11,7 +11,7 @@
 
 include $(top_srcdir)/common.am
 bin_PROGRAMS = allocate_local.exe
- 
+
 #-------------------------------------------------------------------------------
 #Sources
 allocate_local_exe_SOURCES = \
@@ -20,6 +20,5 @@ allocate_local_exe_SOURCES = \
 #-------------------------------------------------------------------------------
 #Libraries
 allocate_local_exe_LDADD = \
-         $(top_builddir)/extern/esmfsm/libsrc/esm/libesm.a \
-         $(top_builddir)/extern/esmfsm/libsrc/fsm/libfsm.a
-
+         $(top_builddir)/extern/esmfsm/libsrc/esm/libesm.la \
+         $(top_builddir)/extern/esmfsm/libsrc/fsm/libfsm.la

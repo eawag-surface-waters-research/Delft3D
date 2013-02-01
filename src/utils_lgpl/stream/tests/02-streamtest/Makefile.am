@@ -10,11 +10,11 @@ INCLUDES = \
 	-I$(top_builddir)/utils_lgpl/stream/include
 
 #-------------------------------------------------------------------------------
-#Libraries 
+#Libraries
 
 stream02test_exe_LDADD = \
-	$(top_builddir)/utils_lgpl/stream/packages/stream/src/libstream.a \
-	$(top_builddir)/utils_lgpl/stream/packages/stream_version_number/src/libstream_version_number.a
+	$(top_builddir)/utils_lgpl/stream/packages/stream/src/libstream.la \
+	$(top_builddir)/utils_lgpl/stream/packages/stream_version_number/src/libstream_version_number.la
 
 
 #	-ldl \

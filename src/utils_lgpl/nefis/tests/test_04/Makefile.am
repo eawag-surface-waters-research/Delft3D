@@ -13,6 +13,6 @@ test_04_dependent_SOURCES = \
 	test_04.f
 
 test_04_dependent_LDADD = \
-	../../packages/nefis/src/libnefis.a \
-	../../packages/nefis_version_number/src/libnefis_version_number.a \
+	../../packages/nefis/src/libnefis.la \
+	../../packages/nefis_version_number/src/libnefis_version_number.la \
 	$(FCLIBS)

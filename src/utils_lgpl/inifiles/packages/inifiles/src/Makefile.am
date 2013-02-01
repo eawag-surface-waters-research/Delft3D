@@ -10,10 +10,10 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libinifiles.a
+lib_LTLIBRARIES = libinifiles.la
 #-------------------------------------------------------------------------------
 #Sources
-libinifiles_a_SOURCES = \
+libinifiles_la_SOURCES = \
          inifiles_version.F90 \
          tree_struct.f90 \
          properties.f90
@@ -22,11 +22,10 @@ EXTRA_DIST = \
 	inifiles_version.F90.svn
 
 BUILT_SOURCES = ./always \
-    ./inifiles_version.F90 
+    ./inifiles_version.F90
 
 ./always:
-	rm -rf ./inifiles_version.F90 
+	rm -rf ./inifiles_version.F90
 
 ./inifiles_version.F90:
 	$(top_srcdir)/scripts_lgpl/linux/update_version.sh $(srcdir)/inifiles_version.F90 $(srcdir) ../include/version_number.ini $(top_builddir)
-

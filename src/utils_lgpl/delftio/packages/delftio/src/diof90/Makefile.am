@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libdelftio.a
+lib_LTLIBRARIES = libdelftio.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -19,7 +19,7 @@ FINCLUDES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libdelftio_a_SOURCES = \
+libdelftio_la_SOURCES = \
          dio_shm_f2c_f.F90 \
          dio-3d-block.F90 \
          dio-prop.F90 \
@@ -38,4 +38,3 @@ libdelftio_a_SOURCES = \
          open_mi_dio.f90
 #-------------------------------------------------------------------------------
 #Libraries
-

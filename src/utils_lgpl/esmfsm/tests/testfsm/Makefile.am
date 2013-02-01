@@ -10,13 +10,12 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libtestfsm.a
+lib_LTLIBRARIES = libtestfsm.la
 
 #-------------------------------------------------------------------------------
 #Sources
-libtestfsm_a_SOURCES = \
+libtestfsm_la_SOURCES = \
          testfsm.f90
 
 #-------------------------------------------------------------------------------
 #Libraries
-

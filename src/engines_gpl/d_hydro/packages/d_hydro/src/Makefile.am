@@ -30,7 +30,7 @@ INCLUDES = \
 
 
 d_hydro_exe_LDADD = \
-    $(top_builddir)/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/src/libD_hydro.a \
+    $(top_builddir)/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/src/libD_hydro.la \
     -ldl
 
 #    -lmcheck
@@ -47,4 +47,3 @@ BUILT_SOURCES = \
 
 ../include/d_hydro_version.h:
 	$(top_srcdir)/scripts_lgpl/linux/update_version.sh ../include/d_hydro_version.h $(srcdir) ../include/version_number.ini $(top_builddir)
-

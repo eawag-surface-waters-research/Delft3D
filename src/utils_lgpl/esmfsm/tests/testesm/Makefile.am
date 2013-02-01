@@ -10,13 +10,12 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libtestesm.a
+lib_LTLIBRARIES = libtestesm.la
 
 #-------------------------------------------------------------------------------
 #Sources
-libtestesm_a_SOURCES = \
+libtestesm_la_SOURCES = \
          testesm.cpp
 
 #-------------------------------------------------------------------------------
 #Libraries
-

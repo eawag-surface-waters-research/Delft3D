@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libdeltares_common_c.a
+lib_LTLIBRARIES = libdeltares_common_c.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -18,7 +18,7 @@ INCLUDES = -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common
 
 #-------------------------------------------------------------------------------
 #Sources
-libdeltares_common_c_a_SOURCES = \
+libdeltares_common_c_la_SOURCES = \
          cutil.c \
          getopt.cpp \
          getputarray.cpp \
@@ -27,3 +27,6 @@ libdeltares_common_c_a_SOURCES = \
 #-------------------------------------------------------------------------------
 #Libraries
 
+libdeltares_common_c_la_LIBADD =\
+	$(top_builddir)/utils_lgpl/stream/packages/stream/src/libstream.la \
+	$(top_builddir)/utils_lgpl/semaphore/packages/semaphore/src/libsemaphore.la
