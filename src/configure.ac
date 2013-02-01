@@ -383,7 +383,6 @@ engines_gpl/wave/packages/manager/Makefile
 engines_gpl/wave/packages/manager/src/Makefile
 engines_gpl/wave/packages/wave/Makefile
 engines_gpl/wave/packages/wave/src/Makefile
-Makefile
 plugins_lgpl/Makefile
 plugins_lgpl/plugin_culvert/Makefile
 plugins_lgpl/plugin_culvert/src/Makefile
