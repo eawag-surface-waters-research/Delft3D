@@ -11,14 +11,14 @@ lib_LIBRARIES = libwaq_utils.a
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
-        -I$(top_srcdir)/engines/waq/include
+        -I$(top_srcdir)/engines_gpl/waq/include \
+        -I$(top_srcdir)/utils_lgpl/timers/src
 
 #-------------------------------------------------------------------------------
 #Sources
 libwaq_utils_a_SOURCES = \
        waqmem.f90 \
        progress.f90 \
-       timers.f \
        fileutils.f90 \
        dlwq1_grid_mod.f \
        dlwq_data.f \
@@ -79,16 +79,13 @@ libwaq_utils_a_SOURCES = \
        dhucas.f \
        dhzerc.f \
        dhzeri.f \
-       dlwqj1.f \
        errsys.f \
        fffind.f \
        filldm.f \
        getcom.f \
        getper.f \
-       gettok.f \
        gkwini.f \
        makpnt.f \
-       mestok.f \
        monsys.f \
        movchr.f \
        move.f \
@@ -100,7 +97,6 @@ libwaq_utils_a_SOURCES = \
        putper.f \
        rapdef.f \
        rbpdef.f \
-       rd_token.f90 \
        rdvers.f \
        rdwrk3.f \
        rdwrk4.f \

@@ -13,8 +13,7 @@ lib_LIBRARIES = libutils_f.a
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES = \
-	-I../../data_f/src \
-        -I$(top_srcdir)/engines/waq/packages/waq_utils_f/src/waq_utils
+	-I../../data_f/src
 
 #-------------------------------------------------------------------------------
 #Sources

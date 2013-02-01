@@ -15,8 +15,7 @@ lib_LIBRARIES = libkernel_f.a
 FMODULES = \
 	-I../../data_f/src \
 	-I../../utils_f/src \
-	-I../../io_f/src \
-        -I$(top_srcdir)/engines/waq/packages/waq_utils_f/src/waq_utils
+	-I../../io_f/src
 
 #-------------------------------------------------------------------------------
 #Sources

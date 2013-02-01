@@ -11,7 +11,7 @@ lib_LIBRARIES = libwaq_plugin_wasteload.a
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
-        -I$(top_srcdir)/engines/waq/packages/waq_utils_f/src/waq_utils
+        -I$(top_srcdir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils
 
 #-------------------------------------------------------------------------------
 #Sources

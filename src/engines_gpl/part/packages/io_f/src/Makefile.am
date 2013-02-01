@@ -14,8 +14,7 @@ lib_LIBRARIES = libio_f.a
 #Includes
 FMODULES = \
 	-I../../data_f/src \
-	-I../../utils_f/src \
-        -I$(top_srcdir)/engines/waq/packages/waq_utils_f/src/waq_utils
+	-I../../utils_f/src
 
 #-------------------------------------------------------------------------------
 #Sources

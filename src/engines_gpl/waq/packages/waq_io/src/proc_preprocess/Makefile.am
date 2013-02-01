@@ -11,8 +11,9 @@ lib_LIBRARIES = libproc_preprocess.a
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
-	-I$(top_srcdir)/engines/waq/include \
-	-I$(top_srcdir)/engines/waq/packages/waq_utils_f/src/waq_utils
+	-I$(top_srcdir)/engines_gpl/waq/include \
+	-I$(top_srcdir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils \
+        -I$(top_srcdir)/utils_lgpl/timers/src
 
 #-------------------------------------------------------------------------------
 #Sources

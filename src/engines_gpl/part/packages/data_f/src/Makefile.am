@@ -12,8 +12,6 @@ lib_LIBRARIES = libdata_f.a
 
 #-------------------------------------------------------------------------------
 #Includes
-FMODULES += \
-        -I$(top_srcdir)/engines/waq/packages/waq_utils_f/src/waq_utils
 
 #-------------------------------------------------------------------------------
 #Sources
