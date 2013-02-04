@@ -28,7 +28,6 @@
 module rdparm_mod
 
 use precision
-use timers
 use fileinfo
 
 use openfl_mod

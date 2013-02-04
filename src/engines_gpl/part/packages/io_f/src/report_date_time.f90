@@ -27,8 +27,6 @@
 
       subroutine report_date_time(lun)
 
-      use timers
-
       implicit none
       integer, intent(in) :: lun
 

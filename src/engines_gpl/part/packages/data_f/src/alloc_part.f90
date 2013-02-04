@@ -31,7 +31,6 @@ use global_pointers
 
 use modeldim
 use precision
-      use timers
 
 use alloc_mod
 

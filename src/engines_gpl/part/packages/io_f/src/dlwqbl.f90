@@ -31,7 +31,6 @@
      &                    update )
 
       use precision
-      use timers
 
       implicit none
 

@@ -30,7 +30,6 @@ module dealloc_part_mod
 use global_pointers
 
 use precision
-      use timers
 
 use dealloc_mod
 

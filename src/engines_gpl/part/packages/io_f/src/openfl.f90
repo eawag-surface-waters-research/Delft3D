@@ -28,7 +28,6 @@
 module openfl_mod
 
 use precision
-      use timers
 
 use delete_file_mod
 
