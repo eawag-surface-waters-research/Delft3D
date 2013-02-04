@@ -43,9 +43,6 @@ contains
 
       integer(ip) :: iopt, ierror
       integer(ip) :: lun
-      integer(4) ithndl
-      data       ithndl / 0 /
-      if ( timon ) call timstrt( "openfl", ithndl )
 
       select case ( iopt )
          case ( 1 )
@@ -86,7 +83,6 @@ contains
             endif
       end select
 
-      if ( timon ) call timstop ( ithndl )
       return
 
    10 write(*,'(/a,a40/)') ' Warning, file does not exist: ',finam

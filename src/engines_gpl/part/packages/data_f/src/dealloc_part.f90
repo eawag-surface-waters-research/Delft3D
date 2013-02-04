@@ -37,9 +37,6 @@ implicit none
 
 contains
       subroutine dealloc_part()
-      integer(4) ithndl
-      data       ithndl / 0 /
-      if ( timon ) call timstrt( "dealloc_part", ithndl )
 
       call dealloc(abuoy      )
       call dealloc(acf        )
@@ -197,7 +194,6 @@ contains
       call dealloc(zlevel     )
       call dealloc(zpart      )
       call dealloc(zwaste     )
-      if ( timon ) call timstop ( ithndl )
       return
       end subroutine dealloc_part
 end module dealloc_part_mod

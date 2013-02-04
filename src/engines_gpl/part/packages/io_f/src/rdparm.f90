@@ -134,9 +134,6 @@ contains
       real   (sp) :: xw1f   , xw2f    , yw1f    , yw2f
 
       integer(ip) nfcons
-      integer(4) ithndl
-      data       ithndl / 0 /
-      if ( timon ) call timstrt( "rdparm", ithndl )
 
       ierr   = 0
 
@@ -1206,7 +1203,6 @@ contains
         stop ' Errors found on part input file; check print file '
       endif
 
-      if ( timon ) call timstop ( ithndl )
       return
 
  1997 format(//,2x,'Applied hydrodynamics file (hyd-file): ',a/)

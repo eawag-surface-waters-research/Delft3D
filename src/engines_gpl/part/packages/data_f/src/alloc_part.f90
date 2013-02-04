@@ -44,9 +44,7 @@ contains
       integer(ip),   parameter  :: nfracmx=4
 
       type(model_dimensions_), pointer :: dim
-      integer(4) ithndl
-      data       ithndl / 0 /
-      if ( timon ) call timstrt( "alloc_part", ithndl )
+
       dim => model_dimensions
 
       call alloc(abuoy     ,dim%no_particles                         )
@@ -262,7 +260,6 @@ contains
       call alloc(zpart     ,dim%no_particles                         )
       call alloc(zwaste    ,dim%no_total_releases                    )
 
-      if ( timon ) call timstop ( ithndl )
       return
       end subroutine alloc_part
 end module alloc_part_mod
