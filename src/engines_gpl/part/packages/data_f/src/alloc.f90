@@ -1,37 +1,55 @@
-module alloc_mod
-!
-!  Generic module for memory allocation,
-!  including proper error handling
-!
-!
-!  data definition module(s)
-!
-      use precision               ! single and double precision
-      implicit none   ! force explicit typing
+!!  Copyright(C) Stichting Deltares, 2012-2013.
+!!
+!!  This program is free software: you can redistribute it and/or modify
+!!  it under the terms of the GNU General Public License version 3,
+!!  as published by the Free Software Foundation.
+!!
+!!  This program is distributed in the hope that it will be useful,
+!!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+!!  GNU General Public License for more details.
+!!
+!!  You should have received a copy of the GNU General Public License
+!!  along with this program. If not, see <http://www.gnu.org/licenses/>.
+!!
+!!  contact: delft3d.support@deltares.nl
+!!  Stichting Deltares
+!!  P.O. Box 177
+!!  2600 MH Delft, The Netherlands
+!!
+!!  All indications and logos of, and references to registered trademarks
+!!  of Stichting Deltares remain the property of Stichting Deltares. All
+!!  rights reserved.
 
-      integer(ip), private :: lunmem        ! output unit memory allocation
-      integer(ip), private :: lunrep        ! output unit dellpar report file
-      integer(ip), private :: accu          ! accumulated memory size
-      integer(ip), private :: number        ! accumulated memory size
-!
-!
+!!  Note: The "part" engine is not yet Open Source, but still under
+!!  development. This package serves as a temporary dummy interface for
+!!  the references in the "waq" engine to the "part" engine.
+
+module alloc_mod
+
+      use precision
+      implicit none
+
+      integer(ip), private :: lunmem
+      integer(ip), private :: lunrep
+      integer(ip), private :: accu
+      integer(ip), private :: number
+
    interface alloc
-      module procedure alloc_int_1D     ! for allocating 1D integer arrays
-      module procedure alloc_int_2D     ! for allocating 2D integer arrays
-      module procedure alloc_int_3D     ! for allocating 3D integer arrays
-      module procedure alloc_int_4D     ! for allocating 4D integer arrays
-      module procedure alloc_real_1D    ! for allocating 1D real    arrays
-      module procedure alloc_real_2D    ! for allocating 2D real    arrays
-      module procedure alloc_real_3D    ! for allocating 3D real    arrays
-      module procedure alloc_real_4D    ! for allocating 4D real    arrays
-      module procedure alloc_double_1D  ! for allocating 1D double  arrays
-      module procedure alloc_char_1D    ! for allocating 1D char.   arrays
-      module procedure alloc_char_2D    ! for allocating 2D char.   arrays
+      module procedure alloc_int_1D
+      module procedure alloc_int_2D
+      module procedure alloc_int_3D
+      module procedure alloc_int_4D
+      module procedure alloc_real_1D
+      module procedure alloc_real_2D
+      module procedure alloc_real_3D
+      module procedure alloc_real_4D
+      module procedure alloc_double_1D
+      module procedure alloc_char_1D
+      module procedure alloc_char_2D
    end interface
    contains
-! ----------------------------------------------------
-!     initialisation
-! ----------------------------------------------------
+
       subroutine init_alloc ( lun    , lunut  )
 
       integer(ip), intent(in   ) :: lun
@@ -47,9 +65,7 @@ module alloc_mod
 
       return
       end subroutine
-! ----------------------------------------------------
-!     wrap up
-! ----------------------------------------------------
+
       subroutine exit_alloc ( accu2 )
       integer(ip) accu2
       accu2 = accu
@@ -62,21 +78,16 @@ module alloc_mod
    10 format ( ' Grand total of all array space:       ',i11,' words or:',      &
                                     i3,'-GB ',i3,'-MB ',i3,'-KB ',i3,'-B.' )
       end subroutine
-!                               integer
-!                               real
-!                               character(256)
-! ----------------------------------------------------
-!     INTEGER ARRAYS
-! ----------------------------------------------------
+
       subroutine alloc_int_1D(name,arr,n1)
 
-      character(*), intent(in   )    :: name       !< array name
-      integer, dimension(:), pointer :: arr        !< array pointer
-      integer     , intent(in   )    :: n1         !< array size
-      integer                           knd        ! array kind
-      integer                        :: stat       ! return from allocate
-      integer     , pointer          :: wrk (:)    ! for resizing
-      integer                           increm     ! increment
+      character(*), intent(in   )    :: name
+      integer, dimension(:), pointer :: arr
+      integer     , intent(in   )    :: n1
+      integer                           knd
+      integer                        :: stat
+      integer     , pointer          :: wrk (:)
+      integer                           increm
 
       knd    = kind(arr)
       increm = knd * n1
@@ -104,18 +115,18 @@ module alloc_mod
       return
 
       end subroutine alloc_int_1D
-! ----------------------------------------------------
+
       subroutine alloc_int_2D(name,arr,n1,n2)
 
-      character(*), intent(in   )     :: name        !< array name
-      integer,                pointer :: arr   (:,:) !< array pointer
-      integer     , intent(in   )     :: n1, n2      !< array sizes
-      integer                            knd         ! array kind
-      integer                         :: stat        ! return from allocate
-      integer,                pointer :: wrk   (:,:) ! work array
-      integer                            first      !< resulting first dimension
-      integer                            secnd      !< resulting first dimension
-      integer                            increm     ! increment
+      character(*), intent(in   )     :: name
+      integer,                pointer :: arr   (:,:)
+      integer     , intent(in   )     :: n1, n2
+      integer                            knd
+      integer                         :: stat
+      integer,                pointer :: wrk   (:,:)
+      integer                            first
+      integer                            secnd
+      integer                            increm
 
       knd    = kind(arr)
       if ( associated(arr) ) then
@@ -149,14 +160,14 @@ module alloc_mod
       return
 
       end subroutine alloc_int_2D
-! ----------------------------------------------------
+
       subroutine alloc_int_3D(name,arr,n1,n2,n3)
 
-      character(*), intent(in   )    :: name          !< array name
-      integer,               pointer :: arr   (:,:,:) !< array pointer
-      integer     , intent(in   )    :: n1, n2, n3    !< array sizes
-      integer                           knd           ! array kind
-      integer                        :: stat          ! return from allocate
+      character(*), intent(in   )    :: name
+      integer,               pointer :: arr   (:,:,:)
+      integer     , intent(in   )    :: n1, n2, n3
+      integer                           knd
+      integer                        :: stat
 
       allocate ( arr(n1,n2,n3), stat=stat )
       if ( stat .eq. 0 .and. n1 .gt. 0 .and. n2 .gt. 0 .and. n3 .gt. 0 ) then
@@ -171,7 +182,7 @@ module alloc_mod
       return
 
       end subroutine alloc_int_3D
-! ----------------------------------------------------
+
       subroutine alloc_int_4D(arr,n1,n2,n3,n4)
       integer, dimension(:,:,:,:), pointer :: arr
       integer                              :: stat
@@ -182,18 +193,16 @@ module alloc_mod
       if (.not.alloc_ok) call alloc_error()
       return
       end subroutine alloc_int_4D
-! ----------------------------------------------------
-!     REAL ARRAYS
-! ----------------------------------------------------
+
       subroutine alloc_real_1D(name,arr,n1)
 
-      character(*), intent(in   ) :: name       !< array name
-      real        , pointer       :: arr  (:)   !< array pointer
-      integer     , intent(in   ) :: n1         !< array size
-      integer                        knd        ! array kind
-      integer                     :: stat       ! return from allocate
-      real        , pointer       :: wrk  (:)   ! work array
-      integer                        increm     ! increment
+      character(*), intent(in   ) :: name
+      real        , pointer       :: arr  (:)
+      integer     , intent(in   ) :: n1
+      integer                        knd
+      integer                     :: stat
+      real        , pointer       :: wrk  (:)
+      integer                        increm
 
       knd    = kind(arr)
       increm = knd * n1
@@ -221,14 +230,14 @@ module alloc_mod
       return
 
       end subroutine alloc_real_1D
-! ----------------------------------------------------
+
       subroutine alloc_double_1D(name,arr,n1)
 
-      character(*), intent(in   )    :: name       !< array name
-      real(dp),              pointer :: arr  (:)   !< array pointer
-      integer     , intent(in   )    :: n1         !< array size
-      integer                           knd        ! array kind
-      integer                        :: stat       ! return from allocate
+      character(*), intent(in   )    :: name
+      real(dp),              pointer :: arr  (:)
+      integer     , intent(in   )    :: n1
+      integer                           knd
+      integer                        :: stat
 
       allocate ( arr(n1), stat=stat )
       if ( stat .eq. 0 .and. n1 .gt. 0 ) then
@@ -243,18 +252,18 @@ module alloc_mod
       return
 
       end subroutine alloc_double_1D
-! ----------------------------------------------------
+
       subroutine alloc_real_2D(name,arr,n1,n2)
 
-      character( *), intent(in   )    :: name       !< array name
-      real     (sp), pointer          :: arr(:,:)   !< array pointer
-      integer      , intent(in   )    :: n1, n2     !< array sizes
-      integer                            knd        ! array kind
-      integer                         :: stat       ! return from allocate
-      real     (sp), pointer          :: wrk(:,:)   !< work arraoy pointer
-      integer                            first      !< resulting first dimension
-      integer                            secnd      !< resulting first dimension
-      integer                            increm     ! increment
+      character( *), intent(in   )    :: name
+      real     (sp), pointer          :: arr(:,:)
+      integer      , intent(in   )    :: n1, n2
+      integer                            knd
+      integer                         :: stat
+      real     (sp), pointer          :: wrk(:,:)
+      integer                            first
+      integer                            secnd
+      integer                            increm
 
       knd    = kind(arr)
       if ( associated(arr) ) then
@@ -287,19 +296,19 @@ module alloc_mod
       return
 
       end subroutine alloc_real_2D
-! ----------------------------------------------------
+
       subroutine alloc_real_3D(name,arr,n1,n2,n3)
 
-      character(*), intent(in   )     :: name         !< array name
-      real   ,                pointer :: arr(:,:,:)   !< array pointer
-      integer     , intent(in   )     :: n1, n2, n3   !< array sizes
-      integer                            knd          ! array kind
-      integer                         :: stat         ! return from allocate
-      real   ,                pointer :: wrk(:,:,:)   !< work array pointer
-      integer                            first      !< resulting first dimension
-      integer                            secnd      !< resulting secnd dimension
-      integer                            third      !< resulting third dimension
-      integer                            increm     ! increment
+      character(*), intent(in   )     :: name
+      real   ,                pointer :: arr(:,:,:)
+      integer     , intent(in   )     :: n1, n2, n3
+      integer                            knd
+      integer                         :: stat
+      real   ,                pointer :: wrk(:,:,:)
+      integer                            first
+      integer                            secnd
+      integer                            third
+      integer                            increm
 
       knd    = kind(arr)
       if ( associated(arr) ) then
@@ -335,14 +344,14 @@ module alloc_mod
       return
 
       end subroutine alloc_real_3D
-! ----------------------------------------------------
+
       subroutine alloc_real_4D(name,arr,n1,n2,n3,n4)
 
-      character(*), intent(in   )    :: name            !< array name
-      real   ,               pointer :: arr(:,:,:,:)    !< array pointer
-      integer     , intent(in   )    :: n1, n2, n3,n4   !< array sizes
-      integer                           knd             ! array kind
-      integer                        :: stat            ! return from allocate
+      character(*), intent(in   )    :: name
+      real   ,               pointer :: arr(:,:,:,:)
+      integer     , intent(in   )    :: n1, n2, n3,n4
+      integer                           knd
+      integer                        :: stat
 
       allocate ( arr(n1,n2,n3,n4), stat=stat )
       if ( stat .eq. 0 .and. n1 .gt. 0 .and. n2 .gt. 0 .and. n3 .gt. 0 .and. n4 .gt. 0 ) then
@@ -357,16 +366,14 @@ module alloc_mod
       return
 
       end subroutine alloc_real_4D
-! ----------------------------------------------------
-!     CHARACTER ARRAYS
-! ----------------------------------------------------
+
       subroutine alloc_char_1D(name,arr,n1)
 
-      character(*), intent(in   )    :: name       !< array name
-      character(*),          pointer :: arr  (:)   !< array pointer
-      integer     , intent(in   )    :: n1         !< array size
-      integer                           knd        ! array kind
-      integer                        :: stat       ! return from allocate
+      character(*), intent(in   )    :: name
+      character(*),          pointer :: arr  (:)
+      integer     , intent(in   )    :: n1
+      integer                           knd
+      integer                        :: stat
 
       allocate ( arr(n1), stat=stat )
       if ( stat .eq. 0 .and. n1 .gt. 0 ) then
@@ -381,7 +388,7 @@ module alloc_mod
       return
 
       end subroutine alloc_char_1D
-! ----------------------------------------------------
+
       subroutine alloc_char_2D(arr,n1,n2)
       character (len=*), dimension(:,:), pointer :: arr
       integer                                    :: stat
@@ -392,7 +399,7 @@ module alloc_mod
       if (.not.alloc_ok) call alloc_error()
       return
       end subroutine alloc_char_2D
-! ----------------------------------------------------
+
       subroutine alloc_error()
          write(lunrep,'(//a)') ' * Part Memory Error '
          write(lunrep,'(  a)') ' *    Could not allocate required memory'

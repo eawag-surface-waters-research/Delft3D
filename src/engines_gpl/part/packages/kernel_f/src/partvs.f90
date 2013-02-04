@@ -1,39 +1,47 @@
+!!  Copyright(C) Stichting Deltares, 2012-2013.
+!!
+!!  This program is free software: you can redistribute it and/or modify
+!!  it under the terms of the GNU General Public License version 3,
+!!  as published by the Free Software Foundation.
+!!
+!!  This program is distributed in the hope that it will be useful,
+!!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+!!  GNU General Public License for more details.
+!!
+!!  You should have received a copy of the GNU General Public License
+!!  along with this program. If not, see <http://www.gnu.org/licenses/>.
+!!
+!!  contact: delft3d.support@deltares.nl
+!!  Stichting Deltares
+!!  P.O. Box 177
+!!  2600 MH Delft, The Netherlands
+!!
+!!  All indications and logos of, and references to registered trademarks
+!!  of Stichting Deltares remain the property of Stichting Deltares. All
+!!  rights reserved.
+
+!!  Note: The "part" engine is not yet Open Source, but still under
+!!  development. This package serves as a temporary dummy interface for
+!!  the references in the "waq" engine to the "part" engine.
+
       subroutine partvs ( lun2   , itime  , nosubs , nopart , ivtset ,   &
                           ivtime , vsfour , vsfact , wpart  , wsettl )
 
-!       Deltares Software Centre
+      use precision
 
-!     System administration : Antoon Koster
+      implicit none
 
-!     Created      : June 1996      by Robert Vos
-
-!     Modified     : July 2011      by Leo Postma, cosmetic redesign and OMP paralellism
-!                    January 2013   by Michel Jeuken : created dummy 'part'-subroutine for 'waq' open source release
-
-!     logical unit numbers  : lun2  output report file
-
-!     subroutines called    : none.
-
-!     functions   called    : none.
-
-      use precision    ! single/double precision
-
-      implicit none    ! explicit typing
-
-!     Arguments
-
-!     kind            function         name                      description
-
-      integer  ( ip), intent(in   ) :: lun2                    !< unit of output report file
-      integer  ( ip), intent(in   ) :: itime                   !< actual time
-      integer  ( ip), intent(in   ) :: nosubs                  !< number of substances
-      integer  ( ip), intent(in   ) :: nopart                  !< number of particles
-      integer  ( ip), intent(in   ) :: ivtset                  !< number of time breakpoints
-      integer  ( ip), intent(in   ) :: ivtime(ivtset)          !< time breakpoint values settling velocities
-      real     ( rp), intent(in   ) :: vsfour(6,nosubs,ivtset) !< settling velocity parameters
-      real     ( rp)                :: vsfact(6,nosubs)        !< local work array
-      real     ( rp), intent(in   ) :: wpart (  nosubs,nopart) !< weight of substances per particle
-      real     ( rp), intent(  out) :: wsettl(         nopart) !< actual settling velocity per particle
+      integer  ( ip), intent(in   ) :: lun2
+      integer  ( ip), intent(in   ) :: itime
+      integer  ( ip), intent(in   ) :: nosubs
+      integer  ( ip), intent(in   ) :: nopart
+      integer  ( ip), intent(in   ) :: ivtset
+      integer  ( ip), intent(in   ) :: ivtime(ivtset)
+      real     ( rp), intent(in   ) :: vsfour(6,nosubs,ivtset)
+      real     ( rp)                :: vsfact(6,nosubs)
+      real     ( rp), intent(in   ) :: wpart (  nosubs,nopart)
+      real     ( rp), intent(  out) :: wsettl(         nopart)
 
       return
 

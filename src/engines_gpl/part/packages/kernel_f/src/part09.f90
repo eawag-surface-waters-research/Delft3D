@@ -1,5 +1,32 @@
+!!  Copyright(C) Stichting Deltares, 2012-2013.
+!!
+!!  This program is free software: you can redistribute it and/or modify
+!!  it under the terms of the GNU General Public License version 3,
+!!  as published by the Free Software Foundation.
+!!
+!!  This program is distributed in the hope that it will be useful,
+!!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+!!  GNU General Public License for more details.
+!!
+!!  You should have received a copy of the GNU General Public License
+!!  along with this program. If not, see <http://www.gnu.org/licenses/>.
+!!
+!!  contact: delft3d.support@deltares.nl
+!!  Stichting Deltares
+!!  P.O. Box 177
+!!  2600 MH Delft, The Netherlands
+!!
+!!  All indications and logos of, and references to registered trademarks
+!!  of Stichting Deltares remain the property of Stichting Deltares. All
+!!  rights reserved.
+
+!!  Note: The "part" engine is not yet Open Source, but still under
+!!  development. This package serves as a temporary dummy interface for
+!!  the references in the "waq" engine to the "part" engine.
+
 module part09_mod
-!
+
 contains
       subroutine part09 ( lun2   , itime  , nodye  , nwaste , mwaste ,  &
                           xwaste , ywaste , iwtime , amassd , aconc  ,  &
@@ -9,66 +36,45 @@ contains
                           layt   , tcktot , nplay  , kwaste , nolay  ,  &
                           modtyp , zwaste , track  , nmdyer , substi )
 
-!       Deltares Software Centre
-
-!     System administration : Antoon Koster
-
-!     Created               : February 1990 by Leo Postma
-
-!     Modified              : May      1996 by Robert Vos    : 3d version
-!                             January  2013 by Michel Jeuken : created dummy 'part'-subroutine for 'waq' open source release
-
-!     Note                  : none
-
-!     Logical unit numbers  : lun2 - output file to print statistics
-
-!     Subroutines called    : find - distributes particles over a circel
-
-!     functions   called    : rnd  - random number generator
-
-      use precision          ! single/double precision
+      use precision
 
       implicit none
 
-!     Arguments
-
-!     kind            function         name                    description
-
-      integer  ( ip), intent(in   ) :: nodye                 !< nr of dye release points
-      integer  ( ip), intent(in   ) :: nosubs                !< nr of substances
-      integer  ( ip), intent(in   ) :: layt                  !< number of hydr. layer
-      integer  ( ip), intent(in   ) :: itime                 !< actual time
-      integer  ( ip), intent(inout) :: iwtime (nodye)        !< array of wasteload times
-      integer  ( ip), intent(in   ) :: nwaste (nodye)        !< n-values of waste locations
-      integer  ( ip), intent(in   ) :: mwaste (nodye)        !< m-values of waste locations
-      real     ( rp), intent(in   ) :: xwaste (nodye)        !< x-values of waste locations
-      real     ( rp), intent(in   ) :: ywaste (nodye)        !< y-values of waste locations
-      real     ( rp), intent(in   ) :: zwaste (nodye)        !< z-values of waste locations
-      real     ( rp), intent(in   ) :: amassd (nosubs,nodye) !< total masses per dye release
-      real     ( rp), pointer       :: aconc  (:,:)          !< mass per particle
-      integer  ( ip), intent(  out) :: npart  (*)            !< n-values particles
-      integer  ( ip), intent(in   ) :: ndprt  (nodye)        !< no. particles per waste entry
-      integer  ( ip), intent(  out) :: mpart  (*)            !< m-values particles
-      real     ( rp), intent(  out) :: xpart  (*)            !< x-in-cell of particles
-      real     ( rp), intent(  out) :: ypart  (*)            !< y-in-cell of particles
-      real     ( rp), intent(  out) :: zpart  (*)            !< z-in-cell of particles
-      real     ( rp), intent(  out) :: wpart  (nosubs,*)     !< weight of the particles
-      integer  ( ip), intent(  out) :: iptime (*)            !< particle age
-      integer  ( ip), intent(inout) :: nopart                !< number of active particles
-      real     ( rp), intent(in   ) :: radius (nodye)        !< help var. radius (speed)
-      integer  ( ip), pointer       :: lgrid  (:,:)          !< grid numbering active
-      real     ( rp), pointer       :: dx     (:)            !< dx of the grid cells
-      real     ( rp), pointer       :: dy     (:)            !< dy of the grid cells
-      integer  ( ip), intent(in   ) :: modtyp                !< for model type 2 temperature
-      integer  ( ip), intent(in   ) :: lun2                  !< output report unit number
-      integer  ( ip), intent(  out) :: kpart  (*)            !< k-values particles
-      real     ( rp), intent(in   ) :: tcktot (layt)         !< thickness hydrod.layer
-      integer  ( ip)                :: nplay  (layt)         !< work array that could as well remain inside
-      integer  ( ip), intent(inout) :: kwaste (nodye)        !< k-values of dye points
-      integer  ( ip), intent(in   ) :: nolay                 !< number of comp. layer
-      real     ( rp), intent(inout) :: track  (8,*)          !< track array for all particles
-      character( 20), intent(in   ) :: nmdyer (nodye)        !< names of the dye loads
-      character( 20), intent(in   ) :: substi (nosubs)       !< names of the substances
+      integer  ( ip), intent(in   ) :: nodye
+      integer  ( ip), intent(in   ) :: nosubs
+      integer  ( ip), intent(in   ) :: layt
+      integer  ( ip), intent(in   ) :: itime
+      integer  ( ip), intent(inout) :: iwtime (nodye)
+      integer  ( ip), intent(in   ) :: nwaste (nodye)
+      integer  ( ip), intent(in   ) :: mwaste (nodye)
+      real     ( rp), intent(in   ) :: xwaste (nodye)
+      real     ( rp), intent(in   ) :: ywaste (nodye)
+      real     ( rp), intent(in   ) :: zwaste (nodye)
+      real     ( rp), intent(in   ) :: amassd (nosubs,nodye)
+      real     ( rp), pointer       :: aconc  (:,:)
+      integer  ( ip), intent(  out) :: npart  (*)
+      integer  ( ip), intent(in   ) :: ndprt  (nodye)
+      integer  ( ip), intent(  out) :: mpart  (*)
+      real     ( rp), intent(  out) :: xpart  (*)
+      real     ( rp), intent(  out) :: ypart  (*)
+      real     ( rp), intent(  out) :: zpart  (*)
+      real     ( rp), intent(  out) :: wpart  (nosubs,*)
+      integer  ( ip), intent(  out) :: iptime (*)
+      integer  ( ip), intent(inout) :: nopart
+      real     ( rp), intent(in   ) :: radius (nodye)
+      integer  ( ip), pointer       :: lgrid  (:,:)
+      real     ( rp), pointer       :: dx     (:)
+      real     ( rp), pointer       :: dy     (:)
+      integer  ( ip), intent(in   ) :: modtyp
+      integer  ( ip), intent(in   ) :: lun2
+      integer  ( ip), intent(  out) :: kpart  (*)
+      real     ( rp), intent(in   ) :: tcktot (layt)
+      integer  ( ip)                :: nplay  (layt)
+      integer  ( ip), intent(inout) :: kwaste (nodye)
+      integer  ( ip), intent(in   ) :: nolay
+      real     ( rp), intent(inout) :: track  (8,*)
+      character( 20), intent(in   ) :: nmdyer (nodye)
+      character( 20), intent(in   ) :: substi (nosubs)
 
       return
 

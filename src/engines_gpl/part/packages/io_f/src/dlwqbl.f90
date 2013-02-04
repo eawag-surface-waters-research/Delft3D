@@ -1,59 +1,56 @@
+!!  Copyright(C) Stichting Deltares, 2012-2013.
+!!
+!!  This program is free software: you can redistribute it and/or modify
+!!  it under the terms of the GNU General Public License version 3,
+!!  as published by the Free Software Foundation.
+!!
+!!  This program is distributed in the hope that it will be useful,
+!!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+!!  GNU General Public License for more details.
+!!
+!!  You should have received a copy of the GNU General Public License
+!!  along with this program. If not, see <http://www.gnu.org/licenses/>.
+!!
+!!  contact: delft3d.support@deltares.nl
+!!  Stichting Deltares
+!!  P.O. Box 177
+!!  2600 MH Delft, The Netherlands
+!!
+!!  All indications and logos of, and references to registered trademarks
+!!  of Stichting Deltares remain the property of Stichting Deltares. All
+!!  rights reserved.
+
+!!  Note: The "part" engine is not yet Open Source, but still under
+!!  development. This package serves as a temporary dummy interface for
+!!  the references in the "waq" engine to the "part" engine.
+
       subroutine dlwqbl ( lunin  , lunout , itime  , idtime , itime1 ,    &
      &                    itime2 , ihdel  , nftot  , nrtot  , array1 ,    &
      &                    result , ipnt   , luntxt , isflag , ifflag ,    &
      &                    update )
 
-!     Deltares Software Centre
-
-!>/File
-!>            Steps along in a dataset with blockwave property (flows)
-!>
-!>            This routine distinguishes from flwqtd that also supports
-!>            blockwaves in that it only needs one array.\n
-!>            Because of support of active-only files this have become
-!>            two arrays, would otherwise need 3 arrays.\n
-!>            The price paid is that:
-!>            - the series need to be equidistant
-!>            - the last record before rewind should contain only zeros
-!>            probably an additional array and use of dlwqtd would be simpler
-
-!     system administration : Antoon Koster
-
-!     created               : September 1996 by Robert Vos
-
-!     modified              : June      2011 by Leo Postma : support for active only hydrodynamics
-!                             January   2013 by Michel Jeuken : created dummy 'part'-subroutine for 'waq' open source release
-
-!     logical unitnumbers   : lunin  - input unit number hydrodynamic file
-!                             lunout - monitor file
-
-!     subroutines called    : srstop   , stops execution
-
-      use precision         ! single/double precision
+      use precision
       use timers
 
       implicit none
 
-!     Arguments           :
-
-!     kind           function         name               description
-
-      integer  (ip), intent(in   ) :: lunin            !< unit number intermediate file
-      integer  (ip), intent(in   ) :: lunout           !< unit number report file
-      integer  (ip), intent(in   ) :: itime            !< current time in the model
-      integer  (ip), intent(inout) :: idtime           !< time offset: > 0 after rewind
-      integer  (ip), intent(inout) :: itime1           !< lower time in file
-      integer  (ip), intent(inout) :: itime2           !< higher time in file
-      integer  (ip), intent(in   ) :: ihdel            !< time step size in file
-      integer  (ip), intent(in   ) :: nftot            !< array size in the file
-      integer  (ip), intent(in   ) :: nrtot            !< array size to be delivered
-      real     (sp), intent(inout) :: array1(nftot)    !< record at lower time in file
-      real     (sp), intent(inout) :: result(nrtot)    !< record as delivered to Delpar
-      integer  (ip), intent(in   ) :: ipnt  (nftot)    !< pointer from nftot to nrtot
-      character( *), intent(in   ) :: luntxt           !< text with this unit number
-      integer  (ip), intent(in   ) :: isflag           !< if 1 then 'dddhhmmss' format
-      integer  (ip), intent(in   ) :: ifflag           !< if 1 then this is first invokation
-      logical      , intent(  out) :: update           !< true if record is updated
+      integer  (ip), intent(in   ) :: lunin
+      integer  (ip), intent(in   ) :: lunout
+      integer  (ip), intent(in   ) :: itime
+      integer  (ip), intent(inout) :: idtime
+      integer  (ip), intent(inout) :: itime1
+      integer  (ip), intent(inout) :: itime2
+      integer  (ip), intent(in   ) :: ihdel
+      integer  (ip), intent(in   ) :: nftot
+      integer  (ip), intent(in   ) :: nrtot
+      real     (sp), intent(inout) :: array1(nftot)
+      real     (sp), intent(inout) :: result(nrtot)
+      integer  (ip), intent(in   ) :: ipnt  (nftot)
+      character( *), intent(in   ) :: luntxt
+      integer  (ip), intent(in   ) :: isflag
+      integer  (ip), intent(in   ) :: ifflag
+      logical      , intent(  out) :: update
 
       return
 

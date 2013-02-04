@@ -1,78 +1,53 @@
+!!  Copyright(C) Stichting Deltares, 2012-2013.
+!!
+!!  This program is free software: you can redistribute it and/or modify
+!!  it under the terms of the GNU General Public License version 3,
+!!  as published by the Free Software Foundation.
+!!
+!!  This program is distributed in the hope that it will be useful,
+!!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+!!  GNU General Public License for more details.
+!!
+!!  You should have received a copy of the GNU General Public License
+!!  along with this program. If not, see <http://www.gnu.org/licenses/>.
+!!
+!!  contact: delft3d.support@deltares.nl
+!!  Stichting Deltares
+!!  P.O. Box 177
+!!  2600 MH Delft, The Netherlands
+!!
+!!  All indications and logos of, and references to registered trademarks
+!!  of Stichting Deltares remain the property of Stichting Deltares. All
+!!  rights reserved.
+
+!!  Note: The "part" engine is not yet Open Source, but still under
+!!  development. This package serves as a temporary dummy interface for
+!!  the references in the "waq" engine to the "part" engine.
+
 module openfl_mod
-!
-!  module declarations
-!
-!
-!  data definition module(s)
-!
-use precision              ! single and double precision
+
+use precision
       use timers
-!
-!  module procedure(s)
-!
-use delete_file_mod        ! explicit interface
-!
-implicit none              ! force explicit typing
-!
+
+use delete_file_mod
+
+implicit none
+
 contains
       subroutine openfl ( lun, finam, ftype, iopt)
-!
-!
-!     Deltares (former: Deltares)
-!
-!     version: 2.40      : windows 95 version
-!
-!     created            : oktober '95  by  robert vos
-!
-!     modified           : november '97 by robert vos
-!                          delete file first when iopt = 1
-!                          for iopt=0 file is 'old'
-!
-!     subroutines called : delete_file
-!                          srstop
-!
-!     function           : open file dependent on ftype
-!
-!     note               : possible types
-!                          'unformatted' (all platforms)
-!                          'transparent' (pc lahey     )
-!                          'binary'      (pc microsoft )
-!
-!*********************************************************************
-!     system dependent routine
-!     configuration
-!
-!     unix systems
-!*********************************************************************
-!
-!     logical units      : -
-!
-!     parameters    :
-!
-!     name    kind       length      funct.  description
-!     ---------------------------------------------------------
-!     finam   character*80 1         input   file name
-!     ftype   character*20 1         input   file type
-!     ierror  integer      1         local   error in delete_file
-!     iopt    integer      1         input   if 1 delete existing file
-!                                            with same name
-!     lun     integer      1         input   unit number file
-!     ---------------------------------------------------------
-!
+
       implicit none
 
       character(len=20)  :: ftype
       character(len=256) :: finam
-!
-!     local scalars
-!
+
       integer(ip) :: iopt, ierror
       integer(ip) :: lun
-      integer(4) ithndl              ! handle to time this subroutine
+      integer(4) ithndl
       data       ithndl / 0 /
       if ( timon ) call timstrt( "openfl", ithndl )
 
-!
       select case ( iopt )
          case ( 1 )
             call delete_file ( finam, ierror )
@@ -111,7 +86,7 @@ contains
                call error(' filetype not known by openfl ')
             endif
       end select
-!
+
       if ( timon ) call timstop ( ithndl )
       return
 
@@ -119,12 +94,12 @@ contains
       lun = 0
       if ( timon ) call timstop ( ithndl )
       return
-!
+
  99   write(*,'(//a,a40)') ' Error on opening file: ',finam
       write(*,'(  a,a  )') ' Expected file type   : ',ftype
       write(*,'(  a    )') ' Please check if file exists'
       write(*,'(  a    )') ' Please check correct file type'
       call srstop(1)
-!
+
       end subroutine
 end module

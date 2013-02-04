@@ -1,17 +1,38 @@
+!!  Copyright(C) Stichting Deltares, 2012-2013.
+!!
+!!  This program is free software: you can redistribute it and/or modify
+!!  it under the terms of the GNU General Public License version 3,
+!!  as published by the Free Software Foundation.
+!!
+!!  This program is distributed in the hope that it will be useful,
+!!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+!!  GNU General Public License for more details.
+!!
+!!  You should have received a copy of the GNU General Public License
+!!  along with this program. If not, see <http://www.gnu.org/licenses/>.
+!!
+!!  contact: delft3d.support@deltares.nl
+!!  Stichting Deltares
+!!  P.O. Box 177
+!!  2600 MH Delft, The Netherlands
+!!
+!!  All indications and logos of, and references to registered trademarks
+!!  of Stichting Deltares remain the property of Stichting Deltares. All
+!!  rights reserved.
+
+!!  Note: The "part" engine is not yet Open Source, but still under
+!!  development. This package serves as a temporary dummy interface for
+!!  the references in the "waq" engine to the "part" engine.
+
 module part21_mod
-!
-!  module declarations
-!
-!  data definition module(s)
-!
-use precision           ! single/double precision
-!
-!  module procedure(s)
-!
+
+use precision
+
 use typos
-!
-implicit none           ! force explicit typing
-!
+
+implicit none
+
 contains
       subroutine part21 ( lun2   , lgrid  , lgrid2 , xb     , yb     , &
                           area   , volume , nmax   , mmax   , nolay  , &
@@ -21,38 +42,15 @@ contains
                           atotal , apeak  , adepth , imap   , nplay  , &
                           wsettl , irfac  , anfac  , lsettl , locdep , &
                           tcktot , dps   )
-!
-!
-!     CALCULATES (CONC. DEPENDENT) SETTING VELOCITIES
-!                     (per time step)
-!
-!     created       : december 2000, by l. postma
-!
-!     modified      : june 2001 : by antoon koster
-!                     settling out (set w=0 in bottom layer) only
-!                     if sed-erosion process active
-!                     January  2013 by Michel Jeuken : created dummy 'part'-subroutine for 'waq' open source release
-!
-!     note          : just the grid is produced, no file is written
-!                     no checking on timings is conducted
-!
-!     logical unit numbers  : lun2 - output log file
-!
-!
-!     declarations
-!
-      type(PlotGrid)                   pg    !< plot grid information
+
+      type(PlotGrid)                   pg
       logical :: lsettl
-!
-!     integer arrays
-!
+
       integer(ip),dimension(:)        :: npart , mpart , kpart
       integer(ip),dimension(:)        :: nplay
       integer(ip),dimension(:,:)      :: imap
       integer(ip),dimension(:,:)      :: lgrid , lgrid2
-!
-!     real arrays
-!
+
       real   (sp),dimension(:)        :: dps
       real   (sp),dimension(:)        :: tcktot
       real   (sp),dimension(:)        :: volume
@@ -65,13 +63,11 @@ contains
       real   (sp),dimension(:,:)      :: locdep
       real   (sp),dimension(:,:)      :: wpart
       real   (sp),dimension(:,:,:,:)  :: amap
-!
-!     local scalars
-!
+
       integer(ip) ::  lun2
       integer(ip) ::  irfac , mmax
       integer(ip) ::  npwndw , nmax   , nolay  , nopart , nosubs
-!
+
       real   (sp) ::  anfac
       return
 

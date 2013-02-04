@@ -1,13 +1,36 @@
+!!  Copyright(C) Stichting Deltares, 2012-2013.
+!!
+!!  This program is free software: you can redistribute it and/or modify
+!!  it under the terms of the GNU General Public License version 3,
+!!  as published by the Free Software Foundation.
+!!
+!!  This program is distributed in the hope that it will be useful,
+!!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+!!  GNU General Public License for more details.
+!!
+!!  You should have received a copy of the GNU General Public License
+!!  along with this program. If not, see <http://www.gnu.org/licenses/>.
+!!
+!!  contact: delft3d.support@deltares.nl
+!!  Stichting Deltares
+!!  P.O. Box 177
+!!  2600 MH Delft, The Netherlands
+!!
+!!  All indications and logos of, and references to registered trademarks
+!!  of Stichting Deltares remain the property of Stichting Deltares. All
+!!  rights reserved.
+
+!!  Note: The "part" engine is not yet Open Source, but still under
+!!  development. This package serves as a temporary dummy interface for
+!!  the references in the "waq" engine to the "part" engine.
+
 module part18_mod
-!
-!  module declarations
-!
-!  data definition module(s)
-!
-use precision               ! single/double precision
-!
-implicit none               ! force explicit typing
-!
+
+use precision
+
+implicit none
+
 contains
       subroutine part18 ( lgrid  , velo   , conc   , flres  , volume , &
                           area   , mnmaxk , npart  , mpart  , wpart  , &
@@ -15,56 +38,23 @@ contains
                           vdiff  , pblay  , ptlay  , const  , nocons , &
                           lun2   , nosubs , layt   , kpart  , icvdf  , &
                           wvelo  , alpha  , nosubc , icvdf2    )
-!
-!
-!                   Deltares (former: Deltares)
-!
-!                        d e l p a r    v3.30
-!
-!
-!     system administration : r.j. vos
-!
-!
-!     created               : january 1991, by a. markus
-!
-!
-!     modified              : cleared may 1996, 3d version
-!                             26/7/1996:
-!                             v3.12: delwaq map is standard for conc-array
-!                             v3.20: recalculates dispersion without depth-aver.
-!                             11/10/1996: corrected for error in 3d version
-!                                         (icvdf2 = icvdf + nosubs)
-!                                         (lead. dim of conc array is nosubc)
-!                             v3.30: icvdf2 as argument
-!                             January  2013 by Michel Jeuken : created dummy 'part'-subroutine for 'waq' open source release
-!
-!     function              : calculates the exchange between the
-!                             two layers and exchanges the particles
-!                             as part of the 3d version
-!
-!
-!     dimensioning
-!
+
       integer(ip),dimension(:)    :: npart , mpart , kpart
       integer(ip),dimension(:,:)  :: lgrid
-!
-!     dimensioning
-!
+
       real   (sp),dimension(:)    :: vdiff , velo  , volume , area , const , zpart
       real   (dp),dimension(:)    :: wvelo
       real   (sp),dimension(:,:)  :: conc
       real   (sp),dimension(:,:)  :: flres
       real   (sp),dimension(:,:)  :: wpart
-!
-!     local scalars
-!
+
       integer(ip) ::  icvdf  , icvdf2 , idelt , layt  , lun2
       integer(ip) ::  mnmaxk, nocons, nolay , nopart
       integer(ip) ::  nosubc, nosubs, npwndw
       real   (sp) ::  alpha , pblay  , ptlay
 
       return
-!
+
       end subroutine
 end module
 

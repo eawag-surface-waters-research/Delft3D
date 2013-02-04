@@ -1,38 +1,40 @@
+!!  Copyright(C) Stichting Deltares, 2012-2013.
+!!
+!!  This program is free software: you can redistribute it and/or modify
+!!  it under the terms of the GNU General Public License version 3,
+!!  as published by the Free Software Foundation.
+!!
+!!  This program is distributed in the hope that it will be useful,
+!!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+!!  GNU General Public License for more details.
+!!
+!!  You should have received a copy of the GNU General Public License
+!!  along with this program. If not, see <http://www.gnu.org/licenses/>.
+!!
+!!  contact: delft3d.support@deltares.nl
+!!  Stichting Deltares
+!!  P.O. Box 177
+!!  2600 MH Delft, The Netherlands
+!!
+!!  All indications and logos of, and references to registered trademarks
+!!  of Stichting Deltares remain the property of Stichting Deltares. All
+!!  rights reserved.
+
+!!  Note: The "part" engine is not yet Open Source, but still under
+!!  development. This package serves as a temporary dummy interface for
+!!  the references in the "waq" engine to the "part" engine.
+
       subroutine rdlgri ( nfiles , lunit  , fname  , ftype   )
 
-!     Deltares Software Centre
+      use precision
 
-!     system administration : Antoon Koster
+      implicit none
 
-!     created               : February 1990 by Leo Postma
-
-!     modified              : June     2011 by Leo Postma: pointers from noseg and noq added
-!                                                          to support active only hydrodynamic files
-!                             October  2011 by Leo Postma: support Domain Decomposition
-!                             January  2013 by Michel Jeuken : created dummy 'part'-subroutine for 'waq' open source release
-
-!     logical unit numbers  : lunit( 1), the delpar input file
-!                             lunit( 2), output report file
-!                             lunit( 3), active grid table
-!                             lunit( 4), total grid table
-!                             lunit(19), from-to pointer table
-
-!     subroutines called    : srstop   - ends the simulation with return code
-
-!     functions   called    : none.
-
-      use precision               ! single and double precision
-
-      implicit none               ! force explicit typing
-
-!     Arguments
-
-!     kind           function         name                 description
-
-      integer  ( ip), intent(in   ) :: nfiles            !< nr. of files
-      integer  ( ip), intent(inout) :: lunit(nfiles)     !< unit nrs of all files
-      character(256), intent(inout) :: fname(nfiles)     !< file names of all files
-      character( 20), intent(inout) :: ftype(2)          !< 'binary'
+      integer  ( ip), intent(in   ) :: nfiles
+      integer  ( ip), intent(inout) :: lunit(nfiles)
+      character(256), intent(inout) :: fname(nfiles)
+      character( 20), intent(inout) :: ftype(2)
 
       return
 

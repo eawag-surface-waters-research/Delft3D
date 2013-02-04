@@ -1,15 +1,37 @@
+!!  Copyright(C) Stichting Deltares, 2012-2013.
+!!
+!!  This program is free software: you can redistribute it and/or modify
+!!  it under the terms of the GNU General Public License version 3,
+!!  as published by the Free Software Foundation.
+!!
+!!  This program is distributed in the hope that it will be useful,
+!!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+!!  GNU General Public License for more details.
+!!
+!!  You should have received a copy of the GNU General Public License
+!!  along with this program. If not, see <http://www.gnu.org/licenses/>.
+!!
+!!  contact: delft3d.support@deltares.nl
+!!  Stichting Deltares
+!!  P.O. Box 177
+!!  2600 MH Delft, The Netherlands
+!!
+!!  All indications and logos of, and references to registered trademarks
+!!  of Stichting Deltares remain the property of Stichting Deltares. All
+!!  rights reserved.
+
+!!  Note: The "part" engine is not yet Open Source, but still under
+!!  development. This package serves as a temporary dummy interface for
+!!  the references in the "waq" engine to the "part" engine.
+
 module parths_mod
-!
-!  module declarations
-!
-!
-!  data definition module(s)
-!
-use precision            ! single and double precision
+
+use precision
 use typos
-!
-implicit none            ! force explicit typing
-!
+
+implicit none
+
 contains
       subroutine parths(lun1     , lun2     , title    , subst    , mmax     ,  &
                         lgrid2   , nmax     , volume   , area     , npart    ,  &
@@ -23,41 +45,16 @@ contains
                         mnmax2   , nfract   , lsettl   , mstick   , elt_names,  &
                         elt_types, elt_dims , elt_bytes, rbuffr   , zpart    ,  &
                         za       , locdep   , dps      , tcktot   , lgrid3   )
-!
-!     WRITING HISTORY FILE (*.his)
-!            (per time step)
-!
-!     system administration : r.j. vos
-!
-!     created               : january  1993, by r.j. vos
-!
-!     modified              : cleared may 1996, now 3d
-!                             20/11/96 restored error in amap (ippl and not ipos)
-!                                      amap should be intialized with nosubt
-!                             contains openfl
-!                             july 1998: for settling substances also
-!                                        also correction for floating oil
-!                             sept 1998: also for sticking material
-!                                        corrected normalization for oil
-!                             apr  1998: vs 3.60: version for release of 1 jun
-!                             jan  2013 by Michel Jeuken : created dummy 'part'-subroutine for 'waq' open source release
-!
-!
-!     declarations
-!
-      type(PlotGrid)                   pg                     !< first plot grid information
+
+      type(PlotGrid)                   pg
       character(len=*), pointer, dimension(:) :: nmstat
       character(len=*), pointer, dimension(:) :: subst
-      character( 40), intent(in   ) :: title (4)              !< model titles
+      character( 40), intent(in   ) :: title (4)
       character(len=256)                      :: finam
       logical                                 :: lsettl
-!
-!     declare putget help var's
-!
-!     dimensioning
-!
+
       character(len=16), pointer, dimension(:) ::  elt_names, elt_types
-!
+
       integer(ip), pointer, dimension(:)       :: ihplot
       integer(ip), pointer, dimension(:)       :: nplsta, mplsta
       integer(ip), pointer, dimension(:)       :: nstat , mstat
@@ -79,9 +76,6 @@ contains
       real   (sp), pointer, dimension(:)       :: dps
       real   (sp), pointer, dimension(:)       :: rbuffr
 
-!
-!     local scalars
-!
       integer(ip) :: idelt     ,ihstep    ,ihstop
       integer(ip) :: lun1      ,lun2      ,mmax
       integer(ip) :: mnmax2    ,modtyp    ,nfract    ,ihstrt
@@ -89,6 +83,6 @@ contains
       integer(ip) :: nosubs    ,npwndw    ,itime     ,nosta
       real   (sp) :: pblay
       return
-!
+
       end subroutine
 end module

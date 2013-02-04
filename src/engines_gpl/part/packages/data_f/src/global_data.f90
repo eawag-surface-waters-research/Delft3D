@@ -1,10 +1,33 @@
+!!  Copyright(C) Stichting Deltares, 2012-2013.
+!!
+!!  This program is free software: you can redistribute it and/or modify
+!!  it under the terms of the GNU General Public License version 3,
+!!  as published by the Free Software Foundation.
+!!
+!!  This program is distributed in the hope that it will be useful,
+!!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+!!  GNU General Public License for more details.
+!!
+!!  You should have received a copy of the GNU General Public License
+!!  along with this program. If not, see <http://www.gnu.org/licenses/>.
+!!
+!!  contact: delft3d.support@deltares.nl
+!!  Stichting Deltares
+!!  P.O. Box 177
+!!  2600 MH Delft, The Netherlands
+!!
+!!  All indications and logos of, and references to registered trademarks
+!!  of Stichting Deltares remain the property of Stichting Deltares. All
+!!  rights reserved.
+
+!!  Note: The "part" engine is not yet Open Source, but still under
+!!  development. This package serves as a temporary dummy interface for
+!!  the references in the "waq" engine to the "part" engine.
+
 module global_pointers
 
-!     Declarations for global pointer arrays
-
-      use precision      ! single and double precision
-
-!     Global character arrays
+      use precision
 
       character     (len=16   ) ,  pointer, dimension(:       ) :: elt_names
       character     (len=16   ) ,  pointer, dimension(:       ) :: elt_types
@@ -18,10 +41,6 @@ module global_pointers
       character     (len=20   ) ,  pointer, dimension(:       ) :: subsud
       character     (len=40   ) ,  pointer, dimension(:       ) :: title
       character     (len=256  ) ,  pointer, dimension(:       ) :: finud
-
-!     Global integer arrays
-
-!     1D integer arrays
 
       integer       (sp       ) ,  pointer, dimension(:       ) :: floil
       integer       (sp       ) ,  pointer, dimension(:       ) :: ictmax
@@ -66,8 +85,6 @@ module global_pointers
       integer       (sp       ) ,  pointer, dimension(:       ) :: cellpnt
       integer       (sp       ) ,  pointer, dimension(:       ) :: flowpnt
 
-!     2D integer arrays
-
       integer       (sp       ) ,  pointer, dimension(:,:     ) :: elt_dims
       integer       (sp       ) ,  pointer, dimension(:,:     ) :: ibuff
       integer       (sp       ) ,  pointer, dimension(:,:     ) :: ictime
@@ -79,13 +96,7 @@ module global_pointers
       integer       (sp       ) ,  pointer, dimension(:,:     ) :: mcell
       integer       (sp       ) ,  pointer, dimension(:,:     ) :: ncell
 
-!     3D integer array
-
       integer       (sp       ) ,  pointer, dimension(:,:,:   ) :: nbin
-
-!     Global real arrays
-
-!     1D real arrays
 
       real          (sp       ) ,  pointer, dimension(:       ) :: abuoy
       real          (sp       ) ,  pointer, dimension(:       ) :: acf
@@ -120,7 +131,7 @@ module global_pointers
       real          (sp       ) ,  pointer, dimension(:       ) :: volume
       real          (sp       ) ,  pointer, dimension(:       ) :: wdira
       real          (sp       ) ,  pointer, dimension(:       ) :: window
-      real          (dp       ) ,  pointer, dimension(:       ) :: wevap      ! double precision
+      real          (dp       ) ,  pointer, dimension(:       ) :: wevap
       real          (sp       ) ,  pointer, dimension(:       ) :: wparm
       real          (sp       ) ,  pointer, dimension(:       ) :: wsettl
       real          (sp       ) ,  pointer, dimension(:       ) :: wveloa
@@ -144,8 +155,6 @@ module global_pointers
       real          (sp       ) ,  pointer, dimension(:       ) :: zlevel
       real          (sp       ) ,  pointer, dimension(:       ) :: zpart
       real          (sp       ) ,  pointer, dimension(:       ) :: zwaste
-
-!     2D real arrays
 
       real          (sp       ) ,  pointer, dimension(:,:     ) :: aconc
       real          (sp       ) ,  pointer, dimension(:,:     ) :: aconud
@@ -179,15 +188,11 @@ module global_pointers
       real          (sp       ) ,  pointer, dimension(:,:     ) :: wpart
       real          (sp       ) ,  pointer, dimension(:,:     ) :: xyztrk
 
-!     3D real arrays
-
       real          (sp       ) ,  pointer, dimension(:,:,:   ) :: amassc
       real          (sp       ) ,  pointer, dimension(:,:,:   ) :: atrack
       real          (sp       ) ,  pointer, dimension(:,:,:   ) :: chismp
       real          (sp       ) ,  pointer, dimension(:,:,:   ) :: chispl
       real          (sp       ) ,  pointer, dimension(:,:,:   ) :: vsfour
-
-!     4D real arrays
 
       real          (sp       ) ,  pointer, dimension(:,:,:,: ) :: amap
       real          (sp       ) ,  pointer, dimension(:,:,:,: ) :: amapsett

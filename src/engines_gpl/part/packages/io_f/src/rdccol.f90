@@ -1,38 +1,44 @@
+!!  Copyright(C) Stichting Deltares, 2012-2013.
+!!
+!!  This program is free software: you can redistribute it and/or modify
+!!  it under the terms of the GNU General Public License version 3,
+!!  as published by the Free Software Foundation.
+!!
+!!  This program is distributed in the hope that it will be useful,
+!!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+!!  GNU General Public License for more details.
+!!
+!!  You should have received a copy of the GNU General Public License
+!!  along with this program. If not, see <http://www.gnu.org/licenses/>.
+!!
+!!  contact: delft3d.support@deltares.nl
+!!  Stichting Deltares
+!!  P.O. Box 177
+!!  2600 MH Delft, The Netherlands
+!!
+!!  All indications and logos of, and references to registered trademarks
+!!  of Stichting Deltares remain the property of Stichting Deltares. All
+!!  rights reserved.
+
+!!  Note: The "part" engine is not yet Open Source, but still under
+!!  development. This package serves as a temporary dummy interface for
+!!  the references in the "waq" engine to the "part" engine.
+
       subroutine rdccol ( nmax   , mmax   , lun    , fnam   , ftype  ,  &
                           lgrid  , xbott  , ybott  , lun2   )
 
-!     READING CURVILINEAR CCO FILE
-!          (initially)
+      use precision
 
-!     system administration : m. zeeuw
-
-
-!     created               : juli 1989, by m.e. sileon
-
-
-
-!     modified              : june 1993, by m. zeeuw
-!                             - implemented error numbers
-!                             nov 1997: uses openfl
-!                             dec 1997: read also layt form first record!!
-!                                       and 9 times xdummy
-!                             january 2013 by Michel Jeuken : created dummy 'part'-subroutine for 'waq' open source release
-
-      use precision      ! single and double precision
-
-!     parameters
-
-!     kind           function         name                Descriptipon
-
-      integer  (ip), intent(in   ) :: nmax              !< first dimension of the grid
-      integer  (ip), intent(in   ) :: mmax              !< second dimension of the grid
-      integer  (ip), intent(in   ) :: lun               !< unit number cco file
-      character( *), intent(in   ) :: fnam              !< name of cco file
-      character( *), intent(in   ) :: ftype(*)          !< type of cco file
-      integer  (ip), intent(in   ) :: lgrid(nmax,mmax)  !< grid table
-      real     (sp), intent(  out) :: xbott(*)          !< x-values in the grid
-      real     (sp), intent(  out) :: ybott(*)          !< y-values in the grid
-      integer  (ip), intent(in   ) :: lun2              !< unit number log-file
+      integer  (ip), intent(in   ) :: nmax
+      integer  (ip), intent(in   ) :: mmax
+      integer  (ip), intent(in   ) :: lun
+      character( *), intent(in   ) :: fnam
+      character( *), intent(in   ) :: ftype(*)
+      integer  (ip), intent(in   ) :: lgrid(nmax,mmax)
+      real     (sp), intent(  out) :: xbott(*)
+      real     (sp), intent(  out) :: ybott(*)
+      integer  (ip), intent(in   ) :: lun2
 
       return
 

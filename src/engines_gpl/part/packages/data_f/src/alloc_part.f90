@@ -1,42 +1,55 @@
+!!  Copyright(C) Stichting Deltares, 2012-2013.
+!!
+!!  This program is free software: you can redistribute it and/or modify
+!!  it under the terms of the GNU General Public License version 3,
+!!  as published by the Free Software Foundation.
+!!
+!!  This program is distributed in the hope that it will be useful,
+!!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+!!  GNU General Public License for more details.
+!!
+!!  You should have received a copy of the GNU General Public License
+!!  along with this program. If not, see <http://www.gnu.org/licenses/>.
+!!
+!!  contact: delft3d.support@deltares.nl
+!!  Stichting Deltares
+!!  P.O. Box 177
+!!  2600 MH Delft, The Netherlands
+!!
+!!  All indications and logos of, and references to registered trademarks
+!!  of Stichting Deltares remain the property of Stichting Deltares. All
+!!  rights reserved.
+
+!!  Note: The "part" engine is not yet Open Source, but still under
+!!  development. This package serves as a temporary dummy interface for
+!!  the references in the "waq" engine to the "part" engine.
+
 module alloc_part_mod
-!
-!  module declarations
-!
-use global_pointers  ! global data pointers
-!
-!  data definition module(s)
-!
-use modeldim         ! model(array) dimensions
-use precision        ! single and double precision
+
+use global_pointers
+
+use modeldim
+use precision
       use timers
 
-use alloc_mod        ! generic module for memory allocation, including error handling
-!
-implicit none        ! force explicit typing
-!
+use alloc_mod
+
+implicit none
+
 contains
       subroutine alloc_part()
-!
-!
-!     ALLOCATES ALL GLOBAL ARRAYS
-!           (initially)
-!
-!     created               : july 2008, by antoon koster
-!
-!
 
       implicit none
 
-!     pointer declarations
-!
       integer(ip),   parameter  :: nfracmx=4
-!
+
       type(model_dimensions_), pointer :: dim
-      integer(4) ithndl              ! handle to time this subroutine
+      integer(4) ithndl
       data       ithndl / 0 /
       if ( timon ) call timstrt( "alloc_part", ithndl )
       dim => model_dimensions
-!
+
       call alloc(abuoy     ,dim%no_particles                         )
       call alloc(acf       ,dim%no_cont_releases                     )
       call alloc(aconc     ,dim%no_total_releases ,                  &
@@ -250,7 +263,6 @@ contains
       call alloc(zpart     ,dim%no_particles                         )
       call alloc(zwaste    ,dim%no_total_releases                    )
 
-!
       if ( timon ) call timstop ( ithndl )
       return
       end subroutine alloc_part

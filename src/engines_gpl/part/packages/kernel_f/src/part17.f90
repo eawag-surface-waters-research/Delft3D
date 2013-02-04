@@ -1,37 +1,44 @@
+!!  Copyright(C) Stichting Deltares, 2012-2013.
+!!
+!!  This program is free software: you can redistribute it and/or modify
+!!  it under the terms of the GNU General Public License version 3,
+!!  as published by the Free Software Foundation.
+!!
+!!  This program is distributed in the hope that it will be useful,
+!!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+!!  GNU General Public License for more details.
+!!
+!!  You should have received a copy of the GNU General Public License
+!!  along with this program. If not, see <http://www.gnu.org/licenses/>.
+!!
+!!  contact: delft3d.support@deltares.nl
+!!  Stichting Deltares
+!!  P.O. Box 177
+!!  2600 MH Delft, The Netherlands
+!!
+!!  All indications and logos of, and references to registered trademarks
+!!  of Stichting Deltares remain the property of Stichting Deltares. All
+!!  rights reserved.
+
+!!  Note: The "part" engine is not yet Open Source, but still under
+!!  development. This package serves as a temporary dummy interface for
+!!  the references in the "waq" engine to the "part" engine.
+
       subroutine part17 ( itime  , nosubs , idtset , idtime , decay  ,          &
                           decays )
 
-!       Deltares Software Centre
+      use precision
 
-!     system administration : Antoon Koster
+      implicit none
 
-!     Created               : February  1990 by Leo Postma
-
-!     Modified              : July      1992 by Robert Vos : nosubs substances
-!                             July      2011 by Leo Postma : cosmetics
-!                             January   2013 by Michel Jeuken : created dummy 'part'-subroutine for 'waq' open source release
-
-!     Subroutines called    : none
-
-!     Functions called      : none
-
-!     Logical units         : none
-
-      use precision    ! single/double precision
-
-      implicit none    ! explicit typing
-
-!     Arguments
-
-!     kind            function         name                    description
-
-      integer  ( ip), intent(in   ) :: itime                 !< actual time
-      integer  ( ip), intent(in   ) :: nosubs                !< number of substances
-      integer  ( ip), intent(in   ) :: idtset                !< number of time breakpoints
-      integer  ( ip), intent(in   ) :: idtime(idtset)        !< time breakpoint values
-      real     ( rp), intent(in   ) :: decay (nosubs,idtset) !< time series of decay factors
-      real     ( rp), intent(  out) :: decays(nosubs)        !< interpolated decay factors
+      integer  ( ip), intent(in   ) :: itime
+      integer  ( ip), intent(in   ) :: nosubs
+      integer  ( ip), intent(in   ) :: idtset
+      integer  ( ip), intent(in   ) :: idtime(idtset)
+      real     ( rp), intent(in   ) :: decay (nosubs,idtset)
+      real     ( rp), intent(  out) :: decays(nosubs)
 
       return
-!
+
       end subroutine

@@ -1,63 +1,84 @@
+!!  Copyright(C) Stichting Deltares, 2012-2013.
+!!
+!!  This program is free software: you can redistribute it and/or modify
+!!  it under the terms of the GNU General Public License version 3,
+!!  as published by the Free Software Foundation.
+!!
+!!  This program is distributed in the hope that it will be useful,
+!!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+!!  GNU General Public License for more details.
+!!
+!!  You should have received a copy of the GNU General Public License
+!!  along with this program. If not, see <http://www.gnu.org/licenses/>.
+!!
+!!  contact: delft3d.support@deltares.nl
+!!  Stichting Deltares
+!!  P.O. Box 177
+!!  2600 MH Delft, The Netherlands
+!!
+!!  All indications and logos of, and references to registered trademarks
+!!  of Stichting Deltares remain the property of Stichting Deltares. All
+!!  rights reserved.
+
+!!  Note: The "part" engine is not yet Open Source, but still under
+!!  development. This package serves as a temporary dummy interface for
+!!  the references in the "waq" engine to the "part" engine.
+
       module typos
 
       use precision
 
-!     These types are used to support Domain decomposition
+      type pnt
 
-      type pnt                                     ! 2 directions because of inner corners to the same cell
-       ! index runs in first 'n' direction (flow runs in second direction)
-         integer         in1                       ! number of the receiver face (see below)
-         integer         n1                        ! (n,m) active cell at receiver side
+         integer         in1
+         integer         n1
          integer         m1
-         integer         f1                        ! refinement factor receiver or inverse factor for coarsening
-         integer         i1                        ! index of finer cell in coarser
-       ! index runs in second 'm' direction ( flows runs in first direction)
-         integer         in2                       ! in2 = 0 => bound is at 0.0 in cell
-         integer         n2                        !     = 1 => bound is at 1.0 in cell
+         integer         f1
+         integer         i1
+
+         integer         in2
+         integer         n2
          integer         m2
          integer         f2
-         integer         i2                        ! zero means count your position in receiver
+         integer         i2
       end type pnt
-      type domain                                  ! domain definition
-         character(256)  name                      ! Part has an array of domains if DD applies
-         integer         nmax                      ! first, fast running index, size of the domain
-         integer         mmax                      ! second, slower running index, size of the domain
-         integer         moff                      ! the m-offset in the larger total matrix of this domain
+      type domain
+         character(256)  name
+         integer         nmax
+         integer         mmax
+         integer         moff
       end type domain
-      type range                                   ! a range is a transect in a domain
-         character(256)  name                      ! name of the domain
-         integer         did                       ! domain ID (sequence number in array of domains
-         integer         fn                        ! from-n   transect definition
-         integer         fm                        ! from-m   one of the 2 indices, n or m is always
-         integer         tn                        ! to-n        constant, a transect under an angle
-         integer         tm                        ! to-m        in the grid is not allowed
+      type range
+         character(256)  name
+         integer         did
+         integer         fn
+         integer         fm
+         integer         tn
+         integer         tm
       end type range
-      type boundp                                  ! a domain boundary consists of 2 ranges,
-         type ( range )  r1                        ! one on each side of the boundary
+      type boundp
+         type ( range )  r1
          type ( range )  r2
       end type boundp
 
-!     These types are used to support plot grids
-
       type PlotGrid
-         integer(ip) :: ztype                      ! 0 = averaged (default and only option before 2011)
-                                                   ! 1 = absolute z-values in m from surface
-                                                   ! 2 = absolute z-values in m from bed
-                                                   ! 3 = relative z-values beteen 0.0 and 1.0 from surface
-         integer(ip) :: mmap                       ! nr of x-cells in the grid
-         integer(ip) :: nmap                       ! nr of y-cells in the grid
-         real   (rp) :: xlow                       ! corner points of the plot grid window
+         integer(ip) :: ztype
+
+         integer(ip) :: mmap
+         integer(ip) :: nmap
+         real   (rp) :: xlow
          real   (rp) :: xhigh
          real   (rp) :: ylow
          real   (rp) :: yhigh
          real   (rp) :: zlow
          real   (rp) :: zhigh
-         real   (rp) :: surf                       ! surface area of 1 plot grid cell
-         integer(ip), pointer :: nmcell(    :,:)   ! backpointer to hydrodynamic grid            (nmap,mmap)
-         real   (rp), pointer :: amap  (:,:,:,:)   ! plot grid map             (substances,layers,nmap,mmap)
-         real   (rp), pointer :: atrack(  :,:,:)   ! plot grid map                        (layers,nmap,mmap)
-         integer(ip), pointer :: nbin  (  :,:,:)   !                                      (layers,nmap,mmap)
-         integer(ip), pointer :: imask (    :,:)   ! plotgrid cells that are inactive            (nmap,mmap)
+         real   (rp) :: surf
+         integer(ip), pointer :: nmcell(    :,:)
+         real   (rp), pointer :: amap  (:,:,:,:)
+         real   (rp), pointer :: atrack(  :,:,:)
+         integer(ip), pointer :: nbin  (  :,:,:)
+         integer(ip), pointer :: imask (    :,:)
       end type PlotGrid
 
       end module typos

@@ -1,32 +1,39 @@
+!!  Copyright(C) Stichting Deltares, 2012-2013.
+!!
+!!  This program is free software: you can redistribute it and/or modify
+!!  it under the terms of the GNU General Public License version 3,
+!!  as published by the Free Software Foundation.
+!!
+!!  This program is distributed in the hope that it will be useful,
+!!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+!!  GNU General Public License for more details.
+!!
+!!  You should have received a copy of the GNU General Public License
+!!  along with this program. If not, see <http://www.gnu.org/licenses/>.
+!!
+!!  contact: delft3d.support@deltares.nl
+!!  Stichting Deltares
+!!  P.O. Box 177
+!!  2600 MH Delft, The Netherlands
+!!
+!!  All indications and logos of, and references to registered trademarks
+!!  of Stichting Deltares remain the property of Stichting Deltares. All
+!!  rights reserved.
+
+!!  Note: The "part" engine is not yet Open Source, but still under
+!!  development. This package serves as a temporary dummy interface for
+!!  the references in the "waq" engine to the "part" engine.
+
       subroutine rdpart ( lun1   , lun2   , lnam1  )
 
-!       Deltares Software Centre
-
-!>\file
-!>                          Reads the delpar input file
-
-!       Created           : July      2011 by Leo Postma
-
-!       Modified          : January   2013 by Michel Jeuken : created dummy 'part'-subroutine for 'waq' open source release
-
-!       Subroutines called:
-
-!       Functions called  :
-
-!       Logical units     : lun1 = delpar input file
-!                           lun2 = delpar report file
-
-      use precision       ! flexible size definition
+      use precision
 
       implicit none
 
-!     Arguments
-
-!     kind            function         name           description
-
-      integer  ( ip), intent(in   ) :: lun1          !< unit number input file
-      integer  ( ip), intent(in   ) :: lun2          !< unit number report file
-      character(256), intent(in   ) :: lnam1         !< name of the input file
+      integer  ( ip), intent(in   ) :: lun1
+      integer  ( ip), intent(in   ) :: lun2
+      character(256), intent(in   ) :: lnam1
 
       return
-      end    
+      end

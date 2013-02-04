@@ -1,3 +1,30 @@
+!!  Copyright(C) Stichting Deltares, 2012-2013.
+!!
+!!  This program is free software: you can redistribute it and/or modify
+!!  it under the terms of the GNU General Public License version 3,
+!!  as published by the Free Software Foundation.
+!!
+!!  This program is distributed in the hope that it will be useful,
+!!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+!!  GNU General Public License for more details.
+!!
+!!  You should have received a copy of the GNU General Public License
+!!  along with this program. If not, see <http://www.gnu.org/licenses/>.
+!!
+!!  contact: delft3d.support@deltares.nl
+!!  Stichting Deltares
+!!  P.O. Box 177
+!!  2600 MH Delft, The Netherlands
+!!
+!!  All indications and logos of, and references to registered trademarks
+!!  of Stichting Deltares remain the property of Stichting Deltares. All
+!!  rights reserved.
+
+!!  Note: The "part" engine is not yet Open Source, but still under
+!!  development. This package serves as a temporary dummy interface for
+!!  the references in the "waq" engine to the "part" engine.
+
 module part12_mod
 contains
       subroutine part12 ( lun1     , lname    , lun2     , title    , subst    ,    &
@@ -12,95 +39,65 @@ contains
                           elt_names, elt_types, elt_dims , elt_bytes, locdep   ,    &
                           nosub_max, bufsize  )
 
-!     CREATING MAP FILE FOR CURVILINEAR GRID
-!          (Nefis and binary files / per time step)
-!
-!     system administration : r.j. vos
-
-!     created               : february 1990, by l. postma
-
-!     modified              : January  2013 by Michel Jeuken : created dummy 'part'-subroutine for 'waq' open source release
-
-!     function              : generates a standard delwaq - map-file,
-!                             and concentration-array for partwq
-!                             3d version...........
-!
-!     note                  : include of file 'crefd.inc'
-!                             include is no standard (ansi) fortran77!!
-!                             check if this include facility is available!
-!
-!     logical unit numbers  : lun1 - unit nr delwaq - map-file
-!                             lun2 - output log file
-
-!     subroutines called    : srstop
-!                             putget
-!                             putget_chars
-
-!     functions   called    : none.
-
-      use precision          ! single and double precision
+      use precision
       use typos
 
-      implicit none          ! force explicit typing
+      implicit none
 
-!     Arguments
-
-!     kind           function         name                      description
-
-      integer  ( ip), intent(in   ) :: lun1                    !< unit nr of the Delwaq .map file
-      character( * ), intent(in   ) :: lname                   !< name of the .map file
-      integer  ( ip), intent(in   ) :: lun2                    !< unit nr of the output log file
-      character( 40), intent(in   ) :: title (4)               !< model- and run titles
-      integer  ( ip), intent(in   ) :: nmax                    !< first dimension of the grid
-      integer  ( ip), intent(in   ) :: mmax                    !< second dimension of the grid
-      integer  ( ip), intent(in   ) :: nolay                   !< number of layers of the grid
-      integer  ( ip), intent(in   ) :: nosubs                  !< number of substances to plot
-      integer  ( ip), intent(in   ) :: nopart                  !< number of particles
-      character( 20), intent(in   ) :: subst (nosubs+1)        !< substance names with layer extension
-      integer  ( ip), intent(in   ) :: lgrid (nmax,mmax)       !< active grid table
-      integer  ( ip), intent(in   ) :: lgrid2(nmax,mmax)       !< total grid table
-      integer  ( ip), intent(in   ) :: lgrid3(nmax,mmax)       !< plot grid either total or active condensed
-      integer  ( ip), intent(in   ) :: nosub_max               !< maximum number of substances
-      real     ( rp), intent(  out) :: conc  (nosub_max,nmax*mmax*nolay) !< computed concentrations
-      real     ( sp), intent(in   ) :: volume( * )             !< volumes of the grid cells
-      integer  ( ip), intent(inout) :: npart ( nopart )        !< n-values of particles
-      integer  ( ip), intent(inout) :: mpart ( nopart )        !< m-values of particles
-      integer  ( ip), intent(inout) :: kpart ( nopart )        !< k-values of particles
-      real     ( sp), intent(inout) :: wpart (nosubs,nopart)   !< weights of particles
-      integer  ( ip), intent(in   ) :: itime                   !< model time
-      integer  ( ip), intent(in   ) :: idelt                   !< model time step
-      integer  ( ip), intent(in   ) :: icwsta                  !< start time map-file
-      integer  ( ip), intent(in   ) :: icwsto                  !< stop  time map-file
-      integer  ( ip), intent(in   ) :: icwste                  !< time step map-file
-      real     ( rp), intent(  out) :: atotal(nolay,nosubs)    !< total mass per subst/per layer
-      integer  ( ip), intent(inout) :: npwndw                  !< start of active particle number
-      real     ( sp), intent(in   ) :: pblay                   !< relative thickness lower layer
-      integer  ( ip), intent(inout) :: iptime( nopart )        !< age of particles
-      integer  ( ip), intent(in   ) :: npwndn                  !< new start of active particle number - 1
-      integer  ( ip), intent(in   ) :: modtyp                  !< model-run-type
-      integer  ( ip), intent(in   ) :: iyear                   !< year
-      integer  ( ip), intent(in   ) :: imonth                  !< month
-      integer  ( ip), intent(in   ) :: iofset                  !< offset in time
-      type(PlotGrid)                   pg                      !< first plot grid information
-      integer  ( ip), intent(in   ) :: bufsize                 !< size of rbuffr
-      real     ( rp)                :: rbuffr(bufsize)         !< work storage
-      integer  ( ip), intent(in   ) :: nosta                   !< number of observation points
-      integer  ( ip), intent(in   ) :: mnmax2                  !< number of grid cells in one grid layer
-      integer  ( ip), intent(in   ) :: nosegl                  !< number of computational elements per layer
-      integer  ( ip), intent(in   ) :: isfile(nosub_max)       !< file output for the substance?
+      integer  ( ip), intent(in   ) :: lun1
+      character( * ), intent(in   ) :: lname
+      integer  ( ip), intent(in   ) :: lun2
+      character( 40), intent(in   ) :: title (4)
+      integer  ( ip), intent(in   ) :: nmax
+      integer  ( ip), intent(in   ) :: mmax
+      integer  ( ip), intent(in   ) :: nolay
+      integer  ( ip), intent(in   ) :: nosubs
+      integer  ( ip), intent(in   ) :: nopart
+      character( 20), intent(in   ) :: subst (nosubs+1)
+      integer  ( ip), intent(in   ) :: lgrid (nmax,mmax)
+      integer  ( ip), intent(in   ) :: lgrid2(nmax,mmax)
+      integer  ( ip), intent(in   ) :: lgrid3(nmax,mmax)
+      integer  ( ip), intent(in   ) :: nosub_max
+      real     ( rp), intent(  out) :: conc  (nosub_max,nmax*mmax*nolay)
+      real     ( sp), intent(in   ) :: volume( * )
+      integer  ( ip), intent(inout) :: npart ( nopart )
+      integer  ( ip), intent(inout) :: mpart ( nopart )
+      integer  ( ip), intent(inout) :: kpart ( nopart )
+      real     ( sp), intent(inout) :: wpart (nosubs,nopart)
+      integer  ( ip), intent(in   ) :: itime
+      integer  ( ip), intent(in   ) :: idelt
+      integer  ( ip), intent(in   ) :: icwsta
+      integer  ( ip), intent(in   ) :: icwsto
+      integer  ( ip), intent(in   ) :: icwste
+      real     ( rp), intent(  out) :: atotal(nolay,nosubs)
+      integer  ( ip), intent(inout) :: npwndw
+      real     ( sp), intent(in   ) :: pblay
+      integer  ( ip), intent(inout) :: iptime( nopart )
+      integer  ( ip), intent(in   ) :: npwndn
+      integer  ( ip), intent(in   ) :: modtyp
+      integer  ( ip), intent(in   ) :: iyear
+      integer  ( ip), intent(in   ) :: imonth
+      integer  ( ip), intent(in   ) :: iofset
+      type(PlotGrid)                   pg
+      integer  ( ip), intent(in   ) :: bufsize
+      real     ( rp)                :: rbuffr(bufsize)
+      integer  ( ip), intent(in   ) :: nosta
+      integer  ( ip), intent(in   ) :: mnmax2
+      integer  ( ip), intent(in   ) :: nosegl
+      integer  ( ip), intent(in   ) :: isfile(nosub_max)
       integer  ( ip), intent(in   ) :: mapsub(nosub_max)
-      integer  ( ip), intent(in   ) :: layt                    !< number of hydrodynamic layers
+      integer  ( ip), intent(in   ) :: layt
       real     ( sp), intent(in   ) :: area  (mnmax2)
-      integer  ( ip), intent(in   ) :: nfract                  !< number of oil fractions
-      logical       , intent(in   ) :: lsettl                  !< if .true. settling occurs in an extra layer
+      integer  ( ip), intent(in   ) :: nfract
+      logical       , intent(in   ) :: lsettl
       integer  ( ip), intent(in   ) :: mstick(nosub_max)
-      character( * ), pointer       :: elt_names(:)            !<  NEFIS
-      character( * ), pointer       :: elt_types(:)            !<  NEFIS
-      integer  ( ip), pointer       :: elt_dims (:,:)          !<  NEFIS
-      integer  ( ip), pointer       :: elt_bytes(:)            !<  NEFIS
+      character( * ), pointer       :: elt_names(:)
+      character( * ), pointer       :: elt_types(:)
+      integer  ( ip), pointer       :: elt_dims (:,:)
+      integer  ( ip), pointer       :: elt_bytes(:)
       real     ( rp)                :: locdep (nmax*mmax,nolay)
 
       return
-!
+
       end subroutine
 end module part12_mod

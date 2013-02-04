@@ -1,204 +1,221 @@
+!!  Copyright(C) Stichting Deltares, 2012-2013.
+!!
+!!  This program is free software: you can redistribute it and/or modify
+!!  it under the terms of the GNU General Public License version 3,
+!!  as published by the Free Software Foundation.
+!!
+!!  This program is distributed in the hope that it will be useful,
+!!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+!!  GNU General Public License for more details.
+!!
+!!  You should have received a copy of the GNU General Public License
+!!  along with this program. If not, see <http://www.gnu.org/licenses/>.
+!!
+!!  contact: delft3d.support@deltares.nl
+!!  Stichting Deltares
+!!  P.O. Box 177
+!!  2600 MH Delft, The Netherlands
+!!
+!!  All indications and logos of, and references to registered trademarks
+!!  of Stichting Deltares remain the property of Stichting Deltares. All
+!!  rights reserved.
+
+!!  Note: The "part" engine is not yet Open Source, but still under
+!!  development. This package serves as a temporary dummy interface for
+!!  the references in the "waq" engine to the "part" engine.
+
 module partmem
 
-!     Deltares Software Centre
-
-!     Function            : This is the new memory allocation area.
-!                           It is like a huge unnamed common block.
-!                           This invites to include it in every routine and make unstructured
-!                           use of everything everywhere
-!                           That is however not meant.
-
-!     Created             : July    2011 by Leo Postma
-
-      use precision       ! single/double precision
-      use typos           ! the derived types
+      use precision
+      use typos
 
       integer(ip)  , parameter          :: nfilesp =  23
-      integer(ip)                       :: lunitp(nfilesp) = 0    ! logical unit numbers for in-/output files
-      character(len=256)                :: fnamep(nfilesp) = ' '  ! file names for in-/output files
-      character(len=20) , dimension(2)  :: ftypep          = ' '  ! file types, i.e. unformatted or binary
-      logical                           :: alone                  ! if .false. coupled with Delwaq
+      integer(ip)                       :: lunitp(nfilesp) = 0
+      character(len=256)                :: fnamep(nfilesp) = ' '
+      character(len=20) , dimension(2)  :: ftypep          = ' '
+      logical                           :: alone
       integer(ip)   :: itrakc  , itraki  , npwndn  , npwndw  , nstep
       real   (sp)   :: defang  , hmin    , ptlay   , accrjv
       logical       :: oil     , oil2dh  , oil3d   , ltrack  , acomp  , fout
 
-      integer  ( ip)           :: bufsize       ! size of rbuffr
-      integer  ( ip)           :: nosub_max     ! maximum number of substances
-      integer  ( ip)           :: nmaxp         ! horizontal dimension 1 of flow file
-      integer  ( ip)           :: mmaxp         ! horizontal dimension 2 of flow file
-      integer  ( ip)           :: mnmax2        ! nmax*mmax
-      integer  ( ip)           :: layt          ! number of layers hydrodynamic model
-      integer  ( ip)           :: mnmaxk        ! mnmax2*layt
-      integer  ( ip)           :: nflow         ! 2*mnmaxk + (layt-1)*mnmax2
-      integer  ( ip)           :: noseglp       ! either mnmax2 or number of active volumes
-      integer  ( ip)           :: nosegp        ! either mnmaxk or nosegl*layt
-      integer  ( ip)           :: noqp          ! either nflow or number of active exchanges
-      integer  ( ip)           :: ihdel         ! time step in hydrodynamic file
-      character( 40)           :: title(4)      ! Simulation title
-      integer  ( ip)           :: modtyp        ! type of model
-      integer  ( ip)           :: notrak        ! number of followed particle tracks
-      logical  ( ip)           :: lsettl        ! if true substances are settling
-      integer  ( ip)           :: nolayp        ! number of layers   <== pas op
-      integer  ( ip)           :: noslay        ! number of layers inclusive of optional bed layer
-      integer  ( ip)           :: idelt         ! simulation time step inputfile
-      integer  ( ip)           :: ipc           ! choice numerical scheme
-      logical  ( ip)           :: lcorr         ! switch for predcorrector scheme
-      integer  ( ip)           :: ioptdv        ! vertical diffusion option
-      real     ( rp)           :: alpha         ! scale factor for vertical diffusivity
-      real     ( rp)           :: cdisp         ! vertical diffusivity constant
-      real     ( rp)           :: dminim        ! minimum value for vertical diffusion
-      logical  ( ip)           :: ldiffz        ! switch for vert.diffusion
-      integer  ( ip)           :: nosubs        ! number of substances in input file
-      integer  ( ip)           :: nosubc        ! number of substances in conc array
-      integer  ( ip)           :: nfract        ! number of oil fractions
-      real     ( rp)           :: pblay         ! relative thickness lower layer
-      integer  ( ip)           :: itrack        ! substance for particle track
-      integer  ( ip)           :: ntrack        ! substance for number of particles per bin ?
-      integer  ( ip)           :: nstick        ! number of sticking substances
-      character(256)           :: finnh4        ! file name ammonia in red tidemodel
-      character(256)           :: finno3        ! file name nitrate in red tidemodel
-      integer  ( ip)           :: nopart        ! number of particles
-      integer  ( ip)           :: npmax         ! maximum number of particles
-      integer  ( ip)           :: npolmax       ! maximum number of polygons in initial conditions
-      real     ( rp)           :: rough         ! roughness length
-      real     ( rp)           :: drand  (3)    ! random step parameters
-      logical  ( ip)           :: spawnd        ! if true space varying wind
-      integer  ( ip)           :: nowind        ! number of wind breakpoints
-      integer  ( ip)           :: noconsp       ! number of constants in the const array
-      integer  ( ip)           :: itstrtp       ! simulation start time
-      integer  ( ip)           :: itstopp       ! simulation stop time
-      integer  ( ip)           :: iddtim        ! DELWAQ delay time (obsolete)
-      integer  ( ip)           :: icwsta        ! map file start time
-      integer  ( ip)           :: icwsto        ! map file stop time
-      integer  ( ip)           :: icwste        ! map file time step
-      integer  ( ip)           :: ihstrtp       ! start time-histories
-      integer  ( ip)           :: ihstopp       ! stop time-histories
-      integer  ( ip)           :: ihstepp       ! time-step on history file
-      integer  ( ip)           :: iyear         ! year of the calendar offset
-      integer  ( ip)           :: imonth        ! month of the calendar offset
-      integer  ( ip)           :: iofset        ! seconds offset to calendar
-      logical  ( ip)           :: ldiffh        ! switch for hor. diffusion
-      real     ( rp)           :: rhow          ! density of water in g/l (= kg/m3)
-      integer  ( ip)           :: stickdf       ! sticking at drying flats
-      integer  ( ip)           :: ini_opt       ! option for initial conditions of oil
-      character(256)           :: ini_file      ! file name initial conditions of oil
-      integer  ( ip)           :: nosta         ! number of monitoring stations
-      integer  ( ip)           :: iptset        ! number of plotgrids
-      real     ( rp)           :: window(4)     ! plotgrid window coordinates
-      integer  ( ip)           :: mmap          ! plotgrid resolution
-      integer  ( ip)           :: nmap          ! plotgrid resolution
-      integer  ( ip)           :: nodye         ! number of dye releases
-      integer  ( ip)           :: nocont        ! number of continuous releases
-      integer  ( ip)           :: noudef        ! number of user defined releases
-      integer  ( ip)           :: idtset        ! number of time points decay rates
-      real     ( rp)           :: anfac         !
-      integer  ( ip)           :: irfac         !
-      integer  ( ip)           :: nrowsmax      !
-      integer  ( ip)           :: ivtset        ! number of time points settling velocities
-      real     ( rp)           :: chezy         ! chezy value
-      real     ( rp)           :: taucs         ! critical tau sedimentation
-      real     ( rp)           :: tauce         ! critical tau erosion
-      logical                  :: caltau        ! if .true. calculate tau
+      integer  ( ip)           :: bufsize
+      integer  ( ip)           :: nosub_max
+      integer  ( ip)           :: nmaxp
+      integer  ( ip)           :: mmaxp
+      integer  ( ip)           :: mnmax2
+      integer  ( ip)           :: layt
+      integer  ( ip)           :: mnmaxk
+      integer  ( ip)           :: nflow
+      integer  ( ip)           :: noseglp
+      integer  ( ip)           :: nosegp
+      integer  ( ip)           :: noqp
+      integer  ( ip)           :: ihdel
+      character( 40)           :: title(4)
+      integer  ( ip)           :: modtyp
+      integer  ( ip)           :: notrak
+      logical  ( ip)           :: lsettl
+      integer  ( ip)           :: nolayp
+      integer  ( ip)           :: noslay
+      integer  ( ip)           :: idelt
+      integer  ( ip)           :: ipc
+      logical  ( ip)           :: lcorr
+      integer  ( ip)           :: ioptdv
+      real     ( rp)           :: alpha
+      real     ( rp)           :: cdisp
+      real     ( rp)           :: dminim
+      logical  ( ip)           :: ldiffz
+      integer  ( ip)           :: nosubs
+      integer  ( ip)           :: nosubc
+      integer  ( ip)           :: nfract
+      real     ( rp)           :: pblay
+      integer  ( ip)           :: itrack
+      integer  ( ip)           :: ntrack
+      integer  ( ip)           :: nstick
+      character(256)           :: finnh4
+      character(256)           :: finno3
+      integer  ( ip)           :: nopart
+      integer  ( ip)           :: npmax
+      integer  ( ip)           :: npolmax
+      real     ( rp)           :: rough
+      real     ( rp)           :: drand  (3)
+      logical  ( ip)           :: spawnd
+      integer  ( ip)           :: nowind
+      integer  ( ip)           :: noconsp
+      integer  ( ip)           :: itstrtp
+      integer  ( ip)           :: itstopp
+      integer  ( ip)           :: iddtim
+      integer  ( ip)           :: icwsta
+      integer  ( ip)           :: icwsto
+      integer  ( ip)           :: icwste
+      integer  ( ip)           :: ihstrtp
+      integer  ( ip)           :: ihstopp
+      integer  ( ip)           :: ihstepp
+      integer  ( ip)           :: iyear
+      integer  ( ip)           :: imonth
+      integer  ( ip)           :: iofset
+      logical  ( ip)           :: ldiffh
+      real     ( rp)           :: rhow
+      integer  ( ip)           :: stickdf
+      integer  ( ip)           :: ini_opt
+      character(256)           :: ini_file
+      integer  ( ip)           :: nosta
+      integer  ( ip)           :: iptset
+      real     ( rp)           :: window(4)
+      integer  ( ip)           :: mmap
+      integer  ( ip)           :: nmap
+      integer  ( ip)           :: nodye
+      integer  ( ip)           :: nocont
+      integer  ( ip)           :: noudef
+      integer  ( ip)           :: idtset
+      real     ( rp)           :: anfac
+      integer  ( ip)           :: irfac
+      integer  ( ip)           :: nrowsmax
+      integer  ( ip)           :: ivtset
+      real     ( rp)           :: chezy
+      real     ( rp)           :: taucs
+      real     ( rp)           :: tauce
+      logical                  :: caltau
 
-      integer  ( ip), pointer  :: lgrid (:,:)   ! active grid matrix, with 1-1 numbering
-      integer  ( ip), pointer  :: lgrid2(:,:)   ! total grid matrix
-      integer  ( ip), pointer  :: lgrid3(:,:)   ! active grid matrix with noseg numbering
-      real     ( rp), pointer  :: tcktot (:)    ! relative layer thickness
-      integer  ( ip), pointer  :: cellpntp(:)   ! pointer from noseg to mnmaxk
-      integer  ( ip), pointer  :: flowpntp(:,:) ! pointer from noq to nflow
-      real     ( rp), pointer  :: angle  (:)    !
-      real     ( rp), pointer  :: area   (:)    !
-      real     ( rp), pointer  :: depth  (:)    !
-      real     ( rp), pointer  :: dpsp   (:)    !
-      real     ( rp), pointer  :: dx     (:)    !
-      real     ( rp), pointer  :: dy     (:)    !
-      real     ( rp), pointer  :: flow   (:)    !
-      real     ( rp), pointer  :: flow1  (:)    !
-      integer  ( ip), pointer  :: ipntp  (:)    !
-      integer  ( ip), pointer  :: nplay  (:)    !
-      real     ( rp), pointer  :: vdiff  (:)    ! vertical diffusion
-      real     ( rp), pointer  :: vdiff1 (:)    ! vertical diffusion from file
-      real     ( rp), pointer  :: tau    (:)    ! tau
-      real     ( rp), pointer  :: tau1   (:)    ! tau from file
-      real     ( rp), pointer  :: salin  (:)    ! salinity
-      real     ( rp), pointer  :: salin1 (:)    ! salinity from file
-      real     ( rp), pointer  :: temper (:)    ! temperature
-      real     ( rp), pointer  :: temper1(:)    ! temperature from file
-      real     ( rp), pointer  :: velo   (:)    !
-      real     ( rp), pointer  :: vol1   (:)    !
-      real     ( rp), pointer  :: vol2   (:)    !
-      real     ( rp), pointer  :: volumep(:)    !
-      real     ( rp), pointer  :: xb     (:)    !
-      real     ( rp), pointer  :: yb     (:)    !
-      real     ( rp), pointer  :: zlevel (:)    !
-      real     ( rp), pointer  :: locdep(:,:)   !
-      character( 20), pointer  :: substi (:)    ! substances' names input file
-      integer  ( ip), pointer  :: mapsub (:)    ! gives substances a number for output
-      integer  ( ip), pointer  :: nplot  (:)    ! seq. ordered particle numbers for tracks
-      integer  ( ip), pointer  :: mstick (:)    ! array that tells if a substance i is sticking
-      character( 20), pointer  :: subst  (:)    ! substances' names output file
-      character( 20), pointer  :: subst2 (:)    ! substances' names output file
-      real     ( rp), pointer  :: wveloa (:)    ! wind velocity  m/s
-      real     ( rp), pointer  :: wdira  (:)    ! wind direction degree from north
-      real     ( dp), pointer  :: wvelo  (:)    ! space varying wind velocity  m/s
-      real     ( dp), pointer  :: wdir   (:)    ! space varying wind direction degree from north
-      integer  ( ip), pointer  :: iwndtm (:)    ! breakpoints wind time series
-      real     ( rp), pointer  :: const  (:)    ! constant factors
-      character( 20), pointer  :: nmstat (:)    ! names of the monitoring stations
-      real     ( rp), pointer  :: xstat  (:)    ! x-values monitoring stations
-      real     ( rp), pointer  :: ystat  (:)    ! y-values monitoring stations
-      integer  ( ip), pointer  :: ipset  (:)    ! plot grid timings
-      real     ( rp), pointer  :: recovr (:)    ! recovery rates to be applied for the plot grids
-      character( 20), pointer  :: nmdyer (:)    ! names of the dye releases
-      integer  ( ip), pointer  :: iwtime (:)    ! times per dye release
-      real     ( rp), pointer  :: xwaste (:)    ! x of waste point
-      real     ( rp), pointer  :: ywaste (:)    ! y of waste point
-      real     ( rp), pointer  :: zwaste (:)    ! z of waste point
-      integer  ( ip), pointer  :: kwaste (:)    ! layer nr of waste point
-      integer  ( ip), pointer  :: ioptrad(:)    ! radius option of dye release
-      real     ( rp), pointer  :: radius (:)    ! radius parameter of waste point
-      real     ( rp), pointer  :: wparm  (:)    ! percentage of particles taken
-      integer  ( ip), pointer  :: ndprt  (:)    ! number of particles per waste point
-      real     ( rp), pointer  :: amassd(:,:)   ! mass of dye per substance
-      character( 20), pointer  :: nmconr (:)    ! names of the continuous releases
-      integer  ( ip), pointer  :: linear (:)    ! interpolation method of continuous releases
-      real     ( rp), pointer  :: stoch (:,:)   ! stochi of continuous loads per substance
-      integer  ( ip), pointer  :: ictmax (:)    ! number of time points per continuous load
-      integer  ( ip), pointer  :: ictime(:,:)   ! time series per continuous load
-      real     ( rp), pointer  :: amassc(:,:,:) ! mass of continuous load per substance per time step
-      real     ( rp), pointer  :: ftime (:,:)   ! time matrix continuous loads in 1/s
-      real     ( rp), pointer  :: uscal  (:)    ! scale values user defined releases
-      integer  ( ip), pointer  :: isubud (:)    ! index array for substances for user defined releases
-      integer  ( ip), pointer  :: iutime (:)    ! user defined releases release times
-      integer  ( ip), pointer  :: ifopt  (:)    ! file option user defined releases
-      character(256), pointer  :: finud  (:)    ! filenames of user defined delwaq files
-      integer  ( ip), pointer  :: iftime (:)    ! user defined releases reading times from files
-      integer  ( ip), pointer  :: nosud  (:)    ! number of subst. on file for ud release (ifopt=1)
-      integer  ( ip), pointer  :: isfud  (:)    ! index array for subst. from files ud rel.
-      integer  ( ip), pointer  :: idtime (:)    ! array with time points for decay
-      real     ( rp), pointer  :: decay (:,:)   ! matrix of decays per substance per time point
-      real     ( rp), pointer  :: decays (:)    ! the actual decay values per substance at this time
-      integer  ( ip), pointer  :: ivtime (:)    ! array with time points for settling velocities
-      real     ( rp), pointer  :: wpart (:,:)   ! weight of the substances in each particle
-      real     ( rp), pointer  :: vsfour(:,:,:) ! matrix with fourier coefficients settling
-      real     ( rp), pointer  :: wsettl (:)    ! settling velocity per particel at this time
-      integer  ( ip)              nbmax         ! maximum amount of real open boundaries
-      integer  ( ip)              ndoms         ! number of domains
-      type  (domain), pointer  :: doms   (:)    ! the domains
-      integer  ( ip)              nbnds         ! number of inter domain boundaries
-      type  (boundp), pointer  :: bnds   (:)    ! the inter domain boundaries
-      integer  ( ip)              nconn         ! number of links
-      type  (pnt   ), pointer  :: conn   (:)    ! the DD links
-      integer  ( ip)              npgrid        ! number of plotgrids
+      integer  ( ip), pointer  :: lgrid (:,:)
+      integer  ( ip), pointer  :: lgrid2(:,:)
+      integer  ( ip), pointer  :: lgrid3(:,:)
+      real     ( rp), pointer  :: tcktot (:)
+      integer  ( ip), pointer  :: cellpntp(:)
+      integer  ( ip), pointer  :: flowpntp(:,:)
+      real     ( rp), pointer  :: angle  (:)
+      real     ( rp), pointer  :: area   (:)
+      real     ( rp), pointer  :: depth  (:)
+      real     ( rp), pointer  :: dpsp   (:)
+      real     ( rp), pointer  :: dx     (:)
+      real     ( rp), pointer  :: dy     (:)
+      real     ( rp), pointer  :: flow   (:)
+      real     ( rp), pointer  :: flow1  (:)
+      integer  ( ip), pointer  :: ipntp  (:)
+      integer  ( ip), pointer  :: nplay  (:)
+      real     ( rp), pointer  :: vdiff  (:)
+      real     ( rp), pointer  :: vdiff1 (:)
+      real     ( rp), pointer  :: tau    (:)
+      real     ( rp), pointer  :: tau1   (:)
+      real     ( rp), pointer  :: salin  (:)
+      real     ( rp), pointer  :: salin1 (:)
+      real     ( rp), pointer  :: temper (:)
+      real     ( rp), pointer  :: temper1(:)
+      real     ( rp), pointer  :: velo   (:)
+      real     ( rp), pointer  :: vol1   (:)
+      real     ( rp), pointer  :: vol2   (:)
+      real     ( rp), pointer  :: volumep(:)
+      real     ( rp), pointer  :: xb     (:)
+      real     ( rp), pointer  :: yb     (:)
+      real     ( rp), pointer  :: zlevel (:)
+      real     ( rp), pointer  :: locdep(:,:)
+      character( 20), pointer  :: substi (:)
+      integer  ( ip), pointer  :: mapsub (:)
+      integer  ( ip), pointer  :: nplot  (:)
+      integer  ( ip), pointer  :: mstick (:)
+      character( 20), pointer  :: subst  (:)
+      character( 20), pointer  :: subst2 (:)
+      real     ( rp), pointer  :: wveloa (:)
+      real     ( rp), pointer  :: wdira  (:)
+      real     ( dp), pointer  :: wvelo  (:)
+      real     ( dp), pointer  :: wdir   (:)
+      integer  ( ip), pointer  :: iwndtm (:)
+      real     ( rp), pointer  :: const  (:)
+      character( 20), pointer  :: nmstat (:)
+      real     ( rp), pointer  :: xstat  (:)
+      real     ( rp), pointer  :: ystat  (:)
+      integer  ( ip), pointer  :: ipset  (:)
+      real     ( rp), pointer  :: recovr (:)
+      character( 20), pointer  :: nmdyer (:)
+      integer  ( ip), pointer  :: iwtime (:)
+      real     ( rp), pointer  :: xwaste (:)
+      real     ( rp), pointer  :: ywaste (:)
+      real     ( rp), pointer  :: zwaste (:)
+      integer  ( ip), pointer  :: kwaste (:)
+      integer  ( ip), pointer  :: ioptrad(:)
+      real     ( rp), pointer  :: radius (:)
+      real     ( rp), pointer  :: wparm  (:)
+      integer  ( ip), pointer  :: ndprt  (:)
+      real     ( rp), pointer  :: amassd(:,:)
+      character( 20), pointer  :: nmconr (:)
+      integer  ( ip), pointer  :: linear (:)
+      real     ( rp), pointer  :: stoch (:,:)
+      integer  ( ip), pointer  :: ictmax (:)
+      integer  ( ip), pointer  :: ictime(:,:)
+      real     ( rp), pointer  :: amassc(:,:,:)
+      real     ( rp), pointer  :: ftime (:,:)
+      real     ( rp), pointer  :: uscal  (:)
+      integer  ( ip), pointer  :: isubud (:)
+      integer  ( ip), pointer  :: iutime (:)
+      integer  ( ip), pointer  :: ifopt  (:)
+      character(256), pointer  :: finud  (:)
+      integer  ( ip), pointer  :: iftime (:)
+      integer  ( ip), pointer  :: nosud  (:)
+      integer  ( ip), pointer  :: isfud  (:)
+      integer  ( ip), pointer  :: idtime (:)
+      real     ( rp), pointer  :: decay (:,:)
+      real     ( rp), pointer  :: decays (:)
+      integer  ( ip), pointer  :: ivtime (:)
+      real     ( rp), pointer  :: wpart (:,:)
+      real     ( rp), pointer  :: vsfour(:,:,:)
+      real     ( rp), pointer  :: wsettl (:)
+      integer  ( ip)              nbmax
+      integer  ( ip)              ndoms
+      type  (domain), pointer  :: doms   (:)
+      integer  ( ip)              nbnds
+      type  (boundp), pointer  :: bnds   (:)
+      integer  ( ip)              nconn
+      type  (pnt   ), pointer  :: conn   (:)
+      integer  ( ip)              npgrid
       type  (PlotGrid),pointer :: pg     (:)
 
-      real     ( rp), pointer  :: t0cf   (:)    !
-      real     ( rp), pointer  :: tmassu (:)    !
-      real     ( rp), pointer  :: acf    (:)    !
-      integer  ( ip), pointer  :: ncheck (:)    !
-      real     ( rp), pointer  :: rem    (:)    !
-      real     ( rp), pointer  :: tmassc(:,:)   !
-      real     ( rp), pointer  :: aconc (:,:)   !
+      real     ( rp), pointer  :: t0cf   (:)
+      real     ( rp), pointer  :: tmassu (:)
+      real     ( rp), pointer  :: acf    (:)
+      integer  ( ip), pointer  :: ncheck (:)
+      real     ( rp), pointer  :: rem    (:)
+      real     ( rp), pointer  :: tmassc(:,:)
+      real     ( rp), pointer  :: aconc (:,:)
       character     (len=20   ) ,  pointer, dimension(:       ) :: cbuff
       character     (len=20   ) ,  pointer, dimension(:       ) :: subsud
       integer       (sp       ) ,  pointer, dimension(:       ) :: floil
