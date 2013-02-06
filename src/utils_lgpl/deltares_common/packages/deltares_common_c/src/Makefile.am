@@ -14,7 +14,7 @@ lib_LTLIBRARIES = libdeltares_common_c.la
 
 #-------------------------------------------------------------------------------
 #Includes
-INCLUDES = -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_c/include
+AM_CPPFLAGS = -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_c/include
 
 #-------------------------------------------------------------------------------
 #Sources
