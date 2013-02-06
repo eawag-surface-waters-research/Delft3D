@@ -176,7 +176,7 @@ subroutine delfil(runid     ,filmd     ,gdp       )
         ! close the files and delete them using routine RMDEL
         !
         filnam = 'TMP_' // runid(:lrid) // '.grd'
-        call rmdel(filnam    ,gdp       )
+        if (inode == master) call rmdel(filnam    ,gdp       )
         ! 
         ! append node number to file name in case of parallel computing within single-domain case 
         ! 
@@ -353,7 +353,7 @@ subroutine delfil(runid     ,filmd     ,gdp       )
         !
         filnam = 'TMP_' // runid(:lrid) // '.bcq'
         if (filnam(:8 + lrid)/=filrd(:8 + lrid)) then
-           call rmdel(filnam    ,gdp       )
+           if (inode == master) call rmdel(filnam    ,gdp       )
         endif
         !
         ! Locate 'FilbcC' record in MD-file/flow file
@@ -480,7 +480,7 @@ subroutine delfil(runid     ,filmd     ,gdp       )
         !
         filnam = 'TMP_' // runid(:lrid) // '.eva'
         if (filnam(:8 + lrid)/=filrd(:8 + lrid)) then
-           call rmdel(filnam    ,gdp       )
+           if (inode == master) call rmdel(filnam    ,gdp       )
         endif
         !
         ! Locate 'Filwnd' record in MD-file/flow file
@@ -511,7 +511,7 @@ subroutine delfil(runid     ,filmd     ,gdp       )
         !
         filnam = 'TMP_' // runid(:lrid) // '.wnd'
         if (filnam(:8 + lrid)/=filrd(:8 + lrid)) then
-           call rmdel(filnam    ,gdp       )
+           if (inode == master) call rmdel(filnam    ,gdp       )
         endif
     endif
     !
@@ -520,20 +520,20 @@ subroutine delfil(runid     ,filmd     ,gdp       )
     ! close the file and delete it using routine RMDEL
     !
     filnam = 'TMP_VisuOL_closed'
-    call rmdel(filnam, gdp)
+    if (inode == master) call rmdel(filnam, gdp)
     !
     ! Temporary file created (mapper_config.cpp) by mappers to check refinement
     !
     filnam = 'TMP_refinement'
-    call rmdel(filnam, gdp)
+    if (inode == master) call rmdel(filnam, gdp)
     !
     ! Temporary file possibly created when writing WAQ input files
     !
     filnam = 'TMP_com-' // runid(:lrid) // '.src'
-    call rmdel(filnam, gdp)
+    if (inode == master) call rmdel(filnam, gdp)
     ! old name
     filnam = 'com-' // runid(:lrid) // '.srctmp'
-    call rmdel(filnam, gdp)
+    if (inode == master) call rmdel(filnam, gdp)
 9999 continue
     !
     if (lmd_open) close(lunmd)

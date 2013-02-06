@@ -312,7 +312,9 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     call dfexchg( aks,   1, 1,       dfloat, nm_pos, gdp)
     call dfexchg( fixfac,1, lsedtot, dfloat, nm_pos, gdp)
     call dfexchg( frac,  1, lsedtot, dfloat, nm_pos, gdp)
-    call dfexchg( rca,   1, lsed,    dfloat, nm_pos, gdp)
+    if (lsed > 0) then
+       call dfexchg( rca,   1, lsed,    dfloat, nm_pos, gdp)
+    endif
     !
     !   Calculate suspended sediment transport correction vector (for SAND)
     !   Note: uses GLM velocites, consistent with DIFU
@@ -526,8 +528,10 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           enddo       ! l
        endif          ! kmax>1
        !
-       call dfexchg( sucor,   1, lsed, dfloat, nm_pos, gdp)
-       call dfexchg( svcor,   1, lsed, dfloat, nm_pos, gdp)
+       if (lsed > 0) then
+          call dfexchg( sucor,   1, lsed, dfloat, nm_pos, gdp)
+          call dfexchg( svcor,   1, lsed, dfloat, nm_pos, gdp)
+       endif
        !
        ! Calculate suspended sediment transport vector components for
        ! output
@@ -573,8 +577,10 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
        endif        ! sscomp .or. nst>=itmor
     endif           ! sus /= 0.0
     !
-    call dfexchg( ssuu,   1, lsed, dfloat, nm_pos, gdp)
-    call dfexchg( ssvv,   1, lsed, dfloat, nm_pos, gdp)
+    if (lsed > 0) then
+       call dfexchg( ssuu,   1, lsed, dfloat, nm_pos, gdp)
+       call dfexchg( ssvv,   1, lsed, dfloat, nm_pos, gdp)
+    endif
     !
     ! if morphological computations have started
     !
@@ -982,8 +988,10 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
        !
        call dfexchg( sbuuc,   1, lsedtot, dfloat, nm_pos, gdp)
        call dfexchg( sbvvc,   1, lsedtot, dfloat, nm_pos, gdp)
-       call dfexchg( ssuuc,   1, lsed,    dfloat, nm_pos, gdp)
-       call dfexchg( ssvvc,   1, lsed,    dfloat, nm_pos, gdp)
+       if (lsed > 0) then
+          call dfexchg( ssuuc,   1, lsed,    dfloat, nm_pos, gdp)
+          call dfexchg( ssvvc,   1, lsed,    dfloat, nm_pos, gdp)
+       endif
        !
        ! Apply erosion and sedimentation to bookkeeping system
        !

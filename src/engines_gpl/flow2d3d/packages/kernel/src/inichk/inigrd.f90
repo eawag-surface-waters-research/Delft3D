@@ -344,5 +344,5 @@ subroutine inigrd(lundia    ,error     ,runid     ,nmax      ,mmax      , &
     !
     ! close and delete unformatted scratch file for grid (see rdgrid)
     !
-    !   close (lungrd, status = 'delete')
+    close (lungrd)
 end subroutine inigrd
