@@ -14,7 +14,7 @@ lib_LTLIBRARIES = libstream.la
 
 #-------------------------------------------------------------------------------
 #Includes
-INCLUDES = -I$(top_builddir)/utils_lgpl/stream/include
+AM_CPPFLAGS = -I$(top_builddir)/utils_lgpl/stream/include
 
 #-------------------------------------------------------------------------------
 #Sources
