@@ -131,6 +131,7 @@ AC_PROG_F77([ifort gfortran-mp-4.6 gfortran-mp-4.5 gfortran-mp-4.4 gfortran g77]
 AC_F77_LIBRARY_LDFLAGS
 AX_OPENMP
 FFLAGS="$FFLAGS $OPENMP_FFLAGS"
+AC_F77_LINE_LENGTH([132])
 AC_LANG_POP
 
 dnl Fortran compiler defaults (this could be a separate m4 file)
