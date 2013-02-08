@@ -913,7 +913,8 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
                   & d(dps)    ,r(dpu)    ,r(dpv)    ,r(s1)     ,r(thick)  , &
                   & r(hu)     ,r(hv)     ,r(dzu1)   ,r(dzu0)   ,r(dzv1)   , &
                   & r(dzv0)   ,r(dzs1)   ,r(dzs0)   ,r(sig)    ,r(r1)     , &
-                  & lstsci    ,r(gsqs)   ,r(qzk)    ,gdp       )
+                  & lstsci    ,r(gsqs)   ,r(qzk)    ,r(umean)  ,r(vmean)  , &
+                  & gdp       )
        if (error) goto 9999
        call inicut(lundia    ,error     ,runid     ,nmax      ,mmax      , &
                  & nmaxus    ,kmax      ,flcut     ,fl45      ,i(kcu)    , &

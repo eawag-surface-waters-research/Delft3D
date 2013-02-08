@@ -194,9 +194,9 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
                    ! s1u is used for setting kfumx0
                    !
                    s1u = max(s0(nm), s0(nmu))
-                   if (umean(nm) >= 0.001_fp) then
+                   if (umean(nm) > 0.001_fp) then
                       s1u = s0(nm)
-                   elseif (umean(nm) <= - 0.001_fp) then
+                   elseif (umean(nm) < -0.001_fp) then
                       s1u = s0(nmu)
                    else
                    endif

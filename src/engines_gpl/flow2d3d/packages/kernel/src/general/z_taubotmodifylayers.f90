@@ -3,7 +3,8 @@ subroutine z_taubotmodifylayers(nmmax  ,kmax     ,lstsci   ,icx     ,icy        
                               & kfu    ,kfumin   ,kfumax   ,dpu     ,dzu1         , &
                               & kfv    ,kfvmin   ,kfvmax   ,dpv     ,dzv1         , &
                               & r0     ,s0       ,s1       ,zk      ,modify_dzsuv , &
-                              & hdt    ,gsqs     ,kfsmx0   ,qzk     ,gdp          )
+                              & hdt    ,gsqs     ,kfsmx0   ,qzk     ,umean        , &
+                              & vmean  ,gdp      )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -74,6 +75,8 @@ subroutine z_taubotmodifylayers(nmmax  ,kmax     ,lstsci   ,icx     ,icy        
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                   :: dpv      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                   :: s0       !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                   :: s1       !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                   :: umean    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                   :: vmean    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(0:kmax)                                  :: zk       !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: dzs1     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)             :: dzu1     !  Description and declaration in esm_alloc_real.f90 
@@ -167,7 +170,13 @@ subroutine z_taubotmodifylayers(nmmax  ,kmax     ,lstsci   ,icx     ,icy        
           if (kfu(nm)==1 .and. kfumax(nm)>kfumin(nm)) then
              k       = kfumin(nm)
              nmu     = nm + icx
-             s1u     = max(s1(nm), s1(nmu))
+             if (umean(nm) > 0.001_fp) then
+                s1u = s1(nm)
+             elseif (umean(nm) < -0.001_fp) then
+                s1u = s1(nmu)
+             else
+                s1u = max(s1(nm), s1(nmu))
+             endif
              dzu1(nm, k  ) = 0.5_fp*(dpu(nm)+min(zk(k+1),s1u))
              dzu1(nm, k+1) = dzu1(nm,k)
           endif
@@ -181,7 +190,13 @@ subroutine z_taubotmodifylayers(nmmax  ,kmax     ,lstsci   ,icx     ,icy        
           if (kfv(nm)==1 .and. kfvmax(nm)>kfvmin(nm)) then
              k       = kfvmin(nm)
              num     = nm + icy
-             s1v     = max(s1(nm), s1(num))
+             if (vmean(nm) > 0.001_fp) then
+                s1v = s1(nm)
+             elseif (vmean(nm) < -0.001_fp) then
+                s1v = s1(num)
+             else
+                s1v = max(s1(nm), s1(num))
+             endif
              dzv1(nm, k  ) = 0.5_fp*(dpv(nm)+min(zk(k+1),s1v))
              dzv1(nm, k+1) = dzv1(nm,k)
           endif

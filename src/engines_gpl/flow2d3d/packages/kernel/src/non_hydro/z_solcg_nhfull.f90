@@ -245,7 +245,21 @@ subroutine z_solcg_nhfull(aak       ,bbk       ,cck       ,aak2      ,cck2      
        enddo
        rk = sqrt(abs(rk))
        if (iter == 1) then
+          if (rk == 0.0d0) then
+             !
+             ! Needed in case whole domain is dry
+             ! Avoid division by zero, but assure convergence
+             !
+             rk = 0.1_fp*epsnh
+          endif
           rk0    = rk
+          if (rkinf == 0.0d0) then
+             !
+             ! Needed in case whole domain is dry
+             ! Avoid division by zero, but assure convergence
+             !
+             rkinf = 0.1_fp*epsnh
+          endif
           rkinf0 = rkinf
        endif
        !

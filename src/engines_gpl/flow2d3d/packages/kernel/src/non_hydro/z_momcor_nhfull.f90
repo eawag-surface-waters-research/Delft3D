@@ -407,22 +407,22 @@ subroutine z_momcor_nhfull(nmmax     ,kmax      ,icx       ,icy       ,s1       
           !
           ! Check conservation of mass
           !
-         do k = kfsmin(nm), kfsmx0(nm)-1
-            rmassd = gsqs(nm)*(w1(nm,k)-w1(nm,k-1)) - (  qxk(nmd,k) - qxk(nm,k)           &
-                   &                                   + qyk(ndm,k) - qyk(nm,k)+d0k(nm,k))
-            rmassd = abs(rmassd)
-            if (rmassd > rmax) then
-               rmax = rmassd
-            endif
-         enddo
-         k     = kfsmx0(nm)
-         rmass =   gsqs(nm)*(s1(nm)-s0(nm))/dt                                   &
-               & - gsqs(nm)* w1(nm,k-1) - (  qxk(nmd,k) - qxk(nm,k)              &
-               &                           + qyk(ndm,k) - qyk(nm,k))-d0k(nm,k)
-         rmass = abs(rmass)
-         if (rmass > rmax) then
-            rmax = rmass
-         endif
+          do k = kfsmin(nm), kfsmx0(nm)-1
+             rmassd = gsqs(nm)*(w1(nm,k)-w1(nm,k-1)) - (  qxk(nmd,k) - qxk(nm,k)           &
+                    &                                   + qyk(ndm,k) - qyk(nm,k)+d0k(nm,k))
+             rmassd = abs(rmassd)
+             if (rmassd > rmax) then
+                rmax = rmassd
+             endif
+          enddo
+          k     = kfsmx0(nm)
+          rmass =   gsqs(nm)*(s1(nm)-s0(nm))/dt                                   &
+                & - gsqs(nm)* w1(nm,k-1) - (  qxk(nmd,k) - qxk(nm,k)              &
+                &                           + qyk(ndm,k) - qyk(nm,k))-d0k(nm,k)
+          rmass = abs(rmass)
+          if (rmass > rmax) then
+             rmax = rmass
+          endif
        endif
        if (kcs(nm)*kfs(nm)>0) then
          do k = kfsmin(nm), kfsmx0(nm)

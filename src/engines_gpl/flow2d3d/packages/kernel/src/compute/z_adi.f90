@@ -423,7 +423,8 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                                   & kfu    ,kfumin   ,kfumax   ,dpu     ,dzu1         , &
                                   & kfv    ,kfvmin   ,kfvmax   ,dpv     ,dzv1         , &
                                   & r0     ,s0       ,s1       ,zk      ,modify_dzsuv , &
-                                  & hdt    ,gsqs     ,kfsmx0   ,qzk     ,gdp          )
+                                  & hdt    ,gsqs     ,kfsmx0   ,qzk     ,umean        , &
+                                  & vmean  ,gdp      )
        endif
        !
        ! Compute Volume and Areas to be used in routines that computes 
@@ -603,12 +604,13 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
           modify_dzsuv(1) = 1
           modify_dzsuv(2) = 0
           modify_dzsuv(3) = 1
-          call z_taubotmodifylayers(nmmax  ,kmax     ,lstsci   ,icx      ,icy          , & 
-                                  & kfs    ,kfsmin   ,kfsmax   ,dps      ,dzs1         , &
-                                  & kfu    ,kfumin   ,kfumax   ,dpu      ,dzu1         , &
-                                  & kfv    ,kfvmin   ,kfvmax   ,dpv      ,dzv1         , &
-                                  & r0     ,s0       ,s1       ,zk       ,modify_dzsuv , &
-                                  & hdt    ,gsqs     ,kfsmx0   ,qzk      ,gdp          )  
+          call z_taubotmodifylayers(nmmax  ,kmax     ,lstsci   ,icx     ,icy          , & 
+                                  & kfs    ,kfsmin   ,kfsmax   ,dps     ,dzs1         , &
+                                  & kfu    ,kfumin   ,kfumax   ,dpu     ,dzu1         , &
+                                  & kfv    ,kfvmin   ,kfvmax   ,dpv     ,dzv1         , &
+                                  & r0     ,s0       ,s1       ,zk      ,modify_dzsuv , &
+                                  & hdt    ,gsqs     ,kfsmx0   ,qzk     ,umean        , &
+                                  & vmean  ,gdp      )
        endif
        !
        ! Compute Volume and Areas to be used in routines that computes 

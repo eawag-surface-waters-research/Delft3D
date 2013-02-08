@@ -171,20 +171,21 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
           ! First determine umean for the top layer(s) of cells NM and NMU
           ! to find the upwind direction
           !
-          nmu   = nm + icx
+          !nmu   = nm + icx
           !
           ! Determine layers participating in velocity point
           !
-          kkmin = min(kfsmax(nm), kfsmax(nmu))
-          kkmax = max(kfsmax(nm), kfsmax(nmu))
+          !kkmin = min(kfsmax(nm), kfsmax(nmu))
+          !kkmax = max(kfsmax(nm), kfsmax(nmu))
           !
           ! kkmin below the bottom in NM or NMU?
           !
-          kkmin = max( kkmin, max(kfsmin(nm), kfsmin(nmu)) )
+          !kkmin = max( kkmin, max(kfsmin(nm), kfsmin(nmu)) )
           !
           if (kfu(nm) == 1 .and. hu(nm)>=htrsh) then
              hnm = 0.0_fp
-             do k = kkmin, kkmax
+             !do k = kkmin, kkmax
+             do k = kfumin(nm), kfumax(nm)
                 umean(nm) = umean(nm) + u1(nm,k)*dzu1(nm,k)
                 hnm       = hnm + dzu1(nm,k)
              enddo
@@ -192,20 +193,21 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
           else
           endif
           !
-          num   = nm + icy
+          !num   = nm + icy
           !
           ! Determine layers participating in velocity point
           !
-          kkmin = min(kfsmax(nm), kfsmax(num))
-          kkmax = max(kfsmax(nm), kfsmax(num))
+          !kkmin = min(kfsmax(nm), kfsmax(num))
+          !kkmax = max(kfsmax(nm), kfsmax(num))
           !
           ! kkmin below the bottom in NM or NUM?
           !
-          kkmin = max( kkmin, max(kfsmin(nm), kfsmin(num)) )
+          !kkmin = max( kkmin, max(kfsmin(nm), kfsmin(num)) )
           !
           if (kfv(nm) == 1 .and. hv(nm)>=htrsh) then
              hnm = 0.0_fp
-             do k = kkmin, kkmax
+             !do k = kkmin, kkmax
+             do k = kfvmin(nm), kfvmax(nm)
                 vmean(nm) = vmean(nm) + v1(nm,k)*dzv1(nm,k)
                 hnm       = hnm + dzv1(nm,k)
              enddo

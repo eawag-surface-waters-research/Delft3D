@@ -447,6 +447,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     integer      , dimension(:)          , pointer :: nread
     real(fp)     , dimension(:)          , pointer :: rcousr
     character*20 , dimension(:)          , pointer :: procs
+    integer                              , pointer :: nrcmp
     logical                              , pointer :: dryrun
     integer(pntrsize)                    , pointer :: typbnd
     integer      , dimension(:)          , pointer :: modify_dzsuv
@@ -887,6 +888,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     nprptr              => gdp%gdusrpar%nprptr
     rcousr              => gdp%gdusrpar%rcousr
     procs               => gdp%gdusrpar%procs
+    nrcmp               => gdp%gdtfzeta%nrcmp
     dryrun              => gdp%gdtmpfil%dryrun
     typbnd              => gdp%gdr_i_ch%typbnd
     modify_dzsuv        => gdp%gdzmodel%modify_dzsuv
@@ -977,6 +979,12 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     if (rtcact) then
        call rtc_comm_get(((nst*2)+2)*hdt, r(cbuvrt), nsluv, gdp)
     endif
+    if (kc > 0 .or. nrcmp > 0) then
+       call timer_start(timer_nodal_factor, gdp)
+       call update_nodal_factors(timnow, kc, ntof, nto, kcd, r(hydrbc), r(omega), gdp)
+       call timer_stop(timer_nodal_factor, gdp)
+    endif
+    !
     if (wind) then
        !
        ! call incwnd is replaced by a call to the meteo module
@@ -1186,9 +1194,9 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
        icy = 1
        call timer_start(timer_euler, gdp)
        call euler(jstart    ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
-                & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumax) , &
-                & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
-                & r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
+                & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumx0) , &
+                & i(kfumin) ,i(kfvmx0) ,i(kfvmin) ,r(dzu0)   ,r(dzv0)   , &
+                & r(u0)     ,r(wrkb3)  ,r(v0)     ,r(wrkb4)  , &
                 & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
                 & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   , &
                 & r(grmsur) ,r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
@@ -1459,12 +1467,13 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
              ! Call with modify_dzsuv set to 1 for all 3 components, to modify both dzs1, dzu1 and dzv1
              !
              modify_dzsuv(:) = 1
-             call z_taubotmodifylayers(nmmax   ,kmax       ,lstsci    ,icx      ,icy          , & 
-                                     & i(kfs)  ,i(kfsmin)  ,i(kfsmax) ,d(dps)   ,r(dzs1)      , &
-                                     & i(kfu)  ,i(kfumin)  ,i(kfumax) ,r(dpu)   ,r(dzu1)      , &
-                                     & i(kfv)  ,i(kfvmin)  ,i(kfvmax) ,r(dpv)   ,r(dzv1)      , &
-                                     & r(r1)   ,r(s0)      ,r(s1)     ,r(sig)   ,modify_dzsuv , &
-                                     & hdt     ,r(gsqs)    ,i(kfsmx0) ,r(qzk)   ,gdp          )
+             call z_taubotmodifylayers(nmmax    ,kmax       ,lstsci    ,icx      ,icy          , & 
+                                     & i(kfs)   ,i(kfsmin)  ,i(kfsmax) ,d(dps)   ,r(dzs1)      , &
+                                     & i(kfu)   ,i(kfumin)  ,i(kfumax) ,r(dpu)   ,r(dzu1)      , &
+                                     & i(kfv)   ,i(kfvmin)  ,i(kfvmax) ,r(dpv)   ,r(dzv1)      , &
+                                     & r(r1)    ,r(s0)      ,r(s1)     ,r(sig)   ,modify_dzsuv , &
+                                     & hdt      ,r(gsqs)    ,i(kfsmx0) ,r(qzk)   ,r(umean)     , &
+                                     & r(vmean) ,gdp        )
           endif
           !
           ! Re-Compute Volume (Areas actually need no update) to be used in routines that computes

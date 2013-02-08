@@ -155,7 +155,7 @@ subroutine upwhu(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              & zmodel               ) then
              if (umean(nm) > 0.001_fp) then
                 hu(nm) = s0(nm) + dpu(nm)
-             elseif (umean(nm) <= -0.001) then
+             elseif (umean(nm) < -0.001) then
                 hu(nm) = s0(nmu) + dpu(nm)
              else
                 hu(nm) = max(s0(nmu), s0(nm)) + dpu(nm)

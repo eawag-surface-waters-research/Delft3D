@@ -381,10 +381,11 @@ subroutine z_hydpres_nhfull(mmax      ,nmax      ,j         ,nmmaxj    ,nmmax   
                                        + (  v0(nm , k)*dzv0(nm , k)*gvv(nm )          &
                                           - v0(ndm, k)*dzv0(ndm, k)*gvv(ndm) )        &
                                        - w0(nm, k - 1)*gsqs(nm)                )      &
-                      - (  alfakm1 * p0(nm,k-1) & !!! + ag*rhow*(s0(nm)-z_km1) )       &
-                         + alfak   * p0(nm,k  ) ) !!! + ag*rhow*(s0(nm)-z_k  ) ) )
-
-
+                      - alfak * p0(nm,k) !!! + ag*rhow*(s0(nm)-z_k  ) ) )
+          if (k > kfsmin(nm)) then
+             ddk (nm, k) = ddk(nm,k) - alfakm1 * p0(nm,k-1) !!! + ag*rhow*(s0(nm)-z_km1) )
+          endif
+          !
           k = kfsmin(nm)
           !
           ! bottom: insert dp/dz = 0 at bottom

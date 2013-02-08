@@ -249,7 +249,21 @@ subroutine z_solbicgstab(aak       ,bbk       ,cck      ,aak2      ,cck2      , 
           ! Store initial residual norms.
           !
           if (iter==1) then
+             if (rk == 0.0d0) then
+                !
+                ! Needed in case whole domain is dry
+                ! Avoid division by zero, but assure convergence
+                !
+                rk = 0.1_fp*epsnh
+             endif
              rk0    = rk
+             if (rkinf == 0.0d0) then
+                !
+                ! Needed in case whole domain is dry
+                ! Avoid division by zero, but assure convergence
+                !
+                rkinf = 0.1_fp*epsnh
+             endif
              rkinf0 = rkinf
           endif
           !
@@ -405,20 +419,20 @@ subroutine z_solbicgstab(aak       ,bbk       ,cck      ,aak2      ,cck2      , 
                 endif
              enddo
           enddo
-         !
-         ! convergence check
-         !
-         if (iter == nhiter) then
-            write (errtxt(1:8), '(i8)') nst
-            write (errtxt(25:30), '(i6)') nhiter
-            call prterr(lundia    ,'Z021'    ,trim(errtxt)    )
-            exit
-         endif
-      enddo
-      !
-      ! Calculate A*pnhcor and store the result in rj.
-      !
-      call z_matpro(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
+          !
+          ! convergence check
+          !
+          if (iter == nhiter) then
+             write (errtxt(1:8), '(i8)') nst
+             write (errtxt(25:30), '(i6)') nhiter
+             call prterr(lundia    ,'Z021'    ,trim(errtxt)    )
+             exit
+          endif
+       enddo
+       !
+       ! Calculate A*pnhcor and store the result in rj.
+       !
+       call z_matpro(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
                    & bbka      ,bbkc      ,kmax      ,icx       ,icy       , &
                    & nmmax     ,kfsz0     ,pnhcor    ,rj        ,kfs       , &
                    & kfsmin    ,kfsmx0    ,gdp       )

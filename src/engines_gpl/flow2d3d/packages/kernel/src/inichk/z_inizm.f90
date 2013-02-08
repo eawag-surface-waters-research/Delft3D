@@ -6,7 +6,8 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                  & dps       ,dpu       ,dpv       ,s1        ,thick     , &
                  & hu        ,hv        ,dzu1      ,dzu0      ,dzv1      , &
                  & dzv0      ,dzs1      ,dzs0      ,zk        ,r1        , &
-                 & lstsci    ,gsqs      ,qzk       ,gdp       )
+                 & lstsci    ,gsqs      ,qzk       ,umean     ,vmean     , &
+                 & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -110,6 +111,8 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(out) :: hu     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(out) :: hv     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: s1     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: umean  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: vmean  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(out) :: dzs0   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: dzs1   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(out) :: dzu0   !  Description and declaration in esm_alloc_real.f90
@@ -317,7 +320,8 @@ subroutine z_inizm(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                                & kfu     ,kfumin   ,kfumax   ,dpu      ,dzu1         , &
                                & kfv     ,kfvmin   ,kfvmax   ,dpv      ,dzv1         , &
                                & r1      ,s1       ,s1       ,zk       ,modify_dzsuv , &
-                               & hdt     ,gsqs     ,kfsmax   ,qzk      ,gdp          )
+                               & hdt     ,gsqs     ,kfsmax   ,qzk      ,umean        , &
+                               & vmean   ,gdp      )
     endif
     !
     do nm = 1, nmmax

@@ -1005,7 +1005,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        call update_nodal_factors(timnow, kc, ntof, nto, kcd, r(hydrbc), r(omega), gdp)
        call timer_stop(timer_nodal_factor, gdp)
     endif
-
+    !
     if (wind) then
        !
        ! call incwnd is replaced by a call to the meteo module
@@ -2384,12 +2384,13 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
              !
              modify_dzsuv(1)   = 1
              modify_dzsuv(2:3) = 0
-             call z_taubotmodifylayers(nmmax   ,kmax       ,lstsci    ,icx      ,icy          , & 
-                                     & i(kfs)  ,i(kfsmin)  ,i(kfsmax) ,d(dps)   ,r(dzs1)      , &
-                                     & i(kfu)  ,i(kfumin)  ,i(kfumax) ,r(dpu)   ,r(dzu1)      , &
-                                     & i(kfv)  ,i(kfvmin)  ,i(kfvmax) ,r(dpv)   ,r(dzv1)      , &
-                                     & r(r1)   ,r(s00)     ,r(s1)     ,r(sig)   ,modify_dzsuv , &
-                                     & hdt     ,r(gsqs)    ,i(kfsmx0) ,r(qzk)   ,gdp          )
+             call z_taubotmodifylayers(nmmax    ,kmax       ,lstsci    ,icx      ,icy          , & 
+                                     & i(kfs)   ,i(kfsmin)  ,i(kfsmax) ,d(dps)   ,r(dzs1)      , &
+                                     & i(kfu)   ,i(kfumin)  ,i(kfumax) ,r(dpu)   ,r(dzu1)      , &
+                                     & i(kfv)   ,i(kfvmin)  ,i(kfvmax) ,r(dpv)   ,r(dzv1)      , &
+                                     & r(r1)    ,r(s00)     ,r(s1)     ,r(sig)   ,modify_dzsuv , &
+                                     & hdt      ,r(gsqs)    ,i(kfsmx0) ,r(qzk)   ,r(umean)     , &
+                                     & r(vmean) ,gdp        )
           endif
           !
           ! Re-Compute Volume (Areas actually need no update) to be used in routines that computes 

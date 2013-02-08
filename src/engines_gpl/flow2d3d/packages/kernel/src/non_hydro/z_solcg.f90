@@ -135,14 +135,14 @@ subroutine z_solcg(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
     ! Start iteration process
     ! Noted that array p1 contains A_inv * rj
     !
-    iter = 0
+    iter   = 0
+    rk0    = 0.0_fp
+    rkinf0 = 0.0_fp
   111 continue
     iter = iter + 1
     !
     rk    = 0.0_fp
-    rk0   = 0.0_fp
     rkinf = 0.0_fp
-    rkinf0 = 0.0_fp
     do m = m1_nhy, m2_nhy
        nmst = nmstart + (m - m1_nhy)*icxy
        do nm = nmst, nmst + ndelta
@@ -160,22 +160,33 @@ subroutine z_solcg(aak       ,bbk       ,cck       ,aak2      ,cck2      , &
     enddo
     !
     if (iter == 1) then
-       rk0    = rk
-       rkinf0 = rkinf
-    endif
-    if (rk0 < 1.0e-6_fp) then
-       rk0 = 1.0e-6_fp
+       if (rk == 0.0_fp) then
+          !
+          ! Needed in case whole domain is dry
+          ! Avoid division by zero, but assure convergence
+          !
+          rk    = 0.1_fp*epsnh
+       endif
+       rk0      = rk
+       if (rkinf == 0.0_fp) then
+          !
+          ! Needed in case whole domain is dry
+          ! Avoid division by zero, but assure convergence
+          !
+          rkinf = 0.1_fp*epsnh
+       endif
+       rkinf0   = rkinf
     endif
     ! 
     ! convergence check: ||r_k|| / ||r_k_init|| < eps
     ! Use L2NORM or Linfinity norm
     !
     if (l2norm) then
-       if ((sqrt(rk)<sqrt(rk0)*epsnh .and. iter>0) .or. rkinf<1.0e-2_fp) then
+       if ((sqrt(rk)<sqrt(rk0)*epsnh .and. iter>0) .or. rkinf<1.0e-2) then
           goto 999
        endif
     else
-       if ((rkinf<rkinf0*epsnh .and. iter>0) .or. rkinf<1.0e-2_fp) then
+       if ((rkinf<rkinf0*epsnh .and. iter>0) .or. rkinf<1.0e-2) then
           goto 999
        endif
     endif
