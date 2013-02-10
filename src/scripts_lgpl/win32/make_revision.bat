@@ -88,7 +88,7 @@ REM Inputfile > Substitute > Outputfile
 REM =====================================
 
 CD "%CURDIR%"
-echo %0: executing version_number.exe %BUILD_NUMBER% "%3" "%4" "%5"
+echo %0: executing %VN_DIR%\version_number.exe %BUILD_NUMBER% "%3" "%4" "%5"
 "%VN_DIR%\version_number.exe" %BUILD_NUMBER% "%3" "%4" "%5"
 
 REM =====================================
