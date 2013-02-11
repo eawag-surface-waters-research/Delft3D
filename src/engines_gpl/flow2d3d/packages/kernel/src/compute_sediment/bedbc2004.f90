@@ -220,10 +220,7 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
        !
        ! Calculate Van Rijn's reference height currents and waves (TR2004)
        !
-       aks = max(0.5_fp*kscr , 0.5_fp*kswr , 0.01_fp)
-       if (aks <= z0cur) then
-          aks = z0cur + aks
-       endif
+       aks = z0cur + max(0.5_fp*kscr , 0.5_fp*kswr , 0.01_fp)
        !
        ! calculate wave parameters
        !
@@ -303,10 +300,8 @@ subroutine bedbc2004(tp        ,rhosol    ,rhowat    , &
        !
        ! kscr uses calibration factor from trachytopes
        !
-       aks = max(0.5_fp*kscr , 0.01_fp)
-       if (aks <= z0cur) then
-          aks = z0cur + aks
-       endif
+       aks = z0cur + max(0.5_fp*kscr , 0.01_fp)
+       !
        tauwav = 0.0_fp
        muw    = 0.0_fp
        alfacw = 1.0_fp
