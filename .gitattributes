@@ -3435,7 +3435,6 @@ src/tools_lgpl/matlab/quickplot/progsrc/@qp_data_resource/private/resourcemanage
 src/tools_lgpl/matlab/quickplot/progsrc/@qp_data_resource/qp_data_resource.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/@qp_data_resource/subsref.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/Contents.m -text
-src/tools_lgpl/matlab/quickplot/progsrc/ap2ep.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/arbcross.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/average_trim.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/bct_io.m -text
@@ -3618,6 +3617,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/adcircmesh.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/adddimension.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/addlocation.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/ai_ungen.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/ap2ep.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/arcgrid.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/arcgridfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/asciiload.m -text
