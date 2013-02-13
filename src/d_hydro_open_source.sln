@@ -6,13 +6,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "delftio", "delftio", "{D5B8
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "esmfsm", "esmfsm", "{DF82D5FD-55E6-428C-A9EF-98F8E8A9B39E}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "inifiles", "inifiles", "{66CA8E56-8303-4F36-8F21-E452633776C4}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "nefis", "nefis", "{100E3FF2-6880-4F5A-A62A-BD536E9C6BED}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "semaphore", "semaphore", "{59EF2A15-3B0A-4996-BB66-ED0191A10C58}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "stream", "stream", "{25D05302-68AF-491F-8E32-66C31BF677D3}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "deltares_common", "deltares_common", "{A704B858-8B41-4DF7-B55A-8841B3D8A00F}"
 EndProject
@@ -31,10 +25,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "lint", "lint", "{8AD9DE3D-3324-4E38-858C-5E25D72C18F7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "kubint", "kubint", "{D05BC9F9-8D5C-435A-883E-52C85CC3188B}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "delftio_sync", "delftio_sync", "{C1BDFC92-62A7-463C-AEE6-568028A21624}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "precision", "precision", "{A12B882C-BC55-45C8-95EE-D5739D0B7CD7}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{EE53212E-A457-48EE-B57A-6A56AC12DD34}"
 EndProject
@@ -96,23 +86,12 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "esmfsm", "utils_lgpl\esmfsm
 		{5D050FBC-7AFA-4D3C-8AE8-D8C138F15596} = {5D050FBC-7AFA-4D3C-8AE8-D8C138F15596}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nefis_version_number", "utils_lgpl\nefis\packages\nefis_version_number\nefis_version_number.vcproj", "{0C8D0AC5-B140-498B-B383-05CE14C138B1}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nefis_dll", "utils_lgpl\nefis\packages\nefis\nefis_dll.vcproj", "{0FB6AEED-A49C-4FD2-9F17-2B0C1ED28BE3}"
 	ProjectSection(ProjectDependencies) = postProject
 		{0C8D0AC5-B140-498B-B383-05CE14C138B1} = {0C8D0AC5-B140-498B-B383-05CE14C138B1}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "datsel_version_number", "tools_gpl\datsel\packages\datsel_version_number\datsel_version_number.vcproj", "{9FB4A6D1-4EC2-4341-AA6D-878AE2BF65BC}"
-EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "inifiles", "utils_lgpl\inifiles\packages\inifiles\inifiles.vfproj", "{B51D72D1-8C84-41D5-87BF-BBB63728B422}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "semaphore", "utils_lgpl\semaphore\packages\semaphore\semaphore.vcproj", "{4C4CF4A4-C5F9-48EC-B39A-7D43427C6CE4}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "stream", "utils_lgpl\stream\packages\stream\stream.vcproj", "{E366AF30-9FFF-4B68-B291-CF9197F5B738}"
-	ProjectSection(ProjectDependencies) = postProject
-		{8330A3A9-BAB4-4D0A-B039-2770388D5225} = {8330A3A9-BAB4-4D0A-B039-2770388D5225}
-	EndProjectSection
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "deltares_common", "utils_lgpl\deltares_common\packages\deltares_common\deltares_common.vfproj", "{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -124,11 +103,7 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "deltares_common", "utils_lg
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "deltares_common_c", "utils_lgpl\deltares_common\packages\deltares_common_c\deltares_common_c.vcproj", "{51065F4C-23D3-4C5F-AF5B-E70776409D7B}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "delftio_version_number", "utils_lgpl\delftio\packages\delftio_version_number\delftio_version_number.vcproj", "{76C16D40-DB61-4E46-BADB-B3D2A5F7A304}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "esmfsm_version_number", "utils_lgpl\esmfsm\packages\esmfsm_version_number\esmfsm_version_number.vcproj", "{73054CB6-9CC1-45D0-91A9-EDF50CF361A4}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "stream_version_number", "utils_lgpl\stream\packages\stream_version_number\stream_version_number.vcproj", "{8330A3A9-BAB4-4D0A-B039-2770388D5225}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "kubint_version_number", "tools_gpl\kubint\packages\kubint_version_number\kubint_version_number.vcproj", "{828C8956-8E10-40E6-95E1-25F29A74B701}"
 EndProject
@@ -232,24 +207,13 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "plugin_user", "engines_gpl\
 		{D84800EE-E66F-4383-81A9-1C958A80A3A8} = {D84800EE-E66F-4383-81A9-1C958A80A3A8}
 	EndProjectSection
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "delftio_sync", "utils_lgpl\delftio_sync\packages\delftio_sync\delftio_sync.vfproj", "{C13F23DE-7C41-4445-8FDD-08B774AD5806}"
-	ProjectSection(ProjectDependencies) = postProject
-		{91C4971E-914C-4AD8-9711-6B53E856884C} = {91C4971E-914C-4AD8-9711-6B53E856884C}
-		{4EA9CF87-EFD8-412B-8BC0-B8FE9171C424} = {4EA9CF87-EFD8-412B-8BC0-B8FE9171C424}
-		{5E1814B7-3691-4CA6-8FE2-A374EC5A5904} = {5E1814B7-3691-4CA6-8FE2-A374EC5A5904}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "delftio_sync_version_number", "utils_lgpl\delftio_sync\packages\delftio_sync_version_number\delftio_sync_version_number.vcproj", "{4EA9CF87-EFD8-412B-8BC0-B8FE9171C424}"
-EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "precision", "utils_lgpl\precision\packages\precision\precision.vfproj", "{5E1814B7-3691-4CA6-8FE2-A374EC5A5904}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "01-smalltest", "utils_lgpl\stream\tests\01-smalltest\01-smalltest.vcproj", "{F0E67372-E42B-4FEB-9B61-82BE85DDCBFF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "02_streams_smalltest", "utils_lgpl\deltares_common\tests\02_streams_smalltest\01-smalltest.vcproj", "{F0E67372-E42B-4FEB-9B61-82BE85DDCBFF}"
 	ProjectSection(ProjectDependencies) = postProject
 		{E366AF30-9FFF-4B68-B291-CF9197F5B738} = {E366AF30-9FFF-4B68-B291-CF9197F5B738}
 		{8330A3A9-BAB4-4D0A-B039-2770388D5225} = {8330A3A9-BAB4-4D0A-B039-2770388D5225}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "02-streamtest", "utils_lgpl\stream\tests\02-streamtest\02-streamtest.vcproj", "{4FE52682-46E0-4703-82FA-CCA07DC3F611}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "03_streams_test", "utils_lgpl\deltares_common\tests\03_streams_test\02-streamtest.vcproj", "{4FE52682-46E0-4703-82FA-CCA07DC3F611}"
 	ProjectSection(ProjectDependencies) = postProject
 		{E366AF30-9FFF-4B68-B291-CF9197F5B738} = {E366AF30-9FFF-4B68-B291-CF9197F5B738}
 		{8330A3A9-BAB4-4D0A-B039-2770388D5225} = {8330A3A9-BAB4-4D0A-B039-2770388D5225}
@@ -267,17 +231,6 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "mormerge", "tools_gpl\morme
 		{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118} = {2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}
 		{B51D72D1-8C84-41D5-87BF-BBB63728B422} = {B51D72D1-8C84-41D5-87BF-BBB63728B422}
 	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "meteo", "meteo", "{B868F0CA-339A-405C-AA99-4E3889F5D242}"
-EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "meteo", "utils_lgpl\meteo\packages\meteo\meteo.vfproj", "{BBB439F6-B1DE-42D2-848E-732EA9402576}"
-	ProjectSection(ProjectDependencies) = postProject
-		{94272A7C-EC63-4BB8-8D1E-94008E227980} = {94272A7C-EC63-4BB8-8D1E-94008E227980}
-		{5E1814B7-3691-4CA6-8FE2-A374EC5A5904} = {5E1814B7-3691-4CA6-8FE2-A374EC5A5904}
-		{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118} = {2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "meteo_version_number", "utils_lgpl\meteo\packages\meteo_version_number\meteo_version_number.vcproj", "{94272A7C-EC63-4BB8-8D1E-94008E227980}"
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "ec_module", "utils_lgpl\ec_module\packages\ec_module\ec_module.vfproj", "{62E2E1DA-4AFA-4880-A508-1C4F217C93B1}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -298,13 +251,6 @@ EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "plugin_culvert", "plugins_lgpl\plugin_culvert\plugin_culvert.vfproj", "{B986E78F-2CEE-49F4-8F50-52D4961E0A28}"
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "ftnunit", "utils_lgpl\ftnunit\packages\ftnunit\ftnunit.vfproj", "{10382558-3C7B-4BED-BEE8-C89EDCAE740B}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "constants", "constants", "{29BCEC1C-8B87-4445-99D0-1DC1953E79B7}"
-EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "mathconsts", "utils_lgpl\constants\packages\mathconsts\mathconsts.vfproj", "{D84800EE-E66F-4383-81A9-1C958A80A3A8}"
-	ProjectSection(ProjectDependencies) = postProject
-		{5E1814B7-3691-4CA6-8FE2-A374EC5A5904} = {5E1814B7-3691-4CA6-8FE2-A374EC5A5904}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "flow2d3d", "engines_gpl\flow2d3d\packages\flow2d3d\flow2d3d.vcproj", "{005E6B5B-C1D0-4DB2-9870-2098A33C40D0}"
 	ProjectSection(ProjectDependencies) = postProject

@@ -196,9 +196,15 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "plugin_user", "engines_gpl\
 		{E4DD914F-DCA3-4CF6-A2C0-6461270D3235} = {E4DD914F-DCA3-4CF6-A2C0-6461270D3235}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "01-smalltest", "utils_lgpl\deltares_common\packages\tests\01-smalltest\01-smalltest.vcxproj", "{F0E67372-E42B-4FEB-9B61-82BE85DDCBFF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "01-smalltest", "utils_lgpl\deltares_common\tests\02_streams_smalltest\01-smalltest.vcxproj", "{F0E67372-E42B-4FEB-9B61-82BE85DDCBFF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{51065F4C-23D3-4C5F-AF5B-E70776409D7B} = {51065F4C-23D3-4C5F-AF5B-E70776409D7B}
+	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "02-streamtest", "utils_lgpl\deltares_common\packages\tests\02-streamtest\02-streamtest.vcxproj", "{4FE52682-46E0-4703-82FA-CCA07DC3F611}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "02-streamtest", "utils_lgpl\deltares_common\tests\03_streams_test\02-streamtest.vcxproj", "{4FE52682-46E0-4703-82FA-CCA07DC3F611}"
+	ProjectSection(ProjectDependencies) = postProject
+		{51065F4C-23D3-4C5F-AF5B-E70776409D7B} = {51065F4C-23D3-4C5F-AF5B-E70776409D7B}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mormerge_version_number", "tools_gpl\mormerge\packages\mormerge_version_number\mormerge_version_number.vcxproj", "{C2638430-A7F5-41DD-A51A-9C23D604FB34}"
 EndProject

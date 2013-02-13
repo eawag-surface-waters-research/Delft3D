@@ -4007,6 +4007,7 @@ src/utils_lgpl/delftio/packages/delftio/src/delftio_sync/sync_flm.f90 -text
 src/utils_lgpl/delftio/packages/delftio/src/delftio_sync/sync_flowwave.f90 -text
 src/utils_lgpl/delftio/packages/delftio/src/delftio_sync/sync_rtcflow.f90 -text
 src/utils_lgpl/delftio/packages/delftio/src/diof90/Makefile.am -text
+src/utils_lgpl/delftio/packages/delftio/src/diof90/delftio_version.F90.svn -text
 src/utils_lgpl/delftio/packages/delftio/src/diof90/dio-2d-field.F90 -text
 src/utils_lgpl/delftio/packages/delftio/src/diof90/dio-2dfield-rw.F90 -text
 src/utils_lgpl/delftio/packages/delftio/src/diof90/dio-2dfield-shm.F90 -text
@@ -4531,6 +4532,7 @@ src/utils_lgpl/ec_module/packages/ec_module/src/ec_elementset.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_field.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_message.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_module.f90 -text
+src/utils_lgpl/ec_module/packages/ec_module/src/ec_module_version.F90.svn -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_parameters.f90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_provider.F90 -text
 src/utils_lgpl/ec_module/packages/ec_module/src/ec_provider_read.F90 -text

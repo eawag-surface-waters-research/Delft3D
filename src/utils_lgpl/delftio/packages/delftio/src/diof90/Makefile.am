@@ -36,5 +36,19 @@ libdelftio_la_SOURCES = \
          dio-sync.F90 \
          dio-time-support.F90 \
          open_mi_dio.f90
+
+EXTRA_DIST = \
+	delftio_version.F90.svn
+
+BUILT_SOURCES = ./always \
+	./delftio_version.F90
+
+./always:
+	rm -rf ./delftio_version.F90
+
+./delftio_version.F90:
+	$(top_srcdir)/scripts_lgpl/linux/update_version.sh $(srcdir)/delftio_version.F90 $(srcdir) ../include/version_number.ini $(top_builddir)
+
+
 #-------------------------------------------------------------------------------
 #Libraries
