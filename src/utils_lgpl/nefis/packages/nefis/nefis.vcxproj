@@ -71,8 +71,8 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>
-      <Command>
-      </Command>
+      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\nefis_version.h ..\.. .\include\version_number.ini
+call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\nefis_version.rc ..\.. .\include\version_number.ini</Command>
     </PreBuildEvent>
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -86,9 +86,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
-    <ProjectReference>
-      <LinkLibraryDependencies>true</LinkLibraryDependencies>
-    </ProjectReference>
+    <ProjectReference />
     <PostBuildEvent>
       <Command>
       </Command>
@@ -167,6 +165,7 @@
     <ClCompile Include="src\gp.c" />
     <ClCompile Include="src\gt.c" />
     <ClCompile Include="src\hs.c" />
+    <ClCompile Include="src\nefis_version.cpp" />
     <ClCompile Include="src\oc.c" />
     <ClCompile Include="src\pt.c" />
     <ClCompile Include="src\rt.c" />
@@ -188,12 +187,6 @@
     <ClInclude Include="include\pt.h" />
     <ClInclude Include="include\rt.h" />
     <ClInclude Include="include\wl-xdr.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\nefis_version_number\nefis_version_number.vcxproj">
-      <Project>{0c8d0ac5-b140-498b-b383-05ce14c138b1}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -41,7 +41,7 @@ module Dio_ds_config
 
 
 use dio_prop
-
+use delftio_version_module
 
 implicit none
 
@@ -609,7 +609,7 @@ subroutine DioGetVersion(retVal)
 
     ! body
     retVal = ' '
-    call getversionnumberstring_DELFTIO(retval)
+    call getfullversionstring_delftio(retval)
 
 end subroutine DioGetVersion
 
@@ -624,7 +624,7 @@ subroutine DioGetIdent(retVal)
 
     ! body
     retVal = ' '
-    call getfullversionstring_DELFTIO(retval)
+    call getfullversionstring_delftio(retval)
 
 end subroutine DioGetIdent
 

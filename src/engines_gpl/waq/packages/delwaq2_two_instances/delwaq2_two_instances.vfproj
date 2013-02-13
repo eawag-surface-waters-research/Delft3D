@@ -4,8 +4,8 @@
 		<Platform Name="Win32"/></Platforms>
 	<Configurations>
 		<Configuration Name="Debug|Win32" OutputDirectory="..\..\bin\$(ConfigurationName)">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\include;..\waq_kernel\lib\$(ConfigurationName);..\waq_utils_f\lib\$(ConfigurationName);..\..\..\..\utils_lgpl\timers\lib\$(ConfigurationName)" WarnInterfaces="true" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug" Interfaces="true"/>
-				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\third_party\wlauth\bin\win32\static;..\..\..\..\third_party_open\pthreads\bin\win32;..\..\bin\$(ConfigurationName);..\..\..\..\utils_lgpl\timers\lib\$(ConfigurationName)" IgnoreDefaultLibraryNames="libcmt.lib;libcmtd.lib" GenerateDebugInformation="true" SubSystem="subSystemConsole" AdditionalDependencies="timers.lib"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\include;..\waq_kernel\lib\$(ConfigurationName);..\waq_utils_f\lib\$(ConfigurationName);..\..\..\..\utils_lgpl\deltares_common\lib\$(ConfigurationName)\static" Interfaces="true" WarnInterfaces="true" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\third_party\wlauth\bin\win32\static;..\..\..\..\third_party_open\pthreads\bin\win32;..\..\bin\$(ConfigurationName);..\..\..\..\utils_lgpl\deltares_common\lib\$(ConfigurationName)\static" IgnoreDefaultLibraryNames="libcmt.lib;libcmtd.lib" GenerateDebugInformation="true" SubSystem="subSystemConsole" AdditionalDependencies="deltares_common.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
@@ -14,8 +14,8 @@
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="..\..\include;..\waq_kernel\lib\$(ConfigurationName);..\waq_utils_f\lib\$(ConfigurationName);..\..\..\..\utils_lgpl\timers\lib\$(ConfigurationName)"/>
-				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\third_party\wlauth\bin\win32\static;..\..\..\..\third_party_open\pthreads\bin\win32;..\..\bin\$(ConfigurationName);..\..\..\..\utils_lgpl\timers\lib\$(ConfigurationName)" IgnoreDefaultLibraryNames="libcmt.lib" SubSystem="subSystemConsole" AdditionalDependencies="timers.lib"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="..\..\include;..\waq_kernel\lib\$(ConfigurationName);..\waq_utils_f\lib\$(ConfigurationName);..\..\..\..\utils_lgpl\deltares_common\lib\$(ConfigurationName)\static"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\third_party\wlauth\bin\win32\static;..\..\..\..\third_party_open\pthreads\bin\win32;..\..\bin\$(ConfigurationName);..\..\..\..\utils_lgpl\deltares_common\lib\$(ConfigurationName)\static" IgnoreDefaultLibraryNames="libcmt.lib" SubSystem="subSystemConsole" AdditionalDependencies="deltares_common.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>

@@ -27,18 +27,26 @@ libdeltares_common_la_SOURCES = \
          deltares_common_version.F90 \
          distance.f90 \
          juldat.f90 \
-         scannr.f90 \
          handles.f90 \
-         tables.f90 \
-         table_handles.f90 \
+         malloc.f90 \
+         mathconsts.f90 \
+         MessageHandling.f90 \
+         nan_check_module.f90 \
          newunit.f90 \
+         precision.F90 \
+         precision_basics.F90 \
+         precision_sp.F90 \
+         properties.f90 \
+         scannr.f90 \
          skipstarlines.f90 \
          small.f90 \
          stringsequal.f90 \
-         malloc.f90 \
-         MessageHandling.f90 \
-         nan_check_module.f90 \
+         tables.f90 \
+         table_handles.f90 \
+         timers.f \
+         tree_struct.f90 \
          util.f90
+
 
 EXTRA_DIST = \
          deltares_common_version.F90.svn

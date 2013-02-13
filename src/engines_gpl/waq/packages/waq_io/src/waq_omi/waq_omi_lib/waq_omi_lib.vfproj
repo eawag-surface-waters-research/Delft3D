@@ -4,8 +4,8 @@
 		<Platform Name="Win32"/></Platforms>
 	<Configurations>
 		<Configuration Name="Debug|Win32" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\..\..\..\include;..\..\..\..\waq_kernel\lib\$(ConfigurationName);..\..\..\..\waq_utils_f\lib\$(ConfigurationName);..\..\..\..\..\..\..\third_party_open\openda\core\native\include;..\..\..\..\..\..\..\utils_lgpl\timers\lib\$(ConfigurationName)" LocalVariableStorage="localStorageAutomatic" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug" Interfaces="true"/>
-				<Tool Name="VFLibrarianTool" AdditionalLibraryDirectories="..\..\..\..\..\..\..\utils_lgpl\timers\lib\$(ConfigurationName)" AdditionalDependencies="timers.lib"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\..\..\..\include;..\..\..\..\waq_kernel\lib\$(ConfigurationName);..\..\..\..\waq_utils_f\lib\$(ConfigurationName);..\..\..\..\..\..\..\third_party_open\openda\core\native\include;..\..\..\..\..\..\..\utils_lgpl\deltares_common\lib\$(ConfigurationName)\static" Interfaces="true" LocalVariableStorage="localStorageAutomatic" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
+				<Tool Name="VFLibrarianTool" AdditionalLibraryDirectories="..\..\..\..\..\..\..\utils_lgpl\deltares_common\lib\$(ConfigurationName)\static" AdditionalDependencies="deltares_common.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
@@ -14,8 +14,8 @@
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="..\..\..\..\..\include;..\..\..\..\waq_kernel\lib\$(ConfigurationName);..\..\..\..\waq_utils_f\lib\$(ConfigurationName);..\..\..\..\..\..\..\third_party_open\openda\core\native\include;..\..\..\..\..\..\..\utils_lgpl\timers\lib\$(ConfigurationName)"/>
-				<Tool Name="VFLibrarianTool" AdditionalLibraryDirectories="..\..\..\..\..\..\..\utils_lgpl\timers\lib\$(ConfigurationName)" AdditionalDependencies="timers.lib"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="..\..\..\..\..\include;..\..\..\..\waq_kernel\lib\$(ConfigurationName);..\..\..\..\waq_utils_f\lib\$(ConfigurationName);..\..\..\..\..\..\..\third_party_open\openda\core\native\include;..\..\..\..\..\..\..\utils_lgpl\deltares_common\lib\$(ConfigurationName)\static"/>
+				<Tool Name="VFLibrarianTool" AdditionalLibraryDirectories="..\..\..\..\..\..\..\utils_lgpl\deltares_common\lib\$(ConfigurationName)\static" AdditionalDependencies="deltares_common.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>

@@ -19,10 +19,16 @@ AM_CPPFLAGS = -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_com
 #-------------------------------------------------------------------------------
 #Sources
 libdeltares_common_c_la_SOURCES = \
+         cpuinfo.cpp \
          cutil.c \
          getopt.cpp \
          getputarray.cpp \
+         meminfo.cpp \
+         sems.cpp \
+         stream-mpi.cpp \
+         stream.cpp \
          throwexception.cpp
+
 
 #-------------------------------------------------------------------------------
 #Libraries

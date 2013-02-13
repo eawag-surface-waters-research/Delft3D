@@ -30,6 +30,9 @@
 //  DelftStream
 //  Stream Class Implementation - MPI-only Version
 //
+//  The file "stream-mpi.cpp" is a test/debug version that only supports MPI
+//  and uses the MPI-1.2 C bindings.
+//
 //  Irv.Elshoff@deltares.nl
 //  24 oct 05
 //

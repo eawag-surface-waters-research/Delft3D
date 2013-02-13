@@ -79,7 +79,6 @@ function initmeteo(runid) result(success)
    logical               :: success
    type(tmeteo), pointer :: meteopointer  ! All Meteo for one subdomain
    character(*)          :: runid
-   character(300)        :: version_full  ! Version information
    !
    ! body
    if (.not. meteodata_initialized) then
@@ -93,8 +92,6 @@ function initmeteo(runid) result(success)
    success                           = addnewsubdomainmeteopointer(runid, meteopointer)
    pi                                = acos(-1.0_fp)
    d2r                               = pi/180.0_fp
-   version_full                      = ''
-   call getfullversionstring_METEO(version_full)
 end function initmeteo
 !
 !

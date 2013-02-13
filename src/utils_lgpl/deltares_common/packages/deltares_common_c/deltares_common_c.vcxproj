@@ -131,9 +131,13 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\cpuinfo.cpp" />
     <ClCompile Include="src\cutil.c" />
     <ClCompile Include="src\getopt.cpp" />
     <ClCompile Include="src\getputarray.cpp" />
+    <ClCompile Include="src\meminfo.cpp" />
+    <ClCompile Include="src\sems.cpp" />
+    <ClCompile Include="src\stream.cpp" />
     <ClCompile Include="src\throwexception.cpp" />
   </ItemGroup>
   <ItemGroup>

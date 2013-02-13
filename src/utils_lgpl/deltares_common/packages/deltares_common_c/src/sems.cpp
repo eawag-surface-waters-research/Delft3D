@@ -97,13 +97,11 @@ void STDCALL VSEMNEFIS(void);
 void STDCALL PSEMFINISH(void);
 void STDCALL VSEMFINISH(void);
 void STDCALL SEMEXIT(void);
-char * STDCALL GETVERSION(void);
 
 #if defined(__cplusplus)
 }
 #endif
 
-extern char * getfullversionstring_semaphore(void);
 
 /*
  * Global variables
@@ -114,10 +112,6 @@ static pthread_mutex_t nfsmutex =  PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t lunmutex =  PTHREAD_MUTEX_INITIALIZER;
 static pthread_mutex_t finmutex =  PTHREAD_MUTEX_INITIALIZER;
 
-char * STDCALL GETVERSION(void)
-{
- return getfullversionstring_semaphore();
-}
 
 
 

@@ -40,8 +40,8 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
 !!--declarations----------------------------------------------------------------
     use precision
     use mathconsts
-    use precision_version_module
     use globaldata
+    use deltares_common_version_module
     use dfparall
     !
     implicit none
@@ -187,7 +187,7 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
     !
     ! Force the version information of the module precision to be displayed within the what tool
     !
-    call getfullversionstring_precision(version_full)
+    call getfullversionstring_deltares_common(version_full)
     call getfullversionstring_flow2d3d(version_full)
     call getshortversionstring_flow2d3d(version_short)
     call flwlic(lunscr    ,error     ,usernm    ,version_full ,version_short   , &

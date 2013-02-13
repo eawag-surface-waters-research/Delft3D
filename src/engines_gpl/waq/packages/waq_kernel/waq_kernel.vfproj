@@ -4,8 +4,8 @@
 		<Platform Name="Win32"/></Platforms>
 	<Configurations>
 		<Configuration Name="Debug|Win32" OutputDirectory=".\lib\$(ConfigurationName)" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\..\part\include;..\..\include;..\..\bin\$(ConfigurationName);..\waq_data\lib\$(ConfigurationName);..\waq_utils_f\lib\$(ConfigurationName);..\..\..\..\utils_lgpl\delftio\lib\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\timers\lib\$(ConfigurationName)" FixedFormLineLength="fixedLength132" FloatingPointExceptionHandling="fpe0" ModulePath="$(OutDir)" Traceback="true"/>
-				<Tool Name="VFLibrarianTool" AdditionalLibraryDirectories="..\..\..\..\utils_lgpl\timers\lib\$(ConfigurationName)" AdditionalDependencies="timers.lib"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\..\part\include;..\..\include;..\..\bin\$(ConfigurationName);..\waq_data\lib\$(ConfigurationName);..\waq_utils_f\lib\$(ConfigurationName);..\..\..\..\utils_lgpl\delftio\lib\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\deltares_common\lib\$(ConfigurationName)\static" FixedFormLineLength="fixedLength132" FloatingPointExceptionHandling="fpe0" ModulePath="$(OutDir)" Traceback="true"/>
+				<Tool Name="VFLibrarianTool" AdditionalLibraryDirectories="..\..\..\..\utils_lgpl\deltares_common\lib\$(ConfigurationName)\static" AdditionalDependencies="deltares_common.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
@@ -14,8 +14,8 @@
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" OutputDirectory=".\lib\$(ConfigurationName)" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" OmitFramePointers="false" AdditionalIncludeDirectories="..\..\..\part\include;..\..\include;..\..\bin\$(ConfigurationName);..\waq_data\lib\$(ConfigurationName);..\waq_utils_f\lib\$(ConfigurationName);..\..\..\..\utils_lgpl\delftio\lib\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\timers\lib\$(ConfigurationName)" FixedFormLineLength="fixedLength132" FloatingPointExceptionHandling="fpe0" ModulePath="$(OutDir)" Traceback="true"/>
-				<Tool Name="VFLibrarianTool" AdditionalOptions="/LTCG" AdditionalLibraryDirectories="..\..\..\..\utils_lgpl\timers\lib\$(ConfigurationName)" AdditionalDependencies="timers.lib"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" OmitFramePointers="false" AdditionalIncludeDirectories="..\..\..\part\include;..\..\include;..\..\bin\$(ConfigurationName);..\waq_data\lib\$(ConfigurationName);..\waq_utils_f\lib\$(ConfigurationName);..\..\..\..\utils_lgpl\delftio\lib\$(ConfigurationName)\static;..\..\..\..\utils_lgpl\deltares_common\lib\$(ConfigurationName)\static" FixedFormLineLength="fixedLength132" FloatingPointExceptionHandling="fpe0" ModulePath="$(OutDir)" Traceback="true"/>
+				<Tool Name="VFLibrarianTool" AdditionalOptions="/LTCG" AdditionalLibraryDirectories="..\..\..\..\utils_lgpl\deltares_common\lib\$(ConfigurationName)\static" AdditionalDependencies="deltares_common.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>

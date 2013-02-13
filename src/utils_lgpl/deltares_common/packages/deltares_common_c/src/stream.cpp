@@ -30,6 +30,11 @@
 //  DelftStream
 //  Stream Class Implementation - TCP/IP and MPI
 //
+//  The file "stream.cpp" is the only souce file for the Delft-Stream library.
+//  It support both TCP/IP and MPI mode, and contains both C and C++ MPI bindings.
+//  The latter are MPI-2, and will prevail over the C bindings once MPI-2
+//  becomes more widely implemented.
+//
 //  Irv.Elshoff@deltares.nl
 //  Adri.Mourits@deltares.nl
 //  02 dec 08
@@ -86,14 +91,6 @@ enum {
     CONNECT_TAG = 17400000  // magic number for MPI mode
     };
 
-extern "C"
-{
-    extern void getFullVersionString_STREAM(char *);
-}
-void getVersionString_STREAM(char * string)
-{
-    getFullVersionString_STREAM(string);
-}
 
 
 

@@ -33,7 +33,6 @@ module properties
 ! NONE
 !!--declarations----------------------------------------------------------------
     use tree_structures
-    use inifiles_version_module
     !
     implicit none
     !
@@ -60,7 +59,6 @@ module properties
        module procedure prop_get_logical
        module procedure prop_get_double
        module procedure prop_get_doubles
-       module procedure prop_get_versionstring
     end interface
 
     interface prop_set
@@ -73,11 +71,6 @@ module properties
     end interface
     !
 contains
-
-subroutine prop_get_versionstring (versionstring)
-    character(*) :: versionstring
-    call getfullversionstring_inifiles(versionstring)
-end subroutine prop_get_versionstring
 
 subroutine prop_file(filetype, filename , tree, error)
     use tree_structures

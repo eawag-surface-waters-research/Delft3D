@@ -103,7 +103,7 @@ del /f vs_l.c vs_y.c
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>..\..\..\..\utils_lgpl\nefis\packages\nefis_version_number\bin\$(ConfigurationName)\nefis_version_number.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -173,7 +173,7 @@ del /f vs_l.c vs_y.c
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>..\..\..\..\utils_lgpl\nefis\packages\nefis_version_number\bin\$(ConfigurationName)\nefis_version_number.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>..\..\..\..\scripts_lgpl\win32\oss-install.cmd vs ..\bin</Command>

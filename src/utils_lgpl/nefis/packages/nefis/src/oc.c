@@ -104,9 +104,9 @@
 #include "nef-def.h"
 #include "oc.h"
 
-extern void getCompanyString_NEFIS(char *);
-extern void getFileVersionString_NEFIS(char *);
-extern void getVersionNumberString_NEFIS(char *);
+extern char * getcompanystring_nefis(void);
+extern char * getfileversionstring_nefis(void);
+extern char * getfullversionstring_nefis(void);
 
 static BChar   tree_name[MAX_TREE_NAME];
 static BInt4   first_create   = TRUE;
@@ -347,10 +347,10 @@ BInt4 create_nefis_files ( BInt4 * fd_nefis   ,
  */
         {
             char * string = (char *) malloc(1024);
-            getCompanyString_NEFIS(string);
+            string = getcompanystring_nefis();
             sprintf(dathdr,"%s",string);
             strcat(dathdr, ", NEFIS Data File; ");
-            getFileVersionString_NEFIS(string);
+            string = getfileversionstring_nefis();
             strcat(dathdr, string);
             free(string);
         }
@@ -558,10 +558,10 @@ BInt4 create_nefis_files ( BInt4 * fd_nefis   ,
  */
         {
             char * string = (char *) malloc(1024);
-            getCompanyString_NEFIS(string);
+            string = getcompanystring_nefis();
             sprintf(defhdr,"%s",string);
             strcat(defhdr, ", NEFIS Definition File; ");
-            getFileVersionString_NEFIS(string);
+            string = getfileversionstring_nefis();
             strcat(defhdr, string);
             free(string);
         }
@@ -817,10 +817,10 @@ BInt4 create_nefis_files ( BInt4 * fd_nefis   ,
  */
             {
                 char * string = (char *) malloc(1024);
-                getCompanyString_NEFIS(string);
+                string = getcompanystring_nefis();
                 sprintf(dafhdr,"%s",string);
                 strcat(dafhdr, ", NEFIS Definition and Data File; ");
-                getFileVersionString_NEFIS(string);
+                string = getfullversionstring_nefis();
                 strcat(dafhdr, string);
             }
 
@@ -1336,7 +1336,7 @@ BInt4 detect_version( BText file_header, File_Version * file_version )
  */
 BInt4 OC_get_version ( BText nefis_version)
 {
-   getVersionNumberString_NEFIS(nefis_version);
+   nefis_version = getfullversionstring_nefis();
    return 0;
 }
 /*==========================================================================*/
