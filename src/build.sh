@@ -299,7 +299,7 @@ echo
 
 if [ $useSp -eq 1 ]; then
     (
-        cd utils_lgpl/precision
+        cd utils_lgpl/deltares_common
         command='scripts/changeprecision.tcl single'
         log "Executing \"$command\" in \"$PWD\" for single-precision executables"
         eval $command
