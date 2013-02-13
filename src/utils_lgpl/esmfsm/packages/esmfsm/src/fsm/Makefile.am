@@ -19,7 +19,7 @@ FINCLUDES += \
 	-I$(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/include
 
 FMODULES += \
-	-I$(top_builddir)/utils_lgpl/precision/packages/precision/src
+	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
 
 #-------------------------------------------------------------------------------
 #Sources

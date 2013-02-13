@@ -20,6 +20,7 @@ FINCLUDES += \
 #-------------------------------------------------------------------------------
 #Sources
 libdelftio_la_SOURCES = \
+         delftio_version.F90 \
          dio_shm_f2c_f.F90 \
          dio-3d-block.F90 \
          dio-prop.F90 \

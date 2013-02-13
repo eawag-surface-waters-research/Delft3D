@@ -25,7 +25,6 @@ libdeltares_common_c_la_SOURCES = \
          getputarray.cpp \
          meminfo.cpp \
          sems.cpp \
-         stream-mpi.cpp \
          stream.cpp \
          throwexception.cpp
 
@@ -33,6 +32,3 @@ libdeltares_common_c_la_SOURCES = \
 #-------------------------------------------------------------------------------
 #Libraries
 
-libdeltares_common_c_la_LIBADD =\
-	$(top_builddir)/utils_lgpl/stream/packages/stream/src/libstream.la \
-	$(top_builddir)/utils_lgpl/semaphore/packages/semaphore/src/libsemaphore.la
