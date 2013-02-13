@@ -7,6 +7,4 @@ SUBDIRS = \
          nefis \
          deltares_common \
          ec_module \
-         d_hydro_lib \
-         rd_token \
-         timers
+         d_hydro_lib
