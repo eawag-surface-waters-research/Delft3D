@@ -84,7 +84,7 @@
     </PreBuildEvent>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>include;..\..\..\..\utils_lgpl\d_hydro_lib\include;..\..\..\..\utils_lgpl\semaphore\include\win32;..\..\..\..\third_party_open\expat\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;../../../../utils_lgpl/d_hydro_lib/include;../../../../utils_lgpl/deltares_common/packages/deltares_common_c/include/win32;../../../../third_party_open/expat/lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -146,7 +146,7 @@ echo "This file is overwritten by the post-build command of the project d_hydro"
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>include;..\..\..\..\utils_lgpl\d_hydro_lib\include;..\..\..\..\utils_lgpl\semaphore\include\win32;..\..\..\..\third_party_open\expat\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>include;../../../../utils_lgpl/d_hydro_lib/include;../../../../utils_lgpl/deltares_common/packages/deltares_common_c/include/win32;../../../../third_party_open/expat/lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
