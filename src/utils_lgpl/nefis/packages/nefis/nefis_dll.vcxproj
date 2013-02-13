@@ -130,6 +130,10 @@ call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\nefis_version.r
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
+    <PreBuildEvent>
+      <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\nefis_version.h ..\.. .\include\version_number.ini
+call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\nefis_version.rc ..\.. .\include\version_number.ini</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
