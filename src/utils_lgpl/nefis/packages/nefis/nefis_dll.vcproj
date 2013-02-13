@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="nefis_dll"
 	ProjectGUID="{0FB6AEED-A49C-4FD2-9F17-2B0C1ED28BE3}"
 	RootNamespace="nefis_dll"
@@ -24,6 +24,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\nefis_version.h ..\.. .\include\version_number.ini&#x0D;&#x0A;call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\nefis_version.rc ..\.. .\include\version_number.ini"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -99,6 +100,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+				CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\nefis_version.h ..\.. .\include\version_number.ini&#x0D;&#x0A;call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\nefis_version.rc ..\.. .\include\version_number.ini"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -199,6 +201,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\nefis_version.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\oc.c"
 				>
 			</File>
@@ -291,11 +297,11 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
-				RelativePath="..\nefis_versionnumber\include\resource.h"
+				RelativePath="include\resource.h"
 				>
 			</File>
 			<File
-				RelativePath="..\nefis_version_number\include\version_number.rc"
+				RelativePath="include\nefis_version.rc"
 				>
 			</File>
 		</Filter>

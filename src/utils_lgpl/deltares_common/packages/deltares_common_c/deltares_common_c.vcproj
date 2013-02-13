@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="deltares_common_c"
 	ProjectGUID="{51065F4C-23D3-4C5F-AF5B-E70776409D7B}"
 	RootNamespace="util_mf_c"
@@ -149,6 +149,10 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\src\cpuinfo.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\src\cutil.c"
 				>
 			</File>
@@ -158,6 +162,18 @@
 			</File>
 			<File
 				RelativePath=".\src\getputarray.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\meminfo.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\sems.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\src\stream.cpp"
 				>
 			</File>
 			<File
