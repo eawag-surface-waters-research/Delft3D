@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -90,7 +90,7 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>..\datsel_f\$(ConfigurationName)\datsel_f.lib;..\..\..\..\utils_lgpl\deltares_common\lib\$(ConfigurationName)\static\deltares_common.lib;..\..\..\..\utils_lgpl\nefis\lib\$(ConfigurationName)\static\nefis.lib;..\..\..\..\utils_lgpl\nefis\packages\nefis_version_number\bin\$(ConfigurationName)\nefis_version_number.lib;libifcoremt.lib;ifconsol.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\datsel_f\$(ConfigurationName)\datsel_f.lib;..\..\..\..\utils_lgpl\deltares_common\lib\$(ConfigurationName)\static\deltares_common.lib;..\..\..\..\utils_lgpl\nefis\lib\$(ConfigurationName)\static\nefis.lib;libifcoremt.lib;ifconsol.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)\datsel.exe</OutputFile>
     </Link>
   </ItemDefinitionGroup>
@@ -132,7 +132,7 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalDependencies>..\datsel_f\$(ConfigurationName)\datsel_f.lib;..\..\..\..\utils_lgpl\deltares_common\lib\$(ConfigurationName)\static\deltares_common.lib;..\..\..\..\utils_lgpl\nefis\lib\$(ConfigurationName)\static\nefis.lib;..\..\..\..\utils_lgpl\nefis\packages\nefis_version_number\bin\$(ConfigurationName)\nefis_version_number.lib;libifcoremt.lib;ifconsol.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\datsel_f\$(ConfigurationName)\datsel_f.lib;..\..\..\..\utils_lgpl\deltares_common\lib\$(ConfigurationName)\static\deltares_common.lib;..\..\..\..\utils_lgpl\nefis\lib\$(ConfigurationName)\static\nefis.lib;libifcoremt.lib;ifconsol.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>libcmt.lib</IgnoreSpecificDefaultLibraries>
       <OutputFile>$(OutDir)\datsel.exe</OutputFile>
     </Link>
