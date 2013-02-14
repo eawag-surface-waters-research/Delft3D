@@ -53,7 +53,7 @@ C
 C
 C     Local declarations
 C
-      PARAMETER   ( NOMODU = 123)
+      PARAMETER   ( NOMODU = 125)
       CHARACTER*6   MODNAM(NOMODU)
       SAVE          MODNAM
       DATA MODNAM /
@@ -179,7 +179,9 @@ C
      +   'STADSC',
      +   'STAGEO',
      +   'STAPRC',
-     +   'STAQTL'
+     +   'STAQTL',
+     +   'SUMFRC',
+     +   'FLXFRC'
      +    /
 C
 C     Set module number
