@@ -346,13 +346,12 @@ BInt4 create_nefis_files ( BInt4 * fd_nefis   ,
  *      Generate new data file
  */
         {
-            char * string = (char *) malloc(1024);
+            char * string;
             string = getcompanystring_nefis();
             sprintf(dathdr,"%s",string);
             strcat(dathdr, ", NEFIS Data File; ");
             string = getfileversionstring_nefis();
             strcat(dathdr, string);
-            free(string);
         }
 
         if (coding == 'N' || coding == 'n') coding = 'L';
@@ -557,13 +556,12 @@ BInt4 create_nefis_files ( BInt4 * fd_nefis   ,
  *    Generate new definition file
  */
         {
-            char * string = (char *) malloc(1024);
+            char * string;
             string = getcompanystring_nefis();
             sprintf(defhdr,"%s",string);
             strcat(defhdr, ", NEFIS Definition File; ");
             string = getfileversionstring_nefis();
             strcat(defhdr, string);
-            free(string);
         }
 
       if (coding == 'N' || coding == 'n') coding = 'L';
@@ -816,7 +814,7 @@ BInt4 create_nefis_files ( BInt4 * fd_nefis   ,
  *    Generate new DefinitionData file
  */
             {
-                char * string = (char *) malloc(1024);
+                char * string;
                 string = getcompanystring_nefis();
                 sprintf(dafhdr,"%s",string);
                 strcat(dafhdr, ", NEFIS Definition and Data File; ");
