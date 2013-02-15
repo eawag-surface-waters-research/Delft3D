@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="flow2d3d_openda"
 	ProjectGUID="{657ABE78-F81C-46FB-8774-8F0C4CD545E1}"
 	RootNamespace="flow2d3d_openda"
@@ -42,7 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="include;..\flow2d3d\include;..\flow2d3d\src;..\flow2d3d\src/dd;..\flow2d3d\src/dd/iterators;..\flow2d3d\src/dd/mapper;../../../../third_party_open/pthreads/include/win32;../../../../third_party_open/DelftOnline/include;../../../../third_party_open/DelftOnline/include\windows;../../../../third_party_open/expat/lib;../../../../utils_lgpl/d_hydro_lib/include;../../../../utils_lgpl/precision/include;../../../../utils_lgpl/stream/include;../../../../utils_lgpl/esmfsm/include;../../../../utils_lgpl/delftonline/include"
+				AdditionalIncludeDirectories="include;../flow2d3d/include;../flow2d3d/src;../flow2d3d/src/dd;../flow2d3d/src/dd/iterators;../flow2d3d/src/dd/mapper;../../../../third_party_open/pthreads/include/win32;../../../../third_party_open/DelftOnline/include;../../../../third_party_open/DelftOnline/include/windows;../../../../third_party_open/expat/lib;../../../../utils_lgpl/d_hydro_lib/include;../../../../utils_lgpl/precision/include;../../../../utils_lgpl/stream/include;../../../../utils_lgpl/esmfsm/include;../../../../utils_lgpl/delftonline/include;;../../../../utils_lgpl/deltares_common/packages/deltares_common_c/include"
 				PreprocessorDefinitions="VS2008;WITH_DELFTONLINE;WIN32;_DEBUG;_WINDOWS;_USRDLL;FLOW2D3D_EXPORTS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -124,7 +124,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="include;../flow2d3d/include;../flow2d3d/src;../flow2d3d/src/dd;../flow2d3d/src/dd/iterators;../flow2d3d/src/dd/mapper;../../../../third_party_open/pthreads/include/win32;../../../../third_party_open/DelftOnline/include;../../../../third_party_open/DelftOnline/include\windows;../../../../third_party_open/expat/lib;../../../../utils_lgpl/d_hydro_lib/include;../../../../utils_lgpl/precision/include;../../../../utils_lgpl/stream/include;../../../../utils_lgpl/esmfsm/include;../../../../utils_lgpl/delftonline/include"
+				AdditionalIncludeDirectories="include;../flow2d3d/include;../flow2d3d/src;../flow2d3d/src/dd;../flow2d3d/src/dd/iterators;../flow2d3d/src/dd/mapper;../../../../third_party_open/pthreads/include/win32;../../../../third_party_open/DelftOnline/include;../../../../third_party_open/DelftOnline/include/windows;../../../../third_party_open/expat/lib;../../../../utils_lgpl/d_hydro_lib/include;../../../../utils_lgpl/precision/include;../../../../utils_lgpl/stream/include;../../../../utils_lgpl/esmfsm/include;../../../../utils_lgpl/delftonline/include;;../../../../utils_lgpl/deltares_common/packages/deltares_common_c/include"
 				PreprocessorDefinitions="VS2008;WITH_DELFTONLINE;WIN32;NDEBUG;_WINDOWS;_USRDLL;FLOW2D3D_EXPORTS"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
