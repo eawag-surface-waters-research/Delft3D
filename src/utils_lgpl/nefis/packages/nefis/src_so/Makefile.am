@@ -39,10 +39,13 @@ libNefisSO_la_SOURCES = \
 	../src/rt.c \
 	../src/wl-xdr.c
 
+EXTRA_DIST = \
+         ../include/nefis_version.h.svn
+
 #-------------------------------------------------------------------------------
 #Libraries
 
-libnefis_la_LIBADD = \
+libNefisSO_la_LIBADD = \
 	-lltdl
 
 BUILT_SOURCES = ./always \
@@ -53,3 +56,4 @@ BUILT_SOURCES = ./always \
 
 ../include/nefis_version.h:
 	$(top_srcdir)/scripts_lgpl/linux/update_version.sh $(srcdir)/../include/nefis_version.h $(srcdir) ../include/version_number.ini $(top_builddir)
+

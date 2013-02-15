@@ -24,12 +24,12 @@ FINCLUDES += \
 
 FMODULES += \
     -I$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90 \
-    -I$(top_builddir)/utils_lgpl/delftio_sync/packages/delftio_sync/src \
-    -I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics \
-    -I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi \
-    -I$(top_builddir)/utils_lgpl/meteo/packages/meteo/src \
+    -I$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/delftio_sync \
     -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
     -I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src \
+    -I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src/meteo \
+    -I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics \
+    -I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi \
     -I$(top_builddir)/engines_gpl/flow2d3d/packages/io_dol_f/src \
     -I$(top_builddir)/engines_gpl/flow2d3d/packages/kernel/src/inichk
 

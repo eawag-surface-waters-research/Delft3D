@@ -34,7 +34,7 @@ STANDARD_C_INCLUDES = \
     -I$(top_builddir)/utils_lgpl/d_hydro_lib/include \
     -I$(top_builddir)/utils_lgpl/delftonline/include \
     -I$(top_builddir)/utils_lgpl/esmfsm/include \
-    -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_c/include \
+    -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_c/include
 
 
 #-------------------------------------------------------------------------------
@@ -55,7 +55,11 @@ AM_FCFLAGS = \
     $(FMODULES) \
     -DWITH_DELFTONLINE
 
-AM_FCFLAGS+=$(OPENMP_FCFLAGS)
+# Do not use the openmp libraries by default: 
+# When using the Intel compiler, this will cause the multi-threaded version to be
+# used, even if no OpenMP is used. And the multi-threaded version is known
+# to have a very high latency.
+# AM_FCFLAGS+=$(OPENMP_FCFLAGS)
 
 
 #-------------------------------------------------------------------------------
@@ -66,7 +70,11 @@ AM_FFLAGS = \
     $(FMODULES) \
     -DWITH_DELFTONLINE
 
-AM_FFLAGS+=$(OPENMP_FFLAGS)
+# Do not use the openmp libraries by default: 
+# When using the Intel compiler, this will cause the multi-threaded version to be
+# used, even if no OpenMP is used. And the multi-threaded version is known
+# to have a very high latency.
+# AM_FFLAGS+=$(OPENMP_FFLAGS)
 
 
 #-------------------------------------------------------------------------------

@@ -41,6 +41,9 @@ libNefis_la_SOURCES = \
          rt.c \
          wl-xdr.c
 
+EXTRA_DIST = \
+         ../include/nefis_version.h.svn
+
 #-------------------------------------------------------------------------------
 #Libraries
 

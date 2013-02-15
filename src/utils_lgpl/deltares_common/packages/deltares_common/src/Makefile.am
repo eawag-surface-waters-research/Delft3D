@@ -19,8 +19,6 @@ lib_LTLIBRARIES = libDeltaresCommon.la
 #-------------------------------------------------------------------------------
 #Includes
 
-FMODULES += \
-	-I$(top_builddir)/utils_lgpl/constants/packages/mathconsts/src
 
 #-------------------------------------------------------------------------------
 #Sources

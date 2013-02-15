@@ -37,8 +37,8 @@ vs_SOURCES = \
 
 vs_LDADD = $(LDADD) \
 	$(top_builddir)/tools_gpl/vs/packages/vs_version_number/src/libvs_version_number.a \
-	$(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libnefis.la \
-	$(top_builddir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.la
+	$(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libNefis.la
 
 AM_LFLAGS = -L
 AM_YFLAGS = -d
+

@@ -7,6 +7,9 @@ FINCLUDES += \
         -I$(top_srcdir)/tools_gpl/nesthd1/packages/nesthd1/include \
         -I$(top_srcdir)/utils_lgpl/esmfsm/include
 
+FMODULES += \
+        -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
+
 nesthd1_SOURCES = \
         nesthd1_version.F90 \
         distance.f90 \

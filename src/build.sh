@@ -345,13 +345,15 @@ fi
 # More information here:
 # http://www.gentoo.org/proj/en/base/amd64/howtos/index.xml?full=1#book_part1_chap3
 
+enableSharedList='--enable-shared=libflow2d3d,libnefis'
+
 if [ "$platform" = 'intel64' ]; then
     command=" \
-        CFLAGS='$flags -m64 $CFLAGS' \
-        CXXFLAGS='$flags -m64 $CXXFLAGS' \
-        FFLAGS='$flags -m64 $FFLAGS' \
-        FCFLAGS='$flags -m64 $FCFLAGS' \
-            ./configure --prefix=`pwd` $configureArgs &> $log \
+        CFLAGS='$flags $CFLAGS' \
+        CXXFLAGS='$flags $CXXFLAGS' \
+        FFLAGS='$flags $FFLAGS' \
+        FCFLAGS='$flags $FCFLAGS' \
+            ./configure $enableSharedList --prefix=`pwd` $configureArgs &> $log \
         "
 else
     command=" \
@@ -359,7 +361,7 @@ else
         CXXFLAGS='$flags $CXXFLAGS' \
         FFLAGS='$flags $FFLAGS' \
         FCFLAGS='$flags $FCFLAGS' \
-            ./configure --prefix=`pwd` $configureArgs &> $log \
+            ./configure $enableSharedList --prefix=`pwd` $configureArgs &> $log \
         "
 fi
 

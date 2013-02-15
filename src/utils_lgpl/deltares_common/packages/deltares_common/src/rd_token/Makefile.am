@@ -20,7 +20,8 @@ libRDToken_la_SOURCES = \
        gettok.f \
        mestok.f \
        rdtok1.f \
-       rd_token.f
+       rd_token.f90
 
 #-------------------------------------------------------------------------------
 # Libraries
+

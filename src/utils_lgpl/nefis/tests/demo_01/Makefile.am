@@ -12,6 +12,5 @@ bin_PROGRAMS = demo_01
 demo_01_SOURCES = \
 	demo_01.f
 demo_01_LDADD = \
-	../../packages/nefis/src/libnefis.la \
-	../../packages/nefis_version_number/src/libnefis_version_number.la \
+	../../packages/nefis/src/libNefis.la \
 	$(FCLIBS)

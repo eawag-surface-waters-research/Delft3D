@@ -15,6 +15,5 @@ INCLUDES = -I../../packages/nefis/include
 test_19_SOURCES = \
 	test_19.c
 test_19_LDADD = \
-	../../packages/nefis/src/libnefis.la \
-	../../packages/nefis_version_number/src/libnefis_version_number.la \
+	../../packages/nefis/src/libNefis.la \
 	$(FCLIBS)

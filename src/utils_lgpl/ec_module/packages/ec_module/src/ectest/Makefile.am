@@ -27,5 +27,7 @@ ectest_SOURCES= \
 
 
 ectest_LDADD =\
-	../libec_module.la \
-        $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libdeltares_common.la
+	../libECModule.la \
+        $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
+        $(CCLIBS)
+

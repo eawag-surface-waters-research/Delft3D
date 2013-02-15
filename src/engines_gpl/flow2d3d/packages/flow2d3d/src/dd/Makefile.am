@@ -31,8 +31,8 @@ INCLUDES = \
     -I../../include
 
 libDD_la_LIBADD = \
-    iterators/*.lo \
-    mapper/*.lo
+    iterators/libDDIterators.la \
+    mapper/libDDMapper.la
 
 AM_CPPFLAGS = \
     -Wno-int-to-pointer-cast

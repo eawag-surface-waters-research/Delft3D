@@ -20,5 +20,6 @@ testfsm_SOURCES = \
 #-------------------------------------------------------------------------------
 #Libraries
 
-testfill_LDADD = \
-    $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/libESMFSM.la
+testfsm_LDADD = \
+    $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libESMFSM.la
+

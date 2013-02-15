@@ -19,8 +19,9 @@ INCLUDES = -I$(top_builddir)/utils_lgpl/esmfsm/include \
 
 #-------------------------------------------------------------------------------
 #Sources
-libFCMC_la_SOURCES = \
+libFSMC_la_SOURCES = \
          fsm.cpp
 
 #-------------------------------------------------------------------------------
 #Libraries
+

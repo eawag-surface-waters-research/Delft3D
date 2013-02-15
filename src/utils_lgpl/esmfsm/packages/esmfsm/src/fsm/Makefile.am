@@ -23,13 +23,14 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libFSM_la_SOURCES = \
+libESMFSM_la_SOURCES = \
          fortapi.f90
 
 #-------------------------------------------------------------------------------
 #Libraries
 
-testesm_LDADD = \
+libESMFSM_la_LIBADD = \
     $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/libESMC.la \
     $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/libFSMC.la \
-    $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_version_number/src/libESMFSMVersionNumber.la \
+    $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_version_number/src/libESMFSMVersionNumber.la
+

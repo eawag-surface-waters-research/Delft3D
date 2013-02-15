@@ -38,10 +38,8 @@ nesthd2_SOURCES = \
 #Libraries
 
 nesthd2_LDADD = \
-        $(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libnefis.la \
-        $(top_builddir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.la \
-        $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libdeltares_common.la \
-        $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_c/src/libdeltares_common_c.la \
+        $(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libNefis.la \
+        $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/libDeltaresCommon.la \
         -ldl \
         $(FCLIBS) $(FCLIBS_ADDITIONAL)
 
@@ -53,3 +51,4 @@ BUILT_SOURCES = ./always \
 
 ./nesthd2_version.F90:
 	$(top_srcdir)/scripts_lgpl/linux/update_version.sh $(srcdir)/nesthd2_version.F90 $(srcdir) ../include/version_number.ini $(top_builddir)
+

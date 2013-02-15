@@ -16,6 +16,5 @@ INCLUDES = -I../../packages/nefis/include
 test_13_SOURCES = \
 	test_13.c
 test_13_LDADD = \
-	../../packages/nefis/src/libnefis.la \
-	../../packages/nefis_version_number/src/libnefis_version_number.la \
+	../../packages/nefis/src/libNefis.la \
 	$(CCLIBS)

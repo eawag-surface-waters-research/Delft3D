@@ -12,6 +12,5 @@ bin_PROGRAMS = test_12
 test_12_SOURCES = \
 	test_12.f
 test_12_LDADD = \
-	../../packages/nefis/src/libnefis.la \
-	../../packages/nefis_version_number/src/libnefis_version_number.la \
+	../../packages/nefis/src/libNefis.la \
 	$(FCLIBS)

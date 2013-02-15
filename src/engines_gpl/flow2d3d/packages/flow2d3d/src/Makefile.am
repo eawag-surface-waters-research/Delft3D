@@ -30,8 +30,6 @@ libflow2d3d_la_SOURCES = \
 #Libraries
 libflow2d3d_la_LIBADD = \
     $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d/src/dd/libDD.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d/src/dd/iterators/libDDIterators.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d/src/dd/mapper/libDDMapper.la \
     $(top_builddir)/engines_gpl/flow2d3d/packages/manager/src/libFlow2d3dManager.la \
     $(top_builddir)/engines_gpl/flow2d3d/packages/kernel/src/main/libKernelMain.la \
     $(top_builddir)/engines_gpl/flow2d3d/packages/kernel/src/non_hydro/libKernelNonHydro.la \

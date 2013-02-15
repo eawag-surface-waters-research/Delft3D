@@ -21,4 +21,5 @@ test_02_SOURCES = \
 #Libraries
 
 test_02_LDADD = \
-    $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/libESMFSM.la
+    $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libESMFSM.la
+

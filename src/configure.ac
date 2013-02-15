@@ -16,6 +16,14 @@ AC_CANONICAL_SYSTEM
 dnl Initialise automake
 AM_INIT_AUTOMAKE
 
+# c, c++ and c preprocessor
+# Problems may occur when mixing a C-compiler from one vendor (Gnu) with a F-compiler from another (Intel).
+# The advice is to use the same vendor for both compilers (and the linker).
+AC_PROG_CXX([icpc g++])
+AC_PROG_CC([icc gcc])
+AC_PROG_CPP
+
+#These are required for java
 dnl Initialize LIBTOOL 
 dnl Make sure we have an up to date version.
 dnl We're going to make it work with older versions also, this might not work (libtool < 2.2, not sure how to check)
@@ -33,13 +41,6 @@ AC_CONFIG_SUBDIRS(libltdl)
 AC_SUBST(LIBLTDL)
 AC_SUBST(INCLTDL)
 
-# c, c++ and c preprocessor
-# We should prefer gcc-mp-#.# for OSX (prefer macports over default compiler), Use CXX=g++-mp-#.# CC=gcc-mp-#.# to use the macports compiler..
-AC_PROG_CXX
-AC_PROG_CC
-AC_PROG_CPP
-
-#These are required for java
 #AC_PROG_JAVA
 #AC_PROG_JAVA_CC
 #AC_PROG_JAVAC
@@ -96,7 +97,7 @@ AC_LANG_POP
 ## -------------------------- ##
 AC_LANG_PUSH([Fortran])
 dnl http://www.astro.gla.ac.uk/users/norman/star/ssn78/ssn78.htx/N-x1a1b12.html
-AC_PROG_FC([ifort gfortran-mp-4.6 gfortran-mp-4.5 gfortran-mp-4.4 gfortran g95])
+AC_PROG_FC([ifort gfortran])
 dnl Check the flags needed to link fc programs with ld (i.e. cc)
 AC_FC_LIBRARY_LDFLAGS
 dnl Check for openmp for fortran
@@ -127,7 +128,7 @@ AC_LANG_POP
 ## Fortran77 compiler checks. ##
 ## -------------------------- ##
 AC_LANG_PUSH([Fortran 77])
-AC_PROG_F77([ifort gfortran-mp-4.6 gfortran-mp-4.5 gfortran-mp-4.4 gfortran g77])
+AC_PROG_F77([ifort gfortran g77])
 AC_F77_LIBRARY_LDFLAGS
 AX_OPENMP
 FFLAGS="$FFLAGS $OPENMP_FFLAGS"

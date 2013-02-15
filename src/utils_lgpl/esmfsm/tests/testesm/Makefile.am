@@ -21,4 +21,5 @@ testesm_SOURCES = \
 #Libraries
 
 testesm_LDADD = \
-    $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/libESMFSM.la
+    $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libESMFSM.la
+
