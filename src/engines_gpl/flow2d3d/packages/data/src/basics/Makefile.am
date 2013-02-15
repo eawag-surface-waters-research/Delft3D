@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libdata_basics.la
+lib_LTLIBRARIES = libDataBasics.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -19,13 +19,12 @@ FINCLUDES += \
 
 FMODULES += \
 	-I$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90 \
-	-I$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
 	-I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src
 
 #-------------------------------------------------------------------------------
 #Sources
-libdata_basics_la_SOURCES = \
+libDataBasics_la_SOURCES = \
          message_module.f90 \
          string_module.f90 \
          bedcomposition_module.f90 \

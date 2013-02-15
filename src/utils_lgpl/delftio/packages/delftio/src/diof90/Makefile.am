@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libdelftio.la
+lib_LTLIBRARIES = libDelftIO.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -19,7 +19,7 @@ FINCLUDES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libdelftio_la_SOURCES = \
+libDelftIO_la_SOURCES = \
          delftio_version.F90 \
          dio_shm_f2c_f.F90 \
          dio-3d-block.F90 \
@@ -53,3 +53,7 @@ BUILT_SOURCES = ./always \
 
 #-------------------------------------------------------------------------------
 #Libraries
+libDelftIO_la_LIBADD=\
+	$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/delftio_sync/libDelftIOSync.la \
+	$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90Nefis/libDIOF90Nefis.la \
+	$(top_builddir)/utils_lgpl/delftio/packages/delftio_shm/src/diof90/libDIOF90Nefis.la

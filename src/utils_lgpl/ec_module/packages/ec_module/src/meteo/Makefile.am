@@ -10,18 +10,16 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libmeteo.la
+lib_LTLIBRARIES = libMeteo.la
 
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
-	-I$(top_builddir)/utils_lgpl/precision/packages/precision/src \
-	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
-	-I$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src
+	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
 
 #-------------------------------------------------------------------------------
 #Sources
-libmeteo_la_SOURCES = \
+libMeteo_la_SOURCES = \
          meteo_data.f90 \
          distance2.f90 \
          meteo_read.f90 \

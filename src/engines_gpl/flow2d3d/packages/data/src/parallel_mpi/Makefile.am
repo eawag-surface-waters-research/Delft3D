@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libparallel.la
+lib_LTLIBRARIES = libDataParallelMPI.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -18,14 +18,13 @@ lib_LTLIBRARIES = libparallel.la
 FINCLUDES += \
         -I$(MPI_INCLUDE) \
         -I$(top_builddir)/utils_lgpl/parallel_mpi/include \
-        -I$(top_builddir)/utils_lgpl/precision/include \
+        -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/include \
         -I$(top_builddir)/engines_gpl/flow2d3d/packages/data/include
 
 FMODULES += \
         -I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics \
         -I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src \
-        -I$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src \
         -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
 
 # fpp is compiler dependent (convention is to use .F90 files for preprocessing)
@@ -34,7 +33,7 @@ AM_FCFLAGS += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libparallel_la_SOURCES = \
+libDataParallelMPI_la_SOURCES = \
          dfparall.F90 \
          initdfparall.F90 \
          dfinitmpi.F90 \

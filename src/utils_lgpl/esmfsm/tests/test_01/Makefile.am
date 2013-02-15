@@ -10,12 +10,15 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libtest_01.la
+bin_PROGRAMS = test_01
 
 #-------------------------------------------------------------------------------
 #Sources
-libtest_01_la_SOURCES = \
+test_01_SOURCES = \
          test_01.c
 
 #-------------------------------------------------------------------------------
 #Libraries
+
+test_01_LDADD = \
+    $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/libESMFSM.la

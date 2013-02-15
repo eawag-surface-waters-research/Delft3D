@@ -10,13 +10,16 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = lib03_dredgedumptest.la
+bin_PROGRAMS = 03_dredgedumptest
 
 #-------------------------------------------------------------------------------
 #Sources
-lib03_dredgedumptest_la_SOURCES = \
+03_dredgedumptest_SOURCES = \
          dredgedumptest.f90 \
          main.c
 
 #-------------------------------------------------------------------------------
 #Libraries
+
+03_dredgedumptest_LDADD = \
+    $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/libDeltaresCommon.la

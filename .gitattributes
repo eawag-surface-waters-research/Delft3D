@@ -152,9 +152,6 @@ src/engines_gpl/d_hydro/packages/d_hydro/d_hydro.vcxproj -text
 src/engines_gpl/d_hydro/packages/d_hydro/include/d_hydro_version.h.svn -text
 src/engines_gpl/d_hydro/packages/d_hydro/include/version_number.ini -text
 src/engines_gpl/d_hydro/packages/d_hydro/src/Makefile.am -text
-src/engines_gpl/d_hydro/packages/d_hydro/src/Makefile_dynamic.am -text
-src/engines_gpl/d_hydro/packages/d_hydro/src/Makefile_monolithic.am -text
-src/engines_gpl/d_hydro/packages/d_hydro/src/Makefile_monolithic_alternative.am -text
 src/engines_gpl/d_hydro/packages/d_hydro/src/d_hydro.cpp -text
 src/engines_gpl/d_hydro/packages/d_hydro/src/d_hydro_version.cpp -text
 src/engines_gpl/d_hydro/packages/d_hydro/src/readme.txt -text

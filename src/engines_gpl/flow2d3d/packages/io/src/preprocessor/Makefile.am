@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libio_preprocessor.la
+lib_LTLIBRARIES = libIOPreprocessor.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -18,14 +18,13 @@ FINCLUDES += \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/include
 
 FMODULES += \
-	-I$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
 	-I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics
 
 #-------------------------------------------------------------------------------
 #Sources
-libio_preprocessor_la_SOURCES = \
+libIOPreprocessor_la_SOURCES = \
          asc.f90 \
          bchfil.f90 \
          bewvuf.f90 \

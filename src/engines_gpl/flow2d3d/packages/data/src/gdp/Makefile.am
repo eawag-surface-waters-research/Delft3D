@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libdata_gdp.la
+lib_LTLIBRARIES = libDataGDP.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -18,7 +18,6 @@ FINCLUDES += \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/include
 
 FMODULES += \
-	-I$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
@@ -26,7 +25,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libdata_gdp_la_SOURCES = \
+libDataGDP_la_SOURCES = \
          gdp_for_dll.f90 \
          clradv2d.f90 \
          clrbedformpar.f90 \

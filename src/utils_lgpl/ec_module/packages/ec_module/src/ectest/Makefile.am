@@ -14,7 +14,6 @@ bin_PROGRAMS= ectest
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
-	-I$(top_builddir)/utils_lgpl/precision/packages/precision/src \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
 	-I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src
 
@@ -29,5 +28,4 @@ ectest_SOURCES= \
 
 ectest_LDADD =\
 	../libec_module.la \
-        $(top_builddir)/utils_lgpl/precision/packages/precision/src/libprecision.la \
         $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libdeltares_common.la

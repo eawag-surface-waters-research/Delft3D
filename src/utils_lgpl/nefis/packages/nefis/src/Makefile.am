@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libnefis.la
+lib_LTLIBRARIES = libNefis.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -27,7 +27,7 @@ AM_CXXFLAGS += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libnefis_la_SOURCES = \
+libNefis_la_SOURCES = \
          c2c.c \
          df.c \
          er.c \
@@ -35,6 +35,7 @@ libnefis_la_SOURCES = \
          gp.c \
          gt.c \
          hs.c \
+         nefis_version.cpp \
          oc.c \
          pt.c \
          rt.c \
@@ -43,5 +44,11 @@ libnefis_la_SOURCES = \
 #-------------------------------------------------------------------------------
 #Libraries
 
-#libnefisla_LIBADD = \
-#	$(top_builddir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.la
+BUILT_SOURCES = ./always \
+	../include/nefis_version.h
+
+./always:
+	rm -rf ../include/nefis_version.h
+
+../include/nefis_version.h:
+	$(top_srcdir)/scripts_lgpl/linux/update_version.sh $(srcdir)/../include/nefis_version.h $(srcdir) ../include/version_number.ini $(top_builddir)

@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libdelftio_sync.la
+lib_LTLIBRARIES = libDelftIOSync.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -23,7 +23,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libdelftio_sync_la_SOURCES = \
+libDelftIOSync_la_SOURCES = \
          d3d_sobek_conf.f90 \
          d3d_sobek.f90 \
          d3s_get_discharges.f90 \

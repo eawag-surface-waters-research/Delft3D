@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libdata_allocation.la
+lib_LTLIBRARIES = libDataAllocation.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -18,7 +18,6 @@ FINCLUDES += \
 	-I$(top_builddir)/utils_lgpl/esmfsm/include
 
 FMODULES += \
-	-I$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
@@ -26,7 +25,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libdata_allocation_la_SOURCES = \
+libDataAllocation_la_SOURCES = \
          chnull.f90 \
          decarr.f90 \
          dnull.f90 \

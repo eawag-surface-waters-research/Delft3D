@@ -11,11 +11,11 @@ lib_LIBRARIES = libwaq_process.a
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
-	 -I$(top_srcdir)/engines_gpl/waq/include \
-	 -I$(top_srcdir)/engines_gpl/waq/packages/waq_data/src/proc_data \
-	 -I$(top_srcdir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings \
-	 -I$(top_srcdir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils \
-     -I$(top_srcdir)/utils_lgpl/timers/src
+	 -I$(top_builddir)/engines_gpl/waq/include \
+	 -I$(top_builddir)/engines_gpl/waq/packages/waq_data/src/proc_data \
+	 -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings \
+	 -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils \
+     -I$(top_builddir)/utils_lgpl/timers/src
 
 #-------------------------------------------------------------------------------
 #Sources

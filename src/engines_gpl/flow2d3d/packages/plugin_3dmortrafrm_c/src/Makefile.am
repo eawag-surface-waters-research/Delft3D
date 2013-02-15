@@ -10,11 +10,11 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libplugin_3dmortrafrm_c.la
+lib_LTLIBRARIES = libPlugin3dmortrafrmC.la
 
 #-------------------------------------------------------------------------------
 #Sources
-libplugin_3dmortrafrm_c_la_SOURCES = \
+libPlugin3dmortrafrmC_la_SOURCES = \
          f902c.c
 #-------------------------------------------------------------------------------
 #Libraries

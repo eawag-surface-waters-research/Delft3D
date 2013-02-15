@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libdiof90Nefis.la
+lib_LTLIBRARIES = libDIOF90Nefis.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -22,7 +22,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libdiof90Nefis_la_SOURCES = \
+libDIOF90Nefis_la_SOURCES = \
          dio-2dfield-nefis.F90 \
          dio-3d-block-nefis.F90 \
          dio-check-nefis-error \

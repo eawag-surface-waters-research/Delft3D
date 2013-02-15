@@ -8,7 +8,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libesmfsm_version_number.la
+lib_LTLIBRARIES = libESMFSMVersionNumber.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -16,7 +16,7 @@ INCLUDES = -I../include
 
 #-------------------------------------------------------------------------------
 #Sources
-libesmfsm_version_number_la_SOURCES = \
+libESMFSMVersionNumber_la_SOURCES = \
          c2c.c \
          f2c.c \
          version.c

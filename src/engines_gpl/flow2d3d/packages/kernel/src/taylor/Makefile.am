@@ -10,19 +10,18 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libkernel_taylor.la
+lib_LTLIBRARIES = libKernelTaylor.la
 
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics \
-	-I$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
 	-I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src
 
 #-------------------------------------------------------------------------------
 #Sources
-libkernel_taylor_la_SOURCES = \
+libKernelTaylor_la_SOURCES = \
          ampiwe.f90 \
          bediwe.f90 \
          brkbed.f90 \

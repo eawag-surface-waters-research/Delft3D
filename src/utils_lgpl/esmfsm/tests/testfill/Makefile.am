@@ -10,12 +10,16 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libtestfill.la
+bin_PROGRAMS = testfill
 
 #-------------------------------------------------------------------------------
 #Sources
-libtestfill_la_SOURCES = \
+testfill_SOURCES = \
          testfill.f90
 
 #-------------------------------------------------------------------------------
 #Libraries
+
+testfill_LDADD = \
+    $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/libESMFSM.la
+

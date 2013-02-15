@@ -13,7 +13,7 @@ lib_LIBRARIES = libdelwaq1_version_number.a
 INCLUDES = \
         -I../include
 #FMODULES += \
-#        -I$(top_srcdir)/...
+#        -I$(top_builddir)/...
 
 #-------------------------------------------------------------------------------
 #Sources

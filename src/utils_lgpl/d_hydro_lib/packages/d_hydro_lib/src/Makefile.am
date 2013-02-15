@@ -10,7 +10,7 @@
 
 include $(top_srcdir)/common.am
 
-lib_LTLIBRARIES = libD_hydro.la
+lib_LTLIBRARIES = libDHydroLib.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -20,7 +20,7 @@ INCLUDES = \
 
 #-------------------------------------------------------------------------------
 #Sources
-libD_hydro_la_SOURCES = \
+libDHydroLib_la_SOURCES = \
     coredump.cpp \
     clock.cpp \
     component.cpp \

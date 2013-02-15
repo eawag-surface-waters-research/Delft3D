@@ -11,9 +11,9 @@ lib_LIBRARIES = libbloom.a
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
-        -I$(top_srcdir)/engines_gpl/waq/include \
-         -I$(top_srcdir)/engines_gpl/waq/packages/waq_data/src/proc_data \
-        -I$(top_srcdir)/utils_lgpl/timers/src
+        -I$(top_builddir)/engines_gpl/waq/include \
+         -I$(top_builddir)/engines_gpl/waq/packages/waq_data/src/proc_data \
+        -I$(top_builddir)/utils_lgpl/timers/src
 
 #-------------------------------------------------------------------------------
 #Sources

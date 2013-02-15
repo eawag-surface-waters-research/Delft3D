@@ -11,18 +11,20 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libec_module.la
+
+SUBDIRS = \
+    meteo
+
+lib_LTLIBRARIES = libECModule.la
 
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
-	-I$(top_builddir)/utils_lgpl/precision/packages/precision/src \
-	-I$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
 
 #-------------------------------------------------------------------------------
 #Sources
-libec_module_la_SOURCES = \
+libECModule_la_SOURCES = \
          ec_typedefs.f90 \
          ec_message.f90 \
          openexistingfile.f90 \
@@ -41,3 +43,6 @@ libec_module_la_SOURCES = \
 
 #-------------------------------------------------------------------------------
 #Libraries
+
+libECModule_la_LIBADD=\
+    $(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src/meteo/libMeteo.la

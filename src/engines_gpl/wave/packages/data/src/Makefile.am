@@ -16,8 +16,6 @@ lib_LIBRARIES = libdata.a
 #Includes
 FMODULES += \
 	-I$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90 \
-	-I$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src \
-	-I$(top_builddir)/utils_lgpl/precision/packages/precision/src \
 	-I$(top_builddir)/utils_lgpl/meteo/packages/meteo/src \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
 

@@ -10,13 +10,16 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = lib01_initest.la
+bin_PROGRAMS = 01_initest
 
 #-------------------------------------------------------------------------------
 #Sources
-lib01_initest_la_SOURCES = \
+01_initest_SOURCES = \
          initest.f90 \
          main.c
 
 #-------------------------------------------------------------------------------
 #Libraries
+
+01_initest_LDADD = \
+    $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/libDeltaresCommon.la

@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libesm_c.la
+lib_LTLIBRARIES = libESMC.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -19,7 +19,7 @@ INCLUDES = -I$(top_builddir)/utils_lgpl/esmfsm/include \
 
 #-------------------------------------------------------------------------------
 #Sources
-libesm_c_la_SOURCES = \
+libESMC_la_SOURCES = \
          esm.cpp \
          esm_f.cpp \
          local.cpp \

@@ -17,7 +17,6 @@ bin_PROGRAMS = mormerge.exe
 #Includes
 
 FMODULES += \
-	-I$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src
 
 #-------------------------------------------------------------------------------
 #Sources
@@ -30,10 +29,6 @@ mormerge_exe_SOURCES = \
 
 mormerge_exe_LDADD   = \
 $(top_builddir)/tools_gpl/mormerge/packages/mormerge_version_number/src/libmormerge_version_number.a \
-$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src/libinifiles.la \
 $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libdeltares_common.la \
 $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_c/src/libdeltares_common_c.la \
-$(top_builddir)/utils_lgpl/semaphore/packages/semaphore/src/libsemaphore.la \
-$(top_builddir)/utils_lgpl/stream/packages/stream/src/libstream.la \
-$(top_builddir)/utils_lgpl/stream/packages/stream_version_number/src/libstream_version_number.la \
 $(FCLIBS)

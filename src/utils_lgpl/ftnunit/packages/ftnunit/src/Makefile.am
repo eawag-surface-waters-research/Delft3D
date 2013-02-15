@@ -7,11 +7,11 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libftnunit.la
+lib_LTLIBRARIES = libFtnUnit.la
 
 #-------------------------------------------------------------------------------
 #Sources
-libftnunit_la_SOURCES = \
+libFtnUnit_la_SOURCES = \
          ftnunit_hooks_teamcity.f90 \
          ftnunit.f90 \
          ftnunit_store.f90

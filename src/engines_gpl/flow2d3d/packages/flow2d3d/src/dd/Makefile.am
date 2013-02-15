@@ -12,8 +12,7 @@ SUBDIRS = \
     iterators \
     mapper
 
-lib_LTLIBRARIES = \
-    libDD.la
+lib_LTLIBRARIES = libDD.la
 
 libDD_la_SOURCES = \
     blob.cpp \

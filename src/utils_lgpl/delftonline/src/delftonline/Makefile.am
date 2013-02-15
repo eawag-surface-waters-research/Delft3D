@@ -8,8 +8,7 @@
 
 include $(top_srcdir)/common.am
 
-lib_LTLIBRARIES = \
-    libDelftOnline.la
+lib_LTLIBRARIES = libDelftOnline.la
 
 INCLUDES = \
     $(STANDARD_C_INCLUDES) \

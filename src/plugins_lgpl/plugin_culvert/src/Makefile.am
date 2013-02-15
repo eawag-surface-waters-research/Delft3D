@@ -10,11 +10,11 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libplugin_culvert.la
+lib_LTLIBRARIES = libPluginCulvert.la
 
 #-------------------------------------------------------------------------------
 #Sources
-libplugin_culvert_la_SOURCES = \
+libPluginCulvert_la_SOURCES = \
          plugin_culvert.f90
 
 #-------------------------------------------------------------------------------

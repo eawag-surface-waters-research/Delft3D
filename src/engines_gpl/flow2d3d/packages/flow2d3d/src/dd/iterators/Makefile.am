@@ -10,10 +10,9 @@
 
 include $(top_srcdir)/common.am
 
-lib_LTLIBRARIES = \
-    libDDMapper.la
+lib_LTLIBRARIES = libDDIterators.la
 
-libDDMapper_la_SOURCES = \
+libDDIterators_la_SOURCES = \
     dredgemerge.cpp \
     gawsbarrier.cpp \
     initbarrier.cpp \
@@ -23,6 +22,3 @@ libDDMapper_la_SOURCES = \
 INCLUDES = \
     $(STANDARD_C_INCLUDES) \
     -I../../../include
-
-libDDMapper_la_LIBADD =
-

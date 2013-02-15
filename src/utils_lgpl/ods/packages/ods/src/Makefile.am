@@ -1,12 +1,12 @@
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libods.la
+lib_LTLIBRARIES = libODS.la
 
 #-------------------------------------------------------------------------------
 #Sources
 
 # Language: C language
-libods_la_SOURCES =           \
+libODS_la_SOURCES =           \
 		dlwbin.c     \
                 dlwbingr.c   \
                 dlwgrid.c    \

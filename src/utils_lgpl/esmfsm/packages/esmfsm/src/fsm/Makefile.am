@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libfsm.la
+lib_LTLIBRARIES = libESMFSM.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -23,8 +23,13 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libfsm_la_SOURCES = \
+libFSM_la_SOURCES = \
          fortapi.f90
 
 #-------------------------------------------------------------------------------
 #Libraries
+
+testesm_LDADD = \
+    $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/libESMC.la \
+    $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/libFSMC.la \
+    $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_version_number/src/libESMFSMVersionNumber.la \

@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libio_input.la
+lib_LTLIBRARIES = libIOInput.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -19,17 +19,15 @@ FINCLUDES += \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/include
 
 FMODULES += \
-	-I$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi \
-	-I$(top_builddir)/utils_lgpl/precision/include \
-	-I$(top_builddir)/utils_lgpl/meteo/packages/meteo/src \
+	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/include \
+	-I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src/meteo \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
-	-I$(top_builddir)/utils_lgpl/constants/packages/mathconsts/src \
 	-I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src
 #-------------------------------------------------------------------------------
 #Sources
-libio_input_la_SOURCES = \
+libIOInput_la_SOURCES = \
          barfil.f90 \
          bndfil.f90 \
          bubfil.f90 \

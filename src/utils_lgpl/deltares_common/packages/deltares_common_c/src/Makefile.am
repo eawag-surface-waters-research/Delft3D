@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libdeltares_common_c.la
+lib_LTLIBRARIES = libDeltaresCommonC.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -18,7 +18,7 @@ AM_CPPFLAGS = -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_com
 
 #-------------------------------------------------------------------------------
 #Sources
-libdeltares_common_c_la_SOURCES = \
+libDeltaresCommonC_la_SOURCES = \
          cpuinfo.cpp \
          cutil.c \
          getopt.cpp \

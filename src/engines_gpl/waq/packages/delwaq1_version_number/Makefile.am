@@ -1,3 +1,3 @@
-include $(top_srcdir)/common.am
+include $(top_builddir)/common.am
 SUBDIRS = \
          src

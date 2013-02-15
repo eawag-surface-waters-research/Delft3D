@@ -11,12 +11,12 @@ lib_LIBRARIES = libwaq_io.a
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
-        -I$(top_srcdir)/engines_gpl/waq/include \
-        -I$(top_srcdir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils \
-        -I$(top_srcdir)/engines_gpl/part/packages/utils_f/src \
-        -I$(top_srcdir)/engines_gpl/part/packages/data_f/src \
-        -I$(top_srcdir)/utils_lgpl/rd_token/src \
-        -I$(top_srcdir)/utils_lgpl/timers/src
+        -I$(top_builddir)/engines_gpl/waq/include \
+        -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils \
+        -I$(top_builddir)/engines_gpl/part/packages/utils_f/src \
+        -I$(top_builddir)/engines_gpl/part/packages/data_f/src \
+        -I$(top_builddir)/utils_lgpl/rd_token/src \
+        -I$(top_builddir)/utils_lgpl/timers/src
 
 #-------------------------------------------------------------------------------
 #Sources

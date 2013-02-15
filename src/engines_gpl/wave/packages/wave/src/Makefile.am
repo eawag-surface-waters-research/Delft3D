@@ -23,7 +23,6 @@ FINCLUDES += \
 
 FMODULES += \
 	-I$(top_builddir)/engines_gpl/wave/packages/data/src \
-	-I$(top_builddir)/utils_lgpl/precision/packages/precision/src \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
 	-I$(top_builddir)/utils_lgpl/meteo/packages/meteo/src
 
@@ -50,9 +49,7 @@ $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libfsm.la \
 $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/libfsm_c.la \
 $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/libesm_c.la \
 $(top_builddir)/utils_lgpl/meteo/packages/meteo/src/libmeteo.la \
-$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src/libinifiles.la \
 $(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libnefis.la \
-$(top_builddir)/utils_lgpl/precision/packages/precision/src/libprecision.la \
 $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libdeltares_common.la \
 $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_c/src/libdeltares_common_c.la \
 $(top_builddir)/utils_lgpl/meteo/packages/meteo_version_number/src/libmeteo_version_number.la \

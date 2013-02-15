@@ -12,8 +12,7 @@
 include $(top_srcdir)/common.am
 
 
-bin_PROGRAMS = \
-    d_hydro.exe
+bin_PROGRAMS = d_hydro.exe
 
 d_hydro_exe_SOURCES = \
     d_hydro_version.cpp \
@@ -30,7 +29,7 @@ INCLUDES = \
 
 
 d_hydro_exe_LDADD = \
-    $(top_builddir)/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/src/libD_hydro.la \
+    $(top_builddir)/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/src/libDHydro.la \
     -ldl
 
 #    -lmcheck

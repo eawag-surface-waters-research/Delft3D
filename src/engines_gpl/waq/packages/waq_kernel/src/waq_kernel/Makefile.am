@@ -6,27 +6,27 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libwaq_kernel.la
+lib_LTLIBRARIES = libWaqKernel.la
 
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
-        -I$(top_srcdir)/engines_gpl/waq/include \
-        -I$(top_srcdir)/engines_gpl/part/packages/data_f/src/ \
-        -I$(top_srcdir)/engines_gpl/part/packages/utils_f/src/ \
-        -I$(top_srcdir)/engines_gpl/part/packages/io_f/src/ \
-        -I$(top_srcdir)/engines_gpl/part/packages/kernel_f/src/ \
-        -I$(top_srcdir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils \
-        -I$(top_srcdir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings \
-        -I$(top_srcdir)/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib \
-        -I$(top_srcdir)/engines_gpl/waq/packages/waq_plugin_wasteload/src/ \
-        -I$(top_srcdir)/utils_lgpl/delftio/packages/delftio/src/diof90 \
-        -I$(top_srcdir)/utils_lgpl/rd_token/src \
-        -I$(top_srcdir)/utils_lgpl/timers/src
+        -I$(top_builddir)/engines_gpl/waq/include \
+        -I$(top_builddir)/engines_gpl/part/packages/data_f/src/ \
+        -I$(top_builddir)/engines_gpl/part/packages/utils_f/src/ \
+        -I$(top_builddir)/engines_gpl/part/packages/io_f/src/ \
+        -I$(top_builddir)/engines_gpl/part/packages/kernel_f/src/ \
+        -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils \
+        -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings \
+        -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib \
+        -I$(top_builddir)/engines_gpl/waq/packages/waq_plugin_wasteload/src/ \
+        -I$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90 \
+	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token \
+	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
 
 #-------------------------------------------------------------------------------
 #Sources
-libwaq_kernel_la_SOURCES = \
+libWaqKernel_la_SOURCES = \
        dlwq_mt3d_data.f90 \
        dlwq_mt3d.f90 \
        dlwq2_hydro_set.f \

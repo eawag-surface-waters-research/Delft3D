@@ -12,8 +12,8 @@ lib_LIBRARIES = libmod_couplib.a
 #Includes
 FMODULES += \
         -I/opt/mpich2/include \
-        -I$(top_srcdir)/engines_gpl/waq/include \
-        -I$(top_srcdir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings
+        -I$(top_builddir)/engines_gpl/waq/include \
+        -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings
 
 #-------------------------------------------------------------------------------
 #Sources

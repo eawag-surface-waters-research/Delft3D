@@ -34,8 +34,7 @@ STANDARD_C_INCLUDES = \
     -I$(top_builddir)/utils_lgpl/d_hydro_lib/include \
     -I$(top_builddir)/utils_lgpl/delftonline/include \
     -I$(top_builddir)/utils_lgpl/esmfsm/include \
-    -I$(top_builddir)/utils_lgpl/precision/include \
-    -I$(top_builddir)/utils_lgpl/stream/include
+    -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_c/include \
 
 
 #-------------------------------------------------------------------------------

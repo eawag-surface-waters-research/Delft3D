@@ -10,19 +10,18 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libkernel_non_hydro.la
+lib_LTLIBRARIES = libKernelNonHydro.la
 
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics \
-	-I$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
 	-I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src
 
 #-------------------------------------------------------------------------------
 #Sources
-libkernel_non_hydro_la_SOURCES = \
+libKernelNonHydro_la_SOURCES = \
          z_hydpres.f90 \
          z_hydpres_nhfull.f90 \
          z_ilu_nhfull.f90 \

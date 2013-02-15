@@ -10,7 +10,11 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libdeltares_common.la
+
+SUBDIRS = \
+    rd_token
+
+lib_LTLIBRARIES = libDeltaresCommon.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -20,7 +24,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libdeltares_common_la_SOURCES = \
+libDeltaresCommon_la_SOURCES = \
          precision_basics.F90 \
          precision.F90 \
          precision_sp.F90 \
@@ -54,8 +58,8 @@ EXTRA_DIST = \
 #-------------------------------------------------------------------------------
 #Libraries
 
-libdeltares_common_la_LIBADD=\
-	$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_c/src/libdeltares_common_c.la
+libDeltaresCommon_la_LIBADD=\
+	$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_c/src/libDeltaresCommonC.la
 
 
 BUILT_SOURCES = ./always \

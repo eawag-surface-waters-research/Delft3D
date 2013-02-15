@@ -10,13 +10,13 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libkernel_inichk.la
+lib_LTLIBRARIES = libKernelInichk.la
 
 #-------------------------------------------------------------------------------
 #Includes
 FINCLUDES += \
 	-I$(top_builddir)/utils_lgpl/esmfsm/include \
-	-I$(top_builddir)/utils_lgpl/precision/include \
+	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/include \
 	-I$(top_builddir)/utils_lgpl/parallel_mpi/include \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/include
 
@@ -25,15 +25,13 @@ FMODULES += \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/general \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi \
 	-I$(top_builddir)/engines_gpl/flow2d3d/packages/io_dol_f/src \
-	-I$(top_builddir)/utils_lgpl/constants/packages/mathconsts/src \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
 	-I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src \
-	-I$(top_builddir)/utils_lgpl/inifiles/packages/inifiles/src \
 	-I$(top_builddir)/utils_lgpl/meteo/packages/meteo/src
 
 #-------------------------------------------------------------------------------
 #Sources
-libkernel_inichk_la_SOURCES = \
+libKernelInichk_la_SOURCES = \
          allocadv2d.f90 \
          caldps.f90 \
          caldpu.f90 \

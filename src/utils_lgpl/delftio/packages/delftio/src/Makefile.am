@@ -1,5 +1,5 @@
 include $(top_srcdir)/common.am
 SUBDIRS = \
-         diof90 \
          diof90Nefis \
-         delftio_sync
+         delftio_sync \
+         diof90
