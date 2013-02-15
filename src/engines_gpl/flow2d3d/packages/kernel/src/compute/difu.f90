@@ -81,7 +81,7 @@ subroutine difu(icreep    ,timest    ,lundia    ,nst       ,icx       , &
 !!--declarations----------------------------------------------------------------
     use precision
     use mathconsts
-    use timers
+    use flow2d3d_timers
     use globaldata
     use dfparall
     !

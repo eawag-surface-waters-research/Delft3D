@@ -42,7 +42,7 @@ subroutine z_difhor_nhfull(j         ,nmmaxj    ,kmax      ,lstsci    ,nmmax    
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use timers
+    use flow2d3d_timers
     !
     use globaldata
     !

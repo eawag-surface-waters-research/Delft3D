@@ -40,7 +40,7 @@ subroutine postpr_hdt(nst, gdp)
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use timers
+    use flow2d3d_timers
     use globaldata
     !
     implicit none

@@ -45,7 +45,7 @@ subroutine z_hormom_fls(nmmax     ,kmax      ,icx       , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use timers
+    use flow2d3d_timers
     !
     use globaldata
     !

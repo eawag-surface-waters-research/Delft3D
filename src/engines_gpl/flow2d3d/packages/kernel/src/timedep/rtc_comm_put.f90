@@ -36,7 +36,7 @@ subroutine rtc_comm_put(kfs       ,kfsmin    ,kfsmax    ,sig       , &
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-    use timers
+    use flow2d3d_timers
     use SyncRtcFlow
     use globaldata
     !

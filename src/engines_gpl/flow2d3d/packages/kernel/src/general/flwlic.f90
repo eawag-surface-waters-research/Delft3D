@@ -44,7 +44,7 @@ subroutine flwlic(lunscr    ,error     ,username    ,version_full ,version_short
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use timers
+    use flow2d3d_timers
     !
     use globaldata
     use dfparall

@@ -71,7 +71,7 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use timers
+    use flow2d3d_timers
    !
     use globaldata
     !

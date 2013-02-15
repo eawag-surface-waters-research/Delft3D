@@ -79,7 +79,7 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
 !!--declarations----------------------------------------------------------------
     use precision
     use mathconsts
-    use timers
+    use flow2d3d_timers
     !
     use globaldata
     !

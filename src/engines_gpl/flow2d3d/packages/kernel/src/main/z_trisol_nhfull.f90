@@ -45,7 +45,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     use precision
     use sync_flm
     use SyncRtcFlow
-    use timers
+    use flow2d3d_timers
     !
     use globaldata
     !

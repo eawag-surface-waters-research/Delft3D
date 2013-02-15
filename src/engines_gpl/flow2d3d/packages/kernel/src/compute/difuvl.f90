@@ -79,7 +79,7 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     use precision
     use mathconsts
     use dfparall 
-    use timers
+    use flow2d3d_timers
    !
     use globaldata
     !

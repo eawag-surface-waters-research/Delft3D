@@ -43,7 +43,7 @@
 
 
 function nxtstp (currentstep, gdp)
-    use timers
+    use flow2d3d_timers
     !
     use globaldata
     !
@@ -88,7 +88,7 @@ end function nxtstp
 
 
 function nxtdry (currentstep, driedornot, gdp)
-    use timers
+    use flow2d3d_timers
     !
     use globaldata
     !

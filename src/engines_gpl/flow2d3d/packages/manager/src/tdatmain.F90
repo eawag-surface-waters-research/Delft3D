@@ -37,7 +37,7 @@ subroutine tdatmain(runid, alone, subsys, filmrs, nuerr, gdp)
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use timers
+    use flow2d3d_timers
     !
     use globaldata
     !

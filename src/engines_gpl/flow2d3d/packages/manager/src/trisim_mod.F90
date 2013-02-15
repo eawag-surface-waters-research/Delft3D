@@ -48,7 +48,7 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, o
     use precision
     use SyncRtcFlow
     use dfparall
-    use timers
+    use flow2d3d_timers
     use d3d_olv_class
     !
     use m_openda_exchange_items, only : openda_buffer_initialize
@@ -442,7 +442,7 @@ end function trisim_finish
 !
 !-----------------------------------------------------------------------
 integer function trisim_close(gdp) result (retval)
-    use timers
+    use flow2d3d_timers
     use meteo
     use globaldata
     !    

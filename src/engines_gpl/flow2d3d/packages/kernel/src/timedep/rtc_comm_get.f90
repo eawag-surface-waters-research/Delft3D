@@ -34,7 +34,7 @@ subroutine rtc_comm_get(cursec    ,cbuvrt    ,nsluv     ,gdp       )
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-    use timers
+    use flow2d3d_timers
     use SyncRtcFlow
     use globaldata
     !

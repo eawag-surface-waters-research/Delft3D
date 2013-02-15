@@ -55,7 +55,7 @@ subroutine tricom_finish(olv_handle, gdp)
     use sync_flm
     use sync_flowcouple
     use sync_flowwave
-    use timers
+    use flow2d3d_timers
     use d3d_olv_class
     use D3D_Sobek 
     use D3DPublish

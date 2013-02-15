@@ -71,7 +71,7 @@ subroutine adi(dischy    ,solver    ,icreep    ,stage     ,nst       , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use timers
+    use flow2d3d_timers
     !
     use globaldata
     !

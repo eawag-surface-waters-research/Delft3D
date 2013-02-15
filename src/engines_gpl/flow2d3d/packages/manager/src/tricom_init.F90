@@ -49,7 +49,7 @@ subroutine tricom_init(olv_handle, gdp)
     use sync_flm
     use sync_flowcouple
     use sync_flowwave
-    use timers
+    use flow2d3d_timers
     use D3DOnline
     use D3DPublish
     use D3D_Sobek 

@@ -77,7 +77,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use timers
+    use flow2d3d_timers
     use globaldata
     use dfparall
     !

@@ -83,7 +83,7 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     use mathconsts
     use globaldata
     use dfparall
-    use timers
+    use flow2d3d_timers
     !
     implicit none
     !

@@ -45,7 +45,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     use precision
     use sync_flm
     use SyncRtcFlow
-    use timers
+    use flow2d3d_timers
     use flow_tables
     !
     use globaldata

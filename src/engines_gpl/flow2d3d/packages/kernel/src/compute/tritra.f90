@@ -65,7 +65,7 @@ subroutine tritra(stage     ,lundia    ,nst       ,icreep    , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    use timers
+    use flow2d3d_timers
     !
     use globaldata
     !

@@ -81,7 +81,7 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
 !!--declarations----------------------------------------------------------------
     use precision
     use mathconsts
-    use timers
+    use flow2d3d_timers
     !
     use globaldata
     !

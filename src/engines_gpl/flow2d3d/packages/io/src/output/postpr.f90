@@ -48,7 +48,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     use sync_flowcouple
     use precision
     use dfparall
-    use timers
+    use flow2d3d_timers
     !
     use globaldata
     !

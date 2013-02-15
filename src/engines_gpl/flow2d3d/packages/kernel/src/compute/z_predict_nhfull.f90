@@ -69,7 +69,7 @@ subroutine z_predict_nhfull(j         ,nmmaxj    ,nmmax     ,kmax      , &
 !
 !!--declarations----------------------------------------------------------------
     use precision
-    use timers
+    use flow2d3d_timers
     !
     use globaldata
     !

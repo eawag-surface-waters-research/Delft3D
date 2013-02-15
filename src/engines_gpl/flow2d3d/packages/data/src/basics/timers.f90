@@ -1,4 +1,4 @@
-module timers
+module flow2d3d_timers
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -52,7 +52,7 @@ module timers
 ! Remarks/restrictions:
 ! - The subroutines containing calls to timer_start/timer_stop must contain
 !   the line:
-!   use timers
+!   use flow2d3d_timers
 ! - The subroutines containing calls to timer_start/timer_stop must contain
 !   the pointer gdp to the Global Data.
 ! - These timers can only be used inside FLOW;
@@ -802,4 +802,4 @@ subroutine timers_finish (gdp)
  111 format('|',a,' | ',2(f12.2,'  |',f5.1,'  | '))
 end subroutine timers_finish
 
-end module timers
+end module flow2d3d_timers
