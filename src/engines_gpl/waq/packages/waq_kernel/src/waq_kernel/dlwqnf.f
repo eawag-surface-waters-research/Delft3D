@@ -345,6 +345,10 @@ C
          call hsurf  ( nosys   , notot   , noseg   , nopa    , c(ipnam),
      +                 a(iparm), nosfun  , c(isfna), a(isfun), surface ,
      +                 lun(19) )
+
+         noth = OMP_GET_NUM_THREADS()
+         call OMP_SET_NUM_THREADS(noth) ! AM: this seems necessary!
+
          call proces ( notot   , nosss   , a(iconc), a(ivol) , itime   ,
      &                 idt     , a(iderv), ndmpar  , nproc   , nflux   ,
      &                 j(iipms), j(insva), j(iimod), j(iiflu), j(iipss),

@@ -43,6 +43,7 @@ contains
 
 !> Set a value
 logical function SetValuePriv(dlwqtype, parid, locid, values, operation)
+    implicit none
 
     integer, intent(in)              :: dlwqtype         !< Type of parameter to be set
     integer, intent(in)              :: parid            !< Index of the parameter
@@ -70,6 +71,21 @@ logical function SetValuePriv(dlwqtype, parid, locid, values, operation)
     endif
 
     idx = DetermineIndex( dlwqtype, parid, locid )
+
+    !
+    ! Sanity check:
+    ! The size of the array "values" must be equal to
+    ! the number of items stored in "idx"
+    !
+    if ( size(values) /= idx(3) ) then
+        write(*,*) 'SetValues: Error - inconsistent number of values'
+        write(*,*) '           Number of substances: ', notot
+        write(*,*) '           Number of segments:   ', noseg
+        write(*,*) '           Number of values:     ', size(values)
+        write(*,*) '           Should be 1, ', notot*noseg, ' or ', noseg
+        SetValuePriv = .false.
+        return
+    endif
 
     call StoreOperation( idx, size(values), values, operation )
 
@@ -704,8 +720,7 @@ integer function Set_Values(partype, parid, loctype, locid, operation, number, v
     integer, intent(in)                   :: number           !< Number of values
     double precision, dimension(number), intent(in)   :: values  !< Value(s) to be used in the operation
 
-
-    real, dimension(number) :: r_values
+    real, dimension(:), allocatable       :: r_values
 
     integer                               :: idx
     integer                               :: locid_
@@ -725,9 +740,13 @@ integer function Set_Values(partype, parid, loctype, locid, operation, number, v
        parid_ = -1  ! TODO: ????
     endif
 
+    allocate( r_values(number) )
     r_values = values
 
     success   = SetValuePriv( dlwqtype, parid_, locid_, r_values, operation )
+
+    deallocate( r_values )
+
     Set_Values = merge( 1, 0, success )
 end function Set_Values
 
@@ -812,7 +831,7 @@ integer function Get_Values(partype, parid, loctype, locid, number, values)
     integer, intent(in)              :: number           !< Size of array values
     double precision, dimension(number),intent(out):: values         !< Value to be used in the operation
 
-    real, dimension(number) :: r_values
+    real, dimension(:), allocatable  :: r_values
     integer                          :: idx
     integer                          :: dlwqtype
     logical                          :: success
@@ -820,9 +839,14 @@ integer function Get_Values(partype, parid, loctype, locid, number, values)
     integer                          :: dummy
     integer, external                :: GetWQCurrentTime
 
+    allocate( r_values(number) )
+
     call odatype_2_dlwq(partype, loctype, dlwqtype)
     success  = GetValuePriv( dlwqtype, parid, locid, r_values )
     values = r_values
+
+    deallocate( r_values )
+
     Get_Values = merge( 1, 0, success )
 
     dummy = GetWQCurrentTime(currentTime)
