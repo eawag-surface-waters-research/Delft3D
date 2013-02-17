@@ -21,92 +21,91 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      SUBROUTINE DLWQCE ( AMASS  , VOLUMN , VOLUML , NOSYS  , NOTOT  ,
-     +                    NOSEG  , LUN    )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:
-C
-C     FUNCTION            : Make closure error correction
-C
-C     LOGICAL UNITNUMBERS : LUN     = number of monitoring file
-C
-C     SUBROUTINES CALLED  : none
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     AMASS   REAL   NOTOT*NOSEG  IN/OUT  mass array to be updated
-C     VOLUMN  REAL      NOSEG     INPUT   New volume
-C     VOLUML  REAL      NOSEG     INPUT   Last volume
-C     NOSYS   INTEGER     1       INPUT   number of active substances
-C     NOTOT   INTEGER     1       INPUT   number of total substances
-C     NOSEG   INTEGER     1       INPUT   number of computational elts.
-C     LUN     INTEGER     1       INPUT   unitnumber of monitoring file
-C
-C     Declaration of arguments
-C
-      use timers
+      subroutine dlwqce ( amass  , volumn , voluml , nosys  , notot  ,
+     &                    noseg  , lun    )
 
-      INTEGER       NOSYS , NOTOT , NOSEG , LUN
-      REAL          AMASS(*) , VOLUMN(*), VOLUML(*)
-C
-C     Local declaration
-C
-      INTEGER       NOBOT , ITEL  , ISEG
-      REAL          CLOFAC
+!     Deltares Software Centre
+
+!>/file
+!>              Makes closure error correction on masses
+!>
+!>         The volume after rewind of hydrodynamics (volumn) generally
+!>         does generally not correspond with the volume that is obtained
+!>         with mass conserving transport in the last time step of the
+!>         hydrodynamic file (voluml). This will give a jump in the the
+!>         time series of concentrations after rewind since DELWAQ preserves
+!>         mass. To avoid this jump, the mass can be adjusted according to
+!>         the volume error made with the rewind of the dataset.
+
+!     Logical unitnumbers : LUN     = number of monitoring file
+
+!     Subroutines called  : none
+
+      use timers                         ! WAQ performance timers
+      implicit none
+
+!     Arguments           :
+
+!     Kind        Function         Name                  Description
+
+      integer(4), intent(in   ) :: lun                 !< Unit number of the monitroing file
+      integer(4), intent(in   ) :: nosys               !< Number of transport substances
+      integer(4), intent(in   ) :: notot               !< Total number of substances
+      integer(4), intent(in   ) :: noseg               !< Number of computational volumes
+      real   (4), intent(inout) :: amass (notot,noseg) !< Delwaq mass array to be updated
+      real   (4), intent(in   ) :: volumn(noseg)       !< Volume after rewind
+      real   (4), intent(in   ) :: voluml(noseg)       !< Last volume before rewind
+
+!     Locals
+
+      real   (8)  tovoll   ! total of the last volume array
+      real   (8)  tovoln   ! total of the last new volume array
+      real   (8)  clofac   ! closure correction factor
+      integer(4)  iseg     ! finite volume counter
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqce", ithandl )
-C
-C     Say what you are doing
-C
-      WRITE (LUN,1000)
-C
-C     loop accross the number of computational elements
-C
-      TOVOLL = 0.0
-      TOVOLN = 0.0
-      NOBOT  = NOTOT - NOSYS
-      ITEL   = 1
-      DO 20 ISEG = 1, NOSEG
-C
-C        Calculate error
-C
-         if ( voluml(iseg) .gt. 1.0e-28 ) then
-            CLOFAC = VOLUMN(ISEG)/VOLUML(ISEG)
+
+!     Say what you are doing
+
+      write ( lun, 1000 )
+
+!     Loop accross the number of computational elements
+
+      tovoll = 0.0d00
+      tovoln = 0.0d00
+      do iseg = 1, noseg
+
+!        Calculate closure error
+
+         if ( abs(voluml(iseg)) .gt. 1.0e-28 ) then
+            clofac = volumn(iseg)/voluml(iseg)
          else
             clofac = 1.0
          endif
-         TOVOLL = TOVOLL + VOLUML(ISEG)
-         TOVOLN = TOVOLN + VOLUMN(ISEG)
-C
-C        Correct active substances mass
-C
-         DO 10 I=1,NOSYS
-            AMASS(ITEL) = AMASS(ITEL) * CLOFAC
-            ITEL = ITEL + 1
-   10    CONTINUE
-         ITEL = ITEL + NOBOT
-C
-   20 CONTINUE
-C
-C
-C
-      CLOERR = TOVOLN/TOVOLL
-      WRITE (LUN,1010) TOVOLL
-      WRITE (LUN,1020) TOVOLN
-      WRITE (LUN,1030) CLOERR
-C
+         tovoll = tovoll + voluml(iseg)
+         tovoln = tovoln + volumn(iseg)
+
+!        Correct mass of transported substances
+
+         amass(1:nosys,iseg) = amass(1:nosys,iseg) * clofac
+
+      enddo
+
+!     Write statistics
+
+      write ( lun, 1010 ) tovoll
+      write ( lun, 1020 ) tovoln
+      write ( lun, 1030 ) tovoln/tovoll
+
       if ( timon ) call timstop ( ithandl )
-      RETURN
-C
-C     Output formats
-C
- 1000 FORMAT ( 'Performing closure error correction')
- 1010 FORMAT ( 'Total volume before rewind:',E12.4)
- 1020 FORMAT ( 'Total volume after rewind :',E12.4)
- 1030 FORMAT ( 'Total correction factor   :',E12.4)
-C
-      END
+      return
+
+!     Output formats
+
+ 1000 format ( 'Performing closure error correction')
+ 1010 format ( 'Total volume before rewind:',e24.13)
+ 1020 format ( 'Total volume after rewind :',e24.13)
+ 1030 format ( 'Total correction factor   :',e24.13)
+
+      end

@@ -389,19 +389,38 @@ C
      *              IDT     , IAFLAG  , A(IDMPS), INTOPT  , J(ISDMP),
      *              J(IOWNS), MYPART )
       call timer_stop(timer_transport)
-C
-C          get new volumes
-C
-      ITIMEL = ITIME
-      ITIME  = ITIME + IDT
-C
-      call timer_start(timer_readdata)
-      CALL DLWQ41 ( LUN     , ITIME   , ITIMEL  , A(IHARM), A(IFARR),
-     *              J(INRHA), J(INRH2), J(INRFT), NOSEG   , A(IVOL2),
-     *              J(IBULK), LCHAR   , ftype   , ISFLAG  , IVFLAG  ,
-     *              LDUMMY  , J(INISP), A(INRSP), J(INTYP), J(IWORK),
-     *              LSTREC  , LREWIN  , A(IVOLL), MYPART  , dlwqd   )
-      call timer_stop(timer_readdata)
+
+!     get new volumes
+         itimel = itime
+         itime  = itime + idt
+         call timer_start(timer_readdata)
+         select case ( ivflag )
+            case ( 1 )                 !     computation of volumes for computed volumes only
+               call move   ( a(ivol) , a(ivol2), noseg   )
+               call dlwqb3 ( a(iarea), a(iflow), a(ivnew), j(ixpnt), notot   ,
+     &                       noq     , nvdim   , j(ivpnw), a(ivol2), intopt  ,
+     &                       a(imas2), idt     , iaflag  , nosys   , a(idmpq),
+     &                       ndmpq   , j(iqdmp))
+               updatr = .true.
+            case ( 2 )                 !     the fraudulous computation option
+               call dlwq41 ( lun     , itime   , itimel  , a(iharm), a(ifarr),
+     &                       j(inrha), j(inrh2), j(inrft), noseg   , a(ivoll),
+     &                       j(ibulk), lchar   , ftype   , isflag  , ivflag  ,
+     &                       updatr  , j(inisp), a(inrsp), j(intyp), j(iwork),
+     &                       lstrec  , lrewin  , a(ivol2), mypart  , dlwqd   )
+               call dlwqf8 ( noseg   , noq     , j(ixpnt), idt     , iknmkv  ,
+     &                       a(ivol ), a(iflow), a(ivoll), a(ivol2))
+               updatr = .true.
+               lrewin = .true.
+               lstrec = .true.
+            case default               !     read new volumes from files
+               call dlwq41 ( lun     , itime   , itimel  , a(iharm), a(ifarr),
+     &                       j(inrha), j(inrh2), j(inrft), noseg   , a(ivol2),
+     &                       j(ibulk), lchar   , ftype   , isflag  , ivflag  ,
+     &                       updatr  , j(inisp), a(inrsp), j(intyp), j(iwork),
+     &                       lstrec  , lrewin  , a(ivoll), mypart  , dlwqd   )
+         end select
+         call timer_stop(timer_readdata)
 
 !        update the info on dry volumes with the new volumes
 
@@ -456,7 +475,6 @@ C
      &              a(iconc), a(iderv), nopa    , c(ipnam), a(iparm),
      &              nosfun  , c(isfna), a(isfun), idtold  , ivflag  ,
      &              lun(19) , j(iowns), mypart  )
-      CALL MOVE   ( A(IVOL2), A(IVOL), NOSEG )
 C
 C          update new concentrations for subdomain boundaries
 C
@@ -473,17 +491,18 @@ C
       endif
 C
 C          calculate closure error
-C
-      IF ( LREWIN .AND. LSTREC ) THEN
+         if ( lrewin .and. lstrec ) then
 c collect information on master for computation of closure error before rewind
-         call collect_rdata(mypart,A(IMASS), notot, 'noseg', 1, ierror)
-         if (mypart.eq.1) then
-            CALL DLWQCE ( A(IMASS), A(IVOLL), A(IVOL2), NOSYS , NOTOT ,
-     +                    NOSEG   , LUN(19) )
+            call collect_rdata(mypart,A(IMASS), notot, 'noseg', 1, ierror)
+            if ( mypart .eq. 1 )
+     &      call dlwqce ( a(imass), a(ivoll), a(ivol2), nosys , notot ,
+     &                    noseg   , lun(19) )
+            call distribute_rdata(mypart,A(IMASS),notot,'noseg',1,'distrib_itf', ierror)
+            call move   ( a(ivoll), a(ivol) , noseg   )
+         else
+!     replace old by new volumes
+            call move   ( a(ivol2), a(ivol) , noseg   )
          endif
-         call distribute_rdata(mypart,A(IMASS),notot,'noseg',1,'distrib_itf', ierror)
-         CALL MOVE   ( A(IVOLL), A(IVOL ), NOSEG )
-      ENDIF
 C
 C          integrate the fluxes at dump segments fill ASMASS with mass
 C

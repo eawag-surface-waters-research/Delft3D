@@ -21,127 +21,121 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      SUBROUTINE DLWQ41 ( LUN    , ITIME  , ITIMEL , HARMAT , ARRAY  ,
-     *                    IHARM  , NRHARM , NRFTOT , NOSEG  , VOLUME ,
-     *                    IPOINT , LUNTXT , ftype  , ISFLAG , IVFLAG ,
-     *                    UPDATV , INWSPC , ANWSPC , INWTYP , IWORK  ,
-     *                    LSTREC , LREWIN , VOLLST , MYPART , dlwqd  )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: april- 8-1988 by L.Postma
-C
-C     FUNCTION            : Makes values at ITIME for volumes only.
-C
-C     LOGICAL UNITNUMBERS : LUN(..) -
-C
-C     SUBROUTINES CALLED  : DLWQT1, makes one time function
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     ITIME   INTEGER       1     INPUT   Model timer
-C     ITIMEL  INTEGER       1     INPUT   Model timer last step
-C     HARMAT  REAL          ?     IN/OUT  matrices harmonic components
-C     ARRAY   REAL          ?     LOCAL   set of double file buffers
-C     IHARM   INTEGER       ?     INPUT   harmonics time space
-C     NRHARM  INTEGER       ?     INPUT   set of nrs of harmonic records
-C     NRFTOT  INTEGER       ?     INPUT   set of record lengthes
-C     NOSEG   INTEGER       1     INPUT   nr of computational elements
-C     VOLUME  REAL       NOSEG    OUTPUT  array of segment volumes
-C     IDT     INTEGER       1     OUTPUT  integration time step size
-C     IPOINT  INTEGER       ?     INPUT   set of pointers to destination
-C     LUNTXT  CHAR*(*)      ?     INPUT   text with the unit numbers
-C     ISFLAG  INTEGER       1     INPUT   = 1 then 'ddhhmmss' format
-C     IVFLAG  INTEGER       1     INPUT   = 1 then computed volumes
-C     UPDATV  LOGICAL       1     OUTPUT  set to T if volume is updated
-C                                         else set to F
-C     INWSPC  INTEGER       *     IN/OUT  Integer space new time funs
-C     ANWSPC  REAL          *     IN/OUT  Real space new time functions
-C     INWTYP  INTEGER       *     INPUT   Types of items
-C     IWORK   INTEGER       *     LOCAL   Integer workspace
-C     LSTREC  LOGICAL       1     INPUT   Switch last record on rewind wanted
-C     LREWIN  LOGICAL       1     OUTPUT  Then rewind took place
-C     VOLLST  REAL          *     OUTPUT  Last volume record before rewind
-C     MYPART  INTEGER       1     INPUT   number of current part/subdomain
-c
-      use timers
-      use m_couplib
+      subroutine dlwq41 ( lun    , itime  , itimel , harmat , array  ,
+     &                    iharm  , nrharm , nrftot , noseg  , volume ,
+     &                    ipoint , luntxt , ftype  , isflag , ivflag ,
+     &                    updatv , inwspc , anwspc , inwtyp , iwork  ,
+     &                    lstrec , lrewin , vollst , mypart , dlwqd  )
+
+!     Deltares Software Centre
+
+!>/file
+!>              Makes values at ITIME for volumes only
+!>
+!>              Routine is a stripped version of dlwqt0 to read volumes
+!>              at the end of the time step only. Remainder of the time
+!>              varying info is updated after the time step has finished.
+!>              Ratio is that the end-volume of a time step is often needed
+!>              to determine drying and flooding and for a number of
+!>              numerical schemes.
+
+!     Created             : april- 8-1988 by Leo Postma
+
+!     Logical unitnumbers : LUN(..) -
+
+!     Subroutines called  : DLWQT1, makes one time function
+
+      use timers                     ! WAQ performance timers
+      use m_couplib                  ! some first steps on paralellism
       use delwaq2_data
-C
-C     DECLARATIONS        :
-C
-      integer, intent(in   )           :: ftype(*)     !< type of file to read
+
+      implicit none
+
+!     Arguments           :
+
+!     Kind        Function         Name                  Description
+
+      integer(4), intent(in   ) :: lun   (*)           !< Array with unit numbers
+      integer(4), intent(in   ) :: itime               !< The model timer
+      integer(4), intent(in   ) :: itimel              !< The model timer last step
+      real   (4), intent(inout) :: harmat(*)           !< Matrices harmonic components
+      real   (4), intent(inout) :: array (*)           !< Set of double file buffers
+      integer(4), intent(in   ) :: iharm (*)           !< Harmonic time space
+      integer(4), intent(in   ) :: nrharm(*)           !< Set of nrs of harmonic records
+      integer(4), intent(in   ) :: nrftot(*)           !< Set of record lengthes
+      integer(4), intent(in   ) :: noseg               !< Nr of computational volumes
+      real   (4), intent(  out) :: volume(noseg)       !< Array of volumes per gridcell
+      integer(4), intent(in   ) :: ipoint(*)           !< Set of pointers to destination
+      character*(*), intent(in) :: luntxt(*)           !< Text with the unit numbers
+      integer(4), intent(in   ) :: ftype (*)           !< Type of file to read
+      integer(4), intent(in   ) :: isflag              !< = 1 then 'ddhhmmss' format
+      integer(4), intent(in   ) :: ivflag              !< = 1 then computed volumes
+      logical   , intent(  out) :: updatv              !< set to T if volume is updated
+      integer(4), intent(inout) :: inwspc(*)           !< Integer space new time functions
+      real   (4), intent(inout) :: anwspc(*)           !< Real space new time functions
+      integer(4), intent(in   ) :: inwtyp(*)           !< Types of items
+      integer(4), intent(inout) :: iwork (*)           !< Integer workspace
+      logical   , intent(in   ) :: lstrec              !< Switch last record on rewind wanted
+      logical   , intent(  out) :: lrewin              !< If T then rewindtook place
+      real   (4), intent(  out) :: vollst(noseg)       !< Last volume record before rewind
+      integer(4), intent(in   ) :: mypart              !< number of current part/subdomain
       type(delwaq_data), intent(inout) :: dlwqd        !< derived type for persistent storage
 
-      DIMENSION    LUN   (*) , HARMAT(*) , ARRAY (*) , IHARM (*) ,
-     *             NRHARM(*) , NRFTOT(*) , VOLUME(*) , IPOINT(*) ,
-     *             INWSPC(*) , ANWSPC(*) , INWTYP(*) , IWORK (*) ,
-     *             VOLLST(*)
-      CHARACTER*(*)LUNTXT(*)
-      LOGICAL      UPDATV    , LSTREC    , LREWIN
-C
-C     Local
-C
-      LOGICAL      UPDATE, LDUM(2)
-C
-C     COMMON  /  SYST   /   System time function flags
-C
-      INCLUDE 'syst.inc'
-      integer(4) ithandl /0/
+!     Common  /  syst   /   system time function flags
+
+      include 'syst.inc'
+
+!     Local
+
+      integer(4)  iph, ipf, ipa, ipi      ! pointers in the arrays
+      integer(4)  ifflag                  ! if 1, then it was the first invoke
+      logical     update, ldum(2)         ! logicals on rewind
+      integer(4)  ierr                    ! error indicator
+
+      integer(4)  ithandl /0/
       if ( timon ) call timstrt ( "dlwq41", ithandl )
-C
-C         initialisation
-C
-      IPH = 1
-      IPF = 1
-      IPA = 1
-      IPI = 1
-      IFFLAG = 0
-      UPDATV = .FALSE.
-      LREWIN = .FALSE.
-C
-C         integration step size IDT
-C
-      IF ( NRFTOT( 1) .GT. 0 ) THEN
-         IPA = IPA + 2
-         IPI = IPI + 4
-      ENDIF
-C
-C         volumes
-C
-      IF ( NRHARM( 2) .GE. 0 ) THEN
-      IPA2 = IPA
-      IPH2 = IPH
-      IPF2 = IPF
-      IPI2 = IPI
-      IF ( IVFLAG     .EQ. 0 ) THEN
-         IF (MYPART.EQ.1) THEN
-            CALL DLWQT1 (LUN        , ITIME       , ITIMEL, IHARM(IPF2), HARMAT(IPH2),
-     *                   ARRAY(IPA2), IPOINT(IPI2), VOLUME, 1          , NRHARM( 2)  ,
-     *                   NOSEG      , NRFTOT( 2)  , IPA   , IPH        , IPF         ,
-     *                   IPI        , LUNTXT      , 7     , ISFLAG     , IFFLAG      ,
-     *                   UPDATE     , .FALSE.     , 0     , IWORK      , LSTREC      ,
-     *                   LREWIN     , VOLLST      , ftype , dlwqd      )
-            LDUM(1) = UPDATE
-            LDUM(2) = LREWIN
-         END IF
 
-         CALL DISTRIBUTE_DATA(MYPART, LDUM, 2, IERR)
-         UPDATE = LDUM(1)
-         LREWIN = LDUM(2)
+!         initialisation
 
-         IF ( UPDATE ) then
-            UPDATV = .TRUE.
-            CALL DISTRIBUTE_DATA(MYPART, VOLUME, 'noseg', 'distrib_itf', IERR)
-         ENDIF
-         IF ( LREWIN )
-     *      CALL DISTRIBUTE_DATA(MYPART, VOLLST, 'noseg', 'distrib_itf', IERR)
-      ENDIF
-      ENDIF
-C
+      iph    = 1
+      ipf    = 1
+      ipa    = 1
+      ipi    = 1
+      ifflag = 0
+      updatv = .false.
+      lrewin = .false.
+
+!         integration step size IDT
+
+      if ( nrftot( 1) .gt. 0 ) then
+         ipa = ipa + 2
+         ipi = ipi + 4
+      endif
+
+!         volumes
+
+      if ( nrharm( 2) .ge. 0 ) then
+         if (mypart.eq.1) then
+            call dlwqt1 ( lun       , itime      , itimel, iharm(ipf), harmat(iph),
+     &                    array(ipa), ipoint(ipi), volume, 1         , nrharm( 2) ,
+     &                    noseg     , nrftot( 2) , ipa   , iph       , ipf        ,
+     &                    ipi       , luntxt     , 7     , isflag    , ifflag     ,
+     &                    update    , .false.    , 0     , iwork     , lstrec     ,
+     &                    lrewin    , vollst     , ftype , dlwqd     )
+!           ldum(1) = update
+!           ldum(2) = lrewin
+         endif
+
+!        call distribute_data(mypart, ldum, 2, ierr)
+!        update = ldum(1)
+!        lrewin = ldum(2)
+!        if ( update ) then
+!           updatv = .true.
+!           call distribute_data( mypart, volume, 'noseg', 'distrib_itf', ierr )
+!        endif
+!        if ( lrewin ) call distribute_data( mypart, vollst, 'noseg', 'distrib_itf', ierr )
+      endif
+
       if ( timon ) call timstop ( ithandl )
-      RETURN
-      END
-
+      return
+      end

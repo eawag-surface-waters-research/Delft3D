@@ -91,7 +91,7 @@
       integer  ( 4), intent(in   ) :: ifact        !< factor between time scales
       logical      , intent(in   ) :: dtflg1       !< 'date'-format 1st time scale
       logical      , intent(in   ) :: disper       !< .true. then dispersion
-      logical      , intent(inout) :: volume       !< .true. then volume ( out: false = computed volumes )
+      integer      , intent(inout) :: volume       !< if 1 then volume ( out: 0 = computed volumes )
       integer  ( 4), intent(in   ) :: iwidth       !< width of the output file
       character( *), intent(inout) :: lchar  (*)   !< array with file names of the files
       integer  ( 4), intent(inout) :: filtype(*)   !< type of binary file
@@ -107,17 +107,19 @@
 
       include 'sysn.inc'
 
-      logical       bound        !  if .true. then boundary call
-      logical       waste        !  if .true. then waste call
-      logical       skip         !  if .true. then waste call with skip
-      integer       iopt1        !  first  option ( type of file e.g. 0 = binary file )
-      integer       iopt2        !  second option ( 1,2 = constant, 3 = time varying )
-      integer       ndim1        !  sum of input in 3 directions
-      integer       ndtot        !  total size of matrix (ndim1*ndim2)
-      integer       ierr2        !  local error flag
-      integer       idummy       !  work integer ( = 0 )
-      real          adummy       !  work real    ( = 0.0 )
-      integer       k            !  loop counter
+      logical        bound       !  if .true. then boundary call
+      logical        waste       !  if .true. then waste call
+      logical        skip        !  if .true. then waste call with skip
+      integer        iopt1       !  first  option ( type of file e.g. 0 = binary file )
+      integer        iopt2       !  second option ( 1,2 = constant, 3 = time varying )
+      integer        ndim1       !  sum of input in 3 directions
+      integer        ndtot       !  total size of matrix (ndim1*ndim2)
+      integer        ierr2       !  local error flag
+      integer        itype       !  to identify the data type read
+      integer        idummy      !  work integer ( = 0 )
+      real           adummy      !  work real    ( = 0.0 )
+      character(128) cdummy      !  work character
+      integer        k           !  loop counter
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "opt0", ithndl )
 
@@ -148,7 +150,24 @@
 
 !        Read first option, write zero dispersion if OPT1=0
 
-      if ( gettoken( iopt1, ierr2 ) .gt. 0 ) goto 50
+      if ( gettoken( cdummy, iopt1, itype, ierr2 ) .gt. 0 ) goto 50
+      if ( itype .eq. 1 ) then
+         if ( volume .ne. 1 ) then
+            write ( lunut, 2070 ) cdummy
+            ierr2 = 1
+            goto 50
+         else
+            if ( cdummy .eq. 'FRAUD' ) then
+               volume = -1
+               write ( lunut, 2080 )
+               if ( gettoken( iopt1, ierr2 ) .gt. 0 ) goto 50
+            else
+               write ( lunut, 2090 ) cdummy
+               ierr2 = 1
+               goto 50
+            endif
+         endif
+      endif
       write ( lunut , 2000 ) iopt1
       call opt1   ( iopt1   , lun     , is      , lchar   , filtype ,
      &              dtflg1  , dtflg3  , ndtot   , ierr2   , iwar    )
@@ -162,7 +181,7 @@
          npoins    = npoins + ndim1 + 3
          nrftot    = ndim1*ndim2
          nrharm    = 0
-         if ( volume ) then
+         if ( volume .eq. 1 ) then
             write( lun(4) ) (  k , k=1,ndim1 ) , ( idummy , k=1,3 )
          else
             write( lun(4) ) ( -k , k=1,ndim1 ) , ( idummy , k=1,3 )
@@ -190,8 +209,8 @@
 
    10 if ( gettoken( iopt2, ierr2 ) .gt. 0 ) goto 50
       write ( lunut , 2010 ) iopt2
-      if ( volume .and. iopt2 .gt. 3 ) then                  ! Computed volumes !!
-         volume = .false.
+      if ( volume .eq. 1 .and. iopt2 .gt. 3 ) then                  ! Computed volumes !!
+         volume = 0
          iopt2 = iopt2 - 3
       endif
 
@@ -251,5 +270,8 @@
      *          /,' The maximum is limited by REAL array space',
      *          /,' Consult your system manager to obtain at least',I7,
      *          /,' words of additional storage.' )
+ 2070 format (  /,' ERROR. No character string allowed: ',A )
+ 2080 format (    ' Keyword FRAUD found for fraudulus computations.' )
+ 2090 format (  /,' ERROR. This keyword is not allowed here: ',A )
 
       end

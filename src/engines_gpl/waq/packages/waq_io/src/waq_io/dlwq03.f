@@ -94,7 +94,7 @@
       character*255           cdummy            !  workspace to read a string
       integer                 idummy            !  location to read an integer
       logical                 disper            !  is opt0 called for dispersions ?
-      logical                 volume            !  is opt0 called for volumes ?
+      integer  ( 4)           volume            !  is 1 if opt0 is called for volumes ?
       integer                 ifact             !  needed for call to opt0
       integer                 itype             !  type of token that is returned
       integer                 ierr2             !  local error indicator
@@ -122,7 +122,7 @@
       if (timon) call timstrt( "dlwq03", ithndl )
 
       disper = .false.
-      volume = .true.
+      volume = 1
       ifact  = 1
       ivflag = 0
       ierr2  = 0
@@ -439,7 +439,8 @@
             ierr = ierr + 1
          endif
       endif
-      if ( .not. volume ) ivflag = 1
+      if ( volume .eq.  0 ) ivflag = 1
+      if ( volume .eq. -1 ) ivflag = 2
       ierr  = ierr + ierr2
       ierr2 = 0
   240 continue

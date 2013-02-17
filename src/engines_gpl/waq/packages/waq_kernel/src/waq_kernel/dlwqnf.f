@@ -159,6 +159,7 @@
       integer         isys
       integer         nstep
 
+      integer         iseg
       integer         ibnd
 
       integer         noth
@@ -463,27 +464,42 @@ C
 !     get new volumes
          itimel = itime
          itime  = itime + idt
-         if ( ivflag .eq. 1 ) then     !     computation of volumes for computed volumes only
-            call move   ( a(ivol) , a(ivol2), noseg   )
-            call dlwqb3 ( a(iarea), a(iflow), a(ivnew), j(ixpnt), notot   ,
-     &                    noq     , nvdim   , j(ivpnw), a(ivol2), intopt  ,
-     &                    a(imas2), idt     , iaflag  , nosys   , a(idmpq),
-     &                    ndmpq   , j(iqdmp))
-            updatr = .true.
-         else                          !     read new volumes from files
-            call dlwq41 ( lun     , itime   , itimel  , a(iharm), a(ifarr),
-     &                    j(inrha), j(inrh2), j(inrft), noseg   , a(ivol2),
-     &                    j(ibulk), lchar   , ftype   , isflag  , ivflag  ,
-     &                    update  , j(inisp), a(inrsp), j(intyp), j(iwork),
-     &                    lstrec  , lrewin  , a(ivoll), mypart  , dlwqd   )
-            if ( update ) updatr = .true.
-         endif
+         select case ( ivflag )
+            case ( 1 )                 !     computation of volumes for computed volumes only
+               call move   ( a(ivol) , a(ivol2), noseg   )
+               call dlwqb3 ( a(iarea), a(iflow), a(ivnew), j(ixpnt), notot   ,
+     &                       noq     , nvdim   , j(ivpnw), a(ivol2), intopt  ,
+     &                       a(imas2), idt     , iaflag  , nosys   , a(idmpq),
+     &                       ndmpq   , j(iqdmp))
+               updatr = .true.
+            case ( 2 )                 !     the fraudulous computation option
+               call dlwq41 ( lun     , itime   , itimel  , a(iharm), a(ifarr),
+     &                       j(inrha), j(inrh2), j(inrft), noseg   , a(ivoll),
+     &                       j(ibulk), lchar   , ftype   , isflag  , ivflag  ,
+     &                       updatr  , j(inisp), a(inrsp), j(intyp), j(iwork),
+     &                       lstrec  , lrewin  , a(ivol2), mypart  , dlwqd   )
+               call dlwqf8 ( noseg   , noq     , j(ixpnt), idt     , iknmkv  ,
+     &                       a(ivol ), a(iflow), a(ivoll), a(ivol2))
+               updatr = .true.
+               lrewin = .true.
+               lstrec = .true.
+            case default               !     read new volumes from files
+               call dlwq41 ( lun     , itime   , itimel  , a(iharm), a(ifarr),
+     &                       j(inrha), j(inrh2), j(inrft), noseg   , a(ivol2),
+     &                       j(ibulk), lchar   , ftype   , isflag  , ivflag  ,
+     &                       updatr  , j(inisp), a(inrsp), j(intyp), j(iwork),
+     &                       lstrec  , lrewin  , a(ivoll), mypart  , dlwqd   )
+         end select
 
 !     update the info on dry volumes with the new volumes
 
+         iexseg = 1
          call dryfle ( noseg    , nosss    , a(ivol2) , nolay    , nocons   ,
      &                 c(icnam) , a(icons) , nopa     , c(ipnam) , a(iparm) ,
      &                 nosfun   , c(isfna) , a(isfun) , j(iknmr) , iknmkv   )
+         do iseg = 1, noseg
+            if ( iknmkv(iseg,1) .eq. 0 ) iexseg(iseg,1) = 0
+         enddo
 
 !     add the waste loads
          inwtyp = intyp + nobnd
@@ -572,14 +588,14 @@ C
      &                 a(iconc), a(iderv), nopa    , c(ipnam), a(iparm),
      &                 nosfun  , c(isfna), a(isfun), idt     )
 
-!     replace old by new volumes
-         call move   ( a(ivol2), a(ivol) , noseg   )
-
 !     calculate closure error
          if ( lrewin .and. lstrec ) then
             call dlwqce ( a(imass), a(ivoll), a(ivol2), nosys , notot ,
      &                    noseg   , lun(19) )
             call move   ( a(ivoll), a(ivol) , noseg   )
+         else
+!     replace old by new volumes
+            call move   ( a(ivol2), a(ivol) , noseg   )
          endif
 
 !     integrate the fluxes at dump segments fill asmass with mass
