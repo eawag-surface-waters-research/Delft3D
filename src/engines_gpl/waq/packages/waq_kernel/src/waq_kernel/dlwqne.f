@@ -384,7 +384,7 @@ C
      &                       a(imas2), idt     , iaflag  , nosys   , a(idmpq),
      &                       ndmpq   , j(iqdmp))
                updatr = .true.
-            case ( 2 )                 !     the fraudulous computation option
+            case ( 2 )                 !     the fraudulent computation option
                call dlwq41 ( lun     , itime   , itimel  , a(iharm), a(ifarr),
      &                       j(inrha), j(inrh2), j(inrft), noseg   , a(ivoll),
      &                       j(ibulk), lchar   , ftype   , isflag  , ivflag  ,

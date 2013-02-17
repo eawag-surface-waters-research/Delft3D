@@ -111,6 +111,7 @@ libWaqKernel_la_SOURCES = \
        dlwqf5.f90 \
        dlwqf6.f90 \
        dlwqf7.f90 \
+       dlwqf8.f90 \
        dlwqg3.f90 \
        dlwqh1.f \
        dlwqh2.f90 \

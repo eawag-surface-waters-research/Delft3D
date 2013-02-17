@@ -271,7 +271,7 @@
      *          /,' Consult your system manager to obtain at least',I7,
      *          /,' words of additional storage.' )
  2070 format (  /,' ERROR. No character string allowed: ',A )
- 2080 format (    ' Keyword FRAUD found for fraudulus computations.' )
+ 2080 format (    ' Keyword FRAUD found for fraudulent computations.' )
  2090 format (  /,' ERROR. This keyword is not allowed here: ',A )
 
       end
