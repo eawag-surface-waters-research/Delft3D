@@ -110,8 +110,8 @@
          ! read item pointer for next data block
 
          ndim1_left = ndim1 - ntotal
-         call rdpoin ( ndim1_left, iopt3  , ioutpt , ipnt_all(ntotal+1:ndim1), nvarnw,
-     &                 ierr      )
+         call rdpoin ( ndim1 , iopt3  , ioutpt , ipnt_all(ntotal+1:ndim1), nvarnw,
+     &                 ierr  )
          allocate(ipnt(nvarnw))
          ipnt = abs(ipnt_all(ntotal+1:))
 
@@ -133,7 +133,8 @@
 
             ntt = nvarnw*ndim2
             allocate(times(nobrk))
-            allocate(values(ndim1,ndim2,nobrk))
+!jvb        allocate(values(ndim1,ndim2,nobrk))
+            allocate(values(ndim2,nvarnw,nobrk))
             call fmread ( nvarnw , ipnt   , ndim2  , ndim3  , scale  ,
      &                    nobrk  , times  , values , dtflg  , dtflg3 ,
      &                    ifact  , iwidth , ioutpt , ierr   )
@@ -187,7 +188,7 @@
             dlwqdata%param_pointered = .false.
          elseif ( subject .eq. SUBJECT_FUNCTION .or.
      &            subject .eq. SUBJECT_SEGFUNC      ) then
-            dlwqdata%iorder          = ORDER_PARAM_LOC
+            dlwqdata%iorder          = ORDER_LOC_PARAM
             dlwqdata%no_param        = nvarnw
             dlwqdata%param_pointered = .true.
             dlwqdata%param_pointers  => ipnt

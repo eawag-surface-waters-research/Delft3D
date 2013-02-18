@@ -333,8 +333,8 @@ C                call with record length 0 => IPOPT1 of -4 not allowed
       write ( lunut , 2040 ) ipopt2
 
       if ( ipopt2 .eq. 1  .or. ipopt2 .eq. 2 ) then
-         call opt2 ( ipopt2 , dlwqdata%values , noseg  , nopa   , nopa   ,
-     &               iwidth , 0               , ioutpt , ierr2  )
+         call read_opt2 ( ipopt2 , dlwqdata%values , noseg  , nopa   , nopa   ,
+     &                    iwidth , 0               , ioutpt , ierr2  )
          if ( ierr2 .gt. 0 ) goto 80
       else
          write ( lunut , 2030 )
