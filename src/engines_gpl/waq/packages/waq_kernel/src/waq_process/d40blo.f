@@ -492,9 +492,13 @@ C              SDMIXALG
 cjvb
                IF (IFIX(IALG).LT.0) THEN
 C
-C                 No PP for fixed ulva in non bottom segment
+C                 No PP for fixed ulva in non bottom segment, unless sdmix is set positive for this segment
 C
-                  IF ((IKMRK2.EQ.1).OR.(IKMRK2.EQ.2)) THEN
+                  IF ( SDMIXN .LT. -1.E-10 ) THEN
+                     IF ((IKMRK2.EQ.1).OR.(IKMRK2.EQ.2)) THEN
+                        CALL BLSPPM(IALG,0.0)
+                     ENDIF
+                  ELSEIF ( SDMIXN .LT. 1.E-10 ) THEN
                      CALL BLSPPM(IALG,0.0)
                   ENDIF
                ENDIF
@@ -525,13 +529,6 @@ c    +                        ID    )
             DO IALG = 1,NTYP_A
                CALL BLSPPM(IALG,ALGTYP(8,IALG))
             ENDDO
-            IF ((IKMRK2.EQ.1).OR.(IKMRK2.EQ.2)) THEN
-               DO IALG = 1,NTYP_A
-                  IF (IFIX(IALG).LT.0) THEN
-                     CALL BLSPPM(IALG,ALGTYP(8,IALG))
-                  ENDIF
-               ENDDO
-            ENDIF
          ENDIF
          IP2  = IP2  + INCREM( 2)
          IP3  = IP3  + INCREM( 3)
@@ -654,16 +651,20 @@ C        SDMIXALG
          SDMIXN = PMSA(IP)
          CALL BLSSDM(IALG,SDMIXN)
 cjvb
-c         scale ulva from (g) to (g/m3)
+c         scale ulva from (g/m2) to (g/m3)
 c
           IOFF = NIPFIX
           IP = IPOINT(IOFF+IALG) + (ISEG-1)*INCREM(IOFF+IALG)
           IF (IFIX(IALG).LT.0) THEN
              BIOMAS(IALG) = PMSA(IP)/DEPTH
 C
-C            No PP for fixed ulva in non bottom segment
+C            No PP for fixed ulva in non bottom segment, unless sdmix is set positive for this segment
 C
-             IF ((IKMRK2.EQ.1).OR.(IKMRK2.EQ.2)) THEN
+             IF ( SDMIXN .LT. -1.E-10 ) THEN
+                IF ((IKMRK2.EQ.1).OR.(IKMRK2.EQ.2)) THEN
+                   CALL BLSPPM(IALG,0.0)
+                ENDIF
+             ELSEIF ( SDMIXN .LT. 1.E-10 ) THEN
                 CALL BLSPPM(IALG,0.0)
              ENDIF
           ELSE

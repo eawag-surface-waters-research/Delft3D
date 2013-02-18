@@ -95,6 +95,14 @@ old_name,new_name,old_default,configuration,serial,action_type
 "RcOOSi    ","n.a.      ",    9.00000    ,"          ",2012032801,         7
 "RcOOSIHigh","n.a.      ",    9.00000    ,"          ",2012032801,         7
 "TcOOSi    ","n.a.      ",    9.00000    ,"          ",2012032801,         7
+"CalVS_DetC","CalVS_POC1",    0.00000    ,"          ",2012032801,         1
+"V0SedDetC ","V0SedPOC1 ",    0.00000    ,"          ",2012032801,         2
+"nDetC     ","nPOC1     ",    0.00000    ,"          ",2012032801,         2
+"EnhSedDetC","EnhSedPOC1",    0.00000    ,"          ",2012032801,         2
+"CalVS_OOC ","CalVS_POC2",    0.00000    ,"          ",2012032801,         1
+"V0SedOOC  ","V0SedPOC2 ",    0.00000    ,"          ",2012032801,         2
+"nOOC      ","nPOC2     ",    0.00000    ,"          ",2012032801,         2
+"EnhSedOOC ","EnhSedPOC2",    0.00000    ,"          ",2012032801,         2
 "SedDetC   ","Sed_POC1  ",    0.00000    ,"          ",2012032801,         1
 "SedDetC   ","VSedPOC1  ",   0.100000    ,"          ",2012032801,         6
 "SedDetC   ","VSedOpal  ",   0.100000    ,"          ",2012032801,         6

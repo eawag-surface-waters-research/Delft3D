@@ -75,7 +75,7 @@ C
       NALG  = NINT(PMSA(IPOINT(1)))
       ISWFIX= NINT(PMSA(IPOINT(2)))
       IF ( ISWFIX .EQ. 1 ) THEN
-         NIPALG = 3
+         NIPALG = 4
       ELSE
          NIPALG = 2
       ENDIF
@@ -87,7 +87,7 @@ C
       IF (BTEST(IKNMRK(ISEG),0)) THEN
 
       EXTALG = 0.0
-      VOLUME  = PMSA ( IPOINT(3) + (ISEG-1)*INCREM(3) )
+      DEPTH  = PMSA ( IPOINT(3) + (ISEG-1)*INCREM(3) )
 C
 C     Loop over algae
 
@@ -103,9 +103,16 @@ C     Loop over algae
              IP = 3 + 2*NALG + IALG
              IFIX   = NINT(PMSA ( IPOINT(IP) + (ISEG-1)*INCREM(IP) ))
              IF ( IFIX .LT. 0 ) THEN
-C            Do not include rooted algae! (JvG, 10102012)
-c                BIOMAS = BIOMAS/VOLUME
-                BIOMAS = 0.0
+
+                ! Rooted algae, inlclude only if sdmix positive
+
+                IP = 3 + 3*NALG + IALG
+                SDMIX = PMSA ( IPOINT(IP) + (ISEG-1)*INCREM(IP) )
+                IF ( SDMIX .GT. 1E-10 ) THEN
+                   BIOMAS = BIOMAS/DEPTH
+                ELSE
+                   BIOMAS = 0.0
+                ENDIF
              ENDIF
           ENDIF
 

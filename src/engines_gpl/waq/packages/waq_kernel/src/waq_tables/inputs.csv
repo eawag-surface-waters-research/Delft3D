@@ -233,9 +233,10 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "EXTINABVLP","ExtVlAlg  ",   1,"Y","x",1
 "EXTINABVLP","BLOOMALG  ",   2,"N","x",1
 "EXTINABVLP","FixAlg    ",   3,"Y","x",1
+"EXTINABVLP","SDMixAlg  ",   4,"Y","x",1
 "EXTINABVL ","NAlgBloom ",   1,"Y"," ",1
 "EXTINABVL ","SW_fixin_y",   2,"Y"," ",1
-"EXTINABVL ","Volume    ",   3,"N","x",1
+"EXTINABVL ","Depth     ",   3,"N","x",1
 "EXTINABVL ","ExtVlAlg01",   4,"Y","x",1
 "EXTINABVL ","ExtVlAlg02",   5,"Y","x",1
 "EXTINABVL ","ExtVlAlg03",   6,"Y","x",1
@@ -326,6 +327,36 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "EXTINABVL ","FixAlg28  ",  91,"Y","x",1
 "EXTINABVL ","FixAlg29  ",  92,"Y","x",1
 "EXTINABVL ","FixAlg30  ",  93,"Y","x",1
+"EXTINABVL ","SDMixAlg01",  94,"Y","x",1
+"EXTINABVL ","SDMixAlg02",  95,"Y","x",1
+"EXTINABVL ","SDMixAlg03",  96,"Y","x",1
+"EXTINABVL ","SDMixAlg04",  97,"Y","x",1
+"EXTINABVL ","SDMixAlg05",  98,"Y","x",1
+"EXTINABVL ","SDMixAlg06",  99,"Y","x",1
+"EXTINABVL ","SDMixAlg07", 100,"Y","x",1
+"EXTINABVL ","SDMixAlg08", 101,"Y","x",1
+"EXTINABVL ","SDMixAlg09", 102,"Y","x",1
+"EXTINABVL ","SDMixAlg10", 103,"Y","x",1
+"EXTINABVL ","SDMixAlg11", 104,"Y","x",1
+"EXTINABVL ","SDMixAlg12", 105,"Y","x",1
+"EXTINABVL ","SDMixAlg13", 106,"Y","x",1
+"EXTINABVL ","SDMixAlg14", 107,"Y","x",1
+"EXTINABVL ","SDMixAlg15", 108,"Y","x",1
+"EXTINABVL ","SDMixAlg16", 109,"Y","x",1
+"EXTINABVL ","SDMixAlg17", 110,"Y","x",1
+"EXTINABVL ","SDMixAlg18", 111,"Y","x",1
+"EXTINABVL ","SDMixAlg19", 112,"Y","x",1
+"EXTINABVL ","SDMixAlg20", 113,"Y","x",1
+"EXTINABVL ","SDMixAlg21", 114,"Y","x",1
+"EXTINABVL ","SDMixAlg22", 115,"Y","x",1
+"EXTINABVL ","SDMixAlg23", 116,"Y","x",1
+"EXTINABVL ","SDMixAlg24", 117,"Y","x",1
+"EXTINABVL ","SDMixAlg25", 118,"Y","x",1
+"EXTINABVL ","SDMixAlg26", 119,"Y","x",1
+"EXTINABVL ","SDMixAlg27", 120,"Y","x",1
+"EXTINABVL ","SDMixAlg28", 121,"Y","x",1
+"EXTINABVL ","SDMixAlg29", 122,"Y","x",1
+"EXTINABVL ","SDMixAlg30", 123,"Y","x",1
 "ExtPhDVL  ","NAlgDynamo",   1,"Y","x",1
 "ExtPhDVL  ","SW_fixin_n",   2,"Y"," ",1
 "ExtPhDVL  ","Volume    ",   3,"N","x",1
@@ -336,9 +367,10 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "EXTINABUVP","ExtUVAlg  ",   1,"Y","x",1
 "EXTINABUVP","BLOOMALG  ",   2,"N","x",1
 "EXTINABUVP","FixAlg    ",   3,"Y","x",1
+"EXTINABUVP","SDMixAlg  ",   4,"Y","x",1
 "EXTINABUV ","NAlgBloom ",   1,"Y"," ",1
 "EXTINABUV ","SW_fixin_y",   2,"Y"," ",1
-"EXTINABUV ","Volume    ",   3,"N","x",1
+"EXTINABUV ","Depth     ",   3,"N","x",1
 "EXTINABUV ","ExtUVAlg01",   4,"Y","x",1
 "EXTINABUV ","ExtUVAlg02",   5,"Y","x",1
 "EXTINABUV ","ExtUVAlg03",   6,"Y","x",1
@@ -429,6 +461,36 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "EXTINABUV ","FixAlg28  ",  91,"Y","x",1
 "EXTINABUV ","FixAlg29  ",  92,"Y","x",1
 "EXTINABUV ","FixAlg30  ",  93,"Y","x",1
+"EXTINABUV ","SDMixAlg01",  94,"Y","x",1
+"EXTINABUV ","SDMixAlg02",  95,"Y","x",1
+"EXTINABUV ","SDMixAlg03",  96,"Y","x",1
+"EXTINABUV ","SDMixAlg04",  97,"Y","x",1
+"EXTINABUV ","SDMixAlg05",  98,"Y","x",1
+"EXTINABUV ","SDMixAlg06",  99,"Y","x",1
+"EXTINABUV ","SDMixAlg07", 100,"Y","x",1
+"EXTINABUV ","SDMixAlg08", 101,"Y","x",1
+"EXTINABUV ","SDMixAlg09", 102,"Y","x",1
+"EXTINABUV ","SDMixAlg10", 103,"Y","x",1
+"EXTINABUV ","SDMixAlg11", 104,"Y","x",1
+"EXTINABUV ","SDMixAlg12", 105,"Y","x",1
+"EXTINABUV ","SDMixAlg13", 106,"Y","x",1
+"EXTINABUV ","SDMixAlg14", 107,"Y","x",1
+"EXTINABUV ","SDMixAlg15", 108,"Y","x",1
+"EXTINABUV ","SDMixAlg16", 109,"Y","x",1
+"EXTINABUV ","SDMixAlg17", 110,"Y","x",1
+"EXTINABUV ","SDMixAlg18", 111,"Y","x",1
+"EXTINABUV ","SDMixAlg19", 112,"Y","x",1
+"EXTINABUV ","SDMixAlg20", 113,"Y","x",1
+"EXTINABUV ","SDMixAlg21", 114,"Y","x",1
+"EXTINABUV ","SDMixAlg22", 115,"Y","x",1
+"EXTINABUV ","SDMixAlg23", 116,"Y","x",1
+"EXTINABUV ","SDMixAlg24", 117,"Y","x",1
+"EXTINABUV ","SDMixAlg25", 118,"Y","x",1
+"EXTINABUV ","SDMixAlg26", 119,"Y","x",1
+"EXTINABUV ","SDMixAlg27", 120,"Y","x",1
+"EXTINABUV ","SDMixAlg28", 121,"Y","x",1
+"EXTINABUV ","SDMixAlg29", 122,"Y","x",1
+"EXTINABUV ","SDMixAlg30", 123,"Y","x",1
 "ExtPhDUV  ","NAlgDynamo",   1,"Y","x",1
 "ExtPhDUV  ","SW_fixin_n",   2,"Y"," ",1
 "ExtPhDUV  ","Volume    ",   3,"N","x",1
