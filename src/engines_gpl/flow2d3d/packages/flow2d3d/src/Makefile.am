@@ -55,7 +55,7 @@ libflow2d3d_la_LIBADD = \
     $(top_builddir)/engines_gpl/flow2d3d/packages/data/src/parallel_mpi/libDataParallelMPI.la \
     $(top_builddir)/engines_gpl/flow2d3d/packages/data/src/basics/libDataBasics.la \
     $(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src/libECModule.la \
-    $(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90/libDelftIO.la \
+    $(top_builddir)/utils_lgpl/delftio/packages/delftio/src/delftio_sync/libDelftIO.la \
     $(top_builddir)/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/src/libDHydroLib.la \
     $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libESMFSM.la \
     $(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libNefis.la \

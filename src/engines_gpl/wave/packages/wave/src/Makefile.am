@@ -43,19 +43,11 @@ $(top_builddir)/engines_gpl/wave/packages/kernel/src/libkernel.a \
 $(top_builddir)/engines_gpl/wave/packages/io/src/libio.a \
 $(top_builddir)/engines_gpl/wave/packages/data/src/libdata.a \
 $(top_builddir)/engines_gpl/wave/packages/io/src/libio.a \
-$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90/libdelftio.la \
-$(top_builddir)/utils_lgpl/delftio/packages/delftio_shm/src/diof90/libdelftio_shm.la \
-$(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libfsm.la \
-$(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/libfsm_c.la \
-$(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/libesm_c.la \
-$(top_builddir)/utils_lgpl/meteo/packages/meteo/src/libmeteo.la \
-$(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libnefis.la \
-$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libdeltares_common.la \
-$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_c/src/libdeltares_common_c.la \
-$(top_builddir)/utils_lgpl/meteo/packages/meteo_version_number/src/libmeteo_version_number.la \
-$(top_builddir)/utils_lgpl/delftio/packages/delftio_version_number/src/libdelftio_version_number.la \
-$(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm_version_number/src/libesmfsm_version_number.la \
-$(top_builddir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.la \
+$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/delftio_sync/libDelftIO.la \
+$(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libESMFSM.la \
+$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src/libECModule.la \
+$(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libNefis.la \
+$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
 $(EXTERNALSOURCES) \
 $(FCLIBS)
 

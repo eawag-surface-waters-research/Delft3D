@@ -57,7 +57,8 @@ EXTRA_DIST = \
 #Libraries
 
 libDeltaresCommon_la_LIBADD=\
-	$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_c/src/libDeltaresCommonC.la
+	$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_c/src/libDeltaresCommonC.la \
+	$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token/libRDToken.la
 
 
 BUILT_SOURCES = ./always \
