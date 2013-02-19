@@ -107,7 +107,7 @@ subroutine write_array_const( name, suffix, value, size )
 
     time_dummy = 0
 
-    open( 10, file = trim(name) // '-' // trim(suffix) // '.wrk', form = 'binary' )
+    open( 10, file = trim(name) // '-' // trim(suffix) // '.wrk', form = 'unformatted',access='stream' )
     write( 10 ) time_dummy, (value, i = 1,size )
     close( 10 )
 
@@ -677,7 +677,7 @@ logical function DefineWQSchematisation(number_segments, pointer_table, number_e
        endif
     endif
 
-    open( 10, file = trim(runid) // '-to_from.wrk', form = 'binary' )
+    open( 10, file = trim(runid) // '-to_from.wrk', form = 'unformatted',access='stream' )
     write( 10 ) pointer_table(:,1:sum(number_exchanges))
     close( 10 )
 
@@ -762,7 +762,7 @@ logical function DefineWQDispersion(dispc, length)
 
     time_dummy = 0
 
-    open( 10, file = trim(runid) // '-lengthes.wrk', form = 'binary' )
+    open( 10, file = trim(runid) // '-lengthes.wrk', form = 'unformatted',access='stream' )
     write( 10 ) time_dummy, length
     close( 10 )
 
@@ -1202,7 +1202,7 @@ logical function SetInitialVolume( volume )
     SetInitialVolume = .false.
 
     time_dummy = 0
-    open( 10, file = trim(runid) // '-volumes.wrk' , form = 'binary',shared, err=911 )
+    open( 10, file = trim(runid) // '-volumes.wrk' , form = 'unformatted',access='stream',shared, err=911 )
     write( 10 ) time_dummy, volume(1:noseg)
     close( 10 )
 
@@ -1513,7 +1513,7 @@ integer function ModelInitialize
     ! Make sure the harmonic work file exists
     !
 
-    open( lun(3), file = lchar(3), form = 'binary' )
+    open( lun(3), file = lchar(3), form = 'unformatted',access='stream' )
     close( lun(3) )
 
     nolun  = 45      ! nolun has been declared in sysn_ff.inc
@@ -1623,7 +1623,7 @@ subroutine write_delwaq03( name )
 
     call space( lunrep, .false., rbuf, ibuf, chbuf, imaxa, imaxi, imaxc )
 
-    open( 10, file = trim(name) // '-delwaq03.wrk', form = 'binary' )
+    open( 10, file = trim(name) // '-delwaq03.wrk', form = 'unformatted',access='stream' )
     write( 10 ) in
     write( 10 ) ii
     write( 10 ) imaxa, imaxi, imaxc
@@ -1671,7 +1671,7 @@ subroutine write_delwaq04( name )
                       'T0: ', ref_year, '.', ref_month,  '.', ref_day,    ' ', &
                               ref_hour, ':', ref_minute, ':', ref_second, '  (scu=       1s)'
 
-    open( 10, file = trim(name) // '-delwaq04.wrk', form = 'binary' )
+    open( 10, file = trim(name) // '-delwaq04.wrk', form = 'unformatted',access='stream' )
     write( 10 ) title
 
     write( 10 ) substance_name
@@ -1969,7 +1969,7 @@ subroutine write_array_2d( name, suffix, array )
 
     time_dummy = 0
 
-    open( 10, file = trim(name) // '-' // trim(suffix) // '.wrk', form = 'binary' )
+    open( 10, file = trim(name) // '-' // trim(suffix) // '.wrk', form = 'unformatted',access='stream' )
     write( 10 ) time_dummy, array
     close( 10 )
 
@@ -1989,7 +1989,7 @@ subroutine write_functions( name )
     character(len=FILE_NAME_SIZE) :: filename
     character(len=ITEM_NAME_SIZE) :: loc
 
-    open( lun, file = trim(name) // '-function.wrk', form = 'binary' )
+    open( lun, file = trim(name) // '-function.wrk', form = 'unformatted',access='stream' )
 !    write( lun ) ' 4.900PROCES'
 !    write( lun ) 1, nocons, (k ,k=1,nocons), 0, 0, 0
 !    write( lun ) 1, 0, procparam_const_value

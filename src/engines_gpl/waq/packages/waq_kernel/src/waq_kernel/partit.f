@@ -242,7 +242,7 @@ c
          endif
 
          write(lunrep,*) 'opening unit=',lunout,' for partition output-file'
-         open(lunout, file='test-partit.map', form='binary')
+         open(lunout, file='test-partit.map', form='unformatted',access='stream')
          dscrp_file(1)='test map-file for parallel WAQ'
          dscrp_file(2)='sample partitioning of Hong-Kong grid'
          dscrp_file(3)='created by program map_file'

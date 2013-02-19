@@ -9,5 +9,4 @@ SUBDIRS = \
          delwaq1_version_number \
          delwaq2_version_number \
          delwaq1 \
-         delwaq2 \
-         unit_tests_waq
+         delwaq2 

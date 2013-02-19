@@ -72,7 +72,7 @@
 
          if ( lunitp(20) .gt. 0 .and. fnamep(20) .ne. 'none' ) then
             write ( lunut, * ) ' Opening the vdf    file:', fnamep(20)(1:len_trim(fnamep(20)))
-            open ( lunitp(20), file = fnamep(20), form = 'binary' )
+            open ( lunitp(20), file = fnamep(20), form = 'unformatted',access='stream' )
             if ( lunitp(20) .eq. 0 ) write ( lunut, * ) ' Warning the vdf file does not exist !'
          else
             lunitp(20) = 0
@@ -80,7 +80,7 @@
          if ( lunitp(20) .eq. 0 ) vdiff = 0.0
          if ( lunitp(21) .gt. 0 .and. fnamep(21) .ne. 'none' ) then
             write ( lunut, * ) ' Opening the tau    file:', fnamep(21)(1:len_trim(fnamep(21)))
-            open ( lunitp(21), file = fnamep(21), form = 'binary' )
+            open ( lunitp(21), file = fnamep(21), form = 'unformatted',access='stream' )
             if ( lunitp(21) .eq. 0 ) write ( lunut, * ) ' Warning the tau file does not exist !'
          else
             lunitp(21) = 0
@@ -135,7 +135,7 @@
          npwndw   = 1
          npwndn   = 0
          acomp  = .false.
-         accrjv = 1.0e-9_sp
+         accrjv = 1.0e-9 !_sp
          ltrack = notrak  /=  0
          oil2dh = oil .and. layt == 1
          oil3d  = oil .and. layt  > 1

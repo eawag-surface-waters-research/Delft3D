@@ -183,7 +183,7 @@ subroutine test_dlwq_boundio_hot_update
     bndid  = (/ 'nA1', 'nC1', 'H2' /)
     ibpnt  = 0
 
-    open(  11, file = 'unit_tests_delwaq.his', form = 'binary' )
+    open(  11, file = 'unit_tests_delwaq.his', form = 'unformatted',access='stream' )
     write( 11 ) (' ', i = 1,4*40 )
     write( 11 ) nosys, noseg
     write( 11 ) syname(2), syname(1)

@@ -104,7 +104,10 @@ integer :: isize(3,2)
 ! definitions for inner-loops
 integer, parameter              :: num_inrlp = 4
 character(len=20), dimension(:) :: inrlp_names(num_inrlp) = &
-             (/'copy', 'gather', 'scatter-replace', 'scatter-add' /)
+             (/'copy           ',&
+               'gather         ',&
+               'scatter-replace',&
+               'scatter-add    ' /)
 !-----------------------------------------------------------------------------
 
 !  print debug-information on the operation to be performed

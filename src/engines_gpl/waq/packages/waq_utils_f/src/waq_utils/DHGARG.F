@@ -57,51 +57,47 @@ C
 C         Call system routine
 C
           N = IARG
-          CALL GETARG( N     , BUFFER, STATUS)
+          CALL GETARG( N     , BUFFER)
 C
 C         Store result
 C
-          IF ( STATUS .GT. 0 ) THEN
-             LINE = BUFFER
-          ELSE
-             LINE = ' '
+          LINE = BUFFER
 
-             !
-             ! Read from file?
-             !
-             INQUIRE( FILE = 'delwaq.options', EXIST = EXISTS )
-             IF ( EXISTS ) THEN
-                 LUN = -1
-                 DO I = 1,100
-                     INQUIRE( UNIT = I, OPENED = OPENED )
-                     IF ( .NOT. OPENED ) THEN
-                         LUN = I
-                         EXIT
-                     ENDIF
-                 ENDDO
-                 IF ( LUN .GT. 0 ) THEN
-                     IF ( NARGS() .GT. 0 ) THEN
-                         COUNT = IARG - NARGS()
-                     ELSE
-                         COUNT = IARG - 1
-                     ENDIF
+          !
+          ! Read from file?
+          !
+          INQUIRE( FILE = 'delwaq.options', EXIST = EXISTS )
+          IF ( EXISTS ) THEN
+              LUN = -1
+              DO I = 1,100
+                  INQUIRE( UNIT = I, OPENED = OPENED )
+                  IF ( .NOT. OPENED ) THEN
+                      LUN = I
+                      EXIT
+                  ENDIF
+              ENDDO
+              IF ( LUN .GT. 0 ) THEN
+                  IF ( NARGS() .GT. 0 ) THEN
+                      COUNT = IARG - NARGS()
+                  ELSE
+                      COUNT = IARG - 1
+                  ENDIF
 
-                     OPEN( LUN, FILE = 'delwaq.options' )
-                     DO
-                         READ( LUN, '(A)', IOSTAT = IERR ) LINE
-                         IF ( IERR .NE. 0 ) THEN
-                             EXIT
-                         ENDIF
-                         IF ( LINE .NE. ' ' ) THEN
-                             IF ( COUNT .EQ. 0 ) THEN
-                                 EXIT
-                             ENDIF
-                             COUNT = COUNT - 1
-                         ENDIF
-                     ENDDO
-                     CLOSE( LUN )
-                 ENDIF
-             ENDIF
+                  OPEN( LUN, FILE = 'delwaq.options' )
+                  DO
+                      READ( LUN, '(A)', IOSTAT = IERR ) LINE
+                      IF ( IERR .NE. 0 ) THEN
+                          EXIT
+                      ENDIF
+                      IF ( LINE .NE. ' ' ) THEN
+                          IF ( COUNT .EQ. 0 ) THEN
+                              EXIT
+                          ENDIF
+                          COUNT = COUNT - 1
+                      ENDIF
+                  ENDDO
+                  CLOSE( LUN )
+              ENDIF
           ENDIF
       ENDIF
 C

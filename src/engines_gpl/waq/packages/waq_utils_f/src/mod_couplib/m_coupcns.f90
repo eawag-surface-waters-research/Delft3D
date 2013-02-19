@@ -94,8 +94,8 @@ integer, parameter, public :: ISYNCHR = 7
 integer, parameter, public :: NUMCOMM = ISYNCHR
 
 character(len=STRLEN), dimension(:), public :: namcomm(NUMCOMM) = (/ &
-        'distrib(lengt)', 'distrib(ixset)', 'collect_data', 'update_data', &
-        'accumulate', 'glob.combine', 'sync_processes' /)
+        'distrib(lengt)', 'distrib(ixset)', 'collect_data  ', 'update_data   ', &
+        'accumulate    ', 'glob.combine  ', 'sync_processes' /)
 
 integer, parameter, public :: ICOMMTM = 1
 integer, parameter, public :: ISYNCTM = 2

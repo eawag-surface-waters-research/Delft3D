@@ -118,7 +118,7 @@ function WQHBInit(WQHBComm, HisFileName, nosys, nobnd, syname, bndid) result(suc
 
 !   Read metadata from HIS file
 
-    open (luhis,file=WQHBComm % filename,form='binary')
+    open (luhis,file=WQHBComm % filename,form='unformatted',access='stream')
     read (luhis) moname
     read (luhis) WQHBComm % numVars, WQHBComm % numPoints
     allocate(WQHBComm % namVars  (WQHBComm % numVars))
@@ -212,7 +212,7 @@ function WQHBGetValues(WQHBComm) result(success)
 
 !   Skip heading from HIS file
 
-    open (luhis,file=WQHBComm % filename,form='binary')
+    open (luhis,file=WQHBComm % filename,form='unformatted',access='stream')
     read (luhis) moname
     read (luhis) ipoint,ivar
     read (luhis) ( c20, ivar = 1,WQHBComm % numVars )

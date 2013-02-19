@@ -151,7 +151,7 @@ C
             if ( l_initial ) then
                write(lunrep,*) 'vtrans using initial condition from file:',trim(file_initial)
                call dhnlun(200,ilun)
-               open(ilun,file=file_initial,form='binary')
+               open(ilun,file=file_initial,form='unformatted',access='stream')
                read(ilun) nosegi, nolayi
                read(ilun) timtot
                read(ilun) concv
@@ -314,7 +314,7 @@ C
       if ( l_restart ) then
          if ( dhltim(itime,idt) ) then
             call dhnlun(200,ilun)
-            open(ilun,file=file_restart,form='binary')
+            open(ilun,file=file_restart,form='unformatted',access='stream')
             write(ilun) noseg, nolay
             write(ilun) timtot
             write(ilun) concv

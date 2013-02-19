@@ -29,7 +29,7 @@ c                    modified 9/27/86.
 c
       use timers
 
-      real(8) sa,sb,c,s,roe,scale,r,z
+      real(8) sa,sb,c,s,roe,scale,r,z,one
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "srotg", ithandl )
 c
@@ -42,7 +42,8 @@ c
          r = 0.0
          go to 20
    10 r = scale*sqrt((sa/scale)**2 + (sb/scale)**2)
-      r = sign(1.0,roe)*r
+      one = 1.0
+      r = sign(one,roe)*r
       c = sa/r
       s = sb/r
    20 z = s

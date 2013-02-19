@@ -20,6 +20,7 @@ FMODULES += \
 #-------------------------------------------------------------------------------
 #Sources
 libkernel_f_a_SOURCES = \
+         ../../data_f/src/precision.f90 \
          avundf_linux.f90 \
          oildsp.f90 \
          inipart.f90 \

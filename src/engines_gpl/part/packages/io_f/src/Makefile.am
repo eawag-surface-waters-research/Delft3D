@@ -19,8 +19,8 @@ FMODULES += \
 #-------------------------------------------------------------------------------
 #Sources
 libio_f_a_SOURCES = \
+	../../data_f/src/precision.f90 \
          dlwqbl.f90 \
-         openfl.f90 \
          getdps.f90 \
          part12.f90 \
          part13.f90 \
@@ -29,7 +29,6 @@ libio_f_a_SOURCES = \
          rdccol.f90 \
          rdfnam.f90 \
          rdlgri.f90 \
-         rdparm.f90 \
          rdpart.f90 \
          report_date_time.f90 \
          wrttrk.f90

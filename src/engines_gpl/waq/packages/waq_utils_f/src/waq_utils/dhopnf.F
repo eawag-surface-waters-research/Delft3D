@@ -100,24 +100,24 @@ C*********************************************************************
          case ( 3 )                           !     harmonic functions, 'SHARED' because this NROPEN
             select case ( opmode )            !     is used from DLWQI0 also for other files,
                case ( 1 )                     !     which are intended to have the SHARED property
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' , shared )
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream'  )
                case ( 2 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' , shared , status = 'old' )
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream'  , status = 'old' )
                case ( 11 )
-                  open ( lun, file = finam, err = 910, form='unformatted', shared  )
+                  open ( lun, file = finam, err = 910, form='unformatted'  )
                case ( 12 )
-                  open ( lun, file = finam, err = 910, form='unformatted', shared , status = 'old' )
+                  open ( lun, file = finam, err = 910, form='unformatted' , status = 'old' )
                case ( 21 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream', shared ,
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' ,
      &                                                 convert='big_endian' )
                case ( 22 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream', shared , status = 'old',
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' , status = 'old',
      &                                                 convert='big_endian' )
                case ( 31 )
-                  open ( lun, file = finam, err = 910, form   ='unformatted', shared ,
+                  open ( lun, file = finam, err = 910, form   ='unformatted' ,
      &                                                 convert='big_endian' )
                case ( 32 )
-                  open ( lun, file = finam, err = 910, form='unformatted', shared , status = 'old',
+                  open ( lun, file = finam, err = 910, form='unformatted' , status = 'old',
      &                                                 convert='big_endian' )
                case default
                   ierr = 3
@@ -156,17 +156,17 @@ C*********************************************************************
          case ( 7 )                           !     volumes file
             select case ( opmode )
                case (  1 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' , shared )
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream'  )
                case (  2 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' , shared )
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream'  )
                case ( 11, 12 )
-                  open ( lun, file = finam, err = 910, form='unformatted', shared )
+                  open ( lun, file = finam, err = 910, form='unformatted' )
                case ( 21, 22 )
                   open ( lun, file = finam, err = 910, form='unformatted', access='stream' ,
-     &                                                 convert='big_endian', shared )
+     &                                                 convert='big_endian' )
                case ( 31, 32 )
                   open ( lun, file = finam, err = 910, form='unformatted',
-     &                                                 convert='big_endian', shared )
+     &                                                 convert='big_endian' )
                case default
                   ierr = 3
             end select
@@ -210,17 +210,17 @@ C*********************************************************************
          case ( 10 )                          !     areas file
             select case ( opmode )
                case ( 1 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' , shared )
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream'  )
                case ( 2 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' , shared )
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream'  )
                case ( 11, 12 )
-                  open ( lun, file = finam, err = 910, form='unformatted', shared )
+                  open ( lun, file = finam, err = 910, form='unformatted' )
                case ( 21, 22 )
                   open ( lun, file = finam, err = 910, form='unformatted', access='stream' ,
-     &                                                 convert='big_endian', shared )
+     &                                                 convert='big_endian' )
                case ( 31, 32 )
                   open ( lun, file = finam, err = 910, form='unformatted',
-     &                                                 convert='big_endian', shared )
+     &                                                 convert='big_endian' )
                case default
                   ierr = 3
             end select
@@ -228,17 +228,17 @@ C*********************************************************************
          case ( 11 )                          !     flows
             select case ( opmode )
                case ( 1 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' , shared )
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream'  )
                case ( 2 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' , shared )
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream'  )
                case ( 11, 12 )
-                  open ( lun, file = finam, err = 910, form='unformatted', shared )
+                  open ( lun, file = finam, err = 910, form='unformatted' )
                case ( 21, 22 )
                   open ( lun, file = finam, err = 910, form='unformatted', access='stream' ,
-     &                                                 convert='big_endian', shared )
+     &                                                 convert='big_endian' )
                case ( 31, 32 )
                   open ( lun, file = finam, err = 910, form='unformatted',
-     &                                                 convert='big_endian', shared )
+     &                                                 convert='big_endian' )
                case default
                   ierr = 3
             end select
@@ -256,17 +256,17 @@ C*********************************************************************
          case ( 13 )                          !     length file
             select case ( opmode )
                case ( 1 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' , shared )
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream'  )
                case ( 2 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' , shared )
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream'  )
                case ( 11, 12 )
-                  open ( lun, file = finam, err = 910, form='unformatted', shared )
+                  open ( lun, file = finam, err = 910, form='unformatted' )
                case ( 21, 22 )
                   open ( lun, file = finam, err = 910, form='unformatted', access='stream' ,
-     &                                                 convert='big_endian', shared )
+     &                                                 convert='big_endian' )
                case ( 31, 32 )
                   open ( lun, file = finam, err = 910, form='unformatted',
-     &                                                 convert='big_endian', shared )
+     &                                                 convert='big_endian' )
                case default
                   ierr = 3
             end select
@@ -304,17 +304,17 @@ C*********************************************************************
          case ( 17 )                          !     segment functions file
             select case ( opmode )
                case ( 1 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' , shared )
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream'  )
                case ( 2 )
-                  open ( lun, file = finam, err = 910, form='unformatted', access='stream' , shared )
+                  open ( lun, file = finam, err = 910, form='unformatted', access='stream'  )
                case ( 11, 12 )
-                  open ( lun, file = finam, err = 910, form='unformatted', shared )
+                  open ( lun, file = finam, err = 910, form='unformatted' )
                case ( 21, 22 )
                   open ( lun, file = finam, err = 910, form='unformatted', access='stream' ,
-     &                                                 convert='big_endian', shared )
+     &                                                 convert='big_endian' )
                case ( 31, 32 )
                   open ( lun, file = finam, err = 910, form='unformatted',
-     &                                                 convert='big_endian', shared )
+     &                                                 convert='big_endian' )
                case default
                   ierr = 3
             end select
@@ -541,7 +541,7 @@ C*********************************************************************
          case ( 42 )                          !     domain names configuration file, online dd
             select case ( opmode )
                case ( 1 )
-                  open ( lun, file = finam, err = 900, status = 'old',shared )
+                  open ( lun, file = finam, err = 900, status = 'old' )
                case default
                   ierr = 3
             end select

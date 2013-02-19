@@ -217,6 +217,7 @@ C
       real                       :: rdummy
       integer                    :: ierror
       integer                    :: ierr2
+      logical                    :: l_stop
 
 
 C     LOGICAL PROFLG

@@ -383,10 +383,10 @@ subroutine dlwq_mt3d   ( lunrep, itime , idt   , itstop, notot ,&
                itel = 0
                do
                   inquire(file=mt3dflagfile,exist=l_exist)
-                  if(l_exist.eq..true.)then
+                  if(l_exist)then
                       call dhnlun(200,lunmt3dcomm)
-   1                  open(lunmt3dcomm,file=mt3dcommfile,status="old",err=1)
-                      exit
+                      open(lunmt3dcomm,file=mt3dcommfile,status="old",err=1)
+   1                  exit
                   endif
                   itel = itel + 1
                   if ( itel .eq. 1 ) write(*,*) 'waiting for MT3D'
@@ -408,10 +408,10 @@ subroutine dlwq_mt3d   ( lunrep, itime , idt   , itstop, notot ,&
             if ( mt3d_online ) then
                close(lunmt3dcomm,status='delete')
                call dhnlun(200,lunmt3dflag)
-  11           open(lunmt3dflag,file=mt3dflagfile,status="old",err=11)
-               close(lunmt3dflag,status="delete")
+               open(lunmt3dflag,file=mt3dflagfile,status="old",err=11)
+  11           close(lunmt3dflag,status="delete")
             endif
-
+  
          endif
 
          itstop_mt3d = itime + idt_mt3d
