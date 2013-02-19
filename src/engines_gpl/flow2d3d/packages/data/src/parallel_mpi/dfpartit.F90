@@ -86,12 +86,14 @@ subroutine dfpartit ( ipown, icom, mmax, nmax, gdp )
     integer                     :: m      ! current M-index of point in computational row
     integer                     :: n      ! current N-index of point in computational column
     integer, external           :: newlun
-    integer                     :: nactp  ! total number of active gridpoints
-    integer                     :: npcum  ! cumulative number of gridpoints
+    integer(kind=8)             :: nactp  ! total number of active gridpoints
+    integer(kind=8)             :: npcum  ! cumulative number of gridpoints
     logical                     :: ex     ! Help flag = TRUE when file is found
     character(18)               :: filspp ! file name for list of processor speeds
     character(256)              :: txt1   ! auxiliary text string
     character(256)              :: txt2   ! auxiliary text string
+    integer(kind=8)             :: tmp
+    integer(kind=8)             :: tmpsum
 !
 !! executable statements -------------------------------------------------------
 !
@@ -196,13 +198,15 @@ subroutine dfpartit ( ipown, icom, mmax, nmax, gdp )
     !
     ! determine numbers and sizes of parts to be created
     !
-    npcum = 0
-    icnt  = 0
+    npcum  = 0
+    icnt   = 0
+    tmpsum = sum(iweig)
     do i = 1, nproc
        icnt       = icnt + iweig(i)
        iwork(1,i) = i
-       iwork(2,i) = (nactp*icnt)/sum(iweig) - npcum
-       npcum      = (nactp*icnt)/sum(iweig)
+       tmp        = nactp*icnt/tmpsum
+       iwork(2,i) = tmp - npcum
+       npcum      = tmp
     enddo
     !
     ! partition grid
