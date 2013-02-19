@@ -33,8 +33,8 @@ unit_tests_waq_LDADD = \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/libwaq_utils.a \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib/libmod_couplib.a \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings/libmod_timings.a \
-    $(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90/libdelftio.la \
-    $(top_builddir)/utils_lgpl/delftio/packages/delftio_shm/src/diof90/libdelftio_shm.la \
+    $(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90/libDIOF90.la \
+    $(top_builddir)/utils_lgpl/delftio/packages/delftio_shm/src/diof90/libDelftIOSHM.la \
     $(top_builddir)/utils_lgpl/delftio/packages/delftio_version_number/src/libdelftio_version_number.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_io/src/ods/libods.a \
     $(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libnefis.la \

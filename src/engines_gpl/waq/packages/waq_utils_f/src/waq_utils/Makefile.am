@@ -12,7 +12,7 @@ lib_LIBRARIES = libwaq_utils.a
 #Includes
 FMODULES += \
         -I$(top_builddir)/engines_gpl/waq/include \
-        -I$(top_builddir)/utils_lgpl/timers/src
+	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
 
 #-------------------------------------------------------------------------------
 #Sources

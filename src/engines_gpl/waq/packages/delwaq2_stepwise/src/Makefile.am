@@ -43,8 +43,8 @@ delwaq2_LDADD = \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/libwaq_utils.a \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib/libmod_couplib.a \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings/libmod_timings.a \
-    $(top_builddir)/utils/delftio/packages/delftio/src/diof90/libdelftio.a \
-    $(top_builddir)/utils/delftio/packages/delftio_shm/src/diof90/libdelftio_shm.a \
+    $(top_builddir)/utils/delftio/packages/delftio/src/diof90/libDIOF90.a \
+    $(top_builddir)/utils/delftio/packages/delftio_shm/src/diof90/libDelftIOSHM.a \
     $(top_builddir)/utils/delftio/packages/delftio_version_number/src/libdelftio_version_number.a \
     $(top_builddir)/engines_gpl/waq/packages/waq_io/src/ods/libods.a \
     $(top_builddir)/utils/nefis/packages/nefis/src/libnefis.a \
