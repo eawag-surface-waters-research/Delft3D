@@ -49,7 +49,7 @@ $(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src/libECModule.la \
 $(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libNefis.la \
 $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
 $(EXTERNALSOURCES) \
-$(FCLIBS)
+$(FCLIBS) $(CCLIBS) $(CCLIBS_ADDITIONAL)
 
 
 BUILT_SOURCES = ./always \

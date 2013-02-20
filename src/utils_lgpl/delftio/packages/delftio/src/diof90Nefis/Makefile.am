@@ -25,7 +25,7 @@ FMODULES += \
 libDIOF90Nefis_la_SOURCES = \
          dio-2dfield-nefis.F90 \
          dio-3d-block-nefis.F90 \
-         dio-check-nefis-error \
+         dio-check-nefis-error.F90 \
          dio-const-rw.F90 \
          dio-plt-nefis.F90
 

@@ -261,10 +261,16 @@ fi
 if [ "$compiler" = 'gnu' ]; then
     export LDFLAGSMT_ADDITIONAL=" "
     export FCLIBS_ADDITIONAL=" "
+    export CCLIBS_ADDITIONAL=" "
 else
     # Intel compilers
     export LDFLAGSMT_ADDITIONAL="-lifcoremt"
     export FCLIBS_ADDITIONAL="-lifcoremt -limf"
+    if [ "$platform" = 'intel64' ]; then
+        export CCLIBS_ADDITIONAL="-L/usr/lib64 -lrt"
+    else
+        export CCLIBS_ADDITIONAL="-L/usr/lib -lrt"
+    fi
 fi
 
 
@@ -282,6 +288,7 @@ echo "export AUTOHEADER=\"$AUTOHEADER\""
 echo "export AUTOCONF=\"$AUTOCONF\""
 echo "export AUTORECONF_FLAGS=\"$AUTORECONF_FLAGS\""
 echo "export FCLIBS_ADDITIONAL=\"$FCLIBS_ADDITIONAL\""
+echo "export CCLIBS_ADDITIONAL=\"$CCLIBS_ADDITIONAL\""
 echo "export LIBTOOLIZE=\"$LIBTOOLIZE\""
 echo "export LDFLAGS=\"$LDFLAGS\""
 echo "export LDFLAGSMT_ADDITIONAL=\"$LDFLAGSMT_ADDITIONAL\""
@@ -345,15 +352,13 @@ fi
 # More information here:
 # http://www.gentoo.org/proj/en/base/amd64/howtos/index.xml?full=1#book_part1_chap3
 
-enableSharedList='--enable-shared=libflow2d3d,libnefis'
-
 if [ "$platform" = 'intel64' ]; then
     command=" \
         CFLAGS='$flags $CFLAGS' \
         CXXFLAGS='$flags $CXXFLAGS' \
         FFLAGS='$flags $FFLAGS' \
         FCFLAGS='$flags $FCFLAGS' \
-            ./configure $enableSharedList --prefix=`pwd` $configureArgs &> $log \
+            ./configure --prefix=`pwd` $configureArgs &> $log \
         "
 else
     command=" \
@@ -361,7 +366,7 @@ else
         CXXFLAGS='$flags $CXXFLAGS' \
         FFLAGS='$flags $FFLAGS' \
         FCFLAGS='$flags $FCFLAGS' \
-            ./configure $enableSharedList --prefix=`pwd` $configureArgs &> $log \
+            ./configure --prefix=`pwd` $configureArgs &> $log \
         "
 fi
 
