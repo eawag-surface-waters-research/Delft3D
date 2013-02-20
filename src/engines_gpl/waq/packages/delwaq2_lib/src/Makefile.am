@@ -23,10 +23,15 @@ FMODULES += \
 #Sources
 delwaq2_SOURCES = block.f \
        d_tr_d3d.f \
+       delwaq2_global_data.f90 \
+       m_delwaq_2_openda.F90 \
+       openda_exchange_items.f90 \ 
+       waq_omi_api.f90 \
+       waq_omi_lib.f90 \
+       waq_omi_substances.f90 \
        dlwqmain.f \
-       dlwqmainprog.f \
        getidentification.f
-
+	   
 #-------------------------------------------------------------------------------
 # Libraries
 

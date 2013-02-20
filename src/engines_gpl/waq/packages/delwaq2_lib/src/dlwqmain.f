@@ -57,21 +57,20 @@ C
 C
 C      PARAMETER (ITOTA=0       ,ITOTI=0       ,ITOTC=0       )
 
-      SUBROUTINE DLWQMAIN( ACTION, ARGC, ARGV, DLWQD )
+      SUBROUTINE dlwqmain( ACTION, ARGC, ARGV, DLWQD )
+
+      !DEC$ ATTRIBUTES DLLEXPORT, ALIAS : '_DLWQMAIN' :: dlwqmain
 
       USE DELWAQ2
       USE DELWAQ2_DATA
+      USE DHCOMMAND
 
       IMPLICIT NONE
 
       INTEGER, INTENT(IN)                           :: ACTION
       INTEGER, INTENT(IN)                           :: ARGC
-      CHARACTER(LEN=*), DIMENSION(*), INTENT(IN)    :: ARGV
+      CHARACTER(LEN=*), DIMENSION(ARGC), INTENT(IN) :: ARGV
       TYPE(DELWAQ_DATA)                             :: DLWQD
-
-C     REAL, DIMENSION(:), POINTER, SAVE             :: RBUF
-C     INTEGER, DIMENSION(:), POINTER, SAVE          :: IBUF
-C     CHARACTER(LEN=1), DIMENSION(:), POINTER, SAVE :: CHBUF
 
       CHARACTER*20  RUNDAT
 C
@@ -86,6 +85,8 @@ C
       INCLUDE 'sysi.inc'
       INCLUDE 'actions.inc'
       INCLUDE 'fsm-fix.i'
+
+      call dhstore_command( argv )
 C
 C     Initial step ...
 C
@@ -109,7 +110,8 @@ C
           ALLOCATE( DLWQD%CHBUF(0) )
 
       ENDIF
-
+      
+      dlwqd%islibrary = .true.
 C
 C     Computation step is always done
 C
@@ -129,7 +131,9 @@ C
           CALL DATTIM(RUNDAT)
           WRITE (LUNREP,'(2A)') ' Execution stop : ',RUNDAT
 C
-          CALL SRSTOP(0)
+          close(lunrep)
+
+          RETURN
 
       ENDIF
 
@@ -143,10 +147,7 @@ C
           CALL DATTIM(RUNDAT)
           WRITE (LUNREP,'(2A)') ' Execution stop : ',RUNDAT
 C
-
           close(lunrep)
-
-        !  CALL SRSTOP(0)
 
       ENDIF
 

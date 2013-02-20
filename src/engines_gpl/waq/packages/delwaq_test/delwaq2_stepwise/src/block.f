@@ -21,18 +21,13 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      program dlwq00
-      
-      integer                          :: argc
-      character(len=256), allocatable  :: argv(:)
-      integer(4)                       :: i
-      
-      argc = nargs()
-      allocate ( argv (argc))
-      do i = 1, argc
-          call getarg(i - 1, argv(i))
-      end do
-      
-      call delwaq1(argc, argv)
-      
-      end
+      BLOCK DATA
+      IMPLICIT INTEGER (A-Z)
+      COMMON /ZDLMTZ/DLM(256), IGN(256), IDLM, IIGN, PUSH(256), PTR
+      DATA PTR/0/, IDLM, IIGN/2, 2/
+C     DATA DLM/64*0, 1, 42*0, 1, 148*0/
+C     DATA IGN/64*0, 1, 42*0, 1, 148*0/
+C *** Replaced previous two line by following two lines on ASCI computers
+      DATA DLM/32*0, 1, 11*0, 1, 211*0/
+      DATA IGN/32*0, 1, 11*0, 1, 211*0/
+      END

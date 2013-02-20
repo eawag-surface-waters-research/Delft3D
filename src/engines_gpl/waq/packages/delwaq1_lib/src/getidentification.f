@@ -21,18 +21,14 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      program dlwq00
-      
-      integer                          :: argc
-      character(len=256), allocatable  :: argv(:)
-      integer(4)                       :: i
-      
-      argc = nargs()
-      allocate ( argv (argc))
-      do i = 1, argc
-          call getarg(i - 1, argv(i))
-      end do
-      
-      call delwaq1(argc, argv)
-      
-      end
+      subroutine getidentification(idstr, version)
+         !
+         ! Get the ident-string and version number for DELWAQ1
+         !
+         character(len=*) :: idstr
+         character(len=*) :: version
+
+         call getfullversionstring_DELWAQ1(idstr)
+         call getfeaturenumberstring_DELWAQ1(version)
+
+      end subroutine
