@@ -263,6 +263,7 @@ c
       ITOTC = ITOTC + NDMPAR
 cjvb
 C
+      close ( 328 )
       return
 
  2000 format ( ' total character array space: ',I8)

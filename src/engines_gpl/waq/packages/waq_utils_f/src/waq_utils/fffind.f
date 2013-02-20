@@ -112,7 +112,10 @@ C
          IERR = 1
          RETURN
       ENDIF
-      IF ( ((ISTEP-ITIM)/IDTF)*IDTF .EQ. ISTEP-ITIM ) RETURN
+      IF ( ((ISTEP-ITIM)/IDTF)*IDTF .EQ. ISTEP-ITIM ) THEN
+         CLOSE ( ILUN )
+         RETURN
+      ENDIF
 C
    50 WRITE ( LUNUT , 1050 ) ISTEP, BFILE
       IERR = 1
