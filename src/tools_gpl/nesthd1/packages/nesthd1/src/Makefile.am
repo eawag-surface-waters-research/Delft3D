@@ -43,14 +43,9 @@ nesthd1_SOURCES = \
 #Libraries
 
 nesthd1_LDADD = \
-        $(top_srcdir)/utils_lgpl/nefis/packages/nefis/src/libnefis.la \
-        $(top_srcdir)/utils_lgpl/nefis/packages/nefis_version_number/src/libnefis_version_number.la \
-        $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libfsm.la \
-        $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/fsm/libfsm_c.la \
-        $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/libesm_c.la \
-        $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_version_number/src/libesmfsm_version_number.la \
-        $(top_srcdir)/utils_lgpl/deltares_common/packages/deltares_common/src/libdeltares_common.la \
-        $(top_srcdir)/utils_lgpl/deltares_common/packages/deltares_common_c/src/libdeltares_common_c.la \
+        $(top_srcdir)/utils_lgpl/nefis/packages/nefis/src/libNefis.la \
+        $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libESMFSM.la \
+        $(top_srcdir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
         -ldl \
         $(FCLIBS) $(FCLIBS_ADDITIONAL)
 

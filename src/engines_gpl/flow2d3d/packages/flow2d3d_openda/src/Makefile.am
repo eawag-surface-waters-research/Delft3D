@@ -46,8 +46,7 @@ libflow2d3d_openda_la_SOURCES = \
 #-------------------------------------------------------------------------------
 #Libraries
 libflow2d3d_openda_la_LIBADD = \
-	$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d/src/libflow2d3d.la \
-	$(top_builddir)/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/src/libD_hydro.la
+	$(top_builddir)/engines_gpl/flow2d3d/packages/flow2d3d/src/libflow2d3d.la
 
 
 BUILT_SOURCES = \

@@ -39,7 +39,7 @@ nesthd2_SOURCES = \
 
 nesthd2_LDADD = \
         $(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libNefis.la \
-        $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/libDeltaresCommon.la \
+        $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
         -ldl \
         $(FCLIBS) $(FCLIBS_ADDITIONAL)
 
