@@ -32,6 +32,8 @@ d_hydro_exe_LDADD = \
     $(top_builddir)/utils_lgpl/d_hydro_lib/packages/d_hydro_lib/src/libDHydroLib.la \
     -ldl
 
+d_hydro_exe_LDFLAGS = -export-dynamic
+
 #    -lmcheck
 
 

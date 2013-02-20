@@ -67,5 +67,6 @@ integer, save  :: dfmin  = 0       ! MPI collective minimum operation
 integer, save  :: dfsum  = 0       ! MPI collective summation
 integer, save  :: dfprec = 0       ! datatype for real indicating single or double precision (only bodsed/dps)
 logical, save  :: parll  = .false. ! flag to denote run as parallel (.TRUE.) or not (.FALSE.)
+logical        :: usempi = .false. ! flag to denote run as using MPI (.TRUE.) or not (.FALSE.)
 
 end module dfparall

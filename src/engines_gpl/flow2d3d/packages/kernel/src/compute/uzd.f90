@@ -1142,6 +1142,9 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
        call dfreduce( itr, 1, dfint, dfmax, gdp )
     enddo loop_iteration
     !
+    if (gdp%gdflwpar%flwoutput%iteroutputsteps >= gdp%gdinttim%ntstep) then
+       write (lundia, '(2(a,i0))') 'uzd (ntstep  ,iter):',gdp%gdinttim%ntstep, '   ',iter
+    endif
     if (iter >= 50) then
        write (errtxt, '(i0)') nst
        call prterr(lundia    ,'S205'    ,trim(errtxt)    )

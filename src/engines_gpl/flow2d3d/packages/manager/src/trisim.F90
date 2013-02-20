@@ -118,7 +118,7 @@ subroutine trisim (numdom, nummap, context_id, fsm_flags, runid)
     !
     ! Finalizes MPI
     !
-    if (parll) then
+    if (usempi) then
        call dfexitmpi(0)
     endif
 end subroutine trisim

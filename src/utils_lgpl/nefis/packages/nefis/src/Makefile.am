@@ -16,12 +16,10 @@ lib_LTLIBRARIES = libNefis.la
 #Includes
 AM_CFLAGS += \
     -I../include \
-    -fPIC \
     -D_FILE_OFFSET_BITS=64 \
     -DPTR8
 AM_CXXFLAGS += \
     -I../include \
-    -fPIC \
     -D_FILE_OFFSET_BITS=64 \
     -DPTR8
 

@@ -28,6 +28,7 @@
 !  $HeadURL$$
 !-------------------------------------------------------------------------------
 type flwoutputtype
+    integer :: iteroutputsteps     ! number of steps since calculation start during whick iteration info is printed to diag-file
     integer :: cntcflmsg           ! Counter of number of warnings concerning high advective Courant numbers
     integer :: maxcflmsg           ! Maximum number of warnings concerning high advective Courant numbers
     logical :: air

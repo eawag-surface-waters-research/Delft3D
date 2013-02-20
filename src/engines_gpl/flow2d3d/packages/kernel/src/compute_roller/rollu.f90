@@ -100,7 +100,7 @@ subroutine rollu(nmmax     ,kfs       ,sourr     ,df        , &
              if (ewave0(nm) < 0.0_fp) then
                 src = 0.0_fp
              else
-                src = max(0.0_hp , sinkw(nm)*ewave0(nm)-df(nm))
+                src = max(0.0_fp , sinkw(nm)*ewave0(nm)-df(nm))
              endif
              sourr(nm) = src
           else

@@ -526,4 +526,5 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        write (message,'(a)') 'Writing GLM velocities to map and his file'
        call prterr(lundia, 'G051', trim(message))
     endif
+    call prop_get_integer(gdp%mdfile_ptr, '*', 'IterOutputSteps', flwoutput%iteroutputsteps)
 end subroutine rdtimo

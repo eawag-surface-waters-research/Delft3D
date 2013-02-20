@@ -63,7 +63,6 @@ subroutine dfinitmpi
     integer, parameter                 :: MPI_SUCCESS = 0
 #endif
     logical                            :: mpi_is_initialized
-    logical                            :: usempi
 !
 !! executable statements -------------------------------------------------------
 !

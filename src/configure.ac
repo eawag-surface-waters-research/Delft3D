@@ -21,10 +21,10 @@ AM_INIT_AUTOMAKE
 # The advice is to use the same vendor for both compilers (and the linker).
 AC_PROG_CXX([icpc g++])
 AC_PROG_CC([icc gcc])
+AC_PROG_CC_C99
 AC_PROG_CPP
 
-#These are required for java
-dnl Initialize LIBTOOL 
+dnl Initialize LIBTOOL
 dnl Make sure we have an up to date version.
 dnl We're going to make it work with older versions also, this might not work (libtool < 2.2, not sure how to check)
 
@@ -32,7 +32,7 @@ dnl We're going to make it work with older versions also, this might not work (l
 ## Libtool initialisation. ##
 ## ----------------------- ##
 
-#LT_PREREQ(2.4)
+LT_PREREQ(2.4)
 LT_INIT
 dnl LTDL_INIT dnl I don't think this is required anymore
 dnl AC_PROG_LIBTOOL
@@ -41,6 +41,7 @@ AC_CONFIG_SUBDIRS(libltdl)
 AC_SUBST(LIBLTDL)
 AC_SUBST(INCLTDL)
 
+#These are required for java
 #AC_PROG_JAVA
 #AC_PROG_JAVA_CC
 #AC_PROG_JAVAC
@@ -53,7 +54,7 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 # These standard macros don't work well (don't throw an error on missing yacc)
 # According to docs we can better use AM_PROG_LEX and AC_PROG_YACC
-AC_PROG_YACC 
+AC_PROG_YACC
 AM_PROG_LEX
 # So we'll double check
 AC_CHECK_PROGS(LEXPROG, flex lex, :)
@@ -73,17 +74,17 @@ AC_MSG_CHECKING([whether to enable dolcli])
 AC_ARG_ENABLE(dolcli,
 AS_HELP_STRING([--enable-dolcli],
 [Enable the compilation of test executable delftonline/dolcli @<:@default no@:>@]),[enableval='yes'],[enableval='no'])
-dnl set compiler specific options here: 
+dnl set compiler specific options here:
 if test "$enableval" = yes ; then
         AC_MSG_RESULT([yes])
         AC_CHECK_HEADERS([readline/history.h readline/readline.h],[],[AC_MSG_ERROR([Can't find readline header files. Please install libreadline6-dev (Ubuntu) or readline-devel (RedHat)])])
-	dnl define a variable in the header file
-	AC_DEFINE([ENABLE_DOLCLI], 1, [Use command line interface precision])
-	dnl define the lowercase variable dolcli (see the substitute)
-	dolcli=true
+        dnl define a variable in the header file
+        AC_DEFINE([ENABLE_DOLCLI], 1, [Use command line interface precision])
+        dnl define the lowercase variable dolcli (see the substitute)
+        dolcli=true
 else
         AC_MSG_RESULT([no])
-	dolcli=false
+        dolcli=false
 fi
 dnl this variable ends up in the makefile.
 AC_SUBST(dolcli)
@@ -130,8 +131,6 @@ AC_LANG_POP
 AC_LANG_PUSH([Fortran 77])
 AC_PROG_F77([ifort gfortran g77])
 AC_F77_LIBRARY_LDFLAGS
-AX_OPENMP
-FFLAGS="$FFLAGS $OPENMP_FFLAGS"
 AC_F77_LINE_LENGTH([132])
 AC_LANG_POP
 
@@ -140,32 +139,30 @@ AC_MSG_CHECKING([whether using Fortran preset flags])
 AC_ARG_ENABLE(fortran-flags-preset,
 AS_HELP_STRING([--enable-fortran-flags-preset],
 [Enable Fortran compiler flags preset @<:@default yes@:>@]),[],[enableval='yes'])
-dnl set compiler specific options here: 
+dnl set compiler specific options here:
 if test "$enableval" = yes ; then
         AC_MSG_RESULT([yes])
-	case "$F77" in
+        case "$F77" in
                 *gfortran*) dnl GNU Fortran 95 compiler
-		dnl no custom flags
+                dnl no custom flags
                 ;;
                 *ifort*) dnl Intel 8.x Fortran compiler
                         FFLAGS="$FFLAGS -recursive -reentrancy threaded -traceback"
                 ;;
         esac
-	case "$FC" in
-	     *gfortran*) dnl GNU Fortran 95 compiler
-	     dnl no custom flags
-	     ;;
-	     *ifort*) dnl Intel 8.x Fortran compiler
-		      FCFLAGS="$FCFLAGS -recursive -reentrancy threaded -traceback"
+        case "$FC" in
+             *gfortran*) dnl GNU Fortran 95 compiler
+             dnl no custom flags
              ;;
-	esac
+             *ifort*) dnl Intel 8.x Fortran compiler
+                      FCFLAGS="$FCFLAGS -recursive -reentrancy threaded -traceback"
+             ;;
+        esac
 else
         AC_MSG_RESULT([no])
 fi
 
-			
 
-   
 
 
 # As of the writing of this demo, GNU Autoconf's AC_OBJEXT and
@@ -180,7 +177,7 @@ AC_OBJEXT
 AC_LANG_POP
 
 
-# executables will get an .exe extension 
+# executables will get an .exe extension
 AC_EXEEXT([.exe])
 
 
@@ -203,8 +200,6 @@ AC_CHECK_HEADERS([libgen.h arpa/inet.h fcntl.h netdb.h netinet/in.h stdlib.h str
 #check for jni.h (for later)
 #AC_JNI_INCLUDE_DIR
 
-#check for c++ standard library
-AC_CHECK_LIB([stdc++], [main],, [AC_MSG_ERROR([Compiler can't find libstdc++])])
 AC_CHECK_TYPES([struct shm_info])
 #Check for expat
 AC_CHECK_HEADER(expat.h,, [AC_MSG_ERROR([Compiler can't find <expat.h>])])
@@ -257,7 +252,7 @@ AC_CHECK_FUNCS([gethostname gettimeofday memset strerror])
 
 
 dnl Already create the libtool script here, because we're using it to detect .dylib/.so extension (works for >=2.2)
-LT_OUTPUT 
+LT_OUTPUT
 
 dnl Lookup the library extension (usually: so,sl,dylib,dll)
 AC_MSG_CHECKING(for the extension of Delft3D plugins)
@@ -541,6 +536,6 @@ utils_lgpl/nefis/tests/test_18/Makefile
 utils_lgpl/nefis/tests/test_19/Makefile
 utils_lgpl/nefis/tests/test_20/Makefile
 utils_lgpl/ods/packages/ods/src/Makefile
-		 ])
+])
 
 AC_OUTPUT

@@ -52,19 +52,20 @@ subroutine initflwpar(gdp)
     gdp%gdflwpar%flwoutput%cntcflmsg   = 0
     gdp%gdflwpar%flwoutput%maxcflmsg   = 100
     !
-    gdp%gdflwpar%flwoutput%air         = .false.
-    gdp%gdflwpar%flwoutput%addtim      = .false.
-    gdp%gdflwpar%flwoutput%cflmsg      = .false.
-    gdp%gdflwpar%flwoutput%chezy       = .false.
-    gdp%gdflwpar%flwoutput%cumdifuflux = .false.
-    gdp%gdflwpar%flwoutput%difuflux    = .false.
-    gdp%gdflwpar%flwoutput%halfdt      = .false.
-    gdp%gdflwpar%flwoutput%layering    = .false.
-    gdp%gdflwpar%flwoutput%roughness   = .false.
-    gdp%gdflwpar%flwoutput%temperature = .false.
-    gdp%gdflwpar%flwoutput%veuler      = .true.
-    gdp%gdflwpar%flwoutput%z0cur       = .false.
-    gdp%gdflwpar%flwoutput%z0rou       = .false.
+    gdp%gdflwpar%flwoutput%iteroutputsteps = 0
+    gdp%gdflwpar%flwoutput%air             = .false.
+    gdp%gdflwpar%flwoutput%addtim          = .false.
+    gdp%gdflwpar%flwoutput%cflmsg          = .false.
+    gdp%gdflwpar%flwoutput%chezy           = .false.
+    gdp%gdflwpar%flwoutput%cumdifuflux     = .false.
+    gdp%gdflwpar%flwoutput%difuflux        = .false.
+    gdp%gdflwpar%flwoutput%halfdt          = .false.
+    gdp%gdflwpar%flwoutput%layering        = .false.
+    gdp%gdflwpar%flwoutput%roughness       = .false.
+    gdp%gdflwpar%flwoutput%temperature     = .false.
+    gdp%gdflwpar%flwoutput%veuler          = .true.
+    gdp%gdflwpar%flwoutput%z0cur           = .false.
+    gdp%gdflwpar%flwoutput%z0rou           = .false.
     !
     nullify(gdp%gdflwpar%fluxu)
     nullify(gdp%gdflwpar%fluxuc)

@@ -16,7 +16,6 @@ lib_LTLIBRARIES = libDataParallelMPI.la
 #Includes
 # TODO:/opt/mpich2/include should be configured....
 FINCLUDES += \
-        -I$(MPI_INCLUDE) \
         -I$(top_builddir)/utils_lgpl/parallel_mpi/include \
         -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/include \
         -I$(top_builddir)/engines_gpl/flow2d3d/packages/data/include

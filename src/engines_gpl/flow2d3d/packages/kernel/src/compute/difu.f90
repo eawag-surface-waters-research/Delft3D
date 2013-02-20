@@ -1010,6 +1010,9 @@ integer                 :: nm_pos ! indicating the array to be exchanged has nm 
        !
        if (itr>0 .and. iter<50) goto 1100
        !
+       if (gdp%gdflwpar%flwoutput%iteroutputsteps >= gdp%gdinttim%ntstep) then
+          write (lundia, '(3(a,i0))') 'difu(ntstep,l,iter):',gdp%gdinttim%ntstep, ' ', l, ' ',iter
+       endif
        if (iter >= 50) then
           write (errtxt, '(i0,a,i0)') l, ' ', nst
           call prterr(lundia    ,'S206'    ,trim(errtxt)    )
