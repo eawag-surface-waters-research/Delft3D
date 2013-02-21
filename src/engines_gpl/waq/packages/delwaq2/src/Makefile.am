@@ -11,58 +11,22 @@ bin_PROGRAMS = delwaq2
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
-        -I$(top_builddir)/engines_gpl/waq/include \
-        -I$(top_builddir)/engines_gpl/waq/packages/waq_kernel/src/waq_kernel \
-        -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings \
-        -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib \
-        -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils \
-        -I$(top_builddir)/engines_gpl/waq/packages/delftio/src/diof90 \
-        -I$(top_builddir)/utils_lgpl/timers/src
+        -I$(top_builddir)/engines_gpl/waq/include 
+
 
 #-------------------------------------------------------------------------------
 #Sources
 delwaq2_SOURCES = block.f \
-       d_tr_d3d.f \
-       dlwqmain.f \
-       dlwqmainprog.f \
-       getidentification.f
+       getidentification.f \
+       dlwq2.f
 
 #-------------------------------------------------------------------------------
 # Libraries
-
-#delwaq2_LDFLAGS = \
-#    -Wl,-rpath /opt/intel/fc/10.1.015/lib
-
 delwaq2_LDADD = \
-    $(top_builddir)/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/libWaqKernel.la \
-    $(top_builddir)/engines_gpl/waq/packages/waq_kernel/src/waq_process/libwaq_process.a \
-    $(top_builddir)/engines_gpl/waq/packages/waq_plugin_wasteload/src/libwaq_plugin_wasteload.a \
-    $(top_builddir)/engines_gpl/waq/packages/waq_io/src/waq_io/libwaq_io.a \
-    $(top_builddir)/engines_gpl/waq/packages/waq_io/src/proc_preprocess/libproc_preprocess.a \
-    $(top_builddir)/engines_gpl/waq/packages/waq_kernel/src/bloom/libbloom.a \
-    $(top_builddir)/engines_gpl/waq/packages/waq_kernel/src/charon/libcharon.a \
-    $(top_builddir)/engines_gpl/waq/packages/waq_io/src/waq_io/libwaq_io.a \
-    $(top_builddir)/engines_gpl/waq/packages/waq_data/src/proc_data/libproc_data.a \
-    $(top_builddir)/engines_gpl/part/packages/kernel_f/src/libkernel_f.a \
-    $(top_builddir)/engines_gpl/part/packages/kernel_c/src/libkernel_c.a \
-    $(top_builddir)/engines_gpl/part/packages/io_f/src/libio_f.a \
-    $(top_builddir)/engines_gpl/part/packages/utils_f/src/libutils_f.a \
-    $(top_builddir)/engines_gpl/part/packages/data_f/src/libdata_f.a \
-    $(top_builddir)/engines_gpl/part/packages/version_number/src/libpart_version_number.a \
-    $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/libwaq_utils.a \
-    $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib/libmod_couplib.a \
-    $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings/libmod_timings.a \
-    $(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90/libDIOF90.la \
-    $(top_builddir)/utils_lgpl/delftio/packages/delftio_shm/src/diof90/libDelftIOSHM.la \
-    $(top_builddir)/utils_lgpl/delftio/packages/delftio_version_number/src/libdelftio_version_number.la \
-    $(top_builddir)/engines_gpl/waq/packages/waq_io/src/ods/libods.a \
-    $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libESMFSM.la \
-    $(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libNefis.la \
-    $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/interact/libinteract.a \
-    $(top_builddir)/engines_gpl/waq/packages/waq_utils_c/src/libwaq_utils_c.a \
-    $(top_builddir)/engines_gpl/waq/packages/delwaq2_version_number/src/libdelwaq2_version_number.a \
-    /opt/mpich2/lib/libmpich.a \
-    -lpthread
+       $(top_builddir)/engines_gpl/waq/packages/delwaq2_version_number/src/libdelwaq2_version_number.a \
+       $(top_builddir)/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/libWaqKernel.la \
+       $(top_builddir)/engines_gpl/waq/packages/delwaq1_lib/src/libDelwaq2.la
+
 
 # To be added when using Intel 11:
 #    $(FCLIBS)

@@ -13,20 +13,22 @@ lib_LTLIBRARIES = libDelwaq1.la
 FMODULES += \
         -I$(top_builddir)/engines_gpl/waq/include \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils \
+        -I$(top_builddir)/engines_gpl/waq/include \
         -I$(top_srcdir)/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token \
         -I$(top_srcdir)/utils_lgpl/deltares_common/packages/deltares_common/src
 
 
 #-------------------------------------------------------------------------------
 #Sources
-delwaq1_SOURCES = block.f \
+libDelwaq1_la_SOURCES = block.f \
        delwaq1.f \
        getidentification.f
 
 #-------------------------------------------------------------------------------
 # Libraries
 
-delwaq1_LDADD = \
+libDelwaq1_la_LIBADD = \
+    $(top_builddir)/engines_gpl/waq/packages/delwaq1_version_number/src/libdelwaq1_version_number.a \
     $(top_builddir)/engines_gpl/waq/packages/waq_io/src/proc_preprocess/libproc_preprocess.a \
     $(top_builddir)/engines_gpl/waq/packages/waq_kernel/src/charon/libcharon.a \
     $(top_builddir)/engines_gpl/waq/packages/waq_io/src/waq_io/libwaq_io.a \
@@ -41,5 +43,6 @@ delwaq1_LDADD = \
     $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libESMFSM.la \
     $(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libNefis.la \
     $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token/libRDToken.la \
-    $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
-    -lpthread
+    $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la 
+ 
+#   -lpthread

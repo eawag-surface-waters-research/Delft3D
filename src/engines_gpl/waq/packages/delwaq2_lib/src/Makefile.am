@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-bin_PROGRAMS = delwaq2
+lib_LTLIBRARIES = libDelwaq2.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -17,17 +17,18 @@ FMODULES += \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils \
         -I$(top_builddir)/engines_gpl/waq/packages/delftio/src/diof90 \
+        -I$(top_builddir)/third_party_open/openda/core/native/include \
         -I$(top_builddir)/utils_lgpl/timers/src
 
 #-------------------------------------------------------------------------------
 #Sources
-delwaq2_SOURCES = block.f \
+libDelwaq2_la_SOURCES = block.f \
        d_tr_d3d.f \
        delwaq2_global_data.f90 \
        m_delwaq_2_openda.F90 \
        openda_exchange_items.f90 \ 
-       waq_omi_api.f90 \
        waq_omi_lib.f90 \
+       waq_omi_api.f90 \
        waq_omi_substances.f90 \
        dlwqmain.f \
        getidentification.f
@@ -35,10 +36,11 @@ delwaq2_SOURCES = block.f \
 #-------------------------------------------------------------------------------
 # Libraries
 
-#delwaq2_LDFLAGS = \
+#delwaq2_a_LDFLAGS = \
 #    -Wl,-rpath /opt/intel/fc/10.1.015/lib
 
-delwaq2_LDADD = \
+libDelwaq2_la_LIBADD = \
+    $(top_builddir)/engines_gpl/waq/packages/delwaq2_version_number/src/libdelwaq2_version_number.a \
     $(top_builddir)/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/libWaqKernel.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_kernel/src/waq_process/libwaq_process.a \
     $(top_builddir)/engines_gpl/waq/packages/waq_plugin_wasteload/src/libwaq_plugin_wasteload.a \

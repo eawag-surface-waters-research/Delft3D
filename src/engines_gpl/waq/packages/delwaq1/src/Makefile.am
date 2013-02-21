@@ -11,16 +11,18 @@ bin_PROGRAMS = delwaq1
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
-
+        -I$(top_builddir)/engines_gpl/waq/include 
 
 #-------------------------------------------------------------------------------
 #Sources
 delwaq1_SOURCES = block.f \
-       dlwq00.f \
-       getidentification.f
+       getidentification.f \
+       dlwq00.f
 
 #-------------------------------------------------------------------------------
 # Libraries
 
 delwaq1_LDADD = \
-    $(top_builddir)/engines_gpl/waq/packages/delwaq1_lib/src/libDelwaq1.la
+       $(top_builddir)/engines_gpl/waq/packages/delwaq1_version_number/src/libdelwaq1_version_number.a \
+       $(top_builddir)/engines_gpl/waq/packages/delwaq1_lib/src/libDelwaq1.la
+
