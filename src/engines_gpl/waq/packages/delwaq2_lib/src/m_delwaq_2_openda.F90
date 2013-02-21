@@ -409,10 +409,13 @@ subroutine dlwq_setcorestate(corestate,size_corestate,retval)
   include 'cta_f77.inc'
   integer :: size_corestate
   double precision, dimension(size_corestate), intent(in) :: corestate
-  real, dimension(size_corestate) :: r_corestate
+  !!real, dimension(size_corestate) :: r_corestate
+  real, dimension(:), allocatable :: r_corestate
 
   integer, intent(out) :: retval
   integer :: s_core, ierr
+
+  allocate( r_corestate(size_corestate) )
 
   r_corestate = corestate
   call CTA_TREEVECTOR_GETSUBTREEVEC(state_handles(current_instance), 'core', s_core, ierr)
@@ -425,6 +428,8 @@ subroutine dlwq_setcorestate(corestate,size_corestate,retval)
      call dlwq_set_ctastate_to_delwaq(ierr)
      retval = ierr
   endif
+
+  deallocate( r_corestate )
 
 end subroutine dlwq_setcorestate
 
