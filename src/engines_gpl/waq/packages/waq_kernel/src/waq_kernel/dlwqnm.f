@@ -259,18 +259,15 @@ c        layers in preconditioner [1,kmax]
           updatr  = .true.
           lstrec = icflag .eq. 1
           nosss  = noseg + nseg2
-          noqtt  = noq + noq4
+          noqtt  = noq   + noq4
           inwtyp = intyp + nobnd
+          noqt   = noq1  + noq2
 
           call initialise_progress( dlwqd%progress, nstep, lchar(44) )
 
 ! initialize second volume array with the first one
-          call move   ( a(ivol ), a(ivol2) , nosss   )
 
-! initialize pointer matices for fast solvers
-          call dlwqf1 ( noseg   , nobnd   , noq     , noq1    , noq2    ,
-     &                  nomat   , j(ixpnt), j(iwrk) , j(imat) , rowpnt  ,
-     &                  fmat    , tmat    )
+          call move   ( a(ivol ), a(ivol2) , nosss   )
       endif
 
 !
@@ -461,21 +458,29 @@ c        layers in preconditioner [1,kmax]
      &                       lstrec  , lrewin  , a(ivoll), mypart  , dlwqd   )
          end select
 
-!     update the info on dry volumes with the new volumes
+!     Update the info on dry volumes with the new volumes        ( dryfle )
+!      Compute new from-topointer on the basis of non-zeroflows  ( zflows )
+!       Initialize pointer matices for fast solvers              ( dlwqf1 )
+
          call dryfle ( noseg    , nosss    , a(ivol2) , nolay    , nocons   ,
      &                 c(icnam) , a(icons) , nopa     , c(ipnam) , a(iparm) ,
      &                 nosfun   , c(isfna) , a(isfun) , j(iknmr) , iknmkv   )
+         call zflows ( noq      , noqt     , nolay    , nocons   , c(icnam) ,
+     &                 a(iflow) , j(ixpnt) )
+         call dlwqf1 ( noseg    , nobnd    , noq      , noq1     , noq2     ,
+     &                 nomat    , j(ixpnt) , j(iwrk)  , j(imat)  , rowpnt   ,
+     &                 fmat     , tmat     )
 
 ! add the waste loads
 
-         call dlwq15 ( nosys     , notot    , noseg    , noq      , nowst    ,
-     &                 nowtyp    , ndmps    , intopt   , idt      , itime    ,
-     &                 iaflag    , c(isnam) , a(iconc) , a(ivol)  , a(ivol2) ,
-     &                 a(iflow ) , j(ixpnt) , c(iwsid) , c(iwnam) , c(iwtyp) ,
-     &                 j(inwtyp) , j(iwast) , iwstkind , a(iwste) , a(iderv) ,
-     &                 iknmkv    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
-     &                 c(isfna ) , a(isfun) , j(isdmp) , a(idmps) , a(imas2) ,
-     &                 a(iwdmp)  , 1        , notot    , j(iowns ), mypart   )
+         call dlwq15 ( nosys    , notot    , noseg    , noq      , nowst    ,
+     &                 nowtyp   , ndmps    , intopt   , idt      , itime    ,
+     &                 iaflag   , c(isnam) , a(iconc) , a(ivol)  , a(ivol2) ,
+     &                 a(iflow ), j(ixpnt) , c(iwsid) , c(iwnam) , c(iwtyp) ,
+     &                 j(inwtyp), j(iwast) , iwstkind , a(iwste) , a(iderv) ,
+     &                 iknmkv   , nopa     , c(ipnam) , a(iparm) , nosfun   ,
+     &                 c(isfna ), a(isfun) , j(isdmp) , a(idmps) , a(imas2) ,
+     &                 a(iwdmp) , 1        , notot    , j(iowns ), mypart   )
 
 !          Here we implement a loop that inverts the same matrix
 !          for series of subsequent substances having the same

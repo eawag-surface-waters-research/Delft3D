@@ -267,18 +267,18 @@ C
           endif
           lstrec   = icflag .eq. 1
           nosss    = noseg + nseg2
-          NOQTT    = NOQ + NOQ4
+          noqtt    = noq   + noq4
           inwtyp   = intyp + nobnd
-          noqt     = noq1+noq2
+          noqt     = noq1  + noq2
           lleng    = ileng+noqt*2
           forester = btest(intopt,6)
           nowarn   = 0
 
           call initialise_progress( dlwqd%progress, nstep, lchar(44) )
-C
-C          initialize second volume array with the first one
-C
-          CALL MOVE   ( A(IVOL ), A(IVOL2) , NOSEG   )
+
+!          initialize second volume array with the first one
+
+          call move   ( a(ivol ), a(ivol2) , nosss   )
       ENDIF
 
 C
@@ -302,7 +302,7 @@ C
 
       if ( timon ) call timstrt ( "dlwqng", ithandl )
 
-      iexseg = 1     !  There is nothing to mask. This array is meant for method 21
+      iexseg = 1     !  There is nothing to mask.
 C
 C======================= simulation loop ============================
    10 CONTINUE
@@ -494,7 +494,7 @@ C
          call dryfle ( noseg    , nosss    , a(ivol2) , nolay    , nocons   ,
      &                 c(icnam) , a(icons) , nopa     , c(ipnam) , a(iparm) ,
      &                 nosfun   , c(isfna) , a(isfun) , j(iknmr) , iknmkv   )
-         call zflows ( noq      , noq1+noq2, nolay    , nocons   , c(icnam) ,
+         call zflows ( noq      , noqt     , nolay    , nocons   , c(icnam) ,
      &                 a(iflow) , j(ixpnt) )
          call dlwqf1 ( noseg    , nobnd    , noq      , noq1     , noq2     ,
      &                 nomat    , j(ixpnt) , j(iwrk)  , j(imat)  , rowpnt   ,
