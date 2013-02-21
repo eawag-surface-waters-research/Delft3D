@@ -92,7 +92,7 @@
       do iseg = noseg+1 , noseg+nobnd
          rowpnt(iseg) = rowpnt(iseg-1)
       enddo
-      if ( rowpnt( noseg+nobnd ) .ne. nomat ) then
+      if ( rowpnt( noseg+nobnd ) .gt. nomat ) then
          write ( * , * ) ' System error in fast solvers matrix.'
          write ( * , * ) ' NOMAT = ',nomat, ', Required = ', rowpnt( noseg+nobnd )
          call srstop(1)

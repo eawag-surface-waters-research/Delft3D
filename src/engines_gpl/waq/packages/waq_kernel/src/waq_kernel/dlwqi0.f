@@ -496,22 +496,32 @@ C
 !         deal with z-layers (inactive cells at the bottom side of the water column
 
 !     open  ( 336, file='kenmerk-test1.out', recl=8575 )
-!     write ( 336, '(2143i4)' ) (mod(j(iknmr+k),1000),k=0,noseg-1)
-!     open  ( 337, file='frmto-test1.out', recl=8575 )
-!     write ( 337, '(2143i4)' ) (mod(j(ixpnt+k),1000),k=(noq1+noq2)*4  ,noq*4-1,4)
-!     write ( 337, * )
-!     write ( 337, '(2143i4)' ) (mod(j(ixpnt+k),1000),k=(noq1+noq2)*4+1,noq*4-1,4)
+!     write ( 336, '(2143i4)' ) (j(iknmr+k),k=0,noseg-1)
+!     open  ( 337, file='frmto-test1.out', recl=24040 )
+!     write ( 337, * ) 'FROM horizontaal'
+!     write ( 337, '(6009i4)' ) (j(ixpnt+k  ),k=0,(noq1+noq2)*4, 4 )
+!     write ( 337, * ) 'TO   horizontaal'
+!     write ( 337, '(6009i4)' ) (j(ixpnt+k+1),k=0,(noq1+noq2)*4, 4 )
+!     write ( 337, * ) 'FROM vertikaal'
+!     write ( 337, '(2143i4)' ) (j(ixpnt+k  ),k=(noq1+noq2)*4,noq*4-1,4)
+!     write ( 337, * ) 'TO   vertikaal'
+!     write ( 337, '(2143i4)' ) (j(ixpnt+k+1),k=(noq1+noq2)*4,noq*4-1,4)
       call zlayer ( noseg    , nosss    , nosys    , notot    , nolay    ,
      &              a(ivol)  , noq1+noq2, noq      , a(iarea) , nocons   ,
      &              c(icnam) , a(icons) , nopa     , c(ipnam) , a(iparm) ,
      &              nosfun   , c(isfna) , a(isfun) , a(iconc) , a(imass) ,
      &              j(iknmr) , iknmkv   , j(ixpnt) )
-!     open  ( 339, file='kenmerk-test2.out', recl=8575 )
-!     write ( 339, '(2143i4)' ) (mod(iknmkv(k,1),1000),k=1,noseg)
-!     open  ( 340, file='frmto-test2.out', recl=8575 )
-!     write ( 340, '(2143i4)' ) (mod(j(ixpnt+k),1000),k=(noq1+noq2)*4  ,noq*4-1,4)
-!     write ( 340, * )
-!     write ( 340, '(2143i4)' ) (mod(j(ixpnt+k),1000),k=(noq1+noq2)*4+1,noq*4-1,4)
+!     open  ( 338, file='kenmerk-test2.out', recl=8575 )
+!     write ( 338, '(2143i4)' ) (j(iknmr+k),k=0,noseg-1)
+!     open  ( 339, file='frmto-test2.out', recl=24040 )
+!     write ( 339, * ) 'FROM horizontaal'
+!     write ( 339, '(6009i4)' ) (j(ixpnt+k  ),k=0,(noq1+noq2)*4, 4 )
+!     write ( 339, * ) 'TO   horizontaal'
+!     write ( 339, '(6009i4)' ) (j(ixpnt+k+1),k=0,(noq1+noq2)*4, 4 )
+!     write ( 339, * ) 'FROM vertikaal'
+!     write ( 339, '(2143i4)' ) (j(ixpnt+k  ),k=(noq1+noq2)*4,noq*4-1,4)
+!     write ( 339, * ) 'TO   vertikaal'
+!     write ( 339, '(2143i4)' ) (j(ixpnt+k+1),k=(noq1+noq2)*4,noq*4-1,4)
 
 !     temporary for closure error
 

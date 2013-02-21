@@ -55,6 +55,7 @@
 !     Created             : September 2010 by Leo Postma
 !     Modified            : February  2011 by Leo Postma determine position of bedlayer
 !                           August    2011 by Leo Postma more limited functionality
+!                           February  2013 by Leo Postma expanded functionality again
 
 !     Files               : none
 
@@ -94,13 +95,15 @@
       integer  ( 4), intent(  out) :: iknmkv(noseg )       !< time varying feature array
       integer  ( 4), intent(inout) :: ifrmto(4,noq )       !< exchange pointer array
 
+!     Locals
+
       integer  ( 4)    idryfld         ! help variable to find dry_tresh constant
       integer  ( 4)    isurf           ! index to find horizontal surface area values
       real     ( 4)    threshold       ! drying and flooding value
       integer  ( 4)    nosegl          ! number of computational volumes per layer
       integer  ( 4)    iseg            ! loop variable volumes
       integer  ( 4)    iq              ! loop variable exchanges
-!     integer  ( 4)    i, j            ! general loop variables
+      integer  ( 4)    i, j            ! general loop variables
       integer  ( 4)    ivol            ! this computational volumes
       integer  ( 4)    isub            ! loop variable substances
       integer  ( 4)    ilay            ! loop variable layers
@@ -125,17 +128,15 @@
       if ( isurf .gt. 0 ) then
          do iseg = 1, nosegl
             call dhkmrk( 1, iknmrk(iseg), ikm )
-            if ( ikm .eq. 0 ) cycle
+            if ( ikm .eq. 0 ) cycle                                    ! whole collumn is inactive
             do ilay = nolay, 1, -1                                     ! from bottom to top
                ivol = iseg + (ilay-1)*nosegl
                if ( volume(ivol) .lt. param(isurf,ivol)*threshold ) then
                   if ( ilay .gt. 1 ) then
-                     call dhkmst(1, iknmrk(ivol), 0 )                  ! zero the last bit
-                     call dhkmst(2, iknmrk(ivol), 0 )                  ! and the second feature
-                     call dhkmst(3, iknmrk(ivol), 0 )                  ! and the third feature
-                     call dhkmrk(2, iknmrk(ivol-nosegl), ikm )
+                     iknmrk(ivol) = 0                                  ! inactive cell below the bed
+                     call dhkmrk(2, iknmrk(ivol-nosegl), ikm )         ! get second one of cell above
                      select case ( ikm )
-                        case ( 1 )                                     ! the cell on top is surface cell
+                        case ( 1 )                                     ! the cell above is surface cell
                            call dhkmst(2, iknmrk(ivol-nosegl), 0 )     ! now it also has a bed
                         case ( 2 )                                     ! the cell on top is middle cell
                            call dhkmst(2, iknmrk(ivol-nosegl), 3 )     ! now it is the bed
@@ -143,8 +144,8 @@
                      do isub = nosys+1,notot
                         conc(isub,ivol-nosegl) = conc(isub,ivol-nosegl) + conc(isub,ivol)
                         mass(isub,ivol-nosegl) = mass(isub,ivol-nosegl) + mass(isub,ivol)
-                        conc(isub,ivol) = 0
-                        mass(isub,ivol) = 0
+                        conc(isub,ivol) = 0.0
+                        mass(isub,ivol) = 0.0
                      enddo
                   endif
                else
@@ -165,9 +166,7 @@
                   ivol = iseg + (ilay-1)*nosegl
                   if ( volume(ivol) .lt. segfun(ivol,isurf)*threshold ) then
                      if ( ilay .gt. 1 ) then
-                        call dhkmst(1, iknmrk(ivol), 0 )               ! zero the last bit
-                        call dhkmst(2, iknmrk(ivol), 0 )               ! and the second feature
-                        call dhkmst(3, iknmrk(ivol), 0 )               ! and the third feature
+                        iknmrk(ivol) = 0                               ! inactive cell below the bed
                         call dhkmrk(2, iknmrk(ivol-nosegl), ikm )
                         select case ( ikm )
                            case ( 1 )                                  ! the cell on top is surface cell
@@ -178,8 +177,8 @@
                         do isub = nosys+1,notot
                            conc(isub,ivol-nosegl) = conc(isub,ivol-nosegl) + conc(isub,ivol)
                            mass(isub,ivol-nosegl) = mass(isub,ivol-nosegl) + mass(isub,ivol)
-                           conc(isub,ivol) = 0
-                           mass(isub,ivol) = 0
+                           conc(isub,ivol) = 0.0
+                           mass(isub,ivol) = 0.0
                         enddo
                      endif
                   else
@@ -194,13 +193,11 @@
             do iseg = 1, nosegl
                call dhkmrk( 1, iknmrk(iseg), ikm )
                if ( ikm .eq. 0 ) cycle
-               do ilay = nolay, 1, -1                             ! from bottom to top
+               do ilay = nolay, 1, -1                               ! from bottom to top
                   ivol = iseg + (ilay-1)*nosegl
                   if ( volume(ivol) .lt. threshold ) then
                      if ( ilay .gt. 1 ) then
-                        call dhkmst(1, iknmrk(ivol), 0 )            ! zero the last bit
-                        call dhkmst(2, iknmrk(ivol), 0 )            ! and the second feature
-                        call dhkmst(3, iknmrk(ivol), 0 )            ! and the third feature
+                        iknmrk(ivol) = 0                            ! inactive cell below the bed
                         call dhkmrk(2, iknmrk(ivol-nosegl), ikm )
                         select case ( ikm )
                            case ( 1 )                                  ! the cell on top is surface cell
@@ -230,14 +227,99 @@
 !          this needs more sophisticated approach when atmosphere and bed
 !          have been attached as open boundary conditions
 
- !    do iq = noq12+1, noq
- !       do i = 1, 4
- !          j = ifrmto(i,iq)
- !          if ( j .gt. 0 ) then
- !             if ( .not. btest( iknmkv(j), 0 ) ) ifrmto(i,iq) = 0
- !          endif
- !       enddo
- !    enddo
+      do iq = 1, noq
+         do i = 1, 2
+            j = ifrmto(i,iq)
+            if ( j .gt. 0 ) then
+               if ( .not. btest( iknmkv(j), 0 ) ) ifrmto(i,iq) = 0
+            endif
+         enddo
+      enddo
+
+      if ( timon ) call timstop ( ithandl )
+
+      return
+      end
+
+      subroutine zflows ( noq    , noq12  , nolay  , nocons , coname ,
+     &                    flow   , ifrmto )
+
+!     Deltares Software Centre
+
+!>\File
+!>      Adjusts the flow pointer to cross layers where needed for a Z-layer model
+!>
+!>      If the bed crosses layer interfaces then the average bed level of a node
+!>      may be in a higher layer than the actual bed level for an exchange.\n
+!>      Some flow models then nevertheless give a flow to the level of the node
+!>      below the bed and also create a vertical flux from below the bed to above.
+!>      This routine adjusts the horizontal flow pointer to point to 1 or 2 layers
+!>      higher. In the above zlayer routine the vertical flow was already masked
+!>      out.
+
+!     Created             : February  2013 by Leo Postma for EDF
+
+!     Files               : none
+
+!     Routines            : zoek20  - to search the DRY_TRESH constant
+
+      use timers
+      implicit none
+
+!     Parameters          :
+
+!     kind           function         name                   description
+
+      integer  ( 4), intent(in   ) :: noq                  !< number of exchanges between cells
+      integer  ( 4), intent(in   ) :: noq12                !< number of horizontal exchanges
+      integer  ( 4), intent(in   ) :: nolay                !< number of Z-layers
+      integer  ( 4), intent(in   ) :: nocons               !< number of constants
+      character(20), intent(in   ) :: coname(nocons)       !< names of the constants
+      real     ( 4), intent(in   ) :: flow  ( noq )        !< flows between cells
+      integer  ( 4), intent(inout) :: ifrmto(4,noq )       !< exchange pointer array
+
+!     Locals
+
+      integer  ( 4)    iq              ! loop variable exchanges
+      integer  ( 4)    ifrom, ito      ! from and to cell number
+      integer  ( 4)    iql             ! help variable to find lowest active cell
+      integer  ( 4)    noqhl           ! number of horizontal exchanges per layer
+
+      integer(4) ithandl /0/
+
+      call zoek20 ( 'Z_THRESH  ', nocons, coname, 10, iq )
+      if ( iq .le. 0 ) return
+
+      if ( timon ) call timstrt ( "zflows", ithandl )
+
+      noqhl = noq12 / nolay
+
+      do iq = 1, noq12
+         ifrom = ifrmto(1,iq)
+         ito   = ifrmto(2,iq)
+         if ( ifrom .ne. 0 .and. ito .ne. 0 ) cycle  ! both below the bed
+         if ( abs(flow(iq)) .lt. 1.0e-4 ) cycle      ! flow is almost zero
+         if ( ifrom .eq. 0 ) then
+            iql = iq - noqhl                         ! look at the corresponding
+            do while ( iql .gt. 0 )                  ! exchange one layer higher
+               if ( ifrmto(1,iql) .gt. 0 ) then      ! if that is real
+                  ifrmto(1,iq) = ifrmto(1,iql)       ! take that cell for this flux also
+                  exit
+               endif
+               iql = iql - noqhl
+            enddo
+         endif
+         if ( ito   .eq. 0 ) then
+            iql = iq - noqhl
+            do while ( iql .gt. 0 )
+               if ( ifrmto(2,iql) .gt. 0 ) then
+                  ifrmto(2,iq) = ifrmto(2,iql)
+                  exit
+               endif
+               iql = iql - noqhl
+            enddo
+         endif
+      enddo
 
       if ( timon ) call timstop ( ithandl )
 

@@ -279,13 +279,6 @@ C
 C          initialize second volume array with the first one
 C
           CALL MOVE   ( A(IVOL ), A(IVOL2) , NOSEG   )
-C
-C      Initialize pointer matices for fast solvers
-C
-          call dlwqf1 ( noseg   , nobnd   , noq     , noq1    , noq2    ,
-     &                  nomat   , j(ixpnt), j(iwrk) , j(imat) , rowpnt  ,
-     &                  fmat    , tmat    )
-
       ENDIF
 
 C
@@ -462,57 +455,63 @@ C
       call timer_stop(timer_transport)
 
 !     get new volumes
+
          itimel = itime
          itime  = itime + idt
          call timer_start(timer_readdata)
          select case ( ivflag )
             case ( 1 )                 !     computation of volumes for computed volumes only
-               call move   ( a(ivol) , a(ivol2), noseg   )
-               call dlwqb3 ( a(iarea), a(iflow), a(ivnew), j(ixpnt), notot   ,
-     &                       noq     , nvdim   , j(ivpnw), a(ivol2), intopt  ,
-     &                       a(imas2), idt     , iaflag  , nosys   , a(idmpq),
-     &                       ndmpq   , j(iqdmp))
+               call move   ( a(ivol)  , a(ivol2) , noseg    )
+               call dlwqb3 ( a(iarea) , a(iflow) , a(ivnew) , j(ixpnt) , notot    ,
+     &                       noq      , nvdim    , j(ivpnw) , a(ivol2) , intopt   ,
+     &                       a(imas2) , idt      , iaflag   , nosys    , a(idmpq) ,
+     &                       ndmpq    , j(iqdmp) )
                updatr = .true.
             case ( 2 )                 !     the fraudulent computation option
-               call dlwq41 ( lun     , itime   , itimel  , a(iharm), a(ifarr),
-     &                       j(inrha), j(inrh2), j(inrft), noseg   , a(ivoll),
-     &                       j(ibulk), lchar   , ftype   , isflag  , ivflag  ,
-     &                       updatr  , j(inisp), a(inrsp), j(intyp), j(iwork),
-     &                       lstrec  , lrewin  , a(ivol2), mypart  , dlwqd   )
-               call dlwqf8 ( noseg   , noq     , j(ixpnt), idt     , iknmkv  ,
-     &                       a(ivol ), a(iflow), a(ivoll), a(ivol2))
+               call dlwq41 ( lun      , itime    , itimel   , a(iharm) , a(ifarr) ,
+     &                       j(inrha) , j(inrh2) , j(inrft) , noseg    , a(ivoll) ,
+     &                       j(ibulk) , lchar    , ftype    , isflag   , ivflag   ,
+     &                       updatr   , j(inisp) , a(inrsp) , j(intyp) , j(iwork) ,
+     &                       lstrec   , lrewin   , a(ivol2) , mypart   , dlwqd    )
+               call dlwqf8 ( noseg    , noq      , j(ixpnt) , idt      , iknmkv   ,
+     &                       a(ivol ) , a(iflow) , a(ivoll) , a(ivol2) )
                updatr = .true.
                lrewin = .true.
                lstrec = .true.
             case default               !     read new volumes from files
-               call dlwq41 ( lun     , itime   , itimel  , a(iharm), a(ifarr),
-     &                       j(inrha), j(inrh2), j(inrft), noseg   , a(ivol2),
-     &                       j(ibulk), lchar   , ftype   , isflag  , ivflag  ,
-     &                       updatr  , j(inisp), a(inrsp), j(intyp), j(iwork),
-     &                       lstrec  , lrewin  , a(ivoll), mypart  , dlwqd   )
+               call dlwq41 ( lun      , itime    , itimel   , a(iharm) , a(ifarr) ,
+     &                       j(inrha) , j(inrh2) , j(inrft) , noseg    , a(ivol2) ,
+     &                       j(ibulk) , lchar    , ftype    , isflag   , ivflag   ,
+     &                       updatr   , j(inisp) , a(inrsp) , j(intyp) , j(iwork) ,
+     &                       lstrec   , lrewin   , a(ivoll) , mypart   , dlwqd    )
          end select
          call timer_stop(timer_readdata)
 
-!        update the info on dry volumes with the new volumes
+!     Update the info on dry volumes with the new volumes        ( dryfle )
+!      Compute new from-topointer on the basis of non-zeroflows  ( zflows )
+!       Initialize pointer matices for fast solvers              ( dlwqf1 )
 
          call dryfle ( noseg    , nosss    , a(ivol2) , nolay    , nocons   ,
      &                 c(icnam) , a(icons) , nopa     , c(ipnam) , a(iparm) ,
      &                 nosfun   , c(isfna) , a(isfun) , j(iknmr) , iknmkv   )
-C
-C          add the waste loads
-C
+         call zflows ( noq      , noq1+noq2, nolay    , nocons   , c(icnam) ,
+     &                 a(iflow) , j(ixpnt) )
+         call dlwqf1 ( noseg    , nobnd    , noq      , noq1     , noq2     ,
+     &                 nomat    , j(ixpnt) , j(iwrk)  , j(imat)  , rowpnt   ,
+     &                 fmat     , tmat     )
 
-      call timer_start(timer_wastes)
-      call dlwq15 ( nosys     , notot    , noseg    , noq      , nowst    ,
-     &              nowtyp    , ndmps    , intopt   , idt      , itime    ,
-     &              iaflag    , c(isnam) , a(iconc) , a(ivol)  , a(ivol2) ,
-     &              a(iflow ) , j(ixpnt) , c(iwsid) , c(iwnam) , c(iwtyp) ,
-     &              j(inwtyp) , j(iwast) , iwstkind , a(iwste) , a(iderv) ,
-     &              iknmkv    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
-     &              c(isfna ) , a(isfun) , j(isdmp) , a(idmps) , a(imas2) ,
-     &              a(iwdmp)  , 1        , notot    , j(iowns ), mypart   )
+!          add the waste loads
 
-      call timer_stop(timer_wastes)
+         call timer_start(timer_wastes)
+         call dlwq15 ( nosys     , notot    , noseg    , noq      , nowst    ,
+     &                 nowtyp    , ndmps    , intopt   , idt      , itime    ,
+     &                 iaflag    , c(isnam) , a(iconc) , a(ivol)  , a(ivol2) ,
+     &                 a(iflow ) , j(ixpnt) , c(iwsid) , c(iwnam) , c(iwtyp) ,
+     &                 j(inwtyp) , j(iwast) , iwstkind , a(iwste) , a(iderv) ,
+     &                 iknmkv    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
+     &                 c(isfna ) , a(isfun) , j(isdmp) , a(idmps) , a(imas2) ,
+     &                 a(iwdmp)  , 1        , notot    , j(iowns ), mypart   )
+         call timer_stop(timer_wastes)
 C
 C          Here we implement a loop that inverts the same matrix
 C          for series of subsequent substances having the same
@@ -606,13 +605,13 @@ C                                                               (KHT, 11/11/96)
       ENDIF
 
 !     calculate closure error
+
          if ( lrewin .and. lstrec ) then
             call dlwqce ( a(imass), a(ivoll), a(ivol2), nosys , notot ,
      &                    noseg   , lun(19) )
-            call move   ( a(ivoll), a(ivol) , noseg   )
+            call move   ( a(ivoll), a(ivol) , noseg   )    !  replace old by new volumes
          else
-!     replace old by new volumes
-            call move   ( a(ivol2), a(ivol) , noseg   )
+            call move   ( a(ivol2), a(ivol) , noseg   )    !  replace old by new volumes
          endif
 
 !     integrate the fluxes at dump segments fill asmass with mass
@@ -620,7 +619,7 @@ C                                                               (KHT, 11/11/96)
             call proint ( nflux   , ndmpar  , idt     , itfact  , a(iflxd),
      &                    a(iflxi), j(isdmp), j(ipdmp), ntdmpq  )
          endif
-      call timer_stop(timer_transport)
+         call timer_stop(timer_transport)
 
 !          new time values, volumes excluded
 
