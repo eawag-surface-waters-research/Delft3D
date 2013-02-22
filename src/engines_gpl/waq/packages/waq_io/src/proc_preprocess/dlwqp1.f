@@ -220,7 +220,7 @@
       ! how many threads ?
 
       if ( nothrd .gt. 0 ) call omp_set_num_threads( nothrd )
-      nothread = omp_get_num_threads()
+      nothread = omp_get_max_threads()
 
       ! allocate
 

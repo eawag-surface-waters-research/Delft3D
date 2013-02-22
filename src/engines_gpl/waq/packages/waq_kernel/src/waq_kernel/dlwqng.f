@@ -529,7 +529,7 @@ C                                                               (KHT, 11/11/96)
       call timer_start(timer_transport)
       if (timon) call timstrt ( "ADE solver", ithand1 )
       timon_old = timon
-      noth = OMP_GET_NUM_THREADS()
+      noth = OMP_GET_MAX_THREADS()
       if ( noth .gt. 1 ) timon = .false.
 
 !$OMP PARALLEL

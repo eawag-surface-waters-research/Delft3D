@@ -795,7 +795,7 @@ C
       if ( timon ) call timstrt ( "onepro", ithand2 )
 
       timon_old = timon
-      if ( OMP_GET_NUM_THREADS() > 1 ) then
+      if ( OMP_GET_MAX_THREADS() > 1 ) then
           timon = .false.
       endif
 !$OMP PARALLEL

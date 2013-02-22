@@ -126,7 +126,7 @@
 !     How many threads ?
 
       if ( nothrd .gt. 0 ) call OMP_SET_NUM_THREADS( nothrd )
-      noth = OMP_GET_NUM_THREADS()
+      noth = OMP_GET_MAX_THREADS()
       write ( lunrep , 2020 ) noth
       if ( l_decl ) write (    6   , 2030 ) noth
 

@@ -528,9 +528,8 @@ C
 
          if ( timon ) call timstrt ( "ADE solver", ithand1 )
          timon_old = timon
-         noth = OMP_GET_NUM_THREADS()
+         noth = OMP_GET_MAX_THREADS()
          if ( noth .gt. 1 ) timon = .false.
-         call OMP_SET_NUM_THREADS(noth) ! AM: this seems necessary!
 
 !$OMP PARALLEL
 !$OMP DO PRIVATE(ith) SCHEDULE(DYNAMIC)

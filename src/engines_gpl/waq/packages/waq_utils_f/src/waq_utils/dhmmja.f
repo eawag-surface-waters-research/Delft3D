@@ -718,7 +718,7 @@ C
          if ( .not. l_decl ) write ( 328, 2040 ) nr_jar_new, "flowpnt             ",  noq
       endif
       if ( f_solv ) then
-         noth = OMP_GET_NUM_THREADS()
+         noth = OMP_GET_MAX_THREADS()
 
          itoti = itoti +  noseg+nobnd + 1        ;  nr_jar_new = nr_jar_new+1                 ! rowpnt
          if ( l_decl ) allocate ( rowpnt (  0:noseg+nobnd               ), stat=ierr )
