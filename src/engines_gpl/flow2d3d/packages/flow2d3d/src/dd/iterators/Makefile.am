@@ -10,7 +10,7 @@
 
 include $(top_srcdir)/common.am
 
-lib_LTLIBRARIES = libDDIterators.la
+noinst_LTLIBRARIES = libDDIterators.la
 
 libDDIterators_la_SOURCES = \
     dredgemerge.cpp \

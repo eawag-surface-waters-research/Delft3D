@@ -1,5 +1,5 @@
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = liblint_f.la
+noinst_LTLIBRARIES = liblint_f.la
 
 liblint_f_la_SOURCES = \
             precision.f90 \

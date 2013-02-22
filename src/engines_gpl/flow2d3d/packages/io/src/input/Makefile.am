@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libIOInput.la
+noinst_LTLIBRARIES = libIOInput.la
 
 #-------------------------------------------------------------------------------
 #Includes

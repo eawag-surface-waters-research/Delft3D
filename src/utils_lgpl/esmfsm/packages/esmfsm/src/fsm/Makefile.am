@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libESMFSM.la
+noinst_LTLIBRARIES = libESMFSM.la
 
 #-------------------------------------------------------------------------------
 #Includes

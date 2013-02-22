@@ -59,7 +59,7 @@ AM_FCFLAGS = \
 # When using the Intel compiler, this will cause the multi-threaded version to be
 # used, even if no OpenMP is used. And the multi-threaded version is known
 # to have a very high latency.
-# AM_FCFLAGS+=$(OPENMP_FCFLAGS)
+# AM_FCFLAGS += $(OPENMP_FCFLAGS)
 
 
 #-------------------------------------------------------------------------------
@@ -74,7 +74,7 @@ AM_FFLAGS = \
 # When using the Intel compiler, this will cause the multi-threaded version to be
 # used, even if no OpenMP is used. And the multi-threaded version is known
 # to have a very high latency.
-# AM_FFLAGS+=$(OPENMP_FFLAGS)
+# AM_FFLAGS += $(OPENMP_FFLAGS)
 
 
 #-------------------------------------------------------------------------------

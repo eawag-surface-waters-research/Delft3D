@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libDelftIOSHM.la
+noinst_LTLIBRARIES = libDelftIOSHM.la
 
 #-------------------------------------------------------------------------------
 #Includes

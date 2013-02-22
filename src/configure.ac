@@ -103,8 +103,6 @@ dnl Check the flags needed to link fc programs with ld (i.e. cc)
 AC_FC_LIBRARY_LDFLAGS
 dnl Check for openmp for fortran
 AX_OPENMP
-dnl prepend the found flags
-FCFLAGS="$FCFLAGS $OPENMP_FCFLAGS"
 
 dnl Check for MPI (sets MPIFC, MPILIBS, HAVE_MPI)
 ACX_MPI
@@ -132,6 +130,8 @@ AC_LANG_PUSH([Fortran 77])
 AC_PROG_F77([ifort gfortran g77])
 AC_F77_LIBRARY_LDFLAGS
 AC_F77_LINE_LENGTH([132])
+dnl Check for openmp for fortran
+AX_OPENMP
 AC_LANG_POP
 
 dnl Fortran compiler defaults (this could be a separate m4 file)
@@ -200,10 +200,13 @@ AC_CHECK_HEADERS([libgen.h arpa/inet.h fcntl.h netdb.h netinet/in.h stdlib.h str
 #check for jni.h (for later)
 #AC_JNI_INCLUDE_DIR
 
+#check for c++ standard library
+AC_CHECK_LIB([stdc++], [main],, [AC_MSG_ERROR([Compiler can't find libstdc++])])
 AC_CHECK_TYPES([struct shm_info])
 #Check for expat
 AC_CHECK_HEADER(expat.h,, [AC_MSG_ERROR([Compiler can't find <expat.h>])])
 AC_CHECK_LIB(expat, XML_Parse,, [AC_MSG_ERROR([Compiler can't find libexpat])])
+AC_CHECK_LIB([rt], [clock_gettime],, [AC_MSG_ERROR([Compiler can't find librt, needed for clock_gettime])])
 AC_FUNC_VPRINTF
 # When using the Intel Fortran compiler, check for the needed libraries
 ####if test $FC == ifort; then

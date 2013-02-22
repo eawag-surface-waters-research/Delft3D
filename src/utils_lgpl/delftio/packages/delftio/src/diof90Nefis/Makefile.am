@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libDIOF90Nefis.la
+noinst_LTLIBRARIES = libDIOF90Nefis.la
 
 #-------------------------------------------------------------------------------
 #Includes

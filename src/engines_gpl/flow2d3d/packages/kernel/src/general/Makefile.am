@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libKernelGeneral.la
+noinst_LTLIBRARIES = libKernelGeneral.la
 
 #-------------------------------------------------------------------------------
 #Includes

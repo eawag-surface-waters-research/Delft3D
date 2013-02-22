@@ -15,7 +15,7 @@ include $(top_srcdir)/common.am
 SUBDIRS = \
     meteo
 
-lib_LTLIBRARIES = libECModule.la
+noinst_LTLIBRARIES = libECModule.la
 
 #-------------------------------------------------------------------------------
 #Includes

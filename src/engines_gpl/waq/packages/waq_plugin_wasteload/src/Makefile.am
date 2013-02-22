@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libwaq_plugin_wasteload.la
+noinst_LTLIBRARIES = libwaq_plugin_wasteload.la
 
 #-------------------------------------------------------------------------------
 #Includes

@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libDataParallelMPI.la
+noinst_LTLIBRARIES = libDataParallelMPI.la
 
 #-------------------------------------------------------------------------------
 #Includes

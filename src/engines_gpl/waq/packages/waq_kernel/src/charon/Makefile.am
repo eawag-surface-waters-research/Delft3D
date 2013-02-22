@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libcharon.la
+noinst_LTLIBRARIES = libcharon.la
 
 #-------------------------------------------------------------------------------
 #Includes

@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libmod_timings.la
+noinst_LTLIBRARIES = libmod_timings.la
 
 #-------------------------------------------------------------------------------
 #Includes

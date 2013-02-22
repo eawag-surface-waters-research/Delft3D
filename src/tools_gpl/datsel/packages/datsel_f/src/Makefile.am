@@ -1,5 +1,5 @@
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libdatsel_f.la
+noinst_LTLIBRARIES = libdatsel_f.la
 
 #-------------------------------------------------------------------------------
 #Includes

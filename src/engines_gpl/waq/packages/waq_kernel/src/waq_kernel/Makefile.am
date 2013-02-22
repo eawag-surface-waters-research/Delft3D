@@ -6,10 +6,15 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libWaqKernel.la
+noinst_LTLIBRARIES = libWaqKernel.la
+
+AM_FCFLAGS += $(OPENMP_FCFLAGS)
+AM_FFLAGS += $(OPENMP_FFLAGS)
 
 #-------------------------------------------------------------------------------
 #Includes
+
+
 FMODULES += \
         -I$(top_builddir)/engines_gpl/waq/include \
         -I$(top_builddir)/engines_gpl/part/packages/data_f/src/ \

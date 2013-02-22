@@ -14,7 +14,7 @@ include $(top_srcdir)/common.am
 SUBDIRS = \
     rd_token
 
-lib_LTLIBRARIES = libDeltaresCommon.la
+noinst_LTLIBRARIES = libDeltaresCommon.la
 
 #-------------------------------------------------------------------------------
 #Includes

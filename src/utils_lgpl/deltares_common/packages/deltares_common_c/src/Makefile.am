@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libDeltaresCommonC.la
+noinst_LTLIBRARIES = libDeltaresCommonC.la
 
 #-------------------------------------------------------------------------------
 #Includes

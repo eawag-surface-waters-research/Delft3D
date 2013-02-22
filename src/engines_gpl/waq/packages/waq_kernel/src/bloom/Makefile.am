@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libbloom.la
+noinst_LTLIBRARIES = libbloom.la
 
 #-------------------------------------------------------------------------------
 #Includes

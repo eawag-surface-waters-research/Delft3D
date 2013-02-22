@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libDataAllocation.la
+noinst_LTLIBRARIES = libDataAllocation.la
 
 #-------------------------------------------------------------------------------
 #Includes

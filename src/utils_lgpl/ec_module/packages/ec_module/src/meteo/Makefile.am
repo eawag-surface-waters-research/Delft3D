@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libMeteo.la
+noinst_LTLIBRARIES = libMeteo.la
 
 #-------------------------------------------------------------------------------
 #Includes

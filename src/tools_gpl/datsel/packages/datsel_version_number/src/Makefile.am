@@ -8,7 +8,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libdatsel_version_number.la
+noinst_LTLIBRARIES = libdatsel_version_number.la
 
 #-------------------------------------------------------------------------------
 #Includes

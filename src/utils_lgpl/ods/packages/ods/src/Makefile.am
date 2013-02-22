@@ -1,6 +1,6 @@
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libODS.la
+noinst_LTLIBRARIES = libODS.la
 
 #-------------------------------------------------------------------------------
 #Sources

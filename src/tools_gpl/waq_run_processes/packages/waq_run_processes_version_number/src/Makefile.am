@@ -8,7 +8,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libwaq_run_processes_version_number.la
+noinst_LTLIBRARIES = libwaq_run_processes_version_number.la
 
 #-------------------------------------------------------------------------------
 #Includes

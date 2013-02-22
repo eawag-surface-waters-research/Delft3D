@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libRDToken.la
+noinst_LTLIBRARIES = libRDToken.la
 
 #-------------------------------------------------------------------------------
 #Includes

@@ -8,7 +8,7 @@
 
 include $(top_srcdir)/common.am
 
-lib_LTLIBRARIES = libDDMapper.la
+noinst_LTLIBRARIES = libDDMapper.la
 
 libDDMapper_la_SOURCES = \
     context-flowside.cpp \

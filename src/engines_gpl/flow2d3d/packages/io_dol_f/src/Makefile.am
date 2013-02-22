@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libIODolF.la
+noinst_LTLIBRARIES = libIODolF.la
 
 #-------------------------------------------------------------------------------
 #Includes

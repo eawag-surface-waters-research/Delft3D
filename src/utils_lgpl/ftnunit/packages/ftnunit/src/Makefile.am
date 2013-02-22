@@ -7,7 +7,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libFtnUnit.la
+noinst_LTLIBRARIES = libFtnUnit.la
 
 #-------------------------------------------------------------------------------
 #Sources

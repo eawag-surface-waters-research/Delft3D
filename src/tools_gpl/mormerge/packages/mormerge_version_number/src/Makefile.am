@@ -8,7 +8,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libmormerge_version_number.la
+noinst_LTLIBRARIES = libmormerge_version_number.la
 
 #-------------------------------------------------------------------------------
 #Includes

@@ -8,7 +8,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libutils_f.la
+noinst_LTLIBRARIES = libutils_f.la
 
 #-------------------------------------------------------------------------------
 #Includes

@@ -8,7 +8,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libdata_f.la
+noinst_LTLIBRARIES = libdata_f.la
 
 #-------------------------------------------------------------------------------
 #Includes

@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libproc_preprocess.la
+noinst_LTLIBRARIES = libproc_preprocess.la
 
 #-------------------------------------------------------------------------------
 #Includes

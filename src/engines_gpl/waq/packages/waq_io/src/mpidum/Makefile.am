@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libmpidum.la
+noinst_LTLIBRARIES = libmpidum.la
 
 #-------------------------------------------------------------------------------
 #Includes

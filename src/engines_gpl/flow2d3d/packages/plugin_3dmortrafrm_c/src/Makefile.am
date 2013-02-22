@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libPlugin3dmortrafrmC.la
+noinst_LTLIBRARIES = libPlugin3dmortrafrmC.la
 
 #-------------------------------------------------------------------------------
 #Sources

@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libdelwaq2_version_number.la
+noinst_LTLIBRARIES = libdelwaq2_version_number.la
 
 #-------------------------------------------------------------------------------
 #Includes

@@ -11,7 +11,7 @@
 
 include $(top_srcdir)/common.am
 
-lib_LTLIBRARIES = libFlow2d3dManager.la
+noinst_LTLIBRARIES = libFlow2d3dManager.la
 
 #-------------------------------------------------------------------------------
 #   Includes

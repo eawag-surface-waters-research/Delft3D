@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libmod_couplib.la
+noinst_LTLIBRARIES = libmod_couplib.la
 
 #-------------------------------------------------------------------------------
 #Includes

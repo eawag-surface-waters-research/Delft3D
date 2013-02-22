@@ -8,7 +8,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libESMFSMVersionNumber.la
+noinst_LTLIBRARIES = libESMFSMVersionNumber.la
 
 #-------------------------------------------------------------------------------
 #Includes

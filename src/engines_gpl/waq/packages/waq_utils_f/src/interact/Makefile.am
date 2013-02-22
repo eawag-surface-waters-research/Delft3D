@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libinteract.la
+noinst_LTLIBRARIES = libinteract.la
 
 #-------------------------------------------------------------------------------
 #Includes
