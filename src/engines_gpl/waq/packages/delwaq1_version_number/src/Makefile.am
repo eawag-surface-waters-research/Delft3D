@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libdelwaq1_version_number.a
+lib_LTLIBRARIES = libdelwaq1_version_number.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -17,7 +17,7 @@ INCLUDES = \
 
 #-------------------------------------------------------------------------------
 #Sources
-libdelwaq1_version_number_a_SOURCES = c2c.c \
+libdelwaq1_version_number_la_SOURCES = c2c.c \
        f2c.c \
        version.c
 

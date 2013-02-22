@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libinteract.a
+lib_LTLIBRARIES = libinteract.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -15,7 +15,7 @@ lib_LIBRARIES = libinteract.a
 
 #-------------------------------------------------------------------------------
 #Sources
-libinteract_a_SOURCES = alarm.f \
+libinteract_la_SOURCES = alarm.f \
        answer.f \
        args.f \
        calc.f \

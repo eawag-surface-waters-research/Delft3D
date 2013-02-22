@@ -1,7 +1,7 @@
 include $(top_srcdir)/common.am
-lib_LIBRARIES = liblint_f.a
+lib_LTLIBRARIES = liblint_f.la
 
-liblint_f_a_SOURCES = \
+liblint_f_la_SOURCES = \
             precision.f90 \
             bilin5.f90 \
             grmap.f90 \

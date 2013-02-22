@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libwaq_io.a
+lib_LTLIBRARIES = libwaq_io.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -20,7 +20,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libwaq_io_a_SOURCES = bound.f \
+libwaq_io_la_SOURCES = bound.f \
        pointr.f \
        check.f \
        conver.f \

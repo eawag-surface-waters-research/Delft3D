@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libmod_timings.a
+lib_LTLIBRARIES = libmod_timings.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -15,7 +15,7 @@ lib_LIBRARIES = libmod_timings.a
 
 #-------------------------------------------------------------------------------
 #Sources
-libmod_timings_a_SOURCES = \
+libmod_timings_la_SOURCES = \
        m_timings.f90 \
        m_timers_waq.f90
 

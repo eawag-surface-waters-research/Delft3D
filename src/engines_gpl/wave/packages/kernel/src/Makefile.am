@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libkernel.a
+lib_LTLIBRARIES = libkernel.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -20,7 +20,7 @@ FMODULES += \
 	
 #-------------------------------------------------------------------------------
 #Sources
-libkernel_a_SOURCES = \
+libkernel_la_SOURCES = \
          corrht.f90 \
          check_input.f90 \
          del_temp_files.f90 \

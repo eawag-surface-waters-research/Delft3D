@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libmod_couplib.a
+lib_LTLIBRARIES = libmod_couplib.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -17,7 +17,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libmod_couplib_a_SOURCES = \
+libmod_couplib_la_SOURCES = \
        m_coupcns.f90 \
        m_ixset.f90 \
        m_prcgrp.f90 \

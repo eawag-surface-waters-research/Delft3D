@@ -8,7 +8,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libdatsel_version_number.a
+lib_LTLIBRARIES = libdatsel_version_number.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -16,7 +16,7 @@ INCLUDES = -I../include
 
 #-------------------------------------------------------------------------------
 #Sources
-libdatsel_version_number_a_SOURCES = \
+libdatsel_version_number_la_SOURCES = \
          c2c.c \
          f2c.c \
          version.c

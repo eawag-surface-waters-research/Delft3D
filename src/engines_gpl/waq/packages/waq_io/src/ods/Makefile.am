@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libods.a
+lib_LTLIBRARIES = libods.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -15,7 +15,7 @@ lib_LIBRARIES = libods.a
 
 #-------------------------------------------------------------------------------
 #Sources
-libods_a_SOURCES = getdim.f \
+libods_la_SOURCES = getdim.f \
        getloc.f \
        getmat.f \
        getpar.f \

@@ -29,7 +29,7 @@ mormerge_exe_SOURCES = \
 #Libraries
 
 mormerge_exe_LDADD   = \
-$(top_builddir)/tools_gpl/mormerge/packages/mormerge_version_number/src/libmormerge_version_number.a \
+$(top_builddir)/tools_gpl/mormerge/packages/mormerge_version_number/src/libmormerge_version_number.la \
 $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la  \
 $(FCLIBS) $(CCLIBS) $(CCLIBS_ADDITIONAL)
 

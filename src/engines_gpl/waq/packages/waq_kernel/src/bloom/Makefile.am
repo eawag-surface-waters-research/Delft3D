@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libbloom.a
+lib_LTLIBRARIES = libbloom.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -17,7 +17,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libbloom_a_SOURCES = blclmort.f \
+libbloom_la_SOURCES = blclmort.f \
        blfile.f \
        blinit.f \
        blinpu.f \

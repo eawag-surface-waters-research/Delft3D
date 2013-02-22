@@ -8,7 +8,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libutils_f.a
+lib_LTLIBRARIES = libutils_f.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -17,7 +17,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libutils_f_a_SOURCES = \
+libutils_f_la_SOURCES = \
 	../../data_f/src/precision.f90 \
 	part11.f90
 

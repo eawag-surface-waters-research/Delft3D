@@ -8,7 +8,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libio_f.a
+lib_LTLIBRARIES = libio_f.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -18,7 +18,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libio_f_a_SOURCES = \
+libio_f_la_SOURCES = \
 	../../data_f/src/precision.f90 \
          dlwqbl.f90 \
          getdps.f90 \

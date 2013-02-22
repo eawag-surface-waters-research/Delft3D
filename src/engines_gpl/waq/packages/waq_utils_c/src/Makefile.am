@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libwaq_utils_c.a
+lib_LTLIBRARIES = libwaq_utils_c.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -15,7 +15,7 @@ lib_LIBRARIES = libwaq_utils_c.a
 
 #-------------------------------------------------------------------------------
 #Sources
-libwaq_utils_c_a_SOURCES = f902c.cpp
+libwaq_utils_c_la_SOURCES = f902c.cpp
 
 #-------------------------------------------------------------------------------
 # Libraries

@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libproc_data.a
+lib_LTLIBRARIES = libproc_data.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -15,7 +15,7 @@ lib_LIBRARIES = libproc_data.a
 
 #-------------------------------------------------------------------------------
 #Sources
-libproc_data_a_SOURCES = \
+libproc_data_la_SOURCES = \
        data_vtrans.F90 \
        data_3dl.F90
 

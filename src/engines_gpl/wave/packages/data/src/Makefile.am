@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libdata.a
+lib_LTLIBRARIES = libdata.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -22,7 +22,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libdata_a_SOURCES = \
+libdata_la_SOURCES = \
          checkmeteoresult_wave.f90 \
          datetime_to_string.f90 \
          utilities.f90 \

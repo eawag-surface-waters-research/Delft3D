@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libwaq_plugin_wasteload.a
+lib_LTLIBRARIES = libwaq_plugin_wasteload.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -15,7 +15,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libwaq_plugin_wasteload_a_SOURCES = delwaq_user_wasteloads.f \
+libwaq_plugin_wasteload_la_SOURCES = delwaq_user_wasteloads.f \
        srstop.f \
        zoekns.f
 

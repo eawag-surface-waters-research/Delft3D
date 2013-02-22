@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libwaq_process.a
+lib_LTLIBRARIES = libwaq_process.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -19,7 +19,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libwaq_process_a_SOURCES = \
+libwaq_process_la_SOURCES = \
        bottom_set.f \
        adspo4.f \
        advtra.f \

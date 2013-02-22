@@ -36,7 +36,7 @@ vs_SOURCES = \
 	viewsel.c
 
 vs_LDADD = $(LDADD) \
-	$(top_builddir)/tools_gpl/vs/packages/vs_version_number/src/libvs_version_number.a \
+	$(top_builddir)/tools_gpl/vs/packages/vs_version_number/src/libvs_version_number.la \
 	$(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libNefis.la
 
 AM_LFLAGS = -L

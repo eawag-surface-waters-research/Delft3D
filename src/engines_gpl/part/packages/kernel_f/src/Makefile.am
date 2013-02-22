@@ -8,7 +8,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libkernel_f.a
+lib_LTLIBRARIES = libkernel_f.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -19,7 +19,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libkernel_f_a_SOURCES = \
+libkernel_f_la_SOURCES = \
          ../../data_f/src/precision.f90 \
          avundf_linux.f90 \
          oildsp.f90 \

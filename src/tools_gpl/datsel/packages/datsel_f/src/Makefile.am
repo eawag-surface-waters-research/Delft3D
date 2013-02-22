@@ -1,5 +1,5 @@
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libdatsel_f.a
+lib_LTLIBRARIES = libdatsel_f.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -8,7 +8,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 
-libdatsel_f_a_SOURCES = \
+libdatsel_f_la_SOURCES = \
 	precision.f90 \
 	co1cen.f90 \
 	co2cen.f90 \

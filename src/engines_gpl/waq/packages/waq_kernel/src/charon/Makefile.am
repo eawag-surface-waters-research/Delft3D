@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libcharon.a
+lib_LTLIBRARIES = libcharon.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -17,7 +17,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libcharon_a_SOURCES = arith.f \
+libcharon_la_SOURCES = arith.f \
        barx.f \
        berror.f \
        ceccal.f \

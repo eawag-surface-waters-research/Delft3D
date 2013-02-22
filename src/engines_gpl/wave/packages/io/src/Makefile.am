@@ -10,7 +10,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libio.a
+lib_LTLIBRARIES = libio.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -20,7 +20,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libio_a_SOURCES = \
+libio_la_SOURCES = \
          compvel.f90 \
          cp_file.f90 \
          dam_cod.f90 \

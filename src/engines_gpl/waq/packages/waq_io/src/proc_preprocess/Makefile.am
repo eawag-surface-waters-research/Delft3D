@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libproc_preprocess.a
+lib_LTLIBRARIES = libproc_preprocess.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -17,7 +17,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libproc_preprocess_a_SOURCES = partab.f90 \
+libproc_preprocess_la_SOURCES = partab.f90 \
        actrep.f \
        add_atrfrc.f \
        add_dspfrc.f \

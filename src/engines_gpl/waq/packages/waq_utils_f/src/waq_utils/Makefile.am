@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libwaq_utils.a
+lib_LTLIBRARIES = libwaq_utils.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -16,7 +16,7 @@ FMODULES += \
 
 #-------------------------------------------------------------------------------
 #Sources
-libwaq_utils_a_SOURCES = \
+libwaq_utils_la_SOURCES = \
        waqmem.f90 \
        progress.f90 \
        fileutils.f90 \

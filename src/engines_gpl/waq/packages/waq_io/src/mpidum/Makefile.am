@@ -6,7 +6,7 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libmpidum.a
+lib_LTLIBRARIES = libmpidum.la
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -15,7 +15,7 @@ lib_LIBRARIES = libmpidum.a
 
 #-------------------------------------------------------------------------------
 #Sources
-libmpidum_a_SOURCES = mpidum.f90
+libmpidum_la_SOURCES = mpidum.f90
 
 #-------------------------------------------------------------------------------
 # Libraries

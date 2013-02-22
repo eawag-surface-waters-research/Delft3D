@@ -8,14 +8,14 @@
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
-lib_LIBRARIES = libdata_f.a
+lib_LTLIBRARIES = libdata_f.la
 
 #-------------------------------------------------------------------------------
 #Includes
 
 #-------------------------------------------------------------------------------
 #Sources
-libdata_f_a_SOURCES = \
+libdata_f_la_SOURCES = \
          precision.f90 \
          typos_mod.f90 \
          file_info.f90 \
