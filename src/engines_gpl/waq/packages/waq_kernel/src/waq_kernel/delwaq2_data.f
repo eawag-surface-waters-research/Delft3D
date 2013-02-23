@@ -204,7 +204,7 @@
           real(kind=kind(1.0d0))                      :: otime
           real(kind=kind(1.0d0))                      :: deltim
           real(kind=kind(1.0d0))                      :: tscale
-          logical                                     :: islibrary = .false.
+          logical                                     :: set_timer = .false.
           logical                                     :: inopenda  = .false.
 
           !

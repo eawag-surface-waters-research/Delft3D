@@ -110,11 +110,9 @@ C
           ALLOCATE( DLWQD%CHBUF(0) )
 
       ENDIF
-      
-      dlwqd%islibrary = .true.
-C
-C     Computation step is always done
-C
+
+!     Computation step is always done
+
       CALL DELWQ2 ( DLWQD%RBUF, DLWQD%IBUF, DLWQD%CHBUF, ITOTA, ITOTI,
      &              ITOTC, INIT, ACTION, DLWQD )
 

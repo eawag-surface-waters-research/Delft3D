@@ -1580,10 +1580,6 @@ integer function ModelInitialize
     open ( lunlst, file = trim(argv(2)) // '.lst' )
     call report_model_data( lunlst )
     !
-    ! set the status as a library to prevent timers
-    !
-    dlwqd%islibrary = .true.
-    !
     ! Everything has been prepared
     !
     call dlwqmain( ACTION_INITIALISATION, 2, argv, dlwqd )
@@ -2190,10 +2186,6 @@ integer function ModelInitialize_By_Id( runid_given )
     call dhstore_command( argv )
 
     call delwaq2_global_data_initialize(runid_given)
-    !
-    ! set the status as a library to prevent timers
-    !
-    dlwqd%islibrary = .true.
     !
     ! Leave everything to DELWAQ itself
     !

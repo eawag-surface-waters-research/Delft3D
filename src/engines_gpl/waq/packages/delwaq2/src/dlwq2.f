@@ -22,7 +22,7 @@
 !!  rights reserved.
 
       program dlwq2
-      
+
       use delwaq2_data
 
       implicit none
@@ -34,17 +34,18 @@
       integer(4)                       :: i
 
       type(delwaq_data)                :: dlwqd
-          
+
       argc = nargs()
       allocate ( argv (argc))
       do i = 1, argc
           call getarg(i - 1, argv(i))
       end do
-          
+
 !!      call delwaq1(argc, argv)
 
       action = ACTION_FULLCOMPUTATION
-          
+      dlwqd%set_timer = .true.
+
       call dlwqmain( action, argc, argv, dlwqd )
 
       end program

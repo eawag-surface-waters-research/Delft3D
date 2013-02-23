@@ -206,7 +206,7 @@ C
          call timini ( )
          ! for openda-usage, where multiple instances are launched,
          ! the time module does not work correctly.
-         if (.not. dlwqd%islibrary) timon = .true.
+         if ( dlwqd%set_timer ) timon = .true.
          if (timon) call timstrt( "delwaq2", ithndl )
 C
 C        boot the system; read dimensions of sysn from delwaq03.wrk-file
@@ -532,10 +532,7 @@ C
           if ( timon ) then
              call timstop ( ithndl )
              call timdump ( TRIM(RUNID)//'-timers.out' )
-          endif
-
-          if ( timon ) then
-              call timfinalize()
+             call timfinalize()
           endif
 
       endif
