@@ -407,7 +407,7 @@
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" OpenMP="OpenMPParallelCode"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
-				<Tool Name="VFFortranCompilerTool" Optimization="optimizeDisabled" ReentrantCode="reentrancyThreaded" OpenMP="OpenMPParallelCode"/></FileConfiguration></File>
+				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" OpenMP="OpenMPParallelCode"/></FileConfiguration></File>
 		<File RelativePath=".\src\waq_kernel\prodr2.f">
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" OpenMP="OpenMPParallelCode"/></FileConfiguration></File>
