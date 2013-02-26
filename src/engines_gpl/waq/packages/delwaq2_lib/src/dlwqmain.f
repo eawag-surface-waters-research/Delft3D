@@ -57,9 +57,9 @@ C
 C
 C      PARAMETER (ITOTA=0       ,ITOTI=0       ,ITOTC=0       )
 
-      SUBROUTINE dlwqmain( ACTION, ARGC, ARGV, DLWQD )
+      SUBROUTINE dlwqmain(ACTION, ARGC, ARGV, DLWQD)
 
-      !DEC$ ATTRIBUTES DLLEXPORT, ALIAS : '_DLWQMAIN' :: dlwqmain
+      !DEC$ ATTRIBUTES DLLEXPORT, ALIAS : '_DLWQMAIN' :: _dlwqmain
 
       USE DELWAQ2
       USE DELWAQ2_DATA

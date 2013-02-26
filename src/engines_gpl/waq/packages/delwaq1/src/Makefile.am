@@ -11,7 +11,8 @@ bin_PROGRAMS = delwaq1
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
-        -I$(top_builddir)/engines_gpl/waq/include 
+        -I$(top_builddir)/engines_gpl/waq/include \
+        -I$(top_builddir)/engines_gpl/waq/packages/delwaq1_lib/src
 
 #-------------------------------------------------------------------------------
 #Sources

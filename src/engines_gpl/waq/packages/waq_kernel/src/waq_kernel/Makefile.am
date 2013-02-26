@@ -9,7 +9,7 @@ include $(top_srcdir)/common.am
 noinst_LTLIBRARIES = libWaqKernel.la
 
 AM_FCFLAGS += $(OPENMP_FCFLAGS)
-AM_FFLAGS += $(OPENMP_FFLAGS)
+AM_FFLAGS += $(OPENMP_FFLAGS) -openmp
 
 #-------------------------------------------------------------------------------
 #Includes
