@@ -62,7 +62,7 @@ libflow2d3d_la_LIBADD = \
     $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
     $(top_builddir)/utils_lgpl/delftonline/src/delftonline/libDelftOnline.la \
     $(MPILIBS) \
-    $(FCLIBS) $(CCLIBS) $(CCLIBS_ADDITIONAL)
+    $(FCLIBS) $(CCLIBS)
 
 
 BUILT_SOURCES = \

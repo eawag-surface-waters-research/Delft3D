@@ -15,11 +15,11 @@
 #
 
 include $(top_srcdir)/common.am
-lib_LTLIBRARIES = libPluginDelftflowTraform.la
+lib_LTLIBRARIES = libplugin_delftflow_traform.la
 
 #-------------------------------------------------------------------------------
 #Sources
-libPluginDelftflowTraform_la_SOURCES = \
+libplugin_delftflow_traform_la_SOURCES = \
          engelund_hansen.f90 \
          partheniades_krone.f90 \
          settling_velocity.f90 \
