@@ -46,7 +46,8 @@ program delwaq2_two_instances
     !
     ! Turn off the timers
     !
-    dlwqd%islibrary = .true.
+    dlwqd%set_timer = .true.
+!    dlwqd%islibrary = .true.
 
     !
     ! Initialise both instances
