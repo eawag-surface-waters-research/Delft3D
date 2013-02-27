@@ -18,30 +18,20 @@ VN_DIR=$TOPDIR/third_party_open/version_number/packages/version_number/src
 
 cd $MODDIR
 
-if [ "$BUILD_NUMBER" != "" ]; then
+#   =====================================
+#   Execute svnrevision
+#   =====================================
 
-   #   =====================================
-   #   BUILD_NUMBER already known
-   #   =====================================
-   SVN_VERSION=$BUILD_NUMBER
+cd $MODDIR
+if svnversion . >/dev/null 2>/dev/null ; then 
+   SVN_VERSION=`svnversion -n $MODDIR`; \
+else 
+   # source is exported/exculded from SVN, no revision number known
+   SVN_VERSION="000000";  
+fi;
+#   also write it to file
+# echo $SVN_VERSION > $MODDIR/$SVN_VERSION
 
-else
-
-   #   =====================================
-   #   Execute svnrevision
-   #   =====================================
-
-   cd $MODDIR
-   if svnversion . >/dev/null 2>/dev/null ; then 
-      SVN_VERSION=`svnversion -n $MODDIR`; \
-   else 
-      # source is exported/exculded from SVN, no revision number known
-      SVN_VERSION="000000";  
-   fi;
-   #   also write it to file
-   # echo $SVN_VERSION > $MODDIR/$SVN_VERSION
-
-fi  
 
 # Generate version number source module using version_number.exe
 $VN_DIR/version_number.exe $SVN_VERSION $3 $1.svn $1.temp

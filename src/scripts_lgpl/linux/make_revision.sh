@@ -31,29 +31,19 @@ VN_DIR=$TOPDIR/third_party_open/version_number/packages/version_number/src
 
 
 
-if [ "$BUILD_NUMBER" != "" ]; then
+#   =====================================
+#   Execute svnrevision
+#   =====================================
 
-   #   =====================================
-   #   BUILD_NUMBER already known
-   #   =====================================
-   BUILD_NUMBER=$BUILD_NUMBER
+cd $MODDIR
+if svnversion . >/dev/null 2>/dev/null ; then 
+   BUILD_NUMBER=`svnversion -n $MODDIR`; \
+else 
+   BUILD_NUMBER="000000"; 
+fi;
+#   also write it to file
+# echo $BUILD_NUMBER > $MODDIR/BUILD_NUMBER
 
-else
-
-   #   =====================================
-   #   Execute svnrevision
-   #   =====================================
-
-   cd $MODDIR
-   if svnversion . >/dev/null 2>/dev/null ; then 
-      BUILD_NUMBER=`svnversion -n $MODDIR`; \
-   else 
-      BUILD_NUMBER="000000"; 
-   fi;
-   #   also write it to file
-   # echo $BUILD_NUMBER > $MODDIR/BUILD_NUMBER
-
-fi 
 
 
 
