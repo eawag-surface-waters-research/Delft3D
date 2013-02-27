@@ -270,11 +270,9 @@ fi
 # Additional link flags/libraries
 if [ "$compiler" = 'gnu' ]; then
     export LDFLAGSMT_ADDITIONAL=" "
-    export FCLIBS_ADDITIONAL=" "
 else
     # Intel compilers
     export LDFLAGSMT_ADDITIONAL="-lifcoremt"
-    export FCLIBS_ADDITIONAL="-lifcoremt -limf"
 fi
 
 
@@ -291,7 +289,6 @@ echo "export AUTOMAKE=\"$AUTOMAKE\""
 echo "export AUTOHEADER=\"$AUTOHEADER\""
 echo "export AUTOCONF=\"$AUTOCONF\""
 echo "export AUTORECONF_FLAGS=\"$AUTORECONF_FLAGS\""
-echo "export FCLIBS_ADDITIONAL=\"$FCLIBS_ADDITIONAL\""
 echo "export LIBTOOLIZE=\"$LIBTOOLIZE\""
 echo "export LDFLAGS=\"$LDFLAGS\""
 echo "export LDFLAGSMT_ADDITIONAL=\"$LDFLAGSMT_ADDITIONAL\""

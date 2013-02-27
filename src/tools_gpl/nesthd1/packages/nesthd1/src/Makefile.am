@@ -47,7 +47,7 @@ nesthd1_LDADD = \
         $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libESMFSM.la \
         $(top_srcdir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
         -ldl \
-        $(FCLIBS) $(FCLIBS_ADDITIONAL) $(CCLIBS)
+        $(FCLIBS) $(CCLIBS)
 
 
 BUILT_SOURCES = ./always \
