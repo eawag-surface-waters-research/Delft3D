@@ -43,25 +43,16 @@ IF "%6"=="Debug" (
 
 CD "%2"
 
-IF DEFINED BUILD_NUMBER (
-   echo %0: build exists
-   REM =====================================
-   REM BUILD_NUMBER already known
-   REM =====================================
+REM =====================================
+REM Execute svnrevision
+REM =====================================
 
-) ELSE (
-
-   REM =====================================
-   REM Execute svnrevision
-   REM =====================================
-
-   set BUILD_NUMBER=000000
-   CD "%MODDIR%"
-   IF EXIST "%SVN_DIR%\svnversion.exe" (
-       echo %0: executing %SVN_DIR%\svnversion.exe -n
-       FOR /F "tokens=*" %%i IN ('call "%SVN_DIR%\svnversion.exe" -n "%MODDIR%"') DO set BUILD_NUMBER=%%i 
-   )					         
-) 
+set BUILD_NUMBER=000000
+CD "%MODDIR%"
+IF EXIST "%SVN_DIR%\svnversion.exe" (
+    echo %0: executing %SVN_DIR%\svnversion.exe -n
+    FOR /F "tokens=*" %%i IN ('call "%SVN_DIR%\svnversion.exe" -n "%MODDIR%"') DO set BUILD_NUMBER=%%i 
+)					         
 
 REM ==========================================================================
 REM If the source has been obtained using a svn export command, the "exported"
