@@ -23,7 +23,7 @@
 
       subroutine delwaq1(argc,  argv)
 
-!DEC$ ATTRIBUTES DLLEXPORT, ALIAS : '_DELWAQ1' :: _delwaq1
+!DEC$ ATTRIBUTES DLLEXPORT, ALIAS : 'DELWAQ1' :: delwaq1
 
 !>\file
 !>                    DELWAQ - INPUT PROGRAMME
