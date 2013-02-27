@@ -65,7 +65,7 @@ libDelwaq2_la_LIBADD = \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/interact/libinteract.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_c/src/libwaq_utils_c.la \
     $(top_builddir)/engines_gpl/waq/packages/delwaq2_version_number/src/libdelwaq2_version_number.la \
-    $(top_builddir)/third_party_open/mpich2/lib/libmpich.a \
+    $(top_builddir)/third_party_open/mpich2/lib/linux/libmpich.a \
     -lpthread
 
 # To be added when using Intel 11:
