@@ -9,11 +9,12 @@
 
 include $(top_srcdir)/common.am
 bin_PROGRAMS = run_processes
-
+ 
 #-------------------------------------------------------------------------------
 #Includes
 #FMODULES +=
 
+MPILIBS += $(MPILIBS_ADDITIONAL)
 
 #-------------------------------------------------------------------------------
 #Sources
@@ -50,7 +51,7 @@ run_processes_LDADD = \
     $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_c/src/esm/libesm_c.la \
     $(top_srcdir)/utils_lgpl/esmfsm/packages/esmfsm_version_number/src/libesmfsm_version_number.la \
     $(top_srcdir)/third_party/wlauth/bin/linux/libWL_auth.a \
-    $(top_builddir)/third_party_open/mpich2/lib/linux/libmpich.a \
+    $(MPILIBS)  \
     -lpthread
 
 # To be added when using Intel 11:

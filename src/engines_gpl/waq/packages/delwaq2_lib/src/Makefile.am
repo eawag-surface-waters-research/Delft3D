@@ -7,7 +7,7 @@
 
 include $(top_srcdir)/common.am
 noinst_LTLIBRARIES = libDelwaq2.la
-
+ 
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
@@ -20,6 +20,8 @@ FMODULES += \
         -I$(top_builddir)/third_party_open/openda/core/native/include \
         -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token \
         -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
+
+MPILIBS += $(MPILIBS_ADDITIONAL)
 
 #-------------------------------------------------------------------------------
 #Sources
@@ -65,7 +67,7 @@ libDelwaq2_la_LIBADD = \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/interact/libinteract.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_c/src/libwaq_utils_c.la \
     $(top_builddir)/engines_gpl/waq/packages/delwaq2_version_number/src/libdelwaq2_version_number.la \
-    $(top_builddir)/third_party_open/mpich2/lib/linux/libmpich.a \
+    $(MPILIBS) \
     -lpthread
 
 # To be added when using Intel 11:

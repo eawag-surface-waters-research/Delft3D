@@ -296,6 +296,60 @@ goto :endproc
 
 
 
+rem ===============
+rem === INSTALL_WAQ
+rem ===============
+:waq
+    echo "installing waq . . ."
+
+    set dest_bin="!dest_main!\win32\waq\bin"
+    set dest_lib="!dest_main!\win32\waq\lib"
+    set dest_default="!dest_main!\win32\waq\default"
+    set dest_scripts="!dest_main!\win32\waq\scripts"  rem does waq need this ??
+    
+    call :makeDir !dest_bin!
+    call :makeDir !dest_lib!
+    call :makeDir !dest_default!
+    call :makeDir !dest_scripts!  rem does waq need this ??
+
+    call :copyFile engines_gpl\waq\bin\Release\delwaq1.exe                     !dest_bin!
+    call :copyFile engines_gpl\waq\bin\Release\delwaq1_lib.dll         	       !dest_bin!
+    call :copyFile engines_gpl\waq\bin\Release\delwaq2.exe               	   !dest_bin!
+    call :copyFile engines_gpl\waq\bin\Release\delwaq2_lib.dll                 !dest_bin!
+    call :copyFile engines_gpl\waq\bin\Release\waq_plugin_wasteload.dll        !dest_bin!
+	
+    call :copyFile third_party_open\openda\core\native\lib\win32\libcta.dll	   !dest_bin!
+    call :copyFile third_party_open\openda\core\native\lib\win32\libxml2.dll   !dest_bin!
+    call :copyFile third_party_open\netcdf\lib\win32\Release\netcdf.dll	       !dest_bin!
+    call :copyFile third_party_open\openmp\lib\win32\libiomp5md.dll            !dest_bin!
+    call :copyFile third_party_open\intel_fortran\lib\win32\libifportmd.dll    !dest_bin!
+    call :copyFile third_party_open\intel_fortran\lib\win32\libmmd.dll         !dest_bin!
+    call :copyFile third_party_open\mpich2\lib\mpich2mpi.dll                   !dest_bin!
+    call :copyFile third_party_open\pthreads\bin\win32\pthreadVCE2.dll         !dest_bin!
+
+    call :copyFile engines_gpl\waq\default\bloom.spe                           !dest_default!
+    call :copyFile engines_gpl\waq\default\bloominp.d09                        !dest_default!
+    call :copyFile engines_gpl\waq\default\proc_def.dat                        !dest_default!
+    call :copyFile engines_gpl\waq\default\proc_def.def                        !dest_default!
+
+	
+    rem Michel Jeuken: don't know if I need this too?!
+    rem
+    rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
+    rem Some (older) libraries will be overwritten.
+    rem
+    if !compiler_dir!=="" (
+        rem Compiler_dir not set
+    ) else (
+        rem "Compiler_dir:!compiler_dir!"
+        set localstring="!compiler_dir!*.dll"
+        rem Note the awkward usage of !-characters
+        call :copyFile !!localstring! !dest_lib!!
+    )
+goto :endproc
+
+
+
 rem ================
 rem === INSTALL_WAVE
 rem ================

@@ -7,7 +7,7 @@
 
 include $(top_srcdir)/common.am
 bin_PROGRAMS = delwaq2
-
+ 
 #-------------------------------------------------------------------------------
 #Includes
 FMODULES += \
@@ -17,6 +17,8 @@ FMODULES += \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils \
         -I$(top_builddir)/engines_gpl/waq/packages/delwaq2_lib/src
+
+MPILIBS += $(MPILIBS_ADDITIONAL)
 
 #-------------------------------------------------------------------------------
 #Sources
@@ -55,7 +57,7 @@ delwaq2_LDADD = \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/interact/libinteract.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_c/src/libwaq_utils_c.la \
     $(top_builddir)/engines_gpl/waq/packages/delwaq2_version_number/src/libdelwaq2_version_number.la \
-    $(top_builddir)/third_party_open/mpich2/lib/linux/libmpich.a \
+    $(MPILIBS) \
     -lpthread
 
 

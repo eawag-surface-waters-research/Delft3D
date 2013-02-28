@@ -2571,7 +2571,6 @@ src/third_party_open/mpich2/lib/fmpich2g.dll -text
 src/third_party_open/mpich2/lib/fmpich2g.lib -text
 src/third_party_open/mpich2/lib/fmpich2s.dll -text
 src/third_party_open/mpich2/lib/fmpich2s.lib -text
-src/third_party_open/mpich2/lib/linux/libmpich.a -text
 src/third_party_open/mpich2/lib/mpe.dll -text
 src/third_party_open/mpich2/lib/mpe.lib -text
 src/third_party_open/mpich2/lib/mpi.lib -text
