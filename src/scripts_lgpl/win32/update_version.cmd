@@ -25,9 +25,13 @@ rem string has been generated, but this cannot be used within *.rc files
 rem Replace it using 000000 (only necessary on Windows systems)
 rem ==========================================================================
 
+IF "%version:~0,8%" == "exported" (
+   set version=000000
+)
 IF "%version:~0,11%" == "Unversioned" (
    set version=000000
 )
+echo %0: %version%
 
 IF "%4" == "--onlyifmissing" (
    IF EXIST "%1" (
