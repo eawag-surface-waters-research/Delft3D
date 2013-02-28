@@ -253,12 +253,21 @@
          if ( ifrom .gt. 0 ) then
             if ( .not. btest(iknmrk(ifrom),0) ) cycle       ! identified dry at start and end of timestep
          endif                                              ! aggregated time step can be wet in between
-         if ( ito   .gt. 0 ) then                           ! start and end, that is why a check on 1 cm3/s
-            if ( .not. btest(iknmrk(ito  ),0) ) cycle       ! life is not easy
+         if ( ito   .gt. 0 ) then                           ! start and end. Life is not easy
+            if ( .not. btest(iknmrk(ito  ),0) ) cycle
          endif
          if ( ifrom .gt. 0 .and.  ito .gt. 0 ) then
-            conc(isys,ifrom)=conc(isys,ifrom) - lim(iq)*real(idt)*flux(iq)/volnew(ifrom)
-            conc(isys, ito )=conc(isys, ito ) + lim(iq)*real(idt)*flux(iq)/volnew( ito )
+            if ( volnew(ifrom) .gt. 1.0e-25 .and. volnew(ito) .gt. 1.0e-25 ) then
+               conc(isys,ifrom)=conc(isys,ifrom) - lim(iq)*real(idt)*flux(iq)/volnew(ifrom)
+               conc(isys, ito )=conc(isys, ito ) + lim(iq)*real(idt)*flux(iq)/volnew( ito )
+               if ( iqdmp(iq) .gt. 0 ) then
+                  if ( flux(iq) .gt. 0 ) then
+                     dmpq(isys,iqdmp(iq),1) = dmpq(isys,iqdmp(iq),1) + real(idt)*lim(iq)*flux(iq)
+                  else
+                     dmpq(isys,iqdmp(iq),2) = dmpq(isys,iqdmp(iq),2) - real(idt)*lim(iq)*flux(iq)
+                  endif
+               endif
+            endif
          endif
 !         if ( ifrom .gt. 0 .and. ito .lt. 0 .and. .not. btest(iopt,2) ) then ! ito   is a boundary volume
 !            conc(isys,ifrom) = conc(isys,ifrom) - lim(iq)*real(idt)*flux(iq)/volnew(ifrom)
@@ -276,13 +285,6 @@
 !               amass2(isys,5) = amass2(isys,5) - real(idt)*lim(iq)*flux(iq)
 !            endif
 !         endif
-         if ( iqdmp(iq) .gt. 0 ) then
-            if ( flux(iq) .gt. 0 ) then
-               dmpq(isys,iqdmp(iq),1) = dmpq(isys,iqdmp(iq),1) + real(idt)*lim(iq)*flux(iq)
-            else
-               dmpq(isys,iqdmp(iq),2) = dmpq(isys,iqdmp(iq),2) - real(idt)*lim(iq)*flux(iq)
-            endif
-         endif
       enddo
 
       if ( timon ) call timstop ( ithandl )

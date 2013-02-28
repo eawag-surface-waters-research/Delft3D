@@ -102,6 +102,8 @@
          threshold = 0.001                                        ! default value of 1 mm
          if ( idryfld .gt. 0 ) threshold = cons(idryfld)          ! or the given value
          do iseg = 1, nosegl
+            call dhkmrk( 1, iknmrk(iseg), ikm )
+            if ( ikm .eq. 0 ) cycle                               ! whole collumn is inactive
             sum = 0.0
             do ilay = 1, nolay
                ivol = iseg + (ilay-1)*nosegl
@@ -119,6 +121,7 @@
                do ilay = 1, nolay                                ! this copies the constant
                   ivol = iseg + (ilay-1)*nosegl                  ! property in case cell had
                   iknmkv(ivol) = iknmrk(ivol)                    ! become wet again
+                  if ( volume(ivol) .lt. 1.0e-25 ) volume(ivol) = 1.0
                enddo
             endif
          enddo
@@ -148,6 +151,7 @@
                   do ilay = 1, nolay
                      ivol = iseg + (ilay-1)*nosegl
                      iknmkv(ivol) = iknmrk(ivol)
+                     if ( volume(ivol) .lt. 1.0e-25 ) volume(ivol) = 1.0
                   enddo
                endif
             enddo
@@ -175,6 +179,7 @@
                   do ilay = 1, nolay
                      ivol = iseg + (ilay-1)*nosegl
                      iknmkv(ivol) = iknmrk(ivol)
+                     if ( volume(ivol) .lt. 1.0e-25 ) volume(ivol) = 1.0
                   enddo
                endif
             enddo
@@ -217,7 +222,7 @@
 
       integer  ( 4), intent(in   ) :: nosegw               !< number of computational volumes water
       integer  ( 4), intent(in   ) :: noseg                !< number of computational volumes
-      real     ( 4), intent(in   ) :: volume(noseg )       !< volumes at start of time step
+      real     ( 4), intent(inout) :: volume(noseg )       !< volumes at end of time step
       integer  ( 4), intent(in   ) :: nolay                !< number of layers
       integer  ( 4), intent(in   ) :: nocons               !< number of constants
       character(20), intent(in   ) :: coname(nocons)       !< names of the constants
@@ -238,6 +243,7 @@
       integer  ( 4)    iseg            ! loop variable
       integer  ( 4)    ivol            ! this computational volume
       integer  ( 4)    ilay            ! loop variable layers
+      integer  ( 4)    ikm             ! feature
       real     ( 4)    sum             ! help variable
 
       integer(4) ithandl /0/
@@ -251,6 +257,8 @@
          threshold = 0.001                                  ! default value of 1 mm
          if ( idryfld .gt. 0 ) threshold = cons(idryfld)    ! or the given value
          do iseg = 1, nosegl
+            call dhkmrk( 1, iknmrk(iseg), ikm )
+            if ( ikm .eq. 0 ) cycle                               ! whole collumn is inactive
             sum = 0.0
             do ilay = 1, nolay
                ivol = iseg + (ilay-1)*nosegl
@@ -269,6 +277,8 @@
             threshold = 0.001
             if ( idryfld .gt. 0 ) threshold = cons(idryfld)
             do iseg = 1, nosegl
+               call dhkmrk( 1, iknmrk(iseg), ikm )
+               if ( ikm .eq. 0 ) cycle                               ! whole collumn is inactive
                sum = 0.0
                do ilay = 1, nolay
                   ivol = iseg + (ilay-1)*nosegl
@@ -285,6 +295,8 @@
             threshold = 1.0                                 ! no surf found 1 m3 default
             if ( idryfld .gt. 0 ) threshold = cons(idryfld)
             do iseg = 1, nosegl
+               call dhkmrk( 1, iknmrk(iseg), ikm )
+               if ( ikm .eq. 0 ) cycle                               ! whole collumn is inactive
                sum = 0.0
                do ilay = 1, nolay
                   ivol = iseg + (ilay-1)*nosegl
@@ -294,6 +306,7 @@
                   do ilay = 1, nolay
                      ivol = iseg + (ilay-1)*nosegl
                      iknmkv(ivol) = iknmrk(ivol)
+                     if ( volume(ivol) .lt. 1.0e-25 ) volume(ivol) = 1.0
                   enddo
                endif
             enddo

@@ -213,49 +213,51 @@
 
          vfrom  = volnew(ifrom)
          vto    = volnew(ito  )
-         s  = sign ( 1.0 , dq )
-         if      ( ifrom1 .gt. 0 ) then
-            cfrm1 = concvt( ifrom1 )
-         else if ( ifrom1 .eq. 0 ) then
-            if ( s .gt. 0 ) then
-               cfrm1 = 0.0
-            else
-               cfrm1 = 2.0*concvt(ifrom)
-            endif
-         else if ( ifrom1 .lt. 0 ) then
-            cfrm1 = bound(isys,-ifrom1)
-         endif
-         if      ( itopl1 .gt. 0 ) then
-            ctop1 = concvt( itopl1 )
-         else if ( itopl1 .eq. 0 ) then
-            if ( s .gt. 0 ) then
-               ctop1 = 2.0*concvt(ito  )
-            else
-               ctop1 = 0.0
-            endif
-         else if ( itopl1 .lt. 0 ) then
-            ctop1 = bound(isys,-itopl1)
-         endif
-
-         e1 = (concvt(ifrom) - cfrm1       )*vfrom
-         e3 = (ctop1         - concvt(ito ))*vto
-         dq = s * max( 0.0 , min( s*e1 , s*dq , s*e3 ) )
-
-         concvt(ifrom) = concvt(ifrom) - dq/vfrom
-         concvt(ito  ) = concvt(ito  ) + dq/vto
-
-         if ( btest(iopt,3) ) then             ! balances active
-            if ( iqdmp(iq) .gt. 0 ) then       ! balances to be updated
-               if ( flowtot(iq) .gt. 0.0 ) then
-                  dqtr = flowtot(iq)*conc (isys, ifrom)*idt
+         if ( vfrom .gt. 1.0e-25 .and. vto .gt. 1.0e-25 ) then
+            s  = sign ( 1.0 , dq )
+            if      ( ifrom1 .gt. 0 ) then
+               cfrm1 = concvt( ifrom1 )
+            else if ( ifrom1 .eq. 0 ) then
+               if ( s .gt. 0 ) then
+                  cfrm1 = 0.0
                else
-                  dqtr = flowtot(iq)*conc (isys, ito  )*idt
+                  cfrm1 = 2.0*concvt(ifrom)
                endif
-               dqtot = dq + dqtr
-               if ( dqtot .gt. 0.0 ) then
-                  dmpq(isys,iqdmp(iq),1)=dmpq(isys,iqdmp(iq),1) + dqtot
+            else if ( ifrom1 .lt. 0 ) then
+               cfrm1 = bound(isys,-ifrom1)
+            endif
+            if      ( itopl1 .gt. 0 ) then
+               ctop1 = concvt( itopl1 )
+            else if ( itopl1 .eq. 0 ) then
+               if ( s .gt. 0 ) then
+                  ctop1 = 2.0*concvt(ito  )
                else
-                  dmpq(isys,iqdmp(iq),2)=dmpq(isys,iqdmp(iq),2) - dqtot
+                  ctop1 = 0.0
+               endif
+            else if ( itopl1 .lt. 0 ) then
+               ctop1 = bound(isys,-itopl1)
+            endif
+
+            e1 = (concvt(ifrom) - cfrm1       )*vfrom
+            e3 = (ctop1         - concvt(ito ))*vto
+            dq = s * max( 0.0 , min( s*e1 , s*dq , s*e3 ) )
+
+            concvt(ifrom) = concvt(ifrom) - dq/vfrom
+            concvt(ito  ) = concvt(ito  ) + dq/vto
+
+            if ( btest(iopt,3) ) then             ! balances active
+               if ( iqdmp(iq) .gt. 0 ) then       ! balances to be updated
+                  if ( flowtot(iq) .gt. 0.0 ) then
+                     dqtr = flowtot(iq)*conc (isys, ifrom)*idt
+                  else
+                     dqtr = flowtot(iq)*conc (isys, ito  )*idt
+                  endif
+                  dqtot = dq + dqtr
+                  if ( dqtot .gt. 0.0 ) then
+                     dmpq(isys,iqdmp(iq),1)=dmpq(isys,iqdmp(iq),1) + dqtot
+                  else
+                     dmpq(isys,iqdmp(iq),2)=dmpq(isys,iqdmp(iq),2) - dqtot
+                  endif
                endif
             endif
          endif
