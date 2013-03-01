@@ -114,21 +114,31 @@
       logical                             :: timon          ! is the timer switched on or off
       integer  ( 4), private              :: nohmax         ! current maximum size of the timer arrays
       integer  ( 4), private              :: nohandl        ! current highest timer handle
+      integer  ( 4), private              :: handinc        ! increment of # of timer handles
       integer  ( 4), private              :: noshndl        ! current highest subroutine handle
       integer  ( 4), private              :: prevhnd        ! previous timer handle
       integer  ( 4), private              :: dlevel         ! current level in the call tree
       integer  ( 4), private              :: maxlvl         ! maximum level of call trees
-      integer  ( 4), private, allocatable :: ntimcal(:)     ! call frequency
-      integer  ( 4), private, allocatable :: level  (:)     ! call level
-      integer  ( 4), private, allocatable :: context(:,:,:) ! call context
-      integer  ( 4), private, allocatable :: ncontxt(:)     ! number of contexts per subroutine
+      integer  ( 4), private, pointer     :: ntimcal(:)     ! call frequency
+      integer  ( 4), private, pointer     :: level  (:)     ! call level
+      real     ( 8), private, pointer     :: cpstart(:)     ! to save cpu startimes
+      real     ( 8), private, pointer     :: cptime (:)     ! to accumulate cpu times
+      real     ( 8), private, pointer     :: wcstart(:)     ! to save wall clock startimes
+      real     ( 8), private, pointer     :: wctime (:)     ! to accumulate wall clock times
+      character(40), private, pointer     :: tmsubnm(:)     ! name of the subroutine
+      integer  ( 4), private, pointer     :: ncontxt(:)     ! number of contexts per subroutine
+      integer  ( 4), private, pointer     :: context(:,:,:) ! call context
+      integer  ( 4), private, pointer     :: ntim1(:)       ! call frequency
+      integer  ( 4), private, pointer     :: levl1(:)       ! call level
+      real     ( 8), private, pointer     :: cpst1(:)       ! to save cp startimes
+      real     ( 8), private, pointer     :: cptt1(:)       ! to save cp times
+      real     ( 8), private, pointer     :: wcst1(:)       ! to save wc startimes
+      real     ( 8), private, pointer     :: wctt1(:)       ! to save wc times
+      character(40), private, pointer     :: tmsu1(:)       ! name of the subroutine
+      integer  ( 4), private, pointer     :: ncon1(:)       ! nr of contexts per subroutine
+      integer  ( 4), private, pointer     :: cont1(:,:,:)   ! context
       integer  ( 8), private              :: count          ! system clock count
       integer  ( 8), private              :: rate           ! ticks per second
-      real     ( 8), private, allocatable :: cpstart(:)     ! to save cpu startimes
-      real     ( 8), private, allocatable :: cptime (:)     ! to accumulate cpu times
-      real     ( 8), private, allocatable :: wcstart(:)     ! to save wall clock startimes
-      real     ( 8), private, allocatable :: wctime (:)     ! to accumulate wall clock times
-      character(40), private, allocatable :: tmsubnm(:)     ! name of the subroutine
 
       contains
 
@@ -136,22 +146,23 @@
 
       subroutine timini  ( )
 
-      nohmax  = 500
+      nohmax  =  10
+      handinc =  10
       nohandl =   0
       noshndl =   0
       prevhnd =   0
       timon   = .false.
       dlevel  =   0
       maxlvl  =   0
-      if ( .not. allocated ( ntimcal ) ) allocate ( ntimcal(     nohmax) )
-      if ( .not. allocated ( level   ) ) allocate ( level  (     nohmax) )
-      if ( .not. allocated ( cpstart ) ) allocate ( cpstart(     nohmax) )
-      if ( .not. allocated ( cptime  ) ) allocate ( cptime (     nohmax) )
-      if ( .not. allocated ( wcstart ) ) allocate ( wcstart(     nohmax) )
-      if ( .not. allocated ( wctime  ) ) allocate ( wctime (     nohmax) )
-      if ( .not. allocated ( tmsubnm ) ) allocate ( tmsubnm(     nohmax) )
-      if ( .not. allocated ( ncontxt ) ) allocate ( ncontxt(     nohmax) )
-      if ( .not. allocated ( context ) ) allocate ( context(99,2,nohmax) )
+      allocate ( ntimcal(     nohmax) )
+      allocate ( level  (     nohmax) )
+      allocate ( cpstart(     nohmax) )
+      allocate ( cptime (     nohmax) )
+      allocate ( wcstart(     nohmax) )
+      allocate ( wctime (     nohmax) )
+      allocate ( tmsubnm(     nohmax) )
+      allocate ( ncontxt(     nohmax) )
+      allocate ( context(99,2,nohmax) )
       ncontxt =   0
 
       return
@@ -161,85 +172,48 @@
 
       subroutine timinc  ( )
 
-      integer  ( 4), allocatable :: ntimtmp(:)     !  call frequency
-      integer  ( 4), allocatable :: levltmp(:)     !  call level
-      integer  ( 4), allocatable :: contemp(:,:,:) !  context
-      integer  ( 4), allocatable :: ncontmp(:)     !  nr of contexts per subroutine
-      real     ( 8), allocatable :: cpstemp(:)     !  to save cp startimes
-      real     ( 8), allocatable :: cpttemp(:)     !  to save cp times
-      real     ( 8), allocatable :: wcstemp(:)     !  to save wc startimes
-      real     ( 8), allocatable :: wcttemp(:)     !  to save wc times
-      character(20), allocatable :: tmsutmp(:)     !  name of the subroutine
+      allocate ( ntim1(     nohmax+handinc) )
+      allocate ( levl1(     nohmax+handinc) )
+      allocate ( cpst1(     nohmax+handinc) )
+      allocate ( cptt1(     nohmax+handinc) )
+      allocate ( wcst1(     nohmax+handinc) )
+      allocate ( wctt1(     nohmax+handinc) )
+      allocate ( tmsu1(     nohmax+handinc) )
+      allocate ( ncon1(     nohmax+handinc) )
+      allocate ( cont1(99,2,nohmax+handinc) )
+      ncon1 = 0
 
-      if ( allocated(ntimtmp) ) deallocate( ntimtmp )
-      if ( allocated(levltmp) ) deallocate( levltmp )
-      if ( allocated(contemp) ) deallocate( contemp )
-      if ( allocated(cpstemp) ) deallocate( cpstemp )
-      if ( allocated(cpttemp) ) deallocate( cpttemp )
-      if ( allocated(wcstemp) ) deallocate( wcstemp )
-      if ( allocated(wcttemp) ) deallocate( wcttemp )
-      if ( allocated(tmsutmp) ) deallocate( tmsutmp )
-
-      allocate ( ntimtmp(     nohmax) )
-      allocate ( levltmp(     nohmax) )
-      allocate ( contemp(99,2,nohmax) )
-      allocate ( ncontmp(     nohmax) )
-      allocate ( cpstemp(     nohmax) )
-      allocate ( cpttemp(     nohmax) )
-      allocate ( wcstemp(     nohmax) )
-      allocate ( wcttemp(     nohmax) )
-      allocate ( tmsutmp(     nohmax) )
-
-      ntimtmp = ntimcal
-      levltmp = level
-      contemp = context
-      ncontmp = ncontxt
-      cpstemp = cpstart
-      cpttemp = cptime
-      wcstemp = wcstart
-      wcttemp = wctime
-      tmsutmp = tmsubnm
+      ntim1(    1:nohmax) = ntimcal
+      levl1(    1:nohmax) = level
+      cpst1(    1:nohmax) = cpstart
+      cptt1(    1:nohmax) = cptime
+      wcst1(    1:nohmax) = wcstart
+      wctt1(    1:nohmax) = wctime
+      tmsu1(    1:nohmax) = tmsubnm
+      ncon1(    1:nohmax) = ncontxt
+      cont1(:,:,1:nohmax) = context
 
       deallocate ( ntimcal )
       deallocate ( level   )
-      deallocate ( context )
-      deallocate ( ncontxt )
       deallocate ( cpstart )
       deallocate ( cptime  )
       deallocate ( wcstart )
       deallocate ( wctime  )
       deallocate ( tmsubnm )
+      deallocate ( ncontxt )
+      deallocate ( context )
 
-      nohmax  = nohmax + 100
-      allocate ( ntimcal(     nohmax) )
-      allocate ( level  (     nohmax) )
-      allocate ( context(99,2,nohmax) )
-      allocate ( ncontxt(     nohmax) )
-      allocate ( cpstart(     nohmax) )
-      allocate ( cptime (     nohmax) )
-      allocate ( wcstart(     nohmax) )
-      allocate ( wctime (     nohmax) )
-      allocate ( tmsubnm(     nohmax) )
+      ntimcal => ntim1
+      level   => levl1
+      cpstart => cpst1
+      cptime  => cptt1
+      wcstart => wcst1
+      wctime  => wctt1
+      tmsubnm => tmsu1
+      ncontxt => ncon1
+      context => cont1
 
-      ntimcal(    1:nohandl) = ntimtmp
-      level  (    1:nohandl) = levltmp
-      context(:,:,1:nohandl) = contemp
-      ncontxt(    1:nohandl) = ncontmp
-      cpstart(    1:nohandl) = cpstemp
-      cptime (    1:nohandl) = cpttemp
-      wcstart(    1:nohandl) = wcstemp
-      wctime (    1:nohandl) = wcttemp
-      tmsubnm(    1:nohandl) = tmsutmp
-
-      deallocate ( ntimtmp )
-      deallocate ( levltmp )
-      deallocate ( contemp )
-      deallocate ( ncontmp )
-      deallocate ( cpstemp )
-      deallocate ( cpttemp )
-      deallocate ( wcstemp )
-      deallocate ( wcttemp )
-      deallocate ( tmsutmp )
+      nohmax  = nohmax + handinc
 
       return
       end subroutine timinc
@@ -258,6 +232,7 @@
       handle = 0
       if ( ihandl .eq. 0 ) then                              !  first time that the timer is called for
          noshndl = noshndl + 1                               !  this handle
+         if ( noshndl .eq. nohmax ) call timinc ( )          !  allocate new batch of memory
          ihandl  = noshndl
       else                                                   !  find its occurence in the call trees
          do i = 1, ncontxt(ihandl)
@@ -271,8 +246,8 @@
          i               = ncontxt(ihandl) + 1               !  increase context counter for this ihandl
          ncontxt(ihandl) = i
          context(i,1,ihandl) = prevhnd                       !  save unique timer handle of the caller,
-         if ( nohandl .eq. nohmax ) call timinc ( )          !  to allow to find the calling context
-         nohandl = nohandl + 1
+         nohandl = nohandl + 1                               !  to allow to find the calling context
+         if ( nohandl .eq. nohmax ) call timinc ( )
          handle  = nohandl                                   !  make a new timer handle
          context(i,2,ihandl) = handle                        !  save this handle for this context
          tmsubnm(handle) = subrou                            !  save the ID of this timer
@@ -317,7 +292,7 @@
 
       if ( handle == -1 ) then
          write( *, * ) 'Programming error: unbalanced calls to timstart/timstop'
-         write( *, * ) 'Found in the context of handle ', ihandl, ' - no reliable routine name avaiable'
+         write( *, * ) 'Found in the context of handle ', ihandl, ncontxt(ihandl)
          return
       endif
 
@@ -398,15 +373,15 @@
       implicit none
       integer :: ierr
 
-      if ( allocated ( ntimcal ) ) deallocate ( ntimcal )
-      if ( allocated ( level   ) ) deallocate ( level   )
-      if ( allocated ( cpstart ) ) deallocate ( cpstart )
-      if ( allocated ( cptime  ) ) deallocate ( cptime  )
-      if ( allocated ( wcstart ) ) deallocate ( wcstart )
-      if ( allocated ( wctime  ) ) deallocate ( wctime  )
-      if ( allocated ( tmsubnm ) ) deallocate ( tmsubnm )
-      if ( allocated ( ncontxt ) ) deallocate ( ncontxt )
-      if ( allocated ( context ) ) deallocate ( context )
+      if ( associated ( ntimcal ) ) deallocate ( ntimcal )
+      if ( associated ( level   ) ) deallocate ( level   )
+      if ( associated ( cpstart ) ) deallocate ( cpstart )
+      if ( associated ( cptime  ) ) deallocate ( cptime  )
+      if ( associated ( wcstart ) ) deallocate ( wcstart )
+      if ( associated ( wctime  ) ) deallocate ( wctime  )
+      if ( associated ( tmsubnm ) ) deallocate ( tmsubnm )
+      if ( associated ( ncontxt ) ) deallocate ( ncontxt )
+      if ( associated ( context ) ) deallocate ( context )
 
       timon = .false.
 

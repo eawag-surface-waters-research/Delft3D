@@ -2233,7 +2233,6 @@ src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/reptim.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/space.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/stasub.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/strip.f -text
-src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/timers.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/usedcp.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/wapdef.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/waqmem.f90 -text

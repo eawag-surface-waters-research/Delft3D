@@ -289,14 +289,11 @@ C          LREWIN         O    ! file has been rewound
 C          found          R    ! return value ** if -aUseDef%istart then itime is befor start of this definition
 C                                                not clear what happens if aUseDef%istart itself is negative
 C
-      use timers
          type(FileUseDefColl)             :: aUseDefColl
          type(FileUseDef),pointer         :: aUseDef
          type(FileProp),pointer           :: aProp
          integer                             i, i2, itime, found, nrftot
          logical                             UPDATE, LREWIN, LrLocal
-      integer(4) ithandl /0/
-      if ( timon ) call timstrt ( "filefind", ithandl )
 
 
 C
@@ -316,7 +313,6 @@ C
          if ( itLocal .lt. aUseDef%istart ) then              ! if earlier than start of this definition
             found = -aUseDef%istart                           !      return minus start of this definition
             aUseDef%active = .false.
-            if ( timon ) call timstop ( ithandl )
             call unlock_this_file( aProp%ilun )
             return
          endif
@@ -332,7 +328,6 @@ C
             if ( itFile .lt. aProp%istart ) then              ! before physical start of file (strange)
                found = -aProp%istart                          !      probably an uncaught error in the input
                aUseDef%active = .false.                       !      it implies that aProp%istart > aProp%istop
-               if ( timon ) call timstop ( ithandl )
                call unlock_this_file( aProp%ilun )
                return
             endif
@@ -430,7 +425,6 @@ C
             endif
 C
          endif
-      if ( timon ) call timstop ( ithandl )
       call unlock_this_file( aProp%ilun )
 C
       end function FileUseDefCollFind
@@ -479,13 +473,10 @@ C
 C
       subroutine Flinterpol ( aProp, array3, nrftot, intopt, aDef, itLocal, itFile, UPDATE )
 C
-      use timers
          type(FileProp)   aProp
          type(FileUseDef) aDef
          real             array3(nrftot), weight
          logical          UPDATE
-      integer(4) ithandl /0/
-      if ( timon ) call timstrt ( "flinterpol", ithandl )
 C
       weight = aDef%weight
       if ( abs(aDef%weight    ) .lt. 1.0E-30 ) weight = float(( itLocal - aDef%istart )) / ( aDef%istop - aDef%istart )
@@ -532,8 +523,6 @@ C
 !     write(88,'(3(a,e15.6))') 'Flinterpol: array1(56) =',aProp%array1(56), ' array2(56) =',aProp%array2(56),
 !    &     ' array3(56) =',array3(56)
 
-      if ( timon ) call timstop ( ithandl )
-C
       end subroutine Flinterpol
 
 C
