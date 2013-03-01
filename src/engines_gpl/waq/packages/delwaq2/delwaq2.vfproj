@@ -16,7 +16,7 @@
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" OutputDirectory="..\..\bin\$(ConfigurationName)">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="..\..\include" FixedFormLineLength="fixedLength132" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)\" Traceback="true"/>
-				<Tool Name="VFLinkerTool" AdditionalOptions="/LTCG" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\third_party\wlauth\bin\win32\static;..\..\..\..\third_party_open\pthreads\bin\win32;..\..\bin\$(ConfigurationName)" IgnoreDefaultLibraryNames="libc.lib;libcmtd.lib;msvcrtd.lib;libcmt.lib" GenerateMapFile="true" SubSystem="subSystemConsole" StackReserveSize="67108864"/>
+				<Tool Name="VFLinkerTool" AdditionalOptions="/LTCG" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\third_party\wlauth\bin\win32\static;..\..\..\..\third_party_open\pthreads\bin\win32;..\..\bin\$(ConfigurationName)" IgnoreDefaultLibraryNames="libc.lib;libcmtd.lib;msvcrtd.lib;libcmt.lib" GenerateMapFile="true" SubSystem="subSystemConsole" StackReserveSize="67108864" LargeAddressAware="addrAwareLarge"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFCustomBuildTool"/>
