@@ -53,8 +53,3 @@ BUILT_SOURCES = ./always \
 
 #-------------------------------------------------------------------------------
 #Libraries
-libDelftIO_la_LIBADD=\
-	$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/delftio_sync/libDelftIOSync.la \
-	$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90Nefis/libDIOF90Nefis.la \
-	$(top_builddir)/utils_lgpl/delftio/packages/delftio_shm/src/diof90/libDelftIOSHM.la
-

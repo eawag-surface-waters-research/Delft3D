@@ -3,6 +3,7 @@ include $(top_srcdir)/common.am
 SUBDIRS = \
     third_party_open \
     utils_lgpl \
+    engines \
     engines_gpl \
     tools_gpl \
     plugins_lgpl \

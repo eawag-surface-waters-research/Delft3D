@@ -13,10 +13,10 @@ noinst_LTLIBRARIES = libwaq_io.la
 FMODULES += \
         -I$(top_builddir)/engines_gpl/waq/include \
         -I$(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils \
-        -I$(top_builddir)/engines_gpl/part/packages/utils_f/src \
-        -I$(top_builddir)/engines_gpl/part/packages/data_f/src \
-	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token \
-	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
+        -I$(top_builddir)/engines/part/packages/utils_f/src \
+        -I$(top_builddir)/engines/part/packages/data_f/src \
+	    -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/rd_token \
+	    -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
 
 #-------------------------------------------------------------------------------
 #Sources

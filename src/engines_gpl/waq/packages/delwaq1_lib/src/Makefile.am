@@ -40,10 +40,12 @@ libDelwaq1_la_LIBADD = \
     $(top_builddir)/engines_gpl/waq/packages/waq_io/src/ods/libods.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/interact/libinteract.la \
     $(top_builddir)/engines_gpl/waq/packages/delwaq1_version_number/src/libdelwaq1_version_number.la \
-    $(top_builddir)/engines_gpl/part/packages/kernel_f/src/libkernel_f.la \
-    $(top_builddir)/engines_gpl/part/packages/io_f/src/libio_f.la \
-    $(top_builddir)/engines_gpl/part/packages/utils_f/src/libutils_f.la \
-    $(top_builddir)/engines_gpl/part/packages/data_f/src/libdata_f.la \
+    $(top_builddir)/engines/part/packages/kernel_f/src/libkernel_f.la \
+    $(top_builddir)/engines/part/packages/kernel_c/src/libkernel_c.a \
+    $(top_builddir)/engines/part/packages/io_f/src/libio_f.la \
+    $(top_builddir)/engines/part/packages/utils_f/src/libutils_f.la \
+    $(top_builddir)/engines/part/packages/data_f/src/libdata_f.la \
+    $(top_builddir)/engines/part/packages/version_number/src/libpart_version_number.a \
     $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libESMFSM.la \
     $(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libNefis.la \
     $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la 
