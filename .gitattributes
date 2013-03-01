@@ -1385,6 +1385,7 @@ src/engines_gpl/waq/packages/delwaq2/src/dlwq2.f -text
 src/engines_gpl/waq/packages/delwaq2/src/getidentification.f -text
 src/engines_gpl/waq/packages/delwaq2_lib/Makefile.am -text
 src/engines_gpl/waq/packages/delwaq2_lib/delwaq2_lib.vfproj -text
+src/engines_gpl/waq/packages/delwaq2_lib/delwaq2_lib_intel13.vfproj -text
 src/engines_gpl/waq/packages/delwaq2_lib/src/Makefile.am -text
 src/engines_gpl/waq/packages/delwaq2_lib/src/block.f -text
 src/engines_gpl/waq/packages/delwaq2_lib/src/d_tr_d3d.f -text

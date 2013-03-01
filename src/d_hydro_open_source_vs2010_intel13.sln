@@ -412,7 +412,7 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "delwaq1_lib", "engines_gpl\
 		{2587ADEA-13B7-4BE1-BFB4-588FF22027DF} = {2587ADEA-13B7-4BE1-BFB4-588FF22027DF}
 	EndProjectSection
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "delwaq2_lib", "engines_gpl\waq\packages\delwaq2_lib\delwaq2_lib.vfproj", "{93FF120B-FF39-4365-860B-2ADF26E746AC}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "delwaq2_lib_intel13", "engines_gpl\waq\packages\delwaq2_lib\delwaq2_lib_intel13.vfproj", "{93FF120B-FF39-4365-860B-2ADF26E746AC}"
 	ProjectSection(ProjectDependencies) = postProject
 		{30957B02-DE35-4C44-B4D5-0F0006645F1E} = {30957B02-DE35-4C44-B4D5-0F0006645F1E}
 		{ECDDEA09-CCCF-404A-B9A4-7947D5EEE2B9} = {ECDDEA09-CCCF-404A-B9A4-7947D5EEE2B9}

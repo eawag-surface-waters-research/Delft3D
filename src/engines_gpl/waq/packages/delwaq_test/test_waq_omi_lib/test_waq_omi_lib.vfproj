@@ -24,7 +24,7 @@
 				<Tool Name="VFPreBuildEventTool"/>
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
-		<Configuration Name="Debug|x64">
+		<Configuration Name="Debug|x64" OutputDirectory="..\..\..\bin\$(PlatformName)\$(ConfigurationName)">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" WarnInterfaces="true" LocalVariableStorage="localStorageAutomatic" Traceback="true" NullPointerCheck="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug" Interfaces="true"/>
 				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\..\third_party\wlauth\bin\win32\static;..\..\..\..\..\third_party_open\pthreads\bin\win32;..\..\..\..\..\third_party_open\openda\core\native\lib\win32;..\..\..\bin\$(ConfigurationName)" GenerateDebugInformation="true" SubSystem="subSystemConsole" AdditionalDependencies="libcta.lib pthreadVCE2.lib wsock32.lib netapi32.lib comctl32.lib user32.lib advapi32.lib comdlg32.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
@@ -34,7 +34,7 @@
 				<Tool Name="VFPreBuildEventTool"/>
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
-		<Configuration Name="Release|x64">
+		<Configuration Name="Release|x64" OutputDirectory="..\..\..\bin\$(PlatformName)\$(ConfigurationName)">
 				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true"/>
 				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\..\third_party\wlauth\bin\win32\static;..\..\..\..\..\third_party_open\pthreads\bin\win32;..\..\..\..\..\third_party_open\openda\core\native\lib\win32;..\..\..\bin\$(ConfigurationName)" SubSystem="subSystemConsole" AdditionalDependencies="libcta.lib pthreadVCE2.lib wsock32.lib netapi32.lib comctl32.lib user32.lib advapi32.lib comdlg32.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>

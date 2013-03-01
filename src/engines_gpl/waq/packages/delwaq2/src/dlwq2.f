@@ -41,8 +41,6 @@
           call getarg(i - 1, argv(i))
       end do
 
-!!      call delwaq1(argc, argv)
-
       action = ACTION_FULLCOMPUTATION
       dlwqd%set_timer = .true.
 
