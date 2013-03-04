@@ -143,6 +143,13 @@ Receive (
     if (received == 0)
         throw (char *) "Zero bytes read (peer dead?)";
 
+//    FILE * logfile = fopen ("DOL.log", "a");
+//    if (logfile == NULL)
+//        throw (char *) "Cannot open DOL.log";
+    
+//    fprintf (logfile, "Received message %5d  %7d bytes (mesg->size = %d)\n", mesg->seqn, received, mesg->size);
+//    fclose (logfile);
+
     return received;
     }
 
@@ -152,6 +159,15 @@ Send (
     int     sock,
     Message::Header * mesg
     ) {
+
+//    FILE * logfile = fopen ("DOL.log", "a");
+//    if (logfile == NULL)
+//        throw (char *) "Cannot open DOL.log";
+    
+//    fprintf (logfile, "Sending  message %5d  %7d bytes\n", mesg->seqn, mesg->size);
+//    fclose (logfile);
+
+    Sleep(2);
 
     int size = sizeof (Message::Header) + mesg->size;
     ssize_t sent = send (sock, (char *) mesg, (ssize_t) size, 0);

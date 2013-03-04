@@ -70,6 +70,7 @@ Server::ClientConnection::ClientConnection (
     this->log       = server->log;
     this->sock      = sock;
     this->port      = ntohs (inaddr->sin_port);
+    this->seqn      = -1000;
 
     uint32_t ipaddr = ntohl (inaddr->sin_addr.s_addr);
     sprintf (this->ipaddr, "%u.%u.%u.%u",
@@ -169,6 +170,7 @@ Server::ClientConnection::ServiceThread (
         try {
             this->mesg->type = Message::GOODBYE;
             this->mesg->size = 0;
+            this->mesg->seqn = --this->seqn;
             Send (this->sock, this->mesg);
             }
         catch (char * explanation) {
@@ -179,6 +181,7 @@ Server::ClientConnection::ServiceThread (
 
     this->mesg->value = (uint64_t) this->clientID;
     this->mesg->size = 0;
+    this->mesg->seqn = --this->seqn;
 
     try {
         Send (this->sock, this->mesg);
@@ -324,6 +327,7 @@ Server::ClientConnection::Reply (
 
     this->mesg->value = (uint64_t) value;
     this->mesg->size = size;
+    this->mesg->seqn = --this->seqn;
 
     try {
         Send (this->sock, this->mesg);

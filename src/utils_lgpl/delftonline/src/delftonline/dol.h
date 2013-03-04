@@ -47,7 +47,9 @@
 #   include <ws2tcpip.h>
 
 #   define DELFTONLINE_LIB
-#   define errno    (WSAGetLastError ())
+#   if !defined(errno)
+#      define errno    (WSAGetLastError ())
+#   endif
 #   define getpid   _getpid
 #   define random   rand
 #   define srandom  srand

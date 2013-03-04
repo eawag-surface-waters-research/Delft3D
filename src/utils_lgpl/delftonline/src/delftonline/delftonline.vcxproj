@@ -60,14 +60,15 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\..\engines_gpl\d_hydro\bin\Debug</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">..\..\..\..\engines_gpl\d_hydro\bin\Debug\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">..\..\..\..\engines_gpl\d_hydro\bin\Debug</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Configuration)\</IntDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../../lib/$(Configuration)/dynamic\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">..\..\..\..\engines_gpl\d_hydro\bin\$(Configuration)\</OutDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../lib/$(Configuration)/dynamic\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <PreBuildEvent>
@@ -97,6 +98,10 @@
       <AdditionalLibraryDirectories>..\..\..\..\third_party_open\pthreads\bin\win32</AdditionalLibraryDirectories>
       <ImportLibrary>../../lib/$(Configuration)/dynamic\$(TargetName).lib</ImportLibrary>
       <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>false</DataExecutionPrevention>
     </Link>
     <PreBuildEvent>
       <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\delftonline_version.h .\ .\version_number.ini</Command>
@@ -155,6 +160,7 @@
       <TargetMachine>MachineX86</TargetMachine>
       <AdditionalLibraryDirectories>..\..\..\..\third_party_open\pthreads\bin\win32</AdditionalLibraryDirectories>
       <AdditionalDependencies>Ws2_32.lib;pthreadVCE2.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <ImportLibrary>../../lib/$(Configuration)/dynamic\$(TargetName).lib</ImportLibrary>
     </Link>
     <PreBuildEvent>
       <Command>call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\delftonline_version.h .\ .\version_number.ini</Command>

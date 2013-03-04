@@ -130,6 +130,8 @@ Client::Client (
 
     // Send key to server in a hello message
 
+    this->seqn = 1000;
+
     try {
         size_t payloadSize = strlen (this->key) + 1;
         if (payloadSize > Message::maxPayload)
@@ -139,6 +141,7 @@ Client::Client (
         this->mesg->magic = DOL_MAGIC_NUMBER;
         this->mesg->value = 0;
         this->mesg->size = payloadSize;
+        this->mesg->seqn = ++this->seqn;
         memcpy (this->mesg->payload, this->key, payloadSize);
 
         Send (this->sock, this->mesg);
@@ -216,6 +219,7 @@ Client::CallServer (
     this->mesg->magic = DOL_MAGIC_NUMBER;
     this->mesg->value = (uint64_t) ((value == NULL) ? 0 : *value);
     this->mesg->size = payloadSize;
+    this->mesg->seqn = ++this->seqn;
 
     if (this->mesg->size > Message::maxPayload)
           throw new Exception (true, "%s request size exceeds send buffer capacity (%d > %d)", MessageTypeString (type), mesg->size, Message::maxPayload);
@@ -245,7 +249,11 @@ Client::CallServer (
     if (mesg->type != type)
         throw new Exception (true, "%s reply has wrong type (%s)", MessageTypeString (type), MessageTypeString (mesg->type));
     if (mesg->size != received - sizeof (Message::Header))
-        throw new Exception (true, "%s reply has wrong message size", MessageTypeString (type));
+        throw new Exception (true, "%s reply has wrong message size [mesg->size = %d, received - sizeof (Message::Header) = %d]",
+                        MessageTypeString (type),
+                        mesg->size,
+                        received - sizeof (Message::Header)
+                        );
 
     if (value != NULL)
         *value = ((unsigned int) mesg->value & 0xFFFFFFFF);
