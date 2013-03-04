@@ -1,4 +1,4 @@
-#						-*- Autoconf -*-
+#                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 AC_PREREQ(2.59)
 AC_INIT(Delft3D, 0.0, delft3d.support@deltares.nl)
@@ -119,6 +119,8 @@ dnl but because ifort and gfortran allow it let's not raise errors by default)
 AC_FC_LINE_LENGTH([unlimited])
 dnl check to see if we can write binary files
 ACX_FC_FORM_BINARY
+dnl check if open(...shared) works
+ACX_FC_SHARED_SPECIFIER
 dnl add preprocess option
 AC_FC_PREPROCESS
 AC_LANG_POP
@@ -130,8 +132,10 @@ AC_LANG_PUSH([Fortran 77])
 AC_PROG_F77([ifort gfortran g77])
 AC_F77_LIBRARY_LDFLAGS
 AC_F77_LINE_LENGTH([132])
-dnl Check for openmp for fortran
+dnl Check for openmp for fortran 77
 AX_OPENMP
+dnl check if open(...shared) works
+ACX_F77_SHARED_SPECIFIER
 AC_LANG_POP
 
 dnl Fortran compiler defaults (this could be a separate m4 file)
