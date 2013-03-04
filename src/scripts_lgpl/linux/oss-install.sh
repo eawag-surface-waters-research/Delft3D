@@ -39,6 +39,8 @@ function install_all () {
     d_hydro
     flow2d3d
     flow2d3d_openda
+    delwaq1
+    delwaq2
     wave
     plugin_culvert
     plugin_delftflow_traform
@@ -154,6 +156,46 @@ function flow2d3d_openda () {
 
     echo "Gathering libraries for flow2d3d_openda..."
     cp -u `$gatherScript lib/libflow2d3d_openda*.so lib/libDelftOnline.so bin/esm_* | eval grep -v $gatherFilter` $dest_lib
+    return
+}
+
+
+
+# ==================
+# === INSTALL_DELWAQ1 ===
+# ==================
+function delwaq1 () {
+    echo "installing delwaq1 . . ."
+
+    dest_bin="$dest_main/lnx/waq/bin"
+    dest_default="$dest_main/lnx/waq/default"
+
+    mkdir -p $dest_bin
+    mkdir -p $dest_default
+
+    copyFile "bin/delwaq1"                                                   $dest_bin
+    copyFile "engines_gpl/waq/default/bloom.spe"           $dest_default
+    copyFile "engines_gpl/waq/default/bloominp.d09"    $dest_default
+    copyFile "engines_gpl/waq/default/proc_def.dat"      $dest_default
+    copyFile "engines_gpl/waq/default/proc_def.def"      $dest_default
+
+    return
+}
+
+
+
+# ==================
+# === INSTALL_DELWAQ2 ===
+# ==================
+function delwaq2 () {
+    echo "installing delwaq2 . . ."
+
+    dest_bin="$dest_main/lnx/waq/bin"
+
+    mkdir -p $dest_bin
+
+    copyFile "bin/delwaq2"                                                 $dest_bin
+
     return
 }
 
