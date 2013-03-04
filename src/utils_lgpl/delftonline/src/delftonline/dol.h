@@ -54,7 +54,7 @@
 #   define random   rand
 #   define srandom  srand
 #   define strdup   _strdup
-
+#   define usleep Sleep
 #else
 #   include <netdb.h>
 #   include <unistd.h>

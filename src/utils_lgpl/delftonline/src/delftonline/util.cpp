@@ -167,7 +167,7 @@ Send (
 //    fprintf (logfile, "Sending  message %5d  %7d bytes\n", mesg->seqn, mesg->size);
 //    fclose (logfile);
 
-    Sleep(2);
+    usleep(2);
 
     int size = sizeof (Message::Header) + mesg->size;
     ssize_t sent = send (sock, (char *) mesg, (ssize_t) size, 0);
