@@ -204,6 +204,7 @@ class Message {
             int         magic;              // magic number for sanity check
             uint64_t    value;              // simple payload
             size_t      size;               // additional payload size
+            int         seqn;               // sequence number (for debugging only)
             char        payload[4];         // message payload (actual space is allocated and larger)
             } Header;
 
@@ -391,6 +392,7 @@ class Server {
                 pthread_t   serviceThread;
                 Directory * curDir;
                 Message::Header * mesg;     // fixed buffer (header + payload) for client/server communication
+                int         seqn;           // message sequence number (for debugging purposes only)
             };
 
         void
@@ -836,6 +838,7 @@ class Client {
         char *          curDir;         // pathname for my current directory on the server
         bool            terminated;     // server was told to terminate
         Message::Header * mesg;         // fixed buffer (header + payload) for client/server communication
+        int             seqn;           // message sequence number (for debugging purposes only)
 
     private:
         void
