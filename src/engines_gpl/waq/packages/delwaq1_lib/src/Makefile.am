@@ -45,7 +45,7 @@ libDelwaq1_la_LIBADD = \
     $(top_builddir)/engines/part/packages/io_f/src/libio_f.la \
     $(top_builddir)/engines/part/packages/utils_f/src/libutils_f.la \
     $(top_builddir)/engines/part/packages/data_f/src/libdata_f.la \
-    $(top_builddir)/engines/part/packages/version_number/src/libpart_version_number.a \
+    $(top_builddir)/engines/part/packages/version_number/src/libpart_version_number.la \
     $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libESMFSM.la \
     $(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libNefis.la \
     $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la 

@@ -24,6 +24,7 @@ delwaq1_SOURCES = block.f \
 # Libraries
 
 delwaq1_LDADD = \
-       $(top_builddir)/engines_gpl/waq/packages/delwaq1_version_number/src/libdelwaq1_version_number.la \
-       $(top_builddir)/engines_gpl/waq/packages/delwaq1_lib/src/libDelwaq1.la
+    $(top_builddir)/engines_gpl/waq/packages/delwaq1_version_number/src/libdelwaq1_version_number.la \
+    $(top_builddir)/engines/part/packages/utils_f/src/libutils_f.la \
+    $(top_builddir)/engines_gpl/waq/packages/delwaq1_lib/src/libDelwaq1.la
 
