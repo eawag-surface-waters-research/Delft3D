@@ -47,7 +47,7 @@ delwaq2_LDADD = \
     $(top_builddir)/engines/part/packages/io_f/src/libio_f.la \
     $(top_builddir)/engines/part/packages/utils_f/src/libutils_f.la \
     $(top_builddir)/engines/part/packages/data_f/src/libdata_f.la \
-    $(top_builddir)/engines/part/packages/version_number/src/libpart_version_number.a \
+    $(top_builddir)/engines/part/packages/version_number/src/libpart_version_number.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/libwaq_utils.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib/libmod_couplib.la \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_f/src/mod_timings/libmod_timings.la \
