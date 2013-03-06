@@ -2407,6 +2407,7 @@ src/scripts_lgpl/win32/update_version.cmd -text
 src/third_party_open/Makefile.am -text
 src/third_party_open/commandline/bin/win32/libiconv2.dll -text
 src/third_party_open/commandline/bin/win32/libintl3.dll -text
+src/third_party_open/commandline/bin/win32/pscp.exe -text
 src/third_party_open/commandline/bin/win32/sed.exe -text
 src/third_party_open/commandline/sed_license_info.txt -text
 src/third_party_open/expat/COPYING -text
