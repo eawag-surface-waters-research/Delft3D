@@ -114,7 +114,7 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
        nmd = nm - icx
        ndm = nm - icy
        if (kfu(nm)==1 .or. kfu(nmd)==1 .or. kfv(nm)==1 .or. kfv(ndm)==1) then
-          if (s1(nm) + real(dps(nm),fp) .lt. 0.001_fp) then
+           if ( s1(nm) <= -real(dps(nm),fp) ) then
              kfu(nm) = 0
              kfu(nmd) = 0
              kfv(nm) = 0
@@ -172,7 +172,7 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
          !
          kfsz1(nm,:) = 0
          do k = kfsmin(nm), kfsmax(nm)
-            kfsz1(nm, k) = 1
+            kfsz1(nm, k) = kfs(nm)
          enddo
        endif
     enddo

@@ -197,59 +197,55 @@ subroutine z_hormom_fls(nmmax     ,kmax      ,icx       , &
     enddo
     !
     do nm = 1, nmmax
-       if (kfu(nm) == 1) then
-          nmd    = nm  - icx
-          nmdd   = nmd - icx
-          ndm    = nm  - icy
-          ndmd   = nm  - icx - icy
-          nmu    = nm  + icx
-          num    = nm  + icy
-          nuum   = num + icy
-          numu   = nm  + icx + icy
-          ndmu   = nm  + icx - icy
-          numd   = nm  - icx + icy
-          do k = kfumin(nm), kfumx0(nm)
-             if (kfuz0(nm, k)==1 .and. kcs(nm)*kcs(nmu)>0) then
-                !
-                ! Compute UA (appr. of velocity in waterlevel points) at internal points
-                ! At open boundary UA == U0 for inflow
-                !
-                du2         = (u0(nm,k) - u0(nmd,k)) * kfuz0(nm,k) * kfuz0(nmd,k)
-                if (kspu(nm,0) > 0 .or. kspu(nmd,0) > 0) then
-                   du2      = 0.0_fp
-                endif
-                if (qxk(nm,k) + qxk(nmd,k) > 0.0_fp) then
-                   du1      = (u0(nmd,k)-u0(nmdd,k)) * kfuz0(nmd,k) * kfuz0(nmdd,k)
-                   if (kspu(nmd,0) > 0 .or. kspu(nmdd,0) > 0 ) then
-                      du1   = 0.0_fp
-                   endif
-                   ua(nm,k) =  u0(nmd,k) + ulim(du1,du2)*du1
-                else
-                   du1      = (u0(nmu,k)-u0(nm,k)) * kfuz0(nmu,k) * kfuz0(nm,k)
-                   if (kspu(nm,0) > 0 .or. kspu(nmu,0) > 0 ) then
-                      du1   = 0.0_fp
-                   endif
-                   ua(nm,k) =  u0(nm,k)  - ulim(du1,du2)*du1
-                endif
-                !
-                ! Compute UB (appr. of velocity in depth points) at internal points
-                ! At open boundary UB == U0 for inflow
-                ! In case thin dams in the transverse direction let UB = 0
-                !
-                if (kfv(nm)*kfv(nmu) /= 0) then
-                   if (qyk(nm,k) + qyk(nmu,k) > 0.0_fp) then
-                      du1      = (u0(nm ,k)-u0(ndm,k)) * kfuz0(nm ,k) * kfuz0(ndm,k)
-                      du2      = (u0(num,k)-u0(nm ,k)) * kfuz0(num,k) * kfuz0(nm ,k)
-                      ub(nm,k) =  u0(nm ,k) + ulim(du1,du2)*du1
-                   else
-                      du1      = (u0(nuum,k)-u0(num,k)) * kfuz0(nuum,k) * kfuz0(num,k)
-                      du2      = (u0(num ,k)-u0(nm ,k)) * kfuz0(num ,k) * kfuz0(nm ,k)
-                      ub(nm,k) =  u0(num ,k) - ulim(du1,du2)*du1
-                   endif
-                endif
+       nmd    = nm  - icx
+       nmdd   = nmd - icx
+       ndm    = nm  - icy
+       ndmd   = nm  - icx - icy
+       nmu    = nm  + icx
+       num    = nm  + icy
+       nuum   = num + icy
+       numu   = nm  + icx + icy
+       ndmu   = nm  + icx - icy
+       numd   = nm  - icx + icy
+       do k = kfumin(nm), kfumx0(nm)
+          !
+          ! Compute UA (appr. of velocity in waterlevel points) at internal points
+          ! At open boundary UA == U0 for inflow
+          !
+          du2         = (u0(nm,k) - u0(nmd,k)) * kfuz0(nm,k) * kfuz0(nmd,k)
+          if (kspu(nm,0) > 0 .or. kspu(nmd,0) > 0) then
+             du2      = 0.0_fp
+          endif
+          if (qxk(nm,k) + qxk(nmd,k) > 0.0_fp) then
+             du1      = (u0(nmd,k)-u0(nmdd,k)) * kfuz0(nmd,k) * kfuz0(nmdd,k)
+             if (kspu(nmd,0) > 0 .or. kspu(nmdd,0) > 0 ) then
+                du1   = 0.0_fp
              endif
-          enddo
-       endif
+             ua(nm,k) =  u0(nmd,k) + ulim(du1,du2)*du1
+          else
+             du1      = (u0(nmu,k)-u0(nm,k)) * kfuz0(nmu,k) * kfuz0(nm,k)
+             if (kspu(nm,0) > 0 .or. kspu(nmu,0) > 0 ) then
+                du1   = 0.0_fp
+             endif
+             ua(nm,k) =  u0(nm,k)  - ulim(du1,du2)*du1
+          endif
+          !
+          ! Compute UB (appr. of velocity in depth points) at internal points
+          ! At open boundary UB == U0 for inflow
+          ! In case thin dams in the transverse direction let UB = 0
+          !
+          if (kfvz0(nm,k)*kfvz0(nmu,k) /= 0) then
+             if (qyk(nm,k) + qyk(nmu,k) > 0.0_fp) then
+                du1      = (u0(nm ,k)-u0(ndm,k)) * kfuz0(nm ,k) * kfuz0(ndm,k)
+                du2      = (u0(num,k)-u0(nm ,k)) * kfuz0(num,k) * kfuz0(nm ,k)
+                ub(nm,k) =  u0(nm ,k) + ulim(du1,du2)*du1
+             else
+                du1      = (u0(nuum,k)-u0(num,k)) * kfuz0(nuum,k) * kfuz0(num,k)
+                du2      = (u0(num ,k)-u0(nm ,k)) * kfuz0(num ,k) * kfuz0(nm ,k)
+                ub(nm,k) =  u0(num ,k) - ulim(du1,du2)*du1
+             endif
+          endif
+       enddo
     enddo
     !
     do nm = 1, nmmax
@@ -273,30 +269,6 @@ subroutine z_hormom_fls(nmmax     ,kmax      ,icx       , &
           dgvnm  = gvd(nm)  - gvd(ndm)
           gsqi   = gsqiu(nm)
           !
-          hl     = max(real(dps(nm) ,fp) + s0(nm) , trsh)
-          hr     = max(real(dps(nmu),fp) + s0(nmu), trsh)
-          dpsu   = max(0.5_fp*(hl + hr), trsh)
-          factor = 1.0_fp
-          !
-          ! Switch from momentum conservation to energy conservation
-          ! is used to correct the advection fluxes at the end of the subroutine
-          !
-          if (       (umean(nm) > 0.0_fp .and. (hl > hr) .and. kfu(nmu) == 1) &
-              & .or. (umean(nm) < 0.0_fp .and. (hr > hl) .and. kfu(nmd) == 1)  ) then
-              if (       (real(dps(nm),fp)          > real(dps(nmu),fp)+ dgcuni) & 
-                  & .or. (real(dps(nm),fp) + dgcuni < real(dps(nmu),fp)        )  ) then
-                 factor = hr * hl / (dpsu*dpsu)
-                 !
-                 ! avoid factor becoming small (synchronised with SOBEK FLS)
-                 !
-                 factor = max (0.33_fp , factor)
-              else
-                 !
-                 ! avoid dividing by zero
-                 !
-                 factor = 1.0_fp
-              endif
-          endif
           !
           do k = kfumin(nm), kfumx0(nm)
              kspu0k = kspu(nm, 0) * kspu(nm, k)
@@ -305,14 +277,18 @@ subroutine z_hormom_fls(nmmax     ,kmax      ,icx       , &
                 advecy = 0.0_fp
                 vvdgdx = 0.0_fp
                 uvdgdy = 0.0_fp
+                hl     = real(dps(nm) ,fp) + s0(nm) 
+                hr     = real(dps(nmu),fp) + s0(nmu)
+                dpsu   = 0.5_fp*(hl + hr)
+                factor = 1.0_fp
                 !
                 ! Compute VVV
                 !
                 if (       (cstbnd .and. (kcs(nm)==2 .or. kcs(nmu)==2)) &
                     & .or. (kcs(nm)==3 .or. kcs(nmu)==3               )  ) then
-                   svvv = max(kfv(ndm) + kfv(ndmu) + kfv(nm) + kfv(nmu), 1)
-                   vvv = (v1(ndm, k)*kfv(ndm) + v1(ndmu, k)*kfv(ndmu) + v1(nm, k)  &
-                       & *kfv(nm) + v1(nmu, k)*kfv(nmu))/svvv
+                   svvv = max(kfvz0(ndm,k) + kfvz0(ndmu,k) + kfvz0(nm,k) + kfvz0(nmu,k),1)
+                   vvv = (v1(ndm, k)*kfvz0(ndm,k) + v1(ndmu, k)*kfvz0(ndmu,k) + v1(nm, k)  &
+                       & *kfvz0(nm,k) + v1(nmu, k)*kfvz0(nmu,k))/svvv
                 else
                    vvv = 0.25_fp*(v1(ndm, k) + v1(ndmu, k) + v1(nm, k) + v1(nmu, k))
                 endif
@@ -325,6 +301,7 @@ subroutine z_hormom_fls(nmmax     ,kmax      ,icx       , &
                 qxdo   = (qxk(nmd,k) + qxk(nm  ,k) )/ max(1, (kfuz0(nmd,k) + kfuz0(nm  ,k)) )
                 qyup   = (qyk(nm ,k) + qyk(nmu ,k) )/ max(1, (kfvz0(nm ,k) + kfvz0(nmu ,k)) )
                 qydo   = (qyk(ndm,k) + qyk(ndmu,k) )/ max(1, (kfvz0(ndm,k) + kfvz0(ndmu,k)) )
+                dpsu   = max(0.5_fp*(real(dps(nm),fp)+s0(nm) + real(dps(nmu),fp)+s0(nmu)),trsh)
                 if (u0(nm,k) > 0.0_fp) then
                    thick  = max(dzs0(nm,k), trsh) / hl
                 elseif (u0(nm,k) < 0.0_fp) then
@@ -334,22 +311,42 @@ subroutine z_hormom_fls(nmmax     ,kmax      ,icx       , &
                 endif
                 if (comparereal(ua(nm ,k),0.0_fp) /= 0 .and. &
                   & comparereal(ua(nmu,k),0.0_fp) /= 0        ) then
-                   advecx = kfu(nmu)*kfu(nmd)*(qxup*ua(nmu,k) - qxdo*ua(nm,k) - u0(nm,k)*(qxup - qxdo)) * gsqi / (dpsu*thick)
+                   advecx = (qxup*ua(nmu,k) - qxdo*ua(nm,k) - u0(nm,k)*(qxup - qxdo)) * gsqi / (dpsu*thick)
                    !
                    ! CURVATURE TERM DUE TO CONVECTION IN U-DIRECTION
                    !
-                   uvdgdy = kfu(nmu)*kfu(nmd)*0.5*vvv*gsqi*(gvnm - gvndm)
+                   uvdgdy = vvv*gsqi*(gvnm - gvndm)
                 endif
                 if (comparereal(ub(ndm,k),0.0_fp) /= 0 .and. &
                   & comparereal(ub(nm ,k),0.0_fp) /= 0        ) then
-                   advecy = kfu(num)*kfu(ndm)*(qyup*ub(nm,k) - qydo*ub(ndm,k) - u0(nm,k)*(qyup - qydo)) * gsqi / (dpsu*thick)
+                   advecy =(qyup*ub(nm,k) - qydo*ub(ndm,k) - u0(nm,k)*(qyup - qydo)) * gsqi / (dpsu*thick)
                    !
                    ! CURVATURE TERM DUE TO ADVECTION IN V-DIRECTION
                    !
-                   vvdgdx = kfu(num)*kfu(ndm)*0.5*vvv*gsqi*(guu(nmu) - guu(nmd))
+                   vvdgdx = 0.5*vvv*gsqi*(guu(nmu) - guu(nmd))
                 endif
                 advecy = advecy - vvv*vvdgdx
                 advecx = advecx + u0(nm,k)*uvdgdy
+                !
+                ! Switch from momentum conservation to energy conservation
+                ! is used to correct the advection fluxes at the end of the subroutine
+                !
+                if (       (umean(nm) > 0.0_fp .and. (hl > hr) .and. kfu(nmu) == 1) &
+                    & .or. (umean(nm) < 0.0_fp .and. (hr > hl) .and. kfu(nmd) == 1)  ) then
+                    if (       (real(dps(nm),fp)          > real(dps(nmu),fp)+ dgcuni) & 
+                        & .or. (real(dps(nm),fp) + dgcuni < real(dps(nmu),fp)        )  ) then
+                       factor = hr * hl / (dpsu*dpsu)
+                       !
+                       ! avoid factor becoming small (synchronised with SOBEK FLS)
+                       !
+                       factor = max (0.33_fp , factor)
+                    else
+                       !
+                       ! avoid dividing by zero
+                       !
+                       factor = 1.0_fp
+                    endif
+                endif   
                 !
                 ddk(nm, k) = ddk(nm, k) - advecx/factor - advecy/factor
              endif
