@@ -9,7 +9,7 @@ include $(top_srcdir)/common.am
 noinst_LTLIBRARIES = libDelwaq1.la
 
 AM_FCFLAGS += $(OPENMP_FCFLAGS)
-AM_FFLAGS += $(OPENMP_FFLAGS) -openmp
+AM_FFLAGS += $(OPENMP_FFLAGS)
 
 #-------------------------------------------------------------------------------
 #Includes

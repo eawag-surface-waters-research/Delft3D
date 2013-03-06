@@ -102,7 +102,7 @@ AC_PROG_FC([ifort gfortran])
 dnl Check the flags needed to link fc programs with ld (i.e. cc)
 AC_FC_LIBRARY_LDFLAGS
 dnl Check for openmp for fortran
-AX_OPENMP
+AC_OPENMP
 
 dnl Check for MPI (sets MPIFC, MPILIBS, HAVE_MPI)
 ACX_MPI
@@ -133,7 +133,7 @@ AC_PROG_F77([ifort gfortran g77])
 AC_F77_LIBRARY_LDFLAGS
 AC_F77_LINE_LENGTH([132])
 dnl Check for openmp for fortran 77
-AX_OPENMP
+AC_OPENMP
 dnl check if open(...shared) works
 ACX_F77_SHARED_SPECIFIER
 AC_LANG_POP
