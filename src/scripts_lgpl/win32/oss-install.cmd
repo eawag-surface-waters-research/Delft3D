@@ -200,12 +200,10 @@ rem ====================
     echo "installing flow2d3d . . ."
 
     set dest_bin="!dest_main!\win32\flow2d3d\bin"
-    set dest_lib="!dest_main!\win32\flow2d3d\lib"
     set dest_default="!dest_main!\win32\flow2d3d\default"
     set dest_scripts="!dest_main!\win32\flow2d3d\scripts"
     
     call :makeDir !dest_bin!
-    call :makeDir !dest_lib!
     call :makeDir !dest_default!
     call :makeDir !dest_scripts!
 
@@ -223,11 +221,11 @@ rem ====================
     rem One of these two dlls will not exist and cause an ErrorLevel=1. Reset it.
     set ErrorLevel=0
     call :copyFile engines_gpl\flow2d3d\scripts\meteo_old2new.m               !dest_scripts!
-    call :copyFile "third_party_open\pthreads\bin\win32\*.dll"                !dest_lib!
+    call :copyFile "third_party_open\pthreads\bin\win32\*.dll"                !dest_bin!
     call :copyFile "third_party_open\mpich2\bin\*.exe"                        !dest_bin!
-    call :copyFile "third_party_open\mpich2\lib\*.dll"                        !dest_lib!
-    call :copyFile third_party_open\expat\win32\bin\Release\libexpat.dll      !dest_lib!
-    call :copyFile "third_party_open\intel_fortran\lib\win32\*.dll"           !dest_lib!
+    call :copyFile "third_party_open\mpich2\lib\*.dll"                        !dest_bin!
+    call :copyFile third_party_open\expat\win32\bin\Release\libexpat.dll      !dest_bin!
+    call :copyFile "third_party_open\intel_fortran\lib\win32\*.dll"           !dest_bin!
     call :copyFile "engines_gpl\flow2d3d\default\*"                           !dest_default!
     call :copyFile utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll !dest_bin!
     rem
@@ -240,7 +238,7 @@ rem ====================
         rem "Compiler_dir:!compiler_dir!"
         set localstring="!compiler_dir!*.dll"
         rem Note the awkward usage of !-characters
-        call :copyFile !!localstring! !dest_lib!!
+        call :copyFile !!localstring! !dest_bin!!
     )
 goto :endproc
 
@@ -253,12 +251,10 @@ rem ===========================
     echo "installing flow2d3d_openda . . ."
 
     set dest_bin="!dest_main!\win32\flow2d3d\bin"
-    set dest_lib="!dest_main!\win32\flow2d3d\lib"
     set dest_default="!dest_main!\win32\flow2d3d\default"
     set dest_scripts="!dest_main!\win32\flow2d3d\scripts"
 
     call :makeDir !dest_bin!
-    call :makeDir !dest_lib!
     call :makeDir !dest_default!
     call :makeDir !dest_scripts!
 
@@ -276,13 +272,13 @@ rem ===========================
     rem One of these two dlls will not exist and cause an ErrorLevel=1. Reset it.
     set ErrorLevel=0
     call :copyFile engines_gpl\flow2d3d\scripts\meteo_old2new.m               !dest_scripts!
-    call :copyFile "third_party_open\pthreads\bin\win32\*.dll"                !dest_lib!
+    call :copyFile "third_party_open\pthreads\bin\win32\*.dll"                !dest_bin!
     call :copyFile "third_party_open\mpich2\bin\*.exe"                        !dest_bin!
-    call :copyFile "third_party_open\mpich2\lib\*.dll"                        !dest_lib!
-    call :copyFile third_party_open\expat\win32\bin\Release\libexpat.dll      !dest_lib!
-    call :copyFile third_party_open\netcdf\lib\win32\release\netcdf.dll       !dest_lib!
-    call :copyFile "third_party_open\openda\core\native\lib\win32\*.dll"      !dest_lib!
-    call :copyFile "third_party_open\intel_fortran\lib\win32\*.dll"           !dest_lib!
+    call :copyFile "third_party_open\mpich2\lib\*.dll"                        !dest_bin!
+    call :copyFile third_party_open\expat\win32\bin\Release\libexpat.dll      !dest_bin!
+    call :copyFile third_party_open\netcdf\lib\win32\release\netcdf.dll       !dest_bin!
+    call :copyFile "third_party_open\openda\core\native\lib\win32\*.dll"      !dest_bin!
+    call :copyFile "third_party_open\intel_fortran\lib\win32\*.dll"           !dest_bin!
     call :copyFile "engines_gpl\flow2d3d\default\*.*"                         !dest_default!
     call :copyFile utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll !dest_bin!
     rem
@@ -295,7 +291,7 @@ rem ===========================
         rem "Compiler_dir:!compiler_dir!"
         set localstring="!compiler_dir!*.dll"
         rem Note the awkward usage of !-characters
-        call :copyFile !!localstring! !dest_lib!!
+        call :copyFile !!localstring! !dest_bin!!
     )
 goto :endproc
 
@@ -384,7 +380,7 @@ rem =======================
         rem "Compiler_dir:!compiler_dir!"
         set localstring="!compiler_dir!*.dll"
         rem Note the awkward usage of !-characters
-        call :copyFile !!localstring! !dest_lib!!
+        call :copyFile !!localstring! !dest_bin!!
     )
 goto :endproc
 
@@ -411,25 +407,20 @@ rem ================
     echo "installing wave . . ."
 
     set dest_bin="!dest_main!\win32\wave\bin"
-    set dest_lib="!dest_main!\win32\wave\lib"
     set dest_default="!dest_main!\win32\wave\default"
     set dest_swan_bin="!dest_main!\win32\swan\bin"
-    set dest_swan_lib="!dest_main!\win32\swan\lib"
        rem When adding quotes here AND when using dest_swan_scripts, xcopy also gets confused
        rem Neat solution: do not add quotes on defining the destination folders, but only at calling :copyFile
     set dest_swan_scripts=!dest_main!\win32\swan\scripts
 
     call :makeDir !dest_bin!
-    call :makeDir !dest_lib!
     call :makeDir !dest_default!
     call :makeDir !dest_swan_bin!
-    call :makeDir !dest_swan_lib!
     call :makeDir !dest_swan_scripts!
 
     call :copyFile engines_gpl\wave\bin\release\wave.exe            !dest_bin!
     call :copyFile engines_gpl\flow2d3d\default\dioconfig.ini       !dest_default!
-    call :copyFile "third_party_open\intel_fortran\lib\win32\*.dll" !dest_lib!
-    call :copyFile "third_party_open\swan\lib\win32\*.*"            !dest_swan_lib!
+    call :copyFile "third_party_open\intel_fortran\lib\win32\*.dll" !dest_bin!
     call :copyFile "third_party_open\swan\bin\win32\*.*"            !dest_swan_bin!
     call :copyFile third_party_open\swan\scripts\swan_install.bat " !dest_swan_scripts!\swan.bat"
     rem
@@ -442,7 +433,7 @@ rem ================
         rem "Compiler_dir:!compiler_dir!"
         set localstring="!compiler_dir!*.dll"
         rem Note the awkward usage of !-characters
-        call :copyFile !!localstring! !dest_lib!!
+        call :copyFile !!localstring! !dest_bin!!
     )
 goto :endproc
 
@@ -563,12 +554,10 @@ rem ===================
     echo "installing nesthd1 . . ."
 
     set dest_bin="!dest_main!\win32\flow2d3d\bin"
-    set dest_lib="!dest_main!\win32\flow2d3d\lib"
 
     call :makeDir !dest_bin!
-    call :makeDir !dest_lib!
 
-    call :copyFile third_party_open\pthreads\bin\win32\pthreadVCE2.dll    !dest_lib!
+    call :copyFile third_party_open\pthreads\bin\win32\pthreadVCE2.dll    !dest_bin!
     call :copyFile tools_gpl\nesthd1\packages\nesthd1\Release\nesthd1.exe !dest_bin!
 goto :endproc
 
@@ -581,12 +570,10 @@ rem ===================
     echo "installing nesthd2 . . ."
 
     set dest_bin="!dest_main!\win32\flow2d3d\bin"
-    set dest_lib="!dest_main!\win32\flow2d3d\lib"
 
     call :makeDir !dest_bin!
-    call :makeDir !dest_lib!
 
-    call :copyFile third_party_open\pthreads\bin\win32\pthreadVCE2.dll    !dest_lib!
+    call :copyFile third_party_open\pthreads\bin\win32\pthreadVCE2.dll    !dest_bin!
     call :copyFile tools_gpl\nesthd2\packages\nesthd2\Release\nesthd2.exe !dest_bin!
 goto :endproc
 
@@ -599,10 +586,8 @@ rem ===================
     echo "installing nestwq1 . . ."
 
     set dest_bin="!dest_main!\win32\flow2d3d\bin"
-    set dest_lib="!dest_main!\win32\flow2d3d\lib"
 
     call :makeDir !dest_bin!
-    call :makeDir !dest_lib!
 
     call :copyFile tools\nestwq1\packages\nestwq1\Release\nestwq1.exe !dest_bin!
 goto :endproc
@@ -616,10 +601,8 @@ rem ===================
     echo "installing nestwq2 . . ."
 
     set dest_bin="!dest_main!\win32\flow2d3d\bin"
-    set dest_lib="!dest_main!\win32\flow2d3d\lib"
 
     call :makeDir !dest_bin!
-    call :makeDir !dest_lib!
 
     call :copyFile tools\nestwq2\packages\nestwq2\Release\nestwq2.exe !dest_bin!
 goto :endproc
