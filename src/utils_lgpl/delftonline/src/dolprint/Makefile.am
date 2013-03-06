@@ -8,6 +8,8 @@
 
 include $(top_srcdir)/common.am
 
+if ENABLE_DOLCLI
+
 bin_PROGRAMS = dolprint
 
 dolprint_SOURCES = \
@@ -19,3 +21,4 @@ INCLUDES = \
 dolprint_LDADD = \
     ../delftonline/libDelftOnline.la
 
+endif
