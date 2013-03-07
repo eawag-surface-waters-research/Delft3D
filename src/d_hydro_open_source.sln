@@ -314,20 +314,20 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "delftonline", "utils_lgpl\d
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "part", "part", "{D668478E-6989-4740-AF73-A082AB448535}"
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "part_data_f", "engines_gpl\part\packages\data_f\part_data_f.vfproj", "{ECDDEA09-CCCF-404A-B9A4-7947D5EEE2B9}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "part_data_f", "engines\part\packages\data_f\part_data_f.vfproj", "{ECDDEA09-CCCF-404A-B9A4-7947D5EEE2B9}"
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "part_io_f", "engines_gpl\part\packages\io_f\part_io_f.vfproj", "{5A143484-553B-4345-B07C-C7DBF0309004}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "part_io_f", "engines\part\packages\io_f\part_io_f.vfproj", "{5A143484-553B-4345-B07C-C7DBF0309004}"
 	ProjectSection(ProjectDependencies) = postProject
 		{ECDDEA09-CCCF-404A-B9A4-7947D5EEE2B9} = {ECDDEA09-CCCF-404A-B9A4-7947D5EEE2B9}
 	EndProjectSection
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "part_kernel_f", "engines_gpl\part\packages\kernel_f\part_kernel_f.vfproj", "{087FFCBF-7DEF-4D42-86EB-10A4B89ED1BA}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "part_kernel_f", "engines\part\packages\kernel_f\part_kernel_f.vfproj", "{087FFCBF-7DEF-4D42-86EB-10A4B89ED1BA}"
 	ProjectSection(ProjectDependencies) = postProject
 		{E2628720-AE0A-4E42-9954-B71147CCE7DC} = {E2628720-AE0A-4E42-9954-B71147CCE7DC}
 		{5A143484-553B-4345-B07C-C7DBF0309004} = {5A143484-553B-4345-B07C-C7DBF0309004}
 	EndProjectSection
 EndProject
-Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "part_utils_f", "engines_gpl\part\packages\utils_f\part_utils_f.vfproj", "{E2628720-AE0A-4E42-9954-B71147CCE7DC}"
+Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "part_utils_f", "engines\part\packages\utils_f\part_utils_f.vfproj", "{E2628720-AE0A-4E42-9954-B71147CCE7DC}"
 	ProjectSection(ProjectDependencies) = postProject
 		{ECDDEA09-CCCF-404A-B9A4-7947D5EEE2B9} = {ECDDEA09-CCCF-404A-B9A4-7947D5EEE2B9}
 	EndProjectSection
