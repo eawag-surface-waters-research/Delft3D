@@ -440,9 +440,6 @@ scriptdir=`dirname $scriptdirname`
 cd $scriptdir/../..
 
 
-mkdir -p $dest_main
-cp scripts_lgpl/linux/convert_lnx_to_old_directory_structure_intel.sh $dest_main
-
 $project
 
 cd $curdir
