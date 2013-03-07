@@ -80,10 +80,13 @@ function d_hydro () {
     echo "installing d_hydro . . ."
 
     dest_bin="$dest_main/lnx/flow2d3d/bin"
+    dest_menu="$dest_main/lnx/menu/bin"
 
     mkdir -p $dest_bin
+    mkdir -p $dest_menu
 
     copyFile "bin/d_hydro.exe" 					    $dest_bin
+    copyFile "engines_gpl/d_hydro/scripts/create_config_xml.tcl"    $dest_menu
 
     echo "Gathering libraries for d_hydro..."
     cp -u `$gatherScript bin/d_hydro.exe | eval grep -v $gatherFilter` $dest_bin
@@ -101,15 +104,18 @@ function flow2d3d () {
     dest_bin="$dest_main/lnx/flow2d3d/bin"
     dest_default="$dest_main/lnx/flow2d3d/default"
     dest_scripts="$dest_main/lnx/flow2d3d/scripts"
+    dest_plugins="$dest_main/lnx/plugins/bin"
 
     mkdir -p $dest_bin
     mkdir -p $dest_default
     mkdir -p $dest_scripts
+    mkdir -p $dest_plugins
 
     copyFile "lib/libflow2d3d.so"                           $dest_bin
     copyFile "lib/libflow2d3d_sp.so"                        $dest_bin
     # For some reason, libflow2d3d.so depends on libDelftOnline.so.0 instead of libDelftOnline.so. Both are links to libDelftOnline.so.0.0.0
     copyFile "lib/libDelftOnline.so.0"                      $dest_bin
+    copyFile "lib/libDelftOnline.so.0"                      $dest_plugins
     copyFile "engines_gpl/flow2d3d/scripts/meteo_old2new.m" $dest_scripts
     copyFile "bin/esm_create"                               $dest_bin
     copyFile "bin/esm_delete"                               $dest_bin
@@ -118,6 +124,7 @@ function flow2d3d () {
 
     echo "Gathering libraries for flow2d3d..."
     cp -u `$gatherScript lib/libflow2d3d*.so lib/libDelftOnline.so bin/esm_* | eval grep -v $gatherFilter` $dest_bin
+    cp -u `$gatherScript lib/libDelftOnline.so | eval grep -v $gatherFilter` $dest_plugins
     return
 }
 
@@ -132,14 +139,18 @@ function flow2d3d_openda () {
     dest_bin="$dest_main/lnx/flow2d3d/bin"
     dest_default="$dest_main/lnx/flow2d3d/default"
     dest_scripts="$dest_main/lnx/flow2d3d/scripts"
+    dest_plugins="$dest_main/lnx/plugins/bin"
 
     mkdir -p $dest_bin
     mkdir -p $dest_default
     mkdir -p $dest_scripts
+    mkdir -p $dest_plugins
 
     copyFile "lib/libflow2d3d_openda.so"                    $dest_bin
     copyFile "lib/libflow2d3d_openda_sp.so"                 $dest_bin
-    copyFile "lib/libDelftOnline.so"                        $dest_bin
+    # For some reason, libflow2d3d.so depends on libDelftOnline.so.0 instead of libDelftOnline.so. Both are links to libDelftOnline.so.0.0.0
+    copyFile "lib/libDelftOnline.so.0"                      $dest_bin
+    copyFile "lib/libDelftOnline.so.0"                      $dest_plugins
     copyFile "engines_gpl/flow2d3d/scripts/meteo_old2new.m" $dest_scripts
     copyFile "bin/esm_create"                               $dest_bin
     copyFile "bin/esm_delete"                               $dest_bin
@@ -148,6 +159,7 @@ function flow2d3d_openda () {
 
     echo "Gathering libraries for flow2d3d_openda..."
     cp -u `$gatherScript lib/libflow2d3d_openda*.so lib/libDelftOnline.so bin/esm_* | eval grep -v $gatherFilter` $dest_bin
+    cp -u `$gatherScript lib/libDelftOnline.so | eval grep -v $gatherFilter` $dest_plugins
     return
 }
 

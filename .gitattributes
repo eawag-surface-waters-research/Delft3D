@@ -226,8 +226,10 @@ src/engines_gpl/d_hydro/packages/d_hydro/src/Makefile.am -text
 src/engines_gpl/d_hydro/packages/d_hydro/src/d_hydro.cpp -text
 src/engines_gpl/d_hydro/packages/d_hydro/src/d_hydro_version.cpp -text
 src/engines_gpl/d_hydro/packages/d_hydro/src/readme.txt -text
-src/engines_gpl/d_hydro/scripts/config_flow2d3d.xml -text
-src/engines_gpl/d_hydro/scripts/runddq.sh -text
+src/engines_gpl/d_hydro/scripts/config_d_hydro.xml -text
+src/engines_gpl/d_hydro/scripts/create_config_xml.tcl -text
+src/engines_gpl/d_hydro/scripts/test_xml_creation.bat -text
+src/engines_gpl/d_hydro/scripts/test_xml_creation.tcl -text
 src/engines_gpl/flow2d3d/Makefile.am -text
 src/engines_gpl/flow2d3d/default/dioconfig.ini -text
 src/engines_gpl/flow2d3d/default/files.def -text

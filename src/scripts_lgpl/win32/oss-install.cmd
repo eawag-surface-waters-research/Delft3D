@@ -181,10 +181,13 @@ rem ===================
     echo "installing d_hydro . . ."
 
     set dest_bin="!dest_main!\win32\flow2d3d\bin"
+    set dest_menu="!dest_main!\win32\menu\bin"
 
     call :makeDir !dest_bin!
+    call :makeDir !dest_menu!
     
     call :copyFile engines_gpl\d_hydro\bin\Release\d_hydro.exe          !dest_bin!
+    call :copyFile engines_gpl\d_hydro\scripts\create_config_xml.tcl    !dest_menu!
 goto :endproc
 
 
@@ -198,10 +201,12 @@ rem ====================
     set dest_bin="!dest_main!\win32\flow2d3d\bin"
     set dest_default="!dest_main!\win32\flow2d3d\default"
     set dest_scripts="!dest_main!\win32\flow2d3d\scripts"
+    set dest_plugins="!dest_main!\win32\plugins\bin"
     
     call :makeDir !dest_bin!
     call :makeDir !dest_default!
     call :makeDir !dest_scripts!
+    call :makeDir !dest_plugins!
 
     set ErrorLevel_flowdll=0
     copy engines_gpl\flow2d3d\bin\Release\flow2d3d.dll !dest_bin!
@@ -224,6 +229,7 @@ rem ====================
     call :copyFile "third_party_open\intel_fortran\lib\win32\*.dll"           !dest_bin!
     call :copyFile "engines_gpl\flow2d3d\default\*"                           !dest_default!
     call :copyFile utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll !dest_bin!
+    call :copyFile utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll !dest_plugins!
     rem
     rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
     rem Some (older) libraries will be overwritten.
@@ -249,10 +255,12 @@ rem ===========================
     set dest_bin="!dest_main!\win32\flow2d3d\bin"
     set dest_default="!dest_main!\win32\flow2d3d\default"
     set dest_scripts="!dest_main!\win32\flow2d3d\scripts"
+    set dest_plugins="!dest_main!\win32\plugins\bin"
 
     call :makeDir !dest_bin!
     call :makeDir !dest_default!
     call :makeDir !dest_scripts!
+    call :makeDir !dest_plugins!
 
     set ErrorLevel_opendadll=0
     copy engines_gpl\flow2d3d\bin\Release\flow2d3d_openda.dll !dest_bin!
@@ -277,6 +285,7 @@ rem ===========================
     call :copyFile "third_party_open\intel_fortran\lib\win32\*.dll"           !dest_bin!
     call :copyFile "engines_gpl\flow2d3d\default\*.*"                         !dest_default!
     call :copyFile utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll !dest_bin!
+    call :copyFile utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll !dest_plugins!
     rem
     rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
     rem Some (older) libraries will be overwritten.
