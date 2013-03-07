@@ -42,6 +42,9 @@
       real     ( rp), intent(in   ) :: ya    (npmax)
       real     ( rp), intent(in   ) :: za    (npmax)
       real     ( rp), intent(  out) :: xyztrk(  3  , npmax)
+      
+      fout = .true.
+      xyztrk (1,1) = 0.0
 
       return
       end subroutine

@@ -76,6 +76,16 @@ contains
       character( 20), intent(in   ) :: nmdyer (nodye)
       character( 20), intent(in   ) :: substi (nosubs)
 
+      xpart (1) = 0.0
+      ypart (1) = 0.0
+      zpart (1) = 0.0
+      wpart (1, 1) = 0.0
+
+      npart (1) = 0
+      mpart (1) = 0
+      iptime (1) = 0
+      kpart (1) = 0
+
       return
 
       end subroutine

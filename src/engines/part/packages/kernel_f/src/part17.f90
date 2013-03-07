@@ -39,6 +39,8 @@
       real     ( rp), intent(in   ) :: decay (nosubs,idtset)
       real     ( rp), intent(  out) :: decays(nosubs)
 
+      decays (1) = 0.0
+      
       return
 
       end subroutine

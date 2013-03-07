@@ -91,6 +91,9 @@ module oildsp_mod
       real     ( rp), pointer       :: amassd  (:,:)
       real     ( rp), pointer       :: wpart   (:,:)
 
+      fstick = 0.0
+      radius = 0.0
+
       return
 
       end subroutine

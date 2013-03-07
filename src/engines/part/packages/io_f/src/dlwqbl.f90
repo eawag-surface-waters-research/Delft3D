@@ -51,6 +51,8 @@
       integer  (ip), intent(in   ) :: ifflag
       logical      , intent(  out) :: update
 
+      update = .true.
+      
       return
 
       end subroutine

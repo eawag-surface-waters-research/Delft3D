@@ -52,6 +52,12 @@
       character(*), intent(in   ) :: substi(nosubs)
       character(*), intent(in   ) :: nmdyer(nodye )
       character(*), intent(in   ) :: nmconr(nocont)
+
+      aconc = 0.0
+      tmass = 0.0
+      tmassc = 0.0
+      tmassu = 0.0
+
       return
 
       end subroutine

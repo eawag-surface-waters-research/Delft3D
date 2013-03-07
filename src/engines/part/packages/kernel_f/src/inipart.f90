@@ -60,6 +60,18 @@
       integer  ( ip), intent(  out) :: iptime(npmax)
       integer  ( ip), intent(in   ) :: lunpr
 
+      xpol = 0.0 
+      ypol = 0.0
+      wpart = 0.0
+      xpart = 0.0
+      ypart = 0.0
+      zpart = 0.0
+      
+      npart = 0
+      mpart = 0
+      kpart = 0
+      iptime = 0
+
       return
 
       end subroutine inipart

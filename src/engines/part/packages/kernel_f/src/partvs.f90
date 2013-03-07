@@ -43,6 +43,7 @@
       real     ( rp), intent(in   ) :: wpart (  nosubs,nopart)
       real     ( rp), intent(  out) :: wsettl(         nopart)
 
+      wsettl (1) = 0.0
       return
 
       end subroutine

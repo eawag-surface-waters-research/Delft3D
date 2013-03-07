@@ -53,6 +53,11 @@
       real   (rp), intent(in   ) :: tcktot(layt)
       logical    , intent(in   ) :: ltrack
 
+      depth = 0.0
+      velo = 0.0
+      locdep = 0.0
+      zlevel = 0.0
+
       return
 
       end subroutine

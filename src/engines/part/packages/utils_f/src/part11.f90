@@ -57,6 +57,10 @@
       real     ( rp), intent(  out) :: ya    (nopart)
       real     ( rp), intent(  out) :: za    (nopart)
 
+      xa = 0.0
+      ya = 0.0
+      za = 0.0
+
       return
 
       end subroutine part11

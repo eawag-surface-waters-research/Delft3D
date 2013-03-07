@@ -90,6 +90,19 @@ module part14_mod
       real     ( rp), intent(inout) :: track  (8,*)
       character( 20), intent(in   ) :: nmconr (nocont)
 
+      npart  (1) = 0
+      mpart  (1) = 0
+      iptime (1) = 0
+      ncheck (1) = 0
+      kpart  (1) = 0
+
+      xpart  (1) = 0.0
+      ypart  (1) = 0.0
+      zpart  (1) = 0.0
+      wpart  (1,1) = 0.0
+      t0buoy (1) = 0.0
+      abuoy  (1) = 0.0
+
       return
 
       end subroutine

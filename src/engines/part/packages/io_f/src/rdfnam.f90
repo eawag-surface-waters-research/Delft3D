@@ -39,7 +39,10 @@
       integer  ( ip), intent(in   ) :: iout
       integer  ( ip), intent(in   ) :: ipri
       logical       , intent(in   ) :: alone
-
+      
+      lun = 1
+      fnam = "a"
+      
       return
 
       end subroutine

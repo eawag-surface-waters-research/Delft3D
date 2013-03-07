@@ -105,6 +105,13 @@ contains
       real     ( rp), intent(in   ) :: dps   (nmax*mmax)
       real     ( rp), intent(in   ) :: tcktot(nolay+1)
 
+      xa = 0.0
+      ya = 0.0
+      za = 0.0
+      atotal = 0.0
+      apeak = 0.0
+      adepth = 0.0
+      
       return
 
       end subroutine

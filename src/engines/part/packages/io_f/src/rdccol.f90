@@ -39,6 +39,9 @@
       real     (sp), intent(  out) :: xbott(*)
       real     (sp), intent(  out) :: ybott(*)
       integer  (ip), intent(in   ) :: lun2
+      
+      xbott(1) = 0.0
+      ybott(1) = 0.0
 
       return
 

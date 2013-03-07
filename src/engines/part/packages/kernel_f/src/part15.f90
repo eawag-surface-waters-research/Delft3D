@@ -43,6 +43,9 @@
       real     ( 8 ), intent(  out) :: wvelo (noseg )
       real     ( 8 ), intent(  out) :: wdir  (noseg )
 
+      wvelo (1 ) = 0.0
+      wdir  (1 ) = 0.0
+
       return
 
       end subroutine

@@ -39,7 +39,7 @@ function install_all () {
     d_hydro
     flow2d3d
     flow2d3d_openda
-    delwaq
+    waq
     wave
     plugin_culvert
     plugin_delftflow_traform

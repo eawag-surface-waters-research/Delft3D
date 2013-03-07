@@ -48,4 +48,7 @@
       integer  ( ip), intent(  out) :: mwaste(nodye+nocont)
       return
 
+      nwaste = 0
+      mwaste = 0
+
       end subroutine

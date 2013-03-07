@@ -45,6 +45,11 @@
 
       real   (sp), parameter        :: default = 999.99
 
+      dx = 0.0
+      dy = 0.0
+      area = 0.0
+      angle = 0.0
+      
       return
 
       end subroutine

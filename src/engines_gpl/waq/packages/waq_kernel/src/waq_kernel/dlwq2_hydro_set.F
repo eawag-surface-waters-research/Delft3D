@@ -469,7 +469,7 @@ C
             call sleepqq(1)
 #elif (defined(salford32))
             call sleep@(real(1))
-#else
+#elif (defined(HAVE_CONFIG_H))
             call DIOSYNCcSLEEP(1)
 #endif
       endif

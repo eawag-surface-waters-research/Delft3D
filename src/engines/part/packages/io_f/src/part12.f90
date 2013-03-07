@@ -97,6 +97,9 @@ contains
       integer  ( ip), pointer       :: elt_bytes(:)
       real     ( rp)                :: locdep (nmax*mmax,nolay)
 
+      conc  (1,1) = 0.0
+      atotal(1,1) = 0.0
+
       return
 
       end subroutine

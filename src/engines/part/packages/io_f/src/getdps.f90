@@ -41,6 +41,8 @@
       real     ( rp), intent(  out) :: dps   (nmax*mmax)
       integer  ( ip), intent(in   ) :: cellpnt(nosegl)
       logical       , intent(in   ) :: ltrack
+      
+      dps (1) = 0.0
 
       return
 
