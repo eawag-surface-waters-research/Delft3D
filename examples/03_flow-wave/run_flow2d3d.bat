@@ -14,7 +14,7 @@
     rem
     rem Set the config file and mdw file
     rem 
-set argfile=config_flow2d3d.ini
+set argfile=config_d_hydro.xml
 set mdwfile=r17.mdw
 
 
@@ -25,11 +25,8 @@ set mdwfile=r17.mdw
     rem
 set D3D_HOME=..\..\bin\win32
 set flowexedir=%D3D_HOME%\flow2d3d\bin
-set flowlibdir=%D3D_HOME%\flow2d3d\lib
 set waveexedir=%D3D_HOME%\wave\bin
-set wavelibdir=%D3D_HOME%\wave\lib
 set swanexedir=%D3D_HOME%\swan\bin
-set swanlibdir=%D3D_HOME%\swan\lib
 set swanbatdir=%D3D_HOME%\swan\scripts
 
     rem
@@ -38,10 +35,10 @@ set swanbatdir=%D3D_HOME%\swan\scripts
 
 
     rem Run
-set PATH=%flowexedir%;%flowlibdir%;%PATH%
-start %flowexedir%\deltares_hydro.exe %argfile%
+set PATH=%flowexedir%;%PATH%
+start %flowexedir%\d_hydro.exe %argfile%
 
-set PATH=%waveexedir%;%wavelibdir%;%swanbatdir%;%swanexedir%;%swanlibdir%;%PATH%
+set PATH=%waveexedir%;%swanbatdir%;%swanexedir%;%PATH%
 %waveexedir%\wave.exe %mdwfile% 1
 
     rem To prevent the DOS box from disappearing immediately: remove the rem on the following line

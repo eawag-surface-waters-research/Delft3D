@@ -14,7 +14,7 @@
     #
     # Set the config file and mdw file
     # 
-argfile=config_flow2d3d.ini
+argfile=config_d_hydro.xml
 mdwfile=r17.mdw
 
 
@@ -27,11 +27,8 @@ export ARCH=intel
 curdir=`pwd`
 export D3D_HOME=$curdir/../../bin/lnx
 flowexedir=$D3D_HOME/flow2d3d/bin
-flowlibdir=$D3D_HOME/flow2d3d/lib
 waveexedir=$D3D_HOME/wave/bin
-wavelibdir=$D3D_HOME/wave/lib
 swanexedir=$D3D_HOME/swan/bin
-swanlibdir=$D3D_HOME/swan/lib
 swanbatdir=$D3D_HOME/swan/scripts
  
     #
@@ -41,11 +38,11 @@ swanbatdir=$D3D_HOME/swan/scripts
     # Set some (environment) parameters
 
     # Run
-export LD_LIBRARY_PATH=$flowexedir:$flowlibdir:$LD_LIBRARY_PATH 
+export LD_LIBRARY_PATH=$flowexedir:$LD_LIBRARY_PATH 
 export PATH=$flowexedir:$PATH 
-$flowexedir/deltares_hydro.exe $argfile &
+$flowexedir/d_hydro.exe $argfile &
 
-export LD_LIBRARY_PATH=$swanbatdir:$swanexedir:$swanlibdir:$waveexedir:$wavelibdir:$LD_LIBRARY_PATH 
+export LD_LIBRARY_PATH=$swanbatdir:$swanexedir:$waveexedir:$LD_LIBRARY_PATH 
 export PATH=$swanbatdir:$PATH 
 $waveexedir/wave.exe $mdwfile 1
 

@@ -188,7 +188,6 @@ rem ===================
     call :makeDir !dest_bin!
     
     call :copyFile engines_gpl\d_hydro\bin\Release\d_hydro.exe          !dest_bin!
-    call :copyFile third_party_open\tclkit\bin\win32\deltares_hydro.exe !dest_bin!
 goto :endproc
 
 

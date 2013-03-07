@@ -124,35 +124,35 @@ Flow2D3D::Flow2D3D (
     this->dd                 = NULL;
     this->log                = DH->log;
     this->flowol             = NULL;
-    this->mdfile             = this->config->GetAttrib ("MDFile");
+    this->mdfFile            = this->config->GetElement ("mdfFile");
     this->runid              = NULL;
 
-    XmlTree * ddconfig = this->config->Lookup ("DomainDecomposition");
+    const char * ddbFile = this->config->GetElement ("ddbFile");
 
-    if (this->mdfile == NULL && ddconfig == NULL)
-        throw new Exception (true, "MDFile not specified");
-    else if (this->mdfile != NULL && ddconfig != NULL)
-        throw new Exception (true, "MDFile specified for domain decomposition simulation");
+    if (this->mdfFile == NULL && ddbFile == NULL)
+        throw new Exception (true, "Neither MDF file nor DD bounds file specified");
+    if (this->mdfFile != NULL && ddbFile != NULL)
+        throw new Exception (true, "Both MDF file nor DD bounds file specified");
 
-    if (ddconfig != NULL)
-        this->dd = new DD (this, ddconfig);
+    if (ddbFile != NULL)
+        this->dd = new DD (this, this->config);
 
-    // Set up DelftOnline if requested, but not in slave mode.
+    // Set up DelftOnline if requested and not in slave mode.
     // Slaves will do it themselves at the right time.
 
-    if (this->DH->slaveArg == NULL && this->config->Lookup ("DelftOnline") != NULL) {
+    XmlTree * dolconfig = this->DH->config->Lookup ("/deltaresHydro/delftOnline");
+    if (dolconfig != NULL && this->DH->slaveArg == NULL ) {
+        // ToDo: Check enabled element
         this->DH->log->Write (Log::MAJOR, "Initializing DelftOnline...");
-
-        XmlTree * dolconfig = this->DH->config->Lookup ("/DeltaresHydro/DelftOnline");
-        if (dolconfig == NULL)
-            throw new Exception (true, "DelftOnline requested, but no DelftOnline section in the configuration file");
-
         this->flowol = new FlowOL (this->DH, dolconfig);
         }
 
     // Initialize ESM/FSM
 
     this->esm_flags = ESM_SILENT;
+
+    /*
+    ToDo: Process ESM/FSM XML element
 
     XmlTree * esmconfig = this->config->Lookup ("EsmFsm");
     if (esmconfig != NULL) {
@@ -161,6 +161,7 @@ Flow2D3D::Flow2D3D (
             this->esm_flags = ESM_TRACE;
             }
         }
+    */
 
     ESM_Init (this->esm_flags);
     }
@@ -191,7 +192,7 @@ Flow2D3D::Run (
     // The following waitFile code is introduced for
     // debugging parallem runs.  It should NOT be used for any other purpose!
 
-    const char * waitFile = this->config->GetAttrib ("waitFile");
+    const char * waitFile = this->config->GetElement ("waitFile");
     if (waitFile != NULL) {
         printf ("Waiting for file \"%s\" to appear...\n", waitFile);
         fflush (stdout);
@@ -213,7 +214,7 @@ Flow2D3D::Run (
 
             // By convention the runid is the part of the MD file name before the extension
 
-            this->runid = strdup (this->mdfile);
+            this->runid = strdup (this->mdfFile);
             char * dot = strrchr (this->runid, '.'); // search last dot
             if (dot != NULL) *dot = '\0';
 

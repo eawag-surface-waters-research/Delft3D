@@ -30,7 +30,7 @@
 //  Tree-representation of an XML file
 //
 //  Irv.Elshoff@Deltares.NL
-//  26 may 12
+//  6 mar 13
 //------------------------------------------------------------------------------
 
 
@@ -94,6 +94,10 @@ starttag (
     }
 
 
+
+#define IS_WHITESPACE(X) ((X) == ' ' || (X) == '\t' || (X) == '\n' ||(X)  == '\r')
+
+
 static void
 endtag (
     void *           userdata,
@@ -103,10 +107,18 @@ endtag (
     XmlTree ** curnode = (XmlTree **) userdata;
 
     if (CharDataLen > 0) {
-        (*curnode)->charData = new char [CharDataLen + 1];
-        memcpy ((*curnode)->charData, CharDataBuffer, CharDataLen);
-        (*curnode)->charData[CharDataLen] = '\0';
-        (*curnode)->charDataLen = CharDataLen + 1;
+        char * begin = CharDataBuffer;
+        while (IS_WHITESPACE (*begin)) begin++;
+
+        char * end = CharDataBuffer + CharDataLen-1;
+        while (IS_WHITESPACE (*end)) end--;
+        *++end = '\0';
+
+        int len = strlen (begin);
+        (*curnode)->charData = new char [len+1];
+        memcpy ((*curnode)->charData, begin, len);
+        (*curnode)->charData[len] = '\0';
+        (*curnode)->charDataLen = len+1;
         CharDataLen = 0;
         }
 
@@ -170,8 +182,8 @@ XmlTree::init (
     void
     ) {
 
-    this->name          = "";
-    this->pathname      = "";
+    this->name          = (char *) "";
+    this->pathname      = (char *) "";
     this->parent        = NULL;
     this->numAttrib     = 0;
     this->numChildren   = 0;
@@ -281,6 +293,7 @@ XmlTree::Lookup (
     return node;
     }
 
+
 //------------------------------------------------------------------------------
 
 
@@ -357,6 +370,55 @@ XmlTree::GetFloatAttrib (
     else
         return result;
 
+    }
+
+
+//------------------------------------------------------------------------------
+
+
+const char *
+XmlTree::GetElement (
+    const char * name
+    ) {
+
+    XmlTree * node = this->Lookup (name);
+    if (node == NULL)
+        return NULL;
+    else
+        return node->charData;
+    }
+
+
+bool
+XmlTree::GetBoolElement (
+    const char * name,
+    bool defaultValue
+    ) {
+
+    const char * value = this->GetElement (name);
+    if (value != NULL) {
+        if (strcmp (value, "true") == 0 ||
+            strcmp (value, "TRUE") == 0 ||
+            strcmp (value, "yes") == 0 ||
+            strcmp (value, "YES") == 0 ||
+            strcmp (value, "on") == 0 ||
+            strcmp (value, "ON") == 0 ||
+            strcmp (value, "1") == 0
+            )
+            return true;
+
+        if (strcmp (value, "false") == 0 ||
+            strcmp (value, "FALSE") == 0 ||
+            strcmp (value, "no") == 0 ||
+            strcmp (value, "NO") == 0 ||
+            strcmp (value, "off") == 0 ||
+            strcmp (value, "OFF") == 0 ||
+            strcmp (value, "0") == 0
+            )
+            return false;
+        }
+
+    return defaultValue;
     }
 
 

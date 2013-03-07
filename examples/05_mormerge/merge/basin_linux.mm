@@ -1,5 +1,5 @@
 flowexedir       = ../../../bin/lnx/flow2d3d/bin
-flowargs         = config_flow2d3d.ini
+flowargs         = config_d_hydro.xml
 waveexedir       = ../../../bin/lnx/wave/bin
 waveargs         = bas.mdw 1
 swanbatdir       = ../../../bin/lnx/swan/scripts

@@ -18,7 +18,7 @@
     rem
     rem Set the config file here
     rem 
-set argfile=config_flow2d3d.ini
+set argfile=config_d_hydro.xml
 
 
 
@@ -29,14 +29,13 @@ set argfile=config_flow2d3d.ini
     rem
 set D3D_HOME=..\..\bin\win32
 set exedir=%D3D_HOME%\flow2d3d\bin
-set libdir=%D3D_HOME%\flow2d3d\lib
 
     rem
     rem No adaptions needed below
     rem
 
     rem Set some (environment) parameters
-set PATH=%exedir%;%libdir%;%PATH%
+set PATH=%exedir%;%PATH%
     rem mpiexec is in %exedir%
     rem For some users, it is necessary to use the locally installed mpiexec:
 set MPIPATH=%exedir%
@@ -46,7 +45,7 @@ set MPIPATH=%exedir%
     rem Run
     rem start computation on all your local cores (2 for dual core; 4 for quad core etc.)
     rem note the flag "-localonly" which may be needed to avoid "Aborting: unable to connect to machinename.local"
-%MPIPATH%\mpiexec -n %NUMBER_OF_PROCESSORS% -localonly %exedir%\deltares_hydro.exe %argfile%
+%MPIPATH%\mpiexec -n %NUMBER_OF_PROCESSORS% -localonly %exedir%\d_hydro.exe %argfile%
 
 
     rem To prevent the DOS box from disappearing immediately: remove the rem on the following line

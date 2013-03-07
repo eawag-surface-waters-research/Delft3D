@@ -31,7 +31,7 @@
 //  DEFINITIONS
 //
 //  Irv.Elshoff@Deltares.NL
-//  29 jun 12
+//  6 mar 13
 //------------------------------------------------------------------------------
 
 
@@ -123,7 +123,7 @@ class Flow2D3D : public Component {
     public:
         Log *       log;            // logging facility
         XmlTree *   config;         // top of Flow2D3D XML configuration tree
-        const char * mdfile;
+        const char * mdfFile;
         char *      runid;
         FlowOL *    flowol;         // Flow online (via DelftOnline)
         DD *        dd;             // domain decomposition object

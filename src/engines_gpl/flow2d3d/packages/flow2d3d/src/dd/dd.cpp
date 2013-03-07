@@ -31,7 +31,7 @@
 //  Domain Decomposition Initialization - IMPLEMENTATION
 //
 //  Irv.Elshoff@Deltares.NL
-//  25 may 12
+//  6 mar 13
 //------------------------------------------------------------------------------
 
 
@@ -92,8 +92,13 @@ DD::DD (
     this->rtcCat                = NULL;
 
     this->log->Write (Log::CONFIG_MINOR, "Sizeof DD object is %d bytes", sizeof (*this));
-    //this->config->Print ();
 
+    this->log->Write (Log::MAJOR, "Flow2D3D initializing single-process multi-domain simulation");
+    this->nodeSet->AddNodesFromString ("localhost");
+    this->role = ROLE_SINGLE;
+
+    /*
+    ToDo: Get multi-node DD configuratino from XML file
     this->multiNode = this->config->Lookup ("MultiNode");
     if (this->multiNode == NULL) {
         this->log->Write (Log::MAJOR, "Flow2D3D initializing single-process multi-domain simulation");
@@ -130,6 +135,7 @@ DD::DD (
             this->role = ROLE_SLAVE;
             }
         }
+    */
 
 #if defined (WIN32)
     if (this->multiNode)
@@ -278,7 +284,7 @@ DD::ReadConfig (
     void
     ) {
 
-    const char * ddbfile = this->config->GetAttrib ("DDBounds:file");
+    const char * ddbfile = this->config->GetElement ("ddbFile");
     if (ddbfile == NULL)
         throw new Exception (true, "DD-bounds file not specified in configuration file");
 
@@ -299,7 +305,7 @@ DD::ReadConfig (
 #if defined (WIN32)
         throw new Exception (true, "XML DD-bounds file is currently not supported on Windows");
 #else
-        throw new Exception (true, "XML DD-bounds file is currently not implemented (WIP)");
+        throw new Exception (true, "XML DD-bounds file is currently not implemented (WIP)");        // ToDo
 #endif
         }
 

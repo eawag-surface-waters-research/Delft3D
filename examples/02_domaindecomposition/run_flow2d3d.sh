@@ -14,7 +14,7 @@
     #
     # Set the config file here
     # 
-argfile=config_flow2d3d.ini
+argfile=config_d_hydro.xml
 
 
 
@@ -26,14 +26,13 @@ argfile=config_flow2d3d.ini
 export ARCH=intel
 export D3D_HOME=../../bin/lnx
 exedir=$D3D_HOME/flow2d3d/bin
-libdir=$D3D_HOME/flow2d3d/lib
  
     #
     # No adaptions needed below
     #
 
     # Set some (environment) parameters
-export LD_LIBRARY_PATH=$exedir:$libdir:$LD_LIBRARY_PATH 
+export LD_LIBRARY_PATH=$exedir:$LD_LIBRARY_PATH 
 
     # Run
-$exedir/deltares_hydro.exe $argfile
+$exedir/d_hydro.exe $argfile

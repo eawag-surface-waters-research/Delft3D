@@ -30,7 +30,7 @@
 //  D_Hydro Main Program
 //
 //  Irv.Elshoff@Deltares.NL
-//  29 jun 12
+//  6 mar 13
 //------------------------------------------------------------------------------
 
 
@@ -185,7 +185,7 @@ DeltaresHydro::DeltaresHydro (
     // Process command-line arguments
 
     int c;
-    while ((c = getopt (argc, argv, "d:l:S:v?")) != -1) {
+    while ((c = getopt (argc, argv, (char *) "d:l:S:v?")) != -1) {
         switch (c) {
             case 'd': {
                 if (sscanf (optarg, "%i", &logMask) != 1)
@@ -249,20 +249,16 @@ DeltaresHydro::DeltaresHydro (
 
     // Get the name and configuration subtree of the start component
 
-    XmlTree * root = this->config->Lookup ("/DeltaresHydro");
+    XmlTree * root = this->config->Lookup ("/deltaresHydro");
     if (root == NULL)
-        throw new Exception (true, "Configuration file \"%s\" does not have a DeltaresHydro root element", this->configfile);
+        throw new Exception (true, "Configuration file \"%s\" does not have a deltaresHydro root element", this->configfile);
 
-    // ToDo: check the minimalVersion attribute against the actual version of this executable
+    // ToDo: Process control element
 
-    const char * startName = root->GetAttrib ("start");
-    if (startName == NULL)
-        throw new Exception (true, "DeltaresHydro element in configuration file \"%s\" is missing a start attribute", this->configfile);
-
+    const char * startName = "flow2D3D";
     this->start = root->Lookup (startName);
     if (this->start == NULL)
         throw new Exception (true, "Configuration element for start component \"%s\" is missing", startName);
-
 
 #if defined (MONOLITHIC_FLOW2D3D)
     //  ToDo: make sure the start component is Flow2D3D.
@@ -278,11 +274,12 @@ DeltaresHydro::DeltaresHydro (
     //  conventions.
     //  ToDo: deal with envar paths
 
-    const char * library = this->start->GetAttrib ("library");
-    if (library == NULL)
-        library = startName;
+    XmlTree * libraryElement = this->start->Lookup ("library");
+    if (libraryElement == NULL)
+        throw new Exception (true, "The start component \"%s\" does not contain a library element", startName);
 
-    //
+    const char * library = libraryElement->charData;
+
     //          linux windows   mac
     // lib        so    dll     dylib
     // module     so    dll     so

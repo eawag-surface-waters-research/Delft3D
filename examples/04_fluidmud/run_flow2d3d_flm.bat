@@ -14,8 +14,8 @@
     rem
     rem Set the config file here
     rem 
-set argfilesed=config_flow2d3d_sed.ini
-set argfilemud=config_flow2d3d_mud.ini
+set argfilesed=config_d_hydro_sed.xml
+set argfilemud=config_d_hydro_mud.xml
 
 
 
@@ -26,18 +26,17 @@ set argfilemud=config_flow2d3d_mud.ini
     rem
 set D3D_HOME=..\..\bin\win32
 set exedir=%D3D_HOME%\flow2d3d\bin
-set libdir=%D3D_HOME%\flow2d3d\lib
 
     rem
     rem No adaptions needed below
     rem
 
     rem Set some (environment) parameters
-set PATH=%exedir%;%libdir%;%PATH%
+set PATH=%exedir%;%PATH%
 
     rem Run
-start %exedir%\deltares_hydro.exe %argfilesed%
-%exedir%\deltares_hydro.exe %argfilemud%
+start %exedir%\d_hydro.exe %argfilesed%
+%exedir%\d_hydro.exe %argfilemud%
 
 
     rem To prevent the DOS box from disappearing immediately: remove the rem on the following line

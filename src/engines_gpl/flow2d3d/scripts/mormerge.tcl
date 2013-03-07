@@ -20,7 +20,7 @@
 #
 
 global version
-set version "2.6"
+set version "2.7"
 
 global debug
 set debug 0
@@ -526,7 +526,7 @@ proc readInputFile { inputfilename iflist } {
    global queuesys
 
    set flowexedir      " "
-   set flowexename     "deltares_hydro"
+   set flowexename     "d_hydro"
    set flowargs        " "
    set waveexedir      " "
    set waveargs        " "
@@ -622,7 +622,7 @@ proc readInputFile { inputfilename iflist } {
       puts "       flowexedir         = /delft3d/flow/bin/wlinux"
       exit 1
    }
-   if {$flowexename != "trisim" && $flowexename != "delftflow" && $flowexename != "deltares_hydro"} {
+   if {$flowexename != "trisim" && $flowexename != "delftflow" && $flowexename != "deltares_hydro" && $flowexename != "d_hydro"} {
       puts "ERROR: In file $inputfilename"
       puts "       Expecting executable name being \"deltares_hydro\" (default), \"trisim\" (default) or \"delftflow\", example:"
       puts "       flowexename         = delftflow"
@@ -928,51 +928,64 @@ proc getRunids { flowargs inputdir numdoms rids} {
    set waveonline 0
    set numdomains 0
    set runids {}
-   set fargs [split $flowargs]
-   set argcount [llength $fargs]
-   if {$argcount == 1} {
-      #the argument is a ddbound file
+   if {[string first "<ddbFile>" $flowargs] >=0} {
+      regsub -all "<ddbFile>" $flowargs "" fargs
+      regsub -all "</ddbFile>" $fargs "" fargs
+      set fargs [string trim $fargs]
       scanDDBoundFile $fargs $inputdir runids
-   }
-   set words [split $flowargs "="]
-   if {[llength $words] == 2} {
-      # the argument has the shape "keyword = value" (from a config.ini file)
-      set keyword [string tolower [string trim [lindex $words 0]]]
-      set value   [string trim [lindex $words 1]]
-      switch -- $keyword {
-         "mdffile" {
-               set runid $value
-               regsub -all {.mdf} $runid "" runid
-               lappend runids $runid
-         }
-         "ddbfile" {
-               scanDDBoundFile $value $inputdir runids
-         }
-      }
+   } elseif {[string first "<mdfFile>" $flowargs] >=0} {
+      regsub -all "<mdfFile>" $flowargs "" fargs
+      regsub -all "</mdfFile>" $fargs "" fargs
+      regsub -all {.mdf} $fargs "" runid
+      set runid [string trim $runid]
+      lappend runids $runid
    } else {
-      # the arguments are guided with flags like -r or -c
-      set argnumber 0
-      while { $argnumber < $argcount } {
-         set arg [lindex $fargs $argnumber ]
-         switch -- $arg {
-            "-R" -
-            "-r" {
-               incr argnumber
-               set runid [lindex $fargs $argnumber]
-               regsub -all {.mdf} $runid "" runid
-               lappend runids $runid
+      set fargs [split $flowargs]
+      set argcount [llength $fargs]
+      if {$argcount == 1} {
+         #the argument is a ddbound file
+         scanDDBoundFile $fargs $inputdir runids
+      }
+      set words [split $flowargs "="]
+      if {[llength $words] == 2} {
+         # the argument has the shape "keyword = value" (from a config.ini file)
+         set keyword [string tolower [string trim [lindex $words 0]]]
+         set value   [string trim [lindex $words 1]]
+         switch -- $keyword {
+            "mdffile" {
+                  set runid $value
+                  regsub -all {.mdf} $runid "" runid
+                  lappend runids $runid
             }
-            "-C" -
-            "-c" {
-               incr argnumber
-               set ddboundfilename [lindex $fargs $argnumber]
-               scanDDBoundFile $ddboundfilename $inputdir runids
-            }
-            default {
-               # skip; just pass through to trisim
+            "ddbfile" {
+                  scanDDBoundFile $value $inputdir runids
             }
          }
-         incr argnumber
+      } else {
+         # the arguments are guided with flags like -r or -c
+         set argnumber 0
+         while { $argnumber < $argcount } {
+            set arg [lindex $fargs $argnumber ]
+            switch -- $arg {
+               "-R" -
+               "-r" {
+                  incr argnumber
+                  set runid [lindex $fargs $argnumber]
+                  regsub -all {.mdf} $runid "" runid
+                  lappend runids $runid
+               }
+               "-C" -
+               "-c" {
+                  incr argnumber
+                  set ddboundfilename [lindex $fargs $argnumber]
+                  scanDDBoundFile $ddboundfilename $inputdir runids
+               }
+               default {
+                  # skip; just pass through to trisim
+               }
+            }
+            incr argnumber
+         }
       }
    }
    set numdomains [llength $runids]
@@ -1179,7 +1192,6 @@ proc startMormerge { inputfilename workdir mergeexe localrun runid node } {
    set rundir [file nativename [file join $rootdir "merge"] ]
    # Collect some directories to be added to PATH/LD_LIBRARY_PATH
    set exedir [file dirname $mergeexe]
-   set libdir [file join $exedir ".." "lib"]
 
    set screenfile [format "mormerge_%s.scr" $runid]
    set logfile [format "mormerge_%s.log" $runid]
@@ -1194,13 +1206,10 @@ proc startMormerge { inputfilename workdir mergeexe localrun runid node } {
          puts $scriptfile "\n. /opt/sge/InitSGE\n"
       }
       puts $scriptfile "\n# Set some environment parameters\n"
-      #puts $scriptfile "export LD_LIBRARY_PATH=\"/opt/intel_cc_90/lib:/opt/intel_fc_90/lib:/opt/jdk1.5/jre/lib/i386:/opt/jdk1.5/jre/lib/i386/client:/u/elshoff/DOL/DelftOnline/lib\""
-      # This line:
-      # puts $scriptfile ". /opt/intel/Compiler/11.0/081/bin/ifortvars.sh ia32"
-      # is replaced by:
-      puts $scriptfile "export LD_LIBRARY_PATH=$exedir:$libdir"
-      puts $scriptfile  "# TEMPORARY SOLUTION: setting LD_PRELOAD"
-      puts $scriptfile "export LD_PRELOAD=[file join $libdir libgfortran.so.3]"
+      puts $scriptfile "export LD_LIBRARY_PATH=$exedir"
+      # Needed when compiled with newer Gnu compiler than the default on the calculation machine:
+      # puts $scriptfile  "# TEMPORARY SOLUTION: setting LD_PRELOAD"
+      # puts $scriptfile "export LD_PRELOAD=[file join $exedir libgfortran.so.3]"
       
       if { $localrun } {
          set worksubdir $idstring
@@ -1256,7 +1265,7 @@ proc startMormerge { inputfilename workdir mergeexe localrun runid node } {
          puts $scriptfile [format "cd /D %s%s" $rootdir "\\merge"]
       }
       puts $scriptfile "\nrem Start mormerge\n"
-      puts $scriptfile "set PATH=$exedir;$libdir;%PATH%"
+      puts $scriptfile "set PATH=$exedir;%PATH%"
       puts $scriptfile "start /b $mergeexe -i [file tail $inputfilename] -w $rundir -r $runid >$screenfile 2>&1"
       if { $localrun } {
          puts $scriptfile "\nrem Copy rundir data back to modeldir\n"
@@ -1384,14 +1393,11 @@ proc startFlow { inflist alist condition runids waveonline tdatomexe flowexe wav
    set flowexedir [file dirname $flowexe]
    set archpos [string last "flow2d3d" $flowexedir]
    set flowhomedir [string range $flowexe 0 [expr $archpos-2]]
-   set flowlibdir [file join $flowhomedir "flow2d3d" "lib"]
    if { $waveonline } {
       set waveexedir [file dirname $waveexe]
       set archpos [string last "wave" $waveexedir]
       set wavehomedir [string range $waveexe 0 [expr $archpos-2]]
-      set wavelibdir [file join $wavehomedir "wave" "lib"]
       set swanexedir [file join $wavehomedir "swan" "bin"]
-      set swanlibdir [file join $wavehomedir "swan" "lib"]
       set swanbatdir $infillist(swanbatdir)
    }
 
@@ -1407,8 +1413,10 @@ proc startFlow { inflist alist condition runids waveonline tdatomexe flowexe wav
       puts $scriptfile "export D3D_HOME=\"$flowhomedir\""
       puts $scriptfile "export ARCH=\"$arch\""
       puts $scriptfile "export DHSDELFT_LICENSE_FILE=\"/f/license/\""
-      puts $scriptfile  "# TEMPORARY SOLUTION: setting LD_PRELOAD"
-      puts $scriptfile "export LD_PRELOAD=[file join $flowlibdir libgfortran.so.3]"
+      # Needed when compiled with newer Gnu compiler than the default on the calculation machine:
+      # puts $scriptfile "export LD_PRELOAD=[file join $exedir libgfortran.so.3]"
+      # puts $scriptfile  "# TEMPORARY SOLUTION: setting LD_PRELOAD"
+      # puts $scriptfile "export LD_PRELOAD=[file join $flowexedir libgfortran.so.3]"
   
       if { $infillist(localrun) } {
          set worksubdir $idstring
@@ -1439,11 +1447,11 @@ proc startFlow { inflist alist condition runids waveonline tdatomexe flowexe wav
          puts $scriptfile "\n# Start wave\n"
          puts $scriptfile "export D3D_HOME=\"$wavehomedir\""
          puts $scriptfile "export PATH=$swanbatdir:\$PATH"
-         puts $scriptfile "export LD_LIBRARY_PATH=$swanbatdir:$swanexedir:$swanlibdir:$waveexedir:$wavelibdir"
+         puts $scriptfile "export LD_LIBRARY_PATH=$swanbatdir:$swanexedir:$waveexedir"
          puts $scriptfile "$waveexe $infillist(waveargs) >wave.scr 2>&1 &"
       }
       puts $scriptfile "\n# Start $infillist(flowexename)\n"
-      puts $scriptfile "export LD_LIBRARY_PATH=$flowexedir:$flowlibdir"
+      puts $scriptfile "export LD_LIBRARY_PATH=$flowexedir"
       puts $scriptfile "$flowexe $infillist(flowargs) >$infillist(flowexename).scr 2>&1"
       if { $infillist(localrun) } {
          puts $scriptfile "\n# Copy rundir data back to modeldir\n"
@@ -1489,11 +1497,11 @@ proc startFlow { inflist alist condition runids waveonline tdatomexe flowexe wav
       if { $waveonline } {
          puts $scriptfile "\nrem Start wave\n"
          puts $scriptfile "set D3D_HOME=$wavehomedir"
-         puts $scriptfile "set PATH=$swanbatdir;$swanexedir;$swanlibdir;$waveexedir;$wavelibdir;%PATH%"
+         puts $scriptfile "set PATH=$swanbatdir;$swanexedir;$waveexedir;%PATH%"
          puts $scriptfile "start /b $waveexe $infillist(waveargs) >wave.scr 2>&1"
       }
       puts $scriptfile "\nrem Start $infillist(flowexename)\n"
-      puts $scriptfile "set PATH=$flowexedir;$flowlibdir;%PATH%"
+      puts $scriptfile "set PATH=$flowexedir;%PATH%"
       puts $scriptfile "start /b $flowexe $infillist(flowargs) >$infillist(flowexename).scr 2>&1"
       if { $infillist(localrun) } {
          puts $scriptfile "\nrem Copy rundir data back to modeldir\n"
@@ -1745,7 +1753,7 @@ if { $infillist(localrun) } {
 putsDebug "numnodes          : $infillist(numnodes)"
 
 # No separate tdatom when using delftflow/deltares_hydro executable
-if { $infillist(flowexename) == "delftflow" || $infillist(flowexename) == "deltares_hydro" } {
+if { $infillist(flowexename) == "delftflow" || $infillist(flowexename) == "deltares_hydro" || $infillist(flowexename) == "d_hydro" } {
    set arglist(runtdatom) 0
 }
 
@@ -1767,7 +1775,7 @@ if { $infillist(flowexename) == "trisim" } {
    }
    close $d3dinfile
    getRunids $aline $inputdir numdomains runids
-} elseif { $infillist(flowexename) == "deltares_hydro" } {
+} elseif { $infillist(flowexename) == "deltares_hydro" || $infillist(flowexename) == "d_hydro" } {
    set d3dfilnam [file nativename [file join $rootdir "input" [lindex $infillist(flowargs) 0] ] ]
    putsDebug "Scanning input file $d3dfilnam ..."
    set d3dinfile [open $d3dfilnam r]
@@ -1860,6 +1868,8 @@ if { $infillist(flowexename) == "trisim" } {
    set flowexe   [file nativename [file join $infillist(flowexedir) "delftflow.exe"] ]
 } elseif { $infillist(flowexename) == "deltares_hydro" } {
    set flowexe   [file nativename [file join $infillist(flowexedir) "deltares_hydro.exe"] ]
+} elseif { $infillist(flowexename) == "d_hydro" } {
+   set flowexe   [file nativename [file join $infillist(flowexedir) "d_hydro.exe"] ]
 }
 
 checkFil exe $mergeexe

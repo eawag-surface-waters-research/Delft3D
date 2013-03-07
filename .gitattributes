@@ -1,6 +1,5 @@
 * text=auto !eol
-examples/01_standard/config_flow2d3d.ini -text
-examples/01_standard/config_flow2d3d.xml -text
+examples/01_standard/config_d_hydro.xml -text
 examples/01_standard/f34.bca -text
 examples/01_standard/f34.bch -text
 examples/01_standard/f34.bnd -text
@@ -22,15 +21,13 @@ examples/01_standard/run_flow2d3d.sh -text
 examples/01_standard/run_flow2d3d_parallel.bat -text
 examples/01_standard/run_flow2d3d_parallel.sh -text
 examples/01_standard/run_flow2d3d_parallel_sge.sh -text
-examples/01_standard/run_flow2d3d_xml.bat -text
-examples/01_standard/run_flow2d3d_xml.sh -text
 examples/02_domaindecomposition/bak_1.enc -text
 examples/02_domaindecomposition/bak_1.grd -text
 examples/02_domaindecomposition/bak_2.enc -text
 examples/02_domaindecomposition/bak_2.grd -text
 examples/02_domaindecomposition/bak_3.enc -text
 examples/02_domaindecomposition/bak_3.grd -text
-examples/02_domaindecomposition/config_flow2d3d.ini -text
+examples/02_domaindecomposition/config_d_hydro.xml -text
 examples/02_domaindecomposition/run_flow2d3d.bat -text
 examples/02_domaindecomposition/run_flow2d3d.sh -text
 examples/02_domaindecomposition/zz1.bcc -text
@@ -47,7 +44,7 @@ examples/02_domaindecomposition/zz3.mdf -text
 examples/02_domaindecomposition/zz3.obs -text
 examples/02_domaindecomposition/zzz.ddb -text
 examples/03_flow-wave/S00D92sm_new02.dep -text
-examples/03_flow-wave/config_flow2d3d.ini -text
+examples/03_flow-wave/config_d_hydro.xml -text
 examples/03_flow-wave/depth_wave05.dep -text
 examples/03_flow-wave/dioconfig.ini -text
 examples/03_flow-wave/f50_spne.bch -text
@@ -71,8 +68,8 @@ examples/04_fluidmud/README -text
 examples/04_fluidmud/case1.enc -text
 examples/04_fluidmud/case1.grd -text
 examples/04_fluidmud/case1.obs -text
-examples/04_fluidmud/config_flow2d3d_mud.ini -text
-examples/04_fluidmud/config_flow2d3d_sed.ini -text
+examples/04_fluidmud/config_d_hydro_mud.xml -text
+examples/04_fluidmud/config_d_hydro_sed.xml -text
 examples/04_fluidmud/dioconfig.ini -text
 examples/04_fluidmud/mud.fil -text
 examples/04_fluidmud/mud.inp -text
@@ -102,7 +99,7 @@ examples/05_mormerge/input/basin.grd -text
 examples/05_mormerge/input/basin.mor -text
 examples/05_mormerge/input/basin.obs -text
 examples/05_mormerge/input/basin.sed -text
-examples/05_mormerge/input/config_flow2d3d.ini -text
+examples/05_mormerge/input/config_d_hydro.xml -text
 examples/05_mormerge/input/det.dep -text
 examples/05_mormerge/input/det.enc -text
 examples/05_mormerge/input/det.grd -text
@@ -2391,8 +2388,6 @@ src/plugins_lgpl/plugin_delftflow_traform/src/shld.f90 -text
 src/plugins_lgpl/plugin_delftflow_traform/src/vrijn84_riv_77.f90 -text
 src/plugins_lgpl/plugin_delftflow_traform/src/vrijn84_riv_77_salt.f90 -text
 src/scripts_lgpl/Makefile.am -text
-src/scripts_lgpl/deltares_hydro/Makefile.am -text
-src/scripts_lgpl/deltares_hydro/deltares_hydro.tcl -text
 src/scripts_lgpl/linux/Makefile.am -text
 src/scripts_lgpl/linux/convert_lnx_to_old_directory_structure_intel.sh -text
 src/scripts_lgpl/linux/gatherlibraries.rb -text
@@ -3042,14 +3037,6 @@ src/third_party_open/swan/scripts/swan_install.bat -text
 src/third_party_open/swan/scripts/swan_install.sh -text
 src/third_party_open/swan/scripts/swan_install_PRINT_for_debugging.sh -text
 src/third_party_open/swan/swan_license_info.txt -text
-src/third_party_open/tclkit/bin/intel/deltares_hydro.exe -text
-src/third_party_open/tclkit/bin/win32/deltares_hydro.exe -text
-src/third_party_open/tclkit/sdx.kit -text
-src/third_party_open/tclkit/tcl_to_exe.bat -text
-src/third_party_open/tclkit/tcl_to_exe.sh -text
-src/third_party_open/tclkit/tclkit -text
-src/third_party_open/tclkit/tclkit.exe -text
-src/third_party_open/tclkit/tclkit_license_info.txt -text
 src/third_party_open/triangle/Makefile.am -text
 src/third_party_open/triangle/f2c.h -text
 src/third_party_open/triangle/triangle.c -text

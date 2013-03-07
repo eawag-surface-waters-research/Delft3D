@@ -31,7 +31,7 @@
 //  Tree-representation of an XML file - DEFINITIONS
 //
 //  Irv.Elshoff@Deltares.NL
-//  25 may 11
+//  6 mar 13
 //------------------------------------------------------------------------------
 
 
@@ -88,15 +88,26 @@ class XmlTree {
             const char * pathname
             );
 
+        XmlTree *
+        Lookup (
+            const char * pathname,
+            int instance
+            );
+
         const char *
         GetAttrib (
             const char * name
             );
 
-        XmlTree *
-        Lookup (
-            const char * pathname,
-            int instance
+        const char *
+        GetElement (
+            const char * name
+            );
+
+        bool
+        GetBoolElement (
+            const char * name,
+            bool defaultValue
             );
 
         void

@@ -70,7 +70,6 @@ rem ==========================
 
     if not exist !dest_bin!     mkdir !dest_bin!
     
-    copy third_party_open\tclkit\bin\win32\deltares_hydro.exe   !dest_bin!
 goto :endproc
 
 

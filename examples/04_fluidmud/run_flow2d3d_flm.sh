@@ -8,8 +8,8 @@
     #
     # Specify the config files to be used here
     # 
-argfilesed=config_flow2d3d_sed.ini
-argfilemud=config_flow2d3d_mud.ini
+argfilesed=config_d_hydro_sed.xml
+argfilemud=config_d_hydro_mud.xml
 
     #
     # Set the directory containing deltares_hydro.exe and libflow2d3d.so here
@@ -17,7 +17,6 @@ argfilemud=config_flow2d3d_mud.ini
 export ARCH=intel
 export D3D_HOME=../../bin/lnx
 exedir=$D3D_HOME/flow2d3d/bin
-libdir=$D3D_HOME/flow2d3d/lib
 useSharedMem=1
 
 
@@ -30,7 +29,7 @@ useSharedMem=1
     #
 
     # Set some (environment) parameters
-export LD_LIBRARY_PATH=$exedir:$libdir:$LD_LIBRARY_PATH 
+export LD_LIBRARY_PATH=$exedir:$LD_LIBRARY_PATH 
 
 
     #
@@ -50,12 +49,12 @@ fi
 
     #
     # Run
-$exedir/deltares_hydro.exe $argfilesed &
+$exedir/d_hydro.exe $argfilesed &
     #echo press enter to continue
     #read dummy
 echo waiting 5 seconds
 sleep 5
-$exedir/deltares_hydro.exe $argfilemud
+$exedir/d_hydro.exe $argfilemud
 
     #
     # delete context

@@ -31,7 +31,7 @@
 //  Interface to DelftOnline - IMPLEMENTATION
 //
 //  Irv.Elshoff@deltares.NL
-//  28 may 12
+//  6 mar 13
 //-------------------------------------------------------------------------------
 
 
@@ -58,16 +58,16 @@ FlowOL::FlowOL (
 
     // Get DOL options from the configuration tree
 
-    const char * urlFile = config->GetAttrib ("URLFile");
+    const char * urlFile = config->GetElement ("urlFile");
     if (urlFile == NULL)
-        throw new Exception (true, "URLFile not specified in DelftOnline section of the configuration file");
+        throw new Exception (true, "urlFile not specified in delftOnline section of the configuration file");
 
-    bool allowStart = ! config->GetBoolAttrib ("wait");
-    bool allowControl = config->GetBoolAttrib ("control");
+    bool allowStart = ! config->GetBoolElement ("wait", false);
+    bool allowControl = config->GetBoolElement ("control", true);
     allowControl |= ! allowStart;
 
     DOL::Verbosity verbosity = DOL::SILENT;
-    const char * verb = config->GetAttrib ("verbosity");
+    const char * verb = config->GetElement ("verbosity");
     if (verb != NULL) {
         if (strcasecmp (verb, "silent") == 0)
             verbosity = DOL::SILENT;
@@ -84,7 +84,7 @@ FlowOL::FlowOL (
     uint16_t firstPort = 0;
     uint16_t lastPort = 0;
 
-    const char * ports = config->GetAttrib ("port");
+    const char * ports = config->GetElement ("port");
     if (ports != NULL) {
         const char * dash = strchr (ports, '-');
         if (dash == NULL)

@@ -398,7 +398,6 @@ plugins_lgpl/plugin_culvert/Makefile
 plugins_lgpl/plugin_culvert/src/Makefile
 plugins_lgpl/plugin_delftflow_traform/Makefile
 plugins_lgpl/plugin_delftflow_traform/src/Makefile
-scripts_lgpl/deltares_hydro/Makefile
 scripts_lgpl/linux/Makefile
 scripts_lgpl/Makefile
 third_party_open/Makefile

@@ -85,7 +85,6 @@ function d_hydro () {
     mkdir -p $dest_bin
 
     copyFile "bin/d_hydro.exe" 					    $dest_bin
-    copyFile "third_party_open/tclkit/bin/intel/deltares_hydro.exe" $dest_bin
 
     echo "Gathering libraries for d_hydro..."
     cp -u `$gatherScript bin/d_hydro.exe | eval grep -v $gatherFilter` $dest_bin

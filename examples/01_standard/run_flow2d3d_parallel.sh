@@ -24,7 +24,7 @@ NPART=$NHOSTS
     #
     # Specify the config file to be used here
     # 
-argfile=config_flow2d3d.ini
+argfile=config_d_hydro.xml
 
 
 
@@ -36,14 +36,13 @@ argfile=config_flow2d3d.ini
 export ARCH=intel
 export D3D_HOME=../../bin/lnx
 exedir=$D3D_HOME/flow2d3d/bin
-libdir=$D3D_HOME/flow2d3d/lib
  
     #
     # No adaptions needed below
     #
 
     # Set some (environment) parameters
-export LD_LIBRARY_PATH=$exedir:$libdir:$LD_LIBRARY_PATH 
+export LD_LIBRARY_PATH=$exedir:$LD_LIBRARY_PATH 
 
 
 
@@ -90,7 +89,7 @@ done
 
     ### General, start delftflow in parallel by means of mpirun.
     ### The machines in the h4 cluster are dual core; start 2*NHOSTS parallel processes
-mpirun -np $NHOSTS $exedir/deltares_hydro.exe $argfile
+mpirun -np $NHOSTS $exedir/d_hydro.exe $argfile
     ### alternatives:
     ### mpiexec -n $DELTAQ_NumNodes delftflow_91.exe -r $inputfile.mdf
     ### mpiexec -n `expr $DELTAQ_NumNodes \* 2` $exedir/deltares_hydro.exe $argfile
