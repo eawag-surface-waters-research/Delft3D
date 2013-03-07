@@ -60,8 +60,10 @@ delwaq2_LDADD = \
     $(top_builddir)/engines_gpl/waq/packages/waq_utils_c/src/libwaq_utils_c.la \
     $(top_builddir)/engines_gpl/waq/packages/delwaq2_version_number/src/libdelwaq2_version_number.la \
     $(MPILIBS) \
-    -lpthread
+    -lpthread \
+    -ldl
 
+delwaq2_LDFLAGS = -export-dynamic 
 
 # To be added when using Intel 11:
 #    $(FCLIBS)

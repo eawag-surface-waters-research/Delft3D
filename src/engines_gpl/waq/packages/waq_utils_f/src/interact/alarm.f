@@ -21,7 +21,7 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      SUBROUTINE ALARM
+      SUBROUTINE ALARMBL
       CHARACTER*1 ESCAP
       INTEGER IESCAP
       DATA IESCAP /7/

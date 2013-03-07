@@ -34,7 +34,7 @@ FMODULES += \
 libWaqKernel_la_SOURCES = \
        dlwq_mt3d_data.f90 \
        dlwq_mt3d.f90 \
-       dlwq2_hydro_set.f \
+       dlwq2_hydro_set.F \
        delwaq2_data.f \
        delwaq_in_openda.f90 \
        wqparcom.F90 \

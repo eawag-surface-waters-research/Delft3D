@@ -39,8 +39,7 @@ function install_all () {
     d_hydro
     flow2d3d
     flow2d3d_openda
-    delwaq1
-    delwaq2
+    delwaq
     wave
     plugin_culvert
     plugin_delftflow_traform
@@ -154,11 +153,11 @@ function flow2d3d_openda () {
 
 
 
-# ==================
-# === INSTALL_DELWAQ1 ===
-# ==================
-function delwaq1 () {
-    echo "installing delwaq1 . . ."
+# ======================
+# === INSTALL DELWAQ ===
+# ======================
+function waq () {
+    echo "installing delwaq . . ."
 
     dest_bin="$dest_main/lnx/waq/bin"
     dest_default="$dest_main/lnx/waq/default"
@@ -166,29 +165,13 @@ function delwaq1 () {
     mkdir -p $dest_bin
     mkdir -p $dest_default
 
-    copyFile "bin/delwaq1"                                                   $dest_bin
-    copyFile "engines_gpl/waq/default/bloom.spe"           $dest_default
-    copyFile "engines_gpl/waq/default/bloominp.d09"    $dest_default
-    copyFile "engines_gpl/waq/default/proc_def.dat"      $dest_default
-    copyFile "engines_gpl/waq/default/proc_def.def"      $dest_default
+    copyFile "bin/delwaq1"                    $dest_bin
+    copyFile "bin/delwaq2"                    $dest_bin
+    copyFile "lib/libwaq_plugin_wasteload.so" $dest_bin
+    copyFile "engines_gpl/waq/default/*"          $dest_default
 
-    return
-}
-
-
-
-# ==================
-# === INSTALL_DELWAQ2 ===
-# ==================
-function delwaq2 () {
-    echo "installing delwaq2 . . ."
-
-    dest_bin="$dest_main/lnx/waq/bin"
-
-    mkdir -p $dest_bin
-
-    copyFile "bin/delwaq2"                                                 $dest_bin
-
+    echo "Gathering libraries for delwaq..."
+    cp -u `$gatherScript bin/delwaq1 bin/delwaq2 | eval grep -v $gatherFilter` $dest_bin
     return
 }
 

@@ -1752,7 +1752,7 @@ src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwq17.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwq18.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwq19.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwq20.f -text
-src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwq2_hydro_set.f -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwq2_hydro_set.F -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwq30.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwq40.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/dlwq41.f -text

@@ -39,7 +39,7 @@ C     Name    Type  Length   I/O  Description
 C
 C     RUNNAM  C*(*) 1        I    Filename consisting of runid (no ext)
 C
-      CHARACTER*(*)   RUNNAM
+      CHARACTER*12   RUNNAM
 C
 C     Common block variables used
 C
@@ -65,17 +65,17 @@ C
 C  Open statement for BLOOM II input files.
 C
       WRITE (RUNNAM(10:12),'(''frm'')')
-      OPEN (IOU(12),FILE=RUNNAM,SHARED,IOSTAT = IOST)
+      OPEN (IOU(12),FILE=RUNNAM,IOSTAT = IOST)
       IF (IOST .NE. 0) GOTO 901
 
       WRITE (RUNNAM(10:12),'(''d09'')')
-      OPEN (IOU( 9),FILE=RUNNAM,SHARED,IOSTAT = IOST)
+      OPEN (IOU( 9),FILE=RUNNAM,IOSTAT = IOST)
       IF (IOST .NE. 0) GOTO 902
 C
 C Open BLOOM output file as unformatted, binary = transparent.
 C
       WRITE (RUNNAM(10:12),'(''blm'')')
-      OPEN (IOU(26),FILE=RUNNAM,SHARED,
+      OPEN (IOU(26),FILE=RUNNAM,
      &         FORM='UNFORMATTED', IOSTAT=IOST)
 c     ENDFILE (IOU(26))
       IF (IOST .NE. 0) GOTO 903
@@ -83,7 +83,7 @@ C
 C  Open statement for BLOOM II debug file.
 C
       WRITE (RUNNAM(10:12),'(''dbg'')')
-      OPEN (IOU(10),FILE=RUNNAM,SHARED,IOSTAT = IOST)
+      OPEN (IOU(10),FILE=RUNNAM,IOSTAT = IOST)
       IF (IOST .NE. 0) GOTO 904
 
       RETURN

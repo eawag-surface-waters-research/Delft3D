@@ -31,6 +31,7 @@ C
 C
 C     Arguments
 C
+      INTEGER       NARG
       INTEGER       IARG
       CHARACTER*(*) LINE
 C
@@ -39,7 +40,6 @@ C
       INTEGER*2     N, STATUS
       CHARACTER*256 BUFFER
       INTEGER       COUNT
-      INTEGER       NARGS
       INTEGER       STORED
       LOGICAL       OPENED, EXISTS
       INTEGER       IERR
@@ -56,6 +56,7 @@ C
 C
 C         Call system routine
 C
+          NARG = IARGC() + 1
           N = IARG
           CALL GETARG( N     , BUFFER)
 C
@@ -77,8 +78,8 @@ C
                   ENDIF
               ENDDO
               IF ( LUN .GT. 0 ) THEN
-                  IF ( NARGS() .GT. 0 ) THEN
-                      COUNT = IARG - NARGS()
+                  IF ( NARG .GT. 0 ) THEN
+                      COUNT = IARG - NARG
                   ELSE
                       COUNT = IARG - 1
                   ENDIF

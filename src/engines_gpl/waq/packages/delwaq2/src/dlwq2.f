@@ -35,7 +35,7 @@
 
       type(delwaq_data)                :: dlwqd
 
-      argc = nargs()
+      argc = iargc() + 1
       allocate ( argv (argc))
       do i = 1, argc
           call getarg(i - 1, argv(i))

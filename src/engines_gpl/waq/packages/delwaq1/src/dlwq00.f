@@ -27,7 +27,8 @@
       character(len=256), allocatable  :: argv(:)
       integer(4)                       :: i
       
-      argc = nargs()
+      argc = iargc() + 1
+
       allocate ( argv (argc))
       do i = 1, argc
           call getarg(i - 1, argv(i))

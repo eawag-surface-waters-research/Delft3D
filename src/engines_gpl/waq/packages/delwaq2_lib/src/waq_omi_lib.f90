@@ -315,7 +315,7 @@ logical function SetAttributeInit(idx, ivalue)
     enddo
 
     if ( reporting ) then
-        write( lunlst, '(a,i)' ) 'Values set for attribute ',idx
+        write( lunlst, '(a25,i)' ) 'Values set for attribute ',idx
     endif
 
     SetAttributeInit = .true.
@@ -1202,7 +1202,7 @@ logical function SetInitialVolume( volume )
     SetInitialVolume = .false.
 
     time_dummy = 0
-    open( 10, file = trim(runid) // '-volumes.wrk' , form = 'unformatted',access='stream',shared, err=911 )
+    open( 10, file = trim(runid) // '-volumes.wrk' , form = 'unformatted',access='stream', err=911 )
     write( 10 ) time_dummy, volume(1:noseg)
     close( 10 )
 
@@ -1445,7 +1445,7 @@ end function SetBoundaryConditions
 ! ModelPerformTimeStep --
 !     Set a single time step
 !
-integer function ModelPerformTimeStep
+integer function ModelPerformTimeStep ()
     !DEC$ ATTRIBUTES DLLEXPORT::ModelPerformTimeStep
     !DEC$ ATTRIBUTES ALIAS : '_MODELPERFORMTIMESTEP' :: ModelPerformTimeStep
 
@@ -1468,7 +1468,7 @@ end function ModelPerformTimeStep
 ! ModelInitialize --
 !     Initialize the model run
 !
-integer function ModelInitialize
+integer function ModelInitialize ()
     !DEC$ ATTRIBUTES DLLEXPORT::ModelInitialize
     !DEC$ ATTRIBUTES ALIAS : '_MODELINITIALIZE' :: ModelInitialize
 

@@ -36,7 +36,7 @@ C
       CMD = 'BROWSE \BLOOM\BLMNEWS'
       IRC = CMS (CMD, 24)
       IF (IRC .NE. 0) THEN
-         CALL ALARM
+         CALL ALARMBL
          CALL VIDEO (1)
          CALL VIDEO (5)
          WRITE (OUUNI,10)

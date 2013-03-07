@@ -118,28 +118,31 @@ subroutine delwaq2_global_data_initialize(runid_given)
                       44 , 45 , 46 , 47 , 48 , 49 , 50 , 51 , 52 , 53 , &
                       54 , 55 , 56 , 0   ,0  ,0   ,0   ,0   ,0   ,0  /)
 
-    lchar =   (/ '-delwaq03.wrk' , '-delwaq04.wrk' , &
+    lchar =   (/  '-delwaq03.wrk' , '-delwaq04.wrk' , &
                   '-harmonic.wrk' , '-pointers.wrk' , &
                   '-timestep.wrk' , '-gridding.wrk' , &
-                  '-volumes.wrk'  , '-to_from.wrk ' , &
-                  '-dispersi.wrk' , '-areas.wrk'    , &
-                  '-flows.wrk'    , '-velocity.wrk' , &
+                  '-volumes.wrk ' , '-to_from.wrk ' , &
+                  '-dispersi.wrk' , '-areas.wrk   ' , &
+                  '-flows.wrk   ' , '-velocity.wrk' , &
                   '-lengthes.wrk' , '-boundary.wrk' , &
                   '-wastload.wrk' , '-function.wrk' , &
-                  '-segfunc.wrk'  , '-initials.wrk' , &
-                  '.mon'          , '.dmp'          , &
-                  '.his'          , '.map'          , &
-                  '.res'          , '-proces.wrk'   , &
-                  '-output.wrk'   , '.inp'          , &
-                  ' '             , '-delwaq02.wrk' , &
-                  '.lst'          , '-dlwqstrt.inc' , &
+                  '-segfunc.wrk ' , '-initials.wrk' , &
+                  '.mon         ' , '.dmp         ' , &
+                  '.his         ' , '.map         ' , &
+                  '.res         ' , '-proces.wrk  ' , &
+                  '-output.wrk  ' , '.inp         ' , &
+                  '             ' , '-delwaq02.wrk' , &
+                  '.lst         ' , '-dlwqstrt.inc' , &
                   '-scratch1opt3' , '-scratch2opt3' , &
-                  '-auxfileop1'   , '-proces.def'   , &
-                  '.lsp'          , '-stochi.inp'   , &
-                  '-bal.his'      , '.hdf'          , &
-                  '.adf'          , '-kenmerk.wrk'  , &
-                  '-filenaam.wrk' , '-stat.map'     , &
-                  '-stat.mon'     , ' ',' ',' ',' ', ' ',' ',' '/)
+                  '-auxfileop1  ' , '-proces.def  ' , &
+                  '.lsp         ' , '-stochi.inp  ' , &
+                  '-bal.his     ' , '.hdf         ' , &
+                  '.adf         ' , '-kenmerk.wrk ' , &
+                  '-filenaam.wrk' , '-stat.map    ' , &
+                  '-stat.mon    ' , '             ' , &
+                  '             ' , '             ' , &
+                  '             ' , '             ' , &
+                  '             ' , '             '/)
 
     filtype = 0
 

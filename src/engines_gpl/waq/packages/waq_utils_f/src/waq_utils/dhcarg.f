@@ -45,7 +45,7 @@ C
 C
 C         Call system routine
 C
-          DHCARG = NARGS()
+          DHCARG = IARGC() + 1
 C
 C         Take care of virtual zeroth argument
 C

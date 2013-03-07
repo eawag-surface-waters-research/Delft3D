@@ -179,25 +179,25 @@ C
       DATA      LCHAR  / '-delwaq03.wrk' , '-delwaq04.wrk' ,
      *                   '-harmonic.wrk' , '-pointers.wrk' ,
      *                   '-timestep.wrk' , '-gridding.wrk' ,
-     *                   '-volumes.wrk'  , '-to_from.wrk ' ,
-     *                   '-dispersi.wrk' , '-areas.wrk'    ,
-     *                   '-flows.wrk'    , '-velocity.wrk' ,
+     *                   '-volumes.wrk ' , '-to_from.wrk ' ,
+     *                   '-dispersi.wrk' , '-areas.wrk   ' ,
+     *                   '-flows.wrk   ' , '-velocity.wrk' ,
      *                   '-lengthes.wrk' , '-boundary.wrk' ,
      *                   '-wastload.wrk' , '-function.wrk' ,
-     *                   '-segfunc.wrk'  , '-initials.wrk' ,
-     *                   '.mon'          , '.dmp'          ,
-     *                   '.his'          , '.map'          ,
-     *                   '.res'          , '-proces.wrk'   ,
-     *                   '-output.wrk'   , '.inp'          ,
-     *                   ' '             , '-delwaq02.wrk' ,
-     *                   '.lst'          , '-dlwqstrt.inc' ,
+     *                   '-segfunc.wrk ' , '-initials.wrk' ,
+     *                   '.mon         ' , '.dmp         ' ,
+     *                   '.his         ' , '.map         ' ,
+     *                   '.res         ' , '-proces.wrk  ' ,
+     *                   '-output.wrk  ' , '.inp         ' ,
+     *                   '             ' , '-delwaq02.wrk' ,
+     *                   '.lst         ' , '-dlwqstrt.inc' ,
      *                   '-scratch1opt3' , '-scratch2opt3' ,
-     *                   '-auxfileop1'   , '-proces.def'   ,
-     *                   '.lsp'          , '-stochi.inp'   ,
-     *                   '-bal.his'      , '.hdf'          ,
-     *                   '.adf'          , '-kenmerk.wrk'  ,
-     *                   '-filenaam.wrk' , '-stat.map'     ,
-     *                   '-stat.mon'     , ' '             ,
+     *                   '-auxfileop1  ' , '-proces.def  ' ,
+     *                   '.lsp         ' , '-stochi.inp  ' ,
+     *                   '-bal.his     ' , '.hdf         ' ,
+     *                   '.adf         ' , '-kenmerk.wrk ' ,
+     *                   '-filenaam.wrk' , '-stat.map    ' ,
+     *                   '-stat.mon    ' , '             ' ,
      *                   ' '             /
       DATA    IOPT / 10 , 11 , 12 , 13 , 14 , 15 , 16 , 17 ,
      *               20 , 21 , 22 , 23 , 24 , 25 , 26 , 27 ,
@@ -231,7 +231,7 @@ C
       call dhstore_command( argv )
 
       narg = dhstored_number_args()            ! but timer is switched 'off' by default
-      if ( narg .eq. 0 ) narg = nargs()
+      if ( narg .eq. 0 ) narg = iargc() + 1
       do ierr = 1, narg
          call dhgarg ( ierr, arg )
          if ( arg .eq. "timer" .or. arg .eq. "TIMER" ) then
