@@ -120,6 +120,7 @@ examples/05_mormerge/merge/basin_windows.mm -text
 examples/05_mormerge/merge/run_flow2d3d_wave_mormerge.bat -text
 examples/05_mormerge/merge/run_flow2d3d_wave_mormerge.sh -text
 examples/run_all_examples.bat -text
+examples/run_all_examples.sh -text
 examples/sed_in_file.tcl -text
 /gpl-3.0.txt -text
 /lgpl-2.1.txt -text
