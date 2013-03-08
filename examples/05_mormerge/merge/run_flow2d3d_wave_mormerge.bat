@@ -6,4 +6,4 @@ set scriptname=../../../bin/win32/flow2d3d/scripts/mormerge.tcl
 
 %TCL_EXE% %scriptname% -i basin_windows.mm -s %scriptname%
 
-pause
+rem pause

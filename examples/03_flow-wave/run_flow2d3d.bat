@@ -42,4 +42,4 @@ set PATH=%waveexedir%;%swanbatdir%;%swanexedir%;%PATH%
 %waveexedir%\wave.exe %mdwfile% 1
 
     rem To prevent the DOS box from disappearing immediately: remove the rem on the following line
-pause
+rem pause
