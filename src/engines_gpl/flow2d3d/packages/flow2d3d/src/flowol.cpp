@@ -62,8 +62,8 @@ FlowOL::FlowOL (
     if (urlFile == NULL)
         throw new Exception (true, "urlFile not specified in delftOnline section of the configuration file");
 
-    bool allowStart = ! config->GetBoolElement ("wait", false);
-    bool allowControl = config->GetBoolElement ("control", true);
+    bool allowStart = ! config->GetBoolElement ("waitOnStart", false);
+    bool allowControl = config->GetBoolElement ("clientControl", true);
     allowControl |= ! allowStart;
 
     DOL::Verbosity verbosity = DOL::SILENT;
