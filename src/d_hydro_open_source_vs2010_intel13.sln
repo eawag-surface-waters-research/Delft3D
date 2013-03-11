@@ -62,6 +62,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "datsel_intel13", "tools_gpl
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nefis", "utils_lgpl\nefis\packages\nefis\nefis.vcxproj", "{A7BAFE5D-1301-48F8-878B-9BECB3DDE241}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0FB6AEED-A49C-4FD2-9F17-2B0C1ED28BE3} = {0FB6AEED-A49C-4FD2-9F17-2B0C1ED28BE3}
+	EndProjectSection
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "kubint_f", "tools_gpl\kubint\packages\kubint_f\kubint_f.vfproj", "{8ADDAA1C-ABB3-4E0F-AB8C-A905C6CC9EDF}"
 EndProject
@@ -96,9 +99,6 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "esmfsm", "utils_lgpl\esmfsm
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nefis_dll", "utils_lgpl\nefis\packages\nefis\nefis_dll.vcxproj", "{0FB6AEED-A49C-4FD2-9F17-2B0C1ED28BE3}"
-	ProjectSection(ProjectDependencies) = postProject
-		{A7BAFE5D-1301-48F8-878B-9BECB3DDE241} = {A7BAFE5D-1301-48F8-878B-9BECB3DDE241}
-	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "datsel_version_number", "tools_gpl\datsel\packages\datsel_version_number\datsel_version_number.vcxproj", "{9FB4A6D1-4EC2-4341-AA6D-878AE2BF65BC}"
 EndProject
