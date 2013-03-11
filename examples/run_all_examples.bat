@@ -41,5 +41,10 @@ call run_flow2d3d_wave_mormerge.bat >screen.log 2>&1
 cd ..\..
 
 
+echo "Running testcase 06_delwaq ..."
+cd 06_delwaq
+call run_delwaq.bat >screen.log 2>&1
+cd ..
+
 echo ...finished
 pause

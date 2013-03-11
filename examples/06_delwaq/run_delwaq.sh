@@ -40,8 +40,6 @@ if [ $? == 0 ]
   then
     echo ""
     echo "Delwaq1 did run without errors."
-    echo ""
-    read -p "Press enter to continue with delwaq2 . . ."
 
     #
     # Run delwaq 2
@@ -61,9 +59,3 @@ else
     echo ""
     echo "Delwaq1 did not run correctly, ending calculation"
 fi
-
-    #
-    # Prevent the script from disappearing immediately
-    #
-echo ""
-read -p "Press enter to exit run_delwaq . . ."

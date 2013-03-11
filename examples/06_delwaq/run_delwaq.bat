@@ -40,10 +40,7 @@ if %ERRORLEVEL% neq 0 (
     goto :end )
 echo. 
 echo Delwaq1 did run without errors.
-
 echo.
-echo Press any key to continue with delwaq2 . . .
-pause > nul
 
     rem
     rem Run delwaq 2
@@ -59,9 +56,4 @@ echo.
 echo Delwaq2 did run without errors.
 
 :end
-    rem
-    rem Prevent the DOS box from disappearing immediately
-    rem
 echo.
-echo Press any key to exit run_delwaq . . .
-pause > nul

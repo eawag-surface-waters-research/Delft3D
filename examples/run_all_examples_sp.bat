@@ -56,5 +56,10 @@ cd ..\input
 cd ..\..
 
 
+echo "Running testcase 06_delwaq ..."
+cd 06_delwaq
+call run_delwaq.bat >screen.log 2>&1
+cd ..
+
 echo ...finished
 pause

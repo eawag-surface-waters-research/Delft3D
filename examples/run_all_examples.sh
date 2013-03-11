@@ -35,5 +35,10 @@ cd 05_mormerge/merge
 cd ../..
 
 
+echo "Running testcase 06_delwaq ..."
+cd 06_delwaq
+./run_delwaq.sh >screen.log 2>&1
+
+
 echo ...finished
 
