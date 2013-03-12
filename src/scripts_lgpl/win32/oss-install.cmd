@@ -221,15 +221,18 @@ rem ====================
     )
     rem One of these two dlls will not exist and cause an ErrorLevel=1. Reset it.
     set ErrorLevel=0
-    call :copyFile engines_gpl\flow2d3d\scripts\meteo_old2new.m               !dest_scripts!
-    call :copyFile "third_party_open\pthreads\bin\win32\*.dll"                !dest_bin!
-    call :copyFile "third_party_open\mpich2\bin\*.exe"                        !dest_bin!
-    call :copyFile "third_party_open\mpich2\lib\*.dll"                        !dest_bin!
-    call :copyFile third_party_open\expat\win32\bin\Release\libexpat.dll      !dest_bin!
-    call :copyFile "third_party_open\intel_fortran\lib\win32\*.dll"           !dest_bin!
-    call :copyFile "engines_gpl\flow2d3d\default\*"                           !dest_default!
-    call :copyFile utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll !dest_bin!
-    call :copyFile utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll !dest_plugins!
+    call :copyFile "engines_gpl\flow2d3d\scripts\meteo_old2new.m"               !dest_scripts!
+    call :copyFile "third_party_open\pthreads\bin\win32\*.dll"                  !dest_bin!
+    call :copyFile "third_party_open\mpich2\bin\*.exe"                          !dest_bin!
+    call :copyFile "third_party_open\mpich2\lib\*.dll"                          !dest_bin!
+    call :copyFile "third_party_open\expat\win32\bin\Release\libexpat.dll"      !dest_bin!
+    call :copyFile "third_party_open\intel_fortran\lib\win32\*.dll"             !dest_bin!
+    call :copyFile "engines_gpl\flow2d3d\default\*"                             !dest_default!
+    call :copyFile "utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll" !dest_bin!
+    call :copyFile "utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll" !dest_plugins!
+    call call :nesthd1
+    call call :nesthd2
+    
     rem
     rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
     rem Some (older) libraries will be overwritten.

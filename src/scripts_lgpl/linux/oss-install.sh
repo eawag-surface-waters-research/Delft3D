@@ -67,6 +67,8 @@ function delft3d_flow () {
     plugin_delftflow_traform
     mormerge
     vs
+    nesthd1
+    nesthd2
 
     return
 }
