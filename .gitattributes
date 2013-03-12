@@ -134,6 +134,8 @@ examples/06_delwaq/com-tut_fti_waq.scn -text
 examples/06_delwaq/com-tut_fti_waq.vol -text
 examples/06_delwaq/run_delwaq.bat -text
 examples/06_delwaq/run_delwaq.sh -text
+examples/06_delwaq/run_delwaq_with_pause.bat -text
+examples/06_delwaq/run_delwaq_with_pause.sh -text
 examples/run_all_examples.bat -text
 examples/run_all_examples.sh -text
 examples/run_all_examples_sp.bat -text
