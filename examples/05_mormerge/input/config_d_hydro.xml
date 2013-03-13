@@ -40,7 +40,7 @@
     <delftOnline>
         <enabled>true</enabled>
         <urlFile>ove.url</urlFile>
-        <waitOnStart>true</waitOnStart>
+        <waitOnStart>false</waitOnStart>
         <clientControl>true</clientControl>    <!-- client allowed to start, step, stop, terminate -->
         <clientWrite>false</clientWrite>    <!-- client allowed to modify data -->
         <!--
