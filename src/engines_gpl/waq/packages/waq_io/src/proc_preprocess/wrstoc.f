@@ -255,8 +255,8 @@
       allocate(outputs%names(nrvarn))
       allocate(outputs%pointers(nrvarn))
       outputs%cursize  = nrvarn
-      outputs%names    = outputl%names
-      outputs%pointers = outputl%pointers
+      outputs%names(1:nrvarn) = outputl%names(1:nrvarn)
+      outputs%pointers(1:nrvarn) = outputl%pointers(1:nrvarn)
 
       ! deallocate local output structure
 
