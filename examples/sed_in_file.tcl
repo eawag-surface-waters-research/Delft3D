@@ -1,3 +1,5 @@
+#! /usr/bin/tclsh
+
 global argv
 
 set filename [lindex $argv 0]
@@ -15,3 +17,4 @@ foreach line [split $wholefile "\n"] {
 set outfile [open $filename "w"]
 puts -nonewline $outfile [join $newfile "\n"] 
 close $outfile
+
