@@ -89,7 +89,6 @@ subroutine datsel ()
     integer                       , external :: inqmxi
     integer                       , external :: opndat
     integer                       , external :: opndef
-    logical                                  :: alone
     logical                                  :: ex
     logical                                  :: lerror
     logical                                  :: intact
@@ -127,7 +126,7 @@ subroutine datsel ()
     character(40)                            :: label
     character(256)                           :: outnam
     character(256)                           :: padnam
-    character(256)                           :: pathd,pathp,fpathd,fpathp
+    character(256)                           :: pathd
     character(10) , dimension(:)  , pointer  :: prefix
     character(1)  , dimension(:,:), pointer  :: typ
     character(16) , dimension(:,:), pointer  :: ugrp
@@ -155,10 +154,9 @@ subroutine datsel ()
     !     ------------------------------
     facrad = atan(1.)/45.
     lerror = .false.
-    alone  = .true.
-    call gethw(lerror,pathp,pathd,alone,fpathp,fpathd)
+    call getmp(lerror, pathd)
     if (lerror) then
-       write(*, '(A,A)') ' ERROR: Path for <files.def> not found, path: ', trim(pathd)
+       write (*, '(a)') "ERROR: Directory ""default"" not found. Needed for <files.def>."
        call ntstop
     endif
     !
