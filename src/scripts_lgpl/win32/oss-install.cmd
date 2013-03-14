@@ -168,8 +168,6 @@ rem ========================
     call :plugin_culvert
     call :plugin_delftflow_traform
     call :mormerge
-    call :nesthd1
-    call :nesthd2
 goto :endproc
 
 
@@ -230,8 +228,6 @@ rem ====================
     call :copyFile "engines_gpl\flow2d3d\default\*"                             !dest_default!
     call :copyFile "utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll" !dest_bin!
     call :copyFile "utils_lgpl\delftonline\lib\Release\dynamic\delftonline.dll" !dest_plugins!
-    call call :nesthd1
-    call call :nesthd2
     
     rem
     rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
