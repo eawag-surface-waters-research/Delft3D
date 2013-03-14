@@ -174,8 +174,6 @@ rem =======================
     
     if not exist !dest_bin!     mkdir !dest_bin!
     
-    copy engines_gpl\waq\bin\Release\delwaq2_lib.dll                 !dest_bin!
-	
     copy third_party_open\openda\core\native\lib\win32\libcta.dll	 !dest_bin!
     copy third_party_open\openda\core\native\lib\win32\libxml2.dll   !dest_bin!
     copy third_party_open\netcdf\lib\win32\Debug\netcdf.dll	         !dest_bin!
