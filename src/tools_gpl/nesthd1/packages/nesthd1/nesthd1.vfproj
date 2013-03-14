@@ -21,7 +21,7 @@
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
 				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\src\nesthd1_version.F90 .\ .\include\version_number.ini"/>
-				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win32\oss-install.cmd nesthd1 ..\bin"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Header Files" Filter="fi;fd">
