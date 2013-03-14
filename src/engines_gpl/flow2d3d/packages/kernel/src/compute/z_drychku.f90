@@ -244,7 +244,7 @@ subroutine z_drychku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
                 if (umean(nm) > 0.0_fp) then
                    kfuz1(nm, k) = kfsz1(nm,k)*kfu(nm)
                 elseif (umean(nm) < 0.0_fp) then
-                   kfuz1(nm, k) = kfsz1(nmu,k)*kfu(nmu)
+                   kfuz1(nm, k) = kfsz1(nmu,k)*kfu(nm)
                 elseif (k <= kfumax(nm)) then
                    kfuz1(nm, k) = kfu(nm)
                 else
