@@ -23,27 +23,19 @@
 
       program dlwq2
 
-      use delwaq2_data
-
       implicit none
-      include 'actions.inc'
 
       integer                          :: argc
       character(len=256), allocatable  :: argv(:)
-      integer                          :: action
       integer(4)                       :: i
 
-      type(delwaq_data)                :: dlwqd
-
       argc = iargc() + 1
+
       allocate ( argv (argc))
       do i = 1, argc
           call getarg(i - 1, argv(i))
       end do
 
-      action = ACTION_FULLCOMPUTATION
-      dlwqd%set_timer = .true.
-
-      call dlwqmain( action, argc, argv, dlwqd )
+      call delwaq2(argc, argv)
 
       end program

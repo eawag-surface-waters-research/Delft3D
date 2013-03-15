@@ -322,17 +322,12 @@ EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "delwaq2", "engines_gpl\waq\packages\delwaq2\delwaq2.vfproj", "{E6C59F91-93EE-4E08-B626-709B2D64D10D}"
 	ProjectSection(ProjectDependencies) = postProject
 		{93FF120B-FF39-4365-860B-2ADF26E746AC} = {93FF120B-FF39-4365-860B-2ADF26E746AC}
-		{93FF2955-C0D7-4EA5-98E3-65B6EBFDDD75} = {93FF2955-C0D7-4EA5-98E3-65B6EBFDDD75}
 		{72D68691-5573-4B61-8942-0CDCA323F7D3} = {72D68691-5573-4B61-8942-0CDCA323F7D3}
-		{2587ADEA-13B7-4BE1-BFB4-588FF22027DF} = {2587ADEA-13B7-4BE1-BFB4-588FF22027DF}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "delwaq2_version_number", "engines_gpl\waq\packages\delwaq2_version_number\delwaq2_version_number.vcxproj", "{72D68691-5573-4B61-8942-0CDCA323F7D3}"
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "waq_data", "engines_gpl\waq\packages\waq_data\waq_data.vfproj", "{30957B02-DE35-4C44-B4D5-0F0006645F1E}"
-	ProjectSection(ProjectDependencies) = postProject
-		{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118} = {2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}
-	EndProjectSection
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "waq_io", "engines_gpl\waq\packages\waq_io\waq_io.vfproj", "{68488C6E-48CA-4C21-8163-4E3043ABFB7B}"
 	ProjectSection(ProjectDependencies) = postProject

@@ -22,6 +22,8 @@
 !!  rights reserved.
 
       program dlwq00
+
+      implicit none
       
       integer                          :: argc
       character(len=256), allocatable  :: argv(:)
@@ -36,4 +38,4 @@
       
       call delwaq1(argc, argv)
       
-      end
+      end program

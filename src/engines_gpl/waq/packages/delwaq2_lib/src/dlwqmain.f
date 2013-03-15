@@ -57,7 +57,26 @@ C
 C
 C      PARAMETER (ITOTA=0       ,ITOTI=0       ,ITOTC=0       )
 
-      SUBROUTINE dlwqmain(ACTION, ARGC, ARGV, DLWQD)
+      subroutine delwaq2( argc, argv )
+      !DEC$ ATTRIBUTES DLLEXPORT::delwaq2
+
+      use delwaq2_data
+      implicit none
+      include 'actions.inc'
+    
+      integer, intent(in)                           :: argc
+      character(len=*), dimension(argc), intent(in) :: argv
+
+      type(delwaq_data)                             :: dlwqd
+
+      dlwqd%set_timer = .true.
+
+      call dlwqmain( ACTION_FULLCOMPUTATION, argc, argv, dlwqd )
+
+      end subroutine delwaq2
+
+
+      subroutine dlwqmain(ACTION, ARGC, ARGV, DLWQD)
 
       !DEC$ ATTRIBUTES DLLEXPORT::dlwqmain
 
