@@ -80,6 +80,7 @@ EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "esmfsm", "utils_lgpl\esmfsm\packages\esmfsm\esmfsm.vfproj", "{C43743A1-7208-41D0-AA2D-098A15E43559}"
 	ProjectSection(ProjectDependencies) = postProject
 		{73054CB6-9CC1-45D0-91A9-EDF50CF361A4} = {73054CB6-9CC1-45D0-91A9-EDF50CF361A4}
+		{5D050FBC-7AFA-4D3C-8AE8-D8C138F15596} = {5D050FBC-7AFA-4D3C-8AE8-D8C138F15596}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "nefis_dll", "utils_lgpl\nefis\packages\nefis\nefis_dll.vcproj", "{0FB6AEED-A49C-4FD2-9F17-2B0C1ED28BE3}"
@@ -90,6 +91,9 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "datsel_version_number", "tools_gpl\datsel\packages\datsel_version_number\datsel_version_number.vcproj", "{9FB4A6D1-4EC2-4341-AA6D-878AE2BF65BC}"
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "deltares_common", "utils_lgpl\deltares_common\packages\deltares_common\deltares_common.vfproj", "{2D6BCBCA-CC6C-49FE-A6AA-61AF62529118}"
+	ProjectSection(ProjectDependencies) = postProject
+		{51065F4C-23D3-4C5F-AF5B-E70776409D7B} = {51065F4C-23D3-4C5F-AF5B-E70776409D7B}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "deltares_common_c", "utils_lgpl\deltares_common\packages\deltares_common_c\deltares_common_c.vcproj", "{51065F4C-23D3-4C5F-AF5B-E70776409D7B}"
 EndProject
