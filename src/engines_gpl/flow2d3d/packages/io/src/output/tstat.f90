@@ -65,7 +65,8 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer          , dimension(:,:)   , pointer :: mnstat
+    integer      , dimension(:,:)   , pointer :: mnstat
+    type (flwoutputtype)            , pointer :: flwoutput
 
 !
 ! Global variables
@@ -186,7 +187,8 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     ! When n,m is in the halo, kcs is -1
     ! => always use the ABSOLUTE value of kcs
     !
-    mnstat => gdp%gdstations%mnstat
+    mnstat         => gdp%gdstations%mnstat
+    flwoutput      => gdp%gdflwpar%flwoutput
     !
     ! Store water-levels and concentrations in defined stations
     ! and calculated discharges to zeta points
@@ -485,7 +487,7 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     !
     ! Store Vorticity and Enstrophy in defined stations
     !
-    if (index(prshis(17:18), 'Y')/=0 .or. index(selhis(17:18), 'Y')/=0) then
+    if (flwoutput%vortic) then
        zvort = -999.0_fp
        zenst = -999.0_fp
        do ii = 1, nostat

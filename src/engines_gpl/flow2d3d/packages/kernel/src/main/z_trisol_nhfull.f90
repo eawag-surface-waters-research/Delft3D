@@ -1896,7 +1896,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
        ! post-processing purpose only
        !
        call timer_start(timer_cvort, gdp)
-       call c_vort(mmax      ,nmax      ,kmax      ,nmaxus    ,i(kfu)    , &
+       call c_vort(mmax      ,nmax      ,kmax      ,nmaxus    ,i(kcs)    ,i(kfu)    , &
                  & i(kfv)    ,r(u1)     ,r(v1)     ,r(gud)    ,r(gvd)    , &
                  & r(vortic) ,r(enstro) ,r(wrkb1)  ,gdp       )
        call timer_stop(timer_cvort, gdp)

@@ -420,7 +420,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
              & 2         ,7         ,nsrc      ,0         ,0         ,0      , &
              & lundia    ,gdp       )
        endif
-       if (index(selmap(2:3),'Y') > 0) then
+       if (flwoutput%vortic) then
           call addelm(nefiswrtmap,'VORTIC',' ','[  1/S  ]','REAL',4          , &
              & 'Vorticity at each layer in depth point                      ', &
              & 3         ,nmaxgl    ,mmaxgl    ,kmaxout_restr,0         ,0      , &
@@ -938,7 +938,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     ! group 3: element 'VORTIC' & 'ENSTRO' only if SELMAP( 2: 3) <> 'NN'
     ! First VORTIC
     !
-    if (index(selmap(2:3),'Y') > 0) then
+    if (flwoutput%vortic) then
        call wrtmap_nmk(1, kmax, ierror, vortic, 'VORTIC', kfsmin, kfsmax)
        if (ierror /= 0) goto 999
        !

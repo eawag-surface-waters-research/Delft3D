@@ -63,6 +63,7 @@ subroutine initflwpar(gdp)
     gdp%gdflwpar%flwoutput%layering        = .false.
     gdp%gdflwpar%flwoutput%roughness       = .false.
     gdp%gdflwpar%flwoutput%temperature     = .false.
+    gdp%gdflwpar%flwoutput%vortic          = .false.
     gdp%gdflwpar%flwoutput%veuler          = .true.
     gdp%gdflwpar%flwoutput%z0cur           = .false.
     gdp%gdflwpar%flwoutput%z0rou           = .false.

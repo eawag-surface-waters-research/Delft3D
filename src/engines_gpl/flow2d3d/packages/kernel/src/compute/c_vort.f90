@@ -1,4 +1,4 @@
-subroutine c_vort(mmax      ,nmax      ,kmax      ,nmaxus    ,kfu       , &
+subroutine c_vort(mmax      ,nmax      ,kmax      ,nmaxus    ,kcs       ,kfu       , &
                 & kfv       ,u1        ,v1        ,gud       ,gvd       , &
                 & vortic    ,enstro    ,wrkarr    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
@@ -39,6 +39,7 @@ subroutine c_vort(mmax      ,nmax      ,kmax      ,nmaxus    ,kfu       , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use mathconsts
     use dfparall
     use globaldata
     !
@@ -55,6 +56,7 @@ subroutine c_vort(mmax      ,nmax      ,kmax      ,nmaxus    ,kfu       , &
     integer                                                            , intent(in) :: mmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                            , intent(in) :: nmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                            , intent(in) :: nmaxus !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in) :: kcs    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in) :: kfu    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in) :: kfv    !  Description and declaration in esm_alloc_int.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)      , intent(in) :: gud    !  Description and declaration in esm_alloc_real.f90
@@ -79,11 +81,13 @@ subroutine c_vort(mmax      ,nmax      ,kmax      ,nmaxus    ,kfu       , &
 !
 !! executable statements -------------------------------------------------------
 !
+    if (.not. gdp%gdflwpar%flwoutput%vortic) return
+    !
     ! For all active computational points
     !
-    vortic = 0.0
-    enstro = 0.0
-    wrkarr = 0.0
+    vortic = 0.0_fp
+    enstro = 0.0_fp
+    wrkarr = 0.0_fp
     nm_pos = 1
     !
     do n = 1, nmaxus
@@ -103,17 +107,20 @@ subroutine c_vort(mmax      ,nmax      ,kmax      ,nmaxus    ,kfu       , &
     enddo
     do n = 2, nmaxus - 1
        do m = 2, mmax - 1
+          if (kcs(n,m) <= 0) cycle
           do k = 1, kmax
              md = m - 1
              nd = n - 1
              vortic(n, m, k) = wrkarr(n, m, k) + wrkarr(n, md, k)               &
                              & + wrkarr(nd, m, k) + wrkarr(nd, md, k)
              num = 4
-             if (comparereal(wrkarr(n , m , k),0.0_fp)==0) num = num - 1
-             if (comparereal(wrkarr(nd, m , k),0.0_fp)==0) num = num - 1
-             if (comparereal(wrkarr(nd, md, k),0.0_fp)==0) num = num - 1
-             if (comparereal(wrkarr(n , md, k),0.0_fp)==0) num = num - 1
-             if (num>=1) vortic(n, m, k) = min(10.0e10_fp,vortic(n, m, k)/num)
+             if (abs(wrkarr(n ,m ,k)) < eps_fp) num = num - 1
+             if (abs(wrkarr(nd,m ,k)) < eps_fp) num = num - 1
+             if (abs(wrkarr(nd,md,k)) < eps_fp) num = num - 1
+             if (abs(wrkarr(n ,md,k)) < eps_fp) num = num - 1
+             if (num >= 1) then
+                vortic(n, m, k) = min(10.0e10_fp,vortic(n, m, k)/num)
+             endif
           enddo
        enddo
     enddo
@@ -123,6 +130,7 @@ subroutine c_vort(mmax      ,nmax      ,kmax      ,nmaxus    ,kfu       , &
     call dfexchg ( vortic, 1, kmax, dfloat, nm_pos, gdp )
     do n = 1, nmaxus
        do m = 1, mmax
+          if (kcs(n,m) <= 0) cycle
           do k = 1, kmax
              enstro(n, m, k) = vortic(n, m, k)*vortic(n, m, k)
           enddo

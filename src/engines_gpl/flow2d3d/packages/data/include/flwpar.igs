@@ -42,6 +42,7 @@ type flwoutputtype
     logical :: roughness
     logical :: temperature
     logical :: veuler
+    logical :: vortic              ! Vorticity and enstrophy calculation and writing to output
     logical :: z0cur
     logical :: z0rou
 end type flwoutputtype

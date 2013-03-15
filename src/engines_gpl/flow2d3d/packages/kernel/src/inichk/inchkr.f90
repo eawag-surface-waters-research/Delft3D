@@ -1210,7 +1210,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     ! computed and stored in HIS and MAP files even when HLES is not
     ! activated. These arrays were meant for post-processing only
     !
-    call c_vort(mmax      ,nmax      ,kmax      ,nmaxus    ,i(kfu)    , &
+    call c_vort(mmax      ,nmax      ,kmax      ,nmaxus    ,i(kcs)    ,i(kfu)    , &
               & i(kfv)    ,r(u1)     ,r(v1)     ,r(gud)    ,r(gvd)    , &
               & r(vortic) ,r(enstro) ,r(wrkb1)  ,gdp       )
     !
