@@ -324,6 +324,18 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
        endif
     enddo
     !
+    ! user defined boundary conditions if nubnd <> 0
+    ! in two directions
+    !
+    if (nubnd /= 0) then
+       do l=1,ltur
+          call usrbcc(j         ,nmmaxj    ,kmax      ,l         , &
+                    & icx       ,icy       ,nto       ,ltur      , &
+                    & mnbnd     ,ubnd      ,aak       ,bbk       ,cck       , &
+                    & ddk       ,rtur0     ,rtur1    , gdp       )
+       enddo            
+    endif
+    !
     ! advective transport
     !
     do n = 1, nmax, 1
@@ -951,6 +963,16 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
              endif
           enddo
        endif
+       !
+       ! Reset the system of equations in the Open Boundary Points
+       ! with User Defined Boundary Conditions
+       !
+       if (nubnd /= 0) then
+          call usrbcc(j         ,nmmaxj    ,kmax      ,l         , &
+                    & icx       ,icy       ,nto       ,ltur      , &
+                    & mnbnd     ,ubnd      ,aak       ,bbk       ,cck       , &
+                    & ddk       ,rtur0     ,rtur1    , gdp       )
+       endif  
        !
        ! SOLUTION PROCEDURE SYSTEM OF EQUATIONS
        !

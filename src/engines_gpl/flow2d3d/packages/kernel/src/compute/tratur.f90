@@ -215,7 +215,6 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     integer :: nmaxddb
     integer :: nmd
     integer :: nmu
-    integer :: nrow    ! Flag = 1 for rows; = 2 for columns 
     integer :: num
     real(fp):: alfa
     real(fp):: ap1
@@ -408,16 +407,10 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
        ! in two directions
        !
        if (nubnd /= 0) then
-          nrow = 1
-          call usrbcc(j         ,nmmaxj    ,0         ,kmax      ,1         , &
-                    & icx       ,icy       ,nrow      ,nto       ,ltur      , &
-                    & l         ,mnbnd     ,ubnd      ,aak       ,bbk       , &
-                    & cck       ,ddk       ,gdp       )
-          nrow = 2
-          call usrbcc(j         ,nmmaxj    ,0         ,kmax      ,1         , &
-                    & icx       ,icy       ,nrow      ,nto       ,ltur      , &
-                    & l         ,mnbnd     ,ubnd      ,aak       ,bbk       , &
-                    & cck       ,ddk       ,gdp       )
+          call usrbcc(j         ,nmmaxj    ,kmax      ,l         , &
+                    & icx       ,icy       ,nto       ,ltur      , &
+                    & mnbnd     ,ubnd      ,aak       ,bbk       ,cck       , &
+                    & ddk       ,rtur0     ,rtur1     ,gdp       )
        endif
        !
        ! iteration loop
@@ -1101,16 +1094,10 @@ subroutine tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
        ! in two directions
        !
        if (nubnd /= 0) then
-          nrow = 1
-          call usrbcc(j         ,nmmaxj    ,0         ,kmax      ,1         , &
-                    & icx       ,icy       ,nrow      ,nto       ,ltur      , &
-                    & l         ,mnbnd     ,ubnd      ,aak       ,bbk       , &
-                    & cck       ,ddk       ,gdp       )
-          nrow = 2
-          call usrbcc(j         ,nmmaxj    ,0         ,kmax      ,1         , &
-                    & icx       ,icy       ,nrow      ,nto       ,ltur      , &
-                    & l         ,mnbnd     ,ubnd      ,aak       ,bbk       , &
-                    & cck       ,ddk       ,gdp       )
+          call usrbcc(j         ,nmmaxj    ,kmax      ,l         , &
+                    & icx       ,icy       ,nto       ,ltur      , &
+                    & mnbnd     ,ubnd      ,aak       ,bbk       ,cck       , &
+                    & ddk       ,rtur0     ,rtur1     ,gdp       )
        endif
        !
        !***SCALE ROWS OF MATRIX/RIGHT HAND SIDE VECTOR

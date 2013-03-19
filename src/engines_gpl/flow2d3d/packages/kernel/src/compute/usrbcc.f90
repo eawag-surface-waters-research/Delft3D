@@ -1,7 +1,7 @@
-subroutine usrbcc(j         ,nmmaxj    ,kmin      ,kmax      ,ldim      , &
-                & icx       ,icy       ,nrow      ,nto       ,lustof    , &
-                & iustof    ,mnbnd     ,ubnd      ,aakl      ,bbkl      , &
-                & cckl      ,ddkl      ,gdp       )
+subroutine usrbcc(j         ,nmmaxj    ,kmax      ,l         , &
+                & icx       ,icy       ,nto       ,ltur      , &
+                & mnbnd     ,ubnd      ,aak       ,bbk       ,cck       , &
+                & ddk       ,rtur0     ,rtur1     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2012.                                
@@ -34,7 +34,7 @@ subroutine usrbcc(j         ,nmmaxj    ,kmin      ,kmax      ,ldim      , &
 !
 !    Function: User defined boundary conditions for constituent
 !              iustof using array UBND (LUSTOF,KMIN:KMAX,2,NTO)
-!              Store in AAKL, BBKL, CCKL and DDKL.
+!              Store in AAK , BBK , CCK  and DDK .
 ! Method used:
 !
 !!--pseudo code and references--------------------------------------------------
@@ -50,80 +50,61 @@ subroutine usrbcc(j         ,nmmaxj    ,kmin      ,kmax      ,ldim      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    logical , pointer :: zmodel
+!
+! Parameters
+!
+    integer, parameter :: kmin = 0
+    integer, parameter :: nrow = 1
 !
 ! Global variables
 !
-    integer                                                    , intent(in)  :: icx    !!  Increment in the x-dir., if icx= nmax
-                                                                                       !!  then computation proceeds in the x-
-                                                                                       !!  dir. if icx=1 then computation pro-
-                                                                                       !!  ceeds in the y-dir.
-    integer                                                    , intent(in)  :: icy    !!  Increment in the y-dir. (see icx)
-    integer                                                    , intent(in)  :: iustof !!  Requested constituents from user
-                                                                                       !!  defined array (<= LUSTOF)
-    integer                                                                  :: j      !!  Begin pointer for arrays which have
-                                                                                       !!  been transformed into 1d arrays.
-                                                                                       !!  due to the shift in the 2nd (m-)
-                                                                                       !!  index, j = -2*nmax + 1
-    integer                                                    , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
-    integer                                                    , intent(in)  :: kmin   !!  Starting index of number of layers
-                                                                                       !!  in the z-dir. (0 or 1)
-    integer                                                    , intent(in)  :: ldim   !!  Dimension for constituents or turbu-
-                                                                                       !!  lent quantities if required (>= 1)
-    integer                                                    , intent(in)  :: lustof !!  Total number of constituents for
-                                                                                       !!  user defined array (eq LUSTOF:=LTUR)
-    integer                                                                  :: nmmaxj !  Description and declaration in dimens.igs
-    integer                                                    , intent(in)  :: nrow   !!  Flag = 1 for rows; = 2 for columns
-    integer                                                    , intent(in)  :: nto    !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(7, nto)                                 , intent(in)  :: mnbnd  !  Description and declaration in esm_alloc_int.f90
-    real(fp), dimension(2, lustof, kmin:kmax, 2, nto)          , intent(in)  :: ubnd   !  Description and declaration in trisol.igs
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmin:kmax, ldim), intent(out) :: aakl   !!  Internal work array, lower diagonal
-                                                                                       !!  tridiagonal matrix, implicit coupling
-                                                                                       !!  of concentration in (n,m,k) with con-
-                                                                                       !!  centration in (n,m,k-1)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmin:kmax, ldim), intent(out) :: bbkl   !!  Internal work array, main diagonal
-                                                                                       !!  tridiagonal matrix, implicit coupling
-                                                                                       !!  of concentration in (n,m,k)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmin:kmax, ldim), intent(out) :: cckl   !!  Internal work array, upper diagonal
-                                                                                       !!  tridiagonal matrix, implicit coupling
-                                                                                       !!  of concentration in (n,m,k) with con-
-                                                                                       !!  centration in (n,m,k+1)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmin:kmax, ldim), intent(out) :: ddkl   !!  Internal work array, diagonal space
-                                                                                       !!  at (n,m,k,l)
+    integer                                                    , intent(in)  :: icx    ! Increment in the x-dir., if icx= nmax then computation proceeds in the x-dir. if icx=1 then computation proceeds in the y-dir.
+    integer                                                    , intent(in)  :: icy    ! Increment in the y-dir. (see icx)
+    integer                                                                  :: j      ! Begin pointer for arrays which have been transformed into 1d arrays. Due to the shift in the 2nd (m-) index, j = -2*nmax + 1
+    integer                                                    , intent(in)  :: kmax   ! Description and declaration in esm_alloc_int.f90
+    integer                                                                  :: nmmaxj ! Description and declaration in dimens.igs
+    integer                                                                  :: ltur   ! Description and declaration in esm_alloc_int.f90
+    integer                                                                  :: l      ! Index turbulent quantity 1 = TKE and 2 = EPS
+    integer                                                    , intent(in)  :: nto    ! Description and declaration in esm_alloc_int.f90
+    integer , dimension(7, nto)                                , intent(in)  :: mnbnd  ! Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(2, ltur, kmin:kmax, 2, nto)            , intent(in)  :: ubnd   ! Description and declaration in trisol.igs
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmin:kmax )     , intent(out) :: aak    ! Internal work array, lower diagonal tridiagonal matrix, implicit coupling of concentration in (n,m,k) with concentration in (n,m,k-1)
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmin:kmax)      , intent(out) :: bbk    ! Internal work array, main diagonal  tridiagonal matrix, implicit coupling of concentration in (n,m,k)
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmin:kmax)      , intent(out) :: cck    ! Internal work array, upper diagonal tridiagonal matrix, implicit coupling of concentration in (n,m,k) with concentration in (n,m,k+1)
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmin:kmax)      , intent(out) :: ddk    ! Internal work array, diagonal space at (n,m,k,l)
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax, ltur)                 :: rtur0  ! Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax, ltur)                 :: rtur1  ! Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !
-    integer           :: ddb
-    integer           :: icxy          ! Max (ICX,ICY) 
-    integer           :: incx
-    integer           :: incy
-    integer           :: istof
-    integer           :: ito
-    integer           :: ix            ! Help var. 
-    integer           :: iy            ! Help var. 
-    integer           :: k
-    integer           :: m
-    integer           :: m1            ! M-coord. of the first  point 
-    integer           :: m2            ! M-coord. of the second point 
-    integer           :: maxinc        ! Maximum of (INCXA,INCYA) 
-    integer           :: n1            ! N-coord. of the first  point 
-    integer           :: n2            ! N-coord. of the second point 
-    integer           :: nm            ! Iy*icy+ix*icx-icxy 
-    logical           :: error         ! Flag=TRUE if an error is encountered 
-    real(fp)          :: autest
-    real(fp)          :: utest
+    integer  :: ddb
+    integer  :: icxy     ! Max (ICX,ICY) 
+    integer  :: incx
+    integer  :: incy
+    integer  :: ito
+    integer  :: ix       ! Help var. 
+    integer  :: iy       ! Help var. 
+    integer  :: k
+    integer  :: m
+    integer  :: m1       ! M-coord. of the first  point 
+    integer  :: m2       ! M-coord. of the second point 
+    integer  :: maxinc   ! Maximum of (INCXA,INCYA) 
+    integer  :: n1       ! N-coord. of the first  point 
+    integer  :: n2       ! N-coord. of the second point 
+    integer  :: nm       ! Iy*icy+ix*icx-icxy 
+    logical  :: error    ! Flag=TRUE if an error is encountered 
 !
 !! executable statements -------------------------------------------------------
 !
+    zmodel     => gdp%gdprocs%zmodel
     !
     ! Initialisation local variable
     !
     ddb  = gdp%d%ddbound
     icxy = max(icx, icy)
     !
-    ! Initialisation of constituent number in "xx"kl array's
-    !
-    istof = 1
-    if (ldim>1) istof = iustof
+    ! Set boundary conditions in array's ; We assume a constant value along the open boundary
     !
     ! Loop over boundary for rows
     ! The definition of the open boundary is checked after reading
@@ -134,11 +115,8 @@ subroutine usrbcc(j         ,nmmaxj    ,kmin      ,kmax      ,ldim      , &
        n1 = mnbnd(2, ito)
        m2 = mnbnd(3, ito)
        n2 = mnbnd(4, ito)
-       call increm(m1        ,n1        ,m2        ,n2        ,incx      , &
-                 & incy      ,maxinc    ,error     )
-       utest = ubnd(nrow, iustof, kmin, 1, ito)
-       autest = abs(ubnd(nrow, iustof, kmin, 1, ito))
-       if (comparereal(autest, utest) == 0) then
+       call increm(m1, n1, m2, n2, incx, incy, maxinc, error)
+       if (ubnd(nrow, l, kmin, 1, ito) > 0.0_fp) then
           ix = m1 - incx
           iy = n1 - incy
           do m = 1, maxinc + 1
@@ -146,10 +124,14 @@ subroutine usrbcc(j         ,nmmaxj    ,kmin      ,kmax      ,ldim      , &
              iy = iy + incy
              nm = (iy + ddb)*icy + (ix + ddb)*icx - icxy
              do k = kmin, kmax
-                aakl(nm, k, istof) = 0.0
-                bbkl(nm, k, istof) = 1.0
-                cckl(nm, k, istof) = 0.0
-                ddkl(nm, k, istof) = ubnd(nrow, iustof, k, 1, ito)
+                aak(nm, k) = 0.0_fp
+                bbk(nm, k) = 1.0_fp
+                cck(nm, k) = 0.0_fp
+                ddk(nm, k) = ubnd(nrow, l, k, 1, ito)
+                if (zmodel) then
+                   rtur0(nm, k, l) = ubnd(nrow, l, k, 1, ito)
+                   rtur1(nm, k, l) = ubnd(nrow, l, k, 1, ito)
+                endif    
              enddo
           enddo
        endif
