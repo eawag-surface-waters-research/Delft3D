@@ -37,6 +37,7 @@ Not supported functionality and limitations
 - culvert
 - powerstation only works when inlet and outfall are in the same partition (is checked)
 - walking discharge
+- Restarting with morphology
 - Writing WAQ input files
 - Moving obstacles
 - 2D skewed (not 1D-) Weirs
@@ -254,7 +255,7 @@ group               testcase
                     03-c33                 OK
                     04-c34                 OK
                     05-c35                 OK
-                    06-bedlvlmap           ERROR: On Linux. To be investigated. On Windows OK
+                    06-bedlvlmap           ERROR: Restarting with morphology
 13_onlinecoup       1-o2d                  ERROR: Coup online
 14_roller           01-t16                 ERROR: Roller model
                     02-t18                 ERROR: Roller model
