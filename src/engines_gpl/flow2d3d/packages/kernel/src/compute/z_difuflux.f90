@@ -388,20 +388,20 @@ subroutine z_difuflux(stage   ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
                 enddo
              enddo
           endif
+          !if (kfvmx0(nm) > min(kkmin,kkminu)) then
+          !   do k = min(kkmin,kkminu)+1, kfvmx0(nm)
+          !      do l = 1, lstsci
+          !         if (qyk(nm,k) > 0) then
+          !            fluxv(nm,k,l) = qyk(nm, k) * r1(nm , k, l)
+          !         elseif (qxk(nm,k) < 0) then
+          !            fluxv(nm,k,l) = qyk(nm, k) * r1(num, k, l)
+          !         endif
+          !      enddo
+          !   enddo
+          !endif
           !
-          ! ADVECTIVE TRANSPORT IN Y-DIRECTION
+          ! Adjacent cell water fall correction 
           !
-          if (kfvmx0(nm) > min(kkmin,kkminu)) then
-             do k = min(kkmin,kkminu)+1, kfvmx0(nm)
-                do l = 1, lstsci
-                   if (qyk(nm,k) > 0) then
-                      fluxv(nm,k,l) = qyk(nm, k) * r1(nm , k, l)
-                   elseif (qxk(nm,k) < 0) then
-                      fluxv(nm,k,l) = qyk(nm, k) * r1(num, k, l)
-                   endif
-                enddo
-             enddo
-          endif
           if (kfumx0(nm) > min(kkmin,kkminu)) then
              do k = min(kkmin,kkminu)+1, kfumx0(nm)
                 if (qxk(nm, k) > 0.0_fp) then
@@ -438,6 +438,9 @@ subroutine z_difuflux(stage   ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
                 enddo
              enddo
           endif
+          !
+          ! Adjacent cell water fall correction 
+          !
           if (kfvmx0(nm) > min(kkmin,kkminv)) then
              do k = min(kkmin,kkminv)+1, kfvmx0(nm)
                 if (qyk(nm, k) > 0.0_fp) then
@@ -503,7 +506,7 @@ subroutine z_difuflux(stage   ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
     ! Cumulative flux
     !
     if (flwoutput%cumdifuflux) then
-       if (icx > 1) then
+       if (icx == 1) then
          fluxuc = fluxuc + fluxu * timest
          fluxvc = fluxvc + fluxv * timest
        else
@@ -512,7 +515,9 @@ subroutine z_difuflux(stage   ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
        endif
     endif
     !
-    if (flwoutput%difuflux) then
+    ! swap fluxu and fluxv for sediment transport in z layer morphology.
+    !
+    ! if (flwoutput%difuflux) then
        if (icx == 1) then
          allocate (switch(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci))
          switch = fluxu
@@ -520,5 +525,5 @@ subroutine z_difuflux(stage   ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
          fluxv  = switch
          deallocate (switch)
        endif
-    endif
+    ! endif
 end subroutine z_difuflux
