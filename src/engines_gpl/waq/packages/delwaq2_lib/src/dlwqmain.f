@@ -105,7 +105,6 @@ C
       INCLUDE 'actions.inc'
       INCLUDE 'fsm-fix.i'
 
-      call dhstore_command( argv )
 C
 C     Initial step ...
 C
@@ -113,6 +112,8 @@ C
       IF ( ACTION == ACTION_INITIALISATION  .OR.
      &     ACTION == ACTION_FULLCOMPUTATION      ) THEN
           INIT = .TRUE.
+
+          call dhstore_command( argv )
 
           CALL AVUNDF
 C
