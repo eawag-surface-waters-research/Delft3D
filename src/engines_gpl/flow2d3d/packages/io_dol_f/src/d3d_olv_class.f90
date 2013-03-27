@@ -33,44 +33,11 @@ use precision
 implicit none
 
 type, public ::  olv_handle_t
-    integer :: runningFlag = 0  ! 0=Flow not running (waiting); 1=Flow is iterating time steps
-    integer :: currentStep = 0
-    integer :: endTimeStep = 0
-    integer :: endFlag     = 0  ! 0 = Flow simulation has not finished yet; 1 = Flow has finished
+    integer :: runningFlag =  0  ! 0=Flow not running (waiting); 1=Flow is iterating time steps
+    integer :: currentStep =  0
+    integer :: endTimeStep =  0
+    integer :: endFlag     =  0  ! 0 = Flow simulation has not finished yet; 1 = Flow has finished
     integer :: timeStepInt = -1
-
-    character(len=260)          :: runid
-    integer, pointer            :: mmax
-    integer, pointer            :: nmax
-    integer, pointer            :: nlb, nub, mlb, mub, kmax
-    
-    integer, pointer            :: ltur
-    integer, pointer            :: lstsci
-    integer(pntrsize), pointer  :: thick
-    integer(pntrsize), pointer  :: xcor
-    integer(pntrsize), pointer  :: ycor
-    integer(pntrsize), pointer  :: gvz
-    integer(pntrsize), pointer  :: guz
-    integer(pntrsize), pointer  :: xz
-    integer(pntrsize), pointer  :: yz
-    integer(pntrsize), pointer  :: kcs
-    integer(pntrsize), pointer  :: kfs
-    integer(pntrsize), pointer  :: kfu
-    integer(pntrsize), pointer  :: kfv
-    integer(pntrsize), pointer  :: kfsz1
-    integer(pntrsize), pointer  :: alfas
-    integer(pntrsize), pointer  :: s1
-    integer(pntrsize), pointer  :: dp
-    integer(pntrsize), pointer  :: dps
-    integer(pntrsize), pointer  :: u1
-    integer(pntrsize), pointer  :: v1
-    integer(pntrsize), pointer  :: r1
-    integer(pntrsize), pointer  :: rtur1
-    integer(pntrsize), pointer  :: namcon
- 
-    real(fp), pointer           :: zbot
-    real(fp), pointer           :: ztop
-    logical                     :: zmodel
 end type
 
 type, public :: OLVHandle
@@ -93,102 +60,19 @@ subroutine new_olv(handle)
     type(olv_handle_t), pointer :: olv
     !
     ! body
-    allocate( olv )
-
-    olv%runid  = ''
-    
-    olv%mmax   => null()
-    olv%nmax   => null()
-    olv%nlb    => null()
-    olv%nub    => null()
-    olv%mlb    => null()
-    olv%mub    => null()
-    olv%kmax   => null()
-    olv%thick  => null()
-    
-    olv%ltur   => null()
-    olv%lstsci => null()
-    olv%xcor   => null()
-    olv%ycor   => null()
-    olv%gvz    => null()
-    olv%guz    => null()
-    olv%xz     => null()
-    olv%yz     => null()
-    olv%kcs    => null()
-    olv%kfs    => null()
-    olv%kfu    => null()
-    olv%kfv    => null()
-    olv%kfsz1  => null()
-    olv%alfas  => null()
-    olv%s1     => null()
-    olv%dp     => null()
-    olv%dps    => null()
-    olv%u1     => null()
-    olv%v1     => null()
-    olv%r1     => null()
-    olv%rtur1  => null()
-    olv%namcon => null()
-    
-    olv%zbot   => null()
-    olv%ztop   => null()
-    olv%zmodel = .false.
-
+    allocate(olv)
     handle%fields => olv
 end subroutine new_olv
 !
 !------------------------------------------------------------------------------
 subroutine free_olv(handle)
     type(OLVHandle) :: handle
-
-    integer                     :: istat
-    type(olv_handle_t), pointer :: olv
-
-    if (isNull_olv(handle)) return
-
-    olv => handle%fields
-
-    olv%runid  = ''
     !
-    ! The following pointers point to the GDP structure
-    ! Deallocation is the responsibility of the GDP related routines
-    ! Here: just stop pointing to the GDP structure
-    ! TO DO: check whether these pointers are really necessary: why not using the GDP structure directly?
-    !    
-    olv%mmax   => null()
-    olv%nmax   => null()
-    olv%nlb    => null()
-    olv%nub    => null()
-    olv%mlb    => null()
-    olv%mub    => null()
-    olv%kmax   => null()
-    olv%thick  => null()
-    
-    olv%ltur   => null()
-    olv%lstsci => null()
-    olv%xcor   => null()
-    olv%ycor   => null()
-    olv%gvz    => null()
-    olv%guz    => null()
-    olv%xz     => null()
-    olv%yz     => null()
-    olv%kcs    => null()
-    olv%kfs    => null()
-    olv%kfu    => null()
-    olv%kfv    => null()
-    olv%kfsz1  => null()
-    olv%alfas  => null()
-    olv%s1     => null()
-    olv%dp     => null()
-    olv%dps    => null()
-    olv%u1     => null()
-    olv%v1     => null()
-    olv%r1     => null()
-    olv%rtur1  => null()
-    olv%namcon => null()
-    
-    olv%zbot   => null()
-    olv%ztop   => null()
-    olv%zmodel = .false.
+    ! locals
+    integer                     :: istat
+    !
+    ! body
+    if (isNull_olv(handle)) return
     !
     ! Deallocate the olv structure
     ! Catch stat to avoid aborts; don't bother whether it succeeded or not

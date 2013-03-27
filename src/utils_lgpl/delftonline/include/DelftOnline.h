@@ -316,6 +316,11 @@ class Server {
             const char *    name
             );
 
+        DLL bool
+        waitOnStart (
+            void
+            );
+
         DLL void
         PassMilestone (
             Milestone       m

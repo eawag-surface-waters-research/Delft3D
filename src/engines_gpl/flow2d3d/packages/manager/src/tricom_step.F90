@@ -753,7 +753,7 @@ subroutine tricom_step(olv_handle, gdp)
     !
     ! Simulation time loop
     !
-    call setRunningFlag( olv_handle, 0, itstrt)    !status is: started
+    call setRunningFlag(olv_handle, 0, itstrt)    !status is: started
 
     do nst = itstrt, itstop - 1, 1
        call timer_start(timer_timeintegr, gdp)

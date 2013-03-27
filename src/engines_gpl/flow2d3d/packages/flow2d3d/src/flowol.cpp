@@ -475,8 +475,16 @@ FLOWOL_Timestep (
 
 #if defined (WITH_DELFTONLINE)
     FlowOL * flowol = FLOW2D3D->flowol;
+    bool echoContinue = false;
+
     if (flowol == NULL || flowol->dol == NULL)
         return;
+
+    if (flowol->dol->waitOnStart()) {
+        echoContinue = true;
+        printf("\tWaiting for Online Visualisation ...");
+        fflush (stdout);
+    }
 
     try {
         flowol->dol->PassMilestone ((DOL::Milestone) *timestep);
@@ -485,6 +493,10 @@ FLOWOL_Timestep (
     catch (DOL::Exception * ex) {
         throw new Exception (true, "DOL fails: %s", ex->message);
         }
+    if (echoContinue) {
+        printf("Continuing\n");
+        fflush (stdout);
+    }
 #endif
     }
 

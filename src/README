@@ -28,7 +28,7 @@ Compiling on Linux
          make ds-install
      Option B):
          Use script build.sh. Executing "./build.sh" will show the usage. The following example line is used to create the latest fully tested version:
-         ./build.sh -gnu -64bit
+         ./build.sh -intel11.1 -64bit
   2) The binaries are installed in directory:
      - "src/bin" and "src/lib" (due to "--prefix=`pwd`" and default "install")
      - "bin/lnx", ready to copy to an existing Delft3D installation (due to "ds-install")
@@ -118,5 +118,5 @@ line 265-276: -fPIC
 line 265-268: -m64
 
 
-5 June 2012
+27 May 2013
 adri.mourits@deltares.nl

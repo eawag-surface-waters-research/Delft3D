@@ -109,7 +109,7 @@ Client::Client (
     // Connect to the DOL server
 
     if (! LookupHostname (this->hostname, &this->addr))
-        throw new Exception (true, "Cannot resolve host \"%s\"", hostname);
+        throw new Exception (true, "Cannot resolve host \"%s\"", this->hostname);
 
     this->inaddr = (struct sockaddr_in *) &this->addr;
     this->inaddr->sin_family = AF_INET;
