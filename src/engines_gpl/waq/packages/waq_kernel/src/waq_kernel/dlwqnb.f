@@ -221,7 +221,7 @@ C
           NOQTT  = NOQ + NOQ4
           inwtyp = intyp + nobnd
 
-          UPDATR = .TRUE.
+          updatr = .true.
 
           call initialise_progress( dlwqd%progress, nstep, lchar(44) )
 C
