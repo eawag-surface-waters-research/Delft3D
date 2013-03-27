@@ -221,7 +221,7 @@ C
           NOQTT  = NOQ + NOQ4
           inwtyp = intyp + nobnd
 
-          updatr = .true.
+          UPDATR = .TRUE.
 
           call initialise_progress( dlwqd%progress, nstep, lchar(44) )
 C
@@ -397,36 +397,32 @@ C
       CALL DLWQ14 ( A(IDERV), NOTOT   , NOSEG   , ITFACT  , A(IMAS2),
      *              IDT     , IAFLAG  , A(IDMPS), INTOPT  , J(ISDMP),
      *              J(IOWNS), MYPART )
-
-!     get new volumes
-         itimel = itime
-         itime  = itime + idt
-         select case ( ivflag )
-            case ( 1 )                 !     computation of volumes for computed volumes only
-               call move   ( a(ivol) , a(ivol2), noseg   )
-               call dlwqb3 ( a(iarea), a(iflow), a(ivnew), j(ixpnt), notot   ,
-     &                       noq     , nvdim   , j(ivpnw), a(ivol2), intopt  ,
-     &                       a(imas2), idt     , iaflag  , nosys   , a(idmpq),
-     &                       ndmpq   , j(iqdmp))
-               updatr = .true.
-            case ( 2 )                 !     the fraudulent computation option
-               call dlwq41 ( lun     , itime   , itimel  , a(iharm), a(ifarr),
-     &                       j(inrha), j(inrh2), j(inrft), noseg   , a(ivoll),
-     &                       j(ibulk), lchar   , ftype   , isflag  , ivflag  ,
-     &                       updatr  , j(inisp), a(inrsp), j(intyp), j(iwork),
-     &                       lstrec  , lrewin  , a(ivol2), mypart  , dlwqd   )
-               call dlwqf8 ( noseg   , noq     , j(ixpnt), idt     , iknmkv  ,
-     &                       a(ivol ), a(iflow), a(ivoll), a(ivol2))
-               updatr = .true.
-               lrewin = .true.
-               lstrec = .true.
-            case default               !     read new volumes from files
-               call dlwq41 ( lun     , itime   , itimel  , a(iharm), a(ifarr),
-     &                       j(inrha), j(inrh2), j(inrft), noseg   , a(ivol2),
-     &                       j(ibulk), lchar   , ftype   , isflag  , ivflag  ,
-     &                       updatr  , j(inisp), a(inrsp), j(intyp), j(iwork),
-     &                       lstrec  , lrewin  , a(ivoll), mypart  , dlwqd   )
-         end select
+C
+C          get new volumes
+C
+      ITIMEL = ITIME
+      ITIME  = ITIME + IDT
+      IF ( IVFLAG .EQ. 1 ) THEN
+C
+C          computation of volumes for computed volumes only
+C
+         CALL MOVE   ( A(IVOL) , A(IVOL2), NOSEG   )
+         CALL DLWQB3 ( A(IAREA), A(IFLOW), A(IVNEW), J(IXPNT), NOTOT   ,
+     *                 NOQ     , NVDIM   , J(IVPNW), A(IVOL2), INTOPT  ,
+     *                 A(IMAS2), IDT     , IAFLAG  , NOSYS   , A(IDMPQ),
+     *                 NDMPQ   , J(IQDMP))
+         UPDATR = .TRUE.
+      ELSE
+C
+C          read new volumes from files
+C
+         CALL DLWQ41 ( LUN     , ITIME   , ITIMEL  , A(IHARM), A(IFARR),
+     *                 J(INRHA), J(INRH2), J(INRFT), NOSEG   , A(IVOL2),
+     *                 J(IBULK), LCHAR   , ftype   , ISFLAG  , IVFLAG  ,
+     *                 UPDATE  , J(INISP), A(INRSP), J(INTYP), J(IWORK),
+     *                 LSTREC  , LREWIN  , A(IVOLL), MYPART  , dlwqd   )
+         IF ( UPDATE ) UPDATR = .TRUE.
+      ENDIF
 
 !        update the info on dry volumes with the new volumes
 
@@ -525,25 +521,28 @@ C
 
 !          update mass array, explicit step for passive substances
 
-         call dlwqb4 ( nosys   , notot   , noseg   , a(ivol2), a(imass),
-     &                 a(iconc), a(iderv), nopa    , c(ipnam), a(iparm),
-     &                 nosfun  , c(isfna), a(isfun), idt     )
-
-!     calculate closure error
-         if ( lrewin .and. lstrec ) then
-            call dlwqce ( a(imass), a(ivoll), a(ivol2), nosys , notot ,
-     &                    noseg   , lun(19) )
-            call move   ( a(ivoll), a(ivol) , noseg   )
-         else
-!     replace old by new volumes
-            call move   ( a(ivol2), a(ivol) , noseg   )
-         endif
-
-!     integrate the fluxes at dump segments fill asmass with mass
-         if ( ibflag .gt. 0 ) then
-            call proint ( nflux   , ndmpar  , idt     , itfact  , a(iflxd),
-     &                    a(iflxi), j(isdmp), j(ipdmp), ntdmpq  )
-         endif
+      call dlwqb4 ( nosys   , notot   , noseg   , a(ivol2), a(imass),
+     &              a(iconc), a(iderv), nopa    , c(ipnam), a(iparm),
+     &              nosfun  , c(isfna), a(isfun), idt     )
+C
+C          replace old by new volumes
+C
+      CALL MOVE   ( A(IVOL2), A(IVOL) , NOSEG   )
+C
+C          calculate closure error
+C
+      IF ( LREWIN .AND. LSTREC ) THEN
+         CALL DLWQCE ( A(IMASS), A(IVOLL), A(IVOL2), NOSYS , NOTOT ,
+     +                 NOSEG   , LUN(19) )
+         CALL MOVE   ( A(IVOLL), A(IVOL) , NOSEG   )
+      ENDIF
+C
+C          integrate the fluxes at dump segments fill ASMASS with mass
+C
+      IF ( IBFLAG .GT. 0 ) THEN
+         CALL PROINT ( NFLUX   , NDMPAR  , IDT     , ITFACT  , A(IFLXD),
+     +                 A(IFLXI), J(ISDMP), J(IPDMP), NTDMPQ  )
+      ENDIF
 
       IF ( RTCACT )
 c     Interface to RTC (i)
