@@ -164,13 +164,13 @@ subroutine z_difuflux(stage   ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
        ! Define GDP pointers after the GDP allocations
        !
        fluxu          => gdp%gdflwpar%fluxu
-       fluxuc         => gdp%gdflwpar%fluxuc
        fluxv          => gdp%gdflwpar%fluxv
-       fluxvc         => gdp%gdflwpar%fluxvc
        flwoutput      => gdp%gdflwpar%flwoutput
        gdflwpar       => gdp%gdflwpar
        !
        if (flwoutput%cumdifuflux) then
+          fluxuc => gdp%gdflwpar%fluxuc
+          fluxvc => gdp%gdflwpar%fluxvc
           fluxuc = 0.0_fp
           fluxvc = 0.0_fp
        endif
