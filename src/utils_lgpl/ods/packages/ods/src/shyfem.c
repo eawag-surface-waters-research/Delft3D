@@ -1,9 +1,9 @@
 /*
  *  shyfem.c  -  ODS functions for SHYFEM grid files
  *
- *  Copyright (C) 1994 Delft Hydraulics
+ *  Copyright (C)  Stichting Deltares, 2011-2013.
  *
- *   Arjen Markus  
+ *   Arjen Markus
  */
 
 /*
@@ -20,7 +20,7 @@
 /*   Program:    SHYFEM.C                                             */
 /*   Version:    1.00                                                 */
 /*   Programmer: Arjen Markus                                         */
-/*   (c) Copyright 1993 Delft Hydraulics                              */
+/*   Copyright (C)  Stichting Deltares, 2011-2013.                    */
 /*   Previous version(s):                                             */
 /*   Project:     Open Data Structuur                                 */
 /*   Module:      GetParameter/GetDimensions                          */
@@ -67,10 +67,10 @@ TVoid ODSGetDimShyf( TString fname,
                      TInt4   pardep,
                      TInt4   timdep,
                      TInt4   locdep,
-                     TInt4   *ndim, 
+                     TInt4   *ndim,
                      TInt4   *ierror,
                      TString option)
-      
+
 /*************************************************************************/
 /*                                                                       */
 /*    Arguments:                                                         */
@@ -88,25 +88,25 @@ TVoid ODSGetDimShyf( TString fname,
 /*                                                                       */
 /*************************************************************************/
 {
-   TInt4 dummy , indx[10] , indloc[9] ; 
-   int len_fname ; 
-   FILE *infile ; 
+   TInt4 dummy , indx[10] , indloc[9] ;
+   int len_fname ;
+   FILE *infile ;
 
    *ierror = IEOK ;
 
 /* Which dimension?
    The grid does not depend on time, so ...
 */
-   if ( equal( dim , "tim" ) ) 
+   if ( equal( dim , "tim" ) )
    {
-      ndim[0] = 1 ; 
-      ndim[1] = 0 ; 
+      ndim[0] = 1 ;
+      ndim[1] = 0 ;
       return ;
    }
 
 /* The grid consists of two parameters that can be read via GETMAT/GETPAR
 */
-   if ( equal( dim , "par" ) ) 
+   if ( equal( dim , "par" ) )
    {
       ndim[0] = 1 ;
       ndim[1] = 2 ;
@@ -118,16 +118,16 @@ TVoid ODSGetDimShyf( TString fname,
    - number of coordinates: number of nodes (NKN)
    - size of the administration array: 3*number of elements (NELTS)
 */
-   if ( equal( dim , "loc" ) ) 
+   if ( equal( dim , "loc" ) )
    {
-      infile = fopen( fname , "r" ) ; 
-      fscanf( infile , "%ld %ld %ld %ld" , &ndim[1] , &dummy , 
+      infile = fopen( fname , "r" ) ;
+      fscanf( infile , "%ld %ld %ld %ld" , &ndim[1] , &dummy ,
               &ndim[4] , &dummy ) ;
       ndim[0] = 4 ;
-      ndim[2] = 1 ;       
-      ndim[3] = 1 ;       
-      ndim[4] = 3 * ndim[4] ;       
-      fclose( infile ) ; 
+      ndim[2] = 1 ;
+      ndim[3] = 1 ;
+      ndim[4] = 3 * ndim[4] ;
+      fclose( infile ) ;
    }
 
    return ;
@@ -178,23 +178,23 @@ TVoid ODSGetParShyf ( TString fname,
 
 /* if list too short to hold the two parameters, an error
 */
-   if ( maxlst < 2 ) 
+   if ( maxlst < 2 )
    {
       *ierror = IEPMNY ;
       return ;
    }
-    
-/* Put the names in the arrays 
+
+/* Put the names in the arrays
 */
    *nrlst = 2 ;
-   strcpy( parlst      , "XCOORD" ) ; 
-   strcpy( parlst + 21 , "YCOORD" ) ; 
-   strcpy( paruni      , "m" ) ; 
-   strcpy( paruni + 21 , "m" ) ; 
-   partyp[0] = ODS_PT_LOC_MNK ; 
-   partyp[1] = ODS_PT_LOC_MNK ; 
-   parcod[0] = 1              ; 
-   parcod[1] = 2              ; 
+   strcpy( parlst      , "XCOORD" ) ;
+   strcpy( parlst + 21 , "YCOORD" ) ;
+   strcpy( paruni      , "m" ) ;
+   strcpy( paruni + 21 , "m" ) ;
+   partyp[0] = ODS_PT_LOC_MNK ;
+   partyp[1] = ODS_PT_LOC_MNK ;
+   parcod[0] = 1              ;
+   parcod[1] = 2              ;
 
    return ;
 }
@@ -247,8 +247,8 @@ TVoid ODSGetTmeShyf ( TString fname,
 
 /* The number of times is zero!
 */
-   *nrlst = 0 ; 
-    
+   *nrlst = 0 ;
+
    return ;
 }
 
@@ -256,15 +256,15 @@ TVoid ODSGetTmeShyf ( TString fname,
 /*    SUBROUTINE Get Values (in matrix form) from SHYFEM grid file       */
 /*************************************************************************/
 
-TVoid ODSGetMatShyf(  TString fname, 
+TVoid ODSGetMatShyf(  TString fname,
                       TInt4   itype,
                       TInt4   parcod ,
                       TReal8  *tim ,
                       TInt4   *loc ,
-                      TReal4  misval , 
+                      TReal4  misval ,
                       TInt4   maxdim ,
-                      TReal4  *data , 
-                      TInt4   *ierror ) 
+                      TReal4  *data ,
+                      TInt4   *ierror )
 {
 
 /*************************************************************************/
@@ -285,9 +285,9 @@ TVoid ODSGetMatShyf(  TString fname,
 /*                                                                       */
 /*************************************************************************/
 
-   TInt4 i , j , dummy , nkn , nel , nlinks ; 
-   float fdummy , xval , yval ; 
-   FILE *infile ; 
+   TInt4 i , j , dummy , nkn , nel , nlinks ;
+   float fdummy , xval , yval ;
+   FILE *infile ;
 
 /* File was closed, so reopen it
 */
@@ -295,21 +295,21 @@ TVoid ODSGetMatShyf(  TString fname,
 
 /* Read the header - just dummies
 */
-   fscanf( infile , "%ld %ld %ld %ld" , &nkn , &dummy , &nel , &dummy ) ; 
+   fscanf( infile , "%ld %ld %ld %ld" , &nkn , &dummy , &nel , &dummy ) ;
 
-/* Skip the element adminstration 
+/* Skip the element adminstration
 */
-   for ( i = 0 ; i < nel ; i ++ ) 
+   for ( i = 0 ; i < nel ; i ++ )
    {
-      fscanf( infile , "%ld %ld %ld" , &dummy , &dummy , &dummy ) ; 
+      fscanf( infile , "%ld %ld %ld" , &dummy , &dummy , &dummy ) ;
    }
 
 /* Skip some rubbish - links between nodes
 */
-   for ( i = 0 ; i < nkn ; i ++ ) 
+   for ( i = 0 ; i < nkn ; i ++ )
    {
       fscanf( infile , "%ld" , &nlinks ) ;
-      for ( j = 0 ; j <= nlinks ; j ++ ) 
+      for ( j = 0 ; j <= nlinks ; j ++ )
       {
          fscanf( infile , "%ld" , &dummy ) ;
       }
@@ -317,17 +317,17 @@ TVoid ODSGetMatShyf(  TString fname,
 
 /* Now, finally the data we want!
 */
-   for ( i = 0 ; i < nkn ; i ++ ) 
+   for ( i = 0 ; i < nkn ; i ++ )
    {
-      fscanf( infile , "%ld %f %f %f %f" , &j , &xval , 
+      fscanf( infile , "%ld %f %f %f %f" , &j , &xval ,
           &yval , &fdummy , &fdummy ) ;
       if ( parcod == 1 )
       {
-         data[j-1] = xval ; 
+         data[j-1] = xval ;
       }
       else
       {
-         data[j-1] = yval ; 
+         data[j-1] = yval ;
       }
    }
 
@@ -341,13 +341,13 @@ TVoid ODSGetMatShyf(  TString fname,
 /*    SUBROUTINE Get Administration array from SHYFEM grid file          */
 /*************************************************************************/
 
-TVoid ODSGetGrdShyf(  TString fname, 
+TVoid ODSGetGrdShyf(  TString fname,
                       TInt4   itype,
                       TInt4   *indloc ,
-                      TInt4   *indx ,   
+                      TInt4   *indx ,
                       TInt4   *nocell ,
                       TInt4   *igisty ,
-                      TInt4   *ierror ) 
+                      TInt4   *ierror )
 {
 /*************************************************************************/
 /*                                                                       */
@@ -365,9 +365,9 @@ TVoid ODSGetGrdShyf(  TString fname,
 /*                                                                       */
 /*************************************************************************/
 
-   TInt4 i , j , dummy , nkn , nel , nlinks ; 
-   float fdummy , xval , yval ; 
-   FILE *infile ; 
+   TInt4 i , j , dummy , nkn , nel , nlinks ;
+   float fdummy , xval , yval ;
+   FILE *infile ;
 
 /* File was closed, so reopen it
 */
@@ -375,15 +375,15 @@ TVoid ODSGetGrdShyf(  TString fname,
 
 /* Read the header - just dummies
 */
-   fscanf( infile , "%ld %ld %ld %ld" , &nkn , &dummy , &nel , &dummy ) ; 
+   fscanf( infile , "%ld %ld %ld %ld" , &nkn , &dummy , &nel , &dummy ) ;
 
-/* Skip the element adminstration 
+/* Skip the element adminstration
 */
-   j = 0 ; 
-   for ( i = 0 ; i < nel ; i ++ ) 
+   j = 0 ;
+   for ( i = 0 ; i < nel ; i ++ )
    {
-      fscanf( infile , "%ld %ld %ld" , &indx[j] ,  &indx[j+1] ,  &indx[j+2] ) ; 
-      j += 3 ; 
+      fscanf( infile , "%ld %ld %ld" , &indx[j] ,  &indx[j+1] ,  &indx[j+2] ) ;
+      j += 3 ;
    }
 
 /* We have read everything, so ...

@@ -1,4 +1,4 @@
-/*	       Copyright (C) 1993 Deltares
+/*	Copyright (C)  Stichting Deltares, 2011-2013.
 
  System      : Viewer/Selector
 

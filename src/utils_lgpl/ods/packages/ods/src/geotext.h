@@ -1,7 +1,7 @@
 /*
  *  tekasc.h  -  ODS function prototypes for TEKAL ASCII files
  *
- *  Copyright (C) 1998 Delft Hydraulics
+ *  Copyright (C)  Stichting Deltares, 2011-2012.
  *
  *  Arjen Markus
  */

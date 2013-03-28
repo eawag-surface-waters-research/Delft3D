@@ -2,7 +2,7 @@
 /*
  *  odserr.c -  ODS routine to return error text
  *
- *  Copyright (C) 1996 Delft Hydraulics
+ *  Copyright (C)  Stichting Deltares, 2011-2013.
  *
  *  Arjen Markus
  */

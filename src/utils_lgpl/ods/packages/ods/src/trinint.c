@@ -1,7 +1,6 @@
-/*  Copyright (C) 1994 Delft Hydraulics
-    Copyright (C) 1999 Delft Hydraulics
-
-    See c2for.txt for details
+/*  Copyright (C)  Stichting Deltares, 2011-2013.
+ *
+ *  See c2for.txt for details
  */
 
 #include "trinint.h"
@@ -176,7 +175,7 @@ TVoid ODS_TRISULA_NEFIS_hispar(
             fname[i] = '\0';
         }
     }
-/* Input - no clean up 
+/* Input - no clean up
     {
         TInt4 i,j;
         for (j=0, i=lpardef-1 ; j < npardef; j++, i+= lpardef) {
@@ -268,7 +267,7 @@ TVoid ODS_TRISULA_NEFIS_hisloc(
             fname[i] = '\0';
         }
     }
-/* Input - no clean up 
+/* Input - no clean up
     {
         TInt4 i,j;
         for (j=0, i=llocdef-1 ; j < nlocdef; j++, i+= llocdef) {
@@ -513,7 +512,7 @@ TVoid ODS_TRISULA_NEFIS_MAPPAR(
             fname[i] = '\0';
         }
     }
-/* Input - no clean up 
+/* Input - no clean up
     {
         TInt4 i,j;
         for (j=0, i=lpardef-1 ; j < npardef; j++, i+= lpardef) {
@@ -605,7 +604,7 @@ TVoid ODS_TRISULA_NEFIS_MAPLOC(
             fname[i] = '\0';
         }
     }
-/* Input - no clean up 
+/* Input - no clean up
     {
         TInt4 i,j;
         for (j=0, i=llocdef-1 ; j < nlocdef; j++, i+= llocdef) {

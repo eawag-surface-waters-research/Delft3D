@@ -6,7 +6,7 @@
 #   Fedor.Baart@deltares.nl
 #   02 dec 2008
 #
-#   Copyright (C) 2008, Deltares
+#   Copyright (C)  Stichting Deltares, 2011-2013.
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am

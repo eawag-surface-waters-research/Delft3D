@@ -1,7 +1,7 @@
 /*
  *  ods2nef.c  -  ODS to NEFIS interface functions
  *
- *  Copyright (C) 1994 Delft Hydraulics
+ *  Copyright (C)  Stichting Deltares, 2011-2013.
  *
  *  Eric Verschuur
  */
@@ -11,7 +11,7 @@
 /*   Program:    ODS2NEF.C                                            */
 /*   Version:    1.00                                                 */
 /*   Programmer: Eric Verschuur                                       */
-/*   (c) Copyright 1993 Delft Hydraulics                              */
+/*   Copyright (C)  Stichting Deltares, 2011-2013.                    */
 /*   Previous version(s):                                             */
 /*   Project:    Open Data Structuur                                  */
 /*   Module:                                                          */

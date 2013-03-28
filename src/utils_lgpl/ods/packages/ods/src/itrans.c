@@ -1,7 +1,7 @@
 /*
  *  itrans.c  -  ODS translate C file error code to ODS error code
  *
- *  Copyright (C) 1994 Delft Hydraulics
+ *  Copyright (C)  Stichting Deltares, 2011-2013.
  *
  *  Marc Kool
  */
@@ -21,7 +21,7 @@
 /*   Program:    ITRANS.C                                             */
 /*   Version:    1.04                                                 */
 /*   Programmer: Andr‚ Hendriks                                       */
-/*   (c) Copyright 1993 Delft Hydraulics                              */
+/*   Copyright (C)  Stichting Deltares, 2011-2013.                    */
 /*   Previous version(s):                                             */
 /*   1.03 -- 4 Aug 1993 -- 09:58 -- Operating System: DOS             */
 /*   1.02 -- 4 Aug 1993 -- 09:57 -- Operating System: DOS             */

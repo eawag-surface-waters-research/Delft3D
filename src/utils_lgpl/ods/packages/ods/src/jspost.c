@@ -1,7 +1,7 @@
 /*
  *  jspost.c  -  ODS functions for standard JSPOST files
  *
- *  Copyright (C) 1994 Delft Hydraulics
+ *  Copyright (C)  Stichting Deltares, 2011-2013.
  *
  *   Peter van den Bosch
  */

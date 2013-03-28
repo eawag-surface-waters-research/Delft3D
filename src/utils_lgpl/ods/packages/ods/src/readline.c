@@ -2,7 +2,7 @@
 
    Routine(s) to facilitate reading text files
 
-   Copyright (c) 2002 WL | Delft Hydraulics
+   Copyright (C)  Stichting Deltares, 2011-2013.
 
    Arjen Markus
 */

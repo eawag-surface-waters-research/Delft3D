@@ -1,7 +1,7 @@
 /*
  *  tridro.h  -  ODS function prototypes for TRISULA drogues files
  *
- *  Copyright (C) 1997 Delft Hydraulics
+ *  Copyright (C)  Stichting Deltares, 2011-2012.
  *
  *  Arjen Markus
  */

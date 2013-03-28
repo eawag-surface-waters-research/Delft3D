@@ -4,7 +4,7 @@ subroutine culver(icx       ,icy       ,kmax      ,nsrc      ,kfs       , &
                 & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2012.                                
+!  Copyright (C)  Stichting Deltares, 2011-2013.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -444,7 +444,7 @@ integer function intlay    (lundia     ,zmodel    ,kfsmin    ,kfsmax    , &
                           & kmax       ,thick     ,isrc      ,intake    )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2012.                                
+!  Copyright (C)  Stichting Deltares, 2011-2013.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         

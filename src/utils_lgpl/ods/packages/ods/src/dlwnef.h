@@ -1,7 +1,7 @@
 /*
  *  dlwnef.h  -  ODS: DELWAQ/DELPAR NEFIS files (prototypes)
  *
- *  Copyright (C) 1996 Delft Hydraulics
+ *  Copyright (C)  Stichting Deltares, 2011-2012.
  *
  *  Derived from code by Eric Verschuur
  *  Arjen Markus

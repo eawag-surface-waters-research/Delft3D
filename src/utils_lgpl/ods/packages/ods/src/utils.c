@@ -1,7 +1,7 @@
 /*
- *  utils.c   -  ODS utility routines                             
+ *  utils.c   -  ODS utility routines
  *
- *  Copyright (C) 1994 Delft Hydraulics
+ *  Copyright (C)  Stichting Deltares, 2011-2013.
  *
  *  Peter van den Bosch
  */
@@ -22,7 +22,7 @@
 /*   Program:    utils.c                                              */
 /*   Version:    1.0                                                  */
 /*   Programmer: Peter van den Bosch                                  */
-/*   (c) Copyright 1993 Delft Hydraulics                              */
+/*   Copyright (C)  Stichting Deltares, 2011-2013.                    */
 /*   Previous version(s):                                             */
 /*   Project:    Open Data Structuur                                  */
 /*   Module:                                                          */
@@ -89,7 +89,7 @@ double AddToJulian(
     icurtm = icurtm - ihou*3600 ;
     imin   = icurtm / 60 ;
     isec   = icurtm - imin*60 ;
-    
+
     /* add days */
     julday = julday + addday ;
 
@@ -109,7 +109,7 @@ double AddToJulian(
     /* add year and month */
     imo    = imo + addmonth;
     iy     = iy  + addyear;
-    
+
     /* Convert to julian notation and store */
 
     imo1      = (imo -14)/12;
@@ -126,7 +126,7 @@ double AddToJulian(
 /*************************************************************************/
 /*    SUBROUTINE Initializes a string with spaces                        */
 /*************************************************************************/
-void Blanks (     
+void Blanks (
     char * string,
     TInt4 len )
 /*************************************************************************/
@@ -153,12 +153,12 @@ void Blanks (
 /*************************************************************************/
 /*    SUBROUTINE Close files and frees memory                            */
 /*************************************************************************/
-void Errfin (     
+void Errfin (
     FILE * unit1,
     FILE * unit2,
     void * mem1,
     void * mem2,
-    void * mem3 ) 
+    void * mem3 )
 
 /*************************************************************************/
 /*                                                                       */
@@ -177,9 +177,9 @@ void Errfin (
 {
     if ( unit1 != NULL ) fclose( unit1 ) ;
     if ( unit2 != NULL ) fclose( unit2 ) ;
-    
+
     if ( mem1 != NULL )  free( mem1 ) ;
     if ( mem2 != NULL )  free( mem2 ) ;
     if ( mem3 != NULL )  free( mem3 ) ;
-}       
+}
 

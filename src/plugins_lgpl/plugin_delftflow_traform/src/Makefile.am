@@ -6,7 +6,7 @@
 #   Fedor.Baart@deltares.nl
 #   11 jan 2007
 #
-#   Copyright (C) 2007, Deltares
+#   Copyright (C)  Stichting Deltares, 2011-2013.
 #-------------------------------------------------------------------------------
 
 #

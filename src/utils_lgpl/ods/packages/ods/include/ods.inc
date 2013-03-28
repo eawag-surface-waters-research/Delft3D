@@ -1,7 +1,7 @@
 c 
 c   ods.inc  -  ODS Fortran interface
 c 
-c   Copyright (C) 1994 Delft Hydraulics
+c   Copyright (C)  Stichting Deltares, 2011-2013.
 c 
 c   Marc Kool
 c 
@@ -44,8 +44,8 @@ C     Date:       3 Mrt 1994
 C     Time:       10:55
 C     Program:    TYPES.INC
 C     Version:    1.00
-C     Programmer: Andr‚ Hendriks
-C     (c) Copyright 1993 Delft Hydraulics
+C     Programmer: Andre Hendriks
+C     Copyright (C)  Stichting Deltares, 2011-2013.
 C     Previous version(s):
 C     0.01 -- 10 Jun 1993 -- 15:11 -- Operating System: DOS
 C     0.00 -- 10 Jun 1993 -- 15:05 -- Operating System: DOS
@@ -112,8 +112,8 @@ C     Date:       10 Jun 1993
 C     Time:       15:11
 C     Program:    ERRORS.INC
 C     Version:    0.00
-C     Programmer: Andr‚ Hendriks
-C     (c) Copyright 1993 Delft Hydraulics
+C     Programmer: Andre Hendriks
+C     Copyright (C)  Stichting Deltares, 2011-2013.
 C     Previous version(s):
 C     0.0 -- 10 Jun 1993 -- 15:35 -- Operating System: DOS
 C     Project:    Open data-structuur

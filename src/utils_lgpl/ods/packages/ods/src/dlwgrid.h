@@ -1,7 +1,6 @@
-/*  Copyright (C) 1994 Delft Hydraulics
-    Copyright (C) 1999 Delft Hydraulics
-
-    See c2for.txt for details
+/*  Copyright (C)  Stichting Deltares, 2011-2012.
+ *
+ *  See c2for.txt for details
  */
 
 #ifndef C2F_H_dlwgrid_INCLUDED
@@ -29,7 +28,7 @@
 #undef  ODS_DELWAQ_UNF_CCO
 #define ODS_DELWAQ_UNF_LGA    ods_delwaq_unf_lga_
 #define ODS_DELWAQ_UNF_CCO    ods_delwaq_unf_cco_
-/* Necessary for g77 
+/* Necessary for g77
 #define ODS_DELWAQ_UNF_LGA    ods_delwaq_unf_lga__
 #define ODS_DELWAQ_UNF_CCO    ods_delwaq_unf_cco__
 */

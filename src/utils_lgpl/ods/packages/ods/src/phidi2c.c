@@ -1,5 +1,4 @@
-/*  Copyright (C) 1994 Delft Hydraulics
- *  Copyright (C) 1999 Delft Hydraulics
+/*  Copyright (C)  Stichting Deltares, 2011-2013.
  *
  *  See c2for.txt for details
  */
@@ -176,7 +175,7 @@ TVoid ODSGetParPhiMap(
             fname[i] = '\0';
         }
     }
-/* Input - do not clean up 
+/* Input - do not clean up
     {
         TInt4 i,j;
         for (j=0, i=lpardef-1 ; j < npardef; j++, i+= lpardef) {
@@ -270,7 +269,7 @@ TVoid ODSGetParPhiSpec(
             fname[i] = '\0';
         }
     }
-/* Input - do not clean up 
+/* Input - do not clean up
     {
         TInt4 i,j;
         for (j=0, i=lpardef-1 ; j < npardef; j++, i+= lpardef) {
@@ -354,7 +353,7 @@ TVoid ODSGetLocPhiSpec(
             fname[i] = '\0';
         }
     }
-/* Input - do not clean up 
+/* Input - do not clean up
     {
         TInt4 i,j;
         for (j=0, i=llocdef-1 ; j < nlocdef; j++, i+= llocdef) {
@@ -648,7 +647,7 @@ TVoid ODSGetLocPhiHis(
             fname[i] = '\0';
         }
     }
-/* Input - do not clean up 
+/* Input - do not clean up
     {
         TInt4 i,j;
         for (j=0, i=llocdef-1 ; j < nlocdef; j++, i+= llocdef) {

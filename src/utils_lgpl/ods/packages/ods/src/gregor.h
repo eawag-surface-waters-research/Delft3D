@@ -1,7 +1,7 @@
 /*
  *  gregor.h  -  ODS prototype for gregor.c
  *
- *  Copyright (C) 1994 Delft Hydraulics
+ *  Copyright (C)  Stichting Deltares, 2011-2012.
  *
  *  Bart Adriaanse
  */
@@ -31,6 +31,6 @@ void FUNTYPE GREGOR ( double *julian,
                       TInt4 *ihour,
                       TInt4 *imin,
                       TInt4 *isec ) ;
- 
+
 #endif
 

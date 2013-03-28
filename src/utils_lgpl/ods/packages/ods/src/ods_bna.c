@@ -2,7 +2,7 @@
 /*
  *  ods_bna.c -  ODS routines to read BNA-, DXF and related TEKAL files
  *
- *  Copyright (C) 1995 Delft Hydraulics
+ *  Copyright (C)  Stichting Deltares, 2011-2013.
  *
  *  Arjen Markus
  */

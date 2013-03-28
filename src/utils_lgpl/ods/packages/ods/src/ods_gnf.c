@@ -1,7 +1,7 @@
 /*
  *  ods_gnf.c -  ODS routines to "generically" read NEFIS files
  *
- *  Copyright (C) 2002 Delft Hydraulics
+ *  Copyright (C)  Stichting Deltares, 2011-2013.
  *
  *  Arjen Markus
  */

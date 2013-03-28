@@ -5,7 +5,7 @@
 #   Adri.Mourits@Deltares.NL
 #   29 oct 11
 #
-#   Copyright (C) 2011, Deltares
+#   Copyright (C)  Stichting Deltares, 2011-2013.
 #-------------------------------------------------------------------------------
 
 

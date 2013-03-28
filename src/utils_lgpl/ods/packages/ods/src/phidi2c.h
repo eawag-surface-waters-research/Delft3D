@@ -1,5 +1,4 @@
-/*  Copyright (C) 1994 Delft Hydraulics
- *  Copyright (C) 1999 Delft Hydraulics
+/*  Copyright (C)  Stichting Deltares, 2011-2012.
  *
  *  See c2for.txt for details
  */
@@ -62,13 +61,13 @@
 #define PHI_MAT               phi_mat_
 #define PHI_LOC               phi_loc_
 
-/* Necessary for g77 
+/* Necessary for g77
 #define PHI_DIM               phi_dim__
 #define PHI_PAR               phi_par__
 #define PHI_TME               phi_tme__
 #define PHI_MAT               phi_mat__
 #define PHI_LOC               phi_loc__
-*/    
+*/
 #endif
 
 

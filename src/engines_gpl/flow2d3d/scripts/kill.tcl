@@ -4,7 +4,7 @@
 #
 # kill.tcl - Script to kill running processes, identified with mask strings
 #
-# Copyright (C) 2006 Deltares
+# Copyright (C)  Stichting Deltares, 2011-2013.
 #
 # Authors: Adri Mourits
 #

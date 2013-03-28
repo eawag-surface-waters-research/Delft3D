@@ -1,7 +1,7 @@
 /*
  *  samples.c  -  ODS: Samples files and simple tables
  *
- *  Copyright (C) 1997 Delft Hydraulics
+ *  Copyright (C)  Stichting Deltares, 2011-2013.
  *
  *  Arjen Markus
  *

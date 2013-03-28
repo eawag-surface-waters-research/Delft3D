@@ -1,6 +1,6 @@
 /*  ods_conv.h - Conversion routines for ODS
  *
- *  Copyright (C) 2002 WL | Delft Hydraulics
+ *  Copyright (C)  Stichting Deltares, 2011-2012.
  *
  *  Arjen Markus
  */

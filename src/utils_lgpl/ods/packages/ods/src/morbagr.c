@@ -1,7 +1,7 @@
 /*
  *  morbagr.c  -  ODS: MORSYS "bagger" files (functions)
  *
- *  Copyright (C) 1997 Delft Hydraulics
+ *  Copyright (C)  Stichting Deltares, 2011-2013.
  *
  *  Derived from code by Cor ten Napel (mor_sys.f)
  *  Arjen Markus
@@ -12,7 +12,7 @@
 /*   Program:    morbagr.c                                            */
 /*   Version:    1.00                                                 */
 /*   Programmer: Arjen Markus                                         */
-/*   (c) Copyright 1997 Delft Hydraulics                              */
+/*   Copyright (C)  Stichting Deltares, 2011-2013.                    */
 /*   Previous version(s):                                             */
 /*   Project:    Open Data Structuur                                  */
 /*   Module:                                                          */
@@ -171,7 +171,7 @@ static TString ReverseFindString( TString string , TString substr )
 */
    for ( i = 0 ; i < 4 ; i ++ )
    {
-      maxdim  = 5 ; 
+      maxdim  = 5 ;
       err_nef = Inqgrp( deffds , &grp_nam[i][0] , celnam , &maxdim ,
                         dims   , usrord                            ) ;
       if ( err_nef != 0 )

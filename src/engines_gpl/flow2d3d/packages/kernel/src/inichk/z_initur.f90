@@ -7,7 +7,7 @@ subroutine z_initur(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                   & dzu1      ,dzv1      ,dzs1      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2012.                                
+!  Copyright (C)  Stichting Deltares, 2011-2013.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         

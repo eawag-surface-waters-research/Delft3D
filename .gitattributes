@@ -71,7 +71,6 @@ examples/04_fluidmud/case1.obs -text
 examples/04_fluidmud/config_d_hydro_mud.xml -text
 examples/04_fluidmud/config_d_hydro_sed.xml -text
 examples/04_fluidmud/dioconfig.ini -text
-examples/04_fluidmud/mud.fil -text
 examples/04_fluidmud/mud.inp -text
 examples/04_fluidmud/mud.mdf -text
 examples/04_fluidmud/run_flow2d3d_flm.bat -text
@@ -80,7 +79,6 @@ examples/04_fluidmud/sed.bcc -text
 examples/04_fluidmud/sed.bch -text
 examples/04_fluidmud/sed.bct -text
 examples/04_fluidmud/sed.bnd -text
-examples/04_fluidmud/sed.fil -text
 examples/04_fluidmud/sed.inp -text
 examples/04_fluidmud/sed.mdf -text
 examples/05_mormerge/README -text
@@ -1377,7 +1375,6 @@ src/engines_gpl/waq/include/sysj_ff.inc -text
 src/engines_gpl/waq/include/sysn.inc -text
 src/engines_gpl/waq/include/sysn_ff.inc -text
 src/engines_gpl/waq/include/syst.inc -text
-src/engines_gpl/waq/include/vssver.scc -text
 src/engines_gpl/waq/include/waqsys.mkf -text
 src/engines_gpl/waq/include/wfarin.inc -text
 src/engines_gpl/waq/include/wfarout.inc -text

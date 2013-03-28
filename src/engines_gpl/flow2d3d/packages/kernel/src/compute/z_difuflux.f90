@@ -9,7 +9,7 @@ subroutine z_difuflux(stage   ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
                   & timest    ,icx       ,icy       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2012.                                
+!  Copyright (C)  Stichting Deltares, 2011-2013.                                
 !                                                                               
 !  This program is free software: you can redistribute it and/or modify         
 !  it under the terms of the GNU General Public License as published by         
@@ -458,13 +458,11 @@ subroutine z_difuflux(stage   ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
     !
     ! swap fluxu and fluxv for sediment transport in z layer morphology.
     !
-    ! if (flwoutput%difuflux) then
-       if (icx == 1) then
-         allocate (switch(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci))
-         switch = fluxu
-         fluxu  = fluxv
-         fluxv  = switch
-         deallocate (switch)
-       endif
-    ! endif
+    if (icx == 1) then
+       allocate (switch(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci))
+       switch = fluxu
+       fluxu  = fluxv
+       fluxv  = switch
+       deallocate (switch)
+    endif
 end subroutine z_difuflux

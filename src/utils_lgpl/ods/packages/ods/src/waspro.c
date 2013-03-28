@@ -1,7 +1,7 @@
 /*
  *  waspro.c  -  ODS functions for WASPRO .WAS and .WS1 format files
  *
- *  Copyright (C) 1994 Delft Hydraulics
+ *  Copyright (C)  Stichting Deltares, 2011-2013.
  *
  *   Bart Adriaanse
  */
@@ -20,7 +20,7 @@
 /*   Program:    LOKETJES.C                                           */
 /*   Version:    1.03                                                 */
 /*   Programmer: Andr  Hendriks                                       */
-/*   (c) Copyright 1993 Delft Hydraulics                              */
+/*   Copyright (C)  Stichting Deltares, 2011-2013.                    */
 /*   Previous version(s):                                             */
 /*   1.02 -- 6 Dec 1993 -- 13:00 -- Operating System: DOS            */
 /*   0.00 -- 21 Jun 1993 -- 11:19 -- Operating System: DOS            */

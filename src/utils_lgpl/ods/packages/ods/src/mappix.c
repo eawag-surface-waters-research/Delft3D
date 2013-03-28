@@ -1,7 +1,7 @@
 /*
  *  mappix.c  -  ODS functions for MAPPIX files
  *
- *  Copyright (C) 1994 Delft Hydraulics
+ *  Copyright (C)  Stichting Deltares, 2011-2013.
  *
  *   Bart Adriaanse
  */
@@ -78,7 +78,7 @@ void ODSGetLocMPX ( char *fname,
 /*       nrlst   -          O   Nr of parameters returned.               */
 /*                                                                       */
 /*************************************************************************/
-   
+
    {
    FILE   *iunit ;
    char   locnam [PARLEN] ;
@@ -93,7 +93,7 @@ void ODSGetLocMPX ( char *fname,
       *ierror = IENOFI ;
       return ;
       }
-   
+
    /* check if this really is a MAPPIX file                           */
    items_read = fread ( &locnam, (size_t) 4, (size_t) 1, iunit ) ;
    if ( ferror ( iunit) || feof ( iunit) || ( items_read != 1)) goto HandleFileErr ;
@@ -118,7 +118,7 @@ void ODSGetLocMPX ( char *fname,
    /* calculate record length and position                            */
    recordlen = 2 + 4 * nloc ;
    firstrecord = 2 + (short) (40.0 * (7 + npar) / recordlen) ;
-         
+
    /* loop over all locations in the file                             */
    *nrlst = 0 ;
    *ierror = IEOK ;
@@ -131,7 +131,7 @@ void ODSGetLocMPX ( char *fname,
       items_read = fread ( &idef, (size_t) 2, (size_t) 1, iunit) ;
       if ( ferror ( iunit) | feof ( iunit) | ( items_read != 1)) goto HandleFileErr ;
       sprintf ( locnam, "%i", idef) ;
-         
+
       /* Try to match the location */
       idef = 0 ;
       while ( idef < maxdef)
@@ -161,15 +161,15 @@ void ODSGetLocMPX ( char *fname,
    return ;
 
 HandleFileErr:
-  
+
    if ( feof ( iunit) )
       *ierror = IEUEOF ;
    else
       itrans ( ferror ( iunit), (TInt4 *) ierror) ;
-   
+
    fclose ( iunit) ;
    return ;
-         
+
    }
 
 /*************************************************************************/
@@ -184,7 +184,7 @@ void ODSGetParMPX ( char *fname,
                    TInt4 maxlst,
                    TInt4 *nrlst,
                    TInt4 *ierror)
-   
+
 /*************************************************************************/
 /*                                                                       */
 /*    Arguments:                                                         */
@@ -207,7 +207,7 @@ void ODSGetParMPX ( char *fname,
    char   pardim [41] ;
    size_t items_read ;
    short  i, idef, npar, nloc, ntim ;
-   
+
    iunit = fopen ( fname, "rb\0") ;
 
    if ( iunit == NULL)
@@ -215,18 +215,18 @@ void ODSGetParMPX ( char *fname,
       *ierror = IENOFI ;
       return ;
       }
-   
+
    /* check if this really is a MAPPIX file                           */
    items_read = fread ( &parnam, (size_t) 4, (size_t) 1, iunit ) ;
    if ( ferror ( iunit) || feof ( iunit) || ( items_read != 1)) goto HandleFileErr ;
    parnam[4]='\0' ;
-   if ( strcmp (parnam,"REAL") != 0 ) 
+   if ( strcmp (parnam,"REAL") != 0 )
      {
      *ierror = IETYPE ;
      fclose( iunit ) ;
      return ;
      }
-  
+
    /* determine file dimensions                                          */
    if ( fseek ( iunit, 24L, SEEK_SET) != 0) goto HandleFileErr ;
    items_read = fread ( &nloc, (size_t) 2, (size_t) 1, iunit) ;
@@ -235,7 +235,7 @@ void ODSGetParMPX ( char *fname,
    if ( ferror ( iunit) || feof ( iunit) || ( items_read != 1)) goto HandleFileErr ;
    items_read = fread ( &npar, (size_t) 2, (size_t) 1, iunit) ;
    if ( ferror ( iunit) || feof ( iunit) || ( items_read != 1)) goto HandleFileErr ;
-         
+
    /* get MAPPIX parameter name and dimension                                         */
    if ( fseek ( iunit, 40L, SEEK_SET) != 0) goto HandleFileErr ;
    items_read = fread ( parnam, (size_t) 40, (size_t) 1, iunit) ;
@@ -244,23 +244,23 @@ void ODSGetParMPX ( char *fname,
    items_read = fread ( pardim, (size_t) 40, (size_t) 1, iunit) ;
    if ( ferror ( iunit) || feof ( iunit) || ( items_read != 1)) goto HandleFileErr ;
    pardim[39]='\0' ;
-      
+
    /* loop over series in the file */
    *nrlst = 0 ;
    *ierror = IEOK ;
    if ( fseek ( iunit, 120L, SEEK_SET) != 0) goto HandleFileErr ;
-      
+
    for ( i = 1; i <= npar; i++)
       {
 
       /* Read MAPPIX parameter from file */
-      if ( npar > 1 )   
+      if ( npar > 1 )
          {
          items_read = fread ( parnam, (size_t) 1, (size_t) 40, iunit) ;
          if ( ferror ( iunit) || feof ( iunit) || ( items_read != 40)) goto HandleFileErr ;
          parnam[PARLEN]='\0' ;
          }
-         
+
       /* try to match the parameter */
       idef = 0 ;
       while ( idef < maxdef )
@@ -289,17 +289,17 @@ void ODSGetParMPX ( char *fname,
       }
    fclose ( iunit) ;
    return ;
-    
+
 HandleFileErr:
-  
+
    if ( feof ( iunit) )
       *ierror = IEUEOF ;
    else
       itrans ( ferror ( iunit), (TInt4 *) ierror) ;
-   
+
    fclose ( iunit) ;
    return ;
-    
+
    }
 
 /*************************************************************************/
@@ -341,17 +341,17 @@ void ODSGetTmeMPX ( char *fname,
    int    some_lower ;
    int    ROUNDDAY, YEARSER ;
    size_t items_read ;
-   
+
    *ierror = IEOK ;
 
    iunit = fopen ( fname, "rb\0") ;
-   
+
    if ( iunit == NULL)
       {
       *ierror = IENOFI ;
       return ;
       }
-   
+
    /* check if this really is a MAPPIX file                           */
    items_read = fread ( &tsttype, (size_t) 4, (size_t) 1, iunit ) ;
    if ( ferror ( iunit) || feof ( iunit) || ( items_read != 1)) goto HandleFileErr ;
@@ -369,7 +369,7 @@ void ODSGetTmeMPX ( char *fname,
    if ( ferror ( iunit) || feof ( iunit) || ( items_read != 1)) goto HandleFileErr ;
    tsttype[8]='\0' ;
    for (i=0 ; i<4 ; i++) tsttype[i] = (char) toupper ( (int) tsttype[i]) ;
-      
+
    /* determine file dimensions                                          */
    if ( fseek ( iunit, 24L, SEEK_SET) != 0) goto HandleFileErr ;
    items_read = fread ( &nloc, (size_t) 2, (size_t) 1, iunit) ;
@@ -382,7 +382,7 @@ void ODSGetTmeMPX ( char *fname,
    /* calculate record length and position                            */
    recordlen = 2 + 4 * nloc ;
    firstrecord = 2 + (short) (40.0 * (7 + npar) / recordlen) ;
-      
+
    /* attemp to set time scale                                        */
    mpxtim = 0.0 ;
    dt0=1 ;
@@ -401,9 +401,9 @@ void ODSGetTmeMPX ( char *fname,
       i= (short) atoi( &tsttype[5] ) ;
       dt0 = 365. / i ;
       }
-         
+
    /* loop over the time steps in the file                            */
-      
+
    *nrtim = 0 ;
    itim = 0 ;
 
@@ -413,7 +413,7 @@ void ODSGetTmeMPX ( char *fname,
       if ( fseek ( iunit, file_pos, SEEK_SET)) goto HandleFileErr ;
       items_read = fread ( &iftime, (size_t) 2, (size_t) 1, iunit) ;
       if ( ferror ( iunit) || feof ( iunit) || ( items_read != 1) ) goto HandleFileErr ;
-         
+
       /* set time step */
       if ( YEARSER )
          {
@@ -425,7 +425,7 @@ void ODSGetTmeMPX ( char *fname,
          ftime = (TInt4) ftime ;
          }
       else ftime = mpxtim + iftime * dt0 ;
-            
+
       if ( ROUNDDAY ) ftime = (TInt4) (ftime + 0.5);
 
       /* check if it is still possible that we find something */
@@ -461,12 +461,12 @@ void ODSGetTmeMPX ( char *fname,
    return ;
 
 HandleFileErr:
-  
+
    if ( feof ( iunit) )
       *ierror = IEUEOF ;
    else
       itrans ( ferror ( iunit), (TInt4 *) ierror) ;
-   
+
    fclose ( iunit) ;
    return ;
 
@@ -495,7 +495,7 @@ void ODSGetValMPX ( char *fname,
                    TInt4 *nrpar,
                    TInt4 *nrtim,
                    TInt4 *ierror)
-      
+
 /*************************************************************************/
 /*                                                                       */
 /*                                                                       */
@@ -542,16 +542,16 @@ void ODSGetValMPX ( char *fname,
    int    some_lower ;
    int    ROUNDDAY, YEARSER ;
    size_t items_read ;
-   
+
    short  *ixloc , *ixpar, *ixtim, *chktim;
    float  *databuf ;
-   
+
    ixloc = NULL ;
    ixpar = NULL ;
    ixtim = NULL ;
    chktim = NULL ;
    databuf = NULL ;
-   
+
    iunit = fopen ( fname, "rb\0") ;
 
    if ( iunit == NULL)
@@ -559,7 +559,7 @@ void ODSGetValMPX ( char *fname,
       *ierror = IENOFI ;
       return ;
       }
-   
+
    /* check if this really is a MAPPIX file                           */
    items_read = fread ( &parnam, (size_t) 4, (size_t) 1, iunit ) ;
    if ( ferror ( iunit) || feof ( iunit) || ( items_read != 1)) goto HandleFileErr ;
@@ -573,11 +573,11 @@ void ODSGetValMPX ( char *fname,
    /* get name of time scale */
    if ( fseek ( iunit, 16L, SEEK_SET) != 0) goto HandleFileErr ;
    items_read = fread ( &tsttype, (size_t) 8, (size_t) 1, iunit) ;
-   if ( ferror ( iunit) || feof ( iunit) || ( items_read != 1)) goto HandleFileErr ; 
+   if ( ferror ( iunit) || feof ( iunit) || ( items_read != 1)) goto HandleFileErr ;
 
    tsttype[8]='\0' ;
    for (i=0 ; i<4 ; i++) tsttype[i] = (char) toupper ( (int) tsttype[i] ) ;
-  
+
    /* determine file dimensions                                          */
    if ( fseek ( iunit, 24L, SEEK_SET) != 0) goto HandleFileErr ;
    items_read = fread ( &nloc, (size_t) 2, (size_t) 1, iunit) ;
@@ -593,18 +593,18 @@ void ODSGetValMPX ( char *fname,
    ixtim = calloc ( ntim, 2 ) ;
    chktim = calloc ( ntim, 2 ) ;
    databuf = calloc ( nloc, 4 ) ;
-   if ( databuf == NULL) 
+   if ( databuf == NULL)
       {
       *ierror = IEBUFF ;
       goto HandleExit ;
       }
-         
+
    /* get MAPPIX parameter name and dimension                                         */
    if ( fseek ( iunit, 40L, SEEK_SET) != 0) goto HandleFileErr ;
    items_read = fread ( parnam, (size_t) 40, (size_t) 1, iunit) ;
    if ( ferror ( iunit) || feof ( iunit) || ( items_read != 1)) goto HandleFileErr ;
    parnam[39]='\0' ;
-   
+
    items_read = fread ( pardim, (size_t) 40, (size_t) 1, iunit) ;
    if ( ferror ( iunit) || feof ( iunit) || ( items_read != 1)) goto HandleFileErr ;
    pardim[39]='\0' ;
@@ -613,18 +613,18 @@ void ODSGetValMPX ( char *fname,
    *nrpar = 0 ;
    *ierror = IEOK ;
    if ( fseek ( iunit, 120L, SEEK_SET) != 0) goto HandleFileErr ;
-      
+
    for ( ipar = 1; ipar <= npar; ipar++)
       {
 
       /* Read MAPPIX parameter from file */
-      if ( npar > 1 )   
+      if ( npar > 1 )
          {
          items_read = fread ( parnam, (size_t) 1, (size_t) 40, iunit) ;
          if ( ferror ( iunit) || feof ( iunit) || ( items_read != 40)) goto HandleFileErr ;
          }
       parnam[PARLEN]='\0' ;
-            
+
       /* try to match the parameter */
       idef = 0 ;
       while ( idef < maxipa )
@@ -653,7 +653,7 @@ void ODSGetValMPX ( char *fname,
    /* calculate record length and position                            */
    recordlen = 2 + 4 * nloc ;
    firstrecord = 2 + (short) (40.0 * (7 + npar) / recordlen) ;
-   
+
    /* loop over all locations in the file                             */
    *nrloc = 0 ;
    *ierror = IEOK ;
@@ -667,7 +667,7 @@ void ODSGetValMPX ( char *fname,
       if ( ferror ( iunit) | feof ( iunit) | ( items_read != 1)) goto HandleFileErr ;
 
       sprintf ( locnam, "%i", idef) ;
-         
+
       /* Try to match the location */
       idef = 0 ;
       while ( idef < maxilo)
@@ -692,7 +692,7 @@ void ODSGetValMPX ( char *fname,
             idef++ ;
          }
       }
-      
+
    /* attemp to set time scale                                        */
    mpxtim = 0.0 ;
    dt0=1 ;
@@ -711,7 +711,7 @@ void ODSGetValMPX ( char *fname,
       i= (short) atoi( &tsttype[5] ) ;
       dt0 = 365. / i ;
       }
-         
+
    /* loop over the time steps in the file */
    *nrtim = 0 ;
    itim = 0 ;
@@ -723,7 +723,7 @@ void ODSGetValMPX ( char *fname,
 
       items_read = fread ( &iftime, (size_t) 2, (size_t) 1, iunit) ;
       if ( ferror ( iunit) || feof ( iunit) || ( items_read != 1) ) goto HandleFileErr ;
-         
+
       /* set time step */
       if ( YEARSER )
          {
@@ -735,7 +735,7 @@ void ODSGetValMPX ( char *fname,
          ftime = (TInt4) ftime ;
          }
       else ftime = mpxtim + iftime * dt0 ;
-                  
+
       if ( ROUNDDAY ) ftime = (TInt4) (ftime + 0.5);
 
       /* check if it is still possible that we find something */
@@ -768,27 +768,27 @@ void ODSGetValMPX ( char *fname,
             } /* timin1 < ftime < timin2  */
          }  /* for i */
       }
-      
+
    /* Be pessemistic, assume we will find nothing ...                 */
 
-   for ( itim = 0; itim < maxoti; itim++)      
+   for ( itim = 0; itim < maxoti; itim++)
       for ( ipar = 0; ipar < maxopa; ipar++)
          for ( iloc = 0; iloc < maxolo; iloc++)
             *(values + (itim * maxolo * maxopa +
                        ipar * maxolo +
                        iloc)) = misval ;
             /* fortran: values ( maxolo, maxopa, maxoti) */
-   
+
 
    /* Now get the actual data !                                        */
-      
+
    for ( ipar = 0; ipar < *nrpar; ipar++)
-     for ( itim = 0; itim < *nrtim ; itim++)      
-       
+     for ( itim = 0; itim < *nrtim ; itim++)
+
        {
        file_pos=(firstrecord + (ixpar[ipar] - 1) * ntim + ixtim[itim] - 1) * recordlen ;
        if ( fseek ( iunit, file_pos, SEEK_SET) != 0 ) goto HandleFileErr ;
-       
+
        /* just to make sure, check the time step */
        items_read = fread ( &iftime, (size_t) 2, (size_t) 1, iunit) ;
        if ( ferror ( iunit) || feof ( iunit) || ( items_read != 1) ) goto HandleFileErr ;
@@ -797,7 +797,7 @@ void ODSGetValMPX ( char *fname,
          *ierror = IETIME ;
          goto HandleExit ;
          }
-       
+
        /* read the whole record and copy selected locations */
        items_read = fread ( databuf, (size_t) 4, (size_t) nloc, iunit) ;
        if ( ferror ( iunit) || feof ( iunit) || ( items_read != (size_t) nloc) ) goto HandleFileErr ;
@@ -805,10 +805,10 @@ void ODSGetValMPX ( char *fname,
           values[itim * maxolo * maxopa +
                  ipar * maxolo +
                  iloc] = databuf[ixloc[iloc]-1] ;
-       }            
+       }
 
    /* we're done, bye ! */
-   
+
 HandleExit:
 
    fclose ( iunit) ;
@@ -818,8 +818,8 @@ HandleExit:
    free ( chktim ) ;
    free ( databuf ) ;
    return ;
-   
-/* is there a cleaner way then goto's for cleaning up on error ? */   
+
+/* is there a cleaner way then goto's for cleaning up on error ? */
 
 HandleFileErr:
 
@@ -827,8 +827,8 @@ HandleFileErr:
       *ierror = IEUEOF ;
    else
       itrans ( ferror ( iunit), (TInt4 *) ierror) ;
-   
+
    goto HandleExit ;
-   
+
    }
-   
+

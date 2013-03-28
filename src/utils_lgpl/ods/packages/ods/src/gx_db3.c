@@ -3,7 +3,7 @@
 /*   Program:    GX_DB3.C                                             */
 /*   Version:    1.02                                                 */
 /*   Programmer: Andr‚ Hendriks                                       */
-/*   (c) Copyright 1993 Delft Hydraulics                              */
+/*   Copyright (C)  Stichting Deltares, 2011-2013.                    */
 /*   Previous version(s):                                             */
 /*   1.01 -- 7 Jul 1993 -- 13:52 -- Operating System: DOS             */
 /*   1.00 -- 7 Jul 1993 -- 13:48 -- Operating System: DOS             */

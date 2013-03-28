@@ -1,7 +1,7 @@
 /*
  *  getval.c  -  Read ODS 3-D matrix data from file
  *
- *  Copyright (C) 1994 Delft Hydraulics
+ *  Copyright (C)  Stichting Deltares, 2011-2013.
  *
  *  Marc Kool
  */
@@ -21,7 +21,7 @@
 /*   Program:    GETVAL.C                                             */
 /*   Version:    1.03                                                 */
 /*   Programmer: Andr‚ Hendriks                                       */
-/*   (c) Copyright 1993 Delft Hydraulics                              */
+/*   Copyright (C)  Stichting Deltares, 2011-2013.                    */
 /*   Previous version(s):                                             */
 /*   1.02 -- 6 Dec 1993 -- 13:00 -- Operating System: DOS             */
 /*   1.01 -- 5 Aug 1993 -- 16:31 -- Operating System: DOS             */
@@ -198,7 +198,7 @@ DllExport void getval ( char   *fname,  TInt4 *itype,  char  *locin,  char   *pa
                          nrloc , nrpar , nrtim , ierror) ;
          break ;
 
-      case ITMPX  :	
+      case ITMPX  :
 
          /* MAPPIX file                                                */
 

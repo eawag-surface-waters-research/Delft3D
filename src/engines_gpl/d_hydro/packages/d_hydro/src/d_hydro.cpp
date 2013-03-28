@@ -1,6 +1,6 @@
 //---- GPL ---------------------------------------------------------------------
 //
-// Copyright (C)  Stichting Deltares, 2011-2012.
+// Copyright (C)  Stichting Deltares, 2011-2013.
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -396,7 +396,7 @@ printAbout (
     GETFULLVERSIONSTRING (strout, strlen (strout));
     printf ("\n\
 %s \n\
-Copyright (C) 2012, Stichting Deltares. \n\
+Copyright (C)  Stichting Deltares, 2011-2013. \n\
 GNU General Public License, see <http://www.gnu.org/licenses/>. \n\n\
 delft3d.support@deltares.nl \n", strout);
     GETURLSTRING (strout, strlen (strout));

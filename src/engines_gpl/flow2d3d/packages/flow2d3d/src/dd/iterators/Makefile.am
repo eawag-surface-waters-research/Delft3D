@@ -4,7 +4,7 @@
 #   Irv.Elshoff@Deltares.NL
 #   31 may 11
 #
-#   Copyright (C) 2011, Deltares
+#   Copyright (C)  Stichting Deltares, 2011-2013.
 #-------------------------------------------------------------------------------
 
 

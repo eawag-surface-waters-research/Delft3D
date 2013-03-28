@@ -1,7 +1,7 @@
 /*
  *  itrans.h  -  ODS prototype for itrans.c
  *
- *  Copyright (C) 1994 Delft Hydraulics
+ *  Copyright (C)  Stichting Deltares, 2011-2012.
  *
  *  Bart Adriaanse
  */

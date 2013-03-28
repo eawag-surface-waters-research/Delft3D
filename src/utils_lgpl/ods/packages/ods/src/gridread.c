@@ -3,7 +3,7 @@
  *  gridread.c   -  Delft3D-WAQ: routines for reading curvilinear and
  *                  FEM grids
  *
- *  Copyright (C) 2004 Delft Hydraulics
+ *  Copyright (C)  Stichting Deltares, 2011-2013.
  *
  *  Arjen Markus
  */

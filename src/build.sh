@@ -16,7 +16,7 @@
 #   Irv.Elshoff@Deltares.NL
 #   2 jul 12
 #
-#   Copyright © 2011, Stichting Deltares
+#   Copyright (C)  Stichting Deltares, 2011-2013.
 #-------------------------------------------------------------------------------
 
 # This script must be executed in the directory where it resides

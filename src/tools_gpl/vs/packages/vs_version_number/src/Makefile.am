@@ -4,7 +4,7 @@
 #   jan.mooiman@deltares.nl
 #   22 jul 2008
 #
-#   Copyright (C) 2008, Deltares
+#   Copyright (C)  Stichting Deltares, 2011-2013.
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am

@@ -1,7 +1,7 @@
 /*
  *  samples.h -  ODS function prototypes for samples files
  *
- *  Copyright (C) 1997 Delft Hydraulics
+ *  Copyright (C)  Stichting Deltares, 2011-2012.
  *
  *  Arjen Markus
  */

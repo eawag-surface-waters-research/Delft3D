@@ -3,7 +3,7 @@
  *                 In addition: it will read TELEMAC grid files that
  *                 used by the TELEMAC-DELWAQ coupling.
  *
- *  Copyright (C) 1994 Delft Hydraulics
+ *  Copyright (C)  Stichting Deltares, 2011-2013.
  *
  *   Arjen Markus
  */
@@ -22,7 +22,7 @@
 /*   Program:    DLWBINGR.C                                           */
 /*   Version:    1.00                                                 */
 /*   Programmer: Arjen Markus                                         */
-/*   (c) Copyright 1993 Delft Hydraulics                              */
+/*   Copyright (C)  Stichting Deltares, 2011-2013.                    */
 /*   Previous version(s):                                             */
 /*   Project:     Open Data Structuur                                 */
 /*   Module:      GetParameter/GetDimensions                          */

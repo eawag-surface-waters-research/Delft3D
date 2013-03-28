@@ -3,7 +3,7 @@
 #   Jan.Mooiman@deltares.nl
 #   18 sep 2008
 #
-#   Copyright (C) 2008, Deltares
+#   Copyright (C)  Stichting Deltares, 2011-2013.
 #-------------------------------------------------------------------------------
 include $(top_srcdir)/common.am
 bin_PROGRAMS = test_18

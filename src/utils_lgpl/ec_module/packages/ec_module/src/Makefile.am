@@ -7,7 +7,7 @@
 #   Edwin.Spee@deltares.nl
 #   9 nov 2009
 #
-#   Copyright (C) 2009, Deltares
+#   Copyright (C)  Stichting Deltares, 2011-2013.
 #-------------------------------------------------------------------------------
 
 include $(top_srcdir)/common.am
