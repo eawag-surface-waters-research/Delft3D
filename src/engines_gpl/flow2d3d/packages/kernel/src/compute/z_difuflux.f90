@@ -113,7 +113,6 @@ subroutine z_difuflux(stage   ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
     integer  :: kenu, kenv
     integer  :: kmin
     integer  :: kkmin, kkminu, kkminv
-    integer  :: maskval1, maskval2
     integer  :: mink2
     integer  :: mink, mink_old, mink_new
     integer  :: ndm
@@ -243,13 +242,13 @@ subroutine z_difuflux(stage   ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
           if (kfs(nm)*kfs(nmu) == 1) then
              do k = kfumin(nm), kmax
                 if (kfuz0(nm, k)==1 .and. kfsz0(nm, k)*kfsz0(nmu, k)==1) then
+                   difl = dicuv(nm, k)
+                   difr = dicuv(nmu, k)
+                   kenu = max(0, abs(2 - kcs(nm)))
                    do l = 1, lstsci
-                      cl   = r0(nm, k, l)
-                      difl = dicuv(nm, k)
-                      cr   = r0(nmu, k, l)
-                      difr = dicuv(nmu, k)
-                      flux = 0.5_fp*(cr - cl)*(difl + difr)/(sigdif(l)*gvu(nm))
-                      kenu = max(0, abs(2 - kcs(nmu)))
+                      cl              = r0(nm, k, l)
+                      cr              = r0(nmu, k, l)
+                      flux            = 0.5_fp*(cr - cl)*(difl + difr)/(sigdif(l)*gvu(nm))
                       fluxu(nm, k, l) = fluxu(nm, k, l) - areau(nm, k)*flux*kenu
                    enddo
                 endif
@@ -301,64 +300,19 @@ subroutine z_difuflux(stage   ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
                 endif
              enddo
           endif
-          !if (kfs(nm)*kfs(num) /= 0) then
-          !   kmin = max(kfvmin(nm), 1)
-          !   do k = kmin, kmax
-          !      cfl = v(nm, k)*timest/guv(nm)
-          !      if (qyk(nm, k) > 0.0_fp) then
-          !         do l = 1, lstsci
-          !            rmax = max(r0(ndm, k, l), r0(num, k, l))
-          !            rmin = min(r0(ndm, k, l), r0(num, k, l))
-          !            if (kfsz1(ndm, k)*kfsz1(num, k) == 0 &
-          !              & .or. r0(nm, k, l) >= rmax        &
-          !              & .or. r0(nm, k, l) <  rmin        ) then
-          !               r00 = r0(nm, k, l)
-          !            else
-          !               r00 = r0(nm , k, l) + (1.0_fp - cfl) &
-          !                 & *(r0(nm , k, l) - r0(ndm, k, l)) &
-          !                 & *(r0(num, k, l) - r0(nm , k, l)) &
-          !                 & /(r0(num, k, l) - r0(ndm, k, l))
-          !            endif
-          !            flux = qyk(nm, k) * r00
-          !            if (kcs(nm) >= 1) then
-          !               fluxv(nm, k, l) = fluxv(nm, k, l) + flux
-          !            endif
-          !         enddo
-          !      elseif (qyk(nm, k) < 0.0_fp) then
-          !         do l = 1, lstsci
-          !            rmax = max(r0(nm, k, l), r0(nuum, k, l))
-          !            rmin = min(r0(nm, k, l), r0(nuum, k, l))
-          !            if (kfsz1(nm, k)*kfsz1(nuum, k) == 0 &
-          !              & .or. r0(num, k, l) >= rmax       &
-          !              & .or. r0(num, k, l) <  rmin       ) then
-          !               r00 = r0(num, k, l)
-          !            else
-          !               r00 = r0(num, k, l) + (1.0_fp + cfl)  &
-          !                 & *(r0(nm , k, l) - r0(num , k, l)) &
-          !                 & *(r0(num, k, l) - r0(nuum, k, l)) &
-          !                 & /(r0(nm , k, l) - r0(nuum, k, l))
-          !            endif
-          !            flux = qyk(nm, k) * r00
-          !            if (kcs(nm) >= 1) then
-          !               fluxv(nm, k, l) = fluxv(nm, k, l) + flux
-          !            endif
-          !         enddo
-          !      endif
-          !   enddo
-          !endif
           !
           ! DIFFUSIVE TRANSPORT IN Y-DIRECTION
           !
           if (kfs(nm)*kfs(num) == 1) then
              do k = kfvmin(nm), kmax
                 if (kfvz0(nm, k)==1 .and. kfsz0(nm, k)*kfsz0(num, k)==1) then
+                   difl = dicuv(nm, k)
+                   difr = dicuv(num, k)
+                   kenv = max(0, abs(2 - kcs(nm)))
                    do l = 1, lstsci
-                      cl   = r0(nm, k, l)
-                      difl = dicuv(nm, k)
-                      cr   = r0(num, k, l)
-                      difr = dicuv(num, k)
-                      flux = 0.5_fp*(cr - cl)*(difl + difr)/(sigdif(l)*guv(nm))
-                      kenv = max(0, abs(2 - kcs(num)))
+                      cl              = r0(nm, k, l)
+                      cr              = r0(num, k, l)
+                      flux            = 0.5_fp*(cr - cl)*(difl + difr)/(sigdif(l)*guv(nm))
                       fluxv(nm, k, l) = fluxv(nm, k, l) - areav(nm, k)*flux*kenv
                    enddo
                 endif
@@ -375,45 +329,34 @@ subroutine z_difuflux(stage   ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
           nmu  = nm + icx
           num  = nm + icy
           if (kfu(nm) /= 0 .and. kcs(nm)*kcs(nmu) /= 0) then
-             kmin = max(kfumin(nm), 1)
+             kmin   = max(kfumin(nm), 1)
              kkmin  = min(kfsmx0(nm), kfsmax(nm))
              kkminu = min(kfsmx0(nmu), kfsmax(nmu))
              do k = kmin, min(kkmin, kkminu)
                 do l = 1, lstsci
-                   if (qxk(nm,k) > 0) then
-                      fluxu(nm,k,l) = qxk(nm, k) * r1(nm , k, l)
-                   elseif (qxk(nm,k) < 0) then
-                      fluxu(nm,k,l) = qxk(nm, k) * r1(nmu, k, l)
+                   if (qxk(nm,k) > 0.0_fp) then
+                      fluxu(nm,k,l) = fluxu(nm,k,l) + qxk(nm, k) * r1(nm , k, l)
+                   elseif (qxk(nm,k) < 0.0_fp) then
+                      fluxu(nm,k,l) = fluxu(nm,k,l) + qxk(nm, k) * r1(nmu, k, l)
                    endif
                 enddo
              enddo
           endif
-          !if (kfvmx0(nm) > min(kkmin,kkminu)) then
-          !   do k = min(kkmin,kkminu)+1, kfvmx0(nm)
-          !      do l = 1, lstsci
-          !         if (qyk(nm,k) > 0) then
-          !            fluxv(nm,k,l) = qyk(nm, k) * r1(nm , k, l)
-          !         elseif (qxk(nm,k) < 0) then
-          !            fluxv(nm,k,l) = qyk(nm, k) * r1(num, k, l)
-          !         endif
-          !      enddo
-          !   enddo
-          !endif
           !
-          ! Adjacent cell water fall correction 
+          ! Adjacent cell water fall correction (explicit)
           !
           if (kfumx0(nm) > min(kkmin,kkminu)) then
              do k = min(kkmin,kkminu)+1, kfumx0(nm)
                 if (qxk(nm, k) > 0.0_fp) then
                    do l = 1, lstsci
-                      flux = qxk(nm, k) * r1(nm , k, l)
+                      flux = qxk(nm, k) * r0(nm , k, l)
                       if (kcs(nm) == 1) then
                          fluxu(nm, k, l) = fluxu(nm, k, l) + flux
                       endif
                    enddo
                 elseif (qxk(nm, k) < 0.0_fp) then
                    do l = 1, lstsci
-                      flux = qxk(nm, k) * r1(num, k, l)
+                      flux = qxk(nm, k) * r0(num, k, l)
                       if (kcs(nm) == 1) then
                          fluxu(nm, kkmin, l) = fluxu(nm, kkmin, l) + flux
                       endif
@@ -425,21 +368,21 @@ subroutine z_difuflux(stage   ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
           ! ADVECTIVE TRANSPORT IN Y-DIRECTION
           !
           if (kfv(nm) /= 0  .and. kcs(nm)*kcs(num) /= 0) then
-             kmin = max(kfvmin(nm), 1)
+             kmin   = max(kfvmin(nm), 1)
              kkmin  = min(kfsmx0(nm), kfsmax(nm))
              kkminv = min(kfsmx0(num), kfsmax(num))
              do k = kmin, min(kkmin,kkminv)
                 do l = 1, lstsci
-                   if (qyk(nm,k) > 0) then
-                      fluxv(nm,k,l) = qyk(nm, k) * r1(nm , k, l)
-                   elseif (qyk(nm,k) < 0) then
-                      fluxv(nm,k,l) = qyk(nm, k) * r1(num, k, l)
+                   if (qyk(nm,k) > 0.0_fp) then
+                      fluxv(nm,k,l) = fluxv(nm,k,l) + qyk(nm, k) * r1(nm , k, l)
+                   elseif (qyk(nm,k) < 0.0_fp) then
+                      fluxv(nm,k,l) = fluxv(nm,k,l) + qyk(nm, k) * r1(num, k, l)
                    endif
                 enddo
              enddo
           endif
           !
-          ! Adjacent cell water fall correction 
+          ! Adjacent cell water fall correction (explicit)
           !
           if (kfvmx0(nm) > min(kkmin,kkminv)) then
              do k = min(kkmin,kkminv)+1, kfvmx0(nm)
@@ -469,13 +412,12 @@ subroutine z_difuflux(stage   ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
              mink     = min(mink_old  ,mink_new)
              do k = kfumin(nm), mink
                 if (kfuz0(nm, k)==1 .and. kfsz0(nm, k)*kfsz0(nmu, k)==1) then
+                   difl = dicuv(nm, k)
+                   difr = dicuv(nmu, k)
+                   flux = 0.5_fp * (difl + difr) / (0.7_fp*gvu(nm))
+                   kenu = max(0, abs(2 - kcs(nm)))
                    do l = 1, lstsci
-                      difl = dicuv(nm, k)
-                      difr = dicuv(nmu, k)
-                      flux = 0.5_fp * (difl + difr) / (0.7_fp*gvu(nm))
-                      maskval1      = max(0, abs(2 - kcs(nmu)))
-                      maskval2      = max(0, abs(2 - kcs(nm )))
-                      fluxu(nm,k,l) = fluxu(nm,k,l) + areau(nm, k)*flux*real(maskval1,fp)
+                      fluxu(nm,k,l) = fluxu(nm,k,l) + areau(nm, k)*flux*real(kenu,fp)
                    enddo
                 endif
              enddo
@@ -489,13 +431,12 @@ subroutine z_difuflux(stage   ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
              mink     = min(mink_old  ,mink_new)
              do k = kfvmin(nm), mink
                 if (kfvz0(nm, k)==1 .and. kfsz0(nm, k)*kfsz0(num, k)==1) then
+                   difl = dicuv(nm, k)
+                   difr = dicuv(num, k)
+                   flux = 0.5_fp * (difl + difr) / (0.7_fp*guv(nm))
+                   kenv = max(0, abs(2 - kcs(nm)))
                    do l = 1, lstsci
-                      difl = dicuv(nm, k)
-                      difr = dicuv(num, k)
-                      flux = 0.5_fp * (difl + difr) / (0.7_fp*guv(nm))
-                      maskval1      = max(0, abs(2 - kcs(num)))
-                      maskval2      = max(0, abs(2 - kcs(nm )))
-                      fluxv(nm,k,l) = fluxv(nm,k,l) + areav(nm, k)*flux*real(maskval1,fp)
+                      fluxv(nm,k,l) = fluxv(nm,k,l) + areav(nm, k)*flux*real(kenv,fp)
                    enddo
                 endif
              enddo
