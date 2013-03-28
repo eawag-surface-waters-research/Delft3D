@@ -160,6 +160,7 @@ C
           CALL GETMLU(LUNREP)
           WRITE ( * , * )
           WRITE ( * , * ) ' SIMULATION ENDED '
+          WRITE ( * , * )
           WRITE ( LUNREP , * )
           WRITE ( LUNREP , '(A)' ) ' Simulation ended normal'
           CALL DATTIM(RUNDAT)

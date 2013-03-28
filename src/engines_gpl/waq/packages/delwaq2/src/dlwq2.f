@@ -38,4 +38,13 @@
 
       call delwaq2(argc, argv)
 
+! Delwaq2_lib should never stop, but must be modified to return an error code instead (0 = normal end)
+! Currently a return from the delwaq2_lib assumes a normal end.
+
+      write (*,*) 'Normal end'
+
+      open  ( 2222 , file = 'delwaq.rtn' )
+      write ( 2222 , * ) 0
+      close ( 2222 )
+
       end program
