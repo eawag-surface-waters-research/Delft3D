@@ -129,10 +129,10 @@
 !        call distribute_data(mypart, ldum, 2, ierr)
 !        update = ldum(1)
 !        lrewin = ldum(2)
-!        if ( update ) then
-!           updatv = .true.
+         if ( update ) then
+            updatv = .true.
 !           call distribute_data( mypart, volume, 'noseg', 'distrib_itf', ierr )
-!        endif
+         endif
 !        if ( lrewin ) call distribute_data( mypart, vollst, 'noseg', 'distrib_itf', ierr )
       endif
 
