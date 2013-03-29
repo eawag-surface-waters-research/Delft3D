@@ -87,8 +87,10 @@ C
       VOLUME = PMSA(IP1 )
       SURF   = PMSA(IP2 )
 
-      write ( message(32:55) , '(i9,1x,e14.6)' ) iseg, surf
-      IF (SURF    .LT. 1E-30) CALL ERRSYS ( message, 1 )
+      IF (SURF    .LT. 1E-30) THEN
+         write ( message(32:55) , '(i9,1x,e14.6)' ) iseg, surf
+         CALL ERRSYS ( message, 1 )
+      ENDIF
 
 C***********************************************************************
 C**** Calculate DEPTH
