@@ -23,11 +23,12 @@ set mdwfile=r17.mdw
     rem
     rem Set the directory containing delftflow.exe
     rem
-set D3D_HOME=..\..\bin\win32
-set flowexedir=%D3D_HOME%\flow2d3d\bin
-set waveexedir=%D3D_HOME%\wave\bin
-set swanexedir=%D3D_HOME%\swan\bin
-set swanbatdir=%D3D_HOME%\swan\scripts
+set ARCH=win32
+set D3D_HOME=..\..\bin
+set flowexedir=%D3D_HOME%\%ARCH%\flow2d3d\bin
+set waveexedir=%D3D_HOME%\%ARCH%\wave\bin
+set swanexedir=%D3D_HOME%\%ARCH%\swan\bin
+set swanbatdir=%D3D_HOME%\%ARCH%\swan\scripts
 
     rem
     rem No adaptions needed below

@@ -50,17 +50,17 @@ MACHINE_TYPE=`uname -m`
  
 if [ $mpirun -eq 1 ]; then
   if [ ${MACHINE_TYPE} = 'x86_64' ]; then
-    SWANEXEC=${D3D_HOME}/swan/bin/swan_4072ABCDE_del_l64_i11_mpi.exe
+    SWANEXEC=${D3D_HOME}/${ARCH}/swan/bin/swan_4072ABCDE_del_l64_i11_mpi.exe
   elif [ ${MACHINE_TYPE} = 'i686' ]; then
-    SWANEXEC=${D3D_HOME}/swan/bin/swan_4072ABCDE_del_l32_i11_mpi.exe
+    SWANEXEC=${D3D_HOME}/${ARCH}/swan/bin/swan_4072ABCDE_del_l32_i11_mpi.exe
   else
     echo "Error \"uname -m\" does not return x86_64 or i686"
   fi
 else
   if [ ${MACHINE_TYPE} = 'x86_64' ]; then
-    SWANEXEC=${D3D_HOME}/swan/bin/swan_4072ABCDE_del_l64_i11_omp.exe
+    SWANEXEC=${D3D_HOME}/${ARCH}/swan/bin/swan_4072ABCDE_del_l64_i11_omp.exe
   elif [ ${MACHINE_TYPE} = 'i686' ]; then
-    SWANEXEC=${D3D_HOME}/swan/bin/swan_4072ABCDE_del_l32_i11_omp.exe
+    SWANEXEC=${D3D_HOME}/${ARCH}/swan/bin/swan_4072ABCDE_del_l32_i11_omp.exe
   else
     echo "Error \"uname -m\" does not return x86_64 or i686"
   fi

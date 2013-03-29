@@ -27,8 +27,9 @@ set argfile=config_d_hydro.xml
     rem
     rem Set the directory containing ALL exes/dlls here (mpiexec.exe, delftflow.exe, flow2d3d.dll, mpich-dlls, DelftOnline dlls etc.)
     rem
-set D3D_HOME=..\..\bin\win32
-set exedir=%D3D_HOME%\flow2d3d\bin
+set ARCH=win32
+set D3D_HOME=..\..\bin
+set exedir=%D3D_HOME%\%ARCH%\flow2d3d\bin
 
     rem
     rem No adaptions needed below

@@ -23,13 +23,13 @@ mdwfile=r17.mdw
     #
     # Set the directory containing delftflow.exe
     #
-export ARCH=intel
+export ARCH=lnx
 curdir=`pwd`
-export D3D_HOME=$curdir/../../bin/lnx
-flowexedir=$D3D_HOME/flow2d3d/bin
-waveexedir=$D3D_HOME/wave/bin
-swanexedir=$D3D_HOME/swan/bin
-swanbatdir=$D3D_HOME/swan/scripts
+export D3D_HOME=$curdir/../../bin
+flowexedir=$D3D_HOME/$ARCH/flow2d3d/bin
+waveexedir=$D3D_HOME/$ARCH/wave/bin
+swanexedir=$D3D_HOME/$ARCH/swan/bin
+swanbatdir=$D3D_HOME/$ARCH/swan/scripts
  
     #
     # No adaptions needed below
