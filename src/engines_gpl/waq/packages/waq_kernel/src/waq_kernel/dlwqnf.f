@@ -140,6 +140,7 @@
       logical         litrep , ldummy, timon_old
       real(8)         tol
       integer         laatst
+      INTEGER         sindex
 
       integer, save :: ithandl
       integer, save :: ithand1 = 0 ! Leave local
@@ -305,10 +306,11 @@ C
 
 !        Determine the volumes and areas that ran dry at start of time step
 
+         call hsurf  ( noseg    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
+     &                 c(isfna) , a(isfun) , surface  , sindex   , lun(19)  )
          call dryfld ( noseg    , nosss    , nolay    , a(ivol)  , noq1+noq2,
-     &                 a(iarea) , nocons   , c(icnam) , a(icons) , nopa     ,
-     &                 c(ipnam) , a(iparm) , nosfun   , c(isfna) , a(isfun) ,
-     &                 j(iknmr) , iknmkv   )
+     &                 a(iarea) , nocons   , c(icnam) , a(icons) , sindex   ,
+     &                 surface  , j(iknmr) , iknmkv   )
 
 !     mt3d coupling
 
@@ -329,18 +331,14 @@ C
      &                 npartp  )
          if ( update ) updatr = .true.
 
-! jvb
-!     Temporary ? set the variables grid-setting for the DELWAQ variables
-         call setset ( lun(19), nocons, nopa  , nofun   , nosfun,
-     &                 nosys  , notot , nodisp, novelo  , nodef ,
-     &                 noloc  , ndspx , nvelx , nlocx   , nflux ,
-     &                 nopred , novar , nogrid, j(ivset))
+!jvb  Temporary ? set the variables grid-setting for the DELWAQ variables
 
-! jvb
-!     call PROCES subsystem
-         call hsurf  ( nosys   , notot   , noseg   , nopa    , c(ipnam),
-     +                 a(iparm), nosfun  , c(isfna), a(isfun), surface ,
-     +                 lun(19) )
+         call setset ( lun(19)  , nocons   , nopa     , nofun    , nosfun   ,
+     &                 nosys    , notot    , nodisp   , novelo   , nodef    ,
+     &                 noloc    , ndspx    , nvelx    , nlocx    , nflux    ,
+     &                 nopred   , novar    , nogrid   , j(ivset) )
+
+!          call PROCES subsystem
 
          call proces ( notot   , nosss   , a(iconc), a(ivol) , itime   ,
      &                 idt     , a(iderv), ndmpar  , nproc   , nflux   ,
@@ -488,8 +486,8 @@ C
 !       Initialize pointer matices for fast solvers              ( dlwqf1 )
 
          call dryfle ( noseg    , nosss    , a(ivol2) , nolay    , nocons   ,
-     &                 c(icnam) , a(icons) , nopa     , c(ipnam) , a(iparm) ,
-     &                 nosfun   , c(isfna) , a(isfun) , j(iknmr) , iknmkv   )
+     &                 c(icnam) , a(icons) , sindex   , surface  , j(iknmr) ,
+     &                 iknmkv   )
          call zflows ( noq      , noqt     , nolay    , nocons   , c(icnam) ,
      &                 a(iflow) , j(ixpnt) )
          call dlwqf1 ( noseg    , nobnd    , noq      , noq1     , noq2     ,

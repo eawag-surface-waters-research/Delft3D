@@ -21,288 +21,99 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      SUBROUTINE SETSET ( LUREP , NOCONS, NOPA  , NOFUN , NOSFUN,
-     +                    NOSYS , NOTOT , NODISP, NOVELO, NODEF ,
-     +                    NOLOC , NDSPX , NVELX , NLOCX , NFLUX ,
-     +                    NOPRED, NOVAR , NOGRID, VGRSET)
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            : Jan van Beek
-C
-C     FUNCTION            : Initialisation of Variables structure
-C
-C     SUBROUTINES CALLED  :
-C
-C     FILES               :
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C
-C     Declaration of arguments
-C
-      use timers
+      subroutine setset ( lurep  , nocons , nopa   , nofun  , nosfun ,
+     &                    nosys  , notot  , nodisp , novelo , nodef  ,
+     &                    noloc  , ndspx  , nvelx  , nlocx  , nflux  ,
+     &                    nopred , novar  , nogrid , vgrset )
 
-      INTEGER             LUREP , NOCONS, NOPA  , NOFUN , NOSFUN,
-     +                    NOSYS , NOTOT , NODISP, NOVELO, NODEF ,
-     +                    NOLOC , NDSPX , NVELX , NLOCX , NFLUX ,
-     +                    NOPRED, NOVAR
-      INTEGER             VGRSET(NOVAR,NOGRID)
+!     Deltares Software Centre
+
+!>\File
+!>      Initialisation of Variables structure
+!>
+!>      Meaning is not documented by author
+
+!     Created:    unknown date by Jan van Beek
+
+      use timers
+      implicit none
+
+!     Parameters          :
+
+!     kind           function         name                    description
+
+      integer  ( 4), intent(in   ) :: lurep                 !< Unit number monitoring file (not used)
+      integer  ( 4), intent(in   ) :: nocons                !< Number of constants
+      integer  ( 4), intent(in   ) :: nopa                  !< Number of parameters
+      integer  ( 4), intent(in   ) :: nofun                 !< Number of functions
+      integer  ( 4), intent(in   ) :: nosfun                !< Number of segment functions
+      integer  ( 4), intent(in   ) :: nosys                 !< Number of transported substances
+      integer  ( 4), intent(in   ) :: notot                 !< Total number of substances
+      integer  ( 4), intent(in   ) :: nodisp                !< Number of user-dispersions
+      integer  ( 4), intent(in   ) :: novelo                !< Number of user-flows
+      integer  ( 4), intent(in   ) :: nodef                 !< Number of default values
+      integer  ( 4), intent(in   ) :: noloc                 !< Number of local values
+      integer  ( 4), intent(in   ) :: ndspx                 !< Number of dspx
+      integer  ( 4), intent(in   ) :: nvelx                 !< Number of velx
+      integer  ( 4), intent(in   ) :: nlocx                 !< Number of locx
+      integer  ( 4), intent(in   ) :: nflux                 !< Number of flux
+      integer  ( 4), intent(in   ) :: nopred                !< Not used
+      integer  ( 4), intent(in   ) :: novar                 !< Number of variables on the grids
+      integer  ( 4), intent(in   ) :: nogrid                !< Number of grids
+      integer  ( 4), intent(inout) :: vgrset(novar,nogrid)  !< Number of grids
+
+!     Local declarations
+
+      integer( 4) i, ivar, igrid      ! help variables for loop and index counting
+      integer( 4) iset                ! help variable 1 for igrid = 1, 0 for igrid > 1
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "setset", ithandl )
-C
-C     Volume
-C
-      IVAR = 1
-      VGRSET(IVAR,1) = 1
-C
-C     Area
-C
-      IVAR = IVAR + 1
-      VGRSET(IVAR,1) = 1
-C
-C     Flow
-C
-      IVAR = IVAR + 1
-      VGRSET(IVAR,1) = 1
-C
-C     Length , two length
-C
-      IVAR = IVAR + 1
-      VGRSET(IVAR,1) = 1
-      IVAR = IVAR + 1
-      VGRSET(IVAR,1) = 1
-C
-C     Cons
-C
-      DO ICONS = 1 , NOCONS
-         IVAR = IVAR + 1
-      ENDDO
-C
-C     Param
-C
-      DO IPA = 1 , NOPA
-         IVAR = IVAR + 1
-      ENDDO
-C
-C     Func
-C
-      DO IFUN = 1 , NOFUN
-         IVAR = IVAR + 1
-         VGRSET(IVAR,1) = 1
-      ENDDO
-C
-C     Seg Func
-C
-      DO ISFUN = 1 , NOSFUN
-         IVAR = IVAR + 1
-         VGRSET(IVAR,1) = 1
-      ENDDO
-C
-C     Conc
-C
-      DO ISYS = 1 , NOSYS
-         IVAR = IVAR + 1
-         VGRSET(IVAR,1) = 1
-      ENDDO
-      DO ISYS = NOSYS + 1 , NOTOT
-         IVAR = IVAR + 1
-         VGRSET(IVAR,1) = 1
-      ENDDO
-C
-C     Mass
-C
-      DO ISYS = 1 , NOTOT
-         IVAR = IVAR + 1
-         VGRSET(IVAR,1) = 1
-      ENDDO
-C
-C     Deriv
-C
-      DO ISYS = 1 , NOTOT
-         IVAR = IVAR + 1
-      ENDDO
-C
-C     Disp
-C
-      DO IDSP = 1 , NODISP
-         IVAR = IVAR + 1
-         VGRSET(IVAR,1) = 1
-      ENDDO
-C
-C     Velo
-C
-      DO IVEL = 1 , NOVELO
-         IVAR = IVAR + 1
-         VGRSET(IVAR,1) = 1
-      ENDDO
-C
-C     Default
-C
-      DO IDEF = 1 , NODEF
-         IVAR = IVAR + 1
-         VGRSET(IVAR,1) = 1
-      ENDDO
-C
-C     Local
-C
-      DO ILOC = 1 , NOLOC
-         IVAR = IVAR + 1
-      ENDDO
-C
-C     DSPX
-C
-      DO IDSX = 1 , NDSPX
-         IVAR = IVAR + 1
-      ENDDO
-C
-C     VELX
-C
-      DO IVLX = 1 , NVELX
-         IVAR = IVAR + 1
-      ENDDO
-C
-C     LOCX
-C
-      DO ILCX = 1 , NLOCX
-         IVAR = IVAR + 1
-      ENDDO
-C
-C     FLUX
-C
-      DO IFLX = 1 , NFLUX
-         IVAR = IVAR + 1
-      ENDDO
-C
-C
-      DO IGRID = 2 , NOGRID
-C
-C        Volume
-C
-         IVAR = 1
-         VGRSET(IVAR,IGRID) = 0
-C
-C        Area
-C
-         IVAR = IVAR + 1
-         VGRSET(IVAR,IGRID) = 0
-C
-C        Flow
-C
-         IVAR = IVAR + 1
-         VGRSET(IVAR,IGRID) = 0
-C
-C        Length , two length
-C
-         IVAR = IVAR + 1
-         VGRSET(IVAR,IGRID) = 0
-         IVAR = IVAR + 1
-         VGRSET(IVAR,IGRID) = 0
-C
-C        Cons
-C
-         DO ICONS = 1 , NOCONS
-            IVAR = IVAR + 1
-         ENDDO
-C
-C        Param
-C
-         DO IPA = 1 , NOPA
-            IVAR = IVAR + 1
-         ENDDO
-C
-C        Func
-C
-         DO IFUN = 1 , NOFUN
-            IVAR = IVAR + 1
-            VGRSET(IVAR,IGRID) = 0
-         ENDDO
-C
-C        Seg Func
-C
-         DO ISFUN = 1 , NOSFUN
-            IVAR = IVAR + 1
-            VGRSET(IVAR,IGRID) = 0
-         ENDDO
-C
-C        Conc
-C
-         DO ISYS = 1 , NOSYS
-            IVAR = IVAR + 1
-            VGRSET(IVAR,IGRID) = 0
-         ENDDO
-         DO ISYS = NOSYS + 1 , NOTOT
-            IVAR = IVAR + 1
-            VGRSET(IVAR,IGRID) = 0
-         ENDDO
-C
-C        Mass
-C
-         DO ISYS = 1 , NOTOT
-            IVAR = IVAR + 1
-            VGRSET(IVAR,IGRID) = 0
-         ENDDO
-C
-C        Deriv
-C
-         DO ISYS = 1 , NOTOT
-            IVAR = IVAR + 1
-         ENDDO
-C
-C        Disp
-C
-         DO IDSP = 1 , NODISP
-            IVAR = IVAR + 1
-            VGRSET(IVAR,IGRID) = 0
-         ENDDO
-C
-C        Velo
-C
-         DO IVEL = 1 , NOVELO
-            IVAR = IVAR + 1
-            VGRSET(IVAR,IGRID) = 0
-         ENDDO
-C
-C        Default
-C
-         DO IDEF = 1 , NODEF
-            IVAR = IVAR + 1
-         ENDDO
-C
-C        Local
-C
-         DO ILOC = 1 , NOLOC
-            IVAR = IVAR + 1
-         ENDDO
-C
-C        DSPX
-C
-         DO IDSX = 1 , NDSPX
-            IVAR = IVAR + 1
-         ENDDO
-C
-C        VELX
-C
-         DO IVLX = 1 , NVELX
-            IVAR = IVAR + 1
-         ENDDO
-C
-C        LOCX
-C
-         DO ILCX = 1 , NLOCX
-            IVAR = IVAR + 1
-         ENDDO
-C
-C        FLUX
-C
-         DO IFLX = 1 , NFLUX
-            IVAR = IVAR + 1
-         ENDDO
-C
-      ENDDO
-C
+
+      do igrid = 1 , nogrid
+         iset = 0
+         if ( igrid .eq. 1 ) iset = 1
+         ivar = 0
+         ivar = ivar + 1  ;  vgrset(ivar,igrid) = iset    ! volume
+         ivar = ivar + 1  ;  vgrset(ivar,igrid) = iset    ! area
+         ivar = ivar + 1  ;  vgrset(ivar,igrid) = iset    ! flow
+         ivar = ivar + 1  ;  vgrset(ivar,igrid) = iset    ! length 1
+         ivar = ivar + 1  ;  vgrset(ivar,igrid) = iset    ! length 2
+         ivar = ivar + nocons                             ! constants
+         ivar = ivar + nopa                               ! parameters
+         do i = 1 , nofun                                 ! functions
+            ivar = ivar + 1  ;  vgrset(ivar,igrid) = iset
+         enddo
+         do i = 1 , nosfun                                ! segment functions
+            ivar = ivar + 1  ;  vgrset(ivar,igrid) = iset
+         enddo
+         do i = 1 , notot                                 ! concentrations
+            ivar = ivar + 1  ;  vgrset(ivar,igrid) = iset
+         enddo
+         do i = 1 , notot                                 ! masses
+            ivar = ivar + 1  ;  vgrset(ivar,igrid) = iset
+         enddo
+         do i = 1 , notot                                 ! derivatives
+            ivar = ivar + 1  ;  vgrset(ivar,igrid) = iset
+         enddo
+         do i = 1 , nodisp                                ! dispersions
+            ivar = ivar + 1  ;  vgrset(ivar,igrid) = iset
+         enddo
+         do i = 1 , novelo                                ! velocities
+            ivar = ivar + 1  ;  vgrset(ivar,igrid) = iset
+         enddo
+         do i = 1 , nodef                                 ! default values
+            ivar = ivar + 1  ;  vgrset(ivar,igrid) = iset
+         enddo
+         do i = 1 , noloc                                 ! local values
+            ivar = ivar + 1  ;  vgrset(ivar,igrid) = iset
+         enddo
+         ivar = ivar + ndspx                           ! dspx
+         ivar = ivar + nvelx                           ! velx
+         ivar = ivar + nlocx                           ! locx
+         ivar = ivar + nflux                           ! flux
+      enddo
+
       if ( timon ) call timstop ( ithandl )
-      RETURN
-      END
+      return
+      end

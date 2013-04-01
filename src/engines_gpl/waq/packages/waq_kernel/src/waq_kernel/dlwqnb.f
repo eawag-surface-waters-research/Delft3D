@@ -154,6 +154,7 @@ C
       INTEGER         IVDEF
       REAL            RDUMMY(1)
       INTEGER         LAATST
+      INTEGER         sindex
 
       integer          :: ithandl
 
@@ -256,44 +257,41 @@ C======================= simulation loop ============================
 
 !        Determine the volumes and areas that ran dry at start of time step
 
+         call hsurf  ( noseg    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
+     &                 c(isfna) , a(isfun) , surface  , sindex   , lun(19)  )
          call dryfld ( noseg    , nosss    , nolay    , a(ivol)  , noq1+noq2,
-     &                 a(iarea) , nocons   , c(icnam) , a(icons) , nopa     ,
-     &                 c(ipnam) , a(iparm) , nosfun   , c(isfna) , a(isfun) ,
-     &                 j(iknmr) , iknmkv   )
+     &                 a(iarea) , nocons   , c(icnam) , a(icons) , sindex   ,
+     &                 surface  , j(iknmr) , iknmkv   )
 
 !     mt3d coupling
 
-         call dlwq_mt3d   ( lun  (19), itime   , idt     , itstop  , notot   ,
-     &                      nosys    , nosss   , nobnd   , c(isnam), c(ibnid),
-     &                      j(ibpnt) , a(iconc), a(ibset), noqtt   , j(ixpnt),
-     &                      a(iflow) , ndmpq   , j(iqdmp), a(idmpq))
-C
-C          user transport processes
-C
-      UPDATE = UPDATR
-      CALL DLWQTR ( NOTOT   , NOSYS   , NOSEG   , NOQ     , NOQ1    ,
-     *              NOQ2    , NOQ3    , NOPA    , NOSFUN  , NODISP  ,
-     *              NOVELO  , J(IXPNT), A(IVOL) , A(IAREA), A(IFLOW),
-     *              A(ILENG), A(ICONC), A(IDISP), A(ICONS), A(IPARM),
-     *              A(IFUNC), A(ISFUN), A(IDIFF), A(IVELO), ITIME   ,
-     *              IDT     , C(ISNAM), NOCONS  , NOFUN   , C(ICNAM),
-     *              C(IPNAM), C(IFNAM), C(ISFNA), UPDATE  , ILFLAG  ,
-     *              NPARTp   )
-      IF ( UPDATE ) UPDATR = .TRUE.
-Cjvb
-C     Temporary ? set the variables grid-setting for the DELWAQ variables
-C
-      CALL SETSET ( LUN(19), NOCONS, NOPA  , NOFUN   , NOSFUN,
-     +              NOSYS  , NOTOT , NODISP, NOVELO  , NODEF ,
-     +              NOLOC  , NDSPX , NVELX , NLOCX   , NFLUX ,
-     +              NOPRED , NOVAR , NOGRID, J(IVSET))
-Cjvb
-C
-C          call PROCES subsystem
-C
-      call hsurf  ( nosys   , notot   , noseg   , nopa    , c(ipnam),
-     +              a(iparm), nosfun  , c(isfna), a(isfun), surface ,
-     +              lun(19) )
+         call dlwq_mt3d ( lun (19) , itime    , idt      , itstop   , notot    ,
+     &                    nosys    , nosss    , nobnd    , c(isnam) , c(ibnid) ,
+     &                    j(ibpnt) , a(iconc) , a(ibset) , noqtt    , j(ixpnt) ,
+     &                    a(iflow) , ndmpq    , j(iqdmp) , a(idmpq) )
+
+!          user transport processes
+
+         update = updatr
+         call dlwqtr ( nototp   , nosys    , nosss    , noq      , noq1     ,
+     &                 noq2     , noq3     , nopa     , nosfun   , nodisp   ,
+     &                 novelo   , j(ixpnt) , a(ivol)  , a(iarea) , a(iflow) ,
+     &                 a(ileng) , a(iconc) , a(idisp) , a(icons) , a(iparm) ,
+     &                 a(ifunc) , a(isfun) , a(idiff) , a(ivelo) , itime    ,
+     &                 idt      , c(isnam) , nocons   , nofun    , c(icnam) ,
+     &                 c(ipnam) , c(ifnam) , c(isfna) , update   , ilflag   ,
+     &                 npartp   )
+         if ( update ) updatr = .true.
+
+!jvb  Temporary ? set the variables grid-setting for the DELWAQ variables
+
+         call setset ( lun(19)  , nocons   , nopa     , nofun    , nosfun   ,
+     &                 nosys    , notot    , nodisp   , novelo   , nodef    ,
+     &                 noloc    , ndspx    , nvelx    , nlocx    , nflux    ,
+     &                 nopred   , novar    , nogrid   , j(ivset) )
+
+!          call PROCES subsystem
+
       CALL PROCES ( NOTOT   , NOSEG   , A(ICONC), A(IVOL) , ITIME   ,
      +              IDT     , A(IDERV), NDMPAR  , NPROC   , NFLUX   ,
      +              J(IIPMS), J(INSVA), J(IIMOD), J(IIFLU), J(IIPSS),
@@ -427,8 +425,8 @@ C
 !        update the info on dry volumes with the new volumes
 
          call dryfle ( noseg    , nosss    , a(ivol2) , nolay    , nocons   ,
-     &                 c(icnam) , a(icons) , nopa     , c(ipnam) , a(iparm) ,
-     &                 nosfun   , c(isfna) , a(isfun) , j(iknmr) , iknmkv   )
+     &                 c(icnam) , a(icons) , sindex   , surface  , j(iknmr) ,
+     &                 iknmkv   )
 
 !          add the waste loads
 

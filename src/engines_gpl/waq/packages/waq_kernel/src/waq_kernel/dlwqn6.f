@@ -136,6 +136,7 @@ C
       INTEGER         I
       INTEGER          :: NOSSS
       INTEGER          :: NOQTT
+      INTEGER         sindex
 
       integer         ithandl
 
@@ -171,10 +172,11 @@ C
 !        Determine the volumes and areas that ran dry,
 !        They cannot have explicit processes during this time step
 
+         call hsurf  ( noseg    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
+     &                 c(isfna) , a(isfun) , surface  , sindex   , lun(19)  )
          call dryfld ( noseg    , nosss    , nolay    , a(ivol)  , noq1+noq2,
-     &                 a(iarea) , nocons   , c(icnam) , a(icons) , nopa     ,
-     &                 c(ipnam) , a(iparm) , nosfun   , c(isfna) , a(isfun) ,
-     &                 j(iknmr) , iknmkv   )
+     &                 a(iarea) , nocons   , c(icnam) , a(icons) , sindex   ,
+     &                 surface  , j(iknmr) , iknmkv   )
 C
 C       make closure error correction
 C

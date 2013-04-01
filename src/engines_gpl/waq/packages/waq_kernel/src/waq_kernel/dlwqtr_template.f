@@ -21,98 +21,97 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      SUBROUTINE DLWQTR ( NOTOT  , NOSYS  , NOSEG  , NOQ    , NOQ1   ,
-     *                    NOQ2   , NOQ3   , NOPA   , NOSFUN , NODISP ,
-     *                    NOVELO , IPOINT , VOLUME , AREA   , FLOW   ,
-     *                    ALENG  , CONC   , DISP   , CONS   , PARAM  ,
-     *                    FUNC   , SEGFUN , DISPER , VELO   , ITIME  ,
-     *                    IDT    , SYNAME , NOCONS , NOFUN  , CONAME ,
-     *                    PANAME , FUNAME , SFNAME , UPDATR , ILFLAG ,
-     *                    NPARTp )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:    march 1988 by L.Postma
-C
-C     FUNCTION            : Parameter list and header for user supplied
-C                           subroutine for TRANSPORT processes.
-C
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     NOTOT   INTEGER       1     INPUT   Total number of substances
-C     NOSYS   INTEGER       1     INPUT   number of active substances
-C     NOSEG   INTEGER       1     INPUT   Nr. of computational elements
-C     NOQ     INTEGER       1     INPUT   Total number of exchanges
-C     NOQ1    INTEGER       1     INPUT   Nr. of exchanges direction 1
-C     NOQ2    INTEGER       1     INPUT   Nr. of exchanges direction 2
-C     NOQ3    INTEGER       1     INPUT   Nr. of exchanges direction 3
-C     NOPA    INTEGER       1     INPUT   Number of parameters
-C     NOSFUN  INTEGER       1     INPUT   Number of segment functions
-C     NODISP  INTEGER       1     INPUT   Number of user-dispersions
-C     NOVELO  INTEGER       1     INPUT   Number of user-flows
-C     IPOINT  INTEGER   4*NOQ     INPUT   1= "From"   segment pointers
-C                                 INPUT   2= "To"     segment pointers
-C                                 INPUT   3= "From-1" segment pointers
-C                                 INPUT   4= "To+1"   segment pointers
-C     VOLUME  REAL      NOSEG     INPUT   Segment volumes
-C     AREA    REAL        NOQ     INPUT   Exchange surfaces
-C     FLOW    REAL        NOQ     INPUT   Flows
-C     ALENG   REAL      2*NOQ     INPUT   1= Length to "From" surface
-C                                         2= Length to "To"   surface
-C     CONC    REAL   NOTOT*NOSEG  INPUT   Model concentrations
-C     DISP    REAL        3       IN/OUT  Dispersion in 3 directions
-C     CONS    REAL          *     IN/OUT  Model constants
-C     PARAM   REAL    NOPA*NOSEG  IN/OUT  Model parameters
-C     FUNC    REAL          *     IN/OUT  Model functions at ITIME
-C     SEGFUN  REAL   NOSEG*NOSFUN IN/OUT  Segment functions at ITIME
-C     DISPER  REAL   NODISP*NOQ   OUTPUT  User defined dispersion
-C     VELO    REAL   NOVELO*NOQ   OUTPUT  User defined flows
-C     ITIME   INTEGER       1     INPUT   Time in system clock units
-C     IDT     INTEGER       1     INPUT   Time step system clock units
-C     SYNAME  CHAR*20    NOTOT    INPUT   names of systems
-C     NOCONS  INTEGER       1     INPUT   Number of constants used
-C     NOFUN   INTEGER       1     INPUT   Number of functions ( user )
-C     CONAME  CHAR*20   NOCONS    INPUT   Constant names
-C     PANAME  CHAR*20   NOPA      INPUT   Parameter names
-C     FUNAME  CHAR*20   NOFUN     INPUT   Function names
-C     SFNAME  CHAR*20   NOSFUN    INPUT   Segment function names
-C     UPDATR  LOGICAL       1     IN/OUT  Flag indicating if the transport
-C                                         matrix is changed. The user should
-C                                         set this flag to .T. if he alters
-C                                         part of the matrix and uses integratio
-C                                         option 10.xx .
-C                                         option 5 )
-C     ILFLAG  INTEGER     1       INPUT   if 0 then 3 length values
-C     NPARTp  INTEGER     1       INPUT   number of subdomains in parallel run
-C
-C     ==================================================================
-C
-      DIMENSION  IPOINT( 4,NOQ )
-      DIMENSION  VOLUME(NOSEG) , AREA(NOQ) , FLOW(NOQ) ,
-     &           ALENG (2,NOQ) , CONC  (NOTOT,NOSEG)       , DISP( 3 ) ,
-     &           CONS  (  *  ) , PARAM (  NOPA,NOSEG )     , FUNC( * ) ,
-     &           SEGFUN( NOSEG , NOSFUN ) ,
-     &           DISPER( NODISP,  NOQ) , VELO  (NOVELO,NOQ)
-      CHARACTER*20 SYNAME (NOTOT), CONAME (*), PANAME (*),
-     &             FUNAME (*)    , SFNAME (*)
-      LOGICAL    UPDATR
-C
-C          check usage w.r.t. parallel computing
-C          activate this check when your routine is not parallellized.
-C
-C     IF ( NPARTp .GT. 1 ) THEN
-C        WRITE(LUNREP,2060) NPARTp
-C        CALL SRSTOP
-C     ENDIF
-C
-C
-      RETURN
-C
-C     Output formats
-C
- 2060 FORMAT (' ERROR: User-supplied transport processes (DLWQTR) may not be used',/,
-     +        '        in parallel runs (NPART=',i3,').')
-      END
+      subroutine dlwqtr ( notot  , nosys  , noseg  , noq    , noq1   ,
+     &                    noq2   , noq3   , nopa   , nosfun , nodisp ,
+     &                    novelo , ipoint , volume , area   , flow   ,
+     &                    aleng  , conc   , disp   , cons   , param  ,
+     &                    func   , segfun , disper , velo   , itime  ,
+     &                    idt    , syname , nocons , nofun  , coname ,
+     &                    paname , funame , sfname , updatr , ilflag ,
+     &                    npartp )
+
+!     Deltares Software Centre
+
+!>\File Before 1995 used to allow users to define their specific (additional) transport processes
+!>
+!>    To use this routine you may get the index for any constant, parameter or (segment) function
+!>    by getting its sequence number e.g. through a call to:\\
+!>         call zoek20 ( 'My_name   ', nocons, coname, 10, index )\\
+!>    and then use cons(index) (or the parameter, function or segment function value) in your
+!>    formula to define a specific additional velo(myvelo,*) or disper(mydisp,*).\\
+!>    Look in the description of the Delwaq input file group 4 how to define additional velocity
+!>    and dispersion arrays and initialize them with a (dummy) value. They will enter into the
+!>    advection diffusion solver as additional velocity (e.g. for settling) or mixing (e.g. for
+!>    the effect of additional stirring).\\
+!>    This functionality is replaced by the processes library who also adds additional velocities
+!>    and dispersions on top of those defined by the user. If you specify 1 additional velocity, but
+!>    also switch 'on' processes that create 3 additional velocities, then you might notice that this
+!>    routine is invoked with novelo set to 4, 1 defined by you and 3 added by the processes library.
+
+!     Created:    march 1988 by L.Postma
+
+      use timers
+      implicit none
+
+!     Parameters          :
+
+!     kind           function         name                    description
+
+      integer  ( 4), intent(in   ) :: notot                 !< Total number of substances
+      integer  ( 4), intent(in   ) :: nosys                 !< Number of transported substances
+      integer  ( 4), intent(in   ) :: noseg                 !< Number of computational cells
+      integer  ( 4), intent(in   ) :: noq                   !< Total number of exchanges
+      integer  ( 4), intent(in   ) :: noq1                  !< Number of exchanges direction 1
+      integer  ( 4), intent(in   ) :: noq2                  !< Number of exchanges direction 2
+      integer  ( 4), intent(in   ) :: noq3                  !< Number of exchanges vertical
+      integer  ( 4), intent(in   ) :: nocons                !< Number of constants
+      integer  ( 4), intent(in   ) :: nopa                  !< Number of parameters
+      integer  ( 4), intent(in   ) :: nofun                 !< Number of functions
+      integer  ( 4), intent(in   ) :: nosfun                !< Number of segment functions
+      integer  ( 4), intent(in   ) :: nodisp                !< Number of user-dispersions
+      integer  ( 4), intent(in   ) :: novelo                !< Number of user-flows
+      integer  ( 4), intent(in   ) :: ipoint(4,noq )        !< 'From'-'to' pointer table
+      real     ( 4), intent(in   ) :: volume(noseg )        !< Segment volumes
+      real     ( 4), intent(in   ) :: area  (noq   )        !< Exchange surfaces
+      real     ( 4), intent(in   ) :: flow  (noq   )        !< Exchange surfaces
+      real     ( 4), intent(in   ) :: aleng (2,noq )        !< "From" and "To" lengthes
+      real     ( 4), intent(in   ) :: conc  (notot ,noseg ) !< Model concentrations
+      real     ( 4), intent(in   ) :: disp  (3)             !< Dispersion in 3 directions
+      real     ( 4), intent(in   ) :: cons  (nocons)        !< Model constants
+      real     ( 4), intent(in   ) :: param (nopa  ,noseg ) !< Model parameters
+      real     ( 4), intent(in   ) :: func  (nofun )        !< Model functions at ITIME
+      real     ( 4), intent(in   ) :: segfun(noseg ,nosfun) !< Segment functions at ITIME
+      real     ( 4), intent(in   ) :: disper(nodisp,noq   ) !< User defined dispersion
+      real     ( 4), intent(in   ) :: velo  (novelo,noq   ) !< User defined flows
+      integer  ( 4), intent(in   ) :: itime                 !< Time in system clock units
+      integer  ( 4), intent(in   ) :: idt                   !< Time step system clock units
+      character(20), intent(in   ) :: syname(notot )        !< Names of substances
+      character(20), intent(in   ) :: coname(nocons)        !< Names of Constant names
+      character(20), intent(in   ) :: paname(nopa  )        !< Names of Parameter names
+      character(20), intent(in   ) :: funame(nofun )        !< Names of Function names
+      character(20), intent(in   ) :: sfname(nosfun)        !< Names of Segment function names
+      logical      , intent(inout) :: updatr                !< Set to .true. if transport is changed
+      integer      , intent(in   ) :: ilflag                !< If 0 then only 3 constant lengthes
+      integer      , intent(in   ) :: npartp                !< Number of subdomains for parallelism
+
+!     Local declarations
+
+      integer(4) ithandl /0/
+      if ( timon ) call timstrt ( "dlwqtr", ithandl )
+
+!          check usage w.r.t. parallel computing
+!          activate this check when your routine is not parallellized.
+
+!     if ( npartp .gt. 1 ) then
+!        write(lunrep,1000) npartp
+!        call srstop
+!     endif
+
+      if ( timon ) call timstop ( ithandl )
+      return
+
+!     Output formats
+
+ 1000 format (' ERROR: User-supplied transport processes (DLWQTR) may not be used',/,
+     &        '        in parallel runs (NPART=',i3,').')
+      end

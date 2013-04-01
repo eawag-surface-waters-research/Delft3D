@@ -134,6 +134,7 @@ c                          zercum, zero's the cummulative array's
       integer         laatst
 
       logical         antidiffusion
+      INTEGER         sindex
 
       integer       :: ithandl
       integer, save :: ithand1 = 0 ! Leave local
@@ -298,35 +299,33 @@ c        layers in preconditioner [1,kmax]
 
 !     Determine the volumes and areas that ran dry at start of time step
 
+         call hsurf  ( noseg    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
+     &                 c(isfna) , a(isfun) , surface  , sindex   , lun(19)  )
          call dryfld ( noseg    , nosss    , nolay    , a(ivol)  , noq1+noq2,
-     &                 a(iarea) , nocons   , c(icnam) , a(icons) , nopa     ,
-     &                 c(ipnam) , a(iparm) , nosfun   , c(isfna) , a(isfun) ,
-     &                 j(iknmr) , iknmkv   )
+     &                 a(iarea) , nocons   , c(icnam) , a(icons) , sindex   ,
+     &                 surface  , j(iknmr) , iknmkv   )
+!          user transport processes
 
-!     user transport processes
          update = updatr
-         call dlwqtr ( notot   , nosys   , noseg   , noq     , noq1    ,
-     &                 noq2    , noq3    , nopa    , nosfun  , nodisp  ,
-     &                 novelo  , j(ixpnt), a(ivol) , a(iarea), a(iflow),
-     &                 a(ileng), a(iconc), a(idisp), a(icons), a(iparm),
-     &                 a(ifunc), a(isfun), a(idiff), a(ivelo), itime   ,
-     &                 idt     , c(isnam), nocons  , nofun   , c(icnam),
-     &                 c(ipnam), c(ifnam), c(isfna), update  , ilflag  ,
-     &                 npartp  )
+         call dlwqtr ( nototp   , nosys    , nosss    , noq      , noq1     ,
+     &                 noq2     , noq3     , nopa     , nosfun   , nodisp   ,
+     &                 novelo   , j(ixpnt) , a(ivol)  , a(iarea) , a(iflow) ,
+     &                 a(ileng) , a(iconc) , a(idisp) , a(icons) , a(iparm) ,
+     &                 a(ifunc) , a(isfun) , a(idiff) , a(ivelo) , itime    ,
+     &                 idt      , c(isnam) , nocons   , nofun    , c(icnam) ,
+     &                 c(ipnam) , c(ifnam) , c(isfna) , update   , ilflag   ,
+     &                 npartp   )
          if ( update ) updatr = .true.
 
-! jvb
-!     temporary ? set the variables grid-setting for the delwaq variables
-         call setset ( lun(19), nocons, nopa  , nofun   , nosfun,
-     &                 nosys  , notot , nodisp, novelo  , nodef ,
-     &                 noloc  , ndspx , nvelx , nlocx   , nflux ,
-     &                 nopred , novar , nogrid, j(ivset)        )
+!jvb  Temporary ? set the variables grid-setting for the DELWAQ variables
 
-! jvb
-!     call proces subsystem
-         call hsurf  ( nosys   , notot   , noseg   , nopa    , c(ipnam),
-     +              a(iparm), nosfun  , c(isfna), a(isfun), surface ,
-     +              lun(19) )
+         call setset ( lun(19)  , nocons   , nopa     , nofun    , nosfun   ,
+     &                 nosys    , notot    , nodisp   , novelo   , nodef    ,
+     &                 noloc    , ndspx    , nvelx    , nlocx    , nflux    ,
+     &                 nopred   , novar    , nogrid   , j(ivset) )
+
+!          call PROCES subsystem
+
          call proces ( notot   , noseg   , a(iconc), a(ivol) , itime   ,
      &                 idt     , a(iderv), ndmpar  , nproc   , nflux   ,
      &                 j(iipms), j(insva), j(iimod), j(iiflu), j(iipss),
@@ -463,8 +462,8 @@ c        layers in preconditioner [1,kmax]
 !       Initialize pointer matices for fast solvers              ( dlwqf1 )
 
          call dryfle ( noseg    , nosss    , a(ivol2) , nolay    , nocons   ,
-     &                 c(icnam) , a(icons) , nopa     , c(ipnam) , a(iparm) ,
-     &                 nosfun   , c(isfna) , a(isfun) , j(iknmr) , iknmkv   )
+     &                 c(icnam) , a(icons) , sindex   , surface  , j(iknmr) ,
+     &                 iknmkv   )
          call zflows ( noq      , noqt     , nolay    , nocons   , c(icnam) ,
      &                 a(iflow) , j(ixpnt) )
          call dlwqf1 ( noseg    , nobnd    , noq      , noq1     , noq2     ,

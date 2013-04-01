@@ -428,14 +428,14 @@
 
       arrnam(iidsto) = 'DSTO  '
       arrknd(iidsto) = 4
-      arrdm1(iidsto) = ndspx
-      arrdm2(iidsto) = nosys
+      arrdm1(iidsto) = nosys
+      arrdm2(iidsto) = ndspx
       arrdm3(iidsto) = 1
 
       arrnam(iivsto) = 'VSTO  '
       arrknd(iivsto) = 4
-      arrdm1(iivsto) = nvelx
-      arrdm2(iivsto) = nosys
+      arrdm1(iivsto) = nosys
+      arrdm2(iivsto) = nvelx
       arrdm3(iivsto) = 1
 
       arrnam(iidmpq) = 'DMPQ  '

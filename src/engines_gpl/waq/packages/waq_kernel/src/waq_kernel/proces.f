@@ -21,186 +21,169 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      SUBROUTINE PROCES ( NOTOT , NOSEG , CONC  , VOLUME, ITIME ,
-     +                    IDT   , DERIV , NDMPAR, NPROC , NOFLUX,
-     +                    IPMSA , PRVNIO, PROMNR, IFLUX , INCREM,
-     +                    FLUX  , FLXDMP, STOCHI, IBFLAG, IPBLOO,
-     +                    IPCHAR, IOFFBL, IOFFCH, AMASS , NOSYS ,
-     +                    ITFACT, AMASS2, IAFLAG, INTOPT, FLXINT,
-     +                    IEXPNT, IKNMRK, NOQ1  , NOQ2  , NOQ3  ,
-     +                    NOQ4  , NDSPN , IDPNEW, DISPNW, NODISP,
-     +                    IDPNT , DISPER, NDSPX , DSPX  , DSTO  ,
-     +                    NVELN , IVPNEW, VELONW, NOVELO, IVPNT ,
-     +                    VELO  , NVELX , VELX  , VSTO  , DMPS  ,
-     +                    ISDMP , IPDMP , NTDMPQ, DEFAUL, PRONDT,
-     +                    PROGRD, PRVVAR, PRVTYP, VARARR, VARIDX,
-     +                    VARTDA, VARDAG, VARTAG, VARAGG, ARRPOI,
-     +                    ARRKND, ARRDM1, ARRDM2, VGRSET, GRDNOS,
-     +                    GRDSEG, NOVAR , A     , NOGRID, NDMPS ,
-     +                    PRONAM, INTSRT, OWNERS, OWNERQ, MYPART,
-     +                    prvpnt, done  , nrref , proref, nodef ,
-     +                    surfac, LUNREP)
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            : november 1992 by Jos van Gils and Jan van Beek
-C
-C     FUNCTION            : Control routine of PROCES system.
-C                           Proces sub-sytem of DELWAQ waterquality
-C                           modelling system.
-C
-C     SUBROUTINES CALLED  : PROCAL, Compute fluxes with call to a module
-C                           PRODER, Make derivatives, store fluxes
-C                           DHDAGG, De-aggrgation off a variable
-C                           DLWQ14, set deriv array
-C                           DLWQP0, set a step
-C                           PROINT, integrate fluxes at dump segments
-C                           PROVEL, calculate new velocities/dispersions
-C                           DHAGGR, aggrgation off a variable
-C                           GETMLU, get unit number monitor file
-C                           SRSTOP, stops execution
-C                           ZERO  , Zero's an array
-C
-C     FILES               : -
-C
-C     COMMON BLOCKS       : -
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     NOTOT   INTEGER       1     INPUT   Total number of substances
-C     NOSEG   INTEGER       1     INPUT   Nr. of computational elements
-C     CONC    REAL   NOTOT*NOSEG  INPUT   Model concentrations
-C     VOLUME  REAL      NOSEG     INPUT   Segment volumes
-C     ITIME   INTEGER       1     INPUT   Time in system clock units
-C     IDT     INTEGER       1     INPUT   Time step system clock units
-C     DERIV   REAL   NOTOT*NOSEG  OUTPUT  Model derivatives
-C     NDMPAR  INTEGER       1     INPUT   Number of dump areas
-C     NPROC   INTEGER       1     INPUT   Number of processes
-C     NOFLUX  INTEGER       1     INPUT   Number of fluxes
-C     IPMSA   INTEGER       *     INPUT   Direct pointer in DELWAQ arrays
-C     PRVNIO  INTEGER       *     INPUT   Nr. of state variables per proces
-C     PROMNR  INTEGER       *     INPUT   Proces module number per proces
-C     IFLUX   INTEGER       *     INPUT   Offset in flux array per proces
-C     INCREM  INTEGER       *     INPUT   Direct increment in DELWAQ arrays
-C     FLUX    REAL          *     LOCAL   Proces fluxes
-C     FLXDMP  REAL   NOFLX*NDMPS  LOCAL   Fluxes at dump segments
-C     STOCHI  REAL   NOTOT*NOFLUX INPUT   Proces stochiometry
-C     IBFLAG  INTEGER    1        INPUT   if 1 then mass balance output
-C     IPBLOO  INTEGER    1        INPUT   Number of Bloom module (if >0)
-C     IPCHAR  INTEGER    1        INPUT   Number of Charon module (if >0)
-C     IOFFBL  INTEGER    1        INPUT   Offset in IPMSA for Bloom
-C     IOFFCH  INTEGER    1        INPUT   Offset in IPMSA for Charon
-C     AMASS   REAL   NOTOT*NOSEG  IN/OUT  mass array to be updated
-C     NOSYS   INTEGER     1       INPUT   number of active substances
-C     ITFACT  INTEGER     1       INPUT   scale factor
-C     AMASS2  REAL     NOTOT*5    IN/OUT  mass balance array
-C     IAFLAG  INTEGER     1       INPUT   if 1 then accumulation
-C     INTOPT  INTEGER     1       INPUT   Integration suboptions
-C     FLXINT  REAL  NOFLUX*NDMPAR IN/OUT  Integrated fluxes at dump areas
-C     IEXPNT
-C     IKNMRK
-C     NOQ1
-c     NOQ2
-C     NOQ3
-c     NOQ4
-C     NDSPN   INTEGER        1    INPUT   Nr. of new dispersion array's
-C     IDPNEW  INTEGER    NOSYS    INPUT   Pointer to new disp array
-C     DISPNW  REAL     NVELN,*    OUTPUT  New dispersion array
-C     NODISP  INTEGER        1    INPUT   Nr. of original dispersion
-C     IDPNT   INTEGER    NOSYS    INPUT   pointer to original dispersion
-C     DISPER  REAL    NOVELO,*    INPUT   Original dispersions
-C     DSPX    REAL     NVELX,*    LOCAL   Calculated dispersions
-C     NDSPX   INTEGER        1    INPUT   Nr. of calculated dispersions
-C     DSTO    REAL    NOSYS,NVELX INPUT   Factor for calc. dispersions
-C     NVELN   INTEGER        1    INPUT   Nr. of new velocity array's
-C     IVPNEW  INTEGER    NOSYS    INPUT   Pointer to new velo array
-C     VELONW  REAL     NVELN,*    OUTPUT  New velocity array
-C     NOVELO  INTEGER        1    INPUT   Nr. of original velocities
-C     IVPNT   INTEGER    NOSYS    INPUT   pointer to original velo
-C     VELO    REAL    NOVELO,*    INPUT   Original velocities
-C     NVELX   INTEGER        1    INPUT   Nr. of calculated velocities
-C     VELX    REAL     NVELX,*    LOCAL   Calculated velocities
-C     VSTO    REAL    NOSYS,NVELX INPUT   Factor for velocitie
-C     DMPS    REAL        *       IN/OUT  dumped segment fluxes
-C     ISDMP   INTEGER  NOSEG      INPUT   pointer dumped segments
-C     IPDMP   INTEGER       *     INPUT   pointer structure dump area's
-C     NTDMPQ  INTEGER       1     INPUT   total number exchanges in dump area
-C     DEFAUL  REAL          *     IN/OUT  Default proces parameters
-C     PRONDT
-C     PROGRD
-C     PRVVAR
-C     PRVTYP
-C     VARARR
-C     VARIDX
-C     VARTDA
-C     VARDAG
-C     VARTAG
-C     VARAGG
-C     ARRPOI
-C     ARRKND
-C     ARRDM1
-C     ARRDM2
-C     VGRSET
-C     GRDNOS
-C     GRDSEG
-C     NOVAR
-C     A
-C     NOGRID
-C     NDMPS   INTEGER       1     INPUT   Number of segments in dump area
-C     PRONAM  CHA*(*)       *     INPUT   Name of called module
-C     INTSRT  INTEGER       1     INPUT   Number of integration routine used
-C     OWNERS  INTEGER   NOSEG     INPUT   Ownership array for segments
-C     OWNERQ  INTEGER     NOQ     INPUT   Ownership array for exchanges
-C     MYPART  INTEGER       1     INPUT   Number of current part/subdomain
-C     NODEF   INTEGER       1     INPUT   Number of values in the deafult array
-C     LUNREP  INTEGER       1     INPUT   Logical unit number of report-file
-C
+      subroutine proces ( notot  , noseg  , conc   , volume , itime  ,
+     &                    idt    , deriv  , ndmpar , nproc  , noflux ,
+     &                    ipmsa  , prvnio , promnr , iflux  , increm ,
+     &                    flux   , flxdmp , stochi , ibflag , ipbloo ,
+     &                    ipchar , ioffbl , ioffch , amass  , nosys  ,
+     &                    itfact , amass2 , iaflag , intopt , flxint ,
+     &                    iexpnt , iknmrk , noq1   , noq2   , noq3   ,
+     &                    noq4   , ndspn  , idpnew , dispnw , nodisp ,
+     &                    idpnt  , disper , ndspx  , dspx   , dsto   ,
+     &                    nveln  , ivpnew , velonw , novelo , ivpnt  ,
+     &                    velo   , nvelx  , velx   , vsto   , dmps   ,
+     &                    isdmp  , ipdmp  , ntdmpq , defaul , prondt ,
+     &                    progrd , prvvar , prvtyp , vararr , varidx ,
+     &                    vartda , vardag , vartag , varagg , arrpoi ,
+     &                    arrknd , arrdm1 , arrdm2 , vgrset , grdnos ,
+     &                    grdseg , novar  , a      , nogrid , ndmps  ,
+     &                    pronam , intsrt , owners , ownerq , mypart ,
+     &                    prvpnt , done   , nrref  , proref , nodef  ,
+     &                    surfac , lunrep )
+
+!     Deltares Software Centre
+
+!>\File
+!>         Control routine of PROCES system. Process sub-system of DELWAQ waterquality modelling system.
+!>
+!>         Routine deals with:
+!>         - processes that act on different spatial grids (important application is layered bed)
+!>         - processes that act with coarser time steps (notably the Bloom algal growth model and the
+!>           Charon equilibrium chemistry model, but others are allowed at coarser time steps as well
+!>         - Paralellism of the different processes on shared memory multi core machines.
+
+!     Created:            : november 1992 by Jos van Gils and Jan van Beek
+
+!     Subroutines called  : PROCAL, Compute fluxes with call to a module
+!                           PRODER, Make derivatives, store fluxes
+!                           DHDAGG, De-aggregation of a variable
+!                           DLWQ14, set deriv array
+!                           DLWQP0, set a step
+!                           PROINT, integrate fluxes at dump segments
+!                           PROVEL, calculate new velocities/dispersions
+!                           DHAGGR, aggrgation of a variable
+!                           GETMLU, get unit number monitor file
+!                           SRSTOP, stops execution with an error indication
+
+!     Files               : Monitoring file if needed for messages
+
       use timers
-!     use m_timers_waq
       use m_couplib
+
+      implicit none
+
 !$    include "omp_lib.h"
-C
-C     Declaration of arguments
-C
-      INTEGER NOTOT , NOSEG , ITIME , IDT   , NDMPAR,
-     +        NPROC , NOFLUX, IBFLAG, NOSYS , ITFACT,
-     +        IAFLAG, INTOPT, IPBLOO, IPCHAR, IOFFBL,
-     +        IOFFCH, NOQ1  , NOQ2  , NOQ3  , NOQ4 ,
-     +        NDSPN , NODISP, NDSPX , NVELN , NOVELO,
-     +        NVELX , NTDMPQ, NOVAR , NOGRID, NDMPS,
-     +        INTSRT, MYPART, NODEF , LUNREP
-      INTEGER IPMSA(*)      , PRVNIO(*)     , PROMNR(*)     ,
-     +        IFLUX(*)      , INCREM(*)     , IEXPNT(*)     ,
-     +        IKNMRK(*)     , IDPNEW(*)     , IDPNT(*)      ,
-     +        IVPNEW(*)     , IVPNT(*)      , ISDMP(*)      ,
-     +        IPDMP(*)      , PRONDT(*)     , PROGRD(*)     ,
-     +        PRVVAR(*)     , PRVTYP(*)     , VARARR(*)     ,
-     +        VARIDX(*)     , VARTDA(*)     , VARDAG(*)     ,
-     +        VARTAG(*)     , VARAGG(*)     , ARRPOI(*)     ,
-     +        ARRKND(*)     , ARRDM1(*)     , ARRDM2(*)     ,
-     +        VGRSET(NOVAR,*),GRDNOS(*)     , GRDSEG(NOSEG,*),
-     +        OWNERS(*)     , OWNERQ(*)
-      REAL    CONC(*)       , VOLUME(*)     , DERIV(*),
-     +        FLUX(*)       , FLXDMP(*)     , STOCHI(*)     ,
-     +        AMASS(*)      , AMASS2(*)     , FLXINT(*)     ,
-     +        DISPNW(*)     , DISPER(*)     , DSPX(*)       ,
-     +        DSTO(*)       , VELONW(*)     , VELO(*)       ,
-     +        VELX(*)       , VSTO(*)       , DMPS(*)       ,
-     +        DEFAUL(*)     , A(*)
-      CHARACTER*20  PRONAM(*)
-      integer(4), intent(in   ) :: prvpnt(nproc)       ! entry in process pointers OMP
-      integer(4)                   done  (nproc)       ! flag whether a process has ran
-      integer(4), intent(in   ) :: nrref               ! maximum nr of back references
-      integer(4), intent(in   ) :: proref(nrref,nproc) ! the back references
-      integer                   :: actually_done
-      real(4)   , intent(in   ) :: surfac(noseg)       ! horizontal surface
-C
-C     Local declarations
-C
-C     ISTEP   INTEGER     1       LOCAL   counter for timesteps (-)
-C
+
+!     Arguments           :
+
+!     Kind         Function         Name                          Description
+
+      integer( 4), intent(in   ) :: nogrid                      !< Number of computational grids
+      integer( 4), intent(in   ) :: notot                       !< Total number of substances
+      integer( 4), intent(in   ) :: noseg                       !< Nr. of computational volumes
+      integer( 4), intent(in   ) :: nodef                       !< Number of values in the deafult array
+      integer( 4), intent(in   ) :: novar                       !<
+      real   ( 4), intent(in   ) :: conc  (notot,noseg,nogrid)  !< Model concentrations
+      real   ( 4), intent(in   ) :: volume(      noseg,nogrid)  !< Segment volumes
+      integer( 4), intent(in   ) :: itime                       !< Time in system clock units
+      integer( 4), intent(in   ) :: idt                         !< Time step system clock units
+      real   ( 4), intent(  out) :: deriv (notot,noseg,nogrid)  !< Model derivatives
+      integer( 4), intent(in   ) :: ndmpar                      !< Number of dump areas
+      integer( 4), intent(in   ) :: nproc                       !< Number of processes
+      integer( 4), intent(in   ) :: noflux                      !< Number of fluxes
+      integer( 4), intent(in   ) :: ipmsa (*)                   !< Direct pointer in DELWAQ arrays
+      integer( 4), intent(in   ) :: prvnio(nproc)               !< Nr. of state variables per proces
+      integer( 4), intent(in   ) :: promnr(nproc)               !< Proces module number per proces
+      integer( 4), intent(in   ) :: iflux (nproc)               !< Offset in flux array per process
+      integer( 4), intent(in   ) :: increm(*)                   !< Direct increment in DELWAQ arrays
+      real   ( 4)                :: flux  (noflux,noseg,nogrid) !< Proces fluxes
+      real   ( 4)                :: flxdmp(ndmps ,noflux)       !< Fluxes at dump segments
+      real   ( 4), intent(in   ) :: stochi(notot ,noflux)       !< Proces stochiometry
+      integer( 4), intent(in   ) :: ibflag                      !< if 1 then mass balance output
+      integer( 4), intent(in   ) :: ipbloo                      !< Number of Bloom module  (if >0)
+      integer( 4), intent(in   ) :: ipchar                      !< Number of Charon module (if >0)
+      integer( 4), intent(in   ) :: ioffbl                      !< Offset in IPMSA for Bloom
+      integer( 4), intent(in   ) :: ioffch                      !< Offset in IPMSA for Charon
+      real   ( 4), intent(inout) :: amass (notot,noseg,nogrid)  !< mass array to be updated
+      integer( 4), intent(in   ) :: nosys                       !< number of active substances
+      integer( 4), intent(in   ) :: itfact                      !< time scale factor processes
+      real   ( 4), intent(inout) :: amass2(notot,5    )         !< mass balance array
+      integer( 4), intent(in   ) :: iaflag                      !< if 1 then accumulation
+      integer( 4), intent(in   ) :: intopt                      !< Integration suboptions
+      real   ( 4), intent(inout) :: flxint(ndmpar,noflux)       !< Integrated fluxes at dump areas
+      integer( 4), intent(in   ) :: iexpnt(4,*)                 !< Exchange pointer
+      integer( 4), intent(in   ) :: iknmrk(noseg,nogrid)        !< Integration suboptions
+      integer( 4), intent(in   ) :: noq1                        !< Number of exchanges first direction
+      integer( 4), intent(in   ) :: noq2                        !< Number of exchanges second direction
+      integer( 4), intent(in   ) :: noq3                        !< Number of exchanges vertical
+      integer( 4), intent(in   ) :: noq4                        !< Number of exchanges in the bed
+      integer( 4), intent(in   ) :: ndspn                       !< Number of new dispersion arrays
+      integer( 4), intent(in   ) :: idpnew(nosys )              !< Pointer to new disp array
+      real   ( 4), intent(  out) :: dispnw(ndspn ,*)            !< New dispersion array
+      integer( 4), intent(in   ) :: nodisp                      !< Nr. of original dispersions
+      integer( 4), intent(in   ) :: idpnt (nosys )              !< Pointer to original dispersion
+      real   ( 4), intent(in   ) :: disper(nodisp,*)            !< Original dispersions
+      integer( 4), intent(in   ) :: ndspx                       !< Nr. of calculated dispersions
+      real   ( 4)                :: dspx  (ndspx ,*)            !< Calculated dispersions
+      real   ( 4), intent(in   ) :: dsto  (nosys,ndspx)         !< Factor for calc. dispersions
+      integer( 4), intent(in   ) :: nveln                       !< Nr. of new velocity array's
+      integer( 4), intent(in   ) :: ivpnew(nosys )              !< Pointer to new velo array
+      real   ( 4), intent(  out) :: velonw(nveln ,*)            !< New velocity array
+      integer( 4), intent(in   ) :: novelo                      !< Nr. of original velocities
+      integer( 4), intent(in   ) :: ivpnt (nosys )              !< pointer to original velo
+      real   ( 4), intent(in   ) :: velo  (novelo,*)            !< Original velocities
+      integer( 4), intent(in   ) :: nvelx                       !< Nr. of calculated velocities
+      real   ( 4)                :: velx  (nvelx ,*)            !< Calculated velocities
+      real   ( 4), intent(in   ) :: vsto  (nosys,nvelx)         !< Factor for velocitie
+      real   ( 4), intent(inout) :: dmps  (notot,ndmps)         !< dumped segment fluxes
+      integer( 4), intent(in   ) :: isdmp (noseg)               !< pointer dumped segments
+      integer( 4), intent(in   ) :: ipdmp (*)                   !< pointer structure dump area's
+      integer( 4), intent(in   ) :: ntdmpq                      !< total number exchanges in dump area
+      real   ( 4), intent(inout) :: defaul(nodef)               !< Default proces parameters
+      integer( 4), intent(inout) :: prondt(nproc)               !<
+      integer( 4), intent(in   ) :: progrd(nproc)               !< Grid per process
+      integer( 4), intent(in   ) :: prvvar(*)                   !<
+      integer( 4), intent(in   ) :: prvtyp(*)                   !<
+      integer( 4), intent(in   ) :: vararr(novar)               !<
+      integer( 4), intent(in   ) :: varidx(novar)               !<
+      integer( 4), intent(in   ) :: vartda(novar)               !<
+      integer( 4), intent(in   ) :: vardag(novar)               !<
+      integer( 4), intent(in   ) :: vartag(novar)               !<
+      integer( 4), intent(in   ) :: varagg(novar)               !<
+      integer( 4), intent(in   ) :: arrpoi(*)                   !<
+      integer( 4), intent(in   ) :: arrknd(*)                   !<
+      integer( 4), intent(in   ) :: arrdm1(*)                   !<
+      integer( 4), intent(in   ) :: arrdm2(*)                   !<
+      integer( 4)                :: vgrset(novar,nogrid)        !< Local flag for variables and grid
+      integer( 4), intent(in   ) :: grdnos(nogrid)              !< Number of segments per grid
+      integer( 4), intent(in   ) :: grdseg(noseg,nogrid)        !< Aggregation pointer per grid
+      real   ( 4), intent(in   ) :: a     (*)                   !<
+      integer( 4), intent(in   ) :: ndmps                       !<
+      character(20)              :: pronam(*)                   !< Name of called module
+      integer( 4), intent(in   ) :: intsrt                      !< Number of integration routine used
+      integer( 4), intent(in   ) :: owners(noseg)               !< Ownership array for segments
+      integer( 4), intent(in   ) :: ownerq(*)                   !< Ownership array for exchanges
+      integer( 4), intent(in   ) :: mypart                      !< Number of current part/subdomain
+      integer( 4), intent(in   ) :: prvpnt(nproc)               !< entry in process pointers OMP
+      integer( 4)                   done  (nproc)               !< flag whether a process has ran
+      integer( 4), intent(in   ) :: nrref                       !< maximum nr of back references
+      integer( 4), intent(in   ) :: proref(nrref,nproc)         !< the back references
+      real   ( 4), intent(in   ) :: surfac(noseg)               !< horizontal surface
+      integer( 4), intent(in   ) :: lunrep                      !< Logical unit number of report-file
+
+!     Local declarations
+
+      integer( 4)                   maxgrid    ! Highest grid number in progrd array
+      integer( 4)                   iiknmr     ! Pointer somewhere into the array tree
+      integer( 4)  ix_hlp, ia_hlp, iv_hlp, ik_hlp, ip_hlp, !  array pointers
+     &             id1hlp, id2hlp                          !
+      integer( 4)  ivar  , iarr  , iv_idx, ip_arr          !  help variables
+      integer( 4)  ix_cnc, ia_cnc, iv_cnc, ip_arh          !  help variables
+      integer( 4)  ipndt , ndtblo, igrblo, ndtcha, igrcha  !  help variables
+      integer( 4)  isys  , igrid , isysh , nototh, igrd    !  help variables
+      integer( 4)  noseg2, nfluxp, iswcum, ifracs, iproc   !  help variables
+      integer( 4)  k
+      integer                    :: actually_done
       integer                    :: idtpro    ! fractional step idt
       integer(4)                 :: ipp_idt    ! pointer in default array to process specific idt
       integer(4)                 :: ipp_delt   ! pointer in default array to process specific delt
@@ -299,507 +282,367 @@ C
 C     aggregate kenmerk array
 C
 Cgrd  only if there is a process on a higher grid
-      MAXGRID= MAXVAL(PROGRD(1:NPROC))
-      IASIZE = 78
-      IIKNMR = IASIZE + 30
-      IF ( MAXGRID .GT. 1 ) THEN
-      NODIM2 = ARRDM2(IIKNMR)
-         CALL DHAGKM ( NOSEG , NODIM2, NOGRID, IKNMRK, GRDNOS,
-     +                 GRDSEG)
-      ENDIF
-C
-C     get the general local work array, first index of LOCAL array
-C
-      IX_HLP = 1
-      IA_HLP = 33
-      CALL DHGVAR( IA_HLP, IX_HLP, IV_HLP)
-      IK_HLP = ARRKND(IA_HLP)
-      IP_HLP = ARRPOI(IA_HLP)
-      ID1HLP = ARRDM1(IA_HLP)
-      ID2HLP = ARRDM2(IA_HLP)
-C
-C     Fill some specific variables absolute in the real array
-C
-      DEFAUL(2) = FLOAT(ITIME)
-      NOQ = NOQ1 + NOQ2 + NOQ3 + NOQ4
-C
-C     BLOOM fractional step (derivs assumed zero at entry)
-C     Check presence of module
-C
-      IF ( IPBLOO .GT. 0 ) THEN
-         IVAR   = PRVVAR(IOFFBL)
-         IARR   = VARARR(IVAR)
-         IV_IDX = VARIDX(IVAR)
-         IP_ARR = ARRPOI(IARR)
-         IPNDT  = IP_ARR + IV_IDX - 1
-         NDTBLO = NINT( A(IPNDT) )
-         PRONDT(IPBLOO) = NDTBLO
-C
-C        This timestep fractional step ?
-C
-         IF ( MOD(ISTEP-1,NDTBLO) .EQ. 0 ) THEN
-C
-C           Set CONC actual on bloom grid
-C
-!           call timer_start(timer_proces_grids)
-            IGRBLO = PROGRD(IPBLOO)
-            IF ( IGRBLO .GT. 1 ) THEN
-               IX_CNC = 1
-               IA_CNC = 6
-               CALL DHGVAR( IA_CNC, IX_CNC, IV_CNC)
-               NOSEG2 = GRDNOS(IGRBLO)
-               IP_CNC = (IGRBLO-1)*NOTOT*NOSEG + 1
-               CALL DHGPOI( IV_HLP, IA_HLP,
-     +                      IK_HLP, IX_HLP,
-     +                      ID1HLP, ID2HLP,
-     +                      IP_HLP, IGRBLO,
-     +                      ISYSH , NOTOTH,
-     +                      IP_ARH)
-C
-C              actives
-C
-               CALL DHAGG2( NOSEG          , NOSEG2          ,
-     +                      NOTOT          , 1               ,
-     +                      NOTOTH         , NOTOT           ,
-     +                      1              , 1               ,
-     +                      ISYSH          , 1               ,
-     +                      NOSYS          , GRDSEG(1,IGRBLO),
-     +                      3              , CONC            ,
-     +                      VOLUME         , A(IP_ARH)       ,
-     +                      CONC(IP_CNC)   )
-C
-C              inactives
-C
-               IF ( NOTOT - NOSYS .GT. 0 ) THEN
-                  CALL DHAGG2( NOSEG          , NOSEG2          ,
-     +                         NOTOT          , 1               ,
-     +                         NOTOTH         , NOTOT           ,
-     +                         NOSYS + 1      , 1               ,
-     +                         ISYSH          , NOSYS + 1       ,
-     +                         NOTOT-NOSYS    , GRDSEG(1,IGRBLO),
-     +                         3              , CONC            ,
-     +                         surfac         , A(IP_ARH)       ,
-     +                         CONC(IP_CNC)   )
-               ENDIF
-               DO ISYS = 1 , NOTOT
-                  IVAR = IV_CNC + ISYS - 1
-                  VGRSET(IVAR,IGRBLO) = 1
-               ENDDO
-            ENDIF
-C
-            CALL ZERO ( FLUX , NOFLUX*NOSEG*NOGRID )
-            IF ( IBFLAG .GT. 0 ) THEN
-               CALL ZERO ( FLXDMP, NOFLUX*NDMPS )
-            ENDIF
+      maxgrid= maxval(progrd(1:nproc))
+      iiknmr = 78 + 30                 !   = iasize + 30
+      if ( maxgrid .gt. 1 ) then
+         call dhagkm ( noseg  , arrdm2(iiknmr) , nogrid , iknmrk , grdnos ,
+     &                 grdseg )
+      endif
+
+!     Get the general local work array, first index of LOCAL array
+
+      ix_hlp = 1
+      ia_hlp = 33
+      call dhgvar( ia_hlp, ix_hlp, iv_hlp)
+      ik_hlp = arrknd(ia_hlp)
+      ip_hlp = arrpoi(ia_hlp)
+      id1hlp = arrdm1(ia_hlp)
+      id2hlp = arrdm2(ia_hlp)
+
+!     Fill some specific variables absolute in the real array
+
+      defaul(2) = float(itime)
+      noq = noq1 + noq2 + noq3 + noq4
+
+!     BLOOM fractional step (derivs assumed zero at entry)
+
+      if ( ipbloo .gt. 0 ) then         !     Check presence of BLOOM module for this run
+         ivar   = prvvar(ioffbl)
+         iarr   = vararr(ivar)
+         iv_idx = varidx(ivar)
+         ip_arr = arrpoi(iarr)
+         ipndt  = ip_arr + iv_idx - 1
+         ndtblo = nint( a(ipndt) )
+         prondt(ipbloo) = ndtblo
+
+!        This timestep fractional step ?
+
+         if ( mod(istep-1,ndtblo) .eq. 0 ) then
+
+!           Set CONC on the Bloom grid if that is not the first grid
+
+            igrblo = progrd(ipbloo)
+            if ( igrblo .gt. 1 ) then
+               noseg2 = grdnos(igrblo)
+               ix_cnc = 1
+               ia_cnc = 6
+               call dhgvar( ia_cnc , ix_cnc , iv_cnc )
+               call dhgpoi( iv_hlp , ia_hlp , ik_hlp , ix_hlp , id1hlp ,
+     &                      id2hlp , ip_hlp , igrblo , isysh  , nototh ,
+     &                      ip_arh )
+
+!              actives and inactives if applicable
+
+               call dhagg2( noseg         , noseg2           , notot , 1     , nototh    ,
+     &                      notot         , 1                , 1     , isysh , 1         ,
+     &                      nosys         , grdseg(1,igrblo) , 3     , conc  , volume    ,
+     &                      a(ip_arh)     , conc(1,1,igrblo) )
+               if ( notot - nosys .gt. 0 )     !   inactives
+     &         call dhagg2( noseg         , noseg2           , notot , 1     , nototh    ,
+     &                      notot         , nosys + 1        , 1     , isysh , nosys + 1 ,
+     &                      notot - nosys , grdseg(1,igrblo) , 3     , conc  , surfac    ,
+     &                      a(ip_arh)     , conc(1,1,igrblo) )
+               do isys = 1 , notot
+                  ivar = iv_cnc + isys - 1
+                  vgrset(ivar,igrblo) = 1
+               enddo
+            endif
+
+            flux = 0.0
+            if ( ibflag .gt. 0 ) flxdmp = 0
+
 !           set idt and delt, bloom itself will multiply with prondt
-            IDTPRO    = PRONDT(IPBLOO)*IDT
+            idtpro     = prondt(ipbloo)*idt
             ipp_idt    = nodef - 2*nproc + ipbloo
             ipp_delt   = nodef -   nproc + ipbloo
-            DEFAUL(ipp_idt)  = FLOAT(IDT)
-            DEFAUL(ipp_delt) = FLOAT(IDT)/FLOAT(ITFACT)
-!           call timer_stop(timer_proces_grids)
-      if ( timon ) call timstrt ( "onepro", ithand2 )
-            CALL ONEPRO ( IPBLOO, IOFFBL, IDT   , ITFACT, PROGRD,
-     +                    GRDNOS, PRVNIO, PRVTYP, PRVVAR, VARARR,
-     +                    VARIDX, ARRKND, ARRPOI, ARRDM1, ARRDM2,
-     +                    VGRSET, NOGRID, VARTDA, VARDAG, NOSEG ,
-     +                    GRDSEG, A     , VARAGG, IPMSA , INCREM,
-     +                    NOFLUX, IFLUX , PROMNR, FLUX  , IEXPNT,
-     +                    IKNMRK, NOQ1  , NOQ2  , NOQ3  , NOQ4  ,
-     +                    NPROC , NOTOT , DERIV , STOCHI, VOLUME,
-     +                    PRONDT, IBFLAG, ISDMP , FLXDMP, NOVAR ,
-     +                    VARTAG, IIKNMR, PRONAM, OWNERS, MYPART,
-     +                    dspndt, velndt, dll_opb)
+            defaul(ipp_idt)  = float(idt)
+            defaul(ipp_delt) = float(idt)/float(itfact)
+            if ( timon ) call timstrt ( "onepro", ithand2 )
+            call onepro ( ipbloo , ioffbl , idt    , itfact , progrd ,
+     &                    grdnos , prvnio , prvtyp , prvvar , vararr ,
+     &                    varidx , arrknd , arrpoi , arrdm1 , arrdm2 ,
+     &                    vgrset , nogrid , vartda , vardag , noseg  ,
+     &                    grdseg , a      , varagg , ipmsa  , increm ,
+     &                    noflux , iflux  , promnr , flux   , iexpnt ,
+     &                    iknmrk , noq1   , noq2   , noq3   , noq4   ,
+     &                    nproc  , notot  , deriv  , stochi , volume ,
+     &                    prondt , ibflag , isdmp  , flxdmp , novar  ,
+     &                    vartag , iiknmr , pronam , owners , mypart ,
+     &                    dspndt , velndt , dll_opb)
             done( ipbloo ) = 1
-      if ( timon ) call timstop ( ithand2 )
-            IGRID = PROGRD(IPBLOO)
-            NOSEG2 = GRDNOS(IGRID)
-            IF ( IPBLOO .NE. NPROC ) THEN
-               NFLUXP = IFLUX(IPBLOO+1) - IFLUX(IPBLOO)
-            ELSE
-               NFLUXP = NOFLUX - IFLUX(IPBLOO) + 1
-            ENDIF
-            IF ( NFLUXP .GT. 0 ) THEN
-C
-C        If necessary set volume for this grid
-C        Volume is always variable 1
-C
-               IF ( VGRSET(1,IGRID) .NE. 1 ) THEN
-                  IPVGR  = (IGRID-1)*NOSEG + 1
-                  CALL DHAGGR( NOSEG          , NOSEG2       ,
-     +                         1              , 1            ,
-     +                         1              , 1            ,
-     +                         1              , 1            ,
-     +                         1              , 1            ,
-     +                         GRDSEG(1,IGRID), 1            ,
-     +                         VOLUME         , VOLUME       ,
-     +                         VOLUME         , VOLUME(IPVGR))
-                  VGRSET(1,IGRID) = 1
-               ENDIF
-C
-C        Construct derivatives for these fluxes on this grid
-C
-               IPFLUX = (IGRID-1)*NOFLUX*NOSEG + 1
-               IPVGR  = (IGRID-1)*NOSEG + 1
-               IPDGR  = NOTOT*NOSEG*(IGRID-1) + 1
-               CALL PRODR2 ( DERIV(IPDGR) , NOTOT        ,
-     +                       NOFLUX       , STOCHI       ,
-     +                       IFLUX(IPBLOO) , NFLUXP       ,
-     +                       FLUX(IPFLUX) , NOSEG2       ,
-     +                       VOLUME(IPVGR), PRONDT(IPBLOO),
-     +                       OWNERS       , MYPART       )
-C
-C        For balances store FLXDMP
-C
-               IF ( IBFLAG .GT. 0 ) THEN
-C
-                  CALL PROFLD ( NOFLUX       , IFLUX(IPBLOO)  ,
-     +                          NFLUXP       , IGRID         ,
-     +                          NOSEG2       , NOSEG         ,
-     +                          PRONDT(IPBLOO), ISDMP         ,
-     +                          GRDSEG       , FLUX(IPFLUX)  ,
-     +                          VOLUME       , FLXDMP        )
-C
-               ENDIF
-            ENDIF
-C
-C        If processes on other grid convert derivs to base grid
-C
-            IGRBLO = PROGRD(IPBLOO)
-            IF ( NOFLUX .GT. 0 .AND. IGRBLO .GT. 1 ) THEN
-!              call timer_start(timer_proces_grids)
-C
-               ISWCUM = 1
-               NOSEG2 = GRDNOS(IGRBLO)
-               IPGR   = NOTOT*NOSEG*(IGRBLO-1) + 1
-               CALL DHDAG2( NOSEG         , NOSEG2          ,
-     +                      NOTOT         , NOTOT           ,
-     +                      NOTOT         , NOTOT           ,
-     +                      1             , 1               ,
-     +                      1             , 1               ,
-     +                      NOTOT         , GRDSEG(1,IGRBLO),
-     +                      2             , DERIV(IPGR)     ,
-     +                      AMASS         , ISWCUM          ,
-     +                      AMASS(IPGR)   , DERIV           )
-C
-C              Zero derivs higher grids
-C
-               CALL ZERO ( DERIV(IPGR), NOTOT*NOSEG )
-!              call timer_stop(timer_proces_grids)
-            ENDIF
-C
-C           Scale fluxes and update "processes" accumulation arrays
-C
-!           call timer_start(timer_proces_fluxes)
-            CALL DLWQ14 ( DERIV  , NOTOT  , NOSEG  , ITFACT , AMASS2 ,
-     *                    IDT    , IAFLAG , DMPS   , INTOPT , ISDMP  ,
-     *                    OWNERS , MYPART )
-C
-C           Integration (derivs are zeroed)
-C
-            CALL DLWQP0 ( CONC   , AMASS  , DERIV  , VOLUME , IDT     ,
-     *                    NOSYS  , NOTOT  , NOSEG  , 0      , 0       ,
-     *                    OWNERS , MYPART , surfac )
-C
-C           Integrate the fluxes at dump segments
-C
-            IF ( IBFLAG .GT. 0 ) THEN
-               CALL PROINT ( NOFLUX, NDMPAR, IDT   , ITFACT, FLXDMP,
-     +                       FLXINT, ISDMP , IPDMP , NTDMPQ)
-               CALL ZERO ( FLXDMP, NOFLUX*NDMPS )
-            ENDIF
-C
-C           Set CONC not actual for higer grids
-C
-            IX_CNC = 1
-            IA_CNC = 6
-            CALL DHGVAR( IA_CNC, IX_CNC, IV_CNC)
-            DO IGRID = 2 , NOGRID
-               DO ISYS = 1 , NOTOT
-                  IVAR = IV_CNC + ISYS - 1
-                  VGRSET(IVAR,IGRID) = 0
-               ENDDO
-            ENDDO
-!           call timer_stop(timer_proces_fluxes)
-C
+            if ( timon ) call timstop ( ithand2 )
+            igrid  = progrd(ipbloo)
+            noseg2 = grdnos(igrid)
+            if ( ipbloo .ne. nproc ) then
+               nfluxp = iflux(ipbloo+1) - iflux(ipbloo)
+            else
+               nfluxp = noflux - iflux(ipbloo) + 1
+            endif
+            if ( nfluxp .gt. 0 ) then
+
+!              If necessary set volume for this grid. Volume is always variable 1
+
+               if ( vgrset(1,igrid) .ne. 1 ) then
+                  call dhaggr( noseg           , noseg2 , 1      , 1      , 1      ,
+     &                         1               , 1      , 1      , 1      , 1      ,
+     &                         grdseg(1,igrid) , 1      , volume , volume , volume ,
+     &                         volume(1,igrid) )
+                  vgrset(1,igrid) = 1
+               endif
+
+!              Construct derivatives for these fluxes on this grid
+
+               call prodr2 ( deriv(1,1,igrid) , notot           , noflux , stochi          , iflux (ipbloo) ,
+     &                       nfluxp           , flux(1,1,igrid) , noseg2 , volume(1,igrid) , prondt(ipbloo) ,
+     &                       owners           , mypart          )
+
+!              For balances store FLXDMP
+
+               if ( ibflag .gt. 0 ) then
+                  call profld ( noflux  , iflux (ipbloo) , nfluxp  , igrid  , noseg2          ,
+     &                          noseg   , prondt(ipbloo) , isdmp   , grdseg , flux(1,1,igrid) ,
+     &                          volume  , flxdmp         )
+               endif
+            endif
+
+!           If processes on other grid convert derivs to base grid
+
+            igrblo = progrd(ipbloo)
+            if ( noflux .gt. 0 .and. igrblo .gt. 1 ) then
+               iswcum = 1
+               noseg2 = grdnos(igrblo)
+               call dhdag2( noseg   , noseg2             , notot  , notot             , notot  ,
+     &                      notot   , 1                  , 1      , 1                 , 1      ,
+     &                      notot   , grdseg(1  ,igrblo) , 2      , deriv(1,1,igrblo) , amass  ,
+     &                      iswcum  , amass (1,1,igrblo) , deriv  )
+               deriv(:,:,igrblo) = 0.0   !     Zero derivs higher grids
+            endif
+
+!           Scale fluxes and update "processes" accumulation arrays
+
+            call dlwq14 ( deriv  , notot  , noseg  , itfact , amass2 ,
+     &                    idt    , iaflag , dmps   , intopt , isdmp  ,
+     &                    owners , mypart )
+
+!           Integration (derivs are zeroed)
+
+            call dlwqp0 ( conc   , amass  , deriv  , volume , idt     ,
+     &                    nosys  , notot  , noseg  , 0      , 0       ,
+     &                    owners , mypart , surfac )
+
+!           Integrate the fluxes at dump segments
+
+            if ( ibflag .gt. 0 ) then
+               call proint ( noflux , ndmpar , idt    , itfact , flxdmp ,
+     &                       flxint , isdmp  , ipdmp  , ntdmpq )
+               flxdmp = 0.0
+            endif
+
+!           Set CONC not actual for higer grids
+
+            ix_cnc = 1
+            ia_cnc = 6
+            call dhgvar( ia_cnc, ix_cnc, iv_cnc)
+            do igrid = 2 , nogrid
+               do isys = 1 , notot
+                  ivar = iv_cnc + isys - 1
+                  vgrset(ivar,igrid) = 0
+               enddo
+            enddo
          else
             done ( ipbloo ) = 1
-         ENDIF
-C
-      ENDIF
-C
-C     Charon fractional step
-C
-      IF ( IPCHAR .GT. 0 ) THEN
-         IVAR   = PRVVAR(IOFFCH)
-         IARR   = VARARR(IVAR)
-         IV_IDX = VARIDX(IVAR)
-         IP_ARR = ARRPOI(IARR)
-         IPNDT  = IP_ARR + IV_IDX - 1
-         NDTCHA = NINT( A(IPNDT) )
-         PRONDT(IPCHAR) = NDTCHA
-C
-C        This timestep fractional step ?
-C
-         IF ( MOD(ISTEP-1,NDTCHA) .EQ. 0 ) THEN
-C
-C           Set CONC actual on bloom grid
-C
-            IGRCHA = PROGRD(IPCHAR)
-            IF ( IGRCHA .GT. 1 ) THEN
-!              call timer_start(timer_proces_grids)
-               IX_CNC = 1
-               IA_CNC = 6
-               CALL DHGVAR( IA_CNC, IX_CNC, IV_CNC)
-               NOSEG2 = GRDNOS(IGRCHA)
-               IP_CNC = (IGRCHA-1)*NOTOT*NOSEG + 1
-               CALL DHGPOI( IV_HLP, IA_HLP,
-     +                      IK_HLP, IX_HLP,
-     +                      ID1HLP, ID2HLP,
-     +                      IP_HLP, IGRCHA,
-     +                      ISYSH , NOTOTH,
-     +                      IP_ARH)
-C
-C              actives
-C
-               CALL DHAGG2( NOSEG          , NOSEG2          ,
-     +                      NOTOT          , 1               ,
-     +                      NOTOTH         , NOTOT           ,
-     +                      1              , 1               ,
-     +                      ISYSH          , 1               ,
-     +                      NOSYS          , GRDSEG(1,IGRCHA),
-     +                      3              , CONC            ,
-     +                      VOLUME         , A(IP_ARH)       ,
-     +                      CONC(IP_CNC)   )
-C
-C              inactives
-C
-               IF ( NOTOT - NOSYS .GT. 0 ) THEN
-                  CALL DHAGG2( NOSEG          , NOSEG2          ,
-     +                         NOTOT          , 1               ,
-     +                         NOTOTH         , NOTOT           ,
-     +                         NOSYS + 1      , 1               ,
-     +                         ISYSH          , NOSYS + 1       ,
-     +                         NOTOT-NOSYS    , GRDSEG(1,IGRCHA),
-     +                         3              , CONC            ,
-     +                         surfac         , A(IP_ARH)       ,
-     +                         CONC(IP_CNC)   )
-               ENDIF
-               DO ISYS = 1 , NOTOT
-                  IVAR = IV_CNC + ISYS - 1
-                  VGRSET(IVAR,IGRCHA) = 1
-               ENDDO
-!              call timer_stop(timer_proces_grids)
-            ENDIF
-C
-            CALL ZERO ( FLUX , NOFLUX*NOSEG*NOGRID )
-            IF ( IBFLAG .GT. 0 ) THEN
-               CALL ZERO ( FLXDMP, NOFLUX*NDMPS )
-            ENDIF
+         endif
+      endif
+
+!     Charon fractional step
+
+      if ( ipchar .gt. 0 ) then
+         ivar   = prvvar(ioffch)
+         iarr   = vararr(ivar)
+         iv_idx = varidx(ivar)
+         ip_arr = arrpoi(iarr)
+         ipndt  = ip_arr + iv_idx - 1
+         ndtcha = nint( a(ipndt) )
+         prondt(ipchar) = ndtcha
+
+!        This timestep fractional step ?
+
+         if ( mod(istep-1,ndtcha) .eq. 0 ) then
+
+!           Set CONC on the Charon grid if that is not the first grid
+
+            igrcha = progrd(ipchar)
+            if ( igrcha .gt. 1 ) then
+               noseg2 = grdnos(igrcha)
+               ix_cnc = 1
+               ia_cnc = 6
+               call dhgvar( ia_cnc , ix_cnc , iv_cnc )
+               call dhgpoi( iv_hlp , ia_hlp , ik_hlp , ix_hlp , id1hlp ,
+     &                      id2hlp , ip_hlp , igrcha , isysh  , nototh ,
+     &                      ip_arh )
+
+!              actives and inactives if applicable
+
+               call dhagg2( noseg         , noseg2           , notot , 1     , nototh    ,
+     &                      notot         , 1                , 1     , isysh , 1         ,
+     &                      nosys         , grdseg(1,igrcha) , 3     , conc  , volume    ,
+     &                      a(ip_arh)     , conc(1,1,igrcha) )
+               if ( notot - nosys .gt. 0 )     !   inactives
+     &         call dhagg2( noseg         , noseg2           , notot , 1     , nototh    ,
+     &                      notot         , nosys + 1        , 1     , isysh , nosys + 1 ,
+     &                      notot - nosys , grdseg(1,igrcha) , 3     , conc  , surfac    ,
+     &                      a(ip_arh)     , conc(1,1,igrcha) )
+               do isys = 1 , notot
+                  ivar = iv_cnc + isys - 1
+                  vgrset(ivar,igrcha) = 1
+               enddo
+            endif
+
+            flux = 0.0
+            if ( ibflag .gt. 0 ) flxdmp = 0
+
 !           set idt and delt
+            idtpro     = prondt(ipchar)*idt
             ipp_idt    = nodef - 2*nproc + ipchar
             ipp_delt   = nodef -   nproc + ipchar
-            IDTPRO    = PRONDT(IPCHAR)*IDT
-            DEFAUL(ipp_idt)  = FLOAT(IDTPRO)
-            DEFAUL(ipp_delt) = FLOAT(IDTPRO)/FLOAT(ITFACT)
-      if ( timon ) call timstrt ( "onepro", ithand2 )
-            CALL ONEPRO ( IPCHAR, IOFFCH, IDT   , ITFACT, PROGRD,
-     +                    GRDNOS, PRVNIO, PRVTYP, PRVVAR, VARARR,
-     +                    VARIDX, ARRKND, ARRPOI, ARRDM1, ARRDM2,
-     +                    VGRSET, NOGRID, VARTDA, VARDAG, NOSEG ,
-     +                    GRDSEG, A     , VARAGG, IPMSA , INCREM,
-     +                    NOFLUX, IFLUX , PROMNR, FLUX  , IEXPNT,
-     +                    IKNMRK, NOQ1  , NOQ2  , NOQ3  , NOQ4  ,
-     +                    NPROC , NOTOT , DERIV , STOCHI, VOLUME,
-     +                    PRONDT, IBFLAG, ISDMP , FLXDMP, NOVAR ,
-     +                    VARTAG, IIKNMR, PRONAM, OWNERS, MYPART,
-     +                    dspndt, velndt, dll_opb)
+            defaul(ipp_idt)  = float(idtpro)
+            defaul(ipp_delt) = float(idtpro)/float(itfact)
+            if ( timon ) call timstrt ( "onepro", ithand2 )
+            call onepro ( ipchar , ioffch , idt    , itfact , progrd ,
+     &                    grdnos , prvnio , prvtyp , prvvar , vararr ,
+     &                    varidx , arrknd , arrpoi , arrdm1 , arrdm2 ,
+     &                    vgrset , nogrid , vartda , vardag , noseg  ,
+     &                    grdseg , a      , varagg , ipmsa  , increm ,
+     &                    noflux , iflux  , promnr , flux   , iexpnt ,
+     &                    iknmrk , noq1   , noq2   , noq3   , noq4   ,
+     &                    nproc  , notot  , deriv  , stochi , volume ,
+     &                    prondt , ibflag , isdmp  , flxdmp , novar  ,
+     &                    vartag , iiknmr , pronam , owners , mypart ,
+     &                    dspndt , velndt , dll_opb)
             done( ipchar ) = 1
-      if ( timon ) call timstop ( ithand2 )
-            IGRID = PROGRD(IPCHAR)
-            NOSEG2 = GRDNOS(IGRID)
-            IF ( IPCHAR .NE. NPROC ) THEN
-               NFLUXP = IFLUX(IPCHAR+1) - IFLUX(IPCHAR)
-            ELSE
-               NFLUXP = NOFLUX - IFLUX(IPCHAR) + 1
-            ENDIF
-            IF ( NFLUXP .GT. 0 ) THEN
-C
-C        If necessary set volume for this grid
-C        Volume is always variable 1
-C
-               IF ( VGRSET(1,IGRID) .NE. 1 ) THEN
-                  IPVGR  = (IGRID-1)*NOSEG + 1
-                  CALL DHAGGR( NOSEG          , NOSEG2       ,
-     +                         1              , 1            ,
-     +                         1              , 1            ,
-     +                         1              , 1            ,
-     +                         1              , 1            ,
-     +                         GRDSEG(1,IGRID), 1            ,
-     +                         VOLUME         , VOLUME       ,
-     +                         VOLUME         , VOLUME(IPVGR))
-                  VGRSET(1,IGRID) = 1
-               ENDIF
-C
-C        Construct derivatives for these fluxes on this grid
-C
-               IPFLUX = (IGRID-1)*NOFLUX*NOSEG + 1
-               IPVGR  = (IGRID-1)*NOSEG + 1
-               IPDGR  = NOTOT*NOSEG*(IGRID-1) + 1
-               CALL PRODR2 ( DERIV(IPDGR) , NOTOT        ,
-     +                       NOFLUX       , STOCHI       ,
-     +                       IFLUX(IPCHAR) , NFLUXP       ,
-     +                       FLUX(IPFLUX) , NOSEG2       ,
-     +                       VOLUME(IPVGR), PRONDT(IPCHAR),
-     +                       OWNERS       , MYPART       )
-C
-C        For balances store FLXDMP
-C
-               IF ( IBFLAG .GT. 0 ) THEN
-C
-                  CALL PROFLD ( NOFLUX       , IFLUX(IPCHAR)  ,
-     +                          NFLUXP       , IGRID         ,
-     +                          NOSEG2       , NOSEG         ,
-     +                          PRONDT(IPCHAR), ISDMP         ,
-     +                          GRDSEG       , FLUX(IPFLUX)  ,
-     +                          VOLUME       , FLXDMP        )
-C
-               ENDIF
-            ENDIF
-C
-C           If processes on other grid convert derivs to base grid
-C
-            IGRCHA = PROGRD(IPCHAR)
-            IF ( NOFLUX .GT. 0 .AND. IGRCHA .GT. 1 ) THEN
-!              call timer_start(timer_proces_grids)
-C
-               ISWCUM = 1
-               NOSEG2 = GRDNOS(IGRCHA)
-               IPGR   = NOTOT*NOSEG*(IGRCHA-1) + 1
-               CALL DHDAG2( NOSEG         , NOSEG2          ,
-     +                      NOTOT         , NOTOT           ,
-     +                      NOTOT         , NOTOT           ,
-     +                      1             , 1               ,
-     +                      1             , 1               ,
-     +                      NOTOT         , GRDSEG(1,IGRCHA),
-     +                      2             , DERIV(IPGR)     ,
-     +                      AMASS         , ISWCUM          ,
-     +                      AMASS(IPGR)   , DERIV           )
-C
-C              Zero derivs higher grids
-C
-               CALL ZERO ( DERIV(IPGR), NOTOT*NOSEG )
-!              call timer_stop(timer_proces_grids)
-            ENDIF
-C
-C           Scale fluxes and update "processes" accumulation arrays
-C
-!           call timer_start(timer_proces_fluxes)
-            CALL DLWQ14 ( DERIV  , NOTOT  , NOSEG  , ITFACT , AMASS2 ,
-     *                    IDT    , IAFLAG , DMPS   , INTOPT , ISDMP  ,
-     *                    OWNERS , MYPART )
-C
-C           Integration (derivs are zeroed)
-C
-            CALL DLWQP0 ( CONC   , AMASS  , DERIV  , VOLUME , IDT    ,
-     *                    NOSYS  , NOTOT  , NOSEG  , 0      , 0      ,
-     *                    OWNERS , MYPART , surfac )
-C
-C           Integrate the fluxes at dump segments
-C
-            IF ( IBFLAG .GT. 0 ) THEN
-               CALL PROINT ( NOFLUX, NDMPAR, IDT   , ITFACT, FLXDMP,
-     +                       FLXINT, ISDMP , IPDMP , NTDMPQ)
-               CALL ZERO ( FLXDMP, NOFLUX*NDMPS )
-            ENDIF
-C
-C           Set CONC not actual for higer grids
-C
-            IX_CNC = 1
-            IA_CNC = 6
-            CALL DHGVAR( IA_CNC, IX_CNC, IV_CNC)
-            DO IGRID = 2 , NOGRID
-               DO ISYS = 1 , NOTOT
-                  IVAR = IV_CNC + ISYS - 1
-                  VGRSET(IVAR,IGRID) = 0
-               ENDDO
-            ENDDO
-!           call timer_stop(timer_proces_fluxes)
-C
+            if ( timon ) call timstop ( ithand2 )
+            igrid  = progrd(ipchar)
+            noseg2 = grdnos(igrid)
+            if ( ipchar .ne. nproc ) then
+               nfluxp = iflux(ipchar+1) - iflux(ipchar)
+            else
+               nfluxp = noflux - iflux(ipchar) + 1
+            endif
+            if ( nfluxp .gt. 0 ) then
+
+!              If necessary set volume for this grid. Volume is always variable 1
+
+               if ( vgrset(1,igrid) .ne. 1 ) then
+                  call dhaggr( noseg           , noseg2 , 1      , 1      , 1      ,
+     &                         1               , 1      , 1      , 1      , 1      ,
+     &                         grdseg(1,igrid) , 1      , volume , volume , volume ,
+     &                         volume(1,igrid) )
+                  vgrset(1,igrid) = 1
+               endif
+
+!              Construct derivatives for these fluxes on this grid
+
+               call prodr2 ( deriv(1,1,igrid) , notot           , noflux , stochi          , iflux (ipchar) ,
+     &                       nfluxp           , flux(1,1,igrid) , noseg2 , volume(1,igrid) , prondt(ipchar) ,
+     &                       owners           , mypart          )
+
+!              For balances store FLXDMP
+
+               if ( ibflag .gt. 0 ) then
+                  call profld ( noflux  , iflux (ipchar) , nfluxp  , igrid  , noseg2          ,
+     &                          noseg   , prondt(ipchar) , isdmp   , grdseg , flux(1,1,igrid) ,
+     &                          volume  , flxdmp         )
+               endif
+            endif
+
+!           If processes on other grid convert derivs to base grid
+
+            igrcha = progrd(ipchar)
+            if ( noflux .gt. 0 .and. igrcha .gt. 1 ) then
+               iswcum = 1
+               noseg2 = grdnos(igrcha)
+               call dhdag2( noseg   , noseg2             , notot  , notot             , notot  ,
+     &                      notot   , 1                  , 1      , 1                 , 1      ,
+     &                      notot   , grdseg(1  ,igrcha) , 2      , deriv(1,1,igrcha) , amass  ,
+     &                      iswcum  , amass (1,1,igrcha) , deriv  )
+               deriv(:,:,igrcha) = 0.0   !     Zero derivs higher grids
+            endif
+
+!           Scale fluxes and update "processes" accumulation arrays
+
+            call dlwq14 ( deriv  , notot  , noseg  , itfact , amass2 ,
+     &                    idt    , iaflag , dmps   , intopt , isdmp  ,
+     &                    owners , mypart )
+
+!           Integration (derivs are zeroed)
+
+            call dlwqp0 ( conc   , amass  , deriv  , volume , idt     ,
+     &                    nosys  , notot  , noseg  , 0      , 0       ,
+     &                    owners , mypart , surfac )
+
+!           Integrate the fluxes at dump segments
+
+            if ( ibflag .gt. 0 ) then
+               call proint ( noflux , ndmpar , idt    , itfact , flxdmp ,
+     &                       flxint , isdmp  , ipdmp  , ntdmpq )
+               flxdmp = 0.0
+            endif
+
+!           Set CONC not actual for higer grids
+
+            ix_cnc = 1
+            ia_cnc = 6
+            call dhgvar( ia_cnc, ix_cnc, iv_cnc)
+            do igrid = 2 , nogrid
+               do isys = 1 , notot
+                  ivar = iv_cnc + isys - 1
+                  vgrset(ivar,igrid) = 0
+               enddo
+            enddo
          else
             done ( ipchar ) = 1
-         ENDIF
-C
-      ENDIF
-C
-C     see if converting CONC in one step speeds up
-C     only in case of no fractional step
-C
-      IF ( IFRACS .EQ. 0 .AND. MAXGRID .GT. 1 ) THEN
-         IX_CNC = 1
-         IA_CNC = 6
-         CALL DHGVAR( IA_CNC, IX_CNC, IV_CNC)
-!        call timer_start(timer_proces_grids)
-         DO IGRID = 2 , NOGRID
-            NOSEG2 = GRDNOS(IGRID)
-            IP_CNC = (IGRID-1)*NOTOT*NOSEG + 1
-            CALL DHGPOI( IV_HLP, IA_HLP,
-     +                   IK_HLP, IX_HLP,
-     +                   ID1HLP, ID2HLP,
-     +                   IP_HLP, IGRID ,
-     +                   ISYSH , NOTOTH,
-     +                   IP_ARH)
-C
-C     actives
-C
-            CALL DHAGG2( NOSEG          , NOSEG2         ,
-     +                   NOTOT          , 1              ,
-     +                   NOTOTH         , NOTOT          ,
-     +                   1              , 1              ,
-     +                   ISYSH          , 1              ,
-     +                   NOSYS          , GRDSEG(1,IGRID),
-     +                   3              , CONC           ,
-     +                   VOLUME         , A(IP_ARH)      ,
-     +                   CONC(IP_CNC)   )
-C
-C     inactives
-C
-            IF ( NOTOT - NOSYS .GT. 0 ) THEN
-               CALL DHAGG2( NOSEG          , NOSEG2         ,
-     +                      NOTOT          , 1              ,
-     +                      NOTOTH         , NOTOT          ,
-     +                      NOSYS + 1      , 1              ,
-     +                      ISYSH          , NOSYS + 1      ,
-     +                      NOTOT-NOSYS    , GRDSEG(1,IGRID),
-     +                      3              , CONC           ,
-     +                      surfac         , A(IP_ARH)      ,
-     +                      CONC(IP_CNC)   )
-            ENDIF
-            DO ISYS = 1 , NOTOT
-               IVAR = IV_CNC + ISYS - 1
-               VGRSET(IVAR,IGRID) = 1
-            ENDDO
-         ENDDO
-!        call timer_stop(timer_proces_grids)
-      ENDIF
-C
-CJVB
-C
-C     The processes fractional step
-C
-      CALL ZERO ( FLUX , NOFLUX*NOSEG*NOGRID )
-      IF ( IBFLAG .GT. 0 ) THEN
-         CALL ZERO ( FLXDMP, NOFLUX*NDMPS )
-      ENDIF
+         endif
+      endif
+
+!     See if converting CONC in one step speeds up. Only in case of no fractional step
+
+      if ( ifracs .eq. 0 .and. maxgrid .gt. 1 ) then
+         ix_cnc = 1
+         ia_cnc = 6
+         call dhgvar( ia_cnc, ix_cnc, iv_cnc)
+         do igrid = 2 , nogrid
+            noseg2 = grdnos(igrid)
+            call dhgpoi( iv_hlp , ia_hlp , ik_hlp , ix_hlp , id1hlp ,
+     &                   id2hlp , ip_hlp , igrid  , isysh  , nototh ,
+     &                   ip_arh )
+
+!           actives and inactives if applicable
+
+            call dhagg2( noseg         , noseg2           , notot , 1     , nototh    ,
+     &                   notot         , 1                , 1     , isysh , 1         ,
+     &                   nosys         , grdseg(1,igrid)  , 3     , conc  , volume    ,
+     &                   a(ip_arh)     , conc(1,1,igrid)  )
+            if ( notot - nosys .gt. 0 )     !   inactives
+     &      call dhagg2( noseg         , noseg2           , notot , 1     , nototh    ,
+     &                   notot         , nosys + 1        , 1     , isysh , nosys + 1 ,
+     &                   notot - nosys , grdseg(1,igrid)  , 3     , conc  , surfac    ,
+     &                   a(ip_arh)     , conc(1,1,igrid)  )
+            do isys = 1 , notot
+               ivar = iv_cnc + isys - 1
+               vgrset(ivar,igrid) = 1
+            enddo
+         enddo
+      endif
+
+!     The processes fractional step
+
+      flux = 0.0
+      if ( ibflag .gt. 0 ) flxdmp = 0
 
       if ( timon ) call timstrt ( "onepro", ithand2 )
-
       timon_old = timon
-      if ( OMP_GET_MAX_THREADS() > 1 ) then
-          timon = .false.
-      endif
+      if ( OMP_GET_MAX_THREADS() > 1 ) timon = .false.
 !$OMP PARALLEL
-
 !$OMP DO  PRIVATE(run,idtpro,k,nfluxp,ipp_idt,ipp_delt)  SCHEDULE(DYNAMIC)
       do iproc = 1,nproc
 
@@ -872,16 +715,14 @@ C
      &              prondt , ibflag , isdmp  , flxdmp , owners ,
      &              mypart , ipbloo , ipchar , istep  )
 
-C
-C     Store fluxes and elaborate mass balances set fractional step
-C     Vraag , doen we nu altijd fractional step? of moeten we als we geen
-C     processen hebben met een grotere tijdstap de integratie samen met het
-C     transport doen.
-C
-Cgrd  IF ( NOFLUX .GT. 0 .AND. NOGRID .GT. 1 ) THEN
-      IF ( NOFLUX .GT. 0 .AND. MAXGRID .GT. 1 ) THEN
-!        call timer_start(timer_proces_grids)
-         DO IGRD = 2 , NOGRID
+!     Store fluxes and elaborate mass balances set fractional step
+!     Vraag , doen we nu altijd fractional step? of moeten we als we geen
+!     processen hebben met een grotere tijdstap de integratie samen met het
+!     transport doen.
+
+!grd  IF ( NOFLUX .GT. 0 .AND. NOGRID .GT. 1 ) THEN
+      if ( noflux .gt. 0 .and. maxgrid .gt. 1 ) then
+         do igrd = 2 , nogrid
 c           DO ISYS = 1 , NOTOT
 c              ISWCUM = 1
 c              NOSEG2 = GRDNOS(IGRD)
@@ -892,110 +733,84 @@ c    +                      NOTOT         , NOTOT      ,
 c    +                      ISYS          , ISYS       ,
 c    +                      ISYS          , ISYS       ,
 c    +                      GRDSEG(1,IGRD), 2          ,
-c    +                      DERIV(IPGR)   , AMASS      ,
+c    +                      DERIV(1,1,igrd)   , AMASS      ,
 c    +                      ISWCUM        , AMASS(IPGR),
 c    +                      DERIV         )
 c           ENDDO
-            ISWCUM = 1
-            NOSEG2 = GRDNOS(IGRD)
-            IPGR   = NOTOT*NOSEG*(IGRD-1) + 1
-            CALL DHDAG2( NOSEG         , NOSEG2        ,
-     +                   NOTOT         , NOTOT         ,
-     +                   NOTOT         , NOTOT         ,
-     +                   1             , 1             ,
-     +                   1             , 1             ,
-     +                   NOTOT         , GRDSEG(1,IGRD),
-     +                   2             , DERIV(IPGR)   ,
-     +                   AMASS         , ISWCUM        ,
-     +                   AMASS(IPGR)   , DERIV         )
-         ENDDO
-C
-C        Zero derivs higher grids
-C
-         IPGR   = NOTOT*NOSEG + 1
-         CALL ZERO ( DERIV(IPGR), NOTOT*NOSEG*(NOGRID-1) )
-!        call timer_stop(timer_proces_grids)
-      ENDIF
-C
-C     Set fractional step
-C
-      IF ( NOFLUX .GT. 0 .AND. IFRACS .EQ. 1 ) THEN
+            iswcum = 1
+            noseg2 = grdnos(igrd)
+            call dhdag2( noseg   , noseg2           , notot  , notot           , notot  ,
+     &                   notot   , 1                , 1      , 1               , 1      ,
+     &                   notot   , grdseg(1  ,igrd) , 2      , deriv(1,1,igrd) , amass  ,
+     &                   iswcum  , amass (1,1,igrd) , deriv  )
+         enddo
+
+!        Zero derivs higher grids
+
+         deriv(:,:,2:nogrid) = 0.0
+      endif
+
+!     Set fractional step
+
+      if ( noflux .gt. 0 .and. ifracs .eq. 1 ) then
 
          ! no fluxes at first step of fractional step
 
-         IF ( ISTEP .EQ. 1 ) THEN
-            ! just zero the deriv
-            CALL ZERO(DERIV,NOTOT*NOSEG)
-            IF ( IBFLAG .GT. 0 ) THEN
-               CALL ZERO ( FLXDMP, NOFLUX*NDMPS )
-            ENDIF
-         ELSE
+         if ( istep .eq. 1 ) then
+            deriv(:,:,1) = 0.0
+            if ( ibflag .gt. 0 ) flxdmp = 0.0
+         else
 
-C
-C           Scale fluxes and update "processes" accumulation arrays
-C
-!           call timer_start(timer_proces_fluxes)
-            CALL DLWQ14 ( DERIV  , NOTOT  , NOSEG  , ITFACT , AMASS2 ,
-     *                    IDT    , IAFLAG , DMPS   , INTOPT , ISDMP  ,
-     *                    OWNERS , MYPART )
-C
-C           Integration (derivs are zeroed)
-C
-            CALL DLWQP0 ( CONC   , AMASS  , DERIV  , VOLUME , IDT    ,
-     *                    NOSYS  , NOTOT  , NOSEG  , 0      , 0      ,
-     *                    OWNERS , MYPART , surfac )
-C
-C           Integrate the fluxes at dump segments
-C
-            IF ( IBFLAG .GT. 0 ) THEN
-               CALL PROINT ( NOFLUX , NDMPAR , IDT    , ITFACT , FLXDMP ,
-     +                       FLXINT , ISDMP  , IPDMP  , NTDMPQ )
-               CALL ZERO ( FLXDMP, NOFLUX*NDMPS )
-            ENDIF
-!           call timer_stop(timer_proces_fluxes)
-         ENDIF
-      ENDIF
-C
-C     Calculate new dispersions
-C
-      IF ( NDSPN  .GT. 0 ) THEN
- !       call timer_start(timer_proces_disper)
-         CALL PROVEL (DISPNW, NDSPN , IDPNEW, DISPER, NODISP,
-     +                IDPNT , DSPX  , NDSPX , DSTO  , NOSYS ,
-     +                NOQ   , OWNERQ, MYPART, DSPNDT, ISTEP )
-  !      call timer_stop(timer_proces_disper)
-      ENDIF
-C
-C     Calculate new velocities
-C
-      IF ( NVELN  .GT. 0 ) THEN
- !       call timer_start(timer_proces_disper)
-         CALL PROVEL (VELONW, NVELN , IVPNEW, VELO  , NOVELO,
-     +                IVPNT , VELX  , NVELX , VSTO  , NOSYS ,
-     +                NOQ   , OWNERQ, MYPART, VELNDT, ISTEP )
- !       call timer_stop(timer_proces_disper)
-      ENDIF
-C
-C     Update output-data between neighbouring processors
-C
-!     call timer_start(timer_proces_comm)
-      call update_data(deriv, notot, 'noseg', 1, 'stc1', ierr)
-      call update_data(amass, notot, 'noseg', 1, 'stc1', ierr)
-      if (ndspn.gt.0)
-     +   call update_data(dispnw, ndspn,'noq',1, 'exchg_for_ownseg', ierr)
-      if (nveln.gt.0)
-     +   call update_data(velonw, nveln,'noq',1, 'exchg_for_ownseg', ierr)
-!     call timer_stop(timer_proces_comm)
-C
-C     Stop timing for cpu/wall-clock time for process library
-C
-!     call timer_stop(timer_proces)
+!           Scale fluxes and update "processes" accumulation arrays
+
+            call dlwq14 ( deriv  , notot  , noseg  , itfact , amass2 ,
+     &                    idt    , iaflag , dmps   , intopt , isdmp  ,
+     &                    owners , mypart )
+
+!           Integration (derivs are zeroed)
+
+            call dlwqp0 ( conc   , amass  , deriv  , volume , idt     ,
+     &                    nosys  , notot  , noseg  , 0      , 0       ,
+     &                    owners , mypart , surfac )
+
+!           Integrate the fluxes at dump segments
+
+            if ( ibflag .gt. 0 ) then
+               call proint ( noflux , ndmpar , idt    , itfact , flxdmp ,
+     &                       flxint , isdmp  , ipdmp  , ntdmpq )
+               flxdmp = 0.0
+            endif
+         endif
+      endif
+
+!     Calculate new dispersions
+
+      if ( ndspn  .gt. 0 ) then
+         call provel ( dispnw , ndspn  , idpnew , disper , nodisp ,
+     &                 idpnt  , dspx   , ndspx  , dsto   , nosys  ,
+     &                 noq    , ownerq , mypart , dspndt , istep  )
+      endif
+
+!     Calculate new velocities
+
+      if ( nveln  .gt. 0 ) then
+         call provel ( velonw , nveln  , ivpnew , velo   , novelo ,
+     &                 ivpnt  , velx   , nvelx  , vsto   , nosys  ,
+     &                 noq    , ownerq , mypart , velndt , istep  )
+      endif
+
+!     Update output-data between neighbouring processors
+
+!     call update_data(deriv, notot, 'noseg', 1, 'stc1', ierr)
+!     call update_data(amass, notot, 'noseg', 1, 'stc1', ierr)
+!     if (ndspn.gt.0) call update_data(dispnw, ndspn,'noq',1, 'exchg_for_ownseg', ierr)
+!     if (nveln.gt.0) call update_data(velonw, nveln,'noq',1, 'exchg_for_ownseg', ierr)
 
  9999 if ( timon ) call timstop ( ithandl )
-      RETURN
- 2000 FORMAT ( ' ERROR: undefined kind of array in PROCES :',I8 )
-      END
-C
+      return
+ 2000 format ( ' ERROR: undefined kind of array in PROCES :', i8 )
+      end
+
       SUBROUTINE ONEPRO ( IPROC , K     , IDT   , ITFACT, PROGRD,
      +                    GRDNOS, PRVNIO, PRVTYP, PRVVAR, VARARR,
      +                    VARIDX, ARRKND, ARRPOI, ARRDM1, ARRDM2,
