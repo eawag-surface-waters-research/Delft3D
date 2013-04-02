@@ -4,13 +4,13 @@
 set TCL_EXE=..\..\src\third_party_open\tcl\bin\win32\tclkit.exe
 
 
-echo "Running testcase 01_standard ..."
+echo "Running testcase 01_standard (sp) ..."
 cd 01_standard
 %TCL_EXE% ../sed_in_file.tcl config_d_hydro.xml "<library>flow2d3d" "<library>flow2d3d_sp"
 call run_flow2d3d.bat >screen.log 2>&1
 
 
-echo "Running testcase 01_standard parallel ..."
+echo "Running testcase 01_standard parallel (sp) ..."
    rem first fix the number of partitions to 2 (it's a very small model)
 %TCL_EXE% ../sed_in_file.tcl run_flow2d3d_parallel.bat "mpiexec -n %%NUMBER_OF_PROCESSORS%%" "mpiexec -n 2"
 call run_flow2d3d_parallel.bat >screen_parallel.log 2>&1
@@ -20,7 +20,7 @@ call run_flow2d3d_parallel.bat >screen_parallel.log 2>&1
 cd ..
 
 
-echo "Running testcase 02_domaindecomposition ..."
+echo "Running testcase 02_domaindecomposition (sp) ..."
 cd 02_domaindecomposition
 %TCL_EXE% ../sed_in_file.tcl config_d_hydro.xml "<library>flow2d3d" "<library>flow2d3d_sp"
 call run_flow2d3d.bat >screen.log 2>&1
@@ -28,7 +28,7 @@ call run_flow2d3d.bat >screen.log 2>&1
 cd ..
 
 
-echo "Running testcase 03_flow-wave ..."
+echo "Running testcase 03_flow-wave (sp) ..."
 cd 03_flow-wave
 %TCL_EXE% ../sed_in_file.tcl config_d_hydro.xml "<library>flow2d3d" "<library>flow2d3d_sp"
 call run_flow2d3d.bat >screen.log 2>&1
@@ -36,7 +36,7 @@ call run_flow2d3d.bat >screen.log 2>&1
 cd ..
 
 
-echo "Running testcase 04_fluidmud ..."
+echo "Running testcase 04_fluidmud (sp) ..."
 cd 04_fluidmud
 %TCL_EXE% ../sed_in_file.tcl config_d_hydro_mud.xml "<library>flow2d3d" "<library>flow2d3d_sp"
 %TCL_EXE% ../sed_in_file.tcl config_d_hydro_sed.xml "<library>flow2d3d" "<library>flow2d3d_sp"
@@ -46,7 +46,7 @@ call run_flow2d3d_flm.bat >screen.log 2>&1
 cd ..
 
 
-echo "Running testcase 05_mormerge ..."
+echo "Running testcase 05_mormerge (sp) ..."
 cd 05_mormerge\input
 ..\%TCL_EXE% ../../sed_in_file.tcl config_d_hydro.xml "<library>flow2d3d" "<library>flow2d3d_sp"
 cd ..\merge
@@ -56,10 +56,7 @@ cd ..\input
 cd ..\..
 
 
-echo "Running testcase 06_delwaq ..."
-cd 06_delwaq
-call run_delwaq.bat >screen.log 2>&1
-cd ..
+echo "Skipping testcase 06_delwaq (no sp variant)"
 
 echo ...finished
 pause
