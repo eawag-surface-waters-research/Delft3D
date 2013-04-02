@@ -216,6 +216,7 @@ subroutine srcfil(lundia    ,filsrc    ,error     ,nsrc      ,mnksrc    , &
          & chulpi=='c' .or. chulpi=='C' .or. &
          & chulpi=='d' .or. chulpi=='D' .or. &
          & chulpi=='e' .or. chulpi=='E' .or. &
+         & chulpi=='f' .or. chulpi=='F' .or. &
          & chulpi=='u' .or. chulpi=='U') then
           !
           ! read ival  (3) from record, default value allowed
@@ -255,6 +256,7 @@ subroutine srcfil(lundia    ,filsrc    ,error     ,nsrc      ,mnksrc    , &
              endif
           endif
           if (chulpi=='u' .or. chulpi=='U') mnksrc(7, n) = 7
+          if (chulpi=='f' .or. chulpi=='F') mnksrc(7, n) = 8
        endif
     enddo
     !

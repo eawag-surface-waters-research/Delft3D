@@ -152,6 +152,8 @@ subroutine esm_alloc_int(lundia, error, verify, zmodel, gdp)
                              !         4 : Culvert; special type 'E' (one-way) for Borgerhout
                              !         5 : Culvert; special type 'D' (two-way) for Borgerhout
                              !         6 : Power station type Q (inlet and outlet are coupled, temperature and/or constituents may be changed, heat dump specified)
+                             !         7 : Culvert in user defined dll
+                             !         8 : two-way culvert with density sensitivity
     if (ierr <= -9) goto 9999
     !
     pntnam = 'itdis'         !  Global data

@@ -1393,7 +1393,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
            call culver(icx       ,icy       ,kmax      ,nsrcd     ,i(kfs)    , &
                      & i(kfsmax) ,i(kfsmin) ,i(mnksrc) ,r(disch)  ,d(dps)    , &
                      & r(s0)     ,r(sig)    ,r(thick)  ,r(voldis) ,timsec    , &
-                     & gdp       )
+                     & r(sumrho) ,gdp       )
            call timer_stop(timer_culver, gdp)
        endif
     endif
@@ -2429,7 +2429,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
            call culver(icx       ,icy       ,kmax      ,nsrcd     ,i(kfs)    , &
                      & i(kfsmax) ,i(kfsmin) ,i(mnksrc) ,r(disch)  ,d(dps)    , &
                      & r(s0)     ,r(sig)    ,r(thick)  ,r(voldis) ,timsec    , &
-                     & gdp       )                                          
+                     & r(sumrho) ,gdp       )                                          
            call timer_stop(timer_culver, gdp)
        endif
     endif

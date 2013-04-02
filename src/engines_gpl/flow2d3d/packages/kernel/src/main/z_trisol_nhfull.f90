@@ -1068,7 +1068,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
            call culver(icx       ,icy       ,kmax      ,nsrcd     ,i(kfs)    , &
                      & i(kfsmx0) ,i(kfsmin) ,i(mnksrc) ,r(disch)  ,d(dps)    , &
                      & r(s0)     ,r(sig)    ,r(thick)  ,r(voldis) ,timsec    , &
-                     & gdp       )
+                     & r(sumrho) ,gdp       )
            call timer_stop(timer_culver, gdp)
        endif
     endif

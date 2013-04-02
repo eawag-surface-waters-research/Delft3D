@@ -1,7 +1,7 @@
 subroutine culver(icx       ,icy       ,kmax      ,nsrc      ,kfs       , &
                 & kfsmax    ,kfsmin    ,mnksrc    ,disch     ,dps       , &
                 & s0        ,zk        ,thick     ,voldis    ,timsec    , &
-                & gdp       )
+                & sumrho    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -66,29 +66,31 @@ subroutine culver(icx       ,icy       ,kmax      ,nsrc      ,kfs       , &
     integer                        , pointer :: lundia
     real(fp)                       , pointer :: hdt
     real(fp)                       , pointer :: ag
+    real(fp)                       , pointer :: rhow
     logical                        , pointer :: culvert
     logical                        , pointer :: zmodel
 !
 ! Global variables
 !
-    integer                                     , intent(in)  :: icx    ! Increment in the X-dir., if ICX= NMAX
-                                                                        ! then computation proceeds in the X-
-                                                                        ! dir. If icx=1 then computation pro-
-                                                                        ! ceeds in the Y-dir.    
-    integer                                     , intent(in)  :: icy    ! Increment in the Y-dir. (see ICX)
-    integer                                     , intent(in)  :: nsrc   ! Description and declaration in dimens.igs
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)   , intent(in)  :: kfs    ! Description and declaration in esm_alloc_int.f90   
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)   , intent(in)  :: kfsmax ! Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)   , intent(in)  :: kfsmin ! Description and declaration in esm_alloc_int.f90
-    integer                                     , intent(in)  :: kmax    
-    integer, dimension(7, nsrc)                               :: mnksrc ! Description and declaration in r-i-ch.igs
-    real(fp)                                    , intent(in)  :: timsec ! Time in seconds since reference date
-    real(fp), dimension(nsrc)                   , intent(out) :: disch  ! Description and declaration in esm_alloc_real.f90
-    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in)  :: dps    ! Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)  , intent(in)  :: s0     ! Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(kmax)                   , intent(in)  :: thick  ! Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(nsrc)                                 :: voldis ! Description and declaration in esm_alloc_real.f90   
-    real(fp), dimension(0:kmax)                 , intent(in)  :: zk     ! See description and declaration of sig in esm_alloc_real.f90
+    integer                                         , intent(in)  :: icx    ! Increment in the X-dir., if ICX= NMAX
+                                                                            ! then computation proceeds in the X-
+                                                                            ! dir. If icx=1 then computation pro-
+                                                                            ! ceeds in the Y-dir.    
+    integer                                         , intent(in)  :: icy    ! Increment in the Y-dir. (see ICX)
+    integer                                         , intent(in)  :: nsrc   ! Description and declaration in dimens.igs
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kfs    ! Description and declaration in esm_alloc_int.f90   
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kfsmax ! Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kfsmin ! Description and declaration in esm_alloc_int.f90
+    integer                                         , intent(in)  :: kmax    
+    integer, dimension(7, nsrc)                                   :: mnksrc ! Description and declaration in r-i-ch.igs
+    real(fp)                                        , intent(in)  :: timsec ! Time in seconds since reference date
+    real(fp), dimension(nsrc)                       , intent(out) :: disch  ! Description and declaration in esm_alloc_real.f90
+    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)    , intent(in)  :: dps    ! Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: s0     ! Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in)  :: sumrho !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax)                       , intent(in)  :: thick  ! Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(nsrc)                                     :: voldis ! Description and declaration in esm_alloc_real.f90   
+    real(fp), dimension(0:kmax)                     , intent(in)  :: zk     ! See description and declaration of sig in esm_alloc_real.f90
 !
 ! Local variables
 !
@@ -101,22 +103,26 @@ subroutine culver(icx       ,icy       ,kmax      ,nsrc      ,kfs       , &
     integer           :: iswitch
     integer           :: k
     integer           :: nmin
-    integer           :: nmin2
     integer           :: nmout
-    integer           :: nmout2
+    integer           :: kin
+    integer           :: kout
+    integer           :: swapval
     real(fp)          :: area
     real(fp)          :: cc1
     real(fp)          :: cd1
     real(fp)          :: cd2
     real(fp)          :: cd3
     real(fp)          :: coefl
-    real(fp)          :: delzet ! Water level gradient
+    real(fp)          :: delpres ! Water pressure gradient
+    real(fp)          :: delzet  ! Water level gradient
     real(fp)          :: h0
     real(fp)          :: height
     real(fp)          :: hin
     real(fp)          :: hout
     real(fp)          :: pos
     real(fp)          :: rdis
+    real(fp)          :: rhorefin
+    real(fp)          :: rhorefout
     real(fp)          :: zz1
     real(fp)          :: zz2
     real(fp)          :: zdown    
@@ -165,6 +171,7 @@ subroutine culver(icx       ,icy       ,kmax      ,nsrc      ,kfs       , &
     lundia           => gdp%gdinout%lundia
     hdt              => gdp%gdnumeco%hdt
     ag               => gdp%gdphysco%ag
+    rhow             => gdp%gdphysco%rhow   
     culvert          => gdp%gdprocs%culvert
     zmodel           => gdp%gdprocs%zmodel
     !
@@ -183,35 +190,21 @@ subroutine culver(icx       ,icy       ,kmax      ,nsrc      ,kfs       , &
     ddb      = gdp%d%ddbound
     icxy     = max(icx, icy)
     rmissval = -1.0e20_hp
-    do isrc = 1, nsrc
-       !
-       ! Discharge relation through culvert (completely submerged culvert)
-       ! for "normal" culvert: MNKSRC(7,.) = 3
-       !
-       if (mnksrc(7, isrc)==3) then
-          call n_and_m_to_nm(mnksrc(2,isrc), mnksrc(1,isrc), nmin, gdp)
-          call n_and_m_to_nm(mnksrc(5,isrc), mnksrc(4,isrc), nmout, gdp)
-          if (kfs(nmin)==1) then
-             delzet = s0(nmin) - s0(nmout)
-             if (delzet>0.0) then
-                disch(isrc) = clcul(isrc)*arcul(isrc)*sqrt(2.*ag*delzet)
-             else
-                disch(isrc) = 0.0
-             endif
-          endif
-       endif
-    enddo
     !
     ! Discharge relation through culvert 
-    ! for "WL Borgerhout" culverts: MNKSRC(7,.) = 4 or 5
-    ! MNKSRC(7,.) = 4: one-way culvert
-    ! MNKSRC(7,.) = 5: two-way culvert
-    !
-    ! User defined discharge relation for culvert 7.
+    ! MNKSRC(7,.) = 3: one-way culvert                                "C"
+    ! MNKSRC(7,.) = 4: one-way culvert especially for "WL Borgerhout" "E"
+    ! MNKSRC(7,.) = 5: two-way culvert especially for "WL Borgerhout" "D"
+    ! MNKSRC(7,.) = 6: power station; not handled here                "Q"
+    ! MNKSRC(7,.) = 7: user defined culvert in a dll                  "U"
+    ! MNKSRC(7,.) = 8: two-way culvert                                "F"
     !
     do isrc = 1, nsrc
-       if ( (mnksrc(7,isrc) == 4) .or. &
-          & (mnksrc(7,isrc) == 5) ) then
+       !
+       ! Calculate the loss coefficient
+       ! Only for type 4 and 5
+       !
+       if ( (mnksrc(7,isrc) == 4) .or. (mnksrc(7,isrc) == 5) ) then
           call n_and_m_to_nm(mnksrc(2,isrc), mnksrc(1,isrc), nmin, gdp)
           call n_and_m_to_nm(mnksrc(5,isrc), mnksrc(4,isrc), nmout, gdp)
           !
@@ -231,7 +224,7 @@ subroutine culver(icx       ,icy       ,kmax      ,nsrc      ,kfs       , &
           !
           area  = 0.0
           coefl = 0.0
-          if (kfs(nmin) .eq. 1 .or. kfs(nmout) .eq. 1) then
+          if (kfs(nmin) == 1 .or. kfs(nmout) == 1) then
              hin  = max (0.0_fp,s0(nmin )-poscul(isrc))
              hout = max (0.0_fp,s0(nmout)-poscul(isrc))
              height = 0.5 * ( hin + hout)
@@ -283,13 +276,81 @@ subroutine culver(icx       ,icy       ,kmax      ,nsrc      ,kfs       , &
                 endif
              enddo
           endif
-       elseif (mnksrc(7,isrc) == 7) then
+       endif
+       !
+       ! Compute discharge for each types (3, 4, 5, 7, 8)
+       !
+       if (mnksrc(7,isrc) == 3) then
           !
-          ! compute loss coefficient:
+          ! Compute discharge for type 3
           !
           call n_and_m_to_nm(mnksrc(2,isrc), mnksrc(1,isrc), nmin, gdp)
           call n_and_m_to_nm(mnksrc(5,isrc), mnksrc(4,isrc), nmout, gdp)
-          if (kfs(nmin) .eq. 1 .or. kfs(nmout) .eq. 1) then
+          if (kfs(nmin)==1) then
+             delzet = s0(nmin) - s0(nmout)
+             if (delzet>0.0) then
+                disch(isrc) = clcul(isrc)*arcul(isrc)*sqrt(2.*ag*delzet)
+             else
+                disch(isrc) = 0.0
+             endif
+          endif
+       endif
+       if (mnksrc(7,isrc) == 4) then
+          !
+          ! Compute discharge for type 4
+          !
+          if (kfs(nmin) == 1) then
+             if (s0(nmin) >= s0(nmout)) then
+                iswitch = 0
+                call cptdis(lundia     ,ag         ,area       ,calfa(isrc), &
+                          & cd1        ,cd2        ,cd3        ,cleng(isrc), &
+                          & cmann(isrc),coefl      ,disch(isrc),htcul(isrc), &
+                          & iflow      ,iswitch    ,poscul(isrc),rdis      , &
+                          & s0(nmin)   ,s0(nmout)  ,wtcul(isrc) ,gdp       )
+                disch(isrc) = rdis
+             else
+                disch(isrc) = 0.0
+             endif
+          else
+             write(lundia,'(a,i2,a)') &
+                & 'intake point of one-way culvert nr.',isrc, &
+                & ' is dry'
+          endif
+       endif
+       if (mnksrc(7,isrc) == 5) then
+          !
+          ! Compute discharge for type 5
+          !
+          iswitch = 0
+          if (s0(nmin) < s0(nmout)) then
+             !
+             ! intake and outfall exchange; recompute area and energy loss
+             !
+             iswitch = 1
+             swapval = nmin
+             nmin    = nmout
+             nmout   = swapval
+          endif
+          if (kfs(nmin) == 1) then
+                call cptdis(lundia     ,ag         ,area       ,calfa(isrc), &
+                          & cd1        ,cd2        ,cd3        ,cleng(isrc), &
+                          & cmann(isrc),coefl      ,disch(isrc),htcul(isrc), &
+                          & iflow      ,iswitch    ,poscul(isrc),rdis      , &
+                          & s0(nmin)   ,s0(nmout)  ,wtcul(isrc) ,gdp       )
+             disch(isrc) = rdis
+          else
+             write(lundia,'(a,i2,a)') &
+                & 'intake point of two-way culvert nr.',isrc, &
+                & ' is dry'
+          endif
+       endif
+       if (mnksrc(7,isrc) == 7) then
+          !
+          ! compute loss coefficient and discharge for type 7
+          !
+          call n_and_m_to_nm(mnksrc(2,isrc), mnksrc(1,isrc), nmin, gdp)
+          call n_and_m_to_nm(mnksrc(5,isrc), mnksrc(4,isrc), nmout, gdp)
+          if (kfs(nmin) == 1 .or. kfs(nmout) == 1) then
              !
              ! User defined formula in DLL
              ! Input parameters are passed via dll_reals/integers/strings-arrays
@@ -383,56 +444,65 @@ subroutine culver(icx       ,icy       ,kmax      ,nsrc      ,kfs       , &
              endif
           endif
        endif
-       !
-       ! in case of a one-way culvert:
-       !
-       if (mnksrc(7,isrc) == 4) then
-          if (kfs(nmin) .eq. 1) then
-             if (s0(nmin) .ge. s0(nmout)) then
-                iswitch = 0
-                call cptdis(lundia     ,ag         ,area       ,calfa(isrc), &
-                          & cd1        ,cd2        ,cd3        ,cleng(isrc), &
-                          & cmann(isrc),coefl      ,disch(isrc),htcul(isrc), &
-                          & iflow      ,iswitch    ,poscul(isrc),rdis      , &
-                          & s0(nmin)   ,s0(nmout)  ,wtcul(isrc) ,gdp       )
-                disch(isrc) = rdis
-             else
-                disch(isrc) = 0.0
-             endif
-          else
-             write(lundia,'(a,i2,a)') &
-                & 'intake point of one-way culvert nr.',isrc, &
-                & ' is dry'
-          endif
-       endif
-       !
-       ! in case of a two-way culvert:
-       !
-       if (mnksrc(7,isrc) == 5) then
-          iswitch = 0
-          nmin2   = nmin
-          nmout2  = nmout
-          if (s0(nmin) .lt. s0(nmout)) then
+       if (mnksrc(7, isrc) == 8) then
+          !
+          ! Compute discharge for type 8
+          !
+          call n_and_m_to_nm(mnksrc(2,isrc), mnksrc(1,isrc), nmin, gdp)
+          call n_and_m_to_nm(mnksrc(5,isrc), mnksrc(4,isrc), nmout, gdp)
+          hin    = max (0.0_fp,s0(nmin )-poscul(isrc))
+          hout   = max (0.0_fp,s0(nmout)-poscul(isrc))
+          height = 0.5_fp * ( hin + hout)
+          height = min ( height , htcul(isrc) )
+          area   = height * wtcul(isrc)
+          !
+          ! vertical position for intake point:
+          !
+          kin = intlay(lundia      ,zmodel    ,kfsmin(nmin) ,kfsmax(nmin) , &
+                     & poscul(isrc),zk        ,dps(nmin)    ,s0(nmin)     , &
+                     & kmax        ,thick     ,isrc         ,'intake '    )
+          mnksrc(3,isrc) = kin                      
+          !
+          ! vertical position for outfall point:
+          !
+          kout = intlay(lundia      ,zmodel    ,kfsmin(nmout),kfsmax(nmout), &
+                       & poscul(isrc),zk        ,dps(nmout)   ,s0(nmout)    , &
+                       & kmax        ,thick     ,isrc         ,'outfall'    )
+          mnksrc(6,isrc) = kout                      
+          rhorefin = 0.5_fp * thick(1) * rhow
+          rhorefout = rhorefin
+          do k = 2, kin
+             rhorefin = rhorefin + 0.5_fp*(thick(k-1)+thick(k)) * rhow
+          enddo
+          do k = 2, kout
+             rhorefout = rhorefout + 0.5_fp*(thick(k-1)+thick(k)) * rhow
+          enddo
+          delpres     = sumrho(nmin,kin)*hin/rhorefin - sumrho(nmout,kout)*hout/rhorefout
+          disch(isrc) = clcul(isrc)*area*sqrt(2.0_fp*ag*abs(delpres))
+          if (delpres < 0.0_fp) then
              !
              ! intake and outfall exchange; recompute area and energy loss
              !
-             iswitch = 1
-             nmin2   = nmout
-             nmout2  = nmin
+             swapval        = nmout
+             nmout          = nmin
+             nmin           = swapval
+             swapval        = kout 
+             kout           = kin
+             kin            = swapval
+             hin            = max (0.0_fp,s0(nmin )-poscul(isrc))
+             hout           = max (0.0_fp,s0(nmout)-poscul(isrc))
+             height         = min ( hin , htcul(isrc) )
+             area           = height * wtcul(isrc)
+             mnksrc(3,isrc) = kin 
+             mnksrc(6,isrc) = kout
+             disch(isrc)    = - disch(isrc)                      
           endif
-          if (kfs(nmin2) .eq. 1) then
-                call cptdis(lundia     ,ag         ,area       ,calfa(isrc), &
-                          & cd1        ,cd2        ,cd3        ,cleng(isrc), &
-                          & cmann(isrc),coefl      ,disch(isrc),htcul(isrc), &
-                          & iflow      ,iswitch    ,poscul(isrc),rdis      , &
-                          & s0(nmin2)  ,s0(nmout2) ,wtcul(isrc) ,gdp       )
-             disch(isrc) = rdis
-          else
-             write(lundia,'(a,i2,a)') &
-                & 'intake point of two-way culvert nr.',isrc, &
-                & ' is dry'
-          endif
+          if (kfs(nmin) /= 1) then
+             disch(isrc) = 0.0_fp
+          endif   
        endif
+       !
+       ! For all types:
        !
        voldis(isrc) = voldis(isrc) + disch(isrc)*hdt
     enddo

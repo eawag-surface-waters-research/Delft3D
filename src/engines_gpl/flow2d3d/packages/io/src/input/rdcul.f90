@@ -377,6 +377,35 @@ subroutine rdcul(nsrc, namsrc ,mnksrc, voldis, gdp)
                             endif
                             write (lundia,*) '  '
                         endif
+                    case(8)
+                        !
+                        ! This culvert type 'f' is specified by loss coefficient (dimensionless)
+                        ! and area of culvert opening (m^2).
+                        !
+                        if (scansofculvertfile .eq. 2) then
+                            call prop_get(link_ptr, '*', 'LossCoefficient', clcul(isrc))
+                            call prop_get(link_ptr, '*', 'Height', &
+                                             & htcul(isrc))
+                            call prop_get(link_ptr, '*', 'Width', &
+                                             & wtcul(isrc))
+                            call prop_get(link_ptr, '*', &
+                                             & 'VerticalPosition', poscul(isrc))
+                            write (lundia, '(a,a,a)') 'for discharge ', &
+                                                     & namsrc(isrc),':'
+                            write (lundia, '(a,a,i4,a,i4,a,a,i4,a,i4,a)') &
+                                         & '* culvert of type "F" between  ', &
+                                         & ' (m = ', mnksrc(1, isrc), ', n = ', &
+                                         & mnksrc(2, isrc), ')  and ', &
+                                         & ' (m = ', mnksrc(4, isrc), ', n = ', &
+                                         & mnksrc(5, isrc),')'
+                            write (lundia,*) '* with loss coefficient ', &
+                                            & clcul(isrc)
+                            write (lundia,*) ' * with height of ',htcul(isrc)
+                            write (lundia,*) ' * and width of ',wtcul(isrc)
+                            write (lundia,*) ' * and vertical position of bottom of culvert at ', &
+                                           & poscul(isrc)
+                            write (lundia,*) '  '
+                        endif
                     case default
                         write (message, '(a)') 'Wrong culvert type in culvert input'
                         call prterr(lundia, 'U021', trim(message))
