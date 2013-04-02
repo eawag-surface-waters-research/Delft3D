@@ -89,7 +89,7 @@ subroutine rollu(nmmax     ,kfs       ,sourr     ,df        , &
                 hdis = max(0.1_fp , s0(nm)+real(dps(nm),fp))
                 kwav = 2.0_fp * pi / (c(nm) * tp(nm))
                 hrms = (8.0_fp * ewave0(nm) /(rhow * ag))**0.5_fp
-                btr  = 0.025_fp * (1.0_fp/(kwav*hdis)) * ((hdis-hrms)/max(0.01_hp,real(Hrms, hp)))**2
+                btr  = 0.025_fp * (1.0_fp/(kwav*hdis)) * ((hdis-hrms)/max(0.01_hp,real(hrms, hp)))**2
              else
                 btr  = betarol
              endif
