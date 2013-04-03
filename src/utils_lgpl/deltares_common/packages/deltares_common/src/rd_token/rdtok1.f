@@ -64,15 +64,16 @@ C     IERR    INTEGER     1       OUTPUT  Error code (see below)
 C
 C     ERROR CODES:
 C
-C     From GETTOK:                  From this routine:
-C     -4 Integer overflow           1 General error/error reading etc.
-C     -3 Exponent out of range      1 General error/error reading etc.
-C     -2 Group separator found      2 End of data group / include stack exceeded
-C     -1 No delimiting quote        1 General error/error reading etc.
-C      0 Normal result              0 Normal end or (if other than expected)
-C                                   4 Unexpected input data
-C      1 End of file encountered    3 End of file * only if ITYPEX >0 at entry!
-C      2 Read error encountered     1 General error/error reading etc.
+C     From GETTOK:                   From this routine:
+C     -5 Negative or zero repeats(*) 1 General error/error reading etc.
+C     -4 Integer overflow            1 General error/error reading etc.
+C     -3 Exponent out of range       1 General error/error reading etc.
+C     -2 Group separator found       2 End of data group / include stack exceeded
+C     -1 No delimiting quote         1 General error/error reading etc.
+C      0 Normal result               0 Normal end or (if other than expected)
+C                                    4 Unexpected input data
+C      1 End of file encountered     3 End of file * only if ITYPEX >0 at entry!
+C      2 Read error encountered      1 General error/error reading etc.
 C
 C DATA ---------------------------------------------------- Arguments --
 
@@ -109,8 +110,18 @@ C
 C
 C           Deal with errors
 C
-C        Integer overflow
+C        Negative or zero repeats(*)
 C
+      IF ( IERR.EQ.-5 ) THEN
+         LINE2= ' ERROR Negative or zero repeats at repeat sign (*)'
+         CALL MESTOK ( LUNUT  , LUNIN  , LCH(IFL), LINE   , IPOSL  ,
+     *                 IPOSR  , NPOS   , LINE2   , 0      , ITYPE  ,
+     *                                                      0      )
+         ITYPEX = 2
+         IERR   = 1
+         GOTO 20
+      ENDIF
+C        Integer overflow
       IF ( IERR.EQ.-4 .AND. ( ITYPEX.EQ. 2 .OR. ITYPEX.EQ. 0 .OR.
      *                        ITYPEX.EQ.-1 .OR. ITYPEX.EQ.-3    ) ) THEN
          LINE2= ' ERROR integer value too large or too small (OVERFLOW)'

@@ -88,7 +88,7 @@
 
 !         see if we are in a repeat cycle
 
-      if ( ntot .ne. 0 ) then
+      if ( ntot .gt. 0 ) then
          itype = itypes
          str   = strs
          int   = ints
@@ -189,6 +189,7 @@
          endif
          if ( line(i:i) .eq. '*' .and. num ) then
             read ( line(iposl:i-1) , '(i40)' ) ntot
+            if (ntot .le. 0 ) goto 140
             iposls = iposl
             iposr  = i
             ntot   = ntot - 1
@@ -197,7 +198,7 @@
          if ( j .lt. ichar('0') .or. j .gt. ichar('9') ) goto 70
          num = .true.
       enddo
-      read ( line(iposl:iposr) , '(i40)',err=120) int
+      read ( line(iposl:iposr) , '(i40)',err=130) int
       itype = 2
       goto 95
 
@@ -247,7 +248,7 @@
          if ( j .lt. ichar('0') .or. j .gt. ichar('9') ) goto 90
          num = .true.
       enddo
-      read ( line(iposl:iposr) , '(e40.0)' ,err=130 ) reel
+      read ( line(iposl:iposr) , '(e40.0)' ,err=120 ) reel
       itype = 3
       goto 95
 !     it apparently is a string
@@ -271,14 +272,19 @@
   110 ierr = 2
       return
 
-!     integer overflow of underflow
-
-  120 ierr = -4
-      return
-
 !     real overflow of underflow
 
-  130 ierr = -3
+  120 ierr = -3
+      return
+
+!     integer overflow of underflow
+
+  130 ierr = -4
+      return
+
+!     negative or zero repeats(*)
+
+  140 ierr = -5
       return
 
       end
