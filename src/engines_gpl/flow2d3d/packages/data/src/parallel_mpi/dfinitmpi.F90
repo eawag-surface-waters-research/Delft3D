@@ -101,6 +101,13 @@ subroutine dfinitmpi
        call get_environment_variable('MPIRUN_RANK', rankstr, len)
        usempi = (len > 0)
     endif
+    !
+    ! if not, verify whether POE (IBM) environment is used
+    !
+    if (.not. usempi) then
+       call get_environment_variable('MP_CHILD', rankstr, len)
+       usempi = (len > 0)
+    endif
 
     if (usempi) then
        !

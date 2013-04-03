@@ -1,5 +1,5 @@
 subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
-              & lsal      ,ltem      ,lsed      ,saleqs    ,temeqs    , &
+              & lsal      ,ltem      ,lsed      ,kcs       ,saleqs    ,temeqs    , &
               & densin    ,zmodel    ,thick     ,r1        ,rho       , &
               & sumrho    ,rhowat    ,rhosol    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
@@ -69,6 +69,7 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     integer, intent(in)                                                  :: ltem   !  Description and declaration in dimens.igs
     integer, intent(in)                                                  :: nmmax  !  Description and declaration in dimens.igs
     integer                                                              :: nmmaxj !  Description and declaration in dimens.igs
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in) :: kcs    !  Description and declaration in esm_alloc_int.f90
     logical, intent(in)                                                  :: densin !  Description and declaration in morpar.igs
     logical, intent(in)                                                  :: zmodel !  Description and declaration in procs.igs
     real(fp), intent(in)                                                 :: saleqs !  Description and declaration in tricom.igs
@@ -82,7 +83,6 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
 !
 ! Local variables
 !
-    integer  :: i
     integer  :: k
     integer  :: l
     integer  :: ll
@@ -106,15 +106,17 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
        if (ltem == 0) then
           select case (idensform)
           case( dens_Eckart )
-             do k = 1, kmax
-                do i = 1, nmmax
-                   call dens_eck(temeqs, r1(i,k,lsal),rhowat(i,k), dummy, dummy )
+             do nm = 1, nmmax
+                if (kcs(nm) <= 0) cycle
+                do k = 1, kmax
+                   call dens_eck(temeqs, r1(nm,k,lsal),rhowat(nm,k), dummy, dummy )
                 enddo
              enddo
           case( dens_UNESCO )
-             do k = 1, kmax
-                do i = 1, nmmax
-                   call dens_unes(temeqs, r1(i,k,lsal),rhowat(i,k), dummy, dummy )
+             do nm = 1, nmmax
+                if (kcs(nm) <= 0) cycle
+                do k = 1, kmax
+                   call dens_unes(temeqs, r1(nm,k,lsal),rhowat(nm,k), dummy, dummy )
                 enddo
              enddo
           end select
@@ -124,15 +126,17 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
           !
           select case (idensform)
           case( dens_Eckart )
-             do k = 1, kmax
-                do i = 1, nmmax
-                   call dens_eck   (r1(i,k,ltem), saleqs, rhowat(i,k), dummy, dummy)
+             do nm = 1, nmmax
+                if (kcs(nm) <= 0) cycle
+                do k = 1, kmax
+                   call dens_eck   (r1(nm,k,ltem), saleqs, rhowat(nm,k), dummy, dummy)
                 enddo
              enddo
           case( dens_UNESCO )
-             do k = 1, kmax
-                do i = 1, nmmax
-                   call dens_unes   (r1(i,k,ltem), saleqs, rhowat(i,k), dummy, dummy)
+             do nm = 1, nmmax
+                if (kcs(nm) <= 0) cycle
+                do k = 1, kmax
+                   call dens_unes   (r1(nm,k,ltem), saleqs, rhowat(nm,k), dummy, dummy)
                 enddo
              enddo
           end select
@@ -142,15 +146,17 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
           !
           select case (idensform)
           case( dens_Eckart )
-             do k = 1, kmax
-                do i = 1, nmmax
-                   call dens_eck   ( r1(i,k,ltem), r1(i,k,lsal), rhowat(i,k), dummy, dummy )
+             do nm = 1, nmmax
+                if (kcs(nm) <= 0) cycle
+                do k = 1, kmax
+                   call dens_eck   ( r1(nm,k,ltem), r1(nm,k,lsal), rhowat(nm,k), dummy, dummy )
                 enddo
              enddo
           case( dens_UNESCO )
-             do k = 1, kmax
-                do i = 1, nmmax
-                   call dens_unes  ( r1(i,k,ltem), r1(i,k,lsal), rhowat(i,k), dummy, dummy )
+             do nm = 1, nmmax
+                if (kcs(nm) <= 0) cycle
+                do k = 1, kmax
+                   call dens_unes  ( r1(nm,k,ltem), r1(nm,k,lsal), rhowat(nm,k), dummy, dummy )
                 enddo
              enddo
           end select
@@ -159,31 +165,33 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
        !
        ! CONSTANT DENSITY
        !
-       do k = 1, kmax
-          do i = 1, nmmax
-             rhowat(i, k) = rhow
+       do nm = 1, nmmax
+          if (kcs(nm) <= 0) cycle
+          do k = 1, kmax
+             rhowat(nm,k) = rhow
           enddo
        enddo
     endif
     !
     ! COPY RHOWAT TO RHO
     !
-    do k = 1, kmax
-       do i = 1, nmmax
-          rho(i, k) = rhowat(i, k)
+    do nm = 1, nmmax
+       if (kcs(nm) <= 0) cycle
+       do k = 1, kmax
+          rho(nm,k) = rhowat(nm,k)
        enddo
     enddo
     !
     ! SEDIMENT LOAD
     !
     if (densin) then
-       lst = max(lsal, ltem)
-       do l = 1, lsed
-          ll = lst + l
-          do k = 1, kmax
-             do nm = 1, nmmax
-                rho(nm, k) = rho(nm, k) + r1(nm, k, ll) - rhowat(nm, k)         &
-                           & *r1(nm, k, ll)/rhosol(l)
+       do nm = 1, nmmax
+          if (kcs(nm) <= 0) cycle
+          lst = max(lsal, ltem)
+          do l = 1, lsed
+             ll = lst + l
+             do k = 1, kmax
+                rho(nm,k) = rho(nm,k) + r1(nm,k,ll) - rhowat(nm,k)*r1(nm,k,ll)/rhosol(l)
              enddo
           enddo
        enddo
@@ -193,13 +201,10 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     !
     if (.not.zmodel) then
        do nm = 1, nmmax
-          sumrho(nm, 1) = .5*thick(1)*rho(nm, 1)
-       enddo
-       do k = 2, kmax
-          do nm = 1, nmmax
-             sumrho(nm, k) = sumrho(nm, k - 1)                                  &
-                           & + .5*(thick(k)*rho(nm, k) + thick(k - 1)           &
-                           & *rho(nm, k - 1))
+          if (kcs(nm) <= 0) cycle
+          sumrho(nm,1) = 0.5_fp*thick(1)*rho(nm,1)
+          do k = 2, kmax
+             sumrho(nm,k) = sumrho(nm,k-1) + 0.5_fp*(thick(k)*rho(nm, k) + thick(k-1)*rho(nm,k-1))
           enddo
        enddo
     endif

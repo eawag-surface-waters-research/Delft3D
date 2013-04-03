@@ -152,6 +152,7 @@ ParseMapperConfigString (
             firstCell [C_0] = lastCell [C_0];
             lastCell  [C_0] = iii;
             printf("switch coordinates-1: (%2d,%2d)\n", firstCell[C_0],lastCell[C_0]);
+            fflush (stdout);
         }
         if ( firstCell [C_1] > lastCell [C_1] )
         {
@@ -159,6 +160,7 @@ ParseMapperConfigString (
             firstCell [C_1] = lastCell [C_1];
             lastCell  [C_1] = iii;
             printf("switch coordinates-2: (%2d,%2d)\n", firstCell[C_1],lastCell[C_1]);
+            fflush (stdout);
         }
     }
         if ( echoRefinement == 1) {

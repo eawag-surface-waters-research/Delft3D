@@ -1137,7 +1137,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           !
           call timer_start(timer_dens, gdp)
           call dens(jstart    ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
-                  & lsal      ,ltem      ,lsed      ,saleqs    ,temeqs    , &
+                  & lsal      ,ltem      ,lsed      ,i(kcs)    ,saleqs    ,temeqs    , &
                   & densin    ,zmodel    ,r(thick)  ,r(r0)     ,r(rho)    , &
                   & r(sumrho) ,r(rhowat) ,rhosol    ,gdp       )
           call timer_stop(timer_dens, gdp)
@@ -1841,7 +1841,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           !
           call timer_start(timer_dens, gdp)
           call dens(jstart    ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
-                  & lsal      ,ltem      ,lsed      ,saleqs    ,temeqs    , &
+                  & lsal      ,ltem      ,lsed      ,i(kcs)    ,saleqs    ,temeqs    , &
                   & densin    ,zmodel    ,r(thick)  ,r(r0)     ,r(rho)    , &
                   & r(sumrho) ,r(rhowat) ,rhosol    ,gdp       )
           call timer_stop(timer_dens, gdp)

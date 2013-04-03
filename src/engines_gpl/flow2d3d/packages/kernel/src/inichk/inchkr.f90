@@ -1034,7 +1034,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     ! DENS  : compute densities
     !
     call dens(jstart    ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
-            & lsal      ,ltem      ,lsed      ,saleqs    ,temeqs    , &
+            & lsal      ,ltem      ,lsed      ,i(kcs)    ,saleqs    ,temeqs    , &
             & densin    ,zmodel    ,r(thick)  ,r(r0)     ,r(rho)    , &
             & r(sumrho) ,r(rhowat) ,rhosol    ,gdp       )
     !

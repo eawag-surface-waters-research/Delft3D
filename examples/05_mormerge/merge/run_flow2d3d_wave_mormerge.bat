@@ -1,5 +1,6 @@
 @ echo off
 
+set ARCH=win32
 set TCL_EXE=..\..\..\src\third_party_open\tcl\bin\win32\tclkit.exe
 
 set scriptname=../../../bin/win32/flow2d3d/scripts/mormerge.tcl
