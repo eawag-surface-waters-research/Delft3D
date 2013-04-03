@@ -57,7 +57,7 @@ C
 C
 C      PARAMETER (ITOTA=0       ,ITOTI=0       ,ITOTC=0       )
 
-      subroutine delwaq2( argc, argv )
+      subroutine delwaq2( argc, argv, errorcode )
       !DEC$ ATTRIBUTES DLLEXPORT::delwaq2
 
       use delwaq2_data
@@ -66,12 +66,18 @@ C      PARAMETER (ITOTA=0       ,ITOTI=0       ,ITOTC=0       )
     
       integer, intent(in)                           :: argc
       character(len=*), dimension(argc), intent(in) :: argv
+      integer, intent(out)                          :: errorcode
 
       type(delwaq_data)                             :: dlwqd
 
       dlwqd%set_timer = .true.
 
       call dlwqmain( ACTION_FULLCOMPUTATION, argc, argv, dlwqd )
+
+      ! Delwaq2_lib should never use a stop, but must be modified to return an error code instead (0 = normal end)
+      ! Currently a return from the delwaq2_lib assumes a normal end.
+      errorcode = 0
+      return
 
       end subroutine delwaq2
 

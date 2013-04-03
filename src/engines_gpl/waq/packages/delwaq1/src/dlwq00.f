@@ -27,6 +27,7 @@
       
       integer                          :: argc
       character(len=256), allocatable  :: argv(:)
+      integer(4)                       :: errorcode
       integer(4)                       :: i
       
       argc = iargc() + 1
@@ -36,15 +37,16 @@
           call getarg(i - 1, argv(i))
       end do
       
-      call delwaq1(argc, argv)
+      call delwaq1(argc, argv, errorcode)
 
-! Delwaq1_lib should never stop, but must be modified to return an error code instead (0 = normal end)
-! Currently a return from the delwaq1_lib assumes a normal end.
-
-      write (*,*) 'Normal end'
+      if (errorcode == 0) then
+        write (*,*) 'Normal end'
+      else
+        write (*,*) 'Error code:', errorcode
+      end if
 
       open  ( 1111 , file = 'delwaq.rtn' )
-      write ( 1111 , * ) 0
+      write ( 1111 , * ) errorcode
       close ( 1111 )
 
       end program

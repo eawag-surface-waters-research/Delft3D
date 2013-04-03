@@ -21,7 +21,7 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      subroutine delwaq1(argc,  argv)
+      subroutine delwaq1(argc,  argv, errorcode)
 
       !DEC$ ATTRIBUTES DLLEXPORT::delwaq1
 
@@ -31,133 +31,140 @@
 !>                    Reads the DELWAQ inputfiles and generates
 !>                    a consistent set of binairy intermediate files.
 
-C     INFORMATION   : Deltares
-C                     L. Postma,
-C                     Rotterdamse weg 185,
-C                     P.O. Box 177,
-C                     2600 MH Delft,
-C                     Netherlands.
-C                     telephone (31) 15-569353
-C                     telefax   (31) 15-619674
-C
-C     LOGICAL UNITS : LUN(29), output, formatted report file
-C                     LUN( 1), output, binary common-block file
-C                     LUN( 2), output, binary system file
-C
-C     SUBROUTINES CALLED :*UNLOCK, unlocks user dependent data
-C                         *UNISET, reads input filename
-C                          DLWQ01, reads block 1 of user data
-C                          DLWQ02, reads block 2 of user data
-C                          DLWQ03, reads block 3 of user data
-C                          DLWQ04, reads block 4 of user data
-C                          DLWQ05, reads block 5 of user data
-C                          DLWQ06, reads block 6 of user data
-C                          DLWQ07, reads block 7 of user data
-C                          DLWQ7A, reads block 7 of user data new style
-C                          DLWQ08, reads block 8 of user data
-C                          DLWQ09, reads block 9 of user data
-C                          DLWQS1, reads block 10 , statistical definition
-C                          DLWQP1, proces pre-processor
-C                          SPACE , computes space needed
-C                          DLWQDI, writes dimensions of arrays for DELWAQ2
-C                         *DHOPNF, opens files ( if neccesary )
-C                         *SRSTOP, stops execution
-C
-C                         *, this routines can contain sytem dependencies
-C
-C
-      USE Grids        !   for the storage of contraction grids
+!     INFORMATION   : Deltares
+!                     L. Postma,
+!                     Rotterdamse weg 185,
+!                     P.O. Box 177,
+!                     2600 MH Delft,
+!                     Netherlands.
+!                     telephone (31) 15-569353
+!                     telefax   (31) 15-619674
+!
+!     LOGICAL UNITS : LUN(29), output, formatted report file
+!                     LUN( 1), output, binary common-block file
+!                     LUN( 2), output, binary system file
+!
+!     SUBROUTINES CALLED :*UNLOCK, unlocks user dependent data
+!                         *UNISET, reads input filename
+!                          DLWQ01, reads block 1 of user data
+!                          DLWQ02, reads block 2 of user data
+!                          DLWQ03, reads block 3 of user data
+!                          DLWQ04, reads block 4 of user data
+!                          DLWQ05, reads block 5 of user data
+!                          DLWQ06, reads block 6 of user data
+!                          DLWQ07, reads block 7 of user data
+!                          DLWQ7A, reads block 7 of user data new style
+!                          DLWQ08, reads block 8 of user data
+!                          DLWQ09, reads block 9 of user data
+!                          DLWQS1, reads block 10 , statistical definition
+!                          DLWQP1, proces pre-processor
+!                          SPACE , computes space needed
+!                          DLWQDI, writes dimensions of arrays for DELWAQ2
+!                         *DHOPNF, opens files ( if neccesary )
+!                         *SRSTOP, stops execution
+!
+!                         *, this routines can contain sytem dependencies
+!
+!
+      use Grids        !   for the storage of contraction grids
       use dlwq_data    !   for definition and storage of data
-      USE Output       !   for the output names and pointers
+      use Output       !   for the output names and pointers
       use timers       !   performance timers
-      USE DHCOMMAND
-C
-      USE     D00SUB
-      USE     ProcesSet
-      USE     Workspace
-      USE     Rd_token
-C
-C     COMMON  /  SYSN   /   System characteristics
-C
-      INCLUDE 'sysn.inc'
-C
-C     COMMON  /  SYSI  /    Timer characteristics
-C
-      INCLUDE 'sysi.inc'
-      INCLUDE 'sysa.inc'
-      INCLUDE 'sysj.inc'
-      INCLUDE 'sysc.inc'
+      use dhcommand
+!
+      use     D00SUB
+      use     ProcesSet
+      use     Workspace
+      use     Rd_token
 
-      INTEGER, INTENT(IN)                           :: ARGC
-      CHARACTER(LEN=*), DIMENSION(ARGC), INTENT(IN) :: ARGV
-C
-C     output structure common blocks
-C
-      INTEGER             IN(INSIZE)       , II(IISIZE)         ! arrays to write common block to file
-      EQUIVALENCE       ( IN(1)  , NOSEG ) , ( II(1), ITSTRT  ) ! equivalence output array with common block
-C
-C     work arrays
-C
-      INTEGER, PARAMETER             :: IIMAX = 2500000         ! default size integer work array
-      INTEGER, PARAMETER             :: IRMAX =10000000         ! default size real work array
-      INTEGER, PARAMETER             :: ICMAX = 1000000         ! default size character work array
-      INTEGER                        :: IMAX                    ! dynamic size integer work array
-      INTEGER                        :: RMAX                    ! dynamic size real work array
-      INTEGER                        :: CMAX                    ! dynamic size character work array
-      INTEGER          , ALLOCATABLE :: IAR(:)                  ! integer work array
-      REAL             , ALLOCATABLE :: RAR(:)                  ! real work array
-      CHARACTER(LEN=20), ALLOCATABLE :: CAR(:)                  ! character work array
+      implicit none
+!
+!     common  /  SYSN   /   System characteristics
+!
+      include 'sysn.inc'
+!
+!     common  /  SYSI  /    Timer characteristics
+!
+      include 'sysi.inc'
+      include 'sysa.inc'
+      include 'sysj.inc'
+      include 'sysc.inc'
 
-      REAL,              DIMENSION(:), POINTER :: ABUF  => NULL()
-      INTEGER,           DIMENSION(:), POINTER :: IBUF  => NULL()
-      CHARACTER(LEN=20), DIMENSION(:), POINTER :: CHBUF => NULL()
+      integer, intent(in)                           :: argc
+      character(len=*), dimension(argc), intent(in) :: argv
+      integer, intent(out)                          :: errorcode
+!
+!     output structure common blocks
+!
+      integer             in(insize)       , ii(iisize)         ! arrays to write common block to file
+      equivalence       ( in(1)  , noseg ) , ( ii(1), itstrt  ) ! equivalence output array with common block
+!
+!     work arrays
+!
+      integer, parameter             :: iimax = 2500000         ! default size integer work array
+      integer, parameter             :: irmax =10000000         ! default size real work array
+      integer, parameter             :: icmax = 1000000         ! default size character work array
+      integer                        :: imax                    ! dynamic size integer work array
+      integer                        :: rmax                    ! dynamic size real work array
+      integer                        :: cmax                    ! dynamic size character work array
+      integer          , allocatable :: iar(:)                  ! integer work array
+      real             , allocatable :: rar(:)                  ! real work array
+      character(len=20), allocatable :: car(:)                  ! character work array
 
-C     files, unit numbers, include file stack, input file settings
-C
-      INTEGER, PARAMETER             :: NLUN   = 45              ! number of input / output files
-!     INTEGER, PARAMETER             :: LSTACK = 4               ! size include files stack
-!     INTEGER, PARAMETER             :: LCHMAX = 255             ! sring length file name variables
-      INTEGER                        :: LUN(NLUN)                ! unit numbers input / output files
+      real,              dimension(:), pointer :: abuf  => null()
+      integer,           dimension(:), pointer :: ibuf  => null()
+      character(len=20), dimension(:), pointer :: chbuf => null()
+
+!     files, unit numbers, include file stack, input file settings
+!
+      integer, parameter             :: nlun   = 45              ! number of input / output files
+!     integer, parameter             :: lstack = 4               ! size include files stack
+!     integer, parameter             :: lchmax = 255             ! sring length file name variables
+      integer                        :: lun(nlun)                ! unit numbers input / output files
       integer                           filtype(nlun)
-      CHARACTER(LEN=LCHMAX)          :: RUNID                    ! runid
-      CHARACTER(LEN=LCHMAX)          :: LCHAR(NLUN)              ! file names input / output files
-!     CHARACTER(LEN=LCHMAX)          :: LCH(LSTACK)              ! file names include files stack
-!     INTEGER                        :: ILUN(LSTACK)             ! unit numbers include files stack
-!     CHARACTER                      :: CCHAR                    ! comment character
-      LOGICAL                        :: DTFLG1                   ! first flag concerning time formats
-      LOGICAL                        :: DTFLG2                   ! second flag concerning time formats
-      LOGICAL                        :: DTFLG3                   ! third flag concerning time formats
+      character(len=lchmax)          :: runid                    ! runid
+      character(len=lchmax)          :: lchar(nlun)              ! file names input / output files
+!     character(len=lchmax)          :: lch(lstack)              ! file names include files stack
+!     integer                        :: ilun(lstack)             ! unit numbers include files stack
+!     character                      :: cchar                    ! comment character
+      logical                        :: dtflg1                   ! first flag concerning time formats
+      logical                        :: dtflg2                   ! second flag concerning time formats
+      logical                        :: dtflg3                   ! third flag concerning time formats
       type(inputfilestack)           :: inpfil                   ! input file strucure with include stack and flags
-C
-C     variaous input-output structures
-C
-      INTEGER, PARAMETER             :: NOITM  = 11              ! number of items with time-functions
-      INTEGER, PARAMETER             :: NOINT  = 184             ! number of integration options implemented
-      INTEGER, PARAMETER             :: NOOUTP = 9               ! number of output files
-      INTEGER                        :: NRFTOT(NOITM)            ! number of function per item
-      INTEGER                        :: NRHARM(NOITM)            ! number of harmoncs per item
-      INTEGER                        :: IOPT(NOINT)              ! integration option list
-      INTEGER                        :: IOUTPS(7,NOOUTP)         ! output file defintion structure
-      CHARACTER(LEN=20), POINTER     :: PSYNAM(:)                ! substance names read buffer copies into SYNAME
+!
+!     variaous input-output structures
+!
+      integer, parameter             :: noitm  = 11              ! number of items with time-functions
+      integer, parameter             :: noint  = 184             ! number of integration options implemented
+      integer, parameter             :: nooutp = 9               ! number of output files
+      integer                        :: nrftot(noitm)            ! number of function per item
+      integer                        :: nrharm(noitm)            ! number of harmoncs per item
+      integer                        :: iopt(noint)              ! integration option list
+      integer                        :: ioutps(7,nooutp)         ! output file defintion structure
+      character(len=20), pointer     :: psynam(:)                ! substance names read buffer copies into syname
       integer( 4)      , pointer     :: multp(:,:)               ! multiplication substances pointer copies into imultp
-      CHARACTER(LEN=20), ALLOCATABLE :: SYNAME(:)                ! substance names final array
-      integer( 4)      , ALLOCATABLE :: imultp(:,:)              ! multiplication substances pointer
-      INTEGER           ,POINTER     :: NSEGDMP(:)               ! number of monitored segments
-      INTEGER           ,POINTER     :: ISEGDMP(:)               ! segment numbers of monitored segments
-      INTEGER           ,POINTER     :: NEXCRAAI(:)              ! number of exchanges used in transects
-      INTEGER           ,POINTER     :: IEXCRAAI(:)              ! exchange numbers used in transects
-      INTEGER           ,POINTER     :: IOPTRAAI(:)              ! option number for transects
+      character(len=20), allocatable :: syname(:)                ! substance names final array
+      integer( 4)      , allocatable :: imultp(:,:)              ! multiplication substances pointer
+      integer           ,pointer     :: nsegdmp(:)               ! number of monitored segments
+      integer           ,pointer     :: isegdmp(:)               ! segment numbers of monitored segments
+      integer           ,pointer     :: nexcraai(:)              ! number of exchanges used in transects
+      integer           ,pointer     :: iexcraai(:)              ! exchange numbers used in transects
+      integer           ,pointer     :: ioptraai(:)              ! option number for transects
       type(ProcesPropColl)           :: StatProcesDef            ! the statistical proces definition
       type(ItemPropColl)             :: AllItems                 ! all items of the proces system
       type(t_dlwq_item)              :: constants                ! delwaq constants list
-C
-C     help variables
-C
-      LOGICAL                        :: NOLIC                    ! No valid license?
-      LOGICAL                        :: LFOUND                   ! help varaiable indicating if command line argument is found
-      CHARACTER(LEN=20)              :: RUNDAT                   ! execution date-time string
-      CHARACTER                      :: CDUMMY
-      REAL                           :: RDUMMY
+!
+!     help variables
+!
+      logical                        :: nolic                    ! No valid license?
+      logical                        :: lfound                   ! help varaiable indicating if command line argument is found
+      character(len=20)              :: rundat                   ! execution date-time string
+      character                      :: cdummy
+      real                           :: rdummy
+      integer( 4)                    :: nomult            !< number of multiple substances
+      integer( 4)                    :: iwidth            !< width of the output file
+      real( 4)                       :: vrsion            !< version number of this input
+      integer( 4)                    :: ioutpt            !< flag for more or less output
       integer                           ierr                     ! cumulative number of errors
       integer                           iwar                     ! cumulative number of warnings
       type(GridPointerColl) GridPs
@@ -165,18 +172,27 @@ C
       integer                           narg        ! nr of command line arguments
       character(lchmax)                 arg         ! a command line argument
 
-      integer                        :: I
-      logical                        :: UNITOP
-      CHARACTER(LEN=200)             :: NAMEOFFILE
-C
-C       initialisations
-C
-      DATA      LUN / 14 , 15 , 16 , 17 , 18 , 19 , 20 , 21 , 22 , 23 ,
+      integer                        :: i, k, icmak
+      integer                        :: itota
+      integer                        :: itoti
+      integer                        :: itotc
+      integer                        :: ibflag
+      integer                        :: lunrep
+      integer                        :: nosss
+      integer                        :: noinfo
+      integer                        :: ierr_alloc
+      logical                        :: unitop
+      character(len=200)             :: nameoffile
+      integer                        :: ioerr
+!
+!       initialisations
+!
+      data      lun / 14 , 15 , 16 , 17 , 18 , 19 , 20 , 21 , 22 , 23 ,
      *                24 , 25 , 26 , 27 , 28 , 29 , 30 , 31 , 32 , 33 ,
      *                34 , 35 , 36 , 37 , 38 , 39 , 40 , 41 , 42 , 43 ,
      *                44 , 45 , 46 , 47 , 48 , 49 , 50 , 51 , 52 , 53 ,
      *                54 , 55 , 56 , 57 , 58 /
-      DATA      LCHAR  / '-delwaq03.wrk' , '-delwaq04.wrk' ,
+      data      lchar  / '-delwaq03.wrk' , '-delwaq04.wrk' ,
      *                   '-harmonic.wrk' , '-pointers.wrk' ,
      *                   '-timestep.wrk' , '-gridding.wrk' ,
      *                   '-volumes.wrk ' , '-to_from.wrk ' ,
@@ -199,7 +215,7 @@ C
      *                   '-filenaam.wrk' , '-stat.map    ' ,
      *                   '-stat.mon    ' , '             ' ,
      *                   ' '             /
-      DATA    IOPT / 10 , 11 , 12 , 13 , 14 , 15 , 16 , 17 ,
+      data    iopt / 10 , 11 , 12 , 13 , 14 , 15 , 16 , 17 ,
      *               20 , 21 , 22 , 23 , 24 , 25 , 26 , 27 ,
      *               30 , 31 , 32 , 33 , 34 , 35 , 36 , 37 ,
      *               40 , 41 , 42 , 43 , 44 , 45 , 46 , 47 ,
@@ -246,130 +262,130 @@ C
 
       ierr   = 0
       iwar   = 0
-      LUNREP = LUN(29)
-      NOLUN  = NLUN
+      lunrep = lun(29)
+      nolun  = nlun
       filtype = 0
-      NOITEM = NOITM
-      NOUTP  = NOOUTP
-      NOINFO = 0
-      NHARMS = 0
-      NIHARM = 0
-      NLINES = 0
-      NPOINS = 0
-      NEWRSP = 0
-      NEWISP = 0
-      IVFLAG = 0
-      ITFLAG = 0
-      NCBUFM = 0
-      NOVAR  = 0
-      NOARR  = IASIZE + IJSIZE + ICSIZE
-      NUFIL  = 0
-      DO 10 I=1, NOITEM
-        NRFTOT(I) = 0
-        NRHARM(I) = 0
-   10 CONTINUE
+      noitem = noitm
+      noutp  = nooutp
+      noinfo = 0
+      nharms = 0
+      niharm = 0
+      nlines = 0
+      npoins = 0
+      newrsp = 0
+      newisp = 0
+      ivflag = 0
+      itflag = 0
+      ncbufm = 0
+      novar  = 0
+      noarr  = iasize + ijsize + icsize
+      nufil  = 0
+      do 10 i=1, noitem
+        nrftot(i) = 0
+        nrharm(i) = 0
+   10 continue
       StatProcesDef%maxsize = 0
       StatProcesDef%cursize = 0
       AllItems%maxsize = 0
       AllItems%cursize = 0
       GridPs%cursize=0
       GridPs%maxsize=0
-C
-      CALL UNISET ( LUN    , LCHAR , NOLUN , RUNID )
-C
-C     UNSCRAMBLE NAME USER
-C
-      CALL UNLOCK (LUNREP,.FALSE.,NOLIC)
-      WRITE(*,*)
-      WRITE(*,*) ' runid : ',TRIM(RUNID)
-      WRITE(*,*)
-C
-C     allocate workspace
-C
-      CALL GETCOM ( '-IMAX', 1 , LFOUND, IMAX  , RDUMMY, CDUMMY, IERR )
-      IF ( LFOUND ) THEN
-         IF ( IERR .EQ. 0 ) THEN
-            WRITE(LUNREP,2010) IMAX
-         ELSE
-            WRITE(LUNREP,2020)
+!
+      call uniset ( lun    , lchar , nolun , runid )
+!
+!     unscramble name user
+!
+      call unlock (lunrep,.false.,nolic)
+      write(*,*)
+      write(*,*) ' runid : ',trim(runid)
+      write(*,*)
+!
+!     allocate workspace
+!
+      call getcom ( '-imax', 1 , lfound, imax  , rdummy, cdummy, ierr )
+      if ( lfound ) then
+         if ( ierr .eq. 0 ) then
+            write(lunrep,2010) imax
+         else
+            write(lunrep,2020)
             ierr = 1
-            GOTO 900
-         ENDIF
-      ELSE
-         IMAX = IIMAX
-      ENDIF
-      CALL GETCOM ( '-RMAX', 1 , LFOUND, RMAX  , RDUMMY, CDUMMY, IERR )
-      IF ( LFOUND ) THEN
-         IF ( IERR .EQ. 0 ) THEN
-            WRITE(LUNREP,2030) RMAX
-         ELSE
-            WRITE(LUNREP,2040)
+            goto 900
+         endif
+      else
+         imax = iimax
+      endif
+      call getcom ( '-rmax', 1 , lfound, rmax  , rdummy, cdummy, ierr )
+      if ( lfound ) then
+         if ( ierr .eq. 0 ) then
+            write(lunrep,2030) rmax
+         else
+            write(lunrep,2040)
             ierr = 1
-            GOTO 900
-         ENDIF
-      ELSE
-         RMAX = IRMAX
-      ENDIF
-      CALL GETCOM ( '-CMAX', 1 , LFOUND, CMAX  , RDUMMY, CDUMMY, IERR )
-      IF ( LFOUND ) THEN
-         IF ( IERR .EQ. 0 ) THEN
-            WRITE(LUNREP,2050) CMAX
-         ELSE
-            WRITE(LUNREP,2060)
+            goto 900
+         endif
+      else
+         rmax = irmax
+      endif
+      call getcom ( '-cmax', 1 , lfound, cmax  , rdummy, cdummy, ierr )
+      if ( lfound ) then
+         if ( ierr .eq. 0 ) then
+            write(lunrep,2050) cmax
+         else
+            write(lunrep,2060)
             ierr = 1
-            GOTO 900
-         ENDIF
-      ELSE
-         CMAX = ICMAX
-      ENDIF
-      ALLOCATE(IAR(IMAX),STAT=IERR_ALLOC)
-      IF ( IERR_ALLOC .NE. 0 ) THEN
-         WRITE ( LUNREP , 2070 ) IERR_ALLOC,IMAX
+            goto 900
+         endif
+      else
+         cmax = icmax
+      endif
+      allocate(iar(imax),stat=ierr_alloc)
+      if ( ierr_alloc .ne. 0 ) then
+         write ( lunrep , 2070 ) ierr_alloc,imax
          ierr = 1
-         GOTO 900
-      ENDIF
-      ALLOCATE(RAR(RMAX),STAT=IERR_ALLOC)
-      IF ( IERR_ALLOC .NE. 0 ) THEN
-         WRITE ( LUNREP , 2080 ) IERR_ALLOC,RMAX
+         goto 900
+      endif
+      allocate(rar(rmax),stat=ierr_alloc)
+      if ( ierr_alloc .ne. 0 ) then
+         write ( lunrep , 2080 ) ierr_alloc,rmax
          ierr = 1
-         GOTO 900
-      ENDIF
-      ALLOCATE(CAR(CMAX),STAT=IERR_ALLOC)
-      IF ( IERR_ALLOC .NE. 0 ) THEN
-         WRITE ( LUNREP , 2090 ) IERR_ALLOC,CMAX
+         goto 900
+      endif
+      allocate(car(cmax),stat=ierr_alloc)
+      if ( ierr_alloc .ne. 0 ) then
+         write ( lunrep , 2090 ) ierr_alloc,cmax
          ierr = 1
-         GOTO 900
-      ENDIF
-C
-      CCHAR   = ' '
-      ILUN    = 0
+         goto 900
+      endif
+!
+      cchar   = ' '
+      ilun    = 0
       ilun(1) = lun  (26)
       lch (1) = lchar(26)
       lunut   = lun(29)
       call dlwq01 ( lun     , psynam  , nosys   , notot   , nomult  ,
      &              multp   , iwidth  , otime   , isfact  , vrsion  ,
      &              ioutpt  , ierr    , iwar    )
-      ALLOCATE(SYNAME(NOTOT+nomult),STAT=IERR_ALLOC)
-      ALLOCATE(imultp( 2 ,  nomult),STAT=IERR_ALLOC)
-      IF ( IERR_ALLOC .NE. 0 ) THEN
-         WRITE ( LUNREP , 2000 ) IERR_ALLOC
+      allocate(syname(notot+nomult),stat=ierr_alloc)
+      allocate(imultp( 2 ,  nomult),stat=ierr_alloc)
+      if ( ierr_alloc .ne. 0 ) then
+         write ( lunrep , 2000 ) ierr_alloc
          ierr = ierr + 1
-         GOTO 900
-      ENDIF
-      SYNAME = PSYNAM
+         goto 900
+      endif
+      syname = psynam
       imultp = multp
-      DEALLOCATE(PSYNAM)
-      DEALLOCATE(multp )
-      DELTIM = OTIME
-      CAR(1) = ' '
-      K = 2
-      ICMAK = CMAX   - 1
+      deallocate(psynam)
+      deallocate(multp )
+      deltim = otime
+      car(1) = ' '
+      k = 2
+      icmak = cmax   - 1
 
-      NULLIFY(NSEGDMP)
-      NULLIFY(ISEGDMP)
-      NULLIFY(NEXCRAAI)
-      NULLIFY(IEXCRAAI)
-      NULLIFY(IOPTRAAI)
+      nullify(nsegdmp)
+      nullify(isegdmp)
+      nullify(nexcraai)
+      nullify(iexcraai)
+      nullify(ioptraai)
       call dlwq02 ( lun     , lchar   , filtype , nrftot  , nlines  ,
      &              npoins  , dtflg1  , dtflg2  , nodump  , iopt    ,
      &              noint   , iwidth  , dtflg3  , ndmpar  , ntdmps  ,
@@ -377,11 +393,11 @@ C
      &              vrsion  , ioutpt  , nsegdmp , isegdmp , nexcraai,
      &              iexcraai, ioptraai, ierr    , iwar    )
 
-      IF ( MOD(INTOPT,16) .GT. 7 ) THEN
-         IBFLAG = 1
-      ELSE
-         IBFLAG = 0
-      ENDIF
+      if ( mod(intopt,16) .gt. 7 ) then
+         ibflag = 1
+      else
+         ibflag = 0
+      endif
 
       call dlwq03 ( lun     , lchar   , filtype , nrftot  , nrharm  ,
      &              ivflag  , dtflg1  , iwidth  , dtflg3  , vrsion  ,
@@ -389,34 +405,33 @@ C
 
       if ( nolic .and. noseg > 150 ) then
          write(*,'(//a)') 'Error: Authorisation problem'
-         write(*,'(a)')   '       No valid license, so the number of se
-     &gments is limited to 150'
+         write(*,'(a)')   '       No valid license, so the number of segments is limited to 150'
          call srstop(1)
       endif
 
-      IF ( .NOT. ASSOCIATED(NSEGDMP)  ) ALLOCATE(NSEGDMP(1))
-      IF ( .NOT. ASSOCIATED(ISEGDMP)  ) ALLOCATE(ISEGDMP(1))
-      IF ( .NOT. ASSOCIATED(NEXCRAAI) ) ALLOCATE(NEXCRAAI(1))
-      IF ( .NOT. ASSOCIATED(IEXCRAAI) ) ALLOCATE(IEXCRAAI(1))
-      IF ( .NOT. ASSOCIATED(IOPTRAAI) ) ALLOCATE(IOPTRAAI(1))
+      if ( .not. associated(nsegdmp)  ) allocate(nsegdmp(1))
+      if ( .not. associated(isegdmp)  ) allocate(isegdmp(1))
+      if ( .not. associated(nexcraai) ) allocate(nexcraai(1))
+      if ( .not. associated(iexcraai) ) allocate(iexcraai(1))
+      if ( .not. associated(ioptraai) ) allocate(ioptraai(1))
       call dlwq04 ( lun     , lchar   , filtype , nrftot  , nrharm  ,
      &              ilflag  , dtflg1  , iwidth  , intsrt  , dtflg3  ,
      &              vrsion  , ioutpt  , nsegdmp , isegdmp , nexcraai,
      &              iexcraai, ioptraai, gridps  , ierr    , iwar    )
-      IF ( ASSOCIATED(NSEGDMP)  ) DEALLOCATE(NSEGDMP)
-      IF ( ASSOCIATED(ISEGDMP)  ) DEALLOCATE(ISEGDMP)
-      IF ( ASSOCIATED(NEXCRAAI) ) DEALLOCATE(NEXCRAAI)
-      IF ( ASSOCIATED(IEXCRAAI) ) DEALLOCATE(IEXCRAAI)
-      IF ( ASSOCIATED(IOPTRAAI) ) DEALLOCATE(IOPTRAAI)
+      if ( associated(nsegdmp)  ) deallocate(nsegdmp)
+      if ( associated(isegdmp)  ) deallocate(isegdmp)
+      if ( associated(nexcraai) ) deallocate(nexcraai)
+      if ( associated(iexcraai) ) deallocate(iexcraai)
+      if ( associated(ioptraai) ) deallocate(ioptraai)
 
-      DELTIM = OTIME
-      CALL DLWQ05 ( LUN    , LCHAR  , filtype, CAR(K) , IAR    ,
-     *              RAR    , NRFTOT , NRHARM , NOBND  , NOSYS  ,
-     *              NOTOT  , NOBTYP , RMAX   , IMAX   , DTFLG1 ,
-     *              IWIDTH , INTSRT , IERR   , DTFLG3 , SYNAME ,
-     *              ICMAK  , VRSION , IOUTPT , iwar   )
-C
-      DELTIM = OTIME
+      deltim = otime
+      call dlwq05 ( lun    , lchar  , filtype, car(k) , iar    ,
+     *              rar    , nrftot , nrharm , nobnd  , nosys  ,
+     *              notot  , nobtyp , rmax   , imax   , dtflg1 ,
+     *              iwidth , intsrt , ierr   , dtflg3 , syname ,
+     *              icmak  , vrsion , ioutpt , iwar   )
+!
+      deltim = otime
 
       nosss = noseg + nseg2     ! increase with bottom segments
       call dlwq06 ( lun    , lchar  , filtype, icmak  , car(k) ,
@@ -424,55 +439,55 @@ C
      &              nosss  , syname , nowst  , nowtyp , nrftot ,
      &              nrharm , dtflg1 , dtflg3 , iwidth , vrsion ,
      &              ioutpt , ierr   , iwar   )
-C
-      NOVEC = 50
+!
+      novec = 50
       inpfil%dtflg1 = dtflg1
       inpfil%dtflg2 = dtflg2
       inpfil%dtflg3 = dtflg3
       inpfil%itfact = itfact
       inpfil%vrsion = vrsion
-      IF ( VRSION .LE. 4.90 ) THEN
+      if ( vrsion .le. 4.90 ) then
          nrharm(10) = 0
          call dlwq07 ( lun    , lchar    , filtype, noseg  , nocons ,
      &                 nopa   , nofun    , nosfun , itfact , dtflg2 ,
      &                 dtflg3 , iwidth   , novec  , vrsion , ioutpt ,
      &                 nothrd , constants, ierr   , iwar   )
-      ELSE
+      else
          nrharm(10) = 0
          deltim     = otime
          call dlwq7a ( lun    , lchar  , filtype, inpfil   , syname ,
      &                 iwidth , ioutpt , gridps , constants, ierr   ,
      &                 iwar   )
-      ENDIF
-C
-C     Finish and close system file ( DLWQ09 can re-read it )
-C
-      WRITE ( LUN(2) ) ( NRFTOT(I) , I = 1,NOITEM )
-      WRITE ( LUN(2) ) ( NRHARM(I) , I = 1,NOITEM )
-      CLOSE ( LUN(2) )
+      endif
+!
+!     Finish and close system file ( DLWQ09 can re-read it )
+!
+      write ( lun(2) ) ( nrftot(i) , i = 1,noitem )
+      write ( lun(2) ) ( nrharm(i) , i = 1,noitem )
+      close ( lun(2) )
 
       call dlwq08 ( lun    , lchar  , filtype, nosss  , notot  ,
      &              syname , iwidth , vrsion , ioutpt , inpfil ,
      &              gridps , ierr   , iwar   )
 
-      CALL DLWQ09 ( LUN    , LCHAR  , filtype, CAR    , IAR    ,
-     +              icmak  , IIMAX  , IWIDTH , IBFLAG , VRSION ,
-     +              IOUTPT , IOUTPS , Outputs, IERR   , iwar   )
-C
-      CALL DLWQS1 ( LUNREP       , NPOS         ,
-     +              CCHAR        , VRSION       ,
-     +              ILUN         , LCH          ,
-     +              LSTACK       , IOUTPT       ,
-     +              DTFLG1       , DTFLG3       ,
-     +              StatProcesDef, AllItems     ,
-     +              NOINFO       , iwar         ,
-     +              IERR         )
-      WRITE ( LUNREP,'(//'' Messages presented in this .lst file:'')')
-!jvb  WRITE ( LUNREP,'( /'' Number of INFOrmative messages:'',I3)') NOINFO
-      WRITE ( LUNREP,'( /'' Number of WARNINGS            :'',I3)') iwar
-      WRITE ( LUNREP,'(  '' Number of ERRORS during input :'',I3)') IERR
-      WRITE ( LUNREP,'(  '' '')')
-C
+      call dlwq09 ( lun    , lchar  , filtype, car    , iar    ,
+     +              icmak  , iimax  , iwidth , ibflag , vrsion ,
+     +              ioutpt , ioutps , outputs, ierr   , iwar   )
+!
+      call dlwqs1 ( lunrep       , npos         ,
+     +              cchar        , vrsion       ,
+     +              ilun         , lch          ,
+     +              lstack       , ioutpt       ,
+     +              dtflg1       , dtflg3       ,
+     +              statprocesdef, allitems     ,
+     +              noinfo       , iwar         ,
+     +              ierr         )
+      write ( lunrep,'(//'' Messages presented in this .lst file:'')')
+!jvb  write ( lunrep,'( /'' Number of INFOrmative messages:'',I3)') noinfo
+      write ( lunrep,'( /'' Number of WARNINGS            :'',I3)') iwar
+      write ( lunrep,'(  '' Number of ERRORS during input :'',I3)') ierr
+      write ( lunrep,'(  '' '')')
+!
       call dlwqp1 ( lun          , lchar        ,
      +              statprocesdef, allitems     ,
      +              ioutps       , outputs      ,
@@ -482,65 +497,69 @@ C
 
       deallocate(syname)
       deallocate(imultp)
-C
-  900 CONTINUE
-      WRITE ( LUNREP,'(//'' Messages presented including .lsp file:'')')
-!jvb  WRITE ( LUNREP,'( /'' Number of INFOrmative messages:'',I3)') NOINFO
-      WRITE ( LUNREP,'(  '' Number of WARNINGS            :'',I6)') iwar
-      WRITE ( LUNREP,'( /'' Number of ERRORS during input :'',I6)') IERR
-      WRITE (   *   ,'(  '' Number of WARNINGS            :'',I3)') iwar
-      WRITE (   *   ,'(  '' Number of ERRORS during input :'',I3)') IERR
-      WRITE (   *   ,'(  '' '')')
-C
-      IF ( IERR .EQ. 0 ) THEN
-         NOVEC = MIN(NOVEC,(NOSSS+NOBND-1))
-         ITOTA = 0
-         ITOTI = 0
-         ITOTC = 0
-         CALL SPACE  ( LUNREP, .FALSE., ABUF   , IBUF   , CHBUF  ,
-     +                 ITOTA , ITOTI  , ITOTC  )
-C
-         CALL DHOPNF  ( LUN(1) , LCHAR(1) , 1     , 1     , IOERR )
-         WRITE ( LUN(1) )   IN
-         WRITE ( LUN(1) )   II
-         WRITE ( LUN(1) )   ITOTA , ITOTI , ITOTC
-         WRITE ( LUN(1) ) ( LUN    (K) , K = 1,NOLUN  )
-         WRITE ( LUN(1) ) ( LCHAR  (K) , K = 1,NOLUN  )
-         WRITE ( LUN(1) ) ( filtype(K) , K = 1,NOLUN  )
-      ELSE
-         WRITE ( LUNREP , '(  '' SIMULATION PROHIBITED !!!!!!!!'')' )
-         CALL DHOPNF  ( LUN(1) , LCHAR(1) , 1     , 3     , IOERR )
-         CALL SRSTOP ( 1 )
-      ENDIF
-C
-      CALL DATTIM(RUNDAT)
-      WRITE (LUNREP,'(2A)') ' Execution stop : ',RUNDAT
+!
+  900 continue
+      write ( lunrep,'(//'' Messages presented including .lsp file:'')')
+!jvb  write ( lunrep,'( /'' Number of INFOrmative messages:'',I3)') noinfo
+      write ( lunrep,'(  '' Number of WARNINGS            :'',I6)') iwar
+      write ( lunrep,'( /'' Number of ERRORS during input :'',I6)') ierr
+      write (   *   ,'(  '' Number of WARNINGS            :'',I3)') iwar
+      write (   *   ,'(  '' Number of ERRORS during input :'',I3)') ierr
+      write (   *   ,'(  '' '')')
+!
+      if ( ierr .eq. 0 ) then
+         novec = min(novec,(nosss+nobnd-1))
+         itota = 0
+         itoti = 0
+         itotc = 0
+         call space  ( lunrep, .false., abuf   , ibuf   , chbuf  ,
+     +                 itota , itoti  , itotc  )
+!
+         call dhopnf  ( lun(1) , lchar(1) , 1     , 1     , ioerr )
+         write ( lun(1) )   in
+         write ( lun(1) )   ii
+         write ( lun(1) )   itota , itoti , itotc
+         write ( lun(1) ) ( lun    (k) , k = 1,nolun  )
+         write ( lun(1) ) ( lchar  (k) , k = 1,nolun  )
+         write ( lun(1) ) ( filtype(k) , k = 1,nolun  )
+      else
+         write ( lunrep , '(  '' SIMULATION PROHIBITED !!!!!!!!'')' )
+         call dhopnf  ( lun(1) , lchar(1) , 1     , 3     , ioerr )
+         call srstop ( 1 )
+      endif
+!
+      call dattim(rundat)
+      write (lunrep,'(2A)') ' Execution stop : ',rundat
       close ( lunrep )
       
-C
-C Close all open LUN files
-C
-      DO I = 1, NLUN
-          inquire (unit=LUN(I), opened=UNITOP)
-          if (UNITOP) then
-              close (unit = LUN(I))
+!
+! Close all open LUN files
+!
+      do i = 1, nlun
+          inquire (unit=lun(i), opened=unitop)
+          if (unitop) then
+              close (unit = lun(i))
           endif
-      End DO
-      
+      end do
+
       if ( timon ) then
          call timstop ( ithndl )
          call timdump ( TRIM(RUNID)//'-delwaq1-timers.out' )
       endif
+
+! Delwaq1_lib should never use a stop, but must be modified to return an error code instead (0 = normal end)
+! Currently a return from the delwaq1_lib assumes a normal end.
+      errorcode = 0
       return
 
- 2000 FORMAT (  /,' ERROR: allocating memory for system names:',I6)
- 2010 FORMAT (  /,' Command line argument -IMAX, size of integer work array:',I12)
- 2020 FORMAT (  /,' ERROR: interpreting command line argument -IMAX, size of integer work array:')
- 2030 FORMAT (  /,' Command line argument -RMAX, size of real work array:',I12)
- 2040 FORMAT (  /,' ERROR: interpreting command line argument -RMAX, size of real work array:')
- 2050 FORMAT (  /,' Command line argument -CMAX, size of character work array:',I12)
- 2060 FORMAT (  /,' ERROR: interpreting command line argument -CMAX, size of character work array:')
- 2070 FORMAT (  /,' ERROR: allocating integer work array:',I6,' with length:',I12)
- 2080 FORMAT (  /,' ERROR: allocating real work array:',I6,' with length:',I12)
- 2090 FORMAT (  /,' ERROR: allocating character work array:',I6,' with length:',I12)
-      END
+ 2000 format (  /,' ERROR: allocating memory for system names:',I6)
+ 2010 format (  /,' Command line argument -IMAX, size of integer work array:',I12)
+ 2020 format (  /,' ERROR: interpreting command line argument -IMAX, size of integer work array:')
+ 2030 format (  /,' Command line argument -RMAX, size of real work array:',I12)
+ 2040 format (  /,' ERROR: interpreting command line argument -RMAX, size of real work array:')
+ 2050 format (  /,' Command line argument -CMAX, size of character work array:',I12)
+ 2060 format (  /,' ERROR: interpreting command line argument -CMAX, size of character work array:')
+ 2070 format (  /,' ERROR: allocating integer work array:',I6,' with length:',I12)
+ 2080 format (  /,' ERROR: allocating real work array:',I6,' with length:',I12)
+ 2090 format (  /,' ERROR: allocating character work array:',I6,' with length:',I12)
+      end
