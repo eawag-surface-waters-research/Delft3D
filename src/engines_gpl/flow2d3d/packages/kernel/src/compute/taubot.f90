@@ -706,7 +706,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                           & + v1(ndmu, kmaxx) + v1(nmu, kmaxx))
                    endif
                    ubot = sqrt(uuu*uuu + vvv*vvv)
-                   dz   = dzu1(nm, kfumin(nm)) + .5*dzu1(nm, kmaxx)
+                   dz   = dzu1(nm, kfumin(nm)) + 0.5_fp*dzu1(nm, kfumin(nm)+1)
                 else
                    !
                    ! 2D case: kfumin(nm) = kfumax(nm)
@@ -786,7 +786,7 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              if (zmodel) then
                 if (kfumin(nm) < kfumax(nm)) then
                    kmaxx = kfumin(nm) + 1
-                   dz    = dzu1(nm, kfumin(nm)) + .5*dzu1(nm, kmaxx)
+                   dz    = dzu1(nm, kfumin(nm)) + 0.5_fp*dzu1(nm, kfumin(nm)+1)
                 else
                    kmaxx = kfumin(nm)
                    dz    = hu(nm)/ee

@@ -724,7 +724,7 @@ void D3dFlowMapper::CopyFlowVariables(
                     if ( C[ctx]->Zmodel && C[ctx]->kMax == C[oCtx]->kMax)
                     {
                         cI2D(ctx,m,n,kfumx0)= cI2D(oCtx,oM,oN,kfumx0);
-                        cI2D(ctx,m,n,kfumin)= cI2D(oCtx,oM,oN,kfumin);
+                        // cI2D(ctx,m,n,kfumin)= cI2D(oCtx,oM,oN,kfumin);
                         // printf("copyflow kfu voor Z-model: (%2d,%2d) \n",m,n);
                     }
                 }
@@ -739,7 +739,7 @@ void D3dFlowMapper::CopyFlowVariables(
                     if ( C[ctx]->Zmodel && C[ctx]->kMax == C[oCtx]->kMax )
                     {
                         cI2D(ctx,m+1,n,kfumx0)= cI2D(oCtx,oM+1,oN,kfumx0);
-                        cI2D(ctx,m+1,n,kfumin)= cI2D(oCtx,oM+1,oN,kfumin);
+                        // cI2D(ctx,m+1,n,kfumin)= cI2D(oCtx,oM+1,oN,kfumin);
                         // printf("copyflow kfu voor Z-model: (%2d,%2d) \n",m+1,n);
                     }
                 }
@@ -834,7 +834,7 @@ void D3dFlowMapper::CopyFlowVariables(
                     if ( C[ctx]->Zmodel && C[ctx]->kMax == C[oCtx]->kMax)
                     {
                         cI2D(ctx,m,n,kfvmx0)= cI2D(oCtx,oM,oN,kfvmx0);
-                        cI2D(ctx,m,n,kfvmin)= cI2D(oCtx,oM,oN,kfvmin);
+                        // cI2D(ctx,m,n,kfvmin)= cI2D(oCtx,oM,oN,kfvmin);
                         // printf("copyflow kfv voor Z-model: (%2d,%2d) \n",m,n);
                     }
                 }
@@ -849,7 +849,7 @@ void D3dFlowMapper::CopyFlowVariables(
                     if ( C[ctx]->Zmodel && C[ctx]->kMax == C[oCtx]->kMax )
                     {
                         cI2D(ctx,m,n+1,kfvmx0)= cI2D(oCtx,oM,oN+1,kfvmx0);
-                        cI2D(ctx,m,n+1,kfvmin)= cI2D(oCtx,oM,oN+1,kfvmin);
+                        // cI2D(ctx,m,n+1,kfvmin)= cI2D(oCtx,oM,oN+1,kfvmin);
                         // printf("copyflow kfv voor Z-model: (%2d,%2d) \n",m,n+1);
                     }
                 }
