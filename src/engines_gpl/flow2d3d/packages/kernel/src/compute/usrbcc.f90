@@ -55,7 +55,6 @@ subroutine usrbcc(j         ,nmmaxj    ,kmax      ,l         , &
 ! Parameters
 !
     integer, parameter :: kmin = 0
-    integer, parameter :: nrow = 1
 !
 ! Global variables
 !
@@ -93,6 +92,7 @@ subroutine usrbcc(j         ,nmmaxj    ,kmax      ,l         , &
     integer  :: n1       ! N-coord. of the first  point 
     integer  :: n2       ! N-coord. of the second point 
     integer  :: nm       ! Iy*icy+ix*icx-icxy 
+    integer  :: nrow
     logical  :: error    ! Flag=TRUE if an error is encountered 
 !
 !! executable statements -------------------------------------------------------
@@ -115,6 +115,11 @@ subroutine usrbcc(j         ,nmmaxj    ,kmax      ,l         , &
        n1 = mnbnd(2, ito)
        m2 = mnbnd(3, ito)
        n2 = mnbnd(4, ito)
+       if (mnbnd(7,ito)== 2 .or. mnbnd(7,ito)== 4) then 
+          nrow = 2
+       else
+          nrow = 1
+       endif
        call increm(m1, n1, m2, n2, incx, incy, maxinc, error)
        if (ubnd(nrow, l, kmin, 1, ito) > 0.0_fp) then
           ix = m1 - incx
