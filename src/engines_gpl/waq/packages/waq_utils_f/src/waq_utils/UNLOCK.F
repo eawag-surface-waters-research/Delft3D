@@ -31,6 +31,8 @@
       ! Declaration of arguments
 
       use timers
+      implicit none
+
       integer      , intent(in   ) :: lunrep   !< Unit number report file
       logical      , intent(in   ) :: l3dmod   !< Check 3D feature or not
       logical      , intent(  out) :: nolic    !< No license found
@@ -41,24 +43,29 @@
 
       character*20  rundat
       character*120 idstr
-      character*75  opkom(11)
       logical       first
       character*10  verwaq
       character*3   os
+      integer (4)   i, j
+
+      character*75  opkom(13)
 
       data     first /.true./
       data     opkom  /
      +'ÉÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ»',
      +'ºÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛº',
-     +'ºÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ  D e l f t 3 D - W A Q  ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛº',
+     +'ºÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛ   D e l f t 3 D - D E L W A Q   ÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛº',
+     +'ºÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛº',
+     +'ºÛÛÛÛÛÛÛÛÛ  D-Water Quality      ÛÛÛÛÛÛÛ  D-Ecology            ÛÛÛÛÛÛÛÛÛº',
      +'ºÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛÛº',
      +'º Version xx.xxxx  xx-xx-xxxx                                           º',
-     +'º Deltares, 1993-2011, 2012                                             º',
-     +'º p.o. box 177, 2600 MH Delft, The Netherlands, tel +31 88 3358273      º',
-     +'º     Design              : L. Postma                                   º',
-     +'º     Technical support   : A. Markus                                   º',
-     +'º     Updates and manuals : delft3d.support@deltares.nl                 º',
+     +'º Deltares, P.O. Box 177, 2600 MH Delft, The Netherlands                º',
+     +'º Sales          : sales@deltaressystems.nl     tel: +31 (0)88 335 8188 º',
+     +'º Support options: support@deltaressystems.nl   tel: +31 (0)88 335 8100 º',
+     +'º Open source website and forum: http://oss.delft3d.nl/                 º',
+     +'º Copyright (c) 1993-2013 Deltares                                      º',
      +'ÈÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ¼'/
+     
       integer(4) ithndl /0/
       if ( timon ) call timstrt( "unlock", ithndl )
 
@@ -72,9 +79,11 @@
 
          call getenv('OS',os)
          call dhucas(os,os,len(os))
-
-         write(opkom(5)(3:72),'(a)') idstr(5:74)
-         do i = 1 , 11
+         
+         do i = 1 , size(opkom)
+            if ( opkom(i)(3:15) .eq. 'Version xx.xx' ) then
+               write(opkom(i)(3:72),'(a)') idstr(5:74)
+            end if
             if ( os .ne. 'WIN' ) then
                do j = 1,len(opkom(i))
                   if ( ichar(opkom(i)(j:j)) > 127 ) opkom(i)(j:j) = '-'
