@@ -2958,7 +2958,6 @@ src/third_party_open/netcdf/matlab/snctools/tests/testdata/varput4.nc -text
 src/third_party_open/netcdf/matlab/snctools/tests/verify_netcdf4.m -text
 src/third_party_open/netcdf/netcdf_license_info.txt -text
 src/third_party_open/openda/core/native/include/cta_f77.inc -text
-src/third_party_open/openda/core/native/lib/win32/libcta.dll -text
 src/third_party_open/openda/core/native/lib/win32/libcta.lib -text
 src/third_party_open/openda/core/native/lib/win32/libxml2.dll -text
 src/third_party_open/openda/openda_license_info.txt -text

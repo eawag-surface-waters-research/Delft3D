@@ -65,6 +65,8 @@
       parameter (CTA_STRING      =-28)
       integer CTA_TIME
       parameter (CTA_TIME        = -15)
+      integer CTA_ARRAY
+      parameter (CTA_ARRAY        = -30)
 
       integer CTA_1DINTEGER
       parameter (CTA_1DINTEGER   =-201)
@@ -197,7 +199,7 @@
       integer, parameter :: CTA_DEFAULT_SOBS   = 23
       integer, parameter :: CTA_COMBINE_SOBS   = 45
       integer, parameter :: CTA_NETCDF_SOBS    = 67
-      integer, parameter :: CTA_MAORI_SOBS     = 173
+      integer, parameter :: CTA_MAORI_SOBS     = -173
       integer, parameter :: CTA_OBSDESCR_TABLE = 77
       integer, parameter :: CTA_DEFAULT_VECTOR = 100
       integer, parameter :: CTA_DEFAULT_MATRIX = 116
