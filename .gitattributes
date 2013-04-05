@@ -4922,6 +4922,7 @@ src/utils_lgpl/nefis/tests/test_999/test_06.c -text
 src/utils_lgpl/nefis/tests/test_999/test_16.c -text
 src/utils_lgpl/nefis/tests/test_999/test_999_1.c -text
 src/utils_lgpl/nefis/tests/test_999/test_999_16.c -text
+src/utils_lgpl/ods/ods_vs2008.sln -text
 src/utils_lgpl/ods/packages/ods/include/ods.h -text
 src/utils_lgpl/ods/packages/ods/include/ods.inc -text
 src/utils_lgpl/ods/packages/ods/include/portable.h -text
