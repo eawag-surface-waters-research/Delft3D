@@ -11,7 +11,7 @@
 'Deltares march 2013'
 'T0: 1990.08.05 00:00:00  (scu=       1s)'
 ;
-; substances file: coli_04.sub
+; substances file: coli_03.sub
 ; hydrodynamic file: com-tut_fti_waq.dat
 ;
 ; areachar.dat: com-tut_fti_waq.srf
@@ -396,6 +396,10 @@ DATA
 1990/08/13-12:30:00  2.1000e+002 
 1990/08/14-12:30:00  2.0000e+002 
 1990/08/15-12:30:00  1.9000e+002 
+SEG_FUNCTIONS
+'VertDisper' ; name of segment function
+ALL
+BINARY_FILE  'com-tut_fti_waq.vdf'  ; binary file
 ;
 #7 ; delimiter for the seventh block
 ; 

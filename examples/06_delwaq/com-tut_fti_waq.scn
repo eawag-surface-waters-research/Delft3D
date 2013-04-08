@@ -44,7 +44,7 @@ dispersion
    second-direction   1
    interface-depth    0
    vertical-diffusion-values 1e-007 0 0
-   vertical-diffusion constant
+   vertical-diffusion from-hydrodynamics
    vertical-diffusion-scale-factor 1
    dispersion-array-info
       use-dispersion-arrays no
@@ -53,7 +53,7 @@ dispersion
 end-dispersion
 
 input-files
-   substances-file    'coli_04.sub'
+   substances-file    'coli_03.sub'
    statistical-output-file 'com-tut_fti_waq.stt'
    hydrodynamics-file 'com-tut_fti_waq.hyd'
    boundary-data-file 'none'   binary no # Boundary data file
