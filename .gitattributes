@@ -160,6 +160,7 @@ src/d_hydro_open_source.sln -text
 src/d_hydro_open_source_vs2010.sln -text
 src/d_hydro_open_source_vs2010_intel13.sln -text
 src/doxyfile_delft3d -text
+src/doxyfile_delwaq -text
 src/engines/Makefile.am -text
 src/engines/README -text
 src/engines/part/Makefile.am -text
