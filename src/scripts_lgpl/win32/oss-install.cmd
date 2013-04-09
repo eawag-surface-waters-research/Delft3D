@@ -131,6 +131,7 @@ rem ===============
 	call :delwaq1_lib
 	call :delwaq2
 	call :delwaq2_lib
+	call :delwaq2_openda_lib
 	call :waq_plugin_wasteload
     call :wave
     call :plugin_culvert
@@ -365,8 +366,40 @@ rem =======================
     
     call :copyFile engines_gpl\waq\bin\Release\delwaq2_lib.dll                 !dest_bin!
 	
-    call :copyFile third_party_open\openda\core\native\lib\win32\libcta.dll	   !dest_bin!
-    call :copyFile third_party_open\openda\core\native\lib\win32\libxml2.dll   !dest_bin!
+    call :copyFile third_party_open\openmp\lib\win32\libiomp5md.dll            !dest_bin!
+    call :copyFile third_party_open\intel_fortran\lib\win32\libifportmd.dll    !dest_bin!
+    call :copyFile third_party_open\intel_fortran\lib\win32\libmmd.dll         !dest_bin!
+	
+    rem
+    rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
+    rem Some (older) libraries will be overwritten.
+    rem
+    if !compiler_dir!=="" (
+        rem Compiler_dir not set
+    ) else (
+        rem "Compiler_dir:!compiler_dir!"
+        rem Note the awkward usage of !-characters
+        set localstring="!compiler_dir!svml_dispmd.dll"
+        call :copyFile !!localstring! !dest_bin!!
+        set localstring="!compiler_dir!libifcoremd.dll"
+        call :copyFile !!localstring! !dest_bin!!
+    )
+goto :endproc
+
+
+
+rem ==============================
+rem === INSTALL_DELWAQ2_OPENDA_LIB
+rem ==============================
+:delwaq2_lib
+    echo "installing delwaq2_openda_lib . . ."
+
+    set dest_bin="!dest_main!\win32\waq\bin"
+    
+    call :makeDir !dest_bin!
+    
+    call :copyFile engines_gpl\waq\bin\Release\delwaq2_openda_lib.dll          !dest_bin!
+	
     call :copyFile third_party_open\netcdf\lib\win32\Release\netcdf.dll	       !dest_bin!
     call :copyFile third_party_open\openmp\lib\win32\libiomp5md.dll            !dest_bin!
     call :copyFile third_party_open\intel_fortran\lib\win32\libifportmd.dll    !dest_bin!

@@ -820,7 +820,7 @@ integer function Get_Values(partype, parid, loctype, locid, number, values)
 
     use waq_omi_priv
     use waq_omi_constants
-    use m_delwaq_2_openda ! Only for current_instance
+!    use m_delwaq_2_openda ! Only for current_instance
 
     implicit none
 

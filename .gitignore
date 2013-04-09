@@ -19,5 +19,15 @@ src/engines_gpl/flow2d3d/packages/kernel/[Bb]in
 src/engines_gpl/flow2d3d/packages/kernel/[Dd]ebug
 src/engines_gpl/flow2d3d/packages/kernel/[Rr]elease
 src/engines_gpl/flow2d3d/packages/kernel/obj
+src/engines_gpl/waq/packages/delwaq2_openda_lib/*.aps
+src/engines_gpl/waq/packages/delwaq2_openda_lib/*.eto
+src/engines_gpl/waq/packages/delwaq2_openda_lib/*.user
+src/engines_gpl/waq/packages/delwaq2_openda_lib/ClientBin
+src/engines_gpl/waq/packages/delwaq2_openda_lib/GeneratedArtifacts
+src/engines_gpl/waq/packages/delwaq2_openda_lib/[Bb]in
+src/engines_gpl/waq/packages/delwaq2_openda_lib/[Dd]ebug
+src/engines_gpl/waq/packages/delwaq2_openda_lib/[Rr]elease
+src/engines_gpl/waq/packages/delwaq2_openda_lib/_Pvt_Extensions
+src/engines_gpl/waq/packages/delwaq2_openda_lib/obj
 src/third_party_open/openda/tests/bin
 src/third_party_open/openda/tests/test_dll_noise/Release

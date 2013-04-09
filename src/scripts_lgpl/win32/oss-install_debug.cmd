@@ -47,6 +47,7 @@ rem ===============
 	call :delwaq1_lib
 	call :delwaq2
 	call :delwaq2_lib
+	call :delwaq2_openda_lib
 	call :waq_plugin_wasteload
     call :wave
     call :plugin_culvert
@@ -174,8 +175,22 @@ rem =======================
     
     if not exist !dest_bin!     mkdir !dest_bin!
     
-    copy third_party_open\openda\core\native\lib\win32\libcta.dll	 !dest_bin!
-    copy third_party_open\openda\core\native\lib\win32\libxml2.dll   !dest_bin!
+    copy third_party_open\openmp\lib\win32\libiomp5md.dll            !dest_bin!
+	
+goto :endproc
+
+
+
+rem ==============================
+rem === INSTALL_DELWAQ2_OPENDA_LIB
+rem ==============================
+:delwaq2_lib
+    echo "installing delwaq2_openda_lib . . ."
+
+    set dest_bin="engines_gpl\waq\bin\debug"
+    
+    if not exist !dest_bin!     mkdir !dest_bin!
+    
     copy third_party_open\netcdf\lib\win32\Debug\netcdf.dll	         !dest_bin!
     copy third_party_open\openmp\lib\win32\libiomp5md.dll            !dest_bin!
     copy third_party_open\mpich2\lib\mpich2mpi.dll                   !dest_bin!
