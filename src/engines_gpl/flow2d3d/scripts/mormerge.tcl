@@ -20,7 +20,7 @@
 #
 
 global version
-set version "2.8"
+set version "2.9"
 
 global debug
 set debug 0
@@ -1988,5 +1988,5 @@ if { ! $debug } {
 }
 
 puts "mormerge.tcl : Finished"
-
+cd $startdir
 
