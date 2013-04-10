@@ -200,8 +200,8 @@ C                call with record length 0 => ICOPT1 of -4 not allowed
 
          ! read constant values.
 
-         call read_opt2 ( 1      , dlwqdata%values , 1      , nocons , nocons ,
-     &                    iwidth , 0               , ioutpt , ierr2  )
+         call opt2 ( 1      , dlwqdata%values , 1      , nocons , nocons ,
+     &               iwidth , 0               , ioutpt , ierr2  )
          if ( ierr2 .gt. 0 ) goto 80
          if ( inovec .gt. 0 ) then
             novec = nint(dlwqdata%values(inovec,1,1))
@@ -333,8 +333,8 @@ C                call with record length 0 => IPOPT1 of -4 not allowed
       write ( lunut , 2040 ) ipopt2
 
       if ( ipopt2 .eq. 1  .or. ipopt2 .eq. 2 ) then
-         call read_opt2 ( ipopt2 , dlwqdata%values , noseg  , nopa   , nopa   ,
-     &                    iwidth , 0               , ioutpt , ierr2  )
+         call opt2 ( ipopt2 , dlwqdata%values , noseg  , nopa   , nopa   ,
+     &               iwidth , 0               , ioutpt , ierr2  )
          if ( ierr2 .gt. 0 ) goto 80
       else
          write ( lunut , 2030 )

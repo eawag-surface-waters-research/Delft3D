@@ -120,6 +120,8 @@
       real           adummy      !  work real    ( = 0.0 )
       character(128) cdummy      !  work character
       integer        k           !  loop counter
+      real           disp(3,1)   !  dispersions in 3 directions
+      real(4), allocatable :: values(:,:) ! read buffer for the values
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "opt0", ithndl )
 
@@ -196,8 +198,8 @@
             write ( lun(2) ) idummy , ( adummy , k=1,3 )     ! no fixed dispersions
          else
             write ( lun(2) ) idummy
-            call opt2 ( 1      , 1      , 3      , 3      , iwidth ,
-     &                  lun(2) , ioutpt , ierr2  )
+            call opt2 ( 1      , disp   , 1      , 3      , 3      ,
+     &                  iwidth , lun(2) , ioutpt , ierr2  )
             if ( ierr2 .gt. 0 ) goto 50
             if ( ndim2 .eq. 0 ) goto 9999
          endif
@@ -217,23 +219,23 @@
 !        Get the data
 
       select case ( iopt2 )
-
          case ( 1, 2 )              !   Constants with and without defaults in three directions
+            allocate ( values( ndim2, max(noql1,noql2,noql3) ) )
             call dhopnf ( lun(is) , lchar(is) , is    , 1     , ierr2 )
             write ( lun(is) ) idummy
             if ( noql1 .gt. 0 ) write ( lunut , 2030 )
-            call opt2 ( iopt2  , noql1  , ndim2  , ndim3  , iwidth ,
-     &                  lun(is), ioutpt , ierr2  )
+            call opt2 ( iopt2  , values , noql1  , ndim2  , ndim3  ,
+     &                  iwidth , lun(is), ioutpt , ierr2  )
             if ( ierr2 .gt. 0 ) goto 50
 
             if ( noql2 .gt. 0 ) write ( lunut , 2040 )
-            call opt2 ( iopt2  , noql2  , ndim2  , ndim3  , iwidth ,
-     &                  lun(is), ioutpt , ierr2  )
+            call opt2 ( iopt2  , values , noql2  , ndim2  , ndim3  ,
+     &                  iwidth , lun(is), ioutpt , ierr2  )
             if ( ierr2 .gt. 0 ) goto 50
 
             if ( noql3 .gt. 0 .and. noql3 .ne. ndim1 ) write ( lunut , 2050 )
-            call opt2 ( iopt2  , noql3  , ndim2  , ndim3  , iwidth ,
-     &                  lun(is), ioutpt , ierr2      )
+            call opt2 ( iopt2  , values , noql3  , ndim2  , ndim3  ,
+     &                  iwidth , lun(is), ioutpt , ierr2      )
             close ( lun(is) )
             if ( ierr2 .gt. 0 ) goto 50
 

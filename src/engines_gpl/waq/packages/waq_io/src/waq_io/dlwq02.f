@@ -100,7 +100,7 @@
       integer  ( 4), intent(  out) :: noraai            !< number of raaien
       integer  ( 4), intent(  out) :: ntraaq            !< total number of exch. in raaien
       integer  ( 4), intent(in   ) :: nosys             !< number of transported substances
-      integer  ( 4), intent(in   ) :: notot             !< total number of substances
+      integer  ( 4), intent(inout) :: notot             !< total number of substances
       integer  ( 4), intent(  out) :: nototp            !< notot inclusive of partcle substances
       real     ( 4), intent(in   ) :: vrsion            !< version number of this input
       integer  ( 4), intent(in   ) :: ioutpt            !< flag for more or less output
@@ -243,7 +243,7 @@
 
 !        Read optional keywords and start time of integration
 
-      nototp = notot
+      nototp = 0
       if ( gettoken( cdummy, idummy, itype, ierr2 ) .gt. 0 ) goto 30
       do while ( itype .eq. 1 )                                      ! read a collection of tokens
          call dlwq0i ( cdummy, intopt, lunut  , ierr2 )
@@ -269,7 +269,8 @@
                write ( lunut, '(i4,2x,a)' ) notot+i, subst(i)
                write ( lun(2) ) subst(i)
             enddo
-            nototp = notot + nosubs
+            nototp = nosubs
+            notot  = notot  + nototp
             call exit_alloc ( i2 )
          endif
 

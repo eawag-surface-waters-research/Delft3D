@@ -166,7 +166,7 @@ C
       IIN = LUN(2)
       READ ( IIN    , END=40, ERR=40)  MODID (1  ), MODID(2)
       READ ( IIN    , END=40, ERR=40)  MODID (3  ), MODID(4)
-      READ ( IIN    , END=40, ERR=40) (SYSID (  K), K=1,NOTOTp )
+      READ ( IIN    , END=40, ERR=40) (SYSID (  K), K=1,NOTOT )
       IF ( NODUMP .GT. 0 )
      &   READ ( IIN , END=40, ERR=40) (IDUMP(K), DUMPID(K), K=1,NODUMP)
       IF ( NDMPAR .GT. 0 )

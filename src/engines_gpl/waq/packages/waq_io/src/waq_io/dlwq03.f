@@ -147,8 +147,9 @@
 
 !       Read optional multiple grids
 
-      call grid ( lun    , noseg  , notot  , nolay  , gridps ,
-     &            nseg2  , nogrid , syname , ierr2  , iwar2  )
+      call grid ( lun    , noseg  , notot  , nototp , nolay  ,
+     &            gridps , nseg2  , nogrid , syname , ierr2  ,
+     &            iwar2  )
       if ( ierr2 .gt. 0 ) goto 240
 
 !       Read grid-layout for visually printed output

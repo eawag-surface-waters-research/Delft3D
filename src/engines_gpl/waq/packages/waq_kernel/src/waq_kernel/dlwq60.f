@@ -21,70 +21,69 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      SUBROUTINE DLWQ60 ( DERIV  , CONC   , NOTOT  , NOSEG  , ITFACT ,
-     *                    AMASS2 , ISYS   , NSYS   , DMPS   , INTOPT ,
-     *                    ISDMP  )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: april 3, 1988 by L.Postma
-C
-C     FUNCTION            : utility that scales the DERIV array after
-C                           the user quality processes routine,
-C                           especially for steady state computation.
-C
-C     LOGICAL UNITNUMBERS : none
-C
-C     SUBROUTINES CALLED  : none
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     DERIV   REAL   NOTOT*NOSEG  IN/OUT  derivatives to be scaled
-C     CONC    REAL   NOTOT*NOSEG  IN/OUT  first order to be scaled
-C     NOTOT   INTEGER     1       INPUT   total number of systems
-C     NOSEG   INTEGER     1       INPUT   number of computational elems
-C     ITFACT  INTEGER     1       INPUT   scale factor
-C     AMASS2  REAL     NOTOT*5    IN/OUT  mass balance array
-C     ISYS    INTEGER     1       INPUT   system considered
-C     NSYS    INTEGER     1       INPUT   number of systems to consider
-C     IAFLAG  INTEGER     1       INPUT   if 1 then accumulation
-C     DMPS    REAL        *       IN/OUT  dumped segment fluxes
-C                                         if INTOPT > 7
-C     INTOPT  INTEGER     1       INPUT   Integration suboptions
-C     ISDMP   INTEGER  NOSEG      INPUT   pointer dumped segments
-C
+      subroutine dlwq60 ( deriv  , conc   , notot  , noseg  , itfact ,
+     *                    amass2 , isys   , nsys   , dmps   , intopt ,
+     *                    isdmp  )
+
+!     Deltares Software Centre
+
+!>\File
+!>           scales DERIV after the user quality processes, for steady state computation.
+
+!     CREATED: april 3, 1988 by L.Postma
+
+!     LOGICAL UNITNUMBERS : none
+
+!     SUBROUTINES CALLED  : none
+
       use timers
 
-      INTEGER     ISDMP(*)
-      DIMENSION   DERIV(NOTOT,*), CONC(NOTOT,*), AMASS2(NOTOT,*),
-     *            DMPS(*)
+      implicit none
+
+!     Parameters          :
+
+!     type     kind  function         name                      description
+      integer   (4), intent(in   ) :: notot                   !< total number of substances
+      integer   (4), intent(in   ) :: noseg                   !< number of computational volumes
+      real      (4), intent(inout) :: deriv (notot ,noseg)    !< derivatives to be scaled
+      real      (4), intent(inout) :: conc  (notot ,noseg)    !< concentrations per substance per volume
+      integer   (4), intent(in   ) :: itfact                  !< scale factor between clocks
+      real      (4), intent(inout) :: amass2(notot , 5   )    !< mass balance array
+      integer   (4), intent(in   ) :: isys                    !< 'this' substance
+      integer   (4), intent(in   ) :: nsys                    !< number of substances
+      real      (4), intent(inout) :: dmps  (notot,*)         !< dumped fluxes is intopt > 7
+      integer   (4), intent(in   ) :: intopt                  !< Integration suboptions
+      integer   (4), intent(in   ) :: isdmp (noseg)           !< Pointer dumped segments
+
+!     Local declarations
+
+      integer(4) iseg, i, ip   ! Loop and help variables
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwq60", ithandl )
-C
-C         loop accross deriv and conc
-C
-      DO 10 ISEG = 1    , NOSEG
-         CONC  (ISYS,ISEG) = CONC  (ISYS,ISEG)/ITFACT
-         DO 10 I    = ISYS , ISYS +NSYS-1
-            DERIV (I,ISEG) = DERIV (I,ISEG)/ITFACT
-            AMASS2(I,   2) = AMASS2(I,   2) + DERIV(I,ISEG)
-   10 CONTINUE
-C
-      IF ( MOD(INTOPT,16) .GE. 8  ) THEN
-         DO 30  ISEG = 1 , NOSEG
-            IP = ISDMP(ISEG)
-            IF ( IP .GT. 0 ) THEN
-               I4 = (IP-1)*NOTOT
-               DO 20 I    = ISYS , ISYS +NSYS-1
-                  I5 = I4 + I
-                  DMPS(I5)= DMPS(I5) + DERIV(I,ISEG)
-   20          CONTINUE
-            ENDIF
-   30    CONTINUE
-      ENDIF
-C
+
+!         loop accross deriv and conc
+
+      do iseg = 1    , noseg
+         conc  (isys,iseg) = conc  (isys,iseg)/itfact
+         do i    = isys , isys +nsys-1
+            deriv (i,iseg) = deriv (i,iseg)/itfact
+            amass2(i,   2) = amass2(i,   2) + deriv(i,iseg)
+         enddo
+      enddo
+
+      if ( mod(intopt,16) .ge. 8  ) then
+         do iseg = 1 , noseg
+            ip = isdmp(iseg)
+            if ( ip .gt. 0 ) then
+               do i    = isys , isys +nsys-1
+                  dmps(i,ip)= dmps(i,ip) + deriv(i,iseg)
+               enddo
+            endif
+         enddo
+      endif
+
       if ( timon ) call timstop ( ithandl )
-      RETURN
-      END
+
+      return
+      end

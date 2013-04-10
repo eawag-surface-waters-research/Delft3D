@@ -21,126 +21,82 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      SUBROUTINE ZERCUM (NOTOT , NOSYS , NOFLUX, NDMPAR, NDMPQ ,
-     +                   NDMPS , ASMASS, FLXINT, AMASS2, FLXDMP,
-     +                   DMPQ  , DMPS  , NORAAI, IMFLAG, IHFLAG,
-     +                   TRRAAI, IBFLAG, NOWST , WSTDMP)
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            : march 1993 by Jan van Beek
-C
-C     FUNCTION            : Zero's the accumulated balance array's
-C
-C     SUBROUTINES CALLED  : -
-C
-C     FILES               : -
-C
-C     COMMON BLOCKS       : -
-C
-C     PARAMETERS          : 7
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     NOTOT   INTEGER       1     INPUT   Total number of substances
-C     NOSYS   INTEGER       1     INPUT   Total number of active substances
-C     NOFLUX  INTEGER       1     INPUT   Nr. of fluxes
-C     NDMPAR  INTEGER       1     INPUT   Number of dump areas
-C     NDMPQ   INTEGER       1     INPUT   Number of dump segments
-C     NDMPS   INTEGER       1     INPUT   Number of dump exchanges
-C     ASMASS  REAL NOTOT*NDMPAR*6 OUTPUT  Mass balance terms
-C     FLXINT  REAL  NOFLUX*NDMPAR OUTPUT  Integrated fluxes
-C     AMASS2  REAL     NOTOT*5    OUTPUT  mass balance whole system
-C     FLXDMP  REAL  NOFLUX*NDMPS  INPUT   Integrated fluxes
-C     DMPQ    REAL  NOSYS*NDMPQ*? INPUT   mass balance dumped exchange
-C     DMPS    REAL  NOTOT*NDMPS*? INPUT   mass balance dumped segments
-C     NORAAI  INTEGER       1     INPUT   Number of raaien
-C     IMFLAG  LOGICAL       1     INPUT   If .T. then monitor step
-C     IHFLAG  LOGICAL       1     INPUT   If .T. then history step
-C     TRRAAI  REAL NOTOT*NDMPAR*6 IN/OUT  Cummulative transport over raai
-C
-C     Declaration of arguments
-C
+      subroutine zercum ( notot  , nosys  , noflux , ndmpar , ndmpq  ,
+     &                    ndmps  , asmass , flxint , amass2 , flxdmp ,
+     &                    dmpq   , dmps   , noraai , imflag , ihflag ,
+     &                    trraai , ibflag , nowst  , wstdmp )
+
+!     Deltares Software Centre
+
+!>\File
+!>        Zero's the accumulated balance array's
+
+!     CREATED:            : march 1993 by Jan van Beek
+
+!     Modified            :       2012 by Jan van Beek, MT3D coupling arrays added
+
+!     FILES               : -
+
       use dlwq_mt3d_data
       use timers
 
-      INTEGER       NOTOT , NOSYS , NOFLUX, NDMPAR, NDMPQ ,
-     +              NDMPS , NORAAI
-      REAL          ASMASS(*), FLXINT(*),
-     +              AMASS2(*), FLXDMP(*),
-     +              DMPQ(*)  , DMPS(*)  ,
-     +              TRRAAI(*)
-      LOGICAL       IMFLAG, IHFLAG
-      integer                    :: nowst                 ! number of wasteloads
-      real                       :: wstdmp(notot,nowst,2) ! accumulated wasteloads 1/2 in and out
-C
-C     Local declarations
-C
-      INTEGER      NOZERO
+      implicit none
+
+!     Parameters          :
+
+!     kind           function         name                      description
+
+      integer  ( 4), intent(in   ) :: notot                   !< Total number of substances
+      integer  ( 4), intent(in   ) :: nosys                   !< Number of transported substances
+      integer  ( 4), intent(in   ) :: noflux                  !< Number of fluxes
+      integer  ( 4), intent(in   ) :: ndmpar                  !< Number of dump areas
+      integer  ( 4), intent(in   ) :: ndmpq                   !< Number of dump exchanges
+      integer  ( 4), intent(in   ) :: ndmps                   !< Number of dump segments
+      real     ( 4), intent(  out) :: asmass(notot ,ndmpar,6) !< Mass balance terms
+      real     ( 4), intent(  out) :: flxint(noflux,ndmpar)   !< Integrated fluxes
+      real     ( 4), intent(  out) :: amass2(notot ,5     )   !< Mass balance whole system
+      real     ( 4), intent(  out) :: flxdmp(noflux,ndmps )   !< Integrated fluxes
+      real     ( 4), intent(  out) :: dmpq  (nosys ,ndmpq ,2) !< Integrated fluxes
+      real     ( 4), intent(  out) :: dmps  (notot ,ndmps ,3) !< Integrated fluxes
+      integer  ( 4), intent(in   ) :: noraai                  !< Number of transects
+      logical      , intent(in   ) :: imflag                  !< True if monitoring step
+      logical      , intent(in   ) :: ihflag                  !< True if history step
+      real     ( 4), intent(  out) :: trraai(nosys ,noraai)   !< Cummulative transport over transects
+      integer  ( 4), intent(in   ) :: ibflag                  !< zero or one
+      integer  ( 4), intent(in   ) :: nowst                   !< number of wasteloads
+      real     ( 4), intent(  out) :: wstdmp(notot ,nowst ,2) !< accumulated wasteloads 1/2 in and out
+
+!     Local declarations
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "zercum", ithandl )
-C
-C     Zero all monitor ( and balance ) realted cummulative array's
-C
-      IF ( IMFLAG ) THEN
-C
-C        Zero ASMASS
-C
-         NOZERO = 6 * NOTOT * NDMPAR * IBFLAG
-         CALL ZERO(ASMASS,NOZERO)
-C
-C        Zero FLXINT
-C
-         NOZERO = NDMPAR * NOFLUX * IBFLAG
-         CALL ZERO(FLXINT,NOZERO)
-C
-C        Zero AMASS2
-C
-         NOZERO = 5 * NOTOT
-         CALL ZERO(AMASS2,NOZERO)
-C
-C        Zero WSTDMP
-C
-         NOZERO = NOTOT * NOWST * 2
-         CALL ZERO(WSTDMP,NOZERO)
-C
-      ENDIF
-C
-C     Zero FLXDMP
-C
-C     NOZERO = NDMPS  * NOFLUX
-C     CALL ZERO(FLXDMP,NOZERO)
-C
-C     Zero all monitor .or. history realted
-C
-      IF ( IMFLAG .OR. IHFLAG ) THEN
-C
-C        Zero DMPQ
-C
-         NOZERO = NDMPQ  * 2 * NOSYS
-         CALL ZERO(DMPQ  ,NOZERO)
+
+!     Zero all monitor ( and balance ) realted cummulative array's
+
+      if ( imflag ) then
+         if ( ibflag .eq. 1 ) asmass = 0.0
+         if ( ibflag .eq. 1 ) flxint = 0.0
+         amass2 = 0.0
+         wstdmp = 0.0
+      endif
+!     flxdmp = 0.0
+
+!     Zero all monitor .or. history realted
+
+      if ( imflag .or. ihflag ) then
+         dmpq = 0.0
+         dmps = 0.0
          if (allocated(gsl_prev_inf)) gsl_prev_inf = 0.0
          if (allocated(gsl_prev_upw)) gsl_prev_upw = 0.0
-C
-C        Zero DMPS
-C
-         NOZERO = NDMPS  * 3 * NOTOT
-         CALL ZERO(DMPS  ,NOZERO)
-C
-      ENDIF
-C
-C     Zero all history realted
-C
-      IF ( IHFLAG ) THEN
-C
-C        Zero TRRAAI
-C
-         NOZERO = NOSYS*NORAAI
-         CALL ZERO(TRRAAI,NOZERO)
-C
-      ENDIF
-C
+      endif
+
+!     Zero all history realted
+
+      if ( ihflag ) then
+         trraai = 0.0
+      endif
+
       if ( timon ) call timstop ( ithandl )
-      RETURN
-C
-      END
+
+      return
+      end

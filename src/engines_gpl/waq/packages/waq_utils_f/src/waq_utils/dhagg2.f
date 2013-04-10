@@ -21,129 +21,131 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      SUBROUTINE DHAGG2 ( NOSEG1, NOSEG2, NOTOTI, NOTOTW, NOTOTH,
-     +                    NOTOTO, ISYSI , ISYSW , ISYSH , ISYSO ,
-     +                    NSYS  , IPGRID, IAGTYP, ARRINP, WEIGHT,
-     +                    ARRHLP, ARROUT)
-C
-C     Deltares
-C
-C     Created             : June 1998 by Jan van Beek
-C
-C     Function            : Aggregates value to coarser grid
-C
-C     Subroutines called  : GETMLU, Get unit number report file
-C                           SRSTOP, Stops execution
-C                           ZERO  , Zero's a real array
-C
-C     Arguments           :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     NOSEG1  INTEGER  1          INPUT   Number of segments on finer grid
-C     NOSEG2  INTEGER  1          INPUT   Number of segments on coarser grid
-C     IPGRID  INTEGER  NOSEG1     INPUT   Grid pointers to coarser grid
-C     IAGTYP  INTEGER  1          INPUT   Aggregation type
-C                                         1 = Accumulation
-C                                         2 = Average
-C                                         3 = Average weighted with WEIGHT
-C     ARRINP  REAL     NOSEG1     INPUT   Array to be aggregated
-C     WEIGHT  REAL     NOSEG1     INPUT   Weigth in averaging
-C     ARRHLP  REAL     NOSEG2     LOCAL   Local help array
-C     ARROUT  REAL     NOSEG2     OUTPUT  Aggregated array
-C
-C     Declaration of arguments
-C
-      INTEGER        NOSEG1, NOSEG2, NOTOTI, NOTOTW, NOTOTH,
-     +               NOTOTO, ISYSI , ISYSW , ISYSH , ISYSO ,
-     +               IAGTYP
-      INTEGER        IPGRID(NOSEG1)
-      REAL           ARRINP(NOTOTI,NOSEG1) , WEIGHT(NOTOTW,NOSEG1) ,
-     +               ARRHLP(NOTOTH,NOSEG2) , ARROUT(NOTOTO,NOSEG2)
-C
-C     Local declaration
-C
-C     ISEG1   INTEGER  1          LOCAL   Segment index finer grid
-C     ISEG2   INTEGER  1          LOCAL   Segment index coarser grid
-C     LUREP   INTEGER  1          LOCAL   Unit number report file
-C
-      INTEGER        ISEG1 , ISEG2 , LUREP
-C
-C     Zero accumulation arrays
-C
-      IF ( IAGTYP .EQ. 1 ) THEN
-         DO ISEG2 = 1 , NOSEG2
-            DO ISYS = 0 , NSYS - 1
-               ARROUT(ISYSO+ISYS,ISEG2) = 0.0
-            ENDDO
-         ENDDO
-      ELSEIF ( IAGTYP .EQ. 2 .OR. IAGTYP .EQ. 3 ) THEN
-         DO ISEG2 = 1 , NOSEG2
-            DO ISYS = 0 , NSYS - 1
-               ARROUT(ISYSO+ISYS,ISEG2) = 0.0
-            ENDDO
-            ARRHLP(ISYSH,ISEG2) = 0.0
-         ENDDO
-      ENDIF
-C
-C     Accumulate
-C
-      IF ( IAGTYP .EQ. 1 ) THEN
-         DO ISEG1 = 1 , NOSEG1
-            ISEG2 = IPGRID(ISEG1)
-            IF ( ISEG2 .GT. 0 ) THEN
-               DO ISYS = 0 , NSYS - 1
-                  ARROUT(ISYSO+ISYS,ISEG2) = ARROUT(ISYSO+ISYS,ISEG2) +
-     +                                       ARRINP(ISYSI+ISYS,ISEG1)
-               ENDDO
-            ENDIF
-         ENDDO
-      ELSEIF ( IAGTYP .EQ. 2 ) THEN
-         DO ISEG1 = 1 , NOSEG1
-            ISEG2 = IPGRID(ISEG1)
-            IF ( ISEG2 .GT. 0 ) THEN
-               DO ISYS = 0 , NSYS - 1
-                  ARROUT(ISYSO+ISYS,ISEG2) = ARROUT(ISYSO+ISYS,ISEG2) +
-     +                                       ARRINP(ISYSI+ISYS,ISEG1)
-               ENDDO
-               ARRHLP(ISYSH,ISEG2) = ARRHLP(ISYSH,ISEG2) + 1.0
-            ENDIF
-         ENDDO
-      ELSEIF ( IAGTYP .EQ. 3 ) THEN
-         DO ISEG1 = 1 , NOSEG1
-            ISEG2 = IPGRID(ISEG1)
-            IF ( ISEG2 .GT. 0 ) THEN
-               W = WEIGHT(ISYSW,ISEG1)
-               DO ISYS = 0 , NSYS - 1
-                  ARROUT(ISYSO+ISYS,ISEG2) = ARROUT(ISYSO+ISYS,ISEG2) +
-     +                                       ARRINP(ISYSI+ISYS,ISEG1)*W
-               ENDDO
-               ARRHLP(ISYSH,ISEG2) = ARRHLP(ISYSH,ISEG2) + W
-            ENDIF
-         ENDDO
-      ELSE
-         CALL GETMLU(LUREP)
-         WRITE(LUREP,2000) IAGTYP
-         CALL SRSTOP(1)
-      ENDIF
-C
-C     Average
-C
-      IF ( IAGTYP .EQ. 2 .OR. IAGTYP .EQ. 3 ) THEN
-         DO ISEG2 = 1 , NOSEG2
-            IF ( ABS(ARRHLP(ISYSH,ISEG2)) .GT. 1.E-20 ) THEN
-               DO ISYS = 0 , NSYS - 1
-                  ARROUT(ISYSO+ISYS,ISEG2) = ARROUT(ISYSO+ISYS,ISEG2) /
-     +                                       ARRHLP(ISYSH,ISEG2)
-               ENDDO
-            ELSE
-               DO ISYS = 0 , NSYS - 1
-                  ARROUT(ISYSO+ISYS,ISEG2) = 0.0
-               ENDDO
-            ENDIF
-         ENDDO
-      ENDIF
-C
-      RETURN
- 2000 FORMAT ( ' ERROR: undefind aggregation type in DHAGGR :',I8 )
-      END
+      subroutine dhagg2 ( noseg1 , noseg2 , nototi , nototw , nototh ,
+     &                    nototo , isysi  , isysw  , isysh  , isyso  ,
+     &                    nsys   , ipgrid , iagtyp , arrinp , weight ,
+     &                    arrhlp , arrout )
+
+!     Deltares Software Centre
+
+!>\File
+!>                 Aggregates value to coarser grid
+
+!     Created             : June 1998 by Jan van Beek
+
+!     Subroutines called  : GETMLU, Get unit number report file
+!                           SRSTOP, Stops execution with error
+
+      implicit none
+
+!     Arguments           :
+
+!     Kind         Function         Name                    Description
+
+      integer( 4), intent(in   ) :: noseg1                !< Number of segments on finer grid
+      integer( 4), intent(in   ) :: noseg2                !< Number of segments on coarser grid
+      integer( 4), intent(in   ) :: nototi                !< First dimension on finer grid
+      integer( 4), intent(in   ) :: nototw                !< First dimension of weight on finer grid
+      integer( 4), intent(in   ) :: nototh                !< First dimension on coarser help grid
+      integer( 4), intent(in   ) :: nototo                !< First dimension on coarser output array
+      integer( 4), intent(in   ) :: isysi                 !<
+      integer( 4), intent(in   ) :: isysw                 !<
+      integer( 4), intent(in   ) :: isysh                 !< Entry in help array to be used
+      integer( 4), intent(in   ) :: isyso                 !< Offset in output
+      integer( 4), intent(in   ) :: nsys                  !< Number of items to aggregate
+      integer( 4), intent(in   ) :: ipgrid(noseg1)        !< Grid pointers to coarser grid
+      integer( 4), intent(in   ) :: iagtyp                !< 1 = accum; 2 = average; 3 = weighted avg
+      real   ( 4), intent(in   ) :: arrinp(nototi,noseg1) !< Array to be aggregated
+      real   ( 4), intent(in   ) :: weight(nototw,noseg1) !< Weigth in averaging
+      real   ( 4)                :: arrhlp(nototh,noseg2) !< Local help array
+      real   ( 4), intent(  out) :: arrout(nototo,noseg2) !< Aggregated array
+
+!     Local declarations
+
+      integer( 4)  iseg1   !  Segment index finer grid
+      integer( 4)  iseg2   !  Segment index coarser grid
+      integer( 4)  lurep   !  Unit number report file
+      integer( 4)  isys    !  Loop counter substances
+      real   ( 4)  w       !  Help variable for weight
+      real         abs
+
+      select case ( iagtyp )
+
+!        accumulate
+
+         case ( 1 )
+            arrout( isyso:isyso+nsys-1 , : ) = 0.0
+            do iseg1 = 1 , noseg1
+               iseg2 = ipgrid(iseg1)
+               if ( iseg2 .le. 0 ) cycle
+               do isys = 0 , nsys - 1
+                  arrout(isyso+isys,iseg2) = arrout(isyso+isys,iseg2) +
+     &                                       arrinp(isysi+isys,iseg1)
+               enddo
+            enddo
+
+!        average
+
+         case ( 2 )
+            arrout( isyso:isyso+nsys-1 , : ) = 0.0
+            arrhlp( isysh , : ) = 0.0
+            do iseg1 = 1 , noseg1
+               iseg2 = ipgrid(iseg1)
+               if ( iseg2 .le. 0 ) cycle
+               do isys = 0 , nsys - 1
+                  arrout(isyso+isys,iseg2) = arrout(isyso+isys,iseg2) +
+     &                                       arrinp(isysi+isys,iseg1)
+               enddo
+               arrhlp(isysh,iseg2) = arrhlp(isysh,iseg2) + 1.0
+            enddo
+            do iseg2 = 1 , noseg2
+               w = arrhlp(isysh,iseg2)
+               if ( abs(w) .gt. 1.e-20 ) then
+                  do isys = 0 , nsys - 1
+                     arrout(isyso+isys,iseg2) = arrout(isyso+isys,iseg2) / w
+                  enddo
+               else
+                  do isys = 0 , nsys - 1
+                     arrout(isyso+isys,iseg2) = 0.0
+                  enddo
+               endif
+            enddo
+
+!        weighted average
+
+         case ( 3 )
+            arrout( isyso:isyso+nsys-1 , : ) = 0.0
+            arrhlp( isysh , : ) = 0.0
+            do iseg1 = 1 , noseg1
+               iseg2 = ipgrid(iseg1)
+               if ( iseg2 .le. 0 ) cycle
+               w = weight(isysw,iseg1)
+               do isys = 0 , nsys - 1
+                  arrout(isyso+isys,iseg2) = arrout(isyso+isys,iseg2) +
+     &                                       arrinp(isysi+isys,iseg1)*w
+               enddo
+               arrhlp(isysh,iseg2) = arrhlp(isysh,iseg2) + w
+            enddo
+            do iseg2 = 1 , noseg2
+               w = arrhlp(isysh,iseg2)
+               if ( abs(w) .gt. 1.e-20 ) then
+                  do isys = 0 , nsys - 1
+                     arrout(isyso+isys,iseg2) = arrout(isyso+isys,iseg2) / w
+                  enddo
+               else
+                  do isys = 0 , nsys - 1
+                     arrout(isyso+isys,iseg2) = 0.0
+                  enddo
+               endif
+            enddo
+
+         case default
+            call getmlu(lurep)
+            write( lurep, 2000 ) iagtyp
+            call srstop(1)
+
+      end select
+
+      return
+ 2000 format ( ' ERROR: undefind aggregation type in DHAGGR :',I8 )
+      end

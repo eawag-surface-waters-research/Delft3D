@@ -21,8 +21,9 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      subroutine grid   ( lun    , noseg  , notot  , nolay  , gridps ,
-     &                    nseg2  , nogrid , syname , ierr   , iwarn  )
+      subroutine grid   ( lun    , noseg  , notot  , nototp , nolay  ,
+     &                    gridps , nseg2  , nogrid , syname , ierr   ,
+     &                    iwarn  )
 
 !       Deltares Software Centre
 
@@ -63,6 +64,7 @@
       integer  ( 4), intent(in   ) :: lun   (*)         !< array with unit numbers
       integer  ( 4), intent(in   ) :: noseg             !< number of computational volumes
       integer  ( 4), intent(in   ) :: notot             !< total number of substances
+      integer  ( 4), intent(in   ) :: nototp            !< total number of particle-substances
       integer  ( 4), intent(  out) :: nolay             !< number of layers
       type(GridPointerColl)        :: GridPs            !< collection of grids
       integer  ( 4), intent(  out) :: nseg2             !< number of additional bottom volumes
@@ -150,9 +152,13 @@
                      if ( nogrid .eq. 1 ) exit       ! no additional grids
                   else
                      if ( nogrid .eq. gridps%cursize ) then
-                        do isys = 1, notot
+                        do isys = 1, notot-nototp
                            if ( gettoken( isysg(isys), ierr2 ) .gt. 0 ) goto 1000
                            if ( gettoken( isyst(isys), ierr2 ) .gt. 0 ) goto 1000
+                        enddo
+                        do isys = notot-nototp+1, notot
+                           isysg(isys) = 1
+                           isyst(isys) = 1
                         enddo
                         exit
                      endif
@@ -238,11 +244,11 @@
 
             case ( 'SUBSTANCE_PROCESSGRID' )
                newinput = .true.
-               call read_sub_procgrid( notot , syname, GridPs, isysg, ierr )
+               call read_sub_procgrid( notot-nototp , syname, GridPs, isysg, ierr )
 
             case ( 'PROCESS_TIMESTEP_MULTIPLIER' )
                newinput = .true.
-               call read_proc_time   ( notot , syname, isyst , ierr )
+               call read_proc_time   ( notot-nototp , syname, isyst , ierr )
 
             case ( 'END_MULTIGRID' )             ! this keyword ends the
                exit                              ! sequence of new input processing
@@ -357,7 +363,7 @@
 
       if ( .not. newinput .and. read_input ) then
          write(lunut,2090)
-         do isys = 1 , notot
+         do isys = 1 , notot-nototp
             if ( gettoken( isysg(isys), ierr2 ) .gt. 0 ) goto 1000
             if ( gettoken( isyst(isys), ierr2 ) .gt. 0 ) goto 1000
             write(lunut,2100) isys,isysg(isys),isyst(isys)
@@ -370,6 +376,10 @@
                write(lunut,2120) isyst(isys)
                ierr = ierr + 1
             endif
+         enddo
+         do isys = notot-nototp+1, notot
+            isysg(isys) = 1
+            isyst(isys) = 1
          enddo
       endif
 

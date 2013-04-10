@@ -28,7 +28,7 @@
      &                    novelo , diname , vename , idpnt  , ivpnt  ,
      &                    ndmpar , ntdmpq , ntdmps , noqtt  , noraai ,
      &                    ntraaq , nobtyp , nowtyp , nogrid , grdref ,
-     &                    sysgrd , sysndt , nototp )
+     &                    sysgrd , sysndt )
 !>\file
 !>                          Reads part of the DelwaQ system file
 !>
@@ -67,7 +67,6 @@
       integer  ( 4), intent(in   ) :: iin               !< system intermediate file
       integer  ( 4), intent(in   ) :: lurep             !< unit number report file
       integer  ( 4), intent(in   ) :: notot             !< Number of systems
-      integer  ( 4), intent(in   ) :: nototp            !< Number of systems + particles
       integer  ( 4), intent(in   ) :: nogrid            !< Number of grids
       integer  ( 4), intent(in   ) :: nodump            !< Number of dump segments
       integer  ( 4), intent(in   ) :: nosys             !< Number of active systems
@@ -92,7 +91,7 @@
       integer  ( 4), intent(  out) :: idpnt (nosys )    !< Pointers to dispersion array
       integer  ( 4), intent(  out) :: ivpnt (nosys )    !< Pointers to velocity array
       character(40), intent(  out) :: modid (4)         !< Model and run-ID
-      character(20), intent(  out) :: sysid (nototp)    !< Systems ID
+      character(20), intent(  out) :: sysid (notot )    !< Systems ID
       character(20), intent(  out) :: coname(nocons)    !< Constant names
       character(20), intent(  out) :: paname(nopa)      !< Parameter names
       character(20), intent(  out) :: funame(nofun )    !< Function names
@@ -126,7 +125,7 @@
 !       => group 1
 
       read ( iin    , end=20, err=20)   modid(1), modid(2), modid(3), modid(4)
-      read ( iin    , end=20, err=20) ( sysid(k), k = 1, nototp )
+      read ( iin    , end=20, err=20) ( sysid(k), k = 1, notot  )
       if ( nodump .gt. 0 ) read ( iin , end=20, err=20) ( idummy, c20dum, k = 1, nodump )
 
 !       => group 2

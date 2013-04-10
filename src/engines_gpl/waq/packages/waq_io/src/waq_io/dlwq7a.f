@@ -105,7 +105,7 @@
          write ( segments%name(i), '(''segment '',i8)' ) i
       enddo
 
-      IERR2 = 0
+      IERR2  = 0
       nothrd = 1
       taupart = .false.
       vdfpart = .false.

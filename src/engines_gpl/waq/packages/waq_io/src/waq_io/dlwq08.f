@@ -72,21 +72,21 @@
 
 !     Arguments           :
 
-!     Kind        Function         Name               Description
+!     Kind                    Function         Name               Description
 
-      integer  ( 4), intent(in   ) :: lun  (*)      !< array with unit numbers
-      character( *), intent(inout) :: lchar(*)      !< filenames
-      integer  ( 4), intent(inout) :: filtype(*)    !< type of binary file
-      integer  ( 4), intent(in   ) :: noseg         !< nr of computational volumes
-      integer  ( 4), intent(in   ) :: notot         !< nr of state variables
-      character(20), intent(in   ) :: syname(notot) !< names of the substances
-      integer  ( 4), intent(in   ) :: iwidth        !< width of the output file
-      real     ( 4), intent(in   ) :: vrsion        !< version of input
-      integer  ( 4), intent(in   ) :: ioutpt        !< option for extent of output
-      type(inputfilestack)  , intent(inout) :: inpfil       !< input file strucure with include stack and flags
-      type(gridpointercoll) , intent(in)    :: gridps       !< collection off all grid definitions
-      integer  ( 4), intent(inout) :: ierr          !< cumulative error   count
-      integer  ( 4), intent(inout) :: iwar          !< cumulative warning count
+      integer           ( 4), intent(in   ) :: lun  (*)      !< array with unit numbers
+      character         ( *), intent(inout) :: lchar(*)      !< filenames
+      integer           ( 4), intent(inout) :: filtype(*)    !< type of binary file
+      integer           ( 4), intent(in   ) :: noseg         !< nr of computational volumes
+      integer           ( 4), intent(in   ) :: notot         !< nr of delwaq + delpar state variables
+      character         (20), intent(in   ) :: syname(notot) !< names of the substances
+      integer           ( 4), intent(in   ) :: iwidth        !< width of the output file
+      real              ( 4), intent(in   ) :: vrsion        !< version of input
+      integer           ( 4), intent(in   ) :: ioutpt        !< option for extent of output
+      type(inputfilestack)  , intent(inout) :: inpfil        !< input file strucure with include stack and flags
+      type(gridpointercoll) , intent(in)    :: gridps        !< collection off all grid definitions
+      integer           ( 4), intent(inout) :: ierr          !< cumulative error   count
+      integer           ( 4), intent(inout) :: iwar          !< cumulative warning count
 
       integer, parameter :: STRING   =  1
       integer, parameter :: EXTASCII = -1, BINARY   = 0, THISFILE = 1
@@ -216,11 +216,15 @@
 
          write ( lun(18) ) 0
          if ( transp ) then
-            call opt2  ( icopt2 , notot  , noseg  , 1      , iwidth ,
-     &                   lun(18), ioutpt , ierr2  )
+            allocate ( values(noseg,notot) )
+            call opt2  ( icopt2 , values , notot  , noseg  , 1      ,
+     &                   iwidth , 0      , ioutpt , ierr2  )
+            write ( lun(18) ) ( values(i,:),i=1,noseg )
          else
-            call opt2  ( icopt2 , noseg  , notot  , notot  , iwidth ,
-     &                   lun(18), ioutpt , ierr2  )
+            allocate ( values(notot,noseg) )
+            call opt2  ( icopt2 , values , noseg  , notot  , notot  ,
+     &                   iwidth , 0      , ioutpt , ierr2  )
+            write ( lun(18) ) values
          endif
          close ( lun(18) )
          if ( ierr2 .gt. 0 ) goto 10

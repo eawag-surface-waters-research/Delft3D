@@ -22,12 +22,13 @@
 !!  rights reserved.
 
       subroutine dryfld ( nosegw , noseg  , nolay  , volume , noq12  ,                &
-     &                    area   , nocons , coname , cons   , sindex ,                &
-     &                    surface, iknmrk , iknmkv )
+     &                    area   , nocons , coname , cons   , surface,                &
+     &                    iknmrk , iknmkv )
 
 !     Deltares Software Centre
 
-!>\File Sets feature of dry cells to zero
+!>\File
+!>      Sets feature of dry cells to zero
 !>
 !>      Determines which cells were dry at start of time step.
 !>      This is an explicit setting of the feature in the
@@ -50,6 +51,7 @@
 !                           dhkmrk  - to get features
 
       use timers
+
       implicit none
 
 !     Parameters          :
@@ -65,7 +67,6 @@
       integer  ( 4), intent(in   ) :: nocons               !< number of constants
       character(20), intent(in   ) :: coname (nocons)      !< names of the constants
       real     ( 4), intent(in   ) :: cons   (nocons)      !< values of the constants
-      integer  ( 4), intent(in   ) :: sindex               !< is zero if no surface array is set
       real     ( 4), intent(in   ) :: surface(noseg)       !< horizontal surface area
       integer  ( 4), intent(in   ) :: iknmrk (noseg)       !< constant feature array
       integer  ( 4), intent(  out) :: iknmkv (noseg)       !< time varying feature array
@@ -74,8 +75,7 @@
       real     ( 4)    threshold       ! drying and flooding value
       integer  ( 4)    nosegl          ! number of computational volumes per layer
       integer  ( 4)    iseg            ! loop variable volumes
-      integer  ( 4)    ivol            ! this computational volumes
-      integer  ( 4)    isub            ! loop variable substances
+      integer  ( 4)    ivol            ! index for this computational volumes
       integer  ( 4)    ilay            ! loop variable layers
       integer  ( 4)    ikm             ! feature
       real     ( 4)    sum             ! help variable
@@ -87,66 +87,33 @@
 
       nosegl = nosegw / nolay
 
+      threshold = 0.001                                        ! default value of 1 mm
       call zoek20 ( 'DRY_THRESH', nocons, coname, 10, idryfld )
-
-!        Surface array is set
-
-      if ( sindex .gt. 0 ) then
-         threshold = 0.001                                        ! default value of 1 mm
-         if ( idryfld .gt. 0 ) threshold = cons(idryfld)          ! or the given value
-         do iseg = 1, nosegl
-            call dhkmrk( 1, iknmrk(iseg), ikm )
-            if ( ikm .eq. 0 ) cycle                               ! whole collumn is inactive
-            sum = 0.0
+      if ( idryfld .gt. 0 ) threshold = cons(idryfld)          ! or the given value
+      do iseg = 1, nosegl
+         call dhkmrk( 1, iknmrk(iseg), ikm )
+         if ( ikm .eq. 0 ) cycle                               ! whole collumn is inactive
+         sum = 0.0
+         do ilay = 1, nolay
+            ivol = iseg + (ilay-1)*nosegl
+            sum  = sum  + volume(ivol)
+         enddo
+         if ( sum .lt. surface(iseg)*threshold ) then
             do ilay = 1, nolay
                ivol = iseg + (ilay-1)*nosegl
-               sum = sum + volume(ivol)
+               call dhkmst(1, iknmkv(ivol), 0 )               ! zero the last bit
+               call dhkmst(2, iknmkv(ivol), 0 )               ! and the second feature
+               call dhkmst(3, iknmkv(ivol), 0 )               ! and the third feature
+               if ( volume(ivol) .lt. 1.0e-25 ) volume(ivol) = 1.0
             enddo
-            if ( sum .lt. surface(iseg)*threshold ) then
-               do ilay = 1, nolay
-                  ivol = iseg + (ilay-1)*nosegl
-                  call dhkmst(1, iknmkv(ivol), 0 )               ! zero the last bit
-                  call dhkmst(2, iknmkv(ivol), 0 )               ! and the second feature
-                  call dhkmst(3, iknmkv(ivol), 0 )               ! and the third feature
-                  if ( volume(ivol) .lt. 1.0e-25 ) volume(ivol) = 1.0
-               enddo
-            else
-               do ilay = 1, nolay                                ! this copies the constant
-                  ivol = iseg + (ilay-1)*nosegl                  ! property in case cell had
-                  iknmkv(ivol) = iknmrk(ivol)                    ! become wet again
-                  if ( volume(ivol) .lt. 1.0e-25 ) volume(ivol) = 1.0
-               enddo
-            endif
-         enddo
-      else
-
-!        Surface is not set, so the default value of 1 m3 is used
-
-         threshold = 1.0
-         if ( idryfld .gt. 0 ) threshold = cons(idryfld)
-         do iseg = 1, nosegl
-            sum = 0.0
-            do ilay = 1, nolay
-               ivol = iseg + (ilay-1)*nosegl
-               sum = sum + volume(ivol)
+         else
+            do ilay = 1, nolay                                ! this copies the constant
+               ivol = iseg + (ilay-1)*nosegl                  ! property in case cell had
+               iknmkv(ivol) = iknmrk(ivol)                    ! become wet again
+               if ( volume(ivol) .lt. 1.0e-25 ) volume(ivol) = 1.0
             enddo
-            if ( sum .lt. threshold ) then
-               do ilay = 1, nolay
-                  ivol = iseg + (ilay-1)*nosegl
-                  call dhkmst(1, iknmkv(ivol), 0 )               ! zero the last bit
-                  call dhkmst(2, iknmkv(ivol), 0 )               ! and the second feature
-                  call dhkmst(3, iknmkv(ivol), 0 )               ! and the third feature
-                  if ( volume(ivol) .lt. 1.0e-25 ) volume(ivol) = 1.0
-               enddo
-            else
-               do ilay = 1, nolay
-                  ivol = iseg + (ilay-1)*nosegl
-                  iknmkv(ivol) = iknmrk(ivol)
-                  if ( volume(ivol) .lt. 1.0e-25 ) volume(ivol) = 1.0
-               enddo
-            endif
-         enddo
-      endif
+         endif
+      enddo
       area = max( area, 1.0 )
 
       if ( timon ) call timstop ( ithandl )
@@ -155,8 +122,7 @@
       end
 
       subroutine dryfle ( nosegw , noseg  , volume , nolay  , nocons ,                &
-     &                    coname , cons   , sindex , surface, iknmrk ,                &
-     &                    iknmkv )
+     &                    coname , cons   , surface, iknmrk , iknmkv )
 
 !     Deltares Software Centre
 
@@ -190,7 +156,6 @@
       integer  ( 4), intent(in   ) :: nocons               !< number of constants
       character(20), intent(in   ) :: coname (nocons)      !< names of the constants
       real     ( 4), intent(in   ) :: cons   (nocons)      !< values of the constants
-      integer  ( 4), intent(in   ) :: sindex               !< is zero if no surface array is set
       real     ( 4), intent(in   ) :: surface(noseg)       !< horizontal surface area
       integer  ( 4), intent(in   ) :: iknmrk (noseg)       !< constant feature array
       integer  ( 4), intent(inout) :: iknmkv (noseg)       !< time varying feature array
@@ -210,44 +175,24 @@
       nosegl = nosegw / nolay
 
       call zoek20 ( 'DRY_THRESH', nocons, coname, 10, idryfld )
-      if ( sindex .gt. 0 ) then                             ! surface array is set
-         threshold = 0.001                                  ! default value of 1 mm
-         if ( idryfld .gt. 0 ) threshold = cons(idryfld)    ! or the given value
-         do iseg = 1, nosegl
-            call dhkmrk( 1, iknmrk(iseg), ikm )
-            if ( ikm .eq. 0 ) cycle                               ! whole collumn is inactive
-            sum = 0.0
+      threshold = 0.001                                  ! default value of 1 mm
+      if ( idryfld .gt. 0 ) threshold = cons(idryfld)    ! or the given value
+      do iseg = 1, nosegl
+         call dhkmrk( 1, iknmrk(iseg), ikm )
+         if ( ikm .eq. 0 ) cycle                               ! whole collumn is inactive
+         sum = 0.0
+         do ilay = 1, nolay
+            ivol = iseg + (ilay-1)*nosegl
+            sum = sum + volume(ivol)
+         enddo
+         if ( sum .gt. surface(iseg)*threshold ) then
             do ilay = 1, nolay
                ivol = iseg + (ilay-1)*nosegl
-               sum = sum + volume(ivol)
+               iknmkv(ivol) = iknmrk(ivol)
+               if ( volume(ivol) .lt. 1.0e-25 ) volume(ivol) = 1.0
             enddo
-            if ( sum .gt. surface(iseg)*threshold ) then
-               do ilay = 1, nolay
-                  ivol = iseg + (ilay-1)*nosegl
-                  iknmkv(ivol) = iknmrk(ivol)
-               enddo
-            endif
-         enddo
-      else
-         threshold = 1.0                                 ! no surf found 1 m3 default
-         if ( idryfld .gt. 0 ) threshold = cons(idryfld)
-         do iseg = 1, nosegl
-            call dhkmrk( 1, iknmrk(iseg), ikm )
-            if ( ikm .eq. 0 ) cycle                               ! whole collumn is inactive
-            sum = 0.0
-            do ilay = 1, nolay
-               ivol = iseg + (ilay-1)*nosegl
-               sum = sum + volume(ivol)
-            enddo
-            if ( sum .gt. threshold ) then
-               do ilay = 1, nolay
-                  ivol = iseg + (ilay-1)*nosegl
-                  iknmkv(ivol) = iknmrk(ivol)
-                  if ( volume(ivol) .lt. 1.0e-25 ) volume(ivol) = 1.0
-               enddo
-            endif
-         enddo
-      endif
+         endif
+      enddo
 
       if ( timon ) call timstop ( ithandl )
 

@@ -206,11 +206,11 @@ C
      &              nomat   , j(ixpnt), j(iwrk) , j(imat) , rowpnt  ,
      &              fmat    , tmat    )
       iexseg = 1     !  There is nothing to mask. This array is meant for method 21
-C
-C======================= simulation loop ============================
-C
-C          make closure error correction
-C
+
+!======================= simulation loop ============================
+
+!          make closure error correction
+
       if ( j(inrh2+1) .ge. 0 .and. ivflag .eq. 0 .and.
      &      idt       .gt. 0 .and. lstrec               ) then
          call dlwq41 ( lun     , itstrt+idt, itstrt  , a(iharm), a(ifarr),
@@ -226,14 +226,14 @@ C
 !        Determine the volumes and areas that ran dry at start of time step
 
          call hsurf  ( noseg    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
-     &                 c(isfna) , a(isfun) , surface  , sindex   , lun(19)  )
+     &                 c(isfna) , a(isfun) , surface  , lun(19)  )
          call dryfld ( noseg    , nosss    , nolay    , a(ivol)  , noq1+noq2,
-     &                 a(iarea) , nocons   , c(icnam) , a(icons) , sindex   ,
-     &                 surface  , j(iknmr) , iknmkv   )
+     &                 a(iarea) , nocons   , c(icnam) , a(icons) , surface  ,
+     &                 j(iknmr) , iknmkv   )
 
 !          user transport processes
 
-         call dlwqtr ( nototp   , nosys    , nosss    , noq      , noq1     ,
+         call dlwqtr ( notot    , nosys    , nosss    , noq      , noq1     ,
      &                 noq2     , noq3     , nopa     , nosfun   , nodisp   ,
      &                 novelo   , j(ixpnt) , a(ivol)  , a(iarea) , a(iflow) ,
      &                 a(ileng) , a(iconc) , a(idisp) , a(icons) , a(iparm) ,
@@ -251,31 +251,31 @@ C
 
 !          call PROCES subsystem
 
-      CALL PROCES ( NOTOT   , NOSEG   , A(ICONC), A(IVOL) , ITIME   ,
-     +              IDT     , A(IDERV), NDMPAR  , NPROC   , NFLUX   ,
-     +              J(IIPMS), J(INSVA), J(IIMOD), J(IIFLU), J(IIPSS),
-     +              A(IFLUX), A(IFLXD), A(ISTOC), IBFLAG  , IPBLOO  ,
-     +              IPCHAR  , IOFFBL  , IOFFCH  , A(IMASS), NOSYS   ,
-     +              ITFACT  , A(IMAS2), IAFLAG  , INTOPT  , A(IFLXI),
-     +              J(IXPNT), J(IKNMR), NOQ1    , NOQ2    , NOQ3    ,
-     +              NOQ4    , NDSPN   , J(IDPNW), A(IDNEW), NODISP  ,
-     +              J(IDPNT), A(IDIFF), NDSPX   , A(IDSPX), A(IDSTO),
-     +              NVELN   , J(IVPNW), A(IVNEW), NOVELO  , J(IVPNT),
-     +              A(IVELO), NVELX   , A(IVELX), A(IVSTO), A(IDMPS),
-     +              J(ISDMP), J(IPDMP), NTDMPQ  , A(IDEFA), J(IPNDT),
-     +              J(IPGRD), J(IPVAR), J(IPTYP), J(IVARR), J(IVIDX),
-     +              J(IVTDA), J(IVDAG), J(IVTAG), J(IVAGG), J(IAPOI),
-     +              J(IAKND), J(IADM1), J(IADM2), J(IVSET), J(IGNOS),
-     +              J(IGSEG), NOVAR   , A       , NOGRID  , NDMPS   ,
-     +              C(IPRNA), INTSRT  , J(IOWNS), J(IOWNQ), MYPART  ,
-     +              j(iprvpt), j(iprdon), nrref , j(ipror), nodef   ,
-     +              surface  ,lun(19) )
+         call proces ( notot    , nosss    , a(iconc) , a(ivol)  , itime    ,
+     &                 idt      , a(iderv) , ndmpar   , nproc    , nflux    ,
+     &                 j(iipms) , j(insva) , j(iimod) , j(iiflu) , j(iipss) ,
+     &                 a(iflux) , a(iflxd) , a(istoc) , ibflag   , ipbloo   ,
+     &                 ipchar   , ioffbl   , ioffch   , a(imass) , nosys    ,
+     &                 itfact   , a(imas2) , iaflag   , intopt   , a(iflxi) ,
+     &                 j(ixpnt) , iknmkv   , noq1     , noq2     , noq3     ,
+     &                 noq4     , ndspn    , j(idpnw) , a(idnew) , nodisp   ,
+     &                 j(idpnt) , a(idiff) , ndspx    , a(idspx) , a(idsto) ,
+     &                 nveln    , j(ivpnw) , a(ivnew) , novelo   , j(ivpnt) ,
+     &                 a(ivelo) , nvelx    , a(ivelx) , a(ivsto) , a(idmps) ,
+     &                 j(isdmp) , j(ipdmp) , ntdmpq   , a(idefa) , j(ipndt) ,
+     &                 j(ipgrd) , j(ipvar) , j(iptyp) , j(ivarr) , j(ividx) ,
+     &                 j(ivtda) , j(ivdag) , j(ivtag) , j(ivagg) , j(iapoi) ,
+     &                 j(iaknd) , j(iadm1) , j(iadm2) , j(ivset) , j(ignos) ,
+     &                 j(igseg) , novar    , a        , nogrid   , ndmps    ,
+     &                 c(iprna) , intsrt   , j(iowns) , j(iownq) , mypart   ,
+     &                 j(iprvpt), j(iprdon), nrref    , j(ipror) , nodef    ,
+     &                 surface  , lun(19)  )
 
 !          save computation time
 
-      call dlwqm7 ( noq     , noq1    , noq2    , a(iarea), a(iflow),
-     &              a(ileng), ilflag  , intopt  , j(ixpnt), mixlen  ,
-     &              iknmkv  )
+         call dlwqm7 ( noq      , noq1     , noq2     , a(iarea) , a(iflow) ,
+     &                 a(ileng) , ilflag   , intopt   , j(ixpnt) , mixlen   ,
+     &                 iknmkv   )
 
 !          loop over the systems
 
@@ -291,20 +291,20 @@ C
      &                 A(ISFUN), A(IDERV), ICSYS   , IDT     , A(ISMAS),
      &                 IBFLAG  , C(ISNAM), NOCONS  , NOFUN   , C(ICNAM),
      &                 C(IPNAM), C(IFNAM), C(ISFNA), NODUMP  , J(IDUMP))
-         CALL DLWQ60 ( A(IDERV), A(ICONC), NOTOT   , NOSEG   , ITFACT  ,
-     &                 A(IMAS2), ISYS    , 1       , A(IDMPS), INTOPT  ,
-     &                 J(ISDMP))
+         call dlwq60 ( a(iderv) , a(iconc) , notot    , noseg    , itfact   ,
+     &                 a(imas2) , isys     , 1        , a(idmps) , intopt   ,
+     &                 j(isdmp) )
 
 !          add the waste loads
 
-         call dlwq15 ( nosys     , notot    , noseg    , noq      , nowst    ,
-     &                 nowtyp    , ndmps    , intopt   ,     1    , itime    ,
-     &                 iaflag    , c(isnam) , a(iconc) , a(ivol)  , a(ivol2) ,
-     &                 a(iflow ) , j(ixpnt) , c(iwsid) , c(iwnam) , c(iwtyp) ,
-     &                 j(inwtyp) , j(iwast) , iwstkind , a(iwste) , a(iderv) ,
-     &                 iknmkv    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
-     &                 c(isfna ) , a(isfun) , j(isdmp) , a(idmps) , a(imas2) ,
-     &                 a(iwdmp)  , isys     , 1        , j(iowns ), mypart   )
+         call dlwq15 ( nosys    , notot    , noseg    , noq      , nowst    ,
+     &                 nowtyp   , ndmps    , intopt   ,     1    , itime    ,
+     &                 iaflag   , c(isnam) , a(iconc) , a(ivol)  , a(ivol2) ,
+     &                 a(iflow ), j(ixpnt) , c(iwsid) , c(iwnam) , c(iwtyp) ,
+     &                 j(inwtyp), j(iwast) , iwstkind , a(iwste) , a(iderv) ,
+     &                 iknmkv   , nopa     , c(ipnam) , a(iparm) , nosfun   ,
+     &                 c(isfna ), a(isfun) , j(isdmp) , a(idmps) , a(imas2) ,
+     &                 a(iwdmp) , isys     , 1        , j(iowns ), mypart   )
 
 !          fill the diagonal of the matrix, with conc-array and closure error
 
@@ -341,9 +341,9 @@ C
      &                 gm_sol(1,ith), a(imas2), a(idmps), intopt  , j(isdmp))
 
    10 continue
-C
-C          mass balance
-C
+
+!          mass balance
+
       IAFLAG = 1
       CALL DLWQ64 ( A(IDISP), A(IDNEW), A(IAREA), A(IFLOW), A(ILENG),
      *              A(IVNEW), A(ICONC), A(IBOUN), J(IXPNT), NOSYS   ,

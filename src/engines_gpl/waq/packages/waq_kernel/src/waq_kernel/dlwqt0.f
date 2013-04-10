@@ -21,517 +21,469 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      SUBROUTINE DLWQT0 ( LUN    , ITIME  , ITIMEL , HARMAT , ARRAY  ,
-     *                    IHARM  , NRHARM , NRFTOT , IDT    , VOLUME ,
-     *                    DISPER , AREA   , FLOW   , VELO   , ALENG  ,
-     *                    WASTES , BOUNDS , CONSTS , PARAM  , FUNCS  ,
-     *                    SFUNCS , IPOINT , LUNTXT , LUNTX2 , ftype  ,
-     *                    INTSRT , ISFLAG , IFFLAG , IVFLAG , ILFLAG ,
-     *                    UPDATE , IKTIM  , IKNMRK , INWSPC , ANWSPC ,
-     *                    INWTYP , IWORK  , LSTREC , LREWIN , VOLLST ,
-     &                    RDVOLU , GridPs , dlwqd  )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED: april- 8-1988 by L.Postma
-C
-C     LAST UPDATE: august 1997 by L. Postma,
-C                           Merged with DLWQ45 to one routine
-C
-C     FUNCTION            : Makes values at ITIME for all the time
-C                                                   dependent aspects.
-C
-C     LOGICAL UNITS       : LUN(3), harmonics file
-C                           LUN(4), function pointer file
-C
-C     SUBROUTINES CALLED  : DLWQT1, makes one time function
-C                           DLWQTA, make values for const,param,func,sfunc
-C                           DLWQTK, make values for kenmerk array
-C                           DHOPNF, opens files
+      subroutine dlwqt0 ( lun    , itime  , itimel , harmat , array  ,
+     &                    iharm  , nrharm , nrftot , idt    , volume ,
+     &                    disper , area   , flow   , velo   , aleng  ,
+     &                    wastes , bounds , consts , param  , funcs  ,
+     &                    sfuncs , ipoint , luntxt , luntx2 , ftype  ,
+     &                    intsrt , isflag , ifflag , ivflag , ilflag ,
+     &                    update , iktim  , iknmrk , inwspc , anwspc ,
+     &                    inwtyp , iwork  , lstrec , lrewin , vollst ,
+     &                    rdvolu , gridps , dlwqd  )
+
+!       Deltares Software Centre
+
+!>\file
+!>                         Updates time level of all external steering
+!>        Besides this routine, there is also the dlwq41 routine that does
+!>        same for volumes only. This routine is campletely used once at
+!>        the start of simulation. Furthermore it is only used without
+!>        reading the new volumes, that is then done by dlwq41.
+
+!     Created: april- 8-1988 by Leo Postma
+
+!     Updated: august 1997 by Leo Postma: Merged with DLWQ45 to one routine
+!                   > 2000 by several authors.
+
+!     LOGICAL UNITS       : LUN(3), harmonics file
+!                           LUN(4), function pointer file
+
+!     SUBROUTINES CALLED  : DLWQT1, makes one time function
+!                           DLWQTA, make values for const,param,func,sfunc
+!                           DLWQTK, make values for kenmerk array
+!                           DHOPNF, opens files
       use timers
       use m_couplib
       use delwaq2_data
       use grids
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     LUN     INTEGER       ?     INPUT   array with unit numbers
-C     ITIME   INTEGER       1     INPUT   Model timer
-C     ITIMEL  INTEGER       1     INPUT   Model timer one step ago
-C     HARMAT  REAL          ?     IN/OUT  matrices harmonic components
-C     ARRAY   REAL          ?     LOCAL   set of double file buffers
-C     IHARM   INTEGER       ?     INPUT   harmonics time space
-C     NRHARM  INTEGER       ?     INPUT   set of nrs of harmonic records
-C     NRFTOT  INTEGER       ?     INPUT   set of record lengthes
-C     IDT     INTEGER       1     OUTPUT  integration time step size
-C     VOLUME  REAL       NOSEG    OUTPUT  array of segment volumes
-C     DISPER  REAL        NOQ     OUTPUT  array of dispersions
-C     AREA    REAL        NOQ     OUTPUT  array of exchange surfaces
-C     FLOW    REAL        NOQ     OUTPUT  array of flows
-C     VELO    REAL    NOQ*NOVELO  OUTPUT  array of velocities
-C     ALENG   REAL       NOQ*2    OUTPUT  array of from and to lengthes
-C     WASTES  REAL (NOTOT+1)*NOWST  OUTPUT  array of wasteloads
-C     BOUNDS  REAL   NOSYS*NOBND  OUTPUT  array of boundary conditions
-C     CONST   REAL      NOCONS    OUTPUT  array of constant values
-C     PARAM   REAL   NOPA*NOSEG   OUTPUT  array of parameter values
-C     FUNCS   REAL       NOFUN    OUTPUT  array of function values
-C     SFUNCS  REAL      NOSFUN    OUTPUT  array of segment functions
-C     IPOINT  INTEGER       ?     INPUT   set of pointers to destination
-C     LUNTXT  CHAR*(*)      ?     INPUT   text with the unit numbers
-C     LUNTX2  CHAR*(*)      ?     INPUT   text with the binary files
-      integer, intent(in   ) :: ftype  (*)   !< type of files to be opened
-C     INTSRT  INTEGER       1     INPUT   integration option
-C     ISFLAG  INTEGER       1     INPUT   = 1 then 'ddhhmmss' format
-C     IFFLAG  INTEGER       1     INPUT   = 1 then first invocation
-C     IVFLAG  INTEGER       1     INPUT   = 1 then computed volumes
-C     ILFLAG  INTEGER       1     INPUT   = 0 then constant lengthes
-C     UPDATE  LOGICAL       1     OUTPUT  TRUE if update took place
-C     IKTIM   INTEGER       *     IN/OUT  Timers in file
-C     IKNMRK  INTEGER   NOSEG,*   IN/OUT  Kenmerk array
-C     INWSPC  INTEGER       *     IN/OUT  Integer space new time funs
-C     ANWSPC  REAL          *     IN/OUT  Real space new time functions
-C     INWTYP  INTEGER       *     INPUT   Types of items
-C     IWORK   INTEGER       *     LOCAL   Integer workspace
-C     LSTREC  LOGICAL       1     INPUT   Switch last record on rewind wanted
-C     LREWIN  LOGICAL       1     OUTPUT  Then rewind took place
-C     VOLLST  REAL          *     OUTPUT  Last volume record before rewind
-C     RDVOLU  LOGICAL       1     INPUT   .TRUE. if volume is expected
-      type(delwaq_data), intent(inout) :: dlwqd !< derived type for persistent storage
-C
-C     DECLARATIONS        :
-C
-      DIMENSION    LUN   (*) , HARMAT(*) , ARRAY (*) , IHARM (*) ,
-     *             NRHARM(*) , NRFTOT(*) , VOLUME(*) , DISPER(*) ,
-     *             AREA  (*) , FLOW  (*) , VELO  (*) , ALENG (*) ,
-     *             WASTES(*) , BOUNDS(*) , CONSTS(*) , PARAM(*)  ,
-     *             FUNCS(*)  , SFUNCS(*) , IPOINT(*) , ADT   (1) ,
-     *             IKTIM (*) , IKNMRK(*) , INWSPC(*) , ANWSPC(*) ,
-     *             INWTYP(*) , IWORK (*) , VOLLST(*)
-      CHARACTER*(*) LUNTXT(*)
-      CHARACTER*200 LUNTX2(*)
-      LOGICAL      UPDATE    , LSTREC    , LREWIN    , RDVOLU
-      type(GridPointerColl), intent(in)    :: GridPs               ! collection off all grid definitions
-C
-C     COMMON  /  SYSN   /   System dimensions
-C
-      INCLUDE 'sysn.inc'
-C
-C     COMMON  /  SYST   /   System time function flags
-C
-      INCLUDE 'syst.inc'
-C
-C     Local declarations
-C
-      REAL         RDUMMY(1) , ADUMMY(1)
-      LOGICAL      LSTDUM    , LREDUM
-      LOGICAL      LDUM(3)
+
+      implicit none
+
+      include 'sysn.inc'     !  common with system dimensions
+      include 'syst.inc'     !  common with time function flags
+
+!     Parameters          :
+
+!     type     kind  function         name                         description
+
+      integer  ( 4), intent(in   ) :: lun   (*)                  !< Array with unit numbers
+      integer  ( 4), intent(in   ) :: itime                      !< Model timer
+      integer  ( 4), intent(inout) :: itimel                     !< Model timer one step ago
+      real     ( 4), intent(inout) :: harmat(nharms)             !< Matrices harmonic components
+      real     ( 4)                :: array (nlines)             !< Set of double file buffers
+      integer  ( 4), intent(in   ) :: iharm (niharm)             !< Harmonics time space
+      integer  ( 4), intent(inout) :: nrharm(noitem)             !< set of nrs of harmonic records
+      integer  ( 4), intent(in   ) :: nrftot(noitem)             !< set of record lengthes
+      integer  ( 4), intent(  out) :: idt                        !< Integration time step size
+      real     ( 4), intent(  out) :: volume(noseg+nseg2)        !< Array of segment volumes
+      real     ( 4), intent(  out) :: disper(nodisp,noq+noq4)    !< Array of dispersions
+      real     ( 4), intent(  out) :: area  (noq+noq4)           !< Array of exchange surfaces
+      real     ( 4), intent(  out) :: flow  (noq+noq4)           !< Array of flows
+      real     ( 4), intent(  out) :: velo  (novelo,noq+noq4)    !< Array of velocities
+      real     ( 4), intent(  out) :: aleng (  2   ,noq+noq4)    !< Array of from and to lengthes
+      real     ( 4), intent(  out) :: wastes(notot+2,nowst)      !< Array of wasteloads
+      real     ( 4), intent(  out) :: bounds(nosys , nobnd)      !< Array of boundary conditions
+      real     ( 4), intent(  out) :: consts(nocons)             !< Array of constant values
+      real     ( 4), intent(  out) :: param (nopa,noseg+nseg2)   !< Array of parameter values
+      real     ( 4), intent(  out) :: funcs (nofun )             !< Array of function values
+      real     ( 4), intent(  out) :: sfuncs(noseg+nseg2,nosfun) !< Array of segment functions
+      integer  ( 4), intent(in   ) :: ipoint(npoins)             !< Set of pointers to destination
+      character*(*), intent(in   ) :: luntxt(*)                  !< text with the unit numbers
+      character*200, intent(in   ) :: luntx2(*)                  !< text with the binary files
+      integer  ( 4), intent(in   ) :: ftype                      !< type of files to be opened
+      integer  ( 4), intent(in   ) :: intsrt                     !< integration option
+      integer  ( 4), intent(in   ) :: isflag                     !< = 1 then 'ddhhmmss' format
+      integer  ( 4), intent(inout) :: ifflag                     !< = 1 then first invocation
+      integer  ( 4), intent(in   ) :: ivflag                     !< = 1 then computed volumes
+      integer  ( 4), intent(in   ) :: ilflag                     !< = 0 then constant lengthes
+      logical      , intent(inout) :: update                     !< TRUE if update took place
+      integer  ( 4), intent(inout) :: iktim (3)                  !< Timers in file
+      integer  ( 4), intent(inout) :: iknmrk(noseg+nseg2)        !< Kenmerk array
+      integer  ( 4), intent(inout) :: inwspc(newisp)             !< Integer space new time funs
+      real     ( 4), intent(inout) :: anwspc(newrsp)             !< Real space new time functions
+      integer  ( 4), intent(in   ) :: inwtyp(nobnd+nowst)        !< Types of items
+      integer  ( 4)                :: iwork (*)                  !< Integer workspace
+      logical      , intent(in   ) :: lstrec                     !< TRUE: last record on rewind wanted
+      logical      , intent(  out) :: lrewin                     !< TRUE: rewind took place
+      real     ( 4), intent(inout) :: vollst(*)                  !< Last volume record before rewind
+      logical      , intent(  out) :: rdvolu                     !< TRUE: also read volumes
+      type(GridPointerColl)        :: GridPs                     !< collection of all grid definitions
+      type(delwaq_data)            :: dlwqd                      !< derived type for persistent storage
+
+!     Local declarations
+
+      real         rdummy(1) , adummy(1) , adt   (1)
+      logical      lstdum    , lredum    , ldum  (3)
+      integer      iph, ipf, ipa, ipi, ipni, ipna           !  incremental pointers
+      integer      isnul, isnul2, idummy                    !  dummy variables
+      integer      nosss, it, nosubs, is                    !  helpvariables
+      integer      ierr                                     !  error flag (not tested)
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqt0", ithandl )
-C
-C         open the harmonics and pointer files
-C
-      IF ( IFFLAG .EQ. 1 ) THEN
-         BNDSET = .FALSE.
-         WSTSET = .FALSE.
-         FUNSET = .FALSE.
-         OTHSET = .FALSE.
-         IF (MYPART .EQ. 1) THEN
-            CALL DHOPNF ( LUN(3), LUNTXT(3), 3    , 2     , IERR  )
-            CALL DHOPNF ( LUN(4), LUNTXT(4), 4    , 2     , IERR  )
-         ENDIF
-      ENDIF
-C
-C         initialisation
-C
-      IPH  = 1
-      IPF  = 1
-      IPA  = 1
-      IPI  = 1
-      IPNI = 1
-      IPNA = 1
-      IT   = 1
-      ISNUL  = 0
-      ISNUL2 = 0
-      IDUMMY = 0
-      LSTDUM = .FALSE.
-      UPDATE = .FALSE.
-C
-C         integration step size IDT
-C
-      IF ( NRFTOT( 1) .GT. 0 ) THEN
-         IF (MYPART.EQ.1) THEN
-            CALL DLWQT1 (
-     *           LUN       ,ITIME      ,ITIMEL ,IHARM(IPF),HARMAT(IPH),
-     *           ARRAY(IPA),IPOINT(IPI),ADT    ,1         ,NRHARM( 1) ,
-     *           1         ,NRFTOT( 1) ,IPA    ,IPH       ,IPF        ,
-     *           IPI       ,LUNTXT     ,5      ,ISFLAG    ,IFFLAG     ,
-     *           UPDATE    ,OTHSET     ,0      ,IWORK     ,LSTDUM     ,
-     *           LREDUM    ,RDUMMY     ,ftype  ,dlwqd    )
-            LDUM(1) = UPDATE
-            LDUM(2) = OTHSET
-         ENDIF
 
-         CALL DISTRIBUTE_DATA(MYPART, LDUM, 2, IERR)
-         UPDATE = LDUM(1)
-         OTHSET = LDUM(2)
+!         open the harmonics and pointer files
 
-         IF ( UPDATE .OR. .TRUE. ) CALL DISTRIBUTE_DATA(MYPART, ADT, 1, IERR)
-         IF ( OTHSET ) THEN
-            IS = 5
-            GOTO 10
-         ENDIF
-         IDT = ADT(1) +   0.5
-      ENDIF
-C
-C         volumes
-C
-C     if read anyway or ( read-requested and there is something to read )
-      IF ( NRHARM( 2) .GE. 0 ) THEN
-         IF   ( RDVOLU ) THEN
-C           if .not. computed volumes .or. this is the first time
-            IF ( IVFLAG     .EQ. 0 .OR. IFFLAG .EQ. 1 ) then
-               IF (MYPART .EQ. 1) THEN
-                  CALL DLWQT1 (
-     *                 LUN       ,ITIME      ,ITIMEL ,IHARM(IPF),HARMAT(IPH),
-     *                 ARRAY(IPA),IPOINT(IPI),VOLUME ,1         ,NRHARM( 2) ,
-     *                 NOSEG     ,NRFTOT( 2) ,IPA    ,IPH       ,IPF        ,
-     *                 IPI       ,LUNTXT     ,7      ,ISFLAG    ,IFFLAG     ,
-     *                 UPDATE    ,OTHSET     ,0      ,IWORK     ,LSTREC     ,
-     *                 LREWIN    ,VOLLST     ,ftype  ,dlwqd     )
-                  LDUM(1) = UPDATE
-                  LDUM(2) = OTHSET
-                  LDUM(3) = LREWIN
-               ENDIF
-
-               CALL DISTRIBUTE_DATA(MYPART, LDUM, 3, IERR)
-               UPDATE = LDUM(1)
-               OTHSET = LDUM(2)
-               LREWIN = LDUM(3)
-
-               IF ( UPDATE .OR. .TRUE. )
-     *             CALL DISTRIBUTE_DATA(MYPART, VOLUME, 'noseg','distrib_itf', IERR)
-            ENDIF
-         ELSE
-            IPA = IPA + NRFTOT(2)*2
-            IPI = IPI + NOSEG + 3
-         ENDIF
-         IF ( OTHSET ) THEN
-            IS = 7
-            GOTO 10
-         ENDIF
-      ENDIF
-C
-C         dispersions
-C
-      IF ( NRHARM( 3) .GE. 0 ) THEN
-         IF (MYPART.EQ.1) THEN
-            CALL DLWQT1 (
-     *           LUN       ,ITIME      ,ITIMEL ,IHARM(IPF),HARMAT(IPH),
-     *           ARRAY(IPA),IPOINT(IPI),DISPER ,NODISP    ,NRHARM( 3) ,
-     *           NOQ       ,NRFTOT( 3) ,IPA    ,IPH       ,IPF        ,
-     *           IPI       ,LUNTXT     ,9      ,ISFLAG    ,IFFLAG     ,
-     *           UPDATE    ,OTHSET     ,0      ,IWORK     ,LSTDUM     ,
-     *           LREDUM    ,RDUMMY     ,ftype  ,dlwqd     )
-            LDUM(1) = UPDATE
-            LDUM(2) = OTHSET
-         ENDIF
-
-         CALL DISTRIBUTE_DATA(MYPART, LDUM, 2, IERR)
-         UPDATE = LDUM(1)
-         OTHSET = LDUM(2)
-
-         IF ( UPDATE .OR. .TRUE. )
-     *      CALL DISTRIBUTE_DATA(MYPART, DISPER, NODISP,'noq',1,
-     *                           'distrib_itf', IERR)
-         IF ( OTHSET ) THEN
-            IS = 9
-            GOTO 10
-         ENDIF
-      ENDIF
-C
-C         area
-C
-      IF ( NRHARM( 4) .GE. 0 ) THEN
-         IF (MYPART .EQ. 1) THEN
-            CALL DLWQT1 (
-     *           LUN       ,ITIME      ,ITIMEL ,IHARM(IPF),HARMAT(IPH),
-     *           ARRAY(IPA),IPOINT(IPI),AREA   ,1         ,NRHARM( 4) ,
-     *           NOQ       ,NRFTOT( 4) ,IPA    ,IPH       ,IPF        ,
-     *           IPI       ,LUNTXT     ,10     ,ISFLAG    ,IFFLAG     ,
-     *           UPDATE    ,OTHSET     ,0      ,IWORK     , LSTDUM    ,
-     *           LREDUM    ,RDUMMY     ,ftype  ,dlwqd     )
-            LDUM(1) = UPDATE
-            LDUM(2) = OTHSET
-         ENDIF
-
-         CALL DISTRIBUTE_DATA(MYPART, LDUM, 2, IERR)
-         UPDATE = LDUM(1)
-         OTHSET = LDUM(2)
-
-         IF ( UPDATE .OR. .TRUE. )
-     *      CALL DISTRIBUTE_DATA(MYPART, AREA, 'noq', 'distrib_itf', IERR)
-         IF ( OTHSET ) THEN
-            IS = 10
-            GOTO 10
-         ENDIF
-      ENDIF
-C
-C         flow
-C
-      IF ( NRHARM( 5) .GE. 0 ) THEN
-         IF (MYPART .EQ. 1) THEN
-            CALL DLWQT1 (
-     *           LUN       ,ITIME      ,ITIMEL ,IHARM(IPF), HARMAT(IPH),
-     *           ARRAY(IPA),IPOINT(IPI),FLOW   ,1         ,NRHARM( 5)  ,
-     *           NOQ       ,NRFTOT( 5) ,IPA    ,IPH       ,IPF         ,
-     *           IPI       ,LUNTXT     ,11     ,ISFLAG    ,IFFLAG      ,
-     *           UPDATE    ,OTHSET     ,0      ,IWORK     , LSTDUM     ,
-     *           LREDUM    ,RDUMMY     ,ftype  ,dlwqd     )
-            LDUM(1) = UPDATE
-            LDUM(2) = OTHSET
-         ENDIF
-
-         CALL DISTRIBUTE_DATA(MYPART, LDUM, 2, IERR)
-         UPDATE = LDUM(1)
-         OTHSET = LDUM(2)
-
-         IF ( UPDATE .OR. .TRUE. )
-     *      CALL DISTRIBUTE_DATA(MYPART, FLOW, 'noq', 'distrib_itf', IERR)
-         IF ( OTHSET ) THEN
-            IS = 11
-            GOTO 10
-         ENDIF
-      ENDIF
-C
-C         velocities
-C
-      IF ( NRHARM( 6) .GE. 0 ) THEN
-         IF (MYPART .EQ. 1) THEN
-            CALL DLWQT1 (
-     *           LUN       ,ITIME      ,ITIMEL ,IHARM(IPF),HARMAT(IPH),
-     *           ARRAY(IPA),IPOINT(IPI),VELO   ,NOVELO    ,NRHARM( 6) ,
-     *           NOQ       ,NRFTOT( 6) ,IPA    ,IPH       ,IPF        ,
-     *           IPI       ,LUNTXT     ,12     ,ISFLAG    ,IFFLAG     ,
-     *           UPDATE    ,OTHSET     ,0      ,IWORK     ,LSTDUM     ,
-     *           LREDUM    ,RDUMMY     ,ftype  ,dlwqd     )
-            LDUM(1) = UPDATE
-            LDUM(2) = OTHSET
-         ENDIF
-
-         CALL DISTRIBUTE_DATA(MYPART, LDUM, 2, IERR)
-         UPDATE = LDUM(1)
-         OTHSET = LDUM(2)
-
-         IF ( UPDATE .OR. .TRUE. )
-     *      CALL DISTRIBUTE_DATA(MYPART,VELO,NOVELO,'noq',1, 'distrib_itf',IERR)
-         IF ( OTHSET ) THEN
-            IS = 12
-            GOTO 10
-         ENDIF
-      ENDIF
-C
-C         'from'- and 'to'-length
-C
-      IF ( NRHARM( 7) .GE. 0 .AND. ILFLAG .EQ. 1 ) THEN
-         IF (MYPART .EQ. 1) THEN
-            CALL DLWQT1 (
-     *           LUN       ,ITIME      ,ITIMEL ,IHARM(IPF),HARMAT(IPH),
-     *           ARRAY(IPA),IPOINT(IPI),ALENG  ,2         ,NRHARM( 7) ,
-     *           NOQ       ,NRFTOT( 7) ,IPA    ,IPH       ,IPF        ,
-     *           IPI       ,LUNTXT     ,13     ,ISFLAG    ,IFFLAG     ,
-     *           UPDATE    ,OTHSET     ,0      ,IWORK     , LSTDUM    ,
-     *           LREDUM    ,RDUMMY     ,ftype  ,dlwqd     )
-            LDUM(1) = UPDATE
-            LDUM(2) = OTHSET
-         ENDIF
-
-         CALL DISTRIBUTE_DATA(MYPART, LDUM, 2, IERR)
-         UPDATE = LDUM(1)
-         OTHSET = LDUM(2)
-         IF ( UPDATE .OR. .TRUE. )
-     *      CALL DISTRIBUTE_DATA(MYPART, ALENG, 2,'noq',1, 'distrib_itf', IERR)
-         IF ( OTHSET ) THEN
-            IS = 13
-            GOTO 10
-         ENDIF
-      ENDIF
-C
-C         boundaries
-C
-      IF ( INTSRT .EQ. 6 .OR. INTSRT .EQ. 7 ) THEN
-         NOSUBS = NOTOT
-      ELSE
-         NOSUBS = NOSYS
-      ENDIF
-      IF ( NRHARM( 8) .GE. 0 .AND. .NOT. BNDSET ) then
-         IF (MYPART .EQ. 1) THEN
-            CALL DLWQT1 (
-     *           LUN       ,ITIME      ,ITIMEL ,IHARM(IPF),HARMAT(IPH),
-     *           ARRAY(IPA),IPOINT(IPI),BOUNDS ,NOSUBS    ,NRHARM( 8) ,
-     *           NOBND     ,NRFTOT( 8) ,IPA    ,IPH       ,IPF        ,
-     *           IPI       , LUNTXT    ,14     ,ISFLAG    ,IFFLAG     ,
-     *           UPDATE    ,BNDSET     ,0      ,IWORK     , LSTDUM    ,
-     *           LREDUM    ,RDUMMY     ,ftype  ,dlwqd     )
-            LDUM(1) = UPDATE
-            LDUM(2) = OTHSET
-            LDUM(3) = BNDSET
-         ENDIF
-
-         CALL DISTRIBUTE_DATA(MYPART, LDUM, 3, IERR)
-         UPDATE = LDUM(1)
-         OTHSET = LDUM(2)
-         BNDSET = LDUM(3)
-
-         IF ( UPDATE .OR. .TRUE. )
-     *      CALL DISTRIBUTE_DATA(MYPART, BOUNDS, NOSUBS*NOBND, IERR)
-      ENDIF
-
-      IF ( BNDSET ) THEN
-         IF (MYPART .EQ. 1) THEN
-            CALL DLWQT1 (
-     *           LUN    , ITIME     ,ITIMEL ,INWSPC(IPNI),ANWSPC(IPNA),
-     *           ADUMMY , INWTYP(IT),BOUNDS ,NOSUBS      ,ISNUL2      ,
-     *           NOBND  , ISNUL     ,IPNI   ,IPNA        ,IDUMMY      ,
-     *           IBNDMX , LUNTXT    ,14     ,ISFLAG      ,IFFLAG      ,
-     *           UPDATE , BNDSET    ,0      ,IWORK       ,LSTDUM      ,
-     *           LREDUM , RDUMMY    ,ftype  ,dlwqd       )
-            LDUM(1) = UPDATE
-            LDUM(2) = OTHSET
-         ENDIF
-
-         CALL DISTRIBUTE_DATA(MYPART, LDUM, 2, IERR)
-         UPDATE = LDUM(1)
-         OTHSET = LDUM(2)
-
-         IF ( UPDATE .OR. .TRUE. )
-     *      CALL DISTRIBUTE_DATA(MYPART, BOUNDS, NOSUBS*NOBND, IERR)
-
-         IT     = IT + NOBND
-c        ILP1 = 0
-c        WRITE ( * , * ) ITIME
-c        DO 2 ILPP = 1,NOBND
-c           WRITE ( * , * ) ILPP
-c           WRITE ( * , '(10F12.2)' ) (BOUNDS(ILP1+K),K=1,NOSYS)
-c           ILP1 = ILP1 + NOSYS
-c   2    CONTINUE
-      ENDIF
-C
-C         wastes
-C
-      IF ( NRHARM( 9) .GE. 0 .AND. .NOT. WSTSET ) then
-         IF (MYPART .EQ. 1) THEN
-            CALL DLWQT1 (
-     *           LUN       ,ITIME      ,ITIMEL ,IHARM(IPF),HARMAT(IPH),
-     *           ARRAY(IPA),IPOINT(IPI),WASTES ,NOTOT+1   ,NRHARM( 9) ,
-     *           NOWST     ,NRFTOT( 9) ,IPA    ,IPH       ,IPF        ,
-     *           IPI       ,LUNTXT     ,15     ,ISFLAG    ,IFFLAG     ,
-     *           UPDATE    ,WSTSET     ,1      ,IWORK     , LSTDUM    ,
-     *           LREDUM    ,RDUMMY     ,ftype  ,dlwqd     )
-            LDUM(1) = UPDATE
-            LDUM(2) = OTHSET
-            LDUM(3) = WSTSET
-         ENDIF
-
-         CALL DISTRIBUTE_DATA(MYPART, LDUM, 3, IERR)
-         UPDATE = LDUM(1)
-         OTHSET = LDUM(2)
-         WSTSET = LDUM(3)
-
-         IF ( UPDATE .OR. .TRUE. )
-     *      CALL DISTRIBUTE_DATA(MYPART, WASTES, (NOTOT+1)*NOWST, IERR)
-      ENDIF
-      ISNUL = 0
-      ISNUL2= 0
-      IF ( WSTSET ) THEN
-         IF (MYPART .EQ. 1) THEN
-            CALL DLWQT1 (
-     *           LUN       ,ITIME     ,ITIMEL ,INWSPC(IPNI),ANWSPC(IPNA),
-     *           ADUMMY    ,INWTYP(IT),WASTES ,NOTOT+1     ,ISNUL2      ,
-     *           NOWST     ,ISNUL     ,IPNI   ,IPNA        ,IDUMMY      ,
-     *           IWSTMX    ,LUNTXT    ,15     ,ISFLAG      ,IFFLAG      ,
-     *           UPDATE    ,WSTSET    ,1      ,IWORK       ,LSTDUM      ,
-     *           LREDUM    ,RDUMMY    ,ftype  ,dlwqd       )
-            LDUM(1) = UPDATE
-            LDUM(2) = OTHSET
-         ENDIF
-
-         CALL DISTRIBUTE_DATA(MYPART, LDUM, 2, IERR)
-         UPDATE = LDUM(1)
-         OTHSET = LDUM(2)
-
-         IF ( UPDATE .OR. .TRUE. )
-     *      CALL DISTRIBUTE_DATA(MYPART, WASTES, (NOTOT+1)*NOWST, IERR)
-
-         IT     = IT + NOWST
-c        ILP1 = 0
-c        WRITE ( * , * ) ITIME
-c        DO 1 ILPP = 1,NOWST
-c           WRITE ( * , * ) ILPP
-c           WRITE ( * , '(20F6.2)' ) (WASTES(ILP1+K),K=1,NOTOT+1)
-c           ILP1 = ILP1 + NOTOT + 1
-c   1    CONTINUE
-      ENDIF
-C
-C         functions
-C
-      NOSSS = NOSEG + NSEG2
-      IF ( NRHARM(10) .GE. 0 ) then
-         IF (MYPART .EQ. 1) THEN
-            call dlwqta ( lun(16), luntxt(16), lun(19), nosss  , nocons ,
-     +                    nopa   , nofun     , nosfun , consts , param  ,
-     +                    funcs  , sfuncs    , isflag , ifflag , itime  ,
-     +                    GridPs , dlwqd     , ierr   )
-         ENDIF
-         CALL DISTRIBUTE_DATA(MYPART, IFFLAG, 1, IERR)
-         IF (IFFLAG .EQ. 1) THEN
-            CALL DISTRIBUTE_DATA(MYPART, CONSTS, NOCONS, IERR)
-            CALL DISTRIBUTE_DATA(MYPART, PARAM , NOPA,'noseg',1,
-     *                           'distrib_itf' , IERR)
-         ENDIF
-         CALL DISTRIBUTE_DATA(MYPART, FUNCS , NOFUN      , IERR)
-         CALL DISTRIBUTE_DATA(MYPART, SFUNCS, NOSSS*NOSFUN , IERR)
-      ENDIF
-
-      CALL DISTRIBUTE_DATA(MYPART, NRHARM, 10, IERR)
-C
-C     kenmerk array
-C
-      CALL DLWQTK ( LUN    , ITIME  , IKTIM  , IKNMRK , NOSSS  ,
-     +              40     , LUNTXT , ISFLAG , IFFLAG , IFIOPK )
-C
-C         close the harmonics and pointer files
-C
-   10 IF ( IFFLAG .EQ. 1 ) THEN
-         IF (MYPART .EQ. 1 ) THEN
-            CLOSE ( LUN( 3) )
-            CLOSE ( LUN( 4) )
+      if ( ifflag .eq. 1 ) then
+         bndset = .false.
+         wstset = .false.
+         funset = .false.
+         othset = .false.
+         if (mypart .eq. 1) then
+            call dhopnf ( lun(3), luntxt(3), 3    , 2     , ierr  )
+            call dhopnf ( lun(4), luntxt(4), 4    , 2     , ierr  )
          endif
-         IF ( OTHSET ) THEN
-            WRITE ( LUN(19) , * ) ' ERROR, new time series processing',
-     *           ' wanted for an unsupported item: ',LUNTXT(IS)
-            CALL SRSTOP(1)
-         ENDIF
-      ENDIF
-C
-      ITIMEL =  ITIME
+      endif
+
+!         initialisation
+
+      iph  = 1
+      ipf  = 1
+      ipa  = 1
+      ipi  = 1
+      ipni = 1
+      ipna = 1
+      it   = 1
+      isnul  = 0
+      isnul2 = 0
+      idummy = 0
+      lstdum = .false.
+      update = .false.
+
+!         integration step size IDT
+
+      if ( nrftot( 1) .gt. 0 ) then
+         if (mypart.eq.1) then
+            call dlwqt1 ( lun       , itime      , itimel , iharm(ipf), harmat(iph),
+     &                    array(ipa), ipoint(ipi), adt    , 1         , nrharm( 1) ,
+     &                    1         , nrftot( 1) , ipa    , iph       , ipf        ,
+     &                    ipi       , luntxt     , 5      , isflag    , ifflag     ,
+     &                    update    , othset     , 0      , iwork     , lstdum     ,
+     &                    lredum    , rdummy     , ftype  , dlwqd     )
+            ldum(1) = update
+            ldum(2) = othset
+         endif
+
+         call distribute_data(mypart, ldum, 2, ierr)
+         update = ldum(1)
+         othset = ldum(2)
+
+         if ( update .or. .true. ) call distribute_data(mypart, adt, 1, ierr)
+         if ( othset ) then
+            is = 5
+            goto 10
+         endif
+         idt = adt(1) +   0.5
+      endif
+
+!         volumes
+
+!     if read anyway or ( read-requested and there is something to read )
+      if ( nrharm( 2) .ge. 0 ) then
+         if   ( rdvolu ) then
+!           if .not. computed volumes .or. this is the first time
+            if ( ivflag     .eq. 0 .or. ifflag .eq. 1 ) then
+               if (mypart .eq. 1) then
+                  call dlwqt1 ( lun       , itime      , itimel , iharm(ipf), harmat(iph),
+     &                          array(ipa), ipoint(ipi), volume , 1         , nrharm( 2) ,
+     &                          noseg     , nrftot( 2) , ipa    , iph       , ipf        ,
+     &                          ipi       , luntxt     , 7      , isflag    , ifflag     ,
+     &                          update    , othset     , 0      , iwork     , lstrec     ,
+     &                          lrewin    , vollst     , ftype  , dlwqd     )
+                  ldum(1) = update
+                  ldum(2) = othset
+                  ldum(3) = lrewin
+               endif
+
+               call distribute_data(mypart, ldum, 3, ierr)
+               update = ldum(1)
+               othset = ldum(2)
+               lrewin = ldum(3)
+
+               if ( update .or. .true. )
+     &             call distribute_data(mypart, volume, 'noseg','distrib_itf', ierr)
+            endif
+         else
+            ipa = ipa + nrftot(2)*2
+            ipi = ipi + noseg + 3
+         endif
+         if ( othset ) then
+            is = 7
+            goto 10
+         endif
+      endif
+
+!         dispersions
+
+      if ( nrharm( 3) .ge. 0 ) then
+         if (mypart.eq.1) then
+            call dlwqt1 ( lun       , itime      , itimel , iharm(ipf), harmat(iph),
+     &                    array(ipa), ipoint(ipi), disper , nodisp    , nrharm( 3) ,
+     &                    noq       , nrftot( 3) , ipa    , iph       , ipf        ,
+     &                    ipi       , luntxt     , 9      , isflag    , ifflag     ,
+     &                    update    , othset     , 0      , iwork     , lstdum     ,
+     &                    lredum    , rdummy     , ftype  , dlwqd     )
+            ldum(1) = update
+            ldum(2) = othset
+         endif
+
+         call distribute_data(mypart, ldum, 2, ierr)
+         update = ldum(1)
+         othset = ldum(2)
+
+         if ( update .or. .true. )
+     &      call distribute_data(mypart, disper, nodisp,'noq',1,
+     &                           'distrib_itf', ierr)
+         if ( othset ) then
+            is = 9
+            goto 10
+         endif
+      endif
+
+!         area
+
+      if ( nrharm( 4) .ge. 0 ) then
+         if (mypart .eq. 1) then
+            call dlwqt1 ( lun       , itime      , itimel , iharm(ipf), harmat(iph),
+     &                    array(ipa), ipoint(ipi), area   , 1         , nrharm( 4) ,
+     &                    noq       , nrftot( 4) , ipa    , iph       , ipf        ,
+     &                    ipi       , luntxt     , 10     , isflag    , ifflag     ,
+     &                    update    , othset     , 0      , iwork     ,  lstdum    ,
+     &                    lredum    , rdummy     , ftype  , dlwqd     )
+            ldum(1) = update
+            ldum(2) = othset
+         endif
+
+         call distribute_data(mypart, ldum, 2, ierr)
+         update = ldum(1)
+         othset = ldum(2)
+
+         if ( update .or. .true. )
+     &      call distribute_data(mypart, area, 'noq', 'distrib_itf', ierr)
+         if ( othset ) then
+            is = 10
+            goto 10
+         endif
+      endif
+
+!         flow
+
+      if ( nrharm( 5) .ge. 0 ) then
+         if (mypart .eq. 1) then
+            call dlwqt1 ( lun       , itime      , itimel , iharm(ipf) , harmat(iph),
+     &                    array(ipa), ipoint(ipi), flow   , 1          , nrharm( 5) ,
+     &                    noq       , nrftot( 5) , ipa    , iph        , ipf        ,
+     &                    ipi       , luntxt     , 11     , isflag     , ifflag     ,
+     &                    update    , othset     , 0      , iwork      , lstdum     ,
+     &                    lredum    , rdummy     , ftype  , dlwqd      )
+            ldum(1) = update
+            ldum(2) = othset
+         endif
+
+         call distribute_data(mypart, ldum, 2, ierr)
+         update = ldum(1)
+         othset = ldum(2)
+
+         if ( update .or. .true. )
+     &      call distribute_data(mypart, flow, 'noq', 'distrib_itf', ierr)
+         if ( othset ) then
+            is = 11
+            goto 10
+         endif
+      endif
+
+!         velocities
+
+      if ( nrharm( 6) .ge. 0 ) then
+         if (mypart .eq. 1) then
+            call dlwqt1 ( lun       , itime      , itimel , iharm(ipf) , harmat(iph),
+     &                    array(ipa), ipoint(ipi), velo   , novelo     , nrharm( 6) ,
+     &                    noq       , nrftot( 6) , ipa    , iph        , ipf        ,
+     &                    ipi       , luntxt     , 12     , isflag     , ifflag     ,
+     &                    update    , othset     , 0      , iwork      , lstdum     ,
+     &                    lredum    , rdummy     , ftype  , dlwqd      )
+            ldum(1) = update
+            ldum(2) = othset
+         endif
+
+         call distribute_data(mypart, ldum, 2, ierr)
+         update = ldum(1)
+         othset = ldum(2)
+
+         if ( update .or. .true. )
+     &      call distribute_data(mypart,velo,novelo,'noq',1, 'distrib_itf',ierr)
+         if ( othset ) then
+            is = 12
+            goto 10
+         endif
+      endif
+
+!         'from'- and 'to'-length
+
+      if ( nrharm( 7) .ge. 0 .and. ilflag .eq. 1 ) then
+         if (mypart .eq. 1) then
+            call dlwqt1 ( lun       , itime      , itimel , iharm(ipf), harmat(iph),
+     &                    array(ipa), ipoint(ipi), aleng  , 2         , nrharm( 7) ,
+     &                    noq       , nrftot( 7) , ipa    , iph       , ipf        ,
+     &                    ipi       , luntxt     , 13     , isflag    , ifflag     ,
+     &                    update    , othset     , 0      , iwork     , lstdum     ,
+     &                    lredum    , rdummy     , ftype  , dlwqd     )
+            ldum(1) = update
+            ldum(2) = othset
+         endif
+
+         call distribute_data(mypart, ldum, 2, ierr)
+         update = ldum(1)
+         othset = ldum(2)
+         if ( update .or. .true. )
+     &      call distribute_data(mypart, aleng, 2,'noq',1, 'distrib_itf', ierr)
+         if ( othset ) then
+            is = 13
+            goto 10
+         endif
+      endif
+
+!         boundaries
+
+      if ( intsrt .eq. 6 .or. intsrt .eq. 7 ) then
+         nosubs = notot
+      else
+         nosubs = nosys
+      endif
+      if ( nrharm( 8) .ge. 0 .and. .not. bndset ) then
+         if (mypart .eq. 1) then
+            call dlwqt1 ( lun       , itime      , itimel , iharm(ipf), harmat(iph),
+     &                    array(ipa), ipoint(ipi), bounds , nosubs    , nrharm( 8) ,
+     &                    nobnd     , nrftot( 8) , ipa    , iph       , ipf        ,
+     &                    ipi       ,  luntxt    , 14     , isflag    , ifflag     ,
+     &                    update    , bndset     , 0      , iwork     ,  lstdum    ,
+     &                    lredum    , rdummy     , ftype  , dlwqd     )
+            ldum(1) = update
+            ldum(2) = othset
+            ldum(3) = bndset
+         endif
+
+         call distribute_data(mypart, ldum, 3, ierr)
+         update = ldum(1)
+         othset = ldum(2)
+         bndset = ldum(3)
+
+         if ( update .or. .true. )
+     &      call distribute_data(mypart, bounds, nosubs*nobnd, ierr)
+      endif
+
+      if ( bndset ) then
+         if (mypart .eq. 1) then
+            call dlwqt1 ( lun    , itime     , itimel , inwspc(ipni), anwspc(ipna),
+     &                    adummy , inwtyp(it), bounds , nosubs      , isnul2      ,
+     &                    nobnd  , isnul     , ipni   , ipna        , idummy      ,
+     &                    ibndmx , luntxt    , 14     , isflag      , ifflag      ,
+     &                    update , bndset    , 0      , iwork       , lstdum      ,
+     &                    lredum , rdummy    , ftype  , dlwqd       )
+            ldum(1) = update
+            ldum(2) = othset
+         endif
+
+         call distribute_data(mypart, ldum, 2, ierr)
+         update = ldum(1)
+         othset = ldum(2)
+
+         if ( update .or. .true. )
+     &      call distribute_data(mypart, bounds, nosubs*nobnd, ierr)
+
+         it     = it + nobnd
+      endif
+
+!         wastes
+
+      if ( nrharm( 9) .ge. 0 .and. .not. wstset ) then
+         if (mypart .eq. 1) then
+            call dlwqt1 ( lun       , itime      , itimel , iharm(ipf), harmat(iph),
+     &                    array(ipa), ipoint(ipi), wastes , notot+1   , nrharm( 9) ,
+     &                    nowst     , nrftot( 9) , ipa    , iph       , ipf        ,
+     &                    ipi       , luntxt     , 15     , isflag    , ifflag     ,
+     &                    update    , wstset     , 1      , iwork     ,  lstdum    ,
+     &                    lredum    , rdummy     , ftype  , dlwqd     )
+            ldum(1) = update
+            ldum(2) = othset
+            ldum(3) = wstset
+         endif
+
+         call distribute_data(mypart, ldum, 3, ierr)
+         update = ldum(1)
+         othset = ldum(2)
+         wstset = ldum(3)
+
+         if ( update .or. .true. )
+     &      call distribute_data(mypart, wastes, (notot+1)*nowst, ierr)
+      endif
+      isnul = 0
+      isnul2= 0
+      if ( wstset ) then
+         if (mypart .eq. 1) then
+            call dlwqt1 ( lun       , itime     , itimel , inwspc(ipni), anwspc(ipna),
+     &                    adummy    , inwtyp(it), wastes , notot+1     , isnul2      ,
+     &                    nowst     , isnul     , ipni   , ipna        , idummy      ,
+     &                    iwstmx    , luntxt    , 15     , isflag      , ifflag      ,
+     &                    update    , wstset    , 1      , iwork       , lstdum      ,
+     &                    lredum    , rdummy    , ftype  , dlwqd       )
+            ldum(1) = update
+            ldum(2) = othset
+         endif
+
+         call distribute_data(mypart, ldum, 2, ierr)
+         update = ldum(1)
+         othset = ldum(2)
+
+         if ( update .or. .true. )
+     &      call distribute_data(mypart, wastes, (notot+1)*nowst, ierr)
+
+         it     = it + nowst
+      endif
+
+!         functions
+
+      nosss = noseg + nseg2
+      if ( nrharm(10) .ge. 0 ) then
+         if (mypart .eq. 1) then
+            call dlwqta ( lun(16), luntxt(16), lun(19), nosss  , nocons ,
+     &                    nopa   , nofun     , nosfun , consts , param  ,
+     &                    funcs  , sfuncs    , isflag , ifflag , itime  ,
+     &                    gridps , dlwqd     , ierr   )
+         endif
+         call distribute_data(mypart, ifflag, 1, ierr)
+         if (ifflag .eq. 1) then
+            call distribute_data(mypart, consts, nocons, ierr)
+            call distribute_data(mypart, param , nopa,'noseg',1,
+     &                           'distrib_itf' , ierr)
+         endif
+         call distribute_data(mypart, funcs , nofun      , ierr)
+         call distribute_data(mypart, sfuncs, nosss*nosfun , ierr)
+      endif
+
+      call distribute_data(mypart, nrharm, 10, ierr)
+
+!     kenmerk array
+
+      call dlwqtk ( lun    , itime  , iktim  , iknmrk , nosss  ,
+     &              40     , luntxt , isflag , ifflag , ifiopk )
+
+!         close the harmonics and pointer files
+
+   10 if ( ifflag .eq. 1 ) then
+         if (mypart .eq. 1 ) then
+            close ( lun( 3) )
+            close ( lun( 4) )
+         endif
+         if ( othset ) then
+            write ( lun(19) , * ) ' error, new time series processing',
+     &           ' wanted for an unsupported item: ',luntxt(is)
+            call srstop(1)
+         endif
+      endif
+
+      itimel =  itime
       if ( timon ) call timstop ( ithandl )
-      RETURN
-      END
 
-
-C     HARMAT  REAL          ?     IN/OUT  matrices harmonic components
-
-c dimensies achterhalen
-C     VOLLST  REAL          *     OUTPUT  Last volume record before rewind
-cajv nog uizoeken wat hiermee moet gebeuren, evt ook aanpassen in dlwq41
-
-c call naar dlwqtk
-C     IKTIM   INTEGER       *     IN/OUT  Timers in file
-C     IKNMRK  INTEGER   NOSEG,*   IN/OUT  Kenmerk array
-
-
-c in dlwqqta
-C     INWSPC  INTEGER       *     IN/OUT  Integer space new time funs
-C     ANWSPC  REAL          *     IN/OUT  Real space new time functions
+      return
+      end

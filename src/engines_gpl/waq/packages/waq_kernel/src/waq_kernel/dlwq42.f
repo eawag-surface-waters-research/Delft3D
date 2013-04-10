@@ -21,10 +21,9 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      subroutine dlwq42 ( nosys  , notot  , noseg  , volume , amass  ,
-     &                    conc   , deriv  , nopa   , paname , param  ,
-     &                    nosfun , sfname , segfun , idt    , ivflag ,
-     &                    lun    , owners , mypart )
+      subroutine dlwq42 ( nosys  , notot  , nototp , noseg  , volume ,
+     &                    surface, amass  , conc   , deriv  , idt    ,
+     &                    ivflag , lun    , owners , mypart )
 
 !     Deltares Software Centre
 
@@ -45,12 +44,15 @@
 !                                           conc of passive substances in mass/m2
 !                                           Also equiped with computed volumes
 !                                           feature.
+!                            4 April   2013 by Leo Postma
+!                                           take presence of particle-substances into account
 
 !     Logical unitnumbers : LUN     = number of monitoring file
 
 !     Subroutines called  : none
 
       use timers
+
       implicit none
 
 !     Parameters          :
@@ -58,17 +60,13 @@
 
       integer   (4), intent(in   ) :: nosys                   !< number of transported substances
       integer   (4), intent(in   ) :: notot                   !< total number of substances
+      integer  ( 4), intent(in   ) :: nototp                  !< number of particle substances
       integer   (4), intent(in   ) :: noseg                   !< number of computational volumes
       real      (4), intent(inout) :: volume(noseg )          !< volumes of the segments
+      real     ( 4), intent(in   ) :: surface(noseg)          !< horizontal surface area
       real      (4), intent(inout) :: amass (notot ,noseg)    !< masses per substance per volume
       real      (4), intent(inout) :: conc  (notot ,noseg)    !< concentrations per substance per volume
       real      (4), intent(inout) :: deriv (notot ,noseg)    !< derivatives per substance per volume
-      integer   (4), intent(in   ) :: nopa                    !< number of parameters
-      character(20), intent(in   ) :: paname(nopa  )          !< names of the parameters
-      real      (4), intent(in   ) :: param (nopa  ,noseg)    !< parameter values
-      integer   (4), intent(in   ) :: nosfun                  !< number of segment functions
-      character(20), intent(in   ) :: sfname(nosfun)          !< names of the segment functions
-      real      (4), intent(in   ) :: segfun(noseg ,nosfun)   !< segment function values
       integer   (4), intent(in   ) :: idt                     !< integration time step size
       integer   (4), intent(in   ) :: ivflag                  !< if 1 computational volumes
       integer   (4), intent(in   ) :: lun                     !< unit number of the monitoring file
@@ -79,36 +77,17 @@
 
       integer(4)          isys            ! loopcounter substances
       integer(4)          iseg            ! loopcounter computational volumes
-      integer(4)          indx            ! index of the surf variable in the array
       real   (4)          surf            ! the horizontal surface area of the cell
       real   (4)          vol             ! helpvariable for this volume
-      integer(4)          mode            ! -1 segment functions, +1 parameters, 0 none
       integer(4), save :: ivmess          ! number of messages printed
       data       ivmess  /0/
       integer(4), save :: ithandl         ! timer handle
       data       ithandl /0/
-
       if ( timon ) call timstrt ( "dlwq42", ithandl )
-
-!         see if the surface is available
-
-      if ( nosys .ne. notot ) then                         ! if there are bed-substances
-         call zoek20 ( 'SURF      ', nopa  , paname , 10 , indx )
-         if ( indx .gt. 0 ) then                           ! SURF is found
-            mode = 1
-         else
-            call zoek20 ( 'SURF      ', nosfun, sfname, 10, indx )
-            if ( indx .gt. 0 ) then
-               mode = -1
-            else
-               mode = 0
-            endif
-         endif
-      endif
 
 !         loop accross the number of computational volumes for the concentrations
 
-      do 10 iseg = 1, noseg
+      do iseg = 1, noseg
 
 !         compute volumes if necessary and check for positivity
 
@@ -135,22 +114,16 @@
 
 !         then the passive substances
 
-         if ( notot .gt. nosys ) then
-            if ( mode .eq.  1 ) then
-               surf = param(indx,iseg)
-            elseif ( mode .eq. -1 ) then
-               surf = segfun(iseg,indx)
-            else
-               surf = 1.0
-            endif
-            do isys = nosys+1, notot
+         if ( notot - nototp .gt. nosys ) then
+            surf = surface(iseg)
+            do isys = nosys+1, notot - nototp
                amass(isys,iseg) = amass(isys,iseg) + idt*deriv(isys,iseg)
                conc (isys,iseg) = amass(isys,iseg) / surf
                deriv(isys,iseg) = 0.0
             enddo
          endif
 
-   10 continue
+      enddo
 
 !        output formats
 

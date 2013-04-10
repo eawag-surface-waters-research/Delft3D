@@ -21,100 +21,81 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      SUBROUTINE DLWQ14 ( DERIV  , NOTOT  , NOSEG  , ITFACT , AMASS2 ,
-     *                    IDT    , IAFLAG , DMPS   , INTOPT , ISDMP  ,
-     *                    OWNERS , MYPART )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED             : april 1988 by L.Postma
-C
-C     FUNCTION            : utility that scales the DERIV array after
-C                           the user quality processes routine and
-C                           accumulates if needed.
-C
-C     LOGICAL UNITS       : none
-C
-C     SUBROUTINES CALLED  : none
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     DERIV   REAL   NOTOT*NOSEG  IN/OUT  derivatives to be scaled
-C     NOTOT   INTEGER     1       INPUT   total number of systems
-C     NOSEG   INTEGER     1       INPUT   number of computational elems
-C     ITFACT  INTEGER     1       INPUT   scale factor
-C     AMASS2  REAL     NOTOT*5    IN/OUT  mass balance array
-C     IDT     INTEGER     1       INPUT   integration time step size
-C     IAFLAG  INTEGER     1       INPUT   if 1 then accumulation
-C     DMPS    REAL        *       IN/OUT  dumped segment fluxes
-C                                         if INTOPT > 7
-C     INTOPT  INTEGER     1       INPUT   Integration suboptions
-C     ISDMP   INTEGER  NOSEG      INPUT   pointer dumped segments
-C     OWNERS  INTEGER  NOSEG      INPUT   ownership of segments
-C     MYPART  INTEGER     1       INPUT   number of current part/subdomain
-C
-      use timers
-      INTEGER     ISDMP(*)
-      DIMENSION   DERIV(*)  ,  AMASS2(*)  , DMPS(*)
-      INTEGER     OWNERS(NOSEG)
-      INTEGER     MYPART
-      integer(4) ithandl /0/
-      if ( timon ) call timstrt ( "dlwq14", ithandl )
-C
-C         loop accross deriv
-C
-      ATFAC = 1.0/ITFACT
-      DTFAC = IDT
-      IF ( IAFLAG .EQ. 1 ) THEN
-         K = 1
-         DO  20  ISEG = 1 , NOSEG
-            IF (OWNERS(ISEG).EQ.MYPART) THEN
-               DO  10  I2 = NOTOT+1 , 2*NOTOT
-                  DERIV (K ) = DERIV (K )*ATFAC
-                  AMASS2(I2) = AMASS2(I2)+DERIV(K)*DTFAC
-                  K = K + 1
-   10          CONTINUE
-            ELSE
-               K = K + NOTOT
-            ENDIF
-   20    CONTINUE
-      ELSE
-         K = 1
-         DO  40 ISEG = 1 , NOSEG
-            IF (OWNERS(ISEG).EQ.MYPART) THEN
-               DO  30 I2 = 1 , NOTOT
-                  DERIV(K) = DERIV(K) * ATFAC
-                  K = K + 1
-   30          CONTINUE
-            ELSE
-               K = K + NOTOT
-            ENDIF
-   40    CONTINUE
-      ENDIF
-C
-      IF ( MOD(INTOPT,16) .GE. 8  ) THEN
-C
-         I1 = 0
-         I3 = 0
-         DO 60 ISEG = 1 , NOSEG
-            IP = ISDMP(ISEG)
-            IF (OWNERS(ISEG).EQ.MYPART .AND. IP.GT.0) THEN
-               I3 = (IP-1)*NOTOT
-               DO 50 ISYS = 1 , NOTOT
-                  I1 = I1 + 1
-                  I3 = I3 + 1
-                  DMPS(I3) = DMPS(I3) + DERIV(I1) * DTFAC
-   50          CONTINUE
-            ELSE
-               I1 = I1 + NOTOT
-            ENDIF
-   60    CONTINUE
-C
-      ENDIF
-C
-      if ( timon ) call timstop ( ithandl )
-      RETURN
-      END
+      subroutine dlwq14 ( deriv  , notot  , noseg  , itfact , amass2 ,
+     &                    idt    , iaflag , dmps   , intopt , isdmp  ,
+     &                    owners , mypart )
 
+!     Deltares Software Centre
+
+!>\File
+!>          Scales deriv and accumulates processes in the balances arrays
+
+!     Created             : april 1988 by L.Postma
+
+!     Logical units       : none
+
+!     Subroutines called  : none
+
+      use timers
+
+      implicit none
+
+!     Parameters          :
+
+!     kind           function         name                   description
+
+      real     ( 4), intent(inout) :: deriv (notot,noseg)  !< Derivatives to be scaled
+      integer  ( 4), intent(in   ) :: notot                !< Total number of substances
+      integer  ( 4), intent(in   ) :: noseg                !< Number of computational volumes
+      integer  ( 4), intent(in   ) :: itfact               !< Factor between process and transport clock
+      real     ( 4), intent(inout) :: amass2(notot,5)      !< Mass balance array
+      integer  ( 4), intent(in   ) :: idt                  !< Integration time step size
+      integer  ( 4), intent(in   ) :: iaflag               !< if 1 then accumulation
+      real     ( 4), intent(inout) :: dmps  (notot,*)      !< Integrated fluxes if intopt > 7
+      integer  ( 4), intent(in   ) :: intopt               !< Integration suboptions
+      integer  ( 4), intent(in   ) :: isdmp (noseg)        !< Pointer dumped segments
+      integer  ( 4), intent(in   ) :: owners(noseg)        !< Ownership of segments
+      integer  ( 4), intent(in   ) :: mypart               !< Number of current part/subdomain
+
+!     Local variables
+
+      real     ( 4) atfac           ! helpvariable 1.0/itfact
+      real     ( 4) dtfac           ! helpvariable idt
+      integer  ( 4) iseg            ! loop variable
+      integer  ( 4) ip              ! help variable
+
+      integer  ( 4) ithandl /0/
+      if ( timon ) call timstrt ( "dlwq14", ithandl )
+
+!         loop accross deriv
+
+      atfac = 1.0/itfact
+      dtfac = idt
+      if ( iaflag .eq. 1 ) then
+         do iseg = 1 , noseg
+            if ( owners(iseg) .ne. mypart ) cycle
+            deriv (:,iseg) = deriv(:,iseg) * atfac
+            amass2(:,2)    = deriv(:,iseg) * dtfac + amass2(:,2)
+         enddo
+      else
+         do iseg = 1 , noseg
+            if ( owners(iseg) .ne. mypart ) cycle
+            deriv (:,iseg) = deriv(:,iseg) * atfac
+         enddo
+      endif
+
+!         accumulate processes for dump segments
+
+      if ( mod(intopt,16) .ge. 8  ) then
+         do iseg = 1 , noseg
+            ip = isdmp(iseg)
+            if ( owners(iseg) .eq. mypart .and. ip .gt. 0 ) then
+               dmps(:,ip) = dmps(:,ip) + deriv(:,iseg) * dtfac
+            endif
+         enddo
+      endif
+
+      if ( timon ) call timstop ( ithandl )
+
+      return
+      end

@@ -21,90 +21,112 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      SUBROUTINE DLWQ20 ( CONC   , AMASS  , DERIV  , VOLUME , IDT    ,
-     *                    NOSYS  , NOTOT  , NOSEG  , LUN    , IVFLAG )
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:    april 1988 by L.Postma
-C
-C     FUNCTION            : Sets an preliminary step from DERIV.
-C
-C     LOGICAL UNITNUMBERS : LUN = number of monitoring file
-C
-C     SUBROUTINES CALLED  : none
-C
-C     PARAMETERS          :
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     CONC    REAL   NOTOT*NOSEG  OUTPUT  new concentrations
-C     AMASS   REAL   NOTOT*NOSEG  IN/OUT  mass array to be updated
-C     DERIV   REAL   NOTOT*NOSEG  INPUT   derivetives for time step
-C     VOLUME  REAL      NOSEG     INPUT   segment volumes
-C     IDT     INTEGER     1       INPUT   time step size in clock units
-C     NOSYS   INTEGER     1       INPUT   number of active substances
-C     NOTOT   INTEGER     1       INPUT   number of total substances
-C     NOSEG   INTEGER     1       INPUT   number of computational elts.
-C     IVFLAG  INTEGER     1       INPUT   = 1 then computed volumes
-C
+      subroutine dlwq20 ( nosys  , notot  , nototp , noseg  , volume ,
+     &                    surface, amass  , conc   , deriv  , idt    ,
+     &                    ivflag , lun    , owners , mypart )
+
+!     Deltares Software Centre
+
+!>\File
+!>           Sets a preliminary time step from DERIV.
+!>
+!>           - the mass array is NOT changed, so unlike dlwq18
+!>           - the deriv array is set to zero.
+!>           - if applicable, computed volumes are evaluated.
+!>           - the concentrations of water bound substances are mass / volume
+!>           - the concentrations of bed susbtances are mass / surface
+
+!     Created             :    April   1988 by Leo Postma
+
+!     Modified            :  4 April   2013 by Leo Postma
+!                                           2D arrays, fortran 90 look and feel
+!                                           conc of passive substances in mass/m2
+!                                           take presence of particle-substances into account
+
+!     Logical unitnumbers : LUN     = number of monitoring file
+
+!     Subroutines called  : none
+
       use timers
 
-      DIMENSION  CONC(*) , AMASS(*) , DERIV(*) , VOLUME(*)
-      SAVE       IVMESS
-      DATA       IVMESS /0/
-      integer(4) ithandl /0/
+      implicit none
+
+!     Parameters          :
+
+!     type     kind  function         name                      description
+
+      integer  ( 4), intent(in   ) :: nosys                   !< number of transported substances
+      integer  ( 4), intent(in   ) :: notot                   !< total number of substances
+      integer  ( 4), intent(in   ) :: nototp                  !< number of particle substances
+      integer  ( 4), intent(in   ) :: noseg                   !< number of computational volumes
+      real     ( 4), intent(inout) :: volume (noseg )         !< volumes of the segments
+      real     ( 4), intent(in   ) :: surface(noseg )         !< horizontal surface area
+      real     ( 4), intent(inout) :: amass  (notot ,noseg)   !< masses per substance per volume
+      real     ( 4), intent(inout) :: conc   (notot ,noseg)   !< concentrations per substance per volume
+      real     ( 4), intent(inout) :: deriv  (notot ,noseg)   !< derivatives per substance per volume
+      integer  ( 4), intent(in   ) :: idt                     !< integration time step size
+      integer  ( 4), intent(in   ) :: ivflag                  !< if 1 computational volumes
+      integer  ( 4), intent(in   ) :: lun                     !< unit number of the monitoring file
+      integer  ( 4), intent(in   ) :: owners (noseg )         !< ownership array for segments
+      integer  ( 4), intent(in   ) :: mypart                  !< number of the current subdomain
+
+!     local variables
+
+      integer(4)          isys            ! loopcounter substances
+      integer(4)          iseg            ! loopcounter computational volumes
+      real   (4)          surf            ! the horizontal surface area of the cell
+      real   (4)          vol             ! helpvariable for this volume
+      integer(4), save :: ivmess          ! number of messages printed
+      data       ivmess  /0/
+      integer(4), save :: ithandl         ! timer handle
       if ( timon ) call timstrt ( "dlwq20", ithandl )
-C
-C         loop accross the number of computational elements
-C
-      ITEL = 1
-      DO 30 ISEG=1,NOSEG
-C
-C         compute volumes if necessary
-C
-      IF ( IVFLAG .EQ. 1 ) VOLUME(ISEG) = AMASS(ITEL) + IDT*DERIV(ITEL)
-      V1 = VOLUME(ISEG)
-      IF ( ABS(V1).LT.1.0E-25 ) THEN
-         IF ( IVMESS .LT. 25 ) THEN
-            IVMESS = IVMESS + 1
-            WRITE ( LUN, 1000 ) ISEG  , V1
-         ELSEIF ( IVMESS .EQ. 25 ) THEN
-            IVMESS = IVMESS + 1
-            WRITE ( LUN, 1001 )
-         ENDIF
-         VOLUME (ISEG) = 1.0
-         V1            = 1.0
-      ENDIF
-C
-C         active substances first
-C
-      DO 10 I=1,NOSYS
-      A           = AMASS(ITEL) + IDT*DERIV(ITEL)
-      CONC (ITEL) = A / V1
-      DERIV(ITEL) = 0.0
-      ITEL = ITEL+1
-   10 CONTINUE
-C
-C         then the inactive substances
-C
-      DO 20 I=NOSYS+1,NOTOT
-      A           = AMASS(ITEL) + IDT*DERIV(ITEL)
-      CONC (ITEL) = A
-      DERIV(ITEL) = 0.0
-      ITEL = ITEL+1
-   20 CONTINUE
-C
-C         end of the loop
-C
-   30 CONTINUE
+
+!     loop accross the number of computational volumes for the concentrations
+
+      do iseg = 1, noseg
+
+!     compute volumes if necessary and check for positivity
+
+         if ( ivflag .eq. 1 ) volume(iseg) = amass(1,iseg) + idt*deriv(1,iseg)
+         vol = volume(iseg)
+         if ( abs(vol) .lt. 1.0e-25 ) then
+            if ( ivmess .lt. 25 ) then
+               ivmess = ivmess + 1
+               write ( lun, 1000 ) iseg  , vol
+            elseif ( ivmess .eq. 25 ) then
+               ivmess = ivmess + 1
+               write ( lun, 1001 )
+            endif
+            volume (iseg) = 1.0
+            vol           = 1.0
+         endif
+
+!         transported substances first
+
+         do isys = 1, nosys
+            conc (isys,iseg) = ( amass(isys,iseg) + idt*deriv(isys,iseg) ) / vol
+            deriv(isys,iseg) = 0.0
+         enddo
+
+!         then the passive substances
+
+         if ( notot - nototp .gt. nosys ) then
+            surf = surface(iseg)
+            do isys = nosys+1, notot - nototp
+               conc(isys,iseg) = ( amass(isys,iseg) + idt*deriv(isys,iseg) ) / surf
+               deriv(isys,iseg) = 0.0
+            enddo
+         endif
+
+      enddo
+
       if ( timon ) call timstop ( ithandl )
-      RETURN
-C
-C        output formats
-C
- 1000 FORMAT ( 'Volume of segment:', I7, ' is:',
+      return
+
+!        output formats
+
+ 1000 format ( 'Volume of segment:', I7, ' is:',
      &          E15.6, ' 1.0 assumed.' )
- 1001 FORMAT ('25 or more zero volumes , further messages surpressed')
-C
-      END
+ 1001 format ('25 or more zero volumes , further messages surpressed')
+
+      end

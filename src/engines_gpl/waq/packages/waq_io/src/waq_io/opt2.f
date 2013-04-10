@@ -21,8 +21,8 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      subroutine opt2 ( iopt2  , nitem  , nvals  , nscale , iwidth ,
-     &                  lun1   , ioutpt , ierr   )
+      subroutine opt2 ( iopt2  , array  , nitem  , nvals  , nscale ,
+     &                  iwidth , lun1   , ioutpt , ierr   )
 
 !       Deltares Software Centre
 
@@ -53,7 +53,6 @@
 !     Logical units      : LUNIN = unit input file
 !                          LUNUT = unit formatted output file
 !                          LUN1  = unit intermediate file ( system )
-
       use timers       !   performance timers
       use rd_token
 
@@ -64,6 +63,7 @@
 !     kind           function         name         Descriptipon
 
       integer  ( 4), intent(in   ) :: iopt2      !< input option
+      real      (4), intent(  out) :: array(nvals,nitem) !< array for the values
       integer  ( 4), intent(in   ) :: nitem      !< number of items to read
       integer  ( 4), intent(in   ) :: nvals      !< number of values per item
       integer  ( 4), intent(in   ) :: nscale     !< number of scale values
@@ -75,7 +75,6 @@
 !     local decalations
 
       real   (4), allocatable :: factor( : )       !  array for scale factors
-      real   (4), allocatable :: array (:,:)       !  array for the values
       real   (4)                 value             !  help variable values
       integer(4)                 nover             !  number of overridings
       integer(4)                 iscal             !  loop counter scale values
@@ -88,11 +87,11 @@
       integer(4) :: ithndl = 0
 
       if ( nitem .eq. 0 ) return                   !  no items specified
-      if (timon) call timstrt( "opt2", ithndl )
+      if (timon) call timstrt( "read_opt2", ithndl )
 
-      allocate ( factor(nvals), array(nvals,nitem) , stat=ierr2 )
+      allocate ( factor(nvals), stat=ierr2 )
       if ( ierr2 .ne. 0 ) then
-         write ( lunut, 2000 ) nvals*(nitem+1)
+         write ( lunut, 2000 ) nvals
          goto 100
       endif
 
@@ -189,6 +188,7 @@
 
   100 ierr = ierr + 1
       write ( lunut , 2140 )
+      if (timon) call timstop( ithndl )
       return
 
 !       Output formats

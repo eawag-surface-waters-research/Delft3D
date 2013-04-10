@@ -200,7 +200,7 @@
          arrdm3(iiconc) = nogrid
          nsubs = notot
       else
-         arrdm1(iiconc) = nototp
+         arrdm1(iiconc) = notot
          arrdm2(iiconc) = noseg+nseg2
          arrdm3(iiconc) = nogrid
          nsubs = nosys

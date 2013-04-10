@@ -55,7 +55,6 @@ C                          DLWQ15, wasteload routine
 C                          DLWQ16, transport routine
 C                          DLWQ17, boundary routine
 C                          DLWQ18, integration step
-C                          DLWQ20, preliminary integration step
 C                          PROINT, integration of fluxes
 C                          DHOPNF, opens files
 C                          ZERCUM, zero's the cummulative array's
@@ -219,14 +218,14 @@ C======================= simulation loop ============================
 !        Determine the volumes and areas that ran dry at start of time step
 
          call hsurf  ( noseg    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
-     &                 c(isfna) , a(isfun) , surface  , sindex   , lun(19)  )
+     &                 c(isfna) , a(isfun) , surface  , lun(19)  )
          call dryfld ( noseg    , nosss    , nolay    , a(ivol)  , noq1+noq2,
-     &                 a(iarea) , nocons   , c(icnam) , a(icons) , sindex   ,
-     &                 surface  , j(iknmr) , iknmkv   )
+     &                 a(iarea) , nocons   , c(icnam) , a(icons) , surface  ,
+     &                 j(iknmr) , iknmkv   )
 
 !          user transport processes
 
-         call dlwqtr ( nototp   , nosys    , nosss    , noq      , noq1     ,
+         call dlwqtr ( notot    , nosys    , nosss    , noq      , noq1     ,
      &                 noq2     , noq3     , nopa     , nosfun   , nodisp   ,
      &                 novelo   , j(ixpnt) , a(ivol)  , a(iarea) , a(iflow) ,
      &                 a(ileng) , a(iconc) , a(idisp) , a(icons) , a(iparm) ,
@@ -244,37 +243,34 @@ C======================= simulation loop ============================
 
 !          call PROCES subsystem
 
-      CALL PROCES ( NOTOT    , nosss    , A(ICONC), A(IVOL) , ITIME   ,
-     +              IDT      , A(IDERV) , NDMPAR  , NPROC   , NFLUX   ,
-     +              J(IIPMS) , J(INSVA) , J(IIMOD), J(IIFLU), J(IIPSS),
-     +              A(IFLUX) , A(IFLXD) , A(ISTOC), IBFLAG  , IPBLOO  ,
-     +              IPCHAR   , IOFFBL   , IOFFCH  , A(IMASS), NOSYS   ,
-     +              ITFACT   , A(IMAS2) , IAFLAG  , INTOPT  , A(IFLXI),
-     +              J(IXPNT) , iknmkv   , NOQ1    , NOQ2    , NOQ3    ,
-     +              NOQ4     , NDSPN    , J(IDPNW), A(IDNEW), NODISP  ,
-     +              J(IDPNT) , A(IDIFF) , NDSPX   , A(IDSPX), A(IDSTO),
-     +              NVELN    , J(IVPNW) , A(IVNEW), NOVELO  , J(IVPNT),
-     +              A(IVELO) , NVELX    , A(IVELX), A(IVSTO), A(IDMPS),
-     +              J(ISDMP) , J(IPDMP) , NTDMPQ  , A(IDEFA), J(IPNDT),
-     +              J(IPGRD) , J(IPVAR) , J(IPTYP), J(IVARR), J(IVIDX),
-     +              J(IVTDA) , J(IVDAG) , J(IVTAG), J(IVAGG), J(IAPOI),
-     +              J(IAKND) , J(IADM1) , J(IADM2), J(IVSET), J(IGNOS),
-     +              J(IGSEG) , NOVAR    , A       , NOGRID  , NDMPS   ,
-     +              C(IPRNA) , INTSRT   , J(IOWNS), J(IOWNQ), MYPART  ,
-     +              j(iprvpt), j(iprdon), nrref   , j(ipror), nodef   ,
-     +              surface  ,lun(19) )
-C
-C          communicate boundaries
-C
-      CALL DLWQ_BOUNDIO( LUN(19)  , NOTOT    ,
-     +                   NOSYS    , nosss    ,
-     +                   NOBND    , C(ISNAM) ,
-     +                   C(IBNID) , J(IBPNT) ,
-     +                   A(ICONC) , A(IBSET) ,
-     +                   LCHAR(19))
-C
-C          set new boundaries
-C
+         call proces ( notot    , nosss    , a(iconc) , a(ivol)  , itime    ,
+     &                 idt      , a(iderv) , ndmpar   , nproc    , nflux    ,
+     &                 j(iipms) , j(insva) , j(iimod) , j(iiflu) , j(iipss) ,
+     &                 a(iflux) , a(iflxd) , a(istoc) , ibflag   , ipbloo   ,
+     &                 ipchar   , ioffbl   , ioffch   , a(imass) , nosys    ,
+     &                 itfact   , a(imas2) , iaflag   , intopt   , a(iflxi) ,
+     &                 j(ixpnt) , iknmkv   , noq1     , noq2     , noq3     ,
+     &                 noq4     , ndspn    , j(idpnw) , a(idnew) , nodisp   ,
+     &                 j(idpnt) , a(idiff) , ndspx    , a(idspx) , a(idsto) ,
+     &                 nveln    , j(ivpnw) , a(ivnew) , novelo   , j(ivpnt) ,
+     &                 a(ivelo) , nvelx    , a(ivelx) , a(ivsto) , a(idmps) ,
+     &                 j(isdmp) , j(ipdmp) , ntdmpq   , a(idefa) , j(ipndt) ,
+     &                 j(ipgrd) , j(ipvar) , j(iptyp) , j(ivarr) , j(ividx) ,
+     &                 j(ivtda) , j(ivdag) , j(ivtag) , j(ivagg) , j(iapoi) ,
+     &                 j(iaknd) , j(iadm1) , j(iadm2) , j(ivset) , j(ignos) ,
+     &                 j(igseg) , novar    , a        , nogrid   , ndmps    ,
+     &                 c(iprna) , intsrt   , j(iowns) , j(iownq) , mypart   ,
+     &                 j(iprvpt), j(iprdon), nrref    , j(ipror) , nodef    ,
+     &                 surface  , lun(19)  )
+
+!          communicate boundaries
+
+         call dlwq_boundio ( lun(19)  , notot    , nosys    , nosss    , nobnd    ,
+     &                       c(isnam) , c(ibnid) , j(ibpnt) , a(iconc) , a(ibset) ,
+     &                       lchar(19))
+
+!          set new boundaries
+
       IF ( ITIME .GE. 0   ) THEN
           ! first: adjust boundaries by OpenDA
           if ( dlwqd%inopenda ) then
@@ -315,33 +311,33 @@ C
      +              INTOPT  , C(IPNAM), C(IFNAM), C(ISFNA), J(IDMPB),
      +              NOWST   , NOWTYP  , C(IWTYP), J(IWAST), J(INWTYP),
      +              A(IWDMP), iknmkv  , J(IOWNS), MYPART  )
-C
-C          zero cummulative array's
-C
-      IF ( IMFLAG .OR. ( IHFLAG .AND. NORAAI .GT. 0 ) ) THEN
-         CALL ZERCUM ( NOTOT   , NOSYS   , NFLUX   , NDMPAR  , NDMPQ   ,
-     +                 NDMPS   , A(ISMAS), A(IFLXI), A(IMAS2), A(IFLXD),
-     +                 A(IDMPQ), A(IDMPS), NORAAI  , IMFLAG  , IHFLAG  ,
-     +                 A(ITRRA), IBFLAG  , NOWST   , A(IWDMP))
-      ENDIF
 
-      CALL WRITE_PROGRESS( DLWQD%PROGRESS )
-C
-C          simulation done ?
-C
-      IF ( ITIME .LT. 0      ) goto 9999
-      IF ( ITIME .GE. ITSTOP ) GOTO 20
+!          zero cummulative array's
+
+         if ( imflag .or. ( ihflag .and. noraai .gt. 0 ) ) then
+            call zercum ( notot   , nosys   , nflux   , ndmpar  , ndmpq   ,
+     &                    ndmps   , a(ismas), a(iflxi), a(imas2), a(iflxd),
+     &                    a(idmpq), a(idmps), noraai  , imflag  , ihflag  ,
+     &                    a(itrra), ibflag  , nowst   , a(iwdmp))
+         endif
+         if (mypart.eq.1) call write_progress( dlwqd%progress )
+
+!          simulation done ?
+
+         if ( itime .lt. 0      ) goto 9999
+         if ( itime .ge. itstop ) goto 20
 
          call delpar01 ( itime   , noseg   , noq     , a(ivol) , a(iflow),
      &                   nosfun  , c(isfna), a(isfun))
 
 !          add processes
 
-      CALL DLWQ14 ( A(IDERV), NOTOT   , nosss   , ITFACT  , A(IMAS2),
-     *              IDT     , 0       , A(IDMPS), IOPTZB  , J(ISDMP),
-     *              J(IOWNS), MYPART )
+         call dlwq14 ( a(iderv), notot   , nosss   , itfact  , a(imas2),
+     &                 idt     , iaflag  , a(idmps), intopt  , j(isdmp),
+     &                 j(iowns), mypart )
 
-!     get new volumes
+!        get new volumes
+
          itimel = itime
          itime  = itime + idt
          select case ( ivflag )
@@ -358,6 +354,7 @@ C
      &                       j(ibulk), lchar   , ftype   , isflag  , ivflag  ,
      &                       updatr  , j(inisp), a(inrsp), j(intyp), j(iwork),
      &                       lstrec  , lrewin  , a(ivol2), mypart  , dlwqd   )
+               if ( lrewin ) call move ( a(ivol2), a(ivoll) , noseg   )
                call dlwqf8 ( noseg   , noq     , j(ixpnt), idt     , iknmkv  ,
      &                       a(ivol ), a(iflow), a(ivoll), a(ivol2))
                updatr = .true.
@@ -374,74 +371,74 @@ C
 !        update the info on dry volumes with the new volumes
 
          call dryfle ( noseg    , nosss    , a(ivol2) , nolay    , nocons   ,
-     &                 c(icnam) , a(icons) , sindex   , surface  , j(iknmr) ,
-     &                 iknmkv   )
-C
-C          add the waste loads
-C
-      call dlwq15 ( nosys     , notot    , noseg    , noq      , nowst    ,
-     &              nowtyp    , ndmps    , intopt   , idt      , itime    ,
-     &              iaflag    , c(isnam) , a(iconc) , a(ivol)  , a(ivol2) ,
-     &              a(iflow ) , j(ixpnt) , c(iwsid) , c(iwnam) , c(iwtyp) ,
-     &              j(inwtyp) , j(iwast) , iwstkind , a(iwste) , a(iderv) ,
-     &              iknmkv    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
-     &              c(isfna ) , a(isfun) , j(isdmp) , a(idmps) , a(imas2) ,
-     &              a(iwdmp)  , 1        , notot    , j(iowns ), mypart   )
-C
-C          do the transport itself
-C
-      call dlwq16 ( nosys   , notot   , nosss   , noq1    , noq2    ,
-     &              noq3    , noqtt   , nddim   , nvdim   , a(idisp),
-     &              a(idnew), a(ivnew), a(iarea), a(iflow), a(ileng),
-     &              j(ixpnt), iknmkv  , j(idpnw), j(ivpnw), a(iconc),
-     &              a(iboun), ioptzb  , ilflag  , idt     , a(iderv),
-     &              0       , a(imas2), ndmpq   , j(iqdmp), a(idmpq),
-     &              j(iowns), mypart  )
-C
-C          time proceeds a half time step
-C
-      IDTOLD = IDT
-C
-C          new values for time functions, except the volumes
-C
-      CALL DLWQT0 ( LUN     , ITIME   , ITIMEL  , A(IHARM), A(IFARR),
-     *              J(INRHA), J(INRH2), J(INRFT), IDT     , A(IVOL) ,
-     *              A(IDIFF), A(IAREA), A(IFLOW), A(IVELO), A(ILENG),
-     *              A(IWSTE), A(IBSET), A(ICONS), A(IPARM), A(IFUNC),
-     *              A(ISFUN), J(IBULK), LCHAR   , C(ILUNT), ftype   ,
-     *              INTSRT  , ISFLAG  , IFFLAG  , IVFLAG  , ILFLAG  ,
-     *              UPDATR  , J(IKTIM), J(IKNMR), J(INISP), A(INRSP),
-     *              J(INTYP), J(IWORK), .FALSE. , LREWIN  , A(IVOLL),
-     &              .FALSE. , GridPs  , dlwqd   )
-      CALL MOVE   ( A(IVOL2), A(IVOL), nosss )
-      IDTTOT = IDTOLD + IDT
-C
-C          set preliminary time step to pridect concentrations
-C
-      CALL DLWQ20 ( A(ICONC), A(IMASS), A(IDERV), A(IVOL2), IDTOLD  ,
-     *              NOSYS   , NOTOT   , nosss   , LUN(19) , IVFLAG  )
-C
-C          call PROCES subsystem
-C
-      CALL PROCES ( NOTOT    , nosss    , A(ICONC), A(IVOL) , ITIME   ,
-     +              IDTTOT   , A(IDERV) , NDMPAR  , NPROC   , NFLUX   ,
-     +              J(IIPMS) , J(INSVA) , J(IIMOD), J(IIFLU), J(IIPSS),
-     +              A(IFLUX) , A(IFLXD) , A(ISTOC), IBFLAG  , IPBLOO  ,
-     +              IPCHAR   , IOFFBL   , IOFFCH  , A(IMASS), NOSYS   ,
-     +              ITFACT   , A(IMAS2) , IAFLAG  , INTOPT  , A(IFLXI),
-     +              J(IXPNT) , iknmkv   , NOQ1    , NOQ2    , NOQ3    ,
-     +              NOQ4     , NDSPN    , J(IDPNW), A(IDNEW), NODISP  ,
-     +              J(IDPNT) , A(IDIFF) , NDSPX   , A(IDSPX), A(IDSTO),
-     +              NVELN    , J(IVPNW) , A(IVNEW), NOVELO  , J(IVPNT),
-     +              A(IVELO) , NVELX    , A(IVELX), A(IVSTO), A(IDMPS),
-     +              J(ISDMP) , J(IPDMP) , NTDMPQ  , A(IDEFA), J(IPNDT),
-     +              J(IPGRD) , J(IPVAR) , J(IPTYP), J(IVARR), J(IVIDX),
-     +              J(IVTDA) , J(IVDAG) , J(IVTAG), J(IVAGG), J(IAPOI),
-     +              J(IAKND) , J(IADM1) , J(IADM2), J(IVSET), J(IGNOS),
-     +              J(IGSEG) , NOVAR    , A       , NOGRID  , NDMPS   ,
-     +              C(IPRNA) , INTSRT   , J(IOWNS), J(IOWNQ), MYPART  ,
-     +              j(iprvpt), j(iprdon), nrref   , j(ipror), nodef   ,
-     +              LUN(19) )
+     &                 c(icnam) , a(icons) , surface  , j(iknmr) , iknmkv   )
+
+!        add the waste loads
+
+         call dlwq15 ( nosys     , notot    , noseg    , noq      , nowst    ,
+     &                 nowtyp    , ndmps    , intopt   , idt      , itime    ,
+     &                 iaflag    , c(isnam) , a(iconc) , a(ivol)  , a(ivol2) ,
+     &                 a(iflow ) , j(ixpnt) , c(iwsid) , c(iwnam) , c(iwtyp) ,
+     &                 j(inwtyp) , j(iwast) , iwstkind , a(iwste) , a(iderv) ,
+     &                 iknmkv    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
+     &                 c(isfna ) , a(isfun) , j(isdmp) , a(idmps) , a(imas2) ,
+     &                 a(iwdmp)  , 1        , notot    , j(iowns ), mypart   )
+
+!        do the transport itself
+
+         call dlwq16 ( nosys   , notot   , nosss   , noq1    , noq2    ,
+     &                 noq3    , noqtt   , nddim   , nvdim   , a(idisp),
+     &                 a(idnew), a(ivnew), a(iarea), a(iflow), a(ileng),
+     &                 j(ixpnt), iknmkv  , j(idpnw), j(ivpnw), a(iconc),
+     &                 a(iboun), ioptzb  , ilflag  , idt     , a(iderv),
+     &                 0       , a(imas2), ndmpq   , j(iqdmp), a(idmpq),
+     &                 j(iowns), mypart  )
+
+!        time proceeds a half time step (=idt)
+
+
+!        new values for time functions, except the volumes
+
+         idtold = idt
+         call dlwqt0 ( lun      , itime    , itimel   , a(iharm) , a(ifarr) ,
+     &                 j(inrha) , j(inrh2) , j(inrft) , idt      , a(ivol)  ,
+     &                 a(idiff) , a(iarea) , a(iflow) , a(ivelo) , a(ileng) ,
+     &                 a(iwste) , a(ibset) , a(icons) , a(iparm) , a(ifunc) ,
+     &                 a(isfun) , j(ibulk) , lchar    , c(ilunt) , ftype    ,
+     &                 intsrt   , isflag   , ifflag   , ivflag   , ilflag   ,
+     &                 updatr   , j(iktim) , j(iknmr) , j(inisp) , a(inrsp) ,
+     &                 j(intyp) , j(iwork) , .false.  , lrewin   , a(ivoll) ,
+     &                 .false.  , gridps   , dlwqd    )
+         call move   ( a(ivol2), a(ivol), nosss )
+         idttot = idtold + idt     ! so this is a whole time step
+
+!          set preliminary time step to predict concentrations
+
+         call dlwq20 ( nosys   , notot   , nototp  , nosss   , a(ivol2),
+     &                 surface , a(imass), a(iconc), a(iderv), idtold  ,
+     &                 ivflag  , lun(19) , j(iowns), mypart  )
+
+!          call PROCES subsystem
+
+         call proces ( notot    , nosss    , a(iconc) , a(ivol)  , itime    ,
+     &                 idttot   , a(iderv) , ndmpar   , nproc    , nflux    ,
+     &                 j(iipms) , j(insva) , j(iimod) , j(iiflu) , j(iipss) ,
+     &                 a(iflux) , a(iflxd) , a(istoc) , ibflag   , ipbloo   ,
+     &                 ipchar   , ioffbl   , ioffch   , a(imass) , nosys    ,
+     &                 itfact   , a(imas2) , iaflag   , intopt   , a(iflxi) ,
+     &                 j(ixpnt) , iknmkv   , noq1     , noq2     , noq3     ,
+     &                 noq4     , ndspn    , j(idpnw) , a(idnew) , nodisp   ,
+     &                 j(idpnt) , a(idiff) , ndspx    , a(idspx) , a(idsto) ,
+     &                 nveln    , j(ivpnw) , a(ivnew) , novelo   , j(ivpnt) ,
+     &                 a(ivelo) , nvelx    , a(ivelx) , a(ivsto) , a(idmps) ,
+     &                 j(isdmp) , j(ipdmp) , ntdmpq   , a(idefa) , j(ipndt) ,
+     &                 j(ipgrd) , j(ipvar) , j(iptyp) , j(ivarr) , j(ividx) ,
+     &                 j(ivtda) , j(ivdag) , j(ivtag) , j(ivagg) , j(iapoi) ,
+     &                 j(iaknd) , j(iadm1) , j(iadm2) , j(ivset) , j(ignos) ,
+     &                 j(igseg) , novar    , a        , nogrid   , ndmps    ,
+     &                 c(iprna) , intsrt   , j(iowns) , j(iownq) , mypart   ,
+     &                 j(iprvpt), j(iprdon), nrref    , j(ipror) , nodef    ,
+     &                 surface  , lun(19)  )
 C
 C          user kinetics at intermediate time level plus accumulation
 C
@@ -450,12 +447,12 @@ C
      *              A(ISFUN), A(IDERV), ITIME   , IDTTOT  , A(ISMAS),
      *              IBFLAG  , C(ISNAM), NOCONS  , NOFUN   , C(ICNAM),
      *              C(IPNAM), C(IFNAM), C(ISFNA), NODUMP  , J(IDUMP))
-C
-C          add processes
-C
-      CALL DLWQ14 ( A(IDERV), NOTOT   , nosss   , ITFACT  , A(IMAS2),
-     *              IDTTOT  , IAFLAG  , A(IDMPS), INTOPT  , J(ISDMP),
-     *              J(IOWNS), MYPART )
+
+!          add processes
+
+         call dlwq14 ( a(iderv), notot   , nosss   , itfact  , a(imas2),
+     &                 idt     , iaflag  , a(idmps), intopt  , j(isdmp),
+     &                 j(iowns), mypart )
 
 !     get new volumes
          itimel = itime
@@ -474,6 +471,7 @@ C
      &                       j(ibulk), lchar   , ftype   , isflag  , ivflag  ,
      &                       updatr  , j(inisp), a(inrsp), j(intyp), j(iwork),
      &                       lstrec  , lrewin  , a(ivol2), mypart  , dlwqd   )
+               if ( lrewin ) call move ( a(ivol2), a(ivoll) , noseg   )
                call dlwqf8 ( noseg   , noq     , j(ixpnt), idt     , iknmkv  ,
      &                       a(ivol ), a(iflow), a(ivoll), a(ivol2))
                lrewin = .true.
@@ -489,73 +487,70 @@ C
 !        update the info on dry volumes with the new volumes
 
          call dryfle ( noseg    , nosss    , a(ivol2) , nolay    , nocons   ,
-     &                 c(icnam) , a(icons) , sindex   , surface  , j(iknmr) ,
-     &                 iknmkv   )
-C
-C          add the waste loads
-C
-      call dlwq15 ( nosys     , notot    , noseg    , noq      , nowst    ,
-     &              nowtyp    , ndmps    , intopt   , idt      , itime    ,
-     &              iaflag    , c(isnam) , a(iconc) , a(ivol)  , a(ivol2) ,
-     &              a(iflow ) , j(ixpnt) , c(iwsid) , c(iwnam) , c(iwtyp) ,
-     &              j(inwtyp) , j(iwast) , iwstkind , a(iwste) , a(iderv) ,
-     &              iknmkv    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
-     &              c(isfna ) , a(isfun) , j(isdmp) , a(idmps) , a(imas2) ,
-     &              a(iwdmp)  , 1        , notot    , j(iowns ), mypart   )
-C
-C          transport at intermediate time level plus accumulation
-C
-      call dlwq16 ( nosys   , notot   , nosss   , noq1    , noq2    ,
-     &              noq3    , noqtt   , nddim   , nvdim   , a(idisp),
-     &              a(idnew), a(ivnew), a(iarea), a(iflow), a(ileng),
-     &              j(ixpnt), iknmkv  , j(idpnw), j(ivpnw), a(iconc),
-     &              a(iboun), intopt  , ilflag  , idttot  , a(iderv),
-     &              iaflag  , a(imas2), ndmpq   , j(iqdmp), a(idmpq),
-     &              j(iowns), mypart  )
-C
-C          time dependent functions are set, except volumes.
-C
-      CALL DLWQT0 ( LUN     , ITIME   , ITIMEL  , A(IHARM), A(IFARR),
-     *              J(INRHA), J(INRH2), J(INRFT), IDT     , A(IVOL) ,
-     *              A(IDIFF), A(IAREA), A(IFLOW), A(IVELO), A(ILENG),
-     *              A(IWSTE), A(IBSET), A(ICONS), A(IPARM), A(IFUNC),
-     *              A(ISFUN), J(IBULK), LCHAR   , C(ILUNT), ftype   ,
-     *              INTSRT  , ISFLAG  , IFFLAG  , IVFLAG  , ILFLAG  ,
-     *              UPDATR  , J(IKTIM), J(IKNMR), J(INISP), A(INRSP),
-     *              J(INTYP), J(IWORK), .FALSE. , LREWIN  , A(IVOLL),
-     &              .FALSE. , GridPs  , dlwqd   )
-C
-C          set a full time step ( dummy step at first time )
-C
-      call dlwq18 ( nosys   , notot   , nosss   , a(ivol2), a(imass),
-     &              a(iconc), a(iderv), nopa    , c(ipnam), a(iparm),
-     &              nosfun  , c(isfna), a(isfun), idttot  , ivflag  ,
-     &              lun(19) , j(iowns), mypart  )
+     &                 c(icnam) , a(icons) , surface  , j(iknmr) , iknmkv   )
 
-!     calculate closure error
+!          add the waste loads
+
+         call dlwq15 ( nosys     , notot    , noseg    , noq      , nowst    ,
+     &                 nowtyp    , ndmps    , intopt   , idt      , itime    ,
+     &                 iaflag    , c(isnam) , a(iconc) , a(ivol)  , a(ivol2) ,
+     &                 a(iflow ) , j(ixpnt) , c(iwsid) , c(iwnam) , c(iwtyp) ,
+     &                 j(inwtyp) , j(iwast) , iwstkind , a(iwste) , a(iderv) ,
+     &                 iknmkv    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
+     &                 c(isfna ) , a(isfun) , j(isdmp) , a(idmps) , a(imas2) ,
+     &                 a(iwdmp)  , 1        , notot    , j(iowns ), mypart   )
+
+!          transport at intermediate time level plus accumulation
+
+         call dlwq16 ( nosys   , notot   , nosss   , noq1    , noq2    ,
+     &                 noq3    , noqtt   , nddim   , nvdim   , a(idisp),
+     &                 a(idnew), a(ivnew), a(iarea), a(iflow), a(ileng),
+     &                 j(ixpnt), iknmkv  , j(idpnw), j(ivpnw), a(iconc),
+     &                 a(iboun), intopt  , ilflag  , idttot  , a(iderv),
+     &                 iaflag  , a(imas2), ndmpq   , j(iqdmp), a(idmpq),
+     &                 j(iowns), mypart  )
+
+!          time dependent functions are set, except volumes.
+
+         call dlwqt0 ( lun      , itime    , itimel   , a(iharm) , a(ifarr) ,
+     &                 j(inrha) , j(inrh2) , j(inrft) , idt      , a(ivol)  ,
+     &                 a(idiff) , a(iarea) , a(iflow) , a(ivelo) , a(ileng) ,
+     &                 a(iwste) , a(ibset) , a(icons) , a(iparm) , a(ifunc) ,
+     &                 a(isfun) , j(ibulk) , lchar    , c(ilunt) , ftype    ,
+     &                 intsrt   , isflag   , ifflag   , ivflag   , ilflag   ,
+     &                 updatr   , j(iktim) , j(iknmr) , j(inisp) , a(inrsp) ,
+     &                 j(intyp) , j(iwork) , .false.  , lrewin   , a(ivoll) ,
+     &                 .false.  , gridps   , dlwqd    )
+
+!        set a full time step ( dummy step at first time )
+
+         call dlwq18 ( nosys   , notot   , nototp  , nosss   , a(ivol2),
+     &                 surface , a(imass), a(iconc), a(iderv), idttot  ,
+     &                 ivflag  , lun(19) , j(iowns), mypart  )
+
+!        calculate closure error
+
          if ( lrewin .and. lstrec ) then
             call dlwqce ( a(imass), a(ivoll), a(ivol2), nosys , notot ,
      &                    noseg   , lun(19) )
             call move   ( a(ivoll), a(ivol) , noseg   )
          else
-!     replace old by new volumes
+!        replace old by new volumes
             call move   ( a(ivol2), a(ivol) , noseg   )
          endif
-C
-C          integrate the fluxes at dump segments fill ASMASS with mass
-C
-      IF ( IBFLAG .GT. 0 ) THEN
-         CALL PROINT ( NFLUX   , NDMPAR  , IDTTOT  , ITFACT  , A(IFLXD),
-     +                 A(IFLXI), J(ISDMP), J(IPDMP), NTDMPQ  )
-      ENDIF
-C
-C          end of loop
-C
-      IF ( ACTION == ACTION_FULLCOMPUTATION ) THEN
-          GOTO 10
-      ENDIF
-C
-   20 CONTINUE
+
+!        integrate the fluxes at dump segments fill ASMASS with mass
+
+         if ( ibflag .gt. 0 ) then
+            call proint ( nflux   , ndmpar  , idtold  , itfact  , a(iflxd),
+     &                    a(iflxi), j(isdmp), j(ipdmp), ntdmpq  )
+         endif
+
+!          end of loop
+
+         if ( ACTION == ACTION_FULLCOMPUTATION ) goto 10
+
+   20 continue
 
       IF ( ACTION == ACTION_FINALISATION    .OR.
      &     ACTION == ACTION_FULLCOMPUTATION      ) THEN

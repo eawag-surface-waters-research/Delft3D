@@ -34,7 +34,6 @@
 
 !     Created           : May    1993 by Jan van Beek
 !                         July   2002 by Leo Postma   : Call to Opt1 changed.
-!                         August 2012 by Leo Postma   nototp for particle-substances
 
 !     Subroutine called : DEFOUT, set default output behavior
 !                         RDODEF, reads output definition block
@@ -104,7 +103,6 @@
 !     NOBTYP  INTEGER  1           INPUT   nr of boundary types
 !     NOWTYP  INTEGER  1           INPUT   nr of wasteload types
 !     NOGRID  INTEGER  1           INPUT   nr of grids
-!     nototp  integer                      total nr of substances including Delpar
 
 !     Local
 
@@ -185,7 +183,7 @@ C
 !     Determine local maximum
 
       nrvarm = min(iimax,icmax)/noutp
-      allocate ( sysid (nototp) , coname(nocons) , paname(nopa  )  )
+      allocate ( sysid (notot ) , coname(nocons) , paname(nopa  )  )
       allocate ( funame(nofun ) , sfname(nosfun) , diname(nodisp)  )
       allocate ( vename(novelo) )
 
@@ -249,13 +247,13 @@ C
      &                   novelo  , diname  , vename  , iar     , iar     ,
      &                   ndmpar  , ntdmpq  , ntdmps  , noqtt   , noraai  ,
      &                   ntraaq  , nobtyp  , nowtyp  , nogrid  , iar     ,
-     &                   iar     , iar     , nototp  )
+     &                   iar     , iar     , notot   )
             close ( lun(2) )
 
 !           Get output pointers
 
             call getopo( noutp   , nrvar   , nrvarm  , car     , iar     ,
-     &                   nmis    , nototp  , sysid   , nocons  , coname  ,
+     &                   nmis    , notot   , sysid   , nocons  , coname  ,
      &                   nopa    , paname  , nofun   , funame  , nosfun  ,
      &                   sfname  , lunut   )
 

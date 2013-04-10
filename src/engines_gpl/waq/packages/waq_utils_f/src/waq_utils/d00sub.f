@@ -67,7 +67,7 @@
             integer  ( 4), intent(  out) :: ntraaq        ! total number of exch. in raaien
             integer  ( 4), intent(in   ) :: nosys         ! number of transported substances
             integer  ( 4), intent(in   ) :: notot         ! total number of substances
-            integer  ( 4), intent(  out) :: nototp        ! notot inclusive of particle substances
+            integer  ( 4), intent(  out) :: nototp        ! nr of particle substances
             real     ( 4), intent(in   ) :: vrsion        ! version number of this input
             integer  ( 4), intent(in   ) :: ioutpt        ! flag for more or less output
             integer  ( 4), pointer       :: nsegdmp (:)   ! number of volumes in this monitoring area

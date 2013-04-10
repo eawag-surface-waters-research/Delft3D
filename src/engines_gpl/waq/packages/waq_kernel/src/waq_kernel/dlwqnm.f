@@ -300,14 +300,15 @@ c        layers in preconditioner [1,kmax]
 !     Determine the volumes and areas that ran dry at start of time step
 
          call hsurf  ( noseg    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
-     &                 c(isfna) , a(isfun) , surface  , sindex   , lun(19)  )
+     &                 c(isfna) , a(isfun) , surface  , lun(19)  )
          call dryfld ( noseg    , nosss    , nolay    , a(ivol)  , noq1+noq2,
-     &                 a(iarea) , nocons   , c(icnam) , a(icons) , sindex   ,
-     &                 surface  , j(iknmr) , iknmkv   )
+     &                 a(iarea) , nocons   , c(icnam) , a(icons) , surface  ,
+     &                 j(iknmr) , iknmkv   )
+
 !          user transport processes
 
          update = updatr
-         call dlwqtr ( nototp   , nosys    , nosss    , noq      , noq1     ,
+         call dlwqtr ( notot    , nosys    , nosss    , noq      , noq1     ,
      &                 noq2     , noq3     , nopa     , nosfun   , nodisp   ,
      &                 novelo   , j(ixpnt) , a(ivol)  , a(iarea) , a(iflow) ,
      &                 a(ileng) , a(iconc) , a(idisp) , a(icons) , a(iparm) ,
@@ -417,10 +418,10 @@ c        layers in preconditioner [1,kmax]
          call delpar01 ( itime   , noseg   , noq     , a(ivol) , a(iflow),
      &                   nosfun  , c(isfna), a(isfun))
 
-!     restore conc-array from mass array
-         call dlwqb8 ( nosys   , notot   , noseg   , a(ivol ), a(imass),
-     &                 a(iconc), nopa    , c(ipnam), a(iparm), nosfun  ,
-     &                 c(isfna), a(isfun))
+!        restore conc-array from mass array
+
+         call dlwqb8 ( nosys    , notot    , nototp   , noseg    , a(ivol ) ,
+     &                 surface  , a(imass) , a(iconc) )
 
 !     add processes
          call dlwq14 ( a(iderv), notot , noseg   , itfact, a(imas2),
@@ -462,8 +463,7 @@ c        layers in preconditioner [1,kmax]
 !       Initialize pointer matices for fast solvers              ( dlwqf1 )
 
          call dryfle ( noseg    , nosss    , a(ivol2) , nolay    , nocons   ,
-     &                 c(icnam) , a(icons) , sindex   , surface  , j(iknmr) ,
-     &                 iknmkv   )
+     &                 c(icnam) , a(icons) , surface  , j(iknmr) , iknmkv   )
          call zflows ( noq      , noqt     , nolay    , nocons   , c(icnam) ,
      &                 a(iflow) , j(ixpnt) )
          call dlwqf1 ( noseg    , nobnd    , noq      , noq1     , noq2     ,
@@ -575,9 +575,8 @@ c        layers in preconditioner [1,kmax]
 
 ! update mass array, explicit step for passive substances
 
-         call dlwqb4 ( nosys   , notot   , noseg   , a(ivol2), a(imass),
-     &                 a(iconc), a(iderv), nopa    , c(ipnam), a(iparm),
-     &                 nosfun  , c(isfna), a(isfun), idt     )
+         call dlwqb4 ( nosys   , notot   , nototp  , noseg   , a(ivol2),
+     &                 surface , a(imass), a(iconc), a(iderv), idt     )
 
 !     calculate closure error
          if ( lrewin .and. lstrec ) then
@@ -615,15 +614,15 @@ c        layers in preconditioner [1,kmax]
          endif
 
 !     update all other time functions
-         call dlwqt0 ( lun     , itime   , itimel  , a(iharm), a(ifarr),
-     &                 j(inrha), j(inrh2), j(inrft), idt     , a(ivol) ,
-     &                 a(idiff), a(iarea), a(iflow), a(ivelo), a(ileng),
-     &                 a(iwste), a(ibset), a(icons), a(iparm), a(ifunc),
-     &                 a(isfun), j(ibulk), lchar   , c(ilunt), ftype   ,
-     &                 intsrt  , isflag  , ifflag  , ivflag  , ilflag  ,
-     &                 update  , j(iktim), j(iknmr), j(inisp), a(inrsp),
-     &                 j(intyp), j(iwork), .false. , ldummy  , rdummy  ,
-     &                 .false. , gridps  , dlwqd   )
+         call dlwqt0 ( lun      , itime    , itimel   , a(iharm) , a(ifarr) ,
+     &                 j(inrha) , j(inrh2) , j(inrft) , idt      , a(ivol)  ,
+     &                 a(idiff) , a(iarea) , a(iflow) , a(ivelo) , a(ileng) ,
+     &                 a(iwste) , a(ibset) , a(icons) , a(iparm) , a(ifunc) ,
+     &                 a(isfun) , j(ibulk) , lchar    , c(ilunt) , ftype    ,
+     &                 intsrt   , isflag   , ifflag   , ivflag   , ilflag   ,
+     &                 update   , j(iktim) , j(iknmr) , j(inisp) , a(inrsp) ,
+     &                 j(intyp) , j(iwork) , .false.  , ldummy   , rdummy   ,
+     &                 .false.  , gridps   , dlwqd    )
          if ( update ) updatr = .true.
 
 !     end of time loop

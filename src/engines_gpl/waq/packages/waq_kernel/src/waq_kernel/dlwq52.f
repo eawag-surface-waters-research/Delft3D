@@ -23,22 +23,24 @@
 
       subroutine dlwq52 ( nosys  , notot  , noseg  , volume , amass  ,
      &                    conc2  , conc   , owners , mypart )
-     &
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:    april 1988 by L.Postma
-C
-C     FUNCTION            : Makes masses and concentrations
-C
-C     LOGICAL UNITNUMBERS : none
-C
+
+!     Deltares Software Centre
+
+!>\File
+!>           Makes masses and concentrations after the flux correction step
+
+!     Created:    april 1988 by L.Postma
+
+!     Logical unitnumbers : none
+
 !     Subroutines called  : none
 
       use timers
+
       implicit none
 
 !     Parameters          :
+
 !     type     kind  function         name                      description
 
       integer   (4), intent(in   ) :: nosys                   !< number of transported substances
@@ -59,11 +61,10 @@ C
       integer(4), save :: ithandl         ! timer handle
       data       ithandl /0/
       if ( timon ) call timstrt ( "dlwq52", ithandl )
-C
-C         loop accross the number of computational elements
-C
-      do 30 iseg=1,noseg
 
+!         loop accross the number of computational elements
+
+      do iseg = 1, noseg
          if (owners(iseg).eq.mypart) then
             vol = volume(iseg)
             do isys = 1, nosys
@@ -74,8 +75,7 @@ C
                conc (isys,iseg) = conc2(isys,iseg)
             enddo
          endif
-
-   30 continue
+      enddo
 
       if ( timon ) call timstop ( ithandl )
 

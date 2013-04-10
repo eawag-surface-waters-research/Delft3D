@@ -21,80 +21,71 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      SUBROUTINE PROINT ( NOFLUX, NDMPAR, IDT   , ITURAT, FLXDMP,
-     +                    FLXINT, ISDMP , IPDMP , NTDMPQ)
-C
-C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
-C
-C     CREATED:            : march 1993 by Jan van Beek
-C
-C     FUNCTION            : Integrates the fluxes for dump area's
-C
-C     SUBROUTINES CALLED  : -
-C
-C     FILES               : -
-C
-C     COMMON BLOCKS       : -
-C
-C     PARAMETERS          :  8
-C
-C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
-C     ----    -----    ------     ------- -----------
-C     NOFLUX  INTEGER       1     INPUT   Nr. of fluxes
-C     NDMPAR  INTEGER       1     INPUT   Number of dump areas
-C     IDT     INTEGER       1     INPUT   Time step system clock units
-C     ITURAT  INTEGER       1     INPUT   System clock/proces clock ratio
-C     FLXDMP  REAL  NOFLUX*?      INPUT   fluxes at dump segments
-C     FLXINT  REAL  NOFLUX*NDMPAR IN/OUT  Integrated fluxes at dump segments
-C     ISDMP   INTEGER       *     INPUT   Segment to dumped segment pointer
-C     IPDMP   INTEGER       *     INPUT   pointer structure dump area's
-C     NTDMPQ  INTEGER       1     INPUT   total number exchanges in dump area
-C
-C     Declaration of arguments
-C
+      subroutine proint ( noflux , ndmpar , idt    , iturat , flxdmp ,
+     &                    flxint , isdmp  , ipdmp  , ntdmpq )
+
+!     Deltares Software Centre
+
+!>\File
+!>            Integrates the fluxes for dump area's
+
+!     Created:            : march 1993 by Jan van Beek
+
+!     Subroutines called  : -
+
+!     Files               : -
+
+!     Common blocks       : -
+
       use timers
 
-      INTEGER       NOFLUX, NDMPAR, IDT   , ITURAT, NTDMPQ
-      INTEGER       ISDMP(*)        , IPDMP(*)
-      REAL          FLXDMP(NOFLUX,*), FLXINT(NOFLUX,*)
-C
-C     Local declaration
-C
-      INTEGER       ITEL2 , IDUMP , NSC   , ISC   , ISEG  ,
-     +              IPS   , IFLX
-      REAL          FSCALE
+      implicit none
+
+!     Parameters          :
+
+!     kind           function         name                    description
+
+      integer  ( 4), intent(in   ) :: noflux                !< Number of fluxes
+      integer  ( 4), intent(in   ) :: ndmpar                !< Number of dump areas
+      integer  ( 4), intent(in   ) :: idt                   !< Time step system clock units
+      integer  ( 4), intent(in   ) :: iturat                !< System clock/proces clock ratio
+      real     ( 4), intent(in   ) :: flxdmp(noflux,*)      !< Fluxes at dump segments
+      real     ( 4), intent(inout) :: flxint(noflux,ndmpar) !< Integrated fluxes at dump segments
+      integer  ( 4), intent(in   ) :: isdmp ( * )           !< Segment to dumped segment pointer
+      integer  ( 4), intent(in   ) :: ipdmp ( * )           !< Pointer structure dump area's
+      integer  ( 4), intent(in   ) :: ntdmpq                !< Total number exchanges in dump area
+
+!     Local declaration
+
+      integer       itel2 , idump , nsc   , isc   , iseg  ,
+     &              ips   , iflx  , ip1
+      real          fscale
+
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "proint", ithandl )
-C
-C     Loop over the dump area's
-C
-      IP1    = NDMPAR + NTDMPQ
-      ITEL2  = NDMPAR + NTDMPQ + NDMPAR
-      FSCALE = REAL(IDT)/REAL(ITURAT)
-      DO 30 IDUMP = 1 , NDMPAR
-C
-C        the segment contributes
-C
-         NSC  = IPDMP(IP1+IDUMP)
-         DO 20 ISC = 1 , NSC
-            ITEL2 = ITEL2 + 1
-            ISEG  = IPDMP(ITEL2)
-            IF ( ISEG .GT. 0 ) THEN
-               IPS   = ISDMP(ISEG)
-C
-C              Integrate the fluxes
-C
-               DO 10 IFLX = 1 , NOFLUX
-                  FLXINT(IFLX,IDUMP) = FLXINT(IFLX,IDUMP) +
-     +                                 FLXDMP(IFLX,IPS)*FSCALE
-   10          CONTINUE
-            ENDIF
-C
-   20    CONTINUE
-C
-   30 CONTINUE
-C
+
+!     Loop over the dump area's
+
+      ip1    = ndmpar + ntdmpq
+      itel2  = ndmpar + ntdmpq + ndmpar
+      fscale = real(idt)/real(iturat)
+      do idump = 1 , ndmpar
+
+!        the segment contributes
+
+         nsc  = ipdmp(ip1+idump)
+         do isc = 1 , nsc
+            itel2 = itel2 + 1
+            iseg  = ipdmp(itel2)
+            if ( iseg .gt. 0 ) then    !  integrate the fluxes
+               ips   = isdmp(iseg)
+               flxint(:,idump) = flxint(:,idump) + flxdmp(:,ips) * fscale
+            endif
+         enddo
+
+      enddo
+
       if ( timon ) call timstop ( ithandl )
-      RETURN
-C
-      END
+
+      return
+      end

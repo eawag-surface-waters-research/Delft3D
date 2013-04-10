@@ -1,9 +1,10 @@
       subroutine hsurf    ( noseg  , nopa   , paname , param  , nosfun ,
-     &                      sfname , segfun , surface, sindex , lun    )
-
+     &                      sfname , segfun , surface, lun)
+     &
 !     Deltares Software Centre
 
-!>\File     Set values of horizontal surface array.
+!>\File
+!>           Set values of horizontal surface array.
 
 !     Created             :    September 2012 by Christophe Thiange
 
@@ -25,13 +26,13 @@
       character(20), intent(in   ) :: sfname(nosfun)          !< names of the segment functions
       real      (4), intent(in   ) :: segfun(noseg ,nosfun)   !< segment function values
       real      (4), intent(inout) :: surface(noseg)          !< horizontal surface
-      integer   (4), intent(inout) :: sindex                  !< index of the surface variable
       integer   (4), intent(in   ) :: lun                     !< logical unit number monitoring file
 
 
 !     local variables
 
       logical   , save :: first = .true.  ! true if first time step
+      integer(4), save :: indx            ! index of the surf variable in the array
       integer(4), save :: mode            ! -1 segment functions, +1 parameters, 0 none
       integer(4), save :: ithandl         ! timer handle
       data       ithandl /0/
@@ -41,13 +42,13 @@
 
       if ( first ) then
          first = .false.
-         call zoek20 ( 'SURF      ', nopa  , paname , 10 , sindex )
-         if ( sindex .gt. 0 ) then                           ! SURF is found
+         call zoek20 ( 'SURF      ', nopa  , paname , 10 , indx )
+         if ( indx .gt. 0 ) then                           ! SURF is found
             mode = 1
-            surface(:) = param(sindex,1:noseg)
+            surface(:) = param(indx,1:noseg)
          else
-            call zoek20 ( 'SURF      ', nosfun, sfname, 10, sindex )
-            if ( sindex .gt. 0 ) then
+            call zoek20 ( 'SURF      ', nosfun, sfname, 10, indx )
+            if ( indx .gt. 0 ) then
                mode = -1
             else
               surface = 1.0
@@ -56,7 +57,7 @@
          endif
       endif
       if ( mode .eq.  -1 ) then
-         surface(:) = segfun(1:noseg,sindex)
+         surface(:) = segfun(1:noseg,indx)
       endif
 
       if ( timon ) call timstop ( ithandl )

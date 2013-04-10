@@ -172,6 +172,7 @@
       real     ( 4)                 factor ( 5 )     !  scale factor tabular input
       integer  ( 4), pointer     :: cellpnt(:)       !  backpointer noseg to mnmaxk
       integer  ( 4), pointer     :: flowpnt(:)       !  backpointer noq to 3*mnmaxk-mnmax
+      real     ( 4)                 length (3,1)     !  lengthes per direction
       integer(4) :: ithndl = 0
       if (timon) call timstrt( "dlwq04", ithndl )
 
@@ -457,8 +458,8 @@
             write ( lunut , 2260 )
             idum   = 4
             write ( lun(2) ) idummy
-            call opt2 ( 1      , 1      , 3      , 1      , iwidth ,
-     &                  lun(2) , idum   , ierr2  )
+            call opt2 ( 1      , length , 1      , 3      , 1      ,
+     &                  iwidth , lun(2) , idum   , ierr2  )
 
          case ( 1 )
             write ( lunut , 2270 )
