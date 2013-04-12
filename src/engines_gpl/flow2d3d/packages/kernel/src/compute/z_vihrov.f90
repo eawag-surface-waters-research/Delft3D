@@ -156,14 +156,14 @@ subroutine z_vihrov(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        ! NOT YET APPLIED TO 45 degrees staircase situation
        !
        do nm = 1, nmmax
-          if (kfs(nm) == 1) then
-             num = nm + icy
+          num = nm + icy
+          if (kfu(nm) == 1 .or. kfu(num)==1) then
              nmu = nm + icx
              numu = nm + icx + icy
              !
              ! rxy in depth point
              !
-             do k = 1, kmax
+             do k = kfumin(nm), kmax
                 if (kfuz0(nm, k)==1 .or. kfuz0(num, k)==1) then
                    ki = kfuz0(num, k) + 2*kfvz0(nmu, k) + 4*kfuz0(nm, k)           &
                       & + 8*kfvz0(nm, k)
@@ -198,15 +198,15 @@ subroutine z_vihrov(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     !
     elseif (irov==2) then
        do nm = 1, nmmax
-          if (kfs(nm) == 1) then
-             ndm = nm - icy
              num = nm + icy
+             if (kfu(nm) == 1 .or. kfu(num)) then
+             ndm = nm - icy
              nmu = nm + icx
              numu = nm + icx + icy
              !
              ! rxy in depth point
              !
-             do k = 1, kmax
+             do k = kfumin(nm), kmax
                 if (kfuz0(nm, k)==1 .or. kfuz0(num, k)==1) then
                    ki = kfuz0(num, k) + 2*kfvz0(nmu, k) + 4*kfuz0(nm, k)           &
                       & + 8*kfvz0(nm, k)
@@ -225,7 +225,7 @@ subroutine z_vihrov(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                       dy = guu(nm)
                       vi = 0.5*(vicuv(nm, k) + vicuv(nmu, k))                      &
                          & + 0.5*(vnu2d(nm) + vnu2d(ndm))
-                      rxy(nm, k) = vi*( - u0(nm, k))/dy/2
+                      rxy(nm, k) = vi*( - u0(nm, k))/(0.5*dy)
                    elseif (ki==9 .or. ki==3 .or. ki==1) then
                       !
                       ! rxy for u(num); rough wall, flow above wall
@@ -233,7 +233,7 @@ subroutine z_vihrov(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                       dy = guu(num)
                       vi = 0.5*(vicuv(num, k) + vicuv(numu, k))                    &
                          & + 0.5*(vnu2d(nm) + vnu2d(num))
-                      rxy(nm, k) = vi*(u0(num, k))/dy/2
+                      rxy(nm, k) = vi*(u0(num, k))/(0.5*dy)
                    else
                    endif
                 endif
@@ -245,8 +245,8 @@ subroutine z_vihrov(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     !
     elseif (irov==3) then
        do nm = 1, nmmax
-          if (kfs(nm) == 1) then
              num = nm + icy
+             if (kfu(nm) == 1 .or. kfu(num)) then
              nmu = nm + icx
              numu = nm + icx + icy
              !
@@ -276,11 +276,11 @@ subroutine z_vihrov(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     ! rxx in zeta point (active point, on open boundary rxx = 0.)
     !
     do nm = 1, nmmax
-       if (kfs(nm) == 1) then
+      if (kfu(nm) == 1 .or. kfu(num)) then
           ndm = nm - icy
           nmd = nm - icx
-          ndmd = nm + icx + icy
-          do k = kfumin(nm), kfumx0(nm)
+          ndmd = nm - icx - icy
+          do k = kfumin(nm), kmax
              if ( (kcs(nm)==1 .or. kcs(nm)==3) .and. kfsz0(nm, k)==1 ) then
                 vi = vicuv(nm, k) + 0.25*(vnu2d(nm) + vnu2d(nmd) + vnu2d(ndm)         &
                    & + vnu2d(ndmd))

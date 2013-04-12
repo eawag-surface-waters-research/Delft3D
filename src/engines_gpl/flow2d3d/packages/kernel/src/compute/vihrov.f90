@@ -1,4 +1,4 @@
-subroutine vihrov(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
+  subroutine vihrov(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                 & icy       ,kcs       ,kfu       ,kfv       ,kfs       , &
                 & u0        ,v         ,vicuv     ,vnu2d     ,guu       , &
                 & gvv       ,gvu       ,ddk       ,rxx       ,rxy       , &
@@ -264,7 +264,7 @@ subroutine vihrov(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        if ( (kcs(nm)==1 .or. kcs(nm)==3) .and. kfs(nm)==1 ) then
           ndm = nm - icy
           nmd = nm - icx
-          ndmd = nm + icx + icy
+          ndmd = nm - icx - icy
           dx = 0.5*(gvv(nm) + gvv(ndm))
           do k = 1, kmax
              vi = vicuv(nm, k) + 0.25*(vnu2d(nm) + vnu2d(nmd) + vnu2d(ndm)      &
