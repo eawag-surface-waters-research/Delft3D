@@ -99,7 +99,36 @@ subroutine wapar(hrm       ,dir       ,deph      ,tp        ,fxhis     , &
        fy    = 0.0
        qbsli = 0.0
     else
-       if (swdis == 1 .or. swdis == 3) then
+       if (swdis == 1) then
+          !
+          ! Determine wave forces based on gradients radiation stresses
+          !
+          fx      = fxhis
+          fy      = fyhis
+          wsbodyu = 0.0
+          wsbodyv = 0.0
+       elseif (swdis == 2) then
+          !
+          ! Determine wave forces based on dissipation
+          !
+          frc      = dish*tp/wavel
+          !
+          tr_angle = 0.0174533*dir
+          fx       = cos(tr_angle)*frc
+          fy       = sin(tr_angle)*frc
+          wsbodyu  = 0.0
+          wsbodyv  = 0.0
+          if (choice == 1) then
+             ftot = fx*fx + fy*fy
+             if (ftot > 0.0) then
+                ftot   = sqrt(ftot)
+                fmax   = dismax/sqrt(grav*deph)
+                factor = min(fmax/ftot, 1.E0)
+                fx     = factor*fx
+                fy     = factor*fy
+             endif
+          endif
+       elseif (swdis == 3) then
           !
           ! Determine wave forces based on dissipation at the free surface
           ! and a separate contribution to the water column through the 
@@ -122,39 +151,6 @@ subroutine wapar(hrm       ,dir       ,deph      ,tp        ,fxhis     , &
           endif
           wsbodyu = fxhis - fx
           wsbodyv = fyhis - fy
-       elseif (swdis == 2) then
-          !
-          ! Determine wave forces based on dissipation
-          !
-          frc      = dish*tp/wavel
-          !
-          tr_angle = 0.0174533*dir
-          fx       = cos(tr_angle)*frc
-          fy       = sin(tr_angle)*frc
-          wsbodyu  = 0.0
-          wsbodyv  = 0.0
-          if (choice == 1) then
-             ftot = fx*fx + fy*fy
-             if (ftot > 0.0) then
-                ftot   = sqrt(ftot)
-                fmax   = dismax/sqrt(grav*deph)
-                factor = min(fmax/ftot, 1.E0)
-                fx     = factor*fx
-                fy     = factor*fy
-             endif
-          endif
-       elseif (swdis == 4) then
-          !
-          ! Originally this was option swdis = 1
-          ! Option was removed as it is replaced by the more adequate options 
-          ! 'DISSIPATION 3D' (new option 1 or 3) and 'DISSIPATION' (option 2)
-          !
-          ! Determine wave forces based on gradients radiation stresses
-          !
-          fx      = fxhis
-          fy      = fyhis
-          wsbodyu = 0.0
-          wsbodyv = 0.0
        else
        endif
     endif

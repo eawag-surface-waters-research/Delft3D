@@ -1622,21 +1622,20 @@ subroutine read_keyw_mdw(sr          ,wavedata   ,keywbased )
     call prop_get_string (mdw_ptr, 'Processes', 'WaveForces', parname)
     call lowercase(parname, len(parname))
     select case (parname)
-    case ('radiation stresses',' ')
+    case ('radiation stresses <2013')
       sr%swdis = 1
+    case ('radiation stresses',' ')
+      write(*,*) 'SWAN_INPUT: [Processes] WaveForces is set to "dissipation 3d"'
+      write(*,*) 'To switch on radiation stresses: "WaveForces = radiation stresses <2013"'
+      sr%swdis = 3
     case ('dissipation')
       sr%swdis = 2
     case ('dissipation 3d')
       sr%swdis = 3
-    case ('radiation stresses <2013')
-      sr%swdis = 4
     case default
        write(*,*) 'SWAN_INPUT: invalid method to compute wave forces'
        goto 999
     end select
-    if (sr%swdis == 1) then
-       write(*,*) 'SWAN_INPUT: [Processes] WaveForces: set to "dissipation 3d"'
-    endif
     !
     ! Numerics
     !
