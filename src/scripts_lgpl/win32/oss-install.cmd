@@ -378,10 +378,8 @@ rem =======================
         rem Compiler_dir not set
     ) else (
         rem "Compiler_dir:!compiler_dir!"
-        rem Note the awkward usage of !-characters
-        set localstring="!compiler_dir!svml_dispmd.dll"
-        call :copyFile !!localstring! !dest_bin!!
         set localstring="!compiler_dir!libifcoremd.dll"
+        rem Note the awkward usage of !-characters
         call :copyFile !!localstring! !dest_bin!!
     )
 goto :endproc
@@ -400,12 +398,9 @@ rem ==============================
     
     call :copyFile engines_gpl\waq\bin\Release\delwaq2_openda_lib.dll          !dest_bin!
 	
-    call :copyFile third_party_open\netcdf\lib\win32\Release\netcdf.dll	       !dest_bin!
     call :copyFile third_party_open\openmp\lib\win32\libiomp5md.dll            !dest_bin!
     call :copyFile third_party_open\intel_fortran\lib\win32\libifportmd.dll    !dest_bin!
     call :copyFile third_party_open\intel_fortran\lib\win32\libmmd.dll         !dest_bin!
-    call :copyFile third_party_open\mpich2\lib\mpich2mpi.dll                   !dest_bin!
-    call :copyFile third_party_open\pthreads\bin\win32\pthreadVCE2.dll         !dest_bin!
 	
     rem
     rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
@@ -415,7 +410,7 @@ rem ==============================
         rem Compiler_dir not set
     ) else (
         rem "Compiler_dir:!compiler_dir!"
-        set localstring="!compiler_dir!*.dll"
+        set localstring="!compiler_dir!libifcoremd.dll"
         rem Note the awkward usage of !-characters
         call :copyFile !!localstring! !dest_bin!!
     )

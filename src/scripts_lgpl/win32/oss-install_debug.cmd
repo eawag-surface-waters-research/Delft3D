@@ -191,10 +191,7 @@ rem ==============================
     
     if not exist !dest_bin!     mkdir !dest_bin!
     
-    copy third_party_open\netcdf\lib\win32\Debug\netcdf.dll	         !dest_bin!
     copy third_party_open\openmp\lib\win32\libiomp5md.dll            !dest_bin!
-    copy third_party_open\mpich2\lib\mpich2mpi.dll                   !dest_bin!
-    copy third_party_open\pthreads\bin\win32\pthreadVCE2.dll         !dest_bin!
 	
 goto :endproc
 
