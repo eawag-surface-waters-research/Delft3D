@@ -21,8 +21,11 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      subroutine delpar01 ( itime  , noseg  , noq    , dwqvol , dwqflo ,
-     &                      nosfun , sfname , segfun )
+      subroutine delpar01 ( itime   , noseg   , nolay   , noq     , nosys   ,
+     &                      notot   , dwqvol  , surface , dwqflo  , syname  ,
+     &                      nosfun  , sfname  , segfun  , amass   , conc    ,
+     &                      iaflag  , intopt  , ndmps   , isdmp   , dmps    ,
+     &                      amass2  )
 
       use partmem      !   for PARTicle tracking
       use timers
@@ -48,17 +51,32 @@
 
       integer  (ip), intent(in   ) :: itime                   !< actual time
       integer  (ip), intent(in   ) :: noseg                   !< delwaq noseg
+      integer  (ip), intent(in   ) :: nolay                   !< delwaq layers
       integer  (ip), intent(in   ) :: noq                     !< delwaq noq
+      integer  (ip), intent(in   ) :: nosys                   !< delwaq transported subs
+      integer  (ip), intent(in   ) :: notot                   !< delwaq total subs, part subs included
       real     (rp), intent(in   ) :: dwqvol (noseg )         !< delwaq volumes
+      real     (rp), intent(in   ) :: surface(noseg )         !< horizontal surfaces
       real     (rp), intent(in   ) :: dwqflo (noq   )         !< delwaq flows
-      integer  (ip), intent(in   ) :: nosfun                  !< nr of segment functions
-      character(20), intent(in   ) :: sfname (nosfun)         !< number of segment functions
+      character(20), intent(in   ) :: syname (notot )         !< names of sumstances
+      integer  (ip), intent(in   ) :: nosfun                  !< number of segment functions
+      character(20), intent(in   ) :: sfname (nosfun)         !< names of segment functions
       real     ( 4), intent(in   ) :: segfun (noseg ,nosfun)  !< segment function values
+      real     ( 4), intent(inout) :: amass  (notot ,noseg )  !< delwaq mass array
+      real     ( 4), intent(inout) :: conc   (notot ,noseg )  !< delwaq conc array
+      integer   (4), intent(in   ) :: iaflag                  !< if 1 then accumulation of balances
+      integer   (4), intent(in   ) :: intopt                  !< integration suboptions
+      integer   (4), intent(in   ) :: ndmps                   !< number of dumped volumes for balances
+      integer   (4), intent(in   ) :: isdmp  (noseg )         !< volume to dump-location pointer
+      real      (4), intent(inout) :: dmps   (notot ,ndmps,*) !< dumped segment fluxes if INTOPT > 7
+      real      (4), intent(inout) :: amass2 (notot , 5 )     !< mass balance array
 
 !     Locals
 
       integer(ip) lunut             !  output unit number
       integer( 4) indx              !  index in segment names
+      integer( 4) ioff              !  offset in substances array
+      integer( 4) isys              !  loop counter substances
       logical     :: first  = .true.
       integer(ip) :: idtimd , itimd1 , itimd2     ! timings of the vertical diffusion file
       integer(ip) :: idtimt , itimt1 , itimt2     ! timings of the tau file
@@ -86,8 +104,18 @@
      &                     nopart - npwndw + 1, npmax
 
 !     Part15 adapts wind and direction for actual time
+
       call part15 ( lunut    , itime    , spawnd   , mnmax2   , nowind   ,
      &              iwndtm   , wveloa   , wdira    , wvelo    , wdir     )
+
+!     Taking over of aged particles by Delwaq
+
+      call par2waq( nopart   , nosys    , notot    , nosubs   , noseg    ,
+     &              nolay    , dwqvol   , surface  , nmaxp    , mmaxp    ,
+     &              lgrid3   , syname   , itime    , iddtim   , npwndw   ,
+     &              iptime   , npart    , mpart    , kpart    , wpart    ,
+     &              amass    , conc     , iaflag   , intopt   , ndmps    ,
+     &              isdmp    , dmps     , amass2   )
 
 !     Part12 makes .map files, binary and Nefis versions
 
@@ -102,6 +130,13 @@
      &              layt     , area     , nfract   , lsettl   , mstick   ,
      &              elt_names, elt_types, elt_dims , elt_bytes, locdep   ,
      &              nosub_max, bufsize  )
+      ioff = notot - nosubs
+      do iseg = 1, noseg            !  give Part concentrations to Waq
+         do isys = 1, nosubs
+            conc ( ioff+isys, iseg ) = concp( isys, iseg )
+            amass( ioff+isys, iseg ) = concp( isys, iseg ) * dwqvol( iseg )
+         enddo
+      enddo
 
 !     Part13 makes 3d detail plot grids corrected for recovery rate
 
@@ -229,37 +264,37 @@
 !     two-layer system with stratification
 
       if ( modtyp .eq. 2 )
-     &call part18 ( lgrid    , velo     , concp    , flres    , volumep  ,
-     &              area     , mnmaxk   , npart    , mpart    , wpart    ,
-     &              zpart    , nopart   , idelt    , nolayp   , npwndw   ,
-     &              vdiff    , pblay    , ptlay    , const    , noconsp  ,
-     &              lunut    , nosubs   , layt     , kpart    , mapsub(1),
-     &              wvelo    , alpha    , nosubc   , mapsub(2) )
+     &   call part18 ( lgrid    , velo     , concp    , flres    , volumep  ,
+     &                 area     , mnmaxk   , npart    , mpart    , wpart    ,
+     &                 zpart    , nopart   , idelt    , nolayp   , npwndw   ,
+     &                 vdiff    , pblay    , ptlay    , const    , noconsp  ,
+     &                 lunut    , nosubs   , layt     , kpart    , mapsub(1),
+     &                 wvelo    , alpha    , nosubc   , mapsub(2) )
 
 !      add dye release
 
       if ( nodye .gt. 0 )
-     &call part09 ( lunut    , itime    , nodye    , nwaste   , mwaste   ,
-     &              xwaste   , ywaste   , iwtime   , amassd   , aconc    ,
-     &              npart    , mpart    , xpart    , ypart    , zpart    ,
-     &              wpart    , iptime   , nopart   , radius   , lgrid    ,
-     &              dx       , dy       , ndprt    , nosubs   , kpart    ,
-     &              layt     , tcktot   , nplay    , kwaste   , nolayp   ,
-     &              modtyp   , zwaste   , track    , nmdyer   , substi   )
+     &   call part09 ( lunut    , itime    , nodye    , nwaste   , mwaste   ,
+     &                 xwaste   , ywaste   , iwtime   , amassd   , aconc    ,
+     &                 npart    , mpart    , xpart    , ypart    , zpart    ,
+     &                 wpart    , iptime   , nopart   , radius   , lgrid    ,
+     &                 dx       , dy       , ndprt    , nosubs   , kpart    ,
+     &                 layt     , tcktot   , nplay    , kwaste   , nolayp   ,
+     &                 modtyp   , zwaste   , track    , nmdyer   , substi   )
 
 !      add continuous release
 
       if ( nocont .gt. 0 )
-     &call part14 ( itime    , idelt    , nodye    , nocont   , ictime   ,
-     &              ictmax   , nwaste   , mwaste   , xwaste   , ywaste   ,
-     &              zwaste   , aconc    , rem      , npart    , ndprt    ,
-     &              mpart    , xpart    , ypart    , zpart    , wpart    ,
-     &              iptime   , nopart   , pblay    , radius   , lgrid    ,
-     &              dx       , dy       , ftime    , tmassu   , nosubs   ,
-     &              ncheck   , t0buoy   , modtyp   , abuoy    , t0cf     ,
-     &              acf      , lunut    , kpart    , layt     , tcktot   ,
-     &              nplay    , kwaste   , nolayp   , linear   , track    ,
-     &              nmconr   )
+     &   call part14 ( itime    , idelt    , nodye    , nocont   , ictime   ,
+     &                 ictmax   , nwaste   , mwaste   , xwaste   , ywaste   ,
+     &                 zwaste   , aconc    , rem      , npart    , ndprt    ,
+     &                 mpart    , xpart    , ypart    , zpart    , wpart    ,
+     &                 iptime   , nopart   , pblay    , radius   , lgrid    ,
+     &                 dx       , dy       , ftime    , tmassu   , nosubs   ,
+     &                 ncheck   , t0buoy   , modtyp   , abuoy    , t0cf     ,
+     &                 acf      , lunut    , kpart    , layt     , tcktot   ,
+     &                 nplay    , kwaste   , nolayp   , linear   , track    ,
+     &                 nmconr   )
 
 !     write particle tracks
 
@@ -321,7 +356,6 @@
 
 !      calculate actual displacement  3d version
 !      this routine must be called with the number of hydrodynamic layers
-
       call part10 ( lgrid    , volumep  , flow     , dx       , dy       ,
      &              area     , angle    , nmaxp    , mnmaxk   , idelt    ,
      &              nopart   , npart    , mpart    , xpart    , ypart    ,

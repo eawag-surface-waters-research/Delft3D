@@ -9,7 +9,7 @@ include $(top_srcdir)/common.am
 noinst_LTLIBRARIES = libWaqKernel.la
 
 AM_FCFLAGS += $(OPENMP_FCFLAGS)
-AM_FFLAGS += $(OPENMP_FFLAGS) 
+AM_FFLAGS += $(OPENMP_FFLAGS)
 
 #-------------------------------------------------------------------------------
 #Includes
@@ -45,6 +45,7 @@ libWaqKernel_la_SOURCES = \
        delmat.f \
        delpar00.f \
        delpar01.f \
+       par2waq.f \
        dlwqi0.f \
        delwaq2.f \
        difacr.f \

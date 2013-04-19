@@ -325,7 +325,16 @@ c        layers in preconditioner [1,kmax]
      &                 noloc    , ndspx    , nvelx    , nlocx    , nflux    ,
      &                 nopred   , novar    , nogrid   , j(ivset) )
 
-!          call PROCES subsystem
+!        return conc and take-over from previous step or initial condition,
+!        and do particle tracking of this step (will be back-coupled next call)
+
+         call delpar01( itime   , noseg    , nolay    , noq      , nosys    ,
+     &                  notot   , a(ivol)  , surface  , a(iflow) , c(isnam) ,
+     &                  nosfun  , c(isfna) , a(isfun) , a(imass) , a(iconc) ,
+     &                  iaflag  , intopt   , ndmps    , j(isdmp) , a(idmps) ,
+     &                  a(imas2))
+
+!        call PROCES subsystem
 
          call proces ( notot   , noseg   , a(iconc), a(ivol) , itime   ,
      &                 idt     , a(iderv), ndmpar  , nproc   , nflux   ,
@@ -414,9 +423,6 @@ c        layers in preconditioner [1,kmax]
 !     simulation done ?
          if ( itime .lt. 0      ) goto 9999
          if ( itime .ge. itstop ) goto 50
-
-         call delpar01 ( itime   , noseg   , noq     , a(ivol) , a(iflow),
-     &                   nosfun  , c(isfna), a(isfun))
 
 !        restore conc-array from mass array
 

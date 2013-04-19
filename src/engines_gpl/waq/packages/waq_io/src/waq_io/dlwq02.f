@@ -266,8 +266,8 @@
             call rdpart ( lunitp(1), lunitp(2), fnamep(1))
             write ( lunut, 2470 ) nosubs
             do i = 1, nosubs
-               write ( lunut, '(i4,2x,a)' ) notot+i, subst(i)
-               write ( lun(2) ) subst(i)
+               write ( lunut, '(i4,2x,a)' ) notot+i, substi(i)
+               write ( lun(2) ) substi(i)
             enddo
             nototp = nosubs
             notot  = notot  + nototp

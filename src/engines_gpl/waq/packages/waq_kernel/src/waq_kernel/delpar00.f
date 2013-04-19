@@ -109,7 +109,8 @@
          call part06 ( lunut     , lgrid     , lgrid2    , nmaxp    , mmaxp    ,
      &                 xb        , yb        , nodye     , nocont   , xwaste   ,
      &                 ywaste    , nwaste    , mwaste    )
-         call getdps ( lunut     , lunitp(17), fnamep(17), dpsp     , ltrack   )
+         call getdps ( lunut     , lunitp(17), fnamep(17), nmaxp    , mmaxp    ,
+     &                 noseglp   , dpsp      , cellpntp  , ltrack   )
          call part03 ( lgrid     , volumep   , flow      , dx       , dy       ,
      &                 nmaxp     , mmaxp     , mnmaxk    , lgrid2   , velo     ,
      &                 layt      , area      , depth     , dpsp     , locdep   ,

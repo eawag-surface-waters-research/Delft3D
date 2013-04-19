@@ -71,6 +71,8 @@
       integer  ( 4), intent(in   ) :: iknmrk (noseg)       !< constant feature array
       integer  ( 4), intent(  out) :: iknmkv (noseg)       !< time varying feature array
 
+!     Local declarations
+
       integer  ( 4)    idryfld         ! help variable to find dry_tresh constant
       real     ( 4)    threshold       ! drying and flooding value
       integer  ( 4)    nosegl          ! number of computational volumes per layer
