@@ -27,10 +27,10 @@
 
 !     Routines            : zoek20  - to search the delwaq names
 
-      use precision        ! single/double precision
-      use timers           ! performance timer
+      use timers
 !
       implicit none
+      integer, parameter :: ip=4, rp=4
 
 !     Parameters          :
 
