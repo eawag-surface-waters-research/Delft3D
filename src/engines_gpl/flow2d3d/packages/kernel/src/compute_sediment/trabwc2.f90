@@ -70,12 +70,19 @@ subroutine trabwc2(utot      ,di        ,taub      ,par       ,sbot      , &
     real(fp) :: thco   ! user specified calibration coefficient Theta c0 - set equal to 0.021 for standard formulation
     real(fp) :: ao     ! user specified calibration coefficient Alpha 0 - set equal to 0.33 for standard formulation
     real(fp) :: ustar  ! shear velocity (m/s)
-    real(hp) :: wistar ! 
-    real(hp) :: phi    ! 
-    real(hp) :: taurm  ! 
-    real(hp) :: tauri  ! 
-    real(hp) :: b      ! 
-    real(hp) :: sag    ! 
+!    real(hp) :: wistar ! 
+!    real(hp) :: phi    ! 
+!    real(hp) :: taurm  ! 
+!    real(hp) :: tauri  ! 
+!    real(hp) :: b      ! 
+!    real(hp) :: sag    ! 
+     real(fp) :: wistar ! 
+     real(fp) :: phi    ! 
+     real(fp) :: taurm  ! 
+     real(fp) :: tauri  ! 
+     real(fp) :: b      ! 
+     real(fp) :: sag    ! 
+     real(fp) :: sigphi ! arithmetic standard deviation of surface size distribution on the sedimentological phi scale
 !
 !! executable statements -------------------------------------------------------
 !
@@ -96,7 +103,11 @@ subroutine trabwc2(utot      ,di        ,taub      ,par       ,sbot      , &
     sag    = sqrt(ag)
     ustar  = sag * utot / chezy
     b       = (1.0_fp - ao) / (1.0_fp + exp(1.5_fp - (di / dg)))
-    taurm   = (thco + 0.015_fp / (1.0_fp + exp(10.1_fp * dgsd - 14.14_fp))) * (rhosol - rhow) * ag * dg
+    !taurm   = (thco + 0.015_fp / (1.0_fp + exp(10.1_fp * dgsd - 14.14_fp))) * (rhosol - rhow) * ag * dg
+    ! converts true dgsd back to sigma phi squared consistent with definition in paper
+    sigphi  = (log(dgsd) / log(2.0_fp))**2
+    taurm   = (thco + 0.015_fp / (1.0_fp + exp(10.1_fp * sigphi - 14.14_fp))) * (rhosol - rhow) * ag * dg
+    !
     tauri   = taurm * (di / dg)**b
     phi     = taub / tauri
     if (phi < 1.35_fp) then
