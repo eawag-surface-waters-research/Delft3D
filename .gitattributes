@@ -1338,7 +1338,6 @@ src/engines_gpl/waq/default/proc_def.dat -text
 src/engines_gpl/waq/default/proc_def.def -text
 src/engines_gpl/waq/default/proctabl.d3d -text
 src/engines_gpl/waq/default/watqual.d3d -text
-src/engines_gpl/waq/doc/new_pb.doc -text
 src/engines_gpl/waq/gpl-3.0.txt -text
 src/engines_gpl/waq/include/actions.inc -text
 src/engines_gpl/waq/include/arin.inc -text
@@ -2287,7 +2286,6 @@ src/engines_gpl/waq/packages/waq_utils_f/src/waq_utils/zoek.f -text
 src/engines_gpl/waq/packages/waq_utils_f/waq_utils_f.vfproj -text
 src/engines_gpl/waq/packages/waq_utils_f/waq_utils_f_vs2008.vfproj -text
 src/engines_gpl/waq/tree.f -text
-src/engines_gpl/waq/versions.txt -text
 src/engines_gpl/wave/Makefile.am -text
 src/engines_gpl/wave/packages/Makefile.am -text
 src/engines_gpl/wave/packages/data/Makefile.am -text

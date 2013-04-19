@@ -170,13 +170,7 @@ rem === INSTALL_DELWAQ2_LIB
 rem =======================
 :delwaq2_lib
     echo "installing delwaq2_lib . . ."
-
-    set dest_bin="engines_gpl\waq\bin\debug"
-    
-    if not exist !dest_bin!     mkdir !dest_bin!
-    
-    copy third_party_open\openmp\lib\win32\libiomp5md.dll            !dest_bin!
-	
+    echo "... nothing to be done"
 goto :endproc
 
 
@@ -184,15 +178,9 @@ goto :endproc
 rem ==============================
 rem === INSTALL_DELWAQ2_OPENDA_LIB
 rem ==============================
-:delwaq2_lib
+:delwaq2_openda_lib
     echo "installing delwaq2_openda_lib . . ."
-
-    set dest_bin="engines_gpl\waq\bin\debug"
-    
-    if not exist !dest_bin!     mkdir !dest_bin!
-    
-    copy third_party_open\openmp\lib\win32\libiomp5md.dll            !dest_bin!
-	
+    echo "... nothing to be done"
 goto :endproc
 
 

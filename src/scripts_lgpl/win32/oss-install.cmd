@@ -367,6 +367,7 @@ rem =======================
     call :copyFile engines_gpl\waq\bin\Release\delwaq2_lib.dll                 !dest_bin!
 	
     call :copyFile third_party_open\openmp\lib\win32\libiomp5md.dll            !dest_bin!
+    call :copyFile third_party_open\intel_fortran\lib\win32\libifcoremd.dll    !dest_bin!
     call :copyFile third_party_open\intel_fortran\lib\win32\libifportmd.dll    !dest_bin!
     call :copyFile third_party_open\intel_fortran\lib\win32\libmmd.dll         !dest_bin!
 	
@@ -378,8 +379,14 @@ rem =======================
         rem Compiler_dir not set
     ) else (
         rem "Compiler_dir:!compiler_dir!"
-        set localstring="!compiler_dir!libifcoremd.dll"
         rem Note the awkward usage of !-characters
+        set localstring="!compiler_dir!libiomp5md.dll"
+        call :copyFile !!localstring! !dest_bin!!
+        set localstring="!compiler_dir!libifcoremd.dll"
+        call :copyFile !!localstring! !dest_bin!!
+        set localstring="!compiler_dir!libifportmd.dll"
+        call :copyFile !!localstring! !dest_bin!!
+        set localstring="!compiler_dir!libmmd.dll"
         call :copyFile !!localstring! !dest_bin!!
     )
 goto :endproc
