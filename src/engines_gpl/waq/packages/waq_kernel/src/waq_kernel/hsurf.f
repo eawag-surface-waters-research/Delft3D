@@ -62,5 +62,5 @@
 
       if ( timon ) call timstop ( ithandl )
       return
- 2000 format ( ' ERROR  : surface is not available')
+ 2000 format ( ' WARNING  : could not find horizontal surface; using value of 1.0 m.')
       end
