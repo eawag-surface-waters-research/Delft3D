@@ -527,6 +527,7 @@
 		<File RelativePath=".\src\waq_kernel\outmo2.f"/>
 		<File RelativePath=".\src\waq_kernel\outmo3.f"/>
 		<File RelativePath=".\src\waq_kernel\outmon.f"/>
+		<File RelativePath=".\src\waq_kernel\par2waq.f"/>
 		<File RelativePath=".\src\waq_kernel\partit.f"/>
 		<File RelativePath=".\src\waq_kernel\proces.f">
 			<FileConfiguration Name="Debug|Win32">
