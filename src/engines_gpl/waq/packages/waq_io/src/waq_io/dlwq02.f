@@ -263,6 +263,7 @@
      &                    lgrid2   , xb       , yb       , lunitp(2))
             call part01 ( lgrid    , lgrid2   , xb       , yb       , dx      ,
      &                    dy       , area     , angle    , nmaxp    , mmaxp   )
+            nolayp = layt
             call rdpart ( lunitp(1), lunitp(2), fnamep(1))
             write ( lunut, 2470 ) nosubs
             do i = 1, nosubs

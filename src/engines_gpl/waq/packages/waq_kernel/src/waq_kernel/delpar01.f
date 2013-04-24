@@ -91,6 +91,62 @@
       if ( alone ) return
       if ( timon ) call timstrt ( "delpar01", ithandl )
 
+!           this replaces the call to rdhydr
+
+      volumep(cellpntp(:)) = dwqvol(:)
+      flow = 0.0
+      do i = 1, noqp
+         if ( flowpntp(i,1) .gt. 0 ) flow(flowpntp(i,1)) = flow(flowpntp(i,1)) + dwqflo(i)
+         if ( flowpntp(i,2) .gt. 0 ) flow(flowpntp(i,2)) = flow(flowpntp(i,2)) + dwqflo(i)
+      enddo
+      depmin = (0.05*nmaxp*mmaxp)/mnmaxk
+      depmin = max(depmin,0.001)
+      do iseg = 1, mnmaxk        !       limit volume to depmin
+         i2 = mod(iseg-1,nmaxp*mmaxp) + 1
+         volumep(iseg) = max(volumep(iseg), area(i2) * depmin)
+      enddo
+      if ( first ) then
+          ifflag = 1
+      else
+          ifflag = 0
+      endif
+      if ( lsettl .or. layt .gt. 1 ) then
+         call zoek20 ( 'TAU       ', nosfun, sfname, 10, indx )
+         if ( indx .gt. 0 ) then
+            tau(cellpntp(:)) = segfun(:,indx)
+         else if ( .not. caltau ) then
+            call dlwqbl ( lunitp(21), lunut   , itime     , idtimt  , itimt1  ,
+     &                    itimt2    , ihdel   , noseg     , mnmaxk  , tau1    ,
+     &                    tau       , cellpntp, fnamep(21), isflag  , ifflag  ,
+     &                    updatd    )
+         endif
+         if ( layt .gt. 1 ) then
+            call zoek20 ( 'VERTDISP  ', nosfun, sfname, 10, indx )
+            if ( indx .gt. 0 ) then
+               vdiff(cellpntp(:)) = segfun(:,indx)
+            else if ( lunitp(20) .gt. 0 ) then
+               call dlwqbl ( lunitp(20), lunut   , itime     , idtimd  , itimd1  ,
+     &                       itimd2    , ihdel   , noseg     , mnmaxk  , vdiff1  ,
+     &                       vdiff     , cellpntp, fnamep(20), isflag  , ifflag  ,
+     &                       updatd    )
+               if ( layt .gt. 1 ) then                              ! fill the zero last layer with the
+                  vdiff(mnmaxk-  nmaxp*mmaxp+1:mnmaxk           ) =   ! values above
+     &            vdiff(mnmaxk-2*nmaxp*mmaxp+1:mnmaxk-nmaxp*mmaxp )
+               endif
+            endif
+         endif
+      endif
+      first = .false.
+
+!     Taking over of aged particles by Delwaq
+
+      call par2waq( nopart   , nosys    , notot    , nosubs   , noseg    ,
+     &              nolay    , dwqvol   , surface  , nmaxp    , mmaxp    ,
+     &              lgrid3   , syname   , itime    , iddtim   , npwndw   ,
+     &              iptime   , npart    , mpart    , kpart    , wpart    ,
+     &              amass    , conc     , iaflag   , intopt   , ndmps    ,
+     &              isdmp    , dmps     , amass2   )
+
 !     Echo actual time to screen
 
       lunut = lunitp(2)
@@ -107,15 +163,6 @@
 
       call part15 ( lunut    , itime    , spawnd   , mnmax2   , nowind   ,
      &              iwndtm   , wveloa   , wdira    , wvelo    , wdir     )
-
-!     Taking over of aged particles by Delwaq
-
-      call par2waq( nopart   , nosys    , notot    , nosubs   , noseg    ,
-     &              nolay    , dwqvol   , surface  , nmaxp    , mmaxp    ,
-     &              lgrid3   , syname   , itime    , iddtim   , npwndw   ,
-     &              iptime   , npart    , mpart    , kpart    , wpart    ,
-     &              amass    , conc     , iaflag   , intopt   , ndmps    ,
-     &              isdmp    , dmps     , amass2   )
 
 !     Part12 makes .map files, binary and Nefis versions
 
@@ -169,53 +216,6 @@
      &              za       , locdep   , dpsp     , tcktot   , lgrid3   )
 
       if ( itime .ge. itstopp ) goto 9999 ! <=== here the simulation loop ends
-
-!           this replaces the call to rdhydr
-
-      volumep(cellpntp(:)) = dwqvol(:)
-      flow = 0.0
-      do i = 1, noqp
-         if ( flowpntp(i,1) .gt. 0 ) flow(flowpntp(i,1)) = flow(flowpntp(i,1)) + dwqflo(i)
-         if ( flowpntp(i,2) .gt. 0 ) flow(flowpntp(i,2)) = flow(flowpntp(i,2)) + dwqflo(i)
-      enddo
-      depmin = (0.05*nmaxp*mmaxp)/mnmaxk
-      depmin = max(depmin,0.001)
-      do iseg = 1, mnmaxk        !       limit volume to depmin
-         i2 = mod(iseg-1,nmaxp*mmaxp) + 1
-         volumep(iseg) = max(volumep(iseg), area(i2) * depmin)
-      enddo
-      if ( first ) then
-          ifflag = 1
-      else
-          ifflag = 0
-      endif
-      if ( lsettl .or. layt .gt. 1 ) then
-         call zoek20 ( 'TAU       ', nosfun, sfname, 10, indx )
-         if ( indx .gt. 0 ) then
-            tau(cellpntp(:)) = segfun(:,indx)
-         else if ( .not. caltau ) then
-            call dlwqbl ( lunitp(21), lunut   , itime     , idtimt  , itimt1  ,
-     &                    itimt2    , ihdel   , noseg     , mnmaxk  , tau1    ,
-     &                    tau       , cellpntp, fnamep(21), isflag  , ifflag  ,
-     &                    updatd    )
-         endif
-         if ( layt .gt. 1 ) then
-            call zoek20 ( 'VERTDISP  ', nosfun, sfname, 10, indx )
-            if ( indx .gt. 0 ) then
-               vdiff(cellpntp(:)) = segfun(:,indx)
-            else if ( lunitp(20) .gt. 0 ) then
-               call dlwqbl ( lunitp(20), lunut   , itime     , idtimd  , itimd1  ,
-     &                       itimd2    , ihdel   , noseg     , mnmaxk  , vdiff1  ,
-     &                       vdiff     , cellpntp, fnamep(20), isflag  , ifflag  ,
-     &                       updatd    )
-               if ( layt .gt. 1 ) then                              ! fill the zero last layer with the
-                  vdiff(mnmaxk-  nmaxp*mmaxp+1:mnmaxk           ) =   ! values above
-     &            vdiff(mnmaxk-2*nmaxp*mmaxp+1:mnmaxk-nmaxp*mmaxp )
-               endif
-            endif
-         endif
-      endif
-      first = .false.
 
 !     Part03 computes velocities and depth
 

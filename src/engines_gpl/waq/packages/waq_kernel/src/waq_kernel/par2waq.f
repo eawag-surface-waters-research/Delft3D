@@ -99,7 +99,6 @@
 
       do ipart = npwndw, nopart
          if ( iptime(ipart) .lt. iddtim ) then
-            write ( 338, * ) 'ipart, npwndw, iptime(ipart): ',ipart, npwndw, iptime(ipart)
             npwndw = ipart
             exit
          endif
