@@ -255,8 +255,8 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
     integer       :: nmu
     logical       :: error   ! Flag for detection of closure error in mass-balance
     real(hp)      :: bi
+    real(hp)      :: fac
     real(fp)      :: epsomb
-    real(fp)      :: fac
     real(fp)      :: hdti
     real(fp)      :: hnm
     real(fp)      :: hucres
@@ -476,10 +476,10 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
     do k = 1, kmax
        do nm = 1, nmmax
           if (kfu(nm)==1) then
-             fac    = porosu(nm,k)*thick(k)/bbk(nm, k)
-             aa(nm) = aa(nm) + aak(nm, k)*fac
-             cc(nm) = cc(nm) + cck(nm, k)*fac
-             dd(nm) = dd(nm) + ddk(nm, k)*fac
+             fac    = real(porosu(nm,k),hp) * real(thick(k),hp) / real(bbk(nm,k),hp)
+             aa(nm) = real(aa(nm),hp) + real(aak(nm,k),hp)*fac
+             cc(nm) = real(cc(nm),hp) + real(cck(nm,k),hp)*fac
+             dd(nm) = real(dd(nm),hp) + real(ddk(nm,k),hp)*fac
           endif
        enddo
     enddo

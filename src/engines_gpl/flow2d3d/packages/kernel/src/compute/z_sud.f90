@@ -248,10 +248,10 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
     integer       :: nmlu
     integer       :: nmu
     real(hp)      :: bi
+    real(hp)      :: fac
     real(fp)      :: dxid
     real(fp)      :: dxiu
     real(fp)      :: eps
-    real(fp)      :: fac
     real(fp)      :: hdti
     real(fp)      :: hnm
     real(fp)      :: hnmd
@@ -478,10 +478,10 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
           enddo
           do k = kfumin(nm), kfumx0(nm)
              if (kfuz0(nm,k) == 1) then
-                fac    = dzu0(nm, k) * porosu(nm, k) / (bbk(nm, k)*hnm)
-                aa(nm) = aa(nm) + aak(nm, k)*fac
-                cc(nm) = cc(nm) + cck(nm, k)*fac
-                dd(nm) = dd(nm) + ddk(nm, k)*fac
+                fac    = real(dzu0(nm,k),hp) * real(porosu(nm,k),hp) / (real(bbk(nm,k),hp)*real(hnm,hp))
+                aa(nm) = real(aa(nm),hp) + real(aak(nm,k),hp)*fac
+                cc(nm) = real(cc(nm),hp) + real(cck(nm,k),hp)*fac
+                dd(nm) = real(dd(nm),hp) + real(ddk(nm,k),hp)*fac
              endif
           enddo
        endif
