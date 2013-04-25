@@ -9,7 +9,7 @@ unsigned __int64 MemInfo::GetTotalMemSize()
   GlobalMemoryStatusEx(&status);
   return unsigned __int64 (status.ullTotalPhys);
 }
-#elseif defined(_SC_PHYS_PAGES)
+#elif defined(_SC_PHYS_PAGES)
 unsigned long long MemInfo::GetTotalMemSize()
 {
 long long pages = sysconf(_SC_PHYS_PAGES);
