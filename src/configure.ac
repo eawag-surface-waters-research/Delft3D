@@ -483,6 +483,8 @@ utils_lgpl/deltares_common/packages/deltares_common_c/include/Makefile
 utils_lgpl/deltares_common/packages/deltares_common_c/Makefile
 utils_lgpl/deltares_common/packages/deltares_common_c/src/Makefile
 utils_lgpl/deltares_common/packages/Makefile
+utils_lgpl/deltares_common/tests/Makefile
+utils_lgpl/deltares_common/tests/09_system_info/Makefile
 utils_lgpl/ec_module/Makefile
 utils_lgpl/ec_module/packages/ec_module/Makefile
 utils_lgpl/ec_module/packages/ec_module/src/Makefile

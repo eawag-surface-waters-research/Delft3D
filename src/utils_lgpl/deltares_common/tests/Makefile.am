@@ -1,4 +1,4 @@
 include $(top_srcdir)/common.am
 SUBDIRS = \
-         01-smalltest \
-         02-streamtest
+         09_system_info
+
