@@ -4569,6 +4569,7 @@ src/utils_lgpl/deltares_common/tests/08_inifiles_dredgedumptest/testcase/rundadt
 src/utils_lgpl/deltares_common/tests/08_inifiles_dredgedumptest/testcase/rundadtest.bat -text
 src/utils_lgpl/deltares_common/tests/09_system_info/Makefile.am -text
 src/utils_lgpl/deltares_common/tests/09_system_info/main.cpp -text
+src/utils_lgpl/deltares_common/tests/09_system_info/system_info.vcxproj -text
 src/utils_lgpl/deltares_common/tests/Makefile.am -text
 src/utils_lgpl/ec_module/Makefile.am -text
 src/utils_lgpl/ec_module/packages/Makefile.am -text

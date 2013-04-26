@@ -1,5 +1,8 @@
 #include "meminfo.h"
+#if HAVE_CONFIG_H
 #include <sys/sysctl.h>
+#endif
+
 #ifdef WIN32
 
 unsigned __int64 MemInfo::GetTotalMemSize()

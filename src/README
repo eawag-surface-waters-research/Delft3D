@@ -57,11 +57,11 @@ Debugging in Microsoft Visual Studio
 ====================================
 - Be sure to have compiled the "Debug configuration" (Build -> Configuration Manager...).
   All resulting binaries are copied automatically to directory "...\src\engines_gpl\d_hydro\bin\Debug".
-- In your model input directory: put a copy of file "...\oss\src\engines_gpl\d_hydro\scripts\config_flow2d3d.xml",
+- In your model input directory: put a copy of file "...\oss\src\engines_gpl\d_hydro\scripts\config_d_hydro.xml",
   open it in a text editor and fill in the correct name of the mdf-file.
 - In VisualStudio:
   1) right-click on the project "d_hydro", Properties -> Configuration properties -> Debugging:
-     Command Arguments: config_flow2d3d.xml
+     Command Arguments: config_d_hydro.xml
      Working directory: d:/full/path/to/your/model/input/directory
      OK
   2) In the source code: add a breakpoint. Click some line, then click in the gray bar in front of this line (or press F9). A red dot will appear.
