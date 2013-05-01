@@ -273,30 +273,28 @@ subroutine z_vihrov(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     ! rxx in zeta point (active point, on open boundary rxx = 0.)
     !
     do nm = 1, nmmax
-      if (kfu(nm)==1 .or. kfu(num)==1) then
-          ndm  = nm - icy
-          nmd  = nm - icx
-          ndmd = nm - icx - icy
-          do k = kfumin(nm), kmax
-             if ((kcs(nm)==1.or.kcs(nm)==3) .and. kfsz0(nm,k)==1) then
-                vi        = vicuv(nm,k) + 0.25_fp*(vnu2d(nm)+vnu2d(nmd)+vnu2d(ndm)+vnu2d(ndmd))
-                rxx(nm,k) = 2.0_fp * vi * (u0(nm,k)-u0(nmd,k)) / gvz(nm)
-             endif
-          enddo
-       endif
+       ndm  = nm - icy
+       nmd  = nm - icx
+       ndmd = nm - icx - icy
+       do k = kfumin(nm), kmax
+          if ((kcs(nm)==1.or.kcs(nm)==3) .and. kfsz0(nm,k)==1) then
+             vi        = vicuv(nm,k) + 0.25_fp*(vnu2d(nm)+vnu2d(nmd)+vnu2d(ndm)+vnu2d(ndmd))
+             rxx(nm,k) = 2.0_fp * vi * (u0(nm,k)-u0(nmd,k)) / gvz(nm)
+          endif
+       enddo
     enddo
     !
     ! roughness rigid walls (partial slip)
     ! explicit term
     !
     do nm = 1, nmmax
-       if (kfu(nm)==1 .or. kfu(num)==1) then
-          nmu = nm + icx
-          ndm = nm - icy
-          do k = kfumin(nm), kfumx0(nm)
+       nmu = nm + icx
+       ndm = nm - icy
+       do k = kfumin(nm), kfumx0(nm)
+          if(kfuz0(nm,k)==1) then
              ddk(nm,k) = ddk(nm,k) + (rxx(nmu,k)-rxx(nm ,k))/gvu(nm) &
                         &          + (rxy(nm, k)-rxy(ndm,k))/guu(nm)
-          enddo
-       endif
+          endif
+       enddo
     enddo
 end subroutine z_vihrov
