@@ -182,7 +182,7 @@ subroutine dfdecomp ( lunmd, lundia, error, runid, gdp )
     !
     ! carry out the block administration
     !
-    call dfbladm( ipown, icom, mmax, nmaxus, gdp )
+    call dfbladm( ipown, icom, mmax, nmaxus, runid, gdp )
     !
     ! recompute grid related dimensions for each subdomain
     !

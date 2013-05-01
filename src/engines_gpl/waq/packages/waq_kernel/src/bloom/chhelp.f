@@ -94,14 +94,14 @@ C
      1        ' * nominal depth  + ',2X,F10.2)
 99940 FORMAT (1X,'Concentration of',2X,A8,2X,' is',
      1        2X,F6.2,2X,' * nominal conc. + ',2X,F6.2)
-99930 FORMAT (1X,'Mineralization of',2X,A8,2X,' = ',2X,F6.4,2X,
+99930 FORMAT (1X,'Mineralization of',2X,A8,2X,' = ',2X,F7.4,2X,
      1       ' * Temparature')
-99920 FORMAT (1X,'Mineralization of',2X,A8,2X,' = ',2X,F6.4)
+99920 FORMAT (1X,'Mineralization of',2X,A8,2X,' = ',2X,F7.4)
 99910 FORMAT (1X,'Blooms will be calculated for the following',
      1        2X,I2,2X,'periods:')
 99900 FORMAT (1X,'First period: ',I5,' Last period: ',I5,
      1        ' Increment: ',I5)
-99890 FORMAT (1X,'Mortality is input + ',F6.4)
+99890 FORMAT (1X,'Mortality is input + ',F7.4)
 99870 FORMAT (1X,'Mortality rate calculated as exponential function ',
      1        'of temperature.')
 99850 FORMAT (1X,'Sedimentation rate =',F6.3)
@@ -109,7 +109,7 @@ C
 99830 FORMAT (1X,'Mineralization rate of detritus =',2X,F6.3,2X,
      1        '*  Temperature')
 99820 FORMAT (1X,'Mineralization rate of chlorophyll is:',1X,
-     1        'EXP (',2X,F6.4,' * Temperature- ',2X,F6.4,' )')
+     1        'EXP (',2X,F7.4,' * Temperature- ',2X,F7.4,' )')
 99810 FORMAT (1X,'Nutrient fraction becoming detritus =',F6.3)
       RETURN
       END

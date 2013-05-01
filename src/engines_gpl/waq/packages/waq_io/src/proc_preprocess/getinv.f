@@ -243,7 +243,7 @@
                            defaul(nodef) = 0.0
                         else
                            defaul(nodef) = proc1%input_item(i_input)%actdef
-                           write(line1,'(a,g12.6)') '       using default value:',proc1%input_item(i_input)%actdef
+                           write(line1,'(a,g13.6)') '       using default value:',proc1%input_item(i_input)%actdef
                         endif
                      endif
                   endif
@@ -342,7 +342,7 @@
                            defaul(nodef) = 0.0
                         else
                            defaul(nodef) = proc1%input_item(i_input)%actdef
-                           write(line1,'(a,g12.6)') '       using default value:',proc1%input_item(i_input)%actdef
+                           write(line1,'(a,g13.6)') '       using default value:',proc1%input_item(i_input)%actdef
                         endif
                      endif
                   endif

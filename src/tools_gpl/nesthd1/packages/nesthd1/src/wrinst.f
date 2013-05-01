@@ -69,7 +69,7 @@
             endif
 
             do 10 inst = 1, 4
-               write (lun   ,'(2(1x,i5),1x,f6.4)')
+               write (lun   ,'(2(1x,i5),1x,f7.4)')
      *               mcnes (ibnd,isize,inst), ncnes (ibnd,isize,inst),
      *               weight(ibnd,isize,inst)
    10 continue

@@ -183,7 +183,7 @@ C
       CAV = YEARPR / (1000. * NREP)
       OAV = YEAROX / (1000. * NREP)
       WRITE (IOU(17),140) CAV,OAV
-  140 FORMAT (///,'   Average gross production rate =  ',F4.2,
+  140 FORMAT (///,'   Average gross production rate =  ',F5.2,
      1        ' grams C  per m2 per day.',/,
      2        '   Average gross production rate = ',F5.2,
      3        ' grams O2 per m2 per day.')

@@ -439,10 +439,10 @@ C
 99800 FORMAT(1X,'Incorrect type number ',I1,' for species',1X,A8)
 99790 FORMAT (1X,A3,' concentration of consumer type',1X,I2,1X,' is',
      1        1X,F6.2,1X,' * nominal conc. + ',1X,F6.2)
-99780 FORMAT (' Consumer''s ',A8,'-carbon ratios: ',20(2X,F6.4))
+99780 FORMAT (' Consumer''s ',A8,'-carbon ratios: ',20(2X,F7.4))
 99770 FORMAT (' Consumer''s feacal fraction for phytoplankton species:')
-99760 FORMAT (1X,A8,20(2X,F6.4))
+99760 FORMAT (1X,A8,20(2X,F7.4))
 99750 FORMAT (' Consumer''s preference for phytoplankton species:')
-99740 FORMAT (' Coeff. ',A8,' values: ',F6.4,19(2X,F6.4))
+99740 FORMAT (' Coeff. ',A8,' values: ',F7.4,19(2X,F7.4))
       RETURN
       END

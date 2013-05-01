@@ -253,8 +253,8 @@ subroutine taylor(kmax      ,kmxdt     ,kmxt      ,np        ,nfreqs    , &
        write (luniwe, *)
        write (luniwe, '(a)') '++++++++++++++++++++++++++++++++++'
        write (luniwe, '(a)') ' TAYLOR                          :'
-       write (luniwe, '(a,1x,g8.2)') ' Mean Ri in layer             [-]:', riav
-       write (luniwe, '(a,1x,g8.2)') ' Interval with Ri>0.25        [m]:', rilz
+       write (luniwe, '(a,1x,g9.2)') ' Mean Ri in layer             [-]:', riav
+       write (luniwe, '(a,1x,g9.2)') ' Interval with Ri>0.25        [m]:', rilz
     endif
     !
     if (.not.barcli) then
@@ -263,15 +263,15 @@ subroutine taylor(kmax      ,kmxdt     ,kmxt      ,np        ,nfreqs    , &
        goto 9999
     else
        if (iwedia) then
-          write (luniwe, '(a,1x,g8.2)') ' Upper level stratified layer [m]:',   &
+          write (luniwe, '(a,1x,g9.2)') ' Upper level stratified layer [m]:',   &
                                       & h0*(1. - ktop/real(kmxt,sp))
-          write (luniwe, '(a,1x,g8.2)') ' Lower level stratified layer [m]:',   &
+          write (luniwe, '(a,1x,g9.2)') ' Lower level stratified layer [m]:',   &
                                       & h0*(1. - kbed/real(kmxt,sp))
-          write (luniwe, '(a,1x,g8.2)') ' Thickness strat. layer       [m]:',   &
+          write (luniwe, '(a,1x,g9.2)') ' Thickness strat. layer       [m]:',   &
                                       & hstrat
-          write (luniwe, '(a,1x,g8.2)') ' Mean Ozmidov length scale    [m]:',   &
+          write (luniwe, '(a,1x,g9.2)') ' Mean Ozmidov length scale    [m]:',   &
                                       & zlo
-          write (luniwe, '(a,1x,g8.2)') ' Minimal IW period            [s]:',   &
+          write (luniwe, '(a,1x,g9.2)') ' Minimal IW period            [s]:',   &
                                       & pi2/(bvav*bvmx)
        endif
        !
@@ -294,15 +294,15 @@ subroutine taylor(kmax      ,kmxdt     ,kmxt      ,np        ,nfreqs    , &
           !
           !
           if (iwedia) then
-             write (luniwe, '(a,1x,g8.2)') &
+             write (luniwe, '(a,1x,g9.2)') &
                  & ' Maximal rms IWE Z-ampl.      [m]:', azmax
-             write (luniwe, '(a,1x,g8.2)') &
+             write (luniwe, '(a,1x,g9.2)') &
                  & ' Bandwidth vertical wave numbers :', bz
-             write (luniwe, '(a,1x,g8.2)') &
+             write (luniwe, '(a,1x,g9.2)') &
                  & ' Integral of IWE diss.  [m^3/s^3]:', epsiwe
           endif
        elseif (iwedia) then
-          write (luniwe, '(a,1x,g8.2)') ' Bandwidth vertical wave numbers :', bz
+          write (luniwe, '(a,1x,g9.2)') ' Bandwidth vertical wave numbers :', bz
           write (luniwe, '(2a       )')                                            &
                                 & ' Therefore no bandwidth of vertical IWE modes', &
                                 & ' inside stratified layer'

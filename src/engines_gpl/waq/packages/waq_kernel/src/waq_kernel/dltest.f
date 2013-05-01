@@ -169,63 +169,63 @@ c work arrays:
       write(lundia,'(A)') 'kcs'
       write(lundia,'(10i10)') (kcs(i),i=jstart,nmmaxj)
       write(lundia,'(A)') 'qxk'
-      write(lundia,'(10e12.6)') ((qxk(i,k),i=jstart,nmmaxj),k=1,kmax)
+      write(lundia,'(10e13.6)') ((qxk(i,k),i=jstart,nmmaxj),k=1,kmax)
       write(lundia,'(A)') 'qyk'
-      write(lundia,'(10e12.6)') ((qyk(i,k),i=jstart,nmmaxj),k=1,kmax)
+      write(lundia,'(10e13.6)') ((qyk(i,k),i=jstart,nmmaxj),k=1,kmax)
       write(lundia,'(A)') 'qzk'
-      write(lundia,'(10e12.6)') ((qzk(i,k),i=jstart,nmmaxj),k=0,kmax)
+      write(lundia,'(10e13.6)') ((qzk(i,k),i=jstart,nmmaxj),k=0,kmax)
       write(lundia,'(A)') 'difx'
-      write(lundia,'(10e12.6)') ((difx(i,k),i=jstart,nmmaxj),k=1,kmax)
+      write(lundia,'(10e13.6)') ((difx(i,k),i=jstart,nmmaxj),k=1,kmax)
       write(lundia,'(A)') 'dify'
-      write(lundia,'(10e12.6)') ((dify(i,k),i=jstart,nmmaxj),k=1,kmax)
+      write(lundia,'(10e13.6)') ((dify(i,k),i=jstart,nmmaxj),k=1,kmax)
       write(lundia,'(A)') 'difz'
-      write(lundia,'(10e12.6)') ((difz(i,k),i=jstart,nmmaxj),k=0,kmax)
+      write(lundia,'(10e13.6)') ((difz(i,k),i=jstart,nmmaxj),k=0,kmax)
       write(lundia,'(A)') 'r1'
-      write(lundia,'(10e12.6)') (((r1(i,k,j),i=jstart,nmmaxj),k=1,kmax),
+      write(lundia,'(10e13.6)') (((r1(i,k,j),i=jstart,nmmaxj),k=1,kmax),
      +                             j=1,notot)
       write(lundia,'(A)') 'vol0'
-      write(lundia,'(10e12.6)') ((vol0(i,k),i=jstart,nmmaxj),k=1,kmax)
+      write(lundia,'(10e13.6)') ((vol0(i,k),i=jstart,nmmaxj),k=1,kmax)
       write(lundia,'(A)') 'vol1'
-      write(lundia,'(10e12.6)') ((vol1(i,k),i=jstart,nmmaxj),k=1,kmax)
+      write(lundia,'(10e13.6)') ((vol1(i,k),i=jstart,nmmaxj),k=1,kmax)
       write(lundia,'(A)') 'guv'
-      write(lundia,'(10e12.6)') (guv(i),i=jstart,nmmaxj)
+      write(lundia,'(10e13.6)') (guv(i),i=jstart,nmmaxj)
       write(lundia,'(A)') 'gvu'
-      write(lundia,'(10e12.6)') (gvu(i),i=jstart,nmmaxj)
+      write(lundia,'(10e13.6)') (gvu(i),i=jstart,nmmaxj)
       write(lundia,'(A)') 'gzz'
-      write(lundia,'(10e12.6)') ((gzz(i,k),i=jstart,nmmaxj),k=0,kmax)
+      write(lundia,'(10e13.6)') ((gzz(i,k),i=jstart,nmmaxj),k=0,kmax)
       write(lundia,'(A)') 'bdddx'
-      write(lundia,'(10e12.6)') ((bdddx(i,k),i=jstart,nmmaxj),k=1,kmax)
+      write(lundia,'(10e13.6)') ((bdddx(i,k),i=jstart,nmmaxj),k=1,kmax)
       write(lundia,'(A)') 'bddx'
-      write(lundia,'(10e12.6)') ((bddx (i,k),i=jstart,nmmaxj),k=1,kmax)
+      write(lundia,'(10e13.6)') ((bddx (i,k),i=jstart,nmmaxj),k=1,kmax)
       write(lundia,'(A)') 'bdx'
-      write(lundia,'(10e12.6)') ((bdx  (i,k),i=jstart,nmmaxj),k=1,kmax)
+      write(lundia,'(10e13.6)') ((bdx  (i,k),i=jstart,nmmaxj),k=1,kmax)
       write(lundia,'(A)') 'bux'
-      write(lundia,'(10e12.6)') ((bux  (i,k),i=jstart,nmmaxj),k=1,kmax)
+      write(lundia,'(10e13.6)') ((bux  (i,k),i=jstart,nmmaxj),k=1,kmax)
       write(lundia,'(A)') 'buux'
-      write(lundia,'(10e12.6)') ((buux (i,k),i=jstart,nmmaxj),k=1,kmax)
+      write(lundia,'(10e13.6)') ((buux (i,k),i=jstart,nmmaxj),k=1,kmax)
       write(lundia,'(A)') 'buuux'
-      write(lundia,'(10e12.6)') ((buuux(i,k),i=jstart,nmmaxj),k=1,kmax)
+      write(lundia,'(10e13.6)') ((buuux(i,k),i=jstart,nmmaxj),k=1,kmax)
       write(lundia,'(A)') 'uvdwk'
-      write(lundia,'(10e12.6)') ((uvdwk(i,k),i=jstart,nmmaxj),k=1,kmax)
+      write(lundia,'(10e13.6)') ((uvdwk(i,k),i=jstart,nmmaxj),k=1,kmax)
       write(lundia,'(A)') 'vvdwk'
-      write(lundia,'(10e12.6)') ((vvdwk(i,k),i=jstart,nmmaxj),k=1,kmax)
+      write(lundia,'(10e13.6)') ((vvdwk(i,k),i=jstart,nmmaxj),k=1,kmax)
       write(lundia,'(A)') 'aak'
-      write(lundia,'(10e12.6)') ((aak  (i,k),i=jstart,nmmaxj),k=1,kmax)
+      write(lundia,'(10e13.6)') ((aak  (i,k),i=jstart,nmmaxj),k=1,kmax)
       write(lundia,'(A)') 'bbk'
-      write(lundia,'(10e12.6)') ((bbk  (i,k),i=jstart,nmmaxj),k=1,kmax)
+      write(lundia,'(10e13.6)') ((bbk  (i,k),i=jstart,nmmaxj),k=1,kmax)
       write(lundia,'(A)') 'cck'
-      write(lundia,'(10e12.6)') ((cck  (i,k),i=jstart,nmmaxj),k=1,kmax)
+      write(lundia,'(10e13.6)') ((cck  (i,k),i=jstart,nmmaxj),k=1,kmax)
       write(lundia,'(A)') 'aakl'
-      write(lundia,'(10e12.6)') (((aakl(i,k,j),i=jstart,nmmaxj),
+      write(lundia,'(10e13.6)') (((aakl(i,k,j),i=jstart,nmmaxj),
      +                            k=1,kmax),j=1,nosys)
       write(lundia,'(A)') 'bbkl'
-      write(lundia,'(10e12.6)') (((bbkl(i,k,j),i=jstart,nmmaxj),
+      write(lundia,'(10e13.6)') (((bbkl(i,k,j),i=jstart,nmmaxj),
      +                            k=1,kmax),j=1,nosys)
       write(lundia,'(A)') 'cckl'
-      write(lundia,'(10e12.6)') (((cckl(i,k,j),i=jstart,nmmaxj),
+      write(lundia,'(10e13.6)') (((cckl(i,k,j),i=jstart,nmmaxj),
      +                            k=1,kmax),j=1,nosys)
       write(lundia,'(A)') 'ddkl'
-      write(lundia,'(10e12.6)') (((ddkl(i,k,j),i=jstart,nmmaxj),
+      write(lundia,'(10e13.6)') (((ddkl(i,k,j),i=jstart,nmmaxj),
      +                            k=1,kmax),j=1,nosys)
       stop
       return

@@ -75,8 +75,8 @@ C
       WRITE (IOU(19),30) (DIST1(K),K=1,7),(DIST2(K),K=1,7),
      1                   (DAYPER(K),K=1,3)
    30 FORMAT ('Net production per hour for oxygen model.',/,
-     1        'Distribution 1',2X,7(F5.3,2X),/,'Distribution 2',2X,
-     2        7(F5.3,2X),/,'Dayperiod',2X,3(F5.3,2X))
+     1        'Distribution 1',2X,7(F6.3,2X),/,'Distribution 2',2X,
+     2        7(F6.3,2X),/,'Dayperiod',2X,3(F6.3,2X))
    40 CONTINUE
 C
 C  Establish time interval for this period

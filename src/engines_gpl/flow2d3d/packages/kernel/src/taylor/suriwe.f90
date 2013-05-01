@@ -288,21 +288,21 @@ subroutine suriwe(kmax      ,kmxdt     ,kmxt      ,h0        ,scale     , &
        !
        write (luniwe, *)
        write (luniwe, '(a)') ' SURIWE                          :'
-       write (luniwe, '(a,1x,g8.3)') ' Wind direction             [dgr]:',      &
+       write (luniwe, '(a,1x,g10.3)') ' Wind direction             [dgr]:',      &
                                    & dirsur
-       write (luniwe, '(a,1x,g8.3)') ' Angle of IW propagation    [dgr]:', angle
-       write (luniwe, '(a,1x,g8.2)') ' Power transfer to TKE  [m^3/s^3]:', epsav
-       write (luniwe, '(a,1x,g8.2)') ' Fraction of power of flow    [-]:',      &
+       write (luniwe, '(a,1x,g10.3)') ' Angle of IW propagation    [dgr]:', angle
+       write (luniwe, '(a,1x,g10.3)') ' Power transfer to TKE  [m^3/s^3]:', epsav
+       write (luniwe, '(a,1x,g10.3)') ' Fraction of power of flow    [-]:',      &
                                    & frccor
-       write (luniwe, '(a,1x,g8.2)') ' Near-surface orb. velocity [m/s]:', aw
+       write (luniwe, '(a,1x,g10.3)') ' Near-surface orb. velocity [m/s]:', aw
        !
-       write (luniwe, '(a,1x,g8.2)') ' Max dZ/dz in strat. layer    [-]:',      &
+       write (luniwe, '(a,1x,g10.3)') ' Max dZ/dz in strat. layer    [-]:',      &
                                    & dzdz(kmxdt)
-       write (luniwe, '(a,1x,g8.2)') ' Max. z-displacement          [m]:',      &
+       write (luniwe, '(a,1x,g10.3)') ' Max. z-displacement          [m]:',      &
                                    & zamp(kmxdt)
        if (singul) then
           zcrit = (kmxt - kcrit)*h0/kmxt
-          write (luniwe, '(a,1x,g8.2)') ' Level crit. layer above bed  [m]:',   &
+          write (luniwe, '(a,1x,g10.3)') ' Level crit. layer above bed  [m]:',   &
                                       & zcrit
        else
           write (luniwe, '(a)') ' No critical layer               :'

@@ -727,7 +727,7 @@ C
 99920 FORMAT (1X,'Computation with extra constraints on growth',
      1        ' rates',/,1X,'using a CONSTANT base level of',1X,F8.2,/)
 99910 FORMAT (1X,'Computation with extra constraints on growth',
-     1        ' rates',/,1X,'using a FRACTION of ',F4.2,' of',
+     1        ' rates',/,1X,'using a FRACTION of ',F5.2,' of',
      2        ' the steady state biomass.',/)
 99900 FORMAT (1X,'Invalid Reset option command:',1X,A8)
 99890 FORMAT (1X,'It is not allowed to reset',1X,A8)
@@ -769,7 +769,7 @@ C
      1        ' intensity of ',F10.1,/,' ')
 99720 FORMAT (1X,'Error setting option',1X,A8,1X,'-- Command NOT',
      1        ' executed.')
-99710 FORMAT (1X,'Minimum Pmax and mortality rate of ',F5.3,' for',
+99710 FORMAT (1X,'Minimum Pmax and mortality rate of ',F6.3,' for',
      1        ' temperatures less or equal to ',F4.1)
 99700 FORMAT (1X,'Ojective function: maximize total biomass.')
 99690 FORMAT (1X,'Ojective function: maximize net growth rates.')

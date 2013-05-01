@@ -225,17 +225,17 @@ subroutine write_swan_datafile (var1  , var2       , mmax   , nmax, covered, &
     !
     if (sumvars) then
        if (positiveonly) then
-          write (lunfil,'(4(3X,E12.6))') ( ( max(var1(i,j)+var2(i,j),0.0), i=1,mmax), j=1,nmax )
+          write (lunfil,'(4(3X,E13.6))') ( ( max(var1(i,j)+var2(i,j),0.0), i=1,mmax), j=1,nmax )
        else
-          write (lunfil,'(4(3X,E12.6))') ( (var1(i,j)+var2(i,j), i=1,mmax), j=1,nmax )
+          write (lunfil,'(4(3X,E13.6))') ( (var1(i,j)+var2(i,j), i=1,mmax), j=1,nmax )
        endif
     else
        if (positiveonly) then
-          write (lunfil,'(4(3X,E12.6))') ( ( max(var1(i,j),0.0), i=1,mmax), j=1,nmax )
-          write (lunfil,'(4(3X,E12.6))') ( ( max(var2(i,j),0.0), i=1,mmax), j=1,nmax )
+          write (lunfil,'(4(3X,E13.6))') ( ( max(var1(i,j),0.0), i=1,mmax), j=1,nmax )
+          write (lunfil,'(4(3X,E13.6))') ( ( max(var2(i,j),0.0), i=1,mmax), j=1,nmax )
        else
-          write (lunfil,'(4(3X,E12.6))') ( (var1(i,j), i=1,mmax), j=1,nmax )
-          write (lunfil,'(4(3X,E12.6))') ( (var2(i,j), i=1,mmax), j=1,nmax )
+          write (lunfil,'(4(3X,E13.6))') ( (var1(i,j), i=1,mmax), j=1,nmax )
+          write (lunfil,'(4(3X,E13.6))') ( (var2(i,j), i=1,mmax), j=1,nmax )
        endif
     endif
     close (lunfil)

@@ -264,10 +264,10 @@ subroutine turiwe(kmxdt     ,kmxt      ,h0        ,scale     ,bvav      , &
     if (iwedia) then
        write (luniwe, *)
        write (luniwe, '(a)') ' TURIWE                          :'
-       write (luniwe, '(a,1x,g8.2)') ' Upper level critical layers  [m]:',      &
+       write (luniwe, '(a,1x,g9.2)') ' Upper level critical layers  [m]:',      &
                                    & h0*(1. - ktgcu/real(kmxt,sp))
-       write (luniwe, '(a,1x,g8.2)') ' Lower level critical layers  [m]:',      &
+       write (luniwe, '(a,1x,g9.2)') ' Lower level critical layers  [m]:',      &
                                    & h0*(1. - ktgcd/real(kmxt,sp))
-       write (luniwe, '(a,1x,g8.2)') ' With IWE to TKE rate   [m^2/s^3]:', tit
+       write (luniwe, '(a,1x,g9.2)') ' With IWE to TKE rate   [m^2/s^3]:', tit
     endif
 end subroutine turiwe

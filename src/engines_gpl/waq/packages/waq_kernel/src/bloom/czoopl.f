@@ -163,7 +163,7 @@ C
 99950 FORMAT (1X,A3,' value of ',A8,' = ',F14.4)
 99940 FORMAT (1X,A3,' value of ',A8,' = ',I2)
 99930 FORMAT (1X,'Present zooplankton characteristics: ')
-99920 FORMAT (' Zooplankton nutrient coefficient for ',A8,2X,F6.4)
+99920 FORMAT (' Zooplankton nutrient coefficient for ',A8,2X,F7.4)
 99910 FORMAT (' Half saturation constant ZOOK = ',F6.1)
 99900 FORMAT (' Phytoplankton escaping grazing XMIN = ',F6.1)
 99890 FORMAT (' Grazing rate constant ZOOGR = ',F8.4,' per day')

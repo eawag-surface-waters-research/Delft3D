@@ -1,4 +1,4 @@
-subroutine dfbladm ( ipown, icom, mmax, nmax, gdp )
+subroutine dfbladm(ipown, icom, mmax, nmax, runid, gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -61,59 +61,67 @@ subroutine dfbladm ( ipown, icom, mmax, nmax, gdp )
     !
     implicit none
     !
-    type(globdat), target    :: gdp
+    type(globdat)     , target    :: gdp
+    type(dfparalltype), pointer   :: gdparall
+    integer           , pointer   :: lundia
+    integer           , pointer   :: nfg
+    integer           , pointer   :: nlg
+    integer           , pointer   :: mfg
+    integer           , pointer   :: mlg
+    integer           , pointer   :: nmaxgl
+    integer           , pointer   :: mmaxgl
+!
+! Parameters
+!
+    integer, parameter :: infg = 1
+    integer, parameter :: inlg = 2
+    integer, parameter :: imfg = 3
+    integer, parameter :: imlg = 4
 !
 ! Global variables
 !
-    integer, intent(in)                       :: mmax  ! number of gridpoints in the x-direction
-    integer, intent(in)                       :: nmax  ! number of gridpoints in the y-direction
-    !
-    integer, dimension(mmax,nmax), intent(in) :: ipown ! array giving the subdomain number of each gridpoint
-!
-    integer, dimension(-1:mmax+2, nmax), intent(in) :: icom
-    type(dfparalltype), pointer          :: gdparall
+    integer                            , intent(in)  :: mmax  ! number of gridpoints in the x-direction
+    integer                            , intent(in)  :: nmax  ! number of gridpoints in the y-direction
+    integer, dimension(mmax,nmax)      , intent(in)  :: ipown ! array giving the subdomain number of each gridpoint
+    integer, dimension(-1:mmax+2, nmax), intent(in)  :: icom
+    character(*)                       , intent(in)  :: runid ! Run identification code for the current simulation
 !
 ! Local variables
 !
-    integer, pointer            :: lundia
-    integer, pointer            :: nfg
-    integer, pointer            :: nlg
-    integer, pointer            :: mfg
-    integer, pointer            :: mlg
-    integer, pointer            :: nmaxgl
-    integer, pointer            :: mmaxgl
-    integer, dimension(:), pointer            :: iblkad
-    integer                              :: i      ! loop counter
-    integer, dimension(:,:), allocatable :: icrecv ! array containing positions of unknowns to be received from neighbour
-    integer, dimension(:,:), allocatable :: icsend ! array containing positions of unknowns to be sent to neighbour
-    integer                              :: idom   ! subdomain number
-    integer                              :: ihalo  ! actual width of halo area
-    integer                              :: inb    ! neighbour counter
-    integer                              :: istat  ! status code of allocation
-    integer, dimension(:), allocatable   :: itemp  ! temporary work array to store block administration
-    integer, dimension(3,nproc)          :: iwork  ! array used to determine interface sizes
-                                                   !       iwork(1,i) = number of the i-th neighbour
-                                                   !       iwork(2,i) = position of the i-th neighbour with
-                                                   !                    respect to present subdomain
-                                                   !                    (resp. top, bottom, right, left)
-                                                   !       iwork(3,i) = size of interface to i-th neighbour
-    integer                              :: j      ! loop counter
-    integer, dimension(2,4)              :: joffs  ! offsets at which a point of a neigbhour domain can be found
-    integer                              :: length ! actual length of array IBLKAD
-    integer                              :: m      ! current M-index of point in computational row
-    integer                              :: moff   ! offset in x-direction
-    integer                              :: n      ! current N-index of point in computational column
-    integer                              :: nneigh ! number of neighbouring subdomains
-    integer                              :: noff   ! offset in y-direction
-    integer                              :: novlu  ! number of overlapping unknowns
-    integer                              :: nsiz   ! size of present subdomain in y-direction
-    !
-    character(300)                       :: message ! string to pass message
-    !
+    integer                              :: fillun
+    integer, dimension(:), pointer       :: iblkad
+    integer                              :: i              ! loop counter
+    integer                              :: ibnd
+    integer, dimension(:,:), allocatable :: icrecv         ! array containing positions of unknowns to be received from neighbour
+    integer, dimension(:,:), allocatable :: icsend         ! array containing positions of unknowns to be sent to neighbour
+    integer                              :: idom           ! subdomain number
+    integer                              :: ihalo          ! actual width of halo area
+    integer                              :: inb            ! neighbour counter
     integer                              :: istart
     integer                              :: iend
-    
-!   integer, dimension(:,:), allocatable :: iarrc
+    integer                              :: istat          ! status code of allocation
+    integer, dimension(:), allocatable   :: itemp          ! temporary work array to store block administration
+    integer, dimension(3,nproc)          :: iwork          ! array used to determine interface sizes
+                                                           !       iwork(1,i) = number of the i-th neighbour
+                                                           !       iwork(2,i) = position of the i-th neighbour with
+                                                           !                    respect to present subdomain
+                                                           !                    (resp. top, bottom, right, left)
+                                                           !       iwork(3,i) = size of interface to i-th neighbour
+    integer                              :: j              ! loop counter
+    integer, dimension(2,4)              :: joffs          ! offsets at which a point of a neigbhour domain can be found
+    integer                              :: length         ! actual length of array IBLKAD
+    integer                              :: m              ! current M-index of point in computational row
+    integer                              :: moff           ! offset in x-direction
+    integer                              :: n              ! current N-index of point in computational column
+    integer,external                     :: newlun
+    integer                              :: nneigh         ! number of neighbouring subdomains
+    integer                              :: noff           ! offset in y-direction
+    integer                              :: novlu          ! number of overlapping unknowns
+    integer                              :: nsiz           ! size of present subdomain in y-direction
+    integer, dimension(:,:), allocatable :: partition_dims
+    logical                              :: ex
+    character(300)                       :: message        ! string to pass message
+    character(256)                       :: ddbfile
 !
 !! executable statements -------------------------------------------------------
 !
@@ -133,25 +141,106 @@ subroutine dfbladm ( ipown, icom, mmax, nmax, gdp )
     !
     joffs = reshape((/0,1,0,-1,1,0,-1,0/), (/2,4/))
     !
-    ! determine enclosing box of present subdomain
+    ! determine enclosing box of present subdomain (and also of the other subdomains)
     !
-    nfg = nmax+1
-    nlg = 0
-    mfg = mmax+1
-    mlg = 0
+    allocate(partition_dims(4,nproc), stat=istat)
+    if (istat /= 0) then
+       call prterr(lundia, 'U021', 'dfbladm: memory alloc error')
+       call d3stop(1, gdp)
+    endif
+    partition_dims(infg,:) = nmax+1
+    partition_dims(inlg,:) = 0
+    partition_dims(imfg,:) = mmax+1
+    partition_dims(imlg,:) = 0
     !
     do m = 1, mmax
        do n = 1, nmax
-          if( ipown(m,n) == inode ) then
-             nfg = min(n,nfg)
-             nlg = max(n,nlg)
-             mfg = min(m,mfg)
-             mlg = max(m,mlg)
-
+          !
+          ! ipown(m,n) contains the number of the partition where this point should
+          ! belong to. Ignore the zeros in there.
+          !
+          if (ipown(m,n)>=1 .and. ipown(m,n)<=nproc) then
+             partition_dims(infg,ipown(m,n)) = min(n,partition_dims(infg,ipown(m,n)))
+             partition_dims(inlg,ipown(m,n)) = max(n,partition_dims(inlg,ipown(m,n)))
+             partition_dims(imfg,ipown(m,n)) = min(m,partition_dims(imfg,ipown(m,n)))
+             partition_dims(imlg,ipown(m,n)) = max(m,partition_dims(imlg,ipown(m,n)))
           endif
-
        enddo
     enddo
+    nfg = partition_dims(infg, inode)
+    nlg = partition_dims(inlg, inode)
+    mfg = partition_dims(imfg, inode)
+    mlg = partition_dims(imlg, inode)
+    !
+    if (inode == master) then
+       !
+       ! Write the related ddb file. Needed as input by DDCOUPLE to prepare a WAQ calculation
+       !
+       ddbfile = trim(runid) // ".ddb"
+       inquire (file = trim(ddbfile), exist = ex)
+       if (ex) then
+          write(message,'(3a)') "File """,trim(ddbfile),""" already exists and will not be generated."
+       else
+          write(message,'(3a)') "File """,trim(ddbfile),""" will be generated."
+       endif
+       call prterr(lundia, 'G051', trim(message))
+       if (.not.ex) then
+          fillun = newlun(gdp)
+          open(fillun, file=trim(ddbfile), iostat = istat)
+          if (istat /= 0) then
+             write(message,'(3a)') "Unable to open file """,trim(ddbfile),""". Skipping generation."
+             call prterr(lundia, 'U190', trim(message))
+          else
+             do i=1,nproc-1
+                !
+                ! Generate the line related to the couple boundary between partition i and i+1
+                !
+                write(message,'(2a,i3.3,a)') trim(runid), '-',i,'.grd'
+                if (idir == 1) then
+                   !
+                   ! First, nmaxus of this partition will be set to
+                   ! nlg-nfg+1
+                   ! Then a halo will be added in front and at the end
+                   ! The index of the boundary to be coupled is the last non-halo index:
+                   ! nlg-nfg+1         for partition 1
+                   ! nlg-nfg+1+halo    for the other partitions
+                   !
+                   ibnd = partition_dims(inlg,i) - partition_dims(infg,i) + 1
+                   if (i /= 1) then
+                      ibnd = ibnd + ihalon
+                   endif
+                   write(message,'(a,4(a,i0))') trim(message), '   ', 1     , '   ', ibnd, &
+                                              &                '   ', mmax-1, '   ', ibnd
+                else
+                   !
+                   ! Idem, with nmaxus/nlg/nfg replaced by mmax/mlg/mfg
+                   !
+                   ibnd = partition_dims(imlg,i) - partition_dims(imfg,i) + 1
+                   if (i /= 1) then
+                      ibnd = ibnd + ihalom
+                   endif
+                   write(message,'(a,4(a,i0))') trim(message), '   ', ibnd, '   ', 1, &
+                                              &                '   ', ibnd, '   ', nmax-1
+                endif
+                write(message,'(4a,i3.3,a)') trim(message), '   ', trim(runid), '-',i+1,'.grd'
+                !
+                ! Couple boundary index in the other partition:
+                ! The first non-halo index is 3
+                !
+                if (idir == 1) then
+                   write(message,'(a,4(a,i0))') trim(message), '   ', 1     , '   ', 3, &
+                                              &                '   ', mmax-1, '   ', 3
+                else
+                   write(message,'(a,4(a,i0))') trim(message), '   ', 3, '   ', 1, &
+                                              &                '   ', 3, '   ', nmax-1
+                endif
+                write(fillun,'(a)') message
+             enddo
+          endif
+          close(fillun)
+       endif
+    endif
+    deallocate(partition_dims, stat=istat)
     !
     ! if subdomain appears to be empty
     !

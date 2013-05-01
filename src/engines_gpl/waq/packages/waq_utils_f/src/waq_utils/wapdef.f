@@ -197,7 +197,7 @@ C
          WRITE ( LUPDEF , '(I3)' ) NST
          DO 400 IST = 1 , NST
             IPV = IPBST(IP) + IST - 1
-            WRITE ( LUPDEF , '(A10,2X,A10,2X,E12.6)') GENBST(IPV),
+            WRITE ( LUPDEF , '(A10,2X,A10,2X,E13.6)') GENBST(IPV),
      +                                                FLXBST(IPV),
      +                                                STOBST(IPV)
   400    CONTINUE
@@ -208,7 +208,7 @@ C
          WRITE ( LUPDEF , '(I3)' ) NST
          DO 500 IST = 1 , NST
             IPV = IPDST(IP) + IST - 1
-            WRITE ( LUPDEF , '(A10,2X,A10,2X,E12.6)') GENDST(IPV),
+            WRITE ( LUPDEF , '(A10,2X,A10,2X,E13.6)') GENDST(IPV),
      +                                                OUTDST(IPV),
      +                                                STODST(IPV)
   500    CONTINUE
@@ -219,7 +219,7 @@ C
          WRITE ( LUPDEF , '(I3)' ) NST
          DO 600 IST = 1 , NST
             IPV = IPVST(IP) + IST - 1
-            WRITE ( LUPDEF , '(A10,2X,A10,2X,E12.6)') GENVST(IPV),
+            WRITE ( LUPDEF , '(A10,2X,A10,2X,E13.6)') GENVST(IPV),
      +                                                OUTVST(IPV),
      +                                                STOVST(IPV)
   600    CONTINUE

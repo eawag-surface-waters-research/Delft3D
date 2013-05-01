@@ -150,31 +150,31 @@ C
 
 
       write(lundia,'(A)') 'flow'
-      write(lundia,'(10e12.6)') (flow(i),i=1,noq)
+      write(lundia,'(10e13.6)') (flow(i),i=1,noq)
       write(lundia,'(A)') 'velo'
-      write(lundia,'(10e12.6)') (velo(i),i=1,noq*novelo)
+      write(lundia,'(10e13.6)') (velo(i),i=1,noq*novelo)
       write(lundia,'(A)') 'conc'
-      write(lundia,'(10e12.6)') ((conc(i,j),i=1,notot),j=1,noseg)
+      write(lundia,'(10e13.6)') ((conc(i,j),i=1,notot),j=1,noseg)
       write(lundia,'(A)') 'bound'
-      write(lundia,'(10e12.6)') ((bound(i,j),i=1,nosys),j=1,nobnd)
+      write(lundia,'(10e13.6)') ((bound(i,j),i=1,nosys),j=1,nobnd)
       write(lundia,'(A)') 'deriv'
-      write(lundia,'(10e12.6)') ((deriv(i,j),i=1,notot),j=1,noseg)
+      write(lundia,'(10e13.6)') ((deriv(i,j),i=1,notot),j=1,noseg)
       write(lundia,'(A)') 'area'
-      write(lundia,'(10e12.6)') (area(i),i=1,noq)
+      write(lundia,'(10e13.6)') (area(i),i=1,noq)
       write(lundia,'(A)') 'dvol0'
-      write(lundia,'(10e12.6)') (dvol0(i),i=1,noseg)
+      write(lundia,'(10e13.6)') (dvol0(i),i=1,noseg)
       write(lundia,'(A)') 'dvol1'
-      write(lundia,'(10e12.6)') (dvol1(i),i=1,noseg)
+      write(lundia,'(10e13.6)') (dvol1(i),i=1,noseg)
       write(lundia,'(A)') 'disp'
-      write(lundia,'(10e12.6)') (disp(i),i=1,3)
+      write(lundia,'(10e13.6)') (disp(i),i=1,3)
       write(lundia,'(A)') 'disper'
-      write(lundia,'(10e12.6)') (disper(i),i=1,noq*nodisp)
+      write(lundia,'(10e13.6)') (disper(i),i=1,noq*nodisp)
       IF ( ILFLAG .EQ. 0 ) THEN
          write(lundia,'(A)') 'aleng'
-         write(lundia,'(10e12.6)') (aleng(i),i=1,3)
+         write(lundia,'(10e13.6)') (aleng(i),i=1,3)
       ELSE
          write(lundia,'(A)') 'aleng'
-         write(lundia,'(10e12.6)') (aleng(i),i=1,2*noq)
+         write(lundia,'(10e13.6)') (aleng(i),i=1,2*noq)
       ENDIF
       if ( timon ) call timstop ( ithandl )
       RETURN

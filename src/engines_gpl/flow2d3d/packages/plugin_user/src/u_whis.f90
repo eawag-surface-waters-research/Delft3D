@@ -181,6 +181,6 @@ subroutine u_whis(lundat    ,header    ,runid     ,itime     ,idate     , &
     !
     ! Write values to output file
     !
-    write (lundat, '(1x,i8.8,1x,i6.6,1x,f11.3,3(1x,g12.6),1x,f5.1)') &
+    write (lundat, '(1x,i8.8,1x,i6.6,1x,f11.3,3(1x,g13.6),1x,f8.1)') &
         & idate, itime, timnow, ztauut, ztauvt, ztaum, ztaud
 end subroutine u_whis

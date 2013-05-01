@@ -503,13 +503,13 @@ C
 99940 FORMAT (1X,A3,' concentration of',1X,A8,1X,' is',
      1        1X,F6.2,1X,' * nominal conc. + ',1X,F6.2)
 99930 FORMAT (1X,A8,' Is an invalid name for a nutrient')
-99920 FORMAT (1X,A3,' mineralization of',1X,A8,1X,' = ',1X,F6.4)
-99910 FORMAT (1X,A3,' mineralization of',1X,A8,1X,' = ',1X,F6.4,1X,
+99920 FORMAT (1X,A3,' mineralization of',1X,A8,1X,' = ',1X,F7.4)
+99910 FORMAT (1X,A3,' mineralization of',1X,A8,1X,' = ',1X,F7.4,1X,
      1       ' * Temperature')
 99905 FORMAT ('  Unrecognised control word ',A8,' for mortality',
      1        ' computation.')
 99904 FORMAT ('  Valid mortality control words are:',/,1X,4(A8,2X))
-99890 FORMAT (1X,A3,' mortality is input + ',F6.4)
+99890 FORMAT (1X,A3,' mortality is input + ',F7.4)
 99880 FORMAT (' *** WARNING MESSAGE ***',//,
      1        ' All input mortality rates are 0.0.')
 99870 FORMAT (1X,'Mortality rate calculated as exponential function ',
@@ -539,7 +539,7 @@ C
 99750 FORMAT (1X,A3,' mineralization rate of detritus =',1X,F6.3,1X,
      1        '*  Temperature')
 99740 FORMAT (1X,A3,' mineralization rate of chlorophyll is:',/,1X,
-     1        'EXP (',1X,F6.4,' * Temperature- ',1X,F6.4,' )')
+     1        'EXP (',1X,F7.4,' * Temperature- ',1X,F7.4,' )')
 99730 FORMAT (1X,A3,' fraction which is autolysing =',F6.3)
 99710 FORMAT (9A8)
 99705 FORMAT (1X,9A8)

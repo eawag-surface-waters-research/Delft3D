@@ -124,17 +124,17 @@ subroutine z_vihrov(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     ! Set upper bound for VICUV in coupling points
     ! maximum value based on CFL stability criterion (see also DETVIC)
     !
-    if (irov>0) then
+    if (irov > 0) then
        do nm = 1, nmmax
           nmd = nm - icx
           if (kfs(nm)==1 .and. kcs(nm)==3) then
              do k = 1, kmax
                 dx =  gvz(nm)
-                dy =  0.5 * ( guu(nm) + guu(nmd) )
-                vicmax = 1.0/dx**2 + 1.0/dy**2
-                vicmax = 0.9/(4.0*hdt*vicmax)
-                if (vicuv(nm, k)>=vicmax) then
-                   vicuv(nm, k) = vicmax
+                dy =  0.5_fp * (guu(nm) + guu(nmd))
+                vicmax = 1.0_fp/dx**2 + 1.0_fp/dy**2
+                vicmax = 0.9_fp / (4.0_fp*hdt*vicmax)
+                if (vicuv(nm,k) >= vicmax) then
+                   vicuv(nm,k) = vicmax
                 endif
              enddo
           endif
@@ -146,47 +146,46 @@ subroutine z_vihrov(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     !
     do nm = 1, nmmax
        do k = 1, kmax
-          rxy(nm, k) = 0.0
-          rxx(nm, k) = 0.0
+          rxy(nm,k) = 0.0_fp
+          rxx(nm,k) = 0.0_fp
        enddo
     enddo
-    if (irov==1) then
+    if (irov == 1) then
        !
        ! roughness rigid walls (partial slip IROV = 1)
        ! NOT YET APPLIED TO 45 degrees staircase situation
        !
        do nm = 1, nmmax
           num = nm + icy
-          if (kfu(nm) == 1 .or. kfu(num)==1) then
-             nmu = nm + icx
+          if (kfu(nm)==1 .or. kfu(num)==1) then
+             nmu  = nm + icx
              numu = nm + icx + icy
              !
              ! rxy in depth point
              !
              do k = kfumin(nm), kmax
-                if (kfuz0(nm, k)==1 .or. kfuz0(num, k)==1) then
-                   ki = kfuz0(num, k) + 2*kfvz0(nmu, k) + 4*kfuz0(nm, k)           &
-                      & + 8*kfvz0(nm, k)
-                   if (ki==15) then
+                if (kfuz0(nm,k)==1 .or. kfuz0(num,k)==1) then
+                   ki = kfuz0(num,k) + 2*kfvz0(nmu,k) + 4*kfuz0(nm,k) + 8*kfvz0(nm,k)
+                   if (ki == 15) then
                       !
                       ! rxy no walls
                       !
-                      vi = 0.25*(vicuv(nm, k) + vicuv(nmu, k) + vicuv(num, k)      &
-                         & + vicuv(numu, k)) + vnu2d(nm)
-                      rxy(nm, k) = vi*((u0(num, k) - u0(nm, k))/gud(nm) + (v(nmu, k&
-                                 & ) - v(nm, k))/gvd(nm))
+                      vi        = 0.25_fp * (vicuv(nm,k)+vicuv(nmu,k)+vicuv(num,k)+vicuv(numu,k))       &
+                                 & + vnu2d(nm)
+                      rxy(nm,k) = vi * (  (u0(num,k)-u0(nm,k))/gud(nm)  &
+                                 &      + (v (nmu,k)-v (nm,k))/gvd(nm) )
                    elseif (ki==12 .or. ki==6 .or. ki==4) then
                       !
                       ! rxy for u(nm); rough wall, flow below wall
                       !
-                      s = vonkar*u0(nm, k)/log((0.5*guu(nm) + z0v)/z0v)
-                      rxy(nm, k) = -s*abs(s)
+                      s         = vonkar * u0(nm,k) / log((0.5_fp*guu(nm)+z0v)/z0v)
+                      rxy(nm,k) = -s * abs(s)
                    elseif (ki==9 .or. ki==3 .or. ki==1) then
                       !
                       ! rxy for u(num); rough wall, flow above wall
                       !
-                      s = vonkar*u0(num, k)/log((0.5*guu(num) + z0v)/z0v)
-                      rxy(nm, k) = s*abs(s)
+                      s         = vonkar * u0(num,k) / log((0.5_fp*guu(num)+z0v)/z0v)
+                      rxy(nm,k) = s * abs(s)
                    else
                    endif
                 endif
@@ -196,44 +195,43 @@ subroutine z_vihrov(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     !
     ! roughness rigid walls (no slip IROV = 2 and Z0V = 0.)
     !
-    elseif (irov==2) then
+    elseif (irov == 2) then
        do nm = 1, nmmax
-             num = nm + icy
-             if (kfu(nm) == 1 .or. kfu(num)) then
-             ndm = nm - icy
-             nmu = nm + icx
+        num = nm + icy
+             if (kfu(nm)==1 .or. kfu(num)==1) then
+             ndm  = nm - icy
+             nmu  = nm + icx
              numu = nm + icx + icy
              !
              ! rxy in depth point
              !
              do k = kfumin(nm), kmax
-                if (kfuz0(nm, k)==1 .or. kfuz0(num, k)==1) then
-                   ki = kfuz0(num, k) + 2*kfvz0(nmu, k) + 4*kfuz0(nm, k)           &
-                      & + 8*kfvz0(nm, k)
+                if (kfuz0(nm,k)==1 .or. kfuz0(num,k)==1) then
+                   ki = kfuz0(num,k) + 2*kfvz0(nmu,k) + 4*kfuz0(nm,k) + 8*kfvz0(nm,k)
                    !
                    ! rxy no walls
                    !
-                   if (ki==15) then
-                      vi = 0.25*(vicuv(nm, k) + vicuv(nmu, k) + vicuv(num, k)      &
-                         & + vicuv(numu, k)) + vnu2d(nm)
-                      rxy(nm, k) = vi*((u0(num, k) - u0(nm, k))/gud(nm) + (v(nmu, k&
-                                 & ) - v(nm, k))/gvd(nm))
+                   if (ki == 15) then
+                      vi        = 0.25_fp * (vicuv(nm,k)+vicuv(nmu,k)+vicuv(num,k)+vicuv(numu,k))       &
+                                 & + vnu2d(nm)
+                      rxy(nm,k) = vi * (  (u0(num,k)-u0(nm,k))/gud(nm)  &
+                                 &      + (v (nmu,k)-v (nm,k))/gvd(nm) )
                    elseif (ki==12 .or. ki==6 .or. ki==4) then
                       !
                       ! rxy for u(nm); rough wall, flow below wall
                       !
-                      dy = guu(nm)
-                      vi = 0.5*(vicuv(nm, k) + vicuv(nmu, k))                      &
-                         & + 0.5*(vnu2d(nm) + vnu2d(ndm))
-                      rxy(nm, k) = vi*( - u0(nm, k))/(0.5*dy)
+                      dy        = guu(nm)
+                      vi        =    0.5_fp * (vicuv(nm,k) + vicuv(nmu,k)) &
+                                 & + 0.5_fp * (vnu2d(nm)   + vnu2d(ndm)  )
+                      rxy(nm,k) = vi * (-u0(nm,k)) / (0.5_fp*dy)
                    elseif (ki==9 .or. ki==3 .or. ki==1) then
                       !
                       ! rxy for u(num); rough wall, flow above wall
                       !
                       dy = guu(num)
-                      vi = 0.5*(vicuv(num, k) + vicuv(numu, k))                    &
-                         & + 0.5*(vnu2d(nm) + vnu2d(num))
-                      rxy(nm, k) = vi*(u0(num, k))/(0.5*dy)
+                      vi =    0.5_fp * (vicuv(num,k) + vicuv(numu,k)) &
+                          & + 0.5_fp * (vnu2d(nm)    + vnu2d(num)   )
+                      rxy(nm, k) = vi * (u0(num,k)) / (0.5_fp*dy)
                    else
                    endif
                 endif
@@ -243,27 +241,26 @@ subroutine z_vihrov(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     !
     ! roughness rigid walls (free slip IROV = 3 and Z0V = 0.)
     !
-    elseif (irov==3) then
+    elseif (irov == 3) then
        do nm = 1, nmmax
-             num = nm + icy
-             if (kfu(nm) == 1 .or. kfu(num)) then
-             nmu = nm + icx
+          num = nm + icy
+          if (kfu(nm)==1 .or. kfu(num)==1) then
+             nmu  = nm + icx
              numu = nm + icx + icy
              !
              ! rxy in depth point
              !
              do k = 1, kmax
-                if (kfuz0(nm, k)==1 .or. kfuz0(num, k)==1) then
-                   ki = kfuz0(num, k) + 2*kfvz0(nmu, k) + 4*kfuz0(nm, k)           &
-                      & + 8*kfvz0(nm, k)
+                if (kfuz0(nm,k)==1 .or. kfuz0(num,k)==1) then
+                   ki = kfuz0(num,k) + 2*kfvz0(nmu,k) + 4*kfuz0(nm,k) + 8*kfvz0(nm,k)
                    !
                    ! rxy no walls
                    !
-                   if (ki==15) then
-                      vi = 0.25*(vicuv(nm, k) + vicuv(nmu, k) + vicuv(num, k)      &
-                         & + vicuv(numu, k)) + vnu2d(nm)
-                      rxy(nm, k) = vi*((u0(num, k) - u0(nm, k))/gud(nm) + (v(nmu, k&
-                                 & ) - v(nm, k))/gvd(nm))
+                   if (ki == 15) then
+                      vi        = 0.25_fp * (vicuv(nm,k)+vicuv(nmu,k)+vicuv(num,k)+vicuv(numu,k))     &
+                                 & + vnu2d(nm)
+                      rxy(nm,k) = vi * (  (u0(num,k)-u0(nm,k))/gud(nm)  &
+                                 &      + (v (nmu,k)-v (nm,k))/gvd(nm) )
                    endif
                 endif
              enddo
@@ -276,15 +273,14 @@ subroutine z_vihrov(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     ! rxx in zeta point (active point, on open boundary rxx = 0.)
     !
     do nm = 1, nmmax
-      if (kfu(nm) == 1 .or. kfu(num)) then
-          ndm = nm - icy
-          nmd = nm - icx
+      if (kfu(nm)==1 .or. kfu(num)==1) then
+          ndm  = nm - icy
+          nmd  = nm - icx
           ndmd = nm - icx - icy
           do k = kfumin(nm), kmax
-             if ( (kcs(nm)==1 .or. kcs(nm)==3) .and. kfsz0(nm, k)==1 ) then
-                vi = vicuv(nm, k) + 0.25*(vnu2d(nm) + vnu2d(nmd) + vnu2d(ndm)         &
-                   & + vnu2d(ndmd))
-                rxx(nm, k) = 2*vi*(u0(nm, k) - u0(nmd, k))/gvz(nm)
+             if ((kcs(nm)==1.or.kcs(nm)==3) .and. kfsz0(nm,k)==1) then
+                vi        = vicuv(nm,k) + 0.25_fp*(vnu2d(nm)+vnu2d(nmd)+vnu2d(ndm)+vnu2d(ndmd))
+                rxx(nm,k) = 2.0_fp * vi * (u0(nm,k)-u0(nmd,k)) / gvz(nm)
              endif
           enddo
        endif
@@ -294,12 +290,12 @@ subroutine z_vihrov(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     ! explicit term
     !
     do nm = 1, nmmax
-       if (kfu(nm) == 1) then
+       if (kfu(nm)==1 .or. kfu(num)==1) then
           nmu = nm + icx
           ndm = nm - icy
           do k = kfumin(nm), kfumx0(nm)
-             ddk(nm, k) = ddk(nm, k) + (rxx(nmu, k) - rxx(nm, k))/gvu(nm)          &
-                        & + (rxy(nm, k) - rxy(ndm, k))/guu(nm)
+             ddk(nm,k) = ddk(nm,k) + (rxx(nmu,k)-rxx(nm ,k))/gvu(nm) &
+                        &          + (rxy(nm, k)-rxy(ndm,k))/guu(nm)
           enddo
        endif
     enddo

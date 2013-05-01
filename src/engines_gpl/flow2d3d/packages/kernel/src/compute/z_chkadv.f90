@@ -263,13 +263,13 @@ subroutine z_chkadv(lundia    ,nmmax     ,kmax      ,icx       , &
        call nm_to_n_and_m(nm_cflumax, n, m, gdp)
        errmsg = ''
        if (frac_dz_u > 2.0_fp) then
-          write (errmsg, '(5a,f8.2,a,i0,a,i0,a,i0,a,i0,a,e9.3,a,e9.3,a)') &
+          write (errmsg, '(5a,f8.2,a,i0,a,i0,a,i0,a,i0,a,e10.3,a,e10.3,a)') &
                & 'Courant number for ', vel, '-velocity in ', point, '-point equals ', cflumax, & 
                & ' for (m,n,k) = (', m, ',', n, ',', k_cflumax, '),  at nst = ', nst ,', due to large gradient in layer thickness: ', frac_dz_u, &
                & '. Advised time step: ', dtadv/60.0_fp, ' minutes.'
           call prterr (lundia, 'G051', trim(errmsg))
        else
-          write (errmsg, '(5a,f8.2,a,i0,a,i0,a,i0,a,i0,a,e9.3,a)') &
+          write (errmsg, '(5a,f8.2,a,i0,a,i0,a,i0,a,i0,a,e10.3,a)') &
                & 'Courant number for ', vel, '-velocity in ', point, '-point equals ', cflumax, & 
                & ' for (m,n,k) = (', m, ',', n, ',', k_cflumax, '),  at nst = ', nst ,'. Advised time step: ', dtadv/60.0_fp, ' minutes.'
           call prterr (lundia, 'G051', trim(errmsg))
@@ -299,13 +299,13 @@ subroutine z_chkadv(lundia    ,nmmax     ,kmax      ,icx       , &
        call nm_to_n_and_m(nm_cflvmax, n, m, gdp)
        errmsg = ''
        if (frac_dz_v > 2.0_fp) then
-          write (errmsg, '(5a,f8.2,a,i0,a,i0,a,i0,a,i0,a,e9.3,a,e9.3,a)') &
+          write (errmsg, '(5a,f8.2,a,i0,a,i0,a,i0,a,i0,a,e10.3,a,e10.3,a)') &
                & 'Courant number for ', vel, '-velocity in ', point, '-point equals ', cflvmax, & 
                & ' for (m,n,k) = (', m, ',', n, ',', k_cflvmax, '),  at nst = ', nst ,', due to large gradient in layer thickness: ', frac_dz_v, &
                & '. Advised time step: ', dtadv/60.0_fp, ' minutes.'
           call prterr (lundia, 'G051', trim(errmsg))
        else
-          write (errmsg, '(5a,f8.2,a,i0,a,i0,a,i0,a,i0,a,e9.3,a)') &
+          write (errmsg, '(5a,f8.2,a,i0,a,i0,a,i0,a,i0,a,e10.3,a)') &
                & 'Courant number for ', vel, '-velocity in ', point, '-point equals ', cflvmax, & 
                & ' for (m,n,k) = (', m, ',', n, ',', k_cflvmax, '),  at nst = ', nst ,'. Advised time step: ', dtadv/60.0_fp, ' minutes.'
           call prterr (lundia, 'G051', trim(errmsg))

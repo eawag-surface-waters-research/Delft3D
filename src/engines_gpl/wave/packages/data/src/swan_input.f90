@@ -4542,13 +4542,13 @@ subroutine write_swan_inp (wavedata, outcnt, &
     endif
     if (sr%frictype==1) then
        line(1:9) = 'FRIC JON '
-       write (line(15:21), '(F6.4,1X)') sr%frcof
+       write (line(15:22), '(F7.4,1X)') sr%frcof
     elseif (sr%frictype==2) then
        line(1:9) = 'FRIC COLL'
-       write (line(15:21), '(F6.4,1X)') sr%frcof
+       write (line(15:22), '(F7.4,1X)') sr%frcof
     elseif (sr%frictype==3) then
        line(1:9) = 'FRIC MAD '
-       write (line(15:21), '(F6.4,1X)') sr%frcof
+       write (line(15:22), '(F7.4,1X)') sr%frcof
     else
     endif
     if (sr%frictype/=0) then
@@ -4560,13 +4560,13 @@ subroutine write_swan_inp (wavedata, outcnt, &
        ! In the future, (some of) the following parameters must be read from the mud-comfile
        !
        !write (luninp, '(1x,a)') 'MUD alpha=1. rhom=1300. nu=0.0027'
-       write (luninp, '(1x,a,f8.2,a,f8.6)') 'MUD alpha=1. rhom=', sr%rhomud, &
+       write (luninp, '(1x,a,f8.2,a,f9.6)') 'MUD alpha=1. rhom=', sr%rhomud, &
             & ' nu=', sr%viscmud
     endif
     if (sr%triads) then
        line(1:6) = 'TRIAD '
-       write (line(15:27), '(F6.4,1X,F6.4)') sr%cftriad1, sr%cftriad2
-       line(31:40)= ' 0.2  0.01'
+       write (line(15:29), '(F7.4,1X,F7.4)') sr%cftriad1, sr%cftriad2
+       line(33:42)= ' 0.2  0.01'
        write (luninp, '(1X,A)') line
        line(1:79) = ' '
     endif
@@ -4608,7 +4608,7 @@ subroutine write_swan_inp (wavedata, outcnt, &
     endif
     if (dom%vegetation == 1) then
        line(1:10) = 'VEGETATION'
-       write (line(15:), '(F6.2,1X,F6.4,1X,I4,1X,F6.4)') dom%veg_height, dom%veg_diamtr, dom%veg_nstems, dom%veg_drag
+       write (line(15:), '(F6.2,1X,F7.4,1X,I4,1X,F7.4)') dom%veg_height, dom%veg_diamtr, dom%veg_nstems, dom%veg_drag
        write (luninp, '(1X,A)') line
        line(1:79) = ' '
     endif
@@ -4656,15 +4656,15 @@ subroutine write_swan_inp (wavedata, outcnt, &
              write (line(24:30), '(F6.2,1X)') obet(i)
           endif
           if (sr%reflection(i) == 1) then
-             write (line(31:44), '(a,F8.6)') ' REFL ',sr%refl_coeff(i)
+             write (line(31:45), '(a,F9.6)') ' REFL ',sr%refl_coeff(i)
              if (sr%refl_type(i) == 1) then
-                write (line(45:50), '(a)') ' RSPEC'
+                write (line(46:51), '(a)') ' RSPEC'
              elseif (sr%refl_type(i) == 2) then
                 !
                 ! With SWAN version 40.51A, 'RDIFF 1 1 1' is replaced with 'RDIFF 1'
                 ! Not backwards compatible!
                 !
-                write (line(45:52), '(a)') ' RDIFF 1'
+                write (line(46:53), '(a)') ' RDIFF 1'
              else
              !
              ! Wrong type indicator

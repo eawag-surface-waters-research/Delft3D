@@ -104,6 +104,7 @@
       nosrc = 0
       nsr2  = 0
       do isrc = 1, nsrc
+         if (mnksrc(3,isrc) == -1) cycle ! awkward disabling of discharges outside partition when running parallel
          k = mnksrc(3,isrc)
          iwpnt(isrc) = nosrc + 1
          if ( k .eq. 0 ) then
@@ -119,6 +120,7 @@
          endif
       enddo
       do isrc = 1, nsrc
+         if ( mnksrc(3,isrc) ==  -1 ) cycle   ! awkward disabling of discharges outside partition when running parallel
          if ( mnksrc(7,isrc) .le. 1 ) cycle   ! no inlet outlet
          k = mnksrc(6,isrc)
          iwpnt(isrc+nsrc) = nosrc + 1
@@ -171,6 +173,7 @@
          endif
          nsr2 = 1
          do isrc = 1, nsrc
+            if (mnksrc(3,isrc) == -1) cycle ! awkward disabling of discharges outside partition when running parallel
             k = mnksrc(3,isrc)
             iwp = iwpnt(isrc)
             write ( lunsrc , '(6X,E15.6,A,I4)' ) awaste(iwp),               &
@@ -185,6 +188,7 @@
             endif
          enddo
          do isrc = 1, nsrc
+            if ( mnksrc(3,isrc) ==  -1 ) cycle   ! awkward disabling of discharges outside partition when running parallel
             if ( mnksrc(7,isrc) .le. 1 ) cycle   ! not an intake - outfall or other construct
             k = mnksrc(6,isrc)
             iwp = iwpnt(isrc+nsrc)
@@ -193,7 +197,7 @@
             nsr2 = nsr2 + 1
             if ( zmodel .and. k .eq. 0 ) then
                do ilay = 1, ksrwaq(nsrc+isrc)-1
-                  write ( lunsrc , '(6X,E12.6,A,I4)' ) awaste(iwp+ilay),    &
+                  write ( lunsrc , '(6X,E15.6,A,I4)' ) awaste(iwp+ilay),    &
      &                                  '    1.0  ; SOURCE:',nsr2
                   nsr2 = nsr2 + 1
                enddo
@@ -202,6 +206,7 @@
          if ( .not. zmodel ) then               ! zmodel alraedy dealt with
             do ilay = 1, nolay-1
                do isrc = 1, nsrc
+                  if ( mnksrc(3,isrc) ==  -1 ) cycle   ! awkward disabling of discharges outside partition when running parallel
                   if ( mnksrc(3,isrc) .eq. 0 ) then    ! depth average loads
                      iwp = iwpnt(isrc)
                      write ( lunsrc , '(6X,E15.6,A,I4)' ) awaste(iwp+ilay), &
@@ -210,6 +215,7 @@
                   endif
                enddo
                do isrc = 1, nsrc
+                  if ( mnksrc(3,isrc) ==  -1 ) cycle   ! awkward disabling of discharges outside partition when running parallel
                   if ( mnksrc(7,isrc) .le. 1 ) cycle   ! not an intake - outfall or other construct
                   if ( mnksrc(6,isrc) .eq. 0 ) then    ! depth average loads
                      iwp = iwpnt(isrc)

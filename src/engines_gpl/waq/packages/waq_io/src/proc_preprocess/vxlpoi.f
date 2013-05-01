@@ -128,7 +128,7 @@ C
 !jcb  call zoek ( valnam , nocons, coname , 10   , ico    )
       ico = dlwq_find(constants,valnam)
       if ( ico .gt. 0 ) then
-         write(line,'(a,i3,a,g12.6)') '       Using constant nr',ico,' with value:',constants%constant(ico)
+         write(line,'(a,i3,a,g13.6)') '       Using constant nr',ico,' with value:',constants%constant(ico)
          ivalip = nopref + nodisp + novelo + nofun + ico
          goto 800
       endif

@@ -539,12 +539,12 @@ subroutine z_solbicgstab(aak       ,bbk       ,cck      ,aak2      ,cck2      , 
    if (l2norm) then
       conv = rk / rk0
       conv = conv**(1.0/max(1,iter))
-         write (lundia,'(a,f5.2,a,i4,4(a,e9.3))') 'conv (L2 norm)=', &
+         write (lundia,'(a,f5.2,a,i4,4(a,e10.3))') 'conv (L2 norm)=', &
               & conv,'  iter=',iter,' ',rk0,' ',rk,' ',rkinf0,' ',rkinf
    else
       conv = rk / rk0
       conv = conv**(1.0/max(1,iter))
-         write (lundia,'(a,f5.2,a,i4,4(a,e9.3))') 'conv (Linf norm)=', &
+         write (lundia,'(a,f5.2,a,i4,4(a,e10.3))') 'conv (Linf norm)=', &
               & conv,'  iter=',iter,' ',rk0,' ',rk,' ',rkinf0,' ',rkinf
    endif
 end subroutine z_solbicgstab

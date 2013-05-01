@@ -177,7 +177,7 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
     endif
     if (       comparereal(versionnr,versionnrlow ) == -1 &
         & .or. comparereal(versionnr,versionnrhigh) ==  1  ) then
-       write (message,'(3(a,f4.2))') 'DPMV input file version number (',versionnr, ') must be between ', &
+       write (message,'(3(a,f5.2))') 'DPMV input file version number (',versionnr, ') must be between ', &
            & versionnrlow, ' and ', versionnrhigh
        call prterr(lundia, 'U021', trim(message))
        call d3stop(1, gdp)

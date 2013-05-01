@@ -146,9 +146,9 @@ subroutine distri(ttkiw     ,tiwtk     ,tkepro    ,tkedis    ,futg      , &
     if (iwedia) then
        write (luniwe, *)
        write (luniwe, '(a)') ' DISTRI                          :'
-       write (luniwe, '(a,1x,g8.2)') ' Integral of TKE prod.  [m^3/s^3]:',      &
+       write (luniwe, '(a,1x,g9.2)') ' Integral of TKE prod.  [m^3/s^3]:',      &
                                    & sumpro
-       write (luniwe, '(a,1x,g8.2)') ' Integral of TKE diss.  [m^3/s^3]:',      &
+       write (luniwe, '(a,1x,g9.2)') ' Integral of TKE diss.  [m^3/s^3]:',      &
                                    & sumdis
     endif
 end subroutine distri

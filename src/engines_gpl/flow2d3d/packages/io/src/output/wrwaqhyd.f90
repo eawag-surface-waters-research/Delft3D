@@ -239,6 +239,7 @@
       nowalk = 0
       il     = 1
       do i = 1,nsrc
+         if (mnksrc(3,i) == -1) cycle ! awkward disabling of discharges outside partition when running parallel
          m = mnksrc(1,i)
          n = mnksrc(2,i)
          filstring = ''''//namsrc(i)(1:LEN_TRIM(namsrc(i)))//''''//' normal'
@@ -268,22 +269,23 @@
             ksrwaq(i) = ilaggr(kmax-kfmin+1)     ! store value with source index
             if ( mnksrc(3,i) .eq. 0 ) then ! uniform source over depth
                do ilay = 1, ksrwaq(i)
-                  write ( lunout , '(3I5,3X,A)' ) n, m, ilay, trim(filstring)
+                  write ( lunout , '(3(I0,3X),A)' ) n, m, ilay, trim(filstring)
                enddo
             else
                nl = ilaggr(kmax-max(kfmin,mnksrc(3,i))+1)
-               write ( lunout , '(3I5,3X,A)' ) n, m, nl, trim(filstring)
+               write ( lunout , '(3(I0,3X),A)' ) n, m, nl, trim(filstring)
             endif
          else
             if ( mnksrc(3,i) .eq. 0 ) then
-               write ( lunout , '(3I5,3X,A)' ) n, m, 0, trim(filstring)
+               write ( lunout , '(3(I0,3X),A)' ) n, m, 0, trim(filstring)
             else
-               write ( lunout , '(3I5,3X,A)' ) n, m, ilaggr(mnksrc(3,i)), trim(filstring)
+               write ( lunout , '(3(I0,3X),A)' ) n, m, ilaggr(mnksrc(3,i)), trim(filstring)
             endif
          endif
       enddo
       il = 1
       do i = 1,nsrc
+         if ( mnksrc(3,i) ==  -1 ) cycle ! awkward disabling of discharges outside partition when running parallel
          if ( mnksrc(7,i) .le. 1 ) cycle
          m = mnksrc(4,i)
          n = mnksrc(5,i)
@@ -308,17 +310,17 @@
             ksrwaq(nsrc+i) = ilaggr(kmax-kfmin+1)     ! store value with source index
             if ( mnksrc(6,i) .eq. 0 ) then ! uniform source over depth
                do ilay = 1, ksrwaq(nsrc+i)
-                  write ( lunout , '(3I5,3X,A)' ) n, m, ilay, trim(filstring)
+                  write ( lunout , '(3(I0,3X),A)' ) n, m, ilay, trim(filstring)
                enddo
             else
                nl = ilaggr(kmax-max(kfmin,mnksrc(3,i))+1)
-               write ( lunout , '(3I5,3X,A)' ) n, m, nl, trim(filstring)
+               write ( lunout , '(3(I0,3X),A)' ) n, m, nl, trim(filstring)
             endif
          else
             if ( mnksrc(6,i) .eq. 0 ) then
-               write ( lunout , '(3I5,3X,A)' ) n, m, 0, trim(filstring)
+               write ( lunout , '(3(I0,3X),A)' ) n, m, 0, trim(filstring)
             else
-               write ( lunout , '(3I5,3X,A)' ) n, m, ilaggr(mnksrc(6,i)),   &
+               write ( lunout , '(3(I0,3X),A)' ) n, m, ilaggr(mnksrc(6,i)),   &
      &                                                    trim(filstring)
             endif
          endif

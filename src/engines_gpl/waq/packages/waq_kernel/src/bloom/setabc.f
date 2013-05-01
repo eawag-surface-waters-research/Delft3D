@@ -250,12 +250,12 @@ C         0895 MvdV subtract nutrients for all grazer types
 C
 C  Formats for this subroutine
 C
-99999 FORMAT (//,1X,'* WARNING *   A sedimentation rate of',2X,F5.3,2X,
+99999 FORMAT (//,1X,'* WARNING *   A sedimentation rate of',2X,F6.3,2X,
      1        'has been specified.',/,1X,'In order to keep the total',
      2        ' amount of nutrients constant, the program assumes',/,
      3        1X,'the amount of sedimented nutrients to be replaced',/,
      4        ' by dissolved nutrients from the bottom.',//)
-99998 FORMAT (//,1X,'* WARNING *  A flushing rate of',2X,F5.3,2X,
+99998 FORMAT (//,1X,'* WARNING *  A flushing rate of',2X,F6.3,2X,
      1        'has been specified.',/,1X,'In order to keep the total',
      2        ' amount of nutrients constant, the program assumes',/,
      3        1X,'the amount of nutrients flushed from the dead algal',
@@ -263,7 +263,7 @@ C
      5        ' from the intake water.',//)
 99997 FORMAT ('  Tcorr(j):   ',10(F5.2,1X))
 99996 FORMAT (//,1X,'Computation with inhomogeneous mixing.',/,
-     1        '  SDMIX(J):   ',20(F4.2,1X))
-99995 FORMAT ('  SDMIXN(J):  ',20(F4.2,1X))
+     1        '  SDMIX(J):   ',20(F5.2,1X))
+99995 FORMAT ('  SDMIXN(J):  ',20(F5.2,1X))
       RETURN
       END

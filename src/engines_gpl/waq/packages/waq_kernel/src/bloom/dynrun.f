@@ -141,7 +141,7 @@ C    1    WRITE (IOU(21),99930) ID,(NONUN(K),K=1,NUMUN)
 C
 99980 FORMAT(2X,'The following species have reduced relative depth',/,
      1       2X,'for buoyancy control: ')
-99970 FORMAT(2X,'Species ',A8,' has relative depth of ',F4.2)
+99970 FORMAT(2X,'Species ',A8,' has relative depth of ',F5.2)
 99960 FORMAT (/,23X,'****** TIME PERIOD ',2X,A8,2X,'******',/)
 99950 FORMAT(2X,'Important parameter values for this week:',/,
      1       2X,'Temperature =',F5.1,4X,'Solar radiation =',F8.1,

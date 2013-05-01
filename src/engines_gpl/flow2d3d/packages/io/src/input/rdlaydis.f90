@@ -127,7 +127,7 @@ subroutine rdlaydis(error, thick, kmax, laydis, gdp)
        do k = 1, kmax
           thick(k) = 1.0_fp / kmax
        enddo
-       write (lundia, '(a,2x,g12.6)') '* Constant layer thickness        THICK : ', &
+       write (lundia, '(a,2x,g13.6)') '* Constant layer thickness        THICK : ', &
                                     & thick(1)
     endif
     !
@@ -320,12 +320,12 @@ subroutine rdlaydis(error, thick, kmax, laydis, gdp)
     dz = h0 * thick(1)
     zu = h0 - 0.5_fp*dz
     k  = 1
-    write (lundia, '(i3,3(2x,g12.6))') k, thick(k), dz, zu
+    write (lundia, '(i3,3(2x,g13.6))') k, thick(k), dz, zu
     do k = 2, kmax
        zu = zu - 0.5_fp*dz
        dz = h0 * thick(k)
        zu = zu - 0.5_fp*dz
-       write (lundia, '(i3,3(2x,g12.6))') k, thick(k), dz, zu
+       write (lundia, '(i3,3(2x,g13.6))') k, thick(k), dz, zu
     enddo
     !
     write (lundia, '(a)') '***********************************************'
@@ -340,11 +340,11 @@ subroutine rdlaydis(error, thick, kmax, laydis, gdp)
     !
     k  = 0
     zw = h0
-    write (lundia, '(i3,2(2x,g12.6))') k, zw
+    write (lundia, '(i3,2(2x,g13.6))') k, zw
     do k = 1, kmax
        dz = h0 * thick(k)
        zw = zw - dz
-       write (lundia, '(i3,2x,g12.6)') k, zw
+       write (lundia, '(i3,2x,g13.6)') k, zw
     enddo
     !
     ! Sum must be 100

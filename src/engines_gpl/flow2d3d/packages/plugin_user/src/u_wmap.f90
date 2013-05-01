@@ -162,10 +162,10 @@ subroutine u_wmap(lundat    ,header    ,runid     ,itime     ,idate     , &
           ! Write values to output file
           !
           if (lvar) then
-             write (lundat, '(2(e12.6,1x),5(1x,g12.6) )') &
+             write (lundat, '(2(e13.6,1x),5(1x,g13.6) )') &
                  & xz(n, m), yz(n, m), wh, s1(n, m), vw
           else
-             write (lundat, '(2(e12.6,1x),5(1x,g12.6) )') &
+             write (lundat, '(2(e13.6,1x),5(1x,g13.6) )') &
                  & (xydef, i = 1, 2), (zdef, i = 1, 3)
           endif
        enddo

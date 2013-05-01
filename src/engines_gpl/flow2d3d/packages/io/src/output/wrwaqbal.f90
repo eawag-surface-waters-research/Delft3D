@@ -118,6 +118,7 @@
       changed = .false.
       if ( mode .eq. 0 ) changed = .true.
       do i = 1, nsrc
+         if (mnksrc(3,i) == -1) cycle ! awkward disabling of discharges outside partition when running parallel
          m = mnksrc(1,i)
          n = mnksrc(2,i)
          k = mnksrc(3,i)
@@ -153,6 +154,7 @@
          write ( lunsrctmp , '(i10,A)' ) itim,'          ; breakpoint time'
       endif
       do i = 1, nsrc
+         if (mnksrc(3,i) == -1) cycle ! awkward disabling of discharges outside partition when running parallel
          m = mnksrc(1,i)
          n = mnksrc(2,i)
          k = mnksrc(3,i)

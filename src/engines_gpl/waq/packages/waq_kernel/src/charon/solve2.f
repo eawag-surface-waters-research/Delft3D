@@ -335,7 +335,7 @@ c******
       call chexit
 99999 format (' ')
 99998 format (' projection', i3, ' size', f12.2, ',  scale', f12.2)
-99997 format (' ',i3,' dfe=',e10.4,
+99997 format (' ',i3,' dfe=',e11.4,
      2 ' av th=',e10.3,' row err=',e10.3,' tda=',e10.3,' ideg=',i3)
 99994 format (' iter', i4, ' positive tda, go to method 2 ')
 99993 format (' iter', i4, ' av theta less than tol(1), go to m',

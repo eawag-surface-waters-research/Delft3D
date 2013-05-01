@@ -68,7 +68,7 @@ C
             READ ( CAR(I+15:I+20) , '(F5.0)' ) VERS2
             IF ( VERS2 .GT. VRSION ) THEN
                VRSION = VERS2
-               WRITE ( * , '(A,A,F5.3)' ) '       ---------->',
+               WRITE ( * , '(A,A,F6.3)' ) '       ---------->',
      *                   ' Version number of the input file is: ',VERS2
             ENDIF
             CAR(I:I+19) = ' '
