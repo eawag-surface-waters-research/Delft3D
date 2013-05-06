@@ -1,18 +1,18 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 10.00
-# Visual Studio 2008
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "elements", "examples\elements.vcproj", "{1D898355-4A0A-4C31-82F9-22543B2D2604}"
 	ProjectSection(ProjectDependencies) = postProject
 		{1B06C09C-4BF9-48F8-A89E-3535B8FC154B} = {1B06C09C-4BF9-48F8-A89E-3535B8FC154B}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "expat", "lib\expat.vcproj", "{71AEFD1F-A058-4FBA-9FD9-18B3352E916C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "expat", "lib\expat.vcxproj", "{71AEFD1F-A058-4FBA-9FD9-18B3352E916C}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "expat_static", "lib\expat_static.vcproj", "{1B06C09C-4BF9-48F8-A89E-3535B8FC154B}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "expat_static", "lib\expat_static.vcxproj", "{1B06C09C-4BF9-48F8-A89E-3535B8FC154B}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "expatw", "lib\expatw.vcproj", "{E5BB600F-EF95-45D1-BA03-8BF458478259}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "expatw", "lib\expatw.vcxproj", "{E5BB600F-EF95-45D1-BA03-8BF458478259}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "expatw_static", "lib\expatw_static.vcproj", "{978025B6-DC31-4D96-A546-454D91674AC5}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "expatw_static", "lib\expatw_static.vcxproj", "{978025B6-DC31-4D96-A546-454D91674AC5}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "outline", "examples\outline.vcproj", "{6021BE0D-B59E-41C0-82EC-0AAF762EEDA9}"
 	ProjectSection(ProjectDependencies) = postProject
