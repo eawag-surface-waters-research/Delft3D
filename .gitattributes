@@ -3432,6 +3432,9 @@ src/third_party_open/pthreads/bin/x64/pthreadVC2.dll -text
 src/third_party_open/pthreads/bin/x64/pthreadVC2.lib -text
 src/third_party_open/pthreads/include/win32/pthread.h -text
 src/third_party_open/pthreads/include/win32/sched.h -text
+src/third_party_open/pthreads/include/x64/pthread.h -text
+src/third_party_open/pthreads/include/x64/sched.h -text
+src/third_party_open/pthreads/include/x64/semaphore.h -text
 src/third_party_open/pthreads/pthreads_license_info.txt -text
 src/third_party_open/pthreads/pthreads_license_info_x64.txt -text
 src/third_party_open/subversion/bin/win32/MSVCP100.DLL -text
