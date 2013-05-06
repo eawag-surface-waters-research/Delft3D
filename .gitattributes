@@ -3495,6 +3495,8 @@ src/third_party_open/swan/bin/linux/swan_4072ABCDE_del_l32_i11_mpi.exe -text
 src/third_party_open/swan/bin/linux/swan_4072ABCDE_del_l32_i11_omp.exe -text
 src/third_party_open/swan/bin/linux/swan_4072ABCDE_del_l64_i11_mpi.exe -text
 src/third_party_open/swan/bin/linux/swan_4072ABCDE_del_l64_i11_omp.exe -text
+src/third_party_open/swan/bin/w64_i11/libiomp5md.dll -text
+src/third_party_open/swan/bin/w64_i11/swan_4072ABCDE_del_w64_i11_omp.exe -text
 src/third_party_open/swan/bin/win32/libifcoremd.dll -text
 src/third_party_open/swan/bin/win32/libifportmd.dll -text
 src/third_party_open/swan/bin/win32/libiomp5md.dll -text
