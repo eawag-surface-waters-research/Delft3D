@@ -68,9 +68,7 @@
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">../../bin/$(Configuration)\</OutDir>
-    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../bin/$(Configuration)\</OutDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
-    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Configuration)\</IntDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">../../bin/$(PlatformName)/$(Configuration)\</OutDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
     <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">d_hydro</TargetName>
@@ -178,7 +176,7 @@ echo "This file is overwritten by the post-build command of the project d_hydro"
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>include;..\..\..\..\utils_lgpl\d_hydro_lib\include;..\..\..\..\utils_lgpl\semaphore\include\win32;..\..\..\..\third_party_open\expat\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\..\..\third_party_open\pthreads\include\x64;include;..\..\..\..\utils_lgpl\d_hydro_lib\include;../../../../third_party_open\expat\x64\include;../../../../third_party_open\expat\x64\x64\release;..\..\..\..\utils_lgpl\delftonline\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -188,9 +186,9 @@ echo "This file is overwritten by the post-build command of the project d_hydro"
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>..\..\..\..\utils_lgpl\d_hydro_lib\lib\$(ConfigurationName)\static\d_hydro_lib.lib;..\..\..\..\utils_lgpl\deltares_common\lib\$(ConfigurationName)\static\deltares_common.lib;pthreadVCE2.lib;libexpat.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\..\..\utils_lgpl\d_hydro_lib\lib\$(PlatformName)\$(ConfigurationName)\static\d_hydro_lib.lib;..\..\..\..\utils_lgpl\deltares_common\lib\$(PlatformName)\$(ConfigurationName)\static\deltares_common.lib;pthreadVC2.lib;..\..\..\..\third_party_open\expat\x64\$(PlatformName)\$(ConfigurationName)\libexpat.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)d_hydro.exe</OutputFile>
-      <AdditionalLibraryDirectories>..\..\..\..\third_party_open\expat\win32\bin\Release;..\..\..\..\third_party_open\pthreads\bin\win32;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\..\..\..\third_party_open\expat\x64\x64\Release;..\..\..\..\third_party_open\pthreads\bin\x64;..\..\..\..\utils_lgpl\d_hydro_lib\lib\x64\Release\static;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>LIBCMTD.lib;LIBCMT.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
@@ -198,8 +196,7 @@ echo "This file is overwritten by the post-build command of the project d_hydro"
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
     <PostBuildEvent>
-      <Command>..\..\..\..\scripts_lgpl\win32\oss-install.cmd d_hydro ..\bin
-echo "This file is overwritten by the post-build command of the project d_hydro" &gt; .\include\d_hydro_version.h</Command>
+      <Command>..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd d_hydro ..\bin</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
