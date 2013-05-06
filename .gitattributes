@@ -2443,6 +2443,7 @@ src/scripts_lgpl/win32/make_revision.bat -text
 src/scripts_lgpl/win32/oss-install.cmd -text
 src/scripts_lgpl/win32/oss-install_debug.cmd -text
 src/scripts_lgpl/win32/update_version.cmd -text
+src/scripts_lgpl/win64/oss-install_x64.cmd -text
 src/third_party_open/Makefile.am -text
 src/third_party_open/commandline/bin/win32/libiconv2.dll -text
 src/third_party_open/commandline/bin/win32/libintl3.dll -text
