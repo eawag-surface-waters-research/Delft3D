@@ -43,14 +43,14 @@
 )"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|x64" DeleteExtensionsOnClean="*.obj;*.mod;*.pdb;*.asm;*.map;*.dyn;*.dpi;*.tmp;*.log;*.ilk;*.exe;$(TargetPath)" BuildLogFile="$(IntDir)\BuildLog.txt">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="../../../../utils_lgpl/inifiles/lib/$(ConfigurationName)/static;../../../../utils_lgpl/precision/include;../../../../utils_lgpl/precision/lib/$(ConfigurationName)/static" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" ObjectFile="$(INTDIR)/"/>
-				<Tool Name="VFLinkerTool" AdditionalOptions="/LTCG" OutputFile="$(OutDir)\mormerge.exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\third_party_open\pthreads\bin\win32" IgnoreDefaultLibraryNames="libc.lib;libcd.lib;libcmt.lib" SubSystem="subSystemConsole" StackReserveSize="10000000" LargeAddressAware="addrAwareLarge" AdditionalDependencies="pthreadVCE2.lib wsock32.lib netapi32.lib comctl32.lib user32.lib advapi32.lib comdlg32.lib gdi32.lib winspool.lib"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="../../../../utils_lgpl/inifiles/lib/$(ConfigurationName)/static;..\..\..\..\utils_lgpl\deltares_common\lib\$(PlatformName)\$(ConfigurationName)\static" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" ObjectFile="$(INTDIR)/"/>
+				<Tool Name="VFLinkerTool" AdditionalOptions="/LTCG" OutputFile="$(OutDir)\mormerge.exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="..\..\..\..\third_party_open\pthreads\bin\x64" IgnoreDefaultLibraryNames="libc.lib;libcd.lib;libcmt.lib" SubSystem="subSystemConsole" StackReserveSize="10000000" LargeAddressAware="addrAwareLarge" AdditionalDependencies="pthreadVC2.lib wsock32.lib netapi32.lib comctl32.lib user32.lib advapi32.lib comdlg32.lib gdi32.lib winspool.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64" HeaderFileName="$(InputName).h" TypeLibraryName="$(IntDir)/$(InputName).tlb"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
 				<Tool Name="VFPreBuildEventTool"/>
-				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win32\oss-install.cmd mormerge ..\bin"/>
+				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win64\oss-install_64.cmd mormerge ..\bin"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Resource Files" Filter="fi;fd">

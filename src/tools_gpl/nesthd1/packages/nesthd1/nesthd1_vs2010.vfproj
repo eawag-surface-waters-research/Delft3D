@@ -5,7 +5,7 @@
 		<Platform Name="x64"/></Platforms>
 	<Configurations>
 		<Configuration Name="Debug|Win32">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="./include;../../../../utils_lgpl/precision/lib/$(ConfigurationName)/static;../../../../utils_lgpl/esmfsm/include" Interfaces="true" WarnInterfaces="true" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="./include;../../../../utils_lgpl/precision/lib/$(ConfigurationName)/static;../../../../utils_lgpl/esmfsm/include" WarnInterfaces="true" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug" Interfaces="true"/>
 				<Tool Name="VFLinkerTool" OutputFile="$(OutDir)\nesthd1.exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" IgnoreDefaultLibraryNames="libcmt.lib; libcmtd.lib" GenerateDebugInformation="true" SubSystem="subSystemConsole" AdditionalDependencies="..\..\..\..\third_party_open\pthreads\bin\win32\pthreadvce2.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
@@ -25,7 +25,7 @@
 				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win32\oss-install.cmd nesthd1 ..\bin"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Debug|x64">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="./include;../../../../utils_lgpl/precision/lib/$(ConfigurationName)/static;../../../../utils_lgpl/esmfsm/include" Interfaces="true" WarnInterfaces="true" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="./include;../../../../utils_lgpl/precision/lib/$(ConfigurationName)/static;../../../../utils_lgpl/esmfsm/include" WarnInterfaces="true" Traceback="true" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug" Interfaces="true"/>
 				<Tool Name="VFLinkerTool" OutputFile="$(OutDir)\nesthd1.exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" IgnoreDefaultLibraryNames="libcmt.lib; libcmtd.lib" GenerateDebugInformation="true" SubSystem="subSystemConsole" AdditionalDependencies="..\..\..\..\third_party_open\pthreads\bin\win32\pthreadvce2.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
@@ -35,14 +35,14 @@
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|x64">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="./include;../../../../utils_lgpl/precision/lib/$(ConfigurationName)/static;../../../../utils_lgpl/esmfsm/include"/>
-				<Tool Name="VFLinkerTool" OutputFile="$(OutDir)\nesthd1.exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" IgnoreDefaultLibraryNames="libcmt.lib; libcmtd.lib" SubSystem="subSystemConsole" AdditionalDependencies="..\..\..\..\third_party_open\pthreads\bin\win32\pthreadvce2.lib"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="./include;../../../../utils_lgpl/esmfsm/include;../../../../utils_lgpl/deltares_common\packages\deltares_common\include\"/>
+				<Tool Name="VFLinkerTool" OutputFile="$(OutDir)\nesthd1.exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" IgnoreDefaultLibraryNames="libcmt.lib; libcmtd.lib" SubSystem="subSystemConsole" AdditionalDependencies="..\..\..\..\third_party_open\pthreads\bin\x64\pthreadvc2.lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
 				<Tool Name="VFCustomBuildTool"/>
 				<Tool Name="VFPreLinkEventTool"/>
 				<Tool Name="VFPreBuildEventTool" CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\src\nesthd1_version.F90 .\ .\include\version_number.ini"/>
-				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool" CommandLine="..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd nesthd1 ..\bin"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
 	<Files>
 		<Filter Name="Header Files" Filter="fi;fd">
