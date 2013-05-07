@@ -1,7 +1,6 @@
 @echo off
 
-rem set swanexec=%D3D_HOME%\%ARCH%\swan\bin\swan_4072ABCDE_del_w64_i11_omp.exe
-set swanexec=%D3D_HOME%\%ARCH%\swan\bin\w64_i11\swan_4072ABCDE_del_w64_i11_omp.exe
+set swanexec=%D3D_HOME%\%ARCH%\swan\bin\swan_4072ABCDE_del_w64_i11_omp.exe
 
 rem
 rem swan40.72AB and newer runs parallel, using the total number of cores on the machine
