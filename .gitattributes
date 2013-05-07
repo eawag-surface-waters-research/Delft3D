@@ -4063,6 +4063,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/grib/wmo_2_v3.tab -text
 src/tools_lgpl/matlab/quickplot/progsrc/grib/wrf_2_200.tab -text
 src/tools_lgpl/matlab/quickplot/progsrc/grib/wwiiitab.tab -text
 src/tools_lgpl/matlab/quickplot/progsrc/hslice.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/inifile.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/isenvironment.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/landboundary.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/matlabversionnumber.m -text
@@ -4169,7 +4170,6 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/hls2rgb.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/idx2rgb.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/incanalysis.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/incremental.m -text
-src/tools_lgpl/matlab/quickplot/progsrc/private/inifile.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/inlist.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/insstruct.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/int32_byteflip.m -text
@@ -4324,7 +4324,6 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/valuemap.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/var2str.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/vardiff.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/vec2str.m -text
-src/tools_lgpl/matlab/quickplot/progsrc/private/waqua.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/waquafil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/writeavi.cpp -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/writeavi.dll -text
@@ -4385,6 +4384,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/vs_type.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/vs_use.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/vslice.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/waqfil.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/waqua.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/waquaio.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/weir.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/wildstrmatch.m -text
