@@ -1,1 +1,0 @@
-copied from c:\Program Files (x86)\Intel\Composer XE\redist\intel64\compiler\

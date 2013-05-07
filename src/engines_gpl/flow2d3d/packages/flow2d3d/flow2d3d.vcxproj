@@ -199,7 +199,8 @@ echo "This file is overwritten by the post-build command of the project flow2d3d
       <OutputFile>$(OutDir)\flow2d3d.dll</OutputFile>
     </Link>
     <PostBuildEvent>
-      <Command>..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd flow2d3d ..\bin</Command>
+      <Command>..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd flow2d3d ..\bin "$(IFORT_COMPILER12)redist\intel64\compiler\"
+echo "This file is overwritten by the post-build command of the project flow2d3d" &gt; .\include\flow2d3d_version.h</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
