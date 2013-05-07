@@ -228,7 +228,7 @@ rem ====================
     call :copyFile "third_party_open\mpich2\x64\bin\*.exe"                          !dest_bin!
     call :copyFile "third_party_open\mpich2\x64\lib\*.dll"                          !dest_bin!
     call :copyFile "third_party_open\expat\x64\x64\Release\libexpat.dll"            !dest_bin!
-    call :copyFile "third_party_open\intel_fortran\lib\x64\*.dll"                   !dest_bin!
+    rem call :copyFile "third_party_open\intel_fortran\lib\x64\*.dll"                   !dest_bin!
     call :copyFile "engines_gpl\flow2d3d\default\*"                                 !dest_default!
     call :copyFile "utils_lgpl\delftonline\lib\x64\Release\dynamic\delftonline.dll" !dest_bin!
     call :copyFile "utils_lgpl\delftonline\lib\x64\Release\dynamic\delftonline.dll" !dest_plugins!
@@ -370,9 +370,9 @@ rem =======================
     call :copyFile engines_gpl\waq\bin\x64\Release\delwaq2_lib.dll           !dest_bin!
 	
     call :copyFile third_party_open\openmp\lib\win32\libiomp5md.dll          !dest_bin!
-    call :copyFile third_party_open\intel_fortran\lib\x64\libifcoremd.dll    !dest_bin!
-    call :copyFile third_party_open\intel_fortran\lib\x64\libifportmd.dll    !dest_bin!
-    call :copyFile third_party_open\intel_fortran\lib\x64\libmmd.dll         !dest_bin!
+    rem call :copyFile third_party_open\intel_fortran\lib\x64\libifcoremd.dll    !dest_bin!
+    rem call :copyFile third_party_open\intel_fortran\lib\x64\libifportmd.dll    !dest_bin!
+    rem call :copyFile third_party_open\intel_fortran\lib\x64\libmmd.dll         !dest_bin!
 	
     rem
     rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
@@ -465,7 +465,7 @@ rem ================
 
     call :copyFile engines_gpl\wave\bin\x64\release\wave.exe            !dest_bin!
     call :copyFile engines_gpl\flow2d3d\default\dioconfig.ini       !dest_default!
-    call :copyFile "third_party_open\intel_fortran\lib\x64\*.dll" !dest_bin!
+    rem call :copyFile "third_party_open\intel_fortran\lib\x64\*.dll" !dest_bin!
     call :copyFile "third_party_open\swan\bin\w64_i11\*.*"            !dest_swan_bin!
     call :copyFile third_party_open\swan\scripts\swan_install_x64.bat " !dest_swan_scripts!\swan.bat"
     rem
