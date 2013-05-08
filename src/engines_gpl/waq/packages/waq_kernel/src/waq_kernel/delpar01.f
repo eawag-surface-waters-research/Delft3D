@@ -78,10 +78,10 @@
       integer( 4) ioff              !  offset in substances array
       integer( 4) isys              !  loop counter substances
       logical     :: first  = .true.
-      integer(ip) :: idtimd , itimd1 , itimd2     ! timings of the vertical diffusion file
-      integer(ip) :: idtimt , itimt1 , itimt2     ! timings of the tau file
-      integer(ip) :: ifflag , isflag
-      logical     :: updatd
+      integer(ip), save :: idtimd , itimd1 , itimd2     ! timings of the vertical diffusion file
+      integer(ip), save :: idtimt , itimt1 , itimt2     ! timings of the tau file
+      integer(ip), save :: ifflag , isflag
+      logical    , save :: updatd
       integer(ip) nosubud
       integer(ip) iseg, i, i2, ipart
       real   (rp) depmin
@@ -90,6 +90,7 @@
 
       if ( alone ) return
       if ( timon ) call timstrt ( "delpar01", ithandl )
+      lunut = lunitp(2)
 
 !           this replaces the call to rdhydr
 
@@ -114,7 +115,7 @@
          call zoek20 ( 'TAU       ', nosfun, sfname, 10, indx )
          if ( indx .gt. 0 ) then
             tau(cellpntp(:)) = segfun(:,indx)
-         else if ( .not. caltau ) then
+         else if ( lunitp(21) .gt. 0 ) then
             call dlwqbl ( lunitp(21), lunut   , itime     , idtimt  , itimt1  ,
      &                    itimt2    , ihdel   , noseg     , mnmaxk  , tau1    ,
      &                    tau       , cellpntp, fnamep(21), isflag  , ifflag  ,
@@ -133,6 +134,8 @@
                   vdiff(mnmaxk-  nmaxp*mmaxp+1:mnmaxk           ) =   ! values above
      &            vdiff(mnmaxk-2*nmaxp*mmaxp+1:mnmaxk-nmaxp*mmaxp )
                endif
+            else
+               vdiff = 0.0
             endif
          endif
       endif
@@ -149,7 +152,6 @@
 
 !     Echo actual time to screen
 
-      lunut = lunitp(2)
       write ( *, 1020) itime  /86400, mod(itime  , 86400)/3600, mod(itime  , 3600)/60, mod(itime  , 60),
      &                 itstopp/86400, mod(itstopp, 86400)/3600, mod(itstopp, 3600)/60, mod(itstopp, 60),
      &                 nopart - npwndw + 1, npmax

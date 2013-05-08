@@ -372,7 +372,8 @@ c          read  (*,*)
 
 !         Particle tracking
 
-      call delpar00 ( lchar(45), noseg  , noq    , a(ivol), a(iflow))
+      call delpar00 ( lchar(45), noseg    , noq      , a(ivol)  , a(iflow) ,
+     &                nosfun   , c(isfna) , a(isfun) )
 
       if (mypart .eq.1) then
 C

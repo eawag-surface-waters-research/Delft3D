@@ -21,11 +21,11 @@
 !!  of Stichting Deltares remain the property of Stichting Deltares. All
 !!  rights reserved.
 
-      subroutine delpar00 ( mdpfile, noseg  , noq    , dwqvol , dwqflo )
+      subroutine delpar00 ( mdpfile, noseg  , noq    , dwqvol , dwqflo ,
+     &                      nosfun , sfname , segfun )
 
       use partmem      !   for PARTicle tracking
       use alloc_mod    !   for PARTicle tracking
-!      use rdhydr_mod   !   explicit interface
       use timers
 
       implicit none
@@ -42,10 +42,13 @@
       integer  ( ip), intent(in   ) :: noq                     !< delwaq noq
       real     ( rp), intent(in   ) :: dwqvol (noseg)          !< delwaq volumes
       real     ( rp), intent(in   ) :: dwqflo (noq)            !< delwaq flows
+      integer  ( ip), intent(in   ) :: nosfun                  !< number of segment functions
+      character( 20), intent(in   ) :: sfname (nosfun)         !< names of segment functions
+      real     (  4), intent(in   ) :: segfun (noseg ,nosfun)  !< segment function values
 
 !     Locals
 
-      integer(ip) i, i2, itime
+      integer(ip) i, i2, itime, indx, ierr
       integer     lunut         ! report file
       real   (rp) depmin
       logical update
@@ -70,23 +73,42 @@
 
 !           this replaces the call to rdhydr
 
-         if ( lunitp(20) .gt. 0 .and. fnamep(20) .ne. 'none' ) then
-            write ( lunut, * ) ' Opening the vdf    file:', fnamep(20)(1:len_trim(fnamep(20)))
-            open ( lunitp(20), file = fnamep(20), form = 'unformatted',access='stream' )
-            if ( lunitp(20) .eq. 0 ) write ( lunut, * ) ' Warning the vdf file does not exist !'
-         else
-            lunitp(20) = 0
+         if ( lsettl .or. layt .gt. 1 ) then
+            call zoek20 ( 'TAU       ', nosfun, sfname, 10, indx )
+            if ( indx .gt. 0 ) then
+               tau(cellpntp(:)) = segfun(:,indx)
+               caltau = .false.
+            else if ( lunitp(21) .gt. 0 ) then
+               if (  fnamep(21)(1:4) .ne. 'none' ) then
+                  write ( lunut, * ) ' Opening the tau    file:', fnamep(21)(1:len_trim(fnamep(21)))
+                  open ( lunitp(21), file = fnamep(21), form = 'binary', status = 'old', iostat = ierr )
+                  if ( ierr .ne. 0 ) then
+                     write ( lunut, * ) ' Warning: could not open the tau file! Tau will be computed.'
+                     lunitp(21) = 0
+                  endif
+               else
+                  lunitp(21) = 0
+               endif
+               caltau = .false.
+               if ( lunitp(21) .eq. 0 ) caltau = .true.
+            endif
+            call zoek20 ( 'VERTDISP  ', nosfun, sfname, 10, indx )
+            if ( indx .gt. 0 ) then
+               vdiff(cellpntp(:)) = segfun(:,indx)
+            else if ( lunitp(20) .gt. 0 ) then
+               if ( fnamep(20)(1:4) .ne. 'none' ) then
+                  write ( lunut, * ) ' Opening the vdf    file:', fnamep(20)(1:len_trim(fnamep(20)))
+                  open ( lunitp(20), file = fnamep(20), form = 'binary', status = 'old', iostat = ierr )
+                  if ( ierr .ne. 0 ) then
+                     write ( lunut, * ) ' Warning: could not open the vdf file! vdf will be set to zero!'
+                     lunitp(20) = 0
+                  endif
+               else
+                  lunitp(20) = 0
+               endif
+            endif
          endif
-         if ( lunitp(20) .eq. 0 ) vdiff = 0.0
-         if ( lunitp(21) .gt. 0 .and. fnamep(21) .ne. 'none' ) then
-            write ( lunut, * ) ' Opening the tau    file:', fnamep(21)(1:len_trim(fnamep(21)))
-            open ( lunitp(21), file = fnamep(21), form = 'unformatted',access='stream' )
-            if ( lunitp(21) .eq. 0 ) write ( lunut, * ) ' Warning the tau file does not exist !'
-         else
-            lunitp(21) = 0
-         endif
-         caltau = .false.
-         if ( lunitp(21) .eq. 0 ) caltau = .true.
+
          volumep(cellpntp(:)) = dwqvol(:)
          do i = 1, noqp
             if ( flowpntp(i,1) .gt. 0 ) flow(flowpntp(i,1)) = flow(flowpntp(i,1)) + dwqflo(i)
