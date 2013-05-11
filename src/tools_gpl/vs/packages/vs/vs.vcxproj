@@ -136,7 +136,7 @@ del /f vs_l.c vs_y.c
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention>
       </DataExecutionPrevention>
-      <AdditionalDependencies>..\..\..\..\utils_lgpl\nefis\lib\x64\Release\static\nefis.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>..\..\..\..\utils_lgpl\nefis\lib\$(PlatformName)\$(Configuration)\static\nefis.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
       <Command>..\..\..\..\scripts_lgpl\win64\oss-install_debug_x64.cmd vs ..\bin</Command>
