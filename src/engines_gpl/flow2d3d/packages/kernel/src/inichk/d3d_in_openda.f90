@@ -572,6 +572,7 @@ subroutine compute_secundary_state(gdp       )
     real(fp)                             , pointer :: anglon
     logical                              , pointer :: sferic    
     integer                              , pointer :: keva
+    integer                                        :: ifirst_dens !  Flag to initialize the water density array
 
 !
 ! Local variables
@@ -990,12 +991,13 @@ subroutine compute_secundary_state(gdp       )
               & r(hu)     ,r(hv)     ,r(dzs1)   ,r(dzu1)   ,r(dzv1)   , &
               & r(volum1) ,r(porosu) ,r(porosv) ,r(areau)  ,r(areav)  ,gdp       )
     !
-    ! DENS  : compute densities
+    ! DENS  : compute densities 
     !
-    call dens(jstart    ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
-            & lsal      ,ltem      ,lsed      ,saleqs    ,temeqs    , &
-            & densin    ,zmodel    ,r(thick)  ,r(r1)     ,r(rho)    , &
-            & r(sumrho) ,r(rhowat) ,rhosol    ,gdp       )
+    ifirst_dens = 1
+    call dens(jstart    ,nmmaxj    ,nmmax     ,kmax       ,lstsci    , &
+            & lsal      ,ltem      ,lsed      ,saleqs     ,temeqs    , &
+            & densin    ,zmodel    ,r(thick)  ,r(r1)      ,r(rho)    , &
+            & r(sumrho) ,r(rhowat) ,rhosol    ,ifirst_dens,gdp       )
     !
     ! Z_DENGRA: compute DRHODX/DRHODY terms (only in Z-MODEL)
     !

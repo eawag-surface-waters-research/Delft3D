@@ -398,6 +398,7 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
     integer                            :: nmaxddb
     integer                            :: nst     ! Current time step counter
     integer                            :: ntot0   ! Number of open boundary sections before the time series type
+    integer                            :: ifirst_dens  ! Flag to initialize the water density array
     integer, dimension(:), allocatable :: kcucopy
     integer, dimension(:), allocatable :: kcvcopy
     real(fp)                           :: timnow  ! Current timestep (multiples of dt)
@@ -1031,12 +1032,13 @@ subroutine inchkr(lundia    ,error     ,runid     ,timhr     ,dischy    , &
               & r(ewave0) ,r(ewave1) ,r(eroll0) ,r(eroll1) ,roller    , &
               & gdp       )
     !
-    ! DENS  : compute densities
+    ! DENS  : compute densities for the first time
     !
-    call dens(jstart    ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
-            & lsal      ,ltem      ,lsed      ,i(kcs)    ,saleqs    ,temeqs    , &
-            & densin    ,zmodel    ,r(thick)  ,r(r0)     ,r(rho)    , &
-            & r(sumrho) ,r(rhowat) ,rhosol    ,gdp       )
+    ifirst_dens = 1
+    call dens(jstart    ,nmmaxj    ,nmmax     ,kmax       ,lstsci    , &
+            & lsal      ,ltem      ,lsed      ,i(kcs)     ,saleqs    ,temeqs    , &
+            & densin    ,zmodel    ,r(thick)  ,r(r0)      ,r(rho)    , &
+            & r(sumrho) ,r(rhowat) ,rhosol    ,ifirst_dens,gdp       )
     !
     ! Z_DENGRA: compute DRHODX/DRHODY terms (only in Z-MODEL)
     !

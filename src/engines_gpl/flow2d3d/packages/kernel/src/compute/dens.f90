@@ -1,7 +1,7 @@
-subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
-              & lsal      ,ltem      ,lsed      ,kcs       ,saleqs    ,temeqs    , &
-              & densin    ,zmodel    ,thick     ,r1        ,rho       , &
-              & sumrho    ,rhowat    ,rhosol    ,gdp       )
+subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax       ,lstsci    , &
+              & lsal      ,ltem      ,lsed      ,kcs        ,saleqs    ,temeqs    , &
+              & densin    ,zmodel    ,thick     ,r1         ,rho       , &
+              & sumrho    ,rhowat    ,rhosol    ,ifirst_dens,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -69,7 +69,8 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     integer, intent(in)                                                  :: ltem   !  Description and declaration in dimens.igs
     integer, intent(in)                                                  :: nmmax  !  Description and declaration in dimens.igs
     integer                                                              :: nmmaxj !  Description and declaration in dimens.igs
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in) :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer, intent(in)                                                  :: ifirst_dens 
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in) :: kcs    !  Description and declaration in esm_alloc_int.f90
     logical, intent(in)                                                  :: densin !  Description and declaration in morpar.igs
     logical, intent(in)                                                  :: zmodel !  Description and declaration in procs.igs
     real(fp), intent(in)                                                 :: saleqs !  Description and declaration in tricom.igs
@@ -98,6 +99,21 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     !
     rhow      => gdp%gdphysco%rhow
     idensform => gdp%gdphysco%idensform
+    !
+    ! Initialize
+    !
+    if(ifirst_dens==1) then
+        do nm = 1, nmmax
+          do k = 1, kmax
+             rhowat(nm,k) = rhow
+             rho(nm,k) = rhow
+          enddo
+          sumrho(nm,1) = 0.5_fp*thick(1)*rho(nm,1)
+          do k = 2, kmax
+             sumrho(nm,k) = sumrho(nm,k-1) + 0.5_fp*(thick(k)*rho(nm, k) + thick(k-1)*rho(nm,k-1))
+          enddo
+        enddo
+    endif
     !
     !
     ! COMPUTE DENSITIES AFTER SALINITY OR TEMPERATURE-COMPUTATION
@@ -166,6 +182,7 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
        ! CONSTANT DENSITY
        !
        do nm = 1, nmmax
+          if (kcs(nm) <= 0) cycle
           do k = 1, kmax
              rhowat(nm,k) = rhow
           enddo
@@ -175,6 +192,7 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     ! COPY RHOWAT TO RHO
     !
     do nm = 1, nmmax
+       if (kcs(nm) <= 0) cycle
        do k = 1, kmax
           rho(nm,k) = rhowat(nm,k)
        enddo
@@ -184,6 +202,7 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     !
     if (densin) then
        do nm = 1, nmmax
+          if (kcs(nm) <= 0) cycle
           lst = max(lsal, ltem)
           do l = 1, lsed
              ll = lst + l
@@ -198,6 +217,7 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     !
     if (.not.zmodel) then
        do nm = 1, nmmax
+          if (kcs(nm) <= 0) cycle
           sumrho(nm,1) = 0.5_fp*thick(1)*rho(nm,1)
           do k = 2, kmax
              sumrho(nm,k) = sumrho(nm,k-1) + 0.5_fp*(thick(k)*rho(nm, k) + thick(k-1)*rho(nm,k-1))

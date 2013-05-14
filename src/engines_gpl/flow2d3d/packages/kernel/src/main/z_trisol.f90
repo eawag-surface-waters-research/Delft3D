@@ -480,6 +480,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     integer             :: ktemp       !  Description and declaration in tricom.igs
     integer             :: nfltyp      !  Description and declaration in esm_alloc_int.f90
     integer             :: nst         !!  Current time step counter
+    integer             :: ifirst_dens !  Flag to initialize the water density array
     logical             :: sferic      !  Description and declaration in tricom.igs
     real(fp)            :: anglat      !!  - Angle of latitude of the model
                                        !!    centre (used to determine the coef.
@@ -1135,11 +1136,12 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           !
           ! note: DENS may still be called if sal or tem even if densin = false
           !
+          ifirst_dens = 0
           call timer_start(timer_dens, gdp)
-          call dens(jstart    ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
-                  & lsal      ,ltem      ,lsed      ,i(kcs)    ,saleqs    ,temeqs    , &
-                  & densin    ,zmodel    ,r(thick)  ,r(r0)     ,r(rho)    , &
-                  & r(sumrho) ,r(rhowat) ,rhosol    ,gdp       )
+          call dens(jstart    ,nmmaxj    ,nmmax     ,kmax       ,lstsci    , &
+                  & lsal      ,ltem      ,lsed      ,i(kcs)     ,saleqs    ,temeqs    , &
+                  & densin    ,zmodel    ,r(thick)  ,r(r0)      ,r(rho)    , &
+                  & r(sumrho) ,r(rhowat) ,rhosol    ,ifirst_dens,gdp       )
           call timer_stop(timer_dens, gdp)
           !
           ! z_DENGRA: compute DRHODX/DRHODY terms (only in Z-MODEL)
@@ -1839,11 +1841,12 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           !
           ! note: DENS may still be called if sal or tem even if densin = false
           !
+          ifirst_dens = 0
           call timer_start(timer_dens, gdp)
-          call dens(jstart    ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
-                  & lsal      ,ltem      ,lsed      ,i(kcs)    ,saleqs    ,temeqs    , &
-                  & densin    ,zmodel    ,r(thick)  ,r(r0)     ,r(rho)    , &
-                  & r(sumrho) ,r(rhowat) ,rhosol    ,gdp       )
+          call dens(jstart    ,nmmaxj    ,nmmax     ,kmax       ,lstsci    , &
+                  & lsal      ,ltem      ,lsed      ,i(kcs)     ,saleqs    ,temeqs    , &
+                  & densin    ,zmodel    ,r(thick)  ,r(r0)      ,r(rho)    , &
+                  & r(sumrho) ,r(rhowat) ,rhosol    ,ifirst_dens,gdp       )
           call timer_stop(timer_dens, gdp)
           !
           ! Z_DENGRA: compute DRHODX/DRHODY terms (only in Z-MODEL)
