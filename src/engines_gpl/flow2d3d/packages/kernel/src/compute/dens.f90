@@ -166,7 +166,6 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
        ! CONSTANT DENSITY
        !
        do nm = 1, nmmax
-          if (kcs(nm) <= 0) cycle
           do k = 1, kmax
              rhowat(nm,k) = rhow
           enddo
@@ -176,7 +175,6 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     ! COPY RHOWAT TO RHO
     !
     do nm = 1, nmmax
-       if (kcs(nm) <= 0) cycle
        do k = 1, kmax
           rho(nm,k) = rhowat(nm,k)
        enddo
@@ -186,7 +184,6 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     !
     if (densin) then
        do nm = 1, nmmax
-          if (kcs(nm) <= 0) cycle
           lst = max(lsal, ltem)
           do l = 1, lsed
              ll = lst + l
@@ -201,7 +198,6 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     !
     if (.not.zmodel) then
        do nm = 1, nmmax
-          if (kcs(nm) <= 0) cycle
           sumrho(nm,1) = 0.5_fp*thick(1)*rho(nm,1)
           do k = 2, kmax
              sumrho(nm,k) = sumrho(nm,k-1) + 0.5_fp*(thick(k)*rho(nm, k) + thick(k-1)*rho(nm,k-1))
