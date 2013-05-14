@@ -369,10 +369,6 @@ rem =======================
     
     call :copyFile engines_gpl\waq\bin\x64\Release\delwaq2_lib.dll           !dest_bin!
 	
-    call :copyFile third_party_open\openmp\lib\win32\libiomp5md.dll          !dest_bin!
-    rem call :copyFile third_party_open\intel_fortran\lib\x64\libifcoremd.dll    !dest_bin!
-    rem call :copyFile third_party_open\intel_fortran\lib\x64\libifportmd.dll    !dest_bin!
-    rem call :copyFile third_party_open\intel_fortran\lib\x64\libmmd.dll         !dest_bin!
 	
     rem
     rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
@@ -391,6 +387,8 @@ rem =======================
            call :copyFile !!localstring! !dest_bin!!
            set localstring="!compiler_dir!libmmd.dll"
            call :copyFile !!localstring! !dest_bin!!
+           set localstring="!compiler_dir!svml_dispmd.dll"
+           call :copyFile !!localstring! !dest_bin!!
        )
 goto :endproc
 
@@ -399,7 +397,7 @@ goto :endproc
 rem ==============================
 rem === INSTALL_DELWAQ2_OPENDA_LIB
 rem ==============================
-:delwaq2_lib
+:delwaq2_openda_lib
 rem    echo "installing delwaq2_openda_lib . . ."
 rem
 rem    set dest_bin="!dest_main!\win64\waq\bin"
@@ -408,13 +406,10 @@ rem    call :makeDir !dest_bin!
 rem    
 rem    call :copyFile engines_gpl\waq\bin\Release\delwaq2_openda_lib.dll          !dest_bin!
 rem	
-rem    call :copyFile third_party_open\netcdf\lib\win64\Release\netcdf.dll	       !dest_bin!
 rem    call :copyFile third_party_open\openmp\lib\win64\libiomp5md.dll            !dest_bin!
 rem    call :copyFile third_party_open\intel_fortran\lib\win64\libifportmd.dll    !dest_bin!
 rem    call :copyFile third_party_open\intel_fortran\lib\win64\libmmd.dll         !dest_bin!
-rem    call :copyFile third_party_open\mpich2\lib\mpich2mpi.dll                   !dest_bin!
-rem    call :copyFile third_party_open\pthreads\bin\win32\pthreadVCE2.dll         !dest_bin!
-rem	
+
 rem    rem
 rem    rem The following if-else statements MUST BE executed AFTER copying "third_party_open\intel_fortran" libraries.
 rem    rem Some (older) libraries will be overwritten.
@@ -423,8 +418,16 @@ rem    if !compiler_dir!=="" (
 rem        rem Compiler_dir not set
 rem    ) else (
 rem        rem "Compiler_dir:!compiler_dir!"
-rem        set localstring="!compiler_dir!*.dll"
 rem        rem Note the awkward usage of !-characters
+rem        set localstring="!compiler_dir!libiomp5md.dll"
+rem        call :copyFile !!localstring! !dest_bin!!
+rem        set localstring="!compiler_dir!libifcoremd.dll"
+rem        call :copyFile !!localstring! !dest_bin!!
+rem        set localstring="!compiler_dir!libifportmd.dll"
+rem        call :copyFile !!localstring! !dest_bin!!
+rem        set localstring="!compiler_dir!libmmd.dll"
+rem        call :copyFile !!localstring! !dest_bin!!
+rem        set localstring="!compiler_dir!svml_dispmd.dll"
 rem        call :copyFile !!localstring! !dest_bin!!
 rem    )
 goto :endproc

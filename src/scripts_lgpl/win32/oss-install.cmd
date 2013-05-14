@@ -388,6 +388,8 @@ rem =======================
         call :copyFile !!localstring! !dest_bin!!
         set localstring="!compiler_dir!libmmd.dll"
         call :copyFile !!localstring! !dest_bin!!
+        set localstring="!compiler_dir!svml_dispmd.dll"
+        call :copyFile !!localstring! !dest_bin!!
     )
 goto :endproc
 
@@ -396,7 +398,7 @@ goto :endproc
 rem ==============================
 rem === INSTALL_DELWAQ2_OPENDA_LIB
 rem ==============================
-:delwaq2_lib
+:delwaq2_openda_lib
     echo "installing delwaq2_openda_lib . . ."
 
     set dest_bin="!dest_main!\win32\waq\bin"
@@ -417,8 +419,16 @@ rem ==============================
         rem Compiler_dir not set
     ) else (
         rem "Compiler_dir:!compiler_dir!"
-        set localstring="!compiler_dir!libifcoremd.dll"
         rem Note the awkward usage of !-characters
+        set localstring="!compiler_dir!libiomp5md.dll"
+        call :copyFile !!localstring! !dest_bin!!
+        set localstring="!compiler_dir!libifcoremd.dll"
+        call :copyFile !!localstring! !dest_bin!!
+        set localstring="!compiler_dir!libifportmd.dll"
+        call :copyFile !!localstring! !dest_bin!!
+        set localstring="!compiler_dir!libmmd.dll"
+        call :copyFile !!localstring! !dest_bin!!
+        set localstring="!compiler_dir!svml_dispmd.dll"
         call :copyFile !!localstring! !dest_bin!!
     )
 goto :endproc

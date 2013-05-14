@@ -5,7 +5,7 @@
 		<Platform Name="x64"/></Platforms>
 	<Configurations>
 		<Configuration Name="Debug|Win32" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\include" FixedFormLineLength="fixedLength132" ErrorLimit="500" StandardWarnings="standardWarningsF90" Diagnostics="diagnosticsShowAll" WarnDeclarations="true" WarnInterfaces="true" LocalVariableStorage="localStorageAutomatic" ModulePath="..\..\include" Traceback="true" RuntimeChecks="rtChecksAll" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\include" FixedFormLineLength="fixedLength132" ErrorLimit="500" StandardWarnings="standardWarningsF90" Diagnostics="diagnosticsShowAll" WarnDeclarations="true" WarnInterfaces="true" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" Traceback="true" RuntimeChecks="rtChecksAll" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
 				<Tool Name="VFLibrarianTool" OutputFile="$(ConfigurationName)/$(ProjectName).lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
@@ -15,7 +15,7 @@
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|Win32" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="..\..\include" FixedFormLineLength="fixedLength132" ErrorLimit="500" StandardWarnings="standardWarningsF90" Diagnostics="diagnosticsShowAll" LocalVariableStorage="localStorageAutomatic" ModulePath="..\..\include" RuntimeChecks="rtChecksNone"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="..\..\include" FixedFormLineLength="fixedLength132" ErrorLimit="500" StandardWarnings="standardWarningsF90" Diagnostics="diagnosticsShowAll" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" RuntimeChecks="rtChecksNone"/>
 				<Tool Name="VFLibrarianTool" OutputFile="$(ConfigurationName)/$(ProjectName).lib"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true"/>
@@ -25,7 +25,7 @@
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Debug|x64" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\include" FixedFormLineLength="fixedLength132" ErrorLimit="500" StandardWarnings="standardWarningsF90" Diagnostics="diagnosticsShowAll" WarnDeclarations="true" WarnInterfaces="true" LocalVariableStorage="localStorageAutomatic" ModulePath="..\..\include" Traceback="true" RuntimeChecks="rtChecksAll" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" AdditionalIncludeDirectories="..\..\include" FixedFormLineLength="fixedLength132" ErrorLimit="500" StandardWarnings="standardWarningsF90" Diagnostics="diagnosticsShowAll" WarnDeclarations="true" WarnInterfaces="true" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" Traceback="true" RuntimeChecks="rtChecksAll" BoundsCheck="true" RuntimeLibrary="rtMultiThreadedDebug"/>
 				<Tool Name="VFLibrarianTool"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
@@ -35,7 +35,7 @@
 				<Tool Name="VFPostBuildEventTool"/>
 				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
 		<Configuration Name="Release|x64" ConfigurationType="typeStaticLibrary">
-				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="..\..\include" FixedFormLineLength="fixedLength132" ErrorLimit="500" StandardWarnings="standardWarningsF90" Diagnostics="diagnosticsShowAll" LocalVariableStorage="localStorageAutomatic" ModulePath="..\..\include" RuntimeChecks="rtChecksNone"/>
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" AdditionalIncludeDirectories="..\..\include" FixedFormLineLength="fixedLength132" ErrorLimit="500" StandardWarnings="standardWarningsF90" Diagnostics="diagnosticsShowAll" LocalVariableStorage="localStorageAutomatic" ModulePath="$(OutDir)/" RuntimeChecks="rtChecksNone"/>
 				<Tool Name="VFLibrarianTool"/>
 				<Tool Name="VFResourceCompilerTool"/>
 				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
