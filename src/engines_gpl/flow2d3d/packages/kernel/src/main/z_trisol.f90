@@ -480,7 +480,6 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     integer             :: ktemp       !  Description and declaration in tricom.igs
     integer             :: nfltyp      !  Description and declaration in esm_alloc_int.f90
     integer             :: nst         !!  Current time step counter
-    integer             :: ifirst_dens !  Flag to initialize the water density array
     logical             :: sferic      !  Description and declaration in tricom.igs
     real(fp)            :: anglat      !!  - Angle of latitude of the model
                                        !!    centre (used to determine the coef.
@@ -517,6 +516,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     integer      :: nhystp
     integer      :: nmaxddb
     integer      :: nreal       ! Pointer to real array RCOUSR for UDF particle wind factor parameters 
+    integer      :: ifirst_dens !  Flag to initialize the water density array
     logical      :: success      
     character(8) :: stage       ! First or second half time step 
                                 ! Stage = 'both' means that in F0ISF1 the layering administration

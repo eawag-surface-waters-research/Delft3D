@@ -463,7 +463,6 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     integer             :: ktemp       !  Description and declaration in tricom.igs
     integer             :: nfltyp      !  Description and declaration in esm_alloc_int.f90
     integer             :: nst         !!  Current time step counter
-    integer             :: ifirst_dens !  Flag to initialize the water density array
     logical             :: sferic      !  Description and declaration in tricom.igs
     real(fp)            :: anglat      !!  - Angle of latitude of the model centre (used to determine the coef. for the coriolis force)
                                        !!  - In spherical coordinates this parameter equals the angle of latitude for the origin (water level point) after INIPHY anglat = 0.
@@ -494,6 +493,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
     integer      :: nhystp
     integer      :: nmaxddb
     integer      :: nreal       ! Pointer to real array RCOUSR for UDF particle wind factor parameters
+    integer      :: ifirst_dens !  Flag to initialize the water density array
     real(fp)     :: timest
     logical      :: success      
     character(8) :: stage       ! First or second half time step

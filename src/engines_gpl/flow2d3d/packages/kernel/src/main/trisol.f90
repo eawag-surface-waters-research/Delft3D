@@ -575,7 +575,6 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     integer              :: ktemp       !  Description and declaration in tricom.igs
     integer              :: nfltyp      !  Description and declaration in esm_alloc_int.f90
     integer              :: nst         !!  Current time step counter
-    integer              :: ifirst_dens ! Flag to initialize the water density array
     logical              :: error
     logical              :: sferic      !  Description and declaration in tricom.igs
     real(fp)             :: anglat      !!  - Angle of latitude of the model centre (used to determine the coef.
@@ -610,6 +609,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     integer                 :: nhystp
     integer                 :: nmaxddb
     integer                 :: nreal       ! Pointer to real array RCOUSR for UDF particle wind factor parameters 
+    integer                 :: ifirst_dens ! Flag to initialize the water density array
     integer(pntrsize)       :: umor
     integer(pntrsize)       :: vmor
     logical                 :: sscomp

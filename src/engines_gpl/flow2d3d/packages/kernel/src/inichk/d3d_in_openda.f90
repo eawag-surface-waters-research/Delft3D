@@ -572,7 +572,6 @@ subroutine compute_secundary_state(gdp       )
     real(fp)                             , pointer :: anglon
     logical                              , pointer :: sferic    
     integer                              , pointer :: keva
-    integer                                        :: ifirst_dens !  Flag to initialize the water density array
 
 !
 ! Local variables
@@ -581,6 +580,7 @@ subroutine compute_secundary_state(gdp       )
     integer                            :: icy
     integer                            :: ierr
     integer                            :: itype
+    integer                            :: ifirst_dens !  Flag to initialize the water density array
 
     character(256)                     :: restid_old
  

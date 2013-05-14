@@ -90,7 +90,6 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax       ,lstsci    , &
     integer  :: lst
     integer  :: nm
     real(fp) :: dummy
-
 !
 !! executable statements -------------------------------------------------------
 !
@@ -100,17 +99,18 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax       ,lstsci    , &
     rhow      => gdp%gdphysco%rhow
     idensform => gdp%gdphysco%idensform
     !
-    ! Initialize
+    ! Initializion of the density arrays for those points where kcs(nm)<=0. 
+    ! If kcs(nm) is not zero, the code below will overwrite the arrays for every time step.
     !
-    if(ifirst_dens==1) then
+    if (ifirst_dens == 1) then
         do nm = 1, nmmax
           do k = 1, kmax
              rhowat(nm,k) = rhow
-             rho(nm,k) = rhow
+             rho   (nm,k) = rhow
           enddo
-          sumrho(nm,1) = 0.5_fp*thick(1)*rho(nm,1)
+          sumrho(nm,1) = 0.5_fp * thick(1) * rho(nm,1)
           do k = 2, kmax
-             sumrho(nm,k) = sumrho(nm,k-1) + 0.5_fp*(thick(k)*rho(nm, k) + thick(k-1)*rho(nm,k-1))
+             sumrho(nm,k) = sumrho(nm,k-1) + 0.5_fp * (thick(k) * rho(nm, k) + thick(k-1) * rho(nm,k-1))
           enddo
         enddo
     endif
