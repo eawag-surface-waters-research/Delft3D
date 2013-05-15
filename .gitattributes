@@ -4368,6 +4368,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/tricontourf.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/trirst.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/ui_inspectstruct.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/ui_message.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/uislider.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/units.ini -text
 src/tools_lgpl/matlab/quickplot/progsrc/ustrcmpi.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/vmean.m -text
