@@ -782,7 +782,11 @@ subroutine lyrerosion(this, nm, dzini, dmi)
        !
        ! compute new masses
        !
-       fac = thlyr(nlyr, nm)/thbaselyr
+       if (thbaselyr>0.0_fp) then
+          fac = thlyr(nlyr, nm)/thbaselyr
+       else
+          fac = 0.0_fp
+       endif
        do l = 1, this%settings%nfrac
           msed(l, nlyr, nm) = mbaselyr(l)*fac
        enddo

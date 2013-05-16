@@ -168,32 +168,25 @@ subroutine compdiam(frac      ,seddm     ,sedd50    ,sedtyp    ,lsedtot   , &
                 fracnonmud = fracnonmud + frac(nm,l)
              endif
           enddo
+          dgsd(nm) = 0.0_fp
           if (fracnonmud > 0.0_fp) then
              dm(nm) = dm(nm) / fracnonmud
              dg(nm) = dg(nm)**(1.0/fracnonmud)
-          else
-             dg(nm) = 0.0_fp
-          endif
-          !
-          ! Compute dgsd (geometric standard deviation of grain size distribution)
-          ! note that this is true geometric standard deviation of grain size as there is an error in
-          ! Gaeuman et al 2009. They use the arithmetic standard deviation of GSD on phi scale.
-          !
-          ! seperate loop required as dg needs to be calculated first
-          !
-          dgsd(nm) = 0.0_fp
-          do l = 1, lsedtot
-             if (sedtyp(l) /= SEDTYP_COHESIVE) then
-                dgsd(nm) = dgsd(nm) + frac(nm,l)*(log(sedd50(l))-log(dg(nm)))**2
-             endif
-          enddo
-          !
-          ! fracnonmud computed above when calculating dm & dg
-          !
-          if (fracnonmud > 0.0_fp) then
+             !
+             ! Compute dgsd (geometric standard deviation of grain size distribution)
+             ! note that this is true geometric standard deviation of grain size as there is an error in
+             ! Gaeuman et al 2009. They use the arithmetic standard deviation of GSD on phi scale.
+             !
+             ! separate loop required as dg needs to be calculated first
+             !
+             do l = 1, lsedtot
+                if (sedtyp(l) /= SEDTYP_COHESIVE) then
+                   dgsd(nm) = dgsd(nm) + frac(nm,l)*(log(sedd50(l))-log(dg(nm)))**2
+                endif
+             enddo
              dgsd(nm) = exp(sqrt(dgsd(nm)/fracnonmud))
           else
-             dgsd(nm) = 0.0_fp
+             dg(nm) = 0.0_fp
           endif
           !
           ! Compute Dxx values
