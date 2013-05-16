@@ -99,7 +99,7 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax       ,lstsci    , &
     rhow      => gdp%gdphysco%rhow
     idensform => gdp%gdphysco%idensform
     !
-    ! Initializion of the density arrays for those points where kcs(nm)<=0. 
+    ! Initializion of the density arrays for those points where kcs(nm)==0. 
     ! If kcs(nm) is not zero, the code below will overwrite the arrays for every time step.
     !
     if (ifirst_dens == 1) then
@@ -123,14 +123,14 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax       ,lstsci    , &
           select case (idensform)
           case( dens_Eckart )
              do nm = 1, nmmax
-                if (kcs(nm) <= 0) cycle
+                if (kcs(nm) == 0) cycle
                 do k = 1, kmax
                    call dens_eck(temeqs, r1(nm,k,lsal),rhowat(nm,k), dummy, dummy )
                 enddo
              enddo
           case( dens_UNESCO )
              do nm = 1, nmmax
-                if (kcs(nm) <= 0) cycle
+                if (kcs(nm) == 0) cycle
                 do k = 1, kmax
                    call dens_unes(temeqs, r1(nm,k,lsal),rhowat(nm,k), dummy, dummy )
                 enddo
@@ -143,14 +143,14 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax       ,lstsci    , &
           select case (idensform)
           case( dens_Eckart )
              do nm = 1, nmmax
-                if (kcs(nm) <= 0) cycle
+                if (kcs(nm) == 0) cycle
                 do k = 1, kmax
                    call dens_eck   (r1(nm,k,ltem), saleqs, rhowat(nm,k), dummy, dummy)
                 enddo
              enddo
           case( dens_UNESCO )
              do nm = 1, nmmax
-                if (kcs(nm) <= 0) cycle
+                if (kcs(nm) == 0) cycle
                 do k = 1, kmax
                    call dens_unes   (r1(nm,k,ltem), saleqs, rhowat(nm,k), dummy, dummy)
                 enddo
@@ -163,14 +163,14 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax       ,lstsci    , &
           select case (idensform)
           case( dens_Eckart )
              do nm = 1, nmmax
-                if (kcs(nm) <= 0) cycle
+                if (kcs(nm) == 0) cycle
                 do k = 1, kmax
                    call dens_eck   ( r1(nm,k,ltem), r1(nm,k,lsal), rhowat(nm,k), dummy, dummy )
                 enddo
              enddo
           case( dens_UNESCO )
              do nm = 1, nmmax
-                if (kcs(nm) <= 0) cycle
+                if (kcs(nm) == 0) cycle
                 do k = 1, kmax
                    call dens_unes  ( r1(nm,k,ltem), r1(nm,k,lsal), rhowat(nm,k), dummy, dummy )
                 enddo
@@ -182,7 +182,7 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax       ,lstsci    , &
        ! CONSTANT DENSITY
        !
        do nm = 1, nmmax
-          if (kcs(nm) <= 0) cycle
+          if (kcs(nm) == 0) cycle
           do k = 1, kmax
              rhowat(nm,k) = rhow
           enddo
@@ -192,7 +192,7 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax       ,lstsci    , &
     ! COPY RHOWAT TO RHO
     !
     do nm = 1, nmmax
-       if (kcs(nm) <= 0) cycle
+       if (kcs(nm) == 0) cycle
        do k = 1, kmax
           rho(nm,k) = rhowat(nm,k)
        enddo
@@ -202,7 +202,7 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax       ,lstsci    , &
     !
     if (densin) then
        do nm = 1, nmmax
-          if (kcs(nm) <= 0) cycle
+          if (kcs(nm) == 0) cycle
           lst = max(lsal, ltem)
           do l = 1, lsed
              ll = lst + l
@@ -217,7 +217,7 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax       ,lstsci    , &
     !
     if (.not.zmodel) then
        do nm = 1, nmmax
-          if (kcs(nm) <= 0) cycle
+          if (kcs(nm) == 0) cycle
           sumrho(nm,1) = 0.5_fp*thick(1)*rho(nm,1)
           do k = 2, kmax
              sumrho(nm,k) = sumrho(nm,k-1) + 0.5_fp*(thick(k)*rho(nm, k) + thick(k-1)*rho(nm,k-1))
