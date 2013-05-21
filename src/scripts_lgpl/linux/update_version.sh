@@ -23,12 +23,12 @@ cd $MODDIR
 #   Execute svnrevision
 #   =====================================
 
+#
+# Be sure that SVN_VERSION always has a value
+SVN_VERSION="000000";  
 cd $MODDIR
 if svnversion . >/dev/null 2>/dev/null ; then 
    SVN_VERSION=`svnversion -n $MODDIR`; \
-else 
-   # source is exported/exculded from SVN, no revision number known
-   SVN_VERSION="000000";  
 fi;
 #   also write it to file
 # echo $SVN_VERSION > $MODDIR/$SVN_VERSION
