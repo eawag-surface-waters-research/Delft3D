@@ -4074,6 +4074,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/md_colormap.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/md_paper.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/mdf.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/none.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/noosfile.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/pathdistance.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/plot_tidalellipses.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/plotlimitingfactors.m -text
