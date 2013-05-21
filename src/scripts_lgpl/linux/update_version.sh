@@ -5,7 +5,7 @@
 # $1 - path to the target source file
 # $2 - path to the folder to be used to check svnversion
 # $3 - Single file with version number information version_number.ini
-# $4 - Top directory of the source tree: used to define VN_DIR
+# $4 - Top directory of the build tree: used to define VN_DIR
 
 echo Generating version number in the $1
 
