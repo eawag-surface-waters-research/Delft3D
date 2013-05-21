@@ -12,6 +12,7 @@ echo Generating version number in the $1
 cd $2
 MODDIR=`pwd` 
 cd $4
+pwd
 TOPDIR=`pwd`
 # we just made this one. ( I think this should work for everyone, TODO: pls make this the default after tested )
 VN_DIR=$TOPDIR/third_party_open/version_number/packages/version_number/src
