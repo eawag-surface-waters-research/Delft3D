@@ -140,7 +140,7 @@ end subroutine sed
 
 
 subroutine printUsage
-   write(*,*) "USAGE : version_number.tcl buildNumber <vnInputFile> <inputFile> <outputFile>"
+   write(*,*) "USAGE : version_number.exe buildNumber <vnInputFile> <inputFile> <outputFile>"
    write(*,*) "    buildNumber   : On the build server: buildNumber (=svn revision number)"
    write(*,*) "                    Else: Subversion revisionNumber"
    write(*,*) "    <vnInputFile> : Name of the inifile containing the integers that form the version number"
