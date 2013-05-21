@@ -4,7 +4,6 @@
 #   Irv.Elshoff@deltares.nl
 #   Adri.Mourits@deltares.nl
 #   Fedor.Baart@deltares.nl
-#   Gennadii.Donchyts@deltares.nl
 #   11 jan 2007
 #
 #   Copyright (C)  Stichting Deltares, 2011-2013.
@@ -69,4 +68,4 @@ BUILT_SOURCES = ./always \
 	rm -rf ./deltares_common_version.F90
 
 ./deltares_common_version.F90:
-	$(top_srcdir)/scripts_lgpl/linux/update_version.sh $(srcdir)/deltares_common_version.F90 $(srcdir) ../include/version_number.ini $(top_buildir)
+	$(top_srcdir)/scripts_lgpl/linux/update_version.sh $(builddir)/deltares_common_version.F90 $(srcdir) ../include/version_number.ini `cd $(top_builddir);pwd`
