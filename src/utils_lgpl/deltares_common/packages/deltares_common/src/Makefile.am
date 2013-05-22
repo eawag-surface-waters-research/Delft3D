@@ -68,4 +68,4 @@ BUILT_SOURCES = ./always \
 	rm -rf ./deltares_common_version.F90
 
 ./deltares_common_version.F90:
-	$(top_srcdir)/scripts_lgpl/linux/update_version.sh $(builddir)/deltares_common_version.F90 $(srcdir) ../include/version_number.ini `cd $(top_builddir);pwd`
+	$(top_srcdir)/scripts_lgpl/linux/update_version.sh $(builddir)/deltares_common_version.F90 $(srcdir) ../include/version_number.ini $(top_builddir)
