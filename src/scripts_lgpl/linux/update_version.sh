@@ -8,11 +8,12 @@
 # $4 - Top directory of the build tree: used to define VN_DIR
 
 echo Generating version number in the $1
-
+curdir=`pwd`
 cd $2
-MODDIR=`pwd` 
+MODDIR=`pwd`
+# go back to the previous directory
+cd $curdir
 cd $4
-pwd
 TOPDIR=`pwd`
 # we just made this one. ( I think this should work for everyone, TODO: pls make this the default after tested )
 VN_DIR=$TOPDIR/third_party_open/version_number/packages/version_number/src
@@ -25,9 +26,9 @@ cd $MODDIR
 
 #
 # Be sure that SVN_VERSION always has a value
-SVN_VERSION="000000";  
+SVN_VERSION="000000";
 cd $MODDIR
-if svnversion . >/dev/null 2>/dev/null ; then 
+if svnversion . >/dev/null 2>/dev/null ; then
    SVN_VERSION=`svnversion -n $MODDIR`; \
 fi;
 #   also write it to file
@@ -38,16 +39,16 @@ fi;
 $VN_DIR/version_number.exe $SVN_VERSION $3 $1.svn $1.temp
 
 if [ -f $1 ]; then
-	diff $1 $1.temp > nul
+    diff $1 $1.temp > nul
     ERRORLEVEL=$?
 else
-	ERRORLEVEL=1
+    ERRORLEVEL=1
 fi
 
 if [ $ERRORLEVEL==1 ]; then
-	mv $1.temp $1
+    mv $1.temp $1
     echo Done, new version number is: $SVN_VERSION
 else
-	rm $1.temp
-	echo Done, file is up to date, no need to update version
+    rm $1.temp
+    echo Done, file is up to date, no need to update version
 fi
