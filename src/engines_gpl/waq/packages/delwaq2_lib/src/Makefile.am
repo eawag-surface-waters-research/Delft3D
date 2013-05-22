@@ -28,6 +28,8 @@ MPILIBS += $(MPILIBS_ADDITIONAL)
 libDelwaq2_la_SOURCES = block.f \
        d_tr_d3d.f \
        delwaq2_global_data.f90 \
+       waq_omi_lib.f90 \
+       waq_omi_api.f90 \
        dlwqmain.f \
        getidentification.f
 	   

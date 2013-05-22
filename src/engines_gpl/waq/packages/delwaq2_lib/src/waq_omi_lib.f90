@@ -315,7 +315,7 @@ logical function SetAttributeInit(idx, ivalue)
     enddo
 
     if ( reporting ) then
-        write( lunlst, '(a25,i)' ) 'Values set for attribute ',idx
+        write( lunlst, '(a25,i5)' ) 'Values set for attribute ',idx
     endif
 
     SetAttributeInit = .true.
@@ -1551,7 +1551,7 @@ integer function ModelInitialize ()
     if ( nopa > 0 ) then
         call write_array_2d( argv(2), 'params'  , procparam_param_value )
         open( lun(3), file = lchar(41) )
-        write( lun(3), '(i,a,a)' ) 0,' ',trim(argv(2)) // '-params.wrk'
+        write( lun(3), '(i5,a1,a256)' ) 0,' ',trim(argv(2)) // '-params.wrk'
         close( lun(3) )
     endif
 
@@ -2118,7 +2118,7 @@ end function ModelInitialize
 ! ModelFinalize --
 !     Conclude the model run - final output will be written
 !
-integer function ModelFinalize
+integer function ModelFinalize( )
     !DEC$ ATTRIBUTES DLLEXPORT::ModelFinalize
     !DEC$ ATTRIBUTES ALIAS : '_MODELFINALIZE' :: ModelFinalize
 
