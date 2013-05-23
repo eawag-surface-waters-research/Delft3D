@@ -103,19 +103,21 @@ subroutine dens(j         ,nmmaxj    ,nmmax     ,kmax       ,lstsci    , &
     idensform => gdp%gdphysco%idensform
     nm_pos    =  1
     !
-    ! Initialize
-    !
-    if(ifirst_dens==1) then
-        do nm = 1, nmmax
+    if (ifirst_dens == 1) then
+       !
+       ! Initialization of the density arrays for all nm points
+       ! The computations in this subroutine are only performed for kcs > 0
+       !
+       do nm = 1, nmmax
           do k = 1, kmax
              rhowat(nm,k) = rhow
              rho(nm,k) =  rhowat(nm,k)
-           enddo
+          enddo
           sumrho(nm,1) = 0.5_fp*thick(1)*rho(nm,1)
           do k = 2, kmax
              sumrho(nm,k) = sumrho(nm,k-1) + 0.5_fp*(thick(k)*rho(nm, k) + thick(k-1)*rho(nm,k-1))
           enddo
-        enddo
+       enddo
     endif
     !
     !
