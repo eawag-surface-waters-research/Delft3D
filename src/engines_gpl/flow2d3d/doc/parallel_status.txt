@@ -48,6 +48,7 @@ Not supported functionality and limitations
 - dredge and dump
 - mormerge
 - mass balance polygons
+- writing dune output
 
 
 
@@ -317,10 +318,10 @@ group               testcase
                     05-noordzee_2d         OK
                     06-noordzee_equid      OK
                     07-noordzee_log        OK
-26_dunes            01-vRijn84             OK
-                    02-FredsoeMPM          OK
-                    03-vRijn84_advection   OK
-                    04-vRijn84_adv_dunei   OK
+26_dunes            01-vRijn84             ERROR: no dune output
+                    02-FredsoeMPM          ERROR: no dune output
+                    03-vRijn84_advection   ERROR: no dune output
+                    04-vRijn84_adv_dunei   ERROR: no dune output
 88_sensitive        01.01-bakje            OK
                     01.07-chezy            OK
                     02.06-b5u              OK
