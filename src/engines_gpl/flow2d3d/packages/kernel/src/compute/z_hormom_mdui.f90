@@ -202,11 +202,11 @@ subroutine z_hormom_mdui(nmmax     ,kmax      ,icx       , &
                 !
                 ! ADVECTION IN U-DIRECTION; DU/DX AND CENTRIFUGAL ACCELERATION
                 !
-                ! methode is niet identiek aan (Koren & Vreugdenhil, pp. 73).
-                ! uuu/vvv wordt niet op juiste punt genomen
-                ! dx en dy volgens zeta-definitie (i.v.m. energiebehoud)
-                ! testen op cuu en cvv gebeurt niet o.b.v. lokale courantgetal maar
-                ! op basis van een gemiddelde snelheid en gksi/geta
+                ! method is not identical to (Koren & Vreugdenhil, pp. 73).
+                ! uuu/vvv are not taken at correct point
+                ! dx and dy according to zeta-definition (for energy conservation)
+                ! tests for cuu and cvv are not based on local courant-number but
+                ! based on an average velocity and gksi/geta
                 !
                 if (        kcs45(nm ,k)/=3 .and. kcs45(nm ,k)/= 9 &
                     & .and. kcs45(nmu,k)/=6 .and. kcs45(nmu,k)/=12  ) then
@@ -351,29 +351,24 @@ subroutine z_hormom_mdui(nmmax     ,kmax      ,icx       , &
                    ! 45 degree staircase
                    !
                    if (uuu > 0.0_fp) then
-                      !advecx = uuu*((u0(nm ,k) - u0(nmd,k))/gksi + vvv*gsqi*dgvnm)
                       bbk(nm,k) = bbk(nm,k) + cuu
                       bdx(nm,k) = bdx(nm,k) - cuu
                       ddk(nm,k) = ddk(nm,k) - curvx
                    else
-                      !advecx = uuu*((u0(nmu,k) - u0(nm ,k))/gksi + vvv*gsqi*dgvnm)
                       bbk(nm,k) = bbk(nm,k) - cuu
                       bux(nm,k) = bux(nm,k) + cuu
                       ddk(nm,k) = ddk(nm,k) - curvx
                    endif
                    if (vvv > 0.0_fp) then
-                      !advecy    = vvv*(u0(nm ,k)-u0(ndm,k))/geta - 0.5_fp*vvv*vvv*gsqi*dgeta
                       bbk(nm,k) = bbk(nm,k) + cvv
                       bdy(nm,k) = bdy(nm,k) - cvv
                       ddk(nm,k) = ddk(nm,k) + curvy
                    else
-                      !advecy    = vvv*(u0(num,k)-u0(nm ,k))/geta - 0.5_fp*vvv*vvv*gsqi*dgeta
                       bbk(nm,k) = bbk(nm,k) - cvv
                       buy(nm,k) = buy(nm,k) + cvv
                       ddk(nm,k) = ddk(nm,k) + curvy
                    endif
                 endif
-                !ddk(nm, k) = ddk(nm, k) - advecx - advecy
              endif
           enddo
        endif
