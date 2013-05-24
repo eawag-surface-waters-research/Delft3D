@@ -3,7 +3,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                  & kfu       ,kfuz0     ,kfumin    ,kfumx0    ,kfv       , &
                  & kfvz0     ,kfvmin    ,kfvmx0    ,dzv0      ,dzs0      , &
                  & kfs       ,kfsz0     ,kfsmin    ,kfsmx0    ,kcu       , &
-                 & u0        ,v1        ,w0        ,hu        ,dzu0      , &
+                 & u0        ,v1        ,w0        ,hu        ,hv        ,dzu0      , &
                  & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
                  & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
                  & disch     ,umdis     ,kspu      ,mnksrc    ,dismmt    , &
@@ -88,6 +88,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)               , pointer :: gammax
     character(8)           , pointer :: dpsopt
     character(6)           , pointer :: momsol
+    logical                , pointer :: old_corio
     logical                , pointer :: slplim
     real(fp)               , pointer :: hdt
     real(fp)               , pointer :: rhow
@@ -150,6 +151,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: gvv     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: gvz     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: hu      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: hv      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: patm    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: pship   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: rlabda  !  Description and declaration in esm_alloc_real.f90
@@ -249,6 +251,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)           :: dgeta
     real(fp)           :: dgvnm
     real(fp)           :: dpsmax
+    real(fp)           :: drythreshold
     real(fp)           :: dux
     real(fp)           :: duy
     real(fp)           :: dz
@@ -264,10 +267,13 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)           :: gksid
     real(fp)           :: gksiu
     real(fp)           :: gsqi
+    real(fp)           :: hl
+    real(fp)           :: hr
     real(fp)           :: htrsh
     real(fp)           :: hugsqs  ! HU(NM/NMD) * GSQS(NM) Depending on UMDIS the HU of point NM or NMD will be used 
     real(fp)           :: qwind
     real(fp), external :: redvic
+    real(fp)           :: svvv
     real(fp)           :: thvert     ! theta coefficient for vertical advection terms
     real(fp)           :: timest
     real(fp)           :: uuu
@@ -275,28 +281,29 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)           :: vih
     real(fp)           :: viznm
     real(fp)           :: viznmd
-    real(fp)           :: vvv
+    real(fp)           :: vvvc   ! Tangential velocity component used in Coriolis term
     real(fp)           :: wsumax
     real(fp)           :: www
     real(fp)           :: wavg0
 !
 !! executable statements -------------------------------------------------------
 !
-    dryflc   => gdp%gdnumeco%dryflc
-    dpsopt   => gdp%gdnumeco%dpsopt
-    momsol   => gdp%gdnumeco%momsol
-    slplim   => gdp%gdnumeco%slplim
-    gammax   => gdp%gdnumeco%gammax
-    rhow     => gdp%gdphysco%rhow
-    ag       => gdp%gdphysco%ag
-    vicmol   => gdp%gdphysco%vicmol
-    iro      => gdp%gdphysco%iro
-    irov     => gdp%gdphysco%irov
-    wave     => gdp%gdprocs%wave
-    roller   => gdp%gdprocs%roller
-    xbeach   => gdp%gdprocs%xbeach
-    hdt      => gdp%gdnumeco%hdt
-    dzmin    => gdp%gdzmodel%dzmin
+    dryflc    => gdp%gdnumeco%dryflc
+    dpsopt    => gdp%gdnumeco%dpsopt
+    momsol    => gdp%gdnumeco%momsol
+    old_corio => gdp%gdnumeco%old_corio
+    slplim    => gdp%gdnumeco%slplim
+    gammax    => gdp%gdnumeco%gammax
+    rhow      => gdp%gdphysco%rhow
+    ag        => gdp%gdphysco%ag
+    vicmol    => gdp%gdphysco%vicmol
+    iro       => gdp%gdphysco%iro
+    irov      => gdp%gdphysco%irov
+    wave      => gdp%gdprocs%wave
+    roller    => gdp%gdprocs%roller
+    xbeach    => gdp%gdprocs%xbeach
+    hdt       => gdp%gdnumeco%hdt
+    dzmin     => gdp%gdzmodel%dzmin
     !
     call timer_start(timer_cucnp_ini, gdp)
     !
@@ -304,7 +311,8 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     icxy   = max(icx, icy)
     !
     ! factor in maximum wave force 1/4 alpha rho g gammax**2 h**2 / tp /(sqrt(g h)
-    facmax = 0.25*sqrt(ag)*rhow*gammax**2
+    facmax       = 0.25*sqrt(ag)*rhow*gammax**2
+    drythreshold = 0.1_fp * dryflc
     !
     if (icx==1) then
        ff = -1.0_fp
@@ -425,13 +433,28 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                 ! -> aak = -2.0 * ag/gki
                 ! -> cck =  2.0 * ag/gki
                 !
-                vvv        = 0.25_fp*(v1(ndm, k) + v1(ndmu, k) + v1(nm, k) + v1(nmu, k))
+                if (old_corio) then
+                   vvvc = 0.25_fp*(v1(ndm, k) + v1(ndmu, k) + v1(nm, k) + v1(nmu, k))
+                else
+                   !
+                   ! Improved implementation Coriolis term for deep areas following
+                   ! Kleptsova, Pietrzak and Stelling, 2009.
+                   !
+                   svvv = max(kfv(ndm) + kfv(ndmu) + kfv(nm) + kfv(nmu), 1)
+                   hl   = real(dps(nm ),fp)+s0(nm)
+                   hr   = real(dps(nmu),fp)+s0(nmu)
+                   vvvc = (  (  v1(nm,  k)*hv(nm  )*kfv(nm  )      &
+                   &          + v1(ndm, k)*hv(ndm )*kfv(ndm ))/max(drythreshold,hl)  & 
+                   &       + (  v1(nmu, k)*hv(nmu )*kfv(nmu )      &
+                   &          + v1(ndmu,k)*hv(ndmu)*kfv(ndmu))/max(drythreshold,hr)) &
+                   &      / svvv
+                endif
                 aak(nm, k) = -ag/gksi
                 bbk(nm, k) = 1.0_fp/timest
                 cck(nm, k) = ag/gksi
                 ddk(nm, k) = ddk(nm, k)                                       & 
                          & + u0(nm, k)/timest                                 &
-                         & + ff*fcorio(nm)*vvv                                &
+                         & + ff*fcorio(nm)*vvvc                               &
                          & - ag/rhow*drhodx(nm, k)*kfsz0(nm, k)*kfsz0(nmu, k) &
                          & - (patm(nmu) - patm(nm))/(gksi*rhow)               &
                          & - (pship(nmu) - pship(nm))/(gksi*rhow)             &

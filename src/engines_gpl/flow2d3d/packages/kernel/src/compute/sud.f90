@@ -9,7 +9,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
              & qzk       ,guu       ,gvv       ,gvu       ,gsqs      , &
              & gud       ,gvd       ,gvz       ,gsqiu     ,dteu      , &
              & circ2d    ,circ3d    ,disch     ,                       &
-             & umdis     ,umean     ,hu        ,dpu       ,dzu1      , &
+             & umdis     ,umean     ,hu        ,hv        ,dpu       ,dzu1      , &
              & dpdksi    ,thick     ,sig       ,dps       ,taubpu    , &
              & taubsu    ,rho       ,sumrho    ,wsu       ,fxw       , &
              & wsbodyu   ,idry      ,crbc      ,vicuv     ,hu0       , &
@@ -168,6 +168,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)                             :: hkru    !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)                             :: hu0
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)                             :: hu      !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)                             :: hv      !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)                             :: patm    !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: precip  !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)                             :: pship   !  Description and declaration in esm_alloc_real.f90
@@ -346,7 +347,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
     !
     call timer_start(timer_sud_cucnp, gdp)
     call cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
-             & v1        ,w1        ,hu        ,dps       ,dpu       , &
+             & v1        ,w1        ,hu        ,hv        ,dps       ,dpu       , &
              & umean     ,guu       ,gvv       ,gvu       ,gsqs      , &
              & gvd       ,gud       ,gvz       ,gsqiu     ,qxk       , &
              & qyk       ,disch     ,umdis     ,mnksrc    ,dismmt    ,j         , &

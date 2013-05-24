@@ -9,7 +9,7 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
                & qxk       ,qyk       ,qzk       ,guu       ,gvv       , &
                & guv       ,gvu       ,gud       ,gvd       ,guz       , &
                & gvz       ,gsqiu     ,gsqs      ,disch     ,umdis     , &
-               & dismmt    ,umean     ,evap      ,hu        ,dps       , &
+               & dismmt    ,umean     ,evap      ,hu        ,hv        ,dps       , &
                & dpu       ,dzs0      ,dzu0      ,dzv0      ,a         , &
                & b         ,c         ,d         ,aa        ,bb        , &
                & cc        ,dd        ,tetau     ,aak       ,bbk       , &
@@ -170,6 +170,7 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                    :: gvv     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                    :: gvz     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                    :: hu      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                    :: hv      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                    :: patm    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: precip  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                    :: pship   !  Description and declaration in esm_alloc_real.f90
@@ -331,7 +332,7 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
                & kfu       ,kfuz0     ,kfumin    ,kfumx0    ,kfv       , &
                & kfvz0     ,kfvmin    ,kfvmx0    ,dzv0      ,dzs0      , &
                & kfs       ,kfsz0     ,kfsmin    ,kfsmx0    ,kcu       , &
-               & u0        ,v1        ,w1        ,hu        ,dzu0      , &
+               & u0        ,v1        ,w1        ,hu        ,hv        ,dzu0      , &
                & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
                & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
                & disch     ,umdis     ,kspu      ,mnksrc    ,dismmt    , &

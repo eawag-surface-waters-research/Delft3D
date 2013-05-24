@@ -1,5 +1,5 @@
 subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
-               & v1        ,w1        ,hu        ,dps       ,dpu       , &
+               & v1        ,w1        ,hu        ,hv        ,dps       ,dpu       , &
                & umean     ,guu       ,gvv       ,gvu       ,gsqs      , &
                & gvd       ,gud       ,gvz       ,gsqiu     ,qxk       , &
                & qyk       ,disch     ,umdis     ,mnksrc    ,dismmt    ,j         , &
@@ -91,8 +91,10 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
     !
     real(fp)                , pointer :: gammax
     real(fp)                , pointer :: hdt
+    real(fp)                , pointer :: dryflc
     integer                 , pointer :: ibaroc
     logical                 , pointer :: cstbnd
+    logical                 , pointer :: old_corio
     character(8)            , pointer :: dpsopt
     character(6)            , pointer :: momsol
     logical                 , pointer :: slplim
@@ -111,15 +113,12 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
 ! Global variables
 !
     integer                                           , intent(in)  :: icreep  !  Description and declaration in tricom.igs
-    integer                                                         :: icx     !!  Increment in the X-dir., if ICX= NMAX
-                                                                               !!  then computation proceeds in the X-
-                                                                               !!  dir. If icx=1 then computation pro-
-                                                                               !!  ceeds in the Y-dir.
-    integer                                                         :: icy     !!  Increment in the Y-dir. (see ICX)
-    integer                                                         :: j       !!  Begin pointer for arrays which have
-                                                                               !!  been transformed into 1D arrays.
-                                                                               !!  Due to the shift in the 2nd (M-)
-                                                                               !!  index, J = -2*NMAX + 1
+    integer                                                         :: icx     !  Increment in the X-dir., if 
+                                                                               !  icx= nmax: computation proceeds in the X-dir
+                                                                               !  icx= 1   : computation proceeds in the Y-dir.
+    integer                                                         :: icy     !  Increment in the Y-dir. (see ICX)
+    integer                                                         :: j       !  Begin pointer for arrays which have been transformed into 1D arrays.
+                                                                               !  Due to the shift in the 2nd (M-)index, J = -2*NMAX + 1
     integer                                                         :: kmax    !  Description and declaration in esm_alloc_int.f90
     integer                                                         :: lsecfl  !  Description and declaration in dimens.igs
     integer                                                         :: lstsci  !  Description and declaration in esm_alloc_int.f90
@@ -153,13 +152,14 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: gvz     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: hkru    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: hu      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: hv      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: patm    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: pship   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: rlabda  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: s0      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: taubpu  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: taubsu  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: tgfsep  !!  Water elev. induced by tide gen.force
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: tgfsep  !  Water elev. induced by tide gen.force
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: tp      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: umean   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: uwtypu  !  Description and declaration in esm_alloc_real.f90
@@ -171,14 +171,12 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax), intent(in)  :: w1      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 3)                   :: cfurou  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 3)                   :: cfvrou  !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: aak     !!  Internal work array, coupling of layer velocity in (N,M,K)
-                                                                               !!  with water level point left (down)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bbk     !!  Internal work array, coefficient layer velocity in (N,M,K) implicit part
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bbka    !!  Internal work array
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bbkc    !!  Internal work array
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: cck     !!  Internal work array, coupling layer velocity in (N,M,K)
-                                                                               !!  with water level point right (upper)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ddk     !!  Internal work array, diagonal space at (N,M,K)
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: aak     !  Internal work array, coupling of layer velocity in (N,M,K) with water level point left (down)
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bbk     !  Internal work array, coefficient layer velocity in (N,M,K) implicit part
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bbka    !  Internal work array
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bbkc    !  Internal work array
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: cck     !  Internal work array, coupling layer velocity in (N,M,K) with water level point right (upper)
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ddk     !  Internal work array, diagonal space at (N,M,K)
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: diapl   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: dpdksi  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: qxk     !  Description and declaration in esm_alloc_real.f90
@@ -245,6 +243,7 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
     real(fp)                   :: ddzb
     real(fp)                   :: ddzc
     real(fp)                   :: dia
+    real(fp)                   :: drythreshold
     real(fp), dimension(1,1,1) :: dummy
     real(fp)                   :: dpsmax
     real(fp)                   :: facmax
@@ -267,6 +266,7 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
     real(fp)                   :: viz1
     real(fp)                   :: viz2
     real(fp)                   :: vvv
+    real(fp)                   :: vvvc   ! Tangential velocity component used in Coriolis term
     real(fp)                   :: wsumax
     real(fp)                   :: www
 !
@@ -274,8 +274,10 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
 !
     gammax     => gdp%gdnumeco%gammax
     hdt        => gdp%gdnumeco%hdt
+    dryflc     => gdp%gdnumeco%dryflc
     ibaroc     => gdp%gdnumeco%ibaroc
     cstbnd     => gdp%gdnumeco%cstbnd
+    old_corio  => gdp%gdnumeco%old_corio
     dpsopt     => gdp%gdnumeco%dpsopt
     momsol     => gdp%gdnumeco%momsol
     slplim     => gdp%gdnumeco%slplim
@@ -298,7 +300,8 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
     icxy = max(icx, icy)
     !
     ! factor in maximum wave force 1/4 alpha rho g gammax**2 h**2 / tp /(sqrt(g h)
-    facmax = 0.25*sqrt(ag)*rhow*gammax**2
+    facmax       = 0.25*sqrt(ag)*rhow*gammax**2
+    drythreshold = 0.1_fp * dryflc
     !
     if (icx==1) then
        ff = -1.0
@@ -364,16 +367,16 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
        nmd  = -icx
        ndm  = -icy
        ndmd = -icx - icy
-       nmu  = icx
-       num  = icy
-       numu = icx + icy
-       ndmu = icx - icy
+       nmu  =  icx
+       num  =  icy
+       numu =  icx + icy
+       ndmu =  icx - icy
        do nm = 1, nmmax
-          nmd  = nmd + 1
-          ndm  = ndm + 1
+          nmd  = nmd  + 1
+          ndm  = ndm  + 1
           ndmd = ndmd + 1
-          nmu  = nmu + 1
-          num  = num + 1
+          nmu  = nmu  + 1
+          num  = num  + 1
           numu = numu + 1
           ndmu = ndmu + 1
           !
@@ -382,19 +385,32 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
           kspu0k = kspu(nm, 0)*kspu(nm, k)
           if (kfu(nm)==1 .and. kspu0k /=4 .and. kspu0k /=10) then
              gksi = gvu(nm)
+             svvv = max(kfv(ndm) + kfv(ndmu) + kfv(nm) + kfv(nmu), 1)
+             hl  = real(dps(nm),fp) + s0(nm)
+             hr  = real(dps(nmu),fp) + s0(nmu)
              if (       (cstbnd .and. (kcs(nm)==2 .or. kcs(nmu)==2) ) &
                  & .or. (kcs(nm)==3 .or. kcs(nmu)==3                )  ) then
-                svvv = max(kfv(ndm) + kfv(ndmu) + kfv(nm) + kfv(nmu), 1)
                 vvv  = (  v1(ndm, k)*kfv(ndm) + v1(ndmu, k)*kfv(ndmu) &
                      &  + v1(nm , k)*kfv(nm ) + v1(nmu , k)*kfv(nmu )  ) / svvv
              else
-                vvv = .25*(v1(ndm, k) + v1(ndmu, k) + v1(nm, k) + v1(nmu, k))
+                vvv = 0.25_fp * (v1(ndm,k)+v1(ndmu,k)+v1(nm,k)+v1(nmu,k))
+             endif
+             if (old_corio) then
+                vvvc = vvv
+             else
+                !
+                ! Improved implementation Coriolis term for deep areas following
+                ! Kleptsova, Pietrzak and Stelling, 2009.
+                !
+                vvvc = (  (  v1(nm,  k)*hv(nm  )*kfv(nm  )      &
+                &          + v1(ndm, k)*hv(ndm )*kfv(ndm ))/max(drythreshold,hl)  & 
+                &       + (  v1(nmu, k)*hv(nmu )*kfv(nmu )      &
+                &          + v1(ndmu,k)*hv(ndmu)*kfv(ndmu))/max(drythreshold,hr)) &
+                &      / svvv
              endif
              uuu  = u0(nm, k)
              umod = sqrt(uuu*uuu + vvv*vvv)
              !
-             hl  = real(dps(nm),fp) + s0(nm)
-             hr  = real(dps(nmu),fp) + s0(nmu)
              rou = .5*(rho(nm, k) + rho(nmu, k))
              !
              ! FLAG BAROCLINE PRESSURE ON OPEN BOUNDARY (DEFAULT YES IBAROC = 1)
@@ -412,7 +428,7 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
              cck(nm, k) =  ag*rhofrac/gksi
              bbk(nm, k) = bbk(nm, k) + 0.5*rttfu(nm, k)*umod
              ddk(nm, k) = ddk(nm, k) +                                          &
-                        & ff*fcorio(nm)*vvv - ag*(1. - icreep)/(gksi*rhow)      &
+                        & ff*fcorio(nm)*vvvc - ag*(1. - icreep)/(gksi*rhow)     &
                         & *nbaroc*(sig(k)*rou*(hr - hl)                         &
                         & + (sumrho(nmu, k)*hr - sumrho(nm, k)*hl))             &
                         & - (patm(nmu) - patm(nm))/(gksi*rhow)                  &

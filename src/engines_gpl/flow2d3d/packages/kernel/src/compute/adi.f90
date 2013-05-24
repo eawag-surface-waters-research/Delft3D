@@ -306,7 +306,7 @@ subroutine adi(dischy    ,solver    ,icreep    ,stage     ,nst       , &
        call timer_start(timer_1stuzd, gdp)
        call uzd(icreep    ,dpdeta    ,s0        ,v0        , &
               & v1        ,u0        ,w1        ,vmean     , &
-              & hv        ,gvv       ,guu       ,guv       ,gsqs      , &
+              & hv        ,hu        ,gvv       ,guu       ,guv       ,gsqs      , &
               & gud       ,gvd       ,guz       ,gsqiv     ,qyk       ,qxk       , &
               & disch     ,vmdis     ,dismmt    ,mnksrc    ,kcv       , &
               & kcs       ,kfv       ,kfu       ,kfs       , &
@@ -371,7 +371,7 @@ subroutine adi(dischy    ,solver    ,icreep    ,stage     ,nst       , &
               & qzk       ,guu       ,gvv       ,gvu       ,gsqs      , &
               & gud       ,gvd       ,gvz       ,gsqiu     ,dteu      , &
               & circ2d(1, 1)         ,circ3d(1, 1, 1)      ,disch     , &
-              & umdis     ,umean     ,hu        ,dpu       ,dzu1      , &
+              & umdis     ,umean     ,hu        ,hv        ,dpu       ,dzu1      , &
               & dpdksi    ,thick     ,sig       ,dps       ,taubpu    , &
               & taubsu    ,rho       ,sumrho    ,wsu       ,fxw       ,wsbodyu   , &
               & idry      ,crbc(1,1) ,vicuv     ,wrka9     , &
@@ -467,7 +467,7 @@ subroutine adi(dischy    ,solver    ,icreep    ,stage     ,nst       , &
        call timer_start(timer_2nduzd, gdp)
        call uzd(icreep    ,dpdksi    ,s0        ,u0        , &
               & u1        ,v0        ,w1        ,umean     , &
-              & hu        ,guu       ,gvv       ,gvu       ,gsqs      , &
+              & hu        ,hv        ,guu       ,gvv       ,gvu       ,gsqs      , &
               & gvd       ,gud       ,gvz       ,gsqiu     ,qxk       ,qyk       , &
               & disch     ,umdis     ,dismmt    ,mnksrc    ,kcu       , &
               & kcs       ,kfu       ,kfv       ,kfs       , &
@@ -529,7 +529,7 @@ subroutine adi(dischy    ,solver    ,icreep    ,stage     ,nst       , &
               & qzk       ,gvv       ,guu       ,guv       ,gsqs      , &
               & gvd       ,gud       ,guz       ,gsqiv     ,dtev      , &
               & circ2d(1, norow + 1) ,circ3d(1, 1, norow + 1)         ,disch     , &
-              & vmdis     ,vmean     ,hv        ,dpv       ,dzv1      , &
+              & vmdis     ,vmean     ,hv        ,hu        ,dpv       ,dzv1      , &
               & dpdeta    ,thick     ,sig       ,dps       ,taubpv    , &
               & taubsv    ,rho       ,sumrho    ,wsv       ,fyw       ,wsbodyv   , &
               & idry      ,crbc(1, norow + 1)   ,vicuv     ,wrka9     , &

@@ -44,7 +44,11 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#if (!defined (WIN32))
 #include <unistd.h>
+#else
+static int getpid() { return 0; }
+#endif
 
 
 static void
@@ -125,7 +129,7 @@ main (
 
     const char * prompt = NULL;
     bool history = false;
-    srand48 (getpid ());
+    srandom (getpid ());
 
     if (isatty (0)) {
         printf ("Interactive DOL version %d.%d client ready\n", DOL::VERSION_MAJOR, DOL::VERSION_MINOR);

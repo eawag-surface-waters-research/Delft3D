@@ -1,6 +1,6 @@
 subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
              & u1        ,v         ,w1        ,umean     , &
-             & hu        ,guu       ,gvv       ,gvu       ,gsqs      , &
+             & hu        ,hv        ,guu       ,gvv       ,gvu       ,gsqs      , &
              & gvd       ,gud       ,gvz       ,gsqiu     ,qxk       ,qyk       , &
              & disch     ,umdis     ,dismmt    ,mnksrc    ,kcu       , &
              & kcs       ,kfu       ,kfv       ,kfs       , &
@@ -100,6 +100,7 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     integer                 , pointer :: ibaroc
     logical                 , pointer :: cstbnd
     character(6)            , pointer :: momsol
+    logical                 , pointer :: old_corio
     logical                 , pointer :: slplim
     real(fp)                , pointer :: rhow
     real(fp)                , pointer :: rhofrac
@@ -118,9 +119,9 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
 ! Global variables
 !
     integer                                             , intent(in)  :: icreep  !  Description and declaration in tricom.igs
-    integer                                             , intent(in)  :: icx     !!  Increment in the X-dir., if ICX= NMAX then computation proceeds in the X-dir. If icx=1 then computation proceeds in the Y-dir.
-    integer                                             , intent(in)  :: icy     !!  Increment in the Y-dir. (see ICX)
-    integer                                                           :: j       !!  Begin pointer for arrays which have been transformed into 1D arrays. Due to the shift in the 2nd (M-) index, J = -2*NMAX + 1
+    integer                                             , intent(in)  :: icx     !  Increment in the X-dir., if ICX= NMAX then computation proceeds in the X-dir. If icx=1 then computation proceeds in the Y-dir.
+    integer                                             , intent(in)  :: icy     !  Increment in the Y-dir. (see ICX)
+    integer                                                           :: j       !  Begin pointer for arrays which have been transformed into 1D arrays. Due to the shift in the 2nd (M-) index, J = -2*NMAX + 1
     integer                                                           :: kmax    !  Description and declaration in esm_alloc_int.f90
     integer                                                           :: lsecfl  !  Description and declaration in dimens.igs
     integer                                                           :: lstsci  !  Description and declaration in esm_alloc_int.f90
@@ -128,7 +129,7 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     integer                                                           :: nmmaxj  !  Description and declaration in dimens.igs
     integer                                             , intent(in)  :: norow   !  Description and declaration in esm_alloc_int.f90
     integer                                             , intent(in)  :: nsrc    !  Description and declaration in esm_alloc_int.f90
-    integer                                             , intent(in)  :: nst     !!  Time step number
+    integer                                             , intent(in)  :: nst     !  Time step number
     integer   , dimension(5, norow)                     , intent(in)  :: irocol  !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(7, nsrc)                      , intent(in)  :: mnksrc  !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kcs     !  Description and declaration in esm_alloc_int.f90
@@ -156,13 +157,14 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: gvz     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: hkru    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: hu      !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: hv      !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: patm    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: pship   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: rlabda  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: s0      !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: taubpu  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: taubsu  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: tgfsep  !!  Water elev. induced by tide gen.force
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: tgfsep  !  Water elev. induced by tide gen.force
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: tp      !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: umean   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: vnu2d   !  Description and declaration in esm_alloc_real.f90
@@ -173,18 +175,18 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax), intent(in)  :: w1      !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, 3)                   :: cfurou  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, 3)                   :: cfvrou  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: aak     !!  Internal work array, lower diagonal tridiagonal matrix, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N,M,K-1)
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bbk     !!  Internal work array, coefficient la=yer velocity in (N,M,K) implicit part
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bddx    !!  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N,M-2,K)
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bddy    !!  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N-2,M,K)
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bdx     !!  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N,M-1,K)
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bdy     !!  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N-1,M,K)
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: buux    !!  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N,M+2,K)
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: buuy    !!  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N+2,M,K)
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bux     !!  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N,M+1,K)
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: buy     !!  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N+1,M,K)
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: cck     !!  Internal work array, upper diagonal tridiagonal matrix, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N,M,K+1)
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ddk     !!  Internal work array, diagonal space at (N,M,K)
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: aak     !  Internal work array, lower diagonal tridiagonal matrix, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N,M,K-1)
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bbk     !  Internal work array, coefficient la=yer velocity in (N,M,K) implicit part
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bddx    !  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N,M-2,K)
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bddy    !  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N-2,M,K)
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bdx     !  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N,M-1,K)
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bdy     !  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N-1,M,K)
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: buux    !  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N,M+2,K)
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: buuy    !  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N+2,M,K)
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: bux     !  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N,M+1,K)
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: buy     !  Internal work array, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N+1,M,K)
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: cck     !  Internal work array, upper diagonal tridiagonal matrix, implicit coupling of layer velocity in (N,M,K) with layer velocity in (N,M,K+1)
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ddk     !  Internal work array, diagonal space at (N,M,K)
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: diapl   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: dpdksi  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: qxk     !  Description and declaration in esm_alloc_real.f90
@@ -201,10 +203,10 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ub
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ubrlsu  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub,kmax)                 :: ustokes !  Description and declaration in trisol.igs
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: uvdwk   !!  Internal work array for Jac.iteration
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: v       !!  V-velocities
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: uvdwk   !  Internal work array for Jac.iteration
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: v       !  V-velocities
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax+2)              :: vicuv   !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: vvdwk   !!  Internal work array for Jac.iteration
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: vvdwk   !  Internal work array for Jac.iteration
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)        :: r0      !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(kmax)                                       :: sig     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(kmax)                                       :: thick   !  Description and declaration in esm_alloc_real.f90
@@ -274,6 +276,7 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     real(fp)           :: ddzb
     real(fp)           :: ddzc
     real(fp)           :: dia
+    real(fp)           :: drythreshold
     real(fp)           :: facmax
     real(fp)           :: ff
     real(fp)           :: geta
@@ -300,6 +303,7 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     real(fp)           :: viz1
     real(fp)           :: viz2
     real(fp)           :: vvv
+    real(fp)           :: vvvc   ! Tangential velocity component used in Coriolis term
     real(fp)           :: wsumax
     real(fp)           :: www
     real(fp)           :: zz
@@ -316,6 +320,7 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     ibaroc     => gdp%gdnumeco%ibaroc
     cstbnd     => gdp%gdnumeco%cstbnd
     momsol     => gdp%gdnumeco%momsol
+    old_corio  => gdp%gdnumeco%old_corio
     slplim     => gdp%gdnumeco%slplim
     rhow       => gdp%gdphysco%rhow
     rhofrac    => gdp%gdphysco%rhofrac
@@ -341,7 +346,8 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     ! factor in maximum wave force 1/4 alpha rho g gammax**2 h**2 / tp /(sqrt(g h)
     ! = facmax * h**1.5/tp
     !
-    facmax = 0.25*sqrt(ag)*rhow*gammax**2
+    facmax       = 0.25*sqrt(ag)*rhow*gammax**2
+    drythreshold = 0.1_fp * dryflc
     !
     if (icx == 1) then
        ff = -1.0
@@ -440,19 +446,32 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
           ! For an active point and not a gate or plate
           !
           if ( ((kcu(nm)==1) .and. (kfu(nm)==1)) .and. kspu0k /=4 .and. kspu0k /=10) then
+             svvv = max(kfv(ndm) + kfv(ndmu) + kfv(nm) + kfv(nmu), 1)
+             hl   = real(dps(nm) ,fp) + s0(nm)
+             hr   = real(dps(nmu),fp) + s0(nmu)
              if (        ( cstbnd .and. (kcs(nm)==2 .or. kcs(nmu)==2)) &
                   & .or. (kcs(nm)==3 .or. kcs(nmu)==3                )  ) then
-                svvv = max(kfv(ndm) + kfv(ndmu) + kfv(nm) + kfv(nmu), 1)
                 vvv  = (  v(ndm, k)*kfv(ndm) + v(ndmu, k)*kfv(ndmu) &
                      &  + v(nm , k)*kfv(nm)  + v(nmu , k)*kfv(nmu)   ) / svvv
              else
-                vvv = .25*(v(nm, k) + v(nmu, k) + v(ndm, k) + v(ndmu, k))
+                vvv = 0.25_fp * (v(nm,k)+v(nmu,k)+v(ndm,k)+v(ndmu,k))
+             endif
+             if (old_corio) then
+                vvvc = vvv
+             else
+                !
+                ! Improved implementation Coriolis term for deep areas following
+                ! Kleptsova, Pietrzak and Stelling, 2009.
+                !
+                vvvc = (  (  v(nm,  k)*hv(nm  )*kfv(nm  )      &
+                &          + v(ndm, k)*hv(ndm )*kfv(ndm ))/max(drythreshold,hl)  & 
+                &       + (  v(nmu, k)*hv(nmu )*kfv(nmu )      &
+                &          + v(ndmu,k)*hv(ndmu)*kfv(ndmu))/max(drythreshold,hr)) &
+                &      / svvv
              endif
              uuu   = u0(nm, k)
              umod  = sqrt(uuu*uuu + vvv*vvv)
              !
-             hl    = real(dps(nm) ,fp) + s0(nm)
-             hr    = real(dps(nmu),fp) + s0(nmu)
              rou   = .5*(rho(nm, k) + rho(nmu, k))
              !
              ! FLAG BAROCLINE PRESSURE ON OPEN BOUNDARY (DEFAULT YES IBAROC = 1)
@@ -463,7 +482,7 @@ subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
              ! CORIOLIS, GRAVITY PRESSURE TERM and TIDE GENERATING FORCES
              !
              bbk(nm, k) = bbk(nm, k) + 0.5*rttfu(nm, k)*umod
-             ddk(nm, k) = ddk(nm, k) + ff*fcorio(nm)*vvv - ag*(1. - icreep)     &
+             ddk(nm, k) = ddk(nm, k) + ff*fcorio(nm)*vvvc - ag*(1. - icreep)    &
                         & /(gvu(nm)*rhow)                                       &
                         & *nbaroc*(sig(k)*rou*(hr - hl) + (sumrho(nmu, k)       &
                         & *hr - sumrho(nm, k)*hl))                              &

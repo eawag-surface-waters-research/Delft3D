@@ -174,6 +174,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     character(6)                  , pointer :: momsol
     real(fp)                      , pointer :: paver
     logical                       , pointer :: pcorr
+    logical                       , pointer :: old_corio
     real(fp)                      , pointer :: rhow
     real(fp)                      , pointer :: rhoa
     real(fp)                      , pointer :: rhofrac
@@ -429,6 +430,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     momsol              => gdp%gdnumeco%momsol
     paver               => gdp%gdnumeco%paver
     pcorr               => gdp%gdnumeco%pcorr
+    old_corio           => gdp%gdnumeco%old_corio
     nudge               => gdp%gdnumeco%nudge
     nudvic              => gdp%gdnumeco%nudvic
     rhow                => gdp%gdphysco%rhow
@@ -747,7 +749,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
              & iter1     ,dryflc    ,dco       ,ibaroc    ,kmax      , &
              & lstsci    ,icreep    ,trasol    ,momsol    ,dgcuni    , &
              & forfuv    ,forfww    ,ktemp     ,temint    , &
-             & keva      ,evaint    , &
+             & keva      ,evaint    ,old_corio , &
              & dpsopt    ,dpuopt    ,zmodel    ,gammax    ,fwfac     , &
              & nudge     ,nudvic    ,gdp       )
     !

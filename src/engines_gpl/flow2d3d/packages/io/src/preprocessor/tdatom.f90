@@ -91,6 +91,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     integer                         , pointer :: itfinish 
     integer                         , pointer :: julday 
     character(256)                  , pointer :: nflmod 
+    logical                         , pointer :: old_corio
     logical                         , pointer :: wind 
     logical                         , pointer :: salin 
     logical                         , pointer :: temp 
@@ -333,6 +334,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     itfinish    => gdp%gdinttim%itfinish 
     julday      => gdp%gdinttim%julday 
     nflmod      => gdp%gdnfl%nflmod 
+    old_corio   => gdp%gdnumeco%old_corio
     wind        => gdp%gdprocs%wind 
     salin       => gdp%gdprocs%salin 
     temp        => gdp%gdprocs%temp 
@@ -565,7 +567,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
                  & iter1     ,dryflc    ,dco       ,ibarco    ,kmax      , & 
                  & lstsci    ,icreep    ,trasol    ,momsol    ,dgcuni    , & 
                  & forfuv    ,forfww    ,ktemp     ,temint    ,            & 
-                 & keva      ,evaint    , & 
+                 & keva      ,evaint    ,old_corio , & 
                  & dpsopt    ,dpuopt    ,zmodel    ,gammax    ,fwfac     , & 
                  & nudge     ,nudvic    ,gdp       ) 
         ! 

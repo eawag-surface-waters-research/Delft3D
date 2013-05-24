@@ -53,18 +53,18 @@ subroutine z_shrwav(nmmax     ,kmax      ,icx       ,dfu       ,deltau    , &
     integer                                           , intent(in) :: icx    !!  Increment in the X-dir., if ICX= NMAX
                                                                              !!  then computation proceeds in the X-dir.
                                                                              !!  If icx=1 then computation proceeds in the Y-dir.
-    integer                                           , intent(in) :: kmax   !  Description and declaration in iidim.f90
+    integer                                           , intent(in) :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                           , intent(in) :: nmmax  !  Description and declaration in dimens.igs
-    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: kfu    !  Description and declaration in iidim.f90
-    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: kfumax !  Description and declaration in iidim.f90
-    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: kfumin !  Description and declaration in iidim.f90
-    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: deltau !  Description and declaration in rjdim.f90
-    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: dfu    !  Description and declaration in rjdim.f90
-    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: hu     !  Description and declaration in rjdim.f90
-    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: rlabda !  Description and declaration in rjdim.f90
-    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: tp     !  Description and declaration in rjdim.f90
+    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: kfu    !  Description and declaration in esm_alloc_int.f90
+    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: kfumax !  Description and declaration in esm_alloc_int.f90
+    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: kfumin !  Description and declaration in esm_alloc_int.f90
+    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: deltau !  Description and declaration in esm_alloc_real.f90
+    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: dfu    !  Description and declaration in esm_alloc_real.f90
+    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: hu     !  Description and declaration in esm_alloc_real.f90
+    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: rlabda !  Description and declaration in esm_alloc_real.f90
+    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: tp     !  Description and declaration in esm_alloc_real.f90
     real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: ddk    !!  Internal work array, diagonal space at (N,M,K)
-    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in) :: dzu1   !  Description and declaration in rjdim.f90
+    real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in) :: dzu1   !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !

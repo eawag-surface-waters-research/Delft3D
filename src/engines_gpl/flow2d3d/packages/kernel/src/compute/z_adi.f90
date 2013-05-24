@@ -299,7 +299,7 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                 & kcv       ,kfv       ,kfvz0     ,kfvmin    ,kfvmx0      , &
                 & kfu       ,kfuz0     ,kfumin    ,kfumx0    ,dzu0        , &
                 & kfs       ,kfsz0     ,kfsmin    ,kfsmx0    , &
-                & v0        ,u0        ,w1        ,hv        ,dzv0        ,dzs0      , &
+                & v0        ,u0        ,w1        ,hv        ,hu          ,dzv0        ,dzs0      , &
                 & gvv       ,guu       ,guv       ,gvu       ,gsqs        , &
                 & gvd       ,gud       ,gvz       ,guz       ,gsqiv       , &
                 & disch     ,umdis     ,kspv      ,mnksrc    ,dismmt      , &
@@ -359,7 +359,7 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                 & qxk       ,qyk       ,qzk       ,guu       ,gvv       , &
                 & guv       ,gvu       ,gud       ,gvd       ,guz       , &
                 & gvz       ,gsqiu     ,gsqs      ,disch     ,umdis     , &
-                & dismmt    ,umean     ,evap      ,hu        ,dps       , &
+                & dismmt    ,umean     ,evap      ,hu        ,hv        ,dps       , &
                 & dpu       ,dzs0      ,dzu0      ,dzv0      ,wrka1     , &
                 & wrka2     ,wrka3     ,wrka4     ,wrka5     ,wrka6     , &
                 & wrka7     ,wrka8     ,wrka15    ,wrkb1     ,wrkb2     , &
@@ -491,7 +491,7 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                 & kcu       ,kfu       ,kfuz0     ,kfumin    ,kfumx0      , &
                 & kfv       ,kfvz0     ,kfvmin    ,kfvmx0    ,dzv0        , &
                 & kfs       ,kfsz0     ,kfsmin    ,kfsmx0    , &
-                & u0        ,v0        ,w1        ,hu        ,dzu0        ,dzs0          , &
+                & u0        ,v0        ,w1        ,hu        ,hv          ,dzu0        ,dzs0          , &
                 & guu       ,gvv       ,gvu       ,guv       ,gsqs        , &
                 & gud       ,gvd       ,guz       ,gvz       ,gsqiu       , &
                 & disch     ,umdis     ,kspu      ,mnksrc    ,dismmt      , &
@@ -505,7 +505,7 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                 & ubrlsu    ,pship     ,diapl     ,rnpl      ,cfurou      , &
                 & u1        ,s0        ,dpu       ,qxk       ,qyk         , &
                 & norow     ,nocol     ,irocol(1, 1)         ,nst         ,umean       , &
-                & crbc(1,1) ,ustokes   ,gdp       )
+                & crbc(1,1) ,ustokes   ,gdp         )
        call timer_stop(timer_2nduzd, gdp)
        call timer_stop(timer_uzd, gdp)
        !
@@ -544,7 +544,7 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                 & qyk       ,qxk       ,qzk       ,gvv       ,guu       , &
                 & gvu       ,guv       ,gvd       ,gud       ,gvz       , &
                 & guz       ,gsqiv     ,gsqs      ,disch     ,vmdis     , &
-                & dismmt    ,vmean     ,evap      ,hv        ,dps       , &
+                & dismmt    ,vmean     ,evap      ,hv        ,hu        ,dps       , &
                 & dpv       ,dzs0      ,dzv0      ,dzu0      ,wrka1     , &
                 & wrka2     ,wrka3     ,wrka4     ,wrka5     ,wrka6     , &
                 & wrka7     ,wrka8     ,wrka16    ,wrkb1     ,wrkb2     , &

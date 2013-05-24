@@ -44,10 +44,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
+#if (!defined (WIN32))
+#include <unistd.h>
 #include <readline/history.h>
 #include <readline/readline.h>
+#else
+#   define getpid   _getpid
+#   define random   rand
+#   define srandom  srand
+#   define strdup   _strdup
+#   define usleep Sleep
+#endif
+
 
 
 #define KILOBYTE    1000
