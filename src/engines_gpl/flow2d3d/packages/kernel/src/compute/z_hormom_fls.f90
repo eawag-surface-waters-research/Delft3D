@@ -1,8 +1,8 @@
 subroutine z_hormom_fls(nmmax     ,kmax      ,icx       , &
                       & icy       ,kcs       ,kcs45     ,kcscut    , &
-                      & kfu       ,kfuz0     ,kfumin    ,kfumx0    ,kfv       , &
-                      & kfvz0     ,kfsz0     ,kfsmin    ,kfsmx0    ,kspu      , &
-                      & u0        ,v1        ,hu        ,kfvmin    ,kfvmx0    , &
+                      & kfu       ,kfuz0     ,kfumn0    ,kfumx0    ,kfv       , &
+                      & kfvz0     ,kfsz0     ,kfsmn0    ,kfsmx0    ,kspu      , &
+                      & u0        ,v1        ,hu        ,kfvmn0    ,kfvmx0    , &
                       & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
                       & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
                       & qxk       ,qyk       ,dzu0      ,dzv0      ,dzs0      , &
@@ -68,12 +68,12 @@ subroutine z_hormom_fls(nmmax     ,kmax      ,icx       , &
     integer                                                         :: nmmax  !  Description and declaration in dimens.igs
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kcs    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: kfsmx0 !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: kfsmin !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: kfsmn0 !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfu    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfv    !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfumin !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfumn0 !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfumx0 !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfvmin !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfvmn0 !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfvmx0 !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)              :: kspu   !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: kcs45
@@ -177,7 +177,7 @@ subroutine z_hormom_fls(nmmax     ,kmax      ,icx       , &
        nmd = nm - icx
        ndm = nm - icy
        if (kcs(nm) > 0) then
-          do k = kfsmin(nm), kfsmx0(nm)
+          do k = kfsmn0(nm), kfsmx0(nm)
              if (kcs45(nm, k) == 3) then
                 v1(ndm, k) = -u0(nm, k) * guu(nm) / gvv(nm)
                 u0(nmd, k) = -v1(nm, k) * gvv(nm) / guu(nm)
@@ -207,7 +207,7 @@ subroutine z_hormom_fls(nmmax     ,kmax      ,icx       , &
        numu   = nm  + icx + icy
        ndmu   = nm  + icx - icy
        numd   = nm  - icx + icy
-       do k = kfumin(nm), kfumx0(nm)
+       do k = kfumn0(nm), kfumx0(nm)
           !
           ! Compute UA (appr. of velocity in waterlevel points) at internal points
           ! At open boundary UA == U0 for inflow
@@ -270,7 +270,7 @@ subroutine z_hormom_fls(nmmax     ,kmax      ,icx       , &
           gsqi   = gsqiu(nm)
           !
           !
-          do k = kfumin(nm), kfumx0(nm)
+          do k = kfumn0(nm), kfumx0(nm)
              kspu0k = kspu(nm, 0) * kspu(nm, k)
              if (kfuz0(nm, k)==1 .and. kspu0k /=4 .and. kspu0k /=10) then
                 advecx = 0.0_fp

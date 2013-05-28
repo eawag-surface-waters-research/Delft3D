@@ -1,7 +1,7 @@
 subroutine z_hormom_mdue(nmmax     ,kmax      ,icx       , &
                        & icy       ,kcs       ,kcs45     ,kcscut    , &
-                       & kfu       ,kfuz0     ,kfumin    ,kfumx0    , &
-                       & kfvz0     ,kfsmin    ,kfsmx0    , &
+                       & kfu       ,kfuz0     ,kfumn0    ,kfumx0    , &
+                       & kfvz0     ,kfsmn0    ,kfsmx0    , &
                        & u0        ,v1        ,hu        , &
                        & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
                        & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
@@ -60,10 +60,10 @@ subroutine z_hormom_mdue(nmmax     ,kmax      ,icx       , &
     integer                                                         :: nmmax  !  Description and declaration in dimens.igs
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kcs    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: kfsmx0 !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: kfsmin !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: kfsmn0 !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfu    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfumx0 !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfumin !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfumn0 !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: kcs45
     integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: kcscut !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: kfuz0  !  Description and declaration in esm_alloc_int.f90
@@ -120,7 +120,7 @@ subroutine z_hormom_mdue(nmmax     ,kmax      ,icx       , &
        nmd = nm - icx
        ndm = nm - icy
        if (kcs(nm) > 0) then
-          do k = kfsmin(nm), kfsmx0(nm)
+          do k = kfsmn0(nm), kfsmx0(nm)
              if (kcs45(nm, k)==3) then
                 v1(ndm, k) = -u0(nm, k)*guu(nm)/gvv(nm)
                 u0(nmd, k) = -v1(nm, k)*gvv(nm)/guu(nm)
@@ -154,7 +154,7 @@ subroutine z_hormom_mdue(nmmax     ,kmax      ,icx       , &
           dgvnm = gvd(nm) - gvd(ndm)
           gsqi  = gsqiu(nm)
           !
-          do k = kfumin(nm), kfumx0(nm)
+          do k = kfumn0(nm), kfumx0(nm)
              if (kfuz0(nm, k)==1 .and. kcs(nm)*kcs(nmu)>0) then
                 vvv   = 0.25_fp * (v1(ndm,k)+v1(ndmu,k)+v1(nm,k)+v1(nmu,k))
                 uuu   = u0(nm, k)

@@ -3,7 +3,7 @@ subroutine z_vihrov(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                   & kfs       ,u0        ,v         ,vicuv     ,vnu2d     , &
                   & gud       ,guu       ,gvd       ,gvu       ,gvz       , &
                   & ddk       ,rxx       ,rxy       ,kfuz0     ,kfvz0     , &
-                  & kfsz0     ,kfumin    ,kfumx0    ,gdp       )
+                  & kfsz0     ,kfumn0    ,kfumx0    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -76,7 +76,7 @@ subroutine z_vihrov(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfs    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfu    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: kfumx0 !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: kfumin !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in) :: kfumn0 !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfv    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: kfsz0  !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: kfuz0  !  Description and declaration in esm_alloc_int.f90
@@ -163,7 +163,7 @@ subroutine z_vihrov(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              !
              ! rxy in depth point
              !
-             do k = kfumin(nm), kmax
+             do k = kfumn0(nm), kmax
                 if (kfuz0(nm,k)==1 .or. kfuz0(num,k)==1) then
                    ki = kfuz0(num,k) + 2*kfvz0(nmu,k) + 4*kfuz0(nm,k) + 8*kfvz0(nm,k)
                    if (ki == 15) then
@@ -205,7 +205,7 @@ subroutine z_vihrov(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              !
              ! rxy in depth point
              !
-             do k = kfumin(nm), kmax
+             do k = kfumn0(nm), kmax
                 if (kfuz0(nm,k)==1 .or. kfuz0(num,k)==1) then
                    ki = kfuz0(num,k) + 2*kfvz0(nmu,k) + 4*kfuz0(nm,k) + 8*kfvz0(nm,k)
                    !
@@ -276,7 +276,7 @@ subroutine z_vihrov(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        ndm  = nm - icy
        nmd  = nm - icx
        ndmd = nm - icx - icy
-       do k = kfumin(nm), kmax
+       do k = kfumn0(nm), kmax
           if ((kcs(nm)==1.or.kcs(nm)==3) .and. kfsz0(nm,k)==1) then
              vi        = vicuv(nm,k) + 0.25_fp*(vnu2d(nm)+vnu2d(nmd)+vnu2d(ndm)+vnu2d(ndmd))
              rxx(nm,k) = 2.0_fp * vi * (u0(nm,k)-u0(nmd,k)) / gvz(nm)
@@ -290,7 +290,7 @@ subroutine z_vihrov(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     do nm = 1, nmmax
        nmu = nm + icx
        ndm = nm - icy
-       do k = kfumin(nm), kfumx0(nm)
+       do k = kfumn0(nm), kfumx0(nm)
           if(kfuz0(nm,k)==1) then
              ddk(nm,k) = ddk(nm,k) + (rxx(nmu,k)-rxx(nm ,k))/gvu(nm) &
                         &          + (rxy(nm, k)-rxy(ndm,k))/guu(nm)

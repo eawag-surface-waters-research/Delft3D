@@ -58,6 +58,8 @@ function getpointer(pntnam, gdp)
     integer(pntrsize) , pointer :: wrka7
     integer(pntrsize) , pointer :: wrka8
     integer(pntrsize) , pointer :: wrka9
+    integer(pntrsize) , pointer :: wrka10
+    integer(pntrsize) , pointer :: wrka11
     integer(pntrsize) , pointer :: wrka12
     integer(pntrsize) , pointer :: wrka13
     integer(pntrsize) , pointer :: wrka14
@@ -400,6 +402,9 @@ function getpointer(pntnam, gdp)
     integer(pntrsize) , pointer :: kfumx0
     integer(pntrsize) , pointer :: kfvmx0
     integer(pntrsize) , pointer :: kfsmx0
+    integer(pntrsize) , pointer :: kfumn0
+    integer(pntrsize) , pointer :: kfvmn0
+    integer(pntrsize) , pointer :: kfsmn0
     integer(pntrsize) , pointer :: kfsz0
     integer(pntrsize) , pointer :: kfsz1
     integer(pntrsize) , pointer :: kfuz0
@@ -749,6 +754,9 @@ function getpointer(pntnam, gdp)
     kfumx0     => gdp%gdr_i_ch%kfumx0
     kfvmx0     => gdp%gdr_i_ch%kfvmx0
     kfsmx0     => gdp%gdr_i_ch%kfsmx0
+    kfumn0     => gdp%gdr_i_ch%kfumn0
+    kfvmn0     => gdp%gdr_i_ch%kfvmn0
+    kfsmn0     => gdp%gdr_i_ch%kfsmn0
     kfsz0      => gdp%gdr_i_ch%kfsz0
     kfsz1      => gdp%gdr_i_ch%kfsz1
     kfuz0      => gdp%gdr_i_ch%kfuz0
@@ -781,6 +789,8 @@ function getpointer(pntnam, gdp)
     wrka7      => gdp%gdaddress%wrka7
     wrka8      => gdp%gdaddress%wrka8
     wrka9      => gdp%gdaddress%wrka9
+    wrka10     => gdp%gdaddress%wrka10
+    wrka11     => gdp%gdaddress%wrka11
     wrka12     => gdp%gdaddress%wrka12
     wrka13     => gdp%gdaddress%wrka13
     wrka14     => gdp%gdaddress%wrka14
@@ -1439,6 +1449,12 @@ function getpointer(pntnam, gdp)
        returnval = kfvmx0
     case ('kfsmx0')
        returnval = kfsmx0
+    case ('kfumn0')
+       returnval = kfumn0
+    case ('kfvmn0')
+       returnval = kfvmn0
+    case ('kfsmn0')
+       returnval = kfsmn0
     case ('kfsz0')
        returnval = kfsz0
     case ('kfsz1')
@@ -1498,6 +1514,10 @@ function getpointer(pntnam, gdp)
        returnval = wrka8
     case ('wrka9')
        returnval = wrka9
+    case ('wrka10')
+       returnval = wrka10
+    case ('wrka11')
+       returnval = wrka11
     case ('wrka12')
        returnval = wrka12
     case ('wrka13')

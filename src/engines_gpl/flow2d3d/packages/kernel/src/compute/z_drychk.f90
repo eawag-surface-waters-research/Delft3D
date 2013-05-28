@@ -1,9 +1,9 @@
 subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                   & nfltyp    ,icx       ,icy       ,kfu       ,kfv       , &
                   & kfs       ,kcs       ,kfuz0     ,kfvz0     ,kfsz1     , &
-                  & kfsmin    ,kfsmax    ,kfsmx0    ,s1        ,r1        , &
-                  & dps       ,qxk       ,qyk       ,w1        ,lstsci    , &
-                  & dzs1      ,zk        ,nst       ,gdp       )
+                  & kfsmin    ,kfsmn0    ,kfsmax    ,kfsmx0    ,s1        , &
+                  & r1        ,dps       ,qxk       ,qyk       ,w1        , &
+                  & lstsci    ,dzs1      ,zk        ,nst       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -71,8 +71,9 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfs    !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfsmax !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: kfsmin !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfsmin !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfsmx0 !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfsmn0 !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfu    !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfv    !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(out) :: kfsz1  !  Description and declaration in esm_alloc_int.f90
@@ -168,6 +169,15 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
              enddo
           endif
          !
+          ! Find the (new) location of the bed layer
+          !
+          do k = 1, kmax
+             if ( zk(k)-dzmin >= -dps(nm) .or. k == kmax) then
+                kfsmin(nm) = k
+                exit
+             endif
+          enddo
+          !
          ! determination number of layers at new time level
          !
          kfsz1(nm,:) = 0
@@ -232,6 +242,17 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
     !
     do nm = 1, nmmax
        if (kfs(nm) == 1) then
+          ! morphology
+          if (kfsmin(nm) < kfsmn0(nm)) then
+             do k = kfsmin(nm), kfsmn0(nm)-1
+                w1(nm, k) = w1(nm, kfsmn0(nm))
+             enddo
+          elseif (kfsmin(nm) > kfsmn0(nm)) then
+             do k = kfsmn0(nm), kfsmin(nm)-1
+                w1(nm, k) = 0.0_fp
+             enddo
+          endif
+          ! morphology
           if (kfsmax(nm) > kfsmx0(nm)) then
              do k = kfsmx0(nm), kfsmax(nm)
                 w1(nm, k) = w1(nm, kfsmx0(nm))
@@ -247,6 +268,16 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
           do k = kfsmx0(nm)+1, kfsmax(nm)
              do l = 1, lstsci
                 r1(nm, k, l) = r1(nm, kfsmx0(nm), l)
+             enddo
+          enddo
+       endif
+       !
+       ! Copy concentration to bottom layer. NB. KFS might be equal to zero!
+       !
+       if (kcs(nm).eq.1 .and. kfsmin(nm) < kfsmn0(nm)) then
+          do k = kfsmin(nm), kfsmn0(nm)-1
+             do l = 1, lstsci
+                r1(nm, k, l) = r1(nm, kfsmn0(nm), l)
              enddo
           enddo
        endif

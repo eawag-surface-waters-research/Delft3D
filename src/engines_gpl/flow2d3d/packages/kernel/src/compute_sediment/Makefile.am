@@ -59,6 +59,10 @@ libKernelComputeSediment_la_SOURCES = \
          shld.f90 \
          soursin_2d.f90 \
          soursin_3d.f90 \
+         z_bott3d.f90 \
+         z_dwnvel.f90 \
+         z_erosed.f90 \
+         z_red_soursin.f90 \
          termfy.f90 \
          termgy.f90 \
          trab10.f90 \

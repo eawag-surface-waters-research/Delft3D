@@ -2,8 +2,9 @@ subroutine f0isf1(stage     ,dischy    ,nst       ,zmodel    ,j         , &
                 & nmmax     ,nmmaxj    ,nmax      ,kmax      ,lstsci    , &
                 & ltur      ,nsrc      ,kcu       ,kcv       ,kcs       , &
                 & kfs       ,kfu       ,kfv       ,kfsmin    ,kfsmax    , &
-                & kfumin    ,kfumax    ,kfvmin    ,kfvmax    ,kfsmx0    , &
-                & kfumx0    ,kfvmx0    ,kfsz0     ,kfuz0     ,kfvz0     , &
+                & kfumin    ,kfumax    ,kfvmin    ,kfvmax    ,kfsmn0    , &
+                & kfumn0    ,kfvmn0    ,kfsmx0    ,kfumx0    ,kfvmx0    , &
+                & kfsz0     ,kfuz0     ,kfvz0     , &
                 & kfsz1     ,kfuz1     ,kfvz1     , &
                 & s0        ,s1        ,u0        , &
                 & u1        ,v0        ,v1        ,volum0    ,volum1    , &
@@ -107,14 +108,17 @@ subroutine f0isf1(stage     ,dischy    ,nst       ,zmodel    ,j         , &
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfsmax !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfsmin !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(out) :: kfsmx0 !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(out) :: kfsmn0 !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfu    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfumax !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfumin !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(out) :: kfumx0 !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(out) :: kfumn0 !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfv    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfvmax !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfvmin !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(out) :: kfvmx0 !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(out) :: kfvmn0 !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(out) :: kfsz0  !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(out) :: kfuz0  !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(out) :: kfvz0  !  Description and declaration in esm_alloc_int.f90
@@ -440,6 +444,7 @@ subroutine f0isf1(stage     ,dischy    ,nst       ,zmodel    ,j         , &
     if (zmodel) then
        do nm = 1, nmmax
           if (stage == 'stage1') then
+             kfvmn0(nm) = kfvmin(nm)
              kfvmx0(nm) = kfvmax(nm)
              if (kfs(nm) == 1) then
                 do k = kfsmin(nm), kmax
@@ -448,6 +453,7 @@ subroutine f0isf1(stage     ,dischy    ,nst       ,zmodel    ,j         , &
                 enddo
              endif
           elseif (stage == 'stage2') then
+             kfumn0(nm) = kfumin(nm)
              kfumx0(nm) = kfumax(nm)
              if (kfs(nm) == 1) then
                 do k = kfsmin(nm), kmax
@@ -456,7 +462,9 @@ subroutine f0isf1(stage     ,dischy    ,nst       ,zmodel    ,j         , &
                 enddo
              endif
           elseif (stage == 'both') then
+             kfumn0(nm) = kfumin(nm)
              kfumx0(nm) = kfumax(nm)
+             kfvmn0(nm) = kfvmin(nm)
              kfvmx0(nm) = kfvmax(nm)
              if (kfs(nm) == 1) then
                 do k = kfsmin(nm), kmax
@@ -467,6 +475,7 @@ subroutine f0isf1(stage     ,dischy    ,nst       ,zmodel    ,j         , &
                 enddo
              endif
           endif
+          kfsmn0(nm) = kfsmin(nm)
           kfsmx0(nm) = kfsmax(nm)
           if (kfs(nm) == 1) then
              do k = kfsmin(nm), kmax

@@ -1,8 +1,8 @@
 subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                & icy       ,nsrc      ,kcs       ,kcs45     ,kcscut    , &
-               & kcu       ,kfu       ,kfuz0     ,kfumin    ,kfumx0    , &
-               & kfv       ,kfvz0     ,kfvmin    ,kfvmx0    ,dzv0      , &
-               & kfs       ,kfsz0     ,kfsmin    ,kfsmx0    , &
+               & kcu       ,kfu       ,kfuz0     ,kfumn0    ,kfumx0    , &
+               & kfv       ,kfvz0     ,kfvmn0    ,kfvmx0    ,dzv0      , &
+               & kfs       ,kfsz0     ,kfsmn0    ,kfsmx0    , &
                & u0        ,v0        ,w0        ,hu        ,hv        ,dzu0      ,dzs0      , &
                & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
                & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
@@ -136,12 +136,12 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     integer     , dimension(5, norow)                                    :: irocol  !  Description and declaration in esm_alloc_int.f90
     integer     , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: kcs     !  Description and declaration in esm_alloc_int.f90
     integer     , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: kfs     !  Description and declaration in esm_alloc_int.f90
-    integer     , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in) :: kfsmin  !  Description and declaration in esm_alloc_int.f90
+    integer     , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in) :: kfsmn0  !  Description and declaration in esm_alloc_int.f90
     integer     , dimension(gdp%d%nmlb:gdp%d%nmub)          , intent(in) :: kfsmx0  !  Description and declaration in esm_alloc_int.f90
     integer     , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: kfu     !  Description and declaration in esm_alloc_int.f90
-    integer     , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: kfumin  !  Description and declaration in esm_alloc_int.f90
+    integer     , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: kfumn0  !  Description and declaration in esm_alloc_int.f90
     integer     , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: kfumx0  !  Description and declaration in esm_alloc_int.f90
-    integer     , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: kfvmin  !  Description and declaration in esm_alloc_int.f90
+    integer     , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: kfvmn0  !  Description and declaration in esm_alloc_int.f90
     integer     , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: kfvmx0  !  Description and declaration in esm_alloc_int.f90
     integer     , dimension(gdp%d%nmlb:gdp%d%nmub)                       :: kfv     !  Description and declaration in esm_alloc_int.f90
     integer     , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)  , intent(in) :: kspu    !  Description and declaration in esm_alloc_int.f90
@@ -382,7 +382,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     do nm = 1, nmmax
        if (kfu(nm) == 1) then
           hnm = 0.0_fp
-          do k = kfumin(nm), kfumx0(nm)
+          do k = kfumn0(nm), kfumx0(nm)
              umean(nm) = umean(nm) + u0(nm,k)*dzu0(nm,k)
              hnm       = hnm + dzu0(nm,k)
           enddo
@@ -449,7 +449,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           ndmu       = nm + icx - icy
           gksi       = gvu(nm)
           if (kfu(nm) == 1) then
-             do k = kfumin(nm), kfumx0(nm)
+             do k = kfumn0(nm), kfumx0(nm)
                 if (kfuz0(nm, k)==1 .and. kcs(nm)*kcs(nmu)>0) then
                    !
                    ! BAROCLINIC PRESSURE, CORIOLIS, ATMOSPHERIC PRES. and TIDE GEN. FORCE
@@ -494,7 +494,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           ! Horizontal advection (first order upwind implicit)
           !
           call z_hormom_iupw(nmmax     ,kmax      ,icx       ,icy       ,kcs     , &
-                           & kcscut    ,kfu       ,kfuz0     ,kfumin    ,kfumx0  , &
+                           & kcscut    ,kfu       ,kfuz0     ,kfumn0    ,kfumx0  , &
                            & kfvz0     ,u0        ,v0        ,guu       ,gvu     , &
                            & gvd       ,guz       ,gsqiu     ,bdx       ,bux     , &
                            & bbk       ,bdy       ,ddk       ,buy       ,gdp     )
@@ -504,8 +504,8 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           !
           call z_hormom_mdui(nmmax     ,kmax      ,icx       , &
                            & icy       ,kcs       ,kcs45     ,kcscut    , &
-                           & kfu       ,kfuz0     ,kfumin    ,kfumx0    , &
-                           & kfvz0     ,kfsmin    ,kfsmx0    , &
+                           & kfu       ,kfuz0     ,kfumn0    ,kfumx0    , &
+                           & kfvz0     ,kfsmn0    ,kfsmx0    , &
                            & u0        ,v0        ,hu        ,bdx       ,&
                            & bux       ,bdy       ,buy       ,buxuy     ,buxdy     , & 
                            & bdxuy     ,bdxdy     ,bbk       , &
@@ -520,8 +520,8 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           !
           call z_hormom_mdue(nmmax     ,kmax      ,icx       , &
                             & icy       ,kcs       ,kcs45     ,kcscut    , &
-                            & kfu       ,kfuz0     ,kfumin    ,kfumx0    , &
-                            & kfvz0     ,kfsmin    ,kfsmx0    , &
+                            & kfu       ,kfuz0     ,kfumn0    ,kfumx0    , &
+                            & kfvz0     ,kfsmn0    ,kfsmx0    , &
                             & u0        ,v0        ,hu        , &
                             & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
                             & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
@@ -537,8 +537,8 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           thvert = 0.0_fp
           ! 
           call z_hormom_finvol(nmmax     ,kmax      ,icx       ,icy       ,kcs       , &
-                             & kfu       ,kcu       ,kfv       ,kfuz0     ,kfumin    , &
-                             & kfumx0    ,kfvz0     ,kfs       ,kfsz0     ,kfsmin    , &
+                             & kfu       ,kcu       ,kfv       ,kfuz0     ,kfumn0    , &
+                             & kfumx0    ,kfvz0     ,kfs       ,kfsz0     ,kfsmn0    , &
                              & kfsmx0    ,u0        ,v0        ,w0        ,dzs0      , &
                              & dzu0      ,dzv0      ,s0        ,guu       ,gvv       , &
                              & gvu       ,guv       ,gsqs      ,gud       ,gvd       , &
@@ -555,9 +555,9 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           !
           call z_hormom_fls(nmmax     ,kmax      ,icx       , &
                           & icy       ,kcs       ,kcs45     ,kcscut    , &
-                          & kfu       ,kfuz0     ,kfumin    ,kfumx0    ,kfv       , &
-                          & kfvz0     ,kfsz0     ,kfsmin    ,kfsmx0    ,kspu      , &
-                          & u0        ,v0        ,hu        ,kfvmin    ,kfvmx0    , &
+                          & kfu       ,kfuz0     ,kfumn0    ,kfumx0    ,kfv       , &
+                          & kfvz0     ,kfsz0     ,kfsmn0    ,kfsmx0    ,kspu      , &
+                          & u0        ,v0        ,hu        ,kfvmn0    ,kfvmx0    , &
                           & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
                           & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
                           & qxk       ,qyk       ,dzu0      ,dzv0      ,dzs0      , &
@@ -587,7 +587,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        call timer_start(timer_uzd_stress, gdp)
        do nm = 1, nmmax
           nmu  = nm + icx
-          kmin = kfumin(nm)
+          kmin = kfumn0(nm)
           if (kfu(nm) == 1 .and. kcs(nm)*kcs(nmu) > 0) then
              kkmax = max(kmin, kfumx0(nm))
              !
@@ -624,11 +624,11 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                 nmu    = nm + icx
                 dpsmax = max(-dps(nm),-dps(nmu))
                 if (s0(nm) < dpsmax) then
-                   do k = kfumin(nm), kfumx0(nm)
+                   do k = kfumn0(nm), kfumx0(nm)
                       ddk(nm,k) = ddk(nm,k) - ag*(s0(nm)-dpsmax)/gvu(nm)
                    enddo
                 elseif (s0(nmu) < dpsmax) then
-                   do k = kfumin(nm), kfumx0(nm)
+                   do k = kfumn0(nm), kfumx0(nm)
                       ddk(nm,k) = ddk(nm,k) + ag*(s0(nmu)-dpsmax)/gvu(nm)
                    enddo
                 endif
@@ -659,12 +659,12 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                 !
                 if (roller .or. xbeach) then
                    fxw(nm) = sign(min(abs(fxw(nm)), wsumax), fxw(nm))
-                   do k = kfumin(nm), kfumx0(nm)
+                   do k = kfumn0(nm), kfumx0(nm)
                       ddk(nm, k) = ddk(nm, k) + fxw(nm)/(rhow*hu(nm))
                    enddo
                 else
                    wsbodyu(nm) = sign(min(abs(wsbodyu(nm)), wsumax), wsbodyu(nm))
-                   do k = kfumin(nm), kfumx0(nm)
+                   do k = kfumn0(nm), kfumx0(nm)
                       ddk(nm, k) = ddk(nm, k) + wsbodyu(nm)/(rhow*hu(nm))
                    enddo
                 endif
@@ -680,7 +680,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        if (wave .and. kmax>1) then
           call z_shrwav(nmmax     ,kmax      ,icx       ,dfu       ,deltau    , &
                       & tp        ,rlabda    ,hu        ,kfu       ,ddk       , &
-                      & kfumin    ,kfumx0    ,dzu0      ,gdp       )
+                      & kfumn0    ,kfumx0    ,dzu0      ,gdp       )
        endif
        call timer_stop(timer_uzd_shrwav, gdp)
        !
@@ -721,15 +721,15 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        !
        call timer_start(timer_uzd_advdiffv, gdp)
        do nm = 1, nmmax
-          if (kfu(nm)==1 .and. kfumx0(nm)>kfumin(nm)) then
+          if (kfu(nm)==1 .and. kfumx0(nm)>kfumn0(nm)) then
              kmaxtl = 1
              nmu    = nm + icx
-             do k = kfumin(nm), kfumx0(nm)
+             do k = kfumn0(nm), kfumx0(nm)
                 if (kfuz0(nm, k) == 1) then
                    kfad = 0
                    kdo  = k - 1
                    kup  = k + 1
-                   if (k == kfumin(nm)) then
+                   if (k == kfumn0(nm)) then
                       kfad = 1
                       kdo  = k
                    endif
@@ -780,7 +780,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                       !
                       ! downwards face
                       !
-                      if (k > kfumin(nm)) then
+                      if (k > kfumn0(nm)) then
                           area  = guu(nm) * gvu(nm)
                           wavg0 = 0.5_fp * (w0(nm,k-1)+w0(nmu,k-1))
                           if (wavg0 > 0.0_fp) then
@@ -860,7 +860,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                       & kfs       ,u0        ,v0        ,vicuv     ,vnu2d     , &
                       & gud       ,guu       ,gvd       ,gvu       ,gvz       , &
                       & ddk       ,rxx       ,rxy       ,kfuz0     ,kfvz0     , &
-                      & kfsz0     ,kfumin    ,kfumx0    ,gdp       )
+                      & kfsz0     ,kfumn0    ,kfumx0    ,gdp       )
        !
        ! for Crank Nicolson method: is computed here (implicitly for the whole time step)
        ! for fractional step method: is computed in z_cucnp (explicitly for the whole time step)
@@ -875,7 +875,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              numu = nm + icx + icy
              ndmu = nm + icx - icy
              numd = nm - icx + icy
-             do k = kfumin(nm), kfumx0(nm)
+             do k = kfumn0(nm), kfumx0(nm)
                 if (kfu(nm) == 1 .and. kcs(nm)*kcs(nmu) > 0) then
                    if (kfuz0(nm, k) == 1) then
                       gksid = gvz(nm)
@@ -918,7 +918,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        if (nonhyd .and. nh_level == nh_full) then
           call z_cucbp_nhfull(kmax      ,norow     ,icx       , &
                             & icy       ,irocol    ,kcs       ,kfu       , &
-                            & kfumin    ,kfumx0    ,s0        ,u0        , &
+                            & kfumn0    ,kfumx0    ,s0        ,u0        , &
                             & hu        ,umean     ,guu       ,gvu       , &
                             & dzu0      ,circ2d    ,circ3d    ,dpu       , &
                             & aak       ,bbk       ,cck       ,ddk       , &
@@ -939,7 +939,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              !
              if (kcu(nmf)*kfu(nmf) == 1) then
                 if (ibf==3 .or. ibf==5 .or. ibf==6 .or. ibf==7) then
-                   do k = kfumin(nmf), kfumx0(nmf)
+                   do k = kfumn0(nmf), kfumx0(nmf)
                       aak  (nmf, k) = 0.0_fp
                       bbk  (nmf, k) = 1.0_fp
                       bux  (nmf, k) = 0.0_fp
@@ -957,7 +957,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              endif
              if (kcu(nml)*kfu(nml) == 1) then
                 if (ibl==3 .or. ibl==5 .or. ibl==6 .or. ibl==7) then
-                   do k = kfumin(nml), kfumx0(nml)
+                   do k = kfumn0(nml), kfumx0(nml)
                       aak  (nml, k) = 0.0_fp
                       bbk  (nml, k) = 1.0_fp
                       bux  (nml, k) = 0.0_fp
@@ -982,7 +982,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        call timer_start(timer_uzd_lhs, gdp)
        do nm = 1, nmmax
           if (kcu(nm) == 3) then
-             do k = kfumin(nm), kfumx0(nm)
+             do k = kfumn0(nm), kfumx0(nm)
                 aak(nm,k) = 0.0_fp
                 bbk(nm,k) = 1.0_fp
                 cck(nm,k) = 0.0_fp
@@ -1018,7 +1018,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        call timer_start(timer_uzd_rowsc, gdp)
        do nm = 1, nmmax
           if (kfu(nm) == 1) then
-             do k = kfumin(nm), kfumx0(nm)
+             do k = kfumn0(nm), kfumx0(nm)
                 bi           = 1.0_fp / bbk(nm, k)
                 aak  (nm, k) = aak  (nm, k) * bi
                 bbk  (nm, k) = 1.0_fp
@@ -1049,7 +1049,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        !
        do nm = 1, nmmax
           if (kfu(nm) == 1) then
-             do k = kfumin(nm)+1, kfumx0(nm)
+             do k = kfumn0(nm)+1, kfumx0(nm)
                 bi         = 1.0_fp/(bbk(nm, k) - aak(nm, k)*cck(nm, k - 1))
                 bbk(nm, k) = bi
                 cck(nm, k) = cck(nm, k)*bi
@@ -1064,7 +1064,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        iter = 0
        do nm = 1, nmmax
           if (kfu(nm) == 1) then
-             do k = kfumin(nm), kfumx0(nm)
+             do k = kfumn0(nm), kfumx0(nm)
                 u1   (nm, k) = u0(nm, k)
                 uvdwk(nm, k) = u0(nm, k)
              enddo
@@ -1096,7 +1096,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        end if
        do nm = 1, nmmax, 2
           if (kfu(nm) == 1) then
-             do k = kfumin(nm), kfumx0(nm)
+             do k = kfumn0(nm), kfumx0(nm)
                 !
                 ! COMPUTE RIGHT HAND SIDE
                 !
@@ -1122,13 +1122,13 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
 !
        do nm = 1, nmmax, 2
           if (kfu(nm) == 1) then
-             kmin = kfumin(nm)
+             kmin = kfumn0(nm)
              vvdwk(nm, kmin) = uvdwk(nm, kmin)*bbk(nm, kmin)
           endif
        enddo
        do nm = 1, nmmax, 2
           if (kfu(nm) == 1) then
-             do k = kfumin(nm)+1, kfumx0(nm)
+             do k = kfumn0(nm)+1, kfumx0(nm)
                 vvdwk(nm, k) = (uvdwk(nm, k) - aak(nm, k)*vvdwk(nm, k - 1))*bbk(nm, k)
              enddo
           endif
@@ -1136,7 +1136,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        !       
        do nm = 1, nmmax, 2
           if (kfu(nm) == 1) then
-             do k = kfumx0(nm)-1, kfumin(nm), -1
+             do k = kfumx0(nm)-1, kfumn0(nm), -1
                 vvdwk(nm, k) = vvdwk(nm, k) - cck(nm, k)*vvdwk(nm, k + 1)
              enddo
           endif
@@ -1147,7 +1147,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        smax = 0.0
        do nm = 1, nmmax, 2
           if (kfu(nm) == 1) then
-             do k = kfumin(nm), kfumx0(nm)
+             do k = kfumn0(nm), kfumx0(nm)
                 if (abs(vvdwk(nm,k)-u1(nm,k)) > eps) then
                    itr = 1
                 endif
@@ -1170,7 +1170,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        !
        do nm = 2, nmmax, 2
           if (kfu(nm) == 1) then
-             do k = kfumin(nm), kfumx0(nm)
+             do k = kfumn0(nm), kfumx0(nm)
                 !
                 ! COMPUTE RIGHT HAND SIDE
                 !
@@ -1198,20 +1198,20 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        !
        do nm = 2, nmmax, 2
           if (kfu(nm) == 1) then
-             kmin           = kfumin(nm)
+             kmin           = kfumn0(nm)
              vvdwk(nm,kmin) = uvdwk(nm,kmin) * bbk(nm, kmin)
           endif
        enddo
        do nm = 2, nmmax, 2
           if (kfu(nm) == 1) then
-             do k = kfumin(nm)+1, kfumx0(nm)
+             do k = kfumn0(nm)+1, kfumx0(nm)
                 vvdwk(nm,k) = (uvdwk(nm,k) - aak(nm,k)*vvdwk(nm,k-1)) * bbk(nm,k)
              enddo
           endif
        enddo
        do nm = 2, nmmax, 2
           if (kfu(nm) == 1) then
-             do k = kfumx0(nm)-1, kfumin(nm), -1
+             do k = kfumx0(nm)-1, kfumn0(nm), -1
                 vvdwk(nm,k) = vvdwk(nm,k) - cck(nm,k)*vvdwk(nm,k+1)
              enddo
           endif
@@ -1221,7 +1221,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        !
        do nm = 2, nmmax, 2
           if (kfu(nm) == 1) then
-             do k = kfumin(nm), kfumx0(nm)
+             do k = kfumn0(nm), kfumx0(nm)
                 if (abs(vvdwk(nm,k)-u1(nm,k)) > eps) then
                    itr = 1
                 endif

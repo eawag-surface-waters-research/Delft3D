@@ -1,8 +1,8 @@
 subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                  & icy       ,nsrc      ,kcs       ,kcs45     ,kcscut    , &
-                 & kfu       ,kfuz0     ,kfumin    ,kfumx0    ,kfv       , &
-                 & kfvz0     ,kfvmin    ,kfvmx0    ,dzv0      ,dzs0      , &
-                 & kfs       ,kfsz0     ,kfsmin    ,kfsmx0    ,kcu       , &
+                 & kfu       ,kfuz0     ,kfumn0    ,kfumx0    ,kfv       , &
+                 & kfvz0     ,kfvmn0    ,kfvmx0    ,dzv0      ,dzs0      , &
+                 & kfs       ,kfsz0     ,kfsmn0    ,kfsmx0    ,kcu       , &
                  & u0        ,v1        ,w0        ,hu        ,hv        ,dzu0      , &
                  & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
                  & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
@@ -121,12 +121,12 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kcu     !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfs     !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: kfsmx0  !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: kfsmin  !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: kfsmn0  !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfu     !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfumx0  !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfumin  !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfumn0  !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfvmx0  !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfvmin  !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfvmn0  !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfv     !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax), intent(in)  :: kspu    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: kcs45
@@ -350,8 +350,8 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        !
        call z_hormom_mdue(nmmax     ,kmax      ,icx       , &
                         & icy       ,kcs       ,kcs45     ,kcscut    , &
-                        & kfu       ,kfuz0     ,kfumin    ,kfumx0    , &
-                        & kfvz0     ,kfsmin    ,kfsmx0    , &
+                        & kfu       ,kfuz0     ,kfumn0    ,kfumx0    , &
+                        & kfvz0     ,kfsmn0    ,kfsmx0    , &
                         & u0        ,v1        ,hu        , &
                         & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
                         & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
@@ -366,8 +366,8 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        !
        call z_hormom_mdue(nmmax     ,kmax      ,icx       , &
                         & icy       ,kcs       ,kcs45     ,kcscut    , &
-                        & kfu       ,kfuz0     ,kfumin    ,kfumx0    , &
-                        & kfvz0     ,kfsmin    ,kfsmx0    , &
+                        & kfu       ,kfuz0     ,kfumn0    ,kfumx0    , &
+                        & kfvz0     ,kfsmn0    ,kfsmx0    , &
                         & u0        ,v1        ,hu        , &
                         & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
                         & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
@@ -383,8 +383,8 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        timest = hdt
        ! 
        call z_hormom_finvol(nmmax     ,kmax      ,icx       ,icy       ,kcs       , &
-                          & kfu       ,kcu       ,kfv       ,kfuz0     ,kfumin    , &
-                          & kfumx0    ,kfvz0     ,kfs       ,kfsz0     ,kfsmin    , &
+                          & kfu       ,kcu       ,kfv       ,kfuz0     ,kfumn0    , &
+                          & kfumx0    ,kfvz0     ,kfs       ,kfsz0     ,kfsmn0    , &
                           & kfsmx0    ,u0        ,v1        ,w0        ,dzs0      , &
                           & dzu0      ,dzv0      ,s0        ,guu       ,gvv       , &
                           & gvu       ,guv       ,gsqs      ,gud       ,gvd       , &
@@ -398,9 +398,9 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        !
        call z_hormom_fls(nmmax     ,kmax      ,icx       , &
                        & icy       ,kcs       ,kcs45     ,kcscut    , &
-                       & kfu       ,kfuz0     ,kfumin    ,kfumx0    ,kfv       , &
-                       & kfvz0     ,kfsz0     ,kfsmin    ,kfsmx0    ,kspu      , &
-                       & u0        ,v1        ,hu        ,kfvmin    ,kfvmx0    , &
+                       & kfu       ,kfuz0     ,kfumn0    ,kfumx0    ,kfv       , &
+                       & kfvz0     ,kfsz0     ,kfsmn0    ,kfsmx0    ,kspu      , &
+                       & u0        ,v1        ,hu        ,kfvmn0    ,kfvmx0    , &
                        & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
                        & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
                        & qxk       ,qyk       ,dzu0      ,dzv0      ,dzs0      , &
@@ -425,7 +425,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           nmu        = nm + icx
           ndmu       = nm + icx - icy
           gksi       = gvu(nm)
-          do k = kfumin(nm), kfumx0(nm)
+          do k = kfumn0(nm), kfumx0(nm)
              if (kfuz0(nm, k)==1 .and. kcs(nm)*kcs(nmu)>0) then
                 !
                 ! BAROCLINIC PRESSURE, CORIOLIS, ATMOSPHERIC PRES. and TIDE GEN. FORCE
@@ -478,7 +478,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     call timer_start(timer_cucnp_stress, gdp)
     do nm = 1, nmmax
        nmu  = nm + icx
-       kmin = kfumin(nm)
+       kmin = kfumn0(nm)
        if (kfu(nm)==1 .and. kcs(nm)*kcs(nmu)>0) then
           kkmax = max(kmin, kfumx0(nm))
           !
@@ -515,11 +515,11 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              nmu    = nm + icx
              dpsmax = max(-dps(nm),-dps(nmu))
              if (s0(nm) < dpsmax) then
-                do k = kfumin(nm), kfumx0(nm)
+                do k = kfumn0(nm), kfumx0(nm)
                    ddk(nm,k) = ddk(nm,k) - ag*(s0(nm)-dpsmax)/gvu(nm)
                 enddo
              elseif (s0(nmu) < dpsmax) then
-                do k = kfumin(nm), kfumx0(nm)
+                do k = kfumn0(nm), kfumx0(nm)
                    ddk(nm,k) = ddk(nm,k) + ag*(s0(nmu)-dpsmax)/gvu(nm)
                 enddo
              endif
@@ -549,12 +549,12 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              !
              if (roller .or. xbeach) then
                 fxw(nm) = sign(min(abs(fxw(nm)), wsumax), fxw(nm))
-                do k = kfumin(nm), kfumx0(nm)
+                do k = kfumn0(nm), kfumx0(nm)
                    ddk(nm, k) = ddk(nm, k) + fxw(nm)/(rhow*hu(nm))
                 enddo
              else
                 wsbodyu(nm) = sign(min(abs(wsbodyu(nm)), wsumax), wsbodyu(nm))
-                do k = kfumin(nm), kfumx0(nm)
+                do k = kfumn0(nm), kfumx0(nm)
                    ddk(nm, k) = ddk(nm, k) + wsbodyu(nm)/(rhow*hu(nm))
                 enddo
              endif
@@ -570,7 +570,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     if (wave .and. kmax>1) then
        call z_shrwav(nmmax     ,kmax      ,icx       ,dfu       ,deltau    , &
                    & tp        ,rlabda    ,hu        ,kfu       ,ddk       , &
-                   & kfumin    ,kfumx0    ,dzu0      ,gdp       )
+                   & kfumn0    ,kfumx0    ,dzu0      ,gdp       )
     endif
     call timer_stop(timer_cucnp_shrwav, gdp)
     !
@@ -612,15 +612,15 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     !
     call timer_start(timer_cucnp_advdiffv, gdp)
     do nm = 1, nmmax
-       if (kfu(nm)==1 .and. kfumx0(nm)>kfumin(nm)) then
+       if (kfu(nm)==1 .and. kfumx0(nm)>kfumn0(nm)) then
           kmaxtl = 1
           nmu    = nm + icx
-          do k = kfumin(nm), kfumx0(nm)
+          do k = kfumn0(nm), kfumx0(nm)
              if (kfuz0(nm, k) == 1) then
                 kfad = 0
                 kdo  = k - 1
                 kup  = k + 1
-                if (k==kfumin(nm)) then
+                if (k==kfumn0(nm)) then
                    kfad = 1
                    kdo  = k
                 endif
@@ -671,7 +671,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                    !
                    ! downwards face
                    !
-                   if (k > kfumin(nm)) then
+                   if (k > kfumn0(nm)) then
                        area  = guu(nm) * gvu(nm)
                        wavg0 = 0.5_fp * (w0(nm,k-1)+w0(nmu,k-1))
                        if (wavg0 > 0.0_fp) then
@@ -751,7 +751,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                    & kfs       ,u0        ,v1        ,vicuv     ,vnu2d     , &
                    & gud       ,guu       ,gvd       ,gvu       ,gvz       , &
                    & ddk       ,rxx       ,rxy       ,kfuz0     ,kfvz0     , &
-                   & kfsz0     ,kfumin    ,kfumx0    ,gdp       )
+                   & kfsz0     ,kfumn0    ,kfumx0    ,gdp       )
     !
     ! for Crank Nicolson method: is computed in routine uzd (implicitly)
     ! for fractional step method: is computed here (explicitly)
@@ -767,7 +767,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              numu = nm + icx + icy
              ndmu = nm + icx - icy
              numd = nm - icx + icy
-             do k = kfumin(nm), kfumx0(nm)
+             do k = kfumn0(nm), kfumx0(nm)
                 if (kfu(nm) == 1 .and. kcs(nm)*kcs(nmu) > 0) then
                    if (kfuz0(nm, k)==1) then
                       gksid = gvz(nm)
@@ -810,7 +810,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     call timer_start(timer_cucnp_lhs, gdp)
     if (kmaxtl > 0) then
        do nm = 1, nmmax
-          if (kfumin(nm) /= 0 .and. kfumx0(nm) > 1) then
+          if (kfumn0(nm) /= 0 .and. kfumx0(nm) > 1) then
              maxk           = kfumx0(nm)
              bi             = 1.0_fp/bbk(nm, maxk)
              bbk (nm, maxk) = 1.0_fp
@@ -821,7 +821,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           endif
        enddo
        do nm = 1, nmmax
-          do k = kfumx0(nm) - 1, kfumin(nm), -1
+          do k = kfumx0(nm) - 1, kfumn0(nm), -1
              bi          = 1.0_fp/(bbk(nm, k) - bbkc(nm, k)*bbka(nm, k + 1))
              bbk (nm, k) = 1.0_fp
              bbka(nm, k) = bbka(nm, k)*bi
@@ -834,7 +834,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        ! back sweep
        !
        do nm = 1, nmmax
-          do k = kfumin(nm) + 1, kfumx0(nm)
+          do k = kfumn0(nm) + 1, kfumx0(nm)
              aak(nm, k) = aak(nm, k) - bbka(nm, k)*aak(nm, k - 1)
              cck(nm, k) = cck(nm, k) - bbka(nm, k)*cck(nm, k - 1)
              ddk(nm, k) = ddk(nm, k) - bbka(nm, k)*ddk(nm, k - 1)

@@ -1,6 +1,6 @@
 subroutine z_hormom_finvol(nmmax     ,kmax      ,icx       ,icy       ,kcs       , &
-                         & kfu       ,kcu       ,kfv       ,kfuz0     ,kfumin    , &
-                         & kfumx0    ,kfvz0     ,kfs       ,kfsz0     ,kfsmin    , &
+                         & kfu       ,kcu       ,kfv       ,kfuz0     ,kfumn0    , &
+                         & kfumx0    ,kfvz0     ,kfs       ,kfsz0     ,kfsmn0    , &
                          & kfsmx0    ,u0        ,v0        ,w0        ,dzs0      , &
                          & dzu0      ,dzv0      ,s0        ,guu       ,gvv       , &
                          & gvu       ,guv       ,gsqs      ,gud       ,gvd       , &
@@ -90,11 +90,11 @@ subroutine z_hormom_finvol(nmmax     ,kmax      ,icx       ,icy       ,kcs      
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kcs    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfs    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: kfsmx0 !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: kfsmin !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: kfsmn0 !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfu    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kcu    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfumx0 !  Description and declaration in esm_alloc_int.f90
-    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfumin !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfumn0 !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfv    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: kfsz0  !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: kfuz0  !  Description and declaration in esm_alloc_int.f90

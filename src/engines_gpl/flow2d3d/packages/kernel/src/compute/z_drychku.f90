@@ -1,6 +1,6 @@
 subroutine z_drychku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
                    & kcs       ,kfu       ,kcu       ,kspu      ,kfsmax    , &
-                   & kfsmin    ,kfsz1     ,kfuz1     ,kfumin    ,kfumax    , &
+                   & kfsmin    ,kfsz1     ,kfuz1     ,kfumin    ,kfumn0    ,kfumax    , &
                    & kfumx0    ,hu        ,s1        ,dpu       ,dps       , &
                    & umean     ,u0        ,u1        ,dzu0      ,dzu1      , &
                    & dzs1      ,zk        ,kfsmx0    ,guu       ,qxk       , &
@@ -85,6 +85,7 @@ subroutine z_drychku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(out) :: kfumax !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfumin !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfumx0 !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfumn0 !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)            :: kspu   !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in)  :: kfsz1  !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(out) :: kfuz1  !  Description and declaration in esm_alloc_int.f90
@@ -151,7 +152,7 @@ subroutine z_drychku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
           !
           if (kfu(nm) == 1) then
              hnm = 0.0_fp
-             do k = kfumin(nm), kfumx0(nm)
+             do k = kfumn0(nm), kfumx0(nm)
                 umean(nm) = umean(nm) + u0(nm,k)*dzu0(nm,k)
                 hnm       = hnm + dzu0(nm,k)
              enddo
@@ -230,6 +231,15 @@ subroutine z_drychku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
              endif
           enddo
           !
+          ! Find the (new) location of the bed layer
+          !
+          do k = 1, kmax
+             if ( zk(k)-dzmin >= -dpu(nm) .or. k==kmax) then
+                kfumin(nm) = k
+                exit
+             endif
+          enddo
+          !
           ! Set kfuz1 but overwrite kfuz1 at points with gates
           !
           kkmin = min(kfsmin(nm), kfsmin(nmu))
@@ -298,6 +308,16 @@ subroutine z_drychku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
                    u1(nm, k) = u1(nm, kfumx0(nm))
                 enddo
              endif
+             ! Morphology
+             do k = kfumin(nm), kfumn0(nm)-1
+                u1(nm, k) = u1(nm, kfumn0(nm))
+                !qxk(nm,k) = dzu1(nm,k) * u1(nm,k) * guu(nm)
+             enddo
+             !do k = kfumn0(nm), kfumin(nm)-1
+             !   u1(nm, k) = 0.0_fp
+             !   !qxk(nm,k) = dzu1(nm,k) * u1(nm,k) * guu(nm)
+             !enddo
+             ! Morphology
           endif
        endif
     enddo

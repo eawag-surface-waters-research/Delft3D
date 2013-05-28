@@ -2457,6 +2457,16 @@ subroutine esm_alloc_real(lundia, error, gdp)
                              !  Internal work array
     if (ierr<= - 9) goto 9999
     !
+    pntnam = 'wrka10'        !  Global data
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
+                             !  Internal work array
+    if (ierr== - 1) goto 9999
+    !
+    pntnam = 'wrka11'        !  Global data
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
+                             !  Internal work array
+    if (ierr== - 1) goto 9999    
+    !
     pntnam = 'wrka12'        !  Global data
     ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
                              !  Internal work array

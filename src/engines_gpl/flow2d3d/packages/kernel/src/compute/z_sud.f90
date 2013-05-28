@@ -3,7 +3,7 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
                & flood     ,norow     ,irocol    ,mnksrc    ,kfsmx0    , &
                & kfu       ,kfv       ,kfs       ,kcs       ,kcu       , &
                & kfuz0     ,kfvz0     ,kfsz0     ,kspu      ,kcs45     , &
-               & kcscut    ,kfumin    ,kfsmin    ,kfumx0    ,kfvmin    , &
+               & kcscut    ,kfumn0    ,kfsmn0    ,kfumx0    ,kfvmn0    , &
                & kfvmx0    ,thick     ,circ2d    ,circ3d    ,s0        , &
                & s1        ,u0        ,u1        ,v1        ,w1        , &
                & qxk       ,qyk       ,qzk       ,guu       ,gvv       , &
@@ -117,12 +117,12 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
     integer    , dimension(gdp%d%nmlb:gdp%d%nmub)                 :: kcscut  !  Description and declaration in esm_alloc_int.f90
     integer    , dimension(gdp%d%nmlb:gdp%d%nmub)                 :: kcu     !  Description and declaration in esm_alloc_int.f90
     integer    , dimension(gdp%d%nmlb:gdp%d%nmub)                 :: kfs     !  Description and declaration in esm_alloc_int.f90
-    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)   , intent(in)  :: kfsmin  !  Description and declaration in esm_alloc_int.f90
+    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)   , intent(in)  :: kfsmn0 !  Description and declaration in iidim.f90
     integer    , dimension(gdp%d%nmlb:gdp%d%nmub)                 :: kfsmx0  !  Description and declaration in esm_alloc_int.f90
     integer    , dimension(gdp%d%nmlb:gdp%d%nmub)                 :: kfu     !  Description and declaration in esm_alloc_int.f90
-    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)                 :: kfumin  !  Description and declaration in esm_alloc_int.f90
+    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)                 :: kfumn0 !  Description and declaration in iidim.f90
     integer    , dimension(gdp%d%nmlb:gdp%d%nmub)                 :: kfumx0  !  Description and declaration in esm_alloc_int.f90
-    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)                 :: kfvmin  !  Description and declaration in esm_alloc_int.f90
+    integer    , dimension(gdp%d%nmlb:gdp%d%nmub)                 :: kfvmn0 !  Description and declaration in iidim.f90
     integer    , dimension(gdp%d%nmlb:gdp%d%nmub)                 :: kfvmx0  !  Description and declaration in esm_alloc_int.f90
     integer    , dimension(gdp%d%nmlb:gdp%d%nmub)                 :: kfv     !  Description and declaration in esm_alloc_int.f90
     integer    , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)         :: kspu    !  Description and declaration in esm_alloc_int.f90
@@ -293,7 +293,7 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
     do nm = 1, nmmax
        if (kfu(nm)==1) then
           hnm = 0.0_fp
-          do k = kfumin(nm), kfumx0(nm)
+          do k = kfumn0(nm), kfumx0(nm)
              umean(nm) = umean(nm) + u0(nm, k)*dzu0(nm, k)
              hnm       = hnm + dzu0(nm, k)
           enddo
@@ -329,9 +329,9 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
     call timer_start(timer_sud_cucnp, gdp)
     call z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                & icy       ,nsrc      ,kcs       ,kcs45     ,kcscut    , &
-               & kfu       ,kfuz0     ,kfumin    ,kfumx0    ,kfv       , &
-               & kfvz0     ,kfvmin    ,kfvmx0    ,dzv0      ,dzs0      , &
-               & kfs       ,kfsz0     ,kfsmin    ,kfsmx0    ,kcu       , &
+               & kfu       ,kfuz0     ,kfumn0    ,kfumx0    ,kfv       , &
+               & kfvz0     ,kfvmn0    ,kfvmx0    ,dzv0      ,dzs0      , &
+               & kfs       ,kfsz0     ,kfsmn0    ,kfsmx0    ,kcu       , &
                & u0        ,v1        ,w1        ,hu        ,hv        ,dzu0      , &
                & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
                & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
@@ -390,14 +390,14 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
              ! The order is important at dry points
              !
              if (k>kfsmx0(nm)) k = kfsmx0(nm)
-             if (k<kfsmin(nm)) k = kfsmin(nm)
+             if (k<kfsmn0(nm)) k = kfsmn0(nm)
              d0k(nm, k) = d0k(nm, k) + disch(i)/gsqs(nm)
           else
-             do kk = kfsmin(nm), max(kfsmx0(nm),kfsmin(nm))
-                !
+             do kk = kfsmn0(nm), max(kfsmx0(nm),kfsmn0(nm))
+ 
                 ! In case of only one layer, add discharge in that layer
                 !
-                if (kfsmin(nm) == kfsmx0(nm)) then
+                if (kfsmn0(nm) == kfsmx0(nm)) then
                    d0k(nm, kk) = d0k(nm, kk) + disch(i)/gsqs(nm)
                 else
                    d0k(nm, kk) = d0k(nm, kk) + disch(i)*dzs0(nm, kk)               &
@@ -428,14 +428,14 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
                 ! The order is important at dry points
                 !
                 if (k>kfsmx0(nm)) k = kfsmx0(nm)
-                if (k<kfsmin(nm)) k = kfsmin(nm)
+                if (k<kfsmn0(nm)) k = kfsmn0(nm)
                 d0k(nm, k) = d0k(nm, k) - disch(i)/gsqs(nm)
              else
-                do kk = kfsmin(nm), max(kfsmx0(nm),kfsmin(nm))
+                do kk = kfsmn0(nm), max(kfsmx0(nm),kfsmn0(nm))
                    !
                    ! In case of only one layer, add discharge in that layer
                    !
-                   if (kfsmin(nm) == kfsmx0(nm)) then
+                   if (kfsmn0(nm) == kfsmx0(nm)) then
                       d0k(nm, kk) = d0k(nm, kk) - disch(i)/gsqs(nm)
                    else
                       d0k(nm, kk) = d0k(nm, kk) - disch(i)*dzs0(nm, kk)               &
@@ -474,10 +474,10 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
     do nm = 1, nmmax
        if (kfu(nm) == 1) then
           hnm = 0.0_fp
-          do k = kfumin(nm), kfumx0(nm)
+          do k = kfumn0(nm), kfumx0(nm)
              hnm = hnm + dzu0(nm,k)
           enddo
-          do k = kfumin(nm), kfumx0(nm)
+          do k = kfumn0(nm), kfumx0(nm)
              if (kfuz0(nm,k) == 1) then
                 fac    = real(dzu0(nm,k),hp) * real(porosu(nm,k),hp) / (real(bbk(nm,k),hp)*real(hnm,hp))
                 aa(nm) = real(aa(nm),hp) + real(aak(nm,k),hp)*fac
@@ -494,7 +494,7 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
     call timer_start(timer_sud_cucbp, gdp)
     call cucbp(kmax      ,norow     ,icx       , &
              & icy       ,zmodel    ,irocol    ,kcs       ,kfu       , &
-             & kfumin    ,kfumx0    ,s0        ,u0        ,dpu       , &
+             & kfumn0    ,kfumx0    ,s0        ,u0        ,dpu       , &
              & hu        ,umean     ,tetau     ,guu       ,gvu       , &
              & dzu0      ,thick     ,circ2d    ,circ3d    ,a         , &
              & b         ,c         ,d         ,aa        ,bb        , &
@@ -526,11 +526,11 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
        nmd = nm - icx
        if (kcs(nm) == 1) then
           hnm = 0.0_fp
-          do k = kfumin(nm), kfumx0(nm)
+          do k = kfumn0(nm), kfumx0(nm)
              hnm = hnm + dzu0(nm,k)
           enddo
           hnmd = 0.0_fp
-          do k = kfumin(nmd), kfumx0(nmd)
+          do k = kfumn0(nmd), kfumx0(nmd)
              hnmd = hnmd + dzu0(nmd,k)
           enddo
           dxid  = hnmd * guu(nmd) / gsqs(nm)
@@ -703,7 +703,7 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
     call timer_start(timer_sud_rest, gdp)
     do nm = 1, nmmax
        if (kfu(nm) == 1) then
-          do k = kfumin(nm), kmax
+          do k = kfumn0(nm), kmax
              if (kfuz0(nm,k) == 1) then
                 pr         = aak(nm, k)*d(nm) + cck(nm, k)*d(nm + icx)
                 u1(nm, k)  = (ddk(nm, k) - pr) / bbk(nm, k)
@@ -714,7 +714,7 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
              endif
           enddo
        elseif (kcu(nm)/=0) then
-          do k = kfumin(nm), kmax
+          do k = kfumn0(nm), kmax
              u1(nm, k)  = 0.0_fp
              qxk(nm, k) = 0.0_fp
           enddo
@@ -728,7 +728,7 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
        umean(nm) = 0.0_fp
        hnm       = 0.0_fp
        if (kfu(nm)==1) then
-          do k = kfumin(nm), kfumx0(nm)
+          do k = kfumn0(nm), kfumx0(nm)
              umean(nm) = umean(nm) + u1(nm, k)*dzu0(nm, k)
              hnm       = hnm + dzu0(nm,k)
           enddo
@@ -751,7 +751,7 @@ subroutine z_sud(j         ,nmmaxj    ,nmmax     ,kmax      ,mmax      , &
        !
        do nm = 1, nmmax
           if (kcs(nm)*kfs(nm) == 1) then
-             do k = kfsmin(nm), kfsmx0(nm)-1 
+             do k = kfsmn0(nm), kfsmx0(nm)-1 
                 qzk(nm, k) = qzk(nm, k - 1)                                             &
                            & + ( - qxk(nm, k) + qxk(nm - icx, k) + d0k(nm, k)*gsqs(nm))
                 w1 (nm, k) = qzk(nm, k)/gsqs(nm)

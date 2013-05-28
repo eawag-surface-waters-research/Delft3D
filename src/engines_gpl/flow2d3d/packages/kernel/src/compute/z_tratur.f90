@@ -11,9 +11,9 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
                   & aak       ,bbk       ,cck       ,ddk       ,bdx       , &
                   & bux       ,bdy       ,buy       ,umea      ,vmea      , &
                   & ubnd      ,pkwbt     ,kpkwbt    ,hpkwbt    ,kdismx    , &
-                  & hsurft    ,pkwav     ,kfsmin    ,kfsmax    ,kfsmx0    , &
-                  & kfuz1     ,kfvz1     ,dzs1      ,ueul      ,veul      , &
-                  & gdp       )
+                  & hsurft    ,pkwav     ,kfsmin    ,kfsmn0    ,kfsmax    , &
+                  & kfsmx0    ,kfuz1     ,kfvz1     ,dzs1      ,ueul      , &
+                  & veul      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -125,6 +125,7 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     integer      , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfs    !  Description and declaration in esm_alloc_int.f90
     integer      , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfsmax !  Description and declaration in esm_alloc_int.f90
     integer      , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfsmin !  Description and declaration in esm_alloc_int.f90
+    integer      , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfsmn0 !  Description and declaration in iidim.f90
     integer      , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfsmx0 !  Description and declaration in esm_alloc_int.f90
     integer      , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfu    !  Description and declaration in esm_alloc_int.f90
     integer      , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfv    !  Description and declaration in esm_alloc_int.f90
@@ -197,6 +198,10 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     integer      :: kmaxx
     integer      :: kmin
     integer      :: kmmx
+    integer      :: kminmax
+    integer      :: kminmin
+    integer      :: kmaxmax
+    integer      :: kmaxmin
     integer      :: knd
     integer      :: knu
     integer      :: ku
@@ -307,22 +312,48 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     !
     do nm = 1, nmmax
        if (kfs(nm) == 1) then
-          kmmx = max(kfsmax(nm), kfsmx0(nm))
-          kmin = min(kfsmax(nm), kfsmx0(nm))
+          kmaxmax = max(kfsmax(nm), kfsmx0(nm))
+          kmaxmin = min(kfsmax(nm), kfsmx0(nm))
+          kminmax = max(kfsmin(nm), kfsmn0(nm))
+          kminmin = min(kfsmin(nm), kfsmn0(nm))
           do k = kfsmin(nm), kfsmax(nm)
              rtur1(nm, k, 1) = rtur0(nm, k, 1)
              if (ltur == 2) rtur1(nm, k, 2) = rtur0(nm, k, 2)
           enddo
-          do k = kfsmax(nm) + 1, kmmx
+          do k = kminmin, kfsmin(nm)-1
              rtur1(nm, k, 1) = 0.0
              if (ltur == 2) rtur1(nm, k, 2) = 0
           enddo
-          do k = kmin + 1, kfsmax(nm)
-             rtur1(nm, k, 1) = rtur1(nm, kmin, 1)
-             if (ltur == 2) rtur1(nm, k, 2) = rtur1(nm, kmin, 2)
+          do k = kfsmin(nm), kminmax-1
+             rtur1(nm, k, 1) = rtur1(nm, kminmax, 1)
+             if (ltur == 2) rtur1(nm, k, 2) = rtur1(nm, kminmax, 2)
+          enddo
+          do k = kfsmax(nm)+1, kmaxmax
+             rtur1(nm, k, 1) = 0.0
+             if (ltur == 2) rtur1(nm, k, 2) = 0
+          enddo
+          do k = kmaxmin+1, kfsmax(nm)
+             rtur1(nm, k, 1) = rtur1(nm, kmaxmin, 1)
+             if (ltur == 2) rtur1(nm, k, 2) = rtur1(nm, kmaxmin, 2)
           enddo
        endif
     enddo
+    !      kmmx = max(kfsmax(nm), kfsmx0(nm))
+    !      kmin = min(kfsmax(nm), kfsmx0(nm))
+    !      do k = kfsmin(nm), kfsmax(nm)
+    !         rtur1(nm, k, 1) = rtur0(nm, k, 1)
+    !         if (ltur == 2) rtur1(nm, k, 2) = rtur0(nm, k, 2)
+    !      enddo
+    !      do k = kfsmax(nm) + 1, kmmx
+    !         rtur1(nm, k, 1) = 0.0
+    !         if (ltur == 2) rtur1(nm, k, 2) = 0
+    !      enddo
+    !      do k = kmin + 1, kfsmax(nm)
+    !         rtur1(nm, k, 1) = rtur1(nm, kmin, 1)
+    !         if (ltur == 2) rtur1(nm, k, 2) = rtur1(nm, kmin, 2)
+    !      enddo
+    !   endif
+    !enddo
     !
     ! user defined boundary conditions if nubnd <> 0
     ! in two directions

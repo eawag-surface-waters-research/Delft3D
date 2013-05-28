@@ -1,5 +1,5 @@
 subroutine z_hormom_iupw(nmmax     ,kmax      ,icx       ,icy       ,kcs     , &
-                       & kcscut    ,kfu       ,kfuz0     ,kfumin    ,kfumx0  , &
+                       & kcscut    ,kfu       ,kfuz0     ,kfumn0    ,kfumx0  , &
                        & kfvz0     ,u0        ,v0        ,guu       ,gvu     , &
                        & gvd       ,guz       ,gsqiu     ,bdx       ,bux     , &
                        & bbk       ,bdy       ,ddk       ,buy       ,gdp     )
@@ -57,7 +57,7 @@ subroutine z_hormom_iupw(nmmax     ,kmax      ,icx       ,icy       ,kcs     , &
     integer  , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kcs    !  Description and declaration in esm_alloc_int.f90
     integer  , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfu    !  Description and declaration in esm_alloc_int.f90
     integer  , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfumx0 !  Description and declaration in esm_alloc_int.f90
-    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfumin !  Description and declaration in esm_alloc_int.f90
+    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfumn0 !  Description and declaration in esm_alloc_int.f90
     integer  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax) , intent(in) :: kcscut !  Description and declaration in esm_alloc_int.f90
     integer  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: kfuz0  !  Description and declaration in esm_alloc_int.f90
     integer  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: kfvz0  !  Description and declaration in esm_alloc_int.f90
@@ -125,7 +125,7 @@ subroutine z_hormom_iupw(nmmax     ,kmax      ,icx       ,icy       ,kcs     , &
           dgvnm = gvd(nm)  - gvd(ndm)
           gsqi  = gsqiu(nm)
           !
-          do k = kfumin(nm), kfumx0(nm)
+          do k = kfumn0(nm), kfumx0(nm)
              if (kfuz0(nm, k)==1 .and. kcs(nm)*kcs(nmu)>0) then
                 vvv   = 0.25_fp*(v0(ndm, k) + v0(ndmu, k) + v0(nm, k) + v0(nmu, k))
                 uuu   = u0(nm, k)

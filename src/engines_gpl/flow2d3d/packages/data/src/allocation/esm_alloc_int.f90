@@ -579,6 +579,27 @@ subroutine esm_alloc_int(lundia, error, verify, zmodel, gdp)
                              !  For the geometry at the current/old time step
     if (ierr <= -9) goto 9999
     !
+    pntnam = 'kfsmn0'        !  Global data
+    ierr = mkipnt(pntnam, max(1, nmaxddb*mmaxddb*kfacz), gdp)
+                             !  Index of the first active (bottom level) layer in a water level point
+                             !  in a z-model
+                             !  For the geometry at the current/old time step
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'kfumn0'        !  Global data
+    ierr = mkipnt(pntnam, max(1, nmaxddb*mmaxddb*kfacz), gdp)
+                             !  Index of the first active (bottom level) layer in a U-velocity point
+                             !  in a z-model
+                             !  For the geometry at the current/old time step
+    if (ierr <= -9) goto 9999
+    !
+    pntnam = 'kfvmn0'        !  Global data
+    ierr = mkipnt(pntnam, max(1, nmaxddb*mmaxddb*kfacz), gdp)
+                             !  Index of the first active (bottom level) layer in a V-velocity point
+                             !  in a z-model
+                             !  For the geometry at the current/old time step
+    if (ierr <= -9) goto 9999
+    !
     pntnam = 'kcshyd'        !  Global data
     ierr = mkipnt(pntnam, max(1, nmaxddb*mmaxddb*kfacz), gdp)
                              !  no description (yet)

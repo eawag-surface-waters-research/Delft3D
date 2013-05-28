@@ -533,6 +533,9 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     integer(pntrsize)                    , pointer :: kfumx0
     integer(pntrsize)                    , pointer :: kfvmx0
     integer(pntrsize)                    , pointer :: kfsmx0
+    integer(pntrsize)                    , pointer :: kfumn0
+    integer(pntrsize)                    , pointer :: kfvmn0
+    integer(pntrsize)                    , pointer :: kfsmn0
     integer(pntrsize)                    , pointer :: kfsz0
     integer(pntrsize)                    , pointer :: kfsz1
     integer(pntrsize)                    , pointer :: kfuz0
@@ -1094,6 +1097,9 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     kfumx0              => gdp%gdr_i_ch%kfumx0
     kfvmx0              => gdp%gdr_i_ch%kfvmx0
     kfsmx0              => gdp%gdr_i_ch%kfsmx0
+    kfumn0              => gdp%gdr_i_ch%kfumn0
+    kfvmn0              => gdp%gdr_i_ch%kfvmn0
+    kfsmn0              => gdp%gdr_i_ch%kfsmn0
     kfsz0               => gdp%gdr_i_ch%kfsz0
     kfuz0               => gdp%gdr_i_ch%kfuz0
     kfvz0               => gdp%gdr_i_ch%kfvz0
@@ -1199,8 +1205,9 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
               & nmmax     ,nmmaxj    ,nmax      ,kmax      ,lstsci    , &
               & ltur      ,nsrc      ,i(kcu)    ,i(kcv)    ,i(kcs)    , &
               & i(kfs)    ,i(kfu)    ,i(kfv)    ,i(kfsmin) ,i(kfsmax) , &
-              & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,i(kfsmx0) , &
-              & i(kfumx0) ,i(kfvmx0) ,i(kfsz0)  ,i(kfuz0)  ,i(kfvz0)  , &
+              & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,i(kfsmn0) , &
+              & i(kfumn0) ,i(kfvmn0) ,i(kfsmx0) ,i(kfumx0) ,i(kfvmx0) , &
+              & i(kfsz0)  ,i(kfuz0)  ,i(kfvz0)  , &
               & i(kfsz1)  ,i(kfuz1)  ,i(kfvz1)  , &
               & r(s0)     ,r(s1)     ,r(u0)     , &
               & r(u1)     ,r(v0)     ,r(v1)     ,r(volum0) ,r(volum1) , &
@@ -1938,7 +1945,8 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & saleqs    ,temeqs    ,r(rhowat) ,r(ws)     ,r(dss)    , &
                     & icx       ,icy       ,lundia    ,d(dps)    ,r(s0)     , &
                     & r(umean)  ,r(vmean)  ,r(z0urou) ,r(z0vrou) ,i(kfu)    , &
-                    & i(kfv)    ,gdp       )
+                    & i(kfv)    ,zmodel    ,i(kfsmx0) ,i(kfsmn0) ,r(dzs0)   , &
+                    & gdp       )        
           call timer_stop(timer_fallve, gdp)
        endif
        !
@@ -2264,8 +2272,9 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                  & nmmax     ,nmmaxj    ,nmax      ,kmax      ,lstsci    , &
                  & ltur      ,nsrc      ,i(kcu)    ,i(kcv)    ,i(kcs)    , &
                  & i(kfs)    ,i(kfu)    ,i(kfv)    ,i(kfsmin) ,i(kfsmax) , &
-                 & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,i(kfsmx0) , &
-                 & i(kfumx0) ,i(kfvmx0) ,i(kfsz0)  ,i(kfuz0)  ,i(kfvz0)  , &
+                 & i(kfumin) ,i(kfumax) ,i(kfvmin) ,i(kfvmax) ,i(kfsmn0) , &
+                 & i(kfumn0) ,i(kfvmn0) ,i(kfsmx0) ,i(kfumx0) ,i(kfvmx0) , &
+                 & i(kfsz0)  ,i(kfuz0)  ,i(kfvz0)  , &
                  & i(kfsz1)  ,i(kfuz1)  ,i(kfvz1)  , &
                  & r(s0)     ,r(s1)     ,r(u0)     , &
                  & r(u1)     ,r(v0)     ,r(v1)     ,r(volum0) ,r(volum1) , &
@@ -2994,7 +3003,8 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & saleqs    ,temeqs    ,r(rhowat) ,r(ws)     ,r(dss)    , &
                     & icx       ,icy       ,lundia    ,d(dps)    ,r(s0)     , &
                     & r(umean)  ,r(vmean)  ,r(z0urou) ,r(z0vrou) ,i(kfu)    , &
-                    & i(kfv)    ,gdp       )
+                    & i(kfv)    ,zmodel    ,i(kfsmx0) ,i(kfsmn0) ,r(dzs0)   , &
+                    & gdp       )
           call timer_stop(timer_fallve, gdp)
        endif
        !

@@ -146,7 +146,8 @@ libKernelCompute_la_SOURCES = \
          z_updtvol.f90 \
          z_uzd.f90 \
          z_vermom_finvol.f90 \
-         z_vihrov.f90
+         z_vihrov.f90 \
+         z_dif_ws.f90
 
 #-------------------------------------------------------------------------------
 #Libraries

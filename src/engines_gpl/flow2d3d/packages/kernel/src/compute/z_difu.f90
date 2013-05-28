@@ -1,20 +1,21 @@
 subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
-                & nmmaxj    ,nmmax     ,kmax      ,lstsci    ,norow     ,nocol     , &
-                & irocol    ,kcs       ,kcu       ,kcv       ,kfs       , &
-                & kfsmin    ,kfsmax    ,kfsmx0    ,kfumin    ,kfumx0    , &
-                & kfumax    ,kfvmin    ,kfvmx0    ,kfvmax    , &
-                & kfsz0     ,kfuz0     ,kfvz0     ,kfu       ,kfv       , &
-                & kfsz1     ,kfuz1     ,kfvz1     , &
-                & qxk       ,qyk       ,qzk       ,u         ,v         , &
-                & guv       ,gvu       ,gsqs      ,rbnd      ,sigdif    , &
-                & sigmol    ,dicuv     ,vicww     ,r0        ,r1        , &
-                & sour      ,sink      ,aak       ,bbk       ,cck       , &
-                & bdx       ,bux       ,bdy       ,buy       ,uvdwk     , &
-                & vvdwk     ,rscale    ,dzu1      ,dzv1      , &
+                & nmmaxj    ,nmmax     ,kmax      ,lstsci    ,norow     , &
+                & nocol     ,irocol    ,kcs       ,kcu       ,kcv       , &
+                & kfs       ,kfsmin    ,kfsmax    ,kfsmn0    ,kfsmx0    , &
+                & kfumin    ,kfumax    ,kfumn0    ,kfumx0    ,kfvmin    , &
+                & kfvmax    ,kfvmn0    ,kfvmx0    ,kfsz0     ,kfuz0     , &
+                & kfvz0     ,kfu       ,kfv       ,kfsz1     ,kfuz1     , &
+                & kfvz1     ,qxk       ,qyk       ,qzk       ,u         , &
+                & v         ,guv       ,gvu       ,gsqs      ,rbnd      , &
+                & sigdif    ,sigmol    ,dicuv     ,vicww     ,r0        , &
+                & r1        ,sour      ,sink      ,aak       ,bbk       , &
+                & cck       ,bdx       ,bux       ,bdy       ,buy       , &
+                & uvdwk     ,vvdwk     ,rscale    ,dzu1      ,dzv1      , &
                 & aakl      ,bbkl      ,cckl      ,ddkl      ,dzs1      , &
-                & areau     ,areav     ,volum0    , &
-                & volum1    ,guu       ,gvv       ,bruvai    , &
-                & ltem      ,gdp       )
+                & areau     ,areav     ,volum0    ,volum1    ,guu       , &
+                & gvv       ,bruvai    ,sedtyp    ,seddif    ,ws        , &
+                & lsed      ,lsal      ,ltem      ,eqmbcsand ,eqmbcmud  , &
+                & lsts      ,kmxsed    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -104,7 +105,7 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
     logical                             , pointer :: nonhyd
     integer                             , pointer :: nh_level
     integer                             , pointer :: nudge
-    integer                             , pointer :: lsed
+    include 'sedparams.inc'
 !
 ! Global variables
 !
@@ -135,12 +136,15 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfsmax !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfsmin !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfsmx0 !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfsmn0 !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfumin !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfumn0 !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfumx0 !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfumax !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfvmin !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfvmx0 !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfvmax !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)               , intent(in)  :: kfvmn0 !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in)  :: kfsz0  !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in)  :: kfsz1  !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)         , intent(in)  :: kfuz0  !  Description and declaration in esm_alloc_int.f90
@@ -198,7 +202,17 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
     real(fp), dimension(kmax, max(lstsci, 1), 2, norow+nocol), intent(in)  :: rbnd   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(lstsci)                                            :: sigdif !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(lstsci)                              , intent(in)  :: sigmol !  Description and declaration in esm_alloc_real.f90
-
+    ! Morphology
+    integer                                                  , intent(in)  :: lsed
+    integer                                                                :: lsts      !  Description and declaration in esm_alloc_int.f90
+    integer                                                                :: lsal      !  Description and declaration in iidim.f90 
+    logical                                                  , intent(in)  :: eqmbcsand !  Description and declaration in morpar.igs
+    logical                                                  , intent(in)  :: eqmbcmud  !  Description and declaration in morpar.igs
+    integer, dimension(lsed)                                 , intent(in)  :: sedtyp    !! sediment type: 0=total/1=noncoh/2=coh    
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub, lsed)          , intent(in)  :: kmxsed    !  Description and declaration in esm_alloc_int.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax, lsed) , intent(in)  :: ws        !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax, lsed) , intent(in)  :: seddif    !  Description and declaration in esm_alloc_real.f90
+    ! Morphology
 !
 ! Local variables
 !
@@ -287,7 +301,6 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
     nonhyd      => gdp%gdprocs%nonhyd
     nh_level    => gdp%gdnonhyd%nh_level
     nudge       => gdp%gdnumeco%nudge
-    lsed        => gdp%d%lsed
     dzmin       => gdp%gdzmodel%dzmin
     !
     if (lstsci == 0) goto 9999
@@ -319,6 +332,21 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
        !
        do nm = 1, nmmax
           if (kfs(nm) == 1) then
+             !
+             ! Set concentrations in bottom layer that may have become (de)activated
+             !
+             if (kfsmin(nm) < kfsmn0(nm)) then
+                do k = kfsmn0(nm)-1, kfsmin(nm), -1
+                   r0(nm, k, l) = r0(nm, kfsmn0(nm), l)
+                enddo
+             elseif (kfsmin(nm) > kfsmn0(nm)) then
+                do k = kfsmn0(nm), kfsmin(nm)-1
+                   r0(nm, k, l) = 0.0_fp
+                enddo
+             endif
+             !
+             ! Dynamics of the top layer
+             !
              kmin = min(kfsmax(nm), kfsmx0(nm))
              if (kfsmax(nm) == kfsmx0(nm) .or. kmax == 1) then
                 do k = kfsmin(nm), kfsmax(nm)
@@ -497,7 +525,7 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
           if (kfs(nm) == 1) then
           ksm = min(kfsmx0(nm), kfsmax(nm))
              do k = kfsmin(nm), ksm - 1
-                delz = max(0.1_fp, 0.5_fp*(dzs1(nm, k) + dzs1(nm, k + 1)))
+                delz = max(0.0001_fp, 0.5_fp*(dzs1(nm, k) + dzs1(nm, k + 1)))
                 !
                 ! Internal wave contribution
                 !
@@ -508,7 +536,20 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
                 ! dicoww-restriction is moved from TURCLO to here (in reddic)
                 ! vicww is used instead of dicww
                 !
-                diz1 = vicmol/sigmol(l) + reddic(difiwe + vicww(nm,k)/sigdif(l), gdp)
+                   if (lsed > 0) then
+                      !
+                      ! sediment constituent:
+                      ! No dicoww-restriction in reddic
+                      !
+                      diz1 = vicmol/sigmol(l) + difiwe + seddif(nm, k, lsed)/sigdif(l)
+                   else
+                      !
+                      ! all other constituents:
+                      ! dicoww-restriction is moved from TURCLO to here (in reddic)
+                      ! vicww is used instead of dicww
+                      !
+                      diz1 = vicmol/sigmol(l) + reddic(difiwe + vicww(nm,k)/sigdif(l), gdp)
+                   endif
                 ddzc = gsqs(nm) * diz1 / delz
                 aakl(nm, k+1, l) = aakl(nm, k+1, l) - ddzc
                 bbkl(nm, k+1, l) = bbkl(nm, k+1, l) + ddzc
@@ -518,6 +559,18 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
           endif
        enddo
        call timer_stop(timer_difu_vertdiff, gdp)  
+       !
+       ! Include settling velocities and Dirichlet BC for sediments in
+       ! matrices AAKL/BBKL/CCKL/DDKL
+       !
+       if (lsed > 0) then
+          call timer_start(timer_difu_difws, gdp)
+          call z_dif_ws(j         ,nmmaxj    ,nmmax     ,kmax      ,lsal      , &
+                    & ltem      ,lstsci    ,lsed      ,kcs       ,kfs       , &
+                    & gsqs      ,ws        ,aakl      ,bbkl      ,cckl      , &
+                    & kmxsed    ,kfsmx0    ,gdp       )
+          call timer_stop(timer_difu_difws, gdp)
+       endif         
        !
        ! set values in open boundary points (in part. for y-direction)
        !
@@ -541,6 +594,7 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
           ml = irocol(3, ic)
           nmf = (n + ddb)*icy + (mf + ddb)*icx - icxy
           nml = (n + ddb)*icy + (ml + ddb)*icx - icxy
+          nmfu = nmf + icx
           nmlu = nml + icx
           if (kcu(nmf) == 1) then
              do k = kfsmin(nmf), kmax
@@ -557,6 +611,27 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
                 cckl(nmlu, k, l) = 0.0_fp
                 ddkl(nmlu, k, l) = rbnd(k, l, 2, ic)
              enddo
+          endif
+          !
+          ! optional Neumann boundary condition for suspended sediment fractions
+          !
+          if ((l>max(lsal, ltem)) .and. (l<=lsts)) then
+             !
+             ! l = sediment type
+             !
+             if ((eqmbcsand .and. sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) .or. &
+               & (eqmbcmud  .and. sedtyp(l) == SEDTYP_COHESIVE )       ) then
+                if (kcu(nmf) == 1) then
+                   do k = 1, kmax
+                      ddkl(nmf, k, l) = r0(nmfu, k, l)
+                   enddo
+                endif
+                if (kcu(nml) == 1) then
+                   do k = 1, kmax
+                      ddkl(nmlu, k, l) = r0(nml, k, l)
+                   enddo
+                endif
+             endif
           endif
        enddo
        call timer_stop(timer_difu_bounopen, gdp) 
@@ -580,7 +655,7 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
              nlm  = (m+ddb)*icx + (nl+ddb)*icy - icxy
              nlum = nlm + icy
              if (kcv(nfm) == 1) then
-                do k = kfsmin(nfm), kmax
+                do k = kfsmin(nfm), kfsmax(nfm)
                    ddkl(nfm,k,l) = rbnd(k,l,1,ic)
                    aakl(nfm,k,l) = 0.0_fp
                    bbkl(nfm,k,l) = 1.0_fp
@@ -588,12 +663,33 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
                 enddo
              endif
              if (kcv(nlm) == 1) then
-                do k = kfsmin(nlum), kmax
+                do k = kfsmin(nlum), kfsmax(nlum)
                    ddkl(nlum,k,l) = rbnd(k,l,2,ic)
                    aakl(nlum,k,l) = 0.0_fp
                    bbkl(nlum,k,l) = 1.0_fp
                    cckl(nlum,k,l) = 0.0_fp
                 enddo
+             endif
+             !
+             ! optional Neumann boundary condition for suspended sediment fractions
+             !
+             if ((l>max(lsal, ltem)) .and. (l<=lsts)) then
+                !
+                ! l = sediment type
+                !
+                if ((eqmbcsand .and. sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) .or. &
+                  & (eqmbcmud  .and. sedtyp(l) == SEDTYP_COHESIVE )       ) then
+                   if (kcv(nfm) == 1) then
+                      do k = 1, kmax
+                         ddkl(nfm, k, l) = r0(nfum, k, l)
+                      enddo
+                   endif
+                   if (kcv(nlm) == 1) then
+                      do k = 1, kmax
+                         ddkl(nlum, k, l) = r0(nlm, k, l)
+                      enddo
+                   endif
+                endif
              endif
           enddo
        endif

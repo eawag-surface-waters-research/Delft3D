@@ -1,12 +1,12 @@
 subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                & mmax      ,nmax      ,zmodel    ,nst       ,nfltyp    , &
                & nocol     ,norow     ,nsrc      ,dismmt    ,irocol    , &
-               & mnksrc    ,kfu       ,kfv       ,kfs       ,            &
-               & kspu      ,kspv      ,kadu      ,kadv      ,kcs       , &
-               & kcu       ,kcv       ,kfsmin    ,kfsmax    ,kfsmx0    , &
-               & kfumin    ,kfumax    ,kfumx0    ,kfvmin    ,kfvmax    , &
-               & kfuz0     ,kfvz0     ,kfsz0     , &
-               & kfvmx0    ,kfuz1     ,kfvz1     ,kfsz1     ,kcu45     , &
+               & mnksrc    ,kfu       ,kfv       ,kfs       ,kspu      , &
+               & kspv      ,kadu      ,kadv      ,kcs       ,kcu       , &
+               & kcv       ,kfsmin    ,kfsmax    ,kfsmn0    ,kfsmx0    , &
+               & kfumin    ,kfumax    ,kfumn0    ,kfumx0    ,kfvmin    , &
+               & kfvmax    ,kfvmn0    ,kfvmx0    ,kfuz0     ,kfvz0     , &
+               & kfsz0     ,kfuz1     ,kfvz1     ,kfsz1     ,kcu45     , &
                & kcv45     ,kcscut    ,porosu    ,porosv    ,areau     , &
                & areav     ,volum1    ,s0        ,s1        ,w1        , &
                & u0        ,u1        ,v0        ,v1        ,hu        , &
@@ -114,14 +114,17 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfsmax  !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfsmin  !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfsmx0  !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfsmn0  !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfu     !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfumax  !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfumin  !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfumx0  !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfumn0  !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfv     !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfvmax  !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfvmin  !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfvmx0  !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfvmn0  !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)     :: kspu    !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)     :: kspv    !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub, kmax)       :: kadu    !  Description and declaration in esm_alloc_int.f90
@@ -296,9 +299,9 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
        call timer_start(timer_1stuzd, gdp)
        call z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx         , &
                 & icy       ,nsrc      ,kcs       ,kcv45     ,kcscut      , &
-                & kcv       ,kfv       ,kfvz0     ,kfvmin    ,kfvmx0      , &
-                & kfu       ,kfuz0     ,kfumin    ,kfumx0    ,dzu0        , &
-                & kfs       ,kfsz0     ,kfsmin    ,kfsmx0    , &
+                & kcv       ,kfv       ,kfvz0     ,kfvmn0    ,kfvmx0      , &
+                & kfu       ,kfuz0     ,kfumn0    ,kfumx0    ,dzu0        , &
+                & kfs       ,kfsz0     ,kfsmn0    ,kfsmx0    , &
                 & v0        ,u0        ,w1        ,hv        ,hu          ,dzv0        ,dzs0      , &
                 & gvv       ,guu       ,guv       ,gvu       ,gsqs        , &
                 & gvd       ,gud       ,gvz       ,guz       ,gsqiv       , &
@@ -331,8 +334,8 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
        call timer_start(timer_checku, gdp)
        call z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
                    & flood     ,kfu       ,kcs       ,kcu       ,kspu      , &
-                   & kfumin    ,kfumx0    ,hu        ,s0        ,dpu       , &
-                   & dps       ,umean     ,kfuz0     ,kfsmin    ,kfsmx0    , &
+                   & kfumn0    ,kfumx0    ,hu        ,s0        ,dpu       , &
+                   & dps       ,umean     ,kfuz0     ,kfsmn0    ,kfsmx0    , &
                    & u0        ,dzu0      ,zk        ,gdp       )
        call timer_stop(timer_checku, gdp)
        !
@@ -353,7 +356,7 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                 & flood     ,norow     ,irocol(1, 1)         ,mnksrc    ,kfsmx0    , &
                 & kfu       ,kfv       ,kfs       ,kcs       ,kcu       , &
                 & kfuz0     ,kfvz0     ,kfsz0     ,kspu      ,kcu45     , &
-                & kcscut    ,kfumin    ,kfsmin    ,kfumx0    ,kfvmin    , &
+                & kcscut    ,kfumn0    ,kfsmn0    ,kfumx0    ,kfvmn0    , &
                 & kfvmx0    ,thick     ,circ2d(1, 1) ,circ3d(1, 1, 1)   ,s0        , &
                 & s1        ,u0        ,u1        ,v1        ,w1        , &
                 & qxk       ,qyk       ,qzk       ,guu       ,gvv       , &
@@ -386,9 +389,9 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
        call z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                    & nfltyp    ,icx       ,icy       ,kfu       ,kfv       , &
                    & kfs       ,kcs       ,kfuz0     ,kfvz0     ,kfsz1     , &
-                   & kfsmin    ,kfsmax    ,kfsmx0    ,s1        ,r0        , &
-                   & dps       ,qxk       ,qyk       ,w1        ,lstsci    , &
-                   & dzs1      ,zk        ,nst       ,gdp       )
+                   & kfsmin    ,kfsmn0    ,kfsmax    ,kfsmx0    ,s1        , &
+                   & r0        ,dps       ,qxk       ,qyk       ,w1        , &
+                   & lstsci    ,dzs1      ,zk        ,nst       ,gdp       )
        call timer_stop(timer_drychk, gdp)
        !
        ! Update the layer geometry in U-velocity points based on the new water levels S1
@@ -401,7 +404,7 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
        icy = 1
        call z_drychku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
                     & kcs       ,kfu       ,kcu       ,kspu      ,kfsmax    , &
-                    & kfsmin    ,kfsz1     ,kfuz1     ,kfumin    ,kfumax    , &
+                   & kfsmin    ,kfsz1     ,kfuz1     ,kfumin    ,kfumn0    ,kfumax    , &
                     & kfumx0    ,hu        ,s1        ,dpu       ,dps       , &
                     & umean     ,u0        ,u1        ,dzu0      ,dzu1      , &
                     & dzs1      ,zk        ,kfsmx0    ,guu       ,qxk       , &
@@ -488,9 +491,9 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
        call timer_start(timer_2nduzd, gdp)
        call z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx         , &
                 & icy       ,nsrc      ,kcs       ,kcu45     ,kcscut      , &
-                & kcu       ,kfu       ,kfuz0     ,kfumin    ,kfumx0      , &
-                & kfv       ,kfvz0     ,kfvmin    ,kfvmx0    ,dzv0        , &
-                & kfs       ,kfsz0     ,kfsmin    ,kfsmx0    , &
+                & kcu       ,kfu       ,kfuz0     ,kfumn0    ,kfumx0      , &
+                & kfv       ,kfvz0     ,kfvmn0    ,kfvmx0    ,dzv0        , &
+                & kfs       ,kfsz0     ,kfsmn0    ,kfsmx0    , &
                 & u0        ,v0        ,w1        ,hu        ,hv          ,dzu0        ,dzs0          , &
                 & guu       ,gvv       ,gvu       ,guv       ,gsqs        , &
                 & gud       ,gvd       ,guz       ,gvz       ,gsqiu       , &
@@ -518,8 +521,8 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
        call timer_start(timer_checku, gdp)
        call z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
                    & flood     ,kfv       ,kcs       ,kcv       ,kspv      , &
-                   & kfvmin    ,kfvmx0    ,hv        ,s0        ,dpv       , &
-                   & dps       ,vmean     ,kfvz0     ,kfsmin    ,kfsmx0    , &
+                   & kfvmn0    ,kfvmx0    ,hv        ,s0        ,dpv       , &
+                   & dps       ,vmean     ,kfvz0     ,kfsmn0    ,kfsmx0    , &
                    & v0        ,dzv0      ,zk        ,gdp       )
        call timer_stop(timer_checku, gdp)
        !
@@ -538,7 +541,7 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                 & flood     ,nocol     ,irocol(1, norow + 1) ,mnksrc    ,kfsmx0    , &
                 & kfv       ,kfu       ,kfs       ,kcs       ,kcv       , &
                 & kfvz0     ,kfuz0     ,kfsz0     ,kspv      ,kcv45     , &
-                & kcscut    ,kfvmin    ,kfsmin    ,kfvmx0    ,kfumin    , &
+                & kcscut    ,kfvmn0    ,kfsmn0    ,kfvmx0    ,kfumn0    , &
                 & kfumx0    ,thick     ,circ2d(1, norow + 1) ,circ3d(1, 1, norow + 1) ,s0        , &
                 & s1        ,v0        ,v1        ,u1        ,w1        , &
                 & qyk       ,qxk       ,qzk       ,gvv       ,guu       , &
@@ -570,9 +573,9 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
        call z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                    & nfltyp    ,icx       ,icy       ,kfu       ,kfv       , &
                    & kfs       ,kcs       ,kfuz0     ,kfvz0     ,kfsz1     , &
-                   & kfsmin    ,kfsmax    ,kfsmx0    ,s1        ,r0        , &
-                   & dps       ,qxk       ,qyk       ,w1        ,lstsci    , &
-                   & dzs1      ,zk        ,nst       ,gdp       )
+                   & kfsmin    ,kfsmn0    ,kfsmax    ,kfsmx0    ,s1        , &
+                   & r0        ,dps       ,qxk       ,qyk       ,w1        , &
+                   & lstsci    ,dzs1      ,zk        ,nst       ,gdp       )
        call timer_stop(timer_drychk, gdp)
        !
        ! Update the layer geometry in V-velocity points based on the new water levels S1
@@ -586,7 +589,7 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
        icy = nmaxddb
        call z_drychku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
                     & kcs       ,kfv       ,kcv       ,kspv      ,kfsmax    , &
-                    & kfsmin    ,kfsz1     ,kfvz1     ,kfvmin    ,kfvmax    , &
+                    & kfsmin    ,kfsz1     ,kfvz1     ,kfvmin    ,kfvmn0    ,kfvmax    , &
                     & kfvmx0    ,hv        ,s1        ,dpv       ,dps       , &
                     & vmean     ,v0        ,v1        ,dzv0      ,dzv1      , &
                     & dzs1      ,zk        ,kfsmx0    ,gvv       ,qyk       , &

@@ -449,6 +449,9 @@ type gd_r_i_ch
        integer(pntrsize) :: kfumx0     !  Description and declaration in esm_alloc_int.f90
        integer(pntrsize) :: kfvmx0     !  Description and declaration in esm_alloc_int.f90
        integer(pntrsize) :: kfsmx0     !  Description and declaration in esm_alloc_int.f90
+       integer(pntrsize) :: kfumn0     !  Description and declaration in esm_alloc_int.f90
+       integer(pntrsize) :: kfvmn0     !  Description and declaration in esm_alloc_int.f90
+       integer(pntrsize) :: kfsmn0     !  Description and declaration in esm_alloc_int.f90
        integer(pntrsize) :: kfsz0
        integer(pntrsize) :: kfsz1      !  Description and declaration in esm_alloc_int.f90
        integer(pntrsize) :: kfuz0

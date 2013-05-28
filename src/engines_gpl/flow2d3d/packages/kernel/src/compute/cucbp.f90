@@ -1,6 +1,6 @@
 subroutine cucbp(kmax      ,norow     ,icx       , &
                & icy       ,zmodel    ,irocol    ,kcs       ,kfu       , &
-               & kfumin    ,kfumx0    ,s0        ,u0        ,dpu       , &
+               & kfumn0    ,kfumx0    ,s0        ,u0        ,dpu       , &
                & hu        ,umean     ,tetau     ,guu       ,gvu       , &
                & dzu0      ,thick     ,circ2d    ,circ3d    ,a         , &
                & b         ,c         ,d         ,aa        ,bb        , &
@@ -76,7 +76,7 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kfu    !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kfumx0 !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kfumin !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kfumn0 !  Description and declaration in esm_alloc_int.f90
     logical                                         , intent(in)  :: wavcmp
     logical                                         , intent(in)  :: zmodel !  Description and declaration in procs.igs
     real(fp), dimension(12, norow)                  , intent(in)  :: crbc   !  Description and declaration in esm_alloc_real.f90
@@ -188,9 +188,9 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
        nmlu = nml + icx
        !
        if (zmodel) then
-          k0f = kfumin(nmf)
+          k0f = kfumn0(nmf)
           k1f = kfumx0(nmf)
-          k0l = kfumin(nml)
+          k0l = kfumn0(nml)
           k1l = kfumx0(nml)
        else
           k0f = 1
@@ -286,7 +286,7 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
              !
              if (zmodel) then
                 hnm = 0.0_fp
-                do k = kfumin(nmf), kfumx0(nmf)
+                do k = kfumn0(nmf), kfumx0(nmf)
                    hnm = hnm + dzu0(nmf,k)
                 enddo
              else
@@ -485,7 +485,7 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
              !
              if (zmodel) then
                 hnm = 0.0_fp
-                do k = kfumin(nml), kfumx0(nml)
+                do k = kfumn0(nml), kfumx0(nml)
                    hnm = hnm + dzu0(nml,k)
                 enddo
              else

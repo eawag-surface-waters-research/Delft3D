@@ -1,6 +1,6 @@
 subroutine z_shrwav(nmmax     ,kmax      ,icx       ,dfu       ,deltau    , &
                   & tp        ,rlabda    ,hu        ,kfu       ,ddk       , &
-                  & kfumin    ,kfumax    ,dzu1      ,gdp       )
+                  & kfumn0    ,kfumx0    ,dzu1      ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -56,8 +56,8 @@ subroutine z_shrwav(nmmax     ,kmax      ,icx       ,dfu       ,deltau    , &
     integer                                           , intent(in) :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                           , intent(in) :: nmmax  !  Description and declaration in dimens.igs
     integer  , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: kfu    !  Description and declaration in esm_alloc_int.f90
-    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: kfumax !  Description and declaration in esm_alloc_int.f90
-    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: kfumin !  Description and declaration in esm_alloc_int.f90
+    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: kfumx0 !  Description and declaration in esm_alloc_int.f90
+    integer  , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: kfumn0 !  Description and declaration in esm_alloc_int.f90
     real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: deltau !  Description and declaration in esm_alloc_real.f90
     real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: dfu    !  Description and declaration in esm_alloc_real.f90
     real(fp) , dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in) :: hu     !  Description and declaration in esm_alloc_real.f90
@@ -89,7 +89,7 @@ subroutine z_shrwav(nmmax     ,kmax      ,icx       ,dfu       ,deltau    , &
        ztop = 0.0_fp
        nmu  = nmu + 1
        if (kfu(nm) == 1) then
-          do k = kfumin(nm), kfumax(nm)
+          do k = kfumn0(nm), kfumx0(nm)
              zbot = ztop 
              ztop = ztop + dzu1(nm,k)
              if (tp(nm)>0.0_fp .and. tp(nmu)>0.0_fp) then

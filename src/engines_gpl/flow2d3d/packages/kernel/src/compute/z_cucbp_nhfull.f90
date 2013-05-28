@@ -1,6 +1,6 @@
 subroutine z_cucbp_nhfull(kmax      ,norow     ,icx       , &
                         & icy       ,irocol    ,kcs       ,kfu       , &
-                        & kfumin    ,kfumx0    ,s0        ,u0        , &
+                        & kfumn0    ,kfumx0    ,s0        ,u0        , &
                         & hu        ,umean     ,guu       ,gvu       , &
                         & dzu0      ,circ2d    ,circ3d    ,dpu       , &
                         & aak       ,bbk       ,cck       ,ddk       , &
@@ -76,7 +76,7 @@ subroutine z_cucbp_nhfull(kmax      ,norow     ,icx       , &
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kfu    !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kfumx0 !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kfumin !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)       , intent(in)  :: kfumn0 !  Description and declaration in esm_alloc_int.f90
     real(fp), dimension(12, norow)                  , intent(in)  :: crbc   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(4, norow)                   , intent(in)  :: circ2d !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: dpu    !  Description and declaration in esm_alloc_real.f90
@@ -159,9 +159,9 @@ subroutine z_cucbp_nhfull(kmax      ,norow     ,icx       , &
        nml  = (n+ddb)*icy + (ml+ddb)*icx - icxy
        nmlu = nml + icx
        !
-       k0f = kfumin(nmf)
+       k0f = kfumn0(nmf)
        k1f = kfumx0(nmf)
-       k0l = kfumin(nml)
+       k0l = kfumn0(nml)
        k1l = kfumx0(nml)
        !
        ! SET COEFFICIENTS FOR BEGIN OF ROW IN THE CASE OF A CLOSED BOUNDARY
@@ -189,7 +189,7 @@ subroutine z_cucbp_nhfull(kmax      ,norow     ,icx       , &
           !
           umean(nmf) = 0.0_fp
           hnm        = 0.0_fp
-          do k = kfumin(nmf), kfumx0(nmf)
+          do k = kfumn0(nmf), kfumx0(nmf)
              umean(nmf) = umean(nmf) + u0(nmf,k)*dzu0(nmf,k)
              hnm        = hnm + dzu0(nmf,k)
           enddo
@@ -314,7 +314,7 @@ subroutine z_cucbp_nhfull(kmax      ,norow     ,icx       , &
           !
           umean(nml) = 0.0_fp
           hnm        = 0.0_fp
-          do k = kfumin(nml), kfumx0(nml)
+          do k = kfumn0(nml), kfumx0(nml)
              umean(nml) = umean(nml) + u0(nml,k)*dzu0(nml,k)
              hnm        = hnm + dzu0(nml,k)
           enddo

@@ -1,7 +1,7 @@
 subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
                   & flood     ,kfu       ,kcs       ,kcu       ,kspu      , &
-                  & kfumin    ,kfumx0    ,hu        ,s0        ,dpu       , &
-                  & dps       ,umean     ,kfuz0     ,kfsmin    ,kfsmx0    , &
+                  & kfumn0    ,kfumx0    ,hu        ,s0        ,dpu       , &
+                  & dps       ,umean     ,kfuz0     ,kfsmn0    ,kfsmx0    , &
                   & u0        ,dzu0      ,zk        ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -78,9 +78,9 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kcu    !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfu    !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfsmin !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfsmn0 !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfsmx0 !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfumin !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfumn0 !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                    :: kfumx0 !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)              :: kfuz0  !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)            :: kspu   !  Description and declaration in esm_alloc_int.f90
@@ -148,7 +148,7 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
           if (kfu(nm) == 1) then
              hnm = 0.0_fp
              !do k = kkmin, kkmax
-             do k = kfumin(nm), kfumx0(nm)
+             do k = kfumn0(nm), kfumx0(nm)
                 umean(nm) = umean(nm) + u0(nm,k)*dzu0(nm,k)
                 hnm       = hnm + dzu0(nm,k)
              enddo
@@ -172,7 +172,7 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
           !
           if (kfu(nm)*hu(nm) < htrsh) then
              kfu(nm) = 0
-             do k = kfumin(nm), kmax
+             do k = kfumn0(nm), kmax
                 kfuz0(nm, k) = 0
              enddo
           endif
@@ -194,9 +194,9 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
                    ! s1u is used for setting kfumx0
                    !
                    s1u = max(s0(nm), s0(nmu))
-                   if (umean(nm) > 0.001_fp) then
+                   if (umean(nm) >= 0.001_fp) then
                       s1u = s0(nm)
-                   elseif (umean(nm) < -0.001_fp) then
+                   elseif (umean(nm) <= - 0.001_fp) then
                       s1u = s0(nmu)
                    else
                    endif
@@ -213,7 +213,7 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
                    ! Set kfumx0 in flooded points,using s1u
                    !
                    found = .false.
-                   do k = kfumin(nm), kmax
+                   do k = kfumn0(nm), kmax
                       if (.not. found .and. zk(k) + dzmin>=s1u .or. &
                           & (s1u>zk(kmax) .and. k==kmax  )) then
                          kfumx0(nm) = k
@@ -224,11 +224,11 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
                    ! determine layer thickness new wet point. We assume that only one or two layers can be active
                    !
                    dzutot = 0.0_fp
-                   do k = kfumin(nm), kfumx0(nm)
+                   do k = kfumn0(nm), kfumx0(nm)
                        kfuz0(nm,k) = 1
-                       if (kfumin(nm) == kfumx0(nm)) then
+                       if (kfumn0(nm) == kfumx0(nm)) then
                           dzu0(nm, k) = hu(nm)
-                       elseif (k == kfumin(nm)) then
+                       elseif (k == kfumn0(nm)) then
                           dzu0(nm, k) = zk(k) + dpu(nm)
                        elseif (k == kfumx0(nm)) then
                           if (nonhyd .and. nh_level==nh_full) then
@@ -253,8 +253,8 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
                     ! --> modify the near-bed layering to obtain smoother bottom shear stress representation in z-layer models
                     !
                     if (ztbml) then
-                       if (kfumx0(nm) > kfumin(nm)) then
-                          k             = kfumin(nm)
+                       if (kfumx0(nm) > kfumn0(nm)) then
+                          k             = kfumn0(nm)
                           dzu0(nm, k  ) = 0.5_fp*(dpu(nm)+min(zk(k+1),s1u))
                           dzu0(nm, k+1) = dzu0(nm,k)
                        endif
@@ -263,9 +263,9 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
                     ! A "trick" to ensure that "wet" cells that were dry
                     ! obtain a velocity
                     !
-                    if (kfumx0(nm) > kfumin(nm)) then
-                       do k = max(kfumx0(nm),kfumin(nm)), kfumx0(nm)
-                          u0(nm, k) = u0(nm, kfumin(nm))
+                    if (kfumx0(nm) > kfumn0(nm)) then
+                       do k = max(kfumx0(nm),kfumn0(nm)), kfumx0(nm)
+                          u0(nm, k) = u0(nm, kfumn0(nm))
                        enddo
                     endif
                  endif

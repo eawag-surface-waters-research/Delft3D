@@ -450,6 +450,9 @@ subroutine gtptrs(gdp)
     integer(pntrsize), pointer :: kfumx0
     integer(pntrsize), pointer :: kfvmx0
     integer(pntrsize), pointer :: kfsmx0
+    integer(pntrsize), pointer :: kfumn0
+    integer(pntrsize), pointer :: kfvmn0
+    integer(pntrsize), pointer :: kfsmn0
     integer(pntrsize), pointer :: kfsz0
     integer(pntrsize), pointer :: kfsz1
     integer(pntrsize), pointer :: kfuz0
@@ -483,6 +486,8 @@ subroutine gtptrs(gdp)
     integer(pntrsize), pointer :: wrka7
     integer(pntrsize), pointer :: wrka8
     integer(pntrsize), pointer :: wrka9
+    integer(pntrsize), pointer :: wrka10
+    integer(pntrsize), pointer :: wrka11
     integer(pntrsize), pointer :: wrka12
     integer(pntrsize), pointer :: wrka13
     integer(pntrsize), pointer :: wrka14
@@ -924,6 +929,9 @@ subroutine gtptrs(gdp)
     kfumx0     => gdp%gdr_i_ch%kfumx0
     kfvmx0     => gdp%gdr_i_ch%kfvmx0
     kfsmx0     => gdp%gdr_i_ch%kfsmx0
+    kfumn0     => gdp%gdr_i_ch%kfumn0
+    kfvmn0     => gdp%gdr_i_ch%kfvmn0
+    kfsmn0     => gdp%gdr_i_ch%kfsmn0
     kfsz0      => gdp%gdr_i_ch%kfsz0
     kfsz1      => gdp%gdr_i_ch%kfsz1
     kfuz0      => gdp%gdr_i_ch%kfuz0
@@ -957,6 +965,8 @@ subroutine gtptrs(gdp)
     wrka7      => gdp%gdaddress%wrka7
     wrka8      => gdp%gdaddress%wrka8
     wrka9      => gdp%gdaddress%wrka9
+    wrka10     => gdp%gdaddress%wrka10
+    wrka11     => gdp%gdaddress%wrka11
     wrka12     => gdp%gdaddress%wrka12
     wrka13     => gdp%gdaddress%wrka13
     wrka14     => gdp%gdaddress%wrka14
@@ -1028,18 +1038,21 @@ subroutine gtptrs(gdp)
     kfsmax     = gtipnt('kfsmax', gdp)
     kfsmin     = gtipnt('kfsmin', gdp)
     kfsmx0     = gtipnt('kfsmx0', gdp)
+    kfsmn0     = gtipnt('kfsmn0', gdp)
     kfsz0      = gtipnt('kfsz0' , gdp)
     kfsz1      = gtipnt('kfsz1' , gdp)
     kfu        = gtipnt('kfu'   , gdp)
     kfumax     = gtipnt('kfumax', gdp)
     kfumin     = gtipnt('kfumin', gdp)
     kfumx0     = gtipnt('kfumx0', gdp)
+    kfumn0     = gtipnt('kfumn0', gdp)
     kfuz0      = gtipnt('kfuz0' , gdp)
     kfuz1      = gtipnt('kfuz1' , gdp)
     kfv        = gtipnt('kfv'   , gdp)
     kfvmax     = gtipnt('kfvmax', gdp)
     kfvmin     = gtipnt('kfvmin', gdp)
     kfvmx0     = gtipnt('kfvmx0', gdp)
+    kfvmn0     = gtipnt('kfvmn0', gdp)
     kfvz0      = gtipnt('kfvz0' , gdp)
     kfvz1      = gtipnt('kfvz1' , gdp)
     kmxsed     = gtipnt('kmxsed', gdp)
@@ -1441,6 +1454,8 @@ subroutine gtptrs(gdp)
     wrka7      = gtrpnt('wrka7' , gdp)
     wrka8      = gtrpnt('wrka8' , gdp)
     wrka9      = gtrpnt('wrka9' , gdp)
+    wrka10     = gtrpnt('wrka10', gdp)
+    wrka11     = gtrpnt('wrka11', gdp)
     wrka12     = gtrpnt('wrka12', gdp)
     wrka13     = gtrpnt('wrka13', gdp)
     wrka14     = gtrpnt('wrka14', gdp)

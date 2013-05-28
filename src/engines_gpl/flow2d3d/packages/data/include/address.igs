@@ -41,6 +41,8 @@
        integer(pntrsize) :: wrka7      !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: wrka8      !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: wrka9      !  Description and declaration in esm_alloc_real.f90
+       integer(pntrsize) :: wrka10     !  Description and declaration in esm_alloc_real.f90
+       integer(pntrsize) :: wrka11     !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: wrka12     !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: wrka13     !  Description and declaration in esm_alloc_real.f90
        integer(pntrsize) :: wrka14     !  Description and declaration in esm_alloc_real.f90

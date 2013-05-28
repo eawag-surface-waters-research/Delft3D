@@ -967,6 +967,7 @@ src/engines_gpl/flow2d3d/packages/kernel/src/compute/z_chkadv.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute/z_cucbp_nhfull.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute/z_cucnp.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute/z_dengra.f90 -text
+src/engines_gpl/flow2d3d/packages/kernel/src/compute/z_dif_ws.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute/z_difhor_nhfull.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute/z_difu.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute/z_difuflux.f90 -text
@@ -1073,6 +1074,10 @@ src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/upbdps.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/updwaqflxsed.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/upwbed.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/wave.f90 -text
+src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/z_bott3d.f90 -text
+src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/z_dwnvel.f90 -text
+src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/z_erosed.f90 -text
+src/engines_gpl/flow2d3d/packages/kernel/src/compute_sediment/z_red_soursin.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/dd/Makefile.am -text
 src/engines_gpl/flow2d3d/packages/kernel/src/dd/caldpu_dd.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/dd/chkdry_dd.f90 -text
