@@ -234,10 +234,6 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
           call prterr(lundia    ,'Z011'    ,'Online Couple'      )
           ierror = ierror+ 1
        endif
-       !if (sedim) then
-       !   call prterr(lundia    ,'Z011'    ,'3D Morphology'      )
-       !   ierror = ierror+ 1
-       !endif
        if (iweflg) then
           call prterr(lundia    ,'Z011'    ,'Internal Wave option'          )
           ierror = ierror+ 1
@@ -271,6 +267,10 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
        !
        ! warnings
        !
+       if (sedim) then
+          call prterr(lundia    ,'Z012'    ,'3D Morphology'      )
+          iwarn = iwarn+ 1
+       endif
        if (method(1:3)/='adi') then
           call prterr(lundia    ,'Z011'    ,method    )
           method = 'adi          '
