@@ -1929,6 +1929,7 @@ src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/ixsets.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/lsame.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/lsolve.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/matvec.f90 -text
+src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/oil2waq.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/online.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/outbal.f -text
 src/engines_gpl/waq/packages/waq_kernel/src/waq_kernel/outdmp.f -text

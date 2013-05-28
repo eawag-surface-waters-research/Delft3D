@@ -1,4 +1,4 @@
-      subroutine par2waq ( nopart  , nosys   , notot   , nosubs  , noseg   ,
+      subroutine oil2waq ( nopart  , nosys   , notot   , nosubs  , noseg   ,
      &                     nolay   , volume  , surface , nmax    , mmax    ,
      &                     lgrida  , syname  , itime   , iddtim  , npwndw  ,
      &                     iptime  , npart   , mpart   , kpart   , wpart   ,
@@ -22,7 +22,8 @@
 !>      level of particles that are still to young to be migrated.
 
 !     Created             : April     2013 by Leo Postma
-
+!     Adapted             : May 2013 Frank Kleissen - adapted from par2waq.f: specifc for the oil module 
+!                           to transfer dispersed oil, no take over time
 !     Files               : none
 
 !     Routines            : zoek20  - to search the delwaq names
@@ -79,7 +80,7 @@
 
       integer(4) ithandl /0/
 
-      if ( iddtim .eq. 0 ) return
+!      if ( iddtim .eq. 0 ) return
 
       if ( timon ) call timstrt ( "par2waq", ithandl )
 
@@ -98,10 +99,6 @@
          nosegl = noseg / nolay
 
       do ipart = npwndw, nopart
-         if ( iptime(ipart) .lt. iddtim ) then
-            npwndw = ipart
-            exit
-         endif
          ic = lgrida( npart(ipart), mpart(ipart) )
          if ( ic .gt.  0 ) then
             ilay = kpart(ipart)
@@ -110,23 +107,19 @@
             do isub = 1, nosubs
                isys = iwaqsub(isub)
                if ( isys .eq. 0 ) cycle
-               if ( isys .lt. 0 ) then
-                  amass(-isys,iseg) = amass(-isys,iseg) + wpart(isub,ipart)
-                  conc (-isys,iseg) = amass(-isys,iseg) / surface(iseg)
-               else
+                if (isub.eq.2.and.wpart(isub,ipart).gt.0) then
                   amass( isys,iseg) = amass( isys,iseg) + wpart(isub,ipart)
                   conc ( isys,iseg) = amass( isys,iseg) / volume (iseg)
-               endif
-               if ( massbal ) amass2(isys,    3) = amass2(isys,    3) + wpart(isub,ipart)
-               if ( ipb .gt. 0 .and. fluxes )
+                  if ( massbal ) amass2(isys,    3) = amass2(isys,    3) + wpart(isub,ipart)
+                  if ( ipb .gt. 0 .and. fluxes )
      &                        dmps  (isys,ipb,2) = dmps  (isys,ipb,2) + wpart(isub,ipart)
-               wpart(isub,ipart) = 0.0
+                  npart (ipart) = 1
+                  mpart (ipart) = 1
+                  kpart (ipart) = 1
+                  iptime(ipart) = 0
+                endif
             enddo
          endif
-         npart (ipart) = 1
-         mpart (ipart) = 1
-         kpart (ipart) = 1
-         iptime(ipart) = 0
       enddo
 
       if ( timon ) call timstop ( ithandl )

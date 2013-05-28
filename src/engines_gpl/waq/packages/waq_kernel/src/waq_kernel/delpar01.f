@@ -142,14 +142,23 @@
       first = .false.
 
 !     Taking over of aged particles by Delwaq
-
-      call par2waq( nopart   , nosys    , notot    , nosubs   , noseg    ,
+! first for oil model
+      if (modtyp.eq.4) then 
+        call oil2waq( nopart , nosys    , notot    , nosubs   , noseg    ,
      &              nolay    , dwqvol   , surface  , nmaxp    , mmaxp    ,
      &              lgrid3   , syname   , itime    , iddtim   , npwndw   ,
      &              iptime   , npart    , mpart    , kpart    , wpart    ,
      &              amass    , conc     , iaflag   , intopt   , ndmps    ,
      &              isdmp    , dmps     , amass2   )
-
+      else 
+        call par2waq( nopart , nosys    , notot    , nosubs   , noseg    ,
+     &              nolay    , dwqvol   , surface  , nmaxp    , mmaxp    ,
+     &              lgrid3   , syname   , itime    , iddtim   , npwndw   ,
+     &              iptime   , npart    , mpart    , kpart    , wpart    ,
+     &              amass    , conc     , iaflag   , intopt   , ndmps    ,
+     &              isdmp    , dmps     , amass2   )
+      endif
+      
 !     Echo actual time to screen
 
       write ( *, 1020) itime  /86400, mod(itime  , 86400)/3600, mod(itime  , 3600)/60, mod(itime  , 60),

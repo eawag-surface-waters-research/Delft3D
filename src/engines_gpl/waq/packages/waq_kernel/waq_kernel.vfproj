@@ -516,6 +516,7 @@
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded" LocalVariableStorage="localStorageAutomatic"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" ReentrantCode="reentrancyThreaded"/></FileConfiguration></File>
+		<File RelativePath=".\src\waq_kernel\oil2waq.f"/>
 		<File RelativePath=".\src\waq_kernel\online.f"/>
 		<File RelativePath=".\src\waq_kernel\outbal.f"/>
 		<File RelativePath=".\src\waq_kernel\outdmp.f"/>
