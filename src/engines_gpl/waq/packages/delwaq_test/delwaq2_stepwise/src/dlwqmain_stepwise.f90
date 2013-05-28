@@ -32,11 +32,13 @@ program delwaq2_stepwise
 
     integer :: dummy
     integer :: ModelInitialize_By_Id, ModelPerformTimeStep, ModelFinalize
-    integer :: GetTimeHorizon, GetWQCurrentTime
+    integer :: GetTimeHorizon, GetWQCurrentTime, WriteRestartFileDefaultName, WriteRestartFile
 
     character(len=200)     :: runid
+    character(len=200)     :: resfile
+    integer                :: itimestamp
     real(kind=kind(1.0d0)) :: startTime, stopTime, currentTime
-    integer                :: status
+    integer                :: i ,status, found
 
     !
     ! Get the run-ID or quit
@@ -48,18 +50,37 @@ program delwaq2_stepwise
         stop
     endif
 
+    found = 0
+    resfile = runid
+    do i=1,200
+      if ( resfile(i:i) .eq. ' ' .and. found .eq. 0 ) then
+        itimestamp = i
+        found = 1
+      endif
+    end do
+    write (resfile(itimestamp+10:itimestamp+17), '(A)') '_res.map'
+
     !
     ! Start the computation - stepwise
     !
     dummy = ModelInitialize_By_Id( runid )
 
-    dummy = ModelInitialize_By_Id( runid ) ! Twice as a test
+!    dummy = ModelInitialize_By_Id( runid ) ! Twice as a test
 
     dummy = GetTimeHorizon( startTime, stopTime )
-
+    i = 0
+    write (resfile(itimestamp:itimestamp+9), '(I10)') i
+    dummy = WriteRestartFile ( resfile )
+    
     do
         dummy = ModelPerformTimeStep()
         dummy = GetWQCurrentTime( currentTime )
+        dummy = WriteRestartFileDefaultName ()
+        i = i + 1
+        if (mod(i,10) == 0) then
+          write (resfile(itimestamp:itimestamp+9), '(I10)') i
+          dummy = WriteRestartFile ( resfile )
+        end if
         if ( currentTime >= stopTime ) then
             dummy = ModelPerformTimeStep()
             exit

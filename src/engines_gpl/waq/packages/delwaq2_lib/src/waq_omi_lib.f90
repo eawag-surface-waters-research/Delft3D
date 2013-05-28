@@ -136,6 +136,27 @@ logical function GetLastMessage( level, text )
 
 end function GetLastMessage
 
+logical function GetWQDimensions(notot, noseg)
+
+    !DEC$ ATTRIBUTES DLLEXPORT::GetWQDimensions
+    !DEC$ ATTRIBUTES ALIAS : '_GETWQDIMENSIONS' :: GetWQDimensions
+
+    use delwaq2_global_data
+
+    implicit none
+
+    integer, intent(out)              :: notot         !< Number of substances
+    integer, intent(out)              :: noseg         !< Number of segments
+
+    include 'sysi_ff.inc'
+
+    notot = size_dlwq_state%notot
+    noseg = size_dlwq_state%noseg
+    
+    GetWQDimensions = .true.
+
+end function GetWQDimensions
+
 !> Set the times for the simulation
 logical function SetSimulationTimes(startTime, endTime, timeStep)
 
@@ -1251,6 +1272,32 @@ logical function SetFlowData( volume, area, flow )
 
 end function SetFlowData
 
+logical function SetFlowDataVelocity( velocity )
+
+    !DEC$ ATTRIBUTES DLLEXPORT::SetFlowDataVelocity
+    !DEC$ ATTRIBUTES ALIAS : '_SETFLOWDATAVELOCITY' :: SetFlowDataVelocity
+
+    use waq_omi_utils
+    use delwaq2_global_data
+
+    implicit none
+
+    include 'sysn_ff.inc'
+    include 'sysi_ff.inc'
+    include 'sysa_ff.inc'
+
+    real, dimension(noq), intent(in)   :: velocity
+
+    SetFlowDataVelocity = .false.
+
+    dlwqd%rbuf(ivelo:ivelo+noq-1) = velocity
+
+    SetFlowDataVelocity = .true.
+
+!    write(*,*) 'Velocity:   ', velocity  (1), velocity  (2), velocity  (3)
+
+end function SetFlowDataVelocity
+
 ! CorrectVolumeSurface --
 !     Correct the mass for all substances via new volumes
 !     and horizontal surface areas
@@ -1464,6 +1511,68 @@ integer function ModelPerformTimeStep ()
     ModelPerformTimeStep = 0
 
 end function ModelPerformTimeStep
+    
+! WriteRestartFileDefaultName --
+!     Write a restart file in .map format using default filename with current status of the model
+!
+integer function WriteRestartFileDefaultName ()
+    !DEC$ ATTRIBUTES DLLEXPORT::WriteRestartFileDefaultName
+    !DEC$ ATTRIBUTES ALIAS : '_WRITERESTARTFILEDEFAULTNAME' :: WriteRestartFileDefaultName
+
+    use delwaq2_global_data
+
+    character (len=255) lcharmap
+    integer    i, k, ierr, found, WriteRestartFile
+
+    lcharmap = lchar(23)
+    found = 0
+    do i=248,1,-1
+      if ( lcharmap(i:i) .eq. '.' .and. found .eq. 0 ) then
+        lcharmap(i:i+7) = "_res.map"
+        found = 1
+      endif
+    end do
+    if ( found == 0) then
+      write ( * , * ) ' Invalid name of restart MAP file !'
+      write (lun(19),*) ' Invalid name of restart MAP file !'
+      WriteRestartFileDefault = 1
+    else
+      WriteRestartFileDefault = WriteRestartFile ( lcharmap )
+    end if
+end function
+    
+! WriteRestartFile --
+!     Write a restart file in .map format with current status of the model
+!
+integer function WriteRestartFile ( lcharmap )
+    !DEC$ ATTRIBUTES DLLEXPORT::WriteRestartFile
+    !DEC$ ATTRIBUTES ALIAS : '_WRITERESTARTFILE' :: WriteRestartFile
+
+    use delwaq2_global_data
+
+    implicit none
+
+    include 'sysc_ff.inc'
+    include 'sysn_ff.inc'
+    include 'sysa_ff.inc'
+
+    character (len=*) lcharmap
+    integer    i, k, ierr
+
+    call dhopnf ( lun(23), lcharmap, 23    , 1     , ierr  )
+    if ( ierr == 0 ) then
+      write ( lun(23) ) (dlwqd%chbuf(imnam+k-1) , k=1,160 )
+      write ( lun(23) ) notot, noseg
+      write ( lun(23) ) ( substance_name(k) , k=1,notot )
+      write ( lun(23) ) dlwqd%itime , ((dlwqd%rbuf(iconc+(k-1)+(i-1)*notot), k=1,notot ), i=1, noseg )
+      close ( lun(23) )
+      WriteRestartFile = 0
+    else
+      write ( * , * ) ' Could not open restart MAP file !'
+      write (lun(19),*) ' Could not open restart MAP file !'
+      WriteRestartFile = 1
+    end if
+end function
 
 ! ModelInitialize --
 !     Initialize the model run

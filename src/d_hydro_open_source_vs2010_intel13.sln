@@ -428,6 +428,7 @@ Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "delwaq2_lib_intel13", "engi
 EndProject
 Project("{6989167D-11E4-40FE-8C1A-2192A86A7E90}") = "delwaq2_stepwise", "engines_gpl\waq\packages\delwaq_test\delwaq2_stepwise\delwaq2_stepwise.vfproj", "{4BA9AEFF-7BC3-4F5A-A070-0215C01DFC5E}"
 	ProjectSection(ProjectDependencies) = postProject
+		{93FF120B-FF39-4365-860B-2ADF26E746AC} = {93FF120B-FF39-4365-860B-2ADF26E746AC}
 		{92CAB073-51BF-4670-B748-C10DC6CCF05E} = {92CAB073-51BF-4670-B748-C10DC6CCF05E}
 	EndProjectSection
 EndProject
@@ -1077,6 +1078,10 @@ Global
 		{92CAB073-51BF-4670-B748-C10DC6CCF05E}.Release|Win32.ActiveCfg = Release|Win32
 		{92CAB073-51BF-4670-B748-C10DC6CCF05E}.Release|Win32.Build.0 = Release|Win32
 		{92CAB073-51BF-4670-B748-C10DC6CCF05E}.Release|x64.ActiveCfg = Release|x64
+		{CAC3B74C-75E7-4555-A925-F0983442D744}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CAC3B74C-75E7-4555-A925-F0983442D744}.Debug|x64.ActiveCfg = Debug|x64
+		{CAC3B74C-75E7-4555-A925-F0983442D744}.Release|Win32.ActiveCfg = Release|Win32
+		{CAC3B74C-75E7-4555-A925-F0983442D744}.Release|x64.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

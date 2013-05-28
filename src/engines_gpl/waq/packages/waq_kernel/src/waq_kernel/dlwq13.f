@@ -55,6 +55,7 @@ C
       CHARACTER*20  SNAME ( * )
       CHARACTER*40  MNAME ( * )
       CHARACTER*(*) LCHAR ( * )
+      CHARACTER*255 LCHARMAP
       integer    i
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwq13", ithandl )
@@ -90,16 +91,17 @@ C
 C
 C     write restart file in .map format
 C
+      LCHARMAP(1:248) = LCHAR(23)(1:248)
       DO 10 I=248,1,-1
-         IF ( LCHAR(23)(I:I) .EQ. '.' ) THEN
-            LCHAR(23)(I:I+7) = "_res.map"
+         IF ( LCHARMAP(I:I) .EQ. '.' ) THEN
+            LCHARMAP(I:I+7) = "_res.map"
             GOTO 20
          ENDIF
    10 CONTINUE
       WRITE ( * , * ) ' Invalid name of restart MAP file !'
       WRITE (LUN(19),*) ' Invalid name of restart MAP file !'
       CALL SRSTOP(1)
-   20 CALL DHOPNF ( LUN(23), LCHAR(23), 23    , 1     , IERR  )
+   20 CALL DHOPNF ( LUN(23), LCHARMAP, 23    , 1     , IERR  )
       WRITE ( LUN(23) ) ( MNAME(K) , K=1,4 )
       WRITE ( LUN(23) )   NOTOT    , NOSEG
       WRITE ( LUN(23) ) ( SNAME(K) , K=1,NOTOT )
