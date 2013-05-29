@@ -33,3 +33,14 @@ src/scripts_lgpl/linux/Makefile
 src/scripts_lgpl/linux/Makefile.in
 src/third_party_open/openda/tests/bin
 src/third_party_open/openda/tests/test_dll_noise/Release
+src/third_party_open/version_number/Makefile
+src/third_party_open/version_number/Makefile.in
+src/third_party_open/version_number/bin/linux/version_number.exe
+src/third_party_open/version_number/packages/Makefile
+src/third_party_open/version_number/packages/Makefile.in
+src/third_party_open/version_number/packages/version_number/Makefile
+src/third_party_open/version_number/packages/version_number/Makefile.in
+src/third_party_open/version_number/packages/version_number/src/.libs
+src/third_party_open/version_number/packages/version_number/src/Makefile
+src/third_party_open/version_number/packages/version_number/src/Makefile.in
+src/third_party_open/version_number/packages/version_number/src/version_number.exe
