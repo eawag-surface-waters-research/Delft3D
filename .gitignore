@@ -29,5 +29,7 @@ src/engines_gpl/waq/packages/delwaq2_openda_lib/[Dd]ebug
 src/engines_gpl/waq/packages/delwaq2_openda_lib/[Rr]elease
 src/engines_gpl/waq/packages/delwaq2_openda_lib/_Pvt_Extensions
 src/engines_gpl/waq/packages/delwaq2_openda_lib/obj
+src/scripts_lgpl/linux/Makefile
+src/scripts_lgpl/linux/Makefile.in
 src/third_party_open/openda/tests/bin
 src/third_party_open/openda/tests/test_dll_noise/Release
