@@ -74,9 +74,10 @@ module MessageHandling
    integer,parameter, public     :: Idlen = 40
    integer,parameter, public     :: max_level = 5
    character(len=12), dimension(max_level), &
-                      private    :: level_prefix = &
-                                              (/'            ', '            ', '** WARNING: ', '** ERROR:   ', '** FATAL:   '/)
-
+                      private    :: level_prefix = (/'            ', '            ', '** WARNING: ', '** ERROR:   ', '** FATAL:   '/)
+   
+   logical                                   , public ::  write_flow_analysis = .true.  ! Flag to prevent double writing in case of FATAL stop
+   
     interface mess
     module procedure message1string
     module procedure message2string
@@ -114,7 +115,7 @@ private
    integer           , dimension(maxMessages), private :: Levels
    integer                                   , private :: messagecount 
    integer                                   , private :: maxErrorLevel = 0 
-   integer                                   , public  :: thresholdLvl = 0 
+   integer                                   , public  :: thresholdLvl = 0
    integer, save                  :: lunMess          = 0
    logical, save                  :: writeMessage2Screen = .false.
    logical, save                  :: useLogging = .true.
@@ -153,6 +154,11 @@ recursive subroutine SetMessage(level, string)
    integer :: levelact
    levelact = max(1,min(max_level, level))
 
+   ! Record maximum error level
+   if (level > maxErrorLevel) then
+      maxErrorLevel = level
+   endif
+
    if (level >= thresholdLvl) then
 
       if (writeMessage2Screen) then
@@ -170,9 +176,6 @@ recursive subroutine SetMessage(level, string)
       end if
       if (useLogging) then
          messageCount           = messageCount + 1 
-         if (level > maxErrorLevel) then
-            maxErrorLevel = level
-         endif
          if (messageCount > maxMessages) then
             messages(maxMessages) = 'Maximum number of messages reached'
             levels(maxMessages)   = level
