@@ -37,6 +37,7 @@ libWaqKernel_la_SOURCES = \
        dlwq2_hydro_set.F \
        delwaq2_data.f \
        delwaq_in_openda.f90 \
+       oil2waq.f \
        wqparcom.F90 \
        wqhbcom.f90 \
        actloc.f \
