@@ -726,7 +726,7 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     ! Keyword to switch back to old computation of the tangential velocities used in the coriolis term
     !
     call prop_get(gdp%mdfile_ptr, '*', 'OCorio' , old_corio)
-    if (old_corio == .false.) then
+    if (old_corio) then
        write (lundia,'(a)') '*** MESSAGE Using Coriolis formulation of Kleptsova-Stelling-Pietrzak.'
     endif
 end subroutine rdnum
