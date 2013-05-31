@@ -138,7 +138,7 @@ subroutine z_red_soursin(nmmax     ,kmax      ,thick     ,kmxsed  , &
        !
        ! Reduction is not applied to mud and not to bedl
        !
-       if (sedtyp(l)==SEDTYP_NONCOHESIVE_SUSPENDED) then
+       if (sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) then
           do nm = 1, nmmax
              if (kfs(nm) == 1) then
                 !
@@ -150,11 +150,11 @@ subroutine z_red_soursin(nmmax     ,kmax      ,thick     ,kmxsed  , &
                 h0     = max(0.01_fp, s0(nm) + real(dps(nm),fp))
                 h1     = max(0.01_fp, s1(nm) + real(dps(nm),fp))
                 !
-                thick = 0.0_fp
+                thick   = 0.0_fp
                 klc     = 1
                 do k = kfsmax(nm),kfsmin(nm),-1
-                   thick(klc)   = dzs1(nm, k)/h1
-                   klc=klc+1
+                   thick(klc) = dzs1(nm,k) / h1
+                   klc        = klc + 1
                 enddo
                 !
                 thick0 = thick(kmaxsd)*h0
@@ -194,10 +194,10 @@ subroutine z_red_soursin(nmmax     ,kmax      ,thick     ,kmxsed  , &
                 ! concentration
                 !
                 if (sinkse(nm,l)*r0(nm,kmaxsd,ll) < sourse(nm,l)) then
-                   sinkse(nm, l) = sinkse(nm, l)*fixfac(nm,l)
-                   sourse(nm, l) = sourse(nm, l)*fixfac(nm,l)
+                   sinkse(nm,l) = sinkse(nm,l) * fixfac(nm,l)
+                   sourse(nm,l) = sourse(nm,l) * fixfac(nm,l)
                    do k = 1, kmax
-                      rsedeq(nm, k, l) = rsedeq(nm, k, l)*fixfac(nm,l)
+                      rsedeq(nm,k,l) = rsedeq(nm,k,l) * fixfac(nm,l)
                    enddo
                 endif
               endif

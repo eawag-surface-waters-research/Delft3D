@@ -64,21 +64,20 @@ subroutine z_dwnvel(nmmax     ,kmax      ,icx     ,kcs       ,kfu       , &
 ! Global variables
 !
     integer                                           , intent(in)  :: icx
-    integer                                           , intent(in)  :: kmax  !  Description and declaration in esm_alloc_int.f90
-    integer                                           , intent(in)  :: nmmax !  Description and declaration in dimens.igs
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kcs   !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kcu   !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kcv   !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfsed !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfu   !  Description and declaration in esm_alloc_int.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfv   !  Description and declaration in esm_alloc_int.f90
-    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: dps   !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: hu    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: hv    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: s1    !  Description and declaration in esm_alloc_real.f90
+    integer                                           , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                           , intent(in)  :: nmmax  !  Description and declaration in dimens.igs
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kcu    !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kcv    !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfsed  !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfu    !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfv    !  Description and declaration in esm_alloc_int.f90
+    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: hu     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: hv     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: s1     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in)  :: u0eul
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in)  :: v0eul
-!   real(fp)  , dimension(kmax)                       , intent(in)  :: sig   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in)  :: dzs1   !  See rjdim.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfsmin !  Description and declaration in iidim.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in)  :: kfsmax !  Description and declaration in iidim.f90
@@ -102,8 +101,9 @@ subroutine z_dwnvel(nmmax     ,kmax      ,icx     ,kcs       ,kfu       , &
     !
     integer :: kmin
     integer :: ksed
-    !
     integer  :: k
+    integer  :: kn
+    integer  :: kmxs
     integer  :: kmx
     integer  :: kmx_u1
     integer  :: kmx_u2
@@ -129,7 +129,6 @@ subroutine z_dwnvel(nmmax     ,kmax      ,icx     ,kcs       ,kfu       , &
     real(fp) :: vv
     real(fp) :: zu   
     real(fp) :: zv
-    !
     real(fp) :: u1   
     real(fp) :: v1
     real(fp) :: u2   
@@ -148,10 +147,7 @@ subroutine z_dwnvel(nmmax     ,kmax      ,icx     ,kcs       ,kfu       , &
     real(fp) :: vstarc
     real(fp) :: thick1
     real(fp) :: thick2
-    integer  :: kn
-    integer  :: kmxs
-    
-    !
+!
 !! executable statements -------------------------------------------------------
 !
     eps                 => gdp%gdconst%eps
@@ -161,10 +157,10 @@ subroutine z_dwnvel(nmmax     ,kmax      ,icx     ,kcs       ,kfu       , &
     do nm = 1, nmmax
        !
        if (kfsed(nm) == 0) then
-          uuu  (nm) = 0.0
-          vvv  (nm) = 0.0
-          umod (nm) = 0.0
-          zumod(nm) = 0.0
+          uuu  (nm) = 0.0_fp
+          vvv  (nm) = 0.0_fp
+          umod (nm) = 0.0_fp
+          zumod(nm) = 0.0_fp
           cycle
        endif
        !
@@ -176,18 +172,9 @@ subroutine z_dwnvel(nmmax     ,kmax      ,icx     ,kcs       ,kfu       , &
        nmu  = nm  + icx
        ndmu = nmu - 1
        !
-       uu = 0.0
-       vv = 0.0
+       uu = 0.0_fp
+       vv = 0.0_fp
        h1 = s1(nm) + real(dps(nm),fp)
-       !
-       !do k = kmax, 1, -1
-       !   cc  = (1.0 + sig(k))*h1
-       !   kmx = k
-       !   if (cc>=0.05*h1 .or. cc>=0.05) then
-       !      exit
-       !   endif         
-       !enddo
-       !
        !
        ! to find kmx and zumod
        !
@@ -195,7 +182,7 @@ subroutine z_dwnvel(nmmax     ,kmax      ,icx     ,kcs       ,kfu       , &
        do k = kfsmin(nm),kfsmax(nm)
           thick1 = thick1 + dzs1(nm, k)
           kmxs = k
-          if (thick1>=0.05*h1 .or. thick1>=0.05) then
+          if (thick1>=0.05_fp*h1 .or. thick1>=0.05_fp) then
              exit
           endif  
        enddo
@@ -207,7 +194,7 @@ subroutine z_dwnvel(nmmax     ,kmax      ,icx     ,kcs       ,kfu       , &
           thick2  = thick2+ dzs1(nm, kmxs)*0.5_fp
           zumod(nm) = thick2
        else
-          zumod(nm) = h1*0.368
+          zumod(nm) = h1*0.368_fp
        endif
        !
        !
@@ -276,21 +263,18 @@ subroutine z_dwnvel(nmmax     ,kmax      ,icx     ,kcs       ,kfu       , &
           nm_v2 = ndm
           vfac  = 1.0_fp
        endif
-       ! sigma code:
-       !uu = ufac * (  kfu(nm_u1)*u0eul(nm_u1, kmx)*hu(nm_u1) &
-       !   &         + kfu(nm_u2)*u0eul(nm_u2, kmx)*hu(nm_u2)  )
-       !vv = vfac * (  kfv(nm_v1)*v0eul(nm_v1, kmx)*hv(nm_v1) &
-       !   &         + kfv(nm_v2)*v0eul(nm_v2, kmx)*hv(nm_v2)  )
-       !
        !
        ! U-direction
        !
-       zu = 0.0_fp
-       uu = 0.0_fp
+       zu        = 0.0_fp
+       uu        = 0.0_fp
        ustarc_u1 = 0.0_fp
        ustarc_u2 = 0.0_fp
-       kmx_u1 = 0       ! kmx_u1 here is for z layers: counting from the bed.
-       kmx_u2 = 0
+       !
+       ! kmx_u1 here is for z layers: counting from the bed.
+       !
+       kmx_u1   = 0
+       kmx_u2   = 0
        zumod_u1 = 0.0_fp
        zumod_u2 = 0.0_fp
        !
@@ -315,52 +299,48 @@ subroutine z_dwnvel(nmmax     ,kmax      ,icx     ,kcs       ,kfu       , &
        endif
        kn      = max(1, kfu(nm_u1) + kfu(nm_u2))
        z0cur_u   = (  kfu(nm_u1)*z0ucur(nm_u1) + kfu(nm_u2)*z0ucur(nm_u2))/kn
-       
-       if ((nm_u1 > 0).and. (kmx_u1 >0)) then
-          u1 = kfu(nm_u1)*u0eul(nm_u1, kmx_u1)
-          
+       if ((nm_u1>0) .and. (kmx_u1>0)) then
+          u1 = kfu(nm_u1) * u0eul(nm_u1,kmx_u1)
           do k = kfumin(nm_u1), kmx_u1-1
             zumod_u1 = zumod_u1 + dzu1(nm, k)
           enddo
-          zumod_u1  = zumod_u1+ dzu1(nm, kmx_u1)*0.5_fp
-          
+          zumod_u1  = zumod_u1+ dzu1(nm,kmx_u1)*0.5_fp
           if(zumod_u1 > 0.0_fp) then
-             ustarc_u1= u1*vonkar/log(1. + zumod_u1/z0ucur(nm_u1))
+             ustarc_u1= u1 * vonkar / log(1.0_fp + zumod_u1/z0ucur(nm_u1))
           else 
              ustarc_u1= 0.0_fp
           endif
        endif
-       if ((nm_u2 > 0).and. (kmx_u2 >0)) then
-          u2 = kfu(nm_u2)*u0eul(nm_u2, kmx_u2)
+       if ((nm_u2>0) .and. (kmx_u2>0)) then
+          u2 = kfu(nm_u2) * u0eul(nm_u2,kmx_u2)
           do k = kfumin(nm_u1), kmx_u2-1
             zumod_u2 = zumod_u2 + dzu1(nm, k)
           enddo
           zumod_u2  = zumod_u2+ dzu1(nm, kmx_u2)*0.5_fp
-          
           if(zumod_u2 > 0.0_fp) then
              ustarc_u2= u2*vonkar/log(1.0 + zumod_u2/z0ucur(nm_u2))
           else
              ustarc_u2= 0.0_fp 
           endif
        endif
-       ustarc = (ustarc_u1 + ustarc_u2)*ufac
+       ustarc = (ustarc_u1+ustarc_u2) * ufac
        if (z0cur_u >0.0_fp) then
-          uu = ustarc*log(1.0 +  zumod(nm)/z0cur_u)/vonkar
+          uu = ustarc * log(1.0_fp+zumod(nm)/z0cur_u) / vonkar
        else
           uu = 0.0_fp
        endif
        !
        ! V-direction
        !
-       zv = 0.0_fp
-       vv = 0.0_fp
+       zv        = 0.0_fp
+       vv        = 0.0_fp
        vstarc_v1 = 0.0_fp
        vstarc_v2 = 0.0_fp
-       kmx_v1 = 0
-       kmx_v2 = 0
-       zvmod_v1 = 0.0_fp
-       zvmod_v2 = 0.0_fp    
-       if ((nm_v1 > 0) .and. (kfvmin(nm_v1)<kfvmax(nm_v1))) then
+       kmx_v1    = 0
+       kmx_v2    = 0
+       zvmod_v1  = 0.0_fp
+       zvmod_v2  = 0.0_fp    
+       if ((nm_v1>0) .and. (kfvmin(nm_v1)<kfvmax(nm_v1))) then
           do k = kfvmin(nm_v1),kfvmax(nm_v1)
              zv = zv + dzv1(nm_v1,k)
              kmx_v1 = k
@@ -370,7 +350,7 @@ subroutine z_dwnvel(nmmax     ,kmax      ,icx     ,kcs       ,kfu       , &
           enddo
        endif
        zv = 0.0_fp
-       if ((nm_v2 >0) .and. (kfvmin(nm_v2)<kfvmax(nm_v2))) then
+       if ((nm_v2>0) .and. (kfvmin(nm_v2)<kfvmax(nm_v2))) then
           do k = kfvmin(nm_v2),kfvmax(nm_v2)
              zv = zv + dzv1(nm_v2,k)
              kmx_v2 = k
@@ -380,38 +360,38 @@ subroutine z_dwnvel(nmmax     ,kmax      ,icx     ,kcs       ,kfu       , &
           enddo
        endif
        kn      = max(1, kfv(nm_v1) + kfv(nm_v2))
-       z0cur_v   = (  kfv(nm_v1)*z0vcur(nm_v1) + kfv(nm_v2)*z0vcur(nm_v2))/kn
-       if ((nm_v1 > 0).and. (kmx_v1 >0)) then          
-          v1 = kfv(nm_v1)*v0eul(nm_v1, kmx_v1)
+       z0cur_v = (kfv(nm_v1)*z0vcur(nm_v1) + kfv(nm_v2)*z0vcur(nm_v2)) / kn
+       if ((nm_v1>0) .and. (kmx_v1>0)) then          
+          v1 = kfv(nm_v1) * v0eul(nm_v1,kmx_v1)
           do k = kfvmin(nm_v1), kmx_v1-1
             zvmod_v1 = zvmod_v1 + dzv1(nm, k)
           enddo
-          zvmod_v1  = zvmod_v1+ dzv1(nm, kmx_v1)*0.5_fp
+          zvmod_v1  = zvmod_v1 + dzv1(nm,kmx_v1)*0.5_fp
           if(zvmod_v1 > 0.0_fp) then
-             vstarc_v1= v1*vonkar/log(1. + zvmod_v1/z0vcur(nm_v1))
+             vstarc_v1= v1 * vonkar / log(1.0_fp + zvmod_v1/z0vcur(nm_v1))
           else
              vstarc_v1= 0.0_fp 
           endif
        endif
-       if ((nm_v2 > 0).and. (kmx_v2 >0)) then          
-          v2 = kfv(nm_v2)*v0eul(nm_v2, kmx_v2)
+       if ((nm_v2>0) .and. (kmx_v2>0)) then          
+          v2 = kfv(nm_v2) * v0eul(nm_v2,kmx_v2)
           do k = kfvmin(nm_v2), kmx_v2-1
             zvmod_v2 = zvmod_v2 + dzv1(nm, k)
           enddo
-          zvmod_v2  = zvmod_v2 + dzv1(nm, kmx_v2)*0.5_fp
+          zvmod_v2  = zvmod_v2 + dzv1(nm,kmx_v2)*0.5_fp
           if(zvmod_v2 > 0.0_fp) then
-             vstarc_v2= v2*vonkar/log(1.0 + zvmod_v2/z0vcur(nm_v2))
+             vstarc_v2= v2 * vonkar / log(1.0_fp + zvmod_v2/z0vcur(nm_v2))
           else
              vstarc_v2= 0.0_fp
           endif
        endif
-       vstarc = vfac * (vstarc_v1 +  vstarc_v2)
+       vstarc = vfac * (vstarc_v1+vstarc_v2)
        if (z0cur_v >0.0_fp) then
-          vv = vstarc*log(1.0 +  zumod(nm)/z0cur_v)/vonkar
+          vv = vstarc * log(1.0_fp + zumod(nm)/z0cur_v) / vonkar
        else
           vv = 0.0_fp
        endif
-       !   
+       !
        if (mornum%maximumwaterdepth) then
           !
           ! prevent any increase in velocity due to a decrease in water depth
@@ -428,10 +408,10 @@ subroutine z_dwnvel(nmmax     ,kmax      ,icx     ,kcs       ,kfu       , &
        !vv = vv/h1
        !
        if (abs(uu) < eps) then
-          uu = 0.0
+          uu = 0.0_fp
        endif
        if (abs(vv) < eps) then
-          vv = 0.0
+          vv = 0.0_fp
        endif
        !
        ! Calculate resultant velocity magnitude and height

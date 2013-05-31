@@ -219,6 +219,12 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     integer                                                   , intent(in)  :: icx     !  Increment in the X-dir., if ICX= NMAX then computation proceeds in the X-dir. If icx=1 then computation proceeds in the Y-dir.
     integer                                                   , intent(in)  :: icy     !  Increment in the Y-dir. (see ICX)
     integer                                                   , intent(in)  :: kmax    !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfsmin  !  Description and declaration in iidim.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfsmax  !  Description and declaration in iidim.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfumin  !  Description and declaration in iidim.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfumax  !  Description and declaration in iidim.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfvmin  !  Description and declaration in iidim.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfvmax  !  Description and declaration in iidim.f90
     integer                                                   , intent(in)  :: lsal    !  Description and declaration in dimens.igs
     integer                                                   , intent(in)  :: lsed    !  Description and declaration in esm_alloc_int.f90
     integer                                                   , intent(in)  :: lsedtot !  Description and declaration in esm_alloc_int.f90
@@ -229,9 +235,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     integer                                                                 :: lundia  !  Description and declaration in inout.igs
     integer                                                   , intent(in)  :: nmmax   !  Description and declaration in dimens.igs
     integer                                                   , intent(in)  :: nst
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: gsqs    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: guu     !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: gvv     !  Description and declaration in esm_alloc_real.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kcs     !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kcu     !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kcv     !  Description and declaration in esm_alloc_int.f90
@@ -245,6 +248,9 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: entr    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: guv     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: gvu     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: gsqs    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: guu     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: gvv     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: hrms    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: hu      !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: hv      !  Description and declaration in esm_alloc_real.f90
@@ -278,21 +284,13 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsed)        , intent(out) :: rca     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot)                   :: sbuu    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsedtot)                   :: sbvv    !  Description and declaration in esm_alloc_real.f90
-!   real(fp)  , dimension(kmax)                               , intent(in)  :: sig     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(kmax)                               , intent(in)  :: thick   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(lstsci)                             , intent(out) :: sigdif  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(lstsci)                                           :: sigmol  !  Description and declaration in esm_alloc_real.f90
     real(fp)                                                  , intent(in)  :: saleqs
     real(fp)                                                  , intent(in)  :: temeqs
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfsmin !  Description and declaration in iidim.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfsmax !  Description and declaration in iidim.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: dzs1   !  Description and declaration in rjdim.f90 
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: dzs0   !  Description and declaration in rjdim.f90 
-!   
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfumin !  Description and declaration in iidim.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfumax !  Description and declaration in iidim.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfvmin !  Description and declaration in iidim.f90
-    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfvmax !  Description and declaration in iidim.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: dzu1   !  Description and declaration in rjdim.f90 
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: dzv1   !  Description and declaration in rjdim.f90 
 !
@@ -314,6 +312,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     integer                       :: nhystp
     integer                       :: nm
     integer                       :: nmd
+    integer                       :: nm_pos    ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
     integer                       :: nmu
     integer                       :: num
     logical                       :: error
@@ -345,6 +344,8 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: tdss      ! temporary variable for dss
     real(fp)                      :: temperature
     real(fp)                      :: tgamtcr
+    real(fp), dimension(kmax)     :: thicklc    
+    real(fp), dimension(kmax)     :: siglc    
     real(fp)                      :: thick0
     real(fp)                      :: thick1
     real(fp)                      :: trsedeq   ! temporary variable for rsedeq
@@ -372,10 +373,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp), dimension(kmax)     :: concin3d
     real(fp), dimension(kmax2d)   :: concin2d
     character(256)                :: errmsg
-    integer                       :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
-    !
-    real(fp), dimension(kmax)     :: thicklc    
-    real(fp), dimension(kmax)     :: siglc    
     !
     data thck2d/0.1747, 0.1449, 0.1202, 0.0997, 0.0827, 0.0686, 0.0569, 0.0472, &
        & 0.0391, 0.0325, 0.0269, 0.0223, 0.0185, 0.0154, 0.0127, 0.0106, 0.0088,&
@@ -524,7 +521,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     eropar              => gdp%gdsedpar%eropar
     hdt                 => gdp%gdnumeco%hdt
     !
-    nm_pos              =  1
+    nm_pos =  1
     if (ifirst == 1) then
        ifirst = 0
        !
@@ -622,7 +619,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     ! to be used in computation of skin friction (Soulsby 2004)
     !
     if (bsskin) then
-       call detthcmud(gdp%gdmorlyr  ,thcmud    )
+       call detthcmud(gdp%gdmorlyr, thcmud)
     endif
     !
     ! Initialisation:
@@ -707,7 +704,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     ! user specified threshold. Also get maximum erosion source SRCMAX
     ! (used for cohesive sediments).
     !
-    dt = hdt*morfac
+    dt = hdt * morfac
     !
     call getfixfac(gdp%gdmorlyr, gdp%d%nmlb, gdp%d%nmub, lsedtot, &
                  & nmmax       , fixfac    , ffthresh  , srcmax , &
@@ -716,16 +713,16 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     ! Set fixfac to 1.0 for tracer sediments and adjust frac
     !
     do l = 1, lsed
-       if (sedtrcfac(l)>0.0_fp) then
+       if (sedtrcfac(l) > 0.0_fp) then
           grkg = (1.0_fp - 0.4_fp) / (cdryb(l)*pi*sedd50(l)**3/6.0_fp) ! Number of grains per kg
           grm2tot = 0.5_fp/(pi*sedd50(l)**2) ! Number of grains per m^2
           istat = bedcomp_getpointer_realprec(gdp%gdmorlyr,'bodsed',bodsed)
           do nm = 1, nmmax
              fixfac(nm, l) = 1.0_fp
-             grm2 = bodsed(l, nm) * grkg
-             frac(nm, l) = grm2 / grm2tot
-             frac(nm, l) = max(min(frac(nm, l), 1.0_fp), 0.0_fp)
-             frac(nm, l) = frac(nm, l)*sedtrcfac(l)
+             grm2          = bodsed(l, nm) * grkg
+             frac  (nm, l) = grm2 / grm2tot
+             frac  (nm, l) = max(min(frac(nm, l), 1.0_fp), 0.0_fp)
+             frac  (nm, l) = frac(nm, l)*sedtrcfac(l)
           enddo
        endif
     enddo
@@ -842,15 +839,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        enddo
        velm = sqrt(umean**2+vmean**2)
        !
-       !ubed = (u0eul(nm,kmax) + u0eul(nmd,kmax))/ku
-       !vbed = (v0eul(nm,kmax) + v0eul(ndm,kmax))/kv
-       !velb = sqrt(ubed**2 + vbed**2)
-       !if (kmax>1) then
-       !   zvelb = h1*thick(kmax)/2.0_fp
-       !else
-       !   zvelb = h1/ee
-       !endif
-       !
        ! Calculate current related roughness
        !
        kn    = max(1, kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm))
@@ -935,15 +923,9 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           dll_reals(RP_RLAMB) = 0.0_hp
           dll_reals(RP_UORB ) = 0.0_hp
        endif
-       ! dll_reals(RP_D50  ) = d50 of fraction
-       ! dll_reals(RP_DSS  ) = suspended sediment diameter of fraction
-       ! dll_reals(RP_DSTAR) = dstar of fraction
        dll_reals(RP_D10MX) = real(dxx(nm,i10),hp)
        dll_reals(RP_D90MX) = real(dxx(nm,i90),hp)
        dll_reals(RP_MUDFR) = real(mudfrac(nm),hp)
-       ! dll_reals(RP_HIDEX) = hiding and exposure
-       ! dll_reals(RP_SETVL) = settling velocity
-       ! dll_reals(RP_RHOSL) = specific density
        dll_reals(RP_RHOWT) = real(rhowat(nm,kmax),hp) ! Density of water
        dll_reals(RP_SALIN) = real(salinity       ,hp)
        dll_reals(RP_TEMP ) = real(temperature    ,hp)
@@ -960,7 +942,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        dll_reals(RP_DG   ) = real(dg(nm)         ,hp)
        dll_reals(RP_SNDFR) = real(sandfrac(nm)   ,hp)
        dll_reals(RP_DGSD ) = real(dgsd(nm)       ,hp)
-       if (ltur>=1) then
+       if (ltur >= 1) then
           dll_reals(RP_KTUR ) = real(rtur0(nm,kmax,1),hp)
        endif
        !
@@ -972,7 +954,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        dll_integers(IP_NM   ) = nm
        dll_integers(IP_N    ) = n
        dll_integers(IP_M    ) = m
-       ! dll_integers(IP_ISED ) = l
        !
        if (max_strings < MAX_SP) then
           write(errmsg,'(a,a,a)') 'Insufficient space to pass strings to transport routine.'
@@ -980,7 +961,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           call d3stop(1, gdp)
        endif
        dll_strings(SP_RUNID) = gdp%runid
-       ! dll_strings(SP_USRFL) = dll_usrfil(l)
        !
        do l = 1, lsedtot
           !
@@ -991,7 +971,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           dll_integers(IP_ISED ) = l
           dll_strings(SP_USRFL)  = dll_usrfil(l)
           !
-          if (sedtyp(l)==SEDTYP_COHESIVE) then
+          if (sedtyp(l) == SEDTYP_COHESIVE) then
              !
              ! sediment type COHESIVE
              !
@@ -1012,7 +992,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                         & dll_integers,dll_reals      ,dll_strings  )
              if (error) call d3stop(1, gdp)
              !
-             if (kmax>1) then 
+             if (kmax > 1) then 
                 !
                 ! For 3D model set sediment diffusion coefficient
                 ! NOTE THAT IF ALGEBRAIC OR K-L TURBULENCE MODEL IS USED THEN WAVES
@@ -1044,7 +1024,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           if (suspfrac) then
              sigdif(ll) = 1.0_fp
           endif
-          tsd = -999.0_fp
+          tsd  = -999.0_fp
           di50 = sedd50(l)
           if (di50 < 0.0_fp) then
              !
@@ -1189,24 +1169,21 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                 ! then the seddif should be taken one layer lower.
                 klc=0
                 do k = kfsmax(nm),kfsmin(nm)-1,-1
-                   seddif(nm, k, l) = sddflc(klc)
-                   klc=klc+1
+                   seddif(nm,k,l) = sddflc(klc)
+                   klc            = klc + 1
                 enddo
-                
-                klc=1
+                klc = 1
                 do k = kfsmax(nm),kfsmin(nm),-1
-                   rsedeq(nm, k, l) = rsdqlc(klc)
-                   klc=klc+1
+                   rsedeq(nm,k,l) = rsdqlc(klc)
+                   klc            = klc + 1
                 enddo
                 !
                 ! Source and sink terms for main 3d computation
                 ! note: terms are part explicit, part implicit, see
                 ! thesis of Giles Lesser, May 2000
                 !
-                thick0        = thicklc(kmaxsd) * h0
-                thick1        = thicklc(kmaxsd) * h1
-                !thick0        = thick(kmaxsd) * h0
-                !thick1        = thick(kmaxsd) * h1
+                thick0 = thicklc(kmaxsd) * h0
+                thick1 = thicklc(kmaxsd) * h1
                 call soursin_3d  (h1                ,thick0         ,thick1             , &
                                &  siglc(kmaxsd)     ,thicklc(kmaxsd),r0(nm,kmxsed(nm,l) ,ll)    , &
                                &  vicmol            ,sigmol(ll)     ,seddif(nm,kmxsed(nm,l)-1,l), &
@@ -1218,7 +1195,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                 ! gradient in sed. conc. exists in this area.
                 !
                 difbot = 10.0_fp * ws(nm,kmxsed(nm,l)-1,l) * thick1
-                !do k = kmaxsd, kmax
                 do k = kfsmin(nm)-1, kmxsed(nm,1)-1
                    seddif(nm, k, l) = difbot
                 enddo

@@ -187,7 +187,6 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     logical                              , pointer :: roller
     logical                              , pointer :: sbkol
     logical                              , pointer :: bubble
-    ! Morphology
     integer                              , pointer :: lsedtot
     integer(pntrsize)                    , pointer :: rsedeq
     integer(pntrsize)                    , pointer :: kmxsed
@@ -208,7 +207,6 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     logical                              , pointer :: eqmbcsand
     logical                              , pointer :: eqmbcmud
     integer              , dimension(:)  , pointer :: sedtyp
-    ! Morphology
     integer(pntrsize)                    , pointer :: alfas
     integer(pntrsize)                    , pointer :: alpha
     integer(pntrsize)                    , pointer :: areau
@@ -953,7 +951,6 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     typbnd              => gdp%gdr_i_ch%typbnd
     modify_dzsuv        => gdp%gdzmodel%modify_dzsuv
     ztbml               => gdp%gdzmodel%ztbml
-    ! Morphology
     flmd2l              => gdp%gdprocs%flmd2l
     depchg              => gdp%gdr_i_ch%depchg
     ssuu                => gdp%gdr_i_ch%ssuu
@@ -975,7 +972,6 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
     rca                 => gdp%gdr_i_ch%rca
     sedtyp              => gdp%gdsedpar%sedtyp
     ubot                => gdp%gdr_i_ch%ubot
-    ! Morphology
     !
     icx     = 0
     icy     = 0
@@ -1595,7 +1591,6 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        ! Transport turbulence
        !
        if (lstsci>0 .and. nst<itdiag) then
-          ! Morphology
           if (lsed > 0) then
              icx = nmaxddb
              icy = 1
@@ -1630,7 +1625,6 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                      & i(kfvmax) ,r(dzu1)   ,r(dzv1)   ,gdp       )
              call timer_stop(timer_erosed, gdp)
           endif
-          ! Morphology
           call timer_start(timer_difu, gdp)
           icx = nmaxddb
           icy = 1
@@ -1737,8 +1731,6 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           call timer_stop(timer_drotim, gdp)
        endif
        !
-       ! Morphology
-       !
        ! Compute change in bottom sediment and bottom elevation
        ! except when run parallel to fluid mud
        ! Suspended transport correction vector
@@ -1844,8 +1836,6 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
              endif
           endif
        endif
-       ! Morphology
-
        call updwaqflx(nst       ,zmodel    ,nmmax     ,kmax      ,i(kcs)    , &
                     & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
                     & nsrc      ,r(disch)  ,gdp       )
@@ -2374,7 +2364,6 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        ! Transport turbulence
        !
        if (lstsci>0 .and. nst<itdiag) then
-          ! Morphology
           if (lsed > 0) then
              icx = nmaxddb
              icy = 1
@@ -2412,7 +2401,6 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                      & i(kfvmax) ,r(dzu1)   ,r(dzv1)   ,gdp       )
              call timer_stop(timer_erosed, gdp)
           endif
-          ! Morphology
           call timer_start(timer_difu, gdp)
           !
           ! Hydra:    difuiter = 0
@@ -2653,8 +2641,6 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           call timer_stop(timer_nonhyd, gdp)
        endif
        !
-       ! Morphology
-       !
        ! Compute change in bottom sediment and bottom elevation
        ! except when run parallel to fluid mud
        ! Suspended transport correction vector
@@ -2691,8 +2677,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                       & i(kfvmax) ,gdp       )
           call timer_stop(timer_bott3d, gdp)
           if (bedupd) then
-!             icx = nmaxddb
-!             icy = 1
+             !icx = nmaxddb
+             !icy = 1
              !call z_updzm(jstart    ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              !           & icy       ,fout      ,i(kcu)    ,i(kcv)    ,i(kcs)    , &
              !           & i(kfu)    ,i(kfv)    ,i(kfs)    ,i(kfsz1)  ,i(kfuz1)  , &
@@ -2771,7 +2757,6 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
              endif
           endif
        endif
-       ! Morphology
        call updwaqflx(nst       ,zmodel    ,nmmax     ,kmax      ,i(kcs)    , &
                     & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
                     & nsrc      ,r(disch)  ,gdp       )

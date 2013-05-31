@@ -106,11 +106,9 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
 !
 ! Global variables
 !
-    integer                                                      , intent(in)  :: icx    !!  Increment in the X-dir., if ICX= NMAX then computation proceeds in the X-dir. 
-                                                                                         !!  If icx=1 then computation proceeds in the Y-dir.
-    integer                                                      , intent(in)  :: icy    !!  Increment in the Y-dir. (see ICX)
-    integer                                                                    :: j      !!  Begin pointer for arrays which have been transformed into 1D arrays.
-                                                                                         !!  Due to the shift in the 2nd (M-) index, J = -2*NMAX + 1
+    integer                                                      , intent(in)  :: icx    !  Increment in the X-dir., if ICX= NMAX then computation proceeds in the X-dir. If icx=1 then computation proceeds in the Y-dir.
+    integer                                                      , intent(in)  :: icy    !  Increment in the Y-dir. (see ICX)
+    integer                                                                    :: j      !  Begin pointer for arrays which have been transformed into 1D arrays. Due to the shift in the 2nd (M-) index, J = -2*NMAX + 1
     integer                                                      , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                      , intent(in)  :: ltur   !  Description and declaration in esm_alloc_int.f90
     integer                                                      , intent(in)  :: mmax   !  Description and declaration in esm_alloc_int.f90
@@ -155,11 +153,11 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: windsv !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: z0urou !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: z0vrou !  Description and declaration in esm_alloc_real.f90
-    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)                    :: aak    !!  Internal work array
-    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)                    :: bbk    !!  Internal work array
+    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)                    :: aak    !  Internal work array
+    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)                    :: bbk    !  Internal work array
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)      , intent(in)  :: bruvai !  Description and declaration in esm_alloc_real.f90
-    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)                    :: cck    !!  Internal work array
-    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)                    :: ddk    !!  Internal work array, diagonal space at (N,M,K)
+    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)                    :: cck    !  Internal work array
+    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)                    :: ddk    !  Internal work array, diagonal space at (N,M,K)
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)      , intent(in)  :: dicww  !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)      , intent(in)  :: dudz   !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)      , intent(in)  :: dvdz   !  Description and declaration in esm_alloc_real.f90
@@ -168,22 +166,20 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)      , intent(in)  :: w1     !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax, ltur), intent(in)  :: rtur0  !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax, ltur)              :: rtur1  !  Description and declaration in esm_alloc_real.f90
-    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: bdx    !!  Internal work array, implicit coupling of concentration in (N,M,K)
+    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: bdx    !  Internal work array, implicit coupling of concentration in (N,M,K)
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: bdy
-    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: bux    !!  Internal work array, implicit coupling of concentration in (N,M,K)
-                                                                                         !!  with layer concentration in (N,M+1,K)
+    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: bux    !  Internal work array, implicit coupling of concentration in (N,M,K) with layer concentration in (N,M+1,K)
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: buy
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: dzs1   !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: pkwbt
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: tkedis !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: tkepro !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: u1     !  Description and declaration in esm_alloc_real.f90
-    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: ueul   !!  Eulerian velocity in X-direction (including Stokes drift)
-
-    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: umea   !!  Mean horizontal velocity
+    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: ueul   !  Eulerian velocity in X-direction (including Stokes drift)
+    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: umea   !  Mean horizontal velocity
     real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: v1     !  Description and declaration in esm_alloc_real.f90
-    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: veul   !! Eulerian velocity in Y-direction (including Stokes drift)
-    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: vmea   !!  Mean horizontal velocity
+    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: veul   !  Eulerian velocity in Y-direction (including Stokes drift)
+    real(fp)     , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: vmea   !  Mean horizontal velocity
     real(fp)     , dimension(kmax)                                             :: sig    !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(kmax)                                             :: thick  !  Description and declaration in esm_alloc_real.f90
     character(8)                                                               :: dischy !  Description and declaration in tricom.igs
@@ -338,22 +334,6 @@ subroutine z_tratur(dischy    ,nubnd     ,j         ,nmmaxj    ,nmmax     , &
           enddo
        endif
     enddo
-    !      kmmx = max(kfsmax(nm), kfsmx0(nm))
-    !      kmin = min(kfsmax(nm), kfsmx0(nm))
-    !      do k = kfsmin(nm), kfsmax(nm)
-    !         rtur1(nm, k, 1) = rtur0(nm, k, 1)
-    !         if (ltur == 2) rtur1(nm, k, 2) = rtur0(nm, k, 2)
-    !      enddo
-    !      do k = kfsmax(nm) + 1, kmmx
-    !         rtur1(nm, k, 1) = 0.0
-    !         if (ltur == 2) rtur1(nm, k, 2) = 0
-    !      enddo
-    !      do k = kmin + 1, kfsmax(nm)
-    !         rtur1(nm, k, 1) = rtur1(nm, kmin, 1)
-    !         if (ltur == 2) rtur1(nm, k, 2) = rtur1(nm, kmin, 2)
-    !      enddo
-    !   endif
-    !enddo
     !
     ! user defined boundary conditions if nubnd <> 0
     ! in two directions

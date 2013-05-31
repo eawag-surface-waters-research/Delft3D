@@ -65,14 +65,8 @@ subroutine z_drychku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
 !
 ! Global variables
 !
-    integer                                                         :: icx    !!  Increment in the X-dir., if ICX= NMAX
-                                                                              !!  then computation proceeds in the X-
-                                                                              !!  dir. If icx=1 then computation pro-
-                                                                              !!  ceeds in the Y-dir.
-    integer                                                         :: j      !!  Begin pointer for arrays which have
-                                                                              !!  been transformed into 1D arrays.
-                                                                              !!  Due to the shift in the 2nd (M-)
-                                                                              !!  index, J = -2*NMAX + 1
+    integer                                                         :: icx    !  Increment in the X-dir., if ICX= NMAX then computation proceeds in the X-dir. If icx=1 then computation proceeds in the Y-dir.
+    integer                                                         :: j      !  Begin pointer for arrays which have been transformed into 1D arrays. Due to the shift in the 2nd (M-)index, J = -2*NMAX + 1
     integer                                                         :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                         :: nmmax  !  Description and declaration in dimens.igs
     integer                                                         :: nmmaxj !  Description and declaration in dimens.igs
@@ -308,16 +302,12 @@ subroutine z_drychku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
                    u1(nm, k) = u1(nm, kfumx0(nm))
                 enddo
              endif
+             !
              ! Morphology
+             !
              do k = kfumin(nm), kfumn0(nm)-1
                 u1(nm, k) = u1(nm, kfumn0(nm))
-                !qxk(nm,k) = dzu1(nm,k) * u1(nm,k) * guu(nm)
              enddo
-             !do k = kfumn0(nm), kfumin(nm)-1
-             !   u1(nm, k) = 0.0_fp
-             !   !qxk(nm,k) = dzu1(nm,k) * u1(nm,k) * guu(nm)
-             !enddo
-             ! Morphology
           endif
        endif
     enddo

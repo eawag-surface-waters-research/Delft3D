@@ -58,16 +58,16 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
 !
 ! Global variables
 !
-    integer                                             , intent(in)  :: icx    !!  Increment in the X-dir., if ICX= NMAX then computation proceeds in the X-dir. If icx=1 then computation proceeds in the Y-dir.
-    integer                                             , intent(in)  :: icy    !!  Increment in the Y-dir. (see ICX)
-    integer                                             , intent(out) :: idry   !!  Flag set to 1 if a dry point is detected in routine DRYCHK after SUD is completed
-    integer                                                           :: j      !!  Begin pointer for arrays which have been transformed into 1D arrays. Due to the shift in the 2nd (M-) index, J = -2*NMAX + 1
+    integer                                             , intent(in)  :: icx    !  Increment in the X-dir., if ICX= NMAX then computation proceeds in the X-dir. If icx=1 then computation proceeds in the Y-dir.
+    integer                                             , intent(in)  :: icy    !  Increment in the Y-dir. (see ICX)
+    integer                                             , intent(out) :: idry   !  Flag set to 1 if a dry point is detected in routine DRYCHK after SUD is completed
+    integer                                                           :: j      !  Begin pointer for arrays which have been transformed into 1D arrays. Due to the shift in the 2nd (M-) index, J = -2*NMAX + 1
     integer                                             , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                           :: lstsci !  Description and declaration in esm_alloc_int.f90
     integer                                                           :: nfltyp !  Description and declaration in esm_alloc_int.f90
     integer                                             , intent(in)  :: nmmax  !  Description and declaration in dimens.igs
     integer                                                           :: nmmaxj !  Description and declaration in dimens.igs
-    integer                                                           :: nst    !!  Time step number
+    integer                                                           :: nst    !  Time step number
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfs    !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)                      :: kfsmax !  Description and declaration in esm_alloc_int.f90
@@ -115,10 +115,10 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
        nmd = nm - icx
        ndm = nm - icy
        if (kfu(nm)==1 .or. kfu(nmd)==1 .or. kfv(nm)==1 .or. kfv(ndm)==1) then
-           if ( s1(nm) <= -real(dps(nm),fp) ) then
-             kfu(nm) = 0
+          if ( s1(nm) <= -real(dps(nm),fp) ) then
+             kfu(nm ) = 0
              kfu(nmd) = 0
-             kfv(nm) = 0
+             kfv(nm ) = 0
              kfv(ndm) = 0
              do k = 1, kmax  ! evt. kfsmin, kmax
                 kfuz0(nm , k) = 0
@@ -168,7 +168,7 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                 endif
              enddo
           endif
-         !
+          !
           ! Find the (new) location of the bed layer
           !
           do k = 1, kmax
@@ -178,22 +178,21 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
              endif
           enddo
           !
-         ! determination number of layers at new time level
-         !
-         kfsz1(nm,:) = 0
-         do k = kfsmin(nm), kfsmax(nm)
-            kfsz1(nm, k) = kfs(nm)
-         enddo
+          ! determination number of layers at new time level
+          !
+          kfsz1(nm,:) = 0
+          do k = kfsmin(nm), kfsmax(nm)
+             kfsz1(nm, k) = kfs(nm)
+          enddo
        endif
     enddo
     !
     ! issue warning if maximum water level is above zk(kmax) (ZTOP)
     !
-    s1max1 = maxval(s1)
-    s1max2 = maxval(s1(1:nmmax))
+    s1max1    = maxval(s1)
+    s1max2    = maxval(s1(1:nmmax))
     nm_s1max1 = maxloc(s1)
     nm_s1max2 = maxloc(s1(1:nmmax))
-    !if (s1max1 > zk(kmax)) then
     kfsmax(nm_s1max1(1)) = max(kfsmax(nm_s1max1(1)),1)
     kfsmax(nm_s1max2(1)) = max(kfsmax(nm_s1max2(1)),1)
     if (s1max1 > zk(kmax)+0.5*(dzs1(nm_s1max1(1),kfsmax(nm_s1max1(1)))).and. kfs(nm_s1max1(1)) == 1) then
@@ -205,7 +204,6 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
        call prterr(lundia, 'U190', trim(errmsg))
     endif
     !
-    !if (s1max2 > zk(kmax)) then
     if (s1max2 > zk(kmax)+0.5*(dzs1(nm_s1max2(1),kfsmax(nm_s1max2(1)))).and. kfs(nm_s1max2(1)) == 1) then
        write (errmsg, '(a,g10.3,2a,i0,a,i0,a,i0,2a)') '2: Maximum water level ', s1max2, &
                     & ', (m). Top layer is too thick.',                                  &
@@ -242,7 +240,6 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
     !
     do nm = 1, nmmax
        if (kfs(nm) == 1) then
-          ! morphology
           if (kfsmin(nm) < kfsmn0(nm)) then
              do k = kfsmin(nm), kfsmn0(nm)-1
                 w1(nm, k) = w1(nm, kfsmn0(nm))
@@ -252,7 +249,6 @@ subroutine z_drychk(idry      ,j         ,nmmaxj    ,nmmax     ,kmax      , &
                 w1(nm, k) = 0.0_fp
              enddo
           endif
-          ! morphology
           if (kfsmax(nm) > kfsmx0(nm)) then
              do k = kfsmx0(nm), kfsmax(nm)
                 w1(nm, k) = w1(nm, kfsmx0(nm))

@@ -1,7 +1,7 @@
 subroutine z_dif_ws(j         ,nmmaxj    ,nmmax     ,kmax      ,lsal      , &
-                & ltem      ,lstsci    ,lsed      ,kcs       ,kfs       , &
-                & gsqs      ,ws        ,aakl      ,bbkl      ,cckl      , &
-                & kmxsed    ,kfsmx0    ,gdp       )
+                  & ltem      ,lstsci    ,lsed      ,kcs       ,kfs       , &
+                  & gsqs      ,ws        ,aakl      ,bbkl      ,cckl      , &
+                  & kmxsed    ,kfsmx0    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -45,111 +45,50 @@ subroutine z_dif_ws(j         ,nmmaxj    ,nmmax     ,kmax      ,lsal      , &
     implicit none
     !
     type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    ! They replace the  include igd / include igp lines
-    !
 !
 ! Global variables
 !
-    integer         :: j
-                                   !!  Begin pointer for arrays which have
-                                   !!  been transformed into 1D arrays.
-                                   !!  Due to the shift in the 2nd (M-)
-                                   !!  index, J = -2*NMAX + 1
-    integer, intent(in)            :: kmax !  Description and declaration in iidim.f90
-    integer, intent(in)            :: lsal !  Description and declaration in dimens.igs
-    integer, intent(in)            :: lsed !  Description and declaration in iidim.f90
-    integer, intent(in)            :: lstsci !  Description and declaration in iidim.f90
-    integer, intent(in)            :: ltem !  Description and declaration in dimens.igs
-    integer, intent(in)            :: nmmax !  Description and declaration in dimens.igs
-    integer                        :: nmmaxj !  Description and declaration in dimens.igs
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)                   , intent(in) :: kfsmx0 !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)                   , intent(in) :: kcs !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)                   , intent(in) :: kfs !  Description and declaration in iidim.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub, lsed)             , intent(in) :: kmxsed !  Description and declaration in iidim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                  , intent(in) :: gsqs !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax, lstsci)  , intent(in) :: ws !  Description and declaration in rjdim.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)                 :: aakl
-                                   !! 
-                                   !!  Internal work array, lower diagonal
-                                   !!  tridiagonal matrix, implicit coupling
-                                   !!  of concentration in (N,M,K) with con-
-                                   !!  centration in (N,M,K-1)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci) :: bbkl
-                                   !! 
-                                   !!  Internal work array, main diagonal
-                                   !!  tridiagonal matrix, implicit coupling
-                                   !!  of concentration in (N,M,K)
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci) :: cckl
-                                   !! 
-                                   !!  Internal work array, lower diagonal
-                                   !!  tridiagonal matrix, implicit coupling
-                                   !!  of concentration in (N,M,K) with con-
-                                   !!  centration in (N,M,K+1)
-!
+    integer                                                                   :: j      !  Begin pointer for arrays which have been transformed into 1D arrays. Due to the shift in the 2nd (M-)index, J = -2*NMAX + 1
+    integer                                                     , intent(in)  :: kmax   !  Description and declaration in iidim.f90
+    integer                                                     , intent(in)  :: lsal   !  Description and declaration in dimens.igs
+    integer                                                     , intent(in)  :: lsed   !  Description and declaration in iidim.f90
+    integer                                                     , intent(in)  :: lstsci !  Description and declaration in iidim.f90
+    integer                                                     , intent(in)  :: ltem   !  Description and declaration in dimens.igs
+    integer                                                     , intent(in)  :: nmmax  !  Description and declaration in dimens.igs
+    integer                                                                   :: nmmaxj !  Description and declaration in dimens.igs
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                  , intent(in)  :: kfsmx0 !  Description and declaration in iidim.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                  , intent(in)  :: kcs    !  Description and declaration in iidim.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub)                  , intent(in)  :: kfs    !  Description and declaration in iidim.f90
+    integer , dimension(gdp%d%nmlb:gdp%d%nmub, lsed)            , intent(in)  :: kmxsed !  Description and declaration in iidim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                  , intent(in)  :: gsqs   !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax, lstsci)  , intent(in)  :: ws     !  Description and declaration in rjdim.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)                  :: aakl   !  Internal work array, lower diagonal tridiagonal matrix, implicit coupling of concentration in (N,M,K) with concentration in (N,M,K-1)
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)                  :: bbkl   !  Internal work array, main diagonal tridiagonal matrix, implicit coupling of concentration in (N,M,K)
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci)                  :: cckl   !  Internal work array, lower diagonal tridiagonal matrix, implicit coupling of concentration in (N,M,K) with concentration in (N,M,K+1)
 !
 ! Local variables
 !
-    integer                        :: k                    ! Help var. 
-    integer                        :: kfd                  ! Mutiplicity factor for top flux 
-    integer                        :: kft                  ! Mutiplicity factor for bottom flux 
-    integer                        :: l                    ! Help var. 
-    integer                        :: ll
-    integer                        :: lst
-    integer                        :: nm                   ! Help var. 
-!
+    integer :: k    ! Help var. 
+    integer :: kfd  ! Mutiplicity factor for top flux 
+    integer :: kft  ! Mutiplicity factor for bottom flux 
+    integer :: l    ! Help var. 
+    integer :: ll
+    integer :: lst
+    integer :: nm   ! Help var. 
 !
 !! executable statements -------------------------------------------------------
 !
-    !
-    !
-    !
-    !
-    !
-    !-----Vertical advection; particles fall downward
-    !                         No fluxes through free surface
-    !                         No fluxes through bottom sand layer for 'sand'
-    !                         No fluxes through bed for non-'sand'
-    !
+    ! Vertical advection; particles fall downward
+    !                     No fluxes through free surface
+    !                     No fluxes through bottom sand layer for 'sand'
+    !                     No fluxes through bed for non-'sand'
     !
     lst = max(lsal, ltem)
-    !$DIR SCALAR
     do l = 1, lsed
-       !
-       ! *** Existing 1st order UPWIND scheme removed by GL 5/11/99 ***
-       ! *** Replaced with CENTRAL scheme at JvK's suggestion       ***
-       ! *** Purpose is to reduce upward numerical diffusion        ***
-       !
-       !
-       ! If the following line is active then an UPWIND scheme is used
-       ! Otherwise a central difference scheme is used
-       ! End of switch
-       !
-       !
-       !$DIR SCALAR
-       !             if (sedtyp(l) .eq. 'sand') then
-       !                maxlay = kmxsed(nm)
-       !             else
-       !                maxlay = kmax
-       !             endif
-       !            do 440 k=1,maxlay-1
-       !               if (k.eq.1 .or. k.eq.maxlay-1) then
-       !
-       !   end of CENTRAL DIFF. scheme
        ll = lst + l
-       !
-       !$DIR SCALAR
        do nm = 1, nmmax
           if (kfs(nm)==1 .and. kcs(nm)<=2) then
-             !                if (sedtyp(l) .eq. 'sand') then
-             !                  maxlay = kmxsed(nm)
-             !                else
-             !                  maxlay = kmax
-             !                endif
-             !              do 630 k=1,maxlay
              do k = kfsmx0(nm), kmxsed(nm, l),-1
-                !                  if (k.ne.maxlay) then
                 if (k/=kmxsed(nm, l)) then
                    kft = 1
                 else
@@ -165,6 +104,5 @@ subroutine z_dif_ws(j         ,nmmaxj    ,nmmax     ,kmax      ,lsal      , &
              enddo
           endif
        enddo
-    !
     enddo
 end subroutine z_dif_ws
