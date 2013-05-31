@@ -37,10 +37,12 @@ set swanbatdir=%D3D_HOME%\%ARCH%\swan\scripts
 
     rem Run
 set PATH=%flowexedir%;%PATH%
-start %flowexedir%\d_hydro.exe %argfile%
+start "Hydrodynamic simulation" "%flowexedir%\d_hydro.exe" %argfile%
 
+title Wave simulation
 set PATH=%waveexedir%;%swanbatdir%;%swanexedir%;%PATH%
-%waveexedir%\wave.exe %mdwfile% 1
+"%waveexedir%\wave.exe" %mdwfile% 1
+title %CD%
 
     rem To prevent the DOS box from disappearing immediately: remove the rem on the following line
 rem pause
