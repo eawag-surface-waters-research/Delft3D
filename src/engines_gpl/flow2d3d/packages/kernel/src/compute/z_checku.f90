@@ -193,12 +193,12 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
                    ! Set some parameters in the points which are flooded
                    ! s1u is used for setting kfumx0
                    !
-                   s1u = max(s0(nm), s0(nmu))
                    if (umean(nm) >= 0.001_fp) then
                       s1u = s0(nm)
                    elseif (umean(nm) <= - 0.001_fp) then
                       s1u = s0(nmu)
                    else
+                      s1u = max(s0(nm), s0(nmu))
                    endif
                    !
                    ! for couple points
@@ -232,6 +232,10 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
                           dzu0(nm, k) = zk(k) + dpu(nm)
                        elseif (k == kfumx0(nm)) then
                           if (nonhyd .and. nh_level==nh_full) then
+                             !
+                             ! When waterlevel above ztop:
+                             ! Use the (bounded) "grid thickness", not "thickness" of the top layer 
+                             !
                              dzu0(nm, k) = min(zk(k)-zk(k-1), hu(nm)-dzutot)
                           else
                              dzu0(nm, k) = hu(nm) - dzutot
@@ -255,7 +259,7 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
                     if (ztbml) then
                        if (kfumx0(nm) > kfumn0(nm)) then
                           k             = kfumn0(nm)
-                          dzu0(nm, k  ) = 0.5_fp*(dpu(nm)+min(zk(k+1),s1u))
+                          dzu0(nm, k  ) = 0.5_fp*(dzu0(nm,k)+dzu0(nm,k+1))
                           dzu0(nm, k+1) = dzu0(nm,k)
                        endif
                     endif

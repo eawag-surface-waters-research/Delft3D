@@ -169,15 +169,7 @@ subroutine z_taubotmodifylayers(nmmax  ,kmax     ,lstsci   ,icx     ,icy        
        do nm = 1, nmmax
           if (kfu(nm)==1 .and. kfumax(nm)>kfumin(nm)) then
              k       = kfumin(nm)
-             nmu     = nm + icx
-             if (umean(nm) > 0.001_fp) then
-                s1u = s1(nm)
-             elseif (umean(nm) < -0.001_fp) then
-                s1u = s1(nmu)
-             else
-                s1u = max(s1(nm), s1(nmu))
-             endif
-             dzu1(nm, k  ) = 0.5_fp*(dpu(nm)+min(zk(k+1),s1u))
+             dzu1(nm, k  ) = 0.5_fp*(dzu1(nm,k)+dzu1(nm,k+1))
              dzu1(nm, k+1) = dzu1(nm,k)
           endif
        enddo
@@ -189,15 +181,7 @@ subroutine z_taubotmodifylayers(nmmax  ,kmax     ,lstsci   ,icx     ,icy        
        do nm = 1, nmmax
           if (kfv(nm)==1 .and. kfvmax(nm)>kfvmin(nm)) then
              k       = kfvmin(nm)
-             num     = nm + icy
-             if (vmean(nm) > 0.001_fp) then
-                s1v = s1(nm)
-             elseif (vmean(nm) < -0.001_fp) then
-                s1v = s1(num)
-             else
-                s1v = max(s1(nm), s1(num))
-             endif
-             dzv1(nm, k  ) = 0.5_fp*(dpv(nm)+min(zk(k+1),s1v))
+             dzv1(nm, k  ) = 0.5_fp*(dzv1(nm,k)+dzv1(nm,k+1))
              dzv1(nm, k+1) = dzv1(nm,k)
           endif
        enddo

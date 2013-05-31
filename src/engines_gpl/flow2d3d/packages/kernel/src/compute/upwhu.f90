@@ -141,12 +141,12 @@ subroutine upwhu(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        nmu = nm + icx
        if (zmodel) then
           if (nonhyd .and. nh_level==nh_full) then
-            hu(nm) = 0.5*(s0(nm) + s0(nmu)) + dpu(nm)
+            hu(nm) = 0.5_fp*(s0(nm) + s0(nmu)) + dpu(nm)
           else
             hu(nm) = max(s0(nmu), s0(nm)) + dpu(nm)
           endif
        else
-          hu(nm) = 0.5*(s0(nm) + s0(nmu)) + dpu(nm)
+          hu(nm) = 0.5_fp*(s0(nm) + s0(nmu)) + dpu(nm)
        endif
        if (kcu(nm) == 1) then
           if ( hu(nm) < dco    .or. &
@@ -155,7 +155,7 @@ subroutine upwhu(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              & zmodel               ) then
              if (umean(nm) > 0.001_fp) then
                 hu(nm) = s0(nm) + dpu(nm)
-             elseif (umean(nm) < -0.001) then
+             elseif (umean(nm) < -0.001_fp) then
                 hu(nm) = s0(nmu) + dpu(nm)
              else
                 hu(nm) = max(s0(nmu), s0(nm)) + dpu(nm)
@@ -166,31 +166,31 @@ subroutine upwhu(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           ! Special approach for steep bottom slopes
           !
           if (momsol=='flood ') then
-             if (umean(nm)>=0.001) then
+             if (umean(nm) >= 0.001_fp) then
                 nmd  = nm  - icx
-                ds1  = (s0(nm ) - s0(nmd))*kcu(nmd)
-                ds2  = (s0(nmu) - s0(nm ))*kcu(nm )
-                if (kspu(nm,0) > 0 .or. kspu(nmd,0) > 0 ) then
-                   ds2=0.0
+                ds1  = (s0(nm )-s0(nmd)) * kcu(nmd)
+                ds2  = (s0(nmu)-s0(nm )) * kcu(nm )
+                if (kspu(nm,0)>0 .or. kspu(nmd,0)>0) then
+                   ds2 = 0.0_fp
                 endif
                 level= s0(nm) + slim(ds1,ds2)
                 hu(nm) = level + dpu(nm)
-                if (real(dps(nm),fp) > real(dps(nmu),fp)+ dgcuni) then
-                   h1     = 2.0 * hu(nm)/3.0
+                if (real(dps(nm),fp) > real(dps(nmu),fp)+dgcuni) then
+                   h1     = 2.0_fp * hu(nm) / 3.0_fp
                    h2     = s0(nmu) + dpu(nm)
                    hu(nm) = MIN(hu(nm) , MAX(h1,h2))
                 endif
-             elseif (umean(nm)<= - 0.001) then
+             elseif (umean(nm) <= - 0.001_fp) then
                 nmuu = nmu + icx
-                ds1  = (s0(nmuu) - s0(nmu))*kcu(nmu)
-                ds2  = (s0(nmu ) - s0(nm ))*kcu(nm )
-                if (kspu(nm,0) > 0 .or. kspu(nmu,0) > 0 ) then
-                   ds2=0.0
+                ds1  = (s0(nmuu)-s0(nmu)) * kcu(nmu)
+                ds2  = (s0(nmu )-s0(nm )) * kcu(nm )
+                if (kspu(nm,0)>0 .or. kspu(nmu,0)>0) then
+                   ds2 = 0.0_fp
                 endif
-                level= s0(nmu) - slim(ds1,ds2)
+                level  = s0(nmu) - slim(ds1,ds2)
                 hu(nm) = level + dpu(nm)
-                if (real(dps(nm),fp) + dgcuni < real(dps(nmu),fp)) then
-                   h1     = 2.0 * hu(nm)/3.0
+                if (real(dps(nm),fp)+dgcuni < real(dps(nmu),fp)) then
+                   h1     = 2.0_fp * hu(nm) / 3.0_fp
                    h2     = s0(nm) + dpu(nm)
                    hu(nm) = MIN(hu(nm) , MAX(h1,h2))
                 endif
