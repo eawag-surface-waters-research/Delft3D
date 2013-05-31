@@ -1202,7 +1202,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           else
              !
              ! kmax = 1
-             ! write(errmsg,'(a)') 'Z layer morphology is not yet working for 2D case. The execution is terminated!'
+             ! Z layer morphology is not yet working for 2D case. The execution will be terminated!
              ! 2D CASE (Numerical approximation) is not 
              !
           endif ! kmax = 1
