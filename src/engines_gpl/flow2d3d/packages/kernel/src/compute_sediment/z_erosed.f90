@@ -1203,7 +1203,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              !
              ! kmax = 1
              ! Z layer morphology is not yet working for 2D case. The execution will be terminated!
-             ! 2D CASE (Numerical approximation) is not 
              !
           endif ! kmax = 1
           if (suspfrac) then
