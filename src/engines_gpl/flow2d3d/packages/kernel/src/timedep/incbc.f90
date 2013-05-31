@@ -191,7 +191,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
     integer                             :: k              ! Loop variable 
     integer                             :: k1st
     integer                             :: k2nd
-    integer                             :: kcuv           ! Value of KCU or KCV in boundary point
+    integer                             :: kfuv           ! Value of KCU or KCV in boundary point
     integer                             :: kp             ! First array index of array CIRC2/3D pointing to the nr. of row/column in array IROCOL
     integer                             :: kpc            ! First array index of array CIRC2/3D pointing to the column number in arra IROCOL 
     integer                             :: kpp            ! Hulp varible 
@@ -359,17 +359,21 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        n1        = nob(8,n)
        mpbt      = nob(1,n)
        npbt      = nob(2,n)
-       if (nob(4,n) == 2) then
+       if (nob(4, n)==2) then
           mpbt = mpbt - 1
           mpbi = mpbt
-       else
+       elseif (nob(4, n)==1) then
           mpbi = mpbt + 1
+       else
+          mpbi = mpbt
        endif
-       if (nob(6,n) == 2) then
+       if (nob(6, n)==2) then
           npbt = npbt - 1
           npbi = npbt
-       else
+       elseif (nob(6, n)==1) then
           npbi = npbt + 1
+       else
+          npbi = npbt
        endif
        !
        ! Determine direction dependent parameters
@@ -454,14 +458,18 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        if (nob(4, n)==2) then
           mpbt = mpbt - 1
           mpbi = mpbt
-       else
+       elseif (nob(4, n)==1) then
           mpbi = mpbt + 1
+       else
+          mpbi = mpbt
        endif
        if (nob(6, n)==2) then
           npbt = npbt - 1
           npbi = npbt
-       else
+       elseif (nob(6, n)==1) then
           npbi = npbt + 1
+       else
+          npbi = npbt
        endif
        !
        ! Determine direction dependent parameters
@@ -477,7 +485,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
           endif
           width = guu(npbt, mpbt)
           czbed = cfurou(npbt, mpbt, 1)
-          kcuv  = kcu(npbt, mpbt)
+          kfuv  = kfu(npbt, mpbt)
           !
           ! Determine depth-averaged vegetation effect
           !
@@ -503,7 +511,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
           endif
           width = gvv(npbt, mpbt)
           czbed = cfvrou(npbt, mpbt, 1)
-          kcuv  = kcv(npbt, mpbt)
+          kfuv  = kfv(npbt, mpbt)
           !
           ! Determine depth-averaged vegetation effect
           !
@@ -521,6 +529,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
           endif
        else
        endif
+       
        if (nob(3,n) == 7) then
           !
           ! part of total discharge boundary, compute B*h^(1.5)*C
@@ -528,7 +537,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
           ! Determine effective roughness
           ! Note: czbed contains Chezy/sqrt(ag) !!
           !
-          if (kcuv == 0) then
+          if (kfuv == 0) then
              qtfrac(n)  = 0.0_fp
           else
              czeff      = czbed / sqrt(1.0_fp + 0.5_fp*ttfhsum*czbed*czbed)
