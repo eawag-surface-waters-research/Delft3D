@@ -264,6 +264,10 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
           call prterr(lundia    ,'Z011'    ,'Roller model'       )
           ierror = ierror+ 1
        endif
+       if(sedim .and. (kmax==1)) then
+          call prterr(lundia    ,'Z011'    ,'2D morphology'       )
+          ierror = ierror+ 1
+       endif
        !
        ! warnings
        !

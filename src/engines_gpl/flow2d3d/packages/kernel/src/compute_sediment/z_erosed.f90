@@ -1200,68 +1200,11 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                 enddo
              endif ! suspfrac
           else
-             write(errmsg,'(a)') 'Z layer morphology is not yet working for 2D case. The execution is terminated! Please contact with Delft3D administrators.'
-             call prterr (lundia,'U021', trim(errmsg),gdp)
-             call d3stop(1, gdp) 
              !
              ! kmax = 1
-             ! 2D CASE (Numerical approximation)
+             ! write(errmsg,'(a)') 'Z layer morphology is not yet working for 2D case. The execution is terminated!'
+             ! 2D CASE (Numerical approximation) is not 
              !
-             !if (suspfrac) then
-             !   !
-             !   ! Fill local 1dv arrays with fall velocity and
-             !   ! diffusivity
-             !   !
-             !   do k2d = 0, kmax2d
-             !      ws2d(k2d)   = ws(nm, 1, l)
-             !      dcww2d(k2d) = 0.0_fp
-             !   enddo
-             !   trsedeq = rsedeq(nm, 1, l)
-             !else
-             !   trsedeq =  0.0_fp
-             !endif
-             !!
-             !if (lsecfl > 0) then
-             !   spirint = r0(nm,1,lsecfl)
-             !else
-             !   spirint = 0.0_fp
-             !endif
-             !!
-             !! Solve equilibrium concentration vertical and
-             !! integrate over vertical; compute bedload
-             !! transport excluding slope effects.
-             !!
-             !call eqtran(sig2d       ,thck2d      ,kmax2d       , &
-             !          & aks(nm)     ,ustarc      ,ws2d         ,ltur       , &
-             !          & frac(nm,l)  ,tsigmol     , &
-             !          & ce_nm       ,taurat(nm,l),dcww2d       ,sddf2d     ,rsdq2d     , &
-             !          & kmaxsd      ,trsedeq     ,sbcu(nm,l)   ,sbcv(nm,l) ,sbwu(nm,l) , &
-             !          & sbwv(nm,l)  ,sswu(nm,l)  ,sswv(nm,l)   ,lundia     , &
-             !          & taucr(l)    ,tdss        ,rksr(nm)     ,2          , &
-             !          & ce_nmtmp    ,akstmp      ,lsecfl       ,spirint    , &
-             !          & suspfrac    ,ust2(nm)    ,tetacr(l)    ,tgamtcr    , &
-             !          & tsalmax     ,tws0        ,tsd          ,concin2d   , &
-             !          & dzduu(nm)   ,dzdvv(nm)   ,ubot(nm)     ,tauadd     , &
-             !          & sus         ,bed         ,susw         ,bedw       ,espir      , &
-             !          & wave        , &
-             !          & scour       ,epspar      ,ubot_from_com,camax      , &
-             !          & aksfac      ,rwave       ,rdc          ,rdw        ,pangle     , &
-             !          & fpco        ,iopsus      ,iopkcw       ,subiw      ,eps        , &
-             !          & iform(l)    ,par(1,l)    , &
-             !          & max_integers,max_reals   ,max_strings  ,dll_function(l),dll_handle(l), &
-             !          & dll_integers,dll_reals   ,dll_strings  ,error      )
-             !if (error) call d3stop(1, gdp)
-             !if (suspfrac) then
-             !   dss   (nm, l)    = tdss
-             !   rsedeq(nm, 1, l) = trsedeq
-             !   kmxsed(nm, l)    = 1
-             !   !
-             !   ! Galappatti time scale and source and sink terms
-             !   !
-             !   call soursin_2d(umod(nm)      ,ustarc        ,h0            ,h1        , &
-             !                 & ws(nm,1,l)    ,tsd           ,rsedeq(nm,1,l),            &
-             !                 & sourse(nm,l)  ,sinkse(nm,l)  ,gdp                      )
-             !endif ! suspfrac
           endif ! kmax = 1
           if (suspfrac) then
              rca(nm, l) = ce_nm * rhosol(l)
