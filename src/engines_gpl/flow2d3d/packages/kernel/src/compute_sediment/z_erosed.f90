@@ -1200,6 +1200,9 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                 enddo
              endif ! suspfrac
           else
+             write(errmsg,'(a)') 'Z layer morphology is not yet working for 2D case. The execution is terminated! Please contact with Delft3D administrators.'
+             call prterr (lundia,'U021', trim(errmsg),gdp)
+             call d3stop(1, gdp) 
              !
              ! kmax = 1
              ! 2D CASE (Numerical approximation)
