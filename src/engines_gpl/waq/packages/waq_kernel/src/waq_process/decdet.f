@@ -302,6 +302,15 @@ C
               CNVDN = 0.0
               CNVDP = 0.0
               CNVDS = 0.0
+
+              RC20C  = 0.0
+              TEMPC  = 1.0
+              ELFACT = 1.0
+              RC20N  = 0.0
+              RC20P  = 0.0
+              N_FACT = 1.0
+              P_FACT = 1.0
+              S_FACT = 1.0
 C
            ELSE
 C
@@ -368,6 +377,9 @@ C
                  N_FACT = MAX(N_FACT,0.5)
                  P_FACT = MAX(P_FACT,0.5)
                  S_FACT = MAX(S_FACT,0.5)
+                 N_FACT = MIN(N_FACT,5.0)
+                 P_FACT = MIN(P_FACT,5.0)
+                 S_FACT = MIN(S_FACT,5.0)
               ELSE
                  N_FACT = 1.0
                  P_FACT = 1.0
