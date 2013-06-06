@@ -17,7 +17,9 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
                & zssv      ,sbuu      ,sbvv      ,ssuu      ,ssvv      , &
                & zhs       ,ztp       ,zdir      ,zrlabd    ,zuorb     , &
                & hrms      ,tp        ,teta      ,rlabda    ,uorb      , &
-               & wave      ,rca       ,zrca      ,gdp       )
+               & wave      ,rca       ,zrca      ,windu     ,windv     , &
+               & zwndsp    ,zwnddr    ,patm      ,zairp     ,wind      , &
+               & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -58,6 +60,7 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     use precision
     !
     use globaldata
+    use mathconsts
     !
     implicit none
     !
@@ -96,6 +99,7 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     integer   , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(in)  :: kfvz1  !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(nostat)                                                , intent(out) :: zkfs   !  Description and declaration in esm_alloc_int.f90
     logical                                                                      , intent(in)  :: wave   !  Description and declaration in procs.igs
+    logical                                                                      , intent(in)  :: wind   !  Description and declaration in procs.igs
     logical                                                                      , intent(in)  :: zmodel !  Description and declaration in procs.igs
     real(fp)                                                                     , intent(in)  :: rhow   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: alfas  !  Description and declaration in esm_alloc_real.f90
@@ -131,6 +135,9 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsedtot)     , intent(in)  :: sbvv   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsed)        , intent(in)  :: ssuu   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsed)        , intent(in)  :: ssvv   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: windu  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: windv  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(in)  :: patm   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nostat)                                                , intent(out) :: zalfas !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nostat)                                                              :: zdir
     real(fp)  , dimension(nostat)                                                , intent(out) :: zdps   !  Description and declaration in esm_alloc_real.f90
@@ -141,6 +148,9 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     real(fp)  , dimension(nostat)                                                , intent(out) :: ztauks !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nostat)                                                , intent(out) :: ztp
     real(fp)  , dimension(nostat)                                                , intent(out) :: zuorb
+    real(fp)  , dimension(nostat)                                                , intent(out) :: zwndsp
+    real(fp)  , dimension(nostat)                                                , intent(out) :: zwnddr
+    real(fp)  , dimension(nostat)                                                , intent(out) :: zairp
     real(fp)  , dimension(nostat)                                                , intent(out) :: zwl    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nostat, 0:kmax)                                        , intent(out) :: zdicww !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(nostat, 0:kmax)                                        , intent(out) :: zrich  !  Description and declaration in esm_alloc_real.f90
@@ -625,6 +635,31 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     !
     if (lsedtot>0) then
        call tstat_bed(nostat, lsedtot, nmax, zdpsed, zbdsed, gdp)
+    endif
+    !
+    ! Store wind speed and direction in defined stations
+    !
+    if (wind) then
+       zwndsp = -999.0_fp
+       zwnddr = -999.0_fp
+       zairp  = -999.0_fp
+       do ii = 1, nostat
+          m = mnstat(1, ii)
+          if (m<0) cycle
+          n = mnstat(2, ii)
+          if (n<0) cycle
+          !
+          zwndsp(ii) = sqrt(windu(n, m)**2 + windv(n, m)**2)
+          !
+          ! zwnddir is in nautical convention (direction wind is coming from, CW from North)
+          !
+          zwnddr(ii) = 270.0 - 180.0_fp*(atan2(windv(n, m), windu(n, m)))/pi
+          if (zwnddr(ii)<0.0)    zwnddr(ii) = zwnddr(ii) + 360.0
+          if (zwnddr(ii)>=360.0) zwnddr(ii) = zwnddr(ii) - 360.0
+          !
+          zairp(ii) = patm(n, m)
+          !
+       enddo
     endif
     !
     ! Store quantities specific for waves in defined stations

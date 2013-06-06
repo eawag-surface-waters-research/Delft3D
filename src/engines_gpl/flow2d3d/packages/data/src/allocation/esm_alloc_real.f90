@@ -3081,6 +3081,27 @@ subroutine esm_alloc_real(lundia, error, gdp)
                              !  defined at the water elevation point
     if (ierr<= - 9) goto 9999
     !
+    pntnam = 'zwndsp'        !  Global data
+    ierr = mkfpnt(pntnam, nostat, gdp)
+                             !  Pointer of array ZWNDSP
+                             !  Wind speed at the monitoring
+                             !  stations
+    if (ierr<= - 9) goto 9999
+    !
+    pntnam = 'zwnddr'        !  Global data
+    ierr = mkfpnt(pntnam, nostat, gdp)
+                             !  Pointer of array ZWNDDR
+                             !  Wind direction at the monitoring
+                             !  stations
+    if (ierr<= - 9) goto 9999
+    !
+    pntnam = 'zairp'         !  Global data
+    ierr = mkfpnt(pntnam, nostat, gdp)
+                             !  Pointer of array ZAIRP
+                             !  Air pressure at the monitoring
+                             !  stations
+    if (ierr<= - 9) goto 9999
+    !
     pntnam = 'fltr'          !  Global data
     ierr = mkfpnt(pntnam, ntruv, gdp)
                              !  Pointer of array FLTR

@@ -386,6 +386,9 @@ subroutine gtptrs(gdp)
     integer(pntrsize), pointer :: zvort
     integer(pntrsize), pointer :: zwl
     integer(pntrsize), pointer :: zws
+    integer(pntrsize), pointer :: zwndsp
+    integer(pntrsize), pointer :: zwnddr
+    integer(pntrsize), pointer :: zairp
     integer(pntrsize), pointer :: drhodx
     integer(pntrsize), pointer :: drhody
     integer(pntrsize), pointer :: dzs0
@@ -865,6 +868,9 @@ subroutine gtptrs(gdp)
     zvort      => gdp%gdr_i_ch%zvort
     zwl        => gdp%gdr_i_ch%zwl
     zws        => gdp%gdr_i_ch%zws
+    zwndsp     => gdp%gdr_i_ch%zwndsp
+    zwnddr     => gdp%gdr_i_ch%zwnddr
+    zairp      => gdp%gdr_i_ch%zairp
     drhodx     => gdp%gdr_i_ch%drhodx
     drhody     => gdp%gdr_i_ch%drhody
     dzs0       => gdp%gdr_i_ch%dzs0
@@ -1417,6 +1423,9 @@ subroutine gtptrs(gdp)
     zvort      = gtrpnt('zvort' , gdp)
     zwl        = gtrpnt('zwl'   , gdp)
     zws        = gtrpnt('zws'   , gdp)
+    zwndsp     = gtrpnt('zwndsp', gdp)
+    zwnddr     = gtrpnt('zwnddr', gdp)
+    zairp      = gtrpnt('zairp' , gdp)
     !
     ! Define pointers for sub-grid viscosity
     !

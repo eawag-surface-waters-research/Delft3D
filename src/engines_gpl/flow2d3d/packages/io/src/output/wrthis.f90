@@ -6,7 +6,8 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
                   & zvicww    ,zdicww    ,zrich     ,zrho      ,gro       , &
                   & ztur      ,zvort     ,zenst     ,hydprs    ,fltr      , &
                   & ctr       ,atr       ,dtr       ,velt      ,zdps      , &
-                  & sferic    ,gdp       )
+                  & zwndsp    ,zwnddr    ,zairp     ,wind      ,sferic    , &
+                  & gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -77,6 +78,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     character(20) , dimension(:)    , pointer :: namst
     character*(10)                  , pointer :: trans_unit !  Unit of the variables ATR and DTR
     type (nefiselement)             , pointer :: nefiselem
+    type (flwoutputtype)            , pointer :: flwoutput
 !
 ! Global variables
 !
@@ -95,11 +97,15 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     integer      , dimension(nostat)                             :: zkfs   !  KFS in monitoring station
     logical                                        , intent(out) :: error  !!  Flag=TRUE if an error is encountered
     logical                                        , intent(in)  :: sferic !  Description and declaration in tricom.igs
+    logical                                        , intent(in)  :: wind   !  Description and declaration in procs.igs
     logical                                        , intent(in)  :: zmodel !  Description and declaration in procs.igs
     real(fp)     , dimension(nostat)                             :: zdps   !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(nostat)                             :: ztauet !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(nostat)                             :: ztauks !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(nostat)                             :: zwl    !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nostat)                             :: zwndsp !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nostat)                             :: zwnddr !  Description and declaration in esm_alloc_real.f90
+    real(fp)     , dimension(nostat)                             :: zairp  !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(nostat, 0:kmax)                     :: zdicww !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(nostat, 0:kmax)                     :: zrich  !  Description and declaration in esm_alloc_real.f90
     real(fp)     , dimension(nostat, 0:kmax)                     :: zvicww !  Description and declaration in esm_alloc_real.f90
@@ -182,6 +188,7 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
     line_orig  => gdp%gdstations%line_orig
     shlay      => gdp%gdpostpr%shlay
     xystat     => gdp%gdstations%xystat
+    flwoutput  => gdp%gdflwpar%flwoutput
     !
     ! Initialize local variables
     !
@@ -334,6 +341,20 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
              call addelm(nefiswrthis,'ZRHO',' ','[ KG/M3 ]','REAL',4              , &
                 & 'Density per layer in station (zeta point)                     ', &
                 & 2         ,nostatgl  ,kmaxout_restr,0         ,0         ,0      , &
+                & lundia    ,gdp       )
+          endif
+          if (wind .and. flwoutput%air) then
+             call addelm(nefiswrthis,'ZWNDSPD',' ','[  M/S  ]','REAL',4              , &
+                & 'Wind-speed in station                                            ', &
+                & 1         ,nostatgl  ,0         ,0         ,0         ,0      , &
+                & lundia    ,gdp       )
+             call addelm(nefiswrthis,'ZWNDDIR',' ','[  DEG  ]','REAL',4              , &
+                & 'Wind-direction in station                                        ', &
+                & 1         ,nostatgl  ,0         ,0         ,0         ,0      , &
+                & lundia    ,gdp       )
+             call addelm(nefiswrthis,'PATM',' ','[  N/M2 ]','REAL',4              , &
+                & 'Air pressure                                                  ', &
+                & 1         ,nostatgl  ,0         ,0         ,0         ,0      , &
                 & lundia    ,gdp       )
           endif
           if (zmodel) then
@@ -551,6 +572,17 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
        !
        if (selhis(19:19)=='Y') then
           call wrthis_nk(station, nostat, 1, kmax, ierror, zrho, 'ZRHO')
+          if (ierror/=0) goto 999
+       endif
+       !
+       ! group 3: element 'ZWNDSPD' and 'ZWNDDIR'
+       !
+       if (wind .and. flwoutput%air) then
+          call wrthis_n(station, nostat, ierror, zwndsp, 'ZWNDSPD')
+          if (ierror/=0) goto 999
+          call wrthis_n(station, nostat, ierror, zwnddr, 'ZWNDDIR')
+          if (ierror/=0) goto 999
+          call wrthis_n(station, nostat, ierror, zairp, 'PATM')
           if (ierror/=0) goto 999
        endif
        !
