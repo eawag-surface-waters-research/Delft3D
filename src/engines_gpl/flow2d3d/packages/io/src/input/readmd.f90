@@ -158,6 +158,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     real(fp)                      , pointer :: chzmin
     real(fp)                      , pointer :: dco
     real(fp)                      , pointer :: dgcuni
+    real(fp)                      , pointer :: drycrt
     real(fp)                      , pointer :: dryflc
     real(fp)                      , pointer :: fwfac
     real(fp)                      , pointer :: gammax
@@ -416,6 +417,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     chzmin              => gdp%gdnumeco%chzmin
     dco                 => gdp%gdnumeco%dco
     dgcuni              => gdp%gdnumeco%dgcuni
+    drycrt              => gdp%gdnumeco%drycrt
     dryflc              => gdp%gdnumeco%dryflc
     fwfac               => gdp%gdnumeco%fwfac
     gammax              => gdp%gdnumeco%gammax
@@ -746,7 +748,8 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     ! Physical Numerical parameters
     !
     call rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
-             & iter1     ,dryflc    ,dco       ,ibaroc    ,kmax      , &
+             & iter1     ,dryflc    ,drycrt    ,dco       ,ibaroc    , &
+             & kmax      , &
              & lstsci    ,icreep    ,trasol    ,momsol    ,dgcuni    , &
              & forfuv    ,forfww    ,ktemp     ,temint    , &
              & keva      ,evaint    ,old_corio , &

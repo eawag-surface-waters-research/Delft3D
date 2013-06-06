@@ -100,6 +100,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     character(8)            , pointer :: dpsopt
     real(fp)                , pointer :: eps
     integer                 , pointer :: lundia
+    real(fp)                , pointer :: drycrt
     real(fp)                , pointer :: dryflc
     real(fp)                , pointer :: gammax
     integer                 , pointer :: ibaroc
@@ -316,7 +317,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)           :: hl
     real(fp)           :: hr
     real(fp)           :: hnm
-    real(fp)           :: htrsh
+    real(fp)           :: drytrsh
     real(fp)           :: hugsqs   ! HU(NM/NMD) * GSQS(NM) Depending on UMDIS the HU of point NM or NMD will be used 
     real(fp)           :: qwind
     real(fp), external :: redvic
@@ -341,6 +342,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     !
     eps        => gdp%gdconst%eps
     lundia     => gdp%gdinout%lundia
+    drycrt     => gdp%gdnumeco%drycrt
     dryflc     => gdp%gdnumeco%dryflc
     gammax     => gdp%gdnumeco%gammax
     hdt        => gdp%gdnumeco%hdt
@@ -365,7 +367,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     nonhyd     => gdp%gdprocs%nonhyd
     dzmin      => gdp%gdzmodel%dzmin
     !
-    htrsh        = 0.5_fp * dryflc
+    drytrsh      = drycrt
     drythreshold = 0.1_fp * dryflc
     !
     ! Flag for vertical advection set to 1.0 by default = Central implicit discretisation of 
@@ -613,7 +615,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                    !
                    ! cfurou(nm,1) contains u/u*
                    !
-                   uweir      = sqrt( 2.0_fp/3.0_fp*ag*max(hu(nm),htrsh) )
+                   uweir      = sqrt( 2.0_fp/3.0_fp*ag*max(hu(nm),drytrsh) )
                    taubpu(nm) = uweir / (cfurou(nm,1)**2.0_fp)
                 endif
              endif
@@ -637,9 +639,9 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              ! End of special measures for smooth inundation
              !
              cbot           = taubpu(nm)
-             qwind          = windu(nm) / max(dzu0(nm, kkmax),htrsh)
-             bdmwrp         = cbot / max(dzu0(nm, kmin),htrsh)
-             bdmwrs         = taubsu(nm) / max(dzu0(nm, kmin),htrsh)
+             qwind          = windu(nm) / max(dzu0(nm, kkmax),drytrsh)
+             bdmwrp         = cbot / max(dzu0(nm, kmin),drytrsh)
+             bdmwrs         = taubsu(nm) / max(dzu0(nm, kmin),drytrsh)
              bbk(nm, kmin)  = bbk(nm, kmin) + bdmwrp
              ddk(nm, kkmax) = ddk(nm, kkmax) - qwind/rhow
              ddk(nm, kmin)  = ddk(nm, kmin) + bdmwrs
@@ -653,7 +655,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                 wsumax = facmax*hu(nm)**(1.5)/max(0.1_fp, tp(nm))
                 wsu(nm) = sign(min(abs(wsu(nm)), wsumax), wsu(nm))
                 !
-                ddk(nm, kkmax) = ddk(nm, kkmax) + wsu(nm)/(rhow*max(dzu0(nm, kkmax),htrsh))
+                ddk(nm, kkmax) = ddk(nm, kkmax) + wsu(nm)/(rhow*max(dzu0(nm, kkmax),drytrsh))
                 !
                 ! WAVE INDUCED BODY FORCE
                 !

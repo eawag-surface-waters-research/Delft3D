@@ -57,6 +57,7 @@ subroutine checku(hu        ,s1        ,dpu       ,umean     , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     real(fp)     , pointer :: dryflc
+    real(fp)     , pointer :: drycrt
     logical      , pointer :: zmodel
 !
 ! Global variables
@@ -81,19 +82,20 @@ subroutine checku(hu        ,s1        ,dpu       ,umean     , &
 ! Local variables
 !
     integer :: nm
-    real(fp):: htrsh
+    real(fp):: drytrsh
     real(fp):: hucres
-    real(fp):: trsh
+    real(fp):: floodtrsh
     integer :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
     zmodel     => gdp%gdprocs%zmodel
     dryflc     => gdp%gdnumeco%dryflc
+    drycrt     => gdp%gdnumeco%drycrt
     !
-    htrsh = 0.5_fp * dryflc
-    trsh  = dryflc
-    nm_pos= 1
+    floodtrsh = dryflc
+    drytrsh   = drycrt
+    nm_pos    = 1
     !
     call upwhu(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              & zmodel    ,kcs       ,kcu       ,kspu      ,dps       , &
@@ -117,15 +119,15 @@ subroutine checku(hu        ,s1        ,dpu       ,umean     , &
        !
        ! check for drying
        !
-       if (kfu(nm)*min(hu(nm), hucres)<htrsh .and. kcu(nm)*kfu(nm)==1) then
+       if (kfu(nm)*min(hu(nm), hucres)<drytrsh .and. kcu(nm)*kfu(nm)==1) then
           kfu(nm) = 0
        endif
        !
        ! check for flooding
        !
        if (  flood .and. kfu(nm)==0 .and. kcu(nm)==1 &
-           & .and. max(s1(nm),s1(nm+icx)) - max(-real(dps(nm),fp),-real(dps(nm+icx),fp)) >= trsh) then
-          if (min(hu(nm), hucres)>trsh) then
+           & .and. max(s1(nm),s1(nm+icx)) - max(-real(dps(nm),fp),-real(dps(nm+icx),fp)) >= floodtrsh) then
+          if (min(hu(nm), hucres)>floodtrsh) then
             kfu(nm) = 1
           endif
        endif

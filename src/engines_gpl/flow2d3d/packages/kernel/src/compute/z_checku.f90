@@ -54,6 +54,7 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+     real(fp)     , pointer :: drycrt
      real(fp)     , pointer :: dryflc
      real(fp)     , pointer :: dzmin
      real(fp)     , pointer :: zbot
@@ -105,9 +106,9 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
     integer  :: nmu
     real(fp) :: dzutot
     real(fp) :: hnm
-    real(fp) :: htrsh
+    real(fp) :: drytrsh
     real(fp) :: s1u
-    real(fp) :: trsh
+    real(fp) :: floodtrsh
     logical  :: found
 !
 !! executable statements -------------------------------------------------------
@@ -115,13 +116,14 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
     dzmin    => gdp%gdzmodel%dzmin
     zbot     => gdp%gdzmodel%zbot
     ztbml    => gdp%gdzmodel%ztbml
+    drycrt   => gdp%gdnumeco%drycrt
     dryflc   => gdp%gdnumeco%dryflc
     zmodel   => gdp%gdprocs%zmodel
     nonhyd   => gdp%gdprocs%nonhyd
     nh_level => gdp%gdnonhyd%nh_level
     !
-    htrsh = 0.5_fp * dryflc
-    trsh  = dryflc
+    drytrsh   = drycrt
+    floodtrsh = dryflc
     !
     kkmin = 0
     kkmax = 0
@@ -170,7 +172,7 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
           !
           ! check for drying
           !
-          if (kfu(nm)*hu(nm) < htrsh) then
+          if (kfu(nm)*hu(nm) < drytrsh) then
              kfu(nm) = 0
              do k = kfumn0(nm), kmax
                 kfuz0(nm, k) = 0
@@ -183,8 +185,8 @@ subroutine z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
              !
              if (kfu(nm) == 0) then
                 !
-                if ( hu(nm) > trsh &
-                   & .and. max(s0(nm),s0(nmu)) - max(-real(dps(nm),fp),-real(dps(nmu),fp)) >= trsh) then
+                if ( hu(nm) > floodtrsh &
+                   & .and. max(s0(nm),s0(nmu)) - max(-real(dps(nm),fp),-real(dps(nmu),fp)) >= floodtrsh) then
                    !
                    ! set kfuz0 for the flooded points
                    !

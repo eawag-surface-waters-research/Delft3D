@@ -93,6 +93,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
     integer                , pointer :: lundia
     integer                , pointer :: ntstep
     real(fp)               , pointer :: dco
+    real(fp)               , pointer :: drycrt
     real(fp)               , pointer :: dryflc
     real(fp)               , pointer :: hdt
     integer                , pointer :: iter1
@@ -262,7 +263,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
     real(fp)      :: hnm
     real(fp)      :: hucres
     real(fp)      :: humean  ! Mean value for H in U-points
-    real(fp)      :: htrsh
+    real(fp)      :: drytrsh
     real(fp)      :: pr
     real(fp)      :: dxiu
     real(fp)      :: dxid
@@ -276,6 +277,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
     lundia      => gdp%gdinout%lundia
     ntstep      => gdp%gdinttim%ntstep
     dco         => gdp%gdnumeco%dco
+    drycrt      => gdp%gdnumeco%drycrt
     dryflc      => gdp%gdnumeco%dryflc
     hdt         => gdp%gdnumeco%hdt
     iter1       => gdp%gdnumeco%iter1
@@ -299,7 +301,8 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
     mmaxddb = mmax + 2*gdp%d%ddbound
     hdti    = 1.0_fp / hdt
     icxy    = max(icx, icy)
-    htrsh   = 0.5_fp * dryflc
+    drytrsh = drycrt
+    !
     if (idry == 1) then
        !
        ! This is necessary because SUD can be repeated in case of drying
@@ -808,7 +811,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
              !
              ! CHECK FOR DRYING
              !
-             if (min(hnm, hucres)<=htrsh) then
+             if (min(hnm, hucres)<=drytrsh) then
                 aa(nm)  = 0.0
                 bb(nm)  = 1.0
                 cc(nm)  = 0.0

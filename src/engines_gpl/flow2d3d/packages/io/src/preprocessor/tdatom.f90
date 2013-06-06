@@ -226,6 +226,7 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
     real(fp)                                            :: chzmin 
     real(fp)                                            :: dco         ! Minimal depth for upwind approach in shallow areas [m]  
     real(fp)                                            :: dgcuni 
+    real(fp)                                            :: drycrt      ! Drying criterion [m]  
     real(fp)                                            :: dryflc      ! Drying & Flooding criterion [m]  
     real(fp)                                            :: dx 
     real(fp)                                            :: dy 
@@ -564,9 +565,9 @@ subroutine tdatom(runid, filmrs, nuerr, alone, gdp)
         ! Initialize global and local parameters in subroutine 
         ! 
         call rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , & 
-                 & iter1     ,dryflc    ,dco       ,ibarco    ,kmax      , & 
-                 & lstsci    ,icreep    ,trasol    ,momsol    ,dgcuni    , & 
-                 & forfuv    ,forfww    ,ktemp     ,temint    ,            & 
+                 & iter1     ,dryflc    ,drycrt    ,dco       ,ibarco    , &
+                 & kmax      ,lstsci    ,icreep    ,trasol    ,momsol    , & 
+                 & dgcuni    ,forfuv    ,forfww    ,ktemp     ,temint    , & 
                  & keva      ,evaint    ,old_corio , & 
                  & dpsopt    ,dpuopt    ,zmodel    ,gammax    ,fwfac     , & 
                  & nudge     ,nudvic    ,gdp       ) 

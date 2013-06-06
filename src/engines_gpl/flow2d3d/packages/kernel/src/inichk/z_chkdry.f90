@@ -61,6 +61,7 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    real(fp)       , pointer :: drycrt
     real(fp)       , pointer :: dryflc
     logical        , pointer :: zmodel
     logical        , pointer :: kfuv_from_restart
@@ -135,7 +136,7 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
     integer :: nmu
     integer :: num
     real(fp):: hnm
-    real(fp):: htrsh
+    real(fp):: drytrsh
     real(fp):: hucres
     real(fp):: hvcres
     real(fp):: s1u
@@ -144,11 +145,11 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
 !! executable statements -------------------------------------------------------
 !
     zmodel             => gdp%gdprocs%zmodel
-    dryflc             => gdp%gdnumeco%dryflc
+    drycrt             => gdp%gdnumeco%drycrt
     kfuv_from_restart  => gdp%gdrestart%kfuv_from_restart
     dzmin              => gdp%gdzmodel%dzmin
     !
-    htrsh = 0.5_fp*dryflc
+    drytrsh = drycrt
     !
     !NOTE: that the contents of KFS are here identical to KCS
     !      (except for boundary points)
@@ -182,7 +183,7 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
           !
           !kkmin = max( kkmin, max(kfsmin(nm), kfsmin(nmu)) )
           !
-          if (kfu(nm) == 1 .and. hu(nm)>=htrsh) then
+          if (kfu(nm) == 1 .and. hu(nm)>=drytrsh) then
              hnm = 0.0_fp
              !do k = kkmin, kkmax
              do k = kfumin(nm), kfumax(nm)
@@ -204,7 +205,7 @@ subroutine z_chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lstsci    , &
           !
           !kkmin = max( kkmin, max(kfsmin(nm), kfsmin(num)) )
           !
-          if (kfv(nm) == 1 .and. hv(nm)>=htrsh) then
+          if (kfv(nm) == 1 .and. hv(nm)>=drytrsh) then
              hnm = 0.0_fp
              !do k = kkmin, kkmax
              do k = kfvmin(nm), kfvmax(nm)

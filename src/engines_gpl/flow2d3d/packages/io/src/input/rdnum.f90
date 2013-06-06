@@ -1,9 +1,9 @@
 subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
-               & iter1     ,dryflc    ,dco       ,ibaroc    ,kmax      , &
-               & lstsci    ,icreep    ,trasol    ,momsol    ,dgcuni    , &
-               & forfuv    ,forfww    ,ktemp     ,temint    ,            &
-               & keva      ,evaint    ,old_corio , &
-               & dpsopt    ,dpuopt    ,zmodel    ,gammax    ,fwfac     , &
+               & iter1     ,dryflc    ,drycrt    ,dco       ,ibaroc    , &
+               & kmax      ,lstsci    ,icreep    ,trasol    ,momsol    , &
+               & dgcuni    ,forfuv    ,forfww    ,ktemp     ,temint    , &
+               & keva      ,evaint    ,old_corio ,dpsopt    ,dpuopt    , &
+               & zmodel    ,gammax    ,fwfac     , &
                & nudge     ,nudvic    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -77,6 +77,7 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     logical                   :: old_corio !  Description and declaration in numeco.igs
     real(fp)                  :: dco       !  Description and declaration in numeco.igs
     real(fp)                  :: dgcuni
+    real(fp)                  :: drycrt    !  Description and declaration in numeco.igs
     real(fp)                  :: dryflc    !  Description and declaration in numeco.igs
     real(fp)                  :: fwfac     !  Description and declaration in numeco.igs
     real(fp)                  :: gammax    !  Description and declaration in numeco.igs
@@ -133,6 +134,7 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     !
     iter1  = 2
     dryflc = 0.1_fp
+    drycrt = -999.999_fp
     dco    = -999.999_fp
     dgcuni = 0.5_fp
     gammax = 1.0_fp
@@ -391,6 +393,24 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
     ! 'Dryflc': threshold depth for drying flooding
     !
     call prop_get(gdp%mdfile_ptr,'*','Dryflc',dryflc)
+    !
+    ! 'Drycrt': threshold depth for drying
+    !
+    call prop_get(gdp%mdfile_ptr,'*','Drycrt',drycrt)
+    !
+    if (drycrt<0.0_fp) then
+       !
+       ! Drycrt not specified in mdf file, set to 0.5 * dryflc
+       !
+       drycrt = 0.5_fp*dryflc
+       !
+    else
+       !
+       ! Drycrt may not exceed dryflc
+       !
+       drycrt = min(drycrt, dryflc)
+       !
+    endif
     !
     ! 'DepIni': Initial water depth in all dry cells
     !

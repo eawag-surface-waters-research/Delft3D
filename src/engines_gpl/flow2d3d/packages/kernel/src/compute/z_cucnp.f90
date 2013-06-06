@@ -84,6 +84,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    real(fp)               , pointer :: drycrt
     real(fp)               , pointer :: dryflc
     real(fp)               , pointer :: gammax
     character(8)           , pointer :: dpsopt
@@ -269,7 +270,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     real(fp)           :: gsqi
     real(fp)           :: hl
     real(fp)           :: hr
-    real(fp)           :: htrsh
+    real(fp)           :: drytrsh
     real(fp)           :: hugsqs  ! HU(NM/NMD) * GSQS(NM) Depending on UMDIS the HU of point NM or NMD will be used 
     real(fp)           :: qwind
     real(fp), external :: redvic
@@ -288,6 +289,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
 !
 !! executable statements -------------------------------------------------------
 !
+    drycrt    => gdp%gdnumeco%drycrt
     dryflc    => gdp%gdnumeco%dryflc
     dpsopt    => gdp%gdnumeco%dpsopt
     momsol    => gdp%gdnumeco%momsol
@@ -320,7 +322,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        ff = 1.0_fp
     endif
     kmaxtl = 0
-    htrsh  = 0.5_fp * dryflc
+    drytrsh  = drycrt
     !
     ! Flag for vertical advection set to 1.0 by default = Central implicit discretisation of 
     ! advection in vertical (0.0 means 1st order upwind explicit)
@@ -504,7 +506,7 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                 !
                 ! cfurou(nm,1) contains u/u*
                 !
-                uweir      = sqrt(2.0 / 3.0 * ag * max(hu(nm), htrsh))
+                uweir      = sqrt(2.0 / 3.0 * ag * max(hu(nm), drytrsh))
                 taubpu(nm) = uweir / (cfurou(nm,1)**2)
              endif
           endif
@@ -530,9 +532,9 @@ subroutine z_cucnp(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
           ! Bottom and wind shear stress
           !
           cbot           = taubpu(nm)
-          qwind          = windu(nm)/max(dzu0(nm, kkmax),htrsh)
-          bdmwrp         = cbot/max(dzu0(nm, kmin),htrsh)
-          bdmwrs         = taubsu(nm)/max(dzu0(nm, kmin),htrsh)
+          qwind          = windu(nm)/max(dzu0(nm, kkmax),drytrsh)
+          bdmwrp         = cbot/max(dzu0(nm, kmin),drytrsh)
+          bdmwrs         = taubsu(nm)/max(dzu0(nm, kmin),drytrsh)
           bbk(nm, kmin)  = bbk(nm, kmin) + bdmwrp
           ddk(nm, kkmax) = ddk(nm, kkmax) - qwind/rhow
           ddk(nm, kmin)  = ddk(nm, kmin) + bdmwrs
