@@ -252,7 +252,7 @@ C
 
 !        Determine the volumes and areas that ran dry at start of time step
 
-         call hsurf  ( noseg    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
+         call hsurf  ( nosss    , nopa     , c(ipnam) , a(iparm) , nosfun   ,
      &                 c(isfna) , a(isfun) , surface  , lun(19)  )
          call dryfld ( noseg    , nosss    , nolay    , a(ivol)  , noq1+noq2,
      &                 a(iarea) , nocons   , c(icnam) , a(icons) , surface  ,

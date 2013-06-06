@@ -761,9 +761,9 @@
       ierr = 0
       itota  = itota  +   noseg
       nr_rar = nr_rar + 1
-      if ( l_decl ) allocate ( surface   ( noseg ), stat=ierr )
+      if ( l_decl ) allocate ( surface   ( noseg+nseg2 ), stat=ierr )
       if ( ierr .ne. 0 ) then ; write(lunrep,2010) "surface             " ; call srstop(1) ; endif
-      if ( .not. l_decl ) write ( 328, 2040 ) nr_rar, "surface             ", noseg
+      if ( .not. l_decl ) write ( 328, 2040 ) nr_rar, "surface             ", noseg+nseg2
 
       if ( delmat ) then
          itota  = itota  +   nosys*noseg
