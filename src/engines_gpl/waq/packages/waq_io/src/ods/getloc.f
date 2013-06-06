@@ -61,11 +61,25 @@ C
       CHARACTER*20  LOCDEF(MAXDEF) , LOCLST(MAXLST)
       DIMENSION     LOCTYP(MAXLST) , LOCNR (MAXLST)
       LOGICAL       SETALL
+      character*256         :: ext     ! file extension
+      integer               :: extpos  ! position of extension
+      integer               :: extlen  ! length of file extension
+      logical               :: mapfil  ! true if map file extension
 C
 C         Open the DELWAQ .HIS file
 C
       CALL DHOPNF ( 10 , FNAME(1) , 24 , 2 , IERROR )
       IF ( IERROR .NE. 0 ) RETURN
+
+      ! map or his
+
+      call dhfext(fname(1), ext, extpos, extlen)
+      call dhucas(ext, ext, extlen)
+      if ( ext .eq. 'MAP' ) then
+         mapfil = .true.
+      else
+         mapfil = .false.
+      endif
 C
 C         Read primary system characteristics
 C
@@ -78,16 +92,22 @@ C
       NRLST = 0
       SETALL = .FALSE.
       IF ( LOCDEF(1) .EQ. '*' ) SETALL = .TRUE.
+
       DO 40 I1 = 1 , NODUMP , MAXLST
          MAXK = MIN(NODUMP,I1+MAXLST-NRLST-1) - I1 + 1
-         READ ( 10 , ERR=130 ) ( IDUMMY, LOCLST(K) , K = NRLST+1 ,
-     *                                                   NRLST+MAXK )
+         if ( .not. mapfil ) then
+            READ ( 10 , ERR=130 ) ( IDUMMY, LOCLST(K), K = NRLST+1, NRLST+MAXK)
+         else
+            do k = nrlst+1, nrlst+maxk
+               write(loclst(k), '(''segment '',i8)' ) k
+            enddo
+         endif
          NBASE = NRLST
          DO 30 I2 = 1 , MAXK
             DO 20 I3 = 1 , MAXDEF
                IF ( LOCLST(NBASE+I2) .EQ. LOCDEF(I3) .OR. SETALL ) THEN
                   NRLST = NRLST + 1
-                  IF ( NRLST .EQ. MAXLST ) THEN
+                  IF ( NRLST .GT. MAXLST ) THEN
                      IERROR = -NODUMP
                      GOTO 50
                   ENDIF

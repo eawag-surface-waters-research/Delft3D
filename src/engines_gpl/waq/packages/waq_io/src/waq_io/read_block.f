@@ -476,6 +476,20 @@ c
 
             if ( data_block%filetype .eq. FILE_ODS ) then
 
+               ! when data_loc is not filled only
+
+               if ( data_loc%no_item .eq. 0 ) then
+                  ierr2 = dlwq_resize(data_loc,waq_loc%no_item)
+                  data_loc%no_item  = waq_loc%no_item
+                  data_loc%name     = waq_loc%name
+                  data_loc%ipnt     = waq_loc%ipnt
+                  data_loc%sequence = waq_loc%sequence
+                  data_loc%constant = waq_loc%constant
+               endif
+
+               data_block%no_param = waq_param%no_item
+               data_block%no_loc   = waq_loc%no_item
+
                call read_data_ods( lunut      , ctoken , data_param, data_loc, amiss ,
      +                             data_buffer, ierr2 )
                if ( ierr2 .ne. 0 ) goto 100

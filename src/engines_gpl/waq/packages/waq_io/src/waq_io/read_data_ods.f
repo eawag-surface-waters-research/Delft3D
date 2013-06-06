@@ -69,6 +69,7 @@
       real*8                , allocatable   :: times(:)     ! times
       integer               , allocatable   :: timetyp(:)   ! time types ?
       real                  , allocatable   :: buffer(:)    ! data buffer for read
+      real                  , allocatable   :: buffer2(:,:,:)! data buffer for read
       integer                               :: nsubs        ! number of parameters in file
       integer                               :: nlocs        ! number of locations in file
       integer                               :: ntims        ! number of times in file
@@ -87,6 +88,8 @@
       integer                               :: i , i1 , i2
       integer                               :: iy1, im1, id1, ih1, in1, is1
       integer                               :: iy2, im2, id2, ih2, in2, is2
+      integer                               :: maxdim
+      integer                               :: ierr_alloc
 
 !     COMMON  /  SYSI   /   System timers
 
@@ -252,27 +255,53 @@ c      times are converted to delwaq times
 
       ! get the data themselves
 
-      loc(3) =  1
-      do ipar = 1 , data_param%no_item
-         if ( ipar_ods(ipar) .gt. 0 ) then
-            do iloc = 1 , data_loc%no_item
-               if ( iloc_ods(iloc) .gt. 0 ) then
-                  loc(1) = iloc_ods(iloc)
-                  loc(2) = iloc_ods(iloc)
-                  call getmat ( cfile , 0 , ipar_ods(ipar), loc     , timdef   ,
-     *                          amiss , 0 , nobrk         , buffer  , ierror   ,
-     *                                                                cfile(3) )
-                  do ibrk = 1 , nobrk
-                     if ( iorder .eq. ORDER_PARAM_LOC ) then
-                        data_block%values(ipar,iloc,ibrk) = buffer(ibrk)
-                     else
-                        data_block%values(iloc,ipar,ibrk) = buffer(ibrk)
-                     endif
-                  enddo
-               endif
-            enddo
-         endif
-      enddo
+      ! try the read the data in one time
+
+      allocate(buffer2(nsubs,nlocs,nobrk),stat=ierr_alloc)
+      if ( ierr_alloc .eq. 0 ) then
+         maxdim = nsubs*nlocs*nobrk
+         call getmat2( cfile , 0 , ipar_ods(ipar), loc     , timdef   ,
+     *                 amiss , 0 , maxdim        , buffer2 , ierror   ,
+     *                                                       cfile(3) )
+         do ipar = 1 , data_param%no_item
+            if ( ipar_ods(ipar) .gt. 0 ) then
+               do iloc = 1 , data_loc%no_item
+                  if ( iloc_ods(iloc) .gt. 0 ) then
+                     do ibrk = 1 , nobrk
+                        if ( iorder .eq. ORDER_PARAM_LOC ) then
+                           data_block%values(ipar,iloc,ibrk) = buffer2(ipar_ods(ipar),iloc_ods(iloc),ibrk)
+                        else
+                           data_block%values(iloc,ipar,ibrk) = buffer2(ipar_ods(ipar),iloc_ods(iloc),ibrk)
+                        endif
+                     enddo
+                  endif
+               enddo
+            endif
+         enddo
+         deallocate(buffer2)
+      else
+         loc(3) =  1
+         do ipar = 1 , data_param%no_item
+            if ( ipar_ods(ipar) .gt. 0 ) then
+               do iloc = 1 , data_loc%no_item
+                  if ( iloc_ods(iloc) .gt. 0 ) then
+                     loc(1) = iloc_ods(iloc)
+                     loc(2) = iloc_ods(iloc)
+                     call getmat ( cfile , 0 , ipar_ods(ipar), loc     , timdef   ,
+     *                             amiss , 0 , nobrk         , buffer  , ierror   ,
+     *                                                                   cfile(3) )
+                     do ibrk = 1 , nobrk
+                        if ( iorder .eq. ORDER_PARAM_LOC ) then
+                           data_block%values(ipar,iloc,ibrk) = buffer(ibrk)
+                        else
+                           data_block%values(iloc,ipar,ibrk) = buffer(ibrk)
+                        endif
+                     enddo
+                  endif
+               enddo
+            endif
+         enddo
+      endif
       deallocate(buffer,ipar_ods,iloc_ods)
 
       ! the sequence is the same as we read it, maybe always set both par and loc??

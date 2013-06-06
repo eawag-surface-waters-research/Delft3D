@@ -60,11 +60,25 @@ C
       REAL*8        TIM(3)    , OTIME  , ATIME    , SECOND  , JULIAN
       EXTERNAL      JULIAN
       real  amiss
+      character*256         :: ext     ! file extension
+      integer               :: extpos  ! position of extension
+      integer               :: extlen  ! length of file extension
+      logical               :: mapfil  ! true if map file extension
 C
 C         Open the DELWAQ .HIS file if needed
 C
       CALL DHOPNF ( 10 , FNAME(1) , 24 , 2 , IERROR )
       IF ( IERROR .NE. 0 ) RETURN
+
+      ! map or his
+
+      call dhfext(fname(1), ext, extpos, extlen)
+      call dhucas(ext, ext, extlen)
+      if ( ext .eq. 'MAP' ) then
+         mapfil = .true.
+      else
+         mapfil = .false.
+      endif
 C
 C         Read primary system characteristics
 C
@@ -84,7 +98,9 @@ C
       READ ( FNAME(3)(151:158) , '(I8)' ) ISFACT
       READ ( 10 , ERR=110 )   NOTOT, NODUMP
       READ ( 10 , ERR=120 ) ( FNAME(3)(181:200) , K = 1,NOTOT )
-      READ ( 10 , ERR=130 ) ( IDUMMY, FNAME(3)(221:240) , K = 1,NODUMP )
+      if ( .not. mapfil ) then
+         READ ( 10 , ERR=130 ) ( IDUMMY, FNAME(3)(221:240) , K = 1,NODUMP )
+      endif
       IDATE  = IYEAR*10000+IMONTH*100+IDAY
       ITIME  = IHOUR*10000+IMINUT*100+ISECND
       OTIME  = JULIAN ( IDATE , ITIME )
@@ -111,6 +127,122 @@ C     WRITE ( 20 , '(25E12.6)' ) ( DATA(K),K=1,NTT )
          ISET = ISET + I2 + 1
       ENDIF
       GOTO 10
+C
+C         Error messages
+C
+  100 IERROR = 10
+      GOTO 200
+  110 IERROR = 11
+      GOTO 200
+  120 IERROR = 12
+      GOTO 200
+  130 IERROR = 13
+      GOTO 200
+  140 IERROR = 14
+      GOTO 200
+  150 IERROR = 15
+C
+  200 CLOSE ( 10 )
+      RETURN
+C
+      END
+      SUBROUTINE GETMAT2( FNAME  , ITYPE  , IPRCOD , LOC    , TIM    ,
+     *                    AMISS  , I3GL   , MAXDIM , DATA   , IERROR ,
+     *                                                        OPTION )
+C
+C
+C     Deltares        MARINE & COASTAL MANAGEMENT
+C
+C     CREATED            : May '96  by L. Postma
+C
+C     MODIFIED           :
+C
+C     FUNCTION           : ODS GETMAT routine for DELWAQ HIS-files
+C
+C     SUBROUTINES CALLED :
+C
+C     LOGICAL UNITS      :
+C
+C     PARAMETERS    :
+C
+C     NAME    KIND     LENGTH     FUNCT.  DESCRIPTION
+C     ---------------------------------------------------------
+C     FNAME   CHAR*256   3        IN/LOC  Complete file name
+C     ITYPE   INTEGER    1        INPUT   File type
+C     IPRCOD  INTEGER  IERROR     INPUT   List of wanted parameters
+C     LOC     INTEGER   3*3       INPUT   List of indices of locations
+C     TIM     REAL*8     3        INPUT   Interval and step for data
+C     AMISS   REAL*4     2        INPUT   Missing value in output/input
+C     I3GL    INTEGER    1        INPUT   Nonsens
+C     MAXDIM  INTEGER    1        INPUT   Maximum dimension of output arr
+C     DATA    REAL*4   MAXDIM     OUTPUT  The produced information
+C     IERROR  INTEGER    1        IN/OUT  Error code
+C     OPTION  CHAR*256   1        IN/OUT  For future use
+C
+C
+      CHARACTER*256 FNAME (3) , OPTION
+      DIMENSION     LOC(*)    , DATA(*)
+      REAL*8        TIM(3)    , OTIME  , ATIME    , SECOND  , JULIAN
+      EXTERNAL      JULIAN
+      real  amiss
+      character*256         :: ext     ! file extension
+      integer               :: extpos  ! position of extension
+      integer               :: extlen  ! length of file extension
+      logical               :: mapfil  ! true if map file extension
+C
+C         Open the DELWAQ .HIS file if needed
+C
+      CALL DHOPNF ( 10 , FNAME(1) , 24 , 2 , IERROR )
+      IF ( IERROR .NE. 0 ) RETURN
+
+      ! map or his
+
+      call dhfext(fname(1), ext, extpos, extlen)
+      call dhucas(ext, ext, extlen)
+      if ( ext .eq. 'MAP' ) then
+         mapfil = .true.
+      else
+         mapfil = .false.
+      endif
+C
+C         Read primary system characteristics
+C
+      READ ( 10 , ERR=100 )   FNAME(3)(1:160)
+      IF ( FNAME(3)(121:123) .NE. 'T0: ' .AND.
+     *     FNAME(3)(121:123) .NE. 't0: ' .AND.
+     *     FNAME(3)(121:123) .NE. 'T0= ' .AND.
+     *     FNAME(3)(121:123) .NE. 't0= '       ) THEN
+         GOTO 140
+      ENDIF
+      READ ( FNAME(3)(125:128) , '(I4)' ) IYEAR
+      READ ( FNAME(3)(130:131) , '(I2)' ) IMONTH
+      READ ( FNAME(3)(133:134) , '(I2)' ) IDAY
+      READ ( FNAME(3)(136:137) , '(I2)' ) IHOUR
+      READ ( FNAME(3)(139:140) , '(I2)' ) IMINUT
+      READ ( FNAME(3)(142:143) , '(I2)' ) ISECND
+      READ ( FNAME(3)(151:158) , '(I8)' ) ISFACT
+      READ ( 10 , ERR=110 )   NOTOT, NODUMP
+      READ ( 10 , ERR=120 ) ( FNAME(3)(181:200) , K = 1,NOTOT )
+      if ( .not. mapfil ) then
+         READ ( 10 , ERR=130 ) ( IDUMMY, FNAME(3)(221:240) , K = 1,NODUMP )
+      endif
+      IDATE  = IYEAR*10000+IMONTH*100+IDAY
+      ITIME  = IHOUR*10000+IMINUT*100+ISECND
+      OTIME  = JULIAN ( IDATE , ITIME )
+      SECOND = ISFACT/864.00D+02
+C
+C         Standard ODS processing
+C
+      NTT   = NODUMP*NOTOT
+      ISET  = 0
+      DO
+         IF ( ISET+NTT .GT. MAXDIM ) GOTO 150
+         READ ( 10 , ERR=150 , END=200 ) IDUMMY , ( DATA(ISET+K) , K=1,NTT)
+         ATIME = OTIME + IDUMMY*SECOND
+         IF ( ATIME .GT. TIM(1) .AND. ATIME .LT. TIM(2) ) THEN
+            ISET = ISET + NTT
+         ENDIF
+      ENDDO
 C
 C         Error messages
 C

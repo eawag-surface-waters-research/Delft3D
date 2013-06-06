@@ -64,11 +64,25 @@ C
       EXTERNAL         JULIAN
 C
       REAL, ALLOCATABLE :: RDATA(:)
+      character*256         :: ext     ! file extension
+      integer               :: extpos  ! position of extension
+      integer               :: extlen  ! length of file extension
+      logical               :: mapfil  ! true if map file extension
 C
 C         Open the DELWAQ .HIS file
 C
       CALL DHOPNF ( 10 , FNAME(1) , 24 , 2 , IERROR )
       IF ( IERROR .NE. 0 ) RETURN
+
+      ! map or his
+
+      call dhfext(fname(1), ext, extpos, extlen)
+      call dhucas(ext, ext, extlen)
+      if ( ext .eq. 'MAP' ) then
+         mapfil = .true.
+      else
+         mapfil = .false.
+      endif
 C
 C         Read primary system characteristics
 C
@@ -88,7 +102,9 @@ C
       READ ( FNAME(3)(151:158) , '(I8)' ) ISFACT
       READ ( 10 , ERR=110 )   NOTOT, NODUMP
       READ ( 10 , ERR=120 ) ( FNAME(3)(181:200) , K = 1,NOTOT )
-      READ ( 10 , ERR=130 ) ( IDUMMY, FNAME(3)(221:240) , K = 1,NODUMP )
+      if ( .not. mapfil ) then
+         READ ( 10 , ERR=130 ) ( IDUMMY, FNAME(3)(221:240) , K = 1,NODUMP )
+      endif
       IDATE  = IYEAR*10000+IMONTH*100+IDAY
       ITIME  = IHOUR*10000+IMINUT*100+ISECND
       OTIME  = JULIAN ( IDATE , ITIME )

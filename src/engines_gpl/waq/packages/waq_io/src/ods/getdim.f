@@ -61,18 +61,35 @@ C
       CHARACTER*256 FNAME(3) , OPTION
       CHARACTER*3   DIM
       DIMENSION     NDIM(5)
+      character*256         :: ext     ! file extension
+      integer               :: extpos  ! position of extension
+      integer               :: extlen  ! length of file extension
+      logical               :: mapfil  ! true if map file extension
+
 C
 C         Open the DELWAQ .HIS file
 C
       CALL DHOPNF ( 10 , FNAME(1) , 24 , 2 , IERROR )
       IF ( IERROR .NE. 0 ) RETURN
+
+      ! map or his
+
+      call dhfext(fname(1), ext, extpos, extlen)
+      call dhucas(ext, ext, extlen)
+      if ( ext .eq. 'MAP' ) then
+         mapfil = .true.
+      else
+         mapfil = .false.
+      endif
 C
 C         Read primary system characteristics
 C
       READ ( 10 , ERR=100 )   FNAME(3)(1:160)
       READ ( 10 , ERR=110 )   NOTOT, NODUMP
       READ ( 10 , ERR=120 ) ( FNAME(3)(181:200) , K = 1,NOTOT )
-      READ ( 10 , ERR=130 ) ( IDUMMY, FNAME(3)(221:240) , K = 1,NODUMP )
+      if ( .not. mapfil ) then
+         READ ( 10 , ERR=130 ) ( IDUMMY, FNAME(3)(221:240) , K = 1,NODUMP )
+      endif
 C
 C         Read the values at all times
 C

@@ -86,7 +86,7 @@ C
             DO 20 I3 = 1 , MAXDEF
                IF ( PARUNI(I2) .EQ. PARDEF(I3) .OR. SETALL ) THEN
                   NRLST = NRLST + 1
-                  IF ( NRLST .EQ. MAXLST ) THEN
+                  IF ( NRLST .GT. MAXLST ) THEN
                      IERROR = -NOTOT
                      GOTO 50
                   ENDIF
