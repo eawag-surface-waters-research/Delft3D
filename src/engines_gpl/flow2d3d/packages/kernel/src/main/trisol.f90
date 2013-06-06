@@ -1702,7 +1702,8 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
           call timer_start(timer_massfl, gdp)
           call massfl(r(c)     ,r(teta)  ,r(ewave1),r(eroll1), &
                     & r(grmasu),r(grmasv),r(grmsur),r(grmsvr), &
-                    & nmax     ,mmax     ,kmax     ,gdp      )
+                    & nmax     ,mmax     ,kmax     ,r(dps)   , &
+                    & r(s0)    ,gdp      )
           !
           ! f_lam > 0.0 implies breaker delay applied on wave mass flux
           !
@@ -2712,7 +2713,8 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
           call timer_start(timer_massfl, gdp)
           call massfl(r(c)     ,r(teta)  ,r(ewave1),r(eroll1), &
                     & r(grmasu),r(grmasv),r(grmsur),r(grmsvr), &
-                    & nmax     ,mmax     ,kmax     ,gdp      )
+                    & nmax     ,mmax     ,kmax     ,r(dps)   , &
+                    & r(s0)    ,gdp      )
           !
           ! f_lam > 0.0 implies breaker delay applied on wave mass flux
           !

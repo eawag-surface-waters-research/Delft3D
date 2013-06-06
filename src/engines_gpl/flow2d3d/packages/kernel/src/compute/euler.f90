@@ -137,11 +137,9 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
     ! Correct Velocities with mass flux
     ! Added vertical structure of mass flux according to 2nd Order Stokes
     !
-    ! in 3D roller part of mass flux was not included
+    ! In 3D, roller part of mass flux is also included
     ! grmasu/v now contain complete mass flux in 2DH or
     ! roller contribution in 3D (this is done in massfl-routine)
-    ! Roller part of mass flux is assumed to be distributed uniformly
-    ! over the water column
     ! Furthermore correction for breaker delay
     ! in 3D grmasu/grmasv contains breaker delay scaling factors
     ! in 2DH grmsur/grmsvr contains breaker delay scaling factors

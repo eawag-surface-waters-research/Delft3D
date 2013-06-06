@@ -300,15 +300,12 @@ subroutine difuwe(timest    ,lundia    ,nst       ,icx       ,icy       , &
     !
     ! Prevent negative energy
     !
-    facmax = 0.125_fp*rhow*ag*gammax**2
-    do nm=1,nmmax
+    do nm = 1, nmmax
        if (kfs(nm) > 0) then
-          dep    = real(dps(nm),fp) + s0(nm)
-          emax   = facmax*dep**2
           e1(nm) = max(e1(nm) , 0.0_fp)
-          e1(nm) = min(e1(nm) , emax)
        else
           e1(nm) = 0.0_fp
        endif
     enddo
+    !
 end subroutine difuwe

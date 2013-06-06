@@ -1,6 +1,7 @@
 subroutine massfl(c         ,dir       ,ewave1    ,eroll1    , &
                 & rmasu     ,rmasv     ,rmasur    ,rmasvr    , &
-                & nmax      ,mmax      ,kmax      ,gdp       )
+                & nmax      ,mmax      ,kmax      ,dps       , &
+                & s0        ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -44,7 +45,9 @@ subroutine massfl(c         ,dir       ,ewave1    ,eroll1    , &
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
+    real(fp)               , pointer :: ag
     real(fp)               , pointer :: rhow
+    real(fp)               , pointer :: gammax
 !
 ! Global variables
 !
@@ -53,6 +56,8 @@ subroutine massfl(c         ,dir       ,ewave1    ,eroll1    , &
     integer                                                  , intent(in)  :: kmax   !  Description and declaration in esm_alloc_int.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: c      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: dir
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: dps
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: s0
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: eroll1 !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(in)  :: ewave1 !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub), intent(out) :: rmasu
@@ -62,10 +67,15 @@ subroutine massfl(c         ,dir       ,ewave1    ,eroll1    , &
 !
 ! Local variables
 !
-    integer :: m
-    integer :: n
-    real(fp):: c1
-    real(fp):: mass
+    integer  :: m
+    integer  :: n
+    real(fp) :: c1
+    real(fp) :: mass
+    real(fp) :: facmax
+    real(fp) :: dep    !   local water depth
+    real(fp) :: emax   !   maximum allowable energy
+    real(fp) :: erol
+    real(fp) :: ewav
 !
 !! executable statements -------------------------------------------------------
 !
@@ -76,22 +86,34 @@ subroutine massfl(c         ,dir       ,ewave1    ,eroll1    , &
     !
     do m = 1, mmax
        do n = 1, nmax
+          !
           c1 = max(c(n, m), 0.1_fp)
+          !
+          ! Limit wave energy and roller energy with gammax
+          !
+          facmax = 0.125_fp*rhow*ag*gammax**2
+          dep    = real(dps(n, m),fp) + s0(n, m)
+          emax   = facmax*dep**2
+          erol   = min(eroll1(n, m), emax) 
+          ewav   = min(ewave1(n, m), emax) 
+          !
           if (kmax > 1) then
              !
              ! 3D: massflux resulting from roller is stored in rmasur/rmasvr
              ! Waves massflux is obtained from stokes drift distribution
              !
-             mass         =  2.0*eroll1(n, m)/rhow/c1
+             mass         =  2.0*erol/rhow/c1
              rmasur(n, m) = mass*cos(dir(n, m)*degrad)
              rmasvr(n, m) = mass*sin(dir(n, m)*degrad)
+             !
           endif
           !
-          ! massflux resulting from waves and roller is stored in rmasu/v
+          ! Total mass flux resulting from waves and roller is stored in rmasu/v
           !
-          mass        = (ewave1(n, m) + 2.0*eroll1(n, m))/rhow/c1
+          mass        = (ewav + 2.0*erol)/rhow/c1
           rmasu(n, m) = mass*cos(dir(n, m)*degrad)
           rmasv(n, m) = mass*sin(dir(n, m)*degrad)
+          !
        enddo
     enddo
 end subroutine massfl
