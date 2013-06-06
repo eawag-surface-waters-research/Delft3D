@@ -61,7 +61,7 @@
       integer      , intent(in   ) :: pronvr      ! Not used
       integer      , intent(in   ) :: prvtyp( * ) ! Not used
       integer      , intent(in   ) :: iproc       ! Process number
-      integer      , intent(in   ) :: dll_opb     ! open proces library dll handle
+      integer(8)   , intent(in   ) :: dll_opb     ! open proces library dll handle
 
 !     local
 
@@ -469,7 +469,7 @@
                write(lunrep,*) 'ERROR     : requested module not in process library DLL'
                write(lunrep,*) 'module    : ', pronam(1:6)
                write(lunrep,*) 'dll handle: ', dll_opb
-                  call srstop(1)
+               call srstop(1)
             endif
 
       end select

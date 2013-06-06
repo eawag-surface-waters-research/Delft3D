@@ -193,7 +193,7 @@
       integer                    :: open_shared_library
       integer                    :: perf_function
       integer, save              :: ifirst = 1
-      integer, save              :: dll_opb     ! open proces library dll handle
+      integer(8), save           :: dll_opb     ! open proces library dll handle
       character(len=256)         :: shared_dll
       logical                    :: lfound
       integer                    :: idummy
@@ -244,6 +244,7 @@ C
             l_stop =.false.
             write(lunrep,*) ' using default dll : ',trim(shared_dll)
          endif
+         dll_opb = 0 ! in C this one could be 4 or 8 bytes, so make sure the last bytes are zero
          ierror = open_shared_library(dll_opb, shared_dll)
          if ( ierror .ne. 0 .and. l_stop ) then
             write(*,*) 'ERROR : opening process library DLL'
@@ -849,7 +850,7 @@ c
      +                    DERIV(*)       , STOCHI(*)      ,
      +                    VOLUME(*)      , FLXDMP(*)
       CHARACTER*20        PRONAM(*)
-      integer      , intent(in   ) :: dll_opb     ! open proces library dll handle
+      integer(8)   , intent(in   ) :: dll_opb     ! open proces library dll handle
 C
 C     Local
 C
