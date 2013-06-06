@@ -31,6 +31,7 @@ subroutine waveu(nmmax     ,kfs       ,sourw     , &
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
+! Computes wave energy dissipation terms due to breaking and bottom friction
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE

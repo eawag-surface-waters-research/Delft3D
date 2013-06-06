@@ -33,7 +33,12 @@ subroutine rolcor(hrms      ,tp        ,theta     ,hu        ,hv         , &
 !  $Id$
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
-! NONE
+! 
+! Computes correction for mass fluxes (used in difu.f90) due to roller mass flux
+! return flow and breaker delay. The former is now taken care of within euler.f90
+! and no longer required in this routine (when using the default settings,
+! i.e. eulerisoglm = false)
+!
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------

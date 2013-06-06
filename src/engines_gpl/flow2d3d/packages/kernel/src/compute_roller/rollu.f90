@@ -31,6 +31,7 @@ subroutine rollu(nmmax     ,kfs       ,sourr     ,df        , &
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
+! Computes roller energy source and sink terms, as well as roller energy dissipation
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
