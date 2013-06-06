@@ -39,6 +39,7 @@ subroutine rdroll(lunmd     ,lundia    ,lunscr    ,lerror    ,nrrec     , &
 ! f_lam     - default  0.0
 ! fwee      - default  0.0
 ! disform   - default  'R1993'
+! wavfrc    - default  .true.
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
@@ -62,6 +63,7 @@ subroutine rdroll(lunmd     ,lundia    ,lunscr    ,lerror    ,nrrec     , &
     real(fp)      , pointer :: thr
     real(fp)      , pointer :: f_lam
     real(fp)      , pointer :: fwee
+    logical       , pointer :: wavfrc
     character(5)  , pointer :: disform
 !
 ! Global variables
@@ -92,6 +94,7 @@ subroutine rdroll(lunmd     ,lundia    ,lunscr    ,lerror    ,nrrec     , &
     f_lam    => gdp%gdbetaro%f_lam
     disform  => gdp%gdbetaro%disform
     fwee     => gdp%gdbetaro%fwee
+    wavfrc   => gdp%gdbetaro%wavfrc
     !
     ! locate 'Alfaro'  record
     !
@@ -148,6 +151,11 @@ subroutine rdroll(lunmd     ,lundia    ,lunscr    ,lerror    ,nrrec     , &
     disform = 'R1993'
     call prop_get_string(gdp%mdfile_ptr, '*', 'Disform', disform)
     !
+    ! locate 'Wavrfc' record
+    !
+    wavfrc = .true.
+    call prop_get_logical(gdp%mdfile_ptr, '*', 'Wavfrc', wavfrc)
+    !
     ! output values to file
     !
     write (lundia, '(//,2a)') '*** Input (or default) parameters for ',        &
@@ -168,6 +176,13 @@ subroutine rdroll(lunmd     ,lundia    ,lunscr    ,lerror    ,nrrec     , &
     write (lundia, '(2a,f10.4)') txtput, ':', fwee
     txtput = 'Disform'
     write (lundia, '(3a)')       txtput, ':', disform
+    if (wavfrc) then
+       txtput = 'Wavfrc'
+       write (lundia, '(3a)')       txtput, ':    ', 'YES'
+    else
+       txtput = 'Wavfrc'
+       write (lundia, '(3a)')       txtput, ':    ', 'NO'
+    endif
     if (wavcmp) then
        txtput = 'File containing wave components '
        write (lundia, '(3a)')    txtput, ':', filrol

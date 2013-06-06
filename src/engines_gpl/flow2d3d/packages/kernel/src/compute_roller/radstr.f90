@@ -59,6 +59,7 @@ subroutine radstr(ewave1    ,eroll1    ,sinkr     ,c         ,cgc       , &
     integer      , pointer :: mmskf
     integer      , pointer :: mmskl
     real(fp)     , pointer :: dryflc
+    logical      , pointer :: wavfrc
 !
 ! Global variables
 !
@@ -165,6 +166,7 @@ subroutine radstr(ewave1    ,eroll1    ,sinkr     ,c         ,cgc       , &
     mmskf     => gdp%gdbcdat%mmskf
     mmskl     => gdp%gdbcdat%mmskl
     dryflc    => gdp%gdnumeco%dryflc
+    wavfrc    => gdp%gdbetaro%wavfrc
     !                                          +
     !
     !                                          g
@@ -298,8 +300,19 @@ subroutine radstr(ewave1    ,eroll1    ,sinkr     ,c         ,cgc       , &
                        &        / max(c(n,m  ),1.0e-1_fp) * cos(dir(n, m  ) * degrad)     &
                        &      + inmp1 * sinkr(n,mp1) * eroll1(n,mp1)                      &
                        &        / max(c(n,mp1),1.0e-1_fp) * cos(dir(n, mp1) * degrad)   )
-             if (hu(n, m)<2.0*dryflc) wsu(n, m) = 0.0
+             !
              fxw(n, m) = fxw(n, m) - wsu(n, m)
+             !
+             ! Reduce forces in water depths less than 2*DRYFLC
+             !
+             if (hu(n, m)<2.0_fp*dryflc) then
+                wsu(n, m) = 0.0
+                fxw(n, m) = 0.0
+             endif
+             !
+             if (.not.wavfrc) fxw(n, m) = 0.0
+             !
+             ! wsu and fxw are limited by gammax in uzd and cucnp
              !
              ds1k1v    = (sr(1, 1, 1) + sr(1, 0, 1) - sr(1, 1, -1) - sr(1, 0, -1)) &
                        & *0.25
@@ -342,8 +355,20 @@ subroutine radstr(ewave1    ,eroll1    ,sinkr     ,c         ,cgc       , &
                        &        / max(c(n  ,m),1.0e-1_fp) * sin(dir(n  ,m) * degrad) &
                        &      + inp1m * sinkr(np1,m) * eroll1(np1,m)                 &
                        &        / max(c(np1,m),1.0e-1_fp) * sin(dir(np1,m) * degrad)   )
-             if (hv(n, m)<2.0*dryflc) wsv(n, m) = 0.0
+             !
              fyw(n, m) = fyw(n, m) - wsv(n, m)
+             !
+             ! Reduce forces in water depths less than 2*DRYFLC
+             !
+             if (hv(n, m)<2.0_fp*dryflc) then
+                wsv(n, m) = 0.0
+                fyw(n, m) = 0.0
+             endif
+             !
+             if (.not.wavfrc) fyw(n, m) = 0.0
+             !
+             ! wsv and fyw are limited by gammax in uzd and cucnp
+             !
           else
              fxw(n, m) = 0.0
              fyw(n, m) = 0.0
