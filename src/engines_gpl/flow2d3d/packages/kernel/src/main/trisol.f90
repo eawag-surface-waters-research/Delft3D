@@ -1526,7 +1526,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                 & i(kfumin) ,i(kfvmx0) ,i(kfvmin) ,r(dzu0)   ,r(dzv0)   , &
                 & r(u0)     ,r(wrkb3)  ,r(v0)     ,r(wrkb4)  , &
                 & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
-                & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   , &
+                & r(tp)     ,r(hrms)   ,r(sig)    ,r(thick)  ,r(teta)   , &
                 & r(grmsur) ,r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
        call timer_stop(timer_euler, gdp)
        !
@@ -1722,7 +1722,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                 & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
                 & r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
                 & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
-                & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   , &
+                & r(tp)     ,r(hrms)   ,r(sig)    ,r(thick)  ,r(teta)   , &
                 & r(grmsur) ,r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
        call timer_stop(timer_euler, gdp)
        if (roller) then
@@ -1967,7 +1967,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                    & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
                    & r(u0)     ,r(wrkb5)  ,r(v0)     ,r(wrkb6)  , &
                    & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
-                   & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   , &
+                   & r(tp)     ,r(hrms)   ,r(sig)    ,r(thick)  ,r(teta)   , &
                    & r(grmsur) ,r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
           call timer_stop(timer_euler, gdp)
           !
@@ -2049,7 +2049,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                    & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
                    & r(u1)     ,r(wrkb13) ,r(v1)     ,r(wrkb14) , &
                    & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
-                   & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   , &
+                   & r(tp)     ,r(hrms)   ,r(sig)    ,r(thick)  ,r(teta)   , &
                    & r(grmsur) ,r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
           call timer_stop(timer_euler, gdp)
           !
@@ -2129,7 +2129,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                    & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
                    & r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
                    & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
-                   & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   , &
+                   & r(tp)     ,r(hrms)   ,r(sig)    ,r(thick)  ,r(teta)   , &
                    & r(grmsur) ,r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
           call timer_stop(timer_euler, gdp)
           !
@@ -2197,7 +2197,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                       & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
                       & r(u0)     ,r(wrkb5)  ,r(v0)     ,r(wrkb6)  , &
                       & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
-                      & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   , &
+                      & r(tp)     ,r(hrms)   ,r(sig)    ,r(thick)  ,r(teta)   , &
                       & r(grmsur) ,r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
              call timer_stop(timer_euler, gdp)
              umor = wrkb5
@@ -2553,7 +2553,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                 & i(kfumin) ,i(kfvmx0) ,i(kfvmin) ,r(dzu0)   ,r(dzv0)   , &
                 & r(u0)     ,r(wrkb3)  ,r(v0)     ,r(wrkb4)  , &
                 & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
-                & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   , &
+                & r(tp)     ,r(hrms)   ,r(sig)    ,r(thick)  ,r(teta)   , &
                 & r(grmsur) ,r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
        call timer_stop(timer_euler, gdp)
        !
@@ -2732,7 +2732,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                 & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
                 & r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
                 & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
-                & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   , &
+                & r(tp)     ,r(hrms)   ,r(sig)    ,r(thick)  ,r(teta)   , &
                 & r(grmsur) ,r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
        call timer_stop(timer_euler, gdp)
        if (roller) then
@@ -3025,7 +3025,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                    & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
                    & r(u0)     ,r(wrkb5)  ,r(v0)     ,r(wrkb6)  , &
                    & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
-                   & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   , &
+                   & r(tp)     ,r(hrms)   ,r(sig)    ,r(thick)  ,r(teta)   , &
                    & r(grmsur) ,r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
           call timer_stop(timer_euler, gdp)
           !
@@ -3107,7 +3107,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                    & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
                    & r(u1)     ,r(wrkb13) ,r(v1)     ,r(wrkb14) , &
                    & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
-                   & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   , &
+                   & r(tp)     ,r(hrms)   ,r(sig)    ,r(thick)  ,r(teta)   , &
                    & r(grmsur) ,r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
           call timer_stop(timer_euler, gdp)
           !
@@ -3187,7 +3187,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                    & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
                    & r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
                    & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
-                   & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   , &
+                   & r(tp)     ,r(hrms)   ,r(sig)    ,r(thick)  ,r(teta)   , &
                    & r(grmsur) ,r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
           call timer_stop(timer_euler, gdp)
           !
@@ -3255,7 +3255,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                       & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
                       & r(u0)     ,r(wrkb5)  ,r(v0)     ,r(wrkb6)  , &
                       & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
-                      & r(tp)     ,r(hrms)   ,r(sig)    ,r(teta)   , &
+                      & r(tp)     ,r(hrms)   ,r(sig)    ,r(thick)  ,r(teta)   , &
                       & r(grmsur) ,r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
              call timer_stop(timer_euler, gdp)
              umor = wrkb5

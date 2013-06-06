@@ -3,7 +3,7 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
                & kfumin    ,kfvmax    ,kfvmin    ,dzu1      ,dzv1      , &
                & u1        ,uwork     ,v1        ,vwork     , &
                & grmasu    ,grmasv    ,hu        ,hv        , &
-               & tp        ,hrms      ,sig       ,teta      , &
+               & tp        ,hrms      ,sig       ,thick     ,teta      , &
                & grmsur    ,grmsvr    ,grfacu    ,grfacv    ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
@@ -61,6 +61,7 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
     real(fp)                , pointer :: ag
     real(fp), dimension(:,:), pointer :: ustokes
     real(fp), dimension(:,:), pointer :: vstokes
+    real(fp)                , pointer :: gammax
 !
 ! Global variables
 !
@@ -95,12 +96,14 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in)  :: v1     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(out) :: vwork  !!  V-velocities corrected with mass flux
     real(fp), dimension(kmax)                       , intent(in)  :: sig    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(kmax)                       , intent(in)  :: thick  !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !
     integer       :: icy
     integer       :: k
     integer       :: kk
+    integer       :: krol
     integer       :: nm
     integer       :: nmu
     integer       :: num
@@ -114,6 +117,7 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
     real(fp)      :: omega
     real(fp)      :: p1
     real(fp)      :: p2
+    real(fp)      :: rolthck
     real(fp)      :: sintv
     real(fp)      :: tpu
     real(fp)      :: z
@@ -128,6 +132,7 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
     roller     => gdp%gdprocs%roller
     ustokes    => gdp%gdtrisol%ustokes
     vstokes    => gdp%gdtrisol%vstokes
+    gammax     => gdp%gdnumeco%gammax
     !
     ! Correct Velocities with mass flux
     ! Added vertical structure of mass flux according to 2nd Order Stokes
@@ -160,7 +165,11 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
                 tpu = (tp(nm) + tp(nmu))/2.0_fp
                 if (tpu > 0.1_fp) then
                    costu = 0.5_fp*(cos(degrad*teta(nm)) + cos(degrad*teta(nmu)))
-                   amp   = (hrms(nm) + hrms(nmu))/4.0_fp
+                   !
+                   ! Limit amp with gammax
+                   !
+                   amp=0.5_fp*(min(0.5_fp*(hrms(nm) + hrms(nmu)), gammax*hu(nm)))
+                   !
                    omega = 2.0_fp*pi/tpu
                    h = hu(nm)
                    !
@@ -177,16 +186,48 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
                    ! to avoid underflow for very small wave influence
                    !
                    if (.not. zmodel) then
+                      !
+                      do k = 1, kmax
+                          ustokes(nm, k) = 0.0
+                      enddo
+                      !
+                      ! First compute contribution of roller mass flux (distributed over top of water column (0.5*Hrms))
+                      !
+                      if (kmax>1) then
+                         !
+                         ! Find index krol of lowest cell to which roller mass flux is added
+                         ! 
+                         rolthck = thick(1)*h
+                         krol = 1 
+                         do k = 2, kmax
+                            if (-sig(k) * h > 1.0_fp*amp) then
+                               exit
+                            else
+                               rolthck = rolthck + thick(k)*h
+                               krol = k
+                            endif
+                         enddo
+                         !
+                         ! And and the roller flux
+                         !
+                         do k = 1, krol
+                            ustokes(nm, k) = grmsur(nm)/rolthck
+                         enddo
+                         !
+                      endif
+                      !
                       do k = 1, kmax
                          z             = (1.0_fp+sig(k)) * h
                          p1            = max(-25.0_fp,  2.0_fp*kwav*(z-h))
                          p2            = max(-25.0_fp, -4.0_fp*kwav*z)
                          f2            = exp(p1) * (1.0_fp+exp(p2))
-                         ustokes(nm,k) = f1 * (f2/f3) * costu
-                         uwork  (nm,k) = u1(nm,k) - ustokes(nm,k)          &
-                                       & - (grmsur(nm) + grfacu(nm))/hu(nm)
+                         ustokes(nm, k) = ustokes(nm, k) + f1 * (f2/f3) * costu
+                         uwork  (nm,k) = u1(nm,k) - ustokes(nm,k) - grfacu(nm)/hu(nm)
                       enddo
                    else
+                      !
+                      ! Still to be implemented: 3D distribution of roller flux
+                      !
                       z = 0.0_fp
                       do k = kfumin(nm), kfumax(nm)
                          z             = z + dzu1(nm, k)
@@ -222,7 +263,11 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
                 tpu = (tp(nm) + tp(num))/2.0_fp
                 if (tpu > 0.1_fp) then
                    sintv = 0.5_fp*(sin(degrad*teta(nm)) + sin(degrad*teta(num)))
-                   amp   = (hrms(nm) + hrms(num))/4.0_fp
+                   !
+                   ! Limit amp with gammax
+                   !
+                   amp=0.5_fp*(min(0.5_fp*(hrms(nm) + hrms(num)), gammax*hv(nm)))
+                   !
                    omega = 2.0_fp*pi/tpu
                    h = hv(nm)
                    !
@@ -239,16 +284,48 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
                    ! to avoid underflow for very small wave influence
                    !
                    if (.not. zmodel) then
+                      !
+                      do k = 1, kmax
+                          vstokes(nm, k) = 0.0
+                      enddo
+                      !
+                      ! First compute contribution of roller mass flux (distributed over top of water column (0.5*Hrms))
+                      !
+                      if (kmax>1) then
+                         !
+                         ! Find index krol of lowest cell to which roller mass flux is added
+                         ! 
+                         rolthck = thick(1)*h
+                         krol = 1 
+                         do k = 2, kmax
+                            if ((-sig(k)) * h > 1.0_fp*amp) then
+                               exit
+                            else
+                               rolthck = rolthck + thick(k)*h
+                               krol = k
+                            endif
+                         enddo
+                         !
+                         ! And and the roller flux
+                         !
+                         do k = 1, krol
+                            vstokes(nm, k) = grmsvr(nm)/rolthck
+                         enddo
+                         !
+                      endif
+                      !
                       do k = 1, kmax
                          z             = (1.0_fp+sig(k)) * h
                          p1            = max(-25.0_fp,  2.0_fp*kwav*(z - h))
                          p2            = max(-25.0_fp, -4.0_fp*kwav*z)
                          f2            = exp(p1) * (1.0_fp+exp(p2))
-                         vstokes(nm,k) = f1 * (f2/f3) * sintv
-                         vwork  (nm,k) = v1(nm,k) - vstokes(nm,k)          &
-                                       & - (grmsvr(nm) + grfacv(nm))/hv(nm) 
+                         vstokes(nm,k) = vstokes(nm,k) + f1 * (f2/f3) * sintv
+                         vwork  (nm,k) = v1(nm,k) - vstokes(nm,k) - grfacv(nm)/hv(nm) 
                       enddo
                    else
+                      !
+                      ! Still to be implemented: 3D distribution of roller flux
+                      !
                       z = 0.0_fp
                       do k = kfvmin(nm), kfvmax(nm)
                          z             = z + dzv1(nm, k)
@@ -284,12 +361,12 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
           !
           do nm = 1, nmmax
              if (kfu(nm)==1 .and. kcu(nm)>-1 .and. kcu(nm)<=2) then
-                uwork(nm, 1) = u1(nm, 1) - (grmasu(nm)+grfacu(nm))/hu(nm) 
+                uwork(nm, 1) = u1(nm, 1) - (grmasu(nm) + grfacu(nm))/hu(nm) 
              else
                 uwork(nm, 1) = u1(nm, 1)
              endif
              if (kfv(nm)==1 .and. kcv(nm)>-1 .and. kcv(nm)<=2) then
-                vwork(nm, 1) = v1(nm, 1) - (grmasv(nm)+grfacv(nm))/hv(nm) 
+                vwork(nm, 1) = v1(nm, 1) - (grmasv(nm) + grfacv(nm))/hv(nm) 
              else
                 vwork(nm, 1) = v1(nm, 1)
              endif

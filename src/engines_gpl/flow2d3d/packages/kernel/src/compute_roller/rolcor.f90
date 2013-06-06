@@ -204,12 +204,15 @@ subroutine rolcor(hrms      ,tp        ,theta     ,hu        ,hv         , &
              endif ! end v-direction
           else 
              !
-             ! Use GLM velocities for fluxes with a correction for massflux due to roller
+             ! Use GLM velocities for fluxes
+             ! Apply correction for breaker delay
+             ! Correction for massflux due to roller is taken care of in euler.f90
              !
              do k=1,kmax
-               qxk(n,m,k) = qxk(n,m,k) - sw*(grmsur(n,m)+grfacu(n,m))*guu(n,m)*thick(k)
-               qyk(n,m,k) = qyk(n,m,k) - sw*(grmsvr(n,m)+grfacv(n,m))*gvv(n,m)*thick(k)
+               qxk(n,m,k) = qxk(n,m,k) - sw*(grfacu(n,m))*guu(n,m)*thick(k)
+               qyk(n,m,k) = qyk(n,m,k) - sw*(grfacv(n,m))*gvv(n,m)*thick(k)
              enddo
+             !
           endif
        enddo
     enddo

@@ -865,11 +865,10 @@ subroutine taubot(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              tpu   = 0.5*(tp(nm) + tp(nmu))
              call stoktb(hrmsu     ,tpu       ,hu(nm)    ,ustokes   ,gdp       )
              !
-             ! In 3D also include roller part of mass flux
              ! Added breaker delay adjustment
              !
-             taubsu(nm) = taubpu(nm)*(costu*ustokes + &
-                        & (grmsur(nm)+grfacu(nm))/hu(nm)) 
+             taubsu(nm) = taubpu(nm)*(costu*ustokes + grfacu(nm)/hu(nm)) 
+             !
           endif
        enddo
     else
