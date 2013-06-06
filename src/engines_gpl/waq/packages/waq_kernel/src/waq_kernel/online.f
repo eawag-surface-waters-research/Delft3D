@@ -512,7 +512,10 @@ C
      +             A(IDEFA),
      j             NTDMPQ,
      J             C(IDANA),
-     J             C(ISNAM) )
+     J             C(ISNAM),
+     J             C(IPNAM),
+     J             C(ISFNA),
+     J             C(IFNAM) )
 C
       if ( timon ) call timstop ( ithandl )
       RETURN
@@ -522,7 +525,8 @@ C
      +                   FUNC  , PARAM , CONS  , IDT   , ITIME ,
      +                   VOLUME, NOSEG , NOSYS , NDMPAR, IPDMP ,
      +                   BOUND , NOLOC , PROLOC, NODEF , DEFAUL,
-     +                   NTDMPQ, DANAM , SYNAME)
+     +                   NTDMPQ, DANAM , SYNAME, paname, sfname,
+     +                   funame)
       use timers
 
 
@@ -536,6 +540,9 @@ C
      +           VOLUME(*)      , BOUND(*)     ,
      +           PROLOC(*)      , DEFAUL(*)
       CHARACTER*20 DANAM(*), SYNAME(*)
+      character(len=20), intent(in   ) :: paname(*) ! parameter names
+      character(len=20), intent(in   ) :: sfname(*) ! segment function names
+      character(len=20), intent(in   ) :: funame(*) ! function names
 
 c     Interface to RTC
 
@@ -596,7 +603,8 @@ c     IOPOIN is not used if NRVAR = 0
      +                   FUNC  , PARAM , CONS  , IDT   , ITIME ,
      +                   VOLUME, NOSEG , NOSYS , NDMPAR, IPDMP ,
      +                   BOUND , NOLOC , PROLOC, NODEF , DEFAUL,
-     +                   NCOUT , NTDMPQ, paname, sfname)
+     +                   NCOUT , NTDMPQ, paname, sfname, funame,
+     +                   danam )
 
       if ( first .or. rewine ) then
           CALL DHOPNF ( IO_RTC, FILNAM, 21    , 1     , IDUM  )

@@ -385,7 +385,8 @@ C
      +                      FUNC  , PARAM     , CONS  , IDT   , ITIME ,
      +                      VOLUME, NOSEG     , NOSYS , NDMPAR, IPDMP ,
      +                      BOUND , NOLOC     , PROLOC, NODEF , DEFAUL,
-     +                      NCOUT , NTDMPQ    , paname, sfname)
+     +                      NCOUT , NTDMPQ    , paname, sfname, funame,
+     +                      danam )
 C
 C           For the raaien
 C

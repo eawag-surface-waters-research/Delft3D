@@ -26,7 +26,8 @@
      +                   FUNC  , PARAM , CONS  , IDT   , ITIME ,
      +                   VOLUME, NOSEG , NOSYS , NDMPAR, IPDMP ,
      +                   BOUND , NOLOC , PROLOC, NODEF , DEFAUL,
-     +                   NCOUT , NTDMPQ, paname, sfname)
+     +                   NCOUT , NTDMPQ, paname, sfname, funame,
+     +                   danam )
       use timers
 C
 C     Deltares     SECTOR WATERRESOURCES AND ENVIRONMENT
@@ -83,6 +84,8 @@ C
      +           VOLUME(*)      , BOUND(*)     ,
      +           PROLOC(*)      , DEFAUL(*)
       character(20) paname(*) , sfname(*)
+      character(len=20), intent(in   ) :: funame(*) ! function names
+      character(len=20), intent(in   ) :: danam(*)  ! dump area names
 C
 C     Local
 C
@@ -92,6 +95,7 @@ C
      +            IODEF , IP    , IP1   , IP2   , ITEL2 ,
      +            ISYS  , IVAR  , IDUMP , ISC   , ISEG  ,
      +            NSC   , IOFDMP, IOCONS, IIP   , IIDUMP
+      integer  :: ifun   ! index in function arrays
       REAL        HLPVAR, HLPCUM, VALCUM, VALVAR
       logical     parm
       integer(4) ithandl /0/
@@ -130,6 +134,13 @@ C
          IF ( NSC .EQ. 1 ) THEN
             ITEL2 = ITEL2 + 1
             ISEG  = IPDMP(ITEL2)
+            if ( danam(idump)(1:6) .eq. 'MOVING' ) then
+               do ifun = 1, nofun
+                  if ( danam(idump) .eq. funame(ifun) ) then
+                     iseg = nint(func(ifun))
+                  endif
+               enddo
+            endif
 C
 C           The substances
 C
