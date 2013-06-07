@@ -120,6 +120,8 @@ outfpr,outffl,outfnm,outfdo
 "BLOOM     ","dMortAlg29",  81," "
 "BLOOM     ","dMortAlg30",  82," "
 "Phy_Blo_P ","dDumphyblo",   1,"x"
+"S1_Comp   ","dDumS1Comp",   1,"x"
+"S2_Comp   ","dDumS2Comp",   1,"x"
 "Compos    ","dDumCompos",   1,"x"
 "EColiMrt  ","dMrtEColi ",   1,"x"
 "FColiMrt  ","dMrtFColi ",   1,"x"
