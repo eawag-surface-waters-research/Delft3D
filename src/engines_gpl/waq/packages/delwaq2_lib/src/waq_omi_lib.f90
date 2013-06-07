@@ -513,7 +513,7 @@ logical function SetCurrentValueFieldRun(name, value)
 
     call find_index( name, procparam_param, idx )
     if ( idx > 0 ) then
-        dlwqd%rbuf(iparm+idx-1:iparm+idx-1+(nopa-1)*noseg:nopa) = value(1:noseg)
+        dlwqd%rbuf(iparm+idx-1:iparm+idx-1+nopa*noseg-1:nopa) = value(1:noseg)
     else
         call SetMessage(LEVEL_ERROR, &
             'Name not found (not a process parameter): ' // name)
@@ -1271,6 +1271,35 @@ logical function SetFlowData( volume, area, flow )
 !    write(*,*) 'Area:   ', area  (1), area  (2), area  (3)
 
 end function SetFlowData
+
+! SetFlowData --
+!     Set the current volumes only
+!
+!     Note: use before ModelPerformTimeStep, after ModelInitialize
+!
+logical function SetFlowDataVolume( volume )
+
+    !DEC$ ATTRIBUTES DLLEXPORT::SetFlowDataVolume
+    !DEC$ ATTRIBUTES ALIAS : '_SETFLOWDATAVOLUME' :: SetFlowDataVolume
+
+    use waq_omi_utils
+    use delwaq2_global_data
+
+    implicit none
+
+    include 'sysn_ff.inc'
+    include 'sysi_ff.inc'
+    include 'sysa_ff.inc'
+
+    real, dimension(noseg), intent(in) :: volume
+
+    SetFlowDataVolume = .false.
+
+    dlwqd%rbuf(ivol2:ivol2+noseg-1) = volume
+
+    SetFlowDataVolume = .true.
+
+end function SetFlowDataVolume
 
 logical function SetFlowDataVelocity( velocity )
 
