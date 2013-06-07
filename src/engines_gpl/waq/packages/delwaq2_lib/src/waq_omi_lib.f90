@@ -470,7 +470,7 @@ logical function SetCurrentValueScalarRun(name, value)
     else
         call find_index( name, procparam_param, idx )
         if ( idx > 0 ) then
-            dlwqd%rbuf(iparm+idx-1:iparm+idx-1+(nopa-1)*noseg:nopa) = value
+            dlwqd%rbuf(iparm+idx-1:iparm+idx-1+nopa*noseg-1:nopa) = value
         else
             call SetMessage(LEVEL_ERROR, &
                 'Name not found (not a process parameter): ' // name)
