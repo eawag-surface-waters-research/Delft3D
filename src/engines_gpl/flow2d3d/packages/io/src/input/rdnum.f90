@@ -405,11 +405,16 @@ subroutine rdnum(lunmd     ,lundia    ,nrrec     ,mdfrec    , &
        drycrt = 0.5_fp*dryflc
        !
     else
+       write(msg,'(a,e12.2)') "Drying criterium read: ", drycrt
+       call prterr(lundia, 'G051', trim(msg))
        !
        ! Drycrt may not exceed dryflc
        !
-       drycrt = min(drycrt, dryflc)
-       !
+       if (drycrt > dryflc) then
+          drycrt = dryflc
+          write(msg,'(a,e12.2)') "Drying criterium is reduced to flooding criterium: ", drycrt
+          call prterr(lundia, 'U190', trim(msg))
+       endif
     endif
     !
     ! 'DepIni': Initial water depth in all dry cells

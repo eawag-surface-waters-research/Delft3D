@@ -224,6 +224,7 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
                       enddo
                    else
                       !
+                      ! Z-layers:
                       ! Still to be implemented: 3D distribution of roller flux
                       !
                       z = 0.0_fp
@@ -304,7 +305,7 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
                             endif
                          enddo
                          !
-                         ! And and the roller flux
+                         ! And add the roller flux
                          !
                          do k = 1, krol
                             vstokes(nm, k) = grmsvr(nm)/rolthck
@@ -322,6 +323,7 @@ subroutine euler(j         ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
                       enddo
                    else
                       !
+                      ! Z-layers:
                       ! Still to be implemented: 3D distribution of roller flux
                       !
                       z = 0.0_fp
