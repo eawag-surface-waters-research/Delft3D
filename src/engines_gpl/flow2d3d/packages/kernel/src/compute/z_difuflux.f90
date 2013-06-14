@@ -459,10 +459,24 @@ subroutine z_difuflux(stage   ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
     ! swap fluxu and fluxv for sediment transport in z layer morphology.
     !
     if (icx == 1) then
-       allocate (switch(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci))
-       switch = fluxu
-       fluxu  = fluxv
-       fluxv  = switch
-       deallocate (switch)
+       allocate (switch(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), stat = istat)
+       if (istat /= 0) then
+          call prterr(lundia, 'U021', 'Z_DIFUFLUX switch: memory alloc error')
+          call d3stop(1, gdp)
+       endif
+       do nm =  gdp%d%nmlb,gdp%d%nmub
+           do k = 1, kmax
+               do l =  1,lstsci
+                 switch(nm,k,l)  = fluxu (nm,k,l)
+                 fluxu (nm,k,l)  = fluxv (nm,k,l)
+                 fluxv (nm,k,l)  = switch(nm,k,l)
+               enddo
+           enddo
+       enddo
+       deallocate(switch,  stat = istat)
+       if (istat /= 0) then
+          call prterr(lundia, 'U021', 'Z_DIFUFLUX switch: memory dealloc error')
+          call d3stop(1, gdp)
+       endif
     endif
 end subroutine z_difuflux

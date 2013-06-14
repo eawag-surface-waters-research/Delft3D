@@ -146,15 +146,15 @@ subroutine difuflux(stage     ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
        fluxvc         => gdp%gdflwpar%fluxvc
        !
        if (flwoutput%cumdifuflux) then
-          fluxuc = 0.0
-          fluxvc = 0.0
+          fluxuc = 0.0_fp
+          fluxvc = 0.0_fp
        endif
     endif
     !
     ! Initialization
     !
-    fluxu = 0.0
-    fluxv = 0.0
+    fluxu = 0.0_fp
+    fluxv = 0.0_fp
     !
     ! Advective transport in X-direction
     !
@@ -167,7 +167,7 @@ subroutine difuflux(stage     ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
              nmuu  = nm + 2*icx
              nmuuu = min(nmmaxj , nm+3*icx)
              !
-             flux    = 0.5*(dicuv(nm, k) + dicuv(nmu, k))/(0.7*gvu(nm))
+             flux    = 0.5_fp*(dicuv(nm, k) + dicuv(nmu, k))/(0.7_fp*gvu(nm))
              maskval = max(0, 2 - kcs(nm))
              flux1   = areau(nm, k)*flux*maskval
              !
@@ -182,10 +182,10 @@ subroutine difuflux(stage     ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
                 !
                 do l = 1,lstsci
                    if (qxu > 0.0) then
-                      flux = 0.5*qxu*((2*iad1-iad2)*r0(nm ,k,l) + &
+                      flux = 0.5_fp*qxu*((2*iad1-iad2)*r0(nm ,k,l) + &
                                       &       iad2 *r0(nmu,k,l))
                    else
-                      flux = 0.5*qxu*((2*iad1-iad2)*r0(nmu,k,l) + &
+                      flux = 0.5_fp*qxu*((2*iad1-iad2)*r0(nmu,k,l) + &
                                       &       iad2 *r0(nm ,k,l))
                    endif
                    fluxu(nm,k,l) = fluxu(nm,k,l) + flux
@@ -201,8 +201,8 @@ subroutine difuflux(stage     ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
                 !
                 ! Implicit direction: advection
                 !
-                qxu = qxk(nm,k)/6.0
-                if (qxu > 0.0) then
+                qxu = qxk(nm,k)/6.0_fp
+                if (qxu > 0.0_fp) then
                    iad1 = kfu(nm   )
                    iad2 = iad1 * kfu(nmd  )
                    iad3 = iad2 * kfu(nmdd )
@@ -254,7 +254,7 @@ subroutine difuflux(stage     ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
              nuum  = nm + 2*icy
              nuuum = min(nmmaxj , nm+3*icy)
              !
-             flux    = 0.5*(dicuv(nm, k) + dicuv(num, k))/(0.7*guv(nm))
+             flux    = 0.5_fp*(dicuv(nm, k) + dicuv(num, k))/(0.7_fp*guv(nm))
              maskval = max(0, 2 - kcs(nm))
              flux1   = areav(nm, k)*flux*maskval
              !
@@ -269,10 +269,10 @@ subroutine difuflux(stage     ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
                 !
                 do l = 1,lstsci
                    if (qyv > 0.0) then
-                      flux = 0.5*qyv*((2*iad1-iad2)*r0(nm ,k,l) + &
+                      flux = 0.5_fp*qyv*((2*iad1-iad2)*r0(nm ,k,l) + &
                                       &       iad2 *r0(num,k,l))
                    else
-                      flux = 0.5*qyv*((2*iad1-iad2)*r0(num,k,l) + &
+                      flux = 0.5_fp*qyv*((2*iad1-iad2)*r0(num,k,l) + &
                                       &       iad2 *r0(nm ,k,l))
                    endif
                    fluxv(nm,k,l) = fluxv(nm,k,l) + flux

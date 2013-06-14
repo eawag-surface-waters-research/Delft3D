@@ -1750,22 +1750,23 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
           icy = 1
           call timer_start(timer_tritra, gdp)
           call z_difu(lundia    ,nst       ,icx       ,icy       ,jstart    , &
-                    & nmmaxj    ,nmmax     ,kmax      ,lstsci    ,norow     ,nocol     , &
-                    & i(irocol) ,i(kcs)    ,i(kcu)    ,i(kcv)    ,i(kfs)    , &
-                    & i(kfsmin) ,i(kfsmax) ,i(kfsmx0) ,i(kfumin) ,i(kfumx0) , &
-                    & i(kfumax) ,i(kfvmin) ,i(kfvmx0) ,i(kfvmax) , &
-                    & i(kfsz0)  ,i(kfuz0)  ,i(kfvz0)  ,i(kfu)    ,i(kfv)    , &
-                    & i(kfsz1)  ,i(kfuz1)  ,i(kfvz1)  , &
-                    & r(qxk)    ,r(qyk)    ,r(qzk)    ,r(u1)     ,r(v1)     , &
-                    & r(guv)    ,r(gvu)    ,r(gsqs)   ,r(rbnd)   ,r(sigdif) , &
-                    & r(sigmol) ,r(dicuv)  ,r(dicww)  ,r(r0)     ,r(r1)     , &
-                    & r(sour)   ,r(sink)   ,r(wrkb1)  ,r(wrkb2)  ,r(wrkb3)  , &
-                    & r(wrkb5)  ,r(wrkb6)  ,r(wrkb7)  ,r(wrkb8)  ,r(wrkb13) , &
-                    & r(wrkb14) ,r(wrkb18) ,r(dzu1)   ,r(dzv1)   , &
-                    & r(wrkc1)  ,r(wrkc2)  ,r(wrkc3)  ,r(wrkc4)  ,r(dzs1)   , &
-                    & r(areau)  ,r(areav)  ,r(volum0) , &
-                    & r(volum1) ,r(guu)    ,r(gvv)    ,r(bruvai) , &
-                    & ltem      ,gdp       )
+                    & nmmaxj    ,nmmax     ,kmax      ,lstsci    ,lstsc     , &
+                    & norow     ,nocol     ,i(irocol) ,i(kcs)    ,i(kcu)    , &
+                    & i(kcv)    ,i(kfs)    ,i(kfsmin) ,i(kfsmax) ,i(kfsmn0) , &
+                    & i(kfsmx0) ,i(kfumin) ,i(kfumax) ,i(kfsmn0) ,i(kfumx0) , &
+                    & i(kfvmin) ,i(kfvmax) ,i(kfvmn0) ,i(kfvmx0) ,i(kfsz0)  , &
+                    & i(kfuz0)  ,i(kfvz0)  ,i(kfu)    ,i(kfv)    ,i(kfsz1)  , &
+                    & i(kfuz1)  ,i(kfvz1)  ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
+                    & r(u1)     ,r(v1)     ,r(guv)    ,r(gvu)    ,r(gsqs)   , &
+                    & r(rbnd)   ,r(sigdif) ,r(sigmol) ,r(dicuv)  ,r(dicww)  , &
+                    & r(r0)     ,r(r1)     ,r(sour)   ,r(sink)   ,r(wrkb1)  , &
+                    & r(wrkb2)  ,r(wrkb3)  ,r(wrkb5)  ,r(wrkb6)  ,r(wrkb7)  , &
+                    & r(wrkb8)  ,r(wrkb13) ,r(wrkb14) ,r(wrkb18) ,r(dzu1)   , &
+                    & r(dzv1)   ,r(wrkc1)  ,r(wrkc2)  ,r(wrkc3)  ,r(wrkc4)  , &
+                    & r(dzs1)   ,r(areau)  ,r(areav)  ,r(volum0) ,r(volum1) , &
+                    & r(guu)    ,r(gvv)    ,r(bruvai) ,sedtyp    ,r(seddif) , &
+                    & r(ws)     ,lsed      ,lsal      ,ltem      ,eqmbcsand , &
+                    & eqmbcmud  ,lsts      ,i(kmxsed) ,gdp       )    
           timest = 2.0_fp*hdt
           call z_difuflux(stage  ,lundia ,kmax      ,nmmax     ,nmmaxj    , &
                   & lstsci    ,r(r0)     ,r(r1)     ,r(qxk)    ,r(qyk)    , &

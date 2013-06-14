@@ -312,14 +312,14 @@ integer                 :: nm_pos ! indicating the array to be exchanged has nm 
     !
     ! Initialise arrays aak - cck for all (nm,k)
     !
-    aak   = 0.0
-    buuux = 0.0
-    buux  = 0.0
-    bux   = 0.0
-    bdx   = 0.0
-    bddx  = 0.0
-    bdddx = 0.0
-    cck   = 0.0
+    aak   = 0.0_fp
+    buuux = 0.0_fp
+    buux  = 0.0_fp
+    bux   = 0.0_fp
+    bdx   = 0.0_fp
+    bddx  = 0.0_fp
+    bdddx = 0.0_fp
+    cck   = 0.0_fp
     !
     timesti = 1.0_fp / timest
     do k = 1, kmax
@@ -327,8 +327,8 @@ integer                 :: nm_pos ! indicating the array to be exchanged has nm 
           if (kfs(nm) == 1) then
              bbk(nm, k) = volum1(nm, k) * timesti
           else
-             bbk(nm, k) = 1.0
-             if (lsec > 0) r0(nm, k, lsecfl) = 0.0
+             bbk(nm, k) = 1.0_fp
+             if (lsec > 0) r0(nm, k, lsecfl) = 0.0_fp
           endif
        enddo
     enddo
@@ -417,11 +417,11 @@ integer                 :: nm_pos ! indicating the array to be exchanged has nm 
              qyv  = qyk(nm, k)
              iad1 = kfv(nm)*kadv(nm, k)
              iad2 = iad1*kfv(num)*kadv(num, k)*kfv(ndm)*kadv(ndm, k)
-             if (qyv > 0.0) then
-                d0k = 0.5*qyv*( (2*iad1 - iad2)*r0(nm , k, l) &
+             if (qyv > 0.0_fp) then
+                d0k = 0.5_fp*qyv*( (2*iad1 - iad2)*r0(nm , k, l) &
                     &          +          iad2 *r0(num, k, l))
              else
-                d0k = 0.5*qyv*( (2*iad1 - iad2)*r0(num, k, l) &
+                d0k = 0.5_fp*qyv*( (2*iad1 - iad2)*r0(num, k, l) &
                     &          +          iad2 *r0(nm , k, l))
              endif
              if (kcs(nm)  == 1) ddkl(nm , k, l) = ddkl(nm , k, l) - d0k
@@ -482,7 +482,7 @@ integer                 :: nm_pos ! indicating the array to be exchanged has nm 
                    difl    = dicuv(nm, k)
                    cr      = r0(num, k, l)
                    difr    = dicuv(num, k)
-                   flux    = 0.5*(cr - cl)*(difl + difr)/(0.7*guv(nm))
+                   flux    = 0.5_fp*(cr - cl)*(difl + difr)/(0.7*guv(nm))
                    maskval = max(0, 2 - abs(kcs(nm)))
                    ddkl(nm, k, l)  = ddkl(nm, k, l) + areav(nm, k)*flux*maskval
                    maskval         = max(0, 2 - abs(kcs(num)))
@@ -522,11 +522,11 @@ integer                 :: nm_pos ! indicating the array to be exchanged has nm 
              if (kfs(nm) == 1) then
                 qzw = qzk(nm, k)
                 if (qzw > 0.0) then
-                   adza = 0.5*qzw*(1 - kfw)
-                   adzc = 0.5*qzw*(1 + kfw)
+                   adza = 0.5_fp*qzw*(1 - kfw)
+                   adzc = 0.5_fp*qzw*(1 + kfw)
                 else
-                   adza = 0.5*qzw*(1 + kfw)
-                   adzc = 0.5*qzw*(1 - kfw)
+                   adza = 0.5_fp*qzw*(1 + kfw)
+                   adzc = 0.5_fp*qzw*(1 - kfw)
                 endif
                 aak(nm, k + 1) = aak(nm, k + 1) + adza
                 bbk(nm, k + 1) = bbk(nm, k + 1) + adzc
@@ -562,17 +562,17 @@ integer                 :: nm_pos ! indicating the array to be exchanged has nm 
           ls = 0
           if ((l>max(lsal, ltem)) .and. (l<=lsts)) ls = l - max(lsal, ltem)
           do k = 1, kmax - 1
-             tsg = 0.5 * (thick(k) + thick(k+1))
+             tsg = 0.5_fp * (thick(k) + thick(k+1))
              do nm = 1, nmmax
                 if (kfs(nm) == 1) then
                    h0  = max(0.1_fp, s0(nm) + real(dps(nm),fp))
-                   h0i = 1.0 / h0
+                   h0i = 1.0_fp / h0
                    !
                    ! Internal wave contribution
                    !
                    sqrtbv = max(0.0_fp, bruvai(nm, k))
                    sqrtbv = sqrt(sqrtbv)
-                   difiwe = 0.2 * sqrtbv * xlo**2
+                   difiwe = 0.2_fp * sqrtbv * xlo**2
                    if (ls > 0) then
                       !
                       ! sediment constituent:
@@ -620,9 +620,9 @@ integer                 :: nm_pos ! indicating the array to be exchanged has nm 
           do l = 1, lstsc
              do k = 1, kmax
                 ddkl(nm, k, l) = r0(nm, k, l)
-                aakl(nm, k, l) = 0.0
-                bbkl(nm, k, l) = 1.0
-                cckl(nm, k, l) = 0.0
+                aakl(nm, k, l) = 0.0_fp
+                bbkl(nm, k, l) = 1.0_fp
+                cckl(nm, k, l) = 0.0_fp
              enddo
           enddo
        endif
@@ -699,7 +699,7 @@ integer                 :: nm_pos ! indicating the array to be exchanged has nm 
                       h0old = s0(nm) + real(dps(nm),fp)
                       r1(nm, k, l) = sour(nm, k, l)*h0old/(sink(nm, k, l)*h0new)
                    else
-                      r1(nm, k, l) = 0.0
+                      r1(nm, k, l) = 0.0_fp
                    endif
                 endif
              enddo
@@ -754,9 +754,9 @@ integer                 :: nm_pos ! indicating the array to be exchanged has nm 
        do nm = 1, nmmax
           if (kcs(nm) == 3 ) then
              do k = 1, kmax
-                aakl(nm,k,l) = 0.0
-                bbkl(nm,k,l) = 1.0
-                cckl(nm,k,l) = 0.0
+                aakl(nm,k,l) = 0.0_fp
+                bbkl(nm,k,l) = 1.0_fp
+                cckl(nm,k,l) = 0.0_fp
                 ddkl(nm,k,l) = r0(nm,k,l)
              enddo
           endif
@@ -798,7 +798,7 @@ integer                 :: nm_pos ! indicating the array to be exchanged has nm 
        do nm = 1, nmmax
           if ( (kfs(nm)==1) .and. (kcs(nm)==1) ) then
              do k = 2, kmax
-                bi             = 1.0/(bbkl(nm, k, l) - aakl(nm, k, l)*cckl(nm, k - 1, l))
+                bi             = 1.0_fp/(bbkl(nm, k, l) - aakl(nm, k, l)*cckl(nm, k - 1, l))
                 bbkl(nm, k, l) = bi
                 cckl(nm, k, l) = cckl(nm, k, l)*bi
              enddo

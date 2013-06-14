@@ -1634,23 +1634,23 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           call timer_start(timer_tritra, gdp)
           call timer_start(timer_1stdifu, gdp)
           call z_difu(lundia    ,nst       ,icx       ,icy       ,jstart    , &
-                    & nmmaxj    ,nmmax     ,kmax      ,lstsci    ,norow     , &
-                    & nocol     ,i(irocol) ,i(kcs)    ,i(kcu)    ,i(kcv)    , &
-                    & i(kfs)    ,i(kfsmin) ,i(kfsmax) ,i(kfsmn0) ,i(kfsmx0) , &
-                    & i(kfumin) ,i(kfumax) ,i(kfumn0) ,i(kfumx0) ,i(kfvmin) , &
-                    & i(kfvmax) ,i(kfvmn0) ,i(kfvmx0) ,i(kfsz0)  ,i(kfuz0)  , &
-                    & i(kfvz0)  ,i(kfu)    ,i(kfv)    ,i(kfsz1)  ,i(kfuz1)  , &
-                    & i(kfvz1)  ,r(qxk)    ,r(qyk)    ,r(qzk)    ,r(u1)     , &
-                    & r(v1)     ,r(guv)    ,r(gvu)    ,r(gsqs)   ,r(rbnd)   , &
-                    & r(sigdif) ,r(sigmol) ,r(dicuv)  ,r(vicww)  ,r(r0)     , &
-                    & r(r1)     ,r(sour)   ,r(sink)   ,r(wrkb1)  ,r(wrkb2)  , &
-                    & r(wrkb3)  ,r(wrkb5)  ,r(wrkb6)  ,r(wrkb7)  ,r(wrkb8)  , &
-                    & r(wrkb13) ,r(wrkb14) ,r(wrkb18) ,r(dzu1)   ,r(dzv1)   , &
-                    & r(wrkc1)  ,r(wrkc2)  ,r(wrkc3)  ,r(wrkc4)  ,r(dzs1)   , &
-                    & r(areau)  ,r(areav)  ,r(volum0) ,r(volum1) ,r(guu)    , &
-                    & r(gvv)    ,r(bruvai) ,sedtyp    ,r(seddif) ,r(ws)     , &
-                    & lsed      ,lsal      ,ltem      ,eqmbcsand ,eqmbcmud  , &
-                    & lsts      ,i(kmxsed) ,gdp       )
+                    & nmmaxj    ,nmmax     ,kmax      ,lstsci    ,lstsc     , &
+                    & norow     ,nocol     ,i(irocol) ,i(kcs)    ,i(kcu)    , &
+                    & i(kcv)    ,i(kfs)    ,i(kfsmin) ,i(kfsmax) ,i(kfsmn0) , &
+                    & i(kfsmx0) ,i(kfumin) ,i(kfumax) ,i(kfumn0) ,i(kfumx0) , &
+                    & i(kfvmin) ,i(kfvmax) ,i(kfvmn0) ,i(kfvmx0) ,i(kfsz0)  , &
+                    & i(kfuz0)  ,i(kfvz0)  ,i(kfu)    ,i(kfv)    ,i(kfsz1)  , &
+                    & i(kfuz1)  ,i(kfvz1)  ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
+                    & r(u1)     ,r(v1)     ,r(guv)    ,r(gvu)    ,r(gsqs)   , &
+                    & r(rbnd)   ,r(sigdif) ,r(sigmol) ,r(dicuv)  ,r(vicww)  , &
+                    & r(r0)     ,r(r1)     ,r(sour)   ,r(sink)   ,r(wrkb1)  , &
+                    & r(wrkb2)  ,r(wrkb3)  ,r(wrkb5)  ,r(wrkb6)  ,r(wrkb7)  , &
+                    & r(wrkb8)  ,r(wrkb13) ,r(wrkb14) ,r(wrkb18) ,r(dzu1)   , &
+                    & r(dzv1)   ,r(wrkc1)  ,r(wrkc2)  ,r(wrkc3)  ,r(wrkc4)  , &
+                    & r(dzs1)   ,r(areau)  ,r(areav)  ,r(volum0) ,r(volum1) , &
+                    & r(guu)    ,r(gvv)    ,r(bruvai) ,sedtyp    ,r(seddif) , &
+                    & r(ws)     ,lsed      ,lsal      ,ltem      ,eqmbcsand , &
+                    & eqmbcmud  ,lsts      ,i(kmxsed) ,gdp       )
           !
           ! z_difu can be called again for correction
           !
@@ -2410,23 +2410,23 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
           call timer_start(timer_tritra, gdp)
           call timer_start(timer_2nddifu, gdp)
           call z_difu(lundia    ,nst       ,icx       ,icy       ,jstart    , &
-                    & nmmaxj    ,nmmax     ,kmax      ,lstsci    ,nocol     , &
-                    & norow     ,i(irocol + 5*norow)  ,i(kcs)    ,i(kcv)    , &
-                    & i(kcu)    ,i(kfs)    ,i(kfsmin) ,i(kfsmax) ,i(kfsmn0) ,i(kfsmx0) , &
-                    & i(kfvmin) ,i(kfvmax) ,i(kfvmn0) ,i(kfvmx0) ,i(kfumin) , &
-                    & i(kfumax) ,i(kfumn0) ,i(kfumx0) ,i(kfsz0)  ,i(kfvz0)  , &
-                    & i(kfuz0)  ,i(kfv)    ,i(kfu)    ,i(kfsz1)  ,i(kfvz1)  , &
-                    & i(kfuz1)  ,r(qyk)    ,r(qxk)    ,r(qzk)    ,r(v0)     , &
-                    & r(u0)     ,r(gvu)    ,r(guv)    ,r(gsqs)   ,r(rbnd + kmax*lstsc*2*norow)    , &
-                    & r(sigdif) ,r(sigmol) ,r(dicuv)  ,r(vicww)  ,r(r0)     , &
-                    & r(r1)     ,r(sour)   ,r(sink)   ,r(wrkb1)  ,r(wrkb2)  , &
-                    & r(wrkb3)  ,r(wrkb5)  ,r(wrkb6)  ,r(wrkb7)  ,r(wrkb8)  , &
-                    & r(wrkb13) ,r(wrkb14) ,r(wrkb18) ,r(dzv1)   ,r(dzu1)   , &
-                    & r(wrkc1)  ,r(wrkc2)  ,r(wrkc3)  ,r(wrkc4)  ,r(dzs1)   , &
-                    & r(areav)  ,r(areau)  ,r(volum0) ,r(volum1) ,r(gvv)    , &
-                    & r(guu)    ,r(bruvai) ,sedtyp    ,r(seddif) ,r(ws)     , &
-                    & lsed      ,lsal      ,ltem      ,eqmbcsand ,eqmbcmud  , &
-                    & lsts      ,i(kmxsed) ,gdp       )
+                    & nmmaxj    ,nmmax     ,kmax      ,lstsci    ,lstsc     , &
+                    & nocol     ,norow     ,i(irocol + 5*norow)  ,i(kcs)    , i(kcv)    , &
+                    & i(kcu)    ,i(kfs)    ,i(kfsmin) ,i(kfsmax) ,i(kfsmn0) , &
+                    & i(kfsmx0) ,i(kfvmin) ,i(kfvmax) ,i(kfvmn0) ,i(kfvmx0) , &
+                    & i(kfumin) ,i(kfumax) ,i(kfumn0) ,i(kfumx0) ,i(kfsz0)  , &
+                    & i(kfvz0)  ,i(kfuz0)  ,i(kfv)    ,i(kfu)    ,i(kfsz1)  , &
+                    & i(kfvz1)  ,i(kfuz1)  ,r(qyk)    ,r(qxk)    ,r(qzk)    , &
+                    & r(v0)     ,r(u0)     ,r(gvu)    ,r(guv)    ,r(gsqs)   , &
+                    & r(rbnd + kmax*lstsc*2*norow)    ,r(sigdif) ,r(sigmol) ,r(dicuv)  , r(vicww)  ,&
+                    & r(r0)     ,r(r1)     ,r(sour)   ,r(sink)   ,r(wrkb1)  , &
+                    & r(wrkb2)  ,r(wrkb3)  ,r(wrkb5)  ,r(wrkb6)  ,r(wrkb7)  , &
+                    & r(wrkb8)  ,r(wrkb13) ,r(wrkb14) ,r(wrkb18) ,r(dzv1)   , &
+                    & r(dzu1)   ,r(wrkc1)  ,r(wrkc2)  ,r(wrkc3)  ,r(wrkc4)  , &
+                    & r(dzs1)   ,r(areav)  ,r(areau)  ,r(volum0) ,r(volum1) , &
+                    & r(gvv)    ,r(guu)    ,r(bruvai) ,sedtyp    ,r(seddif) , &
+                    & r(ws)     ,lsed      ,lsal      ,ltem      ,eqmbcsand , &
+                    & eqmbcmud  ,lsts      ,i(kmxsed) ,gdp       )
           !
           ! z_difu can be called again for correction
           !
@@ -2477,7 +2477,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
                       & r(sig)    ,r(guu)    ,r(gvv)    ,r(guv)    ,r(gvu)    , &
                       & r(vicww)  ,r(dicww)  ,r(cfurou) ,r(cfvrou) ,r(z0urou) , &
                       & r(z0vrou) ,r(windsu) ,r(windsv) ,r(bruvai) ,r(dudz)   , &
-                      & r(dvdz)   ,r(tkepro) ,r(tkedis) ,r(deltau) ,r(deltav) ,r(dfu)    , &
+                      & r(dvdz)   ,r(tkepro) ,r(tkedis) ,r(deltau) ,r(deltav) , &
+                      & r(dfu)    , & 
                       & r(dfv)    ,r(dis)    ,r(hrms)   ,r(uorb)   ,r(tp)     , &
                       & r(wrkb1)  ,r(wrkb2)  ,r(wrkb3)  ,r(wrkb4)  ,r(wrkb6)  , &
                       & r(wrkb7)  ,r(wrkb8)  ,r(wrkb9)  ,r(wrkb10) ,r(wrkb11) , &
