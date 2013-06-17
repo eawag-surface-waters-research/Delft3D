@@ -1384,7 +1384,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        call timer_start(timer_incdis, gdp)
        call incdis(lundia    ,sferic    ,grdang    ,timnow    ,nsrcd     , &
                  & lstsc     ,lstsci    ,jstart    ,nmmaxj    ,kmax      , &
-                 & icx       ,icy       ,i(kfsmin) ,i(kfsmx0) , &
+                 & icx       ,icy       ,i(kfsmin) ,i(kfsmax) , &
                  & ch(disint),ch(dismmt),i(itdis)  ,i(kcu)    ,i(kcv)    , &
                  & i(kfs)    ,i(ibuff)  ,i(mnksrc) ,r(alfas)  ,r(xcor)   , &
                  & r(ycor)   ,r(dp)     ,r(disch)  , &
@@ -2424,7 +2424,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        call timer_start(timer_incdis, gdp)
        call incdis(lundia    ,sferic    ,grdang    ,timnow    ,nsrcd     , &
                  & lstsc     ,lstsci    ,jstart    ,nmmaxj    ,kmax      , &
-                 & icx       ,icy       ,i(kfsmin) ,i(kfsmx0) , &
+                 & icx       ,icy       ,i(kfsmin) ,i(kfsmax) , &
                  & ch(disint),ch(dismmt),i(itdis)  ,i(kcu)    ,i(kcv)    , &
                  & i(kfs)    ,i(ibuff)  ,i(mnksrc) ,r(alfas)  ,r(xcor)   , &
                  & r(ycor)   ,r(dp)     ,r(disch)  , &

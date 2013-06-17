@@ -1252,9 +1252,9 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
        icy = 1
        call timer_start(timer_euler, gdp)
        call euler(jstart    ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
-                & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumax) , &
-                & i(kfumin) ,i(kfvmax) ,i(kfvmin) ,r(dzu1)   ,r(dzv1)   , &
-                & r(u1)     ,r(wrkb3)  ,r(v1)     ,r(wrkb4)  , &
+                & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumx0) , &
+                & i(kfumn0) ,i(kfvmx0) ,i(kfvmn0) ,r(dzu0)   ,r(dzv0)   , &
+                & r(u0)     ,r(wrkb3)  ,r(v0)     ,r(wrkb4)  , &
                 & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
                 & r(tp)     ,r(hrms)   ,r(sig)    ,r(thick)  ,r(teta)   , &
                 & r(grmsur) ,r(grmsvr) ,r(grfacu) ,r(grfacv) ,gdp       )
@@ -1690,7 +1690,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
                     & lstsci    ,lstsc     ,nrob      ,noroco    ,nto       , &
                     & nst       ,i(kfsmn0) ,i(nob)    ,r(thtim)  ,r(rettim) , &
                     & r(v0)     ,r(u0)     ,r(r0)     ,r(rbnd)   ,r(rthbnd) , &
-                    & r(sig)    ,r(dzs1)   ,d(dps)    ,r(s0)     ,gdp       )
+                    & r(sig)    ,r(dzs0)   ,d(dps)    ,r(s0)     ,gdp       )
           call timer_stop(timer_thahbc, gdp)
        endif
        !
@@ -1753,7 +1753,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
                     & nmmaxj    ,nmmax     ,kmax      ,lstsci    ,lstsc     , &
                     & norow     ,nocol     ,i(irocol) ,i(kcs)    ,i(kcu)    , &
                     & i(kcv)    ,i(kfs)    ,i(kfsmin) ,i(kfsmax) ,i(kfsmn0) , &
-                    & i(kfsmx0) ,i(kfumin) ,i(kfumax) ,i(kfsmn0) ,i(kfumx0) , &
+                    & i(kfsmx0) ,i(kfumin) ,i(kfumax) ,i(kfumn0) ,i(kfumx0) , &
                     & i(kfvmin) ,i(kfvmax) ,i(kfvmn0) ,i(kfvmx0) ,i(kfsz0)  , &
                     & i(kfuz0)  ,i(kfvz0)  ,i(kfu)    ,i(kfv)    ,i(kfsz1)  , &
                     & i(kfuz1)  ,i(kfvz1)  ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
@@ -1972,7 +1972,7 @@ subroutine z_trisol_nhfull(dischy    ,solver    ,icreep   , &
              !
              call z_drychk(itemp     ,jstart    ,nmmaxj    ,nmmax     ,kmax      , &
                          & nfltyp    ,icx       ,icy       ,i(kfu)    ,i(kfv)    , &
-                         & i(kfs)    ,i(kcs)    ,i(kfuz0)  ,i(kfvz0)  ,i(kfsz1)  , &
+                         & i(kfs)    ,i(kcs)    ,i(kfuz1)  ,i(kfvz1)  ,i(kfsz1)  , &
                          & i(kfsmin) ,i(kfsmn0) ,i(kfsmax) ,i(kfsmx0) ,r(s1)     , &
                          & r(r1)     ,d(dps)    ,r(qxk)    ,r(qyk)    ,r(w1)     , &
                          & lstsci    ,r(dzs1)   ,r(sig)    ,nst       ,gdp       )

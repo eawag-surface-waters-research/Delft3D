@@ -3,8 +3,8 @@ subroutine z_predict_nhfull(j         ,nmmaxj    ,nmmax     ,kmax      , &
                           & nocol     ,norow     ,nsrc      ,dismmt    ,irocol    , &
                           & mnksrc    ,kfu       ,kfv       ,kfs       ,            &
                           & kspu      ,kspv      ,kadu      ,kadv      ,kcs       , &
-                          & kcu       ,kcv       ,kfsmin    ,kfsmx0    , &
-                          & kfumin    ,kfumx0    ,kfvmin    , &
+                          & kcu       ,kcv       ,kfsmn0    ,kfsmx0    , &
+                          & kfumn0    ,kfumx0    ,kfvmn0    , &
                           & kfvmx0    ,kfuz0     ,kfvz0     ,kfsz0     ,kcu45     , &
                           & kcv45     ,kcscut    ,s0        ,w0        , &
                           & u0        ,u1        ,v0        ,v1        ,hu        , &
@@ -102,13 +102,13 @@ subroutine z_predict_nhfull(j         ,nmmaxj    ,nmmax     ,kmax      , &
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kcu     !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kcv     !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfs     !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfsmin  !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfsmn0  !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfsmx0  !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfu     !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfumin  !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfumn0  !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfumx0  !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfv     !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfvmin  !  Description and declaration in esm_alloc_int.f90
+    integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfvmn0  !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub)             :: kfvmx0  !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)     :: kspu    !  Description and declaration in esm_alloc_int.f90
     integer, dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)     :: kspv    !  Description and declaration in esm_alloc_int.f90
@@ -239,8 +239,8 @@ subroutine z_predict_nhfull(j         ,nmmaxj    ,nmmax     ,kmax      , &
     icy   = 1
     call z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
                 & flood     ,kfu       ,kcs       ,kcu       ,kspu      , &
-                & kfumin    ,kfumx0    ,hu        ,s0        ,dpu       , &
-                & dps       ,umean     ,kfuz0     ,kfsmin    ,kfsmx0    , &
+                & kfumn0    ,kfumx0    ,hu        ,s0        ,dpu       , &
+                & dps       ,umean     ,kfuz0     ,kfsmn0    ,kfsmx0    , &
                 & u0        ,dzu0      ,zk        ,gdp       )
     !
     ! Calculate HV and set KFV = 0 for HV < HTRSH (.5*DRYFLC)
@@ -254,8 +254,8 @@ subroutine z_predict_nhfull(j         ,nmmaxj    ,nmmax     ,kmax      , &
     icy   = nmaxddb
     call z_checku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
                 & flood     ,kfv       ,kcs       ,kcv       ,kspv      , &
-                & kfvmin    ,kfvmx0    ,hv        ,s0        ,dpv       , &
-                & dps       ,vmean     ,kfvz0     ,kfsmin    ,kfsmx0    , &
+                & kfvmn0    ,kfvmx0    ,hv        ,s0        ,dpv       , &
+                & dps       ,vmean     ,kfvz0     ,kfsmn0    ,kfsmx0    , &
                 & v0        ,dzv0      ,zk        ,gdp       )
     !
     ! Computation of U1, i.e. evaluate momentum equation for one timest
@@ -268,10 +268,10 @@ subroutine z_predict_nhfull(j         ,nmmaxj    ,nmmax     ,kmax      , &
     icy            = 1
     call z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              & icy       ,nsrc      ,kcs       ,kcu45     ,kcscut    , &
-             & kcu       ,kfu       ,kfuz0     ,kfumin    ,kfumx0    , &
-             & kfv       ,kfvz0     ,kfvmin    ,kfvmx0    ,dzv0      , &
-             & kfs       ,kfsz0     ,kfsmin    ,kfsmx0    , &
-             & u0        ,v0        ,w0        ,hu        ,dzu0      ,dzs0      , &
+             & kcu       ,kfu       ,kfuz0     ,kfumn0    ,kfumx0    , &
+             & kfv       ,kfvz0     ,kfvmn0    ,kfvmx0    ,dzv0      , &
+             & kfs       ,kfsz0     ,kfsmn0    ,kfsmx0    , &
+             & u0        ,v0        ,w0        ,hu        ,hv        ,dzu0      ,dzs0      , &
              & guu       ,gvv       ,gvu       ,guv       ,gsqs      , &
              & gud       ,gvd       ,guz       ,gvz       ,gsqiu     , &
              & disch     ,umdis     ,kspu      ,mnksrc    ,dismmt    , &
@@ -297,10 +297,10 @@ subroutine z_predict_nhfull(j         ,nmmaxj    ,nmmax     ,kmax      , &
     !
     call z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              & icy       ,nsrc      ,kcs       ,kcv45     ,kcscut    , &
-             & kcv       ,kfv       ,kfvz0     ,kfvmin    ,kfvmx0    , &
-             & kfu       ,kfuz0     ,kfumin    ,kfumx0    ,dzu0      , &
-             & kfs       ,kfsz0     ,kfsmin    ,kfsmx0    , &
-             & v0        ,u0        ,w0        ,hv        ,dzv0      ,dzs0      , &
+             & kcv       ,kfv       ,kfvz0     ,kfvmn0    ,kfvmx0    , &
+             & kfu       ,kfuz0     ,kfumn0    ,kfumx0    ,dzu0      , &
+             & kfs       ,kfsz0     ,kfsmn0    ,kfsmx0    , &
+             & v0        ,u0        ,w0        ,hv        ,hu        ,dzv0      ,dzs0      , &
              & gvv       ,guu       ,guv       ,gvu       ,gsqs      , &
              & gvd       ,gud       ,gvz       ,guz       ,gsqiv     , &
              & disch     ,vmdis     ,kspv      ,mnksrc    ,dismmt    , &

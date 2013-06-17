@@ -1275,7 +1275,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        call timer_start(timer_euler, gdp)
        call euler(jstart    ,nmmax     ,nmmaxj    ,kmax      ,icx       , &
                 & i(kcu)    ,i(kcv)    ,i(kfu)    ,i(kfv)    ,i(kfumx0) , &
-                & i(kfumin) ,i(kfvmx0) ,i(kfvmin) ,r(dzu0)   ,r(dzv0)   , &
+                & i(kfumn0) ,i(kfvmx0) ,i(kfvmn0) ,r(dzu0)   ,r(dzv0)   , &
                 & r(u0)     ,r(wrkb3)  ,r(v0)     ,r(wrkb4)  , &
                 & r(grmasu) ,r(grmasv) ,r(hu)     ,r(hv)     , &
                 & r(tp)     ,r(hrms)   ,r(sig)    ,r(thick)  ,r(teta)   , &
@@ -1288,8 +1288,8 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        call z_turclo(jstart    ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
                    & icx       ,icy       ,tkemod    , &
                    & i(kcs)    ,i(kfu)    ,i(kfv)    ,i(kfs)    ,i(kfuz0)  , &
-                   & i(kfvz0)  ,i(kfsz0)  ,i(kfumin) ,i(kfumx0) ,i(kfvmin) , &
-                   & i(kfvmx0) ,i(kfsmin) ,i(kfsmx0) ,r(s0)     ,d(dps)    , &
+                   & i(kfvz0)  ,i(kfsz0)  ,i(kfumn0) ,i(kfumx0) ,i(kfvmn0) , &
+                   & i(kfvmx0) ,i(kfsmn0) ,i(kfsmx0) ,r(s0)     ,d(dps)    , &
                    & r(hu)     ,r(hv)     ,r(u0)     ,r(v0)     ,r(rtur1)  , &
                    & r(thick)  ,r(sig)    ,r(rho)    ,r(vicuv)  ,r(vicww)  , &
                    & r(dicuv)  ,r(dicww)  ,r(windsu) ,r(windsv) ,r(z0urou) , &
@@ -2771,7 +2771,7 @@ subroutine z_trisol(dischy    ,solver    ,icreep    , &
        call z_chkadv(lundia    ,nmmax     ,kmax      ,icx       , &
                    & icy       ,i(kfv)    ,i(kfvz0)  ,i(kfuz0)  , &
                    & r(gvv)    ,r(guv)    ,r(v0)     ,r(u0)     , &
-                  & i(kfvmx0) ,i(kfvmn0) ,r(dzv0)   ,r(dzs0)   , &
+                   & i(kfvmx0) ,i(kfvmn0) ,r(dzv0)   ,r(dzs0)   , &
                    & nst       ,i(kcs)    ,gdp       )
        !
        ! Reset arrays for next half time step
