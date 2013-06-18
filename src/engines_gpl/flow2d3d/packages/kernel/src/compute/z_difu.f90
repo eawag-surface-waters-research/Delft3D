@@ -527,7 +527,9 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
           ! else        : ls = 0
           !
           ls = 0
-          if ((l>max(lsal, ltem)) .and. (l<=lsts)) ls = l - max(lsal, ltem)
+          if ((l>max(lsal, ltem)) .and. (l<=lsts)) then
+             ls = l - max(lsal, ltem)
+          endif
           do nm = 1, nmmax
              if (kfs(nm) == 1) then
                 ksm = min(kfsmx0(nm), kfsmax(nm))

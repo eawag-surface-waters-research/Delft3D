@@ -129,7 +129,7 @@ subroutine z_difuflux(stage   ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
     real(fp) :: rr1, rr2
     real(fp) :: rmax
     real(fp) :: rmin
-    real(fp), dimension(:,:,:),allocatable :: switch
+    real(fp) :: switch
 
 !
 !! executable statements -------------------------------------------------------
@@ -457,26 +457,22 @@ subroutine z_difuflux(stage   ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
     endif
     !
     ! swap fluxu and fluxv for sediment transport in z layer morphology.
+    ! Originally, switch was a full sized array and the code was without do-loops:
+    !     switch = fluxu
+    !     fluxu  = fluxv
+    !     fluxv  = fluxu
+    ! These statements may cause problems when the arrays are very big; values are put
+    ! on the (restricted) stack
+    ! Therefore, the primitive triple do loop is used, where switch can be a scalar
     !
     if (icx == 1) then
-       allocate (switch(gdp%d%nmlb:gdp%d%nmub, kmax, lstsci), stat = istat)
-       if (istat /= 0) then
-          call prterr(lundia, 'U021', 'Z_DIFUFLUX switch: memory alloc error')
-          call d3stop(1, gdp)
-       endif
        do nm =  gdp%d%nmlb,gdp%d%nmub
            do k = 1, kmax
                do l =  1,lstsci
-                 switch(nm,k,l)  = fluxu (nm,k,l)
+                 switch          = fluxu (nm,k,l)
                  fluxu (nm,k,l)  = fluxv (nm,k,l)
-                 fluxv (nm,k,l)  = switch(nm,k,l)
+                 fluxv (nm,k,l)  = switch
                enddo
            enddo
        enddo
-       deallocate(switch,  stat = istat)
-       if (istat /= 0) then
-          call prterr(lundia, 'U021', 'Z_DIFUFLUX switch: memory dealloc error')
-          call d3stop(1, gdp)
-       endif
-    endif
 end subroutine z_difuflux
