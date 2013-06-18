@@ -580,7 +580,7 @@ function getmeteotypes(runid, meteotypes) result(success)
 ! Global variables
 !
    character(*) , intent(in)  :: runid
-   character(256), dimension(:), allocatable, intent(out)  :: meteotypes
+   character(256), dimension(:), pointer, intent(out)  :: meteotypes
 !
 ! Local variables
 !
@@ -605,7 +605,7 @@ function getmeteotypes(runid, meteotypes) result(success)
    do i = 1, meteo%nummeteoitems
       curtype = meteo%item(i)%ptr%meteotype
       newtype = .true.
-      if (allocated(meteotypes)) then
+      if (associated(meteotypes)) then
          dimmeteotypes = size(meteotypes)
       else
          dimmeteotypes = 0
@@ -617,7 +617,7 @@ function getmeteotypes(runid, meteotypes) result(success)
          endif
       enddo
       if (newtype) then
-         call realloc(meteotypes, size(meteotypes)+1, stat=ierr, keepExisting=.true.)
+         call reallocP(meteotypes, size(meteotypes)+1, stat=ierr, keepExisting=.true.)
          meteotypes(size(meteotypes)) = curtype
       endif
    enddo

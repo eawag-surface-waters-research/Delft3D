@@ -65,7 +65,7 @@ program waves_main
    logical                                      :: mud
    character(20)                                :: tmpchar
    character(256)                               :: mdw_file     ! filename mdw file
-   character(256), dimension(:), allocatable    :: meteotypes
+   character(256), dimension(:), pointer        :: meteotypes
    character(500)                               :: message
    type(wave_data_type),target                  :: wavedata
 !
@@ -216,6 +216,7 @@ program waves_main
          !
          deallocate(x_fp)
          deallocate(y_fp)
+         nullify(meteotypes)
          success = getmeteotypes(swan_grids(i_swan)%grid_name, meteotypes)
          call checkmeteoresult_wave(success)
          do i_meteo = 1, size(meteotypes)
