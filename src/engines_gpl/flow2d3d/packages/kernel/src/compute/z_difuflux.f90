@@ -475,4 +475,5 @@ subroutine z_difuflux(stage   ,lundia    ,kmax      ,nmmax     ,nmmaxj    , &
                enddo
            enddo
        enddo
+    endif
 end subroutine z_difuflux
