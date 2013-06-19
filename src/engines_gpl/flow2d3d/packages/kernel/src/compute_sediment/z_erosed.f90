@@ -826,13 +826,39 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        nmd  = nm - icx
        ndm  = nm - icy
        call nm_to_n_and_m(nm, n, m, gdp)
+       ! Morphology reset the kmaxlc and wslc.
+       if (kmax>1) then  
+          !
+          ! 3D CASE
+          !
+          wslc   = 0.0_fp
+          dcwwlc = 0.0_fp
+          klc    = 0
+          do k = kfsmax(nm),kfsmin(nm)-1,-1
+             wslc(k)   = ws(nm, k, l)
+             dcwwlc(klc) = dicww(nm, k)
+             klc=klc+1
+          enddo
+          thicklc = 0.0_fp
+          klc     = 1
+          do k = kfsmax(nm),kfsmin(nm),-1
+             thicklc(klc)   = dzs1(nm, k)/h1
+             klc=klc+1
+          enddo
+          siglc   = 0.0_fp
+          kmaxlc  =klc-1
+          siglc(1) = -0.5_fp*thicklc(1)
+          do klc = 2, kmaxlc
+             siglc(klc) = siglc(klc - 1) - 0.5_fp*(thicklc(klc) + thicklc(klc - 1))
+          enddo
+       endif
        !
        ! Compute depth-averaged velocity components at cell centre
        !
        ku = max(1,kfu(nmd) + kfu(nm))
        kv = max(1,kfv(ndm) + kfv(nm))
-       umean = 0.0
-       vmean = 0.0
+       umean = 0.0_fp
+       vmean = 0.0_fp
        do k = 1, kmax
           umean = umean + thick(k)*(u0eul(nm,k) + u0eul(nmd,k))/ku
           vmean = vmean + thick(k)*(v0eul(nm,k) + v0eul(ndm,k))/kv
@@ -862,7 +888,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           !
           call compbsskin   (umean   , vmean     , h1      , wave    , &
                            & uorb(nm), tp  (nm)  , teta(nm), kssilt  , &
-                           & kssand  , thcmud(nm), taub    , rhowat(nm,kmax), &
+                           & kssand  , thcmud(nm), taub    , rhowat(nm,kmaxlc), &
                            & vicmol  )
        else
           !
@@ -883,12 +909,12 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        endif
        !
        if (lsal > 0) then
-          salinity = r0(nm, kmax, lsal)
+          salinity = r0(nm, kmaxlc, lsal)
        else
           salinity = saleqs
        endif
        if (ltem > 0) then
-          temperature = r0(nm, kmax, ltem)
+          temperature = r0(nm, kmaxlc, ltem)
        else
           temperature = temeqs
        endif
@@ -926,7 +952,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        dll_reals(RP_D10MX) = real(dxx(nm,i10),hp)
        dll_reals(RP_D90MX) = real(dxx(nm,i90),hp)
        dll_reals(RP_MUDFR) = real(mudfrac(nm),hp)
-       dll_reals(RP_RHOWT) = real(rhowat(nm,kmax),hp) ! Density of water
+       dll_reals(RP_RHOWT) = real(rhowat(nm,kmaxlc),hp) ! Density of water
        dll_reals(RP_SALIN) = real(salinity       ,hp)
        dll_reals(RP_TEMP ) = real(temperature    ,hp)
        dll_reals(RP_GRAV ) = real(ag             ,hp)
@@ -943,7 +969,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        dll_reals(RP_SNDFR) = real(sandfrac(nm)   ,hp)
        dll_reals(RP_DGSD ) = real(dgsd(nm)       ,hp)
        if (ltur >= 1) then
-          dll_reals(RP_KTUR ) = real(rtur0(nm,kmax,1),hp)
+          dll_reals(RP_KTUR ) = real(rtur0(nm,kmaxlc,1),hp)
        endif
        !
        if (max_integers < MAX_IP) then
@@ -978,13 +1004,13 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              dll_reals(RP_D50  ) = 0.0_hp
              dll_reals(RP_DSS  ) = 0.0_hp
              dll_reals(RP_DSTAR) = 0.0_hp
-             dll_reals(RP_SETVL) = real(ws(nm, kmax, l)  ,hp) ! Vertical velocity near bedlevel
+             dll_reals(RP_SETVL) = real(ws(nm, kmaxlc, l)  ,hp) ! Vertical velocity near bedlevel
              !
              do k = 0, kmax
                 wslc(k)   = ws(nm, k, l)
              enddo
              !
-             call erosilt(thick    ,kmax     ,wslc     ,wstau(nm),entr(nm) ,lundia   , &
+             call erosilt(thicklc    ,kmaxlc     ,wslc     ,wstau(nm),entr(nm) ,lundia   , &
                         & h0       ,h1       ,error    ,fixfac(nm,l), srcmax(nm, l)  ,&
                         & frac(nm,l),sinkse(nm,l),sourse(nm,l),oldmudfrac,flmd2l  ,tcrdep(nm,l), &
                         & tcrero(nm,l) ,eropar(nm,l)   ,iform(l) , &
@@ -1008,7 +1034,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              ! The first lsed fractions are the suspended fractions (including cohesive ones),
              ! so this goes right
              !
-             kmxsed(nm, l) = kmax
+             kmxsed(nm, l) = kmaxlc
              cycle
           endif
           !
@@ -1033,7 +1059,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              ! This code is copied from inised (uniform sedd50)
              !
              di50     = sedd50fld(nm)
-             drho     = (rhosol(l)-rhowat(nm,kmax)) / rhowat(nm,kmax)
+             drho     = (rhosol(l)-rhowat(nm,kmaxlc)) / rhowat(nm,kmaxlc)
              dstar(l) = di50 * (drho*ag/vicmol**2)**0.3333_fp
              if (dstar(l) < 1.0_fp) then
                 if (iform(l) == -2) then
@@ -1056,7 +1082,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              else
                 tetacr(l) = 0.055_fp
              endif
-             taucr(l) = factcr * (rhosol(l)-rhowat(nm,kmax)) * ag * di50 * tetacr(l)
+             taucr(l) = factcr * (rhosol(l)-rhowat(nm,kmaxlc)) * ag * di50 * tetacr(l)
           endif
           !
           if (suspfrac) then
@@ -1064,7 +1090,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              tdss    = dss(nm, l)
              tsalmax = salmax(l)
              tws0    = ws0(l)
-             twsk    = ws(nm, kmax, l)
+             twsk    = ws(nm, kmaxlc, l)
              tgamtcr = gamtcr(nm, l)
           else
              !
@@ -1085,7 +1111,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           dll_reals(RP_DSTAR) = real(dstar(l),hp)
           dll_reals(RP_SETVL) = real(twsk    ,hp) ! Vertical velocity near bedlevel
           par(3,l) = rhosol(l)
-          par(4,l) = (rhosol(l)-rhowat(nm,kmax)) / rhowat(nm,kmax)
+          par(4,l) = (rhosol(l)-rhowat(nm,kmaxlc)) / rhowat(nm,kmaxlc)
           par(6,l) = di50
           !
           ! SWITCH 2DH/3D SIMULATIONS
@@ -1098,32 +1124,12 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                 !
                 ! Fill local 1dv arrays with fall velocity and
                 ! diffusivity
+                ! the code is moved upwards since the kmaxlc is used already upwards.
                 !
                 !do k = 0, kmax
                 !   wslc(k)   = ws(nm, k, l)
                 !   dcwwlc(k) = dicww(nm, k)
                 !enddo
-                ! Morphology
-                wslc   = 0.0_fp
-                dcwwlc = 0.0_fp
-                klc    = 0
-                do k = kfsmax(nm),kfsmin(nm)-1,-1
-                   wslc(k)   = ws(nm, k, l)
-                   dcwwlc(klc) = dicww(nm, k)
-                   klc=klc+1
-                enddo
-                thicklc = 0.0_fp
-                klc     = 1
-                do k = kfsmax(nm),kfsmin(nm),-1
-                   thicklc(klc)   = dzs1(nm, k)/h1
-                   klc=klc+1
-                enddo
-                siglc   = 0.0_fp
-                kmaxlc  =klc-1
-                siglc(1) = -0.5*thicklc(1)
-                do klc = 2, kmaxlc
-                   siglc(klc) = siglc(klc - 1) - 0.5*(thicklc(klc) + thicklc(klc - 1))
-                enddo
              endif
              !
              do k = 1, kmax
@@ -1294,7 +1300,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
               & sbcuu     ,sbcvv     ,sbuut     ,sbvvt     ,dzduu     , &
               & dzdvv     ,taurat    ,frac      ,fixfac    ,ust2      , &
               & hu        ,hv        ,dm        ,hidexp    ,.true.    , &
-              & .true.    ,rhowat    ,kmax      ,dps       ,gsqs      , &
+              & .true.    ,rhowat    ,kmaxlc    ,dps       ,gsqs      , &
               & guu       ,gvv       ,guv       ,gvu       ,gdp       )
     endif
     !
@@ -1307,7 +1313,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
               & sbwuu     ,sbwvv     ,sbuut     ,sbvvt     ,dzduu     , &
               & dzdvv     ,taurat    ,frac      ,fixfac    ,ust2      , &
               & hu        ,hv        ,dm        ,hidexp    ,.true.    , &
-              & .false.   ,rhowat    ,kmax      ,dps       ,gsqs      , &
+              & .false.   ,rhowat    ,kmaxlc    ,dps       ,gsqs      , &
               & guu       ,gvv       ,guv       ,gvu       ,gdp       )
     endif
     !
@@ -1320,7 +1326,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
               & sswuu     ,sswvv     ,sbuut     ,sbvvt     ,dzduu     , &
               & dzdvv     ,taurat    ,frac      ,fixfac    ,ust2      , &
               & hu        ,hv        ,dm        ,hidexp    ,.false.   , &
-              & .false.   ,rhowat    ,kmax      ,dps       ,gsqs      , &
+              & .false.   ,rhowat    ,kmaxlc    ,dps       ,gsqs      , &
               & guu       ,gvv       ,guv       ,gvu       ,gdp       )
     endif
     !

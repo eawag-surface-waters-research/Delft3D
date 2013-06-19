@@ -126,8 +126,8 @@ subroutine erosilt(thick    ,kmax     ,ws       ,wstau    ,entr     ,lundia   , 
        ! (ignores sediment settling during the current morphological timestep)
        !
        sour = entr
-       if (tcrdep > 0.0) then
-          sink = max(0.0_fp , 1.0-taub/tcrdep)
+       if (tcrdep > 0.0_fp) then
+          sink = max(0.0_fp , 1.0_fp-taub/tcrdep)
        else
           sink = 0.0
        endif
@@ -136,12 +136,12 @@ subroutine erosilt(thick    ,kmax     ,ws       ,wstau    ,entr     ,lundia   , 
           !
           ! Default Partheniades-Krone formula
           !
-          taum = max(0.0_fp, taub/tcrero - 1.0)
+          taum = max(0.0_fp, taub/tcrero - 1.0_fp)
           sour = eropar * taum
-          if (tcrdep > 0.0) then
-             sink = max(0.0_fp , 1.0-taub/tcrdep)
+          if (tcrdep > 0.0_fp) then
+             sink = max(0.0_fp , 1.0_fp-taub/tcrdep)
           else
-             sink = 0.0
+             sink = 0.0_fp
           endif
        elseif (iform == 15) then
           !
