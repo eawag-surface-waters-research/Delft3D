@@ -19,6 +19,7 @@ examples/01_standard/f34.wnd -text
 examples/01_standard/run_flow2d3d.bat -text
 examples/01_standard/run_flow2d3d.sh -text
 examples/01_standard/run_flow2d3d_parallel.bat -text
+examples/01_standard/run_flow2d3d_parallel.log -text
 examples/01_standard/run_flow2d3d_parallel.sh -text
 examples/01_standard/run_flow2d3d_parallel_sge.sh -text
 examples/02_domaindecomposition/bak_1.enc -text
@@ -2394,6 +2395,9 @@ src/engines_gpl/wave/packages/wave/wave_vs2010.vfproj -text
 src/engines_gpl/wave/packages/wave/wave_vs2010_intel13.vfproj -text
 src/install.cmd -text
 src/install.sh -text
+src/logs/autogen_intel11.1.log -text
+src/logs/configure_intel11.1.log -text
+src/logs/make_intel11.1.log -text
 src/m4/COPYING.gwqt -text
 src/m4/ac_check_java_home.m4 -text
 src/m4/ac_check_old_compilers.m4 -text

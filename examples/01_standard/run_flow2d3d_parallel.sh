@@ -87,6 +87,13 @@ do
    ln -s /dev/null log$node_number.irlog
 done
 
+    ### For debug purpose:
+echo " "
+echo "ldd libflow2d3d.so: start"
+ldd $exedir/libflow2d3d.so
+echo "ldd libflow2d3d.so: end"
+echo " "
+
     ### General, start delftflow in parallel by means of mpirun.
     ### The machines in the h4 cluster are dual core; start 2*NHOSTS parallel processes
 mpirun -np $NHOSTS $exedir/d_hydro.exe $argfile
