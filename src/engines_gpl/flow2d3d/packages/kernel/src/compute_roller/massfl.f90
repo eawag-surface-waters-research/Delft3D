@@ -79,7 +79,9 @@ subroutine massfl(c         ,dir       ,ewave1    ,eroll1    , &
 !
 !! executable statements -------------------------------------------------------
 !
+    ag        => gdp%gdphysco%ag
     rhow      => gdp%gdphysco%rhow
+    gammax    => gdp%gdnumeco%gammax
     !
     ! 2DH: original implementation
     ! 3D : only roller part of Massfl is set in rmasu/vr
