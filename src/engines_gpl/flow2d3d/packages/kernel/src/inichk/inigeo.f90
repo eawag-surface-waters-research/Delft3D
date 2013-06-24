@@ -286,6 +286,7 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
     ! The four contributions are added/subtracted based on the sign of x2-x1 (Conform Green's Theorem). 
     ! In spherical coordinates this approach is not completely correct (issue Delft3D-12967).
     !
+
     if (new_area_method) then
        !
        ! new way of determining gsqs and gsqs
@@ -585,12 +586,12 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
                 call angle(sferic, xmd, ymd, xm, ym, alfas(n,m), gdp)
                 alfas(n,m) = alfas(n,m) * raddeg
              else
-                xz(n, m) = (xcor(n, m) + xcor(nd, m) + xcor(n, md) + xcor(nd, md)) / 4.
-                yz(n, m) = (ycor(n, m) + ycor(nd, m) + ycor(n, md) + ycor(nd, md)) / 4.
-                dydksi = (ycor(n, m) - ycor(n, md) + ycor(nd, m) - ycor(nd, md)) / 2.
-                dxdksi = (xcor(n, m) - xcor(n, md) + xcor(nd, m) - xcor(nd, md)) / 2.
+                xz(n, m) = (xcor(n, m) + xcor(nd, m) + xcor(n, md) + xcor(nd, md)) / 4.0_fp
+                yz(n, m) = (ycor(n, m) + ycor(nd, m) + ycor(n, md) + ycor(nd, md)) / 4.0_fp
+                dydksi = (ycor(n, m) - ycor(n, md) + ycor(nd, m) - ycor(nd, md)) / 2.0_fp
+                dxdksi = (xcor(n, m) - xcor(n, md) + xcor(nd, m) - xcor(nd, md)) / 2.0_fp
                 if (abs(dxdksi) < small .and. abs(dydksi) < small) then
-                   alfas(n, m) = 0.0
+                   alfas(n, m) = 0.0_fp
                 else
                    alfas(n, m) = atan2(dydksi, dxdksi) * raddeg
                 endif
@@ -614,8 +615,8 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
              !      and always 4 (xcor,ycor) coordinates around kcs = 1
              !
              if ((kcs(nd, m) == 1 .and. kcs(nu, m) == 0) .or. (n == nmaxus)) then
-                xz(n, m) = 2.*(xcor(nd, m) + xcor(nd, md))/2. - xz(nd, m)
-                yz(n, m) = 2.*(ycor(nd, m) + ycor(nd, md))/2. - yz(nd, m)
+                xz(n, m) = 2.0_fp*(xcor(nd, m) + xcor(nd, md))/2.0_fp - xz(nd, m)
+                yz(n, m) = 2.0_fp*(ycor(nd, m) + ycor(nd, md))/2.0_fp - yz(nd, m)
                 if (sferic) then
                    xm  = 1.5*xcor(nd, m ) - 0.5*xcor(ndd, m )
                    ym  = 1.5*ycor(nd, m ) - 0.5*ycor(ndd, m )
@@ -625,12 +626,12 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
                             & alfas(n, m) ,gdp       )
                    alfas(n, m) = alfas(n, m) * raddeg
                 else
-                   dydknd = (ycor(nd, m) - ycor(nd, md) + ycor(ndd, m) - ycor(ndd, md)) / 2.
+                   dydknd = (ycor(nd, m) - ycor(nd, md) + ycor(ndd, m) - ycor(ndd, md)) / 2.0_fp
                    dydksi = 2.*(ycor(nd, m) - ycor(nd, md)) - dydknd
-                   dxdknd = (xcor(nd, m) - xcor(nd, md) + xcor(ndd, m) - xcor(ndd, md)) / 2.
+                   dxdknd = (xcor(nd, m) - xcor(nd, md) + xcor(ndd, m) - xcor(ndd, md)) / 2.0_fp
                    dxdksi = 2.*(xcor(nd, m) - xcor(nd, md)) - dxdknd
                    if (abs(dxdksi) < small .and. abs(dydksi) < small) then
-                      alfas(n, m) = 0.0
+                      alfas(n, m) = 0.0_fp
                    else
                       alfas(n, m) = atan2(dydksi, dxdksi) * raddeg
                    endif
@@ -654,23 +655,23 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
              !       and always 4 (xcor,ycor) coordinates around kcs = 1
              !
              if ((kcs(nd, m) == 0 .and. kcs(nu, m) == 1) .or. (n == 1)) then
-                xz(n, m) = 2.*(xcor(n, m) + xcor(n, md))/2. - xz(nu, m)
-                yz(n, m) = 2.*(ycor(n, m) + ycor(n, md))/2. - yz(nu, m)
+                xz(n, m) = 2.0_fp*(xcor(n, m) + xcor(n, md))/2.0_fp - xz(nu, m)
+                yz(n, m) = 2.0_fp*(ycor(n, m) + ycor(n, md))/2.0_fp - yz(nu, m)
                 if (sferic) then
-                   xm  = 1.5*xcor(n, m ) - 0.5*xcor(nu, m )
-                   ym  = 1.5*ycor(n, m ) - 0.5*ycor(nu, m )
-                   xmd = 1.5*xcor(n, md) - 0.5*xcor(nu, md)
-                   ymd = 1.5*ycor(n, md) - 0.5*ycor(nu, md)
+                   xm  = 1.50_fp*xcor(n, m ) - 0.5*xcor(nu, m )
+                   ym  = 1.50_fp*ycor(n, m ) - 0.5*ycor(nu, m )
+                   xmd = 1.50_fp*xcor(n, md) - 0.5*xcor(nu, md)
+                   ymd = 1.50_fp*ycor(n, md) - 0.5*ycor(nu, md)
                    call angle(sferic      ,xmd       ,ymd       ,xm        ,ym        , &
                             & alfas(n, m) ,gdp       )
                    alfas(n, m) = alfas(n, m) * raddeg
                 else
-                   dydknu = (ycor(nu, m) - ycor(nu, md) + ycor(n, m) - ycor(n, md)) / 2.
-                   dydksi = 2.*(ycor(n, m) - ycor(n, md)) - dydknu
-                   dxdknu = (xcor(nu, m) - xcor(nu, md) + xcor(n, m) - xcor(n, md)) / 2.
-                   dxdksi = 2.*(xcor(n, m) - xcor(n, md)) - dxdknu
+                   dydknu = (ycor(nu, m) - ycor(nu, md) + ycor(n, m) - ycor(n, md)) / 2.0_fp
+                   dydksi = 2.0_fp*(ycor(n, m) - ycor(n, md)) - dydknu
+                   dxdknu = (xcor(nu, m) - xcor(nu, md) + xcor(n, m) - xcor(n, md)) / 2.0_fp
+                   dxdksi = 2.0_fp*(xcor(n, m) - xcor(n, md)) - dxdknu
                    if (abs(dxdksi) < small .and. abs(dydksi) < small) then
-                      alfas(n, m) = 0.0
+                      alfas(n, m) = 0.0_fp
                    else
                       alfas(n, m) = atan2(dydksi, dxdksi) * raddeg
                    endif
@@ -695,25 +696,25 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
              !       and always 4 (xcor,ycor) coordinates around kcs = 1
              !
              if ((kcs(n, md) == 1 .and. kcs(n, mu) == 0) .or. (m == mmax)) then
-                xz(n, m) = 2.*(xcor(n, md) + xcor(nd, md))/2. - xz(n, md)
-                yz(n, m) = 2.*(ycor(n, md) + ycor(nd, md))/2. - yz(n, md)
+                xz(n, m) = 2.0_fp*(xcor(n, md) + xcor(nd, md))/2.0_fp - xz(n, md)
+                yz(n, m) = 2.0_fp*(ycor(n, md) + ycor(nd, md))/2.0_fp - yz(n, md)
                 if (sferic) then
-                   xm  = (xcor(n, md) + xcor(nd, md)) / 2.0
-                   ym  = (ycor(n, md) + ycor(nd, md)) / 2.0
-                   xmu = 2.0*xm - (xcor(n, mdd) + xcor(nd, mdd)) / 2.0
-                   ymu = 2.0*ym - (ycor(n, mdd) + ycor(nd, mdd)) / 2.0
+                   xm  = (xcor(n, md) + xcor(nd, md)) / 2.0_fp
+                   ym  = (ycor(n, md) + ycor(nd, md)) / 2.0_fp
+                   xmu = 2.0_fp*xm - (xcor(n, mdd) + xcor(nd, mdd)) / 2.0_fp
+                   ymu = 2.0_fp*ym - (ycor(n, mdd) + ycor(nd, mdd)) / 2.0_fp
                    call angle(sferic      ,xm        ,ym        ,xmu       ,ymu       , &
                             & alfas(n, m) ,gdp       )
                    alfas(n, m) = alfas(n, m) * raddeg
                 else
-                   ycnm   = 2.*ycor(n , md) - ycor(n , mdd)
-                   ycndm  = 2.*ycor(nd, md) - ycor(nd, mdd)
-                   dydksi = (ycnm - ycor(n, md) + ycndm - ycor(nd, md)) / 2.
-                   xcnm   = 2.*xcor(n , md) - xcor(n , mdd)
-                   xcndm  = 2.*xcor(nd, md) - xcor(nd, mdd)
-                   dxdksi = (xcnm - xcor(n, md) + xcndm - xcor(nd, md)) / 2.
+                   ycnm   = 2.0_fp*ycor(n , md) - ycor(n , mdd)
+                   ycndm  = 2.0_fp*ycor(nd, md) - ycor(nd, mdd)
+                   dydksi = (ycnm - ycor(n, md) + ycndm - ycor(nd, md)) / 2.0_fp
+                   xcnm   = 2.0_fp*xcor(n , md) - xcor(n , mdd)
+                   xcndm  = 2.0_fp*xcor(nd, md) - xcor(nd, mdd)
+                   dxdksi = (xcnm - xcor(n, md) + xcndm - xcor(nd, md)) / 2.0_fp
                    if (abs(dxdksi) < small .and. abs(dydksi) < small) then
-                      alfas(n, m) = 0.0
+                      alfas(n, m) = 0.0_fp
                    else
                       alfas(n, m) = atan2(dydksi, dxdksi) * raddeg
                    endif
@@ -737,25 +738,25 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
              !       and always 4 (xcor,ycor) coordinates around kcs = 1
              !
              if ((kcs(n, md) == 0 .and. kcs(n, mu) == 1) .or. (m == 1)) then
-                xz(n, m) = 2*(xcor(n, m) + xcor(nd, m))/2. - xz(n, mu)
-                yz(n, m) = 2*(ycor(n, m) + ycor(nd, m))/2. - yz(n, mu)
+                xz(n, m) = 2.0_fp*(xcor(n, m) + xcor(nd, m))/2.0_fp - xz(n, mu)
+                yz(n, m) = 2.0_fp*(ycor(n, m) + ycor(nd, m))/2.0_fp - yz(n, mu)
                 if (sferic) then
-                   xm  = (xcor(n, m) + xcor(nd, m)) / 2.0
-                   ym  = (ycor(n, m) + ycor(nd, m)) / 2.0
-                   xmd = 2.0*xm - (xcor(n, mu) + xcor(nd, mu)) / 2.0
-                   ymd = 2.0*ym - (ycor(n, mu) + ycor(nd, mu)) / 2.0
+                   xm  = (xcor(n, m) + xcor(nd, m)) / 2.0_fp
+                   ym  = (ycor(n, m) + ycor(nd, m)) / 2.0_fp
+                   xmd = 2.0_fp*xm - (xcor(n, mu) + xcor(nd, mu)) / 2.0_fp
+                   ymd = 2.0_fp*ym - (ycor(n, mu) + ycor(nd, mu)) / 2.0_fp
                    call angle(sferic      ,xmd       ,ymd       ,xm        ,ym        , &
                             & alfas(n, m) ,gdp       )
                    alfas(n, m) = alfas(n, m) * raddeg
                 else
-                   ycnmd  = 2.*ycor(n , m) - ycor(n , mu)
-                   ycndmd = 2.*ycor(nd, m) - ycor(nd, mu)
-                   dydksi = (ycor(n, m) - ycnmd + ycor(nd, m) - ycndmd) / 2.
-                   xcnmd  = 2.*xcor(n , m) - xcor(n , mu)
-                   xcndmd = 2.*xcor(nd, m) - xcor(nd, mu)
-                   dxdksi = (xcor(n, m) - xcnmd + xcor(nd, m) - xcndmd) / 2.
+                   ycnmd  = 2.0_fp*ycor(n , m) - ycor(n , mu)
+                   ycndmd = 2.0_fp*ycor(nd, m) - ycor(nd, mu)
+                   dydksi = (ycor(n, m) - ycnmd + ycor(nd, m) - ycndmd) / 2.0_fp
+                   xcnmd  = 2.0_fp*xcor(n , m) - xcor(n , mu)
+                   xcndmd = 2.0_fp*xcor(nd, m) - xcor(nd, mu)
+                   dxdksi = (xcor(n, m) - xcnmd + xcor(nd, m) - xcndmd) / 2.0_fp
                    if (abs(dxdksi) < small .and. abs(dydksi) < small) then
-                      alfas(n, m) = 0.0
+                      alfas(n, m) = 0.0_fp
                    else
                       alfas(n, m) = atan2(dydksi, dxdksi) * raddeg
                    endif
@@ -773,16 +774,16 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
        do n = 1, nmaxus
           nd = max(1, n - 1)
           nu = min(n + 1, nmaxus)
-          guz(n, m) = 0.5 * (guu(n, m) + guu(n, md))
-          gvz(n, m) = 0.5 * (gvv(n, m) + gvv(nd, m))
-          gud(n, m) = 0.5 * (guu(n, m) + guu(nu, m))
-          gvd(n, m) = 0.5 * (gvv(n, m) + gvv(n, mu))
+          guz(n, m) = 0.5_fp * (guu(n, m) + guu(n, md))
+          gvz(n, m) = 0.5_fp * (gvv(n, m) + gvv(nd, m))
+          gud(n, m) = 0.5_fp * (guu(n, m) + guu(nu, m))
+          gvd(n, m) = 0.5_fp * (gvv(n, m) + gvv(n, mu))
           !
           if (kcu(n, m) > 0) then
              if (new_area_method) then
                 gsqiu(n, m) = 2.0_fp / (gsqs(n, m)+gsqs(n,mu))
              else
-                gsqiu(n, m) = 1. / (gvu(n, m)*guu(n, m))
+                gsqiu(n, m) = 1.0_fp / (gvu(n, m)*guu(n, m))
              endif
           else
              gsqiu(n, m) = 0.0_fp
@@ -791,7 +792,7 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
              if (new_area_method) then
                 gsqiv(n, m) = 2.0_fp / (gsqs(n, m)+gsqs(nu,m))
              else
-                gsqiv(n, m) = 1. / (guv(n, m)*gvv(n, m))
+                gsqiv(n, m) = 1.0_fp / (guv(n, m)*gvv(n, m))
              endif
           else
              gsqiv(n, m) = 0.0_fp
@@ -837,7 +838,7 @@ subroutine inigeo(lundia    ,error     ,filrgf    ,sferic    ,            &
     if (sferic) then
        do n = 1, nmaxus
           do m = 1, mmax
-             fcorio(n, m) = sin(degrad*yz(n, m)) * 4.0 * pi / sidday
+             fcorio(n, m) = sin(degrad*yz(n, m)) * 4.0_fp * pi / sidday
           enddo
        enddo
     endif

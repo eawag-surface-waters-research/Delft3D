@@ -653,9 +653,9 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
           !
           ! zwnddir is in nautical convention (direction wind is coming from, CW from North)
           !
-          zwnddr(ii) = 270.0 - 180.0_fp*(atan2(windv(n, m), windu(n, m)))/pi
-          if (zwnddr(ii)<0.0)    zwnddr(ii) = zwnddr(ii) + 360.0
-          if (zwnddr(ii)>=360.0) zwnddr(ii) = zwnddr(ii) - 360.0
+          zwnddr(ii) = 270.0_fp - 180.0_fp*(atan2(windv(n, m), windu(n, m)))/pi
+          if (zwnddr(ii)<0.0_fp)    zwnddr(ii) = zwnddr(ii) + 360.0_fp
+          if (zwnddr(ii)>=360.0_fp) zwnddr(ii) = zwnddr(ii) - 360.0_fp
           !
           zairp(ii) = patm(n, m)
           !
@@ -665,7 +665,7 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
     ! Store quantities specific for waves in defined stations
     !
     if (wave) then
-       sqrt2 = sqrt(2.0)
+       sqrt2 = sqrt(2.0_fp)
        zhs    = -999.0_fp
        ztp    = -999.0_fp
        zdir   = -999.0_fp
@@ -678,14 +678,14 @@ subroutine tstat(prshis    ,selhis    ,rhow      ,zmodel    ,nostat    , &
           if (n<0) cycle
           !
           zhs(ii) = hrms(n, m)*sqrt2
-          if (zhs(ii) > 0.01) then
+          if (zhs(ii) > 0.01_fp) then
              ztp(ii) = tp(n, m)
              !
              ! zdir is in nautical convention (direction waves are coming from, CW from North)
              !
-             zdir(ii) = 270.0 - (teta(n, m) + zalfas(ii))
-             if (zdir(ii)<0.0)    zdir(ii) = zdir(ii) + 360.0
-             if (zdir(ii)>=360.0) zdir(ii) = zdir(ii) - 360.0
+             zdir(ii) = 270.0_fp - (teta(n, m) + zalfas(ii))
+             if (zdir(ii)<0.0_fp)    zdir(ii) = zdir(ii) + 360.0_fp
+             if (zdir(ii)>=360.0_fp) zdir(ii) = zdir(ii) - 360.0_fp
              zrlabd(ii) = rlabda(n, m)
              zuorb(ii)  = uorb(n, m)
           endif
