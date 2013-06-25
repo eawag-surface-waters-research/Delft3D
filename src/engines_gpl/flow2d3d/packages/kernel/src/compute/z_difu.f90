@@ -115,7 +115,7 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
     integer                                                                :: kmax      ! Description and declaration in esm_alloc_int.f90
     integer                                                                :: lstsci    ! Description and declaration in esm_alloc_int.f90
     integer                                                  , intent(in)  :: lsed
-    integer                                                  , intent(in)  :: lstsc     !  Description and declaration in dimens.igs
+    integer                                                  , intent(in)  :: lstsc     ! Description and declaration in dimens.igs
     integer                                                                :: lsts      ! Description and declaration in esm_alloc_int.f90
     integer                                                                :: lsal      ! Description and declaration in iidim.f90 
     integer, dimension(lsed)                                 , intent(in)  :: sedtyp    ! sediment type: 0=total/1=noncoh/2=coh    
@@ -420,7 +420,6 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
     endif
     call timer_stop(timer_difu_hordiff, gdp)    
     !
-    call timer_start(timer_difu_sourcesink, gdp) 
     do l = 1, lstsci
        !
        uvdwk  = 0.0_fp
@@ -428,6 +427,9 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
        rscale = 0.0_fp
        !
        ! SOURCES AND SINK TERMS
+       !
+       call timer_start(timer_difu_sourcesink, gdp) 
+       !
        ! SINKS ARE TREATED IMPLICITLY
        !
        do nm = 1, nmmax
@@ -451,8 +453,9 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
              endif
           endif
        enddo
+       call timer_stop(timer_difu_sourcesink, gdp) 
        !
-       ! call timer_start(timer_difu_rest, gdp)
+       call timer_start(timer_difu_rest, gdp)
        !
        ! Summation of fluxes for cells which do not have a horizontal neighbour cell
        !
@@ -464,21 +467,19 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
              enddo
           endif
        enddo
-       ! call timer_stop(timer_difu_rest, gdp)
-    enddo
-    call timer_stop(timer_difu_sourcesink, gdp) 
-    !
-    call timer_start(timer_difu_vertadv, gdp)  
-    !
-    do nm = 1, nmmax
-       ksm = min(kfsmx0(nm), kfsmax(nm))
-       if (kfs(nm) == 1) then
-          do k = kfsmin(nm), ksm - 1
-             if (k == kfsmin(nm) .or. k == ksm - 1) then
-                kfw = 1
-             else
-                kfw = 0
-             endif
+       call timer_stop(timer_difu_rest, gdp)
+       !
+       call timer_start(timer_difu_vertadv, gdp)  
+       !
+       do nm = 1, nmmax
+          ksm = min(kfsmx0(nm), kfsmax(nm))
+          if (kfs(nm) == 1) then
+             do k = kfsmin(nm), ksm - 1
+                if (k == kfsmin(nm) .or. k == ksm - 1) then
+                   kfw = 1
+                else
+                   kfw = 0
+                endif
                 !
                 ! ADVECTION IN VERTICAL DIRECTION; W*DC/DZ
                 !
@@ -495,201 +496,115 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
                    adza = 0.0_fp
                    adzc = 0.0_fp
                 endif
-                aak(nm, k + 1) = aak(nm, k + 1) - adza
-                bbk(nm, k + 1) = bbk(nm, k + 1) - adzc
-                bbk(nm, k    ) = bbk(nm, k    ) + adza
-                cck(nm, k    ) = cck(nm, k    ) + adzc
-          enddo
-       endif
-    enddo
-    do l = 1, lstsci
-       ! secondary flow is not supported by z-layer model yet. 
-       ! if (lsec==2 .and. l==lsecfl) then  
-       !   cycle
-       ! endif
-       do nm = 1, nmmax
-          if (kfs(nm) == 1) then
-             ksm = min(kfsmx0(nm), kfsmax(nm))
-             do k = kfsmin(nm), ksm - 1
-                aakl(nm, k, l) = aak(nm, k)
-                bbkl(nm, k, l) = bbk(nm, k)
-                cckl(nm, k, l) = cck(nm, k)
+                aakl(nm, k + 1, l) = aakl(nm, k + 1, l) - adza
+                bbkl(nm, k + 1, l) = bbkl(nm, k + 1, l) - adzc
+                bbkl(nm, k    , l) = bbkl(nm, k    , l) + adza
+                cckl(nm, k    , l) = cckl(nm, k    , l) + adzc
              enddo
           endif
        enddo
-    enddo
-    call timer_stop(timer_difu_vertadv, gdp)
-    !
-    ! DIFFUSION IN VERTICAL DIRECTION
-    !
-    call timer_start(timer_difu_vertdiff, gdp)
-    if (kmax > 1) then
-       do l = 1, lstsci
-          !
-          ! l = sediment: ls > 0
-          ! else        : ls = 0
-          !
-          ls = 0
-          if ((l>max(lsal, ltem)) .and. (l<=lsts)) then
-             ls = l - max(lsal, ltem)
-          endif
-          do nm = 1, nmmax
-             if (kfs(nm) == 1) then
-                ksm = min(kfsmx0(nm), kfsmax(nm))
-                do k = kfsmin(nm), ksm - 1
-                   delz = max(0.0001_fp, 0.5_fp*(dzs1(nm, k) + dzs1(nm, k + 1)))
+       call timer_stop(timer_difu_vertadv, gdp)
+       !
+       ! DIFFUSION IN VERTICAL DIRECTION
+       !
+       call timer_start(timer_difu_vertdiff, gdp)
+       !
+       ! l = sediment: ls > 0
+       ! else        : ls = 0
+       !
+       ls = 0
+       if ((l>max(lsal, ltem)) .and. (l<=lsts)) then
+          ls = l - max(lsal, ltem)
+       endif
+       do nm = 1, nmmax
+          if (kfs(nm) == 1) then
+          ksm = min(kfsmx0(nm), kfsmax(nm))
+             do k = kfsmin(nm), ksm - 1
+                delz = max(0.0001_fp, 0.5_fp*(dzs1(nm, k) + dzs1(nm, k + 1)))
+                !
+                ! Internal wave contribution
+                !
+                sqrtbv = max(0.0_fp, bruvai(nm, k))
+                sqrtbv = sqrt(sqrtbv)
+                difiwe = 0.2_fp * sqrtbv * xlo**2
+                !
+                ! dicoww-restriction is moved from TURCLO to here (in reddic)
+                ! vicww is used instead of dicww
+                !
+                if (ls > 0) then
                    !
-                   ! Internal wave contribution
+                   ! sediment constituent:
+                   ! No dicoww-restriction in reddic
                    !
-                   sqrtbv = max(0.0_fp, bruvai(nm, k))
-                   sqrtbv = sqrt(sqrtbv)
-                   difiwe = 0.2_fp * sqrtbv * xlo**2
+                   diz1 = vicmol/sigmol(l) + difiwe + seddif(nm, k, ls)/sigdif(l)
+                else
                    !
+                   ! all other constituents:
                    ! dicoww-restriction is moved from TURCLO to here (in reddic)
                    ! vicww is used instead of dicww
                    !
-                   if (ls > 0) then
-                      !
-                      ! sediment constituent:
-                      ! No dicoww-restriction in reddic
-                      !
-                      diz1 = vicmol/sigmol(l) + difiwe + seddif(nm, k, lsed)/sigdif(l)
-                   else
-                      !
-                      ! all other constituents:
-                      ! dicoww-restriction is moved from TURCLO to here (in reddic)
-                      ! vicww is used instead of dicww
-                      !
-                      diz1 = vicmol/sigmol(l) + reddic(difiwe + vicww(nm,k)/sigdif(l), gdp)
-                   endif
-                   ddzc = gsqs(nm) * diz1 / delz
-                   aakl(nm, k+1, l) = aakl(nm, k+1, l) - ddzc
-                   bbkl(nm, k+1, l) = bbkl(nm, k+1, l) + ddzc
-                   bbkl(nm, k  , l) = bbkl(nm, k  , l) + ddzc
-                   cckl(nm, k  , l) = cckl(nm, k  , l) - ddzc
-                enddo
-             endif
-          enddo
+                   diz1 = vicmol/sigmol(l) + reddic(difiwe + vicww(nm,k)/sigdif(l), gdp)
+                endif
+                ddzc = gsqs(nm) * diz1 / delz
+                aakl(nm, k+1, l) = aakl(nm, k+1, l) - ddzc
+                bbkl(nm, k+1, l) = bbkl(nm, k+1, l) + ddzc
+                bbkl(nm, k  , l) = bbkl(nm, k  , l) + ddzc
+                cckl(nm, k  , l) = cckl(nm, k  , l) - ddzc
+             enddo
+          endif
        enddo
-    endif
-    call timer_stop(timer_difu_vertdiff, gdp)  
-    !
-    ! Include settling velocities and Dirichlet BC for sediments in
-    ! matrices AAKL/BBKL/CCKL/DDKL
-    !
-    if (lsed > 0) then
-       call timer_start(timer_difu_difws, gdp)
-       call z_dif_ws(j         ,nmmaxj    ,nmmax     ,kmax      ,lsal      , &
-                 & ltem      ,lstsci    ,lsed      ,kcs       ,kfs       , &
-                 & gsqs      ,ws        ,aakl      ,bbkl      ,cckl      , &
-                 & kmxsed    ,kfsmx0    ,gdp       )
-       call timer_stop(timer_difu_difws, gdp)
-    endif         
-    !
-    ! set values in open boundary points (in part. for y-direction)
-    !
-    call timer_start(timer_difu_bounopen, gdp)
-    do nm = 1, nmmax
-       if (kcs(nm) == 2) then
-          do l = 1, lstsc
+       call timer_stop(timer_difu_vertdiff, gdp)  
+       !
+       ! Include settling velocities and Dirichlet BC for sediments in
+       ! matrices AAKL/BBKL/CCKL/DDKL
+       !
+       if (lsed > 0) then
+          call timer_start(timer_difu_difws, gdp)
+          call z_dif_ws(j         ,nmmaxj    ,nmmax     ,kmax      ,lsal      , &
+                    & ltem      ,lstsci    ,lsed      ,kcs       ,kfs       , &
+                    & gsqs      ,ws        ,aakl      ,bbkl      ,cckl      , &
+                    & kmxsed    ,kfsmx0    ,gdp       )
+          call timer_stop(timer_difu_difws, gdp)
+       endif         
+       !
+       ! set values in open boundary points (in part. for y-direction)
+       !
+       call timer_start(timer_difu_bounopen, gdp)
+       do nm = 1, nmmax
+          if (kcs(nm) == 2) then
              do k = kfsmin(nm), kmax
                 ddkl(nm, k, l) = r0(nm, k, l)
                 aakl(nm, k, l) = 0.0_fp
                 bbkl(nm, k, l) = 1.0_fp
                 cckl(nm, k, l) = 0.0_fp
              enddo
-          enddo
-       endif
-    enddo
-    !
-    ! IMPLEMENTATION OF BOUNDARY CONDITIONS IN X-DIRECTION
-    !
-    do ic = 1, norow
-       n    = irocol(1, ic)
-       mf   = irocol(2, ic) - 1
-       ml   = irocol(3, ic)
-       nmf  = (n + ddb)*icy + (mf + ddb)*icx - icxy
-       nml  = (n + ddb)*icy + (ml + ddb)*icx - icxy
-       nmfu = nmf + icx
-       nmlu = nml + icx
-       if (kcu(nmf) == 1) then
-          do k = kfsmin(nmf), kmax
-             do l = 1, lstsc
+          endif
+       enddo
+       !
+       ! IMPLEMENTATION OF BOUNDARY CONDITIONS IN X-DIRECTION
+       !
+       do ic = 1, norow
+          n    = irocol(1, ic)
+          mf   = irocol(2, ic) - 1
+          ml   = irocol(3, ic)
+          nmf  = (n + ddb)*icy + (mf + ddb)*icx - icxy
+          nml  = (n + ddb)*icy + (ml + ddb)*icx - icxy
+          nmfu = nmf + icx
+          nmlu = nml + icx
+          if (kcu(nmf) == 1) then
+             do k = kfsmin(nmf), kmax
                 aakl(nmf, k, l) = 0.0_fp
                 bbkl(nmf, k, l) = 1.0_fp
                 cckl(nmf, k, l) = 0.0_fp
                 ddkl(nmf, k, l) = rbnd(k, l, 1, ic)
              enddo
-          enddo
-       endif
-       if (kcu(nml) == 1) then
-          do k = kfsmin(nmlu), kmax
-             do l = 1, lstsc
+          endif
+          if (kcu(nml) == 1) then
+             do k = kfsmin(nmlu), kmax
                 aakl(nmlu, k, l) = 0.0_fp
                 bbkl(nmlu, k, l) = 1.0_fp
                 cckl(nmlu, k, l) = 0.0_fp
                 ddkl(nmlu, k, l) = rbnd(k, l, 2, ic)
-             enddo
-          enddo
-       endif
-       !
-       ! optional Neumann boundary condition for suspended sediment fractions
-       !
-       lst = max(lsal, ltem)
-       do l = 1, lsed
-          ll = lst + l
-          !
-          ! l = sediment type
-          !
-          if (     (eqmbcsand .and. sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) &
-               & .or. (eqmbcmud  .and. sedtyp(l) == SEDTYP_COHESIVE             )  ) then
-                if (kcu(nmf) == 1) then
-                   do k = 1, kmax
-                      ddkl(nmf, k, ll) = r0(nmfu, k, ll)
-                   enddo
-                endif
-                if (kcu(nml) == 1) then
-                   do k = 1, kmax
-                      ddkl(nmlu, k, ll) = r0(nml, k, ll)
-                   enddo
-                endif
-          endif
-       enddo
-    enddo
-    call timer_stop(timer_difu_bounopen, gdp) 
-    !
-    ! For the fully non-hydrostatic module, transport is done in both directions in one step.
-    ! Include also boundary conditions in Y-direction
-    ! In hydrostatic mode (or weakly non-hydrostatic) the transport in X- and Y-direction are done in two separate calls to z_difu. 
-    !
-    if (nonhyd .and. nh_level==nh_full) then
-       !
-       ! IMPLEMENTATION OF BOUNDARY CONDITIONS IN Y-DIRECTION
-       !
-       do ic = norow+1, norow+nocol
-          m    = irocol(1,ic)
-          nf   = irocol(2,ic) - 1
-          nl   = irocol(3,ic)
-          !
-          ! WATCH OUT: icx and icy are swapped
-          !
-          nfm  = (m+ddb)*icx + (nf+ddb)*icy - icxy
-          nlm  = (m+ddb)*icx + (nl+ddb)*icy - icxy
-          nlum = nlm + icy
-          if (kcv(nfm) == 1) then
-             do k = kfsmin(nfm), kfsmax(nfm)
-                ddkl(nfm,k,l) = rbnd(k,l,1,ic)
-                aakl(nfm,k,l) = 0.0_fp
-                bbkl(nfm,k,l) = 1.0_fp
-                cckl(nfm,k,l) = 0.0_fp
-             enddo
-          endif
-          if (kcv(nlm) == 1) then
-             do k = kfsmin(nlum), kfsmax(nlum)
-                ddkl(nlum,k,l) = rbnd(k,l,2,ic)
-                aakl(nlum,k,l) = 0.0_fp
-                bbkl(nlum,k,l) = 1.0_fp
-                cckl(nlum,k,l) = 0.0_fp
              enddo
           endif
           !
@@ -701,151 +616,210 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
              !
              if (     (eqmbcsand .and. sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) &
                & .or. (eqmbcmud  .and. sedtyp(l) == SEDTYP_COHESIVE             )  ) then
-                if (kcv(nfm) == 1) then
+                if (kcu(nmf) == 1) then
                    do k = 1, kmax
-                      ddkl(nfm, k, l) = r0(nfum, k, l)
+                      ddkl(nmf, k, l) = r0(nmfu, k, l)
                    enddo
                 endif
-                if (kcv(nlm) == 1) then
+                if (kcu(nml) == 1) then
                    do k = 1, kmax
-                      ddkl(nlum, k, l) = r0(nlm, k, l)
+                      ddkl(nmlu, k, l) = r0(nml, k, l)
                    enddo
                 endif
              endif
           endif
        enddo
-    endif
-    !
-    !   set concentrations in temporary dry points and in open boundary points
-    !
-    call timer_start(timer_difu_rest, gdp)
-    do nm = 1, nmmax
-       if (kfs(nm) == 0 .and. kcs(nm) == 1) then
-          do k = kfsmin(nm), kmax
-             r1(nm, k, l) = r0(nm, k, l)
-          enddo
-       endif
-       if (kcs(nm) == 2) then
-          do k = kfsmin(nm), kmax
-             r1(nm, k, l) = ddkl(nm, k, l)
-          enddo
-       endif
-    enddo
-    !
-    ! Check volume in order to circumvent very small volumes
-    !
-    do nm = 1, nmmax
-       if (kfs(nm)*kcs(nm) == 1) then
-          kmin = min(kfsmax(nm), kfsmx0(nm))
-          do k = kfsmin(nm), kmin
-             if (bbkl(nm,k,l) .lt. dzmin) then
-                bbkl(nm,k,l) = bbkl(nm,k,l) + dzmin
-                ddkl(nm,k,l) = ddkl(nm,k,l) + dzmin * r0(nm,k,l)
+       call timer_stop(timer_difu_bounopen, gdp) 
+       !
+       ! For the fully non-hydrostatic module, transport is done in both directions in one step.
+       ! Include also boundary conditions in Y-direction
+       ! In hydrostatic mode (or weakly non-hydrostatic) the transport in X- and Y-direction are done in two separate calls to z_difu. 
+       !
+       if (nonhyd .and. nh_level==nh_full) then
+          !
+          ! IMPLEMENTATION OF BOUNDARY CONDITIONS IN Y-DIRECTION
+          !
+          do ic = norow+1, norow+nocol
+             m    = irocol(1,ic)
+             nf   = irocol(2,ic) - 1
+             nl   = irocol(3,ic)
+             !
+             ! WATCH OUT: icx and icy are swapped
+             !
+             nfm  = (m+ddb)*icx + (nf+ddb)*icy - icxy
+             nlm  = (m+ddb)*icx + (nl+ddb)*icy - icxy
+             nlum = nlm + icy
+             if (kcv(nfm) == 1) then
+                do k = kfsmin(nfm), kfsmax(nfm)
+                   ddkl(nfm,k,l) = rbnd(k,l,1,ic)
+                   aakl(nfm,k,l) = 0.0_fp
+                   bbkl(nfm,k,l) = 1.0_fp
+                   cckl(nfm,k,l) = 0.0_fp
+                enddo
+             endif
+             if (kcv(nlm) == 1) then
+                do k = kfsmin(nlum), kfsmax(nlum)
+                   ddkl(nlum,k,l) = rbnd(k,l,2,ic)
+                   aakl(nlum,k,l) = 0.0_fp
+                   bbkl(nlum,k,l) = 1.0_fp
+                   cckl(nlum,k,l) = 0.0_fp
+                enddo
+             endif
+             !
+             ! optional Neumann boundary condition for suspended sediment fractions
+             !
+             if ((l>max(lsal, ltem)) .and. (l<=lsts)) then
+                !
+                ! l = sediment type
+                !
+                if (     (eqmbcsand .and. sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) &
+                  & .or. (eqmbcmud  .and. sedtyp(l) == SEDTYP_COHESIVE             )  ) then
+                   if (kcv(nfm) == 1) then
+                      do k = 1, kmax
+                         ddkl(nfm, k, l) = r0(nfum, k, l)
+                      enddo
+                   endif
+                   if (kcv(nlm) == 1) then
+                      do k = 1, kmax
+                         ddkl(nlum, k, l) = r0(nlm, k, l)
+                      enddo
+                   endif
+                endif
              endif
           enddo
        endif
-    enddo
-    call timer_stop(timer_difu_rest, gdp)
-    call timer_start(timer_difu_lhs, gdp)
-    do nm = 1, nmmax
-       if (kcs(nm) == 3) then
-          !
-          ! left hand-side is now set by Delft3D-FLOW instead of the mapper
-          !
-          do k = 1, kmax
-             aakl(nm, k, l) = 0.0_fp
-             bbkl(nm, k, l) = 1.0_fp
-             cckl(nm, k, l) = 0.0_fp
-             ddkl(nm, k, l) = r0(nm, k, l)
-          enddo
-       else 
-          if (kfs(nm) /= 0) then
-             !
-             !***SCALE ROWS OF MATRIX/RIGHT HAND SIDE VECTOR
-             !
-             mink = min(kfsmx0(nm), kfsmax(nm))
-             do k = kfsmin(nm), mink
-                rscale(nm, k)  = 1.0_fp / bbkl(nm, k, l)
-                aakl(nm, k, l) = aakl(nm, k, l) * rscale(nm, k)
-                bbkl(nm, k, l) = 1.0_fp
-                cckl(nm, k, l) = cckl(nm, k, l) * rscale(nm, k)
-                ddkl(nm, k, l) = ddkl(nm, k, l) * rscale(nm, k)
+       !
+       !   set concentrations in temporary dry points and in open boundary points
+       !
+       call timer_start(timer_difu_rest, gdp)
+       do nm = 1, nmmax
+          if (kfs(nm) == 0 .and. kcs(nm) == 1) then
+             do k = kfsmin(nm), kmax
+                r1(nm, k, l) = r0(nm, k, l)
              enddo
           endif
-       endif
-    enddo
-    call timer_stop(timer_difu_lhs, gdp)
-    !
-    ! D3dFlow_Build_ADI_Conc: poke the coupling equations into system
-    !
-    nhystp = nxtstp(d3dflow_build_adi_conc, gdp)
-    !
-    ! SOLUTION PROCEDURE SYSTEM OF EQUATIONS
-    !
-    if     (trasol == 'van leer-2   ') then
-       !
-       call z_difu_solv_expl()
-       !
-    elseif (trasol == 'iupw         ') then
-       !
-       call z_difu_solv_impl()
-       !
-    endif
-    !
-    ! Nudging (very experimental)
-    !
-    if (nudge==1) then
-       ! Nudging layer
-       nnudge    = 4
-       nudgefac  = 10.0_fp
-       tnudge    = hdt
-       mu(1)     = max(hdt / tnudge, 1.0_fp)
-       do jj = 2, nnudge
-          mu(jj) = mu(jj-1) / nudgefac
+          if (kcs(nm) == 2) then
+             do k = kfsmin(nm), kmax
+                r1(nm, k, l) = ddkl(nm, k, l)
+             enddo
+          endif
        enddo
+       !
+       ! Check volume in order to circumvent very small volumes
        !
        do nm = 1, nmmax
-          nmu = nm + icx
-          nmd = nm - icx
-          if (kcs(nmd) == 2 .and. kcs(nm) == 1 ) then
-!             call nm_to_n_and_m(nm, n, m, gdp)
-             nms(1) = nm
-             do jj = 2, nnudge
-                nms(jj) = nms(jj-1) + icx
-             enddo
-             do jj = 1, nnudge
-                do k = kfsmin(nm), kmax
-                   if (r1(nmd, k, l )>1.0e-6) then
-                      rb = r1(nmd, k, l )
-                      rp = r1(nms(jj), k, l)
-                      r1(nms(jj), k, l) = rp + mu(jj)*(rb-rp)
-                      r0(nms(jj), k, l) = r1(nms(jj), k, l)
-!                     if (n==94 .and. l==2) then
-!                        write(*,'(6i5,10e14.4)')lstsci,l,k,jj,m,n,rb,rp,mu(jj),r1(nms(jj), k, l)
-!                     endif
-                   endif
-                enddo
-             enddo
-          endif
-          if (kcs(nmu) == 2 .and. kcs(nm) == 1) then
-             nms(1) = nm
-             do jj = 2, nnudge
-                nms(jj) = nms(jj-1) - icx
-             enddo
-             do jj = 1, nnudge
-                do k = kfsmin(nm), kmax
-                   if (r1(nmu, k, l )>1.0e-6) then
-                      rb = r1(nmu, k, l )
-                      rp = r1(nms(jj), k, l)
-                      r1(nms(jj), k, l) = rp + mu(jj)*(rb-rp)
-                      r0(nms(jj), k, l) = r1(nms(jj), k, l)
-                   endif
-                enddo
+          if (kfs(nm)*kcs(nm) == 1) then
+             kmin = min(kfsmax(nm), kfsmx0(nm))
+             do k = kfsmin(nm), kmin
+                if (bbkl(nm,k,l) .lt. dzmin) then
+                   bbkl(nm,k,l) = bbkl(nm,k,l) + dzmin
+                   ddkl(nm,k,l) = ddkl(nm,k,l) + dzmin * r0(nm,k,l)
+                endif
              enddo
           endif
        enddo
-    endif
-    !
+       call timer_stop(timer_difu_rest, gdp)
+       call timer_start(timer_difu_lhs, gdp)
+       do nm = 1, nmmax
+          if (kcs(nm) == 3) then
+             !
+             ! left hand-side is now set by Delft3D-FLOW instead of the mapper
+             !
+             do k = 1, kmax
+                aakl(nm, k, l) = 0.0_fp
+                bbkl(nm, k, l) = 1.0_fp
+                cckl(nm, k, l) = 0.0_fp
+                ddkl(nm, k, l) = r0(nm, k, l)
+             enddo
+          else 
+             if (kfs(nm) /= 0) then
+                !
+                !***SCALE ROWS OF MATRIX/RIGHT HAND SIDE VECTOR
+                !
+                mink = min(kfsmx0(nm), kfsmax(nm))
+                do k = kfsmin(nm), mink
+                   rscale(nm, k)  = 1.0_fp / bbkl(nm, k, l)
+                   aakl(nm, k, l) = aakl(nm, k, l) * rscale(nm, k)
+                   bbkl(nm, k, l) = 1.0_fp
+                   cckl(nm, k, l) = cckl(nm, k, l) * rscale(nm, k)
+                   ddkl(nm, k, l) = ddkl(nm, k, l) * rscale(nm, k)
+                enddo
+             endif
+          endif
+       enddo
+       call timer_stop(timer_difu_lhs, gdp)
+       !
+       ! D3dFlow_Build_ADI_Conc: poke the coupling equations into system
+       !
+       nhystp = nxtstp(d3dflow_build_adi_conc, gdp)
+       !
+       ! SOLUTION PROCEDURE SYSTEM OF EQUATIONS
+       !
+       if     (trasol == 'van leer-2   ') then
+          !
+          call z_difu_solv_expl()
+          !
+       elseif (trasol == 'iupw         ') then
+          !
+          call z_difu_solv_impl()
+          !
+       endif
+       !
+       ! Nudging (very experimental)
+       !
+       if (nudge==1) then
+          ! Nudging layer
+          nnudge    = 4
+          nudgefac  = 10.0_fp
+          tnudge    = hdt
+          mu(1)     = max(hdt / tnudge, 1.0_fp)
+          do jj = 2, nnudge
+             mu(jj) = mu(jj-1) / nudgefac
+          enddo
+          !
+          do nm = 1, nmmax
+             nmu = nm + icx
+             nmd = nm - icx
+             if (kcs(nmd) == 2 .and. kcs(nm) == 1 ) then
+!                call nm_to_n_and_m(nm, n, m, gdp)
+                nms(1) = nm
+                do jj = 2, nnudge
+                   nms(jj) = nms(jj-1) + icx
+                enddo
+                do jj = 1, nnudge
+                   do k = kfsmin(nm), kmax
+                      if (r1(nmd, k, l )>1.0e-6) then
+                         rb = r1(nmd, k, l )
+                         rp = r1(nms(jj), k, l)
+                         r1(nms(jj), k, l) = rp + mu(jj)*(rb-rp)
+                         r0(nms(jj), k, l) = r1(nms(jj), k, l)
+!                        if (n==94 .and. l==2) then
+!                           write(*,'(6i5,10e14.4)')lstsci,l,k,jj,m,n,rb,rp,mu(jj),r1(nms(jj), k, l)
+!                        endif
+                      endif
+                   enddo
+                enddo
+             endif
+             if (kcs(nmu) == 2 .and. kcs(nm) == 1) then
+                nms(1) = nm
+                do jj = 2, nnudge
+                   nms(jj) = nms(jj-1) - icx
+                enddo
+                do jj = 1, nnudge
+                   do k = kfsmin(nm), kmax
+                      if (r1(nmu, k, l )>1.0e-6) then
+                         rb = r1(nmu, k, l )
+                         rp = r1(nms(jj), k, l)
+                         r1(nms(jj), k, l) = rp + mu(jj)*(rb-rp)
+                         r0(nms(jj), k, l) = r1(nms(jj), k, l)
+                      endif
+                   enddo
+                enddo
+             endif
+          enddo
+       endif
+       !
+    enddo
  9999 continue    
 !
 !
