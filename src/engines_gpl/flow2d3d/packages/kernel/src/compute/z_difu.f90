@@ -507,12 +507,15 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
        ! if (lsec==2 .and. l==lsecfl) then  
        !   cycle
        ! endif
-       do k = 1, kmax
-          do nm = 1, nmmax
+       do nm = 1, nmmax
+          if (kfs(nm) == 1) then
+             ksm = min(kfsmx0(nm), kfsmax(nm))
+             do k = kfsmin(nm), ksm - 1
                 aakl(nm, k, l) = aak(nm, k)
                 bbkl(nm, k, l) = bbk(nm, k)
                 cckl(nm, k, l) = cck(nm, k)
-          enddo
+             enddo
+          endif
        enddo
     enddo
     call timer_stop(timer_difu_vertadv, gdp)
