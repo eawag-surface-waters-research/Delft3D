@@ -4312,6 +4312,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/sobek.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/sobekfil.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/spatiallystructured.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/spirint.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/stack2str.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/stdbeep.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/stdinputdlg.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/str2file.m -text
