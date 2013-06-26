@@ -316,7 +316,7 @@ C
       VFFORM = 2.00
       CONTEN = 'DELWAQ PROCESS DEFINITION FILE'
       CALL DATTIM(RUNDAT)
-      SOURCE = 'Jan van Beek'
+      SOURCE = 'Deltares'
       REMARK(1) = 'Remark 1'
       REMARK(2) = 'Remark 2'
       REMARK(3) = 'Remark 3'
