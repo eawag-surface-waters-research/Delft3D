@@ -75,7 +75,7 @@ module MessageHandling
    integer,parameter, public     :: max_level = 5
    character(len=12), dimension(max_level), &
                       private    :: level_prefix = &
-                                              (/'            ', '            ', '** WARNING: ', '** ERROR  : ', '** FATAL  : '/)
+                                              (/'** DEBUG  : ', '** INFO   : ', '** WARNING: ', '** ERROR  : ', '** FATAL  : '/)
 
     interface mess
     module procedure message1string
@@ -156,19 +156,11 @@ recursive subroutine SetMessage(level, string)
    if (level >= thresholdLvl) then
 
       if (writeMessage2Screen) then
-         if (len_trim(level_prefix(levelact)) > 0) then
-            write (*, '(a)') level_prefix(levelact)//trim(string)
-         else
-            write (*, '(a)') trim(string)
-         endif
+         write (*, '(a)') level_prefix(levelact)//trim(string)
       endif
       
       if ( (lunMess > 0) .and. (level >= thresholdLvl) ) then
-         if (len_trim(level_prefix(levelact)) > 0) then
-            write (lunMess, '(a)') level_prefix(levelact)//trim(string)
-         else
-            write (lunMess, '(a)')  trim(string)
-         endif
+         write (lunMess, '(a)') level_prefix(levelact)//trim(string)
       end if
 
       if (useLogging) then
