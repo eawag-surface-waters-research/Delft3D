@@ -66,7 +66,7 @@ extern "C" {
         int *   contextID,
         int *   fsmFlags,
         const char *  runID,
-        int     runIDLen
+        size_t  runIDLen
         );
     }
 
