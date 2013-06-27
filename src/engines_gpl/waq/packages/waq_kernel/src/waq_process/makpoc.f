@@ -53,9 +53,9 @@ C
 C Name    T   L I/O   Description                                    Uni
 C ----    --- -  -    -------------------                            ---
 C IMx     R*4 1 I  conversion factor for gX->dry matter substy [gDM/gm3]
-C FrOMx   R*4 1 I  percentage OM in IMx                        [gOM/gDM]
-C POC     R*4 1 I  particulate carbon content                   [gOC/m3]
-C DMCF    R*4 1 I  Dry weitght of Organic Carbonin Part.Org.Mat[gDW/gOC]
+C FrCx    R*4 1 I  percentage OM in sediment x                 [gOC/gDM]
+C POC(x)  R*4 1 I  particulate carbon content                   [gOC/m3]
+C OCPOM   R*4 1 I  Dry weight of Organic Carbonin Part.Org.Mat [gDM/gOC]
 
 C     Logical Units : -
 
@@ -65,15 +65,19 @@ C     Name     Type   Library
 
 C     ------   -----  ------------
 
-      IMPLICIT REAL (A-H,J-Z)
+      IMPLICIT NONE
 
       REAL     PMSA  ( * ) , FL    (*)
-      INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX,
+      INTEGER  IP1, IP2, IP3, IP4, IP5, IP6, IP7, IP8, ISEG
+      INTEGER  IPOINT( * ) , INCREM(*) , NOSEG , NOFLUX, LUNREP,
      +         IEXPNT(4,*) , IKNMRK(*) , NOQ1, NOQ2, NOQ3, NOQ4
 C
 C     Local
 C
       REAL     IM1   , IM2   , IM3
+      REAL     FRC1  , FRC2  , FRC3
+      REAL     OCPOM
+      REAL     poc, POC1  , POC2  , POC3
 C
       IP1  = IPOINT( 1)
       IP2  = IPOINT( 2)
@@ -92,26 +96,56 @@ C
       IM1   = MAX(0.0, PMSA(IP1))
       IM2   = MAX(0.0, PMSA(IP2))
       IM3   = MAX(0.0, PMSA(IP3))
-      FROM1 = PMSA(IP4) / 100.
-      FROM2 = PMSA(IP5) / 100.
-      FROM3 = PMSA(IP6) / 100.
+      FRC1 = PMSA(IP4)
+      FRC2 = PMSA(IP5)
+      FRC3 = PMSA(IP6)
       OCPOM = PMSA(IP7)
 
 C***********************************************************************
 C**** Calculations connected to the POC calculation
 C***********************************************************************
 
-C     Calculate amount OOC to be made
-      OOC  =  IM1 * FROM1 + IM2 * FROM2 + IM3 * FROM3
+C     Calculate amount POC to be made
+      IF (OCPOM * FRC1 .LT. 1.0D0) THEN
+           POC1  =  FRC1 * IM1 /(1- OCPOM * FRC1)
+      ELSE
+           CALL GETMLU( LUNREP )
+           WRITE( LUNREP, * ) 'ERROR in MAKPOC'
+           WRITE( LUNREP, * ) 'Segment:', ISEG
+           WRITE( LUNREP, * ) 'fctr   :', OCPOM
+           WRITE( LUNREP, * ) 'fcsed1 :', FRC1
+           WRITE( LUNREP, * ) 'fctr * fcsed1 must be less than 1.00'
+           CALL SRSTOP( 1 )
+      END IF
+      
+      IF (OCPOM * FRC2 .LT. 1.0D0) THEN
+           POC2  =  FRC2 * IM2 /(1- OCPOM * FRC2)
+      ELSE
+           CALL GETMLU( LUNREP )
+           WRITE( LUNREP, * ) 'ERROR in MAKPOC'
+           WRITE( LUNREP, * ) 'Segment:', ISEG
+           WRITE( LUNREP, * ) 'fctr   :', OCPOM
+           WRITE( LUNREP, * ) 'fcsed2 :', FRC2
+           WRITE( LUNREP, * ) 'fctr * fcsed2 must be less than 1.00'
+           CALL SRSTOP( 1 )
+      END IF
 
-C     Correct amount OOC
-      SUM  = IM1 + IM2 + IM3
-      IF (SUM .GT. 0.0) THEN
-           FRAC = OOC / SUM
-           OOC  = OOC / (1. - FRAC)
-      ENDIF
+      IF (OCPOM * FRC3 .LT. 1.0D0) THEN
+           POC3  =  FRC3 * IM3 /(1- OCPOM * FRC3)
+      ELSE
+           CALL GETMLU( LUNREP )
+           WRITE( LUNREP, * ) 'ERROR in MAKPOC'
+           WRITE( LUNREP, * ) 'Segment:', ISEG
+           WRITE( LUNREP, * ) 'fctr   :', OCPOM
+           WRITE( LUNREP, * ) 'fcsed3 :', FRC3
+           WRITE( LUNREP, * ) 'fctr * fcsed3 must be less than 1'
+           CALL SRSTOP( 1 )
+      END IF
+      
+C     Total POC
+      POC  = POC1 + POC2 + POC3
 
-      PMSA (IP8) = OOC
+      PMSA (IP8) = POC
 C
       ENDIF
 C

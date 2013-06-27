@@ -1811,23 +1811,23 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "MakOOC    ","IM1       ",   1,"Y","x",1
 "MakOOC    ","IM2       ",   2,"Y","x",1
 "MakOOC    ","IM3       ",   3,"Y","x",1
-"MakOOC    ","%OM_IM1   ",   4,"N","x",1
-"MakOOC    ","%OM_IM2   ",   5,"Y","x",1
-"MakOOC    ","%OM_IM3   ",   6,"Y","x",1
+"MakOOC    ","FCSEDIM1  ",   4,"N","x",1
+"MakOOC    ","FCSEDIM2  ",   5,"Y","x",1
+"MakOOC    ","FCSEDIM3  ",   6,"Y","x",1
 "MakOOC    ","DMCFOOC   ",   7,"Y","x",1
 "MakOOCS1  ","IM1S1     ",   1,"Y","x",1
 "MakOOCS1  ","IM2S1     ",   2,"Y","x",1
 "MakOOCS1  ","IM3S1     ",   3,"Y","x",1
-"MakOOCS1  ","%OM_IM1S1 ",   4,"N","x",1
-"MakOOCS1  ","%OM_IM2S1 ",   5,"Y","x",1
-"MakOOCS1  ","%OM_IM3S1 ",   6,"Y","x",1
+"MakOOCS1  ","FCSEDIM1S1",   4,"N","x",1
+"MakOOCS1  ","FCSEDIM2S1",   5,"Y","x",1
+"MakOOCS1  ","FCSEDIM3S1",   6,"Y","x",1
 "MakOOCS1  ","DMCFOOCS  ",   7,"Y","x",1
 "MakOOCS2  ","IM1S2     ",   1,"Y","x",1
 "MakOOCS2  ","IM2S2     ",   2,"Y","x",1
 "MakOOCS2  ","IM3S2     ",   3,"Y","x",1
-"MakOOCS2  ","%OM_IM1S2 ",   4,"N","x",1
-"MakOOCS2  ","%OM_IM2S2 ",   5,"Y","x",1
-"MakOOCS2  ","%OM_IM3S2 ",   6,"Y","x",1
+"MakOOCS2  ","FCSEDIM1S2",   4,"N","x",1
+"MakOOCS2  ","FCSEDIM2S2",   5,"Y","x",1
+"MakOOCS2  ","FCSEDIM3S2",   6,"Y","x",1
 "MakOOCS2  ","DMCFOOCS  ",   7,"Y","x",1
 "Phy_dyn   ","NAlgDynamo",   1,"Y","x",1
 "Phy_dyn   ","Diat      ",   2,"Y","x",1
@@ -1969,10 +1969,10 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "EColiMrt  ","Temp      ",   4,"Y","x",1
 "EColiMrt  ","CTMrtEColi",   5,"Y","x",1
 "EColiMrt  ","Cl        ",   6,"Y","x",1
-"EColiMrt  ","Rad_uv    ",   7,"Y","x",1
+"EColiMrt  ","Rad_uv    ",   7,"N","x",1
 "EColiMrt  ","CFRAD     ",   8,"Y","x",1
 "EColiMrt  ","DayL      ",   9,"Y","x",1
-"EColiMrt  ","FrUvVL    ",  10,"Y","x",1
+"EColiMrt  ","FrUvVL    ",  10,"N","x",1
 "EColiMrt  ","ExtUv     ",  11,"Y","x",1
 "EColiMrt  ","Depth     ",  12,"N","x",1
 "EColiMrt  ","SpMrtEColi",  13,"Y","x",1
@@ -1982,10 +1982,10 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "FColiMrt  ","Temp      ",   4,"Y","x",1
 "FColiMrt  ","CTMrtFColi",   5,"Y","x",1
 "FColiMrt  ","Cl        ",   6,"Y","x",1
-"FColiMrt  ","Rad_uv    ",   7,"Y","x",1
+"FColiMrt  ","Rad_uv    ",   7,"N","x",1
 "FColiMrt  ","CFRAD     ",   8,"Y","x",1
 "FColiMrt  ","DayL      ",   9,"Y","x",1
-"FColiMrt  ","FrUvVL    ",  10,"Y","x",1
+"FColiMrt  ","FrUvVL    ",  10,"N","x",1
 "FColiMrt  ","ExtUv     ",  11,"Y","x",1
 "FColiMrt  ","Depth     ",  12,"N","x",1
 "FColiMrt  ","SpMrtFColi",  13,"Y","x",1
@@ -1995,10 +1995,10 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "TColiMrt  ","Temp      ",   4,"Y","x",1
 "TColiMrt  ","CTMrtTColi",   5,"Y","x",1
 "TColiMrt  ","Cl        ",   6,"Y","x",1
-"TColiMrt  ","Rad_uv    ",   7,"Y","x",1
+"TColiMrt  ","Rad_uv    ",   7,"N","x",1
 "TColiMrt  ","CFRAD     ",   8,"Y","x",1
 "TColiMrt  ","DayL      ",   9,"Y","x",1
-"TColiMrt  ","FrUvVL    ",  10,"Y","x",1
+"TColiMrt  ","FrUvVL    ",  10,"N","x",1
 "TColiMrt  ","ExtUv     ",  11,"Y","x",1
 "TColiMrt  ","Depth     ",  12,"N","x",1
 "TColiMrt  ","SpMrtTColi",  13,"Y","x",1
@@ -2008,10 +2008,10 @@ inpupr,inpuit,inpunm,inpude,inpudo,inpusx
 "EnCocMrt  ","Temp      ",   4,"Y","x",1
 "EnCocMrt  ","CTMrtEnCoc",   5,"Y","x",1
 "EnCocMrt  ","Cl        ",   6,"Y","x",1
-"EnCocMrt  ","Rad_uv    ",   7,"Y","x",1
+"EnCocMrt  ","Rad_uv    ",   7,"N","x",1
 "EnCocMrt  ","CFRAD     ",   8,"Y","x",1
 "EnCocMrt  ","DayL      ",   9,"Y","x",1
-"EnCocMrt  ","FrUvVL    ",  10,"Y","x",1
+"EnCocMrt  ","FrUvVL    ",  10,"N","x",1
 "EnCocMrt  ","ExtUv     ",  11,"Y","x",1
 "EnCocMrt  ","Depth     ",  12,"N","x",1
 "EnCocMrt  ","SpMrtEnCoc",  13,"Y","x",1
