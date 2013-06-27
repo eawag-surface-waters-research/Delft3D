@@ -1,3 +1,30 @@
+Version 1.8.0-2
+https://dist.apache.org/repos/dist/dev/subversion/
+
+ Changes to included binaries:
+    * Subversion upgraded to 1.8.0.
+    * OpenSSL 1.0.1e.
+    * Serf 1.2.1.
+    * Neon removed.
+    
+
+Version 1.7.10-1
+https://dist.apache.org/repos/dist/dev/subversion/
+
+ Changes to included binaries:
+    * Subversion upgraded to 1.7.10
+    * ZLib upgraded to 1.2.8
+
+
+Version 1.7.9-1
+https://dist.apache.org/repos/dist/dev/subversion/
+
+ Changes to included binaries:
+    * Subversion upgraded to 1.7.9
+    * Httpd upgraded to 2.2.24
+    * Sqlite Upgraded to 1.7.16.1
+
+
 Version 1.7.8-1
 https://dist.apache.org/repos/dist/dev/subversion/
 

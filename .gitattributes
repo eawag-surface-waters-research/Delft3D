@@ -3475,9 +3475,11 @@ src/third_party_open/subversion/bin/win32/svn-rep-sharing-stats.exe -text
 src/third_party_open/subversion/bin/win32/svn.exe -text
 src/third_party_open/subversion/bin/win32/svnadmin.exe -text
 src/third_party_open/subversion/bin/win32/svnauthz-validate.exe -text
+src/third_party_open/subversion/bin/win32/svnauthz.exe -text
 src/third_party_open/subversion/bin/win32/svndumpfilter.exe -text
 src/third_party_open/subversion/bin/win32/svnlook.exe -text
 src/third_party_open/subversion/bin/win32/svnmucc.exe -text
+src/third_party_open/subversion/bin/win32/svnraisetreeconflict.exe -text
 src/third_party_open/subversion/bin/win32/svnrdump.exe -text
 src/third_party_open/subversion/bin/win32/svnserve.exe -text
 src/third_party_open/subversion/bin/win32/svnsync.exe -text
