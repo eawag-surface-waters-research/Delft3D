@@ -38,6 +38,13 @@ cd ../..
 echo "Running testcase 06_delwaq ..."
 cd 06_delwaq
 ./run_delwaq.sh >screen.log 2>&1
+cd ..
+
+
+echo "Running testcase 07_wave ..."
+cd 07_wave
+./run_wave.sh >screen.log 2>&1
+cd ..
 
 
 echo ...finished

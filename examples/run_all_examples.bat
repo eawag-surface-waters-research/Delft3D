@@ -46,5 +46,12 @@ cd 06_delwaq
 call run_delwaq.bat >screen.log 2>&1
 cd ..
 
+
+echo "Running testcase 07_wave ..."
+cd 07_wave
+call run_wave.bat >screen.log 2>&1
+cd ..
+
+
 echo ...finished
 pause

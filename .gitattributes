@@ -150,6 +150,15 @@ examples/06_delwaq/run_delwaq.bat -text
 examples/06_delwaq/run_delwaq.sh -text
 examples/06_delwaq/run_delwaq_with_pause.bat -text
 examples/06_delwaq/run_delwaq_with_pause.sh -text
+examples/07_wave/coastw.enc -text
+examples/07_wave/coastw.grd -text
+examples/07_wave/coastw20.dep -text
+examples/07_wave/obw.mdm -text
+examples/07_wave/obw.mdw -text
+examples/07_wave/obw.obs -text
+examples/07_wave/obw.pol -text
+examples/07_wave/run_wave.bat -text
+examples/07_wave/run_wave.sh -text
 examples/run_all_examples.bat -text
 examples/run_all_examples.sh -text
 examples/run_all_examples_sp.bat -text
