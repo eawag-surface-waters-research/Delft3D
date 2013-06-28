@@ -128,6 +128,7 @@
       <StackReserveSize>20000000</StackReserveSize>
       <LargeAddressAware>true</LargeAddressAware>
       <OutputFile>$(OutDir)\flow2d3d.dll</OutputFile>
+      <DelayLoadDLLs>fmpich2.dll</DelayLoadDLLs>
     </Link>
     <PostBuildEvent>
       <Command>echo "This file is overwritten by the post-build command of the project flow2d3d" &gt; .\include\flow2d3d_version.h
@@ -196,6 +197,7 @@ echo "This file is overwritten by the post-build command of the project flow2d3d
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OutputFile>$(OutDir)\flow2d3d.dll</OutputFile>
+      <DelayLoadDLLs>fmpich2.dll</DelayLoadDLLs>
     </Link>
     <PostBuildEvent>
       <Command>..\..\..\..\scripts_lgpl\win64\oss-install_x64.cmd flow2d3d ..\bin "$(IFORT_COMPILER12)redist\intel64\compiler\"
