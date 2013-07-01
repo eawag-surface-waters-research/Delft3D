@@ -73,40 +73,43 @@ module MessageHandling
    integer,parameter, public     :: Charln = 256
    integer,parameter, public     :: Idlen = 40
    integer,parameter, public     :: max_level = 5
-   character(len=12), dimension(max_level), &
-                      private    :: level_prefix = &
-                                              (/'** DEBUG  : ', '** INFO   : ', '** WARNING: ', '** ERROR  : ', '** FATAL  : '/)
-
-    interface mess
-    module procedure message1string
-    module procedure message2string
-    module procedure message3string
-    module procedure message4string
-    module procedure message1char1real
-    module procedure message1char2real
-    module procedure message2char1real
-    module procedure message2char2real
-    module procedure message1char1int
-    module procedure message1char2int
-    module procedure message1char3int
-    module procedure message2int1char
-    module procedure message1char1int1double
-    module procedure message1double1int1char
-    end interface
+   character(len=12), dimension(max_level), private    :: level_prefix = (/'** DEBUG  : ',  &
+                                                                           '** INFO   : ',  &
+                                                                           '** WARNING: ',  &
+                                                                           '** ERROR  : ',  &
+                                                                           '** FATAL  : '/)
+   integer, dimension(max_level), public  :: mess_level_count
+   
+   interface mess
+   module procedure message1string
+   module procedure message2string
+   module procedure message3string
+   module procedure message4string
+   module procedure message1char1real
+   module procedure message1char2real
+   module procedure message2char1real
+   module procedure message2char2real
+   module procedure message1char1int
+   module procedure message1char2int
+   module procedure message1char3int
+   module procedure message2int1char
+   module procedure message1char1int1double
+   module procedure message1double1int1char
+   end interface
     
-    interface err
-    module procedure error1char
-    module procedure error2char
-    module procedure error3char
-    module procedure error4char
-    module procedure error1char1real
-    module procedure error1char2real
-    module procedure error2char1real
-    module procedure error2char2real
-    module procedure error1char1int
-    module procedure error1char2int
-    module procedure error1char1int1double
-    end interface
+   interface err
+   module procedure error1char
+   module procedure error2char
+   module procedure error3char
+   module procedure error4char
+   module procedure error1char1real
+   module procedure error1char2real
+   module procedure error2char1real
+   module procedure error2char2real
+   module procedure error1char1int
+   module procedure error1char2int
+   module procedure error1char1int1double
+   end interface
 
 private   
    integer, parameter, private   :: maxMessages = 3000
@@ -126,12 +129,15 @@ contains
 
 !> Sets up the output of messages. All three formats are optional
 !! and can be used in any combination.
-subroutine SetMessageHandling(write2screen, useLog, lunMessages, callback, thresholdLevel)
+subroutine SetMessageHandling(write2screen, useLog, lunMessages, callback, thresholdLevel, reset_counters)
    logical, optional, intent(in)       :: write2screen !< Print messages to stdout.
    logical, optional, intent(in)       :: useLog       !< Store messages in buffer.
    integer, optional, intent(in)       :: lunMessages  !< File pointer whereto messages can be written.
    integer, optional, intent(in)       :: thresholdLevel  !< Messages with level lower than the thresholdlevel
                                                           !< will be discarded.
+   logical, optional, intent(in)       :: reset_counters  !< If present and True then reset message counters.
+                                                          !< SetMessageHandling is called more than once.
+
    procedure(mh_callbackiface), optional :: callback
 
    if (present(write2screen) ) writeMessage2Screen = write2screen
@@ -141,7 +147,13 @@ subroutine SetMessageHandling(write2screen, useLog, lunMessages, callback, thres
        mh_callback         =>callback
    endif
    if (present(thresholdLevel) )  thresholdLvl     = thresholdLevel
+
+   if (present(reset_counters)) then
+     if (reset_counters) mess_level_count = 0
+   endif
+
    alreadyInCallback = .false.
+   
 end subroutine SetMessageHandling
 
 !> The main message routine. Puts the message string to all output
@@ -159,15 +171,21 @@ recursive subroutine SetMessage(level, string)
          write (*, '(a)') level_prefix(levelact)//trim(string)
       endif
       
-      if ( (lunMess > 0) .and. (level >= thresholdLvl) ) then
+      if (lunMess > 0) then
+         
          write (lunMess, '(a)') level_prefix(levelact)//trim(string)
+         
+         ! Only count for Log-File, otherwise confusing.....
+         mess_level_count(levelact) = mess_level_count(levelact) + 1
+         
       end if
 
+      if (level > maxErrorLevel) then
+         maxErrorLevel = level
+      endif
+      
       if (useLogging) then
          messageCount           = messageCount + 1 
-         if (level > maxErrorLevel) then
-            maxErrorLevel = level
-         endif
          if (messageCount > maxMessages) then
             messages(maxMessages) = 'Maximum number of messages reached'
             levels(maxMessages)   = level
@@ -177,6 +195,18 @@ recursive subroutine SetMessage(level, string)
             levels(messageCount)   = level
          endif
       endif
+ 
+   elseif (level < 0) then
+      
+      ! If negative level just put string to all output channels without prefix and counting
+      if (writeMessage2Screen) then
+         write (*, '(a)') trim(string)
+      endif
+      
+      if (lunMess > 0) then
+         write (lunMess, '(a)') trim(string)
+      end if
+   
    endif
    
    ! Optional callback routine for any user-specified actions (e.g., upon error)   
@@ -185,6 +215,7 @@ recursive subroutine SetMessage(level, string)
       call mh_callback(level) !In future, possibly also error #ID
       alreadyInCallback = .false.
    end if
+
 end subroutine
 
 integer function getMessageCount()
