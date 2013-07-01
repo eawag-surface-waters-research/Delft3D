@@ -610,12 +610,12 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
           !
           ! optional Neumann boundary condition for suspended sediment fractions
           !
-          if ((l>max(lsal, ltem)) .and. (l<=lsts)) then
+          if (ls>0) then
              !
-             ! l = sediment type
+             ! for sediment fraction
              !
-             if (     (eqmbcsand .and. sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) &
-               & .or. (eqmbcmud  .and. sedtyp(l) == SEDTYP_COHESIVE             )  ) then
+             if (     (eqmbcsand .and. sedtyp(ls) == SEDTYP_NONCOHESIVE_SUSPENDED) &
+               & .or. (eqmbcmud  .and. sedtyp(ls) == SEDTYP_COHESIVE             )  ) then
                 if (kcu(nmf) == 1) then
                    do k = 1, kmax
                       ddkl(nmf, k, l) = r0(nmfu, k, l)
@@ -668,12 +668,12 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
              !
              ! optional Neumann boundary condition for suspended sediment fractions
              !
-             if ((l>max(lsal, ltem)) .and. (l<=lsts)) then
+             if (ls>0) then
                 !
-                ! l = sediment type
+                ! for sediment fraction
                 !
-                if (     (eqmbcsand .and. sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) &
-                  & .or. (eqmbcmud  .and. sedtyp(l) == SEDTYP_COHESIVE             )  ) then
+                if (     (eqmbcsand .and. sedtyp(ls) == SEDTYP_NONCOHESIVE_SUSPENDED) &
+                  & .or. (eqmbcmud  .and. sedtyp(ls) == SEDTYP_COHESIVE             )  ) then
                    if (kcv(nfm) == 1) then
                       do k = 1, kmax
                          ddkl(nfm, k, l) = r0(nfum, k, l)

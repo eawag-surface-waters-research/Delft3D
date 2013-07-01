@@ -835,7 +835,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           dcwwlc = 0.0_fp
           klc    = 0
           do k = kfsmax(nm),kfsmin(nm)-1,-1
-             wslc(k)   = ws(nm, k, l)
              dcwwlc(klc) = dicww(nm, k)
              klc=klc+1
           enddo
