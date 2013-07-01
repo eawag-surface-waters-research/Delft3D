@@ -826,18 +826,11 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        nmd  = nm - icx
        ndm  = nm - icy
        call nm_to_n_and_m(nm, n, m, gdp)
-       ! Morphology reset the kmaxlc and wslc.
+       ! Morphology reset the kmaxlc.
        if (kmax>1) then  
           !
           ! 3D CASE
           !
-          wslc   = 0.0_fp
-          dcwwlc = 0.0_fp
-          klc    = 0
-          do k = kfsmax(nm),kfsmin(nm)-1,-1
-             dcwwlc(klc) = dicww(nm, k)
-             klc=klc+1
-          enddo
           thicklc = 0.0_fp
           klc     = 1
           do k = kfsmax(nm),kfsmin(nm),-1
@@ -850,6 +843,8 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           do klc = 2, kmaxlc
              siglc(klc) = siglc(klc - 1) - 0.5_fp*(thicklc(klc) + thicklc(klc - 1))
           enddo
+       else
+           kmaxlc = 1
        endif
        !
        ! Compute depth-averaged velocity components at cell centre
@@ -858,10 +853,12 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        kv = max(1,kfv(ndm) + kfv(nm))
        umean = 0.0_fp
        vmean = 0.0_fp
-       do k = 1, kmax
-          umean = umean + thick(k)*(u0eul(nm,k) + u0eul(nmd,k))/ku
-          vmean = vmean + thick(k)*(v0eul(nm,k) + v0eul(ndm,k))/kv
+       do k = kfsmin(nm), kfsmax(nm)
+          umean = umean + dzs1(nm, k)*(u0eul(nm,k) + u0eul(nmd,k))/ku
+          vmean = vmean + dzs1(nm, k)*(v0eul(nm,k) + v0eul(ndm,k))/kv
        enddo
+       umean = umean / h1
+       vmean = vmean / h1
        velm = sqrt(umean**2+vmean**2)
        !
        ! Calculate current related roughness
@@ -1003,10 +1000,15 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              dll_reals(RP_D50  ) = 0.0_hp
              dll_reals(RP_DSS  ) = 0.0_hp
              dll_reals(RP_DSTAR) = 0.0_hp
-             dll_reals(RP_SETVL) = real(ws(nm, kmaxlc, l)  ,hp) ! Vertical velocity near bedlevel
+             dll_reals(RP_SETVL) = real(ws(nm, kfsmin(nm), l)  ,hp) ! Vertical velocity near bedlevel
              !
-             do k = 0, kmax
-                wslc(k)   = ws(nm, k, l)
+             klc = 0
+             dcwwlc = 0.0_fp
+             wslc   = 0.0_fp
+             do k = kfsmax(nm),kfsmin(nm)-1,-1
+                dcwwlc(klc) = dicww(nm, k)
+                wslc(klc)   = ws(nm, k, l)
+                klc=klc+1
              enddo
              !
              call erosilt(thicklc    ,kmaxlc     ,wslc     ,wstau(nm),entr(nm) ,lundia   , &
@@ -1024,8 +1026,10 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                 ! ONLY AFFECT THE VERTICAL TURBULENT MIXING VIA THE ENHANCED BED
                 ! ROUGHNESS
                 !
-                do k = 0, kmax
-                   seddif(nm, k, l) = dicww(nm, k)
+                klc    = 0
+                do k = kfsmax(nm),kfsmin(nm)-1,-1
+                   seddif(nm, k, l) = dcwwlc(klc)
+                   klc=klc+1
                 enddo
              endif
              !
@@ -1089,7 +1093,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              tdss    = dss(nm, l)
              tsalmax = salmax(l)
              tws0    = ws0(l)
-             twsk    = ws(nm, kmaxlc, l)
+             twsk    = ws(nm, kfsmin(nm), l)
              tgamtcr = gamtcr(nm, l)
           else
              !
@@ -1115,24 +1119,28 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           !
           ! SWITCH 2DH/3D SIMULATIONS
           !
-          if (kmax > 1) then
+          if (kmaxlc > 1) then
              !
              ! 3D CASE
              !
              if (suspfrac) then
                 !
-                ! Fill local 1dv arrays with fall velocity and
-                ! diffusivity
-                ! the code is moved upwards since the kmaxlc is used already upwards.
+                ! Fill local 1dv arrays with fall velocity and diffusivity.
                 !
-                !do k = 0, kmax
-                !   wslc(k)   = ws(nm, k, l)
-                !   dcwwlc(k) = dicww(nm, k)
-                !enddo
+                klc    = 0
+                dcwwlc = 0.0_fp
+                wslc   = 0.0_fp
+                do k = kfsmax(nm),kfsmin(nm)-1,-1
+                   dcwwlc(klc) = dicww(nm, k)
+                   wslc(klc)   = ws(nm, k, l)
+                   klc=klc+1
+                enddo
              endif
              !
-             do k = 1, kmax
-                concin3d(k) = max(0.0_fp , r0(nm,k,ll))
+             klc    = 1
+             do k = kfsmax(nm),kfsmin(nm),-1
+                concin3d(klc) = max(0.0_fp , r0(nm,k,ll))
+                klc=klc+1
              enddo
              !
              ! Solve equilibrium concentration vertical and
@@ -1163,15 +1171,8 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                 !
                 ! Copy results into arrays
                 !
-                !kmxsed(nm, l) = kmaxsd
-                !do k = 1, kmax
-                !   seddif(nm, k, l) = sddflc(k)
-                !   rsedeq(nm, k, l) = rsdqlc(k)
-                !enddo 
-                ! Morphology
                 kmxsed(nm, l) = kfsmin(nm)+kmaxlc-kmaxsd
-                ! klc=0
-                ! then the seddif should be taken one layer lower.
+                !
                 klc=0
                 do k = kfsmax(nm),kfsmin(nm)-1,-1
                    seddif(nm,k,l) = sddflc(klc)
@@ -1206,25 +1207,68 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              endif ! suspfrac
           else
              !
-             ! kmax = 1
-             ! Z layer morphology is not yet working for 2D case. The execution will be terminated!
+             ! kmaxlc = 1
+             ! 2D CASE (Numerical approximation)
              !
-          endif ! kmax = 1
+             if (suspfrac) then
+                !
+                ! Fill local 1dv arrays with fall velocity and
+                ! diffusivity
+                !
+                do k2d = 0, kmax2d
+                   ws2d(k2d)   = ws(nm, kfsmin(nm), l)
+                   dcww2d(k2d) = 0.0_fp
+                enddo
+                trsedeq = rsedeq(nm, kfsmin(nm), l)
+             else
+                trsedeq =  0.0_fp
+             endif
+             !
+             if (lsecfl > 0) then ! Not in case of local 2D in 3D model; only in real 2D, so k=1 is okay here
+                spirint = r0(nm,1,lsecfl)
+             else
+                spirint = 0.0_fp
+             endif
+             !
+             ! Solve equilibrium concentration vertical and
+             ! integrate over vertical; compute bedload
+             ! transport excluding slope effects.
+             !
+             call eqtran(sig2d       ,thck2d      ,kmax2d       , &
+                       & aks(nm)     ,ustarc      ,ws2d         ,ltur       , &
+                       & frac(nm,l)  ,tsigmol     , &
+                       & ce_nm       ,taurat(nm,l),dcww2d       ,sddf2d     ,rsdq2d     , &
+                       & kmaxsd      ,trsedeq     ,sbcu(nm,l)   ,sbcv(nm,l) ,sbwu(nm,l) , &
+                       & sbwv(nm,l)  ,sswu(nm,l)  ,sswv(nm,l)   ,lundia     , &
+                       & taucr(l)    ,tdss        ,rksr(nm)     ,2          , &
+                       & ce_nmtmp    ,akstmp      ,lsecfl       ,spirint    , &
+                       & suspfrac    ,ust2(nm)    ,tetacr(l)    ,tgamtcr    , &
+                       & tsalmax     ,tws0        ,tsd          ,concin2d   , &
+                       & dzduu(nm)   ,dzdvv(nm)   ,ubot(nm)     ,tauadd     , &
+                       & sus         ,bed         ,susw         ,bedw       ,espir      , &
+                       & wave        , &
+                       & scour       ,epspar      ,ubot_from_com,camax      , &
+                       & aksfac      ,rwave       ,rdc          ,rdw        ,pangle     , &
+                       & fpco        ,iopsus      ,iopkcw       ,subiw      ,eps        , &
+                       & iform(l)    ,par(1,l)    , &
+                       & max_integers,max_reals   ,max_strings  ,dll_function(l),dll_handle(l), &
+                       & dll_integers,dll_reals   ,dll_strings  ,error      )
+             if (error) call d3stop(1, gdp)
+             if (suspfrac) then
+                dss   (nm, l)    = tdss
+                rsedeq(nm, kfsmin(nm), l) = trsedeq
+                kmxsed(nm, l)    = kfsmin(nm)
+                !
+                ! Galappatti time scale and source and sink terms
+                !
+                call soursin_2d(umod(nm)      ,ustarc        ,h0            ,h1        , &
+                              & ws(nm,kfsmin(nm),l)    ,tsd           ,rsedeq(nm,kfsmin(nm),l),            &
+                              & sourse(nm,l)  ,sinkse(nm,l)  ,gdp                      )
+             endif ! suspfrac
+          endif ! kmaxlc = 1
           if (suspfrac) then
              rca(nm, l) = ce_nm * rhosol(l)
           endif
-          ! kfsed(nm) /= 1
-          !
-          ! Very shallow water (kfsed=0)
-          ! set sediment diffusion coefficient
-          ! and set zero equilibrium concentrations
-          !
-          !if (kmax>1 .and. l<=lsed) then
-          !   do k = 1, kmax
-          !      seddif(nm, k, l) = dicww(nm, k)
-          !      rsedeq(nm, k, l) = 0.0_fp
-          !   enddo
-          !endif
        enddo ! next sediment fraction
     enddo ! next nm point
     !
