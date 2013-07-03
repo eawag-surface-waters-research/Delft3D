@@ -1313,25 +1313,26 @@ recursive subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     ! Optionally compute individual momentum terms for output
     !
     if (gdp%gdflwpar%flwoutput%momentum) then
-      call uzd(icreep    ,dpdksi    ,s0        ,u0        , &
-             & u1        ,v         ,w1        ,umean     , &
-             & hu        ,hv        ,guu       ,gvv       ,gvu       ,gsqs      , &
-             & gvd       ,gud       ,gvz       ,gsqiu     ,qxk       ,qyk       , &
-             & disch     ,umdis     ,dismmt    ,mnksrc    ,kcu       , &
-             & kcs       ,kfu       ,kfv       ,kfs       , &
-             & kspu      ,kadu      ,kadv      ,norow     ,icx       ,icy       , &
-             & irocol    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
-             & nsrc      ,lsecfl    ,lstsci    ,betac     ,nst       , &
-             & aak       ,bbk       ,cck       ,ddk       ,bddx      , &
-             & bdx       ,bux       ,buux      ,bddy      ,bdy       , &
-             & buy       ,buuy      ,uvdwk     ,vvdwk     ,ua        , &
-             & ub        ,taubpu    ,taubsu    ,rho       ,sumrho    , &
-             & thick     ,sig       ,dps       ,wsu       ,fxw       ,wsbodyu   , &
-             & vicuv     ,vnu2d     ,vicww     ,rxx       ,rxy       , &
-             & dfu       ,deltau    ,tp        ,rlabda    , &
-             & diapl     ,rnpl      , &
-             & cfurou    ,cfvrou    ,rttfu     ,r0        ,windsu    , &
-             & patm      ,fcorio    ,ubrlsu    ,hkru      , &
-             & pship     ,tgfsep    ,dteu      ,ustokes   ,.true.    ,gdp       )
+       gdp%gdflwpar%mom_accum = gdp%gdflwpar%mom_accum + 1.0_fp
+       call uzd(icreep    ,dpdksi    ,s0        ,u0        , &
+              & u1        ,v         ,w1        ,umean     , &
+              & hu        ,hv        ,guu       ,gvv       ,gvu       ,gsqs      , &
+              & gvd       ,gud       ,gvz       ,gsqiu     ,qxk       ,qyk       , &
+              & disch     ,umdis     ,dismmt    ,mnksrc    ,kcu       , &
+              & kcs       ,kfu       ,kfv       ,kfs       , &
+              & kspu      ,kadu      ,kadv      ,norow     ,icx       ,icy       , &
+              & irocol    ,j         ,nmmaxj    ,nmmax     ,kmax      , &
+              & nsrc      ,lsecfl    ,lstsci    ,betac     ,nst       , &
+              & aak       ,bbk       ,cck       ,ddk       ,bddx      , &
+              & bdx       ,bux       ,buux      ,bddy      ,bdy       , &
+              & buy       ,buuy      ,uvdwk     ,vvdwk     ,ua        , &
+              & ub        ,taubpu    ,taubsu    ,rho       ,sumrho    , &
+              & thick     ,sig       ,dps       ,wsu       ,fxw       ,wsbodyu   , &
+              & vicuv     ,vnu2d     ,vicww     ,rxx       ,rxy       , &
+              & dfu       ,deltau    ,tp        ,rlabda    , &
+              & diapl     ,rnpl      , &
+              & cfurou    ,cfvrou    ,rttfu     ,r0        ,windsu    , &
+              & patm      ,fcorio    ,ubrlsu    ,hkru      , &
+              & pship     ,tgfsep    ,dteu      ,ustokes   ,.true.    ,gdp       )
     endif
 end subroutine uzd

@@ -2309,6 +2309,8 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
     !
     if (gdp%gdflwpar%flwoutput%halfdt) then
        call postpr_hdt(nst, gdp)
+       !
+       call init_mom_output(gdp)
     endif
     !
     !+++++++++++++++++++++++ COMPLETION OF HALF TIMESTEP++++++++++++++++++++

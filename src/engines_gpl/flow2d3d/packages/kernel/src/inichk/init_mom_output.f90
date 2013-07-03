@@ -92,6 +92,8 @@ recursive subroutine init_mom_output(gdp       )
           endif
        endif
        !
+       gdp%gdflwpar%mom_accum = 0.0_fp
+       !
        gdp%gdflwpar%mom_m_velchange  = 0.0_fp
        gdp%gdflwpar%mom_m_densforce  = 0.0_fp
        gdp%gdflwpar%mom_m_flowresist = 0.0_fp

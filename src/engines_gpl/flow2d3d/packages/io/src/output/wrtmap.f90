@@ -80,6 +80,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     real(fp) , dimension(:,:,:)     , pointer :: fluxuc
     real(fp) , dimension(:,:,:)     , pointer :: fluxv
     real(fp) , dimension(:,:,:)     , pointer :: fluxvc
+    real(fp)                        , pointer :: mom_accum
     real(fp)                        , pointer :: rhum
     real(fp)                        , pointer :: tair
     real(fp) , dimension(:)         , pointer :: qeva_out
@@ -800,13 +801,13 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     !
     if (index(selmap(2:3),'Y') > 0) then
        call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & 1, kmax, ierror, u1, 'U1', kfumin, kfumax)
+                     & kmaxout_restr, 1, kmax, ierror, u1, 'U1', kfumin, kfumax)
        if (ierror /= 0) goto 999
        !
        ! group 3: element 'V1'
        !
        call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & 1, kmax, ierror, v1, 'V1', kfvmin, kfvmax)
+                     & kmaxout_restr, 1, kmax, ierror, v1, 'V1', kfvmin, kfvmax)
        if (ierror /= 0) goto 999
     endif
     !
@@ -814,7 +815,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     !
     if (selmap(4:4) == 'Y') then
        call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay, &
-                     & 0, kmax, ierror, w1, 'W', kfsmin, kfsmax)
+                     & kmaxout, 0, kmax, ierror, w1, 'W', kfsmin, kfsmax)
        if (ierror /= 0) goto 999
     endif
     !
@@ -822,7 +823,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     !
     if (selmap(5:5) == 'Y') then
        call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & 1, kmax, ierror, wphy, 'WPHY', kfsmin, kfsmax)
+                     & kmaxout_restr, 1, kmax, ierror, wphy, 'WPHY', kfsmin, kfsmax)
        if (ierror /= 0) goto 999
     endif
     !
@@ -831,7 +832,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     !
     if (index(selmap(6:13),'Y') /= 0) then
        call wrtmap_nmkl(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & 1, kmax, lstsci, ierror, r1, 'R1', kfsmin, kfsmax)
+                     & kmaxout_restr, 1, kmax, lstsci, ierror, r1, 'R1', kfsmin, kfsmax)
        if (ierror /= 0) goto 999
        if (flwoutput%difuflux) then
           !
@@ -861,57 +862,58 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        endif
     endif
     if (flwoutput%momentum) then
+       mom_accum => gdp%gdflwpar%mom_accum
        !
        ! element 'MOM_DUDT'
        !
        if (associated(gdp%gdflwpar%mom_m_velchange)) then
-          gdp%gdflwpar%mom_m_velchange = gdp%gdflwpar%mom_m_velchange / 2
+          gdp%gdflwpar%mom_m_velchange = gdp%gdflwpar%mom_m_velchange / mom_accum
           call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & 1, kmax, ierror, gdp%gdflwpar%mom_m_velchange, 'MOM_DUDT', kfumin, kfumax)
+                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_m_velchange, 'MOM_DUDT', kfumin, kfumax)
           if (ierror /= 0) goto 999
        endif
        !
        ! element 'MOM_UDENSITY'
        !
        if (associated(gdp%gdflwpar%mom_m_densforce)) then
-          gdp%gdflwpar%mom_m_densforce = gdp%gdflwpar%mom_m_densforce / 2
+          gdp%gdflwpar%mom_m_densforce = gdp%gdflwpar%mom_m_densforce / mom_accum
           call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & 1, kmax, ierror, gdp%gdflwpar%mom_m_densforce, 'MOM_UDENSITY', kfumin, kfumax)
+                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_m_densforce, 'MOM_UDENSITY', kfumin, kfumax)
           if (ierror /= 0) goto 999
        endif
        !
        ! element 'MOM_URESISTANCE'
        !
        if (associated(gdp%gdflwpar%mom_m_flowresist)) then
-          gdp%gdflwpar%mom_m_flowresist = gdp%gdflwpar%mom_m_flowresist / 2
+          gdp%gdflwpar%mom_m_flowresist = gdp%gdflwpar%mom_m_flowresist / mom_accum
           call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & 1, kmax, ierror, gdp%gdflwpar%mom_m_flowresist, 'MOM_URESISTANCE', kfumin, kfumax)
+                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_m_flowresist, 'MOM_URESISTANCE', kfumin, kfumax)
           if (ierror /= 0) goto 999
        endif
        !
        ! element 'MOM_UCORIOLIS'
        !
        if (associated(gdp%gdflwpar%mom_m_corioforce)) then
-          gdp%gdflwpar%mom_m_corioforce = gdp%gdflwpar%mom_m_corioforce / 2
+          gdp%gdflwpar%mom_m_corioforce = gdp%gdflwpar%mom_m_corioforce / mom_accum
           call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & 1, kmax, ierror, gdp%gdflwpar%mom_m_corioforce, 'MOM_UCORIOLIS', kfumin, kfumax)
+                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_m_corioforce, 'MOM_UCORIOLIS', kfumin, kfumax)
           if (ierror /= 0) goto 999
        endif
        !
        ! element 'MOM_UVISCO'
        !
        if (associated(gdp%gdflwpar%mom_m_visco)) then
-          gdp%gdflwpar%mom_m_visco = gdp%gdflwpar%mom_m_visco / 2
+          gdp%gdflwpar%mom_m_visco = gdp%gdflwpar%mom_m_visco / mom_accum
           call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & 1, kmax, ierror, gdp%gdflwpar%mom_m_visco, 'MOM_UVISCO', kfumin, kfumax)
+                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_m_visco, 'MOM_UVISCO', kfumin, kfumax)
           if (ierror /= 0) goto 999
        endif
        !
        ! element 'MOM_UPRESSURE'
        !
        if (associated(gdp%gdflwpar%mom_m_pressure)) then
-          gdp%gdflwpar%mom_m_pressure = gdp%gdflwpar%mom_m_pressure / 2
-          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, gdp, &
+          gdp%gdflwpar%mom_m_pressure = gdp%gdflwpar%mom_m_pressure / mom_accum
+          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
                        & ierror, gdp%gdflwpar%mom_m_pressure, 'MOM_UPRESSURE')
           if (ierror /= 0) goto 999
        endif
@@ -919,8 +921,8 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        ! element 'MOM_UTIDEGEN'
        !
        if (associated(gdp%gdflwpar%mom_m_tidegforce)) then
-          gdp%gdflwpar%mom_m_tidegforce = gdp%gdflwpar%mom_m_tidegforce / 2
-          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, gdp, &
+          gdp%gdflwpar%mom_m_tidegforce = gdp%gdflwpar%mom_m_tidegforce / mom_accum
+          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
                        & ierror, gdp%gdflwpar%mom_m_tidegforce, 'MOM_UTIDEGEN')
           if (ierror /= 0) goto 999
        endif
@@ -928,8 +930,8 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        ! element 'MOM_UWINDFORCE'
        !
        if (associated(gdp%gdflwpar%mom_m_windforce)) then
-          gdp%gdflwpar%mom_m_windforce = gdp%gdflwpar%mom_m_windforce / 2
-          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, gdp, &
+          gdp%gdflwpar%mom_m_windforce = gdp%gdflwpar%mom_m_windforce / mom_accum
+          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
                        & ierror, gdp%gdflwpar%mom_m_windforce, 'MOM_UWINDFORCE')
           if (ierror /= 0) goto 999
        endif
@@ -937,8 +939,8 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        ! element 'MOM_UBEDSHEAR'
        !
        if (associated(gdp%gdflwpar%mom_m_bedforce)) then
-          gdp%gdflwpar%mom_m_bedforce = gdp%gdflwpar%mom_m_bedforce / 2
-          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, gdp, &
+          gdp%gdflwpar%mom_m_bedforce = gdp%gdflwpar%mom_m_bedforce / mom_accum
+          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
                        & ierror, gdp%gdflwpar%mom_m_bedforce, 'MOM_UBEDSHEAR')
           if (ierror /= 0) goto 999
        endif
@@ -946,27 +948,27 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        ! element 'MOM_UWAVES'
        !
        if (associated(gdp%gdflwpar%mom_m_waveforce)) then
-          gdp%gdflwpar%mom_m_waveforce = gdp%gdflwpar%mom_m_waveforce / 2
+          gdp%gdflwpar%mom_m_waveforce = gdp%gdflwpar%mom_m_waveforce / mom_accum
           call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & 1, kmax, ierror, gdp%gdflwpar%mom_m_waveforce, 'MOM_UWAVES', kfumin, kfumax)
+                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_m_waveforce, 'MOM_UWAVES', kfumin, kfumax)
           if (ierror /= 0) goto 999
        endif
        !
        ! element 'MOM_UDUDX'
        !
        if (associated(gdp%gdflwpar%mom_m_convec)) then
-          gdp%gdflwpar%mom_m_convec = gdp%gdflwpar%mom_m_convec / 2
+          gdp%gdflwpar%mom_m_convec = gdp%gdflwpar%mom_m_convec / mom_accum
           call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & 1, kmax, ierror, gdp%gdflwpar%mom_m_convec, 'MOM_UDUDX', kfumin, kfumax)
+                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_m_convec, 'MOM_UDUDX', kfumin, kfumax)
           if (ierror /= 0) goto 999
        endif
        !
        ! element 'MOM_VDUDY'
        !
        if (associated(gdp%gdflwpar%mom_m_xadvec)) then
-          gdp%gdflwpar%mom_m_xadvec = gdp%gdflwpar%mom_m_xadvec / 2
+          gdp%gdflwpar%mom_m_xadvec = gdp%gdflwpar%mom_m_xadvec / mom_accum
           call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & 1, kmax, ierror, gdp%gdflwpar%mom_m_xadvec, 'MOM_VDUDY', kfumin, kfumax)
+                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_m_xadvec, 'MOM_VDUDY', kfumin, kfumax)
           if (ierror /= 0) goto 999
        endif
        !
@@ -975,53 +977,53 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        ! element 'MOM_DVDT'
        !
        if (associated(gdp%gdflwpar%mom_n_velchange)) then
-          gdp%gdflwpar%mom_n_velchange = gdp%gdflwpar%mom_n_velchange / 2
+          gdp%gdflwpar%mom_n_velchange = gdp%gdflwpar%mom_n_velchange / mom_accum
           call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & 1, kmax, ierror, gdp%gdflwpar%mom_n_velchange, 'MOM_DVDT', kfvmin, kfvmax)
+                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_n_velchange, 'MOM_DVDT', kfvmin, kfvmax)
           if (ierror /= 0) goto 999
        endif
        !
        ! element 'MOM_VDENSITY'
        !
        if (associated(gdp%gdflwpar%mom_n_densforce)) then
-          gdp%gdflwpar%mom_n_densforce = gdp%gdflwpar%mom_n_densforce / 2
+          gdp%gdflwpar%mom_n_densforce = gdp%gdflwpar%mom_n_densforce / mom_accum
           call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & 1, kmax, ierror, gdp%gdflwpar%mom_n_densforce, 'MOM_VDENSITY', kfvmin, kfvmax)
+                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_n_densforce, 'MOM_VDENSITY', kfvmin, kfvmax)
           if (ierror /= 0) goto 999
        endif
        !
        ! element 'MOM_VRESISTANCE'
        !
        if (associated(gdp%gdflwpar%mom_n_flowresist)) then
-          gdp%gdflwpar%mom_n_flowresist = gdp%gdflwpar%mom_n_flowresist / 2
+          gdp%gdflwpar%mom_n_flowresist = gdp%gdflwpar%mom_n_flowresist / mom_accum
           call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & 1, kmax, ierror, gdp%gdflwpar%mom_n_flowresist, 'MOM_VRESISTANCE', kfvmin, kfvmax)
+                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_n_flowresist, 'MOM_VRESISTANCE', kfvmin, kfvmax)
           if (ierror /= 0) goto 999
        endif
        !
        ! element 'MOM_VCORIOLIS'
        !
        if (associated(gdp%gdflwpar%mom_n_corioforce)) then
-          gdp%gdflwpar%mom_n_corioforce = gdp%gdflwpar%mom_n_corioforce / 2
+          gdp%gdflwpar%mom_n_corioforce = gdp%gdflwpar%mom_n_corioforce / mom_accum
           call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & 1, kmax, ierror, gdp%gdflwpar%mom_n_corioforce, 'MOM_VCORIOLIS', kfvmin, kfvmax)
+                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_n_corioforce, 'MOM_VCORIOLIS', kfvmin, kfvmax)
           if (ierror /= 0) goto 999
        endif
        !
        ! element 'MOM_VVISCO'
        !
        if (associated(gdp%gdflwpar%mom_n_visco)) then
-          gdp%gdflwpar%mom_n_visco = gdp%gdflwpar%mom_n_visco / 2
+          gdp%gdflwpar%mom_n_visco = gdp%gdflwpar%mom_n_visco / mom_accum
           call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & 1, kmax, ierror, gdp%gdflwpar%mom_n_visco, 'MOM_VVISCO', kfvmin, kfvmax)
+                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_n_visco, 'MOM_VVISCO', kfvmin, kfvmax)
           if (ierror /= 0) goto 999
        endif
        !
        ! element 'MOM_VPRESSURE'
        !
        if (associated(gdp%gdflwpar%mom_n_pressure)) then
-          gdp%gdflwpar%mom_n_pressure = gdp%gdflwpar%mom_n_pressure / 2
-          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, gdp, &
+          gdp%gdflwpar%mom_n_pressure = gdp%gdflwpar%mom_n_pressure / mom_accum
+          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
                        & ierror, gdp%gdflwpar%mom_n_pressure, 'MOM_VPRESSURE')
           if (ierror /= 0) goto 999
        endif
@@ -1029,8 +1031,8 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        ! element 'MOM_VTIDEGEN'
        !
        if (associated(gdp%gdflwpar%mom_n_tidegforce)) then
-          gdp%gdflwpar%mom_n_tidegforce = gdp%gdflwpar%mom_n_tidegforce / 2
-          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, gdp, &
+          gdp%gdflwpar%mom_n_tidegforce = gdp%gdflwpar%mom_n_tidegforce / mom_accum
+          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
                        & ierror, gdp%gdflwpar%mom_n_tidegforce, 'MOM_VTIDEGEN')
           if (ierror /= 0) goto 999
        endif
@@ -1038,8 +1040,8 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        ! element 'MOM_VWINDFORCE'
        !
        if (associated(gdp%gdflwpar%mom_n_windforce)) then
-          gdp%gdflwpar%mom_n_windforce = gdp%gdflwpar%mom_n_windforce / 2
-          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, gdp, &
+          gdp%gdflwpar%mom_n_windforce = gdp%gdflwpar%mom_n_windforce / mom_accum
+          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
                        & ierror, gdp%gdflwpar%mom_n_windforce, 'MOM_VWINDFORCE')
           if (ierror /= 0) goto 999
        endif
@@ -1047,8 +1049,8 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        ! element 'MOM_VBEDSHEAR'
        !
        if (associated(gdp%gdflwpar%mom_n_bedforce)) then
-          gdp%gdflwpar%mom_n_bedforce = gdp%gdflwpar%mom_n_bedforce / 2
-          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, gdp, &
+          gdp%gdflwpar%mom_n_bedforce = gdp%gdflwpar%mom_n_bedforce / mom_accum
+          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
                        & ierror, gdp%gdflwpar%mom_n_bedforce, 'MOM_VBEDSHEAR')
           if (ierror /= 0) goto 999
        endif
@@ -1056,27 +1058,27 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        ! element 'MOM_VWAVES'
        !
        if (associated(gdp%gdflwpar%mom_n_waveforce)) then
-          gdp%gdflwpar%mom_n_waveforce = gdp%gdflwpar%mom_n_waveforce / 2
+          gdp%gdflwpar%mom_n_waveforce = gdp%gdflwpar%mom_n_waveforce / mom_accum
           call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & 1, kmax, ierror, gdp%gdflwpar%mom_n_waveforce, 'MOM_VWAVES', kfvmin, kfvmax)
+                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_n_waveforce, 'MOM_VWAVES', kfvmin, kfvmax)
           if (ierror /= 0) goto 999
        endif
        !
        ! element 'MOM_VDVDY'
        !
        if (associated(gdp%gdflwpar%mom_n_convec)) then
-          gdp%gdflwpar%mom_n_convec = gdp%gdflwpar%mom_n_convec / 2
+          gdp%gdflwpar%mom_n_convec = gdp%gdflwpar%mom_n_convec / mom_accum
           call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & 1, kmax, ierror, gdp%gdflwpar%mom_n_convec, 'MOM_VDVDY', kfvmin, kfvmax)
+                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_n_convec, 'MOM_VDVDY', kfvmin, kfvmax)
           if (ierror /= 0) goto 999
        endif
        !
        ! element 'MOM_UDVDX'
        !
        if (associated(gdp%gdflwpar%mom_n_xadvec)) then
-          gdp%gdflwpar%mom_n_xadvec = gdp%gdflwpar%mom_n_xadvec / 2
+          gdp%gdflwpar%mom_n_xadvec = gdp%gdflwpar%mom_n_xadvec / mom_accum
           call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & 1, kmax, ierror, gdp%gdflwpar%mom_n_xadvec, 'MOM_UDVDX', kfvmin, kfvmax)
+                     & kmaxout_restr, 1, kmax, ierror, gdp%gdflwpar%mom_n_xadvec, 'MOM_UDVDX', kfvmin, kfvmax)
           if (ierror /= 0) goto 999
        endif
     endif
@@ -1087,7 +1089,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     !
     if (index(selmap(14:15),'Y') /= 0) then
        call wrtmap_nmkl(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay, &
-                     & 0, kmax, ltur, ierror, rtur1, 'RTUR1')
+                     & kmaxout, 0, kmax, ltur, ierror, rtur1, 'RTUR1')
        if (ierror /= 0) goto 999
     endif
     !
@@ -1175,7 +1177,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     !
     if (selmap(18:18) == 'Y') then
        call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay, &
-                     & 0, kmax, ierror, vicww, 'VICWW', kfsmin, kfsmax)
+                     & kmaxout, 0, kmax, ierror, vicww, 'VICWW', kfsmin, kfsmax)
        if (ierror /= 0) goto 999
     endif
     !
@@ -1184,7 +1186,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     !
     if (selmap(19:19) == 'Y') then
        call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay, &
-                     & 0, kmax, ierror, dicww, 'DICWW', kfsmin, kfsmax)
+                     & kmaxout, 0, kmax, ierror, dicww, 'DICWW', kfsmin, kfsmax)
        if (ierror /= 0) goto 999
     endif
     !
@@ -1193,7 +1195,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     !
     if (index(selmap(18:19),'Y') > 0) then
        call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay, &
-                     & 0, kmax, ierror, rich, 'RICH', kfsmin, kfsmax)
+                     & kmaxout, 0, kmax, ierror, rich, 'RICH', kfsmin, kfsmax)
        if (ierror /= 0) goto 999
     endif
     !
@@ -1202,7 +1204,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     !
     if (selmap(20:20) == 'Y') then
        call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & 1, kmax, ierror, rho, 'RHO', kfsmin, kfsmax)
+                     & kmaxout_restr, 1, kmax, ierror, rho, 'RHO', kfsmin, kfsmax)
        if (ierror /= 0) goto 999
     endif
     !
@@ -1240,7 +1242,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        ! kmax+1 contains initial values and should not be written
        !
        call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & 1, kmax+1, ierror, vicuv, 'VICUV', kfsmin, kfsmax)
+                     & kmaxout_restr, 1, kmax+1, ierror, vicuv, 'VICUV', kfsmin, kfsmax)
        if (ierror /= 0) goto 999
     endif
     if (nsrc>0 .and. inode==master) then
@@ -1271,13 +1273,13 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     !
     if (flwoutput%vortic) then
        call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & 1, kmax, ierror, vortic, 'VORTIC', kfsmin, kfsmax)
+                     & kmaxout_restr, 1, kmax, ierror, vortic, 'VORTIC', kfsmin, kfsmax)
        if (ierror /= 0) goto 999
        !
        ! Next ENSTRO
        !
        call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & 1, kmax, ierror, enstro, 'ENSTRO', kfsmin, kfsmax)
+                     & kmaxout_restr, 1, kmax, ierror, enstro, 'ENSTRO', kfsmin, kfsmax)
        if (ierror /= 0) goto 999
     endif
     !
@@ -1285,7 +1287,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     !
     if (index(selmap(4:4),'Y')>0 .and. zmodel) then
        call wrtmap_nmk(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
-                     & 1, kmax, ierror, p1, 'HYDPRES', kfsmin, kfsmax)
+                     & kmaxout_restr, 1, kmax, ierror, p1, 'HYDPRES', kfsmin, kfsmax)
        if (ierror /= 0) goto 999
     endif
     !
@@ -1293,12 +1295,14 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        !
        ! element 'CFUROU'
        !
-       call wrtmap_nm(ierror, cvalu0, 'CFUROU')
+       call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, cvalu0, 'CFUROU')
        if (ierror /= 0) goto 999
        !
        ! element 'CFVROU'
        !
-       call wrtmap_nm(ierror, cvalv0, 'CFVROU')
+       call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, cvalv0, 'CFVROU')
        if (ierror /= 0) goto 999
     endif
     if (flwoutput%roughness) then
@@ -1307,7 +1311,8 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        !
        allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
        rbuff2(:,:) = cfurou(:,:,2)
-       call wrtmap_nm(ierror, rbuff2, 'ROUMETU')
+       call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, rbuff2, 'ROUMETU')
        deallocate(rbuff2)
        if (ierror /= 0) goto 999
        !
@@ -1315,7 +1320,8 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        !
        allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
        rbuff2(:,:) = cfvrou(:,:,2)
-       call wrtmap_nm(ierror, rbuff2, 'ROUMETV')
+       call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, rbuff2, 'ROUMETV')
        deallocate(rbuff2)
        if (ierror /= 0) goto 999
     endif
@@ -1323,24 +1329,28 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        !
        ! element 'Z0UCUR'
        !
-       call wrtmap_nm(ierror, z0ucur, 'Z0UCUR')
+       call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, z0ucur, 'Z0UCUR')
        if (ierror /= 0) goto 999
        !
        ! element 'Z0VCUR'
        !
-       call wrtmap_nm(ierror, z0vcur, 'Z0VCUR')
+       call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, z0vcur, 'Z0VCUR')
        if (ierror /= 0) goto 999
     endif
     if (flwoutput%z0rou) then
        !
        ! element 'Z0UROU'
        !
-       call wrtmap_nm(ierror, z0urou, 'Z0UROU')
+       call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, z0urou, 'Z0UROU')
        if (ierror /= 0) goto 999
        !
        ! element 'Z0VROU'
        !
-       call wrtmap_nm(ierror, z0vrou, 'Z0VROU')
+       call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, z0vrou, 'Z0VROU')
        if (ierror /= 0) goto 999
     endif
     !
@@ -1389,17 +1399,20 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        !
        ! element 'WINDU'
        !
-       call wrtmap_nm(ierror, windu, 'WINDU')
+       call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, windu, 'WINDU')
        if (ierror /= 0) goto 999
        !
        ! element 'WINDV'
        !
-       call wrtmap_nm(ierror, windv, 'WINDV')
+       call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, windv, 'WINDV')
        if (ierror /= 0) goto 999
        !
        ! element 'PATM'
        !
-       call wrtmap_nm(ierror, patm, 'PATM')
+       call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
+                    & ierror, patm, 'PATM')
        if (ierror /= 0) goto 999
        !
        if (prcp_file) then
@@ -1410,7 +1423,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           !
           allocate( rbuff2(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) )
           rbuff2 = precip * 3600000.0_fp
-          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, gdp, &
+          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
                        & ierror, rbuff2, 'PRECIP')
           deallocate(rbuff2)
           if (ierror /= 0) goto 999
@@ -1426,7 +1439,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
              call nm_to_n_and_m(nm, n, m, gdp)
              rbuff2(n,m) = clouarr(nm)
           enddo
-          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, gdp, &
+          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
                        & ierror, rbuff2, 'CLOUDS')
           deallocate(rbuff2)
           if (ierror /= 0) goto 999
@@ -1442,7 +1455,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
              call nm_to_n_and_m(nm, n, m, gdp)
              rbuff2(n,m) = rhumarr(nm)
           enddo
-          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, gdp, &
+          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
                        & ierror, rbuff2, 'AIRHUM')
           deallocate(rbuff2)
           if (ierror /= 0) goto 999
@@ -1459,7 +1472,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
              call nm_to_n_and_m(nm, n, m, gdp)
              rbuff2(n,m) = tairarr(nm)
           enddo
-          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, gdp, &
+          call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
                        & ierror, rbuff2, 'AIRTEM')
           deallocate(rbuff2)
           if (ierror /= 0) goto 999
@@ -1481,7 +1494,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                 call nm_to_n_and_m(nm, n, m, gdp)
                 rbuff2(n,m) = hlc_out(nm)
              enddo
-             call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, gdp, &
+             call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
                           & ierror, rbuff2, 'HLC')
              deallocate(rbuff2)
              if (ierror /= 0) goto 999
@@ -1496,7 +1509,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                 call nm_to_n_and_m(nm, n, m, gdp)
                 rbuff2(n,m) = qnet_out(nm)
              enddo
-             call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, gdp, &
+             call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
                           & ierror, rbuff2, 'QNET')
              deallocate(rbuff2)
              if (ierror /= 0) goto 999
@@ -1512,7 +1525,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                 call nm_to_n_and_m(nm, n, m, gdp)
                 rbuff2(n,m) = qeva_out(nm)
              enddo
-             call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, gdp, &
+             call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
                           & ierror, rbuff2, 'QEVA')
              deallocate(rbuff2)
              if (ierror /= 0) goto 999
@@ -1527,7 +1540,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                 call nm_to_n_and_m(nm, n, m, gdp)
                 rbuff2(n,m) = qco_out(nm)
              enddo
-             call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, gdp, &
+             call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
                           & ierror, rbuff2, 'QCO')
              deallocate(rbuff2)
              if (ierror /= 0) goto 999
@@ -1542,7 +1555,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                 call nm_to_n_and_m(nm, n, m, gdp)
                 rbuff2(n,m) = qbl_out(nm)
              enddo
-             call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, gdp, &
+             call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
                           & ierror, rbuff2, 'QBL')
              deallocate(rbuff2)
              if (ierror /= 0) goto 999
@@ -1557,7 +1570,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                 call nm_to_n_and_m(nm, n, m, gdp)
                 rbuff2(n,m) = qin_out(nm)
              enddo
-             call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, gdp, &
+             call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
                           & ierror, rbuff2, 'QIN')
              deallocate(rbuff2)
              if (ierror /= 0) goto 999
@@ -1572,7 +1585,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                 call nm_to_n_and_m(nm, n, m, gdp)
                 rbuff2(n,m) = qnet_out(nm)
              enddo
-             call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, gdp, &
+             call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
                           & ierror, rbuff2, 'QNET')
              deallocate(rbuff2)
              if (ierror /= 0) goto 999
@@ -1589,7 +1602,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                    call nm_to_n_and_m(nm, n, m, gdp)
                    rbuff2(n,m) = hfree_out(nm)
                 enddo
-                call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, gdp, &
+                call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
                              & ierror, rbuff2, 'HFREE')
                 deallocate(rbuff2)
                 if (ierror /= 0) goto 999
@@ -1604,7 +1617,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                    call nm_to_n_and_m(nm, n, m, gdp)
                    rbuff2(n,m) = efree_out(nm)
                 enddo
-                call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, gdp, &
+                call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
                              & ierror, rbuff2, 'EFREE')
                 deallocate(rbuff2)
                 if (ierror /= 0) goto 999
@@ -1622,7 +1635,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
                    call nm_to_n_and_m(nm, n, m, gdp)
                    rbuff2(n,m) = qmis_out(nm)
                 enddo
-                call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, gdp, &
+                call wrtmap_nm(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, &
                              & ierror, rbuff2, 'QMIS')
                 deallocate(rbuff2)
                 if (ierror /= 0) goto 999
@@ -1650,254 +1663,3 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
        error= .true.
     endif
 end subroutine wrtmap
-
-                  
-subroutine wrtmap_nm(fds, grpnam_in, uindex, nf, nl, mf, ml, iarrc, gdp, &
-                   & ierr, var, varnam_in)
-    use precision
-    use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: glbarr2, dfgather, dfgather_seq
-    use globaldata
-    !
-    implicit none
-    !
-    type(globdat),target :: gdp
-    !
-    integer                                                            :: ierr
-    integer                                                            :: fds
-    integer      , dimension(0:nproc-1)                                :: mf            ! first index w.r.t. global grid in x-direction
-    integer      , dimension(0:nproc-1)                                :: ml            ! last index w.r.t. global grid in x-direction
-    integer      , dimension(0:nproc-1)                                :: nf            ! first index w.r.t. global grid in y-direction
-    integer      , dimension(0:nproc-1)                                :: nl            ! last index w.r.t. global grid in y-direction
-    integer      , dimension(4,0:nproc-1)                              :: iarrc         ! array containing collected grid indices 
-    integer      , dimension(3,5)                                      :: uindex
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub) :: var
-    character(*)                                                       :: varnam_in
-    character(*)                                                       :: grpnam_in
-    ! local
-    integer                                       :: namlen
-    character(16)                                 :: varnam
-    character(16)                                 :: grpnam
-    integer                        , external     :: putelt
-    ! body
-    namlen = min (16,len(varnam_in))
-    varnam = varnam_in(1:namlen)
-    namlen = min (16,len(grpnam_in))
-    grpnam = grpnam_in(1:namlen)
-    !
-    if (parll) then
-       call dfgather(var,nf,nl,mf,ml,iarrc,gdp)
-    else
-       call dfgather_seq(var, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
-    endif       
-    if (inode == master) then
-       ierr = putelt(fds, grpnam, varnam, uindex, 1, glbarr2)
-    endif
-end subroutine wrtmap_nm
-!
-!======================================================================
-subroutine wrtmap_nmk(fds, grpnam_in, uindex, nf, nl, mf, ml, iarrc, gdp, smlay, &
-                    & lk, uk, ierr, var, varnam_in, kfmin, kfmax)
-    use precision
-    use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: glbarr3, dfgather, dfgather_seq
-    use globaldata
-    !
-    implicit none
-    !
-    type(globdat),target :: gdp
-    !
-    integer                                                                                :: ierr
-    integer                                                                  , intent(in)  :: fds
-    integer                                                                  , intent(in)  :: lk            ! lowerbound dim3(0 or 1)
-    integer                                                                  , intent(in)  :: uk            ! upperbound dim3(kmax or kmax+1)
-    integer      , dimension(0:nproc-1)                                      , intent(in)  :: mf            ! first index w.r.t. global grid in x-direction
-    integer      , dimension(0:nproc-1)                                      , intent(in)  :: ml            ! last index w.r.t. global grid in x-direction
-    integer      , dimension(0:nproc-1)                                      , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
-    integer      , dimension(0:nproc-1)                                      , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
-    integer      , dimension(4,0:nproc-1)                                    , intent(in)  :: iarrc         ! array containing collected grid indices 
-    integer      , dimension(3,5)                                            , intent(in)  :: uindex
-    integer      , dimension(:)                                              , intent(in)  :: smlay
-    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: kfmin
-    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)       , intent(in)  :: kfmax
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lk:uk), intent(in)  :: var
-    character(*)                                                             , intent(in)  :: varnam_in
-    character(*)                                                             , intent(in)  :: grpnam_in
-    ! local
-    integer                                       :: istat
-    integer                                       :: k
-    integer                                       :: kmaxout       ! number of layers to be written to the output file
-    integer                                       :: m
-    integer                                       :: n
-    integer                                       :: namlen
-    real(fp)   , dimension(:,:,:)  , allocatable  :: rbuff3
-    character(16)                                 :: varnam
-    character(16)                                 :: grpnam
-    integer                        , external     :: putelt
-    ! body
-    namlen = min (16,len(varnam_in))
-    varnam = varnam_in(1:namlen)
-    namlen = min (16,len(grpnam_in))
-    grpnam = grpnam_in(1:namlen)
-    !
-    kmaxout = size(smlay)
-    allocate( rbuff3(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:kmaxout), stat = istat )
-    do k=1,kmaxout
-       rbuff3(:,:,k) = var(:,:,smlay(k))
-    enddo
-    if (gdp%gdprocs%zmodel) then
-       do m = 1, gdp%d%mmax
-          do n = 1, gdp%d%nmaxus
-             do k = 1, kmaxout
-                if (smlay(k)<(kfmin(n,m)-1+lk) .or. smlay(k)>kfmax(n, m))  rbuff3(n, m, k) = -999.0_fp
-             enddo
-          enddo
-       enddo
-    endif
-    if (parll) then
-       call dfgather(rbuff3,nf,nl,mf,ml,iarrc,gdp)
-    else
-       call dfgather_seq(rbuff3, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
-    endif   
-    deallocate(rbuff3)
-    if (inode == master) then
-       ierr = putelt(fds, grpnam, varnam, uindex, 1, glbarr3)
-    endif
-end subroutine wrtmap_nmk
-!
-!======================================================================
-subroutine wrtmap_nmkl(fds, grpnam_in, uindex, nf, nl, mf, ml, iarrc, gdp, smlay, &
-                     & lk, uk, ul,ierr, var, varnam_in, kfmin, kfmax)
-    use precision
-    use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: glbarr4, dfgather, dfgather_seq
-    use globaldata
-    !
-    implicit none
-    !
-    type(globdat),target :: gdp
-    !
-    integer                                                                                    :: ierr
-    integer                                                                      , intent(in)  :: fds
-    integer                                                                      , intent(in)  :: lk            ! lowerbound dim3(0 or 1)
-    integer                                                                      , intent(in)  :: uk            ! upperbound dim3(kmax or kmax+1)
-    integer                                                                      , intent(in)  :: ul            ! upperbound dim4
-    integer      , dimension(0:nproc-1)                                          , intent(in)  :: mf            ! first index w.r.t. global grid in x-direction
-    integer      , dimension(0:nproc-1)                                          , intent(in)  :: ml            ! last index w.r.t. global grid in x-direction
-    integer      , dimension(0:nproc-1)                                          , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
-    integer      , dimension(0:nproc-1)                                          , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
-    integer      , dimension(4,0:nproc-1)                                        , intent(in)  :: iarrc         ! array containing collected grid indices 
-    integer      , dimension(3,5)                                                , intent(in)  :: uindex
-    integer      , dimension(:)                                                  , intent(in)  :: smlay
-    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(in)  :: kfmin
-    integer      , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)           , intent(in)  :: kfmax
-    real(fp)     , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lk:uk, ul), intent(in)  :: var
-    character(*)                                                                 , intent(in)  :: varnam_in
-    character(*)                                                                 , intent(in)  :: grpnam_in
-    ! local
-    integer                                       :: istat
-    integer                                       :: k
-    integer                                       :: kmaxout       ! number of layers to be written to the output file
-    integer                                       :: l
-    integer                                       :: m
-    integer                                       :: n
-    integer                                       :: namlen
-    real(fp)   , dimension(:,:,:,:), allocatable  :: rbuff4
-    character(16)                                 :: varnam
-    character(16)                                 :: grpnam
-    integer                        , external     :: putelt
-    ! body
-    namlen = min (16,len(varnam_in))
-    varnam = varnam_in(1:namlen)
-    namlen = min (16,len(grpnam_in))
-    grpnam = grpnam_in(1:namlen)
-    !
-    kmaxout = size(smlay)
-    allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:kmaxout, ul ), stat = istat )
-    rbuff4(:,:,:,:) = -999.0_fp
-    do l = 1, ul
-       do k = 1, kmaxout
-          do m = 1, gdp%d%mmax
-             do n = 1, gdp%d%nmaxus
-                if (gdp%gdprocs%zmodel) then
-                   if (smlay(k)<(kfmin(n,m)-1+lk) .or. smlay(k)>kfmax(n, m)) then
-                      cycle
-                   endif
-                endif
-                rbuff4(n,m,k,l) = var(n,m,smlay(k),l)
-             enddo
-          enddo
-       enddo
-    enddo
-    if (parll) then
-       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-    else 
-       call dfgather_seq(rbuff4, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
-    endif   
-    deallocate(rbuff4)
-    if (inode == master) then
-       ierr = putelt(fds, grpnam, varnam, uindex, 1, glbarr4)
-    endif
-end subroutine wrtmap_nmkl
-!
-!======================================================================
-subroutine wrtmap_nmkl_ptr(fds, grpnam_in, uindex, nf, nl, mf, ml, iarrc, gdp, smlay, &
-                     & lk, uk, ul,ierr, varptr, varnam_in, kfmin, kfmax)
-    use precision
-    use dfparall, only: inode, master, nproc, parll
-    use dffunctionals, only: glbarr4, dfgather, dfgather_seq
-    use globaldata
-    !
-    implicit none
-    !
-    type(globdat),target :: gdp
-    !
-    integer                                                                                    :: ierr
-    integer                                                                      , intent(in)  :: fds
-    integer                                                                      , intent(in)  :: lk            ! lowerbound dim3(0 or 1)
-    integer                                                                      , intent(in)  :: uk            ! upperbound dim3(kmax or kmax+1)
-    integer                                                                      , intent(in)  :: ul            ! upperbound dim4
-    integer      , dimension(0:nproc-1)                                          , intent(in)  :: mf            ! first index w.r.t. global grid in x-direction
-    integer      , dimension(0:nproc-1)                                          , intent(in)  :: ml            ! last index w.r.t. global grid in x-direction
-    integer      , dimension(0:nproc-1)                                          , intent(in)  :: nf            ! first index w.r.t. global grid in y-direction
-    integer      , dimension(0:nproc-1)                                          , intent(in)  :: nl            ! last index w.r.t. global grid in y-direction
-    integer      , dimension(4,0:nproc-1)                                        , intent(in)  :: iarrc         ! array containing collected grid indices 
-    integer      , dimension(3,5)                                                , intent(in)  :: uindex
-    integer      , dimension(:)                                                  , intent(in)  :: smlay
-    integer      , dimension(:,:)                                                , intent(in)  :: kfmin
-    integer      , dimension(:,:)                                                , intent(in)  :: kfmax
-    real(fp)     , dimension(:,:,:)                                              , pointer     :: varptr
-    character(*)                                                                 , intent(in)  :: varnam_in
-    character(*)                                                                 , intent(in)  :: grpnam_in
-    ! local
-    integer                                       :: istat
-    integer                                       :: kmaxout       ! number of layers to be written to the output file
-    integer                                       :: namlen
-    real(fp)   , dimension(:,:,:,:), allocatable  :: rbuff4
-    character(16)                                 :: varnam
-    character(16)                                 :: grpnam
-    integer                        , external     :: putelt
-    ! body
-    if (associated(varptr)) then
-       call wrtmap_nmkl(fds, grpnam_in, uindex, nf, nl, mf, ml, iarrc, gdp, smlay, &
-                      & lk, uk, ul,ierr, varptr, varnam_in, kfmin, kfmax)
-    else
-       namlen = min (16,len(varnam_in))
-       varnam = varnam_in(1:namlen)
-       namlen = min (16,len(grpnam_in))
-       grpnam = grpnam_in(1:namlen)
-       !
-       kmaxout = size(smlay)
-       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmaxout,ul ), stat = istat )
-       rbuff4(:,:,:,:) = -999.0_fp
-       if (parll) then
-          call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
-       else 
-          call dfgather_seq(rbuff4, 1-gdp%d%nlb, 1-gdp%d%mlb, gdp%gdparall%nmaxgl, gdp%gdparall%mmaxgl)
-       endif   
-       deallocate(rbuff4)
-       if (inode == master) then
-          ierr = putelt(fds, grpnam, varnam, uindex, 1, glbarr4)
-       endif
-    endif
-end subroutine wrtmap_nmkl_ptr

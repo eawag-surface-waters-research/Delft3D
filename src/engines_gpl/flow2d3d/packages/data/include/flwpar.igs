@@ -73,6 +73,8 @@ type gd_flwpar
     !
     ! reals
     !
+    real(fp)                                    :: mom_accum           ! number solver steps during which terms have been accumulated
+    !
     !
     ! integers
     !
