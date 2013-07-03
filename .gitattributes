@@ -1209,6 +1209,7 @@ src/engines_gpl/flow2d3d/packages/kernel/src/inichk/inimorlyr.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/inichk/iniphy.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/inichk/inirgl.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/inichk/inised.f90 -text
+src/engines_gpl/flow2d3d/packages/kernel/src/inichk/init_mom_output.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/inichk/initau.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/inichk/initem.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/inichk/initgf.f90 -text

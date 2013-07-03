@@ -14,7 +14,7 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
                & r0        ,diapl     ,rnpl      ,taubpu    ,taubsu    , &
                & windsu    ,patm      ,fcorio    ,ubrlsu    ,uwtypu    , &
                & hkru      ,pship     ,tgfsep    ,dteu      ,ua        , &
-               & ub        ,ustokes   ,gdp       )
+               & ub        ,ustokes   ,mom_output,u1        ,s1        ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -109,6 +109,16 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
     logical                 , pointer :: roller
     logical                 , pointer :: xbeach
     logical                 , pointer :: dpmveg
+    real(fp), dimension(:,:)          , pointer :: mom_m_velchange     ! momentum du/dt term
+    real(fp), dimension(:,:)          , pointer :: mom_m_densforce     ! density force term in u dir
+    real(fp), dimension(:,:)          , pointer :: mom_m_flowresist    ! vegetation and porous plates in u dir
+    real(fp), dimension(:,:)          , pointer :: mom_m_corioforce    ! coriolis term in u dir
+    real(fp), dimension(:,:)          , pointer :: mom_m_visco         ! viscosity term in u dir
+    real(fp), dimension(:)            , pointer :: mom_m_pressure      ! pressure term in u dir
+    real(fp), dimension(:)            , pointer :: mom_m_tidegforce    ! tide generating forces in u dir
+    real(fp), dimension(:)            , pointer :: mom_m_windforce     ! wind shear in u dir
+    real(fp), dimension(:)            , pointer :: mom_m_bedforce      ! bed shear in u dir
+    real(fp), dimension(:,:)          , pointer :: mom_m_waveforce     ! wave forces in u dir
 !
 ! Global variables
 !
@@ -157,6 +167,8 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: pship   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: rlabda  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: s0      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: s1      !  Description and declaration in esm_alloc_real.f90
+                                                                               !  Only used in case mom_output = .true.
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                      :: taubpu  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: taubsu  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)        , intent(in)  :: tgfsep  !  Water elev. induced by tide gen.force
@@ -188,6 +200,9 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: rxy     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: sumrho  !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: u0      !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in)  :: u1      !  Description and declaration in esm_alloc_real.f90
+                                                                               !  Only used in case mom_output = .true.
+
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ua
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ub
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ubrlsu  !  Description and declaration in esm_alloc_real.f90
@@ -199,6 +214,7 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
     real(fp), dimension(kmax)                                       :: thick   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(nsrc)                         , intent(in)  :: disch   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(nsrc)                         , intent(in)  :: umdis   !  Description and declaration in esm_alloc_real.f90
+    logical                                           , intent(in)  :: mom_output
     character(1), dimension(nsrc)                     , intent(in)  :: dismmt  !  Description and declaration in esm_alloc_char.f90
     character(8)                                      , intent(in)  :: dischy  !  Description and declaration in tricom.igs
 !
@@ -237,27 +253,31 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
     real(fp)                   :: bdmwrp
     real(fp)                   :: bdmwrs
     real(fp)                   :: bi
-    real(fp)                   :: cbot
+    real(fp)                   :: corioforce
     real(fp)                   :: cnurh
     real(fp)                   :: ddza
     real(fp)                   :: ddzb
     real(fp)                   :: ddzc
+    real(fp)                   :: densforce
     real(fp)                   :: dia
     real(fp)                   :: drythreshold
     real(fp), dimension(1,1,1) :: dummy
     real(fp)                   :: dpsmax
     real(fp)                   :: facmax
     real(fp)                   :: ff
+    real(fp)                   :: flowresist
     real(fp)                   :: gksi
     real(fp)                   :: h0i
     real(fp)                   :: hl
     real(fp)                   :: hr
     real(fp)                   :: hugsqs  ! HU(NM/NMD) * GSQS(NM) Depending on UMDIS the HU of point NM or NMD will be used
+    real(fp)                   :: pressure
     real(fp)                   :: qwind
     real(fp),external          :: redvic
     real(fp)                   :: rn
-    real(fp)                   :: rou
+    real(fp)                   :: rhou
     real(fp)                   :: svvv
+    real(fp)                   :: tidegforce
     real(fp)                   :: tsg1
     real(fp)                   :: tsg2
     real(fp)                   :: umod
@@ -267,6 +287,7 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
     real(fp)                   :: viz2
     real(fp)                   :: vvv
     real(fp)                   :: vvvc   ! Tangential velocity component used in Coriolis term
+    real(fp)                   :: wlpress
     real(fp)                   :: wsumax
     real(fp)                   :: www
 !
@@ -296,10 +317,38 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
     ! INITIALISATION
     !
     call timer_start(timer_cucnp_ini, gdp)
+    !
+    if (mom_output) then
+       if (icx==1) then ! solve V/N component
+          mom_m_velchange  => gdp%gdflwpar%mom_n_velchange
+          mom_m_densforce  => gdp%gdflwpar%mom_n_densforce
+          mom_m_flowresist => gdp%gdflwpar%mom_n_flowresist
+          mom_m_corioforce => gdp%gdflwpar%mom_n_corioforce
+          mom_m_visco      => gdp%gdflwpar%mom_n_visco
+          mom_m_pressure   => gdp%gdflwpar%mom_n_pressure
+          mom_m_tidegforce => gdp%gdflwpar%mom_n_tidegforce
+          mom_m_windforce  => gdp%gdflwpar%mom_n_windforce
+          mom_m_bedforce   => gdp%gdflwpar%mom_n_bedforce
+          mom_m_waveforce  => gdp%gdflwpar%mom_n_waveforce
+       else ! solve U/M component
+          mom_m_velchange  => gdp%gdflwpar%mom_m_velchange
+          mom_m_densforce  => gdp%gdflwpar%mom_m_densforce
+          mom_m_flowresist => gdp%gdflwpar%mom_m_flowresist
+          mom_m_corioforce => gdp%gdflwpar%mom_m_corioforce
+          mom_m_visco      => gdp%gdflwpar%mom_m_visco
+          mom_m_pressure   => gdp%gdflwpar%mom_m_pressure
+          mom_m_tidegforce => gdp%gdflwpar%mom_m_tidegforce
+          mom_m_windforce  => gdp%gdflwpar%mom_m_windforce
+          mom_m_bedforce   => gdp%gdflwpar%mom_m_bedforce
+          mom_m_waveforce  => gdp%gdflwpar%mom_m_waveforce
+       endif
+    endif
+    !
     ddb = gdp%d%ddbound
     icxy = max(icx, icy)
     !
     ! factor in maximum wave force 1/4 alpha rho g gammax**2 h**2 / tp /(sqrt(g h)
+    !
     facmax       = 0.25*sqrt(ag)*rhow*gammax**2
     drythreshold = 0.1_fp * dryflc
     !
@@ -316,25 +365,34 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
     !
     do k = 1, kmax
         do nm = 1, nmmax
-            bbk(nm, k) = 1.0/hdt
-            if (kfu(nm) == 0) then
-                ddk(nm,k) = 0.0_fp
+            kspu0k = kspu(nm, 0)*kspu(nm, k)
+            !
+            ! For a closed gate layer or dry velocity points
+            !
+            if (kfu(nm) == 0 .or. kspu0k==4 .or. kspu0k==10) then
+                if (mom_output) then
+                    mom_m_velchange(nm, k) = mom_m_velchange(nm, k) &
+                                           & + u1(nm, k)/hdt
+                else
+                    bbk(nm, k) = 1.0/hdt
+                    ddk(nm, k) = 0.0_fp
+                endif
             else
                 !
-                ! For a closed gate layer
+                !  For 2D weir use UUU value derived from flux QXK (value at old time step)
                 !
-                kspu0k = kspu(nm, 0)*kspu(nm, k)
-                if (kspu0k==4 .or. kspu0k==10) then
-                    ddk(nm, k) = 0.0
+                if (abs(kspu(nm, 0))==9) then
+                    uuu = qxk(nm, k)/(guu(nm)*hu(nm))
                 else
-                    !
-                    !  For 2D weir use UUU value derived from flux QXK (value at old time step)
-                    !
-                    if (abs(kspu(nm, 0))==9) then
-                        uuu = qxk(nm, k)/(guu(nm)*hu(nm))
-                    else
-                        uuu = u0(nm, k)
-                    endif
+                    uuu = u0(nm, k)
+                endif
+                if (mom_output) then
+                    mom_m_velchange(nm, k) = mom_m_velchange(nm, k) &
+                                           & + (u1(nm, k) - uuu)/hdt
+                    mom_m_densforce(nm, k) = mom_m_densforce(nm, k) &
+                                           & - icreep*dpdksi(nm, k)
+                else
+                    bbk(nm, k) = 1.0/hdt
                     ddk(nm, k) = uuu/hdt - icreep*dpdksi(nm, k)
                 endif
             endif
@@ -350,7 +408,8 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
             & dps       ,s0        ,u0        ,v1        ,qxk       ,qyk       , &
             & hu        ,guu       ,gvv       ,gvd       ,gvu       ,gsqiu     , &
             & umean     ,bbk       ,ddk       ,dummy     ,dummy     ,dummy     , &
-            & dummy     ,dummy     ,dummy     ,dummy     ,dummy     ,gdp)
+            & dummy     ,dummy     ,dummy     ,dummy     ,dummy     ,mom_output, &
+            & u1        ,gdp)
     elseif (momsol == 'flood ') then
         call mom_fls &
              &(icx       ,icy       ,nmmax     ,kmax      ,kcu       ,kcs       , &
@@ -359,7 +418,7 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
              & hu        ,guu       ,gvv       ,gvd       ,gvu       ,gsqiu     , &
              & umean     ,bbk       ,ddk       ,dummy     ,dummy     ,dummy     , &
              & dummy     ,dummy     ,dummy     ,ua        ,ub        ,thick     , &
-             & gdp)
+             & mom_output,gdp)
     endif
     call timer_stop(timer_cucnp_momsol, gdp)
     call timer_start(timer_cucnp_rhs, gdp)
@@ -379,10 +438,10 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
           num  = num  + 1
           numu = numu + 1
           ndmu = ndmu + 1
-          !
-          ! For an active point and not a gate and plate
-          !
           kspu0k = kspu(nm, 0)*kspu(nm, k)
+          !
+          ! For an active point and not a gate or plate
+          !
           if (kfu(nm)==1 .and. kspu0k /=4 .and. kspu0k /=10) then
              gksi = gvu(nm)
              svvv = max(kfv(ndm) + kfv(ndmu) + kfv(nm) + kfv(nmu), 1)
@@ -411,7 +470,7 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
              uuu  = u0(nm, k)
              umod = sqrt(uuu*uuu + vvv*vvv)
              !
-             rou = .5*(rho(nm, k) + rho(nmu, k))
+             rhou = .5*(rho(nm, k) + rho(nmu, k))
              !
              ! FLAG BAROCLINE PRESSURE ON OPEN BOUNDARY (DEFAULT YES IBAROC = 1)
              !
@@ -424,22 +483,52 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
              !     KSPU(NM,0)*KSPU(NM,K)<>4, so initialisation
              !     test like in loop 100 of UZD is not necessary
              !
-             aak(nm, k) = -ag*rhofrac/gksi
-             cck(nm, k) =  ag*rhofrac/gksi
-             bbk(nm, k) = bbk(nm, k) + 0.5*rttfu(nm, k)*umod
-             ddk(nm, k) = ddk(nm, k) +                                          &
-                        & ff*fcorio(nm)*vvvc - ag*(1. - icreep)/(gksi*rhow)     &
-                        & *nbaroc*(sig(k)*rou*(hr - hl)                         &
-                        & + (sumrho(nmu, k)*hr - sumrho(nm, k)*hl))             &
-                        & - (patm(nmu) - patm(nm))/(gksi*rhow)                  &
-                        & - (pship(nmu) - pship(nm))/(gksi*rhow)                &
-                        & + ag*(tgfsep(nmu) - tgfsep(nm))/gksi
+             wlpress    =  ag*rhofrac/gksi
+             flowresist = 0.5*rttfu(nm, k)*umod
+             corioforce = ff*fcorio(nm)*vvvc
+             densforce  = - ag*(1. - icreep)/(gksi*rhow)*nbaroc*(sig(k)*rhou*(hr - hl) + (sumrho(nmu, k)*hr - sumrho(nm, k)*hl))
+             !
+             ! limit pressure term in case of drying/flooding on steep slopes
+             !
+             if (slplim) then
+                dpsmax = max(-dps(nm),-dps(nmu))
+                if (s0(nm) < dpsmax) then
+                   pressure = - ag*rhofrac*(s0(nmu) - dpsmax)/gvu(nm)
+                elseif (s0(nmu) < dpsmax) then
+                   pressure = - ag*rhofrac*(dpsmax  - s0(nm))/gvu(nm)
+                else
+                   pressure = - ag*rhofrac*(s0(nmu) - s0(nm))/gvu(nm)
+                endif
+             else
+                pressure    = - ag*rhofrac*(s0(nmu) - s0(nm))/gvu(nm)
+             endif
+             pressure   = pressure                                              &
+                        & - (patm(nmu) - patm(nm))/(gvu(nm)*rhow)               &
+                        & - (pship(nmu) - pship(nm))/(gvu(nm)*rhow)
+             tidegforce = ag*(tgfsep(nmu) - tgfsep(nm))/gksi
+             !
+             if (mom_output) then
+                mom_m_flowresist(nm, k) = mom_m_flowresist(nm, k) &
+                                        & - flowresist*u1(nm, k)
+                mom_m_densforce(nm, k)  = mom_m_densforce(nm, k) + densforce
+                mom_m_corioforce(nm, k) = mom_m_corioforce(nm, k) + corioforce
+                if (k==1) then
+                   mom_m_pressure(nm)   = mom_m_pressure(nm) &
+                                        & + pressure - wlpress*(s1(nmu) - s1(nm))
+                   mom_m_tidegforce(nm) = mom_m_tidegforce(nm) + tidegforce 
+                endif
+             else
+                aak(nm, k) = - wlpress
+                cck(nm, k) = + wlpress
+                bbk(nm, k) = bbk(nm, k) + flowresist
+                ddk(nm, k) = ddk(nm, k) + corioforce + densforce + pressure + tidegforce
+             endif
           endif
        enddo
     enddo
     call timer_stop(timer_cucnp_rhs, gdp)
     !
-    ! energy loss (local weir loss/rigid sheets)
+    ! energy loss: e.g. local weirs, rigid sheets
     !
     call timer_start(timer_cucnp_eloss, gdp)
     if (kmax == 1) then
@@ -464,14 +553,6 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
        if (kfu(nm)==1) then
           h0i = 1./hu(nm)
           !
-          ! WIND AND BOTTOM FRICTION
-          !
-          qwind  = 0.0
-          bdmwrp = 0.0
-          bdmwrs = 0.0
-          !
-          ! BOTTOM STRESS DUE TO FLOW AND WAVES
-          !
           ! Special measures for inundation
           !
           ! Estimate velocity on the basis of local equilibrium by solving u(nm)
@@ -491,33 +572,25 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
              endif
           endif
           !
-          ! Slope correction for steep slopes
+          ! WIND FRICTION AND BOTTOM STRESS DUE TO FLOW AND WAVES
           !
-          if (slplim) then
-             nmu    = nm + icx
-             dpsmax = max(-dps(nm),-dps(nmu))
-             if (s0(nm) < dpsmax) then
-                do k = 1, kmax
-                   ddk(nm,k) = ddk(nm,k) - ag*(s0(nm)-dpsmax)/gvu(nm)
-                enddo
-             elseif (s0(nmu) < dpsmax) then
-                do k = 1, kmax
-                   ddk(nm,k) = ddk(nm,k) + ag*(s0(nmu)-dpsmax)/gvu(nm)
-                enddo
-             endif
+
+          qwind  = h0i*windsu(nm)/thick(1)
+          if (mom_output) then
+             mom_m_windforce(nm)     = mom_m_windforce(nm) - qwind/rhow
+          else
+             ddk(nm, 1)    = ddk(nm, 1) - qwind/rhow
           endif
           !
-          ! End of special measures for smooth inundation
-          !
-          ! Bottom and wind shear stress
-          !
-          cbot         = taubpu(nm)
-          qwind        = h0i*windsu(nm)/thick(1)
-          bdmwrp       = h0i*cbot/thick(kmax)
-          bdmwrs       = h0i*taubsu(nm)/thick(kmax)
-          bbk(nm,kmax) = bbk(nm, kmax) + bdmwrp
-          ddk(nm,1)    = ddk(nm, 1) - qwind/rhow
-          ddk(nm,kmax) = ddk(nm, kmax) + bdmwrs
+          bdmwrp = h0i*taubpu(nm)/thick(kmax)
+          bdmwrs = h0i*taubsu(nm)/thick(kmax)
+          if (mom_output) then
+             mom_m_bedforce(nm)      = mom_m_bedforce(nm) &
+                                     & + bdmwrs - bdmwrp*u1(nm, kmax)
+          else
+             bbk(nm, kmax) = bbk(nm, kmax) + bdmwrp
+             ddk(nm, kmax) = ddk(nm, kmax) + bdmwrs
+          endif
           !
           ! WAVE STRESS AT SURFACE
           ! Physical limit to WSU to prevent unrealistically large stress in shallow water
@@ -526,19 +599,34 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
              wsumax = facmax*hu(nm)**(1.5)/max(0.1_fp, tp(nm))
              wsu(nm) = sign(min(abs(wsu(nm)), wsumax), wsu(nm))
              !
-             ddk(nm, 1) = ddk(nm, 1) + wsu(nm)*h0i/(rhow*thick(1))
+             if (mom_output) then
+                mom_m_waveforce(nm, 1)  = mom_m_waveforce(nm, 1) &
+                                        & + wsu(nm)*h0i/(rhow*thick(1))
+             else
+                ddk(nm, 1) = ddk(nm, 1) + wsu(nm)*h0i/(rhow*thick(1))
+             endif
              !
              ! WAVE INDUCED BODY FORCE
              !
              if (roller .or. xbeach) then
                 fxw(nm) = sign(min(abs(fxw(nm)), wsumax), fxw(nm))
                 do k = 1, kmax
-                   ddk(nm, k) = ddk(nm, k) + fxw(nm)*h0i/rhow
+                   if (mom_output) then
+                      mom_m_waveforce(nm, k)  = mom_m_waveforce(nm, k) &
+                                              & + fxw(nm)*h0i/rhow
+                   else
+                      ddk(nm, k) = ddk(nm, k) + fxw(nm)*h0i/rhow
+                   endif
                 enddo
              else
                 wsbodyu(nm) = sign(min(abs(wsbodyu(nm)), wsumax), wsbodyu(nm))
                 do k = 1, kmax
-                   ddk(nm, k) = ddk(nm, k) + wsbodyu(nm)*h0i/rhow
+                   if (mom_output) then
+                      mom_m_waveforce(nm, k)  = mom_m_waveforce(nm, k) &
+                                              & + wsbodyu(nm)*h0i/rhow
+                   else
+                      ddk(nm, k) = ddk(nm, k) + wsbodyu(nm)*h0i/rhow
+                   endif
                 enddo
              endif
           endif
@@ -675,8 +763,14 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
                 !
                 ! Effect of waves, due to Stokes drift
                 !
-                ddk(nm, k) = ddk(nm,k) - ( ddza*(ustokes(nm,kdo)-ustokes(nm,k  )) -   &
-                                        &  ddzc*(ustokes(nm,k  )-ustokes(nm,kup))   )
+                if (mom_output) then
+                   mom_m_waveforce(nm, k)  = mom_m_waveforce(nm, k) &
+                                        & - ( ddza*(ustokes(nm,kdo)-ustokes(nm,k  )) -   &
+                                           &  ddzc*(ustokes(nm,k  )-ustokes(nm,kup))   )
+                else
+                   ddk(nm, k) = ddk(nm,k) - ( ddza*(ustokes(nm,kdo)-ustokes(nm,k  )) -   &
+                                           &  ddzc*(ustokes(nm,k  )-ustokes(nm,kup))   )
+                endif
                 !
                 ! advection in vertical direction; w*du/dz
                 !

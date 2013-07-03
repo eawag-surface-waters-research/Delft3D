@@ -5,7 +5,7 @@ subroutine mom_fls &
                & hu        ,guu       ,gvv       ,gvd       ,gvu       ,gsqiu     , &
                & umean     ,bbk       ,ddk       ,dumm1     ,dumm2     ,dumm3     , &
                & dumm4     ,dumm5     ,dumm6     ,ua        ,ub        ,thick     , &
-               & gdp         ) 
+               & mom_output,gdp) 
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -66,6 +66,8 @@ subroutine mom_fls &
     real(fp)     , pointer :: dgcuni
     real(fp)     , pointer :: dryflc
     logical      , pointer :: cstbnd
+    real(fp), dimension(:,:)          , pointer :: mom_m_convec        ! convection u*du/dx term
+    real(fp), dimension(:,:)          , pointer :: mom_m_xadvec        ! cross-advection v*du/dy term
 !
 ! Global variables
 !
@@ -104,6 +106,7 @@ subroutine mom_fls &
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: dumm5
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: dumm6
     real(fp)  , dimension(kmax)                                       :: thick  !  Description and declaration in esm_alloc_real.f90
+    logical                                              , intent(in) :: mom_output
 !
 ! Local variables
 !
@@ -135,6 +138,7 @@ subroutine mom_fls &
     real(fp)           :: qyup
     real(fp)           :: qydo
     real(fp)           :: svvv
+    real(fp)           :: termex
     real(fp)           :: trsh
     real(fp), external :: ulim
     real(fp)           :: uvdgdy
@@ -146,6 +150,16 @@ subroutine mom_fls &
     dgcuni  => gdp%gdnumeco%dgcuni
     dryflc  => gdp%gdnumeco%dryflc
     cstbnd  => gdp%gdnumeco%cstbnd
+    !
+    if (mom_output) then
+       if (icx==1) then ! solve V/N component
+          mom_m_convec => gdp%gdflwpar%mom_n_convec
+          mom_m_xadvec => gdp%gdflwpar%mom_n_xadvec
+       else ! solve U/M component
+          mom_m_convec => gdp%gdflwpar%mom_m_convec
+          mom_m_xadvec => gdp%gdflwpar%mom_m_xadvec
+       endif
+    endif
     !
     ! INITIALISATION
     !
@@ -278,8 +292,6 @@ subroutine mom_fls &
                 !
                 vvdgdx = 0.5 * vvv * gsqi * (guu(nmu)-guu(nmd))
              endif
-             advecy = advecy - vvv*vvdgdx
-             advecx = advecx + u0(nm,k)*uvdgdy
              !
              ! Switch from momentum conservation to energy conservation
              !
@@ -299,7 +311,14 @@ subroutine mom_fls &
                     factor = 1.0_fp
                  endif
              endif
-             ddk(nm, k) = ddk(nm,k) - advecx/factor - advecy/factor
+             advecy = advecy - vvv*vvdgdx
+             advecx = advecx + u0(nm,k)*uvdgdy
+             if (mom_output) then
+                mom_m_xadvec(nm, k) = mom_m_xadvec(nm, k) - advecy/factor
+                mom_m_convec(nm, k) = mom_m_convec(nm, k) - advecx/factor
+             else
+                ddk(nm, k)  = ddk(nm, k) - advecx/factor - advecy/factor
+             endif
           endif
        enddo
     enddo

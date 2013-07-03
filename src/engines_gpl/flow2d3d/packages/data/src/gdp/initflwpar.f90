@@ -61,6 +61,7 @@ subroutine initflwpar(gdp)
     gdp%gdflwpar%flwoutput%difuflux        = .false.
     gdp%gdflwpar%flwoutput%halfdt          = .false.
     gdp%gdflwpar%flwoutput%layering        = .false.
+    gdp%gdflwpar%flwoutput%momentum        = .false.
     gdp%gdflwpar%flwoutput%roughness       = .false.
     gdp%gdflwpar%flwoutput%temperature     = .false.
     gdp%gdflwpar%flwoutput%vortic          = .false.
@@ -74,6 +75,32 @@ subroutine initflwpar(gdp)
     nullify(gdp%gdflwpar%fluxvc)
     nullify(gdp%gdflwpar%fluxw)
     nullify(gdp%gdflwpar%fluxwc)
+    !
+    nullify(gdp%gdflwpar%mom_m_velchange)
+    nullify(gdp%gdflwpar%mom_m_densforce)
+    nullify(gdp%gdflwpar%mom_m_flowresist)
+    nullify(gdp%gdflwpar%mom_m_corioforce)
+    nullify(gdp%gdflwpar%mom_m_visco)
+    nullify(gdp%gdflwpar%mom_m_pressure)
+    nullify(gdp%gdflwpar%mom_m_tidegforce)
+    nullify(gdp%gdflwpar%mom_m_windforce)
+    nullify(gdp%gdflwpar%mom_m_bedforce)
+    nullify(gdp%gdflwpar%mom_m_waveforce)
+    nullify(gdp%gdflwpar%mom_m_convec)
+    nullify(gdp%gdflwpar%mom_m_xadvec)
+    !
+    nullify(gdp%gdflwpar%mom_n_velchange)
+    nullify(gdp%gdflwpar%mom_n_densforce)
+    nullify(gdp%gdflwpar%mom_n_flowresist)
+    nullify(gdp%gdflwpar%mom_n_corioforce)
+    nullify(gdp%gdflwpar%mom_n_visco)
+    nullify(gdp%gdflwpar%mom_n_pressure)
+    nullify(gdp%gdflwpar%mom_n_tidegforce)
+    nullify(gdp%gdflwpar%mom_n_windforce)
+    nullify(gdp%gdflwpar%mom_n_bedforce)
+    nullify(gdp%gdflwpar%mom_n_waveforce)
+    nullify(gdp%gdflwpar%mom_n_convec)
+    nullify(gdp%gdflwpar%mom_n_xadvec)
     !
     nullify(gdp%gdflwpar%fcrbnd) 
     !

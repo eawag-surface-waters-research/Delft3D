@@ -443,6 +443,7 @@ subroutine rdtimo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     !
     call prop_get_logical(gdp%mdfile_ptr, '*', 'AdvFlx', flwoutput%difuflux)
     call prop_get_logical(gdp%mdfile_ptr, '*', 'CumAFl', flwoutput%cumdifuflux)
+    call prop_get_logical(gdp%mdfile_ptr, '*', 'MomTrm', flwoutput%momentum)
     call prop_get_logical(gdp%mdfile_ptr, '*', 'Chezy' , flwoutput%chezy)
     call prop_get_logical(gdp%mdfile_ptr, '*', 'Rough' , flwoutput%roughness)
     call prop_get_logical(gdp%mdfile_ptr, '*', 'Vortic' , flwoutput%vortic)

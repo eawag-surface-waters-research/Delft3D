@@ -1221,6 +1221,8 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
               & gdp       )
     call timer_stop(timer_f0isf1, gdp)
     !
+    call init_mom_output(gdp)
+    !
     if (dpmveg) then
        !
        ! update vegetation arrays if necessary

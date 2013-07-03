@@ -4,7 +4,8 @@ subroutine mom_cyclic &
                & dps       ,s0        ,u0        ,v         ,qxk       ,qyk       , &
                & hu        ,guu       ,gvv       ,gvd       ,gvu       ,gsqiu     , &
                & umean     ,bbk       ,ddk       ,bddx      ,bddy      ,bdx       , &
-               & bdy       ,bux       ,buy       ,buux      ,buuy      ,gdp)
+               & bdy       ,bux       ,buy       ,buux      ,buuy      ,mom_output, &
+               & u1        ,gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -36,8 +37,8 @@ subroutine mom_cyclic &
 !!--description-----------------------------------------------------------------
 !
 ! This subroutine is part of (called by) UZD. It computes the Horizontal
-! Advection.
-! In U- and V-direction an implicit 2-nd order upwind.
+! Advection in U- and V-direction following the default cyclic scheme.
+! In both U- and V-direction an implicit 2-nd order upwind.
 ! (Ref.: Stelling & Leendertse
 !        "Approximation of Convective Processes by Cyclic
 !         AOI methods", Proc. 2nd ASCE Conf. on Estuarine
@@ -50,7 +51,7 @@ subroutine mom_cyclic &
 ! implemented.
 ! It computes the contribution of the advection terms to the matrix elements
 ! and the right hand side of the system of discretised momentum equations.
-!!
+!
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
@@ -67,6 +68,8 @@ subroutine mom_cyclic &
     logical      , pointer :: cstbnd
     logical      , pointer :: wind
     logical      , pointer :: struct
+    real(fp), dimension(:,:)          , pointer :: mom_m_convec        ! convection u*du/dx term
+    real(fp), dimension(:,:)          , pointer :: mom_m_xadvec        ! cross-advection v*du/dy term
 !
 ! Global variables
 !
@@ -101,9 +104,12 @@ subroutine mom_cyclic &
     real(fp),   dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: ddk
     real(fp),   dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: qxk    !  Description and declaration in esm_alloc_real.f90
     real(fp),   dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: qyk    !  Description and declaration in esm_alloc_real.f90
-    real(fp),   dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: u0     !  Description and declaration in esm_alloc_real.f90
-    real(fp),   dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                :: v
+    real(fp),   dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: u0     !  Description and declaration in esm_alloc_real.f90
+    real(fp),   dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: u1     !  Description and declaration in esm_alloc_real.f90
+                                                                                !  Only used in case mom_output = .true.
+    real(fp),   dimension(gdp%d%nmlb:gdp%d%nmub, kmax)   , intent(in) :: v
     real(fp),   dimension(gdp%d%nmlb:gdp%d%nmub)                      :: umean  !  Description and declaration in esm_alloc_real.f90
+    logical                                              , intent(in) :: mom_output
 !
 ! Local variables
 !
@@ -128,6 +134,12 @@ subroutine mom_cyclic &
     integer :: nuum
     real(fp):: adfac
     real(fp):: gsqi
+    real(fp):: termc
+    real(fp):: termd
+    real(fp):: termdd
+    real(fp):: termex
+    real(fp):: termu
+    real(fp):: termuu
     real(fp):: uu
     real(fp):: vvv
     real(fp):: vvhr
@@ -139,6 +151,16 @@ subroutine mom_cyclic &
     wind       => gdp%gdprocs%wind
     struct     => gdp%gdprocs%struct
     cstbnd     => gdp%gdnumeco%cstbnd
+    !
+    if (mom_output) then
+       if (icx==1) then ! solve V/N component
+          mom_m_convec => gdp%gdflwpar%mom_n_convec
+          mom_m_xadvec => gdp%gdflwpar%mom_n_xadvec
+       else ! solve U/M component
+          mom_m_convec => gdp%gdflwpar%mom_m_convec
+          mom_m_xadvec => gdp%gdflwpar%mom_m_xadvec
+       endif
+    endif
     !
     !  INITIALIZE
     !
@@ -196,10 +218,9 @@ subroutine mom_cyclic &
              !
              ! CONTRIBUTION OF CONVECTION IN X DIRECTION
              !
+             ! begin standard delft3d-flow (compare to mom_waqua)
+             !
              if (u0(nm, k)>0.0) then
-                !
-                ! begin standard delft3d-flow (compare to uzd_wq)
-                !
                 kspu0k = kspu(nmd, 0)*kspu(nmd, k)
                 if (kspu0k==4 .or. kspu0k==10) then
                    neigat = 0
@@ -211,8 +232,15 @@ subroutine mom_cyclic &
                    ! Energy conservative discretisation for structure points
                    !
                    uu = adfac*(u0(nm, k) + u0(nmd, k))
-                   bbk(nm, k) = bbk(nm, k) + (uu + uvdgdy)*kfu(nmd)*neigat
-                   bdx(nm, k) = -uu*kfu(nmd)*neigat
+                   termc = (uu + uvdgdy)*kfu(nmd)*neigat
+                   termd = -uu*kfu(nmd)*neigat
+                   if (mom_output) then
+                      mom_m_convec(nm, k) = mom_m_convec(nm, k) &
+                                          & - termc*u1(nm, k) - termd*u1(nmd, k)
+                   else
+                      bbk(nm, k) = bbk(nm, k) + termc
+                      bdx(nm, k) = termd
+                   endif
                 else
                    !
                    ! Upwind approach near structure points and inactive u-points
@@ -229,10 +257,17 @@ subroutine mom_cyclic &
                    !
                    ! NON CONSERVATIVE FORM
                    !
-                   bbk(nm, k) = bbk(nm, k) + u0(nm, k)*adfac*(iad1 + iad2)      &
-                              & + uvdgdy*kfu(nmd)*neigat
-                   bdx(nm, k) = u0(nm, k)*adfac*( - iad1 - iad2 - iad2)
-                   bddx(nm, k) = u0(nm, k)*adfac*(iad2)
+                   termc  = u0(nm, k)*adfac*(iad1 + iad2) + uvdgdy*kfu(nmd)*neigat
+                   termd  = u0(nm, k)*adfac*( - iad1 - iad2 - iad2)
+                   termdd = u0(nm, k)*adfac*(iad2)
+                   if (mom_output) then
+                      mom_m_convec(nm, k) = mom_m_convec(nm, k) &
+                                          & - termc*u1(nm, k) - termd*u1(nmd, k) - termdd*u1(nmdd, k)
+                   else
+                      bbk(nm, k)  = bbk(nm, k) + termc
+                      bdx(nm, k)  = termd
+                      bddx(nm, k) = termdd
+                   endif
                 endif
              else
                 kspu0k = kspu(nmu, 0)*kspu(nmu, k)
@@ -246,8 +281,15 @@ subroutine mom_cyclic &
                    ! Energy conservative discretisation for structure points
                    !
                    uu = adfac*(u0(nm, k) + u0(nmu, k))
-                   bbk(nm, k) = bbk(nm, k) + (uvdgdy - uu)*kfu(nmu)*neigat
-                   bux(nm, k) = uu*kfu(nmu)*neigat
+                   termc = (uvdgdy - uu)*kfu(nmu)*neigat
+                   termu = uu*kfu(nmu)*neigat
+                   if (mom_output) then
+                      mom_m_convec(nm, k) = mom_m_convec(nm, k) &
+                                          & - termc*u1(nm, k) - termu*u1(nmu, k)
+                   else
+                      bbk(nm, k) = bbk(nm, k) + termc
+                      bux(nm, k) = termu
+                   endif
                 else
                    !
                    ! Upwind approach near structure points and inactive u-points
@@ -266,15 +308,22 @@ subroutine mom_cyclic &
                    !
                    ! NON CONSERVATIVE FORM
                    !
-                   bbk(nm, k) = bbk(nm, k) + u0(nm, k)*adfac*( - iad1 - iad2)   &
-                              & + uvdgdy*kfu(nmu)*neigat
-                   bux(nm, k) = u0(nm, k)*adfac*(iad1 + iad2 + iad2)
-                   buux(nm, k) = u0(nm, k)*adfac*( - iad2)
+                   termc  = u0(nm, k)*adfac*( - iad1 - iad2) + uvdgdy*kfu(nmu)*neigat
+                   termu  = u0(nm, k)*adfac*(iad1 + iad2 + iad2)
+                   termuu = u0(nm, k)*adfac*( - iad2)
+                   if (mom_output) then
+                      mom_m_convec(nm, k) = mom_m_convec(nm, k) &
+                                          & - termc*u1(nm, k) - termu*u1(nmu, k) - termuu*u1(nmuu, k)
+                   else
+                      bbk(nm, k)  = bbk(nm, k) + termc
+                      bux(nm, k)  = termu
+                      buux(nm, k) = termuu
+                   endif
                 endif
-             !
-             ! end standard delft3d-flow (compare to uzd_wq)
-             !
              endif
+             !
+             ! end standard delft3d-flow (compare to mom_waqua)
+             !
              !
              ! CONTRIBUTION OF ADVECTION IN Y DIRECTION
              !           IAD1      =KFV(NDM) *KFV(NDMU)*KFU(NDM) for VVHR > 0
@@ -299,10 +348,19 @@ subroutine mom_cyclic &
                       iad1 = kfv(ndm)*kfv(ndmu)
                       iad2 = iad1*kfv(nddm)*kfv(nddmu)*kfu(nddm)
                    endif
-                   bbk(nm, k) = bbk(nm, k) + vvhr*(iad1 + iad1 + iad2)
-                   bdy(nm, k) = vvhr*( - iad1 - iad1 - iad2 - iad2)
-                   bddy(nm, k) = vvhr*(iad2)
-                   ddk(nm, k) = ddk(nm, k) + vvv*vvdgdx*iad1
+                   termc  = vvhr*(iad1 + iad1 + iad2)
+                   termd  = vvhr*( - iad1 - iad1 - iad2 - iad2)
+                   termdd = vvhr*(iad2)
+                   termex = vvv*vvdgdx*iad1
+                   if (mom_output) then
+                      mom_m_xadvec(nm, k) = mom_m_xadvec(nm, k) &
+                                          & - termc*u1(nm, k) - termd*u1(ndm, k) - termdd*u1(nddm, k) + termex
+                   else
+                      bbk(nm, k)  = bbk(nm, k) + termc
+                      bdy(nm, k)  = termd
+                      bddy(nm, k) = termdd
+                      ddk(nm, k)  = ddk(nm, k) + termex
+                   endif
                 else
                    if (cstbnd) then
                       if (kcs(nm)==2) then
@@ -321,10 +379,19 @@ subroutine mom_cyclic &
                       iad1 = kfv(nm)*kfv(nmu)
                       iad2 = iad1*kfv(num)*kfv(numu)*kfu(nuum)
                    endif
-                   bbk(nm, k) = bbk(nm, k) + vvhr*( - iad1 - iad1 - iad2)
-                   buy(nm, k) = vvhr*(iad1 + iad1 + iad2 + iad2)
-                   buuy(nm, k) = vvhr*( - iad2)
-                   ddk(nm, k) = ddk(nm, k) + vvv*vvdgdx*iad1
+                   termc  = vvhr*( - iad1 - iad1 - iad2)
+                   termu  = vvhr*(iad1 + iad1 + iad2 + iad2)
+                   termuu = vvhr*( - iad2)
+                   termex = vvv*vvdgdx*iad1
+                   if (mom_output) then
+                      mom_m_xadvec(nm, k) = mom_m_xadvec(nm, k) &
+                                          & - termc*u1(nm, k) - termu*u1(num, k) - termuu*u1(nuum, k) + termex
+                   else
+                      bbk(nm, k)  = bbk(nm, k) + termc
+                      buy(nm, k)  = termu
+                      buuy(nm, k) = termuu
+                      ddk(nm, k)  = ddk(nm, k) + termex
+                   endif
                 endif
              endif
           endif

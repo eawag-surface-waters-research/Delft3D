@@ -4,7 +4,8 @@ subroutine mom_cw &
                & dps       ,s0        ,u0        ,v1        ,qxk       ,qyk       , &
                & hu        ,guu       ,gvv       ,gvd       ,gvu       ,gsqiu     , &
                & umean     ,bbk       ,ddk       ,dumm1     ,dumm2     ,dumm3     , &
-               & dumm4     ,dumm5     ,dumm6     ,dumm7     ,dumm8     ,gdp)
+               & dumm4     ,dumm5     ,dumm6     ,dumm7     ,dumm8     ,mom_output, &
+               & u1        ,gdp)
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -61,6 +62,8 @@ subroutine mom_cw &
     logical      , pointer :: cstbnd
     logical      , pointer :: wind
     logical      , pointer :: struct
+    real(fp), dimension(:,:)          , pointer :: mom_m_convec        ! convection u*du/dx term
+    real(fp), dimension(:,:)          , pointer :: mom_m_xadvec        ! cross-advection v*du/dy term
 !
 ! Global variables
 !
@@ -96,8 +99,12 @@ subroutine mom_cw &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: qxk    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: qyk    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: u0     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in) :: u1     !  Description and declaration in esm_alloc_real.f90
+                                                                             !  Only used in case mom_output = .true.
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: v1     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                     :: umean  !  Description and declaration in esm_alloc_real.f90
+    logical                                           , intent(in) :: mom_output
+
 !
 ! Local variables
 !
@@ -135,6 +142,16 @@ subroutine mom_cw &
     wind       => gdp%gdprocs%wind
     struct     => gdp%gdprocs%struct
     cstbnd     => gdp%gdnumeco%cstbnd
+    !
+    if (mom_output) then
+       if (icx==1) then ! solve V/N component
+          mom_m_convec => gdp%gdflwpar%mom_n_convec
+          mom_m_xadvec => gdp%gdflwpar%mom_n_xadvec
+       else ! solve U/M component
+          mom_m_convec => gdp%gdflwpar%mom_m_convec
+          mom_m_xadvec => gdp%gdflwpar%mom_m_xadvec
+       endif
+    endif
     !
     ! INITIALISATION
     !
@@ -283,8 +300,14 @@ subroutine mom_cw &
                 advecy = kad*(0.5*vvv*(u0(num, k) - u0(ndm, k))              &
                        & /geta - vvv*vvdgdx)
              endif
-             bbk(nm, k) = bbk(nm,k) + advecx
-             ddk(nm, k) = ddk(nm,k) - advecy - advcxe
+             if (mom_output) then
+                mom_m_convec(nm, k) = mom_m_convec(nm, k) &
+                                    & - advecx*u1(nm, k) - advcxe
+                mom_m_xadvec(nm, k) = mom_m_xadvec(nm, k) - advecy
+             else
+                bbk(nm, k)  = bbk(nm, k) + advecx
+                ddk(nm, k)  = ddk(nm, k) - advecy - advcxe
+             endif
           endif
        enddo
     enddo

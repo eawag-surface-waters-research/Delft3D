@@ -71,7 +71,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
 !                in drying check
 !              - 2D Turbulence model at depth points
 !
-! UA and UB are workarrays WRKB15 and WRKB16; Used ony in CUCNP
+! UA and UB are workarrays WRKB15 and WRKB16; Used only in CUCNP
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
@@ -365,7 +365,7 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
              & r0        ,diapl     ,rnpl      ,taubpu    ,taubsu    , &
              & windsu    ,patm      ,fcorio    ,ubrlsu    ,uwtypu    , &
              & hkru      ,pship     ,tgfsep    ,dteu      ,ua        , &
-             & ub        ,ustokes   ,gdp       )
+             & ub        ,ustokes   ,.false.   ,u1        ,s1        ,gdp       )
     call timer_stop(timer_sud_cucnp, gdp)
     !
     ! INITIALISATION OF ITERATION OVER CONTINUITY EQUATION
@@ -977,4 +977,29 @@ subroutine sud(dischy    ,nst       ,icreep    ,betac     ,mmax      , &
        endif
     endif
     call timer_stop(timer_sud_veldisch, gdp)
+    !
+    ! Optionally compute individual momentum terms for output
+    !
+    if (gdp%gdflwpar%flwoutput%momentum) then
+       ! pass hu or hu0 ?
+       call timer_start(timer_sud_cucnp, gdp)
+       call cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
+                & v1        ,w1        ,hu        ,hv        ,dps       ,dpu       , &
+                & umean     ,guu       ,gvv       ,gvu       ,gsqs      , &
+                & gvd       ,gud       ,gvz       ,gsqiu     ,qxk       , &
+                & qyk       ,disch     ,umdis     ,mnksrc    ,dismmt    ,j         , &
+                & nmmaxj    ,nmmax     ,kmax      ,icx       ,icy       , &
+                & nsrc      ,lsecfl    ,lstsci    ,betac     ,aak       , &
+                & bbk       ,cck       ,ddk       ,bbka      ,bbkc      , &
+                & thick     ,sig       ,rho       ,sumrho    ,vicuv     , &
+                & vnu2d     ,vicww     ,wsu       ,fxw       ,wsbodyu   , &
+                & rxx       ,rxy       ,kcs       ,kcu       ,kfu       ,kfv       , &
+                & kfs       ,kspu      ,kadu      ,kadv      ,dfu       ,deltau    , &
+                & tp        ,rlabda    ,cfurou    ,cfvrou    ,rttfu     , &
+                & r0        ,diapl     ,rnpl      ,taubpu    ,taubsu    , &
+                & windsu    ,patm      ,fcorio    ,ubrlsu    ,uwtypu    , &
+                & hkru      ,pship     ,tgfsep    ,dteu      ,ua        , &
+                & ub        ,ustokes   ,.true.    ,u1        ,s1        ,gdp       )
+       call timer_stop(timer_sud_cucnp, gdp)
+    endif
 end subroutine sud

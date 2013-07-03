@@ -80,6 +80,7 @@ libKernelInichk_la_SOURCES = \
          initem.f90 \
          initgf.f90 \
          initmerge.f90 \
+         init_mom_output.f90 \
          initur.f90 \
          inivol.f90 \
          iwecof.f90 \

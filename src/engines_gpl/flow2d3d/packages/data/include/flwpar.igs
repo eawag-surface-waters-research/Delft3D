@@ -39,6 +39,7 @@ type flwoutputtype
     logical :: difuflux
     logical :: halfdt
     logical :: layering
+    logical :: momentum
     logical :: roughness
     logical :: temperature
     logical :: veuler
@@ -77,6 +78,32 @@ type gd_flwpar
     !
     !
     ! pointers
+    !
+    real(fp), dimension(:,:)          , pointer :: mom_m_velchange     ! momentum du/dt term
+    real(fp), dimension(:,:)          , pointer :: mom_m_densforce     ! density force term in u dir
+    real(fp), dimension(:,:)          , pointer :: mom_m_flowresist    ! vegetation and porous plates in u dir
+    real(fp), dimension(:,:)          , pointer :: mom_m_corioforce    ! coriolis term in u dir
+    real(fp), dimension(:,:)          , pointer :: mom_m_visco         ! viscosity term in u dir
+    real(fp), dimension(:)            , pointer :: mom_m_pressure      ! pressure term in u dir
+    real(fp), dimension(:)            , pointer :: mom_m_tidegforce    ! tide generating forces in u dir
+    real(fp), dimension(:)            , pointer :: mom_m_windforce     ! wind shear in u dir
+    real(fp), dimension(:)            , pointer :: mom_m_bedforce      ! bed shear in u dir
+    real(fp), dimension(:,:)          , pointer :: mom_m_waveforce     ! wave forces in u dir
+    real(fp), dimension(:,:)          , pointer :: mom_m_convec        ! convection u*du/dx term
+    real(fp), dimension(:,:)          , pointer :: mom_m_xadvec        ! cross-advection v*du/dy term
+    !
+    real(fp), dimension(:,:)          , pointer :: mom_n_velchange     ! momentum dv/dt term
+    real(fp), dimension(:,:)          , pointer :: mom_n_densforce     ! density force term in v dir
+    real(fp), dimension(:,:)          , pointer :: mom_n_flowresist    ! vegetation and porous plates in v dir
+    real(fp), dimension(:,:)          , pointer :: mom_n_corioforce    ! coriolis term in v dir
+    real(fp), dimension(:,:)          , pointer :: mom_n_visco         ! viscosity term in v dir
+    real(fp), dimension(:)            , pointer :: mom_n_pressure      ! pressure term in v dir
+    real(fp), dimension(:)            , pointer :: mom_n_tidegforce    ! tide generating forces in v dir
+    real(fp), dimension(:)            , pointer :: mom_n_windforce     ! wind shear in v dir
+    real(fp), dimension(:)            , pointer :: mom_n_bedforce      ! bed shear in v dir
+    real(fp), dimension(:,:)          , pointer :: mom_n_waveforce     ! wave forces in v dir
+    real(fp), dimension(:,:)          , pointer :: mom_n_convec        ! convection v*dv/dy term
+    real(fp), dimension(:,:)          , pointer :: mom_n_xadvec        ! cross-advection u*dv/dx term
     !
     real(fp), dimension(:,:,:)        , pointer :: fluxu     ! constituent flux xi direction
     real(fp), dimension(:,:,:)        , pointer :: fluxuc    ! cumulative constituent flux xi direction

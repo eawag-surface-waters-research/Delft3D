@@ -4,7 +4,8 @@ subroutine mom_waqua &
                & dps       ,s0        ,u0        ,v         ,qxk       ,qyk       , &
                & hu        ,guu       ,gvv       ,gvd       ,gvu       ,gsqiu     , &
                & umean     ,bbk       ,ddk       ,bddx      ,bddy      ,bdx       , &
-               & bdy       ,bux       ,buy       ,buux      ,buuy      ,gdp) 
+               & bdy       ,bux       ,buy       ,buux      ,buuy      ,mom_output, &
+               & u1        ,gdp) 
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -42,10 +43,13 @@ subroutine mom_waqua &
 ! (Ref.: Stelling & Leendertse
 !        "Approximation of Convective Processes by Cyclic
 !         AOI methods", Proc. 2nd ASCE Conf. on Estuarine
-!         and Coastal Modelling, Tampa, 1991) 
+!         and Coastal Modelling, Tampa, 1991)
+!
+! Along open boundaries the advection terms normal to the open boundaries can
+! be switched off (option: CSTBND = TRUE)
 !
 ! It computes the contribution of the advection terms to the matrix elements
-! and the right hand side of the system of discretised momentum equations. 
+! and the right hand side of the system of discretised momentum equations.
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
@@ -61,6 +65,8 @@ subroutine mom_waqua &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     logical      , pointer :: cstbnd
+    real(fp), dimension(:,:)          , pointer :: mom_m_convec        ! convection u*du/dx term
+    real(fp), dimension(:,:)          , pointer :: mom_m_xadvec        ! cross-advection v*du/dy term
 !
 ! Global variables
 !
@@ -95,9 +101,12 @@ subroutine mom_waqua &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: ddk
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: qxk    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: qyk    !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: u0     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)               :: v
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in) :: u0     !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in) :: u1     !  Description and declaration in esm_alloc_real.f90
+                                                                                !  Only used in case mom_output = .true.
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                     :: umean  !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)  , intent(in) :: v
+    logical                                           , intent(in) :: mom_output
 !
 ! Local variables
 !
@@ -121,6 +130,12 @@ subroutine mom_waqua &
     integer :: nuum
     real(fp):: adfac
     real(fp):: gsqi
+    real(fp):: termc
+    real(fp):: termd
+    real(fp):: termdd
+    real(fp):: termex
+    real(fp):: termu
+    real(fp):: termuu
     real(fp):: vvv
     real(fp):: vvhr
     real(fp):: uvdgdy
@@ -129,6 +144,16 @@ subroutine mom_waqua &
 !! executable statements -------------------------------------------------------
 !
     cstbnd  => gdp%gdnumeco%cstbnd
+    !
+    if (mom_output) then
+       if (icx==1) then ! solve V/N component
+          mom_m_convec => gdp%gdflwpar%mom_n_convec
+          mom_m_xadvec => gdp%gdflwpar%mom_n_xadvec
+       else ! solve U/M component
+          mom_m_convec => gdp%gdflwpar%mom_m_convec
+          mom_m_xadvec => gdp%gdflwpar%mom_m_xadvec
+       endif
+    endif
     !
     !  INITIALIZE
     !
@@ -162,7 +187,7 @@ subroutine mom_waqua &
           !
           ! For an active point and not a gate or plate
           !
-          if (kcu(nm)*kfu(nm)==1 .and. kspu0k /=4 .and. kspu0k /=10) then
+          if ( kcu(nm)==1 .and. kfu(nm)==1 .and. kspu0k /=4 .and. kspu0k /=10) then
              gsqi   = gsqiu(nm)
              if (       (cstbnd .and. (kcs(nm)==2 .or. kcs(nmu)==2)) &
                  & .or. (kcs(nm)==3 .or. kcs(nmu)==3               )  ) then
@@ -171,7 +196,7 @@ subroutine mom_waqua &
                     & *kfv(nm) + v(nmu, k)*kfv(nmu))/kenm
              else
                 vvv = .25*(v(nm, k) + v(nmu, k) + v(ndm, k) + v(ndmu, k))
-             endif 
+             endif
              !
              ! CURVATURE TERM DUE TO CONVECTION IN U-DIRECTION
              !
@@ -184,27 +209,43 @@ subroutine mom_waqua &
              adfac  = 0.50/gvu(nm)
              vvhr   = 0.5*vvv/guu(nm)
              !
-             ! begin waqua (compare to standard uzd)
+             ! CONTRIBUTION OF CONVECTION IN X DIRECTION
+             !
+             ! begin waqua (compare to mom_cyclic)
              !
              if (u0(nm, k)>0.0) then
                 iad1 = kfu(nmd)*kadu(nmd, k)
                 iad2 = iad1*kfu(nmu)*kadu(nmu, k)
                 if (kcu(nmu)==3) iad2 = 0
-                bbk(nm, k) = bbk(nm, k) + uvdgdy*iad2 + u0(nm, k)               &
-                           & *adfac*(2*iad1 - 2*iad2)
-                bux(nm, k) = u0(nm, k)*adfac*(iad2)
-                bdx(nm, k) = -u0(nm, k)*adfac*(2*iad1 - iad2)
+                termc = uvdgdy*iad2 + u0(nm, k)*adfac*(2*iad1 - 2*iad2)
+                termu = u0(nm, k)*adfac*(iad2)
+                termd = -u0(nm, k)*adfac*(2*iad1 - iad2)
+                if (mom_output) then
+                   mom_m_convec(nm, k) = mom_m_convec(nm, k)  &
+                                       & - termu*u1(nmu, k) - termc*u1(nm, k) - termd*u1(nmd, k)
+                else
+                   bbk(nm, k) = bbk(nm, k) + termc
+                   bux(nm, k) = termu
+                   bdx(nm, k) = termd
+                endif
              else
                 iad1 = kfu(nmu)*kadu(nmu, k)
                 iad2 = iad1*kfu(nmd)*kadu(nmd, k)
                 if (kcu(nmd)==3) iad2 = 0
-                bbk(nm, k) = bbk(nm, k) + uvdgdy*iad2 + u0(nm, k)               &
-                           & *adfac*(2*iad2 - 2*iad1)
-                bdx(nm, k) = -u0(nm, k)*adfac*(iad2)
-                bux(nm, k) = u0(nm, k)*adfac*(2*iad1 - iad2)
+                termc = uvdgdy*iad2 + u0(nm, k)*adfac*(2*iad2 - 2*iad1)
+                termd = -u0(nm, k)*adfac*(iad2)
+                termu = u0(nm, k)*adfac*(2*iad1 - iad2)
+                if (mom_output) then
+                   mom_m_convec(nm, k) = mom_m_convec(nm, k) &
+                                       & - termu*u1(nmu, k) - termc*u1(nm, k) - termd*u1(nmd, k)
+                else
+                   bbk(nm, k) = bbk(nm, k) + termc
+                   bux(nm, k) = termu
+                   bdx(nm, k) = termd
+                endif
              endif
              !
-             ! end waqua (compare to standard uzd)
+             ! end waqua (compare to mom_cyclic)
              !
              !
              ! CONTRIBUTION OF ADVECTION IN Y DIRECTION
@@ -230,10 +271,19 @@ subroutine mom_waqua &
                       iad1 = kfv(ndm)*kfv(ndmu)
                       iad2 = iad1*kfv(nddm)*kfv(nddmu)*kfu(nddm)
                    endif
-                   bbk(nm, k) = bbk(nm, k) + vvhr*(iad1 + iad1 + iad2)
-                   bdy(nm, k) = vvhr*( - iad1 - iad1 - iad2 - iad2)
-                   bddy(nm, k) = vvhr*(iad2)
-                   ddk(nm, k) = ddk(nm, k) + vvv*vvdgdx*iad1
+                   termc  = vvhr*(iad1 + iad1 + iad2)
+                   termd  = vvhr*( - iad1 - iad1 - iad2 - iad2)
+                   termdd = vvhr*(iad2)
+                   termex = vvv*vvdgdx*iad1
+                   if (mom_output) then
+                      mom_m_xadvec(nm, k) = mom_m_xadvec(nm, k) &
+                                          & - termc*u1(nm, k) - termd*u1(ndm, k) - termdd*u1(nddm, k) + termex
+                   else
+                      bbk(nm, k)  = bbk(nm, k) + termc
+                      bdy(nm, k)  = termd
+                      bddy(nm, k) = termdd
+                      ddk(nm, k)  = ddk(nm, k) + termex
+                   endif
                 else
                    if (cstbnd) then
                       if (kcs(nm)==2) then
@@ -252,10 +302,19 @@ subroutine mom_waqua &
                       iad1 = kfv(nm)*kfv(nmu)
                       iad2 = iad1*kfv(num)*kfv(numu)*kfu(nuum)
                    endif
-                   bbk(nm, k) = bbk(nm, k) + vvhr*( - iad1 - iad1 - iad2)
-                   buy(nm, k) = vvhr*(iad1 + iad1 + iad2 + iad2)
-                   buuy(nm, k) = vvhr*( - iad2)
-                   ddk(nm, k) = ddk(nm, k) + vvv*vvdgdx*iad1
+                   termc  = vvhr*( - iad1 - iad1 - iad2)
+                   termu  = vvhr*(iad1 + iad1 + iad2 + iad2)
+                   termuu = vvhr*( - iad2)
+                   termex = vvv*vvdgdx*iad1
+                   if (mom_output) then
+                      mom_m_xadvec(nm, k) = mom_m_xadvec(nm, k) &
+                                          & - termc*u1(nm, k) - termu*u1(num, k) - termuu*u1(nuum, k) + termex
+                   else
+                      bbk(nm, k)  = bbk(nm, k) + termc
+                      buy(nm, k)  = termu
+                      buuy(nm, k) = termuu
+                      ddk(nm, k)  = ddk(nm, k) + termex
+                   endif
                 endif
              endif
           endif
