@@ -288,9 +288,8 @@ subroutine rdtdcn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
           ! corresponding format
           !
           if (n==1 .and. l==1) then
-             mxlrec = 89
-             if (tprofc(n, l)=='3d-profile') then
-                mxlrec = max(89, 16 + kmax*2*14 + 1)
+             mxlrec = max(89,16 + kmax*2*14 + 1)
+             if (mxlrec > 89) then           
                 do nb = 1, mxfmtc
                    ix = index(fmtbcc(nb), 't89')
                    if (ix/=0) then
@@ -596,8 +595,7 @@ subroutine rdtdcn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
              else
                 write (fmtbcc(13)(8:10), '(i3)') 2*kmax
                 write (lunout, fmtbcc(13), rec = irec + nr) &
-                    & timrd, (rwbval(k, 1, n, l), k = 1, kmax), (rwbval(k, 2, n, l),  &
-                    & k = 1, kmax), eol
+                    & timrd, (rwbval(k, 1, n, l), k = 1, kmax), (rwbval(k, 2, n, l),  k = 1, kmax), eol
              endif
              !
              ! Re-define ITOLD and
