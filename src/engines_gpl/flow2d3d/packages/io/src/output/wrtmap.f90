@@ -1089,7 +1089,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     !
     if (index(selmap(14:15),'Y') /= 0) then
        call wrtmap_nmkl(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay, &
-                     & kmaxout, 0, kmax, ltur, ierror, rtur1, 'RTUR1')
+                     & kmaxout, 0, kmax, ltur, ierror, rtur1, 'RTUR1', kfsmin, kfsmax)
        if (ierror /= 0) goto 999
     endif
     !
