@@ -249,9 +249,8 @@ subroutine rdtdtn(lundia    ,lunout    ,lunrd     ,error     ,filout    , &
        ! corresponding format
        !
        if (nn == 1) then
-          mxlrec = 83
-          if (tprofu(n)(:2) == '3d') then
-             mxlrec = max(83, 16 + kmax*2*14 + 1)
+          mxlrec = max(83, 16 + kmax*2*14 + 1)
+          if (mxlrec>83) then
              do nb = 1, mxfmtt
                 ix = index(fmtbct(nb), 't83')
                 if (ix /= 0) then
