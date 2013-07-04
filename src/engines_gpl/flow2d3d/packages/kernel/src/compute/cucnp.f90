@@ -489,18 +489,19 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
              densforce  = - ag*(1. - icreep)/(gksi*rhow)*nbaroc*(sig(k)*rhou*(hr - hl) + (sumrho(nmu, k)*hr - sumrho(nm, k)*hl))
              !
              ! limit pressure term in case of drying/flooding on steep slopes
+             ! note correction explicit whereas actual pressure term is implicit here (see wlpres)
              !
              if (slplim) then
                 dpsmax = max(-dps(nm),-dps(nmu))
                 if (s0(nm) < dpsmax) then
-                   pressure = - ag*rhofrac*(s0(nmu) - dpsmax)/gvu(nm)
+                   pressure = - ag*rhofrac*(s0(nm) - dpsmax)/gvu(nm)
                 elseif (s0(nmu) < dpsmax) then
-                   pressure = - ag*rhofrac*(dpsmax  - s0(nm))/gvu(nm)
+                   pressure = - ag*rhofrac*(dpsmax - s0(nmu))/gvu(nm)
                 else
-                   pressure = - ag*rhofrac*(s0(nmu) - s0(nm))/gvu(nm)
+                   pressure = 0.0_fp
                 endif
              else
-                pressure    = - ag*rhofrac*(s0(nmu) - s0(nm))/gvu(nm)
+                pressure = 0.0_fp
              endif
              pressure   = pressure                                              &
                         & - (patm(nmu) - patm(nm))/(gvu(nm)*rhow)               &
