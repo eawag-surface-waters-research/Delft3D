@@ -838,13 +838,15 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           !
           ! element 'R1FLX_UU'
           !
-          call wrtmap_nmkl_ptr(1, kmax, lstsci, ierror, fluxu, 'R1FLX_UU')
+          call wrtmap_nmkl_ptr(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                     & kmaxout_restr, 1, kmax, lstsci, ierror, fluxu, 'R1FLX_UU', kfumin, kfumax)
           if (ierror /= 0) goto 999
 
           !
           ! element 'R1FLX_VV'
           !
-          call wrtmap_nmkl_ptr(1, kmax, lstsci, ierror, fluxv, 'R1FLX_VV')
+          call wrtmap_nmkl_ptr(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                     & kmaxout_restr, 1, kmax, lstsci, ierror, fluxv, 'R1FLX_VV', kfvmin, kfvmax)
           if (ierror /= 0) goto 999
        endif
        !
@@ -852,12 +854,14 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
           !
           ! element 'R1FLX_UUC'
           !
-          call wrtmap_nmkl_ptr(1, kmax, lstsci, ierror, fluxuc, 'R1FLX_UUC')
+          call wrtmap_nmkl_ptr(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                     & kmaxout_restr, 1, kmax, lstsci, ierror, fluxuc, 'R1FLX_UUC', kfumin, kfumax)
           if (ierror /= 0) goto 999
           !
           ! element 'R1FLX_VVC'
           !
-          call wrtmap_nmkl_ptr(1, kmax, lstsci, ierror, fluxvc, 'R1FLX_VVC')
+          call wrtmap_nmkl_ptr(fds, grnam3, uindex, nf, nl, mf, ml, iarrc, gdp, smlay_restr, &
+                     & kmaxout_restr, 1, kmax, lstsci, ierror, fluxvc, 'R1FLX_VVC', kfvmin, kfvmax)
           if (ierror /= 0) goto 999
        endif
     endif

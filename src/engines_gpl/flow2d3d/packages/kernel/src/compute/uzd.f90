@@ -311,8 +311,10 @@ recursive subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
     real(fp)           :: smax
     real(fp)           :: svvv
     real(fp)           :: termc
-    real(fp)           :: termd
-    real(fp)           :: termu
+    real(fp)           :: termdx
+    real(fp)           :: termux
+    real(fp)           :: termdy
+    real(fp)           :: termuy
     real(fp)           :: tidegforce
     real(fp)           :: tsg1
     real(fp)           :: tsg2
@@ -776,20 +778,22 @@ recursive subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
                 !     VISCOSITY TERM HERE IS APPLIED ONLY IN THIS HALF TIMESTEP
                 !
                 vih = vicuv(nm, k) + vicuv(nmu, k) + vnu2d(nm) + vnu2d(ndm)
-                termc = vih/(gksid*gksiu)*idifc
-                termu = vih/(getau*geta) *idifu
-                termd = vih/(getad*geta) *idifd
+                termc  = 2.*vih/(gksid*gksiu)*idifc
+                termux = vih/(gksiu*gksi)*idifc
+                termdx = vih/(gksid*gksi)*idifc
+                termuy = vih/(getau*geta) *idifu
+                termdy = vih/(getad*geta) *idifd
                 if (mom_output) then
                    mom_m_visco(nm, k)     = mom_m_visco(nm, k) &
-                                          & - (2*termc + termu + termd)*u1(nm, k) &
-                                          & + termc*u1(nmu, k) + termc*u1(nmd, k) &
-                                          & + termu*u1(num, k) + termd*u1(ndm, k)
+                                          & - (termc + termuy + termdy)*u1(nm, k) &
+                                          & + termux*u1(nmu, k) + termdx*u1(nmd, k) &
+                                          & + termuy*u1(num, k) + termdy*u1(ndm, k)
                 else
-                   bbk(nm, k) = bbk(nm, k) + 2*termc + termu + termd
-                   bux(nm, k) = bux(nm, k) - termc
-                   bdx(nm, k) = bdx(nm, k) - termc
-                   buy(nm, k) = buy(nm, k) - termu
-                   bdy(nm, k) = bdy(nm, k) - termd
+                   bbk(nm, k) = bbk(nm, k) + termc + termuy + termdy
+                   bux(nm, k) = bux(nm, k) - termux
+                   bdx(nm, k) = bdx(nm, k) - termdx
+                   buy(nm, k) = buy(nm, k) - termuy
+                   bdy(nm, k) = bdy(nm, k) - termdy
                 endif
              endif
           enddo
