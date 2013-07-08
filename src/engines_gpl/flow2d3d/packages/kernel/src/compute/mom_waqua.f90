@@ -217,31 +217,33 @@ subroutine mom_waqua &
                 iad1 = kfu(nmd)*kadu(nmd, k)
                 iad2 = iad1*kfu(nmu)*kadu(nmu, k)
                 if (kcu(nmu)==3) iad2 = 0
-                termc = uvdgdy*iad2 + u0(nm, k)*adfac*(2*iad1 - 2*iad2)
-                termu = u0(nm, k)*adfac*(iad2)
-                termd = -u0(nm, k)*adfac*(2*iad1 - iad2)
                 if (mom_output) then
+                   termc = uvdgdy*iad2 + u0(nm, k)*adfac*(2*iad1 - 2*iad2)
+                   termu = u0(nm, k)*adfac*(iad2)
+                   termd = -u0(nm, k)*adfac*(2*iad1 - iad2)
                    mom_m_convec(nm, k) = mom_m_convec(nm, k)  &
                                        & - termu*u1(nmu, k) - termc*u1(nm, k) - termd*u1(nmd, k)
                 else
-                   bbk(nm, k) = bbk(nm, k) + termc
-                   bux(nm, k) = termu
-                   bdx(nm, k) = termd
+                   bbk(nm, k) = bbk(nm, k) + uvdgdy*iad2 + u0(nm, k)               &
+                              & *adfac*(2*iad1 - 2*iad2)
+                   bux(nm, k) = u0(nm, k)*adfac*(iad2)
+                   bdx(nm, k) = -u0(nm, k)*adfac*(2*iad1 - iad2)
                 endif
              else
                 iad1 = kfu(nmu)*kadu(nmu, k)
                 iad2 = iad1*kfu(nmd)*kadu(nmd, k)
                 if (kcu(nmd)==3) iad2 = 0
-                termc = uvdgdy*iad2 + u0(nm, k)*adfac*(2*iad2 - 2*iad1)
-                termd = -u0(nm, k)*adfac*(iad2)
-                termu = u0(nm, k)*adfac*(2*iad1 - iad2)
                 if (mom_output) then
+                   termc = uvdgdy*iad2 + u0(nm, k)*adfac*(2*iad2 - 2*iad1)
+                   termd = -u0(nm, k)*adfac*(iad2)
+                   termu = u0(nm, k)*adfac*(2*iad1 - iad2)
                    mom_m_convec(nm, k) = mom_m_convec(nm, k) &
                                        & - termu*u1(nmu, k) - termc*u1(nm, k) - termd*u1(nmd, k)
                 else
-                   bbk(nm, k) = bbk(nm, k) + termc
-                   bux(nm, k) = termu
-                   bdx(nm, k) = termd
+                   bbk(nm, k) = bbk(nm, k) + uvdgdy*iad2 + u0(nm, k)               &
+                              & *adfac*(2*iad2 - 2*iad1)
+                   bdx(nm, k) = -u0(nm, k)*adfac*(iad2)
+                   bux(nm, k) = u0(nm, k)*adfac*(2*iad1 - iad2)
                 endif
              endif
              !
@@ -271,18 +273,18 @@ subroutine mom_waqua &
                       iad1 = kfv(ndm)*kfv(ndmu)
                       iad2 = iad1*kfv(nddm)*kfv(nddmu)*kfu(nddm)
                    endif
-                   termc  = vvhr*(iad1 + iad1 + iad2)
-                   termd  = vvhr*( - iad1 - iad1 - iad2 - iad2)
-                   termdd = vvhr*(iad2)
-                   termex = vvv*vvdgdx*iad1
                    if (mom_output) then
+                      termc  = vvhr*(iad1 + iad1 + iad2)
+                      termd  = vvhr*( - iad1 - iad1 - iad2 - iad2)
+                      termdd = vvhr*(iad2)
+                      termex = vvv*vvdgdx*iad1
                       mom_m_xadvec(nm, k) = mom_m_xadvec(nm, k) &
                                           & - termc*u1(nm, k) - termd*u1(ndm, k) - termdd*u1(nddm, k) + termex
                    else
-                      bbk(nm, k)  = bbk(nm, k) + termc
-                      bdy(nm, k)  = termd
-                      bddy(nm, k) = termdd
-                      ddk(nm, k)  = ddk(nm, k) + termex
+                      bbk(nm, k) = bbk(nm, k) + vvhr*(iad1 + iad1 + iad2)
+                      bdy(nm, k) = vvhr*( - iad1 - iad1 - iad2 - iad2)
+                      bddy(nm, k) = vvhr*(iad2)
+                      ddk(nm, k) = ddk(nm, k) + vvv*vvdgdx*iad1
                    endif
                 else
                    if (cstbnd) then
@@ -302,18 +304,18 @@ subroutine mom_waqua &
                       iad1 = kfv(nm)*kfv(nmu)
                       iad2 = iad1*kfv(num)*kfv(numu)*kfu(nuum)
                    endif
-                   termc  = vvhr*( - iad1 - iad1 - iad2)
-                   termu  = vvhr*(iad1 + iad1 + iad2 + iad2)
-                   termuu = vvhr*( - iad2)
-                   termex = vvv*vvdgdx*iad1
                    if (mom_output) then
+                      termc  = vvhr*( - iad1 - iad1 - iad2)
+                      termu  = vvhr*(iad1 + iad1 + iad2 + iad2)
+                      termuu = vvhr*( - iad2)
+                      termex = vvv*vvdgdx*iad1
                       mom_m_xadvec(nm, k) = mom_m_xadvec(nm, k) &
                                           & - termc*u1(nm, k) - termu*u1(num, k) - termuu*u1(nuum, k) + termex
                    else
-                      bbk(nm, k)  = bbk(nm, k) + termc
-                      buy(nm, k)  = termu
-                      buuy(nm, k) = termuu
-                      ddk(nm, k)  = ddk(nm, k) + termex
+                      bbk(nm, k) = bbk(nm, k) + vvhr*( - iad1 - iad1 - iad2)
+                      buy(nm, k) = vvhr*(iad1 + iad1 + iad2 + iad2)
+                      buuy(nm, k) = vvhr*( - iad2)
+                      ddk(nm, k) = ddk(nm, k) + vvv*vvdgdx*iad1
                    endif
                 endif
              endif
