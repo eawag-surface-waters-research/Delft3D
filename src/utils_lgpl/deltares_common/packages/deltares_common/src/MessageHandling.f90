@@ -78,6 +78,7 @@ module MessageHandling
                                                                            '** WARNING: ',  &
                                                                            '** ERROR  : ',  &
                                                                            '** FATAL  : '/)
+   character(len=12), public              :: space12 = ' '
    integer, dimension(max_level), public  :: mess_level_count
    
    interface mess
