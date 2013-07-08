@@ -57,6 +57,7 @@ subroutine wrtmap(lundia    ,error     ,trifil    ,selmap    ,itmapc    , &
     use sp_buffer
     use dfparall
     use globaldata
+    use wrtmap_pointer
     !
     use dffunctionals
     !

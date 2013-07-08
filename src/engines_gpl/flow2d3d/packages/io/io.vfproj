@@ -259,7 +259,7 @@
 		<File RelativePath=".\src\output\wrtmap_nm.f90"/>
 		<File RelativePath=".\src\output\wrtmap_nmk.f90"/>
 		<File RelativePath=".\src\output\wrtmap_nmkl.f90"/>
-		<File RelativePath=".\src\output\wrtmap_nmkl_ptr.f90"/>
+		<File RelativePath=".\src\output\wrtmap_pointer.f90"/>
 		<File RelativePath="src\output\wrwaqapnt.f90"/>
 		<File RelativePath="src\output\wrwaqbal.f90"/>
 		<File RelativePath="src\output\wrwaqcco.F90">

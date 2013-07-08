@@ -114,11 +114,11 @@ libIOOutput_la_SOURCES = \
          wrthisbal.f90 \
          wrthisdad.f90 \
          wrthisdis.f90 \
+         wrtmap_pointer.f90 \
          wrtmap.f90 \
          wrtmap_nm.f90 \
          wrtmap_nmk.f90 \
          wrtmap_nmkl.f90 \
-         wrtmap_nmkl_ptr.f90 \
          wrwaqapnt.f90 \
          wrwaqbal.f90 \
          wrwaqcco.F90 \

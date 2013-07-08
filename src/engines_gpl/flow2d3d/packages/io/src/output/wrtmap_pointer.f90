@@ -1,4 +1,8 @@
-subroutine wrtmap_nmkl_ptr(fds, grpnam_in, uindex, nf, nl, mf, ml, iarrc, gdp, smlay, &
+module wrtmap_pointer
+    
+    contains
+    
+    subroutine wrtmap_nmkl_ptr(fds, grpnam_in, uindex, nf, nl, mf, ml, iarrc, gdp, smlay, &
                      & kmaxout, lk, uk, ul,ierr, varptr, varnam_in, kfmin, kfmax)
     use precision
     use dfparall, only: inode, master, nproc, parll
@@ -56,4 +60,6 @@ subroutine wrtmap_nmkl_ptr(fds, grpnam_in, uindex, nf, nl, mf, ml, iarrc, gdp, s
           ierr = putelt(fds, grpnam, varnam, uindex, 1, glbarr4)
        endif
     endif
-end subroutine wrtmap_nmkl_ptr
+    end subroutine wrtmap_nmkl_ptr
+
+end module wrtmap_pointer
