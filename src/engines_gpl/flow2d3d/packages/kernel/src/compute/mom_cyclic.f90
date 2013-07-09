@@ -232,14 +232,14 @@ subroutine mom_cyclic &
                    ! Energy conservative discretisation for structure points
                    !
                    uu = adfac*(u0(nm, k) + u0(nmd, k))
+                   termc = (uu + uvdgdy)*kfu(nmd)*neigat
+                   termd = -uu*kfu(nmd)*neigat
                    if (mom_output) then
-                      termc = (uu + uvdgdy)*kfu(nmd)*neigat
-                      termd = -uu*kfu(nmd)*neigat
                       mom_m_convec(nm, k) = mom_m_convec(nm, k) &
                                           & - termc*u1(nm, k) - termd*u1(nmd, k)
                    else
-                      bbk(nm, k) = bbk(nm, k) + (uu + uvdgdy)*kfu(nmd)*neigat
-                      bdx(nm, k) = -uu*kfu(nmd)*neigat
+                      bbk(nm, k) = bbk(nm, k) + termc
+                      bdx(nm, k) = termd
                    endif
                 else
                    !
@@ -257,17 +257,16 @@ subroutine mom_cyclic &
                    !
                    ! NON CONSERVATIVE FORM
                    !
+                   termc  = u0(nm, k)*adfac*(iad1 + iad2) + uvdgdy*kfu(nmd)*neigat
+                   termd  = u0(nm, k)*adfac*( - iad1 - iad2 - iad2)
+                   termdd = u0(nm, k)*adfac*(iad2)
                    if (mom_output) then
-                      termc  = u0(nm, k)*adfac*(iad1 + iad2) + uvdgdy*kfu(nmd)*neigat
-                      termd  = u0(nm, k)*adfac*( - iad1 - iad2 - iad2)
-                      termdd = u0(nm, k)*adfac*(iad2)
                       mom_m_convec(nm, k) = mom_m_convec(nm, k) &
                                           & - termc*u1(nm, k) - termd*u1(nmd, k) - termdd*u1(nmdd, k)
                    else
-                      bbk(nm, k) = bbk(nm, k) + u0(nm, k)*adfac*(iad1 + iad2)      &
-                                 & + uvdgdy*kfu(nmd)*neigat
-                      bdx(nm, k) = u0(nm, k)*adfac*( - iad1 - iad2 - iad2)
-                      bddx(nm, k) = u0(nm, k)*adfac*(iad2)
+                      bbk(nm, k)  = bbk(nm, k) + termc
+                      bdx(nm, k)  = termd
+                      bddx(nm, k) = termdd
                    endif
                 endif
              else
@@ -282,14 +281,14 @@ subroutine mom_cyclic &
                    ! Energy conservative discretisation for structure points
                    !
                    uu = adfac*(u0(nm, k) + u0(nmu, k))
+                   termc = (uvdgdy - uu)*kfu(nmu)*neigat
+                   termu = uu*kfu(nmu)*neigat
                    if (mom_output) then
-                      termc = (uvdgdy - uu)*kfu(nmu)*neigat
-                      termu = uu*kfu(nmu)*neigat
                       mom_m_convec(nm, k) = mom_m_convec(nm, k) &
                                           & - termc*u1(nm, k) - termu*u1(nmu, k)
                    else
-                      bbk(nm, k) = bbk(nm, k) + (uvdgdy - uu)*kfu(nmu)*neigat
-                      bux(nm, k) = uu*kfu(nmu)*neigat
+                      bbk(nm, k) = bbk(nm, k) + termc
+                      bux(nm, k) = termu
                    endif
                 else
                    !
@@ -309,17 +308,16 @@ subroutine mom_cyclic &
                    !
                    ! NON CONSERVATIVE FORM
                    !
+                   termc  = u0(nm, k)*adfac*( - iad1 - iad2) + uvdgdy*kfu(nmu)*neigat
+                   termu  = u0(nm, k)*adfac*(iad1 + iad2 + iad2)
+                   termuu = u0(nm, k)*adfac*( - iad2)
                    if (mom_output) then
-                      termc  = u0(nm, k)*adfac*( - iad1 - iad2) + uvdgdy*kfu(nmu)*neigat
-                      termu  = u0(nm, k)*adfac*(iad1 + iad2 + iad2)
-                      termuu = u0(nm, k)*adfac*( - iad2)
                       mom_m_convec(nm, k) = mom_m_convec(nm, k) &
                                           & - termc*u1(nm, k) - termu*u1(nmu, k) - termuu*u1(nmuu, k)
                    else
-                      bbk(nm, k) = bbk(nm, k) + u0(nm, k)*adfac*( - iad1 - iad2)   &
-                                 & + uvdgdy*kfu(nmu)*neigat
-                      bux(nm, k) = u0(nm, k)*adfac*(iad1 + iad2 + iad2)
-                      buux(nm, k) = u0(nm, k)*adfac*( - iad2)
+                      bbk(nm, k)  = bbk(nm, k) + termc
+                      bux(nm, k)  = termu
+                      buux(nm, k) = termuu
                    endif
                 endif
              endif
@@ -350,18 +348,18 @@ subroutine mom_cyclic &
                       iad1 = kfv(ndm)*kfv(ndmu)
                       iad2 = iad1*kfv(nddm)*kfv(nddmu)*kfu(nddm)
                    endif
+                   termc  = vvhr*(iad1 + iad1 + iad2)
+                   termd  = vvhr*( - iad1 - iad1 - iad2 - iad2)
+                   termdd = vvhr*(iad2)
+                   termex = vvv*vvdgdx*iad1
                    if (mom_output) then
-                      termc  = vvhr*(iad1 + iad1 + iad2)
-                      termd  = vvhr*( - iad1 - iad1 - iad2 - iad2)
-                      termdd = vvhr*(iad2)
-                      termex = vvv*vvdgdx*iad1
                       mom_m_xadvec(nm, k) = mom_m_xadvec(nm, k) &
                                           & - termc*u1(nm, k) - termd*u1(ndm, k) - termdd*u1(nddm, k) + termex
                    else
-                      bbk(nm, k) = bbk(nm, k) + vvhr*(iad1 + iad1 + iad2)
-                      bdy(nm, k) = vvhr*( - iad1 - iad1 - iad2 - iad2)
-                      bddy(nm, k) = vvhr*(iad2)
-                      ddk(nm, k) = ddk(nm, k) + vvv*vvdgdx*iad1
+                      bbk(nm, k)  = bbk(nm, k) + termc
+                      bdy(nm, k)  = termd
+                      bddy(nm, k) = termdd
+                      ddk(nm, k)  = ddk(nm, k) + termex
                    endif
                 else
                    if (cstbnd) then
@@ -381,18 +379,18 @@ subroutine mom_cyclic &
                       iad1 = kfv(nm)*kfv(nmu)
                       iad2 = iad1*kfv(num)*kfv(numu)*kfu(nuum)
                    endif
+                   termc  = vvhr*( - iad1 - iad1 - iad2)
+                   termu  = vvhr*(iad1 + iad1 + iad2 + iad2)
+                   termuu = vvhr*( - iad2)
+                   termex = vvv*vvdgdx*iad1
                    if (mom_output) then
-                      termc  = vvhr*( - iad1 - iad1 - iad2)
-                      termu  = vvhr*(iad1 + iad1 + iad2 + iad2)
-                      termuu = vvhr*( - iad2)
-                      termex = vvv*vvdgdx*iad1
                       mom_m_xadvec(nm, k) = mom_m_xadvec(nm, k) &
                                           & - termc*u1(nm, k) - termu*u1(num, k) - termuu*u1(nuum, k) + termex
                    else
-                      bbk(nm, k) = bbk(nm, k) + vvhr*( - iad1 - iad1 - iad2)
-                      buy(nm, k) = vvhr*(iad1 + iad1 + iad2 + iad2)
-                      buuy(nm, k) = vvhr*( - iad2)
-                      ddk(nm, k) = ddk(nm, k) + vvv*vvdgdx*iad1
+                      bbk(nm, k)  = bbk(nm, k) + termc
+                      buy(nm, k)  = termu
+                      buuy(nm, k) = termuu
+                      ddk(nm, k)  = ddk(nm, k) + termex
                    endif
                 endif
              endif

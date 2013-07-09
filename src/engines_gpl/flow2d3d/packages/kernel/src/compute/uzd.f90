@@ -543,30 +543,30 @@ recursive subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
              !
              ! CORIOLIS, GRAVITY PRESSURE TERM and TIDE GENERATING FORCES
              !
-             if (mom_output) then
-                flowresist = 0.5*rttfu(nm, k)*umod
-                corioforce = ff*fcorio(nm)*vvvc
-                densforce  = - ag*(1. - icreep)/(gvu(nm)*rhow)*nbaroc*(sig(k)*rhou*(hr - hl) + (sumrho(nmu, k)*hr - sumrho(nm, k)*hl))
-                !
-                ! limit pressure term in case of drying/flooding on steep slopes
-                !
-                if (slplim) then
-                   dpsmax = max(-dps(nm),-dps(nmu))
-                   if (s0(nm) < dpsmax) then
-                      pressure = - ag*rhofrac*(s0(nmu) - dpsmax)/gvu(nm)
-                   elseif (s0(nmu) < dpsmax) then
-                      pressure = - ag*rhofrac*(dpsmax  - s0(nm))/gvu(nm)
-                   else
-                      pressure = - ag*rhofrac*(s0(nmu) - s0(nm))/gvu(nm)
-                   endif
+             flowresist = 0.5*rttfu(nm, k)*umod
+             corioforce = ff*fcorio(nm)*vvvc
+             densforce  = - ag*(1. - icreep)/(gvu(nm)*rhow)*nbaroc*(sig(k)*rhou*(hr - hl) + (sumrho(nmu, k)*hr - sumrho(nm, k)*hl))
+             !
+             ! limit pressure term in case of drying/flooding on steep slopes
+             !
+             if (slplim) then
+                dpsmax = max(-dps(nm),-dps(nmu))
+                if (s0(nm) < dpsmax) then
+                   pressure = - ag*rhofrac*(s0(nmu) - dpsmax)/gvu(nm)
+                elseif (s0(nmu) < dpsmax) then
+                   pressure = - ag*rhofrac*(dpsmax  - s0(nm))/gvu(nm)
                 else
-                   pressure    = - ag*rhofrac*(s0(nmu) - s0(nm))/gvu(nm)
+                   pressure = - ag*rhofrac*(s0(nmu) - s0(nm))/gvu(nm)
                 endif
-                pressure   = pressure                                              &
-                           & - (patm(nmu) - patm(nm))/(gvu(nm)*rhow)               &
-                           & - (pship(nmu) - pship(nm))/(gvu(nm)*rhow)
-                tidegforce = ag*(tgfsep(nmu) - tgfsep(nm))/gvu(nm)
-                !
+             else
+                pressure    = - ag*rhofrac*(s0(nmu) - s0(nm))/gvu(nm)
+             endif
+             pressure   = pressure                                              &
+                        & - (patm(nmu) - patm(nm))/(gvu(nm)*rhow)               &
+                        & - (pship(nmu) - pship(nm))/(gvu(nm)*rhow)
+             tidegforce = ag*(tgfsep(nmu) - tgfsep(nm))/gvu(nm)
+             !
+             if (mom_output) then
                 mom_m_flowresist(nm, k) = mom_m_flowresist(nm, k) &
                                         & - flowresist*u1(nm, k)
                 mom_m_densforce(nm, k)  = mom_m_densforce(nm, k) + densforce
@@ -576,27 +576,8 @@ recursive subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
                    mom_m_tidegforce(nm) = mom_m_tidegforce(nm) + tidegforce 
                 endif
              else
-                bbk(nm, k) = bbk(nm, k) + 0.5*rttfu(nm, k)*umod
-                ddk(nm, k) = ddk(nm, k) + ff*fcorio(nm)*vvvc - ag*(1. - icreep)    &
-                           & /(gvu(nm)*rhow)                                       &
-                           & *nbaroc*(sig(k)*rhou*(hr - hl) + (sumrho(nmu, k)       &
-                           & *hr - sumrho(nm, k)*hl))                              &
-                           & - ag*rhofrac*(s0(nmu) - s0(nm))/gvu(nm)               &
-                           & - (patm(nmu) - patm(nm))/(gvu(nm)*rhow)               &
-                           & - (pship(nmu) - pship(nm))/(gvu(nm)*rhow)             &
-                           & + ag*(tgfsep(nmu) - tgfsep(nm))/gvu(nm)
-                !
-                ! Slope correction for steep slopes
-                !
-                if (slplim) then
-                   nmu    = nm + icx
-                   dpsmax = max(-dps(nm),-dps(nmu))
-                   if (s0(nm) < dpsmax) then
-                      ddk(nm,k) = ddk(nm,k) - ag*(s0(nm)-dpsmax)/gvu(nm)
-                   elseif (s0(nmu) < dpsmax) then
-                      ddk(nm,k) = ddk(nm,k) + ag*(s0(nmu)-dpsmax)/gvu(nm)
-                   endif
-                endif
+                bbk(nm, k) = bbk(nm, k) + flowresist
+                ddk(nm, k) = ddk(nm, k) + corioforce + densforce + pressure + tidegforce
              endif
           endif
        enddo
@@ -797,25 +778,22 @@ recursive subroutine uzd(icreep    ,dpdksi    ,s0        ,u0        , &
                 !     VISCOSITY TERM HERE IS APPLIED ONLY IN THIS HALF TIMESTEP
                 !
                 vih = vicuv(nm, k) + vicuv(nmu, k) + vnu2d(nm) + vnu2d(ndm)
+                termc  = 2.*vih/(gksid*gksiu)*idifc
+                termux = vih/(gksiu*gksi)*idifc
+                termdx = vih/(gksid*gksi)*idifc
+                termuy = vih/(getau*geta) *idifu
+                termdy = vih/(getad*geta) *idifd
                 if (mom_output) then
-                   termc  = 2.*vih/(gksid*gksiu)*idifc
-                   termux = vih/(gksiu*gksi)*idifc
-                   termdx = vih/(gksid*gksi)*idifc
-                   termuy = vih/(getau*geta) *idifu
-                   termdy = vih/(getad*geta) *idifd
                    mom_m_visco(nm, k)     = mom_m_visco(nm, k) &
                                           & - (termc + termuy + termdy)*u1(nm, k) &
                                           & + termux*u1(nmu, k) + termdx*u1(nmd, k) &
                                           & + termuy*u1(num, k) + termdy*u1(ndm, k)
                 else
-                   bbk(nm, k) = bbk(nm, k)                    &
-                              & + 2.*vih/(gksid*gksiu)*idifc  &
-                              & +    vih/(getau*geta) *idifu  &
-                              & +    vih/(getad*geta) *idifd
-                   bux(nm, k) = bux(nm, k) - vih/(gksiu*gksi)*idifc
-                   bdx(nm, k) = bdx(nm, k) - vih/(gksid*gksi)*idifc
-                   buy(nm, k) = buy(nm, k) - vih/(getau*geta)*idifu
-                   bdy(nm, k) = bdy(nm, k) - vih/(getad*geta)*idifd
+                   bbk(nm, k) = bbk(nm, k) + termc + termuy + termdy
+                   bux(nm, k) = bux(nm, k) - termux
+                   bdx(nm, k) = bdx(nm, k) - termdx
+                   buy(nm, k) = buy(nm, k) - termuy
+                   bdy(nm, k) = bdy(nm, k) - termdy
                 endif
              endif
           enddo

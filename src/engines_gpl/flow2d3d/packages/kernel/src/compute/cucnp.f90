@@ -483,32 +483,32 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
              !     KSPU(NM,0)*KSPU(NM,K)<>4, so initialisation
              !     test like in loop 100 of UZD is not necessary
              !
-             if (mom_output) then
-                wlpress    =  ag*rhofrac/gksi
-                flowresist = 0.5*rttfu(nm, k)*umod
-                corioforce = ff*fcorio(nm)*vvvc
-                densforce  = - ag*(1. - icreep)/(gksi*rhow)*nbaroc*(sig(k)*rhou*(hr - hl) + (sumrho(nmu, k)*hr - sumrho(nm, k)*hl))
-                !
-                ! limit pressure term in case of drying/flooding on steep slopes
-                ! note correction explicit whereas actual pressure term is implicit here (see wlpres)
-                !
-                if (slplim) then
-                   dpsmax = max(-dps(nm),-dps(nmu))
-                   if (s0(nm) < dpsmax) then
-                      pressure = - ag*rhofrac*(s0(nm) - dpsmax)/gvu(nm)
-                   elseif (s0(nmu) < dpsmax) then
-                      pressure = - ag*rhofrac*(dpsmax - s0(nmu))/gvu(nm)
-                   else
-                      pressure = 0.0_fp
-                   endif
+             wlpress    =  ag*rhofrac/gksi
+             flowresist = 0.5*rttfu(nm, k)*umod
+             corioforce = ff*fcorio(nm)*vvvc
+             densforce  = - ag*(1. - icreep)/(gksi*rhow)*nbaroc*(sig(k)*rhou*(hr - hl) + (sumrho(nmu, k)*hr - sumrho(nm, k)*hl))
+             !
+             ! limit pressure term in case of drying/flooding on steep slopes
+             ! note correction explicit whereas actual pressure term is implicit here (see wlpres)
+             !
+             if (slplim) then
+                dpsmax = max(-dps(nm),-dps(nmu))
+                if (s0(nm) < dpsmax) then
+                   pressure = - ag*rhofrac*(s0(nm) - dpsmax)/gksi
+                elseif (s0(nmu) < dpsmax) then
+                   pressure = - ag*rhofrac*(dpsmax - s0(nmu))/gksi
                 else
                    pressure = 0.0_fp
                 endif
-                pressure   = pressure                                              &
-                           & - (patm(nmu) - patm(nm))/(gksi*rhow)               &
-                           & - (pship(nmu) - pship(nm))/(gksi*rhow)
-                tidegforce = ag*(tgfsep(nmu) - tgfsep(nm))/gksi
-                !
+             else
+                pressure = 0.0_fp
+             endif
+             pressure   = pressure                                              &
+                        & - (patm(nmu) - patm(nm))/(gksi*rhow)               &
+                        & - (pship(nmu) - pship(nm))/(gksi*rhow)
+             tidegforce = ag*(tgfsep(nmu) - tgfsep(nm))/gksi
+             !
+             if (mom_output) then
                 mom_m_flowresist(nm, k) = mom_m_flowresist(nm, k) &
                                         & - flowresist*u1(nm, k)
                 mom_m_densforce(nm, k)  = mom_m_densforce(nm, k) + densforce
@@ -519,28 +519,10 @@ subroutine cucnp(dischy    ,icreep    ,dpdksi    ,s0        ,u0        , &
                    mom_m_tidegforce(nm) = mom_m_tidegforce(nm) + tidegforce 
                 endif
              else
-                aak(nm, k) = -ag*rhofrac/gksi
-                cck(nm, k) =  ag*rhofrac/gksi
-                bbk(nm, k) = bbk(nm, k) + 0.5*rttfu(nm, k)*umod
-                ddk(nm, k) = ddk(nm, k) +                                          &
-                           & ff*fcorio(nm)*vvvc - ag*(1. - icreep)/(gksi*rhow)     &
-                           & *nbaroc*(sig(k)*rhou*(hr - hl)                         &
-                           & + (sumrho(nmu, k)*hr - sumrho(nm, k)*hl))             &
-                           & - (patm(nmu) - patm(nm))/(gksi*rhow)                  &
-                           & - (pship(nmu) - pship(nm))/(gksi*rhow)                &
-                           & + ag*(tgfsep(nmu) - tgfsep(nm))/gksi
-                !
-                ! Slope correction for steep slopes
-                !
-                if (slplim) then
-                   nmu    = nm + icx
-                   dpsmax = max(-dps(nm),-dps(nmu))
-                   if (s0(nm) < dpsmax) then
-                      ddk(nm,k) = ddk(nm,k) - ag*(s0(nm)-dpsmax)/gvu(nm)
-                   elseif (s0(nmu) < dpsmax) then
-                      ddk(nm,k) = ddk(nm,k) + ag*(s0(nmu)-dpsmax)/gvu(nm)
-                   endif
-                endif
+                aak(nm, k) = - wlpress
+                cck(nm, k) = + wlpress
+                bbk(nm, k) = bbk(nm, k) + flowresist
+                ddk(nm, k) = ddk(nm, k) + corioforce + densforce + pressure + tidegforce
              endif
           endif
        enddo
