@@ -127,6 +127,7 @@
 		<File RelativePath="src\compute\turclo.f90"/>
 		<File RelativePath="src\compute\ulim.f90"/>
 		<File RelativePath="src\compute\updbar.f90"/>
+		<File RelativePath=".\src\compute\updcomflx.f90"/>
 		<File RelativePath="src\compute\updmassbal.f90"/>
 		<File RelativePath="src\compute\updwaqflx.f90"/>
 		<File RelativePath="src\compute\upwhu.f90"/>

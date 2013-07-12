@@ -965,6 +965,7 @@ src/engines_gpl/flow2d3d/packages/kernel/src/compute/tur2d.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute/turclo.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute/ulim.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute/updbar.f90 -text
+src/engines_gpl/flow2d3d/packages/kernel/src/compute/updcomflx.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute/updmassbal.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute/updwaqflx.f90 -text
 src/engines_gpl/flow2d3d/packages/kernel/src/compute/upwhu.f90 -text

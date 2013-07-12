@@ -11,7 +11,7 @@ subroutine f0isf1(stage     ,dischy    ,nst       ,zmodel    ,j         , &
                 & r0        ,r1        ,rtur0     ,rtur1     ,disch     , &
                 & discum    ,hu        ,hv        ,dzu1      ,dzv1      , &
                 & dzs1      ,dzu0      ,dzv0      ,dzs0      ,qxk       , &
-                & qyk       ,qu        ,qv        ,s00       ,w0        , &
+                & qyk       ,s00       ,w0        , &
                 & w1        ,p0        ,p1        ,hu0       ,hv0       , &
                 & ewabr0    ,ewabr1    , &
                 & ewave0    ,ewave1    ,eroll0    ,eroll1    ,roller    , &
@@ -152,8 +152,6 @@ subroutine f0isf1(stage     ,dischy    ,nst       ,zmodel    ,j         , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: dzv1   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(out) :: p0     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: p1     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: qu     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: qv     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: qxk    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: qyk    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax)                      :: u0     !  Description and declaration in esm_alloc_real.f90
@@ -415,30 +413,9 @@ subroutine f0isf1(stage     ,dischy    ,nst       ,zmodel    ,j         , &
           enddo
        enddo
     enddo
-    !
-    ! calculate cumm. discharge
-    !
-    do nm = 1, nmmax
-       if (zmodel) k0 = kfumin(nm)
-       do k = k0, kmax
-          if (kcu(nm) /= 0) then
-             qu(nm, k) = qu(nm, k) + qxk(nm, k)
-          endif
-       enddo
-       if (zmodel) k0 = kfvmin(nm)
-       do k = k0, kmax
-          if (kcv(nm) /= 0) then
-             qv(nm, k) = qv(nm, k) + qyk(nm, k)
-          endif
-       enddo
-    enddo
-    !
-    ! calculate cumm. discharge in discharge points
-    !
-    do n = 1, nsrc
-       discum(n) = discum(n) + disch(n)
-    enddo
-    !
+    !!
+    !! calculate cumm. discharge  -> being removed to updcomflx.f90
+    !!
     ! copy kfsmx/u/v to kfsmax/u/v0
     !
     if (zmodel) then

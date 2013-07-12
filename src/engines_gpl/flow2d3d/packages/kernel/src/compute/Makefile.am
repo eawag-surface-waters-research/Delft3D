@@ -110,6 +110,7 @@ libKernelCompute_la_SOURCES = \
          updbar.f90 \
          updmassbal.f90 \
          updwaqflx.f90 \
+         updcomflx.f90 \
          upwhu.f90 \
          usrbcc.f90 \
          usrbrl.f90 \

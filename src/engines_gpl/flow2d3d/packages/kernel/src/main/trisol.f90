@@ -1214,7 +1214,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
               & r(r0)     ,r(r1)     ,r(rtur0)  ,r(rtur1)  ,r(disch)  , &
               & r(discum) ,r(hu)     ,r(hv)     ,r(dzu1)   ,r(dzv1)   , &
               & r(dzs1)   ,r(dzu0)   ,r(dzv0)   ,r(dzs0)   ,r(qxk)    , &
-              & r(qyk)    ,r(qu)     ,r(qv)     ,r(s00)    ,r(w0)     , &
+              & r(qyk)    ,r(s00)    ,r(w0)     , &
               & r(w1)     ,r(p0)     ,r(p1)     ,r(hu0)    ,r(hv0)    , &
               & r(ewabr0) ,r(ewabr1) , &
               & r(ewave0) ,r(ewave1) ,r(eroll0) ,r(eroll1) ,roller    , &
@@ -2242,8 +2242,12 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
                     & nsrc      ,r(disch)  ,gdp       )
        call updmassbal(.false.  ,r(qxk)    ,r(qyk)    ,i(kcs)    ,r(r1)     , &
-                     & r(volum1),r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   , &
-                     & r(gsqs)  ,r(guu)    ,r(gvv)    ,d(dps)    ,gdp       )
+                    & r(volum1),r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   , &
+                    & r(gsqs)  ,r(guu)    ,r(gvv)    ,d(dps)    ,gdp       )
+       call updcomflx(nst       ,zmodel    ,nmmax     ,kmax      ,i(kcs)    , &
+                    & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
+                    & nsrc      ,r(disch)  ,i(kfumin) ,i(kfvmin) ,r(qu)     , &
+                    & r(qv)     ,gdp       )
        !
        ! Check Courant numbers for U and V velocities in U-points
        ! Check is done based upon old/original geometry (corresponding to S0)
@@ -2284,7 +2288,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                  & r(r0)     ,r(r1)     ,r(rtur0)  ,r(rtur1)  ,r(disch)  , &
                  & r(discum) ,r(hu)     ,r(hv)     ,r(dzu1)   ,r(dzv1)   , &
                  & r(dzs1)   ,r(dzu0)   ,r(dzv0)   ,r(dzs0)   ,r(qxk)    , &
-                 & r(qyk)    ,r(qu)     ,r(qv)     ,r(s00)    ,r(w0)     , &
+                 & r(qyk)    ,r(s00)    ,r(w0)     , &
                  & r(w1)     ,r(p0)     ,r(p1)     ,r(hu0)    ,r(hv0)    , &
                  & r(ewabr0) ,r(ewabr1) , &
                  & r(ewave0) ,r(ewave1) ,r(eroll0) ,r(eroll1) ,roller    , &
@@ -3305,6 +3309,10 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
        call updmassbal(nst+1 == ithisc,r(qxk)    ,r(qyk)    ,i(kcs)    ,r(r1)     , &
                      & r(volum1),r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   , &
                      & r(gsqs)  ,r(guu)    ,r(gvv)    ,d(dps)    ,gdp       )
+       call updcomflx(nst       ,zmodel    ,nmmax     ,kmax      ,i(kcs)    , &
+                    & i(kcu)    ,i(kcv)    ,r(qxk)    ,r(qyk)    ,r(qzk)    , &
+                    & nsrc      ,r(disch)  ,i(kfumin) ,i(kfvmin) ,r(qu)     , &
+                    & r(qv)     ,gdp       )
        !
        ! Check Courant numbers for U and V velocities in U-points
        ! Check is done based upon old/original geometry (corresponding to S0)
