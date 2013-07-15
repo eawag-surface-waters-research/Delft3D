@@ -100,6 +100,7 @@ subroutine updcomflx(nst       ,zmodel    ,nmmax     ,kmax      ,kcs       , &
     !
     ! calculate cumm. discharge
     !
+    k0 = 1
     do nm = 1, nmmax
        if (zmodel) k0 = kfumin(nm)
        do k = k0, kmax
