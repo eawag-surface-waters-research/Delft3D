@@ -44,16 +44,6 @@ subroutine updcomflx(nst       ,zmodel    ,nmmax     ,kmax      ,kcs       , &
     implicit none
     !
     type(globdat),target :: gdp
-    !
-    ! The following list of pointer parameters is used to point inside the gdp structure
-    !
-    integer                 , pointer :: itwqff
-    integer                 , pointer :: itwqfl
-    real(fp), dimension(:,:), pointer :: quwaq     ! Cumulative qxk
-    real(fp), dimension(:,:), pointer :: qvwaq     ! Cumulative qyk
-    real(fp), dimension(:,:), pointer :: qwwaq     ! Cumulative qzk
-    real(fp), dimension(:)  , pointer :: discumwaq ! Cumulated sources m3/s*nstep 
-    logical                 , pointer :: waqfil
 !
 ! Global variables
 !
@@ -84,19 +74,6 @@ subroutine updcomflx(nst       ,zmodel    ,nmmax     ,kmax      ,kcs       , &
 !
 !! executable statements -------------------------------------------------------
 !
-    !itwqff     => gdp%gdwaqpar%itwqff
-    !itwqfl     => gdp%gdwaqpar%itwqfl
-    !quwaq      => gdp%gdwaqpar%quwaq
-    !qvwaq      => gdp%gdwaqpar%qvwaq
-    !qwwaq      => gdp%gdwaqpar%qwwaq
-    !discumwaq  => gdp%gdwaqpar%discumwaq 
-    !waqfil     => gdp%gdwaqpar%waqfil
-    !!
-    !if (.not.waqfil) return
-    !if (nst<itwqff .or. nst>=itwqfl) return
-
-    
-    
     !
     ! calculate cumm. discharge
     !
