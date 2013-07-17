@@ -58,6 +58,7 @@ subroutine initmerge (nmmax, lsed, runid, gdp)
 ! Local variables
 !
     integer                :: conditionend
+    integer                :: i
     integer                :: istat
     integer, external      :: getstream
     integer                :: lunfil
@@ -95,8 +96,26 @@ subroutine initmerge (nmmax, lsed, runid, gdp)
        !
        if (gdp%arch == 'win32') then
           slash = '\'
+          !
+          ! In filhand: replace all occurences of / by \
+          ! Needed for further parsing
+          !
+          do i=1,len(filhand)
+             if (filhand(i:i) == '/') then
+                filhand(i:i) = '\'
+             endif
+          enddo
        else
           slash = '/'
+          !
+          ! In filhand: replace all occurences of \ by /
+          ! Needed for further parsing
+          !
+          do i=1,len(filhand)
+             if (filhand(i:i) == '\') then
+                filhand(i:i) = '/'
+             endif
+          enddo
        endif
        pathlen = len_trim(filhand)
        do while ( filhand(pathlen:pathlen) /= slash .and. pathlen>1)
