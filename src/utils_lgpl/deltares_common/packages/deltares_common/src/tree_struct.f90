@@ -1,28 +1,28 @@
 !----- LGPL --------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2013.                                
-!                                                                               
-!  This library is free software; you can redistribute it and/or                
-!  modify it under the terms of the GNU Lesser General Public                   
-!  License as published by the Free Software Foundation version 2.1.                 
-!                                                                               
-!  This library is distributed in the hope that it will be useful,              
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-!  Lesser General Public License for more details.                              
-!                                                                               
-!  You should have received a copy of the GNU Lesser General Public             
-!  License along with this library; if not, see <http://www.gnu.org/licenses/>. 
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D" and "Deltares"    
-!  are registered trademarks of Stichting Deltares, and remain the property of  
-!  Stichting Deltares. All rights reserved.                                     
-!                                                                               
+!
+!  Copyright (C)  Stichting Deltares, 2011-2013.
+!
+!  This library is free software; you can redistribute it and/or
+!  modify it under the terms of the GNU Lesser General Public
+!  License as published by the Free Software Foundation version 2.1.
+!
+!  This library is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+!  Lesser General Public License for more details.
+!
+!  You should have received a copy of the GNU Lesser General Public
+!  License along with this library; if not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"
+!  are registered trademarks of Stichting Deltares, and remain the property of
+!  Stichting Deltares. All rights reserved.
+!
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
@@ -190,14 +190,17 @@ end subroutine tree_create_node
 !    tree         The tree or node
 !
 function tree_get_name( tree ) result( node_name )
-   type(TREE_DATA), pointer        :: tree
-   character(len=80)               :: node_name
+   type(TREE_DATA), pointer :: tree
+   character(len=80)        :: node_name
 
-   integer                         :: length
+   integer                  :: length
+   integer                  :: i
 
    length    = min(80, size( tree%node_name ))
    node_name = ' '
-   node_name(1:length) = transfer( tree%node_name, node_name )
+   do i=1,length
+      node_name(i:i) =  tree%node_name(i)
+   end do
 end function tree_get_name
 
 ! tree_get_datatype --
@@ -211,11 +214,14 @@ function tree_get_datatype( tree ) result( data_type )
    character(len=40)               :: data_type
 
    integer                         :: length
+   integer                         :: i
 
    data_type = '?'
    if ( associated( tree%node_data_type ) ) then
       length    = size( tree%node_data_type )
-      data_type(1:length) = transfer( tree%node_data_type, data_type )
+      do i=1,length
+         data_type(i:i) = tree%node_data_type(i)
+      end do
    endif
 end function tree_get_datatype
 
@@ -605,8 +611,8 @@ subroutine tree_get_data_string( tree, string, success )
 
    character(len=1), dimension(:), pointer  :: data_ptr
    character(len=40)                        :: data_type
-   character(len=maxlen)                    :: localstring
    integer                                  :: length
+   integer                                  :: i
 
    success = .false.
    if ( associated(tree) ) then
@@ -621,12 +627,12 @@ subroutine tree_get_data_string( tree, string, success )
 
       success          = .true.
       length           = size(data_ptr)
-      localstring      = ' '
       string           = ' '
       if (length <= maxlen) then
-         localstring      = transfer(data_ptr,localstring)
          length           = min(length,len(string))
-         string(1:length) = localstring(1:length)
+         do i=1,length
+            string(i:i) = data_ptr(i)
+         end do
       endif
    endif
 
@@ -713,3 +719,4 @@ subroutine lowercase(string    ,lenstr    )
 end subroutine lowercase
 
 end module TREE_STRUCTURES
+
