@@ -19,16 +19,15 @@ AM_CPPFLAGS = -I$(top_srcdir)/utils_lgpl/deltares_common/packages/deltares_commo
 #-------------------------------------------------------------------------------
 #Sources
 libDeltaresCommonC_la_SOURCES = \
-         cpuinfo.cpp \
-         cutil.c \
-         getopt.cpp \
-         getputarray.cpp \
-         meminfo.cpp \
-         sems.cpp \
-         stream.cpp \
-         throwexception.cpp \
-         shared_library_fortran.c
+	 cpuinfo.cpp \
+	 cutil.c \
+	 getopt.cpp \
+	 getputarray.cpp \
+	 meminfo.cpp \
+	 sems.cpp \
+	 stream.cpp \
+	 throwexception.cpp \
+	 shared_library_fortran_api.c
 
 #-------------------------------------------------------------------------------
 #Libraries
-
