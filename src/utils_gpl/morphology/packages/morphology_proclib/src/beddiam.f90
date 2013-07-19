@@ -76,6 +76,7 @@
                                                          !<    type of IBS fraction = SEDTYP_NONCOHESIVE_TOTALLOAD
       real(fp), dimension(1)              :: DM_mix      !< O  arithm mean diameter of sediment mixture           (m)
       real(fp), dimension(1)              :: DG_mix      !< O  algebr mean diameter of sediment mixture           (m)
+      real(fp), dimension(1)              :: DGSD_mix    !< O  algebr mean diameter of sediment mixture           (m)
       real(fp), dimension(3)              :: DXX_mix     !< O  D10, D50 and D90 of sediment mixture               (m)
       real(fp), dimension(:), allocatable :: hidexp      !< O  hiding and exposure factor for ISS fractions       (-)
                                                          !< O  hiding and exposure factor for IBS fractions       (-)
@@ -214,7 +215,7 @@
          call compdiam(frac      ,d50       ,d50       ,sedtyp    ,numIS     , &
                      & logstd    ,nseddia   ,logseddia ,1         ,1         , &
                      & 1         ,xx        ,3         ,d50       ,DM_mix    , &
-                     & DG_mix    ,DXX_mix   )
+                     & DG_mix    ,DXX_mix   ,DGSD_mix  )
 !
          call comphidexp(frac      ,DM_mix    ,1         ,numIS     , &
                        & d50       ,hidexp    ,1         ,1.0_fp    , &
