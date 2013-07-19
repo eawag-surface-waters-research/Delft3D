@@ -79,7 +79,7 @@ function cat_filename(path, file, ext) result(name)
     sep = ' '
     if (lenpath>0) then
        if (path(lenpath:lenpath) /= FILESEP                      &
-#if (.not.defined(HAVE_CONFIG_H))
+#ifndef HAVE_CONFIG_H
           ! on Windows also check forward slash
           & .and. path(lenpath:lenpath) /= '/'                   &
 #endif
@@ -120,7 +120,7 @@ subroutine split_filename(name, path, file, ext)
 !
     ! find last file separator
     ifilesep = index(name, FILESEP, back=.true.)
-#if (.not.defined(HAVE_CONFIG_H))
+#ifndef HAVE_CONFIG_H
     ! on Windows also check forward slash
     ifilesep = max(ifilesep,index(name, '/', back=.true.))
 #endif
