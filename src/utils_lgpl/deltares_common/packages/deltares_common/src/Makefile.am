@@ -47,6 +47,7 @@ libDeltaresCommon_la_SOURCES = \
 	 time_module.f90 \
 	 juldat.f90 \
 	 handles.f90 \
+	 tables.f90 \
 	 table_handles.f90 \
 	 malloc.f90 \
 	 nan_check_module.f90 \
@@ -55,7 +56,6 @@ libDeltaresCommon_la_SOURCES = \
 	 scannr.f90 \
 	 skipstarlines.f90 \
 	 small.f90 \
-	 tables.f90 \
 	 timers.f \
 	 util.f90 \
 	 wavenr.f90
