@@ -31,8 +31,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
-// $Id:$
-// $HeadURL:$
+// $Id$
+// $HeadURL$
 
 
 #pragma once

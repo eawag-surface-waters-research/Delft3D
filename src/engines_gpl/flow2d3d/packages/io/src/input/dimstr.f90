@@ -39,6 +39,7 @@ subroutine dimstr(lunmd     ,filnam    ,lundia    ,error     ,nrrec     , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -62,7 +63,6 @@ subroutine dimstr(lunmd     ,filnam    ,lundia    ,error     ,nrrec     , &
     integer           :: lfile   ! Number of non blank characters of file name 
     integer           :: luntmp  ! Unit number of FILTMP 
     integer, external :: newlun
-    logical, external :: exifil
     character(132)    :: rec132
 !
 !! executable statements -------------------------------------------------------
@@ -78,7 +78,7 @@ subroutine dimstr(lunmd     ,filnam    ,lundia    ,error     ,nrrec     , &
     ! Barrier / Gate file name specified; Test file existence
     !
     call noextspaces(filnam    ,lfile     )
-    error = .not.exifil(filnam(:lfile), lundia, 'G004', gdp)
+    error = .not.exifil(filnam, lundia)
     if (error) goto 9999
     !
     ! open formatted file, if not formatted IOCOND <> 0

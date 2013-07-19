@@ -41,6 +41,7 @@ subroutine hybfil(lundia    ,error     ,filrgh    ,fmttmp    ,nmax      , &
     use precision
     use dfparall
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -76,7 +77,6 @@ subroutine hybfil(lundia    ,error     ,filrgh    ,fmttmp    ,nmax      , &
     integer                               :: n        ! Help (loop) var. for N-index 
     integer, external                     :: newlun
     real(fp), dimension(:,:), allocatable :: ctmp     ! temporary array containing roughness of entire domain
-    logical, external                     :: exifil
 !
 !! executable statements -------------------------------------------------------
 !
@@ -91,7 +91,7 @@ subroutine hybfil(lundia    ,error     ,filrgh    ,fmttmp    ,nmax      , &
     !
     lfile = len(filrgh)
     !
-    if (exifil(filrgh, lundia, 'G004', gdp)) then
+    if (exifil(filrgh, lundia)) then
        if (inode==master) then
           luntmp = newlun(gdp)
           open (luntmp, file = filrgh(1:lfile), form = fmttmp, status = 'old')
@@ -112,7 +112,7 @@ subroutine hybfil(lundia    ,error     ,filrgh    ,fmttmp    ,nmax      , &
        if (fmttmp(1:2)=='un') then
           do n = 1, nmaxgl
              if (inode==master) read (luntmp, iostat = iocond) (ctmp(n, m), m = 1, mmaxgl)
-             call dfbroadc(iocond, 1, dfint, gdp)
+             call dfbroadc_gdp(iocond, 1, dfint, gdp)
              if (iocond/=0) then
                 if (iocond<0) then
                    call prterr(lundia    ,'G006'    ,filrgh(1:lfile)      )
@@ -126,7 +126,7 @@ subroutine hybfil(lundia    ,error     ,filrgh    ,fmttmp    ,nmax      , &
           !
           ! send temporary array to other nodes
           !
-          call dfbroadc(ctmp, mmaxgl*nmaxgl, dfloat, gdp)
+          call dfbroadc_gdp(ctmp, mmaxgl*nmaxgl, dfloat, gdp)
           !
           ! put copies of parts of cfurou for each subdomain
           !
@@ -138,7 +138,7 @@ subroutine hybfil(lundia    ,error     ,filrgh    ,fmttmp    ,nmax      , &
           !
           do n = 1, nmaxgl
              if (inode==master) read (luntmp, iostat = iocond) (ctmp(n, m), m = 1, mmaxgl)
-             call dfbroadc(iocond, 1, dfint, gdp)
+             call dfbroadc_gdp(iocond, 1, dfint, gdp)
              if (iocond/=0) then
                 if (iocond<0) then
                    call prterr(lundia    ,'G006'    ,filrgh(1:lfile)      )
@@ -152,7 +152,7 @@ subroutine hybfil(lundia    ,error     ,filrgh    ,fmttmp    ,nmax      , &
           !
           ! send temporary array to other nodes
           !
-          call dfbroadc(ctmp, mmaxgl*nmaxgl, dfloat, gdp)
+          call dfbroadc_gdp(ctmp, mmaxgl*nmaxgl, dfloat, gdp)
           !
           ! put copies of parts of cfvrou for each subdomain
           !
@@ -178,7 +178,7 @@ subroutine hybfil(lundia    ,error     ,filrgh    ,fmttmp    ,nmax      , &
           !
           do n = 1, nmaxgl
              if (inode==master) read (luntmp, *, iostat = iocond) (ctmp(n, m), m = 1, mmaxgl)
-             call dfbroadc(iocond, 1, dfint, gdp)
+             call dfbroadc_gdp(iocond, 1, dfint, gdp)
              if (iocond/=0) then
                 if (iocond<0) then
                    call prterr(lundia    ,'G006'    ,filrgh(1:lfile)      )
@@ -194,7 +194,7 @@ subroutine hybfil(lundia    ,error     ,filrgh    ,fmttmp    ,nmax      , &
           !
           ! send temporary array to other nodes
           !
-          call dfbroadc(ctmp, mmaxgl*nmaxgl, dfloat, gdp)
+          call dfbroadc_gdp(ctmp, mmaxgl*nmaxgl, dfloat, gdp)
           !
           ! put copies of parts of cfurou for each subdomain
           !
@@ -206,7 +206,7 @@ subroutine hybfil(lundia    ,error     ,filrgh    ,fmttmp    ,nmax      , &
           !
           do n = 1, nmaxgl
              if (inode==master) read (luntmp, *, iostat = iocond) (ctmp(n, m), m = 1, mmaxgl)
-             call dfbroadc(iocond, 1, dfint, gdp)
+             call dfbroadc_gdp(iocond, 1, dfint, gdp)
              if (iocond/=0) then
                 if (iocond<0) then
                    call prterr(lundia    ,'G006'    ,filrgh(1:lfile)      )
@@ -220,7 +220,7 @@ subroutine hybfil(lundia    ,error     ,filrgh    ,fmttmp    ,nmax      , &
           !
           ! send temporary array to other nodes
           !
-          call dfbroadc(ctmp, mmaxgl*nmaxgl, dfloat, gdp)
+          call dfbroadc_gdp(ctmp, mmaxgl*nmaxgl, dfloat, gdp)
           !
           ! put copies of parts of cfvrou for each subdomain
           !

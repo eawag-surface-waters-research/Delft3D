@@ -39,8 +39,8 @@ subroutine dimbub(error, gdp)
 !!--declarations----------------------------------------------------------------
     use precision
     use properties
-    !
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -87,7 +87,6 @@ subroutine dimbub(error, gdp)
     integer                       :: ncount ! Nr. of bubble screens in N-direction
     integer                       :: nlook  ! Nr. of values to look for in a record 
     integer                       :: ntrec  ! Current record counter. It's value is changed to detect if all records in the MD-file have been read 
-    logical, external             :: exifil
     logical                       :: found  ! Flag is true if KEYWRD is found 
     logical                       :: newkw  ! Flag to specify if the keyword to look for is a new keyword 
     character(11)                 :: fmttmp ! Format of FILTMP (UN/FRee formatted) 
@@ -145,7 +144,7 @@ subroutine dimbub(error, gdp)
        !
        ! test file existence
        !
-       if (exifil(trim(filtmp), lundia, 'G004', gdp)) then
+       if (exifil(filtmp, lundia)) then
           !
           ! open input file
           !

@@ -40,6 +40,7 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -76,7 +77,6 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
     integer           :: luntmp      ! Help var. for a unit number of an attribute file 
     integer           :: n           ! Help var. 
     integer, external :: newlun
-    logical, external :: exifil
     real(fp)          :: rdef        ! Help var. containing default va- lue(s) for real variable 
     character(300)    :: errmsg      ! Character var. containing the error message to be written to file. The message depend on the error. 
     character(132)    :: rec132      ! Standard rec. length in an attribute file (132) 
@@ -95,7 +95,7 @@ subroutine bchfil(lundia    ,error     ,filbch    ,fmttmp    ,ntof      , &
     !
     call noextspaces(filbch, lfile)
     !
-    if (exifil(filbch(1:lfile), lundia, 'G004', gdp)) then
+    if (exifil(filbch, lundia)) then
        luntmp = newlun(gdp)
        open (luntmp, file = filbch(1:lfile), form = fmttmp, status = 'old')
        !

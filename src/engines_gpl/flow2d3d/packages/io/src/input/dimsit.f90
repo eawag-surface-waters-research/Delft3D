@@ -42,6 +42,7 @@ subroutine dimsit(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -72,7 +73,6 @@ subroutine dimsit(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     integer, external       :: newlun
     integer                 :: nlook   ! Nr. of values to look for in a record 
     integer                 :: ntrec   ! Current record counter. It's value is changed to detect if all records in the MD-file have been read 
-    logical, external       :: exifil
     logical                 :: found   ! Flag is true if KEYW is found 
     logical                 :: lerror  ! Flag=TRUE if an local error is encountered For NOUI this can mean error will be set TRUE 
     logical                 :: newkw   ! Flag to specify if the keyword to look for is a new keyword 
@@ -165,7 +165,7 @@ subroutine dimsit(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
        !
        lfile = len(filtmp)
        !
-       if (exifil(filtmp(1:lfile), lundia, 'G004', gdp)) then
+       if (exifil(filtmp, lundia)) then
           !
           ! open input file
           !

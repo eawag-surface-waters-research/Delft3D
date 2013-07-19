@@ -40,6 +40,7 @@ subroutine rdtdf(lundia    ,luntdp    ,error     ,filnam    ,fmttmp    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -75,7 +76,6 @@ subroutine rdtdf(lundia    ,luntdp    ,error     ,filnam    ,fmttmp    , &
     integer                        :: n      ! Help var. for the nr. of data to be read (see LENDAT) 
     integer         , external     :: newlun
     logical                        :: dtn
-    logical         , external     :: exifil
     logical                        :: rec1st ! Flag set to TRUE if the record read is the first record 
     real(fp)                       :: t
     real(fp)                       :: timrd  ! Time in minutes read 
@@ -91,7 +91,7 @@ subroutine rdtdf(lundia    ,luntdp    ,error     ,filnam    ,fmttmp    , &
     !
     !-----test file existence <YES>
     !
-    if (exifil(filnam(:lfile), lundia, 'G004', gdp)) then
+    if (exifil(filnam, lundia)) then
        !
        !--------Values time dependent data for the first time
        !

@@ -25,9 +25,6 @@ FMODULES += \
 #-------------------------------------------------------------------------------
 #Sources
 libDataBasics_la_SOURCES = \
-         message_module.f90 \
-         string_module.f90 \
-         bedcomposition_module.f90 \
          globaldata.f90 \
          sp_buffer.f90 \
          flow_tables.f90 \

@@ -65,6 +65,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     use bedcomposition_module
     use globaldata
     use dfparall
+    use sediment_basics_module
     !
     implicit none
     !
@@ -126,7 +127,6 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     real(fp), dimension(:,:,:)           , pointer :: fluxu
     real(fp), dimension(:,:,:)           , pointer :: fluxv
     real(fp), dimension(:)               , pointer :: duneheight
-    include 'sedparams.inc'
 !
 ! Local parameters
 !
@@ -155,7 +155,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     integer , dimension(gdp%d%nmlb:gdp%d%nmub, lsed)   , intent(in)  :: kmxsed !  Description and declaration in esm_alloc_int.f90
     logical                                            , intent(in)  :: sscomp
     real(fp)                                                         :: timhr
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)         , intent(in)  :: aks    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, lsed)   , intent(in)  :: aks    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                       :: depchg !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                       :: dp     !  Description and declaration in esm_alloc_real.f90
     real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)                     :: dps    !  Description and declaration in esm_alloc_real.f90
@@ -203,11 +203,17 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     integer  :: nhystp
     integer  :: nm
     integer  :: nmd
+    integer  :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
     integer  :: nmu
     integer  :: num
     integer  :: numu
     integer  :: nxmx
     integer  :: bedchangemesscount
+    logical  :: bedload
+    logical  :: from_ndm
+    logical  :: from_nmd
+    logical  :: from_nmu
+    logical  :: from_num
     real(fp) :: aksu
     real(fp) :: apower
     real(fp) :: cavg
@@ -238,12 +244,6 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     real(fp) :: totfixfrac
     real(fp) :: trndiv
     real(fp) :: z
-    logical  :: bedload
-    logical  :: from_ndm
-    logical  :: from_nmd
-    logical  :: from_nmu
-    logical  :: from_num
-    integer  :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
 !
 !! executable statements -------------------------------------------------------
 !
@@ -309,10 +309,10 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     ! parallel case: exchange arrays in the overlapping regions
     ! other arrays are their overlap data exchanged in erosed.f90
     !
-    call dfexchg( aks,   1, 1,       dfloat, nm_pos, gdp)
     call dfexchg( fixfac,1, lsedtot, dfloat, nm_pos, gdp)
     call dfexchg( frac,  1, lsedtot, dfloat, nm_pos, gdp)
     if (lsed > 0) then
+       call dfexchg( aks,   1, lsed,    dfloat, nm_pos, gdp)
        call dfexchg( rca,   1, lsed,    dfloat, nm_pos, gdp)
     endif
     !
@@ -328,14 +328,14 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
     !   vector arrays are blank
     !
     !
-    sucor = 0.0
-    svcor = 0.0
-    ssuu  = 0.0
-    ssvv  = 0.0
+    sucor = 0.0_fp
+    svcor = 0.0_fp
+    ssuu  = 0.0_fp
+    ssvv  = 0.0_fp
     !
     ! calculate corrections
     !
-    if (sus /= 0.0) then
+    if (sus /= 0.0_fp) then
        !
        ! suspension transport correction vector only for 3D
        !
@@ -363,13 +363,13 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                    ! u direction
                    !
                    if ((kfu(nm)*kfsed(nm)*kfsed(nmu)) /= 0) then
-                      cumflux = 0.0
+                      cumflux = 0.0_fp
                       if (kcs(nmu) == 3 .or. kcs(nmu) == -1) then
-                         aksu = aks(nm)
+                         aksu = aks(nm, l)
                       elseif (kcs(nm) == 3 .or. kcs(nm) == -1) then
-                         aksu = aks(nmu)
+                         aksu = aks(nmu, l)
                       else
-                         aksu = (aks(nm) + aks(nmu))/2.0
+                         aksu = (aks(nm, l) + aks(nmu, l))/2.0
                       endif
                       !
                       ! work up through layers integrating transport
@@ -388,7 +388,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                             cumflux = cumflux + fluxu(nm, k, ll)
                          endif
                       enddo
-                      cumflux = cumflux/guu(nm)
+                      cumflux = cumflux / guu(nm)
                       !
                       ! integration finished
                       ! suspended transport correction = opposite of the
@@ -407,7 +407,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                          elseif (kcs(nm) == 3 .or. kcs(nm) == -1) then
                             ceavg = rca(nmu, l)
                          else
-                            ceavg = (rca(nm, l) + rca(nmu, l))/2.0
+                            ceavg = (rca(nm, l) + rca(nmu, l))/2.0_fp
                          endif
                          r1avg = (r1(nm, k - 1, ll) + r1(nmu, k - 1, ll))/2.0
                        if (ceavg>r1avg*1.1 .and. ceavg>0.05) then
@@ -435,7 +435,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                       ! a case, the suspended sediment transport vector must
                       ! also be reduced.
                       !
-                      if ((sucor(nm,l) > 0.0 .and. kcs(nm)==1) .or. kcs(nmu)/=1) then
+                      if ((sucor(nm,l)>0.0_fp .and. kcs(nm)==1) .or. kcs(nmu)/=1) then
                          sucor(nm,l) = sucor(nm,l) * fixfac(nm,l)
                       else
                          sucor(nm,l) = sucor(nm,l) * fixfac(nmu,l)
@@ -445,13 +445,13 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                    ! v direction
                    !
                    if ((kfv(nm)*kfsed(nm)*kfsed(num)) /= 0) then
-                      cumflux = 0.0
+                      cumflux = 0.0_fp
                       if (kcs(num) == 3 .or. kcs(num) == -1) then
-                         aksu = aks(nm)
+                         aksu = aks(nm, l)
                       elseif (kcs(nm) == 3 .or. kcs(nm) == -1) then
-                         aksu = aks(num)
+                         aksu = aks(num, l)
                       else
-                         aksu = (aks(nm)+aks(num)) / 2.0
+                         aksu = (aks(nm, l)+aks(num, l)) / 2.0_fp
                       endif
                       !
                       ! work up through layers integrating transport
@@ -517,7 +517,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                       ! a case, the suspended sediment transport vector must
                       ! also be reduced.
                       !
-                      if ((svcor(nm,l) > 0.0 .and. kcs(nm)==1) .or. kcs(num)/=1) then
+                      if ((svcor(nm,l) > 0.0_fp .and. kcs(nm)==1) .or. kcs(num)/=1) then
                          svcor(nm, l) = svcor(nm, l)*fixfac(nm, l)
                       else
                          svcor(nm, l) = svcor(nm, l)*fixfac(num, l)
@@ -550,7 +550,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                 ! u component
                 !
                 if (kfu(nm) == 1 .and. kcu(nm)/=-1) then
-                   cumflux = 0.0
+                   cumflux = 0.0_fp
                    do k = 1, kmax
                       cumflux = cumflux + fluxu(nm, k, ll)
                    enddo
@@ -563,7 +563,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                 ! v component
                 !
                 if (kfv(nm) == 1 .and. kcv(nm)/=-1) then
-                   cumflux = 0.0
+                   cumflux = 0.0_fp
                    do k = 1, kmax
                       cumflux = cumflux + fluxv(nm, k, ll)
                    enddo
@@ -589,7 +589,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
        ! Increment morphological time
        ! Note: hdt in seconds, morft in days!
        !
-       morft = morft + hdtmor/86400.0
+       morft = morft + hdtmor/86400.0_fp
        !
        ! Bed boundary conditions: transport condition
        !
@@ -608,11 +608,11 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
              ! Prepare loop over boundary points
              !
              do ib = 1, morbnd(jb)%npnt
-                alfa_dist = morbnd(jb)%alfa_dist(ib)
-                alfa_mag  = morbnd(jb)%alfa_mag(ib)
+                alfa_dist   = morbnd(jb)%alfa_dist(ib)
+                alfa_mag    = morbnd(jb)%alfa_mag(ib)
                 idir_scalar = morbnd(jb)%idir(ib)
-                nm        = morbnd(jb)%nm(ib)
-                nxmx      = morbnd(jb)%nxmx(ib)
+                nm          = morbnd(jb)%nm(ib)
+                nxmx        = morbnd(jb)%nxmx(ib)
                 !
                 nmu = nm + icx
                 num = nm + icy
@@ -627,13 +627,13 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                 ! Detect the case based on the value of nxmx.
                 !
                 if (nxmx == nmu) then
-                   if (umean(nm)<0.0) cycle
+                   if (umean(nm)<0.0_fp) cycle
                 elseif (nxmx == nmd) then
-                   if (umean(nmd)>0.0) cycle
+                   if (umean(nmd)>0.0_fp) cycle
                 elseif (nxmx == num) then
-                   if (vmean(nm)<0.0) cycle
+                   if (vmean(nm)<0.0_fp) cycle
                 elseif (nxmx == ndm) then
-                   if (vmean(ndm)>0.0) cycle
+                   if (vmean(ndm)>0.0_fp) cycle
                 endif
                 !
                 ! The velocity/transport points to the left and top are part
@@ -644,7 +644,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                 !
                 if (nxmx == nmu .or. nxmx == num) nxmx = nm
                 !
-                li = 0
+                li      = 0
                 lsedbed = lsedtot - nmudfrac
                 do l = 1, lsedtot
                    !
@@ -685,8 +685,8 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           endif       ! icond = 4 or 5 (boundary with transport condition)
        enddo          ! jb (open boundary) 
        !
-       call dfexchg( sbuu,   1, lsedtot, dfloat, nm_pos, gdp)
-       call dfexchg( sbvv,   1, lsedtot, dfloat, nm_pos, gdp)
+       call dfexchg(sbuu, 1, lsedtot, dfloat, nm_pos, gdp)
+       call dfexchg(sbvv, 1, lsedtot, dfloat, nm_pos, gdp)
        !
        ! Update quantity of bottom sediment
        !
@@ -703,15 +703,15 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
              ! note: do not update bottom sediment at open boundary pnts
              !
              if (kcs(nm)*kfs(nm) == 1) then
-                nmu = nm + icx
-                num = nm + icy
-                nmd = nm - icx
-                ndm = nm - icy
-                trndiv = 0.0
-                sedflx = 0.0
-                eroflx = 0.0
+                nmu     = nm + icx
+                num     = nm + icy
+                nmd     = nm - icx
+                ndm     = nm - icy
+                trndiv  = 0.0_fp
+                sedflx  = 0.0_fp
+                eroflx  = 0.0_fp
                 gsqsinv = 1.0_fp/gsqs(nm)
-                if (sus/=0.0 .and. .not. bedload) then
+                if (sus/=0.0_fp .and. .not. bedload) then
                    if (neglectentrainment) then
                       !
                       ! mass balance based on fluxes: entrainment and deposition
@@ -742,14 +742,10 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                       else
                          k = kmax
                       endif
-                      !
-                      !thick0 = thick(k)*max(0.01_fp, s0(nm) + real(dps(nm),fp))    ! This introduces a mass balance error!
-                      !thick1 = thick(k)*max(0.01_fp, s1(nm) + real(dps(nm),fp))    ! dps should also be taken from previous half time step, or use following code
-                      !
-                      thick0 = volum0(nm,k)*gsqsinv
-                      thick1 = volum1(nm,k)*gsqsinv
-                      sedflx = sinkse(nm, l)*r1(nm, k, ll)*thick1
-                      eroflx = sourse(nm, l)              *thick0
+                      thick0 = volum0(nm,k) * gsqsinv
+                      thick1 = volum1(nm,k) * gsqsinv
+                      sedflx = sinkse(nm,l) * r1(nm,k,ll) * thick1
+                      eroflx = sourse(nm,l)               * thick0
                       !
                       ! add suspended transport correction vector
                       !
@@ -766,7 +762,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                       endif
                    endif
                 endif
-                if (bed /= 0.0) then
+                if (bed /= 0.0_fp) then
                    if (snelli) then
                      !
                      ! Only cross-shore component
@@ -779,12 +775,12 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                             &           +sbvv(ndm,l)*gvv(ndm)-sbvv(nm,l)*gvv(nm))
                    endif
                 endif
-                dsdnm = (trndiv + sedflx - eroflx)*hdt*morfac
+                dsdnm = (trndiv+sedflx-eroflx) * hdt * morfac
                 !
                 ! Warn if bottom changes are very large,
                 ! depth change NOT LIMITED
                 !
-                dhmax = 0.05
+                dhmax = 0.05_fp
                 h1 = max(0.01_fp, s1(nm) + real(dps(nm),fp))
                 if (abs(dsdnm) > dhmax*h1*cdryb(1) .and. bedupd) then
                    !
@@ -797,7 +793,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                    if (bedchangemesscount <= bedchangemessmax) then
                       call nm_to_n_and_m(nm, n, m, gdp)
                       write (lundia, '(a,f5.1,a,i0,a,i0,a,i0,a)') &
-                          & '*** WARNING Bed change exceeds ' , dhmax*100, ' % of waterdepth after ', ntstep,  &
+                          & '*** WARNING Bed change exceeds ' , dhmax*100.0_fp, ' % of waterdepth after ', ntstep,  &
                           & ' timesteps, location (m,n) = (', m,',',n,')'
                    endif
                 endif
@@ -816,7 +812,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
        endif
        !
        nm_pos = 2
-       call dfexchg( dbodsd, 1, lsedtot, dfloat, nm_pos, gdp)
+       call dfexchg(dbodsd, 1, lsedtot, dfloat, nm_pos, gdp)
        nm_pos = 1
        !
        ! Re-distribute erosion near dry and shallow points to allow erosion
@@ -831,7 +827,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           ! If this is a cell in which sediment processes are active then ...
           !
           if (kcs(nm)*kfs(nm)*kfsed(nm) == 1) then
-             totdbodsd = 0.0
+             totdbodsd = 0.0_fp
              do l = 1, lsedtot
                 totdbodsd = totdbodsd + dbodsd(l, nm)
              enddo
@@ -839,7 +835,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
              ! If this is a cell in erosion is occuring (accretion is not
              ! distributed to dry points) then...
              !
-             if (totdbodsd < 0.0) then
+             if (totdbodsd < 0.0_fp) then
                 !
                 ! Note: contrary to the previous implementation, this new
                 ! implementation erodes the sediment from nm and
@@ -851,7 +847,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                 ! place only in case of net TOTAL erosion, i.e. not of
                 ! individual fractions.
                 !
-                gsqsmin = gsqs(nm)
+                gsqsmin    = gsqs(nm)
                 totfixfrac = 0.0_fp
                 !
                 from_ndm = kfsed(ndm)==0 .and. kcs(ndm) /= 0 .and. kcs(ndm)<3 .and. kcv(ndm)==1 .and. dps(ndm)<dps(nm)
@@ -889,7 +885,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                 ! Re-distribute THET % of erosion in nm to surrounding cells
                 ! THETSD is a user-specified maximum value, range 0-1
                 !
-                if (totfixfrac > 1.0e-7) then
+                if (totfixfrac > 1.0e-7_fp) then
                    !
                    ! Compute local re-distribution factor THET
                    !
@@ -913,31 +909,31 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
                       ! process.
                       !
                       if (from_ndm) then
-                         dv = thet*fixfac(ndm, l)*frac(ndm, l)
+                         dv             = thet*fixfac(ndm, l)*frac(ndm, l)
                          dbodsd(l, ndm) = dbodsd(l, ndm) - dv/gsqs(ndm)
                          dbodsd(l, nm ) = dbodsd(l, nm ) + dv/gsqs(nm)
-                         sbvv(ndm, l) = sbvv(ndm, l) + dv/(hdt*morfac*gvv(ndm))
+                         sbvv(ndm, l)   = sbvv(ndm, l) + dv/(hdt*morfac*gvv(ndm))
                       endif
                       !
                       if (from_nmd) then
-                         dv = thet*fixfac(nmd, l)*frac(nmd, l)
+                         dv             = thet*fixfac(nmd, l)*frac(nmd, l)
                          dbodsd(l, nmd) = dbodsd(l, nmd) - dv/gsqs(nmd)
                          dbodsd(l, nm ) = dbodsd(l, nm ) + dv/gsqs(nm)
-                         sbuu(nmd, l) = sbuu(nmd, l) + dv/(hdt*morfac*guu(nmd))
+                         sbuu(nmd, l)   = sbuu(nmd, l) + dv/(hdt*morfac*guu(nmd))
                       endif
                       !
                       if (from_nmu) then
-                         dv = thet*fixfac(nmu, l)*frac(nmu, l)
+                         dv             = thet*fixfac(nmu, l)*frac(nmu, l)
                          dbodsd(l, nmu) = dbodsd(l, nmu) - dv/gsqs(nmu)
                          dbodsd(l, nm ) = dbodsd(l, nm ) + dv/gsqs(nm)
-                         sbuu(nm, l) = sbuu(nm, l) - dv/(hdt*morfac*guu(nm))
+                         sbuu(nm, l)    = sbuu(nm, l) - dv/(hdt*morfac*guu(nm))
                       endif
                       !
                       if (from_num) then
                          dv = thet*fixfac(num, l)*frac(num, l)
                          dbodsd(l, num) = dbodsd(l, num) - dv/gsqs(num)
                          dbodsd(l, nm ) = dbodsd(l, nm ) + dv/gsqs(nm)
-                         sbvv(nm, l) = sbvv(nm, l) - dv/(hdt*morfac*gvv(nm))
+                         sbvv(nm, l)    = sbvv(nm, l) - dv/(hdt*morfac*gvv(nm))
                       endif
                    enddo ! l
                 endif    ! totfixfrac > 1.0e-7
@@ -946,7 +942,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
        enddo             ! nm
        !
        nm_pos = 2
-       call dfexchg( dbodsd, 1, lsedtot, dfloat, nm_pos, gdp)
+       call dfexchg(dbodsd, 1, lsedtot, dfloat, nm_pos, gdp)
        nm_pos = 1
        !
        ! Modifications for running parallel conditions
@@ -964,7 +960,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           call getarray (mergehandle,mergebuf(1:nmmax*lsedtot),nmmax*lsedtot)
           i = 0
           do l = 1, lsedtot
-             do nm=1,nmmax
+             do nm = 1, nmmax
                 i = i + 1
                 dbodsd(l, nm) = real(mergebuf(i),fp)
              enddo
@@ -986,11 +982,11 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           enddo
        enddo
        !
-       call dfexchg( sbuuc,   1, lsedtot, dfloat, nm_pos, gdp)
-       call dfexchg( sbvvc,   1, lsedtot, dfloat, nm_pos, gdp)
+       call dfexchg(sbuuc, 1, lsedtot, dfloat, nm_pos, gdp)
+       call dfexchg(sbvvc, 1, lsedtot, dfloat, nm_pos, gdp)
        if (lsed > 0) then
-          call dfexchg( ssuuc,   1, lsed,    dfloat, nm_pos, gdp)
-          call dfexchg( ssvvc,   1, lsed,    dfloat, nm_pos, gdp)
+          call dfexchg(ssuuc, 1, lsed, dfloat, nm_pos, gdp)
+          call dfexchg(ssvvc, 1, lsed, dfloat, nm_pos, gdp)
        endif
        !
        ! Apply erosion and sedimentation to bookkeeping system
@@ -1030,7 +1026,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           enddo
        endif
        !
-       call dfexchg( depchg, 1, 1, dfloat, nm_pos, gdp)
+       call dfexchg(depchg, 1, 1, dfloat, nm_pos, gdp)
        !
        ! Bed boundary conditions
        !
@@ -1050,11 +1046,11 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           ! Prepare loop over boundary points
           !
           do ib = 1, morbnd(jb)%npnt
-             alfa_dist = morbnd(jb)%alfa_dist(ib)
-             alfa_mag  = morbnd(jb)%alfa_mag(ib)**2
+             alfa_dist   = morbnd(jb)%alfa_dist(ib)
+             alfa_mag    = morbnd(jb)%alfa_mag(ib)**2
              idir_scalar = morbnd(jb)%idir(ib)
-             nm        = morbnd(jb)%nm(ib)
-             nxmx      = morbnd(jb)%nxmx(ib)
+             nm          = morbnd(jb)%nm(ib)
+             nxmx        = morbnd(jb)%nxmx(ib)
              !
              nmu = nm + icx
              num = nm + icy
@@ -1126,11 +1122,11 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
        ! if morphological computations haven't started yet
        !
        do nm = 1, nmmax
-          depchg(nm) = 0.0
+          depchg(nm) = 0.0_fp
        enddo
     endif ! nst >= itmor
     !
-    call dfexchg( depchg, 1, 1, dfloat, nm_pos, gdp)
+    call dfexchg(depchg, 1, 1, dfloat, nm_pos, gdp)
     !
     ! Update bottom elevations
     !
@@ -1144,7 +1140,7 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           ! should change to following test because depchg may be small
           ! due to truncation errors
           !
-          if (abs(depchg(nm)) > 0.0) then
+          if (abs(depchg(nm)) > 0.0_fp) then
              dps(nm) = dps(nm) - real(depchg(nm),prec)
           endif
        enddo
@@ -1214,11 +1210,11 @@ subroutine bott3d(nmmax     ,kmax      ,lsed      ,lsedtot  , &
           numu = num + icx
           fact =   kcsbot(nm) *gsqs(nm)  + kcsbot(num) *gsqs(num)  &
                & + kcsbot(nmu)*gsqs(nmu) + kcsbot(numu)*gsqs(numu)
-          if (fact > 0.0) then
+          if (fact > 0.0_fp) then
              dp(nm) = dp(nm) - (  depchg(nm) *gsqs(nm)  + depchg(num) *gsqs(num)     &
                     &           + depchg(nmu)*gsqs(nmu) + depchg(numu)*gsqs(numu))/fact
           endif
        enddo
-       call dfexchg( dp,   1, 1, dfloat, nm_pos, gdp)
+       call dfexchg(dp, 1, 1, dfloat, nm_pos, gdp)
     endif
 end subroutine bott3d

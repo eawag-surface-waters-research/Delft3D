@@ -1,4 +1,4 @@
-subroutine rdscour(error, gdp)
+subroutine rdscour(lundia    ,error     ,nmmax     ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -47,22 +47,18 @@ subroutine rdscour(error, gdp)
     !
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
-    integer                , pointer :: nmax
-    integer                , pointer :: nmaxd
-    integer                , pointer :: nmmax
     integer                , pointer :: nof
     integer, dimension(:)  , pointer :: nmapp
     integer, dimension(:)  , pointer :: nmref
     logical                , pointer :: scour
     real(fp), dimension(:) , pointer :: factor
     real(fp)               , pointer :: slope
-    integer                , pointer :: lunmd
-    integer                , pointer :: lundia
-    integer                , pointer :: itis
 !
 ! Global variables
 !
-    logical, intent(out) :: error
+    integer                                  , intent(in)  :: nmmax
+    integer                                  , intent(in)  :: lundia
+    logical                                  , intent(out) :: error
 !
 ! Local variables
 !
@@ -81,15 +77,9 @@ subroutine rdscour(error, gdp)
 !
 !! executable statements -------------------------------------------------------
 !
-    nmax       => gdp%d%nmax
-    nmaxd      => gdp%d%nmaxd
-    nmmax      => gdp%d%nmmax
     nof        => gdp%gdscour%nof
     scour      => gdp%gdscour%scour
     slope      => gdp%gdscour%slope
-    lunmd      => gdp%gdinout%lunmd
-    lundia     => gdp%gdinout%lundia
-    itis       => gdp%gdrdpara%itis
     !
     error  = .false.
     !
@@ -110,7 +100,8 @@ subroutine rdscour(error, gdp)
           open (inp, file = flname,status = 'old', iostat = iost)
           if (iost/=0) then
              call prterr(lundia, 'G004', trim(flname))
-             call d3stop(1, gdp)
+             error = .true.
+             return
           endif
           read (inp, *, iostat = iost) i
           if (iost/=0 .or. i==0) then
@@ -145,7 +136,8 @@ subroutine rdscour(error, gdp)
           if (iost==0) allocate (gdp%gdscour%depchange(nmmax), stat = iost)
           if (iost/=0) then
              call prterr(lundia, 'U021', 'Rdscour: memory alloc error')
-             call d3stop(1, gdp)
+             error = .true.
+             return
           endif
           !
           ! make sure local pointers point to the allocated memory

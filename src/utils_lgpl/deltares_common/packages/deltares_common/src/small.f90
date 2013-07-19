@@ -29,11 +29,13 @@ subroutine small(string    ,lenstr    )
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-! NONE
+!  Subroutine obsolete; this routine will be removed.
+!  Use string_module routine str_lower instead
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
+    use string_module, only:str_lower
     implicit none
 !
 ! Global variables
@@ -41,60 +43,7 @@ subroutine small(string    ,lenstr    )
     integer      , intent(in) :: lenstr
     character(*)              :: string
 !
-!
-! Local variables
-!
-    integer                        :: i
-    integer                        :: j
-    integer                        :: newlen
-!
-!
 !! executable statements -------------------------------------------------------
 !
-    !
-    !
-    ! External program name  : SMALL.F
-    ! Programmer             : Cor van der Schelde
-    ! Function description   : Altering the uppercase characters (in a string)
-    !                          to lower case characters (for UNIX)
-    ! Called by              : Various routines
-    !                    Date: 01-08-2002
-    !
-    ! description external variables/parameters
-    ! ----------------------------------------
-    ! name    type      length   description
-    ! ------  --------  ------   ------------
-    ! lenstr  i*4       1        lengtg of the string
-    ! string  ch*(*)    1        string
-    !
-    !
-    ! description local variables
-    ! ----------------------------
-    ! name    type      length   description
-    ! ------  --------  ------   ------------
-    ! i       i*4       1        loop variable
-    ! j       i*4       1        hulp variable
-    ! newlen  i*4       1        actual string length
-    !
-    !
-    !
-    ! common blocks          : none
-    !
-    ! subroutines            : ichar  (intrinsic function)
-    !                          char   (intrinsic function)
-    !
-    ! lun                    : none
-    !
-    !
-    !  declarations
-    !
-    !
-    newlen = min(lenstr, len(string))
-    do i = 1, newlen
-       j = ichar(string(i:i))
-       if ((j>64) .and. (j<91)) then
-          j = j + 32
-          string(i:i) = char(j)
-       endif
-    enddo
+    call str_lower(string, lenstr)
 end subroutine small

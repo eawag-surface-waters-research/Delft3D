@@ -39,10 +39,9 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    !
     use globaldata
-    !
     use dfparall
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -112,7 +111,6 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
     integer                         :: nrigid ! Help var. (counter) 
     integer, dimension(6)           :: ival   ! Help array (int.) where the data, recently read from file, are stored temporarily 
     integer, external               :: newlun
-    logical, external               :: exifil
     logical                         :: skip   ! Skip flag for structures outside active domain
     real(fp)                        :: brlosc ! Constant value for wall roughness 
     real(fp)                        :: rdef   ! Help var. containing default va- lue(s) for real variable 
@@ -160,7 +158,7 @@ subroutine strfil(lundia    ,error     ,filstr    ,mmax      , &
     ! test file existence, if so read
     !
     call noextspaces(filstr    ,lfile     )
-    if (exifil(filstr(1:lfile), lundia, 'G004', gdp)) then
+    if (exifil(filstr, lundia)) then
        !
        ! file = exist
        !

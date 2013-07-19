@@ -41,7 +41,7 @@ subroutine red_soursin(nmmax     ,kmax      ,thick     ,kmxsed    , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    !
+    use sediment_basics_module
     use globaldata
     !
     implicit none
@@ -65,7 +65,6 @@ subroutine red_soursin(nmmax     ,kmax      ,thick     ,kmxsed    , &
     real(fp)                         , pointer :: hdt
     real(fp)      , dimension(:)     , pointer :: cdryb
     integer       , dimension(:)     , pointer :: sedtyp
-    include 'sedparams.inc'
 !
 ! Local parameters
 !
@@ -133,7 +132,7 @@ subroutine red_soursin(nmmax     ,kmax      ,thick     ,kmxsed    , &
        !
        ! Reduction is not applied to mud and not to bedl
        !
-       if (sedtyp(l)==SEDTYP_NONCOHESIVE_SUSPENDED) then
+       if (sedtyp(l) == SEDTYP_NONCOHESIVE_SUSPENDED) then
           do nm = 1, nmmax
              !
              ! Apply reduction factor to source and sink terms if

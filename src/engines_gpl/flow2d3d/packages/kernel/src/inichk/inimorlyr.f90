@@ -179,12 +179,12 @@ subroutine inimorlyr(flsdbd    ,sdbuni    ,inisedunit,cdryb     , &
              !
              if (prec == hp) then
                 call depfil_double(lundia    ,error     ,flsdbd(ised)         , &
-                                 & fmttmp    ,mmax      ,nmaxus    ,bodsed    , &
-                                 & lsedtot   , ised     ,gdp       )
+                                 & fmttmp    ,bodsed    ,lsedtot   ,ised      , &
+                                 & gdp%griddim)
              else
                 call depfil(lundia    ,error     ,flsdbd(ised)         , &
-                          & fmttmp    ,mmax      ,nmaxus    ,bodsed    , &
-                          & lsedtot   ,ised      ,gdp       )
+                          & fmttmp    ,bodsed    ,lsedtot   ,ised      , &
+                          & gdp%griddim)
              endif
              if (error) goto 9999
           endif

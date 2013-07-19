@@ -41,8 +41,8 @@ subroutine bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    !
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -101,7 +101,6 @@ subroutine bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
     integer           :: luntmp ! Help var. for a unit number of an attribute file 
     integer           :: n      ! Help var. 
     integer, external :: newlun
-    logical, external :: exifil
     logical           :: ltest  ! Flag for testing 
     real(fp)          :: rdef   ! Help var. containing default va- lue(s) for real variable 
     character(1)      :: cdefd  ! Default value when DATBND not found 
@@ -137,7 +136,7 @@ subroutine bndfil(lundia    ,error     ,noui      ,kmax      ,lnto      , &
     !
     call noextspaces(filbnd    ,lfile     )
     !
-    if (exifil(filbnd(1:lfile), lundia, 'G004', gdp)) then
+    if (exifil(filbnd, lundia)) then
        !
        luntmp = newlun(gdp)
        open (luntmp, file = filbnd(1:lfile), form = fmttmp, status = 'old')

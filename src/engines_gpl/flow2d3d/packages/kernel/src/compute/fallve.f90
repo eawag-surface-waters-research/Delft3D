@@ -47,11 +47,10 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
 !!--declarations----------------------------------------------------------------
     use precision
     use mathconsts
-    !
+    use sediment_basics_module
     use globaldata
     !
     implicit none
-    include "vanrijn.inc"
     !
     type(globdat),target :: gdp
     !
@@ -82,7 +81,6 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
     integer            , dimension(:), pointer :: dll_integers
     real(hp)           , dimension(:), pointer :: dll_reals
     character(256)     , dimension(:), pointer :: dll_strings
-    include 'sedparams.inc'
 !
 ! Global variables
 !
@@ -182,20 +180,20 @@ subroutine fallve(kmax      ,nmmax     ,lsal      ,ltem      ,lsed      , &
     sedd50              => gdp%gdsedpar%sedd50
     sedd50fld           => gdp%gdsedpar%sedd50fld
     gamflc              => gdp%gdsedpar%gamflc
-    iform               => gdp%gdeqtran%iform
+    iform               => gdp%gdtrapar%iform
     !
     timsec              => gdp%gdinttim%timsec
     !
-    dll_function        => gdp%gdeqtran%dll_function_settle
-    dll_handle          => gdp%gdeqtran%dll_handle_settle
-    dll_usrfil          => gdp%gdeqtran%dll_usrfil_settle
+    dll_function        => gdp%gdtrapar%dll_function_settle
+    dll_handle          => gdp%gdtrapar%dll_handle_settle
+    dll_usrfil          => gdp%gdtrapar%dll_usrfil_settle
     !
-    max_integers        => gdp%gdeqtran%max_integers_settle
-    max_reals           => gdp%gdeqtran%max_reals_settle
-    max_strings         => gdp%gdeqtran%max_strings_settle
-    dll_integers        => gdp%gdeqtran%dll_integers_settle
-    dll_reals           => gdp%gdeqtran%dll_reals_settle
-    dll_strings         => gdp%gdeqtran%dll_strings_settle
+    max_integers        => gdp%gdtrapar%max_integers_settle
+    max_reals           => gdp%gdtrapar%max_reals_settle
+    max_strings         => gdp%gdtrapar%max_strings_settle
+    dll_integers        => gdp%gdtrapar%dll_integers_settle
+    dll_reals           => gdp%gdtrapar%dll_reals_settle
+    dll_strings         => gdp%gdtrapar%dll_strings_settle
     !
     aak = 0.0_fp
     sag = sqrt(ag)

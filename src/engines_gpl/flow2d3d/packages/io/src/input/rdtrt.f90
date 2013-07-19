@@ -38,10 +38,9 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
 !!--declarations----------------------------------------------------------------
     use precision
     use properties
-    !
     use globaldata
-    !
     use dfparall
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -120,7 +119,6 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     logical                          :: dtn
     logical                          :: lokay
     logical                          :: lrcode
-    logical, external                :: exifil
     real(fp)                         :: rtimtt
     real(fp), dimension(maxfld)      :: rfield
     character(10), dimension(maxfld) :: cfield
@@ -273,7 +271,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
     if (lfile==0) lfile = 13
     lfile = lfile - 1
     call noextspaces(filtmp    ,lfile     )
-    if (.not.exifil(filtmp(1:lfile)  ,lundia    ,'G004'    ,gdp)) then
+    if (.not.exifil(filtmp, lundia)) then
        !
        ! file does not exist !!
        !
@@ -628,7 +626,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
        if (lfile==0) lfile = 13
        lfile = lfile - 1
        call noextspaces(filtmp    ,lfile     )
-       if (.not.exifil(filtmp(1:lfile)  ,lundia    ,'G004'    ,gdp)) then
+       if (.not.exifil(filtmp, lundia)) then
           !
           ! file does not exist !!
           !
@@ -641,8 +639,8 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
        ! Use routine that also read the depth file to read the data
        !
        fmttmp = 'FORMATTED'
-       call depfil(lundia    ,error     ,filtmp    ,fmttmp    ,mmax      , &
-                 & nmaxus    ,rgcalu    ,1         ,1         ,gdp       )
+       call depfil(lundia    ,error     ,filtmp    ,fmttmp    , &
+                 & rgcalu    ,1         ,1         ,gdp%griddim)
        if (error) goto 9999
     else
        !
@@ -675,7 +673,7 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
        if (lfile==0) lfile = 13
        lfile = lfile - 1
        call noextspaces(filtmp    ,lfile     )
-       if (.not.exifil(filtmp(1:lfile) ,lundia    ,'G004'    ,gdp)) then
+       if (.not.exifil(filtmp, lundia)) then
           !
           ! file does not exist !!
           !
@@ -688,8 +686,8 @@ subroutine rdtrt(lundia    ,error     ,lftrto    ,dt        ,mmax      , &
        ! Use routine that also read the depth file to read the data
        !
        fmttmp = 'FORMATTED'
-       call depfil(lundia    ,error     ,filtmp    ,fmttmp    ,mmax      , &
-                 & nmaxus    ,rgcalv    ,1         ,1         ,gdp       )
+       call depfil(lundia    ,error     ,filtmp    ,fmttmp    , &
+                 & rgcalv    ,1         ,1         ,gdp%griddim)
        if (error) then
        endif
     else

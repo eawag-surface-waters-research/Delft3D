@@ -164,7 +164,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
        !
        do i = 1, size(mor_ptr%child_nodes)
           !
-          ! Does sed_ptr contain a child with name 'Layer' (converted to lower case)?
+          ! Does mor_ptr contain a child with name 'Layer' (converted to lower case)?
           !
           layer_ptr => mor_ptr%child_nodes(i)%node_ptr
           parname = tree_get_name( layer_ptr )
@@ -227,8 +227,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                 ! Spatially varying thickness
                 !
                 call depfil(lundia    ,error     ,filename  ,fmttmp    , &
-                          & mmax      ,nmaxus    ,thtemp    ,1         , &
-                          & 1         ,gdp       )
+                          & thtemp    ,1         ,1         ,gdp%griddim)
                 if (error) then
                    write (message,'(3a,i2,2a)')  &
                        & 'Error reading thickness from ', trim(filename), &
@@ -286,8 +285,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                    !
                    anyfrac = .true.
                    call depfil(lundia    ,error     ,filename  , fmttmp    , &
-                             & mmax      ,nmaxus    ,rtemp(nmlb,l)         , &
-                             & 1         ,1         ,gdp       )
+                             & rtemp(nmlb,l)        ,1   ,1    ,gdp%griddim)
                    if (error) then
                       write (message,'(a,i2,3a,i2,2a)')  &
                           & 'Error reading fraction ', l, 'from ', &
@@ -531,8 +529,7 @@ subroutine rdinimorlyr(filcomp   ,msed      ,thlyr     ,cdryb     , &
                    !
                    anysedbed = .true.
                    call depfil(lundia    ,error     ,filename  , fmttmp    , &
-                             & mmax      ,nmaxus    ,rtemp(nmlb,l)         , &
-                             & 1         ,1         ,gdp       )
+                             & rtemp(nmlb,l)        ,1   ,1    ,gdp%griddim)
                    if (error) then
                       write (message,'(5a,i2,2a)')  &
                           & 'Error reading ', layertype, '  from ', trim(filename), &

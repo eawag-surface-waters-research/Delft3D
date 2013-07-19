@@ -1,7 +1,7 @@
 subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
                 & lsed      ,lsedtot   ,irequest  ,fds       ,grpnam    , &
                 & sbuu      ,sbvv      ,ssuu      ,ssvv      ,ws        , &
-                & rsedeq    ,dps       ,rca       ,gdp       )
+                & rsedeq    ,dps       ,rca       ,aks       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -108,6 +108,7 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
     real(prec), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)            , intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax, lsed), intent(in)  :: ws     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lsed)  , intent(in)  :: rsedeq !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsed)        , intent(in)  :: aks    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsed)        , intent(in)  :: rca    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsedtot)     , intent(in)  :: sbuu   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsedtot)     , intent(in)  :: sbvv   !  Description and declaration in esm_alloc_real.f90
@@ -330,6 +331,12 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
             & 'Sink term suspended sediment fractions'                     , &
             & 3         ,nmaxus    ,mmax      ,lsed      ,0         ,0     , &
             & lundia    ,gdp       )
+       endif
+       if (moroutput%aks) then
+          call addelm(nefiswrsedm,'AKS',' ','[   M   ]','REAL',4            , &
+             & 'Near-bed reference concentration height'                    , &
+             & 3         ,nmaxus    ,mmax      ,lsed      ,0         ,0     , &
+             & lundia    ,gdp       )
        endif
        call addelm(nefiswrsedm,'RCA',' ','[ KG/M3 ]','REAL',4            , &
           & 'Near-bed reference concentration of sediment'               , &
@@ -1108,6 +1115,26 @@ subroutine wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
              sbuff(1:lsedtot*mmax*nmaxus) = -999.0
           endif
           ierror = putelt(fds, grpnam, 'SINKSE', uindex, 1, sbuff)
+          if (ierror/=0) goto 9999
+       endif
+       !
+       ! element 'AKS'
+       !
+       if (moroutput%aks) then
+          call sbuff_checksize(lsed*mmax*nmaxus)
+          i = 0
+          do l = 1, lsed
+             do m = 1, mmax
+                do n = 1, nmaxus
+                   !
+                   ! near-bed reference concentration height
+                   !
+                   i        = i+1
+                   sbuff(i) = real(aks(n, m, l),sp)
+                enddo
+             enddo
+          enddo
+          ierror = putelt(fds, grpnam, 'AKS', uindex, 1, sbuff)
           if (ierror/=0) goto 9999
        endif
        !

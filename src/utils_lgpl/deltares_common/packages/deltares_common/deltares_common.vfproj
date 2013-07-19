@@ -78,11 +78,33 @@
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath=".\src\deltares_common_version.F90.svn"/>
+		<File RelativePath=".\src\depfil.f90"/>
+		<File RelativePath=".\src\depfil_double.f90"/>
+		<File RelativePath=".\src\dfbroadc.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
+		<File RelativePath=".\src\dfparall.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath="src\distance.f90"/>
+		<File RelativePath=".\src\grid_dimens_module.f90"/>
 		<File RelativePath="src\handles.f90"/>
 		<File RelativePath="src\juldat.f90"/>
 		<File RelativePath="src\malloc.f90"/>
 		<File RelativePath=".\src\mathconsts.f90"/>
+		<File RelativePath=".\src\message_module.f90"/>
 		<File RelativePath="src\MessageHandling.f90"/>
 		<File RelativePath="src\nan_check_module.f90"/>
 		<File RelativePath="src\newunit.f90"/>
@@ -90,12 +112,24 @@
 		<File RelativePath=".\src\precision_basics.F90"/>
 		<File RelativePath=".\src\precision_sp.F90"/>
 		<File RelativePath=".\src\properties.f90"/>
+		<File RelativePath=".\src\quickin_dep_file.f90"/>
 		<File RelativePath="src\scannr.f90"/>
 		<File RelativePath="src\skipstarlines.f90"/>
 		<File RelativePath="src\small.f90"/>
+		<File RelativePath=".\src\string_module.f90"/>
 		<File RelativePath="src\stringsequal.f90"/>
+		<File RelativePath=".\src\system_utils.F90">
+			<FileConfiguration Name="Debug|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
+			<FileConfiguration Name="Release|Win32">
+				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath="src\table_handles.f90"/>
 		<File RelativePath="src\tables.f90"/>
+		<File RelativePath=".\src\time_module.f90"/>
 		<File RelativePath=".\src\timers.f">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" FixedFormLineLength="fixedLength132"/></FileConfiguration>
@@ -106,5 +140,6 @@
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" FixedFormLineLength="fixedLength132"/></FileConfiguration></File>
 		<File RelativePath=".\src\tree_struct.f90"/>
-		<File RelativePath="src\util.f90"/></Filter></Files>
+		<File RelativePath="src\util.f90"/>
+		<File RelativePath=".\src\wavenr.f90"/></Filter></Files>
 	<Globals/></VisualStudioProject>

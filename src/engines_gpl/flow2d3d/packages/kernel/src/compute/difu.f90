@@ -84,6 +84,7 @@ subroutine difu(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     use flow2d3d_timers
     use globaldata
     use dfparall
+    use sediment_basics_module
     !
     implicit none
     !
@@ -92,7 +93,6 @@ subroutine difu(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     include 'flow_steps_f.inc'
-    include 'sedparams.inc'
     integer                , pointer :: iro
     integer                , pointer :: mfg
     integer                , pointer :: nfg
@@ -666,12 +666,12 @@ integer                 :: nm_pos ! indicating the array to be exchanged has nm 
             & (eqmbcmud  .and. sedtyp(l) == SEDTYP_COHESIVE)             ) then
              if (kcu(nmf) == 1) then
                 do k = 1, kmax
-                   ddkl(nmf, k, ll) = r0(nmfu, k, ll)
+                   ddkl(nmf, k, ll) = max(0.0_fp, r0(nmfu, k, ll))
                 enddo
              endif
              if (kcu(nml) == 1) then
                 do k = 1, kmax
-                   ddkl(nmlu, k, ll) = r0(nml, k, ll)
+                   ddkl(nmlu, k, ll) = max(0.0_fp, r0(nml, k, ll))
                 enddo
              endif
           endif

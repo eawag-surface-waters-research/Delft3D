@@ -43,7 +43,7 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
 !!--declarations----------------------------------------------------------------
     use precision
     use mathconsts
-    !
+    use sediment_basics_module
     use globaldata
     !
     implicit none
@@ -71,7 +71,6 @@ subroutine adjust_bedload(nmmax     ,icx       ,icy       ,kcs       , &
     real(fp)                         , pointer :: eps
     real(fp)                         , pointer :: morfac
     real(fp)                         , pointer :: hdt
-    include 'sedparams.inc'
 !
 ! Global variables
 !

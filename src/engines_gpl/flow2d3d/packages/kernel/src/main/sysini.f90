@@ -258,6 +258,6 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
           close (lunhlp, status = 'delete')
        endif
     endif
-    call dfbroadc(ierr, 1, dfint, gdp)
+    call dfbroadc_gdp(ierr, 1, dfint, gdp)
  9999 continue
 end subroutine sysini

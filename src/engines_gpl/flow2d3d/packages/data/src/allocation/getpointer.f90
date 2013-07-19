@@ -164,8 +164,6 @@ function getpointer(pntnam, gdp)
     integer(pntrsize) , pointer :: dzdksi
     integer(pntrsize) , pointer :: enstro
     integer(pntrsize) , pointer :: entr
-    integer(pntrsize) , pointer :: epscur
-    integer(pntrsize) , pointer :: epswav
     integer(pntrsize) , pointer :: evap
     integer(pntrsize) , pointer :: excbed
     integer(pntrsize) , pointer :: fcorio
@@ -519,8 +517,6 @@ function getpointer(pntnam, gdp)
     dzdksi     => gdp%gdr_i_ch%dzdksi
     enstro     => gdp%gdr_i_ch%enstro
     entr       => gdp%gdr_i_ch%entr
-    epscur     => gdp%gdr_i_ch%epscur
-    epswav     => gdp%gdr_i_ch%epswav
     evap       => gdp%gdr_i_ch%evap
     excbed     => gdp%gdr_i_ch%excbed
     fcorio     => gdp%gdr_i_ch%fcorio
@@ -975,10 +971,6 @@ function getpointer(pntnam, gdp)
        returnval = enstro
     case ('entr')
        returnval = entr
-    case ('epscur')
-       returnval = epscur
-    case ('epswav')
-       returnval = epswav
     case ('evap')
        returnval = evap
     case ('excbed')

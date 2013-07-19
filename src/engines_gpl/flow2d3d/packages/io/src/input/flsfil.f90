@@ -78,7 +78,6 @@ subroutine flsfil(lundia    ,error     ,filfls    ,mmax      ,nmax      , &
     integer           :: n        ! Help loop var. 
     integer           :: nd
     integer, external :: newlun
-    logical, external :: exifil
     character(11)     :: fmttmp   ! Format file ('formatted  ')
     character(300)    :: message
 !
@@ -89,8 +88,7 @@ subroutine flsfil(lundia    ,error     ,filfls    ,mmax      ,nmax      , &
     fmttmp = 'formatted'
     !
     call depfil(lundia    ,error     ,trim(filfls)         ,fmttmp    , &
-              & mmax      ,nmaxus    ,pship     ,1         ,1         , &
-              & gdp       )
+              & pship     ,1         ,1         ,gdp%griddim)
     if (error) then
        write (message,'(3a,i2,2a)') 'error reading file ', trim(filfls)
        call prterr(lundia, 'U021', trim(message))

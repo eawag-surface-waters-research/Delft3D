@@ -187,11 +187,11 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        !
        call dfgather_grddim(lundia, nfg, nlg, mfg, mlg, nmaxgl, mmaxgl, &
           &                 nf, nl, mf, ml, iarrc, lengl, lenlo, gdp )
-       call dfbroadc ( iarrc, 4*nproc, dfint, gdp )
-       call dfbroadc ( nf, nproc, dfint, gdp )
-       call dfbroadc ( nl, nproc, dfint, gdp )
-       call dfbroadc ( mf, nproc, dfint, gdp )
-       call dfbroadc ( ml, nproc, dfint, gdp )
+       call dfbroadc_gdp ( iarrc, 4*nproc, dfint, gdp )
+       call dfbroadc_gdp ( nf, nproc, dfint, gdp )
+       call dfbroadc_gdp ( nl, nproc, dfint, gdp )
+       call dfbroadc_gdp ( mf, nproc, dfint, gdp )
+       call dfbroadc_gdp ( ml, nproc, dfint, gdp )
        ! read restart values and distributed via a broadcast to the slaves
        ! per nmaxus mmax values in s1 array
        ! NOTE: nmaxus and mmax equal nmaxgl and mmaxgl, respectively (for entire domain)
@@ -200,7 +200,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        if (inode == master) then
           read (luntmp, iostat = iocond) ((sbuff(n, m, 1, 1), m = 1, mmaxgl), n = 1, nmaxgl)
        endif
-       call dfbroadc(iocond, 1, dfint, gdp)
+       call dfbroadc_gdp(iocond, 1, dfint, gdp)
        if (iocond /= 0) then
           if (iocond < 0) then
              call prterr(lundia, 'G006', trim(filtmp))
@@ -213,7 +213,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        !
        ! send buffer to other nodes
        !
-       call dfbroadc(sbuff, mmaxgl*nmaxgl*(kmax+1)*max(1,lstsci,ltur), dfreal, gdp)
+       call dfbroadc_gdp(sbuff, mmaxgl*nmaxgl*(kmax+1)*max(1,lstsci,ltur), dfreal, gdp)
        if (.not. nan_check(sbuff(:,:,1,1), 's1 (restart-file)', lundia)) call d3stop(1, gdp)
        !
        ! put copies of parts of s1 for each subdomain
@@ -235,7 +235,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
           if (inode == master) then
              read (luntmp, iostat = iocond) ((sbuff(n, m, k, 1), m = 1, mmaxgl), n = 1,nmaxgl)
           endif
-          call dfbroadc(iocond, 1, dfint, gdp)
+          call dfbroadc_gdp(iocond, 1, dfint, gdp)
           if (iocond /= 0) then
              if (iocond < 0) then
                 call prterr(lundia, 'G006', trim(filtmp))
@@ -249,7 +249,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        !
        ! send buffer to other nodes
        !
-       call dfbroadc(sbuff, mmaxgl*nmaxgl*(kmax+1)*max(1,lstsci,ltur), dfreal, gdp)
+       call dfbroadc_gdp(sbuff, mmaxgl*nmaxgl*(kmax+1)*max(1,lstsci,ltur), dfreal, gdp)
        if (.not. nan_check(sbuff(:,:,1:kmax,1), 'u1 (restart-file)', lundia)) call d3stop(1, gdp)
        !
        ! put copies of parts of u1 for each subdomain
@@ -271,7 +271,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
           if (inode == master) then
              read (luntmp, iostat = iocond) ((sbuff(n, m, k, 1), m = 1, mmaxgl), n = 1, nmaxgl)
           endif
-          call dfbroadc(iocond, 1, dfint, gdp)
+          call dfbroadc_gdp(iocond, 1, dfint, gdp)
           if (iocond /= 0) then
              if (iocond < 0) then
                 call prterr(lundia, 'G006', trim(filtmp))
@@ -285,7 +285,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        !
        ! send buffer to other nodes
        !
-       call dfbroadc(sbuff, mmaxgl*nmaxgl*(kmax+1)*max(1,lstsci,ltur), dfreal, gdp)
+       call dfbroadc_gdp(sbuff, mmaxgl*nmaxgl*(kmax+1)*max(1,lstsci,ltur), dfreal, gdp)
        if (.not. nan_check(sbuff(:,:,1:kmax,1), 'v1 (restart-file)', lundia)) call d3stop(1, gdp)
        !
        ! put copies of parts of v1 for each subdomain
@@ -311,7 +311,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
                 if (inode==master) then
                    read (luntmp, iostat = iocond) ((sbuff(n, m, k, l), m = 1, mmaxgl), n = 1, nmaxgl)
                 endif
-                call dfbroadc(iocond, 1, dfint, gdp)
+                call dfbroadc_gdp(iocond, 1, dfint, gdp)
                 if (iocond /= 0) then
                    if (iocond < 0) then
                       call prterr(lundia, 'G006', trim(filtmp))
@@ -326,7 +326,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
           !
           ! send buffer to other nodes
           !
-          call dfbroadc(sbuff, mmaxgl*nmaxgl*(kmax+1)*max(1,lstsci,ltur), dfreal, gdp)
+          call dfbroadc_gdp(sbuff, mmaxgl*nmaxgl*(kmax+1)*max(1,lstsci,ltur), dfreal, gdp)
           if (.not. nan_check(sbuff(:,:,1:kmax,1:lstsci), 'r1 (restart-file)', lundia)) call d3stop(1, gdp)
           !
           ! put copies of parts of r1 for each subdomain
@@ -357,7 +357,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
                 if (inode==master) then
                    read (luntmp, iostat = iocond) ((sbuff(n, m, k, l), m = 1, mmaxgl) , n = 1, nmaxgl)
                 endif
-                call dfbroadc(iocond, 1, dfint, gdp)
+                call dfbroadc_gdp(iocond, 1, dfint, gdp)
                 if (iocond /= 0) then
                    if (iocond < 0) then
                       lturi = ltur
@@ -373,7 +373,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
           !
           ! send buffer to other nodes
           !
-          call dfbroadc(sbuff, mmaxgl*nmaxgl*(kmax+1)*max(1,lstsci,ltur), dfreal, gdp)
+          call dfbroadc_gdp(sbuff, mmaxgl*nmaxgl*(kmax+1)*max(1,lstsci,ltur), dfreal, gdp)
           if (.not. nan_check(sbuff(:,:,:,1:ltur), 'rtur1 (restart-file)', lundia)) call d3stop(1, gdp)
           !
           ! put copies of parts of rtur1 for each subdomain
@@ -401,7 +401,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        !
        ! send buffer to other nodes
        !
-       call dfbroadc(sbuff, mmaxgl*nmaxgl*(kmax+1)*max(1,lstsci,ltur), dfreal, gdp)
+       call dfbroadc_gdp(sbuff, mmaxgl*nmaxgl*(kmax+1)*max(1,lstsci,ltur), dfreal, gdp)
        if (.not. nan_check(sbuff(:,:,1,1), 'umnldf (restart-file)', lundia)) call d3stop(1, gdp)
        !
        ! put copies of parts of umnldf for each subdomain
@@ -423,7 +423,7 @@ subroutine rstfil(lundia    ,error     ,restid    ,lturi     ,mmax      , &
        !
        ! send buffer to other nodes
        !
-       call dfbroadc(sbuff, mmaxgl*nmaxgl*(kmax+1)*max(1,lstsci,ltur), dfreal, gdp)
+       call dfbroadc_gdp(sbuff, mmaxgl*nmaxgl*(kmax+1)*max(1,lstsci,ltur), dfreal, gdp)
        if (.not. nan_check(sbuff(:,:,1,1), 'vmnldf (restart-file)', lundia)) call d3stop(1, gdp)
        !
        ! put copies of parts of vmnldf for each subdomain

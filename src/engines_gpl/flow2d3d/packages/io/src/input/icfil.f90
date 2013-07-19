@@ -41,6 +41,7 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
     use precision
     use dfparall
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -82,7 +83,6 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
     integer                                     :: n            ! Help var. 
     integer, external                           :: newlun
     real(sp), allocatable, dimension(:,:,:,:)   :: sbuff        !  Single precision buffer to read from file
-    logical, external                           :: exifil
     logical                                     :: test
     character(300)                              :: message
 !
@@ -100,7 +100,7 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
     !
     lfile = len(filic)
     !
-    if (exifil(filic(:lfile), lundia, 'G004', gdp)) then
+    if (exifil(filic, lundia)) then
        if (inode == master) then
           luntmp = newlun(gdp)
           open (luntmp, file = filic(1:lfile), form = fmttmp, status = 'old')
@@ -119,7 +119,7 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
           if (inode == master) then
              read (luntmp, iostat = iocond) ((sbuff(n, m, 1, 1), m = 1, mmaxgl), n = 1, nmaxgl)
           endif
-          call dfbroadc(iocond, 1, dfint, gdp)
+          call dfbroadc_gdp(iocond, 1, dfint, gdp)
           if (iocond /= 0) then
              if (iocond < 0) then
                 call prterr(lundia, 'G006', filic(:lfile))
@@ -130,7 +130,7 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
              goto 200
           endif
           !s1(1:nmaxus,1:mmax) = sbuff(1:nmaxus,1:mmax,1,1)
-          call dfbroadc(sbuff, mmaxgl*nmaxgl*kmax*max(1,lstsci), dfreal, gdp)
+          call dfbroadc_gdp(sbuff, mmaxgl*nmaxgl*kmax*max(1,lstsci), dfreal, gdp)
           do m = mfg, mlg
              do n = nfg, nlg
                 s1(n-nfg+1,m-mfg+1) = sbuff(n,m,1,1)
@@ -141,7 +141,7 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
           !
           do k = 1, kmax
              if (inode == master) read (luntmp, iostat = iocond) ((sbuff(n, m, k, 1), m = 1, mmaxgl), n = 1, nmaxgl)
-             call dfbroadc(iocond, 1, dfint, gdp)
+             call dfbroadc_gdp(iocond, 1, dfint, gdp)
              if (iocond /= 0) then
                 if (iocond < 0) then
                    call prterr(lundia, 'G006', filic(:lfile))
@@ -153,7 +153,7 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
              endif
           enddo
           !u1(1:nmaxus,1:mmax,1:kmax) = sbuff(1:nmaxus,1:mmax,1:kmax,1) 
-          call dfbroadc(sbuff, mmaxgl*nmaxgl*kmax*max(1,lstsci), dfreal, gdp)
+          call dfbroadc_gdp(sbuff, mmaxgl*nmaxgl*kmax*max(1,lstsci), dfreal, gdp)
           do m = mfg, mlg
              do n = nfg, nlg
                 u1(n-nfg+1,m-mfg+1,1:kmax) = sbuff(n,m,1:kmax,1)
@@ -164,7 +164,7 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
           !
           do k = 1, kmax
              if (inode == master) read (luntmp, iostat = iocond) ((sbuff(n, m, k, 1), m = 1, mmaxgl), n = 1, nmaxgl)
-             call dfbroadc(iocond, 1, dfint, gdp)
+             call dfbroadc_gdp(iocond, 1, dfint, gdp)
              if (iocond /= 0) then
                 if (iocond < 0) then
                    call prterr(lundia, 'G006', filic(:lfile))
@@ -176,7 +176,7 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
              endif
           enddo
           !v1(1:nmaxus,1:mmax,1:kmax) = sbuff(1:nmaxus,1:mmax,1:kmax,1) 
-          call dfbroadc(sbuff, mmaxgl*nmaxgl*kmax*max(1,lstsci), dfreal, gdp)
+          call dfbroadc_gdp(sbuff, mmaxgl*nmaxgl*kmax*max(1,lstsci), dfreal, gdp)
           do m = mfg, mlg
              do n = nfg, nlg
                 v1(n-nfg+1,m-mfg+1,1:kmax) = sbuff(n,m,1:kmax,1)
@@ -191,7 +191,7 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
                 do k = 1, kmax
                    if (inode == master) read (luntmp, iostat = iocond) &
                       & ((sbuff(n, m, k, l), m = 1, mmaxgl), n = 1, nmaxgl)
-                   call dfbroadc(iocond, 1, dfint, gdp)
+                   call dfbroadc_gdp(iocond, 1, dfint, gdp)
                    if (iocond /= 0) then
                       if (iocond < 0) then
                          call prterr(lundia, 'G006', filic(:lfile))
@@ -204,7 +204,7 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
                 enddo
              enddo
              !r1(1:nmaxus,1:mmax,1:kmax,1:lstsci) = sbuff(1:nmaxus,1:mmax,1:kmax,1:lstsci) 
-             call dfbroadc(sbuff, mmaxgl*nmaxgl*kmax*max(1,lstsci), dfreal, gdp)
+             call dfbroadc_gdp(sbuff, mmaxgl*nmaxgl*kmax*max(1,lstsci), dfreal, gdp)
              do m = mfg, mlg
                 do n = nfg, nlg
                    r1(n-nfg+1,m-mfg+1,1:kmax,1:lstsci) = sbuff(n,m,1:kmax,1:lstsci)
@@ -223,7 +223,7 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
           ! Read non-uniform initial conditions per nmaxus mmax values in s1 array
           !
           if (inode == master) read (luntmp, *, iostat = iocond) ((sbuff(n, m, 1, 1), m = 1, mmaxgl), n = 1, nmaxgl)
-          call dfbroadc(iocond, 1, dfint, gdp)
+          call dfbroadc_gdp(iocond, 1, dfint, gdp)
           if (iocond /= 0) then
              if (iocond < 0) then
                 call prterr(lundia, 'G006', filic(:lfile))
@@ -233,7 +233,7 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
              error = .true.
              goto 200
           endif
-          call dfbroadc(sbuff, mmaxgl*nmaxgl*kmax*max(1,lstsci), dfreal, gdp)
+          call dfbroadc_gdp(sbuff, mmaxgl*nmaxgl*kmax*max(1,lstsci), dfreal, gdp)
           do m = mfg, mlg
              do n = nfg, nlg
                 s1(n-nfg+1,m-mfg+1) = sbuff(n,m,1,1)
@@ -244,7 +244,7 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
           !
           do k = 1, kmax
              if (inode == master) read (luntmp, *, iostat = iocond) ((sbuff(n, m, k, 1), m = 1, mmaxgl), n = 1, nmaxgl)
-             call dfbroadc(iocond, 1, dfint, gdp)
+             call dfbroadc_gdp(iocond, 1, dfint, gdp)
              if (iocond /= 0) then
                 if (iocond < 0) then
                    call prterr(lundia, 'G006', filic(:lfile))
@@ -255,7 +255,7 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
                 goto 200
              endif
           enddo
-          call dfbroadc(sbuff, mmaxgl*nmaxgl*kmax*max(1,lstsci), dfreal, gdp)
+          call dfbroadc_gdp(sbuff, mmaxgl*nmaxgl*kmax*max(1,lstsci), dfreal, gdp)
           do m = mfg, mlg
              do n = nfg, nlg
                 u1(n-nfg+1,m-mfg+1,1:kmax) = sbuff(n,m,1:kmax,1)
@@ -266,7 +266,7 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
           !
           do k = 1, kmax
              if (inode == master) read (luntmp, *, iostat = iocond) ((sbuff(n, m, k, 1), m = 1, mmaxgl), n = 1, nmaxgl)
-             call dfbroadc(iocond, 1, dfint, gdp)
+             call dfbroadc_gdp(iocond, 1, dfint, gdp)
              if (iocond /= 0) then
                 if (iocond < 0) then
                    call prterr(lundia, 'G006', filic(:lfile))
@@ -277,7 +277,7 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
                 goto 200
              endif
           enddo
-          call dfbroadc(sbuff, mmaxgl*nmaxgl*kmax*max(1,lstsci), dfreal, gdp)
+          call dfbroadc_gdp(sbuff, mmaxgl*nmaxgl*kmax*max(1,lstsci), dfreal, gdp)
           do m = mfg, mlg
              do n = nfg, nlg
                 v1(n-nfg+1,m-mfg+1,1:kmax) = sbuff(n,m,1:kmax,1)
@@ -291,7 +291,7 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
              do l = 1, lstsci
                 do k = 1, kmax
                    if (inode == master) read (luntmp, *, iostat = iocond) ((sbuff(n, m, k, l), m = 1, mmaxgl), n = 1, nmaxgl)
-                   call dfbroadc(iocond, 1, dfint, gdp)
+                   call dfbroadc_gdp(iocond, 1, dfint, gdp)
                    if (iocond /= 0) then
                       if (iocond < 0) then
                          call prterr(lundia, 'G006', filic(:lfile))
@@ -303,7 +303,7 @@ subroutine icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
                    endif
                 enddo
              enddo
-             call dfbroadc(sbuff, mmaxgl*nmaxgl*kmax*max(1,lstsci), dfreal, gdp)
+             call dfbroadc_gdp(sbuff, mmaxgl*nmaxgl*kmax*max(1,lstsci), dfreal, gdp)
              do m = mfg, mlg
                 do n = nfg, nlg
                    r1(n-nfg+1,m-mfg+1,1:kmax,1:lstsci) = sbuff(n,m,1:kmax,1:lstsci)

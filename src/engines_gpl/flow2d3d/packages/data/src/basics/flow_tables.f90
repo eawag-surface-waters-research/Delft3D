@@ -82,14 +82,12 @@ subroutine flw_readtable(handle, filnam, refjulday, gdp)
 !
 ! Local variables
 !
-    integer                         :: lunbcm
     integer, external               :: newlun
     character(256)                  :: errorstring
 !
 !! executable statements -------------------------------------------------------
 !
-    lunbcm      = newlun(gdp)
-    call readtable(handle, lunbcm, filnam, refjulday, errorstring)
+    call readtable(handle, filnam, refjulday, errorstring)
     call errorhandler(errorstring,gdp)
     !
 end subroutine flw_readtable

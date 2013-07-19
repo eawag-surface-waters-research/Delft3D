@@ -42,6 +42,7 @@ subroutine tdfil(lundia    ,luntd     ,error     ,filtd     ,fmttmp    , &
     use precision
     use globaldata
     use dfparall
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -76,7 +77,6 @@ subroutine tdfil(lundia    ,luntd     ,error     ,filtd     ,fmttmp    , &
     integer, external     :: newlun
     integer               :: nlook  ! Help var.: nr. of data to look for in the MD-file 
     integer, dimension(4) :: ival   ! Help array (int.) where the data, recently read from the MD-file, are stored temporarily 
-    logical, external     :: exifil
     logical               :: outsd  ! indicating whether a line of thin dams is outside subdomain (.TRUE.) or not (.FALSE.)
     character(1)          :: dirtd  ! Velocity points on which the thin dams have been specified (U or V) 
     character(132)        :: rec132 ! Standard rec. length in an attribute file (132) 
@@ -95,7 +95,7 @@ subroutine tdfil(lundia    ,luntd     ,error     ,filtd     ,fmttmp    , &
     !
     lfile = len(filtd)
     !
-    if (exifil(filtd(1:lfile), lundia, 'G004', gdp)) then
+    if (exifil(filtd, lundia)) then
        luntmp = newlun(gdp)
        open (luntmp, file = filtd(1:lfile), form = fmttmp, status = 'old')
        !

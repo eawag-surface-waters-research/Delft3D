@@ -41,8 +41,8 @@ subroutine rdbcq(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    !
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -84,7 +84,6 @@ subroutine rdbcq(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer            :: ntrec   ! Help. var to keep track of NRREC 
     integer, external  :: newlun
     logical            :: ex      ! Flag to test if file exists 
-    logical, external  :: exifil
     logical            :: found   ! FOUND=TRUE if KEYW in the MD-file was found 
     logical            :: lerror  ! Flag=TRUE if a local error is encountered 
     logical            :: newkw   ! Logical var. specifying whether a new recnam should be read from the MD-file or just new data in the continuation line 
@@ -192,7 +191,7 @@ subroutine rdbcq(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        ! test file existence <YES> -> open file <NO> -> error
        !
-       if (exifil(filbcq(:lf), lundia, 'G004', gdp)) then
+       if (exifil(filbcq, lundia)) then
           if (.not.noread) then
              !
              ! Open FILBCQ to read data from

@@ -39,6 +39,7 @@ subroutine srcfil(lundia    ,filsrc    ,error     ,nsrc      ,mnksrc    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -74,7 +75,6 @@ subroutine srcfil(lundia    ,filsrc    ,error     ,nsrc      ,mnksrc    , &
     integer , dimension(3) :: ival    ! Help array (integer) where the data, recently read from the MD-file, are stored temporarily
     real(fp)               :: rdef
     real(fp), dimension(1) :: rval
-    logical, external      :: exifil
     logical                :: qType   ! True when there is at least one Q-type powerstation present
     character(1)           :: cdefi   ! Default value for interpolotion (Y) 
     character(1)           :: chulpi  ! Help string for reading interpolation 
@@ -101,7 +101,7 @@ subroutine srcfil(lundia    ,filsrc    ,error     ,nsrc      ,mnksrc    , &
     !
     call noextspaces(filsrc    ,lfile     )
     !
-    error = .not.exifil(filsrc(:lfile), lundia, 'G004', gdp)
+    error = .not.exifil(filsrc, lundia)
     if (error) goto 9999
     !
     ! open formatted file, if not formatted IOCOND <> 0

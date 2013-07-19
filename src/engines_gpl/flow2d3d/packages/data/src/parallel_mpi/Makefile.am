@@ -33,12 +33,11 @@ AM_FCFLAGS += \
 #-------------------------------------------------------------------------------
 #Sources
 libDataParallelMPI_la_SOURCES = \
-         dfparall.F90 \
          initdfparall.F90 \
          dfinitmpi.F90 \
          dfsync.F90 \
          dfexitmpi.F90 \
-         dfbroadc.F90 \
+         dfbroadc_gdp.f90 \
          dfsendd_nm_pos1.F90 \
          dfsendd_nm_pos2.F90 \
          dfsendi_nm_pos1.F90 \

@@ -39,6 +39,7 @@ subroutine ciofil(lundia    ,error     ,filcio    ,mmax      ,nmax      , &
     use precision 
     use dfparall 
     use globaldata 
+    use system_utils, only: exifil
     ! 
     implicit none 
     ! 
@@ -73,7 +74,6 @@ subroutine ciofil(lundia    ,error     ,filcio    ,mmax      ,nmax      , &
     integer                               :: n        ! Help loop variable 
     integer, external                     :: newlun 
     real(fp), dimension(:,:), allocatable :: ftmp     ! temporary array containing coriolis of entire domain 
-    logical, external                     :: exifil 
     character(300)                        :: errmsg   ! Character string containing the errormessage to be written to file. The message depends on the error.  
 ! 
 ! 
@@ -90,7 +90,7 @@ subroutine ciofil(lundia    ,error     ,filcio    ,mmax      ,nmax      , &
     ! 
     lfile = len(filcio) 
     ! 
-    if (exifil(filcio(1:lfile), lundia, 'G004', gdp)) then 
+    if (exifil(filcio, lundia)) then 
        ! 
        ! File exists 
        ! 

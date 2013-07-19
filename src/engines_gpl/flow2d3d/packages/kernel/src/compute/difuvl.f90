@@ -80,6 +80,7 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     use mathconsts
     use dfparall 
     use flow2d3d_timers
+    use sediment_basics_module
    !
     use globaldata
     !
@@ -90,7 +91,6 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
     ! The following list of pointer parameters is used to point inside the gdp structure
     !
     include 'flow_steps_f.inc'
-    include 'sedparams.inc'
     real(fp)                            , pointer :: ck
     real(fp)                            , pointer :: dicoww
     real(fp)                            , pointer :: eps
@@ -711,12 +711,12 @@ subroutine difuvl(icreep    ,timest    ,lundia    ,nst       ,icx       , &
             & (eqmbcmud  .and. sedtyp(l) == SEDTYP_COHESIVE)             ) then
              if (kcu(nmf) == 1) then
                 do k = 1, kmax
-                   ddkl(nmf, k, ll) = r0(nmfu, k, ll)
+                   ddkl(nmf, k, ll) = max(0.0_fp, r0(nmfu, k, ll))
                 enddo
              endif
              if (kcu(nml) == 1) then
                 do k = 1, kmax
-                   ddkl(nmlu, k, ll) = r0(nml, k, ll)
+                   ddkl(nmlu, k, ll) = max(0.0_fp, r0(nml, k, ll))
                 enddo
              endif
           endif

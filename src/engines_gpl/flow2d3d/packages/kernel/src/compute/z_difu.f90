@@ -83,7 +83,7 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
     use precision
     use mathconsts
     use flow2d3d_timers
-    !
+    use sediment_basics_module
     use globaldata
     !
     implicit none
@@ -105,7 +105,6 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
     logical                             , pointer :: nonhyd
     integer                             , pointer :: nh_level
     integer                             , pointer :: nudge
-    include 'sedparams.inc'
 !
 ! Global variables
 !
@@ -618,12 +617,12 @@ subroutine z_difu(lundia    ,nst       ,icx       ,icy       ,j         , &
                & .or. (eqmbcmud  .and. sedtyp(ls) == SEDTYP_COHESIVE             )  ) then
                 if (kcu(nmf) == 1) then
                    do k = 1, kmax
-                      ddkl(nmf, k, l) = r0(nmfu, k, l)
+                      ddkl(nmf, k, l) = max(0.0_fp, r0(nmfu, k, l))
                    enddo
                 endif
                 if (kcu(nml) == 1) then
                    do k = 1, kmax
-                      ddkl(nmlu, k, l) = r0(nml, k, l)
+                      ddkl(nmlu, k, l) = max(0.0_fp, r0(nml, k, l))
                    enddo
                 endif
              endif

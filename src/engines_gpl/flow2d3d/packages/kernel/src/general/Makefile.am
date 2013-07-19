@@ -46,7 +46,6 @@ libKernelGeneral_la_SOURCES = \
          endscr.f90 \
          errmsg.f90 \
          evenquotes.f90 \
-         exifil.f90 \
          filfmt.f90 \
          flhnew.f90 \
          flwlic.f90 \
@@ -60,9 +59,7 @@ libKernelGeneral_la_SOURCES = \
          newlun.f90 \
          nm_to_diag.f90 \
          nm_to_n_and_m.f90 \
-         noendspaces.f90 \
          noextspaces.f90 \
-         nointextspaces.f90 \
          nuliar.f90 \
          open_datdef.f90 \
          pldep.F90 \

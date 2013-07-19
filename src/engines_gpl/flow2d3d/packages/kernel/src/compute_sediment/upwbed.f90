@@ -39,6 +39,7 @@ subroutine upwbed(su        ,sv        ,suu       ,svv       ,kfu       , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
+    use sediment_basics_module
     !
     use globaldata
     !
@@ -51,7 +52,6 @@ subroutine upwbed(su        ,sv        ,suu       ,svv       ,kfu       , &
     integer, dimension(:)                , pointer :: sedtyp
     real(fp)                             , pointer :: bed
     type (mornumericstype)               , pointer :: mornum
-    include 'sedparams.inc'
 !
 ! Global variables
 !

@@ -268,9 +268,9 @@ subroutine restart_lyrs (error     ,restid    ,i_restart ,msed      , &
     ! since the arrays are 'fp'! Otherwise, intractable memory errors will occur. 
     ! 
     call dfsync ( gdp) 
-    call dfbroadc ( thlyr_g, nmaxgl*mmaxgl*nlyr, dfloat, gdp ) 
-    call dfbroadc ( msed_g, nmaxgl*mmaxgl*nlyr*lsedtot, dfloat, gdp ) 
-    call dfbroadc (layerfrac, 1, dfint, gdp)
+    call dfbroadc_gdp ( thlyr_g, nmaxgl*mmaxgl*nlyr, dfloat, gdp ) 
+    call dfbroadc_gdp ( msed_g, nmaxgl*mmaxgl*nlyr*lsedtot, dfloat, gdp ) 
+    call dfbroadc_gdp (layerfrac, 1, dfint, gdp)
     ! 
     ! put copies of parts of msed, thlyr, etc for each subdomain 
     ! 

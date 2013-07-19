@@ -207,8 +207,8 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
              endif
           else
              fmttmp = 'formatted'
-             call depfil(lundia    ,error     ,flnmD50   ,fmttmp    ,mmax      , &
-                       & nmaxus    ,bedformD50,1         ,1         ,gdp       )
+             call depfil(lundia    ,error     ,flnmD50   ,fmttmp    , &
+                       & bedformD50,1         ,1         ,gdp%griddim)
              if (error) then
                 call prterr(lundia, 'P004', 'Error while reading bedformD50 from file ' // trim(flnmD50))
                 call d3stop(1, gdp)
@@ -228,8 +228,8 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
              endif
           else
              fmttmp = 'formatted'
-             call depfil(lundia    ,error     ,flnmD90   ,fmttmp    ,mmax      , &
-                       & nmaxus    ,bedformD90,1         ,1         ,gdp       )
+             call depfil(lundia    ,error     ,flnmD90   ,fmttmp    , &
+                       & bedformD90,1         ,1         ,gdp%griddim)
              if (error) then
                 call prterr(lundia, 'P004', 'Error while reading bedformD90 from file ' // trim(flnmD50))
                 call d3stop(1, gdp)
@@ -665,8 +665,8 @@ subroutine rdbedformpar(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , 
           !Now if the bedformheightfile exists fill duneheight with the specified information
           !
           fmttmp = 'formatted'
-          call depfil(lundia    ,error     ,flbdfh    ,fmttmp    ,mmax      , &
-                    & nmaxus    ,duneheight,1         ,1         ,gdp       )
+          call depfil(lundia    ,error     ,flbdfh    ,fmttmp    , &
+                    & duneheight,1         ,1         ,gdp%griddim)
           !
           write(lundia,'(a,a,a)') txtput1, ':', flbdfh
           if (error) call prterr(lundia, 'U021', 'RDBEDFORMPAR: error reading initial bedform heights from BdfUni')

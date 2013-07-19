@@ -40,6 +40,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -84,7 +85,6 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
     logical                                     :: lfirst
     logical                                     :: lokay
     logical                                     :: lprblk
-    logical                          , external :: exifil
     real(fp)      , dimension(maxfld)           :: rfield
     character(10) , dimension(maxfld)           :: cfield
     character(132)                              :: rec132
@@ -102,7 +102,7 @@ subroutine rdttar(filnam    ,lundia    ,error     ,nttaru    ,ittaru    , &
     ! test file existence
     !
     call noextspaces(filnam    ,lfile     )
-    if (.not.exifil(filnam(1:lfile) ,lundia    ,'G004'    ,gdp)) then
+    if (.not.exifil(filnam, lundia)) then
        !
        ! file does not exist !!
        !

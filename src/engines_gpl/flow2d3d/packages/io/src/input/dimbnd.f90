@@ -40,8 +40,8 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
 !!--declarations----------------------------------------------------------------
     use precision
     use properties
-    !
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -81,7 +81,6 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
     integer                        :: nrrec0  ! Record counter keeping the track of the last record read 
     integer                        :: ntrec   ! Current record counter. It's value is changed to detect if all records in the MD-file have been read 
     integer         , external     :: newlun
-    logical         , external     :: exifil
     logical                        :: lerror  ! Flag=TRUE if an local error is encountered For NOUI this can mean error will be set TRUE 
     logical                        :: newkw   ! Flag to specify if the keyword to look for is a new keyword 
     character(1)                   :: cdum    ! Dummy character variable 
@@ -151,7 +150,7 @@ subroutine dimbnd(lunmd     ,lundia    ,error     ,nrrec     ,noui      , &
        !
        lfile = len(filtmp)
        !
-       if (exifil(filtmp(1:lfile), lundia, 'G004', gdp)) then
+       if (exifil(filtmp, lundia)) then
           !
           ! open input file
           !

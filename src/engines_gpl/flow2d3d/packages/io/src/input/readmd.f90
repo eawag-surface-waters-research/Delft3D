@@ -849,21 +849,10 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     ! Force certain valus of DPUOPT
     !
     if (sedim) then
-       !
-       call rdtrafrm(error, lsedtot, gdp)
-       if (error) goto 9999
-       !
-       call rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
-                & lsedtot   ,lstsci    ,ltur      , &
-                & r(facdss) ,ch(namcon),iopsus    , gdp       )
-       if (error) goto 9999
-       !
-       call rdmor(lundia    ,error     ,filnam    ,lsec      ,lsedtot    , &
-                & mmax      ,nmax      ,nmaxus    ,nmmax     ,nto        , &
-                & ch(nambnd),gdp       )
-       if (error) goto 9999
-       !
-       call rdscour(error, gdp)
+       call rdsedmortra(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
+                      & lsedtot   ,lstsci    ,ltur      ,r(facdss) ,ch(namcon), &
+                      & iopsus    ,filnam    ,mmax      ,nmax      ,nmaxus    , &
+                      & nmmax     ,nto       ,ch(nambnd),lsec      ,gdp       )
        if (error) goto 9999
     endif
     !

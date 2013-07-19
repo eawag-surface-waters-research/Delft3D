@@ -36,8 +36,8 @@ subroutine rdwaqpar(lundia, error, kmax, lsed, dt, itcomf, itcomi, itcoml, gdp)
 !!--declarations----------------------------------------------------------------
     use precision
     use properties
-    !
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -85,7 +85,6 @@ subroutine rdwaqpar(lundia, error, kmax, lsed, dt, itcomf, itcomi, itcoml, gdp)
     real(fp)                                            :: ftwqfl
     real(fp)       ,dimension(3)                        :: times
     logical                                  , external :: dtn
-    logical                                  , external :: exifil
     character(3000)                                     :: txtput2      ! usage depends on kmax
     character(30)                                       :: txtput1
     character(300)                                      :: message
@@ -229,7 +228,7 @@ subroutine rdwaqpar(lundia, error, kmax, lsed, dt, itcomf, itcomi, itcoml, gdp)
     flaggr = ' '
     call prop_get_string(gdp%mdfile_ptr, '*', 'WaqAgg', flaggr)
     if (flaggr /= ' ' .and. flaggr /= 'active only') then
-       if (.not. exifil(trim(flaggr), lundia, 'G004', gdp)) then
+       if (.not. exifil(flaggr, lundia)) then
           error = .true.
           call d3stop(1, gdp)
        endif

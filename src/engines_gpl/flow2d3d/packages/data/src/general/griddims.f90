@@ -113,4 +113,24 @@ subroutine griddims( gdp )
     nmmaxj     = nmmax + 2*(nmax + 2*gdp%d%ddbound)
     gdp%d%nmlb = jstart
     gdp%d%nmub = nmmaxj
+    !
+    gdp%griddim%mlb    = gdp%d%mlb
+    gdp%griddim%mub    = gdp%d%mub
+    gdp%griddim%mmax   = mmax
+    !
+    gdp%griddim%nlb    = gdp%d%nlb
+    gdp%griddim%nub    = gdp%d%nub
+    gdp%griddim%nmax   = nmax
+    !
+    gdp%griddim%nmlb   = gdp%d%nmlb
+    gdp%griddim%nmub   = gdp%d%nmub
+    gdp%griddim%nmmax  = nmmax
+    !
+    gdp%griddim%mfg    = gdp%gdparall%mfg
+    gdp%griddim%mlg    = gdp%gdparall%mlg
+    gdp%griddim%mmaxgl = gdp%gdparall%mmaxgl
+    !
+    gdp%griddim%nfg    = gdp%gdparall%nfg
+    gdp%griddim%nlg    = gdp%gdparall%nlg
+    gdp%griddim%nmaxgl = gdp%gdparall%nmaxgl
 end subroutine griddims

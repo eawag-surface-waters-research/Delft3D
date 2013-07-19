@@ -81,11 +81,10 @@ module table_handles
 
 contains
 
-subroutine readtable(handle, lunbcm, filnam, refjulday, errorstring)
+subroutine readtable(handle, filnam, refjulday, errorstring)
 !
 ! Global variables
 !
-    integer            ,intent(in)  :: lunbcm
     integer            ,intent(in)  :: refjulday
     character(*)       ,intent(in)  :: filnam
     type(handletype)                :: handle
@@ -109,7 +108,7 @@ subroutine readtable(handle, lunbcm, filnam, refjulday, errorstring)
           return
        endif
     endif
-    call org_readtable(tablehandle%this, lunbcm, filnam, refjulday, errorstring)
+    call org_readtable(tablehandle%this, filnam, refjulday, errorstring)
     if (errorstring /= '') return
     handle = cast_from_tablehandle(tablehandle)
     !

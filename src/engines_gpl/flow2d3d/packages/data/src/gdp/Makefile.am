@@ -30,12 +30,9 @@ libDataGDP_la_SOURCES = \
          clradv2d.f90 \
          clrbedformpar.f90 \
          clrdredge.f90 \
-         clreqtran.f90 \
          clrerosed.f90 \
          clrflwpar.f90 \
          clrmassbal.f90 \
-         clrmorpar.f90 \
-         clrsedpar.f90 \
          clrtrachy.f90 \
          clrwaqpar.f90 \
          gdp_alloc.f90 \
@@ -55,7 +52,6 @@ libDataGDP_la_SOURCES = \
          initdischarge.f90 \
          initdpmveg.f90 \
          initdredge.f90 \
-         initeqtran.f90 \
          initerosed.f90 \
          initf0isf1.f90 \
          initflwpar.f90 \
@@ -70,14 +66,12 @@ libDataGDP_la_SOURCES = \
          initincwav.f90 \
          initkeywtd.f90 \
          initmassbal.f90 \
-         initmorpar.f90 \
          initpostpr.f90 \
          initprocs.f90 \
          initrestart.f90 \
          initrtc.f90 \
          initsafe.f90 \
          initscour.f90 \
-         initsedpar.f90 \
          initsnel.f90 \
          initsobek.f90 \
          initstations.f90 \

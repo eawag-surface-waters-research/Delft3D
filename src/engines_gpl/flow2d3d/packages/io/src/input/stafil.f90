@@ -39,6 +39,7 @@ subroutine stafil(lundia    ,filsta    ,fmttmp    ,error     ,nostat    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -74,7 +75,6 @@ subroutine stafil(lundia    ,filsta    ,fmttmp    ,error     ,nostat    , &
     integer                        :: n
     integer, external              :: newlun
     integer, dimension(2)          :: ival     ! Help array (integer) where the data, recently read from the MD-file, are stored temporarily 
-    logical, external              :: exifil
     character(132)                 :: rec132   ! Standard rec. length in an attribute file (132) 
     character(20)                  :: cdef     ! Default value when CVAR not found 
     character(20)                  :: chulp    ! Help var. 
@@ -96,7 +96,7 @@ subroutine stafil(lundia    ,filsta    ,fmttmp    ,error     ,nostat    , &
     !
     lfile = len(filsta)
     !
-    error = .not.exifil(filsta(:lfile), lundia, 'G004', gdp)
+    error = .not.exifil(filsta, lundia)
     if (error) goto 9999
     !
     luntmp = newlun(gdp)

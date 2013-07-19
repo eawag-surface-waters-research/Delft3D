@@ -38,6 +38,7 @@ subroutine rdfour(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -70,7 +71,6 @@ subroutine rdfour(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer         , external     :: newlun
     integer                        :: nlook     ! Help var.: nr. of data to look for in the MD-file 
     integer                        :: ntrec     ! Help. var to keep track of NRREC 
-    logical         , external     :: exifil
     logical                        :: found     ! Flag=TRUE if keyword found 
     logical                        :: lerror    ! Flag=TRUE if an error is encountered 
     logical                        :: newkw     ! Logical var. specifying whether a new recnam should be read from the MD-file or just new data in the continuation line 
@@ -130,7 +130,7 @@ subroutine rdfour(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        !-------test file existence <YES>
        !
-       if (exifil(filfou(1:lfile), lundia, 'G004', gdp)) then
+       if (exifil(filfou, lundia)) then
           !
           !---------read data from external file only if noui = .true.
           !

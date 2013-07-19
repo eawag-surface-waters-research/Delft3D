@@ -41,7 +41,7 @@ subroutine z_red_soursin(nmmax     ,kmax      ,thick     ,kmxsed  , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    !
+    use sediment_basics_module
     use globaldata
     !
     implicit none
@@ -65,7 +65,6 @@ subroutine z_red_soursin(nmmax     ,kmax      ,thick     ,kmxsed  , &
     real(fp)                         , pointer :: hdt
     real(fp)      , dimension(:)     , pointer :: cdryb
     integer       , dimension(:)     , pointer :: sedtyp
-    include 'sedparams.inc'
 !
 ! Local parameters
 !

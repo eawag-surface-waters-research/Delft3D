@@ -35,8 +35,6 @@ libIOInput_la_SOURCES = \
          ck_dpopt.f90 \
          cmpnum.f90 \
          polygon_module.f90 \
-         depfil.f90 \
-         depfil_double.f90 \
          dimbch.f90 \
          dimbnd.f90 \
          dimbub.f90 \
@@ -85,9 +83,6 @@ libIOInput_la_SOURCES = \
          rdlaydis.f90 \
          rdmassbal.f90 \
          rdmeteo.f90 \
-         rdmor.f90 \
-         rdmor0.f90 \
-         rdmor1.f90 \
          rdmorlyr.f90 \
          rdmud.f90 \
          rdnum.f90 \
@@ -98,15 +93,11 @@ libIOInput_la_SOURCES = \
          rdroll.f90 \
          rdrund.f90 \
          rdscour.f90 \
-         rdsed.f90 \
-         rdsed0.f90 \
-         rdsed1.f90 \
+         rdsedmortra.f90 \
          rdsite.f90 \
          rdspec.f90 \
          rdstru.f90 \
          rdtimo.f90 \
-         rdtrafrm.f90 \
-         rdtrafrm0.f90 \
          rdtrt.f90 \
          rdttar.f90 \
          rdusrc.f90 \

@@ -39,6 +39,7 @@ subroutine trafil(lundia    ,filtra    ,fmttmp    ,error     ,ntruv     , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -72,7 +73,6 @@ subroutine trafil(lundia    ,filtra    ,fmttmp    ,error     ,ntruv     , &
     integer                        :: n
     integer, external              :: newlun
     integer        , dimension(4)  :: ival          ! Help array (integer) where the data, recently read from the MD-file, are stored temporarily 
-    logical, external              :: exifil
     character(132)                 :: rec132        ! Standard rec. length in an attribute file (132) 
     character(20)                  :: cdef          ! Default value when CVAR not found 
     character(20)                  :: chulp         ! Help var. 
@@ -94,7 +94,7 @@ subroutine trafil(lundia    ,filtra    ,fmttmp    ,error     ,ntruv     , &
     !
     lfile = len(filtra)
     !
-    error = .not.exifil(filtra(:lfile), lundia, 'G004', gdp)
+    error = .not.exifil(filtra, lundia)
     if (error) goto 9999
     !
     luntmp = newlun(gdp)

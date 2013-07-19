@@ -39,8 +39,8 @@ subroutine drofil(lundia    ,fildro    ,fmttmp    ,error     ,ndro      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    !
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -77,7 +77,6 @@ subroutine drofil(lundia    ,fildro    ,fmttmp    ,error     ,ndro      , &
     integer                :: n
     integer, external      :: newlun
     logical                :: dtn
-    logical, external      :: exifil
     real(fp)               :: rdef     ! Help var. containing default va- lue(s) for real variable 
     real(fp)               :: t
     real(fp), dimension(4) :: rval     ! Help array (real) where the data, recently read from the MD-file, are stored temporarily 
@@ -99,7 +98,7 @@ subroutine drofil(lundia    ,fildro    ,fmttmp    ,error     ,ndro      , &
     !
     lfile = len(fildro)
     !
-    error = .not.exifil(fildro(:lfile), lundia, 'G004', gdp)
+    error = .not.exifil(fildro, lundia)
     if (error) goto 9999
     !
     luntmp = newlun(gdp)

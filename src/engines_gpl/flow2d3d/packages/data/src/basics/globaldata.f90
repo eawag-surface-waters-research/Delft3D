@@ -49,6 +49,10 @@ module globaldata
     use message_module
     use ec_typedefs
     use bedcomposition_module, only:bedcomp_data
+    use morphology_data_module, only:gd_morpar, gd_sedpar, moroutputtype, &
+                              & mornumericstype, bedbndtype, cmpbndtype, &
+                              & gd_trapar
+    use grid_dimens_module, only: griddimtype
     !
     ! dio_plt_rw is only used for coup.igs.
     ! Both the DelftIO modules and the tree_structure modules contain
@@ -88,7 +92,6 @@ module globaldata
     include 'keywtd.igs'
     include 'luntmp.igs'
     include 'massbal.igs'
-    include 'morpar.igs'
     include 'mudcoe.igs'
     include 'nfl.igs'
     include 'numeco.igs'
@@ -100,7 +103,6 @@ module globaldata
     include 'rdpara.igs'
     include 'rivpro.igs'
     include 'scour.igs'
-    include 'sedpar.igs'
     include 'sobek.igs'
     include 'stations.igs'
     include 'tfzeta.igs'
@@ -115,7 +117,6 @@ module globaldata
     include 'culver.igs'
     include 'defsub.igs'
     include 'dredge.igs'
-    include 'eqtran.igs'
     include 'erosed.igs'
     include 'f0isf1.igs'
     include 'incbc.igs'
@@ -166,6 +167,7 @@ module globaldata
        type (gd_diagno)   , pointer :: gddiagno
        type (gd_discharge), pointer :: gddischarge
        type (gd_dimens)   , pointer :: d
+       type (griddimtype) , pointer :: griddim
        type (gd_dpmveg)   , pointer :: gddpmveg
        type (gd_exttim)   , pointer :: gdexttim
        type (gd_flwpar)   , pointer :: gdflwpar
@@ -213,7 +215,7 @@ module globaldata
        type (sv_culver)   , pointer :: gdculver
        type (sv_defsub)   , pointer :: gddefsub
        type (sv_dredge)   , pointer :: gddredge
-       type (sv_eqtran)   , pointer :: gdeqtran
+       type (gd_trapar)   , pointer :: gdtrapar
        type (sv_erosed)   , pointer :: gderosed
        type (sv_f0isf1)   , pointer :: gdf0isf1
        type (sv_incbc)    , pointer :: gdincbc

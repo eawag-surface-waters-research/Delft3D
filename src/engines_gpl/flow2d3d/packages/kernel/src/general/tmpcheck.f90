@@ -47,6 +47,7 @@ subroutine tmpcheck( runid, reusetmp,  tmpexist,  gdp )
     use precision
     use globaldata
     use properties
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -71,7 +72,6 @@ subroutine tmpcheck( runid, reusetmp,  tmpexist,  gdp )
 !
     integer                      :: lrid        ! Length of character string runid 
     logical                      :: ex          ! Flag to test if file exists 
-    logical, external            :: exifil      ! Flag to test if file exists 
     character(12)                :: fildef      ! Empty file name 
     character(256)               :: filnam      ! File name for the time varying data file 
     character(256)               :: filrd       ! File name read from MD FLOW file
@@ -112,7 +112,7 @@ subroutine tmpcheck( runid, reusetmp,  tmpexist,  gdp )
              call prop_get_string(gdp%mdfile_ptr, '*', 'FilbcC', filrd)
              if (filrd /= fildef) then
                 filnam = 'TMP_' // runid(:lrid) // '.bcc'
-                ex = exifil(filnam(:8 + lrid), lundia, 'U190', gdp)
+                ex = exifil(filnam)
             endif
         endif
         !
@@ -124,7 +124,7 @@ subroutine tmpcheck( runid, reusetmp,  tmpexist,  gdp )
              call prop_get_string(gdp%mdfile_ptr, '*', 'FilbcH', filrd)
              if (filrd /= fildef) then
                 filnam = 'TMP_' // runid(:lrid) // '.bch'
-                ex = exifil(filnam(:8 + lrid), lundia, 'U190', gdp)
+                ex = exifil(filnam)
             endif
         endif 
         !
@@ -136,7 +136,7 @@ subroutine tmpcheck( runid, reusetmp,  tmpexist,  gdp )
              call prop_get_string(gdp%mdfile_ptr, '*', 'Filana', filrd)
              if (filrd /= fildef) then
                 filnam = 'TMP_' // runid(:lrid) // '.bch'
-                ex = exifil(filnam(:8 + lrid), lundia, 'U190', gdp)
+                ex = exifil(filnam)
             endif
         endif 
         !
@@ -149,7 +149,7 @@ subroutine tmpcheck( runid, reusetmp,  tmpexist,  gdp )
              call prop_get_string(gdp%mdfile_ptr, '*', 'FilbcQ', filrd)
              if (filrd /= fildef) then
                 filnam = 'TMP_' // runid(:lrid) // '.bcq'
-                ex = exifil(filnam(:8 + lrid), lundia, 'U190', gdp)
+                ex = exifil(filnam)
             endif
         endif
         !
@@ -162,7 +162,7 @@ subroutine tmpcheck( runid, reusetmp,  tmpexist,  gdp )
              call prop_get_string(gdp%mdfile_ptr, '*', 'FilbcT', filrd)
              if (filrd /= fildef) then
                 filnam = 'TMP_' // runid(:lrid) // '.bct'
-                ex = exifil(filnam(:8 + lrid), lundia, 'U190', gdp)
+                ex = exifil(filnam)
             endif
         endif
         !
@@ -175,7 +175,7 @@ subroutine tmpcheck( runid, reusetmp,  tmpexist,  gdp )
              call prop_get_string(gdp%mdfile_ptr, '*', 'Fildis', filrd)
              if (filrd /= fildef) then
                 filnam = 'TMP_' // runid(:lrid) // '.dis'
-                ex = exifil(filnam(:8 + lrid), lundia, 'U190', gdp)
+                ex = exifil(filnam)
             endif
         endif
         !
@@ -188,7 +188,7 @@ subroutine tmpcheck( runid, reusetmp,  tmpexist,  gdp )
              call prop_get_string(gdp%mdfile_ptr, '*', 'Fileva', filrd)
              if (filrd /= fildef) then
                 filnam = 'TMP_' // runid(:lrid) // '.eva'
-                ex = exifil(filnam(:8 + lrid), lundia, 'U190', gdp)
+                ex = exifil(filnam)
             endif
         endif
         !
@@ -200,7 +200,7 @@ subroutine tmpcheck( runid, reusetmp,  tmpexist,  gdp )
              call prop_get_string(gdp%mdfile_ptr, '*', 'Filtmp', filrd)
              if (filrd /= fildef) then
                 filnam = 'TMP_' // runid(:lrid) // '.tem'
-                ex = exifil(filnam(:8 + lrid), lundia, 'U190', gdp)
+                ex = exifil(filnam)
             endif
         endif
         !

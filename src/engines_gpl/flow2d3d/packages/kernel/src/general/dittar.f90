@@ -39,6 +39,7 @@ subroutine dittar(filnam    ,lundia    ,error     ,nttaru    ,gdp)
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -78,8 +79,7 @@ subroutine dittar(filnam    ,lundia    ,error     ,nttaru    ,gdp)
     logical                          :: lfirst
     logical                          :: lokay
     logical                          :: lprblk
-    logical, external                :: exifil
-    real(fp), dimension(maxfld)          :: rfield
+    real(fp), dimension(maxfld)      :: rfield
     character(10), dimension(maxfld) :: cfield
     character(132)                   :: rec132
     character(300)                   :: errmsg
@@ -97,7 +97,7 @@ subroutine dittar(filnam    ,lundia    ,error     ,nttaru    ,gdp)
     ! test file existence
     !
     call noextspaces(filnam    ,lfile     )
-    if (.not.exifil(filnam(1:lfile) ,lundia    ,'G004'    ,gdp)) then
+    if (.not.exifil(filnam, lundia)) then
        !
        ! file does not exist !!
        !

@@ -42,9 +42,9 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     !
     use globaldata
     use bedcomposition_module
+    use sediment_basics_module
     !
     implicit none
-    include "vanrijn.inc"
     !
     type(globdat),target :: gdp
     !
@@ -86,12 +86,6 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     real(fp)      , dimension(:)         , pointer :: ws0
     real(fp)      , dimension(:)         , pointer :: sdbuni
     real(fp)      , dimension(:)         , pointer :: sedtrcfac
-    real(fp)      , dimension(:,:)       , pointer :: tcrdep
-    real(fp)      , dimension(:)         , pointer :: tcduni
-    real(fp)      , dimension(:,:)       , pointer :: tcrero
-    real(fp)      , dimension(:)         , pointer :: tceuni
-    real(fp)      , dimension(:,:)       , pointer :: eropar
-    real(fp)      , dimension(:)         , pointer :: erouni
     real(fp)      , dimension(:)         , pointer :: mudcnt
     real(fp)      , dimension(:)         , pointer :: tcguni
     real(fp)      , dimension(:,:)       , pointer :: gamtcr
@@ -99,15 +93,11 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     integer       , dimension(:)         , pointer :: sedtyp
     character(10) , dimension(:)         , pointer :: inisedunit
     character(256), dimension(:)         , pointer :: flsdbd
-    character(256), dimension(:)         , pointer :: flstcd
-    character(256), dimension(:)         , pointer :: flstce
     character(256), dimension(:)         , pointer :: flstcg
-    character(256), dimension(:)         , pointer :: flsero
     logical                              , pointer :: anymud
     character(256)                       , pointer :: flsdia
     character(256)                       , pointer :: flsmdc
     real(fp)                             , pointer :: factcr
-    include 'sedparams.inc'
 !
 ! Global variables
 !
@@ -139,7 +129,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
 !
 !! executable statements -------------------------------------------------------
 !
-    iform               => gdp%gdeqtran%iform
+    iform               => gdp%gdtrapar%iform
     dm                  => gdp%gderosed%dm
     dg                  => gdp%gderosed%dg
     dgsd                => gdp%gderosed%dg
@@ -175,12 +165,6 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     ws0                 => gdp%gdsedpar%ws0
     sdbuni              => gdp%gdsedpar%sdbuni
     sedtrcfac           => gdp%gdsedpar%sedtrcfac
-    tcrdep              => gdp%gdsedpar%tcrdep
-    tcduni              => gdp%gdsedpar%tcduni
-    tcrero              => gdp%gdsedpar%tcrero
-    tceuni              => gdp%gdsedpar%tceuni
-    eropar              => gdp%gdsedpar%eropar
-    erouni              => gdp%gdsedpar%erouni
     tcguni              => gdp%gdsedpar%tcguni
     gamtcr              => gdp%gdsedpar%gamtcr
     mudcnt              => gdp%gdsedpar%mudcnt
@@ -188,10 +172,7 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     sedtyp              => gdp%gdsedpar%sedtyp
     inisedunit          => gdp%gdsedpar%inisedunit
     flsdbd              => gdp%gdsedpar%flsdbd
-    flstcd              => gdp%gdsedpar%flstcd
-    flstce              => gdp%gdsedpar%flstce
     flstcg              => gdp%gdsedpar%flstcg
-    flsero              => gdp%gdsedpar%flsero
     anymud              => gdp%gdsedpar%anymud
     flsdia              => gdp%gdsedpar%flsdia
     flsmdc              => gdp%gdsedpar%flsmdc
@@ -274,8 +255,8 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
        endif
        sedd50fld           => gdp%gdsedpar%sedd50fld
        !
-       call depfil(lundia    ,error     ,flsdia    ,fmttmp    ,mmax      , &
-                 & nmaxus    ,sedd50fld ,1         ,1         ,gdp       )
+       call depfil(lundia    ,error     ,flsdia    ,fmttmp    , &
+                 & sedd50fld ,1         ,1         ,gdp%griddim)
        if (error) goto 9999
        !
        call mirror_bnd(icx       ,icy       ,nmmax     , &
@@ -286,84 +267,6 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     ! Fill sediment dependent arrays
     !
     do ll = 1, lsed
-       !
-       ! tcrdep; only for mud
-       !
-       if (sedtyp(ll) == SEDTYP_COHESIVE) then
-          if (flstcd(ll) == ' ') then
-             !
-             ! Uniform data has been specified
-             !
-             tcrdep(:, ll) = tcduni(ll)
-          else
-             !
-             ! Space varying data has been specified
-             ! Use routine that also reads the depth file to read the data
-             !
-             call depfil(lundia    ,error     ,flstcd(ll),fmttmp    ,mmax      , &
-                       & nmaxus    ,tcrdep(nmlb, ll)     ,1         ,1         , &
-                       & gdp       )
-             if (error) goto 9999
-          endif
-          !
-          ! Check whether taucr for deposition is zero somewhere
-          ! If so, give a warning for the first cell where that occurs
-          !
-          do nm = 1, nmmax
-             if (kcs(nm) == 1) then
-                if (comparereal(tcrdep(nm,ll), eps_fp) /= 1) then
-                   call prterr(lundia, 'G051', 'Critical shear stress for deposition of mud is 0.0 in at least one cell')
-                   exit
-                endif
-             endif
-          enddo
-       endif
-       !
-       ! tcrero; only for mud
-       !
-       if (sedtyp(ll) == SEDTYP_COHESIVE) then
-          if (flstce(ll) == ' ') then
-             !
-             ! Uniform data has been specified
-             !
-             tcrero(:, ll) = tceuni(ll)
-          else
-             !
-             ! Space varying data has been specified
-             ! Use routine that also reads the depth file to read the data
-             !
-             call depfil(lundia    ,error     ,flstce(ll),fmttmp    ,mmax      , &
-                       & nmaxus    ,tcrero(nmlb, ll)     ,1         ,1         , &
-                       & gdp       )
-             if (error) goto 9999
-          endif
-          do nm = 1, nmmax
-             if (kcs(nm) == 1) then
-                if (comparereal(tcrero(nm,ll), eps_fp) /= 1) then
-                   call prterr(lundia, 'U021', 'Critical shear stress for erosion of mud must be > 0.0')
-                   call d3stop(1, gdp)
-                endif
-             endif
-          enddo
-       endif
-       !
-       ! eropar
-       !
-       if (flsero(ll) == ' ') then
-          !
-          ! Uniform data has been specified
-          !
-          eropar(:, ll) = erouni(ll)
-       else
-          !
-          ! Space varying data has been specified
-          ! Use routine that also read the depth file to read the data
-          !
-          call depfil(lundia    ,error     ,flsero(ll),fmttmp    ,mmax      , &
-                    & nmaxus    ,eropar(nmlb, ll)     ,1         ,1         , &
-                    & gdp       )
-          if (error) goto 9999
-       endif    
        !
        ! Calibration parameter GAMTCR for critical shear stress in Van Rijn (2004)
        !
@@ -377,9 +280,9 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
           ! Space varying data has been specified
           ! Use routine that also reads the depth file to read the data
           !
-          call depfil(lundia    ,error     ,flstcg(ll),fmttmp    ,mmax      , &
-                    & nmaxus    ,gamtcr(nmlb, ll)     ,1         ,1         , &
-                    & gdp       )
+          call depfil(lundia    ,error     ,flstcg(ll),fmttmp    , &
+                    & gamtcr(nmlb, ll)     ,1         ,1         , &
+                    & gdp%griddim)
           if (error) goto 9999
        endif
        !
@@ -408,8 +311,8 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
        ! Space varying data has been specified
        ! Use routine that also read the depth file to read the data
        !
-       call depfil(lundia    ,error     ,flsmdc    ,fmttmp    ,mmax      , &
-                 & nmaxus    ,mudcnt    ,1         ,1         ,gdp       )
+       call depfil(lundia    ,error     ,flsmdc    ,fmttmp    , &
+                 & mudcnt    ,1         ,1         ,gdp%griddim)
        if (error) goto 9999
     endif
     do nm = 1, nmmax

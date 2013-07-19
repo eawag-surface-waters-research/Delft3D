@@ -110,10 +110,10 @@ subroutine dwnvel(nmmax     ,kmax      ,icx       , &
     do nm = 1, nmmax
        !
        if (kfsed(nm) == 0) then
-          uuu  (nm) = 0.0
-          vvv  (nm) = 0.0
-          umod (nm) = 0.0
-          zumod(nm) = 0.0
+          uuu  (nm) = 0.0_fp
+          vvv  (nm) = 0.0_fp
+          umod (nm) = 0.0_fp
+          zumod(nm) = 0.0_fp
           cycle
        endif
        !
@@ -125,8 +125,8 @@ subroutine dwnvel(nmmax     ,kmax      ,icx       , &
        nmu  = nm  + icx
        ndmu = nmu - 1
        !
-       uu = 0.0
-       vv = 0.0
+       uu = 0.0_fp
+       vv = 0.0_fp
        h1 = s1(nm) + real(dps(nm),fp)
        !
        do k = kmax, 1, -1
@@ -224,10 +224,10 @@ subroutine dwnvel(nmmax     ,kmax      ,icx       , &
        vv = vv/h1
        !
        if (abs(uu) < eps) then
-          uu = 0.0
+          uu = 0.0_fp
        endif
        if (abs(vv) < eps) then
-          vv = 0.0
+          vv = 0.0_fp
        endif
        !
        ! Calculate resultant velocity magnitude and height

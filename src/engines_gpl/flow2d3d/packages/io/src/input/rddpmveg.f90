@@ -515,9 +515,10 @@ subroutine rddpmveg(mmax      ,nmax      ,nmaxus    , &
                    nplantdep = 0.0
                    error     = .false.
                    message   = 'formatted'
-                   call depfil(lundia    ,error     ,trim(inputstring),message(1:11)      ,mmax      , &
-                             & nmaxus    ,nplantdep ,1                ,1                  ,gdp       )
                    write (lundia,'(a,a)') '                   dep-file : ',trim(inputstring)
+                   call depfil(lundia    ,error     ,trim(inputstring),message(1:11)      , &
+                             & nplantdep ,1                ,1                  ,gdp%griddim)
+                   if (error) call d3stop(1, gdp)
                    !
                    ! Array nplantdep contains positive reals
                    ! All values below 0.0 (including 0.0, -999 and -999.999) should be neglected

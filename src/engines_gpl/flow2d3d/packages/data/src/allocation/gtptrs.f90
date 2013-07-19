@@ -146,8 +146,6 @@ subroutine gtptrs(gdp)
     integer(pntrsize), pointer :: encgl
     integer(pntrsize), pointer :: enstro
     integer(pntrsize), pointer :: entr
-    integer(pntrsize), pointer :: epscur
-    integer(pntrsize), pointer :: epswav
     integer(pntrsize), pointer :: eroll0
     integer(pntrsize), pointer :: eroll1
     integer(pntrsize), pointer :: evap
@@ -628,8 +626,6 @@ subroutine gtptrs(gdp)
     encgl      => gdp%gdr_i_ch%encgl
     enstro     => gdp%gdr_i_ch%enstro
     entr       => gdp%gdr_i_ch%entr
-    epscur     => gdp%gdr_i_ch%epscur
-    epswav     => gdp%gdr_i_ch%epswav
     eroll0     => gdp%gdr_i_ch%eroll0
     eroll1     => gdp%gdr_i_ch%eroll1
     evap       => gdp%gdr_i_ch%evap
@@ -1182,8 +1178,6 @@ subroutine gtptrs(gdp)
     encgl      = gtrpnt('encgl' , gdp)
     entr       = gtrpnt('entr'  , gdp)
     enstro     = gtrpnt('enstro', gdp)
-    epscur     = gtrpnt('epscur', gdp)
-    epswav     = gtrpnt('epswav', gdp)
     eroll0     = gtrpnt('eroll0', gdp)
     eroll1     = gtrpnt('eroll1', gdp)
     evap       = gtrpnt('evap'  , gdp)

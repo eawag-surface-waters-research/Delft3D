@@ -47,6 +47,7 @@ subroutine rdbcb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -77,7 +78,6 @@ subroutine rdbcb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer, external              :: newlun
     integer                        :: nlook                ! Help var.: nr. of data to look for in the MD-file 
     integer                        :: ntrec                ! Help. var to keep track of NRREC 
-    logical, external              :: exifil
     logical                        :: lerror               ! Flag=TRUE if a local error is encountered 
     logical                        :: newkw                ! Logical var. specifying whether a new recnam should be read from the MD-file or just new data in the continuation line 
     character(12)                  :: fildef               ! Default file name (usually = blank) 
@@ -128,7 +128,7 @@ subroutine rdbcb(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        !-------test file existence <YES> -> open file <NO> -> error
        !
-       if (exifil(filbcb(:lf), lundia, 'G004', gdp)) then
+       if (exifil(filbcb, lundia)) then
           !
           !---------Open FILBCB to read data from
           !

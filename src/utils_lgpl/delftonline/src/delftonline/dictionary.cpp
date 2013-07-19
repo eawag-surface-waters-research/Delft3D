@@ -33,8 +33,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
-// $Id:$
-// $HeadURL:$
+// $Id$
+// $HeadURL$
 
 
 #include "dictionary.h"

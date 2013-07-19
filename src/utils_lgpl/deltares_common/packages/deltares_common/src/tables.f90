@@ -35,7 +35,7 @@ module tables
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    !use utilities
+    use string_module
     !
     public tablefiletype
     !
@@ -105,7 +105,7 @@ contains
 !
 !
 !===============================================================================
-subroutine org_readtable(this, lunbcm, filnam, refjulday, errorstring)
+subroutine org_readtable(this, filnam, refjulday, errorstring)
 !!--description-----------------------------------------------------------------
 !
 !    Function: Read table files (i.e. BCT/BCC/BCM)
@@ -123,7 +123,6 @@ subroutine org_readtable(this, lunbcm, filnam, refjulday, errorstring)
 !
 ! Global variables
 !
-    integer             , intent(in)  :: lunbcm
     integer             , intent(in)  :: refjulday
     character(*)        , intent(in)  :: filnam
     character(MAXERRSTR), intent(out) :: errorstring
@@ -150,6 +149,7 @@ subroutine org_readtable(this, lunbcm, filnam, refjulday, errorstring)
     integer                                               :: lstri1
     integer                                               :: lstri2
     integer                                               :: lstri3
+    integer                                               :: lunbcm
     integer                                               :: nrecords
     integer                                               :: ntables
     integer                                               :: ntoken
@@ -157,6 +157,7 @@ subroutine org_readtable(this, lunbcm, filnam, refjulday, errorstring)
     integer                   , dimension(:), allocatable :: itype
     integer                   , dimension(:), allocatable :: ifield
     integer                   , dimension(:), allocatable :: lenchr
+    integer                   , external                  :: newunit
     !
     logical                                               :: feof
     logical                                               :: error
@@ -178,6 +179,7 @@ subroutine org_readtable(this, lunbcm, filnam, refjulday, errorstring)
     error       = .false.
     errorstring = 'org_readtable: memory alloc error'
     !
+    lunbcm = newunit()
     open (lunbcm, file = filnam, form = 'formatted', &
         & status = 'old', iostat = istat)
     if (istat /= 0) then
@@ -465,7 +467,7 @@ contains
 !
 !===============================================================================
 subroutine org_readtable_keyword()
-    call small(cfield(1),len(cfield(1)))
+    call str_lower(cfield(1),len(cfield(1)))
     if (org_readtable_isComment(cfield(1))) then
        !
        ! Skip comments and record length
@@ -503,7 +505,7 @@ subroutine org_readtable_keyword()
              error = .true.
              goto 100
           else
-             call small(cfield(2),len(cfield(2)))
+             call str_lower(cfield(2),len(cfield(2)))
              table%contents = cfield(2)
           endif
        endif
@@ -554,7 +556,7 @@ subroutine org_readtable_keyword()
                 !
                 ! geo-coordinates <long> <lat> layer <layer number>
                 !
-                call small(cfield(4),len(cfield(4)))
+                call str_lower(cfield(4),len(cfield(4)))
                 if (cfield(4) /= 'layer') then
                    errorstring = 'Expected keyword ''layer'''
                    error = .true.
@@ -607,7 +609,7 @@ subroutine org_readtable_keyword()
                 error = .true.
                 goto 100
              else
-                call small(cfield(2),len(cfield(2)))
+                call str_lower(cfield(2),len(cfield(2)))
                 table%interpolation = cfield(2)
                 if (cfield(2) /= 'linear' .and. &
                   & cfield(2) /= 'block') then
@@ -632,7 +634,7 @@ subroutine org_readtable_keyword()
                 error = .true.
                 goto 100
              else
-                call small(cfield(2),len(cfield(2)))
+                call str_lower(cfield(2),len(cfield(2)))
                 table%parameters(ipar)%interpolation = cfield(2)
                 if (cfield(2) /= 'linear' .and. &
                   & cfield(2) /= 'block') then
@@ -658,7 +660,7 @@ subroutine org_readtable_keyword()
              error = .true.
              goto 100
           else
-             call small(cfield(2),len(cfield(2)))
+             call str_lower(cfield(2),len(cfield(2)))
              table%extrapolation = cfield(2)
              if (cfield(2) /= 'periodic' .and. &
                & cfield(2) /= 'constant' .and. &
@@ -697,7 +699,7 @@ subroutine org_readtable_keyword()
        ! metric co-ordinates
        !
        if (iread_phase == 2) then
-          call small(cfield(2),len(cfield(2)))
+          call str_lower(cfield(2),len(cfield(2)))
           if (itype(2) /= CHAR_READ) then
              errorstring = 'Unknown keyword: '//trim(cfield(1))
              error = .true.
@@ -748,7 +750,7 @@ subroutine org_readtable_keyword()
                 !
                 ! metric coordinates <x> <y> layer <layer number>
                 !
-                call small(cfield(5),len(cfield(5)))
+                call str_lower(cfield(5),len(cfield(5)))
                 if (cfield(5) /= 'layer') then
                    errorstring = 'Expected keyword ''layer'''
                    error = .true.
@@ -803,7 +805,7 @@ subroutine org_readtable_keyword()
              error = .true.
              goto 100
           else
-             call small(cfield(2),len(cfield(2)))
+             call str_lower(cfield(2),len(cfield(2)))
              table%timeunitstr = cfield(2)
              if (cfield(2) == 'date' .or. cfield(2) == 'absolute') then
                  table%timeunit = -1.0_hp
@@ -884,7 +886,7 @@ subroutine org_readtable_keyword()
              error = .true.
              goto 100
           else ! if (itype(2) == CHAR_READ) then
-             call small(cfield(2),len(cfield(2)))
+             call str_lower(cfield(2),len(cfield(2)))
              table%refdate = refjulday
              table%reftime = 0.0_fp
              if (cfield(2) /= 'from model') then
@@ -924,7 +926,7 @@ subroutine org_readtable_keyword()
              error = .true.
              goto 100
           else
-             call small(cfield(2),len(cfield(2)))
+             call str_lower(cfield(2),len(cfield(2)))
              table%timefunction = cfield(2)
              if (cfield(2) /= 'astronomic' .and. &
                & cfield(2) /= 'harmonic' .and. &
@@ -967,7 +969,7 @@ subroutine org_readtable_keyword()
              ! Time column should be skipped; check whether
              ! the parameter is indeed called 'time'.
              !
-             call small(cfield(2),MAXTABLECLENGTH)
+             call str_lower(cfield(2),MAXTABLECLENGTH)
              ! allow 'time' and 'time starting at ...' (in case of reuse TMP files)
              if (cfield(2)(1:5) /= 'time ') then
                 errorstring = 'Parameter in first column should be ''time'''

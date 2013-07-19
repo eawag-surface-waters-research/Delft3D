@@ -67,7 +67,6 @@
 		<File RelativePath="include\dimens.igs"/>
 		<File RelativePath="include\dpmveg.igs"/>
 		<File RelativePath="include\dredge.igs"/>
-		<File RelativePath="include\eqtran.igs"/>
 		<File RelativePath="include\erosed.igs"/>
 		<File RelativePath="include\exttim.igs"/>
 		<File RelativePath="include\f0isf1.igs"/>
@@ -94,7 +93,6 @@
 		<File RelativePath="include\iwearr.igs"/>
 		<File RelativePath="include\iwepar.igs"/>
 		<File RelativePath="include\keywtd.igs"/>
-		<File RelativePath="include\lognormal.inc"/>
 		<File RelativePath="include\luntmp.igs"/>
 		<File RelativePath="include\massbal.igs"/>
 		<File RelativePath="include\morpar.igs"/>
@@ -114,8 +112,6 @@
 		<File RelativePath="include\restart.igs"/>
 		<File RelativePath="include\rivpro.igs"/>
 		<File RelativePath="include\scour.igs"/>
-		<File RelativePath="include\sedpar.igs"/>
-		<File RelativePath="include\sedparams.inc"/>
 		<File RelativePath="include\snel.igs"/>
 		<File RelativePath="include\stations.igs"/>
 		<File RelativePath="include\tablefile.igs"/>
@@ -190,23 +186,17 @@
 				<Tool Name="VFFortranCompilerTool" BoundsCheck="false"/></FileConfiguration></File>
 		<File RelativePath="src\allocation\rnull.f90"/></Filter>
 		<Filter Name="basics">
-		<File RelativePath="src\basics\bedcomposition_module.f90"/>
 		<File RelativePath="src\basics\flow_tables.f90"/>
 		<File RelativePath="src\basics\globaldata.f90"/>
-		<File RelativePath="src\basics\message_module.f90"/>
 		<File RelativePath="src\basics\sp_buffer.f90"/>
-		<File RelativePath="src\basics\string_module.f90"/>
 		<File RelativePath="src\basics\timers.f90"/></Filter>
 		<Filter Name="gdp">
 		<File RelativePath="src\gdp\clradv2d.f90"/>
 		<File RelativePath="src\gdp\clrbedformpar.f90"/>
 		<File RelativePath="src\gdp\clrdredge.f90"/>
-		<File RelativePath="src\gdp\clreqtran.f90"/>
 		<File RelativePath="src\gdp\clrerosed.f90"/>
 		<File RelativePath="src\gdp\clrflwpar.f90"/>
 		<File RelativePath="src\gdp\clrmassbal.f90"/>
-		<File RelativePath="src\gdp\clrmorpar.f90"/>
-		<File RelativePath="src\gdp\clrsedpar.f90"/>
 		<File RelativePath="src\gdp\clrtrachy.f90"/>
 		<File RelativePath="src\gdp\gdp_alloc.f90"/>
 		<File RelativePath="src\gdp\gdp_alloc_arrays.f90"/>
@@ -226,7 +216,6 @@
 		<File RelativePath="src\gdp\initdischarge.f90"/>
 		<File RelativePath="src\gdp\initdpmveg.f90"/>
 		<File RelativePath="src\gdp\initdredge.f90"/>
-		<File RelativePath="src\gdp\initeqtran.f90"/>
 		<File RelativePath="src\gdp\initerosed.f90"/>
 		<File RelativePath="src\gdp\initf0isf1.f90"/>
 		<File RelativePath="src\gdp\initflwpar.f90"/>
@@ -241,14 +230,12 @@
 		<File RelativePath="src\gdp\initincwav.f90"/>
 		<File RelativePath="src\gdp\initkeywtd.f90"/>
 		<File RelativePath="src\gdp\initmassbal.f90"/>
-		<File RelativePath="src\gdp\initmorpar.f90"/>
 		<File RelativePath="src\gdp\initpostpr.f90"/>
 		<File RelativePath="src\gdp\initprocs.f90"/>
 		<File RelativePath="src\gdp\initrestart.f90"/>
 		<File RelativePath="src\gdp\initrtc.f90"/>
 		<File RelativePath="src\gdp\initsafe.f90"/>
 		<File RelativePath="src\gdp\initscour.f90"/>
-		<File RelativePath="src\gdp\initsedpar.f90"/>
 		<File RelativePath="src\gdp\initsnel.f90"/>
 		<File RelativePath="src\gdp\initsobek.f90"/>
 		<File RelativePath="src\gdp\initstations.f90"/>
@@ -314,15 +301,7 @@
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfbroadc.F90">
-			<FileConfiguration Name="Debug|Win32">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
-			<FileConfiguration Name="Release|x64">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
-			<FileConfiguration Name="Debug|x64">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
-			<FileConfiguration Name="Release|Win32">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
+		<File RelativePath=".\src\parallel_mpi\dfbroadc_gdp.f90"/>
 		<File RelativePath=".\src\parallel_mpi\dfcollect.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
@@ -405,15 +384,6 @@
 			<FileConfiguration Name="Release|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
 		<File RelativePath=".\src\parallel_mpi\dforb.F90">
-			<FileConfiguration Name="Debug|Win32">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
-			<FileConfiguration Name="Release|x64">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
-			<FileConfiguration Name="Debug|x64">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
-			<FileConfiguration Name="Release|Win32">
-				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration></File>
-		<File RelativePath=".\src\parallel_mpi\dfparall.F90">
 			<FileConfiguration Name="Debug|Win32">
 				<Tool Name="VFFortranCompilerTool" Preprocess="preprocessYes"/></FileConfiguration>
 			<FileConfiguration Name="Release|x64">

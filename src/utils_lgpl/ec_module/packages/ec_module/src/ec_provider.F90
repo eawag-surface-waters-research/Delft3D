@@ -676,8 +676,7 @@ function set_prov_filetype(provider, provtype) result (success)
   integer          , intent(in) :: provtype
   !
   ! local parameters
-  integer                       :: unitnr, refjulday
-  logical                       :: unitused
+  integer                       :: refjulday
   character(len=256)            :: errorstring
   type(handletype)              :: handle
   ! body
@@ -689,12 +688,8 @@ function set_prov_filetype(provider, provtype) result (success)
       provider%filetype = provtype
     case (provFile_table)
        provider%filetype = provtype
-       do unitnr = 1, 100
-          inquire (unit = unitnr, opened = unitused) 
-          if (.not. unitused) exit
-       enddo
        refjulday = 245245
-       call readtable(handle, unitnr, provider%fileName, refjulday, errorstring)
+       call readtable(handle, provider%fileName, refjulday, errorstring)
        success           = .true.
     case default
       success = .false.

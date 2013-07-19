@@ -50,6 +50,7 @@ subroutine rdxyzo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     use properties
     use globaldata
     use dfparall
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -111,7 +112,6 @@ subroutine rdxyzo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                          :: nlook    ! Help var.: nr. of data to look for in the MD-file
     integer                          :: ntrec    ! Help. var to keep track of NRREC
     logical                          :: defaul   ! Flag set to YES if default value may be applied in case var. read is empty (ier <= 0, or nrread < nlook)
-    logical, external                :: exifil
     logical                          :: lerror   ! Flag=TRUE if a local error is encountered
     logical                          :: newkw    ! Logical var. specifying whether a new recnam should be read from the MD-file or just new data in the continuation line
     logical                          :: nodef    ! Flag set to YES if default value may NOT be applied in case var. read is empty (ier <= 0, or nrread < nlook)
@@ -192,7 +192,7 @@ subroutine rdxyzo(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        !
        if (noui) then
           lfile = len(filrgf)
-          error = .not.exifil(filrgf(1:lfile), lundia, 'G004', gdp)
+          error = .not.exifil(filrgf, lundia)
           !
           if (fmtrgf/='FR') then
              write(lundia, '(a)') '*** error inconsistent format for grid file'

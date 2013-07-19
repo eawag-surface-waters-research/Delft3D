@@ -66,6 +66,8 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     use precision
     use mathconsts
     use bedcomposition_module
+    use morphology_data_module
+    use sediment_basics_module
     use globaldata
     use dfparall
     !
@@ -201,14 +203,10 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                             , pointer :: kssand
     logical                              , pointer :: oldmudfrac
     logical                              , pointer :: flmd2l
-    real(fp)         , dimension(:,:)    , pointer :: tcrdep
-    real(fp)         , dimension(:,:)    , pointer :: tcrero
-    real(fp)         , dimension(:,:)    , pointer :: eropar
     real(prec)       , dimension(:,:)    , pointer :: bodsed 
     real(fp)         , dimension(:)      , pointer :: sedtrcfac
+    integer                              , pointer :: iunderlyr
     include 'flow_steps_f.inc'
-    include 'sedparams.inc'
-    include 'trapar.inc'
 !
 ! Local parameters
 !
@@ -243,7 +241,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfu     !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfv     !  Description and declaration in esm_alloc_int.f90
     integer   , dimension(gdp%d%nmlb:gdp%d%nmub, lsed)                      :: kmxsed  !  Description and declaration in esm_alloc_int.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)                            :: aks     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, lsed)                      :: aks     !  Description and declaration in esm_alloc_real.f90
     real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: dps     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: entr    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: guv     !  Description and declaration in esm_alloc_real.f90
@@ -319,11 +317,11 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     integer                       :: klc
     integer                       :: kmaxlc    
     logical                       :: suspfrac  ! suspended component sedtyp(l)/=SEDTYP_NONCOHESIVE_TOTALLOAD
-    real(fp)                      :: akstmp
-    real(fp)                      :: ce_nm
-    real(fp)                      :: ce_nmtmp
+    real(fp)                      :: aks_ss3d
+    real(fp)                      :: caks
+    real(fp)                      :: caks_ss3d
     real(fp)                      :: chezy
-    real(fp)                      :: crep
+    real(fp)                      :: conc2d
     real(fp)                      :: di50
     real(fp)                      :: difbot
     real(fp)                      :: drho
@@ -334,11 +332,13 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: grkg
     real(fp)                      :: grm2tot
     real(fp)                      :: grm2
+    real(fp)                      :: grlyrs
     real(fp)                      :: h0
     real(fp)                      :: h1
     real(fp)                      :: sag
     real(fp)                      :: salinity
     real(fp)                      :: spirint   ! local variable for spiral flow intensity r0(nm,1,lsecfl)
+    real(fp)                      :: taks
     real(fp)                      :: tauadd
     real(fp)                      :: taub
     real(fp)                      :: tdss      ! temporary variable for dss
@@ -476,8 +476,8 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     wslc                => gdp%gderosed%wslc
     zumod               => gdp%gderosed%zumod
     scour               => gdp%gdscour%scour
-    iform               => gdp%gdeqtran%iform
-    par                 => gdp%gdeqtran%par
+    iform               => gdp%gdtrapar%iform
+    par                 => gdp%gdtrapar%par
     rksr                => gdp%gdbedformpar%rksr
     sus                 => gdp%gdmorpar%sus
     bed                 => gdp%gdmorpar%bed
@@ -501,24 +501,21 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     iopkcw              => gdp%gdmorpar%iopkcw
     subiw               => gdp%gdmorpar%subiw
     ubot_from_com       => gdp%gdprocs%ubot_from_com
-    max_integers        => gdp%gdeqtran%max_integers
-    max_reals           => gdp%gdeqtran%max_reals
-    max_strings         => gdp%gdeqtran%max_strings
-    dll_function        => gdp%gdeqtran%dll_function
-    dll_handle          => gdp%gdeqtran%dll_handle
-    dll_integers        => gdp%gdeqtran%dll_integers
-    dll_reals           => gdp%gdeqtran%dll_reals
-    dll_strings         => gdp%gdeqtran%dll_strings
-    dll_usrfil          => gdp%gdeqtran%dll_usrfil
+    max_integers        => gdp%gdtrapar%max_integers
+    max_reals           => gdp%gdtrapar%max_reals
+    max_strings         => gdp%gdtrapar%max_strings
+    dll_function        => gdp%gdtrapar%dll_function
+    dll_handle          => gdp%gdtrapar%dll_handle
+    dll_integers        => gdp%gdtrapar%dll_integers
+    dll_reals           => gdp%gdtrapar%dll_reals
+    dll_strings         => gdp%gdtrapar%dll_strings
+    dll_usrfil          => gdp%gdtrapar%dll_usrfil
     bsskin              => gdp%gdsedpar%bsskin
     thcmud              => gdp%gdsedpar%thcmud
     kssilt              => gdp%gdsedpar%kssilt
     kssand              => gdp%gdsedpar%kssand
     oldmudfrac          => gdp%gdmorpar%oldmudfrac
     flmd2l              => gdp%gdprocs%flmd2l
-    tcrdep              => gdp%gdsedpar%tcrdep
-    tcrero              => gdp%gdsedpar%tcrero
-    eropar              => gdp%gdsedpar%eropar
     hdt                 => gdp%gdnumeco%hdt
     !
     nm_pos =  1
@@ -707,25 +704,40 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     dt = hdt * morfac
     !
     call getfixfac(gdp%gdmorlyr, gdp%d%nmlb, gdp%d%nmub, lsedtot, &
-                 & nmmax       , fixfac    , ffthresh  , srcmax , &
-                 & cdryb       , dt)
+                 & nmmax       , fixfac    , ffthresh  )
     !
     ! Set fixfac to 1.0 for tracer sediments and adjust frac
     !
-    do l = 1, lsed
-       if (sedtrcfac(l) > 0.0_fp) then
-          grkg = (1.0_fp - 0.4_fp) / (cdryb(l)*pi*sedd50(l)**3/6.0_fp) ! Number of grains per kg
-          grm2tot = 0.5_fp/(pi*sedd50(l)**2) ! Number of grains per m^2
-          istat = bedcomp_getpointer_realprec(gdp%gdmorlyr,'bodsed',bodsed)
-          do nm = 1, nmmax
-             fixfac(nm, l) = 1.0_fp
-             grm2          = bodsed(l, nm) * grkg
-             frac  (nm, l) = grm2 / grm2tot
-             frac  (nm, l) = max(min(frac(nm, l), 1.0_fp), 0.0_fp)
-             frac  (nm, l) = frac(nm, l)*sedtrcfac(l)
-          enddo
-       endif
-    enddo
+    istat = bedcomp_getpointer_integer(gdp%gdmorlyr, 'IUnderLyr', iunderlyr)
+    if (ffthresh>0.0_hp .or. iunderlyr/=1) then
+       srcmax = 1.0e+10_fp
+    elseif (iunderlyr==1) then
+       istat = bedcomp_getpointer_realprec(gdp%gdmorlyr,'bodsed',bodsed)
+       do l = 1, lsed
+          if (ffthresh<1.0e-10_fp) then
+             !
+             ! Compute SRCMAX (only used for cohesive sediments)
+             !
+             do nm = 1, nmmax
+                !
+                ! If user-specified THRESH is <= 0.0, the erosion flux is effectively not limited by FIXFAC since ffthresh is 1e-10
+                ! but by the amount of sediment that is available
+                !
+                srcmax(nm, l) = bodsed(l, nm)*cdryb(l)/dt
+             enddo
+          endif
+          !
+          if (sedtrcfac(l)>0.0_fp) then
+             grkg = 1.0_fp / (rhosol(l)*pi*sedd50(l)**3/6.0_fp) ! Number of grains per kg
+             grm2 = 0.5_fp / (pi*sedd50(l)**2) ! Number of grains per m^2 -- Not quite correct: maximum area of grain is pi*r^2 not pi*d^2, using porosity factor of 0.5
+             do nm = 1, nmmax
+                fixfac(nm, l) = 1.0_fp
+                grlyrs = bodsed(l, nm) * grkg / grm2 ! Number of grain layers
+                frac(nm, l) = min(max(0.0_fp, grlyrs), 1.0_fp)*sedtrcfac(l)
+             enddo
+          endif
+       enddo
+    endif
     !
     ! in case of multiple (non-mud) fractions, the following quantities
     ! --- that are initialized in INISED --- may be time-dependent and
@@ -923,9 +935,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           call d3stop(1, gdp)
        endif
        dll_reals(RP_TIME ) = real(timsec    ,hp)
-       dll_reals(RP_UMEAN) = real(umean     ,hp)
-       dll_reals(RP_VMEAN) = real(vmean     ,hp)
-       dll_reals(RP_VELMN) = real(velm      ,hp)
        dll_reals(RP_UCHAR) = real(uuu(nm)   ,hp)
        dll_reals(RP_VCHAR) = real(vvv(nm)   ,hp)
        dll_reals(RP_VELCH) = real(umod(nm)  ,hp)
@@ -967,6 +976,10 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
        if (ltur >= 1) then
           dll_reals(RP_KTUR ) = real(rtur0(nm,kmaxlc,1),hp)
        endif
+       dll_reals(RP_UMEAN) = real(umean     ,hp)
+       dll_reals(RP_VMEAN) = real(vmean     ,hp)
+       dll_reals(RP_VELMN) = real(velm      ,hp)
+
        !
        if (max_integers < MAX_IP) then
           write(errmsg,'(a,a,a)') 'Insufficient space to pass integer values to transport routine.'
@@ -1011,12 +1024,15 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                 klc=klc+1
              enddo
              !
-             call erosilt(thicklc    ,kmaxlc     ,wslc     ,wstau(nm),entr(nm) ,lundia   , &
-                        & h0       ,h1       ,error    ,fixfac(nm,l), srcmax(nm, l)  ,&
-                        & frac(nm,l),sinkse(nm,l),sourse(nm,l),oldmudfrac,flmd2l  ,tcrdep(nm,l), &
-                        & tcrero(nm,l) ,eropar(nm,l)   ,iform(l) , &
-                        & max_integers,max_reals      ,max_strings  ,dll_function(l),dll_handle(l), &
-                        & dll_integers,dll_reals      ,dll_strings  )
+             thick0        = thick(kmaxsd) * h0
+             thick1        = thick(kmaxsd) * h1
+             call erosilt(thicklc     ,kmaxlc      ,wslc        ,lundia      , &
+                        & thick0      ,thick1      ,fixfac(nm,l), srcmax(nm, l),&
+                        & frac(nm,l)  ,oldmudfrac  ,flmd2l      ,iform(l)    , &
+                        & par         ,max_integers,max_reals   ,max_strings , &
+                        & dll_function(l),dll_handle(l),dll_integers,dll_reals, &
+                        & dll_strings  , &
+                        & error ,wstau(nm) ,sinkse(nm,l) ,sourse(nm,l))
              if (error) call d3stop(1, gdp)
              !
              if (kmax > 1) then 
@@ -1136,6 +1152,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                    klc=klc+1
                 enddo
              endif
+             taks = 0.0_fp
              !
              klc    = 1
              do k = kfsmax(nm),kfsmin(nm),-1
@@ -1146,27 +1163,22 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              ! Solve equilibrium concentration vertical and
              ! integrate over vertical
              !
-             call eqtran(siglc       ,thicklc     ,kmaxlc       , &
-                       & aks(nm)     ,ustarc      ,wslc         ,ltur      , &
-                       & frac(nm,l)  ,tsigmol     , &
-                       & ce_nm       ,taurat(nm,l),dcwwlc       ,sddflc    ,rsdqlc    , &
-                       & kmaxsd      ,crep        ,sbcu(nm,l )  ,sbcv(nm,l),sbwu(nm,l), &
-                       & sbwv(nm,l)  ,sswu(nm,l)  ,sswv(nm,l)   ,lundia    , &
-                       & taucr(l)    ,tdss        ,rksr(nm)     ,3         , &
-                       & ce_nmtmp    ,akstmp      ,lsecfl       ,spirint   , &
-                       & suspfrac    ,ust2(nm)    ,tetacr(l)    ,tgamtcr   , &
-                       & tsalmax     ,tws0        ,tsd          ,concin3d  , &
-                       & dzduu(nm)   ,dzdvv(nm)   ,ubot(nm)     ,tauadd    , &
-                       & sus         ,bed         ,susw         ,bedw      ,espir     , &
-                       & wave        , &
-                       & scour       ,epspar      ,ubot_from_com,camax     , &
-                       & aksfac      ,rwave       ,rdc          ,rdw       ,pangle    , &
-                       & fpco        ,iopsus      ,iopkcw       ,subiw     ,eps       , &
-                       & iform(l)    ,par(1,l)    , &
-                       & max_integers,max_reals   ,max_strings  ,dll_function(l),dll_handle(l), &
-                       & dll_integers,dll_reals   ,dll_strings  ,error     )
+             call eqtran(siglc     ,thicklc   ,kmaxlc    ,wslc      ,ltur      , &
+                       & frac(nm,l),tsigmol   ,dcwwlc    ,lundia    ,taucr(l)  , &
+                       & rksr(nm)  ,3         ,lsecfl    ,spirint   ,suspfrac  , &
+                       & tetacr(l) ,tsalmax   ,tws0      ,concin3d  , &
+                       & dzduu(nm) ,dzdvv(nm) ,ubot(nm)  ,tauadd    ,sus       , &
+                       & bed       ,susw      ,bedw      ,espir     ,wave      , &
+                       & scour     ,ubot_from_com        ,camax     ,eps       , &
+                       & iform(l)  ,par(1,l)  ,max_integers,max_reals,max_strings, &
+                       & dll_function(l),dll_handle(l),dll_integers,dll_reals,dll_strings, &
+                       & taks      ,caks      ,taurat(nm,l),sddflc  ,rsdqlc    , &
+                       & kmaxsd    ,conc2d    ,sbcu(nm,l ),sbcv(nm,l),sbwu(nm,l), &
+                       & sbwv(nm,l),sswu(nm,l),sswv(nm,l),tdss      ,caks_ss3d , &
+                       & aks_ss3d  ,ust2(nm)  ,tsd       ,error     )
              if (error) call d3stop(1, gdp)
              if (suspfrac) then
+                aks(nm, l) = taks
                 dss(nm, l) = tdss
                 !
                 ! Copy results into arrays
@@ -1193,8 +1205,8 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                 call soursin_3d  (h1                ,thick0         ,thick1             , &
                                &  siglc(kmaxsd)     ,thicklc(kmaxsd),r0(nm,kmxsed(nm,l) ,ll)    , &
                                &  vicmol            ,sigmol(ll)     ,seddif(nm,kmxsed(nm,l)-1,l), &
-                               &  rhosol(l)         ,ce_nmtmp       ,ws(nm,kmxsed(nm,l),l)      , &
-                               &  akstmp            ,sourse(nm,l)   ,sinkse(nm,l) )
+                               &  rhosol(l)         ,caks_ss3d      ,ws(nm,kmxsed(nm,l),l)      , &
+                               &  aks_ss3d          ,sourse(nm,l)   ,sinkse(nm,l) )
                 ! Impose relatively large vertical diffusion
                 ! coefficients for sediment in layer interfaces from
                 ! bottom of reference cell downwards, to ensure little
@@ -1234,25 +1246,19 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              ! integrate over vertical; compute bedload
              ! transport excluding slope effects.
              !
-             call eqtran(sig2d       ,thck2d      ,kmax2d       , &
-                       & aks(nm)     ,ustarc      ,ws2d         ,ltur       , &
-                       & frac(nm,l)  ,tsigmol     , &
-                       & ce_nm       ,taurat(nm,l),dcww2d       ,sddf2d     ,rsdq2d     , &
+             call eqtran(sig2d     ,thck2d    ,kmax2d    ,ws2d      ,ltur      , &
+                       & frac(nm,l),tsigmol   ,dcww2d    ,lundia    ,taucr(l)  , &
+                       & rksr(nm)  ,2         ,lsecfl    ,spirint   ,suspfrac  , &
+                       & tetacr(l) ,tsalmax   ,tws0      ,concin2d  , &
+                       & dzduu(nm) ,dzdvv(nm) ,ubot(nm)  ,tauadd    ,sus       , &
+                       & bed       ,susw      ,bedw      ,espir     ,wave      , &
+                       & scour     ,ubot_from_com        ,camax     ,eps       , &
+                       & iform(l)  ,par(1,l)  ,max_integers,max_reals,max_strings, &
+                       & dll_function(l),dll_handle(l),dll_integers,dll_reals,dll_strings, &
+                       & taks      ,caks      ,taurat(nm,l),sddf2d  ,rsdq2d    , &
                        & kmaxsd      ,trsedeq     ,sbcu(nm,l)   ,sbcv(nm,l) ,sbwu(nm,l) , &
-                       & sbwv(nm,l)  ,sswu(nm,l)  ,sswv(nm,l)   ,lundia     , &
-                       & taucr(l)    ,tdss        ,rksr(nm)     ,2          , &
-                       & ce_nmtmp    ,akstmp      ,lsecfl       ,spirint    , &
-                       & suspfrac    ,ust2(nm)    ,tetacr(l)    ,tgamtcr    , &
-                       & tsalmax     ,tws0        ,tsd          ,concin2d   , &
-                       & dzduu(nm)   ,dzdvv(nm)   ,ubot(nm)     ,tauadd     , &
-                       & sus         ,bed         ,susw         ,bedw       ,espir      , &
-                       & wave        , &
-                       & scour       ,epspar      ,ubot_from_com,camax      , &
-                       & aksfac      ,rwave       ,rdc          ,rdw        ,pangle     , &
-                       & fpco        ,iopsus      ,iopkcw       ,subiw      ,eps        , &
-                       & iform(l)    ,par(1,l)    , &
-                       & max_integers,max_reals   ,max_strings  ,dll_function(l),dll_handle(l), &
-                       & dll_integers,dll_reals   ,dll_strings  ,error      )
+                       & sbwv(nm,l),sswu(nm,l),sswv(nm,l),tdss      ,caks_ss3d , &
+                       & aks_ss3d  ,ust2(nm)  ,tsd       ,error     )
              if (error) call d3stop(1, gdp)
              if (suspfrac) then
                 dss   (nm, l)    = tdss
@@ -1267,7 +1273,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              endif ! suspfrac
           endif ! kmaxlc = 1
           if (suspfrac) then
-             rca(nm, l) = ce_nm * rhosol(l)
+             rca(nm, l) = caks * rhosol(l)
           endif
        enddo ! next sediment fraction
     enddo ! next nm point

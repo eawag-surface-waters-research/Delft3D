@@ -161,11 +161,11 @@ subroutine inibcparl(nto       ,nrob      ,mnbnd     ,nob       ,typbnd    , &
     ! so every partition knows the dimensions and positions
     ! of the other partitions in the global domain
     !
-    call dfbroadc( iarrc, 4*nproc, dfint, gdp )
-    call dfbroadc( nf, nproc, dfint, gdp )
-    call dfbroadc( nl, nproc, dfint, gdp )
-    call dfbroadc( mf, nproc, dfint, gdp )
-    call dfbroadc( ml, nproc, dfint, gdp )
+    call dfbroadc_gdp( iarrc, 4*nproc, dfint, gdp )
+    call dfbroadc_gdp( nf, nproc, dfint, gdp )
+    call dfbroadc_gdp( nl, nproc, dfint, gdp )
+    call dfbroadc_gdp( mf, nproc, dfint, gdp )
+    call dfbroadc_gdp( ml, nproc, dfint, gdp )
     !
                   allocate(guu_global(1:nmaxgl,1:mmaxgl), stat=istat)
     if (istat==0) allocate(gvv_global(1:nmaxgl,1:mmaxgl), stat=istat)
@@ -183,7 +183,7 @@ subroutine inibcparl(nto       ,nrob      ,mnbnd     ,nob       ,typbnd    , &
     !
     ! The master partition broadcasts this guu array to all partitions
     !
-    call dfbroadc (guu_global, (nmaxgl)*(mmaxgl), dfreal, gdp )
+    call dfbroadc_gdp (guu_global, (nmaxgl)*(mmaxgl), dfreal, gdp )
     !
     ! Collect all gvv values from all partitions in the (single precision) array glbarr2 in the master partition
     !
@@ -194,7 +194,7 @@ subroutine inibcparl(nto       ,nrob      ,mnbnd     ,nob       ,typbnd    , &
     !
     ! The master partition broadcasts this gvv array to all partitions
     !
-    call dfbroadc (gvv_global, (nmaxgl)*(mmaxgl), dfreal, gdp )
+    call dfbroadc_gdp (gvv_global, (nmaxgl)*(mmaxgl), dfreal, gdp )
     !
     ! loop over all boundaries that are (partly) inside this partition
     !

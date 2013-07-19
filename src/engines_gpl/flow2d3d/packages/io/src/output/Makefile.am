@@ -73,7 +73,6 @@ libIOOutput_la_SOURCES = \
          updbnddps.f90 \
          uv2zeta.f90 \
          waq2flow.f90 \
-         wavenr.f90 \
          wrboun.f90 \
          wrcomi.f90 \
          wrcomt.f90 \

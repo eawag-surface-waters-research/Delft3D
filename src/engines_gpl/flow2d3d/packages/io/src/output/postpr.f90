@@ -156,6 +156,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     logical                              , pointer :: roller
     logical                              , pointer :: xbeach
     integer(pntrsize)                    , pointer :: alfas
+    integer(pntrsize)                    , pointer :: aks
     integer(pntrsize)                    , pointer :: areau
     integer(pntrsize)                    , pointer :: areav
     integer(pntrsize)                    , pointer :: atr
@@ -507,6 +508,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
     roller              => gdp%gdprocs%roller
     xbeach              => gdp%gdprocs%xbeach
     alfas               => gdp%gdr_i_ch%alfas
+    aks                 => gdp%gdr_i_ch%aks
     areau               => gdp%gdr_i_ch%areau
     areav               => gdp%gdr_i_ch%areav
     atr                 => gdp%gdr_i_ch%atr
@@ -1140,8 +1142,8 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
                 else
                    call dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
                                & mmax      ,kmax      ,nmaxus    ,lsed      ,lsedtot   , &
-                               & r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   , &
-                               & r(ws)     ,r(rsedeq) ,d(dps)    ,r(rca)    ,gdp       )
+                               & r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   ,r(ws)     , &
+                               & r(rsedeq) ,d(dps)    ,r(rca)    ,r(aks)    ,gdp       )
                 endif
                 if (error) goto 9999
              endif

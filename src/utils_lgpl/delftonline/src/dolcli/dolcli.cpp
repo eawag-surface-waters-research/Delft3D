@@ -32,8 +32,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
-// $Id:$
-// $HeadURL:$
+// $Id$
+// $HeadURL$
 
 
 #define DOLCLIENT_MAIN

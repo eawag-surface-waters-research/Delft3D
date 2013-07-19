@@ -40,6 +40,7 @@ subroutine rdrgf(filrgf    ,lundia    ,error     ,nmax      ,mmax      , &
     use precision 
     use globaldata 
     use dfparall 
+    use system_utils, only: exifil
     ! 
     implicit none 
     ! 
@@ -78,7 +79,6 @@ subroutine rdrgf(filrgf    ,lundia    ,error     ,nmax      ,mmax      , &
     integer                               :: nc       ! Number of grid points in the N-dir. specified in the curvi linear grid file  
     integer                    , external :: newlun 
     integer                               :: pos 
-    logical                    , external :: exifil
     logical                               :: kw_found 
     real(fp)                              :: xymiss 
     real(fp), dimension(:,:), allocatable :: xtmp     ! temporary array containing xcor of entire domain 
@@ -108,7 +108,7 @@ subroutine rdrgf(filrgf    ,lundia    ,error     ,nmax      ,mmax      , &
     ! check file existence 
     ! 
     call noextspaces(filrgf    ,ilen      ) 
-    error = .not.exifil(filrgf(:ilen), lundia, errornr, gdp) 
+    error = .not.exifil(filrgf, lundia) 
     if (error) goto 9999 
     ! 
     ! the master opens and reads the grid file 
@@ -225,7 +225,7 @@ subroutine rdrgf(filrgf    ,lundia    ,error     ,nmax      ,mmax      , &
     ! 
     ! scatter integer array to all nodes and determine sferic and dimensions 
     ! 
-    call dfbroadc ( ival, 3, dfint, gdp ) 
+    call dfbroadc_gdp ( ival, 3, dfint, gdp ) 
     !   isfer = ival(1) 
     mc    = ival(2) 
     nc    = ival(3) 
@@ -249,8 +249,8 @@ subroutine rdrgf(filrgf    ,lundia    ,error     ,nmax      ,mmax      , &
     ! 
     ! scatter arrays xtmp and ytmp to all nodes 
     ! 
-    call dfbroadc ( xtmp, nmaxgl*mmaxgl, dfloat, gdp ) 
-    call dfbroadc ( ytmp, nmaxgl*mmaxgl, dfloat, gdp ) 
+    call dfbroadc_gdp ( xtmp, nmaxgl*mmaxgl, dfloat, gdp ) 
+    call dfbroadc_gdp ( ytmp, nmaxgl*mmaxgl, dfloat, gdp ) 
     ! 
     ! put copies of parts of xcor, ycor for each subdomain 
     ! 

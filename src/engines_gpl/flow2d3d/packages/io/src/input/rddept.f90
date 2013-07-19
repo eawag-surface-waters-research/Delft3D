@@ -90,8 +90,8 @@ subroutine rddept(lundia    ,error     , &
        call prop_get_string(gdp%mdfile_ptr, '*', 'Fmtdep', fmtdep)
        fmttmp = fmtdep
        call filfmt(lundia    ,'Fmtdep'      ,fmttmp    ,lerror    ,gdp       )
-       call depfil(lundia    ,error     ,fildep    ,fmttmp    ,mmax      , &
-                 & nmaxus    ,dp        ,1         ,1         ,gdp       )
+       call depfil(lundia    ,error     ,fildep    ,fmttmp    , &
+                 & dp        ,1         ,1         ,gdp%griddim)
     else
        !
        ! No depth values in file

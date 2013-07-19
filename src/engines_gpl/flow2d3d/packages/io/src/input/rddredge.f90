@@ -449,8 +449,8 @@ subroutine rddredge(xcor      ,ycor      ,xz        ,yz        ,gsqs      , &
        !
        fmttmp = 'formatted'
        error  = .false.
-       call depfil(lundia    ,error     ,refplanefile,fmttmp  ,mmax      , &
-                 & nmaxus    ,refplane  ,1         ,1         ,gdp       )
+       call depfil(lundia    ,error     ,refplanefile,fmttmp  , &
+                 & refplane  ,1         ,1         ,gdp%griddim)
        if (error) call d3stop(1, gdp)
        write(lundia,'(2a)') '  Reference plane             : ', trim(refplanefile)
     else

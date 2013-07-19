@@ -43,6 +43,7 @@ subroutine rdibch(lundia    ,error     ,runid     ,ntof      ,nto       , &
     use precision
     use globaldata
     use dfparall
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -73,7 +74,6 @@ subroutine rdibch(lundia    ,error     ,runid     ,ntof      ,nto       , &
     integer                               :: luntmp
     integer                               :: n
     integer, external                     :: newlun
-    logical, external                     :: exifil
     character(256)                        :: filbch
     real(fp), dimension(:,:), allocatable :: rtmp    ! temporary array containing hydrbc of entire domain
 !
@@ -87,7 +87,7 @@ subroutine rdibch(lundia    ,error     ,runid     ,ntof      ,nto       , &
     !
     filbch = 'TMP_' // runid(:lrid) // '.bch'
     !
-    if (exifil(filbch(:8 + lrid), lundia, 'G004', gdp)) then
+    if (exifil(filbch, lundia)) then
        !
        ! allocate temporary array to store hydrbc of entire domain read from file
        !

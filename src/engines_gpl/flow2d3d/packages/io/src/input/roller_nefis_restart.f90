@@ -253,7 +253,7 @@ subroutine roller_nefis_restart(lundia    ,error     ,restid1 , &
     ! scatter arrays s1 etc to all nodes. Note: the broadc must use 'dfreal'
     ! since the arrays are single precision! Otherwise, intractable memory errors will occur. 
     !
-    call dfbroadc ( roll_g, nmaxgl*mmaxgl*11, dfreal, gdp )
+    call dfbroadc_gdp ( roll_g, nmaxgl*mmaxgl*11, dfreal, gdp )
     !
     !
     ! 

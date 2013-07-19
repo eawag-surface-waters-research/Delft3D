@@ -135,6 +135,7 @@
     <ClCompile Include="src\getputarray.cpp" />
     <ClCompile Include="src\meminfo.cpp" />
     <ClCompile Include="src\sems.cpp" />
+    <ClCompile Include="src\shared_library_fortran_api.c" />
     <ClCompile Include="src\stream.cpp" />
     <ClCompile Include="src\throwexception.cpp" />
   </ItemGroup>

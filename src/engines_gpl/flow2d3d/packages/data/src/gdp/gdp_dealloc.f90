@@ -36,6 +36,8 @@ subroutine gdp_dealloc(gdp)
 !!--declarations----------------------------------------------------------------
     use precision
     use sp_buffer
+    !
+    use morphology_data_module
     use bedcomposition_module
     use message_module
     use flow_tables
@@ -127,6 +129,7 @@ subroutine gdp_dealloc(gdp)
     if (associated(gdp%gddischarge%capacity)) deallocate (gdp%gddischarge%capacity, STAT = istat)
     deallocate (gdp%gddischarge, STAT = istat)
     deallocate (gdp%d          , STAT = istat)
+    deallocate (gdp%griddim    , STAT = istat)
     if (localdpmveg) then
        do i=1,gdp%gddpmveg%nveg
           if (associated(gdp%gddpmveg%vegs(i)%dia   )) deallocate (gdp%gddpmveg%vegs(i)%dia   , STAT = istat)
@@ -264,16 +267,17 @@ subroutine gdp_dealloc(gdp)
     deallocate (gdp%gddefsub, STAT = istat)
     call clrflwpar(istat, gdp)
     deallocate (gdp%gdflwpar, STAT = istat)
-    call clreqtran(istat, gdp)
+    !
     call clrerosed(istat, gdp)
-    call clrsedpar(istat, gdp)
-    call clrdredge(istat, gdp)
-    call clrmorpar(istat, gdp)
+    call clrsedpar(istat, gdp%gdsedpar)
+    call clrmorpar(istat, gdp%gdmorpar)
+    call clrtrapar(istat, gdp%gdtrapar)
     istat = clrmorlyr(gdp%gdmorlyr)
     deallocate (gdp%gdmorlyr , STAT = istat)
+    call clrdredge(istat, gdp)
     call cleartable(gdp%gddredge%tseriesfile)
     deallocate (gdp%gddredge , STAT = istat)
-    deallocate (gdp%gdeqtran , STAT = istat)
+    deallocate (gdp%gdtrapar , STAT = istat)
     deallocate (gdp%gderosed , STAT = istat)
     deallocate (gdp%gdsedpar , STAT = istat)
     deallocate (gdp%gdmorpar , STAT = istat)

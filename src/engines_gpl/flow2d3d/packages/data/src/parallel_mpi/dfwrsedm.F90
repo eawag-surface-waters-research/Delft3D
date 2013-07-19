@@ -1,7 +1,7 @@
 subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
                 & mmax      ,kmax      ,nmaxus    ,lsed      ,lsedtot   , &
                 & sbuu      ,sbvv      ,ssuu      ,ssvv      ,ws        , &
-                & rsedeq    ,dps       ,rca       ,gdp       )
+                & rsedeq    ,dps       ,rca       ,aks       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -123,6 +123,7 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 0:kmax, lsed), intent(in)  :: ws     !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lsed)  , intent(in)  :: rsedeq !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsed)        , intent(in)  :: rca    !  Description and declaration in esm_alloc_real.f90
+    real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsed)        , intent(in)  :: aks    !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsedtot)     , intent(in)  :: sbuu   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsedtot)     , intent(in)  :: sbvv   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, lsed)        , intent(in)  :: ssuu   !  Description and declaration in esm_alloc_real.f90
@@ -411,6 +412,12 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
             & 3         ,nmaxgl    ,mmaxgl    ,lsed      ,0         ,0     , &
             & lundia    ,gdp       )
        endif
+       if (moroutput%aks) then
+          call addelm(nefiswrsedm,'AKS',' ','[   M   ]','REAL',4            , &
+             & 'Near-bed reference concentration height'                    , &
+             & 3         ,nmaxgl    ,mmaxgl    ,lsed      ,0         ,0     , &
+             & lundia    ,gdp       )
+       endif
        call addelm(nefiswrsedm,'RCA',' ','[ KG/M3 ]','REAL',4            , &
           & 'Near-bed reference concentration of sediment'               , &
           & 3         ,nmaxgl    ,mmaxgl    ,lsed      ,0         ,0     , &
@@ -526,11 +533,11 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
     ! so every partition knows the dimensions and positions
     ! of the other partitions in the global domain
     !
-    call dfbroadc ( iarrc, 4*nproc, dfint, gdp )
-    call dfbroadc ( nf, nproc, dfint, gdp )
-    call dfbroadc ( nl, nproc, dfint, gdp )
-    call dfbroadc ( mf, nproc, dfint, gdp )
-    call dfbroadc ( ml, nproc, dfint, gdp )
+    call dfbroadc_gdp ( iarrc, 4*nproc, dfint, gdp )
+    call dfbroadc_gdp ( nf, nproc, dfint, gdp )
+    call dfbroadc_gdp ( nl, nproc, dfint, gdp )
+    call dfbroadc_gdp ( mf, nproc, dfint, gdp )
+    call dfbroadc_gdp ( ml, nproc, dfint, gdp )
     !    
     if (inode == master) then
        ierror = open_datdef(filnam   ,fds      )
@@ -1293,6 +1300,28 @@ subroutine dfwrsedm(lundia    ,error     ,trifil    ,itmapc    , &
        deallocate(rbuff4)
        if (inode == master) then
           ierror = putelt(fds, grnam5, 'SINKSE', uindex, 1, glbarr4)
+       endif
+       if (ierror/=0) goto 9999
+    endif
+    !
+    ! group 5: element 'AKS'
+    !
+    if (moroutput%aks) then
+       allocate( rbuff4(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, 1:lsed, 1) )
+       do l = 1, lsed
+          do m = 1, mmax
+             do n = 1, nmaxus
+                !
+                ! near-bed reference concentration of sediment
+                !
+                rbuff4(n, m, l, 1) = aks(n, m, l)
+             enddo
+          enddo
+       enddo
+       call dfgather(rbuff4,nf,nl,mf,ml,iarrc,gdp)
+       deallocate(rbuff4)
+       if (inode == master) then
+          ierror = putelt(fds, grnam5, 'AKS', uindex, 1, glbarr4)
        endif
        if (ierror/=0) goto 9999
     endif

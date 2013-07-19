@@ -39,9 +39,9 @@ subroutine bubfil(lundia    ,filbub    ,error     ,mmax      ,nmax      , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    !
     use globaldata
     use dfparall 
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -104,7 +104,6 @@ subroutine bubfil(lundia    ,filbub    ,error     ,mmax      ,nmax      , &
     integer, dimension(4)                       :: ival    ! Help array (integer) where the data, recently read from the MD-file, are stored temporarily 
     integer, dimension(:,:)       , allocatable :: itemp   ! work array to store mnksrc temporarily 
     integer, dimension(nsrc)                    :: nsd     ! integer array to store sequence number of arrays mnksrc and namsrc in own subdomain 
-    logical, external                           :: exifil
     real(fp)                                    :: rdef    ! Help var. containing default va- lue(s) for real variable 
     real(fp)                                    :: zbub    ! Help var. containing default va- lue(s) for real variable 
     real(fp)     , dimension(:)   , allocatable :: zbubltemp
@@ -141,7 +140,7 @@ subroutine bubfil(lundia    ,filbub    ,error     ,mmax      ,nmax      , &
     ! test file existence
     !
     call noextspaces(filbub, lfile)
-    error = .not.exifil(filbub(:lfile), lundia, 'G004', gdp)
+    error = .not.exifil(filbub, lundia)
     if (error) goto 9999
     !
     ! open formatted file, if not formatted IOCOND <> 0

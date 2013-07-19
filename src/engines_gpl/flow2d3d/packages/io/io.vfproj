@@ -53,8 +53,6 @@
 		<File RelativePath="src\input\ciofil.f90"/>
 		<File RelativePath="src\input\ck_dpopt.f90"/>
 		<File RelativePath="src\input\cmpnum.f90"/>
-		<File RelativePath="src\input\depfil.f90"/>
-		<File RelativePath="src\input\depfil_double.f90"/>
 		<File RelativePath="src\input\dimbch.f90"/>
 		<File RelativePath="src\input\dimbnd.f90"/>
 		<File RelativePath="src\input\dimbub.f90"/>
@@ -108,10 +106,6 @@
 		<File RelativePath="src\input\rdlaydis.f90"/>
 		<File RelativePath="src\input\rdmassbal.f90"/>
 		<File RelativePath="src\input\rdmeteo.f90"/>
-		<File RelativePath="src\input\rdmor.f90"/>
-		<File RelativePath="src\input\rdmor0.f90"/>
-		<File RelativePath="src\input\rdmor1.f90"/>
-		<File RelativePath="src\input\rdmorlyr.f90"/>
 		<File RelativePath="src\input\rdmud.f90"/>
 		<File RelativePath="src\input\rdnum.f90"/>
 		<File RelativePath="src\input\rdprfl.f90"/>
@@ -121,15 +115,11 @@
 		<File RelativePath="src\input\rdroll.f90"/>
 		<File RelativePath="src\input\rdrund.f90"/>
 		<File RelativePath="src\input\rdscour.f90"/>
-		<File RelativePath="src\input\rdsed.f90"/>
-		<File RelativePath="src\input\rdsed0.f90"/>
-		<File RelativePath="src\input\rdsed1.f90"/>
+		<File RelativePath=".\src\input\rdsedmortra.f90"/>
 		<File RelativePath="src\input\rdsite.f90"/>
 		<File RelativePath="src\input\rdspec.f90"/>
 		<File RelativePath="src\input\rdstru.f90"/>
 		<File RelativePath="src\input\rdtimo.f90"/>
-		<File RelativePath="src\input\rdtrafrm.f90"/>
-		<File RelativePath="src\input\rdtrafrm0.f90"/>
 		<File RelativePath="src\input\rdtrt.f90"/>
 		<File RelativePath="src\input\rdttar.f90"/>
 		<File RelativePath="src\input\rdusrc.f90"/>
@@ -210,7 +200,6 @@
 		<File RelativePath="src\output\updbnddps.f90"/>
 		<File RelativePath="src\output\uv2zeta.f90"/>
 		<File RelativePath="src\output\waq2flow.f90"/>
-		<File RelativePath="src\output\wavenr.f90"/>
 		<File RelativePath="src\output\wrboun.f90"/>
 		<File RelativePath="src\output\wrcomi.f90"/>
 		<File RelativePath="src\output\wrcomt.f90"/>

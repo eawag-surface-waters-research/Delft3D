@@ -39,6 +39,7 @@ subroutine grdfil(lundia    ,lungrd    ,error     ,filgrd    ,fmttmp    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -65,7 +66,6 @@ subroutine grdfil(lundia    ,lungrd    ,error     ,filgrd    ,fmttmp    , &
     integer                        :: m       ! Help var. 
     integer, external              :: newlun
     integer, dimension(2)          :: ival    ! Help array (int.) where the data, recently read from the MD-file, are stored temporarily 
-    logical, external              :: exifil
 !
 !
 !! executable statements -------------------------------------------------------
@@ -77,7 +77,7 @@ subroutine grdfil(lundia    ,lungrd    ,error     ,filgrd    ,fmttmp    , &
     !
     lfile = len(filgrd)
     !
-    if (exifil(filgrd(1:lfile), lundia, 'G004', gdp)) then
+    if (exifil(filgrd, lundia)) then
        luntmp = newlun(gdp)
        open (luntmp, file = filgrd(1:lfile), form = fmttmp, status = 'old')
        !

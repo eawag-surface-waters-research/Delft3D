@@ -29,11 +29,14 @@ function stringsequalinsens(string1, string2) result(retval)
 !  $HeadURL$
 !!--description-----------------------------------------------------------------
 !
-! NONE
+!  Subroutine obsolete; this routine will be removed.
+!  Use string_module routine strcmpi instead
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
+    use string_module
+    !
     implicit none
 !
 ! return value
@@ -45,55 +48,8 @@ function stringsequalinsens(string1, string2) result(retval)
 !
     character(*)                  , intent(in)  :: string1 ! incoming string1
     character(*)                  , intent(in)  :: string2 ! incoming string2
-!                                               
-! locals                                        
-!                                               
-    integer                                     :: len1    ! length of string1, without trailing blanks
-    integer                                     :: len2    ! length of string2, without trailing blanks
-    integer                                     :: lenmin  ! minimum of the two lengths
-    character(999) , dimension(:) , allocatable :: locstr1 ! copy of string1, to convert to lowercase
-    character(999) , dimension(:) , allocatable :: locstr2 ! copy of string2, to convert to lowercase
 !
 !! executable statements -------------------------------------------------------
 !
-    retval = .false.
-    len1   = len_trim(string1)
-    len2   = len_trim(string2)
-    lenmin = min(len1, len2)
-    !
-    ! Strings must be of the same length
-    !
-    if (len1 /= len2) then
-       retval = .false.
-       return
-    endif
-    !
-    ! Local copy of the strings needed
-    !
-    allocate (locstr1(1))
-    allocate (locstr2(1))
-    locstr1 = ' '
-    locstr2 = ' '
-    !
-    ! Strings will be compared upto lenmin
-    !
-    locstr1(1)(1:lenmin) = string1(1:lenmin)
-    call small(locstr1(1), lenmin)
-    !
-    locstr2(1)(1:lenmin) = string2(1:lenmin)
-    call small(locstr2(1), lenmin)
-    !
-    if (locstr1(1)(1:lenmin) == locstr2(1)(1:lenmin)) then
-       !
-       ! Strings are equal upto lenmin
-       !
-       retval = .true.
-    else
-       !
-       ! Strings are not equal
-       !
-       retval = .false.
-    endif
-    deallocate (locstr1)
-    deallocate (locstr2)
+    retval = strcmpi(string1, string2)
 end function stringsequalinsens

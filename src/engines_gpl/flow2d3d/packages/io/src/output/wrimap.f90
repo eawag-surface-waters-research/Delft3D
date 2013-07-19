@@ -582,11 +582,11 @@ subroutine wrimap(lundia      ,error     ,trifil    ,selmap    ,simdat    , &
        call dfsync(gdp)
        call dfgather_grddim(lundia, nfg, nlg, mfg, mlg, nmaxgl, mmaxgl, &
        &                 nf, nl, mf, ml, iarrc, lengl, lenlo, gdp )
-       call dfbroadc ( iarrc, 4*nproc, dfint, gdp )
-       call dfbroadc ( nf, nproc, dfint, gdp )
-       call dfbroadc ( nl, nproc, dfint, gdp )
-       call dfbroadc ( mf, nproc, dfint, gdp )
-       call dfbroadc ( ml, nproc, dfint, gdp )
+       call dfbroadc_gdp ( iarrc, 4*nproc, dfint, gdp )
+       call dfbroadc_gdp ( nf, nproc, dfint, gdp )
+       call dfbroadc_gdp ( nl, nproc, dfint, gdp )
+       call dfbroadc_gdp ( mf, nproc, dfint, gdp )
+       call dfbroadc_gdp ( ml, nproc, dfint, gdp )
        call dfsync(gdp)
     endif
     !

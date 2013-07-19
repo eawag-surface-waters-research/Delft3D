@@ -42,6 +42,7 @@ subroutine dryfil(lundia    ,lundry    ,error     ,fildry    ,fmttmp    , &
     use precision
     use dfparall
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -68,7 +69,6 @@ subroutine dryfil(lundia    ,lundry    ,error     ,fildry    ,fmttmp    , &
     integer               :: m      ! Help var. 
     integer, external     :: newlun
     integer, dimension(4) :: ival   ! Help array (int.) where the data, recently read from the MD-file, are stored temporarily 
-    logical, external     :: exifil
     logical               :: outsd  ! indicating whether all dry points are outside subdomain (.TRUE.) or not (.FALSE.)
     integer, pointer      :: mfg
     integer, pointer      :: nfg
@@ -81,7 +81,7 @@ subroutine dryfil(lundia    ,lundry    ,error     ,fildry    ,fmttmp    , &
     !
     lfile = len(fildry)
     !
-    if (exifil(fildry(1:lfile), lundia, 'G004', gdp)) then
+    if (exifil(fildry, lundia)) then
        luntmp = newlun(gdp)
        open (luntmp, file = fildry(1:lfile), form = fmttmp, status = 'old')
        !

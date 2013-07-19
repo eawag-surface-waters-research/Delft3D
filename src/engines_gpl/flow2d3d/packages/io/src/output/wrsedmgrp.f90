@@ -51,6 +51,7 @@ subroutine wrsedmgrp(lundia    ,error     ,trifil    ,itmapc    ,mmax      , &
     !
     include 'fsm.i'
     include 'tri-dyn.igd'
+    integer(pntrsize)                    , pointer :: aks
     integer(pntrsize)                    , pointer :: sbuu
     integer(pntrsize)                    , pointer :: sbvv
     integer(pntrsize)                    , pointer :: ssuu
@@ -155,7 +156,7 @@ subroutine wrsedmgrp(lundia    ,error     ,trifil    ,itmapc    ,mmax      , &
           call wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
                     & lsed      ,lsedtot   ,1         ,0         ,grnam5    , &
                     & r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   ,r(ws)     , &
-                    & r(rsedeq) ,d(dps)    ,r(rca)    ,gdp       )
+                    & r(rsedeq) ,d(dps)    ,r(rca)    ,r(aks)    ,gdp       )
        endif
        !
        ! Add bedform fields
@@ -221,7 +222,7 @@ subroutine wrsedmgrp(lundia    ,error     ,trifil    ,itmapc    ,mmax      , &
        call wrsedm(lundia    ,error     ,mmax      ,kmax      ,nmaxus    , &
                  & lsed      ,lsedtot   ,2         ,fds       ,grnam5    , &
                  & r(sbuu)   ,r(sbvv)   ,r(ssuu)   ,r(ssvv)   ,r(ws)     , &
-                 & r(rsedeq) ,d(dps)    ,r(rca)    ,gdp       )
+                 & r(rsedeq) ,d(dps)    ,r(rca)    ,r(aks)    ,gdp       )
        if (error) goto 9999
     endif
     !

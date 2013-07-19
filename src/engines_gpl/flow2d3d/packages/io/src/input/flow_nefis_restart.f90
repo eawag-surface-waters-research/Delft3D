@@ -533,11 +533,11 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     ! first scatter flags that are changed by the master
     ! (as ltur1, r1 etc) to all other domains!
     !
-    call dfbroadc ( rst_lstci, 1, dfint, gdp )
-    call dfbroadc ( rst_ltur, 1, dfint, gdp )
-    call dfbroadc ( lturi, 1, dfint, gdp )
-    call dfbroadc ( dp_from_map_file, 1, dfint, gdp )
-    call dfbroadc ( has_umean, 1, dfint, gdp)
+    call dfbroadc_gdp ( rst_lstci, 1, dfint, gdp )
+    call dfbroadc_gdp ( rst_ltur, 1, dfint, gdp )
+    call dfbroadc_gdp ( lturi, 1, dfint, gdp )
+    call dfbroadc_gdp ( dp_from_map_file, 1, dfint, gdp )
+    call dfbroadc_gdp ( has_umean, 1, dfint, gdp)
 
     call dfsync(gdp)
       
@@ -569,18 +569,18 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     ! scatter arrays s1 etc to all nodes. Note: the broadc must use 'dfreal'
     ! since the arrays are single precision! Otherwise, intractable memory errors will occur. 
     !
-    call dfbroadc ( s1_g, nmaxgl*mmaxgl, dfreal, gdp )   
-    if (dp_from_map_file) call dfbroadc ( dp_g, nmaxgl*mmaxgl, dfreal, gdp ) 
-    call dfbroadc ( u1_g, nmaxgl*mmaxgl*kmax, dfreal, gdp )
-    call dfbroadc ( v1_g, nmaxgl*mmaxgl*kmax, dfreal, gdp )
+    call dfbroadc_gdp ( s1_g, nmaxgl*mmaxgl, dfreal, gdp )   
+    if (dp_from_map_file) call dfbroadc_gdp ( dp_g, nmaxgl*mmaxgl, dfreal, gdp ) 
+    call dfbroadc_gdp ( u1_g, nmaxgl*mmaxgl*kmax, dfreal, gdp )
+    call dfbroadc_gdp ( v1_g, nmaxgl*mmaxgl*kmax, dfreal, gdp )
     if (has_umean /= 0) then
-       call dfbroadc ( umnldf_g, nmaxgl*mmaxgl, dfreal, gdp )
-       call dfbroadc ( vmnldf_g, nmaxgl*mmaxgl, dfreal, gdp )
+       call dfbroadc_gdp ( umnldf_g, nmaxgl*mmaxgl, dfreal, gdp )
+       call dfbroadc_gdp ( vmnldf_g, nmaxgl*mmaxgl, dfreal, gdp )
     endif
-    call dfbroadc ( kfu_g, nmaxgl*mmaxgl, dfint, gdp )
-    call dfbroadc ( kfv_g, nmaxgl*mmaxgl, dfint, gdp )
-    if (lstsci > 0 .and. lstsci  == rst_lstci) call dfbroadc ( r1_g, nmaxgl*mmaxgl*kmax*lstsci, dfreal, gdp )
-    if (ltur > 0  .and. ltur == rst_ltur )  call dfbroadc ( rtur1_g, nmaxgl*mmaxgl*(kmax+1)*ltur, dfreal, gdp )    
+    call dfbroadc_gdp ( kfu_g, nmaxgl*mmaxgl, dfint, gdp )
+    call dfbroadc_gdp ( kfv_g, nmaxgl*mmaxgl, dfint, gdp )
+    if (lstsci > 0 .and. lstsci  == rst_lstci) call dfbroadc_gdp ( r1_g, nmaxgl*mmaxgl*kmax*lstsci, dfreal, gdp )
+    if (ltur > 0  .and. ltur == rst_ltur )  call dfbroadc_gdp ( rtur1_g, nmaxgl*mmaxgl*(kmax+1)*ltur, dfreal, gdp )    
     !
     !
     ! 

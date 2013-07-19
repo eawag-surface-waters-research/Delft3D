@@ -45,8 +45,8 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 ! NONE
 !!--declarations----------------------------------------------------------------
     use precision
-    !
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -124,7 +124,6 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer, dimension(0:7)        :: ntpara  ! Total number of parameter records 
     integer, dimension(7)          :: npara   ! Number of parameter records 
     logical                        :: ex      ! Flag to test if file exists 
-    logical, external              :: exifil
     logical                        :: found   ! FOUND=TRUE if KEYW in the MD-file was found 
     logical                        :: lerror  ! Flag=TRUE if a local error is encountered 
     logical                        :: newkw   ! Logical var. specifying whether a new recnam should be read from the MD-file or just new data in the continuation line 
@@ -250,7 +249,7 @@ subroutine rdbcc(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           !
           ! Test file existence <YES> -> open file <NO> -> error
           !
-          if (exifil(filbcc(:lf), lundia, 'G004', gdp)) then
+          if (exifil(filbcc, lundia)) then
              if (nrver<=249) then
                 !
                 ! Open file only in case NRVER =< 249. Otherwise it will be

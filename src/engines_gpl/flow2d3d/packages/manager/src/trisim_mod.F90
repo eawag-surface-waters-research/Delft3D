@@ -245,7 +245,7 @@ integer function trisim_init(numdom, nummap, context_id, fsm_flags, runid_arg, o
     if (.not.parll .or. inode == master) then
        call tdatmain(runid, alone, subsys, filmrs, icheck, gdp) 
     endif
-    call dfbroadc(icheck, 1, dfint,gdp)
+    call dfbroadc_gdp(icheck, 1, dfint,gdp)
     call dfsync(gdp)
     if (icheck /= 0 ) then
        write (*, '(a)') 'ABORT: error returned by tdatmain'

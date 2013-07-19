@@ -37,8 +37,8 @@ subroutine dimtrt(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
 !!--declarations----------------------------------------------------------------
     use precision
     use properties
-    !
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -78,7 +78,6 @@ subroutine dimtrt(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
     integer                            , external :: newlun
     logical                                       :: lftrto
     logical                                       :: newkw
-    logical                            , external :: exifil
     real(fp)       , dimension(maxfld)            :: rfield
     character(10)  , dimension(maxfld)            :: cfield
     character(12)                                 :: fildef
@@ -135,7 +134,7 @@ subroutine dimtrt(lunmd     ,lundia    ,error     ,nrrec     ,gdp       )
     ! test file existence
     !
     call noextspaces(filtmp    ,lfile     )
-    if (.not.exifil(filtmp(1:lfile) ,lundia    ,'G004'    ,gdp)) then
+    if (.not.exifil(filtmp, lundia)) then
        !
        ! file does not exist !!
        !

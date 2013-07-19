@@ -168,7 +168,7 @@ subroutine dfdecomp ( lunmd, lundia, error, runid, gdp )
     !
     ! scatter array ICOM to all nodes
     !
-    call dfbroadc ( icom, nmtot, dfint, gdp )
+    call dfbroadc_gdp ( icom, nmtot, dfint, gdp )
     !
     ! carry out the partitioning of the computational grid using array ICOM
     !

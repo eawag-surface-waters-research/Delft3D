@@ -23,6 +23,12 @@ noinst_LTLIBRARIES = libDeltaresCommon.la
 #-------------------------------------------------------------------------------
 #Sources
 libDeltaresCommon_la_SOURCES = \
+         depfil.f90 \
+         depfil_double.f90 \
+         dfbroadc.f90 \
+         dfparall.f90 \
+         quickin_dep_file.f90 \
+         system_utils.F90 \
          precision_basics.F90 \
          precision.F90 \
          precision_sp.F90 \
@@ -32,10 +38,14 @@ libDeltaresCommon_la_SOURCES = \
          bilin5.f90 \
          combinepaths.f90 \
          deltares_common_version.F90 \
+         grid_dimens_module.f90 \
          distance.f90 \
          juldat.f90 \
          handles.f90 \
+         tables.f90 \
+         table_handles.f90 \
          malloc.f90 \
+         message_module.f90 \
          MessageHandling.f90 \
          nan_check_module.f90 \
          newunit.f90 \
@@ -44,11 +54,13 @@ libDeltaresCommon_la_SOURCES = \
          skipstarlines.f90 \
          small.f90 \
          stringsequal.f90 \
+         string_module.f90 \
          tables.f90 \
          table_handles.f90 \
+         time_module.f90 \
          timers.f \
-         util.f90
-
+         util.f90 \
+         wavenr.f90
 
 EXTRA_DIST = \
          deltares_common_version.F90.svn

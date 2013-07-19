@@ -38,6 +38,7 @@ subroutine initsafe(gdp)
     use sp_buffer
     use message_module
     use bedcomposition_module
+    use morphology_data_module
     !
     use globaldata
     !
@@ -64,7 +65,6 @@ subroutine initsafe(gdp)
     call initdefsub    (gdp)
     call initdpmveg    (gdp)
     call initdredge    (gdp)
-    call initeqtran    (gdp)
     call initerosed    (gdp)
     call initf0isf1    (gdp)
     call initflwpar    (gdp)
@@ -79,10 +79,11 @@ subroutine initsafe(gdp)
     call initincwav    (gdp)
     call initkeywtd    (gdp)
     call initmassbal   (gdp)
-    call initmorpar    (gdp)
-    call initsedpar    (gdp)
-    call initstack     (gdp%messages)
+    call initmorpar    (gdp%gdmorpar)
+    call initsedpar    (gdp%gdsedpar)
+    call inittrapar    (gdp%gdtrapar)
     istat = initmorlyr (gdp%gdmorlyr)
+    call initstack     (gdp%messages)
     call initpostpr    (gdp)
     call initrestart   (gdp)
     call initprocs     (gdp)

@@ -46,6 +46,7 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
     use precision
     use dfparall
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -84,7 +85,6 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
     integer           :: m       ! Help (loop) var. for M-index 
     integer           :: n       ! Help (loop) var. for N-index 
     integer, external :: newlun
-    logical, external :: exifil
     character(300)    :: message
     real(fp), dimension(:,:), allocatable :: tmp   ! Temporary array containing dicuv/vicuv of entire domain 
 !
@@ -104,7 +104,7 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
     !
     lfile = len(filedy)
     !
-    if (exifil(filedy, lundia, 'G004', gdp)) then
+    if (exifil(filedy, lundia)) then
        ! 
        ! allocate temporary array to store data of entire domain read from file 
        ! 
@@ -135,7 +135,7 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
              read (luntmp, *, iostat = iocond) ((tmp(n, m), m = 1, mmaxgl), n = 1, nmaxgl)
           endif
        endif
-       call dfbroadc(iocond, 1, dfint, gdp)
+       call dfbroadc_gdp(iocond, 1, dfint, gdp)
        if (iocond /= 0) then
           if (iocond < 0) then
              call prterr(lundia, 'G006', filedy(1:lfile))
@@ -145,7 +145,7 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
           error = .true.
           goto 200
        endif
-       call dfbroadc(tmp, mmaxgl*nmaxgl, dfloat, gdp)
+       call dfbroadc_gdp(tmp, mmaxgl*nmaxgl, dfloat, gdp)
        do m = mfg, mlg 
           do n = nfg, nlg 
              vicuv(n-nfg+1,m-mfg+1,kbg) = tmp(n,m) 
@@ -162,7 +162,7 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
                 read (luntmp, *, iostat = iocond) ((tmp(n, m), m = 1, mmaxgl), n = 1, nmaxgl)
              endif
           endif
-          call dfbroadc(iocond, 1, dfint, gdp)
+          call dfbroadc_gdp(iocond, 1, dfint, gdp)
           if (iocond /= 0) then
              if (iocond < 0) then
                 call prterr(lundia, 'G006', filedy(1:lfile))
@@ -171,7 +171,7 @@ subroutine edyfil(lundia    ,error     ,filedy    ,fmttmp    ,nmax      , &
              endif
              error = .true.
           endif
-          call dfbroadc(tmp, mmaxgl*nmaxgl, dfloat, gdp)
+          call dfbroadc_gdp(tmp, mmaxgl*nmaxgl, dfloat, gdp)
           do m = mfg, mlg 
              do n = nfg, nlg 
                 dicuv(n-nfg+1,m-mfg+1,kbg) = tmp(n,m)

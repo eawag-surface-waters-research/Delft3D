@@ -41,11 +41,11 @@ subroutine calksc(nmmax     ,itimtt    ,dps       ,s1        ,lsedtot   , &
 !!--declarations----------------------------------------------------------------
     use precision
     use mathconsts
+    use sediment_basics_module
     !
     use globaldata
     !
     implicit none
-    include "vanrijn.inc"
     !
     type(globdat),target :: gdp
     !

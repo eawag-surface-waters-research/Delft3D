@@ -44,8 +44,8 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
 !!--declarations----------------------------------------------------------------
     use precision
     use flow_tables
-    !
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -117,7 +117,6 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                     :: ntyp
     integer, external           :: newlun
     logical                     :: ex     ! Flag to test if file exists 
-    logical, external           :: exifil
     logical                     :: found  ! FOUND=TRUE if KEYW in the MD-file was found 
     logical                     :: lerror ! Flag=TRUE if a local error is encountered 
     logical                     :: newkw  ! Logical var. specifying whether a new recnam should be read from the MD-file or just new data in the continuation line 
@@ -256,7 +255,7 @@ subroutine rdbct(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           !
           ! test file existence <YES> -> open file <NO> -> error
           !
-          if ( exifil(filbct(:lf),lundia,'G004',gdp) ) then
+          if ( exifil(filbct, lundia) ) then
              if (nrver <= 249) then
                 !
                 ! Open file only in case NRVER =< 249. Otherwise it will be

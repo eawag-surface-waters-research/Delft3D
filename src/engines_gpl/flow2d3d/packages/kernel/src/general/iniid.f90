@@ -45,6 +45,7 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
     use dfparall
     !
     use globaldata
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -78,7 +79,6 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
     integer           :: nrec
     integer           :: pos               ! Help var. for adjusting runid 
     logical           :: ex                ! Help flag = TRUE when file is found 
-    logical, external :: exifil
     logical           :: found             ! Flag to see if MD file name is found
     logical           :: mdfile_ptr_isnull ! F: Contents of mdfile are already placed in gdp%mdfile_ptr
     logical           :: opend             ! Help flag = TRUE when file is still open (DELFT3D) 
@@ -120,12 +120,13 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
        ! Read RUN-id if runid = ' '
        !
        if (runid==' ') then
-          if (exifil(filid, lunscr, 'G003', gdp)) then
+          if (exifil(filid)) then
              lunid = newlun(gdp)
              open (lunid, file = filid, form = 'formatted', status = 'old')
              read (lunid, '(a)') runid
              close (lunid)
           else
+             call prterr(lunscr, 'G003')
              error = .true.
              goto 9999
           endif
@@ -316,7 +317,7 @@ subroutine iniid(error     ,soort     ,runid     ,filmd     ,filmrs    , &
        !
        ! Check file existence
        !
-       if (exifil(filmd(1:lfil), lunscr, 'G004', gdp)) then
+       if (exifil(filmd, lunscr)) then
           inquire (file = filmd(1:lfil), opened = opend)
           if (opend) then
              inquire (file = filmd(1:lfil), number = luntmp)

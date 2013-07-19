@@ -30,8 +30,8 @@
 // Stichting Deltares. All rights reserved.
 //
 //------------------------------------------------------------------------------
-// $Id:$
-// $HeadURL:$
+// $Id$
+// $HeadURL$
 
 
 #include "DelftOnline.h"

@@ -41,6 +41,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
     use precision
     use globaldata
     use dfparall
+    use system_utils, only: exifil
     !
     implicit none
     !
@@ -102,7 +103,6 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
     integer, dimension(maxfld)       :: ifield
     integer, dimension(maxfld)       :: itype
     integer, dimension(maxfld)       :: lenchr 
-    logical, external                :: exifil
     logical                          :: outside              ! indicating whether a line of thin dams is outside subdomain (.TRUE.) or not (.FALSE.)
     real(fp)                         :: brlosc               ! Barrier energy loss coefficient 
     real(fp)                         :: gate                 ! Initial gate height for barrier 
@@ -132,7 +132,7 @@ subroutine barfil(lundia    ,filbar    ,error     ,mmax      ,nmax      , &
     ! test file existence
     !
     call noextspaces(filbar    ,lfile     )
-    error = .not.exifil(filbar(:lfile), lundia, 'G004', gdp)
+    error = .not.exifil(filbar, lundia)
     if (error) goto 9999
     !
     ! open formatted file, if not formatted IOCOND <> 0

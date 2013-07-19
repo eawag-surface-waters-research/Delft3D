@@ -1991,7 +1991,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                  & r(taubmx) ,r(s1)     ,r(uorb)   ,r(tp)     ,r(sigdif) , &
                  & lstsci    ,r(thick)  ,r(dicww)  ,i(kmxsed) ,i(kcs)    , &
                  & i(kcu)    ,i(kcv)    ,r(guv)    ,r(gvu)    ,r(sbuu)   , &
-                 & r(sbvv)   ,r(seddif) ,r(hrms)   ,r(dis)    ,ltur      , &
+                 & r(sbvv)   ,r(seddif) ,r(hrms)   ,ltur      , &
                  & r(teta)   ,r(rlabda) ,r(aks)    ,i(kfsed)  ,saleqs    , &
                  & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &
                  & r(hv)     ,r(rca)    ,r(dss)    ,r(ubot)   ,r(rtur0)  , &
@@ -3056,7 +3056,7 @@ subroutine trisol(dischy    ,solver    ,icreep    ,ithisc    , &
                     & r(taubmx) ,r(s1)     ,r(uorb)   ,r(tp)     ,r(sigdif) , &
                     & lstsci    ,r(thick)  ,r(dicww)  ,i(kmxsed) ,i(kcs)    , &
                     & i(kcu)    ,i(kcv)    ,r(guv)    ,r(gvu)    ,r(sbuu)   , &
-                    & r(sbvv)   ,r(seddif) ,r(hrms)   ,r(dis)    ,ltur      , &
+                    & r(sbvv)   ,r(seddif) ,r(hrms)   ,ltur      , &
                     & r(teta)   ,r(rlabda) ,r(aks)    ,i(kfsed)  ,saleqs    , &
                     & r(wrka14) ,r(wrka15) ,r(entr)   ,r(wstau)  ,r(hu)     , &
                     & r(hv)     ,r(rca)    ,r(dss)    ,r(ubot)   ,r(rtur0)  , &
