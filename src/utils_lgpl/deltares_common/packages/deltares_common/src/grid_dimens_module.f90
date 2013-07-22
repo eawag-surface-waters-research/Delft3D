@@ -148,7 +148,7 @@ type griddimtype
     integer :: nlg    ! global n index corresponding to local n index nmaxus
     integer :: nmaxgl ! global maximum n index as known to user
     !
-    integer, dimension(:,:), pointer :: aggrtable
+    integer, dimension(:,:), pointer :: aggrtable => null()
 end type griddimtype
 
 contains

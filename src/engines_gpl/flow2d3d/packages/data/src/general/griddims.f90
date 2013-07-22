@@ -133,4 +133,6 @@ subroutine griddims( gdp )
     gdp%griddim%nfg    = gdp%gdparall%nfg
     gdp%griddim%nlg    = gdp%gdparall%nlg
     gdp%griddim%nmaxgl = gdp%gdparall%nmaxgl
+    !
+    gdp%griddim%aggrtable => null()
 end subroutine griddims
