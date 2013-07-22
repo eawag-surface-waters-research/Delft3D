@@ -70,6 +70,7 @@ subroutine dimsedconst(lundia    ,error     ,sedim     ,const     , &
     character(6)                                           :: keyword
     character(20)                                          :: versionstring
     character(20)                                          :: namc          ! Name of a constituent as read from md-file
+    character(20)                                          :: nami          ! Default name of sediment fraction i
     character(20)                                          :: tmpnam        ! Temporary storage for name of sediment fraction
     character(20)   , dimension(:) , allocatable           :: namconst      ! Names of the constituents as read in md-file
     character(20)                                          :: sedtyptmp     ! Sediment type in sed-file
@@ -153,8 +154,16 @@ subroutine dimsedconst(lundia    ,error     ,sedim     ,const     , &
     !
     ! verify that the first lsed constituent names match the lsed suspended sediment fractions
     !
-    do i = 1, min(lconst,lsed)
+    if (lsed>lconst) then
+       message = 'Number of suspended sediment fractions should not be greater than the number of constituents.'
+       call write_error(message, unit=lundia)
+       error = .true.
+       return
+    endif
+    !
+    do i = 1,lsed
        namc = namconst(i)
+       write(nami,'(a,1i0)') 'sed.fraction ',i
        found = .false.
        j = i-1
        do while (.not.found .and. j<lsed)
@@ -182,20 +191,19 @@ subroutine dimsedconst(lundia    ,error     ,sedim     ,const     , &
              namsed(j) = tmpnam
              sedtyp(j) = tmptyp
           endif
+       elseif (strcmpi(namsed(i),nami)) then
+           !
+           ! automatic name in case version 0 or 1 .sed files, adopt the name of the constituent as specified in the .mdf file
+           !
+           namsed(i) = namc
        else
-          write(message,*) 'Names of first ',lsed,' constituents should match the names of the suspended sediment fractions'
+          write(message,'(A,I0,A)') 'Names of first ',lsed,' constituent(s) should match the names of the suspended sediment fractions'
           call write_error(message, unit=lundia)
-          write(message,*) 'Name of constituent ',i,' (',trim(namc),') does not match name of any suspended sediment fraction'
+          write(message,'(A,I0,3A)') 'Name of constituent ',i,' (',trim(namc),') does not match name of any suspended sediment fraction'
           call write_error(message, unit=lundia)
           error = .true.
           return
        endif
     enddo
     !
-    if (lsed>lconst) then
-       message = 'Suspended sediment fraction '//trim(namsed(lconst+1))//' does not match any constituent'
-       call write_error(message, unit=lundia)
-       error = .true.
-       return
-    endif
 end subroutine dimsedconst

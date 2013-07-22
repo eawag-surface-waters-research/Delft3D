@@ -236,7 +236,7 @@ subroutine tram1 (numrealpar,realpar   ,wave      ,par       ,kmax      , &
        deltas = 3.0_fp*delr
        deltas = min(max(0.05_fp, deltas), 0.2_fp)
        epsbed = 0.004_fp * dstar * deltas * uwb
-       epsmax = 0.035_fp * gambr * h1 * hs / tp
+       epsmax = 0.035_fp * h1 * hs / tp
     else
        deltas = 0.05_fp
        epsbed = 0.0_fp

@@ -108,6 +108,7 @@ subroutine wrsedmgrp(lundia    ,error     ,trifil    ,itmapc    ,mmax      , &
     morft               => gdp%gdmorpar%morft
     morfac              => gdp%gdmorpar%morfac
     lfbedfrmout         => gdp%gdbedformpar%lfbedfrmout
+    aks                 => gdp%gdr_i_ch%aks
     sbuu                => gdp%gdr_i_ch%sbuu
     sbvv                => gdp%gdr_i_ch%sbvv
     ssuu                => gdp%gdr_i_ch%ssuu

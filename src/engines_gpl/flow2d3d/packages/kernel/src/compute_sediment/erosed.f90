@@ -1006,6 +1006,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                 wslc(k)   = ws(nm, k, l)
              enddo
              !
+             kmaxsd = kmax ! for mud fractions kmaxsd points to the grid cell at the bottom of the water column
              thick0        = thick(kmaxsd) * h0
              thick1        = thick(kmaxsd) * h1
              call erosilt(thick       ,kmax        ,wslc        ,lundia      , &
