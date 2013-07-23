@@ -45,16 +45,6 @@ public datetime2sec
 public sec2ddhhmmss
 public ymd2jul
 public jul2ymd
-!
-! functions and subroutines
-!
-public string_module_info
-public str_token
-public str_lower
-public str_upper
-public strcmpi
-public remove_leading_spaces
-public remove_all_spaces
 
 contains
 
