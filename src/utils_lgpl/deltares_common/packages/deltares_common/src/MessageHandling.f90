@@ -1,28 +1,28 @@
 !----- LGPL --------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2013.                                
-!                                                                               
-!  This library is free software; you can redistribute it and/or                
-!  modify it under the terms of the GNU Lesser General Public                   
-!  License as published by the Free Software Foundation version 2.1.                 
-!                                                                               
-!  This library is distributed in the hope that it will be useful,              
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-!  Lesser General Public License for more details.                              
-!                                                                               
-!  You should have received a copy of the GNU Lesser General Public             
-!  License along with this library; if not, see <http://www.gnu.org/licenses/>. 
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D" and "Deltares"    
-!  are registered trademarks of Stichting Deltares, and remain the property of  
-!  Stichting Deltares. All rights reserved.                                     
-!                                                                               
+!
+!  Copyright (C)  Stichting Deltares, 2011-2013.
+!
+!  This library is free software; you can redistribute it and/or
+!  modify it under the terms of the GNU Lesser General Public
+!  License as published by the Free Software Foundation version 2.1.
+!
+!  This library is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+!  Lesser General Public License for more details.
+!
+!  You should have received a copy of the GNU Lesser General Public
+!  License along with this library; if not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"
+!  are registered trademarks of Stichting Deltares, and remain the property of
+!  Stichting Deltares. All rights reserved.
+!
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
@@ -35,6 +35,15 @@ module MHCallBack
       subroutine mh_callbackiface(level)
          integer, intent(in) :: level !< The severity level
       end subroutine mh_callbackiface
+   end interface
+
+   abstract interface
+      subroutine c_callbackiface(level, msg)
+        use iso_c_binding
+        use iso_c_utils
+        integer(c_int), intent(in) :: level !< severity
+        character(c_char), intent(in) :: msg(MAXSTRINGLEN) !< c message null terminated
+      end subroutine c_callbackiface
    end interface
 end module MHCallBack
 
@@ -62,7 +71,8 @@ module MessageHandling
    public resetMessageCount_MH
    public getMaxErrorLevel
    public resetMaxerrorLevel
-
+   public set_mh_c_callback
+   public set_mh_callback
 
    integer,parameter, public     :: LEVEL_DEBUG = 1
    integer,parameter, public     :: LEVEL_INFO  = 2
@@ -80,7 +90,7 @@ module MessageHandling
                                                                            '** FATAL  : '/)
    character(len=12), public              :: space12 = ' '
    integer, dimension(max_level), public  :: mess_level_count
-   
+
    interface mess
    module procedure message1string
    module procedure message2string
@@ -97,7 +107,7 @@ module MessageHandling
    module procedure message1char1int1double
    module procedure message1double1int1char
    end interface
-    
+
    interface err
    module procedure error1char
    module procedure error2char
@@ -112,19 +122,20 @@ module MessageHandling
    module procedure error1char1int1double
    end interface
 
-private   
+private
    integer, parameter, private   :: maxMessages = 3000
    character(len=256), dimension(maxMessages), private :: Messages
    integer           , dimension(maxMessages), private :: Levels
-   integer                                   , private :: messagecount 
-   integer                                   , private :: maxErrorLevel = 0 
-   integer                                   , public  :: thresholdLvl = 0 
+   integer                                   , private :: messagecount
+   integer                                   , private :: maxErrorLevel = 0
+   integer                                   , public  :: thresholdLvl = 0
    integer, save                  :: lunMess          = 0
    logical, save                  :: writeMessage2Screen = .false.
    logical, save                  :: useLogging = .true.
    logical, save                  :: alreadyInCallback=.false.                   !< flag for preventing recursive calls to callback subroutine
    !> Callback routine invoked upon any mess/err (i.e. SetMessage)
    procedure(mh_callbackiface), pointer :: mh_callback => null()
+   procedure(c_callbackiface), pointer :: c_callback => null()
 
 contains
 
@@ -154,16 +165,37 @@ subroutine SetMessageHandling(write2screen, useLog, lunMessages, callback, thres
    endif
 
    alreadyInCallback = .false.
-   
+
 end subroutine SetMessageHandling
+
+subroutine set_mh_callback(callback)
+  procedure(mh_callbackiface) :: callback
+  mh_callback => callback
+end subroutine set_mh_callback
+
+
+subroutine set_mh_c_callback(callback)
+  use iso_c_binding
+  procedure(c_callbackiface) :: callback
+
+  ! TODO check if we need cptr2fptr
+  c_callback => callback
+end subroutine set_mh_c_callback
 
 !> The main message routine. Puts the message string to all output
 !! channels previously set up by SetMessageHandling
 recursive subroutine SetMessage(level, string)
-   integer, intent(in)           :: level  !< One of: LEVEL_(DEBUG|INFO|WARN|ERROR|FATAL).
-   character(len=*), intent(in)  :: string !< Complete message string.
+  use iso_c_binding
+  use iso_c_utils
 
-   integer :: levelact
+
+  integer, intent(in)           :: level  !< One of: LEVEL_(DEBUG|INFO|WARN|ERROR|FATAL).
+  character(len=*), intent(in)  :: string !< Complete message string.
+  character(c_char)             :: c_string(MAXSTRINGLEN)
+
+  integer :: levelact
+
+
    levelact = max(1,min(max_level, level))
 
    if (level >= thresholdLvl) then
@@ -171,22 +203,22 @@ recursive subroutine SetMessage(level, string)
       if (writeMessage2Screen) then
          write (*, '(a)') level_prefix(levelact)//trim(string)
       endif
-      
+
       if (lunMess > 0) then
-         
+
          write (lunMess, '(a)') level_prefix(levelact)//trim(string)
-         
+
          ! Only count for Log-File, otherwise confusing.....
          mess_level_count(levelact) = mess_level_count(levelact) + 1
-         
+
       end if
 
       if (level > maxErrorLevel) then
          maxErrorLevel = level
       endif
-      
+
       if (useLogging) then
-         messageCount           = messageCount + 1 
+         messageCount           = messageCount + 1
          if (messageCount > maxMessages) then
             messages(maxMessages) = 'Maximum number of messages reached'
             levels(maxMessages)   = level
@@ -196,34 +228,41 @@ recursive subroutine SetMessage(level, string)
             levels(messageCount)   = level
          endif
       endif
- 
+
    elseif (level < 0) then
-      
+
       ! If negative level just put string to all output channels without prefix and counting
       if (writeMessage2Screen) then
          write (*, '(a)') trim(string)
       endif
-      
+
       if (lunMess > 0) then
          write (lunMess, '(a)') trim(string)
       end if
-   
+
    endif
-   
-   ! Optional callback routine for any user-specified actions (e.g., upon error)   
+
+   ! Optional callback routine for any user-specified actions (e.g., upon error)
    if (associated(mh_callback).and. .not. alreadyInCallback) then
       alreadyInCallback = .true.
       call mh_callback(level) !In future, possibly also error #ID
       alreadyInCallback = .false.
    end if
 
-end subroutine
+   if (associated(c_callback).and. .not. alreadyInCallback) then
+      alreadyInCallback = .true.
+      c_string = string_to_char_array(trim(string), len(trim(string)))
+      call c_callback(level, c_string)
+      alreadyInCallback = .false.
+   end if
+
+ end subroutine SetMessage
 
 integer function getMessageCount()
    getMessageCount = messagecount
 end function
 
-integer function GetMessage_MH(imessage, message) 
+integer function GetMessage_MH(imessage, message)
    character(len=200)               :: message
    integer, intent(in)              :: imessage
 
@@ -254,7 +293,7 @@ subroutine message1string(level, w1)
     rec = ' '
     l1 = max(1, len_trim(w1))
     write (rec(1:), '(a)') w1(:l1)
-    
+
     call setMessage(level, rec)
 end subroutine message1string
 
@@ -270,7 +309,7 @@ subroutine message2string(level, w1, w2)
     l2 = max(1, len_trim(w2))
     write (rec(1:), '(a)') w1(:l1)
     write (rec(2 + l1:), '(a)') w2(:l2)
-    
+
     call SetMessage(level, rec)
 end subroutine message2string
 
@@ -288,7 +327,7 @@ subroutine message3string(level, w1, w2, w3)
     write (rec(1:), '(a)') w1(1:l1)
     write (rec(2 + l1:), '(a)') w2(1:l2)
     write (rec(3 + l1 + l2:), '(a)') w3(1:l3)
-    
+
     call SetMessage(level, rec)
  end subroutine message3string
 
@@ -308,7 +347,7 @@ subroutine message4string(level, w1, w2, w3, w4)
     write (rec(2 + l1:), '(a)') w2(:l2)
     write (rec(3 + l1 + l2:), '(a)') w3(:l3)
     write (rec(4 + l1 + l2 + l3:), '(a)') w4(:l4)
-    
+
     call SetMessage(level, rec)
 end subroutine message4string
 
@@ -328,7 +367,7 @@ subroutine message2char1real(level, w1, w2, r3)
     write (rec(1:), '(a)') w1(:l1)
     write (rec(2 + l1:), '(a)') w2(:l2)
     write (rec(3 + l1 + l2:), '(f14.6)') r3
-    
+
     call SetMessage(level, rec)
 end subroutine message2char1real
 
@@ -347,7 +386,7 @@ subroutine message2char2real(level, w1, w2, r3, r4)
     write (rec(1:), '(a)') w1(:l1)
     write (rec(2 + l1:), '(a)') w2(:l2)
     write (rec(3 + l1 + l2:), '(2f14.6)') r3, r4
-    
+
     call SetMessage(level, rec)
 end subroutine message2char2real
 
@@ -364,7 +403,7 @@ subroutine message1char1real(level, w1, r2)
     l1 = max(1, len_trim(w1))
     write (rec(1:), '(a)') w1(:l1)
     write (rec(2 + l1:), '(F14.6)') r2
-    
+
     call SetMessage(level, rec)
 end subroutine message1char1real
 
@@ -381,7 +420,7 @@ subroutine message1char1int(level, w1, i2)
     l1 = max(1, len_trim(w1))
     write (rec(1:), '(a)') w1(:l1)
     write (rec(2 + l1:), '(I14)') i2
-    
+
     call SetMessage(level, rec)
 end subroutine message1char1int
 
@@ -398,7 +437,7 @@ subroutine message1char2int(level, w1, i2, i3)
     l1 = max(1, len_trim(w1))
     write (rec(1:), '(a)') w1(:l1)
     write (rec(2 + l1:), '(2I14)') i2, i3
-    
+
     call SetMessage(level, rec)
 
 end subroutine message1char2int
@@ -417,7 +456,7 @@ subroutine message2int1char(level, i1, i2, w3)
     write (rec( 1:28), '(2I14)') i1, i2
     write (rec(30:)  , '(a)'   ) w3(:l3)
 
-    
+
     call SetMessage(level, rec)
 
 end subroutine message2int1char
@@ -434,7 +473,7 @@ subroutine message1char3int(level, w1, i2, i3, i4)
     l1 = max(1, len_trim(w1))
     write (rec(1:), '(a)') w1(:l1)
     write (rec(2 + l1:), '(3I14)') i2, i3, i4
-    
+
     call SetMessage(level, rec)
 end subroutine message1char3int
 
