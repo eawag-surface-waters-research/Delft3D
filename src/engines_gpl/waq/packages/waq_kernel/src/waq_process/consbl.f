@@ -298,9 +298,9 @@ c     Input items (potentially) dependent on space
       DEPTH  = PMSA(IP(4))
       DO 30 IFILSP = 1,NTOGRZ
        if (active_grazer(ifilsp)) then
-        GRZNEW(IFILSP) = MAX(PMSA(IP(6+(IFILSP-1)*NINGRZ)),1.0E-20) *
+        GRZNEW(IFILSP) = MAX(PMSA(IP(6+(IFILSP-1)*NINGRZ)),1.0E-2) *
      1                   GRZML(IFILSP)
-        GRZOLD(IFILSP) = MAX(PMSA(IP(7+(IFILSP-1)*NINGRZ)),1.0E-20) *
+        GRZOLD(IFILSP) = MAX(PMSA(IP(7+(IFILSP-1)*NINGRZ)),1.0E-2) *
      1                   GRZML(IFILSP)
 c       Correct unit of input concentration for zoobenthos
 c       Force concentration zero for zoobenthos segments without bottom
