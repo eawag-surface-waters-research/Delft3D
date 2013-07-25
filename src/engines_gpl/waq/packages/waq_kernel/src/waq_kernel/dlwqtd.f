@@ -72,6 +72,7 @@ C     FLOW    REAL    NOQ+NOQ4    IN/OUT  Exchange flows
 C     ALENG   REAL   2,NOQ+NOQ4   IN/OUT  Diffusion lengthes
 C
 C
+      use grids
       use timers
 
       INTEGER              LUN(*), IGREF(NOGRID), IGSEG(NOSEG,NOGRID),
@@ -84,22 +85,13 @@ C
      *                     FUNAME(NOFUN ), SFNAME(NOSFUN)
 C
       LOGICAL              LGET
+      logical           :: first_q_column
       REAL, Allocatable :: Horsurf(:), Thickn(:)
       CHARACTER*20         CTAG
       integer(4) ithandl /0/
       if ( timon ) call timstrt ( "dlwqtd", ithandl )
 C
       NOSSS = NOSEG + NSEG2
-C
-C     Find the bottomgrid
-C
-cgrd  do igrd = 1, nogrid
-c        nblay = -igref(igrd)
-c        ibgrd =  igrd
-c        if ( nblay .gt. 0 ) goto 10
-c     enddo
-c     write ( lun(19) , * ) ' ERROR: Bottomgrid not found !'
-cgrd  call srstop(1)
 c
 c     Set up the horizontal surfaces
 c
@@ -114,24 +106,47 @@ c
          write ( lun(19) , * ) ' ERROR: Variabele SURF not found !'
          call srstop(1)
       endif
-cgrd  nbseg = nseg2/nblay
-c     if ( nbseg*nblay .ne. nseg2 ) then
-c        write ( lun(19) , * ) ' ERROR: Inconsistent bottom !'
-c        call srstop(1)
-c     endif
-c     do iseg = 1, noseg/nolay
-c        hs = Horsurf(iseg)
-c        ip = igseg(iseg,ibgrd)
-c        do ilay = 1, nblay
-c           Horsurf(noseg+ip) = Horsurf(noseg+ip) + hs
-c           ip = ip + nbseg
-c        enddo
-c     enddo
-c     LGET = .false.
-c     CALL VALUES ( CTAG   , NOSSS  , Horsurf, NOCONS , NOPA   ,
-c    *              NOFUN  , NOSFUN , CONST  , CONAME , PARAM  ,
-c    *              PANAME , FUNCS  , FUNAME , SFUNCS , SFNAME ,
-cgrd *              LGET   , IERR   )
+
+      ! set surface of the first layer of sediment bed
+
+      horsurf(noseg+1:nosss) = 0.0
+      first_q_column = .true.
+      do iq = 1 , noq4
+         if ( first_q_column ) then
+            if ( ipoint(1,noq+iq) .le. noseg ) then
+               if ( ipoint(2,noq+iq) .gt. 0 ) then
+                  horsurf(ipoint(2,noq+iq)) = horsurf(ipoint(2,noq+iq)) + horsurf(ipoint(1,noq+iq))
+               endif
+            endif
+         endif
+         if ( ipoint(2,noq+iq) .lt. 0 ) then
+            first_q_column = .not. first_q_column
+         endif
+      enddo
+
+      ! set surface of the rest of the sediment layers
+
+      first_q_column = .true.
+      do iq = 1 , noq4
+         if ( first_q_column ) then
+            if ( ipoint(1,noq+iq) .gt. noseg ) then
+               if ( ipoint(2,noq+iq) .gt. 0 ) then
+                  horsurf(ipoint(2,noq+iq)) = horsurf(ipoint(2,noq+iq)) + horsurf(ipoint(1,noq+iq))
+               endif
+            endif
+         endif
+         if ( ipoint(2,noq+iq) .lt. 0 ) then
+            first_q_column = .not. first_q_column
+         endif
+      enddo
+
+      ! store the surface areas
+
+      LGET = .false.
+      CALL VALUES ( CTAG   , NOSSS  , Horsurf, NOCONS , NOPA   ,
+     *              NOFUN  , NOSFUN , CONST  , CONAME , PARAM  ,
+     *              PANAME , FUNCS  , FUNAME , SFUNCS , SFNAME ,
+     *              LGET   , IERR   )
 C
 C        Expand the volumes
 C
