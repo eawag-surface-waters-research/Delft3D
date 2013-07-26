@@ -89,6 +89,9 @@
    10    continue
          nmnoag = nmnoag - 1
          close (67)
+      else
+         nmnoag = 1
+         monoag(1) = 'TOTDEPTH'
       endif
 
       ! first step, processes with fluxes set to the grid set for the
