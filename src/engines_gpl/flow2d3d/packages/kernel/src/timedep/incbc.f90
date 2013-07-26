@@ -417,7 +417,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        !
        qtfrct_global = 0.0_fp
        call dfgather_filter(lundia, nto, nobcto, nobcgl, gdp%gdbcdat%bct_order, cwidth, qtfrct_global, gdp, sum_elements)
-       call dfbroadc(qtfrct_global, nobcgl, dfloat, gdp)
+       call dfbroadc_gdp(qtfrct_global, nobcgl, dfloat, gdp)
        do n1 = 1, nto
           if(typbnd(n1) == 'T') then
              cwidth(n1) = qtfrct_global(gdp%gdbcdat%bct_order(n1))
@@ -428,7 +428,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        !
        qtfrct_global = 0.0_fp
        call dfgather_filter(lundia, nto, nobcto, nobcgl, gdp%gdbcdat%bct_order, qtfrct, qtfrct_global, gdp, sum_elements)
-       call dfbroadc(qtfrct_global, nobcgl, dfloat, gdp)
+       call dfbroadc_gdp(qtfrct_global, nobcgl, dfloat, gdp)
        do n1 = 1, nto
           if(typbnd(n1) == 'T') then
              qtfrct(n1) = qtfrct_global(gdp%gdbcdat%bct_order(n1))
@@ -620,7 +620,7 @@ subroutine incbc(lundia    ,timnow    ,zmodel    ,nmax      ,mmax      , &
        endif
        qtfrct_global = 0.0_fp
        call dfgather_filter(lundia, nto, nobcto, nobcgl, gdp%gdbcdat%bct_order, qtfrct, qtfrct_global, gdp, sum_elements)
-       call dfbroadc(qtfrct_global, nobcgl, dfloat, gdp)
+       call dfbroadc_gdp(qtfrct_global, nobcgl, dfloat, gdp)
        do n1 = 1, nto
           if(typbnd(n1)=='T') then
              qtfrct(n1) = qtfrct_global(gdp%gdbcdat%bct_order(n1))

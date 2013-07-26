@@ -150,7 +150,7 @@ subroutine ciofil(lundia    ,error     ,filcio    ,mmax      ,nmax      , &
        ! 
        ! check whether something went wrong with reading file 
        ! 
-       call dfbroadc ( iocond, 1, dfint, gdp ) 
+       call dfbroadc_gdp ( iocond, 1, dfint, gdp ) 
        ! 
        if (iocond/=0) then 
           if (iocond<0) then 
@@ -165,7 +165,7 @@ subroutine ciofil(lundia    ,error     ,filcio    ,mmax      ,nmax      , &
           ! 
           ! scatter array ftmp to all nodes 
           ! 
-          call dfbroadc ( ftmp, nmaxgl*mmaxgl, dfloat, gdp ) 
+          call dfbroadc_gdp ( ftmp, nmaxgl*mmaxgl, dfloat, gdp ) 
           ! 
           ! put copies of parts of fcorio for each subdomain 
           ! 
