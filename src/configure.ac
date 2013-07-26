@@ -321,8 +321,8 @@ engines_gpl/flow2d3d/packages/kernel_dd_f/src/Makefile
 engines_gpl/flow2d3d/packages/Makefile
 engines_gpl/flow2d3d/packages/manager/Makefile
 engines_gpl/flow2d3d/packages/manager/src/Makefile
-engines_gpl/flow2d3d/packages/plugin_3dmortrafrm_c/Makefile
-engines_gpl/flow2d3d/packages/plugin_3dmortrafrm_c/src/Makefile
+engines_gpl/flow2d3d/packages/plugin_culvert_c/Makefile
+engines_gpl/flow2d3d/packages/plugin_culvert_c/src/Makefile
 engines_gpl/flow2d3d/packages/plugin_user/Makefile
 engines_gpl/flow2d3d/packages/plugin_user/src/Makefile
 engines_gpl/Makefile
@@ -457,6 +457,15 @@ tools_gpl/waq_run_processes/packages/waq_run_processes/Makefile
 tools_gpl/waq_run_processes/packages/waq_run_processes/src/Makefile
 tools_gpl/waq_run_processes/packages/waq_run_processes_version_number/Makefile
 tools_gpl/waq_run_processes/packages/waq_run_processes_version_number/src/Makefile
+utils_gpl/Makefile
+utils_gpl/morphology/Makefile
+utils_gpl/morphology/packages/Makefile
+utils_gpl/morphology/packages/morphology_io/Makefile
+utils_gpl/morphology/packages/morphology_io/src/Makefile
+utils_gpl/morphology/packages/morphology_kernel/Makefile
+utils_gpl/morphology/packages/morphology_kernel/src/Makefile
+utils_gpl/morphology/packages/morphology_plugins_c/Makefile
+utils_gpl/morphology/packages/morphology_plugins_c/src/Makefile
 utils_lgpl/d_hydro_lib/Makefile
 utils_lgpl/d_hydro_lib/packages/d_hydro_lib/Makefile
 utils_lgpl/d_hydro_lib/packages/d_hydro_lib/src/Makefile

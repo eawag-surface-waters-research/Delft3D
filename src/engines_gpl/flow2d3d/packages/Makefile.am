@@ -2,7 +2,7 @@ include $(top_srcdir)/common.am
 
 SUBDIRS = \
      data \
-     plugin_3dmortrafrm_c \
+     plugin_culvert_c \
      plugin_user \
      io_dol_f \
      io \

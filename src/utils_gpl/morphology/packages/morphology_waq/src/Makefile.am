@@ -24,9 +24,11 @@ FMODULES += \
 #Sources
 libMorphologyWaq_la_SOURCES = \
          waqmor_module.f90 \
+         waqsim_module.f90 \
          wrwaqfil1d.f90 \
          wrwaq.f90 \
-         waqlib.f90
+         waqlib.f90 \
+         waqdata.f90
 
 #-------------------------------------------------------------------------------
 #Libraries
