@@ -90,7 +90,7 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
     integer         , external :: newlun
     logical                    :: ex           ! Help flag = TRUE when file is found
     character(10)              :: date        ! Date to be filled in the header
-    character(1000)            :: txthlp       ! Help var.; 300 can be just not enough
+    character(message_len)     :: txthlp       ! Help var.
     character(20)              :: rundat       ! Current date and time containing a combination of DATE and TIME
     character(256)             :: version_full
     character(256)             :: filtmp       ! Help var. to specify file name
@@ -98,6 +98,7 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
     character(256)             :: fpathp       ! See FPATHD and PATHP
     character(55)              :: txtput       ! Texts to be filled in the header
     character(256)             :: usernm       ! Licensee name set in 'userfil'
+    type(message_stack)        :: stack
 !
 !! executable statements -------------------------------------------------------
 !
@@ -162,7 +163,7 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
     ! platform definition
     !
     call util_getenv('ARCH',txthlp)
-    call small(txthlp,1000)
+    call small(txthlp,message_len)
     if (txthlp == 'win32' .or. txthlp == 'w32') then
        gdp%arch = 'win32'
     else
@@ -224,15 +225,29 @@ subroutine sysini(error     ,runid     ,filmrs    ,alone     ,soort     , &
     !
     call noextspaces(filmd     ,lfil      )
     !
+    ! get source code location
+    !
+    txthlp = deltares_common_source_code
+    n = index(txthlp,'/src/utils_lgpl') ! regular checkout with src and examples level
+    if (n==0) then
+        n = index(txthlp,'/utils_lgpl') ! reduced checkout with src and examples level
+    endif
+    if (n==0) then
+        txthlp = 'unknown source code location'
+    else
+        txthlp = txthlp(16:n-1)
+    endif
+    !
     ! write start date and time in LUNDIA
     !
     write (lundia, '(a)')
     write (lundia, '(80a1)') ('*', n = 1, 80)
     write (lundia, '(a)')   '***'
     write (lundia, '(2a)')  '*** ', trim(version_full)
+    write (lundia, '(2a)')  '***           built from : ', trim(txthlp)
     write (lundia, '(a)')   '***'
-    write (lundia, '(2a)')  '***           runid     : ', trim(runid)
-    write (lundia, '(4a)')  '***           date,time : ', date, ',', rundat(11:19)
+    write (lundia, '(2a)')  '***           runid      : ', trim(runid)
+    write (lundia, '(4a)')  '***           date,time  : ', date, ',', rundat(11:19)
     write (lundia, '(a)')   '***'
     write (lundia, '(80a1)') ('*', n = 1, 80)
     write (lundia, '(a)')

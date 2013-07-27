@@ -42,6 +42,7 @@ implicit none
     character(*),  public, parameter :: deltares_common_version      = deltares_common_major//'.'//deltares_common_minor//'.'//deltares_common_revision//'.'//deltares_common_build_number
     character(*),  public, parameter :: deltares_common_version_full = 'Deltares, '//deltares_common_program//' Version '//deltares_common_version//', '//__DATE__//', '//__TIME__
     character(*),  public, parameter :: deltares_common_version_id   = '@(#)'//deltares_common_version_full
+    character(*),  public, parameter :: deltares_common_source_code  = '@(#) $HeadURL: https://svn.oss.deltares.nl/repos/delft3d/trunk/src/utils_lgpl/deltares_common/packages/deltares_common/src/deltares_common_version.F90.svn $'//char(0)
 
 contains
 

@@ -50,7 +50,6 @@ public message_stack
 !
 ! functions and subroutines
 !
-public message_module_info
 public initstack
 public clearstack
 public isempty
@@ -84,24 +83,6 @@ type message_stack
 end type message_stack
 
 contains
-!
-!
-!
-!==============================================================================
-subroutine message_module_info(messages)
-    !    Function: - Add info about this message module to the message stack
-    !
-    implicit none
-    !
-    ! arguments
-    !
-    type(message_stack), pointer :: messages
-    !
-    ! body
-    !
-    call addmessage(messages,'$Id$')
-    call addmessage(messages,'@(#) $URL$'//char(0))
-end subroutine message_module_info
 !
 !
 !
