@@ -71,10 +71,10 @@ subroutine d3stop(iexit, gdp)
 !
 ! Local variables
 !
+    integer :: ierror ! Value is non-zero if error is encountered
     integer :: idate
     integer :: idumda ! Dummy Date 
     integer :: istate ! Status for RTC
-    logical :: success
 !
 !! executable statements -------------------------------------------------------
 !
@@ -128,16 +128,16 @@ subroutine d3stop(iexit, gdp)
     ! to shut down Wave.
     !
     if (waveol) then
-       success = flow_to_wave_command(flow_wave_comm_finalize, &
-                                    & numdomains, mudlay, -1)
+       ierror = flow_to_wave_command(flow_wave_comm_finalize, &
+                                   & numdomains, mudlay, -1)
     endif
     !
     ! Check if Wave-Mud-connection is active and if so send (negative) status
     ! to shut down Wave.
     !
     if (mudwave) then
-       success = flow_to_wave_command(flow_wave_comm_finalize, &
-                                    & numdomains, mudlay, -1)
+       ierror = flow_to_wave_command(flow_wave_comm_finalize, &
+                                   & numdomains, mudlay, -1)
     endif
     !
     ! Close Communication with Sobek if Delft3D-FLOW has encountered an error

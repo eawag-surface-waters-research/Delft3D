@@ -119,12 +119,12 @@ contains
 !
 !==============================================================================
 function flow_to_wave_init(case_name, flow_IT01, flow_timestep, &
-                         & numdomains, mud, wait) result(success)
+                         & numdomains, mud, parll, wait) result(ierror)
     implicit none
     !
     ! Result value
     !
-    logical :: success ! .true.: succesfull initialized communication with waves
+    integer :: ierror ! 0: succesfull initialized communication with WAVE
     !
     ! Arguments
     !
@@ -134,7 +134,8 @@ function flow_to_wave_init(case_name, flow_IT01, flow_timestep, &
     integer           , intent(in) :: numdomains    ! number of domains
     real(fp)          , intent(in) :: flow_timestep ! flow timestep in seconds
     logical           , intent(in) :: mud           ! water (false) or mud layer (true)
-    logical, optional , intent(in) :: wait          ! Wait until waves is finished?
+    logical           , intent(in) :: parll         ! flag for parallel flow run
+    logical, optional , intent(in) :: wait          ! Wait until WAVE is finished?
                                                     ! (default true)
     !
     ! Local variables (for DIO communication)
@@ -143,10 +144,11 @@ function flow_to_wave_init(case_name, flow_IT01, flow_timestep, &
     real(hp)                   , dimension(num_to_pars, max_num_subdoms) :: out_values  ! outgoing param. values
     integer                    , dimension(:,:), pointer                 :: in_results  ! incoming result flag
     integer                                                              :: num_dom     ! local version of numPassedDomains/numPassedMudDomains
+    integer                                                              :: i
     !
     ! Executable statements ---------------------------------------------------
     !
-    success = .true.
+    ierror = 0
     !
     ! Perferm action only for the last domain
     !
@@ -162,17 +164,23 @@ function flow_to_wave_init(case_name, flow_IT01, flow_timestep, &
     
     if (num_dom > max_num_subdoms) then
        write(*,'(a)') '*** ERROR Dimension max_num_subdoms too small in module sync_flowwave'
-       success = .false.
+       ierror = 1
        return
     endif
     
     if (mud) then
        mudsubdomains(num_dom) = case_name
     else
-       subdomains(num_dom) = case_name
+        if (parll) then
+            do i = 1,numdomains
+                write(subdomains(i),'(A,A,I3.3)') trim(case_name),'-',i
+            enddo
+        else
+            subdomains(num_dom) = case_name
+        endif
     endif
 
-    if (num_dom == numdomains) then
+    if (parll .or. num_dom == numdomains) then
 
         if (mud) then
            numPassedMudDomains = 0
@@ -181,7 +189,7 @@ function flow_to_wave_init(case_name, flow_IT01, flow_timestep, &
         endif
 
         if ( present(wait) ) waitForResult = wait
-        ! Define outgoing data set (commands from flow to waves)
+        ! Define outgoing data set (commands from FLOW to WAVE)
         !
         par_names(1) = param_1_string
         par_names(2) = param_2_string
@@ -232,12 +240,12 @@ function flow_to_wave_init(case_name, flow_IT01, flow_timestep, &
             ! Get result flag for wave initialization
             !
             if (flow_from_wave_status(mud) == flow_wave_comm_result_ok) then
-               success = .true.
+               ierror = 0
             else
-               success = .false.
+               ierror = 1
             endif
         endif
-        if (success) then
+        if (ierror==0) then
             if (mud) then
                 mudinitialized = .true.
             else
@@ -261,7 +269,7 @@ function wave_from_flow_init(subdom_names, flow_IT01, flow_timestep, mud) result
     character(*), dimension(:), intent(out) :: subdom_names  ! flow subdom. names
     integer                   , intent(out) :: flow_IT01     ! parameter IT01 in flow
                                                              ! (reference date)
-    real(fp)                  , intent(out) :: flow_timestep ! flow timestep in seconds
+    real(hp)                  , intent(out) :: flow_timestep ! flow timestep in seconds
     logical                   , intent(in)  :: mud           ! water (false) or mud layer (true)
 
     ! Local variables (for DIO communication)
@@ -274,8 +282,8 @@ function wave_from_flow_init(subdom_names, flow_IT01, flow_timestep, mud) result
     ! Executable statements ---------------------------------------------------
     !
     num_subdomains = -1
-        !
-    ! Receive incoming data set (commands from flow to waves)
+    !
+    ! Receive incoming data set (commands from FLOW to WAVE)
     !
     if (mud) then
         comminfo => comminfomud
@@ -294,7 +302,7 @@ function wave_from_flow_init(subdom_names, flow_IT01, flow_timestep, mud) result
             !
             if (diopltget( comminfo%flow_to_wave, in_values ) ) then
                 flow_IT01     = nint(in_values(1,1))
-                flow_timestep = real(in_values(2,1),fp)
+                flow_timestep = in_values(2,1)
                 if ( nint(in_values(3,1)) == flow_wave_comm_do_wait ) then
                     waitForResult = .true.
                 else
@@ -321,11 +329,11 @@ end function wave_from_flow_init
 !
 !
 !==============================================================================
-function flow_to_wave_command(command, numdomains, mud, num_steps) result(success)
+function flow_to_wave_command(command, numdomains, mud, num_steps) result(ierror)
     implicit none
     ! Result value
     !
-    logical :: success ! .true.: succesfull initialized communication with waves
+    integer :: ierror ! 0: succesfull initialized communication with WAVE
     !
     ! Arguments
     !
@@ -345,9 +353,9 @@ function flow_to_wave_command(command, numdomains, mud, num_steps) result(succes
     !
     ! Executable statements ---------------------------------------------------
     !
-    success = .true.
+    ierror = 0
     !
-    !only for the last domain activate wave module
+    ! only for the last domain activate WAVE module
     !
     if (mud) then
         comminfo => comminfomud
@@ -376,16 +384,16 @@ function flow_to_wave_command(command, numdomains, mud, num_steps) result(succes
        !
        call diopltput( comminfo%flow_to_wave , out_values )
        !
-       success = .true.
+       ierror = 0
        !
        if ( waitForResult ) then
            !
            ! Get result flag for wave initialization
            !
            if (flow_from_wave_status(mud) == flow_wave_comm_result_ok) then
-              success = .true.
+              ierror = 0
            else
-              success = .false.
+              ierror = 1
            endif
        endif
     endif
@@ -398,7 +406,7 @@ function wave_from_flow_command(command, mud, num_steps) result(success)
     !
     ! Result value
     !
-    logical :: success ! .true.: succesfull initialized communication with waves
+    logical :: success ! .true.: succesfull initialized communication with WAVE
     !
     ! Arguments
     !

@@ -408,6 +408,7 @@ subroutine tricom_init(olv_handle, gdp)
 !
     integer                                       :: icx
     integer                                       :: icy
+    integer                                       :: ierror        ! Value is non-zero when an error is encountered
     integer                                       :: initi         ! Control parameter 
     integer                                       :: iplus
     integer                                       :: istat
@@ -1534,10 +1535,20 @@ subroutine tricom_init(olv_handle, gdp)
        ! Waves needs numdomains, not nummappers
        !
        call timer_start(timer_wait, gdp)
-       success = flow_to_wave_init(runid     , it01   , tscale       , &
-                                 & numdomains, mudlay )
+       if (parll) then
+           if (inode==master) then
+               ierror = flow_to_wave_init(runid     , it01   , tscale       , &
+                                        & nproc     , mudlay ,.true. )
+           else
+               ierror = 0
+           endif
+           call dfreduce( ierror, 1, dfint, dfmax, gdp )
+       else
+          ierror = flow_to_wave_init(runid     , it01   , tscale       , &
+                                   & numdomains, mudlay ,.false. )
+       endif
        call timer_stop(timer_wait, gdp)
-       if (.not. success) then
+       if (ierror /= 0) then
           txtput = 'Initialization of DelftIO communication with waves failed'
           write(lunscr,'(a)') trim(txtput)
           call prterr(lundia, 'P004', trim(txtput))
@@ -1550,10 +1561,10 @@ subroutine tricom_init(olv_handle, gdp)
        ! Initialise wave pointering
        !
        call timer_start(timer_wait, gdp)
-       success = flow_to_wave_init(runid     , it01   , tscale, &
-                                 & numdomains, mudlay )
+       ierror = flow_to_wave_init(runid     , it01   , tscale, &
+                                & numdomains, mudlay ,.false. )
        call timer_stop(timer_wait, gdp)
-       if (.not. success) then
+       if (ierror /= 0) then
           txtput = 'Initialization of DelftIO communication with waves failed'
           write(lunscr,'(a)') trim(txtput)
           call prterr(lundia, 'P004', trim(txtput))

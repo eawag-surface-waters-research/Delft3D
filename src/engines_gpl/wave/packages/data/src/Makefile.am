@@ -42,7 +42,6 @@ libdata_la_SOURCES = \
          skcomc.f90 \
          sort.f90 \
          swan_flow_grid_maps.f90 \
-         sync_flowwave.f90 \
          timdat.f90 \
          flow_data.f90
 

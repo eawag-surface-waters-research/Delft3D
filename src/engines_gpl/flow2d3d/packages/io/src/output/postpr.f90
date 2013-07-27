@@ -1049,11 +1049,15 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
           ! Write additional data for waves to NEFIS HIS files
           ! only when nostat > 0 and wave
           !
-          if (nostat>0 .and. wave) then
-             call wrwavh(lundia    ,error     ,trifil    ,ithisc    , &
-                       & nostat    ,r(wrka1)  ,r(wrka2)  , &
-                       & r(wrka3)  ,r(wrka4)  ,r(wrka5)  ,gdp       )
-             if (error) goto 9999
+          if (.not. parll) then
+             if (nostat>0 .and. wave) then
+                call wrwavh(lundia    ,error     ,trifil    ,ithisc    , &
+                          & nostat    ,r(wrka1)  ,r(wrka2)  , &
+                          & r(wrka3)  ,r(wrka4)  ,r(wrka5)  ,gdp       )
+                if (error) goto 9999
+             endif
+          else
+              ! dfwrwavh
           endif
           !
           ! Update timestep to write HIS files

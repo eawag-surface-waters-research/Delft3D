@@ -265,10 +265,10 @@ subroutine mkmap(code      ,x1        ,y1        ,m1        ,n1        , &
                 ! Check on point with nonsense information on source grid 1;
                 ! This depends on agreements
                 !
-                if (      (code(i1    , j1    )==1 .or. code(i1    , j1    )==3) &
-                  & .and. (code(i1 + 1, j1    )==1 .or. code(i1 + 1, j1    )==3) &
-                  & .and. (code(i1 + 1, j1 + 1)==1 .or. code(i1 + 1, j1 + 1)==3) &
-                  & .and. (code(i1    , j1 + 1)==1 .or. code(i1    , j1 + 1)==3) ) then
+                if (      (code(i1    , j1    )==1 .or. code(i1    , j1    )==-1 .or. code(i1    , j1    )==3) &
+                  & .and. (code(i1 + 1, j1    )==1 .or. code(i1 + 1, j1    )==-1 .or. code(i1 + 1, j1    )==3) &
+                  & .and. (code(i1 + 1, j1 + 1)==1 .or. code(i1 + 1, j1 + 1)==-1 .or. code(i1 + 1, j1 + 1)==3) &
+                  & .and. (code(i1    , j1 + 1)==1 .or. code(i1    , j1 + 1)==-1 .or. code(i1    , j1 + 1)==3) ) then
                    !
                    ! grid2 point is covered by 4 valid grid1 points
                    !
@@ -280,8 +280,8 @@ subroutine mkmap(code      ,x1        ,y1        ,m1        ,n1        , &
                    iref(2, i2) = i1 + 1 + (j1 - 1)*m1
                    iref(3, i2) = i1 + 1 + j1*m1
                    iref(4, i2) = i1 + j1*m1
-                elseif (code(i1, j1)>0 .and. code(i1 + 1, j1)>0 .and. &
-                  & code(i1 + 1, j1 + 1)>0 .and. code(i1, j1 + 1)>0) then
+                elseif (code(i1, j1)/=0 .and. code(i1 + 1, j1)/=0 .and. &
+                  & code(i1 + 1, j1 + 1)/=0 .and. code(i1, j1 + 1)/=0) then
                    !
                    ! Grid2 point is covered by 4 valid grid1 points, containing
                    ! one or more boundary points:

@@ -294,12 +294,10 @@ subroutine inippr(lundia    ,error     ,trifil    ,comfil    ,mainys    , &
                  & r(cfvrou) ,i(ibuff)  ,r(rbuff)  ,r(rbuff)  ,sferic    , & 
                  & gdp       ) 
        if (error) goto 9999 
-       if (inode == master) then 
-          call wrplot(comfil    ,lundia    ,error     ,mmax      ,nmax      , & 
-                    & nmaxus    ,i(kcs)    ,i(ibuff)  ,r(xz)     ,r(yz)     , & 
-                    & r(rbuff)  ,sferic    ,gdp       ) 
-          if (error) goto 9999 
-       endif 
+       call wrplot(comfil    ,lundia    ,error     ,mmax      ,nmax      , & 
+                 & nmaxus    ,i(kcs)    ,i(ibuff)  ,r(xz)     ,r(yz)     , & 
+                 & r(rbuff)  ,sferic    ,gdp       ) 
+       if (error) goto 9999 
        soort = 'com' 
        call wridoc(error     ,comfil    ,soort     ,simdat    ,runtxt    , & 
                  & commrd    ,gdp       ) 

@@ -253,8 +253,8 @@ subroutine get_gri(filnam    ,xz        ,yz        ,guu       ,gvv       , &
           alfas(m, n) = rbuff(n, m)
        enddo
     enddo
-    ielem = 1     ! XZ
 
+    ielem = 1     ! XZ
     call putgtr(filnam    ,grpna2    ,nelmx2    ,elmnm2    ,elmdm2    , &
               & elmqt2    ,elmun2    ,elmde2    ,elmtp2    ,nbyts2    , &
               & elmnm2(ielem)        ,celidt    ,wrswch    ,error     ,rbuff     )
@@ -263,7 +263,7 @@ subroutine get_gri(filnam    ,xz        ,yz        ,guu       ,gvv       , &
           xz(m, n) = rbuff(n, m)
        enddo
     enddo
-    ielem = 2     ! yZ
+    ielem = 2     ! YZ
     call putgtr(filnam    ,grpna2    ,nelmx2    ,elmnm2    ,elmdm2    , &
               & elmqt2    ,elmun2    ,elmde2    ,elmtp2    ,nbyts2    , &
               & elmnm2(ielem)        ,celidt    ,wrswch    ,error     ,rbuff     )

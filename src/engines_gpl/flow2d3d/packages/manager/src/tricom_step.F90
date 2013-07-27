@@ -402,6 +402,7 @@ subroutine tricom_step(olv_handle, gdp)
 !
 
   
+    integer                                       :: ierror        ! Value is non-zero when an error is encountered
     integer                                       :: istat
     integer                                       :: iofset        ! Shift of inner part of matrix to remove strips
     integer                                       :: lunfil
@@ -415,7 +416,6 @@ subroutine tricom_step(olv_handle, gdp)
     integer(pntrsize)                  , external :: gtipnt
     integer(pntrsize)                  , external :: gtrpnt
     logical                                       :: error         ! Flag=TRUE if an error is encountered 
-    logical                                       :: success       ! Flag = false when an error is encountered
     logical                                       :: ex            ! Help flag = TRUE when file is found 
     real(fp)                                      :: zini
     character(60)                                 :: txtput        ! Text to be print
@@ -852,10 +852,15 @@ subroutine tricom_step(olv_handle, gdp)
              ! That's why flow_to_wave_command needs numdomains.
              !
              call timer_start(timer_wait, gdp)
-             success = flow_to_wave_command(flow_wave_comm_perform_step, &
-                                          & numdomains, mudlay, nst)
+             if (.not.parll .or. (parll .and. inode == master)) then
+                ierror = flow_to_wave_command(flow_wave_comm_perform_step, &
+                                             & numdomains, mudlay, nst)
+             else
+                ierror = 0
+             endif
+             call dfreduce( ierror, 1, dfint, dfmax, gdp )
              call timer_stop(timer_wait, gdp)
-             if (.not. success) then
+             if (ierror /= 0) then
                 txtput = 'Delftio command to waves failed'
                 write(lunscr,'(a)') trim(txtput)
                 call prterr(lundia    ,'P004'    ,trim(txtput)    )
@@ -885,10 +890,10 @@ subroutine tricom_step(olv_handle, gdp)
              ! That's why flow_to_wave_command needs numdomains.
              !
              call timer_start(timer_wait, gdp)
-             success = flow_to_wave_command(flow_wave_comm_perform_step, &
+             ierror = flow_to_wave_command(flow_wave_comm_perform_step, &
                                           & numdomains, mudlay, nst)
              call timer_stop(timer_wait, gdp)
-             if (.not. success) then
+             if (ierror /= 0) then
                 txtput = 'Delftio command to waves failed'
                 write(lunscr,'(a)') trim(txtput)
                 call prterr(lundia    ,'P004'    ,trim(txtput)    )

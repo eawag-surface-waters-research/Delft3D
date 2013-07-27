@@ -62,7 +62,6 @@
 		<File RelativePath=".\src\sort.f90"/>
 		<File RelativePath=".\src\swan_flow_grid_maps.f90"/>
 		<File RelativePath=".\src\swan_input.f90"/>
-		<File RelativePath=".\src\sync_flowwave.f90"/>
 		<File RelativePath=".\src\table_handles.f90"/>
 		<File RelativePath=".\src\tables.f90"/>
 		<File RelativePath=".\src\timdat.f90"/>

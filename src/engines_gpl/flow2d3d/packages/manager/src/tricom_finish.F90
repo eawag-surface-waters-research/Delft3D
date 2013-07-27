@@ -381,6 +381,7 @@ subroutine tricom_finish(olv_handle, gdp)
 !
 ! Local variables
 !
+    integer                                       :: ierror        ! Value is non-zero when an error is encountered
     integer                                       :: istat
     integer                                       :: lunfil
     integer                            , external :: modlen
@@ -391,7 +392,6 @@ subroutine tricom_finish(olv_handle, gdp)
     integer(pntrsize)                  , external :: gtipnt
     integer(pntrsize)                  , external :: gtrpnt
     logical                                       :: error         ! Flag=TRUE if an error is encountered 
-    logical                                       :: success       ! Flag = false when an error is encountered
     real(fp)                                      :: zini
     character(60)                                 :: txtput        ! Text to be print
 !
@@ -776,16 +776,16 @@ subroutine tricom_finish(olv_handle, gdp)
                        & r(rbuff)  ,ite       ,gdp       )
           endif
           call timer_start(timer_wait, gdp)
-          success = flow_to_wave_command(flow_wave_comm_finalize, &
+          ierror = flow_to_wave_command(flow_wave_comm_finalize, &
                                         & numdomains, mudlay, nst)
           call timer_stop(timer_wait, gdp)
        else
           call timer_start(timer_wait, gdp)
-          success = flow_to_wave_command(flow_wave_comm_finalize, &
+          ierror = flow_to_wave_command(flow_wave_comm_finalize, &
                                         & numdomains, mudlay, -1)
           call timer_stop(timer_wait, gdp)
        endif
-       if (.not. success) then
+       if (ierror /= 0) then
           txtput = 'Delftio command to waves failed'
           write(lunscr,'(a)') trim(txtput)
           call prterr(lundia    ,'P004'    ,trim(txtput)    )
@@ -799,14 +799,14 @@ subroutine tricom_finish(olv_handle, gdp)
        !
        call timer_start(timer_wait, gdp)
        if (nst == itwav) then
-          success = flow_to_wave_command(flow_wave_comm_finalize, &
+          ierror = flow_to_wave_command(flow_wave_comm_finalize, &
                                         & numdomains, mudlay, nst)
        else
-          success = flow_to_wave_command(flow_wave_comm_finalize, &
+          ierror = flow_to_wave_command(flow_wave_comm_finalize, &
                                         & numdomains, mudlay, -1)
        endif
        call timer_stop(timer_wait, gdp)
-       if (.not. success) then
+       if (ierror /= 0) then
           txtput = 'Delftio command to waves failed'
           write(lunscr,'(a)') trim(txtput)
           call prterr(lundia    ,'P004'    ,trim(txtput)    )
