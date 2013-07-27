@@ -198,7 +198,7 @@ subroutine inibcparl(nto       ,nrob      ,mnbnd     ,nob       ,typbnd    , &
     !
     ! loop over all boundaries that are (partly) inside this partition
     !
-    do n=1,nto-ntof-ntoq
+    do n=1,nto
        !
        ! Find an index np for which nob(:,np) refers to a point belonging to this open boundary: nob(8,np)=n
        ! np is needed to use nob(4,np) and nob(6,np) to detect the location of this open boundary related to the domain:
