@@ -18,15 +18,16 @@ FINCLUDES += \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/include
 
 FMODULES += \
-	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
+	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
+	-I$(top_builddir)/utils_gpl/morphology/packages/morphology_kernel/src
 
 #-------------------------------------------------------------------------------
 #Sources
 libMorphologyIO_la_SOURCES = \
-         rdsed.f90 \
-         rdmor.f90 \
          rdtrafrm.f90 \
+         rdsed.f90 \
          rdmorlyr.f90 \
+         rdmor.f90 \
          rdstm.f90
 
 #-------------------------------------------------------------------------------

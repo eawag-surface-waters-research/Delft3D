@@ -48,7 +48,7 @@ libflow2d3d_la_LIBADD = \
     $(top_builddir)/engines_gpl/flow2d3d/packages/kernel/src/general/libKernelGeneral.la \
     $(top_builddir)/engines_gpl/flow2d3d/packages/io_dol_f/src/libIODolF.la \
     $(top_builddir)/engines_gpl/flow2d3d/packages/plugin_user/src/libPluginUser.la \
-    $(top_builddir)/engines_gpl/flow2d3d/packages/plugin_3dmortrafrm_c/src/libPlugin3dmortrafrmC.la \
+    $(top_builddir)/engines_gpl/flow2d3d/packages/plugin_culvert_c/src/libPluginCulvertC.la \
     $(top_builddir)/engines_gpl/flow2d3d/packages/data/src/allocation/libDataAllocation.la \
     $(top_builddir)/engines_gpl/flow2d3d/packages/data/src/general/libDataGeneral.la \
     $(top_builddir)/engines_gpl/flow2d3d/packages/data/src/gdp/libDataGDP.la \

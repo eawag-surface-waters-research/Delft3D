@@ -85,7 +85,6 @@ libIOInput_la_SOURCES = \
          rdlaydis.f90 \
          rdmassbal.f90 \
          rdmeteo.f90 \
-         rdmorlyr.f90 \
          rdmud.f90 \
          rdnum.f90 \
          rdprfl.f90 \
