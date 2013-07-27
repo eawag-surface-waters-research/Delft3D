@@ -596,21 +596,33 @@ subroutine wrthis(lundia    ,error     ,trifil    ,selhis    ,ithisc    , &
        !
        ! group 3: element 'XYSTAT'
        !
-       if (inode == master) allocate( rsbuff2(2,1:nostatgl) )
-       if (parll) then
-          call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, 2, order_sta, xystat, rsbuff2, gdp )
-       else
-          rsbuff2 = real(xystat, sp)
-       endif
+       allocate(rsbuff2(nostat,2), stat=istat)
+       do i = 1, nostat
+          rsbuff2(i,:) = xystat(:,i)
+       enddo
        if (inode == master) then
+          allocate(rsbuff2b(nostatgl,2), stat=istat)
+       endif
+       if (parll) then
+          call dfgather_filter(lundia, nostat, nostatto, nostatgl, 1, 2, order_sta, rsbuff2, rsbuff2b, gdp )
+       else
+          rsbuff2b = rsbuff2   ! not parallel, so it is on the master node
+       endif
+       deallocate(rsbuff2, stat=istat)
+       if (inode == master) then
+          allocate(rsbuff2(2,nostatgl), stat=istat)
+          do i = 1,nostatgl
+             rsbuff2(:,i) = rsbuff2b(i,:)
+          enddo
+          deallocate(rsbuff2b, stat=istat)
           ierror = putelt(fds, grnam3, 'XYSTAT', uindex, 1, rsbuff2)
-          deallocate( rsbuff2 )
+          deallocate( rsbuff2, stat=istat )
        endif
        if (ierror/=0) goto 999
        !
        ! group 3: element 'MNSTAT'
        !
-       allocate(ibuff2b(2,nostat))
+       allocate(ibuff2b(2,nostat), stat=istat)
        do i=1,nostat
           !
           ! mnstat contains indices with respect to this partion
