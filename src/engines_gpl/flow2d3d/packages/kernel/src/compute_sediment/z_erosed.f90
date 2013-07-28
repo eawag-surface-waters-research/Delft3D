@@ -133,7 +133,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)         , dimension(:)      , pointer :: epswlc
     real(fp)         , dimension(:,:)    , pointer :: fixfac
     real(fp)         , dimension(:,:)    , pointer :: frac
-    real(fp)         , dimension(:,:)    , pointer :: gamtcr
     real(fp)         , dimension(:)      , pointer :: mudfrac
     real(fp)         , dimension(:)      , pointer :: sandfrac
     real(fp)         , dimension(:,:)    , pointer :: hidexp
@@ -343,7 +342,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: taub
     real(fp)                      :: tdss      ! temporary variable for dss
     real(fp)                      :: temperature
-    real(fp)                      :: tgamtcr
     real(fp), dimension(kmax)     :: thicklc    
     real(fp), dimension(kmax)     :: siglc    
     real(fp)                      :: thick0
@@ -403,7 +401,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     ws0                 => gdp%gdsedpar%ws0
     salmax              => gdp%gdsedpar%salmax
     mudcnt              => gdp%gdsedpar%mudcnt
-    gamtcr              => gdp%gdsedpar%gamtcr
     nseddia             => gdp%gdsedpar%nseddia
     sedtyp              => gdp%gdsedpar%sedtyp
     anymud              => gdp%gdsedpar%anymud
@@ -1110,7 +1107,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              tsalmax = salmax(l)
              tws0    = ws0(l)
              twsk    = ws(nm, kfsmin(nm), l)
-             tgamtcr = gamtcr(nm, l)
           else
              !
              ! use dummy values for bedload fractions
@@ -1120,7 +1116,6 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              tsalmax = 30.0_fp
              tws0    =  0.0_fp
              twsk    =  0.0_fp
-             tgamtcr =  1.5_fp
           endif
           !
           ! NONCOHESIVE fraction specific quantities

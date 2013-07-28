@@ -131,7 +131,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)         , dimension(:)      , pointer :: epswlc
     real(fp)         , dimension(:,:)    , pointer :: fixfac
     real(fp)         , dimension(:,:)    , pointer :: frac
-    real(fp)         , dimension(:,:)    , pointer :: gamtcr
     real(fp)         , dimension(:)      , pointer :: mudfrac
     real(fp)         , dimension(:)      , pointer :: sandfrac
     real(fp)         , dimension(:,:)    , pointer :: hidexp
@@ -178,14 +177,8 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                             , pointer :: timsec
     real(fp)                             , pointer :: camax
     real(fp)                             , pointer :: aksfac
-    real(fp)                             , pointer :: rwave
     real(fp)                             , pointer :: rdc
-    real(fp)                             , pointer :: rdw
-    real(fp)                             , pointer :: pangle
-    real(fp)                             , pointer :: fpco
-    integer                              , pointer :: iopsus
     integer                              , pointer :: iopkcw
-    integer                              , pointer :: subiw
     integer                              , pointer :: max_integers
     integer                              , pointer :: max_reals
     integer                              , pointer :: max_strings
@@ -309,6 +302,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: caks_ss3d
     real(fp)                      :: chezy
     real(fp)                      :: conc2d
+    real(fp)                      :: delr
     real(fp)                      :: di50
     real(fp)                      :: difbot
     real(fp)                      :: drho
@@ -322,16 +316,17 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     real(fp)                      :: grlyrs
     real(fp)                      :: h0
     real(fp)                      :: h1
+    real(fp)                      :: rc
     real(fp)                      :: sag
     real(fp)                      :: salinity
     real(fp)                      :: spirint   ! local variable for spiral flow intensity r0(nm,1,lsecfl)
     real(fp)                      :: taks
+    real(fp)                      :: taks0
     real(fp)                      :: tauadd
     real(fp)                      :: taub
     real(fp)                      :: tauc
     real(fp)                      :: tdss      ! temporary variable for dss
     real(fp)                      :: temperature
-    real(fp)                      :: tgamtcr
     real(fp)                      :: thick0
     real(fp)                      :: thick1
     real(fp)                      :: trsedeq   ! temporary variable for rsedeq
@@ -392,7 +387,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     ws0                 => gdp%gdsedpar%ws0
     salmax              => gdp%gdsedpar%salmax
     mudcnt              => gdp%gdsedpar%mudcnt
-    gamtcr              => gdp%gdsedpar%gamtcr
     nseddia             => gdp%gdsedpar%nseddia
     sedtyp              => gdp%gdsedpar%sedtyp
     anymud              => gdp%gdsedpar%anymud
@@ -475,19 +469,12 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
     epspar              => gdp%gdmorpar%epspar 
     vonkar              => gdp%gdphysco%vonkar
     vicmol              => gdp%gdphysco%vicmol
-    wave                => gdp%gdprocs%wave
     scour               => gdp%gdscour%scour
     timsec              => gdp%gdinttim%timsec
     camax               => gdp%gdmorpar%camax
     aksfac              => gdp%gdmorpar%aksfac
-    rwave               => gdp%gdmorpar%rwave
     rdc                 => gdp%gdmorpar%rdc
-    rdw                 => gdp%gdmorpar%rdw
-    pangle              => gdp%gdmorpar%pangle
-    fpco                => gdp%gdmorpar%fpco
-    iopsus              => gdp%gdmorpar%iopsus
     iopkcw              => gdp%gdmorpar%iopkcw
-    subiw               => gdp%gdmorpar%subiw
     ubot_from_com       => gdp%gdprocs%ubot_from_com
     max_integers        => gdp%gdtrapar%max_integers
     max_reals           => gdp%gdtrapar%max_reals
@@ -911,6 +898,27 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           temperature = temeqs
        endif
        !
+       taks0 = 0.0_fp
+       !
+       ! Calculate Van Rijn's reference height
+       !
+       if (iopkcw==1) then
+          rc = 30.0_fp*z0cur
+       else
+          rc = rdc
+       endif
+       taks0 = max(aksfac*rc, 0.01_fp*h1)
+       !
+       if (wave .and. tp(nm)>0.0_fp) then
+          delr  = 0.025_fp
+          taks0 = max(0.5_fp*delr, taks0)
+       endif
+       !
+       ! Limit maximum aks to 20% of water depth
+       ! (may be used when water depth becomes very small)
+       !
+       taks0 = min(taks0, 0.2_fp*h1)
+       !
        ! Input parameters are passed via dll_reals/integers/strings-arrays
        !
        if (max_reals < MAX_RP) then
@@ -1091,7 +1099,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              tsalmax = salmax(l)
              tws0    = ws0(l)
              twsk    = ws(nm, kmax, l)
-             tgamtcr = gamtcr(nm, l)
           else
              !
              ! use dummy values for bedload fractions
@@ -1101,7 +1108,6 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              tsalmax = 30.0_fp
              tws0    =  0.0_fp
              twsk    =  0.0_fp
-             tgamtcr =  1.5_fp
           endif
           !
           ! NONCOHESIVE fraction specific quantities
@@ -1133,7 +1139,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                    dcwwlc(k) = dicww(nm, k)
                 enddo
              endif
-             taks = 0.0_fp
+             taks = taks0
              !
              do k = 1, kmax
                 concin3d(k) = max(0.0_fp , r0(nm,k,ll))
@@ -1207,7 +1213,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              else
                 trsedeq =  0.0_fp
              endif
-             taks = 0.0_fp
+             taks = taks0
              !
              if (lsecfl > 0) then
                 spirint = r0(nm,1,lsecfl)

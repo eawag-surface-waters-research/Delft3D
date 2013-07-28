@@ -44,7 +44,7 @@ subroutine factor3d2d(kmax      ,aks       ,kmaxsd    ,sig       ,thick     , &
 ! Call variables
 !
     integer                         , intent(in)   :: kmax     ! number of layers
-    integer                         , intent(inout):: kmaxsd   ! layer above reference height
+    integer                         , intent(out)  :: kmaxsd   ! layer above reference height
     real(fp)                        , intent(inout):: aks      ! reference height
     real(fp), dimension(kmax)       , intent(in)   :: sig      ! sigma coordinate of layer centre
     real(fp), dimension(kmax)       , intent(in)   :: thick    ! layer thickness
@@ -72,6 +72,20 @@ subroutine factor3d2d(kmax      ,aks       ,kmaxsd    ,sig       ,thick     , &
 !
 !! executable statements -------------------------------------------------------
 !
+    !
+    ! Determine first center cell above aks (at most kmax-1)
+    !
+    kmaxsd = 1
+    do k = kmax-1, 1, -1
+       !
+       ! Calculate level of lower cell interface
+       !
+       z = (1.0_fp + sig(k) - thick(k)/2.0_fp) * h1
+       if (z >= aks) then
+          kmaxsd = k
+          exit
+       endif
+    enddo
     !
     ! Compute the conversion factor from reference concentration to depth
     ! averaged concentration. Use reference concentration of 1.0 as basis.
@@ -111,9 +125,9 @@ subroutine factor3d2d(kmax      ,aks       ,kmaxsd    ,sig       ,thick     , &
        ! In higher layers, the sediment concentration gradually reduces.
        !
        z      = h1 * (1.0_fp + sig(k))
-       dz     = h1 * (sig(k)-sig(k+1))
-       diff   = seddif(k) + bakdif
-       fact1  = 1.0_fp + min(dz * ws(k) / diff, 10.0_fp)
+       diff   = max(seddif(k) + bakdif, 0.1_fp*dz*ws(k)) ! \_ lines should be switched
+       dz     = h1 * (sig(k)-sig(k+1))                   ! /
+       fact1  = 1.0_fp + dz * ws(k) / diff
        conc   = conc / fact1
        !
        u      = log(1.0_fp + z/z0rou)
@@ -127,11 +141,12 @@ subroutine factor3d2d(kmax      ,aks       ,kmaxsd    ,sig       ,thick     , &
     do k = kmaxsd + 1, kmax
        !
        ! In the near-bed layers, the sediment concentration slowly increases.
-       ! Since seddif will be set to approximately 10*dz*ws in EROSED, we'll
-       ! use fact1 = 1+ws*dz/diff = 1.1 here.
+       ! Since seddif will be set to approximately 10*dz*ws in EROSED, we
+       ! should use fact1 = 1+ws*dz/diff = 1.1 here. However, we will use 1.0
+       ! for the time being since this is in line with the old code.
        !
        z      = h1 * (1.0_fp + sig(k))
-       fact1  = 1.1_fp
+       fact1  = 1.0_fp ! 1.1_fp seems to be more consistent
        conc   = conc * fact1
        !
        u      = log(1.0_fp + z/z0rou)
@@ -140,17 +155,4 @@ subroutine factor3d2d(kmax      ,aks       ,kmaxsd    ,sig       ,thick     , &
     enddo
     !
     factor = sumcu/max(sumu, 1.0e-6_fp)
-    !
-    ! Distinguish between a case with aks>0 and kmaxsd<kmax (like Van Rijn)
-    ! and traditional way without aks and sediment flux terms in bottom-most
-    ! layer.
-    !
-    if (kmaxsd == kmax) then
-       !
-       ! Move aks up away from zero.
-       !
-       aks    = zk
-       factor = factor / conck
-       kmaxsd = kmax-1
-    endif
 end subroutine factor3d2d

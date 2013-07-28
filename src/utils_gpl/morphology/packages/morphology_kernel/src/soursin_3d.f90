@@ -93,13 +93,11 @@ subroutine soursin_3d(h1          ,thick0      ,thick1      ,sigsed      ,thicks
           !
           ! Concentration near bed has been given.
           !
-          !ckmxb = r00 !caksrho
           ckmxb = caksrho
           !
           ! Concentration gradient at bed equals settling velocity divided by
           ! diffusivity when in equilibrium.
           !
-          !dcdz  = (r00 - caksrho)/dz !-ws*ckmxb/diffus
           dcdz  = -ws*ckmxb/diffus
        else
           !

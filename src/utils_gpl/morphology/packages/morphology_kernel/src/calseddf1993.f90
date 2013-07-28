@@ -1,7 +1,7 @@
 subroutine calseddf1993(ustarc    ,ws        ,h1        ,kmax      ,sig       , &
                       & thick     ,dicww     ,tauwav    ,tauc      ,ltur      , &
-                      & eps       ,vonkar    ,epspar    ,wave      ,deltas    , &
-                      & epsbed    ,epsmax    ,epsmxc    ,seddif    )
+                      & eps       ,vonkar    ,difvr     ,deltas    ,epsbed    , &
+                      & epsmax    ,epsmxc    ,seddif    )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -59,8 +59,7 @@ subroutine calseddf1993(ustarc    ,ws        ,h1        ,kmax      ,sig       , 
     real(fp)                   , intent(in)  :: ustarc
     real(fp)                   , intent(in)  :: vonkar
     real(fp), dimension(0:kmax), intent(in)  :: ws     !  Description and declaration in esm_alloc_real.f90
-    logical                    , intent(in)  :: epspar
-    logical                    , intent(in)  :: wave
+    logical                    , intent(in)  :: difvr
     !
     real(fp)                   , intent(out) :: epsmxc
     real(fp), dimension(0:kmax), intent(out) :: seddif !  Description and declaration in esm_alloc_real.f90
@@ -93,9 +92,9 @@ subroutine calseddf1993(ustarc    ,ws        ,h1        ,kmax      ,sig       , 
     endif
     !
     epsmxc = 0.25_fp * vonkar * beta * ustarc * h1
-    if (ltur==0 .or. ltur==1 .or. (epspar .and. wave)) then
+    if (ltur==0 .or. ltur==1 .or. difvr) then
        !
-       ! if algebraic or K-L turbulence model or waves and epspar = .true. then
+       ! if algebraic or K-L turbulence model or difvr = .true. then
        ! calculate sediment mixing according to Van Rijn based on his
        ! parabolic-linear mixing distribution for current-related mixing
        !

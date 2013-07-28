@@ -1397,13 +1397,9 @@ subroutine echomor(lundia    ,error     ,lsec      ,lsedtot   ,nto       , &
     if (iopkcw == 1) then
        txtput3 = 'Standard option: Rc from Flow, Rw=RWAVE*0.025'
        write (lundia, '(2a,i20)') txtput3(1:46), ':', iopkcw
-    elseif (iopkcw == 2) then
+    else
        txtput1 = 'Constant Rc and Rw Prescribed'
        write (lundia, '(2a,2e20.4)') txtput1, ':', rdc, rdw
-    elseif (iopkcw == 3) then
-       txtput3 = 'Rc and Rw computed from mobility parameter'
-       write (lundia, '(2a,i20)') txtput3(1:43), ':', iopkcw
-    else
     endif
     !
     txtput1 = 'Update bed level at inflow boundaries'

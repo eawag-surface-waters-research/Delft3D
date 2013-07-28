@@ -152,7 +152,7 @@ subroutine rdsedmortra(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     call setpardef(ipardef, rpardef, NPARDEF, -1, 4, gdp%gdmorpar%rdc)
     call setpardef(ipardef, rpardef, NPARDEF, -1, 5, gdp%gdmorpar%rdw)
     call setpardef(ipardef, rpardef, NPARDEF, -1, 6, gdp%gdmorpar%iopkcw)
-    call setpardef(ipardef, rpardef, NPARDEF, -1, 7, gdp%gdmorpar%epspar)
+    ! for backward compatibility gdp%gdmorpar%epspar should NOT be copied to par 7 of Van Rijn 1993 (-1)
     call setpardef(ipardef, rpardef, NPARDEF, -2, 1, gdp%gdmorpar%iopsus)
     call setpardef(ipardef, rpardef, NPARDEF, -2, 2, gdp%gdmorpar%pangle)
     call setpardef(ipardef, rpardef, NPARDEF, -2, 3, gdp%gdmorpar%fpco)

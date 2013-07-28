@@ -57,8 +57,8 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
     integer                         , intent(in)   :: i2d3d
     integer                         , intent(in)   :: kmax
     real(fp)                        , intent(in)   :: bed
-    real(fp)                        , intent(in)   :: dzduu     !  Description and declaration in rjdim.f90
-    real(fp)                        , intent(in)   :: dzdvv     !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: dzduu    !  Description and declaration in rjdim.f90
+    real(fp)                        , intent(in)   :: dzdvv    !  Description and declaration in rjdim.f90
     real(fp)                        , intent(in)   :: rksrs    !  Description and declaration in rjdim.f90
     real(fp)                        , intent(in)   :: tauadd
     real(fp)                        , intent(in)   :: taucr0
@@ -130,7 +130,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
     real(fp):: z0cur    
     real(fp):: z0rou    
     real(fp):: zumod    
-    real(fp):: gamtcr !<----- TODO: DEFINE
+    real(fp):: gamtcr
     !
     integer  :: k
     real(fp) :: avgu
@@ -211,6 +211,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
     fpco   = par(13)
     subiw  = int(par(14))
     epspar = par(15)>0.0_fp
+    gamtcr = par(16)
     !
     sag    = sqrt(ag)
     !

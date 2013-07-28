@@ -107,6 +107,7 @@ subroutine calseddf2004(ustarc    ,ws        ,tp        ,hrms      ,h1        , 
     real(fp)                    :: z
     real(fp)                    :: zkmax
     real(fp)                    :: znew
+    logical                     :: difvr
 !
 !! executable statements -------------------------------------------------------
 !
@@ -137,10 +138,11 @@ subroutine calseddf2004(ustarc    ,ws        ,tp        ,hrms      ,h1        , 
     !
     ! calculate vertical sediment diffusion coefficient
     !
+    difvr = epspar .and. wave
     call calseddf1993(ustarc    ,ws        ,h1        ,kmax      ,sig       , &
                     & thick     ,dicww     ,tauwav    ,tauc      ,ltur      , &
-                    & eps       ,vonkar    ,epspar    ,wave      ,deltas    , &
-                    & epsbed    ,epsmax    ,epsmxc    ,seddif    )
+                    & eps       ,vonkar    ,difvr     ,deltas    ,epsbed    , &
+                    & epsmax    ,epsmxc    ,seddif    )
     !
     ! Determine height cell centre kmax
     !

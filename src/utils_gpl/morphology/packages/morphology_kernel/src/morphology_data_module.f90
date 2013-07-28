@@ -353,7 +353,6 @@ type gd_sedpar
                                                             !  sediment depths
     real(fp)      , dimension(:)    , pointer :: dstar      !  Dimensionless grain size 
     real(fp)      , dimension(:)    , pointer :: gamflc     !  Calibration factor on flocculation parameter in Van Rijn (2004) 
-    real(fp)      , dimension(:,:)  , pointer :: gamtcr     !  Calibration factor on critical shear stress in Van Rijn (2004)
     real(fp)      , dimension(:)    , pointer :: taucr      !  Critical shear stress 
     real(fp)      , dimension(:)    , pointer :: tetacr     !  Dimensionless critical shear stress (Shields parameter)
     real(fp)      , dimension(:)    , pointer :: ws0        !  Settling velocity fresh water
@@ -480,7 +479,6 @@ subroutine initsedpar(gdsedpar)
     nullify(gdsedpar%dstar)
     nullify(gdsedpar%taucr)
     nullify(gdsedpar%tetacr)
-    nullify(gdsedpar%gamtcr)
     nullify(gdsedpar%gamflc)
     nullify(gdsedpar%ws0)
     nullify(gdsedpar%wsm)
@@ -531,7 +529,6 @@ subroutine clrsedpar(istat     ,gdsedpar  )
     if (associated(gdsedpar%dstar))      deallocate(gdsedpar%dstar,      STAT = istat)
     if (associated(gdsedpar%taucr))      deallocate(gdsedpar%taucr,      STAT = istat)
     if (associated(gdsedpar%tetacr))     deallocate(gdsedpar%tetacr,     STAT = istat)
-    if (associated(gdsedpar%gamtcr))     deallocate(gdsedpar%gamtcr,     STAT = istat)
     if (associated(gdsedpar%gamflc))     deallocate(gdsedpar%gamflc,     STAT = istat)
     if (associated(gdsedpar%ws0))        deallocate(gdsedpar%ws0,        STAT = istat)
     if (associated(gdsedpar%wsm))        deallocate(gdsedpar%wsm,        STAT = istat)

@@ -102,7 +102,7 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
 !
     logical                         , intent(out)  :: error
     integer                         , intent(out)  :: kmaxsd
-    real(fp)                        , intent(out)  :: aks
+    real(fp)                        , intent(inout):: aks ! out parameter for Van Rijn, in parameter for others
     real(fp)                        , intent(out)  :: aks_ss3d
     real(fp)                        , intent(out)  :: caks
     real(fp)                        , intent(out)  :: caks_ss3d
@@ -266,8 +266,8 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
           ! analytical 1984, 1993 or 2004 formulations here.
           !
           do k = 0, kmax
-                seddif(k) = dicww(k)
-             enddo
+              seddif(k) = dicww(k)
+          enddo
           ! seddif(kmax) = vonkar*z0rou*ustarc
        endif
     endif
@@ -678,30 +678,29 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
           !
        else
           !
-       ! If we are not using Van Rijn 1993 or Van Rijn 2004
+          ! If we are not using Van Rijn 1993 or Van Rijn 2004
           ! then we still need to provide values for conc2d, aks, and caks.
-       !
-       if (equi_conc) then
-           !
-           ! Concentration given by transport formula
-           !
-       else
-           !
-           ! Suspended transport rate given by transport formula,
-           ! derive concentration
-           !
-           cesus = ssus / (utot+eps) / h1
-       endif
-       !
+          !
+          if (equi_conc) then
+              !
+              ! Concentration given by transport formula
+              !
+          else
+              !
+              ! Suspended transport rate given by transport formula,
+              ! derive concentration
+              !
+              cesus = ssus / (utot+eps) / h1
+          endif
+          !
           ! Concentration needs to be multiplied by frac to match Van Rijn
           ! formulae.
-       !
+          !
           conc2d    = cesus * frac
-       !
+          !
           ! Convert depth averaged concentration to reference concentration
-          ! near bed.
-       !
-          aks       = 0.0_fp
+          ! at distance aks from bed.
+          !
           kmaxsd    = kmax
           call factor3d2d(kmax      ,aks       ,kmaxsd    ,sig       , &
                         & thick     ,seddif    ,ws        ,bakdif    , &
@@ -723,14 +722,14 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
        if (iform <= 0) then
            !
            ! Van Rijn 1993 or 2004 formula
-          ! NOTE: conc2d is based on caks which has been multiplied by
+           ! NOTE: conc2d is based on caks which has been multiplied by
            ! frac above. Since sbcu/v will be multiplied by frac later (again)
-          ! there is the risk of double correction. So, undo the multiplication.
+           ! there is the risk of double correction. So, undo the multiplication.
            !
-          if (frac>0.0_fp) then
-             sbcu = sbcu + conc2d * h1 * u / frac
-             sbcv = sbcv + conc2d * h1 * v / frac
-          endif
+           if (frac>0.0_fp) then
+              sbcu = sbcu + conc2d * h1 * u / frac
+              sbcv = sbcv + conc2d * h1 * v / frac
+           endif
        elseif (equi_conc) then
            !
            ! Concentration given by transport formula
@@ -749,8 +748,8 @@ subroutine eqtran(sig       ,thick     ,kmax      ,ws        ,ltur      , &
            ! Suspended transport rate components given by transport
            ! formula, add them individually to the bed load
            !
-          sbcu = sbcu + sscu
-          sbcv = sbcv + sscv
+           sbcu = sbcu + sscu
+           sbcv = sbcv + sscv
        endif
     endif
 end subroutine eqtran

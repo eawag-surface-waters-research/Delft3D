@@ -88,7 +88,6 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     real(fp)         , dimension(:)    , pointer :: sedtrcfac
     real(fp)         , dimension(:)    , pointer :: thcmud
     real(fp)         , dimension(:)    , pointer :: tcguni
-    real(fp)         , dimension(:,:)  , pointer :: gamtcr
     real(fp)         , dimension(:)    , pointer :: gamflc
     real(fp)         , dimension(:)    , pointer :: mudcnt
     integer          , dimension(:)    , pointer :: nseddia
@@ -235,7 +234,6 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        !
        if (istat==0) allocate (gdsedpar%thcmud    (nmlb:nmub            ), stat = istat)
        if (istat==0) allocate (gdsedpar%flstcg    (                      max(1,lsed)), stat = istat)
-       if (istat==0) allocate (gdsedpar%gamtcr    (nmlb:nmub,max(1,lsed)), stat = istat)
        !
        if (istat==0) allocate (gdsedpar%mudcnt    (nmlb:nmub            ), stat = istat)
        if (istat==0) allocate (gdsedpar%sedd50fld (nmlb:nmub            ), stat = istat)
@@ -274,7 +272,6 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
        !
        mudcnt        => gdsedpar%mudcnt
        sedd50fld     => gdsedpar%sedd50fld
-       gamtcr        => gdsedpar%gamtcr
        gamflc        => gdsedpar%gamflc
        tcguni        => gdsedpar%tcguni
        flstcg        => gdsedpar%flstcg
@@ -318,7 +315,6 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     sedd50fld    = rmissval
     !
     tcguni       = 1.5
-    gamtcr       = 1.5
     gamflc       = 1.0
     !
     ! Initialization of local parameters/arrays
@@ -530,25 +526,6 @@ subroutine rdsed(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
              ! Tracer calibration factor
              !
              call prop_get(sedblock_ptr, '*', 'TracerCalibrationFactor', sedtrcfac(l))
-             !
-             ! First assume that 'GamTcr' contains a filename
-             ! If the file does not exist, assume that 'GamTcr' contains a uniform value (real)
-             !
-             call prop_get_string(sedblock_ptr, '*', 'GamTcr', flstcg(l))
-             !
-             ! Intel 7.0 crashes on an inquire statement when file = ' '
-             !
-             if (flstcg(l) == ' ') then
-                ex = .false.
-             else
-                call combinepaths(filsed, flstcg(l))
-                inquire (file = flstcg(l), exist = ex)
-             endif
-             if (.not. ex) then
-                flstcg(l) = ' '
-                tcguni(l) = 1.5
-                call prop_get(sedblock_ptr, '*', 'GamTcr', tcguni(l))
-             endif
           endif
           !
           cdryb(l) = rmissval
@@ -1370,14 +1347,6 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   ,facdss    , &
        if (iform(l)==-2) then
           !
           ! Van Rijn 2007
-          !
-          if (flstcg(l) /= ' ') then
-             txtput1 = '  File GamTcr'
-             write (lundia, '(3a)') txtput1, ':  ', trim(flstcg(l))
-          else
-             txtput1 = '  Uniform GamTcr'
-             write (lundia, '(2a,e12.4)') txtput1, ':', tcguni(l)
-          endif
           !
           txtput1 = '  Flocculation factor GamFloc'
           write (lundia, '(2a,e12.4)') txtput1, ':', gamflc(l)

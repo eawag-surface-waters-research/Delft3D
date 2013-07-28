@@ -332,12 +332,14 @@ subroutine rdtrafrm(lundia    ,error     ,filtrn    ,lsedtot   , &
     endif
     !
     do ll = 1,lsedtot
-       if (flstrn(ll) /= ' ') write (lundia, '(a,a)') 'Reading: ',trim(flstrn(ll))
-       call rdtrafrm0(lundia    ,error     ,iform     ,npar      ,par       , &
-                    & parfil    ,iparfld   ,nparfld   ,ll        , &
-                    & flstrn(ll),name      ,dll_handle,dll_name  ,dll_function, &
-                    & dll_usrfil,ipardef   ,rpardef   ,npardef   ,sedblock  )
-       if (error) return
+       if (flstrn(ll) /= ' ') then
+          write (lundia, '(a,a)') 'Reading: ',trim(flstrn(ll))
+          call rdtrafrm0(lundia    ,error     ,iform     ,npar      ,par       , &
+                       & parfil    ,iparfld   ,nparfld   ,ll        , &
+                       & flstrn(ll),name      ,dll_handle,dll_name  ,dll_function, &
+                       & dll_usrfil,ipardef   ,rpardef   ,npardef   ,sedblock  )
+          if (error) return
+       endif
     enddo
     !
     call rdtraparfld(lundia    ,error     ,lsedtot   ,gdtrapar  , &
@@ -420,7 +422,6 @@ subroutine rdtrafrm0(lundia    ,error     ,iform     ,npar      ,par       , &
     allocate(sed_ptr)
     sed_ptr = sedblock(l)
     !
-    version = -0
     if (flname == ' ') then
        ! don't read any file, just use defaults
        version = -1
@@ -575,7 +576,7 @@ subroutine rdtrafrm0(lundia    ,error     ,iform     ,npar      ,par       , &
        nparopt = nparreq+nparopt
        nparreq = 0
     endif
-    do i = 1, nparreq+nparopt
+    do i = nparreq+1, nparreq+nparopt
        if (version==0) then
           read(inp,*,iostat=iost) par(10+i,l)
           if (iost/=0) par(10+i,l) = pardef(i)
@@ -629,6 +630,7 @@ subroutine rdtrafrm0(lundia    ,error     ,iform     ,npar      ,par       , &
           endif
        endif
        if (comparereal(par(10+i,l),nodef)==0 .and. iparfld(10+i,l)==0) then
+          error  = .true.
           errmsg = 'No value obtained for parameter '//trim(parkeyw(i))//' without default value.'
           call write_error(errmsg, unit=lundia)
        endif

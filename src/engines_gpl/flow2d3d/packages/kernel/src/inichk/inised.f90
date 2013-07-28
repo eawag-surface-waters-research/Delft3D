@@ -88,7 +88,6 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     real(fp)      , dimension(:)         , pointer :: sedtrcfac
     real(fp)      , dimension(:)         , pointer :: mudcnt
     real(fp)      , dimension(:)         , pointer :: tcguni
-    real(fp)      , dimension(:,:)       , pointer :: gamtcr
     integer       , dimension(:)         , pointer :: nseddia
     integer       , dimension(:)         , pointer :: sedtyp
     character(10) , dimension(:)         , pointer :: inisedunit
@@ -166,7 +165,6 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
     sdbuni              => gdp%gdsedpar%sdbuni
     sedtrcfac           => gdp%gdsedpar%sedtrcfac
     tcguni              => gdp%gdsedpar%tcguni
-    gamtcr              => gdp%gdsedpar%gamtcr
     mudcnt              => gdp%gdsedpar%mudcnt
     nseddia             => gdp%gdsedpar%nseddia
     sedtyp              => gdp%gdsedpar%sedtyp
@@ -263,41 +261,6 @@ subroutine inised(lundia    ,error     ,nmax      ,mmax      ,nmaxus    , &
                      & kcs       ,sedd50fld ,nmlb      ,nmub      )
        !
     endif
-    !
-    ! Fill sediment dependent arrays
-    !
-    do ll = 1, lsed
-       !
-       ! Calibration parameter GAMTCR for critical shear stress in Van Rijn (2004)
-       !
-       if (flstcg(ll) == ' ') then
-          !
-          ! Uniform data has been specified
-          !
-          gamtcr(:, ll) = tcguni(ll)
-       else
-          !
-          ! Space varying data has been specified
-          ! Use routine that also reads the depth file to read the data
-          !
-          call depfil(lundia    ,error     ,flstcg(ll),fmttmp    , &
-                    & gamtcr(nmlb, ll)     ,1         ,1         , &
-                    & gdp%griddim)
-          if (error) goto 9999
-       endif
-       !
-       ! Check whether gamtcr is zero somewhere
-       ! If so, give a warning for the first cell where that occurs
-       !
-       do nm = 1, nmmax
-          if (kcs(nm) == 1) then
-             if (comparereal(gamtcr(nm,ll), eps_fp) /= 1) then
-                call prterr(lundia, 'U021', 'Calibration parameter for critical shear stress is 0.0 in at least one cell')
-                call d3stop(1, gdp)
-             endif
-          endif
-       enddo
-    enddo
     !
     ! Start filling array MUDCNT
     !

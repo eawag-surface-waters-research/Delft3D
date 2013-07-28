@@ -150,6 +150,7 @@ subroutine tram1 (numrealpar,realpar   ,wave      ,par       ,kmax      , &
     real(fp) :: v
     real(fp) :: z
     real(fp) :: zusus
+    logical  :: difvr
 !
 !! executable statements -------------------------------------------------------
 !
@@ -242,10 +243,11 @@ subroutine tram1 (numrealpar,realpar   ,wave      ,par       ,kmax      , &
        epsbed = 0.0_fp
        epsmax = 0.0_fp
     endif
+    difvr = epspar .and. wave
     call calseddf1993(ustarc    ,ws        ,h1        ,kmax      ,sig       , &
                     & thick     ,dicww     ,tauwav    ,tauc      ,ltur      , &
-                    & eps       ,vonkar    ,epspar    ,wave      ,deltas    , &
-                    & epsbed    ,epsmax    ,epsmxc    ,seddif    )
+                    & eps       ,vonkar    ,difvr     ,deltas    ,epsbed    , &
+                    & epsmax    ,epsmxc    ,seddif    )
     !
     ! Calculate equilibrium concentration profile for sediment
     ! Note: option of selecting either Rouse profile or solution
@@ -277,8 +279,8 @@ subroutine tram1 (numrealpar,realpar   ,wave      ,par       ,kmax      , &
           ! Set diffusion coefficient at bottom of layer
           !
           diffbt    = seddif(k) + bakdif
-          diffbt    = max(diffbt , 0.1_fp*ws(k)*dz)
-          dz        = h1 * (sig(k)-sig(k+1))
+          diffbt    = max(diffbt , 0.1_fp*ws(k)*dz) ! \_ lines should be switched
+          dz        = h1 * (sig(k)-sig(k+1))        ! /
           fact1     = 1.0_fp + dz * ws(k) / diffbt
           rsedeq(k) = rsedeq(k+1) / fact1
        enddo
