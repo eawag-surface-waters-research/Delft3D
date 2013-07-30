@@ -88,7 +88,6 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
     logical                       , pointer :: fl45
     logical                       , pointer :: waqol
     integer                       , pointer :: itcomi
-    integer                       , pointer :: nofou
 !
 ! Global variables
 !
@@ -120,7 +119,6 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
     nto                 => gdp%d%nto
     ntoq                => gdp%d%ntoq
     ndro                => gdp%d%ndro
-    nofou               => gdp%d%nofou
     multi               => gdp%gdmorpar%multi
     nh_level            => gdp%gdnonhyd%nh_level
     dpsopt              => gdp%gdnumeco%dpsopt
@@ -409,14 +407,6 @@ subroutine chkset(lundia    ,error     ,sferic    ,method    ,trasol    , &
        !
        if (drogue) then
           errtxt = 'Drogues/walking monitor points are not available in parallel computations'
-          call prterr(lundia ,'U021' ,errtxt )
-          ierror = ierror+ 1
-       endif
-       !
-       ! when running in parallel, should NOT use Fourier output.
-       !
-       if (nofou > 0) then
-          errtxt = 'When running in parallel mode, Fourier output function is NOT support yet'
           call prterr(lundia ,'U021' ,errtxt )
           ierror = ierror+ 1
        endif

@@ -42,6 +42,7 @@ subroutine wrfou(nmax      ,mmax      ,nmaxus    ,kmax      ,lmax      , &
 !!--declarations----------------------------------------------------------------
     use precision
     use globaldata
+    use dfparall
     !
     implicit none
     !
@@ -81,31 +82,34 @@ subroutine wrfou(nmax      ,mmax      ,nmaxus    ,kmax      ,lmax      , &
     integer                        :: lunfou
     integer        , external      :: newlun
     character(256)                 :: fixid        ! fixed size version of runid, needed for character concatenation 
+    character(256)                 :: filename     ! fixed size version of runid, needed for character concatenation 
 !
 !
 !! executable statements -------------------------------------------------------
 !
 !
-    foutyp              => gdp%gdfourier%foutyp
+    foutyp => gdp%gdfourier%foutyp
     !
-    !-----define length of runid and put in fixed size array
-    !     size is tested in iniid
+    ! define length of runid and put in fixed size array
+    ! size is tested in iniid
     !
-    call noextspaces(runid     ,lrid      )
-    fixid(1:lrid) = runid(1:lrid)
+    filename = "fourier." // trim(runid)
+    if ( parll ) then
+       write(filename,'(2a,i3.3)') trim(filename), '-', inode
+    endif
     !
-    !-----Open output file 'fourier.'runid
+    ! Open output file 'fourier.'runid
     !
     lunfou = newlun(gdp)
-    open (lunfou, file = 'fourier.' // fixid(1:lrid), status = 'unknown')
+    open (lunfou, file = filename, status = 'unknown')
     !
-    !-----Write all requested fourier function output until IFOU > NOFOU
+    ! Write all requested fourier function output until IFOU > NOFOU
     !
     write (lunfou, '(a,a,a)') '*** Delft3D-FLOW utility FOUMOD *** version ',   &
                             & versio, ' ***'
     ifou = 1
     !
-    !--------Write requested fourier function output for scalar quantity
+    ! Write requested fourier function output for scalar quantity
     !
     do 
        if (ifou > nofou) exit
@@ -115,12 +119,11 @@ subroutine wrfou(nmax      ,mmax      ,nmaxus    ,kmax      ,lmax      , &
                     & nofou     ,ifou      ,lunfou    ,dtsec     ,namcon    , &
                     & kcs       ,xz        ,yz        ,xcor      ,ycor      , &
                     & kfu       ,kfv       ,itdate    ,gdp       )
-          !
           ifou = ifou + 1
        else
           !
-          !-----------Write requested fourier function output for vector quantity
-          !           and add 2 to ifou afterwards
+          ! Write requested fourier function output for vector quantity
+          ! and add 2 to ifou afterwards
           !
           call wrfouv(nmax      ,mmax      ,nmaxus    ,kmax      ,nofou     , &
                     & ifou      ,lunfou    ,dtsec     ,kcs       ,xz        , &
@@ -132,7 +135,7 @@ subroutine wrfou(nmax      ,mmax      ,nmaxus    ,kmax      ,lmax      , &
     enddo
     !
     !
-    !-----Close fourier output file
+    ! Close fourier output file
     !
     close (lunfou)
 end subroutine wrfou
