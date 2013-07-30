@@ -81,7 +81,6 @@ subroutine wrfou(nmax      ,mmax      ,nmaxus    ,kmax      ,lmax      , &
     integer                        :: lrid         ! Length of RUNID character string 
     integer                        :: lunfou
     integer        , external      :: newlun
-    character(256)                 :: fixid        ! fixed size version of runid, needed for character concatenation 
     character(256)                 :: filename     ! fixed size version of runid, needed for character concatenation 
 !
 !
