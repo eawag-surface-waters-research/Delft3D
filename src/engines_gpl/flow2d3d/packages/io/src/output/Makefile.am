@@ -22,6 +22,7 @@ FINCLUDES += \
 FMODULES += \
 	-I$(top_builddir)/utils_gpl/morphology/packages/morphology_kernel/src \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
+	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_mpi/src \
 	-I$(top_builddir)/utils_lgpl/ec_module/packages/ec_module/src \
 	-I$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/diof90 \
 	-I$(top_builddir)/utils_lgpl/delftio/packages/delftio/src/delftio_sync \
