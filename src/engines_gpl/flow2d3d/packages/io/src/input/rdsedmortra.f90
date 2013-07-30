@@ -148,7 +148,7 @@ subroutine rdsedmortra(lundia    ,error     ,lsal      ,ltem      ,lsed      , &
     rpardef = 0.0_fp
     call setpardef(ipardef, rpardef, NPARDEF, -1, 1, gdp%gdmorpar%iopsus)
     call setpardef(ipardef, rpardef, NPARDEF, -1, 2, gdp%gdmorpar%aksfac)
-    call setpardef(ipardef, rpardef, NPARDEF, -1, 4, gdp%gdmorpar%rwave)
+    call setpardef(ipardef, rpardef, NPARDEF, -1, 3, gdp%gdmorpar%rwave)
     call setpardef(ipardef, rpardef, NPARDEF, -1, 4, gdp%gdmorpar%rdc)
     call setpardef(ipardef, rpardef, NPARDEF, -1, 5, gdp%gdmorpar%rdw)
     call setpardef(ipardef, rpardef, NPARDEF, -1, 6, gdp%gdmorpar%iopkcw)
