@@ -33,11 +33,6 @@ libDeltaresCommon_la_SOURCES = \
 	string_module.f90 \
 	stringsequal.f90 \
 	system_utils.F90 \
-	dfparall.F90 \
-	quickin_dep_file.f90 \
-	depfil.f90 \
-	depfil_double.f90 \
-	dfbroadc.F90 \
 	mathconsts.f90 \
 	tree_struct.f90 \
 	buffer.f90 \

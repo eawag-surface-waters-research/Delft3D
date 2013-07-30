@@ -60,6 +60,7 @@ libflow2d3d_la_LIBADD = \
     $(top_builddir)/utils_lgpl/esmfsm/packages/esmfsm/src/fsm/libESMFSM.la \
     $(top_builddir)/utils_lgpl/nefis/packages/nefis/src/libNefis.la \
     $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommon.la \
+    $(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src/libDeltaresCommonMpi.la \
     $(top_builddir)/utils_lgpl/delftonline/src/delftonline/libDelftOnline.la \
     $(MPILIBS) \
     $(FCLIBS) $(CCLIBS)
