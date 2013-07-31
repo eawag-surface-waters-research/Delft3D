@@ -404,7 +404,7 @@ subroutine z_adi(stage     ,j         ,nmmaxj    ,nmmax     ,kmax      , &
        icy = 1
        call z_drychku(j         ,nmmaxj    ,nmmax     ,icx       ,kmax      , &
                     & kcs       ,kfu       ,kcu       ,kspu      ,kfsmax    , &
-                   & kfsmin    ,kfsz1     ,kfuz1     ,kfumin    ,kfumn0    ,kfumax    , &
+                    & kfsmin    ,kfsz1     ,kfuz1     ,kfumin    ,kfumn0    ,kfumax    , &
                     & kfumx0    ,hu        ,s1        ,dpu       ,dps       , &
                     & umean     ,u0        ,u1        ,dzu0      ,dzu1      , &
                     & dzs1      ,zk        ,kfsmx0    ,guu       ,qxk       , &

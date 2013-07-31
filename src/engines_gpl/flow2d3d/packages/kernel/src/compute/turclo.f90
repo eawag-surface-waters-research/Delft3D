@@ -85,10 +85,10 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
     integer                                                   , intent(in)  :: ltur   !  Description and declaration in esm_alloc_int.f90
     integer                                                   , intent(in)  :: nmmax  !  Description and declaration in dimens.igs
     integer                                                                 :: nmmaxj !  Description and declaration in dimens.igs
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)                 , intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)                 , intent(in)  :: kfs    !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)                 , intent(in)  :: kfu    !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub)                 , intent(in)  :: kfv    !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfs    !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfu    !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: kfv    !  Description and declaration in esm_alloc_int.f90
     real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: dps    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: hu     !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: hv     !  Description and declaration in esm_alloc_real.f90
@@ -104,13 +104,13 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)                    :: rich   !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)                    :: vicww  !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax, ltur), intent(in)  :: rtur0  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax + 2)                  :: dicuv  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax + 2)                  :: vicuv  !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: rho    !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: u0     !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: ueul   !!  Eulerian velocity in X-direction (including Stokes drift)
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: v0     !  Description and declaration in esm_alloc_real.f90
-    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in)  :: veul   !!  Eulerian velocity in Y-direction (including Stokes drift)
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub,   kmax+2)                  :: dicuv  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub,   kmax+2)                  :: vicuv  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub,   kmax)      , intent(in)  :: rho    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub,   kmax)      , intent(in)  :: u0     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub,   kmax)      , intent(in)  :: ueul   !!  Eulerian velocity in X-direction (including Stokes drift)
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub,   kmax)      , intent(in)  :: v0     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub,   kmax)      , intent(in)  :: veul   !!  Eulerian velocity in Y-direction (including Stokes drift)
     real(fp)  , dimension(kmax)                               , intent(in)  :: sig    !  Description and declaration in esm_alloc_real.f90
     real(fp)  , dimension(kmax)                               , intent(in)  :: thick  !  Description and declaration in esm_alloc_real.f90
     character(12)                                             , intent(in)  :: tkemod !  Description and declaration in tricom.igs
@@ -176,7 +176,7 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
     khtur = kmax + 2
     nm_pos= 1
     !
-    ! THIS ROUTINE IS ONLY OF INTEREST IN CASE KMAX > 1 !!
+    ! This routine is only of interest in case KMAX > 1
     !
     if (kmax==1) then
        do nm = 1, nmmax
@@ -187,9 +187,9 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
     endif
     !=======================================================================
     !
-    ! VERTICAL EDDY VISCOSITIES/DIFFUSIVITIES AT LAYER INTERFACES
+    ! Vertical eddy viscosities/diffusivities at layer interfaces
     !
-    !     CONSTANT VALUES FOR EDDY VISCOSITY & DIFFUSIVITY
+    ! Constant values for eddy viscosity & diffusivity
     !
     if (tkemod=='Constant   ') then
        do k = 0, kmax
@@ -201,12 +201,11 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
     else
        !=======================================================================
        !
-       !     OTHER TURBULENCE MODELS
+       !     Other turbulence models
        !
        !=======================================================================
        !
-       ! USE DICWW AS SCRATCH ARRAY TO COMPUTE 'Z0' IN
-       !         WATER-LEVEL POINTS
+       ! Use dicww as scratch array to compute Z0 in water-level points
        !
        nmd = -icx
        ndm = -icy
@@ -221,7 +220,7 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
           endif
        enddo
        !
-       !***production and buoyancy term (only vertical gradients)
+       ! Production and buoyancy term (only vertical gradients)
        !
        do k = 1, kmax - 1
           kup = k + 1
@@ -244,7 +243,7 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
           enddo
        enddo
        !
-       ! parallel case: exchange arrays in the overlapping cells
+       ! Parallel case: exchange arrays in the overlapping cells
        !
        call dfexchg(dudz, 0, kmax, dfloat, nm_pos, gdp)
        call dfexchg(dvdz, 0, kmax, dfloat, nm_pos, gdp)
@@ -275,7 +274,7 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
        enddo
        !=======================================================================
        !
-       !       ALGEBRAIC TURBULENCE MODEL (LTUR = 0)
+       !       Algebraic turbulence model (LTUR = 0)
        !
        !=======================================================================
        if (ltur==0) then
@@ -328,7 +327,7 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
              endif
           enddo
           !
-          !***KOLMOGOROV-PRANDTL MIXING LENGTH MODEL
+          ! Kolmogorov-Prandtl mixing length model
           !
           sigw = 0.0
           do k = 1, kmax - 1
@@ -342,8 +341,8 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
                    h0 = max(0.01_fp, real(dps(nm),fp) + s0(nm))
                    h0i = 1./h0
                    !
-                   ! DAMPING FUNCTION MIXING LENGTH  (FL)
-                   ! DAMPING FUNCTION DIFFUSIVITY    (FS)
+                   ! Damping function mixing length  (FL)
+                   ! Damping function diffusivity    (FS)
                    !
                    if (rich(nm, k)>=0.0) then
                       fl = exp( - 2.3*min(rich(nm, k), 30.0_fp))
@@ -357,11 +356,11 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
                       fs = 1.
                    endif
                    !
-                   !***MIXING LENGTH
+                   ! Mixing length
                    !
                    rl = vonkar*h0*(1. + sigw)*sqrt( - sigw)*fl
                    !
-                   !***ALGEBRAIC EDDY VISCOSITY (UITTENBOGAARD '91 )
+                   ! Algebraic eddy viscosity (Uittenbogaard '91 )
                    !
                    tkewin = sqrt(windsu(nm)**2 + windsv(nm)**2)
                    ustwi = sqrt(tkewin/rhow)
@@ -370,7 +369,7 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
                        & + ustwi*ustwi*(1. + sigw)/sqrt(cmukep)
                    vicww(nm, k) = cmukl*rl*sqrt(tke)
                    !
-                   !***EDDY VISCOSITY IS MAXIMUM UITTENBOGAARD/KOLMOGOROV-PRANDTL
+                   ! Eddy viscosity is maximum Uittenbogaard/Kolmogorov-Prandtl
                    !
                    if (kcs(nm)==3) then
                       maskval = kcs(nm) - 2
@@ -387,7 +386,7 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
           enddo
        !=======================================================================
        !
-       !    K-L MODEL (LTUR = 1)
+       !    K-L Model (LTUR = 1)
        !
        !=======================================================================
        elseif (ltur==1) then
@@ -399,8 +398,8 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
                    h0 = max(0.01_fp, real(dps(nm),fp) + s0(nm))
                    h0i = 1./h0
                    !
-                   ! DAMPING FUNCTION MIXING LENGTH  (FL)
-                   ! DAMPING FUNCTION DIFFUSIVITY    (FS)
+                   ! Damping function mixing length  (FL)
+                   ! Damping function diffusivity    (FS)
                    !
                    if (rich(nm, k)>=0.0) then
                       fl = exp( - 2.3*min(rich(nm, k), 30.0_fp))
@@ -417,7 +416,7 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
           enddo
        !=======================================================================
        !
-       !   K-EPS MODEL (LTUR = 2)
+       !   K-EPS model (LTUR = 2)
        !
        !=======================================================================
        else
@@ -430,7 +429,7 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
                    dicww(nm, k) = vicww(nm, k)
                 else
                    !
-                   ! make vicww and dicww small for points
+                   ! Make vicww and dicww small for points
                    ! that are dry or almost dry
                    ! Actually, it would be more consistent to use
                    ! dicww(nm, k) = vicmol/sigmol
@@ -445,7 +444,7 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
           enddo
        endif
        !
-       ! bottom and free surface (for all turbulence models except constant)
+       ! Bottom and free surface (for all turbulence models except constant)
        !
        nmd = -icx
        ndm = -icy
@@ -462,7 +461,7 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
              vicww(nm, 0) = vonkar*zw*ustwin
              dicww(nm, 0) = vonkar*zw*ustwin
              !
-             ! rtur can be used to determine viscosity at surface
+             ! RTUR can be used to determine viscosity at surface
              ! only for k-eps model
              !
              if (ltur==2) then
@@ -471,7 +470,7 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
                 dicww(nm, 0) = vicww(nm, 0)
              endif
              !
-             ! bottom is assumed at Z0 (for all turbulence models execpt constant)
+             ! Bottom is assumed at Z0 (for all turbulence models except constant)
              !
              h0 = max(0.01_fp, real(dps(nm),fp) + s0(nm))
              if (kcs(nm)==3) then
@@ -487,7 +486,7 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
              dicww(nm, kmax) = vonkar*ustbot*dicww(nm, kmax)
           else
              !
-             ! make vicww and dicww small for points
+             ! Make vicww and dicww small for points
              ! that are dry or almost dry (for k=kmin and k=kmax)
              ! Actually, it would be more consistent to use
              ! dicww(nm, k) = vicmol/sigmol
@@ -517,13 +516,12 @@ subroutine turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
        enddo
     endif
     !
-    ! parallel case: exchange arrays in the overlapping cells
+    ! Parallel case: exchange arrays in the overlapping cells
     !
     call dfexchg(vicww, 0, kmax, dfloat, nm_pos, gdp)
     call dfexchg(dicww, 0, kmax, dfloat, nm_pos, gdp)
     !
-    !***HORIZONTAL EDDY VISCOSITIES AND DIFFUSIVITIES
-    !   IN DENSITY POINTS
+    ! Horizontal eddy viscosities and diffusivities in density points
     !
     do k = 1, kmax
        do nm = 1, nmmax

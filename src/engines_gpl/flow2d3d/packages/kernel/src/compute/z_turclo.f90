@@ -201,8 +201,9 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
     ee    = exp(1.0)
     !
     ! Copy the computed HLES eddy viscosity to the index that will be
-    ! used by the program (THIS PART OF ROUTINE IS ONLY OF INTEREST IN
-    ! CASE KMAX = 1 !; copying of HLES eddy viscosity for 3D see below)
+    ! used by the program 
+    ! This part of routine is only of interest in case KMAX = 1
+    ! Copying of HLES eddy viscosity for 3D see below)
     !
     if (kmax==1) then
        do nm = 1, nmmax
@@ -212,7 +213,7 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
        goto 2000
     endif
     !
-    ! free surface moving through grid, set VICWW, DICWW, BRUVAI and RICH zero
+    ! Free surface moving through grid, set VICWW, DICWW, BRUVAI and RICH zero
     !
     do nm = 1, nmmax
        do k = 1, kmax
@@ -226,9 +227,9 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
     if (tkemod=='Constant   ') then
        !=======================================================================
        !
-       ! VERTICAL EDDY VISCOSITIES/DIFFUSIVITIES AT LAYER INTERFACES
+       ! Vertical eddy viscosities/diffusivities at layer interfaces
        !
-       !     CONSTANT VALUES FOR EDDY VISCOSITY & DIFFUSIVITY
+       ! Constant values for eddy viscosity & diffusivity
        !
        do nm = 1, nmmax
           if (kfsmin(nm)/=0) then
@@ -241,11 +242,11 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
     else
        !=======================================================================
        !
-       !     OTHER TURBULENCE MODELS
+       ! Other turbulence models
        !
        !=======================================================================
        !
-       !USE DICWW AS SCRATCH ARRAY TO COMPUTE 'Z0' IN WATER-LEVEL POINTS
+       ! Use DICWW as scratch array to compute Z0 in water-level points
        !
        nmd = -icx
        ndm = -icy
@@ -260,7 +261,7 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
           endif
        enddo
        !
-       !***production and buoyancy term (only vertical gradients)
+       ! Production and buoyancy term (only vertical gradients)
        !
        do nm = 1, nmmax
           if (kfu(nm) == 1) then
@@ -312,7 +313,7 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
        enddo
        !=======================================================================
        !
-       !       ALGEBRAIC TURBULENCE MODEL (LTUR = 0)
+       ! Algebraic turbulence model (LTUR = 0)
        !
        !=======================================================================
        if (ltur==0) then
@@ -328,7 +329,7 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
                        & /max(1, kfvz1(ndm, k) + kfvz1(nm, k))
                    utot = sqrt(uuu*uuu + vvv*vvv)
                    !
-                   ! bottom is assumed at Z0
+                   ! Bottom is assumed at Z0
                    !
                    if (k==kfsmin(nm)) then
                       zcord = zcord + .5*dzs1(nm, k)
@@ -363,7 +364,7 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
                 endif
                 utot = sqrt(uuu*uuu + vvv*vvv)
                 !
-                ! bottom is assumed at Z0
+                ! Bottom is assumed at Z0
                 !
                 rz              = 1.0_fp + dz/dicww(nm, kmax)
                 ustbot          = utot*vonkar/log(rz)
@@ -371,7 +372,7 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
              endif
           enddo
           !
-          !***KOLMOGOROV-PRANDTL MIXING LENGTH MODEL
+          ! Kolmogorov-Prandtl mixing length model
           !
           do nm = 1, nmmax
              reldik = 0.
@@ -381,8 +382,8 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
                 if (kfs(nm)==1) then
                    h0 = max(0.01_fp, real(dps(nm),fp) + s1(nm))
                    !
-                   ! DAMPING FUNCTION MIXING LENGTH  (FL)
-                   ! DAMPING FUNCTION DIFFUSIVITY    (FS)
+                   ! Damping function mixing length  (FL)
+                   ! Damping function diffusivity    (FS)
                    !
                    if (rich(nm, k)>=0.0) then
                       fl = exp( - 2.3*min(rich(nm, k), 30.0_fp))
@@ -396,12 +397,12 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
                       fs = 1.
                    endif
                    !
-                   !***MIXING LENGTH
+                   ! Mixing length
                    !
                    reldik = reldik + dzs1(nm, k)/h0
                    rl = vonkar*h0*reldik*sqrt(1.0 - reldik)*fl
                    !
-                   !***ALGEBRAIC EDDY VISCOSITY (UITTENBOGAARD '91 )
+                   ! Algebraic eddy viscosity (Uittenbogaard '91 )
                    !
                    tkewin = sqrt(windsu(nm)**2 + windsv(nm)**2)
                    ustwi = sqrt(tkewin/rhow)
@@ -410,7 +411,7 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
                        & + ustwi*ustwi*(reldik)/sqrt(cmukep)
                    vicww(nm, k) = cmukl*rl*sqrt(tke)
                    !
-                   !***EDDY VISCOSITY IS MAXIMUM UITTENBOGAARD/KOLMOGOROV-PRANDTL
+                   ! Eddy viscosity is maximum Uittenbogaard/Kolmogorov-Prandtl
                    !
                    if (kcs(nm)==3) then
                       maskval = kcs(nm) - 2
@@ -427,7 +428,7 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
           enddo
        !=======================================================================
        !
-       !    K-L MODEL (LTUR = 1)
+       !    K-L model (LTUR = 1)
        !
        !=======================================================================
        elseif (ltur==1) then
@@ -437,8 +438,8 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
                 if (kfs(nm)==1) then
                    h0 = max(0.01_fp, real(dps(nm),fp) + s1(nm))
                    !
-                   ! DAMPING FUNCTION MIXING LENGTH  (FL)
-                   ! DAMPING FUNCTION DIFFUSIVITY    (FS)
+                   ! Damping function mixing length  (FL)
+                   ! Damping function diffusivity    (FS)
                    !
                    if (rich(nm, k)>=0.0) then
                       fl = exp( - 2.3*min(rich(nm, k), 30.0_fp))
@@ -455,7 +456,7 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
           enddo
        !=======================================================================
        !
-       !   K-EPS MODEL (LTUR = 2)
+       !   K-EPS model (LTUR = 2)
        !
        !=======================================================================
        else
@@ -468,7 +469,7 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
                    dicww(nm, k) = vicww(nm, k)
                 else
                    !
-                   ! make vicww and dicww small for points
+                   ! Make vicww and dicww small for points
                    ! that are dry or almost dry
                    ! Actually, it would be more consistent to use
                    ! dicww(nm, k) = vicmol/sigmol
@@ -483,7 +484,7 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
           enddo
        endif
        !
-       ! bottom and free surface (for all turbulence models except constant)
+       ! Bottom and free surface (for all turbulence models except constant)
        !
        do nm = 1, nmmax
           nmd = nm - icx
@@ -492,7 +493,7 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
           if (kfs(nm)==1 .and. h0>0.01_fp) then
              !
              !
-             ! bottom is assumed at Z0 (for all turbulence models execpt constant)
+             ! Bottom is assumed at Z0 (for all turbulence models except constant)
              !
              kmin = kfsmin(nm)
              if (kfsmin(nm)/=kfsmax(nm)) then
@@ -545,7 +546,7 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
              vicww(nm, kfsmax(nm)) = vonkar*zw*ustwin
              dicww(nm, kfsmax(nm)) = vonkar*zw*ustwin
              !
-             ! Rtur1 can be used to determine viscosity at surface
+             ! RTUR1 can be used to determine viscosity at surface
              ! Only for k-eps model
              !
              if (ltur == 2) then
@@ -556,7 +557,7 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
              
           else
              !
-             ! make vicww and dicww small for points
+             ! Make vicww and dicww small for points
              ! that are dry or almost dry (for k=kfsmin and k=kfsmax)
              ! Actually, it would be more consistent to use
              ! dicww(nm, k) = vicmol/sigmol
@@ -564,7 +565,7 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
              ! So, just use
              ! dicww(nm, k) = vicmol
              !
-             ! kfsmax may be uninitialized (-1)
+             ! KFSMAX may be uninitialized (-1)
              !
              vicww(nm, kfsmin(nm)) = vicmol
              dicww(nm, kfsmin(nm)) = vicmol
@@ -582,8 +583,7 @@ subroutine z_turclo(j         ,nmmaxj    ,nmmax     ,kmax      ,ltur      , &
        !
     endif
     !
-    !***HORIZONTAL EDDY VISCOSITIES AND DIFFUSIVITIES
-    !   IN DENSITY POINTS
+    ! Horizontal eddy viscosities and diffusivities in density points
     !
     do nm = 1, nmmax
        if (kfsmax(nm)>kfsmin(nm)) then

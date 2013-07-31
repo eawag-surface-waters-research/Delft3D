@@ -89,10 +89,6 @@ subroutine z_taubotmodifylayers(nmmax  ,kmax     ,lstsci   ,icx     ,icy        
     integer  :: k
     integer  :: l
     integer  :: nm
-    integer  :: nmu
-    integer  :: num
-    real(fp) :: s1u
-    real(fp) :: s1v
     real(fp) :: dzh
 !
 !! executable statements -------------------------------------------------------

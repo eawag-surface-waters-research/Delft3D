@@ -338,7 +338,7 @@ subroutine chkdry(j         ,nmmaxj    ,nmmax     ,kmax      ,lsec      , &
     enddo
     deallocate(mask)
     !
-    ! Correction for temporarily drypoints (secondary flow only)
+    ! Correction for temporarily dry points (secondary flow only)
     ! Note: redundant at coupling interfaces for parallel runs
     !
     if (lsec>0) then

@@ -1073,7 +1073,7 @@ subroutine wrimap(lundia      ,error     ,trifil    ,selmap    ,simdat    , &
              enddo
           enddo
        enddo
-       ierror = putelt(fds, grnam2, 'PPARTITION', uindex, 1, isbuff)
+       ierror = putelt(fds, grnam2, 'PARTITION', uindex, 1, isbuff)
        deallocate( isbuff )
        if (ierror/=0) goto 999
     endif

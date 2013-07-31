@@ -1270,7 +1270,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        !
        !  Time integration following the original approach of Bijvelds and Stelling
        !  with a dummy UZD (velocities are computed in Z_SUD/Z_CUCNP and frozen
-       !  for the second half timestep. This is done in his part.
+       !  for the second half timestep. This is done in this part.
        !
        call timer_start(timer_uzd_ini, gdp)
        !
@@ -1292,7 +1292,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        enddo
        call timer_stop(timer_uzd_rhs, gdp)
        !
-       ! end of "build_system_for_velocity",
+       ! End of "build_system_for_velocity",
        ! mapper can build the coupling equations
        !
        call timer_start(timer_uzd_rest, gdp) 
@@ -1311,7 +1311,7 @@ subroutine z_uzd(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        endif
        call timer_stop(timer_uzd_rest, gdp) 
        !
-       ! resume point for next solve
+       ! Resume point for next solve
        !
      333 continue
        gdp%dd%uzditer = gdp%dd%uzditer + 1

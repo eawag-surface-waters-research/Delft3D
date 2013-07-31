@@ -128,7 +128,7 @@ subroutine disbub(kmax      ,nsrcd     ,nsrc      ,nxbub    , &
     real(fp)       :: zup
     real(fp)       :: zdown
     logical        :: stopOnError
-    character(20)  :: chulp   ! Help charatcter string
+    character(20)  :: chulp        ! Help character string
     character(256) :: error
     character(256) :: message
 !

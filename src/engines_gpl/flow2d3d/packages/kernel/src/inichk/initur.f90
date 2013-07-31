@@ -67,58 +67,62 @@ subroutine initur(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
 !
 ! Global variables
 !
-    integer                                                 , intent(in)  :: icx    !!  Increment in the X-dir., if ICX= NMAX then computation proceeds in the X-dir. If icx=1 then computation proceeds in the Y-dir.
-    integer                                                 , intent(in)  :: icy    !!  Increment in the Y-dir. (see ICX)
-    integer                                                               :: j      !!  Begin pointer for arrays which have been transformed into 1D arrays. Due to the shift in the 2nd (M-) index, J = -2*NMAX + 1
-    integer, intent(in)            :: kmax !  Description and declaration in esm_alloc_int.f90
-    integer, intent(in)            :: ltur !  Description and declaration in esm_alloc_int.f90
-    integer, intent(in)            :: lturi !  Description and declaration in tricom.igs
-    integer, intent(in)            :: nmmax !  Description and declaration in dimens.igs
-    integer         :: nmmaxj !  Description and declaration in dimens.igs
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kcs !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kfs !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kfu !  Description and declaration in esm_alloc_int.f90
-    integer, dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: kfv !  Description and declaration in esm_alloc_int.f90
-    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: dps !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: hu !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: hv !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: s0 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: windsu !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: windsv !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: z0urou !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub), intent(in) :: z0vrou !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax) :: dudz !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax) :: dvdz !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax, ltur) :: rtur0 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in) :: u0 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub, kmax), intent(in) :: v0 !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(kmax), intent(in) :: thick !  Description and declaration in esm_alloc_real.f90
+    integer                                                   , intent(in) :: icx    !!  Increment in the X-dir., if ICX= NMAX then 
+                                                                                     !!  computation proceeds in the X-dir. 
+                                                                                     !!  If icx=1 then computation proceeds in the Y-dir.
+    integer                                                   , intent(in) :: icy    !!  Increment in the Y-dir. (see ICX)
+    integer                                                                :: j      !!  Begin pointer for arrays which have been 
+                                                                                     !!  transformed into 1D arrays. Due to the shift 
+                                                                                     !!  in the 2nd (M-) index, J = -2*NMAX + 1
+    integer                                                   , intent(in) :: kmax   !  Description and declaration in esm_alloc_int.f90
+    integer                                                   , intent(in) :: ltur   !  Description and declaration in esm_alloc_int.f90
+    integer                                                   , intent(in) :: lturi  !  Description and declaration in tricom.igs
+    integer                                                   , intent(in) :: nmmax  !  Description and declaration in dimens.igs
+    integer                                                                :: nmmaxj !  Description and declaration in dimens.igs
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in) :: kcs    !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in) :: kfs    !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in) :: kfu    !  Description and declaration in esm_alloc_int.f90
+    integer   , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in) :: kfv    !  Description and declaration in esm_alloc_int.f90
+    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in) :: dps    !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in) :: hu     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in) :: hv     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in) :: s0     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in) :: windsu !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in) :: windsv !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in) :: z0urou !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in) :: z0vrou !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)                   :: dudz   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax)                   :: dvdz   !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, 0:kmax, ltur)             :: rtur0  !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in) :: u0     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(gdp%d%nmlb:gdp%d%nmub, kmax)        , intent(in) :: v0     !  Description and declaration in esm_alloc_real.f90
+    real(fp)  , dimension(kmax)                               , intent(in) :: thick  !  Description and declaration in esm_alloc_real.f90
 !
 ! Local variables
 !
-    integer                        :: k
-    integer                        :: kup
-    integer                        :: maskval
-    integer                        :: ndm
-    integer                        :: nm
-    integer                        :: nmd
-    real(fp)                       :: dz
-    real(fp)                       :: ene
-    real(fp)                       :: h0
-    real(fp)                       :: rl
-    real(fp)                       :: shear
-    real(fp)                       :: sigw
-    real(fp)                       :: tke
-    real(fp)                       :: tsg
-    real(fp)                       :: ust
-    real(fp)                       :: utot
-    real(fp)                       :: uuu
-    real(fp)                       :: vvv
-    real(fp), dimension(:,:), allocatable       :: z0scratch
-    real(fp)                       :: z00
-    real(fp)                       :: zw
-    real(fp)                       :: zwc
-    integer                        :: nm_pos ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
+    integer                               :: k
+    integer                               :: kup
+    integer                               :: maskval
+    integer                               :: ndm
+    integer                               :: nm
+    integer                               :: nmd
+    integer                               :: nm_pos    ! indicating the array to be exchanged has nm index at the 2nd place, e.g., dbodsd(lsedtot,nm)
+    real(fp)                              :: dz
+    real(fp)                              :: ene
+    real(fp)                              :: h0
+    real(fp)                              :: rl
+    real(fp)                              :: shear
+    real(fp)                              :: sigw
+    real(fp)                              :: tke
+    real(fp)                              :: tsg
+    real(fp)                              :: ust
+    real(fp)                              :: utot
+    real(fp)                              :: uuu
+    real(fp)                              :: vvv
+    real(fp), dimension(:,:), allocatable :: z0scratch
+    real(fp)                              :: z00
+    real(fp)                              :: zw
+    real(fp)                              :: zwc
 !
 !! executable statements -------------------------------------------------------
 !
@@ -132,6 +136,7 @@ subroutine initur(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
     z0          => gdp%gdphysco%z0
     z0v         => gdp%gdphysco%z0v
     vonkar      => gdp%gdphysco%vonkar
+    !
     nm_pos      =  1
     !
     allocate(z0scratch(gdp%d%nmlb:gdp%d%nmub, kmax))
@@ -142,16 +147,16 @@ subroutine initur(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        nmd = nmd + 1
        ndm = ndm + 1
        if (kfs(nm)==1) then
-          z0scratch(nm, kmax) = (kfu(nm)*z0urou(nm) + kfu(nmd)*z0urou(nmd) + kfv(nm) &
-                          & *z0vrou(nm) + kfv(ndm)*z0vrou(ndm))                 &
-                          & /(kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm))
+          z0scratch(nm, kmax) = (  kfu(nm)*z0urou(nm) + kfu(nmd)*z0urou(nmd)   &
+                              &  + kfv(nm)*z0vrou(nm) + kfv(ndm)*z0vrou(ndm) ) &
+                              &  /(kfu(nm) + kfu(nmd) + kfv(nm) + kfv(ndm))
        endif
     enddo
     !
     !***PRODUCTION AND BUOYANCY TERM (ONLY VERTICAL GRADIENTS)
     !
     if (lturi>0) then
-       do k = 1, kmax - 1
+       do k = 1, kmax-1
           kup = k + 1
           tsg = 0.5*(thick(k) + thick(kup))
           do nm = j, nmmax
@@ -169,7 +174,7 @@ subroutine initur(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
        !***KOLMOGOROV-PRANDTL MIXING LENGTH MODEL
        !
        sigw = 0.0
-       do k = 1, kmax - 1
+       do k = 1, kmax-1
           sigw = sigw - thick(k)
           nmd = -icx
           ndm = -icy
@@ -190,11 +195,11 @@ subroutine initur(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
                 !
                 !***INITIALISATION TKE and EPSILON from PRANDTL MIXING LENGTH MODEL
                 !
-                shear = maskval*0.5*(dudz(nm, k)**2 + dudz(nmd, k)              &
-                      & **2 + dvdz(nm, k)**2 + dvdz(ndm, k)**2)
-                ene = maskval*0.25*(u0(nm, k)**2 + u0(nmd, k)**2 + v0(nm, k)    &
-                    & **2 + v0(ndm, k)**2)
-                tke = min(ene, rl*rl*shear/sqrt(cmukep))
+                shear = maskval*0.5 *(  dudz(nm, k)**2 + dudz(nmd, k)**2   &
+                      &               + dvdz(nm, k)**2 + dvdz(ndm, k)**2 )
+                ene   = maskval*0.25*(  u0(nm, k)**2 + u0(nmd, k)**2       &
+                      &               + v0(nm, k)**2 + v0(ndm, k)**2 )
+                tke   = min(ene, rl*rl*shear/sqrt(cmukep))
                 rtur0(nm, k, 1) = tke
              endif
           enddo
@@ -222,13 +227,13 @@ subroutine initur(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              !
              !***AT BOTTOM
              !
-             z00 = z0scratch(nm, kmax)
-             uuu = 0.5*(u0(nmd, kmax) + u0(nm, kmax))*maskval
-             vvv = 0.5*(v0(ndm, kmax) + v0(nm, kmax))*maskval
+             z00  = z0scratch(nm, kmax)
+             uuu  = 0.5*(u0(nmd, kmax) + u0(nm, kmax))*maskval
+             vvv  = 0.5*(v0(ndm, kmax) + v0(nm, kmax))*maskval
              utot = sqrt(uuu*uuu + vvv*vvv)
-             dz = 0.5*thick(kmax)*h0
-             ust = utot*vonkar/log(1. + dz/z00)
-             tke = ust*ust/sqrt(cmukep)
+             dz   = 0.5*thick(kmax)*h0
+             ust  = utot*vonkar/log(1. + dz/z00)
+             tke  = ust*ust/sqrt(cmukep)
              rtur0(nm, kmax, 1) = tke
           endif
        enddo
@@ -264,14 +269,13 @@ subroutine initur(j         ,nmmaxj    ,nmmax     ,kmax      ,icx       , &
              !***AT FREE SURFACE
              !
              zwc = 0.5*thick(1)*h0
-             zw = inpzw*zwi + (1 - inpzw)*zwc
+             zw  = inpzw*zwi + (1 - inpzw)*zwc
              rtur0(nm, 0, 2) = max(1.E-7_fp, cewall*(rtur0(nm, 0, 1))**1.5/zw)
              !
              !***AT BOTTOM
              !
              z00 = z0scratch(nm, kmax)
-             rtur0(nm, kmax, 2) = max(1.E-7_fp, cewall*(rtur0(nm, kmax, 1))        &
-                                & **1.5/z00)
+             rtur0(nm, kmax, 2) = max(1.E-7_fp, cewall*(rtur0(nm, kmax, 1))**1.5/z00)
           endif
        enddo
     endif
