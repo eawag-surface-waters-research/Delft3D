@@ -4191,6 +4191,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/plotstatestruct.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/procargs.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/progressbar.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/protectstring.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/ps2pdf.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qncmap.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qnhls.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_basedir.m -text
