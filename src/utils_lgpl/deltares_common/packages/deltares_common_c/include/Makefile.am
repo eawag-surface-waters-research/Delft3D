@@ -13,8 +13,12 @@ include $(top_srcdir)/common.am
 #-------------------------------------------------------------------------------
 #Includes
 dist_noinst_HEADERS = \
+	cpuinfo.h \
 	getputarray.h \
+	meminfo.h \
 	platformst.h \
+	precision.h \
+	shared_library_fortran_api.h \
 	stream.h \
 	throwexception.h \
 	util_mf.h 
