@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="plugin_3dmortrafrm_c"
-	ProjectGUID="{0C894FD0-D65E-42D5-B343-EC2076E98641}"
+	Name="morphology_plugins_c"
+	ProjectGUID="{1D7CB86F-1AA2-499E-B68E-2F376044E26F}"
 	RootNamespace="morphology_plugins_c"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
@@ -147,7 +147,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\src\f902c.c"
+				RelativePath=".\src\shared_lib_fallve.c"
+				>
+			</File>
+			<File
+				RelativePath=".\src\shared_lib_trafrm.c"
 				>
 			</File>
 		</Filter>

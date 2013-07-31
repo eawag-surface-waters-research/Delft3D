@@ -37,7 +37,7 @@ module bedcomposition_module
 !!--module declarations---------------------------------------------------------
 
 use precision
-private
+
 
 !
 ! public data types
@@ -173,7 +173,6 @@ type bedcomp_work
 end type bedcomp_work
 !
 type bedcomp_data
-   private
    type (bedcomp_settings), pointer :: settings
    type (bedcomp_state)   , pointer :: state
 end type bedcomp_data

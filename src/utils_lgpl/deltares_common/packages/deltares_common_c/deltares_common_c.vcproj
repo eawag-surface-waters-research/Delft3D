@@ -173,6 +173,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\src\shared_library_fortran_api.c"
+				>
+			</File>
+			<File
 				RelativePath=".\src\stream.cpp"
 				>
 			</File>

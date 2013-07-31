@@ -104,56 +104,8 @@ void RemoveTrailingBlanksXX(char * String)
  * ============================================================================
  */
 extern "C" {
-long STDCALL OPEN_SHARED_LIBRARY(long * sharedDLLHandle, char * library, long length_lib)
-{
-    long error = 1;
-    SharedDLL * tmpSharedDLL = NULL;
-    char * lib_name = strFcpy(library, length_lib);
-
-    *sharedDLLHandle = 0;
-
-    RemoveTrailingBlanksXX(lib_name);
-
-    tmpSharedDLL = (SharedDLL *) malloc(sizeof(SharedDLL));
-#if defined(WIN32)
-    tmpSharedDLL->dllHandle = LoadLibrary(lib_name);
-#elif defined(LINUX)
-    tmpSharedDLL->dllHandle = dlopen(lib_name, RTLD_LAZY);
-#endif
-
-    if (tmpSharedDLL->dllHandle != NULL)
-    {
-        error = 0;
-        *sharedDLLHandle = (long) tmpSharedDLL;
-    }
-
-    free(lib_name); lib_name = NULL;
-
-    return error;
-}
 /*
- * ============================================================================
- */
-long STDCALL CLOSE_SHARED_LIBRARY(long * sharedDLLHandle)
-{
-    SharedDLL * sharedDLL = (SharedDLL *) (*sharedDLLHandle);
-
-#if defined(WIN32)
-    (void) FreeLibrary(sharedDLL->dllHandle);
-#elif defined(SALF)
-    (void) FreeLibrary(sharedDLL->dllHandle);
-#elif defined(LINUX)
-    (void) dlclose(sharedDLL->dllHandle);
-#endif
-
-    /*
-     * dllHandle not set to NULL, because FreeLibrary counts the number of 'LoadLibrary's
-     */
-
-    return 0;
-}
-/*
- * ============================================================================
+ * OPEN_SHARED_LIBRARY and CLOSE_SHARED_LIBRARY are used from utils_lgpl\deltares_common\packages\deltares_common_c\src\shared_library_fortran_api.c
  */
 #if defined(XWIN32)
 long STDCALL PERFORM_FUNCTION(long  * sharedDLLHandle  ,
