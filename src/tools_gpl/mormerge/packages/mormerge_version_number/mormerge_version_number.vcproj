@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="mormerge_version_number"
 	ProjectGUID="{C2638430-A7F5-41DD-A51A-9C23D604FB34}"
 	RootNamespace="nefis_version_number"
@@ -49,6 +49,7 @@
 				GeneratePreprocessedFile="0"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
+				RuntimeLibrary="3"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"
@@ -111,6 +112,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="./include"
 				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_WARNINGS"
+				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="false"

@@ -24,7 +24,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\nefis_version.h ..\.. .\include\version_number.ini&#x0D;&#x0A;call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\nefis_version.rc ..\.. .\include\version_number.ini"
+				CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\nefis_version.h ..\.. .\include\version_number.ini&#x0D;&#x0A;call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\nefis_version.rc ..\.. .\include\version_number.ini&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -100,7 +100,7 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\nefis_version.h ..\.. .\include\version_number.ini&#x0D;&#x0A;call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\nefis_version.rc ..\.. .\include\version_number.ini"
+				CommandLine="call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\nefis_version.h ..\.. .\include\version_number.ini&#x0D;&#x0A;call ..\..\..\..\scripts_lgpl\win32\update_version.cmd .\include\nefis_version.rc ..\.. .\include\version_number.ini&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -118,6 +118,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="./include"
 				PreprocessorDefinitions="PTR8;WIN64;NEFIS_DLL;_CRT_SECURE_NO_WARNINGS"
+				RuntimeLibrary="2"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
@@ -297,11 +298,11 @@
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
-				RelativePath="include\resource.h"
+				RelativePath="include\nefis_version.rc"
 				>
 			</File>
 			<File
-				RelativePath="include\nefis_version.rc"
+				RelativePath="include\resource.h"
 				>
 			</File>
 		</Filter>

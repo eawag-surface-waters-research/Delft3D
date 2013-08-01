@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="flow2d3d_openda"
 	ProjectGUID="{657ABE78-F81C-46FB-8774-8F0C4CD545E1}"
 	RootNamespace="flow2d3d_openda"
@@ -147,7 +147,7 @@
 				OutputFile="$(OutDir)\flow2d3d_openda.dll"
 				LinkIncremental="1"
 				AdditionalLibraryDirectories="..\..\..\..\third_party_open\pthreads\bin\win32;&quot;..\..\..\..\third_party_open\DelftOnline\lib\$(ConfigurationName)&quot;;..\..\..\..\third_party_open\expat\win32\bin\Release;..\..\..\..\third_party_open\mpich2\lib;..\..\..\..\third_party_open\openda\core\native\lib\win32;&quot;$(IFORT_COMPILER11)\lib\ia32&quot;"
-				IgnoreDefaultLibraryNames="LIBCMT.lib"
+				IgnoreDefaultLibraryNames="LIBCMT.lib;libifcoremt.lib;libmmt.lib"
 				GenerateDebugInformation="true"
 				SubSystem="2"
 				StackReserveSize="20000000"

@@ -120,6 +120,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="../../include;../../../../utils_lgpl/deltares_common/packages/deltares_common_c/include/win32"
 				PreprocessorDefinitions="VS2008;WIN32;_CRT_SECURE_NO_WARNINGS"
+				RuntimeLibrary="2"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
