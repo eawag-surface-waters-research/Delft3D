@@ -41,7 +41,6 @@ libKernelComputeSediment_la_SOURCES = \
          dredgedump.f90 \
          dwnvel.f90 \
          erosed.f90 \
-         layers.f90 \
          red_soursin.f90 \
          shearx.f90 \
          z_bott3d.f90 \
