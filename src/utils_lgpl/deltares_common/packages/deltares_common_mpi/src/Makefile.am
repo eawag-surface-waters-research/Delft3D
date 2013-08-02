@@ -19,6 +19,9 @@ noinst_LTLIBRARIES = libDeltaresCommonMpi.la
 FMODULES += \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
 	
+AM_FCFLAGS += \
+        -DDFMPI
+
 #-------------------------------------------------------------------------------
 #Sources
 libDeltaresCommonMpi_la_SOURCES = \
@@ -30,3 +33,7 @@ libDeltaresCommonMpi_la_SOURCES = \
 
 #-------------------------------------------------------------------------------
 #Libraries
+
+# MPI
+FC=$(MPIFC)
+
