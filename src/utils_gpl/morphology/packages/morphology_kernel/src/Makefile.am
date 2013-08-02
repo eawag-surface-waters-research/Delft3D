@@ -52,6 +52,8 @@ libMorphologyKernel_la_SOURCES = \
          trabg.f90 \
          trabwc.f90 \
          trabwc2.f90 \
+         tram1.f90 \
+         tram2.f90 \
          tran9t.f90 \
          tranb1.f90 \
          tranb2.f90 \
