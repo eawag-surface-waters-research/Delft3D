@@ -276,7 +276,9 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
 !
 ! Local variables
 !
+    integer                       :: i
     integer                       :: istat
+    integer                       :: j
     integer                       :: k
     integer                       :: k2d
     integer                       :: kmaxsd
@@ -1001,6 +1003,13 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
           dll_integers(IP_ISED ) = l
           dll_strings(SP_USRFL)  = dll_usrfil(l)
           !
+          do i = 1,gdp%gdtrapar%npar
+             j = gdp%gdtrapar%iparfld(i,l)
+             if (j>0) then
+                 par(i,l) = gdp%gdtrapar%parfld(nm,j)
+             endif
+          enddo
+          !
           if (sedtyp(l) == SEDTYP_COHESIVE) then
              !
              ! sediment type COHESIVE
@@ -1009,6 +1018,9 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              dll_reals(RP_DSS  ) = 0.0_hp
              dll_reals(RP_DSTAR) = 0.0_hp
              dll_reals(RP_SETVL) = real(ws(nm, kmax, l)  ,hp) ! Vertical velocity near bedlevel
+             if (flmd2l) then
+                 par(11) = entr(nm)
+             endif
              !
              do k = 0, kmax
                 wslc(k)   = ws(nm, k, l)

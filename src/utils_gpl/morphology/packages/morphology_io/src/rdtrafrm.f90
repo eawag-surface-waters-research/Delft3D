@@ -249,6 +249,7 @@ subroutine rdtrafrm(lundia    ,error     ,filtrn    ,lsedtot   , &
     !
     integer           :: i
     integer           :: iform1tmp
+    integer           :: iformdef
     integer           :: ll
     character(256)    :: errmsg
 !
@@ -303,9 +304,9 @@ subroutine rdtrafrm(lundia    ,error     ,filtrn    ,lsedtot   , &
                  & parfil    ,iparfld   ,nparfld   ,0         , &
                  & filtrn    ,name      ,dll_handle,dll_name  ,dll_function, &
                  & dll_usrfil,ipardef   ,rpardef   ,npardef   ,sedblock  )
+    iformdef = iform(1)
     do ll=2, lsedtot
        if (iform(ll)==-999) then
-          iform       (ll) = iform(1)
           name        (ll) = name(1)
           dll_handle  (ll) = dll_handle(1)
           dll_function(ll) = dll_function(1)
@@ -320,8 +321,8 @@ subroutine rdtrafrm(lundia    ,error     ,filtrn    ,lsedtot   , &
     !
     ! restore the iform(1) value if it had a specified value
     !
+    iform(1) = iform1tmp
     if (iform1tmp/=-999) then
-       iform(1) = iform1tmp
        name(1) = ' '
        dll_handle(1) = 0
        dll_function(1) = ' '
@@ -332,14 +333,16 @@ subroutine rdtrafrm(lundia    ,error     ,filtrn    ,lsedtot   , &
     endif
     !
     do ll = 1,lsedtot
-       if (flstrn(ll) /= ' ') then
-          write (lundia, '(a,a)') 'Reading: ',trim(flstrn(ll))
+       if (flstrn(ll) /= ' ') write (lundia, '(a,a)') 'Reading: ',trim(flstrn(ll))
+       if (flstrn(ll) /= ' ' .or. iform(ll)/=-999) then
           call rdtrafrm0(lundia    ,error     ,iform     ,npar      ,par       , &
                        & parfil    ,iparfld   ,nparfld   ,ll        , &
                        & flstrn(ll),name      ,dll_handle,dll_name  ,dll_function, &
                        & dll_usrfil,ipardef   ,rpardef   ,npardef   ,sedblock  )
-          if (error) return
+       else
+          iform(ll) = iformdef
        endif
+       if (error) return
     enddo
     !
     call rdtraparfld(lundia    ,error     ,lsedtot   ,gdtrapar  , &

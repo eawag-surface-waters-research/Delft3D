@@ -310,6 +310,11 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
     xxprog(2) = 50.0_fp
     xxprog(3) = 90.0_fp
     !
+    ! Set default value for FWFac (only used if no mor file specified and
+    ! parameter not specified in mdf file)
+    !
+    fwfac     = 1.0_fp
+    !
     ! locate 'Filmor' record for attribute file containing parameters
     ! for morphological computation
     !
@@ -484,8 +489,7 @@ subroutine rdmor(lundia    ,error     ,filmor    ,lsec      ,lsedtot   , &
        ! The reading of fwfac is left here for backwards compatibility
        ! [This value will only be used if fwfac is not read from mdf-file]
        !
-       fwfac = 1.0_fp
-          call prop_get(mor_ptr, 'Morphology', 'FWFac', fwfac)
+       call prop_get(mor_ptr, 'Morphology', 'FWFac', fwfac)
        !
        ! === factor for adjusting shields critical shear stress
        !

@@ -121,8 +121,8 @@ subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
     ! calculation both for mud and floc
     !
     if (flmd2l) then
-       entr   = par(1)
-       tcrdep = par(2)
+       entr   = par(11)
+       tcrdep = par(12)
        !
        ! maximum erosion is sediment available at bed
        ! (ignores sediment settling during the current morphological timestep)
@@ -135,9 +135,9 @@ subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
        endif
     else
        if (iform == -3) then
-          eropar = par(1)
-          tcrdep = par(2)
-          tcrero = par(3)
+          eropar = par(11)
+          tcrdep = par(12)
+          tcrero = par(13)
           !
           ! Default Partheniades-Krone formula
           !
