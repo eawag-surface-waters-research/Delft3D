@@ -1019,7 +1019,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              dll_reals(RP_DSTAR) = 0.0_hp
              dll_reals(RP_SETVL) = real(ws(nm, kmax, l)  ,hp) ! Vertical velocity near bedlevel
              if (flmd2l) then
-                 par(11) = entr(nm)
+                 par(11,l) = entr(nm)
              endif
              !
              do k = 0, kmax
