@@ -99,7 +99,7 @@ subroutine dfgather_filter_C(lundia, nblocal, nbtotal, nbglobal, order, &
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     use mpi
 #endif
     use precision
@@ -127,7 +127,7 @@ integer, dimension(:), allocatable        :: ibuff
 character(20), dimension(:), allocatable  :: rbuff
 integer                                   :: onode
 integer                                   :: ierr                   ! error value of MPI call
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     integer                               :: istat(mpi_status_size) ! MPI status array
 #endif
 character(80)                             :: msgstr                 ! string to pass message
@@ -164,7 +164,7 @@ subroutine dfgather_filter_I1D(lundia, nblocal, nbtotal, nbglobal, order, &
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     use mpi
 #endif
     use precision
@@ -191,7 +191,7 @@ integer, dimension(:), allocatable        :: tempbuff
 integer, dimension(:), allocatable        :: ibuff
 integer                                   :: onode
 integer                                   :: ierr                   ! error value of MPI call
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     integer                               :: istat(mpi_status_size) ! MPI status array
 #endif
 character(80)                             :: msgstr                 ! string to pass message
@@ -242,7 +242,7 @@ subroutine dfgather_filter_I2D(lundia, nblocal, nbtotal, nbglobal, jf, jl, order
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     use mpi
 #endif
     use precision
@@ -272,7 +272,7 @@ integer, dimension(:)  , allocatable      :: ibuff
 integer, dimension(:,:), allocatable      :: rbuff
 integer                                   :: onode
 integer                                   :: ierr                   ! error value of MPI call
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     integer                               :: istat(mpi_status_size) ! MPI status array
 #endif
 character(80)                             :: msgstr                 ! string to pass message
@@ -310,7 +310,7 @@ subroutine dfgather_filter_R1D_sp(lundia, nblocal, nbtotal, nbglobal, order, &
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     use mpi
 #endif
     use precision
@@ -337,7 +337,7 @@ real(sp), dimension(:), allocatable       :: rbuff
 integer , dimension(:), allocatable       :: ibuff
 integer                                   :: onode
 integer                                   :: ierr                   ! error value of MPI call
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     integer                               :: istat(mpi_status_size) ! MPI status array
 #endif
 character(80)                             :: msgstr                 ! string to pass message
@@ -432,7 +432,7 @@ subroutine dfgather_filter_R1D_hphp(lundia, nblocal, nbtotal, nbglobal, order, &
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     use mpi
 #endif
     use precision
@@ -459,7 +459,7 @@ real(hp), dimension(:), allocatable       :: rbuff
 integer , dimension(:), allocatable       :: ibuff
 integer                                   :: onode
 integer                                   :: ierr                   ! error value of MPI call
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     integer                               :: istat(mpi_status_size) ! MPI status array
 #endif
 character(80)                             :: msgstr                 ! string to pass message
@@ -509,7 +509,7 @@ subroutine dfgather_filter_R2D_sp(lundia, nblocal, nbtotal, nbglobal, jf, jl, or
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     use mpi
 #endif
     use precision
@@ -541,7 +541,7 @@ real(sp), dimension(:,:), allocatable     :: rbuff
 real(sp), dimension(:,:), allocatable     :: tbuff
 integer                                   :: onode
 integer                                   :: ierr                   ! error value of MPI call
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     integer                               :: istat(mpi_status_size) ! MPI status array
 #endif
 character(80)                             :: msgstr                 ! string to pass message
@@ -645,7 +645,7 @@ subroutine dfgather_filter_R3D_sp(lundia, nblocal, nbtotal, nbglobal, jf, jl, kf
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     use mpi
 #endif
     use precision
@@ -678,7 +678,7 @@ real(sp), dimension(:,:,:), allocatable   :: rbuff
 real(sp), dimension(:,:,:), allocatable   :: tbuff
 integer                                   :: onode
 integer                                   :: ierr                   ! error value of MPI call
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     integer                               :: istat(mpi_status_size) ! MPI status array
 #endif
 character(80)                             :: msgstr                 ! string to pass message
@@ -724,7 +724,7 @@ subroutine dfgather_filter_R3D_hp(lundia, nblocal, nbtotal, nbglobal, jf, jl, kf
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     use mpi
 #endif
     use precision
@@ -772,7 +772,7 @@ subroutine dfgather_I2e(inparr,nf,nl,mf,ml,iarrc,gdp)
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     use mpi
 #endif
     use precision
@@ -877,7 +877,7 @@ integer, dimension(:,:), allocatable      :: inparr_slice
        enddo
        deallocate(tmp)
     endif
-#if defined (DFMPI)
+#ifdef HAVE_MPI
 call mpi_barrier(MPI_COMM_WORLD, ierr)
 #endif
 end subroutine dfgather_I2e
@@ -895,7 +895,7 @@ subroutine dfgather_R2e_sp(inparr,nf,nl,mf,ml,iarrc,gdp)
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     use mpi
 #endif
     use precision
@@ -1004,7 +1004,7 @@ real(sp), dimension(:,:), allocatable  :: inparr_slice
        enddo
        deallocate(tmp)
     endif
-#if defined (DFMPI)
+#ifdef HAVE_MPI
 call mpi_barrier(MPI_COMM_WORLD, ierr)
 #endif
 end subroutine dfgather_R2e_sp
@@ -1062,7 +1062,7 @@ subroutine dfgather_R3e_sp(inparr,nf,nl,mf,ml,iarrc,gdp)
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     use mpi
 #endif
     use precision
@@ -1177,7 +1177,7 @@ real(sp), dimension(:,:,:), allocatable :: inparr_slice
        enddo
        deallocate(tmp)
     endif
-#if defined (DFMPI)
+#ifdef HAVE_MPI
 call mpi_barrier(MPI_COMM_WORLD, ierr)
 #endif
 end subroutine dfgather_R3e_sp
@@ -1196,7 +1196,7 @@ subroutine dfgather_R3e_hp(inparr,nf,nl,mf,ml,iarrc,gdp)
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     use mpi
 #endif
     use precision
@@ -1238,7 +1238,7 @@ subroutine dfgather_R4e_sp(inparr,nf,nl,mf,ml,iarrc,gdp)
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     use mpi
 #endif
     use precision
@@ -1360,7 +1360,7 @@ real(sp), dimension(:,:,:,:), allocatable  :: inparr_slice
        enddo
        deallocate(tmp)
     endif
-#if defined (DFMPI)
+#ifdef HAVE_MPI
 call mpi_barrier(MPI_COMM_WORLD, ierr)
 #endif
 end subroutine dfgather_R4e_sp
@@ -1379,7 +1379,7 @@ subroutine dfgather_R4e_hp(inparr,nf,nl,mf,ml,iarrc,gdp)
 !!--pseudo code and references--------------------------------------------------
 ! NONE
 !!--declarations----------------------------------------------------------------
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     use mpi
 #endif
     use precision

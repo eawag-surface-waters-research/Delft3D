@@ -67,8 +67,13 @@ if test "x$YACCPROG" = "x:"; then
 fi
 
 AC_LANG_PUSH([C++])
-dnl Check for MPI (sets MPIFC, MPILIBS, HAVE_MPI)
-ACX_MPI
+AC_ARG_WITH(mpi, [AS_HELP_STRING([--with-mpi],[Build with mpi support @<:@default=no@:>@])], [],[with_mpi=no])
+AS_IF([test "x$with_mpi" != xno],
+            [AC_LANG_PUSH(Fortran)
+            ACX_MPI
+            AC_LANG_POP
+            FC=$MPIFC], <---- alles compileren met mpifc
+            [])
 AC_CHECK_FUNCS([strdup vsnprintf])
 AC_MSG_CHECKING([whether to enable dolcli])
 AC_ARG_ENABLE(dolcli,

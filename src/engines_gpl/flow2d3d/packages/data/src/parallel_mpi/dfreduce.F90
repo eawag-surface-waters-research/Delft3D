@@ -39,7 +39,7 @@ subroutine dfreduce ( iptr, ilen, itype, ityprd, gdp )
 !
 !
 !!--declarations----------------------------------------------------------------
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     use mpi
 #endif
     use dfparall
@@ -72,7 +72,7 @@ subroutine dfreduce ( iptr, ilen, itype, ityprd, gdp )
     lundia => gdp%gdinout%lundia
     ioptr = 0
     !
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     call mpi_allreduce ( iptr, ioptr, ilen, itype, ityprd, MPI_COMM_WORLD, ierr )
     if ( ierr /= MPI_SUCCESS ) then
        write (msgstr,'(a,i5)') 'MPI produces some internal error - return code is ',ierr

@@ -42,7 +42,7 @@ subroutine dfinitmpi
 !
 !
 !!--declarations----------------------------------------------------------------
-#ifdef DFMPI
+#ifdef HAVE_MPI
     use mpi
 #endif
     use precision
@@ -56,7 +56,7 @@ subroutine dfinitmpi
     integer                            :: len
     character(128)                     :: msgstr    ! string to pass message
     character(128)                     :: rankstr
-#ifdef DFMPI
+#ifdef HAVE_MPI
     character(MPI_MAX_PROCESSOR_NAME)  :: host      ! hostname       for current MPI process
     character(MPI_MAX_PROCESSOR_NAME)  :: processor ! processor name for current MPI process
 #else
@@ -113,7 +113,7 @@ subroutine dfinitmpi
        !
        ! test first if MPI was initialized (to avoid boxing MPI_init in DD runs)    
        !
-#ifdef DFMPI
+#ifdef HAVE_MPI
        call mpi_initialized( mpi_is_initialized, ierr )
 #endif
        if ( ierr /= MPI_SUCCESS ) then
@@ -126,7 +126,7 @@ subroutine dfinitmpi
        !
        if (mpi_is_initialized) return
 
-#ifdef DFMPI
+#ifdef HAVE_MPI
        call mpi_init ( ierr )
 #endif
        if ( ierr /= MPI_SUCCESS ) then
@@ -144,7 +144,7 @@ subroutine dfinitmpi
     ! get node number INODE
     !
     if (usempi) then
-#ifdef DFMPI
+#ifdef HAVE_MPI
        host      = 'unknown'
        processor = 'unknown'
        call mpi_comm_rank ( MPI_COMM_WORLD, inode, ierr )
@@ -165,7 +165,7 @@ subroutine dfinitmpi
     !
     ! determine total number of processes
     !
-#ifdef DFMPI
+#ifdef HAVE_MPI
        call mpi_comm_size ( MPI_COMM_WORLD, nproc, ierr )
 #endif
        if ( ierr /= MPI_SUCCESS ) then
@@ -185,7 +185,7 @@ subroutine dfinitmpi
     !
     ! define MPI constants for communication within Delft3D-FLOW
     !
-#ifdef DFMPI
+#ifdef HAVE_MPI
     dfint  = MPI_INTEGER
     dfreal = MPI_REAL
     dfdble = MPI_DOUBLE_PRECISION

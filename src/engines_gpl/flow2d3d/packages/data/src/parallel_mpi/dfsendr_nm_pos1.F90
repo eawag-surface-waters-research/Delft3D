@@ -47,7 +47,7 @@ subroutine dfsendr_nm_pos1 ( field, work, worksize, ks, ke, request, tag, gdp )
 !
 !!--declarations----------------------------------------------------------------
     use precision
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     use mpi
 #endif
     use dfparall
@@ -130,7 +130,7 @@ subroutine dfsendr_nm_pos1 ( field, work, worksize, ks, ke, request, tag, gdp )
        !
        itag = tag
        !
-#if defined (DFMPI)
+#ifdef HAVE_MPI
        call mpi_isend ( work(1,inb,1), novlu*ksiz, MPI_REAL, idom-1, itag, MPI_COMM_WORLD, request(inb,1), ierr )
        if ( ierr /= MPI_SUCCESS ) then
           write (msgstr,'(a,i5,a,i3.3)') 'MPI produces some internal error - return code is ',ierr,' and node number is ',inode

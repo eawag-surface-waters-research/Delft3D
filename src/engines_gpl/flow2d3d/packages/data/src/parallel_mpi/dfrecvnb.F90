@@ -37,7 +37,7 @@ subroutine dfrecvnb ( iptr, ilen, itype, isource, itag, gdp )
 !
 !
 !!--declarations----------------------------------------------------------------
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     use mpi
 #endif
     use dfparall
@@ -59,7 +59,7 @@ subroutine dfrecvnb ( iptr, ilen, itype, isource, itag, gdp )
 !
     integer, pointer :: lundia
     integer       :: ierr                   ! error value of MPI call
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     integer       :: istat(mpi_status_size) ! MPI status array
 #endif
     character(80) :: msgstr                 ! string to pass message
@@ -72,7 +72,7 @@ subroutine dfrecvnb ( iptr, ilen, itype, isource, itag, gdp )
     !
     if (.not.parll) return
     !
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     call mpi_recv ( iptr, ilen, itype, isource-1, itag, MPI_COMM_WORLD, istat, ierr )
     if ( ierr /= MPI_SUCCESS ) then
        write (msgstr,'(a,i5,a,i3.3)') 'MPI produces some internal error - return code is ',ierr,' and node number is ',inode

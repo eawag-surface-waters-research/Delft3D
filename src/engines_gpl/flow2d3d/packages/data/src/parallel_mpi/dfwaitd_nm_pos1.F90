@@ -49,7 +49,7 @@ subroutine dfwaitd_nm_pos1 ( field, work, worksize, ks, ke, request, tag, gdp )
 !
 !!--declarations----------------------------------------------------------------
     use precision
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     use mpi
 #endif
     use dfparall
@@ -86,7 +86,7 @@ subroutine dfwaitd_nm_pos1 ( field, work, worksize, ks, ke, request, tag, gdp )
     integer                        :: m
     integer                        :: indxddb
     integer                        :: ierr     ! error value of MPI call
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     integer                        :: istat(mpi_status_size) ! MPI status array
     integer                        :: mpistatus(mpi_status_size)
 #endif
@@ -114,7 +114,7 @@ subroutine dfwaitd_nm_pos1 ( field, work, worksize, ks, ke, request, tag, gdp )
        !
        ! wait for array WORK
        !
-#if defined (DFMPI)
+#ifdef HAVE_MPI
        ! waiting for the send call
        call mpi_wait(request(inb,1), mpistatus, ierr)
        if ( ierr /= MPI_SUCCESS ) then

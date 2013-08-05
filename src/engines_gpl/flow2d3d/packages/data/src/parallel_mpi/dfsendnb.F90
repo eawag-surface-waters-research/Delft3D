@@ -37,7 +37,7 @@ subroutine dfsendnb ( iptr, ilen, itype, idest, itag, gdp )
 !
 !
 !!--declarations----------------------------------------------------------------
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     use mpi
 #endif
     use dfparall
@@ -60,7 +60,7 @@ subroutine dfsendnb ( iptr, ilen, itype, idest, itag, gdp )
     integer, pointer :: lundia
     integer          :: ierr   ! error value of MPI call
     integer          :: request   ! error value of MPI call
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     integer       :: mpistatus(mpi_status_size)
 #endif
     character(1000)  :: msgstr ! string to pass message
@@ -73,7 +73,7 @@ subroutine dfsendnb ( iptr, ilen, itype, idest, itag, gdp )
     !
     if (.not.parll) return
     !
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     call mpi_isend ( iptr, ilen, itype, idest-1, itag, MPI_COMM_WORLD, request, ierr )
     call mpi_wait(request, mpistatus, ierr)
     if ( ierr /= MPI_SUCCESS ) then

@@ -37,7 +37,7 @@ subroutine dfsync ( gdp )
 !
 !
 !!--declarations----------------------------------------------------------------
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     use mpi
 #endif
     use dfparall
@@ -63,7 +63,7 @@ subroutine dfsync ( gdp )
     !
     ! blocks until all nodes have called this routine
     !
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     call mpi_barrier ( MPI_COMM_WORLD, ierr )
     if ( ierr /= MPI_SUCCESS ) then
        write (msgstr,'(a,i5,a,i3.3)') 'MPI produces some internal error - return code is ',ierr,' and node number is ',inode

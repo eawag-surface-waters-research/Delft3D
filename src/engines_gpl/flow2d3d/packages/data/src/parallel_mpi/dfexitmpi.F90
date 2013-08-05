@@ -42,7 +42,7 @@ subroutine dfexitmpi ( iexit )
 !
 !
 !!--declarations----------------------------------------------------------------
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     use mpi
 #endif
     !
@@ -59,7 +59,7 @@ subroutine dfexitmpi ( iexit )
 !
 !! executable statements -------------------------------------------------------
 !
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     call mpi_initialized ( mpi_is_initialized, ierr )
     if ( mpi_is_initialized ) then
 

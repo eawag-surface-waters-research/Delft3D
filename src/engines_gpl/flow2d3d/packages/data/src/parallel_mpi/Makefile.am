@@ -16,7 +16,6 @@ noinst_LTLIBRARIES = libDataParallelMPI.la
 #Includes
 # TODO:/opt/mpich2/include should be configured....
 FINCLUDES += \
-        -I$(top_builddir)/utils_lgpl/parallel_mpi/include \
         -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/include \
         -I$(top_builddir)/engines_gpl/flow2d3d/packages/data/include
 
@@ -27,10 +26,6 @@ FMODULES += \
         -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src \
         -I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common_mpi/src \
 	-I$(top_builddir)/utils_gpl/morphology/packages/morphology_kernel/src
-
-# fpp is compiler dependent (convention is to use .F90 files for preprocessing)
-AM_FCFLAGS += \
-        -DDFMPI
 
 #-------------------------------------------------------------------------------
 #Sources

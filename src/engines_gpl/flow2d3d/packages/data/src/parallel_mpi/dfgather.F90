@@ -40,7 +40,7 @@ subroutine dfgather_lowlevel ( ioptr, iolen, iiptr, iilen, itype, gdp )
 !
 !
 !!--declarations----------------------------------------------------------------
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     use mpi
 #endif
     use dfparall
@@ -70,7 +70,7 @@ subroutine dfgather_lowlevel ( ioptr, iolen, iiptr, iilen, itype, gdp )
 !
 !    integer                            :: m, n, onode
 !    integer                            :: itag
-!#if defined (DFMPI)
+!#ifdef HAVE_MPI
 !    integer       :: istat(mpi_status_size) ! MPI status array
 !#endif
 !
@@ -90,7 +90,7 @@ subroutine dfgather_lowlevel ( ioptr, iolen, iiptr, iilen, itype, gdp )
     !
     ! gather the array sizes to the master
     !
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     call mpi_gather( iilen, 1, dfint, icount, 1, dfint, master-1, MPI_COMM_WORLD, ierr )
     if ( ierr /= MPI_SUCCESS ) then
        write (msgstr,'(a,i5)') 'MPI produces some internal error - return code is ',ierr
@@ -119,7 +119,7 @@ subroutine dfgather_lowlevel ( ioptr, iolen, iiptr, iilen, itype, gdp )
     !
     ! gather different amounts of data from each processor to the master
     !
-#if defined (DFMPI)
+#ifdef HAVE_MPI
     call mpi_gatherv( iiptr, iilen, itype, ioptr, icount, idsplc, itype, master-1, MPI_COMM_WORLD, ierr )
     if ( ierr /= MPI_SUCCESS ) then
        write (msgstr,'(a,i5)') 'MPI produces some internal error - return code is ',ierr
