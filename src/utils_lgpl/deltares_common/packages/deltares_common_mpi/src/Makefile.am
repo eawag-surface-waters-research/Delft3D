@@ -18,9 +18,6 @@ noinst_LTLIBRARIES = libDeltaresCommonMpi.la
 
 FMODULES += \
 	-I$(top_builddir)/utils_lgpl/deltares_common/packages/deltares_common/src
-	
-AM_FCFLAGS += \
-        -DDFMPI
 
 #-------------------------------------------------------------------------------
 #Sources
@@ -35,5 +32,12 @@ libDeltaresCommonMpi_la_SOURCES = \
 #Libraries
 
 # MPI
+# Not sure how to get rid of the warning
+# See discussion here. Problem is that we don't always set MPIFC...
+# http://stackoverflow.com/q/3968656/386327
+if HAVE_MPI
 FC=$(MPIFC)
-
+else
+# we're not using the mpi compiler but we can't set FC conditionally
+FC=$(FC)
+endif
