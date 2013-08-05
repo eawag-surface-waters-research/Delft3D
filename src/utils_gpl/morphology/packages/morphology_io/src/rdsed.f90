@@ -929,6 +929,8 @@ subroutine echosed(lundia    ,error     ,lsed      ,lsedtot   ,facdss    , &
     dll_usrfil_settle    => gdtrapar%dll_usrfil_settle
     iform                => gdtrapar%iform
     !
+    rmissval = -999.0_fp
+    !
     ! echo input in diagnose-file
     !
     write (lundia, '(a)')   '*** Start  of sediment input'
