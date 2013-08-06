@@ -17,16 +17,16 @@ FMODULES += \
 #-------------------------------------------------------------------------------
 #Sources
 libmod_couplib_la_SOURCES = \
-       m_coupcns.f90 \
-       m_ixset.f90 \
-       m_prcgrp.f90 \
+       m_coupcns.F90 \
+       m_ixset.F90 \
+       m_prcgrp.F90 \
        m_intfc.F90 \
        m_sndrcv.F90  \
        m_globcomm.F90 \
-       reshape_idata.f90 \
-       reshape_rdata.f90 \
-       m_couplib.f90 \
-       reshape_ddata.f90
+       reshape_idata.F90 \
+       reshape_rdata.F90 \
+       m_couplib.F90 \
+       reshape_ddata.F90
 
 #-------------------------------------------------------------------------------
 # Libraries

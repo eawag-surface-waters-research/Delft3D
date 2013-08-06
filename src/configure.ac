@@ -257,12 +257,17 @@ dnl Check for MPI (sets MPIFC, MPILIBS, HAVE_MPI), compile everything with mpi i
 AC_ARG_WITH(mpi, [AS_HELP_STRING([--with-mpi],[Build with mpi support @<:@default=yes@:>@])], [],[with_mpi=yes])
 AS_IF([test "x$with_mpi" != xno],
 [
-AC_LANG_PUSH(Fortran)
+AC_LANG_PUSH([Fortran])
+ACX_MPI
+AC_LANG_POP
+dnl needed for linking
+AC_LANG_PUSH([Fortran 77])
 ACX_MPI
 AC_LANG_POP
 AC_LANG_PUSH([C++])
 ACX_MPI
 AC_LANG_POP
+F77=$MPIF77
 FC=$MPIFC
 CXX=$MPICXX
 ],
