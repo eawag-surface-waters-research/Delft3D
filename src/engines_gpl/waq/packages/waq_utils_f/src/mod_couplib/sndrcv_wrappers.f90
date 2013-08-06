@@ -1,3 +1,6 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 !!  Copyright (C)  Stichting Deltares, 2012-2013.
 !!
 !!  This program is free software: you can redistribute it and/or modify
@@ -52,6 +55,9 @@ end subroutine distribute_0d_ldata_on_cardset
 
 subroutine distribute_1d_ldata_on_cardset(mypart, larray, nelem, info, idebug)
 !-- HEADER VARIABLES/ARGUMENTS
+#ifdef HAVE_MPI
+use mpi
+#endif
 implicit none
 integer, intent(in)                       :: mypart
 integer, intent(in)                       :: nelem
@@ -76,6 +82,7 @@ integer :: ierror
       return
    endif
 
+#ifdef HAVE_MPI
    if (measure_idletime) then
       if (my_idebug.ge.2) write(LOUT,*) 'distribute_cardset: entering barrier',&
          ' for measuring idle time'
@@ -100,6 +107,8 @@ integer :: ierror
       amount_data(IRECV,IDSTRBC) = amount_data(IRECV,IDSTRBC) + nelem
    endif
    if (use_timers) call timer_stop(itimer_commop(ICOMMTM,IDSTRBC))
+#endif
+
 end subroutine distribute_1d_ldata_on_cardset
 
 
@@ -182,6 +191,9 @@ end subroutine distribute_0d_rdata_on_cardset
 
 subroutine distribute_1d_rdata_on_cardset(mypart, rarray, nelem, info, idebug)
 !-- HEADER VARIABLES/ARGUMENTS
+#ifdef HAVE_MPI
+use mpi
+#endif
 implicit none
 integer, intent(in)                          :: mypart
 integer, intent(in)                          :: nelem
@@ -206,6 +218,7 @@ integer :: ierror
       return
    endif
 
+#ifdef HAVE_MPI
    if (measure_idletime) then
       if (my_idebug.ge.2) write(LOUT,*) 'distribute_cardset: entering barrier',&
          ' for measuring idle time'
@@ -231,6 +244,7 @@ integer :: ierror
       amount_data(IRECV,IDSTRBC) = amount_data(IRECV,IDSTRBC) + nelem*SIZE_REAL
    endif
    if (use_timers) call timer_stop(itimer_commop(ICOMMTM,IDSTRBC))
+#endif
 end subroutine distribute_1d_rdata_on_cardset
 
 
@@ -294,6 +308,9 @@ end subroutine distribute_0d_ddata_on_cardset
 
 subroutine distribute_1d_ddata_on_cardset(mypart, darray, nelem, info, idebug)
 !-- HEADER VARIABLES/ARGUMENTS
+#ifdef HAVE_MPI
+use mpi
+#endif
 implicit none
 integer, intent(in)                       :: mypart
 integer, intent(in)                       :: nelem
@@ -318,6 +335,7 @@ integer :: ierror
       return
    endif
 
+#ifdef HAVE_MPI
    if (measure_idletime) then
       if (my_idebug.ge.2) write(LOUT,*) 'distribute_cardset: entering barrier',&
          ' for measuring idle time'
@@ -343,6 +361,7 @@ integer :: ierror
       amount_data(IRECV,IDSTRBC) = amount_data(IRECV,IDSTRBC) + nelem*SIZE_DBLE
    endif
    if (use_timers) call timer_stop(itimer_commop(ICOMMTM,IDSTRBC))
+#endif
 end subroutine distribute_1d_ddata_on_cardset
 
 
@@ -387,6 +406,10 @@ end subroutine distribute_4d_ddata_on_cardset
 
 subroutine distribute_1d_cdata_on_cardset(mypart, carray, nelem, info, idebug)
 !-- HEADER VARIABLES/ARGUMENTS
+#ifdef HAVE_MPI
+use mpi
+#endif
+
 implicit none
 integer, intent(in)                           :: mypart
 integer, intent(in)                           :: nelem
@@ -411,6 +434,7 @@ integer :: my_idebug
       return
    endif
 
+#ifdef HAVE_MPI
    if (measure_idletime) then
       if (my_idebug.ge.2) write(LOUT,*) 'distribute_cardset: entering barrier',&
          ' for measuring idle time'
@@ -433,6 +457,7 @@ integer :: my_idebug
       amount_data(IRECV,IDSTRBC) = amount_data(IRECV,IDSTRBC) + nelem
    endif
    if (use_timers) call timer_stop(itimer_commop(ICOMMTM,IDSTRBC))
+#endif
 end subroutine distribute_1d_cdata_on_cardset
 
 

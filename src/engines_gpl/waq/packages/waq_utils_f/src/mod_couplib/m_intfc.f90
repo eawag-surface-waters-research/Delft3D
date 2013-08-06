@@ -1,3 +1,6 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 !!  Copyright (C)  Stichting Deltares, 2012-2013.
 !!
 !!  This program is free software: you can redistribute it and/or modify
@@ -961,7 +964,9 @@ integer, dimension(:), allocatable :: iwork
 ! help variables for MPI-operations
 integer, parameter             :: TAG_COLCIF = 1002
 integer                        :: idest, isrc, msgtag, ierror
+#ifdef HAVE_MPI
 integer                        :: mpstat(MPI_STATUS_SIZE)
+#endif
 ! level of debug-output, 0=none
 integer                        :: idebug
 !-----------------------------------------------------------------------------
@@ -970,6 +975,12 @@ integer                        :: idebug
    if (idebug.ge.1) write(LOUT,*) 'intfc_define_collcitf_ihave: starting ', &
         'for namitf="', trim(namitf),'" on ixset "',trim(namixs),'"'
 
+
+   if (iscple.eq.0) then
+
+      return 
+   end if
+#ifdef HAVE_MPI
 !  start timing of interface definition
 
    if (use_timers) call timer_start(itimer_couplib_intfc)
@@ -1094,7 +1105,7 @@ integer                        :: idebug
    call intfc_define(namitf, iset, nngb, nghtbl)
 
    if (use_timers) call timer_stop(itimer_couplib_intfc)
-
+#endif
 end subroutine intfc_define_collcitf_ihave
 
 
@@ -1295,7 +1306,9 @@ integer, dimension(:), allocatable :: iwork
 ! help variables for MPI-operations
 integer, parameter             :: TAG_DSTRIF = 1001
 integer                        :: idest, isrc, msgtag, ierror
+#ifdef HAVE_MPI
 integer                        :: mpstat(MPI_STATUS_SIZE)
+#endif
 ! level of debug-output, 0=none
 integer                        :: idebug=0
 !-----------------------------------------------------------------------------
@@ -1303,6 +1316,11 @@ integer                        :: idebug=0
    if (idebug.ge.1) write(LOUT,*) 'intfc_define_dstrbitf_ineed: starting for', &
         ' namitf="', trim(namitf),'" on ixset "',trim(namixs),'"'
 
+
+   if (iscple.eq.0) then
+      return 
+   end if
+#ifdef HAVE_MPI
 !  start timing of interface definition
 
    if (use_timers) call timer_start(itimer_couplib_intfc)
@@ -1426,7 +1444,7 @@ integer                        :: idebug=0
    call intfc_define(namitf, iset, nngb, nghtbl)
 
    if (use_timers) call timer_stop(itimer_couplib_intfc)
-
+#endif
 end subroutine intfc_define_dstrbitf_ineed
 
 
@@ -1474,7 +1492,9 @@ integer, dimension(:), pointer :: iwork
 ! help variables for MPI-operations
 integer, parameter             :: TAG_UPDTIF = 1002
 integer                        :: idest, isrc, msgtag, ierror
+#ifdef HAVE_MPI
 integer                        :: mpstat(MPI_STATUS_SIZE)
+#endif
 ! internal value of idebug
 integer                        :: my_idebug=0
 !-----------------------------------------------------------------------------
@@ -1487,6 +1507,10 @@ integer                        :: my_idebug=0
    if (my_idebug.ge.1) write(LOUT,*) 'intfc_define_updatitf: starting for ', &
         'namitf="', trim(namitf),'" on ixset "',trim(namixs),'"'
 
+   if (iscple.eq.0) then
+      return 
+   end if
+#ifdef HAVE_MPI
 !  start timing of interface definition
 
    if (use_timers) call timer_start(itimer_couplib_intfc)
@@ -1671,7 +1695,7 @@ integer                        :: my_idebug=0
    call intfc_define(namitf, iset, nngb, nghtbl2)
 
    if (use_timers) call timer_stop(itimer_couplib_intfc)
-
+#endif
 end subroutine intfc_define_updatitf
 
 

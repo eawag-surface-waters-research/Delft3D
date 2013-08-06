@@ -1,3 +1,6 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 !!  Copyright (C)  Stichting Deltares, 2012-2013.
 !!
 !!  This program is free software: you can redistribute it and/or modify
@@ -38,6 +41,9 @@
 !   Version 1.0  30-11-2007  initial version
 !-----------------------------------------------------------------------------
 module m_globcomm
+#ifdef HAVE_MPI
+use mpi
+#endif
 use m_timings
 use m_coupcns
 use m_prcgrp
@@ -105,6 +111,9 @@ contains
 !!<
 !-----------------------------------------------------------------------------
 subroutine globcomm_initmod(idebug)
+#ifdef HAVE_MPI
+use mpi
+#endif
 
 !-- HEADER VARIABLES/ARGUMENTS
 implicit none
@@ -126,13 +135,15 @@ integer         :: i, ierr
    if (iscple.eq.0) then
 
       globcomm_initialized = 1
-
-   elseif (globcomm_initialized.gt.0) then
+      return 
+   end if
+   if (globcomm_initialized.gt.0) then
 
       write(LOUT,*) 'globcomm_initmod: Error: called for the second time.'
 
-   else
+   end if
 
+#ifdef HAVE_MPI
 !     Register subroutine for global operation CP_MAX1
 
       if (my_idebug.ge.2) write(LOUT,*) 'globcomm_initmod: register operation',&
@@ -160,10 +171,9 @@ integer         :: i, ierr
          call mpi_type_contiguous(i, MPI_REAL8, dattyp_dble(i), ierr)
          call mpi_type_commit(dattyp_dble(i), ierr)
       enddo
-   endif
 
    globcomm_initialized = 1
-
+#endif
 end subroutine globcomm_initmod
 
 
@@ -182,6 +192,9 @@ end subroutine globcomm_initmod
 !!<
 !-----------------------------------------------------------------------------
 subroutine sync_processes()
+#ifdef HAVE_MPI
+use mpi
+#endif
 
 !-- HEADER VARIABLES/ARGUMENTS
 implicit none
@@ -192,10 +205,11 @@ integer     :: ierr
 
 !  return directly in non-coupled runs, avoid use of MPI
    if (iscple.eq.0) return
-
+#ifdef HAVE_MPI
    if (use_timers) call timer_start(itimer_commop(ISYNCTM,ISYNCHR))
    call mpi_barrier(MPI_COMM_ALL, ierr)
    if (use_timers) call timer_stop(itimer_commop(ISYNCTM,ISYNCHR))
+#endif
 end subroutine sync_processes
 
 
@@ -220,6 +234,9 @@ end subroutine sync_processes
 !!<
 !-----------------------------------------------------------------------------
 subroutine combine_1d_idata(iarray, numval, oper, info)
+#ifdef HAVE_MPI
+use mpi
+#endif
 
 !-- HEADER VARIABLES/ARGUMENTS
 implicit none
@@ -237,6 +254,7 @@ integer         :: mpi_op
 !  return directly in non-coupled runs, avoid use of MPI
    if (iscple.eq.0) return
 
+#ifdef HAVE_MPI
 !  If synchronization time is to be measured separately:
 !     wait for other processes, measure the time needed
 
@@ -268,7 +286,7 @@ integer         :: mpi_op
 !  Stop timing of communication phase of combine_data
 
    if (use_timers) call timer_stop(itimer_commop(ICOMMTM,ICOMBIN))
-
+#endif
 end subroutine combine_1d_idata
 
 
@@ -293,6 +311,9 @@ end subroutine combine_1d_idata
 !!<
 !-----------------------------------------------------------------------------
 subroutine combine_1d_rdata(rarray, numval, oper, info)
+#ifdef HAVE_MPI
+use mpi
+#endif
 
 !-- HEADER VARIABLES/ARGUMENTS
 implicit none
@@ -309,7 +330,7 @@ integer         :: mpi_op
 
 !  return directly in non-coupled runs, avoid use of MPI
    if (iscple.eq.0) return
-
+#ifdef HAVE_MPI
 !  If synchronization time is to be measured separately:
 !     wait for other processes, measure the time needed
 
@@ -341,7 +362,7 @@ integer         :: mpi_op
 !  Stop timing of communication phase of combine_data
 
    if (use_timers) call timer_stop(itimer_commop(ICOMMTM,ICOMBIN))
-
+#endif
 end subroutine combine_1d_rdata
 
 
@@ -366,6 +387,9 @@ end subroutine combine_1d_rdata
 !!<
 !-----------------------------------------------------------------------------
 subroutine combine_1d_ddata(darray, numval, oper, info)
+#ifdef HAVE_MPI
+use mpi
+#endif
 
 !-- HEADER VARIABLES/ARGUMENTS
 implicit none
@@ -383,6 +407,7 @@ integer         :: mpi_op
 !  return directly in non-coupled runs, avoid use of MPI
    if (iscple.eq.0) return
 
+#ifdef HAVE_MPI
 !  If synchronization time is to be measured separately:
 !     wait for other processes, measure the time needed
 
@@ -414,7 +439,7 @@ integer         :: mpi_op
 !  Stop timing of communication phase of combine_data
 
    if (use_timers) call timer_stop(itimer_commop(ICOMMTM,ICOMBIN))
-
+#endif
 end subroutine combine_1d_ddata
 
 
@@ -441,6 +466,9 @@ end subroutine combine_1d_ddata
 !!<
 !-----------------------------------------------------------------------------
 subroutine combine_2d_idata(iarray, lenvec, numvec, oper, info)
+#ifdef HAVE_MPI
+use mpi
+#endif
 
 !-- HEADER VARIABLES/ARGUMENTS
 implicit none
@@ -458,7 +486,7 @@ integer         :: mpi_op, mpi_type
 
 !  return directly in non-coupled runs, avoid use of MPI
    if (iscple.eq.0) return
-
+#ifdef HAVE_MPI
 !  for element-wise operations: call 1D version of this routine
 
    if (oper.eq.CP_SUM .or. oper.eq.CP_MAX .or. oper.eq.CP_MIN) then
@@ -511,7 +539,7 @@ integer         :: mpi_op, mpi_type
       if (use_timers) call timer_stop(itimer_commop(ICOMMTM,ICOMBIN))
 
    endif
-
+#endif
 end subroutine combine_2d_idata
 
 
@@ -538,6 +566,9 @@ end subroutine combine_2d_idata
 !!<
 !-----------------------------------------------------------------------------
 subroutine combine_2d_rdata(rarray, lenvec, numvec, oper, info)
+#ifdef HAVE_MPI
+use mpi
+#endif
 
 !-- HEADER VARIABLES/ARGUMENTS
 implicit none
@@ -555,7 +586,7 @@ integer         :: mpi_op, mpi_type
 
 !  return directly in non-coupled runs, avoid use of MPI
    if (iscple.eq.0) return
-
+#ifdef HAVE_MPI
 !  for element-wise operations: call 1D version of this routine
 
    if (oper.eq.CP_SUM .or. oper.eq.CP_MAX .or. oper.eq.CP_MIN) then
@@ -608,7 +639,7 @@ integer         :: mpi_op, mpi_type
       if (use_timers) call timer_stop(itimer_commop(ICOMMTM,ICOMBIN))
 
    endif
-
+#endif
 end subroutine combine_2d_rdata
 
 
@@ -635,6 +666,9 @@ end subroutine combine_2d_rdata
 !!<
 !-----------------------------------------------------------------------------
 subroutine combine_2d_ddata(darray, lenvec, numvec, oper, info)
+#ifdef HAVE_MPI
+use mpi
+#endif
 
 !-- HEADER VARIABLES/ARGUMENTS
 implicit none
@@ -652,7 +686,7 @@ integer         :: mpi_op, mpi_type
 
 !  return directly in non-coupled runs, avoid use of MPI
    if (iscple.eq.0) return
-
+#ifdef HAVE_MPI
 !  for element-wise operations: call 1D version of this routine
 
    if (oper.eq.CP_SUM .or. oper.eq.CP_MAX .or. oper.eq.CP_MIN) then
@@ -705,7 +739,7 @@ integer         :: mpi_op, mpi_type
       if (use_timers) call timer_stop(itimer_commop(ICOMMTM,ICOMBIN))
 
    endif
-
+#endif
 end subroutine combine_2d_ddata
 
 
@@ -728,6 +762,9 @@ end subroutine combine_2d_ddata
 !!<
 !-----------------------------------------------------------------------------
 subroutine combine_oper_imax1(iarr1, iarr2, numvec, itype)
+#ifdef HAVE_MPI
+use mpi
+#endif
 
 !-- HEADER VARIABLES/ARGUMENTS
 implicit none
@@ -739,6 +776,9 @@ integer,                    intent(in)    :: itype
 !-- LOCAL VARIABLES
 integer         :: ndim, ivec, iel, iof, ierr
 !-----------------------------------------------------------------------------
+   if (iscple.eq.0) return
+
+#ifdef HAVE_MPI
 
 !  determine the number of data-items per vector
 
@@ -761,11 +801,15 @@ integer         :: ndim, ivec, iel, iof, ierr
          enddo
       endif
    enddo
-
+#endif
 end subroutine combine_oper_imax1
 
 
 subroutine combine_oper_rmax1(rarr1, rarr2, numvec, itype)
+#ifdef HAVE_MPI
+use mpi
+#endif
+
 !-- HEADER VARIABLES/ARGUMENTS
 implicit none
 real(kind=4), dimension(*), intent(in)    :: rarr1
@@ -773,6 +817,9 @@ real(kind=4), dimension(*), intent(inout) :: rarr2
 integer,                    intent(in)    :: numvec, itype
 !-- LOCAL VARIABLES
 integer         :: ndim, ivec, iel, iof, ierr
+
+   if (iscple.eq.0) return
+#ifdef HAVE_MPI
 
    call mpi_type_size(itype, ndim, ierr)
    ndim = ndim / 4
@@ -784,10 +831,15 @@ integer         :: ndim, ivec, iel, iof, ierr
          enddo
       endif
    enddo
+#endif
 end subroutine combine_oper_rmax1
 
 
 subroutine combine_oper_dmax1(darr1, darr2, numvec, itype)
+#ifdef HAVE_MPI
+use mpi
+#endif
+
 !-- HEADER VARIABLES/ARGUMENTS
 implicit none
 real(kind=8), dimension(*), intent(in)    :: darr1
@@ -795,6 +847,9 @@ real(kind=8), dimension(*), intent(inout) :: darr2
 integer,                    intent(in)    :: numvec, itype
 !-- LOCAL VARIABLES
 integer         :: ndim, ivec, iel, iof, ierr
+
+   if (iscple.eq.0) return
+#ifdef HAVE_MPI
 
    call mpi_type_size(itype, ndim, ierr)
    ndim = ndim / 8
@@ -807,6 +862,7 @@ integer         :: ndim, ivec, iel, iof, ierr
          enddo
       endif
    enddo
+#endif
 end subroutine combine_oper_dmax1
 
 

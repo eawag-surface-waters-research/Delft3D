@@ -1,3 +1,6 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 !!  Copyright (C)  Stichting Deltares, 2012-2013.
 !!
 !!  This program is free software: you can redistribute it and/or modify
@@ -38,6 +41,9 @@
 !   Version 1.0  30-11-2007  initial version
 !-----------------------------------------------------------------------------
 module m_sndrcv
+#ifdef HAVE_MPI
+use mpi
+#endif
 use m_timings
 use m_coupcns
 use m_prcgrp
@@ -348,7 +354,7 @@ end subroutine sndrcv_stopmod
 ! collect, update and accumulate operations for 1D integer arrays only.
 ! The versions for other array-shapes and variable types are included here:
 
-include 'sndrcv_wrappers.f90'
+#include "sndrcv_wrappers.F90"
 
 !-- SUBROUTINE distribute_1d_idata_on_cardset -----------------------------------
 !   Author:             Edwin Vollebregt (VORtech)
@@ -370,7 +376,9 @@ include 'sndrcv_wrappers.f90'
 !!<
 !-----------------------------------------------------------------------------
 subroutine distribute_1d_idata_on_cardset(mypart, iarray, nelem, info, idebug)
-
+#ifdef HAVE_MPI
+use mpi
+#endif
 !-- HEADER VARIABLES/ARGUMENTS
 implicit none
 integer, intent(in)                       :: mypart
@@ -399,7 +407,7 @@ integer :: ierror
       if (my_idebug.ge.2) write(LOUT,*) 'distribute_cardset: non-coupled run, nothing to be done'
       return
    endif
-
+#ifdef HAVE_MPI
 !  If synchronization time is to be measured separately:
 !     wait for other processes, measure the time needed
 
@@ -434,7 +442,7 @@ integer :: ierror
 !  Stop timer
 
    if (use_timers) call timer_stop(itimer_commop(ICOMMTM,IDSTRBC))
-
+#endif
 end subroutine distribute_1d_idata_on_cardset
 
 
@@ -883,6 +891,9 @@ end subroutine accumulate_1d_idata_on_repl_namedset
 subroutine sendrecv_data(iarray, rarray, darray, presiz, namixs, possiz, &
                          namitf, ladd, comm_op, info, idebug)
 
+#ifdef HAVE_MPI
+use mpi
+#endif
 !-- HEADER VARIABLES/ARGUMENTS
 implicit none
 integer,      dimension(*), intent(inout), optional :: iarray
@@ -926,7 +937,9 @@ integer                                    :: elem_size
 integer                                    :: iof, nitm
 ! help variables for MPI-operations
 integer                                    :: idest, isrc, msgtag, ierror
+#ifdef HAVE_MPI
 integer                                    :: mpstat(MPI_STATUS_SIZE)
+#endif
 integer, dimension(:), pointer             :: ireq
 ! dummy array for calling reshape_data
 integer                                    :: inrlp
@@ -952,6 +965,7 @@ integer                                    :: my_idebug
       return
    endif
 
+#ifdef HAVE_MPI
 !  Get optional pre- and post replication factors
 
    ipresiz = 1
@@ -1290,7 +1304,7 @@ integer                                    :: my_idebug
    info = 0
 
    if (use_timers) call timer_stop(itimer_commop(ICOMMTM,comm_op))
-
+#endif
 end subroutine sendrecv_data
 
 end module m_sndrcv
