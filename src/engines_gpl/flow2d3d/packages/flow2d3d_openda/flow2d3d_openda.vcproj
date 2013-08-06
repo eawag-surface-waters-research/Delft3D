@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9,00"
+	Version="9.00"
 	Name="flow2d3d_openda"
 	ProjectGUID="{657ABE78-F81C-46FB-8774-8F0C4CD545E1}"
 	RootNamespace="flow2d3d_openda"
@@ -63,7 +63,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="$(ConfigurationName)\flow2d3d_openda_dll.obj libcta.lib pthreadVCE2.lib libexpat.lib fmpich2.lib wsock32.lib netapi32.lib comctl32.lib user32.lib advapi32.lib comdlg32.lib gdi32.lib winspool.lib cxx.lib"
-				OutputFile="d:\src\openda\public\bin\flow2d3d_openda.dll"
+				OutputFile="$(OutDir)\flow2d3d_openda.dll"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="..\..\..\..\third_party_open\pthreads\bin\win32;&quot;..\..\..\..\third_party_open\DelftOnline\lib\$(ConfigurationName)&quot;;..\..\..\..\third_party_open\expat\win32\bin\Release;..\..\..\..\third_party_open\mpich2\lib;..\..\..\..\third_party_open\openda\core\native\lib\win32;&quot;$(IFORT_COMPILER11)\lib\ia32&quot;"
 				IgnoreDefaultLibraryNames="LIBCMTD.lib;LIBCMT.lib"
