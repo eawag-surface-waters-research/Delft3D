@@ -12,14 +12,14 @@ noinst_LTLIBRARIES = libpart_version_number.la
 
 #-------------------------------------------------------------------------------
 #Includes
-INCLUDES = -I../include 
+AM_CPPFLAGS = -I../include
 
 #-------------------------------------------------------------------------------
 #Sources
 libpart_version_number_la_SOURCES = \
-         c2c.c \
-         f2c.c \
-         version.c
+	 c2c.c \
+	 f2c.c \
+	 version.c
 
 BUILT_SOURCES =  ../include/always \
 	../include/version_number.h

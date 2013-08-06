@@ -67,13 +67,7 @@ if test "x$YACCPROG" = "x:"; then
 fi
 
 AC_LANG_PUSH([C++])
-AC_ARG_WITH(mpi, [AS_HELP_STRING([--with-mpi],[Build with mpi support @<:@default=no@:>@])], [],[with_mpi=no])
-AS_IF([test "x$with_mpi" != xno],
-            [AC_LANG_PUSH(Fortran)
-            ACX_MPI
-            AC_LANG_POP
-            FC=$MPIFC], <---- alles compileren met mpifc
-            [])
+
 AC_CHECK_FUNCS([strdup vsnprintf])
 AC_MSG_CHECKING([whether to enable dolcli])
 AC_ARG_ENABLE(dolcli,
@@ -108,9 +102,6 @@ dnl Check the flags needed to link fc programs with ld (i.e. cc)
 AC_FC_LIBRARY_LDFLAGS
 dnl Check for openmp for fortran
 AC_OPENMP
-
-dnl Check for MPI (sets MPIFC, MPILIBS, HAVE_MPI)
-ACX_MPI
 
 dnl Check for underscoring of external names
 AC_FC_WRAPPERS
@@ -215,7 +206,7 @@ AC_CHECK_TYPES([struct shm_info])
 #Check for expat
 AC_CHECK_HEADER(expat.h,, [AC_MSG_ERROR([Compiler can't find <expat.h>])])
 AC_CHECK_LIB(expat, XML_Parse,, [AC_MSG_ERROR([Compiler can't find libexpat])])
-AC_CHECK_LIB([rt], [clock_gettime],, [AC_MSG_ERROR([Compiler can't find librt, needed for clock_gettime])])
+AC_CHECK_LIB([rt], [clock_gettime],, [AC_MSG_WARN([Compiler can't find librt, needed for clock_gettime])])
 AC_FUNC_VPRINTF
 # When using the Intel Fortran compiler, check for the needed libraries
 ####if test $FC == ifort; then
@@ -261,6 +252,22 @@ AC_CHECK_FUNCS([gethostname gettimeofday memset strerror])
 
 # Checks for QT library functions.
 # gw_CHECK_QT
+
+dnl Check for MPI (sets MPIFC, MPILIBS, HAVE_MPI), compile everything with mpi if mpi is used (c++ + fortran)
+AC_ARG_WITH(mpi, [AS_HELP_STRING([--with-mpi],[Build with mpi support @<:@default=yes@:>@])], [],[with_mpi=yes])
+AS_IF([test "x$with_mpi" != xno],
+[
+AC_LANG_PUSH(Fortran)
+ACX_MPI
+AC_LANG_POP
+AC_LANG_PUSH([C++])
+ACX_MPI
+AC_LANG_POP
+FC=$MPIFC
+CXX=$MPICXX
+],
+[])
+AM_CONDITIONAL(HAVE_MPI, [test "x$with_mpi" != xno])
 
 
 dnl Already create the libtool script here, because we're using it to detect .dylib/.so extension (works for >=2.2)

@@ -19,7 +19,7 @@ d_hydro_exe_SOURCES = \
     d_hydro.cpp
 
 
-INCLUDES = \
+AM_CPPFLAGS = \
     -I$(STANDARD_C_INCLUDES) \
     -I../include
 
