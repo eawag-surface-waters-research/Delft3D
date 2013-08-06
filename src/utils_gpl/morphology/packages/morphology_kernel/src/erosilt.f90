@@ -187,7 +187,7 @@ subroutine erosilt(thick    ,kmax      ,ws        ,lundia   , &
           sour    = real(sour_dll,fp)
           sink    = real(sink_dll,fp)
        else
-          write (errmsg,'(a,i,a)') 'Invalid transport formula ',iform,' for mud fraction.'
+          write (errmsg,'(a,i0,a)') 'Invalid transport formula ',iform,' for mud fraction.'
           call write_error(errmsg, unit=lundia)
        endif
     endif

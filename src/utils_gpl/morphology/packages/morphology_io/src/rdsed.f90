@@ -1645,7 +1645,7 @@ subroutine count_sed01(lundia    ,error     ,lsed      ,filsed    , &
        do i = 1,npar
           read (luninp, *, iostat = iocond) line
           if (iocond /= 0) then
-             write(errmsg,'(A,I)') 'Error reading parameters for sediment fraction',l
+             write(errmsg,'(A,I0)') 'Error reading parameters for sediment fraction',l
              call write_error(errmsg, unit=lundia)
              error = .true.
              goto 999
