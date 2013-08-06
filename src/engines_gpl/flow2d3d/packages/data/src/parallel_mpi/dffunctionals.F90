@@ -1,30 +1,33 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 module dffunctionals
 !
 !----- GPL ---------------------------------------------------------------------
-!                                                                               
-!  Copyright (C)  Stichting Deltares, 2011-2013.                                
-!                                                                               
-!  This program is free software: you can redistribute it and/or modify         
-!  it under the terms of the GNU General Public License as published by         
-!  the Free Software Foundation version 3.                                      
-!                                                                               
-!  This program is distributed in the hope that it will be useful,              
-!  but WITHOUT ANY WARRANTY; without even the implied warranty of               
-!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                
-!  GNU General Public License for more details.                                 
-!                                                                               
-!  You should have received a copy of the GNU General Public License            
-!  along with this program.  If not, see <http://www.gnu.org/licenses/>.        
-!                                                                               
-!  contact: delft3d.support@deltares.nl                                         
-!  Stichting Deltares                                                           
-!  P.O. Box 177                                                                 
-!  2600 MH Delft, The Netherlands                                               
-!                                                                               
-!  All indications and logos of, and references to, "Delft3D" and "Deltares"    
-!  are registered trademarks of Stichting Deltares, and remain the property of  
-!  Stichting Deltares. All rights reserved.                                     
-!                                                                               
+!
+!  Copyright (C)  Stichting Deltares, 2011-2013.
+!
+!  This program is free software: you can redistribute it and/or modify
+!  it under the terms of the GNU General Public License as published by
+!  the Free Software Foundation version 3.
+!
+!  This program is distributed in the hope that it will be useful,
+!  but WITHOUT ANY WARRANTY; without even the implied warranty of
+!  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!  GNU General Public License for more details.
+!
+!  You should have received a copy of the GNU General Public License
+!  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+!
+!  contact: delft3d.support@deltares.nl
+!  Stichting Deltares
+!  P.O. Box 177
+!  2600 MH Delft, The Netherlands
+!
+!  All indications and logos of, and references to, "Delft3D" and "Deltares"
+!  are registered trademarks of Stichting Deltares, and remain the property of
+!  Stichting Deltares. All rights reserved.
+!
 !-------------------------------------------------------------------------------
 !  $Id$
 !  $HeadURL$
@@ -71,14 +74,14 @@ module dffunctionals
    !
    interface dfgather_seq
       module procedure dfgather_R2e_seq_sp
-      module procedure dfgather_R2e_seq_hp      
+      module procedure dfgather_R2e_seq_hp
       module procedure dfgather_R3e_seq_sp
-      module procedure dfgather_R3e_seq_hp 
+      module procedure dfgather_R3e_seq_hp
       module procedure dfgather_R4e_seq_sp
-      module procedure dfgather_R4e_seq_hp 
+      module procedure dfgather_R4e_seq_hp
       module procedure dfgather_I2_seq
    end interface dfgather_seq
-   
+
    interface dffind_duplicate
       module procedure dffind_duplicate_C
       module procedure dffind_duplicate_I
@@ -208,7 +211,7 @@ logical                                   :: crosec_case_l
     if (inode == master) then
        allocate( tempbuff(nbtotal) )
        allocate( ibuff(1:nbtotal) )
-       tempbuff = 0       
+       tempbuff = 0
     endif
     call dfgather_lowlevel ( tempbuff, nbtotal, inbuff, nblocal, dfint, gdp )
     call dfgather_lowlevel ( ibuff   , nbtotal, order , nblocal, dfint, gdp )
@@ -354,7 +357,7 @@ logical                                   :: crosec_case_l
     if (inode == master) then
        allocate( rbuff(nbtotal) )
        allocate( ibuff(1:nbtotal) )
-       rbuff = 0.0 
+       rbuff = 0.0
     endif
     call dfgather_lowlevel ( rbuff, nbtotal, inbuff, nblocal, dfreal, gdp )
     call dfgather_lowlevel ( ibuff, nbtotal, order, nblocal, dfint, gdp )
@@ -476,7 +479,7 @@ logical                                   :: crosec_case_l
     if (inode == master) then
        allocate( rbuff(nbtotal) )
        allocate( ibuff(1:nbtotal) )
-       rbuff = 0.0_hp 
+       rbuff = 0.0_hp
     endif
     call dfgather_lowlevel ( rbuff, nbtotal, inbuff, nblocal, dfdble, gdp )
     call dfgather_lowlevel ( ibuff, nbtotal, order, nblocal, dfint, gdp )
@@ -1470,7 +1473,7 @@ character(20), dimension(:), allocatable    :: namto
              indx = indx + nbarr(ip)
           endif
        enddo
-       nbgl = count(duplicate == 0) 
+       nbgl = count(duplicate == 0)
        deallocate( namto )
        deallocate( nbarr )
     endif
@@ -1549,7 +1552,7 @@ subroutine dfgather_I2_seq(inparr,noff,moff,nmaxgl,mmaxgl)
 !
 !    Function:    Gather array in global array globar
 !                  for writing to Map files (sequential mode)
-!    Method used: shift indices of input array 
+!    Method used: shift indices of input array
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
@@ -1561,7 +1564,7 @@ subroutine dfgather_I2_seq(inparr,noff,moff,nmaxgl,mmaxgl)
 !
 integer                         , intent(in) :: nmaxgl
 integer                         , intent(in) :: mmaxgl
-integer                         , intent(in) :: moff       ! desired offset w.r.t. globarr 
+integer                         , intent(in) :: moff       ! desired offset w.r.t. globarr
 integer                         , intent(in) :: noff       ! desired offset w.r.t. globarr
 integer, dimension(:,:)         , intent(in) :: inparr
 !
@@ -1588,7 +1591,7 @@ subroutine dfgather_R2e_seq_sp(inparr,noff, moff, nmaxgl,mmaxgl)
 !
 !    Function:    Gather array in global array globar
 !                  for writing to Map files (sequential mode)
-!    Method used: shift indices of input array 
+!    Method used: shift indices of input array
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
@@ -1628,7 +1631,7 @@ subroutine dfgather_R2e_seq_hp(inparr,noff, moff, nmaxgl, mmaxgl)
 !
 !    Function:    Gather array in global array globar
 !                  for writing to Map files (sequential mode)
-!    Method used: shift indices of input array 
+!    Method used: shift indices of input array
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
@@ -1642,7 +1645,7 @@ integer                         , intent(in) :: nmaxgl
 integer                         , intent(in) :: mmaxgl
 real(hp), dimension(:,:)        , intent(in) :: inparr
 integer                         , intent(in) :: moff     ! desired offset w.r.t. globarr
-integer                         , intent(in) :: noff     ! desired offset w.r.t. globarr 
+integer                         , intent(in) :: noff     ! desired offset w.r.t. globarr
 !
 ! Local variables
 !
@@ -1663,7 +1666,7 @@ subroutine dfgather_R3e_seq_sp(inparr,noff,moff,nmaxgl,mmaxgl)
 !
 !    Function:    Gather array in global array globar
 !                  for writing to Map files (sequential mode)
-!    Method used: shift indices of input array 
+!    Method used: shift indices of input array
 
 !!--pseudo code and references--------------------------------------------------
 ! NONE
@@ -1710,7 +1713,7 @@ subroutine dfgather_R3e_seq_hp(inparr,noff,moff,nmaxgl, mmaxgl)
 !
 !    Function:    Gather array in global array globar
 !                  for writing to Map files (sequential mode)
-!    Method used: shift indices of input array 
+!    Method used: shift indices of input array
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
@@ -1750,7 +1753,7 @@ subroutine dfgather_R4e_seq_sp(inparr,noff,moff,nmaxgl,mmaxgl)
 !
 !    Function:    Gather array in global array globar
 !                  for writing to Map files (sequential mode)
-!    Method used: shift indices of input array 
+!    Method used: shift indices of input array
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
@@ -1783,7 +1786,7 @@ kf = lbound(inparr,3)
 kl = ubound(inparr,3)
 lf = lbound(inparr,4)
 ll = ubound(inparr,4)
-    
+
 if (allocated(glbarr4)) deallocate(glbarr4)
 allocate(glbarr4(1:nmaxgl,1:mmaxgl,kf:kl,lf:ll))
 do l = lf, ll
@@ -1794,7 +1797,7 @@ do l = lf, ll
          enddo
       enddo
    enddo
-enddo   
+enddo
 
 end subroutine dfgather_R4e_seq_sp
 !
@@ -1805,7 +1808,7 @@ subroutine dfgather_R4e_seq_hp(inparr,noff,moff,nmaxgl, mmaxgl)
 !
 !    Function:    Gather array in global array globar
 !                  for writing to Map files (sequential mode)
-!    Method used: shift indices of input array 
+!    Method used: shift indices of input array
 !
 !!--pseudo code and references--------------------------------------------------
 ! NONE
