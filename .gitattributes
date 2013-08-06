@@ -2143,7 +2143,7 @@ src/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib/m_prcgrp.F90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib/m_sndrcv.F90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib/reshape_ddata.F90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib/reshape_idata.F90 -text
-src/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib/reshape_rdata.f90 -text
+src/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib/reshape_rdata.F90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib/sndrcv_wrappers.f90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/mod_timings/Makefile.am -text
 src/engines_gpl/waq/packages/waq_utils_f/src/mod_timings/m_timers_waq.f90 -text
