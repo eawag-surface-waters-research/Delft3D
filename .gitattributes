@@ -2135,7 +2135,7 @@ src/engines_gpl/waq/packages/waq_utils_f/src/interact/uprcas.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/interact/wipe.f -text
 src/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib/Makefile.am -text
 src/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib/m_coupcns.F90 -text
-src/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib/m_couplib.f90 -text
+src/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib/m_couplib.F90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib/m_globcomm.f90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib/m_intfc.f90 -text
 src/engines_gpl/waq/packages/waq_utils_f/src/mod_couplib/m_ixset.f90 -text
