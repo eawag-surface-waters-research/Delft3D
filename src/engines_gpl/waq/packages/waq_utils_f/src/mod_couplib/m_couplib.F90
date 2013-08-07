@@ -1,3 +1,6 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 !!  Copyright (C)  Stichting Deltares, 2012-2013.
 !!
 !!  This program is free software: you can redistribute it and/or modify
@@ -279,7 +282,9 @@ integer     :: ierr
 !-----------------------------------------------------------------------------
 
    call sndrcv_stopmod()
+#ifdef HAVE_MPI
    call mpi_finalize(ierr)
+#endif   
 end subroutine couplib_stop
 
 

@@ -1,3 +1,7 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 !!  Copyright (C)  Stichting Deltares, 2012-2013.
 !!
 !!  This program is free software: you can redistribute it and/or modify
@@ -62,8 +66,9 @@ public
 ! now we assume that processes are ordered by rank, such that the task-id of a
 ! process is itid = irank = iprc-1.
 
-
+#ifdef HAVE_MPI
 include 'mpif.h'
+#endif
 !integer, parameter, public :: MPI_REAL8 = MPI_DOUBLE_PRECISION
 
 ! subroutines for configuration of processes and groups:
@@ -71,7 +76,9 @@ public  prcgrp_initmod
 
 ! overall MPI process group as far as CouPLib is concerned:
 ! (maybe this value should be settable by the calling program)
+#ifdef HAVE_MPI
 integer, parameter, public   :: MPI_COMM_ALL = MPI_COMM_WORLD
+#endif
 
 ! flag indicating whether this is a coupled run or not
 integer, public              :: iscple=0
@@ -132,9 +139,16 @@ integer           :: supported_level
    if (prcgrp_initialized.gt.0) then
 
       write(*,*) 'prcgrp_initmod: Error: called for the second time.'
+      return
+   end if
+   if (iscple.eq.0) then
 
-   else
+      prcgrp_initialized = 1
+      return 
+   end if  
 
+#ifdef HAVE_MPI       
+       
 !     First register with MPI and start-up the parallel run
 
       if (my_idebug.ge.2) write(*,*) 'starting MPI...'
@@ -169,10 +183,9 @@ integer           :: supported_level
             ': running at host="', trim(hostname), '"'
       endif
 
-   endif
-
+   
    prcgrp_initialized = 1
-
+#endif
 end subroutine prcgrp_initmod
 
 
