@@ -38,6 +38,7 @@ subroutine dimsedconst(lundia    ,error     ,sedim     ,const     , &
     use properties
     use string_module
     use globaldata
+    use message_module
     use m_rdsed
     !
     implicit none
