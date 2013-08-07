@@ -1,3 +1,6 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 subroutine dfsendr_nm_pos2 ( field, work, worksize, ks, ke, request, tag, gdp )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               

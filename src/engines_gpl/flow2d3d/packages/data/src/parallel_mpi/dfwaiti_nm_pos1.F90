@@ -1,3 +1,6 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 subroutine dfwaiti_nm_pos1 ( field, work, worksize, ks, ke, request, tag, gdp )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
