@@ -1,4 +1,6 @@
 @echo off
+setlocal enableextensions
+
 rem Program will replace %1 by the %1.svn and will replace VERSION_BUILD_NUMBER by a corresponding svn version using svnversion command
 rem
 rem %1 - path to the target source file
@@ -10,14 +12,16 @@ echo Generating version number in '%1' ...
 
 set SCRIPT_DIRECTORY=%~dp0
 
-set SED=%SCRIPT_DIRECTORY%\..\..\third_party_open\commandline\bin\win32\sed.exe
 set SVNVERSION=%SCRIPT_DIRECTORY%\..\..\third_party_open\subversion\bin\win32\svnversion.exe
 set VN=%SCRIPT_DIRECTORY%\..\..\third_party_open\version_number\bin\win32\version_number.exe
 
 set version=000000
+
 rem Obtain the svn version number 
-"%SVNVERSION%" %2 | "%SED%" "s/\(.*\)/set version=\1/" > setversion.bat
-call setversion.bat & del setversion.bat > NUL
+for /f "tokens=*" %%a in ('%SVNVERSION% %2') do set version=%%a
+
+rem In case version="123:128", use "128":
+set version=%version:*:=%
 
 rem ==========================================================================
 rem If the source has been obtained using a svn export command, the "Unversioned directory"
