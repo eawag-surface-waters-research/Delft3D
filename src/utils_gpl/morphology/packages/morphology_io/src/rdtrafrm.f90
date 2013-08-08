@@ -306,7 +306,7 @@ subroutine rdtrafrm(lundia    ,error     ,filtrn    ,lsedtot   , &
                  & dll_usrfil,ipardef   ,rpardef   ,npardef   ,sedblock  )
     iformdef = iform(1)
     do ll=2, lsedtot
-       if (iform(ll)==-999) then
+       if (iform(ll)==-999 .and. flstrn(ll)==' ') then
           name        (ll) = name(1)
           dll_handle  (ll) = dll_handle(1)
           dll_function(ll) = dll_function(1)
@@ -322,7 +322,7 @@ subroutine rdtrafrm(lundia    ,error     ,filtrn    ,lsedtot   , &
     ! restore the iform(1) value if it had a specified value
     !
     iform(1) = iform1tmp
-    if (iform1tmp/=-999) then
+    if (iform1tmp/=-999 .or. flstrn(1)/=' ') then
        name(1) = ' '
        dll_handle(1) = 0
        dll_function(1) = ' '
@@ -494,10 +494,10 @@ subroutine rdtrafrm0(lundia    ,error     ,iform     ,npar      ,par       , &
                 error = .true.
                 return
              endif
-             dll_func = ' '
+             dll_func(l) = ' '
              call prop_get_string(tran_ptr,'TransportFormula','function',dll_func(l))
              !
-             dll_usrfil = ' '
+             dll_usrfil(l) = ' '
              call prop_get_string(tran_ptr,'TransportFormula','InputFile',dll_usrfil(l))
           else
              iform(l) = -999
@@ -561,7 +561,7 @@ subroutine rdtrafrm0(lundia    ,error     ,iform     ,npar      ,par       , &
                  & pardef    ,nodef     )
     if (name(l) == ' ') then
        error      = .true.
-       errmsg     = 'Transport formula number is not implemented'
+       write(errmsg,'(A,I0,A)') 'Transport formula number ',iform(l),' is not implemented'
        call write_error(errmsg, unit=lundia)
        return
     endif
@@ -1069,6 +1069,9 @@ subroutine traparams(iform     ,name      ,nparreq   ,nparopt   ,parkeyw   , &
        parkeyw(3) = 'PowerM'
        parkeyw(4) = 'PowerP'
        parkeyw(5) = 'PowerQ'
+    elseif (iform == 15) then
+       name       = 'External subroutine'
+       nparreq    = 0
     elseif (iform == 16) then
        name       = 'Wilcock-Crowe (2003)'
        nparopt    = 1
