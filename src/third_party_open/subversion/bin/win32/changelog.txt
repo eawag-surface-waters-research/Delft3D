@@ -1,3 +1,14 @@
+Version 1.8.1
+https://dist.apache.org/repos/dist/dev/subversion/
+
+ Changes to included binaries:
+    * Subversion upgraded to 1.8.1.
+    * APR 1.4.8.
+    * APR-Util 1.5.2.
+    * Httpd 2.2.25.
+    * Sqlite3 3.7.17.
+    
+
 Version 1.8.0-2
 https://dist.apache.org/repos/dist/dev/subversion/
 
