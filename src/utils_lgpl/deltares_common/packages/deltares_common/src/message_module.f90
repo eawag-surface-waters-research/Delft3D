@@ -62,14 +62,10 @@ public writemessages
 public write_error
 public write_warning
 !                                                                1         2         3
-!                                                       123456789012345678901234567890
 character( 16), parameter, public :: FILE_NOT_FOUND  = 'File not found: '
 character( 23), parameter, public :: PREMATURE_EOF   = 'Premature EOF in file: '
 character( 22), parameter, public :: FILE_READ_ERROR = 'Read error from file: '
 character( 19), parameter, public :: ERROR_FILE_OPEN = 'Error opening file: '
-
-!
-! bed composition boundary conditions at one open boundary
 !
 type message_type
     private
