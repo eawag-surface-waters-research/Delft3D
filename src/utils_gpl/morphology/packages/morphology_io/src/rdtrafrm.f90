@@ -936,7 +936,7 @@ subroutine traparams(iform     ,name      ,nparreq   ,nparopt   ,parkeyw   , &
 !
     nodef   = -999999.0_fp
     !
-    name    = ' '
+    if (iform /= 15) name = ' '
     nparreq = 0
     nparopt = 0
     parkeyw = ' '
@@ -1070,7 +1070,7 @@ subroutine traparams(iform     ,name      ,nparreq   ,nparopt   ,parkeyw   , &
        parkeyw(4) = 'PowerP'
        parkeyw(5) = 'PowerQ'
     elseif (iform == 15) then
-       name       = 'External subroutine'
+       if (name == ' ') name = 'External subroutine'
        nparreq    = 0
     elseif (iform == 16) then
        name       = 'Wilcock-Crowe (2003)'
