@@ -1032,7 +1032,7 @@ subroutine erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              call erosilt(thick       ,kmax        ,wslc        ,lundia      , &
                         & thick0      ,thick1      ,fixfac(nm,l), srcmax(nm, l),&
                         & frac(nm,l)  ,oldmudfrac  ,flmd2l      ,iform(l)    , &
-                        & par         ,max_integers,max_reals   ,max_strings , &
+                        & par(1,l)    ,max_integers,max_reals   ,max_strings , &
                         & dll_function(l),dll_handle(l),dll_integers,dll_reals, &
                         & dll_strings  , &
                         & error ,wstau(nm) ,sinkse(nm,l) ,sourse(nm,l))
