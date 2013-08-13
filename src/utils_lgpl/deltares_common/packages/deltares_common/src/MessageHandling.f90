@@ -92,6 +92,12 @@ module MessageHandling
    character(len=12), public              :: space12 = ' '
    integer, dimension(max_level), public  :: mess_level_count
 
+   integer, parameter, public   :: maxMessages = 3000
+   integer,                                    public :: messagecount = 0 !< Number of messages currently in message buffer (queue).
+   character(len=charln), dimension(maxMessages), public :: Messages
+   integer           , dimension(maxMessages), public :: Levels
+   integer,                                    public :: ibuffertail  = 0 !< Index of newest message in message buffer.
+
    interface mess
    module procedure message1string
    module procedure message2string
@@ -124,14 +130,9 @@ module MessageHandling
    end interface
 
 private
-   integer, parameter, private   :: maxMessages = 3000
-   character(len=charln), dimension(maxMessages), private :: Messages
-   integer           , dimension(maxMessages), private :: Levels
-   integer,                                    private :: messagecount = 0 !< Number of messages currently in message buffer (queue).
-   integer,                                    private :: ibuffertail  = 0 !< Index of newest message in message buffer.
 
-   integer,                                    private :: maxErrorLevel = 0 
-   integer,                                    public  :: thresholdLvl = 0 
+   integer,                                    private :: maxErrorLevel = 0
+   integer,                                    public  :: thresholdLvl = 0
 
    integer, save                  :: lunMess          = 0
    logical, save                  :: writeMessage2Screen = .false.
@@ -139,7 +140,7 @@ private
    logical, save                  :: alreadyInCallback=.false.                   !< flag for preventing recursive calls to callback subroutine
    !> Callback routine invoked upon any mess/err (i.e. SetMessage)
    procedure(mh_callbackiface), pointer :: mh_callback => null()
-   procedure(c_callbackiface), pointer :: c_callback => null()
+   procedure(c_callbackiface), pointer :: f_callback => null()
 
 contains
 
@@ -182,12 +183,14 @@ subroutine set_mh_callback(callback)
 end subroutine set_mh_callback
 
 
-subroutine set_mh_c_callback(callback)
+subroutine set_mh_c_callback(c_callback) bind(C, name="set_mh_c_callback")
   use iso_c_binding
-  procedure(c_callbackiface) :: callback
+  implicit none
+  type(c_funptr) :: c_callback
 
-  ! TODO check if we need cptr2fptr
-  c_callback => callback
+  ! Set a callback that will be cauled with new messages
+
+  call c_f_procpointer(c_callback, f_callback)
 end subroutine set_mh_c_callback
 
 
@@ -250,10 +253,10 @@ recursive subroutine SetMessage(level, string)
       alreadyInCallback = .false.
    end if
 
-   if (associated(c_callback).and. .not. alreadyInCallback) then
+   if (associated(f_callback).and. .not. alreadyInCallback) then
       alreadyInCallback = .true.
       c_string(1:len(trim(string))+1) = string_to_char_array(trim(string), len(trim(string)))
-      call c_callback(level, c_string)
+      call f_callback(level, c_string)
       alreadyInCallback = .false.
    end if
 
