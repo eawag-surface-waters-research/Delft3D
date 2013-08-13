@@ -184,7 +184,7 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
     rlabda    = real(realpar(RP_RLAMB),fp)
     uorb      = real(realpar(RP_UORB) ,fp)
     di50      = real(realpar(RP_D50)  ,fp)
-    !realpar(RP_DSS) = real(dss,hp)
+    dss       = real(realpar(RP_DSS)  ,fp)
     dstar     = real(realpar(RP_DSTAR),fp)
     d10       = real(realpar(RP_D10MX),fp)
     d90       = real(realpar(RP_D90MX),fp)
@@ -251,6 +251,8 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
     ! Calculate sediment mixing due to waves following
     ! Van Rijn 2004 - intra-wave approach for bed load (original TR2004)
     !
+    caks_ss3d = caks
+    aks_ss3d  = aks
     if (caks > 1.0e-6_fp) then
        call calseddf2004(ustarc    ,ws        ,tp        ,hrms      ,h1        , &
                        & seddif    ,kmax      ,sig       ,thick     ,dicww     , &
@@ -259,8 +261,6 @@ subroutine tram2 (numrealpar,realpar   ,wave      ,i2d3d     ,par       , &
                        & aks_ss3d  ,di50      ,salinity  ,ws0       ,psi       , &
                        & epspar    ,eps       ,vonkar    ,salmax    ,wave      )
     else
-       caks_ss3d = caks
-       aks_ss3d  = aks
        do k = 1, kmax
           seddif(k) = dicww(k)
        enddo
