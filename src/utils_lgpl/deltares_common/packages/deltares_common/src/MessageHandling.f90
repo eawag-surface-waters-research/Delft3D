@@ -32,8 +32,9 @@
 ! did not make it visible in subprograms when using ifort 11.0.)
 module MHCallBack
    abstract interface
-      subroutine mh_callbackiface(level)
+      subroutine mh_callbackiface(level, message)
          integer, intent(in) :: level !< The severity level
+         character(len=*), intent(in) :: message !< log message
       end subroutine mh_callbackiface
    end interface
 
@@ -92,11 +93,6 @@ module MessageHandling
    character(len=12), public              :: space12 = ' '
    integer, dimension(max_level), public  :: mess_level_count
 
-   integer, parameter, public   :: maxMessages = 3000
-   integer,                                    public :: messagecount = 0 !< Number of messages currently in message buffer (queue).
-   character(len=charln), dimension(maxMessages), public :: Messages
-   integer           , dimension(maxMessages), public :: Levels
-   integer,                                    public :: ibuffertail  = 0 !< Index of newest message in message buffer.
 
    interface mess
    module procedure message1string
@@ -131,6 +127,12 @@ module MessageHandling
 
 private
 
+   integer               , parameter,              private :: maxMessages = 3000
+   integer               ,                         private :: messagecount = 0 !< Number of messages currently in message buffer (queue).
+   character(len=charln) , dimension(maxMessages), private :: Messages
+   integer               , dimension(maxMessages), private :: Levels
+   integer               ,                         private :: ibuffertail  = 0 !< Index of newest message in message buffer.
+
    integer,                                    private :: maxErrorLevel = 0
    integer,                                    public  :: thresholdLvl = 0
 
@@ -161,7 +163,7 @@ subroutine SetMessageHandling(write2screen, useLog, lunMessages, callback, thres
    if (present(lunMessages) )  lunMess             = lunMessages
    if (present(useLog) )       useLogging          = useLog
    if (present(callback) ) then
-       mh_callback         =>callback
+      call set_mh_callback(callback)
    endif
    if (present(thresholdLevel) )  thresholdLvl     = thresholdLevel
 
@@ -249,7 +251,7 @@ recursive subroutine SetMessage(level, string)
    ! Optional callback routine for any user-specified actions (e.g., upon error)
    if (associated(mh_callback).and. .not. alreadyInCallback) then
       alreadyInCallback = .true.
-      call mh_callback(level) !In future, possibly also error #ID
+      call mh_callback(level, trim(string)) !In future, possibly also error #ID
       alreadyInCallback = .false.
    end if
 
