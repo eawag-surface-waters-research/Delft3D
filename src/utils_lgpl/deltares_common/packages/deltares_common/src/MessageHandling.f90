@@ -50,9 +50,9 @@ end module MHCallBack
 !> Diagnostics output module.
 !! Prints and/or logs messages from an application.
 !! Three variants:
-!! -# write2screen: prints directly on stdout
-!! -# useLog: writes to a specified file points.
-!! -# MessageQueue: Can be emptied by any other application.
+!! -# write2screen: writes directly to stdout
+!! -# useLog: log all messages in a message buffer (a queue), can be read out by any other application.
+!! -# lunMessages: writes directly to an already opened specified file pointer.
 !!
 !! See MessageHandling::SetMessageHandling for more details.
 !!
@@ -68,6 +68,7 @@ module MessageHandling
    public mess
    public err
    public GetMessage_MH
+   public getOldestMessage
    public resetMessageCount_MH
    public getMaxErrorLevel
    public resetMaxerrorLevel
@@ -124,11 +125,14 @@ module MessageHandling
 
 private
    integer, parameter, private   :: maxMessages = 3000
-   character(len=256), dimension(maxMessages), private :: Messages
+   character(len=charln), dimension(maxMessages), private :: Messages
    integer           , dimension(maxMessages), private :: Levels
-   integer                                   , private :: messagecount
-   integer                                   , private :: maxErrorLevel = 0
-   integer                                   , public  :: thresholdLvl = 0
+   integer,                                    private :: messagecount = 0 !< Number of messages currently in message buffer (queue).
+   integer,                                    private :: ibuffertail  = 0 !< Index of newest message in message buffer.
+
+   integer,                                    private :: maxErrorLevel = 0 
+   integer,                                    public  :: thresholdLvl = 0 
+
    integer, save                  :: lunMess          = 0
    logical, save                  :: writeMessage2Screen = .false.
    logical, save                  :: useLogging = .true.
@@ -161,7 +165,11 @@ subroutine SetMessageHandling(write2screen, useLog, lunMessages, callback, thres
    if (present(thresholdLevel) )  thresholdLvl     = thresholdLevel
 
    if (present(reset_counters)) then
-     if (reset_counters) mess_level_count = 0
+     if (reset_counters) then
+        mess_level_count = 0
+        messagecount = 0
+        ibuffertail  = 0
+     end if
    endif
 
    alreadyInCallback = .false.
@@ -181,6 +189,7 @@ subroutine set_mh_c_callback(callback)
   ! TODO check if we need cptr2fptr
   c_callback => callback
 end subroutine set_mh_c_callback
+
 
 !> The main message routine. Puts the message string to all output
 !! channels previously set up by SetMessageHandling
@@ -218,15 +227,7 @@ recursive subroutine SetMessage(level, string)
       endif
 
       if (useLogging) then
-         messageCount           = messageCount + 1
-         if (messageCount > maxMessages) then
-            messages(maxMessages) = 'Maximum number of messages reached'
-            levels(maxMessages)   = level
-            messagecount          = maxmessages
-         else
-            messages(messageCount) = string
-            levels(messageCount)   = level
-         endif
+         call pushMessage(levelact, string)
       endif
 
    elseif (level < 0) then
@@ -256,19 +257,64 @@ recursive subroutine SetMessage(level, string)
       alreadyInCallback = .false.
    end if
 
- end subroutine SetMessage
+end subroutine SetMessage
 
+
+!> Pushes a new message at the tail of the message queue.
+subroutine pushMessage(level, string)
+   integer,          intent(in)  :: level  !< One of: LEVEL_(DEBUG|INFO|WARN|ERROR|FATAL).
+   character(len=*), intent(in)  :: string !< Complete message string.
+
+
+   ibuffertail = mod(ibuffertail, maxmessages) + 1
+   messagecount = min(maxmessages, messagecount+1)
+
+   messages(ibuffertail)  = string
+   levels(ibuffertail)    = level
+end subroutine pushMessage
+
+
+!> Pops the oldest message from the head of the message queue.
+!! When the message queue is empty, level=LEVEL_NONE is returned.
+subroutine getOldestMessage(level, msg)
+   integer,          intent(out) :: level !< Set to the level of the newest message.
+   character(len=*), intent(out) :: msg   !< Set to the newest message text.
+
+   integer :: ibufferhead, itrimlen
+
+   if (messagecount == 0) then
+      level = LEVEL_NONE
+      return
+   else
+      ! ibufferhead: front element in the message queue, is tail minus count, but notice the cyclic list/queue (mod) and +1 for 1-based index.
+      ibufferhead = mod(ibuffertail - messagecount + maxmessages, maxmessages) + 1
+      msg = ' '
+      itrimlen = min(len(msg), len_trim(messages(ibuffertail))) ! Shortest of actual message and the available space in output variable.
+
+      msg   = messages(ibuffertail)(1:itrimlen)
+      level = levels(ibufferhead)
+      messagecount = messagecount-1
+   end if
+end subroutine getOldestMessage
+
+
+!> Returns the number of messages that are still in the message buffer queue.
+!! Note: it is advised to use getOldestMessage to pop messages from the queue.
 integer function getMessageCount()
    getMessageCount = messagecount
 end function
 
+
+!> Gets a message from the message buffer queue, without any checks on whether it's there.
+!! Returns the integer level as the function's return value, and stores the accompanying message in the message dummy argument.
 integer function GetMessage_MH(imessage, message)
-   character(len=200)               :: message
-   integer, intent(in)              :: imessage
+   integer,            intent(in)  :: imessage  !< Position in the message queue.
+   character(len=200), intent(out) :: message   !< The message text.
 
    message=messages(imessage)(1:200)
    GetMessage_MH = levels(imessage)
 end function
+
 
 subroutine resetMessageCount_MH()
 
