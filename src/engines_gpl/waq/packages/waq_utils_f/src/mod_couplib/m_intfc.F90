@@ -975,12 +975,6 @@ integer                        :: idebug
    if (idebug.ge.1) write(LOUT,*) 'intfc_define_collcitf_ihave: starting ', &
         'for namitf="', trim(namitf),'" on ixset "',trim(namixs),'"'
 
-
-   if (iscple.eq.0) then
-
-      return 
-   end if
-#ifdef HAVE_MPI
 !  start timing of interface definition
 
    if (use_timers) call timer_start(itimer_couplib_intfc)
@@ -1017,7 +1011,7 @@ integer                        :: idebug
 !   - send array 'ihave' to master
 !   - fill in neighbour-table with 1 neighbour (master), for sending all
 !     indices marked "1" in ihave
-
+#ifdef HAVE_MPI
    if (mypart.eq.1) then
 
 !     Note: assuming that global adressing is used, such that nelem is
@@ -1099,13 +1093,13 @@ integer                        :: idebug
       !write(LOUT,*) sndrcv%isnd
 
    endif
-
+#endif
 !  Use intfc_define to register the data collected as a new interface
 
    call intfc_define(namitf, iset, nngb, nghtbl)
 
    if (use_timers) call timer_stop(itimer_couplib_intfc)
-#endif
+
 end subroutine intfc_define_collcitf_ihave
 
 
@@ -1317,10 +1311,6 @@ integer                        :: idebug=0
         ' namitf="', trim(namitf),'" on ixset "',trim(namixs),'"'
 
 
-   if (iscple.eq.0) then
-      return 
-   end if
-#ifdef HAVE_MPI
 !  start timing of interface definition
 
    if (use_timers) call timer_start(itimer_couplib_intfc)
@@ -1356,7 +1346,7 @@ integer                        :: idebug=0
 !   - send array 'ineed' to master
 !   - fill in neighbour-table with 1 neighbour (master), delivering all
 !     indices marked "1" in ineed
-
+#ifdef HAVE_MPI
    if (mypart.eq.1) then
 
 !     Note: assuming that global adressing is used, such that nelem is
@@ -1438,13 +1428,13 @@ integer                        :: idebug=0
       !write(LOUT,*) sndrcv%ircv
 
    endif
-
+#endif
 !  Use intfc_define to register the data collected as a new interface
 
    call intfc_define(namitf, iset, nngb, nghtbl)
 
    if (use_timers) call timer_stop(itimer_couplib_intfc)
-#endif
+
 end subroutine intfc_define_dstrbitf_ineed
 
 
@@ -1507,10 +1497,6 @@ integer                        :: my_idebug=0
    if (my_idebug.ge.1) write(LOUT,*) 'intfc_define_updatitf: starting for ', &
         'namitf="', trim(namitf),'" on ixset "',trim(namixs),'"'
 
-   if (iscple.eq.0) then
-      return 
-   end if
-#ifdef HAVE_MPI
 !  start timing of interface definition
 
    if (use_timers) call timer_start(itimer_couplib_intfc)
@@ -1543,7 +1529,10 @@ integer                        :: my_idebug=0
    enddo
 
 !  allocate neighbour-table with maximum size; all processes might be neighbours
-
+#ifndef HAVE_MPI
+   nngb = 0
+   allocate(nghtbl2(nngb))
+#else
    nngb = numprc
    allocate(nghtbl(nngb))
 
@@ -1687,7 +1676,7 @@ integer                        :: my_idebug=0
       endif
    enddo
    deallocate(nghtbl)
-
+#endif
 !  Use intfc_define to register the data collected as a new interface
 
    if (my_idebug.ge.10) write(LOUT,*) 'intfc_define_updatitf: calling ',&
@@ -1695,7 +1684,7 @@ integer                        :: my_idebug=0
    call intfc_define(namitf, iset, nngb, nghtbl2)
 
    if (use_timers) call timer_stop(itimer_couplib_intfc)
-#endif
+
 end subroutine intfc_define_updatitf
 
 

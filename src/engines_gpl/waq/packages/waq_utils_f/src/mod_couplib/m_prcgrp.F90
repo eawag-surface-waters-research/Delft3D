@@ -141,13 +141,12 @@ integer           :: supported_level
       write(*,*) 'prcgrp_initmod: Error: called for the second time.'
       return
    end if
-   if (iscple.eq.0) then
-
-      prcgrp_initialized = 1
-      return 
-   end if  
-
-#ifdef HAVE_MPI       
+#ifndef HAVE_MPI
+     numprc = 1
+     iscple = 0
+     myrank = 0
+     myprc  = 1
+#else
        
 !     First register with MPI and start-up the parallel run
 
@@ -182,10 +181,8 @@ integer           :: supported_level
          write(*,'(2(a,i3),3a)') ' Process', myprc,' of',numprc, &
             ': running at host="', trim(hostname), '"'
       endif
-
-   
-   prcgrp_initialized = 1
 #endif
+   prcgrp_initialized = 1
 end subroutine prcgrp_initmod
 
 
