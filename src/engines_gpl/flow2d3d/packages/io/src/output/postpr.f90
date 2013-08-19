@@ -843,7 +843,7 @@ subroutine postpr(lundia    ,lunprt    ,error     ,versio    ,comfil    , &
           ! Set DPS at the boundary cell which is not taken care of by WAQ (depth at water level points)
           !
           call upbdps(mmax      , nmax         , i(kcs), &
-                    & nmaxus    , r(dp)        , r(dps), gdp       )
+                    & nmaxus    , r(dp)        , d(dps), gdp       )
           !
           ! Recalculate DPU/DPV (depth at velocity points)
           !

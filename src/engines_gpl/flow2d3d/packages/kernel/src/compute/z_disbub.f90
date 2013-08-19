@@ -89,7 +89,7 @@ subroutine z_disbub(kmax    ,nsrcd     ,nsrc      ,nxbub    , &
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: xcor   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: ycor   !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(0:kmax)                             , intent(in)  :: zk
-    real(hp), dimension(gdp%d%nmlb:gdp%d%nmub)              , intent(in)  :: dps
+    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)            , intent(in)  :: dps
     character(20), dimension(nsrc)                          , intent(in)  :: namsrc !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables

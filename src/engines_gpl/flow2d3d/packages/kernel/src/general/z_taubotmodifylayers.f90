@@ -70,7 +70,7 @@ subroutine z_taubotmodifylayers(nmmax  ,kmax     ,lstsci   ,icx     ,icy        
     integer , dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: kfvmax   !  Description and declaration in esm_alloc_int.f90
     real(fp)                                        , intent(in) :: hdt
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: gsqs     !  Description and declaration in esm_alloc_real.f90
-    real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)      , intent(in) :: dps      !  Description and declaration in esm_alloc_real.f90
+    real(prec), dimension(gdp%d%nmlb:gdp%d%nmub)    , intent(in) :: dps      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                   :: dpu      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                   :: dpv      !  Description and declaration in esm_alloc_real.f90
     real(fp), dimension(gdp%d%nmlb:gdp%d%nmub)                   :: s0       !  Description and declaration in esm_alloc_real.f90
