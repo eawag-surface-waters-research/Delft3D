@@ -1420,7 +1420,7 @@ subroutine esm_alloc_real(lundia, error, gdp)
     !                           sbv   (nmaxddb  ,mmaxddb,lsedtot)
     !                           epscur(0:kmax)
     !                           epswav(0:kmax)
-    !                          aks   (nmaxddb  ,mmaxddb)
+    !                          aks   (nmaxddb  ,mmaxddb,lsed)
     !                          sbuu  (nmaxddb  ,mmaxddb,lsedtot)
     !                          sbvv  (nmaxddb  ,mmaxddb,lsedtot)
     !                          ssuu  (nmaxddb  ,mmaxddb,lsed)
@@ -1481,7 +1481,7 @@ subroutine esm_alloc_real(lundia, error, gdp)
     if (ierr<= - 9) goto 9999
     !
     pntnam = 'aks'           !  Global data
-    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb, gdp)
+    ierr = mkfpnt(pntnam, nmaxddb*mmaxddb*lsed, gdp)
                              !  no description (yet)
     if (ierr<= - 9) goto 9999
     !
