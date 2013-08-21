@@ -47,7 +47,7 @@ C tegelijk open kunnen zijn.
      *          '' but open en close files 1000 times '')')
 
       do i=1, 1000
-      if (mod(i,100)==0) write(*,*) i
+      if (mod(i,100)==0) write(*,'(a)') i
 
       CALL WriteFile( 'data_c16a', fds_a, 33 )
       CALL WriteFile( 'data_c16b', fds_b, 39 )
@@ -61,37 +61,37 @@ C tegelijk open kunnen zijn.
       error= Clsdat( fds_a )
       if (error.ne.0) then
         error = neferr( 0, errstr)
-        write(*,*) trim(errstr)
+        write(*,'(a)') trim(errstr)
       endif
 
       error= Clsdat( fds_b )
       if (error.ne.0) then
         error = neferr( 0, errstr)
-        write(*,*) trim(errstr)
+        write(*,'(a)') trim(errstr)
       endif
 
       error= Clsdat( fds_c )
       if (error.ne.0) then
         error = neferr( 0, errstr)
-        write(*,*) trim(errstr)
+        write(*,'(a)') trim(errstr)
       endif
 
       error= Clsdef( fds_a )
       if (error.ne.0) then
         error = neferr( 0, errstr)
-        write(*,*) trim(errstr)
+        write(*,'(a)') trim(errstr)
       endif
 
       error= Clsdef( fds_b )
       if (error.ne.0) then
         error = neferr( 0, errstr)
-        write(*,*) trim(errstr)
+        write(*,'(a)') trim(errstr)
       endif
 
       error= Clsdef( fds_c )
       if (error.ne.0) then
         error = neferr( 0, errstr)
-        write(*,*) trim(errstr)
+        write(*,'(a)') trim(errstr)
       endif
 
 
@@ -99,7 +99,7 @@ C tegelijk open kunnen zijn.
 
       if (error.eq.0) then
         error =neferr( 0, errstr)
-        write(*,*)
+        write(*,'(a)')
         write(*,'(a)') trim(errstr)
       endif
 
@@ -137,13 +137,13 @@ C
       error= Opndef( fds, fName // '.def', coding)
       if (error.ne.0) then
         error = neferr( 0, errstr)
-        write(*,*) trim(errstr)
+        write(*,'(a)') trim(errstr)
       endif
 
       error= Opndat( fds, fName // '.dat', coding)
       if (error.ne.0) then
         error = neferr( 0, errstr)
-        write(*,*) trim(errstr)
+        write(*,'(a)') trim(errstr)
       endif
 
       error= Defelm( fds, 'ELEM_R_8_DIM_1', 'REAL8', 8,
@@ -151,14 +151,14 @@ C
      &               1, BUFSIZ)
       if (error.ne.0) then
         error = neferr( 0, errstr)
-        write(*,*) trim(errstr)
+        write(*,'(a)') trim(errstr)
       endif
 
       names= 'ELEM_R_8_DIM_1'
       error= Defcel( fds, 'CEL_TEST_3', 1, names)
       if (error.ne.0) then
         error = neferr( 0, errstr)
-        write(*,*) trim(errstr)
+        write(*,'(a)') trim(errstr)
       endif
 
       grpdms= 0
@@ -167,13 +167,13 @@ C
      *               grpdms, grpord)
       if (error.ne.0) then
         error = neferr( 0, errstr)
-        write(*,*) trim(errstr)
+        write(*,'(a)') trim(errstr)
       endif
 c---------------------------------------------------------------------
       error= Credat( fds, 'DATAGRP_TEST_3D', 'GRP_TEST_3D')
       if (error.ne.0) then
         error = neferr( 0, errstr)
-        write(*,*) trim(errstr)
+        write(*,'(a)') trim(errstr)
       endif
 c---------------------------------------------------------------------
 
@@ -191,7 +191,7 @@ c---------------------------------------------------------------------
      *                 'ELEM_R_8_DIM_1', UINDEX, usrord, buffer)
         if (error.ne.0) then
           error = neferr( 0, errstr)
-          write(*,*) trim(errstr)
+          write(*,'(a)') trim(errstr)
         endif
    20 CONTINUE
 
@@ -227,7 +227,7 @@ C
      *                 buffer)
         if (error.ne.0) then
           error = neferr( 0, errstr)
-          write(*,*) trim(errstr)
+          write(*,'(a)') trim(errstr)
         endif
         DO 30 i= 1, BUFSIZ
         IF (INT(buffer(i)- DBLE(i)*DBLE(j)*DBLE(bias)).NE. 0)
