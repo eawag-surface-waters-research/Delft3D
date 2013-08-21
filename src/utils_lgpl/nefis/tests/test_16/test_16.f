@@ -47,7 +47,7 @@ C tegelijk open kunnen zijn.
      *          '' but open en close files 1000 times '')')
 
       do i=1, 1000
-      if (mod(i,100)==0) write(*,'(a)') i
+      if (mod(i,100)==0) write(*,'(i0)') i
 
       CALL WriteFile( 'data_c16a', fds_a, 33 )
       CALL WriteFile( 'data_c16b', fds_b, 39 )
