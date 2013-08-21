@@ -66,7 +66,10 @@ int main(){
   strcpy(def_file,"untitled.wdf");
   printf(" Filenames: %s %s\n", dat_file, def_file);
   error = Crenef( &fd1, dat_file, def_file, coding,  rdwr);
-  if (error != 0) error = Neferr( 1, error_string);
+  if (error != 0) {
+    error = Neferr( 1, error_string);
+    exit(1);
+  }
 
   rdwr = 'R';
   coding = 'N';
@@ -74,7 +77,10 @@ int main(){
   strcpy(def_file,"sewage_1.wdf");
   printf(" Filenames: %s %s\n", dat_file, def_file);
   error = Crenef( &fd2, dat_file, def_file, coding,  rdwr);
-  if (error != 0) error = Neferr( 1, error_string);
+  if (error != 0) {
+    error = Neferr( 1, error_string);
+    exit(1);
+  }
 
 
 /*-------------------------------------------------------------------------*/

@@ -9,6 +9,7 @@
 
 NEFIS message 8031:
  File 'data_r.dat' can not be opened as read only
+ --- No such file or directory
  -----------------------------------------------
  Filenames: C data_c.dat data_c.def
  -----------------------------------------------
@@ -24,6 +25,7 @@ NEFIS message 8031:
 
 NEFIS message 8031:
  File 'data_r.daf' can not be opened as read only
+ --- No such file or directory
  -----------------------------------------------
  Filenames: C data_c.daf data_c.daf
  -----------------------------------------------

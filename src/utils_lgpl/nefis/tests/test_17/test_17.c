@@ -32,7 +32,7 @@
 #include "btps.h"
 #include "nefis.h"
 
-#if defined(WIN32)
+#if defined(WIN32) 
 # define strdup _strdup
 #endif
 
@@ -117,7 +117,10 @@ int main(){
     def_file = strdup("trim-f34.def");
     printf(" Filenames: %s %s\n", dat_file, def_file);
     error = Crenef( &fd_nefis, dat_file, def_file, coding,  rdwr);
-    if (error != 0) error = Neferr( 1, error_string);
+    if (error != 0) {
+        error = Neferr( 1, error_string);
+        exit(1);
+    }
 
 /*-------------------------------------------------------------------------*/
     if ( error == 0 )
