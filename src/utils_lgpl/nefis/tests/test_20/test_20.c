@@ -1,8 +1,8 @@
 // errno for fun and profit
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
-#include <stdlib.h>
 #include <errno.h>
 #include <string.h>
 
@@ -58,11 +58,11 @@ cap_nefis_files = 0;
 
 for ( icnt=0; icnt < 100; icnt++)
 {
-fprintf(stderr,"Counting: %d\n", icnt);
+fprintf(stdout,"Counting: %d\n", icnt);
 
 for (set= 0; set<50; set++)
 {
-fprintf(stderr,"\tNEFIS-set: %d\n", set);
+fprintf(stdout,"\tNEFIS-set: %d\n", set);
 	/*
 	 * Create the retrieve_var array
 	 */
@@ -90,7 +90,7 @@ fprintf(stderr,"\tNEFIS-set: %d\n", set);
     }
 } // end for-loop set
 
-fprintf(stderr,"\tCleaning up\n");
+fprintf(stdout,"\tCleaning up\n");
 
 /*
  * Free the retrieve_var array if all nefis file set are closed
@@ -119,7 +119,7 @@ for ( i=0; i<cap_nefis_files; i++ )
 	{
 		for ( i=0; i<cap_nefis_files; i++ )
 		{
-fprintf(stderr,"\t\tNEFIS-set: %d\n", i);
+fprintf(stdout,"\t\tNEFIS-set: %d\n", i);
 			for ( j=0; j<MAX_VAR_GROUPS ; j++ )
 			{
 				free ((BData) retrieve_var[i][j] );
