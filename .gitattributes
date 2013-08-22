@@ -5417,9 +5417,9 @@ src/utils_lgpl/nefis/tests/test_17/test_17.dsp -text
 src/utils_lgpl/nefis/tests/test_17/test_17.vcproj -text
 src/utils_lgpl/nefis/tests/test_17/test_17.vcxproj -text
 src/utils_lgpl/nefis/tests/test_17/trim-f34.dat -text
-src/utils_lgpl/nefis/tests/test_17/trim-f34.dat.org -text
-src/utils_lgpl/nefis/tests/test_17/trim-f34.def -text svneol=unset#unset
-src/utils_lgpl/nefis/tests/test_17/trim-f34.def.org -text
+src/utils_lgpl/nefis/tests/test_17/trim-f34.dat.output -text
+src/utils_lgpl/nefis/tests/test_17/trim-f34.def -text
+src/utils_lgpl/nefis/tests/test_17/trim-f34.def.output -text svneol=unset#unset
 src/utils_lgpl/nefis/tests/test_18/Makefile.am -text
 src/utils_lgpl/nefis/tests/test_18/pre_c18.res -text
 src/utils_lgpl/nefis/tests/test_18/test_18.c -text
