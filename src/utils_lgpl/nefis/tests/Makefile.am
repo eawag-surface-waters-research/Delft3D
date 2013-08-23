@@ -18,8 +18,7 @@ SUBDIRS = \
 	  test_16 \
 	  test_17 \
 	  test_18 \
-	  test_19 \
-	  test_20
+	  test_19
 	  
 TESTS_ENVIRONMENT = $(top_srcdir)/scripts_lgpl/linux/regression.sh 
 TESTS = \
@@ -37,6 +36,5 @@ TESTS = \
 	  test_16/test_16 \
 	  test_17/test_17 \
 	  test_18/test_18 \
-	  test_19/test_19 \
-	  test_19/test_20
+	  test_19/test_19
 

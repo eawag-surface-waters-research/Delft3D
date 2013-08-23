@@ -576,7 +576,6 @@ utils_lgpl/nefis/tests/test_16/Makefile
 utils_lgpl/nefis/tests/test_17/Makefile
 utils_lgpl/nefis/tests/test_18/Makefile
 utils_lgpl/nefis/tests/test_19/Makefile
-utils_lgpl/nefis/tests/test_20/Makefile
 utils_lgpl/ods/packages/ods/src/Makefile
 ])
 
