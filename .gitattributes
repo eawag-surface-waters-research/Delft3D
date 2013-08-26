@@ -4213,6 +4213,7 @@ src/tools_lgpl/matlab/quickplot/progsrc/private/qp_file2function.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_filefilters.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_fmem.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_fontsettings.m -text
+src/tools_lgpl/matlab/quickplot/progsrc/private/qp_getscreen.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_gettype.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_icon.m -text
 src/tools_lgpl/matlab/quickplot/progsrc/private/qp_interface.m -text
