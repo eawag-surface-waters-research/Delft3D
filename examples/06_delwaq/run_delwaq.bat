@@ -29,7 +29,7 @@ set procfile=%currentdir%..\..\bin\win32\waq\default\proc_def
     rem Run delwaq 1
     rem
 echo.
-%exedir%\delwaq1.exe %argfile% -p "%procfile%"
+"%exedir%\delwaq1.exe" "%argfile%" -p "%procfile%"
 
     rem
     rem Wait for any key to run delwaq 2
@@ -46,7 +46,7 @@ echo.
     rem Run delwaq 2
     rem
 echo.
-%exedir%\delwaq2.exe %argfile%
+"%exedir%\delwaq2.exe" "%argfile%"
 
 if %ERRORLEVEL% neq 0 (
     echo.
