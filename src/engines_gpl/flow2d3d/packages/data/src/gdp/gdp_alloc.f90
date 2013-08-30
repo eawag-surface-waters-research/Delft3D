@@ -143,10 +143,6 @@ subroutine gdp_alloc(gdp)
     allocate (gdp%gdwrline)
     allocate (gdp%gdz_initcg)
     !
-    ! Delft3D-MOR
-    !
-    allocate (gdp%gdcrvout)
-    !
     allocate (gdp%dd)
     !
     ! runid may be already allocated. See d3df_dll.F90, module gdp_entry, subroutine gdpAlloc

@@ -48,7 +48,6 @@ libDataGDP_la_SOURCES = \
          initbubble.f90 \
          initcline.f90 \
          initcoup.f90 \
-         initcrvout.f90 \
          initculver.f90 \
          initdefsub.f90 \
          initdischarge.f90 \

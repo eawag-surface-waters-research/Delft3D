@@ -107,10 +107,6 @@ subroutine initsafe(gdp)
     !
     call sbuff_init
     !
-    ! Delft3D-MOR
-    !
-    call initcrvout    (gdp)
-    !
     call initdfparall  (gdp) 
     ! 
     ! Since GDP allocation has not yet succeeded, I can't call prterr(...,gdp) and d3stop(...)

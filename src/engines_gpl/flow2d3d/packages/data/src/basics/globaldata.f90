@@ -145,10 +145,6 @@ module globaldata
     include 'dddata.igs'
     include 'dfparall.igs'
     !
-    ! Delft3D-MOR
-    !
-    include 'crvout.igs'
-    !
     !
     ! Derived Type definitions
     !
@@ -239,10 +235,6 @@ module globaldata
        type (sv_wrline)   , pointer :: gdwrline
        type (sv_z_initcg) , pointer :: gdz_initcg
        type (nefisio)     , pointer :: nefisio
-       !
-       ! Delft3D-MOR
-       !
-       type (sv_crvout)   , pointer :: gdcrvout
        !
        ! DD data fields
        !

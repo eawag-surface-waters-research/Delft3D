@@ -61,7 +61,6 @@ subroutine gdp_dealloc(gdp)
     integer :: i
     integer :: istat
     !
-    integer :: localmaxpolyp
     integer :: locallsedtot
     integer :: localnofou
     logical :: localrhum_file
@@ -89,7 +88,6 @@ subroutine gdp_dealloc(gdp)
     ! to local parameters, because their gdp entries will be deallocated
     ! before they are used to deallocate their related structures
     !
-    localmaxpolyp    = gdp%gdcrvout%maxpolyp
     locallsedtot     = gdp%d%lsedtot
     localnofou       = gdp%d%nofou
     localrhum_file   = gdp%gdheat%rhum_file
@@ -326,14 +324,6 @@ subroutine gdp_dealloc(gdp)
     deallocate (gdp%gdwrirst  , STAT = istat)
     deallocate (gdp%gdwrline  , STAT = istat)
     deallocate (gdp%gdz_initcg, STAT = istat)
-    !
-    ! Delft3D-MOR
-    !
-    if (localmaxpolyp>0) then
-       if (associated(gdp%gdcrvout%xpol)) deallocate (gdp%gdcrvout%xpol, STAT = istat)
-       if (associated(gdp%gdcrvout%ypol)) deallocate (gdp%gdcrvout%ypol, STAT = istat)
-    endif
-    deallocate (gdp%gdcrvout, STAT = istat)
     !
     deallocate (gdp%dd      , STAT = istat)
     !
