@@ -689,9 +689,9 @@ subroutine dimrd(lunmd     ,lundia    ,error     ,runid     ,nrver     , &
           call prop_get_logical(gdp%mdfile_ptr, '*', 'Nonhyd', nonhyd)
           if (nonhyd) then
              nh_level = nh_weak
-             write(lundia,'(3a)') 'Keyword "Nonhyd" found in mdf-file with value ', trim(stringval), '. Interpreted as "ON: Weak formulation (Bijvelds)'
+             write(lundia,'(3a)') 'Keyword "Nonhyd" found in mdf-file with value ', trim(stringval), '. Interpreted as "ON: Weak formulation (Bijvelds)"'
           else
-             write(lundia,'(3a)') 'Keyword "Nonhyd" found in mdf-file with value ', trim(stringval), '. Interpreted as "OFF'
+             write(lundia,'(3a)') 'Keyword "Nonhyd" found in mdf-file with value ', trim(stringval), '. Interpreted as "OFF"'
           endif
        endif
     endif

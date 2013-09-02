@@ -156,7 +156,7 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
     real(fp)      :: hnm
     real(fp)      :: relthk
     real(fp)      :: sepu
-    character(24) :: errtxt
+    character(30) :: errtxt
 !
 !! executable statements -------------------------------------------------------
 !
@@ -386,7 +386,7 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
              enddo
 !         else
           elseif ( (ibf /= 10) .and. (kcs(nmf) /= -1) ) then
-             write (errtxt, '(6i4)') ic, (irocol(ll, ic), ll = 1, 5)
+             write (errtxt, '(6i5)') ic, (irocol(ll, ic), ll = 1, 5)
              call prterr(lundia    ,'S200'    ,errtxt    )
              !
              ! stop routine for DELFT3D
@@ -584,7 +584,7 @@ subroutine cucbp(kmax      ,norow     ,icx       , &
              enddo
 !         else
           elseif ( (ibl/=10) .and. (kcs(nml).ne.-1) ) then
-             write (errtxt, '(6i4)') ic, (irocol(ll, ic), ll = 1, 5)
+             write (errtxt, '(6i5)') ic, (irocol(ll, ic), ll = 1, 5)
              call prterr(lundia    ,'S201'    ,errtxt    )
              !
              ! stop routine for DELFT3D

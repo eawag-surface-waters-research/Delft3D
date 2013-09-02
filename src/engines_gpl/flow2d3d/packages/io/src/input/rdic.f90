@@ -7,7 +7,7 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
               & lstsci    ,ltur      ,namcon    ,s1        ,u1        , &
               & v1        ,r1        ,rtur1     ,decay     ,umnldf    , &
               & vmnldf    ,kfu       ,kfv       ,dp        ,lsed      , &
-              & gdp       )
+              & kcu       ,kcv       ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -84,6 +84,8 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                                                                     :: nmax   !  Description and declaration in esm_alloc_int.f90
     integer                                                                     :: nmaxus !  Description and declaration in esm_alloc_int.f90
     integer                                                                     :: nrrec  !!  Pointer to the record number in the MD-file
+    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: kcu    !  Description and declaration in esm_alloc_int.f90
+    integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: kcv    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: kfu    !  Description and declaration in esm_alloc_int.f90
     integer , dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               :: kfv    !  Description and declaration in esm_alloc_int.f90
     logical                                                       , intent(in)  :: const  !  Description and declaration in procs.igs
@@ -144,6 +146,7 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     integer                           :: lnconc  ! Help var. for constituent 
     integer                           :: nlook   ! Help var.: nr. of data to look for in the MD-file 
     integer                           :: ntrec   ! Help. var to keep track of NRREC 
+    integer, dimension(:), allocatable:: coninit ! Flag indicating whether a constituent has been initialized (0 = not initialized, 1 = initialized)
     logical                           :: defaul  ! Flag set to YES if default value may be applied in case var. read is empty (ier <= 0, or nrread < nlook) 
     logical                           :: found   ! FOUND=TRUE if KEYW in the MD-file was found 
     logical                           :: lerror  ! Flag=TRUE if a local error is encountered 
@@ -185,6 +188,79 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
     fmtic = 'FR'
     lturi = ltur
     !
+    ! define or read names of constituents
+    !
+    allocate(coninit(lstsci))
+    coninit = 0
+    lnconc = 0
+    !
+    ! define name of salinity  (Sub1(1:1) = 'S')
+    !
+    if (salin) then
+       lnconc         = lnconc + 1
+       namcon(lnconc) = 'Salinity'
+    endif
+    !
+    ! define name of temperature  (Sub1(2:2) = 'T')
+    !
+    if (temp) then
+       lnconc         = lnconc + 1
+       namcon(lnconc) = 'Temperature'
+    endif
+    !
+    ! read names of constituents, if lconc > 0 then namc <> ' '
+    !
+    keyw  = 'Namc  '
+    ntrec = nrrec
+    lenc  = 20
+    do l = 1, lconc
+       lnconc = lnconc + 1
+       if (l < 10) then
+          write (keyw(5:5), '(i1)') l
+       else
+          write (keyw(5:6), '(i2)') l
+       endif
+       namcon(lnconc) = cdef
+       call prop_get_string(gdp%mdfile_ptr,'*',trim(keyw),namcon(lnconc))
+       !
+       ! test for namcon = ' ', which is per definition not possible
+       ! because lconc is defined by namcon values <> ' '
+       !
+       if (namcon(lnconc) == cdef) then
+          error = .true.
+          call prterr(lundia    ,'V015'    ,' '       )
+       endif
+    enddo
+    !
+    ! define name of Secondary flow  (Sub1(*) = 'I')
+    !
+    if (secflo) then
+       lnconc         = lnconc + 1
+       namcon(lnconc) = 'Secondary flow'
+    endif
+    !
+    ! define names of turbulence
+    !
+    if (ltur >= 1) then
+       lnconc         = lnconc + 1
+       namcon(lnconc) = 'Turbulent energy    '
+    endif
+    if (ltur == 2) then
+       lnconc         = lnconc + 1
+       namcon(lnconc) = 'Energy dissipation  '
+    endif
+    !
+    ! not twice the same name
+    !
+    do l = 1, lnconc
+       do ll = 1, l - 1
+          if (namcon(ll) == namcon(l)) then
+             error = .true.
+             call prterr(lundia    ,'U160'    ,namcon(l) )
+          endif
+       enddo
+    enddo
+    !
     ! locate 'Restid' record for restart run-identification
     !
     restid = ' '
@@ -202,31 +278,33 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                  & nmaxus    ,kmax      ,lstsci    ,ltur      , &
                  & s1        ,u1        ,v1        ,r1        ,rtur1     , &
                  & umnldf    ,vmnldf    ,kfu       ,kfv       , &
-                 & dp        ,gdp       )
+                 & dp        ,kcu       ,kcv       ,namcon    ,coninit   , &
+                 & gdp       )
+    endif
+    !
+    ! locate 'Filic' record for initial cond. in extra input file
+    !
+    filic = ' '
+    call prop_get_string(gdp%mdfile_ptr, '*', 'Filic', filic)
+    if (filic /= ' ' .and. restid == ' ') then
+       !
+       ! initial conditions in file
+       ! locate 'Fmtic ' record for format definition of input file
+       !
+       fmtic = 'FR'
+       call prop_get_string(gdp%mdfile_ptr, '*', 'Fmtic', fmtic)
+       fmttmp = fmtic
+       call filfmt(lundia    ,'Fmtic'      ,fmttmp    ,lerror    ,gdp       )
+       call icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
+                & nmax      ,nmaxus    ,kmax      ,lstsci    ,s1        , &
+                & u1        ,v1        ,r1        ,gdp       )
     else
        !
-       ! no restart file
-       ! locate 'Filic' record for initial cond. in extra input file
+       ! no initial conditions file
        !
-       filic = ' '
-       call prop_get_string(gdp%mdfile_ptr, '*', 'Filic', filic)
-       if (filic /= ' ') then
-          !
-          ! initial conditions in file
-          ! locate 'Fmtic ' record for format definition of input file
-          !
-          fmtic = 'FR'
-          call prop_get_string(gdp%mdfile_ptr, '*', 'Fmtic', fmtic)
-          fmttmp = fmtic
-          call filfmt(lundia    ,'Fmtic'      ,fmttmp    ,lerror    ,gdp       )
-          call icfil(lundia    ,error     ,filic     ,fmttmp    ,mmax      , &
-                   & nmax      ,nmaxus    ,kmax      ,lstsci    ,s1        , &
-                   & u1        ,v1        ,r1        ,gdp       )
-       else
+       if (restid == ' ') then
           !
           ! no restart file
-          ! no initial conditions file
-          !
           ! 'Zeta0 '
           !
           zini = rdef
@@ -329,16 +407,22 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           do k = 1, kmax
              v1(:, :, k) = v0ini(k)
           enddo
-          !
-          ! lnconc is a counter for the pointer of the r1 array for all
-          ! constituents.
-          !
-          lnconc = 0
-          !
-          ! 'S0' (if salin = true) for all layers (or just one value)
-          ! First read as string to check whether S0 specification is present
-          !
-          if (salin) then
+       endif
+       !
+       ! lnconc is a counter for the pointer of the r1 array for all
+       ! constituents.
+       !
+       lnconc = 0
+       !
+       ! Salinity
+       !
+       if (salin) then
+          lnconc = lnconc + 1
+          if (coninit(lnconc)==0) then
+             !
+             ! 'S0' (if salin = true) for all layers (or just one value)
+             ! First read as string to check whether S0 specification is present
+             !
              s0ini = 0.0_fp
              chulp = ' '
              call prop_get_string(gdp%mdfile_ptr,'*','S0',chulp)
@@ -379,17 +463,21 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              !
              ! copy s0ini in r1
              !
-             lnconc = lnconc + 1
              do k = 1, kmax
                 r1(:, :, k, lnconc) = s0ini(k)
              enddo
           endif
-          !
-          ! locate and read 'T0    ' record for t0ini
-          ! if temp  = .true.
-          ! default value not allowed => nodef
-          !
-          if (temp) then
+       endif
+       !
+       ! Temperature
+       !
+       if (temp) then
+          lnconc = lnconc + 1
+          if (coninit(lnconc)==0) then
+             !
+             ! locate and read 'T0    ' record for t0ini
+             ! if temp  = .true.
+             ! default value not allowed => nodef
              !
              ! Initialize T0INI (MXKMAX) for KMAX layers
              !
@@ -429,19 +517,24 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              !
              ! copy t0ini in r1
              !
-             lnconc = lnconc + 1
              do k = 1, kmax
                 r1(:, :, k, lnconc) = t0ini(k)
              enddo
           endif
+       endif
+       !
+       ! Sediment concentrations and tracers
+       !
+       if (const) then
           !
           ! 'C0##  ' record if const = .true.
           ! read c0ini(lmaxc ) from record where lmaxc = ltem + l
           ! First read as string to check whether C0 specification is present
           !
-          if (const) then
-             keyw = 'C0?   '
-             do l = 1, lconc
+          keyw = 'C0?   '
+          do l = 1, lconc
+             lnconc = lnconc + 1
+             if (coninit(lnconc)==0) then
                 !
                 ! Initialize WRKINI (MXKMAX) for KMAX layers
                 !
@@ -489,19 +582,23 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
                 !
                 ! copy c0ini in r1
                 !
-                lnconc = lnconc + 1
                 do k = 1, kmax
                    r1(:, :, k, lnconc) = c0ini(k)
                 enddo
-             enddo
-          endif
-          !
-          ! 'I0    ' record for i0ini
-          ! if secflo = .true.
-          ! default value not allowed
-          ! write in r1
-          !
-          if (secflo) then
+             endif
+          enddo
+       endif
+       !
+       ! Secondary flow
+       !
+       if (secflo) then
+          lnconc = lnconc + 1
+          if (coninit(lnconc)==0) then
+             !
+             ! 'I0    ' record for i0ini
+             ! if secflo = .true.
+             ! default value not allowed
+             ! write in r1
              !
              ! Initialize I0INI (MXKMAX) for KMAX layers
              !
@@ -539,7 +636,6 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
              !
              ! copy i0ini in r1
              !
-             lnconc = lnconc + 1
              do k = 1, kmax
                 r1(:, :, k, lnconc) = i0ini(k)
              enddo
@@ -547,76 +643,6 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
        endif
     endif
     !=======================================================================
-    ! define or read names of constituents
-    !
-    lnconc = 0
-    !
-    ! define name of salinity  (Sub1(1:1) = 'S')
-    !
-    if (salin) then
-       lnconc         = lnconc + 1
-       namcon(lnconc) = 'Salinity'
-    endif
-    !
-    ! define name of temperature  (Sub1(2:2) = 'T')
-    !
-    if (temp) then
-       lnconc         = lnconc + 1
-       namcon(lnconc) = 'Temperature'
-    endif
-    !
-    ! read names of constituents, if lconc > 0 then namc <> ' '
-    !
-    keyw  = 'Namc  '
-    ntrec = nrrec
-    lenc  = 20
-    do l = 1, lconc
-       lnconc = lnconc + 1
-       if (l < 10) then
-          write (keyw(5:5), '(i1)') l
-       else
-          write (keyw(5:6), '(i2)') l
-       endif
-       namcon(lnconc) = cdef
-       call prop_get_string(gdp%mdfile_ptr,'*',trim(keyw),namcon(lnconc))
-       !
-       ! test for namcon = ' ', which is per definition not possible
-       ! because lconc is defined by namcon values <> ' '
-       !
-       if (namcon(lnconc) == cdef) then
-          error = .true.
-          call prterr(lundia    ,'V015'    ,' '       )
-       endif
-    enddo
-    !
-    ! define name of Secondary flow  (Sub1(*) = 'I')
-    !
-    if (secflo) then
-       lnconc         = lnconc + 1
-       namcon(lnconc) = 'Secondary flow'
-    endif
-    !
-    ! define names of turbulence
-    !
-    if (ltur >= 1) then
-       lnconc         = lnconc + 1
-       namcon(lnconc) = 'Turbulent energy    '
-    endif
-    if (ltur == 2) then
-       lnconc         = lnconc + 1
-       namcon(lnconc) = 'Energy dissipation  '
-    endif
-    !
-    ! not twice the same name
-    !
-    do l = 1, lnconc
-       do ll = 1, l - 1
-          if (namcon(ll) == namcon(l)) then
-             error = .true.
-             call prterr(lundia    ,'U160'    ,namcon(l) )
-          endif
-       enddo
-    enddo
     !
     ! Read decay rates For both Salinity and Temperature skipped
     !
@@ -680,6 +706,7 @@ subroutine rdic(lunmd     ,lundia    ,error     ,nrrec     ,mdfrec    , &
           endif
        endif
     enddo
+    deallocate(coninit)
 
     if (salin .and. .not. temp .and. lconc==0) then
     !  only salinity:

@@ -101,6 +101,8 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     integer(pntrsize)             , pointer :: xcor
     integer(pntrsize)             , pointer :: ycor
     integer(pntrsize)             , pointer :: itdro
+    integer(pntrsize)             , pointer :: kcu
+    integer(pntrsize)             , pointer :: kcv
     integer(pntrsize)             , pointer :: kfu
     integer(pntrsize)             , pointer :: kfv
     integer(pntrsize)             , pointer :: kspu
@@ -510,6 +512,8 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
     xcor                => gdp%gdr_i_ch%xcor
     ycor                => gdp%gdr_i_ch%ycor
     itdro               => gdp%gdr_i_ch%itdro
+    kcu                 => gdp%gdr_i_ch%kcu
+    kcv                 => gdp%gdr_i_ch%kcv
     kfu                 => gdp%gdr_i_ch%kfu
     kfv                 => gdp%gdr_i_ch%kfv
     kspu                => gdp%gdr_i_ch%kspu
@@ -655,7 +659,7 @@ subroutine readmd(lunmd     ,lundia    ,lunscr    ,error     ,runid     ,runtxt 
             & lstsci    ,ltur      ,ch(namcon),r(s1)     ,r(u1)     , &
             & r(v1)     ,r(r1)     ,r(rtur1)  ,r(decay)  ,r(umnldf) , &
             & r(vmnldf) ,i(kfu)    ,i(kfv)    ,r(dp)     ,lsed      , &
-            & gdp       )
+            & i(kcu)    ,i(kcv)    ,gdp       )
     if (error) goto 9999
     !
     ! Boundary conditions general (only if nto > 0)

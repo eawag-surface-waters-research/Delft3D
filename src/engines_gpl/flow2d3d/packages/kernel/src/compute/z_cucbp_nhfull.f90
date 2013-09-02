@@ -125,7 +125,7 @@ subroutine z_cucbp_nhfull(kmax      ,norow     ,icx       , &
     real(fp)      :: facc
     real(fp)      :: relthk
     real(fp)      :: sepu
-    character(24) :: errtxt
+    character(30) :: errtxt
 !
 !! executable statements -------------------------------------------------------
 !
@@ -280,7 +280,7 @@ subroutine z_cucbp_nhfull(kmax      ,norow     ,icx       , &
                 ddk(nmfd,k) = u0(nmfd,k)
              enddo
           else
-             write (errtxt, '(6i4)') ic, (irocol(ll, ic), ll = 1, 5)
+             write (errtxt, '(6i5)') ic, (irocol(ll, ic), ll = 1, 5)
              call prterr(lundia    ,'S200'    ,errtxt    )
              !
              ! stop routine for DELFT3D
@@ -404,7 +404,7 @@ subroutine z_cucbp_nhfull(kmax      ,norow     ,icx       , &
                 ddk(nmlu,k) = u0(nmlu, k)
              enddo
           else
-             write (errtxt, '(6i4)') ic, (irocol(ll, ic), ll = 1, 5)
+             write (errtxt, '(6i5)') ic, (irocol(ll, ic), ll = 1, 5)
              call prterr(lundia    ,'S201'    ,errtxt    )
              !
              ! stop routine for DELFT3D

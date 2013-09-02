@@ -2,7 +2,8 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
                             & nmaxus    ,kmax      ,lstsci    ,ltur      , &
                             & s1        ,u1        ,v1        ,r1        ,rtur1     , &
                             & umnldf    ,vmnldf    ,kfu       ,kfv       , &
-                            & dp        ,ex_nfs    ,gdp       )
+                            & dp        ,kcu       ,kcv       ,ex_nfs    ,namcon    , &
+                            & coninit   ,gdp       )
 !----- GPL ---------------------------------------------------------------------
 !                                                                               
 !  Copyright (C)  Stichting Deltares, 2011-2013.                                
@@ -81,8 +82,11 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     integer                                                                                  :: lundia
     integer                                                                    , intent(in)  :: mmax
     integer                                                                    , intent(in)  :: nmaxus
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: kcu
+    integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(in)  :: kcv
     integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(out) :: kfu
     integer, dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)               , intent(out) :: kfv
+    integer, dimension(lstsci)                                                               :: coninit ! Flag=1 if constituent is initialized, all 0 upon entry
     logical                                                                                  :: error
     logical                                                                                  :: ex_nfs !  Flag indicating whether Nefis restart files exist
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub)              , intent(out) :: dp
@@ -94,6 +98,7 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax)        , intent(out) :: v1
     real(fp), dimension(gdp%d%nlb:gdp%d%nub, gdp%d%mlb:gdp%d%mub, kmax, lstsci), intent(out) :: r1
     character(*)                                                                             :: restid1
+    character(20), dimension(lstsci + ltur)                                    , intent(in)  :: namcon !  Description and declaration in esm_alloc_char.f90
 !
 ! Local variables
 !
@@ -107,6 +112,8 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     integer, external                     :: neferr
     integer                               :: ii
     integer                               :: itmapc
+    integer                               :: l
+    integer                               :: ll
     integer                               :: max_index
     integer                               :: rst_lstci
     integer                               :: rst_ltur
@@ -119,6 +126,7 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     real(fp)                              :: t_restart
     real(sp)                              :: dtms         ! time step in minutes (single precision)
     real(sp), dimension(:,:,:,:), pointer :: sbuff
+    character(20), dimension(:), allocatable :: rst_namcon
     character(1024)                       :: error_string
     character(256)                        :: dat_file
     character(256)                        :: def_file
@@ -235,7 +243,6 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     cuindex (1,1) = 1
     cuindex (2,1) = 1
     !
-    
     ! the master opens and reads the grid file 
     ! 
     if ( inode /= master ) goto 50 
@@ -259,7 +266,6 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     !
     ! look for restart time on nefis map file
     !
-
     found = .false.
     do ii = max_index,1,-1 ! assume last time on map file has highest probability of being the requested time step
        uindex (1,1) = ii
@@ -279,6 +285,7 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
           exit ! restart time found on map file
        end if
     enddo
+    !
     if (.not. found) then
        call prterr(lundia    ,'P004'    , &
             & 'Restart time not found on restart file ' // trim(dat_file))
@@ -459,40 +466,64 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
        ! Use nmaxus*mmax*kmax*lstsci buffer
        !
        ierror = getelt(fds, 'map-const', 'LSTCI', cuindex, 1, 4, rst_lstci)       
-       
-       if (lstsci /= 0) then
-          if (lstsci == rst_lstci) then
-             deallocate(sbuff)
-             allocate(sbuff(nmaxgl, mmaxgl, kmax, lstsci), stat = ier1)
-             allocate(r1_g(nmaxgl,mmaxgl, kmax, lstsci), stat = ier2)
-             if (ier1 /= 0 .or. ier2 /= 0) then
-                call prterr(lundia, 'G020', 'r1_g')
-                call d3stop(1, gdp)
-             endif
-             ierror = getelt( fds , 'map-series', 'R1', uindex, 1, mmaxgl*nmaxgl*kmax*rst_lstci*4, sbuff )
-             if (ierror/= 0) then
-                ierror = neferr(0,error_string)
-                call prterr(lundia    ,'P004'    , error_string)
-                error = .true.
-                goto 9999
-             endif
-             r1_g(1:nmaxgl,1:mmaxgl,1:kmax,1:lstsci) = sbuff(1:nmaxgl,1:mmaxgl,1:kmax,1:lstsci)
-             if (.not. nan_check(r1_g, 'r1_g (restart-file)', lundia)) call d3stop(1, gdp)
-          else        
-             write(lundia, *) 'No restart value used for Salinity, Temperature, a Constituent or Spiral Intensity'
-          endif
-       endif
-       !
-       ! Turbulence
-       ! Use nmaxus*mmax*0:kmax*ltur buffer
-       !
-       ierror = getelt(fds, 'map-const', 'LTUR', cuindex, 1, 4, rst_ltur)
-       if (ierror/= 0) then
+       if (ierror == 0) ierror = getelt(fds, 'map-const', 'LTUR', cuindex, 1, 4, rst_ltur)
+       if (ierror /= 0) then
           ierror = neferr(0,error_string)
           call prterr(lundia    ,'P004'    , error_string)
           error = .true.
           goto 9999
        endif
+       if (lstsci /= 0) then
+          allocate(rst_namcon(rst_lstci+rst_ltur), stat = ier1)
+          if (ier1 /= 0) then
+             call prterr(lundia, 'G020', 'rst_lstci')
+             call d3stop(1, gdp)
+          endif
+          ierror = getelt(fds, 'map-const', 'NAMCON', cuindex, 1, 20*(rst_lstci+rst_ltur), rst_namcon)
+          if (ierror/= 0) then
+             ierror = neferr(0,error_string)
+             call prterr(lundia    ,'P004'    , error_string)
+             error = .true.
+             goto 9999
+          endif
+          !
+          deallocate(sbuff)
+          allocate(sbuff(nmaxgl, mmaxgl, kmax, rst_lstci), stat = ier1)
+          allocate(r1_g(nmaxgl,mmaxgl, kmax, lstsci), stat = ier2)
+          if (ier1 /= 0 .or. ier2 /= 0) then
+             call prterr(lundia, 'G020', 'r1_g')
+             call d3stop(1, gdp)
+          endif
+          ierror = getelt( fds , 'map-series', 'R1', uindex, 1, mmaxgl*nmaxgl*kmax*rst_lstci*4, sbuff )
+          if (ierror/= 0) then
+             ierror = neferr(0,error_string)
+             call prterr(lundia    ,'P004'    , error_string)
+             error = .true.
+             goto 9999
+          endif
+          do l = 1,lstsci
+             found = .false.
+             do ll = 1,rst_lstci
+                 if (rst_namcon(ll)==namcon(l)) then
+                    found = .true.
+                    coninit(l) = 1
+                    r1_g(1:nmaxgl,1:mmaxgl,1:kmax,l) = sbuff(1:nmaxgl,1:mmaxgl,1:kmax,ll)
+                    exit
+                 endif
+             enddo
+             if (.not.found) then
+                write(lundia, '(3A)') 'No restart data found for "',trim(namcon(l)),'"; using constant default value.'
+                ! coninit(l) = 0
+             endif
+          enddo
+          if (.not. nan_check(r1_g, 'r1_g (restart-file)', lundia)) call d3stop(1, gdp)
+          !
+          deallocate(rst_namcon)
+       endif
+       !
+       ! Turbulence
+       ! Use nmaxus*mmax*0:kmax*ltur buffer
+       !
        lturi = 0
        if (ltur > 0) then
           if (ltur == rst_ltur) then
@@ -538,6 +569,7 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
     call dfbroadc_gdp ( lturi, 1, dfint, gdp )
     call dfbroadc_gdp ( dp_from_map_file, 1, dfint, gdp )
     call dfbroadc_gdp ( has_umean, 1, dfint, gdp)
+    call dfbroadc_gdp ( coninit, lstsci, dfint, gdp)
 
     call dfsync(gdp)
       
@@ -591,9 +623,19 @@ subroutine flow_nefis_restart(lundia    ,error     ,restid1   ,lturi     ,mmax  
        do n = nfg, nlg 
           s1(n-nfg+1,m-mfg+1) = s1_g(n,m) 
           u1(n-nfg+1,m-mfg+1,1:kmax) = u1_g(n,m,1:kmax)
-          v1(n-nfg+1,m-mfg+1,1:kmax) = v1_g(n,m,1:kmax)           
-          kfu(n-nfg+1,m-mfg+1) = kfu_g(n,m)
-          kfv(n-nfg+1,m-mfg+1) = kfv_g(n,m)
+          v1(n-nfg+1,m-mfg+1,1:kmax) = v1_g(n,m,1:kmax)
+          ! copy also kfu and kfv flags, but keep closed boundaries closed
+          ! This allows restarting a single domain from a trim-file of a DD simulation for debugging purposes
+          if (kcu(n-nfg+1,m-mfg+1)==0) then
+              kfu(n-nfg+1,m-mfg+1) = 0
+          else
+              kfu(n-nfg+1,m-mfg+1) = kfu_g(n,m)
+          endif
+          if (kcv(n-nfg+1,m-mfg+1)==0) then
+              kfv(n-nfg+1,m-mfg+1) = 0
+          else
+              kfv(n-nfg+1,m-mfg+1) = kfv_g(n,m)
+          endif
        enddo 
     enddo 
     if (has_umean /= 0) then

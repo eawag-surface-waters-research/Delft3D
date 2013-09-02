@@ -1021,8 +1021,9 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
                 klc=klc+1
              enddo
              !
-             thick0        = thick(kmaxsd) * h0
-             thick1        = thick(kmaxsd) * h1
+             kmaxsd        = kmaxlc ! for mud fractions kmaxsd points to the grid cell at the bottom of the water column
+             thick0        = thicklc(kmaxsd) * h0
+             thick1        = thicklc(kmaxsd) * h1
              call erosilt(thicklc     ,kmaxlc      ,wslc        ,lundia      , &
                         & thick0      ,thick1      ,fixfac(nm,l), srcmax(nm, l),&
                         & frac(nm,l)  ,oldmudfrac  ,flmd2l      ,iform(l)    , &
@@ -1050,7 +1051,7 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              ! The first lsed fractions are the suspended fractions (including cohesive ones),
              ! so this goes right
              !
-             kmxsed(nm, l) = kmaxlc
+             kmxsed(nm, l) = kfsmin(nm)+kmaxlc-kmaxsd
              cycle
           endif
           !
