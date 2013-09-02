@@ -96,7 +96,7 @@ subroutine usrbrl(icx       ,icy       ,nmmax     ,kmax      ,kfu       , &
     dpmveg     => gdp%gdprocs%dpmveg
     !
     ! either: general local weir (3D); quadratic friction (KSPU=3)
-    ! or    : rigid sheet, linear friction (KSPU=5), or CDW (lineair friction)
+    ! or    : rigid sheet, linear friction (KSPU=5), or CDW (quadratic as well)
     !
     do k = 1, kmax
        ndm  = -icy
