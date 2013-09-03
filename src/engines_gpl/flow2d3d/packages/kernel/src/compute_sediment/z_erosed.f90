@@ -853,7 +853,8 @@ subroutine z_erosed(nmmax     ,kmax      ,icx       ,icy       ,lundia    , &
              siglc(klc) = siglc(klc - 1) - 0.5_fp*(thicklc(klc) + thicklc(klc - 1))
           enddo
        else
-           kmaxlc = 1
+           kmaxlc  = 1
+           thicklc = 1.0_fp
        endif
        !
        ! Compute depth-averaged velocity components at cell centre
