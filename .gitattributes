@@ -3025,6 +3025,11 @@ src/third_party_open/netcdf/bin/win32/ncgen.exe -text
 src/third_party_open/netcdf/lib/linux/netcdf.mod -text
 src/third_party_open/netcdf/lib/win32/Debug/f77_netcdf.lib -text
 src/third_party_open/netcdf/lib/win32/Debug/f90_netcdf.lib -text
+src/third_party_open/netcdf/lib/win32/Debug/ifort13/f77_netcdf.lib -text
+src/third_party_open/netcdf/lib/win32/Debug/ifort13/f90_netcdf.lib -text
+src/third_party_open/netcdf/lib/win32/Debug/ifort13/netcdf.dll -text
+src/third_party_open/netcdf/lib/win32/Debug/ifort13/netcdf.lib -text
+src/third_party_open/netcdf/lib/win32/Debug/ifort13/netcdf.mod -text
 src/third_party_open/netcdf/lib/win32/Debug/netcdf.dll -text
 src/third_party_open/netcdf/lib/win32/Debug/netcdf.lib -text
 src/third_party_open/netcdf/lib/win32/Debug/netcdf.mod -text
@@ -3042,16 +3047,31 @@ src/third_party_open/netcdf/lib/win32/Release/ifort12/netcdf.dll -text
 src/third_party_open/netcdf/lib/win32/Release/ifort12/netcdf.lib -text
 src/third_party_open/netcdf/lib/win32/Release/ifort12/netcdf.mod -text
 src/third_party_open/netcdf/lib/win32/Release/ifort12/typesizes.mod -text
+src/third_party_open/netcdf/lib/win32/Release/ifort13/f77_netcdf.lib -text
+src/third_party_open/netcdf/lib/win32/Release/ifort13/f90_netcdf.lib -text
+src/third_party_open/netcdf/lib/win32/Release/ifort13/netcdf.dll -text
+src/third_party_open/netcdf/lib/win32/Release/ifort13/netcdf.lib -text
+src/third_party_open/netcdf/lib/win32/Release/ifort13/netcdf.mod -text
 src/third_party_open/netcdf/lib/win32/Release/netcdf.dll -text
 src/third_party_open/netcdf/lib/win32/Release/netcdf.lib -text
 src/third_party_open/netcdf/lib/win32/Release/netcdf.mod -text
 src/third_party_open/netcdf/lib/win32/x64/Debug/f77_netcdf.lib -text svneol=unset#application/x-archive
 src/third_party_open/netcdf/lib/win32/x64/Debug/f90_netcdf.lib -text svneol=unset#application/x-archive
+src/third_party_open/netcdf/lib/win32/x64/Debug/ifort13/f77_netcdf.lib -text
+src/third_party_open/netcdf/lib/win32/x64/Debug/ifort13/f90_netcdf.lib -text
+src/third_party_open/netcdf/lib/win32/x64/Debug/ifort13/netcdf.dll -text
+src/third_party_open/netcdf/lib/win32/x64/Debug/ifort13/netcdf.lib -text
+src/third_party_open/netcdf/lib/win32/x64/Debug/ifort13/netcdf.mod -text
 src/third_party_open/netcdf/lib/win32/x64/Debug/netcdf.dll -text svneol=unset#application/x-dosexec
 src/third_party_open/netcdf/lib/win32/x64/Debug/netcdf.lib -text svneol=unset#application/x-archive
 src/third_party_open/netcdf/lib/win32/x64/Debug/netcdf.mod -text
 src/third_party_open/netcdf/lib/win32/x64/Release/f77_netcdf.lib -text svneol=unset#application/x-archive
 src/third_party_open/netcdf/lib/win32/x64/Release/f90_netcdf.lib -text svneol=unset#application/x-archive
+src/third_party_open/netcdf/lib/win32/x64/Release/ifort13/f77_netcdf.lib -text
+src/third_party_open/netcdf/lib/win32/x64/Release/ifort13/f90_netcdf.lib -text
+src/third_party_open/netcdf/lib/win32/x64/Release/ifort13/netcdf.dll -text
+src/third_party_open/netcdf/lib/win32/x64/Release/ifort13/netcdf.lib -text
+src/third_party_open/netcdf/lib/win32/x64/Release/ifort13/netcdf.mod -text
 src/third_party_open/netcdf/lib/win32/x64/Release/netcdf.dll -text svneol=unset#application/x-dosexec
 src/third_party_open/netcdf/lib/win32/x64/Release/netcdf.lib -text svneol=unset#application/x-archive
 src/third_party_open/netcdf/lib/win32/x64/Release/netcdf.mod -text
