@@ -66,4 +66,5 @@ contains
     enddo
     char_array(len(string)+1:len(string)+1) = C_NULL_CHAR
   end function string_to_char_array
+
 end module iso_c_utils
