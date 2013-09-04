@@ -57,12 +57,13 @@ contains
   end function char_array_to_string
 
   pure function string_to_char_array(string) result(char_array)
+    ! pass only trimmed strings to this one
     character(len=*), intent(in) :: string
     character(kind=c_char,len=1) :: char_array(len(string)+1)
     integer :: i
     do i = 1, len(string)
-       char_array(i) = string(i:i)
+       char_array(i:i) = string(i:i)
     enddo
-    char_array(len(string)+1) = C_NULL_CHAR
+    char_array(len(string)+1:len(string)+1) = C_NULL_CHAR
   end function string_to_char_array
 end module iso_c_utils
